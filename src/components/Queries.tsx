@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { queryViaOf } from "../lib/queryVia";
 import { SendExtras } from "./queryActions/SendExtras";
 import { requeryLine } from "../lib/requery";
 import React, { useCallback, useLayoutEffect, useState, useEffect, useRef, useMemo, useSyncExternalStore } from "react";
@@ -6359,7 +6360,7 @@ export const Queries: React.FC<{
     const forBook = queries.filter((q) => q.manuscriptId === ms.id);
     const flowAgents: FlowAgent[] = agents.map((a) => ({
       id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a), initials: agentInitials(a), querying: forBook.some((q) => q.agentId === a.id && qaIsLive(q)),
-      via: (a.submissionMethod as SubmissionMethod) || null,
+      via: queryViaOf(a.submissionMethod),
     }));
     const onSaveLog = async (x: LogAnswers): Promise<boolean> => {
       const ag = agents.find((a) => a.id === x.agentId);

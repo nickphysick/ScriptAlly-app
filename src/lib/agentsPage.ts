@@ -318,7 +318,7 @@ export function filterSentence(sub: AgentsSubFilter, queried: AgentsQueriedFilte
     sub === "open" ? "Agents open to submissions" : sub === "closed" ? "Agents closed to submissions" : "All agents";
   const queriedClause =
     queried === "yes" ? " you've already queried" : queried === "no" ? " you haven't queried yet" : ", both queried and unqueried";
-  const sortPhrase = sort === "az" ? "sorted A to Z" : sort === "resp" ? "sorted by response time" : "sorted by star rating";
+  const sortPhrase = sort === "az" ? "sorted A to Z" : sort === "resp" ? "sorted by response time" : "sorted by agent fit";
   return `${subject}${queriedClause}, ${sortPhrase}.`;
 }
 
@@ -356,7 +356,7 @@ export function agentsSummary(
   else if (location === "international") active.push("international");
   if (active.length) clauses.push({ label: "filtered by", value: active.join(", ") });
 
-  clauses.push({ label: "sorted by", value: sort === "az" ? "a to z" : sort === "resp" ? "response time" : "star rating" });
+  clauses.push({ label: "sorted by", value: sort === "az" ? "a to z" : sort === "resp" ? "response time" : "agent fit" });
 
   if (groupBy !== "none") {
     clauses.push({ label: "grouped by", value: groupBy === "rating" ? "rating" : groupBy === "location" ? "location" : "queried status" });

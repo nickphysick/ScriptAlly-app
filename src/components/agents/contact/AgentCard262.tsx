@@ -307,7 +307,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
 
   const bandRight = (
     <span className="apc-bandr cl262-bandr">
-      <span className="cl262-stars" data-cl262="stars" role="radiogroup" aria-label="Your rating">
+      <span className="cl262-stars" data-cl262="stars" role="radiogroup" aria-label="Agent fit">
         {[1, 2, 3, 4, 5].map((i) => (
           <button key={i} type="button" role="radio" aria-checked={(a.starRating ?? 0) === i} data-on={i <= (a.starRating ?? 0) ? "" : undefined}
             aria-label={`${i} ${i === 1 ? "star" : "stars"}`} onClick={() => rate(i)}>★</button>

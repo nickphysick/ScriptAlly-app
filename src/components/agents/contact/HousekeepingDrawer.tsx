@@ -76,6 +76,7 @@ export const QUESTION: Record<GapKey, (first: string) => string> = {
   genres: (f) => `Which genres does ${f} take?`,
   wishlist: (f) => `What is ${f} hoping to find?`,
   reopen: (f) => `When does ${f} reopen to queries?`,
+  agency: (f) => `Which agency is ${f} with?`,
 };
 export const UNLOCK: Record<GapKey, string> = {
   reply: "Due dates and follow-ups on every query you send.",
@@ -83,10 +84,11 @@ export const UNLOCK: Record<GapKey, string> = {
   genres: "Ticks the agents who take what you write, before you query.",
   wishlist: "Their own words, to judge fit and tailor your letter.",
   reopen: "A reminder on your to-do list when a closed agent reopens.",
+  agency: "A warning before you query two agents at one agency.",
 };
 const DETAIL_NAME = GAP_DETAIL;
 /** v18.2 §D.5 — "Saved {first}'s {detail}." */
-const SAVED_WORD: Record<GapKey, string> = { reply: "reply time", materials: "materials", genres: "genres", wishlist: "wishlist", reopen: "reopening date" };
+const SAVED_WORD: Record<GapKey, string> = { reply: "reply time", materials: "materials", genres: "genres", wishlist: "wishlist", reopen: "reopening date", agency: "agency" };
 export const HK_FOOT_V18 = "We only ask for details that make QueryHawk more useful to you.";
 const nameOf = (a: Agent) => (a.name ?? "").trim() || (a.agency ?? "").trim();
 /** the agent's stored website as a link (the panel's own reading of the field), or null */
@@ -248,6 +250,13 @@ const FocusField: React.FC<{ item: HkItem; book: HkBook; today: Date; agents: re
         </div>
       );
     }
+    case "agency":
+      return (
+        <div className="hk8-field" data-hk8="field" data-gap="agency">
+          <input className="hk8-ta hk8-in" data-hk8="agency" value={wish} aria-label={QUESTION.agency(firstNameOf(a))} placeholder="e.g. Fenwick & Rowe" autoComplete="off"
+            onChange={(e) => { setWish(e.target.value); onAnswer(e.target.value.trim() ? { kind: "agency", agency: e.target.value.trim() } : null); }} />
+        </div>
+      );
     default: {
       const unhandled: never = item.gap;
       return unhandled;

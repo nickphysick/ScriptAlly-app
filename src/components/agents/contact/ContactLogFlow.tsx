@@ -13,6 +13,7 @@
  * ⚠️ This mirrors the Query Centre host's onSaveLog (Queries.tsx) rather than sharing it: the pack confines Query
  *    Centre changes to the parts it names. A follow-up can lift both into one hook.
  */
+import { queryViaOf } from "../../../lib/queryVia";
 import React from "react";
 import { collection, doc } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
@@ -46,7 +47,7 @@ export const ContactLogFlow: React.FC<{ seed: ContactLogSeed; activeMsId: string
   const forBook = queries.filter((q) => q.manuscriptId === ms.id);
   const flowAgents: FlowAgent[] = agents.map((a) => ({
     id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a), initials: agentInitials(a), querying: forBook.some((q) => q.agentId === a.id && qaIsLive(q)),
-    via: (a.submissionMethod as SubmissionMethod) || null,
+    via: queryViaOf(a.submissionMethod),
   }));
   const onSave = async (x: LogAnswers): Promise<boolean> => {
     const ag = agents.find((a) => a.id === x.agentId);

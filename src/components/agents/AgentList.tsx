@@ -750,7 +750,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     }
     const base = draftOf(agent, personalGenres);
     const change: Partial<CardDraft> = fix.kind === "weeks" ? { weeks: fix.weeks }
-      : fix.kind === "mats" ? { mats: fix.mats } : fix.kind === "genres" ? { genres: fix.genres } : { wishlist: fix.text };
+      : fix.kind === "mats" ? { mats: fix.mats } : fix.kind === "genres" ? { genres: fix.genres }
+      : fix.kind === "agency" ? { agency: fix.agency, agencyUnknown: false } : { wishlist: fix.text };
     const patch = cardPatch(agent, base, { ...base, ...change }, new Date().toISOString());
     const r = await writeFix(agent, patch);
     if ("error" in r) return r;

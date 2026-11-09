@@ -765,6 +765,9 @@ export interface Agent {
   userId: string;
   name: string;
   agency: string;
+  /** Add agent v1 — the writer has said they can't find the agency: set only on a named agent with no agency, and
+   *  cleared when an agency is typed. Absent is the ordinary case. Never `false`: absence says it. */
+  agencyUnknown?: true;
   email: string;
   website: string;
   // Optional location — simple stored fields (added in the v12 Edit Agent revision). The flag-icon
@@ -788,6 +791,8 @@ export interface Agent {
   // Absent = not stated; true = no response means rejection/close; false = they reply either way.
   noResponseMeansNo?: boolean;
   submissionMethod: SubmissionMethod;
+  /** Add agent v1 — the words for `SubmissionMethod.OTHER` ("Agency portal"), up to 40 characters; absent = not given */
+  submissionMethodOther?: string;
   materialsWanted: string[]; // e.g. ["Query Letter", "Synopsis", "First 10 pages"]
   dateAdded: string; // ISO String
   lastCheckedDate: string; // ISO string — when the writer last VERIFIED these details are still

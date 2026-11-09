@@ -63,6 +63,10 @@ export interface AgentEditPatch {
   /** null = back to unstated — only ever an Undo; the editor itself has no road back (decision 9) */
   noResponseMeansNo?: boolean | null;
   submissionMethod?: string;
+  /** Add agent v1 — the words for an "Other" method; null = clear */
+  submissionMethodOther?: string | null;
+  /** Add agent v1 — "Agency unknown"; null = clear (an agency was typed, or it was taken back) */
+  agencyUnknown?: true | null;
   materialsWanted?: string[];
 }
 
@@ -124,6 +128,18 @@ export function sanitizeAgentPatch(patch: AgentEditPatch): SanitizedAgentWrite {
     if (v === null && (k === "country" || k === "city")) { deletes.push(k); continue; }
     if (typeof v !== "string") { errors.push(`${k} must be a string.`); continue; }
     fields[k] = v;
+  }
+
+  /* Add agent v1 — "Agency unknown" (true, or cleared by deletion) and the words for an Other method */
+  if (patch.agencyUnknown === null) deletes.push("agencyUnknown");
+  else if (patch.agencyUnknown !== undefined) {
+    if (patch.agencyUnknown !== true) errors.push("agencyUnknown is true or absent.");
+    else fields.agencyUnknown = true;
+  }
+  if (patch.submissionMethodOther === null) deletes.push("submissionMethodOther");
+  else if (patch.submissionMethodOther !== undefined) {
+    if (typeof patch.submissionMethodOther !== "string" || patch.submissionMethodOther.length > 40) errors.push("submissionMethodOther is a short string.");
+    else fields.submissionMethodOther = patch.submissionMethodOther;
   }
 
   // Social handles list — { platform, handle } entries, capped at 30 (mirrors the Firestore rule).

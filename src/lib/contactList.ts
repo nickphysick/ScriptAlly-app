@@ -671,10 +671,10 @@ export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [st
   { key: "status", label: "Status", line: "Furthest along first", dir: ["Furthest along first", "Least far first"] },
   /* v19 §C — the Date added heading: newest first, a record with no readable date last either way */
   { key: "added", label: "Date added", line: "Newest first", dir: ["Newest first", "Oldest first"] },
-  /* v25.1 E4 — the Genres, Your query and Your rating headings */
+  /* v25.1 E4 — the Genres, Your query and Agent fit headings */
   { key: "fit", label: "Genre fit", line: "Most matches with the book first", dir: ["Best fit first", "Weakest fit first"] },
   { key: "urgency", label: "Urgency", line: "The soonest dated next step first", dir: ["Most urgent first", "Least urgent first"] },
-  { key: "rating", label: "Your rating", line: "Unrated last, either way", dir: ["Highest first", "Lowest first"] },
+  { key: "rating", label: "Agent fit", line: "Unrated last, either way", dir: ["Highest first", "Lowest first"] },
 ];
 
 /** v19 §C/§J — when the agent was added, from the record's own `dateAdded` (ISO); null when it does not parse */
@@ -766,6 +766,8 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
 export function findDuplicateAgent(name: string, agents: readonly Agent[]): Agent | null {
   const typed = name.trim().toLowerCase();
   if (!typed) return null;
-  return agents.find((a) => (a.name ?? "").trim().toLowerCase() === typed) ?? null;
+  /* Add agent v1 — an agent whose agency is unknown is never the match: two such agents never match each other on
+     an empty agency */
+  return agents.find((a) => a.agencyUnknown !== true && (a.name ?? "").trim().toLowerCase() === typed) ?? null;
 }
 

@@ -129,7 +129,7 @@ export const Tally: React.FC<{ n: number | null | undefined; onSet?: (n: 1 | 2 |
   const v = typeof n === "number" && n > 0 ? Math.min(5, Math.round(n)) : 0;
   return (
     <span className={`cl252-tally${onSet ? " set" : ""}`} data-cl252="tally" data-n={v} role={onSet ? "radiogroup" : undefined}
-      aria-label={v ? `Your rating: ${v} of 5` : "Not rated"}>
+      aria-label={v ? `Agent fit: ${v} of 5` : "Agent fit: not rated yet"}>
       <span className="cl252-bars">
         {[1, 2, 3, 4, 5].map((k) => onSet ? (
           <button key={k} type="button" role="radio" aria-checked={k === v} aria-label={`${k} of 5`} data-cl252="bar" data-k={k}

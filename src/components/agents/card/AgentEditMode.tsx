@@ -6,7 +6,7 @@
  * the card itself into the editor: a navy band ("EDITING {FIRST}", ×), then four sections, each headed in Special
  * Elite with its fields labelled in mono capitals, and one foot.
  *
- *   1  Who they are             Name · Agency · City · Country · Your rating
+ *   1  Who they are             Name · Agency · City · Country · Agent fit
  *   2  What {first}'s looking for Wishlist · Genres
  *   3  How to query {first}     Replies in · Response policy · Taking queries (+ Reopens) · How they take them · What to send
  *   4  How to reach {first}     Email · Website · Submission form · MSWL · Social
@@ -282,7 +282,7 @@ export const AgentEditMode: React.FC<AgentEditModeProps> = (p) => {
               </span>
               {elsewhere ? <div className="cl252-cty" data-ae="country-list"><CountryField value={d.country} onPick={(c) => set({ country: c })} /></div> : null}
             </F>
-            <F k="rating" label="Your rating">
+            <F k="rating" label="Agent fit">
               <Tally n={d.rating} onSet={(n) => set({ rating: n })} />
             </F>
             {alsoBox(1)}

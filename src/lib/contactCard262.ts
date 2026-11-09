@@ -84,7 +84,8 @@ export function howTiles(a: Agent, door: AgentFacts["door"]): Tile[] {
   const w = typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null;
   const checked = monthOf(a.lastCheckedDate);
   const reopens = monthOf(a.reopensOn);
-  const m = METHOD[String(a.submissionMethod ?? "")];
+  /* Add agent v1 — an Other method: "Takes queries via {its words}" (or "via Other") */
+  const m = a.submissionMethod === SubmissionMethod.OTHER ? `via ${(a.submissionMethodOther ?? "").trim() || "Other"}` : METHOD[String(a.submissionMethod ?? "")];
   return [
     w ? { k: "reply", known: true, pre: "Replies in about ", bold: `${w} ${w === 1 ? "week" : "weeks"}`, post: "" }
       : { k: "reply", known: false, pre: "Reply time not known", bold: "", post: "" },

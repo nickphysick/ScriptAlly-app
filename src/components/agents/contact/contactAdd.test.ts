@@ -25,7 +25,8 @@ describe("a new agent is born the way the house births agents", () => {
     expect(d.nrn, "unstated is an ORIGIN state").toBeNull();
     expect(d.method).toBeNull();
     expect(d.country, "a new agent is in no country until the writer says so").toBe("");
-    expect(d.door).toBe("open");
+    /* re-pointed (Add agent v1): taking queries starts empty — nothing is pre-picked that isn't known */
+    expect(d.door).toBeNull();
     expect(d.reopens).toBe("");
     expect(d.genres).toEqual([]);
     /* ⚠️ the mock ticks three materials on its add card; stored, they would be a claim about what an

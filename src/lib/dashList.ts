@@ -263,7 +263,7 @@ export function boardItems(i: BoardInput): Partial<Record<ListGroupKey, ListItem
 
 /* ── 4: housekeeping ───────────────────────────────────────────────────────────────────────── */
 
-const GAP_DISC: Record<GapKey, string> = { reply: "RW", materials: "MS", genres: "GE", wishlist: "WL", reopen: "OP" };
+const GAP_DISC: Record<GapKey, string> = { reply: "RW", materials: "MS", genres: "GE", wishlist: "WL", reopen: "OP", agency: "AG" };
 
 const GAP_COPY: Record<GapKey, { one: (n: string) => string; many: (n: number) => [string, string, string?]; why: string; note: string }> = {
   reply: {
@@ -295,6 +295,12 @@ const GAP_COPY: Record<GapKey, { one: (n: string) => string; many: (n: number) =
     many: (n) => ["Add reopening dates for ", `${n} agents`],
     why: "So you are reminded when they reopen",
     note: "Pick a date and a reminder goes on your To-do list.",
+  },
+  agency: {
+    one: (n) => `Add the agency ${n} is with`,
+    many: (n) => ["Add the agency for ", `${n} agents`],
+    why: "So you don’t query two agents at one agency by mistake",
+    note: "With the agency on file, QueryHawk can tell you when two agents work together.",
   },
 };
 

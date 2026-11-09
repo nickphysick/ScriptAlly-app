@@ -186,7 +186,7 @@ describe("agentsPage · agentsSummary (only the clauses that apply)", () => {
   it("no filters, no group → count + sorted-by only", () => {
     const s = agentsSummary(12, "all", "all", "all", "rating", "none");
     expect(s.count).toBe("12 agents");
-    expect(s.clauses).toEqual([{ label: "sorted by", value: "star rating" }]);
+    expect(s.clauses).toEqual([{ label: "sorted by", value: "agent fit" }]);
   });
   it("singular count", () => {
     expect(agentsSummary(1, "all", "all", "all", "az", "none").count).toBe("1 agent");
@@ -335,7 +335,7 @@ describe("firestore.rules · agent pinned flag is STRIPPED (rule-text lock, no e
 
 describe("agentsPage · filterSentence (contextual list sentence)", () => {
   it("narrates the default lens", () => {
-    expect(filterSentence("all", "all", "rating")).toBe("All agents, both queried and unqueried, sorted by star rating.");
+    expect(filterSentence("all", "all", "rating")).toBe("All agents, both queried and unqueried, sorted by agent fit.");
   });
   it("narrates a narrowed lens (the spec example)", () => {
     expect(filterSentence("open", "no", "resp")).toBe("Agents open to submissions you haven't queried yet, sorted by response time.");

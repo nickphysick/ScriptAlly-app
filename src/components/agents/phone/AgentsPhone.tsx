@@ -148,7 +148,7 @@ const AgentTile: React.FC<{ x: AgentFacts; onOpen: () => void }> = ({ x, onOpen 
   const queried = x.stand !== "none" && !!x.q;
   const fact = queried
     ? [STAGE_NAME[x.q!.status] ?? String(x.q!.status), x.q!.dayN != null ? `Day ${x.q!.dayN}` : null].filter(Boolean).join(" · ")
-    : (replyWords(a.responseTimeWeeks) ? `Replies in ${replyWords(a.responseTimeWeeks)}` : howWords(a.submissionMethod));
+    : (replyWords(a.responseTimeWeeks) ? `Replies in ${replyWords(a.responseTimeWeeks)}` : howWords(a.submissionMethod, a.submissionMethodOther));
   return (
     <button type="button" className="pa-agtile" data-pa="ag-row" data-id={a.id} data-stand={x.stand} data-status={queried ? x.q!.status : ""} onClick={onOpen}>
       {queried ? <PhoneDisc status={x.q!.status} size={42} /> : <span className="pa-agtav" data-pa="ag-ring" aria-hidden="true">{initialsOf(name)}</span>}
@@ -180,7 +180,7 @@ const AgentProfileSheet: React.FC<{ x: AgentFacts | null; now: number; onClose: 
               </div>
               <div className="pa-astats" data-pa="ag-stats">
                 <div data-k="reply"><b>{replyWords(a.responseTimeWeeks)?.replace(" weeks", " wks").replace(" week", " wk") ?? "Not stated"}</b><span>Reply time</span></div>
-                <div data-k="how"><b>{howWords(a.submissionMethod)?.replace("By ", "").replace(/^./, (c) => c.toUpperCase()) ?? "Not stated"}</b><span>Submissions</span></div>
+                <div data-k="how"><b>{howWords(a.submissionMethod, a.submissionMethodOther)?.replace("By ", "").replace(/^./, (c) => c.toUpperCase()) ?? "Not stated"}</b><span>Submissions</span></div>
                 <div data-k="query"><b>{q ? (STAGE_NAME[q.status] ?? String(q.status)) : "Not yet"}</b><span>Your query</span></div>
               </div>
             </div>
@@ -194,7 +194,7 @@ const AgentProfileSheet: React.FC<{ x: AgentFacts | null; now: number; onClose: 
               <div className="pa-asec">They ask for</div>
               {a.materialsWanted?.length ? <div className="pa-pillrow" data-pa="ag-asks">{a.materialsWanted.map((m) => <span key={m} className="pa-tag white">{m}</span>)}</div>
                 : <button type="button" className="pa-addrow" data-pa="ag-add-asks" onClick={() => openAgentCard(a.id, { tab: "work", from: "button" })}>{PI.plus}Add what they ask for</button>}
-              <p className="pa-asub" data-pa="ag-route">{[howWords(a.submissionMethod), domainOf(a)].filter(Boolean).join(" · ")}</p>
+              <p className="pa-asub" data-pa="ag-route">{[howWords(a.submissionMethod, a.submissionMethodOther), domainOf(a)].filter(Boolean).join(" · ")}</p>
               <p className="pa-asub" data-pa="ag-door">{doorWords(a)}</p>
               {q ? (
                 <>

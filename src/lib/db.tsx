@@ -2300,7 +2300,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           manuscriptId: "",
           queryId: "",
           date: dateStr,
-          details: `Updated star rating field from ${previousStarRating} to ${fields.starRating}`
+          details: `Updated agent fit from ${previousStarRating} to ${fields.starRating}`
         });
       }
 

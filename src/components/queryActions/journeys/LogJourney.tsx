@@ -10,6 +10,7 @@
  * CHECK the method differs from how the agent takes queries · BLOCK nothing marked as sent ·
  * CHECK the materials differ from the agent's guidelines · CHECK a nudge before the reply date.
  */
+import { queryViaOf } from "../../../lib/queryVia";
 import { inUseLetter } from "../../../lib/queryLetters";
 import { previousQueryFor } from "../../../lib/requery";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -138,7 +139,7 @@ export function LogJourney({ req, today, children }: JourneyProps) {
     const g = guidelineAsk(a);
     setAgentId(a.id);
     setRequery(false);
-    setVia((a.submissionMethod as SubmissionMethod) || SubmissionMethod.EMAIL);
+    setVia(queryViaOf(a.submissionMethod) || SubmissionMethod.EMAIL);
     if (!again) {
       /* ⚠️ A GUIDELINE MATCH NEVER CHANGES THE PACKAGE (§A1, LP2). It fills the sample's portion —
          the agent's to set (D2) — and, when the writer is choosing individually, the ticks. */

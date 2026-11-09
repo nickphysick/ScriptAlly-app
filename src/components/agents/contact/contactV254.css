@@ -1,6 +1,6 @@
 /*
  * Contact list v25.4 (design-refs/contact-list-v25-4/) — simpler rows. The columns read Agent · What they want ·
- * Replies in · Your rating · Your query (Your rating drops at ≤1440 of window); Your query is one line; an agent with
+ * Replies in · Agent fit · Your query (Agent fit drops at ≤1440 of window); Your query is one line; an agent with
  * no genres shows one profile link (spanning Replies in when there is no reply time); and the row has no hover
  * actions but "Log a query" on a not-queried agent.
  */
@@ -38,7 +38,7 @@
   .cl254-fillp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; border-radius: 2px; }
 }
 @media (min-width: 768px) and (max-width: 1440px) {
-  /* ≤1440: Agent · What they want · Replies in · Your query — Your rating drops, Replies in comes back */
+  /* ≤1440: Agent · What they want · Replies in · Your query — Agent fit drops, Replies in comes back */
   .cl24-sheet { --cl24-cols: minmax(0, 1.9fr) minmax(0, 1.9fr) minmax(0, 0.9fr) minmax(0, 1.9fr); }
   .cl24-th > [data-col="3"], .cl24-tr > [data-col="3"] { display: block; }
   .cl24-th > [data-col="3"] { display: inline-flex; }

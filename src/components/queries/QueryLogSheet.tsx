@@ -19,6 +19,7 @@
  * inside it is clipped at the scroller's edge. "Must not be clipped by any ancestor" is the
  * brief's own phrase, and a portal is the only honest answer inside a scrolling column.
  */
+import { queryViaOf } from "../../lib/queryVia";
 import React, { useMemo, useRef, useState } from "react";
 import { AgentDisc } from "../shared/AgentDisc";
 import { createPortal } from "react-dom";
@@ -120,7 +121,7 @@ export const QueryLogSheet: React.FC<QueryLogSheetProps> = ({
     onDraft({
       ...draft,
       agentId: a.id,
-      sendMethod: (a.submissionMethod as QueryDraft["sendMethod"]) || draft.sendMethod,
+      sendMethod: (queryViaOf(a.submissionMethod) as QueryDraft["sendMethod"] | null) || draft.sendMethod,
       /* the agent's window becomes the pre-selected nudge — their window is the DEFAULT */
       reminder: typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0
         ? { kind: "preset", weeks: a.responseTimeWeeks, seeded: true }

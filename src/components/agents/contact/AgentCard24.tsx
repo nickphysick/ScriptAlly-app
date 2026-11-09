@@ -281,7 +281,7 @@ export const Contact: React.FC<{ p: AgentCard24Props; first: string; heading?: b
   const email = (a.email ?? "").trim();
   const site = (a.website ?? "").trim();
   const href = site ? hrefFor(site) : null;
-  const method = methodAnswer(a.submissionMethod);
+  const method = methodAnswer(a.submissionMethod, a.submissionMethodOther);
   const social = socialOf(a);
   const k = p.edit;
   const form = k ? k.draft.form.trim() : "";

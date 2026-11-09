@@ -11,7 +11,8 @@ const ag = (id: string, closed = false) => ({ id, submissionStatus: closed ? Sub
 const model = (m: Record<string, GapKey[]>, items = 0) => ({ gapsById: new Map(Object.entries(m)), items: Array.from({ length: items }) as never[] });
 
 describe("List health (points)", () => {
-  it("the table is the pack's", () => expect(POINTS).toEqual({ reply: 6, materials: 5, genres: 4, wishlist: 3, reopen: 2 }));
+  /* re-pointed (Add agent v1): the agency, worth 1, counted only for a named agent with no agency (see appliesTo) */
+  it("the table is the pack's", () => expect(POINTS).toEqual({ reply: 6, materials: 5, genres: 4, wishlist: 3, reopen: 2, agency: 1 }));
   it("a profile is worth 18, or 20 closed for now", () => {
     expect(possibleFor(ag("a"))).toBe(18);
     expect(possibleFor(ag("b", true))).toBe(20);
