@@ -29,4 +29,30 @@
   .qc151.qc153 .qc1531-hd { grid-template-columns: 268px minmax(0, 1fr) minmax(400px, 560px); column-gap: 28px; }
   .qc151.qc153 .qc1531-art { justify-self: center; }
   .qc151.qc153 .qc1531-rc { display: flex; justify-content: flex-end; }
+
+  /* ── 4 · the filter rail as a sidebar: no card; the header straight on the page over a 2px navy rule; each section a
+     small serif label over its own white panel, 8px apart. Filter logic, counts, zero-fade and Reset are untouched. ── */
+  .qc151.qc153 .qc153-rail { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+  .qc151.qc153 .qc153-rail .qc153-rin { border: 0; border-radius: 0; overflow: visible; background: none; }
+  .qc151.qc153 .qc153-rail .qc153-rbd { padding: 4px 4px 12px; background: none; box-shadow: inset 0 -2px 0 #2a3a52; }
+  .qc151.qc153 .qc153-rail .qc153-rsec,
+  .qc151.qc153 .qc153-rail .qc153-rbd + .qc153-rsec { border-top: 0; margin-top: 8px; }
+  .qc151.qc153 .qc153-rail .qc153-rh5 button {
+    padding: 10px 4px 8px; font: 600 12.5px/1.3 var(--sp-serif) !important; color: #8a8076; letter-spacing: 0.01em;
+  }
+  .qc151.qc153 .qc153-rail .qc153-rbody { padding: 6px; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px #e8e1d6; }
+  /* the rows: 8 10, radius 8, a warm hover; Most used is a plain list (it was pills), navy with cream text when on */
+  .qc151.qc153 .qc153-rail .qc153-fr { padding: 8px 10px; border-radius: 8px; }
+  .qc151.qc153 .qc153-rail .qc153-fr:hover:not(.is-on) { background: #f7f4ef; }
+  .qc151.qc153 .qc153-rail .qc1534-quick { display: flex; flex-direction: column; gap: 0; }
+  .qc151.qc153 .qc153-rail .qc1534-q { justify-content: space-between; }
+  .qc151.qc153 .qc153-rail .qc1534-q.is-on { background: #2a3a52; color: #f4eee5; }
+  .qc151.qc153 .qc153-rail .qc153-fr .qc153-n { font: 400 13.5px/1 var(--sp-type) !important; color: #8a8076; }
+  .qc151.qc153 .qc153-rail .qc1534-q.is-on .qc153-n { color: rgba(244, 238, 229, 0.75); }
+  /* Where it stands: the tiles keep their stage fills, 4px apart, radius 8 */
+  .qc151.qc153 .qc153-rail .qc1533-where { padding: 6px; }
+  .qc151.qc153 .qc153-rail .qc153-courts { gap: 4px; padding: 0 0 6px; }
+  .qc151.qc153 .qc153-rail .qc153-court { border-radius: 8px; }
+  /* the export at its foot sits on the page too */
+  .qc151.qc153 .qc153-rail .qc153-rft { padding: 12px 4px 4px; border-top: 0; }
 }
