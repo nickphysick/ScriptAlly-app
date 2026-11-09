@@ -1,0 +1,42 @@
+[
+ {
+  "name": "the card is headed Queries",
+  "ok": true,
+  "got": "Queries"
+ },
+ {
+  "name": "the label",
+  "ok": true,
+  "got": "label"
+ },
+ {
+  "name": "the helper, muted italic",
+  "ok": true,
+  "got": "Queries with no reply after this long move to Gone quiet."
+ },
+ {
+  "name": "the five choices",
+  "ok": true,
+  "got": "2 weeks,3 weeks,4 weeks,6 weeks,8 weeks"
+ },
+ {
+  "name": "a change is stored and read back",
+  "ok": true,
+  "got": "4 → 6"
+ },
+ {
+  "name": "the account's value is put back",
+  "ok": true,
+  "got": "4"
+ },
+ {
+  "name": "the header carries no quiet control",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "the action row is the two buttons",
+  "ok": true,
+  "got": "+ Log a query | Record a response"
+ }
+]

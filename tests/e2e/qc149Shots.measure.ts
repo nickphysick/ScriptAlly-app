@@ -71,12 +71,18 @@ for (const vp of SIZES) {
     const before = (await rows(page)).length;
     await tap(page, "[data-qc149='log']"); await page.waitForTimeout(1000);
     await shot(page, "11-log-pick-agent", w);
-    await tap(page, "[data-qc149f='agent']"); await page.waitForTimeout(500);
-    await tap(page, "[data-qc149f='send'][data-k='sample']"); await page.waitForTimeout(300);
+    /* Log a query v1 — the staged journey: Agent, Sent, Materials, How, the check, the celebration; Undo is the celebration's */
+    await tap(page, "[data-qls='agent'][data-group='ready']"); await page.waitForTimeout(500);
+    await tap(page, "[data-qls='when-opt'][data-k='today']"); await page.waitForTimeout(400);
+    if (await page.locator("[data-qls='package']").count()) await tap(page, "[data-qls='package']"); else await tap(page, "[data-qls='pieces-continue']");
+    await page.waitForTimeout(400);
+    if (await page.locator("[data-qls='root'][data-step='how']").count()) await tap(page, "[data-qls='how-opt']");
+    await page.waitForTimeout(400);
     await shot(page, "12-log-fill", w);
-    await tap(page, "[data-qc149f='save']"); await page.waitForTimeout(3500);
+    await tap(page, "[data-qls='log']"); await page.waitForTimeout(3500);
     await shot(page, "13-log-saved", w);
-    expect(await undo(page), "13: no undo bar — the account has been changed").toBe(true);
+    await tap(page, "[data-qls='undo']"); await page.waitForTimeout(2500);
+    expect(await page.locator("[data-qls='root'][data-step='check']").count(), "13: Undo did not return to the check — the account may have been changed").toBe(1);
     await page.waitForTimeout(1500);
     expect((await rows(page)).length, "13: the logged query was not undone").toBe(before);
     await closePanel(page);

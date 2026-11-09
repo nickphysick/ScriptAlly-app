@@ -415,34 +415,37 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       const before = (await rows(page)).length;
       await tap(page, "[data-qc149='log']");
       await page.waitForTimeout(1000);
-      L.check("the panel opens on the new card", !!(await box(page, "[data-qp='panel'] [data-qc149f='log'][data-step='pick']")), "no pick step");
-      const busy = page.locator("[data-qc149f='agent-busy']").first();
+      /* Log a query v1 — the staged journey (QcLogStages): Agent, Sent, Materials, How, the check, then the celebration */
+      L.check("the panel opens on the Agent stage", !!(await box(page, "[data-qp='panel'] [data-qls='root'][data-step='who']")), "no Agent stage");
+      const fold = page.locator("[data-qls='busy']").first();
+      if (await fold.count()) await fold.click();
+      const busy = page.locator("[data-qls='agent-busy']").first();
       if (await busy.count()) {
-        /* aria-disabled: Playwright will not click it, so the click is dispatched on the element itself — what a mouse would do */
         await busy.evaluate((e) => (e as HTMLElement).click());
         await page.waitForTimeout(400);
-        L.check("an agent already querying cannot be picked", !!(await box(page, "[data-qc149f='log'][data-step='pick']")), "it was picked");
+        L.check("an agent already querying cannot be picked", !!(await box(page, "[data-qls='root'][data-step='who']")), "it was picked");
       } else L.check("population: an agent already querying this book", false, "none listed");
-      const agentName = (await text(page, "[data-qc149f='agent'] b")) ?? "";
-      await tap(page, "[data-qc149f='agent']");
-      await page.waitForTimeout(500);
-      L.check("the card fills in", !!(await box(page, "[data-qc149f='log'][data-step='fill']")), "no fill");
-      await tap(page, "[data-qc149f='send'][data-k='sample']");
-      await tap(page, "[data-qc149f='save']");
+      const agentName = (await text(page, "[data-qls='agent'][data-group='ready'] b")) ?? "";
+      await tap(page, "[data-qls='agent'][data-group='ready']");
+      await tap(page, "[data-qls='when-opt'][data-k='today']");
+      if (await page.locator("[data-qls='package']").count()) await tap(page, "[data-qls='package']");
+      else await tap(page, "[data-qls='pieces-continue']");
+      if (await page.locator("[data-qls='root'][data-step='how']").count()) await tap(page, "[data-qls='how-opt']");
+      L.check("the check, with the preview slip", !!(await box(page, "[data-qls='root'][data-step='check'] [data-qls='preview'] [data-qc153='slip']")), "no check");
+      await tap(page, "[data-qls='log']");
       await page.waitForTimeout(3500);
-      const band = await text(page, `${CARD} [data-qc149c='band-word']`);
-      L.check("it becomes the live query: WITH THE AGENT", band === "With the agent", String(band));
-      L.check("…with its day", /Day\s*\d/.test((await text(page, `${CARD} [data-qc149c='day']`)) ?? ""), String(await text(page, `${CARD} [data-qc149c='day']`)));
+      L.check("the celebration", /^Off to /.test((await page.locator("[data-qls='yay-head']").getAttribute("aria-label").catch(() => null)) ?? ""), "no celebration");
       const after = await rows(page);
       L.check("the list gains the row", after.length === before + 1 && after.some((r) => r.name === agentName), `${before} → ${after.length} · ${agentName}`);
-      L.check("UNDONE: the logged query is removed", await undo(page), "no undo bar — the account has been changed");
-      await page.waitForTimeout(1500);
+      await tap(page, "[data-qls='undo']");
+      await page.waitForTimeout(2500);
+      L.check("UNDONE: back on the check", !!(await box(page, "[data-qls='root'][data-step='check']")), "no check after Undo — the account may have been changed");
       L.check("…the list is back to its count", (await rows(page)).length === before, String((await rows(page)).length));
       await closePanel(page);
       /* the top bar's "+ Log a query" opens the same card */
       const bar = page.locator(".ws-pagebar button").filter({ hasText: "Log a query" }).first();
       if (await bar.count()) { await bar.click(); await page.waitForTimeout(1000); }
-      L.check("the top bar's + Log a query opens the same card", !!(await box(page, "[data-qp='panel'] [data-qc149f='log']")), "no card");
+      L.check("the top bar's + Log a query opens the same card", !!(await box(page, "[data-qp='panel'] [data-qls='root']")), "no card");
       L.done(9);
     });
 

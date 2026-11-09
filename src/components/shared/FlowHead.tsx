@@ -6,7 +6,7 @@
  * and, where there is one, a line, on the band's #f3eee8 with a hairline under it and the × at top right. It replaces
  * v25 F's cream panel with the courier or the desk hawk, and the small mono band label the flows used to carry.
  *
- *   Log a query (QcLogFlow149), both steps           "Logging new query" + its line
+ *   Log a query (QcLogStages), every stage            "Logging new query" + the stage's line
  *   Add an agent (AgentEditMode, panel, new agent) "Adding new agent" + its line
  *   Record a response (QcWhoReplied149, then QcQueryCard149's respond mode)
  *                                                    "Recording response"; a line once an answer is picked

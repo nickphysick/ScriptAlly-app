@@ -92,7 +92,6 @@
 /* ── the modes (respond, edit) and the header flows: shared form parts ── */
 .qc149c-md { flex: 0 1 auto !important; /* workspace width v2: actions follow the content */ min-height: 0; overflow: auto; padding: 16px 20px 10px; animation: qc149cMdIn 0.22s ease-out; }
 @keyframes qc149cMdIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-.qc149c-lb { display: block; font: 400 10px/1 var(--sp-mono); letter-spacing: 0.17em; text-transform: uppercase; color: #8f8a82; }
 .qc149c-h3 { margin: 8px 0 14px; font: 400 26px/1.1 var(--sp-type) !important; color: #1c130f; }
 .qc149c-opt {
   all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; margin: 0 0 8px;
@@ -150,10 +149,6 @@ textarea.qc149c-inp { height: auto; min-height: 70px; padding: 10px 12px; line-h
 
 /* ── D · the header flows: the new query card and "Who replied?" ── */
 .qc149f .qc149f-band { display: flex; align-items: center; justify-content: space-between; background: #efe9df; color: #5b524a; }
-.qc149f .qc149f-pick { flex: 1 1 auto !important; min-height: 0; display: flex; flex-direction: column; padding: 18px 20px 6px; }
-/* Contact list v25.1 B — the header is taller than the band it replaced: the label and the search keep their height,
-   the list beneath them takes what is left (they were squeezed into each other) */
-.qc149f .qc149f-pick > :not(.qc149f-ags) { flex: none; }
 .qc149f .qc149f-srch { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 10px; background: #f5f1ea; box-shadow: inset 0 1px 2px rgba(28, 19, 15, 0.08); }
 .qc149f .qc149f-srch input { all: unset; flex: 1; font: 400 17px var(--sp-serif); }
 .qc149f .qc149f-srch input::placeholder { font-style: italic; color: #9a948b; }
@@ -170,15 +165,6 @@ textarea.qc149c-inp { height: auto; min-height: 70px; padding: 10px 12px; line-h
 .qc149f .qc149f-ag em { margin-left: auto; font: 400 10px var(--sp-mono); font-style: normal; letter-spacing: 0.12em; text-transform: uppercase; color: #8f8a82; white-space: nowrap; }
 .qc149f .qc149f-st { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: #efeae2; font: 400 14px var(--sp-serif); white-space: nowrap; }
 .qc149f .qc149f-st.y { background: #f5e6df; }
-.qc149f .qc149f-chg { all: unset; cursor: pointer; margin-left: auto; font: 400 14.5px var(--sp-serif); color: #6c675f; padding-bottom: 2px; box-shadow: inset 0 -1px 0 rgba(28, 19, 15, 0.25); }
-.qc149f .qc149f-bkf { margin: 0 18px; padding: 14px 16px 16px; border-radius: 10px; background: #f5f1ea; }
-.qc149f .qc149f-bkf b.qc149f-tt { display: block; margin: 8px 0 0; font: 400 27px/1 var(--sp-type) !important; }
-.qc149f .qc149f-sends { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
-.qc149f .qc149f-sends button { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 11px; border-radius: 7px; background: #f5f1ea; font: 400 10.5px var(--sp-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #5f5a53; }
-.qc149f .qc149f-sends button[aria-pressed="true"] { background: #2a3a52; color: #f4eee5; }
-.qc149f .qc149f-sends button i { width: 12px; height: 12px; border-radius: 3px; box-shadow: inset 0 0 0 1.4px currentColor; }
-.qc149f .qc149f-sends button[aria-pressed="true"] i { background: #f4eee5; box-shadow: none; }
-.qc149f .qc149f-sends button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 .qc149f .qc149f-pg2 { flex: 0 1 auto !important; /* workspace width v2: the form hugs, the footer follows it */ min-height: 0; overflow: auto; padding: 16px 20px 10px; }
 .qc149f .qc149f-pg2 h4 { margin: 4px 0 0; font: 400 10px/1 var(--sp-mono); letter-spacing: 0.17em; text-transform: uppercase; color: #8f8a82; }
 .qc149f .qc149f-ttl { margin: 8px 0 14px; font: 400 26px/1.1 var(--sp-type) !important; }

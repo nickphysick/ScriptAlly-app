@@ -130,25 +130,33 @@ export interface QcSlip153Props {
   act: RowAct | null;
   onOpen: (id: string) => void;
   onAct: (id: string, mode?: DrawerMode) => void;
+  /**
+   * Log a query v1 — the check stage's PREVIEW of an unsaved query: the slip is not a control (no click-to-open, no tab
+   * stop, no hover CTA) and only its paperclip tab works. `next` and `policy` replace those two facts' words where the
+   * agent's card states no reply window ("No reply window" / "Not on their card").
+   */
+  preview?: { next?: { value: string; line: string | null }; policy?: { value: string; line: string | null } };
 }
 
-export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, packageName, agent = null, act, onOpen, onAct }) => {
+export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, packageName, agent = null, act, onOpen, onAct, preview }) => {
   const t = slipTrack(r);
   const word = standWords(r);
   const qd = queriedFact(r, nowMs);
   const hd = heardFact(r, nowMs);
-  const nx = nextFact(r, nowMs);
-  const pol = policyWords(agent);
+  const nx0 = nextFact(r, nowMs);
+  const nx = preview?.next ? { value: preview.next.value, line: preview.next.line, hot: false, bar: null } : nx0;
+  const pol = preview?.policy ?? policyWords(agent);
   const mats = materialGroups(r.query, r.status, packageName, r.stageStartMs, nowMs);
   const [popOpen, setPopOpen] = useState(false);
   const cta = act && act.tone !== "plain" ? act : null;
   const open = () => onOpen(r.id);
   return (
-    <div className={`sa-slip qc153-slip${selected ? " is-sel" : ""}${popOpen ? " has-pop" : ""}`} id={`query-row-${r.id}`} data-qc153="slip" data-qcv="row" data-id={r.id}
-      data-tone={slipTone(r.status)} data-status={r.status} role="button" tabIndex={0}
-      aria-label={`${r.agentName}, ${r.agency}, ${word}`} aria-pressed={selected}
-      onClick={open}
-      onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); open(); } }}>
+    <div className={`sa-slip qc153-slip${selected ? " is-sel" : ""}${popOpen ? " has-pop" : ""}${preview ? " is-preview" : ""}`} id={preview ? undefined : `query-row-${r.id}`}
+      data-qc153="slip" data-qcv={preview ? "preview" : "row"} data-id={r.id} data-tone={slipTone(r.status)} data-status={r.status}
+      {...(preview
+        ? { role: "group", "aria-label": `Preview: ${r.agentName}, ${r.agency}, ${word}` }
+        : { role: "button", tabIndex: 0, "aria-label": `${r.agentName}, ${r.agency}, ${word}`, "aria-pressed": selected, onClick: open,
+            onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); open(); } } })}>
       <div className="sa-slip-in">
         <div className="qc153-top" data-qc153="head">
           <span className="qc153-seal" aria-hidden="true">{r.initials}</span>
@@ -160,11 +168,11 @@ export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, p
             {mats ? <MatTab1533 id={r.id} g={mats} status={r.status} onOpen={setPopOpen} /> : null}
           </span>
           <span className="qc153-rt">
-            <span className="qc153-cta" data-qc153="cta" aria-hidden="true">
+            {preview ? null : <span className="qc153-cta" data-qc153="cta" aria-hidden="true">
               {cta
                 ? <button type="button" tabIndex={-1} className="qc153-btn" data-qc153="cta-btn" data-mode={cta.mode} onClick={(e) => { e.stopPropagation(); onAct(r.id, cta.mode); }}>{cta.label} →</button>
                 : <button type="button" tabIndex={-1} className="qc153-btn qc153-btn--ghost" data-qc153="cta-open" onClick={(e) => { e.stopPropagation(); open(); }}>Open the card →</button>}
-            </span>
+            </span>}
             {/* v153.2 — the status word beside the track, to its right, on one line */}
             <span className="qc153-st">
               <Track153 t={t} />
