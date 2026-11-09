@@ -79,7 +79,7 @@
   .cl24-sheet .cl24-fs:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 
   /* B2 · the table */
-  /* v25.1 E1 — five columns: Agent 2.4fr · Genres 1.8fr · Replies in 1.2fr · Your query 2.1fr · Your rating 1fr */
+  /* v25.1 E1 — five columns: Agent 2.4fr · Genres 1.8fr · Replies in 1.2fr · Your query 2.1fr · Agent fit 1fr */
   .cl24-sheet { --cl24-cols: minmax(220px, 2.4fr) minmax(160px, 1.8fr) minmax(110px, 1.2fr) minmax(180px, 2.1fr) minmax(96px, 1fr); --cl24-px: 26px; }
   .cl24-th, .cl24-tr { display: grid; grid-template-columns: var(--cl24-cols); column-gap: 22px; align-items: center; padding: 0 var(--cl24-px); }
   .cl24-th {
@@ -178,7 +178,7 @@
 }
 /* ≤1440 of window: Replies in and Added hide, Filters and Full screen go icon-only, the prefixes drop (the Query Centre's) */
 @media (min-width: 768px) and (max-width: 1440px) {
-  /* v25.1 E1 — at ≤1440 of window the LAST column (Your rating) drops: Agent · Genres · Replies in · Your query */
+  /* v25.1 E1 — at ≤1440 of window the LAST column (Agent fit) drops: Agent · Genres · Replies in · Your query */
   .cl24-sheet { --cl24-cols: minmax(200px, 2.4fr) minmax(140px, 1.8fr) minmax(100px, 1.2fr) minmax(170px, 2.1fr); --cl24-px: 18px; }
   .cl24-th > [data-col="5"], .cl24-tr > [data-col="5"] { display: none; }
   .cl24-sheet .cl24-cl, .cl24-sheet .cl24-gby, .cl24-sheet .cl24-sort .sc-sby, .cl24-sheet .cl24-fslb { display: none; }

@@ -16,6 +16,8 @@ import { QueryStatus, SubmissionMethod, type Agent, type Query } from "../../typ
 import { buildQcRows, type QcRow } from "../qcSummary";
 import { stampRows, type QueryState } from "../queryState";
 import { doorOf } from "../agentList";
+import { fitOrder } from "../agentFit";
+import { queryViaOf } from "../queryVia";
 import { MONTHS_SHORT } from "../dates";
 import { agentAgencyLine, agentInitials, agentPrimary } from "../agentDisplay";
 import { logDefaults, logPayload, pieceVersions, type LogPlan, type PieceVersions } from "./logSave";
@@ -86,7 +88,7 @@ export function stageAgents(agents: readonly Agent[], live: readonly Query[], no
       id: a.id, name, first: firstName(name), agency: agentAgencyLine(a), initials: agentInitials(a),
       querying: q.length > 0, queriedMs: sent.length ? Math.max(...sent) : null,
       closed: doorOf(a) === "closed", reopens: Number.isFinite(reo) ? dayMonY(reo, nowMs) : null,
-      via: (a.submissionMethod as SubmissionMethod) || null, email: a.email?.trim() || null,
+      via: queryViaOf(a.submissionMethod), email: a.email?.trim() || null,
       weeks: wks, nrmn: !!a.noResponseMeansNo, ask: guidelineAsk(a), agent: a,
     };
   });
@@ -99,10 +101,13 @@ export function whoGroups(list: readonly StageAgent[], find: string): WhoGroups 
   const q = norm(find.trim());
   const m = (a: StageAgent) => !q || norm(`${a.name} ${a.agency}`).includes(q);
   const by = (a: StageAgent, b: StageAgent) => a.name.localeCompare(b.name);
+  /* Add agent v1 Phase 6 — the agents you can query are in fit order: Agent fit high first (unrated last), then the
+     shorter response time, then the name (lib/agentFit) */
+  const fit = (a: StageAgent, b: StageAgent) => fitOrder({ starRating: a.agent.starRating, responseTimeWeeks: a.agent.responseTimeWeeks, name: a.name }, { starRating: b.agent.starRating, responseTimeWeeks: b.agent.responseTimeWeeks, name: b.name });
   const busy = list.filter((a) => a.querying).sort(by);
   return {
-    ready: list.filter((a) => !a.querying && !a.closed && m(a)).sort(by),
-    closed: list.filter((a) => !a.querying && a.closed && m(a)).sort(by),
+    ready: list.filter((a) => !a.querying && !a.closed && m(a)).sort(fit),
+    closed: list.filter((a) => !a.querying && a.closed && m(a)).sort(fit),
     busy,
     busyHit: busy.filter(m),
   };

@@ -27,16 +27,51 @@ import { bandWords, howTiles, materialChips, metaLine, nextStep, type NextStep }
 import { NQ_RING } from "./ContactSheet24";
 import { Notes, type AgentCard24Props, useCardModel } from "./AgentCard24";
 import { YouAndStory } from "./AgentCardParts255";
-import type { AgentCardField } from "../../../lib/agentCardStore";
+import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
+import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
 import { requestCardClose } from "./AgentCardPanel262";
 import { useAgentForm } from "../card/useAgentForm";
-import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar } from "./AgentCard262Edit";
+import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar, changeNames } from "./AgentCard262Edit";
+import type { InlineField } from "../card/InlineEdits";
+import type { CardDraft } from "../../../lib/cardDraft";
+
+/** changes are counted by the names the writer reads ("how they take queries" is one change, method and words alike) */
+const changeCount = (changed: readonly (keyof CardDraft)[]) => changeNames(changed).length;
+/** an inline field's ask, as a field the card opens at */
+const INLINE_FOCUS: Record<InlineField, AgentCardField> = { wishlist: "wishlist", genres: "genres", replies: "reply", email: "email", website: "website", form: "website", social: "mswl" };
 import "./contactV262.css";
 
 /** the band's slate, for every agent (v26.2 ruling) */
 export const CARD262_BAND = "#5e7189";
 
 export type Sec262 = "contact" | "genres" | "wishlist" | "materials" | "how";
+/** Add agent v1 — the family a section's edit wears: Contact details in powder, genres and wishlist in blush, materials
+ *  and how they work in sand */
+export const SEC_FAM: Record<Sec262, "who" | "want" | "query"> = { contact: "who", genres: "want", wishlist: "want", materials: "query", how: "query" };
+export const SEC_ORDER: Sec262[] = ["contact", "genres", "wishlist", "materials", "how"];
+
+/**
+ * Add agent v1 Phase 5 — WHERE A DOOR'S EDIT OPENS ON THE CARD: a field's own section; "who" with no field (Edit agent,
+ * the band's pencil) is every section with Contact details at the top; "want" / "work" the sections of that tab;
+ * "notes" the Notes tab.
+ */
+export function secsFor(tab?: AgentCardTab, focus?: AgentCardField): Sec262[] | "all" | "notes" {
+  switch (focus) {
+    case "genres": return ["genres"];
+    case "wishlist": return ["wishlist"];
+    case "materials": return ["materials"];
+    case "reply": case "nrmn": case "method": case "door": case "reopen": return ["how"];
+    case "name": case "agency": case "country": case "city": case "email": case "website": case "mswl": return "all";
+    default: break;
+  }
+  if (tab === "notes") return "notes";
+  if (tab === "want") return ["genres", "wishlist"];
+  if (tab === "work") return ["materials", "how"];
+  return "all";
+}
+/** a door's ask: its seq makes a second ask for the same place a new ask */
+export interface OpenAt { seq: number; tab?: AgentCardTab; focus?: AgentCardField; prefill?: Partial<import("../../../lib/cardDraft").CardDraft> }
+
 /** where a section's edit opens in the editor (the field it starts at) */
 export const SEC_FOCUS: Record<Sec262, AgentCardField> = { contact: "name", genres: "genres", wishlist: "wishlist", materials: "materials", how: "reply" };
 
@@ -58,6 +93,11 @@ type Tab = "profile" | "history" | "notes";
 export interface AgentCard262Props extends AgentCard24Props {
   /** a section's edit (Part C opens it on the card) */
   onEditSection?: (k: Sec262) => void;
+  /** Add agent v1 — the add journey's finish screen: the real face, read-only (no ✕, no pencils, no pager; its gap
+   *  links hand off to `onEdit`) */
+  preview?: boolean;
+  /** Add agent v1 Phase 5 — open the card in edit mode at a door's section */
+  openAt?: OpenAt;
 }
 
 /** the 60px disc, coloured by who it's with */
@@ -86,9 +126,10 @@ export const NextBox: React.FC<{ s: NextStep; p: AgentCard24Props }> = ({ s, p }
 };
 
 /** a section: heading (with its pencil on hover), then its content or its ghost lines and one "+ Add …" */
-const Section: React.FC<{ k: Sec262; title: string; onEdit?: () => void; editing?: React.ReactNode; children?: React.ReactNode }> = ({ k, title, onEdit, editing, children }) => (
-  <section className={`apc-sec cl262-sec${editing ? " is-edit" : ""}`} data-cl262="sec" data-k={k} data-editing={editing ? "" : undefined}>
-    <h5>{title}{onEdit && !editing ? <button type="button" className="cl262-pen" data-cl262="pen" data-k={k} aria-label={`Edit ${title.toLowerCase()}`} onClick={onEdit}>{IC.pen}</button> : null}</h5>
+const Section: React.FC<{ k: Sec262; title: string; onEdit?: () => void; onDone?: () => void; editing?: React.ReactNode; children?: React.ReactNode }> = ({ k, title, onEdit, onDone, editing, children }) => (
+  <section className={`apc-sec cl262-sec${editing ? " is-edit" : ""}`} data-cl262="sec" data-k={k} data-fam={SEC_FAM[k]} data-editing={editing ? "" : undefined}>
+    <h5>{title}{onEdit && !editing ? <button type="button" className="cl262-pen" data-cl262="pen" data-k={k} aria-label={`Edit ${title.toLowerCase()}`} onClick={onEdit}>{IC.pen}</button> : null}
+      {editing && onDone ? <button type="button" className="cl262-done" data-cl262="sec-close" data-k={k} onClick={onDone}>Close</button> : null}</h5>
     {/* the editor's own field styles live under its `.ac` root (box-sizing and face inheritance only) */}
     {editing ? <div className="ac cl262-fx">{editing}</div> : children}
   </section>
@@ -122,7 +163,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       if (!kit) return { ok: false, error: "Nothing to save to." };
       const r = await kit.onSave(d, base);
       if ("error" in r) return r;
-      /* the sections close in place, the card leans back, and the frame flashes sage */
+      /* the sections close in place, the card leans back, and the frame flashes navy (never sage: no green) */
       closeAll();
       setFlash(true);
       window.setTimeout(() => setFlash(false), 1200);
@@ -133,7 +174,14 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const resetRef = useRef(form.reset);
   resetRef.current = form.reset;
   /* a new agent: nothing open, a fresh draft */
-  useEffect(() => { setOpen([]); resetRef.current(a); }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* Add agent v1 — only on a REAL change of agent (paging): a mount re-run (StrictMode runs mount effects twice) must not
+     close the sections a door's ask has just opened */
+  const shownId = useRef(a.id);
+  useEffect(() => {
+    if (shownId.current === a.id) return;
+    shownId.current = a.id;
+    setOpen([]); resetRef.current(a);
+  }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
   /** open one section (adding it to any already open); the first opening starts a fresh draft */
   const openSec = (k: Sec262) => {
     if (!kit) { p.onEdit(undefined, SEC_FOCUS[k]); return; }
@@ -152,7 +200,29 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     setTab("profile");
     setOpen((cur) => { if (!cur.length) resetRef.current(a); return ["contact", "genres", "wishlist", "materials", "how"]; });
   };
-  const cancel = () => { setGuard(null); closeAll(); form.reset(a); };
+  const cancel = () => { if (form.dirty) { setGuard({ n: changeCount(form.changed), run: () => {} }); return; } setGuard(null); closeAll(); form.reset(a); };
+  /** a section's Close: it folds; the last one folding with unsaved changes asks first */
+  const closeSec = (k: Sec262) => {
+    if (open.length === 1 && open[0] === k && form.dirty) { setGuard({ n: changeCount(form.changed), run: () => {} }); return; }
+    setOpen((cur) => cur.filter((x) => x !== k));
+  };
+  /* Add agent v1 Phase 5 — a door's ask: open at its section (or every section, or the Notes tab), once per seq */
+  const applyAsk = (tab?: AgentCardTab, focus?: AgentCardField) => {
+    const w = secsFor(tab, focus);
+    if (w === "notes") { setTab("notes"); return; }
+    if (w === "all") { openAll(); return; }
+    for (const k of w) openSec(k);
+  };
+  const askSeq = useRef(0);
+  const ask0: OpenAt | null = p.openAt ?? (p.edit?.request?.edit ? { seq: p.edit.request.seq, focus: p.edit.request.edit.focus, prefill: p.edit.request.edit.prefill } : p.edit?.request?.inline ? { seq: p.edit.request.seq, focus: INLINE_FOCUS[p.edit.request.inline] } : null);
+  useEffect(() => {
+    if (!ask0 || !kit || ask0.seq === askSeq.current) return;
+    askSeq.current = ask0.seq;
+    applyAsk(ask0.tab, ask0.focus);
+    /* answers carried over (Housekeeping's "Edit on {first}'s card") land on the fresh draft, unsaved */
+    if (ask0.prefill && Object.keys(ask0.prefill).length) { const pf = ask0.prefill; window.setTimeout(() => form.set(pf), 0); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once per ask (its seq)
+  }, [ask0?.seq, kit, a.id]);
   const edit = openSec;
   const isOpen = (k: Sec262) => open.includes(k);
   const all = open.includes("contact");
@@ -217,11 +287,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (!el) return;
     const field = el.querySelector<HTMLInputElement | HTMLTextAreaElement>("textarea, input[data-ae='name']");
     if (field) { field.focus({ preventScroll: true }); const n = field.value.length; try { field.setSelectionRange(n, n); } catch { /* not a text field */ } }
-    if (o.all) return;
+    /* Add agent v1 — the band pencil (every section) brings Contact details to the top */
+    if (o.all) { sc.scrollTop = 0; return; }
     const r = el.getBoundingClientRect(), b = sc.getBoundingClientRect();
     const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let by = 0;
-    if (r.top < b.top) by = r.top - b.top - 70;
+    /* a heading flush with the top (to within a pixel: layout lands on fractions) is in view, not hidden */
+    if (r.top < b.top - 1) by = r.top - b.top - 70;
     else if (r.bottom > b.bottom) by = Math.min(r.bottom - b.bottom + 90, r.top - b.top - 70);
     if (by) sc.scrollBy({ top: by, behavior: reduce ? "auto" : "smooth" });
   }, [open]);
@@ -234,9 +306,9 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const bypass = useRef(false);
   const ask = useCallback((run: () => void): boolean => {
     if (bypass.current || !dirtyRef.current) return true;
-    setGuard({ n: form.changed.length, run });
+    setGuard({ n: changeCount(form.changed), run });
     return false;
-  }, [form.changed.length]);
+  }, [form.changed]);
   const discardThen = (run: () => void) => {
     setGuard(null);
     bypass.current = true;
@@ -284,7 +356,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   /* Esc while editing: the guard up means Keep editing; changes ask; no changes closes the open sections */
   useEscapeLayer(editing || !!guard, () => {
     if (guard) { setGuard(null); return; }
-    if (form.dirty) { setGuard({ n: form.changed.length, run: () => {} }); return; }
+    if (form.dirty) { setGuard({ n: changeCount(form.changed), run: () => {} }); return; }
     closeAll();
   }, ESC_LEVEL.card);
 
@@ -300,22 +372,29 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
 
   const data: PaperCardData = {
     status: x.stand === "agent" ? "querying" : x.stand, statusLabel: bandWords(x), stars: a.starRating ?? 0,
-    initials: agentInitials(a).slice(0, 2), name: agentPrimary(a), agency: (a.name ?? "").trim() ? (a.agency ?? "").trim() : "",
+    initials: agentInitials(a).slice(0, 2), name: agentPrimary(a),
+    /* Add agent v1 — "Agency unknown" stands where the agency would be */
+    agency: (a.name ?? "").trim() ? ((a.agency ?? "").trim() || (a.agencyUnknown ? "Agency unknown" : "")) : "",
     genres: [], materials: [],
   };
-  const rate = (n: number) => { if (p.edit) void p.edit.save({ rating: n }); };
+  /* Add agent v1 — Agent fit: a star saves at once ("Agent fit: great fit"); the chosen one pressed again clears it */
+  const rate = (n: number | null) => { if (p.edit) void p.edit.save({ rating: n }); };
 
   const bandRight = (
     <span className="apc-bandr cl262-bandr">
-      <span className="cl262-stars" data-cl262="stars" role="radiogroup" aria-label="Your rating">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <button key={i} type="button" role="radio" aria-checked={(a.starRating ?? 0) === i} data-on={i <= (a.starRating ?? 0) ? "" : undefined}
-            aria-label={`${i} ${i === 1 ? "star" : "stars"}`} onClick={() => rate(i)}>★</button>
-        ))}
-      </span>
-      {all ? <span className="cl262-editing" data-cl262="editing-chip">Editing</span>
+      {p.preview ? (
+        <span className="cl262-stars cl262-fitro" data-cl262="stars" aria-label={`Agent fit: ${a.starRating ? `${a.starRating} of 5` : "not rated"}`}>
+          <small className="aap-fitw">Agent fit</small>{[1, 2, 3, 4, 5].map((i) => <i key={i} data-on={i <= (a.starRating ?? 0) ? "" : undefined}>★</i>)}
+        </span>
+      ) : (
+        <span className="cl262-fitwrap" data-cl262="fit">
+          <span data-cl262="stars"><FitStars variant="band" value={a.starRating ?? null} onPick={rate} /></span>
+          <InfoTip tone="light">{FIT_TIP}</InfoTip>
+        </span>
+      )}
+      {p.preview ? null : all ? <span className="cl262-editing" data-cl262="editing-chip">Editing</span>
         : <button type="button" className="cl262-rb" data-cl262="edit-all" aria-label={`Edit everything about ${m.first}`} onClick={openAll}>{IC.pen}</button>}
-      <button type="button" className="cl262-rb" data-cl262="close" data-cl24="close" aria-label="Close the agent" onClick={() => requestCardClose()}><span aria-hidden="true">×</span></button>
+      {p.preview ? null : <button type="button" className="cl262-rb" data-cl262="close" data-cl24="close" aria-label="Close the agent" onClick={() => requestCardClose()}><span aria-hidden="true">×</span></button>}
     </span>
   );
   const links = (
@@ -327,7 +406,12 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     </span>
   );
   const gaps = p.gaps && p.gaps.n > 0 ? p.gaps : null;
-  const firstGap = (): Sec262 => (!genres.length ? "genres" : !wish ? "wishlist" : !mats.length ? "materials" : "how");
+  /* the first gap is Housekeeping's (its order); its section, or every section for a contact field */
+  const fillGaps = () => {
+    if (!gaps) return;
+    if (!kit) { p.onEdit(gaps.tab, gaps.focus); return; }
+    applyAsk(gaps.tab, gaps.focus);
+  };
   const tabs = (
     <div className="cl262-tabs" role="tablist" aria-label="The agent">
       {(["profile", "history", "notes"] as const).map((t) => (
@@ -337,15 +421,15 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       ))}
       {tab === "profile" && gaps ? (
         <span className="cl262-gapl" data-cl262="gap-line" data-n={gaps.n}>
-          {gaps.n} {gaps.n === 1 ? "detail" : "details"} missing · <button type="button" data-cl262="gap-fill" onClick={() => edit(firstGap())}>Fill them in →</button>
+          {gaps.n} {gaps.n === 1 ? "detail" : "details"} missing · <button type="button" data-cl262="gap-fill" onClick={fillGaps}>Fill them in →</button>
         </span>
       ) : null}
     </div>
   );
   const profile = (
     <div className="cl262-body" data-cl262="profile" data-cl24="pane">
-      {all && kit ? <Section k="contact" title="Contact details" editing={<EditContact form={form} agent={a} kit={kit} />} /> : null}
-      <Section k="genres" title="Genres sought" onEdit={() => edit("genres")} editing={isOpen("genres") && kit ? <EditGenres form={form} kit={kit} isHit={p.genreHit} /> : undefined}>
+      {all && kit ? <Section k="contact" title="Contact details" onDone={() => closeSec("contact")} editing={<EditContact form={form} agent={a} kit={kit} />} /> : null}
+      <Section k="genres" title="Genres sought" onEdit={p.preview ? undefined : () => edit("genres")} onDone={() => closeSec("genres")} editing={isOpen("genres") && kit ? <EditGenres form={form} kit={kit} isHit={p.genreHit} /> : undefined}>
         {genres.length ? (
           <span className="apc-chips" data-cl262="genres">
             {[...genres.filter((g) => p.genreHit(g)), ...genres.filter((g) => !p.genreHit(g))].map((g) => (
@@ -354,15 +438,15 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
           </span>
         ) : <Ghost kind="chips" add="+ Add genres" k="genres" onAdd={() => edit("genres")} />}
       </Section>
-      <Section k="wishlist" title="Manuscript wishlist" onEdit={() => edit("wishlist")} editing={isOpen("wishlist") ? <EditWishlist form={form} /> : undefined}>
+      <Section k="wishlist" title="Manuscript wishlist" onEdit={p.preview ? undefined : () => edit("wishlist")} onDone={() => closeSec("wishlist")} editing={isOpen("wishlist") ? <EditWishlist form={form} /> : undefined}>
         {wish ? <p className="apc-wish" data-cl262="wishlist">{wish}</p> : <Ghost kind="lines" add="+ Add their wishlist" k="wishlist" onAdd={() => edit("wishlist")} />}
       </Section>
-      <Section k="materials" title="Materials requested" onEdit={() => edit("materials")} editing={isOpen("materials") ? <EditMaterials form={form} /> : undefined}>
+      <Section k="materials" title="Materials requested" onEdit={p.preview ? undefined : () => edit("materials")} onDone={() => closeSec("materials")} editing={isOpen("materials") ? <EditMaterials form={form} /> : undefined}>
         {mats.length ? (
           <span className="apc-chips" data-cl262="materials">{mats.map((c) => <span key={c.label} className="apc-mat"><PaperIcon kind={c.kind} />{c.label}</span>)}</span>
         ) : <Ghost kind="chips" add="+ Add materials" k="materials" onAdd={() => edit("materials")} />}
       </Section>
-      <Section k="how" title={`How ${m.first} works`} onEdit={() => edit("how")} editing={isOpen("how") && kit ? <EditHow form={form} agent={a} kit={kit} first={m.first} /> : undefined}>
+      <Section k="how" title={`How ${m.first} works`} onEdit={p.preview ? undefined : () => edit("how")} onDone={() => closeSec("how")} editing={isOpen("how") && kit ? <EditHow form={form} agent={a} kit={kit} first={m.first} /> : undefined}>
         <div className="cl262-tiles" data-cl262="tiles">
           {tiles.map((t) => (
             <span key={t.k} className={`cl262-tile${t.known ? "" : " gap"}`} data-cl262="tile" data-k={t.k} data-known={t.known ? "" : undefined}>
@@ -380,20 +464,20 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const foot = (
     <div className="cl262-foot" data-cl262="foot">
       <span className="cl262-added apc-meta" data-cl262="added">{IC.clock}{added ? `Added ${added}` : "Added"}</span>
-      <span className="cl262-pager" data-cl24="nav">
+      {p.preview ? null : <span className="cl262-pager" data-cl24="nav">
         <button type="button" data-cl262="prev" data-cl24="prev" aria-label="Previous agent" disabled={p.index <= 0} onClick={() => goStep(-1)}>{IC.l}</button>
         <span data-cl24="pos">{p.index + 1} / {p.total}</span>
         <button type="button" data-cl262="next-agent" data-cl24="next" aria-label="Next agent" disabled={p.index >= p.total - 1} onClick={() => goStep(1)}>{IC.r}</button>
-      </span>
+      </span>}
     </div>
   );
   return (
-    <AgentPaperCard variant="panel" className={`cl262-card${editing ? " is-editing" : ""}${flash ? " is-saved" : ""}`} data={data}
+    <AgentPaperCard variant="panel" className={`cl262-card${editing ? " is-editing" : ""}${flash ? " is-saved" : ""}${p.preview ? " is-preview" : ""}`} data={data}
       panel={{
         onClose: () => (p.onClose ?? requestCardClose)(), closeLabel: "Close the agent", links, tabs, body,
         /* while editing the save bar sits above the foot, which stays: ‹ › must still be pressable, and they ask the guard */
         foot,
-        afterScroll: editing ? <SaveBar form={form} guard={guard} onCancel={cancel} onSave={() => void form.save()} onKeep={() => setGuard(null)}
+        afterScroll: editing ? <SaveBar form={form} first={m.first} guard={guard} onCancel={cancel} onSave={() => void form.save()} onKeep={() => setGuard(null)}
           onDiscard={() => { const g = guard; discardThen(g ? g.run : () => {}); }} /> : null,
         band: CARD262_BAND, bandRight, disc: <Disc262 stand={x.stand} initials={data.initials} />,
         meta: meta ? <span className="apc-meta" data-cl262="meta">{meta}</span> : null,

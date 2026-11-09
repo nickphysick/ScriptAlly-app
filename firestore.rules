@@ -385,7 +385,10 @@ service cloud.firestore {
         // update allowlist, so every save that recomputed it was denied WHOLE — probed on the
         // deployed dev ruleset 25 Sep (permission-denied), the affectedKeys shape this file keeps
         // warning about, live on the page that documented the cache.
-        && (!data.keys().hasAll(['notePreview']) || (data.notePreview is string && data.notePreview.size() <= 512));
+        && (!data.keys().hasAll(['notePreview']) || (data.notePreview is string && data.notePreview.size() <= 512))
+        // Add agent v1 (9 Nov): "Agency unknown" is true or absent (never false), and an Other method's words are short.
+        && (!data.keys().hasAll(['agencyUnknown']) || data.agencyUnknown == true)
+        && (!data.keys().hasAll(['submissionMethodOther']) || (data.submissionMethodOther is string && data.submissionMethodOther.size() <= 40));
     }
 
     // Country allowlist for agent/communityAgent `country` fields. Three tolerated shapes:
@@ -1065,7 +1068,7 @@ service cloud.firestore {
             'name', 'agency', 'email', 'website', 'country', 'city', 'twitter', 'bluesky', 'instagram', 'socials', 'genres', 'mswlNotes',
             'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
             'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside', 'fieldSources',
-            'reopensOn', 'mswlCheckedAt', 'notePreview'
+            'reopensOn', 'mswlCheckedAt', 'notePreview', 'agencyUnknown', 'submissionMethodOther'
           ])
         );
 

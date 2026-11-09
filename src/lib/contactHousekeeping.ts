@@ -31,18 +31,19 @@ import { formatDate } from "./dates";
 import { addMonths, dayKey, earliestLater, itemKey, type ContactPrefs } from "./contactPrefs";
 import type { AgentCardField, AgentCardTab } from "./agentCardStore";
 
-export type GapKey = "reply" | "materials" | "genres" | "wishlist" | "reopen";
-export const GAP_ORDER: readonly GapKey[] = ["reply", "materials", "genres", "wishlist", "reopen"];
+/* Add agent v1 — "agency": a named agent whose agency is not known (marked unknown, or simply not given) */
+export type GapKey = "reply" | "materials" | "genres" | "wishlist" | "reopen" | "agency";
+export const GAP_ORDER: readonly GapKey[] = ["reply", "materials", "genres", "wishlist", "reopen", "agency"];
 
 export type GroupKey = "dates" | "packages" | "matches" | "reminders";
 export const GROUP_ORDER: readonly GroupKey[] = ["dates", "packages", "matches", "reminders"];
 export const GAP_GROUP: Record<GapKey, GroupKey> = {
-  reply: "dates", materials: "packages", genres: "matches", wishlist: "matches", reopen: "reminders",
+  reply: "dates", materials: "packages", genres: "matches", wishlist: "matches", reopen: "reminders", agency: "matches",
 };
 
 /** the by-agent tags — one per gap */
 export const GAP_LABEL: Record<GapKey, string> = {
-  reply: "Reply time", materials: "What to send", genres: "Genres", wishlist: "Wishlist", reopen: "Reopening date",
+  reply: "Reply time", materials: "What to send", genres: "Genres", wishlist: "Wishlist", reopen: "Reopening date", agency: "Agency not known",
 };
 
 /** where a gap's card link lands: the tab and the field focused there (HK v2 §1.5's table) */
@@ -52,9 +53,10 @@ export const GAP_TARGET: Record<GapKey, { tab: AgentCardTab; focus: AgentCardFie
   genres: { tab: "want", focus: "genres" },
   wishlist: { tab: "want", focus: "wishlist" },
   reopen: { tab: "work", focus: "reopen" },
+  agency: { tab: "who", focus: "agency" },
 };
 
-const WEIGHT: Record<GapKey, number> = { reply: 6, materials: 5, genres: 4, wishlist: 3, reopen: 1 };
+const WEIGHT: Record<GapKey, number> = { reply: 6, materials: 5, genres: 4, wishlist: 3, reopen: 1, agency: 1 };
 
 /** A run of copy: plain text, the manuscript's title in italic, or a figure in bold. */
 export type Run = string | { em: string } | { b: string };
@@ -91,6 +93,10 @@ export interface HkItem {
 
 const hasWeeks = (a: Agent) => typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0;
 
+/** Add agent v1 — a named agent with no agency on file: marked "Agency unknown", or never given one */
+export const agencyNotKnown = (a: Pick<Agent, "name" | "agency" | "agencyUnknown">): boolean =>
+  !!(a.name ?? "").trim() && !(a.agency ?? "").trim();
+
 /** The agent's gaps, in table order. `settled` is the writer's "Say it's not stated" list. */
 export function agentGaps(a: Agent, ctx: Pick<HkAgentCtx, "hasReopenTask">, settled: readonly string[]): GapKey[] {
   const gaps: GapKey[] = [];
@@ -99,6 +105,7 @@ export function agentGaps(a: Agent, ctx: Pick<HkAgentCtx, "hasReopenTask">, sett
   if ((a.genres ?? []).length === 0) gaps.push("genres");
   if (!(a.mswlNotes ?? "").trim()) gaps.push("wishlist");
   if (isDoorClosed(a) && !ctx.hasReopenTask) gaps.push("reopen");
+  if (agencyNotKnown(a)) gaps.push("agency");
   return gaps;
 }
 
@@ -176,6 +183,12 @@ export function gapCopy(item: Pick<HkItem, "agent" | "gap" | "live" | "fits">, b
         where: "If their page gives a reopening date, use that. If not, checking back in a month is a good default.",
       };
     }
+    case "agency":
+      return {
+        title: `Which agency ${f} is with`,
+        why: [`With the agency on file you won’t query two agents at the same agency by mistake, and it helps keep ${f}’s details up to date.`],
+        where: "Their MSWL page, social profile or a search for their name usually says.",
+      };
     default: {
       const unhandled: never = item.gap;
       return unhandled;
@@ -269,7 +282,7 @@ export function hkModel(agents: readonly Agent[], ctxOf: (a: Agent) => HkAgentCt
 
 /** each gap's name as Housekeeping says it ("Reply time", "What to send") — the drawer's detail cards and the agent
     panel's gap line read this one table */
-export const GAP_DETAIL: Record<GapKey, string> = { reply: "Reply time", materials: "What to send", genres: "Genres", wishlist: "Wishlist", reopen: "Reopening" };
+export const GAP_DETAIL: Record<GapKey, string> = { reply: "Reply time", materials: "What to send", genres: "Genres", wishlist: "Wishlist", reopen: "Reopening", agency: "Agency" };
 
 /**
  * Contact list v18.1 §B.4 — the agent panel's gap line: this agent's VISIBLE Housekeeping items, in Housekeeping's
@@ -292,9 +305,9 @@ export function agentGapAction(model: Pick<HkModel, "byAgent">, agentId: string)
   return { n: row.items.length, first: row.items[0].gap };
 }
 /** where each gap opens in the card's edit mode */
-export const GAP_FOCUS: Record<GapKey, { tab: "who" | "want" | "work"; focus: "reply" | "materials" | "genres" | "wishlist" | "reopen" }> = {
+export const GAP_FOCUS: Record<GapKey, { tab: "who" | "want" | "work"; focus: "reply" | "materials" | "genres" | "wishlist" | "reopen" | "agency" }> = {
   reply: { tab: "work", focus: "reply" }, materials: { tab: "want", focus: "materials" }, genres: { tab: "want", focus: "genres" },
-  wishlist: { tab: "want", focus: "wishlist" }, reopen: { tab: "work", focus: "reopen" },
+  wishlist: { tab: "want", focus: "wishlist" }, reopen: { tab: "work", focus: "reopen" }, agency: { tab: "who", focus: "agency" },
 };
 /** the button's words: "Fill in 1 gap", "Fill in 3 gaps" */
 export const fillGapsWords = (n: number): string => `Fill in ${n} ${n === 1 ? "gap" : "gaps"}`;
@@ -366,6 +379,7 @@ export function savedLine(item: Pick<HkItem, "agent" | "gap" | "live">, what: {
     case "genres": return `${n}: ${(what.genres ?? []).join(", ")}.${what.fitsAfter && what.book?.title ? ` Now matches ${what.book.title}.` : ""}`;
     case "wishlist": return `${n}: wishlist saved.`;
     case "reopen": return `Reminder on your To-do list for ${what.remindOn ? dayLabel(what.remindOn) : "that day"}.`;
+    case "agency": return `${n}: agency saved.`;
     default: {
       const unhandled: never = item.gap;
       return unhandled;

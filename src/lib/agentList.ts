@@ -232,7 +232,7 @@ export type AgentListSort = "rating" | "az" | "recent" | "speed";
 export const DEFAULT_AGENT_SORT: AgentListSort = "rating";
 
 export const AGENT_SORT_OPTIONS: readonly { key: AgentListSort; label: string }[] = [
-  { key: "rating", label: "Star rating" },
+  { key: "rating", label: "Agent fit" },
   { key: "az", label: "Name A–Z" },
   { key: "recent", label: "Recently queried" },
   { key: "speed", label: "Fastest to reply" },
@@ -307,7 +307,7 @@ export const AGENT_GROUP_OPTIONS: readonly { key: AgentGrouping; label: string }
   { key: "standing", label: "Where things stand" },
   { key: "turn", label: "Whose turn" },
   { key: "door", label: "Their door" },
-  { key: "stars", label: "Star rating" },
+  { key: "stars", label: "Agent fit" },
 ];
 
 export interface AgentGroup {
@@ -451,10 +451,10 @@ export function locationCounts(agents: Agent[]): { code: string; n: number }[] {
 }
 
 /** The meta line's method token: Form / the free-text Other / Email. */
-export function methodShort(agent: Pick<Agent, "submissionMethod" | "agentNotes">): string {
+export function methodShort(agent: Pick<Agent, "submissionMethod" | "agentNotes" | "submissionMethodOther">): string {
   const m = agent.submissionMethod as string;
   if (m === "Online Form") return "Form";
-  if (m === "Other") return (agent.agentNotes || "").trim() || "Other";
+  if (m === "Other") return (agent.submissionMethodOther || agent.agentNotes || "").trim() || "Other";
   return m || "Email";
 }
 

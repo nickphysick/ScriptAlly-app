@@ -64,7 +64,7 @@ export const HowWorks: React.FC<{ p: AgentCard24Props; ed: CardEdit; first: stri
   const door = p.x.door;
   const checked = monthOf(a.lastCheckedDate);
   const reopens = monthOf(a.reopensOn);
-  const method = METHOD[String(a.submissionMethod ?? "")] ?? null;
+  const method = (a.submissionMethod === "Other" ? { words: `Via ${(a.submissionMethodOther ?? "").trim() || "Other"}`, form: true } : METHOD[String(a.submissionMethod ?? "")]) ?? null;
   const openReplies = () => (k ? ed.setInline("replies") : p.onEdit("work", "reply"));
   return (
     <Sec255 icon={IC255.clock} title={`How ${first} works`} k="how">

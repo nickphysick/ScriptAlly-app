@@ -107,12 +107,12 @@ export interface ContactSheet24Props {
   onSearch: (v: string) => void;
 }
 
-/* v25.1 E1/E3/E4 — every heading a sort. v25.4 A — the order is Agent · What they want · Replies in · Your rating ·
-   Your query, and at ≤1440 of window Your rating drops. `col` is the cell's `data-col`: Your rating keeps 5 (the
+/* v25.1 E1/E3/E4 — every heading a sort. v25.4 A — the order is Agent · What they want · Replies in · Agent fit ·
+   Your query, and at ≤1440 of window Agent fit drops. `col` is the cell's `data-col`: Agent fit keeps 5 (the
    column that drops), Your query is 4. */
 const COLS: { key: SortKey; label: string; col: number }[] = [
   { key: "surname", label: "Agent", col: 1 }, { key: "fit", label: "What they want", col: 2 }, { key: "reply", label: "Replies in", col: 3 },
-  { key: "rating", label: "Your rating", col: 5 }, { key: "urgency", label: "Your query", col: 4 },
+  { key: "rating", label: "Agent fit", col: 5 }, { key: "urgency", label: "Your query", col: 4 },
 ];
 
 export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
@@ -268,7 +268,7 @@ const GROUP24: readonly GroupMenuOption<"status" | "none">[] = [
    bars; and, as a second grid row spanning every column from the name's left edge, the wishlist behind the nib.
    v25.3 — A ROW DOES NOT ADVERTISE WHAT IS MISSING: an empty cell is blank and a row with no wishlist has no wishlist
    line. The pills fit their cell: whole pills only, then "+n".
-   v25.4 — SIMPLER ROWS: Your rating comes before Your query; Your query is ONE line (the stage's StatusDot and
+   v25.4 — SIMPLER ROWS: Agent fit comes before Your query; Your query is ONE line (the stage's StatusDot and
    "Queried" or "Queried · {stage}"; "Not queried" with the dotted ring) — the status pill, day count, track and next
    step are gone from the row, the disc's "!" carries urgency; an agent with no genres shows one link, "Fill in
    {first}'s profile →", spanning Replies in too when there is no reply time; and the row has no hover actions but

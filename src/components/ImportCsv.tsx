@@ -104,7 +104,7 @@ function findFuzzyMatch(headers: string[], targetFields: string[]): Record<strin
     website: ["website", "site", "url", "web page", "web", "link"],
     genres: ["genres", "categories", "subjects", "genre list", "tags"],
     mswlNotes: ["mswl", "mswl notes", "manuscript wish list", "wishlist", "interests"],
-    starRating: ["rating", "stars", "star rating", "rank", "importance", "priority"],
+    starRating: ["rating", "stars", "star rating", "agent fit", "fit", "rank", "importance", "priority"],
     notes: ["notes", "comments", "remarks", "memo", "description"],
     
     title: ["title", "book title", "work", "manuscript title", "novel", "manuscript", "story"],

@@ -274,3 +274,6 @@
 
 /* Contact list v25.2 C — the agent edit mode (AgentEditMode) fills the panel's act slot, its foot pinned */
 .apn .apn-actslot > .cl252-em { flex: 1 1 auto; min-height: 0; height: auto; }
+
+/* Add agent v1 — the add journey fills the act slot (its head, its scroller and its foot are its own) */
+.apn .apn-actslot > .aaj { flex: 1 1 auto; min-height: 0; }

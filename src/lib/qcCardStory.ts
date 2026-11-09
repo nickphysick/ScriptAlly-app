@@ -303,7 +303,7 @@ export function agentView(agent: Agent | null, toAgent: readonly Query[], msTitl
 const monthYear = (ms: number) => { const d = new Date(ms); return `${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`; };
 
 /** how the agent takes submissions, as the Contact row's words, or null when not recorded */
-export const submissionWords = (a: Pick<Agent, "submissionMethod"> | null): string | null => methodAnswer(a?.submissionMethod ?? null);
+export const submissionWords = (a: Pick<Agent, "submissionMethod" | "submissionMethodOther"> | null): string | null => methodAnswer(a?.submissionMethod ?? null, a?.submissionMethodOther);
 
 /** the strip's tint per set (the panel's court) */
 export const STRIP_TINT: Record<WhereKey, string> = { you: "#f5e6df", agent: "#e2e6e0", quiet: "#efeae2", closed: "#e4e1db" };

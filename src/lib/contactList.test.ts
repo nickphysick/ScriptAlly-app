@@ -299,7 +299,7 @@ describe("v14 §4 — grouping partitions the ordered list; sorting orders withi
   });
   /* re-pointed (v25.1 E4): three heading sorts join the six */
   it("the nine sorts, each with its direction words (v19 §C adds Date added; v25.1 the heading sorts)", () => {
-    expect(SORT_OPTIONS_V12.map((o) => o.label)).toEqual(["Surname", "Agency", "Response time", "Recent activity", "Status", "Date added", "Genre fit", "Urgency", "Your rating"]);
+    expect(SORT_OPTIONS_V12.map((o) => o.label)).toEqual(["Surname", "Agency", "Response time", "Recent activity", "Status", "Date added", "Genre fit", "Urgency", "Agent fit"]);
     expect(SORT_OPTIONS_V12.find((o) => o.key === "added")?.dir).toEqual(["Newest first", "Oldest first"]);
     expect(SORT_OPTIONS_V12[0].dir).toEqual(["A to Z", "Z to A"]);
   });
