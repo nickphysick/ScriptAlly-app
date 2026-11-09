@@ -55,7 +55,7 @@ import { genreLabel } from "../../../lib/genres";
 import {
   alsoQueried, cardQuery, cardRows, cardSavedLine, queryTone, reminderOnSave, reopenReminder, savedPulse, stepTarget, type CardAct, type SavedPulse,
 } from "../../../lib/agentCard";
-import { type CardDraft, applyPatch, cardPatch, changedTabs, encodeMats, inversePatch, toContactDraft } from "../../../lib/cardDraft";
+import { type CardDraft, FORM_PLATFORM, applyPatch, cardPatch, changedTabs, encodeMats, inversePatch, toContactDraft } from "../../../lib/cardDraft";
 import { restoreAgentSnapshot, takeAgentSnapshot, type AgentSnapshot } from "../../../lib/agentCardSnapshot";
 import { agentDataQualityNeeds } from "../../../lib/agentDataQuality";
 import { flagKeyForTask } from "../../../lib/taskFlags";
@@ -63,6 +63,8 @@ import { destroyManifest } from "../../../lib/cascade";
 import { AgentCardFrame, type AgentCardFrameHandle } from "./AgentCardFrame";
 import { AgentQuickView, type QuickFoot } from "./AgentQuickView";
 import { AgentEditMode, type EditorSaveResult } from "./AgentEditMode";
+import { AddAgentJourney } from "./AddAgentJourney";
+import { PreviewHostCard } from "./HostAgentCard";
 import { useAgentSave } from "./useAgentSave";
 import { AgentPanelNew } from "../panel/AgentPanelNew";
 import { ESC_LEVEL, EscapeRaise } from "../../../lib/escapeStack";
@@ -280,9 +282,17 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
    * links through the scheme allowlist, `reopensOn` only behind a CLOSED door, and
    * `submissionMethod` defaulting to Email exactly as the app-level form does when none is chosen.
    */
-  const onCreateAgent = useCallback(async (d: CardDraft): Promise<EditorSaveResult> => {
+  const createAgent = useCallback(async (d: CardDraft): Promise<{ ok: true; id: string } | { ok: false; error: string }> => {
     const wishlist = d.wishlist.trim();
     const mswl = d.mswl.trim();
+    const form = d.form.trim();
+    const social = d.social.handle.trim();
+    const socials = [
+      ...(mswl && hrefFor(mswl) ? [{ platform: "MSWL", handle: hrefFor(mswl)! }] : []),
+      ...(form && hrefFor(form) && (d.method === SubmissionMethod.ONLINE_FORM || d.method === SubmissionMethod.QUERY_MANAGER || d.method === SubmissionMethod.OTHER) ? [{ platform: FORM_PLATFORM, handle: hrefFor(form)! }] : []),
+      ...(social ? [{ platform: d.social.platform || "Other", handle: social }] : []),
+    ];
+    const mirror = ({ "X / Twitter": "twitter", Bluesky: "bluesky", Instagram: "instagram" } as Record<string, "twitter" | "bluesky" | "instagram">)[d.social.platform];
     const res = await addAgent({
       name: d.name.trim(),
       agency: d.agency.trim(),
@@ -290,8 +300,12 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
       website: hrefFor(d.website) ?? "",
       genres: [...d.genres],
       mswlNotes: wishlist,
-      submissionStatus: d.door === "closed" ? SubmissionStatus.CLOSED : SubmissionStatus.OPEN,
+      /* Add agent v1 — nothing pre-picked: an unstated door is Unknown, never Open */
+      submissionStatus: d.door === "closed" ? SubmissionStatus.CLOSED : d.door === "open" ? SubmissionStatus.OPEN : SubmissionStatus.UNKNOWN,
       submissionMethod: d.method ?? SubmissionMethod.EMAIL,
+      ...(d.method === SubmissionMethod.OTHER && d.methodOther.trim() ? { submissionMethodOther: d.methodOther.trim().slice(0, 40) } : {}),
+      ...(d.agencyUnknown && d.name.trim() && !d.agency.trim() ? { agencyUnknown: true as const } : {}),
+      ...(d.rating ? { starRating: d.rating as 1 | 2 | 3 | 4 | 5 } : {}),
       materialsWanted: encodeMats(d.mats),
       notes: "",
       ...(d.city.trim() ? { city: d.city.trim() } : {}),
@@ -299,20 +313,23 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
       ...(d.weeks != null ? { responseTimeWeeks: d.weeks } : {}),
       ...(d.nrn != null ? { noResponseMeansNo: d.nrn } : {}),
       ...(d.door === "closed" && d.reopens ? { reopensOn: d.reopens } : {}),
-      ...(mswl && hrefFor(mswl) ? { socials: [{ platform: "MSWL", handle: hrefFor(mswl)! }] } : {}),
+      ...(socials.length ? { socials } : {}),
+      ...(mirror && social ? { [mirror]: social } : {}),
       /* the wishlist was written just now, so it was checked just now */
       ...(wishlist ? { mswlCheckedAt: new Date().toISOString() } : {}),
     });
     if (!res.success || !res.id) return { ok: false, error: res.error ?? "Couldn’t add the agent." };
-    /* the confirmation: on the Contact list the new row's ring and its panel say it; on every other page, the toast
-       the log-a-query add already used */
-    if (!sandbox?.contactListHere && pathname !== "/agents") {
-      showToast({ message: `Added ${d.name.trim() || d.agency.trim()} to your contact list` });
-    }
-    /* closes, tells the page ("added"), and hands the id to a flow waiting on it */
-    completeNewAgent(res.id);
-    return { ok: true };
-  }, [addAgent, sandbox, pathname, showToast]);
+    /* Add agent v1 — a flow WAITING on the new agent (Log a query's "Add a new agent") takes it at once: the finish
+       screen is for an add on its own */
+    if (req?.onCreated) completeNewAgent(res.id);
+    return { ok: true, id: res.id };
+  }, [addAgent, req]);
+  /** Done (or Esc / ✕ on the finish screen): closes, tells the page ("added"), and says so off the Contact list */
+  const finishNew = useCallback((id: string | null | undefined, name: string) => {
+    if (!id) { closeAgentCard(); return; }
+    if (!sandbox?.contactListHere && pathname !== "/agents") showToast({ message: `Added ${name} to your contact list` });
+    completeNewAgent(id);
+  }, [sandbox, pathname, showToast]);
 
   /**
    * A genre matching nothing on any list (ruling 1): its case is matched to a genre that already
@@ -443,19 +460,36 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   if (!req) return null;
   if (!isNew && !agent) return null;
 
+  if (inEditor && isNew) {
+    if (!panelSlot || !panelSlot.isConnected) return null;
+    return createPortal(
+      <EscapeRaise.Provider value={req.over === "drawer" ? ESC_LEVEL.drawerPopup : 0}>
+        <AddAgentJourney
+          agents={agents} personal={personal} msGenre={scoped?.genre ?? null} genrePool={genrePool} personalGenres={personalLabels} allGenres={AGENT_GENRES}
+          nowMs={nowMs} prefill={req.prefill} onNewGenre={onNewGenre} onCreate={createAgent}
+          onLeave={(how, id) => { if (how === "done") { const a = id ? agents.find((x) => x.id === id) : null; finishNew(id, ((a?.name ?? "").trim() || (a?.agency ?? "").trim()) || "the agent"); } else closeAgentCard(); }}
+          onAnother={() => { closeAgentCard(); window.requestAnimationFrame(() => openNewAgentCard({ from: "button", host: "panel" })); }}
+          onOpenDup={(id) => openAgentCard(id, { tab: "who", host: "panel", from: "button" })}
+          renderPreview={(id) => { const a = agents.find((x) => x.id === id); return a ? <PreviewHostCard agent={a} /> : null; }}
+        />
+      </EscapeRaise.Provider>,
+      panelSlot,
+    );
+  }
+
   if (inEditor) {
-    const target: EditTarget = isNew ? { tab: "who", focus: "name", prefill: req.prefill } : editing!;
+    const target: EditTarget = editing!;
     if (!panelSlot || !panelSlot.isConnected) return null;
     return createPortal(
       /* over the query drawer, the editor and its popups hear Escape before the drawer does */
       <EscapeRaise.Provider value={req.over === "drawer" ? ESC_LEVEL.drawerPopup : 0}>
         <AgentEditMode
-          mode={isNew ? "new" : "edit"} agent={isNew ? null : agent} prefill={target.prefill} focus={target.focus}
-          band={!isNew} defaultCountry={isNew ? "GB" : undefined}
+          mode="edit" agent={agent} prefill={target.prefill} focus={target.focus}
+          band
           personal={personal} agents={agents} msGenre={scoped?.genre ?? null} genrePool={genrePool} personalGenres={personalLabels} allGenres={AGENT_GENRES}
           isHit={genreHit} nowMs={nowMs} alsoFor={alsoFor}
-          notes={isNew ? undefined : { stored: storedNotes, earlier: agent?.notes ?? "", onAdd: onAddNote, onEdit: onEditNote, onDelete: onDeleteNote }}
-          onSave={isNew ? (dd) => onCreateAgent(dd) : onEditorSave} onLeave={() => closeAgentCard()}
+          notes={{ stored: storedNotes, earlier: agent?.notes ?? "", onAdd: onAddNote, onEdit: onEditNote, onDelete: onDeleteNote }}
+          onSave={onEditorSave} onLeave={() => closeAgentCard()}
           onOpenAgent={(id) => openAgentCard(id, { tab: "who", host: "panel" })}
           onNewGenre={onNewGenre} bindLeave={editorLeave}
         />

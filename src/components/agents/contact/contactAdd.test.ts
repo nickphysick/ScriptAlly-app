@@ -40,9 +40,11 @@ describe("a new agent is born the way the house births agents", () => {
   });
 
   it("the create goes through addAgent — the one path with the cap and the activity — and the optionals spread in only when stated", () => {
-    const at = strip(host).indexOf("const onCreateAgent");
+    /* retargeted (Add agent v1): the create is `createAgent` now (it hands back the new id for the finish screen); the
+       law is unchanged — one path through addAgent, optionals only when stated */
+    const at = strip(host).indexOf("const createAgent");
     expect(at, "the create is no longer in the host").toBeGreaterThan(-1);
-    const create = strip(host).slice(at, strip(host).indexOf("}, [addAgent]);", at));
+    const create = strip(host).slice(at, strip(host).indexOf("}, [addAgent, req]);", at));
     expect(create.length, "the create's end anchor moved — re-anchor this lock").toBeGreaterThan(200);
     expect(create, "the create left the shared path").toContain("await addAgent({");
     expect(create, "the links stopped going through the shared href builder").toMatch(/website: hrefFor\(d\.website\)/);

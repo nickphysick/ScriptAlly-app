@@ -12,14 +12,11 @@
  */
 import React, { useLayoutEffect, useState } from "react";
 import { SidePanel } from "../../shell/SidePanel";
-import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import "../../queries/queryPanelHost.css";
 import "./agentPanel.css";
 
 /* v25.1 B — ADD_AGENT_LINE retired with the ink head (FLOW_WORDS.agent carries the line) */
 
-/** ✕ is the editor's Escape, as Edit profile's is: a draft with answers asks before it goes */
-const escape = () => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
 
 /**
  * Mounted ONCE, by the app-level `AgentCardHost`, so "Add an agent" opens it over whichever page is on screen.
@@ -50,7 +47,7 @@ export const AgentPanelNew: React.FC<{ over?: boolean; edit?: boolean }> = ({ ov
         <div className="qad-drawer qad-drawer--panel" role="group" aria-label={edit ? "Edit agent" : "Add an agent"}>
           {/* Contact list v25.1 B — the head is the flow header: "Adding new agent" and its line (the ink head, its
               eyebrow, quill and line are retired); ✕ is still the editor's Escape */}
-          {edit ? null : <FlowHead title={FLOW_WORDS.agent.title} line={FLOW_WORDS.agent.line} onClose={escape} data={{ "data-ap": "new-head" }} />}
+          {/* Add agent v1 — a new agent's head is the journey's own (it changes to "Agent added" on the finish screen) */}
           <div className="apn-actslot" data-ap-act-slot="" />
         </div>
       </div>
