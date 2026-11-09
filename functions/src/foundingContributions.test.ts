@@ -64,14 +64,28 @@ describe("the weekly cap (Europe/London ISO weeks)", () => {
   });
 });
 
-describe("the built bonus", () => {
+describe("the now-in-the-app bonus (built or fixed — Your notes v1, Part A)", () => {
   it("+3 per built doc, on top of its point", () => {
     expect(writerTotals([doc({ status: "built" })]).contributions).toBe(4);
-    expect(writerTotals([doc({ status: "fixed" })]).contributions).toBe(1);
+  });
+  it("+3 per fixed doc too: to a writer, fixed and built are the same outcome", () => {
+    expect(writerTotals([doc({ status: "fixed" })]).contributions).toBe(4);
+  });
+  it("read and planned earn no bonus", () => {
+    expect(writerTotals([doc({ status: "read" })]).contributions).toBe(1);
+    expect(writerTotals([doc({ status: "planned" })]).contributions).toBe(1);
   });
   it("is not capped by the week", () => {
     const docs = [0, 1, 2, 3, 4].map((i) => doc({ status: "built", createdAt: D(`2026-10-2${i}T09:00:00Z`) }));
     expect(writerTotals(docs).contributions).toBe(3 + 5 * 3);
+  });
+  it("is not capped by the week for fixed docs either", () => {
+    const docs = [0, 1, 2, 3, 4].map((i) => doc({ status: i % 2 ? "fixed" : "built", createdAt: D(`2026-10-2${i}T09:00:00Z`) }));
+    expect(writerTotals(docs).contributions).toBe(3 + 5 * 3);
+  });
+  it("an excluded or short fixed doc earns nothing", () => {
+    expect(writerTotals([doc({ status: "fixed", counted: false })]).contributions).toBe(0);
+    expect(writerTotals([doc({ status: "fixed", message: "too short" })]).contributions).toBe(0);
   });
 });
 

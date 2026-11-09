@@ -6,7 +6,8 @@
  * A feedback doc COUNTS when it has a `uid`; its `status` is read, planned, built or fixed (set by hand in the console);
  * its `counted` is not false (a way to exclude junk); and its `message` has at least five words.
  * - At most THREE counting docs per ISO week (Europe/London, by `createdAt`): the earliest three count.
- * - +3 for every counting doc whose status is "built" — the bonus is not capped by the week.
+ * - +3 for every counting doc whose status is "built" OR "fixed" — to a writer both are the same outcome, "Now in the
+ *   app" (Nick's ruling, Your notes v1). The bonus is not capped by the week.
  * - WAITING = the writer's docs with no status yet and at least five words.
  * - Tiers by total: Fledgling 1 · Archivist 3 · Scout 8 · Mentor 15 · QueryHawk 25.
  * - Standing: writers with ≥1 contribution, ranked by total; topPct = rank ÷ N × 100 rounded UP to 5, shown only
@@ -30,6 +31,8 @@ export type TierKey = (typeof TIERS)[number]["key"];
 export const COUNTED_STATUSES = ["read", "planned", "built", "fixed"] as const;
 export const WEEKLY_CAP = 3;
 export const BUILT_BONUS = 3;
+/** The statuses that earn BUILT_BONUS: both read as "Now in the app" (Your notes v1, Part A). */
+export const BONUS_STATUSES = ["built", "fixed"] as const;
 export const MIN_WORDS = 5;
 export const STANDING_MIN_WRITERS = 10;
 export const STANDING_MAX_PCT = 50;
@@ -81,7 +84,7 @@ export function isoWeekLondon(ms: number): string {
 
 export interface WriterTotals { contributions: number; waiting: number }
 
-/** One writer's docs → their contributions (the earliest three per week, plus +3 per built) and waiting count. */
+/** One writer's docs → their contributions (the earliest three per week, plus +3 per built or fixed) and waiting count. */
 export function writerTotals(docs: readonly FeedbackFacts[]): WriterTotals {
   const counting = docs.filter(eligible).sort((a, b) => (a.createdAt ?? Infinity) - (b.createdAt ?? Infinity));
   const perWeek = new Map<string, number>();
@@ -92,7 +95,7 @@ export function writerTotals(docs: readonly FeedbackFacts[]): WriterTotals {
     const n = perWeek.get(wk) ?? 0;
     if (n < WEEKLY_CAP) { perWeek.set(wk, n + 1); base += 1; }
   }
-  const bonus = counting.filter((d) => d.status === "built").length * BUILT_BONUS;
+  const bonus = counting.filter((d) => (BONUS_STATUSES as readonly string[]).includes(d.status ?? "")).length * BUILT_BONUS;
   return { contributions: base + bonus, waiting: docs.filter(waiting).length };
 }
 
