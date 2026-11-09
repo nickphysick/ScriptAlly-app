@@ -81,9 +81,15 @@ The drop is environmental: linking `functions/node_modules` for the harness logi
 
 ### Dev
 
-Deployed hosting-only to https://scriptally-dev.web.app/agents from `contact-list-v27` @ `e94ca2b96`
-(bundle `index-BZZ8fY_4.js`; it was `index-DtjKHDsx.js`, the td53 line this branch is cut from). Phase 4 changes
-only tests and this report, so dev already serves the shipped page.
+Dev serves **`dev/qc153-tl1-ww2-qc1531-qc1532-qc1533-crash1-td53-cl27-td54-cl27b`** (bundle `index-DIr9O0zd.js`):
+the To-do v54 session's integration line (which had merged this branch at Phase 2) with Phases 3 and 4 merged on
+top. Gates on that merge: tsc and `build:dev` clean, Vitest 4 failed in the same 3 pre-existing files.
+
+⚠️ **A redeploy of mine briefly took To-do v54 off dev.** Phase 2 went to dev from this branch (`index-BZZ8fY_4.js`).
+The To-do v54 session then merged it into its own line and deployed (`index-CnZfSAXv.js`). My Phase 3 redeploy printed
+the served hash but did not stop on the mismatch, and replaced that build with this branch alone
+(`index-CcU50SBC.js`) for about five minutes, until the merged line above went out. Nothing was lost (every branch is
+pushed). The final deploy stopped on any served hash other than the one it was replacing.
 
 Screens (emulator account): `shots/1512-top.png`, `shots/1512-scrolled-filter.png` (Ready to query on, scrolled
 700), and the same at 1280.
