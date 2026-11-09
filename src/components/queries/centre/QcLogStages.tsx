@@ -17,7 +17,7 @@ import { SubmissionMethod } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import {
-  HOW, MILESTONE, MONL, PREVIEW_ID, STAGES, celebrationLine, STAGE_LABEL, STAGE_LINE, askWords, batchCheckLine, batchWhoLine, checkLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk, piecesMatchAsk,
+  HOW, MILESTONE, PREVIEW_ID, monthLong, STAGES, celebrationLine, STAGE_LABEL, STAGE_LINE, askWords, batchCheckLine, batchWhoLine, checkLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk, piecesMatchAsk,
   planOf, previewOf, sameDay, sizeName, sizesFor, sod, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
@@ -134,7 +134,7 @@ export const Stepper: React.FC<{ s: FlowState; values: Record<StageKey, string |
         <button key={k} type="button" role="listitem" className={`qls-st${now ? " is-now" : ""}${done ? " is-done" : ""}`} data-qls="step" data-k={k}
           data-state={now ? "now" : done ? "done" : "todo"} disabled={!done} aria-current={now ? "step" : undefined}
           aria-label={done ? `${STAGE_LABEL[k]}: ${values[k] ?? ""}. Change it` : STAGE_LABEL[k]} onClick={() => onGo(k)}>
-          {STAGE_LABEL[k]}<b data-qls="step-value">{done ? values[k] ?? "" : " "}</b>
+          {STAGE_LABEL[k]}<b data-qls="step-value">{done ? values[k] ?? "" : "\u00a0"}</b>
         </button>
       );
     })}
@@ -330,7 +330,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
           <div className="qls-cal" data-qls="calendar" ref={calRef}>
             <div className="qls-calh">
               <button type="button" aria-label="Previous month" data-qls="cal-prev" onClick={() => shift(-1)}>{ICON.l}</button>
-              <b data-qls="cal-month">{MONL[s.calM]} {s.calY}</b>
+              <b data-qls="cal-month">{monthLong(s.calY, s.calM)} {s.calY}</b>
               <button type="button" aria-label="Next month" data-qls="cal-next" disabled={!cal.canNext} onClick={() => shift(1)}>{ICON.r}</button>
             </div>
             <div className="qls-calg">
@@ -543,6 +543,9 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   /* ── logging ── */
   const reduce = useReducedMotion();
   const [busy, setBusy] = useState(false);
+  /* the book's count when "Log" was pressed: the live count moves the moment the save lands, and the check's own line
+     ("Your {n}th query…") must not change under the stamp */
+  const [countAt, setCountAt] = useState<number | null>(null);
   const [stamp, setStamp] = useState(false);
   const [bump, setBump] = useState(false);
   const [toast, setToast] = useState<{ text: string; undo: () => void } | null>(null);
@@ -563,20 +566,22 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     const a = answers();
     if (!a || busy) return;
     setBusy(true);
+    setCountAt(p.count);
     const n = p.count + 1;
     const before = s;
     const done = await p.onSave(a);
     setBusy(false);
-    if (!done) return;
+    if (!done) { setCountAt(null); return; }
     const lastFirst = agent?.first ?? "The agent";
     if (more) {
       stampThen(() => {
         /* the date and materials carry over; how comes from the next agent's card */
         setS((o) => ({ ...o, step: "who", dir: "in", agentId: null, via: null, find: "", note: "", noteOpen: false, hi: 0, showBusy: false, carried: lastFirst }));
         showToast(`${lastFirst} logged`, async () => { setToast(null); await done.undo(); setS({ ...before, step: "check", dir: "back" }); });
+        setCountAt(null);
       });
     } else {
-      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: agent?.weeks ?? null, before }); setPhase("yay"); });
+      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: agent?.weeks ?? null, before }); setPhase("yay"); setCountAt(null); });
     }
   };
   /* ⌘↵ / Ctrl↵ logs from the check */
@@ -591,7 +596,8 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
       <button type="button" className="qls-lnk" data-qls="cancel" onClick={p.onClose} disabled={busy || stamp}>Cancel</button>
       <span className="qls-sp" />
       <button type="button" className="qls-lnk" data-qls="log-more" disabled={busy || stamp} onClick={() => void doLog(true)}>Log and start another</button>
-      <button type="button" className="qls-btn" data-qls="log" disabled={busy || stamp} onClick={() => void doLog(false)}>Log query {ICON.arrow}</button>
+      {/* the save is awaited before the stamp (a stamp is a claim that it landed), so while it is in flight the button says so */}
+      <button type="button" className="qls-btn" data-qls="log" disabled={busy || stamp} aria-busy={busy || undefined} onClick={() => void doLog(false)}>{busy ? "Logging…" : <>Log query {ICON.arrow}</>}</button>
     </>
   );
 
@@ -629,7 +635,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   };
 
   const line = s.step === "who" ? (s.carried ? batchWhoLine(s.carried) : FLOW_WORDS.log.line)
-    : s.step === "check" ? (s.carried ? batchCheckLine(s.carried) : checkLine(p.count + 1, p.bookTitle)) : STAGE_LINE[s.step];
+    : s.step === "check" ? (s.carried ? batchCheckLine(s.carried) : checkLine((countAt ?? p.count) + 1, p.bookTitle)) : STAGE_LINE[s.step];
   const backFoot = (hint: string | null) => (
     <>
       <button type="button" className="qls-lnk" data-qls={s.step === "who" ? "cancel" : "back"} onClick={() => (s.step === "who" ? p.onClose() : go(STAGES[Math.max(0, STAGES.indexOf(s.step) - 1)], "back"))}>{s.step === "who" ? "Cancel" : "Back"}</button>

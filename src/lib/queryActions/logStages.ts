@@ -16,18 +16,19 @@ import { QueryStatus, SubmissionMethod, type Agent, type Query } from "../../typ
 import { buildQcRows, type QcRow } from "../qcSummary";
 import { stampRows, type QueryState } from "../queryState";
 import { doorOf } from "../agentList";
+import { MONTHS_SHORT } from "../dates";
 import { agentAgencyLine, agentInitials, agentPrimary } from "../agentDisplay";
 import { logDefaults, logPayload, pieceVersions, type LogPlan, type PieceVersions } from "./logSave";
 import { guidelineAsk, packageMatches, type GuidelineAsk, type PackageCard } from "./packages";
 import { blankSample, sampleName, capFirst, type Materials, type Sample } from "./sample";
 
-export const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"] as const;
-export const MONL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"] as const;
+/** the calendar's heading month, through the platform rather than a second month table (lib/dates owns the one) */
+export const monthLong = (year: number, month: number): string => new Date(year, month, 1).toLocaleString("en-GB", { month: "long" });
 export const WEEKDAY = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"] as const;
 
 export const sod = (ms: number): number => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
 export const sameDay = (a: number | null, b: number | null): boolean => a != null && b != null && sod(a) === sod(b);
-export const dayMon = (ms: number): string => { const d = new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]}`; };
+export const dayMon = (ms: number): string => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
 export const dayMonY = (ms: number, nowMs: number): string => {
   const d = new Date(ms);
   return dayMon(ms) + (d.getFullYear() !== new Date(nowMs).getFullYear() ? ` ${d.getFullYear()}` : "");
@@ -221,7 +222,7 @@ export interface Preview { row: QcRow; packageName: string | null; agent: Agent;
 /** the unsaved query as the Query Centre will list it: the save's own record, through the list's own helpers */
 export function previewOf(plan: LogPlan, nowMs: number, quietWeeks: number): Preview {
   const { payload, summary } = logPayload(plan);
-  const q = { ...payload, status: QueryStatus.QUERIED, sentMaterials: summary, lastStatusChange: payload.dateSent } as unknown as Query;
+  const q = { ...payload, status: QueryStatus.QUERIED, sentMaterials: summary } as unknown as Query;
   const [row0] = buildQcRows([q], [plan.agent], [], nowMs);
   const [row] = stampRows([row0], [plan.agent], { quietWeeks, nowMs });
   const noWindow = !(plan.agent.responseTimeWeeks && plan.agent.responseTimeWeeks > 0);
