@@ -292,7 +292,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     const r = el.getBoundingClientRect(), b = sc.getBoundingClientRect();
     const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let by = 0;
-    if (r.top < b.top) by = r.top - b.top - 70;
+    /* a heading flush with the top (to within a pixel: layout lands on fractions) is in view, not hidden */
+    if (r.top < b.top - 1) by = r.top - b.top - 70;
     else if (r.bottom > b.bottom) by = Math.min(r.bottom - b.bottom + 90, r.top - b.top - 70);
     if (by) sc.scrollBy({ top: by, behavior: reduce ? "auto" : "smooth" });
   }, [open]);
