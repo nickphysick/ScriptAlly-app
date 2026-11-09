@@ -1,0 +1,137 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Your notes v1, Part D — the feedback pop-up in the founding band's frame (design-refs/your-notes-v1, the Pop-up state).
+ * 500 wide; white, radius 22, padding 7; the band's striped top (`.d22-top`, `.d22-tag` — the band's own rules, reached
+ * through `.d58.d2` on the frame); a blush-washed body; a blush foot.
+ *
+ * ⚠️ `.d58` IS THE DASHBOARD PAGE'S ROOT AND SETS A ONE-SCREEN HEIGHT: the frame undoes it (height auto, block).
+ * ⚠️ brand.tsx names a face on bare h3/p/span/button/label at runtime: every face here is two classes and `!important`.
+ */
+.fb-panel.fb3 {
+  width: 500px; max-width: calc(100vw - 16px); padding: 7px; border-radius: 22px; background: #fff; overflow-y: auto;
+  box-shadow: 0 0 0 1px #ecd6cd, 0 30px 60px -20px rgba(28, 19, 15, 0.5), 0 2px 6px rgba(28, 19, 15, 0.08);
+  --fb3-ink: #1c130f; --fb3-ink2: #3b322c; --fb3-muted: #7d7067; --fb3-rose: #a0675a; --fb3-navy: #2d3a50;
+}
+.fb-panel.fb3 :where(p, span, div, button, label, b, small, i, em) { font-family: inherit; }
+.fb-panel.fb3 * { box-sizing: border-box; }
+.fb-panel.fb3 .fb3-frame.d58 { height: auto; display: block; font: 16px/1.5 var(--sp-serif) !important; color: var(--fb3-ink); }
+
+/* the band's striped top, with the tag and the round close */
+.fb-panel.fb3 .fb3-top { padding: 8px 10px 8px 16px; }
+.fb-panel.fb3 .fb3-x {
+  all: unset; box-sizing: border-box; cursor: pointer; margin-left: auto; flex: none; width: 28px; height: 28px; border-radius: 50%;
+  display: grid; place-items: center; background: rgba(255, 255, 255, 0.75); box-shadow: inset 0 0 0 1px #e2c8bc;
+}
+.fb-panel.fb3 .fb3-x svg { width: 13px; height: 13px; fill: none; stroke: #7a3f31; stroke-width: 2; stroke-linecap: round; }
+.fb-panel.fb3 .fb3-x:focus-visible { outline: 2px solid var(--fb3-navy); outline-offset: 2px; }
+
+/* the body */
+.fb-panel.fb3 .fb3-b { padding: 20px 22px 18px; border: 1px solid #e6cfc4; border-top: 0; border-bottom: 0; background: radial-gradient(110% 90% at 0% 0%, #fcefe8 0%, #fff 55%); }
+.fb-panel.fb3 .fb3-h { display: flex; align-items: center; gap: 16px; }
+.fb-panel.fb3 .fb3-hawk { flex: none; width: 60px; height: 60px; border-radius: 50%; background: #fff; overflow: hidden;
+  box-shadow: 0 0 0 3px #fff, 0 0 0 5.5px var(--fb3-rose), 0 10px 20px -8px rgba(160, 103, 90, 0.55); }
+.fb-panel.fb3 .fb3-hawk img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fb-panel.fb3 .fb3-h h3 { margin: 0; font: 400 27px/1.1 var(--sp-type) !important; color: var(--fb3-ink) !important; letter-spacing: 0; }
+.fb-panel.fb3 .fb3-h p { margin: 5px 0 0; font: 15px/1.4 var(--sp-serif) !important; color: var(--fb3-ink2); }
+
+/* the three tiles; once a kind is picked they tuck into a row of pills */
+.fb-panel.fb3 .fb3-ks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 20px; }
+.fb-panel.fb3 .fb3-k {
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; flex-direction: column; align-items: flex-start; gap: 2px;
+  padding: 14px 14px 13px; border-radius: 14px; background: #fff; text-align: left;
+  box-shadow: inset 0 0 0 1px #e8d7cf, 0 1px 0 rgba(160, 103, 90, 0.14);
+  transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+}
+.fb-panel.fb3 .fb3-k:hover { background: #fff7f3; box-shadow: inset 0 0 0 1.5px var(--fb3-rose), 0 6px 14px -8px rgba(160, 103, 90, 0.5); transform: translateY(-1px); }
+.fb-panel.fb3 .fb3-k:focus-visible { outline: 2px solid var(--fb3-rose); outline-offset: 2px; }
+.fb-panel.fb3 .fb3-ki { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 8px; border-radius: 50%; background: #f6e2d9; color: var(--fb3-rose); transition: background 0.15s, color 0.15s; }
+.fb-panel.fb3 .fb3-ki svg, .fb-panel.fb3 .fb3-nk svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.fb-panel.fb3 .fb3-k b { font: 600 16px/1.2 var(--sp-serif) !important; color: var(--fb3-ink); }
+.fb-panel.fb3 .fb3-k small { font: 13px/1.3 var(--sp-serif) !important; color: var(--fb3-muted); }
+.fb-panel.fb3 .fb3-k[aria-checked="true"] { background: var(--fb3-navy); box-shadow: none; transform: none; }
+.fb-panel.fb3 .fb3-k[aria-checked="true"] b { color: #fffaf3; }
+.fb-panel.fb3 .fb3-k[aria-checked="true"] small { color: rgba(255, 250, 243, 0.72); }
+.fb-panel.fb3 .fb3-k[aria-checked="true"] .fb3-ki { background: #fffaf3; color: var(--fb3-navy); }
+.fb-panel.fb3 .fb3-ks.picked { gap: 6px; margin-top: 16px; }
+.fb-panel.fb3 .fb3-ks.picked .fb3-k { flex-direction: row; align-items: center; gap: 8px; padding: 6px 12px 6px 6px; border-radius: 999px; }
+.fb-panel.fb3 .fb3-ks.picked .fb3-ki { width: 26px; height: 26px; margin: 0; }
+.fb-panel.fb3 .fb3-ks.picked .fb3-ki svg { width: 13px; height: 13px; }
+.fb-panel.fb3 .fb3-ks.picked .fb3-k b { font-size: 14px !important; }
+.fb-panel.fb3 .fb3-ks.picked .fb3-k small { display: none; }
+
+/* the question */
+.fb-panel.fb3 .fb3-w { display: grid; gap: 0; margin-top: 18px; padding-top: 16px; border-top: 1px dashed #ead7ce; }
+.fb-panel.fb3 .fb3-q { display: block; margin: 0 0 10px; font: 400 21px/1.2 var(--sp-type) !important; color: var(--fb3-ink); }
+.fb-panel.fb3 .fb3-chips { display: flex; gap: 6px; margin: 0 0 10px; }
+.fb-panel.fb3 .fb3-chips button {
+  all: unset; box-sizing: border-box; cursor: pointer; height: 32px; padding: 0 13px; border-radius: 999px; display: inline-flex; align-items: center;
+  font: 600 13.5px var(--sp-serif) !important; color: var(--fb3-ink); background: #fff; box-shadow: inset 0 0 0 1px #e8d7cf;
+}
+.fb-panel.fb3 .fb3-chips button[aria-checked="true"] { background: #f6e2d9; box-shadow: inset 0 0 0 1.5px var(--fb3-rose); color: #7a3f31; }
+.fb-panel.fb3 .fb3-chips button:focus-visible { outline: 2px solid var(--fb3-rose); outline-offset: 2px; }
+.fb-panel.fb3 .fb3-ta {
+  width: 100%; min-height: 112px; resize: vertical; padding: 13px 15px; border: 0; border-radius: 14px; background: #fff;
+  box-shadow: inset 0 0 0 1px #e3d5c9, 0 1px 0 rgba(28, 19, 15, 0.03); font: 16px/1.5 var(--sp-serif) !important; color: var(--fb3-ink);
+}
+.fb-panel.fb3 .fb3-ta:focus { outline: 0; box-shadow: inset 0 0 0 2px var(--fb3-navy); }
+.fb-panel.fb3 .fb3-ta::placeholder { color: #a39a91; }
+.fb-panel.fb3 .fb-drop, .fb-panel.fb3 .fb-thumb, .fb-panel.fb3 .fb-err:not(.fb-err--send) { margin-top: 10px; }
+.fb-panel.fb3 .fb3-ctx { margin: 8px 2px 0; font: 12.5px/1.45 var(--sp-serif) !important; color: var(--fb3-muted); }
+.fb-panel.fb3 .fb-err--send { margin: 0; border-radius: 0; border: 1px solid #e6cfc4; border-top: 0; border-bottom: 0; padding: 8px 18px; }
+
+/* the foot */
+.fb-panel.fb3 .fb3-f {
+  display: flex; align-items: center; gap: 10px; padding: 12px 12px 12px 16px;
+  border: 1px solid #e6cfc4; border-top: 1px solid #f0e2db; border-radius: 0 0 15px 15px; background: #fbf6f2;
+}
+.fb-panel.fb3 .fb3-rk { flex: 1 1 auto; display: flex; align-items: center; gap: 10px; margin-right: auto; min-width: 0; min-height: 34px; }
+.fb-panel.fb3 .fb3-rkav { flex: none; width: 34px; height: 34px; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: #fbefe9;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--fb3-rose); }
+.fb-panel.fb3 .fb3-rkav img { width: 100%; height: 100%; object-fit: cover; }
+.fb-panel.fb3 .fb3-egg { width: 26px; height: auto; }
+/* ⚠️ THE DISTANCE LINE GIVES WAY (ellipsis), never the actions: with two of them (sent: Send another, See your notes) the
+   foot is narrow, and at 1280 the line ran into "Send another" */
+.fb-panel.fb3 .fb3-rkt { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 6px; align-items: baseline; min-width: 0; }
+.fb-panel.fb3 .fb3-rkt b { font: 400 16px/1.1 var(--sp-type) !important; color: var(--fb3-ink); }
+.fb-panel.fb3 .fb3-rkt span { font: 12.5px var(--sp-serif) !important; color: var(--fb3-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fb-panel.fb3 .fb3-notes, .fb-panel.fb3 .fb3-btn { flex: none; }
+.fb-panel.fb3 .fb3-bar { grid-column: 1 / -1; display: block; width: 140px; height: 4px; margin-top: 5px; border-radius: 2px; background: #ead7ce; overflow: hidden; }
+.fb-panel.fb3 .fb3-bar em { display: block; height: 100%; border-radius: 2px; background: var(--fb3-rose); }
+.fb-panel.fb3 .fb3-notes {
+  all: unset; cursor: pointer; white-space: nowrap; font: 600 14px var(--sp-serif) !important; color: #7a3f31; text-decoration: underline; text-underline-offset: 3px;
+}
+.fb-panel.fb3 .fb3-notes i { display: inline-block; margin-left: 6px; padding: 1px 7px; border-radius: 999px; background: var(--fb3-rose); color: #fff; font: normal 600 11.5px var(--sp-serif) !important; text-decoration: none; }
+.fb-panel.fb3 .fb3-notes:focus-visible { outline: 2px solid var(--fb3-navy); outline-offset: 2px; border-radius: 4px; }
+.fb-panel.fb3 .fb3-btn {
+  all: unset; box-sizing: border-box; cursor: pointer; height: 42px; padding: 0 18px; border-radius: 999px; display: inline-flex; align-items: center;
+  background: var(--fb3-navy); color: #fff; font: 600 15px var(--sp-serif) !important; white-space: nowrap;
+}
+.fb-panel.fb3 .fb3-btn:disabled { background: #d9d3cb; color: #fff; cursor: not-allowed; }
+.fb-panel.fb3 .fb3-btn:focus-visible { outline: 2px solid var(--fb3-navy); outline-offset: 2px; }
+
+/* sent */
+.fb-panel.fb3 .fb3-done { display: flex; flex-direction: column; align-items: center; text-align: center; padding-top: 24px; background: radial-gradient(90% 90% at 50% 0%, #fcefe8 0%, #fff 60%); }
+.fb-panel.fb3 .fb3-done .fb3-hawk { width: 68px; height: 68px; }
+.fb-panel.fb3 .fb3-done h3 { margin: 14px 0 0; font: 400 28px/1.1 var(--sp-type) !important; color: var(--fb3-ink) !important; }
+.fb-panel.fb3 .fb3-lead { margin: 8px 0 0; max-width: 360px; font: 15.5px/1.5 var(--sp-serif) !important; color: var(--fb3-ink2); }
+.fb-panel.fb3 .fb3-sent {
+  display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; align-items: center; width: 100%; margin-top: 18px; padding: 12px 14px;
+  border-radius: 14px; background: #fff; text-align: left; box-shadow: inset 0 0 0 1px #ecdcd4, 0 10px 22px -16px rgba(28, 19, 15, 0.35);
+}
+.fb-panel.fb3 .fb3-nk { width: 38px; height: 38px; border-radius: 50%; background: #f6e2d9; color: var(--fb3-rose); display: grid; place-items: center; }
+.fb-panel.fb3 .fb3-sent b { display: block; font: 600 15px/1.35 var(--sp-serif) !important; overflow-wrap: anywhere; }
+.fb-panel.fb3 .fb3-sent div span { display: block; margin-top: 2px; font: 13px var(--sp-serif) !important; color: var(--fb3-muted); }
+.fb-panel.fb3 .fb3-oc { display: inline-flex; padding: 3px 10px; border-radius: 999px; white-space: nowrap; background: #fff; box-shadow: inset 0 0 0 1px #e2d6cc; font: normal 600 12.5px var(--sp-serif) !important; color: var(--fb3-muted); }
+
+@media (prefers-reduced-motion: reduce) {
+  .fb-panel.fb3 .fb3-k, .fb-panel.fb3 .fb3-ki { transition: none; }
+}
+/* a phone: the existing sheet behaviour (dashPhone.css places `.fb-panel` as a bottom sheet); the tiles stay in a row */
+@media (max-width: 767px) {
+  .fb-panel.fb3 { border-radius: 20px 20px 0 0; }
+  .fb-panel.fb3 .fb3-k { padding: 12px 10px; }
+  .fb-panel.fb3 .fb3-k small { display: none; }
+  .fb-panel.fb3 .fb3-rkt span { white-space: normal; }
+}

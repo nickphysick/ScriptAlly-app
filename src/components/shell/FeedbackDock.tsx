@@ -2,75 +2,121 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The feedback panel (Help system v1, Part E — design-refs/help-system-v1, screens 08 to 11). It opens from the
- * sidebar's Give feedback, from the Help menu's, and from the beta strip; there is one panel, mounted once by AppShell.
+ * The feedback pop-up (Help system v1, Part E; restyled by Your notes v1 Part D — design-refs/your-notes-v1, its "Pop-up"
+ * state). It opens from the sidebar's Give feedback, the Help menu's, the beta strip, the founding band's three buttons and
+ * Your notes' "+ Tell us something"; there is one panel, mounted once by AppShell.
  *
- *   header    blush: the hawk, "Tell us what you found", "Every message reaches our founder.", ✕ (the draft is kept)
- *   kind      four tiles in a radio group; nothing below shows until one is chosen, and the question follows the kind
- *   broken    "How much is it in your way?" — three optional pills
- *   broken or confusing   a screenshot: add, drop or paste one image (5 MB), sent only if added
- *   reply     "Reply to {email} if it needs one", on by default
- *   context   "Sent with it: …", closed by default: the page's name, the browser in plain words, the window, the version,
- *             the account — and, in sage, what is never sent
- *   foot      "⌘ ↵ to send" and Tell us (navy), disabled until there is a kind and a message
- *   sent      the hawk again, "Got it, thank you", where any reply will come from, "— The QueryHawk team"
+ *   frame    the founding band's: white, radius 22, padding 7, the striped blush top with "Founding writer" and the
+ *            founding number (the band's own tag), the round close
+ *   head     the feedback hawk (60, rose ring), "Tell us something", "It goes straight to our founder. We read every word."
+ *   choice   three tiles — Like · Don't like · Idea (`COMPOSE`); once one is picked they tuck into a row of pills and the
+ *            question appears: COMPOSE's question and placeholder, the two chips for Don't like (`DONT_CHIPS`, broken
+ *            first), the text, and the "Sent with it" line
+ *   foot     blush: the writer's rank (`foundingStats`, the server's), "{n} more notes to {next}" and a thin bar; "Your
+ *            notes" with "{k} new"; the navy Send
+ *   sent     the hawk, "Thank you, {first name}." (`sentCopy`), a card for the note with "Not read yet", and the rank,
+ *            "Send another" and "See your notes"
  *
- * ⚠️ IT CAPTURES CONTEXT AND SHOWS THE WRITER EXACTLY WHAT IT CAPTURED — and NEVER page content, form values, or a line
- *    of anyone's manuscript. The page name and the button it opens beside are REGISTERED with `lib/feedbackStore` by the
- *    shell; this file reads nothing off the page.
- * ⚠️ THE DRAFT IS KEPT when the panel closes for any reason but a send (module state in `lib/feedbackStore`: it lasts
- *    the session, not a reload). A failed send keeps it too, and says so.
- * ⚠️ THE EMAIL AND THE UID ARE THE SERVER'S TO READ from the verified token; the panel shows the account's address only
- *    so the writer knows where a reply would go.
+ * ⚠️ ITS JOB IS UNCHANGED: one panel, the one send path (`lib/sendFeedback`), the kept draft, Escape, ⌘↵, and the
+ *    placement beside the sidebar's button. Severity is no longer asked (the callable accepts none). The reply switch is
+ *    gone and every note asks for a reply: it can now be answered on Your notes.
+ * ⚠️ IT CAPTURES CONTEXT AND SAYS SO — and NEVER page content, form values, or a line of anyone's manuscript. The page
+ *    name and the button it opens beside are REGISTERED with `lib/feedbackStore` by the shell; this file reads nothing
+ *    off the page.
+ * ⚠️ THE DRAFT IS KEPT when the panel closes for any reason but a send. A failed send keeps it too, and says so.
+ * ⚠️ THE EMAIL AND THE UID ARE THE SERVER'S TO READ from the verified token.
+ * ⚠️ THE BAND'S CLASSES ARE SCOPED TO `.d58.d2`, so the frame carries both (feedbackPop.css undoes `.d58`'s height).
  */
 
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./betaChrome.css";
 import "./feedbackPanel.css";
+import "./feedbackPop.css";
 import { AnchoredPortal } from "./useAnchoredPopover";
 import {
-  BETA_MODE, FEEDBACK_ACCOUNT_LINE, FEEDBACK_CLOSE_LABEL, FEEDBACK_CONTEXT_SUMMARY, FEEDBACK_HEADING, FEEDBACK_KINDS,
-  FEEDBACK_KIND_LABEL, FEEDBACK_MAX, FEEDBACK_NEVER, FEEDBACK_QUESTION, FEEDBACK_SEND, FEEDBACK_SENDING, FEEDBACK_SENT_TITLE,
-  FEEDBACK_SEVERITIES, FEEDBACK_SEVERITY_LABEL, FEEDBACK_SHOT_MAX, FEEDBACK_SIGNATURE, FEEDBACK_SUBHEAD, type FeedbackKind,
-  appVersionLabel, describeBrowser, feedbackSentLines, takesScreenshot,
+  BETA_MODE, FEEDBACK_CLOSE_LABEL, FEEDBACK_MAX, FEEDBACK_SENDING, FEEDBACK_SENT_TITLE, FEEDBACK_SHOT_MAX, type FeedbackKind,
+  appVersionLabel, describeBrowser, takesScreenshot,
 } from "../../lib/beta";
 import { clearFeedbackDraft, feedbackAnchor, feedbackDraft, feedbackPage, setFeedbackDraft, type FeedbackDraft } from "../../lib/feedbackStore";
 import { sendFeedback } from "../../lib/sendFeedback";
+import { DONT_CHIPS, composeFor, sentCopy, type ComposeKey } from "../../lib/foundingCard";
+import { TIERS, cardTier, useFoundingStats } from "../../lib/foundingStats";
+import { composeKeyOf, kindWords, rowTitle } from "../../lib/yourNotes";
+import { EggNest, ICONS, headFor } from "../dashboard/v105/foundingArt";
 
 declare const __QH_BUILD_DATE__: string | undefined;
 const BUILD = typeof __QH_BUILD_DATE__ !== "undefined" ? __QH_BUILD_DATE__ : undefined;
 export const FEEDBACK_HAWK = "/images/feedback-hawk.png";
 
-const KIND_ICON: Record<FeedbackKind, string> = {
-  "Something's broken": "!",
-  "Something's confusing": "?",
-  "An idea": "✦",
-  "Something I liked": "♥",
+/* the pop-up's words (design-refs/your-notes-v1, the Pop-up state) */
+export const POP_TITLE = "Tell us something";
+export const POP_SUB = "It goes straight to our founder. We read every word.";
+export const POP_TILES: readonly { key: ComposeKey; label: string; line: string }[] = [
+  { key: "like", label: "Like", line: "Something that’s working" },
+  { key: "dont", label: "Don’t like", line: "Broken, or hard to follow" },
+  { key: "idea", label: "Idea", line: "Something you’d add" },
+];
+export const POP_SEND = "Send";
+export const POP_NOTES = "Your notes";
+export const sentWithLine = (page: string): string =>
+  `Sent with it: the page${page ? ` (${page})` : ""}, your browser and your account. Never anything you’ve written in QueryHawk.`;
+
+const X = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>;
+
+/** The rank in the foot: the bird (or the egg), its name, the distance to the next and a thin bar — all the server's. */
+const RankFoot: React.FC<{ read: ReturnType<typeof useFoundingStats> }> = ({ read: { loading, error, stats } }) => {
+  if (loading || error) return <div className="fb3-rk" aria-hidden="true" />;
+  const tier = cardTier(stats);
+  const name = tier === 0 ? "Egg" : TIERS[tier - 1].name;
+  const next = stats.nextTier ? TIERS.find((t) => t.key === stats.nextTier) ?? null : null;
+  const from = tier === 0 ? 0 : TIERS[tier - 1].min;
+  const into = next ? Math.max(0, Math.min(1, (stats.contributions - from) / (next.min - from))) : 1;
+  const head = headFor(tier);
+  return (
+    <div className="fb3-rk" data-fb="rank">
+      <span className="fb3-rkav" aria-hidden="true">{head ? <img src={head} alt="" /> : <EggNest className="d105-nest fb3-egg" />}</span>
+      <div className="fb3-rkt">
+        <b>{name}</b>
+        <span>{next && stats.toNext != null ? `${stats.toNext} more ${stats.toNext === 1 ? "note" : "notes"} to ${next.name}` : "Top of the flock"}</span>
+        <i className="fb3-bar" aria-hidden="true"><em style={{ width: `${Math.max(6, Math.round(into * 100))}%` }} /></i>
+      </div>
+    </div>
+  );
 };
 
-const isMac = () => typeof navigator !== "undefined" && /Mac|iP(hone|ad|od)/.test(navigator.platform ?? navigator.userAgent ?? "");
+/** The founding band's tag: "Founding writer" and, where the waitlist proves one, the number. */
+const Tag: React.FC<{ foundingNo: number | null }> = ({ foundingNo }) => ( <span className="d22-tag" data-fb="tag">Founding writer{foundingNo ? <i>No. {foundingNo}</i> : null}</span>
+);
 
 export const FeedbackDock: React.FC<{
   /** The signed-in account, when there is one. Only the uid's presence decides "Linked"; the server reads the token. */
   uid?: string;
-  /** The account's address, shown where a reply would go. Never sent: the server reads its own. */
+  /** The account's address. Never sent: the server reads its own. */
   email?: string | null;
+  /** The writer's name, for "Thank you, {first name}." */
+  name?: string | null;
+  /** Replies on Your notes the writer has not seen (the "{k} new" pill) */
+  newReplies?: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   /** The app's own confirmation toast. */
   onReceipt: (message: string) => void;
-}> = ({ uid, email, open, onOpenChange, onReceipt }) => {
+}> = ({ uid, name, newReplies = 0, open, onOpenChange, onReceipt }) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [d, setD] = useState<FeedbackDraft>(() => feedbackDraft());
   const [state, setState] = useState<"idle" | "sending" | "sent" | "failed">("idle");
   const [error, setError] = useState("");
   const [shotError, setShotError] = useState("");
-  const [sent, setSent] = useState<{ wantsReply: boolean; broken: boolean } | null>(null);
+  const [sent, setSent] = useState<{ kind: string; message: string; page: string } | null>(null);
   const [over, setOver] = useState(false);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const msgRef = useRef<HTMLTextAreaElement | null>(null);
   const [place, setPlace] = useState<React.CSSProperties>({ visibility: "hidden" });
+  /* one read of the writer's founding stats, while the panel is open: the tag's number, the foot's rank, the thank-you */
+  const statsRead = useFoundingStats(open ? uid : null);
+  const { stats } = statsRead;
 
   /* every change goes to the module draft as well, so a close keeps it */
   const update = useCallback((patch: Partial<FeedbackDraft>) => {
@@ -117,13 +163,13 @@ export const FeedbackDock: React.FC<{
     return () => window.removeEventListener("keydown", key);
   }, [open, close]);
 
-  /* focus: the chosen kind's question, else the first tile; the sent state's Close */
+  /* focus: the chosen kind's question, else the first tile; the sent state's "See your notes" */
   useEffect(() => {
     if (!open) return;
     requestAnimationFrame(() => {
       const p = panelRef.current;
       if (!p) return;
-      const target = state === "sent" ? p.querySelector<HTMLElement>("[data-fb='close2']")
+      const target = state === "sent" ? p.querySelector<HTMLElement>("[data-fb='see-notes']")
         : feedbackDraft().kind ? msgRef.current : p.querySelector<HTMLElement>("[data-fb='kind']");
       target?.focus({ preventScroll: true });
     });
@@ -132,12 +178,20 @@ export const FeedbackDock: React.FC<{
   if (!BETA_MODE || !open) return null;
 
   const kind = d.kind as FeedbackKind | null;
-  const q = kind ? FEEDBACK_QUESTION[kind] : null;
+  const key = kind ? composeKeyOf(kind) : null;
+  const spec = key ? composeFor(key) : null;
   const ready = !!kind && d.message.trim().length > 0;
   const browserName = typeof navigator === "undefined" ? "" : describeBrowser(navigator.userAgent);
   const viewport = typeof window === "undefined" ? "" : `${window.innerWidth} × ${window.innerHeight}`;
   const version = appVersionLabel(BUILD);
   const pageName = feedbackPage() ?? "";
+
+  const pick = (k: ComposeKey) => {
+    /* "Don't like" keeps a chip already chosen; broken is the default */
+    const nextKind = k === "dont" && (kind === "Something's broken" || kind === "Something's confusing") ? kind : composeFor(k).kind;
+    update({ kind: nextKind });
+    requestAnimationFrame(() => msgRef.current?.focus());
+  };
 
   const takeFile = (f: File | null | undefined) => {
     setShotError("");
@@ -160,15 +214,14 @@ export const FeedbackDock: React.FC<{
         const [{ getStorage, ref, uploadBytes }, { app }] = await Promise.all([import("firebase/storage"), import("../../lib/firebase")]);
         await uploadBytes(ref(getStorage(app), screenshotPath), d.shot.file, { contentType: d.shot.file.type });
       }
-      /* Dashboard v77: the call lives in lib/sendFeedback (the founding writer card posts through it too) */
+      /* Dashboard v77: the call lives in lib/sendFeedback (the one send path). Your notes v1: severity is no longer asked,
+         and every note asks for a reply — it can be answered on Your notes. */
       await sendFeedback({
-        kind, message: d.message.trim(),
-        severity: kind === "Something's broken" ? d.severity ?? "" : "",
-        wantsReply: d.reply, pageName, route: location.pathname, viewport,
+        kind, message: d.message.trim(), severity: "", wantsReply: true, pageName, route: location.pathname, viewport,
         browser: typeof navigator === "undefined" ? "" : navigator.userAgent, browserName, appVersion: version,
         screenshotPath,
       });
-      setSent({ wantsReply: d.reply, broken: kind === "Something's broken" });
+      setSent({ kind, message: d.message.trim(), page: pageName });
       clearFeedbackDraft();
       setD(feedbackDraft());
       setState("sent");
@@ -182,63 +235,78 @@ export const FeedbackDock: React.FC<{
   };
 
   const onKindKey = (e: React.KeyboardEvent, i: number) => {
-    const n = FEEDBACK_KINDS.length;
+    const n = POP_TILES.length;
     const go = e.key === "ArrowRight" || e.key === "ArrowDown" ? (i + 1) % n : e.key === "ArrowLeft" || e.key === "ArrowUp" ? (i - 1 + n) % n : -1;
     if (go < 0) return;
     e.preventDefault();
-    update({ kind: FEEDBACK_KINDS[go] });
-    requestAnimationFrame(() => panelRef.current?.querySelector<HTMLElement>(`[data-fb='kind'][data-k="${FEEDBACK_KINDS[go]}"]`)?.focus());
+    pick(POP_TILES[go].key);
+    requestAnimationFrame(() => panelRef.current?.querySelector<HTMLElement>(`[data-fb='kind'][data-key="${POP_TILES[go].key}"]`)?.focus());
   };
 
-  const lines = sent ? feedbackSentLines({ wantsReply: sent.wantsReply, email: email ?? null, broken: sent.broken }) : null;
+  const seeNotes = () => { close(); navigate("/your-notes"); };
+  const notesLink = (
+    <button type="button" className="fb3-notes" data-fb="your-notes" onClick={seeNotes}>
+      {POP_NOTES}{newReplies > 0 ? <i data-fb="new-replies">{newReplies} new</i> : null}
+    </button>
+  );
+  const copy = sentCopy(cardTier(stats), name);
 
-  const body = state === "sent" && lines ? (
-    <div className="fb-done" data-fb="sent">
-      <img className="fb-face fb-face--sent" src={FEEDBACK_HAWK} alt="" width={56} height={56} />
-      <h3 id="fb-t">{FEEDBACK_SENT_TITLE}</h3>
-      <p>{lines.lead}{lines.email ? <b>{lines.email}</b> : null}{lines.tail}</p>
-      <p className="fb-sig">{FEEDBACK_SIGNATURE}</p>
-      <div className="fb-done-b">
-        <button type="button" className="fb-ghost" data-fb="again" onClick={() => { setState("idle"); setSent(null); }}>Send another</button>
-        <button type="button" className="fb-send" data-fb="close2" onClick={close}>Close</button>
-      </div>
+  const top = (
+    <div className="d22-top fb3-top">
+      <Tag foundingNo={stats.foundingNo} />
+      <button type="button" className="fb3-x" aria-label={FEEDBACK_CLOSE_LABEL} data-fb="close" onClick={close}>{X}</button>
     </div>
+  );
+
+  const body = state === "sent" && sent ? (
+    <>
+      <div className="fb3-b fb3-done" data-fb="sent">
+        <span className="fb3-hawk"><img src={FEEDBACK_HAWK} alt="" /></span>
+        <h3 id="fb-t">{copy.title}</h3>
+        <p className="fb3-lead">{copy.body}</p>
+        <div className="fb3-sent" data-fb="sent-note">
+          <span className="fb3-nk" aria-hidden="true">{ICONS[composeKeyOf(sent.kind) ?? "dont"]}</span>
+          <div><b>{rowTitle({ title: null, message: sent.message })}</b><span>{kindWords(sent.kind)}{sent.page ? ` · from ${sent.page}` : ""}</span></div>
+          <i className="fb3-oc">Not read yet</i>
+        </div>
+      </div>
+      <div className="fb3-f">
+        <RankFoot read={statsRead} />
+        <button type="button" className="fb3-notes" data-fb="again" onClick={() => { setState("idle"); setSent(null); }}>Send another</button>
+        <button type="button" className="fb3-btn" data-fb="see-notes" onClick={seeNotes}>See your notes</button>
+      </div>
+    </>
   ) : (
     <>
-      <div className="fb-b">
-        <div>
-          <span className="fb-fl" id="fb-kl">{FEEDBACK_KIND_LABEL}</span>
-          <div className="fb-kinds" role="radiogroup" aria-labelledby="fb-kl" data-fb="kinds">
-            {FEEDBACK_KINDS.map((k, i) => (
-              <button key={k} type="button" role="radio" aria-checked={kind === k} className="fb-kind" data-fb="kind" data-k={k}
-                tabIndex={kind ? (kind === k ? 0 : -1) : i === 0 ? 0 : -1}
-                onKeyDown={(e) => onKindKey(e, i)}
-                onClick={() => { update({ kind: k }); requestAnimationFrame(() => msgRef.current?.focus()); }}>
-                <span className="fb-ki" aria-hidden="true">{KIND_ICON[k]}</span>{k}
-              </button>
-            ))}
-          </div>
+      <div className="fb3-b">
+        <div className="fb3-h">
+          <span className="fb3-hawk"><img src={FEEDBACK_HAWK} alt="" /></span>
+          <div><h3 id="fb-t">{POP_TITLE}</h3><p>{POP_SUB}</p></div>
         </div>
-        {kind && q ? (
-          <>
-            <div>
-              <label className="fb-fl" htmlFor="fb-msg" data-fb="question">{q.label}</label>
-              <textarea id="fb-msg" ref={msgRef} placeholder={q.placeholder} maxLength={FEEDBACK_MAX} value={d.message} data-fb="message"
-                onChange={(e) => { update({ message: e.target.value }); if (state === "failed") setState("idle"); }}
-                onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); } }} />
-              <div className="fb-count" data-fb="count">{d.message.length} / {FEEDBACK_MAX}</div>
-            </div>
-            {kind === "Something's broken" ? (
-              <div>
-                <span className="fb-fl" id="fb-sl">{FEEDBACK_SEVERITY_LABEL}</span>
-                <div className="fb-sev" role="radiogroup" aria-labelledby="fb-sl" data-fb="severity">
-                  {FEEDBACK_SEVERITIES.map((s) => (
-                    <button key={s} type="button" role="radio" aria-checked={d.severity === s}
-                      onClick={() => update({ severity: d.severity === s ? null : s })}>{s}</button>
-                  ))}
-                </div>
+        <div className={`fb3-ks${key ? " picked" : ""}`} role="radiogroup" aria-label="What kind of note" data-fb="kinds">
+          {POP_TILES.map((t, i) => (
+            <button key={t.key} type="button" role="radio" aria-checked={key === t.key} className="fb3-k" data-fb="kind" data-key={t.key}
+              data-k={t.key === "dont" && key === "dont" && kind ? kind : composeFor(t.key).kind}
+              tabIndex={key ? (key === t.key ? 0 : -1) : i === 0 ? 0 : -1}
+              onKeyDown={(e) => onKindKey(e, i)} onClick={() => pick(t.key)}>
+              <span className="fb3-ki" aria-hidden="true">{ICONS[t.key]}</span><b>{t.label}</b><small>{t.line}</small>
+            </button>
+          ))}
+        </div>
+        {spec && kind ? (
+          <div className="fb3-w">
+            <label className="fb3-q" htmlFor="fb-msg" data-fb="question">{spec.question}</label>
+            {key === "dont" ? (
+              <div className="fb3-chips" role="radiogroup" aria-label="Which is it?" data-fb="chips">
+                {DONT_CHIPS.map((c) => (
+                  <button key={c.kind} type="button" role="radio" aria-checked={kind === c.kind} data-fb="chip" data-k={c.kind}
+                    onClick={() => { update({ kind: c.kind }); requestAnimationFrame(() => msgRef.current?.focus()); }}>{c.label}</button>
+                ))}
               </div>
             ) : null}
+            <textarea id="fb-msg" ref={msgRef} className="fb3-ta" placeholder={spec.placeholder} maxLength={FEEDBACK_MAX} value={d.message} data-fb="message"
+              onChange={(e) => { update({ message: e.target.value }); if (state === "failed") setState("idle"); }}
+              onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); void send(); } }} />
             {takesScreenshot(kind) && uid ? (
               d.shot ? (
                 <div className="fb-thumb" data-fb="thumb">
@@ -257,32 +325,16 @@ export const FeedbackDock: React.FC<{
               )
             ) : null}
             {shotError ? <p className="fb-err" role="alert">{shotError}</p> : null}
-            {email ? (
-              <div className="fb-reply">
-                <button type="button" className="fb-sw" role="switch" aria-checked={d.reply} aria-labelledby="fb-reply-l" data-fb="reply"
-                  onClick={() => update({ reply: !d.reply })} />
-                <span id="fb-reply-l">Reply to <b>{email}</b> if it needs one</span>
-              </div>
-            ) : null}
-            <details className="fb-ctx" data-fb="context">
-              <summary>{FEEDBACK_CONTEXT_SUMMARY}</summary>
-              <dl>
-                <dt>PAGE</dt><dd>{pageName || "This page"}</dd>
-                <dt>BROWSER</dt><dd>{browserName}</dd>
-                <dt>WINDOW</dt><dd>{viewport}</dd>
-                <dt>VERSION</dt><dd>{version}</dd>
-                <dt>ACCOUNT</dt><dd>{uid ? FEEDBACK_ACCOUNT_LINE : "Not signed in"}</dd>
-              </dl>
-              <p className="fb-never">{FEEDBACK_NEVER}</p>
-            </details>
-          </>
+            <p className="fb3-ctx" data-fb="context">{sentWithLine(pageName)}</p>
+          </div>
         ) : null}
       </div>
       {state === "failed" && error ? <p className="fb-err fb-err--send" role="alert" data-fb="error">{error}</p> : null}
-      <div className="fb-f">
-        <span className="fb-k">{isMac() ? "⌘" : "Ctrl"} ↵ to send</span>
-        <button type="button" className="fb-send" data-fb="send" disabled={!ready || state === "sending"} onClick={() => void send()}>
-          {state === "sending" ? FEEDBACK_SENDING : FEEDBACK_SEND}
+      <div className="fb3-f">
+        <RankFoot read={statsRead} />
+        {notesLink}
+        <button type="button" className="fb3-btn" data-fb="send" disabled={!ready || state === "sending"} onClick={() => void send()}>
+          {state === "sending" ? FEEDBACK_SENDING : POP_SEND}
         </button>
       </div>
     </>
@@ -290,20 +342,14 @@ export const FeedbackDock: React.FC<{
 
   return (
     <AnchoredPortal>
-      <div ref={panelRef} className="fb-panel" role="dialog" aria-labelledby="fb-t" data-fb="panel" style={place}
+      <div ref={panelRef} className="fb-panel fb3" role="dialog" aria-labelledby="fb-t" data-fb="panel" style={place}
         onPaste={(e) => {
           if (!takesScreenshot(kind) || !uid) return;
           const f = [...(e.clipboardData?.files ?? [])][0];
           if (f) { e.preventDefault(); takeFile(f); }
         }}>
-        <div className="fb-frame">
-          {state === "sent" ? null : (
-            <div className="fb-h">
-              <img className="fb-face" src={FEEDBACK_HAWK} alt="" width={48} height={48} />
-              <div><h3 id="fb-t">{FEEDBACK_HEADING}</h3><p>{FEEDBACK_SUBHEAD}</p></div>
-              <button type="button" className="fb-x" aria-label={FEEDBACK_CLOSE_LABEL} data-fb="close" onClick={close}>×</button>
-            </div>
-          )}
+        <div className="fb3-frame d58 d2">
+          {top}
           {body}
         </div>
       </div>

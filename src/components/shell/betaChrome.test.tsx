@@ -200,9 +200,19 @@ describe("the feedback dock", () => {
     expect(unwired).not.toContain('data-shell="feedback"');
   });
 
+  /* Your notes v1, Part D retarget — the same law in the pop-up's new first step: three ways in (Like · Don't like · Idea)
+     that between them reach all four kinds, one of which is not a complaint. Don't like opens on broken, and its second
+     chip is confusing. */
   it("offers all four kinds, including one that is not a complaint", () => {
+    clearFeedbackDraft();
     const html = dock(true);
-    for (const kind of FEEDBACK_KINDS) expect(html).toContain(esc(kind));
+    for (const kind of ["Something I liked", "Something's broken", "An idea"]) expect(html).toContain(`data-k="${esc(kind)}"`);
+    expect(html).toContain(">Like</b>");
+    setFeedbackDraft({ ...EMPTY_DRAFT, kind: "Something's broken" });
+    try {
+      const dont = dock(true);
+      for (const kind of FEEDBACK_KINDS) expect(dont).toContain(`data-k="${esc(kind)}"`);
+    } finally { clearFeedbackDraft(); }
     // A channel that only accepts faults becomes a complaints box, and then only the angriest
     // tenth ever use it.
     expect(FEEDBACK_KINDS).toContain("Something I liked");
@@ -215,15 +225,17 @@ describe("the feedback dock", () => {
   /* Help system v1 E.1 retarget — the same law (the writer sees exactly what travels, and the limit in words), in the
      panel's new plain words: PAGE · BROWSER · WINDOW · VERSION · ACCOUNT, and what is never sent. The block shows once
      a kind is chosen, so the kept draft is set first and cleared after. */
+  /* Your notes v1, Part D retarget — the same law (the writer sees what travels, and the limit in words), in the ref's
+     one line: the page by its name, the browser, the account, and never anything they have written. */
   it("prints the captured context and states the limit in words", () => {
     setFeedbackDraft({ ...EMPTY_DRAFT, kind: "An idea" });
     try {
       const html = dock(true);
-      for (const k of ["PAGE", "BROWSER", "WINDOW", "VERSION", "ACCOUNT"]) expect(html).toContain(`<dt>${k}</dt>`);
-      expect(html).toContain(esc(FEEDBACK_ACCOUNT_LINE));
-      expect(html).toContain(esc(FEEDBACK_NEVER));
-      /* the question follows the kind */
-      expect(html).toContain(esc(FEEDBACK_QUESTION["An idea"].label));
+      expect(html).toContain("Sent with it: the page");
+      expect(html).toContain("your browser and your account");
+      expect(html).toContain("Never anything you’ve written in QueryHawk.");
+      /* the question follows the kind (COMPOSE's) */
+      expect(html).toContain("What would you add?");
     } finally { clearFeedbackDraft(); }
   });
 
