@@ -23,4 +23,10 @@
 
   /* ── 2 · the title in the typewriter: the size and leading v153.1 set (54/1.05, the ref's too) ─────────────── */
   .qc151.qc153 .qc1531-hd h1.qc1531-t { font: 400 54px/1.05 var(--sp-type) !important; letter-spacing: -0.01em; }
+
+  /* ── 3 · the header on the page's grid: the rail's 268 and the list's 28px gap, so the title block starts on the list
+     column's left edge; the hawk centred over the rail; the ring right-aligned to the list's right edge ──────────── */
+  .qc151.qc153 .qc1531-hd { grid-template-columns: 268px minmax(0, 1fr) minmax(400px, 560px); column-gap: 28px; }
+  .qc151.qc153 .qc1531-art { justify-self: center; }
+  .qc151.qc153 .qc1531-rc { display: flex; justify-content: flex-end; }
 }
