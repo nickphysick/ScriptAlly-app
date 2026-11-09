@@ -10,6 +10,10 @@
  * pills (each one's description in its title); Where it stands' four tiles take their stage colours; the stage rows lose
  * their proportion bars; the section headings are the typewriter with a drawn chevron. Presentation only.
  *
+ * v153.4 (design-refs/query-centre-v153-4.html): a sidebar. No card: the header sits on the page over a 2px navy rule;
+ * each section is a small serif label over its own white panel. Most used is a plain list of rows again (each one's
+ * description still in its title); counts in the typewriter. Presentation only (qcv1534.css).
+ *
  * ⚠️ IT IS A PRESENTATION OF THE PAGE'S ONE FILTER STATE (`Qc138Filters`), never a second model: every control writes
  *    through `onFilters`. Counts are faceted (lib/qc153Rail); an option at 0 that is not on fades and cannot be pressed.
  */
@@ -21,6 +25,7 @@ import { MORE_ROWS_153, pickQuick, quickOn, railOn, type RailCounts } from "../.
 import { StageGlyph } from "./StageGlyph";
 import "./qcv153.css";
 import "./qcv1531.css";
+import "./qcv1534.css";
 
 export interface RailSent { key: string; name: string; line?: string }
 export interface QcRail153Props {
@@ -63,12 +68,12 @@ export const QcRail153: React.FC<QcRail153Props> = ({ filters: f, onFilters, cou
         <section className={`qc153-rsec${open.quick ? " is-open" : ""}`} data-qc153="rail-sec" data-k="quick">
           {head("quick", "Most used")}
           {open.quick ? (
-            <div className="qc153-rbody qc1533-pills" role="radiogroup" aria-label="Most used">
+            <div className="qc153-rbody qc1534-quick" role="radiogroup" aria-label="Most used">
               {QUICK_PICKS.map((p) => {
                 const isOn = quickOn(f, p.key);
                 const n = counts.quick[p.key] ?? 0;
                 return (
-                  <button key={p.key} type="button" role="radio" aria-checked={isOn} className={`qc1533-pill${isOn ? " is-on" : ""}${!isOn && n === 0 ? " is-zero" : ""}`}
+                  <button key={p.key} type="button" role="radio" aria-checked={isOn} className={`qc153-fr qc1534-q${isOn ? " is-on" : ""}${!isOn && n === 0 ? " is-zero" : ""}`}
                     data-qc153="quick" data-k={p.key} data-n={n} title={p.line} disabled={loading || (!isOn && n === 0)} onClick={() => onFilters(pickQuick(f, p.key))}>
                     <span className="qc153-tx">{p.title}</span>
                     <span className="qc153-n">{n}</span>

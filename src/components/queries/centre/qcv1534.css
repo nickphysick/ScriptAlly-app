@@ -1,0 +1,69 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v153.4 (design-refs/query-centre-v153-4.html, read from the rendered page at 1920): a crisp ground, the
+ * title in the typewriter, the header on the list's grid, the filter rail as a sidebar, and the ring alone with its
+ * annotations on hover. Desktop only (768px and up), like every Query Centre rule since v131.
+ *
+ * ⚠️ THIS SHEET IS IMPORTED AFTER qcv153.css AND qcv1531.css, AND EVERY RULE STILL WINS ON SPECIFICITY: each is scoped
+ *    under the page root `.qc151.qc153` (or, for the ground, the same four classes as v153.1's rule), one step above
+ *    the rule it overrides, so a change in bundle order cannot undo it.
+ * Faces are READ, never named: --sp-type (Special Elite), --sp-serif (Source Serif).
+ */
+@media (min-width: 768px) {
+  /* ── 1 · the ground: plain cool off-white, the doodle tile kept under an even .45 wash (v153.1's fade is gone) ── */
+  .ws-window .qc-wpg.qc-wpg--v11 > .wpg-scroll.wpg-scroll {
+    background-color: #f5f5f3;
+    background-image: linear-gradient(rgba(245, 245, 243, 0.45), rgba(245, 245, 243, 0.45)), url("/images/qc/doodle-tile.svg");
+    background-repeat: repeat, repeat;
+    background-size: auto, 340px 360px;
+    background-attachment: local, local;
+  }
+
+  /* ── 2 · the title in the typewriter: the size and leading v153.1 set (54/1.05, the ref's too) ─────────────── */
+  .qc151.qc153 .qc1531-hd h1.qc1531-t { font: 400 54px/1.05 var(--sp-type) !important; letter-spacing: -0.01em; }
+
+  /* ── 3 · the header on the page's grid: the rail's 268 and the list's 28px gap, so the title block starts on the list
+     column's left edge; the hawk centred over the rail; the ring right-aligned to the list's right edge ──────────── */
+  .qc151.qc153 .qc1531-hd { grid-template-columns: 268px minmax(0, 1fr) minmax(400px, 560px); column-gap: 28px; }
+  .qc151.qc153 .qc1531-art { justify-self: center; }
+  .qc151.qc153 .qc1531-rc { display: flex; justify-content: flex-end; }
+
+  /* ── 4 · the filter rail as a sidebar: no card; the header straight on the page over a 2px navy rule; each section a
+     small serif label over its own white panel, 8px apart. Filter logic, counts, zero-fade and Reset are untouched. ── */
+  .qc151.qc153 .qc153-rail { padding: 0; border-radius: 0; background: none; box-shadow: none; }
+  .qc151.qc153 .qc153-rail .qc153-rin { border: 0; border-radius: 0; overflow: visible; background: none; }
+  .qc151.qc153 .qc153-rail .qc153-rbd { padding: 4px 4px 12px; background: none; box-shadow: inset 0 -2px 0 #2a3a52; }
+  .qc151.qc153 .qc153-rail .qc153-rsec,
+  .qc151.qc153 .qc153-rail .qc153-rbd + .qc153-rsec { border-top: 0; margin-top: 8px; }
+  .qc151.qc153 .qc153-rail .qc153-rh5 button {
+    padding: 10px 4px 8px; font: 600 12.5px/1.3 var(--sp-serif) !important; color: #8a8076; letter-spacing: 0.01em;
+  }
+  .qc151.qc153 .qc153-rail .qc153-rbody { padding: 6px; border-radius: 12px; background: #fff; box-shadow: 0 0 0 1px #e8e1d6; }
+  /* the rows: 8 10, radius 8, a warm hover; Most used is a plain list (it was pills), navy with cream text when on */
+  .qc151.qc153 .qc153-rail .qc153-fr { padding: 8px 10px; border-radius: 8px; }
+  .qc151.qc153 .qc153-rail .qc153-fr:hover:not(.is-on) { background: #f7f4ef; }
+  .qc151.qc153 .qc153-rail .qc1534-quick { display: flex; flex-direction: column; gap: 0; }
+  .qc151.qc153 .qc153-rail .qc1534-q { justify-content: space-between; }
+  .qc151.qc153 .qc153-rail .qc1534-q.is-on { background: #2a3a52; color: #f4eee5; }
+  .qc151.qc153 .qc153-rail .qc153-fr .qc153-n { font: 400 13.5px/1 var(--sp-type) !important; color: #8a8076; }
+  .qc151.qc153 .qc153-rail .qc1534-q.is-on .qc153-n { color: rgba(244, 238, 229, 0.75); }
+  /* Where it stands: the tiles keep their stage fills, 4px apart, radius 8 */
+  .qc151.qc153 .qc153-rail .qc1533-where { padding: 6px; }
+  .qc151.qc153 .qc153-rail .qc153-courts { gap: 4px; padding: 0 0 6px; }
+  .qc151.qc153 .qc153-rail .qc153-court { border-radius: 8px; }
+  /* the export at its foot sits on the page too */
+  .qc151.qc153 .qc153-rail .qc153-rft { padding: 12px 4px 4px; border-top: 0; }
+
+  /* ── 5 · the ring alone, right-aligned to the list's right edge; no legend. The svg is 214 tall and as wide as its
+     measured annotations need. One annotation at a time, faded in over 150ms; the other segments fade as before. ── */
+  .qc151.qc153 .qc1534-ring .qc1531-rb { display: block; padding: 0; }
+  .qc151.qc153 .qc1534-ring .qc1531-rsvg { height: 214px; margin-left: auto; }
+  .qc151.qc153 .qc1534-ring .qc1531-seg { cursor: pointer; outline: none; }
+  .qc1534-ann { opacity: 0; transition: opacity 0.15s; pointer-events: none; }
+  .qc1534-ann.is-on { opacity: 1; }
+  .qc1534-an { font: 400 15px var(--sp-type); fill: #1c130f; }
+  .qc1534-al { font: 400 13px var(--sp-serif); fill: #5b4f47; }
+  @media (prefers-reduced-motion: reduce) { .qc1534-ann { transition: none; } }
+}

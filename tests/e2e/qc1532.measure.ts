@@ -25,7 +25,7 @@ export async function ready(page: Page) {
   const b = page.locator(`${PAGE} [data-qc153="bar"] button[data-v="list"]`);
   if ((await b.getAttribute("aria-pressed")) !== "true") await b.click();
   await expect(page.locator(`${PAGE} [data-qc153="slip"]`).first()).toBeVisible({ timeout: 60_000 });
-  await expect(page.locator(`${PAGE} [data-qc1531="legend-row"]:not([disabled])`).first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.locator(`${PAGE} [data-qc1531="seg"]`).first()).toBeVisible({ timeout: 60_000 });
   await page.evaluate(() => document.fonts.ready);
 }
 
@@ -81,7 +81,8 @@ class Ledger {
 }
 
 for (const vp of [{ width: 1440, height: 900 }, { width: 1920, height: 1080 }] as const) {
-  test(`v153.2 · ${vp.width}`, async ({ page }) => {
+  /* RETIRED by v153.4 — see tests/e2e/RETIRED-query-centre-v153-4.md */
+  test.skip(`v153.2 · ${vp.width}`, async ({ page }) => {
     const L = new Ledger(`v1532-${vp.width}`);
     mkdirSync(DIR, { recursive: true });
     await openRoute(page, "/queries", vp);

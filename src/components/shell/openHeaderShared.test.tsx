@@ -3,6 +3,11 @@
  * `shell/OpenHeader` and `shell/OpenRing`; this holds their markup, in nine states, byte-identical to a capture taken
  * from the components BEFORE the extraction (`__fixtures__/openHeaderShared.fixture.json`, committed with this lock).
  * Identical markup over unchanged CSS is identical rendering.
+ *
+ * Query Centre v153.4 (9 Nov) RETOOK the capture on this dev line: the Query Centre's ring is now the ring alone (no
+ * legend, annotations on hover; queries/centre/QcStageRing1531.tsx, no longer drawn through OpenRing), so the six ring
+ * states and headerFull (which embeds the ring) changed on purpose. headerLoading and headerNoMs came out byte-identical,
+ * which is the half of this lock that still speaks for OpenHeader.
  */
 import { describe, expect, it } from "vitest";
 import fixture from "./__fixtures__/openHeaderShared.fixture.json";
