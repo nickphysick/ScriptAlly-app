@@ -1,0 +1,98 @@
+{
+ "ground": {
+  "color": "rgb(242, 238, 232)",
+  "image": "linear-gradient(rgba(242, 238, 232, 0) 84px, rgba(242, 238, 232, 0.72) 360px), url(\"https://scriptally-dev.web.app/images/qc/doodle-tile.svg\")",
+  "size": "100% 100%, 340px 360px",
+  "repeat": "no-repeat, repeat"
+ },
+ "header": {
+  "cols": "190px 774px 560px",
+  "gap": "36px",
+  "box": {
+   "x": 198,
+   "y": 135.75,
+   "w": 1596,
+   "h": 218
+  }
+ },
+ "title": {
+  "box": {
+   "x": 424,
+   "y": 182.41,
+   "w": 774,
+   "h": 56.69
+  },
+  "font": "600 54px \"Playfair Display\", Georgia, serif",
+  "ls": "normal"
+ },
+ "titleLeft": 424,
+ "listLeft": 494,
+ "listRight": 1794,
+ "art": {
+  "x": 198,
+  "y": 151.19,
+  "w": 190,
+  "h": 183.13
+ },
+ "artCol": {
+  "x": 198,
+  "y": 151.19,
+  "w": 190,
+  "h": 183.13
+ },
+ "rail": {
+  "bg": "rgb(255, 255, 255)",
+  "shadow": "rgb(227, 213, 201) 0px 0px 0px 1px, rgba(28, 19, 15, 0.06) 0px 1px 2px 0px, rgba(28, 19, 15, 0.3) 0px 18px 36px -24px",
+  "radius": "16px",
+  "pad": "0px",
+  "rinBg": "rgb(255, 255, 255)",
+  "box": {
+   "x": 198,
+   "y": 379.75,
+   "w": 268,
+   "h": 914
+  }
+ },
+ "railHead": "rgb(255, 255, 255) pad 14px 16px 12px rgb(42, 58, 82) 0px -2px 0px 0px inset",
+ "secs": [
+  {
+   "k": "quick",
+   "mt": "0px",
+   "bt": "0px",
+   "head": "400 15px \"Special Elite\" rgb(28, 19, 15) pad 13px 16px 8px",
+   "body": "rgba(0, 0, 0, 0) r0px none pad 0px 14px 14px"
+  },
+  {
+   "k": "where",
+   "mt": "0px",
+   "bt": "1px",
+   "head": "400 15px \"Special Elite\" rgb(28, 19, 15) pad 13px 16px 8px",
+   "body": "rgba(0, 0, 0, 0) r0px none pad 0px 8px 10px"
+  },
+  {
+   "k": "sent",
+   "mt": "0px",
+   "bt": "1px",
+   "head": "400 15px \"Special Elite\" rgb(28, 19, 15) pad 13px 16px 8px",
+   "body": "rgba(0, 0, 0, 0) r0px none pad 0px 8px 10px"
+  },
+  {
+   "k": "more",
+   "mt": "0px",
+   "bt": "1px",
+   "head": "400 15px \"Special Elite\" rgb(28, 19, 15) pad 13px 16px 8px",
+   "body": null
+  }
+ ],
+ "legend": true,
+ "legendHead": true,
+ "ringSvg": {
+  "x": 1234,
+  "y": 135.75,
+  "w": 214,
+  "h": 214
+ },
+ "ringRight": 1448,
+ "segN": 4,
+ "ann": 0
+}

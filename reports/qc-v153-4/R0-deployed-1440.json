@@ -1,0 +1,98 @@
+{
+ "ground": {
+  "color": "rgb(245, 245, 243)",
+  "image": "linear-gradient(rgba(245, 245, 243, 0.45), rgba(245, 245, 243, 0.45)), url(\"https://scriptally-dev.web.app/images/qc/doodle-tile.svg\")",
+  "size": "auto, 340px 360px",
+  "repeat": "repeat, repeat"
+ },
+ "header": {
+  "cols": "268px 404px 560px",
+  "gap": "28px",
+  "box": {
+   "x": 112,
+   "y": 135.75,
+   "w": 1288,
+   "h": 218
+  }
+ },
+ "title": {
+  "box": {
+   "x": 408,
+   "y": 182.41,
+   "w": 404,
+   "h": 56.69
+  },
+  "font": "400 54px \"Special Elite\", \"Courier New\", Courier, monospace",
+  "ls": "-0.54px"
+ },
+ "titleLeft": 408,
+ "listLeft": 408,
+ "listRight": 1400,
+ "art": {
+  "x": 151,
+  "y": 151.19,
+  "w": 190,
+  "h": 183.13
+ },
+ "artCol": {
+  "x": 151,
+  "y": 151.19,
+  "w": 190,
+  "h": 183.13
+ },
+ "rail": {
+  "bg": "rgba(0, 0, 0, 0)",
+  "shadow": "none",
+  "radius": "0px",
+  "pad": "0px",
+  "rinBg": "rgba(0, 0, 0, 0)",
+  "box": {
+   "x": 112,
+   "y": 379.75,
+   "w": 268,
+   "h": 734
+  }
+ },
+ "railHead": "rgba(0, 0, 0, 0) pad 4px 4px 12px rgb(42, 58, 82) 0px -2px 0px 0px inset",
+ "secs": [
+  {
+   "k": "quick",
+   "mt": "8px",
+   "bt": "0px",
+   "head": "600 12.5px \"Source Serif 4\" rgb(138, 128, 118) pad 10px 4px 8px",
+   "body": "rgb(255, 255, 255) r12px rgb(232, 225, 214) 0px 0px 0px 1px pad 6px"
+  },
+  {
+   "k": "where",
+   "mt": "8px",
+   "bt": "0px",
+   "head": "600 12.5px \"Source Serif 4\" rgb(138, 128, 118) pad 10px 4px 8px",
+   "body": "rgb(255, 255, 255) r12px rgb(232, 225, 214) 0px 0px 0px 1px pad 6px"
+  },
+  {
+   "k": "sent",
+   "mt": "8px",
+   "bt": "0px",
+   "head": "600 12.5px \"Source Serif 4\" rgb(138, 128, 118) pad 10px 4px 8px",
+   "body": "rgb(255, 255, 255) r12px rgb(232, 225, 214) 0px 0px 0px 1px pad 6px"
+  },
+  {
+   "k": "more",
+   "mt": "8px",
+   "bt": "0px",
+   "head": "600 12.5px \"Source Serif 4\" rgb(138, 128, 118) pad 10px 4px 8px",
+   "body": null
+  }
+ ],
+ "legend": false,
+ "legendHead": false,
+ "ringSvg": {
+  "x": 1000.92,
+  "y": 135.75,
+  "w": 399.08,
+  "h": 214
+ },
+ "ringRight": 1400,
+ "segN": 0,
+ "ann": 5
+}
