@@ -45,6 +45,7 @@ import {
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader27 } from "./contact/ContactHeader27";
+import { ContactRail27 } from "./contact/ContactRail27";
 import { applyPick, headerFigures, pickOn } from "../../lib/contactV26";
 import { SET_LABEL } from "../../lib/contactV24";
 /** v26 E — a set the page narrowed to from a link, in the applied row's words ("Querying" for Your move + With the agent) */
@@ -337,6 +338,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v17 §B — anything narrowing the list: a filter, the summary card's group, or Find */
   const anyActive = contactFilterCount(filters) > 0 || !!glance || !!sets || search.trim() !== "";
   const clearFilters = useCallback(() => { setFilters(emptyContactFilters()); setSearch(""); setGlance(null); setSets(null); }, [setFilters]);
+  /* v27 — the applied row's "Clear filters" and the rail's Reset: ONE handler (the filters, the set and the glance; Find stays) */
+  const clearRailFilters = useCallback(() => { setFilters(emptyContactFilters()); setSets(null); setGlance(null); }, [setFilters]);
   /* v24 A3 — each chip's count, over every agent (never the filtered view) */
   const counts = useMemo(() => setCounts(factsAll), [factsAll]);
   /* the band's "your move": agents with a live query whose next step is the writer's (the census's own count) */
@@ -1091,6 +1094,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         <>
         {/* v26 B — THE LIST IS ONE BIG CARD: the landing page's framed card opening on a navy band (count, Find, Filters,
             Group, Sort). The List / Cards switch, Cards and Full screen (the address book) are retired. */}
+        {/* v27 — TWO COLUMNS, the Query Centre's (`qc153-cl`): the filter rail (sticky), then the list, unchanged */}
+        <div className="qc153-cl" data-cl27="columns">
+        <div className="qc153-railcol" data-cl27="rail-column">
+          <ContactRail27 all={factsAll} filters={filters} onFilters={setFilters} sets={sets} onSets={setSets} pool={inPool}
+            genreLabel={(k, raw) => genreLabel(raw, personalGenres) || k} genreHit={bookHit} showing={visibleFacts.length}
+            onReset={clearRailFilters}
+            onExport={() => downloadAgentsCsv(visibleFacts, (raw) => genreLabel(raw, personalGenres))} />
+        </div>
+        <div className="qc153-main" data-cl27="list-column">
         <ContactSheet26 pool={visibleFacts} all={factsAll} group={group26} onGroup={setGroup26}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
           filters={filters} onFilters={setFilters} onClearAll={clearFilters} search={search} onSearch={setSearch}
@@ -1106,8 +1118,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             setEditReq({ id, seq: Date.now(), edit: { focus: g ? GAP_FOCUS[g.first].focus : "genres" } });
           }}
           setChip={sets ? { label: setsLabel(sets), onDrop: () => setSets(null) } : null}
-          onClearFilters={() => { setFilters(emptyContactFilters()); setSets(null); setGlance(null); }}
+          onClearFilters={clearRailFilters}
           onExport={(rows) => downloadAgentsCsv(rows, (raw) => genreLabel(raw, personalGenres))} />
+        </div>
+        </div>
         {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}
         {logSeed && active ? (
           <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)}>

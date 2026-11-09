@@ -146,8 +146,8 @@
   .qc153-rail { position: sticky; top: calc(var(--pin-cover, 12px) + 12px); }
   .qc153-rail .qc153-rin { max-height: calc(var(--wpg-port-h, 100vh) - var(--pin-cover, 12px) - 40px); overflow-y: auto; overscroll-behavior: contain; }
   .qc153-rbd { display: flex; align-items: baseline; gap: 10px; padding: 12px 14px; background: #f4e6d6; }
-  .qc151 .qc153-rbd b { font: 400 20px/1.3 var(--sp-type) !important; color: var(--ink); }
-  .qc151 .qc153-ron { font: 400 13px/1 var(--sp-serif) !important; color: var(--mut); }
+  :is(.qc151, .cl27) .qc153-rbd b { font: 400 20px/1.3 var(--sp-type) !important; color: var(--ink); }
+  :is(.qc151, .cl27) .qc153-ron { font: 400 13px/1 var(--sp-serif) !important; color: var(--mut); }
   .qc153-rst {
     all: unset; margin-left: auto; cursor: pointer; font: 600 13.5px/1 var(--sp-serif) !important; color: var(--ink);
     text-decoration: underline; text-underline-offset: 3px;
@@ -177,8 +177,8 @@
   .qc153-fr--sw.is-on { background: none; }
   .qc153-fr.is-zero, .qc153-court.is-zero { opacity: 0.45; cursor: default; pointer-events: none; }
   .qc153-tx { flex: 1; min-width: 0; }
-  .qc151 .qc153-tx small { display: block; font: 400 12.5px/1.3 var(--sp-serif) !important; color: var(--faint); }
-  .qc151 .qc153-n { font: 400 13.5px/1 var(--sp-type) !important; color: var(--faint); }
+  :is(.qc151, .cl27) .qc153-tx small { display: block; font: 400 12.5px/1.3 var(--sp-serif) !important; color: var(--faint); }
+  :is(.qc151, .cl27) .qc153-n { font: 400 13.5px/1 var(--sp-type) !important; color: var(--faint); }
   .qc153-rd { flex: none; display: grid; place-items: center; width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #b9afa3; }
   .qc153-fr.is-on .qc153-rd { box-shadow: inset 0 0 0 1.5px var(--navy); }
   .qc153-fr.is-on .qc153-rd::after { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--navy); }
@@ -203,10 +203,10 @@
   }
   .qc153-court:hover { box-shadow: inset 0 0 0 1px #d9cfc1; }
   .qc153-court:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
-  .qc151 .qc153-court b { display: block; font: 400 20px/1 var(--sp-type) !important; color: inherit; }
-  .qc151 .qc153-court span { display: block; margin-top: 4px; font: 400 12.5px/1.25 var(--sp-serif) !important; color: var(--mut); }
+  :is(.qc151, .cl27) .qc153-court b { display: block; font: 400 20px/1 var(--sp-type) !important; color: inherit; }
+  :is(.qc151, .cl27) .qc153-court span { display: block; margin-top: 4px; font: 400 12.5px/1.25 var(--sp-serif) !important; color: var(--mut); }
   .qc153-court.is-on { background: var(--navy); color: #f4eee5; }
-  .qc151 .qc153-court.is-on span { color: rgba(244, 238, 229, 0.78); }
+  :is(.qc151, .cl27) .qc153-court.is-on span { color: rgba(244, 238, 229, 0.78); }
 
   .qc153-rft { padding: 10px 14px 12px; border-top: 1px solid #efe8de; }
   .qc153-exp { all: unset; cursor: pointer; font: 400 13.5px/1.3 var(--sp-serif) !important; color: var(--mut); text-decoration: underline; text-underline-offset: 3px; }

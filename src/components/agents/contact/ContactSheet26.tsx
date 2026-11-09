@@ -5,10 +5,11 @@
  * Contact list v26 (design-refs/contact-list-v26/, screens 01–11) — THE LIST IS ONE BIG CARD: the landing page's framed
  * card (white, padding 10, radius 22; a 1px #a5837b frame inside at radius 13, clipped) opening on a navy band.
  *
- *   B  the band       "{shown} agents" · Find · Filters · Group · Sort — the List / Cards switch and Full screen retired
+ *   B  the band       "{shown} agents" · Find · Group · Sort — the List / Cards switch and Full screen retired (v27: the
+ *                     Filters button too; the filter rail beside the list replaced it)
  *   C  the index      under the band: the sections the list draws, as jumps (A–Z, weeks, months or statuses)
  *   D  the rows       three columns (Agent · What they want · Your query) and a margin labelling each section
- *   E  the menus      Group (Letter · Status · No grouping), Sort (the four), Filters (quick picks, genres, submissions)
+ *   E  the menus      Group (Letter · Status · No grouping), Sort (the four)
  *
  * ⚠️ THE PIN IS ONE STICKY BLOCK — the band, the index row, the applied row and the column headings — 12px below the
  *    scroller's top. It sits inside the frame, which clips (`overflow: clip`, never `hidden`: hidden would make the frame
@@ -20,17 +21,16 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
-import { type AgentFacts, type ContactFilters, type SortKey, appliedFilters, contactFilterCount, genreList } from "../../../lib/contactList";
+import { type AgentFacts, type ContactFilters, type SortKey, appliedFilters } from "../../../lib/contactList";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { CL_SORT_FIELDS } from "../../../lib/cardsSort";
 import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
 import { usePopover } from "../../shell/ListPills";
 import { GROUP_ICON150 } from "../../queries/centre/QcToolbar140";
-import { FilterMenu } from "./ContactFilters24";
 import { GroupMenu, NQ_RING, SetGlyph } from "./ContactSheet24";
 import { GenrePills } from "../../shared/agentRowParts";
 import type { Group26Key } from "../../../lib/contactListMemory";
-import { GROUP26_OPTIONS, PICKS26, applyPick, drawnSections, pickOn, sections, type Pick26Key, type Section } from "../../../lib/contactV26";
+import { GROUP26_OPTIONS, drawnSections, sections, type Section } from "../../../lib/contactV26";
 import type { StatusKey } from "../../../lib/contactList";
 import "./contactV26.css";
 
@@ -57,8 +57,8 @@ export interface ContactSheet26Props {
   onExport: (rows: readonly AgentFacts[]) => void;
   /** the page guide's tick: an index entry was used */
   onJump?: () => void;
-  /** E — how many rows the list would show under these filters (Find and any page set still applied: `wouldShow`) */
-  wouldShow: (f: ContactFilters) => number;
+  /** E — how many rows the list would show under these filters (v27: read by the rail, no longer by the band) */
+  wouldShow?: (f: ContactFilters) => number;
   /** E — Housekeeping's gap words for an agent ("reply time", "wishlist"…), in its order, or null */
   gapsOf: (id: string) => readonly string[] | null;
   /** E — "Fill in →": the card's editor at the agent's first missing field */
@@ -70,7 +70,6 @@ export interface ContactSheet26Props {
 }
 
 const I = {
-  filt: <svg className="cl26-ic" viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 5.5h14M5.5 10h9M8 14.5h4" /></svg>,
   cv: <svg className="cl26-cv" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>,
   find: <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>,
 };
@@ -155,15 +154,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   }, [read]);
 
   /* E — one count per applied-filters chip (the pick "Ready to query" sets two filters, and shows two chips) */
-  const filterN = contactFilterCount(p.filters) + (p.setChip ? 1 : 0);
   const applied = useMemo(() => appliedFilters(p.filters, (k) => p.genreWord(k) || k), [p.filters, p]); // eslint-disable-line react-hooks/exhaustive-deps
-  const on = pickOn(p.filters);
-  const picks = PICKS26.map((k) => ({ key: k.key, title: k.title, line: k.line, on: on === k.key, n: p.wouldShow(on === k.key ? p.filters : applyPick(p.filters, k.key)) }));
-  const allGenres = useMemo(
-    () => genreList(p.all, (k, raw) => p.genreWord(raw) || k).sort((a, b) => a.label.localeCompare(b.label)),
-    [p.all, p], // eslint-disable-line react-hooks/exhaustive-deps
-  );
-  const openN = p.all.filter((x) => x.openKey === "open").length;
   const groupChanged = p.group !== "letter";
   const sortChanged = p.sortKey !== "surname" || p.reversed;
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
@@ -179,10 +170,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
               <input value={p.search} onChange={(e) => p.onSearch(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
             </label>
             <span className="cl26-sp" aria-hidden="true" />
-            <button type="button" className="cl26-ch" data-cl26="filters" data-on={filterN ? "" : undefined} aria-haspopup="dialog" aria-expanded={pop.open === "filters"}
-              aria-label={filterN ? `Filters: ${filterN} applied` : "Filters"} onClick={(e) => pop.toggle("filters", e.currentTarget)}>
-              {I.filt}<span>Filters</span>{filterN ? <em className="cl26-n" data-cl26="filters-n">{filterN}</em> : null}
-            </button>
+            {/* v27 — the Filters button is retired: the filter rail beside the list (ContactRail27) is the one way in */}
             <button type="button" className="cl26-ch" data-cl26="group" data-on={groupChanged ? "" : undefined} aria-haspopup="menu" aria-expanded={pop.open === "group"}
               aria-label={`Grouped by ${GROUP26_LABEL[p.group]}. Change the grouping`} onClick={(e) => pop.toggle("group", e.currentTarget)}>
               {GROUP_ICON150}<span className="cl26-by">Grouped by</span><b>{GROUP26_LABEL[p.group]}</b>{I.cv}
@@ -254,11 +242,6 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
         )}
       </div>
 
-      {pop.open === "filters" && pop.anchor ? (
-        <FilterMenu anchor={pop.anchor} filters={p.filters} onFilters={p.onFilters} genres={allGenres} openN={openN} className="cl26-fpop"
-          picks={picks} onPick={(k) => p.onFilters(applyPick(p.filters, k as Pick26Key))} genreHit={p.genreHit}
-          showing={p.pool.length} total={p.all.length} onExport={() => p.onExport(p.pool)} />
-      ) : null}
       {pop.open === "sort" && pop.anchor ? (
         <SortChipMenu anchor={pop.anchor} fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} ns="cl26" heading="Sort by" note={null}
           onChange={(v) => p.onSort(v as { key: SortKey; reversed: boolean })} />
