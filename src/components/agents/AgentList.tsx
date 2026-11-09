@@ -74,7 +74,6 @@ import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
 import { type ContactPop } from "./contact/ContactListControls";
 import { ESC_LEVEL, escapeDepth } from "../../lib/escapeStack";
-import { AgentEditMode } from "./card/AgentEditMode";
 import { useAgentSave } from "./card/useAgentSave";
 import { useEditOptions } from "./card/useEditOptions";
 import { useAgentNotes } from "./card/useAgentNotes";
@@ -895,37 +894,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         showToast({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
         return true;
       },
-      renderEdit: ({ focus, wide, onDone }) => {
-        const done = () => {
-          editLeave.current = null;
-          onDone();
-          const n = pendingPick.current;
-          pendingPick.current = null;
-          if (n) setCardId(n);
-        };
-        return (
-          <AgentEditMode
-            key={`${agent.id}:${req?.seq ?? 0}`}
-            mode="edit" agent={agent} focus={focus} prefill={req?.edit?.prefill} wide={wide}
-            personal={editOpts.personal} agents={agents} msGenre={scoped?.genre ?? null} genrePool={editOpts.genrePool}
-            personalGenres={editOpts.personalLabels} allGenres={editOpts.allGenres} isHit={bookHit} nowMs={nowMs}
-            alsoFor={(d, base) => alsoChanges(agent, toContactDraft(agent, base, d), hkEditCtx)}
-            onSave={async (d, base) => {
-              const r = await saveDraft(agent, base, d);
-              if (!r.ok) return { ok: false, error: (r as { error: string }).error };
-              done();
-              return { ok: true };
-            }}
-            onLeave={done}
-            onOpenAgent={(id) => { done(); pickCard(id); }}
-            onNewGenre={editOpts.onNewGenre}
-            notes={!wide && notesAgent?.id === agent.id ? { stored: cardNotes.storedNotes, earlier: agent.notes ?? "", onAdd: cardNotes.onAddNote, onEdit: cardNotes.onEditNote, onDelete: cardNotes.onDeleteNote } : undefined}
-            escLevel={ESC_LEVEL.card}
-            bindLeave={editLeave}
-          />
-        );
-      },
-      request: req ? { seq: req.seq, inline: req.inline, edit: req.edit ? { focus: req.edit.focus } : undefined } : null,
+      /* Add agent v1 Phase 5 — the long form is retired: the card's own sections are the editor (`form` below) */
+      renderEdit: () => null,
+      request: req ? { seq: req.seq, inline: req.inline, edit: req.edit ? { focus: req.edit.focus, prefill: req.edit.prefill } : undefined } : null,
       /* v26.2 C — editing on the card: one draft, the editor's own lists and Also-changes, one write (`saveDraft`),
          and the page's toast ("Saved {first}'s card", with the save's snapshot Undo) */
       form: {

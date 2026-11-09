@@ -26,7 +26,9 @@ import "./agentPanel.css";
  * Contact list v25.2 C3 — the SAME panel holds an existing agent's edit mode on every page but the Contact list (whose
  * own card turns into the editor): `edit` — no flow header (the edit mode draws its navy "EDITING {FIRST}" band).
  */
-export const AgentPanelNew: React.FC<{ over?: boolean; edit?: boolean }> = ({ over = false, edit = false }) => {
+export const AgentPanelNew: React.FC<{ over?: boolean }> = ({ over = false }) => {
+  /* Add agent v1 Phase 5 — the panel holds a new agent only: an existing agent's editor is the card itself */
+  const edit = false;
   /* the panel starts under the shell's bar: its bottom edge, measured, as the agent panel does */
   const [top, setTop] = useState<number | null>(null);
   useLayoutEffect(() => {

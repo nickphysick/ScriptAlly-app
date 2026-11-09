@@ -115,7 +115,7 @@ export interface CardEditKit {
   save: (change: Partial<CardDraft>) => Promise<boolean>;
   /** the card's edit mode for this agent */
   renderEdit: (o: { focus?: AgentCardField; wide?: boolean; onDone: () => void }) => React.ReactNode;
-  request: { seq: number; inline?: InlineField; edit?: { focus?: AgentCardField } } | null;
+  request: { seq: number; inline?: InlineField; edit?: { focus?: AgentCardField; prefill?: Partial<CardDraft> } } | null;
   /** Contact list v26.2 C — editing ON the card: what one draft over the whole card needs — the editor's own lists, its
    *  Also-changes dry run and its one save (absent: the card hands every edit to `renderEdit`) */
   form?: CardFormKit;

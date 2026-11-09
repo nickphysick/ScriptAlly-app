@@ -62,9 +62,9 @@ import { flagKeyForTask } from "../../../lib/taskFlags";
 import { destroyManifest } from "../../../lib/cascade";
 import { AgentCardFrame, type AgentCardFrameHandle } from "./AgentCardFrame";
 import { AgentQuickView, type QuickFoot } from "./AgentQuickView";
-import { AgentEditMode, type EditorSaveResult } from "./AgentEditMode";
+import type { EditorSaveResult } from "./useAgentForm";
 import { AddAgentJourney } from "./AddAgentJourney";
-import { PreviewHostCard } from "./HostAgentCard";
+import { HostAgentCard, PreviewHostCard } from "./HostAgentCard";
 import { useAgentSave } from "./useAgentSave";
 import { AgentPanelNew } from "../panel/AgentPanelNew";
 import { ESC_LEVEL, EscapeRaise } from "../../../lib/escapeStack";
@@ -105,9 +105,16 @@ export const AgentCardHost: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbo
   /* Contact list v25.2 C3 — THE CENTRED EDITOR IS RETIRED: every editor request — a new agent, or an existing one
      asked for at a tab, a field or with carried answers — is the agent panel holding the card's edit mode */
   const panel = isEditorRequest(req);
+  /* Add agent v1 Phase 5 — EVERY "EDIT AGENT" OPENS THE AGENT'S CARD: an existing agent's editor is the Contact list's
+     card (`AgentCard262` in `AgentCardPanel262`) in edit mode at the door's section; `AgentEditMode`'s long form is
+     deleted. On the Contact list the page's own card answers first (the edit interceptor). */
+  if (panel && req.agentId !== null) {
+    return <HostAgentCard key={req.agentId} agentId={req.agentId}
+      openAt={{ seq: req.seq, tab: req.tab, focus: req.focus, prefill: req.prefill }} sequence={req.sequence ? [...req.sequence] : undefined} />;
+  }
   return (
     <>
-      {panel && <AgentPanelNew over={req.over === "drawer"} edit={req.agentId !== null} />}
+      {panel && <AgentPanelNew over={req.over === "drawer"} />}
       <AgentCardSession key={req.seq} sandbox={sandbox} />
     </>
   );
@@ -214,7 +221,6 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   const [handover, setHandover] = useState<{ foot: QuickFoot; pulse: SavedPulse[] } | null>(null);
   const [slide, setSlide] = useState<"l" | "r" | null>(null);
   const frameRef = useRef<AgentCardFrameHandle>(null);
-  const editorLeave = useRef<(() => void) | null>(null);
 
   /* ── the hand-off (§6.1): a query journey runs in the drawer while the card waits, docked ─────
      The drawer says when the card steps aside and when it comes back (`onDock`) — on save, cancel,
@@ -251,30 +257,6 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     if (!agentId) return false;
     return (await writeAgent(agentId, patch)).ok;
   }, [agentId, writeAgent]);
-
-  /** The dry run the editor shows before a save — the REAL engine (decision 14), never a sum. */
-  const alsoFor = useCallback(
-    (d: CardDraft, base: CardDraft) => (agent ? alsoChanges(agent, toContactDraft(agent, base, d), editCtx) : []),
-    [agent, editCtx],
-  );
-
-  /**
-   * SAVE (v25.2 C): the one save every editing shape shares (`useAgentSave` — only what changed, through
-   * `commitCardSave`, the deadline fan-out, the data-quality flag, the reopen reminder, the snapshot Undo). The panel
-   * closes and the toast says what moved, with the Undo.
-   */
-  const { saveDraft } = useAgentSave({ writeAgent: sandbox?.writeAgent, editCtx });
-  const onEditorSave = useCallback(async (d: CardDraft, base: CardDraft): Promise<EditorSaveResult> => {
-    if (!agent) return { ok: false, error: "That agent is no longer on your list." };
-    const r = await saveDraft(agent, base, d);
-    if (!r.ok) return { ok: false, error: (r as { error: string }).error };
-    if (!r.nothing) {
-      const undo = r.undo;
-      showToast({ message: r.line, ...(undo ? { undo: async () => { await undo(); } } : {}) });
-    }
-    closeAgentCard();
-    return { ok: true };
-  }, [agent, saveDraft, showToast]);
 
   /**
    * The create — through the SAME `addAgent` path every other creator uses (free-tier cap,
@@ -477,26 +459,9 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     );
   }
 
-  if (inEditor) {
-    const target: EditTarget = editing!;
-    if (!panelSlot || !panelSlot.isConnected) return null;
-    return createPortal(
-      /* over the query drawer, the editor and its popups hear Escape before the drawer does */
-      <EscapeRaise.Provider value={req.over === "drawer" ? ESC_LEVEL.drawerPopup : 0}>
-        <AgentEditMode
-          mode="edit" agent={agent} prefill={target.prefill} focus={target.focus}
-          band
-          personal={personal} agents={agents} msGenre={scoped?.genre ?? null} genrePool={genrePool} personalGenres={personalLabels} allGenres={AGENT_GENRES}
-          isHit={genreHit} nowMs={nowMs} alsoFor={alsoFor}
-          notes={{ stored: storedNotes, earlier: agent?.notes ?? "", onAdd: onAddNote, onEdit: onEditNote, onDelete: onDeleteNote }}
-          onSave={onEditorSave} onLeave={() => closeAgentCard()}
-          onOpenAgent={(id) => openAgentCard(id, { tab: "who", host: "panel" })}
-          onNewGenre={onNewGenre} bindLeave={editorLeave}
-        />
-      </EscapeRaise.Provider>,
-      panelSlot,
-    );
-  }
+  /* Add agent v1 Phase 5 — an existing agent's editor is the card (`HostAgentCard`), drawn by the host above; this
+     session never receives that request, and draws nothing for it */
+  if (inEditor) return null;
 
   const facts = agentFacts(agent!, qcRows, scoped?.id ?? null);
   const q = cardQuery(cardRows(qcRows, agent!.id, scoped?.id ?? null));

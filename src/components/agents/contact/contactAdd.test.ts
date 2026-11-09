@@ -15,8 +15,10 @@ import { emptyCardDraft, encodeMats, problemsOf } from "../../../lib/cardDraft";
 
 const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/[^\n]*/gm, "");
 const host = readFileSync(new URL("../card/AgentCardHost.tsx", import.meta.url), "utf8");
-/* re-pointed (Contact list v25.2 C2): the editor is the card's edit mode now (AgentCardEditor is deleted) */
-const editor = readFileSync(new URL("../card/AgentEditMode.tsx", import.meta.url), "utf8");
+/* re-pointed (Add agent v1 Phase 5): AgentEditMode is deleted; the editors are the add journey, the card's own edit
+   sections and the controls both share — the laws below hold over all three */
+const editor = ["../card/AddAgentJourney.tsx", "./AgentCard262Edit.tsx", "../card/agentPills.tsx"]
+  .map((f) => readFileSync(new URL(f, import.meta.url), "utf8")).join("\n");
 
 describe("a new agent is born the way the house births agents", () => {
   it("the empty draft carries ABSENCE where the writer has said nothing — no window, no rule, no method, no country, no materials", () => {

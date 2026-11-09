@@ -70,7 +70,7 @@ export function secsFor(tab?: AgentCardTab, focus?: AgentCardField): Sec262[] | 
   return "all";
 }
 /** a door's ask: its seq makes a second ask for the same place a new ask */
-export interface OpenAt { seq: number; tab?: AgentCardTab; focus?: AgentCardField }
+export interface OpenAt { seq: number; tab?: AgentCardTab; focus?: AgentCardField; prefill?: Partial<import("../../../lib/cardDraft").CardDraft> }
 
 /** where a section's edit opens in the editor (the field it starts at) */
 export const SEC_FOCUS: Record<Sec262, AgentCardField> = { contact: "name", genres: "genres", wishlist: "wishlist", materials: "materials", how: "reply" };
@@ -174,7 +174,14 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const resetRef = useRef(form.reset);
   resetRef.current = form.reset;
   /* a new agent: nothing open, a fresh draft */
-  useEffect(() => { setOpen([]); resetRef.current(a); }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* Add agent v1 — only on a REAL change of agent (paging): a mount re-run (StrictMode runs mount effects twice) must not
+     close the sections a door's ask has just opened */
+  const shownId = useRef(a.id);
+  useEffect(() => {
+    if (shownId.current === a.id) return;
+    shownId.current = a.id;
+    setOpen([]); resetRef.current(a);
+  }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
   /** open one section (adding it to any already open); the first opening starts a fresh draft */
   const openSec = (k: Sec262) => {
     if (!kit) { p.onEdit(undefined, SEC_FOCUS[k]); return; }
@@ -207,11 +214,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     for (const k of w) openSec(k);
   };
   const askSeq = useRef(0);
-  const ask0 = p.openAt ?? (p.edit?.request?.edit ? { seq: p.edit.request.seq, focus: p.edit.request.edit.focus } : p.edit?.request?.inline ? { seq: p.edit.request.seq, focus: INLINE_FOCUS[p.edit.request.inline] } : null);
+  const ask0: OpenAt | null = p.openAt ?? (p.edit?.request?.edit ? { seq: p.edit.request.seq, focus: p.edit.request.edit.focus, prefill: p.edit.request.edit.prefill } : p.edit?.request?.inline ? { seq: p.edit.request.seq, focus: INLINE_FOCUS[p.edit.request.inline] } : null);
   useEffect(() => {
     if (!ask0 || !kit || ask0.seq === askSeq.current) return;
     askSeq.current = ask0.seq;
-    applyAsk("tab" in ask0 ? ask0.tab : undefined, ask0.focus);
+    applyAsk(ask0.tab, ask0.focus);
+    /* answers carried over (Housekeeping's "Edit on {first}'s card") land on the fresh draft, unsaved */
+    if (ask0.prefill && Object.keys(ask0.prefill).length) { const pf = ask0.prefill; window.setTimeout(() => form.set(pf), 0); }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- once per ask (its seq)
   }, [ask0?.seq, kit, a.id]);
   const edit = openSec;
