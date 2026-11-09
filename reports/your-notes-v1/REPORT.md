@@ -49,3 +49,55 @@ The new "fixed earns 4" and "fixed is not capped by the week" tests were run red
 - `firebase deploy --only functions:foundingStatsOnFeedback,functions:foundingStatsNightly --project scriptally-dev` — both "Successful update operation".
 - `firebase deploy --only functions:addFeedbackNote,functions:markFeedbackSeen --project scriptally-dev` — both "Successful create operation".
 - `firebase deploy --only firestore:rules --config firebase.dev.json --project scriptally-dev` — release `updateTime` moved from 2026-11-07T09:25:51Z to **2026-11-09T18:15:35Z**, and the uploaded source carries `match /thread/{msg}`.
+- `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev` from a clean checkout of the pushed tip (`origin/your-notes-v1`). Before: `index-DIr9O0zd.js` (this branch's base, unchanged). After: **`index-jVsm42PS.js`**.
+
+## Tests, baseline against now
+
+| Gate | Baseline | Now |
+|---|---|---|
+| `tsc --noEmit` | clean | clean |
+| `tsc -p functions` | clean | clean |
+| `npm run build:dev` | clean (after the `@sentry/react` repair) | clean, no warnings |
+| Vitest (root) | 3 failed · 11,767 passed | 3 failed (the same: emuGuard, firestoreTarget ×2) · **11,811 passed** |
+| Vitest (functions) | 16 failed · 316 passed | 16 failed (the same three files) · **330 passed** |
+| Rules (`firestore.rules.test.ts`, emulator) | — | **187/187**, incl. 4 new thread cases |
+| `yourNotesV1.measure.ts` (dev build, live dev data, harness) | — | **11/11** |
+
+New locks: `foundingContributions.test.ts` (fixed earns 4, not capped by the week — red before the fix), `feedbackNotesCore.test.ts` (N1–N4), `yourNotes.test.ts` (YN1–YN6, incl. the copied counting rule summing to the server's `writerTotals`), `openHeaderShared.test.tsx` (the Query Centre header and ring byte-identical in nine states — red on a one-word change), `yourNotesPageSmoke.test.tsx`. Retargeted, each keeping its law: two `betaChrome` cases; the nav locks (`workspaceNav`, `todoWorkspace`, `workspaceTasksNav`) to the new section.
+
+**YN-E1** sent one real follow-up through `addFeedbackNote` on dev: "Still happening" on a fixed note reopened it (its chip went to Not read yet) and the message reached the thread. One `[Still happening]` email went to dev's `FEEDBACK_TO`. The seeder was re-run afterwards.
+
+## Measured on the rendered page
+
+| | 1512 × 982 | 1280 × 800 |
+|---|---|---|
+| Header columns (art · title block · ring) | 190 · 538 · 560 | 190 · 306 · 560 |
+| Ring | 214 × 214 | 214 × 214 |
+| Side column | 380 | 380 |
+| Note panel | 560 × 962 | 560 × 780 |
+| Pop-up | 500 wide | 500 wide |
+| Phone (390) | page 390 = 390 (no sideways scroll); ring centred at 214 | |
+
+## Screenshots (`reports/your-notes-v1/shots/`)
+
+`page-*`, `page-full-*`, `empty-*`, `panel-thread-*` (reply and thread), `panel-reopen-*` (still happening), `pop-idle-*`, `pop-dont-*`, `pop-sent-*` at both sizes; `rail-more.png`; `dash-band-link.png`; `phone-390*.png`.
+
+### Differences from the ref, kept on purpose
+
+1. **The ring and legend are the Query Centre's own** (`shell/OpenRing`): legend rows for an empty bucket are disabled but not greyed (the ref greys them), and a legend row shows no pressed state (the ref has none either, so I pass `isOn = false`). Not restyled, because the ring is shared.
+2. **The header's art column stays 190 below 1400px.** The ref narrows it to 150 there; the shared header keeps the Query Centre's 190 so the two pages cannot drift. The placeholder itself narrows to 150 × 190 as the ref's does.
+3. **The empty panel line says "No reply yet. If one comes, it'll be here."** The ref adds "and we'll email you". Nothing emails a writer when the desk replies (the desk is a later prompt), so the copy says only what the code does.
+4. **The "Sent with it" line names the page, the browser and the account** (the ref's words). The note also carries the window size and the app version, which the old panel listed. Worth a look (below).
+5. **The pop-up's screenshot drop zone is kept for Don't like**, though the ref draws none. It never renders while `FEEDBACK_SCREENSHOTS` is false (Storage is not set up), so on screen it matches the ref.
+6. **"Thank you, harness."** is the harness account's own name — `sentCopy` and the account, as specified.
+7. **The panel's "What you sent · date · from page" line** is the ref's, though the brief does not list it.
+8. **Phone:** one column in the order specified. The Dashboard band is not built for a phone: it scrolls sideways inside its own wrapper and its ask is cramped. The pop-up uses the existing phone sheet. The switch's four buttons are tight at 390. Not redesigned, per the brief.
+
+## What Nick needs to do
+
+1. **Look at it on dev** (`/your-notes`, as the harness account, or open More › Founding writer). Six `yn1-` notes are seeded for the harness account; remove them with `node tests/e2e/seedYourNotes.mjs --clean` from the branch.
+2. **Prod is yours, when you are ready:** the functions `addFeedbackNote`, `markFeedbackSeen`, `foundingStatsOnFeedback` and `foundingStatsNightly`; the rules (the thread block); and hosting. Note that `release/live-1` still runs functions on Node 20 (see memory) and prod has no `functions/.env.<prod>` for the database id.
+3. **Decide the context line** (difference 4): keep the ref's three things, or name the window size and version as well.
+4. **The founder's desk is the next prompt:** it writes `status`, `statusLog`, `reply` and `thread` messages from `"founder"`. The page reads all four today; until then a status set by hand in the console still shows (the timeline is derived from `statusAt`).
+5. **The Dashboard band's last-note chip still says "Sent"** for an unread note, where Your notes says "Not read yet". The band was out of scope; one word to align when you next touch it.
+6. **Merge the branch** when you are happy: `your-notes-v1` is cut from the dev line, not `main`.
