@@ -47,6 +47,9 @@ import { StatusDot } from "../../StatusDot";
 import { AnchoredPanel } from "../AnchoredPanel";
 import TagsPane from "../TagsSheet";
 import "./todoWs.css";
+import "./todoWs54.css";
+import { WsHeader54 } from "./WsHeader54";
+import { needRows } from "../../../lib/todoHeader54";
 
 const MENTOR = "/images/todo/mentor.webp";
 const HOUR = "/images/todo/hour.webp";
@@ -411,6 +414,11 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     });
   };
 
+  /* v54 (D1): the legend's rows, read off the same category sections as the bar */
+  const needRowsV = useMemo(() => needRows(wsSections(visible, "category"), bd, now), [visible, bd, now]);
+  /* v54 (D1): "Quick fill" opens the "Fill in what you sent" batch (there is one: v51.1 folds every gap into it) */
+  const quickFill = () => { setTab("todo"); go("materials-batch"); };
+
   /* ── render: the tray ── */
   const typeCount = (k: WsType) => all.filter((t) => t.type === k).length;
   const whenCount = (k: WsWhen) => all.filter((t) => whenOf(t) === k).length;
@@ -758,14 +766,12 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     <div ref={rootRef} className="tws-root" data-tws="root">
       <WorkspacePageGrid className="tws-wpg" scrollLabel="To-do list" masthead={null}>
         <div className="tws" data-tws="page">
-          {/* v53 (D2): the thin header — the page's name in the typewriter face, the book's beside it in grey (one book
-              only), "+ Add a task" on the right. No picture and no counts: the counts are the tray's bar. */}
-          <header className="tws-hd" data-tws="header">
-            <h1 className="tws-ttl" data-page-title>Your to-do list</h1>
-            {statBook ? <span className="tws-tsub" data-tws="book">{statBook}</span> : null}
-            <span className="tws-sp" />
-            <button type="button" className="tws-addb" onClick={() => { setMile(null); setAdding(true); }}>+ Add a task</button>
-          </header>
+          {/* v54 (D1): the page header, in the Query Centre's dress — the hawk at the desk, "{n} things to do", "for {book}"
+              between rules (one book only), "+ Add a task" and "Quick fill", the ring and "What needs doing". */}
+          <WsHeader54 todo={seq.length} bd={bd} rows={needRowsV} book={statBook}
+            onAdd={() => { setMile(null); setAdding(true); }}
+            onQuickFill={all.some((x) => x.key === "materials-batch") ? () => quickFill() : null}
+            onJump={(k) => jump(k)} />
 
           <div className="tws-ws" data-tws="workspace" data-slim={slim ? "" : undefined}>
             {slim ? (

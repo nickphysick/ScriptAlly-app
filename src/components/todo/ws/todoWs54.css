@@ -1,0 +1,25 @@
+/*
+ * To-do list v54 (design-refs/todo-list-v54/todo-desk-v15.html, todo-batch-v3.html). Desktop only (768px and up); the
+ * phone To-do has its own sheets and none of this reaches it.
+ *
+ * ⚠️ THE HEADER IS THE QUERY CENTRE'S (qcv1531.css, under the `.qc151` wrapper). Only what differs is stated here.
+ * ⚠️ NO GREEN. Rust is for a lateness and nothing else.
+ */
+@media (min-width: 768px) {
+  /* ── D1 · the page header ─────────────────────────────────────────────────────────────────────────────────── */
+  /* `.qc151` is the Query Centre page's root class: it brings 30px of top padding and a container of its own; here it
+     only carries the header's scoped rules, so both are put back */
+  .tws .qc151.tws54-hdw { flex: none; padding-top: 0; container-type: normal; color: var(--tw-ink); font-family: var(--tw-serif); }
+  .qc151 .qc1531-hd.tws54-hd { padding: 14px 0 22px; }
+  /* the hawk at the desk: the armchair hawk's size and place, on nothing (no disc, no box) */
+  .tws54-art img { background: none; border-radius: 0; }
+  /* the legend's last column holds a note ("when you have a moment"), not a share */
+  /* the right column a little wider than the Query Centre's (its notes are words, not a share) */
+  .qc151 .qc1531-hd.tws54-hd { grid-template-columns: 190px minmax(0, 1fr) minmax(470px, 600px); }
+  /* the label takes its whole width; the note is what gives way */
+  .qc151 .tws54-lg button { grid-template-columns: 16px max-content 30px minmax(0, 1fr); }
+  .qc151 .tws54-lg .qc1531-lbl { overflow: visible; }
+  .qc151 .tws54-lg em { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc151 .tws54-lg em[data-late] { color: #8a4a3a; font-style: normal !important; }
+  .qc151 .tws54-lg b { min-width: 22px; }
+}

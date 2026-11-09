@@ -54,24 +54,10 @@
 .tws *, .tws-layer * { box-sizing: border-box; }
 .tws :where(p, span, div, label, button, input, textarea) { font-family: inherit; }
 
-/* the header (workspace width v2, 8 Nov): one light row on the page, no container — the title in the type face, a rust
-   late pill (absent at 0), a plain to-do pill, and the solid navy "+ Add a task" on the right. The navy card is gone. */
-.tws-hd {
-  /* v53 (D2): one thin line, about 40px — the title, the book in grey, the button */
-  flex: none; display: flex; align-items: center; gap: 14px; min-height: 40px; padding: 8px 0 10px;
-  background: none; color: var(--tw-ink);
-}
-.tws .tws-hd h1.tws-ttl {
-  margin: 0; font: 400 24px/1.3 var(--tw-type) !important; color: var(--tw-ink) !important;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: none;
-}
-.tws .tws-hd .tws-tsub { min-width: 0; font: 400 16px/1.3 var(--tw-serif); color: var(--tw-mut2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* v54 (D1): the thin header (.tws-hd, .tws-ttl, .tws-tsub, .tws-addb) is retired — the page header is WsHeader54 in the
+   Query Centre's dress (todoWs54.css). `tws-hd` and `tws-addb` survive on it as class names only, with no rules. */
 .tws-sp { flex: 1; min-width: 8px; }
-.tws-addb {
-  flex: none; height: 40px; padding: 0 20px; border: 0; border-radius: 20px; background: var(--tw-navy); color: #f4eee5; cursor: pointer;
-  font: 600 16px var(--tw-serif);
-}
-.tws-addb:hover { background: #1f2c3f; }
+
 
 /* the workspace takes the rest of the column (min 520); its panes scroll on their own */
 .tws-ws {
