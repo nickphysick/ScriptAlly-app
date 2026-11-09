@@ -16,6 +16,8 @@
      health at its own width */
   .clv-group[data-v24][data-v27] > .cl24-hd.cl27-hd {
     display: grid; grid-template-columns: 200px minmax(0, 1fr) auto; align-items: center; column-gap: 34px; padding: 0 0 4px;
+    /* Phase 3 — 30px under the scroller's top, where the Query Centre's header sits (and the ref's); v24's was 24 */
+    margin-top: 30px;
   }
   .cl27-art img {
     display: block; width: 200px; height: auto; transform: scaleX(-1);

@@ -1,0 +1,72 @@
+[
+ {
+  "where": "1512 rail found",
+  "ok": true,
+  "detail": "no rail"
+ },
+ {
+  "where": "1512 268 wide",
+  "ok": true,
+  "detail": "268"
+ },
+ {
+  "where": "1512 the list starts 28 after it",
+  "ok": true,
+  "detail": "28"
+ },
+ {
+  "where": "1512 sections in order",
+  "ok": true,
+  "detail": "[\"quick\",\"where\",\"genres\",\"subs\"]"
+ },
+ {
+  "where": "1512 no Filters button in the band",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "1512 the page scrolled 1200 (precondition)",
+  "ok": true,
+  "detail": "1200"
+ },
+ {
+  "where": "1512 still in view after the scroll",
+  "ok": true,
+  "detail": "{\"top\":129.75,\"sc\":105.75}"
+ },
+ {
+  "where": "1280 rail found",
+  "ok": true,
+  "detail": "no rail"
+ },
+ {
+  "where": "1280 268 wide",
+  "ok": true,
+  "detail": "268"
+ },
+ {
+  "where": "1280 the list starts 28 after it",
+  "ok": true,
+  "detail": "28"
+ },
+ {
+  "where": "1280 sections in order",
+  "ok": true,
+  "detail": "[\"quick\",\"where\",\"genres\",\"subs\"]"
+ },
+ {
+  "where": "1280 no Filters button in the band",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "1280 the page scrolled 1200 (precondition)",
+  "ok": true,
+  "detail": "1200"
+ },
+ {
+  "where": "1280 still in view after the scroll",
+  "ok": true,
+  "detail": "{\"top\":129.75,\"sc\":105.75}"
+ }
+]
