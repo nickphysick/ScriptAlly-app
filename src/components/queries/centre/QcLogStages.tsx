@@ -125,17 +125,29 @@ const NO_ASK = { ql: true, syn: true, sample: { unit: "none" as const, amt: 0, f
 
 /* ── the shared parts ─────────────────────────────────────────────────────────────────────────────────────────── */
 
+/* v1.1 — THE TRACK (option C): the five stages as the slip's own status track, on the FlowHead's ground. A finished
+   node is a button (navy, ✓, its answer under its label) that opens that stage; the current one is a white disc ringed
+   in navy; the rest are faint outlines and are not focusable. */
 export const Stepper: React.FC<{ s: FlowState; values: Record<StageKey, string | null>; onGo: (k: StageKey) => void }> = ({ s, values, onGo }) => (
-  <div className="laq-steps" data-qls="steps" role="list">
-    {STAGES.map((k) => {
+  <div className="laq-trk" data-qls="steps" data-laq="track" role="list" aria-label="Logging a query, step by step">
+    {STAGES.map((k, i) => {
       const now = s.step === k;
       const done = !now && answered(s, k);
+      const state = now ? "now" : done ? "done" : "todo";
+      const cls = `laq-s${now ? " is-n" : ""}${done ? " is-d" : ""}`;
+      const inner = <>
+        <span className="laq-nd" data-laq="node" aria-hidden="true">{done ? "✓" : i + 1}</span>
+        <span className="laq-l">{STAGE_LABEL[k]}{done ? <b data-qls="step-value">{values[k] ?? ""}</b> : null}</span>
+      </>;
       return (
-        <button key={k} type="button" role="listitem" className={`laq-st${now ? " is-now" : ""}${done ? " is-done" : ""}`} data-qls="step" data-k={k}
-          data-state={now ? "now" : done ? "done" : "todo"} disabled={!done} aria-current={now ? "step" : undefined}
-          aria-label={done ? `${STAGE_LABEL[k]}: ${values[k] ?? ""}. Change it` : STAGE_LABEL[k]} onClick={() => onGo(k)}>
-          {STAGE_LABEL[k]}<b data-qls="step-value">{done ? values[k] ?? "" : "\u00a0"}</b>
-        </button>
+        <div key={k} role="listitem" className="laq-si">
+          {done ? (
+            <button type="button" className={cls} data-qls="step" data-k={k} data-state={state}
+              aria-label={`${STAGE_LABEL[k]}: ${values[k] ?? ""}. Change it`} onClick={() => onGo(k)}>{inner}</button>
+          ) : (
+            <span className={cls} data-qls="step" data-k={k} data-state={state} aria-current={now ? "step" : undefined}>{inner}</span>
+          )}
+        </div>
       );
     })}
   </div>

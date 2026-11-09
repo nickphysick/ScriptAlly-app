@@ -11,6 +11,9 @@
  *   LAQ6  Log and start another: the toast, then the next agent lands on the check with the date and materials carried
  *   LAQ7  the milestone at n = 25 (the book padded to 24 by seedLaq.mjs, removed after)
  *   LAQ8  reduced motion: the finished celebration at once (headline whole, no confetti, no stamp)
+ *   LAQ9  v1.1, the track: each node's state on every stage (navy ✓ done, the 40px ringed disc now, faint outlines
+ *         to come); finished nodes are buttons in the tab order and nothing else on the track is focusable; Enter on
+ *         a finished node opens its stage, and answering it returns to the check
  * Every log is undone in the same run (the celebration's Undo, or the batch toast's), and a run writing fewer readings
  * than it claims fails (LAQ_FLOOR).
  */
@@ -19,7 +22,7 @@ import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openLog, settledReady } from "./laqLib";
 
-const OUT = "reports/log-a-query-v1";
+const OUT = "reports/log-a-query-v1-1";
 const READ: Record<string, unknown> = {};
 let checks = 0;
 /* soft: a red check never stops a case before its Undo, so a failing run still leaves the account as it found it */
@@ -120,6 +123,63 @@ test("LAQ1 · LAQ2 · LAQ3 · LAQ4 · LAQ5 — the stages, the calendar, the ste
   ok((await step(page)) === "check", "LAQ4: answering it returns straight to the check");
   ok((await val(page, "when")) === "Yesterday", "LAQ4: …with the new answer in the strip");
   ok((await val(page, "what")) === values.what && (await val(page, "how")) === values.how, "LAQ4: …and the other answers kept");
+});
+
+/* v1.1 — the track's nodes, read off the page */
+async function trackRead(page: Page) {
+  /* the nodes' size and fill animate over .25s: read once the track has settled (two reads alike) */
+  let last = "";
+  for (let i = 0; i < 20; i++) {
+    await page.waitForTimeout(150);
+    const now = JSON.stringify(await trackRead1(page));
+    if (now === last) break;
+    last = now;
+  }
+  return trackRead1(page);
+}
+async function trackRead1(page: Page) {
+  return page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-qls="step"]')].map((el) => {
+    const nd = el.querySelector<HTMLElement>('[data-laq="node"]')!;
+    const c = getComputedStyle(nd);
+    return { k: el.dataset.k, state: el.dataset.state, tag: el.tagName, focusable: el.tabIndex >= 0 && !(el as HTMLButtonElement).disabled,
+      w: Math.round(nd.getBoundingClientRect().width), bg: c.backgroundColor, text: (nd.textContent ?? "").trim() };
+  }));
+}
+test("LAQ9 — the track: node states, keyboard, a finished node opens its stage", async ({ page }) => {
+  test.setTimeout(600_000);
+  await openLog(page);
+  const expectStates = async (stage: string, states: string[]) => {
+    const t = await trackRead(page);
+    READ[`LAQ9 ${stage}`] = t;
+    ok(t.map((x) => x.state).join() === states.join(), `LAQ9 ${stage}: states ${t.map((x) => x.state).join()}`);
+    for (const [i, n] of t.entries()) {
+      if (n.state === "done") ok(n.tag === "BUTTON" && n.focusable && n.w === 32 && n.bg === "rgb(42, 58, 82)" && n.text === "✓", `LAQ9 ${stage}: ${n.k} is a finished node (navy ✓, a button) ${JSON.stringify(n)}`);
+      else if (n.state === "now") ok(n.tag !== "BUTTON" && !n.focusable && n.w === 40 && n.bg === "rgb(255, 255, 255)" && n.text === String(i + 1), `LAQ9 ${stage}: ${n.k} is the current disc ${JSON.stringify(n)}`);
+      else ok(n.tag !== "BUTTON" && !n.focusable && n.w === 32 && n.text === String(i + 1), `LAQ9 ${stage}: ${n.k} is to come, not focusable ${JSON.stringify(n)}`);
+    }
+  };
+  await expectStates("Agent", ["now", "todo", "todo", "todo", "todo"]);
+  await page.locator(`[data-qls="agent"][data-id="${await settledReady(page)}"]`).click();
+  await expectStates("Sent", ["done", "now", "todo", "todo", "todo"]);
+  await page.locator('[data-qls="when-opt"][data-k="today"]').click();
+  await expectStates("Materials", ["done", "done", "now", "todo", "todo"]);
+  if (await page.locator('[data-qls="package"]').count()) await page.locator('[data-qls="package"]').first().click();
+  else await page.locator('[data-qls="pieces-continue"]').click();
+  if ((await step(page)) === "how") {
+    await expectStates("How", ["done", "done", "done", "now", "todo"]);
+    await page.locator('[data-qls="how-opt"]').first().click();
+  }
+  await expectStates("Check", ["done", "done", "done", "done", "now"]);
+  /* the keyboard: Tab reaches the finished nodes, Enter opens one, and answering returns to the check */
+  await page.locator('[data-qls="step"][data-k="who"]').focus();
+  await page.keyboard.press("Tab");
+  ok((await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.k ?? null)) === "when", "LAQ9: Tab moves from Agent to the next finished node");
+  await page.keyboard.press("Enter");
+  ok((await step(page)) === "when", "LAQ9: Enter on a finished node opens its stage");
+  await expectStates("Sent, reopened", ["done", "now", "done", "done", "todo"]);
+  await page.locator('[data-qls="when-opt"][data-k="yesterday"]').click();
+  ok((await step(page)) === "check", "LAQ9: answering it returns straight to the check");
+  ok((await val(page, "when")) === "Yesterday", "LAQ9: the track shows the new answer");
 });
 
 test("LAQ6 — Log and start another: toast, carried date and materials, the next agent's own method", async ({ page }) => {

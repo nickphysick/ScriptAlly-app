@@ -42,15 +42,23 @@
 .laq .flh { padding: 18px 18px 8px 24px; border-bottom: 0; }
 .laq .flh p.flh-l { margin-top: 7px; font: italic 400 15.5px/1.45 var(--sp-serif) !important; }
 
-/* the stepper, on the FlowHead's ground */
-.laq .laq-steps { flex: none; display: flex; gap: 4px; padding: 0 18px 12px 26px; background: #f3eee8; border-bottom: 1px solid #e7dfd4; }
-.laq .laq-st { all: unset; box-sizing: border-box; display: block; text-align: left; flex: 1 1 0; min-width: 0; padding: 7px 0 0; border-top: 2px solid #ddd3c6; font: 400 12.5px/1.3 var(--laq-se); color: var(--laq-mut2); }
-.laq .laq-st b { display: block; font: 400 14px/1.3 var(--laq-se); color: var(--laq-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.laq .laq-st.is-done { cursor: pointer; border-color: var(--laq-navy); }
-.laq .laq-st.is-done:hover b, .laq .laq-st.is-done:focus-visible b { text-decoration: underline; text-underline-offset: 3px; }
-.laq .laq-st.is-done:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
-.laq .laq-st.is-now { border-color: var(--laq-navy); color: var(--laq-ink); }
-.laq .laq-st.is-now b { color: var(--laq-mut2); font-style: italic; }
+/* the track (option C), the reference's `.ltrk`: on the FlowHead's ground, under the title and line */
+.laq .laq-trk { flex: none; display: flex; align-items: flex-start; margin: 0; padding: 2px 26px 14px; background: #f3eee8; border-bottom: 1px solid #e7dfd4; list-style: none; }
+.laq .laq-si { position: relative; flex: 1 1 0; min-width: 0; display: flex; justify-content: center; }
+.laq .laq-si:not(:last-child)::after { content: ""; position: absolute; top: 16px; left: calc(50% + 20px); right: calc(-50% + 20px); height: 2px; border-radius: 1px; background: #d8cfc3; transition: background .3s; }
+.laq .laq-si:has(> .is-d):not(:last-child)::after { background: var(--laq-navy); }
+.laq .laq-s { all: unset; box-sizing: border-box; position: relative; min-width: 0; max-width: 100%; display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; }
+.laq .laq-nd { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: #f3eee8; box-shadow: inset 0 0 0 1.5px #cfc4b5; color: #a59a90; font: 400 13px var(--laq-tw) !important; transition: background .25s, box-shadow .25s, width .25s, height .25s, margin .25s; }
+.laq .laq-s.is-d { cursor: pointer; }
+.laq .laq-s.is-d .laq-nd { background: var(--laq-navy); box-shadow: none; color: #fff; }
+.laq .laq-s.is-d:hover .laq-nd { box-shadow: 0 0 0 3px rgba(42, 58, 82, .18); }
+.laq .laq-s.is-n .laq-nd { width: 40px; height: 40px; margin-top: -4px; background: #fff; box-shadow: 0 2px 6px -2px rgba(28, 19, 15, .3), inset 0 0 0 2px var(--laq-navy); color: var(--laq-ink); }
+.laq .laq-l { font: 400 12.5px var(--laq-se); color: #a59a90; max-width: 96px; }
+.laq .laq-s.is-d .laq-l, .laq .laq-s.is-n .laq-l { color: var(--laq-ink); }
+.laq .laq-s.is-d .laq-l b { display: block; font: italic 400 12.5px var(--laq-se); color: var(--laq-mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.laq .laq-s.is-d:hover .laq-l { text-decoration: underline; text-underline-offset: 3px; }
+.laq .laq-s:focus-visible .laq-nd { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { .laq .laq-nd, .laq .laq-si::after { transition: none; } }
 
 /* the stage body */
 .laq .laq-sb { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 20px 20px 12px; display: flex; flex-direction: column; }

@@ -9,7 +9,7 @@ import type { Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 import { ensureSignedIn } from "./measure";
 
-export const OUT = process.env.LAQ_OUT ?? "reports/log-a-query-v1/shots";
+export const OUT = process.env.LAQ_OUT ?? "reports/log-a-query-v1-1/shots";
 
 export async function openLog(page: Page): Promise<void> {
   page.on("console", (m) => { if (m.text().startsWith("[laq-timing]")) console.log(m.text()); });

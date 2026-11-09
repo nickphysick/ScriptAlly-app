@@ -39,13 +39,15 @@ const APP: Record<string, string> = {
   bigRowName: `.${P}-big .${P}-tx b`, bigRowSub: `.${P}-big .${P}-tx > span`, footer: `.${P}-cf`, primary: `.${P}-cf .${P}-btn:not(.is-ghost)`, slip: ".sa-slip",
 };
 /* the track lands in Phase 2: until then its keys are not read, and parts below it are placed from the body's top */
-const TRACK_BUILT = false;
+const TRACK_BUILT = true;
 const TEXT_H = new Set(["title", "line", "question", "sub", "trackLabel", "bigRowName", "bigRowSub", "bigRow", "slip"]);
 /* CONTENT: widths that follow the harness's words (a row's name beside its tag, a label's own text) */
 const CONTENT_W = new Set(["bigRowName", "bigRowSub", "trackLabel"]);
 /* the reference names the celebration's footer `.yay-acts` (with `.cf`'s own values inline), so ref-metrics.json
    records no footer there: the app's footer is compared with that element, read live */
 const REF_ALIAS: Record<string, Record<string, string>> = { celebration: { footer: ".yay-acts", primary: ".yay-acts .btn.nv" } };
+/* a label centred under its node is as wide as its words, so it is placed by its centre */
+const CENTRED = new Set(["trackLabel"]);
 const STYLE = ["font", "size", "weight", "style", "color", "bg", "radius"] as const;
 
 let reads = 0;
@@ -76,7 +78,7 @@ function compare({ r: live, a, state }: { r: Record<string, Metric | null>; a: R
     const d: string[] = [];
     const after = !TRACK_BUILT && bodyR && bodyA && w.y >= bodyR.y && !["panel", "frame", "head", "title", "line", "footer", "primary"].includes(k);
     const ry = after ? w.y - bodyR!.y : w.y, ay = after ? got.y - bodyA!.y : got.y;
-    if (!near(w.x, got.x)) d.push(`x ${w.x}→${got.x}`);
+    if (CENTRED.has(k) ? !near(w.x + w.w / 2, got.x + got.w / 2) : !near(w.x, got.x)) d.push(`x ${w.x}→${got.x}${CENTRED.has(k) ? " (by centre)" : ""}`);
     if (!near(ry, ay)) d.push(`y ${ry}→${ay}${after ? " (from the body)" : ""}`);
     if (!CONTENT_W.has(k) && !near(w.w, got.w)) d.push(`w ${w.w}→${got.w}`);
     if (!TEXT_H.has(k) && !(k === "body" && !TRACK_BUILT) && !near(w.h, got.h)) d.push(`h ${w.h}→${got.h}`);
