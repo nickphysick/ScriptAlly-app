@@ -20,26 +20,26 @@
   .qc1531-art img { display: block; width: 190px; height: auto; filter: drop-shadow(0 14px 14px rgba(28, 19, 15, 0.12)); }
   .qc1531-main { min-width: 0; }
   /* the title: Playfair 54/600. Mixed case at 1.05 is the ref's; nothing above it clips, so the descenders print */
-  .qc151 .qc1531-hd h1.qc1531-t {
+  :is(.qc151, .cl27) .qc1531-hd h1.qc1531-t {
     margin: 0; font: 600 54px/1.05 var(--font-serif) !important; color: var(--ink) !important; letter-spacing: 0;
     white-space: nowrap; overflow: visible; min-height: 1.05em;
   }
   .qc1531-for { display: flex; align-items: center; gap: 18px; max-width: 640px; margin: 8px 0 12px; }
   .qc1531-for i { flex: 1 1 0; height: 1px; background: #cfc5b7; }
-  .qc151 .qc1531-for span { flex: none; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 21px/1.25 var(--sp-type) !important; color: var(--ink); }
-  .qc151 .qc1531-for em { margin-right: 6px; font: italic 400 19px/1.25 var(--sp-serif) !important; color: var(--mut); }
+  :is(.qc151, .cl27) .qc1531-for span { flex: none; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 21px/1.25 var(--sp-type) !important; color: var(--ink); }
+  :is(.qc151, .cl27) .qc1531-for em { margin-right: 6px; font: italic 400 19px/1.25 var(--sp-serif) !important; color: var(--mut); }
   /* with no "for" line (several manuscripts, none scoped) the buttons keep the same distance from the title */
   .qc1531-t + .qc1531-acts { margin-top: 18px; }
   .qc1531-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
-  .qc151 .qc1531-b {
+  :is(.qc151, .cl27) .qc1531-b {
     all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 46px; padding: 0 22px;
     border-radius: 12px; font: 400 16.5px/1 var(--sp-type) !important; white-space: nowrap;
   }
-  .qc151 .qc1531-b--n { background: var(--navy); color: #fff; }
-  .qc151 .qc1531-b--g { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px #d9d0c3, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
-  .qc151 .qc1531-b--g:hover { box-shadow: inset 0 0 0 1px #b9ad9e, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
-  .qc151 .qc1531-b:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
-  .qc151 .qc1531-b:disabled { opacity: 0.55; cursor: default; }
+  :is(.qc151, .cl27) .qc1531-b--n { background: var(--navy); color: #fff; }
+  :is(.qc151, .cl27) .qc1531-b--g { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px #d9d0c3, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
+  :is(.qc151, .cl27) .qc1531-b--g:hover { box-shadow: inset 0 0 0 1px #b9ad9e, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
+  :is(.qc151, .cl27) .qc1531-b:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+  :is(.qc151, .cl27) .qc1531-b:disabled { opacity: 0.55; cursor: default; }
   /* nothing in the row wraps mid-label; the row itself may wrap */
   .qc1531-acts > * { white-space: nowrap; }
   .qc1531-rc { min-width: 0; }
@@ -153,7 +153,7 @@
 
 /* ══ v153.2 · a tighter gap above the list: the header's foot 4px, as the ref's (content to bar 30px, measured) ══ */
 @media (min-width: 768px) {
-  .qc151 .qc1531-hd { padding-bottom: 4px; }
+  :is(.qc151, .cl27) .qc1531-hd { padding-bottom: 4px; }
 }
 
 /* ══ v153.2 · the slip's header back to two lines: the status word beside the track, not above it ═══════════════ */
@@ -219,39 +219,39 @@
    in the typewriter with a drawn chevron; Most used as pills; the four tiles in their stage colours; no proportion
    bars. Filter logic, counts, zero-fade and Reset are unchanged. */
 @media (min-width: 768px) {
-  .qc151 .qc153-rail { box-sizing: border-box; padding: 0; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9, 0 1px 2px rgba(28, 19, 15, 0.06), 0 18px 36px -24px rgba(28, 19, 15, 0.3); }
-  .qc151 .qc153-rail .qc153-rin { border-radius: 16px; overflow-x: hidden; background: #fff; }
-  .qc151 .qc153-rail .qc153-rbd { padding: 14px 16px 12px; }
-  .qc151 .qc153-rail .qc153-rsec { border-top: 1px solid #f1ebe2; }
-  .qc151 .qc153-rail .qc153-rbd + .qc153-rsec { border-top: 0; }
-  .qc151 .qc153-rail .qc153-rh5 button { padding: 13px 16px 8px; font: 400 15px/1.2 var(--sp-type) !important; color: #1c130f; }
-  .qc151 .qc153-rail .qc153-rh5 i { display: grid; place-items: center; width: 14px; height: 14px; color: #8a8076; }
+  :is(.qc151, .cl27) .qc153-rail { box-sizing: border-box; padding: 0; border-radius: 16px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9, 0 1px 2px rgba(28, 19, 15, 0.06), 0 18px 36px -24px rgba(28, 19, 15, 0.3); }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rin { border-radius: 16px; overflow-x: hidden; background: #fff; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rbd { padding: 14px 16px 12px; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rsec { border-top: 1px solid #f1ebe2; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rbd + .qc153-rsec { border-top: 0; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rh5 button { padding: 13px 16px 8px; font: 400 15px/1.2 var(--sp-type) !important; color: #1c130f; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rh5 i { display: grid; place-items: center; width: 14px; height: 14px; color: #8a8076; }
   .qc153-rail .qc153-rh5 i svg { display: block; width: 12px; height: 12px; }
 
   /* Most used: pills in a wrapping row */
-  .qc151 .qc153-rail .qc1533-pills { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 14px; }
-  .qc151 .qc1533-pill {
+  :is(.qc151, .cl27) .qc153-rail .qc1533-pills { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 14px; }
+  :is(.qc151, .cl27) .qc1533-pill {
     all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
     padding: 6px 11px 6px 12px; border-radius: 999px; background: #faf7f2; box-shadow: inset 0 0 0 1px #e9e0d4; color: #1c130f;
     transition: background 0.15s, box-shadow 0.15s;
   }
-  .qc151 .qc1533-pill .qc153-tx { flex: none; font: 400 14px/1.25 var(--sp-serif) !important; color: inherit; }
-  .qc151 .qc1533-pill .qc153-n { font: 400 12.5px/1 var(--sp-type) !important; color: #5b4f47; }
-  .qc151 .qc1533-pill:hover:not(.is-on) { background: #fff; box-shadow: inset 0 0 0 1px #d6cabb; }
-  .qc151 .qc1533-pill.is-on { background: #2a3a52; color: #f4eee5; box-shadow: none; }
-  .qc151 .qc1533-pill.is-on .qc153-n { color: rgba(244, 238, 229, 0.75); }
-  .qc151 .qc1533-pill.is-zero { opacity: 0.45; cursor: default; pointer-events: none; }
-  .qc151 .qc1533-pill:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  :is(.qc151, .cl27) .qc1533-pill .qc153-tx { flex: none; font: 400 14px/1.25 var(--sp-serif) !important; color: inherit; }
+  :is(.qc151, .cl27) .qc1533-pill .qc153-n { font: 400 12.5px/1 var(--sp-type) !important; color: #5b4f47; }
+  :is(.qc151, .cl27) .qc1533-pill:hover:not(.is-on) { background: #fff; box-shadow: inset 0 0 0 1px #d6cabb; }
+  :is(.qc151, .cl27) .qc1533-pill.is-on { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+  :is(.qc151, .cl27) .qc1533-pill.is-on .qc153-n { color: rgba(244, 238, 229, 0.75); }
+  :is(.qc151, .cl27) .qc1533-pill.is-zero { opacity: 0.45; cursor: default; pointer-events: none; }
+  :is(.qc151, .cl27) .qc1533-pill:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 
   /* Where it stands: the tiles in their stage colours, then the stage rows */
-  .qc151 .qc153-rail .qc1533-where { padding: 0 8px 10px; }
-  .qc151 .qc153-rail .qc153-courts { gap: 6px; padding: 0 6px 12px; }
-  .qc151 .qc153-rail .qc153-court { border-radius: 12px; padding: 10px 11px 9px; }
-  .qc151 .qc153-rail .qc153-court[data-k="you"] { background: #ecd6d2; }
-  .qc151 .qc153-rail .qc153-court[data-k="agent"] { background: #efe7da; }
-  .qc151 .qc153-rail .qc153-court[data-k="quiet"] { background: #f3efe9; }
-  .qc151 .qc153-rail .qc153-court[data-k="closed"] { background: repeating-linear-gradient(135deg, #f3f0eb 0 6px, #ebe6df 6px 8px); }
-  .qc151 .qc153-rail .qc153-court.is-on { background: #2a3a52; color: #f4eee5; }
+  :is(.qc151, .cl27) .qc153-rail .qc1533-where { padding: 0 8px 10px; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-courts { gap: 6px; padding: 0 6px 12px; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court { border-radius: 12px; padding: 10px 11px 9px; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court[data-k="you"] { background: #ecd6d2; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court[data-k="agent"] { background: #efe7da; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court[data-k="quiet"] { background: #f3efe9; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court[data-k="closed"] { background: repeating-linear-gradient(135deg, #f3f0eb 0 6px, #ebe6df 6px 8px); }
+  :is(.qc151, .cl27) .qc153-rail .qc153-court.is-on { background: #2a3a52; color: #f4eee5; }
 }
 
 /* ══ v153.3 · the group headings, ruled (design-refs/query-centre-v153-3.html, its `ruled` headings) ═══════════════

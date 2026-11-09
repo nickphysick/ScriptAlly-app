@@ -13,10 +13,12 @@
  * ⚠️ THE SCORE AND THE COUNT ARE HOUSEKEEPING'S OWN (`listHealth` over `hkModel`), handed in — never recomputed here.
  */
 import React from "react";
-import { RING26, RING26_C, RING26_R, ringArc, ring26Colours, type HeaderFigures } from "../../../lib/contactV26";
+import type { HeaderFigures } from "../../../lib/contactV26";
+import { ContactHealth26 } from "./ContactHealth26";
 import "./contactV26.css";
 
-export const ARCHIVIST26 = "/images/contact-list-archivist.webp";
+/* List health lives in ContactHealth26 since Contact list v27 (unchanged; the v27 header mounts it too) */
+export { ARCHIVIST26 } from "./ContactHealth26";
 
 export const ContactHeader26: React.FC<{
   loading: boolean;
@@ -29,9 +31,6 @@ export const ContactHeader26: React.FC<{
   onOpenHealth: () => void;
   onShowWho: () => void;
 }> = ({ loading, figures: f, health: h, onAdd, addRef, onDiscover, onOpenHealth, onShowWho }) => {
-  const c = ring26Colours(h?.pct ?? 0);
-  const arc = h ? ringArc(h.pct) : 0;
-  const mid = RING26.box / 2;
   return (
     <header className="cl24-hd cl26-hd" data-cl26="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
       <div className="cl26-panel" data-cl26="panel">
@@ -50,35 +49,7 @@ export const ContactHeader26: React.FC<{
             {onDiscover ? <button type="button" className="cl26-b2" data-cl26="discover" data-cl24="discover" onClick={onDiscover}>Discover agents</button> : null}
           </div>
         </div>
-        <div className="cl26-health" data-cl26="health" aria-hidden={h ? undefined : true}>
-          <button type="button" className="cl26-ring" data-cl26="ring" data-pct={h?.pct ?? ""} disabled={!h}
-            aria-label={h ? `List health ${h.pct}%. Open Housekeeping` : "List health"} onClick={onOpenHealth}
-            style={{ width: RING26.px, height: RING26.px }}>
-            <svg viewBox={`0 0 ${RING26.box} ${RING26.box}`} width={RING26.px} height={RING26.px} aria-hidden="true">
-              <circle data-cl26="track" cx={mid} cy={mid} r={RING26_R} fill="none" style={{ stroke: c.track }} strokeWidth={RING26.stroke} />
-              {h ? (
-                <circle data-cl26="arc" cx={mid} cy={mid} r={RING26_R} fill="none" style={{ stroke: c.arc }} strokeWidth={RING26.stroke}
-                  strokeLinecap="round" strokeDasharray={`${arc} ${RING26_C}`} transform={`rotate(-90 ${mid} ${mid})`} />
-              ) : null}
-            </svg>
-            <img className="cl26-arch" data-cl26="archivist" src={ARCHIVIST26} alt="" width={100} height={89} draggable={false} />
-            {h ? <span className="cl26-pct" data-cl26="pct" style={{ "--arc": c.arc } as React.CSSProperties}>{h.pct}%</span> : null}
-          </button>
-          <div className="cl26-hw">
-            <b className="cl26-ht">List health</b>
-            {h ? (
-              <>
-                <span className="cl26-hm" data-cl26="missing">
-                  {h.gaps > 0 ? <><em>{h.gaps}</em> {h.gaps === 1 ? "detail" : "details"} missing</> : "Nothing missing"}
-                </span>
-                <span className="cl26-hb">
-                  <button type="button" className="cl26-open" data-cl26="open" onClick={onOpenHealth}>Open</button>
-                  {h.gaps > 0 ? <button type="button" className="cl26-who" data-cl26="who" onClick={onShowWho}>Show me who →</button> : null}
-                </span>
-              </>
-            ) : null}
-          </div>
-        </div>
+        <ContactHealth26 health={h} onOpenHealth={onOpenHealth} onShowWho={onShowWho} />
       </div>
     </header>
   );

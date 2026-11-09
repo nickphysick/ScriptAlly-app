@@ -44,7 +44,7 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ContactHeader26 } from "./contact/ContactHeader26";
+import { ContactHeader27 } from "./contact/ContactHeader27";
 import { applyPick, headerFigures, pickOn } from "../../lib/contactV26";
 import { SET_LABEL } from "../../lib/contactV24";
 /** v26 E — a set the page narrowed to from a link, in the applied row's words ("Querying" for Your move + With the agent) */
@@ -1061,16 +1061,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
         {/* v138.6 §A — a pinned list hides its header from the first frame, settling included (a restored pin must not
             flash the header while the list loads) */}
-        <div className="clv-group" data-v24="" data-v25="" data-v26="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
+        <div className="clv-group cl27" data-v24="" data-v25="" data-v26="" data-v27="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
           aria-busy={pageState === "settling" || undefined}
           inert={pageState === "settling" || undefined}>
         {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
             card that is the page's figures and its group filter (the strip's own `glance` state). Over a LIST
             only, and while settling: the blank account's page is ContactEmpty. */}
-        {/* v26 A — THE HEADER IS ONE NAVY PANEL (supersedes the title card and At a glance): the title, one sentence, two
-            buttons; List health on the right as a ring the archivist breaks out of. Its score and count are Housekeeping's. */}
+        {/* v27 — THE QUERY CENTRE'S OPEN HEADER, the Contact list's content (supersedes v26's navy panel): the mirrored
+            bird, "{n} agents on file" over "you've queried {q}" and the two buttons, and v26's List health unchanged. */}
         {(showList || pageState === "settling") && (
-          <ContactHeader26 loading={pageState !== "list"} figures={pageState === "list" ? headFigures : null}
+          <ContactHeader27 loading={pageState !== "list"} figures={pageState === "list" ? headFigures : null}
             health={pageState === "list" ? health : null} addRef={addBtnRef} onAdd={openAdd}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
             onOpenHealth={openHk} onShowWho={showMissing} />
