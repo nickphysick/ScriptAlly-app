@@ -1,0 +1,22 @@
+{
+ "src": "/images/todo/todo-desk-hawk.webp?v=1",
+ "natural": 480,
+ "width": 190,
+ "bytes": 48592,
+ "chain": [
+  {
+   "bg": "rgba(0, 0, 0, 0)",
+   "img": "none",
+   "radius": "0px",
+   "shadow": "none",
+   "border": "0px"
+  },
+  {
+   "bg": "rgba(0, 0, 0, 0)",
+   "img": "none",
+   "radius": "0px",
+   "shadow": "none",
+   "border": "0px"
+  }
+ ]
+}

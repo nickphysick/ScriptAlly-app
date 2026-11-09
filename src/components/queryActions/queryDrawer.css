@@ -173,6 +173,9 @@
 .qad-step button { width: 38px; height: 40px; border: 0; background: none; cursor: pointer; font-size: 18px; color: var(--qad-ink70); }
 .qad-step button:hover { color: var(--qad-ink); }
 .qad-step b { min-width: 74px; text-align: center; font-family: var(--qad-machine); font-weight: 400; font-size: 20px; }
+/* v54 (D7): the stepper's middle is a box you can type into; it keeps the figure's face and size */
+.qad-step b .qad-typed { all: unset; box-sizing: border-box; width: 100%; min-width: 0; text-align: center; font: inherit; color: inherit; cursor: text; border-radius: 6px; }
+.qad-step b .qad-typed:focus { box-shadow: inset 0 0 0 1.5px var(--qad-ink, #1c130f); }
 .qad-step.sm b { min-width: 64px; font-size: 17px; }
 .qad-step.sm button { width: 32px; height: 34px; }
 .qad-unitl { font-family: var(--qad-machine); font-size: 15px; color: var(--qad-ink70); }

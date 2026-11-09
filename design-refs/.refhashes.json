@@ -1146,7 +1146,9 @@
     "design-refs/query-centre-v153-2.html": "07400175803c75cf24995a50549de430e1f0e054d51edfa7b2c7e67d404fa8f5",
     "design-refs/todo-list-v53/todo-desk-v13.html": "5b01aab03036fd9c1485ea14a656c7913ca40e236e6b46834a55778ef007161e",
     "design-refs/todo-list-v53/todo-complete-v1.html": "1fadbea6a6ced96e52010e3772699f6de20e1c5d5fcb13412be6a419e47780f3",
-    "design-refs/contact-list-v27/contact-list-v27.html": "39a52e92e969fb4db88624178d7b0a5b7b43be6cbb844bfa0b3924ba2c1d432c"
+    "design-refs/contact-list-v27/contact-list-v27.html": "39a52e92e969fb4db88624178d7b0a5b7b43be6cbb844bfa0b3924ba2c1d432c",
+    "design-refs/todo-list-v54/todo-desk-v15.html": "3890f7f5051694353abd50e80cbcc3f7d0a207a0d987255ac7a16a49cc51e64e",
+    "design-refs/todo-list-v54/todo-batch-v3.html": "dcee12f8193f6cf5340b33d45c76736ff31873a84500146621ff1058763380fd"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

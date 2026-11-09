@@ -121,18 +121,25 @@ export function bumpFrom(s: Sample, d: 1 | -1, b: Book): Sample {
   return { ...s, from: Math.max(F.min, Math.min(F.max, v)) };
 }
 
-/** `first 3 chapters` · `chapter 4` · `chapters 4–6` · `pages 40–49` · `5,000 words from page 40`. */
+/**
+ * `first 3 chapters` · `first chapter` · `chapter 4` · `chapters 4–6` · `pages 40–49` · `5,000 words from word 20,000` ·
+ * `5,000 words from page 40`.
+ *
+ * ⚠️ THE ONE WORDING FOR A SAMPLE (To-do list v54): the picker's "Reads as", the To-do's tiles and table, and every place
+ *    a SENT sample is shown (`formatQueryMaterial`, which the card's paperclip reads) all come through here, so they
+ *    cannot disagree. One of anything from the opening drops its numeral ("first chapter", materials.ts's rule: "first 1
+ *    chapter" is the tell that a label was assembled), and a run of words counted from a word names its start.
+ */
 export function sampleName(s: Sample | null | undefined): string {
   if (!s || s.unit === "none") return "no sample";
   const a = s.amt;
   const one = s.unit === "pages" ? "page" : s.unit === "words" ? "word" : "chapter";
   const word = a === 1 ? one : `${one}s`;
-  if (!s.sect) return `first ${n0(a)} ${word}`;
+  if (!s.sect) return a === 1 ? `first ${one}` : `first ${n0(a)} ${word}`;
   const fu = s.fu || defFromUnit(s.unit);
   const f = s.from;
   if (s.unit === "chapters" && fu === "chapter") return a === 1 ? `chapter ${f}` : `chapters ${f}–${f + a - 1}`;
-  if (s.unit === "pages" && fu === "page") return `pages ${n0(f)}–${n0(f + a - 1)}`;
-  if (s.unit === "words" && fu === "word") return `words ${n0(f)}–${n0(f + a)}`;
+  if (s.unit === "pages" && fu === "page") return a === 1 ? `page ${n0(f)}` : `pages ${n0(f)}–${n0(f + a - 1)}`;
   return `${n0(a)} ${word} from ${fu} ${n0(f)}`;
 }
 

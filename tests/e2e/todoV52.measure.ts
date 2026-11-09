@@ -95,6 +95,9 @@ async function answer(page: Page): Promise<boolean> {
 async function primaryReading(page: Page) {
   return page.evaluate(() => {
     const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
+    /* ⚠️ RE-POINTED BY v54 (D2): the page header scrolls away before the pinned workspace fills the window, so the
+       primary's place is read with the header gone (scrolled as far as the page goes) */
+    const sc = root.closest<HTMLElement>(".wpg-scroll"); if (sc) sc.scrollTop = sc.scrollHeight;
     const p = root.querySelector<HTMLElement>('[data-tws="primary"]');
     const col = root.querySelector<HTMLElement>('[data-tws="qcol"]');
     if (!p || !col) return { has: !!p, ok: !p };
@@ -137,7 +140,7 @@ for (const vp of SIZES) {
       const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
       const b = (s: string) => { const e = root.querySelector<HTMLElement>(s); if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, r: x.right, w: x.width }; };
       const sc = root.closest<HTMLElement>(".wpg-scroll")!; const sr = sc.getBoundingClientRect();
-      return { hd: b('[data-tws="header"]'), ws: b('[data-tws="workspace"]'), tray: b('[data-tws="tray"]'), wp: b('[data-tws="side"]'), sc: { l: sr.left, r: sr.right }, sh: sc.scrollHeight, ch: sc.clientHeight };
+      return { hd: b('[data-tws="header"]'), ws: b('[data-tws="workspace"]'), tray: b('[data-tws="tray"]'), wp: b('[data-tws="side"]'), sc: { l: sr.left, r: sr.right }, sh: sc.scrollHeight, ch: sc.clientHeight, hdH: root.querySelector<HTMLElement>('[data-tws="header"]')?.offsetHeight ?? 0 };
     });
     note(`L1-${vp.width}${MUT ? `-${MUT}` : ""}`, r);
     expect(r.hd && r.ws, "header and workspace are drawn").toBeTruthy();
@@ -145,7 +148,8 @@ for (const vp of SIZES) {
     expect(Math.abs(r.hd!.r - r.ws!.r), "L1: equal right edges").toBeLessThanOrEqual(1);
     expect(r.hd!.w, "L1: at most 1320 wide").toBeLessThanOrEqual(1320.5);
     expect(Math.abs((r.hd!.l - r.sc.l) - (r.sc.r - r.hd!.r)), "L1: centred in the page").toBeLessThanOrEqual(1);
-    expect(r.sh, "L1: the page itself does not scroll").toBe(r.ch);
+    /* ⚠️ RE-POINTED BY v54 (D2): the page scrolls by at most the header's height (todoV54 L1) */
+    expect(r.sh - r.ch, "L1: the page scrolls by no more than the header's height").toBeLessThanOrEqual(r.hdH);
     expect(Math.abs(r.tray!.w - 340), "L4: the tray is 340").toBeLessThanOrEqual(1);
     expect(r.wp, "L4: the preview is drawn").not.toBeNull();
     expect(Math.abs(r.wp!.w - 390), "L4: the preview is 390").toBeLessThanOrEqual(1);
