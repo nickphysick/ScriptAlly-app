@@ -55,4 +55,15 @@
   .qc151.qc153 .qc153-rail .qc153-court { border-radius: 8px; }
   /* the export at its foot sits on the page too */
   .qc151.qc153 .qc153-rail .qc153-rft { padding: 12px 4px 4px; border-top: 0; }
+
+  /* ── 5 · the ring alone, right-aligned to the list's right edge; no legend. The svg is 214 tall and as wide as its
+     measured annotations need. One annotation at a time, faded in over 150ms; the other segments fade as before. ── */
+  .qc151.qc153 .qc1534-ring .qc1531-rb { display: block; padding: 0; }
+  .qc151.qc153 .qc1534-ring .qc1531-rsvg { height: 214px; margin-left: auto; }
+  .qc151.qc153 .qc1534-ring .qc1531-seg { cursor: pointer; outline: none; }
+  .qc1534-ann { opacity: 0; transition: opacity 0.15s; pointer-events: none; }
+  .qc1534-ann.is-on { opacity: 1; }
+  .qc1534-an { font: 400 15px var(--sp-type); fill: #1c130f; }
+  .qc1534-al { font: 400 13px var(--sp-serif); fill: #5b4f47; }
+  @media (prefers-reduced-motion: reduce) { .qc1534-ann { transition: none; } }
 }

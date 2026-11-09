@@ -169,6 +169,9 @@ for (const vp of SIZES) {
     await page.locator(`${PAGE} [data-qc153='rail']`).screenshot({ path: `${DIR}/rail-on-${vp.width}.png` });
     await first.click(); await page.waitForTimeout(300);
     L.check("a second press clears", (await page.locator(`${PAGE} [data-qc153='quick'][aria-checked='true']`).count()) === 0, "");
+    /* the whole rail at rest: a window tall enough to hold it, the pointer away */
+    await page.mouse.move(2, 2);
+    await page.setViewportSize({ width: vp.width, height: 1700 }); await page.waitForTimeout(500);
     await page.locator(`${PAGE} [data-qc153='rail']`).screenshot({ path: `${DIR}/rail-${vp.width}.png` });
     L.done(30);
   });
@@ -183,6 +186,14 @@ for (const vp of SIZES) {
     L.check("ring 214 tall", near(r.ringSvg?.h, 214, 0.5), String(r.ringSvg?.h));
     L.check("ring right edge on the list's right edge (±1)", near(r.ringRight, r.listRight!), `${r.ringRight} · ${r.listRight}`);
     L.check("header height 218 (unchanged)", near(r.header?.box.h, 218, 0.5), String(r.header?.box.h));
+    /* the typewriter title is wider than its 372px track on this capped page: its ink must stay clear of the ring */
+    const clear = await page.evaluate((sel) => {
+      const t = document.querySelector(`${sel} [data-qc151='title']`)!; const rg = document.createRange(); rg.selectNodeContents(t);
+      const ink = rg.getBoundingClientRect().right;
+      const ring = document.querySelector(`${sel} [data-qc1531='ring'] svg circle`)!.getBoundingClientRect().left;
+      return { ink: +ink.toFixed(1), ring: +ring.toFixed(1) };
+    }, PAGE);
+    L.check("title ink clear of the ring", clear.ink < clear.ring - 8, JSON.stringify(clear));
     const vis = () => page.evaluate((sel) => [...document.querySelectorAll<SVGGElement>(`${sel} [data-qc1534='ann']`)].filter((a) => Number(getComputedStyle(a).opacity) > 0.5).map((a) => a.dataset.k), PAGE);
     L.check("at rest: no annotation shown", (await vis()).length === 0, JSON.stringify(await vis()));
     L.check("no floating tooltip in the page", (await page.locator(`${PAGE} [data-qc1531='tip']`).count()) === 0, "");
@@ -191,7 +202,12 @@ for (const vp of SIZES) {
     L.check("segments (population)", segs.length >= 3, String(segs.length));
     for (const s of segs) {
       const k = await s.getAttribute("data-k");
-      await s.hover(); await page.waitForTimeout(260);
+      /* an arc's box centre is in the ring's hole: point at the arc's own midpoint, along the path */
+      const at = await s.evaluate((el) => {
+        const g = el as SVGGeometryElement; const p = g.getPointAtLength(g.getTotalLength() / 2); const m = g.getScreenCTM()!;
+        return { x: p.x * m.a + p.y * m.c + m.e, y: p.x * m.b + p.y * m.d + m.f };
+      });
+      await page.mouse.move(at.x, at.y); await page.waitForTimeout(260);
       const v = await vis();
       L.check(`hover ${k}: exactly its annotation`, v.length === 1 && v[0] === k, JSON.stringify(v));
       const geo = await page.evaluate(([sel, key]) => {
@@ -218,7 +234,11 @@ for (const vp of SIZES) {
     /* a click toggles the stage filter */
     await first.press("Enter"); await page.waitForTimeout(300);
     L.check("Enter on a segment turns its stage on", (await first.getAttribute("aria-pressed")) === "true" && (await page.locator(`${PAGE} [data-qc153='rail-on']`).count()) === 1, String(await first.getAttribute("aria-pressed")));
-    await first.click(); await page.waitForTimeout(300);
+    const fat = await first.evaluate((el) => {
+      const g = el as SVGGeometryElement; const p = g.getPointAtLength(g.getTotalLength() / 2); const m = g.getScreenCTM()!;
+      return { x: p.x * m.a + p.y * m.c + m.e, y: p.x * m.b + p.y * m.d + m.f };
+    });
+    await page.mouse.click(fat.x, fat.y); await page.waitForTimeout(300);
     L.check("a click toggles it off", (await first.getAttribute("aria-pressed")) === "false", String(await first.getAttribute("aria-pressed")));
     L.done(25);
   });
