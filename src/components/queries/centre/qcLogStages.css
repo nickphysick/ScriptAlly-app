@@ -1,0 +1,179 @@
+/* ══ Log a query v1 (design-refs/log-a-query-v1/log-a-query-v1.html) — the staged journey ═════════════════════════
+   Values are the reference's, scoped under `.qls`. The panel portals to document.body, so no page token reaches it:
+   the faces are the shell's `--sp-*` (declared at :root) and every colour is a literal.
+   ⚠️ brand.tsx names a body face on bare `p, span, div, button, input` (0-0-1) and forces h1–h3 with !important, so
+      everything inside inherits the serif back (0-1-1), and the one heading states the typewriter with !important. */
+.qls {
+  --qls-ink: #1c130f; --qls-mut: #6f645b; --qls-mut2: #9a8f84; --qls-paper: #f6f3ee; --qls-line: #e2d9cc;
+  --qls-navy: #2a3a52; --qls-harbour: #2f4a5c; --qls-rust: #a2452a;
+  --qls-tw: var(--sp-type, 'Special Elite', monospace); --qls-se: var(--sp-serif, 'Source Serif 4', Georgia, serif); --qls-mono: var(--sp-mono, 'JetBrains Mono', monospace);
+  position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; color: var(--qls-ink); font-family: var(--qls-se); text-align: left;
+}
+.qls :is(span, p, div, button, input, textarea, label, b, em, small, i, u, strong) { font-family: inherit; }
+.qls .qls-in { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.qls .qls-in.is-bump { animation: qls-bump .32s .22s both; }
+@keyframes qls-bump { 30% { transform: translateY(2px); } 60% { transform: translateY(-1px); } }
+
+/* the stepper, on the FlowHead's ground */
+.qls .flh { border-bottom: 0; padding-bottom: 14px; }
+.qls .qls-steps { flex: none; display: flex; gap: 4px; padding: 0 18px 12px 26px; background: #f3eee8; border-bottom: 1px solid #e7dfd4; }
+.qls .qls-st { all: unset; box-sizing: border-box; flex: 1 1 0; min-width: 0; padding: 7px 0 0; border-top: 2px solid #ddd3c6; font: 400 12.5px/1.3 var(--qls-se); color: var(--qls-mut2); }
+.qls .qls-st b { display: block; font: 400 14px/1.3 var(--qls-se); color: var(--qls-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qls .qls-st.is-done { cursor: pointer; border-color: var(--qls-navy); }
+.qls .qls-st.is-done:hover b, .qls .qls-st.is-done:focus-visible b { text-decoration: underline; text-underline-offset: 3px; }
+.qls .qls-st.is-done:focus-visible { outline: 2px solid var(--qls-navy); outline-offset: 2px; }
+.qls .qls-st.is-now { border-color: var(--qls-navy); color: var(--qls-ink); }
+.qls .qls-st.is-now b { color: var(--qls-mut2); font-style: italic; }
+
+/* the stage body */
+.qls .qls-sb { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 20px 20px 12px; display: flex; flex-direction: column; }
+.qls .qls-sb > * { flex: none; }
+.qls .qls-sb.is-in { animation: qls-slide .28s cubic-bezier(.2,.8,.2,1) both; }
+.qls .qls-sb.is-back { animation: qls-slideb .28s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes qls-slide { from { opacity: 0; transform: translateX(18px); } }
+@keyframes qls-slideb { from { opacity: 0; transform: translateX(-18px); } }
+.qls h2.qls-qh { margin: 0 0 4px; font: 400 22px/1.25 var(--qls-tw) !important; font-family: var(--qls-tw) !important; color: var(--qls-ink); letter-spacing: 0; text-transform: none; }
+.qls p.qls-qs { margin: 0 0 16px; font: italic 400 15px/1.45 var(--qls-se); color: var(--qls-mut); }
+
+/* big choices */
+.qls .qls-big { display: grid; gap: 8px; }
+.qls .qls-big > button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; background: #fff; }
+.qls .qls-big > button:hover, .qls .qls-big > button.is-hi { box-shadow: inset 0 0 0 1.5px var(--qls-navy); }
+.qls .qls-big > button:focus-visible { box-shadow: inset 0 0 0 2px var(--qls-navy); }
+.qls .qls-big > button.is-on { box-shadow: inset 0 0 0 1.5px var(--qls-navy); background: #f7f5f1; }
+.qls .qls-g { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--qls-paper); font: 500 11px var(--qls-mono) !important; color: #5b4f47; }
+.qls .qls-g.is-pkg { border-radius: 9px; background: var(--qls-harbour); }
+.qls .qls-tx { flex: 1 1 auto; min-width: 0; }
+.qls .qls-tx b { display: block; font: 500 16.5px/1.25 var(--qls-se); }
+.qls .qls-tx span { display: block; font: 400 13.5px/1.4 var(--qls-se); color: var(--qls-mut); }
+.qls .qls-tag { flex: none; font: italic 400 13px var(--qls-se); color: var(--qls-mut); }
+.qls .qls-tag.is-y { color: var(--qls-ink); font-style: normal; }
+.qls .qls-tag.is-closed { color: var(--qls-rust); }
+.qls .qls-ar { flex: none; display: inline-flex; color: #b3a89b; }
+.qls .qls-big > button.is-quiet { box-shadow: none; background: transparent; padding: 8px 14px; }
+.qls .qls-big > button.is-quiet:hover { background: #f6f2ec; }
+.qls .qls-big > button.is-quiet .qls-tx b { font-weight: 400; color: var(--qls-navy); text-decoration: underline; text-underline-offset: 3px; font-size: 15px; }
+
+/* who */
+.qls .qls-srch { display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px; border-radius: 10px; background: #f5f1ea; box-shadow: inset 0 1px 2px rgba(28,19,15,.08); margin-bottom: 6px; }
+.qls .qls-srch:focus-within { background: #fff; box-shadow: inset 0 0 0 1.5px var(--qls-navy); }
+.qls .qls-srch input { all: unset; flex: 1 1 auto; min-width: 0; font: 400 17px var(--qls-se); color: var(--qls-ink); }
+.qls .qls-srch input::placeholder { font-style: italic; color: #9a948b; }
+.qls .qls-grp { display: flex; align-items: baseline; gap: 8px; margin: 14px 4px 6px; font: 400 15px var(--qls-se); color: var(--qls-mut); }
+.qls .qls-grp > span { color: var(--qls-mut2); }
+.qls .qls-busy { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; background: #faf8f4; box-shadow: inset 0 0 0 1px #ece5da; font: 400 14.5px var(--qls-se); color: var(--qls-mut); }
+.qls .qls-busy:focus-visible { box-shadow: inset 0 0 0 2px var(--qls-navy); }
+.qls .qls-faces { display: flex; }
+.qls .qls-faces i { display: grid; place-items: center; width: 24px; height: 24px; margin-left: -6px; border-radius: 50%; background: var(--qls-paper); box-shadow: 0 0 0 2px #faf8f4, inset 0 0 0 1px var(--qls-line); font: 500 8px var(--qls-mono) !important; font-style: normal; color: #5b4f47; }
+.qls .qls-faces i:first-child { margin-left: 0; }
+.qls .qls-busy u { margin-left: auto; color: var(--qls-navy); text-underline-offset: 3px; }
+.qls .qls-off { display: flex; align-items: center; gap: 12px; padding: 8px 14px; opacity: .55; }
+.qls .qls-off .qls-g { width: 30px; height: 30px; font-size: 10px; }
+.qls .qls-off b { font: 500 15px var(--qls-se); }
+.qls .qls-off > span:last-child { margin-left: auto; font: italic 400 13px var(--qls-se); }
+.qls .qls-none { margin: 10px 0; padding: 16px; border-radius: 12px; background: #faf8f4; text-align: center; font: 400 15px var(--qls-se); color: var(--qls-mut); }
+.qls .qls-lk { all: unset; cursor: pointer; color: var(--qls-navy); text-decoration: underline; text-underline-offset: 3px; }
+.qls .qls-lk:focus-visible { outline: 2px solid var(--qls-navy); outline-offset: 2px; border-radius: 2px; }
+
+/* the inline calendar */
+.qls .qls-cal { margin-top: 10px; padding: 12px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; animation: qls-fadein .2s both; }
+@keyframes qls-fadein { from { opacity: 0; transform: translateY(-3px); } }
+.qls .qls-calh { display: flex; align-items: center; margin: 0 2px 8px; }
+.qls .qls-calh b { flex: 1 1 auto; text-align: center; font: 400 16px var(--qls-tw); }
+.qls .qls-calh button { all: unset; cursor: pointer; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #5b4f47; }
+.qls .qls-calh button:hover { background: #f6f2ec; }
+.qls .qls-calh button:disabled { opacity: .25; pointer-events: none; }
+.qls .qls-calg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
+.qls .qls-calg > span { font: 400 12px var(--qls-se); color: var(--qls-mut2); padding: 2px 0 4px; }
+.qls .qls-calg > button { all: unset; cursor: pointer; height: 32px; border-radius: 50%; font: 400 14px var(--qls-se); }
+.qls .qls-calg > button:hover { background: #f6f2ec; }
+.qls .qls-calg > button:focus-visible { box-shadow: inset 0 0 0 2px var(--qls-navy); }
+.qls .qls-calg > button.is-today { box-shadow: inset 0 0 0 1px #cfc4b5; }
+.qls .qls-calg > button.is-on { background: var(--qls-navy); color: #fff; }
+.qls .qls-calg > button:disabled { color: #d3cbc0; pointer-events: none; }
+
+/* pieces */
+.qls .qls-pcs { display: grid; gap: 8px; }
+.qls .qls-pc { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; cursor: pointer; }
+.qls .qls-pc:hover { box-shadow: inset 0 0 0 1.5px #8e8274; }
+.qls .qls-pc:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--qls-navy); }
+.qls .qls-bx { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px; box-shadow: inset 0 0 0 1.5px #b9ad9e; color: #fff; font-size: 13px; }
+.qls .qls-pc.is-on { box-shadow: inset 0 0 0 1.5px var(--qls-navy); }
+.qls .qls-pc.is-on .qls-bx { background: var(--qls-navy); box-shadow: none; }
+.qls .qls-pc .qls-tx b { font: 500 16px var(--qls-se); }
+.qls .qls-vr { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; background: var(--qls-paper); box-shadow: inset 0 0 0 1px #e6ded2; font: 400 14px var(--qls-se); white-space: nowrap; }
+.qls .qls-vr:hover { box-shadow: inset 0 0 0 1.5px #8e8274; }
+.qls .qls-vr:focus-visible { box-shadow: inset 0 0 0 2px var(--qls-navy); }
+.qls .qls-pc:not(.is-on) .qls-vr { opacity: .4; pointer-events: none; }
+.qls .qls-ask { margin: 12px 2px 0; font: 400 13.5px/1.45 var(--qls-se); color: var(--qls-mut); }
+
+/* the version menus */
+.qls .qls-pop { position: absolute; z-index: 20; min-width: 220px; max-height: calc(100% - 16px); overflow: auto; padding: 6px; border-radius: 12px; background: #fff; box-shadow: 0 18px 40px -14px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.08); animation: qls-fadein .14s ease-out both; }
+.qls .qls-pop .qls-ph { padding: 6px 10px 4px; font: 400 15px var(--qls-tw); }
+.qls .qls-pop button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 10px; border-radius: 8px; font: 400 14.5px var(--qls-se); }
+.qls .qls-pop button:hover, .qls .qls-pop button:focus-visible { background: #f6f2ec; }
+.qls .qls-pop button small { margin-left: auto; font: italic 400 12.5px var(--qls-se); color: var(--qls-mut2); }
+.qls .qls-pop .qls-ck { width: 14px; color: var(--qls-navy); }
+.qls .qls-pop hr { border: 0; border-top: 1px solid #f0ebe3; margin: 5px 4px; }
+
+/* the check: the preview slip */
+.qls .qls-pv { position: relative; }
+.qls .qls-pv .sa-slip { cursor: default; }
+.qls .qls-pvtag { position: absolute; top: -9px; right: 18px; z-index: 5; padding: 1px 9px; border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9; font: italic 400 12.5px var(--qls-se); color: var(--qls-mut); }
+.qls .qls-nt { display: flex; justify-content: flex-end; margin-top: 14px; }
+.qls .qls-nt textarea { box-sizing: border-box; width: 100%; min-height: 58px; resize: vertical; font: 400 14.5px/1.45 var(--qls-se); padding: 7px 10px; border-radius: 9px; border: 1px solid #d9cfc2; outline: none; color: var(--qls-ink); background: #fff; }
+.qls .qls-nt textarea:focus { border-color: var(--qls-navy); box-shadow: 0 0 0 3px rgba(42,58,82,.12); }
+.qls p.qls-qs.is-foot { margin: auto 0 0; padding-top: 14px; text-align: center; }
+
+/* the footer */
+.qls .qls-cf { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 16px 14px; border-top: 1px solid #f0ebe3; background: #fff; }
+.qls .qls-sp { flex: 1 1 auto; }
+.qls .qls-hint { font: italic 400 13px var(--qls-se); color: var(--qls-mut2); }
+.qls .qls-btn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 17px; border-radius: 21px; font: 600 14.5px var(--qls-se); white-space: nowrap; transition: filter .15s, transform .1s; background: var(--qls-navy); color: #fff; }
+.qls .qls-btn:active { transform: scale(.97); }
+.qls .qls-btn:hover { filter: brightness(1.12); }
+.qls .qls-btn:focus-visible { outline: 2px solid var(--qls-navy); outline-offset: 2px; }
+.qls .qls-btn.is-ghost { background: #fff; color: var(--qls-navy); box-shadow: inset 0 0 0 1.5px var(--qls-navy); }
+.qls .qls-btn.is-sm { height: 36px; padding: 0 14px; font-size: 14px; }
+.qls .qls-btn:disabled { opacity: .38; pointer-events: none; }
+.qls .qls-lnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--qls-se); color: #5b4f47; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.qls .qls-lnk:hover { color: var(--qls-navy); }
+.qls .qls-lnk:focus-visible { outline: 2px solid var(--qls-navy); outline-offset: 2px; border-radius: 2px; }
+.qls .qls-lnk:disabled { opacity: .38; pointer-events: none; }
+
+/* the batch toast */
+.qls .qls-toast { position: absolute; left: 50%; bottom: 84px; transform: translate(-50%, 10px); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 16px; border-radius: 999px; background: var(--qls-ink); color: #fff; font: 400 14.5px var(--qls-se); white-space: nowrap; opacity: 0; pointer-events: none; transition: .25s; z-index: 25; }
+.qls .qls-toast.is-on { opacity: 1; transform: translate(-50%, 0); pointer-events: auto; }
+.qls .qls-toast button { all: unset; cursor: pointer; padding: 4px 11px; border-radius: 999px; background: rgba(255,255,255,.14); font-weight: 600; }
+
+/* the stamp */
+.qls .qls-stamp { position: absolute; right: 44px; top: 104px; z-index: 6; padding: 6px 12px 5px; border: 2.5px double var(--qls-navy); border-radius: 8px; color: var(--qls-navy); background: rgba(255,255,255,.55); font: 400 19px/1 var(--qls-tw) !important; letter-spacing: .06em; transform: rotate(-8deg); mix-blend-mode: multiply; pointer-events: none; text-align: center; }
+.qls .qls-stamp small { display: block; margin-top: 3px; font-size: 11.5px; letter-spacing: .1em; text-align: center; }
+.qls .qls-stamp.is-thump { animation: qls-thump .42s cubic-bezier(.3,1.6,.5,1) both; }
+@keyframes qls-thump { 0% { opacity: 0; transform: rotate(-8deg) scale(1.9); } 60% { opacity: 1; transform: rotate(-8deg) scale(.94); } 100% { transform: rotate(-8deg) scale(1); } }
+
+/* the celebration */
+.qls .qls-yay { flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; align-items: center; padding: 20px 22px 14px; text-align: center; background: radial-gradient(120% 60% at 50% 0%, #f6efe3 0%, #fff 62%); }
+.qls .qls-yay > * { flex: none; }
+.qls .qls-yay .qi-slot { animation: qls-rise .55s .05s cubic-bezier(.2,1.2,.4,1) both; }
+@keyframes qls-rise { from { opacity: 0; transform: translateY(16px) scale(.94); } }
+.qls h2.qls-yh { margin: 14px 0 6px; min-height: 35px; font: 400 30px/1.15 var(--qls-tw) !important; font-family: var(--qls-tw) !important; color: var(--qls-ink); letter-spacing: 0; text-transform: none; }
+.qls .qls-cur { display: inline-block; width: 2px; height: 26px; margin-left: 2px; vertical-align: -3px; background: var(--qls-ink); animation: qls-blink .8s steps(1) infinite; }
+@keyframes qls-blink { 50% { opacity: 0; } }
+.qls p.qls-yl { margin: 0 0 4px; max-width: 400px; font: italic 400 15.5px/1.5 var(--qls-se); color: #5b4f47; animation: qls-fade .4s .7s both; }
+@keyframes qls-fade { from { opacity: 0; } }
+.qls .qls-cnt { display: inline-flex; align-items: baseline; gap: 6px; margin: 6px 0 14px; animation: qls-fade .4s .8s both; font: 400 14.5px var(--qls-se); color: var(--qls-mut); }
+.qls .qls-odo { display: inline-block; height: 1.15em; overflow: hidden; vertical-align: bottom; font: 400 22px/1.15 var(--qls-tw) !important; color: var(--qls-ink); }
+.qls .qls-odo > span { display: block; transition: transform .7s 1.1s cubic-bezier(.3,1.3,.5,1); }
+.qls .qls-odo.is-go > span { transform: translateY(-50%); }
+.qls .qls-odo b { display: block; font-weight: 400; font-family: inherit; }
+.qls .qls-ms { display: inline-block; margin: -6px 0 14px; padding: 4px 12px; border-radius: 999px; background: var(--qls-navy); color: #fff; font: 400 13.5px var(--qls-se); animation: qls-rise .4s 1.6s both; }
+.qls .qls-slipw { position: relative; width: 100%; text-align: left; animation: qls-rise .5s .45s both; }
+.qls .qls-conf { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 4; }
+.qls .qls-conf i { position: absolute; top: -14px; width: 8px; height: 11px; border-radius: 2px; opacity: .9; animation: qls-fall var(--d) var(--w) cubic-bezier(.3,.6,.6,1) forwards; }
+.qls .qls-conf i.is-dot { width: 5px; height: 5px; border-radius: 50%; }
+@keyframes qls-fall { to { transform: translate(var(--x), 720px) rotate(var(--r)); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .qls *, .qls *::before, .qls *::after { animation: none !important; transition: none !important; }
+}

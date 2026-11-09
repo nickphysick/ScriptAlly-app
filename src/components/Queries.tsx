@@ -108,7 +108,8 @@ import { QcListTitle150, QcViewSwitch150 } from "./queries/centre/QcListTitle150
 import { QC_SORT_FIELDS } from "../lib/cardsSort";
 import { GROUP_BY_OPTIONS } from "../lib/qcCalView";
 import { eyeRows } from "../lib/qcBirdsEye";
-import { QcLogFlow149, QcWhoReplied149, type FlowAgent, type LogAnswers } from "./queries/centre/QcFlows149";
+import { QcWhoReplied149 } from "./queries/centre/QcFlows149";
+import { LogStagesHost } from "./queries/centre/LogStagesHost";
 import { logDefaults, pieceVersions, saveLog } from "../lib/queryActions/logSave";
 import { packagesFor } from "../lib/queryActions/packages";
 import { previousQueryFor } from "../lib/requery";
@@ -6355,48 +6356,11 @@ export const Queries: React.FC<{
     const msId = resolveInitialManuscriptId(qcFlow.manuscriptId ?? scopeMs, pickableManuscripts(manuscripts));
     const ms = manuscripts.find((m) => m.id === msId) ?? null;
     if (!ms) return null;
-    const cards = packagesFor(ms.id, packages, scriptDb.versions, ms.bookVersions);
-    const forBook = queries.filter((q) => q.manuscriptId === ms.id);
-    const flowAgents: FlowAgent[] = agents.map((a) => ({
-      id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a), initials: agentInitials(a), querying: forBook.some((q) => q.agentId === a.id && qaIsLive(q)),
-      via: (a.submissionMethod as SubmissionMethod) || null,
-    }));
-    const onSaveLog = async (x: LogAnswers): Promise<boolean> => {
-      const ag = agents.find((a) => a.id === x.agentId);
-      if (!ag) return false;
-      const uid = currentUser.id;
-      const sent = new Date(x.sent);
-      const pkCard = x.packageId ? cards.find((c) => c.id === x.packageId) ?? null : null;
-      const mat = { ql: x.ql, syn: x.syn, s: x.sample ? blankSample() : { ...blankSample(), unit: "none" as const } };
-      const qlV = currentVersion(ms.id, scriptDb.versions, ComponentType.QUERY_LETTER);
-      const synV = currentVersion(ms.id, scriptDb.versions, ComponentType.SYNOPSIS);
-      const id = doc(collection(db, "users", uid, "queries")).id;
-      const prev = previousQueryFor({ id: "__new__", agentId: ag.id, manuscriptId: ms.id, status: QueryStatus.QUERIED, dateSent: "" }, forBook, sent.getTime());
-      let snap;
-      try {
-        snap = await takeSnapshot(uid, [id]);
-        await saveLog(scriptDb, { id, manuscriptId: ms.id, agent: ag, sent, via: x.via, pkCard, mat, pieceV: pieceVersions(pkCard, mat, qlV, synV), basedOn: null, ...logDefaults(ag, sent), requery: !!prev });
-      } catch (e) {
-        console.error("[query card] log save failed", e);
-        showToast({ message: "Couldn't log the query. Nothing was saved." });
-        return false;
-      }
-      if (x.note) await addJournalEntry(id, x.note);
-      const s0 = snap;
-      const nm = (ag.name || ag.agency || "The agent").trim();
-      setQcFlow(null);
-      setQcCardFresh("__last");
-      window.setTimeout(() => setQcCardFresh(null), 1600);
-      cardSetRef.current = qcVisible.map((r) => r.id);
-      onOpenQuery?.(id);
-      showUndoBar({ message: `Logged. ${nm} is now in your Query Centre.`, sub: `SENT ${fieldDay(x.sent).toUpperCase()}`, undo: async () => { await restoreSnapshot(s0); } });
-      return true;
-    };
+    /* Log a query v1 — the staged journey (LogStagesHost), which saves through the same log save; "Open {First}'s
+       card" is the page's own open-query door */
     return (
-      <QcLogFlow149 nowMs={now} agents={flowAgents} seedAgentId={qcFlow.agentId} bookTitle={ms.title || "Untitled manuscript"}
-        packages={cards.map((c) => ({ id: c.id, name: c.name, ql: c.ql, syn: c.syn, sample: !!c.bookVersion }))}
-        defaultPackageId={ms.activePackageId && cards.some((c) => c.id === ms.activePackageId) ? ms.activePackageId : null}
-        onClose={() => setQcFlow(null)} onSave={onSaveLog} />
+      <LogStagesHost key={`${ms.id}:${qcFlow.agentId ?? ""}`} ms={ms} seedAgentId={qcFlow.agentId} onClose={() => setQcFlow(null)}
+        onOpenCard={(id) => { setQcFlow(null); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} />
     );
   })();
   const qcOpenCardNode = panelRow && activeQuery && qcById.get(activeQuery.id) ? (
