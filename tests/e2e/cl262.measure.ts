@@ -36,8 +36,9 @@ test("CL262 shots — editing", async ({ page }) => {
   await page.screenshot({ path: `${shotDir()}/05-edit-materials-1512.png` });
   await openCard(page, SIZES[0], { stand: "agent" });
   await pen("how"); await page.waitForTimeout(400);
-  await page.locator("[data-cl262='sec'][data-k='how'] [data-ae='weeks'] button[data-d='1']").first().click();
-  await page.locator("[data-cl262='sec'][data-k='how'] [data-ae='weeks'] button[data-d='1']").first().click();
+  /* Add agent v1 — the response time is the app's WeekSlider: two steps from the keyboard */
+  await page.locator("[data-cl262='sec'][data-k='how'] [data-aap='weeks'] input[type='range']").first().focus();
+  await page.keyboard.press("ArrowRight"); await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(500);
   await page.screenshot({ path: `${shotDir()}/06-edit-how-also-1512.png` });
   await openCard(page, SIZES[0], { stand: "you" });
@@ -57,6 +58,13 @@ const GAPPY = "cl262fx-gappy";
 const fresh = () => execFileSync("node", ["tests/e2e/seedCl262.mjs"], { stdio: "inherit" });
 const pen = (page: Page, k: string) => page.locator(`${CARD} [data-cl262='pen'][data-k='${k}']`).first();
 const sec = (page: Page, k: string) => page.locator(`${CARD} [data-cl262='sec'][data-k='${k}']`).first();
+/** Add agent v1 — the response time is the shared WeekSlider (1 to 26): stepped from the keyboard, read off its readout */
+const WEEKS = `${CARD} [data-aap='weeks'] input[type='range']`;
+const stepWeeks = async (page: Page, key: "ArrowRight" | "ArrowLeft" | "End" | "Home", n = 1) => {
+  await page.locator(WEEKS).first().focus();
+  for (let i = 0; i < n; i++) await page.keyboard.press(key);
+};
+const weeksRead = (page: Page) => page.locator(`${CARD} [data-aap='weeks'] .sa-wk-read`).first().innerText();
 const editingKeys = (page: Page) => page.$$eval(`${CARD} [data-cl262='sec'][data-editing]`, (els) => els.map((e) => (e as HTMLElement).dataset.k ?? ""));
 const lean = (page: Page) => page.evaluate(() => {
   const el = document.querySelector<HTMLElement>("[data-cl262='lean']");
@@ -222,34 +230,39 @@ test.describe("CL262 locks", () => {
       const L = new Ledger(`J6-${at}`);
       fresh();
       await openCard(page, vp, { id: GAPPY });
-      if (MUT === "J6") await cssBreak(page, "[data-ae='reopens']{display:none!important}");
+      if (MUT === "J6") await cssBreak(page, "[data-aap='door-closed']{display:none!important}");
       await pressPen(page, "genres");
       const g = await page.evaluate(() => {
         const s = document.querySelector<HTMLElement>("[data-cl262='panel'] [data-cl262='sec'][data-k='genres']")!;
-        return { chips: s.querySelectorAll("[data-ae='genre-chip']").length, inputs: [...s.querySelectorAll<HTMLElement>("input[type='text'], input:not([type])")].filter((e) => e.getBoundingClientRect().height > 0).length };
+        /* v26.2's chips were the genres on offer: now the finder's suggestions ("+ Fantasy") beside any chosen chip */
+        return { chips: s.querySelectorAll("[data-aap='genre-chip']").length, offer: s.querySelectorAll("[data-aap='genre-sugg'] [data-addg]").length };
       });
-      L.check(`genres · chips (${g.chips})`, g.chips > 0, String(g.chips));
-      L.check("genres · no free-text field", g.inputs === 0, String(g.inputs));
-      await pressPen(page, "materials");
-      const smp = page.locator(`${CARD} [data-cl262='sec'][data-k='materials'] [data-ae='materials'] .ae-bx`).nth(2);
-      await smp.click({ timeout: 4000 }).catch(() => {});
+      L.check(`genres · chips to pick (${g.offer} offered, ${g.chips} chosen)`, g.offer + g.chips > 0, `${g.offer}+${g.chips}`);
+      /* Add agent v1 — the genres take the journey's finder (typed to FIND a genre, or added through the new-genre
+         check). v26.2's claim, restated: loose words typed and left are never a genre */
+      await page.locator(`${CARD} [data-aap='genre-input']`).first().fill("zzq loose words");
+      await page.locator(`${CARD} [data-cl262='sec'][data-k='genres']`).first().click({ position: { x: 4, y: 4 } }).catch(() => {});
       await page.waitForTimeout(250);
-      const units = await page.$$eval(`${CARD} [data-ae='unit'] button[aria-checked='true']`, (e) => e.length);
+      const chips2 = await page.locator(`${CARD} [data-cl262='sec'][data-k='genres'] [data-aap='genre-chip']`).count();
+      L.check("genres · typed words left unpicked are no genre", chips2 === g.chips, `${g.chips} → ${chips2}`);
+      await pressPen(page, "materials");
+      const smp = page.locator(`${CARD} [data-cl262='sec'][data-k='materials'] [data-aap='mats'] [data-mat='smp']`).first();
+      if (await smp.count()) await smp.click({ timeout: 4000 }).catch(() => {});
+      await page.waitForTimeout(250);
+      const units = await page.$$eval(`${CARD} [data-aap='unit'] button[aria-checked='true']`, (e) => e.length);
       L.check("one sample unit chosen", units === 1, String(units));
       await pressPen(page, "how");
-      const plus = page.locator(`${CARD} [data-ae='weeks'] button[data-d='1']`).first();
-      const minus = page.locator(`${CARD} [data-ae='weeks'] button[data-d='-1']`).first();
-      const wtext = () => page.locator(`${CARD} [data-ae='weeks']`).first().innerText();
-      for (let i = 0; i < 24 && await plus.isEnabled(); i++) await plus.click();
-      L.check("reply tops out at 26", /26 weeks/.test(await wtext()) && !(await plus.isEnabled()), await wtext());
-      for (let i = 0; i < 30 && await minus.isEnabled(); i++) await minus.click();
-      L.check("reply floors at 1", /About 1 week/.test(await wtext()) && !(await minus.isEnabled()), await wtext());
-      await page.locator(`${CARD} [data-ae='door'] button[data-v='closed']`).click();
+      await stepWeeks(page, "ArrowRight", 30);
+      L.check("reply tops out at 26", /^26 weeks$/.test(await weeksRead(page)) && (await page.locator(WEEKS).first().inputValue()) === "26", await weeksRead(page));
+      await stepWeeks(page, "ArrowLeft", 30);
+      L.check("reply floors at 1", /^1 week$/.test(await weeksRead(page)) && (await page.locator(WEEKS).first().inputValue()) === "1", await weeksRead(page));
+      await page.locator(`${CARD} [data-aap='door'] [data-door='closed']`).first().click();
       await page.waitForTimeout(300);
-      L.check("door Closed reveals Reopens", await page.locator(`${CARD} [data-ae='reopens']`).first().isVisible(), "");
-      await page.locator(`${CARD} [data-ae='door'] button[data-v='open']`).click();
+      L.check("door Closed reveals Reopens", await page.locator(`${CARD} [data-aap='door-closed']`).first().isVisible(), "");
+      /* the reopens calendar opens on Closed: press Open on the element itself, so the calendar cannot take the click */
+      await page.locator(`${CARD} [data-aap='door'] [data-door='open']`).first().evaluate((e) => (e as HTMLElement).click());
       await page.waitForTimeout(200);
-      L.check("door Open hides Reopens", (await page.locator(`${CARD} [data-ae='reopens']`).count()) === 0, "");
+      L.check("door Open hides Reopens", (await page.locator(`${CARD} [data-aap='door-closed']`).count()) === 0, "");
       L.done(7);
     });
 
@@ -259,8 +272,7 @@ test.describe("CL262 locks", () => {
       await openCard(page, vp, { stand: "agent" });
       if (MUT === "J7") await cssBreak(page, ".cl262-also{display:none!important}");
       await pressPen(page, "how");
-      await page.locator(`${CARD} [data-ae='weeks'] button[data-d='1']`).first().click();
-      await page.locator(`${CARD} [data-ae='weeks'] button[data-d='1']`).first().click();
+      await stepWeeks(page, "ArrowRight", 2);
       await page.waitForTimeout(400);
       const r = await page.evaluate(() => {
         const c = document.querySelector<HTMLElement>("[data-cl262='panel'] .cl262-card")!;
@@ -269,7 +281,8 @@ test.describe("CL262 locks", () => {
         return { lines, moved: Number(sum?.dataset.moved ?? -1), text: sum?.textContent ?? "" };
       });
       L.check(`an Also note shows (${r.lines})`, r.lines > 0, r.text);
-      L.check("the bar's count is the notes'", r.moved === r.lines && new RegExp(`also changes ${r.lines} thing`).test(r.text), `${r.moved} vs ${r.lines} · ${r.text}`);
+      /* Add agent v1 — the bar counts the NUDGES the reply note moves (the engine's own count), by name */
+      L.check("the bar names the nudges the note moves", r.moved >= 1 && new RegExp(`moves ${r.moved} nudge`).test(r.text), `${r.moved} moved · ${r.lines} note lines · ${r.text}`);
       L.done(2);
     });
 
@@ -286,13 +299,12 @@ test.describe("CL262 locks", () => {
       const start = await frameScroll(page);
       L.check(`the card sits scrolled (${start})`, start >= 200, String(start));
       const near = async (sel: string) => { await page.locator(sel).first().evaluate((e) => e.scrollIntoView({ block: "nearest" })); await page.waitForTimeout(250); };
-      const plus = `${CARD} [data-ae='weeks'] button[data-d='1']`;
-      await near(plus);
+      await near(WEEKS);
       let top0 = await secTop(page, "how");
-      for (let i = 0; i < 3; i++) await page.locator(plus).first().click();
+      await stepWeeks(page, "ArrowRight", 3);
       await page.waitForTimeout(300);
       L.check("stepping ×3 holds How", Math.abs((await secTop(page, "how")) - top0) <= 1, `${top0} → ${await secTop(page, "how")}`);
-      const meth = `${CARD} [data-ae='method'] button:not([aria-checked='true'])`;
+      const meth = `${CARD} [data-aap='method'] button[role='radio']:not([aria-checked='true'])`;
       await near(meth);
       top0 = await secTop(page, "how");
       await page.locator(meth).first().click();
@@ -317,12 +329,12 @@ test.describe("CL262 locks", () => {
       await openCard(page, vp, { id: GAPPY });
       if (MUT === "J9") await page.evaluate(() => document.addEventListener("input", (e) => (e.target as HTMLElement).blur(), true));
       await pressPen(page, "wishlist");
-      const focused = () => page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.cl262 ?? "");
-      L.check("wishlist takes focus", (await focused()) === "wish-input", await focused());
+      const focused = () => page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.aap ?? "");
+      L.check("wishlist takes focus", (await focused()) === "wishlist", await focused());
       await page.keyboard.type("Quiet literary fiction with a big heart.");
-      const v = await page.locator(`${CARD} [data-cl262='wish-input']`).inputValue();
+      const v = await page.locator(`${CARD} [data-aap='wishlist']`).inputValue();
       L.check("40 characters typed in one go", v.length === 40, String(v.length));
-      L.check("focus still on the wishlist", (await focused()) === "wish-input", await focused());
+      L.check("focus still on the wishlist", (await focused()) === "wishlist", await focused());
       await page.locator(`${CARD} [data-cl262='cancel']`).click();
       await page.waitForTimeout(300);
       await page.locator(`${CARD} [data-cl262='edit-all']`).click();
@@ -420,7 +432,7 @@ test("CL262 shots — frame strips", async ({ page }) => {
   await page.locator("[data-cl262='sec'][data-k='how']").first().hover();
   await page.locator("[data-cl262='pen'][data-k='how']").first().click();
   for (let i = 0; i < 3; i++) { await page.waitForTimeout(140); editing.push(await clip()); }
-  await page.locator("[data-ae='weeks'] button[data-d='1']").first().click();
+  await page.locator("[data-aap='weeks'] input[type='range']").first().focus(); await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(300);
   editing.push(await clip());
   await strip(editing, "11-strip-edit-how-1512");
