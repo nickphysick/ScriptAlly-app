@@ -34,6 +34,7 @@ import { Dash105How } from "../v105/Dash105How";
 export const PRIZE_LINE = "Top contributors win a weekly prize";
 export const HOW_LINK = "How it works";
 export const LAST_NOTE = "Your last note";
+export const ALL_NOTES = "All your notes";
 const TILES: readonly { key: ComposeKey; label: string }[] = [
   { key: "like", label: "Like" }, { key: "dont", label: "Don’t like" }, { key: "idea", label: "Idea" },
 ];
@@ -77,7 +78,11 @@ export const Dash2Founding: React.FC<{
   folded: boolean;
   /** stores the fold; absent → the fold is this view's only */
   onFold?: (folded: boolean) => void | Promise<void>;
-}> = ({ loading, uid, seenTier, onSeen, folded, onFold }) => {
+  /** Your notes v1: the Your notes page shows every note, so it draws the band without the "Your last note" strip */
+  noLast?: boolean;
+  /** Your notes v1: the strip's "All your notes" link (dashboard-v2-2's `.fwb-last a`); absent → no link */
+  onAllNotes?: () => void;
+}> = ({ loading, uid, seenTier, onSeen, folded, onFold, noLast = false, onAllNotes }) => {
   const { loading: sLoading, error: sError, stats, aided } = useFoundingStats(uid);
   const notes = useLatestNote(uid);
   const [howOpen, setHowOpen] = useState(false);
@@ -230,11 +235,12 @@ export const Dash2Founding: React.FC<{
           <p data-d2="fw-next">{busy ? " " : <><b>{ask.bold}</b>{ask.rest}</>}</p>
           <Tell />
         </div>
-        {!busy && !notes.loading && !notes.error && notes.note && (
+        {!noLast && !busy && !notes.loading && !notes.error && notes.note && (
           <div className="d22-last" data-d2="fw-note">
             <span className="d22-lt">{LAST_NOTE}</span>
             <em data-d2="fw-quote">“{notes.note.text}”</em>
             <i className={outcomeDone(notes.note.outcome) ? "is-done" : undefined} data-d2="fw-outcome">{outcomeDone(notes.note.outcome) && TICK}{notes.note.outcome}</i>
+            {onAllNotes && <button type="button" className="d22-all" data-d2="fw-all-notes" onClick={onAllNotes}>{ALL_NOTES}</button>}
           </div>
         )}
       </div>

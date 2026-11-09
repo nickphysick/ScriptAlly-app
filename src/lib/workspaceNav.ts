@@ -143,6 +143,17 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
         ...(r.id === "list" ? { count: input.todo || undefined, urgent: true as const, rail: true as const, railLabel: "Tasks" } : {}),
       })),
     },
+    /* ⚠️ YOUR NOTES v1 (9 Nov): the founding writer's record of their notes. Never a rail item: it lives under More ›
+       Founding writer, and the full sidebar's Give feedback card links to it as well. */
+    {
+      id: "founding",
+      label: "Founding writer",
+      icon: "notes",
+      def: "notes",
+      children: [
+        { id: "notes", label: "Your notes", path: "/your-notes", icon: "notes" },
+      ],
+    },
     /* There is no Account section: Settings is the account's own furniture, reached from the foot. */
   ];
 }

@@ -96,7 +96,7 @@ describe("The IA renders what exists — and nothing else", () => {
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks"]); /* sidebar materials v1, 6 Nov */
+      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks", "founding"]); /* sidebar materials v1, 6 Nov; Your notes v1, 9 Nov */
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -128,7 +128,7 @@ describe("The IA renders what exists — and nothing else", () => {
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks"]); /* sidebar materials v1, 6 Nov */
+      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks", "founding"]); /* sidebar materials v1, 6 Nov; Your notes v1, 9 Nov */
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -181,7 +181,7 @@ describe("The IA renders what exists — and nothing else", () => {
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks"]); /* sidebar materials v1, 6 Nov */
+      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks", "founding"]); /* sidebar materials v1, 6 Nov; Your notes v1, 9 Nov */
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -209,7 +209,7 @@ describe("The IA renders what exists — and nothing else", () => {
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks"]); /* sidebar materials v1, 6 Nov */
+      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks", "founding"]); /* sidebar materials v1, 6 Nov; Your notes v1, 9 Nov */
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -337,7 +337,9 @@ describe("`Needs attention` is the past-reply-window set — ONE derivation, bot
 describe("sidebar rail v1 — the nav the rail reads", () => {
   const nav = workspaceSections({ todo: 4 });
   it("six sections, most-used first: Your book and Materials are separate; no Calendar", () => {
-    expect(nav.map((s) => s.label)).toEqual(["Workspace", "Queries", "Agents", "Your book", "Materials", "Tasks"]);
+    /* Your notes v1 (9 Nov): Founding writer joins as the last section, after Tasks — its one page lives in More */
+    expect(nav.map((s) => s.label)).toEqual(["Workspace", "Queries", "Agents", "Your book", "Materials", "Tasks", "Founding writer"]);
+    expect(nav.find((s) => s.id === "founding")!.children!.map((c) => [c.label, c.path, !!c.rail])).toEqual([["Your notes", "/your-notes", false]]);
     const labels = nav.flatMap((s) => (s.children ?? []).map((c) => c.label));
     expect(labels).not.toContain("Calendar");
     expect(nav.find((s) => s.label === "Your book")!.children!.map((c) => c.label)).toEqual(["Manuscripts", "Versions"]);
@@ -374,6 +376,7 @@ describe("sidebar rail v1 — the nav the rail reads", () => {
       ["Your book", ["Manuscripts", "Versions"]],
       ["Materials", ["Comps", "Packages"]],
       ["Tasks", ["Corkboard"]],
+      ["Founding writer", ["Your notes"]], /* Your notes v1, 9 Nov */
     ]);
     expect(moreGroups(nav).flatMap((x) => x.pages.map((p) => p.label))).toContain("Comparable titles");
     /* every page is on the rail or in More, exactly once */
@@ -388,7 +391,7 @@ describe("sidebar rail v1 — the nav the rail reads", () => {
   it("the full sidebar's short label: Queries (25 Oct), every other row its full name", () => {
     expect(nav.flatMap((s) => (s.children ?? []).map((c) => sidebarLabel(c)))).toEqual([
       "Dashboard", "Queries", "Responses", "Analytics", "Contact list", "Discover",
-      "Manuscripts", "Versions", "Query letters", "Comparable titles", "Submission packages", "To-do list", "Corkboard",
+      "Manuscripts", "Versions", "Query letters", "Comparable titles", "Submission packages", "To-do list", "Corkboard", "Your notes",
     ]);
   });
   it("the settings rail's short labels cover every account section", () => {

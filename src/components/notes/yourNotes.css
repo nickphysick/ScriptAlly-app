@@ -1,0 +1,201 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Your notes v1 (design-refs/your-notes-v1) — the page's own parts. Values are read off the rendered ref at 1512.
+ *
+ * ⚠️ THE BAND AND THE CARD FRAME ARE THE DASHBOARD'S, SCOPED TO `.d58.d2`; THE HEADER AND RING ARE THE QUERY CENTRE'S,
+ *    SCOPED TO `.qc151`. The root carries `.d58.d2` and the header's wrapper `.qc151`, so those rules reach here
+ *    unchanged; this sheet only undoes `.d58`'s one-screen height (this page flows) and draws what is the page's own.
+ * ⚠️ brand.tsx names a face on bare span/p/div/button at runtime: `.yn :where(…)` hands inheritance back (0-1-0).
+ */
+
+.yn, .yn-layer {
+  --yn-ink: #1c130f; --yn-ink2: #3b322c; --yn-muted: #7d7067; --yn-faint: #a39a91;
+  --yn-hair: #ebe4da; --yn-fill: #f1ece4; --yn-rose: #a0675a; --yn-navy: #2d3a50;
+}
+.yn :where(p, span, div, button, label, li, small, b, em, i, time, textarea, a),
+.yn-layer :where(p, span, div, button, label, li, small, b, em, i, time, textarea, a) { font-family: inherit; }
+.yn *, .yn-layer * { box-sizing: border-box; }
+
+/* ── the page: it flows (undoing `.d58`'s one-screen height), on the Query Centre's doodle ground ───────────────────── */
+.yn.d58 {
+  height: auto; min-height: 100%; display: block; position: relative;
+  padding: 28px var(--work-gutter, 32px) 64px;
+  font: 16px/1.5 var(--sp-serif) !important; color: var(--yn-ink);
+  background-color: #f2eee8;
+  background-image: linear-gradient(to bottom, rgba(242, 238, 232, 0) 84px, rgba(242, 238, 232, 0.72) 360px), url("/images/qc/doodle-tile.svg");
+  background-repeat: no-repeat, repeat; background-size: 100% 100%, 340px 360px;
+}
+.yn-wrap { max-width: calc(var(--work-max, 1660px) - 2 * var(--work-gutter, 32px)); margin: 0 auto; }
+
+/* ── the header: the Query Centre's, with a dashed placeholder in the art slot ──────────────────────────────────── */
+.yn .yn-hdw .qc1531-hd { padding-bottom: 18px; }
+.yn .yn-art { display: grid; place-items: center; }
+.yn .yn-ph {
+  width: 190px; height: 230px; border-radius: 22px; border: 2px dashed #cdbfb0; background: rgba(255, 255, 255, 0.45);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  color: #8a7d72; text-align: center; font: italic 15px/1.35 var(--sp-serif) !important;
+}
+.yn .yn-ph svg { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; opacity: 0.7; }
+.yn .yn-ph span { font: inherit !important; }
+
+/* ── the band ───────────────────────────────────────────────────────────────────────────────────────────────────── */
+.yn .yn-band .d22-fw { margin-top: 6px; }
+
+/* ── the grid: the list and the side column (380, sticky) ───────────────────────────────────────────────────────── */
+.yn-grid { display: grid; grid-template-columns: minmax(0, 1fr) 380px; gap: 24px; align-items: start; margin-top: 24px; scroll-margin-top: 20px; }
+.yn-side { display: grid; gap: 20px; position: sticky; top: 20px; }
+.yn .yn-grid .os-card { margin: 0; }
+.yn .d2-meta .yn-newlink { all: unset; cursor: pointer; font-weight: 600; color: var(--yn-ink); }
+.yn .d2-meta .yn-newlink:hover { text-decoration: underline; text-underline-offset: 3px; }
+.yn .d2-meta .yn-newlink:focus-visible { outline: 2px solid var(--yn-navy); outline-offset: 2px; border-radius: 4px; }
+
+/* the switch: the feed's light pill (dashboard-v2-2 `.fsw`) */
+.yn-nf { padding: 14px 18px 4px; }
+.yn-fsw { display: flex; max-width: 560px; padding: 3px; border-radius: 999px; background: #f1ece4; }
+.yn .yn-fsw button {
+  all: unset; box-sizing: border-box; flex: 1 1 0; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 999px; cursor: pointer; white-space: nowrap; font: 600 14px var(--sp-serif) !important; color: var(--yn-ink2);
+}
+.yn .yn-fsw button[aria-pressed="true"] { background: #fff; color: var(--yn-ink); box-shadow: 0 1px 3px rgba(28, 19, 15, 0.12); }
+.yn .yn-fsw button small { margin-left: 5px; font: 400 12.5px var(--sp-serif) !important; color: var(--yn-muted); }
+.yn .yn-fsw button:focus-visible { outline: 2px solid var(--yn-navy); outline-offset: 1px; }
+
+/* a note */
+.yn-nl { list-style: none; margin: 0; padding: 6px 10px 10px; }
+.yn .yn-nr {
+  all: unset; box-sizing: border-box; display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; align-items: start;
+  width: 100%; padding: 16px 12px; border-radius: 12px; text-align: left; cursor: pointer;
+}
+.yn-nl li + li .yn-nr { border-top: 1px solid var(--yn-hair); border-radius: 0 0 12px 12px; }
+.yn .yn-nr:hover { background: #faf6f1; }
+.yn .yn-nr:focus-visible { outline: 2px solid var(--yn-rose); outline-offset: 2px; }
+.yn .yn-nk, .yn-layer .yn-nk { width: 38px; height: 38px; flex: none; border-radius: 50%; background: #f6e2d9; color: var(--yn-rose); display: grid; place-items: center; }
+.yn-nk svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.yn-nt { min-width: 0; }
+.yn .yn-nt > b { display: block; font: 600 17px/1.35 var(--sp-serif) !important; color: var(--yn-ink); }
+.yn .yn-nm { display: block; margin-top: 3px; font: 14px var(--sp-serif) !important; color: var(--yn-muted); }
+.yn .yn-nm em { font-style: normal; font-weight: 600; color: var(--yn-ink2); }
+.yn .yn-nrep { display: flex; gap: 10px; align-items: flex-start; margin-top: 10px; padding: 9px 12px; border-radius: 11px; background: #fbf0ea; box-shadow: inset 0 0 0 1px #f0dbd1; font: 14.5px/1.45 var(--sp-serif) !important; color: var(--yn-ink2); }
+.yn .yn-nrep img { width: 26px; height: 26px; flex: none; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px #fff; }
+.yn .yn-nrep > span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.yn .yn-nrep b { color: #7a3f31; font-weight: 700; }
+.yn .yn-nnew { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: var(--yn-rose); color: #fff; font: 600 11.5px var(--sp-serif) !important; vertical-align: 2px; }
+.yn-ns { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; padding-top: 2px; }
+.yn .yn-ns small { font: 13px var(--sp-serif) !important; color: var(--yn-muted); white-space: nowrap; }
+.yn .yn-ns small b { color: #7a3f31; font-weight: 700; }
+.yn-none p { margin: 0; padding: 22px 12px; font: italic 15px var(--sp-serif); color: var(--yn-muted); }
+
+/* the chips: the band's "Your last note" chip, one per status */
+.yn .yn-oc, .yn-layer .yn-oc { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; white-space: nowrap; font: normal 600 12.5px var(--sp-serif) !important; }
+.yn-oc svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.yn-oc.ok { background: #e1ebe1; color: #355a3a; }
+.yn-oc.rd { background: #efe7df; color: #6b5a4e; }
+.yn-oc.pl { background: #f6e2d9; color: #7a3f31; }
+.yn-oc.wt { background: #fff; color: var(--yn-muted); box-shadow: inset 0 0 0 1px #e2d6cc; }
+
+/* the side cards */
+.yn-key { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.yn .yn-key li { display: grid; grid-template-columns: 128px 1fr; gap: 12px; align-items: start; font: 14.5px/1.4 var(--sp-serif) !important; color: var(--yn-ink2); }
+.yn-key li .yn-oc { justify-self: start; }
+.yn .yn-howp { margin: 0; font: 15px/1.5 var(--sp-serif) !important; color: var(--yn-ink2); }
+.yn .yn-howp + .yn-howp { margin-top: 10px; }
+.yn .yn-howp b { color: var(--yn-ink); }
+.yn .yn-howfine { margin: 12px 0 0; padding-top: 10px; border-top: 1px dashed #e3d5c9; font: 13.5px/1.45 var(--sp-serif) !important; color: var(--yn-muted); }
+
+/* the band's three buttons, outside the band (the empty card): the band's stroke rule is scoped to `.d22-fw` */
+.yn .yn-tell { justify-content: center; }
+.yn .yn-tell .d22-ti svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* empty, loading and a failed read */
+.yn-empty { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px 20px 44px; text-align: center; }
+.yn .yn-empty h3.yn-eh { margin: 0; font: 400 24px/1.3 var(--sp-type) !important; color: var(--yn-ink) !important; }
+.yn .yn-empty p { margin: 0; max-width: 460px; font: 15.5px/1.5 var(--sp-serif) !important; color: var(--yn-ink2); }
+.yn-sk { display: grid; gap: 12px; padding: 20px 22px 24px; }
+.yn-sk i { display: block; height: 64px; border-radius: 12px; background: rgba(28, 19, 15, 0.05); }
+
+/* buttons in the page and the panel */
+.yn .yn-btn, .yn-layer .yn-btn {
+  all: unset; box-sizing: border-box; cursor: pointer; height: 40px; padding: 0 16px; border-radius: 999px; display: inline-flex; align-items: center; gap: 8px;
+  font: 600 15px var(--sp-serif) !important; background: #fff; color: var(--yn-ink); box-shadow: inset 0 0 0 1px var(--yn-hair); white-space: nowrap;
+}
+.yn .yn-btn.pri, .yn-layer .yn-btn.pri { background: var(--yn-navy); color: #fff; box-shadow: none; }
+.yn .yn-btn:disabled, .yn-layer .yn-btn:disabled { background: #d9d3cb !important; color: #fff !important; cursor: not-allowed; box-shadow: none; }
+.yn .yn-btn:focus-visible, .yn-layer .yn-btn:focus-visible { outline: 2px solid var(--yn-navy); outline-offset: 2px; }
+
+/* ── a note's panel ─────────────────────────────────────────────────────────────────────────────────────────────── */
+.yn-layer.d58 { position: fixed; inset: 0; z-index: 70; height: auto; display: block; font: 16px/1.5 var(--sp-serif) !important; color: var(--yn-ink); }
+.yn-scrim { position: absolute; inset: 0; background: rgba(20, 24, 33, 0.28); opacity: 0; transition: opacity 0.22s ease; }
+.yn-layer.is-on .yn-scrim { opacity: 1; }
+.yn-panel { position: absolute; top: 10px; right: 10px; bottom: 10px; width: 560px; max-width: calc(100vw - 20px); transform: translateX(30px); opacity: 0;
+  transition: transform 0.26s cubic-bezier(0.2, 0.9, 0.3, 1), opacity 0.2s ease; }
+.yn-layer.is-on .yn-panel { transform: none; opacity: 1; }
+.yn-layer .yn-pcard.os-card { height: 100%; display: flex; flex-direction: column; margin: 0; }
+.yn-layer .yn-pcard .os-frame { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.yn-layer .yn-pcard .os-bandrow { display: flex; align-items: center; gap: 10px; }
+.yn-layer .yn-pcard h2.os-cardttl { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.yn-layer .yn-dx { all: unset; box-sizing: border-box; cursor: pointer; margin-left: auto; width: 30px; height: 30px; flex: none; border-radius: 50%; background: rgba(255, 255, 255, 0.75); display: grid; place-items: center; box-shadow: inset 0 0 0 1px #e2c8bc; }
+.yn-layer .yn-dx svg { width: 14px; height: 14px; fill: none; stroke: #7a3f31; stroke-width: 2; stroke-linecap: round; }
+.yn-layer .yn-dx:focus-visible { outline: 2px solid var(--yn-navy); outline-offset: 2px; }
+.yn-db { flex: 1; overflow-y: auto; padding: 18px 20px; }
+.yn-layer .yn-dk { margin: 0 0 8px; font: 600 14px var(--sp-serif) !important; color: #7a3f31; }
+.yn-layer .yn-dnote { padding: 14px 16px; border-radius: 12px; background: var(--yn-fill); font: 16px/1.55 var(--sp-serif) !important; color: var(--yn-ink); white-space: pre-wrap; overflow-wrap: anywhere; }
+.yn-layer .yn-dctx { margin: 8px 0 0; font: 13.5px/1.4 var(--sp-serif) !important; color: var(--yn-muted); }
+.yn-dtl { list-style: none; margin: 22px 0 0; padding: 0; }
+.yn-layer .yn-dtl li { position: relative; display: grid; grid-template-columns: 22px 1fr auto; gap: 12px; padding-bottom: 14px; font: 15px var(--sp-serif) !important; }
+.yn-dtl li::before { content: ""; position: absolute; left: 9px; top: 16px; bottom: -2px; border-left: 2px solid #ead7ce; }
+.yn-dtl li:last-child::before { display: none; }
+.yn-dtl li > i { width: 14px; height: 14px; margin: 4px 0 0 3px; border-radius: 50%; background: var(--yn-rose); box-shadow: 0 0 0 3px #f4e0d7; position: relative; z-index: 1; }
+.yn-dtl li.todo > i { background: #fff; box-shadow: inset 0 0 0 2px #dfc7bd; }
+.yn-dtl b { font-weight: 600; }
+.yn-dtl li.todo b { color: var(--yn-faint); font-weight: 400; }
+.yn-layer .yn-dtl small { display: block; margin-top: 1px; font: 13.5px var(--sp-serif) !important; color: var(--yn-muted); }
+.yn-layer .yn-dtl time { font: 13.5px var(--sp-serif) !important; color: var(--yn-muted); white-space: nowrap; }
+.yn-dmsg { display: flex; gap: 12px; margin-top: 16px; }
+.yn-dmsg img { width: 38px; height: 38px; flex: none; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 2px #fff, 0 1px 4px rgba(0, 0, 0, 0.15); }
+.yn-layer .yn-bub { flex: 1; min-width: 0; padding: 13px 15px 9px; border-radius: 4px 14px 14px 14px; background: #fbf0ea; box-shadow: inset 0 0 0 1px #f0dbd1; font: 15.5px/1.55 var(--sp-serif) !important; white-space: pre-wrap; overflow-wrap: anywhere; }
+.yn-layer .yn-sig { display: block; margin-top: 2px; font: 600 21px/1.2 "Caveat", cursive !important; color: var(--yn-rose); white-space: normal; }
+.yn-layer .yn-when { display: block; margin-top: 4px; font: 13px var(--sp-serif) !important; color: var(--yn-muted); white-space: normal; }
+.yn-dmsg.me { flex-direction: row-reverse; }
+.yn-dmsg.me .yn-bub { border-radius: 14px 4px 14px 14px; background: var(--yn-fill); box-shadow: none; }
+.yn-layer .yn-disc { width: 38px; height: 38px; flex: none; border-radius: 50%; background: #8a4a3c; color: #fff; display: grid; place-items: center; font: 600 13px var(--sp-serif) !important; }
+.yn-df { padding: 12px 16px 14px; border-top: 1px solid var(--yn-hair); }
+.yn-layer .yn-ta { width: 100%; min-height: 84px; resize: vertical; padding: 11px 13px; border-radius: 12px; border: 0; box-shadow: inset 0 0 0 1px #e3d5c9; background: #fff; font: 15.5px/1.5 var(--sp-serif) !important; color: var(--yn-ink); }
+.yn-layer .yn-ta:focus { outline: 0; box-shadow: inset 0 0 0 2px var(--yn-navy); }
+.yn-layer .yn-err { margin: 8px 0 0; font: 13.5px var(--sp-serif) !important; color: #7a3f31; }
+.yn-dfr { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+.yn-layer .yn-dfr > span { margin-right: auto; font: 13.5px var(--sp-serif) !important; color: var(--yn-muted); }
+
+@media (max-width: 1400px) {
+  .yn .yn-ph { width: 150px; height: 190px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .yn-scrim, .yn-panel { transition: none; }
+}
+
+/* ── phones: one column — the art, the title, the buttons, the ring, the band, the list, the side cards ─────────── */
+@media (max-width: 767px) {
+  .yn.d58 { padding: 16px 16px 48px; }
+  .yn .yn-hdw .qc1531-hd { display: flex; flex-direction: column; align-items: stretch; gap: 18px; }
+  .yn .yn-art { justify-items: start; }
+  .yn .yn-ph { width: 120px; height: 140px; }
+  .yn .yn-hdw h1.qc1531-t { margin: 0; font: 600 38px/1.1 var(--font-serif) !important; }
+  .yn .yn-hdw .qc1531-for { display: flex; align-items: center; gap: 12px; margin: 6px 0 12px; }
+  .yn .yn-hdw .qc1531-for i { flex: 1 1 0; height: 1px; background: #cfc5b7; }
+  .yn .yn-hdw .qc1531-for span { font: 400 18px var(--sp-type) !important; }
+  .yn .yn-hdw .qc1531-for em { margin-right: 6px; font: italic 400 17px var(--sp-serif) !important; color: #5b4f47; }
+  .yn .yn-hdw .qc1531-acts { display: flex; flex-wrap: wrap; gap: 10px; }
+  .yn .yn-hdw .qc1531-b { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 44px; padding: 0 18px; border-radius: 12px; font: 400 16px/1 var(--sp-type) !important; }
+  .yn .yn-hdw .qc1531-b--n { background: #2a3a52; color: #fff; }
+  .yn .yn-hdw .qc1531-b--g { background: #fff; color: var(--yn-ink); box-shadow: inset 0 0 0 1px #d9d0c3; }
+  .yn .yn-hdw .qc1531-rb { display: grid; grid-template-columns: 1fr; justify-items: center; gap: 12px; }
+  .yn .yn-hdw .qc1531-lgw { width: 100%; }
+  .yn-grid { grid-template-columns: 1fr; }
+  .yn-side { position: static; }
+  .yn .yn-nr { grid-template-columns: 38px minmax(0, 1fr); }
+  .yn .yn-ns { grid-column: 2; flex-direction: row; align-items: center; gap: 10px; padding-top: 0; }
+  .yn .yn-key li { grid-template-columns: 1fr; gap: 6px; }
+  .yn-panel { top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-width: none; height: 92vh; transform: translateY(30px); }
+  .yn-layer .yn-pcard.os-card { border-radius: 20px 20px 0 0; }
+}

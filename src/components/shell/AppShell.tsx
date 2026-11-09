@@ -23,7 +23,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   ArrowLeftRight, Book, BookCopy, CalendarDays, Compass, FilePenLine, LayoutGrid, Library, LineChart, ListChecks,
-  Mail, Send, Settings, StickyNote, Sun, Users,
+  Mail, MessageSquareText, Send, Settings, StickyNote, Sun, Users,
 } from "lucide-react";
 import { parchment } from "../../lib/designTokens";
 import { ShellTopBar } from "./ShellV2";
@@ -198,6 +198,8 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   book: <Library aria-hidden="true" />,
   materials: <Mail aria-hidden="true" />,
   manuscript: <Library aria-hidden="true" />,
+  /* Your notes v1 — the Founding writer section's rib (and its one row, `notes`, below) */
+  founding: <MessageSquareText aria-hidden="true" />,
   /* ACCOUNT joined the nav when Settings came up out of the foot (audit pack P5). BOTH keys are
      added — the group's and the row's — per the parallel-surface warning below; adding the
      section without its glyph is the quiet half of that failure.
@@ -236,6 +238,8 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   folder: <Book aria-hidden="true" />,
   /* Manuscripts v27 Part E — Versions: the mock's ⇆ */
   versions: <ArrowLeftRight aria-hidden="true" />,
+  /* Your notes v1 — the Founding writer section and its one page */
+  notes: <MessageSquareText aria-hidden="true" />,
   settings: <Settings aria-hidden="true" />,
 };
 

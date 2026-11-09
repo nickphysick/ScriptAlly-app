@@ -88,6 +88,8 @@ import { UndoBar } from "./components/queryActions/UndoBar";
 import { Palette, X, Check, HelpCircle, Bell, Settings, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { openContactLog } from "./lib/contactLogStore";
+/* Your notes v1 — imported last so its sheets (and the Dashboard's it reads) keep their first-import places */
+import { YourNotesPage } from "./components/notes/YourNotesPage";
 
 /** TEMP dev harness for the shared Form11Drawer (#/drawer-lab): renders EditQueryDrawer over a mock
  *  query so the shell can be reviewed without signing in. Sits inside DbProvider, so the drawer's
@@ -753,6 +755,13 @@ function AppContent() {
         {routeKey === "account" && (
           <StagePage name="account" active layout="fill">
             <SettingsRoute path={path} section={accountSectionForPath(path) ?? "profile"} onNavigate={handleNavigate} />
+          </StagePage>
+        )}
+        {/* Your notes v1 (9 Nov) — the founding writer's notes. Mounted on demand: its read of the writer's notes and a
+            note's thread run only while the page is open. */}
+        {routeKey === "your-notes" && (
+          <StagePage name="your-notes" active>
+            <YourNotesPage active />
           </StagePage>
         )}
         {/* Phone app v2 Part 7D — Streaks & goals: a phone page; a computer is sent to the dashboard (GoalsRoute) */}
