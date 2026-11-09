@@ -33,7 +33,7 @@ import { GAP_FOCUS, agentGaps } from "../../../lib/contactHousekeeping";
 import { contactPrefsOf, itemKey } from "../../../lib/contactPrefs";
 import { destroyManifest } from "../../../lib/cascade";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
-import { closeAgentCard, openAgentCard, stepAgentCard, type AgentCardField, type AgentCardTab } from "../../../lib/agentCardStore";
+import { closeAgentCard, completeNewAgent, openAgentCard, stepAgentCard, type AgentCardField, type AgentCardTab } from "../../../lib/agentCardStore";
 import { useToast } from "../../toast/ToastProvider";
 import { AgentCard262, type AgentCard262Props, type OpenAt } from "../contact/AgentCard262";
 import { AgentCardPanel262, type CloseGuard } from "../contact/AgentCardPanel262";
@@ -68,9 +68,14 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
     if (!currentUser) return false;
     return (await commitAgentEdits(firestoreDb, currentUser.id, id, { notes })).ok;
   }, [currentUser]);
+  /* ⚠️ FROM THE ADD JOURNEY'S FINISH SCREEN (`preview`) A HAND-OFF FIRST FINISHES THE ADD: on the Contact list the page's
+     own card answers an edit request (the interceptor), which leaves the store's new-agent session — and its panel —
+     standing behind the card unless the add is completed first (found by AA9) */
+  const finishAdd = useCallback(() => { if (o.preview) completeNewAgent(agentId); }, [o.preview, agentId]);
   const openEdit = useCallback((tab?: AgentCardTab, focus?: AgentCardField) => {
+    finishAdd();
     openAgentCard(agentId, { tab: tab ?? "who", ...(focus ? { focus } : {}), host: "panel", from: "button" });
-  }, [agentId]);
+  }, [agentId, finishAdd]);
 
   const props = useMemo((): AgentCard262Props | null => {
     if (!agent) return null;
@@ -124,7 +129,7 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
       onStep: (dd) => { const n = seq[at + dd]; if (n) stepAgentCard(n); },
       onClose: o.preview ? noop : undefined,
       onJourney: (mode, queryId) => openQueryDrawer({ mode: mode as "resp", queryId }),
-      onLog: () => openQueryDrawer({ mode: "log", agentId: agent.id, ...(msId ? { manuscriptId: msId } : {}) }),
+      onLog: () => { finishAdd(); openQueryDrawer({ mode: "log", agentId: agent.id, ...(msId ? { manuscriptId: msId } : {}) }); },
       onEdit: openEdit,
       onOpenQuery: (queryId) => { closeAgentCard(); navigate(`/queries?q=${encodeURIComponent(queryId)}`); },
       onNotes: (text) => write(agent.id, text),
@@ -138,7 +143,7 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
       story: { blocks: storyBlocks(rows, toAgent, activities, (id) => titleOf(id) || null, replyWeeksOf(agent), nowMs), heard: heardWords(rows) },
     };
     return { ...base, preview: o.preview };
-  }, [agent, agents, queries, manuscripts, activities, qcRows, scoped, personal, currentUser, userTasks, taskFlags, nowMs, editOpts, editCtx, saveDraft, showToast, write, openEdit, navigate, deleteAgent, o.preview, o.sequence]);
+  }, [agent, agents, queries, manuscripts, activities, qcRows, scoped, personal, currentUser, userTasks, taskFlags, nowMs, editOpts, editCtx, saveDraft, showToast, write, openEdit, navigate, deleteAgent, o.preview, o.sequence, finishAdd]);
   return { props, guard };
 }
 
