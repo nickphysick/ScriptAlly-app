@@ -750,6 +750,8 @@ export enum SubmissionMethod {
   ONLINE_FORM = "Online Form",
   QUERY_MANAGER = "Query Manager",
   POST = "Post",
+  /** Add agent v1 — any other way in ("Agency portal", …): the words are `Agent.submissionMethodOther` */
+  OTHER = "Other",
 }
 
 /** One repeatable social handle on an agent — platform label + handle/URL. */
