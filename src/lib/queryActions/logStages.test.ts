@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 import { QueryStatus, SubmissionMethod, SubmissionStatus, type Agent, type Query } from "../../types";
 import { logPayload } from "./logSave";
 import {
-  askWords, calMonth, celebrationLine, checkLine, materialsOf, MILESTONE, piecesFromAsk, piecesMatchAsk, planOf, previewOf,
+  askWords, calMonth, sizeName, sizesFor, celebrationLine, checkLine, materialsOf, MILESTONE, piecesFromAsk, piecesMatchAsk, planOf, previewOf,
   stageAgents, titleName, whoGroups, type PlanContext, type StagePackage,
 } from "./logStages";
 import type { PackageCard } from "./packages";
@@ -111,6 +111,13 @@ describe("the check and the celebration", () => {
     expect(Object.keys(MILESTONE).map(Number)).toEqual([1, 10, 25, 50, 100]);
     expect(MILESTONE[25]).toBe("Twenty-five queries. That takes some nerve.");
     expect(checkLine(27, "Murphy's Day Out")).toBe("Your 27th query for Murphy's Day Out.");
+  });
+});
+
+describe("the sizes menu", () => {
+  it("offers the ref's five, named as the ref names them, plus the agent's own ask", () => {
+    const ask = stageAgents([ag("x", "X Y", { materialsWanted: ["Query Letter", "5,000 words"] })], [], NOW)[0].ask;
+    expect(sizesFor(ask).map(sizeName)).toEqual(["First 5 pages", "First 10 pages", "First 50 pages", "First chapter", "First 3 chapters", "First 5,000 words"]);
   });
 });
 

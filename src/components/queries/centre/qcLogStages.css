@@ -10,7 +10,7 @@
   position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; color: var(--qls-ink); font-family: var(--qls-se); text-align: left;
 }
 .qls :is(span, p, div, button, input, textarea, label, b, em, small, i, u, strong) { font-family: inherit; }
-.qls .qls-in { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+.qls .qls-in { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden; background: #fff; }
 .qls .qls-in.is-bump { animation: qls-bump .32s .22s both; }
 @keyframes qls-bump { 30% { transform: translateY(2px); } 60% { transform: translateY(-1px); } }
 

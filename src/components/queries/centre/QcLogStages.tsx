@@ -13,11 +13,13 @@
  *    a big row or our own menu.
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import type { SubmissionMethod } from "../../../types";
+import { SubmissionMethod } from "../../../types";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import {
-  STAGES, STAGE_LABEL, STAGE_LINE, batchWhoLine, dayMon, sameDay, titleName, whoGroups, yesterday,
-  type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type StageAgent, type StageKey, type StagePackage,
+  HOW, MONL, STAGES, STAGE_LABEL, STAGE_LINE, askWords, batchWhoLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk, piecesMatchAsk,
+  sameDay, sizeName, sizesFor, sod, titleName, weekdayDay, whoGroups, yesterday,
+  type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
@@ -97,6 +99,12 @@ export function nextStage(s: FlowState, from: StageKey): StageKey {
   for (let j = STAGES.indexOf(from) + 1; j < STAGES.length; j++) if (!answered(s, STAGES[j])) return STAGES[j];
   return "check";
 }
+
+/** stand-ins for a piece the book has no version of yet: ticked, but recorded with no version id */
+export const NO_LETTER = "__letter";
+export const NO_SYN = "__synopsis";
+const NO_PIECES: Pieces = { letterId: null, synopsisId: null, sample: null };
+const NO_ASK = { ql: true, syn: true, sample: { unit: "none" as const, amt: 0, from: 1, sect: false, fu: null }, stated: false };
 
 /* ── the shared parts ─────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -217,12 +225,235 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     );
   };
 
+  /* ── the Sent stage ── */
+  const first = agent?.first ?? "the agent";
+  const y = yesterday(nowMs);
+  const isEarlier = s.sent != null && !sameDay(s.sent, nowMs) && !sameDay(s.sent, y);
+  const calRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => { if (s.earlier && calRef.current && sbRef.current) sbRef.current.scrollTop = sbRef.current.scrollHeight; }, [s.earlier]);
+  const whenBody = () => {
+    const cal = calMonth(s.calY, s.calM, nowMs);
+    const shift = (d: number) => { const m = new Date(s.calY, s.calM + d, 1); set({ calY: m.getFullYear(), calM: m.getMonth() }); };
+    return (
+      <>
+        <h2 className="qls-qh">When did it go to {first}?</h2>
+        <p className="qls-qs">This starts the clock on {first}'s reply window.</p>
+        <div className="qls-big" data-qls="when">
+          <BigRow glyph={ICON.cal} title="Today" sub={weekdayDay(nowMs)} on={sameDay(s.sent, nowMs)} data={{ "data-qls": "when-opt", "data-k": "today" }} onClick={() => answer({ sent: sod(nowMs), earlier: false })} />
+          <BigRow glyph={ICON.cal} title="Yesterday" sub={weekdayDay(y)} on={sameDay(s.sent, y)} data={{ "data-qls": "when-opt", "data-k": "yesterday" }} onClick={() => answer({ sent: y, earlier: false })} />
+          <BigRow glyph={ICON.cal} title="An earlier date" sub={isEarlier ? `Chosen: ${dayMonY(s.sent!, nowMs)}` : "Pick it from the calendar"} on={s.earlier} arrow={false}
+            data={{ "data-qls": "when-opt", "data-k": "earlier" }} onClick={() => set({ earlier: !s.earlier })} />
+        </div>
+        {s.earlier ? (
+          <div className="qls-cal" data-qls="calendar" ref={calRef}>
+            <div className="qls-calh">
+              <button type="button" aria-label="Previous month" data-qls="cal-prev" onClick={() => shift(-1)}>{ICON.l}</button>
+              <b data-qls="cal-month">{MONL[s.calM]} {s.calY}</b>
+              <button type="button" aria-label="Next month" data-qls="cal-next" disabled={!cal.canNext} onClick={() => shift(1)}>{ICON.r}</button>
+            </div>
+            <div className="qls-calg">
+              {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => <span key={i} aria-hidden="true">{d}</span>)}
+              {Array.from({ length: cal.lead }, (_, i) => <i key={`b${i}`} />)}
+              {cal.days.map((d) => (
+                <button key={d.ms} type="button" data-qls="cal-day" data-day={d.day} disabled={d.future} aria-label={weekdayDay(d.ms)}
+                  className={`${d.today ? "is-today" : ""}${sameDay(s.sent, d.ms) ? " is-on" : ""}`} onClick={() => answer({ sent: d.ms })}>{d.day}</button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </>
+    );
+  };
+
+  /* ── the Materials stage ── */
+  const dflt = { letter: p.letters[0]?.id ?? null, synopsis: p.synopses[0]?.id ?? null, book: p.bookVersions.find((b) => b.current)?.id ?? p.bookVersions[0]?.id ?? null };
+  const ask = agent?.ask ?? null;
+  const aw = ask ? askWords(ask) : null;
+  const hasPkgs = p.packages.length > 0;
+  const showPkgs = hasPkgs && !s.custom;
+  const usePackage = (pk: StagePackage) => {
+    /* a package sets the letter and the synopsis; a package states no sample size, so where it tests a book version
+       the portion is what the agent asks for, else the house opening sample (3 chapters) */
+    const sample: SampleChoice | null = pk.card.bookVersion
+      ? (ask && ask.sample.unit !== "none" ? { unit: ask.sample.unit, amt: ask.sample.amt, bookVersionId: null } : { unit: "chapters", amt: 3, bookVersionId: null })
+      : null;
+    answer({ packageId: pk.id, piecesSet: true, custom: false, pieces: { letterId: pk.card.qlId, synopsisId: pk.card.synId, sample } });
+  };
+  /* the pieces view starts from what the agent asks for, the first time it is shown for this agent */
+  useEffect(() => {
+    if (s.step === "what" && !showPkgs && !s.piecesTouched) {
+      set({ pieces: ask ? piecesFromAsk(ask, NO_PIECES, dflt) : { letterId: dflt.letter ?? NO_LETTER, synopsisId: dflt.synopsis ?? NO_SYN, sample: null }, piecesTouched: true });
+    }
+  }); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const [pop, setPop] = useState<{ k: "letter" | "syn" | "sample"; top: number; left: number } | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const popRef = useRef<HTMLDivElement>(null);
+  const openPop = (k: "letter" | "syn" | "sample", el: HTMLElement) => {
+    if (pop?.k === k) { setPop(null); return; }
+    const r = el.getBoundingClientRect(), c = rootRef.current!.getBoundingClientRect();
+    setPop({ k, top: r.bottom - c.top + 6, left: r.right - c.left });
+  };
+  /* the menu flips upwards when there is no room below, and is kept inside the panel, so it is never clipped */
+  useLayoutEffect(() => {
+    const el = popRef.current, root = rootRef.current;
+    if (!pop || !el || !root) return;
+    const c = root.getBoundingClientRect();
+    const h = el.offsetHeight, w = el.offsetWidth;
+    const r = root.querySelector<HTMLElement>(`[data-qls="vr"][data-k="${pop.k}"]`)?.getBoundingClientRect();
+    let top = pop.top;
+    const up = !!r && top + h > c.height - 8;
+    if (up && r) top = r.top - c.top - h - 6;
+    el.dataset.up = up ? "1" : "0";
+    el.style.top = `${Math.max(8, top)}px`;
+    el.style.left = `${Math.max(8, Math.min(pop.left - w, c.width - w - 8))}px`;
+  }, [pop]);
+  useEscapeLayer(!!pop, () => setPop(null), ESC_LEVEL.drawerPopup);
+  useEffect(() => {
+    if (!pop) return;
+    const off = (e: PointerEvent) => {
+      const t = e.target as HTMLElement;
+      if (popRef.current?.contains(t) || t.closest?.('[data-qls="vr"]')) return;
+      setPop(null);
+    };
+    document.addEventListener("pointerdown", off, true);
+    return () => document.removeEventListener("pointerdown", off, true);
+  }, [pop]);
+  useEffect(() => setPop(null), [s.step]);
+
+  const pc = s.pieces;
+  const sizes = sizesFor(ask ?? NO_ASK);
+  const sampleNow: SampleChoice = pc.sample ?? { unit: ask && ask.sample.unit !== "none" ? ask.sample.unit : "chapters", amt: ask && ask.sample.unit !== "none" ? ask.sample.amt : 3, bookVersionId: dflt.book };
+  const bookName = (id: string | null) => p.bookVersions.find((b) => b.id === id)?.name ?? null;
+  const setPieces = (patch: Partial<Pieces>) => set({ pieces: { ...pc, ...patch } });
+  const tog = (k: "letter" | "syn" | "sample") => {
+    if (k === "letter") setPieces({ letterId: pc.letterId ? null : dflt.letter ?? NO_LETTER });
+    else if (k === "syn") setPieces({ synopsisId: pc.synopsisId ? null : dflt.synopsis ?? NO_SYN });
+    else setPieces({ sample: pc.sample ? null : sampleNow });
+  };
+  const letterName = (id: string | null) => p.letters.find((l) => l.id === id)?.name ?? "Query letter";
+  const synName = (id: string | null) => p.synopses.find((l) => l.id === id)?.name ?? "Synopsis";
+  const pieceCount = [!!pc.letterId, !!pc.synopsisId, !!pc.sample].filter(Boolean).length;
+  const anyPiece = pieceCount > 0;
+  const fitsAsk = ask ? piecesMatchAsk(ask, pc) : false;
+
+  const whatBody = () => {
+    const sub = aw ? `${first}'s card asks for ${aw}.` : `Nothing on ${first}'s card about what they ask for.`;
+    if (showPkgs) {
+      const fitOne = ask ? p.packages.find((x) => packageFits(x, ask))?.id ?? null : null;
+      return (
+        <>
+          <h2 className="qls-qh">What did you send {first}?</h2>
+          <p className="qls-qs" data-qls="asks">{sub}</p>
+          <div className="qls-big" data-qls="packages">
+            {p.packages.map((x) => (
+              <BigRow key={x.id} glyph={ICON.pkg} glyphClass="is-pkg" title={x.name} sub={x.pieces.join(" · ")} on={s.piecesSet && s.packageId === x.id}
+                tag={x.id === fitOne ? `✓ What ${first} asks for` : x.active ? "Active" : null} tagClass={x.id === fitOne ? "is-y" : undefined}
+                data={{ "data-qls": "package", "data-id": x.id }} onClick={() => usePackage(x)} />
+            ))}
+            <button type="button" className="is-quiet" data-qls="choose-pieces" onClick={() => set({ custom: true, piecesTouched: false })}><span className="qls-tx"><b>Choose the pieces myself</b></span></button>
+          </div>
+        </>
+      );
+    }
+    const row = (k: "letter" | "syn" | "sample", label: string, on: boolean, val: string) => (
+      <div className={`qls-pc${on ? " is-on" : ""}`} data-qls="piece" data-k={k} data-on={on ? "1" : "0"} role="checkbox" aria-checked={on} tabIndex={0}
+        onClick={() => tog(k)} onKeyDown={(e) => { if ((e.key === " " || e.key === "Enter") && e.target === e.currentTarget) { e.preventDefault(); tog(k); } }}>
+        <span className="qls-bx" aria-hidden="true">{on ? "✓" : ""}</span>
+        <span className="qls-tx"><b>{label}</b></span>
+        <button type="button" className="qls-vr" data-qls="vr" data-k={k} aria-haspopup="menu" aria-expanded={pop?.k === k}
+          onClick={(e) => { e.stopPropagation(); openPop(k, e.currentTarget); }}>{val}{ICON.chev}</button>
+      </div>
+    );
+    const bv = bookName(sampleNow.bookVersionId);
+    return (
+      <>
+        <h2 className="qls-qh">What did you send {first}?</h2>
+        <p className="qls-qs" data-qls="asks">{sub}</p>
+        <div className="qls-pcs" data-qls="pieces">
+          {row("letter", "Query letter", !!pc.letterId, letterName(pc.letterId ?? dflt.letter))}
+          {row("syn", "Synopsis", !!pc.synopsisId, synName(pc.synopsisId ?? dflt.synopsis))}
+          {row("sample", "Opening pages", !!pc.sample, `${sizeName(sampleNow)}${bv ? ` · ${bv}` : ""}`)}
+        </div>
+        {ask?.stated ? <p className="qls-ask" data-qls="ask-line">{fitsAsk ? `✓ That's what ${first} asks for.` : <button type="button" className="qls-lk" data-qls="use-ask" onClick={() => setPieces(piecesFromAsk(ask, pc, dflt))}>Use what {first} asks for</button>}</p> : null}
+        {hasPkgs ? <p className="qls-ask"><button type="button" className="qls-lk" data-qls="back-packages" onClick={() => set({ custom: false })}>Back to your packages</button></p> : null}
+      </>
+    );
+  };
+  const menu = () => {
+    if (!pop) return null;
+    const item = (key: string, on: boolean, label: string, onPick: () => void, small?: string) => (
+      <button key={key} type="button" role="menuitemradio" aria-checked={on} data-qls="menu-item" onClick={() => { onPick(); setPop(null); }}>
+        <span className="qls-ck" aria-hidden="true">{on ? "✓" : ""}</span>{label}{small ? <small>{small}</small> : null}
+      </button>
+    );
+    let inner: React.ReactNode;
+    if (pop.k === "letter") inner = <><div className="qls-ph">Which letter?</div>{(p.letters.length ? p.letters : [{ id: NO_LETTER, name: "Query letter" }]).map((l) => item(l.id, (pc.letterId ?? dflt.letter ?? NO_LETTER) === l.id, l.name, () => setPieces({ letterId: l.id })))}</>;
+    else if (pop.k === "syn") inner = <><div className="qls-ph">Which synopsis?</div>{(p.synopses.length ? p.synopses : [{ id: NO_SYN, name: "Synopsis" }]).map((l) => item(l.id, (pc.synopsisId ?? dflt.synopsis ?? NO_SYN) === l.id, l.name, () => setPieces({ synopsisId: l.id })))}</>;
+    else inner = (
+      <>
+        <div className="qls-ph">How much?</div>
+        {sizes.map((z) => item(`${z.unit}${z.amt}`, sampleNow.unit === z.unit && sampleNow.amt === z.amt, sizeName(z), () => setPieces({ sample: { ...sampleNow, unit: z.unit, amt: z.amt } })))}
+        {p.bookVersions.length ? <><hr /><div className="qls-ph">From</div>{p.bookVersions.map((b) => item(b.id, sampleNow.bookVersionId === b.id, b.name, () => setPieces({ sample: { ...sampleNow, bookVersionId: b.id } }), b.current ? "current" : undefined))}</> : null}
+      </>
+    );
+    return <div ref={popRef} className="qls-pop" role="menu" data-qls="menu" data-k={pop.k} style={{ top: pop.top, left: 8 }}>{inner}</div>;
+  };
+
+  /* ── the How stage ── */
+  const howBody = () => {
+    const sub: Record<string, string> = {
+      [SubmissionMethod.EMAIL]: agent?.email ? `To ${agent.email}` : `No email on ${first}'s card yet`,
+      [SubmissionMethod.QUERY_MANAGER]: `${first}'s QueryManager form`,
+      [SubmissionMethod.ONLINE_FORM]: agent?.agency && agent.agency !== "No agency" ? `The form on ${agent.agency}'s website` : "The form on their website",
+      [SubmissionMethod.POST]: "Printed and posted",
+    };
+    const card = agent?.via ? HOW.find((h) => h.k === agent.via) ?? null : null;
+    const order = card ? [card, ...HOW.filter((h) => h.k !== card.k)] : [...HOW];
+    return (
+      <>
+        <h2 className="qls-qh">How did you send it?</h2>
+        <p className="qls-qs">{card ? `${first}'s card says ${card.word}, so that's first.` : `Nothing on ${first}'s card about how they take queries.`}</p>
+        <div className="qls-big" data-qls="how">
+          {order.map((h) => (
+            <BigRow key={h.k} glyph={h.k === SubmissionMethod.EMAIL ? ICON.mail : h.k === SubmissionMethod.POST ? ICON.post : ICON.web} title={h.label} sub={sub[h.k]}
+              on={s.via === h.k} tag={card?.k === h.k ? `From ${first}'s card` : null} data={{ "data-qls": "how-opt", "data-k": h.k }} onClick={() => answer({ via: h.k })} />
+          ))}
+        </div>
+      </>
+    );
+  };
+
+  /* ↑ ↓ and ↵ over the big rows on Sent, Materials and How */
+  useEffect(() => {
+    if (s.step !== "when" && s.step !== "what" && s.step !== "how") return;
+    const onKey = (e: KeyboardEvent) => {
+      const t = e.target as HTMLElement | null;
+      if (t?.closest?.("input, textarea") || popRef.current) return;
+      if (!rootRef.current?.isConnected || !rootRef.current.offsetParent) return;
+      const bs = [...(sbRef.current?.querySelectorAll<HTMLButtonElement>(".qls-big > button:not(.is-quiet)") ?? [])];
+      if (!bs.length) return;
+      let i = bs.findIndex((b) => b.classList.contains("is-hi"));
+      if (i < 0) i = bs.findIndex((b) => b === document.activeElement);
+      if (i < 0) i = bs.findIndex((b) => b.classList.contains("is-on"));
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        i = e.key === "ArrowDown" ? (i + 1) % bs.length : (i - 1 + bs.length) % bs.length;
+        bs.forEach((b) => b.classList.remove("is-hi"));
+        bs[i].classList.add("is-hi");
+        bs[i].focus();
+      } else if (e.key === "Enter" && i >= 0 && !(t && t.closest?.("button"))) { e.preventDefault(); bs[i].click(); }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [s.step]);
+
   /* ── the stepper's values ── */
   const values: Record<StageKey, string | null> = {
     who: agent?.first ?? null,
-    when: s.sent == null ? null : sameDay(s.sent, nowMs) ? "Today" : sameDay(s.sent, yesterday(nowMs)) ? "Yesterday" : dayMon(s.sent),
-    what: null,
-    how: null,
+    when: s.sent == null ? null : sameDay(s.sent, nowMs) ? "Today" : sameDay(s.sent, y) ? "Yesterday" : dayMon(s.sent),
+    what: !s.piecesSet ? null : s.packageId ? p.packages.find((x) => x.id === s.packageId)?.name ?? "Package" : `${pieceCount} ${pieceCount === 1 ? "piece" : "pieces"}`,
+    how: s.via ? howLabel(s.via) : null,
     check: null,
   };
 
@@ -236,17 +467,28 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     </>
   );
 
-  const body = s.step === "who" ? whoBody() : <p className="qls-qs">This stage arrives in the next phase.</p>;
-  const foot = s.step === "who" ? backFoot("↑ ↓ and ↵") : backFoot(null);
+  const body = s.step === "who" ? whoBody() : s.step === "when" ? whenBody() : s.step === "what" ? whatBody() : s.step === "how" ? howBody()
+    : <p className="qls-qs">The check arrives in the next phase.</p>;
+  const piecesFoot = (
+    <>
+      <button type="button" className="qls-lnk" data-qls="back" onClick={() => go("when", "back")}>Back</button>
+      <span className="qls-sp" />
+      <button type="button" className="qls-btn" data-qls="pieces-continue" disabled={!anyPiece}
+        onClick={() => answer({ packageId: null, piecesSet: true })}>Continue {ICON.arrow}</button>
+    </>
+  );
+  const foot = s.step === "who" ? backFoot("↑ ↓ and ↵") : s.step === "what" && !showPkgs ? piecesFoot
+    : s.step === "check" ? backFoot(null) : backFoot("Tap one to carry on");
 
   return (
-    <div className="qc149f qls qcv-legacy" data-qc149f="log" data-qls="root" data-step={s.step}>
+    <div ref={rootRef} className="qc149f qls qcv-legacy" data-qc149f="log" data-qls="root" data-step={s.step}>
       <div className="mk-lc-in qc149c-in qls-in">
         <FlowHead title={FLOW_WORDS.log.title} line={line} onClose={p.onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
         <Stepper s={s} values={values} onGo={(k) => go(k)} />
         <div ref={sbRef} key={s.step} className={`qls-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
         <div className="qls-cf" data-qls="foot">{foot}</div>
       </div>
+      {menu()}
     </div>
   );
 };

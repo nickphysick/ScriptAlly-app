@@ -127,7 +127,8 @@ export function sizesFor(ask: GuidelineAsk): { unit: SampleChoice["unit"]; amt: 
   if (s.unit !== "none" && !out.some((x) => x.unit === s.unit && x.amt === s.amt)) out.push({ unit: s.unit, amt: s.amt });
   return out;
 }
-export const sizeName = (s: { unit: Sample["unit"]; amt: number }): string => capFirst(sampleName({ ...blankSample(), unit: s.unit, amt: s.amt }));
+export const sizeName = (s: { unit: Sample["unit"]; amt: number }): string =>
+  s.unit === "chapters" && s.amt === 1 ? "First chapter" : capFirst(sampleName({ ...blankSample(), unit: s.unit, amt: s.amt }));
 
 /** "a query letter, a synopsis and the first 10 pages", or null when the card says nothing */
 export function askWords(ask: GuidelineAsk): string | null {
