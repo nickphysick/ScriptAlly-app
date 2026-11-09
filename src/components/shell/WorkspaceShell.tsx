@@ -108,6 +108,8 @@ export interface WorkspaceShellProps {
   onOpenFeedback?: () => void;
   /** True while that panel is open — the pill reports it, as the dock's button did. */
   feedbackOpen?: boolean;
+  /** Your notes v1: replies on Your notes the writer has not seen — the card link's "{k} new" and the rail's dot */
+  newReplies?: number;
   /** Opens the account menu, and hands it the element to anchor against (it is portalled). */
   onOpenAccount?: (anchor: HTMLElement) => void;
   onUpgrade?: () => void;
@@ -168,7 +170,7 @@ const FEEDBACK_ICON = (
 
 export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   sections, icons, onNavigatePath, onOpenSearch, searchAnchorRef, onOpenHelp, onOpenFeedback,
-  feedbackOpen = false, onOpenAccount, onUpgrade,
+  feedbackOpen = false, newReplies = 0, onOpenAccount, onUpgrade,
   onNavigate, scrollId, scrollRef, onScroll, footFade, fit = false, accountMenu, children,
 }) => {
   const { pathname, search } = useLocation();
@@ -903,6 +905,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             onBack={leaveSettings}
             onFeedback={onOpenFeedback}
             feedbackOpen={feedbackOpen}
+            newReplies={newReplies}
             feedbackRef={fbAnchor}
             onAccount={onOpenAccount}
             initials={getInitials(name)}
@@ -1121,6 +1124,10 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 <span className="ws-fbl">A snag, or a wish? Tell us.</span>
                 <button ref={fbAnchor} type="button" className="ws-fbtn" data-probe="feedback" onClick={onOpenFeedback} aria-expanded={feedbackOpen}>
                   {FEEDBACK_ICON}<span>Give feedback</span>
+                </button>
+                {/* Your notes v1 — the way to the record of every note, with the replies not yet seen */}
+                <button type="button" className="ws-fblink" data-probe="your-notes" onClick={() => onNavigatePath("/your-notes")}>
+                  <span>See your notes</span>{newReplies > 0 ? <i data-probe="your-notes-new">{newReplies} new</i> : null}
                 </button>
               </div>
               <button ref={fbAnchor} type="button" className="ws-fbb" onClick={onOpenFeedback} aria-expanded={feedbackOpen}>

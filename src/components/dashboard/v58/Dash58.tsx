@@ -640,7 +640,8 @@ export const Dash58: React.FC<Dash58Props> = ({
           <Dash2Founding loading={loading} uid={fwUid} seenTier={currentUser?.foundingSeenTier}
             onSeen={example || !onFoundingSeen ? undefined : onFoundingSeen}
             /* Part E: the fold is `todoPrefs.dash.foundingFolded`, one dotted leaf; absent onPrefs → this view's only */
-            folded={prefs.foundingFolded} onFold={onPrefs && !example ? (f) => onPrefs(foundingFoldWrite(f)) : undefined} />
+            folded={prefs.foundingFolded} onFold={onPrefs && !example ? (f) => onPrefs(foundingFoldWrite(f)) : undefined}
+            onAllNotes={example ? undefined : () => navigate("/your-notes")} />
           <div className="d2-grid" data-d2="grid">
             <div className="d2-col d2-left" data-d2="left">
               {gsSheetOpen && (

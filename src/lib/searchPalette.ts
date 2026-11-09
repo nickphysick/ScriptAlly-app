@@ -143,6 +143,7 @@ const NAV_PAGE_META: Readonly<Record<string, { id: string; subtitle: string }>> 
   "/queries/packages": { id: "page:packages", subtitle: "Submission package workshop" },
   "/manuscripts/versions": { id: "page:versions", subtitle: "Every version of your book, and what each one landed" },
   "/manuscripts/comps": { id: "page:comps", subtitle: "Find comps for your book" },
+  "/your-notes": { id: "page:your-notes", subtitle: "Everything you’ve told us, and what happened" },
   ...Object.fromEntries(TODO_ROUTES.map((r) => [r.path, { id: r.id === "list" ? "page:todo" : `page:todo-${r.id}`, subtitle: r.blurb }])),
 };
 

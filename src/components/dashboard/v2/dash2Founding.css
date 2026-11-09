@@ -105,6 +105,10 @@
 .d58.d2 .d22-last em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .d58.d2 .d22-last i { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-style: normal; font-weight: 600; font-size: 12px; line-height: 1.3; white-space: nowrap; background: #efe7df; color: #6b5a4e; }
 .d58.d2 .d22-last i.is-done { background: #e1ebe1; color: #355a3a; }
+/* Your notes v1 — the strip's link to the Your notes page (design-refs/dashboard-v2-2 `.fwb-last a`) */
+.d58.d2 .d22-all { all: unset; box-sizing: border-box; margin-left: auto; cursor: pointer; white-space: nowrap; font: inherit; font-size: 12.5px; color: #7d7067; text-decoration: underline; text-underline-offset: 3px; }
+.d58.d2 .d22-all:hover { color: #3b322c; }
+.d58.d2 .d22-all:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; border-radius: 4px; }
 .d58.d2 .d22-last i svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
 
 /* the folded strip (Part E) */

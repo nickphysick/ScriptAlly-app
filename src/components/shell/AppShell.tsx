@@ -30,6 +30,7 @@ import { ShellTopBar } from "./ShellV2";
 import { BetaStrip } from "./BetaStrip";
 import { DeletionBanner } from "../settings/DeletionBanner";
 import { FeedbackDock } from "./FeedbackDock";
+import { useNewReplies } from "../../lib/yourNotesStore";
 import { notifyFeedbackSent, subscribeFeedback } from "../../lib/feedbackStore";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
@@ -273,6 +274,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   // reversed; the board's sidebar no longer carries help).
   const [helpMenuOpen, setHelpMenuOpen] = useState(false);
   const [feedbackOpen, setFeedbackOpen] = useState(false);
+  /* Your notes v1 — replies on Your notes the writer has not seen: the sidebar link's pill, the rail's dot, the pop-up's */
+  const newReplies = useNewReplies(currentUser?.id);
   /* Dashboard v59: a page may ask for the ONE feedback panel to open (lib/feedbackStore) */
   useEffect(() => subscribeFeedback(() => setFeedbackOpen(true)), []);
   // (NavDrawer retired — shell follow-up P3. The slim mobile Nav is retired too (Mobile Pass 1):
@@ -594,6 +597,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
            `BetaStrip`'s "tell us when you find one" still opens the same panel. */
         onOpenFeedback={() => setFeedbackOpen((o) => !o)}
         feedbackOpen={feedbackOpen}
+        newReplies={newReplies}
         onOpenAccount={toggleAccount}
         onUpgrade={() => goPath("/plans")}
         onNavigate={onNavigate}
@@ -772,6 +776,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         <FeedbackDock
           uid={currentUser?.id}
           email={currentUser?.email ?? null}
+          name={currentUser?.name ?? null}
+          newReplies={newReplies}
           open={feedbackOpen}
           onOpenChange={setFeedbackOpen}
           onReceipt={() => notifyFeedbackSent()}

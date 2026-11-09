@@ -614,6 +614,16 @@
     transition: filter 0.14s ease;
   }
   .ws-fbtn:hover { filter: brightness(1.06); }
+  /* Your notes v1 — "See your notes" under the card's button, with a terra "{k} new" pill (design-refs/your-notes-v1) */
+  .ws-fblink {
+    box-sizing: border-box; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%;
+    margin-top: 8px; padding: 6px 2px 0; border: 0; background: none; cursor: pointer; color: var(--ink-cream); opacity: 0.9;
+    font: 400 13px/1.2 var(--sp-serif); text-align: left;
+  }
+  .ws-fblink span { font-family: inherit; }
+  .ws-fblink:hover { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
+  .ws-fblink:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: 2px; border-radius: 4px; }
+  .ws-fblink i { font-style: normal; padding: 1px 7px; border-radius: 999px; background: var(--ink-terra); color: var(--ink-shell); font-weight: 600; font-size: 11px; white-space: nowrap; }
   .ws-fbtn span, .ws-fbb span { font-family: inherit; }
   .ws-fbb, .ws-fbi { display: none; }
   /* ⚠️ THE FOLDED CARD IS THE REFERENCE'S `.fbb` — OUTLINED (fix-ups, 7 Oct, superseding the filled

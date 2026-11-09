@@ -48,6 +48,8 @@ export interface SidebarRailProps {
   onBack: () => void;
   onFeedback?: () => void;
   feedbackOpen?: boolean;
+  /** Your notes v1: the Feedback button's dot shows only while a reply on Your notes is unseen */
+  newReplies?: number;
   feedbackRef?: React.Ref<HTMLButtonElement>;
   onAccount?: (anchor: HTMLElement) => void;
   initials: string;
@@ -90,7 +92,7 @@ export const railCount = (n: number): string => (n > 99 ? "99+" : String(n));
 
 export const SidebarRail: React.FC<SidebarRailProps> = ({
   sections, icons, hit, todoCount, locked, onGo, onExpand, expandRef, expanded, switcher, markSrc,
-  settingsMode, settingsSection, onSettings, onBack, onFeedback, feedbackOpen = false, feedbackRef,
+  settingsMode, settingsSection, onSettings, onBack, onFeedback, feedbackOpen = false, newReplies = 0, feedbackRef,
   onAccount, initials, who, planLabel, tip, toggleKbd,
 }) => {
   const page = settingsMode ? null : hit?.child ?? null;
@@ -176,7 +178,7 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
       </nav>
       {onFeedback && (
         <button ref={feedbackRef} type="button" className="wsr-fb" data-probe="feedback-rail" onClick={onFeedback} aria-expanded={feedbackOpen} aria-label="Give feedback" {...tip("Give feedback")}>
-          <span className="wsr-fbi">{FEEDBACK_ICON}<i aria-hidden="true" /></span>
+          <span className="wsr-fbi">{FEEDBACK_ICON}{newReplies > 0 ? <i aria-hidden="true" data-probe="feedback-dot" /> : null}</span>
           <span className="wsr-t">Feedback</span>
         </button>
       )}
