@@ -462,12 +462,14 @@ test("AA13 · Who are you querying?: Agent fit high first, unrated last, then re
   const L = new Ledger("AA13");
   const agents = JSON.parse(emu("agents")) as { id: string; name: string; agency: string; starRating: number | null; weeks: number | null }[];
   await openApp(page, "/queries", VP);
-  await page.locator("[data-qc149f='agents'], button:has-text('Log a query'):visible").first().click().catch(() => {});
-  const list = page.locator("[data-qc149f='agents']");
-  if (!(await list.isVisible().catch(() => false))) await page.locator("button:has-text('Log a query'):visible").first().click();
-  await list.waitFor({ timeout: 20_000 });
-  if (MUT === "AA13") await page.evaluate(() => { const l = document.querySelector("[data-qc149f='agents']")!; const xs = [...l.querySelectorAll("[data-qc149f='agent']")]; xs.reverse().forEach((x) => l.appendChild(x)); });
-  const ids = await list.locator("[data-qc149f='agent']").evaluateAll((es) => es.map((e) => (e as HTMLElement).dataset.id ?? ""));
+  /* the picker is Log a query v1's staged journey (QcLogStages): its "Ready to query" group is the open agents */
+  const btn = page.getByRole("button", { name: /^\+?\s*Log a query$/ }).locator("visible=true").first();
+  await btn.waitFor({ state: "visible", timeout: 60_000 });
+  await btn.click();
+  const sel = "[data-qls='agent'][data-group='ready']";
+  await page.locator(sel).first().waitFor({ timeout: 20_000 });
+  if (MUT === "AA13") await page.evaluate((s) => { const xs = [...document.querySelectorAll(s)]; const l = xs[0].parentElement!; xs.reverse().forEach((x) => l.appendChild(x)); }, sel);
+  const ids = await page.locator(sel).evaluateAll((es) => es.map((e) => (e as HTMLElement).dataset.id ?? ""));
   const by = new Map(agents.map((a) => [a.id, a]));
   const shown = ids.map((id) => by.get(id)!).filter(Boolean);
   L.check("population: rated and unrated agents in the list", shown.some((a) => a.starRating) && shown.some((a) => !a.starRating), `${shown.filter((a) => a.starRating).length} rated of ${shown.length}`);
