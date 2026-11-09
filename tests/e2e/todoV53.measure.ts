@@ -103,6 +103,9 @@ async function kinds(page: Page): Promise<{ kind: string; key: string }[]> {
     const out: { kind: string; key: string }[] = []; const seen = new Set<string>();
     for (const r of root.querySelectorAll<HTMLElement>("[data-tws-row]")) {
       const k = r.getAttribute("data-kind") ?? "?";
+      /* ⚠️ v54 (D5): the "Fill in what you sent" batch no longer ends on "Check it, then log it" — it is two steps ending
+         "Log it for {n} queries" (todoV54.measure.ts L7, L8 hold it) — so this walk leaves it out */
+      if (k === "batch") continue;
       const kk = k === "fix" ? `fix:${(r.querySelector(".tws-tx b")?.textContent ?? "").match(/reply|wishlist|want sent/)?.[0] ?? "x"}` : k;
       if (seen.has(kk)) continue; seen.add(kk);
       out.push({ kind: kk, key: r.getAttribute("data-tws-row")! });
@@ -246,6 +249,9 @@ for (const vp of SIZES) {
     for (const k of ["quiet", "nudge", "wait"]) {
       const part = page.locator(`${PG} [data-tws="bar"] button[data-k="${k}"]`);
       if (!(await part.count())) continue;
+      /* ⚠️ RE-POINTED BY v54 (D2): the page may scroll by the header's height now, so "the page did not scroll" is read
+         as "the click left the page's scroll where it was" */
+      const was = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)!.scrollTop);
       await part.click();
       await page.waitForTimeout(700);
       const s = await page.evaluate((id) => {
@@ -253,10 +259,10 @@ for (const vp of SIZES) {
         const sc = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)!;
         const list = root.querySelector<HTMLElement>('[data-tws="list"]')!;
         const h = root.querySelector<HTMLElement>(`[data-tws-group="${id}"]`)!;
-        return { page: sc.scrollTop + (sc.scrollHeight - sc.clientHeight), headTop: h.getBoundingClientRect().top - list.getBoundingClientRect().top,
+        return { page: sc.scrollTop, headTop: h.getBoundingClientRect().top - list.getBoundingClientRect().top,
           atEnd: list.scrollTop + list.clientHeight >= list.scrollHeight - 2, moved: list.scrollTop };
       }, k);
-      expect(s.page, `L9 · ${k}: the page did not scroll`).toBe(0);
+      expect(s.page, `L9 · ${k}: the page did not scroll`).toBe(was);
       expect(s.headTop <= 32 || s.atEnd, `L9 · ${k}: the tray brought the group's header to its top (or as far as it goes)`).toBe(true);
     }
     note(`L9-${vp.width}`, r);

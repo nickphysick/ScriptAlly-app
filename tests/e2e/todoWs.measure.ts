@@ -60,7 +60,8 @@ for (const vp of SIZES) {
     expect(read.greens).toEqual([]);
     /* v52: the workspace takes the column under the header (520 floor) and the page itself does not scroll */
     expect(read.wsH).toBeGreaterThanOrEqual(520);
-    expect(read.scrollH, "the page does not scroll").toBe(read.port);
+    /* ⚠️ RE-POINTED BY v54 (D2): the page scrolls by at most the header's height, and no more (todoV54 L1) */
+    expect(read.scrollH - read.port, "the page scrolls by no more than the header's height").toBeLessThanOrEqual(read.header?.h ?? 0);
   });
 }
 
