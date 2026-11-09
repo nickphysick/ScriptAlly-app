@@ -147,10 +147,11 @@ test("CL251-B1 B2 B3 · the headers: Logging new query, Recording response and i
     B1.check(`${where} line`, h.line === LOG_LINE, `line "${h.line?.slice(0, 50)}…"`);
     B1.check(`${where} no art`, h.imgs === 0, `${h.imgs} img(s) in the header`);
     B1.check(`${where} no band label`, !/^New query$/m.test(h.text), "\"New query\" absent");
-    await page.locator("[data-qc149f='agent']").first().click(T).catch(() => {});
+    /* Log a query v1 — each stage has its own line under the same title: Sent asks "When did you send it?" */
+    await page.locator("[data-qls='agent'][data-group='ready']").first().click(T);
     await page.waitForTimeout(600);
     const h2 = await head(page, "[data-qc149f='log']");
-    B1.check(`${where} after an agent`, h2?.title === "Logging new query" && h2.line === LOG_LINE, `after choosing: "${h2?.title}"`);
+    B1.check(`${where} after an agent`, h2?.title === "Logging new query" && h2.line === "When did you send it?", `after choosing: "${h2?.title}" / "${h2?.line}"`);
   };
   /* the Contact list: the top bar's Log a query, in place */
   await openCl24(page, vp);

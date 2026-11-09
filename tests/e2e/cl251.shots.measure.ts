@@ -54,7 +54,7 @@ for (const w of [1512, 1280]) test(`CL251 screens @ ${w}`, async ({ page }) => {
   await openCl24(page, vp);
   await page.locator(".ws-cap--bar .ws-capl").first().click(T); await page.waitForTimeout(1200);
   await shot(page, "03-log-pick-1512");
-  await page.locator("[data-qc149f='agent']").first().click(T); await page.waitForTimeout(800);
+  await page.locator("[data-qls='agent'][data-group='ready']").first().click(T); await page.waitForTimeout(800);
   await shot(page, "04-log-details-1512");
   /* 09 — Add an agent */
   await openCl24(page, vp);
