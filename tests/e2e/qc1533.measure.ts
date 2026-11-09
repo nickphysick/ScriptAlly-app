@@ -215,7 +215,8 @@ for (const vp of SIZES) {
  *       radio row did (one on at a time, the list narrows to the pill's count, a second click clears it); the tiles in
  *       their stage colours; drawn chevrons; no proportion bars. */
 for (const vp of SIZES) {
-  test(`v153.3 P1 chips rail · ${vp.width}`, async ({ page }) => {
+  /* RETIRED by v153.4 — see tests/e2e/RETIRED-query-centre-v153-4.md */
+  test.skip(`v153.3 P1 chips rail · ${vp.width}`, async ({ page }) => {
     const L = new Ledger(`P1-${vp.width}`);
     await openQc(page, vp);
     const R = `${PAGE} [data-qc153='rail']`;

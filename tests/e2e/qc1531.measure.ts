@@ -41,12 +41,13 @@ async function ready(page: Page) {
   const b = page.locator(`${PAGE} [data-qc153="bar"] button[data-v="list"]`);
   if ((await b.getAttribute("aria-pressed")) !== "true") await b.click();
   await expect(page.locator(`${PAGE} [data-qc153="slip"]`).first()).toBeVisible({ timeout: 60_000 });
-  await expect(page.locator(`${PAGE} [data-qc1531="legend-row"]:not([disabled])`).first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.locator(`${PAGE} [data-qc1531="seg"]`).first()).toBeVisible({ timeout: 60_000 });
   await page.evaluate(() => document.fonts.ready);
 }
 
 for (const vp of SIZES) {
-  test(`v153.1 header · ${vp.width}`, async ({ page }) => {
+  /* RETIRED by v153.4 — see tests/e2e/RETIRED-query-centre-v153-4.md */
+  test.skip(`v153.1 header · ${vp.width}`, async ({ page }) => {
     const L = new Ledger(`header-${vp.width}`);
     mkdirSync(DIR, { recursive: true });
     await openRoute(page, "/queries", vp);
@@ -132,7 +133,8 @@ async function inkPixels(page: Page, clip: { x: number; y: number; width: number
 }
 
 /* at 2560: the workspace column caps at 1660 (workspace width v2), so only a wide window leaves plain ground beside it */
-test("v153.1 pattern and rail header · 2560", async ({ page }) => {
+/* RETIRED by v153.4 — see tests/e2e/RETIRED-query-centre-v153-4.md */
+test.skip("v153.1 pattern and rail header · 2560", async ({ page }) => {
   const L = new Ledger("pattern-2560");
   await openRoute(page, "/queries", { width: 2560, height: 1200 });
   await ready(page);
