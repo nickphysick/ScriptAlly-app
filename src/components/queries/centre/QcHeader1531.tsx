@@ -14,30 +14,30 @@
 import React from "react";
 import type { CountLine1512 } from "./QcPage151";
 import "./qcv1531.css";
+import { OpenHeader } from "../../shell/OpenHeader";
 
 export const ARMCHAIR_HAWK = "/images/qc/qc-armchair-hawk.png?v=1";
 
 /** "26 queries sent", "1 query sent" */
 export const sentTitle = (n: number): string => `${n} ${n === 1 ? "query" : "queries"} sent`;
 
+/* Your notes v1: the frame is the shared `shell/OpenHeader`; openHeaderShared.test.tsx holds this markup byte-identical. */
 export const QcHeader1531: React.FC<{
   loading: boolean; onLog: () => void; onRecord: () => void; logDisabled?: boolean; logRef?: React.Ref<HTMLButtonElement>;
   counts?: CountLine1512 | null;
   /** the stage ring card (built by the page that owns the rail's filters) */
   ring?: React.ReactNode;
 }> = ({ loading, onLog, onRecord, logDisabled = false, logRef, counts = null, ring = null }) => (
-  <header className="qc1531-hd" data-qc151="header" data-qc1531="header" data-qcv="open-header" data-own-header="">
-    <div className="qc1531-art" aria-hidden="true"><img src={ARMCHAIR_HAWK} alt="" width={190} /></div>
-    <div className="qc1531-main">
-      <h1 className="qc1531-t" data-page-title="true" data-qc151="title">{counts ? sentTitle(counts.sent) : " "}</h1>
-      {counts?.ms ? (
-        <p className="qc1531-for" data-qc1531="for"><i aria-hidden="true" /><span><em>for</em> {counts.ms}</span><i aria-hidden="true" /></p>
-      ) : null}
-      <div className="qc1531-acts">
-        <button type="button" ref={logRef} className="qc1531-b qc1531-b--n" data-qc151="log" data-qcv="oh-log" disabled={loading || logDisabled} onClick={onLog}>+ Log a query</button>
-        <button type="button" className="qc1531-b qc1531-b--g" data-qc151="record" data-qcv="oh-record" disabled={loading} onClick={onRecord}>Record a response</button>
-      </div>
-    </div>
-    <div className="qc1531-rc">{ring}</div>
-  </header>
+  <OpenHeader
+    attrs={{ "data-qc151": "header", "data-qc1531": "header", "data-qcv": "open-header", "data-own-header": "" }}
+    art={<img src={ARMCHAIR_HAWK} alt="" width={190} />}
+    title={counts ? sentTitle(counts.sent) : " "}
+    titleAttrs={{ "data-qc151": "title" }}
+    forLine={counts?.ms ? { lead: "for", text: counts.ms, attrs: { "data-qc1531": "for" } } : null}
+    actions={<>
+      <button type="button" ref={logRef} className="qc1531-b qc1531-b--n" data-qc151="log" data-qcv="oh-log" disabled={loading || logDisabled} onClick={onLog}>+ Log a query</button>
+      <button type="button" className="qc1531-b qc1531-b--g" data-qc151="record" data-qcv="oh-record" disabled={loading} onClick={onRecord}>Record a response</button>
+    </>}
+    ring={ring}
+  />
 );

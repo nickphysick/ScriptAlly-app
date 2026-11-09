@@ -78,13 +78,23 @@ const pt = (a: number, r = RING_GEO.r) => ({ x: RING_GEO.c + r * Math.sin(a), y:
 export const RING_LABEL_MIN = 12;
 
 export function ringArcs(c: RingCounts): RingArc[] {
-  const total = ringTotal(c);
+  return ringArcsFor(RING_BUCKETS.map((b) => ({ key: b.key, n: c[b.key] }))) as RingArc[];
+}
+
+/** One arc of a ring whose buckets are the caller's own (Your notes v1 shares the ring: `shell/OpenRing`). */
+export interface RingArcOf<K extends string = string> { key: K; d: string; full: boolean; label: { x: number; y: number } | null; mid: { x: number; y: number } }
+/**
+ * THE RING'S ARCS OVER ANY BUCKETS, in the order given, clockwise from 12 o'clock. `ringArcs` is this over the Query
+ * Centre's five (qc1531.test.ts holds its output); the Your notes page passes its four.
+ */
+export function ringArcsFor<K extends string>(entries: readonly { key: K; n: number }[]): RingArcOf<K>[] {
+  const total = entries.reduce((s, e) => s + e.n, 0);
   if (!total) return [];
-  const live = RING_BUCKETS.filter((b) => c[b.key] > 0);
-  const out: RingArc[] = [];
+  const live = entries.filter((e) => e.n > 0);
+  const out: RingArcOf<K>[] = [];
   let a = 0;
   for (const b of live) {
-    const span = (c[b.key] / total) * Math.PI * 2;
+    const span = (b.n / total) * Math.PI * 2;
     const midA = a + span / 2;
     const mid = pt(midA);
     if (live.length === 1) {
