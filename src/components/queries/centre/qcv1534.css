@@ -1,0 +1,26 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v153.4 (design-refs/query-centre-v153-4.html, read from the rendered page at 1920): a crisp ground, the
+ * title in the typewriter, the header on the list's grid, the filter rail as a sidebar, and the ring alone with its
+ * annotations on hover. Desktop only (768px and up), like every Query Centre rule since v131.
+ *
+ * ⚠️ THIS SHEET IS IMPORTED AFTER qcv153.css AND qcv1531.css, AND EVERY RULE STILL WINS ON SPECIFICITY: each is scoped
+ *    under the page root `.qc151.qc153` (or, for the ground, the same four classes as v153.1's rule), one step above
+ *    the rule it overrides, so a change in bundle order cannot undo it.
+ * Faces are READ, never named: --sp-type (Special Elite), --sp-serif (Source Serif).
+ */
+@media (min-width: 768px) {
+  /* ── 1 · the ground: plain cool off-white, the doodle tile kept under an even .45 wash (v153.1's fade is gone) ── */
+  .ws-window .qc-wpg.qc-wpg--v11 > .wpg-scroll.wpg-scroll {
+    background-color: #f5f5f3;
+    background-image: linear-gradient(rgba(245, 245, 243, 0.45), rgba(245, 245, 243, 0.45)), url("/images/qc/doodle-tile.svg");
+    background-repeat: repeat, repeat;
+    background-size: auto, 340px 360px;
+    background-attachment: local, local;
+  }
+
+  /* ── 2 · the title in the typewriter: the size and leading v153.1 set (54/1.05, the ref's too) ─────────────── */
+  .qc151.qc153 .qc1531-hd h1.qc1531-t { font: 400 54px/1.05 var(--sp-type) !important; letter-spacing: -0.01em; }
+}

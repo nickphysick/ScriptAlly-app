@@ -21,6 +21,7 @@ import { MORE_ROWS_153, pickQuick, quickOn, railOn, type RailCounts } from "../.
 import { StageGlyph } from "./StageGlyph";
 import "./qcv153.css";
 import "./qcv1531.css";
+import "./qcv1534.css";
 
 export interface RailSent { key: string; name: string; line?: string }
 export interface QcRail153Props {

@@ -14,6 +14,7 @@
 import React from "react";
 import type { CountLine1512 } from "./QcPage151";
 import "./qcv1531.css";
+import "./qcv1534.css";
 
 export const ARMCHAIR_HAWK = "/images/qc/qc-armchair-hawk.png?v=1";
 
