@@ -875,6 +875,11 @@ export interface QueryMaterial {
   material: string; // canonical name, e.g. "Query Letter" | "Synopsis" | "Sample Pages"
   type?: "pages" | "words" | "chapters" | "other";
   quantity?: number | string; // number for pages/words/chapters; free text when type === "other"
+  /** To-do list v54 (D7): a sample from further in — where it started, and in which unit. ABSENT for a sample from the
+   *  opening, so every earlier record and every new opening sample are the same shape. Read and written only through
+   *  lib/sentSample (`sampleOfMaterials`, `sampleToMaterial`). */
+  from?: number;
+  fromUnit?: "chapter" | "page" | "word";
 }
 
 export enum QueryStatus {

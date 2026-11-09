@@ -9,6 +9,7 @@
  * `logDefaults` is the journey's own opening answers once an agent is chosen: their usual reply window (8 weeks when
  * they state none), and if nothing comes back, a nudge a week after it — or "close it" where no response means no.
  */
+import { sampleToMaterial } from "../sentSample";
 import type { useScriptAllyDb } from "../db";
 import { SubmissionMethod, type Agent, type QueryMaterial } from "../../types";
 import { addDays, dayIso, reminderAnchors } from "./dates";
@@ -28,7 +29,9 @@ export function materialsToQuery(m: Materials): (string | QueryMaterial)[] {
   const out: (string | QueryMaterial)[] = [];
   if (m.ql) out.push("Query Letter");
   if (m.syn) out.push("Synopsis");
-  if (m.s.unit !== "none") out.push({ material: "Sample Pages", type: m.s.unit, quantity: m.s.amt });
+  /* v54: the one writer — a section from further in keeps where it started; an opening sample is unchanged */
+  const sample = sampleToMaterial(m.s);
+  if (sample) out.push(sample);
   return out;
 }
 

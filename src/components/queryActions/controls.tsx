@@ -7,6 +7,7 @@
  * and the agent card. Every journey composes these and nothing else, so one control never looks two
  * ways in two journeys.
  */
+import { typedWhole } from "../../lib/sentSample";
 import React, { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   addDays, dayDiff, fmt, fmtY, isWeekend, MONL, rel, sameDay, SHIFT_NOTE, up, type Anchor,
@@ -207,6 +208,19 @@ function Calendar({ value, dir, onPick }: { value: Date | null; dir: DateDir; on
 
 /* ---------- the sample control ---------- */
 
+/** v54 (D7): a typed whole number in a stepper's middle; the shown value keeps its comma, and a typed one is committed
+ *  on blur or Enter (rewriting the box mid-keystroke would throw the caret about) */
+function TypedWhole({ value, show, cls, label, onSet }: { value: number; show: string; cls?: string; label: string; onSet: (n: number) => void }) {
+  const [draft, setDraft] = useState<string | null>(null);
+  useEffect(() => { setDraft(null); }, [value]);
+  const commit = () => { if (draft == null) return; const n = typedWhole(draft); setDraft(null); if (n != null && n !== value) onSet(n); };
+  return (
+    <input className={`qad-typed${cls ? ` ${cls}` : ""}`} type="text" inputMode="numeric" aria-label={label} value={draft ?? show}
+      onChange={(e) => setDraft(e.target.value)} onBlur={commit}
+      onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } else if (e.key === "Escape" && draft != null) { e.stopPropagation(); setDraft(null); } }} />
+  );
+}
+
 export function SampleControl({ sample, onChange, book, allowNone, name }: { sample: Sample; onChange: (s: Sample) => void; book: Book; allowNone?: boolean; name?: string }) {
   const units: SampleUnit[] = ["pages", "words", "chapters", ...(allowNone ? (["none"] as SampleUnit[]) : [])];
   const s = sample;
@@ -225,7 +239,8 @@ export function SampleControl({ sample, onChange, book, allowNone, name }: { sam
           <div className="qad-amt">
             <span className="qad-step">
               <button type="button" aria-label="Less" onClick={() => onChange(bump(s, -1, book))}>−</button>
-              <b data-qad-amount><span className={tick} key={s.amt}>{n0(s.amt)}</span></b>
+              {/* v54 (D7): the amount is a box you can type any whole number into, committed on blur or Enter */}
+              <b data-qad-amount><TypedWhole value={s.amt} show={n0(s.amt)} cls={tick} label="How much of the sample" onSet={(n) => onChange({ ...s, amt: n })} /></b>
               <button type="button" aria-label="More" onClick={() => onChange(bump(s, 1, book))}>+</button>
             </span>
             <span className="qad-unitl">{s.amt === 1 ? U.one : U.many}</span>
@@ -242,7 +257,7 @@ export function SampleControl({ sample, onChange, book, allowNone, name }: { sam
                 <Seg value={fu} onPick={(u) => onChange(setFromUnit(s, u, book))} options={[["chapter", "Chapter"], ["page", "Page"], ["word", "Word"]]} />
                 <span className="qad-step sm">
                   <button type="button" aria-label="Earlier" onClick={() => onChange(bumpFrom(s, -1, book))}>−</button>
-                  <b>{n0(s.from)}</b>
+                  <b data-qad-from><TypedWhole value={s.from} show={n0(s.from)} label="Where the section started" onSet={(n) => onChange({ ...s, from: n })} /></b>
                   <button type="button" aria-label="Later" onClick={() => onChange(bumpFrom(s, 1, book))}>+</button>
                 </span>
               </div>
