@@ -25,7 +25,8 @@ export async function openLog(page: Page): Promise<void> {
   await page.locator('[data-qls="root"]').waitFor({ state: "visible", timeout: 20_000 });
   await page.waitForTimeout(400);
 }
-export const panel = (page: Page) => page.locator('[data-qls="root"]').locator("xpath=ancestor::*[contains(@class,'spanel')][1]");
+/* the panel itself: `contains(@class,'spanel')` also matched its inner `.spanel-own`, so v1's shots were the inner box */
+export const panel = (page: Page) => page.locator('[data-qls="root"]').locator("xpath=ancestor::*[contains(concat(' ',normalize-space(@class),' '),' spanel ')][1]");
 export async function shot(page: Page, name: string): Promise<void> {
   mkdirSync(OUT, { recursive: true });
   await page.waitForTimeout(450);

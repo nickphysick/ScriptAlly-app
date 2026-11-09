@@ -180,7 +180,7 @@ test("LAQ8 — reduced motion: the finished celebration at once", async ({ page 
   /* read at once: nothing may still be arriving */
   const r = await page.evaluate(() => ({
     head: document.querySelector('[data-qls="yay-head"] span')?.textContent ?? "",
-    cursor: !!document.querySelector(".qls-cur"),
+    cursor: !!document.querySelector(".laq-cur"),
     confetti: !!document.querySelector('[data-qls="confetti"]'),
     anims: document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.target instanceof Element && ((a.effect as KeyframeEffect).target as Element).closest('[data-qls="root"]')).length,
   }));

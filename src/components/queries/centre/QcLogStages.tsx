@@ -126,12 +126,12 @@ const NO_ASK = { ql: true, syn: true, sample: { unit: "none" as const, amt: 0, f
 /* ── the shared parts ─────────────────────────────────────────────────────────────────────────────────────────── */
 
 export const Stepper: React.FC<{ s: FlowState; values: Record<StageKey, string | null>; onGo: (k: StageKey) => void }> = ({ s, values, onGo }) => (
-  <div className="qls-steps" data-qls="steps" role="list">
+  <div className="laq-steps" data-qls="steps" role="list">
     {STAGES.map((k) => {
       const now = s.step === k;
       const done = !now && answered(s, k);
       return (
-        <button key={k} type="button" role="listitem" className={`qls-st${now ? " is-now" : ""}${done ? " is-done" : ""}`} data-qls="step" data-k={k}
+        <button key={k} type="button" role="listitem" className={`laq-st${now ? " is-now" : ""}${done ? " is-done" : ""}`} data-qls="step" data-k={k}
           data-state={now ? "now" : done ? "done" : "todo"} disabled={!done} aria-current={now ? "step" : undefined}
           aria-label={done ? `${STAGE_LABEL[k]}: ${values[k] ?? ""}. Change it` : STAGE_LABEL[k]} onClick={() => onGo(k)}>
           {STAGE_LABEL[k]}<b data-qls="step-value">{done ? values[k] ?? "" : "\u00a0"}</b>
@@ -146,10 +146,10 @@ export const BigRow: React.FC<{
   on?: boolean; hi?: boolean; arrow?: boolean; onClick: () => void; data?: Record<string, string>;
 }> = ({ glyph, glyphClass, title, sub, tag, tagClass, on, hi, arrow = true, onClick, data }) => (
   <button type="button" className={`${on ? "is-on" : ""}${hi ? " is-hi" : ""}`} onClick={onClick} aria-pressed={on ? true : undefined} {...data}>
-    <span className={`qls-g${glyphClass ? ` ${glyphClass}` : ""}`} aria-hidden="true">{glyph}</span>
-    <span className="qls-tx"><b>{title}</b>{sub ? <span>{sub}</span> : null}</span>
-    {tag ? <span className={`qls-tag${tagClass ? ` ${tagClass}` : ""}`} data-qls="tag">{tag}</span> : null}
-    {arrow ? <span className="qls-ar" aria-hidden="true">{ICON.arrow}</span> : null}
+    <span className={`laq-g${glyphClass ? ` ${glyphClass}` : ""}`} aria-hidden="true">{glyph}</span>
+    <span className="laq-tx"><b>{title}</b>{sub ? <span>{sub}</span> : null}</span>
+    {tag ? <span className={`laq-tag${tagClass ? ` ${tagClass}` : ""}`} data-qls="tag">{tag}</span> : null}
+    {arrow ? <span className="laq-ar" aria-hidden="true">{ICON.arrow}</span> : null}
   </button>
 );
 
@@ -181,7 +181,7 @@ const Confetti: React.FC = () => {
   }, []);
   if (gone) return null;
   return (
-    <div ref={ref} className="qls-conf" data-qls="confetti" aria-hidden="true">
+    <div ref={ref} className="laq-conf" data-qls="confetti" aria-hidden="true">
       {PIECES.map((p, i) => <i key={i} className={p.dot ? "is-dot" : undefined} style={{ left: `${p.left}%`, background: p.c }} />)}
     </div>
   );
@@ -198,8 +198,8 @@ const TypedHead: React.FC<{ text: string; reduce: boolean }> = ({ text, reduce }
     return () => window.clearTimeout(t);
   }, [text, reduce]);
   return (
-    <h2 className="qls-yh" data-qls="yay-head" aria-label={text}>
-      <span aria-hidden="true">{text.slice(0, n)}</span>{n < text.length ? <span className="qls-cur" aria-hidden="true" /> : null}
+    <h2 className="laq-yh" data-qls="yay-head" aria-label={text}>
+      <span aria-hidden="true">{text.slice(0, n)}</span>{n < text.length ? <span className="laq-cur" aria-hidden="true" /> : null}
     </h2>
   );
 };
@@ -209,7 +209,7 @@ const Odometer: React.FC<{ n: number }> = ({ n }) => {
   const [go, setGo] = useState(false);
   useEffect(() => { const r = requestAnimationFrame(() => requestAnimationFrame(() => setGo(true))); return () => cancelAnimationFrame(r); }, []);
   return (
-    <span className={`qls-odo${go ? " is-go" : ""}`} data-qls="odometer" data-n={n} aria-label={String(n)}>
+    <span className={`laq-odo${go ? " is-go" : ""}`} data-qls="odometer" data-n={n} aria-label={String(n)}>
       <span aria-hidden="true"><b>{n - 1}</b><b>{n}</b></span>
     </span>
   );
@@ -255,7 +255,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   useEffect(() => { if (s.step === "who") findRef.current?.focus({ preventScroll: true }); }, [s.step]);
   useLayoutEffect(() => {
     if (s.step !== "who") return;
-    sbRef.current?.querySelector<HTMLElement>(".qls-big > button.is-hi")?.scrollIntoView({ block: "nearest" });
+    sbRef.current?.querySelector<HTMLElement>(".laq-big > button.is-hi")?.scrollIntoView({ block: "nearest" });
   }, [hi, s.step]);
 
   const whoBody = () => {
@@ -270,16 +270,16 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     };
     const q = s.find.trim();
     const off = (a: StageAgent) => (
-      <div key={a.id} className="qls-off" data-qls="agent-busy" data-id={a.id}>
-        <span className="qls-g" aria-hidden="true">{a.initials}</span><b>{a.name}</b>
+      <div key={a.id} className="laq-off" data-qls="agent-busy" data-id={a.id}>
+        <span className="laq-g" aria-hidden="true">{a.initials}</span><b>{a.name}</b>
         <span>{a.queriedMs != null ? `queried ${dayMon(a.queriedMs)}` : "already querying"}</span>
       </div>
     );
     const nm = titleName(q);
     return (
       <>
-        <h2 className="qls-qh">Who are you querying?</h2>
-        <label className="qls-srch">{ICON.search}
+        <h2 className="laq-qh">Who are you querying?</h2>
+        <label className="laq-srch">{ICON.search}
           <input ref={findRef} value={s.find} data-qls="find" placeholder="Find an agent in your Contact list" aria-label="Find an agent in your Contact list" autoComplete="off"
             onChange={(e) => set({ find: e.target.value, hi: 0 })}
             onKeyDown={(e) => {
@@ -289,18 +289,18 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
               else if (e.key === "Enter" && n) { e.preventDefault(); choose(pick[hi].id); }
             }} />
         </label>
-        {g.ready.length ? <><div className="qls-grp" data-qls="group" data-k="ready">Ready to query <span>{g.ready.length}</span></div><div className="qls-big">{g.ready.map(row)}</div></> : null}
-        {g.closed.length ? <><div className="qls-grp" data-qls="group" data-k="closed">Closed right now <span>{g.closed.length}</span></div><div className="qls-big">{g.closed.map(row)}</div></> : null}
-        {q && g.busyHit.length ? <><div className="qls-grp" data-qls="group" data-k="busy">Already querying</div>{g.busyHit.map(off)}</> : null}
+        {g.ready.length ? <><div className="laq-grp" data-qls="group" data-k="ready">Ready to query <span>{g.ready.length}</span></div><div className="laq-big">{g.ready.map(row)}</div></> : null}
+        {g.closed.length ? <><div className="laq-grp" data-qls="group" data-k="closed">Closed right now <span>{g.closed.length}</span></div><div className="laq-big">{g.closed.map(row)}</div></> : null}
+        {q && g.busyHit.length ? <><div className="laq-grp" data-qls="group" data-k="busy">Already querying</div>{g.busyHit.map(off)}</> : null}
         {!q && g.busy.length ? (s.showBusy
-          ? <><div className="qls-grp" data-qls="group" data-k="busy">Already querying <span>{g.busy.length}</span><button type="button" className="qls-lk" style={{ marginLeft: "auto", fontSize: 13.5 }} data-qls="busy-hide" onClick={() => set({ showBusy: false })}>Hide</button></div>{g.busy.map(off)}</>
-          : <button type="button" className="qls-busy" data-qls="busy" onClick={() => set({ showBusy: true })}>
-              <span className="qls-faces" aria-hidden="true">{g.busy.slice(0, 4).map((a) => <i key={a.id}>{a.initials}</i>)}</span>
+          ? <><div className="laq-grp" data-qls="group" data-k="busy">Already querying <span>{g.busy.length}</span><button type="button" className="laq-lk" style={{ marginLeft: "auto", fontSize: 13.5 }} data-qls="busy-hide" onClick={() => set({ showBusy: false })}>Hide</button></div>{g.busy.map(off)}</>
+          : <button type="button" className="laq-busy" data-qls="busy" onClick={() => set({ showBusy: true })}>
+              <span className="laq-faces" aria-hidden="true">{g.busy.slice(0, 4).map((a) => <i key={a.id}>{a.initials}</i>)}</span>
               You're already querying {g.busy.length} {g.busy.length === 1 ? "agent" : "agents"} with this book<u>Show</u>
             </button>) : null}
         {q && !pick.length && !g.busyHit.length ? (
-          <div className="qls-none" data-qls="none">No one called “{q}” in your Contact list.<br />
-            <button type="button" className="qls-btn is-ghost is-sm" style={{ marginTop: 10 }} data-qls="new-agent" onClick={() => p.onAddAgent(nm, (id) => answer({ agentId: id, find: "" }))}>+ Add {nm} as a new agent</button>
+          <div className="laq-none" data-qls="none">No one called “{q}” in your Contact list.<br />
+            <button type="button" className="laq-btn is-ghost is-sm" style={{ marginTop: 10 }} data-qls="new-agent" onClick={() => p.onAddAgent(nm, (id) => answer({ agentId: id, find: "" }))}>+ Add {nm} as a new agent</button>
           </div>
         ) : null}
       </>
@@ -318,22 +318,22 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     const shift = (d: number) => { const m = new Date(s.calY, s.calM + d, 1); set({ calY: m.getFullYear(), calM: m.getMonth() }); };
     return (
       <>
-        <h2 className="qls-qh">When did it go to {first}?</h2>
-        <p className="qls-qs">This starts the clock on {first}'s reply window.</p>
-        <div className="qls-big" data-qls="when">
+        <h2 className="laq-qh">When did it go to {first}?</h2>
+        <p className="laq-qs">This starts the clock on {first}'s reply window.</p>
+        <div className="laq-big" data-qls="when">
           <BigRow glyph={ICON.cal} title="Today" sub={weekdayDay(nowMs)} on={sameDay(s.sent, nowMs)} data={{ "data-qls": "when-opt", "data-k": "today" }} onClick={() => answer({ sent: sod(nowMs), earlier: false })} />
           <BigRow glyph={ICON.cal} title="Yesterday" sub={weekdayDay(y)} on={sameDay(s.sent, y)} data={{ "data-qls": "when-opt", "data-k": "yesterday" }} onClick={() => answer({ sent: y, earlier: false })} />
           <BigRow glyph={ICON.cal} title="An earlier date" sub={isEarlier ? `Chosen: ${dayMonY(s.sent!, nowMs)}` : "Pick it from the calendar"} on={s.earlier} arrow={false}
             data={{ "data-qls": "when-opt", "data-k": "earlier" }} onClick={() => set({ earlier: !s.earlier })} />
         </div>
         {s.earlier ? (
-          <div className="qls-cal" data-qls="calendar" ref={calRef}>
-            <div className="qls-calh">
+          <div className="laq-cal" data-qls="calendar" ref={calRef}>
+            <div className="laq-calh">
               <button type="button" aria-label="Previous month" data-qls="cal-prev" onClick={() => shift(-1)}>{ICON.l}</button>
               <b data-qls="cal-month">{monthLong(s.calY, s.calM)} {s.calY}</b>
               <button type="button" aria-label="Next month" data-qls="cal-next" disabled={!cal.canNext} onClick={() => shift(1)}>{ICON.r}</button>
             </div>
-            <div className="qls-calg">
+            <div className="laq-calg">
               {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => <span key={i} aria-hidden="true">{d}</span>)}
               {Array.from({ length: cal.lead }, (_, i) => <i key={`b${i}`} />)}
               {cal.days.map((d) => (
@@ -425,40 +425,40 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
       const fitOne = ask ? p.packages.find((x) => packageFits(x, ask))?.id ?? null : null;
       return (
         <>
-          <h2 className="qls-qh">What did you send {first}?</h2>
-          <p className="qls-qs" data-qls="asks">{sub}</p>
-          <div className="qls-big" data-qls="packages">
+          <h2 className="laq-qh">What did you send {first}?</h2>
+          <p className="laq-qs" data-qls="asks">{sub}</p>
+          <div className="laq-big" data-qls="packages">
             {p.packages.map((x) => (
               <BigRow key={x.id} glyph={ICON.pkg} glyphClass="is-pkg" title={x.name} sub={x.pieces.join(" · ")} on={s.piecesSet && s.packageId === x.id}
                 tag={x.id === fitOne ? `✓ What ${first} asks for` : x.active ? "Active" : null} tagClass={x.id === fitOne ? "is-y" : undefined}
                 data={{ "data-qls": "package", "data-id": x.id }} onClick={() => usePackage(x)} />
             ))}
-            <button type="button" className="is-quiet" data-qls="choose-pieces" onClick={() => set({ custom: true, piecesTouched: false })}><span className="qls-tx"><b>Choose the pieces myself</b></span></button>
+            <button type="button" className="is-quiet" data-qls="choose-pieces" onClick={() => set({ custom: true, piecesTouched: false })}><span className="laq-tx"><b>Choose the pieces myself</b></span></button>
           </div>
         </>
       );
     }
     const row = (k: "letter" | "syn" | "sample", label: string, on: boolean, val: string) => (
-      <div className={`qls-pc${on ? " is-on" : ""}`} data-qls="piece" data-k={k} data-on={on ? "1" : "0"} role="checkbox" aria-checked={on} tabIndex={0}
+      <div className={`laq-pc${on ? " is-on" : ""}`} data-qls="piece" data-k={k} data-on={on ? "1" : "0"} role="checkbox" aria-checked={on} tabIndex={0}
         onClick={() => tog(k)} onKeyDown={(e) => { if ((e.key === " " || e.key === "Enter") && e.target === e.currentTarget) { e.preventDefault(); tog(k); } }}>
-        <span className="qls-bx" aria-hidden="true">{on ? "✓" : ""}</span>
-        <span className="qls-tx"><b>{label}</b></span>
-        <button type="button" className="qls-vr" data-qls="vr" data-k={k} aria-haspopup="menu" aria-expanded={pop?.k === k}
+        <span className="laq-bx" aria-hidden="true">{on ? "✓" : ""}</span>
+        <span className="laq-tx"><b>{label}</b></span>
+        <button type="button" className="laq-vr" data-qls="vr" data-k={k} aria-haspopup="menu" aria-expanded={pop?.k === k}
           onClick={(e) => { e.stopPropagation(); openPop(k, e.currentTarget); }}>{val}{ICON.chev}</button>
       </div>
     );
     const bv = bookName(sampleNow.bookVersionId);
     return (
       <>
-        <h2 className="qls-qh">What did you send {first}?</h2>
-        <p className="qls-qs" data-qls="asks">{sub}</p>
-        <div className="qls-pcs" data-qls="pieces">
+        <h2 className="laq-qh">What did you send {first}?</h2>
+        <p className="laq-qs" data-qls="asks">{sub}</p>
+        <div className="laq-pcs" data-qls="pieces">
           {row("letter", "Query letter", !!pc.letterId, letterName(pc.letterId ?? dflt.letter))}
           {row("syn", "Synopsis", !!pc.synopsisId, synName(pc.synopsisId ?? dflt.synopsis))}
           {row("sample", "Opening pages", !!pc.sample, `${sizeName(sampleNow)}${bv ? ` · ${bv}` : ""}`)}
         </div>
-        {ask?.stated ? <p className="qls-ask" data-qls="ask-line">{fitsAsk ? `✓ That's what ${first} asks for.` : <button type="button" className="qls-lk" data-qls="use-ask" onClick={() => setPieces(piecesFromAsk(ask, pc, dflt))}>Use what {first} asks for</button>}</p> : null}
-        {hasPkgs ? <p className="qls-ask"><button type="button" className="qls-lk" data-qls="back-packages" onClick={() => set({ custom: false })}>Back to your packages</button></p> : null}
+        {ask?.stated ? <p className="laq-ask" data-qls="ask-line">{fitsAsk ? `✓ That's what ${first} asks for.` : <button type="button" className="laq-lk" data-qls="use-ask" onClick={() => setPieces(piecesFromAsk(ask, pc, dflt))}>Use what {first} asks for</button>}</p> : null}
+        {hasPkgs ? <p className="laq-ask"><button type="button" className="laq-lk" data-qls="back-packages" onClick={() => set({ custom: false })}>Back to your packages</button></p> : null}
       </>
     );
   };
@@ -466,20 +466,20 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     if (!pop) return null;
     const item = (key: string, on: boolean, label: string, onPick: () => void, small?: string) => (
       <button key={key} type="button" role="menuitemradio" aria-checked={on} data-qls="menu-item" onClick={() => { onPick(); setPop(null); }}>
-        <span className="qls-ck" aria-hidden="true">{on ? "✓" : ""}</span>{label}{small ? <small>{small}</small> : null}
+        <span className="laq-ck" aria-hidden="true">{on ? "✓" : ""}</span>{label}{small ? <small>{small}</small> : null}
       </button>
     );
     let inner: React.ReactNode;
-    if (pop.k === "letter") inner = <><div className="qls-ph">Which letter?</div>{(p.letters.length ? p.letters : [{ id: NO_LETTER, name: "Query letter" }]).map((l) => item(l.id, (pc.letterId ?? dflt.letter ?? NO_LETTER) === l.id, l.name, () => setPieces({ letterId: l.id })))}</>;
-    else if (pop.k === "syn") inner = <><div className="qls-ph">Which synopsis?</div>{(p.synopses.length ? p.synopses : [{ id: NO_SYN, name: "Synopsis" }]).map((l) => item(l.id, (pc.synopsisId ?? dflt.synopsis ?? NO_SYN) === l.id, l.name, () => setPieces({ synopsisId: l.id })))}</>;
+    if (pop.k === "letter") inner = <><div className="laq-ph">Which letter?</div>{(p.letters.length ? p.letters : [{ id: NO_LETTER, name: "Query letter" }]).map((l) => item(l.id, (pc.letterId ?? dflt.letter ?? NO_LETTER) === l.id, l.name, () => setPieces({ letterId: l.id })))}</>;
+    else if (pop.k === "syn") inner = <><div className="laq-ph">Which synopsis?</div>{(p.synopses.length ? p.synopses : [{ id: NO_SYN, name: "Synopsis" }]).map((l) => item(l.id, (pc.synopsisId ?? dflt.synopsis ?? NO_SYN) === l.id, l.name, () => setPieces({ synopsisId: l.id })))}</>;
     else inner = (
       <>
-        <div className="qls-ph">How much?</div>
+        <div className="laq-ph">How much?</div>
         {sizes.map((z) => item(`${z.unit}${z.amt}`, sampleNow.unit === z.unit && sampleNow.amt === z.amt, sizeName(z), () => setPieces({ sample: { ...sampleNow, unit: z.unit, amt: z.amt } })))}
-        {p.bookVersions.length ? <><hr /><div className="qls-ph">From</div>{p.bookVersions.map((b) => item(b.id, sampleNow.bookVersionId === b.id, b.name, () => setPieces({ sample: { ...sampleNow, bookVersionId: b.id } }), b.current ? "current" : undefined))}</> : null}
+        {p.bookVersions.length ? <><hr /><div className="laq-ph">From</div>{p.bookVersions.map((b) => item(b.id, sampleNow.bookVersionId === b.id, b.name, () => setPieces({ sample: { ...sampleNow, bookVersionId: b.id } }), b.current ? "current" : undefined))}</> : null}
       </>
     );
-    return <div ref={popRef} className="qls-pop" role="menu" data-qls="menu" data-k={pop.k} style={{ top: pop.top, left: 8 }}>{inner}</div>;
+    return <div ref={popRef} className="laq-pop" role="menu" data-qls="menu" data-k={pop.k} style={{ top: pop.top, left: 8 }}>{inner}</div>;
   };
 
   /* ── the How stage ── */
@@ -494,9 +494,9 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     const order = card ? [card, ...HOW.filter((h) => h.k !== card.k)] : [...HOW];
     return (
       <>
-        <h2 className="qls-qh">How did you send it?</h2>
-        <p className="qls-qs">{card ? `${first}'s card says ${card.word}, so that's first.` : `Nothing on ${first}'s card about how they take queries.`}</p>
-        <div className="qls-big" data-qls="how">
+        <h2 className="laq-qh">How did you send it?</h2>
+        <p className="laq-qs">{card ? `${first}'s card says ${card.word}, so that's first.` : `Nothing on ${first}'s card about how they take queries.`}</p>
+        <div className="laq-big" data-qls="how">
           {order.map((h) => (
             <BigRow key={h.k} glyph={h.k === SubmissionMethod.EMAIL ? ICON.mail : h.k === SubmissionMethod.POST ? ICON.post : ICON.web} title={h.label} sub={sub[h.k]}
               on={s.via === h.k} tag={card?.k === h.k ? `From ${first}'s card` : null} data={{ "data-qls": "how-opt", "data-k": h.k }} onClick={() => answer({ via: h.k })} />
@@ -517,26 +517,26 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     return plan ? previewOf(plan, nowMs, p.quietWeeks) : null;
   }, [s, phase, p.ctx, nowMs, p.quietWeeks]); // eslint-disable-line react-hooks/exhaustive-deps
   const slip = (pv: NonNullable<typeof preview>, tag: boolean) => (
-    <div className="qls-pv qls-pvw qc151 qc153" data-qls="preview">
-      {tag ? <span className="qls-pvtag" data-qls="preview-tag">Preview</span> : null}
+    <div className="laq-pv laq-pvw qc151 qc153" data-qls="preview">
+      {tag ? <span className="laq-pvtag" data-qls="preview-tag">Preview</span> : null}
       <QcSlip153 row={pv.row} nowMs={nowMs} selected={false} packageName={pv.packageName} agent={pv.agent} act={null} onOpen={() => {}} onAct={() => {}}
         preview={pv.noWindow ? { next: { value: "No reply window", line: `add one on ${first}'s card` }, policy: { value: "Not on their card", line: null } } : {}} />
-      {stamp ? <span className={`qls-stamp${reduce ? "" : " is-thump"}`} data-qls="stamp"><span>Logged</span><small>{dayMon(s.sent ?? nowMs).toUpperCase()}</small></span> : null}
+      {stamp ? <span className={`laq-stamp${reduce ? "" : " is-thump"}`} data-qls="stamp"><span>Logged</span><small>{dayMon(s.sent ?? nowMs).toUpperCase()}</small></span> : null}
     </div>
   );
   const noteRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { if (s.noteOpen) noteRef.current?.focus({ preventScroll: true }); }, [s.noteOpen]);
   const checkBody = () => (
     <>
-      <h2 className="qls-qh">Ready to log {first}?</h2>
-      <p className="qls-qs">Here's how {first} will look in your Query Centre. Hover the paperclip to check what went.</p>
+      <h2 className="laq-qh">Ready to log {first}?</h2>
+      <p className="laq-qs">Here's how {first} will look in your Query Centre. Hover the paperclip to check what went.</p>
       {preview ? slip(preview, true) : null}
-      <div className="qls-nt">
+      <div className="laq-nt">
         {s.noteOpen
           ? <textarea ref={noteRef} data-qls="note" value={s.note} placeholder={`Anything about this query for ${first}. It goes on the query card.`} aria-label="A note on this query" onChange={(e) => set({ note: e.target.value })} />
-          : <button type="button" className="qls-lk" data-qls="add-note" onClick={() => set({ noteOpen: true })}>+ Add a note</button>}
+          : <button type="button" className="laq-lk" data-qls="add-note" onClick={() => set({ noteOpen: true })}>+ Add a note</button>}
       </div>
-      <p className="qls-qs is-foot">Something not right? Tap any step above to change it.</p>
+      <p className="laq-qs is-foot">Something not right? Tap any step above to change it.</p>
     </>
   );
 
@@ -593,11 +593,11 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   });
   const checkFoot = (
     <>
-      <button type="button" className="qls-lnk" data-qls="cancel" onClick={p.onClose} disabled={busy || stamp}>Cancel</button>
-      <span className="qls-sp" />
-      <button type="button" className="qls-lnk" data-qls="log-more" disabled={busy || stamp} onClick={() => void doLog(true)}>Log and start another</button>
+      <button type="button" className="laq-lnk" data-qls="cancel" onClick={p.onClose} disabled={busy || stamp}>Cancel</button>
+      <span className="laq-sp" />
+      <button type="button" className="laq-lnk" data-qls="log-more" disabled={busy || stamp} onClick={() => void doLog(true)}>Log and start another</button>
       {/* the save is awaited before the stamp (a stamp is a claim that it landed), so while it is in flight the button says so */}
-      <button type="button" className="qls-btn" data-qls="log" disabled={busy || stamp} aria-busy={busy || undefined} onClick={() => void doLog(false)}>{busy ? "Logging…" : <>Log query {ICON.arrow}</>}</button>
+      <button type="button" className="laq-btn" data-qls="log" disabled={busy || stamp} aria-busy={busy || undefined} onClick={() => void doLog(false)}>{busy ? "Logging…" : <>Log query {ICON.arrow}</>}</button>
     </>
   );
 
@@ -608,7 +608,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
       const t = e.target as HTMLElement | null;
       if (t?.closest?.("input, textarea") || popRef.current) return;
       if (!rootRef.current?.isConnected || !rootRef.current.offsetParent) return;
-      const bs = [...(sbRef.current?.querySelectorAll<HTMLButtonElement>(".qls-big > button:not(.is-quiet)") ?? [])];
+      const bs = [...(sbRef.current?.querySelectorAll<HTMLButtonElement>(".laq-big > button:not(.is-quiet)") ?? [])];
       if (!bs.length) return;
       let i = bs.findIndex((b) => b.classList.contains("is-hi"));
       if (i < 0) i = bs.findIndex((b) => b === document.activeElement);
@@ -638,9 +638,9 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     : s.step === "check" ? (s.carried ? batchCheckLine(s.carried) : checkLine((countAt ?? p.count) + 1, p.bookTitle)) : STAGE_LINE[s.step];
   const backFoot = (hint: string | null) => (
     <>
-      <button type="button" className="qls-lnk" data-qls={s.step === "who" ? "cancel" : "back"} onClick={() => (s.step === "who" ? p.onClose() : go(STAGES[Math.max(0, STAGES.indexOf(s.step) - 1)], "back"))}>{s.step === "who" ? "Cancel" : "Back"}</button>
-      <span className="qls-sp" />
-      {hint ? <span className="qls-hint">{hint}</span> : null}
+      <button type="button" className="laq-lnk" data-qls={s.step === "who" ? "cancel" : "back"} onClick={() => (s.step === "who" ? p.onClose() : go(STAGES[Math.max(0, STAGES.indexOf(s.step) - 1)], "back"))}>{s.step === "who" ? "Cancel" : "Back"}</button>
+      <span className="laq-sp" />
+      {hint ? <span className="laq-hint">{hint}</span> : null}
     </>
   );
 
@@ -648,9 +648,9 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     : checkBody();
   const piecesFoot = (
     <>
-      <button type="button" className="qls-lnk" data-qls="back" onClick={() => go("when", "back")}>Back</button>
-      <span className="qls-sp" />
-      <button type="button" className="qls-btn" data-qls="pieces-continue" disabled={!anyPiece}
+      <button type="button" className="laq-lnk" data-qls="back" onClick={() => go("when", "back")}>Back</button>
+      <span className="laq-sp" />
+      <button type="button" className="laq-btn" data-qls="pieces-continue" disabled={!anyPiece}
         onClick={() => answer({ packageId: null, piecesSet: true })}>Continue {ICON.arrow}</button>
     </>
   );
@@ -662,32 +662,32 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     const line = celebrationLine(L.preview, L.first, L.weeks, nowMs);
     const mile = MILESTONE[L.n] ?? null;
     return (
-      <div ref={rootRef} className="qc149f qls qcv-legacy" data-qc149f="log" data-qls="root" data-step="yay">
-        <div className="mk-lc-in qc149c-in qls-in">
-          <div className="qls-yay" data-qls="yay">
+      <div ref={rootRef} className="laq" data-qc149f="log" data-qls="root" data-step="yay">
+        <div className="laq-in">
+          <div className="laq-yay" data-qls="yay">
             <IlloSlot name="celebration · query sent" width={210} height={130} />
             <TypedHead text={`Off to ${L.first}.`} reduce={reduce} />
-            <p className="qls-yl" data-qls="yay-line">{line}</p>
-            <span className="qls-cnt" data-qls="count">Query number <Odometer n={L.n} /> for {p.bookTitle}</span>
-            {mile ? <span className="qls-ms" data-qls="milestone">{mile}</span> : null}
-            <div className="qls-slipw">
-              <div className="qls-pv qls-pvw qc151 qc153" data-qls="preview">
+            <p className="laq-yl" data-qls="yay-line">{line}</p>
+            <span className="laq-cnt" data-qls="count">Query number <Odometer n={L.n} /> for {p.bookTitle}</span>
+            {mile ? <span className="laq-ms" data-qls="milestone">{mile}</span> : null}
+            <div className="laq-slipw">
+              <div className="laq-pv laq-pvw qc151 qc153" data-qls="preview">
                 <QcSlip153 row={L.preview.row} nowMs={nowMs} selected={false} packageName={L.preview.packageName} agent={L.preview.agent} act={null} onOpen={() => {}} onAct={() => {}}
                   preview={L.preview.noWindow ? { next: { value: "No reply window", line: `add one on ${L.first}'s card` }, policy: { value: "Not on their card", line: null } } : {}} />
-                <span className="qls-stamp" data-qls="stamp"><span>Logged</span><small>{dayMon(L.before.sent ?? nowMs).toUpperCase()}</small></span>
+                <span className="laq-stamp" data-qls="stamp"><span>Logged</span><small>{dayMon(L.before.sent ?? nowMs).toUpperCase()}</small></span>
               </div>
             </div>
           </div>
-          <div className="qls-cf" data-qls="foot">
-            <button type="button" className="qls-lnk" data-qls="open-card" onClick={() => L.openCard()}>Open {L.first}'s card</button>
-            <span className="qls-sp" />
-            <button type="button" className="qls-lnk" data-qls="undo" disabled={busy} onClick={async () => {
+          <div className="laq-cf" data-qls="foot">
+            <button type="button" className="laq-lnk" data-qls="open-card" onClick={() => L.openCard()}>Open {L.first}'s card</button>
+            <span className="laq-sp" />
+            <button type="button" className="laq-lnk" data-qls="undo" disabled={busy} onClick={async () => {
               setBusy(true);
               try { await L.undo(); } finally { setBusy(false); }
               setLogged(null); setPhase("flow"); setS({ ...L.before, step: "check", dir: "back" });
             }}>Undo</button>
-            <button type="button" className="qls-lnk" data-qls="done" onClick={p.onClose}>Done</button>
-            <button type="button" className="qls-btn" data-qls="log-another" onClick={() => { setLogged(null); setPhase("flow"); setS({ ...freshState(nowMs), dir: "in" }); }}>Log another {ICON.arrow}</button>
+            <button type="button" className="laq-lnk" data-qls="done" onClick={p.onClose}>Done</button>
+            <button type="button" className="laq-btn" data-qls="log-another" onClick={() => { setLogged(null); setPhase("flow"); setS({ ...freshState(nowMs), dir: "in" }); }}>Log another {ICON.arrow}</button>
           </div>
           {reduce ? null : <Confetti />}
         </div>
@@ -696,13 +696,13 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   }
 
   return (
-    <div ref={rootRef} className="qc149f qls qcv-legacy" data-qc149f="log" data-qls="root" data-step={s.step}>
-      <div className={`mk-lc-in qc149c-in qls-in${bump ? " is-bump" : ""}`}>
+    <div ref={rootRef} className="laq" data-qc149f="log" data-qls="root" data-step={s.step}>
+      <div className={`laq-in${bump ? " is-bump" : ""}`}>
         <FlowHead title={FLOW_WORDS.log.title} line={line} onClose={p.onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
         <Stepper s={s} values={values} onGo={(k) => go(k)} />
-        <div ref={sbRef} key={s.step} className={`qls-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
-        <div className="qls-cf" data-qls="foot">{foot}</div>
-        <div className={`qls-toast${toast ? " is-on" : ""}`} data-qls="toast" role="status" aria-live="polite">
+        <div ref={sbRef} key={s.step} className={`laq-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
+        <div className="laq-cf" data-qls="foot">{foot}</div>
+        <div className={`laq-toast${toast ? " is-on" : ""}`} data-qls="toast" role="status" aria-live="polite">
           {toast ? <>{toast.text}<button type="button" data-qls="toast-undo" onClick={toast.undo}>Undo</button></> : null}
         </div>
       </div>
