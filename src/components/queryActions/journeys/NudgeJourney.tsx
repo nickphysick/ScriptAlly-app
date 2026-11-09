@@ -11,6 +11,7 @@
  * `closePlan`, which `replyTask` reads. The drawer writes NO task or dismissal document — the old
  * `logNudge` wrote a task flag, which is why it is not called here.
  */
+import { queryViaOf } from "../../../lib/queryVia"; /* Add agent v1 — an agent's "Other" method seeds no nudge */
 import React, { useState } from "react";
 import { saveNudgeSent } from "../../../lib/queryActions/stepSaves";
 import { useScriptAllyDb } from "../../../lib/db";
@@ -47,7 +48,7 @@ export function NudgeJourney({ req, today, children, switchTo }: JourneyProps) {
   const agent = q ? db.agents.find((a) => a.id === q.agentId) || null : null;
   const [tabPick, setTabPick] = useState<Tab | null>(S.tabPick !== undefined ? S.tabPick : (req.preset?.nudgeTab ?? null));
   const [sent, setSent] = useState<Date>(dayIn(S.sent) ?? today);
-  const [via, setVia] = useState<SubmissionMethod>(S.via ?? ((agent?.submissionMethod as SubmissionMethod) || (q?.sendMethod as SubmissionMethod) || SubmissionMethod.EMAIL));
+  const [via, setVia] = useState<SubmissionMethod>(S.via ?? (queryViaOf(agent?.submissionMethod) || (q?.sendMethod as SubmissionMethod) || SubmissionMethod.EMAIL));
   const [said, setSaid] = useState(S.said ?? "");
   const [thenMode, setThenMode] = useState(S.thenMode ?? "4w");
   const [thenCustom, setThenCustom] = useState<Date | null>(dayIn(S.thenCustom));
