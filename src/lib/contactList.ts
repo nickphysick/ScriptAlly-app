@@ -733,7 +733,9 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
   }
   if (key === "rating") {
     const r = (x: AgentFacts) => (typeof x.rating === "number" && x.rating > 0 ? x.rating : null);
-    return by.sort((a, b) => { const x = r(a), y = r(b); if (x == null || y == null) return x == null && y == null ? sur(a, b) : x == null ? 1 : -1; return turn * (y - x) || sur(a, b); });
+    /* Add agent v1 — ties fall to the shorter response time (the fit order), then surname */
+    const wk = (a: AgentFacts, b: AgentFacts) => { const x = weeks(a), y = weeks(b); return x === y ? 0 : x == null ? 1 : y == null ? -1 : x - y; };
+    return by.sort((a, b) => { const x = r(a), y = r(b); if (x == null || y == null) return x == null && y == null ? wk(a, b) || sur(a, b) : x == null ? 1 : -1; return turn * (y - x) || wk(a, b) || sur(a, b); });
   }
   if (key === "urgency") {
     const now = ctx?.nowMs ?? Date.now();

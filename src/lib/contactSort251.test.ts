@@ -49,8 +49,9 @@ describe("the heading sorts (v25.1 E4)", () => {
   it("the pill's fields are the five headings, in order, with their words", () => {
     /* RE-POINTED by Contact list v26 E: the fields are the page's four sorts, in words, with no chip of their own (the
        band's chip reads "Sorted by {field}") */
-    expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual([...HEADING_SORTS]);
-    expect(CL_SORT_FIELDS.map((f) => f.label)).toEqual(["Surname", "Date added", "Reply time", "Query status"]);
-    expect(CL_SORT_FIELDS.map((f) => f.order.map((o) => o.label))).toEqual([["A to Z", "Z to A"], ["Newest first", "Oldest first"], ["Fastest first", "Slowest first"], ["Furthest on", "Earliest first"]]);
+    /* and Add agent v1 Phase 6 adds Agent fit, through the same chip and menu (it has no heading of its own) */
+    expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual([...HEADING_SORTS, "rating"]);
+    expect(CL_SORT_FIELDS.map((f) => f.label)).toEqual(["Surname", "Date added", "Reply time", "Query status", "Agent fit"]);
+    expect(CL_SORT_FIELDS.map((f) => f.order.map((o) => o.label))).toEqual([["A to Z", "Z to A"], ["Newest first", "Oldest first"], ["Fastest first", "Slowest first"], ["Furthest on", "Earliest first"], ["Best fit first", "Lowest first"]]);
   });
 });

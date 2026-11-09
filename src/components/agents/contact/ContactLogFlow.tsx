@@ -47,7 +47,7 @@ export const ContactLogFlow: React.FC<{ seed: ContactLogSeed; activeMsId: string
   const forBook = queries.filter((q) => q.manuscriptId === ms.id);
   const flowAgents: FlowAgent[] = agents.map((a) => ({
     id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a), initials: agentInitials(a), querying: forBook.some((q) => q.agentId === a.id && qaIsLive(q)),
-    via: queryViaOf(a.submissionMethod),
+    via: queryViaOf(a.submissionMethod), rating: a.starRating ?? null, weeks: a.responseTimeWeeks ?? null,
   }));
   const onSave = async (x: LogAnswers): Promise<boolean> => {
     const ag = agents.find((a) => a.id === x.agentId);

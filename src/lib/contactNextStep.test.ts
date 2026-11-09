@@ -109,14 +109,21 @@ describe("the ready order (§9)", () => {
     ].sort(readyOrder(["Thriller"]));
     expect(xs.map((a) => a.id)).toEqual(["f", "a", "y", "z", "s", "u"]);
   });
-  it("takers before unknown genres, whatever the rating (v15 §4)", () => {
+  /* re-pointed (Add agent v1 Phase 6): the spotlight picks by the fit order — Agent fit first, then the reply time —
+     and the §4 genre tiers became the tie-break (every ready agent takes the book or has unknown genres) */
+  it("Agent fit comes before the genre tiers; at equal fit, takers before unknown genres (v15 §4)", () => {
     const xs = [ag("unk", { genres: [], starRating: 5 }), ag("fit", { starRating: 1 })].sort(readyOrder(["Thriller"]));
-    expect(xs.map((a) => a.id)).toEqual(["fit", "unk"]);
+    expect(xs.map((a) => a.id)).toEqual(["unk", "fit"]);
+    const ys = [ag("unk", { genres: [], starRating: 3 }), ag("fit", { starRating: 3 })].sort(readyOrder(["Thriller"]));
+    expect(ys.map((a) => a.id)).toEqual(["fit", "unk"]);
   });
-  it("where the book has subGenres, main-genre takers come before the rating", () => {
+  it("where the book has subGenres, main-genre takers break a tie of fit", () => {
     const xs = [ag("sub", { genres: ["crime"], starRating: 5 }), ag("main", { genres: ["thriller"], starRating: 2 })]
       .sort(readyOrder(["Thriller", "Crime"]));
-    expect(xs.map((a) => a.id)).toEqual(["main", "sub"]);
+    expect(xs.map((a) => a.id)).toEqual(["sub", "main"]);
+    const ys = [ag("sub", { genres: ["crime"], starRating: 4 }), ag("main", { genres: ["thriller"], starRating: 4 })]
+      .sort(readyOrder(["Thriller", "Crime"]));
+    expect(ys.map((a) => a.id)).toEqual(["main", "sub"]);
   });
 });
 

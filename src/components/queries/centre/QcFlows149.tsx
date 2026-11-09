@@ -14,6 +14,7 @@
  * ⚠️ NO "FULL MANUSCRIPT" TOGGLE: a full manuscript is what you send when asked, never part of a query (the house rule
  *    on both material surfaces); the mock's fourth toggle is not built. The sample is the opening sample (3 chapters).
  */
+import { fitOrder } from "../../../lib/agentFit";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import { SubmissionMethod, type QueryStatus } from "../../../types";
@@ -30,7 +31,11 @@ const VIA: { k: SubmissionMethod; label: string }[] = [
   { k: SubmissionMethod.QUERY_MANAGER, label: "QueryManager" },
 ];
 
-export interface FlowAgent { id: string; name: string; agency: string; initials: string; querying: boolean; via: SubmissionMethod | null }
+export interface FlowAgent {
+  id: string; name: string; agency: string; initials: string; querying: boolean; via: SubmissionMethod | null;
+  /** Add agent v1 — the writer's Agent fit and the stated response time: "Not queried yet" is in fit order (lib/agentFit) */
+  rating?: number | null; weeks?: number | null;
+}
 export interface FlowPackage { id: string; name: string; ql: boolean; syn: boolean; sample: boolean }
 export interface LogAnswers { agentId: string; sent: number; via: SubmissionMethod; packageId: string | null; ql: boolean; syn: boolean; sample: boolean; note: string }
 
@@ -78,7 +83,8 @@ export const QcLogFlow149: React.FC<{
 
   const q = norm(find.trim());
   const shown = agents.filter((a) => !q || norm(`${a.name} ${a.agency}`).includes(q));
-  const open = shown.filter((a) => !a.querying).sort((a, b) => a.name.localeCompare(b.name));
+  /* Add agent v1 Phase 6 — Agent fit high first (unrated last), then the shorter response time, then the name */
+  const open = shown.filter((a) => !a.querying).sort((a, b) => fitOrder({ starRating: a.rating, responseTimeWeeks: a.weeks, name: a.name }, { starRating: b.rating, responseTimeWeeks: b.weeks, name: b.name }));
   const busyWith = shown.filter((a) => a.querying).sort((a, b) => a.name.localeCompare(b.name));
   /* Contact list v25.1 B — the band is the header: "Logging new query" and its line, on both steps; the Day chip, once
      an agent is chosen, sits beside the × */
