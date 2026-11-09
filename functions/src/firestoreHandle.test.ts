@@ -121,6 +121,9 @@ describe("the Firestore handle has exactly one home", () => {
       /* the twelfth (Dashboard first visit v2, Part F): the daily clean-up deletes kept import reviews — every draft and
          its parts — so it must be on the one handle, which on prod is the named database */
       "importDrafts.ts",
+      /* the thirteenth (Your notes v1, Part B): addFeedbackNote and markFeedbackSeen write a note's thread and its
+         writerSeenAt — on prod that is the named database, so they are on the one handle */
+      "feedbackNotes.ts",
     ];
     /* ⚠️ RECONCILED AGAINST index.ts RATHER THAN TRUSTED AS A HAND-WRITTEN LIST — a literal here
      * goes stale the day a ninth function is exported, and goes stale silently. */

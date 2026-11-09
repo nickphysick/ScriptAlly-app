@@ -1998,6 +1998,36 @@ describe('/betaFeedback', () => {
   });
 });
 
+// Your notes v1 — a note's thread. Written only by callables; the parent note's owner (or an admin) reads it.
+describe('/betaFeedback/{id}/thread', () => {
+  const seed = async () => asAdmin(async (ctx) => {
+    await setDoc(doc(ctx.firestore(), 'betaFeedback', 'fb-alice-1'), { uid: ALICE, kind: 'An idea', message: 'A bulk nudge', createdAt: new Date() });
+    await setDoc(doc(ctx.firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm1'), { from: 'founder', text: 'Thank you', at: new Date() });
+  });
+  it('the owner of the note reads its thread (one message, and the list)', async () => {
+    await seed();
+    await assertSucceeds(getDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm1')));
+    await assertSucceeds(getDocs(collection(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread')));
+  });
+  it('another writer cannot read it', async () => {
+    await seed();
+    await assertFails(getDoc(doc(bobCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm1')));
+    await assertFails(getDocs(collection(bobCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread')));
+    await assertFails(getDocs(collection(unauthed().firestore(), 'betaFeedback', 'fb-alice-1', 'thread')));
+  });
+  it('an admin reads it', async () => {
+    await seed();
+    await assertSucceeds(getDocs(collection(adminCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread')));
+  });
+  it('no client writes: not the owner, not an admin', async () => {
+    await seed();
+    await assertFails(setDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm2'), { from: 'writer', text: 'x', at: new Date() }));
+    await assertFails(setDoc(doc(adminCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm2'), { from: 'founder', text: 'x', at: new Date() }));
+    await assertFails(updateDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm1'), { text: 'edited' }));
+    await assertFails(deleteDoc(doc(aliceCtx().firestore(), 'betaFeedback', 'fb-alice-1', 'thread', 'm1')));
+  });
+});
+
 // Dashboard v105 — the celebration's seen-mark: the owner may write foundingSeenTier, an integer 0–5, and nothing else may.
 describe('/users foundingSeenTier (DB105 A2)', () => {
   const seed = () => asAdmin(async (ctx) => { await setDoc(doc(ctx.firestore(), 'users', ALICE), validUser(ALICE)); });

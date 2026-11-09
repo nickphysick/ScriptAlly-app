@@ -1344,7 +1344,16 @@ service cloud.firestore {
     // list filtered `where uid == me`; a query the rules cannot prove is theirs is denied). `uid` is set by
     // the `sendBetaFeedback` callable from the verified token, never the body. Still no client writes:
     // Nick sets `status`, `title` and `statusAt` by hand in the console (betaFeedbackCore.ts documents them).
-    match /betaFeedback/{id} { allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid); allow write: if false; }
+    match /betaFeedback/{id} {
+      allow read: if isAdmin() || (isSignedIn() && resource.data.uid == request.auth.uid);
+      allow write: if false;
+      // Your notes v1 — a note's follow-ups: `{ from: "writer" | "founder", text, at }`. Written only by callables
+      // (`addFeedbackNote`, and the founder's desk later), so NO client writes; read by an admin or the parent note's owner.
+      match /thread/{msg} {
+        allow read: if isAdmin() || (isSignedIn() && get(/databases/$(database)/documents/betaFeedback/$(id)).data.uid == request.auth.uid);
+        allow write: if false;
+      }
+    }
 
     // ROUTE: Founding writer stats (Dashboard v93) — NO client writes. The foundingStats functions recompute every
     // writer's contributions, tier and standing from betaFeedback (Admin SDK) on any feedback write and nightly. A
