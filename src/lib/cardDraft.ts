@@ -340,7 +340,8 @@ export function cardPatch(a: Agent, base: CardDraft, d: CardDraft, nowIso: strin
     }
     patch.socials = list;
   }
-  if (changed.has("rating") && d.rating != null) patch.starRating = Math.max(1, Math.min(5, Math.round(d.rating)));
+  /* Add agent v1 — Agent fit: the chosen star pressed again clears it (the writer's own act, so it is written) */
+  if (changed.has("rating")) patch.starRating = d.rating != null ? Math.max(1, Math.min(5, Math.round(d.rating))) : null;
   if (changed.has("genres")) patch.genres = [...d.genres];
   if (changed.has("wishlist")) {
     patch.mswlNotes = d.wishlist.trim();

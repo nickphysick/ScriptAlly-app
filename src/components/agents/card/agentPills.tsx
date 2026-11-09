@@ -43,6 +43,8 @@ import "./agentPills.css";
 export const FIT_WORDS = ["", "Poor fit", "Worth a try", "Good fit", "Great fit", "Dream agent"] as const;
 export const fitWord = (n: number | null | undefined): string => (n && n >= 1 && n <= 5 ? FIT_WORDS[n] : "Not rated yet");
 export const FIT_TIP_TITLE = "Agent fit";
+/** the toast a star's save says: "Agent fit: great fit" */
+export const fitToast = (n: number | null | undefined): string => (n ? `Agent fit: ${FIT_WORDS[n].toLowerCase()}` : "Agent fit cleared");
 
 /** The method pills, in the order the writer reads them */
 export const METHOD_PILLS: [SubmissionMethod, string][] = [

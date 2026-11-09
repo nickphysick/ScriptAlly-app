@@ -31,6 +31,7 @@ import {
 } from "../../lib/contactPrefs";
 import { type FixResult, type HkFix } from "./contact/ContactHousekeeping";
 import { HousekeepingDrawer } from "./contact/HousekeepingDrawer";
+import { fitToast } from "./card/agentPills";
 import { health as healthOf } from "../../lib/listHealth";
 import { applyPatch, cardPatch, draftOf, inversePatch, toContactDraft, type CardDraft } from "../../lib/cardDraft";
 import { alsoChanges } from "../../lib/contactEdit";
@@ -891,7 +892,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         const r = await saveDraft(agent, base, { ...base, ...change }, { emit: false });
         if (!r.ok) { showToast({ message: `Couldn’t save that: ${(r as { error: string }).error}` }); return false; }
         const undo = r.undo;
-        showToast({ message: `Saved to ${first}’s profile`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
+        showToast({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
         return true;
       },
       renderEdit: ({ focus, wide, onDone }) => {

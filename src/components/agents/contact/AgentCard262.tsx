@@ -31,12 +31,12 @@ import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
 import { requestCardClose } from "./AgentCardPanel262";
 import { useAgentForm } from "../card/useAgentForm";
-import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar } from "./AgentCard262Edit";
+import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar, changeNames } from "./AgentCard262Edit";
 import type { InlineField } from "../card/InlineEdits";
 import type { CardDraft } from "../../../lib/cardDraft";
 
-/** changes are counted by field (Phase 4 counts them by the names the writer reads) */
-const changeCount = (changed: readonly (keyof CardDraft)[]) => changed.length;
+/** changes are counted by the names the writer reads ("how they take queries" is one change, method and words alike) */
+const changeCount = (changed: readonly (keyof CardDraft)[]) => changeNames(changed).length;
 /** an inline field's ask, as a field the card opens at */
 const INLINE_FOCUS: Record<InlineField, AgentCardField> = { wishlist: "wishlist", genres: "genres", replies: "reply", email: "email", website: "website", form: "website", social: "mswl" };
 import "./contactV262.css";
@@ -278,7 +278,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (!el) return;
     const field = el.querySelector<HTMLInputElement | HTMLTextAreaElement>("textarea, input[data-ae='name']");
     if (field) { field.focus({ preventScroll: true }); const n = field.value.length; try { field.setSelectionRange(n, n); } catch { /* not a text field */ } }
-    if (o.all) return;
+    /* Add agent v1 — the band pencil (every section) brings Contact details to the top */
+    if (o.all) { sc.scrollTop = 0; return; }
     const r = el.getBoundingClientRect(), b = sc.getBoundingClientRect();
     const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let by = 0;
@@ -466,7 +467,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         onClose: () => (p.onClose ?? requestCardClose)(), closeLabel: "Close the agent", links, tabs, body,
         /* while editing the save bar sits above the foot, which stays: ‹ › must still be pressable, and they ask the guard */
         foot,
-        afterScroll: editing ? <SaveBar form={form} guard={guard} onCancel={cancel} onSave={() => void form.save()} onKeep={() => setGuard(null)}
+        afterScroll: editing ? <SaveBar form={form} first={m.first} guard={guard} onCancel={cancel} onSave={() => void form.save()} onKeep={() => setGuard(null)}
           onDiscard={() => { const g = guard; discardThen(g ? g.run : () => {}); }} /> : null,
         band: CARD262_BAND, bandRight, disc: <Disc262 stand={x.stand} initials={data.initials} />,
         meta: meta ? <span className="apc-meta" data-cl262="meta">{meta}</span> : null,

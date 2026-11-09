@@ -40,6 +40,7 @@ import { AgentCardPanel262, type CloseGuard } from "../contact/AgentCardPanel262
 import type { AgentCard24Props, CardEditKit } from "../contact/AgentCard24";
 import { useEditOptions } from "./useEditOptions";
 import { useAgentSave } from "./useAgentSave";
+import { fitToast } from "./agentPills";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const noop = () => {};
@@ -141,8 +142,7 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
   return { props, guard };
 }
 
-const FIT = ["", "poor fit", "worth a try", "good fit", "great fit", "dream agent"];
-export const fitToast = (n: number | null): string => (n ? `Agent fit: ${FIT[n]}` : "Agent fit cleared");
+
 
 /** the card in its panel, in edit mode at the door's section */
 export const HostAgentCard: React.FC<{ agentId: string; openAt: OpenAt; sequence?: string[] }> = ({ agentId, openAt, sequence }) => {
