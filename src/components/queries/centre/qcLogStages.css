@@ -178,9 +178,13 @@
 .qls .qls-ms { display: inline-block; margin: -6px 0 14px; padding: 4px 12px; border-radius: 999px; background: var(--qls-navy); color: #fff; font: 400 13.5px var(--qls-se); animation: qls-rise .4s 1.6s both; }
 .qls .qls-slipw { position: relative; width: 100%; text-align: left; animation: qls-rise .5s .45s both; }
 .qls .qls-conf { position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 4; }
-.qls .qls-conf i { position: absolute; top: -14px; width: 8px; height: 11px; border-radius: 2px; opacity: .9; animation: qls-fall var(--d) var(--w) cubic-bezier(.3,.6,.6,1) forwards; }
+.qls .qls-conf i { position: absolute; top: -14px; width: 8px; height: 11px; border-radius: 2px; opacity: .9; }
 .qls .qls-conf i.is-dot { width: 5px; height: 5px; border-radius: 50%; }
-@keyframes qls-fall { to { transform: translate(var(--x), 720px) rotate(var(--r)); opacity: 0; } }
+/* the celebration's slip carries no preview tag, and the stamp sits on its facts */
+.qls .qls-yay .qls-pvtag { display: none; }
+.qls .qls-yay .qls-stamp { top: 96px; }
+.qls .qi-slot { display: flex; align-items: center; justify-content: center; flex: none; background: repeating-linear-gradient(135deg, rgba(58,28,20,.05) 0 6px, transparent 6px 12px); border: 1px dashed rgba(58,28,20,.22); border-radius: 14px; }
+.qls .qi-ph { color: #8a7a6c; font: 400 8px/1.5 var(--qls-mono) !important; letter-spacing: .12em; text-transform: uppercase; }
 
 @media (prefers-reduced-motion: reduce) {
   .qls *, .qls *::before, .qls *::after { animation: none !important; transition: none !important; }

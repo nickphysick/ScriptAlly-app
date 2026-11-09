@@ -17,11 +17,12 @@ import { SubmissionMethod } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import {
-  HOW, MONL, PREVIEW_ID, STAGES, STAGE_LABEL, STAGE_LINE, askWords, batchCheckLine, batchWhoLine, checkLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk, piecesMatchAsk,
+  HOW, MILESTONE, MONL, PREVIEW_ID, STAGES, celebrationLine, STAGE_LABEL, STAGE_LINE, askWords, batchCheckLine, batchWhoLine, checkLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk, piecesMatchAsk,
   planOf, previewOf, sameDay, sizeName, sizesFor, sod, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
 import { QcSlip153 } from "./QcSlip153";
+import { IlloSlot } from "../IlloSlot";
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
 import "./qcLogStages.css";
@@ -151,6 +152,68 @@ export const BigRow: React.FC<{
     {arrow ? <span className="qls-ar" aria-hidden="true">{ICON.arrow}</span> : null}
   </button>
 );
+
+/* ── the celebration ──────────────────────────────────────────────────────────────────────────────────────────── */
+
+/** the slip colours, falling once */
+const CONFETTI = ["#efe7da", "#ecd6d2", "#d3dce7", "#e7d6dc", "#2a3a52", "#e0d2bb"] as const;
+/** a fixed scatter (no Math.random in render): each piece's start, drift, spin, length and delay */
+const PIECES = Array.from({ length: 46 }, (_, i) => {
+  const r = (k: number) => { const x = Math.sin((i + 1) * 12.9898 + k * 78.233) * 43758.5453; return x - Math.floor(x); };
+  return { left: 6 + r(1) * 88, x: r(2) * 120 - 60, rot: r(3) * 720 - 360, dur: 1600 + r(4) * 1200, wait: 250 + r(5) * 500, dot: i % 3 === 0, c: CONFETTI[i % CONFETTI.length] };
+});
+/**
+ * ⚠️ THE FALL IS THE WEB ANIMATIONS API, NOT A CSS KEYFRAME: a `var()` inside `@keyframes` fails silently in this
+ * setup, and each piece needs its own drift and spin. One animation each, run once, and the layer removed after.
+ */
+const Confetti: React.FC = () => {
+  const ref = useRef<HTMLDivElement>(null);
+  const [gone, setGone] = useState(false);
+  useEffect(() => {
+    const els = [...(ref.current?.querySelectorAll<HTMLElement>("i") ?? [])];
+    const anims = els.map((el, i) => {
+      const p = PIECES[i];
+      return el.animate?.([{ transform: "translate(0,0) rotate(0deg)", opacity: 0.9 }, { transform: `translate(${p.x}px,720px) rotate(${p.rot}deg)`, opacity: 0 }],
+        { duration: p.dur, delay: p.wait, easing: "cubic-bezier(.3,.6,.6,1)", fill: "both" });
+    });
+    const t = window.setTimeout(() => setGone(true), 3600);
+    return () => { window.clearTimeout(t); anims.forEach((a) => a?.cancel()); };
+  }, []);
+  if (gone) return null;
+  return (
+    <div ref={ref} className="qls-conf" data-qls="confetti" aria-hidden="true">
+      {PIECES.map((p, i) => <i key={i} className={p.dot ? "is-dot" : undefined} style={{ left: `${p.left}%`, background: p.c }} />)}
+    </div>
+  );
+};
+
+/** "Off to {First}." types itself out, like the page titles (all at once under reduced motion) */
+const TypedHead: React.FC<{ text: string; reduce: boolean }> = ({ text, reduce }) => {
+  const [n, setN] = useState(reduce ? text.length : 0);
+  useEffect(() => {
+    if (reduce) { setN(text.length); return; }
+    let i = 0, t = 0;
+    const tick = () => { i++; setN(i); if (i < text.length) t = window.setTimeout(tick, 55); };
+    t = window.setTimeout(tick, 350);
+    return () => window.clearTimeout(t);
+  }, [text, reduce]);
+  return (
+    <h2 className="qls-yh" data-qls="yay-head" aria-label={text}>
+      <span aria-hidden="true">{text.slice(0, n)}</span>{n < text.length ? <span className="qls-cur" aria-hidden="true" /> : null}
+    </h2>
+  );
+};
+
+/** the count rolls from n−1 to n, the landing odometer's roll in the ref's form */
+const Odometer: React.FC<{ n: number }> = ({ n }) => {
+  const [go, setGo] = useState(false);
+  useEffect(() => { const r = requestAnimationFrame(() => requestAnimationFrame(() => setGo(true))); return () => cancelAnimationFrame(r); }, []);
+  return (
+    <span className={`qls-odo${go ? " is-go" : ""}`} data-qls="odometer" data-n={n} aria-label={String(n)}>
+      <span aria-hidden="true"><b>{n - 1}</b><b>{n}</b></span>
+    </span>
+  );
+};
 
 /* ── the journey ──────────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -587,6 +650,44 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   );
   const foot = s.step === "who" ? backFoot("↑ ↓ and ↵") : s.step === "what" && !showPkgs ? piecesFoot
     : s.step === "check" ? checkFoot : backFoot("Tap one to carry on");
+
+  if (phase === "yay" && logged) {
+    const L = logged;
+    const line = celebrationLine(L.preview, L.first, L.weeks, nowMs);
+    const mile = MILESTONE[L.n] ?? null;
+    return (
+      <div ref={rootRef} className="qc149f qls qcv-legacy" data-qc149f="log" data-qls="root" data-step="yay">
+        <div className="mk-lc-in qc149c-in qls-in">
+          <div className="qls-yay" data-qls="yay">
+            <IlloSlot name="celebration · query sent" width={210} height={130} />
+            <TypedHead text={`Off to ${L.first}.`} reduce={reduce} />
+            <p className="qls-yl" data-qls="yay-line">{line}</p>
+            <span className="qls-cnt" data-qls="count">Query number <Odometer n={L.n} /> for {p.bookTitle}</span>
+            {mile ? <span className="qls-ms" data-qls="milestone">{mile}</span> : null}
+            <div className="qls-slipw">
+              <div className="qls-pv qls-pvw qc151 qc153" data-qls="preview">
+                <QcSlip153 row={L.preview.row} nowMs={nowMs} selected={false} packageName={L.preview.packageName} agent={L.preview.agent} act={null} onOpen={() => {}} onAct={() => {}}
+                  preview={L.preview.noWindow ? { next: { value: "No reply window", line: `add one on ${L.first}'s card` }, policy: { value: "Not on their card", line: null } } : {}} />
+                <span className="qls-stamp" data-qls="stamp"><span>Logged</span><small>{dayMon(L.before.sent ?? nowMs).toUpperCase()}</small></span>
+              </div>
+            </div>
+          </div>
+          <div className="qls-cf" data-qls="foot">
+            <button type="button" className="qls-lnk" data-qls="open-card" onClick={() => L.openCard()}>Open {L.first}'s card</button>
+            <span className="qls-sp" />
+            <button type="button" className="qls-lnk" data-qls="undo" disabled={busy} onClick={async () => {
+              setBusy(true);
+              try { await L.undo(); } finally { setBusy(false); }
+              setLogged(null); setPhase("flow"); setS({ ...L.before, step: "check", dir: "back" });
+            }}>Undo</button>
+            <button type="button" className="qls-lnk" data-qls="done" onClick={p.onClose}>Done</button>
+            <button type="button" className="qls-btn" data-qls="log-another" onClick={() => { setLogged(null); setPhase("flow"); setS({ ...freshState(nowMs), dir: "in" }); }}>Log another {ICON.arrow}</button>
+          </div>
+          {reduce ? null : <Confetti />}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div ref={rootRef} className="qc149f qls qcv-legacy" data-qc149f="log" data-qls="root" data-step={s.step}>
