@@ -88,6 +88,9 @@ export interface User {
     /* v52 (7 Nov): when each rule in `mutedTaskRules` was switched off — rule → ISO time. A preference, never a source:
        a rule switched off before it existed simply has no date. Same unconstrained map, so NO rules change. */
     switchedOffAt?: Record<string, string>;
+    /* To-do list v54 (D9): how a housekeeping batch opens once the writer has picked — "one" (one at a time) or "table"
+       (all at once). Absent: under 8 queries opens one at a time, 8 or more the table. One leaf, NO rules change. */
+    batchView?: "one" | "table";
     /* The Noteboard's own preferences (paper run, Phase 2) — the map already carries nested
        sub-maps in live data (the To-do list's view prefs write `listView` here), so a page-scoped
        sub-map follows an established precedent. `dismissedExamples` = example-paper ids sent away

@@ -35,9 +35,9 @@ function Stepper({ value, words, onSet, onBump, label, testId }: { value: number
   useEffect(() => { setDraft(null); }, [value]);
   const commit = () => { if (draft == null) return; const n = typedWhole(draft); setDraft(null); if (n != null && n !== value) onSet(n); };
   return (
-    <span className="ssp-st" onClick={(e) => e.stopPropagation()}>
+    <span className="snt-st" onClick={(e) => e.stopPropagation()}>
       <button type="button" aria-label={`Less (${label})`} onClick={() => onBump(-1)}>−</button>
-      <input className="ssp-num" type="text" inputMode="numeric" aria-label={label} data-ssp={testId} value={draft ?? shown}
+      <input className="snt-num" type="text" inputMode="numeric" aria-label={label} data-snt={testId} value={draft ?? shown}
         onChange={(e) => setDraft(e.target.value)} onBlur={commit}
         onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); commit(); } else if (e.key === "Escape" && draft != null) { e.stopPropagation(); setDraft(null); } }} />
       <button type="button" aria-label={`More (${label})`} onClick={() => onBump(1)}>+</button>
@@ -50,7 +50,7 @@ export const SentSamplePicker: React.FC<{
   /** D8: "{first}'s guidelines ask for {sample}", shown under the picker; it never changes the answer */
   mismatch?: string | null;
   idPrefix?: string;
-}> = ({ sample, onChange, book, mismatch = null, idPrefix = "ssp" }) => {
+}> = ({ sample, onChange, book, mismatch = null, idPrefix = "snt" }) => {
   const s = sample;
   const unit: Unit = s.unit === "none" ? "chapters" : s.unit;
   const fu: FromUnit = s.fu ?? (unit === "pages" ? "page" : unit === "words" ? "word" : "chapter");
@@ -78,51 +78,51 @@ export const SentSamplePicker: React.FC<{
   const presets = unitSpec(unit, book).pre;
   const name = `${idPrefix}-from`;
   return (
-    <div className="ssp" data-ssp="picker">
-      <h4 className="ssp-h">How much of the sample went?</h4>
-      <div className="ssp-units" role="radiogroup" aria-label="Sample unit">
+    <div className="snt" data-snt="picker">
+      <h4 className="snt-h">How much of the sample went?</h4>
+      <div className="snt-units" role="radiogroup" aria-label="Sample unit">
         {UNITS.map(([u, l]) => {
           const on = unit === u && s.unit !== "none";
           return (
-            <div key={u} className="ssp-unit" data-on={on ? "" : undefined} data-ssp-unit={u}>
-              <button type="button" role="radio" aria-checked={on} className="ssp-ul" onClick={() => setUnit(u)}>{l}</button>
+            <div key={u} className="snt-unit" data-on={on ? "" : undefined} data-snt-unit={u}>
+              <button type="button" role="radio" aria-checked={on} className="snt-ul" onClick={() => setUnit(u)}>{l}</button>
               {on ? <Stepper value={s.amt} words={u === "words"} label={`How many ${l.toLowerCase()}`} testId="amount"
                 onSet={(n) => onChange({ ...s, unit, amt: n })} onBump={bumpAmt} /> : null}
             </div>
           );
         })}
       </div>
-      <div className="ssp-pres">
+      <div className="snt-pres">
         {presets.map((n) => <button key={n} type="button" aria-pressed={s.amt === n} onClick={() => onChange({ ...s, unit, amt: n })}>{n0(n)}</button>)}
-        <span className="ssp-or">or type any amount</span>
+        <span className="snt-or">or type any amount</span>
       </div>
-      <div className="ssp-from" role="radiogroup" aria-label="Where the sample came from">
+      <div className="snt-from" role="radiogroup" aria-label="Where the sample came from">
         <label><input type="radio" name={name} checked={!s.sect} onChange={() => setSect(false)} /> From the opening</label>
-        <label><input type="radio" name={name} checked={s.sect} onChange={() => setSect(true)} data-ssp="section" /> A section from further in</label>
+        <label><input type="radio" name={name} checked={s.sect} onChange={() => setSect(true)} data-snt="section" /> A section from further in</label>
       </div>
       {s.sect ? (
-        <div className="ssp-sect" data-ssp="start">
-          <h4 className="ssp-h">Where did it start?</h4>
-          <div className="ssp-units" role="radiogroup" aria-label="Where it started">
+        <div className="snt-sect" data-snt="start">
+          <h4 className="snt-h">Where did it start?</h4>
+          <div className="snt-units" role="radiogroup" aria-label="Where it started">
             {FROMS.map(([u, l]) => {
               const on = fu === u;
               return (
-                <div key={u} className="ssp-unit" data-on={on ? "" : undefined} data-ssp-from={u}>
-                  <button type="button" role="radio" aria-checked={on} className="ssp-ul" onClick={() => setFu(u)}>{l}</button>
+                <div key={u} className="snt-unit" data-on={on ? "" : undefined} data-snt-from={u}>
+                  <button type="button" role="radio" aria-checked={on} className="snt-ul" onClick={() => setFu(u)}>{l}</button>
                   {on ? <Stepper value={s.from} words={u === "word"} label={`Which ${l.toLowerCase()} it started at`} testId="from"
                     onSet={(n) => onChange({ ...s, from: n })} onBump={bumpFrom} /> : null}
                 </div>
               );
             })}
           </div>
-          <div className="ssp-pres">
+          <div className="snt-pres">
             {FROM_PRESETS[fu].map((n) => <button key={n} type="button" aria-pressed={s.from === n} onClick={() => onChange({ ...s, from: n })}>{n0(n)}</button>)}
-            <span className="ssp-or">or type where it started</span>
+            <span className="snt-or">or type where it started</span>
           </div>
         </div>
       ) : null}
-      <p className="ssp-reads" data-ssp="reads">Reads as: <b>{sampleName({ ...s, unit, fu: s.sect ? fu : s.fu })}</b></p>
-      {mismatch ? <p className="ssp-mm" data-ssp="mismatch">ⓘ {mismatch}. Leave it if that’s not what went.</p> : null}
+      <p className="snt-reads" data-snt="reads">Reads as: <b>{sampleName({ ...s, unit, fu: s.sect ? fu : s.fu })}</b></p>
+      {mismatch ? <p className="snt-mm" data-snt="mismatch">ⓘ {mismatch}. Leave it if that’s not what went.</p> : null}
     </div>
   );
 };

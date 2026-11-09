@@ -49,6 +49,9 @@ import TagsPane from "../TagsSheet";
 import "./todoWs.css";
 import "./todoWs54.css";
 import { WsHeader54 } from "./WsHeader54";
+import { WsBatch54 } from "./WsBatch54";
+import { openingView, type BatchView } from "../../../lib/todoBatch54";
+import { devBatchCap } from "../../../lib/todoBatchReviewAid";
 import { needRows } from "../../../lib/todoHeader54";
 
 const MENTOR = "/images/todo/mentor.webp";
@@ -162,12 +165,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   /** v52 (7 Nov): "Tasks you've switched off", opened from the Done tab's foot or the Filters menu */
   const [offPop, setOffPop] = useState<HTMLElement | null>(null);
   const [linkPicking, setLinkPicking] = useState(false);
+  /* v54 (D9): the batch's view this time round (null: the saved choice, else by size); the row whose card the side shows */
+  const [batchView, setBatchView] = useState<BatchView | null>(null);
+  const [batchFocus, setBatchFocus] = useState<string | null>(null);
   /* the batch row's place (v51.1): queries skipped this time round, and queries saved but not yet gone from the board */
   /* ⚠️ DECLARED ABOVE `go`, which resets its skips (moved to useWsBatch, unchanged) */
   const batch = useWsBatch(sel, selKey, setSelKey, all);
   const { bRemaining, bCur, deskT } = batch;
   const go = useCallback((key: string | null) => {
-    setSelKey(key); setA({}); setQi(0); setMile(null); setAdding(false); setPop(null); setLinkPicking(false); batch.resetSkip();
+    setSelKey(key); setA({}); setQi(0); setMile(null); setAdding(false); setPop(null); setLinkPicking(false); batch.resetSkip(); setBatchView(null); setBatchFocus(null);
     /* the row is brought into the tray's own view; never scrollIntoView, which would scroll the page too */
     if (key) requestAnimationFrame(() => {
       const r = document.querySelector<HTMLElement>(`.tws [data-tws-row="${CSS.escape(key)}"]`);
@@ -293,7 +299,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const cardFree = !packagesUnlocked(currentUser);
 
   /* ── the flow on the desk ── */
-  const qLog = useQueryLog(currentUser?.id ?? null, deskT?.query?.id ?? null);
+  const qLog = useQueryLog(currentUser?.id ?? null, (sel?.kind === "batch" ? batchFocus : null) ?? deskT?.query?.id ?? null);
   const linkLog = useQueryLog(currentUser?.id ?? null, deskT?.kind === "own" ? deskT.userTask?.queryId ?? null : null);
   const userFirst = (currentUser?.name ?? "").trim().split(/\s+/)[0] || "";
   const flow: Flow | null = useMemo(() => core.makeFlow(sel, deskT, A, setA, (m) => flash(m)),
@@ -417,7 +423,10 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   /* v54 (D1): the legend's rows, read off the same category sections as the bar */
   const needRowsV = useMemo(() => needRows(wsSections(visible, "category"), bd, now), [visible, bd, now]);
   /* v54 (D1): "Quick fill" opens the "Fill in what you sent" batch (there is one: v51.1 folds every gap into it) */
-  const quickFill = () => { setTab("todo"); go("materials-batch"); };
+  const quickFill = () => { setTab("todo"); go("materials-batch"); setBatchView("table"); };
+  /* D9: a pick is remembered (todoPrefs.batchView, one leaf) and used from then on */
+  const savedBatchView = (currentUser?.todoPrefs as { batchView?: BatchView } | undefined)?.batchView ?? null;
+  const pickBatchView = (v: BatchView) => { setBatchView(v); void updateUserPaths({ "todoPrefs.batchView": v }).catch(() => flash("Couldn’t save that choice.")); };
 
   /* ── render: the tray ── */
   const typeCount = (k: WsType) => all.filter((t) => t.type === k).length;
@@ -722,10 +731,21 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       progress = !total ? null : `${cur + 1} of ${t.kind === "quiet" && !A.act ? "a few" : total}`;
       back = cur > 0 && !logged ? <button type="button" className="tws-sb tws-back" data-tws="back" onClick={() => setQi(cur - 1)}>← Back</button> : null;
     }
+    /* v54 (D4–D9): a "Fill in what you sent" batch is its own desk — the band, the view switch and two views */
+    const isBatch = sel.kind === "batch" && (sel.batch?.length ?? 0) > 1;
+    /* ⚠️ a dev-only review aid trims the batch (lib/todoBatchReviewAid); gated HERE so production never reaches it */
+    const cap = import.meta.env.MODE !== "production" ? devBatchCap() : null;
+    const bQueue = isBatch ? (cap ? sel.batch!.slice(0, cap) : sel.batch!) : [];
+    const batchViewNow: BatchView = batchView ?? openingView(bQueue.length, savedBatchView);
+    const footBtns = (
+      <>
+          <button ref={snzRef} type="button" className="tws-sb" aria-label={own ? "Move it" : "Snooze"} title={own ? "Move it (S)" : "Snooze (S)"} aria-expanded={pop?.kind === "snooze"} onClick={(e) => setPop(pop?.kind === "snooze" ? null : { kind: "snooze", opener: e.currentTarget })}>{ZZ}<span>{own ? "Move it" : "Snooze"}</span><kbd>S</kbd></button>
+          <button ref={disRef} type="button" className="tws-sb" aria-label={own ? "Delete" : "Dismiss"} title={own ? "Delete (D)" : "Dismiss (D)"} aria-expanded={pop?.kind === "dismiss"} onClick={(e) => setPop(pop?.kind === "dismiss" ? null : { kind: "dismiss", opener: e.currentTarget })}>{DIS}<span>{own ? "Delete" : "Dismiss"}</span><kbd>D</kbd></button>
+      </>
+    );
     const foot = (
       <div className="tws-wf" data-tws="footer" data-over={over ? "" : undefined}>
-        <button ref={snzRef} type="button" className="tws-sb" aria-label={own ? "Move it" : "Snooze"} title={own ? "Move it (S)" : "Snooze (S)"} aria-expanded={pop?.kind === "snooze"} onClick={(e) => setPop(pop?.kind === "snooze" ? null : { kind: "snooze", opener: e.currentTarget })}>{ZZ}<span>{own ? "Move it" : "Snooze"}</span><kbd>S</kbd></button>
-        <button ref={disRef} type="button" className="tws-sb" aria-label={own ? "Delete" : "Dismiss"} title={own ? "Delete (D)" : "Dismiss (D)"} aria-expanded={pop?.kind === "dismiss"} onClick={(e) => setPop(pop?.kind === "dismiss" ? null : { kind: "dismiss", opener: e.currentTarget })}>{DIS}<span>{own ? "Delete" : "Dismiss"}</span><kbd>D</kbd></button>
+        {footBtns}
         <span className="tws-sp" />
         {progress ? <em className="tws-prog" data-tws="progress">{progress}</em> : null}
         {back}
@@ -735,24 +755,37 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
 
     return (
       <div key={t.key} className="tws-wsx tws-in" data-tws="desk" data-phase={held?.task.key === t.key ? held.phase : undefined} style={{ containerType: "inline-size" } as React.CSSProperties}>
-        <div className="tws-wh" data-band={band}>
-          <h2 data-tws="desk-title">{t.kind === "batch" && bCur ? `${t.first} · ${bRemaining.indexOf(bCur) + 1} of ${bRemaining.length}` : t.title}</h2>
-          {meta ? <span className="tws-m">{t.kind === "batch" ? t.agency || meta : meta}</span> : null}
-          <span className="tws-sp" />
-          {chip ? <span className="tws-dchip" data-late={chip.late ? "" : undefined}><b>{chip.b}</b>{chip.s ? ` ${chip.s}` : ""}</span> : null}
-          {seqPos >= 0 ? <span className="tws-pos" data-tws="pos"><b>{seqPos + 1}</b>/{seq.length}</span> : null}
-          <button type="button" className="tws-wb" aria-label="Previous task (K)" title="Previous (K)" onClick={() => move(-1)}>‹</button>
-          <button type="button" className="tws-wb" aria-label="Next task (J)" title="Next (J)" onClick={() => move(1)}>›</button>
-        </div>
-        <div className="tws-wbody">
-          <div className="tws-wcol" data-tws="qcol">
-            <div className="tws-wq" ref={setWqEl} data-tws="questions">{main}{t.kind === "batch" && bRemaining.length > 1 && !held ? (
-              <div className="tws-skip"><button type="button" className="tws-lnk" data-tws="skip" onClick={skipOne}>Skip this one</button></div>
-            ) : null}</div>
-            {foot}
+        {isBatch ? (
+          <WsBatch54 key={`${sel.key}|${bQueue.length}`} queue={bQueue} queries={queries} agents={agents} wordCount={ms?.wordCount ?? null}
+            view={batchViewNow} onView={pickBatchView} updateQuery={(id, patch) => db.updateQuery(id, patch)} flash={flash}
+            onFocus={setBatchFocus} footLeft={footBtns}
+            card={(() => { const fq = queries.find((q) => q.id === batchFocus) ?? t.query ?? null; const fa = fq ? agents.find((x) => x.id === fq.agentId) ?? null : null; return fq ? (
+              <ScaledCard kind="query" focusKey={`${fq.id}|batch`} label="Open the full query card ↗" onOpen={() => openQueryPanel(fq.id, "other")}>
+                <PreviewQueryCard q={fq} row={cardRows.get(fq.id) ?? null} agent={fa} queries={queries} manuscripts={manuscripts} manuscript={manuscripts.find((m) => m.id === fq.manuscriptId) ?? null} packages={packages} log={qLog} draft={null} nowMs={now} quietWeeks={quietWeeks} free={cardFree} mode="plain" agents={agents} activities={activities} />
+              </ScaledCard>
+            ) : null; })()} />
+        ) : (
+          <>
+          <div className="tws-wh" data-band={band}>
+            <h2 data-tws="desk-title">{t.kind === "batch" && bCur ? `${t.first} · ${bRemaining.indexOf(bCur) + 1} of ${bRemaining.length}` : t.title}</h2>
+            {meta ? <span className="tws-m">{t.kind === "batch" ? t.agency || meta : meta}</span> : null}
+            <span className="tws-sp" />
+            {chip ? <span className="tws-dchip" data-late={chip.late ? "" : undefined}><b>{chip.b}</b>{chip.s ? ` ${chip.s}` : ""}</span> : null}
+            {seqPos >= 0 ? <span className="tws-pos" data-tws="pos"><b>{seqPos + 1}</b>/{seq.length}</span> : null}
+            <button type="button" className="tws-wb" aria-label="Previous task (K)" title="Previous (K)" onClick={() => move(-1)}>‹</button>
+            <button type="button" className="tws-wb" aria-label="Next task (J)" title="Next (J)" onClick={() => move(1)}>›</button>
           </div>
-          {side}
-        </div>
+          <div className="tws-wbody">
+            <div className="tws-wcol" data-tws="qcol">
+              <div className="tws-wq" ref={setWqEl} data-tws="questions">{main}{t.kind === "batch" && bRemaining.length > 1 && !held ? (
+                <div className="tws-skip"><button type="button" className="tws-lnk" data-tws="skip" onClick={skipOne}>Skip this one</button></div>
+              ) : null}</div>
+              {foot}
+            </div>
+            {side}
+          </div>
+          </>
+        )}
         {pop?.kind === "snooze" ? <SnoozePop t={t} today={today} limit={limitFor(t)} opener={pop.opener} onClose={() => setPop(null)} onSnooze={(d, u) => void doSnooze(t, d, u)} /> : null}
         {pop?.kind === "dismiss" ? (
           <DismissPop t={t} ruleWord={(() => { const r = (t.item.card as BoardCard & { sweepRule?: string }).sweepRule; return r && r in RULE_PLAIN ? RULE_PLAIN[r] : null; })()}
