@@ -17,10 +17,11 @@ import { SubmissionMethod } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import {
-  HOW, MONL, STAGES, STAGE_LABEL, STAGE_LINE, askWords, batchWhoLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk, piecesMatchAsk,
-  sameDay, sizeName, sizesFor, sod, titleName, weekdayDay, whoGroups, yesterday,
+  HOW, MONL, PREVIEW_ID, STAGES, STAGE_LABEL, STAGE_LINE, askWords, batchCheckLine, batchWhoLine, checkLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk, piecesMatchAsk,
+  planOf, previewOf, sameDay, sizeName, sizesFor, sod, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
+import { QcSlip153 } from "./QcSlip153";
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
 import "./qcLogStages.css";
@@ -38,8 +39,23 @@ export const ICON = {
   post: <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#5b4f47" strokeWidth="1.4" aria-hidden="true"><path d="M3 6.5h10v6.5H3z M5 6.5V3h6v3.5" /></svg>,
 } as const;
 
-/** what a save hands back: the new query's id and count, how to undo it, and the door to its card */
+/** what a save hands back: the new query's id, how to undo it, and the door to its card */
 export interface Logged { id: string; undo: () => Promise<void>; openCard: () => void }
+/** the celebration's facts, fixed at the moment of the log */
+interface LoggedView extends Logged { n: number; first: string; preview: Preview; weeks: number | null; before: FlowState }
+
+export function useReducedMotion(): boolean {
+  const q = "(prefers-reduced-motion: reduce)";
+  const [r, setR] = useState(() => typeof window !== "undefined" && !!window.matchMedia?.(q).matches);
+  useEffect(() => {
+    const m = window.matchMedia?.(q);
+    if (!m) return;
+    const on = () => setR(m.matches);
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, []);
+  return r;
+}
 
 export interface QcLogStagesProps {
   nowMs: number;
@@ -142,6 +158,9 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   const { nowMs, agents } = p;
   const [s, setS] = useState<FlowState>(() => freshState(nowMs));
   const set = (patch: Partial<FlowState>) => setS((o) => ({ ...o, ...patch }));
+  /* the flow, then the celebration once a query is logged with "Log query" */
+  const [phase, setPhase] = useState<"flow" | "yay">("flow");
+  const [logged, setLogged] = useState<LoggedView | null>(null);
   const agent = agents.find((a) => a.id === s.agentId) ?? null;
   const findRef = useRef<HTMLInputElement>(null);
   const sbRef = useRef<HTMLDivElement>(null);
@@ -424,6 +443,95 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     );
   };
 
+  /* ── the check stage ── */
+  const answers = (): LogAnswers | null => (s.agentId && s.sent != null && s.via && s.piecesSet
+    ? { agentId: s.agentId, sent: s.sent, via: s.via, packageId: s.packageId, letterId: pc.letterId, synopsisId: pc.synopsisId, sample: pc.sample, note: s.note.trim() }
+    : null);
+  const preview = useMemo(() => {
+    const a = answers();
+    if (!a || (s.step !== "check" && phase === "flow")) return null;
+    const plan = planOf(a, p.ctx, PREVIEW_ID, false);
+    return plan ? previewOf(plan, nowMs, p.quietWeeks) : null;
+  }, [s, phase, p.ctx, nowMs, p.quietWeeks]); // eslint-disable-line react-hooks/exhaustive-deps
+  const slip = (pv: NonNullable<typeof preview>, tag: boolean) => (
+    <div className="qls-pv qls-pvw qc151 qc153" data-qls="preview">
+      {tag ? <span className="qls-pvtag" data-qls="preview-tag">Preview</span> : null}
+      <QcSlip153 row={pv.row} nowMs={nowMs} selected={false} packageName={pv.packageName} agent={pv.agent} act={null} onOpen={() => {}} onAct={() => {}}
+        preview={pv.noWindow ? { next: { value: "No reply window", line: `add one on ${first}'s card` }, policy: { value: "Not on their card", line: null } } : {}} />
+      {stamp ? <span className={`qls-stamp${reduce ? "" : " is-thump"}`} data-qls="stamp"><span>Logged</span><small>{dayMon(s.sent ?? nowMs).toUpperCase()}</small></span> : null}
+    </div>
+  );
+  const noteRef = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => { if (s.noteOpen) noteRef.current?.focus({ preventScroll: true }); }, [s.noteOpen]);
+  const checkBody = () => (
+    <>
+      <h2 className="qls-qh">Ready to log {first}?</h2>
+      <p className="qls-qs">Here's how {first} will look in your Query Centre. Hover the paperclip to check what went.</p>
+      {preview ? slip(preview, true) : null}
+      <div className="qls-nt">
+        {s.noteOpen
+          ? <textarea ref={noteRef} data-qls="note" value={s.note} placeholder={`Anything about this query for ${first}. It goes on the query card.`} aria-label="A note on this query" onChange={(e) => set({ note: e.target.value })} />
+          : <button type="button" className="qls-lk" data-qls="add-note" onClick={() => set({ noteOpen: true })}>+ Add a note</button>}
+      </div>
+      <p className="qls-qs is-foot">Something not right? Tap any step above to change it.</p>
+    </>
+  );
+
+  /* ── logging ── */
+  const reduce = useReducedMotion();
+  const [busy, setBusy] = useState(false);
+  const [stamp, setStamp] = useState(false);
+  const [bump, setBump] = useState(false);
+  const [toast, setToast] = useState<{ text: string; undo: () => void } | null>(null);
+  const toastTimer = useRef<number | null>(null);
+  useEffect(() => () => { if (toastTimer.current) window.clearTimeout(toastTimer.current); }, []);
+  const showToast = (text: string, undo: () => void) => {
+    setToast({ text, undo });
+    if (toastTimer.current) window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(null), 4200);
+  };
+  /** the stamp thumps onto the preview and the panel gives a small bump; about 650ms later `then` runs */
+  const stampThen = (then: () => void) => {
+    if (reduce) { then(); return; }
+    setStamp(true); setBump(true);
+    window.setTimeout(() => { setStamp(false); setBump(false); then(); }, 650);
+  };
+  const doLog = async (more: boolean) => {
+    const a = answers();
+    if (!a || busy) return;
+    setBusy(true);
+    const n = p.count + 1;
+    const before = s;
+    const done = await p.onSave(a);
+    setBusy(false);
+    if (!done) return;
+    const lastFirst = agent?.first ?? "The agent";
+    if (more) {
+      stampThen(() => {
+        /* the date and materials carry over; how comes from the next agent's card */
+        setS((o) => ({ ...o, step: "who", dir: "in", agentId: null, via: null, find: "", note: "", noteOpen: false, hi: 0, showBusy: false, carried: lastFirst }));
+        showToast(`${lastFirst} logged`, async () => { setToast(null); await done.undo(); setS({ ...before, step: "check", dir: "back" }); });
+      });
+    } else {
+      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: agent?.weeks ?? null, before }); setPhase("yay"); });
+    }
+  };
+  /* ⌘↵ / Ctrl↵ logs from the check */
+  useEffect(() => {
+    if (s.step !== "check" || phase !== "flow") return;
+    const onKey = (e: KeyboardEvent) => { if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && rootRef.current?.offsetParent) { e.preventDefault(); void doLog(false); } };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  });
+  const checkFoot = (
+    <>
+      <button type="button" className="qls-lnk" data-qls="cancel" onClick={p.onClose} disabled={busy || stamp}>Cancel</button>
+      <span className="qls-sp" />
+      <button type="button" className="qls-lnk" data-qls="log-more" disabled={busy || stamp} onClick={() => void doLog(true)}>Log and start another</button>
+      <button type="button" className="qls-btn" data-qls="log" disabled={busy || stamp} onClick={() => void doLog(false)}>Log query {ICON.arrow}</button>
+    </>
+  );
+
   /* ↑ ↓ and ↵ over the big rows on Sent, Materials and How */
   useEffect(() => {
     if (s.step !== "when" && s.step !== "what" && s.step !== "how") return;
@@ -458,7 +566,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   };
 
   const line = s.step === "who" ? (s.carried ? batchWhoLine(s.carried) : FLOW_WORDS.log.line)
-    : s.step === "check" ? null : STAGE_LINE[s.step];
+    : s.step === "check" ? (s.carried ? batchCheckLine(s.carried) : checkLine(p.count + 1, p.bookTitle)) : STAGE_LINE[s.step];
   const backFoot = (hint: string | null) => (
     <>
       <button type="button" className="qls-lnk" data-qls={s.step === "who" ? "cancel" : "back"} onClick={() => (s.step === "who" ? p.onClose() : go(STAGES[Math.max(0, STAGES.indexOf(s.step) - 1)], "back"))}>{s.step === "who" ? "Cancel" : "Back"}</button>
@@ -468,7 +576,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   );
 
   const body = s.step === "who" ? whoBody() : s.step === "when" ? whenBody() : s.step === "what" ? whatBody() : s.step === "how" ? howBody()
-    : <p className="qls-qs">The check arrives in the next phase.</p>;
+    : checkBody();
   const piecesFoot = (
     <>
       <button type="button" className="qls-lnk" data-qls="back" onClick={() => go("when", "back")}>Back</button>
@@ -478,15 +586,18 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     </>
   );
   const foot = s.step === "who" ? backFoot("↑ ↓ and ↵") : s.step === "what" && !showPkgs ? piecesFoot
-    : s.step === "check" ? backFoot(null) : backFoot("Tap one to carry on");
+    : s.step === "check" ? checkFoot : backFoot("Tap one to carry on");
 
   return (
     <div ref={rootRef} className="qc149f qls qcv-legacy" data-qc149f="log" data-qls="root" data-step={s.step}>
-      <div className="mk-lc-in qc149c-in qls-in">
+      <div className={`mk-lc-in qc149c-in qls-in${bump ? " is-bump" : ""}`}>
         <FlowHead title={FLOW_WORDS.log.title} line={line} onClose={p.onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
         <Stepper s={s} values={values} onGo={(k) => go(k)} />
         <div ref={sbRef} key={s.step} className={`qls-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
         <div className="qls-cf" data-qls="foot">{foot}</div>
+        <div className={`qls-toast${toast ? " is-on" : ""}`} data-qls="toast" role="status" aria-live="polite">
+          {toast ? <>{toast.text}<button type="button" data-qls="toast-undo" onClick={toast.undo}>Undo</button></> : null}
+        </div>
       </div>
       {menu()}
     </div>

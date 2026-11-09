@@ -119,6 +119,14 @@
 /* the check: the preview slip */
 .qls .qls-pv { position: relative; }
 .qls .qls-pv .sa-slip { cursor: default; }
+/* the slip is the list's own (QcSlip153 under the list's root classes, so its rules and its 2×2 container query apply);
+   here it is fitted to the drawer as the ref draws it: no page padding, the facts under the whole header, the status
+   word above the track, and no lift (it is not a control) */
+.qls .qls-pvw.qc151.qc153 { padding-top: 0; width: 100%; font: inherit; }
+.qls .qls-pvw.qc151.qc153 .qc153-slip { margin-bottom: 0; }
+.qls .qls-pvw.qc151.qc153 .qc153-slip:hover { transform: none; box-shadow: none; }
+.qls .qls-pvw.qc151.qc153 .qc153-facts { padding: 0 12px 12px; gap: 8px; }
+.qls .qls-pvw.qc151.qc153 .qc153-st { flex-direction: column-reverse; align-items: flex-end; gap: 9px; }
 .qls .qls-pvtag { position: absolute; top: -9px; right: 18px; z-index: 5; padding: 1px 9px; border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px #e3d5c9; font: italic 400 12.5px var(--qls-se); color: var(--qls-mut); }
 .qls .qls-nt { display: flex; justify-content: flex-end; margin-top: 14px; }
 .qls .qls-nt textarea { box-sizing: border-box; width: 100%; min-height: 58px; resize: vertical; font: 400 14.5px/1.45 var(--qls-se); padding: 7px 10px; border-radius: 9px; border: 1px solid #d9cfc2; outline: none; color: var(--qls-ink); background: #fff; }
