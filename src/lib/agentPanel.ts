@@ -190,8 +190,10 @@ export interface IndexRow {
 }
 
 /** how they take queries, in the panel's words; anything unrecognised says nothing */
-export function methodAnswer(m: string | undefined | null): string | null {
+export function methodAnswer(m: string | undefined | null, other?: string | null): string | null {
   const v = (m ?? "").trim().toLowerCase().replace(/\s+/g, "");
+  /* Add agent v1 — an Other method says its own words, or "Other" */
+  if (v === "other") return `Via ${(other ?? "").trim() || "Other"}`;
   if (v === SubmissionMethod.EMAIL.toLowerCase()) return "By email";
   if (v === "querymanager") return "Through QueryManager";
   if (v === "onlineform" || v === "agencyform") return "Through their submission form";
@@ -220,7 +222,7 @@ export function panelIndex({ agent, genres, queried, nowMs }: IndexInput): Index
   return [
     { key: "wishlist", label: INDEX_LABEL.wishlist, answer: wish ? `“${wish}”` : null, note: stamp },
     { key: "genres", label: INDEX_LABEL.genres, answer: genres.length ? genres.map((g) => g.label).join(", ") : null, chips: genres },
-    { key: "method", label: INDEX_LABEL.method, answer: methodAnswer(agent.submissionMethod) },
+    { key: "method", label: INDEX_LABEL.method, answer: methodAnswer(agent.submissionMethod, agent.submissionMethodOther) },
     { key: "reply", label: INDEX_LABEL.reply, answer: weeks ? `In about ${weeks} week${weeks === 1 ? "" : "s"}` : null, note: weeks ? nrn : null },
     { key: "materials", label: INDEX_LABEL.materials, answer: mats.length ? mats.join(" · ") : null },
     { key: "queries", label: INDEX_LABEL.queries, answer: queried.length === 0 ? "None yet" : `${NUM[queried.length] ?? String(queried.length)}, for ${list(queried)}`, chips: undefined },

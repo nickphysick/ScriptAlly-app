@@ -15,8 +15,10 @@ import { emptyCardDraft, encodeMats, problemsOf } from "../../../lib/cardDraft";
 
 const strip = (src: string) => src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/[^\n]*/gm, "");
 const host = readFileSync(new URL("../card/AgentCardHost.tsx", import.meta.url), "utf8");
-/* re-pointed (Contact list v25.2 C2): the editor is the card's edit mode now (AgentCardEditor is deleted) */
-const editor = readFileSync(new URL("../card/AgentEditMode.tsx", import.meta.url), "utf8");
+/* re-pointed (Add agent v1 Phase 5): AgentEditMode is deleted; the editors are the add journey, the card's own edit
+   sections and the controls both share — the laws below hold over all three */
+const editor = ["../card/AddAgentJourney.tsx", "./AgentCard262Edit.tsx", "../card/agentPills.tsx"]
+  .map((f) => readFileSync(new URL(f, import.meta.url), "utf8")).join("\n");
 
 describe("a new agent is born the way the house births agents", () => {
   it("the empty draft carries ABSENCE where the writer has said nothing — no window, no rule, no method, no country, no materials", () => {
@@ -25,7 +27,8 @@ describe("a new agent is born the way the house births agents", () => {
     expect(d.nrn, "unstated is an ORIGIN state").toBeNull();
     expect(d.method).toBeNull();
     expect(d.country, "a new agent is in no country until the writer says so").toBe("");
-    expect(d.door).toBe("open");
+    /* re-pointed (Add agent v1): taking queries starts empty — nothing is pre-picked that isn't known */
+    expect(d.door).toBeNull();
     expect(d.reopens).toBe("");
     expect(d.genres).toEqual([]);
     /* ⚠️ the mock ticks three materials on its add card; stored, they would be a claim about what an
@@ -39,9 +42,11 @@ describe("a new agent is born the way the house births agents", () => {
   });
 
   it("the create goes through addAgent — the one path with the cap and the activity — and the optionals spread in only when stated", () => {
-    const at = strip(host).indexOf("const onCreateAgent");
+    /* retargeted (Add agent v1): the create is `createAgent` now (it hands back the new id for the finish screen); the
+       law is unchanged — one path through addAgent, optionals only when stated */
+    const at = strip(host).indexOf("const createAgent");
     expect(at, "the create is no longer in the host").toBeGreaterThan(-1);
-    const create = strip(host).slice(at, strip(host).indexOf("}, [addAgent]);", at));
+    const create = strip(host).slice(at, strip(host).indexOf("}, [addAgent, req]);", at));
     expect(create.length, "the create's end anchor moved — re-anchor this lock").toBeGreaterThan(200);
     expect(create, "the create left the shared path").toContain("await addAgent({");
     expect(create, "the links stopped going through the shared href builder").toMatch(/website: hrefFor\(d\.website\)/);

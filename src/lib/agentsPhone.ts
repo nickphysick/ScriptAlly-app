@@ -9,8 +9,10 @@ import { DOOR_NOT_KNOWN, doorOf } from "./agentList";
 import { SubmissionMethod, type Agent } from "../types";
 
 /** how they take submissions, in the ref's words; null when the record does not say */
-export function howWords(m: SubmissionMethod | string | undefined | null): string | null {
+export function howWords(m: SubmissionMethod | string | undefined | null, other?: string | null): string | null {
   switch (m) {
+    /* Add agent v1 — an Other method says its own words, or "Other" */
+    case SubmissionMethod.OTHER: return (other ?? "").trim() || "Other";
     case SubmissionMethod.EMAIL: return "By email";
     case SubmissionMethod.ONLINE_FORM: return "Online form";
     case SubmissionMethod.QUERY_MANAGER: return "QueryManager";

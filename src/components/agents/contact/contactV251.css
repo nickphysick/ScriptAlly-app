@@ -89,7 +89,7 @@
     color: #6b5f52; white-space: nowrap;
   }
 
-  /* E3 — Your rating: five 14px stars, 1px apart, rust on and sand off; "Not rated" in italic grey */
+  /* E3 — Agent fit: five 14px stars, 1px apart, rust on and sand off; "Not rated" in italic grey */
   .cl251-rate { display: flex; align-items: center; }
   .cl251-stars { display: inline-flex; gap: 1px; }
   .cl251-stars i { font: normal 400 14px/1 var(--sp-serif); color: #d9cfc4; }

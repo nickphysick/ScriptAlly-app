@@ -27,11 +27,14 @@ export const QC_SORT_FIELDS: readonly SortField<Qc138SortKey>[] = [
  *  arrow): "Name A–Z", "Best genre fit", "Quickest reply", "Most urgent", "Highest rated", and their reverses */
 export const CL_SORT_FIELDS: readonly SortField<SortKey>[] = [
   /* Contact list v26 E — the four sorts the page offers (the menu, the chip and the two sorting headings): Surname,
-     Date added, Reply time, Query status. v25.1's Genre fit, Urgency and Your rating left with their columns. */
+     Date added, Reply time, Query status. v25.1's Genre fit, Urgency and Agent fit left with their columns. */
   { key: "surname", label: "Surname", order: AZ },
   { key: "added", label: "Date added", order: [{ label: "Newest first", reversed: false }, { label: "Oldest first", reversed: true }] },
   { key: "reply", label: "Reply time", order: [{ label: "Fastest first", reversed: false }, { label: "Slowest first", reversed: true }] },
   { key: "status", label: "Query status", order: [{ label: "Furthest on", reversed: false }, { label: "Earliest first", reversed: true }] },
+  /* Add agent v1 Phase 6 — Agent fit, through the same chip and menu (lib/contactList sortFacts' "rating": unrated last
+     either way, ties by the shorter response time, then surname) */
+  { key: "rating", label: "Agent fit", order: [{ label: "Best fit first", reversed: false }, { label: "Lowest first", reversed: true }] },
 ]
 
 /**

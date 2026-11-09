@@ -20,10 +20,11 @@ describe("the Query Centre's fields", () => {
 });
 
 describe("the Contact list's fields", () => {
-  /* re-pointed (v25.1 E4): the five headings, Added and Submissions gone, Genres and Your rating sorting */
+  /* re-pointed (v25.1 E4): the five headings, Added and Submissions gone, Genres and Agent fit sorting */
   it("are its five sortable headings, in their order", () => {
     /* RE-POINTED by Contact list v26 E: the page offers four sorts (v25.1's five headings retired with their columns) */
-    expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual(["surname", "added", "reply", "status"]);
+    /* and Add agent v1 Phase 6 adds Agent fit through the same chip and menu */
+    expect(CL_SORT_FIELDS.map((f) => f.key)).toEqual(["surname", "added", "reply", "status", "rating"]);
   });
 });
 

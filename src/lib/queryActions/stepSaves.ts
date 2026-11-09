@@ -11,6 +11,7 @@
  * drawer's offer journey and the To-do workspace's desk record a decline or an accept through `saveOfferDecision`, and
  * "I asked for more time" through `saveOfferMoreTime`.
  */
+import { queryViaOf } from "../queryVia";
 import { deleteField, doc, setDoc } from "firebase/firestore";
 import { db as fsdb } from "../firebase";
 import type { useScriptAllyDb } from "../db";
@@ -71,7 +72,7 @@ export interface NudgePlan { sent: Date; then: Date; said: string; via: Submissi
 export function nudgeDefaults(q: Query, agent: Agent | null, sent: Date): Pick<NudgePlan, "then" | "via"> {
   return {
     then: futureWeeks(sent, [["4w", "In four weeks", 28]])[0].d!,
-    via: (agent?.submissionMethod as SubmissionMethod) || (q.sendMethod as SubmissionMethod) || SubmissionMethod.EMAIL,
+    via: queryViaOf(agent?.submissionMethod) || (q.sendMethod as SubmissionMethod) || SubmissionMethod.EMAIL,
   };
 }
 

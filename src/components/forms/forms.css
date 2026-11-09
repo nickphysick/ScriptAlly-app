@@ -475,9 +475,9 @@
 }
 .sa-seg-b.on { background: #f5e2da; color: #7c3a2a; font-weight: 500; box-shadow: 0 1px 2px rgba(58, 28, 20, 0.08); }
 
-/* response-window slider (1–26 weeks) */
+/* response-window slider (1–26 weeks) — navy (Add agent v1), never burgundy, never green */
 .sa-wk-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 11px; }
-.sa-wk-read { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: #7c3a2a; }
+.sa-wk-read { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 500; color: #2a3a52; }
 .sa-wk-slider {
   -webkit-appearance: none; appearance: none;
   width: 100%; height: 6px; border-radius: 4px; background: #e7ddd0;
@@ -486,16 +486,16 @@
 .sa-wk-slider::-webkit-slider-thumb {
   -webkit-appearance: none; appearance: none;
   width: 20px; height: 20px; border-radius: 50%;
-  background: #7c3a2a; border: 3px solid #fdfaf5;
+  background: #2a3a52; border: 3px solid #fdfaf5;
   box-shadow: 0 1px 4px rgba(58, 28, 20, 0.32); cursor: grab;
 }
 .sa-wk-slider::-webkit-slider-thumb:active { cursor: grabbing; }
 .sa-wk-slider::-moz-range-thumb {
   width: 18px; height: 18px; border-radius: 50%;
-  background: #7c3a2a; border: 3px solid #fdfaf5;
+  background: #2a3a52; border: 3px solid #fdfaf5;
   box-shadow: 0 1px 4px rgba(58, 28, 20, 0.32); cursor: grab;
 }
-.sa-wk-slider:focus-visible { box-shadow: 0 0 0 3px rgba(138, 158, 136, 0.25); }
+.sa-wk-slider:focus-visible { box-shadow: 0 0 0 3px rgba(42, 58, 82, 0.2); }
 .sa-wk-ends {
   display: flex; justify-content: space-between; margin-top: 7px;
   font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.04em; color: #bcae9e;
@@ -509,8 +509,8 @@
   color: #a89a8a; background: transparent; border: 1px solid #d8cab9; border-radius: 999px; padding: 3px 10px;
   cursor: pointer; transition: all .14s;
 }
-.sa-wk-unkbtn:hover { border-color: #8a9e88; color: #5a6e58; }
-.sa-wk-unkbtn.on { background: #f5e2da; border-color: #e8c8bc; color: #7c3a2a; } /* clearly filled when active */
+.sa-wk-unkbtn:hover { border-color: #9a8f82; color: #3d3530; }
+.sa-wk-unkbtn.on { background: #2a3a52; border-color: #2a3a52; color: #f4eee5; } /* clearly filled when active */
 .sa-wk-unktip {
   position: absolute; bottom: 140%; right: 0; width: 224px; background: #3a1c14; color: #f3ece2;
   font-size: 10.5px; line-height: 1.5; padding: 9px 11px; border-radius: 8px; box-shadow: 0 8px 22px rgba(58,28,20,0.3);

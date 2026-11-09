@@ -108,7 +108,7 @@ export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, on
           <div className="qat-tk">window</div>
         </div>
         <div className="qat-tile">
-          <div className="qat-tv">{agent.submissionMethod || "—"}</div>
+          <div className="qat-tv">{agent.submissionMethod === "Other" ? ((agent.submissionMethodOther ?? "").trim() || "Other") : agent.submissionMethod || "—"}</div>
           <div className="qat-tk">method</div>
         </div>
         <div className="qat-tile">

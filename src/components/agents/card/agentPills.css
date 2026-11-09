@@ -1,0 +1,152 @@
+/*
+ * Add agent v1 Phase 1 — the shared controls (agentPills.tsx). Values from design-refs/add-agent-v1/add-agent-v1.html,
+ * "v3 · ONE CONTROL LANGUAGE", "materials, softer", the agency ask and the flags.
+ *
+ * ⚠️ A SECTION'S TINT IS `--t` ON ITS CONTAINER; a pill's hover reads it (falling back to warm paper).
+ * ⚠️ NO GREEN, NO BURGUNDY: navy #2a3a52 chosen, sand #d6bf9c / #9c7a4c on materials, rust #a2452a for problems only.
+ */
+.aap-f { display: block; margin-top: 20px; }
+.aap-f:first-child { margin-top: 2px; }
+.aap-l { display: flex; align-items: baseline; gap: 8px; margin: 0 0 9px; font: 600 15px/1.25 var(--sp-serif); color: #3d3530; }
+.aap-l small { font: italic 400 13.5px var(--sp-serif); color: #6c675f; }
+.aap-c { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+
+.aap-pills { display: flex; flex-wrap: wrap; gap: 8px; }
+.aap-pill {
+  all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 15px;
+  border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #ddd3c6; font: 400 15px/1 var(--sp-serif); color: #3d3530; white-space: nowrap;
+  transition: background .12s, box-shadow .12s, color .12s;
+}
+.aap-pill:hover:not(.on) { box-shadow: inset 0 0 0 1px #9a8f82; background: var(--t, #faf7f2); }
+.aap-pill:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.aap-pill.on { background: #2a3a52; color: #f4eee5; box-shadow: none; }
+.aap-ck { font-size: 12px; margin-left: -3px; }
+.aap-plus { color: #9a948b; margin-left: -4px; }
+
+/* a chosen pill that carries its own amount or text */
+.aap-pill.amt { cursor: default; padding: 0 6px 0 14px; gap: 4px; }
+.aap-pill.amt .aap-mb { all: unset; cursor: pointer; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font: 400 16px/1 var(--sp-serif); color: #f4eee5; }
+.aap-pill.amt .aap-mb:hover:not(:disabled) { background: rgba(244,238,229,.16); }
+.aap-pill.amt .aap-mb:disabled { opacity: .35; cursor: default; }
+.aap-pill.amt .aap-x { all: unset; cursor: pointer; width: 24px; height: 24px; margin-left: 2px; border-radius: 50%; display: grid; place-items: center; font: 400 15px/1 var(--sp-serif); color: rgba(244,238,229,.7); }
+.aap-pill.amt .aap-x:hover { background: rgba(244,238,229,.16); color: #f4eee5; }
+.aap-pill.amt .aap-pin { all: unset; box-sizing: border-box; width: 130px; font: 400 15px var(--sp-serif); color: #f4eee5; padding: 0 4px; }
+.aap-pill.amt .aap-pin::placeholder { color: rgba(244,238,229,.55); font-style: italic; }
+.aap-pill.amt .aap-qn { all: unset; box-sizing: border-box; width: 46px; height: 26px; padding: 0; border-radius: 6px; text-align: center; font: 600 15px var(--sp-serif); background: rgba(244,238,229,.12); color: #f4eee5; }
+.aap-pill.amt .aap-qn:focus { background: #f4eee5; color: #1c130f; }
+.aap-pill.amt .aap-qn::placeholder { color: rgba(244,238,229,.6); font-weight: 400; font-style: italic; }
+.aap-pill.amt.wide { width: 100%; height: auto; flex-wrap: wrap; row-gap: 8px; padding: 9px 8px 10px 14px; border-radius: 14px; }
+.aap-pill.amt.wide .aap-br { flex-basis: 100%; height: 0; }
+.aap-pill.amt.wide .aap-useg { margin-left: auto; }
+.aap-pill.amt .aap-gap { flex: 1; }
+.aap-useg { display: inline-flex; gap: 2px; margin-left: 6px; padding: 2px; border-radius: 999px; background: rgba(244,238,229,.12); }
+.aap-useg button { all: unset; cursor: pointer; height: 26px; padding: 0 10px; border-radius: 999px; font: 400 14px/26px var(--sp-serif); color: rgba(244,238,229,.85); }
+.aap-useg button.on { background: #f4eee5; color: #1c130f; }
+.aap-useg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+
+/* the closed pill holds the app's date control, in cream */
+.aap-pill.amt[data-door-box] .ae-fl { position: relative; display: inline-flex; }
+.aap-pill.amt[data-door-box] .ae-dt { display: inline-flex; align-items: center; gap: 8px; color: #f4eee5; font: 400 15px var(--sp-serif); }
+.aap-pill.amt[data-door-box] .ae-dt .unk { font-style: italic; color: rgba(244,238,229,.7); }
+.aap-pill.amt[data-door-box] .ae-dt .ae-lnk { all: unset; cursor: pointer; color: #f4eee5; text-decoration: underline; text-underline-offset: 3px; font: 400 14px var(--sp-serif); }
+.aap-pill.amt[data-door-box] .ae-cal { color: #1c130f; white-space: normal; }
+
+/* ── materials, softer: a chosen material is a warm paper pill with a sand edge, not a navy slab ── */
+.aap-mats .aap-pill.on { background: #fbf6ee; color: #1c130f; box-shadow: inset 0 0 0 1.5px #d6bf9c; }
+.aap-mats .aap-pill.on:hover { background: #fbf6ee; }
+.aap-mats .aap-pill.on .aap-ck { color: #9c7a4c; font-weight: 600; }
+.aap-mats .aap-pill.amt .aap-mb { color: #3d3530; }
+.aap-mats .aap-pill.amt .aap-mb:hover:not(:disabled) { background: rgba(28,19,15,.07); }
+.aap-mats .aap-pill.amt .aap-qn { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px #e2d6c4; }
+.aap-mats .aap-pill.amt .aap-qn:focus { box-shadow: inset 0 0 0 1.5px #2a3a52; background: #fff; }
+.aap-mats .aap-pill.amt .aap-qn::placeholder { color: #a39b90; }
+.aap-mats .aap-pill.amt .aap-pin { color: #1c130f; }
+.aap-mats .aap-pill.amt .aap-pin::placeholder { color: #a39b90; }
+.aap-mats .aap-pill.amt .aap-x { color: rgba(28,19,15,.45); }
+.aap-mats .aap-pill.amt .aap-x:hover { background: rgba(28,19,15,.07); color: #1c130f; }
+.aap-mats .aap-useg { background: #f1e7d8; }
+.aap-mats .aap-useg button { color: #5b524a; }
+.aap-mats .aap-useg button:hover:not(.on) { background: rgba(255,255,255,.6); }
+.aap-mats .aap-useg button.on { background: #fff; color: #1c130f; box-shadow: 0 1px 2px rgba(28,19,15,.14); }
+.aap-mats .aap-pill.amt.bad { box-shadow: inset 0 0 0 2px #a2452a; }
+
+/* notes and hints */
+.aap-note { font: italic 400 13.5px/1.35 var(--sp-serif); color: #6c675f; }
+.aap-note.ok { font-style: normal; color: #3d4f66; }
+.aap-note.bad, .aap-hint.bad { font-style: normal; color: #a2452a; }
+.aap-hint { font: italic 400 13.5px/1.35 var(--sp-serif); color: #6c675f; }
+
+/* text fields */
+.aap-inp {
+  all: unset; box-sizing: border-box; width: 100%; height: 40px; padding: 0 12px; border-radius: 8px; background: #fff;
+  box-shadow: inset 0 0 0 1px #e6dfd5; font: 400 16px var(--sp-serif); color: #1c130f;
+}
+.aap-inp.big { height: 46px; font-size: 18px; background: #f5f1ea; box-shadow: inset 0 1px 2px rgba(28,19,15,.08); }
+.aap-inp:focus, .aap-inp.big:focus { background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.aap-inp[aria-invalid="true"] { box-shadow: inset 0 0 0 1.5px #a2452a; }
+.aap-inp::placeholder { font-style: italic; color: #9a948b; }
+.aap-ta { height: auto; min-height: 96px; padding: 10px 12px; resize: vertical; font: italic 400 16.5px/1.45 var(--sp-serif); white-space: pre-wrap; }
+
+/* flags: flag-icons (never emoji) */
+.aap-pill .fi { width: 18px; height: 13.5px; line-height: 13.5px; border-radius: 2px; flex: none; background-size: cover; box-shadow: 0 0 0 .5px rgba(28,19,15,.18); }
+.aap-pill.on .fi { box-shadow: 0 0 0 1px rgba(244,238,229,.5); }
+.aap-glb { width: 15px; height: 15px; flex: none; }
+.aap-cty { padding: 10px; border-radius: 10px; background: #faf7f2; box-shadow: inset 0 0 0 1px #efe8de; }
+
+/* genres: the chips field and an in-flow list */
+.aap-gp { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 40px; padding: 5px 7px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1px #e6dfd5; cursor: text; box-sizing: border-box; }
+.aap-gp:focus-within { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.aap-chip { display: inline-flex; align-items: center; gap: 3px; height: 28px; padding: 0 4px 0 11px; border-radius: 999px; background: #f0d6ca; font: 400 14px var(--sp-serif); }
+.aap-chip button { all: unset; cursor: pointer; width: 20px; height: 20px; border-radius: 50%; text-align: center; font: 400 14px/20px var(--sp-serif); color: rgba(28,19,15,.45); }
+.aap-chip button:hover { background: rgba(28,19,15,.08); color: #1c130f; }
+.aap-gp input { all: unset; flex: 1; min-width: 130px; height: 28px; font: 400 15.5px var(--sp-serif); }
+.aap-gp input::placeholder { font-style: italic; color: #9a948b; }
+.aap-glist { border-radius: 9px; background: #fff; box-shadow: inset 0 0 0 1px #e6dfd5; padding: 4px; max-height: 196px; overflow: auto; }
+.aap-glist button { all: unset; cursor: pointer; display: flex; justify-content: space-between; width: 100%; box-sizing: border-box; padding: 7px 10px; border-radius: 6px; font: 400 15px var(--sp-serif); }
+.aap-glist button.hi { background: #f5f1ea; }
+.aap-glist button small { font: italic 400 13px var(--sp-serif); color: #6c675f; }
+.aap-sug { display: flex; flex-wrap: wrap; gap: 6px; }
+.aap-sug button { all: unset; cursor: pointer; padding: 4px 11px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28,19,15,.18); font: 400 14px var(--sp-serif); color: #4a433d; }
+.aap-sug button:hover { box-shadow: inset 0 0 0 1px #1c130f; color: #1c130f; }
+.aap-sug button em { font-style: italic; color: #6c675f; }
+
+/* response time: the slider sits on its own, the nudge line under it */
+.aap-wk .sa-fld { margin: 0; }
+
+/* Agent fit */
+.aap-fit { display: inline-flex; align-items: center; gap: 2px; }
+.aap-stars { display: inline-flex; gap: 2px; }
+.aap-stars button { all: unset; cursor: pointer; padding: 0 2px; font: 400 27px/1 var(--sp-serif); color: #ddd3c6; transition: color .1s, transform .1s; }
+.aap-stars button.on { color: #2a3a52; }
+.aap-fit.pv .aap-stars button.pv { color: #7d8ea6; }
+.aap-stars button:hover { transform: scale(1.08); }
+.aap-stars button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; border-radius: 4px; }
+.aap-fit--field .aap-fitw { margin-left: 10px; font: italic 400 15px var(--sp-serif); color: #3d3530; }
+.aap-fit--band .aap-stars button { font-size: 16px; padding: 0 1px; color: #f4eee5; opacity: .35; }
+.aap-fit--band .aap-stars button.on { color: #f4eee5; opacity: 1; }
+.aap-fit--band.pv .aap-stars button.pv { color: #f4eee5; opacity: .8; }
+.aap-fit--band .aap-fitw { margin-right: 8px; font: italic 400 13px var(--sp-serif); color: rgba(244,238,229,.88); white-space: nowrap; }
+
+/* the little "i" and its tip (portalled to body) */
+.aap-info { position: relative; display: inline-grid; place-items: center; width: 18px; height: 18px; margin-left: 6px; border-radius: 50%; cursor: help; flex: none;
+  box-shadow: inset 0 0 0 1.3px currentColor; font: italic 600 11.5px/1 var(--sp-serif); color: #8f8a82; vertical-align: middle; }
+.aap-info.light { color: rgba(244,238,229,.85); }
+.aap-info:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.aap-tip { position: fixed; z-index: 400; width: 280px; max-width: calc(100vw - 24px); box-sizing: border-box; padding: 10px 12px; border-radius: 10px; background: #1c130f; color: #f4eee5;
+  font: normal 400 13.5px/1.45 var(--sp-serif); text-align: left; box-shadow: 0 10px 24px rgba(28,19,15,.3); pointer-events: none; }
+.aap-tip b { display: block; margin-bottom: 3px; font: 400 14px var(--sp-type); }
+.aap-tip i { font-style: normal; font-weight: 600; }
+
+.aap-mini { all: unset; cursor: pointer; font: inherit; box-shadow: inset 0 -1px 0 currentColor; }
+
+/* the agency ask: a polite blush note under the field, never red */
+.aap-agask { padding: 12px 14px; border-radius: 10px; background: #f5e6df; box-shadow: inset 0 0 0 1px #ecd2c6; }
+.aap-agask b { display: block; font: 600 15px/1.3 var(--sp-serif); color: #1c130f; }
+.aap-agask p { margin: 4px 0 10px; font: 400 14.5px/1.45 var(--sp-serif); color: #3d3530; }
+.aap-agask-b { display: flex; align-items: center; gap: 14px; }
+.aap-agask-b .aap-pill { height: 32px; background: #fff; }
+.aap-agask-b .aap-mini { font: 400 14.5px var(--sp-serif); color: #3d3530; }
+.aap-agu { display: flex; align-items: center; gap: 12px; height: 46px; padding: 0 14px; border-radius: 8px; background: #f5f1ea; box-shadow: inset 0 0 0 1px #e6dfd5; }
+.aap-agu span { flex: 1; font: italic 400 17px var(--sp-serif); color: #6c675f; }
+.aap-agu .aap-mini { font: 400 14px var(--sp-serif); color: #3d3530; }
+

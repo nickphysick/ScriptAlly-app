@@ -55,14 +55,16 @@ import { genreLabel } from "../../../lib/genres";
 import {
   alsoQueried, cardQuery, cardRows, cardSavedLine, queryTone, reminderOnSave, reopenReminder, savedPulse, stepTarget, type CardAct, type SavedPulse,
 } from "../../../lib/agentCard";
-import { type CardDraft, applyPatch, cardPatch, changedTabs, encodeMats, inversePatch, toContactDraft } from "../../../lib/cardDraft";
+import { type CardDraft, FORM_PLATFORM, applyPatch, cardPatch, changedTabs, encodeMats, inversePatch, toContactDraft } from "../../../lib/cardDraft";
 import { restoreAgentSnapshot, takeAgentSnapshot, type AgentSnapshot } from "../../../lib/agentCardSnapshot";
 import { agentDataQualityNeeds } from "../../../lib/agentDataQuality";
 import { flagKeyForTask } from "../../../lib/taskFlags";
 import { destroyManifest } from "../../../lib/cascade";
 import { AgentCardFrame, type AgentCardFrameHandle } from "./AgentCardFrame";
 import { AgentQuickView, type QuickFoot } from "./AgentQuickView";
-import { AgentEditMode, type EditorSaveResult } from "./AgentEditMode";
+import type { EditorSaveResult } from "./useAgentForm";
+import { AddAgentJourney } from "./AddAgentJourney";
+import { HostAgentCard, PreviewHostCard } from "./HostAgentCard";
 import { useAgentSave } from "./useAgentSave";
 import { AgentPanelNew } from "../panel/AgentPanelNew";
 import { ESC_LEVEL, EscapeRaise } from "../../../lib/escapeStack";
@@ -103,9 +105,16 @@ export const AgentCardHost: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbo
   /* Contact list v25.2 C3 — THE CENTRED EDITOR IS RETIRED: every editor request — a new agent, or an existing one
      asked for at a tab, a field or with carried answers — is the agent panel holding the card's edit mode */
   const panel = isEditorRequest(req);
+  /* Add agent v1 Phase 5 — EVERY "EDIT AGENT" OPENS THE AGENT'S CARD: an existing agent's editor is the Contact list's
+     card (`AgentCard262` in `AgentCardPanel262`) in edit mode at the door's section; `AgentEditMode`'s long form is
+     deleted. On the Contact list the page's own card answers first (the edit interceptor). */
+  if (panel && req.agentId !== null) {
+    return <HostAgentCard key={req.agentId} agentId={req.agentId}
+      openAt={{ seq: req.seq, tab: req.tab, focus: req.focus, prefill: req.prefill }} sequence={req.sequence ? [...req.sequence] : undefined} />;
+  }
   return (
     <>
-      {panel && <AgentPanelNew over={req.over === "drawer"} edit={req.agentId !== null} />}
+      {panel && <AgentPanelNew over={req.over === "drawer"} />}
       <AgentCardSession key={req.seq} sandbox={sandbox} />
     </>
   );
@@ -212,7 +221,6 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   const [handover, setHandover] = useState<{ foot: QuickFoot; pulse: SavedPulse[] } | null>(null);
   const [slide, setSlide] = useState<"l" | "r" | null>(null);
   const frameRef = useRef<AgentCardFrameHandle>(null);
-  const editorLeave = useRef<(() => void) | null>(null);
 
   /* ── the hand-off (§6.1): a query journey runs in the drawer while the card waits, docked ─────
      The drawer says when the card steps aside and when it comes back (`onDock`) — on save, cancel,
@@ -250,39 +258,23 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     return (await writeAgent(agentId, patch)).ok;
   }, [agentId, writeAgent]);
 
-  /** The dry run the editor shows before a save — the REAL engine (decision 14), never a sum. */
-  const alsoFor = useCallback(
-    (d: CardDraft, base: CardDraft) => (agent ? alsoChanges(agent, toContactDraft(agent, base, d), editCtx) : []),
-    [agent, editCtx],
-  );
-
-  /**
-   * SAVE (v25.2 C): the one save every editing shape shares (`useAgentSave` — only what changed, through
-   * `commitCardSave`, the deadline fan-out, the data-quality flag, the reopen reminder, the snapshot Undo). The panel
-   * closes and the toast says what moved, with the Undo.
-   */
-  const { saveDraft } = useAgentSave({ writeAgent: sandbox?.writeAgent, editCtx });
-  const onEditorSave = useCallback(async (d: CardDraft, base: CardDraft): Promise<EditorSaveResult> => {
-    if (!agent) return { ok: false, error: "That agent is no longer on your list." };
-    const r = await saveDraft(agent, base, d);
-    if (!r.ok) return { ok: false, error: (r as { error: string }).error };
-    if (!r.nothing) {
-      const undo = r.undo;
-      showToast({ message: r.line, ...(undo ? { undo: async () => { await undo(); } } : {}) });
-    }
-    closeAgentCard();
-    return { ok: true };
-  }, [agent, saveDraft, showToast]);
-
   /**
    * The create — through the SAME `addAgent` path every other creator uses (free-tier cap,
    * AGENT_ADDED activity, undefined-stripping), with the house rules: optionals born ABSENT, the
    * links through the scheme allowlist, `reopensOn` only behind a CLOSED door, and
    * `submissionMethod` defaulting to Email exactly as the app-level form does when none is chosen.
    */
-  const onCreateAgent = useCallback(async (d: CardDraft): Promise<EditorSaveResult> => {
+  const createAgent = useCallback(async (d: CardDraft): Promise<{ ok: true; id: string } | { ok: false; error: string }> => {
     const wishlist = d.wishlist.trim();
     const mswl = d.mswl.trim();
+    const form = d.form.trim();
+    const social = d.social.handle.trim();
+    const socials = [
+      ...(mswl && hrefFor(mswl) ? [{ platform: "MSWL", handle: hrefFor(mswl)! }] : []),
+      ...(form && hrefFor(form) && (d.method === SubmissionMethod.ONLINE_FORM || d.method === SubmissionMethod.QUERY_MANAGER || d.method === SubmissionMethod.OTHER) ? [{ platform: FORM_PLATFORM, handle: hrefFor(form)! }] : []),
+      ...(social ? [{ platform: d.social.platform || "Other", handle: social }] : []),
+    ];
+    const mirror = ({ "X / Twitter": "twitter", Bluesky: "bluesky", Instagram: "instagram" } as Record<string, "twitter" | "bluesky" | "instagram">)[d.social.platform];
     const res = await addAgent({
       name: d.name.trim(),
       agency: d.agency.trim(),
@@ -290,8 +282,12 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
       website: hrefFor(d.website) ?? "",
       genres: [...d.genres],
       mswlNotes: wishlist,
-      submissionStatus: d.door === "closed" ? SubmissionStatus.CLOSED : SubmissionStatus.OPEN,
+      /* Add agent v1 — nothing pre-picked: an unstated door is Unknown, never Open */
+      submissionStatus: d.door === "closed" ? SubmissionStatus.CLOSED : d.door === "open" ? SubmissionStatus.OPEN : SubmissionStatus.UNKNOWN,
       submissionMethod: d.method ?? SubmissionMethod.EMAIL,
+      ...(d.method === SubmissionMethod.OTHER && d.methodOther.trim() ? { submissionMethodOther: d.methodOther.trim().slice(0, 40) } : {}),
+      ...(d.agencyUnknown && d.name.trim() && !d.agency.trim() ? { agencyUnknown: true as const } : {}),
+      ...(d.rating ? { starRating: d.rating as 1 | 2 | 3 | 4 | 5 } : {}),
       materialsWanted: encodeMats(d.mats),
       notes: "",
       ...(d.city.trim() ? { city: d.city.trim() } : {}),
@@ -299,20 +295,23 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
       ...(d.weeks != null ? { responseTimeWeeks: d.weeks } : {}),
       ...(d.nrn != null ? { noResponseMeansNo: d.nrn } : {}),
       ...(d.door === "closed" && d.reopens ? { reopensOn: d.reopens } : {}),
-      ...(mswl && hrefFor(mswl) ? { socials: [{ platform: "MSWL", handle: hrefFor(mswl)! }] } : {}),
+      ...(socials.length ? { socials } : {}),
+      ...(mirror && social ? { [mirror]: social } : {}),
       /* the wishlist was written just now, so it was checked just now */
       ...(wishlist ? { mswlCheckedAt: new Date().toISOString() } : {}),
     });
     if (!res.success || !res.id) return { ok: false, error: res.error ?? "Couldn’t add the agent." };
-    /* the confirmation: on the Contact list the new row's ring and its panel say it; on every other page, the toast
-       the log-a-query add already used */
-    if (!sandbox?.contactListHere && pathname !== "/agents") {
-      showToast({ message: `Added ${d.name.trim() || d.agency.trim()} to your contact list` });
-    }
-    /* closes, tells the page ("added"), and hands the id to a flow waiting on it */
-    completeNewAgent(res.id);
-    return { ok: true };
-  }, [addAgent, sandbox, pathname, showToast]);
+    /* Add agent v1 — a flow WAITING on the new agent (Log a query's "Add a new agent") takes it at once: the finish
+       screen is for an add on its own */
+    if (req?.onCreated) completeNewAgent(res.id);
+    return { ok: true, id: res.id };
+  }, [addAgent, req]);
+  /** Done (or Esc / ✕ on the finish screen): closes, tells the page ("added"), and says so off the Contact list */
+  const finishNew = useCallback((id: string | null | undefined, name: string) => {
+    if (!id) { closeAgentCard(); return; }
+    if (!sandbox?.contactListHere && pathname !== "/agents") showToast({ message: `Added ${name} to your contact list` });
+    completeNewAgent(id);
+  }, [sandbox, pathname, showToast]);
 
   /**
    * A genre matching nothing on any list (ruling 1): its case is matched to a genre that already
@@ -443,26 +442,26 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
   if (!req) return null;
   if (!isNew && !agent) return null;
 
-  if (inEditor) {
-    const target: EditTarget = isNew ? { tab: "who", focus: "name", prefill: req.prefill } : editing!;
+  if (inEditor && isNew) {
     if (!panelSlot || !panelSlot.isConnected) return null;
     return createPortal(
-      /* over the query drawer, the editor and its popups hear Escape before the drawer does */
       <EscapeRaise.Provider value={req.over === "drawer" ? ESC_LEVEL.drawerPopup : 0}>
-        <AgentEditMode
-          mode={isNew ? "new" : "edit"} agent={isNew ? null : agent} prefill={target.prefill} focus={target.focus}
-          band={!isNew} defaultCountry={isNew ? "GB" : undefined}
-          personal={personal} agents={agents} msGenre={scoped?.genre ?? null} genrePool={genrePool} personalGenres={personalLabels} allGenres={AGENT_GENRES}
-          isHit={genreHit} nowMs={nowMs} alsoFor={alsoFor}
-          notes={isNew ? undefined : { stored: storedNotes, earlier: agent?.notes ?? "", onAdd: onAddNote, onEdit: onEditNote, onDelete: onDeleteNote }}
-          onSave={isNew ? (dd) => onCreateAgent(dd) : onEditorSave} onLeave={() => closeAgentCard()}
-          onOpenAgent={(id) => openAgentCard(id, { tab: "who", host: "panel" })}
-          onNewGenre={onNewGenre} bindLeave={editorLeave}
+        <AddAgentJourney
+          agents={agents} personal={personal} msGenre={scoped?.genre ?? null} genrePool={genrePool} personalGenres={personalLabels} allGenres={AGENT_GENRES}
+          nowMs={nowMs} prefill={req.prefill} onNewGenre={onNewGenre} onCreate={createAgent}
+          onLeave={(how, id) => { if (how === "done") { const a = id ? agents.find((x) => x.id === id) : null; finishNew(id, ((a?.name ?? "").trim() || (a?.agency ?? "").trim()) || "the agent"); } else closeAgentCard(); }}
+          onAnother={() => { closeAgentCard(); window.requestAnimationFrame(() => openNewAgentCard({ from: "button", host: "panel" })); }}
+          onOpenDup={(id) => openAgentCard(id, { tab: "who", host: "panel", from: "button" })}
+          renderPreview={(id) => { const a = agents.find((x) => x.id === id); return a ? <PreviewHostCard agent={a} /> : null; }}
         />
       </EscapeRaise.Provider>,
       panelSlot,
     );
   }
+
+  /* Add agent v1 Phase 5 — an existing agent's editor is the card (`HostAgentCard`), drawn by the host above; this
+     session never receives that request, and draws nothing for it */
+  if (inEditor) return null;
 
   const facts = agentFacts(agent!, qcRows, scoped?.id ?? null);
   const q = cardQuery(cardRows(qcRows, agent!.id, scoped?.id ?? null));

@@ -89,23 +89,26 @@ export const genresUnknown = (a: Pick<Agent, "genres">): boolean => (a.genres ??
 export const knownMismatch = (a: Pick<Agent, "genres">, book: readonly string[]): boolean =>
   book.length > 0 && !genresUnknown(a) && !takesBook(a.genres, book);
 
-/** The §4 ready order: takers before unknown genres; main-genre takers first (only where the book has subGenres); then
- *  the writer's rating (highest first, unrated last); then the stated reply time (fastest first, not stated last);
- *  then surname. */
+/**
+ * The ready order. ⚠️ ADD AGENT v1 PHASE 6 PUTS AGENT FIT FIRST: the spotlight picks by the same order as "Who are you
+ * querying?" — Agent fit high first (unrated last), then the stated reply time (fastest first, not stated last) — and
+ * only then the §4 genre tiers (takers before unknown genres; main-genre takers first where the book has subGenres),
+ * then surname. Every ready agent already takes the book or has unknown genres, so the tiers are a tie-break.
+ */
 export function readyOrder(book: readonly string[]): (a: Agent, b: Agent) => number {
   const split = book.length > 1;
   return (a, b) => {
+    const ra = typeof a.starRating === "number" ? a.starRating : 0;
+    const rb = typeof b.starRating === "number" ? b.starRating : 0;
+    if (ra !== rb) return rb - ra;
+    const wa = statedWeeks(a), wb = statedWeeks(b);
+    if (wa !== wb) return wa === null ? 1 : wb === null ? -1 : wa - wb;
     const ua = genresUnknown(a) ? 1 : 0, ub = genresUnknown(b) ? 1 : 0;
     if (ua !== ub) return ua - ub;
     if (split) {
       const ma = takesMain(a.genres, book) ? 0 : 1, mb = takesMain(b.genres, book) ? 0 : 1;
       if (ma !== mb) return ma - mb;
     }
-    const ra = typeof a.starRating === "number" ? a.starRating : 0;
-    const rb = typeof b.starRating === "number" ? b.starRating : 0;
-    if (ra !== rb) return rb - ra;
-    const wa = statedWeeks(a), wb = statedWeeks(b);
-    if (wa !== wb) return wa === null ? 1 : wb === null ? -1 : wa - wb;
     return surnameOf(a).localeCompare(surnameOf(b));
   };
 }

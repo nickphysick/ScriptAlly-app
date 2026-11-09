@@ -671,10 +671,10 @@ export const SORT_OPTIONS: { key: SortKey; label: string; line: string; dir: [st
   { key: "status", label: "Status", line: "Furthest along first", dir: ["Furthest along first", "Least far first"] },
   /* v19 §C — the Date added heading: newest first, a record with no readable date last either way */
   { key: "added", label: "Date added", line: "Newest first", dir: ["Newest first", "Oldest first"] },
-  /* v25.1 E4 — the Genres, Your query and Your rating headings */
+  /* v25.1 E4 — the Genres, Your query and Agent fit headings */
   { key: "fit", label: "Genre fit", line: "Most matches with the book first", dir: ["Best fit first", "Weakest fit first"] },
   { key: "urgency", label: "Urgency", line: "The soonest dated next step first", dir: ["Most urgent first", "Least urgent first"] },
-  { key: "rating", label: "Your rating", line: "Unrated last, either way", dir: ["Highest first", "Lowest first"] },
+  { key: "rating", label: "Agent fit", line: "Unrated last, either way", dir: ["Highest first", "Lowest first"] },
 ];
 
 /** v19 §C/§J — when the agent was added, from the record's own `dateAdded` (ISO); null when it does not parse */
@@ -733,7 +733,9 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
   }
   if (key === "rating") {
     const r = (x: AgentFacts) => (typeof x.rating === "number" && x.rating > 0 ? x.rating : null);
-    return by.sort((a, b) => { const x = r(a), y = r(b); if (x == null || y == null) return x == null && y == null ? sur(a, b) : x == null ? 1 : -1; return turn * (y - x) || sur(a, b); });
+    /* Add agent v1 — ties fall to the shorter response time (the fit order), then surname */
+    const wk = (a: AgentFacts, b: AgentFacts) => { const x = weeks(a), y = weeks(b); return x === y ? 0 : x == null ? 1 : y == null ? -1 : x - y; };
+    return by.sort((a, b) => { const x = r(a), y = r(b); if (x == null || y == null) return x == null && y == null ? wk(a, b) || sur(a, b) : x == null ? 1 : -1; return turn * (y - x) || wk(a, b) || sur(a, b); });
   }
   if (key === "urgency") {
     const now = ctx?.nowMs ?? Date.now();
@@ -766,6 +768,8 @@ export function sortFacts(facts: readonly AgentFacts[], key: SortKey, reversed =
 export function findDuplicateAgent(name: string, agents: readonly Agent[]): Agent | null {
   const typed = name.trim().toLowerCase();
   if (!typed) return null;
-  return agents.find((a) => (a.name ?? "").trim().toLowerCase() === typed) ?? null;
+  /* Add agent v1 — an agent whose agency is unknown is never the match: two such agents never match each other on
+     an empty agency */
+  return agents.find((a) => a.agencyUnknown !== true && (a.name ?? "").trim().toLowerCase() === typed) ?? null;
 }
 

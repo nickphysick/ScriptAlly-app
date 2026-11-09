@@ -287,7 +287,7 @@ export const AgentQuickView: React.FC<AgentQuickViewProps> = ({
           </span>
         )}
         <span className="sp" />
-        <span ref={starsRef} className="ac-stars" title="Your rating" data-ac="stars">
+        <span ref={starsRef} className="ac-stars" title="Agent fit" data-ac="stars">
           {[1, 2, 3, 4, 5].map((n) => (
             <button key={n} type="button" className={n <= rating ? "on" : undefined} aria-label={`${n} star${n > 1 ? "s" : ""}`} aria-pressed={n <= rating} onClick={() => void rate(n)}>★</button>
           ))}
