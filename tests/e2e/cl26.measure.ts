@@ -41,7 +41,7 @@ const listState = (page: Page) => page.evaluate(() => {
 async function mut(page: Page, lock: string) {
   if (MUT !== lock) return;
   switch (lock) {
-    case "H1": await cssBreak(page, ".cl26-panel{grid-template-columns:1fr !important}"); break;
+    case "H1": await cssBreak(page, ".clv-group .cl24-hd.cl27-hd{grid-template-columns:1fr !important}"); break;
     case "H2": await cssBreak(page, ".cl26-ring{background:#fff !important;border-radius:50% !important}"); break;
     case "H3": await page.evaluate(() => {
       document.addEventListener("click", (e) => {
@@ -78,48 +78,47 @@ async function mut(page: Page, lock: string) {
 }
 
 /* ═════════ H1 · the header ═════════ */
-test("CL26-H1 · the navy panel: title, sentence, two buttons, the ring; no At a glance, no title card; its height is its left column's", async ({ page }) => {
+test("CL26-H1 · (re-pointed by v27) the open header: title, the for line, two buttons, the ring beside them; no At a glance, no title card", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("H1");
   for (const vp of SIZES) {
     await openCl26(page, vp);
     await mut(page, "H1");
     const r = await page.evaluate(() => {
-      const panel = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl26='panel']")].find((e) => e.getBoundingClientRect().height > 0);
-      if (!panel) return null;
-      const left = panel.querySelector<HTMLElement>("[data-cl26='left']")!;
-      const ring = panel.querySelector<HTMLElement>("[data-cl26='ring']")!;
-      const cs = getComputedStyle(panel);
-      const lr = left.getBoundingClientRect(), rr = ring.getBoundingClientRect();
+      const hd = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='header']")].find((e) => e.getBoundingClientRect().height > 0);
+      if (!hd) return null;
+      const main = hd.querySelector<HTMLElement>("[data-cl27='main']")!;
+      const ring = hd.querySelector<HTMLElement>("[data-cl26='ring']")!;
+      const lr = main.getBoundingClientRect(), rr = ring.getBoundingClientRect();
       return {
-        bg: cs.backgroundColor, h: panel.getBoundingClientRect().height,
-        leftH: lr.height + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom),
-        title: panel.querySelector("[data-cl26='title']")?.textContent?.trim(), line: panel.querySelector("[data-cl26='line']")?.textContent?.trim() ?? "",
-        btns: [...panel.querySelectorAll("[data-cl26='add'], [data-cl26='discover']")].map((b) => b.textContent?.trim()),
+        bg: getComputedStyle(hd).backgroundColor,
+        title: hd.querySelector("[data-cl26='title']")?.textContent?.trim(), line: hd.querySelector("[data-cl27='for']")?.textContent?.replace(/\s+/g, " ").trim() ?? "",
+        btns: [...hd.querySelectorAll("[data-cl26='add'], [data-cl26='discover']")].map((b) => b.textContent?.trim()),
         ringRightOfText: rr.left >= lr.right - 1 && rr.top < lr.bottom,
+        panel: document.querySelectorAll(".aglist [data-cl26='panel']").length,
         glance: document.querySelectorAll(".aglist [data-cl251='cell'], .aglist [data-cl251='glance']").length,
         titleCard: document.querySelectorAll(".aglist .cl25-hd, .aglist .phc").length,
       };
     });
-    L.check(`${vp.width} panel found`, !!r, "no panel");
+    L.check(`${vp.width} header found`, !!r, "no header");
     if (!r) continue;
-    L.check(`${vp.width} navy`, r.bg === "rgb(42, 58, 82)", r.bg);
-    L.check(`${vp.width} title`, r.title === "Contact list", String(r.title));
-    L.check(`${vp.width} sentence`, /^\d+ agents? on file\. You’ve queried \d+(, and \d+ (is|are) waiting on you)?\.$/.test(r.line), r.line);
+    L.check(`${vp.width} on the page's ground (no panel)`, r.bg === "rgba(0, 0, 0, 0)" && r.panel === 0, `${r.bg}, ${r.panel} panels`);
+    L.check(`${vp.width} title`, /^\d+ agents? on file$/.test(String(r.title)), String(r.title));
+    L.check(`${vp.width} the for line`, /^you’ve queried \d+$/.test(r.line), r.line);
     L.check(`${vp.width} two buttons`, JSON.stringify(r.btns) === JSON.stringify(["+ Add an agent", "Discover agents"]), JSON.stringify(r.btns));
-    L.check(`${vp.width} ring beside the text`, r.ringRightOfText, "the ring is under the left column");
-    L.check(`${vp.width} height = left column ±2`, near(r.h, r.leftH), `${r.h} vs ${r.leftH}`);
+    L.check(`${vp.width} ring beside the text`, r.ringRightOfText, "the ring is under the title block");
     L.check(`${vp.width} no At a glance`, r.glance === 0, String(r.glance));
     L.check(`${vp.width} no title card`, r.titleCard === 0, String(r.titleCard));
   }
-  L.done(16);
+  L.done(14);
 });
 
 /* ═════════ H2 · the ring ═════════ */
-test("CL26-H2 · the ring's colour is healthTone's on navy, its arc the score; the pill; the archivist with no disc", async ({ page }) => {
+test("CL26-H2 · (re-pointed by v27) the ring's colour is healthTone's on the light ground, its arc the score; the pill; the archivist with no disc", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("H2");
-  const ARC: Record<number, string> = { 93: "rgb(159, 208, 173)", 72: "rgb(224, 161, 136)", 44: "rgb(240, 96, 63)" };
+  /* v27 — the header is on the page's ground: RING_TONES' light tones (the ref's), no longer the on-navy ones */
+  const ARC: Record<number, string> = { 93: "rgb(78, 125, 96)", 72: "rgb(201, 118, 93)", 44: "rgb(162, 69, 42)" };
   for (const pct of [93, 72, 44]) {
     await openCl26(page, SIZES[0], { health: pct });
     await mut(page, "H2");
@@ -193,7 +192,7 @@ test("CL26-H3 · the ring and Open open Housekeeping; Show me who applies Missin
 });
 
 /* ═════════ H4 · the band ═════════ */
-test("CL26-H4 · the band: count, Find, Filters, Group, Sort; no List / Cards, no Full screen; the count is the rows drawn", async ({ page }) => {
+test("CL26-H4 · the band: count, Find, Group, Sort (v27: Filters retired to the rail); no List / Cards, no Full screen; the count is the rows drawn", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("H4");
   for (const vp of SIZES) {
@@ -210,7 +209,7 @@ test("CL26-H4 · the band: count, Find, Filters, Group, Sort; no List / Cards, n
     });
     const s = await listState(page);
     L.check(`${vp.width} rows (population)`, s.rows > 0, String(s.rows));
-    L.check(`${vp.width} order`, JSON.stringify(r.order) === JSON.stringify(["count", "find", "filters", "group", "sort"]), JSON.stringify(r.order));
+    L.check(`${vp.width} order`, JSON.stringify(r.order) === JSON.stringify(["count", "find", "group", "sort"]), JSON.stringify(r.order));
     L.check(`${vp.width} navy`, r.bg === "rgb(42, 58, 82)", r.bg);
     L.check(`${vp.width} no List / Cards switch`, r.sw === 0, String(r.sw));
     L.check(`${vp.width} no Full screen`, r.full === 0, String(r.full));
@@ -391,7 +390,7 @@ test("CL26-H9 · the margin follows the sort: letters; weeks to 12, then 12+ and
 });
 
 /* ═════════ H10 · the menus ═════════ */
-test("CL26-H10 · Group is Letter, Status, No grouping; Sort the four; Filters' four quick picks; every word the typewriter, upright", async ({ page }) => {
+test("CL26-H10 · Group is Letter, Status, No grouping; Sort the four (every word the typewriter, upright); the rail's four quick picks (v27)", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("H10");
   await openCl26(page, SIZES[0]);
@@ -426,13 +425,11 @@ test("CL26-H10 · Group is Letter, Status, No grouping; Sort the four; Filters' 
   L.check("Sort: text (population)", f.n > 4, String(f.n));
   L.check("Sort: typewriter, upright", f.bad.length === 0, f.bad.slice(0, 3).join(" | "));
   await shut();
-  await page.locator(`${VIS} [data-cl26='filters']`).first().click(T); await page.waitForTimeout(400);
-  const qp = await page.evaluate(() => [...document.querySelectorAll("[data-nb1='pick'] b")].map((b) => b.textContent?.trim()));
-  L.check("Filters: the four quick picks, Missing details among them", JSON.stringify(qp) === JSON.stringify(["Your move", "Ready to query", "Waiting to hear back", "Missing details"]), JSON.stringify(qp));
-  f = await fonts("[data-nb1='filter-menu']");
-  L.check("Filters: text (population)", f.n > 8, String(f.n));
-  L.check("Filters: typewriter, upright", f.bad.length === 0, f.bad.slice(0, 3).join(" | "));
-  L.done(9);
+  /* v27 — the quick picks are the rail's Most used pills (the Query Centre rail's look: serif labels, typewriter counts) */
+  const qp = await page.evaluate(() => [...document.querySelectorAll(".aglist [data-cl27='pick'] .qc153-tx")].map((b) => b.textContent?.trim()));
+  L.check("the rail: the four quick picks, Missing details among them", JSON.stringify(qp) === JSON.stringify(["Your move", "Ready to query", "Waiting to hear back", "Missing details"]), JSON.stringify(qp));
+  L.check("no Filters menu on the page", (await page.locator("[data-nb1='filter-menu']").count()) === 0, "a Filters menu is mounted");
+  L.done(8);
 });
 
 /* ═════════ H11 · the applied row ═════════ */
@@ -441,10 +438,9 @@ test("CL26-H11 · Missing details + a genre: two chips and Clear; every row says
   const L = new Ledger("H11");
   await openCl26(page, SIZES[0]);
   await mut(page, "H11");
-  await page.locator(`${VIS} [data-cl26='filters']`).first().click(T); await page.waitForTimeout(400);
-  await page.locator("[data-nb1='pick'][data-k='missing']").first().click(T); await page.waitForTimeout(400);
-  await page.locator("[data-nb1='genre']").first().click(T); await page.waitForTimeout(400);
-  await page.keyboard.press("Escape"); await page.mouse.click(5, 5); await page.waitForTimeout(600);
+  /* v27 — through the rail: the Missing details pick, then the first genre still pressable */
+  await page.locator(`${VIS} [data-cl27='pick'][data-k='missing']`).first().click(T); await page.waitForTimeout(400);
+  await page.locator(`${VIS} [data-cl27='genre']:not([disabled])`).first().click(T); await page.waitForTimeout(600);
   const a = await page.evaluate(() => ({
     chips: [...document.querySelectorAll<HTMLElement>(".aglist [data-cl26='applied-chip']")].map((c) => c.dataset.k),
     clear: document.querySelectorAll(".aglist [data-cl26='applied-clear']").length,
@@ -485,7 +481,7 @@ test("CL26 shots — the page in each state", async ({ page }) => {
   await page.evaluate(() => { const sc = [...document.querySelectorAll<HTMLElement>(".agl-wpg .wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)!; sc.scrollTop = 900; });
   await page.waitForTimeout(600);
   await page.screenshot({ path: `${shotDir()}/xx-pinned-1512.png` });
-  for (const [name, sel] of [["08-group-menu", "[data-cl26='group']"], ["09-sort-menu", "[data-cl26='sort']"], ["10-filters-menu", "[data-cl26='filters']"]] as const) {
+  for (const [name, sel] of [["08-group-menu", "[data-cl26='group']"], ["09-sort-menu", "[data-cl26='sort']"]] as const) {
     await openCl26(page, SIZES[0]);
     await page.locator(`${VIS} ${sel}`).first().click();
     await page.waitForTimeout(400);
@@ -494,9 +490,7 @@ test("CL26 shots — the page in each state", async ({ page }) => {
   await openCl26(page, SIZES[0]);
   await page.locator(`${VIS} [data-cl26='who']`).first().click();
   await page.waitForTimeout(900);
-  await page.locator(`${VIS} [data-cl26='filters']`).first().click();
-  await page.locator("[data-nb1='genre']").first().click();
-  await page.keyboard.press("Escape");
+  await page.locator(`${VIS} [data-cl27='genre']:not([disabled])`).first().click();
   await page.waitForTimeout(500);
   await page.screenshot({ path: `${shotDir()}/11-missing-details-1512.png` });
 });

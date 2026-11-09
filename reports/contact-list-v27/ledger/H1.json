@@ -1,0 +1,92 @@
+[
+ {
+  "where": "1512 header found",
+  "ok": true,
+  "detail": "no header"
+ },
+ {
+  "where": "1512 three columns",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "1512 on the page's ground",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "1512 art | title block | List health, left to right",
+  "ok": true,
+  "detail": "[{\"l\":112,\"r\":312,\"t\":135.75,\"b\":331.53125,\"w\":200},{\"l\":346,\"r\":1117.5,\"t\":158.671875,\"b\":308.609375,\"w\":771.5},{\"l\":1151.5,\"r\":1472,\"t\":171.640625,\"b\":295.640625,\"w\":320.5}]"
+ },
+ {
+  "where": "1512 the binoculars bird",
+  "ok": true,
+  "detail": "/images/contact/discover-binoculars-bird.webp 200"
+ },
+ {
+  "where": "1512 mirrored",
+  "ok": true,
+  "detail": "matrix(-1, 0, 0, 1, 0, 0)"
+ },
+ {
+  "where": "1512 title",
+  "ok": true,
+  "detail": "53 agents on file · \"Playfair Display\",  54px"
+ },
+ {
+  "where": "1512 you've queried",
+  "ok": true,
+  "detail": "you’ve queried 14"
+ },
+ {
+  "where": "1512 the two buttons keep their hooks; Add is navy",
+  "ok": true,
+  "detail": "1/1 rgb(42, 58, 82)"
+ },
+ {
+  "where": "1280 header found",
+  "ok": true,
+  "detail": "no header"
+ },
+ {
+  "where": "1280 three columns",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "1280 on the page's ground",
+  "ok": true,
+  "detail": "rgba(0, 0, 0, 0)"
+ },
+ {
+  "where": "1280 art | title block | List health, left to right",
+  "ok": true,
+  "detail": "[{\"l\":112,\"r\":312,\"t\":135.75,\"b\":331.53125,\"w\":200},{\"l\":346,\"r\":885.5,\"t\":158.671875,\"b\":308.609375,\"w\":539.5},{\"l\":919.5,\"r\":1240,\"t\":171.640625,\"b\":295.640625,\"w\":320.5}]"
+ },
+ {
+  "where": "1280 the binoculars bird",
+  "ok": true,
+  "detail": "/images/contact/discover-binoculars-bird.webp 200"
+ },
+ {
+  "where": "1280 mirrored",
+  "ok": true,
+  "detail": "matrix(-1, 0, 0, 1, 0, 0)"
+ },
+ {
+  "where": "1280 title",
+  "ok": true,
+  "detail": "53 agents on file · \"Playfair Display\",  54px"
+ },
+ {
+  "where": "1280 you've queried",
+  "ok": true,
+  "detail": "you’ve queried 14"
+ },
+ {
+  "where": "1280 the two buttons keep their hooks; Add is navy",
+  "ok": true,
+  "detail": "1/1 rgb(42, 58, 82)"
+ }
+]
