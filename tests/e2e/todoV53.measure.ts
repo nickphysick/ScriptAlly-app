@@ -40,7 +40,8 @@ async function mutate(page: Page) {
   await page.evaluate((l) => {
     const css = (t: string) => { const s = document.createElement("style"); s.textContent = t; document.head.appendChild(s); };
     const root = () => [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0);
-    if (l === "L1") css(".tws { height: calc(var(--tws-port) + 80px) !important; }");
+    /* v54: the page may scroll by the header's height (D2), so L1's break makes the workspace 80px taller than the window */
+    if (l === "L1") css(".tws .tws-ws { height: calc(var(--tws-port) + 80px) !important; }");
     if (l === "L2") css(".tws-wq { flex: 0 1 auto !important; }");
     if (l === "L3") document.addEventListener("click", (e) => { const t = e.target as HTMLElement; if (t.closest(".tws-tile")) window.setTimeout(() => (document.querySelector('[data-tws="primary"][data-next]') as HTMLElement | null)?.click(), 300); }, true);
     if (l === "L4") window.setInterval(() => document.querySelectorAll('[data-tws="check"]').forEach((e) => e.remove()), 50);
@@ -159,12 +160,16 @@ for (const vp of SIZES) {
   test(`L1 + L2 + L4 + L12 · the page fits, the footer is pinned, every kind ends on "Check it, then log it" (${vp.width})`, async ({ page }) => {
     test.setTimeout(240_000);
     await open(page, vp);
+    /* ⚠️ RE-POINTED BY v54 (D2): the header scrolls away and the workspace pins, so the page may scroll by AT MOST the
+       header's height (todoV54.measure.ts L1 holds the rest: once it has, the frame fills the window). */
     const fit = await page.evaluate(() => {
       const sc = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)!;
-      return { sh: sc.scrollHeight, ch: sc.clientHeight };
+      const hd = sc.querySelector<HTMLElement>('[data-tws="header"]');
+      return { sh: sc.scrollHeight, ch: sc.clientHeight, hd: hd ? hd.offsetHeight : 0 };
     });
     expect(fit.ch, "L1 · a real scrollport").toBeGreaterThan(300);
-    expect(fit.sh, "L1 · the page's scrollHeight equals its clientHeight").toBe(fit.ch);
+    expect(fit.hd, "L1 · the page header is there").toBeGreaterThan(100);
+    expect(fit.sh - fit.ch, "L1 · the page scrolls by no more than the header's height").toBeLessThanOrEqual(fit.hd);
     const ks = await kinds(page);
     expect(ks.length, "kinds on the account").toBeGreaterThanOrEqual(6);
     const out: Record<string, unknown> = {};
@@ -187,7 +192,7 @@ for (const vp of SIZES) {
         expect(hawk, `L12 · ${k.kind}: the hawk never watches, checks or hears from anyone`).not.toMatch(HAWK_CLAIM);
       }
       const after = await page.evaluate(() => { const sc = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)!; return sc.scrollHeight - sc.clientHeight; });
-      expect(after, `L1 · ${k.kind}: still no page scroll`).toBe(0);
+      expect(after, `L1 · ${k.kind}: still no more page scroll than the header (v54)`).toBeLessThanOrEqual(fit.hd);
     }
     note(`L1L2L4-${vp.width}`, { fit, kinds: ks.map((k) => k.kind), out });
   });

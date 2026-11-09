@@ -23,3 +23,13 @@
   .qc151 .tws54-lg em[data-late] { color: #8a4a3a; font-style: normal !important; }
   .qc151 .tws54-lg b { min-width: 22px; }
 }
+
+@media (min-width: 768px) {
+  /* ── D2 · the header scrolls away; the workspace pins ────────────────────────────────────────────────────────
+     ⚠️ THE WORKSPACE IS EXACTLY THE SCROLLPORT LESS ITS TWO 12px MARGINS (--tws-port, the scroller's own clientHeight:
+        never 100vh), sticky 12px under the scroller's top. With the header above it in the flow, the page can scroll by
+        the header's height and no further: once it has, the workspace's own top is at 12px and it fills the window.
+        Everything inside keeps v53's rules — the tray, the questions and the card scroll in their own boxes. */
+  .tws { height: auto; display: block; padding-block: 0 12px; }
+  .tws .tws-ws { position: sticky; top: 12px; height: calc(var(--tws-port, 800px) - 24px); min-height: 0; }
+}
