@@ -79,13 +79,12 @@
 .qc152 .qc1522-lk { all: unset; cursor: pointer; font: 400 14px var(--sp-serif) !important; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 .qc152 .qc1522-lk:hover { color: #1c130f; }
 .qc152 .qc1522-lk.rust { color: #a2452a; text-decoration: none; }
-.qc152 .qc1522-in, .qc152 .qc1522-ta, .qc152 .qc1522-sel {
+.qc152 .qc1522-in, .qc152 .qc1522-ta {
   box-sizing: border-box; width: 100%; padding: 7px 10px; border: 1px solid #d9cfc2; border-radius: 9px; background: #fff; outline: none;
   font: 400 14.5px/1.45 var(--sp-serif) !important; color: #1c130f;
 }
-.qc152 .qc1522-sel { width: auto; max-width: 100%; }
 .qc152 .qc1522-ta { min-height: 62px; resize: vertical; }
-.qc152 .qc1522-in:focus, .qc152 .qc1522-ta:focus, .qc152 .qc1522-sel:focus { border-color: #2a3a52; box-shadow: 0 0 0 3px rgba(42, 58, 82, 0.12); }
+.qc152 .qc1522-in:focus, .qc152 .qc1522-ta:focus { border-color: #2a3a52; box-shadow: 0 0 0 3px rgba(42, 58, 82, 0.12); }
 .qc152 .qc1522-chks { display: grid; gap: 6px; }
 .qc152 .qc1522-chk { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; cursor: pointer; font: 400 14.5px var(--sp-serif) !important; color: #1c130f; }
 .qc152 .qc1522-chks .qc1522-chk { margin: 0; }

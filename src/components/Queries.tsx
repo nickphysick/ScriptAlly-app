@@ -125,6 +125,7 @@ import { isLive as qaIsLive, viaLabel } from "./queryActions/journeys/common";
 import { commitCardSave } from "../lib/agentCardSave";
 import { copyText } from "./agents/contact/ContactCells";
 import type { AgentEditPatch } from "../lib/saveAgentEdits";
+import { METHODS as EDIT_METHODS, type AgentDetails } from "./queries/centre/QcCardEdit152";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
 import { expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
@@ -1819,7 +1820,7 @@ export const Queries: React.FC<{
   const [qc152Busy, setQc152Busy] = useState(false);
   /* v152 §4 — the step Fix a mistake opens on (a bubble's ✎ Edit), and where the record form was opened from */
   /* v152.2 §3 — the card's composer (its journey; `n` remounts it), its draft, the bubble edited in place, the toast */
-  const [qc1522J, setQc1522J] = useState<{ j: Journey; n: number; reply?: ReplyType | null; mats?: ComposerCtx["mats"] } | null>(null);
+  const [qc1522J, setQc1522J] = useState<{ j: Journey; n: number; reply?: ReplyType | null } | null>(null);
   const [qc1522Draft, setQc1522Draft] = useState<ThreadStepIn | null>(null);
   const [qc1522Edit, setQc1522Edit] = useState<string | null>(null);
   const [qc1522Toast, setQc1522Toast] = useState<{ msg: string; undo: (() => Promise<void>) | null } | null>(null);
@@ -1828,11 +1829,13 @@ export const Queries: React.FC<{
   useEffect(() => { if (!qc1522Toast) return undefined; const t = window.setTimeout(() => setQc1522Toast(null), 5200); return () => window.clearTimeout(t); }, [qc1522Toast]);
   useEffect(() => { if (!qc1522Burst) return undefined; const t = window.setTimeout(() => setQc1522Burst(null), 2400); return () => window.clearTimeout(t); }, [qc1522Burst]);
   const FOOT_J: Record<FootAct, Journey> = { offer: "offer", tell: "tell", sent: "send", nudge: "nudge", close: "close", resp: "reply", reopen: "reopen" };
-  const open1522 = useCallback((a: FootAct | "details" | Journey, reply: ReplyType | null = null) => {
+  const open1522 = useCallback((a: FootAct | Journey, reply: ReplyType | null = null) => {
     setQc1522Edit(null); setQc1522Toast(null); setQc1522Draft(null);
     setQc1522J({ j: (FOOT_J as Record<string, Journey>)[a] ?? (a as Journey), n: Date.now(), reply });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
+  /* Log a query v1.1 — a query opened from the list's "Add date": its first undated step's editor opens with the card */
+  const qc1522EditPending = useRef<string | null>(null);
   /* v152.2 §1.6 — a list row's button opens that query's card with its composer (the footer's own journey) */
   const qc1522Pending = useRef<{ id: string; a: FootAct } | null>(null);
   /* v149.1 B3 — the row's "add date" opens the card in edit mode at its undated step */
@@ -3024,6 +3027,7 @@ export const Queries: React.FC<{
     setQc1522J(null); setQc1522Edit(null); setQc1522Draft(null); setQc1522Toast(null);
     const pj = qc1522Pending.current;
     if (pj && pj.id === cardQueryId) { qc1522Pending.current = null; open1522(pj.a); }
+    if (qc1522EditPending.current && qc1522EditPending.current === cardQueryId) { qc1522EditPending.current = null; setQc1522Edit("__undated"); }
     if (p && p.id === cardQueryId) {
       /* v152.2 §5 — on the desktop "respond" is the card's composer, "What did they say?" */
       if (p.mode === "respond" && qcDesk) { setQcCardMode("view"); open1522("resp"); } else setQcCardMode(p.mode);
@@ -6107,9 +6111,7 @@ export const Queries: React.FC<{
         passMs: pass?.ms ?? null, passedAfter, restartToMs: now + 28 * 86_400_000,
         offerFromMs: offerStep?.ms ?? null, offerByMs: anyToMs(q.offerResponseDeadline), others,
         openOthers: live1522.length, withPages: others.filter((o) => o.holdsPages).length,
-        agents: agents.map((a) => ({ id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a) })), agentId: q.agentId, method: via,
-        packages: pkgList, packageId: rec0.how === "package" ? rec0.packageId ?? null : null, notes: "",
-        mats: qc1522J?.mats ?? null,
+        packages: pkgList, packageId: rec0.how === "package" ? rec0.packageId ?? null : null,
       };
       /* one save: plan it, commit it in one batch, then the toast and its Undo */
       const done1522 = (snap: Snapshot, msg: string, freshId: string | null) => {
@@ -6187,18 +6189,6 @@ export const Queries: React.FC<{
         } else if (p.j === "decline") {
           const plan = planRecord(pc, "withdrawn", Date.now(), [], { withdraw: { token: "offer_declined", event: "offer_declined", notes: p.note } });
           done1522(await commitPlan(uid, plan), "Offer declined", newId(plan));
-        } else if (p.j === "details") {
-          const k = p.packageId ? packages.find((x) => x.id === p.packageId) : null;
-          const plan = planDetails1522(q, { agentId: p.agentId, method: p.method, pkg: k ? { id: k.id, name: k.packageName, edition: k.edition ?? 1 } : null, pkgChanged: !!pkgList && (p.packageId ?? null) !== ctx.packageId });
-          const snap = await commitPlan(uid, plan);
-          if (p.notes.trim()) await addJournalEntry(q.id, p.notes.trim());
-          done1522(snap, "Details saved", null);
-        } else if (p.j === "mats") {
-          const feed = await readFeed(uid, q.id);
-          const cur = steps1522.find((x) => x.activityId === p.stepId);
-          const kindOf = (x?: ThreadStepIn | null): FixStep["kind"] => (x?.status === QueryStatus.QUERIED ? "queried" : x?.status === QueryStatus.PARTIAL_SENT ? "partial_sent" : x?.status === QueryStatus.RESUBMITTED ? "resubmitted" : "full_sent");
-          const plan = planStepEdit({ ...pc, feed }, { id: p.stepId, kind: kindOf(cur), dayMs: cur?.ms ?? Date.now(), materials: p.mats }, null);
-          done1522(await commitPlan(uid, plan), "Materials saved", null);
         }
       });
       if (qc1522J) {
@@ -6211,7 +6201,9 @@ export const Queries: React.FC<{
         );
       }
       /* §2.4 the bubble edited in place */
-      const ed = qc1522Edit ? steps1522.find((x) => x.activityId === qc1522Edit) ?? null : null;
+      /* "__undated": the list's "Add date" asked for the first undated step's editor (Log a query v1.1) */
+      const editKey = qc1522Edit === "__undated" ? steps1522.find((x) => x.ms == null && x.activityId && !x.kind)?.activityId ?? null : qc1522Edit;
+      const ed = editKey ? steps1522.find((x) => x.activityId === editKey) ?? null : null;
       /* an undated step can be edited too: giving it a date is the commonest reason to open it */
       if (ed && ed.activityId) {
         const i = dated.indexOf(ed);
@@ -6224,6 +6216,7 @@ export const Queries: React.FC<{
         const backTo = rest?.status ? STAGE_NAME[rest.status] ?? null : null;
         const deleteText = `Delete this step? ${deps.length ? `${deps.map((d) => depName(d)).join(", ")} ${deps.length === 1 ? "depends" : "depend"} on it, so ${deps.length === 1 ? "it goes" : "they go"} too. ` : ""}${backTo ? `${first}’s card goes back to ${backTo}.` : "This removes the whole query."}`;
         const words0 = typeof (evStore.get(ed.activityId) as { replyNote?: unknown } | undefined)?.replyNote === "string" ? String((evStore.get(ed.activityId) as { replyNote?: string }).replyNote) : (ed.quote ?? "");
+        const isQueryStep = ed.status === QueryStatus.QUERIED && !ed.kind;
         const kind: FixStep["kind"] = ed.kind === "nudge" ? "nudge" : ed.kind === "told" ? "told" : ({ queried: "queried", preq: "partial_req", psent: "partial_sent", freq: "full_req", fsent: "full_sent", rr: "rr_req", offer: "offer", passed: "pass", noresp: "noresp", withdrawn: "withdrawn" } as Record<string, FixStep["kind"]>)[T[ed.status ?? ""] ?? "queried"] ?? "queried";
         edit1522 = (
           <QcStepEdit1522 key={ed.activityId} side={side152(ed)} status={ed.status} kind={ed.kind} title={stepTitle152(ed, first)} ms={ed.ms ?? new Date(now).setHours(0, 0, 0, 0)}
@@ -6231,11 +6224,21 @@ export const Queries: React.FC<{
             request={ed.status === QueryStatus.PARTIAL_REQUESTED || ed.status === QueryStatus.FULL_REQUESTED || ed.status === QueryStatus.REVISE_RESUBMIT}
             words={words0} first={first} env={env} nowMs={now} floorMs={i > 0 ? dated[i - 1].ms : null} ceilMs={i >= 0 && i < dated.length - 1 ? dated[i + 1].ms : null}
             deleteText={deleteText} busy={qc152Busy}
+            /* Log a query v1.1 — the query's method and package are edited on its first step, and nowhere else */
+            how={isQueryStep ? { value: q.sendMethod ?? null, options: EDIT_METHODS } : null}
+            pkg={isQueryStep && pkgList ? { value: ctx.packageId ?? null, options: pkgList } : null}
             onCancel={() => setQc1522Edit(null)}
             onSave={(v) => run1522(async () => {
               const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
               const plan = planStepEdit({ uid, q, agent: ag, ms, existing, feed, nowMs: Date.now(), quietWeeks: qcQuietWeeks },
                 { id: ed.activityId!, kind, dayMs: v.dayMs, materials: v.mats }, side152(ed) === "them" ? v.words : null);
+              if (isQueryStep && (v.how !== undefined || v.pkgId !== undefined)) {
+                /* the old details save's own fields (lib/qc1522Write planDetails1522), riding the step's plan: one write, one undo */
+                const k = v.pkgId ? packages.find((x) => x.id === v.pkgId) : null;
+                const dp = planDetails1522(q, { agentId: q.agentId, method: v.how ?? q.sendMethod ?? "",
+                  pkg: k ? { id: k.id, name: k.packageName, edition: k.edition ?? 1 } : null, pkgChanged: !!pkgList && v.pkgId !== undefined && (v.pkgId ?? null) !== (ctx.packageId ?? null) });
+                plan.query = { ...plan.query, ...dp.query };
+              }
               done1522(await commitPlan(uid, plan), "Step saved", null);
             })}
             onDelete={() => run1522(async () => {
@@ -6248,7 +6251,60 @@ export const Queries: React.FC<{
       }
       card1522.composer = composer1522;
       card1522.draft = qc1522J ? qc1522Draft : null;
-      card1522.editingId = edit1522 ? qc1522Edit : null;
+      card1522.editingId = edit1522 ? editKey : null;
+      /* Log a query v1.1 — editing in place: the agent, the agent's details and the notes, saved on the card's Save */
+      const detailsOf = (id: string): AgentDetails | null => {
+        const a = agents.find((x) => x.id === id);
+        if (!a) return null;
+        return {
+          weeks: typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null,
+          nrmn: typeof a.noResponseMeansNo === "boolean" ? a.noResponseMeansNo : null,
+          asks: (a.materialsWanted ?? []).map((x) => String(x)).filter(Boolean),
+          method: a.submissionMethod ? String(a.submissionMethod) : null,
+          wishlist: a.mswlNotes ?? "", email: a.email ?? "", website: a.website ?? "",
+        };
+      };
+      card1522.editData = {
+        agentId: q.agentId,
+        agents: [...agents].map((a) => ({ id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a) || null })).sort((a, b) => a.name.localeCompare(b.name)),
+        detailsOf,
+        notes: journalEntries.filter((j) => j.queryId === q.id)
+          .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))
+          .map((j) => ({ id: j.id, text: j.entryText, when: j.createdAt ? fieldDay(new Date(j.createdAt as string).getTime()) : "" })),
+      };
+      card1522.onSaveEdits = async (e) => {
+        if (qc152Busy) return false;
+        setQc152Busy(true);
+        try {
+          /* 1 · the agent the query is to: the old details save (planDetails1522), on the page's batched writer */
+          if (e.agentId) await commitPlan(uid, planDetails1522(q, { agentId: e.agentId, method: q.sendMethod ?? "", pkg: null, pkgChanged: false }));
+          /* 2 · the agent's own details: the agent card's save path (its snapshot, the reply-time fan-out, the flag) */
+          const target = agents.find((x) => x.id === e.detailsAgentId);
+          if (target && Object.keys(e.details).length) {
+            const d = e.details;
+            const patch: AgentEditPatch = {};
+            if ("weeks" in d) patch.responseTimeWeeks = d.weeks ?? null;
+            if ("nrmn" in d && typeof d.nrmn === "boolean") patch.noResponseMeansNo = d.nrmn;
+            if ("asks" in d) patch.materialsWanted = d.asks ?? [];
+            if ("method" in d && d.method) patch.submissionMethod = d.method;
+            if ("wishlist" in d) { patch.mswlNotes = (d.wishlist ?? "").trim(); patch.mswlCheckedAt = new Date().toISOString(); }
+            if ("email" in d) patch.email = (d.email ?? "").trim();
+            if ("website" in d) patch.website = (d.website ?? "").trim();
+            const out = await commitCardSave({ uid, agent: target, queries, patch, resolveTaskFlag: scriptDb.resolveTaskFlag });
+            if ("error" in out.res) throw new Error(String(out.res.error));
+          }
+          /* 3 · the notes: the notes path (journalEntries) */
+          for (const n of e.notes.updated) await updateJournalEntry(n.id, n.text);
+          for (const id of e.notes.deleted) await deleteJournalEntry(id);
+          for (const t of e.notes.added) await addJournalEntry(q.id, t);
+        } catch (err) {
+          console.error("[query card] edit-in-place save failed", err);
+          showToast({ message: "Couldn't save all the changes. Check the card and try again." });
+          return false;
+        } finally { setQc152Busy(false); }
+        setQc1522Toast({ msg: "Changes saved", undo: null });
+        return true;
+      };
       card1522.editNode = edit1522;
       card1522.toast = qc1522Toast ? { msg: qc1522Toast.msg, onUndo: qc1522Toast.undo ? () => {
         const t = qc1522Toast; setQc1522Toast(null);
@@ -6257,13 +6313,6 @@ export const Queries: React.FC<{
       } : null } : null;
       card1522.burst = qc1522Burst;
       card1522.onFoot = (a) => open1522(a);
-      card1522.onEditMats = (id) => {
-        const st = (id ? steps1522.find((x) => x.activityId === id) : steps1522.find((x) => x.status === QueryStatus.QUERIED && !x.kind)) ?? null;
-        if (!st?.activityId) return;
-        const title = st.status === QueryStatus.QUERIED ? "What went with the query" : st.status === QueryStatus.PARTIAL_SENT ? "What went with the partial" : st.status === QueryStatus.RESUBMITTED ? "What went with the revision" : "What went with the full";
-        setQc1522Edit(null);
-        setQc1522J({ j: "mats", n: Date.now(), mats: { stepId: st.activityId, title, mats: storedMats(st.activityId) ?? (st.status === QueryStatus.QUERIED ? asMats(st.chips.map((c) => c.label)) : []), stepMs: st.ms ?? now } });
-      };
     }
 
     return (
@@ -6272,7 +6321,6 @@ export const Queries: React.FC<{
         edit152={null}
         onBack152={() => setQcCardMode("view")}
         /* v152.2 §2.5 — the pencil goes straight to "Query details"; §2.4 ✎ Edit turns that bubble into a form in place */
-        onPencil152={() => open1522("details")}
         onEditStep152={(id) => { setQc1522J(null); setQc1522Draft(null); setQc1522Toast(null); setQc1522Edit(id); }}
         card1522={card1522}
         {...view.display}
@@ -8292,6 +8340,14 @@ export const Queries: React.FC<{
                 <QcList138
                   onAddDate={(id) => {
                     cardSetRef.current = qcVisible.map((r) => r.id);
+                    /* Log a query v1.1 — on the desktop the card's step editor gives the step its date (the old edit mode
+                       carried native selects) */
+                    if (qcDesk) {
+                      if (cardQueryId === id) { setQcCardMode("view"); setQc1522J(null); setQc1522Edit("__undated"); return; }
+                      qc1522EditPending.current = id;
+                      onOpenQuery?.(id);
+                      return;
+                    }
                     setQcEditUndated(true);
                     if (cardQueryId === id) { setQcCardMode("edit"); return; }
                     qcCardPendingMode.current = { id, mode: "edit" };

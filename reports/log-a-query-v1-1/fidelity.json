@@ -1,0 +1,20 @@
+{
+ "reads": 311,
+ "deltas": {
+  "agent": {},
+  "sent": {},
+  "materials": {},
+  "how": {},
+  "check": {},
+  "celebration": {},
+  "edit:stepPill": {},
+  "edit:stepEditor": {
+   "editPill": [
+    "exempt: dev's step editor hides the other ✎ Edit pills while a step is open"
+   ]
+  },
+  "edit:editTracking": {},
+  "edit:editAgent": {},
+  "edit:editLeave": {}
+ }
+}
