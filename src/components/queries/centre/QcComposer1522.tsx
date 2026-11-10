@@ -28,11 +28,10 @@ const sod = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); re
 const dm = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
 const dmy = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]} ${d.getFullYear()}`; };
 
-export type Journey = "send" | "nudge" | "reply" | "close" | "reopen" | "unpass" | "offer" | "tell" | "accept" | "decline" | "details" | "mats";
+export type Journey = "send" | "nudge" | "reply" | "close" | "reopen" | "unpass" | "offer" | "tell" | "accept" | "decline";
 export type ReplyType = "req" | "passed" | "rr" | "offer" | "more";
 export type Deadline = "none" | "2w" | "date";
 export interface TellRow { id: string; name: string; initials: string; stage: string; group: "pages" | "query"; email: string; told: boolean }
-export interface AgentChoice { id: string; name: string; agency: string }
 export interface ComposerCtx {
   first: string;
   fullName: string;
@@ -66,15 +65,9 @@ export interface ComposerCtx {
   /** the other open queries accepting closes, and how many of them hold pages */
   openOthers: number;
   withPages: number;
-  /* details */
-  agents: AgentChoice[];
-  agentId: string;
-  method: string;
+  /* the query step's package (the step editor's Package row reads it, from the page) */
   packages: { id: string; name: string }[] | null;
   packageId: string | null;
-  notes: string;
-  /* materials tab */
-  mats?: { stepId: string; title: string; mats: StepMaterial[]; stepMs: number } | null;
 }
 export type ComposerSave =
   | { j: "send"; dayMs: number; mats: StepMaterial[] }
@@ -84,9 +77,7 @@ export type ComposerSave =
   | { j: "unpass" }
   | { j: "tell"; told: Record<string, boolean>; later: boolean }
   | { j: "accept"; closeOthers: boolean; todo: boolean }
-  | { j: "decline"; note: string }
-  | { j: "details"; agentId: string; method: string; packageId: string | null; notes: string }
-  | { j: "mats"; stepId: string; mats: StepMaterial[] };
+  | { j: "decline"; note: string };
 
 export interface QcComposerProps {
   journey: Journey;
@@ -175,11 +166,6 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
   const [closeOthers, setCloseOthers] = useState(true);
   const [todo, setTodo] = useState(true);
   const [note, setNote] = useState("");
-  const [agentId, setAgentId] = useState(c.agentId);
-  const [method, setMethod] = useState(c.method);
-  const [pkg, setPkg] = useState<string | null>(c.packageId);
-  const [notes, setNotes] = useState(c.notes);
-  const [mm, setMm] = useState<StepMaterial[]>(c.mats?.mats ?? []);
   const [copied, setCopied] = useState<string | null>(null);
 
   const go = (n: Journey) => { setJ(n); setDirty(false); setConf(false); pop.setOpen(null); };
@@ -412,31 +398,6 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
       title = `Decline ${f}’s offer`;
       body = <div className="qc1522-fl">{fl("A note for you", <textarea className="qc1522-ta" data-qc1522="decline-note" maxLength={500} value={note} placeholder="Only you see this." onChange={(e) => { setNote(e.target.value); touch(); }} />, "n")}</div>;
       foot = <>{cancel}<span className="sp" />{primary("Decline it", { j: "decline", note: note.trim() })}</>;
-      break;
-    }
-    case "details": {
-      title = "Query details";
-      const ag = c.agents.find((a) => a.id === agentId);
-      body = <div className="qc1522-fl">
-        {fl("Agent", <span data-qc1522="details-agent"><b className="qc1522-b">{ag?.name ?? c.fullName}</b>{ag?.agency ? ` · ${ag.agency}` : ""}{" "}
-          <select className="qc1522-sel" data-qc1522="agent-change" aria-label="Change the agent" value={agentId} onChange={(e) => { setAgentId(e.target.value); touch(); }}>
-            {c.agents.map((a) => <option key={a.id} value={a.id}>{a.name}{a.agency ? ` · ${a.agency}` : ""}</option>)}
-          </select></span>, "a")}
-        {fl("How you sent it", <Seg data="how-sent" v={method} on={(k) => { setMethod(k); touch(); }} opts={[["Email", "Email"], ["QueryManager", "QueryManager"], ["Post", "Post"], ["Other", "Other"]]} />, "h")}
-        {c.packages ? fl("Package", <select className="qc1522-sel" data-qc1522="package" value={pkg ?? ""} onChange={(e) => { setPkg(e.target.value || null); touch(); }}>
-          <option value="">None</option>{c.packages.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>, "p") : null}
-        {fl("Notes", <textarea className="qc1522-ta" data-qc1522="notes" maxLength={2000} value={notes} placeholder="Anything to remember about this query" onChange={(e) => { setNotes(e.target.value); touch(); }} />, "n")}
-      </div>;
-      foot = <>{cancel}<span className="sp" />{primary("Save", { j: "details", agentId, method, packageId: pkg, notes })}</>;
-      break;
-    }
-    case "mats": {
-      title = c.mats?.title ?? "What went with the query";
-      body = <div className="qc1522-fl">
-        {fl("Materials", <MatChips id="medit" mats={mm} onChange={(m) => { setMm(m); touch(); }} env={c.env} stepMs={c.mats?.stepMs ?? c.nowMs} request={false} addLabel="+ Add" />, "m")}
-      </div>;
-      foot = <>{cancel}<span className="sp" />{primary("Save", c.mats ? { j: "mats", stepId: c.mats.stepId, mats: mm } : null)}</>;
       break;
     }
   }

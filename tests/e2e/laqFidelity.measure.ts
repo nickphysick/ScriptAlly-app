@@ -20,6 +20,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { openLog, settledReady } from "./laqLib";
+import { ensureSignedIn } from "./measure";
 import { outlineEq, readMetrics, type Metric } from "./laqMetrics";
 
 const DIR = "design-refs/log-a-query-v1-1";
@@ -118,6 +119,88 @@ test("F-log — logging, ref against app, six states", async ({ page, browser })
     await page.locator('[data-qls="undo"]').click();
     await expect(page.locator('[data-qls="root"]')).toHaveAttribute("data-step", "check", { timeout: 120_000 });
   }
+});
+
+
+/* ── F-edit: the edit layer's styles against ref-metrics-edit.json (positions exempt: the reference card is a redraw) ── */
+const RME = JSON.parse(readFileSync(`${DIR}/ref-metrics-edit.json`, "utf8")) as { metrics: Record<string, Record<string, (Metric & { bgImage?: string | null; borderBottom?: string }) | null>> };
+const EDIT_REF = "file://" + resolve(`${DIR}/edit-in-place-v1.html`);
+const EQID = "seed-query-10";
+const EDIT_APP: Record<string, string> = {
+  frame: ".spanel-own:has(> [data-editing])", editStrip: ".qc152-band.is-ed", editStripTitle: ".qc152-edstrip > b",
+  editStripLine: ".qc152-edstrip > span:not(.qc152-pi)", editStripButton: ".qc152-edstrip > button",
+  saveBar: ".qc152-ebar", saveBarTitle: ".qc152-efl > b", saveBarLine: ".qc152-efl > span", saveButton: ".qc152-ebtn",
+  editableToken: "[data-editing] .qc152-agent .qc152-ed", agentSection: ".qc152-agsec", replyOption: ".qc152-seg2 button.on", toggle: ".qc152-tgl",
+  textLine: ".qc152-inl", tabDot: ".qc152-dot", leaveAsk: ".qc152-leave",
+  stepEditor: ".qc1522-ebx", stepEditorTitle: ".qc1522-eh", stepDate: ".qc1522-edit .qc152-qdb", stepSave: '[data-qc1522="edit-save"]', editPill: ".qc152-fx",
+};
+const EDIT_STYLE = ["font", "size", "weight", "color", "bg", "radius"] as const;
+/* the dotted underline is the token's background image; the dashed rule is the text line's bottom border */
+const UNDERLINE: Record<string, "bgImage" | "borderBottom"> = { editableToken: "bgImage", textLine: "borderBottom", stepEditor: "borderBottom" };
+
+/* dev's step editor hides the other messages' ✎ Edit while a step is open (`.qc152[data-j] .qc152-fx`); the reference's
+   port keeps them. The ruling keeps dev's editor unchanged in look and behaviour, so this one key is not compared. */
+const EDIT_EXEMPT: Record<string, string> = { "stepEditor.editPill": "dev's step editor hides the other ✎ Edit pills while a step is open" };
+
+function compareEdit(a: Record<string, Metric | null>, state: string) {
+  const want = RME.metrics[state];
+  const rows: Record<string, string[]> = {};
+  for (const [k, w] of Object.entries(want)) {
+    if (EDIT_EXEMPT[`${state}.${k}`]) { rows[k] = [`exempt: ${EDIT_EXEMPT[`${state}.${k}`]}`]; continue; }
+    const got = a[k];
+    const hiddenInRef = !w || (w.w === 0 && w.h === 0);
+    if (hiddenInRef) { ok(got == null, `edit ${state}.${k}: not shown in the reference, not shown in the app`); if (got) rows[k] = ["shown"]; continue; }
+    if (!got) { ok(false, `edit ${state}.${k}: missing in the app`); rows[k] = ["missing"]; continue; }
+    const d: string[] = [];
+    for (const f of EDIT_STYLE) if (String(w[f]) !== String(got[f])) d.push(`${f} ${w[f]}→${got[f]}`);
+    if (!outlineEq(w.outline, got.outline)) d.push(`outline ${w.outline}→${got.outline}`);
+    const u = UNDERLINE[k];
+    if (u && String(w[u] ?? null) !== String(got[u] ?? null)) d.push(`${u} ${w[u]}→${got[u]}`);
+    if (d.length) rows[k] = d;
+    ok(d.length === 0, `edit ${state}.${k}: ${d.join(" | ")}`);
+  }
+  LEDGER[`edit:${state}`] = rows;
+}
+
+test("F-edit — editing in place, the edit layer against the reference, five states", async ({ page }) => {
+  test.setTimeout(1_200_000);
+  await page.setViewportSize({ width: 1440, height: 860 });
+  await page.goto("/queries");
+  await ensureSignedIn(page);
+  await page.goto(`/queries?q=${EQID}`);
+  const card = page.locator(`.spanel [data-qc152="card"][data-id="${EQID}"]`).first();
+  await card.waitFor({ state: "visible", timeout: 90_000 });
+  await expect.poll(() => card.locator('[data-qc152="msg"][data-activity]').count(), { timeout: 120_000 }).toBeGreaterThanOrEqual(4);
+  const panelSel = `.spanel:has([data-qc152="card"][data-id="${EQID}"])`;
+  const read = async () => { await page.waitForTimeout(500); return page.evaluate(readMetrics, { panelSel, sels: EDIT_APP }); };
+  /* the reference opens too, so a stale JSON would show; its values are the oracle */
+  const ref = await page.context().browser()!.newPage({ viewport: { width: 1440, height: 860 } });
+  await ref.goto(EDIT_REF); await ref.evaluate(() => document.fonts.ready);
+  /* step pill: hover a message */
+  const msg = card.locator('[data-qc152="msg"][data-activity]').last();
+  await msg.hover();
+  compareEdit(await read(), "stepPill");
+  /* the step editor, outside edit mode */
+  await msg.locator('[data-qc152="edit-step"]').click();
+  await card.locator('[data-qc1522="step-edit"]').waitFor({ state: "visible" });
+  await card.locator('[data-qc152="msg"]').first().hover();
+  compareEdit(await read(), "stepEditor");
+  await card.locator('[data-qc1522="edit-cancel"]').click();
+  /* edit mode on Tracking */
+  await card.locator('[data-qc152="pencil"]').click();
+  await card.locator('[data-qc152="msg"]').last().hover();
+  compareEdit(await read(), "editTracking");
+  /* edit mode on Agent with a change */
+  await card.locator('[data-qc152="tab"][data-tab="agent"]').click();
+  const on = await card.locator('[data-qc152="reply-opt"].on').getAttribute("data-w").catch(() => null);
+  await card.locator(`[data-qc152="reply-opt"][data-w="${on === "12" ? 6 : 12}"]`).click();
+  compareEdit(await read(), "editAgent");
+  /* the leave check */
+  await card.locator('[data-qc152="edit-stop"]').click();
+  compareEdit(await read(), "editLeave");
+  await card.locator('[data-qc152="leave-lose"]').click();
+  await expect(card).not.toHaveAttribute("data-editing", "");
+  await ref.close();
 });
 
 test("F floor — the run read what it claims", () => {

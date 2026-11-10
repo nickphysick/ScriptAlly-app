@@ -31,6 +31,11 @@ import { waitWords } from "../../../lib/qc1522";
 import { PopCtx, useOutsideClose } from "./QcEdit152";
 import { Bubble, StepGlyph, chipIcon } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
+import {
+  AgentEditPane, ASK_POOL, Ed, EdMenu, EditStrip, LeaveAsk, METHODS, MenuItem, NotesEditPane, SaveBar, useEditLayer,
+  type CardEditData, type CardEdits,
+} from "./QcCardEdit152";
+import "./qcv152inplace.css";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -100,8 +105,9 @@ export interface QcCard152Props {
   burst?: number | null;
   /** v152.2 §3.2 — a footer control: its composer */
   onFoot?: (a: FootAct) => void;
-  /** v152.2 §2.6 — a sending step's materials, edited in the composer (null: "+ Add something you sent", the query step) */
-  onEditMats?: (activityId: string | null) => void;
+  /** Log a query v1.1 — editing in place: the pencil's edit mode (the agent, the agent's details, the notes) */
+  editData?: CardEditData;
+  onSaveEdits?: (e: CardEdits) => Promise<boolean>;
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
@@ -168,6 +174,17 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   /* ONE Escape handler for the editing views: the open popover first, then one level back */
   useEscapeLayer(view !== "read", () => { if (popOpen) setPopOpen(null); else p.onBack?.(); }, ESC_LEVEL.pageModal);
   const bodyRef = useRef<HTMLDivElement>(null);
+  /* v1.1 — the edit layer: the pencil, or a double-click on a value, enters it; Esc closes a menu, then asks */
+  const ed = useEditLayer(p.editData, p.onSaveEdits, r.id);
+  const inRef = useRef<HTMLDivElement>(null);
+  useEscapeLayer(ed.on, () => {
+    if (ed.open) ed.setOpen(null);
+    else if (ed.leave) ed.keep();
+    else ed.ask();
+  }, ESC_LEVEL.pageModal);
+  const queryStepId = d.steps.find((x) => x.status === QueryStatus.QUERIED && !x.kind)?.activityId ?? null;
+  const openStep = (id: string | null) => { p.onTab("tracking"); p.onEditStep(id); };
+  const edAgent = ed.on && ed.dr ? p.editData?.agents.find((a) => a.id === ed.dr!.agentId) ?? null : null;
   const thread: ThreadItem[] = buildThread(d.steps, { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
   const box = replyBox({ state: d.state, status: r.status, first, nowMs, dueMs: d.dueMs, replyMs: d.replyMs, closedMs: d.closedMs, steps: d.steps, quietWeeks: d.quietWeeks, reason: d.reason ?? null, nudged: d.nudged });
   const [buildId, setBuildId] = useState<string | null>(null);
@@ -229,6 +246,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const shown = folded ? thread.slice(msgIdx[folded]) : thread;
   const trackingPane = (
     <div className={`qc152-th${buildId === r.id ? " build" : ""}`} data-qc152="thread" data-steps={msgIdx.length}>
+      {ed.on ? <div className="qc152-trknote" data-qc152="track-note">Steps are edited one at a time: hover a message for ✎ Edit</div> : null}
       {folded ? (
         <button type="button" className="qc152-coll" data-qc152="fold" onClick={() => setUnfold(true)}>{folded} earlier {folded === 1 ? "step" : "steps"} · show</button>
       ) : null}
@@ -259,8 +277,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     ? (href ? <a className="qc152-lk" href={href} target="_blank" rel="noreferrer" data-qc152="link">{icon}{v}</a>
       : <button type="button" className="qc152-lk" data-qc152="link" onClick={field === "email" ? p.onCopyEmail : undefined}>{icon}{v}</button>)
     : <button type="button" className="qc152-lk miss" data-qc152="add" data-k={field} onClick={() => p.onAgentField(field)}>+ {label}</button>;
-  const agentPane = (
-    <div className="qc152-agt" data-qc152="agent-pane">
+  const agentStrip = (
       <div className="qc152-agq" data-qc152="agent-strip">
         <div><small>Queried</small><b>{r.sentMs != null ? dayLabel(r.sentMs, nowMs) : "Not dated"}</b><em>{d.queriedVia ?? "how not recorded"}</em></div>
         {d.free
@@ -269,22 +286,34 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         <div><small>Last heard</small><b>{d.lastHeardMs != null ? dayLabel(d.lastHeardMs, nowMs) : "Not yet"}</b>
           <em>{d.lastHeardMs != null ? `${Math.max(0, Math.round((nowMs - d.lastHeardMs) / 86_400_000))} days ago` : r.sentMs != null ? `since ${dayLabel(r.sentMs, nowMs)}` : ""}</em></div>
       </div>
+  );
+  /* a double-click on a detail outside edit mode enters it (with that detail's menu open, where it has one) */
+  const dbl = (k: "weeks" | "asks" | "method" | "wishlist" | "email" | "website") => p.editData ? {
+    "data-ed-r": k,
+    onDoubleClick: (e: React.MouseEvent<HTMLElement>) => { if (ed.on) return; ed.start(k === "asks" || k === "method" ? k : null, e.currentTarget); },
+  } : {};
+  const agentPane = ed.on && ed.dr ? (
+    <AgentEditPane layer={ed} first={(edAgent?.name ?? p.first ?? "the agent").split(/\s+/)[0]} strip={agentStrip}
+      onQueryStep={queryStepId ? () => openStep(queryStepId) : null} />
+  ) : (
+    <div className="qc152-agt" data-qc152="agent-pane">
+      {agentStrip}
       <dl className="qc152-agf">
         <dt>Replies in</dt>
-        <dd data-qc152="reply-in">{d.agentWeeks != null ? <>About <b>{d.agentWeeks} {d.agentWeeks === 1 ? "week" : "weeks"}</b></> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="reply" onClick={() => p.onAgentField("reply")}>+ Add reply time</button>}
+        <dd data-qc152="reply-in" {...dbl("weeks")}>{d.agentWeeks != null ? <>About <b>{d.agentWeeks} {d.agentWeeks === 1 ? "week" : "weeks"}</b></> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="reply" onClick={() => p.onAgentField("reply")}>+ Add reply time</button>}
           {d.nrmn === true ? " · no reply means no" : d.nrmn === false ? " · always replies" : ""}</dd>
         <dt>Asks for</dt>
-        <dd data-qc152="asks">{d.asks.length ? <>
+        <dd data-qc152="asks" {...dbl("asks")}>{d.asks.length ? <>
           <span className="qc152-askc">{ask.chips.map((c) => <i key={c.label} className={c.sent ? "ok" : "no"} data-qc152="ask" data-sent={c.sent ? "" : undefined}>{c.label}</i>)}</span>
           {ask.missing.length ? <span className="qc152-fitn" data-qc152="ask-missing">You didn’t send {ask.missing.map((x) => x.toLowerCase()).join(", ")}</span>
             : <span className="qc152-fity" data-qc152="ask-all">✓ You sent everything {first} asks for</span>}
         </> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="asks" onClick={() => p.onAgentField("materials")}>+ Add what {first} asks for</button>}</dd>
         <dt>How to submit</dt>
-        <dd>{d.how ?? <button type="button" className="qc152-lk miss" data-qc152="add" data-k="method" onClick={() => p.onAgentField("method")}>+ Add how {first} takes queries</button>}</dd>
+        <dd {...dbl("method")}>{d.how ?? <button type="button" className="qc152-lk miss" data-qc152="add" data-k="method" onClick={() => p.onAgentField("method")}>+ Add how {first} takes queries</button>}</dd>
         <dt>Wishlist</dt>
-        <dd>{p.wishlist ? <q data-qc152="wishlist">{p.wishlist}</q> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="wishlist" onClick={() => p.onAgentField("wishlist")}>+ Add {first}’s wishlist</button>}</dd>
+        <dd {...dbl("wishlist")}>{p.wishlist ? <q data-qc152="wishlist">{p.wishlist}</q> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="wishlist" onClick={() => p.onAgentField("wishlist")}>+ Add {first}’s wishlist</button>}</dd>
         <dt>Contact</dt>
-        <dd className="qc152-lks">{lk(p.email, MAIL, "email", "Email")}{lk(p.website.replace(/^https?:\/\//, "").replace(/\/$/, ""), WEB, "website", "Website", p.websiteHref)}</dd>
+        <dd className="qc152-lks" {...dbl("email")}>{lk(p.email, MAIL, "email", "Email")}{lk(p.website.replace(/^https?:\/\//, "").replace(/\/$/, ""), WEB, "website", "Website", p.websiteHref)}</dd>
       </dl>
       <button type="button" className="qc152-open" data-qc152="open-agent" onClick={() => p.onAgentField(null)}>✎ Open {first}’s card</button>
     </div>
@@ -303,29 +332,38 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               <div className="qc152-mh"><b>{b.title}{b.pkg && !d.free && p.packageName ? <> <span className="qc152-pkc" data-qc152="pkg-chip">{p.packageName}</span></> : null}</b><span>{b.date}</span></div>
               <div className="qc152-mc">{b.chips.length ? b.chips.map((c, i) => <i key={i}>{c.label}</i>) : <em>Nothing recorded</em>}</div>
               {b.note ? <p>{b.note}</p> : null}
-              {b.request ? null : <button type="button" className="qc152-mfx" data-qc152="mat-edit" onClick={() => (p.onEditMats ? p.onEditMats(b.activityId ?? null) : p.onEditStep(b.activityId ?? null))}>Edit</button>}
+              {b.request ? null : <button type="button" className="qc152-mfx" data-qc152="mat-edit" onClick={() => openStep(b.activityId ?? null)}>Edit</button>}
             </div>
           </li>
         ))}
       </ol>
-      {p.onEditMats ? <button type="button" className="qc1522-lk qc1522-madd" data-qc1522="add-sent" onClick={() => p.onEditMats!(null)}>+ Add something you sent</button> : null}
+      {queryStepId ? <button type="button" className="qc1522-lk qc1522-madd" data-qc1522="add-sent" onClick={() => openStep(queryStepId)}>+ Add something you sent</button> : null}
     </div>
   );
 
   return (
     <PopCtx.Provider value={pop}>
     <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view}
-      data-lean={view === "read" && !jOpen ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined}>
-      <div className="qc152-in">
+      data-lean={view === "read" && !jOpen && !ed.on ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}>
+      <div ref={inRef} className="qc152-in">
+        {ed.on ? (
+        <div className="qc152-band is-ed" data-qc152="band" data-edit="">
+          <EditStrip n={ed.keys.length} onStop={() => ed.ask()} />
+        </div>
+        ) : (
         <div className={`qc152-band${dark ? " dk" : ""}`} data-qc152="band" style={{ background: bandBg, color: head.fg }}>
           <span data-qc152="band-word">{d.foot ? bnd.word : r.status === QueryStatus.OFFER ? "OFFER" : STATE_BAND[d.state]}</span>
           {d.state !== "closed" && r.dayN != null ? <span className="qc152-day" data-qc152="day">Day {r.dayN}</span> : <span className="qc152-day" />}
-          <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query" title="Edit this query" onClick={p.onPencil}>{PEN}</button>
+          <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query" title="Edit this query"
+            onClick={() => (p.editData ? ed.start() : p.onPencil())}>{PEN}</button>
           <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={p.onClose}>✕</button>
         </div>
+        )}
         <div className="qc152-agent">
           <span className="qc152-disc" aria-hidden="true">{r.initials}</span>
-          <div className="qc152-who"><div className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div><div className="qc152-ag">{(r.agency || "").toUpperCase()}</div></div>
+          <div className="qc152-who">{p.editData ? (
+            <Ed k="agent" layer={ed} changed={ed.keys.includes("agent")} label="The agent this query is to"><span className="qc152-nm qcv-open-nm" data-qc149c="name">{edAgent?.name ?? r.agentName}</span></Ed>
+          ) : <div className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div>}<div className="qc152-ag">{((edAgent ? edAgent.agency : r.agency) || "").toUpperCase()}</div></div>
           <span className="qc152-pill" data-qc152="pill"><span className="qc152-cap" style={{ background: STATUS_FILL[statusKind(r.status)] }}><StatusDot status={r.status} overrideSize={17} decorative /></span><span>{STAGE_NAME[r.status]}</span></span>
         </div>
         {view !== "read" ? p.editBody : <>
@@ -338,13 +376,16 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           {(["tracking", "agent", "materials", "notes"] as const).map((t) => (
             <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => p.onTab(t)}>
               {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : t === "materials" ? "Materials" : "Notes"}
+              {ed.on && ((t === "agent" && ed.keys.some((k) => k !== "agent" && k !== "notes")) || (t === "notes" && ed.keys.includes("notes")))
+                ? <span className="qc152-dot" data-qc152="tab-dot" aria-label="unsaved changes" /> : null}
             </button>
           ))}
         </div>
         <div ref={bodyRef} className={`qc152-body${p.toast ? " qc1522-tpad" : ""}`} data-qc152="body" role="tabpanel">
-          {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{p.notes}</div>}
+          {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{ed.on && ed.dr && p.editData ? <NotesEditPane layer={ed} data={p.editData} /> : p.notes}</div>}
         </div>
-        {p.composer ? p.composer : d.foot ? (() => {
+        {ed.on ? <SaveBar keys={ed.keys} nudge={ed.nudge} busy={ed.busy} onCancel={() => ed.ask()} onSave={() => void ed.save()} />
+          : p.composer ? p.composer : d.foot ? (() => {
           /* v152.2 §3.2 — the footer: two lines, the button, and the quieter link */
           const ft = footer1522({ ...d.foot, state: d.state, status: r.status, first, nowMs });
           return (
@@ -372,6 +413,26 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         </div>
         )}
         </>}
+        {ed.on && ed.leave ? <LeaveAsk n={ed.keys.length} busy={ed.busy} onLose={ed.lose} onKeep={ed.keep} onSave={() => void ed.save()} /> : null}
+        {ed.on && ed.open && ed.dr && p.editData ? (
+          <EdMenu root={inRef.current} anchor={ed.anchor} onClose={() => ed.setOpen(null)}>
+            {ed.open === "agent" ? <>
+              <div className="ph">Who’s this query to?</div>
+              {p.editData.agents.map((a) => <MenuItem key={a.id} data={a.id} on={ed.dr!.agentId === a.id} label={a.name} sub={a.agency} onPick={() => { ed.setAgent(a.id); ed.setOpen(null); }} />)}
+              <div className="pf">Moves this query to another agent. Their details come with them.</div>
+            </> : ed.open === "asks" ? <>
+              <div className="ph">What they ask for</div>
+              {[...new Set([...ASK_POOL, ...ed.dr.details.asks])].map((a) => {
+                const on = ed.dr!.details.asks.includes(a);
+                return <MenuItem key={a} data={a} on={on} label={a} onPick={() => ed.patch({ asks: on ? ed.dr!.details.asks.filter((x) => x !== a) : [...ed.dr!.details.asks, a] })} />;
+              })}
+              <div className="pf">Tick as many as apply.</div>
+            </> : ed.open === "method" ? <>
+              <div className="ph">How they take queries</div>
+              {METHODS.map((m) => <MenuItem key={m.v} data={m.v} on={ed.dr!.details.method === m.v} label={m.label} onPick={() => { ed.patch({ method: m.v }); ed.setOpen(null); }} />)}
+            </> : null}
+          </EdMenu>
+        ) : null}
         {p.toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{p.toast.msg}</span>{p.toast.onUndo ? <button type="button" data-qc1522="undo" onClick={p.toast.onUndo}>Undo</button> : null}</div> : null}
         {p.burst ? <div key={p.burst} className="qc1522-burst" aria-hidden="true" data-qc1522="burst">{Array.from({ length: 46 }, (_, k) => <i key={k} style={{ left: `${(k * 37) % 100}%`, background: ["#f2ebe0", "#f3d3c6", "#d3dce7", "#cbd9be"][k % 4], animationDelay: `${(k % 7) * 0.08}s` }} />)}</div> : null}
       </div>

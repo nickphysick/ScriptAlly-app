@@ -1,0 +1,133 @@
+/* ══ Log a query v1.1 Phase 3 — EDITING IN PLACE ON THE QUERY CARD (design-refs/log-a-query-v1-1/edit-in-place-v1.html) ══
+   A LAYER over the card as built: every rule keys off `[data-editing]` or a part only the layer draws, so the card's
+   reading look is untouched. The values are the reference's. (qcv152edit.css is v152's editing VIEWS; a different thing.)
+   ⚠️ THE CARD PORTALS WITH THE PANEL: colours are literals, faces are the `:root` --sp-* tokens. brand.tsx forces a
+      face on bare spans and buttons, so every part states its own. */
+
+/* 1 · the card's inner frame becomes the app's "draft" line: 2px dashed navy (the inner border is the panel's) */
+.spanel.qsp.qsp:has(> .spanel-own > [data-qc152][data-editing]) > .spanel-own {
+  border-color: transparent; outline: 2px dashed #2a3a52; outline-offset: -2px;
+}
+
+/* 2 · the band becomes the editing strip: pale navy, says so in words, and carries the way out */
+.qc152 .qc152-band.is-ed { height: 48px; padding: 0 12px 0 20px; box-sizing: border-box; background: #e9edf4; color: #2a3a52; font: 400 16px/1.5 var(--sp-serif); letter-spacing: 0; }
+.qc152 .qc152-edstrip { display: flex; align-items: center; gap: 10px; width: 100%; font: inherit; }
+.qc152 .qc152-edstrip .qc152-pi { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: #2a3a52; color: #fff; }
+.qc152 .qc152-edstrip > b { font: 400 17px var(--sp-type) !important; letter-spacing: 0; }
+.qc152 .qc152-edstrip > span:not(.qc152-pi) { font: italic 400 13.5px var(--sp-serif) !important; color: #4a5a74; letter-spacing: 0; }
+.qc152 .qc152-edstrip > button { all: unset; cursor: pointer; margin-left: auto; padding: 5px 12px; border-radius: 999px; font: 400 14px var(--sp-serif) !important; color: #2a3a52; box-shadow: inset 0 0 0 1px #b7c2d4; }
+.qc152 .qc152-edstrip > button:hover { background: #fff; }
+.qc152 .qc152-edstrip > button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* 3 · the surface takes a faint cool wash; the book block a cooler grey */
+.qc152[data-editing] .qc152-body, .qc152[data-editing] .qc152-agent, .qc152[data-editing] .qc152-tabs { background: #fbfcfe; }
+.qc152[data-editing] .qc152-ms { background: #eef0f4; }
+
+/* 4 · the save bar: solid navy, counts what is unsaved */
+.qc152 .qc152-ebar { flex: none; display: flex; align-items: center; gap: 10px; padding: 12px 14px 14px; background: #2a3a52; color: #fff; font: 400 16px/1.5 var(--sp-serif); animation: qc152-edin .2s both; }
+.qc152 .qc152-ebar.nudge { animation: qc152-nudge .5s both; }
+@keyframes qc152-edin { from { opacity: 0; transform: translateY(-3px); } }
+@keyframes qc152-nudge { 0%, 100% { transform: none; } 30% { transform: translateY(-3px); } 60% { transform: translateY(1px); } }
+.qc152 .qc152-efl { flex: 1 1 auto; min-width: 0; padding-left: 6px; }
+.qc152 .qc152-efl > b { display: block; font: 400 17px/1.2 var(--sp-type) !important; color: #fff; }
+.qc152 .qc152-efl > span { display: block; font: italic 400 13px/1.3 var(--sp-serif) !important; color: #c9d2e0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qc152 .qc152-elnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--sp-serif) !important; color: #dfe5ee; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.qc152 .qc152-elnk:hover { color: #fff; }
+.qc152 .qc152-ebtn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 21px; background: #fff; color: #2a3a52; font: 600 14px var(--sp-serif) !important; white-space: nowrap; transition: filter .15s, transform .1s; }
+.qc152 .qc152-ebtn:active { transform: scale(.97); }
+.qc152 .qc152-ebtn:disabled { opacity: .45; pointer-events: none; }
+.qc152 .qc152-elnk:focus-visible, .qc152 .qc152-ebtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* editable values: a fine dotted underline in edit mode; a soft navy tint on hover and while its menu is open */
+.qc152 .qc152-ed { all: unset; cursor: text; border-radius: 4px; font: inherit; transition: background .15s, box-shadow .15s, color .15s; }
+.qc152 .qc152-agent .qc152-ed { display: block; width: fit-content; max-width: 100%; font: 400 16px var(--sp-serif); }
+.qc152[data-editing] .qc152-ed { cursor: pointer; background-image: linear-gradient(90deg, #b9ad9e 50%, transparent 0); background-size: 4px 1px; background-repeat: repeat-x; background-position: 0 100%; padding-bottom: 1px; }
+.qc152[data-editing] .qc152-ed:hover, .qc152[data-editing] .qc152-ed.open { background-color: rgba(42, 58, 82, .06); box-shadow: 0 0 0 3px rgba(42, 58, 82, .06); }
+.qc152[data-editing] .qc152-ed:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152[data-editing] .qc152-ed.chg, .qc152[data-editing] .qc152-ed.chg .qc152-nm { color: #2a3a52; font-weight: 600; }
+.qc152[data-editing] .qc152-ed.chg::after, .qc152 .qc152-chgdot { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 0 0 4px; border-radius: 50%; background: #a2452a; vertical-align: 3px; }
+.qc152[data-editing] .qc152-agent .qc152-ed.chg { display: flex; align-items: center; }
+
+/* text values: typed straight onto a dashed rule, no box */
+.qc152 .qc152-inl { width: 100%; box-sizing: border-box; font: inherit; color: inherit; padding: 2px 0 3px; border: 0; border-bottom: 1px dashed #c9bead; border-radius: 0; outline: none; background: transparent; resize: none; field-sizing: content; min-height: 1.5em; }
+.qc152 .qc152-inl:hover { border-bottom-color: #8e8274; }
+.qc152 .qc152-inl:focus { border-bottom: 1.5px solid #2a3a52; }
+.qc152 .qc152-inl.chg { color: #2a3a52; }
+
+/* the Agent tab in edit mode */
+.qc152 .qc152-agt-ed .qc152-agq > div { box-shadow: none; }
+.qc152 .qc152-qsnote { margin: 10px 0 10px; font: italic 400 13px/1.45 var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc152-lk2 { all: unset; cursor: pointer; font: inherit; font-style: normal; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
+.qc152 .qc152-lk2:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152 .qc152-agsec { margin: 16px 0 8px; display: flex; align-items: baseline; gap: 8px; font: 400 15px var(--sp-type) !important; color: #1c130f; }
+.qc152 .qc152-agsec small { font: italic 400 12.5px var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc152-share { display: inline-flex; align-items: center; gap: 5px; font: inherit; }
+.qc152 .qc152-agt-ed .qc152-agf dd { font: 400 15px var(--sp-serif); color: #1c130f; }
+.qc152 .qc152-seg2 { display: inline-flex; gap: 4px; flex-wrap: wrap; }
+.qc152 .qc152-seg2 button { all: unset; cursor: pointer; padding: 2px 10px; border-radius: 999px; font: 400 13.5px var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc152-seg2 button:hover { background: #f3eee6; }
+.qc152 .qc152-seg2 button.on { background: #f3eee6; color: #1c130f; box-shadow: inset 0 0 0 1px #cfc4b5; }
+.qc152 .qc152-seg2 button:focus-visible, .qc152 .qc152-tgl:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152 .qc152-tgl { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; margin: 6px 0 0; font: 400 13.5px var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc152-tgl i { width: 26px; height: 15px; border-radius: 999px; background: #d9cfc2; position: relative; transition: background .15s; }
+.qc152 .qc152-tgl i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: #fff; transition: left .15s; }
+.qc152 .qc152-tgl.on i { background: #2a3a52; }
+.qc152 .qc152-tgl.on i::after { left: 13px; }
+.qc152 .qc152-agt-ed .qc152-askc { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+/* the chips keep the card's own look; a chip's × and a row's "+ Add" only on hover of their row */
+.qc152 .qc152-arm { all: unset; display: none; cursor: pointer; margin-left: 4px; color: #9a8f84; font: 400 13.5px var(--sp-serif); }
+.qc152 .qc152-askc i:hover .qc152-arm, .qc152 .qc152-arm:focus-visible { display: inline; }
+.qc152 .qc152-arm:hover { color: #a2452a; }
+.qc152[data-editing] .qc152-add2, .qc152 .qc152-add2 { background-image: none !important; padding-bottom: 0; font: 400 13px var(--sp-serif) !important; color: #8a8076; opacity: 0; transition: opacity .15s; }
+.qc152 .qc152-add2:hover { color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
+.qc152 dd:hover .qc152-add2, .qc152 .qc152-nt2:hover .qc152-add2, .qc152 .qc152-add2.always, .qc152 .qc152-add2:focus-visible, .qc152 .qc152-add2.open { opacity: 1; }
+.qc152 .qc152-cgrid { display: grid; gap: 6px; }
+
+/* Notes in edit mode */
+.qc152 .qc152-nt2 { position: relative; padding: 10px 12px; border-radius: 12px; background: #f7f5f1; margin: 0 0 8px; font: 400 15px/1.5 var(--sp-serif); }
+.qc152 .qc152-ndel { all: unset; float: right; margin-top: 4px; cursor: pointer; }
+.qc152 .qc152-notes-ed > .qc152-add2.always { all: unset; cursor: pointer; font: 400 13px var(--sp-serif) !important; color: #8a8076; }
+.qc152 .qc152-notes-ed > .qc152-add2.always:hover { color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
+
+/* Tracking in edit mode: one quiet line pointing at the step editor */
+.qc152 .qc152-trknote { align-self: center; margin: 0 0 12px; padding: 6px 14px; border-radius: 999px; background: #eef1f6; font: italic 400 13px var(--sp-serif) !important; color: #4a5a74; }
+
+/* the tab dot: a tab with unsaved changes */
+.qc152 .qc152-tabs button { position: relative; }
+.qc152 .qc152-dot { position: absolute; top: 2px; right: -9px; width: 7px; height: 7px; border-radius: 50%; background: #a2452a; }
+
+/* the leave check */
+.qc152 .qc152-in { position: relative; }
+.qc152 .qc152-leave { position: absolute; left: 14px; right: 14px; bottom: 76px; z-index: 35; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: #fff;
+  box-shadow: 0 14px 30px -12px rgba(28, 19, 15, .4), 0 0 0 1px #e2d9cc; animation: qc152-edin .18s both; font: 400 14.5px var(--sp-serif); color: #1c130f; }
+.qc152 .qc152-leave > span:first-child { font: inherit; }
+.qc152 .qc152-leave .sp { flex: 1 1 auto; }
+.qc152 .qc152-llnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--sp-serif) !important; color: #5b4f47; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.qc152 .qc152-llnk:hover { color: #2a3a52; }
+.qc152 .qc152-lbtn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 21px; background: #2a3a52; color: #fff; font: 600 14px var(--sp-serif) !important; }
+.qc152 .qc152-llnk:focus-visible, .qc152 .qc152-lbtn:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* the menu: our small anchored popover (the logging flow's family), flipping up when there is no room below */
+.qc152 .qc152-pp { position: absolute; z-index: 40; min-width: 240px; max-width: 300px; max-height: 340px; overflow: auto; padding: 6px; border-radius: 12px; background: #fff;
+  box-shadow: 0 18px 40px -14px rgba(28, 19, 15, .35), 0 0 0 1px rgba(28, 19, 15, .08); animation: qc152-edin .14s ease-out both; text-align: left; }
+.qc152 .qc152-pp .ph { padding: 6px 10px 4px; font: 400 15px var(--sp-type) !important; color: #1c130f; }
+.qc152 .qc152-pp .pf { padding: 6px 10px 4px; font: italic 400 12.5px var(--sp-serif) !important; color: #6f645b; }
+.qc152 .qc152-it { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 10px; border-radius: 8px; font: 400 14.5px var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc152-it:hover, .qc152 .qc152-it:focus-visible { background: #f6f2ec; }
+.qc152 .qc152-it .ck { width: 14px; color: #2a3a52; font: inherit; }
+.qc152 .qc152-it small { margin-left: auto; font: italic 400 12.5px var(--sp-serif) !important; color: #9a8f84; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qc152 .qc152-ebar, .qc152 .qc152-ebar.nudge, .qc152 .qc152-leave, .qc152 .qc152-pp { animation: none; }
+  .qc152 .qc152-ed, .qc152 .qc152-tgl i, .qc152 .qc152-tgl i::after, .qc152 .qc152-add2 { transition: none; }
+}
+
+/* the step editor's How and Package (the Query sent step only), styled like its other rows: the chosen one navy */
+.qc152 .qc1522-sseg { display: flex; flex-wrap: wrap; gap: 6px; }
+.qc152 .qc1522-sseg button { all: unset; cursor: pointer; padding: 5px 11px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d9cfc2; font: 400 13.5px var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc1522-sseg button:hover { box-shadow: inset 0 0 0 1.5px #8e8274; }
+.qc152 .qc1522-sseg button.on { background: #2a3a52; color: #fff; box-shadow: none; }
+.qc152 .qc1522-sseg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+/* the step editor's buttons at the reference's small size (its `.btn.sm`: 14px) */
+.qc152 .qc1522-ebx .qc1522-btn.sm { font-size: 14px !important; }

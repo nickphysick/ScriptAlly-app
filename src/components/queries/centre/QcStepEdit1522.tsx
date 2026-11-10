@@ -35,7 +35,11 @@ export interface StepEditProps {
   /** "Sent the partial depends on it, so it goes too. Sophie's card goes back to Queried, …" */
   deleteText: string;
   busy: boolean;
-  onSave: (v: { dayMs: number; mats: StepMaterial[]; words: string }) => Promise<boolean>;
+  /** Log a query v1.1 — the Query sent step only: how it went, and the package it went as (the date, method and package
+   *  of a query are edited here and nowhere else) */
+  how?: { value: string | null; options: { v: string; label: string }[] } | null;
+  pkg?: { value: string | null; options: { id: string; name: string }[] } | null;
+  onSave: (v: { dayMs: number; mats: StepMaterial[]; words: string; how?: string | null; pkgId?: string | null }) => Promise<boolean>;
   onDelete: () => Promise<boolean>;
   onCancel: () => void;
 }
@@ -45,6 +49,8 @@ export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
   const [d, setD] = useState(p.ms);
   const [mats, setMats] = useState<StepMaterial[]>(p.mats);
   const [words, setWords] = useState(p.words);
+  const [how, setHow] = useState<string | null>(p.how?.value ?? null);
+  const [pkgId, setPkgId] = useState<string | null>(p.pkg?.value ?? null);
   const [del, setDel] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [conf, setConf] = useState(false);
@@ -68,7 +74,21 @@ export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
           <button type="button" className="qc1522-x" aria-label="Close" data-qc1522="edit-x" onClick={up}>✕</button></div>
         <div className="qc1522-fl tight">
           <label>When</label>
-          <div><CalendarField id="edit" valueMs={d} nowMs={p.nowMs} blocked={blocked} onChange={(ms) => { setD(sod(ms)); setDirty(true); }} /></div>
+          <div className="qc1522-dp on" data-qc1522="edit-date"><CalendarField id="edit" valueMs={d} nowMs={p.nowMs} blocked={blocked} onChange={(ms) => { setD(sod(ms)); setDirty(true); }} /></div>
+          {p.how ? <>
+            <label>How</label>
+            <div className="qc1522-sseg" role="radiogroup" aria-label="How it went" data-qc1522="edit-how">
+              {p.how.options.map((o) => <button key={o.v} type="button" role="radio" aria-checked={how === o.v} className={how === o.v ? "on" : undefined} data-v={o.v}
+                onClick={() => { setHow(o.v); setDirty(true); }}>{o.label}</button>)}
+            </div>
+          </> : null}
+          {p.pkg ? <>
+            <label>Package</label>
+            <div className="qc1522-sseg" role="radiogroup" aria-label="The package it went as" data-qc1522="edit-pkg">
+              {[...p.pkg.options, { id: "", name: "No package" }].map((o) => <button key={o.id || "none"} type="button" role="radio" aria-checked={(pkgId ?? "") === o.id} className={(pkgId ?? "") === o.id ? "on" : undefined} data-v={o.id}
+                onClick={() => { setPkgId(o.id || null); setDirty(true); }}>{o.name}</button>)}
+            </div>
+          </> : null}
           {p.kind !== "nudge" && p.kind !== "told" ? <>
             <label>Materials</label>
             <div><MatChips id="edit" mats={mats} onChange={(m) => { setMats(m); setDirty(true); }} env={p.env} stepMs={d} request={p.request} addLabel="+ Add" /></div>
@@ -95,7 +115,7 @@ export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
             <button type="button" className="qc1522-lk rust" data-qc1522="delete-step" onClick={() => setDel(true)}>Delete this step</button>
             <span className="sp" />
             <button type="button" className="qc1522-btn gh sm" data-qc1522="edit-cancel" onClick={up}>Cancel</button>
-            <button type="button" className="qc1522-btn nv sm" data-qc1522="edit-save" disabled={p.busy || !dirty} onClick={() => void p.onSave({ dayMs: d, mats, words: words.trim() })}>Save</button>
+            <button type="button" className="qc1522-btn nv sm" data-qc1522="edit-save" disabled={p.busy || !dirty} onClick={() => void p.onSave({ dayMs: d, mats, words: words.trim(), ...(p.how ? { how } : {}), ...(p.pkg ? { pkgId } : {}) })}>Save</button>
           </div>
         )}
       </div>
