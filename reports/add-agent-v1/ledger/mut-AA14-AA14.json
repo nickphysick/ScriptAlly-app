@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: the add panel",
+  "ok": true,
+  "detail": "111 elements"
+ },
+ {
+  "where": "the add panel: none",
+  "ok": false,
+  "detail": "[\"aap-pill color 78,125,96\",\"aap-pill borderTopColor 78,125,96\",\"aap-pill outlineColor 78,125,96\",\"aap-pill on amt color 78,125,96\",\"aap-pill on amt borderTopColor 78,125,96\",\"aap-pill on amt outlineColor 78,125,96\",\"ae-fl color 78,125,96\",\"ae-fl borderTopColor 78,125,96\",\"ae-fl outlineColor 78,125,96\",\"aap-pill on amt wide color 78,125,96\",\"aap-pill on amt wide borderTopColor 78,125,96\",\"aap-pill on amt wide outlineColor 78,125,96\",\"aap-gap color 78,125,96\",\"aap-gap borderTopColor 78,125,96\",\"aap-gap outlineColor 78,125,96\",\"aap-br color 78,125,96\",\"aap-br borderTopColor 78,125,96\",\"aap-br outlineColor 78,125,96\",\"aap-useg color 78,125,96\",\"aap-useg borderTopColor 78,125,96\"]"
+ },
+ {
+  "where": "WeekSlider fill is navy",
+  "ok": true,
+  "detail": "linear-gradient(90deg, rgb(42, 58, 82) 0%, rgb(42, 58, 82) 4%, rgb(231, 221, 208) 4%, rgb(231, 221, 208) 100%)"
+ },
+ {
+  "where": "WeekSlider thumb is navy (every thumb rule)",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "its readout is not burgundy",
+  "ok": true,
+  "detail": "rgb(168, 154, 138)"
+ },
+ {
+  "where": "population: the card in edit mode",
+  "ok": true,
+  "detail": "193 elements"
+ },
+ {
+  "where": "card edit mode: none",
+  "ok": true,
+  "detail": "[]"
+ }
+]

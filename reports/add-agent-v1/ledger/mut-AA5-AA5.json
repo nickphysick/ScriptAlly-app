@@ -1,0 +1,27 @@
+[
+ {
+  "where": "Online Form → Submission form",
+  "ok": false,
+  "detail": "(none)"
+ },
+ {
+  "where": "Query Manager → QueryManager",
+  "ok": false,
+  "detail": "(none)"
+ },
+ {
+  "where": "Other → Link, if there is one",
+  "ok": false,
+  "detail": "(none)"
+ },
+ {
+  "where": "the card's tile reads via {text}",
+  "ok": true,
+  "detail": "Takes queries via Agency portal"
+ },
+ {
+  "where": "stored: Other and its words",
+  "ok": true,
+  "detail": "{\"id\":\"agent-0ciuhhe9z\",\"name\":\"Petra Runq2hzv\",\"agency\":\"Harbour Lane Test\",\"starRating\":null,\"weeks\":null,\"agencyUnknown\":null,\"submissionMethod\":\"Other\",\"submissionMethodOther\":\"Agency portal\"}"
+ }
+]

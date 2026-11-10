@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: four pills",
+  "ok": true,
+  "detail": "[\"GB\",\"IE\",\"US\",\"elsewhere\"]"
+ },
+ {
+  "where": "GB has a flag",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "where": "IE has a flag",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "where": "US has a flag",
+  "ok": false,
+  "detail": "none"
+ },
+ {
+  "where": "Elsewhere wears the globe",
+  "ok": true,
+  "detail": "globe"
+ },
+ {
+  "where": "Elsewhere opens CountryCombobox",
+  "ok": true,
+  "detail": "combobox"
+ }
+]

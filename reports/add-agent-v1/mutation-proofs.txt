@@ -1,0 +1,27 @@
+AA1 mutated: ✘   ✗ AA1 · no aria-invalid — 1 
+AA2 mutated: ✘ 
+AA3 mutated: ✘   ✗ AA3 · the notice shows — dup 
+AA4 mutated: ✘   ✗ AA4 · the floor line — At least 500 words for the opening sample.   ✗ AA4 · a rust ring — none 
+AA5 mutated: ✘   ✗ AA5 · Online Form → Submission form — (none)   ✗ AA5 · Query Manager → QueryManager — (none) 
+AA6 mutated: ✘   ✗ AA6 · ✓ Instagram — ✓ Instagram   ✗ AA6 · the ask — social-ask 
+AA7 mutated: ✘   ✗ AA7 · GB has a flag — none   ✗ AA7 · IE has a flag — none 
+AA8 mutated: ✘   ✗ AA8 · 1440: inside the viewport — {"left":1360,"right":1640,"top":680.28125,"bottom":815.09375,"w":1440,"h":900,"clipped":[],"text":"Agent fitQueryHawk is about finding the right agent, not just any agent. Rate how well they fit you and your book, and your Contact list and query suggestions put your best fits first."}   ✗ AA8 · 1280: inside the viewport — {"left":1200,"right":1480,"top":523.46875,"bottom":658.28125,"w":1280,"h":800,"clipped":[],"text":"Agent fitQueryHawk is about finding the right agent, not just any agent. Rate how well they fit you and your book, and your Contact list and query suggestions put your best fits first."} 
+AA9 mutated: ✘   ✗ AA9 · whole inside the body at 900 tall — [285,1136,230,821] 
+AA10 mutated: ✘   ✗ AA10 · the nudge line, inside the section — Also changesQuery Centre and Birds-eye view: your query's reply expected no date → 21 Oct, so it becomes past the date a 
+AA11 mutated: ✘   ✗ AA11 · rust — rgb(42, 58, 82) 
+AA12 mutated: ✘   ✗ AA12 · Contact list · band pencil: no long form — 1 
+AA13 mutated: ✘   ✗ AA13 · in fit order — Wren Tallis (null, null) before William Tan (null, null)   ✗ AA13 · unrated last — 49 / 0 
+AA14 mutated: ✘   ✗ AA14 · the add panel: none — ["aap-pill color 78,125,96","aap-pill borderTopColor 78,125,96","aap-pill outlineColor 78,125,96","aap-pill on amt color 78,125,96","aap-pill on amt borderTopColor 78,125,96","aap-pill on amt outlineColor 78,125,96","ae-fl color 78,125,96","ae-fl borderTopColor 78,125,96","ae-fl outlineColor 78,125,96","aap-pill on amt wide color 78,125,96","aap-pill on amt wide borderTopColor 78,125,96","aap-pill on amt wide outlineColor 78,125,96","aap-gap color 78,125,96","aap-gap borderTopColor 78,125,96","aap-gap outlineColor 78,125,96","aap-br color 78,125,96","aap-br borderTopColor 78,125,96","aap-br outlineColor 78,125,96","aap-useg color 78,125,96","aap-useg borderTopColor 78,125,96"] 
+
+## CL262 J6–J9, re-pointed (10 Nov, on …-laq1-aa1 + a42d3aa33)
+green: 9 passed (setup + J6–J9 at 1512 and 1280)
+CL262_MUTATE=J6:
+  ✗ J6-1512 · door Closed reveals Reopens — 
+CL262_MUTATE=J7:
+  ✗ J7-1512 · an Also note shows (0) — 1 changeresponse time · moves 1 nudge
+CL262_MUTATE=J8:
+  ✗ J8-1512 · Submit by holds How — 137.96875 → 537.96875
+  ✗ J8-1512 · opening Materials keeps it, or only reveals it (heading stays in view) — 434.96875 → 438.96875 (How 536.96875 → 615.96875)
+CL262_MUTATE=J9:
+  ✗ J9-1512 · 40 characters typed in one go — 1
+  ✗ J9-1512 · focus still on the wishlist — 

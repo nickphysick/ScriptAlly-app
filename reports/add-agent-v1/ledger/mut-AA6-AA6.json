@@ -1,0 +1,17 @@
+[
+ {
+  "where": "✓ Instagram",
+  "ok": false,
+  "detail": "✓ Instagram"
+ },
+ {
+  "where": "the ask",
+  "ok": false,
+  "detail": "social-ask"
+ },
+ {
+  "where": "the platform pills",
+  "ok": true,
+  "detail": "[\"X / Twitter\",\"Bluesky\",\"Instagram\",\"TikTok\",\"Other\"]"
+ }
+]

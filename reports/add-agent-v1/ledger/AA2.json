@@ -1,0 +1,47 @@
+[
+ {
+  "where": "the blush note shows",
+  "ok": true,
+  "detail": "agency-ask"
+ },
+ {
+  "where": "its words",
+  "ok": true,
+  "detail": "Do you know Imogen’s agency?Having it on file stops you querying two agents at the same agency by mistake, and helps us keep agents’ details up to date. If you really can’t find it, you can carry on without it.Agency unknownI’ll add it"
+ },
+ {
+  "where": "not red",
+  "ok": true,
+  "detail": "rgb(245, 230, 223)"
+ },
+ {
+  "where": "Who stays open",
+  "ok": true,
+  "detail": "who"
+ },
+ {
+  "where": "the foot asks for the agency",
+  "ok": true,
+  "detail": "Add Imogen’s agency, or mark it unknown."
+ },
+ {
+  "where": "the field greys",
+  "ok": true,
+  "detail": "agency-unknown"
+ },
+ {
+  "where": "Agency unknown lets Next through",
+  "ok": true,
+  "detail": "want"
+ },
+ {
+  "where": "an agency alone goes straight through",
+  "ok": true,
+  "detail": "want"
+ },
+ {
+  "where": "and is never asked about",
+  "ok": true,
+  "detail": "no ask"
+ }
+]

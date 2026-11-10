@@ -1,0 +1,42 @@
+[
+ {
+  "where": "Contact list · band pencil: the card",
+  "ok": true,
+  "detail": "panel"
+ },
+ {
+  "where": "Contact list · band pencil: in edit mode",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "Contact list · band pencil: no long form",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "where": "population: a query to open",
+  "ok": true,
+  "detail": "row"
+ },
+ {
+  "where": "population: a door on the agent tab",
+  "ok": true,
+  "detail": "door"
+ },
+ {
+  "where": "Query Centre · agent tab door: the card",
+  "ok": true,
+  "detail": "panel"
+ },
+ {
+  "where": "Query Centre · agent tab door: in edit mode",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "Query Centre · agent tab door: no long form",
+  "ok": true,
+  "detail": "0"
+ }
+]

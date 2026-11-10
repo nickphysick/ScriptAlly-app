@@ -1,0 +1,27 @@
+[
+ {
+  "where": "the guard is up",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "rust",
+  "ok": false,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "its words",
+  "ok": true,
+  "detail": "Discard 1 change to Nadia?Nothing has been saved yet.Keep editingDiscard"
+ },
+ {
+  "where": "Keep editing returns",
+  "ok": true,
+  "detail": "kept"
+ },
+ {
+  "where": "Discard closes",
+  "ok": true,
+  "detail": "closed"
+ }
+]

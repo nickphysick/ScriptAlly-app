@@ -2634,6 +2634,14 @@ when `TodoDock` and `TaskPane` briefly coexisted. Retiring the pane becomes its 
 - **⚠️ versionsV2.css IS GENERATED** (`scripts/versions-v2/extract-css.mjs` then `gen-css.mjs`); hand edits go in versionsV2.app.css. Three traps the generator handles: the CSSOM turns a `font:` shorthand holding a `var()` into empty longhands (bodies come from the ref's source text), `@container` rules, and the ref's own `--sp-type`/`--sp-serif` redefinitions, which cycle with the app's tokens and blank every face while every gate stays green.
 - **Prod rules for the three new fields are Nick's and must precede any prod deploy of this page.**
 
+## Add agent v1 — the add journey, editing on the card, Agent fit (10 Nov; refs = the pack's two design refs, SHA256s in the report; report reports/add-agent-v1/REPORT.md; branch `add-agent-v1`, NOT merged)
+- **"Adding new agent" is a sectioned journey in `AgentPanelNew`** (`AddAgentJourney`: who / want / query / reach, the later sections locked until a name and an agency, or "Agency unknown"), ending on a finish screen that previews the real card. Every control is from `agents/card/agentPills.tsx`.
+- **The card edits with the same controls (`AgentCard262Edit`); every "Edit agent" route opens the card at its section, and `AgentEditMode` is deleted.** The save bar names the changes and how many nudges they move.
+- **Agent fit is `starRating`, 1–5, read as Poor fit / Worth a try / Good fit / Great fit / Dream agent, with an "i" tip portalled through `useFixedMenu`.** `lib/agentFit.ts` `fitOrder` (fit high first, unrated last, then the shorter response time, then the name) orders "Who are you querying?" (`whoGroups` in `lib/queryActions/logStages.ts` on the dev line), the next-step spotlight (`readyOrder`) and the Contact list's "Agent fit" sort.
+- **⚠️ New agent fields: `agencyUnknown` (true or absent) and `submissionMethodOther` (at most 40), with `SubmissionMethod.OTHER`.** DEV rules are deployed; **PROD rules are Nick's**, and until then any agent write carrying either field is denied, silently. A query's `sendMethod` is an enum, so an agent's Other never seeds one: `lib/queryVia.ts` `queryViaOf` maps it to null, in every log flow and the nudge journey.
+- **WeekSlider is navy everywhere** (Record a response, "Your expected response time", the agent's response time).
+- **Locks:** `tests/e2e/addAgentV1.measure.ts` AA1–AA14 (`AA_MUTATE=<lock>`; run `node tests/e2e/aa1Emu.mjs pro` first: the harness is Free with 53 agents, so `addAgent` refuses). CL262 J6–J9 were re-pointed at the shared controls.
+
 ## Next session — start here
 **Versions v2 is DONE on branch `versions-v2` (pushed), on dev via `dev/ver1-nbab-pkglink-hm1-ver2` as `index-OojVGv_5.js`, NOT merged; dev Firestore rules deployed, prod not.** Read `reports/versions-v2.md` §5 first.
 

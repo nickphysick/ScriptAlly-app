@@ -1,0 +1,17 @@
+[
+ {
+  "where": "population: rated and unrated agents in the list",
+  "ok": true,
+  "detail": "27 rated of 41"
+ },
+ {
+  "where": "in fit order",
+  "ok": false,
+  "detail": "Wren Tallis (null, null) before William Tan (null, null)"
+ },
+ {
+  "where": "unrated last",
+  "ok": false,
+  "detail": "40 / 0"
+ }
+]
