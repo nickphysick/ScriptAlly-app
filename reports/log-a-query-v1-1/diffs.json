@@ -1,0 +1,16 @@
+{
+ "01-agent": 5.09,
+ "02-sent": 2.62,
+ "03-materials": 5.93,
+ "04-materials-pieces": 3.58,
+ "05-how": 3.09,
+ "06-check": 8.69,
+ "07-back-to-sent-from-track": 2.21,
+ "08-celebration": 8.36,
+ "09-batch-check": 12.07,
+ "10-step-edit-pill": null,
+ "11-step-editor": null,
+ "12-edit-mode-tracking": null,
+ "13-edit-mode-agent-changed": null,
+ "14-edit-mode-leave-check": null
+}
