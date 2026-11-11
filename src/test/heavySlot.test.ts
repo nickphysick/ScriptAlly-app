@@ -35,6 +35,7 @@ describe("the test slot", () => {
   it("npm run e2e goes through the guard", () => {
     const scripts = JSON.parse(read("package.json")).scripts as Record<string, string>;
     expect(scripts.e2e).toMatch(/^node scripts\/emu-guard\.mjs npx playwright test$/);
+    expect(scripts["hooks:install"]).toBe("node scripts/hooks/install.mjs");
   });
 
   it("every tracked .sh runner re-runs itself inside the slot on its second line", () => {

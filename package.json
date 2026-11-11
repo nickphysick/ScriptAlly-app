@@ -25,6 +25,7 @@
     "deploy:prod": "npm run build:prod && firebase deploy --only hosting --project prod && firebase deploy --only functions:smartImportMap --project prod",
     "e2e": "node scripts/emu-guard.mjs npx playwright test",
     "e2e:emu": "node scripts/emu.mjs e2e",
+    "hooks:install": "node scripts/hooks/install.mjs",
     "check:refs": "node scripts/check-design-refs.mjs"
   },
   "dependencies": {

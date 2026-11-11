@@ -102,8 +102,7 @@ export async function acquire({ cwd = process.cwd(), command = process.argv.join
   if (told) say(`got the test slot after ${Math.round((Date.now() - t0) / 1000)} s.`);
   process.env.HEAVY_SLOT_TOKEN = token;
   /* HEAVY_SLOT_SWEEP=dry lists what would go without killing it (proofs, self-tests); =off skips it. */
-  const mode = process.env.HEAVY_SLOT_SWEEP || "on";
-  if (mode !== "off") sweep({ dryRun: mode === "dry", quiet: false, reason: "on acquire" });
+  sweep({ quiet: false, reason: "on acquire" });
   let released = false;
   const release = () => {
     if (released) return; released = true;
@@ -155,6 +154,10 @@ export function leftovers() {
 
 /** Kill every leftover (or list them with dryRun). Only ever call it with the slot held or free. */
 export function sweep({ dryRun = false, quiet = false, reason = "" } = {}) {
+  /* HEAVY_SLOT_SWEEP=dry|off wins everywhere (acquire, the session hooks, the CLI): proofs never kill */
+  const mode = process.env.HEAVY_SLOT_SWEEP || "on";
+  if (mode === "off") return [];
+  if (mode === "dry") dryRun = true;
   const rows = leftovers();
   if (!rows.length) { if (!quiet) say(`sweep${reason ? ` (${reason})` : ""}: nothing left over.`); return rows; }
   for (const r of rows) say(`${dryRun ? "would kill" : "killing"} ${r.kind} pid ${r.pid}, age ${r.etime}, ${r.rssMb} MB${reason ? ` (${reason})` : ""}`);
