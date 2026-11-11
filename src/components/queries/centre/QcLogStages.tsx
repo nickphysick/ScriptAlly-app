@@ -716,7 +716,9 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         <div className="laq-nopts" data-qls="nudge-opts" role="radiogroup" aria-label="Want a reminder to nudge?">
           {opt("nudge", "Remind me to nudge", nd ? `On ${day(nd)}. It goes on your to-do list.` : rp.nWhen === "pick" ? "Pick the day below." : "", chipRow, false, null)}
           {opt("close", "Close it if there's no reply", ex ? `On ${day(addDays(ex, 1))}, marked as no reply.` : "Needs a response time first.", null, !ex, agent?.nrmn ? `${first}'s card says no reply means no` : null)}
-          {opt("none", "No reminder", "You can add one later from the query card.", null, false, null)}
+          {/* ⚠️ the brief's "You can add one later from the query card." is not true today: the card logs a nudge sent and
+             snoozes one that is due, but nothing there sets a new reminder (reported in v1.3's REPORT) */}
+          {opt("none", "No reminder", "Nothing goes on your to-do list.", null, false, null)}
         </div>
       </>
     );

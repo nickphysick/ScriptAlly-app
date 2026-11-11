@@ -19,7 +19,7 @@ import { stampRows, type QueryState } from "../queryState";
 import { doorOf } from "../agentList";
 import { MONTHS_SHORT } from "../dates";
 import { agentAgencyLine, agentInitials, agentPrimary } from "../agentDisplay";
-import { closeDateIso, logPayload, pieceVersions, type IfNo, type LogPlan, type PieceVersions } from "./logSave";
+import { logPayload, pieceVersions, type IfNo, type LogPlan, type PieceVersions } from "./logSave";
 import { addDays, reminderAnchors } from "./dates";
 import { guidelineAsk, packageMatches, type GuidelineAsk, type PackageCard } from "./packages";
 import { blankSample, sampleName, capFirst, type FromUnit, type Materials, type Sample } from "./sample";
@@ -395,9 +395,7 @@ export interface Preview { row: QcRow; packageName: string | null; agent: Agent;
 /** the unsaved query as the Query Centre will list it: the save's own record, through the list's own helpers */
 export function previewOf(plan: LogPlan, nowMs: number, quietWeeks: number): Preview {
   const { payload, summary } = logPayload(plan);
-  /* v1.3 — and the close date `saveLog` writes straight after, so the slip can say when it closes */
-  const close = plan.ifNo === "close" && plan.expect ? { responseDeadline: closeDateIso(plan.expect) } : {};
-  const q = { ...payload, ...close, status: QueryStatus.QUERIED, sentMaterials: summary } as unknown as Query;
+  const q = { ...payload, status: QueryStatus.QUERIED, sentMaterials: summary } as unknown as Query;
   const [row0] = buildQcRows([q], [plan.agent], [], nowMs);
   const [row] = stampRows([row0], [plan.agent], { quietWeeks, nowMs });
   const noWindow = !plan.expect;

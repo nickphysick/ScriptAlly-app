@@ -162,7 +162,9 @@ describe("v1.3 · what each choice saves (the old journey's fields, through the 
     await saveLog(f.db, planOf(answers("rb", replyDefaults(ROSALIND)), CTX, "q2", false)!);
     expect(f.added[0]).toMatchObject({ ifNoResponse: "Mark as no response automatically" });
     expect(f.added[0].nudgeDate).toBeUndefined();
-    expect(f.updated).toEqual([["q2", { responseDeadline: closeDateIso(new Date(2026, 11, 21)) }]]);
+    /* in the query's own write: an update straight after the add found no query and wrote nothing */
+    expect(f.added[0]).toMatchObject({ status: QueryStatus.QUERIED, responseDeadline: closeDateIso(new Date(2026, 11, 21)) });
+    expect(f.updated).toEqual([]);
     expect(new Date(closeDateIso(new Date(2026, 11, 21))).getDate()).toBe(22);
   });
   it("No reminder: neither", async () => {
