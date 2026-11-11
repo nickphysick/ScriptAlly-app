@@ -203,7 +203,16 @@ export interface MigrationQuery {
   responseDeadline?: string;
   /** present on real queries; read through the accessor above in production */
   writerExpectedDate?: string;
+  /** the query's "if they don't reply" answer, as stored */
+  ifNoResponse?: string;
 }
+
+/**
+ * ⚠️ Log a query v1.3 · A CLOSE DATE IS NOT AN EXPECTED DATE. "Close it if there's no reply" stores the day it closes in
+ * `responseDeadline`, because that is what the auto-close reads (db.tsx). This migration read every `responseDeadline`
+ * as a stale expected date and deleted it on every load, so the close never fired. A query set to close itself keeps it.
+ */
+export const AUTO_CLOSE_STORED = "Mark as no response automatically";
 
 export interface MigrationPlan {
   /** stored dates that are just the agency's window written down — they re-derive, so they go */
@@ -237,6 +246,7 @@ export function planExpectedDateMigration(
   const plan: MigrationPlan = { drop: [], adopt: [], unresolvable: [] };
   for (const q of queries) {
     if (!q.responseDeadline) continue;
+    if (q.ifNoResponse === AUTO_CLOSE_STORED) continue;
     if (q.writerExpectedDate) { plan.drop.push(q.id); continue; }
     const stored = ms(q.responseDeadline);
     if (Number.isNaN(stored)) { plan.drop.push(q.id); continue; }
