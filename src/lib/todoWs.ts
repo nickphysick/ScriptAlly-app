@@ -163,7 +163,7 @@ export function wsTasks(items: readonly TrayItem[], agents: readonly Agent[], sw
     const agency = (agent?.agency ?? "").trim();
     const dueYmd = kind === "own" ? i.userTask?.dueDate ?? null : i.dial.ymd;
     const dueDays = kind === "fix" || kind === "quiet" || !dueYmd ? null : daysBetweenYmd(today, dueYmd.slice(0, 10));
-    const quietDays = kind === "quiet" && Number.isFinite(i.anchorMs) ? Math.max(0, Math.round((nowMs - i.anchorMs) / DAY)) : null;
+    const quietDays = kind === "quiet" ? daysSinceAnchor(i, nowMs) : null;
     const title = titleOf(kind, i, first || "the agent", need);
     return {
       key, item: i, kind, group: GROUP_OF[i.group.id] ?? "house", title, first: first || "The agent", agentName, agency,
@@ -334,6 +334,20 @@ export function dayBit(t: WsTask): DayBit {
 /* ── To-do list v53 (D4) — the tray row's right-hand figure, and the breakdown bar ─────────────────── */
 
 export interface TrayFigure { n: string; words: string; late: boolean }
+
+/** whole days since a tray item's anchor, or null where the record gives no date (never a "0" counted from today) */
+function daysSinceAnchor(i: TrayItem, nowMs: number): number | null {
+  const at = i.waitMs !== undefined ? i.waitMs : (Number.isFinite(i.anchorMs) ? i.anchorMs : null);
+  return at == null || !Number.isFinite(at) ? null : Math.max(0, Math.round((nowMs - at) / DAY));
+}
+/**
+ * v55 (D7) — THE ONE DAYS-WAITING FIGURE: whole days since the event that started this wait (for a request, the day the
+ * agent asked). The tray row and the page header's legend both read it, so the two cannot disagree. null where the
+ * record cannot say; an own task has none.
+ */
+export function daysWaiting(t: WsTask, nowMs: number): number | null {
+  return t.kind === "own" ? null : daysSinceAnchor(t.item, nowMs);
+}
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day late", "days late"), late: true }
   : d === 0 ? { n: "Today", words: "", late: true } : { n: String(d), words: plural(d, "day left", "days left"), late: false };
@@ -343,7 +357,7 @@ const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plu
  * Housekeeping shows its Quick fill label instead (null here).
  */
 export function trayFigure(t: WsTask, nowMs: number): TrayFigure | null {
-  const waited = Number.isFinite(t.item.anchorMs) && t.kind !== "own" ? Math.max(0, Math.round((nowMs - t.item.anchorMs) / DAY)) : null;
+  const waited = daysWaiting(t, nowMs);
   const waiting = (): TrayFigure | null => (waited == null ? null : { n: String(waited), words: plural(waited, "day waiting", "days waiting"), late: false });
   switch (t.kind) {
     case "fix": case "batch": return null;

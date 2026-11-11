@@ -163,6 +163,10 @@ export interface TrayItem {
   dial: Dial;
   /** the clock's anchor (ms) — what "oldest" sorts on */
   anchorMs: number;
+  /** v55 (D7): the anchor when the RECORD gives one, else null. `anchorMs` falls back to now (or an own task's
+   *  creation) so the sorts have a number; a figure counted from that fallback read "0 days waiting". Every day count
+   *  reads this instead, through `daysWaiting` (lib/todoWs). Optional so a hand-built item reads as before. */
+  waitMs?: number | null;
   /** a search haystack: deed, agent, agency */
   hay: string;
   /** the due bucket for the Due filter */
@@ -245,6 +249,7 @@ export function trayItem(card: BoardCard, db: TrayDb, now: number): TrayItem {
     card, key: card.key, group: groupOf(card), kind: kindOf(card), bucket, deed, query, agent, userTask, sub,
     initials: own ? null : initialsOf(name || agency || (isSweepCard(card) ? `${card.sweepOf} ` : card.title)),
     who, whoSub, dial, anchorMs: Number.isFinite(anchorMs) ? anchorMs : (userTask?.createdAt ? Date.parse(userTask.createdAt) : now),
+    waitMs: Number.isFinite(anchorMs) ? anchorMs : null,
     hay: `${deed} ${name} ${agency} ${card.title}`.toLowerCase(), due: dueKey, sweep: isSweepCard(card),
   };
 }

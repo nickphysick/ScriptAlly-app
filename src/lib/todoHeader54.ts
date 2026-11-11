@@ -12,9 +12,8 @@
  *    differ, so the arcs are drawn here over the To-do's own four keys.
  */
 import { RING_GEO } from "./qc1531";
-import type { Breakdown, WsSection } from "./todoWs";
+import { daysWaiting, type Breakdown, type WsSection } from "./todoWs";
 
-const DAY = 86400000;
 export type NeedKey = "wait" | "nudge" | "quiet" | "house";
 
 /** the tray's group colours (todoWs.css: --tw-rose, --tw-sand, --tw-stone; housekeeping's pale blue) */
@@ -28,7 +27,8 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 /** the legend's four rows, in the tray's order */
 export function needRows(sections: readonly WsSection[], bd: Breakdown, nowMs: number): NeedRow[] {
   const tasks = (id: string) => sections.find((s) => s.id === id)?.tasks ?? [];
-  const waited = tasks("wait").map((t) => (Number.isFinite(t.item.anchorMs) ? Math.max(0, Math.round((nowMs - t.item.anchorMs) / DAY)) : 0));
+  /* v55 (D7): the same figure the rows show (`daysWaiting`); a row with no date on record adds none */
+  const waited = tasks("wait").map((t) => daysWaiting(t, nowMs)).filter((d): d is number => d != null);
   const longest = waited.length ? Math.max(...waited) : 0;
   const lateBy = tasks("nudge").filter((t) => t.dueDays != null && t.dueDays < 0).map((t) => -(t.dueDays as number));
   const latest = lateBy.length ? Math.max(...lateBy) : 0;
