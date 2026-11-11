@@ -130,8 +130,8 @@ import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { QcRail153 } from "./queries/centre/QcRail153";
-import { QcStageRing1531 } from "./queries/centre/QcStageRing1531";
-import { ringCounts } from "../lib/qc1531";
+import { QcGoal154 } from "./queries/centre/QcGoal154";
+import { weekGoal154 } from "../lib/qc154goal";
 import { railCounts } from "../lib/qc153Rail";
 import { slipTone } from "../lib/qc153";
 import { nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
@@ -8077,7 +8077,9 @@ export const Queries: React.FC<{
                 <QcPage151
                   loading={showGridSkeleton}
                   counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
-                  ring={<QcStageRing1531 counts={showGridSkeleton ? null : ringCounts(qcScoped.map((r) => r.status))} filters={qcF138} onFilters={setQcF138} />}
+                  /* v154 — the weekly goal chart replaces the stage ring: the writer's own sends (every manuscript, as the
+                     Streaks & goals card counts them) against their weekly target; filtering by stage is the rail's */
+                  ring={<QcGoal154 m={showGridSkeleton ? null : weekGoal154(queries.map((q) => anyToMs(q.dateSent)), currentUser?.queryingGoals, now151)} />}
                   view={qcView150} onView={pickView150}
                   onLog={() => onNavigate?.("queries", "Log a query")}
                   onRecord={() => onNavigate?.("queries", "Record a response")}
