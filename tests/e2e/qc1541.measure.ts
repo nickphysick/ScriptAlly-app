@@ -109,7 +109,7 @@ for (const vp of SIZES) {
     /* N1 · the warm page */
     L.check("N1 the ground is #f6f3ee", r.page.bg === "rgb(246, 243, 238)", r.page.bg);
     L.check("N1 the doodle wash is rgba(246,243,238,.45)", r.page.img.includes("rgba(246, 243, 238, 0.45)") && r.page.img.includes("doodle"), r.page.img);
-    L.check("N1 the strip's fade is the warm paper", r.fade === "linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0) 100%)", r.fade);
+    L.check("N1 the strip's fade is the warm paper", /* the browser serialises "to bottom" and the last stop's 100% away */ r.fade === "linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0))", r.fade);
     L.check("N1 nothing on the ground is cool", r.cool.length === 0, JSON.stringify(r.cool));
 
     /* N2 · quiet Queried bands, quiet seals */
