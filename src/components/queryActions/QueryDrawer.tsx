@@ -41,6 +41,7 @@ import { SIDE_SLOT } from "../shell/SidePanel";
 import { ParkedChip } from "./ParkedChip";
 import type { JourneyView } from "./journey";
 import { LogJourney } from "./journeys/LogJourney";
+import { LogStagesPanel } from "../queries/centre/LogStagesPanel";
 import { ResponseJourney } from "./journeys/ResponseJourney";
 import { SentJourney } from "./journeys/SentJourney";
 import { NudgeJourney } from "./journeys/NudgeJourney";
@@ -321,6 +322,17 @@ export function QueryDrawer() {
   if (isPracticeId(active.queryId) && active.mode !== "resp") return chip;
   const J = JOURNEYS[active.mode];
   if (!J) return chip;
+  /* Log a query v1.2 — ONE JOURNEY EVERYWHERE: on a desktop, "log" is the staged journey in the side panel over a dimmed
+     page (LogStagesPanel), whichever door asked. The phone keeps LogJourney below for now. Only an open request is
+     handed over: the staged journey is never parked. */
+  if (active.mode === "log" && !phone) {
+    return (
+      <>
+        {req ? <LogStagesPanel key={req.instance ?? 0} req={req} onClose={() => { const r = currentDrawerRequest(); closeQueryDrawer(); r?.onCancel?.(); }} /> : null}
+        {chip}
+      </>
+    );
+  }
   /* PHONE APP v2, PART 4 — on a phone the same journey walks in the flow layout (PhoneFlowShell), never in the panel */
   const flowPhone = phone && !(!!active?.panel && !!slot && slot.isConnected);
   const liveFor = (view: { live?: { name: string; agency: string; book: string | null } | null }): LiveFacts => {

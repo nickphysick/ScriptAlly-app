@@ -17,11 +17,16 @@ import { SubmissionMethod } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import {
-  HOW, MILESTONE, PREVIEW_ID, monthLong, STAGES, celebrationLine, STAGE_LABEL, STAGE_LINE, askWords, batchCheckLine, batchWhoLine, checkLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk, piecesMatchAsk,
-  planOf, previewOf, sameDay, sizeName, sizesFor, sod, titleName, weekdayDay, whoGroups, yesterday, type Preview,
+  HOW, MILESTONE, PREVIEW_ID, monthLong, STAGES, celebrationLine, STAGE_LABEL, flowLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk,
+  planOf, previewOf, sameDay, sizeName, sod, askCard, choiceOfSample, sampleOfChoice, type AskCard, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
 import { QcSlip153 } from "./QcSlip153";
+import { SampleControl, Seg } from "../../queryActions/controls";
+import type { Book, Materials } from "../../../lib/queryActions/sample";
+import type { LogAgain } from "../../../lib/queryActions/drawerStore";
+/* the sample control's rules and its --qad-* tokens (declared for `.laq` there too) */
+import "../../queryActions/queryDrawer.css";
 import { IlloSlot } from "../IlloSlot";
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
@@ -72,10 +77,19 @@ export interface QcLogStagesProps {
   count: number;
   quietWeeks: number;
   ctx: PlanContext;
+  /** the book's sizes, for the sample control's ceilings and presets */
+  book: Book;
   onClose: () => void;
   /** "+ Add {Name} as a new agent": opens Adding new agent; `done` is handed the new agent's id */
   onAddAgent: (name: string, done: (id: string) => void) => void;
   onSave: (a: LogAnswers) => Promise<Logged | null>;
+  /** v1.2 — a door that names a package (a package's builder): it is preselected on the Materials stage, still unanswered,
+   *  so the ask card shows over it */
+  seedPackageId?: string | null;
+  /** v1.2 — "Log another" from the old drawer's receipt: the date and the materials carry over, as "Log and start another" */
+  again?: LogAgain | null;
+  /** v1.2 — the host's press on the dimmed page: set to the journey's leave check (ask with answers, close without) */
+  leaveRef?: React.MutableRefObject<(() => void) | null>;
 }
 
 export interface FlowState {
@@ -100,13 +114,15 @@ export interface FlowState {
   noteOpen: boolean;
   /** the first name of the agent just logged with "Log and start another" */
   carried: string | null;
+  /** v1.2 — the package a door named: shown chosen on the Materials stage until the writer answers it */
+  pkgSeed: string | null;
 }
 
 export const freshState = (nowMs: number): FlowState => ({
   step: "who", dir: "", find: "", hi: 0, showBusy: false, agentId: null, sent: null, earlier: false,
   calY: new Date(nowMs).getFullYear(), calM: new Date(nowMs).getMonth(),
   custom: false, packageId: null, pieces: { letterId: null, synopsisId: null, sample: null }, piecesSet: false, piecesTouched: false,
-  via: null, note: "", noteOpen: false, carried: null,
+  via: null, note: "", noteOpen: false, carried: null, pkgSeed: null,
 });
 
 export const answered = (s: FlowState, k: StageKey): boolean =>
@@ -121,7 +137,6 @@ export function nextStage(s: FlowState, from: StageKey): StageKey {
 export const NO_LETTER = "__letter";
 export const NO_SYN = "__synopsis";
 const NO_PIECES: Pieces = { letterId: null, synopsisId: null, sample: null };
-const NO_ASK = { ql: true, syn: true, sample: { unit: "none" as const, amt: 0, from: 1, sect: false, fu: null }, stated: false };
 
 /* ── the shared parts ─────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -164,6 +179,42 @@ export const BigRow: React.FC<{
     {arrow ? <span className="laq-ar" aria-hidden="true">{ICON.arrow}</span> : null}
   </button>
 );
+
+/* v1.2 — WHAT {FIRST} ASKS FOR: the agent card's asks at the top of the Materials stage, checked against what is
+   ticked (lib/queryActions/logStages `askCard`). It reads the card and never writes it. */
+const MARK: Record<string, string> = { ok: "✓", diff: "≠", no: "", dot: "" };
+const MARK_WORDS: Record<string, string> = { ok: "sending it", diff: "sending something different", no: "not ticked", dot: "" };
+export const AskCardView: React.FC<{ card: AskCard; first: string; onUse: () => void }> = ({ card, first, onUse }) => {
+  if (card.kind === "nil") return (
+    <div className="laq-asks is-nil" data-qls="asks" data-kind="nil"><p>Nothing on {first}'s card about what they ask for, so tick what went.</p></div>
+  );
+  return (
+    <div className={`laq-asks${card.kind === "pkg" ? " is-pkg" : ""}`} data-qls="asks" data-kind={card.kind}>
+      <div className="laq-ah"><b>What {first} asks for</b><span>From {first}'s card</span></div>
+      <ul>
+        {card.items.map((it) => (
+          <li key={it.key} className={`is-${it.mark}`} data-qls="ask" data-k={it.key} data-mark={it.mark}
+            aria-label={it.mark === "dot" ? it.label : `${it.label}: ${MARK_WORDS[it.mark]}`}>
+            <span className="laq-mk" aria-hidden="true">{MARK[it.mark]}</span><b aria-hidden="true">{it.label}</b>
+          </li>
+        ))}
+      </ul>
+      {card.kind === "pkg" ? (
+        card.fit
+          ? <p className="laq-af" data-qls="ask-foot" data-k="fit">Your <b>{card.fit}</b> package matches it.</p>
+          : <p className="laq-af" data-qls="ask-foot" data-k="none">None of your packages matches it. <button type="button" className="laq-btn is-xs" data-qls="use-ask" onClick={onUse}>Send what {first} asks for</button></p>
+      ) : card.ok ? (
+        <p className="laq-af is-ok" data-qls="ask-foot" data-k="ok">✓ That's what you're sending.</p>
+      ) : (
+        <p className="laq-af" data-qls="ask-foot" data-k="differs" aria-live="polite">
+          {card.whys.map((w) => <span key={w} className="laq-why" data-qls="ask-why">{w}</span>)}
+          {card.extra ? <span className="laq-xtra" data-qls="ask-extra">{card.extra}</span> : null}
+          <button type="button" className="laq-btn is-xs" data-qls="use-ask" onClick={onUse}>Use what {first} asks for</button>
+        </p>
+      )}
+    </div>
+  );
+};
 
 /* ── the celebration ──────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -232,7 +283,9 @@ const Odometer: React.FC<{ n: number }> = ({ n }) => {
 export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   const { nowMs, agents } = p;
   const [s, setS] = useState<FlowState>(() => freshState(nowMs));
-  const set = (patch: Partial<FlowState>) => setS((o) => ({ ...o, ...patch }));
+  /* v1.2 — anything the writer does marks the journey as answered (a door's seeds do not), for the dimmed page's leave check */
+  const touched = useRef(false);
+  const set = (patch: Partial<FlowState>) => { touched.current = true; setS((o) => ({ ...o, ...patch })); };
   /* the flow, then the celebration once a query is logged with "Log query" */
   const [phase, setPhase] = useState<"flow" | "yay">("flow");
   const [logged, setLogged] = useState<LoggedView | null>(null);
@@ -242,15 +295,37 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
 
   const go = (step: StageKey, dir?: "in" | "back") => setS((o) => ({ ...o, step, hi: 0, dir: dir ?? (STAGES.indexOf(step) > STAGES.indexOf(o.step) ? "in" : "back") }));
   /** answer the current stage and move on, skipping anything already answered */
-  const answer = (patch: Partial<FlowState>) => setS((o) => {
+  const answer = (patch: Partial<FlowState>) => { touched.current = true; advance(patch); };
+  const advance = (patch: Partial<FlowState>) => setS((o) => {
     const n = { ...o, ...patch };
     return { ...n, step: nextStage(n, o.step), hi: 0, dir: "in" };
   });
 
-  /* a seeded agent (the Contact list's "+ Log a query") is the first answer */
+  /* a door's seeds, none of which counts as the writer's answer: the agent (an agent's card, the Contact list) is the
+     first answer; v1.2 — a package a door named is shown chosen on Materials; "Log another" carries the date and the
+     materials over (the package if it was one, else the pieces), as "Log and start another" does */
   useEffect(() => {
+    const patch: Partial<FlowState> = {};
+    if (p.seedPackageId && p.packages.some((x) => x.id === p.seedPackageId)) patch.pkgSeed = p.seedPackageId;
+    const ag = p.again;
+    if (ag) {
+      patch.sent = sod(new Date(ag.sent).getTime());
+      const pk = ag.how !== "individual" ? p.packages.find((x) => x.id === ag.pkg) : undefined;
+      const m = ag.mat as Materials | undefined;
+      if (pk) Object.assign(patch, { packageId: pk.id, piecesSet: true, custom: false, pieces: { letterId: pk.card.qlId, synopsisId: pk.card.synId, sample: null } });
+      else if (m && (m.ql || m.syn || (m.s && m.s.unit !== "none"))) {
+        const book = p.bookVersions.find((b) => b.current)?.id ?? p.bookVersions[0]?.id ?? null;
+        Object.assign(patch, {
+          custom: p.packages.length > 0, piecesSet: true, piecesTouched: true, packageId: null,
+          pieces: { letterId: m.ql ? p.letters[0]?.id ?? NO_LETTER : null, synopsisId: m.syn ? p.synopses[0]?.id ?? NO_SYN : null, sample: m.s ? choiceOfSample(m.s, book) : null },
+        });
+      }
+    }
     const a = p.seedAgentId ? agents.find((x) => x.id === p.seedAgentId && !x.querying) : null;
-    if (a) answer({ agentId: a.id });
+    if (a) patch.agentId = a.id;
+    /* ⚠️ PLACED, NOT ADVANCED: the step is worked out from the first stage, never from the one on screen, so running the
+       seed twice (React's StrictMode does, in development) lands in the same place — v1.1's seed advanced twice there */
+    if (Object.keys(patch).length) setS((o) => { const n = { ...o, ...patch }; return { ...n, step: n.agentId ? nextStage(n, "who") : "who", hi: 0, dir: "in" }; });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const choose = (id: string) => {
@@ -362,7 +437,6 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   /* ── the Materials stage ── */
   const dflt = { letter: p.letters[0]?.id ?? null, synopsis: p.synopses[0]?.id ?? null, book: p.bookVersions.find((b) => b.current)?.id ?? p.bookVersions[0]?.id ?? null };
   const ask = agent?.ask ?? null;
-  const aw = ask ? askWords(ask) : null;
   const hasPkgs = p.packages.length > 0;
   const showPkgs = hasPkgs && !s.custom;
   const usePackage = (pk: StagePackage) => {
@@ -380,10 +454,12 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     }
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [pop, setPop] = useState<{ k: "letter" | "syn" | "sample"; top: number; left: number } | null>(null);
+  const [pop, setPop] = useState<{ k: "letter" | "syn"; top: number; left: number } | null>(null);
+  /* v1.2 — the opening pages open into the sample control, inline under their row */
+  const [sampOpen, setSampOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
-  const openPop = (k: "letter" | "syn" | "sample", el: HTMLElement) => {
+  const openPop = (k: "letter" | "syn", el: HTMLElement) => {
     if (pop?.k === k) { setPop(null); return; }
     const r = el.getBoundingClientRect(), c = rootRef.current!.getBoundingClientRect();
     setPop({ k, top: r.bottom - c.top + 6, left: r.right - c.left });
@@ -416,32 +492,36 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   useEffect(() => setPop(null), [s.step]);
 
   const pc = s.pieces;
-  const sizes = sizesFor(ask ?? NO_ASK);
   const sampleNow: SampleChoice = pc.sample ?? { unit: ask && ask.sample.unit !== "none" ? ask.sample.unit : "chapters", amt: ask && ask.sample.unit !== "none" ? ask.sample.amt : 3, bookVersionId: dflt.book };
-  const bookName = (id: string | null) => p.bookVersions.find((b) => b.id === id)?.name ?? null;
+  /* the pill names the version by its number ("V2"), as the packages page does; the Version row below gives the names */
+  const bookName = (id: string | null) => { const b = p.bookVersions.find((x) => x.id === id); return b ? b.short ?? b.name : null; };
   const setPieces = (patch: Partial<Pieces>) => set({ pieces: { ...pc, ...patch } });
   const tog = (k: "letter" | "syn" | "sample") => {
     if (k === "letter") setPieces({ letterId: pc.letterId ? null : dflt.letter ?? NO_LETTER });
     else if (k === "syn") setPieces({ synopsisId: pc.synopsisId ? null : dflt.synopsis ?? NO_SYN });
-    else setPieces({ sample: pc.sample ? null : sampleNow });
+    else {
+      setPieces({ sample: pc.sample ? null : sampleNow });
+      /* closed while the card states what they ask for (the ask already set it); open the moment it is ticked when it says nothing */
+      setSampOpen(!pc.sample && !ask?.stated);
+    }
   };
   const letterName = (id: string | null) => p.letters.find((l) => l.id === id)?.name ?? "Query letter";
   const synName = (id: string | null) => p.synopses.find((l) => l.id === id)?.name ?? "Synopsis";
   const pieceCount = [!!pc.letterId, !!pc.synopsisId, !!pc.sample].filter(Boolean).length;
   const anyPiece = pieceCount > 0;
-  const fitsAsk = ask ? piecesMatchAsk(ask, pc) : false;
+  const useAsk = (from: Pieces) => { if (ask) setPieces(piecesFromAsk(ask, from, dflt)); };
 
   const whatBody = () => {
-    const sub = aw ? `${first}'s card asks for ${aw}.` : `Nothing on ${first}'s card about what they ask for.`;
     if (showPkgs) {
       const fitOne = ask ? p.packages.find((x) => packageFits(x, ask))?.id ?? null : null;
       return (
         <>
           <h2 className="laq-qh">What did you send {first}?</h2>
-          <p className="laq-qs" data-qls="asks">{sub}</p>
+          <AskCardView card={askCard(ask, "pkg", pc, p.packages, first)} first={first}
+            onUse={() => { if (ask) set({ custom: true, piecesTouched: true, pieces: piecesFromAsk(ask, NO_PIECES, dflt) }); }} />
           <div className="laq-big" data-qls="packages">
             {p.packages.map((x) => (
-              <BigRow key={x.id} glyph={ICON.pkg} glyphClass="is-pkg" title={x.name} sub={x.pieces.join(" · ")} on={s.piecesSet && s.packageId === x.id}
+              <BigRow key={x.id} glyph={ICON.pkg} glyphClass="is-pkg" title={x.name} sub={x.pieces.join(" · ")} on={(s.piecesSet ? s.packageId : s.pkgSeed) === x.id}
                 tag={x.id === fitOne ? `✓ What ${first} asks for` : x.active ? "Active" : null} tagClass={x.id === fitOne ? "is-y" : undefined}
                 data={{ "data-qls": "package", "data-id": x.id }} onClick={() => usePackage(x)} />
             ))}
@@ -450,26 +530,46 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         </>
       );
     }
+    const open = sampOpen && !!pc.sample;
     const row = (k: "letter" | "syn" | "sample", label: string, on: boolean, val: string) => (
-      <div className={`laq-pc${on ? " is-on" : ""}`} data-qls="piece" data-k={k} data-on={on ? "1" : "0"} role="checkbox" aria-checked={on} tabIndex={0}
+      <div className={`laq-pc${on ? " is-on" : ""}${k === "sample" && open ? " is-open" : ""}`} data-qls="piece" data-k={k} data-on={on ? "1" : "0"} role="checkbox" aria-checked={on} tabIndex={0}
         onClick={() => tog(k)} onKeyDown={(e) => { if ((e.key === " " || e.key === "Enter") && e.target === e.currentTarget) { e.preventDefault(); tog(k); } }}>
         <span className="laq-bx" aria-hidden="true">{on ? "✓" : ""}</span>
         <span className="laq-tx"><b>{label}</b></span>
-        <button type="button" className="laq-vr" data-qls="vr" data-k={k} aria-haspopup="menu" aria-expanded={pop?.k === k}
-          onClick={(e) => { e.stopPropagation(); openPop(k, e.currentTarget); }}>{val}{ICON.chev}</button>
+        {k === "sample" ? (
+          <button type="button" className="laq-vr" data-qls="vr" data-k={k} aria-expanded={open} aria-controls="laq-sample-control" aria-label={`${val}. ${open ? "Close" : "Open"} the sample`}
+            onClick={(e) => { e.stopPropagation(); setSampOpen(!open); }}>{val}{ICON.chev}</button>
+        ) : (
+          <button type="button" className="laq-vr" data-qls="vr" data-k={k} aria-haspopup="menu" aria-expanded={pop?.k === k}
+            onClick={(e) => { e.stopPropagation(); openPop(k, e.currentTarget); }}>{val}{ICON.chev}</button>
+        )}
       </div>
     );
     const bv = bookName(sampleNow.bookVersionId);
     return (
       <>
         <h2 className="laq-qh">What did you send {first}?</h2>
-        <p className="laq-qs" data-qls="asks">{sub}</p>
+        <AskCardView card={askCard(ask, "pcs", pc, p.packages, first)} first={first} onUse={() => useAsk(pc)} />
         <div className="laq-pcs" data-qls="pieces">
           {row("letter", "Query letter", !!pc.letterId, letterName(pc.letterId ?? dflt.letter))}
           {row("syn", "Synopsis", !!pc.synopsisId, synName(pc.synopsisId ?? dflt.synopsis))}
-          {row("sample", "Opening pages", !!pc.sample, `${sizeName(sampleNow)}${bv ? ` · ${bv}` : ""}`)}
+          <div className={`laq-pcw${open ? " is-open" : ""}`} data-qls="sample-block">
+            {row("sample", "Opening pages", !!pc.sample, `${sizeName(sampleNow)}${bv ? ` · ${bv}` : ""}`)}
+            {open ? (
+              /* THE APP'S OWN SAMPLE CONTROL (queryActions/controls), unchanged; `.laq-qsamp` only takes off its frame */
+              <div className="laq-qsamp" id="laq-sample-control" data-qls="sample-control">
+                <SampleControl name="laq" sample={sampleOfChoice(sampleNow)} book={p.book}
+                  onChange={(x) => setPieces({ sample: choiceOfSample(x, sampleNow.bookVersionId) })} />
+                {p.bookVersions.length ? (
+                  <div className="laq-vrow" data-qls="version"><span>Version</span>
+                    <Seg value={sampleNow.bookVersionId ?? ""} onPick={(id) => setPieces({ sample: { ...sampleNow, bookVersionId: id } })}
+                      options={p.bookVersions.map((b) => [b.id, b.current ? <>{b.name} <small>current</small></> : b.name] as [string, React.ReactNode])} />
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         </div>
-        {ask?.stated ? <p className="laq-ask" data-qls="ask-line">{fitsAsk ? `✓ That's what ${first} asks for.` : <button type="button" className="laq-lk" data-qls="use-ask" onClick={() => setPieces(piecesFromAsk(ask, pc, dflt))}>Use what {first} asks for</button>}</p> : null}
         {hasPkgs ? <p className="laq-ask"><button type="button" className="laq-lk" data-qls="back-packages" onClick={() => set({ custom: false })}>Back to your packages</button></p> : null}
       </>
     );
@@ -483,14 +583,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     );
     let inner: React.ReactNode;
     if (pop.k === "letter") inner = <><div className="laq-ph">Which letter?</div>{(p.letters.length ? p.letters : [{ id: NO_LETTER, name: "Query letter" }]).map((l) => item(l.id, (pc.letterId ?? dflt.letter ?? NO_LETTER) === l.id, l.name, () => setPieces({ letterId: l.id })))}</>;
-    else if (pop.k === "syn") inner = <><div className="laq-ph">Which synopsis?</div>{(p.synopses.length ? p.synopses : [{ id: NO_SYN, name: "Synopsis" }]).map((l) => item(l.id, (pc.synopsisId ?? dflt.synopsis ?? NO_SYN) === l.id, l.name, () => setPieces({ synopsisId: l.id })))}</>;
-    else inner = (
-      <>
-        <div className="laq-ph">How much?</div>
-        {sizes.map((z) => item(`${z.unit}${z.amt}`, sampleNow.unit === z.unit && sampleNow.amt === z.amt, sizeName(z), () => setPieces({ sample: { ...sampleNow, unit: z.unit, amt: z.amt } })))}
-        {p.bookVersions.length ? <><hr /><div className="laq-ph">From</div>{p.bookVersions.map((b) => item(b.id, sampleNow.bookVersionId === b.id, b.name, () => setPieces({ sample: { ...sampleNow, bookVersionId: b.id } }), b.current ? "current" : undefined))}</> : null}
-      </>
-    );
+    else inner = <><div className="laq-ph">Which synopsis?</div>{(p.synopses.length ? p.synopses : [{ id: NO_SYN, name: "Synopsis" }]).map((l) => item(l.id, (pc.synopsisId ?? dflt.synopsis ?? NO_SYN) === l.id, l.name, () => setPieces({ synopsisId: l.id })))}</>;
     return <div ref={popRef} className="laq-pop" role="menu" data-qls="menu" data-k={pop.k} style={{ top: pop.top, left: 8 }}>{inner}</div>;
   };
 
@@ -555,9 +648,6 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   /* ── logging ── */
   const reduce = useReducedMotion();
   const [busy, setBusy] = useState(false);
-  /* the book's count when "Log" was pressed: the live count moves the moment the save lands, and the check's own line
-     ("Your {n}th query…") must not change under the stamp */
-  const [countAt, setCountAt] = useState<number | null>(null);
   const [stamp, setStamp] = useState(false);
   const [bump, setBump] = useState(false);
   const [toast, setToast] = useState<{ text: string; undo: () => void } | null>(null);
@@ -578,22 +668,20 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     const a = answers();
     if (!a || busy) return;
     setBusy(true);
-    setCountAt(p.count);
     const n = p.count + 1;
     const before = s;
     const done = await p.onSave(a);
     setBusy(false);
-    if (!done) { setCountAt(null); return; }
+    if (!done) return;
     const lastFirst = agent?.first ?? "The agent";
     if (more) {
       stampThen(() => {
         /* the date and materials carry over; how comes from the next agent's card */
         setS((o) => ({ ...o, step: "who", dir: "in", agentId: null, via: null, find: "", note: "", noteOpen: false, hi: 0, showBusy: false, carried: lastFirst }));
         showToast(`${lastFirst} logged`, async () => { setToast(null); await done.undo(); setS({ ...before, step: "check", dir: "back" }); });
-        setCountAt(null);
       });
     } else {
-      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: agent?.weeks ?? null, before }); setPhase("yay"); setCountAt(null); });
+      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: agent?.weeks ?? null, before }); setPhase("yay"); });
     }
   };
   /* ⌘↵ / Ctrl↵ logs from the check */
@@ -646,13 +734,26 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     check: null,
   };
 
-  const line = s.step === "who" ? (s.carried ? batchWhoLine(s.carried) : FLOW_WORDS.log.line)
-    : s.step === "check" ? (s.carried ? batchCheckLine(s.carried) : checkLine((countAt ?? p.count) + 1, p.bookTitle)) : STAGE_LINE[s.step];
+  /* v1.2 — one line for the whole journey; a step changed from the check (every stage answered, back on one) says so */
+  const line = flowLine({ carried: s.carried, changing: s.step !== "check" && STAGES.slice(0, 4).every((k) => answered(s, k)) });
   const backFoot = (hint: string | null) => (
     <>
       <button type="button" className="laq-lnk" data-qls={s.step === "who" ? "cancel" : "back"} onClick={() => (s.step === "who" ? p.onClose() : go(STAGES[Math.max(0, STAGES.indexOf(s.step) - 1)], "back"))}>{s.step === "who" ? "Cancel" : "Back"}</button>
       <span className="laq-sp" />
       {hint ? <span className="laq-hint">{hint}</span> : null}
+    </>
+  );
+
+  /* v1.2 — THE DIMMED PAGE'S LEAVE CHECK, the action drawers' own: with answers it asks, without it closes. The host's
+     scrim calls it through `leaveRef`; Escape is unchanged (the host closes). */
+  const [leaveAsk, setLeaveAsk] = useState(false);
+  if (p.leaveRef) p.leaveRef.current = () => { if (phase === "flow" && touched.current) setLeaveAsk(true); else p.onClose(); };
+  const leaveFoot = (
+    <>
+      <span className="laq-lv" role="alertdialog" aria-label="Discard this query?"><b>Discard this?</b> Nothing has been saved yet.</span>
+      <span className="laq-sp" />
+      <button type="button" className="laq-lnk" data-qls="leave-keep" onClick={() => setLeaveAsk(false)}>Keep going</button>
+      <button type="button" className="laq-btn" data-qls="leave-discard" onClick={p.onClose}>Discard</button>
     </>
   );
 
@@ -713,7 +814,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         <FlowHead title={FLOW_WORDS.log.title} line={line} onClose={p.onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
         <Stepper s={s} values={values} onGo={(k) => go(k)} />
         <div ref={sbRef} key={s.step} className={`laq-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
-        <div className="laq-cf" data-qls="foot">{foot}</div>
+        <div className={`laq-cf${leaveAsk ? " is-leave" : ""}`} data-qls="foot">{leaveAsk ? leaveFoot : foot}</div>
         <div className={`laq-toast${toast ? " is-on" : ""}`} data-qls="toast" role="status" aria-live="polite">
           {toast ? <>{toast.text}<button type="button" data-qls="toast-undo" onClick={toast.undo}>Undo</button></> : null}
         </div>

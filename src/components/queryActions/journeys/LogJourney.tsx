@@ -2,6 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
+ * ⚠️ PHONE ONLY SINCE LOG A QUERY v1.2. On a desktop every "log" request is handed to the staged journey
+ *    (queries/centre/LogStagesPanel) by QueryDrawer; this journey is what the phone's flow still walks, until the phone
+ *    has a design of its own. Do not delete it while the phone uses it.
+ *
  * D1 · LOG A QUERY (design-refs/query-actions-v11.html §3.10).
  * Agent and book → Sending → What you sent → Response expectations → If they don't reply → Check and log.
  *

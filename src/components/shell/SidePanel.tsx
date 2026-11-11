@@ -21,6 +21,12 @@ import "./sidePanel.css";
 
 export const SIDE_SLOT = "[data-side-slot]";
 
+/* ⚠️ THE DIM IS COUNTED, NOT TOGGLED (Log a query v1.2). Two panels can be mounted at once (the staged log journey opens
+   over an agent's or a query's panel), and a toggle let the one closing underneath take `spanel-dim` off the body while
+   the other was still dimming: the shell's bar then rose above the scrim (queryPanelHost.css). */
+let dims = 0;
+const syncDim = () => { document.body.classList.toggle("spanel-dim", dims > 0); };
+
 export const SidePanel: React.FC<{
   label: string;
   children: React.ReactNode;
@@ -36,7 +42,9 @@ export const SidePanel: React.FC<{
    * back, or leaves the action under its own park-or-cancel rule, and never discards an answer.
    */
   dim?: boolean;
-}> = ({ label, children, step = false, attrs, className, style, dim = false }) => {
+  /** what a press on the dimmed page does; by default it is the Escape key */
+  onScrim?: () => void;
+}> = ({ label, children, step = false, attrs, className, style, dim = false, onScrim }) => {
   const ref = useRef<HTMLElement>(null);
   /* the Birds-eye tab and anything else that stands down while a panel is open read this */
   useEffect(() => {
@@ -45,14 +53,15 @@ export const SidePanel: React.FC<{
   }, []);
   /* …and whether the page is dimmed behind it: the shell's bar rises over the panel only while it is not */
   useEffect(() => {
-    document.body.classList.toggle("spanel-dim", dim);
-    return () => { document.body.classList.remove("spanel-dim"); };
+    if (!dim) return undefined;
+    dims++; syncDim();
+    return () => { dims--; syncDim(); };
   }, [dim]);
   return createPortal(
     <>
     {/* always mounted while the panel is, so it can fade both ways; inert and clear until an action runs */}
     <div className="spanel-scrim" data-side-scrim="" data-on={dim ? "true" : undefined} aria-hidden="true"
-      onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }))} />
+      onClick={() => (onScrim ? onScrim() : window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })))} />
     <aside ref={ref} className={`spanel${className ? ` ${className}` : ""}`} role="dialog" aria-label={label} style={style} data-side-panel="" data-step={step ? "true" : undefined} data-dim={dim ? "true" : undefined} {...attrs}>
       <div className="spanel-own" data-side-own="" hidden={step || undefined}>{children}</div>
       <div className="spanel-slot" data-side-slot="" />

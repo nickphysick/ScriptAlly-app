@@ -27,7 +27,11 @@ export const QueryPanelHost: React.FC<{
   step: boolean;
   onClose: () => void;
   children: React.ReactNode;
-}> = ({ id, from, step, onClose, children }) => {
+  /** Log a query v1.2 — the staged journey dims the page though it is not a step; defaults to `step` */
+  dim?: boolean;
+  /** what a press on the dimmed page does (SidePanel's default is the Escape key) */
+  onScrim?: () => void;
+}> = ({ id, from, step, onClose, children, dim, onScrim }) => {
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
   const idRef = useRef(id);
@@ -84,7 +88,7 @@ export const QueryPanelHost: React.FC<{
   }, []);
 
   return (
-    <SidePanel label="Query" step={step} dim={step} className="qsp" style={top != null ? ({ "--qsp-top": `${top}px` } as React.CSSProperties) : undefined} attrs={{ "data-qp": "panel", "data-qp-id": id, "data-qp-from": from }}>
+    <SidePanel label="Query" step={step} dim={dim ?? step} onScrim={onScrim} className="qsp" style={top != null ? ({ "--qsp-top": `${top}px` } as React.CSSProperties) : undefined} attrs={{ "data-qp": "panel", "data-qp-id": id, "data-qp-from": from }}>
       {children}
     </SidePanel>
   );

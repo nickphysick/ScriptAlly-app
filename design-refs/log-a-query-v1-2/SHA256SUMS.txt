@@ -1,0 +1,9 @@
+297906f48e1418dd8dfe3ed37516e24b6543afd42ee39abc9226510d6f524d6b  log-a-query-v1-2.html
+618b8c39582a2230f626f91d45706e2a59e23a9aad66048f556d5d2212055843  screens/01-asks-over-packages.png
+d5682a24af51be1d977c1fa4533c4f08713b5498b1cb56eda8bfc98ec1b91a51  screens/02-asks-differs-sample-open.png
+42ede9760294d0e6a718783fd10e21eeb9ee9e6a92f527aaef6fad95bfc5fffc  screens/03-asks-matches.png
+89abb03fee87665fb5c172ca250ac4bee54fe84da613028260113a005ad2db66  screens/04-header-as-built.png
+046c1df99cfaf38d94e351b2542a98cb2696c33a2e95524e8690d652bb180f18  screens/05-header-warm-sand-not-chosen.png
+42ede9760294d0e6a718783fd10e21eeb9ee9e6a92f527aaef6fad95bfc5fffc  screens/06-header-navy-chosen.png
+9d756a4807a687af3c79d052fd2c03b90626b1ba50aff87d1aa63b3402f0e671  screens/07-no-asks-sample-control.png
+230b21ef9509ffa83ef3dbeff05f8594160f3df4837c83c92355b328313c0e75  screens/08-over-the-page-dimmed.png

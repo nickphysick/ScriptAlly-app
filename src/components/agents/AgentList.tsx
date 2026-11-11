@@ -198,6 +198,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v25.1 C4 — the in-place log flow: its seed while open. The page hosts it while it is the page on screen (and not a
      sandbox); opening it closes the agent card, as one right-hand panel at a time. */
   const [logSeed, setLogSeed] = useState<ContactLogSeed | null>(null);
+  /* Log a query v1.2 — the staged journey's leave check, for the dimmed page's scrim */
+  const logLeave = useRef<(() => void) | null>(null);
   useEffect(() => {
     if (!active || sandbox) return undefined;
     return hostContactLog((seed) => { setCardId(null); setLogSeed(seed); });
@@ -1097,8 +1099,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         </div>
         {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}
         {logSeed && active ? (
-          <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)}>
-            <ContactLogFlow seed={logSeed} activeMsId={scoped?.id ?? null} onClose={() => setLogSeed(null)} />
+          <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)} dim onScrim={() => (logLeave.current ? logLeave.current() : setLogSeed(null))}>
+            <ContactLogFlow seed={logSeed} activeMsId={scoped?.id ?? null} onClose={() => setLogSeed(null)} leaveRef={logLeave} />
           </AgentCardPanel24>
         ) : null}
         {/* v26.2 A — THE PANEL IS THE CARD: no backdrop or padding, leaning, an arrival swing (once; paging swaps the

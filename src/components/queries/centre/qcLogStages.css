@@ -8,16 +8,18 @@
       everything inside inherits the serif back (0-1-1), and the one heading states the typewriter with !important. */
 
 /* THE PANEL'S SURFACE IS THE REFERENCE CARD: 540 wide (504 at ≤1400, the query card's own step), the 7px white mat
-   and 20px corners, clamp(640, 100vh − 32, 760) tall, centred in the viewport by `top`, over the shell's bar as the
-   query card is (z 68). It replaces SidePanel's 520/560 and the borrowed `.qc149f` surface. */
+   and 20px corners, over the shell's bar as the query card is (z 68). It replaces SidePanel's 520/560 and the borrowed
+   `.qc149f` surface.
+   v1.2 — OVER THE PAGE, AS THE REFERENCE PUTS IT THERE (`body.inapp .card`): 16px from the window's top, right and
+   bottom, over the dimmed page. v1.1's placement (760 at most, centred, 40 in) was the reference's card beside its notes;
+   in the app the journey is always over a page. The height comes from the two insets, never from a viewport constant. */
 .spanel.qsp.qsp:has(> .spanel-own > .laq) {
-  --laq-h: clamp(640px, calc(100vh - 32px), 760px);
-  top: calc(50vh - var(--laq-h) / 2); bottom: auto; right: 40px; left: auto;
-  width: 540px; height: var(--laq-h); box-sizing: border-box;
+  top: 16px; bottom: 16px; right: 16px; left: auto;
+  width: 540px; height: auto; box-sizing: border-box;
   padding: 7px; border-radius: 20px; background: #fff; overflow: visible; z-index: 68;
   box-shadow: 0 30px 60px -30px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.06);
 }
-@media (max-width: 1400px) { .spanel.qsp.qsp:has(> .spanel-own > .laq) { width: 504px; right: 28px; } }
+@media (max-width: 1400px) { .spanel.qsp.qsp:has(> .spanel-own > .laq) { width: 504px; } }
 @media (max-width: 899.98px) {
   .spanel.qsp.qsp:has(> .spanel-own > .laq) { top: 0; right: 0; bottom: 0; left: 0; width: auto; height: auto; padding: 0; border-radius: 0; box-shadow: none; }
 }
@@ -40,6 +42,7 @@
 
 /* the FlowHead in this flow: flush to the inner frame, and its foot handed to the track (the reference's `.flh`) */
 .laq .flh { padding: 18px 18px 8px 24px; border-bottom: 0; }
+.laq .flh .flh-rt { margin-top: 0; }
 .laq .flh p.flh-l { margin-top: 7px; font: italic 400 15.5px/1.45 var(--sp-serif) !important; }
 
 /* the track (option C), the reference's `.ltrk`: on the FlowHead's ground, under the title and line */
@@ -59,6 +62,26 @@
 .laq .laq-s.is-d:hover .laq-l { text-decoration: underline; text-underline-offset: 3px; }
 .laq .laq-s:focus-visible .laq-nd { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .laq .laq-nd, .laq .laq-si::after { transition: none; } }
+
+/* v1.2 — THE NAVY HEADER (the reference's `.ci.hc` rules, chosen over "as built" and "warm sand"). The FlowHead and the
+   track share one navy ground; the body below stays white. Scoped to `.laq`: FlowHead elsewhere is untouched. */
+.laq .flh, .laq .laq-trk { background: var(--laq-navy); }
+.laq .laq-trk { border-bottom-color: var(--laq-navy); }
+.laq .flh h3.flh-t { color: #fff; }
+.laq .flh p.flh-l { color: rgba(255, 255, 255, .78); }
+.laq .flh .flh-x { color: #fff; }
+.laq .flh .flh-x:hover { background: rgba(255, 255, 255, .12); }
+.laq .flh .flh-x:focus-visible { outline-color: #fff; }
+.laq .laq-trk .laq-nd { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .35); color: rgba(255, 255, 255, .55); }
+.laq .laq-trk .laq-si:not(:last-child)::after { background: rgba(255, 255, 255, .22); }
+.laq .laq-trk .laq-si:has(> .is-d):not(:last-child)::after { background: #fff; }
+.laq .laq-trk .laq-s.is-d .laq-nd { background: #fff; box-shadow: none; color: var(--laq-navy); }
+.laq .laq-trk .laq-s.is-d:hover .laq-nd { box-shadow: 0 0 0 3px rgba(255, 255, 255, .25); }
+.laq .laq-trk .laq-s.is-n .laq-nd { background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, .2); color: var(--laq-ink); }
+.laq .laq-trk .laq-l { color: rgba(255, 255, 255, .5); }
+.laq .laq-trk .laq-s.is-d .laq-l, .laq .laq-trk .laq-s.is-n .laq-l { color: #fff; }
+.laq .laq-trk .laq-s.is-d .laq-l b { color: rgba(255, 255, 255, .7); }
+.laq .laq-trk .laq-s:focus-visible .laq-nd { outline-color: #fff; }
 
 /* the stage body */
 .laq .laq-sb { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 20px 20px 12px; display: flex; flex-direction: column; }
@@ -142,6 +165,45 @@
 .laq .laq-pc:not(.is-on) .laq-vr { opacity: .4; pointer-events: none; }
 .laq .laq-ask { margin: 12px 2px 0; font: 400 13.5px/1.45 var(--laq-se); color: var(--laq-mut); }
 
+/* v1.2 — WHAT {FIRST} ASKS FOR (the reference's `.asks`): Queried sand, the asks as one wrapping row, a foot under a rule */
+.laq .laq-asks { margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; background: #efe7da; animation: laq-fadein .25s ease-out both; }
+.laq .laq-ah { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; }
+.laq .laq-ah b { font: 600 15.5px var(--laq-se); }
+.laq .laq-ah span { margin-left: auto; font: italic 400 13px var(--laq-se); color: #7d7268; }
+.laq .laq-asks ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.laq .laq-asks li { display: flex; align-items: center; gap: 7px; }
+.laq .laq-asks li b { font: 400 15.5px/1.35 var(--laq-se); }
+.laq .laq-mk { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; font: 600 12px var(--laq-se); box-shadow: inset 0 0 0 1.5px #b9ad9e; background: #f6f1e9; color: transparent; }
+.laq .laq-asks.is-pkg .laq-mk { width: 6px; height: 6px; box-shadow: none; background: #8e8274; }
+.laq .laq-asks li.is-ok .laq-mk { background: var(--laq-navy); box-shadow: none; color: #fff; }
+.laq .laq-asks li.is-diff .laq-mk { background: #fff; box-shadow: inset 0 0 0 1.5px var(--laq-rust); color: var(--laq-rust); }
+.laq .laq-af { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid #e0d4c3; font: 400 14px/1.4 var(--laq-se); color: #5b4f47; }
+.laq .laq-af.is-ok { color: var(--laq-ink); }
+.laq .laq-af .laq-why { display: block; color: var(--laq-rust); }
+.laq .laq-af .laq-xtra { display: block; font-style: italic; }
+.laq .laq-btn.is-xs { height: 32px; padding: 0 14px; font-size: 13.5px; margin-top: 8px; }
+.laq .laq-asks.is-nil { background: none; box-shadow: inset 0 0 0 1.2px #ddd3c6; border-radius: 12px; padding: 10px 14px; }
+.laq .laq-asks.is-nil p { margin: 0; font: italic 400 14.5px/1.45 var(--laq-se); color: var(--laq-mut); }
+
+/* v1.2 — THE OPENING PAGES OPEN INTO THE APP'S SAMPLE CONTROL: the row and the control are one block with a navy ring,
+   the control under a dashed rule, 12px in. The control is `SampleControl` unchanged; this only takes off its frame
+   (`.qad-samp`'s ring and padding) and hands its parts the typewriter back from `.laq`'s inherit rule. */
+.laq .laq-pcw { border-radius: 14px; }
+.laq .laq-pcw.is-open { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
+.laq .laq-pcw.is-open .laq-pc { box-shadow: none; }
+.laq .laq-pc.is-open .laq-vr { box-shadow: inset 0 0 0 1.5px var(--laq-navy); background: #fff; }
+.laq .laq-qsamp { margin: 0 12px; padding: 14px 2px; border-top: 1px dashed rgba(28,19,15,.18); animation: laq-fadein .2s ease-out both; }
+.laq .laq-qsamp .qad-samp { margin: 0; padding: 0; border-radius: 0; box-shadow: none; }
+.laq .laq-qsamp :is(.qad-srow b, .qad-seg button, .qad-step b, .qad-step button, .qad-unitl, .qad-chip, .qad-sectline, .laq-vrow > span:first-child) { font-family: var(--laq-tw); }
+/* the reference sets these with the `font` shorthand, which resets the line height to normal; here they would inherit
+   `.laq`'s 1.5 and stand taller than the reference's */
+.laq .laq-qsamp :is(.qad-srow b, .qad-step b, .qad-unitl, .qad-sectline, .laq-vrow > span:first-child) { line-height: normal; }
+.laq .laq-qsamp .qad-step button { font-family: inherit; }
+.laq .laq-vrow { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(28,19,15,.12); }
+.laq .laq-vrow > span:first-child { font: 400 15px var(--laq-tw); }
+.laq .laq-vrow .qad-seg { margin-left: auto; }
+.laq .laq-vrow .qad-seg small { font: italic 400 12px var(--laq-se); color: #7d7268; }
+
 /* the version menus */
 .laq .laq-pop { position: absolute; z-index: 20; min-width: 220px; max-height: calc(100% - 16px); overflow: auto; padding: 6px; border-radius: 12px; background: #fff; box-shadow: 0 18px 40px -14px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.08); animation: laq-fadein .14s ease-out both; }
 .laq .laq-pop .laq-ph { padding: 6px 10px 4px; font: 400 15px var(--laq-tw); }
@@ -183,6 +245,11 @@
 .laq .laq-lnk:hover { color: var(--laq-navy); }
 .laq .laq-lnk:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; border-radius: 2px; }
 .laq .laq-lnk:disabled { opacity: .38; pointer-events: none; }
+
+/* v1.2 — the leave check, in the footer's place */
+.laq .laq-cf.is-leave { background: #faf6f0; }
+.laq .laq-lv { font: 400 14.5px/1.35 var(--laq-se); color: #5b4f47; }
+.laq .laq-lv b { font-weight: 600; color: var(--laq-ink); }
 
 /* the batch toast */
 .laq .laq-toast { position: absolute; left: 50%; bottom: 84px; transform: translate(-50%, 10px); display: flex; align-items: center; gap: 14px; padding: 9px 10px 9px 16px; border-radius: 999px; background: var(--laq-ink); color: #fff; font: 400 14.5px var(--laq-se); white-space: nowrap; opacity: 0; pointer-events: none; transition: .25s; z-index: 25; }
