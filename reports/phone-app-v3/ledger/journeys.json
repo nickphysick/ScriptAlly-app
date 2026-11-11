@@ -1,0 +1,152 @@
+[
+ {
+  "lock": "PA3-9",
+  "where": "Continue with a name and no agency",
+  "ok": true,
+  "detail": "must be disabled"
+ },
+ {
+  "lock": "PA3-9",
+  "where": "Continue with “I don’t know the agency”",
+  "ok": true,
+  "detail": "enabled"
+ },
+ {
+  "lock": "PA3-9",
+  "where": "an agent not yet queried",
+  "ok": true,
+  "detail": "clv-fx-stub0"
+ },
+ {
+  "lock": "PA3-9",
+  "where": "field country",
+  "ok": true,
+  "detail": "country=\"US\""
+ },
+ {
+  "lock": "PA3-9",
+  "where": "field submissionStatus",
+  "ok": true,
+  "detail": "submissionStatus=\"Open\""
+ },
+ {
+  "lock": "PA3-9",
+  "where": "field email",
+  "ok": true,
+  "detail": "email=\"fixture@example.com\""
+ },
+ {
+  "lock": "PA3-9",
+  "where": "field responseTimeWeeks",
+  "ok": true,
+  "detail": "responseTimeWeeks=6"
+ },
+ {
+  "lock": "PA3-9",
+  "where": "field noResponseMeansNo",
+  "ok": true,
+  "detail": "noResponseMeansNo=false"
+ },
+ {
+  "lock": "PA3-9",
+  "where": "field website",
+  "ok": true,
+  "detail": "https://example.com"
+ },
+ {
+  "lock": "PA3-9",
+  "where": "field mswlNotes",
+  "ok": true,
+  "detail": "Quiet, character-led historical fiction."
+ },
+ {
+  "lock": "PA3-9",
+  "where": "field materialsWanted",
+  "ok": true,
+  "detail": "[\"Query letter\",\"First 50 pages\"]"
+ },
+ {
+  "lock": "PA3-9",
+  "where": "field agency kept",
+  "ok": true,
+  "detail": "Kron Literary"
+ },
+ {
+  "lock": "PA3-7",
+  "where": "opens on the agent's 50 pages",
+  "ok": true,
+  "detail": "amount 50"
+ },
+ {
+  "lock": "PA3-8",
+  "where": "the control is a range input",
+  "ok": true,
+  "detail": "range"
+ },
+ {
+  "lock": "PA3-8",
+  "where": "the expected date follows it",
+  "ok": true,
+  "detail": "Remind me to nudge Reply expected by 23 Dec. Nudge reminder on 30 Dec. → Remind me to nudge Reply expected by 3 Feb. Nudge reminder on 10 Feb."
+ },
+ {
+  "lock": "PA3-7",
+  "where": "stored",
+  "ok": true,
+  "detail": "q_mwcgqww9_qgexyc"
+ },
+ {
+  "lock": "PA3-7",
+  "where": "37 pages, from page 12",
+  "ok": true,
+  "detail": "Query letter v3 · pages 12–48"
+ },
+ {
+  "lock": "PA3-8",
+  "where": "the stored reply window",
+  "ok": true,
+  "detail": "12 weeks (dateSent 2026-11-11T12:00:00.000Z, writerExpectedDate 2027-02-03T12:00:00.000Z)"
+ },
+ {
+  "lock": "PA3-7",
+  "where": "Undo removed the query",
+  "ok": true,
+  "detail": "0 left"
+ },
+ {
+  "lock": "PA3-7",
+  "where": "journey 4: the query sheet opens",
+  "ok": true,
+  "detail": "qc150l9-q"
+ },
+ {
+  "lock": "PA3-7",
+  "where": "journey 2: the reply is recorded",
+  "ok": true,
+  "detail": "Partial Requested"
+ },
+ {
+  "lock": "PA3-7",
+  "where": "journey 2: Undo puts the status back",
+  "ok": true,
+  "detail": "Full Sent → Full Sent"
+ },
+ {
+  "lock": "PA3-7",
+  "where": "journey 1: Today lists tasks",
+  "ok": true,
+  "detail": "tasks"
+ },
+ {
+  "lock": "PA3-7",
+  "where": "journey 6: You says how it's going",
+  "ok": true,
+  "detail": "figure"
+ },
+ {
+  "lock": "PA3-9",
+  "where": "the agent is put back as it was",
+  "ok": true,
+  "detail": "clv-fx-stub0"
+ }
+]

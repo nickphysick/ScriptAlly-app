@@ -29,7 +29,7 @@ const noop = () => {};
    badge — is SUPERSEDED: a floating capsule, Home · Queries · [+] · To-do · Agents, the badge on To-do. Analytics moved
    to the menu and More's "you" sheet became the menu behind your initials. The claims below are the new bar's; where an
    old claim still holds (path-driven active, a navy pill with a white icon, no badge at zero, nothing inline) it is
-   kept and re-pointed rather than dropped. The rendered measurement is tests/e2e/phoneAppV2Shell.measure.ts S1–S2. */
+   kept and re-pointed rather than dropped. The rendered measurement was tests/e2e/phoneAppV2Shell.measure.ts S1–S2, retired with Phone app v3 (tests/e2e/RETIRED-phone-app-v2.md). */
 describe("the tab bar — a floating capsule, five slots, + in the middle (Phone app v2)", () => {
   /* Phone round two v1 (2B): Packages took To-do's slot; To-do is a page now and its badge rides on Home. */
   it("renders Home · Queries · + · Packages · Agents in that order, path-driven active", () => {
