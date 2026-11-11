@@ -148,19 +148,30 @@ export function redirectTargets(seg) {
 export function bashRoots(command, cwd, { rootOf = gitRoot } = {}) {
   let here = cwd || process.cwd();
   const roots = new Set();
-  const at = (p) => { const abs = isAbsolute(p) ? p : resolve(here, p.replace(/^~(?=\/|$)/, homedir())); const r = rootOf(dirname(abs)); if (r) roots.add(r); };
-  const atCwd = () => { const r = rootOf(here); if (r) roots.add(r); };
+  /* ⚠️ A PATH THE SHELL HAS NOT EXPANDED YET ($VAR, `cmd`, $(…)) IS UNKNOWN, AND UNKNOWN CLAIMS NOTHING.
+   * Read literally, `cd "$P/W" && git commit` resolved "$P/W" under the current folder and claimed
+   * the session's own checkout for a commit in a scratch repo. After an unknown `cd`, every later
+   * segment is unknown too, until a cd to a literal path. */
+  const unknown = (p) => /[$`]/.test(p);
+  const at = (p) => { if (here === null || unknown(p)) return; const abs = isAbsolute(p) ? p : resolve(here, p.replace(/^~(?=\/|$)/, homedir())); const r = rootOf(dirname(abs)); if (r) roots.add(r); };
+  const atCwd = () => { if (here === null) return; const r = rootOf(here); if (r) roots.add(r); };
   for (const seg of segments(stripHeredocs(command || ""))) {
     for (const t of redirectTargets(seg)) at(t.replace(/^~(?=\/|$)/, homedir()));
     const w = words(head(seg));
     if (!w.length) continue;
     const [cmd, ...args] = w;
-    if (cmd === "cd") { if (args[0]) here = isAbsolute(args[0]) ? args[0] : resolve(here, args[0].replace(/^~(?=\/|$)/, homedir())); continue; }
+    if (cmd === "cd") {
+      const t = args[0];
+      if (!t) continue;
+      if (unknown(t)) here = null;
+      else here = isAbsolute(t) ? t : here === null ? null : resolve(here, t.replace(/^~(?=\/|$)/, homedir()));
+      continue;
+    }
     const files = args.filter((a) => !a.startsWith("-"));
     if (cmd === "git") {
       let i = 0, dir = here;
-      while (i < args.length && args[i].startsWith("-")) { if (args[i] === "-C" && args[i + 1]) { dir = resolve(here, args[i + 1]); i += 2; } else i++; }
-      if (GIT_WRITES.has(args[i])) { const r = rootOf(dir); if (r) roots.add(r); }
+      while (i < args.length && args[i].startsWith("-")) { if (args[i] === "-C" && args[i + 1]) { dir = unknown(args[i + 1]) ? null : isAbsolute(args[i + 1]) ? args[i + 1] : dir === null ? null : resolve(dir, args[i + 1]); i += 2; } else i++; }
+      if (GIT_WRITES.has(args[i]) && dir !== null) { const r = rootOf(dir); if (r) roots.add(r); }
     } else if (cmd === "npm" && NPM_WRITES.has(args[0])) atCwd();
     else if (cmd === "sed" && args.some((a) => /^-i/.test(a) || /^-[a-zA-Z]*i/.test(a))) {
       const hasE = args.includes("-e");

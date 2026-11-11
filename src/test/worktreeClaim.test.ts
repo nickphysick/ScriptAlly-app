@@ -58,6 +58,11 @@ describe("worktree claims", () => {
     expect(bashRoots(`cd ${W2} && git commit -m x`, W, { rootOf })).toEqual([W2]);
     expect(bashRoots("cat > /tmp/x.sh <<'EOF'\necho hi > f\nEOF", W, { rootOf })).toEqual([]); // heredoc body is data
     expect(redirectTargets('echo "a > b" > out.txt')).toEqual(["out.txt"]);
+    /* a path the shell has not expanded is unknown, and unknown claims nothing (found live: `cd "$P/W"`) */
+    expect(bashRoots('(cd "$P/W" && git commit -q -m init)', W, { rootOf })).toEqual([]);
+    expect(bashRoots("echo x > $OUT/f", W, { rootOf })).toEqual([]);
+    expect(bashRoots('git -C "$X" commit -m y', W, { rootOf })).toEqual([]);
+    expect(bashRoots(`cd $X && cd ${W2} && git commit -m z`, W, { rootOf })).toEqual([W2]);
   });
 
   it("5 · B changes W2: claims W2, allowed (A keeps W)", () => {
