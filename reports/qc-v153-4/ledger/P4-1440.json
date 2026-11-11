@@ -1,0 +1,177 @@
+[
+ {
+  "name": "no legend and no legend heading",
+  "ok": true,
+  "got": "false false"
+ },
+ {
+  "name": "no counts drawn on the segments",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "ring 214 tall",
+  "ok": true,
+  "got": "214"
+ },
+ {
+  "name": "ring right edge on the list's right edge (±1)",
+  "ok": true,
+  "got": "1400 · 1400"
+ },
+ {
+  "name": "header height 218 (unchanged)",
+  "ok": true,
+  "got": "218"
+ },
+ {
+  "name": "title ink clear of the ring",
+  "ok": true,
+  "got": "{\"ink\":829.3,\"ring\":1124.3}"
+ },
+ {
+  "name": "at rest: no annotation shown",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "no floating tooltip in the page",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "segments (population)",
+  "ok": true,
+  "got": "5"
+ },
+ {
+  "name": "hover wait: exactly its annotation",
+  "ok": true,
+  "got": "[\"wait\"]"
+ },
+ {
+  "name": "hover wait: the annotation inside the svg's box (never clipped)",
+  "ok": true,
+  "got": "{\"a\":[1299.4,1395.5,210.7,227.7],\"s\":[1000.9,1400,135.8,349.8]}"
+ },
+ {
+  "name": "hover wait: the other segments fade",
+  "ok": true,
+  "got": "[0.3,0.3,0.3,0.3]"
+ },
+ {
+  "name": "hover wait: label carries count and name",
+  "ok": true,
+  "got": "38Waiting"
+ },
+ {
+  "name": "hover partial: exactly its annotation",
+  "ok": true,
+  "got": "[\"partial\"]"
+ },
+ {
+  "name": "hover partial: the annotation inside the svg's box (never clipped)",
+  "ok": true,
+  "got": "{\"a\":[1121,1200.2,329.5,346.5],\"s\":[1000.9,1400,135.8,349.8]}"
+ },
+ {
+  "name": "hover partial: the other segments fade",
+  "ok": true,
+  "got": "[0.3,0.3,0.3,0.3]"
+ },
+ {
+  "name": "hover partial: label carries count and name",
+  "ok": true,
+  "got": "Partial14"
+ },
+ {
+  "name": "hover full: exactly its annotation",
+  "ok": true,
+  "got": "[\"full\"]"
+ },
+ {
+  "name": "hover full: the annotation inside the svg's box (never clipped)",
+  "ok": true,
+  "got": "{\"a\":[1045.4,1117.8,279.7,296.7],\"s\":[1000.9,1400,135.8,349.8]}"
+ },
+ {
+  "name": "hover full: the other segments fade",
+  "ok": true,
+  "got": "[0.3,0.3,0.3,0.3]"
+ },
+ {
+  "name": "hover full: label carries count and name",
+  "ok": true,
+  "got": "Full16"
+ },
+ {
+  "name": "hover offer: exactly its annotation",
+  "ok": true,
+  "got": "[\"offer\"]"
+ },
+ {
+  "name": "hover offer: the annotation inside the svg's box (never clipped)",
+  "ok": true,
+  "got": "{\"a\":[1039.9,1111.1,210.7,227.7],\"s\":[1000.9,1400,135.8,349.8]}"
+ },
+ {
+  "name": "hover offer: the other segments fade",
+  "ok": true,
+  "got": "[0.3,0.3,0.3,0.3]"
+ },
+ {
+  "name": "hover offer: label carries count and name",
+  "ok": true,
+  "got": "Offer2"
+ },
+ {
+  "name": "hover closed: exactly its annotation",
+  "ok": true,
+  "got": "[\"closed\"]"
+ },
+ {
+  "name": "hover closed: the annotation inside the svg's box (never clipped)",
+  "ok": true,
+  "got": "{\"a\":[1004.9,1148.3,146.1,166],\"s\":[1000.9,1400,135.8,349.8]}"
+ },
+ {
+  "name": "hover closed: the other segments fade",
+  "ok": true,
+  "got": "[0.3,0.3,0.3,0.3]"
+ },
+ {
+  "name": "hover closed: label carries count and name",
+  "ok": true,
+  "got": "Passed or closed18"
+ },
+ {
+  "name": "pointer away: none shown",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "focus a segment: exactly one annotation",
+  "ok": true,
+  "got": "[\"wait\"]"
+ },
+ {
+  "name": "segment named \"X, n of N\"",
+  "ok": true,
+  "got": "Waiting to hear, 38 of 88"
+ },
+ {
+  "name": "segment is a focusable button",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Enter on a segment turns its stage on",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "a click toggles it off",
+  "ok": true,
+  "got": "false"
+ }
+]

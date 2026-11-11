@@ -1,0 +1,52 @@
+[
+ {
+  "name": "at rest the toolbar shows the count",
+  "ok": true,
+  "got": "not stuck"
+ },
+ {
+  "name": "no sticky group headings",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "mid-scroll in Offers: the toolbar names the group",
+  "ok": true,
+  "got": "{\"stuck\":true,\"g\":\"Offers2\",\"op\":\"1\",\"wy\":105.75,\"bg\":\"linear-gradient(rgb(245, 245, 243) 0px, rgb(245, 245, 243) calc(100% - 22px), rgba(245, 245, 243, 0))\",\"ff\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\"}"
+ },
+ {
+  "name": "mid-scroll in Offers: the 22px fade",
+  "ok": true,
+  "got": "linear-gradient(rgb(245, 245, 243) 0px, rgb(245, 245, 243) calc(100% - 22px), rgba(245, 245, 243, 0))"
+ },
+ {
+  "name": "mid-scroll in Materials requested: the toolbar names the group",
+  "ok": true,
+  "got": "{\"stuck\":true,\"g\":\"Materials requested14\",\"op\":\"1\",\"wy\":105.75,\"bg\":\"linear-gradient(rgb(245, 245, 243) 0px, rgb(245, 245, 243) calc(100% - 22px), rgba(245, 245, 243, 0))\",\"ff\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\"}"
+ },
+ {
+  "name": "mid-scroll in Materials requested: the 22px fade",
+  "ok": true,
+  "got": "linear-gradient(rgb(245, 245, 243) 0px, rgb(245, 245, 243) calc(100% - 22px), rgba(245, 245, 243, 0))"
+ },
+ {
+  "name": "mid-scroll in Nudge due: the toolbar names the group",
+  "ok": true,
+  "got": "{\"stuck\":true,\"g\":\"Nudge due7\",\"op\":\"1\",\"wy\":105.75,\"bg\":\"linear-gradient(rgb(245, 245, 243) 0px, rgb(245, 245, 243) calc(100% - 22px), rgba(245, 245, 243, 0))\",\"ff\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\"}"
+ },
+ {
+  "name": "mid-scroll in Nudge due: the 22px fade",
+  "ok": true,
+  "got": "linear-gradient(rgb(245, 245, 243) 0px, rgb(245, 245, 243) calc(100% - 22px), rgba(245, 245, 243, 0))"
+ },
+ {
+  "name": "back at the top: the count again, and nothing has moved",
+  "ok": true,
+  "got": "{\"rest\":{\"barY\":359.9375,\"barH\":54,\"firstY\":431.9375},\"back\":{\"barY\":359.9375,\"barH\":54,\"firstY\":431.9375,\"stuck\":false,\"g\":\"\"}}"
+ },
+ {
+  "name": "rail: sticky 14px under the lip, or scrolling when taller than the port",
+  "ok": true,
+  "got": "{\"pos\":\"relative\",\"top\":\"0px\",\"tall\":true,\"h\":1303,\"port\":966}"
+ }
+]

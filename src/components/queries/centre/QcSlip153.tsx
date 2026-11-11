@@ -49,8 +49,9 @@ export const FACT_ICON = {
 const LIVE_KIND: readonly TrackNodeKind[] = ["q", "partial", "full", "offer"];
 const NODE_TITLE = ["Queried", "Partial", "Full", "Offer"] as const;
 
-/** the four-step track: ink to the current step, faded future, a dotted line into a skipped step */
-export const Track153: React.FC<{ t: SlipTrack }> = ({ t }) => (
+/** the four-step track: ink to the current step, faded future, a dotted line into a skipped step. v154: `label`, when
+ *  given, is drawn under the current step only (the card's "Draw the journey" hover shows it; hidden at rest). */
+export const Track153: React.FC<{ t: SlipTrack; label?: string }> = ({ t, label }) => (
   <span className={`qc153-trk${t.ended ? " is-ended" : ""}`} data-qc153="track" data-dir={t.dir}>
     {t.nodes.map((n, i) => {
       const k: TrackNodeKind = n === "cur" ? (t.end ?? (i === 3 ? "offer-on" : LIVE_KIND[i])) : LIVE_KIND[i];
@@ -60,6 +61,7 @@ export const Track153: React.FC<{ t: SlipTrack }> = ({ t }) => (
           <span className={`qc153-nd qc153-nd--${n}`} data-qc153="node" data-state={n} title={NODE_TITLE[i]}>
             <TrackNode k={k} />
             {n === "cur" ? <b className={`qc153-arw qc153-arw--${t.dir}`} data-qc153="arrow" data-dir={t.dir} aria-hidden="true">{t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}
+            {n === "cur" && label ? <span className="qc154-thl" data-qc154="track-label" aria-hidden="true">{label}</span> : null}
           </span>
         </React.Fragment>
       );

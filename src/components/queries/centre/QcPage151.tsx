@@ -30,7 +30,7 @@ import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { RadioMenu151 } from "./QcToolbar140";
 import { GROUP_1522, GROUP_MENU_HEAD, PACKAGE_LOCKED_LINE, head1522 } from "../../../lib/qc1522";
 import { QcHeader1531 } from "./QcHeader1531";
-import { QcSlip153 } from "./QcSlip153";
+import { QcCard154 } from "./QcCard154";
 import { QcBar153 } from "./QcBar153";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
 import { sectionSwatch, standWords } from "../../../lib/qc153";
@@ -215,6 +215,63 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     return () => { document.removeEventListener("scroll", on, true); if (raf) cancelAnimationFrame(raf); };
   }, []);
 
+  /* v154 §6 — the sticky toolbar: once it is stuck, its count gives way to the current group (the last heading that
+     has scrolled above its bottom edge, less its 22px fade); not stuck, the count comes back. The group's words stay
+     put for the 0.25s fade-out, then clear so the count's width is its own again. Read from the boxes on every
+     scroll, like the header shadow above. */
+  const tbRef = useRef<HTMLDivElement>(null);
+  const [tbOn, setTbOn] = useState(false);
+  const [tbGrp, setTbGrp] = useState<{ label: string; count: string } | null>(null);
+  useEffect(() => {
+    let raf = 0;
+    let clear = 0;
+    const read = () => {
+      raf = 0;
+      const tb = tbRef.current, root = rootRef.current;
+      if (!tb || !root || !tb.offsetParent) return;
+      const port = tb.closest<HTMLElement>(".wpg-scroll") ?? document.scrollingElement as HTMLElement | null;
+      const portTop = port && port !== document.scrollingElement ? port.getBoundingClientRect().top : 0;
+      const box = tb.getBoundingClientRect();
+      const top = parseFloat(getComputedStyle(tb).top) || 0;
+      const stuck = (port?.scrollTop ?? 0) > 0 && box.top - portTop <= top + 0.5;
+      const line = box.bottom - 22;
+      let cur: HTMLElement | null = null;
+      root.querySelectorAll<HTMLElement>("[data-qc154='head']").forEach((h) => { if (h.getBoundingClientRect().top < line) cur = h; });
+      const c = cur as HTMLElement | null;
+      const on = stuck && !!c;
+      setTbOn(on);
+      if (on && c) {
+        const next = { label: c.dataset.label ?? "", count: c.dataset.count ?? "" };
+        window.clearTimeout(clear);
+        setTbGrp((g) => (g && g.label === next.label && g.count === next.count ? g : next));
+      } else {
+        window.clearTimeout(clear);
+        clear = window.setTimeout(() => setTbGrp(null), 260);
+      }
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(read); };
+    document.addEventListener("scroll", on, true);
+    window.addEventListener("resize", on);
+    on();
+    return () => { document.removeEventListener("scroll", on, true); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); window.clearTimeout(clear); };
+  }, []);
+  /* v154 §6 — the rail sticks 14px under the toolbar's top; taller than the scrollport, it scrolls with the page */
+  useEffect(() => {
+    const root = rootRef.current;
+    const rail = root?.querySelector<HTMLElement>(".qc153-rail");
+    if (!root || !rail) return undefined;
+    const port = root.closest<HTMLElement>(".wpg-scroll");
+    const fit = () => {
+      const room = (port?.clientHeight ?? window.innerHeight) - 14 - (parseFloat(getComputedStyle(root).getPropertyValue("--pin-cover")) || 12);
+      rail.toggleAttribute("data-qc154-tall", rail.offsetHeight > room);
+    };
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(fit);
+    ro?.observe(rail); if (port) ro?.observe(port);
+    window.addEventListener("resize", fit);
+    fit();
+    return () => { ro?.disconnect(); window.removeEventListener("resize", fit); };
+  }, [p.rail]);
+
   /* §6 — a group's rows fold away under its header, for the session */
   const [collapsed, setCollapsed] = useState<Set<string>>(readCollapsed);
   const fold = (k: string) => setCollapsed((c) => {
@@ -336,8 +393,9 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     try { sessionStorage.setItem(OPENED_KEY, JSON.stringify([...n])); } catch { /* a private window */ }
     return n;
   });
-  const slip = (r: QcRow) => (
-    <QcSlip153 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)} agent={p.agentOf?.(r) ?? null}
+  /* v154 — each group's queries are a 3-across grid of small cards (the slip's successor: same row, facts and act) */
+  const card = (r: QcRow) => (
+    <QcCard154 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)}
       act={rowAct(r, p.nowMs)} onOpen={p.onOpen} onAct={p.onAct} />
   );
   const only = p.sections.length === 1;
@@ -346,7 +404,8 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     <QcBar153 view={p.view} onView={p.onView} loading={p.loading} showing={p.showing} total={p.total}
       find={p.find} onFind={p.onFind} findRef={p.findRef} sort={p.sort} onSort={p.onSort}
       group={p.group} onGroup={p.onGroup} packageOk={p.packageOk}
-      beGroup={p.beGroup} onBeGroup={p.onBeGroup} beSort={p.beSort} onBeSort={p.onBeSort} />
+      beGroup={p.beGroup} onBeGroup={p.onBeGroup} beSort={p.beSort} onBeSort={p.onBeSort}
+      stuckGroup={birds ? null : tbGrp} stuckOn={!birds && tbOn} />
   );
   return (
     <div className="qc151 qc153" data-qc151="page" data-view={p.view} ref={rootRef}>
@@ -357,7 +416,8 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
       <div className="qc153-cl" data-qc153="columns">
         <div className="qc153-railcol" data-qc153="rail-column">{p.rail ?? null}</div>
         <div className="qc153-main" data-qc153="list-column">
-          {controlLine}
+          {/* v154 §6 — the slim bar sticks on a strip of the page's own ground that ends in a 22px fade */}
+          <div className="qc154-tbw" data-qc154="toolbar" ref={tbRef}>{controlLine}</div>
 
           {birds ? (
             <div className="qc151-be sa-slip" data-qc151="birds-card"><div className="sa-slip-in">
@@ -384,7 +444,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                 if (folds && !opened.has(s.key)) {
                   const st = foldInitials(s.rows);
                   return (
-                    <div key={s.key} className={`qc153-fold qc153-fold--${fk}`} data-qc153="fold" data-k={s.key}>
+                    <div key={s.key} className={`qc153-fold qc153-fold--${fk}`} data-qc153="fold" data-k={s.key} data-qc154="head" data-label={s.label} data-count={s.rows.length}>
                       <div className="qc153-ftx"><b>{s.label}</b><small>{s.rows.length}</small><p>{FOLD_LINE[fk]}</p></div>
                       <span className="qc153-stack" aria-hidden="true">
                         {st.shown.map((x) => <span key={x.id} className="qc153-sm">{x.initials}</span>)}
@@ -398,14 +458,14 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                 return (
                   <section key={s.key} className="qc153-grp" data-qc1511="group" data-k={s.key} aria-label={s.label || "Queries"}>
                     {s.label ? (
-                      <div className="qc153-sec" data-qc153="heading" style={{ "--sw": sectionSwatch(p.group, s.key) } as React.CSSProperties}>
+                      <div className="qc153-sec" data-qc153="heading" data-qc154="head" data-label={s.label} data-count={s.rows.length} style={{ "--sw": sectionSwatch(p.group, s.key) } as React.CSSProperties}>
                         <b data-qc151="section">{s.label}</b><small data-qc1533="count">{s.rows.length}</small><i className="qc1533-rule" aria-hidden="true" />
                         {folds
                           ? <button type="button" className="qc153-lnk qc153-lnk--r" data-qc153="fold-away" aria-expanded={true} onClick={() => openFold(s.key, false)}>Fold away</button>
                           : why ? <em>{why}</em> : null}
                       </div>
                     ) : null}
-                    {s.rows.map(slip)}
+                    <div className="qc154-grid" data-qc154="grid">{s.rows.map(card)}</div>
                   </section>
                 );
               })}

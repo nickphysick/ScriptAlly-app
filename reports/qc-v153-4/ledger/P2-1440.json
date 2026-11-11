@@ -1,0 +1,27 @@
+[
+ {
+  "name": "header columns 268 · flexible · 400–560",
+  "ok": true,
+  "got": "268px 404px 560px"
+ },
+ {
+  "name": "column gap 28",
+  "ok": true,
+  "got": "28px"
+ },
+ {
+  "name": "title block left = list column left (±1)",
+  "ok": true,
+  "got": "title 408 · list 408"
+ },
+ {
+  "name": "hawk centred over the rail (±1)",
+  "ok": true,
+  "got": "hawk mid 246 · rail mid 246"
+ },
+ {
+  "name": "header height 218 (unchanged)",
+  "ok": true,
+  "got": "218"
+ }
+]

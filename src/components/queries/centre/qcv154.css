@@ -1,0 +1,215 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v154 (design-refs/query-centre-v154.html, read from the rendered page at 1920 with getComputedStyle):
+ * the card grid, the card, the Next box's states, "Draw the journey" on the track, the weekly goal chart and the
+ * sticky toolbar with its soft fade. Desktop only (768px and up), like every Query Centre rule since v131.
+ *
+ * ⚠️ ONLY NEW CLASSES (`qc154-*`) AND OVERRIDES SCOPED UNDER THE PAGE ROOT `.qc151.qc153`: the older sheets
+ *    (qcv150 … qcv1534) are not edited. Faces are READ, never named: --sp-type (Special Elite), --sp-serif (Source
+ *    Serif); every face carries `!important` because brand.tsx names bare spans as sans on every route.
+ * ⚠️ NO RED: the rose band's ink is #5f433d; nothing here is rust.
+ */
+@media (min-width: 768px) {
+  /* ── 1 · the grid: three across, 14px apart; two under 1100px, one under 700px (not in the ref) ─────────────── */
+  .qc154-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 4px 0 6px; }
+
+  /* ── 2 · the card: a white frame, the inner card inset by 6px ─────────────────────────────────────────────── */
+  .qc154-card {
+    --navy: #2a3a52;
+    position: relative; overflow: visible; margin: 0 0 12px; padding: 6px; border-radius: 18px; background: #fff; cursor: pointer;
+    box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 18px 34px -22px rgba(28, 19, 15, 0.32);
+    transition: transform 0.15s, box-shadow 0.15s; outline: none;
+  }
+  .qc154-card:hover { transform: translateY(-2px); box-shadow: 0 2px 4px rgba(28, 19, 15, 0.08), 0 24px 40px -22px rgba(28, 19, 15, 0.38); }
+  .qc154-card:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--navy), 0 18px 34px -22px rgba(28, 19, 15, 0.32); }
+  .qc154-card.is-sel { box-shadow: 0 0 0 2px var(--navy), 0 18px 34px -22px rgba(28, 19, 15, 0.32); }
+  /* an open paperclip raises its card over its neighbours, never over the sticky toolbar (z 30) */
+  .qc154-card.has-pop, .qc154-card:has(.qc1533-tw:hover) { z-index: 25; }
+  /* the stage's tone and its ink (the ref's, round 55): sand, rose, blue, heather */
+  .qc154-card[data-tone="sand"] { --tone: #efe7da; --tink: #6f5c45; }
+  .qc154-card[data-tone="rose"] { --tone: #ecd6d2; --tink: #5f433d; }
+  .qc154-card[data-tone="blue"] { --tone: #d9e1ea; --tink: #34506e; }
+  .qc154-card[data-tone="heather"] { --tone: #e7d6dc; --tink: #653f56; }
+
+  .qc154-in { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; border: 1px solid #e3d5c9; border-radius: 13px; }
+
+  /* the band: seal, name and agency on the left, the track on the right */
+  .qc154-hd { position: relative; display: flex; align-items: center; gap: 10px; min-height: 76px; box-sizing: border-box; padding: 12px 14px 12px 12px; background: var(--tone); overflow: visible; }
+  .qc151.qc153 .qc154-seal {
+    flex: none; display: grid; place-items: center; width: 38px; height: 38px; border-radius: 50%; background: var(--navy); color: #f4eee5;
+    font: 400 13px/1 var(--sp-type) !important; box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(42, 58, 82, 0.35);
+  }
+  .qc154-who { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+  .qc151 .qc154-nm { display: block; font: 600 16.5px/1.4 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc151 .qc154-ag { display: block; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc154-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  /* the track: v153's, at the ref's size (26px steps, 34px current, 10px links, 14px apart), in the tone's ink */
+  .qc154-trkw { position: relative; flex: none; display: flex; align-items: center; cursor: default; outline: none; border-radius: 20px; }
+  .qc154-trkw:focus-visible { box-shadow: 0 0 0 2px var(--navy); }
+  .qc154-card .qc153-trk { --ink: var(--tink); gap: 0; }
+  .qc154-card .qc153-nd--cur { width: 34px; height: 34px; }
+  .qc154-card .qc153-nd--cur svg { width: 20px; height: 20px; }
+  .qc154-card .qc153-nd--cur .qc153-arw { box-sizing: border-box; top: -5px; right: -5px; width: 19px; height: 19px; padding: 0; place-items: center; overflow: hidden; }
+  .qc154-card .qc153-nd--cur .qc153-arw svg { width: 13px; height: 13px; overflow: hidden; }
+
+  /* §4 "Draw the journey" (the ref's round 61–62 timings): on the track's hover or keyboard focus the done connectors
+     draw in left to right, the reached steps pop in turn, the current step pulses once, and one bold label fades in
+     under the current step after the draw. --k is the step's (or the link's) place: steps are children 1·3·5·7. */
+  .qc154-trkw .qc153-trk > :nth-child(1), .qc154-trkw .qc153-trk > :nth-child(2) { --k: 0; }
+  .qc154-trkw .qc153-trk > :nth-child(3), .qc154-trkw .qc153-trk > :nth-child(4) { --k: 1; }
+  .qc154-trkw .qc153-trk > :nth-child(5), .qc154-trkw .qc153-trk > :nth-child(6) { --k: 2; }
+  .qc154-trkw .qc153-trk > :nth-child(7) { --k: 3; }
+  .qc154-trkw:hover .qc153-ln--done, .qc154-trkw:focus-visible .qc153-ln--done { transform-origin: left center; animation: qc154-draw 0.22s ease-out both; animation-delay: calc(var(--k) * 0.18s); }
+  .qc154-trkw:hover .qc153-nd:not(.qc153-nd--fut), .qc154-trkw:focus-visible .qc153-nd:not(.qc153-nd--fut) { animation: qc154-pop 0.3s ease-out both; animation-delay: calc(var(--k) * 0.18s); }
+  .qc154-trkw:hover .qc153-nd--cur, .qc154-trkw:focus-visible .qc153-nd--cur { animation: qc154-pop 0.35s ease-out both, qc154-ring 1s ease-out 1; animation-delay: calc(var(--k) * 0.18s), calc(var(--k) * 0.18s + 0.2s); }
+  .qc154-thl {
+    position: absolute; left: 50%; top: calc(100% + 2px); transform: translate(-50%, -3px); opacity: 0; pointer-events: none;
+    white-space: nowrap; font: 600 11.5px/1.2 var(--sp-serif) !important; color: #1c130f; transition: opacity 0.2s, transform 0.2s; transition-delay: 0s;
+  }
+  /* the last step sits at the band's right edge: its label ends on the step's right edge, so the card never clips it */
+  .qc154-trkw .qc153-nd--cur:last-child .qc154-thl { left: auto; right: -2px; transform: translate(0, -3px); }
+  .qc154-trkw:hover .qc154-thl, .qc154-trkw:focus-visible .qc154-thl { opacity: 1; transform: translate(-50%, 0); transition-delay: 0.45s; }
+  .qc154-trkw:hover .qc153-nd--cur:last-child .qc154-thl, .qc154-trkw:focus-visible .qc153-nd--cur:last-child .qc154-thl { transform: translate(0, 0); }
+
+  /* the facts: Sent and Next, side by side */
+  .qc154-fx { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin-top: auto; padding: 10px; }
+  .qc154-f { position: relative; min-width: 0; padding: 8px 10px; border-radius: 10px; background: #fbf9f5; overflow: hidden; }
+  .qc154-f.is-hot, .qc154-f[data-state="over"] { background: #f6eee8; }
+  .qc151 .qc154-f > span.qc154-fl { display: block; font: 400 12px/1.35 var(--sp-serif) !important; color: #8a8076; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc151 .qc154-f > b { display: block; margin-top: 2px; font: 400 15px/1.1 var(--sp-type) !important; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc154-f.is-hot > b::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: var(--navy); vertical-align: 2px; }
+  .qc151 .qc154-f > em { display: block; font: italic 400 12px/1.35 var(--sp-serif) !important; color: #8a8076; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* §3 the Next box's states: the reply window bar (5px, #ece6dc under #b3a58f) and the planned nudge, one line under it */
+  .qc154-bar { display: block; height: 5px; margin: 7px 0 6px; border-radius: 3px; background: #ece6dc; overflow: hidden; text-decoration: none; }
+  .qc154-bar > i { display: block; height: 100%; border-radius: 3px; background: #b3a58f; }
+  .qc151 .qc154-f > em.qc154-nl { display: flex; align-items: center; gap: 5px; font: normal 400 12px/1.35 var(--sp-serif) !important; color: #7a6f66; }
+  .qc154-nl > svg { flex: none; }
+
+  /* the action: the Next box becomes the navy button on hover or focus-within; hidden while the track is hovered */
+  .qc154-act { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; border-radius: inherit; background: var(--navy); opacity: 0; pointer-events: none; transition: opacity 0.15s; }
+  .qc154-card:hover .qc154-act, .qc154-card:focus-within .qc154-act { opacity: 1; pointer-events: auto; }
+  .qc154-card:has(.qc154-trkw:hover) .qc154-act, .qc154-card:has(.qc154-trkw:focus-visible) .qc154-act, .qc154-card:has(.qc1533-tw:hover) .qc154-act { opacity: 0 !important; pointer-events: none; }
+  .qc151 .qc154-actb {
+    all: unset; box-sizing: border-box; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; padding: 0 8px; cursor: pointer;
+    color: #f4eee5; font: 600 14.5px/1.2 var(--sp-serif) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+
+  /* the paperclip: a wire clip over the card's top edge near the right, a plain count beside it */
+  .qc154-clipw { position: absolute; top: -16px; right: 22px; z-index: 6; }
+  .qc151 .qc154-card .qc1533-tw { position: relative; display: block; margin: 0; }
+  .qc151 .qc154-card .qc1533-clip.qc1533-clip,
+  .qc151 .qc154-card .qc1533-clip.qc1533-clip:hover, .qc151 .qc154-card .qc1533-clip.qc1533-clip:focus, .qc151 .qc154-card .qc1533-clip.qc1533-clip.is-open {
+    all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: flex-start; gap: 3px; height: auto; padding: 0; background: none; box-shadow: none; transform: none;
+  }
+  .qc154-card .qc1533-clip > svg { display: none; }
+  .qc154-card .qc1533-clip::before {
+    content: ""; display: block; width: 16px; height: 38px; transition: transform 0.15s; filter: drop-shadow(0 1px 1px rgba(28, 19, 15, 0.25));
+    background: center / 16px 38px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 22 48' fill='none' stroke='%238d96a3' stroke-width='2.2' stroke-linecap='round'%3E%3Cpath d='M15 14v22a5 5 0 0 1-10 0V9a7 7 0 0 1 14 0v28a9 9 0 0 1-18 0V16'/%3E%3C/svg%3E");
+  }
+  .qc154-card .qc1533-clip:hover::before, .qc154-card .qc1533-clip.is-open::before { transform: rotate(-6deg); }
+  .qc154-card .qc1533-clip:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; border-radius: 6px; }
+  .qc151 .qc154-card .qc1533-clip.qc1533-clip > i { margin-top: 14px; padding: 0; background: none; box-shadow: none; font: 400 14px/17px var(--sp-type) !important; font-style: normal; color: #5b4f47; -webkit-text-stroke: 0; }
+  .qc151 .qc154-card .qc1533-pop { top: 44px; right: -14px; left: auto; z-index: 50; }
+  .qc151 .qc154-card .qc1533-pop.is-up { top: auto; bottom: calc(100% + 8px); }
+}
+
+@keyframes qc154-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes qc154-pop { 0% { transform: scale(1); } 40% { transform: scale(1.18); } 100% { transform: scale(1); } }
+/* the pulse keeps the current step's own resting shadow under the ring */
+@keyframes qc154-ring {
+  0% { box-shadow: 0 0 0 0 rgba(42, 58, 82, 0.45), 0 2px 6px -2px rgba(28, 19, 15, 0.3); }
+  100% { box-shadow: 0 0 0 12px rgba(42, 58, 82, 0), 0 2px 6px -2px rgba(28, 19, 15, 0.3); }
+}
+
+/* a narrow card (under 380px: the 3-across grid at 1440, or any list column under ~1200px): a smaller track (21/28px
+   steps, 7px links) and seal, so the name keeps ~117px, and the fact boxes at 8px padding with 13.5px values, so the
+   longest Next value ("Response overdue", 121px at 13.5px) fits a 311px card without an ellipsis. Not in the ref,
+   which only draws the 419px card. */
+@media (min-width: 768px) {
+  .qc154-card { container-type: inline-size; }
+}
+@container (max-width: 380px) {
+  .qc154-hd { gap: 8px; padding: 12px 10px; }
+  .qc151.qc153 .qc154-seal { width: 32px; height: 32px; font-size: 12px !important; box-shadow: 0 0 0 2.5px #fff, 0 0 0 3.5px rgba(42, 58, 82, 0.35); }
+  .qc151 .qc154-nm { font-size: 15.5px !important; }
+  .qc151 .qc154-ag { font-size: 13px !important; }
+  .qc154-card .qc153-nd { width: 21px; height: 21px; }
+  .qc154-card .qc153-nd svg { width: 17px; height: 17px; }
+  .qc154-card .qc153-nd--cur { width: 28px; height: 28px; }
+  .qc154-card .qc153-nd--cur svg { width: 17px; height: 17px; }
+  .qc154-card .qc153-nd--cur .qc153-arw { top: -5px; right: -6px; width: 16px; height: 16px; }
+  .qc154-card .qc153-nd--cur .qc153-arw svg { width: 11px; height: 11px; }
+  .qc154-card .qc153-ln { width: 7px; }
+  .qc154-fx { gap: 6px; padding: 8px; }
+  .qc154-f { padding: 7px 8px; }
+  .qc151 .qc154-f > b { font-size: 13.5px !important; }
+}
+
+@media (min-width: 768px) and (max-width: 1099.98px) {
+  .qc154-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 699.98px) {
+  .qc154-grid { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qc154-card, .qc154-act, .qc154-card .qc1533-clip::before { transition: none; }
+  .qc154-card:hover { transform: none; }
+  .qc154-trkw .qc153-ln, .qc154-trkw .qc153-nd { animation: none !important; }
+  .qc154-thl { transition: none !important; transition-delay: 0s !important; }
+}
+
+/* ── 5 · the weekly goal chart, in the header's third column in place of the stage ring: on the page, no card, right-
+   aligned to the list's right edge and centred in the row, so the header (218px, set by the hawk and the title) does
+   not grow ─────────────────────────────────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc1531-rc { align-items: center; }
+  .qc154-wkc { width: 380px; flex: none; }
+  .qc154-wkh { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 10px; padding-bottom: 8px; border-bottom: 2px solid #2a3a52; }
+  .qc151 .qc154-wkt { font: 400 19px/1.15 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
+  .qc151 .qc154-wkt b { font: 400 22px/1.15 var(--sp-type) !important; color: #1c130f; }
+  .qc151 .qc154-stk {
+    display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px 3px 8px; border-radius: 999px; background: #2a3a52; color: #f4eee5;
+    font: 600 12.5px/1.35 var(--sp-serif) !important; white-space: nowrap;
+  }
+  .qc151 .qc154-wkn { margin: -4px 0 6px; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: #5b4f47; }
+  .qc154-wkp { position: relative; }
+  .qc154-wkc svg { display: block; overflow: visible; }
+  .qc154-wb path, .qc154-wb rect { transition: opacity 0.12s; }
+  .qc154-wkc svg.is-hv .qc154-wb:not(.is-on) path { opacity: 0.35; }
+  .qc151 .qc154-wkg { font: italic 400 11.5px var(--sp-serif) !important; fill: #7a6f66; paint-order: stroke; stroke: #f5f5f3; stroke-width: 3px; stroke-linejoin: round; }
+  .qc151 .qc154-wkm { font: 400 11.5px var(--sp-serif) !important; fill: #8a8076; }
+  .qc151 .qc154-wktip {
+    position: absolute; top: -6px; left: 0; transform: translate(-50%, -100%); padding: 6px 9px; border-radius: 8px; pointer-events: none; opacity: 0;
+    transition: opacity 0.1s; background: #1c130f; color: #f4eee5; font: 400 12.5px/1.3 var(--sp-serif) !important; white-space: nowrap;
+  }
+}
+@media (prefers-reduced-motion: reduce) { .qc154-wb path, .qc154-wb rect, .qc151 .qc154-wktip { transition: none; } }
+
+/* ── 6 · the sticky toolbar: the bar sits on a strip of the page's ground (#f5f5f3) that ends in a 22px fade, stuck at
+   the scrollport's top so the bar itself stays 12px under the sheet's lip as before. The strip's padding is undone by
+   its own margins, so the page at rest is exactly as it was. Above every card, paperclip and pop-up (z 30). Group
+   headings are not sticky (none ever were in v153; v151's table header is not rendered). The rail sticks 14px down,
+   unless it is taller than the scrollport. ─────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc154-tbw {
+    position: sticky; top: calc(var(--pin-cover, 12px) - 12px); z-index: 30; padding: 12px 0 22px; margin: -12px 0 -22px;
+    background: linear-gradient(to bottom, #f5f5f3 0, #f5f5f3 calc(100% - 22px), rgba(245, 245, 243, 0) 100%);
+    pointer-events: none;
+  }
+  .qc151.qc153 .qc154-tbw > .qc153-bar { position: relative; top: auto; pointer-events: auto; }
+  .qc154-tc { position: relative; display: inline-grid; white-space: nowrap; }
+  .qc154-tc > .qc154-tn, .qc154-tc > .qc154-tg { grid-area: 1 / 1; transition: opacity 0.25s, transform 0.25s; }
+  .qc151 .qc154-tg { opacity: 0; transform: translateY(5px); font: 400 15px/1.2 var(--sp-type) !important; color: #2a3a52; pointer-events: none; }
+  .qc151 .qc154-tg small { margin-left: 6px; font: 400 12px/1 var(--sp-serif) !important; color: #8a7f72; }
+  .qc154-tc.is-grp > .qc154-tn { opacity: 0; transform: translateY(-5px); }
+  .qc154-tc.is-grp > .qc154-tg { opacity: 1; transform: none; }
+
+  .qc151.qc153 .qc153-rail { top: calc(var(--pin-cover, 12px) + 14px); }
+  .qc151.qc153 .qc153-rail .qc153-rin { max-height: none; overflow: visible; overscroll-behavior: auto; }
+  .qc151.qc153 .qc153-rail[data-qc154-tall] { position: relative; top: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .qc154-tc > .qc154-tn, .qc154-tc > .qc154-tg { transition: none; } }
