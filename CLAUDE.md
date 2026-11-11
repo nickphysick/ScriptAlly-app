@@ -54,6 +54,12 @@ The full reasoning, dates and incidents behind every rule below are in `docs/dec
 - **End of every session that made a worktree:** commit, or list in the report, any uncommitted work; then `git worktree remove` your own worktree and delete its `node_modules`, `dist-emu` and emulator data. Never force-remove one with uncommitted `src/`, `functions/` or `design-refs/` changes.
 - **Never touch another session's worktree, its emulators or its ports.** Stop only processes you started — confirm the full command and path, never kill by port.
 
+## Worktrees, quick lane and deploy batch
+- One session per worktree, enforced by hooks (`scripts/worktree-claim.mjs status | release <root> | release-dead`). If blocked, use your own worktree — never work around a claim.
+- QUICK LANE — prompt starts "QUICK LANE": work in the named worktree (must hold its claim); no new worktree, no npm install unless package.json changed, no baseline runs; checks = tsc --noEmit + only the spec(s) covering the change, through the test slot; no fidelity passes, older-version suites or full suite; one commit per change (git commit --only); no deploy; end with one line: sha + what changed + "for tonight's deploy batch". If the change touches status derivation, recomputeQuery, Firestore/Storage rules, import, functions or money/entitlements: STOP — full lane.
+- FULL LANE — new pages, journeys, logic changes: normal prompt structure.
+- DEPLOY BATCH — prompt starts "DEPLOY BATCH": one full suite on the line through the slot, then one dev deploy. If red, find the breaking commit by its own spec and report; don't deploy.
+
 ## Testing and machine load
 - Heavy runs (emulator, e2e, Playwright) go through the test slot via npm scripts only (`scripts/heavy-slot.mjs`: one heavy job at a time on this Mac, queued, low priority, leftovers swept); hooks enforce it. If you're queued, wait or do non-test work — never work around the slot.
 - Run only the specs covering what you changed. One full suite at the end, only for logic changes (status derivation, recomputeQuery, rules, import, money/entitlements). Visual, copy and docs changes: typecheck + build + the touched specs only.
