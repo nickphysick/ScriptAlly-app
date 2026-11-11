@@ -164,3 +164,28 @@
   }
 }
 @media (prefers-reduced-motion: reduce) { .qc154-wb path, .qc154-wb rect, .qc151 .qc154-wktip { transition: none; } }
+
+/* ── 6 · the sticky toolbar: the bar sits on a strip of the page's ground (#f5f5f3) that ends in a 22px fade, stuck at
+   the scrollport's top so the bar itself stays 12px under the sheet's lip as before. The strip's padding is undone by
+   its own margins, so the page at rest is exactly as it was. Above every card, paperclip and pop-up (z 30). Group
+   headings are not sticky (none ever were in v153; v151's table header is not rendered). The rail sticks 14px down,
+   unless it is taller than the scrollport. ─────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc154-tbw {
+    position: sticky; top: calc(var(--pin-cover, 12px) - 12px); z-index: 30; padding: 12px 0 22px; margin: -12px 0 -22px;
+    background: linear-gradient(to bottom, #f5f5f3 0, #f5f5f3 calc(100% - 22px), rgba(245, 245, 243, 0) 100%);
+    pointer-events: none;
+  }
+  .qc151.qc153 .qc154-tbw > .qc153-bar { position: relative; top: auto; pointer-events: auto; }
+  .qc154-tc { position: relative; display: inline-grid; white-space: nowrap; }
+  .qc154-tc > .qc154-tn, .qc154-tc > .qc154-tg { grid-area: 1 / 1; transition: opacity 0.25s, transform 0.25s; }
+  .qc151 .qc154-tg { opacity: 0; transform: translateY(5px); font: 400 15px/1.2 var(--sp-type) !important; color: #2a3a52; pointer-events: none; }
+  .qc151 .qc154-tg small { margin-left: 6px; font: 400 12px/1 var(--sp-serif) !important; color: #8a7f72; }
+  .qc154-tc.is-grp > .qc154-tn { opacity: 0; transform: translateY(-5px); }
+  .qc154-tc.is-grp > .qc154-tg { opacity: 1; transform: none; }
+
+  .qc151.qc153 .qc153-rail { top: calc(var(--pin-cover, 12px) + 14px); }
+  .qc151.qc153 .qc153-rail .qc153-rin { max-height: none; overflow: visible; overscroll-behavior: auto; }
+  .qc151.qc153 .qc153-rail[data-qc154-tall] { position: relative; top: auto; }
+}
+@media (prefers-reduced-motion: reduce) { .qc154-tc > .qc154-tn, .qc154-tc > .qc154-tg { transition: none; } }

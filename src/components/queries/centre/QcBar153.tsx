@@ -47,6 +47,9 @@ export interface QcBar153Props {
   onBeGroup: (g: BeGroup) => void;
   beSort: BeSort;
   onBeSort: (s: BeSort) => void;
+  /** v154 §6 — once the bar is stuck, the current group's name and count (kept through the fade-out) */
+  stuckGroup?: { label: string; count: string } | null;
+  stuckOn?: boolean;
 }
 
 export const QcBar153: React.FC<QcBar153Props> = (p) => {
@@ -61,8 +64,11 @@ export const QcBar153: React.FC<QcBar153Props> = (p) => {
         <button type="button" aria-pressed={!birds} data-v="list" disabled={p.loading} onClick={() => p.onView("list")}>{LIST_I}List</button>
         <button type="button" aria-pressed={birds} data-v="birds" disabled={p.loading} onClick={() => p.onView("birds")}>{BE_I}Birds-eye</button>
       </div>
-      <span className="qc153-cnt" data-qc153="count" aria-live="polite">
-        {p.loading ? " " : narrowed ? <><b>{p.showing}</b> of <b>{p.total}</b></> : <><b>{p.total}</b> {p.total === 1 ? "query" : "queries"}</>}
+      {/* v154 §6 — the count and, stuck, the current group cross-fade in one cell; the group is the eye's, not the
+          screen reader's (the headings already name it) */}
+      <span className={`qc153-cnt qc154-tc${p.stuckOn ? " is-grp" : ""}`} data-qc153="count" data-stuck={p.stuckOn ? "" : undefined}>
+        <span className="qc154-tn" aria-live="polite">{p.loading ? " " : narrowed ? <><b>{p.showing}</b> of <b>{p.total}</b></> : <><b>{p.total}</b> {p.total === 1 ? "query" : "queries"}</>}</span>
+        <span className="qc154-tg" data-qc154="toolbar-group" aria-hidden="true">{p.stuckGroup ? <>{p.stuckGroup.label}<small>{p.stuckGroup.count}</small></> : null}</span>
       </span>
       <label className="qc153-find" data-qc151="find" data-qc140="find">
         {FIND_I}
