@@ -14,8 +14,8 @@
  *   AA8   Agent fit: hovering 2 says "Worth a try"; 4 is stored; the "i" tip sits inside the viewport, clipped by nothing
  *   AA9   the finish screen's preview is the real AgentCard262 face, whole inside the body at 900 tall; "Fill them in →"
  *         opens the real card in edit mode
- *   AA10  on the card: the band pencil opens every section, Contact details first; a response time change shows the
- *         Also-changes nudge line; the save bar counts changes by name
+ *   AA10  on the card: the band pencil opens every section, Contact details first; a response time change says what it
+ *         does (Card offers v1: an offer or a quiet footnote, never the rust box); the save bar counts changes by name
  *   AA11  with changes, × turns the bar rust ("Discard n changes to {First}?"); Keep editing returns; Discard closes
  *   AA12  the edit routes open the card in edit mode; nothing renders the retired long form (`.cl252-em`)
  *   AA13  "Who are you querying?": Agent fit high first, unrated last, then the shorter response time, then the name
@@ -365,13 +365,13 @@ async function openQueryingCard(page: Page) {
 }
 
 /* ═════════ AA10 ═════════ */
-test("AA10 · on the card: every section from the band pencil, Contact first; the Also-changes nudge; changes by name", async ({ page }) => {
+test("AA10 · on the card: every section from the band pencil, Contact first; what a reply change does; changes by name", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("AA10");
   const panel = await openQueryingCard(page);
   await panel.locator("[data-cl262='edit-all']").click();
   await page.waitForTimeout(500);
-  if (MUT === "AA10") await css(page, "[data-cl262='also']{display:none !important}");
+  if (MUT === "AA10") await css(page, ".co-offer, .co-quiet{display:none !important}");
   const secs = await panel.locator(".cl262-sec.is-edit").evaluateAll((es) => es.map((e) => (e as HTMLElement).dataset.k));
   L.check("every section opens", ["contact", "genres", "wishlist", "materials", "how"].every((k) => secs.includes(k)), JSON.stringify(secs));
   L.check("Contact details first", secs[0] === "contact", JSON.stringify(secs));
@@ -381,18 +381,20 @@ test("AA10 · on the card: every section from the band pencil, Contact first; th
   const before = await slider.inputValue();
   await page.keyboard.press("ArrowRight"); await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(400);
-  const also = panel.locator(".cl262-sec[data-k='how'] [data-cl262='also']");
-  const alsoText = (await also.textContent().catch(() => "")) ?? "";
-  L.check("the nudge line, inside the section", (await also.isVisible()) && /nudge|reply|expected/i.test(alsoText), alsoText.slice(0, 120) || `slider ${before}`);
+  /* Card offers v1 — the change says what it does to the query, inside the section: an offer or a quiet footnote */
+  const says = panel.locator(".cl262-sec[data-k='how'] [data-co='rt'], .cl262-sec[data-k='how'] [data-co='quiet']");
+  const saysText = ((await says.allTextContents().catch(() => [])) ?? []).join(" ");
+  L.check("what it does to the query, inside the section", (await says.count()) > 0 && (await says.first().isVisible()) && /query|request|dates/i.test(saysText), saysText.slice(0, 120) || `slider ${before}`);
+  L.check("no rust Also-changes box", (await panel.locator("[data-cl262='also'], .cl262-also").count()) === 0, "also");
   await panel.locator("[data-ae='city']").fill("Testbridge");
   const sum = panel.locator("[data-cl262='save-sum']");
   const n = Number(await sum.getAttribute("data-n"));
   const names = ((await panel.locator("[data-cl262='save-names']").textContent()) ?? "").trim();
   L.check("two changes, by name", n === 2 && names.startsWith("city, response time") || names.startsWith("response time, city"), `${n} · ${names}`);
-  L.check("moves a nudge", /moves \d+ nudge/.test(names), names);
+  L.check("never a nudge count", !/moves \d+ nudge/.test(names), names);
   await panel.locator("[data-cl262='cancel']").click();
   if (await panel.locator("[data-cl262='discard']").count()) await panel.locator("[data-cl262='discard']").click();
-  L.done(6);
+  L.done(7);
 });
 
 /* ═════════ AA11 ═════════ */

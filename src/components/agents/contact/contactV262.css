@@ -227,14 +227,8 @@
 .cl262-rf { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; min-width: 0; }
 .cl262-hint { padding: 0; border: 0; background: none; font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .6); }
 button.cl262-hint { cursor: pointer; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
-/* "Also changes": indented to the field column, white, a 3px rust edge */
-.cl262-also { margin: 2px 0 0 130px; padding: 8px 12px; border-radius: 8px; background: #fff; box-shadow: inset 3px 0 0 #a2452a; }
-.cl262-also em { display: block; margin-bottom: 4px; font: 400 13px/1.2 var(--sp-type) !important; font-style: normal !important; color: #a2452a; }
-.cl262-also p { margin: 0; font: 400 14px/1.4 var(--sp-serif) !important; color: #1c130f; }
-.cl262-sec[data-k="genres"] .cl262-also, .cl262-ctg .cl262-also { margin-left: 0; margin-top: 10px; }
 /* contact details: two columns */
 .cl262-ctg { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 14px; }
-.cl262-ctg .cl262-also { grid-column: 1 / -1; }
 .cl262-cf { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
 .cl262-cf > label { font: 400 14px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, .6); }
 .cl262-card .cl262-fx .cl262-cf .ac-in, .cl262-card .cl262-fx .cl262-cf input { box-sizing: border-box; width: 100%; background: #fff; }
@@ -277,8 +271,6 @@ button.cl262-hint { cursor: pointer; color: #2a3a52; text-decoration: underline;
 .cl262-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
 .cl262-ctg { display: block; }
 .cl262-card .cl262-fx .aap-inp { box-sizing: border-box; }
-.cl262-also { margin: 14px 0 0; padding: 9px 12px; border-radius: 8px; background: #fff; box-shadow: inset 3px 0 0 #a2452a, inset 0 0 0 1px #f0e4dd; }
-.cl262-sec[data-k="genres"] .cl262-also, .cl262-ctg .cl262-also { margin-left: 0; }
 /* the save bar's two lines: the count (or the problem), and what changed */
 .cl262-sv i { display: block; }
 .cl262-svbad { color: #f4eee5; }
@@ -296,3 +288,40 @@ button.cl262-hint { cursor: pointer; color: #2a3a52; text-decoration: underline;
 .cl262-card.apc .apc-band > .apc-bandr { flex: none; }
 .cl262-two > .aap-f, .cl262-two > .aap-f:first-child { margin-top: 16px; }
 .cl262-ctg > .aap-f:first-child, .cl262-ctg > .cl262-two:first-child > .aap-f { margin-top: 6px; }
+
+/* ══ Card offers v1 (design-refs/card-offers-v1/agent-card-edit-v8.html) ═════════════════════════════════════════════
+   What an edit does to the queries already out: an OFFER that asks (sand header, white body), a calm powder note when a
+   request in progress is safe, and quiet grey footnotes. No green anywhere; no burgundy. The panel portals to
+   `document.body`, so every value here is a literal or a `:root` token, and every face is stated with `!important`
+   on two classes (brand.tsx names a face on bare `p`, `span` and `b`). */
+.cl262-card .co-quiet { margin: 10px 0 0; font: italic 400 13.5px/1.45 var(--sp-serif) !important; color: #8f8a82; }
+.cl262-card .co-offer { margin-top: 14px; border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px #e6dccd, 0 6px 16px -12px rgba(28, 19, 15, .35); overflow: hidden; animation: co-in .22s ease-out; }
+@keyframes co-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .cl262-card .co-offer { animation: none; } }
+.cl262-card .co-h { display: flex; align-items: center; gap: 10px; padding: 11px 14px; background: #f7efe3; }
+.cl262-card .co-ic { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: #9c7a4c; }
+.cl262-card .co-h b { font: 600 15px/1.3 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card .co-b { padding: 12px 14px 14px; }
+.cl262-card .co-lead { margin: 0 0 4px; font: 400 15px/1.45 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card .co-lead b { font: 600 15px/1.45 var(--sp-serif) !important; }
+.cl262-card .co-qrow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; font: 400 14.5px/1.35 var(--sp-serif) !important; color: #3d3530; }
+.cl262-card .co-st { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: #f7efe3; font: 400 13.5px/1.35 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card .co-dates { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0 0 12px; font: 400 15px/1.35 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card .co-dates dt { color: rgba(28, 19, 15, .6); font: 400 15px/1.35 var(--sp-serif) !important; }
+.cl262-card .co-dates dd { margin: 0; font: 400 15px/1.35 var(--sp-serif) !important; }
+.cl262-card .co-dates s { color: #a39b90; text-decoration-thickness: 1px; }
+.cl262-card .co-to { font: 600 15px/1.35 var(--sp-serif) !important; }
+.cl262-card .co-arrow { color: #9c7a4c; margin: 0 6px; }
+.cl262-card .co-sub { display: block; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, .6); }
+.cl262-card .co-ask { display: flex; flex-wrap: wrap; gap: 8px; }
+.cl262-card .co-why { margin: 10px 0 0; font: italic 400 13.5px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, .6); }
+.cl262-card .co-opt { all: unset; box-sizing: border-box; cursor: pointer; display: flex; gap: 12px; width: 100%; padding: 11px 13px; margin-top: 8px; border-radius: 10px; background: #faf7f2; box-shadow: inset 0 0 0 1px #ece4d9; font: 400 15px/1.35 var(--sp-serif) !important; color: #1c130f; }
+.cl262-card .co-opt:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl262-card .co-opt small { display: block; margin-top: 2px; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, .6); }
+.cl262-card .co-rd { flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #b9ae9f; background: #fff; }
+.cl262-card .co-opt[aria-checked="true"] { background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.cl262-card .co-opt[aria-checked="true"] .co-rd { box-shadow: inset 0 0 0 5px #2a3a52; }
+.cl262-card .co-tag { margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: #e6edf6; font: 400 12.5px/1.6 var(--sp-serif) !important; font-style: normal !important; color: #2a3a52; }
+.cl262-card .co-safe { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; padding: 11px 13px; border-radius: 10px; background: #e6edf6; font: 400 14.5px/1.45 var(--sp-serif) !important; color: #2a3a52; }
+.cl262-card .co-safe span, .cl262-card .co-safe b { font: inherit !important; color: inherit; }
+.cl262-card .co-safe b { font-weight: 600 !important; }

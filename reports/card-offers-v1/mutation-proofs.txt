@@ -5,3 +5,11 @@ CO4: mutation `rows.every((r) => r.past)` -> exit 1, red: ['CO4'] -> RED
 CO5: mutation `const queried = live.filter((q) => q.status !== QueryStatus.QUERIED ||` -> exit 1, red: ['CO5'] -> RED
 CO6: mutation `closesAll = false;` -> exit 1, red: ['CO6'] -> RED
 CO7: mutation `if (closing) out.quiet.push("This page's counts move: Open to queries ` -> exit 1, red: ['CO7'] -> RED
+## Phase 2 (rendered, CO_MUTATE=<lock>)
+CO8 mutated: ✘   ✗ CO8 · released: the offer appears under the slider — weeks 6   ✗ CO8 · → moves the choice and the focus to Keep — update · focus  
+CO9 mutated: ✘   ✗ CO9 · the line is visible in the navy bar — visible 
+CO10 mutated: ✘   ✗ CO10 · co1-rt: Suggested on keep — []   ✗ CO10 · co1-old: Suggested on close — [] 
+CO11 mutated: ✘   ✗ CO11 · the safe note is shown — safe 
+CO12 mutated: ✘   ✗ CO12 · no Also element — count   ✗ CO12 · no "Also changes" words — text 
+J7 (CL262_MUTATE=J7, .co-offer/.co-quiet hidden): red at 1512 and 1280
+AA10 (AA_MUTATE=AA10, same break): red

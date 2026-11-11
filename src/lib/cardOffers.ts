@@ -38,6 +38,8 @@ const DAY = 86_400_000;
 const WEEK = 7 * DAY;
 
 export type CloseChoice = "keep" | "close";
+/** the one footnote that belongs under Taking queries (the rest sit under the slider) */
+export const REOPEN_QUIET = "Without a reopening date there’s no reminder. Housekeeping will ask for one.";
 export type RtChoice = "update" | "keep";
 
 /** a stored or derived nudge, before and after: `moves` false when the writer set it themselves */
@@ -158,7 +160,7 @@ export function cardOffers(orig: Agent, draft: ContactDraft, queries: readonly Q
   }
   if (closing && inRequest.length) out.safe = { stage: inRequest.some((q) => FULL.has(String(q.status))) ? "full" : "partial" };
   if (String(draft.submissionStatus) === "Closed" && !(draft.reopensOn ?? "").trim() && String(orig.submissionStatus) !== "Closed") {
-    out.quiet.push("Without a reopening date there’s no reminder. Housekeeping will ask for one.");
+    out.quiet.push(REOPEN_QUIET);
   }
 
   /* ── response time ──────────────────────────────────────────────────────────────────────────────────────────────── */

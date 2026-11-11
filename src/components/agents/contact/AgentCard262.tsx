@@ -16,7 +16,7 @@
  * ⚠️ IT DRAWS FROM THE PAGE'S OWN MODEL (`AgentCard24Props`, `useCardModel`): the call box, the gaps, the story and the
  *    edit kit are the ones the v25 card read, so nothing is derived twice.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { StatusDot } from "../../StatusDot";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
@@ -31,9 +31,10 @@ import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
 import { requestCardClose } from "./AgentCardPanel262";
 import { useAgentForm } from "../card/useAgentForm";
-import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar, changeNames } from "./AgentCard262Edit";
+import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar, changeNames, type OfferKit } from "./AgentCard262Edit";
 import type { InlineField } from "../card/InlineEdits";
-import type { CardDraft } from "../../../lib/cardDraft";
+import { toContactDraft, type CardDraft } from "../../../lib/cardDraft";
+import { cardOffers, offerPlan, saveExtras, type CardOffers, type CloseChoice, type RtChoice } from "../../../lib/cardOffers";
 
 /** changes are counted by the names the writer reads ("how they take queries" is one change, method and words alike) */
 const changeCount = (changed: readonly (keyof CardDraft)[]) => changeNames(changed).length;
@@ -173,6 +174,27 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   });
   const resetRef = useRef(form.reset);
   resetRef.current = form.reset;
+  /* ── Card offers v1 · what this edit does to the queries already out, asked as a choice ──────────────────────────
+     The two choices live for one edit session: they start on Update and on the close offer's suggestion, and reset
+     whenever the sections close (a save, Cancel, a discard). While the slider is dragged the offer holds still and
+     settles on release. */
+  const [rtChoice, setRtChoice] = useState<RtChoice>("update");
+  const [closeChoice, setCloseChoice] = useState<CloseChoice | null>(null);
+  const [dragging, setDragging] = useState(false);
+  useEffect(() => { if (!editing) { setRtChoice("update"); setCloseChoice(null); setDragging(false); } }, [editing]);
+  const settled = useRef<CardOffers | null>(null);
+  const offersNow = useMemo<CardOffers | null>(() => {
+    if (!editing || !kit || !form.dirty) return null;
+    return cardOffers(a, toContactDraft(a, form.base, form.d), p.queries, p.nowMs, { close: closeChoice, titleOf: p.titleOf });
+  }, [editing, kit, form.dirty, form.base, form.d, a, p.queries, p.nowMs, closeChoice, p.titleOf]);
+  if (!dragging) settled.current = offersNow;
+  const offers = dragging ? settled.current : offersNow;
+  const plan = offers ? offerPlan(offers, rtChoice, closeChoice) : null;
+  /* while editing there is always a kit, so a press on the slider holds the offer even before the draft differs */
+  const offerKit: OfferKit | null = editing ? {
+    o: offers ?? { quiet: [] }, rt: rtChoice, close: closeChoice, setRt: setRtChoice, setClose: setCloseChoice, onDrag: setDragging,
+    weeks: form.d.weeks ?? null, nrn: form.d.nrn === true,
+  } : null;
   /* a new agent: nothing open, a fresh draft */
   /* Add agent v1 — only on a REAL change of agent (paging): a mount re-run (StrictMode runs mount effects twice) must not
      close the sections a door's ask has just opened */
@@ -446,7 +468,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
           <span className="apc-chips" data-cl262="materials">{mats.map((c) => <span key={c.label} className="apc-mat"><PaperIcon kind={c.kind} />{c.label}</span>)}</span>
         ) : <Ghost kind="chips" add="+ Add materials" k="materials" onAdd={() => edit("materials")} />}
       </Section>
-      <Section k="how" title={`How ${m.first} works`} onEdit={p.preview ? undefined : () => edit("how")} onDone={() => closeSec("how")} editing={isOpen("how") && kit ? <EditHow form={form} agent={a} kit={kit} first={m.first} /> : undefined}>
+      <Section k="how" title={`How ${m.first} works`} onEdit={p.preview ? undefined : () => edit("how")} onDone={() => closeSec("how")} editing={isOpen("how") && kit ? <EditHow form={form} agent={a} kit={kit} first={m.first} offers={offerKit} /> : undefined}>
         <div className="cl262-tiles" data-cl262="tiles">
           {tiles.map((t) => (
             <span key={t.k} className={`cl262-tile${t.known ? "" : " gap"}`} data-cl262="tile" data-k={t.k} data-known={t.known ? "" : undefined}>
@@ -478,7 +500,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         /* while editing the save bar sits above the foot, which stays: ‹ › must still be pressable, and they ask the guard */
         foot,
         afterScroll: editing ? <SaveBar form={form} first={m.first} guard={guard} onCancel={cancel} onSave={() => void form.save()} onKeep={() => setGuard(null)}
-          onDiscard={() => { const g = guard; discardThen(g ? g.run : () => {}); }} /> : null,
+          onDiscard={() => { const g = guard; discardThen(g ? g.run : () => {}); }} extras={plan ? saveExtras(plan) : []} /> : null,
         band: CARD262_BAND, bandRight, disc: <Disc262 stand={x.stand} initials={data.initials} />,
         meta: meta ? <span className="apc-meta" data-cl262="meta">{meta}</span> : null,
         afterHead: <NextBox s={step} p={p} />, scrollRef,
