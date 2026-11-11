@@ -6,8 +6,9 @@
  * and the Contact list). Everything here is pure: what each agent, package and piece looks like to the stages, how the
  * writer's answers become the log save's own `LogPlan`, and the words the check stage and the celebration say.
  *
- * ⚠️ THE SAVE IS UNCHANGED. `planOf` builds exactly the `LogPlan` the old form built — `logDefaults` for the reply
- *    date and the nudge, `pieceVersions` for a package — and adds nothing to the payload. A chosen book version rides
+ * ⚠️ THE SAVE IS UNCHANGED. `planOf` builds exactly the `LogPlan` the old form built — v1.3's Nudge stage answers
+ *    (`replyPlan`) fill the reply date and the nudge as the old journey's "Response expectations" did, `pieceVersions`
+ *    a package — and adds nothing to the payload. A chosen book version rides
  *    in `pieceV.bookVersion` by NAME, because that is the field the plan has (it never stored an id).
  * ⚠️ THE PREVIEW IS THE SAVE: the check stage's slip is built from `logPayload(plan)` — the very record `saveLog` will
  *    write — through `buildQcRows` and `stampRows`, the list's own helpers. Nothing about the slip is re-derived here.
@@ -18,7 +19,8 @@ import { stampRows, type QueryState } from "../queryState";
 import { doorOf } from "../agentList";
 import { MONTHS_SHORT } from "../dates";
 import { agentAgencyLine, agentInitials, agentPrimary } from "../agentDisplay";
-import { logDefaults, logPayload, pieceVersions, type LogPlan, type PieceVersions } from "./logSave";
+import { closeDateIso, logPayload, pieceVersions, type IfNo, type LogPlan, type PieceVersions } from "./logSave";
+import { addDays, reminderAnchors } from "./dates";
 import { guidelineAsk, packageMatches, type GuidelineAsk, type PackageCard } from "./packages";
 import { blankSample, sampleName, capFirst, type FromUnit, type Materials, type Sample } from "./sample";
 
@@ -39,9 +41,10 @@ export const firstName = (name: string): string => name.trim().split(/\s+/)[0] |
 
 /* ── the stages ───────────────────────────────────────────────────────────────────────────────────────────────── */
 
-export type StageKey = "who" | "when" | "what" | "how" | "check";
-export const STAGES: readonly StageKey[] = ["who", "when", "what", "how", "check"];
-export const STAGE_LABEL: Record<StageKey, string> = { who: "Agent", when: "Sent", what: "Materials", how: "How", check: "Log" };
+export type StageKey = "who" | "when" | "what" | "how" | "nudge" | "check";
+/** v1.3 — six nodes: the Nudge stage sits between How and Log, and always shows */
+export const STAGES: readonly StageKey[] = ["who", "when", "what", "how", "nudge", "check"];
+export const STAGE_LABEL: Record<StageKey, string> = { who: "Agent", when: "Sent", what: "Materials", how: "How", nudge: "Nudge", check: "Log" };
 
 /**
  * v1.2 — THE FLOWHEAD'S LINE: one short line for the whole journey, the same on every stage (the question under the track
@@ -256,6 +259,8 @@ export interface LogAnswers {
   synopsisId: string | null;
   sample: SampleChoice | null;
   note: string;
+  /** v1.3 — the Nudge stage's answers; absent takes `replyDefaults` for the agent */
+  reply?: ReplyAnswers;
 }
 
 export interface PlanContext {
@@ -288,8 +293,101 @@ export function planOf(a: LogAnswers, ctx: PlanContext, id: string, requery: boo
   if (!agent) return null;
   const sent = new Date(a.sent);
   const { pkCard, mat, pieceV } = materialsOf(a, ctx);
-  return { id, manuscriptId: ctx.manuscriptId, agent, sent, via: a.via, pkCard, mat, pieceV, basedOn: null, ...logDefaults(agent, sent), requery };
+  return { id, manuscriptId: ctx.manuscriptId, agent, sent, via: a.via, pkCard, mat, pieceV, basedOn: null, ...replyPlan(a.reply ?? replyDefaults(agent), agent, a.sent), requery };
 }
+
+/* ── v1.3 — the Nudge stage ───────────────────────────────────────────────────────────────────────────────────── */
+
+/** the reminder chips: counted from the reply date, or from the day it was sent when the reply time is Unknown */
+export type NudgeWhen = "w0" | "week" | "2w" | "6w" | "8w" | "12w" | "pick";
+export type ReplyChoice = "nudge" | "close" | "none";
+export interface ReplyAnswers {
+  /** the slider: weeks, or null for Unknown */
+  wk: number | null;
+  /** the card offer's tick */
+  saveWk: boolean;
+  ifNo: ReplyChoice;
+  nWhen: NudgeWhen;
+  /** the picked day (start of day, ms), for "Pick a date" */
+  nPick: number | null;
+}
+/** the card's weeks as the slider shows them (whole weeks, as `stageAgents` rounds them), or null */
+export const cardWeeks = (agent: Pick<Agent, "responseTimeWeeks"> | null | undefined): number | null =>
+  agent?.responseTimeWeeks && agent.responseTimeWeeks > 0 ? Math.round(agent.responseTimeWeeks) : null;
+export const WINDOW_CHIPS: readonly NudgeWhen[] = ["w0", "week", "2w"];
+export const SENT_CHIPS: readonly NudgeWhen[] = ["6w", "8w", "12w"];
+
+/** the stage's opening answers: the card's weeks (or Unknown), close where no reply means no and there is a window */
+export function replyDefaults(agent: Pick<Agent, "responseTimeWeeks" | "noResponseMeansNo">): ReplyAnswers {
+  const wk = cardWeeks(agent);
+  return { wk, saveWk: false, ifNo: agent.noResponseMeansNo && wk ? "close" : "nudge", nWhen: wk ? "week" : "8w", nPick: null };
+}
+/** the slider moved: the offer's tick is the default for its kind (blank card → ticked, a changed one → unticked) */
+export function withWeeks(r: ReplyAnswers, wk: number, agentWk: number | null): ReplyAnswers {
+  return { ...r, wk, saveWk: agentWk == null, nWhen: r.nWhen === "pick" || WINDOW_CHIPS.includes(r.nWhen) ? r.nWhen : "week" };
+}
+/** Unknown pressed (or pressed again, which puts the card's weeks back, else 8) */
+export function toggleUnknown(r: ReplyAnswers, agentWk: number | null): ReplyAnswers {
+  if (r.wk != null) {
+    return { ...r, wk: null, saveWk: false, ifNo: r.ifNo === "close" ? "nudge" : r.ifNo, nWhen: WINDOW_CHIPS.includes(r.nWhen) ? "8w" : r.nWhen };
+  }
+  return { ...r, wk: agentWk ?? 8, saveWk: false, nWhen: r.nWhen === "pick" ? "pick" : "week" };
+}
+
+/** the reply date: sent + weeks, or null with Unknown */
+export const expectOf = (sentMs: number, wk: number | null): Date | null => (wk ? addDays(new Date(sod(sentMs)), wk * 7) : null);
+
+export interface NudgeChip { k: NudgeWhen; label: string; d: Date }
+/** the chips, weekend-shifted as the old journey's were (`reminderAnchors`) */
+export function nudgeChips(sentMs: number, wk: number | null): NudgeChip[] {
+  const ex = expectOf(sentMs, wk);
+  const list: [string, string, number][] = ex
+    ? [["w0", "On the day", 0], ["week", "A week later", 7], ["2w", "Two weeks later", 14]]
+    : [["6w", "In 6 weeks", 42], ["8w", "In 8 weeks", 56], ["12w", "In 12 weeks", 84]];
+  return reminderAnchors(ex ?? new Date(sod(sentMs)), list).map((a) => ({ k: a.k as NudgeWhen, label: a.label, d: a.d! }));
+}
+/** the nudge day, or null (no reminder, Close it, or "Pick a date" with no day yet) */
+export function nudgeDateOf(r: ReplyAnswers, sentMs: number): Date | null {
+  if (r.ifNo !== "nudge") return null;
+  if (r.nWhen === "pick") return r.nPick != null ? new Date(sod(r.nPick)) : null;
+  const chips = nudgeChips(sentMs, r.wk);
+  return (chips.find((c) => c.k === r.nWhen) ?? chips[1]).d;
+}
+/** Continue waits only while "Pick a date" has no day */
+export const replyReady = (r: ReplyAnswers): boolean => !(r.ifNo === "nudge" && r.nWhen === "pick" && r.nPick == null);
+
+export type CardOffer = { kind: "save"; n: number } | { kind: "update"; n: number; was: number } | null;
+/** the offer to save the reply time to the agent's card: a blank card, or a card the slider moved off; else none */
+export function cardOffer(agentWk: number | null, wk: number | null): CardOffer {
+  if (wk == null) return null;
+  if (agentWk == null) return { kind: "save", n: wk };
+  return wk !== agentWk ? { kind: "update", n: wk, was: agentWk } : null;
+}
+/** the weeks to save to the card when the query is logged, or null */
+export const cardWeeksToSave = (r: ReplyAnswers, agentWk: number | null): number | null => (cardOffer(agentWk, r.wk) && r.saveWk ? r.wk : null);
+
+const IF_NO_OF: Record<ReplyChoice, IfNo> = { nudge: "nudge", close: "close", none: "nothing" };
+/**
+ * The answers → the reply half of the log save's own `LogPlan` (the old journey's fields, unchanged). The reply date is
+ * the WRITER'S whenever it is not the card's own weeks (`writerExpected`, as the old journey's "moved off the usual");
+ * Unknown saves none. Close it needs a reply date, so with Unknown it falls back to no reminder.
+ */
+export function replyPlan(r: ReplyAnswers, agent: Pick<Agent, "responseTimeWeeks">, sentMs: number): Pick<LogPlan, "expect" | "writerExpected" | "ifNo" | "nudgeDate" | "nrmnOverride"> {
+  const expect = expectOf(sentMs, r.wk);
+  const choice: ReplyChoice = r.ifNo === "close" && !expect ? "none" : r.ifNo;
+  return {
+    expect,
+    writerExpected: !!expect && r.wk !== cardWeeks(agent),
+    ifNo: IF_NO_OF[choice],
+    nudgeDate: nudgeDateOf({ ...r, ifNo: choice }, sentMs),
+    nrmnOverride: null,
+  };
+}
+/** the track's finished answer under Nudge */
+export const nudgeAnswer = (r: ReplyAnswers, sentMs: number): string => {
+  const d = nudgeDateOf(r, sentMs);
+  return d ? dayMon(d.getTime()) : r.ifNo === "close" ? "Close it" : "None";
+};
 
 export const PREVIEW_ID = "__log-preview__";
 
@@ -297,11 +395,13 @@ export interface Preview { row: QcRow; packageName: string | null; agent: Agent;
 /** the unsaved query as the Query Centre will list it: the save's own record, through the list's own helpers */
 export function previewOf(plan: LogPlan, nowMs: number, quietWeeks: number): Preview {
   const { payload, summary } = logPayload(plan);
-  const q = { ...payload, status: QueryStatus.QUERIED, sentMaterials: summary } as unknown as Query;
+  /* v1.3 — and the close date `saveLog` writes straight after, so the slip can say when it closes */
+  const close = plan.ifNo === "close" && plan.expect ? { responseDeadline: closeDateIso(plan.expect) } : {};
+  const q = { ...payload, ...close, status: QueryStatus.QUERIED, sentMaterials: summary } as unknown as Query;
   const [row0] = buildQcRows([q], [plan.agent], [], nowMs);
   const [row] = stampRows([row0], [plan.agent], { quietWeeks, nowMs });
-  const noWindow = !(plan.agent.responseTimeWeeks && plan.agent.responseTimeWeeks > 0);
-  return { row, packageName: plan.pkCard?.name ?? null, agent: plan.agent, state: row.qs, expectMs: noWindow ? null : plan.expect.getTime(), noWindow };
+  const noWindow = !plan.expect;
+  return { row, packageName: plan.pkCard?.name ?? null, agent: plan.agent, state: row.qs, expectMs: plan.expect ? plan.expect.getTime() : null, noWindow };
 }
 
 /* ── the celebration ──────────────────────────────────────────────────────────────────────────────────────────── */
@@ -341,5 +441,19 @@ export function calMonth(year: number, month: number, nowMs: number): { lead: nu
     days.push({ ms, day: d, future: ms > t, today: ms === t });
   }
   return { lead, days, canNext: new Date(year, month + 1, 1).getTime() <= t };
+}
+/** v1.3 — the nudge's "Pick a date": a Monday-first month with today and every day before it disabled */
+export function calMonthAhead(year: number, month: number, nowMs: number): { lead: number; days: CalCell[]; canPrev: boolean } {
+  const first = new Date(year, month, 1);
+  const lead = (first.getDay() + 6) % 7;
+  const n = new Date(year, month + 1, 0).getDate();
+  const t = sod(nowMs);
+  const days: CalCell[] = [];
+  for (let d = 1; d <= n; d++) {
+    const ms = new Date(year, month, d).getTime();
+    days.push({ ms, day: d, future: ms > t, today: ms === t });
+  }
+  const now = new Date(t);
+  return { lead, days, canPrev: year * 12 + month > now.getFullYear() * 12 + now.getMonth() };
 }
 export const yesterday = (nowMs: number): number => { const d = new Date(sod(nowMs)); d.setDate(d.getDate() - 1); return d.getTime(); };

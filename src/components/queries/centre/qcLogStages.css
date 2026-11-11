@@ -84,7 +84,7 @@
 .laq .laq-trk .laq-s:focus-visible .laq-nd { outline-color: #fff; }
 
 /* the stage body */
-.laq .laq-sb { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 20px 20px 12px; display: flex; flex-direction: column; }
+.laq .laq-sb { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 20px 20px 12px; display: flex; flex-direction: column; }
 .laq .laq-sb > * { flex: none; }
 .laq .laq-sb.is-in { animation: laq-slide .28s cubic-bezier(.2,.8,.2,1) both; }
 .laq .laq-sb.is-back { animation: laq-slideb .28s cubic-bezier(.2,.8,.2,1) both; }
@@ -151,7 +151,9 @@
 .laq .laq-calg > button:disabled { color: #d3cbc0; pointer-events: none; }
 
 /* pieces */
-.laq .laq-pcs { display: grid; gap: 8px; }
+/* v1.3 A — ONE COLUMN THAT MAY SHRINK. An unsized grid column grows to its widest unwrappable content (v1.2's Version
+   seg, three long names on one line), and every row widened with it, off the panel. */
+.laq .laq-pcs { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 .laq .laq-pc { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; cursor: pointer; }
 .laq .laq-pc:hover { box-shadow: inset 0 0 0 1.5px #8e8274; }
 .laq .laq-pc:focus-visible { outline: none; box-shadow: inset 0 0 0 2px var(--laq-navy); }
@@ -159,6 +161,10 @@
 .laq .laq-pc.is-on { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
 .laq .laq-pc.is-on .laq-bx { background: var(--laq-navy); box-shadow: none; }
 .laq .laq-pc .laq-tx b { font: 500 16px var(--laq-se); }
+.laq .laq-pc .laq-tx { flex: 1; min-width: 0; }
+.laq .laq-pc .laq-vr { max-width: 58%; min-width: 0; box-sizing: border-box; }
+.laq .laq-vr svg { flex: none; }
+.laq .laq-vt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 .laq .laq-vr { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; background: var(--laq-paper); box-shadow: inset 0 0 0 1px #e6ded2; font: 400 14px var(--laq-se); white-space: nowrap; }
 .laq .laq-vr:hover { box-shadow: inset 0 0 0 1.5px #8e8274; }
 .laq .laq-vr:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
@@ -205,8 +211,17 @@
 .laq .laq-qsamp .qad-step.sm b { width: 64px; }
 .laq .laq-vrow { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(28,19,15,.12); }
 .laq .laq-vrow > span:first-child { font: 400 15px var(--laq-tw); }
-.laq .laq-vrow .qad-seg { margin-left: auto; }
-.laq .laq-vrow .qad-seg small { font: italic 400 12px var(--laq-se); color: #7d7268; }
+.laq .laq-vrow > span:first-child { flex: none; }
+.laq .laq-vr2 { all: unset; box-sizing: border-box; cursor: pointer; margin-left: auto; display: inline-flex; align-items: center; gap: 6px; max-width: 70%; min-width: 0; padding: 5px 10px; border-radius: 9px; background: #f3eee7; font: 400 13px var(--laq-tw); color: var(--laq-ink); }
+.laq .laq-vr2:hover { box-shadow: inset 0 0 0 1.5px #8e8274; }
+.laq .laq-vr2:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-vr2 small { flex: none; font: italic 400 12px var(--laq-se); color: #7d7268; }
+.laq .laq-vr2 svg { flex: none; }
+/* v1.3 B — the sample control's Done line */
+.laq .laq-sdone { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(28,19,15,.12); }
+.laq .laq-sdone p { flex: 1; min-width: 0; margin: 0; font: italic 400 14px/1.4 var(--laq-se); color: var(--laq-mut); }
+.laq .laq-sdone p b { font-style: normal; font-weight: 500; color: var(--laq-ink); }
+.laq .laq-btn.is-sd { height: 34px; padding: 0 14px; font-size: 13.5px; }
 
 /* the version menus */
 .laq .laq-pop { position: absolute; z-index: 20; min-width: 220px; max-height: calc(100% - 16px); overflow: auto; padding: 6px; border-radius: 12px; background: #fff; box-shadow: 0 18px 40px -14px rgba(28,19,15,.35), 0 0 0 1px rgba(28,19,15,.08); animation: laq-fadein .14s ease-out both; }
@@ -295,3 +310,39 @@
 @media (prefers-reduced-motion: reduce) {
   .laq *, .laq *::before, .laq *::after { animation: none !important; transition: none !important; }
 }
+
+/* ── v1.3 — the Nudge stage (design-refs/log-a-query-v1-3, "Nudge, with a response time") ─────────────────────────── */
+.laq h3.laq-qh.is-q2 { margin: 20px 0 10px; font: 400 19px/1.25 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
+.laq .laq-wkb { padding: 14px 16px 12px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; margin-bottom: 6px; }
+.laq .laq-wkb .sa-fld { margin: 0; }
+/* the app's WeekSlider, as the agent card draws it; its label speaks in the stage's serif, never a mono eyebrow */
+.laq .laq-wkb .sa-wk-head { justify-content: flex-start; gap: 10px; }
+.laq .laq-wkb .sa-wk-head > span { margin-left: auto; }
+.laq .laq-wkb .sa-label { margin: 0; font: 500 16px var(--laq-se); letter-spacing: 0; text-transform: none; color: var(--laq-ink); }
+.laq .laq-wkb .sa-wk-slider { margin: 0; }
+.laq p.laq-wkx { margin: 10px 0 0; font: italic 400 14.5px/1.4 var(--laq-se); color: var(--laq-mut); }
+.laq p.laq-wkx b { font-style: normal; font-weight: 500; color: var(--laq-ink); }
+.laq .laq-svk { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #efe7da; cursor: pointer; }
+.laq .laq-svk:focus-within { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-bx3 { flex: none; display: grid; place-items: center; width: 20px; height: 20px; margin-top: 1px; border-radius: 6px; box-shadow: inset 0 0 0 1.5px #b9ad9e; background: #fff; color: #fff; font-size: 13px; }
+.laq .laq-svk.is-on .laq-bx3 { background: var(--laq-navy); box-shadow: none; }
+.laq .laq-svk b { display: block; font: 500 15px/1.35 var(--laq-se); }
+.laq .laq-svk i { display: block; font: italic 400 13.5px/1.35 var(--laq-se); color: #7d7268; }
+.laq .laq-nopts { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
+.laq .laq-nopt { border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; }
+.laq .laq-nopt.is-on { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
+.laq .laq-nopt > button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px; }
+.laq .laq-nopt > button:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-rd { flex: none; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #b9ad9e; }
+.laq .laq-nopt.is-on .laq-rd { box-shadow: inset 0 0 0 5.5px var(--laq-navy); }
+.laq .laq-nopt .laq-tx { flex: 1; min-width: 0; }
+.laq .laq-nopt .laq-tx b { display: block; font: 500 16px var(--laq-se); }
+.laq .laq-nopt .laq-tx span { display: block; font: italic 400 13.5px/1.35 var(--laq-se); color: var(--laq-mut); }
+.laq .laq-ntag { flex: none; max-width: 44%; text-align: right; font: italic 400 12.5px/1.3 var(--laq-se); color: var(--laq-mut); }
+.laq .laq-nopt.is-dis { opacity: .5; }
+.laq .laq-nopt.is-dis > button { cursor: default; }
+.laq .laq-nch { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 12px 44px; }
+.laq .laq-chip { all: unset; cursor: pointer; font: 400 13px/1.3 var(--laq-tw); padding: 6px 11px; border-radius: 18px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.22); background: #fff; }
+.laq .laq-chip.is-on { background: var(--laq-navy); color: #fff; box-shadow: none; }
+.laq .laq-chip:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-ncal { margin: 0 14px 12px 44px; }
