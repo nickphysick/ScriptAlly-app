@@ -193,7 +193,7 @@ test("V13-2 — Joanna: Unknown, then 6 weeks, saved to her card on Log", async 
   Object.assign(READ.V13_2 as object, { by1, offerTxt, on1 });
   ok(by1.startsWith("Reply expected by ") && by1.includes(`${expect6.getDate()} `), `V13-2: the reply date ("${by1}")`);
   ok((await offer.getAttribute("data-kind")) === "save" && (await offer.getAttribute("data-on")) === "1", "V13-2: the save to her card is offered, ticked");
-  ok(offerTxt === "Save 6 weeks to Joanna's card / So your next query to Joanna starts from it.", `V13-2: the offer's words ("${offerTxt}")`);
+  ok(offerTxt === "Save 6 weeks to Joanna's card / It keeps your Contact list complete, so your tracking and analysis are more accurate.", `V13-2: the offer's words ("${offerTxt}")`);
   ok(on1 === "week", `V13-2: the reminder now counts from the reply date (${on1})`);
   ok(!(await page.locator('[data-qls="nudge-opt"][data-k="close"] button').isDisabled()), "V13-2: Close it is open now");
   /* nothing saved to the card before Log */
@@ -230,7 +230,7 @@ test("V13-3 — Marcus: 10 weeks, the update left unticked, his card stays at 8"
   const offerTxt = `${await text(page, '[data-qls="save-weeks"] b')} / ${await text(page, '[data-qls="save-weeks"] i')}`;
   READ.V13_3 = { sub, read0, offerTxt };
   ok((await offer.getAttribute("data-kind")) === "update" && (await offer.getAttribute("data-on")) === "0", "V13-3: the update is offered, unticked");
-  ok(offerTxt === "Update Marcus's card to 10 weeks / It says 8 weeks now.", `V13-3: its words ("${offerTxt}")`);
+  ok(offerTxt === "Update Marcus's card to 10 weeks / It says 8 weeks now. Keeping it current makes your tracking and analysis more accurate.", `V13-3: its words ("${offerTxt}")`);
   await logAndWait(page);
   const s = saved("laq13-mr");
   Object.assign(READ.V13_3 as object, { saved: s });

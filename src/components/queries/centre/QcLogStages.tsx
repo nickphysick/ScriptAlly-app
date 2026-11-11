@@ -707,8 +707,8 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
               <input type="checkbox" className="sr-only" checked={rp.saveWk} onChange={() => setReply({ ...rp, saveWk: !rp.saveWk })} />
               <span className="laq-bx3" aria-hidden="true">{rp.saveWk ? "✓" : ""}</span>
               {offer.kind === "save"
-                ? <span><b>Save {offer.n} weeks to {first}'s card</b><i>So your next query to {first} starts from it.</i></span>
-                : <span><b>Update {first}'s card to {offer.n} weeks</b><i>It says {offer.was} weeks now.</i></span>}
+                ? <span><b>Save {offer.n} weeks to {first}'s card</b><i>It keeps your Contact list complete, so your tracking and analysis are more accurate.</i></span>
+                : <span><b>Update {first}'s card to {offer.n} weeks</b><i>It says {offer.was} weeks now. Keeping it current makes your tracking and analysis more accurate.</i></span>}
             </label>
           ) : null}
         </div>
