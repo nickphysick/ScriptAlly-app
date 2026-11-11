@@ -48,6 +48,8 @@ export interface BuilderProps {
   onFigures: (p: SubmissionPackage) => void;
   /** a deep link (`?tab=let|syn|ver`) asks for that step open (the Your materials list it used to open is retired) */
   askStep: LibTab | null;
+  /** the page is the one on screen (every workspace page stays mounted); To-do list v55 */
+  onScreen?: boolean;
   onDuplicate: (p: SubmissionPackage) => void;
   onEditPackage: (p: SubmissionPackage, focus?: "note") => void;
   onOpenMaterial: (kind: "let" | "syn" | "ext", id: string) => void;
@@ -56,7 +58,7 @@ export interface BuilderProps {
   onOpenComps: () => void;
 }
 
-export const Pk26Builder: React.FC<BuilderProps> = ({ model, current, onSelect, onFigures, askStep, onDuplicate, onEditPackage, onOpenMaterial, onNewMaterial, onOpenVersions, onOpenComps }) => {
+export const Pk26Builder: React.FC<BuilderProps> = ({ model, current, onSelect, onFigures, askStep, onScreen = true, onDuplicate, onEditPackage, onOpenMaterial, onNewMaterial, onOpenVersions, onOpenComps }) => {
   const { msPkgs, active, activeMs } = model;
 
   /* the draft first package — only when the writer has no package at all (the brand-new page). v42 F: with packages and
@@ -86,7 +88,7 @@ export const Pk26Builder: React.FC<BuilderProps> = ({ model, current, onSelect, 
       <section className="p41-build" aria-label="The open package" data-pk26="builder" data-pk39="builder" data-pk41="builder">
         {/* v39.3: Steps + preview */}
         {p ? <Pk393Builder model={model} p={p} isActive={active?.id === p.id || p.id === DRAFT_ID} onFigures={onFigures} onEdit={onEditPackage} onDuplicate={onDuplicate}
-          onPut={put} onOpenMaterial={onOpenMaterial} onNewMaterial={onNewMaterial} onOpenVersions={onOpenVersions} onOpenComps={onOpenComps} askStep={askStep} />
+          onPut={put} onOpenMaterial={onOpenMaterial} onNewMaterial={onNewMaterial} onOpenVersions={onOpenVersions} onOpenComps={onOpenComps} askStep={askStep} onScreen={onScreen} />
           : null}
         {/* v40's package guidelines, kept (v39 draws none and asks for none to go). v39.1: inside the builder's own section,
             24 under the cards, so the builder ends 96 above the results band (the ref's rhythm) */}

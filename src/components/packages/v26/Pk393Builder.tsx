@@ -80,6 +80,8 @@ export interface Pk393Props {
   onOpenComps: () => void;
   /** a deep link (`?tab=let|syn|ver`) asks for that step open */
   askStep?: StepKey | null;
+  /** false while another page is on screen (every workspace page stays mounted) */
+  onScreen?: boolean;
 }
 
 type Item = { id: string; name: string; summary: string; glyph: React.ReactNode };
@@ -290,7 +292,10 @@ export const Pk393Builder: React.FC<Pk393Props> = (props) => {
     setOpen(props.askStep);
   }, [props.askStep, p.id, locked]);
   const eff: StepKey | null = locked ? null : open === undefined ? nextMissing(p) : open;
-  useEscapeLayer(eff != null, () => setOpen(null), ESC_LEVEL.page);
+  /* ⚠️ To-do list v55: ONLY WHILE THE PAGE IS ON SCREEN. Every workspace page stays mounted and a step is open by default
+     (the first missing one), so this layer was held app-wide from the moment the app loaded — and any open layer stands
+     down every page's own keys (the To-do list's "/", J, K, S, D, N among them). */
+  useEscapeLayer(eff != null && props.onScreen !== false, () => setOpen(null), ESC_LEVEL.page);
   const pick = async (k: StepKey, id: string) => {
     await props.onPut(k, id);
     setOpen(nextMissing(p, k));

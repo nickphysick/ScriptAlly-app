@@ -148,7 +148,7 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
         {/* v42 A: the rail is retired; the open package takes the column's full width */}
         {showBuilder ? (
           <div className="p42-ws" data-pk41="workspace">
-            <Pk26Builder model={model} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep}
+            <Pk26Builder model={model} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep} onScreen={routeActive}
               onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
               onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
               onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />
