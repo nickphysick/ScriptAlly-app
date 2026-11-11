@@ -127,7 +127,7 @@ The journeys (PA3-7 to PA3-9, plus journeys 1, 2, 4 and 6) wrote to the emulator
 - the reply, by its own Undo (Full sent → Partial requested → Full sent);
 - the edited agent, its whole document written back by id.
 
-WebKit (`--project=iphone`) ran the phone locks once at the end: see "WebKit" below.
+WebKit (`--project=iphone`) ran the phone locks once at the end: green, see "WebKit" below.
 
 ## What retired, by name
 
@@ -196,7 +196,13 @@ WebKit (`--project=iphone`) ran the phone locks once at the end: see "WebKit" be
 
 ## WebKit
 
-**Not run.** `--project=iphone` failed to launch in 0ms: Playwright's WebKit build is not installed on this machine (`~/Library/Caches/ms-playwright/webkit-2388` is missing). Installing it is a browser download (`npx playwright install webkit`), which needs Nick's go-ahead. Every lock above is Chromium (`--project=pixel`).
+Run once at the end (`--project=iphone`, Playwright WebKit 27.2, build 2388, installed with Nick's go-ahead on 11 Nov):
+
+- **shell:** 134 readings, 0 red. PA3-1, 2, 3, 6 and 10 at 360, 390 and 414, over every tab, pushed page, sheet and journey step.
+- **figures:** 8 readings, 0 red. PA3-4 (103 = 103 = 103; 23/10/37) and PA3-5.
+- **journeys:** skipped in WebKit by design. They write to the emulator, so they run once, in Chromium.
+
+The first WebKit attempt stopped on a harness race, not an app fault: each new width re-ran the sign-in, and WebKit's first `goto` collided with the app's own redirect. The sweep now signs in once and resizes for each later width.
 
 ## Gates at the end
 

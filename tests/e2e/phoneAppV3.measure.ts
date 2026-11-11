@@ -158,9 +158,11 @@ test.describe("PA3 phone shell", () => {
     };
     /* PA3_FAST=1 (the mutation proofs): 390 only, the four tabs and Packages, no sheets */
     const FAST = !!process.env.PA3_FAST;
+    let signedIn = false;
     for (const vp of FAST ? [PA3_PHONES[0]] : [...PA3_PHONES, { width: 414, height: 896 }]) {
       const w = tag(vp);
-      await openPhone3(page, "/dashboard", vp);
+      /* sign in once; each later width only resizes (a second sign-in raced the app's own redirect in WebKit) */
+      if (!signedIn) { await openPhone3(page, "/dashboard", vp); signedIn = true; } else { await page.setViewportSize(vp); await go(page, "/dashboard"); }
       for (const p of ROOTS) {
         await go(page, p);
         const where = `${p} @${w}`;
