@@ -32,7 +32,7 @@ describe("the weekly goal chart", () => {
     expect(m.streak).toBe(3);
     expect(goalHeadline(m)).toBe("2 of 3 this week");
     expect(streakWords(m.streak)).toBe("3-week streak");
-    expect(goalNudge(m.left)).toBe("One more keeps the streak going.");
+    expect(goalNudge(m.left, m.streak)).toBe("One more keeps the streak going.");
   });
 
   it("the week boundary is midnight on Monday, London: Sunday 23:30 is last week, Monday 00:10 is this one", () => {
@@ -50,8 +50,16 @@ describe("the weekly goal chart", () => {
     const met = weekGoal154([...SERIES, at(2026, 11, 11, 9)], WEEKLY3, NOW);
     expect(met).toMatchObject({ now: 3, left: 0, streak: 3 });
     expect(met.weeks[19].met).toBe(true);
-    expect(goalNudge(met.left)).toBe("Goal met — nice work.");
-    expect(goalNudge(2)).toBe("2 more keeps the streak going.");
+    expect(goalNudge(met.left, met.streak)).toBe("Goal met — nice work.");
+    expect(goalNudge(2, 1)).toBe("2 more keeps the streak going.");
+  });
+
+  it("v154.1: with no streak the line is about this week alone, never the streak", () => {
+    expect(goalNudge(1, 0)).toBe("One more to hit your goal this week.");
+    expect(goalNudge(3, 0)).toBe("3 more to hit your goal this week.");
+    expect(goalNudge(0, 0)).toBe("Goal met — nice work.");
+    expect(goalNudge(1, 2)).toBe("One more keeps the streak going.");
+    expect(goalNudge(3, 2)).toBe("3 more keeps the streak going.");
   });
 
   it("no weekly target in force: the named fallback, never a goal the writer chose", () => {

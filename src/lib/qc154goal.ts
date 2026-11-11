@@ -53,8 +53,11 @@ export const monthOf = (d: string): string => MONTHS_SHORT[Number(d.slice(5, 7))
 /** the headline's words */
 export const goalHeadline = (m: Pick<WeekGoal154, "now" | "goal">): string => `${m.now} of ${m.goal} this week`;
 export const streakWords = (k: number): string => `${k}-week streak`;
-export const goalNudge = (left: number): string =>
-  left <= 0 ? "Goal met — nice work." : left === 1 ? "One more keeps the streak going." : `${left} more keeps the streak going.`;
+/** v154.1: with no streak to keep, the line speaks of this week alone (never "keeps the streak going") */
+export const goalNudge = (left: number, streak: number): string =>
+  left <= 0 ? "Goal met — nice work."
+    : streak > 0 ? (left === 1 ? "One more keeps the streak going." : `${left} more keeps the streak going.`)
+      : left === 1 ? "One more to hit your goal this week." : `${left} more to hit your goal this week.`;
 export const goalLineWords = (goal: number): string => `your goal · ${goal} a week`;
 export const barTip = (w: Pick<GoalWeek154, "start" | "count">): string => `w/c ${weekDay(w.start)} · ${w.count} sent`;
 

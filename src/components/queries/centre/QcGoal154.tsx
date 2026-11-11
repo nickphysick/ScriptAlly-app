@@ -3,7 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Query Centre v154 (design-refs/query-centre-v154.html) — the weekly goal chart in the header's third column, in
- * place of the stage ring: "[n] of [goal] this week" over a 2px navy rule, the streak pill, one line of encouragement,
+ * place of the stage ring: "[n] of [goal] this week" over a 2px navy rule, the streak pill (only with a streak, v154.1),
+ * one line of encouragement,
  * and the last twenty weeks as navy bars on one baseline with a dashed goal line. The maths is lib/qc154goal's.
  *
  * ⚠️ NO CARD AND NO FILTERING: the chart sits on the page; filtering by stage is the rail's (it always was).
@@ -36,9 +37,10 @@ export const QcGoal154: React.FC<{ m: WeekGoal154 | null }> = ({ m }) => {
     <div className="qc154-wkc" data-qc154="goal" data-goal-from-writer={m.goalFromWriter ? "" : undefined}>
       <div className="qc154-wkh" data-qc154="goal-head">
         <span className="qc154-wkt" data-qc154="goal-headline"><b>{m.now} of {m.goal}</b> this week</span>
-        {!m.empty ? <span className="qc154-stk" data-qc154="streak">{FLAME}{streakWords(m.streak)}</span> : null}
+        {/* v154.1: no pill without a streak — never "0-week streak" */}
+        {!m.empty && m.streak > 0 ? <span className="qc154-stk" data-qc154="streak">{FLAME}{streakWords(m.streak)}</span> : null}
       </div>
-      <p className="qc154-wkn" data-qc154="goal-line">{goalNudge(m.left)}</p>
+      <p className="qc154-wkn" data-qc154="goal-line">{goalNudge(m.left, m.streak)}</p>
       <div className="qc154-wkp">
         <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className={on != null ? "is-hv" : undefined} role="img"
           aria-label={`${goalHeadline(m)}. Queries sent in each of the last ${n} weeks.`}>
