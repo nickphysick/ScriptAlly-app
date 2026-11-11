@@ -77,7 +77,7 @@
   /* the facts: Sent and Next, side by side */
   .qc154-fx { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; margin-top: auto; padding: 10px; }
   .qc154-f { position: relative; min-width: 0; padding: 8px 10px; border-radius: 10px; background: #fbf9f5; overflow: hidden; }
-  .qc154-f.is-hot { background: #f6eee8; }
+  .qc154-f.is-hot, .qc154-f[data-state="over"] { background: #f6eee8; }
   .qc151 .qc154-f > span.qc154-fl { display: block; font: 400 12px/1.35 var(--sp-serif) !important; color: #8a8076; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qc151 .qc154-f > b { display: block; margin-top: 2px; font: 400 15px/1.1 var(--sp-type) !important; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qc154-f.is-hot > b::after { content: ""; display: inline-block; width: 6px; height: 6px; margin-left: 6px; border-radius: 50%; background: var(--navy); vertical-align: 2px; }
@@ -125,6 +125,30 @@
   100% { box-shadow: 0 0 0 12px rgba(42, 58, 82, 0), 0 2px 6px -2px rgba(28, 19, 15, 0.3); }
 }
 
+/* a narrow card (under 380px: the 3-across grid at 1440, or any list column under ~1200px): a smaller track (21/28px
+   steps, 7px links) and seal, so the name keeps ~117px, and the fact boxes at 8px padding with 13.5px values, so the
+   longest Next value ("Response overdue", 121px at 13.5px) fits a 311px card without an ellipsis. Not in the ref,
+   which only draws the 419px card. */
+@media (min-width: 768px) {
+  .qc154-card { container-type: inline-size; }
+}
+@container (max-width: 380px) {
+  .qc154-hd { gap: 8px; padding: 12px 10px; }
+  .qc151.qc153 .qc154-seal { width: 32px; height: 32px; font-size: 12px !important; box-shadow: 0 0 0 2.5px #fff, 0 0 0 3.5px rgba(42, 58, 82, 0.35); }
+  .qc151 .qc154-nm { font-size: 15.5px !important; }
+  .qc151 .qc154-ag { font-size: 13px !important; }
+  .qc154-card .qc153-nd { width: 21px; height: 21px; }
+  .qc154-card .qc153-nd svg { width: 17px; height: 17px; }
+  .qc154-card .qc153-nd--cur { width: 28px; height: 28px; }
+  .qc154-card .qc153-nd--cur svg { width: 17px; height: 17px; }
+  .qc154-card .qc153-nd--cur .qc153-arw { top: -5px; right: -6px; width: 16px; height: 16px; }
+  .qc154-card .qc153-nd--cur .qc153-arw svg { width: 11px; height: 11px; }
+  .qc154-card .qc153-ln { width: 7px; }
+  .qc154-fx { gap: 6px; padding: 8px; }
+  .qc154-f { padding: 7px 8px; }
+  .qc151 .qc154-f > b { font-size: 13.5px !important; }
+}
+
 @media (min-width: 768px) and (max-width: 1099.98px) {
   .qc154-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -156,7 +180,7 @@
   .qc154-wkc svg { display: block; overflow: visible; }
   .qc154-wb path, .qc154-wb rect { transition: opacity 0.12s; }
   .qc154-wkc svg.is-hv .qc154-wb:not(.is-on) path { opacity: 0.35; }
-  .qc151 .qc154-wkg { font: italic 400 11.5px var(--sp-serif) !important; fill: #7a6f66; }
+  .qc151 .qc154-wkg { font: italic 400 11.5px var(--sp-serif) !important; fill: #7a6f66; paint-order: stroke; stroke: #f5f5f3; stroke-width: 3px; stroke-linejoin: round; }
   .qc151 .qc154-wkm { font: 400 11.5px var(--sp-serif) !important; fill: #8a8076; }
   .qc151 .qc154-wktip {
     position: absolute; top: -6px; left: 0; transform: translate(-50%, -100%); padding: 6px 9px; border-radius: 8px; pointer-events: none; opacity: 0;

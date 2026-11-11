@@ -43,7 +43,6 @@ export const QcGoal154: React.FC<{ m: WeekGoal154 | null }> = ({ m }) => {
         <svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} className={on != null ? "is-hv" : undefined} role="img"
           aria-label={`${goalHeadline(m)}. Queries sent in each of the last ${n} weeks.`}>
           <line x1="0" x2={W} y1={gy} y2={gy} stroke={NAVY} strokeOpacity=".35" strokeDasharray="2 4" />
-          <text className="qc154-wkg" x="0" y={gy - 5}>{goalLineWords(m.goal)}</text>
           <line x1="0" x2={W} y1={BASE} y2={BASE} stroke="rgba(28,19,15,.18)" />
           {m.weeks.map((w, i) => {
             const x = i * bw + (bw - barw) / 2;
@@ -61,10 +60,16 @@ export const QcGoal154: React.FC<{ m: WeekGoal154 | null }> = ({ m }) => {
               </g>
             );
           })}
+          {/* the goal's words over the bars, haloed in the page's ground, so a tall week never hides them */}
+          <text className="qc154-wkg" x="0" y={gy - 5}>{goalLineWords(m.goal)}</text>
           {labs.map((l) => <text key={l.i} className="qc154-wkm" x={l.i * bw + bw / 2} y={BASE + 15} textAnchor="middle">{l.label}</text>)}
         </svg>
         <span className="qc154-wktip" data-qc154="goal-tip" aria-hidden="true"
-          style={on != null ? { left: `${on * bw + bw / 2}px`, opacity: 1 } : undefined}>{on != null ? barTip(m.weeks[on]) : ""}</span>
+          style={on != null ? {
+            left: `${on * bw + bw / 2}px`, opacity: 1,
+            /* the end weeks anchor the tooltip inward, so it never runs past the chart's edge */
+            transform: `translate(${on < 3 ? "-8px" : on > n - 4 ? "calc(-100% + 8px)" : "-50%"}, -100%)`,
+          } : undefined}>{on != null ? barTip(m.weeks[on]) : ""}</span>
       </div>
     </div>
   );

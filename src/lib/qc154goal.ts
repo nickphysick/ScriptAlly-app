@@ -13,6 +13,7 @@
 import type { QueryingGoalEntry } from "../types";
 import { weekStreak } from "./milestones";
 import { resolveGoal } from "./queryingGoals";
+import { MONTHS_SHORT } from "./dates";
 
 const DAY = 86_400_000;
 
@@ -43,12 +44,11 @@ export interface WeekGoal154 {
   empty: boolean;
 }
 
-const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const asUtc = (d: string): Date => new Date(`${d}T00:00:00Z`);
 const addDays = (d: string, n: number): string => new Date(asUtc(d).getTime() + n * DAY).toISOString().slice(0, 10);
 /** "3 Nov" */
-export const weekDay = (d: string): string => `${Number(d.slice(8, 10))} ${MON[Number(d.slice(5, 7)) - 1]}`;
-export const monthOf = (d: string): string => MON[Number(d.slice(5, 7)) - 1];
+export const weekDay = (d: string): string => `${Number(d.slice(8, 10))} ${MONTHS_SHORT[Number(d.slice(5, 7)) - 1]}`;
+export const monthOf = (d: string): string => MONTHS_SHORT[Number(d.slice(5, 7)) - 1];
 
 /** the headline's words */
 export const goalHeadline = (m: Pick<WeekGoal154, "now" | "goal">): string => `${m.now} of ${m.goal} this week`;
