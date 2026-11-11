@@ -3,11 +3,13 @@
  * Claude Code SessionEnd hook — if this session's checkout holds the test slot, stop the holder's job
  * (its recorded process groups, then its pid) and release the slot — "this checkout" means the same
  * git root as the holder's; then, with the slot free, sweep
- * leftovers as SessionStart does. Never touches a slot held from another checkout. Fails open.
+ * leftovers as SessionStart does. Never touches a slot held from another checkout. Also releases every
+ * worktree claim this session holds. Fails open.
  */
 import { realpathSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { slotState, forceRelease, sweep, logHookError } from "./slot-core.mjs";
+import { makeStore } from "./claim-core.mjs";
 
 const real = (p) => { try { return realpathSync(p); } catch { return p; } };
 /* ⚠️ MATCH ON THE GIT ROOT, NEVER A PATH PREFIX: a session opened in the home folder "contains" every
@@ -18,6 +20,8 @@ process.stdin.on("data", (d) => { raw += d; });
 process.stdin.on("end", () => {
   try {
     const input = JSON.parse(raw || "{}");
+    /* every worktree claim this session holds is released (claim-core.mjs) */
+    try { const store = makeStore(); for (const c of store.all()) if (input.session_id && c.sessionId === input.session_id) store.drop(c.root); } catch (e) { logHookError("session-end claims", e); }
     const root = rootOf(input.cwd || process.cwd());
     const { state, holder } = slotState();
     if (state === "held" && holder) {

@@ -4,7 +4,8 @@
  *
  *   1. copies scripts/hooks/*.mjs (except this file) to ~/.claude/hooks/queryhawk/
  *   2. backs up ~/.claude/settings.json to ~/.claude/settings.json.bak-<YYYY-MM-DD-HHMMSS>
- *   3. MERGES three hook entries into it — PreToolUse (Bash), SessionStart, SessionEnd — keeping every
+ *   3. MERGES its hook entries into it — PreToolUse (Bash: the test slot; Bash|Edit|Write|MultiEdit|
+ *      NotebookEdit: worktree claims), SessionStart, SessionEnd — keeping every
  *      other setting and hook. Re-running replaces only its own entries (matched by the install path).
  *
  * Machine-wide on purpose: a session on an old branch or in another worktree is held to the same slot.
@@ -37,14 +38,17 @@ if (existsSync(SETTINGS)) {
 const cmd = (f) => `node "${join(DEST, f)}"`;
 const ours = (entry) => (entry?.hooks ?? []).some((h) => typeof h.command === "string" && h.command.includes(MARK));
 const want = {
-  PreToolUse: { matcher: "Bash", hooks: [{ type: "command", command: cmd("pretool-bash.mjs"), timeout: 10 }] },
+  PreToolUse: [
+    { matcher: "Bash", hooks: [{ type: "command", command: cmd("pretool-bash.mjs"), timeout: 10 }] },
+    { matcher: "Bash|Edit|Write|MultiEdit|NotebookEdit", hooks: [{ type: "command", command: cmd("pretool-claim.mjs"), timeout: 10 }] },
+  ],
   SessionStart: { hooks: [{ type: "command", command: cmd("session-start.mjs"), timeout: 30 }] },
   SessionEnd: { hooks: [{ type: "command", command: cmd("session-end.mjs"), timeout: 30 }] },
 };
 settings.hooks = settings.hooks ?? {};
 for (const [event, entry] of Object.entries(want)) {
   const kept = (settings.hooks[event] ?? []).filter((e) => !ours(e));
-  settings.hooks[event] = [...kept, entry];
+  settings.hooks[event] = [...kept, ...(Array.isArray(entry) ? entry : [entry])];
 }
 writeFileSync(SETTINGS, JSON.stringify(settings, null, 2) + "\n");
 console.log(`merged the test-slot hooks into ${SETTINGS}:`);
