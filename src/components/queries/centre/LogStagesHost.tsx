@@ -20,6 +20,7 @@ import { saveLog } from "../../../lib/queryActions/logSave";
 import { restoreSnapshot, takeSnapshot } from "../../../lib/queryActions/snapshot";
 import { planOf, stageAgents, type BookChoice, type Choice, type LogAnswers, type PlanContext, type StagePackage } from "../../../lib/queryActions/logStages";
 import { bookVersionsOf, latestVersion } from "../../../lib/bookVersions";
+import { bookOf } from "../../../lib/queryActions/sample";
 import { previousQueryFor } from "../../../lib/requery";
 import { quietWeeksOf } from "../../../lib/queryState";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
@@ -97,7 +98,7 @@ export const LogStagesHost: React.FC<{
   return (
     <QcLogStages nowMs={nowMs} agents={model.stAgents} seedAgentId={seedAgentId} bookTitle={ms.title || "Untitled manuscript"}
       packages={model.stPackages} activePackageId={model.active} letters={model.ctx.letters} synopses={model.ctx.synopses} bookVersions={model.ctx.bookVersions}
-      count={forBook.length} quietWeeks={quietWeeksOf(currentUser)} ctx={model.ctx} onClose={onClose}
+      count={forBook.length} quietWeeks={quietWeeksOf(currentUser)} ctx={model.ctx} book={bookOf(ms.wordCount)} onClose={onClose}
       onAddAgent={(name, done) => openNewAgentCard({ from: "button", host: "panel", ...(name ? { prefill: { name } } : {}), onCreated: done })}
       onSave={onSave} />
   );

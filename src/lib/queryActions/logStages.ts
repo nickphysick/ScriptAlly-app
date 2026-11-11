@@ -138,16 +138,6 @@ export const choiceOfSample = (s: Sample, bookVersionId: string | null): SampleC
 
 export interface StagePackage { id: string; name: string; active: boolean; card: PackageCard; pieces: string[] }
 
-/** the sizes the "How much?" menu offers: the ref's five, and the agent's own ask when it is not among them */
-export const SAMPLE_SIZES: readonly { unit: SampleChoice["unit"]; amt: number }[] = [
-  { unit: "pages", amt: 5 }, { unit: "pages", amt: 10 }, { unit: "pages", amt: 50 }, { unit: "chapters", amt: 1 }, { unit: "chapters", amt: 3 },
-];
-export function sizesFor(ask: GuidelineAsk): { unit: SampleChoice["unit"]; amt: number }[] {
-  const out = [...SAMPLE_SIZES];
-  const s = ask.sample;
-  if (s.unit !== "none" && !out.some((x) => x.unit === s.unit && x.amt === s.amt)) out.push({ unit: s.unit, amt: s.amt });
-  return out;
-}
 /** "First 10 pages", "First chapter", "Pages 40–64": the sample's own name (`sampleName`), capitalised */
 export const sizeName = (s: { unit: Sample["unit"]; amt: number; sect?: boolean; from?: number; fu?: FromUnit | null }): string =>
   !s.sect && s.unit === "chapters" && s.amt === 1 ? "First chapter"
