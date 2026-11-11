@@ -1,0 +1,7 @@
+CO1: mutation `void ({ id: q.id,` -> exit 1, red: ['CO1', 'CO2', 'CO3', 'CO6'] -> RED
+CO2: mutation `const due = false;` -> exit 1, red: ['CO2'] -> RED
+CO3: mutation `return true;` -> exit 1, red: ['CO3'] -> RED
+CO4: mutation `rows.every((r) => r.past)` -> exit 1, red: ['CO4'] -> RED
+CO5: mutation `const queried = live.filter((q) => q.status !== QueryStatus.QUERIED ||` -> exit 1, red: ['CO5'] -> RED
+CO6: mutation `closesAll = false;` -> exit 1, red: ['CO6'] -> RED
+CO7: mutation `if (closing) out.quiet.push("This page's counts move: Open to queries ` -> exit 1, red: ['CO7'] -> RED
