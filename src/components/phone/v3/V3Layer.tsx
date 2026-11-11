@@ -41,12 +41,12 @@ export const V3Layer: React.FC<V3Panels> = ({ render }) => {
     full = true;
   } else if (o) {
     body = render?.(o) ?? null;
-    full = o.type === "log" || o.type === "reply" || o.type === "add" || o.type === "tasks" || o.type === "agents-all";
+    full = o.type === "reply" || o.type === "add" || o.type === "tasks" || o.type === "agents-all";
   }
   if (!body && !snack) return null;
   return createPortal(
     <div className="pa3 pa3-layer pa-layer pa4-layer" data-pa3="layer" data-pa4="layer" style={body ? undefined : { pointerEvents: "none", inset: "auto" }}>
-      {body ? (<React.Fragment key={seq}>{full ? null : <div className="pa3-scrim" data-pa3="scrim" onClick={closeV3} />}{body}</React.Fragment>) : null}
+      {body ? (<React.Fragment key={seq}>{full ? null : <div className="pa4-scrim" data-pa3="scrim" onClick={closeV3} />}{body}</React.Fragment>) : null}
       {snack ? (
         /* Phone app v4: the snackbar keeps Undo and loses the hawk (the board's `.snack`) */
         <div className={`pa4-snack${o?.type === "query" ? "" : " low"}`} role="status" data-pa3="snack" data-pa4="snack" style={{ pointerEvents: "auto" }}>

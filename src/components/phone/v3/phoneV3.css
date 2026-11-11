@@ -100,16 +100,7 @@
 
   /* ── overlays: sheets, full screens (ref "overlays") ── */
   .pa3-layer { position: fixed; inset: 0; z-index: 1000; font-family: var(--pa-sans); color: var(--pa-ink); }
-  .pa3-scrim { position: absolute; inset: 0; background: rgba(20, 26, 36, 0.45); animation: pa3-fade 0.2s; }
-  .pa3-sheet {
-    position: absolute; left: 0; right: 0; bottom: 0; max-height: 92%; overflow-y: auto; overflow-x: hidden; background: var(--pa-page);
-    border-radius: 24px 24px 0 0; box-shadow: var(--pa-sh-up); scrollbar-width: none; overscroll-behavior: contain;
-    animation: pa3-up 0.32s var(--pa-spring); padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .pa3-sheet::-webkit-scrollbar, .pa3-full .pa3-body::-webkit-scrollbar { display: none; }
-  .pa3-sheet .pa3-grab { position: sticky; top: 0; z-index: 3; height: 22px; display: grid; place-items: center; }
-  .pa3-sheet .pa3-grab::after { content: ""; width: 38px; height: 5px; border-radius: 3px; background: rgba(31, 38, 51, 0.2); }
-  .pa3-sheet .pa3-pad { padding: 0 16px 22px; }
+  .pa3-full .pa3-body::-webkit-scrollbar { display: none; }
   .pa3 .pa3-h3 { font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 23px; line-height: 1.2; margin: 4px 4px 4px; color: var(--pa-ink); }
   .pa3-lead { font-size: 14.5px; color: var(--pa-muted); margin: 0 4px 16px; line-height: 1.45; }
   .pa3-full { position: absolute; inset: 0; background: var(--pa-page); display: flex; flex-direction: column; animation: pa3-up 0.32s var(--pa-spring); }
@@ -180,6 +171,6 @@
   @keyframes pa3-fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes pa3-pop { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
   @media (prefers-reduced-motion: reduce) {
-    .pa3-sheet, .pa3-full, .pa3-scrim, .pa3-cele, .pa3-cele img { animation: none !important; transition: none !important; }
+    .pa3-full, .pa3-cele, .pa3-cele img { animation: none !important; transition: none !important; }
   }
 }

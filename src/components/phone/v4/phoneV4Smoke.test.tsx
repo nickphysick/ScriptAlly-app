@@ -20,6 +20,7 @@ import { TodayV4 } from "./TodayV4";
 import { QueriesV4 } from "./QueriesV4";
 import { AgentsV4, AgentsListPageV4 } from "./AgentsV4";
 import { YouV4 } from "./YouV4";
+import { QuickLogV4 } from "./QuickLogV4";
 import { V3Provider } from "../v3/V3Provider";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
@@ -62,5 +63,10 @@ describe("Phone app v4 renders", () => {
     expect(empty).toContain("Nothing sent yet.");
     const full = renderPageSeeded(<YouV4 />, "/you");
     for (const w of ["See the full picture", "What’s landing", "Wall of no", "Packages", "Responses", "Query letters", "Synopses and comps"]) expect(full).toContain(w);
+  });
+  it("the quick log opens on who, with the two quiet links", () => {
+    for (const html of [renderPage(P(<QuickLogV4 />), "/dashboard"), renderPageSeeded(P(<QuickLogV4 />), "/dashboard")]) {
+      for (const w of ["Who did you query?", "Other", "An agent replied", "Pin a note"]) expect(html).toContain(w);
+    }
   });
 });
