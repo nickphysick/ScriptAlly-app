@@ -30,7 +30,7 @@
  *      already holds the slot, it joins that holding.
  */
 import { spawn } from "node:child_process";
-import { lstatSync, readdirSync, rmSync, statSync, statfsSync, symlinkSync, unlinkSync } from "node:fs";
+import { existsSync, lstatSync, readdirSync, rmSync, statSync, statfsSync, symlinkSync, unlinkSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 import { acquire } from "./hooks/slot-core.mjs";
 
@@ -71,6 +71,7 @@ const removeLogs = () => {
 };
 
 export const JAVA_CAPS = "-Xmx1536m -XX:ActiveProcessorCount=2";
+const JDK = "/opt/homebrew/opt/openjdk@21/bin";
 
 async function main(argv) {
   if (argv.length === 0) {
@@ -105,6 +106,9 @@ async function main(argv) {
 
   /* The child leads its own process group, so the watchdog can stop the emulators it starts. */
   const env = { ...process.env, HEAVY_SLOT_TOKEN: slot.token };
+  /* The Firestore emulator needs Java 21; the keg-only Homebrew openjdk@21 is not on PATH by default.
+   * emu.mjs already adds it; test:rules / test:functions call the guard directly and did not. */
+  if (existsSync(JDK) && !(env.PATH ?? "").split(":").includes(JDK)) env.PATH = `${JDK}:${env.PATH}`;
   if (!/ActiveProcessorCount/.test(env.JAVA_TOOL_OPTIONS ?? "")) env.JAVA_TOOL_OPTIONS = `${env.JAVA_TOOL_OPTIONS ?? ""} ${JAVA_CAPS}`.trim();
   const child = spawn("nice", ["-n", "10", argv[0], ...argv.slice(1)], { cwd: ROOT, stdio: "inherit", detached: true, env });
   slot.addPgid(child.pid);
