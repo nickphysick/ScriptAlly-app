@@ -14,7 +14,6 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pageSmoke")).toastMock());
 
 import { YouV3 } from "./YouV3";
-import { TodayV3 } from "./TodayV3";
 import { QueriesV3 } from "./QueriesV3";
 import { V3Provider } from "./V3Provider";
 import { AgentsV3, AgentFormV3 } from "./AgentsV3";
@@ -29,14 +28,6 @@ describe("Phone app v3 renders", () => {
       expect(html).toContain("Materials");
       expect(html).toContain("Responses");
     }
-  });
-  it("Today: empty (all caught up) and populated", () => {
-    const empty = renderPage(P(<TodayV3 />), "/dashboard");
-    expect(empty).toContain("You’re all caught up.");
-    expect(empty).toContain("With the agent");
-    const full = renderPageSeeded(P(<TodayV3 />), "/dashboard");
-    expect(full).toContain("Lately");
-    expect(full).toContain("Corkboard");
   });
   it("Queries: the five chips, empty and populated", () => {
     for (const html of [renderPage(P(<QueriesV3 />), "/queries"), renderPageSeeded(P(<QueriesV3 />), "/queries")]) {

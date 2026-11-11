@@ -14,7 +14,10 @@ export type V3Overlay =
   | { type: "reply"; queryId?: string }
   | { type: "add"; editId?: string; name?: string }
   | { type: "note" }
-  | { type: "search" };
+  | { type: "search" }
+  /* Phone app v4: pushed pages drawn by the layer (back arrow, the page's name) */
+  | { type: "tasks" }
+  | { type: "agents-all" };
 
 export interface V3Snack { msg: string; undo?: () => Promise<void> | void }
 

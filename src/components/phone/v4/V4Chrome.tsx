@@ -111,3 +111,16 @@ export const V4PushedHeader: React.FC<{ title: string; onBack: () => void; extra
     {slot ? <div className="pa3-pslot" data-pa3="page-slot">{slot}</div> : null}
   </>
 );
+
+/** a pushed page the layer draws over everything (the task list, everyone on the list): back arrow, name, its own scroll */
+export const V4Page: React.FC<{ title: string; onBack: () => void; pa4: string; children: React.ReactNode; foot?: React.ReactNode; extra?: React.ReactNode }> = ({ title, onBack, pa4, children, foot, extra }) => (
+  <div className="pa4-page pa4" role="dialog" aria-modal="true" aria-label={title} data-pa4={pa4}>
+    <div className="pa4-topbar">
+      <IconBtn label="Back" n="back" pa4="back" onClick={onBack} />
+      <h1 className="pa4-ph-t" style={{ flex: 1, minWidth: 0, margin: 0, padding: "0 4px" }}><span className="pa4-n">{title}</span></h1>
+      {extra}
+    </div>
+    <div className="pa4-scroll" data-pa4="page-scroll">{children}</div>
+    {foot ? <div className="pa4-act" data-pa4="act">{foot}</div> : null}
+  </div>
+);

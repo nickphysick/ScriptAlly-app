@@ -45,6 +45,7 @@ import { V3Provider } from "../phone/v3/V3Provider";
 import { V3Layer } from "../phone/v3/V3Layer";
 import { renderJourney } from "../phone/v3/JourneysV3";
 import { renderAgents } from "../phone/v3/AgentsV3";
+import { renderV4 } from "../phone/v4/renderV4";
 import { openV3, closeV3, v3Overlay } from "../phone/v3/v3Store";
 import { v3IsRoot, v3RootTitle, v3TabFor } from "../../lib/phoneV3Nav";
 import { PhoneBandContext } from "../phone/phoneBandStore";
@@ -657,7 +658,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       />
       )}
 
-      {phoneNav ? <V3Layer render={(o) => renderJourney(o) ?? renderAgents(o)} /> : null}
+      {phoneNav ? <V3Layer render={(o) => renderV4(o) ?? renderJourney(o) ?? renderAgents(o)} /> : null}
       {/* Phone app v2 (Part 1D) — THE PHONE'S SHEETS. The menu REPLACES the "you" sheet (Mobile Pass 1, concept
           frame 07): every row it offered is still reachable — To-do is a tab, packages are the Materials tile, and
           Import, Settings, Help, Sign out and Upgrade (Plan & billing) are in the menu. Phones only; at 768px and up

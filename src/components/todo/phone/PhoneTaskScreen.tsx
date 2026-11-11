@@ -56,9 +56,12 @@ export interface PhoneTaskScreenProps {
   startKey: string;
   now: number;
   onClose: () => void;
+  /** Phone app v4: when given, a finished task hands back what was done and the next task's key instead of opening it,
+   *  so Today can show the stamp and "Continue" (the snackbar and its Undo are unchanged) */
+  onDid?: (did: { head: string; task: WsTask; next: string | null }) => void;
 }
 
-export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, startKey, now, onClose }) => {
+export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, startKey, now, onClose, onDid }) => {
   const { db, all, today, todayYmd } = core;
   const { queries, agents, manuscripts, packages, activities, taskFlags, currentUser, updateUserTask } = db;
   const [key, setKey] = useState<string | null>(startKey);
@@ -137,6 +140,7 @@ export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, s
         return;
       }
       flash(d.head, d.undo);
+      if (onDid) { onDid({ head: d.head, task: sel, next }); return; }
       go(next);
     } catch (e) {
       console.error("[to-do] the save failed", e);
@@ -148,7 +152,7 @@ export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, s
     setBusy(true);
     saving.current = true;
     const next = nextKeyAfter(sel);
-    try { const undo = await core.ownDoneWrite(own); flash("Done. One less thing on your mind.", undo); go(next); }
+    try { const undo = await core.ownDoneWrite(own); flash("Done. One less thing on your mind.", undo); if (onDid) { onDid({ head: "Done", task: sel, next }); return; } go(next); }
     catch { flash("Couldn’t save that. Nothing was changed."); } finally { setBusy(false); saving.current = false; }
   };
 
