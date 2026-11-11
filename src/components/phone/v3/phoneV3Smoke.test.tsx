@@ -15,7 +15,7 @@ vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pa
 
 import { YouV3 } from "./YouV3";
 import { V3Provider } from "./V3Provider";
-import { AgentsV3, AgentFormV3 } from "./AgentsV3";
+import { AgentFormV3 } from "./AgentsV3";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
 const P = (n: React.ReactNode) => <V3Provider on now={NOW}>{n}</V3Provider>;
@@ -28,10 +28,7 @@ describe("Phone app v3 renders", () => {
       expect(html).toContain("Responses");
     }
   });
-  it("Agents: the switch and chips; the add form's first step", () => {
-    for (const html of [renderPage(P(<AgentsV3 />), "/agents"), renderPageSeeded(P(<AgentsV3 />), "/agents")]) {
-      for (const w of ["Your list", "Discover", "To query", "Queried"]) expect(html).toContain(w);
-    }
+  it("the add form's first step", () => {
     const f = renderPage(P(<AgentFormV3 />), "/agents");
     for (const w of ["Who are they?", "I don’t know the agency", "Agent fit"]) expect(f).toContain(w);
   });

@@ -23,9 +23,11 @@ export const V4_MINI_AT = 300;
 export function useStageScroll(scroller: () => HTMLElement | null, routeKey: string): { y: number; down: boolean } {
   const [st, setSt] = useState({ y: 0, down: false });
   const last = useRef(0);
+  const [tries, setTries] = useState(0);
   useEffect(() => {
-    const el = scroller();
-    if (!el) return undefined;
+    /* the bar can mount before the stage does: look again on the next frame until it exists */
+    const el = scroller() ?? document.getElementById("app-stage-scroll");
+    if (!el) { if (tries > 120) return undefined; const f = requestAnimationFrame(() => setTries((t) => t + 1)); return () => cancelAnimationFrame(f); }
     let frame = 0;
     last.current = el.scrollTop;
     setSt({ y: el.scrollTop, down: false });
@@ -41,7 +43,7 @@ export function useStageScroll(scroller: () => HTMLElement | null, routeKey: str
     };
     el.addEventListener("scroll", read, { passive: true });
     return () => { el.removeEventListener("scroll", read); cancelAnimationFrame(frame); };
-  }, [scroller, routeKey]);
+  }, [scroller, routeKey, tries]);
   return st;
 }
 

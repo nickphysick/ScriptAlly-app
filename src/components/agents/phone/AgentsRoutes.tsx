@@ -10,11 +10,11 @@ import { useIsMobile } from "../../shell/mobileChrome";
 import { Agents } from "../../Agents";
 import { DiscoverPage } from "../discover1/DiscoverPage";
 import { DiscoverPhone } from "./AgentsPhone";
-import { AgentsV3 } from "../../phone/v3/AgentsV3";
+import { AgentsV4 } from "../../phone/v4/AgentsV4";
 
 export const AgentsRoute: React.FC<React.ComponentProps<typeof Agents>> = (props) =>
-  /* Phone app v3: below 768px the Agents tab (AgentsV3); at 768px and up the Contact list, unchanged */
-  useIsMobile() ? <AgentsV3 /> : <Agents {...props} />;
+  /* Phone app v4: below 768px the Agents tab (AgentsV4); at 768px and up the Contact list, unchanged */
+  useIsMobile() ? <AgentsV4 /> : <Agents {...props} />;
 
 export const DiscoverRoute: React.FC<React.ComponentProps<typeof DiscoverPage>> = (props) =>
   useIsMobile() ? <DiscoverPhone /> : <DiscoverPage {...props} />;

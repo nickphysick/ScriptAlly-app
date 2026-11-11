@@ -18,6 +18,7 @@ import { V4PushedHeader, V4TabBar } from "./V4Chrome";
 import { Cta, Hero } from "./V4Parts";
 import { TodayV4 } from "./TodayV4";
 import { QueriesV4 } from "./QueriesV4";
+import { AgentsV4, AgentsListPageV4 } from "./AgentsV4";
 import { V3Provider } from "../v3/V3Provider";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
@@ -47,5 +48,12 @@ describe("Phone app v4 renders", () => {
     const full = renderPageSeeded(P(<QueriesV4 />), "/queries");
     for (const w of ["All", "With you", "With the agent", "Gone quiet", "Closed", "Birds-eye"]) expect(full).toContain(w);
     expect(full).not.toContain("Need you");
+  });
+  it("Agents: the header sentence, the list rows and the pushed list's chips", () => {
+    expect(renderPage(P(<AgentsV4 />), "/agents")).toContain("No agents on your list yet.");
+    const full = renderPageSeeded(P(<AgentsV4 />), "/agents");
+    expect(full).toContain("Everyone on your list");
+    const list = renderPageSeeded(P(<AgentsListPageV4 />), "/agents");
+    for (const w of ["To query", "Queried"]) expect(list).toContain(w);
   });
 });
