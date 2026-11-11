@@ -63,6 +63,30 @@ describe("v154.1 · quiet Queried bands and quiet seals", () => {
   });
 });
 
+describe("v154.1 · the rail recedes, the toolbar opens up", () => {
+  it("rail panels lose their fill, ring and side padding; a hairline under each section but the last", () => {
+    const b = rule(".qc151.qc153 .qc153-rail .qc153-rsec .qc153-rbody");
+    expect(b).toMatch(/background:\s*none/);
+    expect(b).toMatch(/box-shadow:\s*none/);
+    expect(b).toMatch(/padding-left:\s*0/);
+    expect(b).toMatch(/padding-right:\s*0/);
+    expect(rule(".qc151.qc153 .qc153-rail .qc153-rsec.qc153-rsec")).toMatch(/border-bottom:\s*1px solid #e4ded4;\s*padding-bottom:\s*6px/);
+    expect(rule(".qc151.qc153 .qc153-rail .qc153-rsec.qc153-rsec:last-of-type")).toMatch(/border-bottom:\s*0/);
+  });
+  it("the toolbar has no container and no side padding; the search field is white with a fine ring", () => {
+    const t = rule(".qc151.qc153 .qc154-tbw > .qc153-bar.qc153-bar");
+    expect(t).toMatch(/background:\s*none/);
+    expect(t).toMatch(/box-shadow:\s*none/);
+    expect(t).toMatch(/backdrop-filter:\s*none/);
+    expect(t).toMatch(/padding-left:\s*0/);
+    expect(t).toMatch(/padding-right:\s*0/);
+    expect(t).not.toMatch(/padding-(?:top|bottom)|height/);
+    const f = rule(".qc151.qc153 .qc153-bar .qc153-find.qc153-find");
+    expect(f).toMatch(/background:\s*#fff\b/);
+    expect(f).toContain("box-shadow: inset 0 0 0 1px #e3ddd3");
+  });
+});
+
 describe("v154.1 · no cool grey left on the Query Centre's ground", () => {
   it("every #f5f5f3 in the v153.4 and v154 sheets is overridden by a warm rule in qcv1541.css", () => {
     const cool = readdirSync(DIR).filter((f) => /^qcv15(?:34|4)\.css$/.test(f)).flatMap((f) => [...read(f).matchAll(/#f5f5f3|245,\s*245,\s*243/g)].map(() => f));
