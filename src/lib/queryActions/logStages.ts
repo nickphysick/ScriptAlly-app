@@ -20,7 +20,7 @@ import { MONTHS_SHORT } from "../dates";
 import { agentAgencyLine, agentInitials, agentPrimary } from "../agentDisplay";
 import { logDefaults, logPayload, pieceVersions, type LogPlan, type PieceVersions } from "./logSave";
 import { guidelineAsk, packageMatches, type GuidelineAsk, type PackageCard } from "./packages";
-import { blankSample, sampleName, capFirst, type Materials, type Sample } from "./sample";
+import { blankSample, sampleName, capFirst, type FromUnit, type Materials, type Sample } from "./sample";
 
 /** the calendar's heading month, through the platform rather than a second month table (lib/dates owns the one) */
 export const monthLong = (year: number, month: number): string => new Date(year, month, 1).toLocaleString("en-GB", { month: "long" });
@@ -114,7 +114,27 @@ export const titleName = (s: string): string => s.trim().replace(/\s+/g, " ").re
 
 export interface Choice { id: string; name: string }
 export interface BookChoice extends Choice { current: boolean }
-export interface SampleChoice { unit: Exclude<Sample["unit"], "none">; amt: number; bookVersionId: string | null }
+/**
+ * The opening pages as the stages hold them: the sample control's whole `Sample` (unit, amount, and — v1.2 — a specific
+ * section's start and its unit), plus the book version it came from. A choice with no `sect` is "from the opening".
+ */
+export interface SampleChoice {
+  unit: Exclude<Sample["unit"], "none">;
+  amt: number;
+  bookVersionId: string | null;
+  /** v1.2 — a specific section rather than the opening */
+  sect?: boolean;
+  /** the section's first unit (1 = the opening) */
+  from?: number;
+  /** the unit `from` counts in; null takes the unit's default */
+  fu?: FromUnit | null;
+}
+/** the choice as the sample control's own `Sample`, which is what the save records */
+export const sampleOfChoice = (c: SampleChoice): Sample =>
+  ({ ...blankSample(), unit: c.unit, amt: c.amt, sect: !!c.sect, from: c.sect ? (c.from ?? 1) : 1, fu: c.sect ? (c.fu ?? null) : null });
+/** a choice from the control's `Sample`, keeping the book version */
+export const choiceOfSample = (s: Sample, bookVersionId: string | null): SampleChoice | null =>
+  s.unit === "none" ? null : { unit: s.unit, amt: s.amt, bookVersionId, ...(s.sect ? { sect: true, from: s.from, fu: s.fu } : {}) };
 
 export interface StagePackage { id: string; name: string; active: boolean; card: PackageCard; pieces: string[] }
 
@@ -128,8 +148,10 @@ export function sizesFor(ask: GuidelineAsk): { unit: SampleChoice["unit"]; amt: 
   if (s.unit !== "none" && !out.some((x) => x.unit === s.unit && x.amt === s.amt)) out.push({ unit: s.unit, amt: s.amt });
   return out;
 }
-export const sizeName = (s: { unit: Sample["unit"]; amt: number }): string =>
-  s.unit === "chapters" && s.amt === 1 ? "First chapter" : capFirst(sampleName({ ...blankSample(), unit: s.unit, amt: s.amt }));
+/** "First 10 pages", "First chapter", "Pages 40–64": the sample's own name (`sampleName`), capitalised */
+export const sizeName = (s: { unit: Sample["unit"]; amt: number; sect?: boolean; from?: number; fu?: FromUnit | null }): string =>
+  !s.sect && s.unit === "chapters" && s.amt === 1 ? "First chapter"
+    : capFirst(sampleName({ ...blankSample(), unit: s.unit, amt: s.amt, sect: !!s.sect, from: s.sect ? (s.from ?? 1) : 1, fu: s.sect ? (s.fu ?? null) : null }));
 
 /** "a query letter, a synopsis and the first 10 pages", or null when the card says nothing */
 export function askWords(ask: GuidelineAsk): string | null {
@@ -153,11 +175,67 @@ export function piecesFromAsk(ask: GuidelineAsk, cur: Pieces, d: { letter: strin
 }
 export function piecesMatchAsk(ask: GuidelineAsk, p: Pieces): boolean {
   if (!ask.stated) return false;
-  const s = p.sample;
-  const sameS = ask.sample.unit === "none" ? !s : !!s && s.unit === ask.sample.unit && s.amt === ask.sample.amt;
-  return !!p.letterId === ask.ql && !!p.synopsisId === ask.syn && sameS;
+  return !!p.letterId === ask.ql && !!p.synopsisId === ask.syn && sampleMatchesAsk(ask, p.sample);
+}
+/** ⚠️ a specific section never counts as matching an opening-pages ask, whatever its size */
+export function sampleMatchesAsk(ask: GuidelineAsk, s: SampleChoice | null): boolean {
+  return ask.sample.unit === "none" ? !s : !!s && !s.sect && s.unit === ask.sample.unit && s.amt === ask.sample.amt;
 }
 export const packageFits = (p: StagePackage, ask: GuidelineAsk): boolean => packageMatches(p.card, ask);
+
+/* ── v1.2 · what {First} asks for ─────────────────────────────────────────────────────────────────────────────── */
+
+/** how one ask stands against what is ticked: sent as asked, sent differently, not ticked — or a plain dot (packages) */
+export type AskMark = "ok" | "diff" | "no" | "dot";
+export interface AskItem { key: "ql" | "syn" | "sample"; label: string; mark: AskMark }
+export type AskCard =
+  /** nothing on the card: the quiet note, no button */
+  | { kind: "nil" }
+  /** over the packages: the asks as dots, and the package that matches (by `packageFits`), if one does */
+  | { kind: "pkg"; items: AskItem[]; fit: string | null }
+  /** over the pieces: each ask marked, and the lines that say what differs */
+  | { kind: "pcs"; items: AskItem[]; ok: boolean; whys: string[]; extra: string | null };
+
+const lowerFirst = (t: string): string => (t ? t[0].toLowerCase() + t.slice(1) : t);
+const listWords = (b: string[]): string => (b.length > 1 ? `${b.slice(0, -1).join(", ")} and ${b[b.length - 1]}` : b[0] ?? "");
+
+/**
+ * The card at the top of the Materials stage. It reads the agent's card (`GuidelineAsk`) and what is ticked, and never
+ * writes either: changing the materials here never changes the agent's card.
+ * ⚠️ A SPECIFIC SECTION NEVER MATCHES AN OPENING-PAGES ASK (`sampleMatchesAsk`), so "pages 1–10" against "the first 10
+ *    pages" is a difference, as the writer sent a section rather than the opening.
+ */
+export function askCard(ask: GuidelineAsk | null, view: "pkg" | "pcs", pieces: Pieces, packages: readonly StagePackage[], first: string): AskCard {
+  if (!ask || !ask.stated) return { kind: "nil" };
+  const sampleLabel = ask.sample.unit !== "none" ? sizeName(ask.sample) : "";
+  if (view === "pkg") {
+    const items: AskItem[] = [];
+    if (ask.ql) items.push({ key: "ql", label: "Query letter", mark: "dot" });
+    if (ask.syn) items.push({ key: "syn", label: "Synopsis", mark: "dot" });
+    if (ask.sample.unit !== "none") items.push({ key: "sample", label: sampleLabel, mark: "dot" });
+    return { kind: "pkg", items, fit: packages.find((x) => packageFits(x, ask))?.name ?? null };
+  }
+  const items: AskItem[] = [];
+  const whys: string[] = [];
+  if (ask.ql) items.push({ key: "ql", label: "Query letter", mark: pieces.letterId ? "ok" : "no" });
+  if (ask.syn) items.push({ key: "syn", label: "Synopsis", mark: pieces.synopsisId ? "ok" : "no" });
+  if (ask.sample.unit !== "none") {
+    const s = pieces.sample;
+    const mark: AskMark = !s ? "no" : sampleMatchesAsk(ask, s) ? "ok" : "diff";
+    items.push({ key: "sample", label: sampleLabel, mark });
+  }
+  /* one line per difference, in the order of the asks */
+  for (const it of items) {
+    if (it.mark === "no") whys.push(`${it.label} isn't ticked.`);
+    else if (it.mark === "diff" && pieces.sample) whys.push(`You're sending the ${lowerFirst(sizeName(pieces.sample))}, not the ${lowerFirst(sampleLabel)}.`);
+  }
+  const extraBits: string[] = [];
+  if (pieces.letterId && !ask.ql) extraBits.push("a query letter");
+  if (pieces.synopsisId && !ask.syn) extraBits.push("a synopsis");
+  if (pieces.sample && ask.sample.unit === "none") extraBits.push("opening pages");
+  const extra = extraBits.length ? `You're also sending ${listWords(extraBits)}, which ${first} doesn't ask for.` : null;
+  return { kind: "pcs", items, ok: piecesMatchAsk(ask, pieces), whys, extra };
+}
 
 /* ── how ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -195,7 +273,7 @@ export interface PlanContext {
 /** the answers → the materials and versions the save records, in the shape `saveLog` already takes */
 export function materialsOf(a: LogAnswers, ctx: PlanContext): { pkCard: PackageCard | null; mat: Materials; pieceV: PieceVersions } {
   const pk = a.packageId ? ctx.packages.find((p) => p.id === a.packageId)?.card ?? null : null;
-  const s: Sample = a.sample ? { ...blankSample(), unit: a.sample.unit, amt: a.sample.amt } : { ...blankSample(), unit: "none" };
+  const s: Sample = a.sample ? sampleOfChoice(a.sample) : { ...blankSample(), unit: "none" };
   if (pk) {
     const mat: Materials = { ql: pk.ql, syn: pk.syn, s };
     return { pkCard: pk, mat, pieceV: pieceVersions(pk, mat, null, null) };
