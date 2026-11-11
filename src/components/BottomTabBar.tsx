@@ -19,7 +19,7 @@
  *    detail screen (`hidden`).
  *
  * SUPERSEDES the Queries on a phone v1 five-tab bar (Home · Queries · Agents · Analytics · More): Analytics moved to the
- * menu, and More's "you" sheet is the menu behind your initials (PhoneMenu).
+ * menu. (Phone app v3: below 768px the shell mounts V3TabBar instead; this capsule now renders only at 768px and up, where it is hidden.)
  *
  * Phone only: the bar is `display: none` at 768px and up (class + media query, never inline — the shell CSS law).
  */

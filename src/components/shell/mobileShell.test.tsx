@@ -216,26 +216,19 @@ describe("the app-feel layer (Phase 6)", () => {
   });
 });
 
-/* ⚠️ RE-POINTED 29 OCT (Phone app v2, Part 1D): the "you" sheet is REPLACED by the menu behind your initials
-   (components/phone/PhoneSheets.tsx `PhoneMenu`, ref menuv.js ovMenu MV B). The claim that survives is that nothing it
-   offered became unreachable: each of its six rows, and its Upgrade link, has a home. The rendered check is
-   tests/e2e/phoneAppV2Shell.measure.ts S6. */
-describe("the menu — everything the you-sheet offered is still reachable", () => {
-  const sheets = readFileSync(resolve(__dirname, "../phone/PhoneSheets.tsx"), "utf8");
-  it("To-do, packages, import, settings, help, sign out and upgrade are in the menu (To-do left the bar in round two)", () => {
-    expect(barSrc).not.toContain('{ key: "todo"');
-    expect(appShell).toContain('{ key: "todo", label: "To-do", icon: PI.todo');
-    expect(appShell).toContain('onTodo: () => goPath("/todo")');
-    /* Phone app v2 Part 7: the Materials tile opens the phone Manuscript page at its materials, which shows the packages
-       (read only — building one stays on a computer). The packages are still one tap from the menu. */
-    expect(appShell).toContain('goPath("/manuscripts#materials")');
-    expect(appShell).toContain('onImport={() => goPath("/import")}');
-    expect(appShell).toContain('onSettings={() => goPath("/account")}');
-    expect(appShell).toContain('onHelp={() => goPath("/help")}');
-    expect(appShell).toContain('onPlan={() => goPath("/plans")}');
-    expect(appShell).toContain("onSignOut={logout}");
-    for (const w of ["Import queries", "Help centre", "Settings", "Plan &amp; billing", "Sign out"]) expect(sheets).toContain(w);
-    expect(appShell).toContain("planLine(currentUser?.plan).label");
-    expect(appShell).not.toContain("sa-ymenu-row");
+/* ⚠️ RE-POINTED 11 NOV (Phone app v3): the menu behind the initials (PhoneMenu) RETIRES with the initials themselves.
+   The claim that survives is the same one: nothing it offered became unreachable. Each of its doors now has a home on
+   the You tab, its Settings page or Today. The rendered walk is tests/e2e/phoneAppV3.measure.ts. */
+describe("the retired menu — everything it offered is still reachable", () => {
+  const you = readFileSync(resolve(__dirname, "../phone/v3/YouV3.tsx"), "utf8");
+  it("the shell no longer mounts the menu, the band or the book sheet on a phone", () => {
+    for (const gone of [/<PhoneMenu\b/, /<PhoneBand\s/, /<PhoneBookSheet\b/, /setMenuOpen\(/]) expect(appShell, String(gone)).not.toMatch(gone);
+    expect(appShell).toContain("<V3Header");
+    expect(appShell).toContain("<V3TabBarHost");
+  });
+  it("You reaches Responses, Analytics, Streaks and goals, the book, packages, letters and comps, and Settings", () => {
+    for (const path of ['"/queries/responses"', '"/queries/analytics"', '"/goals"', '"/manuscripts"', '"/queries/packages"', '"/materials/letters"', '"/account"']) {
+      expect(you, path).toContain(path);
+    }
   });
 });
