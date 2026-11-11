@@ -369,3 +369,101 @@ test("CO16 · Close it as no reply: No Response, nudge gone, on the Wall of no, 
   L.check("on the Wall of no (the Responses page names Olive)", /Olive Offerton/.test(wall), wall.slice(0, 80));
   L.done(8);
 });
+
+/* ══════════════ Phase 4 · the page dims behind the card; + Website / + Email ══════════════ */
+
+const scrimOf = (page: Page, sel: string) => page.locator(sel).first().evaluate((e) => {
+  const c = getComputedStyle(e);
+  return { on: (e as HTMLElement).dataset.on ?? "", bg: c.backgroundColor, op: c.opacity, pe: c.pointerEvents, z: c.zIndex };
+}).catch(() => null);
+
+/* ═════════ CO17 ═════════ */
+test("CO17 · card open: the page dims lightly, and a row click still switches the agent", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("CO17");
+  const panel = await openCard(page, "co1-rt");
+  if (MUT === "CO17") await css(page, ".cl262-scrim{pointer-events:auto!important}");
+  await page.waitForTimeout(400);
+  const s = await scrimOf(page, ".spanel-scrim.cl262-scrim");
+  L.check("one scrim under the card, at the light level", !!s && s.on === "light" && s.bg === "rgba(28, 19, 15, 0.16)" && s.op === "1", JSON.stringify(s));
+  L.check("visual only: pointer events pass through", s?.pe === "none", String(s?.pe));
+  L.check("under the card (z 60 < 61)", s?.z === "60", String(s?.z));
+  /* a row behind the dim, not this agent's, not under the panel */
+  const row = page.locator(".aglist [data-cl26='row'][data-k='agent']:not([data-id='co1-rt']):visible").first();
+  await row.waitFor({ timeout: 20_000 });
+  await row.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  const box = (await row.boundingBox())!;
+  const hit = await page.evaluate(([x, y]) => { const e = document.elementFromPoint(x, y); return e?.closest("[data-cl26='row']") ? "row" : e ? `${e.tagName}.${e.className}` : "nothing"; }, [box.x + 60, box.y + box.height / 2]);
+  L.check("the row is reachable through the dim (what is under the pointer is the row)", hit === "row", hit);
+  await page.mouse.click(box.x + 60, box.y + box.height / 2);
+  await page.waitForTimeout(1200);
+  const id = await page.locator("[data-cl262='panel']").getAttribute("data-agent-id").catch(() => null);
+  L.check("the row click switched the card", !!id && id !== "co1-rt", String(id));
+  await page.screenshot({ path: `${DIR}/shots/co17-light-1440.png` }).catch(() => {});
+  L.done(5);
+});
+
+/* ═════════ CO18 ═════════ */
+test("CO18 · editing: the action dim, and a click on it shows the rust guard when there are changes", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("CO18");
+  const panel = await openCard(page, "co1-rt");
+  await editHow(page, panel);
+  await page.waitForTimeout(400);
+  if (MUT === "CO18") await css(page, ".cl262-scrim{pointer-events:none!important}");
+  const s = await scrimOf(page, ".spanel-scrim.cl262-scrim");
+  L.check("the action level while editing", !!s && s.on === "true" && s.bg === "rgba(28, 19, 15, 0.45)" && s.op === "1" && s.pe === "auto", JSON.stringify(s));
+  await weeksBy(page, panel, -2);
+  /* a click on the dimmed page, clear of the card and of any row: over the Contact list's own heading, which does nothing
+     when clicked — so with the scrim taking the click there is a guard, and without it there is none */
+  const h = page.locator(".aglist h1:visible, .aglist [data-page-title]:visible").first();
+  const hb = (await h.boundingBox().catch(() => null)) ?? { x: 300, y: 200, width: 100, height: 40 };
+  await page.mouse.click(hb.x + Math.min(40, hb.width / 2), hb.y + hb.height / 2);
+  await page.waitForTimeout(500);
+  const guard = panel.locator("[data-cl262='save-bar'][data-guard]");
+  L.check("the click is Escape: with changes, the rust guard", (await guard.count()) === 1, "guard");
+  const rust = (await guard.count()) ? await guard.evaluate((e) => getComputedStyle(e).backgroundColor) : "no guard";
+  L.check("rust #a2452a", rust === "rgb(162, 69, 42)", rust);
+  L.check("the card is still open", (await page.locator("[data-cl262='panel'][data-agent-id='co1-rt']").count()) === 1, "open");
+  await page.screenshot({ path: `${DIR}/shots/co18-action-1440.png` }).catch(() => {});
+  if (await panel.locator("[data-cl262='discard']").count()) await panel.locator("[data-cl262='discard']").click();
+  L.done(4);
+});
+
+/* ═════════ CO19 ═════════ */
+test("CO19 · the Query Centre's query panel has no scrim while browsing", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("CO19");
+  await openApp(page, "/queries?q=co1-rt-q", VP);
+  await page.locator("[data-side-panel]").first().waitFor({ timeout: 20_000 });
+  await page.waitForTimeout(800);
+  if (MUT === "CO19") await css(page, ".spanel-scrim{opacity:1!important;background:rgba(28,19,15,.16)!important}");
+  const s = await scrimOf(page, "[data-side-scrim]");
+  L.check("its scrim is off: clear and inert", !!s && s.on === "" && s.op === "0" && s.pe === "none", JSON.stringify(s));
+  L.check("no agent-card scrim on the page", (await page.locator(".cl262-scrim").count()) === 0, "none");
+  L.check("the shell's bar is not dropped under a dim", !(await page.evaluate(() => document.body.classList.contains("spanel-dim"))), "body");
+  L.done(3);
+});
+
+/* ═════════ CO20 ═════════ */
+test("CO20 · + Website and + Email open Contact details with the cursor in that field", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("CO20");
+  for (const [k, sel] of [["website", "add-website"], ["email", "add-email"]] as const) {
+    const panel = await openCard(page, "co1-full");
+    await panel.locator(`[data-cl262='${sel}']`).click();
+    await page.waitForTimeout(700);
+    const r = await page.evaluate(() => {
+      const a = document.activeElement as HTMLElement | null;
+      const sc = document.querySelector<HTMLElement>("[data-cl262='panel'] [data-cl262='scroll']");
+      const ar = a?.getBoundingClientRect(), sr = sc?.getBoundingClientRect();
+      return { ae: a?.dataset.ae ?? a?.tagName ?? "", inView: !!ar && !!sr && ar.top >= sr.top && ar.bottom <= sr.bottom };
+    });
+    L.check(`+ ${k}: the cursor is in the ${k} field`, r.ae === k, r.ae);
+    L.check(`+ ${k}: the field is in view in the card`, r.inView, String(r.inView));
+    L.check(`+ ${k}: Contact details is open`, (await panel.locator(".cl262-sec[data-k='contact'].is-edit").count()) === 1, "contact");
+    await page.screenshot({ path: `${DIR}/shots/co20-${k}-1440.png` }).catch(() => {});
+  }
+  L.done(6);
+});

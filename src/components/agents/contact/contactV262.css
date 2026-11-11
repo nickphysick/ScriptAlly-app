@@ -10,6 +10,8 @@
  */
 
 /* ═════════ A · the host: no backdrop, no padding, no background ═════════ */
+/* Card offers v1 — the card's scrim sits just under it (the SidePanel's own sits at 65, above a query panel) */
+.spanel-scrim.cl262-scrim { z-index: 60; transition: opacity 280ms ease, background-color 280ms ease; }
 .cl262-panel {
   position: fixed; z-index: 61; top: 14px; bottom: 14px; right: 16px; width: 580px; box-sizing: border-box;
   padding: 0; background: none; box-shadow: none; pointer-events: none;

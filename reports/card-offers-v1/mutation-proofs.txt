@@ -21,3 +21,8 @@ CO13 source: no stored nudge is written on Update: ✘   ✗ CO13 · the stored 
 CO14 source: a writer-moved nudge is treated as the log flow's: ✘   ✗ CO14 · the offer says the nudge stays — 10 Jan→9 DecThe To-do to nudge Nell moves with it.   ✗ CO14 · the stored nudge is where the writer put it — 2026-12-09T12:00:00.000Z vs 2027-01-10T12:00:00.000Z 
 CO15 source: Keep writes nothing: ✘   ✗ CO15 · the old date is held on the query (stamped) — none vs 16 Dec   ✗ CO15 · the card's next step keeps the old date — Queried · expect a reply by 2 Dec. 
 CO16 source: the close is skipped: ✘   ✗ CO16 · the query is No Response — Queried   ✗ CO16 · its nudge is removed — 2026-11-05T12:00:00.000Z 
+## Phase 4 (rendered)
+CO17 in-page (the scrim takes pointer events): ✘   ✗ CO17 · visual only: pointer events pass through — auto   ✗ CO17 · the row is reachable through the dim (what is under the pointer is the row) — DIV.spanel-scrim cl262-scrim 
+CO18 in-page (the scrim lets clicks through): ✘   ✗ CO18 · the action level while editing — {"on":"true","bg":"rgba(28, 19, 15, 0.45)","op":"1","pe":"none","z":"60"}   ✗ CO18 · the click is Escape: with changes, the rust guard — guard
+CO19 in-page (the query panel's scrim shown): ✘   ✗ CO19 · its scrim is off: clear and inert — {"on":"","bg":"rgba(28, 19, 15, 0.16)","op":"1","pe":"none","z":"65"} 
+CO20 source (+ Website / + Email call openAll() as before): ✘   ✗ CO20 · + website: the cursor is in the website field — name   ✗ CO20 · + email: the cursor is in the email field — name 

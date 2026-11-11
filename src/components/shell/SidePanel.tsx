@@ -21,6 +21,28 @@ import "./sidePanel.css";
 
 export const SIDE_SLOT = "[data-side-slot]";
 
+/**
+ * The scrim behind a right-hand panel, at one of three levels (Card offers v1 lifted it out of `SidePanel` so the agent
+ * card's panel, which is not a SidePanel, dims through the same element rather than a second one):
+ *   off     clear and inert — browsing a SidePanel
+ *   light   rgba(28,19,15,.16), VISUAL ONLY: pointer events pass through, so the page stays live (the agent card while
+ *           it is read: another row still switches the card)
+ *   action  the existing action dim (.45): a click on it is the Escape key, which steps back or asks first
+ * Always mounted while its panel is, so it fades both ways. While it is not off, `body.spanel-dim` drops the shell's bar
+ * under it.
+ */
+export const SideScrim: React.FC<{ level: "off" | "light" | "action"; className?: string }> = ({ level, className }) => {
+  useEffect(() => {
+    if (level === "off") return undefined;
+    document.body.classList.add("spanel-dim");
+    return () => { document.body.classList.remove("spanel-dim"); };
+  }, [level]);
+  return (
+    <div className={`spanel-scrim${className ? ` ${className}` : ""}`} data-side-scrim="" data-on={level === "action" ? "true" : level === "light" ? "light" : undefined} aria-hidden="true"
+      onClick={() => { if (level === "action") window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); }} />
+  );
+};
+
 export const SidePanel: React.FC<{
   label: string;
   children: React.ReactNode;
@@ -43,16 +65,12 @@ export const SidePanel: React.FC<{
     document.body.classList.add("spanel-open");
     return () => { document.body.classList.remove("spanel-open"); };
   }, []);
-  /* …and whether the page is dimmed behind it: the shell's bar rises over the panel only while it is not */
-  useEffect(() => {
-    document.body.classList.toggle("spanel-dim", dim);
-    return () => { document.body.classList.remove("spanel-dim"); };
-  }, [dim]);
+  /* whether the page is dimmed behind it (the scrim owns `body.spanel-dim`): the shell's bar rises over the panel only
+     while it is not */
   return createPortal(
     <>
     {/* always mounted while the panel is, so it can fade both ways; inert and clear until an action runs */}
-    <div className="spanel-scrim" data-side-scrim="" data-on={dim ? "true" : undefined} aria-hidden="true"
-      onClick={() => window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }))} />
+    <SideScrim level={dim ? "action" : "off"} />
     <aside ref={ref} className={`spanel${className ? ` ${className}` : ""}`} role="dialog" aria-label={label} style={style} data-side-panel="" data-step={step ? "true" : undefined} data-dim={dim ? "true" : undefined} {...attrs}>
       <div className="spanel-own" data-side-own="" hidden={step || undefined}>{children}</div>
       <div className="spanel-slot" data-side-slot="" />

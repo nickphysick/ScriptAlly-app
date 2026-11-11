@@ -8,7 +8,7 @@
  *   co1-rt    Queried 21 days ago, an 8-week window, the nudge the log flow writes (a week after the expected date,
  *             off the weekend) — the response-time offer, and "Leave it open" suggested on closing
  *   co1-old   Queried 69 days ago (ten weeks), 8 weeks, "no response means no" — past its date: "Close it as no reply"
- *   co1-full  Full requested — the calm note, never a close option
+ *   co1-full  Full requested — the calm note, never a close option; no email and no website (+ Email, + Website)
  *   co1-wn    Queried 21 days ago, the nudge moved by the writer to a day of their own — Update leaves it alone
  *
  *   node tests/e2e/co1Emu.mjs seed          (re)writes all four, and deletes their activity rows
@@ -73,7 +73,7 @@ if (cmd === "seed") {
     const nrn = id === "co1-old";
     const agent = {
       ...aT, notes: "",
-      id, userId: uid, name: NAMES[id], agency: "Harbour Lane Literary", email: `${id}@harbourlane.test`, website: "",
+      id, userId: uid, name: NAMES[id], agency: "Harbour Lane Literary", email: id === "co1-full" ? "" : `${id}@harbourlane.test`, website: "",
       responseTimeWeeks: 8, submissionStatus: "Open", submissionMethod: "Email", genres: ["Thriller"], mswlNotes: "Dark, twisty crime.",
       materialsWanted: ["Query letter", "Synopsis"], starRating: 3, dateAdded: daysAgo(120).toISOString(), lastCheckedDate: daysAgo(30).toISOString(),
       ...(nrn ? { noResponseMeansNo: true } : {}),

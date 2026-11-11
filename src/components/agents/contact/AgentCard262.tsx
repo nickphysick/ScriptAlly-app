@@ -29,7 +29,7 @@ import { Notes, type AgentCard24Props, useCardModel } from "./AgentCard24";
 import { YouAndStory } from "./AgentCardParts255";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
-import { requestCardClose } from "./AgentCardPanel262";
+import { CARD_EDITING_EVENT, requestCardClose } from "./AgentCardPanel262";
 import { useAgentForm } from "../card/useAgentForm";
 import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar, changeNames, type OfferKit } from "./AgentCard262Edit";
 import type { InlineField } from "../card/InlineEdits";
@@ -156,6 +156,12 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const [open, setOpen] = useState<Sec262[]>([]);
   const [flash, setFlash] = useState(false);
   const editing = open.length > 0;
+  /* Card offers v1 — the panel deepens its scrim while anything is being edited (and lets it go when the card goes) */
+  useEffect(() => {
+    if (p.preview) return undefined;
+    window.dispatchEvent(new CustomEvent(CARD_EDITING_EVENT, { detail: editing }));
+    return () => { if (editing) window.dispatchEvent(new CustomEvent(CARD_EDITING_EVENT, { detail: false })); };
+  }, [editing, p.preview]);
   const closeAll = useCallback(() => setOpen([]), []);
   /* Card offers v1 — what the save does with the queries already out: the plan at the moment Save is pressed (set below,
      every render; declared here so the save's closure never reads it before it exists) */
@@ -219,10 +225,12 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       return [...cur, k];
     });
   };
-  /** the band's pencil: every section, and Contact details at the top */
-  const openAll = () => {
-    if (!kit) { p.onEdit("who"); return; }
-    opened.current = { k: "contact", all: true };
+  /** the band's pencil: every section, and Contact details at the top — or, from + Website / + Email (Card offers v1),
+   *  every section with the cursor in that field, scrolled into view */
+  const openAll = (focus?: "website" | "email") => {
+    if (!kit) { p.onEdit("who", focus); return; }
+    opened.current = { k: "contact", all: true, focus };
+    setRevealSeq((n) => n + 1);
     setTab("profile");
     setOpen((cur) => { if (!cur.length) resetRef.current(a); return ["contact", "genres", "wishlist", "materials", "how"]; });
   };
@@ -236,7 +244,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const applyAsk = (tab?: AgentCardTab, focus?: AgentCardField) => {
     const w = secsFor(tab, focus);
     if (w === "notes") { setTab("notes"); return; }
-    if (w === "all") { openAll(); return; }
+    if (w === "all") {
+      /* Card offers v1 — a door at a contact link lands in it: whichever of website and email is missing first */
+      const site0 = !(a.website ?? "").trim(), mail0 = !(a.email ?? "").trim();
+      const f = focus === "website" || focus === "email" ? (site0 ? "website" : mail0 ? "email" : focus) : undefined;
+      openAll(f);
+      return;
+    }
     for (const k of w) openSec(k);
   };
   const askSeq = useRef(0);
@@ -303,7 +317,9 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
 
   /* revealing and focus: a section opened on its own scrolls into view only by what it needs (plus 90px of air), or its
      heading comes to 70px below the band when it was hidden; its first text field takes focus without scrolling */
-  const opened = useRef<{ k: Sec262; all: boolean } | null>(null);
+  const opened = useRef<{ k: Sec262; all: boolean; focus?: "website" | "email" } | null>(null);
+  /* a reveal asked for while every section is already open changes no state: this makes it a new ask */
+  const [revealSeq, setRevealSeq] = useState(0);
   useEffect(() => {
     const o = opened.current;
     const sc = scrollRef.current;
@@ -311,8 +327,15 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     opened.current = null;
     const el = secEl(sc, o.all ? "contact" : o.k);
     if (!el) return;
-    const field = el.querySelector<HTMLInputElement | HTMLTextAreaElement>("textarea, input[data-ae='name']");
+    const field = o.focus ? el.querySelector<HTMLInputElement>(`input[data-ae='${o.focus}']`)
+      : el.querySelector<HTMLInputElement | HTMLTextAreaElement>("textarea, input[data-ae='name']");
     if (field) { field.focus({ preventScroll: true }); const n = field.value.length; try { field.setSelectionRange(n, n); } catch { /* not a text field */ } }
+    /* Card offers v1 — + Website / + Email: the field itself, brought into view in the card's scroller */
+    if (o.focus && field) {
+      const fr = field.getBoundingClientRect(), b = sc.getBoundingClientRect();
+      if (fr.top < b.top + 70 || fr.bottom > b.bottom - 90) sc.scrollTop += fr.top - b.top - Math.max(70, (b.height - fr.height) / 2);
+      return;
+    }
     /* Add agent v1 — the band pencil (every section) brings Contact details to the top */
     if (o.all) { sc.scrollTop = 0; return; }
     const r = el.getBoundingClientRect(), b = sc.getBoundingClientRect();
@@ -322,7 +345,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (r.top < b.top - 1) by = r.top - b.top - 70;
     else if (r.bottom > b.bottom) by = Math.min(r.bottom - b.bottom + 90, r.top - b.top - 70);
     if (by) sc.scrollBy({ top: by, behavior: reduce ? "auto" : "smooth" });
-  }, [open]);
+  }, [open, revealSeq]);
 
   /* THE DISCARD GUARD: ✕, Esc, paging, another row and leaving the page all ask the draft; with unsaved changes the save
      bar turns rust and nothing else happens until Keep editing or Discard is chosen */
@@ -419,16 +442,16 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         </span>
       )}
       {p.preview ? null : all ? <span className="cl262-editing" data-cl262="editing-chip">Editing</span>
-        : <button type="button" className="cl262-rb" data-cl262="edit-all" aria-label={`Edit everything about ${m.first}`} onClick={openAll}>{IC.pen}</button>}
+        : <button type="button" className="cl262-rb" data-cl262="edit-all" aria-label={`Edit everything about ${m.first}`} onClick={() => openAll()}>{IC.pen}</button>}
       {p.preview ? null : <button type="button" className="cl262-rb" data-cl262="close" data-cl24="close" aria-label="Close the agent" onClick={() => requestCardClose()}><span aria-hidden="true">×</span></button>}
     </span>
   );
   const links = (
     <span className="cl262-links" data-cl262="links">
       {site ? <a href={hrefFor(site) ?? "#"} target="_blank" rel="noopener noreferrer" data-cl262="website"><PaperIcon kind="web" />Website</a>
-        : <button type="button" className="cl262-lk" data-cl262="add-website" onClick={openAll}>+ Website</button>}
+        : <button type="button" className="cl262-lk" data-cl262="add-website" onClick={() => openAll("website")}>+ Website</button>}
       {email ? <a href={`mailto:${email}`} data-cl262="email"><PaperIcon kind="mail" />Email</a>
-        : <button type="button" className="cl262-lk" data-cl262="add-email" onClick={openAll}>+ Email</button>}
+        : <button type="button" className="cl262-lk" data-cl262="add-email" onClick={() => openAll("email")}>+ Email</button>}
     </span>
   );
   const gaps = p.gaps && p.gaps.n > 0 ? p.gaps : null;
