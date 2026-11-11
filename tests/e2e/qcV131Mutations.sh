@@ -1,4 +1,5 @@
 #!/bin/zsh
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- zsh "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # Query Centre v131 — prove each QC lock red on its named break (applied in the page; see inkLib.ts).
 #   SA_E2E_BASE_URL=http://127.0.0.1:<port> zsh tests/e2e/qcV131Mutations.sh
 # APPENDS to reports/query-centre-v131/mutation-proofs.jsonl. QC5 is a unit test and is proved separately.

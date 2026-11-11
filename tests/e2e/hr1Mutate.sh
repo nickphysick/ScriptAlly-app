@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # Header rules v1.1 — prove each HR1 lock red under its named break. Run in the MEASUREMENT worktree only.
 # The page-side breaks run through HR1_MUTATE (CSS injected after load, nothing on disk changes). The one source break
 # (HR1-2: the Query Centre's stage tabs rendered again) is backed up by its PATH and put back from that backup — never

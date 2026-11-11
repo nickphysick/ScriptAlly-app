@@ -22,6 +22,7 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { acquire } from "./hooks/slot-core.mjs";
 
 const ROOT = resolve(new URL("..", import.meta.url).pathname);
 const PROJECT = "demo-scriptally";
@@ -59,6 +60,12 @@ function ensureSeeded() {
 }
 
 const [cmd, ...rest] = process.argv.slice(2);
+/* ⚠️ THE TEST SLOT (scripts/heavy-slot.mjs) is taken HERE, not only in emu-guard, so `e2e`'s vite build
+ * runs inside it too. Child processes inherit HEAVY_SLOT_TOKEN and join this holding. */
+if (["seed", "dev", "e2e"].includes(cmd)) {
+  const slot = await acquire({ command: `emu.mjs ${process.argv.slice(2).join(" ")}` });
+  env.HEAVY_SLOT_TOKEN = slot.token;
+}
 if (cmd === "seed") {
   seed();
 } else if (cmd === "dev") {
@@ -66,7 +73,7 @@ if (cmd === "seed") {
   exec(withLogin("npx vite --mode emulator --port 3000 --host 127.0.0.1"), ["--import", DATA]);
 } else if (cmd === "e2e") {
   ensureSeeded();
-  run("npx", ["vite", "build", "--mode", "emulator", "--outDir", "dist-emu", "--emptyOutDir"]);
+  run("nice", ["-n", "10", "npx", "vite", "build", "--mode", "emulator", "--outDir", "dist-emu", "--emptyOutDir"]);
   exec(withLogin(["node", "scripts/emu-e2e-inner.mjs", ...rest].map(quote).join(" ")), ["--import", DATA]);
 } else {
   console.error("usage: node scripts/emu.mjs <seed|dev|e2e> [playwright args]");

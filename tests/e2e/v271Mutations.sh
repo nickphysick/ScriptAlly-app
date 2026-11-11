@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # Comparable titles v27.1 — prove W1, W2 and X1 red by their named mutations.
 #
 #   SA_E2E_BASE_URL=http://127.0.0.1:<port> bash tests/e2e/v271Mutations.sh

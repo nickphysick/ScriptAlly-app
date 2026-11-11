@@ -1,4 +1,5 @@
 #!/bin/zsh
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- zsh "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # Query Centre v138.6 — the SOURCE mutations (breaks that live in compiled code), run in the measurement worktree.
 # usage: tests/e2e/qcV1386Mutate.sh <A1|A2|A3|A4|C1> <base url, e.g. http://127.0.0.1:4491>
 # Each: back the file up to a path-derived name, break it, run its lock (expected RED), restore, rebuild.
