@@ -25,13 +25,15 @@ const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
 const dash58Css = readFileSync(resolve(__dirname, "./v58/dash58.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
 describe("below 768px the dashboard is the phone page", () => {
-  it("Dashboard renders DashPhone when useIsMobile says so, and Dash58 otherwise", () => {
+  /* Phone app v3 (11 Nov): the phone page is Today (TodayV3); DashPhone is retired */
+  it("Dashboard renders TodayV3 when useIsMobile says so, and Dash58 otherwise", () => {
     expect(dash).toContain('import { useIsMobile } from "./shell/mobileChrome"');
     expect(dash).toContain("const phone = useIsMobile();");
     const branch = dash.indexOf("{phone ? (");
     expect(branch, "the phone branch must exist").toBeGreaterThan(-1);
-    expect(dash.indexOf("<DashPhone", branch)).toBeGreaterThan(branch);
-    expect(dash.indexOf("<Dash58", branch)).toBeGreaterThan(dash.indexOf("<DashPhone", branch));
+    expect(dash.indexOf("<TodayV3", branch)).toBeGreaterThan(branch);
+    expect(dash.indexOf("<Dash58", branch)).toBeGreaterThan(dash.indexOf("<TodayV3", branch));
+    expect(dash).not.toContain("<DashPhone");
   });
 
   it("the v37 phone stack's rules are retired, not left inert", () => {

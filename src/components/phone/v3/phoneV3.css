@@ -8,6 +8,17 @@
   body.pa3-on .sv2-stagepad { padding-bottom: calc(70px + env(safe-area-inset-bottom, 0px)) !important; }
   body.pa3-on .pa-edgefade, body.pa3-on .sv2-fade { display: none !important; }
 
+  /* the shell's FeedbackDock is a bottom sheet on a phone, over a scrim (moved here from the retired dashPhone.css, where
+     it hung off the v2 Home's body class; Today's beta notice and Settings both open it now) */
+  body.pa3-on:has(.fb-panel)::after { content: ""; position: fixed; inset: 0; z-index: 58; background: rgba(20, 26, 36, 0.45); }
+  body.pa3-on .fb-panel {
+    left: 0 !important; right: 0 !important; top: auto !important; bottom: 0 !important;
+    width: 100% !important; max-width: none !important; max-height: 88vh !important; overflow: auto;
+    border-radius: 20px 20px 0 0; z-index: 60;
+    padding-bottom: calc(7px + env(safe-area-inset-bottom, 0px));
+  }
+  .pa3 [hidden] { display: none !important; }
+
   /* ── the header (ref `.hd`) ── */
   .pa3-hd {
     position: relative; z-index: 5; flex: none; box-sizing: border-box;

@@ -14,6 +14,7 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pageSmoke")).toastMock());
 
 import { YouV3 } from "./YouV3";
+import { TodayV3 } from "./TodayV3";
 import { V3Header, V3TabBar } from "./V3Chrome";
 
 describe("Phone app v3 renders", () => {
@@ -23,6 +24,14 @@ describe("Phone app v3 renders", () => {
       expect(html).toContain("Materials");
       expect(html).toContain("Responses");
     }
+  });
+  it("Today: empty (all caught up) and populated", () => {
+    const empty = renderPage(<TodayV3 />, "/dashboard");
+    expect(empty).toContain("You’re all caught up.");
+    expect(empty).toContain("With the agent");
+    const full = renderPageSeeded(<TodayV3 />, "/dashboard");
+    expect(full).toContain("Lately");
+    expect(full).toContain("Corkboard");
   });
   it("the header and the bar", () => {
     const h = renderPage(<V3Header root title="Today" routeKey="/dashboard" scroller={() => null} onSearch={() => {}} onBack={() => {}} />);
