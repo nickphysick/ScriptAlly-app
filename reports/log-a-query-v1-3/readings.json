@@ -1,0 +1,214 @@
+{
+  "checks": 71,
+  "V13_1": {
+    "menu": {
+      "head": "Which version?",
+      "items": [
+        "✓The one where the ferry never quite dockscurrent",
+        "Flashback first",
+        "Prologue cut",
+        "Bethuses Version"
+      ]
+    },
+    "420 · Bethuses Version": {
+      "n": 14,
+      "bodySW": 406,
+      "bodyCW": 406,
+      "bad": [],
+      "pill": "Bethuses Version",
+      "done": "Sending the first 3 chapters of Bethuses Version."
+    },
+    "420 · Prologue cut": {
+      "n": 14,
+      "bodySW": 406,
+      "bodyCW": 406,
+      "bad": [],
+      "pill": "Prologue cut",
+      "done": "Sending the first 3 chapters of Prologue cut."
+    },
+    "420 · Flashback first": {
+      "n": 14,
+      "bodySW": 406,
+      "bodyCW": 406,
+      "bad": [],
+      "pill": "Flashback first",
+      "done": "Sending the first 3 chapters of Flashback first."
+    },
+    "420 · The one where the ferry never quite docks": {
+      "n": 14,
+      "bodySW": 406,
+      "bodyCW": 406,
+      "bad": [],
+      "pill": "The one where the ferry never quite dockscurrent",
+      "done": "Sending the first 3 chapters of The one where the ferry never quite docks."
+    },
+    "540 · Bethuses Version": {
+      "n": 14,
+      "bodySW": 526,
+      "bodyCW": 526,
+      "bad": [],
+      "pill": "Bethuses Version",
+      "done": "Sending the first 3 chapters of Bethuses Version."
+    },
+    "540 · Prologue cut": {
+      "n": 14,
+      "bodySW": 526,
+      "bodyCW": 526,
+      "bad": [],
+      "pill": "Prologue cut",
+      "done": "Sending the first 3 chapters of Prologue cut."
+    },
+    "540 · Flashback first": {
+      "n": 14,
+      "bodySW": 526,
+      "bodyCW": 526,
+      "bad": [],
+      "pill": "Flashback first",
+      "done": "Sending the first 3 chapters of Flashback first."
+    },
+    "540 · The one where the ferry never quite docks": {
+      "n": 14,
+      "bodySW": 526,
+      "bodyCW": 526,
+      "bad": [],
+      "pill": "The one where the ferry never quite dockscurrent",
+      "done": "Sending the first 3 chapters of The one where the ferry never quite docks."
+    },
+    "640 · Bethuses Version": {
+      "n": 14,
+      "bodySW": 626,
+      "bodyCW": 626,
+      "bad": [],
+      "pill": "Bethuses Version",
+      "done": "Sending the first 3 chapters of Bethuses Version."
+    },
+    "640 · Prologue cut": {
+      "n": 14,
+      "bodySW": 626,
+      "bodyCW": 626,
+      "bad": [],
+      "pill": "Prologue cut",
+      "done": "Sending the first 3 chapters of Prologue cut."
+    },
+    "640 · Flashback first": {
+      "n": 14,
+      "bodySW": 626,
+      "bodyCW": 626,
+      "bad": [],
+      "pill": "Flashback first",
+      "done": "Sending the first 3 chapters of Flashback first."
+    },
+    "640 · The one where the ferry never quite docks": {
+      "n": 14,
+      "bodySW": 626,
+      "bodyCW": 626,
+      "bad": [],
+      "pill": "The one where the ferry never quite dockscurrent",
+      "done": "Sending the first 3 chapters of The one where the ferry never quite docks."
+    }
+  },
+  "V13_2": {
+    "q": "When might Joanna reply?",
+    "sub": "Nothing on Joanna's card about how long they take. Your best guess is fine.",
+    "read0": "Unknown",
+    "by0": "No reply date, so choose when to be reminded below.",
+    "chips0": [
+      "In 6 weeks",
+      "In 8 weeks",
+      "In 12 weeks",
+      "Pick a date"
+    ],
+    "on0": "8w",
+    "closeDis": true,
+    "closeSub": "Needs a response time first.",
+    "unkOn": "true",
+    "by1": "Reply expected by Wed 23 Dec.",
+    "offerTxt": "Save 6 weeks to Joanna's card / So your next query to Joanna starts from it.",
+    "on1": "week",
+    "next": {
+      "label": "Reply expected by",
+      "value": "23 Dec",
+      "line": "Nudge scheduled for 30 Dec"
+    },
+    "saved": {
+      "queries": [
+        {
+          "id": "J8WZoIpEHCWmAPdht6hW",
+          "dateSent": "2026-11-11T12:00:00.000Z",
+          "status": "Queried",
+          "ifNoResponse": "Remind me to nudge",
+          "nudgeDate": "2026-12-30T12:00:00.000Z",
+          "writerExpectedDate": "2026-12-23T12:00:00.000Z",
+          "responseDeadline": null
+        }
+      ],
+      "agentWeeks": 6
+    }
+  },
+  "V13_3": {
+    "sub": "Marcus's card says 8 weeks.",
+    "read0": "8 weeks",
+    "offerTxt": "Update Marcus's card to 10 weeks / It says 8 weeks now.",
+    "saved": {
+      "queries": [
+        {
+          "id": "Af916RAYFvRHrCOJfBit",
+          "dateSent": "2026-11-11T12:00:00.000Z",
+          "status": "Queried",
+          "ifNoResponse": "Remind me to nudge",
+          "nudgeDate": "2027-01-27T12:00:00.000Z",
+          "writerExpectedDate": "2027-01-20T12:00:00.000Z",
+          "responseDeadline": null
+        }
+      ],
+      "agentWeeks": 8
+    }
+  },
+  "V13_4": {
+    "tag": "Rosalind's card says no reply means no",
+    "closeSub": "On Thu 4 Feb 2027, marked as no reply.",
+    "how": "QueryManager",
+    "next": {
+      "label": "Reply expected by",
+      "value": "3 Feb",
+      "line": "Closes 4 Feb if no reply"
+    },
+    "saved": {
+      "queries": [
+        {
+          "id": "Jy6shN7QAjhqROXi0BTR",
+          "dateSent": "2026-11-11T12:00:00.000Z",
+          "status": "Queried",
+          "ifNoResponse": "Mark as no response automatically",
+          "nudgeDate": null,
+          "writerExpectedDate": null,
+          "responseDeadline": "2027-02-04T00:00:00.000Z"
+        }
+      ],
+      "agentWeeks": 12
+    },
+    "afterReload": {
+      "queries": [
+        {
+          "id": "Jy6shN7QAjhqROXi0BTR",
+          "dateSent": "2026-11-11T12:00:00.000Z",
+          "status": "Queried",
+          "ifNoResponse": "Mark as no response automatically",
+          "nudgeDate": null,
+          "writerExpectedDate": null,
+          "responseDeadline": "2027-02-04T00:00:00.000Z"
+        }
+      ],
+      "agentWeeks": 12
+    },
+    "qc": {
+      "label": "Reply expected by",
+      "line": "Closes 4 Feb if no reply"
+    }
+  },
+  "V13_5": {
+    "at": "nudge",
+    "now": "nudge",
+    "sub": "Nothing on Joanna's card about how long they take. Your best guess is fine."
+  }
+}

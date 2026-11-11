@@ -1,0 +1,11 @@
+{
+ "01-sample-control-done": 1.35,
+ "02-materials-after-done": 1.28,
+ "03-nudge-no-card-unknown": 8.15,
+ "04-nudge-no-card-6-weeks": 13.33,
+ "05-nudge-from-card": 1.95,
+ "06-nudge-update-card": 2.54,
+ "07-nudge-no-reply-means-no": 2.02,
+ "08-slip-reply-expected-nudge": 13.77,
+ "09-slip-reply-expected-close": 13.63
+}
