@@ -26,3 +26,15 @@
   /* the goal line's words are haloed in the ground */
   .qc151.qc153 .qc154-wkg.qc154-wkg { stroke: #f6f3ee; }
 }
+
+/* ── 2 · quiet Queried bands: a Queried card's band is white, with a 3px sand edge along its top and a hairline along
+   its foot. Every other stage keeps its full band (rose, blue, heather; a closed card its sand). The band's contents
+   are v154's, and the current node's white disc keeps its own shadow, which reads on the white. ─────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc154-card[data-status="Queried"] .qc154-hd { background: #fff; box-shadow: inset 0 3px 0 #e9dfce, inset 0 -1px 0 #f0eae0; }
+
+  /* ── 3 · quiet seals: white, the initials in navy (still the typewriter, from v154's rule), one fine ring in place
+     of the white-then-navy pair. Size and place are v154's (38px, or 32px on a narrow card). The grid cards only: the
+     slide-out card's seal is another class. ───────────────────────────────────────────────────────────────────── */
+  .qc151.qc153 .qc154-card .qc154-seal.qc154-seal { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #c5ccd6; }
+}

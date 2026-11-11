@@ -5,6 +5,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
+import { QueryStatus } from "../../../types";
+import { card154, row154 } from "./qc154.fixture";
 
 const DIR = new URL("./", import.meta.url);
 const read = (f: string) => { try { return readFileSync(new URL(f, DIR), "utf8"); } catch { return ""; } };
@@ -31,6 +33,33 @@ describe("v154.1 · the warm page", () => {
   });
   it("the goal line's halo is the warm paper too", () => {
     expect(rule(".qc151.qc153 .qc154-wkg.qc154-wkg")).toMatch(/stroke:\s*#f6f3ee/);
+  });
+});
+
+describe("v154.1 · quiet Queried bands and quiet seals", () => {
+  it("a Queried card's band has no sand fill: white, a 3px sand edge and a hairline", () => {
+    const b = rule('.qc151.qc153 .qc154-card[data-status="Queried"] .qc154-hd');
+    expect(b).toMatch(/background:\s*#fff\b/);
+    expect(b).toContain("box-shadow: inset 0 3px 0 #e9dfce, inset 0 -1px 0 #f0eae0");
+  });
+  it("a Partial card's band keeps its rose: the quiet rule names Queried only, and nothing else whitens a band", () => {
+    for (const m of bare.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
+      if (!/\.qc154-hd\b/.test(m[1]) || !/background/.test(m[2])) continue;
+      expect(m[1].trim()).toBe('.qc151.qc153 .qc154-card[data-status="Queried"] .qc154-hd');
+    }
+    const v154 = read("qcv154.css");
+    expect(v154).toContain('.qc154-card[data-tone="rose"] { --tone: #ecd6d2;');
+    const h = card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"));
+    expect(h).toContain('data-tone="rose"');
+    expect(h).toContain('data-status="Partial Requested"');
+    expect(card154(row154(QueryStatus.QUERIED, "agent"))).toContain('data-status="Queried"');
+  });
+  it("the seal: white, navy initials in the typewriter, one 1.5px ring", () => {
+    const s = rule(".qc151.qc153 .qc154-card .qc154-seal.qc154-seal");
+    expect(s).toMatch(/background:\s*#fff\b/);
+    expect(s).toMatch(/color:\s*#2a3a52/);
+    expect(s).toContain("box-shadow: inset 0 0 0 1.5px #c5ccd6");
+    expect(s).not.toMatch(/font|width|height/);
   });
 });
 
