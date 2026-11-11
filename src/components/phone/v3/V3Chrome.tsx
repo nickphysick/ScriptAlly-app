@@ -13,7 +13,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { V3I } from "./v3Icons";
 import { V3_SHRINK_AT, V3_TABS, v3TabFor, type V3Tab } from "../../../lib/phoneV3Nav";
-import { useV3TodayCount } from "./useV3Today";
+import { useV3TodayCount } from "./useV3";
 import "./phoneV3.css";
 
 export interface V3HeaderProps {
