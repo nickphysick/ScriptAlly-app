@@ -10,7 +10,7 @@ import React, { useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { closeV3, clearV3Snack, subscribeV3, v3Overlay, v3Seq, v3Snack, type V3Overlay } from "./v3Store";
 import { useV3Data } from "./V3Provider";
-import { QuerySheetV3 } from "./QuerySheetV3";
+import { QueryPageV4 } from "../v4/QueryPageV4";
 import { SearchV4 } from "../v4/SearchV4";
 
 export interface V3Panels {
@@ -34,7 +34,8 @@ export const V3Layer: React.FC<V3Panels> = ({ render }) => {
   let full = false;
   if (o?.type === "query") {
     const q = v.byId.get(o.id);
-    body = q ? <QuerySheetV3 v={q} nowMs={v.now} quietWeeks={v.quietWeeks} /> : null;
+    body = q ? <QueryPageV4 v={q} nowMs={v.now} quietWeeks={v.quietWeeks} /> : null;
+    full = true;
   } else if (o?.type === "search") {
     body = <SearchV4 />;
     full = true;

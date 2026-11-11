@@ -7,10 +7,20 @@
  */
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import type { V3ActKind } from "../../../lib/phoneV3";
-import { closeV3, openV3 } from "../v3/v3Store";
+import { openV3 } from "../v3/v3Store";
 
-const door = (req: Parameters<typeof openQueryDrawer>[0]) => { closeV3(); openQueryDrawer(req); };
-export function runAct(kind: V3ActKind, queryId: string): void {
+/* the query page stays open under the app's journey (its phone flow sits above the layer), so a save lands in its thread */
+const door = (req: Parameters<typeof openQueryDrawer>[0]) => { openQueryDrawer(req); };
+
+/** what the query looked like when a step was started from it: the page reads "just logged" once it changes */
+let pending: { id: string; sig: string } | null = null;
+export const querySig = (status: string, lastMs: number, msgs: number): string => `${status}|${lastMs}|${msgs}`;
+export function markPending(id: string, sig: string): void { pending = { id, sig }; }
+export const isFresh = (id: string, sig: string): boolean => !!pending && pending.id === id && pending.sig !== sig;
+export function clearPending(id?: string): void { if (!id || pending?.id === id) pending = null; }
+
+export function runAct(kind: V3ActKind, queryId: string, sig?: string): void {
+  if (sig) markPending(queryId, sig);
   switch (kind) {
     case "sent": door({ mode: "sent", queryId }); return;
     case "nudge": door({ mode: "nudge", queryId }); return;
