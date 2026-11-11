@@ -37,6 +37,7 @@ import { sectionSwatch, standWords } from "../../../lib/qc153";
 import "./qcv151.css";
 import "./qcv1522.css";
 import "./qcv153.css";
+import "./qcv1541.css";
 
 const LIST_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>;
 const BIRDS_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M4 12h14M4 17h6" /><circle cx="14" cy="7" r="1.6" /><circle cx="19" cy="12" r="1.6" /><circle cx="11" cy="17" r="1.6" /></svg>;

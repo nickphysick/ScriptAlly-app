@@ -1,0 +1,28 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v154.1 (design-refs/query-centre-v154-1.html, read from the rendered page at 1920): a warm page, quiet
+ * Queried bands, quiet seals, a filter rail that recedes onto the page, and a toolbar without a container. Colour and
+ * surface only; the cards' layout, the Sent and Next boxes, the track and the filter logic are v154's, untouched.
+ * Desktop only (768px and up), like every Query Centre rule since v131.
+ *
+ * ⚠️ OVERRIDES ONLY, AND EVERY ONE WINS ON SPECIFICITY, NOT ON BUNDLE ORDER: each selector is one class (or one
+ *    repeated class) above the v153.4 / v154 rule it replaces. The older sheets are not edited.
+ * ⚠️ NO COOL GREY: the page's ground is #f6f3ee everywhere it is painted (the scrollport, the wash, the toolbar strip's
+ *    fade, the goal line's halo). qcQuiet1541.test.tsx counts the cool values left in the older sheets.
+ */
+@media (min-width: 768px) {
+  /* ── 1 · the warm page: the ground, and the doodle tile under the same even .45 wash, in the warm paper. `qc-wpg--v11`
+     is the Query Centre's page alone (Queries.tsx), so no other page changes; repeated, to outrank v153.4's rule ── */
+  .ws-window .qc-wpg.qc-wpg--v11.qc-wpg--v11 > .wpg-scroll.wpg-scroll {
+    background-color: #f6f3ee;
+    background-image: linear-gradient(rgba(246, 243, 238, 0.45), rgba(246, 243, 238, 0.45)), url("/images/qc/doodle-tile.svg");
+  }
+  /* the toolbar's strip, and its 22px fade, in the same paper */
+  .qc151.qc153 .qc154-tbw.qc154-tbw {
+    background: linear-gradient(to bottom, #f6f3ee 0, #f6f3ee calc(100% - 22px), rgba(246, 243, 238, 0) 100%);
+  }
+  /* the goal line's words are haloed in the ground */
+  .qc151.qc153 .qc154-wkg.qc154-wkg { stroke: #f6f3ee; }
+}
