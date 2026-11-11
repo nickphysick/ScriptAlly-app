@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "PA3-4",
+  "where": "badge = Today's rows @390x844",
+  "ok": true,
+  "detail": "badge 103, rows 103"
+ },
+ {
+  "lock": "PA3-4",
+  "where": "rows = the workspace's own count @390x844",
+  "ok": true,
+  "detail": "rows 103, desktop To-do “103 to do”"
+ },
+ {
+  "lock": "PA3-4",
+  "where": "Queries' With you = Today's @390x844",
+  "ok": true,
+  "detail": "queries 23/10/37, today 23/10/37"
+ },
+ {
+  "lock": "PA3-5",
+  "where": "88 rows @390x844",
+  "ok": false,
+  "detail": "Tom Ellery / Ellery & Finch / Offer · Offer · 3 months ago / Decide ‖ Noah Bright / Bright Literary / Offer · Offer · 3 months ago / Decide"
+ },
+ {
+  "lock": "PA3-4",
+  "where": "badge = Today's rows @360x740",
+  "ok": true,
+  "detail": "badge 103, rows 103"
+ },
+ {
+  "lock": "PA3-4",
+  "where": "rows = the workspace's own count @360x740",
+  "ok": true,
+  "detail": "rows 103, desktop To-do “103 to do”"
+ },
+ {
+  "lock": "PA3-4",
+  "where": "Queries' With you = Today's @360x740",
+  "ok": true,
+  "detail": "queries 23/10/37, today 23/10/37"
+ },
+ {
+  "lock": "PA3-5",
+  "where": "88 rows @360x740",
+  "ok": false,
+  "detail": "Tom Ellery / Ellery & Finch / Offer · Offer · 3 months ago / Decide ‖ Noah Bright / Bright Literary / Offer · Offer · 3 months ago / Decide"
+ }
+]

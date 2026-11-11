@@ -38,37 +38,6 @@ import { PI } from "../phoneIcons";
 import "./pagesPhone.css";
 
 const Chev = () => <span className="pa-chev" aria-hidden="true">{PI.chev}</span>;
-const ICON: Record<AccountSectionId, React.ReactNode> = {
-  profile: PI.person, security: PI.shield, plan: PI.card, notifications: PI.bell, preferences: PI.sliders, tasks: PI.todo, data: PI.data,
-};
-/** the ref's three groups; every section the desktop has is in one of them */
-export const SETTINGS_GROUPS: AccountSectionId[][] = [["profile", "security", "plan"], ["notifications", "preferences", "tasks"], ["data"]];
-
-/* ══ Settings: the index ══ */
-export const SettingsPhone: React.FC = () => {
-  const navigate = useNavigate();
-  return (
-    <div className="pa-pg" data-pa="settings">
-      <div className="pa-pgbody">
-        {SETTINGS_GROUPS.map((g, i) => (
-          <div key={i} className="pa-group pa-setgroup" data-pa="set-group">
-            {g.map((id) => {
-              const r = ACCOUNT_ROUTES.find((x) => x.id === id)!;
-              return (
-                <button key={id} type="button" className="pa-li" data-pa="set-row" data-k={id} onClick={() => navigate(r.path)}>
-                  <span className="pa-ico">{ICON[id]}</span>
-                  <span className="pa-lt">{r.label}<span className="pa-sub">{SECTION_BANDS[id].sub}</span></span>
-                  <Chev />
-                </button>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-};
-
 /* ══ Plan & billing ══ */
 export const PlanPhone: React.FC = () => {
   const { currentUser } = useScriptAllyDb();

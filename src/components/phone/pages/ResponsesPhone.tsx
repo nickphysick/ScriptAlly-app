@@ -91,7 +91,7 @@ export const ResponsesPhone: React.FC = () => {
         ) : <p className="pa-pgnone" data-pa="resp-noreqs">No requests yet.</p>}
 
         <div className="pa-shd">
-          <h2 className="pa-h2">Wall of no</h2>
+          <h2 className="pa-h2" id="wall">Wall of no</h2>
           {m.nos.length ? <button type="button" className="pa-link" data-pa="resp-share" onClick={() => setShare(true)}>{PI.share}Share</button> : null}
         </div>
         {/* the desktop's own words (RspBanner): a fact, never a verdict */}

@@ -30,6 +30,8 @@
     --pa-st-pink: #f5e6df;
     --pa-st-slate: #d7e0e8;
     --pa-st-grey: #e4e1db;
+    /* Phone app v3: the ref's rust (`--rust`), for its one warm accent (Your next step, the BETA mark, a pin, the danger link). No phone token held a warm colour, so the nearest would have lost the meaning. */
+    --pa-rust: #8a4a3c;
     /* type: Special Elite (the app's own face) for titles and numbers; the system stack for everything read or tapped */
     /* ⚠️ THE FACE IS READ FROM `--sp-type`, NEVER NAMED HERE — a stylesheet naming the family is a new owner, which
        marketingTokens.test refuses; `--sp-type` is declared at :root (primitives.css), so it resolves on a portal too */

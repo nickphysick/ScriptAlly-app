@@ -51,7 +51,7 @@ import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
 // (settled desk): hero zone → stat row → story/diary → pipeline → Pro banner.
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { Dash58 } from "./dashboard/v58/Dash58";
-import { DashPhone } from "./dashboard/phone/DashPhone";
+import { TodayV3 } from "./phone/v3/TodayV3";
 import { useIsMobile } from "./shell/mobileChrome";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
 import "./dashboard/dashboardV37.css";
@@ -1523,21 +1523,8 @@ export const Dashboard: React.FC<{
           banner all leave this page. Day one is §9's job now; loading is §8's per-card
           skeletons, passed down rather than gated up here. */}
       {phone ? (
-      <DashPhone
-        loading={!collectionsReady}
-        queries={queries}
-        agents={agents}
-        manuscripts={manuscripts}
-        tasks={tasks}
-        userTasks={userTasks}
-        activities={mergedActivities}
-        taskFlags={taskFlags}
-        currentUser={currentUser}
-        activeManuscript={activeManuscriptForKicker}
-        versions={versions}
-        smartImportUsage={smartImportUsage}
-        onNavigate={onNavigate}
-        setSearchQuery={setSearchQuery}
+      /* Phone app v3: below 768px the dashboard is Today (TodayV3); at 768px and up nothing here changes */
+      <TodayV3 loading={!collectionsReady}
       />
       ) : (
       <Dash58

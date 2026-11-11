@@ -242,7 +242,7 @@ export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, s
         </header>
 
         <div className="tdp-tsheet" data-tdp="task-sheet">
-          <div className="tdp-hawk"><span className="tdp-ph" aria-hidden="true">hawk</span><p className="tdp-bub" data-tdp="mentor">{mentorLine(t, facts)}</p></div>
+          <div className="tdp-hawk"><p className="tdp-bub" data-tdp="mentor">{mentorLine(t, facts)}</p></div>
           {own ? (
             <WsOwnTask task={own} today={today} agents={agents} queries={queries} picking={picking} setPicking={setPicking}
               titleOf={(id) => manuscripts.find((m) => m.id === id)?.title?.trim() || null}

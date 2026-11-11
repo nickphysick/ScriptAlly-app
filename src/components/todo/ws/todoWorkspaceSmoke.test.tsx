@@ -64,10 +64,11 @@ import { join } from "node:path";
 describe("the desktop To-do is the workspace, and the tray is gone", () => {
   const root = join(__dirname, "..", "..", "..");
   const read = (p: string) => readFileSync(join(root, p), "utf8");
-  it("TodoRoute renders TodoWorkspace on a desktop and TodoPhone below it", () => {
+  /* Phone app v3: To-do has no page of its own on a phone (its tasks are Today's), so below 768px the slot is empty */
+  it("TodoRoute renders TodoWorkspace on a desktop and nothing below it", () => {
     const r = read("components/todo/TodoRoute.tsx");
     expect(r).toContain('import { TodoWorkspace } from "./ws/TodoWorkspace";');
-    expect(r).toMatch(/desk \? <TodoWorkspace onNavigate=\{props\.onNavigate\} \/> : <TodoPhone \/>/);
+    expect(r).toMatch(/desk \? <TodoWorkspace onNavigate=\{props\.onNavigate\} \/> : null;/);
   });
   it("no source file imports from the retired todo/v5 folder", () => {
     const hits: string[] = [];

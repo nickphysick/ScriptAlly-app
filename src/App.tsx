@@ -21,7 +21,7 @@ import { TodoRoute } from "./components/todo/TodoRoute";
 import { Agents } from "./components/Agents";
 import { DiscoverPage } from "./components/agents/discover1/DiscoverPage";
 import { AgentsRoute, DiscoverRoute } from "./components/agents/phone/AgentsRoutes";
-import { AnalyticsRoute, GoalsRoute, HelpRoute, ManuscriptRoute, PackagesRoute, PlansRoute, ResponsesRoute, SettingsRoute } from "./components/phone/pages/PageRoutes";
+import { AnalyticsRoute, GoalsRoute, YouRoute, HelpRoute, ManuscriptRoute, PackagesRoute, PlansRoute, ResponsesRoute, SettingsRoute } from "./components/phone/pages/PageRoutes";
 import { PACKAGES_PATH, packagesRedirectFor } from "./lib/packagesRoute";
 import { DiaryLab } from "./components/dashboard/DiaryLab";
 import { ComparableTitlesPage } from "./components/manuscripts/ComparableTitlesPage";
@@ -549,6 +549,10 @@ function AppContent() {
   const isPhoneNow = typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 767.98px)").matches;
   const phoneSection = isPhoneNow ? phoneSectionFor(path) : null;
   if (phoneSection) return <Navigate to={`/manuscripts${location.search}#${phoneSection}`} replace />;
+  /* Phone app v3: To-do has no page of its own on a phone — its tasks are Today's (the Corkboard keeps its address) */
+  if (isPhoneNow && routeBase(path) === "/todo") return <Navigate to={`/dashboard${location.search}`} replace />;
+  /* Phone app v3: the query letters live in the book page's materials on a phone (read and reword there) */
+  if (isPhoneNow && path === "/materials/letters") return <Navigate to="/manuscripts#materials" replace />;
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
@@ -770,6 +774,12 @@ function AppContent() {
         {routeKey === "your-notes" && (
           <StagePage name="your-notes" active>
             <YourNotesPage active />
+          </StagePage>
+        )}
+        {/* Phone app v3 — You: a phone tab; a computer is sent to the dashboard (YouRoute) */}
+        {routeKey === "you" && (
+          <StagePage name="you" active>
+            <YouRoute />
           </StagePage>
         )}
         {/* Phone app v2 Part 7D — Streaks & goals: a phone page; a computer is sent to the dashboard (GoalsRoute) */}

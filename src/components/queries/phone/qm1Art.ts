@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Queries on a phone v1 — THE ART SLOTS. Since Phone app v2 Part 1A these live in the phone's one art table
- * (`components/phone/phoneArt.ts`); this module keeps the old name so its two readers (QueriesPhone, Queries) are
+ * (`components/phone/phoneArt.ts`); this module keeps the old name so its readers (Queries; QueriesPhone retired in Phone app v3) are
  * unchanged. Swapping a commissioned piece in is one line THERE.
  *
  * ⚠️ NO SCREEN SHOWS ONE SOURCE TWICE (QM1 L11, now every phone screen).

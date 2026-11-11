@@ -128,7 +128,7 @@
 @media (prefers-reduced-motion: reduce) {
   .fb-panel.fb3 .fb3-k, .fb-panel.fb3 .fb3-ki { transition: none; }
 }
-/* a phone: the existing sheet behaviour (dashPhone.css places `.fb-panel` as a bottom sheet); the tiles stay in a row */
+/* a phone: the existing sheet behaviour (phone/v3/phoneV3.css places `.fb-panel` as a bottom sheet); the tiles stay in a row */
 @media (max-width: 767px) {
   .fb-panel.fb3 { border-radius: 20px 20px 0 0; }
   .fb-panel.fb3 .fb3-k { padding: 12px 10px; }

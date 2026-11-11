@@ -12,6 +12,7 @@
  *
  * Missing facts are left out — never a dash, never "Unknown".
  */
+import { AgentsSeg } from "../../phone/v3/AgentsV3";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
@@ -34,10 +35,6 @@ import { doorWords, howWords, replyWords } from "../../../lib/agentsPhone";
 import "./agentsPhone.css";
 import "./agentsPhoneR2.css";
 
-const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
-export type AgentChip = "all" | "toq" | "qd";
-export const AGENT_CHIP_LABEL: Record<AgentChip, string> = { all: "All", toq: "To query", qd: "Queried" };
-
 const initialsOf = (name: string) => name.trim().split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]!.toUpperCase()).join("") || "?";
 const domainOf = (a: Pick<Agent, "email" | "website">): string | null => {
   const e = (a.email ?? "").split("@")[1]?.trim();
@@ -45,22 +42,6 @@ const domainOf = (a: Pick<Agent, "email" | "website">): string | null => {
   const w = (a.website ?? "").replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0]?.trim();
   return w || null;
 };
-
-/** the shared model: the Contact list's facts for the book in scope */
-function useAgentFacts() {
-  const { agents, queries, activities, manuscripts } = useScriptAllyDb();
-  const location = useLocation();
-  const scoped = useMemo(() => {
-    let id: string | null = null;
-    try { id = window.localStorage.getItem(ACTIVE_MS_KEY); } catch { id = null; }
-    return resolveScopedManuscript(manuscripts, id);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- the key is the switch's signal
-  }, [manuscripts, location.key]);
-  const now = useMemo(() => Date.now(), [queries, agents, activities]); // eslint-disable-line react-hooks/exhaustive-deps
-  const qcRows = useMemo(() => buildQcRows(queries, agents, activities, now), [queries, agents, activities, now]);
-  const facts = useMemo(() => agents.map((a) => agentFacts(a, qcRows, scoped?.id ?? null)), [agents, qcRows, scoped]);
-  return { facts, scoped, now };
-}
 
 const NO_AID: DevAid = { face: null, fixture: null, memory: null, holdMs: 0 };
 /** Discover's own gate (`DISCOVER_LIVE`), with the desktop's dev review aid. ⚠️ THE MODE CHECK IS AT THE CALL SITE, as
@@ -71,168 +52,7 @@ function useDiscoverFace(): { live: boolean; aid: DevAid } {
   return { live: (aid.face ?? (DISCOVER_LIVE ? "live" : "soon")) === "live", aid };
 }
 
-/* ══ Your list ══ */
-export const AgentsPhone: React.FC = () => {
-  const navigate = useNavigate();
-  const { facts, now } = useAgentFacts();
-  const toq = facts.filter((x) => x.stand === "none");
-  const qd = facts.filter((x) => x.stand !== "none");
-  const [chip, setChip] = useState<AgentChip>("all");
-  const [open, setOpen] = useState<AgentFacts | null>(null);
-  /* Phone fixes v1, G2: A SHEET DOES NOT OUTLIVE ITS PAGE. Every page stays mounted, so this sheet stayed open when the
-     writer left Agents — the phone's back button, a tab, the menu — and was drawn over the next page, locking its scroll
-     (measured in J4: opened on Agents, it covered Corkboard, Analytics, Responses and Manuscripts). */
-  const { pathname } = useLocation();
-  useEffect(() => { if (pathname !== "/agents") setOpen(null); }, [pathname]);
-  const face = useDiscoverFace();
-  const scout = useScout(face.live ? face.aid : NO_AID);
-
-  /* Phone round two v1 (1D, ref boot2 `c4`): the band's hero is a ring — queried against your list, a blush arc on
-     navy — with "{q} of {n} queried" and "{n} on your list still to query". The Contact list's own counts (agentFacts). */
-  const ringPct = facts.length ? qd.length / facts.length : 0;
-  usePhoneBandSlot("/agents", (
-    <div className="pa-agringb" data-pa="agents-band" data-queried={qd.length} data-onlist={facts.length}>
-      <svg width="72" height="72" viewBox="0 0 72 72" aria-hidden="true" data-pa="ag-ring-svg">
-        <circle cx="36" cy="36" r="29" fill="none" stroke="rgba(255,255,255,.15)" strokeWidth="9" />
-        {qd.length > 0 ? <circle cx="36" cy="36" r="29" fill="none" stroke="#e8c8bc" strokeWidth="9" strokeLinecap="round" data-pa="ag-ring-arc"
-          data-pct={ringPct.toFixed(4)} strokeDasharray={`${(ringPct * 2 * Math.PI * 29).toFixed(1)} ${(2 * Math.PI * 29 + 1).toFixed(1)}`} transform="rotate(-90 36 36)" /> : null}
-      </svg>
-      <div>
-        <div className="pa-agringt" data-pa="ag-onlist"><span data-pa="ag-qd">{qd.length}</span> of {facts.length} queried</div>
-        <div className="pa-agrings" data-pa="ag-toq">{toq.length === 0 ? "Everyone on your list has been queried" : `${toq.length} on your list still to query`}</div>
-      </div>
-    </div>
-  ), [facts.length, toq.length, qd.length]);
-
-  const counts: Record<AgentChip, number> = { all: facts.length, toq: toq.length, qd: qd.length };
-  const group = (title: string, list: AgentFacts[], key: string) => (list.length ? (
-    <section data-pa="ag-group" data-group={key} key={key}>
-      <div className="pa-rowhd">{title} <span className="n">· {list.length}</span></div>
-      <div className="pa-agtiles" data-pa="ag-tiles">{list.map((x) => <AgentTile key={x.agent.id} x={x} onOpen={() => setOpen(x)} />)}</div>
-    </section>
-  ) : null);
-
-  return (
-    <div className="pa-agents" data-pa="agents">
-      <div className="pa-agbody">
-        <Seg list onDiscover={() => navigate("/agents/discover")} newN={face.live ? scout.tally.toReview : 0} />
-        <div className="pa-chips" role="group" aria-label="Show">
-          {(["all", "toq", "qd"] as AgentChip[]).map((k) => (
-            <button type="button" key={k} className="pa-chip" aria-pressed={chip === k} data-pa="ag-chip" data-key={k} data-count={counts[k]} onClick={() => setChip(k)}>
-              {AGENT_CHIP_LABEL[k]} <b>{counts[k]}</b>
-            </button>
-          ))}
-        </div>
-        {chip !== "qd" ? group("To query", toq, "toq") : null}
-        {chip !== "toq" ? group("Queried", qd, "qd") : null}
-      </div>
-      <AgentProfileSheet x={open} now={now} onClose={() => setOpen(null)} />
-    </div>
-  );
-};
-
-const Seg: React.FC<{ list: boolean; onDiscover?: () => void; onList?: () => void; newN: number }> = ({ list, onDiscover, onList, newN }) => (
-  <div className="pa-seg" role="tablist" aria-label="Agents">
-    <button type="button" role="tab" aria-pressed={list} aria-selected={list} data-pa="seg-list" onClick={onList}>Your list</button>
-    <button type="button" role="tab" aria-pressed={!list} aria-selected={!list} data-pa="seg-discover" onClick={onDiscover}>
-      Discover{newN > 0 ? <span className="pa-segsub" data-pa="disc-new"> {newN} new</span> : null}
-    </button>
-  </div>
-);
-
-/* ── a tile (Phone round two v1, ref boot2 `agCard` at `c4`): the status disc, or initials on blush when not queried;
-   the name and agency; then one fact — "{status} · Day n" for a queried agent, the reply time for the rest ── */
-const AgentTile: React.FC<{ x: AgentFacts; onOpen: () => void }> = ({ x, onOpen }) => {
-  const a = x.agent;
-  const name = (a.name || a.agency || "").trim();
-  const queried = x.stand !== "none" && !!x.q;
-  const fact = queried
-    ? [STAGE_NAME[x.q!.status] ?? String(x.q!.status), x.q!.dayN != null ? `Day ${x.q!.dayN}` : null].filter(Boolean).join(" · ")
-    : (replyWords(a.responseTimeWeeks) ? `Replies in ${replyWords(a.responseTimeWeeks)}` : howWords(a.submissionMethod, a.submissionMethodOther));
-  return (
-    <button type="button" className="pa-agtile" data-pa="ag-row" data-id={a.id} data-stand={x.stand} data-status={queried ? x.q!.status : ""} onClick={onOpen}>
-      {queried ? <PhoneDisc status={x.q!.status} size={42} /> : <span className="pa-agtav" data-pa="ag-ring" aria-hidden="true">{initialsOf(name)}</span>}
-      <b className="pa-agtn">{name}</b>
-      {a.name && a.agency ? <span className="pa-agta">{a.agency}</span> : null}
-      {fact ? <span className="pa-agtf" data-pa="ag-f1">{fact}</span> : null}
-    </button>
-  );
-};
-
-/* ══ The agent profile (ref ovAgentD at AGS D: a navy head with three facts) ══ */
-const AgentProfileSheet: React.FC<{ x: AgentFacts | null; now: number; onClose: () => void }> = ({ x, onClose }) => {
-  const navigate = useNavigate();
-  const [more, setMore] = useState(false);
-  const a = x?.agent;
-  const first = (a?.name || a?.agency || "").trim().split(/\s+/)[0] ?? "";
-  const q = x && x.stand !== "none" ? x.q : null;
-  const close = () => { setMore(false); onClose(); };
-  return (
-    <>
-      <MobileSheet open={!!x} onClose={close} ariaLabel={a?.name || "Agent"} pa={{ height: "92%", white: true, className: "pa-agsheet", grabOnNavy: true }}>
-        {a && x ? (
-          <div className="pa-agprof" data-pa="ag-profile" data-id={a.id}>
-            <div className="pa-ahero" data-pa="ag-head">
-              <div className="pa-aheadrow">
-                <span className="pa-amono">{initialsOf(a.name || a.agency)}</span>
-                <div className="pa-awho"><div className="pa-aname">{a.name || a.agency}</div>{a.name && a.agency ? <div className="pa-aagency">{a.agency}</div> : null}</div>
-                <button type="button" className="pa-ring" aria-label="More" data-pa="ag-more" onClick={() => setMore(true)}>{PI.more}</button>
-              </div>
-              <div className="pa-astats" data-pa="ag-stats">
-                <div data-k="reply"><b>{replyWords(a.responseTimeWeeks)?.replace(" weeks", " wks").replace(" week", " wk") ?? "Not stated"}</b><span>Reply time</span></div>
-                <div data-k="how"><b>{howWords(a.submissionMethod, a.submissionMethodOther)?.replace("By ", "").replace(/^./, (c) => c.toUpperCase()) ?? "Not stated"}</b><span>Submissions</span></div>
-                <div data-k="query"><b>{q ? (STAGE_NAME[q.status] ?? String(q.status)) : "Not yet"}</b><span>Your query</span></div>
-              </div>
-            </div>
-            <div className="pa-abody">
-              <div className="pa-asec">What they’re looking for</div>
-              {a.mswlNotes?.trim()
-                ? <p className="pa-aquote" data-pa="ag-wish">“{a.mswlNotes.trim().replace(/[.]$/, "")}.”</p>
-                : <button type="button" className="pa-addrow" data-pa="ag-add-wish" onClick={() => openAgentCard(a.id, { tab: "want", from: "button" })}>{PI.plus}Add what they’re looking for</button>}
-              {a.genres?.length ? <div className="pa-pillrow" data-pa="ag-genres">{a.genres.map((g) => <span key={g} className="pa-tag">{g}</span>)}</div>
-                : <button type="button" className="pa-addrow" data-pa="ag-add-genres" onClick={() => openAgentCard(a.id, { tab: "want", from: "button" })}>{PI.plus}Add their genres</button>}
-              <div className="pa-asec">They ask for</div>
-              {a.materialsWanted?.length ? <div className="pa-pillrow" data-pa="ag-asks">{a.materialsWanted.map((m) => <span key={m} className="pa-tag white">{m}</span>)}</div>
-                : <button type="button" className="pa-addrow" data-pa="ag-add-asks" onClick={() => openAgentCard(a.id, { tab: "work", from: "button" })}>{PI.plus}Add what they ask for</button>}
-              <p className="pa-asub" data-pa="ag-route">{[howWords(a.submissionMethod, a.submissionMethodOther), domainOf(a)].filter(Boolean).join(" · ")}</p>
-              <p className="pa-asub" data-pa="ag-door">{doorWords(a)}</p>
-              {q ? (
-                <>
-                  <div className="pa-asec">Your query</div>
-                  <button type="button" className="pa-agrow pa-aq" data-pa="ag-query" onClick={() => { close(); navigate({ pathname: "/queries", search: `?q=${encodeURIComponent(q.id)}` }); }}>
-                    <PhoneDisc status={q.status} size={40} />
-                    <span className="pa-mid"><span className="pa-nm">{STAGE_NAME[q.status] ?? String(q.status)}</span>{q.dayN != null ? <span className="pa-ag">{`Day ${q.dayN}`}</span> : null}</span>
-                    <span className="pa-chev" aria-hidden="true">{PI.chev}</span>
-                  </button>
-                </>
-              ) : null}
-              <div className="pa-asec">Your notes</div>
-              {a.notePreview?.trim()
-                ? <button type="button" className="pa-anote" data-pa="ag-notes" onClick={() => openAgentCard(a.id, { tab: "notes", from: "button" })}>{a.notePreview}</button>
-                : <button type="button" className="pa-addrow" data-pa="ag-add-note" onClick={() => openAgentCard(a.id, { tab: "notes", from: "button" })}>{PI.plus}Add a note: who they’ve signed, what they said at an event</button>}
-            </div>
-            <div className="pa-afoot">
-              {q
-                ? <button type="button" className="pa-pri" data-pa="ag-foot" data-mode="open" onClick={() => { close(); navigate({ pathname: "/queries", search: `?q=${encodeURIComponent(q.id)}` }); }}>Open your query to {first}</button>
-                : <button type="button" className="pa-pri" data-pa="ag-foot" data-mode="log" onClick={() => { close(); openQueryDrawer({ mode: "log", agentId: a.id }); }}>{PI.send}Log a query to {first}</button>}
-            </div>
-          </div>
-        ) : null}
-      </MobileSheet>
-      <MobileSheet open={more && !!a} onClose={() => setMore(false)} ariaLabel="More" pa={{ height: "auto", white: true, className: "pa-agmore" }}>
-        {a ? (
-          <div className="pa-morelist" data-pa="ag-more-sheet">
-            <button type="button" className="pa-moreitem" data-pa="ag-edit" onClick={() => { close(); openAgentCard(a.id, { from: "button" }); }}>{PI.edit}Edit</button>
-            {/* Remove: the agent card's own guarded removal — the phone draws no second delete (ink, never red) */}
-            <button type="button" className="pa-moreitem ink" data-pa="ag-remove" onClick={() => { close(); openAgentCard(a.id, { from: "button" }); }}>{PI.closeq}Remove from list</button>
-          </div>
-        ) : null}
-      </MobileSheet>
-    </>
-  );
-};
-
-/* ══ Discover (ref discList at ADC B: like the query card) ══ */
+/* ══ Discover (Phone app v3: under the Agents tab's "Your list | Discover" switch) ══ */
 export const DiscoverPhone: React.FC = () => {
   const navigate = useNavigate();
   const face = useDiscoverFace();
@@ -241,13 +61,6 @@ export const DiscoverPhone: React.FC = () => {
   const notified = notifyPrefs(db.currentUser?.notifyPrefs).discover;
   const [busy, setBusy] = useState<string | null>(null);
   const [peek, setPeek] = useState<CommunityAgent | null>(null);
-  const { facts } = useAgentFacts();
-  usePhoneBandSlot("/agents/discover", (
-    <div className="pa-bstats pa-agband" data-pa="agents-band">
-      <span><b className="pa-num">{facts.length}</b> on your list</span>
-      <span><b className="pa-num">{facts.filter((x) => x.stand === "none").length}</b> to query</span>
-    </div>
-  ), [facts]);
 
   /* the Discover page's own add path (DiscoverPage `decide`): add, record the decision, the increment; Undo reverses both */
   const add = async (ca: CommunityAgent) => {
@@ -274,7 +87,7 @@ export const DiscoverPhone: React.FC = () => {
   return (
     <div className="pa-agents" data-pa="discover">
       <div className="pa-agbody">
-        <Seg list={false} onList={() => navigate("/agents")} newN={face.live ? s.tally.toReview : 0} />
+        <div className="pa3" style={{ padding: "0 0 4px" }}><AgentsSeg on="disc" /></div>
         {!face.live ? (
           <section className="pa-dsoon" data-pa="d-soon">
             <span className="pa-dspot" aria-hidden="true">{PI.scope}</span>

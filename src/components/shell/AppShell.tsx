@@ -35,33 +35,24 @@ import { notifyFeedbackSent, subscribeFeedback } from "../../lib/feedbackStore";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
-import { PhoneSearchPage } from "../phone/PhoneSearchPage";
 import { usePalette } from "./usePalette";
 import { ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChrome";
-import { todoDueBadge } from "../../lib/todoDueTally";
 import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
 import { ACCOUNT_ROUTES } from "../../lib/accountRoutes";
-import { PhoneBand, dayWord } from "../phone/PhoneBand";
+import { V3Header, V3TabBarHost } from "../phone/v3/V3Chrome";
+import { V3Provider } from "../phone/v3/V3Provider";
+import { V3Layer } from "../phone/v3/V3Layer";
+import { renderJourney } from "../phone/v3/JourneysV3";
+import { renderAgents } from "../phone/v3/AgentsV3";
+import { openV3, closeV3, v3Overlay } from "../phone/v3/v3Store";
+import { v3IsRoot, v3RootTitle, v3TabFor } from "../../lib/phoneV3Nav";
 import { PhoneBandContext } from "../phone/phoneBandStore";
-import { PhoneBookSheet, PhoneMenu, PhonePlusSheet, type MenuTile } from "../phone/PhoneSheets";
 import { PhoneComposeHost } from "../phone/PhoneComposeFlow";
-import { openPhoneCompose } from "../../lib/phoneCompose";
-import { PI } from "../phone/phoneIcons";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
-import { buildQcRows } from "../../lib/qcSummary";
-import { pageCounts, respItems } from "../../lib/responses";
-import { manuscriptComps } from "../../lib/comps";
-import { manuscriptViewPath } from "./manuscriptScope";
-import { salutation } from "../../lib/dashboardStats";
 import { shellCrumbForPath } from "./shellV2Nav";
-import { resolveScopedManuscript } from "../../lib/shellSidebar";
-import { firstNameOf } from "../../lib/responses";
-import { initialsOf } from "../../lib/searchSuggestionsCore";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { useScriptAllyDb } from "../../lib/db";
-import { planLine } from "../../lib/shellSidebar";
 import { BackgroundLab } from "../dev/BackgroundLab";
 import "./contentColumn.css";
 import "./mobileShell.css";
@@ -375,29 +366,13 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     },
     [navigate, setSearchQuery]
   );
-  /* Phone app v2 (Part 1B) — the tab bar's To-do badge: tasks due today or earlier, the To-do tray's own tally
-     (lib/todoDueTally — the tray's chain, unchanged). Phones only; the desktop never builds it. The Queries Your-move
-     badge is retired from the bar (its derivation, `yourMoveBadge`, stays for its other readers). */
+  /* Phone app v3 — THE PHONE'S CHROME (design-refs/phone-app-v3/). Below 768px the slim header and the docked bar take
+     the places of the navy band and the floating capsule; the menu behind the initials, the book chip and switcher, the
+     feedback icon and the tile band retire with them (every door they held has a home on You, Settings or Today). At
+     768px and up `phoneNav` is false and the shell renders exactly what it did before. */
   const phoneNav = useIsMobile();
-  const tabBadge = useMemo(() => {
-    if (!phoneNav) return 0;
-    return todoDueBadge({
-      tasks: tasks ?? [], userTasks: userTasks ?? [], queries, agents, manuscripts, taskFlags: taskFlags ?? [], activities,
-      mutedTaskRules: currentUser?.mutedTaskRules, nowMs: Date.now(),
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phoneNav, tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, currentUser?.mutedTaskRules, pathname]);
-
-  /* Phone app v2 (Part 1B) — THE BAR TUCKS AWAY AS YOU READ. One passive listener on the stage, in the CAPTURE phase so
-     a page that scrolls an inner box (the fill routes) is heard too: scroll does not bubble, but capture reaches every
-     descendant. The ref's thresholds (app.js `onScroll`): away after 6px down once past 90px; back after 6px up or
-     above 40px. Reset on every route. */
-  /* Phone app v2 (Part 1C/1D) — the band, the menu, the book switcher */
-  const [menuOpen, setMenuOpen] = useState(false);
-  /* Phone fixes v1 (3A): the band's search opens the phone's full-screen search; the desktop palette drew nothing here */
-  const [phoneSearch, setPhoneSearch] = useState(false);
-  useEffect(() => { setPhoneSearch(false); }, [pathname]);
-  const [bookOpen, setBookOpen] = useState(false);
+  /* a navigation closes any v3 sheet or journey still open (the ref's `go` clears the overlay) */
+  useEffect(() => { if (phoneNav) closeV3(); }, [pathname, phoneNav]);
   const [bandSlots, setBandSlots] = useState<Record<string, React.ReactNode | null>>({});
   const setBandSlot = useCallback((path: string, node: React.ReactNode | null) => {
     setBandSlots((prev) => (prev[path] === node ? prev : { ...prev, [path]: node }));
@@ -407,94 +382,21 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     setBandExtras((prev) => (prev[path] === node ? prev : { ...prev, [path]: node }));
   }, []);
   const phoneBandValue = useMemo(() => ({ setBandSlot, setBandExtra }), [setBandSlot, setBandExtra]);
+  /* a tab's own page is named for the tab; a pushed page keeps the name it had */
   const bandTitle = useMemo(() => {
-    const tab = tabFor(pathname);
-    if (tab === "home") return `${dayWord(salutation(new Date()))}, ${firstNameOf(currentUser?.name ?? "")}`.replace(/, $/, "");
-    if (tab === "queries") return "Queries";
-    if (tab === "packages") return "Packages";
-    if (tab === "agents") return "Agents";
-    /* Phone round two v1 (2B): To-do is a page now, opened from Home, the menu and the + sheet */
-    /* To-do on the phone v1 (D2): the list's own title */
-    if (pathname === "/todo") return "Your to-do list";
-    if (pathname.startsWith("/todo/")) return "To-do";
-    /* Phone app v2 Part 8B: a settings section names itself in the band (the index is "Settings") */
+    const root = v3RootTitle(pathname);
+    if (root) return root;
     const section = ACCOUNT_ROUTES.find((r) => r.path === pathname);
     if (section) return section.label;
+    if (pathname === "/account") return "Settings";
     if (pathname === "/plans") return "Plan & billing";
     return shellCrumbForPath(pathname)?.page ?? "QueryHawk";
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, currentUser?.name]);
-  const bandMs = useMemo(() => {
-    if (!phoneNav) return null;
-    let stored: string | null = null;
-    try { stored = window.localStorage.getItem("scriptally_active_manuscript_id"); } catch { /* storage refused */ }
-    return resolveScopedManuscript(manuscripts, stored);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phoneNav, manuscripts, pathname, location.search, bookOpen]);
-  const bandBook = bandMs?.title?.trim() || null;
-  const bandBookId = bandMs?.id ?? null;
+  }, [pathname]);
 
-  /* the + sheet's doors — each opens what exists today (Part 4 restyles the journeys, not these doors) */
-  const plusDoors = useMemo(() => ({
-    onSent: () => openQueryDrawer({ mode: "log", ...(bandBookId ? { manuscriptId: bandBookId } : {}) }),
-    onReplied: () => onNavigate("queries", "Record a response"),
-    onAgent: () => onNavigate("agents", "Add an agent"),
-    onTask: () => {
-      /* PHONE APP v2, PART 4 — on a phone the task is added in the flow layout, wherever you are */
-      if (phoneNav) { openPhoneCompose("task"); return; }
-      /* the To-do page's own one-shot composer open (sa.todoCompose); on /todo already, its event */
-      if (pathname === "/todo") { window.dispatchEvent(new CustomEvent(TODO_OPEN_COMPOSER)); return; }
-      try { sessionStorage.setItem("sa.todoCompose", "task"); } catch { /* private mode */ }
-      goPath("/todo");
-    },
-    onImport: () => goPath("/import"),
-    /* Phone round two v1 (2B): To-do left the tab bar; the + sheet keeps a door to it */
-    onTodo: () => goPath("/todo"),
-  }), [bandBookId, onNavigate, pathname, goPath, phoneNav]);
-
-  /* the menu's tiles — a line is an existing figure, or the tile shows its name alone */
-  const menuTiles = useMemo<MenuTile[]>(() => {
-    if (!phoneNav) return [];
-    const nowMs = Date.now();
-    const own = bandMs ? queries.filter((q) => q.manuscriptId === bandMs.id) : [];
-    const replies = pageCounts(respItems(buildQcRows(own, agents, activities, nowMs)), buildQcRows(own, agents, activities, nowMs)).replies;
-    const words = bandMs?.wordCount ? `${bandMs.wordCount.toLocaleString("en-GB")} words` : null;
-    const comps = bandMs ? manuscriptComps(bandMs).length : 0;
-    return [
-      /* Phone round two v1 (2B): To-do left the tab bar, so the menu leads with it; its line is the badge's own count */
-      { key: "todo", label: "To-do", icon: PI.todo, line: tabBadge > 0 ? `${tabBadge} due` : null, onOpen: () => goPath("/todo") },
-      { key: "responses", label: "Responses", icon: PI.inbox, line: `${replies} ${replies === 1 ? "reply" : "replies"}`, onOpen: () => goPath("/queries/responses") },
-      { key: "analytics", label: "Analytics", icon: PI.chart, line: null, onOpen: () => goPath("/queries/analytics") },
-      { key: "goals", label: "Streaks & goals", icon: PI.flame, line: null, onOpen: () => goPath("/goals") },
-      { key: "manuscript", label: "Manuscript", icon: PI.book, line: words, onOpen: () => goPath("/manuscripts") },
-      { key: "materials", label: "Materials", icon: PI.box, line: null, onOpen: () => goPath("/manuscripts#materials") },
-      { key: "comps", label: "Comparable titles", icon: PI.pages, line: bandMs ? `${comps} ${comps === 1 ? "comp" : "comps"}` : null, onOpen: () => goPath("/manuscripts#comps") },
-      { key: "discover", label: "Discover agents", icon: PI.scope, line: null, onOpen: () => goPath("/agents/discover") },
-      { key: "feedback", label: "Feedback", icon: PI.chat, line: null, onOpen: () => setFeedbackOpen(true) },
-    ];
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phoneNav, bandMs, queries, agents, activities, goPath, tabBadge]);
-  const [tabAway, setTabAway] = useState(false);
+  /* a fresh clock for the phone's one read on every navigation */
+  const v3Now = useMemo(() => Date.now(), [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   const [plusOpen, setPlusOpen] = useState(false);
-  useEffect(() => { setTabAway(false); setPlusOpen(false); }, [pathname]);
-  useEffect(() => {
-    if (!phoneNav) return undefined;
-    const stage = stageRef.current;
-    if (!stage) return undefined;
-    const last = new WeakMap<EventTarget, number>();
-    const onScrollAny = (e: Event) => {
-      const t = e.target as HTMLElement | Document | null;
-      const el = t && "scrollTop" in t ? (t as HTMLElement) : null;
-      if (!el) return;
-      const y = el.scrollTop;
-      const prev = last.get(el) ?? 0;
-      if (y > prev + 6 && y > 90) setTabAway(true);
-      else if (y < prev - 6 || y < 40) setTabAway(false);
-      last.set(el, y);
-    };
-    stage.addEventListener("scroll", onScrollAny, { passive: true, capture: true });
-    return () => stage.removeEventListener("scroll", onScrollAny, { capture: true } as EventListenerOptions);
-  }, [phoneNav, pathname]);
+  useEffect(() => { setPlusOpen(false); }, [pathname]);
 
   return (
     /**
@@ -529,7 +431,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           computes the header's collapse and its scroll-invariance padding within `.wpg`; a strip
           up here is outside that box entirely, so `--wpg-reclaim-pad` and the collapse trigger
           cannot see it. That separation is the condition this was allowed under. */}
-      <BetaStrip onReport={() => setFeedbackOpen(true)} />
+      {/* Phone app v3: no full-width beta banner on a phone — Today ends on its one-row beta notice instead */}
+      {phoneNav ? null : <BetaStrip onReport={() => setFeedbackOpen(true)} />}
 
       {/* ⚠️ A PENDING DELETION IS A FACT ABOUT THE WHOLE ACCOUNT, so it is stated on every page.
           It used to live inside the Danger zone card — the one place you reach only by going
@@ -540,6 +443,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       <DeletionBanner />
 
       <div className="sv2-app ws-host">
+      {/* Phone app v3: the one read every phone screen makes, computed once (phone only; renders no element) */}
+      <V3Provider on={phoneNav} now={v3Now}>
 
       {/* THE DOUBLE-DECKER (shell-rebuild pack, Phase 3) — it replaces ShellColumn and the
           desktop top bar in one move. The rail is PAINT on a single column; the IA is a prop, so
@@ -636,23 +541,18 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             Cancel and Done live in it (MobileDetailSpec) until each is rebuilt. At 768px and up `phoneNav` is false and
             this renders exactly what it did before. */}
         {phoneNav && activeMobileDetail === null ? (
-          <PhoneBand
-            variant={isMenuPage(pathname) ? "page" : "tab"}
+          <V3Header
+            root={v3IsRoot(pathname)}
             title={bandTitle}
-            greeting={pathname === "/dashboard"}
-            book={bandBook}
-            initials={initialsOf(currentUser?.name ?? "")}
-            onSearch={phoneNav ? () => setPhoneSearch(true) : openPalette}
-            onFeedback={() => setFeedbackOpen(true)}
-            onMenu={() => setMenuOpen(true)}
-            onBook={() => setBookOpen(true)}
+            routeKey={pathname}
+            scroller={() => stageRef.current}
+            onSearch={() => openV3({ type: "search" })}
             onBack={() => {
               const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
-              if (idx > 0) navigate(-1); else goPath("/dashboard");
+              if (idx > 0) navigate(-1); else goPath(v3TabFor(pathname) === "today" ? "/dashboard" : "/you");
             }}
-            slot={bandSlots[pathname] ?? null}
             extra={bandExtras[pathname] ?? null}
-            todo={pathname === "/todo"}
+            slot={bandSlots[pathname] ?? null}
           />
         ) : (
         <div className="ws-mobilebar">
@@ -667,7 +567,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
                itself belongs to the LOCKED mobile bar and is left for a mobile pass to remove. */
             onOpenAccount={toggleAccount}
             mobileDetail={activeMobileDetail}
-            onOpenYou={() => setMenuOpen(true)}
+            onOpenYou={() => goPath("/you")}
           />
         </div>
         )}
@@ -719,46 +619,42 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
 
       {/* The floating tab-bar capsule (<md). It stands down while the active route shows a
           pushed detail screen (baked decision 5) — the detail's own affordances take the foot. */}
+      {phoneNav ? (
+        <V3TabBarHost
+          pathname={pathname}
+          /* a tap on the tab you are on, at its own page, takes it back to the top (ref `ACT.tab`) */
+          onGo={(path, tab) => {
+            if (tab === v3TabFor(pathname) && v3IsRoot(pathname) && stageRef.current) { stageRef.current.scrollTo({ top: 0, behavior: "smooth" }); return; }
+            goPath(path);
+          }}
+          onPlus={() => { if (v3Overlay()?.type === "plus") closeV3(); else openV3({ type: "plus" }); }}
+          hidden={activeMobileDetail !== null}
+        />
+      ) : (
+      /* the floating capsule — at 768px and up it is `display: none`, rendered exactly as before */
       <BottomTabBar
         pathname={pathname}
-        /* a tap on the tab you are on takes it back to the top (ref app.js `tab`) */
         onGo={(path) => {
           if (tabFor(path) === tabFor(pathname) && stageRef.current) { stageRef.current.scrollTo({ top: 0, behavior: "smooth" }); return; }
           goPath(path);
         }}
         onPlus={() => setPlusOpen((o) => !o)}
         plusOpen={plusOpen}
-        badge={tabBadge}
-        away={tabAway}
+        badge={0}
+        away={false}
         more={fadeOn}
         hidden={activeMobileDetail !== null || isMenuPage(pathname)}
       />
+      )}
 
-      {phoneNav && phoneSearch ? <PhoneSearchPage onClose={() => setPhoneSearch(false)} /> : null}
+      {phoneNav ? <V3Layer render={(o) => renderJourney(o) ?? renderAgents(o)} /> : null}
       {/* Phone app v2 (Part 1D) — THE PHONE'S SHEETS. The menu REPLACES the "you" sheet (Mobile Pass 1, concept
           frame 07): every row it offered is still reachable — To-do is a tab, packages are the Materials tile, and
           Import, Settings, Help, Sign out and Upgrade (Plan & billing) are in the menu. Phones only; at 768px and up
           none of the three can open (their openers are phone chrome). */}
       {phoneNav ? (
         <>
-          <PhonePlusSheet open={plusOpen} onClose={() => setPlusOpen(false)} doors={plusDoors} />
           <PhoneComposeHost />
-          <PhoneMenu
-            open={menuOpen} onClose={() => setMenuOpen(false)}
-            name={currentUser?.name ?? ""} initials={initialsOf(currentUser?.name ?? "")}
-            planLine={planLine(currentUser?.plan).label}
-            book={bandBook} onBook={() => setBookOpen(true)}
-            tiles={menuTiles}
-            onImport={() => goPath("/import")} onHelp={() => goPath("/help")} onFeedback={() => setFeedbackOpen(true)}
-            onSettings={() => goPath("/account")} onPlan={() => goPath("/plans")} planChip="Founding"
-            onSignOut={logout}
-          />
-          <PhoneBookSheet open={bookOpen} onClose={() => setBookOpen(false)} manuscripts={manuscripts} activeId={bandBookId}
-            onPick={(id) => {
-              try { localStorage.setItem("scriptally_active_manuscript_id", id); } catch { /* private mode */ }
-              /* the desktop picker's own rule: re-route, so a page that reads the key follows it */
-              goPath(manuscriptViewPath(pathname, id) ?? `${pathname}${location.search}`);
-            }} />
         </>
       ) : null}
 
@@ -784,6 +680,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         />
       </PageBoundary>
 
+      </V3Provider>
       </div>{/* closes .sv2-app.ws-host — EVERYTHING except the strip stays inside it, deliberately:
                  the floating chrome below (tab bar, sheets, dock, the dev lab) has always been a
                  descendant of `.sv2-app`, and moving it up to the frame would silently change what

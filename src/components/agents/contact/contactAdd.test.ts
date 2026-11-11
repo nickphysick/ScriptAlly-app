@@ -48,11 +48,14 @@ describe("a new agent is born the way the house births agents", () => {
     expect(at, "the create is no longer in the host").toBeGreaterThan(-1);
     const create = strip(host).slice(at, strip(host).indexOf("}, [addAgent, req]);", at));
     expect(create.length, "the create's end anchor moved — re-anchor this lock").toBeGreaterThan(200);
-    expect(create, "the create left the shared path").toContain("await addAgent({");
-    expect(create, "the links stopped going through the shared href builder").toMatch(/website: hrefFor\(d\.website\)/);
-    expect(create, "reopensOn must ride only a CLOSED door").toMatch(/d\.door === "closed" && d\.reopens \? \{ reopensOn/);
+    /* Phone app v3 (11 Nov): the record moved, unchanged, into lib/agentCreate (`agentFromDraft`), which the phone's add
+       steps share — the host's create hands it to addAgent; the rules below are read where the record is built */
+    expect(create, "the create left the shared path").toContain("await addAgent(agentFromDraft(d));");
+    const rec = strip(readFileSync(new URL("../../../lib/agentCreate.ts", import.meta.url), "utf8"));
+    expect(rec, "the links stopped going through the shared href builder").toMatch(/website: hrefFor\(d\.website\)/);
+    expect(rec, "reopensOn must ride only a CLOSED door").toMatch(/d\.door === "closed" && d\.reopens \? \{ reopensOn/);
     for (const [field, draft] of [["responseTimeWeeks", "weeks"], ["noResponseMeansNo", "nrn"], ["city", "city"], ["country", "country"]]) {
-      expect(create, `${field} is written unconditionally — a born agent must OMIT what the writer did not state`)
+      expect(rec, `${field} is written unconditionally — a born agent must OMIT what the writer did not state`)
         .toMatch(new RegExp(`\\.\\.\\.\\(d\\.${draft}[^?]*\\?\\s*\\{\\s*${field}`));
     }
   });

@@ -18,7 +18,8 @@ import { ResponsesPhone } from "./ResponsesPhone";
 import { ManuscriptPhone } from "./ManuscriptPhone";
 import { AnalyticsPhone } from "./AnalyticsPhone";
 import { GoalsPhone } from "./GoalsPhone";
-import { HelpPhone, PlanPhone, SettingsPhone } from "./AccountPhone";
+import { HelpPhone, PlanPhone } from "./AccountPhone";
+import { SettingsV3 } from "../v3/YouV3";
 
 const base = { userId: "smoke-user", manuscriptId: "m1", agentId: "a1", packageId: "", personalisationNotes: "", sendMethod: "Email", materialsWanted: ["Query Letter"] };
 const QUERIES = [
@@ -53,7 +54,9 @@ describe("the phone's menu pages render", () => {
     expect(html).toContain("Founding writer ranks");
   });
   it("Settings, Plan & billing and Help (Part 8B)", () => {
-    const set = renderPage(<SettingsPhone />, "/account");
+    /* Phone app v3: the Settings index is SettingsV3 (reminders, help and tools, then every desktop section) */
+    const set = renderPage(<SettingsV3 />, "/account");
+    for (const w of ["Nudge reminders by email", "Call a query gone quiet after", "Import queries", "Help centre", "Give feedback", "Sign out"]) expect(set).toContain(w);
     for (const w of ["Profile", "Sign-in &amp; security", "Plan &amp; billing", "Notifications", "Preferences", "Tasks", "Your data"]) expect(set).toContain(w);
     expect(renderPage(<PlanPhone />, "/plans")).toContain("Founding writer");
     const help = renderPageSeededWith(<HelpPhone />, "/help", { queries: QUERIES });
