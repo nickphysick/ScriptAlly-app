@@ -199,6 +199,10 @@
    `.laq`'s 1.5 and stand taller than the reference's */
 .laq .laq-qsamp :is(.qad-srow b, .qad-step b, .qad-unitl, .qad-sectline, .laq-vrow > span:first-child) { line-height: normal; }
 .laq .laq-qsamp .qad-step button { font-family: inherit; }
+/* the stepper's middle keeps the control's own width here: since To-do v54 it holds a typed box (an input), whose
+   intrinsic width would otherwise stretch it to ~266px */
+.laq .laq-qsamp .qad-step b { width: 74px; }
+.laq .laq-qsamp .qad-step.sm b { width: 64px; }
 .laq .laq-vrow { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(28,19,15,.12); }
 .laq .laq-vrow > span:first-child { font: 400 15px var(--laq-tw); }
 .laq .laq-vrow .qad-seg { margin-left: auto; }
