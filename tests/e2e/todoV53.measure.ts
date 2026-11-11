@@ -235,6 +235,7 @@ for (const vp of SIZES) {
 /* ══ L9 · the bar's counts are the groups'; a click scrolls the tray, never the page ═════════════════════════════ */
 for (const vp of SIZES) {
   test(`L9 · the bar counts the groups, and a part scrolls the tray (${vp.width})`, async ({ page }) => {
+    test.skip(true, "Retired by To-do list v55 — D1: the tray's breakdown bar and its counts line are removed; the page header's ring and legend give the breakdown (TD54 L5 holds them to the tray's groups).");
     await open(page, vp);
     const r = await page.evaluate(() => {
       const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
@@ -275,8 +276,8 @@ for (const vp of SIZES) {
     await open(page, vp);
     const hk = page.locator(`${PG} [data-tws-group="house"] .tws-gb[aria-expanded="false"]`);
     if (await hk.count()) await hk.click();
-    await page.locator(`${PG} button[aria-label="Filters"]`).click();
-    await page.waitForTimeout(200);
+    /* v55 (D3, re-pointed): the old Filters menu is gone, and the new filter menu's When chip reads "No date" by Nick's
+       ruling (the mock's word) — so the menu is no longer opened here; "No date" stays out of everything else */
     const t = await page.evaluate(() => {
       const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
       return { start: root.querySelectorAll('[data-tws="start"]').length, text: root.innerText };

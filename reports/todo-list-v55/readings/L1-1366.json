@@ -1,0 +1,52 @@
+{
+ "head": {
+  "top": 369.75,
+  "bottom": 413.75,
+  "h": 44
+ },
+ "parts": [
+  {
+   "name": "todo",
+   "mid": 391.75,
+   "top": 370.75,
+   "bottom": 412.75
+  },
+  {
+   "name": "snoozed",
+   "mid": 391.75,
+   "top": 370.75,
+   "bottom": 412.75
+  },
+  {
+   "name": "done",
+   "mid": 391.75,
+   "top": 370.75,
+   "bottom": 412.75
+  },
+  {
+   "name": "search-btn",
+   "mid": 391.25,
+   "top": 375.25,
+   "bottom": 407.25
+  },
+  {
+   "name": "menu-btn",
+   "mid": 391.25,
+   "top": 375.25,
+   "bottom": 407.25
+  },
+  {
+   "name": "collapse",
+   "mid": 391.25,
+   "top": 375.25,
+   "bottom": 407.25
+  }
+ ],
+ "gone": {
+  "bar": 0,
+  "oldTabs": 0,
+  "oldSearch": 0,
+  "oldButtons": 0
+ },
+ "between": 0
+}

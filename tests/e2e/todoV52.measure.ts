@@ -11,6 +11,7 @@
  * Readings go to reports/todo-list-v52/readings/.
  */
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 
@@ -26,8 +27,10 @@ const held = new Map<string, unknown>();
 const note = (name: string, v: unknown) => { held.set(name, v); };
 test.afterAll(() => { for (const [name, v] of held) writeFileSync(`${READ}/${name}.json`, JSON.stringify(v, null, 1)); });
 
-/* the tray starts open for each test (the collapse is remembered per device); L5 reloads inside one test */
+/* the tray starts open for each test; L5 reloads inside one test.
+   v55 (D6): the collapse is saved to the ACCOUNT now (todoPrefs.trayCollapsed), so it is cleared there, not in storage */
 async function open(page: Page, vp: { width: number; height: number }) {
+  execFileSync("node", ["tests/e2e/seedTd55.mjs", "prefs", JSON.stringify({ trayCollapsed: null, trayGrouping: null })], { stdio: "ignore" });
   await page.addInitScript(() => {
     try { if (!sessionStorage.getItem("td52-init")) { localStorage.removeItem("sa.todoTraySlim"); sessionStorage.setItem("td52-init", "1"); } } catch { /* */ }
   });
@@ -210,6 +213,7 @@ test("L3 · Start here: first in the To do list; the quill, the phrase; opens it
 
 /* ══ L5 collapse ════════════════════════════════════════════════════════════════════════════════════════════════ */
 test("L5 · the collapse: 112, the desk gains it, no hover-open, it survives a reload, every item is labelled", async ({ page }) => {
+  test.skip(true, "Retired by To-do list v55 — D5: the collapse is a 64px strip of group counts (no rows), saved to the account's prefs; TD55 L5 and L6 hold it.");
   await open(page, SIZES[1]);
   await mutate(page, "L5");
   const w = (sel: string) => page.locator(`${PG} ${sel}`).evaluate((e) => e.getBoundingClientRect().width);
@@ -312,6 +316,7 @@ test("L6 + L8 · one question at a time; nothing moves on until the primary is p
 for (const vp of SIZES) {
   for (const slim of [false, true]) {
     test(`L7 · the primary is always in its column and on screen (${vp.width}, tray ${slim ? "collapsed" : "open"})`, async ({ page }) => {
+      test.skip(slim, "Retired by To-do list v55 — D5: the collapsed tray is a strip of group counts with no rows to walk; TD55 L5 holds the footer pinned at its width.");
       test.setTimeout(240_000);
       await open(page, vp);
       const kinds = await kindsInTray(page);
@@ -536,8 +541,9 @@ test("L14 · one count: the Done tab and its intro both say how many were cleare
   expect(a2, "two agents on the account").toBeTruthy();
   const now = Date.now();
   const paths = { done: `users/${uid}/tasks/td52-l14-done`, mine: `users/${uid}/taskFlags/td52-l14-this`, old: `users/${uid}/taskFlags/td52-l14-last` };
-  const tabBtn = page.locator(`${PG} .tws-seg button`, { hasText: "Done" });
-  const nOf = async (l: Locator) => Number(((await l.textContent()) ?? "").match(/(\d+) cleared this week|Done\s*(\d+)/)?.slice(1).find(Boolean) ?? NaN);
+  /* v55 (D1): the Done tab carries no count now; the intro is the one place that states it, so the intro is read */
+  const tabBtn = page.locator(`${PG} [data-tws55-tab="done"]`);
+  const nOf = async () => Number(((await page.locator(`${PG} .tws-note`).first().textContent()) ?? "").match(/(\d+) cleared this week/)?.[1] ?? NaN);
   try {
     await emuPut(paths.done, { id: "td52-l14-done", userId: uid, text: "L14 ticked off this week", done: true, createdAt: new Date(now - 3600e3).toISOString(), completedAt: new Date(now).toISOString() });
     await emuPut(paths.mine, { id: "td52-l14-this", userId: uid, taskType: "data_quality_poor", agentId: a1, snoozeCount: 0, skippedAt: new Date(now).toISOString() });
@@ -547,12 +553,12 @@ test("L14 · one count: the Done tab and its intro both say how many were cleare
     const list = page.locator(`${PG} [data-tws-done]`);
     await expect(page.locator(`${PG} [data-tws-done="task:td52-l14-done"]`)).toHaveCount(1, { timeout: 15_000 });
     await expect(page.locator(`${PG} [data-tws-done="flag-td52-l14-this"]`)).toHaveCount(1);
-    const tab = await nOf(tabBtn), rows = await list.count();
+    const tab = await nOf(), rows = await list.count();
     const lastShown = await page.locator(`${PG} [data-tws-done="flag-td52-l14-last"]`).count();
     const intro = ((await page.locator(`${PG} .tws-note`).first().textContent()) ?? "").replace(/\s+/g, " ").trim();
     note(`L14${MUT ? `-${MUT}` : ""}`, { tab, rows, lastShown, intro });
     expect(lastShown, "last week's dismissal is not shown").toBe(0);
-    expect(tab, "the Done tab's count is the rows it shows").toBe(rows);
+    expect(tab, "the Done intro's count is the rows it shows").toBe(rows);
     /* workspace width v2: the header no longer states this count; the tab and its intro are the two that must agree */
     expect(intro).toBe(`${tab} cleared this week. Anything you dismissed is here too, in case you change your mind.`);
     expect(rows, "with only the fixtures this week, the count is 2 (the harness snapshot holds nothing cleared this week)").toBe(2);
@@ -595,7 +601,7 @@ test("L15 · a switched-off rule is listed, comes back on, and Undo switches it 
     await expect(dp.locator(".tws-po", { hasText: /Stop asking/ }).locator("small")).toHaveText("You can turn them back on from the Done tab.");
     await dp.locator(".tws-go").click();
     await expect.poll(replyRows, { timeout: 15_000, message: "switched off: no reply-time tasks in To do" }).toBe(0);
-    await pg.locator(".tws-seg button", { hasText: "Done" }).click();
+    await pg.locator('[data-tws55-tab="done"]').click();
     const link = pg.locator('[data-tws="off-open"]');
     await expect(link, "the Done tab's foot names the switched-off tasks").toHaveText(/Tasks you’ve switched off \(\d+\)/, { timeout: 10_000 });
     await link.click();
@@ -607,7 +613,7 @@ test("L15 · a switched-off rule is listed, comes back on, and Undo switches it 
     /* the pop-up stays open while other rules are still off (the harness account has one); Escape closes it */
     await expect(row).toHaveCount(0);
     if (await pop.count()) { await page.keyboard.press("Escape"); await expect(pop).toHaveCount(0); }
-    await pg.locator(".tws-seg button", { hasText: "To do" }).click();
+    await pg.locator('[data-tws55-tab="todo"]').click();
     await expect.poll(replyRows, { timeout: 15_000, message: "turned back on: the reply-time tasks are back" }).toBe(n0);
     const toast = page.locator('[data-tws="toast"]');
     await expect(toast).toContainText("Reply-time questions are back on.");
