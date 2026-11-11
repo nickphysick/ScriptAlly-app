@@ -94,10 +94,14 @@ describe("the desktop To-do is the workspace, and the tray is gone", () => {
 describe("one count on the page, and the badge says what it counts", () => {
   const strip = (x: string) => x.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
   const ws = () => strip(readFileSync(join(__dirname, "TodoWorkspace.tsx"), "utf8"));
-  it("the tab and the n/m both count `seq`, the rows of every group", () => {
+  /* v55 (D4): re-pointed — the To do count (and the page header's) is now EVERY task, so a filter or a search narrows
+     the list and never the count; the n/m still counts the rows on show. With nothing filtered the two are equal (every
+     task sits in one category section). The tab itself is WsTrayHead55's (todoV55 L3/L4 measure it on the page). */
+  it("the tab and the header count every task; the n/m counts `seq`, the rows on show", () => {
     const w = ws();
     expect(w).toContain("const seq = useMemo(() => sections.flatMap((s) => s.tasks), [sections]);");
-    expect(w).toMatch(/To do <b data-tws="todo-count">\{seq\.length\}<\/b>/);
+    expect(w).toContain("<WsTrayHead55 tab={tab} onTab={(t) => { setTab(t); setMenuState(false); }} todo={all.length}");
+    expect(w).toContain("<WsHeader54 todo={all.length}");
     expect(w).toMatch(/<b>\{seqPos \+ 1\}<\/b>\/\{seq\.length\}/);
     expect(w, "the tab no longer reads the board's card count").not.toContain("boardFigures(");
   });

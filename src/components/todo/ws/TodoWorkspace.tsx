@@ -20,8 +20,8 @@ import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../../lib/db";
 import type { BoardCard } from "../../../lib/todoBoard";
 import {
-  NO_WS_FILTERS, STRIP_GROUP, WS_GROUPINGS, WS_GROUPS, WS_TYPES, WS_WHENS, breakdownOf, dueChip, mentorLine, passes, milestoneFor, stripWords, trayFigure, whenOf, whenWord, wsSections,
-  type DoneRow, type WsFilters, type WsGroupId, type WsGrouping, type WsTask, type WsType, type WsWhen,
+  NO_WS_FILTERS, WS_GROUPINGS, WS_GROUPS, breakdownOf, dueChip, mentorLine, passes, milestoneFor, trayFigure, wsSections,
+  type DoneRow, type WsFilters, type WsGrouping, type WsTask,
 } from "../../../lib/todoWs";
 import { RULE_OFF_WORDS, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
 import { openQueryPanel } from "../../../lib/queryPanelStore";
@@ -53,13 +53,14 @@ import { WsBatch54 } from "./WsBatch54";
 import { openingView, type BatchView } from "../../../lib/todoBatch54";
 import { devBatchCap } from "../../../lib/todoBatchReviewAid";
 import { needRows } from "../../../lib/todoHeader54";
+import "./todoWs55.css";
+import { WsTrayHead55, SVG_EXPAND } from "./WsTrayHead55";
+import { filterLine, stripCounts } from "../../../lib/todoTrayHead55";
 
 const MENTOR = "/images/todo/mentor.webp";
 const HOUR = "/images/todo/hour.webp";
-/** the collapsed tray, remembered per device (v52 Part B) */
-const SLIM_KEY = "sa.todoTraySlim";
-const readSlim = (): boolean => { try { return localStorage.getItem(SLIM_KEY) === "1"; } catch { return false; } };
-const writeSlim = (v: boolean) => { try { localStorage.setItem(SLIM_KEY, v ? "1" : "0"); } catch { /* private mode */ } };
+/* v55 (D6): the collapse and the grouping are saved to the writer's prefs (todoPrefs.trayCollapsed / trayGrouping, one
+   leaf each, beside v54's batchView); v52's per-device `sa.todoTraySlim` is no longer read */
 const DAY = 86400000;
 const UNDO_MS = 7000;
 /** v53 (D10): the snackbar after a log runs for 6s; the stamp holds the logged task on the desk for ~850ms first */
@@ -68,19 +69,6 @@ const STAMP_MS = 850;
 const LEAVE_MS = 380;
 const reducedMotion = () => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
 
-const SVG_FILTER = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5h14M6 10h8M8.5 15h3" /></svg>;
-const SVG_GROUP = <svg viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="6" rx="1.6" /><rect x="2.5" y="11.5" width="15" height="6" rx="1.6" /></svg>;
-const SVG_SLIM = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 5l-5 5 5 5M16 5l-5 5 5 5" /></svg>;
-const SVG_WIDE = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 5l5 5-5 5M9 5l5 5-5 5" /></svg>;
-/* housekeeping's job marks: a clock (reply time), a heart (wishlist), a tag (genres), a page (what was sent) */
-const HK_ICON: Record<"clock" | "heart" | "tag" | "page", React.ReactNode> = {
-  clock: <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="6.5" /><path d="M10 6.5V10l2.5 1.6" /></svg>,
-  heart: <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 15.5s-5.5-3.3-5.5-7.1A2.9 2.9 0 0 1 10 6.6a2.9 2.9 0 0 1 5.5 1.8c0 3.8-5.5 7.1-5.5 7.1z" /></svg>,
-  tag: <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 4h6l6 6-6 6-6-6z" /><circle cx="7.5" cy="7.5" r="1" /></svg>,
-  page: <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5h5.5L14.5 6.5V16.5H6z" /><path d="M11.5 3.5v3h3M8 10h4.5M8 12.8h4.5" /></svg>,
-};
-const hkIcon = (t: WsTask): React.ReactNode => (t.kind === "batch" || t.need === "materials" ? HK_ICON.page : t.need === "mswl" ? HK_ICON.heart : t.need === "responseTime" ? HK_ICON.clock : HK_ICON.tag);
-const SVG_FIND = <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.5" /><path d="M10.5 10.5L14 14" /></svg>;
 
 const initialsOf = (n: string) => { const w = n.trim().split(/\s+/).filter(Boolean); return (w.length > 1 ? w[0][0] + w[w.length - 1][0] : (w[0] ?? "").slice(0, 2)).toUpperCase() || "··"; };
 const dayWord = (ms: number, today: Date): string => {
@@ -136,21 +124,37 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const [filters, setFilters] = useState<WsFilters>(NO_WS_FILTERS);
   const filtRef = useRef<HTMLButtonElement>(null);
   const [tagsOpen, setTagsOpen] = useState(false);
-  const [grouping, setGrouping] = useState<WsGrouping>("category");
-  const [menu, setMenu] = useState<"f" | "g" | null>(null);
+  /* v55 (D6): the grouping and the collapse come back from the writer's prefs; a choice made here wins until the page
+     is left, and is written as one leaf each. Filters and search are never saved. */
+  const prefs = currentUser?.todoPrefs as { trayGrouping?: WsGrouping; trayCollapsed?: boolean } | undefined;
+  const [groupingPick, setGroupingPick] = useState<WsGrouping | null>(null);
+  const grouping: WsGrouping = groupingPick ?? (WS_GROUPINGS.some((g) => g.id === prefs?.trayGrouping) ? prefs!.trayGrouping! : "category");
+  const [menu, setMenuState] = useState(false);
+  /* v55 (D2): search turns the head's one line into a field */
+  const [searching, setSearching] = useState(false);
   /* v53 (D4): Housekeeping starts folded — its header, its count and Quick fill; the header opens it */
   const [shut, setShut] = useState<ReadonlySet<string>>(() => new Set(["house"]));
   const [hkMore, setHkMore] = useState(false);
-  const [slim, setSlimState] = useState<boolean>(readSlim);
-  const setSlim = (v: boolean) => { setSlimState(v); writeSlim(v); setMenu(null); };
+  const [slimPick, setSlimPick] = useState<boolean | null>(null);
+  const slim = slimPick ?? prefs?.trayCollapsed === true;
+  const setMenu = (open: boolean) => { setMenuState(open); };
+  const setSlim = (v: boolean) => {
+    setSlimPick(v); setMenuState(false);
+    void updateUserPaths({ "todoPrefs.trayCollapsed": v }).catch(() => flash("Couldn’t save that choice."));
+  };
+  const setGrouping = (g: WsGrouping) => {
+    setGroupingPick(g); setShut(new Set());
+    void updateUserPaths({ "todoPrefs.trayGrouping": g }).catch(() => flash("Couldn’t save that choice."));
+  };
   const visible = useMemo(() => all.filter((t) => passes(t, filters)), [all, filters]);
   const sections = useMemo(() => wsSections(visible, grouping), [visible, grouping]);
   const order = useMemo(() => sections.flatMap((s) => (shut.has(s.id) ? [] : s.tasks)), [sections, shut]);
   /* ⚠️ ONE COUNT (v51.1): the To do tab, the desk's "n/m" and the group headings all count the rows the tray holds —
      every group, Housekeeping's one-row-per-agent included, a collapsed group too. ‹ › still step only the open groups. */
   const seq = useMemo(() => sections.flatMap((s) => s.tasks), [sections]);
-  const findRef = useRef<HTMLInputElement>(null);
-  useEscapeLayer(!!menu, () => setMenu(null), ESC_LEVEL.page);
+  useEscapeLayer(menu, () => setMenuState(false), ESC_LEVEL.page);
+  const openSearch = () => { setTab("todo"); setMenuState(false); setSearching(true); };
+  const closeSearch = () => { setSearching(false); setFilters((f) => ({ ...f, q: "" })); };
 
   /* ── selection ── */
   const [selKey, setSelKey] = useState<string | null>(null);
@@ -394,7 +398,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       if (location.pathname !== "/todo" || isEditableTarget(e.target) || escapeDepth() > 0 || e.metaKey || e.ctrlKey || e.altKey) return;
       if (matchesShortcut(SHORTCUTS.todoDown, e) && tab === "todo") { e.preventDefault(); move(1); }
       else if (matchesShortcut(SHORTCUTS.todoUp, e) && tab === "todo") { e.preventDefault(); move(-1); }
-      else if (matchesShortcut(SHORTCUTS.todoSearch, e)) { e.preventDefault(); findRef.current?.focus(); }
+      else if (matchesShortcut(SHORTCUTS.todoSearch, e)) { e.preventDefault(); openSearch(); }
       else if (matchesShortcut(SHORTCUTS.todoSnooze, e) && sel && !held && !adding) { e.preventDefault(); setPop({ kind: "snooze", opener: snzRef.current }); }
       else if (matchesShortcut(SHORTCUTS.todoDismiss, e) && sel && !held && !adding) { e.preventDefault(); setPop({ kind: "dismiss", opener: disRef.current }); }
       else if (matchesShortcut(SHORTCUTS.todoAdd, e)) { e.preventDefault(); setMile(null); setAdding(true); }
@@ -407,7 +411,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
      every book, so a book's name over all of them would be false) ── */
   const statBook = manuscripts.length === 1 ? (manuscripts[0].title ?? "").trim() || null : null;
   /* ── v53 (D3): the breakdown bar reads the category groups the tray draws, so its counts are the groups' counts ── */
-  const bd = useMemo(() => breakdownOf(wsSections(visible, "category")), [visible]);
+  /* v55 (D4): read off EVERY task, never the filtered view — a search or a filter narrows the list, never the counts */
+  const bd = useMemo(() => breakdownOf(wsSections(all, "category")), [all]);
   const jump = (id: string) => {
     setShut((x) => { const n = new Set(x); n.delete(id); return n; });
     /* the TRAY scrolls, never the page: its own scrollTop, never scrollIntoView */
@@ -421,7 +426,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   };
 
   /* v54 (D1): the legend's rows, read off the same category sections as the bar */
-  const needRowsV = useMemo(() => needRows(wsSections(visible, "category"), bd, now), [visible, bd, now]);
+  const needRowsV = useMemo(() => needRows(wsSections(all, "category"), bd, now), [all, bd, now]);
   /* v54 (D1): "Quick fill" opens the "Fill in what you sent" batch (there is one: v51.1 folds every gap into it) */
   const quickFill = () => { setTab("todo"); go("materials-batch"); setBatchView("table"); };
   /* D9: a pick is remembered (todoPrefs.batchView, one leaf) and used from then on */
@@ -429,10 +434,10 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const pickBatchView = (v: BatchView) => { setBatchView(v); void updateUserPaths({ "todoPrefs.batchView": v }).catch(() => flash("Couldn’t save that choice.")); };
 
   /* ── render: the tray ── */
-  const typeCount = (k: WsType) => all.filter((t) => t.type === k).length;
-  const whenCount = (k: WsWhen) => all.filter((t) => whenOf(t) === k).length;
   const toggleSet = <T,>(s: ReadonlySet<T>, v: T) => { const n = new Set(s); if (n.has(v)) n.delete(v); else n.add(v); return n; };
-  const nFilters = filters.types.size + filters.whens.size;
+  /* v55 (D4): the filters (never the search, never the grouping) clear here; the line says what is showing */
+  const clearFilters = () => setFilters((f) => ({ ...f, types: new Set(), whens: new Set() }));
+  const fLine = filterLine(filters, visible.length, all.length);
 
   const row = (t: WsTask) => {
     const fig = trayFigure(t, now);
@@ -465,7 +470,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
 
   /* ⚠️ DECLARED ABOVE trayBody, which reads it during render (an IIFE reading a later const is a TDZ that tsc cannot see) */
   const sectionsBody = (() => {
-    if (!visible.length) return <div className="tws-empty">Nothing matches. <button type="button" onClick={() => setFilters(NO_WS_FILTERS)}>Show everything</button></div>;
+    if (!visible.length) return <p className="tws55-none" data-tws55="none">No tasks match. <button type="button" onClick={() => setFilters(NO_WS_FILTERS)}>Clear the filters</button></p>;
     return sections.map((s) => {
       if (!s.tasks.length && s.id !== "yours") return null;
       const isShut = shut.has(s.id);
@@ -801,101 +806,35 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         <div className="tws" data-tws="page">
           {/* v54 (D1): the page header, in the Query Centre's dress — the hawk at the desk, "{n} things to do", "for {book}"
               between rules (one book only), "+ Add a task" and "Quick fill", the ring and "What needs doing". */}
-          <WsHeader54 todo={seq.length} bd={bd} rows={needRowsV} book={statBook}
+          <WsHeader54 todo={all.length} bd={bd} rows={needRowsV} book={statBook}
             onAdd={() => { setMile(null); setAdding(true); }}
             onQuickFill={all.some((x) => x.key === "materials-batch") ? () => quickFill() : null}
             onJump={(k) => jump(k)} />
 
           <div className="tws-ws" data-tws="workspace" data-slim={slim ? "" : undefined}>
             {slim ? (
-              <aside className="tws-tray tws-strip" data-tws="tray" data-slim="" aria-label="Your tasks">
-                <button type="button" className="tws-wide" data-tws="expand" onClick={() => setSlim(false)}>{SVG_WIDE}<span>All tasks</span></button>
-                <div className="tws-sl" data-tws="list">
-                  {sections.map((sec) => (sec.tasks.length ? (
-                    <React.Fragment key={sec.id}>
-                      <div className="tws-sgb" data-band={sec.band}>{grouping === "category" ? STRIP_GROUP[sec.id as WsGroupId] ?? sec.name : sec.name}<em>{sec.tasks.length}</em></div>
-                      {sec.tasks.map((t) => {
-                        const w = stripWords(t);
-                        const on = !!sel && sel.key === t.key && !adding;
-                        const glyph = t.query && t.kind !== "fix" ? <StatusDot status={t.query.status as QueryStatus} overrideSize={16} decorative /> : null;
-                        return (
-                          <button key={t.key} type="button" className="tws-si" data-tws-row={t.key} data-tws-strip="" aria-current={on ? "true" : undefined} title={t.title} onClick={() => go(t.key)}>
-                            <span className="tws-sav" data-k={t.kind === "own" ? "own" : t.group === "house" ? "house" : undefined} aria-hidden="true">
-                              {t.kind === "own" ? null : t.group === "house" ? hkIcon(t) : glyph ?? initialsOf(t.agentName || t.title)}
-                            </span>
-                            <b data-tws="strip-name">{w.name}</b>
-                            <i data-tws="strip-what">{w.what}</i>
-                            {w.when ? <small data-tws="strip-when" data-hot={w.hot ? "" : undefined}>{w.when}</small> : null}
-                          </button>
-                        );
-                      })}
-                    </React.Fragment>
-                  ) : null))}
-                </div>
+              /* v55 (D5): the tray as a 64px strip — » and one round count per category group (the name is its
+                 tooltip); a click anywhere on the strip opens the tray again */
+              <aside className="tws-tray tws55-strip" data-tws="tray" data-slim="" aria-label="Your tasks" onClick={() => setSlim(false)}>
+                <button type="button" className="tws55-ic" data-tws="expand" aria-label="Open the list" title="Open the list" onClick={(e) => { e.stopPropagation(); setSlim(false); }}>{SVG_EXPAND}</button>
+                {stripCounts(all).map((g) => (
+                  <span key={g.id} className="tws55-sdot" data-k={g.id} data-tws55-strip={g.id} title={g.name} aria-label={`${g.name}: ${g.n}`}>{g.n}</span>
+                ))}
               </aside>
             ) : (
             <aside className="tws-tray" data-tws="tray" aria-label="Your tasks">
-              <div className="tws-th">
-                <div className="tws-seg" role="group" aria-label="Show">
-                  <button type="button" aria-pressed={tab === "todo"} onClick={() => setTab("todo")}>To do <b data-tws="todo-count">{seq.length}</b></button>
-                  <button type="button" aria-pressed={tab === "snoozed"} onClick={() => setTab("snoozed")}>Snoozed <b>{snoozed.length}</b></button>
-                  <button type="button" aria-pressed={tab === "done"} onClick={() => setTab("done")}>Done <b>{clearedN}</b></button>
-                </div>
-                {tab === "todo" && grouping === "category" && bd.need + bd.house > 0 ? (
-                  /* v53 (D3): one thin bar split into the three urgent groups, then the words; a part scrolls the tray */
-                  <div className="tws-bd" data-tws="breakdown">
-                    {bd.need ? (
-                      <div className="tws-bar" data-tws="bar">
-                        {([["wait", bd.wait, "agents waiting"], ["nudge", bd.nudge, "nudges due"], ["quiet", bd.quiet, "gone quiet"]] as const).map(([k, n, w]) => n ? (
-                          <button key={k} type="button" data-k={k} data-n={n} style={{ flexGrow: n }} aria-label={`${n} ${w}`} title={`${n} ${w}`} onClick={() => jump(k)} />
-                        ) : null)}
-                      </div>
-                    ) : null}
-                    <p data-tws="bar-words"><b>{bd.need}</b> need you{bd.late ? <> · <span className="tws-bdl" data-tws="bar-late">{bd.late} late</span></> : null}
-                      {bd.house ? <> · <button type="button" className="tws-bdt" data-tws="bar-tidy" onClick={() => jump("house")}>{bd.house} to tidy</button></> : null}</p>
-                  </div>
-                ) : null}
-                {tab === "todo" ? (
-                  <>
-                    <div className="tws-row">
-                      <label className="tws-find">{SVG_FIND}<input ref={findRef} placeholder="Search tasks" value={filters.q} aria-label="Search tasks or agents"
-                        onChange={(e) => setFilters((f) => ({ ...f, q: e.target.value }))} onKeyDown={(e) => { if (e.key === "Escape") { setFilters((f) => ({ ...f, q: "" })); (e.target as HTMLInputElement).blur(); } }} /></label>
-                      <span style={{ position: "relative" }}>
-                        <button type="button" ref={filtRef} className="tws-ib" data-on={nFilters ? "" : undefined} aria-label="Filters" aria-expanded={menu === "f"} onClick={() => setMenu(menu === "f" ? null : "f")}>{SVG_FILTER}{nFilters ? <span className="tws-nb">{nFilters}</span> : null}</button>
-                        {menu === "f" ? (
-                          <div className="tws-menu" role="dialog" aria-label="Filters" style={{ right: -44 }}>
-                            <h6>Task type</h6>
-                            <div className="tws-fcs">{WS_TYPES.map((k) => <button key={k} type="button" className="tws-fc" aria-pressed={filters.types.has(k)} disabled={!typeCount(k)} onClick={() => setFilters((f) => ({ ...f, types: toggleSet(f.types, k) }))}>{k}<em>{typeCount(k)}</em></button>)}</div>
-                            <h6>When</h6>
-                            <div className="tws-fcs">{WS_WHENS.map((k) => <button key={k} type="button" className="tws-fc" aria-pressed={filters.whens.has(k)} disabled={!whenCount(k)} onClick={() => setFilters((f) => ({ ...f, whens: toggleSet(f.whens, k) }))}>{whenWord(k)}<em>{whenCount(k)}</em></button>)}</div>
-                            {/* tag management's way in (the retired tray's Tags panel: TagsPane, the only place tags are edited) */}
-                            <button type="button" className="tws-mlink" data-tws="tags-open" onClick={() => { setMenu(null); setTagsOpen(true); }}>Manage your tags</button>
-                            {offRows.length ? <button type="button" className="tws-mlink tws-mlink--off" data-tws="off-open" onClick={() => { setMenu(null); setOffPop(filtRef.current); }}>Tasks you’ve switched off ({offRows.length})</button> : null}
-                          </div>
-                        ) : null}
-                      </span>
-                      <span style={{ position: "relative" }}>
-                        <button type="button" className="tws-ib" data-on={grouping !== "category" ? "" : undefined} aria-label="Group" aria-expanded={menu === "g"} onClick={() => setMenu(menu === "g" ? null : "g")}>{SVG_GROUP}</button>
-                        {menu === "g" ? (
-                          <div className="tws-menu" role="dialog" aria-label="Group the tray by">
-                            <h6>Group the tray by</h6>
-                            {WS_GROUPINGS.map((g) => (
-                              <button key={g.id} type="button" className="tws-gopt" role="radio" aria-checked={grouping === g.id} onClick={() => { setGrouping(g.id); setShut(new Set()); setMenu(null); }}>
-                                <i /><span><b>{g.label}</b><small>{g.hint}</small></span>
-                              </button>
-                            ))}
-                          </div>
-                        ) : null}
-                      </span>
-                      <button type="button" className="tws-ib" data-tws="collapse" aria-label="Collapse the tray" title="Collapse the tray" onClick={() => setSlim(true)}>{SVG_SLIM}</button>
-                    </div>
-                    {nFilters ? (
-                      <div className="tws-chips">
-                        {[...filters.types].map((k) => <button key={k} type="button" className="tws-chip" onClick={() => setFilters((f) => ({ ...f, types: toggleSet(f.types, k) }))}>{k}<i>✕</i></button>)}
-                        {[...filters.whens].map((k) => <button key={k} type="button" className="tws-chip" onClick={() => setFilters((f) => ({ ...f, whens: toggleSet(f.whens, k) }))}>{whenWord(k)}<i>✕</i></button>)}
-                      </div>
-                    ) : null}
-                  </>
+              <div className="tws55-th">
+                <WsTrayHead55 tab={tab} onTab={(t) => { setTab(t); setMenuState(false); }} todo={all.length}
+                  searching={searching} q={filters.q} onQ={(q) => setFilters((f) => ({ ...f, q }))} onOpenSearch={openSearch} onCloseSearch={closeSearch}
+                  menu={menu} onMenu={setMenu}
+                  filters={filters} onType={(k) => { setTab("todo"); setFilters((f) => ({ ...f, types: toggleSet(f.types, k) })); }}
+                  onWhen={(k) => { setTab("todo"); setFilters((f) => ({ ...f, whens: toggleSet(f.whens, k) })); }}
+                  onClear={clearFilters}
+                  grouping={grouping} onGroup={(g) => { setTab("todo"); setGrouping(g); }} groupings={WS_GROUPINGS}
+                  onCollapse={() => setSlim(true)} menuRef={filtRef}
+                  extra={<button type="button" className="tws-mlink" data-tws="tags-open" onClick={() => { setMenuState(false); setTagsOpen(true); }}>Manage your tags</button>} />
+                {tab === "todo" && fLine ? (
+                  <p className="tws55-fline" data-tws55="fline">{fLine} · <button type="button" data-tws55="fline-clear" onClick={clearFilters}>Clear</button></p>
                 ) : null}
               </div>
               <div className="tws-tl" data-tws="list">{trayBody}</div>

@@ -91,6 +91,10 @@ export interface User {
     /* To-do list v54 (D9): how a housekeeping batch opens once the writer has picked — "one" (one at a time) or "table"
        (all at once). Absent: under 8 queries opens one at a time, 8 or more the table. One leaf, NO rules change. */
     batchView?: "one" | "table";
+    /* To-do list v55 (D6): the tray's grouping and whether it is collapsed to its strip. Absent: Category, open. One leaf
+       each, beside batchView; the same unconstrained map, so NO rules change. Filters and search are never saved. */
+    trayGrouping?: "category" | "urgency" | "when" | "agent" | "none";
+    trayCollapsed?: boolean;
     /* The Noteboard's own preferences (paper run, Phase 2) — the map already carries nested
        sub-maps in live data (the To-do list's view prefs write `listView` here), so a page-scoped
        sub-map follows an established precedent. `dismissedExamples` = example-paper ids sent away
