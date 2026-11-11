@@ -19,6 +19,7 @@ import { Cta, Hero } from "./V4Parts";
 import { TodayV4 } from "./TodayV4";
 import { QueriesV4 } from "./QueriesV4";
 import { AgentsV4, AgentsListPageV4 } from "./AgentsV4";
+import { YouV4 } from "./YouV4";
 import { V3Provider } from "../v3/V3Provider";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
@@ -55,5 +56,11 @@ describe("Phone app v4 renders", () => {
     expect(full).toContain("Everyone on your list");
     const list = renderPageSeeded(P(<AgentsListPageV4 />), "/agents");
     for (const w of ["To query", "Queried"]) expect(list).toContain(w);
+  });
+  it("You: early days in words, and the rows for every page v3 reached", () => {
+    const empty = renderPage(<YouV4 />, "/you");
+    expect(empty).toContain("Nothing sent yet.");
+    const full = renderPageSeeded(<YouV4 />, "/you");
+    for (const w of ["See the full picture", "What’s landing", "Wall of no", "Packages", "Responses", "Query letters", "Synopses and comps"]) expect(full).toContain(w);
   });
 });

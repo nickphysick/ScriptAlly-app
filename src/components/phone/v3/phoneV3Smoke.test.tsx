@@ -13,7 +13,6 @@ vi.mock("../../../lib/db", async () => (await import("../../../test/pageSmoke"))
 vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSmoke")).firebaseMock());
 vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pageSmoke")).toastMock());
 
-import { YouV3 } from "./YouV3";
 import { V3Provider } from "./V3Provider";
 import { AgentFormV3 } from "./AgentsV3";
 
@@ -21,13 +20,6 @@ const NOW = Date.parse("2026-11-11T12:00:00Z");
 const P = (n: React.ReactNode) => <V3Provider on now={NOW}>{n}</V3Provider>;
 
 describe("Phone app v3 renders", () => {
-  it("You: the switch and its first rows", () => {
-    for (const html of [renderPage(<YouV3 />, "/you"), renderPageSeeded(<YouV3 />, "/you")]) {
-      expect(html).toContain("Progress");
-      expect(html).toContain("Materials");
-      expect(html).toContain("Responses");
-    }
-  });
   it("the add form's first step", () => {
     const f = renderPage(P(<AgentFormV3 />), "/agents");
     for (const w of ["Who are they?", "I don’t know the agency", "Agent fit"]) expect(f).toContain(w);

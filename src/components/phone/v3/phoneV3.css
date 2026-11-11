@@ -92,23 +92,7 @@
   .pa3 .pa3-fold { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 14px; font-size: 14.5px; font-weight: 500; color: var(--pa-navy); }
 
 
-  /* ── You (ref "library") ── */
-  .pa3-tiles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-  .pa3 .pa3-tile { background: #fff; border-radius: 16px; box-shadow: var(--pa-sh); padding: 14px; min-height: 104px; display: flex; flex-direction: column; box-sizing: border-box; min-width: 0; }
-  .pa3-tile .pa3-ic { color: var(--pa-navy); margin-bottom: auto; }
-  .pa3-tile b { font-size: 15.5px; font-weight: 600; margin-top: 12px; }
-  .pa3-tile span { font-size: 13px; color: var(--pa-muted); margin-top: 1px; }
-  .pa3 .pa3-book { display: flex; gap: 14px; align-items: center; padding: 14px; width: 100%; box-sizing: border-box; }
-  .pa3-cover {
-    flex: none; width: 52px; height: 76px; box-sizing: border-box; border-radius: 3px 6px 6px 3px; background: var(--pa-navy); overflow: hidden;
-    box-shadow: inset 4px 0 0 rgba(255, 255, 255, 0.12), 2px 3px 8px rgba(31, 38, 51, 0.25); color: #fff;
-    font: 400 8.5px/1.2 var(--pa-type); padding: 12px 6px 0 10px; overflow-wrap: anywhere;
-  }
-  .pa3 .pa3-show { background: var(--pa-navy); border-radius: 16px; padding: 14px 14px 0; color: #fff; box-shadow: var(--pa-sh); display: block; width: 100%; box-sizing: border-box; }
-  .pa3-show small { font-size: 13px; color: var(--pa-st-slate); }
-  .pa3-show .pa3-in { background: #fff; color: var(--pa-ink); border-radius: 12px 12px 0 0; margin-top: 12px; padding: 14px; }
-  .pa3-show .pa3-in b { display: block; font: 400 21px/1.2 var(--pa-type); }
-  .pa3-show .pa3-in span { font-size: 13.5px; color: var(--pa-muted); }
+  /* ── Settings rows (v3's You page retired to phone/v4/YouV4.tsx) ── */
   .pa3-kv { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; font-size: 14.5px; }
   .pa3-kv + .pa3-kv { border-top: 1px solid var(--pa-rule); }
   .pa3-kv > span { color: var(--pa-muted); }

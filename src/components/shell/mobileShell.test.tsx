@@ -220,7 +220,7 @@ describe("the app-feel layer (Phase 6)", () => {
    The claim that survives is the same one: nothing it offered became unreachable. Each of its doors now has a home on
    the You tab, its Settings page or Today. The rendered walk is tests/e2e/phoneAppV3.measure.ts. */
 describe("the retired menu — everything it offered is still reachable", () => {
-  const you = readFileSync(resolve(__dirname, "../phone/v3/YouV3.tsx"), "utf8");
+  const you = readFileSync(resolve(__dirname, "../phone/v4/YouV4.tsx"), "utf8");
   it("the shell no longer mounts the menu, the band or the book sheet on a phone", () => {
     for (const gone of [/<PhoneMenu\b/, /<PhoneBand\s/, /<PhoneBookSheet\b/, /setMenuOpen\(/]) expect(appShell, String(gone)).not.toMatch(gone);
     expect(appShell).toContain("<V4MiniBar");
