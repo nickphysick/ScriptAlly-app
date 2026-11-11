@@ -8,7 +8,7 @@
  */
 import React, { useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
-import { closeV3, clearV3Snack, subscribeV3, v3Overlay, v3Snack, type V3Overlay } from "./v3Store";
+import { closeV3, clearV3Snack, subscribeV3, v3Overlay, v3Seq, v3Snack, type V3Overlay } from "./v3Store";
 import { useV3Data } from "./V3Provider";
 import { QuerySheetV3 } from "./QuerySheetV3";
 import { HAWK_SRC } from "./V3Parts";
@@ -21,6 +21,7 @@ export interface V3Panels {
 export const V3Layer: React.FC<V3Panels> = ({ render }) => {
   const o = useSyncExternalStore(subscribeV3, v3Overlay, v3Overlay);
   const snack = useSyncExternalStore(subscribeV3, v3Snack, v3Snack);
+  const seq = useSyncExternalStore(subscribeV3, v3Seq, v3Seq);
   const v = useV3Data();
   /* Escape closes the overlay (the app's journeys own their own Escape) */
   useEffect(() => {
@@ -41,7 +42,7 @@ export const V3Layer: React.FC<V3Panels> = ({ render }) => {
   if (!body && !snack) return null;
   return createPortal(
     <div className="pa3 pa3-layer pa-layer" data-pa3="layer" style={body ? undefined : { pointerEvents: "none", inset: "auto" }}>
-      {body ? (<>{full ? null : <div className="pa3-scrim" data-pa3="scrim" onClick={closeV3} />}{body}</>) : null}
+      {body ? (<React.Fragment key={seq}>{full ? null : <div className="pa3-scrim" data-pa3="scrim" onClick={closeV3} />}{body}</React.Fragment>) : null}
       {snack ? (
         <div className="pa3-snack" role="status" data-pa3="snack" style={{ pointerEvents: "auto" }}>
           <img src={HAWK_SRC} alt="" />

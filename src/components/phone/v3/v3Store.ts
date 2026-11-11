@@ -19,15 +19,18 @@ export interface V3Snack { msg: string; undo?: () => Promise<void> | void }
 
 type Listener = () => void;
 let overlay: V3Overlay | null = null;
+/** counts opens, so the host remounts a panel opened afresh (Log another) and keeps one that only re-renders */
+let seq = 0;
 let snack: V3Snack | null = null;
 const listeners = new Set<Listener>();
 const emit = () => { for (const l of listeners) l(); };
 
 export const v3Overlay = (): V3Overlay | null => overlay;
+export const v3Seq = (): number => seq;
 export const v3Snack = (): V3Snack | null => snack;
 export function subscribeV3(l: Listener): () => void { listeners.add(l); return () => { listeners.delete(l); }; }
 
-export function openV3(o: V3Overlay): void { overlay = o; snack = null; emit(); }
+export function openV3(o: V3Overlay): void { overlay = o; seq += 1; snack = null; emit(); }
 export function closeV3(): void { overlay = null; emit(); }
 export const openV3Query = (id: string): void => openV3({ type: "query", id });
 export const openV3Agent = (id: string): void => openV3({ type: "agent", id });

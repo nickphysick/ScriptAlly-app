@@ -44,15 +44,13 @@ import { ACCOUNT_ROUTES } from "../../lib/accountRoutes";
 import { V3Header, V3TabBarHost } from "../phone/v3/V3Chrome";
 import { V3Provider } from "../phone/v3/V3Provider";
 import { V3Layer } from "../phone/v3/V3Layer";
+import { renderJourney } from "../phone/v3/JourneysV3";
+import { openV3, closeV3, v3Overlay } from "../phone/v3/v3Store";
 import { v3IsRoot, v3RootTitle, v3TabFor } from "../../lib/phoneV3Nav";
 import { PhoneBandContext } from "../phone/phoneBandStore";
-import { PhonePlusSheet } from "../phone/PhoneSheets";
 import { PhoneComposeHost } from "../phone/PhoneComposeFlow";
-import { openPhoneCompose } from "../../lib/phoneCompose";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
-import { TODO_OPEN_COMPOSER } from "../../lib/todoRoutes";
 import { shellCrumbForPath } from "./shellV2Nav";
-import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { STAGE_SCROLL_ID } from "../../lib/stageScroll";
 import { useScriptAllyDb } from "../../lib/db";
 import { BackgroundLab } from "../dev/BackgroundLab";
@@ -395,28 +393,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     if (pathname === "/plans") return "Plan & billing";
     return shellCrumbForPath(pathname)?.page ?? "QueryHawk";
   }, [pathname]);
-  const bandMs = useMemo(() => {
-    if (!phoneNav) return null;
-    let stored: string | null = null;
-    try { stored = window.localStorage.getItem("scriptally_active_manuscript_id"); } catch { /* storage refused */ }
-    return resolveScopedManuscript(manuscripts, stored);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phoneNav, manuscripts, pathname, location.search]);
-  const bandBookId = bandMs?.id ?? null;
 
-  /* the + sheet's doors — each opens what exists today (Phase E of v3 replaces the sheet) */
-  const plusDoors = useMemo(() => ({
-    onSent: () => openQueryDrawer({ mode: "log", ...(bandBookId ? { manuscriptId: bandBookId } : {}) }),
-    onReplied: () => onNavigate("queries", "Record a response"),
-    onAgent: () => onNavigate("agents", "Add an agent"),
-    onTask: () => {
-      if (phoneNav) { openPhoneCompose("task"); return; }
-      if (pathname === "/todo") { window.dispatchEvent(new CustomEvent(TODO_OPEN_COMPOSER)); return; }
-      try { sessionStorage.setItem("sa.todoCompose", "task"); } catch { /* private mode */ }
-      goPath("/todo");
-    },
-    onImport: () => goPath("/import"),
-  }), [bandBookId, onNavigate, pathname, goPath, phoneNav]);
   /* a fresh clock for the phone's one read on every navigation */
   const v3Now = useMemo(() => Date.now(), [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   const [plusOpen, setPlusOpen] = useState(false);
@@ -651,8 +628,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             if (tab === v3TabFor(pathname) && v3IsRoot(pathname) && stageRef.current) { stageRef.current.scrollTo({ top: 0, behavior: "smooth" }); return; }
             goPath(path);
           }}
-          onPlus={() => setPlusOpen((o) => !o)}
-          plusOpen={plusOpen}
+          onPlus={() => { if (v3Overlay()?.type === "plus") closeV3(); else openV3({ type: "plus" }); }}
           hidden={activeMobileDetail !== null}
         />
       ) : (
@@ -672,7 +648,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       />
       )}
 
-      {phoneNav ? <V3Layer /> : null}
+      {phoneNav ? <V3Layer render={renderJourney} /> : null}
       {phoneNav && phoneSearch ? <PhoneSearchPage onClose={() => setPhoneSearch(false)} /> : null}
       {/* Phone app v2 (Part 1D) — THE PHONE'S SHEETS. The menu REPLACES the "you" sheet (Mobile Pass 1, concept
           frame 07): every row it offered is still reachable — To-do is a tab, packages are the Materials tile, and
@@ -680,7 +656,6 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           none of the three can open (their openers are phone chrome). */}
       {phoneNav ? (
         <>
-          <PhonePlusSheet open={plusOpen} onClose={() => setPlusOpen(false)} doors={plusDoors} />
           <PhoneComposeHost />
         </>
       ) : null}
