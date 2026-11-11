@@ -33,7 +33,7 @@ Design reference: `design-refs/query-centre-v154.html`, sha256 `911cdb25…71a03
 | 3 draw the journey | 32029bfb9 |
 | 4 weekly goal chart | eee2641b7 |
 | 5 sticky toolbar | 61930371b |
-| 6 verify and ship (fixes below, measurement, this report) | see `git log` |
+| 6 verify and ship (fixes below, measurement, this report) | 76064cbc5 |
 
 ## Gates against baseline
 
@@ -114,6 +114,14 @@ Screenshots in this folder: `header-*`, `group-*` (every group), `hover-card-*`,
 - `QcStageRing1531.tsx` and its test, and lib/qc1531 `ringCounts` and `policyWords`. Nothing renders them now.
 - The v153.x measurement specs (`qc153`, `qc1531`, `qc1532`, `qc1533`, `qc1534`). All wait for a slip, so none can
   run. They are retired in `tests/e2e/RETIRED-query-centre-v154.md`.
+
+## Dev
+
+https://scriptally-dev.web.app serves `index-hyqKHEqz.js` (checked after deploy). It was built from
+`dev/…-laq13-pa3-laq131-qc154` at d553a9925 (pushed), which is the served dev line `…-pa3-laq131` (4a53b37c8, rebuilt
+here to the bundle it served, `index-DMVm1gN9.js`, before merging) with `query-centre-v154` merged in cleanly. The
+merged tree's gates: tsc 0, build clean, 40 Query Centre, goal and dates spec files (418 tests) green. Prod is
+untouched.
 
 ## Deferred
 
