@@ -52,11 +52,27 @@ async function clearActivities(qid) {
 }
 
 const cmd = process.argv[2];
+/** a real record of the harness account's, as the shape to start from: whatever the rules require, it already has */
+async function template(coll, where) {
+  const s = await db.collection(`users/${uid}/${coll}`).where(...where).limit(1).get();
+  if (s.empty) throw new Error(`the harness account has no ${coll} to start from`);
+  return s.docs[0].data();
+}
+const STRIP_Q = ["responseDeadline", "writerExpectedDate", "writerExpectedSetAt", "nudgeDate", "lastNudgeSentDate", "closePlan", "replyRestartedOn",
+  "nrmnOverride", "partialRequestedDate", "partialSentDate", "fullRequestedDate", "fullSentDate", "responseReceivedAt", "expectedSendDate",
+  "offerResponseDeadline", "rejectionFeedbackType", "rejectionFeedbackText", "closingReason", "sentPackageId", "sentPackageEdition", "sentPackageName"];
+const STRIP_A = ["noResponseMeansNo", "reopensOn", "pinned", "setAside", "agencyUnknown", "submissionMethodOther", "notePreview", "importedNeedsReview", "fieldSources"];
+
 if (cmd === "seed") {
   const ms = await msId();
+  const qT = await template("queries", ["status", "==", "Queried"]);
+  const aT = await template("agents", ["submissionStatus", "==", "Open"]);
+  for (const k of STRIP_Q) delete qT[k];
+  for (const k of STRIP_A) delete aT[k];
   for (const id of IDS) {
     const nrn = id === "co1-old";
     const agent = {
+      ...aT, notes: "",
       id, userId: uid, name: NAMES[id], agency: "Harbour Lane Literary", email: `${id}@harbourlane.test`, website: "",
       responseTimeWeeks: 8, submissionStatus: "Open", submissionMethod: "Email", genres: ["Thriller"], mswlNotes: "Dark, twisty crime.",
       materialsWanted: ["Query letter", "Synopsis"], starRating: 3, dateAdded: daysAgo(120).toISOString(), lastCheckedDate: daysAgo(30).toISOString(),
@@ -65,6 +81,7 @@ if (cmd === "seed") {
     await db.doc(`users/${uid}/agents/${id}`).set(agent);
     const sent = id === "co1-old" ? daysAgo(69) : daysAgo(21);
     const q = {
+      ...qT,
       id: `${id}-q`, userId: uid, agentId: id, manuscriptId: ms, sendMethod: "Email", materialsWanted: ["Query letter"],
       personalisationNotes: "", packageId: "", dateSent: sent.toISOString(),
       status: id === "co1-full" ? "Full Requested" : "Queried",

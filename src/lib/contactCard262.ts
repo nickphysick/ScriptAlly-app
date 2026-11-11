@@ -51,6 +51,11 @@ export function nextStep(x: AgentFacts, first: string, call: CallBox | null, now
       : q.sentMs != null ? `${stageOf(x)} · sent ${dm(q.sentMs)}` : stageOf(x);
     return { tone: "agent", bold: `Waiting to hear from ${first}.`, sub: `${sub}.`, status: q.status as QueryStatus, button: { label: "Record a response", act: { kind: "journey", mode: "resp", queryId: q.id } } };
   }
+  /* Card offers v1 — closed as no reply (the card's close offer, or anywhere): the mock's words, and a way to query again */
+  if (x.stand === "closed" && q && q.status === QueryStatus.NO_RESPONSE) {
+    return { tone: "closed", bold: "Closed · No response.", sub: q.sentMs != null ? `Your query from ${dm(q.sentMs)} is on your Wall of no. You can reopen it from History.` : "It’s on your Wall of no. You can reopen it from History.",
+      status: q.status as QueryStatus, button: { label: "Query again", act: { kind: "log" } } };
+  }
   if (x.stand === "closed" && q) {
     return { tone: "closed", bold: `${stageOf(x)}.`, sub: q.lastMs ? `Closed ${dm(q.lastMs)}.` : "This query is closed.", status: q.status as QueryStatus, button: { label: "See the query", act: { kind: "open", queryId: q.id } } };
   }

@@ -34,7 +34,7 @@ import { useAgentForm } from "../card/useAgentForm";
 import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar, changeNames, type OfferKit } from "./AgentCard262Edit";
 import type { InlineField } from "../card/InlineEdits";
 import { toContactDraft, type CardDraft } from "../../../lib/cardDraft";
-import { cardOffers, offerPlan, saveExtras, type CardOffers, type CloseChoice, type RtChoice } from "../../../lib/cardOffers";
+import { cardOffers, offerPlan, saveExtras, type CardOffers, type CloseChoice, type OfferPlan, type RtChoice } from "../../../lib/cardOffers";
 
 /** changes are counted by the names the writer reads ("how they take queries" is one change, method and words alike) */
 const changeCount = (changed: readonly (keyof CardDraft)[]) => changeNames(changed).length;
@@ -157,12 +157,15 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const [flash, setFlash] = useState(false);
   const editing = open.length > 0;
   const closeAll = useCallback(() => setOpen([]), []);
+  /* Card offers v1 — what the save does with the queries already out: the plan at the moment Save is pressed (set below,
+     every render; declared here so the save's closure never reads it before it exists) */
+  const planRef = useRef<OfferPlan | null>(null);
   const form = useAgentForm({
     mode: "edit", agent: a, personal: kit?.personal ?? [], agents: kit?.agents ?? [],
     alsoFor: kit?.alsoFor ?? (() => []),
     onSave: async (d, base) => {
       if (!kit) return { ok: false, error: "Nothing to save to." };
-      const r = await kit.onSave(d, base);
+      const r = await kit.onSave(d, base, planRef.current);
       if ("error" in r) return r;
       /* the sections close in place, the card leans back, and the frame flashes navy (never sage: no green) */
       closeAll();
@@ -190,6 +193,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   if (!dragging) settled.current = offersNow;
   const offers = dragging ? settled.current : offersNow;
   const plan = offers ? offerPlan(offers, rtChoice, closeChoice) : null;
+  planRef.current = plan;
   /* while editing there is always a kit, so a press on the slider holds the offer even before the draft differs */
   const offerKit: OfferKit | null = editing ? {
     o: offers ?? { quiet: [] }, rt: rtChoice, close: closeChoice, setRt: setRtChoice, setClose: setCloseChoice, onDrag: setDragging,

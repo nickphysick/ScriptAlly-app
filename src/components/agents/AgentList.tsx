@@ -35,6 +35,7 @@ import { fitToast } from "./card/agentPills";
 import { health as healthOf } from "../../lib/listHealth";
 import { applyPatch, cardPatch, draftOf, inversePatch, toContactDraft, type CardDraft } from "../../lib/cardDraft";
 import { alsoChanges } from "../../lib/contactEdit";
+import { offerToast } from "../../lib/cardOffers";
 import { commitCardSave } from "../../lib/agentCardSave";
 import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
 import { commitAgentEdits } from "../../lib/saveAgentEdits";
@@ -903,11 +904,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         personal: editOpts.personal, agents, msGenre: scoped?.genre ?? null, genrePool: editOpts.genrePool, personalGenres: editOpts.personalLabels,
         allGenres: editOpts.allGenres, nowMs, onNewGenre: editOpts.onNewGenre,
         alsoFor: (d, base) => alsoChanges(agent, toContactDraft(agent, base, d), hkEditCtx),
-        onSave: async (d, base) => {
-          const r = await saveDraft(agent, base, d, { emit: false });
+        onSave: async (d, base, offers) => {
+          const r = await saveDraft(agent, base, d, { emit: false, offers });
           if (!r.ok) return { ok: false, error: (r as { error: string }).error };
           const undo = r.undo;
-          showToast({ message: `Saved ${first}’s card`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
+          /* Card offers v1 — the toast says what the save did to the query (the mock's words); a query that did not
+             update is named, and the agent's save stands */
+          const failed = (r as { failed?: string[] }).failed ?? [];
+          const message = failed.length ? `Saved ${first}’s card, but ${failed.join(" and ")} didn’t update. Try it from the query.`
+            : (offers ? offerToast(offers) : null) ?? `Saved ${first}’s card`;
+          showToast({ message, ...(undo ? { undo: async () => { await undo(); } } : {}) });
           return { ok: true };
         },
         leaveRef: editLeave,

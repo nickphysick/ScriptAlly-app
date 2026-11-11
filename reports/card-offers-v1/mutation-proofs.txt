@@ -13,3 +13,11 @@ CO11 mutated: ✘   ✗ CO11 · the safe note is shown — safe
 CO12 mutated: ✘   ✗ CO12 · no Also element — count   ✗ CO12 · no "Also changes" words — text 
 J7 (CL262_MUTATE=J7, .co-offer/.co-quiet hidden): red at 1512 and 1280
 AA10 (AA_MUTATE=AA10, same break): red
+## Phase 3 (emulator store + rendered)
+CO13 in-page (the other choice): ✘   ✗ CO13 · the toast: Saved · 1 query’s dates moved — Saved · your query keeps its datesUNDO✕   ✗ CO13 · the stored nudge moved to the new window's — 23 Dec vs 9 Dec 
+CO15 in-page (the other choice): ✘   ✗ CO15 · the toast: Saved · your query keeps its dates — Saved · 1 query’s dates movedUNDO✕   ✗ CO15 · the old date is held on the query (stamped) — none vs 16 Dec 
+CO16 in-page (the other choice): ✘   ✗ CO16 · the bar: closes 1 query as no reply (the suggestion) — 1 query stays open   ✗ CO16 · the toast: Saved · query closed as no reply — Saved Olive’s cardUNDO✕ 
+CO13 source: no stored nudge is written on Update: ✘   ✗ CO13 · the stored nudge moved to the new window's — 23 Dec vs 9 Dec 
+CO14 source: a writer-moved nudge is treated as the log flow's: ✘   ✗ CO14 · the offer says the nudge stays — 10 Jan→9 DecThe To-do to nudge Nell moves with it.   ✗ CO14 · the stored nudge is where the writer put it — 2026-12-09T12:00:00.000Z vs 2027-01-10T12:00:00.000Z 
+CO15 source: Keep writes nothing: ✘   ✗ CO15 · the old date is held on the query (stamped) — none vs 16 Dec   ✗ CO15 · the card's next step keeps the old date — Queried · expect a reply by 2 Dec. 
+CO16 source: the close is skipped: ✘   ✗ CO16 · the query is No Response — Queried   ✗ CO16 · its nudge is removed — 2026-11-05T12:00:00.000Z 

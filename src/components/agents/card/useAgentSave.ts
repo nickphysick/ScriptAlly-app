@@ -23,17 +23,21 @@ import { commitCardSave } from "../../../lib/agentCardSave";
 import { cardSavedLine, reminderOnSave, reopenReminder } from "../../../lib/agentCard";
 import { type CardDraft, applyPatch, cardPatch, changedTabs, inversePatch, toContactDraft } from "../../../lib/cardDraft";
 import { emitAgentCardEvent } from "../../../lib/agentCardStore";
+import type { OfferPlan } from "../../../lib/cardOffers";
+import { noreplyAnswers, saveClose } from "../../../lib/queryActions/closeSave";
 
 export type AgentSaveOutcome =
-  | { ok: true; line: string; undo?: () => Promise<boolean>; nothing?: boolean; tabs: ReturnType<typeof changedTabs> }
+  | { ok: true; line: string; undo?: () => Promise<boolean>; nothing?: boolean; tabs: ReturnType<typeof changedTabs>;
+      /** Card offers v1 — the queries (by manuscript title) whose own write did not land; the agent's save stands */
+      failed?: string[] }
   | { ok: false; error: string };
 
 export function useAgentSave(o: { writeAgent?: (id: string, patch: AgentEditPatch) => Promise<SaveAgentResult>; editCtx: EditCtx }) {
-  const { currentUser, queries, resolveTaskFlag, addUserTask, deleteUserTask } = useScriptAllyDb();
+  const { currentUser, queries, manuscripts, updateQuery, resolveTaskFlag, addUserTask, deleteUserTask } = useScriptAllyDb();
   const { writeAgent, editCtx } = o;
 
   /** `emit: false` — an inline edit: the caller says so in its own toast, and the list raises no notice */
-  const saveDraft = useCallback(async (agent: Agent, base: CardDraft, d: CardDraft, opts: { emit?: boolean } = {}): Promise<AgentSaveOutcome> => {
+  const saveDraft = useCallback(async (agent: Agent, base: CardDraft, d: CardDraft, opts: { emit?: boolean; offers?: OfferPlan | null } = {}): Promise<AgentSaveOutcome> => {
     const patch = cardPatch(agent, base, d, new Date().toISOString());
     const tabs = changedTabs(base, d);
     if (Object.keys(patch).length === 0) return { ok: true, line: "No changes.", nothing: true, tabs };
@@ -47,6 +51,7 @@ export function useAgentSave(o: { writeAgent?: (id: string, patch: AgentEditPatc
       if (task) { try { reminderId = await addUserTask(task); } catch { reminderId = undefined; } }
     };
     let undo: (() => Promise<boolean>) | undefined;
+    let failed: string[] = [];
     if (writeAgent) {
       /* the lab's cast: nothing but the agent, and the reminder the save added, to put back */
       const res = await writeAgent(agent.id, patch);
@@ -61,7 +66,14 @@ export function useAgentSave(o: { writeAgent?: (id: string, patch: AgentEditPatc
       };
     } else {
       if (!currentUser) return { ok: false, error: "Not signed in." };
-      const out = await commitCardSave({ uid: currentUser.id, agent, queries, patch, resolveTaskFlag, afterCommit: addReminder });
+      const today = new Date();
+      const out = await commitCardSave({
+        uid: currentUser.id, agent, queries, patch, resolveTaskFlag, afterCommit: addReminder, offers: opts.offers ?? null,
+        /* the app's one close-as-no-reply path, as the bulk close and the Query Centre run it */
+        closeQuery: (q) => saveClose({ currentUser, manuscripts, updateQuery }, q, after, noreplyAnswers(today), today),
+      });
+      const titleOf = (id: string) => manuscripts.find((m) => m.id === queries.find((q) => q.id === id)?.manuscriptId)?.title?.trim() || "your query";
+      failed = (out.failed ?? []).map(titleOf);
       /* "in", not `!res.ok`: with strictNullChecks off a boolean discriminant does not narrow */
       if ("error" in out.res) return { ok: false, error: out.res.error };
       if (out.undo) {
@@ -74,8 +86,8 @@ export function useAgentSave(o: { writeAgent?: (id: string, patch: AgentEditPatc
       }
     }
     if (opts.emit !== false) emitAgentCardEvent({ type: "saved", agentId: agent.id, before, after, undo: undo ? async () => ((await undo!()) ? { text: "Undone." } : { text: "Couldn’t undo the save." }) : undefined });
-    return { ok: true, line: cardSavedLine(notes, reminderId ? due : null), undo, tabs };
-  }, [writeAgent, editCtx, currentUser, queries, resolveTaskFlag, addUserTask, deleteUserTask]);
+    return { ok: true, line: cardSavedLine(notes, reminderId ? due : null), undo, tabs, ...(failed.length ? { failed } : {}) };
+  }, [writeAgent, editCtx, currentUser, queries, manuscripts, updateQuery, resolveTaskFlag, addUserTask, deleteUserTask]);
 
   return { saveDraft };
 }

@@ -130,7 +130,7 @@ export interface CardFormKit {
   nowMs: number;
   alsoFor: (d: CardDraft, base: CardDraft) => import("../../../lib/contactEdit").AlsoNote[];
   /** the one write (the editor's existing save); its toast is the page's */
-  onSave: (d: CardDraft, base: CardDraft) => Promise<{ ok: true } | { ok: false; error: string }>;
+  onSave: (d: CardDraft, base: CardDraft, offers?: import("../../../lib/cardOffers").OfferPlan | null) => Promise<{ ok: true } | { ok: false; error: string }>;
   onNewGenre: (typed: string) => Promise<{ ok: true; label: string } | { ok: false; reason: string }>;
   /** the page's "another row was picked" / "leave" hook: the card sets it while it has unsaved changes */
   leaveRef: React.MutableRefObject<(() => void) | null>;

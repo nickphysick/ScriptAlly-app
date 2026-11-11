@@ -12,8 +12,13 @@
  *   CO11  Closed with a full requested: the powder note, no options
  *   CO12  no rust "Also changes" anywhere on the card
  *
- * ⚠️ EMULATOR ONLY. `CO_MUTATE=<lock>` applies that lock's named break in the page; `CO_BASE=1` names the ledger for a
- *    run against the build before this pack (every lock red there).
+ *   CO13  Update moves the stored nudge; the card and the Query Centre show the new reply date
+ *   CO14  a nudge the writer moved themselves is left alone
+ *   CO15  Keep: the card and the Query Centre still show the old date after the window changes
+ *   CO16  Close it as no reply: No Response, nudge gone, on the Wall of no, the shared path's activity row
+ *
+ * ⚠️ EMULATOR ONLY. `CO_MUTATE=<lock>` applies that lock's named break in the page (or, for a break that lives in the
+ *    code, the run edits the measurement copy's source and vite's hot reload serves it — never the worktree).
  */
 import { expect, test, type Locator, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
@@ -251,4 +256,116 @@ test("CO12 · no rust Also-changes element anywhere on the card", async ({ page 
   L.check("no rust left edge anywhere", rustEdge === 0, String(rustEdge));
   await discard(page, panel);
   L.done(4);
+});
+
+/* ══════════════ Phase 3 · what Save does (the emulator's store, then the rendered page) ══════════════ */
+
+const isoDay = (iso: string | null) => (iso ? dm(new Date(iso)) : "none");
+export async function saveCard(page: Page, panel: Locator) {
+  await panel.locator("[data-cl262='save']").click();
+  await panel.locator(".cl262-sec.is-edit").first().waitFor({ state: "detached", timeout: 20_000 }).catch(() => {});
+  await page.waitForTimeout(2500);
+}
+const toastText = (page: Page) => page.locator(".sa-toasts .sa-toast").allTextContents().then((t) => t.join(" | ")).catch(() => "");
+/** the Query Centre's open query: "reply expected by {d Mon}" */
+async function qcExpected(page: Page, qid: string): Promise<string> {
+  await openApp(page, `/queries?q=${qid}`, VP);
+  const own = page.locator("[data-side-own]");
+  await own.waitFor({ timeout: 20_000 }).catch(() => {});
+  await page.waitForTimeout(1500);
+  const t = ((await own.innerText().catch(() => "")) ?? "").replace(/\s+/g, " ");
+  return t.match(/reply expected by (\d{1,2} \w{3})/i)?.[1] ?? `none · ${t.slice(0, 120)}`;
+}
+
+/* ═════════ CO13 ═════════ */
+test("CO13 · Update moves the stored nudge, and the Query Centre shows the new date", async ({ page }) => {
+  test.setTimeout(300_000);
+  const L = new Ledger("CO13");
+  const panel = await openCard(page, "co1-rt");
+  await editHow(page, panel);
+  await weeksBy(page, panel, -2);
+  if (MUT === "CO13") await panel.locator("[data-co='rt-keep']").click();
+  await saveCard(page, panel);
+  const t = await toastText(page);
+  L.check("the toast: Saved · 1 query’s dates moved", /Saved · 1 query’s dates moved/.test(t), t);
+  const st = read()["co1-rt"];
+  L.check("the agent holds 6 weeks", st.agent?.weeks === 6, String(st.agent?.weeks));
+  L.check("the stored nudge moved to the new window's", isoDay(st.nudgeDate) === dm(nudgeOn(6)), `${isoDay(st.nudgeDate)} vs ${dm(nudgeOn(6))}`);
+  L.check("no writer's date was written", st.writerExpectedDate == null, String(st.writerExpectedDate));
+  const next = ((await panel.locator("[data-cl262='next-sub']").textContent().catch(() => "")) ?? "").trim();
+  L.check("the card's next step: Queried · expect a reply by the new date", next === `Queried · expect a reply by ${dm(expOn(6))}.`, next);
+  const qc = await qcExpected(page, "co1-rt-q");
+  L.check("the Query Centre: reply expected by the new date", qc === dm(expOn(6)), `${qc} vs ${dm(expOn(6))}`);
+  L.done(6);
+});
+
+/* ═════════ CO14 ═════════ */
+test("CO14 · a nudge the writer moved themselves is left alone", async ({ page }) => {
+  test.setTimeout(300_000);
+  const L = new Ledger("CO14");
+  const before = read()["co1-wn"].nudgeDate;
+  const panel = await openCard(page, "co1-wn");
+  await editHow(page, panel);
+  await weeksBy(page, panel, -2);
+  const sub = ((await panel.locator("[data-co='rt'] [data-co='nudge']").textContent().catch(() => "")) ?? "").trim();
+  L.check("the offer says the nudge stays", /You set this nudge yourself, so it stays\./.test(sub) && (await panel.locator("[data-co='rt'] [data-co='nudge'] s").count()) === 0, sub);
+  await saveCard(page, panel);
+  const st = read()["co1-wn"];
+  L.check("the stored nudge is where the writer put it", st.nudgeDate === before, `${st.nudgeDate} vs ${before}`);
+  L.check("the toast says the dates moved (the reply date did)", /Saved · 1 query’s dates moved/.test(await toastText(page)), await toastText(page));
+  L.done(3);
+});
+
+/* ═════════ CO15 ═════════ */
+test("CO15 · Keep: the card and the Query Centre still show the old date after the window changes", async ({ page }) => {
+  test.setTimeout(300_000);
+  const L = new Ledger("CO15");
+  const before = read()["co1-rt"].nudgeDate;
+  const panel = await openCard(page, "co1-rt");
+  await editHow(page, panel);
+  await weeksBy(page, panel, -2);
+  if (MUT !== "CO15") await panel.locator("[data-co='rt-keep']").click();
+  await page.waitForTimeout(200);
+  await saveCard(page, panel);
+  const t = await toastText(page);
+  L.check("the toast: Saved · your query keeps its dates", /Saved · your query keeps its dates/.test(t), t);
+  const st = read()["co1-rt"];
+  L.check("the agent holds 6 weeks", st.agent?.weeks === 6, String(st.agent?.weeks));
+  L.check("the old date is held on the query (stamped)", isoDay(st.writerExpectedDate) === dm(expOn(8)), `${isoDay(st.writerExpectedDate)} vs ${dm(expOn(8))}`);
+  L.check("the nudge is left as it was", st.nudgeDate === before, `${st.nudgeDate} vs ${before}`);
+  const next = ((await panel.locator("[data-cl262='next-sub']").textContent().catch(() => "")) ?? "").trim();
+  L.check("the card's next step keeps the old date", next === `Queried · expect a reply by ${dm(expOn(8))}.`, next);
+  const qc = await qcExpected(page, "co1-rt-q");
+  L.check("the Query Centre keeps the old date", qc === dm(expOn(8)), `${qc} vs ${dm(expOn(8))}`);
+  L.done(6);
+});
+
+/* ═════════ CO16 ═════════ */
+test("CO16 · Close it as no reply: No Response, nudge gone, on the Wall of no, the shared path's activity row", async ({ page }) => {
+  test.setTimeout(300_000);
+  const L = new Ledger("CO16");
+  const panel = await openCard(page, "co1-old");
+  await editHow(page, panel);
+  await closeDoor(page, panel);
+  if (MUT === "CO16") await panel.locator("[data-co='close-keep']").click();
+  const extras = (await panel.locator("[data-cl262='save-sum']").getAttribute("data-extras")) ?? "";
+  L.check("the bar: closes 1 query as no reply (the suggestion)", extras === "closes 1 query as no reply", extras);
+  await saveCard(page, panel);
+  const t = await toastText(page);
+  L.check("the toast: Saved · query closed as no reply", /Saved · query closed as no reply/.test(t), t);
+  const st = read()["co1-old"];
+  L.check("the query is No Response", st.status === "No Response", st.status);
+  L.check("its nudge is removed", st.nudgeDate == null, String(st.nudgeDate));
+  L.check("the shared path wrote the closing row (closed_no_reply → No Response), in the log and the feed",
+    st.activity.some((a) => a.eventKey === "closed_no_reply" && a.resultingStatus === "No Response") && st.feed.some((a) => a.resultingStatus === "No Response"),
+    JSON.stringify({ a: st.activity, f: st.feed }));
+  L.check("the agent is closed to queries", st.agent?.door === "Closed", String(st.agent?.door));
+  const bold = ((await panel.locator("[data-cl262='next-bold']").textContent().catch(() => "")) ?? "").trim();
+  const btn = ((await panel.locator("[data-cl262='next-btn']").textContent().catch(() => "")) ?? "").trim();
+  L.check("the card's next step: Closed · No response, Query again", bold === "Closed · No response." && btn === "Query again", `${bold} · ${btn}`);
+  await openApp(page, "/queries/responses", VP);
+  await page.waitForTimeout(3000);
+  const wall = ((await page.locator("body").innerText().catch(() => "")) ?? "");
+  L.check("on the Wall of no (the Responses page names Olive)", /Olive Offerton/.test(wall), wall.slice(0, 80));
+  L.done(8);
 });
