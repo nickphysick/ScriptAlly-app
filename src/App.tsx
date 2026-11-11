@@ -34,6 +34,7 @@ import { AddManuscriptFocusForm } from "./components/AddManuscriptFocusForm";
 // Rail "+ Record a response" host (the dashboard keeps its own independent instance).
 import { PasteEmailFlow } from "./components/emailImport/PasteEmailFlow";
 import { PASTE_RESPONSE_EVENT, openQueryDrawer } from "./lib/queryActions/drawerStore";
+import { MOBILE_MEDIA_QUERY } from "./components/shell/mobileChrome";
 import { closeQueryPanel, openResponsePicker, responsePickerHosted } from "./lib/queryPanelStore";
 // Route tiers: marketing chrome for "/" + /pricing; EVERYTHING signed-in is workspace, in the
 // one capsule shell (the focus tier is retired — capsule fixes P5).
@@ -316,6 +317,13 @@ function AppContent() {
     if (subPageName === "Log a query" || subPageName === "Send a query") {
       /* Contact list v25.1 C4 — on the Contact list the log flow opens IN PLACE, in its panel; elsewhere unchanged */
       if (window.location.pathname === "/agents" && openContactLog({ agentId: opts?.agentId ?? null, manuscriptId: opts?.manuscriptId ?? null })) return;
+      /* Log a query v1.2 — ONE JOURNEY EVERYWHERE: on a desktop the staged journey opens over the page it was asked for on
+         (QueryDrawer hands "log" to it). The Query Centre keeps its own host, so it still navigates there; the phone too. */
+      const desk = typeof window.matchMedia === "function" && !window.matchMedia(MOBILE_MEDIA_QUERY).matches;
+      if (desk && window.location.pathname !== "/queries") {
+        openQueryDrawer({ mode: "log", ...(opts?.agentId ? { agentId: opts.agentId } : {}), ...(opts?.manuscriptId ? { manuscriptId: opts.manuscriptId } : {}) });
+        return;
+      }
       // Inline creation lives on the hub, so this one NAVIGATES (the popup did not) and seeds it.
       setCreateQuerySeed({ agentId: opts?.agentId ?? null, manuscriptId: opts?.manuscriptId ?? null });
       navigate(pathFor("queries"));

@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 import { QueryStatus, SubmissionMethod, SubmissionStatus, type Agent, type Query } from "../../types";
 import { logPayload } from "./logSave";
 import {
-  askCard, askWords, calMonth, sizeName, celebrationLine, choiceOfSample, sampleOfChoice, checkLine, materialsOf, MILESTONE, piecesFromAsk, piecesMatchAsk, planOf, previewOf,
+  askCard, askWords, calMonth, sizeName, celebrationLine, choiceOfSample, sampleOfChoice, flowLine, materialsOf, MILESTONE, piecesFromAsk, piecesMatchAsk, planOf, previewOf,
   stageAgents, titleName, whoGroups, type PlanContext, type StagePackage,
 } from "./logStages";
 import type { PackageCard } from "./packages";
@@ -110,7 +110,11 @@ describe("the check and the celebration", () => {
   it("the milestones, worded exactly", () => {
     expect(Object.keys(MILESTONE).map(Number)).toEqual([1, 10, 25, 50, 100]);
     expect(MILESTONE[25]).toBe("Twenty-five queries. That takes some nerve.");
-    expect(checkLine(27, "Murphy's Day Out")).toBe("Your 27th query for Murphy's Day Out.");
+  });
+  it("v1.2 — one FlowHead line for the whole journey, and its two exceptions", () => {
+    expect(flowLine({ carried: null, changing: false })).toBe("Add as much detail as you can.");
+    expect(flowLine({ carried: "Marcus", changing: false })).toBe("Same date and materials as Marcus.");
+    expect(flowLine({ carried: "Marcus", changing: true })).toBe("Change it and you'll go straight back.");
   });
 });
 

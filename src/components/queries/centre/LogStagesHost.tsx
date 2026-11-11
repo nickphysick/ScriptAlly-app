@@ -27,6 +27,7 @@ import { openNewAgentCard } from "../../../lib/agentCardStore";
 import { isLive as qaIsLive } from "../../queryActions/journeys/common";
 import { useToast } from "../../toast/ToastProvider";
 import { QcLogStages, type Logged } from "./QcLogStages";
+import type { LogAgain } from "../../../lib/queryActions/drawerStore";
 
 const isLiveVersion = (v: { status?: string; retiredAt?: unknown }) => (v.status ?? "Active") !== "Retired" && !v.retiredAt;
 
@@ -36,7 +37,15 @@ export const LogStagesHost: React.FC<{
   onClose: () => void;
   /** "Open {First}'s card": the site's own open-query door */
   onOpenCard: (queryId: string) => void;
-}> = ({ ms, seedAgentId, onClose, onOpenCard }) => {
+  /** v1.2 — the package a door named (a package's builder), preselected on Materials */
+  seedPackageId?: string | null;
+  /** v1.2 — the old drawer's "Log another": the date and materials carry over */
+  again?: LogAgain | null;
+  /** v1.2 — set to the journey's leave check, for the host's dimmed page */
+  leaveRef?: React.MutableRefObject<(() => void) | null>;
+  /** v1.2 — told after a save, with the new query's id and its undo (a door's `onSaved`) */
+  onLogged?: (queryId: string, undo: () => Promise<void>) => void;
+}> = ({ ms, seedAgentId, onClose, onOpenCard, seedPackageId, again, leaveRef, onLogged }) => {
   const scriptDb = useScriptAllyDb();
   const { currentUser, agents, queries, packages, versions, addJournalEntry, deleteJournalEntry } = scriptDb;
   const { showToast } = useToast();
@@ -84,6 +93,11 @@ export const LogStagesHost: React.FC<{
     }
     if (a.note) await addJournalEntry(id, a.note);
     const s0 = snap;
+    const undo = async () => {
+      await restoreSnapshot(s0);
+      for (const j of live.current.journalEntries.filter((x) => x.queryId === id)) await deleteJournalEntry(j.id);
+    };
+    onLogged?.(id, undo);
     return {
       id,
       undo: async () => {
@@ -100,7 +114,7 @@ export const LogStagesHost: React.FC<{
       packages={model.stPackages} activePackageId={model.active} letters={model.ctx.letters} synopses={model.ctx.synopses} bookVersions={model.ctx.bookVersions}
       count={forBook.length} quietWeeks={quietWeeksOf(currentUser)} ctx={model.ctx} book={bookOf(ms.wordCount)} onClose={onClose}
       onAddAgent={(name, done) => openNewAgentCard({ from: "button", host: "panel", ...(name ? { prefill: { name } } : {}), onCreated: done })}
-      onSave={onSave} />
+      onSave={onSave} seedPackageId={seedPackageId} again={again} leaveRef={leaveRef} />
   );
 };
 

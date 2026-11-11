@@ -17,13 +17,14 @@ import { SubmissionMethod } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import {
-  HOW, MILESTONE, PREVIEW_ID, monthLong, STAGES, celebrationLine, STAGE_LABEL, STAGE_LINE, batchCheckLine, batchWhoLine, checkLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk,
+  HOW, MILESTONE, PREVIEW_ID, monthLong, STAGES, celebrationLine, STAGE_LABEL, flowLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk,
   planOf, previewOf, sameDay, sizeName, sod, askCard, choiceOfSample, sampleOfChoice, type AskCard, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
 import { QcSlip153 } from "./QcSlip153";
 import { SampleControl, Seg } from "../../queryActions/controls";
-import type { Book } from "../../../lib/queryActions/sample";
+import type { Book, Materials } from "../../../lib/queryActions/sample";
+import type { LogAgain } from "../../../lib/queryActions/drawerStore";
 /* the sample control's rules and its --qad-* tokens (declared for `.laq` there too) */
 import "../../queryActions/queryDrawer.css";
 import { IlloSlot } from "../IlloSlot";
@@ -82,6 +83,13 @@ export interface QcLogStagesProps {
   /** "+ Add {Name} as a new agent": opens Adding new agent; `done` is handed the new agent's id */
   onAddAgent: (name: string, done: (id: string) => void) => void;
   onSave: (a: LogAnswers) => Promise<Logged | null>;
+  /** v1.2 — a door that names a package (a package's builder): it is preselected on the Materials stage, still unanswered,
+   *  so the ask card shows over it */
+  seedPackageId?: string | null;
+  /** v1.2 — "Log another" from the old drawer's receipt: the date and the materials carry over, as "Log and start another" */
+  again?: LogAgain | null;
+  /** v1.2 — the host's press on the dimmed page: set to the journey's leave check (ask with answers, close without) */
+  leaveRef?: React.MutableRefObject<(() => void) | null>;
 }
 
 export interface FlowState {
@@ -106,13 +114,15 @@ export interface FlowState {
   noteOpen: boolean;
   /** the first name of the agent just logged with "Log and start another" */
   carried: string | null;
+  /** v1.2 — the package a door named: shown chosen on the Materials stage until the writer answers it */
+  pkgSeed: string | null;
 }
 
 export const freshState = (nowMs: number): FlowState => ({
   step: "who", dir: "", find: "", hi: 0, showBusy: false, agentId: null, sent: null, earlier: false,
   calY: new Date(nowMs).getFullYear(), calM: new Date(nowMs).getMonth(),
   custom: false, packageId: null, pieces: { letterId: null, synopsisId: null, sample: null }, piecesSet: false, piecesTouched: false,
-  via: null, note: "", noteOpen: false, carried: null,
+  via: null, note: "", noteOpen: false, carried: null, pkgSeed: null,
 });
 
 export const answered = (s: FlowState, k: StageKey): boolean =>
@@ -273,7 +283,9 @@ const Odometer: React.FC<{ n: number }> = ({ n }) => {
 export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   const { nowMs, agents } = p;
   const [s, setS] = useState<FlowState>(() => freshState(nowMs));
-  const set = (patch: Partial<FlowState>) => setS((o) => ({ ...o, ...patch }));
+  /* v1.2 — anything the writer does marks the journey as answered (a door's seeds do not), for the dimmed page's leave check */
+  const touched = useRef(false);
+  const set = (patch: Partial<FlowState>) => { touched.current = true; setS((o) => ({ ...o, ...patch })); };
   /* the flow, then the celebration once a query is logged with "Log query" */
   const [phase, setPhase] = useState<"flow" | "yay">("flow");
   const [logged, setLogged] = useState<LoggedView | null>(null);
@@ -283,15 +295,37 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
 
   const go = (step: StageKey, dir?: "in" | "back") => setS((o) => ({ ...o, step, hi: 0, dir: dir ?? (STAGES.indexOf(step) > STAGES.indexOf(o.step) ? "in" : "back") }));
   /** answer the current stage and move on, skipping anything already answered */
-  const answer = (patch: Partial<FlowState>) => setS((o) => {
+  const answer = (patch: Partial<FlowState>) => { touched.current = true; advance(patch); };
+  const advance = (patch: Partial<FlowState>) => setS((o) => {
     const n = { ...o, ...patch };
     return { ...n, step: nextStage(n, o.step), hi: 0, dir: "in" };
   });
 
-  /* a seeded agent (the Contact list's "+ Log a query") is the first answer */
+  /* a door's seeds, none of which counts as the writer's answer: the agent (an agent's card, the Contact list) is the
+     first answer; v1.2 — a package a door named is shown chosen on Materials; "Log another" carries the date and the
+     materials over (the package if it was one, else the pieces), as "Log and start another" does */
   useEffect(() => {
+    const patch: Partial<FlowState> = {};
+    if (p.seedPackageId && p.packages.some((x) => x.id === p.seedPackageId)) patch.pkgSeed = p.seedPackageId;
+    const ag = p.again;
+    if (ag) {
+      patch.sent = sod(new Date(ag.sent).getTime());
+      const pk = ag.how !== "individual" ? p.packages.find((x) => x.id === ag.pkg) : undefined;
+      const m = ag.mat as Materials | undefined;
+      if (pk) Object.assign(patch, { packageId: pk.id, piecesSet: true, custom: false, pieces: { letterId: pk.card.qlId, synopsisId: pk.card.synId, sample: null } });
+      else if (m && (m.ql || m.syn || (m.s && m.s.unit !== "none"))) {
+        const book = p.bookVersions.find((b) => b.current)?.id ?? p.bookVersions[0]?.id ?? null;
+        Object.assign(patch, {
+          custom: p.packages.length > 0, piecesSet: true, piecesTouched: true, packageId: null,
+          pieces: { letterId: m.ql ? p.letters[0]?.id ?? NO_LETTER : null, synopsisId: m.syn ? p.synopses[0]?.id ?? NO_SYN : null, sample: m.s ? choiceOfSample(m.s, book) : null },
+        });
+      }
+    }
     const a = p.seedAgentId ? agents.find((x) => x.id === p.seedAgentId && !x.querying) : null;
-    if (a) answer({ agentId: a.id });
+    if (a) patch.agentId = a.id;
+    /* ⚠️ PLACED, NOT ADVANCED: the step is worked out from the first stage, never from the one on screen, so running the
+       seed twice (React's StrictMode does, in development) lands in the same place — v1.1's seed advanced twice there */
+    if (Object.keys(patch).length) setS((o) => { const n = { ...o, ...patch }; return { ...n, step: n.agentId ? nextStage(n, "who") : "who", hi: 0, dir: "in" }; });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const choose = (id: string) => {
@@ -486,7 +520,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
             onUse={() => { if (ask) set({ custom: true, piecesTouched: true, pieces: piecesFromAsk(ask, NO_PIECES, dflt) }); }} />
           <div className="laq-big" data-qls="packages">
             {p.packages.map((x) => (
-              <BigRow key={x.id} glyph={ICON.pkg} glyphClass="is-pkg" title={x.name} sub={x.pieces.join(" · ")} on={s.piecesSet && s.packageId === x.id}
+              <BigRow key={x.id} glyph={ICON.pkg} glyphClass="is-pkg" title={x.name} sub={x.pieces.join(" · ")} on={(s.piecesSet ? s.packageId : s.pkgSeed) === x.id}
                 tag={x.id === fitOne ? `✓ What ${first} asks for` : x.active ? "Active" : null} tagClass={x.id === fitOne ? "is-y" : undefined}
                 data={{ "data-qls": "package", "data-id": x.id }} onClick={() => usePackage(x)} />
             ))}
@@ -613,9 +647,6 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   /* ── logging ── */
   const reduce = useReducedMotion();
   const [busy, setBusy] = useState(false);
-  /* the book's count when "Log" was pressed: the live count moves the moment the save lands, and the check's own line
-     ("Your {n}th query…") must not change under the stamp */
-  const [countAt, setCountAt] = useState<number | null>(null);
   const [stamp, setStamp] = useState(false);
   const [bump, setBump] = useState(false);
   const [toast, setToast] = useState<{ text: string; undo: () => void } | null>(null);
@@ -636,22 +667,20 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     const a = answers();
     if (!a || busy) return;
     setBusy(true);
-    setCountAt(p.count);
     const n = p.count + 1;
     const before = s;
     const done = await p.onSave(a);
     setBusy(false);
-    if (!done) { setCountAt(null); return; }
+    if (!done) return;
     const lastFirst = agent?.first ?? "The agent";
     if (more) {
       stampThen(() => {
         /* the date and materials carry over; how comes from the next agent's card */
         setS((o) => ({ ...o, step: "who", dir: "in", agentId: null, via: null, find: "", note: "", noteOpen: false, hi: 0, showBusy: false, carried: lastFirst }));
         showToast(`${lastFirst} logged`, async () => { setToast(null); await done.undo(); setS({ ...before, step: "check", dir: "back" }); });
-        setCountAt(null);
       });
     } else {
-      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: agent?.weeks ?? null, before }); setPhase("yay"); setCountAt(null); });
+      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: agent?.weeks ?? null, before }); setPhase("yay"); });
     }
   };
   /* ⌘↵ / Ctrl↵ logs from the check */
@@ -704,13 +733,26 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     check: null,
   };
 
-  const line = s.step === "who" ? (s.carried ? batchWhoLine(s.carried) : FLOW_WORDS.log.line)
-    : s.step === "check" ? (s.carried ? batchCheckLine(s.carried) : checkLine((countAt ?? p.count) + 1, p.bookTitle)) : STAGE_LINE[s.step];
+  /* v1.2 — one line for the whole journey; a step changed from the check (every stage answered, back on one) says so */
+  const line = flowLine({ carried: s.carried, changing: s.step !== "check" && STAGES.slice(0, 4).every((k) => answered(s, k)) });
   const backFoot = (hint: string | null) => (
     <>
       <button type="button" className="laq-lnk" data-qls={s.step === "who" ? "cancel" : "back"} onClick={() => (s.step === "who" ? p.onClose() : go(STAGES[Math.max(0, STAGES.indexOf(s.step) - 1)], "back"))}>{s.step === "who" ? "Cancel" : "Back"}</button>
       <span className="laq-sp" />
       {hint ? <span className="laq-hint">{hint}</span> : null}
+    </>
+  );
+
+  /* v1.2 — THE DIMMED PAGE'S LEAVE CHECK, the action drawers' own: with answers it asks, without it closes. The host's
+     scrim calls it through `leaveRef`; Escape is unchanged (the host closes). */
+  const [leaveAsk, setLeaveAsk] = useState(false);
+  if (p.leaveRef) p.leaveRef.current = () => { if (phase === "flow" && touched.current) setLeaveAsk(true); else p.onClose(); };
+  const leaveFoot = (
+    <>
+      <span className="laq-lv" role="alertdialog" aria-label="Discard this query?"><b>Discard this?</b> Nothing has been saved yet.</span>
+      <span className="laq-sp" />
+      <button type="button" className="laq-lnk" data-qls="leave-keep" onClick={() => setLeaveAsk(false)}>Keep going</button>
+      <button type="button" className="laq-btn" data-qls="leave-discard" onClick={p.onClose}>Discard</button>
     </>
   );
 
@@ -771,7 +813,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         <FlowHead title={FLOW_WORDS.log.title} line={line} onClose={p.onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
         <Stepper s={s} values={values} onGo={(k) => go(k)} />
         <div ref={sbRef} key={s.step} className={`laq-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
-        <div className="laq-cf" data-qls="foot">{foot}</div>
+        <div className={`laq-cf${leaveAsk ? " is-leave" : ""}`} data-qls="foot">{leaveAsk ? leaveFoot : foot}</div>
         <div className={`laq-toast${toast ? " is-on" : ""}`} data-qls="toast" role="status" aria-live="polite">
           {toast ? <>{toast.text}<button type="button" data-qls="toast-undo" onClick={toast.undo}>Undo</button></> : null}
         </div>

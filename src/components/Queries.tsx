@@ -756,6 +756,8 @@ export const Queries: React.FC<{
   /* v149 Part D — on the desktop Query Centre, while it is the page on screen, the header's two actions open in the
      query panel as cards; everywhere else the drawer's journeys stand. Written each render once `qcDesk` is known. */
   const qcFlowGate = useRef({ desk: false, active: false });
+  /* Log a query v1.2 — the staged journey's leave check, for the dimmed page's scrim */
+  const laqLeaveRef = useRef<(() => void) | null>(null);
   const openCreate = (seed: { agentId?: string | null; manuscriptId?: string | null } = {}) => {
     if (qcFlowGate.current.desk && qcFlowGate.current.active) {
       setQcFlow({ kind: "log", agentId: seed.agentId ?? null, manuscriptId: seed.manuscriptId ?? null });
@@ -6382,6 +6384,7 @@ export const Queries: React.FC<{
   /* ══ v149 Part D — THE HEADER'S ACTIONS IN THE SAME PANEL: a new query card, and "Who replied?" ══════════════════ */
   const qcFlowNode = (() => {
     if (!qcDesk || !qcFlow || !currentUser) return null;
+    laqLeaveRef.current = null;
     const now = Date.now();
     if (qcFlow.kind === "who") {
       /* every live query in the page's scope, once: waiting on the agent first, then those already with the writer */
@@ -6407,7 +6410,7 @@ export const Queries: React.FC<{
     /* Log a query v1 — the staged journey (LogStagesHost), which saves through the same log save; "Open {First}'s
        card" is the page's own open-query door */
     return (
-      <LogStagesHost key={`${ms.id}:${qcFlow.agentId ?? ""}`} ms={ms} seedAgentId={qcFlow.agentId} onClose={() => setQcFlow(null)}
+      <LogStagesHost key={`${ms.id}:${qcFlow.agentId ?? ""}`} ms={ms} seedAgentId={qcFlow.agentId} onClose={() => setQcFlow(null)} leaveRef={laqLeaveRef}
         onOpenCard={(id) => { setQcFlow(null); cardSetRef.current = qcVisible.map((r) => r.id); onOpenQuery?.(id); }} />
     );
   })();
@@ -6760,6 +6763,9 @@ export const Queries: React.FC<{
   const queryPanelHost = queryPanelOn ? (
     <QueryPanelHost id={qcFlowNode && qcFlow ? `__${qcFlow.kind}` : pipShown ? PIP_ID : qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel && !pipShown ? extPanel.from : "queries"}
       step={qcFlowNode ? false : pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))}
+      /* Log a query v1.2 — the staged journey dims the page as the action drawers do, and a press there runs its leave check */
+      dim={qcFlowNode && qcFlow?.kind === "log" ? true : undefined}
+      onScrim={qcFlowNode && qcFlow?.kind === "log" ? () => (laqLeaveRef.current ? laqLeaveRef.current() : setQcFlow(null)) : undefined}
       onClose={qcFlowNode ? () => setQcFlow(null) : pipShown ? () => endWalk(walkRef.current === "done" ? "clear" : "early") : fromAgent ? backToAgent : closeQueryCard}>
       {qcFlowNode ?? (pipShown ? pipPanel : qcOpenCardNode && cardQueryId ? (qmPhone ? qcOpenCardNode : (qcCardNode ?? qcOpenCardNode)) : null)}
     </QueryPanelHost>

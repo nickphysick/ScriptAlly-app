@@ -43,15 +43,18 @@ export type StageKey = "who" | "when" | "what" | "how" | "check";
 export const STAGES: readonly StageKey[] = ["who", "when", "what", "how", "check"];
 export const STAGE_LABEL: Record<StageKey, string> = { who: "Agent", when: "Sent", what: "Materials", how: "How", check: "Log" };
 
-/** the FlowHead's line on each stage (the Agent stage's is `FLOW_WORDS.log.line`, or the batch line) */
-export const STAGE_LINE: Record<Exclude<StageKey, "who" | "check">, string> = {
-  when: "When did you send it?",
-  what: "What went with it?",
-  how: "How did it go?",
-};
-export const batchWhoLine = (lastFirst: string): string => `${lastFirst} is logged. Who's next? We'll keep the same date and materials.`;
-export const checkLine = (n: number, book: string): string => `Your ${ordinal(n)} query for ${book}.`;
-export const batchCheckLine = (lastFirst: string): string => `Same date and materials as ${lastFirst}. Tap a step above to change anything.`;
+/**
+ * v1.2 — THE FLOWHEAD'S LINE: one short line for the whole journey, the same on every stage (the question under the track
+ * already says what each stage is). Two exceptions: after "Log and start another" it names the agent just logged, and a
+ * step changed from the check says it goes straight back.
+ */
+export const FLOW_LINE = "Add as much detail as you can.";
+export const CHANGE_LINE = "Change it and you'll go straight back.";
+export const carriedLine = (lastFirst: string): string => `Same date and materials as ${lastFirst}.`;
+export function flowLine(o: { carried: string | null; changing: boolean }): string {
+  if (o.changing) return CHANGE_LINE;
+  return o.carried ? carriedLine(o.carried) : FLOW_LINE;
+}
 
 /* ── the agents ───────────────────────────────────────────────────────────────────────────────────────────────── */
 

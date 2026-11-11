@@ -19,14 +19,18 @@ import { openQueryPanel } from "../../../lib/queryPanelStore";
 import type { ContactLogSeed } from "../../../lib/contactLogStore";
 import { LogStagesHost } from "../../queries/centre/LogStagesHost";
 
-export const ContactLogFlow: React.FC<{ seed: ContactLogSeed; activeMsId: string | null; onClose: () => void }> = ({ seed, activeMsId, onClose }) => {
+export const ContactLogFlow: React.FC<{
+  seed: ContactLogSeed; activeMsId: string | null; onClose: () => void;
+  /** v1.2 — set to the journey's leave check, for the host's dimmed page */
+  leaveRef?: React.MutableRefObject<(() => void) | null>;
+}> = ({ seed, activeMsId, onClose, leaveRef }) => {
   const { currentUser, manuscripts } = useScriptAllyDb();
   if (!currentUser) return null;
   const msId = resolveInitialManuscriptId(seed.manuscriptId ?? activeMsId ?? (manuscripts.length === 1 ? manuscripts[0].id : undefined), pickableManuscripts(manuscripts));
   const ms = manuscripts.find((m) => m.id === msId) ?? null;
   if (!ms) return null;
   return (
-    <LogStagesHost key={`${ms.id}:${seed.agentId ?? ""}`} ms={ms} seedAgentId={seed.agentId} onClose={onClose}
+    <LogStagesHost key={`${ms.id}:${seed.agentId ?? ""}`} ms={ms} seedAgentId={seed.agentId} onClose={onClose} leaveRef={leaveRef}
       onOpenCard={(id) => { onClose(); openQueryPanel(id, "other"); }} />
   );
 };

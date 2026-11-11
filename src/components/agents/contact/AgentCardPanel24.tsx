@@ -16,7 +16,11 @@ import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { claimRightPanel, releaseRightPanel, subscribeRightPanel } from "../../../lib/queryPanelStore";
 import "../../queries/queryPanelHost.css";
 
-export const AgentCardPanel24: React.FC<{ agentId: string; onClose: () => void; children: React.ReactNode }> = ({ agentId, onClose, children }) => {
+export const AgentCardPanel24: React.FC<{
+  agentId: string; onClose: () => void; children: React.ReactNode;
+  /** Log a query v1.2 — the staged journey hosted here dims the page, and a press there runs its leave check */
+  dim?: boolean; onScrim?: () => void;
+}> = ({ agentId, onClose, children, dim = false, onScrim }) => {
   const closeRef = useRef(onClose);
   closeRef.current = onClose;
   useEscapeLayer(true, () => closeRef.current(), ESC_LEVEL.pageDrawer);
@@ -45,7 +49,7 @@ export const AgentCardPanel24: React.FC<{ agentId: string; onClose: () => void; 
     return () => window.clearTimeout(t);
   }, []);
   return (
-    <SidePanel label="Agent" className="qsp cl24-panel" style={top != null ? ({ "--qsp-top": `${top}px` } as React.CSSProperties) : undefined}
+    <SidePanel label="Agent" dim={dim} onScrim={onScrim} className="qsp cl24-panel" style={top != null ? ({ "--qsp-top": `${top}px` } as React.CSSProperties) : undefined}
       attrs={{ "data-cl24": "panel", "data-agent-id": agentId }}>
       {children}
     </SidePanel>

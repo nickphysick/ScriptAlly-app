@@ -153,7 +153,7 @@ test("LAQ9 — the track: node states, keyboard, a finished node opens its stage
     READ[`LAQ9 ${stage}`] = t;
     ok(t.map((x) => x.state).join() === states.join(), `LAQ9 ${stage}: states ${t.map((x) => x.state).join()}`);
     for (const [i, n] of t.entries()) {
-      if (n.state === "done") ok(n.tag === "BUTTON" && n.focusable && n.w === 32 && n.bg === "rgb(42, 58, 82)" && n.text === "✓", `LAQ9 ${stage}: ${n.k} is a finished node (navy ✓, a button) ${JSON.stringify(n)}`);
+      if (n.state === "done") ok(n.tag === "BUTTON" && n.focusable && n.w === 32 && n.bg === "rgb(255, 255, 255)" && n.text === "✓", `LAQ9 ${stage}: ${n.k} is a finished node (v1.2, on the navy header: white with a navy ✓, a button) ${JSON.stringify(n)}`);
       else if (n.state === "now") ok(n.tag !== "BUTTON" && !n.focusable && n.w === 40 && n.bg === "rgb(255, 255, 255)" && n.text === String(i + 1), `LAQ9 ${stage}: ${n.k} is the current disc ${JSON.stringify(n)}`);
       else ok(n.tag !== "BUTTON" && !n.focusable && n.w === 32 && n.text === String(i + 1), `LAQ9 ${stage}: ${n.k} is to come, not focusable ${JSON.stringify(n)}`);
     }
@@ -194,7 +194,8 @@ test("LAQ6 — Log and start another: toast, carried date and materials, the nex
   const line = ((await page.locator('[data-flh="line"]').textContent()) ?? "").trim();
   READ.LAQ6 = { toast, line, whenBefore, whatBefore };
   ok(toast.startsWith(`${firstName} logged`) && /Undo$/.test(toast), `LAQ6: the toast "${toast}"`);
-  ok(line === `${firstName} is logged. Who's next? We'll keep the same date and materials.`, `LAQ6: the batch line "${line}"`);
+  /* v1.2 — one line for the journey; after "Log and start another" it names the agent just logged */
+  ok(line === `Same date and materials as ${firstName}.`, `LAQ6: the batch line "${line}"`);
   await page.locator(`[data-qls="agent"][data-id="${await settledReady(page)}"]`).click();
   const at = await step(page);
   (READ.LAQ6 as Record<string, unknown>).landed = at;
@@ -215,7 +216,8 @@ test("LAQ7 — the milestone at the 25th query", async ({ page }) => {
     await openLog(page);
     await toCheck(page);
     const line = ((await page.locator('[data-flh="line"]').textContent()) ?? "").trim();
-    ok(line === "Your 25th query for Murphy's Day Out.", `LAQ7: the check's line "${line}"`);
+    /* v1.2 — the check's line is the journey's one line now; the count is the celebration's (asserted below) */
+    ok(line === "Add as much detail as you can.", `LAQ7: the check's line "${line}"`);
     await page.locator('[data-qls="log"]').click();
     await page.locator('[data-qls="yay"]').waitFor({ state: "visible", timeout: 120_000 });
     const ms = ((await page.locator('[data-qls="milestone"]').textContent({ timeout: 3_000 }).catch(() => null)) ?? "").trim();
