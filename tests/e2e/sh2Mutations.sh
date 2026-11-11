@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # App shell v2 — prove each SH2 lock red by its named mutation (sh2Lib MUTATIONS), in the page, without a rebuild.
 # Usage: SA_E2E_BASE_URL=http://127.0.0.1:<port> bash tests/e2e/sh2Mutations.sh   (a build of the branch)
 # Writes reports/shell-v2/mutation-proofs.jsonl: one line per lock, with how many of THAT lock's readings went red.

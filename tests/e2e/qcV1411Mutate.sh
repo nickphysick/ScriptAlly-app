@@ -1,4 +1,5 @@
 #!/bin/bash
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # Query Centre v141.1 — prove each QC1411 lock red against its named break. Run in a MEASUREMENT worktree only (never the
 # primary checkout): every source break is backed up by its PATH ($BK/<path with / as ->), built with build:dev,
 # measured against the preview on $PORT, and put back from that backup — never with git.

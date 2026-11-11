@@ -23,10 +23,16 @@
  *   d) ON EXIT, pass or fail — the working directory's debug logs (and symlinks) and dist-emu/ are
  *      removed. Emulator data is never written by the guard; the committed tests/emulator-data/
  *      snapshot is the only data that persists (and only `emu:seed` writes it).
+ *   e) THE TEST SLOT (11 Nov) — before anything starts, the guard takes the machine-wide test slot
+ *      (scripts/heavy-slot.mjs; one heavy job at a time on this Mac, queued, leftovers swept on
+ *      acquire) and releases it on exit. The job runs under `nice -n 10`, and the emulators' JVMs get
+ *      JAVA_TOOL_OPTIONS="-Xmx1536m -XX:ActiveProcessorCount=2". Re-entrant: inside `emu.mjs`, which
+ *      already holds the slot, it joins that holding.
  */
 import { spawn } from "node:child_process";
 import { lstatSync, readdirSync, rmSync, statSync, statfsSync, symlinkSync, unlinkSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
+import { acquire } from "./hooks/slot-core.mjs";
 
 const ROOT = resolve(new URL("..", import.meta.url).pathname);
 export const LOG_NAMES = [
@@ -64,7 +70,9 @@ const removeLogs = () => {
   }
 };
 
-function main(argv) {
+export const JAVA_CAPS = "-Xmx1536m -XX:ActiveProcessorCount=2";
+
+async function main(argv) {
   if (argv.length === 0) {
     say("usage: node scripts/emu-guard.mjs <command> [args...]");
     return 2;
@@ -74,11 +82,15 @@ function main(argv) {
     return 2;
   }
 
+  /* e) the test slot — queue here, before the disk check, so the check is current when we run */
+  const slot = await acquire({ command: argv.join(" ") });
+
   /* a) pre-flight */
   const free = freeGb();
   if (free < MIN_FREE_GB) {
     say(`refusing to start: ${fmt(free)} free on this volume, under ${MIN_FREE_GB} GB (EMU_MIN_FREE_GB).`);
     say("clear old worktrees / *-debug.log first.");
+    slot.release();
     return 3;
   }
 
@@ -92,7 +104,10 @@ function main(argv) {
   say(`${fmt(free)} free. Debug logs: ${!realLogs ? "/dev/null" : keepDir ? keepDir : "real, deleted on exit"}.`);
 
   /* The child leads its own process group, so the watchdog can stop the emulators it starts. */
-  const child = spawn(argv[0], argv.slice(1), { cwd: ROOT, stdio: "inherit", detached: true });
+  const env = { ...process.env, HEAVY_SLOT_TOKEN: slot.token };
+  if (!/ActiveProcessorCount/.test(env.JAVA_TOOL_OPTIONS ?? "")) env.JAVA_TOOL_OPTIONS = `${env.JAVA_TOOL_OPTIONS ?? ""} ${JAVA_CAPS}`.trim();
+  const child = spawn("nice", ["-n", "10", argv[0], ...argv.slice(1)], { cwd: ROOT, stdio: "inherit", detached: true, env });
+  slot.addPgid(child.pid);
   let reason = null;
   let finished = false;
 
@@ -135,13 +150,14 @@ function main(argv) {
       removeLogs();
       rmSync(join(ROOT, "dist-emu"), { recursive: true, force: true });
       if (keepDir) say(`debug logs kept in ${keepDir}`);
+      slot.release();
       if (reason) {
         say(`run killed: ${reason}`);
         return done(4);
       }
       done(code ?? (signal ? 1 : 0));
     });
-    child.on("error", (e) => { say(`could not start ${argv[0]}: ${e.message}`); finished = true; clearInterval(timer); removeLogs(); done(127); });
+    child.on("error", (e) => { say(`could not start ${argv[0]}: ${e.message}`); finished = true; clearInterval(timer); removeLogs(); slot.release(); done(127); });
   });
 }
 

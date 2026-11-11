@@ -85,7 +85,8 @@ export const STORAGE_STATE = "tests/e2e/.auth/state.json";
 export default defineConfig({
   testDir: "tests/e2e",
   /* measurement, not a test suite — one worker keeps the numbers attributable and the log readable */
-  workers: 1,
+  /* PW_WORKERS overrides, capped at 2 so a run never swamps the Mac (the test slot, scripts/heavy-slot.mjs) */
+  workers: Math.min(2, Math.max(1, Number(process.env.PW_WORKERS) || 1)),
   fullyParallel: false,
   reporter: [["list"]],
   /* each measurement signs in — Firebase auth lives in IndexedDB, which storageState cannot carry */

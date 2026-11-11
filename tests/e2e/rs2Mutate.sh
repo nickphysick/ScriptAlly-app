@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # Responses v2 — run each RS2 lock with its named break (RS2_MUTATE=<lock>) and record whether it went red.
 # A lock whose mutation leaves it green is not proved; the summary says which.
 #   SA_E2E_BASE_URL=http://127.0.0.1:4621 bash tests/e2e/rs2Mutate.sh [LOCK ...]
