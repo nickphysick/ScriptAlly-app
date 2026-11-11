@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<title>To-do list head — one line, v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root{--navy:#2a3a52;--oat:#f2eee8;--paper:#fbf9f5;--ink:#1c130f;--ink2:#3a332d;--muted:#7a7066;--rule:#e6dfd4;--rose:#ecd5cd;--sand:#f2ebe0;--stone:#e4e1db;--hk:#e4ebf1;--rust:#8a4a3a;
+    --type:"Special Elite","Courier New",monospace;--serif:"Source Serif 4",Georgia,serif}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--oat);font-family:var(--serif);color:var(--ink);padding:24px 28px}
+  button{font-family:inherit;cursor:pointer}
+  h1{font:400 24px var(--type);margin:0 0 4px}
+  .lede{margin:0 0 18px;color:var(--ink2);font-size:15px;max-width:900px;line-height:1.5}
+  .frame{display:grid;grid-template-columns:350px 1fr;height:720px;background:var(--paper);border:1px solid var(--rule);border-radius:22px;overflow:hidden;transition:grid-template-columns .3s cubic-bezier(.22,1,.36,1)}
+  .frame.col{grid-template-columns:64px 1fr}
+  .tray{border-right:1px solid var(--rule);padding:14px 12px;overflow-y:auto;position:relative}
+  .desk{padding:16px}
+  .desk .band{background:var(--navy);color:#fff;border-radius:16px 16px 0 0;padding:14px 20px;font:400 22px var(--type)}
+  .desk .body{background:#fff;border:1px solid var(--rule);border-top:0;border-radius:0 0 16px 16px;height:calc(100% - 56px);display:grid;place-items:center;color:var(--muted);font-style:italic}
+
+  /* the one line */
+  .head{display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--rule);padding:0 2px;min-height:44px;position:relative}
+  .tab{padding:9px 0 10px;font-size:15.5px;color:var(--muted);border:0;background:none;border-bottom:2px solid transparent;margin-bottom:-1px}
+  .tab.on{color:var(--ink);border-color:var(--navy);font-weight:600}
+  .tab sup{font:400 12px var(--type);margin-left:3px}
+  .icons{margin-left:auto;display:flex;gap:2px}
+  .ic{position:relative;width:32px;height:32px;border:0;border-radius:8px;background:transparent;display:grid;place-items:center;color:var(--ink2)}
+  .ic:hover,.ic.open{background:#f0ebe3}
+  .ic svg{width:17px;height:17px}
+  .ic .pip{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--rust);display:none}
+  .ic.active .pip{display:block}
+  /* search mode */
+  .sfield{display:none;flex:1;align-items:center;gap:8px;height:40px;margin:2px 0 4px;border:1.5px solid var(--navy);border-radius:10px;background:#fff;padding:0 6px 0 10px}
+  .sfield input{flex:1;border:0;outline:0;font:inherit;font-size:15px;background:transparent}
+  .sfield button{border:0;background:none;color:var(--muted);font-size:16px;width:28px;height:28px;border-radius:6px}
+  .sfield button:hover{background:var(--paper)}
+  .head.search .tab,.head.search .icons{display:none}
+  .head.search .sfield{display:flex}
+  /* the menu */
+  .menu{display:none;position:absolute;right:0;top:42px;width:260px;background:#fff;border:1px solid var(--rule);border-radius:14px;box-shadow:0 14px 34px rgba(28,19,15,.12);padding:10px;z-index:5}
+  .menu.open{display:block}
+  .menu h4{margin:4px 6px 6px;font-size:13.5px;color:var(--muted);font-weight:400;font-style:italic}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:0 4px 8px}
+  .chip{height:28px;padding:0 10px;border-radius:999px;border:1px solid var(--rule);background:#fff;font-size:13.5px}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .menu hr{border:0;border-top:1px solid var(--rule);margin:6px 2px 8px}
+  .opt{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;text-align:left;padding:7px 8px;border-radius:8px;font-size:14.5px}
+  .opt:hover{background:var(--paper)}
+  .opt i{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1.5px #b9b1a5;flex:none}
+  .opt.on i{box-shadow:inset 0 0 0 5px var(--navy)}
+  .opt small{display:block;font-size:12px;color:var(--muted)}
+  .clear{margin:2px 6px 0;font-size:13.5px;border:0;background:none;color:var(--ink2);text-decoration:underline;text-decoration-color:var(--rule);padding:0}
+  .fline{display:none;margin:8px 2px 0;font-size:13.5px;color:var(--ink2)}
+  .fline.show{display:block}
+  .fline button{border:0;background:none;padding:0;font-size:13.5px;text-decoration:underline;color:var(--ink2)}
+
+  /* list */
+  .gh{margin-top:12px;border-radius:10px;padding:8px 12px;font:400 15.5px var(--type);display:flex;justify-content:space-between;align-items:center}
+  .gh small{font:400 13px var(--serif);color:var(--muted)}
+  .row{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:12px;font-size:15px;border:2px solid transparent}
+  .row.sel{border-color:var(--navy);background:#fff}
+  .dot{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--rule);background:#fff;flex:none;display:grid;place-items:center;font-size:12px;color:var(--muted)}
+  .row b{display:block;font-weight:600}
+  .row i{color:var(--muted)}
+  .row em{margin-left:auto;font-style:normal;text-align:right;font-size:13px;color:var(--muted);white-space:nowrap}
+  .row em b{font:400 15px var(--type);color:var(--ink)}
+  .row em.late,.row em.late b{color:var(--rust)}
+  .none{margin:24px 6px;color:var(--muted);font-style:italic;font-size:15px}
+  /* collapsed strip */
+  .strip{display:none;flex-direction:column;align-items:center;gap:10px;padding-top:4px}
+  .frame.col .full{display:none}
+  .frame.col .strip{display:flex}
+  .frame.col .tray{padding:14px 8px}
+  .sdot{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font:400 14px var(--type);cursor:pointer}
+  .notes{margin-top:18px;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;max-width:1300px}
+  .note{background:#fff;border:1px solid var(--rule);border-radius:14px;padding:12px 16px;font-size:14.5px;line-height:1.5}
+  .note h3{font:400 16px var(--type);margin:0 0 4px}
+  .note p{margin:0;color:var(--ink2)}
+</style>
+</head>
+<body>
+<h1>The list's head: one line</h1>
+<p class="lede">Everything works. Switch tabs, click the search icon (or press /), open the filter and group menu, and collapse the list with «.</p>
+
+<div class="frame" id="frame">
+  <aside class="tray">
+    <div class="full">
+      <div class="head" id="head">
+        <button class="tab on" data-t="todo">To do<sup id="cnt">7</sup></button>
+        <button class="tab" data-t="snoozed">Snoozed</button>
+        <button class="tab" data-t="done">Done</button>
+        <span class="icons">
+          <button class="ic" id="sBtn" title="Search (/)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg></button>
+          <button class="ic" id="mBtn" title="Filter and group"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span class="pip"></span></button>
+          <button class="ic" id="cBtn" title="Collapse the list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6l-6 6 6 6M19 6l-6 6 6 6"/></svg></button>
+        </span>
+        <label class="sfield"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7a7066" stroke-width="2"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg><input id="q" placeholder="Search tasks, agents or agencies"><button id="sClose" title="Close search">✕</button></label>
+        <div class="menu" id="menu">
+          <h4>Show only</h4>
+          <div class="chips" id="types"></div>
+          <div class="chips" id="whens"></div>
+          <hr>
+          <h4>Group by</h4>
+          <div id="groups"></div>
+          <hr>
+          <button class="clear" id="clr">Clear filters</button>
+        </div>
+      </div>
+      <p class="fline" id="fline"></p>
+      <div id="list"></div>
+    </div>
+    <div class="strip" id="strip"></div>
+  </aside>
+  <section class="desk"><div class="band">Send Jonathan your full</div><div class="body">The desk, as built</div></section>
+</div>
+
+<div class="notes">
+  <div class="note"><h3>⌕ Search</h3><p>Turns the line into a search box. It matches the task, the agent and the agency. ✕ or Esc closes it and brings the tabs back.</p></div>
+  <div class="note"><h3>☰ Filter and group</h3><p>One menu. "Show only" narrows by task type or when it's due, and a small rust dot stays on the icon while a filter is on, with a line above the list saying what's showing. "Group by" changes how the list is grouped.</p></div>
+  <div class="note"><h3>« Collapse</h3><p>Shrinks the list to a thin strip of coloured counts, one per group, so the desk gets the full width. Click the strip to open it again. The app remembers which way you left it.</p></div>
+</div>
+
+<script>
+const T=[
+ {t:"Send Jonathan your full",a:"The Marsh Agency",g:"wait",type:"Send",when:"Overdue",n:"953",u:"days waiting",ag:"Jonathan Marsh"},
+ {t:"Send Daniel your partial",a:"Inkwell & Stone",g:"wait",type:"Send",when:"Overdue",n:"946",u:"days waiting",ag:"Daniel Okafor"},
+ {t:"Nudge Eleanor",a:"Greenfield Literary",g:"nudge",type:"Nudge",when:"Overdue",n:"78",u:"days late",late:1,ag:"Eleanor Price"},
+ {t:"Eleanor's gone quiet",a:"Greenfield Literary",g:"quiet",type:"Close",when:"No date",n:"972",u:"days quiet",ag:"Eleanor Price"},
+ {t:"Aisha's gone quiet",a:"The Lantern Agency",g:"quiet",type:"Close",when:"No date",n:"952",u:"days quiet",ag:"Aisha Bello"},
+ {t:"Fill in what you sent",a:"12 queries",g:"house",type:"Fill in",when:"No date",n:"",u:"Quick fill",ag:""},
+ {t:"What does William want sent?",a:"Foxglove Literary",g:"house",type:"Fill in",when:"No date",n:"",u:"Quick fill",ag:"William Hart"}
+];
+const GN={wait:["Agents are waiting","var(--rose)"],nudge:["Nudges","var(--sand)"],quiet:["Gone quiet","linear-gradient(90deg,var(--stone),#f6f4f0)"],house:["Housekeeping","var(--hk)"]};
+const TYPES=["Send","Decide","Nudge","Close","Fill in"],WHENS=["Overdue","Due this week","Coming up","No date"];
+const GROUPS=[["category","Category","Agents waiting · Nudges · Gone quiet · Housekeeping"],["urgency","Urgency","Needs you now · Housekeeping"],["when","When","Overdue · This week · Coming up · No date"],["agent","Agent","What you owe each person"],["none","None","One flat list"]];
+let tab="todo",q="",types=new Set(),whens=new Set(),group="category";
+const $=x=>document.getElementById(x);
+function shown(){return T.filter(x=>(!types.size||types.has(x.type))&&(!whens.size||whens.has(x.when))&&(!q||(x.t+x.a+x.ag).toLowerCase().includes(q.toLowerCase())))}
+function row(x,k){return `<div class="row${k===0?" sel":""}"><span class="dot">${x.g==="house"?"▤":""}</span><span><b>${x.t}</b><i>${x.a}</i></span><em class="${x.late?"late":""}">${x.n?`<b>${x.n}</b><br>`:""}${x.u}</em></div>`}
+function render(){
+  if(tab!=="todo"){$("list").innerHTML=`<p class="none">${tab==="snoozed"?"Nothing snoozed.":"Nothing done yet this week."}</p>`;return}
+  const L=shown();let h="",k=0;
+  const keyOf=x=>group==="category"?x.g:group==="urgency"?(x.g==="house"?"house":"wait"):group==="when"?x.when:group==="agent"?(x.ag||"Housekeeping"):"all";
+  const keys=[...new Set(L.map(keyOf))];
+  keys.forEach(key=>{const rows=L.filter(x=>keyOf(x)===key);
+    const [name,bg]=group==="category"?GN[key]:group==="urgency"?(key==="house"?GN.house:["Needs you now","var(--rose)"]):[key==="all"?"Everything":key,"#eee8de"];
+    if(group!=="none")h+=`<div class="gh" style="background:${bg}"><span>${name} ${rows.length}</span><small>${key==="house"?"Quick fill ▸":"⌄"}</small></div>`;
+    rows.forEach(x=>{h+=row(x,k++)})});
+  $("list").innerHTML=h||`<p class="none">No tasks match. <a href="#" onclick="clearAll();return false">Clear the filters</a></p>`;
+  const f=[...types,...whens];
+  $("fline").innerHTML=f.length?`Showing ${L.length} of ${T.length}: ${f.join(", ")} · <button onclick="clearAll()">Clear</button>`:"";
+  $("fline").classList.toggle("show",!!f.length);
+  $("mBtn").classList.toggle("active",!!f.length);
+  $("cnt").textContent=T.length;
+  // the collapsed strip
+  const g=["wait","nudge","quiet","house"].map(k=>[k,T.filter(x=>x.g===k).length]);
+  $("strip").innerHTML=`<button class="ic" title="Open the list" onclick="toggleCol()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 6l6 6-6 6M5 6l6 6-6 6"/></svg></button>`+g.map(([k,n])=>`<span class="sdot" title="${GN[k][0]}" style="background:${GN[k][1]}" onclick="toggleCol()">${n}</span>`).join("");
+}
+function menu(){
+  $("types").innerHTML=TYPES.map(x=>`<button class="chip${types.has(x)?" on":""}" onclick="tg(types,'${x}')">${x}</button>`).join("");
+  $("whens").innerHTML=WHENS.map(x=>`<button class="chip${whens.has(x)?" on":""}" onclick="tg(whens,'${x}')">${x}</button>`).join("");
+  $("groups").innerHTML=GROUPS.map(([id,l,h])=>`<button class="opt${group===id?" on":""}" onclick="setG('${id}')"><i></i><span>${l}<small>${h}</small></span></button>`).join("");
+}
+function tg(set,x){set.has(x)?set.delete(x):set.add(x);menu();render()}
+function setG(id){group=id;menu();render()}
+function clearAll(){types.clear();whens.clear();menu();render()}
+function openSearch(){$("head").classList.add("search");$("menu").classList.remove("open");$("mBtn").classList.remove("open");setTimeout(()=>$("q").focus(),0)}
+function closeSearch(){$("head").classList.remove("search");q="";$("q").value="";render()}
+function toggleCol(){$("frame").classList.toggle("col")}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));b.classList.add("on");tab=b.dataset.t;render()});
+$("sBtn").onclick=openSearch;$("sClose").onclick=e=>{e.preventDefault();closeSearch()};
+$("q").oninput=e=>{q=e.target.value;render()};
+$("mBtn").onclick=e=>{e.stopPropagation();$("menu").classList.toggle("open");$("mBtn").classList.toggle("open")};
+$("menu").onclick=e=>e.stopPropagation();
+document.addEventListener("click",()=>{$("menu").classList.remove("open");$("mBtn").classList.remove("open")});
+$("clr").onclick=clearAll;$("cBtn").onclick=toggleCol;
+document.addEventListener("keydown",e=>{if(e.key==="/"&&document.activeElement!==$("q")){e.preventDefault();openSearch()}if(e.key==="Escape"){closeSearch();$("menu").classList.remove("open")}});
+menu();render();
+</script>
+</body>
+</html>
