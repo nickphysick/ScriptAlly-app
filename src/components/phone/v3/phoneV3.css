@@ -91,14 +91,6 @@
   .pa3 .pa3-lrow .pa3-icw { flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--pa-fill); display: grid; place-items: center; color: var(--pa-navy); }
   .pa3 .pa3-fold { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 14px; font-size: 14.5px; font-weight: 500; color: var(--pa-navy); }
 
-  /* ── Birds-eye (ref `.be`) ── */
-  .pa3 .pa3-be { display: block; width: 100%; padding: 13px 14px; box-sizing: border-box; }
-  .pa3-be + .pa3-be { border-top: 1px solid var(--pa-rule); }
-  .pa3-be .pa3-top { display: flex; justify-content: space-between; gap: 10px; font-size: 14.5px; font-weight: 600; }
-  .pa3-be .pa3-top span { font-weight: 400; color: var(--pa-muted); font-size: 13px; white-space: nowrap; }
-  .pa3-be .pa3-bar { height: 8px; border-radius: 4px; background: var(--pa-fill); margin-top: 8px; overflow: hidden; }
-  .pa3-be .pa3-bar i { display: block; height: 100%; border-radius: 4px; background: var(--pa-navy); }
-  .pa3-be .pa3-bar i.past { background: var(--pa-blush); }
 
   /* ── You (ref "library") ── */
   .pa3-tiles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }

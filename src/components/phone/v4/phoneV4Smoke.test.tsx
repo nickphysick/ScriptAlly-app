@@ -17,6 +17,7 @@ vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pa
 import { V4PushedHeader, V4TabBar } from "./V4Chrome";
 import { Cta, Hero } from "./V4Parts";
 import { TodayV4 } from "./TodayV4";
+import { QueriesV4 } from "./QueriesV4";
 import { V3Provider } from "../v3/V3Provider";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
@@ -40,5 +41,11 @@ describe("Phone app v4 renders", () => {
     expect(full).toContain("Where your queries are");
     expect(full).toContain("Lately");
     expect(full).toContain("asked for more");
+  });
+  it("Queries: before the first query, then the app's own court names and the switch", () => {
+    expect(renderPage(P(<QueriesV4 />), "/queries")).toContain("Nothing sent yet.");
+    const full = renderPageSeeded(P(<QueriesV4 />), "/queries");
+    for (const w of ["All", "With you", "With the agent", "Gone quiet", "Closed", "Birds-eye"]) expect(full).toContain(w);
+    expect(full).not.toContain("Need you");
   });
 });

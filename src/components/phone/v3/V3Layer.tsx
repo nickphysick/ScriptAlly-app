@@ -11,7 +11,7 @@ import { createPortal } from "react-dom";
 import { closeV3, clearV3Snack, subscribeV3, v3Overlay, v3Seq, v3Snack, type V3Overlay } from "./v3Store";
 import { useV3Data } from "./V3Provider";
 import { QuerySheetV3 } from "./QuerySheetV3";
-import { SearchV3 } from "./SearchV3";
+import { SearchV4 } from "../v4/SearchV4";
 
 export interface V3Panels {
   /** the panels later phases add (+, journeys, agent sheet); each returns null when it does not draw this overlay */
@@ -36,7 +36,7 @@ export const V3Layer: React.FC<V3Panels> = ({ render }) => {
     const q = v.byId.get(o.id);
     body = q ? <QuerySheetV3 v={q} nowMs={v.now} quietWeeks={v.quietWeeks} /> : null;
   } else if (o?.type === "search") {
-    body = <SearchV3 />;
+    body = <SearchV4 />;
     full = true;
   } else if (o) {
     body = render?.(o) ?? null;

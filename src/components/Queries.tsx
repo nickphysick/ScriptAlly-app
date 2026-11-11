@@ -433,7 +433,7 @@ import {
 import { csvCell } from "../lib/csvCell";
 import { formatDate } from "../lib/dates";
 import { EditQueryPhone } from "./queries/phone/EditQueryPhone";
-import { QueriesV3 } from "./phone/v3/QueriesV3";
+import { QueriesV4 } from "./phone/v4/QueriesV4";
 /* the phone query card's own sheet (`.qm1-*`, QcQueryCard149 `layout="phone"`), which other pages still open through this
    page's query panel host; it was loaded here through the retired QueriesPhone, so the bundle keeps it unchanged */
 import "./queries/phone/queriesPhone.css";
@@ -626,7 +626,7 @@ export const Queries: React.FC<{
      pane shows. Both panes stay mounted (translated, never display:none'd), so the list's
      scroll survives the push for free. */
   const isMobile = useIsMobile();
-  /* Phone app v3 — below 768px the page is `QueriesV3` (see the return at the foot), on the app's one breakpoint (the v1
+  /* Phone app v3 — below 768px the page is `QueriesV4` (Phone app v4) (see the return at the foot), on the app's one breakpoint (the v1
      page's own 760px retired with it). Declared up here because the response picker's subscription below must know it
      (a later declaration would be a TDZ read). */
   const qmPhone = isMobile;
@@ -6787,7 +6787,7 @@ export const Queries: React.FC<{
   if (qmPhone) {
     return (
       <>
-      <QueriesV3 />
+      <QueriesV4 />
       {/* ⚠️ THE QUERY PANEL STILL OPENS FROM OTHER PAGES ON A PHONE: `openQueryPanel` (the phone dashboard's View task,
           the agent panel, search) is drawn by this page's ONE host whichever route is on screen. Found by the dashboard's
           C1 lock, after the phone return first left the host out. */}
