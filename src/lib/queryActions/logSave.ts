@@ -11,7 +11,7 @@
  */
 import { sampleToMaterial } from "../sentSample";
 import type { useScriptAllyDb } from "../db";
-import { SubmissionMethod, type Agent, type QueryMaterial } from "../../types";
+import { QueryStatus, SubmissionMethod, type Agent, type QueryMaterial } from "../../types";
 import { addDays, dayIso, reminderAnchors } from "./dates";
 import { sentPieces, summaryWith, type PackageCard } from "./packages";
 import type { Materials } from "./sample";
@@ -49,7 +49,8 @@ export interface LogPlan {
   pieceV: PieceVersions;
   /** a package the individual send started from, with what changed (the journey's "based on"); null for none */
   basedOn: { pk: PackageCard; changes: string[] } | null;
-  expect: Date;
+  /** the reply date; null when the writer says it is Unknown (Log a query v1.3), which saves none */
+  expect: Date | null;
   /** the writer moved the reply date off the agent's usual */
   writerExpected: boolean;
   ifNo: IfNo;
@@ -96,7 +97,12 @@ export function logPayload(p: LogPlan): { payload: Record<string, unknown>; summ
     sentMaterials: summary,
     sentVersions: versionIds,
     ...(p.nudgeDate ? { nudgeDate: dayIso(p.nudgeDate) } : {}),
-    ...(p.writerExpected ? { writerExpectedDate: dayIso(p.expect), writerExpectedSetAt: new Date().toISOString() } : {}),
+    /* "Close it" is the app's existing auto-close, which fires from `responseDeadline`: the writer's choice writes that
+       date, and only that choice does. ⚠️ Log a query v1.3 — IN THE QUERY'S OWN WRITE. It was an `updateQuery` straight
+       after `addQuery`, which returns silently when the query is not yet in the loaded list (and a query added a moment
+       ago is not), so the close date was never written. `addQuery` keeps a stated `responseDeadline` on a Queried query. */
+    ...(p.ifNo === "close" && p.expect ? { status: QueryStatus.QUERIED, responseDeadline: closeDateIso(p.expect) } : {}),
+    ...(p.writerExpected && p.expect ? { writerExpectedDate: dayIso(p.expect), writerExpectedSetAt: new Date().toISOString() } : {}),
     ...(p.requery ? { requery: true } : {}),
     ...(p.nrmnOverride != null ? { nrmnOverride: p.nrmnOverride } : {}),
   };
@@ -107,7 +113,12 @@ export async function saveLog(db: Db, p: LogPlan): Promise<void> {
   const { payload, summary } = logPayload(p);
   const res = await db.addQuery(payload as never, false, { eventKey: p.requery ? "requery_sent" : "query_sent", details: summary, stampPackage: !!p.pkCard });
   if (!res.success) throw new Error(res.error || "Couldn't log the query");
-  /* "Close it" is the app's existing auto-close, which fires from `responseDeadline` — so the writer's choice writes
-     that date, and only that choice does. */
-  if (p.ifNo === "close") await db.updateQuery(p.id, { responseDeadline: dayIso(p.expect) });
 }
+
+/**
+ * ⚠️ Log a query v1.3 · THE CLOSE DATE IS THE DAY AFTER THE REPLY DATE, AT ITS START. The auto-close fires once
+ * `responseDeadline` has passed; noon on the reply date closed it on the reply date itself, while every surface says
+ * "Closes {the day after}". The start of the next day makes the words true: a full reply day, then it closes.
+ */
+export const closeDateIso = (expect: Date): string =>
+  new Date(expect.getFullYear(), expect.getMonth(), expect.getDate() + 1, 0, 0, 0).toISOString();

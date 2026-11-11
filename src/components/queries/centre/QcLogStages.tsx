@@ -19,10 +19,14 @@ import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
 import {
   HOW, MILESTONE, PREVIEW_ID, monthLong, STAGES, celebrationLine, STAGE_LABEL, flowLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk,
   planOf, previewOf, sameDay, sizeName, sod, askCard, choiceOfSample, sampleOfChoice, type AskCard, titleName, weekdayDay, whoGroups, yesterday, type Preview,
+  WEEKDAY, calMonthAhead, cardOffer, expectOf, nudgeAnswer, nudgeChips, nudgeDateOf, replyDefaults, replyReady, toggleUnknown, withWeeks, type ReplyAnswers,
   type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
 import { QcSlip153 } from "./QcSlip153";
-import { SampleControl, Seg } from "../../queryActions/controls";
+import { WeekSlider } from "../../forms/WeekSlider";
+import { addDays } from "../../../lib/queryActions/dates";
+import { SampleControl } from "../../queryActions/controls";
+import { sampleName } from "../../../lib/queryActions/sample";
 import type { Book, Materials } from "../../../lib/queryActions/sample";
 import type { LogAgain } from "../../../lib/queryActions/drawerStore";
 /* the sample control's rules and its --qad-* tokens (declared for `.laq` there too) */
@@ -116,17 +120,23 @@ export interface FlowState {
   carried: string | null;
   /** v1.2 — the package a door named: shown chosen on the Materials stage until the writer answers it */
   pkgSeed: string | null;
+  /** v1.3 — the Nudge stage's answers for this agent (null until changed: the agent's defaults stand), and whether it
+   *  has been answered (Continue); both reset with a new agent, so "Log and start another" asks again */
+  reply: ReplyAnswers | null;
+  replySet: boolean;
+  /** v1.3 — the month "Pick a date" shows, as year·12 + month */
+  nCal: number | null;
 }
 
 export const freshState = (nowMs: number): FlowState => ({
   step: "who", dir: "", find: "", hi: 0, showBusy: false, agentId: null, sent: null, earlier: false,
   calY: new Date(nowMs).getFullYear(), calM: new Date(nowMs).getMonth(),
   custom: false, packageId: null, pieces: { letterId: null, synopsisId: null, sample: null }, piecesSet: false, piecesTouched: false,
-  via: null, note: "", noteOpen: false, carried: null, pkgSeed: null,
+  via: null, note: "", noteOpen: false, carried: null, pkgSeed: null, reply: null, replySet: false, nCal: null,
 });
 
 export const answered = (s: FlowState, k: StageKey): boolean =>
-  k === "who" ? !!s.agentId : k === "when" ? s.sent != null : k === "what" ? s.piecesSet : k === "how" ? !!s.via : false;
+  k === "who" ? !!s.agentId : k === "when" ? s.sent != null : k === "what" ? s.piecesSet : k === "how" ? !!s.via : k === "nudge" ? s.replySet : false;
 /** the next stage not yet answered, after `from` (the check when everything is) */
 export function nextStage(s: FlowState, from: StageKey): StageKey {
   for (let j = STAGES.indexOf(from) + 1; j < STAGES.length; j++) if (!answered(s, STAGES[j])) return STAGES[j];
@@ -140,7 +150,7 @@ const NO_PIECES: Pieces = { letterId: null, synopsisId: null, sample: null };
 
 /* ── the shared parts ─────────────────────────────────────────────────────────────────────────────────────────── */
 
-/* v1.1 — THE TRACK (option C): the five stages as the slip's own status track, on the FlowHead's ground. A finished
+/* v1.1 — THE TRACK (option C): the stages (six from v1.3) as the slip's own status track, on the FlowHead's ground. A finished
    node is a button (navy, ✓, its answer under its label) that opens that stage; the current one is a white disc ringed
    in navy; the rest are faint outlines and are not focusable. */
 export const Stepper: React.FC<{ s: FlowState; values: Record<StageKey, string | null>; onGo: (k: StageKey) => void }> = ({ s, values, onGo }) => (
@@ -278,6 +288,10 @@ const Odometer: React.FC<{ n: number }> = ({ n }) => {
   );
 };
 
+/** v1.3 — the preview's policy fact reads the weeks the Nudge stage settled on, as the mock's slip does */
+const slipAgent = (a: Preview["agent"], r: ReplyAnswers | null): Preview["agent"] =>
+  r && r.wk != null ? { ...a, responseTimeWeeks: r.wk } : a;
+
 /* ── the journey ──────────────────────────────────────────────────────────────────────────────────────────────── */
 
 export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
@@ -332,7 +346,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     const a = agents.find((x) => x.id === id);
     if (!a) return;
     /* how always comes from the agent's own card in a batch; otherwise the How stage asks, with the card's first */
-    answer({ agentId: id, find: "", via: s.carried ? a.via : null });
+    answer({ agentId: id, find: "", via: s.carried ? a.via : null, ...(id !== s.agentId ? { reply: null, replySet: false, nCal: null } : {}) });
   };
 
   /* ── the Agent stage ── */
@@ -387,7 +401,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
             </button>) : null}
         {q && !pick.length && !g.busyHit.length ? (
           <div className="laq-none" data-qls="none">No one called “{q}” in your Contact list.<br />
-            <button type="button" className="laq-btn is-ghost is-sm" style={{ marginTop: 10 }} data-qls="new-agent" onClick={() => p.onAddAgent(nm, (id) => answer({ agentId: id, find: "" }))}>+ Add {nm} as a new agent</button>
+            <button type="button" className="laq-btn is-ghost is-sm" style={{ marginTop: 10 }} data-qls="new-agent" onClick={() => p.onAddAgent(nm, (id) => answer({ agentId: id, find: "", reply: null, replySet: false, nCal: null }))}>+ Add {nm} as a new agent</button>
           </div>
         ) : null}
       </>
@@ -454,12 +468,12 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     }
   }); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const [pop, setPop] = useState<{ k: "letter" | "syn"; top: number; left: number } | null>(null);
+  const [pop, setPop] = useState<{ k: "letter" | "syn" | "ver"; top: number; left: number } | null>(null);
   /* v1.2 — the opening pages open into the sample control, inline under their row */
   const [sampOpen, setSampOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
   const popRef = useRef<HTMLDivElement>(null);
-  const openPop = (k: "letter" | "syn", el: HTMLElement) => {
+  const openPop = (k: "letter" | "syn" | "ver", el: HTMLElement) => {
     if (pop?.k === k) { setPop(null); return; }
     const r = el.getBoundingClientRect(), c = rootRef.current!.getBoundingClientRect();
     setPop({ k, top: r.bottom - c.top + 6, left: r.right - c.left });
@@ -490,6 +504,13 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     return () => document.removeEventListener("pointerdown", off, true);
   }, [pop]);
   useEffect(() => setPop(null), [s.step]);
+  /* v1.3 B — opening the sample control brings its Done line into view */
+  const sampWas = useRef(false);
+  useLayoutEffect(() => {
+    const now = sampOpen && !!s.pieces.sample;
+    if (now && !sampWas.current) sbRef.current?.querySelector<HTMLElement>('[data-qls="sample-done"]')?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    sampWas.current = now;
+  });
 
   const pc = s.pieces;
   const sampleNow: SampleChoice = pc.sample ?? { unit: ask && ask.sample.unit !== "none" ? ask.sample.unit : "chapters", amt: ask && ask.sample.unit !== "none" ? ask.sample.amt : 3, bookVersionId: dflt.book };
@@ -538,14 +559,15 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         <span className="laq-tx"><b>{label}</b></span>
         {k === "sample" ? (
           <button type="button" className="laq-vr" data-qls="vr" data-k={k} aria-expanded={open} aria-controls="laq-sample-control" aria-label={`${val}. ${open ? "Close" : "Open"} the sample`}
-            onClick={(e) => { e.stopPropagation(); setSampOpen(!open); }}>{val}{ICON.chev}</button>
+            onClick={(e) => { e.stopPropagation(); setSampOpen(!open); }}><span className="laq-vt">{val}</span>{ICON.chev}</button>
         ) : (
           <button type="button" className="laq-vr" data-qls="vr" data-k={k} aria-haspopup="menu" aria-expanded={pop?.k === k}
-            onClick={(e) => { e.stopPropagation(); openPop(k, e.currentTarget); }}>{val}{ICON.chev}</button>
+            onClick={(e) => { e.stopPropagation(); openPop(k, e.currentTarget); }}><span className="laq-vt">{val}</span>{ICON.chev}</button>
         )}
       </div>
     );
     const bv = bookName(sampleNow.bookVersionId);
+    const verNow = p.bookVersions.find((b) => b.id === sampleNow.bookVersionId) ?? null;
     return (
       <>
         <h2 className="laq-qh">What did you send {first}?</h2>
@@ -560,12 +582,20 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
               <div className="laq-qsamp" id="laq-sample-control" data-qls="sample-control">
                 <SampleControl name="laq" sample={sampleOfChoice(sampleNow)} book={p.book}
                   onChange={(x) => setPieces({ sample: choiceOfSample(x, sampleNow.bookVersionId) })} />
-                {p.bookVersions.length ? (
+                {/* v1.3 A — the version is one pill that opens "Which version?", never a seg: three long names cannot spill */}
+                {verNow ? (
                   <div className="laq-vrow" data-qls="version"><span>Version</span>
-                    <Seg value={sampleNow.bookVersionId ?? ""} onPick={(id) => setPieces({ sample: { ...sampleNow, bookVersionId: id } })}
-                      options={p.bookVersions.map((b) => [b.id, b.current ? <>{b.name} <small>current</small></> : b.name] as [string, React.ReactNode])} />
+                    <button type="button" className="laq-vr2" data-qls="vr" data-k="ver" aria-haspopup="menu" aria-expanded={pop?.k === "ver"}
+                      onClick={(e) => { e.stopPropagation(); openPop("ver", e.currentTarget); }}>
+                      <span className="laq-vt">{verNow.name}</span>{verNow.current ? <small>current</small> : null}{ICON.chev}
+                    </button>
                   </div>
                 ) : null}
+                {/* v1.3 B — what is going, in words, and a Done that folds the control away */}
+                <div className="laq-sdone" data-qls="sample-done">
+                  <p>Sending the <b>{sampleName(sampleOfChoice(sampleNow))}</b>{verNow ? <> of {verNow.name}</> : null}.</p>
+                  <button type="button" className="laq-btn is-sd" data-qls="sample-done-btn" onClick={() => setSampOpen(false)}>Done</button>
+                </div>
               </div>
             ) : null}
           </div>
@@ -583,6 +613,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     );
     let inner: React.ReactNode;
     if (pop.k === "letter") inner = <><div className="laq-ph">Which letter?</div>{(p.letters.length ? p.letters : [{ id: NO_LETTER, name: "Query letter" }]).map((l) => item(l.id, (pc.letterId ?? dflt.letter ?? NO_LETTER) === l.id, l.name, () => setPieces({ letterId: l.id })))}</>;
+    else if (pop.k === "ver") inner = <><div className="laq-ph">Which version?</div>{p.bookVersions.map((b) => item(b.id, sampleNow.bookVersionId === b.id, b.name, () => setPieces({ sample: { ...sampleNow, bookVersionId: b.id } }), b.current ? "current" : undefined))}</>;
     else inner = <><div className="laq-ph">Which synopsis?</div>{(p.synopses.length ? p.synopses : [{ id: NO_SYN, name: "Synopsis" }]).map((l) => item(l.id, (pc.synopsisId ?? dflt.synopsis ?? NO_SYN) === l.id, l.name, () => setPieces({ synopsisId: l.id })))}</>;
     return <div ref={popRef} className="laq-pop" role="menu" data-qls="menu" data-k={pop.k} style={{ top: pop.top, left: 8 }}>{inner}</div>;
   };
@@ -611,9 +642,91 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     );
   };
 
+  /* ── v1.3 — the Nudge stage: when they might reply, and whether to be reminded ── */
+  const agentWk = agent?.weeks ?? null;
+  const rp: ReplyAnswers | null = s.reply ?? (agent ? replyDefaults({ responseTimeWeeks: agentWk ?? undefined, noResponseMeansNo: agent.nrmn }) : null);
+  const setReply = (r: ReplyAnswers) => set({ reply: r });
+  const nudgeBody = () => {
+    if (!rp || s.sent == null) return null;
+    const sent = s.sent;
+    const ex = expectOf(sent, rp.wk);
+    const offer = cardOffer(agentWk, rp.wk);
+    const nd = nudgeDateOf(rp, sent);
+    const day = (d: Date) => `${WEEKDAY[d.getDay()].slice(0, 3)} ${dayMonY(d.getTime(), nowMs)}`;
+    const opt = (k: ReplyAnswers["ifNo"], title: string, sub: string, extra: React.ReactNode, dis: boolean, tag: string | null) => (
+      <div className={`laq-nopt${rp.ifNo === k ? " is-on" : ""}${dis ? " is-dis" : ""}`} data-qls="nudge-opt" data-k={k} data-on={rp.ifNo === k ? "1" : "0"}>
+        <button type="button" role="radio" aria-checked={rp.ifNo === k} disabled={dis} onClick={() => setReply({ ...rp, ifNo: k })}>
+          <span className="laq-rd" aria-hidden="true" /><span className="laq-tx"><b>{title}</b><span data-qls="nudge-opt-sub">{sub}</span></span>
+          {tag ? <span className="laq-ntag" data-qls="nudge-tag">{tag}</span> : null}
+        </button>
+        {rp.ifNo === k && extra ? extra : null}
+      </div>
+    );
+    const chips = nudgeChips(sent, rp.wk);
+    const calAt = s.nCal ?? (() => { const d = new Date(rp.nPick ?? nd?.getTime() ?? nowMs); return d.getFullYear() * 12 + d.getMonth(); })();
+    const cal = calMonthAhead(Math.floor(calAt / 12), calAt % 12, nowMs);
+    const chipRow = (
+      <>
+        <div className="laq-nch" data-qls="nudge-chips" role="radiogroup" aria-label="When to be reminded">
+          {chips.map((c) => (
+            <button key={c.k} type="button" role="radio" aria-checked={rp.nWhen === c.k} className={`laq-chip${rp.nWhen === c.k ? " is-on" : ""}`} data-qls="nudge-chip" data-k={c.k}
+              onClick={() => setReply({ ...rp, nWhen: c.k })}>{c.label}</button>
+          ))}
+          <button type="button" role="radio" aria-checked={rp.nWhen === "pick"} className={`laq-chip${rp.nWhen === "pick" ? " is-on" : ""}`} data-qls="nudge-chip" data-k="pick"
+            onClick={() => set({ reply: { ...rp, nWhen: "pick" }, nCal: null })}>Pick a date</button>
+        </div>
+        {rp.nWhen === "pick" ? (
+          <div className="laq-cal laq-ncal" data-qls="nudge-calendar">
+            <div className="laq-calh">
+              <button type="button" aria-label="Previous month" data-qls="ncal-prev" disabled={!cal.canPrev} onClick={() => set({ nCal: calAt - 1 })}>{ICON.l}</button>
+              <b data-qls="ncal-month">{monthLong(Math.floor(calAt / 12), calAt % 12)} {Math.floor(calAt / 12)}</b>
+              <button type="button" aria-label="Next month" data-qls="ncal-next" onClick={() => set({ nCal: calAt + 1 })}>{ICON.r}</button>
+            </div>
+            <div className="laq-calg">
+              {["M", "T", "W", "T", "F", "S", "S"].map((d, i) => <span key={i} aria-hidden="true">{d}</span>)}
+              {Array.from({ length: cal.lead }, (_, i) => <i key={`b${i}`} />)}
+              {cal.days.map((d) => (
+                <button key={d.ms} type="button" data-qls="ncal-day" data-day={d.day} disabled={!d.future} aria-label={weekdayDay(d.ms)}
+                  className={`${d.today ? "is-today" : ""}${sameDay(rp.nPick, d.ms) ? " is-on" : ""}`} onClick={() => setReply({ ...rp, nPick: d.ms })}>{d.day}</button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+      </>
+    );
+    return (
+      <>
+        <h2 className="laq-qh">When might {first} reply?</h2>
+        <p className="laq-qs" data-qls="nudge-sub">{agentWk ? `${first}'s card says ${agentWk} weeks.` : `Nothing on ${first}'s card about how long they take. Your best guess is fine.`}</p>
+        <div className="laq-wkb" data-qls="weeks">
+          <WeekSlider label="Response time" value={rp.wk} min={1} max={26}
+            onChange={(w) => setReply(withWeeks(rp, w, agentWk))} onUnknown={() => setReply(toggleUnknown(rp, agentWk))} />
+          <p className="laq-wkx" data-qls="reply-by">{ex ? <>Reply expected by <b>{day(ex)}</b>.</> : "No reply date, so choose when to be reminded below."}</p>
+          {offer ? (
+            <label className={`laq-svk${rp.saveWk ? " is-on" : ""}`} data-qls="save-weeks" data-kind={offer.kind} data-on={rp.saveWk ? "1" : "0"}>
+              <input type="checkbox" className="sr-only" checked={rp.saveWk} onChange={() => setReply({ ...rp, saveWk: !rp.saveWk })} />
+              <span className="laq-bx3" aria-hidden="true">{rp.saveWk ? "✓" : ""}</span>
+              {offer.kind === "save"
+                ? <span><b>Save {offer.n} weeks to {first}'s card</b><i>So your next query to {first} starts from it.</i></span>
+                : <span><b>Update {first}'s card to {offer.n} weeks</b><i>It says {offer.was} weeks now.</i></span>}
+            </label>
+          ) : null}
+        </div>
+        <h3 className="laq-qh is-q2">Want a reminder to nudge?</h3>
+        <div className="laq-nopts" data-qls="nudge-opts" role="radiogroup" aria-label="Want a reminder to nudge?">
+          {opt("nudge", "Remind me to nudge", nd ? `On ${day(nd)}. It goes on your to-do list.` : rp.nWhen === "pick" ? "Pick the day below." : "", chipRow, false, null)}
+          {opt("close", "Close it if there's no reply", ex ? `On ${day(addDays(ex, 1))}, marked as no reply.` : "Needs a response time first.", null, !ex, agent?.nrmn ? `${first}'s card says no reply means no` : null)}
+          {/* ⚠️ the brief's "You can add one later from the query card." is not true today: the card logs a nudge sent and
+             snoozes one that is due, but nothing there sets a new reminder (reported in v1.3's REPORT) */}
+          {opt("none", "No reminder", "Nothing goes on your to-do list.", null, false, null)}
+        </div>
+      </>
+    );
+  };
+
   /* ── the check stage ── */
   const answers = (): LogAnswers | null => (s.agentId && s.sent != null && s.via && s.piecesSet
-    ? { agentId: s.agentId, sent: s.sent, via: s.via, packageId: s.packageId, letterId: pc.letterId, synopsisId: pc.synopsisId, sample: pc.sample, note: s.note.trim() }
+    ? { agentId: s.agentId, sent: s.sent, via: s.via, packageId: s.packageId, letterId: pc.letterId, synopsisId: pc.synopsisId, sample: pc.sample, note: s.note.trim(), ...(rp ? { reply: rp } : {}) }
     : null);
   const preview = useMemo(() => {
     const a = answers();
@@ -624,8 +737,8 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   const slip = (pv: NonNullable<typeof preview>, tag: boolean) => (
     <div className="laq-pv laq-pvw qc151 qc153" data-qls="preview">
       {tag ? <span className="laq-pvtag" data-qls="preview-tag">Preview</span> : null}
-      <QcSlip153 row={pv.row} nowMs={nowMs} selected={false} packageName={pv.packageName} agent={pv.agent} act={null} onOpen={() => {}} onAct={() => {}}
-        preview={pv.noWindow ? { next: { value: "No reply window", line: `add one on ${first}'s card` }, policy: { value: "Not on their card", line: null } } : {}} />
+      <QcSlip153 row={pv.row} nowMs={nowMs} selected={false} packageName={pv.packageName} agent={slipAgent(pv.agent, rp)} act={null} onOpen={() => {}} onAct={() => {}}
+        preview={pv.noWindow ? { policy: { value: "Not on their card", line: null } } : {}} />
       {stamp ? <span className={`laq-stamp${reduce ? "" : " is-thump"}`} data-qls="stamp"><span>Logged</span><small>{dayMon(s.sent ?? nowMs).toUpperCase()}</small></span> : null}
     </div>
   );
@@ -677,11 +790,11 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     if (more) {
       stampThen(() => {
         /* the date and materials carry over; how comes from the next agent's card */
-        setS((o) => ({ ...o, step: "who", dir: "in", agentId: null, via: null, find: "", note: "", noteOpen: false, hi: 0, showBusy: false, carried: lastFirst }));
+        setS((o) => ({ ...o, step: "who", dir: "in", agentId: null, via: null, find: "", note: "", noteOpen: false, hi: 0, showBusy: false, carried: lastFirst, reply: null, replySet: false, nCal: null }));
         showToast(`${lastFirst} logged`, async () => { setToast(null); await done.undo(); setS({ ...before, step: "check", dir: "back" }); });
       });
     } else {
-      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: agent?.weeks ?? null, before }); setPhase("yay"); });
+      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: rp?.wk ?? null, before }); setPhase("yay"); });
     }
   };
   /* ⌘↵ / Ctrl↵ logs from the check */
@@ -731,11 +844,12 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     when: s.sent == null ? null : sameDay(s.sent, nowMs) ? "Today" : sameDay(s.sent, y) ? "Yesterday" : dayMon(s.sent),
     what: !s.piecesSet ? null : s.packageId ? p.packages.find((x) => x.id === s.packageId)?.name ?? "Package" : `${pieceCount} ${pieceCount === 1 ? "piece" : "pieces"}`,
     how: s.via ? howLabel(s.via) : null,
+    nudge: s.replySet && rp && s.sent != null ? nudgeAnswer(rp, s.sent) : null,
     check: null,
   };
 
   /* v1.2 — one line for the whole journey; a step changed from the check (every stage answered, back on one) says so */
-  const line = flowLine({ carried: s.carried, changing: s.step !== "check" && STAGES.slice(0, 4).every((k) => answered(s, k)) });
+  const line = flowLine({ carried: s.carried, changing: s.step !== "check" && STAGES.slice(0, -1).every((k) => answered(s, k)) });
   const backFoot = (hint: string | null) => (
     <>
       <button type="button" className="laq-lnk" data-qls={s.step === "who" ? "cancel" : "back"} onClick={() => (s.step === "who" ? p.onClose() : go(STAGES[Math.max(0, STAGES.indexOf(s.step) - 1)], "back"))}>{s.step === "who" ? "Cancel" : "Back"}</button>
@@ -758,7 +872,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   );
 
   const body = s.step === "who" ? whoBody() : s.step === "when" ? whenBody() : s.step === "what" ? whatBody() : s.step === "how" ? howBody()
-    : checkBody();
+    : s.step === "nudge" ? nudgeBody() : checkBody();
   const piecesFoot = (
     <>
       <button type="button" className="laq-lnk" data-qls="back" onClick={() => go("when", "back")}>Back</button>
@@ -767,8 +881,16 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         onClick={() => answer({ packageId: null, piecesSet: true })}>Continue {ICON.arrow}</button>
     </>
   );
+  const nudgeFoot = (
+    <>
+      <button type="button" className="laq-lnk" data-qls="back" onClick={() => go("how", "back")}>Back</button>
+      <span className="laq-sp" />
+      <button type="button" className="laq-btn" data-qls="nudge-continue" disabled={!rp || !replyReady(rp)}
+        onClick={() => { if (rp) answer({ reply: rp, replySet: true }); }}>Continue {ICON.arrow}</button>
+    </>
+  );
   const foot = s.step === "who" ? backFoot("↑ ↓ and ↵") : s.step === "what" && !showPkgs ? piecesFoot
-    : s.step === "check" ? checkFoot : backFoot("Tap one to carry on");
+    : s.step === "nudge" ? nudgeFoot : s.step === "check" ? checkFoot : backFoot("Tap one to carry on");
 
   if (phase === "yay" && logged) {
     const L = logged;
@@ -785,8 +907,8 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
             {mile ? <span className="laq-ms" data-qls="milestone">{mile}</span> : null}
             <div className="laq-slipw">
               <div className="laq-pv laq-pvw qc151 qc153" data-qls="preview">
-                <QcSlip153 row={L.preview.row} nowMs={nowMs} selected={false} packageName={L.preview.packageName} agent={L.preview.agent} act={null} onOpen={() => {}} onAct={() => {}}
-                  preview={L.preview.noWindow ? { next: { value: "No reply window", line: `add one on ${L.first}'s card` }, policy: { value: "Not on their card", line: null } } : {}} />
+                <QcSlip153 row={L.preview.row} nowMs={nowMs} selected={false} packageName={L.preview.packageName} agent={slipAgent(L.preview.agent, L.before.reply ?? null)} act={null} onOpen={() => {}} onAct={() => {}}
+                  preview={L.preview.noWindow ? { policy: { value: "Not on their card", line: null } } : {}} />
                 <span className="laq-stamp" data-qls="stamp"><span>Logged</span><small>{dayMon(L.before.sent ?? nowMs).toUpperCase()}</small></span>
               </div>
             </div>

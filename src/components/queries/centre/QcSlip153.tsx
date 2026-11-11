@@ -132,10 +132,10 @@ export interface QcSlip153Props {
   onAct: (id: string, mode?: DrawerMode) => void;
   /**
    * Log a query v1 — the check stage's PREVIEW of an unsaved query: the slip is not a control (no click-to-open, no tab
-   * stop, no hover CTA) and only its paperclip tab works. `next` and `policy` replace those two facts' words where the
-   * agent's card states no reply window ("No reply window" / "Not on their card").
+   * stop, no hover CTA) and only its paperclip tab works. `policy` replaces that fact's words where the agent's card
+   * states no reply window ("Not on their card"). v1.3: the Next fact takes no override; `nextFact` says it all.
    */
-  preview?: { next?: { value: string; line: string | null }; policy?: { value: string; line: string | null } };
+  preview?: { policy?: { value: string; line: string | null } };
 }
 
 export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, packageName, agent = null, act, onOpen, onAct, preview }) => {
@@ -143,8 +143,7 @@ export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, p
   const word = standWords(r);
   const qd = queriedFact(r, nowMs);
   const hd = heardFact(r, nowMs);
-  const nx0 = nextFact(r, nowMs);
-  const nx = preview?.next ? { value: preview.next.value, line: preview.next.line, hot: false, bar: null } : nx0;
+  const nx = nextFact(r, nowMs);
   const pol = preview?.policy ?? policyWords(agent);
   const mats = materialGroups(r.query, r.status, packageName, r.stageStartMs, nowMs);
   const [popOpen, setPopOpen] = useState(false);
@@ -190,7 +189,7 @@ export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, p
             <b>{hd.value}</b>{hd.line ? <em>{hd.line}</em> : null}
           </div>
           <div className={`qc153-fact${nx.hot ? " is-hot" : ""}`} data-qc153="fact" data-k="next" data-hot={nx.hot ? "" : undefined}>
-            <span className="qc153-fl"><i className="qc153-fi" aria-hidden="true">{FACT_ICON.next}</i>Next</span>
+            <span className="qc153-fl"><i className="qc153-fi" aria-hidden="true">{FACT_ICON.next}</i>{nx.label}</span>
             <b>{nx.value}</b>{nx.line ? <em data-qc1532="next-line">{nx.line}</em> : null}
             {nx.bar != null ? <u className="qc153-win" data-qc153="window" aria-hidden="true"><i style={{ width: `${Math.round(nx.bar * 100)}%` }} /></u> : null}
           </div>

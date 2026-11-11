@@ -15,6 +15,7 @@ import { STAGE_NAME, type QcRow } from "./qcSummary";
 import { CLOSED_STATUSES, isClosedRow, lastHeardMs, liveLevel, shortDate } from "./qc151";
 import { nextNum, type NextNum } from "./qc1512";
 import { stateOf } from "./queryState";
+import { MONTHS_SHORT } from "./dates";
 
 /* ── the header's colour ─────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -107,7 +108,7 @@ export function nextWords(n: NextNum): string {
   if (n.kind === "text") return n.text;
   return `${n.n} ${n.label[0]} ${n.label[1]}`;
 }
-export interface NextFact { value: string; hot: boolean; bar: number | null; line: string | null }
+export interface NextFact { label: string; value: string; hot: boolean; bar: number | null; line: string | null }
 /**
  * The Next box: hot (the `#f6eee8` fill and the navy dot) when it is the writer's move or past its date; a
  * reply-window bar for Watch and wait (with the agent, inside the window), the share of the window gone.
@@ -121,7 +122,49 @@ export function nextFact(r: QcRow, nowMs: number): NextFact {
   if (!hot && waiting && r.expectedMs != null && r.stageStartMs != null && r.expectedMs > r.stageStartMs) {
     bar = Math.min(1, Math.max(0, (nowMs - r.stageStartMs) / (r.expectedMs - r.stageStartMs)));
   }
-  return { value: nextWords(n), hot, bar, line: nextLine(r, nowMs) };
+  /* v1.3 D — waiting on the agent and not late: the reply date under its own heading, and what is planned */
+  if (r.court === "agent" && !r.withYou && !hot) {
+    const st = stateOf(r);
+    const due = st ? (r as { replyMs?: number | null }).replyMs ?? r.expectedMs : r.expectedMs;
+    if (due != null && sod(due) >= sod(nowMs)) return { label: "Reply expected by", value: nextDay(due, nowMs), hot, bar, line: planLine(r, nowMs) };
+    if (due == null) {
+      const nudge = scheduledNudgeMs(r, nowMs);
+      return nudge != null
+        ? { label: "Nudge scheduled for", value: nextDay(nudge, nowMs), hot, bar: null, line: "no reply date set" }
+        : { label: "Next", value: "No reply date", hot, bar: null, line: "add a response time" };
+    }
+  }
+  return { label: "Next", value: nextWords(n), hot, bar, line: nextLine(r, nowMs) };
+}
+
+/** a date ahead, as the slip says it: "4 Jan" within the coming year, with its year beyond that */
+export function nextDay(ms: number, nowMs: number): string {
+  const d = new Date(ms);
+  const near = ms - nowMs < 330 * 864e5;
+  return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}${near ? "" : ` ${d.getFullYear()}`}`;
+}
+const AUTO_CLOSE = "Mark as no response automatically";
+const dayMs = (v: unknown): number | null => {
+  if (typeof v !== "string" || !v) return null;
+  const t = new Date(v.length === 10 ? `${v}T12:00:00` : v).getTime();
+  return Number.isNaN(t) ? null : t;
+};
+/** the writer's own nudge reminder, when its day is still to come (a passed one is the nudge, `nudgeMsOf`) */
+export function scheduledNudgeMs(r: Pick<QcRow, "query">, nowMs: number): number | null {
+  const t = dayMs((r.query as { nudgeDate?: string } | null)?.nudgeDate);
+  return t != null && sod(t) >= sod(nowMs) ? t : null;
+}
+/**
+ * v1.3 D — the Next box's line under "Reply expected by": the nudge the writer booked, else the close they chose (the
+ * day `responseDeadline` falls on, which is when the auto-close fires), else none. Retires "reply by …".
+ */
+export function planLine(r: Pick<QcRow, "query">, nowMs: number): string {
+  const nudge = scheduledNudgeMs(r, nowMs);
+  if (nudge != null) return `Nudge scheduled for ${nextDay(nudge, nowMs)}`;
+  const q = r.query as { ifNoResponse?: string; responseDeadline?: string } | null;
+  const close = q?.ifNoResponse === AUTO_CLOSE ? dayMs(q.responseDeadline) : null;
+  if (close != null) return `Closes ${nextDay(close, nowMs)} if no reply`;
+  return "No nudge planned";
 }
 
 /**

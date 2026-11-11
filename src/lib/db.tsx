@@ -1125,7 +1125,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       // Nudge/close precedence: one decision, one task (close SUCCEEDS nudge, never competes).
-      // No reply window → neither fires; the data_quality_poor "set a window" item does instead.
+      // No reply window → neither fires (only a nudge the writer booked, Log a query v1.3); the data_quality_poor
+      // "set a window" item does instead.
       const reply = replyTask({
         status: q.status,
         dateSent: q.dateSent,

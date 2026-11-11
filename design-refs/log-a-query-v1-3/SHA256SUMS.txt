@@ -1,0 +1,10 @@
+918bcff6a63d6dfd9ad89df8e1a595072ddb6a16f81a57584f27d2a33c0e5008  log-a-query-v1-3.html
+992cf9918d80d5b0a1ffd96e5e07b24c5c700c7a9231efb22816ce4a5dbaece8  screens/01-sample-control-done.png
+e42680fdac930386021021e4b429cf52d5e22fceea9f0d97bf2598cb66671608  screens/02-materials-after-done.png
+0fdf76fae41198283a848ce59371a27b1c76ab6283d461e16a1625dc862b34ed  screens/03-nudge-no-card-unknown.png
+082959d7a51dc4f0f24e9f2b435fb5dedc732b26cac0c3fbd338e861eb4992e7  screens/04-nudge-no-card-6-weeks.png
+f9addc66bf6716677da23b0bea1ff0d038e1b5b46daa19b2ce10c84002988da9  screens/05-nudge-from-card.png
+174780d271805b80fc0a43bff99742fa8cb2ef32f6501f4e13ae3c4d5b234526  screens/06-nudge-update-card.png
+b4bd11fab5064c37abaa1e98a8e32d36d1573bf24ce78cb74bf8bfeb834c4559  screens/07-nudge-no-reply-means-no.png
+f6fdf808705fd2e9e7174a3e03bd56841dc89dcaac902da119ad0daa2105f932  screens/08-slip-reply-expected-nudge.png
+2d60480842a4dc6c98cb8c25b1c2c975ffa41bd939d133707b1a5540b21bb6da  screens/09-slip-reply-expected-close.png

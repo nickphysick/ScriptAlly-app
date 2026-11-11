@@ -74,8 +74,13 @@ describe("the Next box's second line", () => {
     expect(nextFact(row(QueryStatus.PARTIAL_REQUESTED, "you"), NOW).line).toBe("asked 25 days ago");
     expect(nextFact(row(QueryStatus.FULL_REQUESTED, "you", { stageStartMs: NOW }), NOW).line).toBe("asked today");
   });
-  it("with the agent: reply by the date, or time for a nudge once it has passed", () => {
-    expect(nextFact(row(QueryStatus.QUERIED, "agent", { expectedMs: NOW + 19 * DAY }), NOW).line).toMatch(/^reply by \d{1,2} \w{3}/);
+  /* Log a query v1.3 D — "reply by …" is retired: the reply date is the value under "Reply expected by", and the line
+     says what is planned (the full set is in queryActions/logNudge.test.ts) */
+  it("with the agent: the reply date under Reply expected by, or time for a nudge once it has passed", () => {
+    const f = nextFact(row(QueryStatus.QUERIED, "agent", { expectedMs: NOW + 19 * DAY }), NOW);
+    expect(f.label).toBe("Reply expected by");
+    expect(f.value).toMatch(/^\d{1,2} \w{3}$/);
+    expect(f.line).toBe("No nudge planned");
     expect(nextFact(row(QueryStatus.QUERIED, "agent", { expectedMs: NOW - 23 * DAY, pastExpected: true }), NOW).line).toBe("time for a nudge");
   });
   it("closed: no second line", () => {

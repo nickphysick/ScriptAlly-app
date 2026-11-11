@@ -52,6 +52,8 @@ async function toCheck(page: Page) {
   if (await page.locator('[data-qls="package"]').count()) await page.locator('[data-qls="package"]').first().click();
   else await page.locator('[data-qls="pieces-continue"]').click();
   if ((await step(page)) === "how") await page.locator('[data-qls="how-opt"]').first().click();
+  /* v1.3 — the Nudge stage, on the agent's own defaults */
+  if ((await step(page)) === "nudge") await page.locator('[data-qls="nudge-continue"]').click();
   await expect(P(page)).toHaveAttribute("data-step", "check");
 }
 async function undoCelebration(page: Page) {
@@ -102,6 +104,7 @@ test("LAQ1 · LAQ2 · LAQ3 · LAQ4 · LAQ5 — the stages, the calendar, the ste
   if (await pk.count()) { what = ((await pk.first().locator("b").textContent()) ?? "").trim(); await pk.first().click(); }
   else { await page.locator('[data-qls="pieces-continue"]').click(); what = "pieces"; }
   if ((await step(page)) === "how") { await noFormControls(page, "How"); await page.locator('[data-qls="how-opt"]').first().click(); }
+  if ((await step(page)) === "nudge") await page.locator('[data-qls="nudge-continue"]').click();
   await noFormControls(page, "Check");
   /* LAQ3 */
   const values = { who: await val(page, "who"), when: await val(page, "when"), what: await val(page, "what"), how: await val(page, "how") };
@@ -158,25 +161,28 @@ test("LAQ9 — the track: node states, keyboard, a finished node opens its stage
       else ok(n.tag !== "BUTTON" && !n.focusable && n.w === 32 && n.text === String(i + 1), `LAQ9 ${stage}: ${n.k} is to come, not focusable ${JSON.stringify(n)}`);
     }
   };
-  await expectStates("Agent", ["now", "todo", "todo", "todo", "todo"]);
+  /* v1.3 — six nodes: Nudge between How and Log */
+  await expectStates("Agent", ["now", "todo", "todo", "todo", "todo", "todo"]);
   await page.locator(`[data-qls="agent"][data-id="${await settledReady(page)}"]`).click();
-  await expectStates("Sent", ["done", "now", "todo", "todo", "todo"]);
+  await expectStates("Sent", ["done", "now", "todo", "todo", "todo", "todo"]);
   await page.locator('[data-qls="when-opt"][data-k="today"]').click();
-  await expectStates("Materials", ["done", "done", "now", "todo", "todo"]);
+  await expectStates("Materials", ["done", "done", "now", "todo", "todo", "todo"]);
   if (await page.locator('[data-qls="package"]').count()) await page.locator('[data-qls="package"]').first().click();
   else await page.locator('[data-qls="pieces-continue"]').click();
   if ((await step(page)) === "how") {
-    await expectStates("How", ["done", "done", "done", "now", "todo"]);
+    await expectStates("How", ["done", "done", "done", "now", "todo", "todo"]);
     await page.locator('[data-qls="how-opt"]').first().click();
   }
-  await expectStates("Check", ["done", "done", "done", "done", "now"]);
+  await expectStates("Nudge", ["done", "done", "done", "done", "now", "todo"]);
+  await page.locator('[data-qls="nudge-continue"]').click();
+  await expectStates("Check", ["done", "done", "done", "done", "done", "now"]);
   /* the keyboard: Tab reaches the finished nodes, Enter opens one, and answering returns to the check */
   await page.locator('[data-qls="step"][data-k="who"]').focus();
   await page.keyboard.press("Tab");
   ok((await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.k ?? null)) === "when", "LAQ9: Tab moves from Agent to the next finished node");
   await page.keyboard.press("Enter");
   ok((await step(page)) === "when", "LAQ9: Enter on a finished node opens its stage");
-  await expectStates("Sent, reopened", ["done", "now", "done", "done", "todo"]);
+  await expectStates("Sent, reopened", ["done", "now", "done", "done", "done", "todo"]);
   await page.locator('[data-qls="when-opt"][data-k="yesterday"]').click();
   ok((await step(page)) === "check", "LAQ9: answering it returns straight to the check");
   ok((await val(page, "when")) === "Yesterday", "LAQ9: the track shows the new answer");
@@ -199,9 +205,10 @@ test("LAQ6 — Log and start another: toast, carried date and materials, the nex
   await page.locator(`[data-qls="agent"][data-id="${await settledReady(page)}"]`).click();
   const at = await step(page);
   (READ.LAQ6 as Record<string, unknown>).landed = at;
-  ok(at === "check" || at === "how", `LAQ6: the next agent skips Sent and Materials (landed on ${at})`);
+  /* v1.3 — the Nudge stage asks again for each agent, so the next agent lands on How or Nudge, never the check */
+  ok(at === "nudge" || at === "how", `LAQ6: the next agent skips Sent and Materials, and is asked Nudge again (landed on ${at})`);
   ok((await val(page, "when")) === whenBefore && (await val(page, "what")) === whatBefore, "LAQ6: the date and materials carried over");
-  if (at === "check") ok(((await page.locator('[data-flh="line"]').textContent()) ?? "").startsWith(`Same date and materials as ${firstName}.`), "LAQ6: the check says what carried over");
+  if (at === "nudge") ok(((await page.locator('[data-flh="line"]').textContent()) ?? "").startsWith(`Same date and materials as ${firstName}.`), "LAQ6: the line says what carried over");
   /* undo the first query (the toast's own Undo) — back on its check */
   await page.locator('[data-qls="toast-undo"]').click();
   /* the page is already on a check (the next agent's), so wait for the FIRST agent's check, not for any check */

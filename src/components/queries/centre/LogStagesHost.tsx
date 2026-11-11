@@ -18,7 +18,7 @@ import { ComponentType, QueryStatus, type Manuscript } from "../../../types";
 import { activePackageId, packagesFor } from "../../../lib/queryActions/packages";
 import { saveLog } from "../../../lib/queryActions/logSave";
 import { restoreSnapshot, takeSnapshot } from "../../../lib/queryActions/snapshot";
-import { planOf, stageAgents, type BookChoice, type Choice, type LogAnswers, type PlanContext, type StagePackage } from "../../../lib/queryActions/logStages";
+import { cardWeeks, cardWeeksToSave, firstName, planOf, stageAgents, type BookChoice, type Choice, type LogAnswers, type PlanContext, type StagePackage } from "../../../lib/queryActions/logStages";
 import { bookVersionsOf, latestVersion, readVersions } from "../../../lib/bookVersions";
 import { bookOf } from "../../../lib/queryActions/sample";
 import { previousQueryFor } from "../../../lib/requery";
@@ -28,6 +28,9 @@ import { isLive as qaIsLive } from "../../queryActions/journeys/common";
 import { useToast } from "../../toast/ToastProvider";
 import { QcLogStages, type Logged } from "./QcLogStages";
 import type { LogAgain } from "../../../lib/queryActions/drawerStore";
+import { useAgentSave } from "../../agents/card/useAgentSave";
+import { draftOf } from "../../../lib/cardDraft";
+import { agentPrimary } from "../../../lib/agentDisplay";
 
 const isLiveVersion = (v: { status?: string; retiredAt?: unknown }) => (v.status ?? "Active") !== "Retired" && !v.retiredAt;
 
@@ -53,6 +56,9 @@ export const LogStagesHost: React.FC<{
   const live = useRef(scriptDb);
   live.current = scriptDb;
   const nowMs = useMemo(() => Date.now(), []);
+  /* v1.3 — "Save {n} weeks to {First}'s card" goes through the card's own save, quietly (no notice, no consequences
+     offer: the toast and the celebration are this journey's) */
+  const { saveDraft } = useAgentSave({ editCtx: { queries, agents, msGenre: ms.genre ?? null, msTitle: ms.title ?? null, nowMs } });
   const forBook = useMemo(() => queries.filter((q) => q.manuscriptId === ms.id), [queries, ms.id]);
 
   const model = useMemo(() => {
@@ -93,21 +99,26 @@ export const LogStagesHost: React.FC<{
       return null;
     }
     if (a.note) await addJournalEntry(id, a.note);
+    /* v1.3 — the card's response time, only when ticked and only now the query is logged (Cancel saves nothing). A card
+       save that fails leaves the query logged with its own reply date, and says so. */
+    let undoCard: (() => Promise<boolean>) | undefined;
+    const wk = a.reply ? cardWeeksToSave(a.reply, cardWeeks(plan.agent)) : null;
+    if (wk != null) {
+      const base = draftOf(plan.agent);
+      const r = await saveDraft(plan.agent, base, { ...base, weeks: wk }, { emit: false });
+      if ("error" in r) showToast({ message: `Logged, but ${firstName(agentPrimary(plan.agent))}'s card wasn't updated.` });
+      else undoCard = r.undo;
+    }
     const s0 = snap;
+    /* the card first: its snapshot holds the new query, so the log's own undo must run after it */
     const undo = async () => {
+      if (undoCard) await undoCard();
       await restoreSnapshot(s0);
       for (const j of live.current.journalEntries.filter((x) => x.queryId === id)) await deleteJournalEntry(j.id);
     };
     onLogged?.(id, undo);
-    return {
-      id,
-      undo: async () => {
-        await restoreSnapshot(s0);
-        /* the note is the one thing the snapshot does not hold: it lives in journalEntries, keyed by the query */
-        for (const j of live.current.journalEntries.filter((x) => x.queryId === id)) await deleteJournalEntry(j.id);
-      },
-      openCard: () => onOpenCard(id),
-    };
+    /* the note is the one thing the snapshot does not hold: it lives in journalEntries, keyed by the query */
+    return { id, undo, openCard: () => onOpenCard(id) };
   };
 
   return (

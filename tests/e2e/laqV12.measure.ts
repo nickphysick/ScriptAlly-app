@@ -213,9 +213,11 @@ test("V12-4 · V12-5 — the ask card's states, the sample control, and a specif
   const ver = await text(page, '[data-qls="version"]');
   READ.V12_5 = { pill, ver };
   ok(pill.startsWith("Pages 40–64"), `V12-5: the row names the section ("${pill}")`);
-  ok(/Version 2 current/.test(ver) && /Version 1/.test(ver), `V12-5: the Version row ("${ver}")`);
+  /* v1.3 — the Version row is one pill naming the chosen version; the others are in its menu */
+  ok(/Version 2\s*current/.test(ver), `V12-5: the Version row ("${ver}")`);
   await page.locator('[data-qls="pieces-continue"]').click();
   await page.locator('[data-qls="how-opt"][data-k="Email"]').click();
+  await page.locator('[data-qls="nudge-continue"]').click();
   await expect(R(page)).toHaveAttribute("data-step", "check");
   await page.locator('[data-qls="log"]').click();
   await page.locator('[data-qls="yay"]').waitFor({ state: "visible", timeout: 120_000 });

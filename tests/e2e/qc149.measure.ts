@@ -431,6 +431,7 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       if (await page.locator("[data-qls='package']").count()) await tap(page, "[data-qls='package']");
       else await tap(page, "[data-qls='pieces-continue']");
       if (await page.locator("[data-qls='root'][data-step='how']").count()) await tap(page, "[data-qls='how-opt']");
+      if (await page.locator("[data-qls='root'][data-step='nudge']").count()) await tap(page, "[data-qls='nudge-continue']");
       L.check("the check, with the preview slip", !!(await box(page, "[data-qls='root'][data-step='check'] [data-qls='preview'] [data-qc153='slip']")), "no check");
       await tap(page, "[data-qls='log']");
       await page.waitForTimeout(3500);
