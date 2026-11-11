@@ -60,6 +60,26 @@
 .laq .laq-s:focus-visible .laq-nd { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .laq .laq-nd, .laq .laq-si::after { transition: none; } }
 
+/* v1.2 — THE NAVY HEADER (the reference's `.ci.hc` rules, chosen over "as built" and "warm sand"). The FlowHead and the
+   track share one navy ground; the body below stays white. Scoped to `.laq`: FlowHead elsewhere is untouched. */
+.laq .flh, .laq .laq-trk { background: var(--laq-navy); }
+.laq .laq-trk { border-bottom-color: var(--laq-navy); }
+.laq .flh h3.flh-t { color: #fff; }
+.laq .flh p.flh-l { color: rgba(255, 255, 255, .78); }
+.laq .flh .flh-x { color: #fff; }
+.laq .flh .flh-x:hover { background: rgba(255, 255, 255, .12); }
+.laq .flh .flh-x:focus-visible { outline-color: #fff; }
+.laq .laq-trk .laq-nd { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .35); color: rgba(255, 255, 255, .55); }
+.laq .laq-trk .laq-si:not(:last-child)::after { background: rgba(255, 255, 255, .22); }
+.laq .laq-trk .laq-si:has(> .is-d):not(:last-child)::after { background: #fff; }
+.laq .laq-trk .laq-s.is-d .laq-nd { background: #fff; box-shadow: none; color: var(--laq-navy); }
+.laq .laq-trk .laq-s.is-d:hover .laq-nd { box-shadow: 0 0 0 3px rgba(255, 255, 255, .25); }
+.laq .laq-trk .laq-s.is-n .laq-nd { background: #fff; box-shadow: 0 0 0 4px rgba(255, 255, 255, .2); color: var(--laq-ink); }
+.laq .laq-trk .laq-l { color: rgba(255, 255, 255, .5); }
+.laq .laq-trk .laq-s.is-d .laq-l, .laq .laq-trk .laq-s.is-n .laq-l { color: #fff; }
+.laq .laq-trk .laq-s.is-d .laq-l b { color: rgba(255, 255, 255, .7); }
+.laq .laq-trk .laq-s:focus-visible .laq-nd { outline-color: #fff; }
+
 /* the stage body */
 .laq .laq-sb { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 20px 20px 12px; display: flex; flex-direction: column; }
 .laq .laq-sb > * { flex: none; }
