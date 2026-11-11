@@ -32,7 +32,7 @@ The full reasoning, dates and incidents behind every rule below are in `docs/dec
 - **A deferral is written in the next prompt's out-of-scope list, never as a `// until Phase N` comment.**
 
 ### Gates
-- **Gates green before every commit: tsc + production build + full Vitest, with `set -o pipefail`.** Never pipe a gate into anything before reading its exit code — `tsc … | tail -3 && echo CLEAN` prints CLEAN over real errors.
+- **Gates green before every commit, with `set -o pipefail`** — which gates, and how often the full suite runs, is "Testing and machine load" below. Never pipe a gate into anything before reading its exit code — `tsc … | tail -3 && echo CLEAN` prints CLEAN over real errors.
 - **Read the build output in full or grep it** (`npx vite build 2>&1 | grep -inE "error|\[WARNING\]"`; the chunk-size note is the one expected match). Never `tail` alone: CSS diagnostics print near the top and exit 0.
 - **`npx vitest run` can exit 1 with zero failed tests** (`Error: [vitest-worker]: Timeout calling "onTaskUpdate"` under CPU load). Read the counts: a real red names the file and the case.
 - **Read the output before you commit.** Chain the gate to the commit with `&&`, or read the counts and commit as a separate act — never a gate and a commit in one block where the commit runs regardless.
@@ -53,6 +53,15 @@ The full reasoning, dates and incidents behind every rule below are in `docs/dec
 - **Step 0 of every session: `df -h ~`. STOP if under 20 GB free.**
 - **End of every session that made a worktree:** commit, or list in the report, any uncommitted work; then `git worktree remove` your own worktree and delete its `node_modules`, `dist-emu` and emulator data. Never force-remove one with uncommitted `src/`, `functions/` or `design-refs/` changes.
 - **Never touch another session's worktree, its emulators or its ports.** Stop only processes you started — confirm the full command and path, never kill by port.
+
+## Testing and machine load
+- Heavy runs (emulator, e2e, Playwright) go through the test slot via npm scripts only (`scripts/heavy-slot.mjs`: one heavy job at a time on this Mac, queued, low priority, leftovers swept); hooks enforce it. If you're queued, wait or do non-test work — never work around the slot.
+- Run only the specs covering what you changed. One full suite at the end, only for logic changes (status derivation, recomputeQuery, rules, import, money/entitlements). Visual, copy and docs changes: typecheck + build + the touched specs only.
+- Red-before proofs only for logic locks, not for visual or copy checks.
+- One baseline (tsc/build/Vitest) per session, not per phase.
+- Never chain runs. One run, read it, act.
+- Never leave dev:emu or vite preview running at the end of a session.
+- Slot by hand: `node scripts/heavy-slot.mjs status | sweep --dry-run | release`; hooks install with `npm run hooks:install`.
 
 ## Firestore off production — the emulator is the default
 - October's bill was £46 with no live users, from our own tooling reading the dev database (report reports/firestore-bill/REPORT.md).
