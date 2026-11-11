@@ -123,7 +123,7 @@
     "closeSub": "Needs a response time first.",
     "unkOn": "true",
     "by1": "Reply expected by Wed 23 Dec.",
-    "offerTxt": "Save 6 weeks to Joanna's card / So your next query to Joanna starts from it.",
+    "offerTxt": "Save 6 weeks to Joanna's card / It keeps your Contact list complete, so your tracking and analysis are more accurate.",
     "on1": "week",
     "next": {
       "label": "Reply expected by",
@@ -133,7 +133,7 @@
     "saved": {
       "queries": [
         {
-          "id": "J8WZoIpEHCWmAPdht6hW",
+          "id": "wIxyrRP8WgcXDh4aFA2C",
           "dateSent": "2026-11-11T12:00:00.000Z",
           "status": "Queried",
           "ifNoResponse": "Remind me to nudge",
@@ -148,11 +148,11 @@
   "V13_3": {
     "sub": "Marcus's card says 8 weeks.",
     "read0": "8 weeks",
-    "offerTxt": "Update Marcus's card to 10 weeks / It says 8 weeks now.",
+    "offerTxt": "Update Marcus's card to 10 weeks / It says 8 weeks now. Keeping it current makes your tracking and analysis more accurate.",
     "saved": {
       "queries": [
         {
-          "id": "Af916RAYFvRHrCOJfBit",
+          "id": "WsihEmmvnIao5zsBEKnj",
           "dateSent": "2026-11-11T12:00:00.000Z",
           "status": "Queried",
           "ifNoResponse": "Remind me to nudge",
@@ -176,7 +176,7 @@
     "saved": {
       "queries": [
         {
-          "id": "Jy6shN7QAjhqROXi0BTR",
+          "id": "n3EIuWEwZIeBIkRnyjvK",
           "dateSent": "2026-11-11T12:00:00.000Z",
           "status": "Queried",
           "ifNoResponse": "Mark as no response automatically",
@@ -190,7 +190,7 @@
     "afterReload": {
       "queries": [
         {
-          "id": "Jy6shN7QAjhqROXi0BTR",
+          "id": "n3EIuWEwZIeBIkRnyjvK",
           "dateSent": "2026-11-11T12:00:00.000Z",
           "status": "Queried",
           "ifNoResponse": "Mark as no response automatically",

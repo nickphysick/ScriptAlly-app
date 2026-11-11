@@ -204,3 +204,11 @@ The app's clock is held at the reference's day, Monday 9 November 2026. The pane
   - 262 related unit tests pass;
   - `laqV13` and `laqV12` pass, 11 / 11 tests.
 - **No rules or functions changed.** The code fixes are client-side, in `expectedDate.ts`, `taskPrecedence.ts` and `logSave.ts`.
+
+## Follow-up, 11 Nov — the save-to-card row's sub-lines
+
+Nick's copy change for Decision C (defaults unchanged: ticked when filling a blank card, unticked when changing a value):
+- blank card: **Save {n} weeks to {First}'s card** / "It keeps your Contact list complete, so your tracking and analysis are more accurate."
+- card moved off: **Update {First}'s card to {n} weeks** / "It says {m} weeks now. Keeping it current makes your tracking and analysis more accurate."
+
+V13-2 and V13-3 read the new words (V13 7/7 with setup; `readings.json` refreshed by that run). tsc and build clean. The design pack's mock still carries the old lines — the pack is checksummed and left as delivered. Nothing in the log-a-query journey mentions the community database; Discover's "community catalogue" share drawer is outside this brief and untouched.
