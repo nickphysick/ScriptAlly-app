@@ -42,6 +42,8 @@ import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChro
 import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
 import { ACCOUNT_ROUTES } from "../../lib/accountRoutes";
 import { V3Header, V3TabBarHost } from "../phone/v3/V3Chrome";
+import { V3Provider } from "../phone/v3/V3Provider";
+import { V3Layer } from "../phone/v3/V3Layer";
 import { v3IsRoot, v3RootTitle, v3TabFor } from "../../lib/phoneV3Nav";
 import { PhoneBandContext } from "../phone/phoneBandStore";
 import { PhonePlusSheet } from "../phone/PhoneSheets";
@@ -415,6 +417,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     },
     onImport: () => goPath("/import"),
   }), [bandBookId, onNavigate, pathname, goPath, phoneNav]);
+  /* a fresh clock for the phone's one read on every navigation */
+  const v3Now = useMemo(() => Date.now(), [pathname]); // eslint-disable-line react-hooks/exhaustive-deps
   const [plusOpen, setPlusOpen] = useState(false);
   useEffect(() => { setPlusOpen(false); }, [pathname]);
 
@@ -463,6 +467,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       <DeletionBanner />
 
       <div className="sv2-app ws-host">
+      {/* Phone app v3: the one read every phone screen makes, computed once (phone only; renders no element) */}
+      <V3Provider on={phoneNav} now={v3Now}>
 
       {/* THE DOUBLE-DECKER (shell-rebuild pack, Phase 3) — it replaces ShellColumn and the
           desktop top bar in one move. The rail is PAINT on a single column; the IA is a prop, so
@@ -666,6 +672,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       />
       )}
 
+      {phoneNav ? <V3Layer /> : null}
       {phoneNav && phoneSearch ? <PhoneSearchPage onClose={() => setPhoneSearch(false)} /> : null}
       {/* Phone app v2 (Part 1D) — THE PHONE'S SHEETS. The menu REPLACES the "you" sheet (Mobile Pass 1, concept
           frame 07): every row it offered is still reachable — To-do is a tab, packages are the Materials tile, and
@@ -700,6 +707,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
         />
       </PageBoundary>
 
+      </V3Provider>
       </div>{/* closes .sv2-app.ws-host — EVERYTHING except the strip stays inside it, deliberately:
                  the floating chrome below (tab bar, sheets, dock, the dev lab) has always been a
                  descendant of `.sv2-app`, and moving it up to the frame would silently change what

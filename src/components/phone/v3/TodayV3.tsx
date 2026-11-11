@@ -17,7 +17,7 @@
  */
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useV3 } from "./useV3";
+import { useV3Data } from "./V3Provider";
 import { HAWK_SRC, Spark, TaskRowV3, V3Glyph } from "./V3Parts";
 import { V3I } from "./v3Icons";
 import { taskLine } from "../../../lib/phoneV3";
@@ -51,8 +51,8 @@ export function heroSeries(kind: HeroKind, queries: readonly Query[], replyMs: r
 
 export const TodayV3: React.FC<{ loading?: boolean }> = ({ loading = false }) => {
   const navigate = useNavigate();
-  const [now] = useState(() => Date.now());
-  const v = useV3(now);
+  const v = useV3Data();
+  const now = v.now;
   const { queries, agents, activities, manuscripts, userTasks } = v.core.db;
   const [hero, setHero] = useState<HeroKind>("active");
   const [open, setOpen] = useState<string | null>(null);

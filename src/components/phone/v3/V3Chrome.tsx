@@ -10,10 +10,10 @@
  *    band. A root carries its title, at most one page icon (`extra`) and search; a pushed page carries the back arrow,
  *    its title and, under the header, the page's own key figure (`slot`) where it set one.
  */
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { V3I } from "./v3Icons";
 import { V3_SHRINK_AT, V3_TABS, v3TabFor, type V3Tab } from "../../../lib/phoneV3Nav";
-import { useV3TodayCount } from "./useV3";
+import { useV3Maybe } from "./V3Provider";
 import "./phoneV3.css";
 
 export interface V3HeaderProps {
@@ -113,11 +113,9 @@ export const V3TabBar: React.FC<V3TabBarProps> = ({ pathname, onGo, onPlus, plus
   );
 };
 
-/** the bar as the shell mounts it: its badge is Today's own task count (one source, `useV3TodayCount`) */
+/** the bar as the shell mounts it: its badge is Today's own task count (the provider's one read) */
 export const V3TabBarHost: React.FC<Omit<V3TabBarProps, "badge"> & { hidden?: boolean }> = ({ hidden, ...p }) => {
-  /* a fresh clock on every navigation, so the count is read against the page you are on */
-  const now = useMemo(() => Date.now(), [p.pathname]); // eslint-disable-line react-hooks/exhaustive-deps
-  const n = useV3TodayCount(now);
+  const v = useV3Maybe();
   if (hidden) return null;
-  return <V3TabBar {...p} badge={n} />;
+  return <V3TabBar {...p} badge={v?.ordered.length ?? 0} />;
 };

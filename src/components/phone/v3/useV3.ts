@@ -2,8 +2,8 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phone app v3 — THE ONE READ every v3 screen makes (lib/phoneV3.ts over the app's own engines). The bar's badge,
- * Today's tasks and hero, the Queries chips and groups, the query sheet and search rows all come from here.
+ * Phone app v3 — THE ONE READ every v3 screen makes (lib/phoneV3.ts over the app's own engines), computed ONCE by the
+ * shell's provider (V3Provider, phone only) and read by the bar's badge, Today, Queries, the sheets and search.
  *
  * ⚠️ THE TASKS ARE THE DESKTOP TO-DO WORKSPACE'S OWN (`useWsCore`), in its own list order (`phoneOrder`), so the badge
  *    is Today's rows and Today's rows are the workspace's count (`TodoWorkspace`'s `all.length`).
@@ -25,11 +25,6 @@ export function useV3(now: number) {
   const counts = useMemo(() => v3Counts(qs), [qs]);
   const groups = useMemo(() => todayGroups(ordered), [ordered]);
   const byId = useMemo(() => new Map(qs.map((q) => [q.id, q])), [qs]);
-  return { core, ordered, qs, counts, groups, byId, quietWeeks };
+  return { now, core, ordered, qs, counts, groups, byId, quietWeeks };
 }
-
-/** the bar's badge: Today's task rows (the same `ordered` Today draws) */
-export function useV3TodayCount(now: number): number {
-  const core = useWsCore(now);
-  return useMemo(() => phoneOrder(core.all).length, [core.all]);
-}
+export type V3Data = ReturnType<typeof useV3>;

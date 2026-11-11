@@ -433,7 +433,10 @@ import {
 import { csvCell } from "../lib/csvCell";
 import { formatDate } from "../lib/dates";
 import { EditQueryPhone } from "./queries/phone/EditQueryPhone";
-import { QueriesPhone, useQm1Phone } from "./queries/phone/QueriesPhone";
+import { QueriesV3 } from "./phone/v3/QueriesV3";
+/* the phone query card's own sheet (`.qm1-*`, QcQueryCard149 `layout="phone"`), which other pages still open through this
+   page's query panel host; it was loaded here through the retired QueriesPhone, so the bundle keeps it unchanged */
+import "./queries/phone/queriesPhone.css";
 import { QM1_ART } from "./queries/phone/qm1Art";
 
 // Materials are rendered through the single formatQueryMaterial helper (src/lib/materials.ts) —
@@ -623,13 +626,20 @@ export const Queries: React.FC<{
      pane shows. Both panes stay mounted (translated, never display:none'd), so the list's
      scroll survives the push for free. */
   const isMobile = useIsMobile();
-  /* Queries on a phone v1 — at 760px and narrower the page is `QueriesPhone` (see the return at the foot). Declared up here
-     because the response picker's subscription below must know it (a later declaration would be a TDZ read). */
-  const qmPhone = useQm1Phone();
+  /* Phone app v3 — below 768px the page is `QueriesV3` (see the return at the foot), on the app's one breakpoint (the v1
+     page's own 760px retired with it). Declared up here because the response picker's subscription below must know it
+     (a later declaration would be a TDZ read). */
+  const qmPhone = isMobile;
   /* Phone app v2, Part 3 — the query sheet's ••• opens the phone's more sheet; the card is built here, so the state is too */
   const [qmMore, setQmMore] = useState(false);
   /* Phone last screens v1, 9B — the query open in "Edit this query" on a phone */
   const [phoneEditId, setPhoneEditId] = useState<string | null>(null);
+  /* Phone app v3 — the query sheet's "Edit" opens the same screen (the sheet lives in the shell, so it asks by event) */
+  useEffect(() => {
+    const on = (e: Event) => setPhoneEditId(String((e as CustomEvent).detail ?? "") || null);
+    window.addEventListener("pa3:edit-query", on);
+    return () => window.removeEventListener("pa3:edit-query", on);
+  }, []);
   const { setMobileDetail } = useMobileChrome();
   const [mobileView, setMobileView] = useState<"list" | "detail">("list");
   const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
@@ -6777,24 +6787,7 @@ export const Queries: React.FC<{
   if (qmPhone) {
     return (
       <>
-      <QueriesPhone
-        routeActive={routeActive}
-        loading={qcLoad.loading}
-        rows={qcRows}
-        queries={queries as Query[]}
-        agents={agents as Agent[]}
-        manuscripts={manuscripts as Manuscript[]}
-        idsFilter={idsFilter}
-        openId={selectedQueryId}
-        card={qcCardNode}
-        onNavigate={(t, sub) => onNavigate?.(t, sub)}
-        onOrder={(ids) => { qmOrderRef.current = ids; }}
-        onEditQuery={() => setPhoneEditId(selectedQueryId ?? null)}
-        moreOpen={qmMore}
-        onMoreClose={() => setQmMore(false)}
-        onDelete={(id) => { void deleteQueryWithUndo(id); }}
-        onPdf={() => { void handleDownloadPDF(); }}
-      />
+      <QueriesV3 />
       {/* ⚠️ THE QUERY PANEL STILL OPENS FROM OTHER PAGES ON A PHONE: `openQueryPanel` (the phone dashboard's View task,
           the agent panel, search) is drawn by this page's ONE host whichever route is on screen. Found by the dashboard's
           C1 lock, after the phone return first left the host out. */}

@@ -15,6 +15,11 @@ vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pa
 
 import { YouV3 } from "./YouV3";
 import { TodayV3 } from "./TodayV3";
+import { QueriesV3 } from "./QueriesV3";
+import { V3Provider } from "./V3Provider";
+
+const NOW = Date.parse("2026-11-11T12:00:00Z");
+const P = (n: React.ReactNode) => <V3Provider on now={NOW}>{n}</V3Provider>;
 import { V3Header, V3TabBar } from "./V3Chrome";
 
 describe("Phone app v3 renders", () => {
@@ -26,12 +31,18 @@ describe("Phone app v3 renders", () => {
     }
   });
   it("Today: empty (all caught up) and populated", () => {
-    const empty = renderPage(<TodayV3 />, "/dashboard");
+    const empty = renderPage(P(<TodayV3 />), "/dashboard");
     expect(empty).toContain("You’re all caught up.");
     expect(empty).toContain("With the agent");
-    const full = renderPageSeeded(<TodayV3 />, "/dashboard");
+    const full = renderPageSeeded(P(<TodayV3 />), "/dashboard");
     expect(full).toContain("Lately");
     expect(full).toContain("Corkboard");
+  });
+  it("Queries: the five chips, empty and populated", () => {
+    for (const html of [renderPage(P(<QueriesV3 />), "/queries"), renderPageSeeded(P(<QueriesV3 />), "/queries")]) {
+      for (const w of ["All", "With you", "With the agent", "Gone quiet", "Closed"]) expect(html).toContain(w);
+    }
+    expect(renderPage(P(<QueriesV3 />), "/queries")).toContain("Nothing here");
   });
   it("the header and the bar", () => {
     const h = renderPage(<V3Header root title="Today" routeKey="/dashboard" scroller={() => null} onSearch={() => {}} onBack={() => {}} />);
