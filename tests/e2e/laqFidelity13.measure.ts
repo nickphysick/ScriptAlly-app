@@ -57,7 +57,7 @@ const PANEL: Record<string, [string, string]> = {
   footer: [".cf", ".laq-cf"], primary: [".cf .btn.nv", ".laq-cf .laq-btn"], backFoot: [".cf .lnk", ".laq-cf .laq-lnk"],
 };
 const SLIP: Record<string, [string, string]> = {
-  slip: [".frame", ".sa-slip"],
+  slip: [".frame", ".sa-slip-in"],
   name: [".top .n", ".qc153-nm"], agency: [".top .ag", ".qc153-ag"],
   queriedLabel: [".facts .fact:nth-child(1) > span", '[data-k="queried"] .qc153-fl'], queriedValue: [".facts .fact:nth-child(1) b", '[data-k="queried"] b'],
   nextBox: [".facts .fact:nth-child(3)", '[data-k="next"]'], nextLabel: [".facts .fact:nth-child(3) > span", '[data-k="next"] .qc153-fl'],
@@ -139,7 +139,8 @@ async function compare(ref: Page, app: Page, state: string, parts: Record<string
     if (Math.abs(w.y - g.y) > 1) d.push(`y ${w.y}→${g.y}`);
     if (!TEXT_W.has(k) && Math.abs(w.w - g.w) > 1) d.push(`w ${w.w}→${g.w}`);
     if (!TEXT_W.has(k) && Math.abs(w.h - g.h) > 1) d.push(`h ${w.h}→${g.h}`);
-    for (const s of STYLE) if (String(w[s]) !== String(g[s])) d.push(`${s} ${w[s]}→${g[s]}`);
+    /* a range input draws no text: its font is never seen */
+    for (const s of STYLE) if (!(k === "wkSlider" && (s === "font" || s === "size" || s === "color")) && String(w[s]) !== String(g[s])) d.push(`${s} ${w[s]}→${g[s]}`);
     ok(d.length === 0, `${state}.${k}: ${d.join("; ") || "equal"}`);
     rows[k] = d;
   }
@@ -155,7 +156,7 @@ async function panel(ref: Page, app: Page, state: string, name: string, bottom =
 }
 async function slip(ref: Page, app: Page, state: string, name: string) {
   await settle(ref); await settle(app);
-  await compare(ref, app, state, SLIP, ".qslip .frame", "[data-qls='preview'] .sa-slip");
+  await compare(ref, app, state, SLIP, ".qslip .frame", "[data-qls='preview'] .sa-slip-in");
   mkdirSync(SHOTS, { recursive: true });
   await ref.locator(".qslip").screenshot({ path: `${SHOTS}/${name}-ref.png`, animations: "disabled" });
   await app.locator("[data-qls='preview']").screenshot({ path: `${SHOTS}/${name}-build.png`, animations: "disabled" });
@@ -176,7 +177,7 @@ test("fidelity — 01 to 09 against the reference", async ({ browser }) => {
   /* 01 — Joanna, the pieces, Opening pages open: 3 chapters of "Prologue cut, flashback first", scrolled to the Done line */
   await refJourney(ref, "log", "jl");
   await refClick(ref, '[data-act="custom"]');
-  await refClick(ref, '[data-tog="sample"]');
+  /* the reference's pieces view opens with Opening pages already ticked and its control open; the app's ticks it here */
   /* Joanna's card asks for nothing, so the sample opens at 3 chapters in both: nothing to set */
   await refClick(ref, '[data-vr="ver"]'); await refClick(ref, '[data-set="ver:v3"]');
   await appStart(app, "laq13-jl");

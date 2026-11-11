@@ -317,9 +317,16 @@
 .laq .laq-wkb .sa-fld { margin: 0; }
 /* the app's WeekSlider, as the agent card draws it; its label speaks in the stage's serif, never a mono eyebrow */
 .laq .laq-wkb .sa-wk-head { justify-content: flex-start; gap: 10px; }
-.laq .laq-wkb .sa-wk-head > span { margin-left: auto; }
+/* the readout and the Unknown pill sit on the label's baseline, 10px apart (the slider sets centre and 8 inline) */
+.laq .laq-wkb .sa-wk-head > span { margin-left: auto; align-items: baseline !important; gap: 10px !important; }
 .laq .laq-wkb .sa-label { margin: 0; font: 500 16px var(--laq-se); letter-spacing: 0; text-transform: none; color: var(--laq-ink); }
 .laq .laq-wkb .sa-wk-slider { margin: 0; }
+/* the readout, the Unknown pill and the ends are the slider's own mono; brand.tsx names bare spans as the page face, so
+   they are named here (two classes and !important, as the brand rule needs) */
+.laq .laq-wkb .sa-wk-read { font: 500 13px var(--laq-mono) !important; color: var(--laq-navy); }
+.laq .laq-wkb .sa-wk-read.muted { font: italic 400 13px var(--laq-mono) !important; color: #a89a8a; }
+.laq .laq-wkb .sa-wk-unkbtn { font: 400 9px var(--laq-mono) !important; letter-spacing: .04em; text-transform: uppercase; line-height: normal; }
+.laq .laq-wkb .sa-wk-ends, .laq .laq-wkb .sa-wk-ends span { font: 400 9px var(--laq-mono) !important; letter-spacing: .04em; color: #bcae9e; line-height: normal; }
 .laq p.laq-wkx { margin: 10px 0 0; font: italic 400 14.5px/1.4 var(--laq-se); color: var(--laq-mut); }
 .laq p.laq-wkx b { font-style: normal; font-weight: 500; color: var(--laq-ink); }
 .laq .laq-svk { display: flex; align-items: flex-start; gap: 10px; margin-top: 10px; padding: 10px 12px; border-radius: 12px; background: #efe7da; cursor: pointer; }

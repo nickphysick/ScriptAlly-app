@@ -98,7 +98,8 @@ const agent = (id, name, agency, email, wanted, x = {}) => b.set(u("agents", id)
   id, userId: uid, name, agency, email, submissionMethod: "Email", submissionStatus: "Open", materialsWanted: wanted,
   responseTimeWeeks: 8, genres: ["Literary"], website: "", notes: "", mswlNotes: "", dateAdded: at("2026-01-10"), lastCheckedDate: at("2026-01-10"), ...x,
 });
-agent(`${P}mr`, "Marcus Reed", "Hartley & Co", "marcus@hartleyandco.com", ["Query Letter", "Synopsis", "First 10 pages"]);
+/* Marcus replies to everyone, stated (the reference's "Replies to everyone"; an unstated policy reads "—" in the app) */
+agent(`${P}mr`, "Marcus Reed", "Hartley & Co", "marcus@hartleyandco.com", ["Query Letter", "Synopsis", "First 10 pages"], { noResponseMeansNo: false });
 agent(`${P}ra`, "Rosalind Achebe", "Hartley & Co", "", ["Query Letter", "Synopsis", "First 3 chapters"], { responseTimeWeeks: 12, noResponseMeansNo: true, submissionMethod: "Query Manager" });
 /* no response time on Joanna's card: the field is absent, as on a card that never had one */
 b.set(u("agents", `${P}jl`), {
