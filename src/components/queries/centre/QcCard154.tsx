@@ -19,12 +19,15 @@ import React, { useState } from "react";
 import type { QcRow } from "../../../lib/qcSummary";
 import type { RowAct } from "../../../lib/qc1512";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
-import { nextFact, queriedFact, slipTone, slipTrack, standWords } from "../../../lib/qc153";
+import { queriedFact, slipTone, slipTrack, standWords } from "../../../lib/qc153";
+import { NEXT_WAIT_LABEL, OVERDUE_LINE, OVERDUE_VALUE, nextBox154, nudgeOnLine } from "../../../lib/qc154";
 import { materialGroups } from "../../../lib/qc1533";
 import { MatTab1533, Track153 } from "./QcSlip153";
 import "./qcv153.css";
 import "./qcv1531.css";
 import "./qcv154.css";
+
+const BELL = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M8 2.5a4 4 0 0 0-4 4v2.5L2.8 11h10.4L12 9V6.5a4 4 0 0 0-4-4zM6.5 13a1.5 1.5 0 0 0 3 0" /></svg>;
 
 export interface QcCard154Props {
   row: QcRow;
@@ -40,7 +43,8 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
   const t = slipTrack(r);
   const word = standWords(r);
   const sent = queriedFact(r, nowMs);
-  const nx = nextFact(r, nowMs);
+  const nx = nextBox154(r, nowMs);
+  const hot = nx.kind === "other" && nx.hot;
   const mats = materialGroups(r.query, r.status, packageName, r.stageStartMs, nowMs);
   const [popOpen, setPopOpen] = useState(false);
   /* the slip's rule: a navy or nudge act is the button's words; anything else opens the card */
@@ -69,9 +73,21 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
             <span className="qc154-fl">Sent</span>
             <b>{sent.value}</b>{sent.line ? <em>{sent.line}</em> : null}
           </div>
-          <div className={`qc154-f qc154-nx${nx.hot ? " is-hot" : ""}`} data-qc154="fact" data-k="next" data-hot={nx.hot ? "" : undefined}>
-            <span className="qc154-fl">Next</span>
-            <b>{nx.value}</b>{nx.line ? <em>{nx.line}</em> : null}
+          {/* v154 §3 — the Next box by state: waiting (the date, the window bar, the planned nudge if any), overdue (words
+              only; the nudge is the hover's), or the slip's own Next copy */}
+          <div className={`qc154-f qc154-nx${hot ? " is-hot" : ""}`} data-qc154="fact" data-k="next" data-state={nx.kind} data-hot={hot ? "" : undefined}>
+            {nx.kind === "wait" ? <>
+              <span className="qc154-fl">{NEXT_WAIT_LABEL}</span>
+              <b>{nx.due}</b>
+              <u className="qc154-bar" data-qc154="window" aria-hidden="true"><i style={{ width: `${Math.round(nx.bar * 100)}%` }} /></u>
+              {nx.nudgeOn ? <em className="qc154-nl" data-qc154="nudge-on">{BELL}{nudgeOnLine(nx.nudgeOn)}</em> : null}
+            </> : nx.kind === "over" ? <>
+              <span className="qc154-fl">Next</span>
+              <b>{OVERDUE_VALUE}</b><em>{OVERDUE_LINE}</em>
+            </> : <>
+              <span className="qc154-fl">Next</span>
+              <b>{nx.value}</b>{nx.line ? <em>{nx.line}</em> : null}
+            </>}
             <span className="qc154-act" data-qc154="act-wrap" aria-hidden="true">
               {cta
                 ? <button type="button" tabIndex={-1} className="qc154-actb" data-qc154="act" data-mode={cta.mode} onClick={(e) => { e.stopPropagation(); onAct(r.id, cta.mode); }}>{cta.label} →</button>
