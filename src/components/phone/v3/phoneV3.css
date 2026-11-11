@@ -19,64 +19,7 @@
   }
   .pa3 [hidden] { display: none !important; }
 
-  /* ── the header (ref `.hd`) ── */
-  .pa3-hd {
-    position: relative; z-index: 5; flex: none; box-sizing: border-box; contain: inline-size; width: 100%;
-    background: var(--pa-navy); color: #fff; font-family: var(--pa-sans);
-    display: flex; align-items: center; gap: 10px;
-    padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 14px; transition: padding 0.2s;
-  }
-  .pa3-hd .pa3-ht {
-    flex: 1; min-width: 0; margin: 0; padding-top: 4px; color: #fff;
-    font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 30px; line-height: 1.1; letter-spacing: 0;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: font-size 0.2s;
-  }
-  .pa3-hd.sm { padding: calc(9px + env(safe-area-inset-top, 0px)) 20px 9px; }
-  .pa3-hd.sm .pa3-ht { font-size: 19px; }
-  /* ⚠️ PA3-1 holds the shrunk header to 56px: the ref's 40px buttons in a 9+9 row make 58, so they step to 38 when small */
-  .pa3-hd.sm .pa3-ib { width: 38px; height: 38px; }
-  .pa3-hd.sub .pa3-ht { font-size: 21px; }
-  .pa3-ib {
-    flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
-    padding: 0; border: 0; background: none; color: #fff; cursor: pointer;
-  }
-  .pa3-ib:active { background: rgba(255, 255, 255, 0.12); }
-  .pa3-ib svg, .pa3-ic {
-    width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
-  }
-  .pa3-hd .pa3-back { margin-left: -10px; }
-  .pa3-hd .pa3-search { margin-right: -8px; }
-  /* a pushed page's own key figure, under the header on navy (ref `.hero` on Analytics and a package) */
   .pa3-pslot { background: var(--pa-navy); color: #fff; padding: 12px 20px 22px; overflow: hidden; }
-
-  /* ── the docked bar (ref `#tabs`) ── */
-  .pa3-tabs {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; box-sizing: border-box;
-    display: flex; background: #fff; border-top: 1px solid var(--pa-rule);
-    padding: 6px 6px calc(8px + env(safe-area-inset-bottom, 0px)); font-family: var(--pa-sans);
-  }
-  .pa3-tb {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 48px; padding: 4px 0;
-    border: 0; background: none; cursor: pointer; color: var(--pa-faint);
-    font: 500 11px/1.2 var(--pa-sans) !important;
-  }
-  .pa3-tb svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-  .pa3-tb.on { color: var(--pa-navy); font-weight: 600 !important; }
-  .pa3-tw { position: relative; width: 52px; height: 28px; border-radius: 14px; display: grid; place-items: center; }
-  /* ref #e3e8ef → nearest token --pa-st-slate */
-  .pa3-tb.on .pa3-tw { background: var(--pa-st-slate); }
-  .pa3-bd {
-    position: absolute; top: -3px; right: 4px; min-width: 17px; height: 17px; box-sizing: border-box; border-radius: 9px;
-    background: var(--pa-blush); color: var(--pa-ink); font: 600 10.5px/17px var(--pa-sans) !important; text-align: center; padding: 0 4px;
-  }
-  .pa3-plus { flex: none; width: 64px; display: flex; justify-content: center; align-items: center; border: 0; background: none; padding: 0; cursor: pointer; }
-  .pa3-plus span {
-    width: 50px; height: 50px; border-radius: 50%; background: var(--pa-blush); color: var(--pa-ink); display: grid; place-items: center;
-    box-shadow: 0 4px 12px rgba(138, 74, 60, 0.22);
-  }
-  .pa3-plus svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
-  .pa3-plus:active span { transform: scale(0.95); }
-
   /* ── type and common parts (ref "type and common parts") ── */
   /* ⚠️ THE PAGE'S OWN WIDTH IS ITS CONTAINER'S (carried over from the retired dashPhone.css, measured again here: 458px
      at 390). The shell's columns are flex items at `min-width: auto`, so any unbreakable line inside reaches them as a
@@ -320,14 +263,6 @@
   .pa3-disc .pa3-in { padding: 14px; }
 
   /* ── snackbar and celebration (ref `#snack`, `.cele`) ── */
-  .pa3-snack {
-    position: fixed; left: 14px; right: 14px; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); z-index: 1100;
-    background: var(--pa-navy-deep); color: #fff; border-radius: 26px; height: 52px; display: flex; align-items: center; gap: 10px;
-    padding: 0 8px 0 10px; font: 14.5px var(--pa-sans); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); animation: pa3-up 0.3s var(--pa-spring);
-  }
-  .pa3-snack img { width: 34px; height: 34px; border-radius: 50%; background: #fff; }
-  .pa3-snack span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pa3-snack button { color: var(--pa-blush); font-weight: 600; padding: 8px 12px; background: none; border: 0; font: 600 14.5px var(--pa-sans); cursor: pointer; }
   .pa3-cele { position: absolute; inset: 0; background: var(--pa-navy); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; animation: pa3-fade 0.25s; box-sizing: border-box; overflow-y: auto; }
   .pa3-cele img { width: 128px; height: 128px; border-radius: 50%; background: #fff; animation: pa3-pop 0.5s var(--pa-spring); }
   .pa3 .pa3-cele .pa3-h3 { font-size: 30px; line-height: 1.15; margin: 24px 0 8px; color: #fff; }
@@ -340,6 +275,6 @@
   @keyframes pa3-fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes pa3-pop { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
   @media (prefers-reduced-motion: reduce) {
-    .pa3-hd, .pa3-hd .pa3-ht, .pa3-sheet, .pa3-full, .pa3-scrim, .pa3-snack, .pa3-cele, .pa3-cele img { animation: none !important; transition: none !important; }
+    .pa3-sheet, .pa3-full, .pa3-scrim, .pa3-cele, .pa3-cele img { animation: none !important; transition: none !important; }
   }
 }

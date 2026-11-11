@@ -24,10 +24,10 @@ export const YOU_PATH = "/you";
 
 const trim = (p: string): string => p.replace(/\/+$/, "") || "/";
 
-/** a tab's own page */
+/** a tab's own page (Phone app v4: Discover is pushed from Agents, so it carries a back arrow) */
 export function v3IsRoot(pathname: string): boolean {
   const p = trim(pathname);
-  return p === "/dashboard" || p === "/todo" || p === "/queries" || p === "/agents" || p === "/agents/discover" || p === YOU_PATH;
+  return p === "/dashboard" || p === "/todo" || p === "/queries" || p === "/agents" || p === YOU_PATH;
 }
 
 /** the tab chosen in the bar for any address: Corkboard sits on Today, the pushed pages on You */
@@ -46,5 +46,3 @@ export function v3RootTitle(pathname: string): string | null {
   return V3_TABS.find((x) => x.key === t)!.label;
 }
 
-/** the header shrinks once the page has scrolled more than this (ref `onScroll`: `scrollTop > 18`) */
-export const V3_SHRINK_AT = 18;

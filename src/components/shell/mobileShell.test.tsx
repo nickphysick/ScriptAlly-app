@@ -223,8 +223,9 @@ describe("the retired menu — everything it offered is still reachable", () => 
   const you = readFileSync(resolve(__dirname, "../phone/v3/YouV3.tsx"), "utf8");
   it("the shell no longer mounts the menu, the band or the book sheet on a phone", () => {
     for (const gone of [/<PhoneMenu\b/, /<PhoneBand\s/, /<PhoneBookSheet\b/, /setMenuOpen\(/]) expect(appShell, String(gone)).not.toMatch(gone);
-    expect(appShell).toContain("<V3Header");
-    expect(appShell).toContain("<V3TabBarHost");
+    expect(appShell).toContain("<V4MiniBar");
+    expect(appShell).toContain("<V4PushedHeader");
+    expect(appShell).toContain("<V4TabBar");
   });
   it("You reaches Responses, Analytics, Streaks and goals, the book, packages, letters and comps, and Settings", () => {
     for (const path of ['"/queries/responses"', '"/queries/analytics"', '"/goals"', '"/manuscripts"', '"/queries/packages"', '"/manuscripts#materials"', '"/manuscripts#comps"', '"/account"']) {

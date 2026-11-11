@@ -21,7 +21,6 @@ import { AgentsV3, AgentFormV3 } from "./AgentsV3";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
 const P = (n: React.ReactNode) => <V3Provider on now={NOW}>{n}</V3Provider>;
-import { V3Header, V3TabBar } from "./V3Chrome";
 
 describe("Phone app v3 renders", () => {
   it("You: the switch and its first rows", () => {
@@ -51,13 +50,5 @@ describe("Phone app v3 renders", () => {
     }
     const f = renderPage(P(<AgentFormV3 />), "/agents");
     for (const w of ["Who are they?", "I don’t know the agency", "Agent fit"]) expect(f).toContain(w);
-  });
-  it("the header and the bar", () => {
-    const h = renderPage(<V3Header root title="Today" routeKey="/dashboard" scroller={() => null} onSearch={() => {}} onBack={() => {}} />);
-    expect(h).toContain('data-pa3="header"');
-    expect(h).not.toContain('data-pa3="back"');
-    const b = renderPage(<V3TabBar pathname="/dashboard" onGo={() => {}} onPlus={() => {}} plusOpen={false} badge={3} />);
-    for (const w of ["Today", "Queries", "Agents", "You"]) expect(b).toContain(w);
-    expect(b).toContain('data-pa3="badge"');
   });
 });
