@@ -60,11 +60,10 @@ let reads = 0;
 const ok = (cond: boolean, label: string) => { reads++; expect.soft(cond, label).toBe(true); };
 
 test.beforeAll(() => { execSync("node tests/e2e/seedLaq12.mjs --clean && node tests/e2e/seedLaq12.mjs", { stdio: "ignore" }); });
-test.afterAll(() => {
-  execSync("node tests/e2e/seedLaq12.mjs --clean", { stdio: "ignore" });
-  mkdirSync(OUT, { recursive: true });
-  writeFileSync(`${OUT}/fidelity.json`, JSON.stringify({ reads, ...LEDGER }, null, 1));
-});
+test.afterAll(() => { execSync("node tests/e2e/seedLaq12.mjs --clean", { stdio: "ignore" }); });
+/* the ledger is written by the test that fills it: a soft failure restarts the worker, so an afterAll would write an
+   empty one */
+const writeLedger = () => { mkdirSync(OUT, { recursive: true }); writeFileSync(`${OUT}/fidelity.json`, JSON.stringify({ reads, ...LEDGER }, null, 1)); };
 
 /* ── the reference ── */
 async function refOpen(page: Page) {
@@ -190,6 +189,7 @@ test("fidelity — 01, 02, 03/06, 07 and 08 against the reference", async ({ bro
   await closeApp(app);
   /* the floor: a run that measured fewer parts than this read the wrong page (a worker restarts after a failure, so the
      count is asserted here, in the same test, never in one of its own) */
+  writeLedger();
   expect(reads).toBeGreaterThanOrEqual(80);
 });
 
