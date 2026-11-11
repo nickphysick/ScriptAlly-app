@@ -159,7 +159,18 @@ open. Filters and search are never saved. v52's per-device `sa.todoTraySlim` is 
 
 ## Dev
 
-DEV_PLACEHOLDER
+Deployed 11 Nov with `npm run deploy:dev` (hosting, plus the dev `smartImportMap` function, as the script does), from a
+clean scratch checkout of **`dev/qc153-tl1-ww2-qc1531-qc1532-qc1533-crash1-td53-cl27-td54-cl27b-yn1-laq1-qc1534-aa1-laq11-td55`**
+at `1a304058e`. That branch is the branch dev was serving (`510c1cec3`) plus v55: a fast-forward, since v55 was cut
+from that tip.
+
+- **Before:** `index-uz3iJgBA.js`. The base commit rebuilt here as `index-VpK5r-Ms.js`, and the two differ only in a
+  build-date stamp (`BUILD = "2026-11-10"` against `"2026-11-11"`) and the chunk names that follow from it. So dev was
+  serving exactly `510c1cec3`.
+- **After:** **`index-BbOKFQSr.js`**, release stamp `1a304058e`, local and served hashes equal. The served `AppRoot`
+  chunk carries the new head ("Search tasks, agents or agencies", `tws55-head`) and the packages fix (`onScreen`).
+- ⚠️ Any session that redeploys its own branch without v55 takes v55 off dev. The card-offers session
+  (`ScriptAlly-co1`) works from the same base.
 
 ## Not done, and why
 
