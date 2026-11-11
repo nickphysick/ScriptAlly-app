@@ -551,6 +551,8 @@ function AppContent() {
   if (phoneSection) return <Navigate to={`/manuscripts${location.search}#${phoneSection}`} replace />;
   /* Phone app v3: To-do has no page of its own on a phone — its tasks are Today's (the Corkboard keeps its address) */
   if (isPhoneNow && routeBase(path) === "/todo") return <Navigate to={`/dashboard${location.search}`} replace />;
+  /* Phone app v3: the query letters live in the book page's materials on a phone (read and reword there) */
+  if (isPhoneNow && path === "/materials/letters") return <Navigate to="/manuscripts#materials" replace />;
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.

@@ -227,7 +227,7 @@ describe("the retired menu — everything it offered is still reachable", () => 
     expect(appShell).toContain("<V3TabBarHost");
   });
   it("You reaches Responses, Analytics, Streaks and goals, the book, packages, letters and comps, and Settings", () => {
-    for (const path of ['"/queries/responses"', '"/queries/analytics"', '"/goals"', '"/manuscripts"', '"/queries/packages"', '"/materials/letters"', '"/account"']) {
+    for (const path of ['"/queries/responses"', '"/queries/analytics"', '"/goals"', '"/manuscripts"', '"/queries/packages"', '"/manuscripts#materials"', '"/manuscripts#comps"', '"/account"']) {
       expect(you, path).toContain(path);
     }
   });

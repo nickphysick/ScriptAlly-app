@@ -5,7 +5,7 @@
  * The menu pages choose their page by width, as `/todo` does (TodoRoute): the desktop pages from 768px up, the phone's
  * own pages (Phone app v2, Part 7) below it. One is mounted at a time.
  */
-import { YouV3 } from "../v3/YouV3";
+import { SettingsV3, YouV3 } from "../v3/YouV3";
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useIsMobile } from "../../shell/mobileChrome";
@@ -19,7 +19,7 @@ import { GoalsPhone } from "./GoalsPhone";
 import { AccountSettings } from "../../AccountSettings";
 import { PlansPage } from "../../PlansPage";
 import { HelpCentre } from "../../HelpCentre";
-import { HelpPhone, PlanPhone, SettingsPhone } from "./AccountPhone";
+import { HelpPhone, PlanPhone } from "./AccountPhone";
 import type { AccountSectionId } from "../../../lib/accountRoutes";
 import { SubmissionPackages } from "../../SubmissionPackages";
 import { PackagesPhone } from "../../packages/phone/PackagesPhone";
@@ -46,7 +46,8 @@ export const GoalsRoute: React.FC = () => (useIsMobile() ? <GoalsPhone /> : <Nav
 export const SettingsRoute: React.FC<{ path: string; section: AccountSectionId } & Omit<React.ComponentProps<typeof AccountSettings>, "section">> = ({ path, section, ...rest }) => {
   const phone = useIsMobile();
   if (!phone) return <AccountSettings section={section} {...rest} />;
-  return path === "/account" ? <SettingsPhone /> : <div className="pa-set" data-pa="settings-section" data-k={section}><AccountSettings section={section} {...rest} /></div>;
+  /* Phone app v3: the bare /account is Settings (the gear on You) */
+  return path === "/account" ? <SettingsV3 /> : <div className="pa-set" data-pa="settings-section" data-k={section}><AccountSettings section={section} {...rest} /></div>;
 };
 
 export const PlansRoute: React.FC = () => (useIsMobile() ? <PlanPhone /> : <div className="sv2-focuscol"><PlansPage /></div>);

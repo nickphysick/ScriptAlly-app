@@ -47,7 +47,7 @@
   .pa3-hd .pa3-back { margin-left: -10px; }
   .pa3-hd .pa3-search { margin-right: -8px; }
   /* a pushed page's own key figure, under the header on navy (ref `.hero` on Analytics and a package) */
-  .pa3-pslot { background: var(--pa-navy); color: #fff; padding: 2px 20px 22px; }
+  .pa3-pslot { background: var(--pa-navy); color: #fff; padding: 12px 20px 22px; overflow: hidden; }
 
   /* ── the docked bar (ref `#tabs`) ── */
   .pa3-tabs {
@@ -84,8 +84,8 @@
   .pa3 { contain: inline-size; width: 100%; box-sizing: border-box; font-family: var(--pa-sans); color: var(--pa-ink); font-synthesis: none; -webkit-font-smoothing: antialiased; }
   /* ⚠️ brand.tsx names a face on bare `p, span, div, button, label` at runtime, injected last — hand inheritance back
      (0-1-1 against its 0-0-1); every face this sheet names on a classed element is more specific or later */
-  .pa3 :is(p, span, div, button, label, b, small, li, input, textarea, a, time, strong, em, i):not([class*="aap-"]):not([class*="ssp"]):not([class*="sa-"]),
-  .pa3-layer :is(p, span, div, button, label, b, small, li, input, textarea, a, time, strong, em, i):not([class*="aap-"]):not([class*="ssp"]):not([class*="sa-"]) { font-family: inherit; }
+  .pa3 :is(p, span, div, button, label, b, small, li, input, textarea, a, time, strong, em, i):where(:not([class*="aap-"]):not([class*="ssp"]):not([class*="sa-"])),
+  .pa3-layer :is(p, span, div, button, label, b, small, li, input, textarea, a, time, strong, em, i):where(:not([class*="aap-"]):not([class*="ssp"]):not([class*="sa-"])) { font-family: inherit; }
   /* ⚠️ ZERO SPECIFICITY (`:where`): the reset is for v3's own buttons; the app's controls a v3 journey mounts (agentPills,
      SampleSpecPicker, WeekSlider) keep their own padding, borders and faces */
   :where(.pa3) :where(button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }

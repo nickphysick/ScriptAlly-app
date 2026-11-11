@@ -33,7 +33,7 @@ test.describe("PA3 probe", () => {
       const [p, ...taps] = spec.split("|");
       if (first) { await openPhone3(page, p, PA3_PHONES[0]); first = false; }
       else { await page.goto(p); await page.locator('[data-pa3="header"]').first().waitFor({ timeout: 30_000 }); await page.waitForTimeout(1500); }
-      for (const t of taps) { await page.locator(t).first().click(); await page.waitForTimeout(1200); }
+      for (const t of taps) { await page.locator(t).filter({ visible: true }).first().click({ timeout: 15_000 }); await page.waitForTimeout(1200); }
       const name = spec.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "").slice(0, 60) || "root";
       const chain = await page.evaluate(() => {
         const out: string[] = [];

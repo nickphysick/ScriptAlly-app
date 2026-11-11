@@ -13,7 +13,8 @@ export type V3Overlay =
   | { type: "log"; agentId?: string }
   | { type: "reply"; queryId?: string }
   | { type: "add"; editId?: string; name?: string }
-  | { type: "note" };
+  | { type: "note" }
+  | { type: "search" };
 
 export interface V3Snack { msg: string; undo?: () => Promise<void> | void }
 

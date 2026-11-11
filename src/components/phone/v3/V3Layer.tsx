@@ -11,6 +11,7 @@ import { createPortal } from "react-dom";
 import { closeV3, clearV3Snack, subscribeV3, v3Overlay, v3Seq, v3Snack, type V3Overlay } from "./v3Store";
 import { useV3Data } from "./V3Provider";
 import { QuerySheetV3 } from "./QuerySheetV3";
+import { SearchV3 } from "./SearchV3";
 import { HAWK_SRC } from "./V3Parts";
 
 export interface V3Panels {
@@ -35,6 +36,9 @@ export const V3Layer: React.FC<V3Panels> = ({ render }) => {
   if (o?.type === "query") {
     const q = v.byId.get(o.id);
     body = q ? <QuerySheetV3 v={q} nowMs={v.now} quietWeeks={v.quietWeeks} /> : null;
+  } else if (o?.type === "search") {
+    body = <SearchV3 />;
+    full = true;
   } else if (o) {
     body = render?.(o) ?? null;
     full = o.type === "log" || o.type === "reply" || o.type === "add";

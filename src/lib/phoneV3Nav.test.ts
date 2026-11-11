@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { V3_TABS, v3IsRoot, v3RootTitle, v3TabFor } from "./phoneV3Nav";
+import { WORKSPACE_PATHS } from "../marketing/routeTiers";
 
 describe("phone v3: every address sits in one of the four tabs", () => {
   it("the bar reads Today, Queries, Agents, You (the + sits between Queries and Agents)", () => {
@@ -21,5 +22,9 @@ describe("phone v3: every address sits in one of the four tabs", () => {
     expect(v3RootTitle("/dashboard")).toBe("Today");
     expect(v3RootTitle("/agents/discover")).toBe("Agents");
     expect(v3RootTitle("/queries/analytics")).toBeNull();
+  });
+  /* found by measurement: /you was missing here, so the unknown-path guard sent the You tab to the dashboard */
+  it("every tab's address is a workspace path (the unknown-path guard lets it through)", () => {
+    for (const t of V3_TABS) expect(WORKSPACE_PATHS.has(t.path), t.path).toBe(true);
   });
 });

@@ -35,7 +35,6 @@ import { notifyFeedbackSent, subscribeFeedback } from "../../lib/feedbackStore";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
-import { PhoneSearchPage } from "../phone/PhoneSearchPage";
 import { usePalette } from "./usePalette";
 import { ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChrome";
@@ -372,9 +371,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
      feedback icon and the tile band retire with them (every door they held has a home on You, Settings or Today). At
      768px and up `phoneNav` is false and the shell renders exactly what it did before. */
   const phoneNav = useIsMobile();
-  /* Phone fixes v1 (3A): the header's search opens the phone's full-screen search; the desktop palette drew nothing here */
-  const [phoneSearch, setPhoneSearch] = useState(false);
-  useEffect(() => { setPhoneSearch(false); }, [pathname]);
+  /* a navigation closes any v3 sheet or journey still open (the ref's `go` clears the overlay) */
+  useEffect(() => { if (phoneNav) closeV3(); }, [pathname, phoneNav]);
   const [bandSlots, setBandSlots] = useState<Record<string, React.ReactNode | null>>({});
   const setBandSlot = useCallback((path: string, node: React.ReactNode | null) => {
     setBandSlots((prev) => (prev[path] === node ? prev : { ...prev, [path]: node }));
@@ -548,7 +546,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             title={bandTitle}
             routeKey={pathname}
             scroller={() => stageRef.current}
-            onSearch={() => setPhoneSearch(true)}
+            onSearch={() => openV3({ type: "search" })}
             onBack={() => {
               const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
               if (idx > 0) navigate(-1); else goPath(v3TabFor(pathname) === "today" ? "/dashboard" : "/you");
@@ -650,7 +648,6 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       )}
 
       {phoneNav ? <V3Layer render={(o) => renderJourney(o) ?? renderAgents(o)} /> : null}
-      {phoneNav && phoneSearch ? <PhoneSearchPage onClose={() => setPhoneSearch(false)} /> : null}
       {/* Phone app v2 (Part 1D) — THE PHONE'S SHEETS. The menu REPLACES the "you" sheet (Mobile Pass 1, concept
           frame 07): every row it offered is still reachable — To-do is a tab, packages are the Materials tile, and
           Import, Settings, Help, Sign out and Upgrade (Plan & billing) are in the menu. Phones only; at 768px and up
