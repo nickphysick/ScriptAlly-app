@@ -17,8 +17,10 @@ describe("the goal chart", () => {
     const m = weekGoal154([at(10, 26), at(10, 27), at(10, 28), at(11, 3), at(11, 10)], WEEKLY3, NOW);
     const h = renderToStaticMarkup(<QcGoal154 m={m} />);
     expect(h).toContain("<b>1 of 3</b> this week");
-    expect(h).toMatch(/data-qc154="streak"[^>]*>[\s\S]*?<\/svg>0-week streak<\/span>/);
-    expect(h).toContain("2 more keeps the streak going.");
+    /* v154.1: the week of 2 Nov fell short, so there is no streak: no pill, and the line is about this week */
+    expect(h).not.toContain('data-qc154="streak"');
+    expect(h).not.toContain("week streak");
+    expect(h).toContain("2 more to hit your goal this week.");
     expect(h).toContain("your goal · 3 a week");
     expect(h.match(/data-qc154="bar"/g)).toHaveLength(20);
     expect(h).toContain('data-start="2026-10-26" data-count="3" data-kind="met"');
@@ -36,5 +38,21 @@ describe("the goal chart", () => {
     expect(h).not.toContain('data-qc154="streak"');
     expect(h.match(/data-kind="empty"/g)).toHaveLength(19);
     expect(h).toContain('data-kind="now"');
+  });
+  it("v154.1: streak 0 renders no pill; streak 0 and 3 short says what this week needs", () => {
+    const m = weekGoal154([at(9, 1)], WEEKLY3, NOW);
+    expect(m).toMatchObject({ streak: 0, left: 3, empty: false });
+    const h = renderToStaticMarkup(<QcGoal154 m={m} />);
+    expect(h).not.toContain('data-qc154="streak"');
+    expect(h).not.toContain("0-week streak");
+    expect(h).toContain("3 more to hit your goal this week.");
+    expect(renderToStaticMarkup(<QcGoal154 m={weekGoal154([at(9, 1), at(11, 9), at(11, 10)], WEEKLY3, NOW)} />)).toContain("One more to hit your goal this week.");
+  });
+  it("v154.1: streak 2 and 1 short keeps v154's pill and line", () => {
+    const m = weekGoal154([at(10, 26), at(10, 27), at(10, 28), at(11, 2), at(11, 3), at(11, 4), at(11, 9), at(11, 10)], WEEKLY3, NOW);
+    expect(m).toMatchObject({ streak: 2, left: 1 });
+    const h = renderToStaticMarkup(<QcGoal154 m={m} />);
+    expect(h).toMatch(/data-qc154="streak"[^>]*>[\s\S]*?<\/svg>2-week streak<\/span>/);
+    expect(h).toContain("One more keeps the streak going.");
   });
 });
