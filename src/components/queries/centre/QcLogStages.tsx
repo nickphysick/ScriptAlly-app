@@ -493,7 +493,8 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
 
   const pc = s.pieces;
   const sampleNow: SampleChoice = pc.sample ?? { unit: ask && ask.sample.unit !== "none" ? ask.sample.unit : "chapters", amt: ask && ask.sample.unit !== "none" ? ask.sample.amt : 3, bookVersionId: dflt.book };
-  const bookName = (id: string | null) => p.bookVersions.find((b) => b.id === id)?.name ?? null;
+  /* the pill names the version by its number ("V2"), as the packages page does; the Version row below gives the names */
+  const bookName = (id: string | null) => { const b = p.bookVersions.find((x) => x.id === id); return b ? b.short ?? b.name : null; };
   const setPieces = (patch: Partial<Pieces>) => set({ pieces: { ...pc, ...patch } });
   const tog = (k: "letter" | "syn" | "sample") => {
     if (k === "letter") setPieces({ letterId: pc.letterId ? null : dflt.letter ?? NO_LETTER });

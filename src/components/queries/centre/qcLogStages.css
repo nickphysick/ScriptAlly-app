@@ -8,16 +8,18 @@
       everything inside inherits the serif back (0-1-1), and the one heading states the typewriter with !important. */
 
 /* THE PANEL'S SURFACE IS THE REFERENCE CARD: 540 wide (504 at ≤1400, the query card's own step), the 7px white mat
-   and 20px corners, clamp(640, 100vh − 32, 760) tall, centred in the viewport by `top`, over the shell's bar as the
-   query card is (z 68). It replaces SidePanel's 520/560 and the borrowed `.qc149f` surface. */
+   and 20px corners, over the shell's bar as the query card is (z 68). It replaces SidePanel's 520/560 and the borrowed
+   `.qc149f` surface.
+   v1.2 — OVER THE PAGE, AS THE REFERENCE PUTS IT THERE (`body.inapp .card`): 16px from the window's top, right and
+   bottom, over the dimmed page. v1.1's placement (760 at most, centred, 40 in) was the reference's card beside its notes;
+   in the app the journey is always over a page. The height comes from the two insets, never from a viewport constant. */
 .spanel.qsp.qsp:has(> .spanel-own > .laq) {
-  --laq-h: clamp(640px, calc(100vh - 32px), 760px);
-  top: calc(50vh - var(--laq-h) / 2); bottom: auto; right: 40px; left: auto;
-  width: 540px; height: var(--laq-h); box-sizing: border-box;
+  top: 16px; bottom: 16px; right: 16px; left: auto;
+  width: 540px; height: auto; box-sizing: border-box;
   padding: 7px; border-radius: 20px; background: #fff; overflow: visible; z-index: 68;
   box-shadow: 0 30px 60px -30px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.06);
 }
-@media (max-width: 1400px) { .spanel.qsp.qsp:has(> .spanel-own > .laq) { width: 504px; right: 28px; } }
+@media (max-width: 1400px) { .spanel.qsp.qsp:has(> .spanel-own > .laq) { width: 504px; } }
 @media (max-width: 899.98px) {
   .spanel.qsp.qsp:has(> .spanel-own > .laq) { top: 0; right: 0; bottom: 0; left: 0; width: auto; height: auto; padding: 0; border-radius: 0; box-shadow: none; }
 }
@@ -40,6 +42,7 @@
 
 /* the FlowHead in this flow: flush to the inner frame, and its foot handed to the track (the reference's `.flh`) */
 .laq .flh { padding: 18px 18px 8px 24px; border-bottom: 0; }
+.laq .flh .flh-rt { margin-top: 0; }
 .laq .flh p.flh-l { margin-top: 7px; font: italic 400 15.5px/1.45 var(--sp-serif) !important; }
 
 /* the track (option C), the reference's `.ltrk`: on the FlowHead's ground, under the title and line */
@@ -191,7 +194,10 @@
 .laq .laq-pc.is-open .laq-vr { box-shadow: inset 0 0 0 1.5px var(--laq-navy); background: #fff; }
 .laq .laq-qsamp { margin: 0 12px; padding: 14px 2px; border-top: 1px dashed rgba(28,19,15,.18); animation: laq-fadein .2s ease-out both; }
 .laq .laq-qsamp .qad-samp { margin: 0; padding: 0; border-radius: 0; box-shadow: none; }
-.laq .laq-qsamp :is(.qad-srow b, .qad-seg button, .qad-step b, .qad-step button, .qad-unitl, .qad-chip, .qad-sectline, .laq-vrow > span) { font-family: var(--laq-tw); }
+.laq .laq-qsamp :is(.qad-srow b, .qad-seg button, .qad-step b, .qad-step button, .qad-unitl, .qad-chip, .qad-sectline, .laq-vrow > span:first-child) { font-family: var(--laq-tw); }
+/* the reference sets these with the `font` shorthand, which resets the line height to normal; here they would inherit
+   `.laq`'s 1.5 and stand taller than the reference's */
+.laq .laq-qsamp :is(.qad-srow b, .qad-step b, .qad-unitl, .qad-sectline, .laq-vrow > span:first-child) { line-height: normal; }
 .laq .laq-qsamp .qad-step button { font-family: inherit; }
 .laq .laq-vrow { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(28,19,15,.12); }
 .laq .laq-vrow > span:first-child { font: 400 15px var(--laq-tw); }

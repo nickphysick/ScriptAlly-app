@@ -19,7 +19,7 @@ import { activePackageId, packagesFor } from "../../../lib/queryActions/packages
 import { saveLog } from "../../../lib/queryActions/logSave";
 import { restoreSnapshot, takeSnapshot } from "../../../lib/queryActions/snapshot";
 import { planOf, stageAgents, type BookChoice, type Choice, type LogAnswers, type PlanContext, type StagePackage } from "../../../lib/queryActions/logStages";
-import { bookVersionsOf, latestVersion } from "../../../lib/bookVersions";
+import { bookVersionsOf, latestVersion, readVersions } from "../../../lib/bookVersions";
 import { bookOf } from "../../../lib/queryActions/sample";
 import { previousQueryFor } from "../../../lib/requery";
 import { quietWeeksOf } from "../../../lib/queryState";
@@ -69,7 +69,8 @@ export const LogStagesHost: React.FC<{
       .map((v) => ({ id: v.id, name: v.versionName || (t === ComponentType.QUERY_LETTER ? "Query letter" : "Synopsis") }));
     const bvs = bookVersionsOf(ms);
     const cur = latestVersion(bvs)?.id ?? null;
-    const bookVersions: BookChoice[] = [...bvs].sort((a, b) => b.createdDate.localeCompare(a.createdDate)).map((b) => ({ id: b.id, name: b.name, current: b.id === cur }));
+    const nums = new Map(readVersions(ms).map((v) => [v.id, v.original ? "Original" : `V${v.num}`]));
+    const bookVersions: BookChoice[] = [...bvs].sort((a, b) => b.createdDate.localeCompare(a.createdDate)).map((b) => ({ id: b.id, name: b.name, current: b.id === cur, short: nums.get(b.id) }));
     const ctx: PlanContext = { manuscriptId: ms.id, agents, packages: stPackages, letters: of(ComponentType.QUERY_LETTER), synopses: of(ComponentType.SYNOPSIS), bookVersions };
     return { stAgents, stPackages, active, ctx };
   }, [agents, forBook, packages, versions, ms, nowMs]);

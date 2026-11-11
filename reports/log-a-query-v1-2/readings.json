@@ -1,0 +1,76 @@
+{
+  "checks": 39,
+  "V12_1": {
+    "scrim": true,
+    "bg": "rgba(28, 19, 15, 0.45)",
+    "bodyDim": true,
+    "head": "rgb(42, 58, 82)",
+    "track": "rgb(42, 58, 82)",
+    "line": "Add as much detail as you can.",
+    "url": "http://127.0.0.1:3000/dashboard",
+    "step": "who"
+  },
+  "V12_2": {
+    "builder": true,
+    "pkgName": "",
+    "pressed": "laq12-pb",
+    "asks": "pkg"
+  },
+  "V12_3": {
+    "door": true,
+    "who": "Marcus",
+    "step": "when",
+    "dim": true
+  },
+  "V12_4": {
+    "s0": {
+      "kind": "pcs",
+      "foot": "ok",
+      "marks": "ql:ok syn:ok sample:ok",
+      "why": [],
+      "extra": [],
+      "btn": 0
+    },
+    "s1": {
+      "kind": "pcs",
+      "foot": "differs",
+      "marks": "ql:ok syn:ok sample:diff",
+      "why": [
+        "You're sending the first 3 chapters, not the first 10 pages."
+      ],
+      "extra": [],
+      "btn": 1
+    },
+    "s2": {
+      "kind": "pcs",
+      "foot": "differs",
+      "marks": "ql:ok syn:no sample:diff",
+      "why": [
+        "Synopsis isn't ticked.",
+        "You're sending the first 3 chapters, not the first 10 pages."
+      ],
+      "extra": [],
+      "btn": 1
+    },
+    "s3": {
+      "kind": "pcs",
+      "foot": "ok",
+      "marks": "ql:ok syn:ok sample:ok",
+      "why": [],
+      "extra": [],
+      "btn": 0
+    }
+  },
+  "V12_5": {
+    "pill": "Pages 40–64 · V2",
+    "ver": "VersionVersion 2 currentVersion 1",
+    "saved": [
+      {
+        "id": "M9JLwq2x8ce6nSAYjFBd",
+        "dateSent": "2026-11-11T12:00:00.000Z",
+        "sentMaterials": "Query letter Letter A · Synopsis One-page synopsis · pages 40–64 · Version 2",
+        "sentPackageId": null
+      }
+    ]
+  }
+}

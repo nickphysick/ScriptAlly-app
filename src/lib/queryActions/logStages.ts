@@ -116,7 +116,11 @@ export const titleName = (s: string): string => s.trim().replace(/\s+/g, " ").re
 /* ── the pieces ───────────────────────────────────────────────────────────────────────────────────────────────── */
 
 export interface Choice { id: string; name: string }
-export interface BookChoice extends Choice { current: boolean }
+export interface BookChoice extends Choice {
+  current: boolean;
+  /** v1.2 — the version's number as the packages page shows it ("V2", or "Original"), for the opening pages' pill */
+  short?: string;
+}
 /**
  * The opening pages as the stages hold them: the sample control's whole `Sample` (unit, amount, and — v1.2 — a specific
  * section's start and its unit), plus the book version it came from. A choice with no `sect` is "from the opening".
