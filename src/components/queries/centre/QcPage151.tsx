@@ -30,7 +30,7 @@ import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { RadioMenu151 } from "./QcToolbar140";
 import { GROUP_1522, GROUP_MENU_HEAD, PACKAGE_LOCKED_LINE, head1522 } from "../../../lib/qc1522";
 import { QcHeader1531 } from "./QcHeader1531";
-import { QcSlip153 } from "./QcSlip153";
+import { QcCard154 } from "./QcCard154";
 import { QcBar153 } from "./QcBar153";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
 import { sectionSwatch, standWords } from "../../../lib/qc153";
@@ -336,8 +336,9 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     try { sessionStorage.setItem(OPENED_KEY, JSON.stringify([...n])); } catch { /* a private window */ }
     return n;
   });
-  const slip = (r: QcRow) => (
-    <QcSlip153 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)} agent={p.agentOf?.(r) ?? null}
+  /* v154 — each group's queries are a 3-across grid of small cards (the slip's successor: same row, facts and act) */
+  const card = (r: QcRow) => (
+    <QcCard154 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)}
       act={rowAct(r, p.nowMs)} onOpen={p.onOpen} onAct={p.onAct} />
   );
   const only = p.sections.length === 1;
@@ -405,7 +406,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                           : why ? <em>{why}</em> : null}
                       </div>
                     ) : null}
-                    {s.rows.map(slip)}
+                    <div className="qc154-grid" data-qc154="grid">{s.rows.map(card)}</div>
                   </section>
                 );
               })}
