@@ -201,3 +201,11 @@ WebKit (`--project=iphone`) ran the phone locks once at the end: see "WebKit" be
 ## Gates at the end
 
 See the commit for Phase H: root `tsc` (4 GB heap) and `functions/` `tsc` clean, `build:dev` clean, and the full Vitest suite with only the three reds that were there before this pack.
+
+## Deployed to dev
+
+- Dev had moved while this pack was built: it served `dev/…-laq12-laq13` (Log a query v1.3, `index-Dew3IMgB.js`). The two packs touch no file in common.
+- `phone-app-v3` (`cffd517f2`) is merged into a new branch stacked on it, `dev/…-laq12-laq13-pa3` (`651aa049a`, pushed). Gates on the merged tree: `tsc` clean, 776 spec files and 11,420 tests green.
+- Built from that clean pushed tip and deployed to dev hosting only. The deploy was guarded on dev still serving `index-Dew3IMgB.js`.
+- Dev now serves **`index-U2eoEdze.js`** (checked after the deploy).
+- Not merged to main. Nothing deployed to prod.
