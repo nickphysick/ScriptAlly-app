@@ -11,6 +11,10 @@
  *    from the frame, not a constant 32px: a constant would leave it 22px inside.
  */
 
+/** THE LIST HEALTH RING IN BRAND COLOURS (wherever it is drawn on a light ground): navy for what's filled in, soft pink
+ *  for what's missing, at every score — it no longer follows `healthTone` (which went green at 80 and above). */
+export const BRAND_RING = { arc: "#2a3a52", track: "#ecc0ae" } as const;
+
 export const NUDGE_INSET = 32;
 export const NUDGE_CLEAR = 24;
 

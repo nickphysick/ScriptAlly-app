@@ -3,7 +3,15 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, expect, it } from "vitest";
-import { NUDGE_CLEAR, NUDGE_INSET, healthNudge } from "./contactPrinciples2";
+import { BRAND_RING, NUDGE_CLEAR, NUDGE_INSET, healthNudge } from "./contactPrinciples2";
+import { healthColours } from "../components/agents/contact/ContactHealth26";
+
+describe("principles v2 — the List health ring in brand colours", () => {
+  it("navy arc, soft pink track at every score on the light ground (it no longer follows the score)", () => {
+    for (let p = 0; p <= 100; p++) expect(healthColours(p, "light")).toEqual({ arc: "#2a3a52", track: "#ecc0ae" });
+    expect(BRAND_RING).toEqual({ arc: "#2a3a52", track: "#ecc0ae" });
+  });
+});
 
 describe("principles v2 — List health nudged in (healthNudge)", () => {
   /* 1440 as built (R0-base.json): block 1079.5–1400, frame right 1390, headline text ends 911.6 */
