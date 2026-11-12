@@ -11,7 +11,12 @@
  * to the page that opens it, as before.
  */
 import { MATERIALS_PATH, QUERIES_ALL_PATH } from "./phoneV3Nav";
-import { QueryStatus } from "../types";
+import { QueryStatus, type CompTitle, type ManuscriptVersion, type Query, type SubmissionPackage } from "../types";
+import { isSlotFilled, packageMetrics, rankPackagesByRequests, strongestPackage, type RateStat } from "./packageMetrics";
+import { factsOf, queriesWithPiece, type Facts, type PieceContext } from "./packagesV40";
+import type { AnalyticsRow } from "./analytics";
+import type { V2Version } from "./bookVersions";
+import { VERSIONS_FOUNDING_ACCESS, versionsUnlocked } from "./entitlements";
 import { stageTint, type BeLine } from "./qc150";
 import { MONTHS_SHORT } from "./dates";
 
@@ -477,3 +482,152 @@ export function bvTrackDays(line: Pick<BeLine, "past" | "cur" | "dueMs" | "row">
     } : null,
   };
 }
+
+/* ═══ Phase F — MATERIALS (design-refs/phone-app-v5/phone-materials-v1.html) ═════════════════════════════════════════
+   Pure. Nothing here counts a query of its own: a PACKAGE's result is packageMetrics' (`packageMetrics`, ranked by
+   `rankPackagesByRequests` / `strongestPackage`, no "best" under MIN_SENDS_FOR_CLAIM); a LETTER's, a SYNOPSIS's and a
+   VERSION's are the desktop packages page's per-piece figures (packagesV40 `queriesWithPiece` + `factsOf`, H3: a
+   query counts for the piece it recorded, whichever package it went in — so a query sent WITHOUT a package counts on
+   its letter only, through its own `sentVersions`, and on no package). What is added is the words and the order. */
+
+/** the result a package card, the header and a package's page show: "3 from 7 asked for more", or "Not sent yet" */
+export interface MatResult { sent: number; more: number; big: string; of: string | null; words: string }
+export function matResult(sent: number, more: number): MatResult {
+  if (!sent) return { sent, more, big: "Not sent yet", of: null, words: "Not sent yet" };
+  return { sent, more, big: String(more), of: `from ${sent}`, words: `${more} from ${sent} asked for more` };
+}
+/** a package's result, from packageMetrics' own stat (queries whose `packageId` is the package) */
+export const pkgResult = (s: Pick<RateStat, "sent" | "requests">): MatResult => matResult(s.sent, s.requests);
+/** a letter's, synopsis's or version's result, from the desktop's per-piece facts */
+export const pieceResult = (f: Pick<Facts, "n" | "more">): MatResult => matResult(f.n, f.more);
+
+/** every package's stat, keyed by id — packageMetrics itself, once per package */
+export function pkgStats(pkgs: readonly Pick<SubmissionPackage, "id">[], queries: Query[]): Map<string, RateStat> {
+  return new Map(pkgs.map((p) => [p.id, packageMetrics(p.id, queries)]));
+}
+
+const COUNT_WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+const countWord = (n: number): string => COUNT_WORDS[n] ?? String(n);
+/**
+ * "Best of your three packages so far." — only when packageMetrics would crown it: `strongestPackage` names this one,
+ * at least two packages have cleared MIN_SENDS_FOR_CLAIM (one alone is not "best of"), and it is strictly ahead of the
+ * next (a tie crowns nobody). Otherwise null, and the page says nothing.
+ */
+export function bestClaim(pkgId: string, pkgs: SubmissionPackage[], queries: Query[]): string | null {
+  const ranked = rankPackagesByRequests(pkgs, queries).filter((r) => r.ranked && r.stat.requestRate !== null);
+  if (ranked.length < 2) return null;
+  const top = strongestPackage(pkgs, queries);
+  if (!top || top.pkg.id !== pkgId || ranked[0].pkg.id !== pkgId) return null;
+  if ((ranked[0].stat.requestRate ?? 0) <= (ranked[1].stat.requestRate ?? 0)) return null;
+  return `Best of your ${countWord(ranked.length)} packages so far.`;
+}
+
+/** a package's three pieces, in the ref's order: letter, synopsis, the manuscript version. `set` is isSlotFilled. */
+export type PieceKey = "let" | "syn" | "ver";
+export interface PkgPiece { k: PieceKey; label: string; set: boolean; name: string | null; id: string | null }
+export function pkgPieces(
+  p: Pick<SubmissionPackage, "queryLetterVersionId" | "synopsisVersionId" | "bookVersionId">,
+  materials: readonly Pick<ManuscriptVersion, "id" | "versionName">[],
+  bookVersions: readonly Pick<V2Version, "id" | "name">[],
+): PkgPiece[] {
+  const mat = (id: string | null | undefined) => (isSlotFilled(id) ? materials.find((m) => m.id === id)?.versionName?.trim() || null : null);
+  const ver = (id: string | null | undefined) => (isSlotFilled(id) ? bookVersions.find((v) => v.id === id)?.name?.trim() || null : null);
+  return [
+    { k: "let", label: "Query letter", set: isSlotFilled(p.queryLetterVersionId), name: mat(p.queryLetterVersionId), id: isSlotFilled(p.queryLetterVersionId) ? p.queryLetterVersionId : null },
+    { k: "syn", label: "Synopsis", set: isSlotFilled(p.synopsisVersionId), name: mat(p.synopsisVersionId), id: isSlotFilled(p.synopsisVersionId) ? p.synopsisVersionId : null },
+    { k: "ver", label: "Manuscript", set: isSlotFilled(p.bookVersionId), name: ver(p.bookVersionId), id: isSlotFilled(p.bookVersionId) ? p.bookVersionId! : null },
+  ];
+}
+/** a piece's chip: its name; a slot left unfilled says so */
+export const pieceChip = (x: PkgPiece): string => (x.set ? x.name ?? `${x.label} not found` : `No ${x.label.toLowerCase()}`);
+
+/** the first line of a letter's wording, for the sheet (blank lines skipped), or null when it has none */
+export function firstLine(text: string | null | undefined, max = 90): string | null {
+  const line = (text ?? "").split(/\r?\n/).map((l) => l.trim()).find(Boolean);
+  if (!line) return null;
+  return line.length > max ? `${line.slice(0, max - 1).trimEnd()}…` : line;
+}
+/** the letter's paragraphs, to read (blank lines part them) */
+export const paragraphs = (text: string | null | undefined): string[] => (text ?? "").split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+
+/** how many comps a letter mentions: its `compIds`' length; null when it has not recorded any (compUsage's rule) */
+export const letterCompCount = (v: { compIds?: string[] | null }): number | null => (Array.isArray(v.compIds) ? v.compIds.length : null);
+export function compsWords(n: number | null): string {
+  if (n == null) return "Comps not noted";
+  return n === 0 ? "No comps" : `Mentions ${n} ${n === 1 ? "comp" : "comps"}`;
+}
+/** how many letters mention a comp (by its id) */
+export function lettersNaming(comp: Pick<CompTitle, "id">, letters: readonly { compIds?: string[] | null }[]): number {
+  if (!comp.id) return 0;
+  return letters.filter((l) => Array.isArray(l.compIds) && l.compIds.includes(comp.id!)).length;
+}
+export const lettersWords = (n: number): string => (n === 0 ? "Not in a letter yet" : `In ${n} ${n === 1 ? "letter" : "letters"}`);
+export const packagesWords = (n: number): string => (n === 0 ? "Not in a package" : `In ${n} ${n === 1 ? "package" : "packages"}`);
+
+/**
+ * The queries a letter, synopsis or version went out with: EXACTLY the desktop's own `queriesWithPiece` (packagesV40
+ * `pieceOf`: what the query recorded it sent first, else its package's slot, else — for a version — versionsV2's
+ * resolver). A query sent without a package counts on its letter through its own `sentVersions`, and on no package.
+ * ⚠️ Nothing is filled in or widened here: the phone and the desktop read one figure.
+ */
+export function materialQueries(kind: PieceKey, id: string, queries: Query[], ctx: PieceContext): Query[] {
+  return queriesWithPiece(queries, kind, id, ctx);
+}
+/** a letter's, synopsis's or version's result: the desktop's per-piece facts over those queries */
+export function materialFacts(kind: PieceKey, id: string, queries: Query[], ctx: PieceContext, rows: Map<string, AnalyticsRow>): Facts {
+  return factsOf(materialQueries(kind, id, queries, ctx), rows);
+}
+
+/**
+ * The versions as a tree from the Original, drawn growing UP: every version sits above its parent and the Original is
+ * last. Pre-order from each root (children oldest first), then reversed. Archived versions are left out unless a live
+ * one grew from them (desktop `treeModel`'s rule). A version whose parent is missing is a root.
+ */
+export interface VerNode { v: V2Version; depth: number; parentId: string | null }
+export function versionTree(vs: readonly V2Version[]): VerNode[] {
+  const byId = new Map(vs.map((v) => [v.id, v]));
+  const parentOf = (v: V2Version) => (v.parentId && v.parentId !== v.id ? byId.get(v.parentId) ?? null : null);
+  const keep = new Set<string>();
+  for (const v of vs) if (!v.archived) { keep.add(v.id); for (let p = parentOf(v), g = 0; p && g < 60; p = parentOf(p), g++) keep.add(p.id); }
+  const nodes = vs.filter((v) => keep.has(v.id));
+  const order = (a: V2Version, b: V2Version) => (a.createdDate < b.createdDate ? -1 : a.createdDate > b.createdDate ? 1 : a.num - b.num);
+  const kids = new Map<string | null, V2Version[]>();
+  for (const v of nodes) { const p = parentOf(v); const k = p && keep.has(p.id) ? p.id : null; (kids.get(k) ?? kids.set(k, []).get(k)!).push(v); }
+  for (const l of kids.values()) l.sort(order);
+  const out: VerNode[] = [];
+  const seen = new Set<string>();
+  const walk = (v: V2Version, depth: number, parentId: string | null) => {
+    if (seen.has(v.id)) return;
+    seen.add(v.id);
+    out.push({ v, depth, parentId });
+    for (const c of kids.get(v.id) ?? []) walk(c, depth + 1, v.id);
+  };
+  const roots = (kids.get(null) ?? []).sort((a, b) => Number(b.original) - Number(a.original) || order(a, b));
+  for (const r of roots) walk(r, 0, null);
+  return out.reverse();
+}
+export const versionsLine = (n: number): string =>
+  n === 0 ? "No versions of your manuscript saved yet." : `${n} ${n === 1 ? "version" : "versions"} of your manuscript saved. New queries go out with the one in use.`;
+
+/**
+ * The Versions gate — the desktop's exactly (VersionsV2Page `locked`): founding access or Pro opens it, and the dev
+ * review aid `sessionStorage["sa.dev.versionsFree"] = "1"` shows the lock on a dev build (never in production).
+ */
+export function versionsLocked(user: Parameters<typeof versionsUnlocked>[0], mode: string, read: () => string | null): boolean {
+  let free = false;
+  if (mode !== "production") { try { free = read() === "1"; } catch { free = false; } }
+  return free || !versionsUnlocked(user, VERSIONS_FOUNDING_ACCESS);
+}
+/** ⚠️ THE DESKTOP'S LOCK COPY, VERBATIM (VersionsV2Page's lock card). phoneV5.test.ts asserts every string is in it. */
+export const VERSIONS_LOCK = {
+  kicker: "Versions · part of Pro",
+  head: "Find out which opening gets agents reading on.",
+  body: "Save each version of your manuscript as it changes. QueryHawk records which one went out with every query, then shows you which is landing.",
+  bullets: [
+    ["A league table.", "Every version side by side."],
+    ["Every query, by version.", "One timeline of who saw what."],
+    ["Fix the record.", "Say which version went, even after it’s sent."],
+  ] as const,
+  plans: "See plans",
+  small: "Plans run only while you’re querying.",
+};

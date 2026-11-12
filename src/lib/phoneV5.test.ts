@@ -454,3 +454,137 @@ describe("phone v5 full Birds-eye view (Phase E)", () => {
     expect(past.cur!.solid).toBeCloseTo(pc.cur!.solid);
   });
 });
+
+/* ── Phase F: Materials ── */
+import {
+  VERSIONS_LOCK, bestClaim, compsWords, firstLine, letterCompCount, lettersNaming, lettersWords, materialFacts, materialQueries, matResult,
+  pieceChip, pkgPieces, pkgResult, pkgStats, versionTree, versionsLocked,
+} from "./phoneV5";
+import { packageMetrics } from "./packageMetrics";
+import { factsOf, queriesWithPiece } from "./packagesV40";
+import { ComponentType, type ManuscriptVersion, type Query, type SubmissionPackage } from "../types";
+import type { V2Version } from "./bookVersions";
+import type { AnalyticsRow } from "./analytics";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+const PK = (id: string, o: Partial<SubmissionPackage> = {}) => ({
+  id, manuscriptId: "m1", userId: "u", packageName: id, queryLetterVersionId: "", synopsisVersionId: "", samplePagesVersionId: "", status: "Active", createdDate: "2026-01-01", ...o,
+}) as unknown as SubmissionPackage;
+const Q = (id: string, o: Partial<Query> = {}) => ({
+  id, userId: "u", manuscriptId: "m1", agentId: `a-${id}`, packageId: "", status: QueryStatus.QUERIED, dateSent: "2026-03-01", personalisationNotes: "", ...o,
+}) as unknown as Query;
+const MAT = (id: string, type: ComponentType, o: Partial<ManuscriptVersion> = {}) => ({
+  id, manuscriptId: "m1", userId: "u", componentType: type, versionName: id, createdDate: "2026-01-01", contentDraft: "", ...o,
+}) as unknown as ManuscriptVersion;
+const V = (id: string, o: Partial<V2Version> = {}): V2Version => ({
+  id, num: 1, name: id, parentId: null, changes: [], original: false, archived: false, archivedDate: null, createdDate: "2026-01-01", wordCount: null, raw: {} as V2Version["raw"], ...o,
+});
+const asked = (id: string, n: number, more: number, pkgId: string) => Array.from({ length: n }, (_, i) =>
+  Q(`${id}${i}`, { packageId: pkgId, status: i < more ? QueryStatus.PARTIAL_REQUESTED : QueryStatus.REJECTED }));
+
+describe("phone v5 Materials (Phase F) — packages are packageMetrics'", () => {
+  const pkgs = [PK("A"), PK("B"), PK("C")];
+  const qs = [...asked("a", 7, 3, "A"), ...asked("b", 5, 1, "B"), ...asked("c", 2, 0, "C"), Q("solo")];
+  it("every package's stat is packageMetrics' own, and its words come from that stat", () => {
+    const st = pkgStats(pkgs, qs);
+    for (const p of pkgs) expect(st.get(p.id)).toEqual(packageMetrics(p.id, qs));
+    expect(pkgResult(st.get("A")!).words).toBe("3 from 7 asked for more");
+    expect(pkgResult(st.get("A")!)).toMatchObject({ big: "3", of: "from 7", sent: 7, more: 3 });
+    expect(pkgResult(packageMetrics("none", qs)).words).toBe("Not sent yet");
+    expect(matResult(0, 0).of).toBeNull();
+  });
+  it("'best of your N packages' only when packageMetrics would crown it: two or more over the threshold, strictly ahead", () => {
+    expect(bestClaim("A", pkgs, qs)).toBe("Best of your two packages so far.");
+    expect(bestClaim("B", pkgs, qs)).toBeNull();
+    /* one package over the threshold is not "best of" anything */
+    expect(bestClaim("A", pkgs, [...asked("a", 7, 3, "A"), ...asked("b", 3, 3, "B")])).toBeNull();
+    /* a tie crowns nobody */
+    expect(bestClaim("A", pkgs, [...asked("a", 4, 2, "A"), ...asked("b", 4, 2, "B")])).toBeNull();
+  });
+  it("a package's pieces: an unfilled slot is shown as not set (isSlotFilled), a filled one by name", () => {
+    const p = PK("A", { queryLetterVersionId: "L1", synopsisVersionId: "" });
+    const pieces = pkgPieces(p, [{ id: "L1", versionName: "Hook-first" }], [{ id: "v1", name: "Version 3" }]);
+    expect(pieces.map((x) => [x.k, x.set])).toEqual([["let", true], ["syn", false], ["ver", false]]);
+    expect(pieces.map(pieceChip)).toEqual(["Hook-first", "No synopsis", "No manuscript"]);
+    expect(pieceChip(pkgPieces(PK("B", { bookVersionId: "v1" }), [], [{ id: "v1", name: "Version 3" }])[2])).toBe("Version 3");
+  });
+});
+
+describe("phone v5 Materials (Phase F) — letters, comps, versions", () => {
+  const L1 = MAT("L1", ComponentType.QUERY_LETTER, { compIds: ["c1", "c2"] });
+  const L2 = MAT("L2", ComponentType.QUERY_LETTER);
+  const pk = PK("P", { queryLetterVersionId: "L1" });
+  const ctx = { packages: [pk], materials: [L1, L2], versions: [] as V2Version[] };
+  const rows = (ids: string[]) => new Map(ids.map((id) => [id, { reachedRequest: true } as unknown as AnalyticsRow]));
+  it("a letter's result counts its package's queries AND a query sent without a package (on its letter only)", () => {
+    const viaPkg = Q("q1", { packageId: "P", sentHow: "package", sentPackageId: "P" });
+    const alone = Q("q2", { packageId: "", sentHow: "individual", sentVersions: ["L1"] });
+    /* written before `sentHow` was stored: the desktop's rule (pieceOf) credits it to no letter, and the phone agrees */
+    const older = Q("q3", { packageId: "", sentMaterials: "Query letter", sentVersions: ["L1"] });
+    const other = Q("q4", { packageId: "", sentHow: "individual", sentVersions: ["L2"] });
+    const queries = [viaPkg, alone, older, other];
+    const f = materialFacts("let", "L1", queries, ctx, rows(["q2"]));
+    expect(f.n).toBe(2);
+    expect(f.more).toBe(1);
+    expect(materialQueries("let", "L1", queries, ctx).map((q) => q.id)).toEqual(["q1", "q2"]);
+    /* the phone's figure IS the desktop's, piece by piece */
+    const r = rows(["q1", "q2"]);
+    for (const [k, id] of [["let", "L1"], ["let", "L2"], ["syn", "S0"]] as const) {
+      expect(materialQueries(k, id, queries, ctx)).toEqual(queriesWithPiece(queries, k, id, ctx));
+      expect(materialFacts(k, id, queries, ctx, r)).toEqual(factsOf(queriesWithPiece(queries, k, id, ctx), r));
+    }
+    expect(materialFacts("let", "L2", queries, ctx, rows([])).n).toBe(1);
+    /* …and on no package: the package counts only its own */
+    expect(packageMetrics("P", queries).sent).toBe(1);
+  });
+  it("comps per letter, and letters per comp", () => {
+    expect(letterCompCount(L1)).toBe(2);
+    expect(letterCompCount(L2)).toBeNull();
+    expect(letterCompCount({ compIds: [] })).toBe(0);
+    expect([compsWords(2), compsWords(1), compsWords(0), compsWords(null)]).toEqual(["Mentions 2 comps", "Mentions 1 comp", "No comps", "Comps not noted"]);
+    expect(lettersNaming({ id: "c1" }, [L1, L2, { compIds: ["c1"] }])).toBe(2);
+    expect(lettersNaming({ id: "c9" }, [L1])).toBe(0);
+    expect(lettersNaming({}, [L1])).toBe(0);
+    expect([lettersWords(0), lettersWords(1), lettersWords(3)]).toEqual(["Not in a letter yet", "In 1 letter", "In 3 letters"]);
+    expect(firstLine("\n  Dear agent,\nOn the night…")).toBe("Dear agent,");
+    expect(firstLine("   ")).toBeNull();
+  });
+  it("the version tree grows up from the Original: each above its parent, the Original last, archived leaves left out", () => {
+    const vs = [
+      V("orig", { original: true, num: 1, createdDate: "2026-01-01" }),
+      V("v2", { parentId: "orig", num: 2, createdDate: "2026-02-01" }),
+      V("v3", { parentId: "v2", num: 3, createdDate: "2026-03-01" }),
+      V("v2b", { parentId: "orig", num: 4, createdDate: "2026-04-01" }),
+      V("gone", { parentId: "v3", num: 5, createdDate: "2026-05-01", archived: true }),
+    ];
+    const t = versionTree(vs);
+    expect(t.map((n) => n.v.id)).toEqual(["v2b", "v3", "v2", "orig"]);
+    expect(t.map((n) => n.parentId)).toEqual(["orig", "v2", "orig", null]);
+    expect(t.map((n) => n.depth)).toEqual([1, 2, 1, 0]);
+    for (const [i, n] of t.entries()) if (n.parentId) expect(t.findIndex((x) => x.v.id === n.parentId)).toBeGreaterThan(i);
+    /* an archived version a live one grew from stays in the tree */
+    const kept = versionTree([V("o", { original: true }), V("mid", { parentId: "o", archived: true, num: 2 }), V("tip", { parentId: "mid", num: 3 })]);
+    expect(kept.map((n) => n.v.id)).toEqual(["tip", "mid", "o"]);
+    expect(versionTree([])).toEqual([]);
+  });
+  it("the Versions gate is the desktop's: founding access opens it; the dev review aid locks it, never in production", () => {
+    const free = { plan: "Free" } as Parameters<typeof versionsLocked>[0];
+    expect(versionsLocked(free, "development", () => null)).toBe(false);
+    expect(versionsLocked(free, "development", () => "1")).toBe(true);
+    expect(versionsLocked(free, "production", () => "1")).toBe(false);
+    const desk = readFileSync(resolve(__dirname, "../components/versions/VersionsV2Page.tsx"), "utf8");
+    expect(desk).toContain('const locked = reviewFree() || !versionsUnlocked(currentUser, VERSIONS_FOUNDING_ACCESS);');
+    expect(desk).toContain('sessionStorage.getItem("sa.dev.versionsFree") === "1"');
+    expect(desk).toContain('if (import.meta.env.MODE === "production") return false;');
+  });
+  it("the lock's copy is the desktop's, word for word", () => {
+    const desk = readFileSync(resolve(__dirname, "../components/versions/VersionsV2Page.tsx"), "utf8");
+    expect(desk).toContain(`<span>${VERSIONS_LOCK.kicker}</span>`);
+    expect(desk).toContain(`<h2 id="lkH">${VERSIONS_LOCK.head}</h2>`);
+    expect(desk).toContain(`<p className="d">${VERSIONS_LOCK.body}</p>`);
+    for (const [b, t] of VERSIONS_LOCK.bullets) expect(desk).toContain(`<span><b>${b}</b> ${t}</span>`);
+    expect(desk).toContain(`>${VERSIONS_LOCK.plans}</button>`);
+    expect(desk).toContain(`<small>${VERSIONS_LOCK.small}</small>`);
+  });
+});

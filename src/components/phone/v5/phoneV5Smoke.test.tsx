@@ -34,6 +34,10 @@ import { AgentsTabV5 } from "./AgentsTabV5";
 import { GapsSheetV5 } from "./GapsSheetV5";
 import { BirdsViewV5 } from "./BirdsViewV5";
 import { QueriesV4 } from "../v4/QueriesV4";
+import { PackagesPhonePage } from "../../packages/phone/PackagesPhone";
+import { usePk26Model } from "../../packages/v26/usePk26Model";
+import { ComponentType } from "../../../types";
+import { packageMetrics } from "../../../lib/packageMetrics";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
 const P = (n: React.ReactNode) => <V3Provider on now={NOW}>{n}</V3Provider>;
@@ -133,19 +137,11 @@ describe("Phone app v5 renders", () => {
     expect(empty).toContain("That’s everything for today.");
     expect(renderPageSeeded(P(<TodoV5 />), "/todo")).toContain('data-pa5="todo"');
   });
-  it("Materials: the four tabs, each body the Packages page's own part", () => {
+  it("Materials: the header and the four tabs (Phase F's own smokes are below)", () => {
     for (const html of [renderPage(P(<MaterialsV5 />), "/materials"), renderPageSeeded(P(<MaterialsV5 />), "/materials")]) {
       expect(html).toContain('data-pa5="materials"');
       for (const w of ["Packages", "Letters", "Versions", "Comps"]) expect(html).toContain(`>${w}</button>`);
-      expect(html).toContain("Your packages");
-    }
-    for (const [tab, word] of [["letters", "Query letters"], ["versions", "Versions"], ["comps", "Comps"]] as const) {
-      onTab(tab);
-      const html = renderPageSeeded(P(<MaterialsV5 />), "/materials");
-      expect(html, tab).toContain(`data-section="${tab}"`);
-      expect(html, tab).toContain(word);
-      expect(html, tab).not.toContain("Your packages");
-      vi.unstubAllGlobals();
+      expect(html).toContain('data-pa5="mat-packages"');
     }
   });
 });
@@ -554,5 +550,180 @@ describe("Phone app v5, Phase E — the full Birds-eye view", () => {
     const list = renderPageSeededWith(P(<QueriesV4 />), "/queries/all?court=agent", QS(8));
     expect(list).toContain('data-view="list"');
     expect(list).not.toContain('data-pa5="birds-view"');
+  });
+});
+
+/* ── Phase F: Materials — each tab populated and empty, the locked Versions tab, a package's page and a letter's ── */
+const MS = {
+  id: "m1", userId: SMOKE_USER.id, title: "The Salt Road", genre: "Literary Fiction", ageCategory: "Adult", wordCount: 92000,
+  status: "Querying", statusChangedDate: "2026-01-05T00:00:00.000Z", createdDate: "2026-01-01T00:00:00.000Z",
+  comps: [{ id: "c1", title: "The Glass Tide", author: "M. Ellory", year: 2023 }, { id: "c2", title: "Salt and Ash", author: "R. Okonjo", year: 2022 }, { id: "c3", title: "A Quiet Harbour", year: 2024 }],
+  activePackageId: "P1", inUseBookVersionId: "bv2",
+  bookVersions: [
+    { id: "bv1", name: "Original", kind: "draft", createdDate: "2026-01-01", num: 1, original: true, wordCount: 92000 },
+    { id: "bv2", name: "Version 2", kind: "draft", createdDate: "2026-02-01", num: 2, parentId: "bv1", changes: ["Cut chapter 3", "Added a prologue"], wordCount: 93100 },
+  ],
+};
+const MAT_V = (id: string, type: ComponentType, name: string, o: Record<string, unknown> = {}) => ({
+  id, userId: SMOKE_USER.id, manuscriptId: "m1", componentType: type, versionName: name, createdDate: "2026-01-02T00:00:00.000Z",
+  contentType: "text", contentDraft: "", status: "Active", ...o,
+});
+const PKG = (id: string, name: string, o: Record<string, unknown> = {}) => ({
+  id, userId: SMOKE_USER.id, manuscriptId: "m1", packageName: name, queryLetterVersionId: "", synopsisVersionId: "", samplePagesVersionId: "",
+  status: "Active", createdDate: "2026-01-03T00:00:00.000Z", ...o,
+});
+const MAT_QS = Array.from({ length: 7 }, (_, i) => ({
+  id: `mq${i}`, userId: SMOKE_USER.id, manuscriptId: "m1", agentId: "a1", packageId: i < 5 ? "P1" : "", personalisationNotes: "",
+  status: i < 2 ? QueryStatus.PARTIAL_REQUESTED : QueryStatus.QUERIED, dateSent: `2026-03-0${i + 1}T00:00:00.000Z`, sendMethod: SubmissionMethod.EMAIL,
+  ...(i >= 5 ? { sentHow: "individual", sentVersions: ["L1"] } : { sentHow: "package", sentPackageId: "P1" }),
+}));
+const MAT_DATA = {
+  manuscripts: [MS],
+  versions: [
+    MAT_V("L1", ComponentType.QUERY_LETTER, "Hook-first", { contentDraft: "Dear agent,\n\nOn the night the salt road floods, Mara finds the ledger.", compIds: ["c1", "c2"] }),
+    MAT_V("L2", ComponentType.QUERY_LETTER, "Short and plain", { contentDraft: "Dear agent, I am seeking representation." }),
+    MAT_V("S1", ComponentType.SYNOPSIS, "One page", { contentDraft: "Mara Venn inherits a salt works and a debt." }),
+  ],
+  packages: [PKG("P1", "Autumn round", { queryLetterVersionId: "L1", synopsisVersionId: "S1", bookVersionId: "bv2", firstSentAt: "2026-03-01" }), PKG("P2", "First batch", { queryLetterVersionId: "L2", bookVersionId: "bv1" })],
+  queries: MAT_QS,
+};
+/** the session left Materials on `tab`; `free` turns on the desktop's dev review aid for the Versions lock */
+const matTab = (tab: string, free = false) => vi.stubGlobal("window", {
+  sessionStorage: { getItem: (k: string) => (k === "pa5.materials.tab" ? tab : k === "sa.dev.versionsFree" && free ? "1" : null), setItem: () => {} },
+  localStorage: { getItem: () => null, setItem: () => {} },
+});
+const mat = () => renderPageSeededWith(P(<MaterialsV5 />), "/materials", MAT_DATA);
+const PageAt: React.FC = () => <PackagesPhonePage model={usePk26Model()} />;
+
+describe("Phone app v5, Phase F — Materials", () => {
+  it("the header: Materials, the book, the package going out with new queries as a bundle with packageMetrics' result", () => {
+    const html = mat();
+    expect(html).toContain(">Materials</h1>");
+    expect(html).toContain("What goes out with The Salt Road");
+    expect(html).toMatch(/data-pa5="mat-header-pkg" data-id="P1" data-sent="5" data-requests="2"/);
+    expect(packageMetrics("P1", MAT_QS as never)).toMatchObject({ sent: 5, requests: 2 });
+    expect(html).toContain('data-pa5="bundle"');
+    expect(html).toContain("Autumn round");
+    expect(html).toContain("Going out with new queries");
+    expect(html).toContain("asked for more");
+    expect(html).not.toMatch(/overdue|\blate\b/i);
+  });
+  it("no package set: the bundle's outline and the chooser's line", () => {
+    const html = renderPageSeededWith(P(<MaterialsV5 />), "/materials", { ...MAT_DATA, manuscripts: [{ ...MS, activePackageId: "" }] });
+    expect(html).toMatch(/data-pa5="mat-header-pkg" data-none="1"/);
+    expect(html).toContain("Choose what goes out with new queries");
+    expect(html).toContain("pa5m-bundle outline");
+  });
+  it("Packages: a bundle card per package, its pieces as chips (unset says so), packageMetrics' result, Going out now", () => {
+    const html = mat();
+    const cards = [...html.matchAll(/data-pa5="pkg-card" data-id="(\w+)" data-sent="(\d+)" data-requests="(\d+)" data-active="(\d)"/g)].map((m) => m.slice(1));
+    expect(cards).toEqual([["P1", "5", "2", "1"], ["P2", "0", "0", "0"]]);
+    for (const [id, sent, req] of cards) expect(packageMetrics(id, MAT_QS as never)).toMatchObject({ sent: Number(sent), requests: Number(req) });
+    expect(html.match(/data-pa5="pkg-result"/g)?.length).toBe(2);
+    expect(html).toContain("Going out now");
+    expect(html).toContain("Not sent yet");
+    expect(html).toContain(">Hook-first</span>");
+    expect(html).toContain(">Version 2</span>");
+    expect(html).toMatch(/data-k="syn" data-set="0">No synopsis</);
+    expect(html).toContain('data-pa5="pkg-new"');
+    const empty = renderPage(P(<MaterialsV5 />), "/materials");
+    expect(empty).toContain('data-pa5="pkg-none"');
+    expect(empty).not.toContain('data-pa5="pkg-card"');
+  });
+  it("Letters: letters then synopses, with counts, first lines, results (a package-less query counts on its letter) and comps", () => {
+    matTab("letters");
+    const html = mat();
+    expect(html).toContain('data-pa5="mat-letters"');
+    expect(html.indexOf("Query letters")).toBeLessThan(html.indexOf("Synopses"));
+    expect(html).toMatch(/data-pa5="letter-sheet" data-id="L1" data-comps="2" data-sent="7" data-requests="2"/);
+    expect(html).toMatch(/data-pa5="letter-sheet" data-id="L2" data-comps="" data-sent="0"/);
+    expect(html).toContain("2 from 7 asked for more");
+    expect(html).toContain("Mentions 2 comps");
+    expect(html).toContain("Comps not noted");
+    expect(html).toContain('data-pa5="synopsis-sheet" data-id="S1"');
+    expect(html).toContain("In Autumn round");
+    expect(html).toContain("Dear agent,");
+    expect(html).toContain("Add a letter or synopsis");
+    vi.unstubAllGlobals();
+    matTab("letters");
+    const empty = renderPage(P(<MaterialsV5 />), "/materials");
+    expect(empty).toContain("No query letters yet.");
+    expect(empty).toContain("No synopses yet.");
+    expect(empty).not.toContain('data-pa5="letter-sheet"');
+  });
+  it("Versions: the tree from the Original, what changed, the result, the one in use; the desktop's lock when locked", () => {
+    matTab("versions");
+    const html = mat();
+    expect(html).toContain('data-pa5="mat-versions"');
+    const nodes = [...html.matchAll(/data-pa5="version-node" data-id="(\w+)" data-inuse="(\d)" data-parent="(\w*)"/g)].map((m) => m.slice(1));
+    expect(nodes).toEqual([["bv2", "1", "bv1"], ["bv1", "0", ""]]);
+    expect(html).toContain("Cut chapter 3");
+    expect(html).toContain("Where you started");
+    expect(html).toContain("In use");
+    expect(html).toContain("2 versions of your manuscript saved.");
+    expect(html).not.toContain('data-pa5="versions-locked"');
+    vi.unstubAllGlobals();
+    matTab("versions", true);
+    const locked = mat();
+    expect(locked).toContain('data-pa5="versions-locked"');
+    expect(locked).toContain("Find out which opening gets agents reading on.");
+    expect(locked).toContain("See plans");
+    expect(locked).not.toContain('data-pa5="version-node"');
+    vi.unstubAllGlobals();
+    matTab("versions");
+    const empty = renderPage(P(<MaterialsV5 />), "/materials");
+    expect(empty).toContain("No versions of your manuscript saved yet.");
+    expect(empty).not.toContain('data-pa5="version-node"');
+  });
+  it("Comps: the list, each with how many letters mention it; add and edit open the comps form", () => {
+    matTab("comps");
+    const html = mat();
+    const rows = [...html.matchAll(/data-pa5="comp-row" data-id="(\w+)" data-letters="(\d+)"/g)].map((m) => m.slice(1));
+    expect(rows).toEqual([["c1", "1"], ["c2", "1"], ["c3", "0"]]);
+    expect(html).toContain("In 1 letter");
+    expect(html).toContain("Not in a letter yet");
+    expect(html).toContain('data-pa5="comp-add"');
+    vi.unstubAllGlobals();
+    matTab("comps");
+    const empty = renderPage(P(<MaterialsV5 />), "/materials");
+    expect(empty).toContain('data-pa5="comps-none"');
+  });
+  it("a package's page: how it's doing (packageMetrics), what an agent receives, the sample line, sent to, the button", () => {
+    const html = renderPageSeededWith(<PageAt />, "/queries/packages?pkg=P1", MAT_DATA);
+    expect(html).toMatch(/data-pa5="pkg-page" data-id="P1" data-stage="out" data-sent="5" data-requests="2"/);
+    expect(html).toContain("How it’s doing");
+    expect(html).toContain("40%");
+    expect(html).toContain("What an agent receives");
+    expect(html.match(/data-pa5="pkg-slot"/g)?.length).toBe(3);
+    expect(html).toContain("Hook-first · mentions 2 comps");
+    expect(html).toContain("Version 2 · Cut chapter 3");
+    expect(html).toContain("The opening sample is set per agent when you log a query.");
+    expect(html).toMatch(/data-pa5="pkg-sent" data-n="5"/);
+    expect(html).toContain("See all 5");
+    expect(html).toMatch(/disabled=""[^>]*data-pa5="pkg-set-active" data-on="1"/);
+    expect(html).toContain("Going out with new queries ✓");
+    /* one package over the threshold is not "best of" anything */
+    expect(html).not.toContain('data-pa5="pkg-best"');
+    const other = renderPageSeededWith(<PageAt />, "/queries/packages?pkg=P2", MAT_DATA);
+    expect(other).toMatch(/data-stage="ready"/);
+    expect(other).toMatch(/data-pa5="pkg-set-active" data-on="0"/);
+    const draft = renderPageSeededWith(<PageAt />, "/queries/packages?pkg=P2", { ...MAT_DATA, packages: [MAT_DATA.packages[0], { ...MAT_DATA.packages[1], bookVersionId: "" }] });
+    expect(draft).toMatch(/data-stage="draft"/);
+    expect(draft).not.toContain('data-pa5="pkg-set-active"');
+    expect(other).toContain("Change what’s in it");
+    expect(other).toContain('data-pa5="pkg-sent-none"');
+  });
+  it("a letter's page: the wording, its comps as chips with Add, its result, Edit the wording and Save as a new letter", () => {
+    const html = renderPageSeededWith(<PageAt />, "/queries/packages?mat=L1", MAT_DATA);
+    expect(html).toMatch(/data-pa5="letter-page" data-id="L1" data-kind="let" data-sent="7" data-requests="2"/);
+    expect(html).toContain("On the night the salt road floods");
+    expect(html).toContain("Comps in this letter");
+    expect(html.match(/data-pa5="letter-comp" /g)?.length).toBe(2);
+    expect(html).toContain("Sent in Autumn round · sent on its own");
+    expect(html).toContain("Edit the wording");
+    expect(html).toContain("Save as a new letter");
+    const syn = renderPageSeededWith(<PageAt />, "/queries/packages?mat=S1", MAT_DATA);
+    expect(syn).toContain("Save as a new synopsis");
+    expect(syn).not.toContain("Comps in this letter");
   });
 });
