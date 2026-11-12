@@ -171,3 +171,10 @@ condition was "if any differs, don't deploy", and a failed deploy check is a sto
    query-centre-v155 into the dev line (…-qc1541-pa4)". That is inferred from the frames: I didn't run S4 on the
    `query-centre-v155` branch itself, but its report says it passed there. The sidebar pixel noise above is a second,
    smaller cause of red in the same check.
+
+   **S4's pixel check is not stable from run to run, so the fix-the-reds prompt should make it reliable.** Its sidebar
+   strip (x 28–70) varies between runs of the same build. On dev's branch da2a05a60 two runs read 798208 differing pixels
+   with the box from x 52, then 798214 from x 28 (1920). At 1440, -clp1's runs read 206200, 206200 and 206203 (x 28), and
+   dev's branch read 206197 (x 52) twice. The varying pixels are 6 at most, each 1–3 off in one colour channel, in the
+   shell's sidebar icons (v155's own report saw 0, 190 and 6). A reliable S4 would mask the shell's sidebar, or compare the
+   page's own scrollport only.
