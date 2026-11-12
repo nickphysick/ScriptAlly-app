@@ -18,8 +18,8 @@ const noop = () => {};
 const figures = { n: 41, q: 22, y: 5 };
 const v26 = (health: { pct: number; gaps: number } | null) => renderToStaticMarkup(
   <ContactHeader26 loading={false} figures={figures} health={health} onAdd={noop} onDiscover={noop} onOpenHealth={noop} onShowWho={noop} />);
-const v27 = (health: { pct: number; gaps: number } | null) => renderToStaticMarkup(
-  <ContactHeader27 loading={false} figures={figures} health={health} onAdd={noop} onDiscover={noop} onOpenHealth={noop} onShowWho={noop} />);
+const v27 = (health: { pct: number; gaps: number } | null, f: { n: number; q: number; y: number } = figures) => renderToStaticMarkup(
+  <ContactHeader27 loading={false} figures={f} health={health} onAdd={noop} onDiscover={noop} onOpenHealth={noop} onShowWho={noop} onNotQueried={noop} />);
 
 /** the List health block's markup, the ground and the two stroke colours taken out */
 function healthBlock(html: string): string {
@@ -58,20 +58,42 @@ describe("v27 — List health is v26's block", () => {
   });
 });
 
-describe("v27 — the header's content", () => {
+describe("v27 — the header's content (header v2)", () => {
   const html = v27({ pct: 86, gaps: 29 });
-  it("the title is the live headline (Contact list principles v1); the count line moves underneath", () => {
-    expect(html).toContain('data-clp="headline"><b>5 need you.</b> 19 not queried yet.</h1>');
-    expect(html).toMatch(/<p class="qc1531-for clp-for" data-cl27="for"><i aria-hidden="true"><\/i><span><b>41<\/b> agents on file · <em>you’ve queried<\/em> <b>22<\/b><\/span><i aria-hidden="true"><\/i><\/p>/);
-    expect(html).not.toContain("waiting on you");
+  it("CLH2-2 · the h1 is the count on file; the subheader is nq as a button onto the filter", () => {
+    expect(html).toContain('data-clp="headline">41 agents on file</h1>');
+    expect(html).toMatch(/<p class="clh2-sub" data-clh2="sub" data-link=""><button type="button" class="clh2-nq" data-clh2="notq">19 not yet queried<\/button><\/p>/);
+    expect(html).not.toContain('data-cl27="for"');
   });
-  it("the drawing is the binoculars bird (one constant)", () => {
+  it("CLH2-2 · all queried: the subheader is plain text, not a control", () => {
+    const all = v27({ pct: 86, gaps: 29 }, { n: 17, q: 17, y: 2 });
+    expect(all).toContain('<p class="clh2-sub" data-clh2="sub">All of them queried</p>');
+    expect(all).not.toContain('data-clh2="notq"');
+  });
+  /** the header's own markup, List health taken out (its block is the header's last column) */
+  const own = (x: string) => x.slice(0, x.indexOf('<div class="qc1531-rc'));
+  it("CLH2-3 · the populated header has exactly one button in its action row; no 'need you', no 'Discover agents'", () => {
+    for (const f of [figures, { n: 17, q: 17, y: 0 }]) {
+      const x = v27({ pct: 86, gaps: 29 }, f);
+      const acts = x.slice(x.indexOf('<div class="qc1531-acts">'), x.indexOf('<div class="qc1531-rc'));
+      expect((acts.match(/<button/g) ?? []).length).toBe(1);
+      expect(acts).toMatch(/data-cl27="add"[^>]*>\+ Add an agent</);
+      expect(own(x)).not.toMatch(/need you|needs you/);
+      expect(own(x)).not.toContain("Discover agents");
+    }
+  });
+  it("day one is unchanged: its sentence, its words beneath, and Discover agents beside Add", () => {
+    const d1 = v27({ pct: 40, gaps: 3 }, { n: 2, q: 0, y: 0 });
+    expect(d1).toContain('data-clp="headline">2 agents so far. Neither queried yet.</h1>');
+    expect(d1).toContain('<span class="clp-under">Add a few more and QueryHawk can start suggesting who to query next.</span>');
+    expect(d1).toMatch(/class="qc1531-b qc1531-b--g" data-cl26="discover" data-cl24="discover"[^>]*>Discover agents</);
+  });
+  it("the drawing is the binoculars bird (one constant), 160 wide", () => {
     expect(CL27_HEADER_ART).toBe("/images/contact/discover-binoculars-bird.webp");
-    expect(html).toContain(`src="${CL27_HEADER_ART}"`);
+    expect(html).toContain(`src="${CL27_HEADER_ART}" alt="" width="160"`);
   });
-  it("the buttons keep every hook the v26 ones carried, in the Query Centre header's styles", () => {
+  it("the add button keeps every hook the v26 one carried, in the Query Centre header's styles", () => {
     expect(html).toMatch(/class="qc1531-b qc1531-b--n" data-cl26="add" data-cl24="add" data-cl17="add"[^>]*>\+ Add an agent</);
-    expect(html).toMatch(/class="qc1531-b qc1531-b--g" data-cl26="discover" data-cl24="discover"[^>]*>Discover agents</);
   });
   it("the h1 keeps data-page-title (the folder tab and the page guide read it)", () => {
     expect(html).toMatch(/<h1 class="qc1531-t clp-t" data-page-title="true"/);

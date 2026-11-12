@@ -695,6 +695,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     setFilters((f) => (pickOn(f) === "missing" ? f : applyPick(f, "missing")));
     requestAnimationFrame(() => mainColRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
   }, []);
+  /* Contact list header v2 — "{nq} not yet queried": the existing `queried: "no"` filter and nothing else — Find, the
+     group and the other filters cleared, so the list shows exactly the nq agents the line counted — then the list into view */
+  const showNotQueried = useCallback(() => {
+    setFilters({ ...emptyContactFilters(), queried: "no" }); setSearch(""); setGlance(null); setSets(null);
+    requestAnimationFrame(() => mainColRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
+  }, [setFilters]);
   /* v18 §F.1 — the drawer's figures: the same score, with its held and possible points */
   const listH0 = useMemo(() => healthOf(agents, hk), [agents, hk]);
   const listH = useMemo(() => (healthStub === null ? listH0 : { ...listH0, pct: healthStub }), [listH0, healthStub]);
@@ -1085,7 +1091,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <ContactHeader27 loading={!showList} figures={showList ? headFigures : null}
             health={showList ? health : null} addRef={addBtnRef} onAdd={openAdd}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
-            onOpenHealth={openHk} onShowWho={showMissing} />
+            onOpenHealth={openHk} onShowWho={showMissing} onNotQueried={showNotQueried} />
         )}
         <div className="clv-main" ref={mainColRef}>
 

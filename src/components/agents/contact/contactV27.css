@@ -15,12 +15,13 @@
      is the Query Centre's grid, restated here at 0-5-0 with the ref's columns: a 200px drawing, the title block, List
      health at its own width */
   .clv-group[data-v24][data-v27] > .cl24-hd.cl27-hd {
-    display: grid; grid-template-columns: 200px minmax(0, 1fr) auto; align-items: center; column-gap: 34px; padding: 0 0 4px;
+    /* header v2 — the drawing is 160 wide (was 200) */
+    display: grid; grid-template-columns: 160px minmax(0, 1fr) auto; align-items: center; column-gap: 34px; padding: 0 0 4px;
     /* Phase 3 — 30px under the scroller's top, where the Query Centre's header sits (and the ref's); v24's was 24 */
     margin-top: 30px;
   }
   .cl27-art img {
-    display: block; width: 200px; height: auto; transform: scaleX(-1);
+    display: block; width: 160px; height: auto; transform: scaleX(-1);
     filter: drop-shadow(0 14px 14px rgba(28, 19, 15, 0.12));
   }
   /* the right column: List health at its own width, at the column's end */

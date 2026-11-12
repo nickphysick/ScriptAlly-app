@@ -33,6 +33,21 @@
   .cl27 .qc1531-for.clp-for span.clp-under { font: italic 400 19px/1.25 var(--sp-serif) !important; color: var(--mut, #5b4f47); white-space: normal; max-width: 100%; }
 }
 
+/* header v2 (design-refs/contact-list-header-v2.html, frames 1 and 3) — under the 36px headline, 6px down, the subheader:
+   Source Serif 4 italic 19/1.25 in the quiet brown; "{nq} not yet queried" is a rust button underlined as the ref's link
+   (1.5px, 4px under, rust at 40%). Then 18px to the one button. */
+@media (min-width: 768px) {
+  .cl27 .qc1531-hd .clh2-sub { margin: 6px 0 0; font: italic 400 19px/1.25 var(--sp-serif) !important; color: #5b4f47; }
+  .cl27 .qc1531-hd .clh2-sub + .qc1531-acts { margin-top: 18px; }
+  .cl27 .clh2-nq {
+    all: unset; cursor: pointer; font: inherit !important; color: #a2452a;
+    text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 4px; text-decoration-color: rgba(162, 69, 42, 0.4);
+  }
+  .cl27 .clh2-nq:hover { text-decoration-color: #a2452a; }
+  .cl27 .clh2-nq:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 2px; }
+  .cl27 .clh2-nq:disabled { cursor: default; }
+}
+
 /* principles v2 — List health nudged in: pulled left by the header's measured `--clp2-nudge` (healthNudge: 32px inside
    the list frame, never within 24px of the headline), a transform so the headline's column keeps its width. The ring
    needs no top margin taken off: it has none, and its centre already sits on the headline block's (CLP19). */

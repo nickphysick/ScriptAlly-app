@@ -6,21 +6,23 @@
  * the words the page derives from the writer's own numbers. Pure, so every sentence is unit-locked (CLP2) and the
  * rendered page can only show what these return.
  *
- *   clHeadline     the header's sentence and the count line beneath it, from `headerFigures` (the same `stand` the rail's
- *                  Where they stand tiles count)
+ *   clHeadline     the header's headline and the line beneath it, from `headerFigures` (header v2: "{n} agents on
+ *                  file" over "{nq} not yet queried" / "All of them queried")
  *   isDayOne       three or fewer agents on file and none queried
  *   noMatchCopy    the no-matches state: what is applied, named, and what to do about it
  */
 import type { HeaderFigures } from "./contactV26";
 
-/** an agent's stand is "you" (Your move) — `HeaderFigures.y`; not queried is everyone not yet queried, `n - q` */
+/** not queried is everyone not yet queried, `n - q` (`HeaderFigures.y`, Your move, is no longer the header's) */
 export const isDayOne = (f: HeaderFigures): boolean => f.n >= 1 && f.n <= 3 && f.q === 0;
 
 export interface Headline {
-  /** the rust part ("5 need you."), or null when nothing needs the writer */
-  lead: string | null;
-  /** the rest of the sentence, after the lead and a space */
-  rest: string;
+  /** the h1: "{n} agents on file", or day one's sentence */
+  title: string;
+  /** the line under it: "{nq} not yet queried", "All of them queried", "Already queried"; null on day one */
+  sub: string | null;
+  /** the sub is a control (it applies the `queried: "no"` filter) — only when someone is not yet queried */
+  subLink: boolean;
   /** day one: the line beneath is words, not the count */
   dayOne: boolean;
   /** day one's line beneath */
@@ -34,16 +36,17 @@ const DAY_ONE: Record<number, string> = {
 };
 export const DAY_ONE_UNDER = "Add a few more and QueryHawk can start suggesting who to query next.";
 
+/** Contact list header v2 (design-refs/contact-list-header-v2.html) — the agents page says how many agents there are
+ *  and how many have not been queried. "need you" left the header (it stays in the filter panel's Your move chip). */
 export function clHeadline(f: HeaderFigures): Headline {
-  if (isDayOne(f)) return { lead: null, rest: DAY_ONE[f.n], dayOne: true, under: DAY_ONE_UNDER };
-  const you = f.y;
+  if (isDayOne(f)) return { title: DAY_ONE[f.n], sub: null, subLink: false, dayOne: true, under: DAY_ONE_UNDER };
   const nq = Math.max(0, f.n - f.q);
-  const lead = you > 0 ? `${you} need${you === 1 ? "s" : ""} you.` : null;
-  const second = nq > 0 ? `${nq} not queried yet.` : "Everyone’s been queried.";
-  return { lead, rest: lead ? second : `Nothing needs you right now. ${second}`, dayOne: false, under: null };
+  const title = `${f.n} ${f.n === 1 ? "agent" : "agents"} on file`;
+  if (nq > 0) return { title, sub: `${nq} not yet queried`, subLink: true, dayOne: false, under: null };
+  return { title, sub: f.n === 1 ? "Already queried" : "All of them queried", subLink: false, dayOne: false, under: null };
 }
-/** the whole sentence as it reads (the lead, a space, the rest) */
-export const headlineText = (h: Headline): string => (h.lead ? `${h.lead} ${h.rest}` : h.rest);
+/** the h1 as it reads */
+export const headlineText = (h: Headline): string => h.title;
 
 const WORD = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
 

@@ -1152,7 +1152,8 @@
     "design-refs/todo-list-v55/todo-tray-head-v2.html": "9c684b6fb404d1b18d6c3cfd0d5770cd997eb07b1b28ef898ef18c134a1392c9",
     "design-refs/your-notes-v1/your-notes-v1.html": "7e19d98ac439d4e4ee3348dbde870f44571a7bd4fe80bb0b750ed046bec8e72d",
     "design-refs/contact-list-principles-v1/contact-list-principles-v1.html": "2069e37eb2c5d1b03ee63b54ff522f2c5a1fd19609b8d7ad75609dab42dd6604",
-    "design-refs/contact-list-principles-v2/contact-list-principles-v4.html": "06b6c7fc8b8be5ec7ddfd003fa320a7d712429ec4b883b7bc4c74e6172cad598"
+    "design-refs/contact-list-principles-v2/contact-list-principles-v4.html": "06b6c7fc8b8be5ec7ddfd003fa320a7d712429ec4b883b7bc4c74e6172cad598",
+    "design-refs/contact-list-header-v2.html": "9b895264ed3f797539da587b8c23e9ea261dd14e433c5caaccbaf1ca8dac749e"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

@@ -7,7 +7,7 @@
  * `document.activeElement`, never a declaration.
  *
  *   CLP1  exactly one filled navy button among the header's buttons
- *   CLP2  the headline: the harness account's own case, and each of the five cases through the dev aid
+ *   CLP2  the headline (re-pointed by header v2): the harness account's own case, and each case through the dev aid
  *   CLP3  the Query Centre's header title: font and text equal the base run's (`CLP_BASE=1` writes them)
  *   CLP4  the agency line: 14px, text-transform none
  *   CLP5  contrast ≥ 4.5:1 for the listed text/ground pairs (composited)
@@ -59,7 +59,7 @@ async function mut(page: Page, lock: string) {
   if (!MUTS.includes(lock)) return;
   switch (lock) {
     case "CLP1": await css(page, ".cl26-health .cl26-open{background:#2a3a52 !important;box-shadow:none !important}"); break;
-    case "CLP2": await page.evaluate(() => { const t = [...document.querySelectorAll<HTMLElement>(".aglist [data-clp='headline']")].find((e) => e.offsetHeight); if (t) t.textContent = "41 agents on file"; }); break;
+    case "CLP2": await page.evaluate(() => { const t = [...document.querySelectorAll<HTMLElement>(".aglist [data-clp='headline']")].find((e) => e.offsetHeight); if (t) t.textContent = "5 need you. 41 agents on file"; }); break;
     /* inline !important: a later Query Centre rule (v154's typewriter title) outranks any sheet-level break */
     case "CLP3": await page.evaluate(() => { for (const t of document.querySelectorAll<HTMLElement>(".qc151 .qc1531-hd h1.qc1531-t")) t.style.setProperty("font-size", "36px", "important"); }); break;
     case "CLP4": await css(page, ".cl27 .cl26-whot small{font-size:11px !important;text-transform:uppercase !important}"); break;
@@ -117,50 +117,47 @@ test("CLP1 · exactly one filled navy button among the header's buttons", async 
 });
 
 /* ═════════ CLP2 · the headline ═════════ */
-test("CLP2 · the headline from the writer's own numbers, each of the five cases", async ({ page }) => {
+/* re-pointed by Contact list header v2 (CLH2-1's rendered half): the h1 is "{n} agents on file", the subheader
+   "{nq} not yet queried" (a rust button) or "All of them queried" / "Already queried" (plain); day one unchanged */
+test("CLP2 · the headline from the writer's own numbers, each case (header v2)", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("CLP2");
-  const read = () => page.evaluate(() => {
+  const read = (p: Page) => p.evaluate(() => {
     const hd = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='header']")].find((e) => e.offsetHeight)!;
-    const t = hd.querySelector<HTMLElement>("[data-clp='headline']") ?? hd.querySelector<HTMLElement>("[data-cl27='title']")!;
-    const b = t.querySelector<HTMLElement>("b");
+    const t = hd.querySelector<HTMLElement>("[data-clp='headline']")!;
+    const sub = hd.querySelector<HTMLElement>("[data-clh2='sub']");
+    const nq = hd.querySelector<HTMLElement>("[data-clh2='notq']");
     const rows = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl26='row']")].filter((e) => e.offsetHeight);
     const ts = getComputedStyle(t);
     return {
-      text: (t.textContent ?? "").replace(/\s+/g, " ").trim(), lead: b ? b.textContent?.trim() : null, leadColour: b ? getComputedStyle(b).color : null,
-      font: ts.fontFamily, size: ts.fontSize, colour: ts.color,
+      text: (t.textContent ?? "").replace(/\s+/g, " ").trim(), font: ts.fontFamily, size: ts.fontSize, colour: ts.color,
+      sub: sub ? (sub.textContent ?? "").replace(/\s+/g, " ").trim() : null, link: !!nq, linkColour: nq ? getComputedStyle(nq).color : null,
+      subColour: sub ? getComputedStyle(sub).color : null,
       under: (hd.querySelector("[data-cl27='for']")?.textContent ?? "").replace(/\s+/g, " ").trim(),
-      n: rows.length, you: rows.filter((r) => r.dataset.k === "you").length, none: rows.filter((r) => r.dataset.k === "none").length,
+      n: rows.length, none: rows.filter((r) => r.dataset.k === "none").length,
     };
   });
   await openCl(page);
   await mut(page, "CLP2");
-  const r = await read();
-  const q = r.n - r.none;
-  const expect1 = `${r.you ? `${r.you} need${r.you === 1 ? "s" : ""} you. ` : "Nothing needs you right now. "}${r.none ? `${r.none} not queried yet.` : "Everyone’s been queried."}`;
-  L.check("harness: the sentence from the rows' own stands", r.text === expect1, `${r.text} ≠ ${expect1}`);
-  L.check("harness: typewriter, 36px, ink", /Special Elite|Courier|type/i.test(r.font) && r.size === "36px", `${r.font.slice(0, 30)} ${r.size} ${r.colour}`);
-  if (r.you) L.check("harness: the need-you part in rust", r.leadColour === "rgb(162, 69, 42)", String(r.leadColour));
-  L.check("harness: the count line underneath", r.under === `${r.n} agents on file · you’ve queried ${q}`, r.under);
-  const cases: { fig: { n: number; q: number; y: number }; text: string; under?: string }[] = [
-    { fig: { n: 41, q: 22, y: 5 }, text: "5 need you. 19 not queried yet." },
-    { fig: { n: 12, q: 12, y: 1 }, text: "1 needs you. Everyone’s been queried." },
-    { fig: { n: 41, q: 22, y: 0 }, text: "Nothing needs you right now. 19 not queried yet." },
-    { fig: { n: 9, q: 9, y: 0 }, text: "Nothing needs you right now. Everyone’s been queried." },
-    { fig: { n: 2, q: 0, y: 0 }, text: "2 agents so far. Neither queried yet.", under: "Add a few more and QueryHawk can start suggesting who to query next." },
+  const r = await read(page);
+  L.check("harness: the count on file from the rows", r.text === `${r.n} agents on file`, `${r.text} vs ${r.n} rows`);
+  L.check("harness: typewriter, 36px, ink", /Special Elite|Courier|type/i.test(r.font) && r.size === "36px" && r.colour === "rgb(28, 19, 15)", `${r.font.slice(0, 30)} ${r.size} ${r.colour}`);
+  L.check("harness: the subheader from the rows' own stands", r.sub === (r.none ? `${r.none} not yet queried` : "All of them queried"), String(r.sub));
+  if (r.none) L.check("harness: the subheader is a rust button", r.link && r.linkColour === "rgb(162, 69, 42)", `${r.link} ${r.linkColour}`);
+  const cases: { fig: { n: number; q: number; y: number }; text: string; sub: string | null; link: boolean; under?: string }[] = [
+    { fig: { n: 17, q: 12, y: 5 }, text: "17 agents on file", sub: "5 not yet queried", link: true },
+    { fig: { n: 17, q: 17, y: 1 }, text: "17 agents on file", sub: "All of them queried", link: false },
+    { fig: { n: 1, q: 1, y: 0 }, text: "1 agent on file", sub: "Already queried", link: false },
+    { fig: { n: 2, q: 0, y: 0 }, text: "2 agents so far. Neither queried yet.", sub: null, link: false, under: "Add a few more and QueryHawk can start suggesting who to query next." },
   ];
   for (const c of cases) {
     const p2 = await page.context().newPage();
     await openCl(p2, VP, { fig: c.fig });
-    const page0 = page; void page0;
-    const x = await p2.evaluate(() => {
-      const hd = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='header']")].find((e) => e.offsetHeight)!;
-      const t = hd.querySelector<HTMLElement>("[data-clp='headline']") ?? hd.querySelector<HTMLElement>("[data-cl27='title']")!;
-      return { text: (t.textContent ?? "").replace(/\s+/g, " ").trim(), under: (hd.querySelector("[data-cl27='for']")?.textContent ?? "").replace(/\s+/g, " ").trim() };
-    });
-    L.check(`case ${JSON.stringify(c.fig)}`, x.text === c.text, x.text);
+    const x = await read(p2);
+    L.check(`case ${JSON.stringify(c.fig)} title`, x.text === c.text, x.text);
+    L.check(`case ${JSON.stringify(c.fig)} subheader`, x.sub === c.sub && x.link === c.link, `${x.sub} link=${x.link}`);
+    if (c.sub && !c.link) L.check(`case ${JSON.stringify(c.fig)} plain in the quiet brown`, x.subColour === "rgb(91, 79, 71)", String(x.subColour));
     if (c.under) L.check(`case ${JSON.stringify(c.fig)} line beneath`, x.under === c.under, x.under);
-    else L.check(`case ${JSON.stringify(c.fig)} count line`, x.under === `${c.fig.n} agents on file · you’ve queried ${c.fig.q}`, x.under);
     await p2.close();
   }
   L.done(13);

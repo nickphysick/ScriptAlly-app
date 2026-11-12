@@ -2,30 +2,38 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list principles v1 — CLP2 (unit half): the header's sentence for each case, word for word from the prompt,
- * and the no-matches and band copy. The rendered half is tests/e2e/clp1.measure.ts.
+ * Contact list principles v1 — the no-matches and band copy; Contact list header v2 — CLH2-1, the header's headline and
+ * subheader for each case. The rendered half is tests/e2e/clp1.measure.ts.
  */
 import { describe, expect, it } from "vitest";
-import { bandCount, clHeadline, headlineText, isDayOne, noMatchCopy } from "./contactPrinciples";
+import { bandCount, clHeadline, DAY_ONE_UNDER, headlineText, isDayOne, noMatchCopy } from "./contactPrinciples";
 
 const h = (n: number, q: number, y: number) => clHeadline({ n, q, y });
 
-describe("CLP2 · the live headline", () => {
-  it("Your move > 0, not queried > 0", () => {
-    expect(h(41, 22, 5)).toMatchObject({ lead: "5 need you.", rest: "19 not queried yet.", dayOne: false });
-    expect(headlineText(h(41, 22, 1))).toBe("1 needs you. 19 not queried yet.");
+/* Contact list header v2 — CLH2-1: the headline is the count on file; the line under it is how many are not yet queried
+   (a link onto that filter) or that all of them are. Replaces principles v1's "{y} need you." sentence (CLP2's headline
+   half, retired with it). */
+describe("CLH2-1 · the agents headline and its subheader", () => {
+  it("some not queried: the count, then nq as a link", () => {
+    expect(h(17, 12, 5)).toEqual({ title: "17 agents on file", sub: "5 not yet queried", subLink: true, dayOne: false, under: null });
   });
-  it("Your move > 0, not queried = 0", () => {
-    expect(headlineText(h(12, 12, 5))).toBe("5 need you. Everyone’s been queried.");
-    expect(h(12, 12, 5).lead).toBe("5 need you.");
+  it("all queried: plain, never a link", () => {
+    expect(h(17, 17, 3)).toEqual({ title: "17 agents on file", sub: "All of them queried", subLink: false, dayOne: false, under: null });
   });
-  it("Your move = 0, not queried > 0", () => {
-    expect(h(41, 22, 0)).toMatchObject({ lead: null, rest: "Nothing needs you right now. 19 not queried yet." });
+  it("one agent, queried: 'Already queried'", () => {
+    expect(h(1, 1, 0)).toEqual({ title: "1 agent on file", sub: "Already queried", subLink: false, dayOne: false, under: null });
   });
-  it("both 0", () => {
-    expect(headlineText(h(9, 9, 0))).toBe("Nothing needs you right now. Everyone’s been queried.");
+  it("one agent, not queried, is day one (isDayOne claims n ≤ 3 with none queried) — its output unchanged", () => {
+    expect(h(1, 0, 0)).toEqual({ title: "1 agent so far. Not queried yet.", sub: null, subLink: false, dayOne: true, under: DAY_ONE_UNDER });
   });
-  it("day one: three or fewer, none queried", () => {
+  it("singular past day one: '1 not yet queried' with more on file", () => {
+    expect(h(4, 3, 0)).toMatchObject({ title: "4 agents on file", sub: "1 not yet queried", subLink: true });
+    expect(h(4, 0, 0)).toMatchObject({ title: "4 agents on file", sub: "4 not yet queried", subLink: true });
+  });
+  it("Your move never reaches the header", () => {
+    for (const y of [0, 1, 5]) expect(JSON.stringify(h(41, 22, y))).not.toMatch(/need/);
+  });
+  it("day one: three or fewer, none queried — unchanged", () => {
     expect(headlineText(h(1, 0, 0))).toBe("1 agent so far. Not queried yet.");
     expect(headlineText(h(2, 0, 0))).toBe("2 agents so far. Neither queried yet.");
     expect(headlineText(h(3, 0, 0))).toBe("3 agents so far. None queried yet.");
@@ -33,7 +41,7 @@ describe("CLP2 · the live headline", () => {
     expect(isDayOne({ n: 4, q: 0, y: 0 })).toBe(false);
     expect(isDayOne({ n: 3, q: 1, y: 0 })).toBe(false);
     expect(isDayOne({ n: 0, q: 0, y: 0 })).toBe(false);
-    expect(headlineText(h(4, 0, 0))).toBe("Nothing needs you right now. 4 not queried yet.");
+    expect(headlineText(h(4, 0, 0))).toBe("4 agents on file");
   });
 });
 

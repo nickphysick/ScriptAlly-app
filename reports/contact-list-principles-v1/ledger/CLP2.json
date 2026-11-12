@@ -1,8 +1,8 @@
 [
  {
-  "where": "harness: the sentence from the rows' own stands",
+  "where": "harness: the count on file from the rows",
   "ok": true,
-  "detail": "7 need you. 39 not queried yet. ≠ 7 need you. 39 not queried yet."
+  "detail": "53 agents on file vs 53 rows"
  },
  {
   "where": "harness: typewriter, 36px, ink",
@@ -10,59 +10,64 @@
   "detail": "\"Special Elite\", \"Courier New\" 36px rgb(28, 19, 15)"
  },
  {
-  "where": "harness: the need-you part in rust",
+  "where": "harness: the subheader from the rows' own stands",
   "ok": true,
-  "detail": "rgb(162, 69, 42)"
+  "detail": "39 not yet queried"
  },
  {
-  "where": "harness: the count line underneath",
+  "where": "harness: the subheader is a rust button",
   "ok": true,
-  "detail": "53 agents on file · you’ve queried 14"
+  "detail": "true rgb(162, 69, 42)"
  },
  {
-  "where": "case {\"n\":41,\"q\":22,\"y\":5}",
+  "where": "case {\"n\":17,\"q\":12,\"y\":5} title",
   "ok": true,
-  "detail": "5 need you. 19 not queried yet."
+  "detail": "17 agents on file"
  },
  {
-  "where": "case {\"n\":41,\"q\":22,\"y\":5} count line",
+  "where": "case {\"n\":17,\"q\":12,\"y\":5} subheader",
   "ok": true,
-  "detail": "41 agents on file · you’ve queried 22"
+  "detail": "5 not yet queried link=true"
  },
  {
-  "where": "case {\"n\":12,\"q\":12,\"y\":1}",
+  "where": "case {\"n\":17,\"q\":17,\"y\":1} title",
   "ok": true,
-  "detail": "1 needs you. Everyone’s been queried."
+  "detail": "17 agents on file"
  },
  {
-  "where": "case {\"n\":12,\"q\":12,\"y\":1} count line",
+  "where": "case {\"n\":17,\"q\":17,\"y\":1} subheader",
   "ok": true,
-  "detail": "12 agents on file · you’ve queried 12"
+  "detail": "All of them queried link=false"
  },
  {
-  "where": "case {\"n\":41,\"q\":22,\"y\":0}",
+  "where": "case {\"n\":17,\"q\":17,\"y\":1} plain in the quiet brown",
   "ok": true,
-  "detail": "Nothing needs you right now. 19 not queried yet."
+  "detail": "rgb(91, 79, 71)"
  },
  {
-  "where": "case {\"n\":41,\"q\":22,\"y\":0} count line",
+  "where": "case {\"n\":1,\"q\":1,\"y\":0} title",
   "ok": true,
-  "detail": "41 agents on file · you’ve queried 22"
+  "detail": "1 agent on file"
  },
  {
-  "where": "case {\"n\":9,\"q\":9,\"y\":0}",
+  "where": "case {\"n\":1,\"q\":1,\"y\":0} subheader",
   "ok": true,
-  "detail": "Nothing needs you right now. Everyone’s been queried."
+  "detail": "Already queried link=false"
  },
  {
-  "where": "case {\"n\":9,\"q\":9,\"y\":0} count line",
+  "where": "case {\"n\":1,\"q\":1,\"y\":0} plain in the quiet brown",
   "ok": true,
-  "detail": "9 agents on file · you’ve queried 9"
+  "detail": "rgb(91, 79, 71)"
  },
  {
-  "where": "case {\"n\":2,\"q\":0,\"y\":0}",
+  "where": "case {\"n\":2,\"q\":0,\"y\":0} title",
   "ok": true,
   "detail": "2 agents so far. Neither queried yet."
+ },
+ {
+  "where": "case {\"n\":2,\"q\":0,\"y\":0} subheader",
+  "ok": true,
+  "detail": "null link=false"
  },
  {
   "where": "case {\"n\":2,\"q\":0,\"y\":0} line beneath",

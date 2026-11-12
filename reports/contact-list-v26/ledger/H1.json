@@ -1,45 +1,39 @@
 [
  {
   "lock": "H1",
-  "where": "1512 panel found",
+  "where": "1512 header found",
   "ok": true,
-  "detail": "no panel"
+  "detail": "no header"
  },
  {
   "lock": "H1",
-  "where": "1512 navy",
+  "where": "1512 on the page's ground (no panel)",
   "ok": true,
-  "detail": "rgb(42, 58, 82)"
+  "detail": "rgba(0, 0, 0, 0), 0 panels"
  },
  {
   "lock": "H1",
   "where": "1512 title",
   "ok": true,
-  "detail": "Contact list"
+  "detail": "53 agents on file"
  },
  {
   "lock": "H1",
-  "where": "1512 sentence",
+  "where": "1512 the subheader",
   "ok": true,
-  "detail": "53 agents on file. You’ve queried 14, and 4 are waiting on you."
+  "detail": "39 not yet queried"
  },
  {
   "lock": "H1",
-  "where": "1512 two buttons",
+  "where": "1512 one button (header v2: Discover left the header)",
   "ok": true,
-  "detail": "[\"+ Add an agent\",\"Discover agents\"]"
+  "detail": "[\"+ Add an agent\"]"
  },
  {
   "lock": "H1",
   "where": "1512 ring beside the text",
   "ok": true,
-  "detail": "the ring is under the left column"
- },
- {
-  "lock": "H1",
-  "where": "1512 height = left column ±2",
-  "ok": true,
-  "detail": "184.9375 vs 184.9375"
+  "detail": "the ring is under the title block"
  },
  {
   "lock": "H1",
@@ -55,45 +49,39 @@
  },
  {
   "lock": "H1",
-  "where": "1280 panel found",
+  "where": "1280 header found",
   "ok": true,
-  "detail": "no panel"
+  "detail": "no header"
  },
  {
   "lock": "H1",
-  "where": "1280 navy",
+  "where": "1280 on the page's ground (no panel)",
   "ok": true,
-  "detail": "rgb(42, 58, 82)"
+  "detail": "rgba(0, 0, 0, 0), 0 panels"
  },
  {
   "lock": "H1",
   "where": "1280 title",
   "ok": true,
-  "detail": "Contact list"
+  "detail": "53 agents on file"
  },
  {
   "lock": "H1",
-  "where": "1280 sentence",
+  "where": "1280 the subheader",
   "ok": true,
-  "detail": "53 agents on file. You’ve queried 14, and 4 are waiting on you."
+  "detail": "39 not yet queried"
  },
  {
   "lock": "H1",
-  "where": "1280 two buttons",
+  "where": "1280 one button (header v2: Discover left the header)",
   "ok": true,
-  "detail": "[\"+ Add an agent\",\"Discover agents\"]"
+  "detail": "[\"+ Add an agent\"]"
  },
  {
   "lock": "H1",
   "where": "1280 ring beside the text",
   "ok": true,
-  "detail": "the ring is under the left column"
- },
- {
-  "lock": "H1",
-  "where": "1280 height = left column ±2",
-  "ok": true,
-  "detail": "184.9375 vs 184.9375"
+  "detail": "the ring is under the title block"
  },
  {
   "lock": "H1",

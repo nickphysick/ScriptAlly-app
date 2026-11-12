@@ -1,0 +1,32 @@
+[
+ {
+  "where": "1512 one button, + Add an agent",
+  "ok": true,
+  "detail": "[\"+ Add an agent\"]"
+ },
+ {
+  "where": "1512 no \"need you\"",
+  "ok": true,
+  "detail": "53 agents on file 39 not yet queried + Add an agent"
+ },
+ {
+  "where": "1512 no \"Discover agents\"",
+  "ok": true,
+  "detail": "53 agents on file 39 not yet queried + Add an agent"
+ },
+ {
+  "where": "1280 one button, + Add an agent",
+  "ok": true,
+  "detail": "[\"+ Add an agent\"]"
+ },
+ {
+  "where": "1280 no \"need you\"",
+  "ok": true,
+  "detail": "53 agents on file 39 not yet queried + Add an agent"
+ },
+ {
+  "where": "1280 no \"Discover agents\"",
+  "ok": true,
+  "detail": "53 agents on file 39 not yet queried + Add an agent"
+ }
+]

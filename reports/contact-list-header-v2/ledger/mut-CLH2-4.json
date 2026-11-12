@@ -1,0 +1,22 @@
+[
+ {
+  "where": "the subheader reads '{nq} not yet queried'",
+  "ok": true,
+  "detail": "39 not yet queried"
+ },
+ {
+  "where": "the population is non-zero (nq > 0, and fewer than every row)",
+  "ok": true,
+  "detail": "nq=39, rows before=53"
+ },
+ {
+  "where": "after the click the list renders exactly nq rows",
+  "ok": false,
+  "detail": "rows=53, nq=39"
+ },
+ {
+  "where": "every row shown is not yet queried",
+  "ok": false,
+  "detail": "14 queried rows shown"
+ }
+]

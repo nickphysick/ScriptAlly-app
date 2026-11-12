@@ -95,7 +95,7 @@ test("CL26-H1 · (re-pointed by v27 and principles v1) the open header: title, t
       const nx = new DOMMatrixReadOnly(((t) => (t === "none" ? undefined : t))(getComputedStyle(hd.querySelector<HTMLElement>("[data-cl27='health']")!).transform)).m41;
       return {
         bg: getComputedStyle(hd).backgroundColor,
-        title: hd.querySelector("[data-cl26='title']")?.textContent?.trim(), line: hd.querySelector("[data-cl27='for']")?.textContent?.replace(/\s+/g, " ").trim() ?? "",
+        title: hd.querySelector("[data-cl26='title']")?.textContent?.trim(), line: hd.querySelector("[data-clh2='sub']")?.textContent?.replace(/\s+/g, " ").trim() ?? "",
         btns: [...hd.querySelectorAll("[data-cl26='add'], [data-cl26='discover']")].map((b) => b.textContent?.trim()),
         ringRightOfText: rr.left - nx >= lr.right - 1 && rr.top < lr.bottom,
         panel: document.querySelectorAll(".aglist [data-cl26='panel']").length,
@@ -107,9 +107,10 @@ test("CL26-H1 · (re-pointed by v27 and principles v1) the open header: title, t
     if (!r) continue;
     L.check(`${vp.width} on the page's ground (no panel)`, r.bg === "rgba(0, 0, 0, 0)" && r.panel === 0, `${r.bg}, ${r.panel} panels`);
     /* re-pointed by Contact list principles v1: the title is the live headline, the count line moved beneath it */
-    L.check(`${vp.width} title`, /^(?:\d+ needs? you\. (?:\d+ not queried yet\.|Everyone’s been queried\.)|Nothing needs you right now\. (?:\d+ not queried yet\.|Everyone’s been queried\.)|\d agents? so far\. (?:Not|Neither|None) queried yet\.)$/.test(String(r.title)), String(r.title));
-    L.check(`${vp.width} the for line`, /^\d+ agents? on file · you’ve queried \d+$/.test(r.line), r.line);
-    L.check(`${vp.width} two buttons`, JSON.stringify(r.btns) === JSON.stringify(["+ Add an agent", "Discover agents"]), JSON.stringify(r.btns));
+    /* re-pointed by Contact list header v2: the title is the count on file, the subheader beneath it (CLH2) */
+    L.check(`${vp.width} title`, /^(?:\d+ agents? on file|\d agents? so far\. (?:Not|Neither|None) queried yet\.)$/.test(String(r.title)), String(r.title));
+    L.check(`${vp.width} the subheader`, /^(?:\d+ not yet queried|All of them queried|Already queried)$/.test(r.line), r.line);
+    L.check(`${vp.width} one button (header v2: Discover left the header)`, JSON.stringify(r.btns) === JSON.stringify(["+ Add an agent"]), JSON.stringify(r.btns));
     L.check(`${vp.width} ring beside the text`, r.ringRightOfText, "the ring is under the title block");
     L.check(`${vp.width} no At a glance`, r.glance === 0, String(r.glance));
     L.check(`${vp.width} no title card`, r.titleCard === 0, String(r.titleCard));

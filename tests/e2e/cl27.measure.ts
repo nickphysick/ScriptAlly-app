@@ -95,7 +95,7 @@ test("CL27-H1 · the open header: the mirrored bird, the title block, List healt
         nudge: new DOMMatrixReadOnly(((t) => (t === "none" ? undefined : t))(getComputedStyle(hd.querySelector<HTMLElement>("[data-cl27='health']")!).transform)).m41,
         src: img.getAttribute("src"), transform: getComputedStyle(img).transform, imgW: img.getBoundingClientRect().width,
         title: t.textContent?.trim(), titleFont: getComputedStyle(t).fontFamily, titleSize: getComputedStyle(t).fontSize,
-        forLine: hd.querySelector("[data-cl27='for']")?.textContent?.replace(/\s+/g, " ").trim(),
+        forLine: hd.querySelector("[data-clh2='sub']")?.textContent?.replace(/\s+/g, " ").trim(),
         add: hd.querySelectorAll("[data-cl26='add'][data-cl24='add'][data-cl17='add']").length,
         disc: hd.querySelectorAll("[data-cl26='discover'][data-cl24='discover']").length,
         addBg: getComputedStyle(hd.querySelector<HTMLElement>("[data-cl26='add']")!).backgroundColor,
@@ -106,12 +106,14 @@ test("CL27-H1 · the open header: the mirrored bird, the title block, List healt
     L.check(`${vp.width} three columns`, r.cols === 3, String(r.cols));
     L.check(`${vp.width} on the page's ground`, r.bg === "rgba(0, 0, 0, 0)", r.bg);
     L.check(`${vp.width} art | title block | List health, left to right`, !!(r.art && r.main && r.health && r.art.r <= r.main.l && r.main.r <= r.health.l - r.nudge + 1), JSON.stringify([r.art, r.main, r.health, r.nudge]));
-    L.check(`${vp.width} the binoculars bird`, String(r.src).includes("discover-binoculars-bird.webp") && near(r.imgW, 200, 1), `${r.src} ${r.imgW}`);
+    /* re-pointed by Contact list header v2: the drawing is 160 wide */
+    L.check(`${vp.width} the binoculars bird`, String(r.src).includes("discover-binoculars-bird.webp") && near(r.imgW, 160, 1), `${r.src} ${r.imgW}`);
     L.check(`${vp.width} mirrored`, r.transform === "matrix(-1, 0, 0, 1, 0, 0)", r.transform);
     /* re-pointed by Contact list principles v1 (CLP2): the live headline in the typewriter at 36px, the count line beneath */
-    L.check(`${vp.width} title`, /^(?:\d+ needs? you\. (?:\d+ not queried yet\.|Everyone’s been queried\.)|Nothing needs you right now\. (?:\d+ not queried yet\.|Everyone’s been queried\.)|\d agents? so far\. (?:Not|Neither|None) queried yet\.)$/.test(String(r.title)) && /Special Elite/.test(r.titleFont) && r.titleSize === "36px", `${r.title} · ${r.titleFont.slice(0, 20)} ${r.titleSize}`);
-    L.check(`${vp.width} you've queried`, /^\d+ agents? on file · you’ve queried \d+$/.test(String(r.forLine)), String(r.forLine));
-    L.check(`${vp.width} the two buttons keep their hooks; Add is navy`, r.add === 1 && r.disc === 1 && r.addBg === "rgb(42, 58, 82)", `${r.add}/${r.disc} ${r.addBg}`);
+    /* re-pointed by Contact list header v2 (CLH2): the count on file in the typewriter at 36px, the subheader beneath */
+    L.check(`${vp.width} title`, /^(?:\d+ agents? on file|\d agents? so far\. (?:Not|Neither|None) queried yet\.)$/.test(String(r.title)) && /Special Elite/.test(r.titleFont) && r.titleSize === "36px", `${r.title} · ${r.titleFont.slice(0, 20)} ${r.titleSize}`);
+    L.check(`${vp.width} the subheader`, /^(?:\d+ not yet queried|All of them queried|Already queried)$/.test(String(r.forLine)), String(r.forLine));
+    L.check(`${vp.width} one button (header v2), its hooks kept; Add is navy`, r.add === 1 && r.disc === 0 && r.addBg === "rgb(42, 58, 82)", `${r.add}/${r.disc} ${r.addBg}`);
   }
   L.done(18);
 });
