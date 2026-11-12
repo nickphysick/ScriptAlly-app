@@ -1,0 +1,17 @@
+[
+ {
+  "name": "S4 below the banner, the everyday page is pixel-identical to the before build",
+  "ok": false,
+  "got": "{\"same\":true,\"n\":6,\"banner\":1535,\"box\":[28,151,56,285]}"
+ },
+ {
+  "name": "S4 every frame box unchanged",
+  "ok": true,
+  "got": "{\"header\":{\"x\":368,\"y\":135.75,\"w\":1256,\"h\":198.19},\"title\":{\"x\":664,\"y\":172.5,\"w\":372,\"h\":56.69},\"acts\":{\"x\":664,\"y\":247.19,\"w\":372,\"h\":46},\"forLine\":null,\"chart\":{\"x\":1064,\"y\":135.75,\"w\":560,\"h\":194.19},\"toolbar\":{\"x\":664,\"y\":347.94,\"w\":960,\"h\":92},\"bar\":{\"x\":664,\"y\":359.94,\"w\":960,\"h\":54},\"rail\":{\"x\":368,\"y\":359.94,\"w\":268,\"h\":1329.81},\"list\":{\"x\":664,\"y\":431.94,\"w\":960,\"h\":2885.25}}"
+ },
+ {
+  "name": "S4 no state panel on the everyday page",
+  "ok": true,
+  "got": "0"
+ }
+]

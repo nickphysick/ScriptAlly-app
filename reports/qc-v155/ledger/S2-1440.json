@@ -1,0 +1,82 @@
+[
+ {
+  "name": "S2 the header's height is the populated page's",
+  "ok": true,
+  "got": "day one 198.19 · populated 198.19; toolbar y 347.94 vs 347.94"
+ },
+ {
+  "name": "S2 the title reads No queries yet",
+  "ok": true,
+  "got": "No queries yet"
+ },
+ {
+  "name": "S2 both header buttons stay",
+  "ok": true,
+  "got": "+ Log a query|Record a response"
+ },
+ {
+  "name": "S2 the toolbar reads 0 queries",
+  "ok": true,
+  "got": "0 queries"
+ },
+ {
+  "name": "S2 no group headings, no cards",
+  "ok": true,
+  "got": "0 heads, 0 cards"
+ },
+ {
+  "name": "S2 the panel and nothing else in the list",
+  "ok": true,
+  "got": "[\"panel\"]"
+ },
+ {
+  "name": "S2 panel heading",
+  "ok": true,
+  "got": "No queries yet."
+ },
+ {
+  "name": "S2 panel body",
+  "ok": true,
+  "got": "Log your first query and it will appear here, with the date a reply is expected. Already keeping a tracker somewhere? Bring it in with Smart import or use our template."
+ },
+ {
+  "name": "S2 Smart import links to /import",
+  "ok": true,
+  "got": "[{\"t\":\"Bring it in with Smart import\",\"href\":\"/import\",\"dl\":false,\"c\":\"rgb(42, 58, 82)\",\"w\":\"600\",\"off\":\"3px\"},{\"t\":\"use our template\",\"href\":\"/QueryHawk-pipeline-import-template.xlsx\",\"dl\":true,\"c\":\"rgb(42, 58, 82)\",\"w\":\"600\",\"off\":\"3px\"}]"
+ },
+ {
+  "name": "S2 the template link is the download",
+  "ok": true,
+  "got": "[{\"t\":\"Bring it in with Smart import\",\"href\":\"/import\",\"dl\":false,\"c\":\"rgb(42, 58, 82)\",\"w\":\"600\",\"off\":\"3px\"},{\"t\":\"use our template\",\"href\":\"/QueryHawk-pipeline-import-template.xlsx\",\"dl\":true,\"c\":\"rgb(42, 58, 82)\",\"w\":\"600\",\"off\":\"3px\"}]"
+ },
+ {
+  "name": "S2 panel: white, 16px, a 1px #e6dfd4 ring, 34px 30px, 14/18 margins, full width",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(255, 255, 255)\",\"r\":\"16px\",\"sh\":\"rgb(230, 223, 212) 0px 0px 0px 1px\",\"pad\":\"34px 30px\",\"mt\":\"14px\",\"mb\":\"18px\",\"w\":960,\"listW\":960}"
+ },
+ {
+  "name": "S2 heading: Special Elite 26px 400 #1c130f, 8px under",
+  "ok": true,
+  "got": "{\"t\":\"No queries yet.\",\"f\":\"\\\"Special Elite\\\", \\\"Courier New\\\", Courier, monospace\",\"s\":\"26px\",\"w\":\"400\",\"c\":\"rgb(28, 19, 15)\",\"mb\":\"8px\"}"
+ },
+ {
+  "name": "S2 body: Source Serif 4 16/1.5 #5b4f47, about 60 characters",
+  "ok": true,
+  "got": "{\"t\":\"Log your first query and it will appear here, with the date a reply is expected. Already keeping a tracker somewhere? Bring it in with Smart import or use our template.\",\"f\":\"\\\"Source Serif 4\\\", Georgia, serif\",\"s\":\"16px\",\"lh\":\"24px\",\"c\":\"rgb(91, 79, 71)\",\"mw\":\"498.559px\",\"ch\":8.3125}"
+ },
+ {
+  "name": "S2 links: navy 600, underline offset 3px",
+  "ok": true,
+  "got": "[{\"t\":\"Bring it in with Smart import\",\"href\":\"/import\",\"dl\":false,\"c\":\"rgb(42, 58, 82)\",\"w\":\"600\",\"off\":\"3px\"},{\"t\":\"use our template\",\"href\":\"/QueryHawk-pipeline-import-template.xlsx\",\"dl\":true,\"c\":\"rgb(42, 58, 82)\",\"w\":\"600\",\"off\":\"3px\"}]"
+ },
+ {
+  "name": "S2 no illustration and no button in the panel",
+  "ok": true,
+  "got": "0 img, 0 buttons"
+ },
+ {
+  "name": "S2 the rail at 40%, inert, every count 0",
+  "ok": true,
+  "got": "{\"op\":\"0.4\",\"pe\":\"none\",\"inert\":true,\"nums\":[\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\",\"0\"]}"
+ }
+]

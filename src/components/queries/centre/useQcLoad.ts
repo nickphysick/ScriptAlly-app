@@ -38,10 +38,13 @@ export function qcLoadPhase(s: { ready: boolean; sinceMountMs: number; skeletonF
   return s.ready && s.skeletonForMs >= t.minMs ? "content" : "skeleton";
 }
 
-/** A review aid: `window.__SA_QC_HOLD_MS = 4000` holds the skeleton. Never read in a production build. */
+/** A review aid: `window.__SA_QC_HOLD_MS = 4000` (or localStorage `sa.qc155.holdMs`) holds the skeleton. Never read in a
+ *  production build. */
 function holdMs(): number {
   if (import.meta.env.MODE === "production" || typeof window === "undefined") return 0;
-  const v = (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS;
+  let v: unknown = (window as unknown as { __SA_QC_HOLD_MS?: number }).__SA_QC_HOLD_MS;
+  /* v155 — or a localStorage key, so the hold survives the reload it needs on dev */
+  if (v == null) { try { v = Number(window.localStorage.getItem("sa.qc155.holdMs") ?? 0); } catch { /* a private window */ } }
   return typeof v === "number" && v > 0 ? v : 0;
 }
 
