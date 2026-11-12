@@ -91,6 +91,8 @@ test("CL27-H1 · the open header: the mirrored bird, the title block, List healt
       return {
         cols: getComputedStyle(hd).gridTemplateColumns.split(" ").length, bg: getComputedStyle(hd).backgroundColor,
         art: box("[data-cl27='art']"), main: box("[data-cl27='main']"), health: box("[data-cl26='health']"),
+        /* re-pointed (principles v2): List health's transform (the nudge, CLP18/CLP20), taken back out for the column order */
+        nudge: new DOMMatrixReadOnly(((t) => (t === "none" ? undefined : t))(getComputedStyle(hd.querySelector<HTMLElement>("[data-cl27='health']")!).transform)).m41,
         src: img.getAttribute("src"), transform: getComputedStyle(img).transform, imgW: img.getBoundingClientRect().width,
         title: t.textContent?.trim(), titleFont: getComputedStyle(t).fontFamily, titleSize: getComputedStyle(t).fontSize,
         forLine: hd.querySelector("[data-cl27='for']")?.textContent?.replace(/\s+/g, " ").trim(),
@@ -103,7 +105,7 @@ test("CL27-H1 · the open header: the mirrored bird, the title block, List healt
     if (!r) continue;
     L.check(`${vp.width} three columns`, r.cols === 3, String(r.cols));
     L.check(`${vp.width} on the page's ground`, r.bg === "rgba(0, 0, 0, 0)", r.bg);
-    L.check(`${vp.width} art | title block | List health, left to right`, !!(r.art && r.main && r.health && r.art.r <= r.main.l && r.main.r <= r.health.l + 1), JSON.stringify([r.art, r.main, r.health]));
+    L.check(`${vp.width} art | title block | List health, left to right`, !!(r.art && r.main && r.health && r.art.r <= r.main.l && r.main.r <= r.health.l - r.nudge + 1), JSON.stringify([r.art, r.main, r.health, r.nudge]));
     L.check(`${vp.width} the binoculars bird`, String(r.src).includes("discover-binoculars-bird.webp") && near(r.imgW, 200, 1), `${r.src} ${r.imgW}`);
     L.check(`${vp.width} mirrored`, r.transform === "matrix(-1, 0, 0, 1, 0, 0)", r.transform);
     /* re-pointed by Contact list principles v1 (CLP2): the live headline in the typewriter at 36px, the count line beneath */
