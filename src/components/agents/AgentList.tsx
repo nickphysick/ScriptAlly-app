@@ -46,6 +46,7 @@ import {
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader27 } from "./contact/ContactHeader27";
+import { ContactSlimRow } from "./contact/ContactSlimRow";
 import { ContactRail27 } from "./contact/ContactRail27";
 import { headerFigures } from "../../lib/contactV26";
 import { SET_LABEL } from "../../lib/contactV24";
@@ -1082,6 +1083,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             only, and while settling: the blank account's page is ContactEmpty. */}
         {/* v27 — THE QUERY CENTRE'S OPEN HEADER, the Contact list's content (supersedes v26's navy panel): the mirrored
             bird, "{n} agents on file" over "you've queried {q}" and the two buttons, and v26's List health unchanged. */}
+        {/* Contact list header v2 — the slim pinned row once the header has scrolled away (desktop only; never on day one,
+            on the empty page or while loading) */}
+        {showList && !dayOneHere && (
+          <ContactSlimRow figures={headFigures} health={health} onNotQueried={showNotQueried} onOpenHealth={openHk} onAdd={openAdd} />
+        )}
         {showFrame && (
           <ContactHeader27 loading={!showList} figures={showList ? headFigures : null}
             health={showList ? health : null} addRef={addBtnRef} onAdd={openAdd}

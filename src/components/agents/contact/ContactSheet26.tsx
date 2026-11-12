@@ -90,6 +90,9 @@ export function queryWords(x: AgentFacts): { kind: "nq" | "shut" | "stage"; word
   return { kind: "stage", words: STAGE_NAME[q.status as QueryStatus] ?? String(q.status), status: q.status as QueryStatus };
 }
 
+/** the pin's sticky top as laid out — `var(--pin-cover, 12px)` resolved (12 when it cannot be read) */
+const pinTopOf = (pin: HTMLElement): number => { const v = parseFloat(getComputedStyle(pin).top); return Number.isFinite(v) ? v : 12; };
+
 export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   const pop = usePopover<"filters" | "group" | "sort">();
   const cardRef = useRef<HTMLElement>(null);
@@ -115,17 +118,19 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
     return () => ro.disconnect();
   }, []);
 
-  /* ONE READER: is the pin stuck */
+  /* ONE READER: is the pin stuck. Contact list header v2: the pin's sticky top is read off the pin itself
+     (`var(--pin-cover, 12px)`: the lip's 12px, or below the slim pinned row while it shows), never a literal */
   const [stuck, setStuck] = useState(false);
   const read = useCallback(() => {
     const pin = pinRef.current, card = cardRef.current;
     const sc = card?.closest<HTMLElement>(".wpg-scroll");
     if (!pin || !card || !sc) return;
     const top = sc.getBoundingClientRect().top;
-    const s = pin.getBoundingClientRect().top <= top + 12.5 && card.getBoundingClientRect().top < top + 12;
+    const at = pinTopOf(pin);
+    const s = pin.getBoundingClientRect().top <= top + at + 0.5 && card.getBoundingClientRect().top < top + at;
     setStuck((v) => (v === s ? v : s));
     /* the section nearest the pinned headings: the last one whose top has reached the headings' foot */
-    const line = top + 12 + pin.offsetHeight + 2;
+    const line = top + at + pin.offsetHeight + 2;
     let cur: string | null = null;
     for (const sec of drawnRef.current) {
       const el = secEls.current.get(sec.key);
@@ -144,7 +149,10 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
     const el = secEls.current.get(key), pin = pinRef.current;
     const sc = cardRef.current?.closest<HTMLElement>(".wpg-scroll");
     if (!el || !pin || !sc) return;
-    const delta = el.getBoundingClientRect().top - (sc.getBoundingClientRect().top + 12 + pin.offsetHeight);
+    /* where the pin will sit once there: under the slim pinned row, which shows as soon as the header is gone */
+    const slim = cardRef.current?.closest<HTMLElement>(".clv-group")?.querySelector<HTMLElement>(":scope > .clh2-slim");
+    const ahead = slim && !slim.hasAttribute("data-shown") ? slim.offsetHeight : 0;
+    const delta = el.getBoundingClientRect().top - (sc.getBoundingClientRect().top + pinTopOf(pin) + ahead + pin.offsetHeight);
     const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     jumping.current = { key, until: performance.now() + (reduce ? 50 : 900) };
     setCurrent(key);

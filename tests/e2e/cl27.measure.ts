@@ -149,7 +149,9 @@ test("CL27-R1 · the rail: 268px, beside the list, the band has no Filters; stil
     await page.waitForTimeout(400);
     L.check(`${vp.width} the page scrolled 1200 (precondition)`, y === 1200, String(y));
     const b = await at();
-    L.check(`${vp.width} still in view after the scroll`, !!b && b.t >= sc.top - 1 && b.t <= sc.top + 40 && b.b > sc.top + 200, JSON.stringify({ top: b?.t, sc: sc.top }));
+    /* re-pointed by Contact list header v2: scrolled this far the slim pinned row (48px) shows, and the rail sits under it
+       (`--pin-cover` 12 + 48, then its own 12) — so within 40px of the row's foot, not of the scroller's top */
+    L.check(`${vp.width} still in view after the scroll`, !!b && b.t >= sc.top - 1 && b.t <= sc.top + 48 + 40 && b.b > sc.top + 200, JSON.stringify({ top: b?.t, sc: sc.top }));
   }
   L.done(14);
 });

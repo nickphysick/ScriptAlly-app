@@ -1,0 +1,52 @@
+[
+ {
+  "where": "1512 scrolled 600 (population: the scroller moved)",
+  "ok": true,
+  "detail": "600"
+ },
+ {
+  "where": "1512 visible, its controls focusable",
+  "ok": true,
+  "detail": "visible=true inert=false focusable=3"
+ },
+ {
+  "where": "1512 48px high",
+  "ok": true,
+  "detail": "48"
+ },
+ {
+  "where": "1512 its bottom at or above the pinned toolbar's top",
+  "ok": false,
+  "detail": "row 60 toolbar 12"
+ },
+ {
+  "where": "1512 the filter rail's top below it",
+  "ok": false,
+  "detail": "row 60 rail 24"
+ },
+ {
+  "where": "1280 scrolled 600 (population: the scroller moved)",
+  "ok": true,
+  "detail": "600"
+ },
+ {
+  "where": "1280 visible, its controls focusable",
+  "ok": true,
+  "detail": "visible=true inert=false focusable=3"
+ },
+ {
+  "where": "1280 48px high",
+  "ok": true,
+  "detail": "48"
+ },
+ {
+  "where": "1280 its bottom at or above the pinned toolbar's top",
+  "ok": false,
+  "detail": "row 60 toolbar 12"
+ },
+ {
+  "where": "1280 the filter rail's top below it",
+  "ok": false,
+  "detail": "row 60 rail 24"
+ }
+]

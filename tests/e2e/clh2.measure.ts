@@ -11,6 +11,11 @@
  *   CLH2-6  List health: no image inside the ring; the percentage inside the ring's box; exactly one button beside it,
  *           "Fill the gaps" (the harness has gaps), and clicking it opens Housekeeping
  *   SHOTS   the header at 1512 × 982 and 1728 × 1117 (Phase 2), for the report beside the ref's frame 1
+ *   CLH2-8  the slim row at the top of the page: not visible, its controls not focusable (inert, aria-hidden)
+ *   CLH2-9  after 600px of scroll: visible, 48px high, its bottom at or above the pinned toolbar's top; the rail's top below it
+ *   CLH2-10 back at the top: hidden again, and the toolbar where it was before, to the pixel
+ *   CLH2-11 below 768px the row never renders
+ *   SHOTS3  scrolled at 1512 × 982 in both subheader states, beside the ref's frame 2
  *
  * The unit halves are CLH2-1 (src/lib/contactPrinciples.test.ts) and CLH2-2/3 (contactHeader27.test.tsx).
  *
@@ -56,6 +61,14 @@ async function mut(page: Page, lock: string) {
       const hb = hd?.querySelector<HTMLElement>(".cl26-hb");
       const b = document.createElement("button"); b.type = "button"; b.textContent = "Open"; hb?.appendChild(b);
     }); break;
+    case "CLH2-8": await page.addStyleTag({ content: ".clv-group.cl27 > .clh2-slim{opacity:1 !important;visibility:visible !important;transform:none !important}" });
+      await page.evaluate(() => document.querySelectorAll(".clh2-slim").forEach((e) => { e.removeAttribute("inert"); e.removeAttribute("aria-hidden"); })); break;
+    case "CLH2-9": await page.addStyleTag({ content: ".cl27 .cl26-pin{top:12px !important} .cl27 .qc153-rail{top:24px !important}" }); break;
+    case "CLH2-10": await page.addStyleTag({ content: ".clv-group.cl27 > .clh2-slim{opacity:1 !important;visibility:visible !important;transform:none !important}" }); break;
+    case "CLH2-11": await page.evaluate(() => {
+      const g = [...document.querySelectorAll<HTMLElement>(".clv-group.cl27")].find((e) => e.offsetHeight) ?? document.body;
+      const d = document.createElement("div"); d.className = "clh2-slim"; d.style.height = "48px"; g.prepend(d);
+    }); break;
     case "CLH2-5": await page.evaluate(() => {
       const acts = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='header'] .qc1531-acts")].find((e) => e.offsetHeight);
       const b = document.createElement("button"); b.type = "button"; b.textContent = "Discover agents"; acts?.appendChild(b);
@@ -64,8 +77,9 @@ async function mut(page: Page, lock: string) {
 }
 
 /** the Contact list, the page guide out of the way, no filters remembered */
-async function openCl(page: Page, vp = VP) {
+async function openCl(page: Page, vp = VP, fig?: { n: number; q: number; y: number }) {
   await page.setViewportSize(vp);
+  if (fig) await page.addInitScript((f) => { (window as unknown as { __SA_CLP_FIG?: unknown }).__SA_CLP_FIG = f; }, fig);
   await page.addInitScript(() => {
     try {
       for (const k of ["contacts", "queries", "manuscripts", "agents"]) localStorage.setItem(`sa.guide.${k}`, "1");
@@ -168,5 +182,93 @@ test("SHOTS · the header at 1512 × 982 and 1728 × 1117", async ({ page }) => 
     expect(b, "the header is on screen").not.toBeNull();
     await page.screenshot({ path: `${DIR}/shots/header-${vp.width}.png`, clip: { x: Math.max(0, b!.x - 24), y: Math.max(0, b!.y - 24), width: Math.min(vp.width - Math.max(0, b!.x - 24), b!.width + 48), height: b!.height + 48 } });
     await page.screenshot({ path: `${DIR}/shots/page-${vp.width}.png` });
+  }
+});
+
+/* ═════════ the slim pinned row (Phase 3) ═════════ */
+/** one read: the row, the pinned toolbar, the rail, all against the scroller's top */
+const readSlim = (page: Page) => page.evaluate(() => {
+  const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+  const sc = vis(".agl-wpg .wpg-scroll");
+  const row = document.querySelector<HTMLElement>(".aglist .clh2-slim") ?? [...document.querySelectorAll<HTMLElement>(".clh2-slim")].find((e) => e.closest(".aglist")) ?? null;
+  const pin = vis(".aglist .cl26-pin"), rail = vis(".aglist .qc153-rail");
+  const t0 = sc?.getBoundingClientRect().top ?? 0;
+  const rr = row?.getBoundingClientRect();
+  const cs = row ? getComputedStyle(row) : null;
+  const ctl = row ? [...row.querySelectorAll<HTMLElement>("button")] : [];
+  const focusable = ctl.filter((b) => { b.focus(); const ok = document.activeElement === b; b.blur(); return ok; }).length;
+  return {
+    has: !!row, scrollTop: sc?.scrollTop ?? null,
+    visible: !!cs && cs.visibility === "visible" && Number(cs.opacity) > 0.99,
+    inert: !!row?.hasAttribute("inert"), hidden: row?.getAttribute("aria-hidden") === "true",
+    h: rr?.height ?? null, rowTop: rr ? rr.top - t0 : null, rowBottom: rr ? rr.bottom - t0 : null,
+    pinTop: pin ? pin.getBoundingClientRect().top - t0 : null, railTop: rail ? rail.getBoundingClientRect().top - t0 : null,
+    controls: ctl.length, focusable,
+    text: (row?.querySelector(".clh2-st")?.textContent ?? "").replace(/\s+/g, " ").trim(),
+  };
+});
+const scrollTo = async (page: Page, y: number) => {
+  await page.evaluate((top) => { const sc = [...document.querySelectorAll<HTMLElement>(".agl-wpg .wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0); sc?.scrollTo({ top, behavior: "instant" as ScrollBehavior }); }, y);
+  await page.waitForTimeout(500);
+};
+
+test("CLH2-8/9/10 · the slim row: hidden and inert at the top; shown above the pinned toolbar and rail after 600px; gone again at the top", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L8 = new Ledger("CLH2-8"), L9 = new Ledger("CLH2-9"), L10 = new Ledger("CLH2-10");
+  for (const vp of [VP, { width: 1280, height: 720 }]) {
+    await openCl(page, vp);
+    for (const k of ["CLH2-8", "CLH2-9", "CLH2-10"]) await mut(page, k);
+    const a = await readSlim(page);
+    L8.check(`${vp.width} the row is in the page`, a.has && a.controls === 3, `has=${a.has}, ${a.controls} controls`);
+    L8.check(`${vp.width} at the top: not visible`, !a.visible, `visible=${a.visible}`);
+    L8.check(`${vp.width} at the top: inert and aria-hidden, no control focusable`, a.inert && a.hidden && a.focusable === 0, `inert=${a.inert} hidden=${a.hidden} focusable=${a.focusable}`);
+    await scrollTo(page, 600);
+    const b = await readSlim(page);
+    L9.check(`${vp.width} scrolled 600 (population: the scroller moved)`, b.scrollTop !== null && b.scrollTop >= 590, String(b.scrollTop));
+    L9.check(`${vp.width} visible, its controls focusable`, b.visible && !b.inert && b.focusable === 3, `visible=${b.visible} inert=${b.inert} focusable=${b.focusable}`);
+    L9.check(`${vp.width} 48px high`, b.h !== null && Math.abs(b.h - 48) < 0.5, String(b.h));
+    L9.check(`${vp.width} its bottom at or above the pinned toolbar's top`, b.rowBottom !== null && b.pinTop !== null && b.rowBottom <= b.pinTop + 0.5, `row ${b.rowBottom} toolbar ${b.pinTop}`);
+    L9.check(`${vp.width} the filter rail's top below it`, b.rowBottom !== null && b.railTop !== null && b.railTop >= b.rowBottom - 0.5, `row ${b.rowBottom} rail ${b.railTop}`);
+    await scrollTo(page, 0);
+    const c = await readSlim(page);
+    L10.check(`${vp.width} back at the top: hidden and inert`, !c.visible && c.inert && c.focusable === 0, `visible=${c.visible} inert=${c.inert} focusable=${c.focusable}`);
+    L10.check(`${vp.width} the toolbar where it was, to the pixel`, a.pinTop !== null && c.pinTop !== null && Math.abs(c.pinTop - a.pinTop) < 0.5, `${a.pinTop} → ${c.pinTop}`);
+  }
+  /* every ledger is judged (and written) before any one of them throws */
+  const errs: unknown[] = [];
+  for (const [l, n] of [[L8, 6], [L9, 10], [L10, 4]] as const) { try { l.done(n); } catch (e) { errs.push(e); } }
+  if (errs.length) throw errs[0];
+});
+
+test("CLH2-11 · below 768px the slim row never renders", async ({ page }) => {
+  test.setTimeout(180_000);
+  const L = new Ledger("CLH2-11");
+  /* signed in on the desktop page (the population: the row is there at 1512), then the window narrowed under 768 */
+  await openCl(page);
+  const wide = await page.evaluate(() => document.querySelectorAll(".aglist .clh2-slim").length);
+  L.check("1512: the row is in the page (population)", wide === 1, String(wide));
+  for (const vp of [{ width: 767, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(vp);
+    await page.waitForTimeout(800);
+    await mut(page, "CLH2-11");
+    const n0 = await page.evaluate(() => document.querySelectorAll(".clh2-slim").length);
+    await page.evaluate(() => { for (const sc of document.querySelectorAll<HTMLElement>(".wpg-scroll")) sc.scrollTo({ top: 600 }); window.scrollTo({ top: 600 }); });
+    await page.waitForTimeout(600);
+    const n1 = await page.evaluate(() => document.querySelectorAll(".clh2-slim").length);
+    L.check(`${vp.width} none at the top`, n0 === 0, String(n0));
+    L.check(`${vp.width} none after scrolling`, n1 === 0, String(n1));
+  }
+  L.done(5);
+});
+
+test("SHOTS3 · scrolled at 1512 × 982, both subheader states", async ({ page }) => {
+  test.setTimeout(180_000);
+  mkdirSync(`${DIR}/shots`, { recursive: true });
+  for (const [name, fig] of [["some-not-queried", undefined], ["all-queried", { n: 53, q: 53, y: 0 }]] as const) {
+    await openCl(page, VP, fig);
+    await scrollTo(page, 600);
+    const r = await readSlim(page);
+    expect(r.visible, "the row shows").toBe(true);
+    await page.screenshot({ path: `${DIR}/shots/slim-${name}-1512.png`, clip: { x: 0, y: 0, width: VP.width, height: 420 } });
   }
 });

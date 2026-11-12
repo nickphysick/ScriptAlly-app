@@ -17,7 +17,7 @@
  {
   "where": "1512 sections in order",
   "ok": true,
-  "detail": "[\"quick\",\"where\",\"genres\",\"subs\"]"
+  "detail": "[\"quick\",\"genres\",\"where\",\"subs\"]"
  },
  {
   "where": "1512 no Filters button in the band",
@@ -32,7 +32,7 @@
  {
   "where": "1512 still in view after the scroll",
   "ok": true,
-  "detail": "{\"top\":129.75,\"sc\":105.75}"
+  "detail": "{\"top\":177.75,\"sc\":105.75}"
  },
  {
   "where": "1280 rail found",
@@ -52,7 +52,7 @@
  {
   "where": "1280 sections in order",
   "ok": true,
-  "detail": "[\"quick\",\"where\",\"genres\",\"subs\"]"
+  "detail": "[\"quick\",\"genres\",\"where\",\"subs\"]"
  },
  {
   "where": "1280 no Filters button in the band",
@@ -67,6 +67,6 @@
  {
   "where": "1280 still in view after the scroll",
   "ok": true,
-  "detail": "{\"top\":129.75,\"sc\":105.75}"
+  "detail": "{\"top\":177.75,\"sc\":105.75}"
  }
 ]
