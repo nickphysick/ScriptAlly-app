@@ -12,7 +12,6 @@
  */
 import React from "react";
 import { V3Glyph } from "../v3/V3Parts";
-import type { TrackCounts } from "../../../lib/phoneV4";
 import "./phoneV4.css";
 
 /** the app's own art files, by the names the boards were built from */
@@ -115,25 +114,6 @@ export const Seal: React.FC<{ name: string; size?: number; dark?: boolean; statu
 /* ── the postmark stamp ── */
 export const Stamp: React.FC<{ word: string; date: string; style?: React.CSSProperties }> = ({ word, date, style }) => (
   <div className="pa4-stamp" data-pa4="stamp" role="img" aria-label={`${word} ${date}`} style={style}><b>{word}</b><span>{date}</span></div>
-);
-
-/* ── the four-stage journey track ── */
-export const JourneyTrack: React.FC<{ c: TrackCounts; empty?: boolean }> = ({ c, empty }) => (
-  <div data-pa4="track">
-    <div className="pa4-jr" aria-hidden="true">
-      {[0, 1, 2, 3].map((k) => (
-        <React.Fragment key={k}>
-          {k ? <u className={empty ? "e" : ""} /> : null}
-          <i className={empty ? "e" : k === 3 ? "end" : ""} />
-        </React.Fragment>
-      ))}
-    </div>
-    <div className="pa4-jl">
-      {([["queried", c.queried], ["asked for more", c.requested], ["full", c.full], ["offer", c.offer]] as const).map(([l, n]) => (
-        <span key={l} data-pa4="track-n" data-k={l}><b>{n}</b>{l}</span>
-      ))}
-    </div>
-  </div>
 );
 
 /* ── the ring: three arcs over the live queries ── */

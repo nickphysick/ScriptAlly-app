@@ -4,7 +4,6 @@
  *
  * Phone app v4 (design-refs/phone-app-v4/) — THE FIGURES v4 ADDS, below 768px only. Every one is read from an engine the
  * app already has, and none restates its rule:
- *   - the journey track: the Analytics page's own four rungs (`funnelStages` over `buildRows`);
  *   - "how close" a query is to its date: the Birds-eye engine's own fraction (`eyeProgress`);
  *   - best fit: the writer's own Agent fit order (`fitOrder`), over agents with no query yet;
  *   - the streak: the Goals page's own (`weekStreak`).
@@ -13,7 +12,7 @@
  * ⚠️ COPY (PA4-9): never "overdue" or "late"; a passed date is "N wks past its date".
  */
 import { QueryStatus, type Agent, type Query, type QueryingGoalEntry } from "../types";
-import { funnelStages, type AnalyticsRow } from "./analytics";
+import type { AnalyticsRow } from "./analytics";
 import { eyeProgress } from "./qcBirdsEye";
 import { fitOrder } from "./agentFit";
 import { weekStreak } from "./milestones";
@@ -22,15 +21,6 @@ import type { V3Court, V3Query } from "./phoneV3";
 
 const DAY = 86_400_000;
 const WEEK = 7 * DAY;
-
-/* ── the journey track ── */
-export interface TrackCounts { queried: number; requested: number; full: number; offer: number }
-/** the Analytics page's four rungs: queried, asked for more (a partial or straight to full), full, offer */
-export function trackCounts(rows: readonly AnalyticsRow[]): TrackCounts {
-  const s = funnelStages(rows as AnalyticsRow[]);
-  const n = (k: string) => s.find((x) => x.key === k)?.count ?? 0;
-  return { queried: n("queried"), requested: n("requested"), full: n("full"), offer: n("offer") };
-}
 
 /* ── how close each open query is to its date ── */
 export interface Closeness {

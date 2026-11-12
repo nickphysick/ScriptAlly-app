@@ -13,16 +13,17 @@
  *   - day one: no queries at all.
  * ⚠️ List health hides at 100%. The founding card shows to founding writers only (a waitlist place on file).
  */
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useV3Data } from "../v3/V3Provider";
 import { V3Glyph } from "../v3/V3Parts";
 import { openV3, openV3Query } from "../v3/v3Store";
 import { PhoneTaskScreen } from "../../todo/phone/PhoneTaskScreen";
-import { usePhoneBandExtra } from "../phoneBandStore";
 import { taskLine, type V3Query } from "../../../lib/phoneV3";
 import { buildRows } from "../../../lib/analytics";
-import { closestOpen, dayN, firstSentMs, longDay, nextReply, repliesAhead, streakLine, trackCounts, weeksWord, bestFit, type Closeness } from "../../../lib/phoneV4";
+import { closestOpen, dayN, firstSentMs, nextReply, repliesAhead, streakLine, bestFit, type Closeness } from "../../../lib/phoneV4";
+import { activeSeries, weekChange } from "../../../lib/phoneV41";
+import { TodayHeaderV41 } from "./TodayHeaderV41";
 import { feedEntries } from "../../../lib/dashFeed";
 import { dayMonth } from "../../../lib/dates";
 import { houseModel } from "../../../lib/dashList";
@@ -34,7 +35,10 @@ import { COMPOSE, RANK_NAMES, nextStep, type ComposeKey } from "../../../lib/fou
 import { feedbackDraft, openFeedback, setFeedbackDraft } from "../../../lib/feedbackStore";
 import { QueryStatus, type Activity } from "../../../types";
 import type { WsTask } from "../../../lib/todoWs";
-import { CAST, Chev, Cta, Hero, I4, IconBtn, JourneyTrack, LapCard, Link4, RANK_HEADS, Ring, Stamp } from "./V4Parts";
+import { CAST, Chev, Cta, I4, LapCard as LapCard0, Link4, RANK_HEADS, Ring, Stamp } from "./V4Parts";
+
+/* v4.1: Today's first card sits below the header — nothing overlaps the chart's months (PA41-4) */
+const LapCard: React.FC<React.ComponentProps<typeof LapCard0>> = ({ style, ...p }) => <LapCard0 {...p} style={{ marginTop: 16, ...style }} />;
 import { BirdBar } from "./BirdsV4";
 import { todayState } from "./todayState";
 import "./phoneV4.css";
@@ -53,7 +57,6 @@ export const TodayV4: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
   const [did, setDid] = useState<Did | null>(null);
 
   const rows = useMemo(() => buildRows(queries, activities as Activity[], agents, now), [queries, activities, agents, now]);
-  const track = useMemo(() => trackCounts(rows), [rows]);
   const first = useMemo(() => firstSentMs(rows), [rows]);
   const streak = useMemo(() => streakLine(rows, currentUser?.queryingGoals, now), [rows, currentUser?.queryingGoals, now]);
   const c = v.counts;
@@ -66,7 +69,6 @@ export const TodayV4: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
   const shownDid: Did | null = did ?? (aid?.did && v.ordered[0] ? { head: "Done", next: v.ordered[1]?.key ?? null, queryId: v.ordered[0].query?.id ?? null, done: 1 } : null);
   const state = todayState(aid?.queries === 0 ? 0 : v.qs.length, tasks.length, !!shownDid);
 
-  usePhoneBandExtra("/dashboard", c.you > 0 ? <span className="pa4-pill" data-pa4="mini-pill">{c.you} need you</span> : null, [c.you]);
 
   const ms = useMemo(() => {
     let stored: string | null = null;
@@ -89,24 +91,14 @@ export const TodayV4: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
     setDid((p) => ({ head: d.head, next: d.next, queryId: d.task.query?.id ?? null, done: (p?.done ?? 0) + 1 }));
   };
 
-  const head = state === "dayone" ? <>Let’s get your<br />first query down.</>
-    : <>{c.active} {c.active === 1 ? "query" : "queries"} live.<br />{c.you ? `${c.you} need${c.you === 1 ? "s" : ""} you.` : "Nothing needs you."}</>;
-
+  /* Phone app v4.1: the header holds four things (baked decision 2): the day line with streak and search, the active
+     figure with its change on last week, the need pill, the chart */
+  const series = useMemo(() => activeSeries(queries, now), [queries, now]);
+  const upRef = useRef<HTMLDivElement>(null);
+  const toUpNext = () => upRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   const hero = (
-    <Hero pa4="today-hero" lap
-      top={<>
-        <span className="pa4-s" data-pa4="date">{longDay(now)}</span>
-        {streak.weeks > 0 ? (
-          <span className="pa4-pill" data-pa4="streak"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2c1 4 5 5.5 5 10.5a5 5 0 0 1-10 0c0-2 .7-3.3 2-4.5 0 2 .7 2.7 2 2.7 0-3.2 0-5.7 1-8.7z" /></svg>{weeksWord(streak.weeks)}</span>
-        ) : null}
-        <span style={{ marginRight: -12 }}><IconBtn label="Search" n="search" pa4="search" onClick={() => openV3({ type: "search" })} /></span>
-      </>}
-      kick={first != null ? `Day ${dayN(first, now)} of querying` : "Getting started"}
-      head={head}
-      cast={{ src: CAST.mentor, width: 92 }}
-      minHead={152}
-      after={<JourneyTrack c={track} empty={state === "dayone"} />}
-    />
+    <TodayHeaderV41 day={first != null ? `Day ${dayN(first, now)} of querying` : "Getting started"} streakWeeks={streak.weeks}
+      active={c.active} change={weekChange(series)} need={tasks.length} series={series} dayOne={state === "dayone"} onNeed={toUpNext} />
   );
 
   /* ── the first card, by state ── */
@@ -205,7 +197,7 @@ export const TodayV4: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
   return (
     <div className="pa4 pa4-today" data-pa4="today" data-state={state} data-tasks={tasks.length} data-loading={loading ? "1" : "0"}>
       {hero}
-      {loading ? null : lead}
+      {loading ? null : <div ref={upRef} data-pa41="lead" style={{ scrollMarginTop: 72 }}>{lead}</div>}
       {loading || state === "dayone" ? null : (
         <div className="pa4-inset">
           <RingCard qs={v.qs} c={c} next={nr} onCourt={(k) => navigate(`/queries?court=${k}`)} />

@@ -36,14 +36,15 @@ describe("Phone app v4 renders", () => {
     expect(h).toContain("3 are with agents.");
     expect(renderPage(<Cta>Log query</Cta>)).toContain('data-cta="1"');
   });
-  it("Today: day one when empty, the journey track and Lately when populated", () => {
+  it("Today: day one when empty; the v4.1 header and Lately when populated", () => {
     const empty = renderPage(P(<TodayV4 />), "/dashboard");
     expect(empty).toContain("Log your first query");
     expect(empty).toContain('data-state="dayone"');
     const full = renderPageSeeded(P(<TodayV4 />), "/dashboard");
     expect(full).toContain("Where your queries are");
     expect(full).toContain("Lately");
-    expect(full).toContain("asked for more");
+    expect(full).toContain("Active queries");
+    expect(full).toContain('data-pa41="header"');
   });
   it("Queries: before the first query, then the app's own court names and the switch", () => {
     expect(renderPage(P(<QueriesV4 />), "/queries")).toContain("Nothing sent yet.");
