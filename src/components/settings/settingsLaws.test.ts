@@ -31,7 +31,7 @@ const SHEETS = {
   ...Object.fromEntries(
     SETTINGS_SHEETS.map((f) => [f, decls(readFileSync(join(here, f), "utf8"))]),
   ) as Record<(typeof SETTINGS_SHEETS)[number], string>,
-  "planComparison.css": decls(readFileSync(join(here, "..", "plans", "planComparison.css"), "utf8")),
+  "planTable.css": decls(readFileSync(join(here, "..", "plans", "planTable.css"), "utf8")), // non-workspace v1: the one plan table
 };
 
 /** The settings scope as one string — for the laws that are about the SCOPE, not about a file. */
@@ -65,11 +65,11 @@ describe("law 4 — nowrap only on a mono chip label", () => {
 
   /* ⚠️ ONE PERMITTED USE, AND IT IS NAMED. A two-line "CURRENT" pill is not a pill; a two-line
      VALUE is fine, which is why `.plc-figure` lost its own. */
-  it("planComparison.css uses it once, on the chip", () => {
-    const uses = (SHEETS["planComparison.css"].match(/white-space:\s*nowrap/g) ?? []).length;
+  it("planTable.css uses it once, on the Pro only tag (re-pointed from planComparison.css)", () => {
+    const uses = (SHEETS["planTable.css"].match(/white-space:\s*nowrap/g) ?? []).length;
     expect(uses, "exactly one").toBe(1);
-    const chip = SHEETS["planComparison.css"].slice(
-      SHEETS["planComparison.css"].indexOf(".plc-chip {"),
+    const chip = SHEETS["planTable.css"].slice(
+      SHEETS["planTable.css"].indexOf(".plt-tag {"),
     );
     expect(chip.slice(0, chip.indexOf("}"))).toContain("nowrap");
   });

@@ -125,7 +125,7 @@ describe("/plans renders", () => {
   });
 
   it("…and produces its own chrome", () => {
-    expect(renderPage(<PlansPage />, "/plans")).toContain("Choose your plan");
+    expect(renderPage(<PlansPage />, "/plans")).toContain("Everything, side by side"); // non-workspace v1: the plans-v2 page
   });
 });
 

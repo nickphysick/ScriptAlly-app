@@ -1,0 +1,38 @@
+/* The Plans page (non-workspace v1, Phase 4; design-refs/plans-v2.html). Layout only; the cards are settings' own. */
+.pl-work { display: grid; gap: 18px; }
+.pl-crumb { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 14px; min-height: 24px; color: var(--sp-ink); }
+.pl-crumb svg { width: 16px; height: 16px; }
+.pl-then h2 { font-family: var(--sp-type); font-weight: 400; font-size: 22px; margin: 8px 0 4px; }
+.pl-then p { margin: 0; font-size: 16px; }
+.pl-tiers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.pl-tier { background: #fff; border: 1px solid #e0d5c8; border-radius: 12px; padding: 20px; }
+.pl-tier--pro { background: var(--ink-band); color: var(--ink-cream); border-color: var(--ink-band); }
+.pl-tier h3 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; font-family: var(--sp-type); font-weight: 400; font-size: 24px; }
+.pl-tier .plt-chip svg { width: 14px; height: 14px; }
+.pl-price { margin-top: 10px; display: flex; align-items: baseline; gap: 8px; }
+.pl-price b { font-size: 30px; font-weight: 600; }
+.pl-price span { font-size: 16px; }
+.pl-sub { margin: 4px 0 0; font-size: 14px; opacity: .8; }
+.pl-tier hr { border: 0; border-top: 1px solid currentColor; opacity: .15; margin: 16px 0; }
+.pl-feat { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 16px; }
+.pl-feat li { display: flex; gap: 8px; align-items: flex-start; }
+.pl-feat svg { width: 16px; height: 16px; flex: none; margin-top: 3px; }
+.pl-lead { font-weight: 600; }
+.pl-len { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
+.pl-len button { all: unset; cursor: pointer; display: grid; gap: 2px; text-align: center; padding: 8px 4px; min-height: 24px; border-radius: 10px; border: 1px solid rgba(244, 238, 229, .3); position: relative; }
+.pl-len button[aria-checked="true"] { background: var(--ink-cream); color: var(--ink-band); }
+.pl-len button:focus-visible { outline: 2px solid var(--ink-cream); outline-offset: 2px; }
+.pl-len em { font-style: normal; font-size: 12px; }
+.pl-len b { font-size: 14px; }
+.pl-len span { font-size: 14px; }
+.pl-small { font-size: 14px; margin: 0; }
+.pl-incl { list-style: none; margin: 0; padding: 4px 0 8px; display: grid; gap: 8px; font-size: 16px; }
+.pl-incl li { display: flex; gap: 8px; }
+.pl-incl svg { width: 16px; height: 16px; flex: none; margin-top: 3px; }
+.pl-q { border-top: 1px solid #efe6db; padding: 12px 0; }
+.pl-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 10px; font-weight: 600; font-size: 16px; min-height: 24px; }
+.pl-q summary svg { width: 18px; height: 18px; flex: none; }
+.pl-q[open] summary svg { transform: rotate(180deg); }
+.pl-q p { margin: 8px 0 0; font-size: 16px; }
+.pl-btn { display: inline-flex; align-items: center; padding: 9px 16px; min-height: 36px; border-radius: 8px; }
+@media (max-width: 767.98px) { .pl-tiers { grid-template-columns: 1fr; } .pl-len { grid-template-columns: repeat(2, 1fr); } }

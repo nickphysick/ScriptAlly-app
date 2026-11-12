@@ -46,7 +46,7 @@ import { SettingsCard, SettingsRow, SettingsNote, IdentityRow } from "./settings
 import "./settings/settings.css";
 import "./agents/contact/contactPrinciples.css"; // the desktop postmark stamp (.clp-stamp-at)
 import { CountryCombobox } from "./forms";
-import { PlanComparison } from "./plans/PlanComparison";
+import { PlanTable } from "./plans/PlanTable";
 import { todoPrefs, STALE_MONTHS_CHOICES } from "../lib/todoPrefs";
 import { QUIET_WEEKS, quietWeeksOf, quietWeeksPaths } from "../lib/queryState";
 import { deskPrefPaths, type DeskPrefPatch } from "../lib/userPaths";
@@ -553,11 +553,7 @@ export const AccountSettings: React.FC<{
         />
         <SettingsRow label="Smart Import" description={smartImportUsedUp ? "Used." : "Once on every plan. You haven't used yours yet."} control={smartImportUsedUp ? <Chip>Used</Chip> : <button type="button" onClick={() => onNavigate("import")} className="acct-btn acct-btn--ghost" style={ghostBtn}><Upload style={{ width: 14, height: 14 }} aria-hidden="true" />Open import</button>} />
       </SettingsCard>
-      <SettingsCard heading="What each plan includes" blurb="Pro plans are sized to how long you expect to be querying." note="Nothing to pay on the Free plan.">
-        <div className="sc-row sc-row--full">
-          <PlanComparison currentPlan={planColumn(entitlement)} onSeePlans={undefined} />
-        </div>
-      </SettingsCard>
+      <PlanTable viewer={planColumn(entitlement) === "pro" ? "pro" : "free"} />
     </>
   );
 

@@ -51,7 +51,7 @@ export const SettingsRoute: React.FC<{ path: string; section: AccountSectionId }
   return path === "/account" ? <SettingsV3 /> : <div className="pa-set" data-pa="settings-section" data-k={section}><AccountSettings section={section} {...rest} /></div>;
 };
 
-export const PlansRoute: React.FC = () => (useIsMobile() ? <PlanPhone /> : <div className="sv2-focuscol"><PlansPage /></div>);
+export const PlansRoute: React.FC = () => (useIsMobile() ? <PlanPhone /> : <PlansPage />);
 
 /** Help: the phone's own home at `/help`; an article (`/help/{slug}`) is the Help Centre's own page */
 export const HelpRoute: React.FC<{ path: string }> = ({ path }) => (useIsMobile() && path.replace(/\/+$/, "") === "/help" ? <HelpPhone /> : <HelpCentre />);
