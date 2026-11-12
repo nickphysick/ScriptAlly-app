@@ -46,14 +46,15 @@ describe("Phone app v4 renders", () => {
     expect(renderPage(P(<AgentsV4 />), "/agents")).toContain("No agents on your list yet.");
     const full = renderPageSeeded(P(<AgentsV4 />), "/agents");
     expect(full).toContain("Everyone on your list");
-    /* Phone app v5: Today's Agents tab draws the body without the header; its sentence and its + stay */
-    const bare = renderPageSeeded(P(<AgentsV4 bare />), "/dashboard");
-    expect(bare).not.toContain('data-pa4="agents-hero"');
-    expect(bare).toContain('data-pa4="agents-line"');
-    expect(bare).toContain("Add an agent");
-    expect(bare).toContain("Everyone on your list");
+    /* Phone app v5: the pushed list's groups are Today's Agents summary's — To query · Querying · Closed — and it can
+       open on one of them (Today's Agents tab is AgentsTabV5 now; AgentsV4's `bare` body is retired) */
     const list = renderPageSeeded(P(<AgentsListPageV4 />), "/agents");
-    for (const w of ["To query", "Queried"]) expect(list).toContain(w);
+    for (const w of ["To query", "Querying", "Closed"]) expect(list).toContain(w);
+    expect(list).toContain('data-group="all"');
+    const one = renderPageSeeded(P(<AgentsListPageV4 group="querying" />), "/agents");
+    expect(one).toContain('data-group="querying"');
+    expect(one).toMatch(/data-pa4="agrp" data-k="querying"/);
+    expect(one).not.toMatch(/data-pa4="agrp" data-k="toquery"/);
   });
   it("You: early days in words, and the rows for every page v3 reached", () => {
     const empty = renderPage(<YouV4 />, "/you");

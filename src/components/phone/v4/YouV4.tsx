@@ -23,6 +23,7 @@ import { dayMonth } from "../../../lib/dates";
 import { YOU_PATH } from "../../../lib/phoneV3Nav";
 import type { Activity } from "../../../types";
 import { CAST, Check, Chev, Hero, IconBtn, LapCard, Link4 } from "./V4Parts";
+import { FoundingCardV5 } from "../v5/FoundingCardV5";
 import "./phoneV4.css";
 
 const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
@@ -101,6 +102,8 @@ export const YouV4: React.FC = () => {
           <p className="pa4-b pa4-body" style={{ marginBottom: 8 }}>Every no is proof you asked.</p>
           <Link4 sb pa4="open-wall" onClick={() => navigate("/queries/responses#wall")}>Open the wall</Link4>
         </div>
+        {/* Phone app v5: the founding writer card, moved here from Today */}
+        <FoundingCardV5 uid={currentUser?.id ?? null} />
         <div className="pa4-card" style={{ padding: "0 24px", marginTop: 16 }} data-pa4="you-rows">
           {YOU_ROWS.map(([l, p]) => <button key={p} type="button" className="pa4-tap" data-pa4="you-row" data-path={p} onClick={() => navigate(p)}><span className="pa4-x pa4-b" style={{ fontWeight: 600 }}>{l}</span><Chev /></button>)}
         </div>

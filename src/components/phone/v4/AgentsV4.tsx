@@ -25,6 +25,7 @@ import type { V3Query } from "../../../lib/phoneV3";
 import type { Agent } from "../../../types";
 import { useDiscoverCount } from "../../agents/phone/AgentsPhone";
 import { V4Page } from "./V4Chrome";
+import { AGENT_GROUPS, AGENT_GROUP_NAME, agentPartition, type AgentGroup } from "../../../lib/phoneV5";
 import { CAST, Chev, Cta, Hero, IconBtn, LapCard, Link4, Seal } from "./V4Parts";
 import "./phoneV4.css";
 
@@ -55,12 +56,37 @@ const Face: React.FC<{ name: string; status?: string | null; on?: boolean; onTap
 );
 export { Face as FaceV4 };
 
-/* Phone app v5: inside Today's Agents tab the page has no header of its own, so its first card sits flat under the tabs */
-const FlatCard: React.FC<React.ComponentProps<typeof LapCard>> = ({ style, ...p }) => <LapCard {...p} style={{ marginTop: 16, ...style }} />;
+/** the best fit on the list (or, with everyone queried, the way to the next agent) — the Agents page's first card's
+ *  content. Phone app v5: Today's Agents tab draws the same content under "Next to query" (`kick`). */
+export const NextToQueryV4: React.FC<{ top: Agent | null; discover: number; agentsN: number; kick?: string }> = ({ top, discover, agentsN, kick = "Best fit on your list" }) => {
+  const navigate = useNavigate();
+  return top ? (<>
+    <div className="pa4-s" style={{ marginBottom: 16 }}>{kick}</div>
+    <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 16 }}>
+      <Seal name={top.name} size={56} />
+      <div style={{ minWidth: 0 }}><h2 className="pa4-h" data-pa4="fit-name">{top.name}</h2><div className="pa4-s">{agencyOf(top)}</div></div>
+    </div>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}><Stars n={top.starRating} /><span className="pa4-s">{fitWord(top.starRating)}</span></div>
+    {askTags(top).length ? <div className="pa4-tags" style={{ marginBottom: 16 }} data-pa4="fit-asks">{askTags(top).map((t) => <span key={t} className="pa4-tag">{t}</span>)}</div> : null}
+    <div className="pa4-s" style={{ marginBottom: 24 }}>{[replyWords(top.responseTimeWeeks) ? `Replies in about ${replyWords(top.responseTimeWeeks)}` : "No reply time saved", howWords(top.submissionMethod, top.submissionMethodOther)?.toLowerCase().replace(/^by /, "takes queries by ")].filter(Boolean).join(" · ")}</div>
+    <Cta pa4="fit-log" onClick={() => openV3({ type: "log", agentId: top.id })}>Log a query to {firstOf(top.name)}</Cta>
+    <Link4 pa4="fit-card" style={{ minHeight: 56 }} onClick={() => openV3Agent(top.id)}>Open {firstOf(top.name)}’s card</Link4>
+  </>) : (<>
+    {discover > 0 ? (<>
+      <h2 className="pa4-h" style={{ marginBottom: 8 }}>The Scout has found {discover} more</h2>
+      <p className="pa4-b pa4-body" style={{ marginBottom: 24 }}>Agents open to submissions who represent books like yours.</p>
+      <Cta pa4="see-scout" onClick={() => navigate("/agents/discover")}>See who the Scout found</Cta>
+      <Link4 pa4="add-yourself" style={{ minHeight: 56 }} onClick={() => openV3({ type: "add" })}>Add an agent yourself</Link4>
+    </>) : (<>
+      <h2 className="pa4-h" style={{ marginBottom: 8 }}>{agentsN ? "Everyone on your list has a query" : "Start your list"}</h2>
+      <p className="pa4-b pa4-body" style={{ marginBottom: 24 }}>Add the next agent you’d like to query, and they’ll wait here until you do.</p>
+      <Cta pa4="add-next" onClick={() => openV3({ type: "add" })}>Add an agent</Cta>
+      <div style={{ height: 16 }} />
+    </>)}
+  </>);
+};
 
-/** `bare` (Phone app v5): the Agents page's body without its header, for Today's Agents tab. The header's sentence
- *  becomes the first line and its + becomes an "Add an agent" row, so nothing the header held is lost. */
-export const AgentsV4: React.FC<{ bare?: boolean }> = ({ bare = false }) => {
+export const AgentsV4: React.FC = () => {
   const v = useV3Data();
   const navigate = useNavigate();
   const { agents, queries } = v.core.db;
@@ -74,40 +100,10 @@ export const AgentsV4: React.FC<{ bare?: boolean }> = ({ bare = false }) => {
     ? <>{fits.length} still to query.<br />{queried} queried.</>
     : `All ${agents.length} queried.`;
 
-  const Lap = bare ? FlatCard : LapCard;
   return (
-    <div className="pa4 pa4-agents" data-pa4="agents" data-tq={fits.length} data-bare={bare ? "1" : undefined}>
-      {bare
-        ? <p className="pa4-b pa4-body" style={{ padding: "16px 24px 0" }} data-pa4="agents-line">{head}</p>
-        : <Hero pa4="agents-hero" lap kick="Agents" head={head} cast={{ src: CAST.scout, width: 112 }} corner={corner} />}
-      {top ? (
-        <Lap pa4="best-fit">
-          <div className="pa4-s" style={{ marginBottom: 16 }}>Best fit on your list</div>
-          <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 16 }}>
-            <Seal name={top.name} size={56} />
-            <div style={{ minWidth: 0 }}><h2 className="pa4-h" data-pa4="fit-name">{top.name}</h2><div className="pa4-s">{agencyOf(top)}</div></div>
-          </div>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}><Stars n={top.starRating} /><span className="pa4-s">{fitWord(top.starRating)}</span></div>
-          {askTags(top).length ? <div className="pa4-tags" style={{ marginBottom: 16 }} data-pa4="fit-asks">{askTags(top).map((t) => <span key={t} className="pa4-tag">{t}</span>)}</div> : null}
-          <div className="pa4-s" style={{ marginBottom: 24 }}>{[replyWords(top.responseTimeWeeks) ? `Replies in about ${replyWords(top.responseTimeWeeks)}` : "No reply time saved", howWords(top.submissionMethod, top.submissionMethodOther)?.toLowerCase().replace(/^by /, "takes queries by ")].filter(Boolean).join(" · ")}</div>
-          <Cta pa4="fit-log" onClick={() => openV3({ type: "log", agentId: top.id })}>Log a query to {firstOf(top.name)}</Cta>
-          <Link4 pa4="fit-card" style={{ minHeight: 56 }} onClick={() => openV3Agent(top.id)}>Open {firstOf(top.name)}’s card</Link4>
-        </Lap>
-      ) : (
-        <Lap pa4="all-queried">
-          {discover > 0 ? (<>
-            <h2 className="pa4-h" style={{ marginBottom: 8 }}>The Scout has found {discover} more</h2>
-            <p className="pa4-b pa4-body" style={{ marginBottom: 24 }}>Agents open to submissions who represent books like yours.</p>
-            <Cta pa4="see-scout" onClick={() => navigate("/agents/discover")}>See who the Scout found</Cta>
-            <Link4 pa4="add-yourself" style={{ minHeight: 56 }} onClick={() => openV3({ type: "add" })}>Add an agent yourself</Link4>
-          </>) : (<>
-            <h2 className="pa4-h" style={{ marginBottom: 8 }}>{agents.length ? "Everyone on your list has a query" : "Start your list"}</h2>
-            <p className="pa4-b pa4-body" style={{ marginBottom: 24 }}>Add the next agent you’d like to query, and they’ll wait here until you do.</p>
-            <Cta pa4="add-next" onClick={() => openV3({ type: "add" })}>Add an agent</Cta>
-            <div style={{ height: 16 }} />
-          </>)}
-        </Lap>
-      )}
+    <div className="pa4 pa4-agents" data-pa4="agents" data-tq={fits.length}>
+      <Hero pa4="agents-hero" lap kick="Agents" head={head} cast={{ src: CAST.scout, width: 112 }} corner={corner} />
+      <LapCard pa4={top ? "best-fit" : "all-queried"}><NextToQueryV4 top={top} discover={discover} agentsN={agents.length} /></LapCard>
       <div className="pa4-inset">
         {fits.length > 1 ? (<>
           <div className="pa4-sec"><h2 className="pa4-h">Then</h2></div>
@@ -137,12 +133,6 @@ export const AgentsV4: React.FC<{ bare?: boolean }> = ({ bare = false }) => {
             <button type="button" className="pa4-tap" style={{ minHeight: 72 }} data-pa4="discover" onClick={() => navigate("/agents/discover")}>
               <img src={CAST.scout} alt="" style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--pa-st-slate)", objectFit: "cover", objectPosition: "top" }} />
               <span className="pa4-x"><b>Discover</b><span className="pa4-s">{discover} {discover === 1 ? "agent" : "agents"} the Scout matched to your book</span></span><Chev />
-            </button>
-          ) : null}
-          {bare ? (
-            <button type="button" className="pa4-tap" style={{ minHeight: 72 }} data-pa4="add-agent" onClick={() => openV3({ type: "add" })}>
-              <Seal name="+" size={40} />
-              <span className="pa4-x"><b>Add an agent</b></span><Chev />
             </button>
           ) : null}
         </div>
@@ -191,17 +181,19 @@ export const AgentSheetV4: React.FC<{ id: string }> = ({ id }) => {
   );
 };
 
-/* ── Everyone on your list (v3's list, pushed) ── */
-type AChip = "all" | "tq" | "qd";
-export const AgentsListPageV4: React.FC = () => {
+/* ── Everyone on your list (v3's list, pushed) ──
+   Phone app v5: the groups are Today's Agents summary's own (lib/phoneV5 `agentPartition` over `queryByAgent`): To
+   query · Querying · Closed, and a figure on the summary opens the list on its group (`group`). */
+type AChip = "all" | AgentGroup;
+export const AgentsListPageV4: React.FC<{ group?: AgentGroup | null }> = ({ group = null }) => {
   const v = useV3Data();
   const { agents } = v.core.db;
-  const [chip, setChip] = useState<AChip>("all");
+  const [chip, setChip] = useState<AChip>(group ?? "all");
   const byAgent = useMemo(() => queryByAgent(v.qs), [v.qs]);
   const sorted = useMemo(() => [...agents].sort((x, y) => x.name.localeCompare(y.name)), [agents]);
-  const tq = sorted.filter((a) => !byAgent.has(a.id));
-  const qd = sorted.filter((a) => byAgent.has(a.id));
-  const CH: [AChip, string, number][] = [["all", "All", agents.length], ["tq", "To query", tq.length], ["qd", "Queried", qd.length]];
+  const parts = useMemo(() => agentPartition(sorted, byAgent), [sorted, byAgent]);
+  const CH: [AChip, string, number][] = [["all", "All", agents.length], ...AGENT_GROUPS.map((k) => [k, AGENT_GROUP_NAME[k], parts[k].length] as [AChip, string, number])];
+  const EMPTY: Record<AgentGroup, string> = { toquery: "Everyone on your list has been queried.", querying: "No queries out at the moment.", closed: "No closed queries yet." };
   const row = (a: Agent) => {
     const q = byAgent.get(a.id) ?? null;
     return (
@@ -219,11 +211,15 @@ export const AgentsListPageV4: React.FC = () => {
   return (
     <V4Page title="Everyone on your list" onBack={closeV3} pa4="agents-all"
       extra={<IconBtn label="Add an agent" n="plus" pa4="add-agent" onClick={() => openV3({ type: "add" })} />}>
-      <div className="pa4-chips" data-pa4="achips">
-        {CH.map(([k, l, n]) => <button key={k} type="button" className={`pa4-chip${chip === k ? " on" : ""}`} data-pa4="achip" data-k={k} data-count={n} onClick={() => setChip(k)}><span>{l} <i>{n}</i></span></button>)}
+      <div className="pa4-chips" data-pa4="achips" data-group={chip}>
+        {CH.map(([k, l, n]) => <button key={k} type="button" className={`pa4-chip${chip === k ? " on" : ""}`} aria-pressed={chip === k} data-pa4="achip" data-k={k} data-count={n} onClick={() => setChip(k)}><span>{l} <i>{n}</i></span></button>)}
       </div>
-      {chip !== "qd" ? (<><div className="pa4-grp"><h2 className="pa4-h">To query</h2><span className="pa4-s">{tq.length}</span></div>{tq.length ? tq.map(row) : <p className="pa4-b pa4-empty" style={{ padding: "8px 24px" }}>Everyone on your list has been queried.</p>}</>) : null}
-      {chip !== "tq" ? (<><div className="pa4-grp"><h2 className="pa4-h">Queried</h2><span className="pa4-s">{qd.length}</span></div>{qd.length ? qd.map(row) : <p className="pa4-b pa4-empty" style={{ padding: "8px 24px" }}>No queries yet.</p>}</>) : null}
+      {AGENT_GROUPS.filter((k) => chip === "all" || chip === k).map((k) => (
+        <React.Fragment key={k}>
+          <div className="pa4-grp" data-pa4="agrp" data-k={k}><h2 className="pa4-h">{AGENT_GROUP_NAME[k]}</h2><span className="pa4-s">{parts[k].length}</span></div>
+          {parts[k].length ? parts[k].map(row) : <p className="pa4-b pa4-empty" style={{ padding: "8px 24px" }}>{EMPTY[k]}</p>}
+        </React.Fragment>
+      ))}
       <div style={{ height: 32 }} />
     </V4Page>
   );

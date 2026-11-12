@@ -29,6 +29,8 @@ import { V3Provider, useV3Data } from "../v3/V3Provider";
 import { TodayHeaderV5 } from "./TodayHeaderV5";
 import { BirdsBlockV5 } from "./BirdsBlockV5";
 import type { BeCourt } from "../../../lib/phoneV5";
+import { AgentsTabV5 } from "./AgentsTabV5";
+import { GapsSheetV5 } from "./GapsSheetV5";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
 const P = (n: React.ReactNode) => <V3Provider on now={NOW}>{n}</V3Provider>;
@@ -109,17 +111,18 @@ describe("Phone app v5 renders", () => {
     expect(empty).not.toContain('data-pa5="be"');
     expect(empty).toContain('data-pa4="dayone"');
   });
-  it("Today's Agents tab is the Agents page's body; its Activity tab is Lately", () => {
+  it("Today's Agents tab is v5's (Phase C); its Activity tab is Lately only", () => {
     onTab("agents");
     const agents = renderPageSeeded(P(<TodayV5 />), "/dashboard");
     expect(agents).toContain('data-tab="agents"');
-    expect(agents).toContain("Everyone on your list");
+    expect(agents).toContain('data-pa5="agents-tab"');
     expect(agents).not.toContain('data-pa4="agents-hero"');
     vi.unstubAllGlobals();
     onTab("activity");
     const activity = renderPageSeeded(P(<TodayV5 />), "/dashboard");
     expect(activity).toContain("Lately");
     expect(activity).toContain("See all replies");
+    expect(activity).not.toContain('data-pa4="founding"');
   });
   it("To do: the task list, and its empty line", () => {
     const empty = renderPage(P(<TodoV5 />), "/todo");
@@ -256,5 +259,127 @@ describe("Phone app v5 is what the phone mounts", () => {
     expect(app).not.toContain('routeBase(path) === "/todo") return <Navigate to={`/dashboard');
     expect(app).not.toContain('<Navigate to="/manuscripts#materials" replace />');
     expect(app).toContain("<MaterialsRoute><MaterialsLock page=\"letters\"><QueryLettersPage");
+  });
+});
+
+/* ── Phase C: Today's Agents tab, List health and the gap-filling sheet ── */
+/** an agent with every Housekeeping detail on file (no gap of any kind) */
+const FULL_AGENT = {
+  id: "a1", userId: SMOKE_USER.id, name: "Ada Reader", agency: "Reader & Co", email: "ada@example.com", website: "https://example.com",
+  country: "GB", city: "London", genres: ["Literary Fiction"], mswlNotes: "Quiet literary novels with a strong sense of place.", starRating: 4,
+  submissionStatus: "Open", submissionMethod: SubmissionMethod.EMAIL, responseTimeWeeks: 8, materialsWanted: ["Query Letter"],
+  dateAdded: "2026-01-02T00:00:00.000Z", lastCheckedDate: "2026-01-02T00:00:00.000Z",
+};
+
+describe("Phone app v5, Phase C — the Agents tab and filling the gaps", () => {
+  it("populated: the summary (three figures that add up to the list), List health with its groups, Next to query, See all, Discover", () => {
+    const html = renderPageSeeded(P(<div className="pa4 pa5"><AgentsTabV5 /></div>), "/dashboard");
+    expect(html).toContain('data-pa5="agents-summary"');
+    const counts = [...html.matchAll(/data-pa5="ag-count" data-k="(\w+)" data-n="(\d+)"/g)].map((m) => [m[1], Number(m[2])] as const);
+    expect(counts.map((c) => c[0])).toEqual(["toquery", "querying", "closed"]);
+    expect(counts.reduce((n, c) => n + c[1], 0)).toBe(1);
+    for (const w of ["to query", "querying", "closed"]) expect(html).toContain(w);
+    expect(html).toContain("1 agent on your list");
+    /* the seed's agent has no wishlist: one gap, so List health shows, with its ring and the one group that has a gap */
+    expect(html).toMatch(/data-pa5="health"[^>]*data-gaps="1" data-agents="1"/);
+    expect(html).toContain('data-pa5="health-ring"');
+    expect(html).toContain("1 gap across 1 agent");
+    expect(html).toMatch(/data-pa5="gap-group" data-group="matches" data-n="1"/);
+    expect(html).toContain("Know who fits your book");
+    expect(html).not.toContain('data-group="dates"');
+    expect(html).toContain('data-pa5="fill-gaps"');
+    expect(html).toContain("Fill in the gaps");
+    /* the seed's agent is queried, so Next to query is v4's "everyone has a query" card */
+    expect(html).toContain('data-pa5="best-fit"');
+    expect(html).toContain("Everyone on your list has a query");
+    expect(html).toContain('data-pa5="see-all-agents"');
+    expect(html).toContain("See all 1 agent");
+    expect(html).toContain('data-pa5="discover-row"');
+    /* the order: Summary → List health → Next to query → See all → Discover */
+    const at = ['data-pa5="agents-summary"', 'data-pa5="health"', 'data-pa5="best-fit"', 'data-pa5="see-all-agents"', 'data-pa5="discover-row"'].map((k) => html.indexOf(k));
+    expect([...at].sort((x, y) => x - y)).toEqual(at);
+    /* nothing of AgentsV4's old bare body is here */
+    for (const k of ['data-pa4="shelf"', 'data-pa4="waiting"', 'data-pa4="everyone"', 'data-pa4="agents-line"']) expect(html).not.toContain(k);
+    expect(html).not.toMatch(/overdue|\blate\b/i);
+  });
+  it("an agent not yet queried is the best fit, under Next to query", () => {
+    const html = renderPageSeededWith(P(<div className="pa4 pa5"><AgentsTabV5 /></div>), "/dashboard", { queries: [] });
+    expect(html).toContain("Next to query");
+    expect(html).toContain('data-pa4="fit-log"');
+    expect(html).toMatch(/data-pa5="ag-count" data-k="toquery" data-n="1"/);
+    expect(html).toMatch(/disabled=""[^>]*data-pa5="ag-count" data-k="closed" data-n="0"/);
+  });
+  it("at 100% with no gaps, List health is not there", () => {
+    const html = renderPageSeededWith(P(<div className="pa4 pa5"><AgentsTabV5 /></div>), "/dashboard", { agents: [FULL_AGENT] });
+    expect(html).toContain('data-pa5="agents-summary"');
+    expect(html).not.toContain('data-pa5="health"');
+    expect(html).not.toContain('data-pa5="fill-gaps"');
+    expect(html).toContain('data-pa5="best-fit"');
+  });
+  it("the sheet: the ring, 'n of N' and the strip, the agent, the gap's own copy, the drawer's control and the three buttons", () => {
+    const html = renderPageSeeded(P(<GapsSheetV5 group={null} />), "/dashboard");
+    expect(html).toMatch(/data-pa5="gaps-sheet" data-i="1" data-total="1"/);
+    expect(html).toContain("Filling the gaps · 1 of 1");
+    expect(html).toContain('data-pa5="health-ring"');
+    expect(html.match(/<i class="cur"/g)?.length).toBe(1);
+    expect(html).toMatch(/data-pa5="gap-card" data-agent="a1" data-kind="wishlist"/);
+    expect(html).toContain("Ada Reader");
+    expect(html).toMatch(/Reader &amp; Co · queried \d+ months? ago/);
+    expect(html).toContain("What Ada is hoping to find");
+    expect(html).toContain("Where to find it");
+    expect(html).toContain('data-hk8="wish"');
+    expect(html).toContain('aria-label="Close"');
+    for (const [k, w] of [["gap-save", "Save and next"], ["gap-later", "Ask me later"], ["gap-skip", "Skip"]]) {
+      expect(html).toContain(`data-pa5="${k}"`);
+      expect(html).toContain(w);
+    }
+    /* nothing is answered yet, so Save waits */
+    expect(html).toContain('data-pa5="gap-save" disabled=""');
+    expect(html).not.toMatch(/overdue|\blate\b/i);
+  });
+  it("the sheet with nothing to fill: the plain finished state and Done", () => {
+    const html = renderPageSeededWith(P(<GapsSheetV5 group="dates" />), "/dashboard", { agents: [FULL_AGENT] });
+    expect(html).toMatch(/data-pa5="gaps-sheet"[^>]*data-total="0" data-done="1"/);
+    expect(html).toContain("That’s every gap for now.");
+    expect(html).toContain('data-pa5="gaps-doneb"');
+  });
+});
+
+/* source locks: Housekeeping's fix handlers live in ONE hook, called by the Contact list and the phone's sheet */
+describe("Housekeeping's fix handlers are one shared hook (Nick, 12 Nov)", () => {
+  const read = (p: string) => readFileSync(resolve(__dirname, p), "utf8");
+  const list = read("../../agents/AgentList.tsx");
+  const hook = read("../../agents/contact/useHkFixes.ts");
+  const phone = read("./usePhoneHk.ts");
+  const sheet = read("./GapsSheetV5.tsx");
+  it("AgentList and the phone both call useHkFixes", () => {
+    expect(list).toContain('import { useHkFixes } from "./contact/useHkFixes";');
+    expect(list).toMatch(/= useHkFixes\(\{/);
+    expect(phone).toContain('import { useHkFixes } from "../../agents/contact/useHkFixes";');
+    expect(phone).toMatch(/= useHkFixes\(\{/);
+    /* the sheet's writes are the hook's: its save, its Later */
+    expect(sheet).toContain("fixes.onHkFix(cur, answer)");
+    expect(sheet).toContain("fixes.onLater(cur)");
+  });
+  it("AgentList no longer defines the handlers inline; the hook holds them", () => {
+    for (const k of ["const writeFix = useCallback", "const onHkFix = useCallback", "const onWishlistStill = useCallback", "laterPath(item.agent.id", "showAllPath()", "commitCardSave("]) {
+      expect(list, k).not.toContain(k);
+    }
+    for (const k of ["const writeFix = useCallback", "const onHkFix = useCallback", "const onWishlistStill = useCallback", "laterPath(item.agent.id, item.gap, hkToday)", "showAllPath()", "commitCardSave({ uid: currentUser.id, agent, queries, patch, resolveTaskFlag })"]) {
+      expect(hook, k).toContain(k);
+    }
+    expect(list).toContain("onFix={onHkFixGuided}");
+    expect(list).toContain("onLater={onHkLater}");
+    expect(list).toContain("onShowAll={onHkShowAll}");
+    expect(list).toContain("onWishlistStill={onWishlistStill}");
+  });
+  it("the phone writes nothing itself: no writer is called from the Agents tab or the sheet", () => {
+    for (const src of [sheet, read("./AgentsTabV5.tsx")]) {
+      expect(src).not.toMatch(/updateUserPaths\(|commitCardSave|commitAgentEdits|addUserTask\(|updateAgent\(/);
+    }
+  });
+  it("the founding writer card left Today for Profile", () => {
+    expect(read("./TodayV5.tsx")).not.toContain("FoundingCard");
+    expect(read("../v4/YouV4.tsx")).toContain("<FoundingCardV5 uid={currentUser?.id ?? null} />");
   });
 });

@@ -6,6 +6,12 @@ import {
 import { QueryStatus } from "../types";
 import type { BeLine } from "./qc150";
 import { v3TabFor } from "./phoneV3Nav";
+import {
+  AGENT_GROUPS, agentGroupOf, agentPartition, gapGroupCounts, gapQueue, gapStrip, gapsAcross, healthShows, nextGap, queriedAgo,
+} from "./phoneV5";
+import { GROUP_ORDER, hkModel, type HkAgentCtx } from "./contactHousekeeping";
+import { contactPrefsOf } from "./contactPrefs";
+import type { Agent } from "../types";
 
 const go = (path: string, search = "", hash = "") => phoneV5Redirect(path, search, hash);
 
@@ -190,5 +196,77 @@ describe("the Birds-eye block (Phase B)", () => {
     /* the 23rd, nine days from a 1st in a wide window: the first month gives way */
     const crowd = beMonthLabels({ fromMs: Date.parse("2026-10-23T12:00:00Z"), toMs: Date.parse("2027-01-31T12:00:00Z") });
     expect(crowd.map((x) => x.label)).toEqual(["Nov", "Dec", "Jan"]);
+  });
+});
+
+/* ── Phase C: the Agents summary's partition, List health's groups, the gap session's order ── */
+
+describe("phone v5 Agents tab (Phase C)", () => {
+  it("the summary splits the list three ways by each agent's latest query, and every agent is in exactly one group", () => {
+    const agents = ["a", "b", "c", "d", "e"].map((id) => ({ id }));
+    const latest = new Map<string, { court: string }>([["b", { court: "agent" }], ["c", { court: "you" }], ["d", { court: "closed" }], ["x", { court: "quiet" }]]);
+    const p = agentPartition(agents, latest);
+    expect(p.toquery.map((a) => a.id)).toEqual(["a", "e"]);
+    expect(p.querying.map((a) => a.id)).toEqual(["b", "c"]);
+    expect(p.closed.map((a) => a.id)).toEqual(["d"]);
+    /* a query to an agent no longer on the list ("x") counts nowhere; the three add up to the list */
+    expect(AGENT_GROUPS.reduce((n, k) => n + p[k].length, 0)).toBe(agents.length);
+    expect(agentGroupOf(undefined)).toBe("toquery");
+    expect(agentGroupOf({ court: "quiet" })).toBe("querying");
+    expect(agentGroupOf({ court: "closed" })).toBe("closed");
+  });
+  it("List health's words, and when it hides", () => {
+    expect(gapsAcross(14, 9)).toBe("14 gaps across 9 agents");
+    expect(gapsAcross(1, 1)).toBe("1 gap across 1 agent");
+    expect(healthShows(null)).toBe(false);
+    expect(healthShows({ pct: 100, gaps: 0 })).toBe(false);
+    expect(healthShows({ pct: 82, gaps: 14 })).toBe(true);
+    expect(healthShows({ pct: 90, gaps: 0 })).toBe(true);
+  });
+
+  /* three agents with gaps in every group; Housekeeping's own model orders them */
+  const A = (id: string, over: Partial<Agent>): Agent => ({
+    id, userId: "u", name: `Agent ${id}`, agency: "Agency", email: "", genres: ["Crime"], mswlNotes: "wants crime", responseTimeWeeks: 6,
+    materialsWanted: ["Query Letter"], ...over,
+  } as unknown as Agent);
+  const agents = [
+    A("p", { responseTimeWeeks: undefined, mswlNotes: "" }),
+    A("q", { genres: [], agency: "" }),
+    A("r", { responseTimeWeeks: undefined }),
+  ];
+  const ctx = (a: Agent): HkAgentCtx => ({ live: a.id === "r", fits: false, queried: a.id === "r", passedOn: false, hasReopenTask: false });
+  const model = hkModel(agents, ctx, contactPrefsOf(null, new Date("2026-11-12T12:00:00Z")));
+
+  it("the groups are Housekeeping's four, in GROUP_ORDER, each counting the visible gaps in it", () => {
+    const g = gapGroupCounts(GROUP_ORDER, model.items);
+    expect(g.map((x) => x.group)).toEqual(["dates", "packages", "matches", "reminders"]);
+    expect(g.reduce((n, x) => n + x.n, 0)).toBe(model.items.length);
+    expect(g.find((x) => x.group === "dates")!.n).toBe(model.items.filter((i) => i.gap === "reply").length);
+  });
+  it("the session runs in Housekeeping's own order; a group's row puts that group's gaps first, in the same order", () => {
+    expect(model.items.length).toBeGreaterThan(3);
+    expect(gapQueue(model.items, null).map((i) => i.key)).toEqual(model.items.map((i) => i.key));
+    const m = gapQueue(model.items, "matches");
+    const n = model.items.filter((i) => i.group === "matches").length;
+    expect(n).toBeGreaterThan(0);
+    expect(m.slice(0, n).every((i) => i.group === "matches")).toBe(true);
+    expect(m.slice(0, n).map((i) => i.key)).toEqual(model.items.filter((i) => i.group === "matches").map((i) => i.key));
+    expect(m.slice(n).map((i) => i.key)).toEqual(model.items.filter((i) => i.group !== "matches").map((i) => i.key));
+    expect(m.length).toBe(model.items.length);
+  });
+  it("the strip marks saved gaps and the current one; the next gap is the next still open", () => {
+    expect(gapStrip(4, 2, ["saved", "skipped"])).toEqual(["on", "", "cur", ""]);
+    expect(gapStrip(3, -1, ["saved", "later", "saved"])).toEqual(["on", "", "on"]);
+    const keys = ["a", "b", "c", "d"];
+    expect(nextGap(keys, 0, new Set(["a", "b", "c", "d"]))).toBe(1);
+    expect(nextGap(keys, 0, new Set(["a", "d"]))).toBe(3);
+    expect(nextGap(keys, 3, new Set(keys))).toBeNull();
+  });
+  it("queried N ago", () => {
+    const now = Date.parse("2026-11-12T12:00:00Z"), D = 86_400_000;
+    expect(queriedAgo(now - 3600_000, now)).toBe("queried today");
+    expect(queriedAgo(now - D, now)).toBe("queried 1 day ago");
+    expect(queriedAgo(now - 21 * D, now)).toBe("queried 3 weeks ago");
+    expect(queriedAgo(now - 90 * D, now)).toBe("queried 3 months ago");
   });
 });

@@ -200,3 +200,71 @@ export function beMonthLabels(win: { fromMs: number; toMs: number }): { l: numbe
   }
   return out;
 }
+
+/* ═══ Phase C — TODAY'S AGENTS TAB: the summary, List health's groups, the gap-filling session ═══
+   Pure. The agents' courts are the phone's own query rows (`V3Query.court`, via AgentsV4 `queryByAgent`: each agent's
+   latest query, a live one over a closed one); the gaps, their groups and their order are Housekeeping's (`hkModel`,
+   through lib/dashList `houseModel`). Nothing here decides a gap or a court. */
+
+export type AgentGroup = "toquery" | "querying" | "closed";
+export const AGENT_GROUPS: readonly AgentGroup[] = ["toquery", "querying", "closed"];
+export const AGENT_GROUP_WORDS: Record<AgentGroup, string> = { toquery: "to query", querying: "querying", closed: "closed" };
+export const AGENT_GROUP_NAME: Record<AgentGroup, string> = { toquery: "To query", querying: "Querying", closed: "Closed" };
+export const isAgentGroup = (x: string | null | undefined): x is AgentGroup => x === "toquery" || x === "querying" || x === "closed";
+
+/** one agent's group from their latest query's court: none → to query; closed → closed; any other court → querying */
+export const agentGroupOf = (latest: { court: string } | null | undefined): AgentGroup =>
+  !latest ? "toquery" : latest.court === "closed" ? "closed" : "querying";
+
+/**
+ * The agents on the list, split three ways by ONE source (each agent's latest query, `queryByAgent`). Every agent is in
+ * exactly one group, so the three figures always add up to "N agents on your list". A query to an agent no longer on
+ * the list counts nowhere. Order within a group is the input's.
+ */
+export function agentPartition<A extends { id: string }>(agents: readonly A[], latest: ReadonlyMap<string, { court: string }>): Record<AgentGroup, A[]> {
+  const out: Record<AgentGroup, A[]> = { toquery: [], querying: [], closed: [] };
+  for (const a of agents) out[agentGroupOf(latest.get(a.id))].push(a);
+  return out;
+}
+
+/** "14 gaps across 9 agents"; "1 gap across 1 agent" */
+export function gapsAcross(gaps: number, agents: number): string {
+  return `${gaps} ${gaps === 1 ? "gap" : "gaps"} across ${agents} ${agents === 1 ? "agent" : "agents"}`;
+}
+/** List health shows unless the list is at 100% with nothing left to fill (and there is a list at all) */
+export const healthShows = (h: { pct: number; gaps: number } | null): boolean => !!h && !(h.pct >= 100 && h.gaps === 0);
+
+/** each of Housekeeping's four groups (GROUP_ORDER) with how many of the visible gaps fall in it */
+export function gapGroupCounts<G extends string>(order: readonly G[], items: readonly { group: G }[]): { group: G; n: number }[] {
+  return order.map((group) => ({ group, n: items.filter((i) => i.group === group).length }));
+}
+
+/**
+ * The session's queue: the visible gaps in Housekeeping's own order (`hkModel`'s items, the order the desktop drawer's
+ * "One at a time" runs). Opened from a group's row, that group's gaps come first, in the same order, then the rest.
+ */
+export function gapQueue<T extends { group: string }>(items: readonly T[], group: string | null): T[] {
+  if (!group) return [...items];
+  return [...items.filter((i) => i.group === group), ...items.filter((i) => i.group !== group)];
+}
+
+export type GapOutcome = "saved" | "later" | "skipped";
+/** the progress strip: one segment per gap in the session — filled ones navy ("on"), the current one marked ("cur") */
+export function gapStrip(total: number, at: number, outcomes: readonly (GapOutcome | undefined)[]): ("on" | "cur" | "")[] {
+  return Array.from({ length: total }, (_, k) => (outcomes[k] === "saved" ? "on" : k === at ? "cur" : ""));
+}
+/** where the session goes after gap `at`: the next gap still open in the live model, or null when there is none */
+export function nextGap(keys: readonly string[], at: number, open: ReadonlySet<string>): number | null {
+  for (let k = at + 1; k < keys.length; k += 1) if (open.has(keys[k])) return k;
+  return null;
+}
+
+/** "queried today" · "queried 4 days ago" · "queried 3 weeks ago" · "queried 2 months ago" */
+export function queriedAgo(ms: number, nowMs: number): string {
+  const d = Math.floor((nowMs - ms) / DAY_MS);
+  if (d < 1) return "queried today";
+  if (d < 14) return `queried ${d} ${d === 1 ? "day" : "days"} ago`;
+  if (d < 63) return `queried ${Math.round(d / 7)} weeks ago`;
+  const m = Math.round(d / 30.44);
+  return `queried ${m} ${m === 1 ? "month" : "months"} ago`;
+}

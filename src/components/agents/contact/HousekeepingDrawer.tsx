@@ -165,7 +165,7 @@ const Flights: React.FC<{ list: Flight[]; onLand: (id: number) => void }> = ({ l
 
 const matsOk = (m: CardMats) => (m.ql || m.syn.on || m.smp.on || m.oth.on) && !(m.oth.on && !m.oth.text.trim());
 
-const FocusField: React.FC<{ item: HkItem; book: HkBook; today: Date; agents: readonly Agent[]; onAnswer: (fix: HkFix | null) => void }> = ({ item, book, today, agents, onAnswer }) => {
+export const FocusField: React.FC<{ item: HkItem; book: HkBook; today: Date; agents: readonly Agent[]; onAnswer: (fix: HkFix | null) => void }> = ({ item, book, today, agents, onAnswer }) => {
   const a = item.agent;
   const [weeks, setWeeks] = useState<number | null>(null);
   const [mats, setMats] = useState<CardMats>(() => matsOf([]));

@@ -60,9 +60,10 @@ describe("the To-do workspace renders", () => {
 /* To-do list v51 — THE SWAP: the desktop route mounts the workspace; nothing reaches the retired tray; the pop-up the
    phone still opens carries its own sheet. (A source lock, because these are facts about what imports what.) */
 import { readFileSync, readdirSync, statSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 describe("the desktop To-do is the workspace, and the tray is gone", () => {
   const root = join(__dirname, "..", "..", "..");
+  const retired = join(root, "components", "todo", "v5");
   const read = (p: string) => readFileSync(join(root, p), "utf8");
   /* Phone app v3: To-do had no page of its own on a phone (its tasks were Today's), so below 768px the slot was empty.
      Phone app v5: To do is a dock tab again, so below 768px the slot is the phone's To do page (TodoV5) */
@@ -78,7 +79,11 @@ describe("the desktop To-do is the workspace, and the tray is gone", () => {
         const p = join(d, n);
         if (statSync(p).isDirectory()) { if (n !== "node_modules") walk(p); continue; }
         if (!/\.(tsx?|css)$/.test(n)) continue;
-        if (/from "[./]*(\.\.\/)?v5\/|todo\/v5\//.test(readFileSync(p, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, ""))) hits.push(p);
+        /* Phone app v5: every import is resolved against its own file, so `components/phone/v5/` (a different folder) is
+           not taken for the retired `components/todo/v5/` */
+        const src = readFileSync(p, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+        const specs = [...src.matchAll(/(?:from|import)\s+"([^"]+)"/g)].map((m) => m[1]);
+        if (specs.some((x) => /todo\/v5\//.test(x) || (x.startsWith(".") && (resolve(dirname(p), x) + "/").startsWith(`${retired}/`)))) hits.push(p);
       }
     };
     walk(root);
