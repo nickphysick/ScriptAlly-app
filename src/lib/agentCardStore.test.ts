@@ -80,9 +80,9 @@ describe("the agent card's store", () => {
     const off = subscribeAgentCardEvents((e) => got.push(`${e.type}:${e.agentId}`));
     const a = { id: "ag-1" } as never;
     emitAgentCardEvent({ type: "saved", agentId: "ag-1", before: a, after: a });
-    emitAgentCardEvent({ type: "added", agentId: "ag-9" });
+    emitAgentCardEvent({ type: "added", agentId: "ag-9", how: "done" });
     off();
-    emitAgentCardEvent({ type: "added", agentId: "ag-x" });
+    emitAgentCardEvent({ type: "added", agentId: "ag-x", how: "done" });
     expect(got).toEqual(["saved:ag-1", "added:ag-9"]);
   });
 });

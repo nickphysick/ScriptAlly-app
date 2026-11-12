@@ -103,6 +103,9 @@ import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcut
 import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklist";
 import { useAgentsHold } from "../../lib/contactLoadHold";
 import { readClpFigures, readClpState } from "../../lib/contactPrinciplesReview";
+import { undoAgentAdd } from "../../lib/scoutStore";
+import { agentPrimary } from "../../lib/agentDisplay";
+import { Stamp } from "../phone/v4/V4Parts";
 import { CONTACT_ADD_FIRST, CONTACT_CHECKLIST, CONTACT_NEEDS_AN_AGENT, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, GUIDE_UNHIDE_PATH, contactGuideOf, guideDonePath, nextGuideAfter, type ContactGuideKey } from "../../lib/pageChecklist";
 import { readSkipped } from "../../lib/guideHub";
 import { downloadAgentsCsv } from "../../lib/agentCsv";
@@ -117,6 +120,10 @@ import "./agentList.css";
 /** v16 §E — the device key the shared full-screen hook remembers under (Comparable titles has its own) */
 /** v16 E's key: the shared pin hook reads it once and moves it to `sa.pinList.agents` (v138.6) */
 export const CONTACTS_FULL_KEY = "sa.contactsFull";
+/** principles v1 — the page's snackbar channel and lifetime (a new one replaces the old; they never stack) */
+const CLP_TOAST = "contact-list";
+const CLP_TOAST_MS = 5000;
+const MONTH3 = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
 const DISCOVER = RAIL_GROUPS.flatMap((g) => g.items).find((i) => i.path === "/agents/discover");
 
@@ -570,6 +577,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, []);
 
 
+  /* Contact list principles v1 — an add FINISHED HERE (the journey's Done) lands on the list, not in a panel: the new row
+     comes into view, tinted powder, phone v4's rust postmark ("ADDED" and the date) lands on it, and the page's snackbar
+     offers Undo — `undoAgentAdd`, exactly what `addAgent` created (the agent and its AGENT_ADDED row), never the delete
+     path's compensating "You deleted" record. */
+  const [justAdded, setJustAdded] = useState<string | null>(null);
+  /* the page's snackbar (declared here, above every reader) */
+  const { showToast } = useToast();
+  const [stampAt, setStampAt] = useState<{ left: number; top: number; date: string } | null>(null);
+
   /* `onHkRemind` is declared further down; the act handler reads it through a ref, never a TDZ read */
   const remindRef = useRef<(a: Agent) => void>(() => {});
   /* the card's aftermath ON THE LIST: a save's notice (with the card's Undo) and FLIP, an add's ring,
@@ -581,8 +597,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       beginSaveChoreography(e.after);
     } else if (e.type === "added") {
       tickGuide.current("add");
-      /* v18.3 §D — added from the panel: the panel switches to the new agent's Profile once the list holds it */
-      if (addFromHere.current) addedInPanel.current = e.agentId;
+      /* principles v1 — the journey's Done: the row, the postmark and the snackbar (below). v18.3 §D still holds for a
+         hand-off (the finish screen's edit doors): the panel follows the add once the list holds it. */
+      if (addFromHere.current) { if (e.how === "done") setJustAdded(e.agentId); else addedInPanel.current = e.agentId; }
       addFromHere.current = false;
     } else if (e.type === "undone") {
       undoSave.current = null;
@@ -591,6 +608,35 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       setNotice({ text: `Couldn’t delete ${e.name} — try again.`, kind: "failed", agentId: e.agentId, canUndo: false });
     }
   }), [beginSaveChoreography]);
+
+  useEffect(() => {
+    const id = justAdded;
+    if (!id) return;
+    const a = agents.find((x) => x.id === id);
+    if (!a) return; /* waits for the list to hold it */
+    setJustAdded(null);
+    const name = agentPrimary(a);
+    const uid = currentUser?.id ?? null;
+    showToast({
+      message: `${name} added to your list`, duration: CLP_TOAST_MS, replaces: CLP_TOAST, undoneMessage: `${name} removed`,
+      ...(uid ? { undo: async () => { await undoAgentAdd(uid, id); } } : {}),
+    });
+    /* two frames: the row is drawn by the render the new agent caused */
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const row = [...document.querySelectorAll<HTMLElement>(`.aglist [data-cl26='row'][data-id="${CSS.escape(id)}"]`)].find((el) => el.offsetHeight > 0);
+      if (!row) return; /* filtered out of view: the snackbar alone says so */
+      row.scrollIntoView({ block: "center" });
+      row.removeAttribute("data-clp-new");
+      void row.offsetWidth;
+      row.setAttribute("data-clp-new", "");
+      window.setTimeout(() => row.removeAttribute("data-clp-new"), 2300);
+      const r = row.getBoundingClientRect();
+      const d = new Date();
+      setStampAt({ left: r.left + r.width * 0.56 - 37, top: r.top + r.height / 2 - 37, date: `${d.getDate()} ${MONTH3[d.getMonth()]}` });
+      window.setTimeout(() => setStampAt(null), 1700);
+      row.focus({ preventScroll: true });
+    }));
+  }, [justAdded, agents]); // eslint-disable-line react-hooks/exhaustive-deps -- showToast and the uid are read once, at the add
 
   /* the new-agent form left without an add: a later add elsewhere is not this page's */
   useEffect(() => { if (!cardReq && !addedInPanel.current) addFromHere.current = false; }, [cardReq]);
@@ -870,7 +916,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* ── v25.2 C · editing inside the agent card ── */
   const editOpts = useEditOptions(scoped?.genre ?? null);
   const { saveDraft } = useAgentSave({ writeAgent: sandbox?.writeAgent, editCtx: hkEditCtx });
-  const { showToast } = useToast();
   /* the open card's stored notes (the retired centred editor's Notes, kept in the edit mode) */
   const notesAgent = cardId ? agents.find((a) => a.id === cardId) ?? null : null;
   const cardNotes = useAgentNotes(notesAgent, currentUser?.id ?? null, writeAgentPatch);
@@ -898,7 +943,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         const r = await saveDraft(agent, base, { ...base, ...change }, { emit: false });
         if (!r.ok) { showToast({ message: `Couldn’t save that: ${(r as { error: string }).error}` }); return false; }
         const undo = r.undo;
-        showToast({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
+        /* principles v1 — the page's one snackbar channel: about 5 seconds, a new one replaces the old */
+        showToast({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, duration: CLP_TOAST_MS, replaces: CLP_TOAST,
+          ...(undo ? { undo: async () => { await undo(); } } : {}) });
         return true;
       },
       /* Add agent v1 Phase 5 — the long form is retired: the card's own sections are the editor (`form` below) */
@@ -1162,6 +1209,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       </div>
 
 
+      {/* principles v1 — the postmark over the new row (fixed, where the row was measured; gone after 1.7s) */}
+      {stampAt ? (
+        <div className="clp-stamp-at" data-clp="stamp" style={{ left: stampAt.left, top: stampAt.top }}><Stamp word="ADDED" date={stampAt.date} /></div>
+      ) : null}
       {/* the card itself is app-level now — AgentCardHost, mounted once by App (Agent card v1 §2) */}
     </div>
   );

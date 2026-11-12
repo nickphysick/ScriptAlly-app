@@ -141,12 +141,12 @@ export function closeAgentCard(): void {
  * that opened the editor — if one is waiting — is handed the id, once. A call with no new-agent session open does
  * nothing.
  */
-export function completeNewAgent(agentId: string): void {
+export function completeNewAgent(agentId: string, how: "done" | "handoff" = "done"): void {
   const was = current;
   if (!was || was.agentId !== null) return;
   current = null;
   notify();
-  emitAgentCardEvent({ type: "added", agentId });
+  emitAgentCardEvent({ type: "added", agentId, how });
   was.onCreated?.(agentId);
   giveFocusBack();
 }
@@ -182,7 +182,9 @@ export type AgentCardEvent =
   /* `undo` is the card's whole-document Undo — the SAME closure the card's foot offers, so the list's
      notice can offer it too and the two cannot restore different things; it runs once */
   | { type: "saved"; agentId: string; before: Agent; after: Agent; undo?: () => Promise<unknown> }
-  | { type: "added"; agentId: string }
+  /* `how`: "done" — the add journey's own finish (Done); "handoff" — finished on the way to another surface (the finish
+     screen's edit doors, a flow waiting on the new agent), which then opens its own card */
+  | { type: "added"; agentId: string; how: "done" | "handoff" }
   /* a save's Undo ran (from either place) — the list drops its notice's Undo */
   | { type: "undone"; agentId: string }
   /* a delete is under way: the card has shrunk into the row, which collapses (240ms) */

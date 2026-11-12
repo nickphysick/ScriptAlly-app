@@ -304,7 +304,7 @@ test("CLP7 · after an add: the row in view, the postmark, the snackbar; Undo re
     const host = document.querySelector(".sa-toasts");
     return {
       row: !!row, inView: !!rb && rb.top >= sc.top && rb.bottom <= sc.bottom, tint: row ? row.hasAttribute("data-clp-new") : false,
-      stamp: stamp ? (stamp.textContent ?? "").replace(/\s+/g, " ").trim() : null, panel: document.querySelectorAll("[data-aaj='journey'], [data-cl262='panel']").length,
+      stamp: stamp ? [...stamp.querySelectorAll("b, span")].map((x) => (x.textContent ?? "").trim()).join(" ") : null, panel: document.querySelectorAll("[data-aaj='journey'], [data-cl262='panel']").length,
       toast, role: host?.getAttribute("role") ?? null,
     };
   }, name);
@@ -355,14 +355,15 @@ test("CLP8 · a star saves on the click, the snackbar says so, Undo restores the
   await page.waitForTimeout(900);
   const n2 = await page.locator(".sa-toast").count();
   L.check("never stacks", n2 === 1, String(n2));
-  /* restore */
-  await page.locator(".sa-toast .sa-toast-undo").first().click().catch(() => {});
-  await page.waitForTimeout(1200);
-  await page.locator(`[data-cl262='fit'] [data-star='${before ?? (pick === 3 ? 4 : 3)}']`).first().click().catch(() => {});
-  await page.waitForTimeout(1200);
+  /* restore: the second star's Undo, then — if anything still differs — the star itself (a chosen star pressed again clears) */
+  if (await page.locator(".sa-toast .sa-toast-undo").count()) await page.locator(".sa-toast .sa-toast-undo").first().click();
+  await page.waitForTimeout(1500);
+  const now = (JSON.parse(emu("agents")) as { id: string; starRating: number | null }[]).find((a) => a.id === id)?.starRating ?? null;
+  if (now !== before) await page.locator(`[data-cl262='fit'] [data-star='${before ?? now}']`).first().click();
+  await page.waitForTimeout(1500);
   const end = (JSON.parse(emu("agents")) as { id: string; starRating: number | null }[]).find((a) => a.id === id)?.starRating ?? null;
-  if (end !== before) console.log(`  (CLP8 left ${id} at ${end}, was ${before}; the run's emulator is discarded)`);
-  L.done(4);
+  L.check("restored: the agent's rating as it was", end === before, `${before} → ${end}`);
+  L.done(5);
 });
 
 /* ═════════ CLP9 · keyboard ═════════ */

@@ -55,3 +55,23 @@
   .cl27 .qc153-rail .clp-mf i svg { width: 12px; height: 12px; }
   .cl27 .qc153-rail .clp-mf[aria-expanded="true"] i { transform: rotate(180deg); }
 }
+
+/* ── 3 · feedback: the new row's tint and the postmark ──────────────────────────────────────────────────────────── */
+.cl27 .cl26-row[data-clp-new] { animation: clp-new 2.2s ease-out; }
+@keyframes clp-new { 0%, 40% { background: #e6edf6; } 100% { background: transparent; } }
+/* the rust postmark: phone v4's `Stamp` (V4Parts), drawn here on the desktop — its own sheet is phone-only */
+.clp-stamp-at { position: fixed; z-index: 120; pointer-events: none; }
+.clp-stamp-at .pa4-stamp {
+  position: relative; width: 74px; height: 74px; border-radius: 50%; box-sizing: border-box; border: 2px solid #a2452a; color: #a2452a;
+  display: grid; place-content: center; text-align: center; background: rgba(255, 255, 255, .55); mix-blend-mode: multiply;
+  transform: rotate(-12deg); opacity: 0; animation: clp-stamp 1.6s cubic-bezier(.2, .8, .2, 1) forwards;
+}
+.clp-stamp-at .pa4-stamp::before { content: ""; position: absolute; inset: 4px; border: 1px solid rgba(162, 69, 42, .55); border-radius: 50%; }
+.clp-stamp-at .pa4-stamp b { display: block; font: 400 13px/1.15 var(--sp-type) !important; letter-spacing: .04em; }
+.clp-stamp-at .pa4-stamp span { display: block; font: 400 11px/1.15 var(--sp-type) !important; letter-spacing: .04em; }
+@keyframes clp-stamp {
+  0% { opacity: 0; transform: rotate(-12deg) scale(1.6); }
+  14% { opacity: .95; transform: rotate(-12deg) scale(1); }
+  75% { opacity: .9; }
+  100% { opacity: 0; transform: rotate(-12deg) scale(1); }
+}

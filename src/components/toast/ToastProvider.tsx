@@ -28,6 +28,9 @@ export interface ToastOptions {
   undo?: () => void | Promise<void>;
   /** Overrides the "UNDO" button label (upper-cased in the chip). */
   undoLabel?: string;
+  /** What the toast says once its Undo has run (default "Undone") — e.g. "{Name} removed". It rides the same channel
+   *  (`replaces`) and lifetime as the toast it follows. Additive: omit it and nothing changes. */
+  undoneMessage?: string;
   /**
    * A second, quieter line beneath the message — mono, uppercase.
    *
@@ -118,7 +121,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     dismiss(t.id);
     try {
       await t.undo?.();
-      showToast({ message: "Undone" });
+      showToast({ message: t.undoneMessage ?? "Undone", ...(t.replaces ? { replaces: t.replaces } : {}), ...(t.undoneMessage && t.duration ? { duration: t.duration } : {}) });
     } catch {
       showToast({ message: "Couldn't undo that — please try again." });
     }

@@ -271,14 +271,14 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
     if (!res.success || !res.id) return { ok: false, error: res.error ?? "Couldn’t add the agent." };
     /* Add agent v1 — a flow WAITING on the new agent (Log a query's "Add a new agent") takes it at once: the finish
        screen is for an add on its own */
-    if (req?.onCreated) completeNewAgent(res.id);
+    if (req?.onCreated) completeNewAgent(res.id, "handoff");
     return { ok: true, id: res.id };
   }, [addAgent, req]);
   /** Done (or Esc / ✕ on the finish screen): closes, tells the page ("added"), and says so off the Contact list */
   const finishNew = useCallback((id: string | null | undefined, name: string) => {
     if (!id) { closeAgentCard(); return; }
     if (!sandbox?.contactListHere && pathname !== "/agents") showToast({ message: `Added ${name} to your contact list` });
-    completeNewAgent(id);
+    completeNewAgent(id, "done");
   }, [sandbox, pathname, showToast]);
 
   /**
