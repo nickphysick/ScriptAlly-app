@@ -37,7 +37,7 @@ const toast = (page: Page, text: string | RegExp) => page.locator(".sa-toast", {
 const sheetText = (page: Page) => P(page).locator('[data-ql="sheet"]').innerText();
 const leftOf = (page: Page, sel: string) => page.locator(sel).first().evaluate((e) => e.getBoundingClientRect().left);
 
-test.describe.configure({ mode: "serial" });
+test.describe.configure({ mode: "default" }); // independent: every lock reports its own red or green (one worker, in order; the seed is idempotent)
 test.beforeAll(() => { execSync("node tests/e2e/seedQueryLetters.mjs", { stdio: "inherit" }); });
 
 test("QL2-1 the header is the shared OpenHeader, its columns over the desk's", async ({ page }) => {
@@ -256,9 +256,22 @@ test("QL2-F day one, and the loading skeleton", async ({ page }) => {
   await page.unroute(/127\.0\.0\.1:8085/);
 });
 
+test("QL2-F2 a Free writer meets the Materials lock on Query letters, as in v1", async ({ page }) => {
+  await page.addInitScript(() => { (window as unknown as { __SA_NAV_FREE?: boolean }).__SA_NAV_FREE = true; });
+  await openLetters(page, "cv25-ms");
+  const lock = page.locator('[data-mlk="letters"] [data-mlk="lock"]');
+  await expect(lock).toContainText("Query letters is part of Pro");
+  await expect(lock).toContainText("On Free, your queries still record that a query letter went.");
+  expect(await page.locator('[data-mlk="letters"] .mlk-page').getAttribute("inert")).not.toBeNull();
+});
+
 test("QL2-11 below 768px the route still redirects to Materials on the phone", async ({ page }) => {
-  await openRoute(page, "/materials/letters", { width: 390, height: 844 });
-  await expect(page).toHaveURL(/\/manuscripts#materials/);
+  /* signed in on the desktop first (openRoute waits for the desktop shell, which a phone never shows), then the phone */
+  await openLetters(page, "cv25-ms");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/materials/letters");
+  await expect(page).toHaveURL(/\/manuscripts#materials/, { timeout: 20_000 });
+  await expect(page.locator('[data-ql="desk"]:visible')).toHaveCount(0);
 });
 
 test("QL2-12 contrast at least 4.5:1, no text under 12px, controls at least 32px tall", async ({ page }) => {

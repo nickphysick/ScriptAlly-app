@@ -177,3 +177,27 @@ export const openingParas = (t: string | undefined, n = 4): string[] =>
 /** Part D's note, said when the first letter is saved with queries already out. */
 export const firstLetterNote = (n: number): string =>
   `You already have ${n} ${n === 1 ? "query" : "queries"} out. We'll count ${n === 1 ? "it" : "them"} towards this letter. If that's not right, it's easy to change on each query.`;
+
+/* ── Query letters v2 (12 Nov): pure helpers for the letter desk. Nothing above this line changed. ───────────────── */
+
+/** A square-bracketed gap: up to 80 characters on one line (design-refs/query-letters-v2's `GAP`). */
+export const BRACKET_GAP = /\[[^\]\n]{1,80}\]/g;
+
+/** Every distinct `[...]` in the text, in reading order. It reports what is there; it never says what to write. */
+export function bracketGaps(text: string): string[] {
+  const out: string[] = [];
+  for (const m of String(text ?? "").match(BRACKET_GAP) ?? []) if (!out.includes(m)) out.push(m);
+  return out;
+}
+
+/** The note under "Your letters" while letters under `LETTER_MIN_SENT` are being compared: only when more than one
+ *  letter has gone out and at least one of them is early. The ref's wording; "their bars" when more than one. */
+export function earlyNote(rows: readonly { name: string; sent: number }[]): string {
+  const sent = rows.filter((r) => r.sent > 0);
+  const early = sent.filter((r) => r.sent < LETTER_MIN_SENT);
+  if (sent.length < 2 || !early.length) return "";
+  const names = early.map((r) => r.name).join(" and ");
+  return early.length > 1
+    ? `${names} have only gone to a few agents so far, so their bars will move a lot with each reply.`
+    : `${names} has only gone to a few agents so far, so its bar will move a lot with each reply.`;
+}
