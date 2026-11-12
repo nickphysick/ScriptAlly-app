@@ -123,6 +123,16 @@ line restyle and the headline's balanced wrap); `page-*.png` were retaken on the
   nothing in the Query Centre (no file under src/components/queries; CLP3 holds its title).
 - The suites' ledgers are copied to `suite-ledgers/`. Their own report folders were put back as committed.
 
-## Dev deploy
+## Dev deploy — not done, waiting on Nick
 
-Recorded in the deploy section below.
+- **Served hash before:** `index-CzLH0sbg.js` at the start (`…-qc1541-pa4`). Dev moved mid-session to `index-CLC0PZ_h.js`
+  (`…-pa4-qc155` @ da2a05a60, Query Centre v155). Its 8 commits touch no file this branch touches.
+- **Deploy branch:** `dev/…-pa4-qc155-clp1` = that tip + `cl-principles-v1` (merge 83e9d594c, clean), local, not pushed.
+- **On it:** tsc 0; both builds clean; Vitest 3 failed (the baseline's 3). CLP1–14 all green. cl262 25/25, cl27 all green,
+  addAgentV1 14/14 and qc1541 all green.
+- **Red on it, already red before this branch:**
+  - CL26-H10, the Agent fit sort (see above).
+  - qc155 S4 ×2 ("pixel-identical to the before build", "every frame box unchanged"). This is red the same way on v155's
+    own tip, da2a05a60, without this branch (run on a detached checkout of it). The content column is 16px wider each side
+    than v155's recorded before reading, so the reading was taken in a different setup.
+- The brief says to deploy only if all of them are green, so nothing was deployed. Served hash after: unchanged, `index-CLC0PZ_h.js`.
