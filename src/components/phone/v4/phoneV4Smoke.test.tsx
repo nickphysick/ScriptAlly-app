@@ -4,7 +4,7 @@
  *
  * Render smokes — Phone app v4. See `src/test/pageSmoke.tsx` for why these exist and why they assert almost nothing.
  * The node environment has no matchMedia, so the routes take their desktop path; the phone pieces are smoked directly.
- * The rendered checks are tests/e2e/phoneAppV4.measure.ts (PA4-1…11).
+ * The rendered checks are tests/e2e/phoneAppV5.measure.ts (PA5-1…15; v4's and v4.1's specs are retired, tests/e2e/RETIRED-phone-app-v4.md).
  * Phone app v5: the dock (V5Dock) and Today (TodayV5) replace V4TabBar and TodayV4; their smokes moved to
  * components/phone/v5/phoneV5Smoke.test.tsx.
  */

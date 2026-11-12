@@ -218,7 +218,7 @@ describe("the app-feel layer (Phase 6)", () => {
 
 /* ⚠️ RE-POINTED 11 NOV (Phone app v3): the menu behind the initials (PhoneMenu) RETIRES with the initials themselves.
    The claim that survives is the same one: nothing it offered became unreachable. Each of its doors now has a home on
-   the You tab, its Settings page or Today. The rendered walk is tests/e2e/phoneAppV4.measure.ts (PA4-8). */
+   the You tab, its Settings page or Today. The rendered walk is tests/e2e/phoneAppV5.measure.ts (PA5-2). */
 describe("the retired menu — everything it offered is still reachable", () => {
   /* Phone app v5, Phase G: You is Profile (ProfileV5, its rows in lib/phoneV5 PROFILE_ROWS); packages, letters and comps
      moved to the Materials tab (its own dock place) */

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "PA5-11",
+  "where": "gaps on the list (population 79; 20 reply dates)",
+  "ok": true,
+  "detail": "{\"gaps\":79,\"pct\":69,\"dates\":20}"
+ },
+ {
+  "lock": "PA5-11",
+  "where": "a reply-time gap in the session",
+  "ok": true,
+  "detail": "{\"kind\":\"reply\",\"agent\":\"cv25-agent-10\",\"key\":\"cv25-agent-10:reply\"}"
+ },
+ {
+  "lock": "PA5-11",
+  "where": "the agent changed (reply time set)",
+  "ok": true,
+  "detail": "undefined → 6"
+ },
+ {
+  "lock": "PA5-11",
+  "where": "through Housekeeping's handler: its saved line, with Undo, and the session moved on",
+  "ok": true,
+  "detail": "{\"snack\":\"Aisha Kapoor replies in about 6 weeks. Your reply-due date is set.Undo\",\"i0\":\"1\",\"i1\":\"2\"}"
+ },
+ {
+  "lock": "PA5-11",
+  "where": "the gap count dropped by one",
+  "ok": true,
+  "detail": "79 → 78"
+ },
+ {
+  "lock": "PA5-11",
+  "where": "Undo: the agent and the count are back",
+  "ok": true,
+  "detail": "{\"diff\":[],\"gaps\":79}"
+ }
+]

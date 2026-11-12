@@ -1,0 +1,290 @@
+[
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Queries · population 238 texts, 110 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Queries · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Queries · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Queries · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Agents · population 110 texts, 63 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Agents · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Agents · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Agents · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Activity · population 61 texts, 35 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Activity · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Activity · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Today · Activity · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · To do · population 189 texts, 110 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · To do · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · To do · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · To do · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Packages · population 75 texts, 38 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Packages · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Packages · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Packages · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Letters · population 78 texts, 46 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Letters · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Letters · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Letters · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Versions · population 26 texts, 24 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Versions · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Versions · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Versions · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Comps · population 88 texts, 45 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Comps · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Comps · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Materials · Comps · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Profile · population 51 texts, 37 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Profile · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Profile · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · Profile · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the full Birds-eye view · population 94 texts, 63 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the full Birds-eye view · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the full Birds-eye view · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the full Birds-eye view · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the gaps sheet · population 16 texts, 4 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the gaps sheet · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the gaps sheet · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the gaps sheet · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the feedback sheet · population 6 texts, 4 targets",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the feedback sheet · text ≥ 14px (dock labels excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the feedback sheet · targets ≥ 48×48 (Birds-eye rows excepted)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-13",
+  "where": "390x664 · the feedback sheet · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ }
+]

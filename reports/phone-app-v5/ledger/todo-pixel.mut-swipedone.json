@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "PA5-10",
+  "where": "an own task to mark done (population)",
+  "ok": true,
+  "detail": "[{\"key\":\"task-full-seed-query-9\",\"kind\":\"send\"},{\"key\":\"task-partial-seed-query-20\",\"kind\":\"send\"},{\"key\":\"task-partial-seed-query-7\",\"kind\":\"send\"},{\"key\":\"task-offer-cv25-q-08\",\"kind\":\"offer\"},{\"key\":\"task-partial-cv25-q-06\",\"kind\":\"send\"},{\"key\":\"task-full-rj-dupe\",\"kind\":\"send\"},{\"key\":\"task-partial-cv25-q-07\",\"kind\":\"send\"},{\"key\":\"task-full-rj-send\",\"kind\":\"send\"},{\"key\":\"task-partial-msv12-q-3\",\"kind\":\"send\"},{\"key\":\"task-full-msv12-q-4\",\"kind\":\"send\"},{\"key\":\"task-full-cv25-q-09\",\"kind\":\"send\"},{\"key\":\"task-offer-seed-query-12\",\"kind\":\"offer\"}]"
+ },
+ {
+  "lock": "PA5-10",
+  "where": "the top card is an own task (population 103 tasks)",
+  "ok": true,
+  "detail": "{\"top\":\"seed-cal-carried\",\"kind\":\"own\",\"n\":103}"
+ },
+ {
+  "lock": "PA5-10",
+  "where": "the task's own document (population)",
+  "ok": true,
+  "detail": "{\"acts\":408,\"open\":15,\"done\":false,\"id\":\"seed-cal-carried\",\"taskId\":\"seed-cal-carried\"}"
+ },
+ {
+  "lock": "PA5-10",
+  "where": "the verb opens the task's journey",
+  "ok": true,
+  "detail": "{\"key\":\"seed-cal-carried\",\"label\":\"Chase the Blaine partial\",\"title\":\"Chase the Blaine partial\"}"
+ },
+ {
+  "lock": "PA5-10",
+  "where": "cancel (the verb's journey): nothing recorded, the card back on top",
+  "ok": true,
+  "detail": "{\"top\":\"seed-cal-carried\",\"kind\":\"own\",\"title\":\"Chase the Blaine partial\",\"n\":103,\"badge\":103,\"then\":[{\"key\":\"seed-cal-task\",\"kind\":\"own\"},{\"key\":\"cbseed-t1\",\"kind\":\"own\"},{\"key\":\"cbseed-n5\",\"kind\":\"own\"},{\"key\":\"task-zztd51i3mvd0hg51\",\"kind\":\"own\"},{\"key\":\"task-zztd51i3mvgv7nze\",\"kind\":\"own\"},{\"key"
+ },
+ {
+  "lock": "PA5-10",
+  "where": "a right swipe opens the same journey",
+  "ok": false,
+  "detail": "{\"bySwipe\":null,\"byVerb\":{\"key\":\"seed-cal-carried\",\"label\":\"Chase the Blaine partial\",\"title\":\"Chase the Blaine partial\"}}"
+ },
+ {
+  "lock": "PA5-10",
+  "where": "the swipe itself records nothing",
+  "ok": false,
+  "detail": "{\"acts\":408,\"open\":14,\"done\":true}"
+ },
+ {
+  "lock": "PA5-10",
+  "where": "cancel (the swipe's journey): nothing recorded",
+  "ok": true,
+  "detail": "{\"n\":103,\"acts\":408,\"done\":false}"
+ },
+ {
+  "lock": "PA5-10",
+  "where": "save: the card leaves and the badge and count drop by one",
+  "ok": true,
+  "detail": "{\"top\":\"seed-cal-task\",\"n\":102,\"badge\":102,\"done\":true}"
+ },
+ {
+  "lock": "PA5-10",
+  "where": "Undo: the card and the badge are back, and the task is open again",
+  "ok": true,
+  "detail": "{\"hasUndo\":true,\"top\":\"seed-cal-carried\",\"n\":103,\"badge\":103,\"done\":false,\"acts\":408}"
+ }
+]

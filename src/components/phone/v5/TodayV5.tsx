@@ -28,7 +28,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useV3Data } from "../v3/V3Provider";
 import { V3Glyph } from "../v3/V3Parts";
 import { openV3, openV3Query } from "../v3/v3Store";
-import { courtRows } from "../../../lib/phoneV3";
+import { courtRows, v3Counts, v3Queries } from "../../../lib/phoneV3";
+import { buildQcRows } from "../../../lib/qcSummary";
+import { anyToMs } from "../../../lib/qcStages";
 import { buildRows } from "../../../lib/analytics";
 import { dayN, firstSentMs, streakLine } from "../../../lib/phoneV4";
 import { activeSeries, weekChange } from "../../../lib/phoneV41";
@@ -118,6 +120,23 @@ export const TodayV5: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
     );
   }
 
+  /* a DEV-ONLY review aid (Phone app v5, PA5-5 and the campaign states): `window.__SA_PA5_BE = { now?, ids? }` feeds the
+     Birds-eye block the SAME derivations (buildQcRows → v3Queries → v3Counts) over a subset of the writer's own queries
+     (`ids`) and their activities up to `now` — the measurement picks queries with nothing recorded after `now`, so their
+     stored fields are what they were then. The MODE test is at the call site, so a production build folds it away. */
+  const beAid: { now?: number; ids?: string[] } | null = import.meta.env.MODE !== "production" && typeof window !== "undefined"
+    ? ((window as unknown as { __SA_PA5_BE?: { now?: number; ids?: string[] } }).__SA_PA5_BE ?? null) : null;
+  const be = (() => {
+    if (!beAid) return { qs: v.qs, c, now };
+    const at = beAid.now ?? now;
+    const keep = beAid.ids ? new Set(beAid.ids) : null;
+    const qq = queries.filter((q) => !keep || keep.has(q.id));
+    const ids = new Set(qq.map((q) => q.id));
+    const acts = (activities as Activity[]).filter((a) => !!a.queryId && ids.has(a.queryId) && (anyToMs(a.date) ?? 0) <= at);
+    const fq = v3Queries({ rows: buildQcRows(qq, agents, acts, at), agents, tasks: [], quietWeeks: v.quietWeeks, nowMs: at });
+    return { qs: fq, c: v3Counts(fq), now: at };
+  })();
+
   /* ── the three tabs ── */
   const mine = useMemo(() => courtRows(v.qs, "you"), [v.qs]);
   const hasQueries = aid?.queries === 0 ? false : v.qs.length > 0;
@@ -126,7 +145,7 @@ export const TodayV5: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
     panel = (<>
       <div className="pa4-inset" style={{ paddingTop: 16 }}>
         {/* v5: the Birds-eye block, straight on the page; absent with nothing open (day one shows above the tabs) */}
-        {hasQueries && c.active > 0 ? <BirdsBlockV5 qs={v.qs} c={c} nowMs={now} /> : null}
+        {hasQueries && be.c.active > 0 ? <BirdsBlockV5 qs={be.qs} c={be.c} nowMs={be.now} /> : null}
       </div>
       {mine.length ? (<>
         <div className="pa4-grp" data-pa5="your-move"><h2 className="pa4-h">Your move</h2><span className="pa4-s">{mine.length}</span></div>

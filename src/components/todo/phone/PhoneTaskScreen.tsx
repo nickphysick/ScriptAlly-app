@@ -116,7 +116,10 @@ export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, s
   const cur = Math.min(qi, Math.max(0, qs.length - 1));
   const curQ = qs[cur] ?? null;
   const last = cur === qs.length - 1;
-  const chip = dueChip(t);
+  /* Phone app v5 (PA5-14, Phase H): no verdict words on the phone — the desk's "N days late" reads "N days past its date"
+     here (the phone's own words for a passed date, as the Birds-eye block's); the desk keeps its own chip */
+  const chip0 = dueChip(t);
+  const chip = chip0 && chip0.s.endsWith("late") ? { ...chip0, s: chip0.s.replace(/late$/, "past its date") } : chip0;
   const facts = t.kind === "quiet" || t.kind === "nudge" ? core.quietFacts(t) : undefined;
   const meta = own ? "Your task" : [t.agentName, t.agency && t.agency !== t.agentName ? t.agency : ""].filter(Boolean).join(" · ");
   const q = t.query ?? null;

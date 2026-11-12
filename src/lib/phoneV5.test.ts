@@ -183,6 +183,9 @@ describe("the Birds-eye block (Phase B)", () => {
     const far = beTrack(line({ start: -2, due: 60 }), win, NOW);
     expect(far.cur).toMatchObject({ off: true, notch: null });
     expect(far.cur!.l + far.cur!.rem).toBe(100);
+    /* a date before the window's start: no notch at the edge; the deeper segment runs in from the edge to today */
+    const before = beTrack(line({ start: -60, due: -30, overdue: true }), win, NOW);
+    expect(before.cur).toMatchObject({ notch: null, deep: { l: 0, w: 50 } });
     /* no date: solid to today, nothing paler, no notch */
     expect(beTrack(line({ start: -5, due: null }), win, NOW).cur).toMatchObject({ rem: 0, notch: null, deep: null });
     /* earlier stages, clipped to the window */

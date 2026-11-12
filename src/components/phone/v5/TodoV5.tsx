@@ -284,7 +284,7 @@ export const TodoV5: React.FC = () => {
                 const q = t.query ? byId.get(t.query.id) ?? null : null;
                 const sub = chipsOf(t, q, now)?.lead ?? taskLine(t, q);
                 return (
-                  <button key={t.key} type="button" className="pa5-ck" data-pa5="todo-then-row" data-key={t.key} onClick={() => openTask(t, false)}>
+                  <button key={t.key} type="button" className="pa5-ck" data-pa5="todo-then-row" data-key={t.key} data-kind={t.kind} onClick={() => openTask(t, false)}>
                     <i className="pa5-ckb" aria-hidden="true" />
                     <span className="pa5-ckx"><span className="pa4-b">{t.title}</span>{sub ? <span className="pa4-s">{sub}</span> : null}</span>
                     <Chev />

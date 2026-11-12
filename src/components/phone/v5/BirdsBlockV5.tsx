@@ -159,7 +159,7 @@ export const BirdsBlockV5: React.FC<{ qs: readonly V3Query[]; c: V3Counts; nowMs
           return (
             <React.Fragment key={r.id}>
               <button type="button" className={`pa5-be-row${op ? " op" : ""}`} data-pa5="be-row" data-id={r.id} data-court={r.court}
-                data-from={r.line.cur?.fromMs ?? ""} data-due={r.dueMs ?? ""} data-past={past ? "1" : "0"} data-status={String(row.status)}
+                data-from={r.line.cur?.fromMs ?? ""} data-to={r.line.cur?.toMs ?? ""} data-pasts={r.line.past.map((b) => `${b.fromMs}-${b.toMs}`).join(",")} data-due={r.dueMs ?? ""} data-past={past ? "1" : "0"} data-status={String(row.status)}
                 aria-expanded={op} aria-controls={op ? `pa5-be-d-${r.id}` : undefined} onClick={() => setOpen(op ? null : r.id)}>
                 <span className="pa5-be-nm"><MiniTrack status={String(row.status)} /><b>{surname(row.agentName) || row.agentName}</b></span>
                 <span className="pa5-be-tk" aria-hidden="true">

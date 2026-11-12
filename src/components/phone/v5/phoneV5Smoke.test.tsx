@@ -502,7 +502,7 @@ describe("Phone app v5, Phase E — the full Birds-eye view", () => {
     expect(html).not.toContain("6 weeks");
     /* the ruler, the pill and the line; every row carries its engine dates and court */
     for (const k of ["bv-track", "bv-today", "bv-now", "bv-names"]) expect(html).toContain(`data-pa5="${k}"`);
-    expect(html).toMatch(/data-pa5="bv-row" data-pa41="vrow" data-id="qq\d+" data-court="(you|agent|quiet)" data-from="\d+" data-due="\d*" data-past="[01]"/);
+    expect(html).toMatch(/data-pa5="bv-row" data-pa41="vrow" data-id="qq\d+" data-court="(you|agent|quiet)" data-from="\d+" data-to="\d+" data-pasts="[\d,-]*" data-due="\d*" data-past="[01]"/);
     /* groups: the first is the phone's "Past its date"; a heading carries its count; one over five folds */
     expect(html).toContain("Past its date");
     const groups = [...html.matchAll(/data-pa5="bv-group" data-k="(\w+)" data-n="(\d+)"/g)].map((m) => [m[1], Number(m[2])] as const);

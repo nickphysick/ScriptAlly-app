@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "PA5-15",
+  "where": "dashboard DOM",
+  "ok": true,
+  "detail": "483872 chars, identical"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "dashboard pixels",
+  "ok": true,
+  "detail": "0 pixels differ"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "queries DOM",
+  "ok": true,
+  "detail": "481320 chars, identical"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "queries pixels",
+  "ok": true,
+  "detail": "0 pixels differ"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "agents DOM",
+  "ok": true,
+  "detail": "481955 chars, identical"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "agents pixels",
+  "ok": false,
+  "detail": "3 pixels differ"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "letters DOM",
+  "ok": true,
+  "detail": "479339 chars, identical"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "letters pixels",
+  "ok": true,
+  "detail": "0 pixels differ"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "packages DOM",
+  "ok": true,
+  "detail": "481545 chars, identical"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "packages pixels",
+  "ok": true,
+  "detail": "0 pixels differ"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "birds DOM",
+  "ok": true,
+  "detail": "583073 chars, identical"
+ },
+ {
+  "lock": "PA5-15",
+  "where": "birds pixels",
+  "ok": true,
+  "detail": "0 pixels differ"
+ }
+]

@@ -300,7 +300,7 @@ export const BirdsViewV5: React.FC<{ switcher: React.ReactNode; corner: React.Re
                   const agency = r.row.agency && r.row.agency !== "No agency" ? r.row.agency : "";
                   return (
                     <div key={r.q.id} className={`pa5bv-row${stageOf && !stage ? " pre" : ""}${isOpen ? " op" : ""}`} data-pa5="bv-row" data-pa41="vrow"
-                      data-id={r.q.id} data-court={r.court} data-from={r.line.cur?.fromMs ?? ""} data-due={r.line.dueMs ?? ""} data-past={r.line.cur?.overdue ? "1" : "0"}
+                      data-id={r.q.id} data-court={r.court} data-from={r.line.cur?.fromMs ?? ""} data-to={r.line.cur?.toMs ?? ""} data-pasts={r.line.past.map((b) => `${b.fromMs}-${b.toMs}`).join(",")} data-due={r.line.dueMs ?? ""} data-past={r.line.cur?.overdue ? "1" : "0"}
                       data-status={String(r.row.status)} data-state={r.q.state} data-name={r.row.agentName}>
                       <button type="button" className="pa5bv-top" aria-expanded={isOpen} aria-controls={isOpen ? `pa5bv-d-${r.q.id}` : undefined} onClick={() => onRow(r.q.id)}>
                         <span className="pa5bv-nm" data-pa5="bv-names"><MiniTrack status={stage ?? String(r.row.status)} /><b>{land ? r.row.agentName : surname(r.row.agentName) || r.row.agentName}</b></span>

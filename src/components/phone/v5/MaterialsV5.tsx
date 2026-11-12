@@ -77,7 +77,7 @@ export const MaterialsV5: React.FC = () => {
     : <CompsTabV5 model={model} />;
 
   return (
-    <div className="pa4 pa5 pa5-mat" data-pa5="materials" data-tab={tab}>
+    <div className="pa4 pa5 pa5-mat" data-pa5="materials" data-tab={tab} data-ms={ms?.id ?? ""}>
       <header className="pa5-hd pa5m-hd" data-pa5="mat-hd" data-pa4="materials-hero">
         <img className="pa5-hd-sh" src={CAST.shadow} alt="" />
         <div className="pa5-hd-t">

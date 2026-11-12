@@ -156,7 +156,8 @@ export function beWindow(lines: readonly Pick<BeLine, "past" | "cur" | "dueMs">[
 /**
  * One row's bar track, in percent of the window (ref `btrack` with beP "B", "the bar carries on"): earlier stages
  * faded; the current stage solid to today and paler to its date, with a notch at the date; past its date the bar carries
- * on from the notch to today in a deeper tone (`deep`). A date beyond the window fades off the right edge, no notch.
+ * on from the notch to today in a deeper tone (`deep`). A date beyond the window fades off the right edge, no notch; a
+ * date before its start has no notch and the deeper segment runs in from the left edge.
  * From the engine's own line: its stage dates and its due date are used as they are.
  */
 export interface BeTrack {
@@ -183,7 +184,9 @@ export function beTrack(line: Pick<BeLine, "past" | "cur" | "dueMs" | "row">, wi
       l, status, off,
       rem: Math.max(0, e - l),
       solid: Math.max(0, Math.min(t, e) - l),
-      notch: off ? null : e,
+      /* a date before the window's start has no notch either: clamped to the left edge it would mark a day it is not
+         (PA5-6, Phase H) — the deeper segment simply runs in from the edge to today */
+      notch: off || line.dueMs < win.fromMs ? null : e,
       deep: c.overdue && t > e ? { l: e, w: t - e } : null,
     },
   };
