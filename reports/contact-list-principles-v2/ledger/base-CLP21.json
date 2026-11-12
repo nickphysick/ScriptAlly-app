@@ -1,0 +1,17 @@
+[
+ {
+  "where": "header ring arc #2a3a52",
+  "ok": false,
+  "detail": "rgb(201, 118, 93)"
+ },
+ {
+  "where": "header ring track #ecc0ae",
+  "ok": false,
+  "detail": "rgb(241, 217, 207)"
+ },
+ {
+  "where": "badge: navy text on white, a 1.5px navy outline",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(244, 238, 229)\",\"fg\":\"rgb(28, 19, 15)\",\"sh\":\"rgb(201, 118, 93) 0px 0px 0px 2.5px, rgb(242, 238, 232) 0px 0px 0px 5px\"}"
+ }
+]
