@@ -55,6 +55,7 @@ import { deskPrefPaths, type DeskPrefPatch } from "../lib/userPaths";
 import { useSmartImportEntitlement } from "../lib/useSmartImportEntitlement";
 import { optionalTaskTypes, staleOptionLabel } from "../lib/accountTasks";
 import { countryName } from "../lib/territory";
+import { MONTHS_SHORT } from "../lib/dates";
 import { startEmailChange, pendingEmailChange, settlePendingEmailChange, signOutOtherDevices } from "../lib/authActions";
 import { settingsHeadline } from "../lib/settingsHeadline";
 import { saveEmailToggle, finishQuerying, EMAIL_LABEL, type EmailToggle } from "../lib/settingsSaves";
@@ -172,7 +173,6 @@ const DeleteAccountModal: React.FC<{
   );
 };
 
-const MONTH3 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const longDate = (iso: string | null | undefined) => {
   if (!iso) return null;
   const d = new Date(iso);
@@ -225,7 +225,7 @@ export const AccountSettings: React.FC<{
     window.setTimeout(() => setStampAt(null), 1700);
   }, []);
   const today = new Date();
-  const stampDate = `${today.getDate()} ${MONTH3[today.getMonth()]}`;
+  const stampDate = `${today.getDate()} ${MONTHS_SHORT[today.getMonth()]}`;
 
   /** The one confirmation: the stamp, then the snackbar with Undo. */
   const saved = (el: Element | null | undefined, message: string, undo?: () => void | Promise<void>) => {
