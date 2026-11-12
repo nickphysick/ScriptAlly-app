@@ -128,7 +128,7 @@ const readRing = (page: Page, where: "header" | "drawer") => page.evaluate((w) =
 }, where);
 
 async function openDrawer(page: Page) {
-  await page.locator(".aglist [data-cl27='header'] [data-cl26='open']:visible").first().click();
+  await page.locator(".aglist [data-cl27='header'] [data-cl26='fill']:visible").first().click(); /* header v2: Open → Fill the gaps */
   await page.locator(".hk82 [data-hk8='ring']").first().waitFor({ timeout: 15_000 });
   await page.waitForTimeout(900);
 }
@@ -305,7 +305,7 @@ test("CLP20 · at least 24px between the headline and the ring at 1440, 1280 and
 });
 
 /* ═════════ CLP21 + CLP22 · the ring in brand colours, no green ═════════ */
-test("CLP21 · the header ring: arc navy, track soft pink; its badge navy on white", async ({ page }) => {
+test("CLP21 · the header ring: arc navy, track soft pink; the score ink in its centre (header v2)", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("CLP21");
   await openCl(page);
@@ -313,7 +313,8 @@ test("CLP21 · the header ring: arc navy, track soft pink; its badge navy on whi
   const h = await readRing(page, "header");
   L.check("header ring arc #2a3a52", h.arc === NAVY, String(h.arc));
   L.check("header ring track #ecc0ae", h.track === PINK, String(h.track));
-  L.check("badge: navy text on white, a 1.5px navy outline", !!h.badge && h.badge.bg === "rgb(255, 255, 255)" && h.badge.fg === NAVY && /rgb\(42, 58, 82\) 0px 0px 0px 1\.5px/.test(h.badge.sh), JSON.stringify(h.badge));
+  /* re-pointed by Contact list header v2: no badge — the score sits in the ring's centre, ink on no ground */
+  L.check("the score: ink, no badge behind it", !!h.badge && h.badge.bg === "rgba(0, 0, 0, 0)" && h.badge.fg === "rgb(28, 19, 15)" && h.badge.sh === "none", JSON.stringify(h.badge));
   /* that it no longer follows the score (every pct, 0–100) is locked in src/lib/contactPrinciples2.test.ts */
   /* ⚠️ the Housekeeping drawer's ring is out of scope (Nick, 12 Nov: it sits on the drawer's navy header, where a navy arc
      would vanish) — R0 records its colours */

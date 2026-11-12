@@ -47,7 +47,7 @@ import {
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeader27 } from "./contact/ContactHeader27";
 import { ContactRail27 } from "./contact/ContactRail27";
-import { applyPick, headerFigures, pickOn } from "../../lib/contactV26";
+import { headerFigures } from "../../lib/contactV26";
 import { SET_LABEL } from "../../lib/contactV24";
 /** v26 E — a set the page narrowed to from a link, in the applied row's words ("Querying" for Your move + With the agent) */
 const setsLabel = (sets: readonly SetKey[]): string => (sets.length === 2 && sets.includes("you") && sets.includes("agent") ? "Querying" : sets.map((k) => SET_LABEL[k]).join(" + "));
@@ -690,11 +690,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const dayOneHere = isDayOne(headFigures);
   const listAll = day1Facts ?? factsAll;
   const listPool = day1Facts ?? visibleFacts;
-  /* v26 A — "Show me who": the Missing details quick pick (Part E's own), then the list card into view */
-  const showMissing = useCallback(() => {
-    setFilters((f) => (pickOn(f) === "missing" ? f : applyPick(f, "missing")));
-    requestAnimationFrame(() => mainColRef.current?.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" }));
-  }, []);
   /* Contact list header v2 — "{nq} not yet queried": the existing `queried: "no"` filter and nothing else — Find, the
      group and the other filters cleared, so the list shows exactly the nq agents the line counted — then the list into view */
   const showNotQueried = useCallback(() => {
@@ -1091,7 +1086,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <ContactHeader27 loading={!showList} figures={showList ? headFigures : null}
             health={showList ? health : null} addRef={addBtnRef} onAdd={openAdd}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
-            onOpenHealth={openHk} onShowWho={showMissing} onNotQueried={showNotQueried} />
+            onOpenHealth={openHk} onNotQueried={showNotQueried} />
         )}
         <div className="clv-main" ref={mainColRef}>
 

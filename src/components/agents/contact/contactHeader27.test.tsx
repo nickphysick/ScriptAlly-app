@@ -19,42 +19,48 @@ const figures = { n: 41, q: 22, y: 5 };
 const v26 = (health: { pct: number; gaps: number } | null) => renderToStaticMarkup(
   <ContactHeader26 loading={false} figures={figures} health={health} onAdd={noop} onDiscover={noop} onOpenHealth={noop} onShowWho={noop} />);
 const v27 = (health: { pct: number; gaps: number } | null, f: { n: number; q: number; y: number } = figures) => renderToStaticMarkup(
-  <ContactHeader27 loading={false} figures={f} health={health} onAdd={noop} onDiscover={noop} onOpenHealth={noop} onShowWho={noop} onNotQueried={noop} />);
+  <ContactHeader27 loading={false} figures={f} health={health} onAdd={noop} onDiscover={noop} onOpenHealth={noop} onNotQueried={noop} />);
 
-/** the List health block's markup, the ground and the two stroke colours taken out */
-function healthBlock(html: string): string {
-  const a = html.indexOf('<div class="cl26-health"');
-  expect(a, "the List health block is rendered").toBeGreaterThan(-1);
-  /* the block is the last thing in both headers: it runs to the header's own closing tags */
-  const b = html.lastIndexOf("</header>");
-  return html.slice(a, b)
-    .replace(/ data-ground="[a-z]+"/, "")
-    .replace(/stroke:#[0-9a-f]{6}|stroke:rgba\([^)]*\)/gi, "stroke:X")
-    .replace(/--arc:#[0-9a-f]{6}/gi, "--arc:X")
-    .replace(/(<\/div>)+$/, "");
-}
-
-describe("v27 — List health is v26's block", () => {
+/* header v2 — CLH2-7: the navy ground (v26's panel, `ContactHeader26`; no route mounts it today) renders EXACTLY as
+   before. The snapshot was recorded against the pre-v2 component and must not change. */
+describe("CLH2-7 · the navy ground is unchanged", () => {
   for (const h of [{ pct: 86, gaps: 29 }, { pct: 64, gaps: 1 }, { pct: 100, gaps: 0 }, null]) {
-    it(`identical text, hooks and structure (${h ? `${h.pct}% · ${h.gaps}` : "loading"})`, () => {
-      expect(healthBlock(v27(h))).toBe(healthBlock(v26(h)));
+    it(`v26's whole header markup, List health in it, as recorded (${h ? `${h.pct}% · ${h.gaps}` : "loading"})`, () => {
+      expect(v26(h)).toMatchSnapshot();
     });
   }
-  it("its hooks are all there", () => {
-    const html = v27({ pct: 86, gaps: 29 });
-    for (const k of ["health", "ring", "track", "arc", "archivist", "pct", "missing", "open", "who"]) expect(html).toContain(`data-cl26="${k}"`);
-    expect(html).toContain("List health");
-    expect(html).toContain("<em>29</em> details missing");
-    expect(html).toContain("Show me who →");
+});
+
+/* header v2 — CLH2-6: List health in this header is the ring as the figure, with one action */
+describe("CLH2-6 · List health: the ring is the figure, one action", () => {
+  const ring = (x: string) => { const a = x.indexOf('<button type="button" class="cl26-ring"'); return x.slice(a, x.indexOf("</button>", a)); };
+  const words = (x: string) => { const a = x.indexOf('<div class="cl26-hw">'); return x.slice(a, x.lastIndexOf("</header>")); };
+  it("no image inside the ring; the percentage inside it, no pill", () => {
+    const x = v27({ pct: 16, gaps: 61 });
+    expect(ring(x)).not.toContain("<img");
+    expect(ring(x)).toContain('<b class="cl26-fig" data-cl26="pct">16%</b>');
+    expect(x).not.toContain("cl26-pct");
+    expect(x).toContain('data-figure=""');
   });
-  /* re-pointed (principles v2): the light ground is the brand pair at every score, no longer RING_TONES' light tones */
-  it("on the light ground the ring is navy on soft pink at any score; v26's navy panel keeps its own", () => {
-    for (const pct of [44, 72, 86]) {
-      expect(v27({ pct, gaps: 3 })).toContain("stroke:#2a3a52");
-      expect(v27({ pct, gaps: 3 })).toContain("stroke:#ecc0ae");
-      expect(v27({ pct, gaps: 3 })).not.toContain(`stroke:${RING_TONES.good.light.arc}`);
-    }
-    expect(v26({ pct: 86, gaps: 3 })).toContain(`stroke:${RING_TONES.good.navy.arc}`);
+  it("exactly one button beside it, 'Fill the gaps', when gaps > 0", () => {
+    const w = words(v27({ pct: 16, gaps: 61 }));
+    expect(w.match(/<button/g) ?? []).toHaveLength(1);
+    expect(w).toMatch(/data-cl26="fill"[^>]*>Fill the gaps<\/button>/);
+    expect(w).toContain("<em>61</em> details missing");
+    expect(w).not.toMatch(/data-cl26="(open|who)"|Show me who|>Open</);
+  });
+  it("none when nothing is missing", () => {
+    const w = words(v27({ pct: 100, gaps: 0 }));
+    expect(w).toContain("Nothing missing");
+    expect(w).not.toContain("<button");
+  });
+  it("the ring keeps its size, stroke and colours (BRAND_RING on the light ground)", () => {
+    const x = v27({ pct: 44, gaps: 3 });
+    expect(ring(x)).toContain('style="width:124px;height:124px"');
+    expect(ring(x)).toContain('stroke-width="4"');
+    expect(ring(x)).toContain("stroke:#2a3a52");
+    expect(ring(x)).toContain("stroke:#ecc0ae");
+    expect(ring(x)).not.toContain(`stroke:${RING_TONES.good.light.arc}`);
   });
 });
 

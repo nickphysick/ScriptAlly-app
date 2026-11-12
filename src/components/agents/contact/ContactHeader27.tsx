@@ -7,7 +7,7 @@
  *
  *   left    the binoculars bird, mirrored so it faces the title (a placeholder: `CL27_HEADER_ART`)
  *   middle  "{n} agents on file", the rule-flanked "you've queried {q}", then + Add an agent and Discover agents
- *   right   List health, exactly as v26 built it (`ContactHealth26`), on the light ground
+ *   right   List health (`ContactHealth26`) on the light ground — header v2: as the figure (`figure`), one action
  *
  * It renders the Query Centre's own classes (`qc1531-*`); the page root carries `.cl27`, which those rules name beside
  * `.qc151` (`:is(.qc151, .cl27)`, the same specificity), so the two headers cannot drift. contactV27.css holds only the
@@ -49,10 +49,9 @@ export const ContactHeader27: React.FC<{
   /** day one only (the populated header carries one action) */
   onDiscover?: () => void;
   onOpenHealth: () => void;
-  onShowWho: () => void;
   /** header v2 — "{nq} not yet queried": the `queried: "no"` filter, nothing else */
   onNotQueried: () => void;
-}> = ({ loading, figures: f, health, onAdd, addRef, onDiscover, onOpenHealth, onShowWho, onNotQueried }) => {
+}> = ({ loading, figures: f, health, onAdd, addRef, onDiscover, onOpenHealth, onNotQueried }) => {
   const h = f ? clHeadline(f) : null;
   const hdRef = useRef<HTMLElement>(null);
   const nudge = useCallback(() => {
@@ -126,7 +125,8 @@ export const ContactHeader27: React.FC<{
       </div>
     </div>
     <div className="qc1531-rc cl27-rc" data-cl27="health">
-      <ContactHealth26 health={health} onOpenHealth={onOpenHealth} onShowWho={onShowWho} ground="light" />
+      {/* header v2 — the ring is the figure: the score in its centre, one "Fill the gaps" (Housekeeping) */}
+      <ContactHealth26 health={health} onOpenHealth={onOpenHealth} ground="light" figure />
     </div>
   </header>
   );

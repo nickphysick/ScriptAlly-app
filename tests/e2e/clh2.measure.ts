@@ -8,6 +8,9 @@
  *   CLH2-4  "{nq} not yet queried": nq read from the subheader (and proved non-zero), clicked, and the list then renders
  *           exactly nq rows
  *   CLH2-5  the populated header: one button in its action row; neither "need you" nor "Discover agents" inside it
+ *   CLH2-6  List health: no image inside the ring; the percentage inside the ring's box; exactly one button beside it,
+ *           "Fill the gaps" (the harness has gaps), and clicking it opens Housekeeping
+ *   SHOTS   the header at 1512 × 982 and 1728 × 1117 (Phase 2), for the report beside the ref's frame 1
  *
  * The unit halves are CLH2-1 (src/lib/contactPrinciples.test.ts) and CLH2-2/3 (contactHeader27.test.tsx).
  *
@@ -45,6 +48,13 @@ async function mut(page: Page, lock: string) {
         if (!(e.target as HTMLElement).closest("[data-clh2='notq']")) return;
         e.stopImmediatePropagation(); e.preventDefault();
       }, true);
+    }); break;
+    case "CLH2-6": await page.evaluate(() => {
+      const hd = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='header']")].find((e) => e.offsetHeight);
+      const ring = hd?.querySelector<HTMLElement>("[data-cl26='ring']");
+      const img = document.createElement("img"); img.src = "/images/contact-list-archivist.webp"; img.width = 100; ring?.appendChild(img);
+      const hb = hd?.querySelector<HTMLElement>(".cl26-hb");
+      const b = document.createElement("button"); b.type = "button"; b.textContent = "Open"; hb?.appendChild(b);
     }); break;
     case "CLH2-5": await page.evaluate(() => {
       const acts = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='header'] .qc1531-acts")].find((e) => e.offsetHeight);
@@ -111,4 +121,52 @@ test("CLH2-5 · the populated header: one button in its action row; no 'need you
     L.check(`${vp.width} no "Discover agents"`, !/Discover agents/.test(r.text), r.text);
   }
   L.done(6);
+});
+
+/* ═════════ CLH2-6 · List health as the figure ═════════ */
+test("CLH2-6 · List health: no image in the ring, the percentage inside it, one 'Fill the gaps' that opens Housekeeping", async ({ page }) => {
+  test.setTimeout(180_000);
+  const L = new Ledger("CLH2-6");
+  for (const vp of [VP, { width: 1280, height: 720 }]) {
+    await openCl(page, vp);
+    await mut(page, "CLH2-6");
+    const r = await page.evaluate(() => {
+      const hd = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='header']")].find((e) => e.offsetHeight)!;
+      const ring = hd.querySelector<HTMLElement>("[data-cl26='ring']")!;
+      const pct = ring.querySelector<HTMLElement>("[data-cl26='pct']");
+      const rb = ring.getBoundingClientRect(), pb = pct?.getBoundingClientRect();
+      const hw = hd.querySelector<HTMLElement>(".cl26-hw")!;
+      const bs = [...hw.querySelectorAll<HTMLElement>("button")].filter((b) => b.offsetWidth > 0);
+      return {
+        imgs: ring.querySelectorAll("img").length, pct: pct?.textContent?.trim() ?? null, want: `${ring.dataset.pct}%`,
+        inside: !!pb && pb.left >= rb.left && pb.right <= rb.right && pb.top >= rb.top && pb.bottom <= rb.bottom,
+        size: pct ? getComputedStyle(pct).fontSize : null, ink: pct ? getComputedStyle(pct).color : null,
+        missing: (hw.querySelector("[data-cl26='missing']")?.textContent ?? "").replace(/\s+/g, " ").trim(),
+        labels: bs.map((b) => b.textContent?.trim()),
+      };
+    });
+    L.check(`${vp.width} no image inside the ring`, r.imgs === 0, String(r.imgs));
+    L.check(`${vp.width} the percentage inside the ring's box`, r.inside && r.pct === r.want, `${r.pct} inside=${r.inside}`);
+    L.check(`${vp.width} the percentage 28px, ink`, r.size === "28px" && r.ink === "rgb(28, 19, 15)", `${r.size} ${r.ink}`);
+    L.check(`${vp.width} the harness has gaps (population)`, /^\d+ details? missing$/.test(r.missing) && !r.missing.startsWith("0 "), r.missing);
+    L.check(`${vp.width} exactly one button beside it, 'Fill the gaps'`, JSON.stringify(r.labels) === JSON.stringify(["Fill the gaps"]), JSON.stringify(r.labels));
+  }
+  await page.locator(".aglist [data-cl27='header'] [data-cl26='fill']:visible").first().click({ timeout: 10_000 }).catch(() => {});
+  const opened = await page.locator(".hk82 [data-hk8='ring']").first().waitFor({ timeout: 15_000 }).then(() => true).catch(() => false);
+  L.check("Fill the gaps opens Housekeeping", opened, "no drawer");
+  L.done(11);
+});
+
+/* ═════════ SHOTS · the header beside the ref's frame 1 ═════════ */
+test("SHOTS · the header at 1512 × 982 and 1728 × 1117", async ({ page }) => {
+  test.setTimeout(180_000);
+  mkdirSync(`${DIR}/shots`, { recursive: true });
+  for (const vp of [VP, { width: 1728, height: 1117 }]) {
+    await openCl(page, vp);
+    const hd = page.locator(".aglist [data-cl27='header']:visible").first();
+    const b = await hd.boundingBox();
+    expect(b, "the header is on screen").not.toBeNull();
+    await page.screenshot({ path: `${DIR}/shots/header-${vp.width}.png`, clip: { x: Math.max(0, b!.x - 24), y: Math.max(0, b!.y - 24), width: Math.min(vp.width - Math.max(0, b!.x - 24), b!.width + 48), height: b!.height + 48 } });
+    await page.screenshot({ path: `${DIR}/shots/page-${vp.width}.png` });
+  }
 });

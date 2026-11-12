@@ -5,7 +5,7 @@
   "detail": "[\"+ Add an agent\"]"
  },
  {
-  "where": "1440 Open is an outline: white, navy text, a 1.5px navy inset",
+  "where": "1440 Fill the gaps is an outline: white, navy text, a 1.5px navy inset",
   "ok": true,
   "detail": "{\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(42, 58, 82)\",\"sh\":\"rgb(42, 58, 82) 0px 0px 0px 1.5px inset\"}"
  },
@@ -15,7 +15,7 @@
   "detail": "[\"+ Add an agent\"]"
  },
  {
-  "where": "1280 Open is an outline: white, navy text, a 1.5px navy inset",
+  "where": "1280 Fill the gaps is an outline: white, navy text, a 1.5px navy inset",
   "ok": true,
   "detail": "{\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(42, 58, 82)\",\"sh\":\"rgb(42, 58, 82) 0px 0px 0px 1.5px inset\"}"
  }

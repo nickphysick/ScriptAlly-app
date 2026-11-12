@@ -10,8 +10,8 @@
   "detail": "rgb(236, 192, 174)"
  },
  {
-  "where": "badge: navy text on white, a 1.5px navy outline",
+  "where": "the score: ink, no badge behind it",
   "ok": true,
-  "detail": "{\"bg\":\"rgb(255, 255, 255)\",\"fg\":\"rgb(42, 58, 82)\",\"sh\":\"rgb(42, 58, 82) 0px 0px 0px 1.5px inset\"}"
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"fg\":\"rgb(28, 19, 15)\",\"sh\":\"none\"}"
  }
 ]

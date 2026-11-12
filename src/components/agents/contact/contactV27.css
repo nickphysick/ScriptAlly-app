@@ -45,6 +45,15 @@
     text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 4px;
   }
   .cl26-health[data-ground="light"] .cl26-who:hover { text-decoration-color: #1c130f; }
+
+  /* header v2 (design-refs/contact-list-header-v2.html, frame 1) — the ring is the figure: the score in its centre
+     (Special Elite 28/1, ink), 18px to the words; "Fill the gaps" is the outline button the Open one was (4px above it,
+     the `.cl26-hb` margin) */
+  .cl27 .cl26-health[data-figure] { gap: 18px; }
+  .cl27 .cl26-health[data-figure] .cl26-ring .cl26-fig {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none;
+    font: 400 28px/1 var(--sp-type) !important; color: #1c130f;
+  }
 }
 
 /* ── the filter rail (the Query Centre's v153.3 chips rail; its rules name `.cl27`) ───────────────────────────────── */

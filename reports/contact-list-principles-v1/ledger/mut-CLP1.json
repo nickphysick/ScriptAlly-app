@@ -2,20 +2,20 @@
  {
   "where": "1440 one filled, and it is + Add an agent",
   "ok": false,
-  "detail": "[\"+ Add an agent\",\"Open\"]"
+  "detail": "[\"+ Add an agent\",\"Fill the gaps\"]"
  },
  {
-  "where": "1440 Open is an outline: white, navy text, a 1.5px navy inset",
+  "where": "1440 Fill the gaps is an outline: white, navy text, a 1.5px navy inset",
   "ok": false,
   "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(42, 58, 82)\",\"sh\":\"none\"}"
  },
  {
   "where": "1280 one filled, and it is + Add an agent",
   "ok": false,
-  "detail": "[\"+ Add an agent\",\"Open\"]"
+  "detail": "[\"+ Add an agent\",\"Fill the gaps\"]"
  },
  {
-  "where": "1280 Open is an outline: white, navy text, a 1.5px navy inset",
+  "where": "1280 Fill the gaps is an outline: white, navy text, a 1.5px navy inset",
   "ok": false,
   "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"fg\":\"rgb(42, 58, 82)\",\"sh\":\"none\"}"
  }

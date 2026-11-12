@@ -45,9 +45,8 @@ async function mut(page: Page, lock: string) {
     case "H2": await cssBreak(page, ".cl26-ring{background:#fff !important;border-radius:50% !important}"); break;
     case "H3": await page.evaluate(() => {
       document.addEventListener("click", (e) => {
-        if (!(e.target as HTMLElement).closest("[data-cl26='open']")) return;
+        if (!(e.target as HTMLElement).closest("[data-cl26='fill']")) return;
         e.stopImmediatePropagation(); e.preventDefault();
-        (document.querySelector(".aglist [data-cl26='who']") as HTMLElement | null)?.click();
       }, true);
     }); break;
     case "H4": await page.evaluate(() => {
@@ -119,10 +118,9 @@ test("CL26-H1 · (re-pointed by v27 and principles v1) the open header: title, t
 });
 
 /* ═════════ H2 · the ring ═════════ */
-test("CL26-H2 · (re-pointed by v27, then principles v2) the ring navy at every score, its arc the score; the pill navy on white; the archivist with no disc", async ({ page }) => {
+test("CL26-H2 · (re-pointed by v27, principles v2, then header v2) the ring navy at every score, its arc the score; the score in its centre; no archivist", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("H2");
-  /* v27 — the header is on the page's ground: RING_TONES' light tones (the ref's), no longer the on-navy ones */
   /* principles v2 — the brand pair at every score: the arc navy (no longer healthTone's green / rust) */
   const ARC: Record<number, string> = { 93: "rgb(42, 58, 82)", 72: "rgb(42, 58, 82)", 44: "rgb(42, 58, 82)" };
   for (const pct of [93, 72, 44]) {
@@ -131,46 +129,31 @@ test("CL26-H2 · (re-pointed by v27, then principles v2) the ring navy at every 
     const r = await page.evaluate(() => {
       const ring = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl26='ring']")].find((e) => e.getBoundingClientRect().height > 0)!;
       const arc = ring.querySelector<SVGCircleElement>("[data-cl26='arc']")!;
-      const pill = ring.querySelector<HTMLElement>("[data-cl26='pct']")!;
-      const arch = ring.querySelector<HTMLImageElement>("[data-cl26='archivist']")!;
-      const rr = ring.getBoundingClientRect(), ar = arch.getBoundingClientRect();
+      const fig = ring.querySelector<HTMLElement>("[data-cl26='pct']")!;
       const r0 = Number(arc.getAttribute("r"));
       const dash = parseFloat((arc.getAttribute("stroke-dasharray") ?? "0").split(/[ ,]/)[0]);
+      const rr = ring.getBoundingClientRect(), fr = fig.getBoundingClientRect();
       return {
-        stroke: getComputedStyle(arc).stroke, share: dash / (2 * Math.PI * r0),
-        pill: pill.textContent?.trim(), pillInk: getComputedStyle(pill).color, pillBg: getComputedStyle(pill).backgroundColor,
-        ringBg: getComputedStyle(ring).backgroundColor, archBg: getComputedStyle(arch).backgroundColor,
-        archW: ar.width, archMid: ar.left + ar.width / 2, ringMid: rr.left + rr.width / 2, archBottomGap: rr.bottom - ar.bottom,
-        archTop: ar.top, strokeInner: rr.top + rr.height * (4 / 46), ringH: rr.height,
+        stroke: getComputedStyle(arc).stroke, share: dash / (2 * Math.PI * r0), fig: fig.textContent?.trim(),
+        figMid: [fr.left + fr.width / 2 - (rr.left + rr.width / 2), fr.top + fr.height / 2 - (rr.top + rr.height / 2)],
+        ringBg: getComputedStyle(ring).backgroundColor, imgs: ring.querySelectorAll("img").length, ringH: rr.height,
       };
     });
     L.check(`${pct} arc colour`, r.stroke === ARC[pct], r.stroke);
     L.check(`${pct} arc length ∝ score (±1%)`, Math.abs(r.share - pct / 100) <= 0.01, String(r.share));
-    L.check(`${pct} pill`, r.pill === `${pct}%`, String(r.pill));
-    L.check(`${pct} pill navy on white (principles v2)`, r.pillInk === "rgb(42, 58, 82)" && r.pillBg === "rgb(255, 255, 255)", `${r.pillInk} on ${r.pillBg}`);
+    L.check(`${pct} the score in the ring`, r.fig === `${pct}%`, String(r.fig));
+    L.check(`${pct} the score centred in the ring (±1.5px)`, Math.abs(r.figMid[0]) <= 1.5 && Math.abs(r.figMid[1]) <= 1.5, JSON.stringify(r.figMid));
     L.check(`${pct} ring 124`, near(r.ringH, 124, 0.5), String(r.ringH));
-    L.check(`${pct} no disc behind the archivist`, r.ringBg === "rgba(0, 0, 0, 0)" && r.archBg === "rgba(0, 0, 0, 0)", `${r.ringBg} / ${r.archBg}`);
-    L.check(`${pct} archivist 100 wide, centred`, near(r.archW, 100, 0.6) && near(r.archMid, r.ringMid, 1), `${r.archW} at ${r.archMid} vs ${r.ringMid}`);
-    L.check(`${pct} archivist's foot 24 above the ring's`, near(r.archBottomGap, 24, 1), String(r.archBottomGap));
-    /* ⚠️ FALSE PREMISE (report): at 100px wide and 24px up this artwork's head reaches the stroke's inner edge, not above the
-       ring's top — the mock renders the same. The lock holds what the stated values give: he reaches the ring. */
-    L.check(`${pct} archivist reaches the ring (top within 2px of the stroke's inner edge)`, r.archTop <= r.strokeInner + 2, `${r.archTop} vs ${r.strokeInner}`);
+    L.check(`${pct} no disc, no archivist`, r.ringBg === "rgba(0, 0, 0, 0)" && r.imgs === 0, `${r.ringBg} / ${r.imgs} img`);
   }
-  L.done(27);
+  L.done(18);
 });
 
 /* ═════════ H3 · the ring's actions ═════════ */
-async function hkAgentsWithGaps(page: Page) {
-  await page.locator(`${VIS} [data-cl26='open']`).first().click(T);
-  await page.waitForTimeout(1200);
-  await page.locator("[data-hkv='view'][data-v='agent']").first().click(T).catch(() => {});
-  await page.waitForTimeout(800);
-  const n = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-hk8='agent-row']")].filter((r) => r.querySelectorAll("[data-hk8='gap-chip']").length > 0).length);
-  await page.keyboard.press("Escape"); await page.waitForTimeout(400);
-  return n;
-}
+/* re-pointed by Contact list header v2: Open and "Show me who →" left this header (retired with them, with the
+   Missing-details half this lock held); the ring and "Fill the gaps" open Housekeeping, and neither filters */
 const hkOpen = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-hkv='view'], [data-hk8='agent-row']")].some((e) => e.getBoundingClientRect().height > 0));
-test("CL26-H3 · the ring and Open open Housekeeping; Show me who applies Missing details, Housekeeping's count", async ({ page }) => {
+test("CL26-H3 · the ring and Fill the gaps open Housekeeping; neither filters", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("H3");
   await openCl26(page, SIZES[0]);
@@ -179,22 +162,12 @@ test("CL26-H3 · the ring and Open open Housekeeping; Show me who applies Missin
   await page.waitForTimeout(1200);
   L.check("the ring opens Housekeeping", await hkOpen(page), "no drawer");
   await page.keyboard.press("Escape"); await page.waitForTimeout(500);
-  await page.locator(`${VIS} [data-cl26='open']`).first().click(T);
+  await page.locator(`${VIS} [data-cl26='fill']`).first().click(T);
   await page.waitForTimeout(1200);
-  L.check("Open opens Housekeeping", await hkOpen(page), "no drawer");
-  L.check("Open does not filter", (await page.locator(`${VIS} [data-cl26='applied']`).count()) === 0, "the applied row is up");
+  L.check("Fill the gaps opens Housekeeping", await hkOpen(page), "no drawer");
+  L.check("Fill the gaps does not filter", (await page.locator(`${VIS} [data-cl26='applied']`).count()) === 0, "the applied row is up");
   await page.keyboard.press("Escape"); await page.waitForTimeout(500);
-  const hk = await hkAgentsWithGaps(page);
-  L.check("Housekeeping has agents with gaps (population)", hk > 0, String(hk));
-  await page.locator(`${VIS} [data-cl26='who']`).first().click(T);
-  await page.waitForTimeout(1200);
-  const s = await listState(page);
-  const chip = await page.locator(`${VIS} [data-cl26='applied-chip'][data-k='missing']`).count();
-  L.check("Show me who applies Missing details", chip === 1, String(chip));
-  L.check("shown = Housekeeping's agents with gaps", s.rows === hk && s.count === hk, `${s.rows} rows, count ${s.count}, Housekeeping ${hk}`);
-  const cardTop = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".aglist [data-cl26='card']")].find((e) => e.getBoundingClientRect().height > 0)!.getBoundingClientRect().top);
-  L.check("the list card is brought into view", cardTop < 300, String(cardTop));
-  L.done(7);
+  L.done(3);
 });
 
 /* ═════════ H4 · the band ═════════ */
@@ -493,10 +466,5 @@ test("CL26 shots — the page in each state", async ({ page }) => {
     await page.waitForTimeout(400);
     await page.screenshot({ path: `${shotDir()}/${name}-1512.png` });
   }
-  await openCl26(page, SIZES[0]);
-  await page.locator(`${VIS} [data-cl26='who']`).first().click();
-  await page.waitForTimeout(900);
-  await page.locator(`${VIS} [data-cl27='genre']:not([disabled])`).first().click();
-  await page.waitForTimeout(500);
-  await page.screenshot({ path: `${shotDir()}/11-missing-details-1512.png` });
+  /* 11-missing-details retired by Contact list header v2: it was reached through "Show me who →", which left the header */
 });

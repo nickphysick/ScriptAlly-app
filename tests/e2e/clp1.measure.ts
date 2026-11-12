@@ -58,7 +58,7 @@ const css = (page: Page, rule: string) => page.addStyleTag({ content: rule });
 async function mut(page: Page, lock: string) {
   if (!MUTS.includes(lock)) return;
   switch (lock) {
-    case "CLP1": await css(page, ".cl26-health .cl26-open{background:#2a3a52 !important;box-shadow:none !important}"); break;
+    case "CLP1": await css(page, ".cl26-health .cl26-fill{background:#2a3a52 !important;box-shadow:none !important}"); break;
     case "CLP2": await page.evaluate(() => { const t = [...document.querySelectorAll<HTMLElement>(".aglist [data-clp='headline']")].find((e) => e.offsetHeight); if (t) t.textContent = "5 need you. 41 agents on file"; }); break;
     /* inline !important: a later Query Centre rule (v154's typewriter title) outranks any sheet-level break */
     case "CLP3": await page.evaluate(() => { for (const t of document.querySelectorAll<HTMLElement>(".qc151 .qc1531-hd h1.qc1531-t")) t.style.setProperty("font-size", "36px", "important"); }); break;
@@ -106,12 +106,12 @@ test("CLP1 · exactly one filled navy button among the header's buttons", async 
       const hd = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='header']")].find((e) => e.offsetHeight)!;
       const bs = [...hd.querySelectorAll<HTMLElement>("button")].filter((b) => b.offsetWidth > 0 && getComputedStyle(b).visibility !== "hidden");
       const filled = bs.filter((b) => { const c = getComputedStyle(b).backgroundColor; return c === "rgb(42, 58, 82)" || c === "rgb(51, 71, 99)"; });
-      const open = hd.querySelector<HTMLElement>("[data-cl26='open']");
+      const open = hd.querySelector<HTMLElement>("[data-cl26='fill']"); /* re-pointed by header v2: Open → Fill the gaps */
       const os = open ? getComputedStyle(open) : null;
       return { n: bs.length, filled: filled.map((b) => b.textContent?.trim()), open: os ? { bg: os.backgroundColor, fg: os.color, sh: os.boxShadow } : null };
     });
     L.check(`${vp.width} one filled, and it is + Add an agent`, r.filled.length === 1 && r.filled[0] === "+ Add an agent", JSON.stringify(r.filled));
-    L.check(`${vp.width} Open is an outline: white, navy text, a 1.5px navy inset`, !!r.open && r.open.bg === "rgb(255, 255, 255)" && r.open.fg === "rgb(42, 58, 82)" && /rgb\(42, 58, 82\) 0px 0px 0px 1\.5px inset/.test(r.open.sh), JSON.stringify(r.open));
+    L.check(`${vp.width} Fill the gaps is an outline: white, navy text, a 1.5px navy inset`, !!r.open && r.open.bg === "rgb(255, 255, 255)" && r.open.fg === "rgb(42, 58, 82)" && /rgb\(42, 58, 82\) 0px 0px 0px 1\.5px inset/.test(r.open.sh), JSON.stringify(r.open));
   }
   L.done(4);
 });
