@@ -33,6 +33,12 @@
   .cl27 .qc1531-for.clp-for span.clp-under { font: italic 400 19px/1.25 var(--sp-serif) !important; color: var(--mut, #5b4f47); white-space: normal; max-width: 100%; }
 }
 
+/* principles v2 — List health nudged in: pulled left by the header's measured `--clp2-nudge` (healthNudge: 32px inside
+   the list frame, never within 24px of the headline), a transform so the headline's column keeps its width. The ring
+   needs no top margin taken off: it has none, and its centre already sits on the headline block's (CLP19). */
+@media (min-width: 768px) {
+  .cl27 .cl27-hd .cl27-rc { transform: translateX(calc(-1 * var(--clp2-nudge, 0px))); }
+}
 /* ── 2 · readable rows and rail ──────────────────────────────────────────────────────────────────────────────────── */
 .cl27 .cl26-whot small {
   font: 400 14px/1.35 var(--sp-serif) !important; text-transform: none; letter-spacing: 0; color: #5b4f47;
@@ -41,6 +47,16 @@
 .cl27 .cl26-row[data-k="closed"] .cl26-whot b,
 .cl27 .cl26-row[data-k="closed"] .cl26-whot small { color: #6b6058; opacity: 1; }
 .cl27 .cl26-th > span { color: #5b4f47; }
+/* principles v2 — Agent fit by the name: the name's line is a row, the name truncating before the stars (which never
+   shrink), the stars 10px after it on its baseline, nudged up 3px to sit on its middle */
+.cl27 .cl26-whot .clp2-nl { display: flex; align-items: baseline; min-width: 0; }
+.cl27 .cl26-whot .clp2-nl > b { flex: 0 1 auto; min-width: 0; }
+.cl27 .clp2-fit {
+  flex: none; position: relative; top: -3px; margin-left: 10px; white-space: nowrap;
+  font: 400 12.5px/1 var(--sp-serif) !important; letter-spacing: .5px; color: #2a3a52;
+}
+.cl27 .clp2-fit i { font-style: normal; color: #d3c9bb; }
+.cl27 .clp2-fit i.on { color: #2a3a52; }
 .cl27 .cl26-ix .cl26-ixe:disabled { opacity: .45; }
 @media (min-width: 768px) {
   .cl27 .qc153-rail .qc1533-pill .qc153-n, .cl27 .qc153-rail .qc153-n { font-size: 13px !important; color: #6b6058; }
@@ -142,6 +158,7 @@
   .clv-group[data-v24][data-v27] > .cl24-hd.cl27-hd { grid-template-columns: 72px minmax(0, 1fr) !important; row-gap: 18px; column-gap: 20px; }
   .cl27-hd .cl27-art img { width: 72px; }
   .cl27-hd .cl27-rc { grid-column: 1 / -1; justify-self: start; }
+  .cl27 .cl27-hd .cl27-rc { transform: none; }
   .cl27 .qc1531-hd h1.qc1531-t.clp-t { font-size: 30px !important; }
   .cl27 .qc1531-for.clp-for span { white-space: normal; max-width: 100%; }
 }
