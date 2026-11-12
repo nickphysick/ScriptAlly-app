@@ -144,3 +144,16 @@ Three harness facts, found by measurement, shape the WebKit run (none is an app 
    nothing), while the page's own hit test (`elementFromPoint` at the tab's centre) returns the tab. So WebKit taps
    dispatch the click on the element: WebKit's rendering, layout and wiring are measured; Playwright's touch coordinates
    are not. A check on a real iPhone is worth doing before this ships.
+
+## Dev deploy (12 Nov)
+
+Dev had moved during the pack: it served `index-DN1T-SE6.js` from `dev/…-pa3-laq131-qc154-qc1541` (Query Centre
+v154.1). A rebuild of that branch differed from the served bundle only by the build-date stamp and the chunk names that
+follow from it, so v4 was merged onto it as **`dev/…-qc154-qc1541-pa4` @ `936411db3`** (pushed; the merge was clean).
+On the merged tree: `tsc` 0; 109 phone, Query Centre, shell and dashboard spec files green; PA4-5/6 green (24 readings).
+Built from a clean checkout of the pushed tip and deployed hosting-only with the served hash checked in the same command:
+**dev now serves `index-CzLH0sbg.js`** (matches the build). Branch `phone-app-v4` @ `af05da35c` is pushed and not merged
+to main. Prod is untouched.
+
+The dev build carries the dev-only Today aid (`__SA_PA4_TODAY`), as every dev build carries the app's review aids; a
+production build folds it away.
