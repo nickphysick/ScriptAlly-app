@@ -26,7 +26,14 @@ const barPath = (x: number, y: number, w: number): string => {
 
 export const QcGoal154: React.FC<{ m: WeekGoal154 | null }> = ({ m }) => {
   const [on, setOn] = useState<number | null>(null);
-  if (!m) return <div className="qc154-wkc" data-qc154="goal" aria-busy="true" />;
+  /* v155 §3 — while loading, the chart's own boxes at their final size, hidden: the header does not grow when it lands */
+  if (!m) return (
+    <div className="qc154-wkc" data-qc154="goal" data-qc155="goal-hold" aria-busy="true">
+      <div className="qc154-wkh" aria-hidden="true"><span className="qc154-wkt"><b>0 of 0</b> this week</span></div>
+      <p className="qc154-wkn" aria-hidden="true">{"\u00a0"}</p>
+      <div className="qc154-wkp" aria-hidden="true"><svg viewBox={`0 0 ${W} ${H}`} width={W} height={H} /></div>
+    </div>
+  );
   const n = m.weeks.length;
   const mx = Math.max(5, m.goal + 2, ...m.weeks.map((w) => w.count));
   const Y = (v: number) => BASE - (BASE - TOP) * v / mx;

@@ -23,13 +23,19 @@ export const ENTRANCE_MS = 800;
 
 export type QcLoadPhase = "blank" | "skeleton" | "content";
 
+/** when the skeleton may first show, and how long it then stays at least */
+export interface QcLoadTiming { delayMs: number; minMs: number }
+const DEFAULT_TIMING: QcLoadTiming = { delayMs: SKELETON_DELAY_MS, minMs: SKELETON_MIN_MS };
+/** v155 §3 — the desktop Query Centre's: no skeleton before 200ms, and once shown it gives way the moment the data lands */
+export const QC155_LOAD: QcLoadTiming = { delayMs: 200, minMs: 0 };
+
 /** PURE — what to show, given what has happened. `skeletonForMs` is null until the skeleton has been shown. */
-export function qcLoadPhase(s: { ready: boolean; sinceMountMs: number; skeletonForMs: number | null }): QcLoadPhase {
+export function qcLoadPhase(s: { ready: boolean; sinceMountMs: number; skeletonForMs: number | null }, t: QcLoadTiming = DEFAULT_TIMING): QcLoadPhase {
   if (s.skeletonForMs == null) {
     if (s.ready) return "content";
-    return s.sinceMountMs >= SKELETON_DELAY_MS ? "skeleton" : "blank";
+    return s.sinceMountMs >= t.delayMs ? "skeleton" : "blank";
   }
-  return s.ready && s.skeletonForMs >= SKELETON_MIN_MS ? "content" : "skeleton";
+  return s.ready && s.skeletonForMs >= t.minMs ? "content" : "skeleton";
 }
 
 /** A review aid: `window.__SA_QC_HOLD_MS = 4000` holds the skeleton. Never read in a production build. */
@@ -39,7 +45,7 @@ function holdMs(): number {
   return typeof v === "number" && v > 0 ? v : 0;
 }
 
-export function useQcLoad(dataReady: boolean): { phase: QcLoadPhase; loading: boolean; blank: boolean; entering: boolean } {
+export function useQcLoad(dataReady: boolean, timing: QcLoadTiming = DEFAULT_TIMING): { phase: QcLoadPhase; loading: boolean; blank: boolean; entering: boolean } {
   const mountedAt = useRef<number>(typeof performance !== "undefined" ? performance.now() : 0);
   const shownAt = useRef<number | null>(null);
   const [held, setHeld] = useState<boolean>(() => holdMs() > 0);
@@ -55,7 +61,7 @@ export function useQcLoad(dataReady: boolean): { phase: QcLoadPhase; loading: bo
   }, []);
 
   const now = typeof performance !== "undefined" ? performance.now() : 0;
-  const phase = qcLoadPhase({ ready, sinceMountMs: now - mountedAt.current, skeletonForMs: shownAt.current == null ? null : now - shownAt.current });
+  const phase = qcLoadPhase({ ready, sinceMountMs: now - mountedAt.current, skeletonForMs: shownAt.current == null ? null : now - shownAt.current }, timing);
   if (phase === "skeleton" && shownAt.current == null) shownAt.current = now;
 
   /* wake at the two moments the answer can change without any prop changing */
@@ -63,11 +69,11 @@ export function useQcLoad(dataReady: boolean): { phase: QcLoadPhase; loading: bo
     if (phase === "content") return undefined;
     const at = performance.now();
     const wait = phase === "blank"
-      ? Math.max(0, SKELETON_DELAY_MS - (at - mountedAt.current))
-      : Math.max(0, SKELETON_MIN_MS - (at - (shownAt.current ?? at)));
+      ? Math.max(0, timing.delayMs - (at - mountedAt.current))
+      : Math.max(0, timing.minMs - (at - (shownAt.current ?? at)));
     const t = window.setTimeout(() => tick((n) => n + 1), wait + 1);
     return () => window.clearTimeout(t);
-  }, [phase, ready]);
+  }, [phase, ready, timing.delayMs, timing.minMs]);
 
   /**
    * ⚠️ TWO EFFECTS, AND THE SPLIT IS THE FIX. As one effect keyed on `entered` it armed the timer and

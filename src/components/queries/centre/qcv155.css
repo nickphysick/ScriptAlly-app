@@ -49,3 +49,63 @@
   opacity: 0.4;
   pointer-events: none;
 }
+
+/* ── §3 loading: the skeleton (the ref's .zskh / .zskg / .zsk). The grid is the real list's own `.qc154-grid`, so its
+   columns and breakpoints are the cards'; only the gap is restated. ── */
+.qc151.qc153 .qc155-skh {
+  height: 22px;
+  width: 220px;
+  border-radius: 6px;
+  background: #ebe5db;
+  margin: 26px 0 14px;
+}
+.qc151.qc153 .qc155-skg.qc155-skg {
+  gap: 14px;
+}
+.qc151.qc153 .qc155-skc {
+  position: relative;
+  height: 168px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 0 1px #ebe5db;
+  overflow: hidden;
+}
+/* the band along the top, the white disc where the seal sits, three short bars where Sent and Next sit */
+.qc151.qc153 .qc155-skc::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(#efe9df 0 62px, transparent 62px),
+    radial-gradient(circle at 34px 31px, #fff 0 17px, transparent 18px),
+    linear-gradient(#f3eee6, #f3eee6) 18px 86px / 40% 14px no-repeat,
+    linear-gradient(#f3eee6, #f3eee6) 18px 112px / 28% 12px no-repeat,
+    linear-gradient(#f3eee6, #f3eee6) 55% 86px / 34% 14px no-repeat;
+}
+/* one soft highlight sweeping left to right */
+.qc151.qc153 .qc155-skc::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.7) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: qc155-sweep 1.3s infinite;
+}
+@keyframes qc155-sweep {
+  to { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qc151.qc153 .qc155-skc::after {
+    animation: none;
+    display: none;
+  }
+}
+
+/* while loading, the rail and the chart hold their final boxes and show no figures: the numbers arrive with the data */
+.qc151.qc153 .qc153-railcol[data-qc155-busy] .qc153-n,
+.qc151.qc153 .qc153-railcol[data-qc155-busy] [data-qc153="court"] b {
+  visibility: hidden;
+}
+.qc151.qc153 .qc154-wkc[data-qc155="goal-hold"] > * {
+  visibility: hidden;
+}

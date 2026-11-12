@@ -39,3 +39,19 @@ export const FirstPanel155: React.FC<{ onImport: () => void }> = ({ onImport }) 
 export const QuietPanel155: React.FC<{ body: string }> = ({ body }) => (
   <Panel155 kind="quiet" head={QUIET_HEAD_155}>{body}</Panel155>
 );
+
+/** §3 — loading: placeholders in the card grid's shape, two groups (2 cards, then 6). Hidden from screen readers; the
+ *  list around it is `aria-busy`. No words and no spinner. */
+const SK_GROUPS = [2, 6] as const;
+export const Skeleton155: React.FC = () => (
+  <div className="qc155-sk" data-qc155="skeleton" aria-hidden="true">
+    {SK_GROUPS.map((n, g) => (
+      <React.Fragment key={g}>
+        <div className="qc155-skh" data-qc155="sk-head" />
+        <div className="qc154-grid qc155-skg" data-qc155="sk-grid">
+          {Array.from({ length: n }, (_, i) => <div key={i} className="qc155-skc" data-qc155="sk-card" />)}
+        </div>
+      </React.Fragment>
+    ))}
+  </div>
+);

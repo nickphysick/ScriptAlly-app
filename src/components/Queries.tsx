@@ -197,7 +197,7 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
 import { QueryPanelHost, PICKER_PANEL_ID } from "./queries/QueryPanelHost";
 import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, queryPanelBack, releaseRightPanel, subscribeQueryPanel, subscribeResponsePicker, subscribeRightPanel } from "../lib/queryPanelStore";
-import { useQcLoad } from "./queries/centre/useQcLoad";
+import { QC155_LOAD, useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
   DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, tileCourt, filterForStatusParam, filterOptions,
@@ -2630,7 +2630,8 @@ export const Queries: React.FC<{
   /* ⚠️ ONE LOADING MODEL FOR THE BROWSING PAGE (v11): no flash under 150ms, a 400ms floor once shown,
      and one entrance when the data lands. "Ready" includes the ACTIVITY FEED — every gauge and every
      calendar bar is dated from it, so drawn before it lands they would re-lay themselves out. */
-  const qcLoad = useQcLoad(collectionsReady && activitiesReady);
+  /* v155 §3 — the desktop page shows its skeleton only after 200ms and swaps straight to the list (QC155_LOAD) */
+  const qcLoad = useQcLoad(collectionsReady && activitiesReady, qcDesk ? QC155_LOAD : undefined);
   /* v138 §H — one staggered entrance on the first mount, once the data is ready */
   const qc138In = useEntrance138(routeActive && qcDesk && collectionsReady && activitiesReady && !qcLoad.loading);
   /* LIVING HEADERS — a DEV-ONLY review aid (lib/livingHeaderReview): render the hero as if the page
@@ -5401,7 +5402,7 @@ export const Queries: React.FC<{
   /* v155 — the desktop list's state, from the data (lib/qc155). Nothing narrowing it means no chip, no "Where it stands"
      and no search, the page's or the shell's. Declared up here, below everything it reads. */
   const filtersOn155 = qc140Chips.length > 0 || qcF138.where != null || qcTerm !== "";
-  const state155: State155 | null = showGridSkeleton ? null
+  const state155: State155 | null = showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }
     /* §2 day one: the manuscript's own rows (never the searched view: a search that matches nothing is not day one) */
     : qcLivingRows.length === 0 ? { kind: "first" }
     : quietNow155({ rows: qcScoped, view: qcView150, filtersOn: filtersOn155 }) ? { kind: "quiet", body: quietBody155(qcScoped, qcNow138) }

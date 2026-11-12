@@ -95,10 +95,11 @@ describe("the hook", () => {
   });
   it("the page's readiness includes the ACTIVITY FEED — the gauges and the calendar are dated from it", () => {
     const page = strip(readFileSync(join(process.cwd(), "src/components/Queries.tsx"), "utf8"));
-    expect(page).toContain("const qcLoad = useQcLoad(collectionsReady && activitiesReady);");
+    /* v155 §3 — the desktop page passes its own timings (QC155_LOAD); readiness is unchanged */
+    expect(page).toContain("const qcLoad = useQcLoad(collectionsReady && activitiesReady, qcDesk ? QC155_LOAD : undefined);");
     expect(page, "the first-run branch must not answer while the page is still loading").toContain('{!qcLoad.loading && !qcDesk && ((lhOverride === null && emptyKind === "first") || lhOverride === 0) ? (');
     /* v155 §2 — the desktop's day one is QcPage151's, and it too waits for the data: `state155` is null while loading */
-    expect(page).toMatch(/const state155: State155 \| null = showGridSkeleton \? null/);
+    expect(page).toContain('const state155: State155 | null = showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }');
     /* ⚠️ RETARGETED (living headers §3): the dev count override can also ask for the empty page, and
        it waits for the load exactly as the real condition does — the guard is outside both. */
     for (const gone of ["useSkeleton(", "<QueryCentreSkeleton", "SKELETON_FLOOR_MS);"]) expect(page, `${gone} — a second loading model on this page`).not.toContain(gone);
