@@ -8,7 +8,7 @@
  * AddManuscriptFocusForm never diverge into two manuscript writers.
  */
 import { AGE_LABELS, normaliseAgeCategory } from "./ageCategories";
-import { CompTitle, Manuscript, ManuscriptStatus, UserPlan } from "../types";
+import { CompTitle, Manuscript, ManuscriptStatus } from "../types";
 
 export const PREDEFINED_GENRES = [
   "Literary Fiction",
@@ -163,11 +163,18 @@ export function buildManuscriptPayload(
   };
 }
 
-/** FREE-tier manuscript limit message, or null when within limit. Mirrors db.addManuscript. */
-export function manuscriptLimitError(plan: UserPlan | undefined, existingCount: number): string | null {
-  if (plan === UserPlan.FREE && existingCount >= FREE_MANUSCRIPT_LIMIT) {
-    return "Free Tier limit reached: You can only configure 1 active manuscript profile. Upgrade to Pro for unlimited additions!";
-  }
+/** The one Free-plan manuscript limit message. */
+export const MANUSCRIPT_LIMIT_ERROR =
+  "Free Tier limit reached: You can only configure 1 active manuscript profile. Upgrade to Pro for unlimited additions!";
+
+/**
+ * ⚠️ PLAN RULES v1.1 (13 Nov) — THE ONE MANUSCRIPT LIMIT, read off the entitlement resolver, never the stored plan: a
+ * founding writer or a trial whose stored plan says Free is not held to one. `pro` is `Entitlement.pro` (true while
+ * the entitlement is pending, so nothing is refused before it loads). Every caller (db.addManuscript, the add form,
+ * onboarding, import) goes through here. There is no agent limit on any plan.
+ */
+export function manuscriptLimitError(pro: boolean, existingCount: number): string | null {
+  if (!pro && existingCount >= FREE_MANUSCRIPT_LIMIT) return MANUSCRIPT_LIMIT_ERROR;
   return null;
 }
 

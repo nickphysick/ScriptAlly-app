@@ -321,11 +321,11 @@ describe("D6 — versions never count against the manuscript limit", () => {
 
   it("⚠️ and the LIVE gate is structurally incapable of counting them", () => {
     /* The claim is about the real gate, not about the identity above, so it is asserted where the
-       gate lives: `manuscriptLimitError(plan, existingCount)` takes a COUNT OF MANUSCRIPTS and has
+       gate lives: `manuscriptLimitError(pro, existingCount)` takes a COUNT OF MANUSCRIPTS and has
        no access to a manuscript at all — it could not reach a version if it wanted to. That is a
        stronger guarantee than a rule saying it must not, and the grep below keeps it that way. */
-    expect(manuscriptLimitError(UserPlan.FREE, 1)).toBeTruthy();
-    expect(manuscriptLimitError(UserPlan.FREE, 0)).toBeNull();
+    expect(manuscriptLimitError(false, 1)).toBeTruthy();
+    expect(manuscriptLimitError(false, 0)).toBeNull();
     const src = readFileSync(join(__dirname, "manuscripts.ts"), "utf8");
     expect(src).not.toContain("bookVersion");
   });

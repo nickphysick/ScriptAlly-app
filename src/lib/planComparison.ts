@@ -56,7 +56,7 @@ const proOnly = (feature: ProFeature) => ({ free: NO, pro: YES, feature });
  * resolver's `PRO_FEATURES` must be exactly the `feature`s on the rows that differ (`planComparison.test.ts`).
  *
  * ⚠️ SMART IMPORT IS ONCE PER ACCOUNT ON BOTH PLANS (the monthly Pro allowance is retired), so it is a tick on both.
- * ⚠️ AGENTS ARE UNLIMITED ON BOTH. There is no agent cap in the code; there never was one in `addAgent`.
+ * ⚠️ AGENTS ARE UNLIMITED ON BOTH. There is no agent cap in the code (v1.1 removed the Free cap of 5 from `addAgent`; planLimits.test.ts locks it).
  */
 export const PLAN_GROUPS: PlanGroup[] = [
   { group: "Run your campaign", rows: [
