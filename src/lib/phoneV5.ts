@@ -16,7 +16,7 @@ import { isSlotFilled, packageMetrics, rankPackagesByRequests, strongestPackage,
 import { factsOf, queriesWithPiece, type Facts, type PieceContext } from "./packagesV40";
 import type { AnalyticsRow } from "./analytics";
 import type { V2Version } from "./bookVersions";
-import { VERSIONS_FOUNDING_ACCESS, versionsUnlocked } from "./entitlements";
+import { versionsUnlocked, type Entitlement } from "./entitlements";
 import { stageTint, type BeLine } from "./qc150";
 import { MONTHS_SHORT } from "./dates";
 import { canSend, composeFor, type ComposeKey } from "./foundingCard";
@@ -615,13 +615,13 @@ export const versionsLine = (n: number): string =>
   n === 0 ? "No versions of your manuscript saved yet." : `${n} ${n === 1 ? "version" : "versions"} of your manuscript saved. New queries go out with the one in use.`;
 
 /**
- * The Versions gate — the desktop's exactly (VersionsV2Page `locked`): founding access or Pro opens it, and the dev
+ * The Versions gate — the desktop's exactly (VersionsV2Page `locked`): the one resolver's entitlement opens it, and the dev
  * review aid `sessionStorage["sa.dev.versionsFree"] = "1"` shows the lock on a dev build (never in production).
  */
-export function versionsLocked(user: Parameters<typeof versionsUnlocked>[0], mode: string, read: () => string | null): boolean {
+export function versionsLocked(e: Entitlement, mode: string, read: () => string | null): boolean {
   let free = false;
   if (mode !== "production") { try { free = read() === "1"; } catch { free = false; } }
-  return free || !versionsUnlocked(user, VERSIONS_FOUNDING_ACCESS);
+  return free || !versionsUnlocked(e);
 }
 /** ⚠️ THE DESKTOP'S LOCK COPY, VERBATIM (VersionsV2Page's lock card). phoneV5.test.ts asserts every string is in it. */
 export const VERSIONS_LOCK = {

@@ -40,7 +40,7 @@ import "./phoneV5.css";
 export const MaterialsV5: React.FC = () => {
   const loc = useLocation();
   const navigate = useNavigate();
-  const { queries, currentUser } = useScriptAllyDb();
+  const { queries, entitlement } = useScriptAllyDb();
   const model = usePk26Model();
   const [tab, setTab] = useState<MatTab>(() => readTab(MAT_TAB_KEY, isMatTab, "packages"));
   const pick = (t: MatTab) => { setTab(t); saveTab(MAT_TAB_KEY, t); };
@@ -69,7 +69,7 @@ export const MaterialsV5: React.FC = () => {
   const act = model.active;
   const actResult = act ? pkgResult(stats.get(act.id) ?? { sent: 0, requests: 0 }) : null;
   const choosable = model.live.filter((p) => canMakeActive(p, act?.id));
-  const locked = versionsLocked(currentUser, import.meta.env.MODE, () => { try { return window.sessionStorage.getItem("sa.dev.versionsFree"); } catch { return null; } });
+  const locked = versionsLocked(entitlement, import.meta.env.MODE, () => { try { return window.sessionStorage.getItem("sa.dev.versionsFree"); } catch { return null; } });
 
   const body = tab === "packages" ? <PackagesTabV5 model={model} stats={stats} open={open} />
     : tab === "letters" ? <LettersTabV5 model={model} open={open} />

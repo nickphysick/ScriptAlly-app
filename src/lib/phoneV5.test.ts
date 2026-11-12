@@ -5,6 +5,7 @@ import {
 } from "./phoneV5";
 import { QueryStatus } from "../types";
 import type { BeLine } from "./qc150";
+import type { Entitlement } from "./entitlements";
 import { v3TabFor } from "./phoneV3Nav";
 import {
   AGENT_GROUPS, agentGroupOf, agentPartition, gapGroupCounts, gapQueue, gapStrip, gapsAcross, healthShows, nextGap, queriedAgo,
@@ -571,13 +572,15 @@ describe("phone v5 Materials (Phase F) — letters, comps, versions", () => {
     expect(kept.map((n) => n.v.id)).toEqual(["tip", "mid", "o"]);
     expect(versionTree([])).toEqual([]);
   });
-  it("the Versions gate is the desktop's: founding access opens it; the dev review aid locks it, never in production", () => {
-    const free = { plan: "Free" } as Parameters<typeof versionsLocked>[0];
-    expect(versionsLocked(free, "development", () => null)).toBe(false);
-    expect(versionsLocked(free, "development", () => "1")).toBe(true);
-    expect(versionsLocked(free, "production", () => "1")).toBe(false);
+  it("the Versions gate is the desktop's: the resolver's entitlement opens it; the dev review aid locks it, never in production", () => {
+    const pro: Entitlement = { basis: "pro", pro: true, prompts: false, trialEndsMs: null };
+    const free: Entitlement = { basis: "free", pro: false, prompts: true, trialEndsMs: null };
+    expect(versionsLocked(pro, "development", () => null)).toBe(false);
+    expect(versionsLocked(free, "development", () => null)).toBe(true);
+    expect(versionsLocked(pro, "development", () => "1")).toBe(true);
+    expect(versionsLocked(pro, "production", () => "1")).toBe(false);
     const desk = readFileSync(resolve(__dirname, "../components/versions/VersionsV2Page.tsx"), "utf8");
-    expect(desk).toContain('const locked = reviewFree() || !versionsUnlocked(currentUser, VERSIONS_FOUNDING_ACCESS);');
+    expect(desk).toContain('const locked = reviewFree() || !versionsUnlocked(db.entitlement);');
     expect(desk).toContain('sessionStorage.getItem("sa.dev.versionsFree") === "1"');
     expect(desk).toContain('if (import.meta.env.MODE === "production") return false;');
   });
