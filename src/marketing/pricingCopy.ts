@@ -65,43 +65,21 @@ export const PV4_STEPS_H = "How it works";
 export const PV4_STEPS = ["Sign up", "Receive and confirm your invite", "Log in with your unique founder's code"];
 
 /* ══════════════ The Pro plans — planned launch prices ══════════════
-   ⚠️ ONE TABLE, AND EVERY OTHER FIGURE ON THE PAGE IS READ FROM IT. The per-month figure is DERIVED
-   (price ÷ months, to the penny); the saving is STATED, because the ref's three savings are not one
-   rounding of the arithmetic — 20 / 40 / 53 against a computed 20.7 / 39.5 / 53.1 — and the page
-   prints the ref's words. `pricingCopy.test.ts` holds each stated saving within one point of the
-   arithmetic, so a price that moves without its saving fails there rather than on the page.
-   ⚠️ THEY ARE PLANS, NEVER PASSES (pricing v4): the copy says "plans" and so do the identifiers. */
-export interface ProPlan {
-  months: 1 | 3 | 6 | 12;
-  /** Pounds, as the page prints it: "7.99", "19". */
-  price: string;
-  /** Percentage off twelve single months at the one-month price. Null for the one-month plan. */
-  saving: number | null;
-}
-export const PRO_PLANS: ProPlan[] = [
-  { months: 1, price: "7.99", saving: null },
-  { months: 3, price: "19", saving: 20 },
-  { months: 6, price: "29", saving: 40 },
-  { months: 12, price: "45", saving: 53 },
-];
+   ⚠️ THE PRICES AND LENGTHS LIVE IN `lib/planRules.ts` (plan rules v1), which the app's plan table reads too. They are
+   re-exported here so this page's readers keep their imports. */
+export { PRO_PLANS, perMonth, planFor, PRO_FROM, ROLL_ON_PRICE, planMonths, type ProPlan } from "../lib/planRules";
+import { perMonth, planFor, PRO_FROM, PRO_PLANS, ROLL_ON_PRICE, type ProPlan } from "../lib/planRules";
+import { DIFFERING_ROWS } from "../lib/planComparison";
 
-/** £ a month for a plan, to the penny: 19 / 3 → "6.33". */
-export const perMonth = (p: ProPlan): string => (Number(p.price) / p.months).toFixed(2);
-export const planFor = (months: ProPlan["months"]): ProPlan => PRO_PLANS.find((p) => p.months === months)!;
 /** "£6.33 a month · save 20%", or the one-month plan's own line — the result card's wording. */
 export const planPerMonthLine = (p: ProPlan): string =>
   p.saving === null ? "One month of Pro" : `£${perMonth(p)} a month · save ${p.saving}%`;
-/** The cheapest month on any plan — Pro's "from" figure. */
-export const PRO_FROM = PRO_PLANS.map(perMonth).sort((a, b) => Number(a) - Number(b))[0];
-/** "1 month", "3 months". */
-export const planMonths = (m: number): string => `${m} month${m > 1 ? "s" : ""}`;
 
 /* ══════════════ The Pro ladder, and the monthly roll-on (26 Oct; ref pricing-plans-ladder-v1.html) ══════════════
    ⚠️ EVERY PLAN CARRIES ON MONTH BY MONTH AT THE ONE-MONTH PRICE ONCE IT ENDS, UNTIL THE WRITER CANCELS
    (Nick, 26 Oct). It is said QUIETLY: one line of small print under the lengths, and in full only in the
    FAQ. It is page copy for a planned launch — there is no payment path and nothing here bills anyone.
    The price is the table's one-month figure, never a second literal. */
-export const ROLL_ON_PRICE = planFor(1).price;
 /** Under "Pro", above the four lengths. */
 export const PRO_CHOOSE = "Choose how long to start with.";
 /** The small print under the lengths — the page's only mention of renewal outside the FAQ. */
@@ -124,25 +102,20 @@ export const PV4_FREE = {
   sub: "For as long as you like",
   list: [
     "One manuscript",
-    "Up to 20 agents",
+    "Unlimited agents",
     "Unlimited queries and response tracking",
     "To-do list",
     "Bring your list across with Smart Import",
   ],
 } as const;
 
-export const PV4_PRO = {
+export const PV4_PRO: { name: string; from: string; per: string; plus: string; list: readonly string[] } = {
   name: "Pro",
   from: "from",
   per: "a month",
   plus: "Everything in Free, plus:",
-  list: [
-    "Unlimited agents",
-    "Manuscript versions, one for each draft",
-    "Submission packages and materials tracking",
-    "Smart email drop",
-    "The Scout",
-  ],
+  /* Plan rules v1: the rows Pro adds, read from the plan table (lib/planComparison), never typed here. */
+  list: DIFFERING_ROWS.map((r) => r.label),
 } as const;
 
 /* ══════════════ The questions behind a link ══════════════ */
@@ -168,9 +141,9 @@ export const PV4_FAQ: Pv4Question[] = [
   },
   {
     q: "What's the difference between Free and Pro?",
-    a: ["Free covers the essentials: one manuscript, up to 20 agents, and every query and response tracked. " +
-        "Pro adds the tools that make querying smarter, from manuscript versions and submission packages to " +
-        "Smart email drop and The Scout."],
+    a: ["Free covers the essentials: one manuscript, as many agents as you like, and every query and response " +
+        "tracked. Pro adds the tools that make querying smarter, from query letters, manuscript versions and " +
+        "submission packages to Smart email drop and The Scout."],
   },
   {
     q: "Is Pro a subscription?",

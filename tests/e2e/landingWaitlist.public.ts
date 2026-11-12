@@ -586,7 +586,7 @@ test.describe("LW-12 · the founding pass states a number only when the count ha
     await page.waitForTimeout(1500);
     const s = await stub(page);
     console.log("LW-12 unloaded", JSON.stringify(s));
-    expect(s, "the stub is drawn").toContain("Founding writer pass");
+    expect(s, "the stub is drawn").toContain("Founding writer place");
     expect(s).not.toMatch(/No\./);
     expect(s).not.toMatch(/\d/);
   });
@@ -595,7 +595,7 @@ test.describe("LW-12 · the founding pass states a number only when the count ha
     await page.waitForTimeout(1500);
     const s = await stub(page);
     console.log("LW-12 loaded", JSON.stringify(s));
-    expect(s).toBe("Founding writer passNo. 14of 50");
+    expect(s).toBe("Founding writer placeNo. 14of 50");
   });
   /* Founding emails v1 (1 Nov): full says so, "All fifty taken", and still states no number. */
   test("full: no number, and the stub says the places are gone", async ({ page }) => {
@@ -603,7 +603,7 @@ test.describe("LW-12 · the founding pass states a number only when the count ha
     await page.waitForTimeout(1500);
     const s = await stub(page);
     console.log("LW-12 full", JSON.stringify(s));
-    expect(s).toBe("Founding writer passAll fifty taken");
+    expect(s).toBe("Founding writer placeAll fifty taken");
     expect(s).not.toMatch(/No\./);
   });
 });

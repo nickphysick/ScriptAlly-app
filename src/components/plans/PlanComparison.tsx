@@ -63,11 +63,9 @@ const Column: React.FC<{
         {current && <span className="plc-chip" style={{ fontFamily: FONT_MONO }}>{CURRENT_PLAN_CHIP}</span>}
       </div>
 
-      {/* ⚠️ THE PRICE IS THE LOCKED MARKETING COPY'S, WORD FOR WORD. Today that is £4.99 a month,
-          set 16 Sep; for the year before it, "Price to be confirmed". The rule is unchanged by the
-          figure arriving and is the reason this reads `tier.price` rather than holding its own:
-          this card must never be a SECOND place a price is typed, because the day the two disagree
-          nobody can tell which one a reader was shown. */}
+      {/* ⚠️ THE PRICE IS `PRICING_TIERS`', WHICH READS `lib/planRules` (plan rules v1): Free "£0" over "First 14 days
+          are Pro"; Pro "from £3.75 a month" over "1, 3, 6 or 12 months". This card must never be a second place a price
+          is typed. */}
       <p className="plc-price" style={{ fontFamily: FONT_SERIF, color: bodyInk }}>{tier.price}</p>
       {/* ⚠️ THE NOTE'S LINE IS RESERVED IN BOTH COLUMNS, EVEN WHEN EMPTY — the same rule as the CTA
           slot below, and the one I missed first time. NO tier carries a note now: `priceNote` was

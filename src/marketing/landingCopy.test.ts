@@ -15,7 +15,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import {
   HERO_H1, HERO_CTA, FOUNDING_PERKS, WAIT_HERO_Q, WAIT_HERO_STRAP, WAIT_HERO_SUB, BE_HEADING, BE_LINE,
-  BE_TICKS, FAQ, MISSION_HEADING, SEE_WHAT, DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, PASS_LABEL,
+  BE_TICKS, FAQ, MISSION_HEADING, SEE_WHAT, DETAILS_HEADING, DETAILS_SUB, DETAILS_PILLS, PLACE_LABEL,
   FOUNDING_GET_LEADS, PHONE_FEATURE_ORDER, featureAnchor, passNumber, passOf, TickItem,
   HERO_PHONE_Q, HERO_PHONE_JOIN, HERO_PHONE_MS, HERO_PHONE_MS_FRONT, HERO_PHONE_TAGS, PHONE_STORY,
   DOCUMENT_TITLE, FEATURE_ROWS,
@@ -81,7 +81,7 @@ describe("landing copy — verbatim locks", () => {
     const PHRASE = "No more winging it.";
     const said = [
       BE_HEADING, BE_LINE, ...BE_TICKS.map(tickText), WAIT_HERO_SUB, SEE_WHAT, ...WAIT_HERO_Q, MISSION_HEADING,
-      DETAILS_HEADING.join(""), DETAILS_SUB, ...DETAILS_PILLS.map((p) => p.label), PASS_LABEL, ...FAQ.flat(),
+      DETAILS_HEADING.join(""), DETAILS_SUB, ...DETAILS_PILLS.map((p) => p.label), PLACE_LABEL, ...FAQ.flat(),
       HERO_H1, HERO_CTA,
       /* The phone hero's own strings (23 Oct): its strapline IS `HERO_H1`, so none of these may say it. */
       ...HERO_PHONE_Q, HERO_PHONE_JOIN, HERO_PHONE_MS, HERO_PHONE_MS_FRONT, ...HERO_PHONE_TAGS, PHONE_STORY.asked.label, ...Object.values(PHONE_STORY.chips).map((c) => c[0]),
@@ -557,7 +557,7 @@ describe("landing copy — verbatim locks", () => {
 
   it("the founding pass: its label, its number's words, and each get's bold lead found in the unchanged string", () => {
     expect(MISSION_HEADING).toBe("Our mission? Simple.");
-    expect(PASS_LABEL).toBe("Founding writer pass");
+    expect(PLACE_LABEL).toBe("Founding writer place");
     expect(passNumber(14)).toBe("No. 14");
     expect(passOf(50)).toBe("of 50");
     expect(FOUNDING_GET_LEADS).toEqual(["QueryHawk Pro, free", "A direct line", "Smart Import", "An exclusive Early Bird discount"]);

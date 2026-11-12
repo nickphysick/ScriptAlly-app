@@ -2,7 +2,7 @@
  * FoundingTicket — the founding sign-up at the foot of the landing page on phones (≤760px; waitlist v2,
  * 1 Nov; ref design-refs/landing-mobile-v17.html `.tkt`). It replaces `FoundingClose`'s card.
  *
- * A pass: a blush stub ("Founding writer pass", the next place's number "No. N" over "of 50", the
+ * A pass: a blush stub ("Founding writer place", the next place's number "No. N" over "of 50", the
  * founding-pass bird clipped by the stub's rounded corner), a dashed tear line with a half-circle notch
  * each side, then the body — the heading, the lead, the four gets with their lead phrases in bold, the
  * shared sign-up, the places counter, the note and Privacy.
@@ -19,7 +19,7 @@
  */
 import React from "react";
 import {
-  FOUNDING_GETS, FOUNDING_GET_LEADS, CLOSE_HEADING, CLOSE_LEAD, CLOSE_NOTE, PASS_FULL, PASS_LABEL, passNumber, passOf,
+  FOUNDING_GETS, FOUNDING_GET_LEADS, CLOSE_HEADING, CLOSE_LEAD, CLOSE_NOTE, PLACE_FULL, PLACE_LABEL, passNumber, passOf,
 } from "./landingCopy";
 import { FoundingSignup } from "./FoundingSignup";
 import { HeroPlaces } from "./HeroPlaces";
@@ -52,9 +52,9 @@ export const FoundingTicket: React.FC<{ onNavigate: (tab: string, subPageName?: 
       <div className="mk-tkt" id={CLOSE_FORM + "-signup"}>
         <div className="mk-tkt-stub">
           <div className="mk-tkt-st">
-            <small>{PASS_LABEL}</small>
+            <small>{PLACE_LABEL}</small>
             {place && <><b>{passNumber(place.n)}</b><span>{passOf(place.cap)}</span></>}
-            {gone && <b className="mk-tkt-full">{PASS_FULL}</b>}
+            {gone && <b className="mk-tkt-full">{PLACE_FULL}</b>}
           </div>
           <img src={v(PASS_BIRD)} alt="" width={PASS_BIRD.width} height={PASS_BIRD.height} loading="lazy" />
         </div>

@@ -58,12 +58,13 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
   const TIERS = [
     "Then, once we launch:",
     "For as long as you like",
-    "One manuscript", "Up to 20 agents", "Unlimited queries and response tracking", "To-do list",
+    /* Plan rules v1 (12 Nov): no agent cap, and Pro lists the seven rows the plan table says Pro adds. */
+    "One manuscript", "Unlimited agents", "Unlimited queries and response tracking", "To-do list",
     "Bring your list across with Smart Import",
     /* 26 Oct: the Pro card is the ladder (ref pricing-plans-ladder-v1.html, option 3) */
     "Choose how long to start with.", "Everything in Free, plus:",
-    "Unlimited agents", "Manuscript versions, one for each draft", "Submission packages and materials tracking",
-    "Smart email drop", "The Scout",
+    "Query letters", "Manuscript versions", "Submission packages", "Which package wins requests",
+    "Comparable titles", "The Scout", "Smart email drop",
     "Renews monthly at £7.99 once your plan ends. Cancel any time.",
   ];
   const PLANS = [
@@ -79,7 +80,7 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
     ["What happens when my founding campaign ends?",
       "Just drop us a note to let us know you're done. We'd love to hear how it went."],
     ["What's the difference between Free and Pro?",
-      "Free covers the essentials: one manuscript, up to 20 agents, and every query and response tracked. Pro adds the tools that make querying smarter, from manuscript versions and submission packages to Smart email drop and The Scout."],
+      "Free covers the essentials: one manuscript, as many agents as you like, and every query and response tracked. Pro adds the tools that make querying smarter, from query letters, manuscript versions and submission packages to Smart email drop and The Scout."],
     ["Is Pro a subscription?",
       /* 26 Oct: the monthly roll-on (ref pricing-plans-ladder-v1.html, its wording panel) */
       "Yes, but a flexible one. You start with a plan that matches how long you expect to be querying, from one month to twelve. If you're still going when it ends, it carries on month by month at £7.99 until you cancel. We'll remind you a week before."],
@@ -105,9 +106,9 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
     expect(PV4_STEPS).toEqual(BOX.slice(13, 16));
     expect(PV4_LAUNCH_LINE).toBe(TIERS[0]);
     expect([...PV4_FREE.list]).toEqual(TIERS.slice(2, 7));
-    expect([...PV4_PRO.list]).toEqual(TIERS.slice(9, 14));
+    expect([...PV4_PRO.list]).toEqual(TIERS.slice(9, 16));
     expect(PRO_CHOOSE).toBe(TIERS[7]);
-    expect(LADDER_SMALL).toBe(TIERS[14]);
+    expect(LADDER_SMALL).toBe(TIERS[16]);
     expect(PV4_FAQ.map((qa) => [qa.q, faqText(qa.a)])).toEqual(FAQ);
   });
 
