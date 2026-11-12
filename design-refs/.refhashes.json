@@ -1151,7 +1151,15 @@
     "design-refs/todo-list-v54/todo-batch-v3.html": "dcee12f8193f6cf5340b33d45c76736ff31873a84500146621ff1058763380fd",
     "design-refs/todo-list-v55/todo-tray-head-v2.html": "9c684b6fb404d1b18d6c3cfd0d5770cd997eb07b1b28ef898ef18c134a1392c9",
     "design-refs/your-notes-v1/your-notes-v1.html": "7e19d98ac439d4e4ee3348dbde870f44571a7bd4fe80bb0b750ed046bec8e72d",
-    "design-refs/contact-list-principles-v1/contact-list-principles-v1.html": "2069e37eb2c5d1b03ee63b54ff522f2c5a1fd19609b8d7ad75609dab42dd6604"
+    "design-refs/contact-list-principles-v1/contact-list-principles-v1.html": "2069e37eb2c5d1b03ee63b54ff522f2c5a1fd19609b8d7ad75609dab42dd6604",
+    "design-refs/settings-v2.html": "7e386c543e572f2ad22c10edff4864d39542b51bc969a8815e201168d82eaa6e",
+    "design-refs/plans-v2.html": "1f19a29056a43f4f57614fc6a8cf09796fbfceae884f6b863b9a7cde1de1a2db",
+    "design-refs/plan-table-v1.html": "cf5ae3db5248d4158fc2a9d97cf781faf175374f5328acd8cfbde8bb06b2db64",
+    "design-refs/getting-in-v1.html": "6f67f93ffe0dba03f0ea6a1d10dee3d36ae3052f295bd78173e17ed70b15b6ed",
+    "design-refs/contact-terms-unsubscribe-v1.html": "fba85c9615f134457a3c3ddf13885a0166e877a89728cb8a5f882f564d2d9eeb",
+    "design-refs/help-centre-v1.html": "cf860b2ee9c2f3316a2c03d1a0c55704dac9875f7e583cc7587bff04e6cb9800",
+    "design-refs/public-sweep-v1.html": "94482fb8f320eb80ac27df2855db099415cab547a9bc4a1f13dad16e724bf8ba",
+    "design-refs/emails-v1.html": "c02d8698fd44cd760ff8c6fdbc45bc2a7b84d856376815a704c3e425fbafd90c"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
