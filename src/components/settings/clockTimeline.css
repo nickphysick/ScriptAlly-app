@@ -1,6 +1,6 @@
 /* A query's clock (non-workspace v1, Phase 3). The ink band for the line; no new colours. */
 .ct { padding: 6px 0 4px; }
-.ct-line { display: flex; align-items: flex-start; gap: 0; overflow-x: auto; padding-bottom: 4px; }
+.ct-line { display: flex; align-items: flex-start; gap: 0; overflow-x: auto; padding: 22px 0 4px; }
 .ct-node { flex: none; position: relative; z-index: 1; display: grid; justify-items: center; gap: 3px; width: 92px; text-align: center; }
 .ct-node i { display: block; width: 12px; height: 12px; border-radius: 50%; background: var(--ink-band); margin-top: 6px; }
 .ct-node--end i { background: #fff; box-shadow: inset 0 0 0 2px var(--ink-band); }
