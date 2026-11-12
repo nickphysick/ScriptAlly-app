@@ -150,6 +150,7 @@ test("QL2-7 unsaved changes + another row: the guard holds the selection until a
   await row(page, "ql1-draft").click();
   const draftBefore = await sheetText(page);
   await P(page).locator('[data-ql="edit"]').click();
+  await expect(P(page).locator('[data-ql="ed-text"]')).toBeFocused();
   await page.keyboard.type(" Guarded.");
   await row(page, "cv25-let-1").click();
   const guard = P(page).locator('[data-ql="guard"]');
@@ -170,6 +171,7 @@ test("QL2-7 unsaved changes + another row: the guard holds the selection until a
   expect(await sheetText(page)).toBe(draftBefore);
   /* Save then move */
   await P(page).locator('[data-ql="edit"]').click();
+  await expect(P(page).locator('[data-ql="ed-text"]')).toBeFocused();
   await page.keyboard.type(" Saved by the guard.");
   await row(page, "cv25-let-1").click();
   await P(page).locator('[data-ql="g-save"]').click();
@@ -183,6 +185,7 @@ test("QL2-9 square brackets: typing one adds it, removing it takes it off", asyn
   await openLetters(page, "cv25-ms");
   await row(page, "ql1-draft").click();
   await P(page).locator('[data-ql="edit"]').click();
+  await expect(P(page).locator('[data-ql="ed-text"]')).toBeFocused();
   const gaps = P(page).locator('[data-ql="gaps"]');
   await expect(gaps.locator('[data-ql="gap"]')).toHaveText(["[Agent]"]);
   await page.keyboard.type(" [agent]");
@@ -237,7 +240,7 @@ test("QL2-6 + QL2-8 a new version of a sent letter, then the next-step card", as
   if (await undo.count()) await undo.click();
 });
 
-test("QL2-F day one, and the loading skeleton", async ({ page }) => {
+test("QL2-F day one", async ({ page }) => {
   for (const size of [W1440, W1920]) {
     await openLetters(page, "thin-ms", size);
     await expect(P(page).locator("h1.qc1531-t")).toHaveText("No query letters yet");
@@ -246,14 +249,28 @@ test("QL2-F day one, and the loading skeleton", async ({ page }) => {
     await expect(P(page).locator('[data-ql="first-save"]')).toBeVisible();
     await shot(page, "07-day-one");
   }
-  /* loading: hold the emulator's Firestore traffic on a fresh page */
-  await page.route(/127\.0\.0\.1:8085/, async (r) => { await new Promise((res) => setTimeout(res, 6000)); await r.continue().catch(() => {}); });
-  await page.goto("/materials/letters");
-  const sk = page.locator('[data-ql="skeleton"]');
-  const seen = await sk.first().waitFor({ state: "visible", timeout: 6000 }).then(() => true).catch(() => false);
-  console.log("[QL2-F] skeleton seen while Firestore is held:", seen);
-  if (seen) await shot(page, "08-loading");
-  await page.unroute(/127\.0\.0\.1:8085/);
+});
+
+test("QL2-F3 loading: the skeleton at the columns' final sizes (render harness, the build's own CSS), no spinner", async ({ page }) => {
+  /* the emulator cannot hold this state (holding Firestore holds the boot splash: sign-in waits on the user document),
+     so the page's own loading markup is rendered by src/components/letters/qlRender.harness.test.tsx into a file that
+     links every stylesheet the build emitted */
+  const out = `${process.cwd()}/dist-emu/ql2-loading.html`;
+  execSync("npx vitest run src/components/letters/qlRender.harness.test.tsx", { stdio: "inherit", env: { ...process.env, QL2_RENDER_OUT: out, QL2_RENDER_DIST: "dist-emu" } });
+  for (const size of [W1440, W1920]) {
+    await page.setViewportSize(size);
+    await page.goto(`file://${out}`);
+    const sk = page.locator('[data-ql="skeleton"]');
+    await expect(sk).toBeVisible();
+    const cols = await sk.evaluate((e) => getComputedStyle(e).gridTemplateColumns);
+    const ground = await page.locator('[data-ql="page"]').evaluate((e) => getComputedStyle(e).backgroundImage);
+    console.log(`[QL2-F3] ${size.width}: skeleton columns "${cols}"`);
+    expect(cols.split(" ")[0]).toBe("280px");
+    expect(cols.split(" ")[2]).toBe("380px");
+    expect(ground).toContain("doodle-tile");
+    await expect(page.locator('[role="progressbar"], .spinner, [class*="spin"]')).toHaveCount(0);
+    await shot(page, "08-loading");
+  }
 });
 
 test("QL2-F2 a Free writer meets the Materials lock on Query letters, as in v1", async ({ page }) => {

@@ -14,7 +14,9 @@
   --ql-ink: #1c130f; --ql-navy: #2a3a52; --ql-btn: #2d3a50; --ql-cream: #f4eee5;
   --ql-berry: #8f4a5a; --ql-blush: #f8e8ea;
   --ql-t62: rgba(28, 19, 15, .62); --ql-t72: rgba(28, 19, 15, .72); --ql-line: rgba(28, 19, 15, .12);
-  position: relative; box-sizing: border-box; min-width: 0; min-height: 100%;
+  position: relative; box-sizing: border-box; min-width: 0;
+  /* the ground fills the scroll port even when the page is short (day one): `100%` has no sized parent to resolve against */
+  min-height: max(100%, var(--qlp-port-h, 0px));
   padding: 28px var(--work-gutter) 64px;
   font: 16px/1.5 var(--sp-serif); color: var(--ql-ink);
   /* the Query Centre's ground: the cool off-white with the doodle tile under an even .45 wash (qcv1534) */
