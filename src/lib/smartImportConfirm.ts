@@ -5,7 +5,7 @@
  * The Smart Import confirm step's sentence — pure, so it can be tested without the component.
  *
  * ⚠️ THIS SCREEN EXISTS TO NAME THE FILE. It is the beat where a writer spends a one-shot
- * entitlement (one free Smart Import ever, or one a month on Pro), so "which file?" is the only
+ * entitlement (one Smart Import per account, on every plan — plan rules v1), so "which file?" is the only
  * question it asks. The named and unnamed forms are therefore NOT interchangeable: the unnamed one
  * is a fallback for a state that should not happen, not a neutral alternative.
  *

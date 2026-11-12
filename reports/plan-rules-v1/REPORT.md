@@ -1,4 +1,136 @@
-# Plan rules v1 — STOPPED at Step 0.2 (red gate: no founding signal)
+# Plan rules v1 — final report
+
+12 Nov 2026. Branch `plan-rules-v1` (pushed, tip in the log below), cut from the dev line's tip `0dbabdc89`.
+**On dev:** https://scriptally-dev.web.app serves `index-nf9qrdAM.js`, built from a clean checkout of `9dddd36c0`
+(pushed as `plan-rules-v1` and as `dev/…-pa41-clp1-ql2-prv1`). It replaced `index-BTbKdg-q.js` (…-clp1-ql2, this branch's base).
+Functions deployed to scriptally-dev: `extractFromEmail`, `suggestComps` (a create: it had not been on dev), `smartImportMap`,
+`foundingStatsOnFeedback`, `foundingStatsNightly`. **Nothing on prod.** Not merged into main.
+
+## Commits
+| sha | what |
+|---|---|
+| `4a5f358bf` | Founding flag 1/4: the resolver reads it, on client and server |
+| `2c4712f0a` | Founding flag 2/4: the foundingStats run is the backstop setter |
+| `bf7ae6ce5` | Founding flag 3/4: the founder-only admin script |
+| `cc43a61d9` | Founding flag 4/4: the one-off backfill, run on dev |
+| `073a11bbc` | Phase 1: the plan table and one module for prices |
+| `4bc3abbd4` | Phase 2: every gate reads the one resolver, client and server |
+| `e2255b84a` | Phase 3: Smart Import once per account, on every plan |
+| `9dddd36c0` | The four open-to-all switches retired |
+| (this commit) | One stale comment ("one a month on Pro", smartImportConfirm.ts), plus this report. Not in the dev bundle. |
+
+## Gates
+- **Baseline** (`0dbabdc89`, before the first edit): tsc 0 errors (needs `NODE_OPTIONS=--max-old-space-size=8192`, or it runs out of
+  memory); `functions` tsc 0; build clean; Vitest **3 failed** / 12022 passed (`emuGuard` ×1, `firestoreTarget` ×2, all of them
+  e2e files on the dev line).
+- **End:** tsc 0, `functions` tsc 0, build clean, Vitest the **same 3 failed** / 12055 passed. No worse than baseline.
+- **`npm run test:functions`** (emulator, through the slot): 81 passed, **1 failed**. The failure is
+  `foundingStats.emulator.spec.ts` "counted:false…": it expects a `fixed` note to be worth 1, but `84db5c5b4` (Your notes v1) made
+  `fixed` earn +3 and left this spec as it was. That red came in before this pass and is not from this work. The Smart Import claim
+  spec passes with the new reasons.
+- **Red against the base first:** with the new locks copied onto `0dbabdc89`, 11 assertions fail. They cover: Free sees its work
+  read-only; the Scout lock; the second Smart Import refused for Free, paid Pro and founding accounts, and for an old Pro month on
+  record; the plan no longer read. The client–server agreement test and the Smart Import agreement test fail to load on the base,
+  because the resolver did not exist there.
+- The e2e specs I edited (`queryLettersV2` QL2-F2, `onbV5ImportPage` D2, `onbV5`, `landingWaitlist.public`) collect, but **were not
+  run**.
+
+## The founding flag
+- **Shape:** `users/{uid}/private/entitlement` gains `founding: true|false`, `foundingSince` (server timestamp) and
+  `foundingSource` (`invite` | `waitlist` | `admin` | `backfill`). Rules: owner read, `allow write: if false`. Rules unchanged. The
+  app cannot write it; it is still not writable from the app, which was a stop condition, and it did not trigger.
+- **Who sets it:**
+  1. **Founder's code: it exists, but nothing in it can be hooked by uid.** `redeemInviteCode` runs before the account exists. It
+     records the email on `inviteCodes/{CODE}.usedBy` / `usedAt`. It is also switched off (`INVITE_GATE_ENABLED = false` in
+     `src/lib/beta.ts`). I did not rewrite it. I hooked it the only way it allows, which is an email match in the backstop below.
+     Invite proof ranks above waitlist proof.
+  2. **The backstop:** `markFoundingFlags` at the end of `recomputeFoundingStats` (nightly at 03:00, and on every betaFeedback
+     write). It fills an **absent** flag only. `false` is an unmark and stays. It respects the cap (`counters/waitlist.cap`, else
+     `DEFAULT_CAP` 50): accounts already founding count against it, and each refusal is logged as `founding.flag.capped`.
+  3. **The admin script:** `scripts/founding-flag.mjs`, below.
+- **Dev backfill:** `scripts/backfill-founding-flags.mjs`. Dev has **87 accounts against a cap of 50**. You ruled that all 87 are
+  marked, so the run passed `--over-cap`: "written: 87. Founding now 87 of 87 accounts." A second dry run plans nothing.
+- **How dev resolves now:** founding **87**, trial **0**, Free **0**, paid Pro **0**. Two of the 87 are under 14 days old; they
+  are founding, so they have no trial clock. Every dev account resolves to everything, so no dev account lost anything it could
+  open before, which was a stop condition, and it did not trigger.
+
+### Marking one account by hand
+```
+ALLOW_LIVE_FIRESTORE=1 node scripts/founding-flag.mjs --project scriptally-dev --email writer@example.com --mark
+ALLOW_LIVE_FIRESTORE=1 node scripts/founding-flag.mjs --project scriptally-dev --email writer@example.com --mark --confirm
+```
+The first prints the account, its flag, the count against the cap and the change; only `--confirm` writes. `--uid <uid>` works
+in place of `--email`, and `--unmark` in place of `--mark`. On prod, pass `--project gen-lang-client-0801391782`; its database is
+filled in for you.
+
+### What Nick must run on prod when founding writers are first let in
+1. Create `functions/.env.gen-lang-client-0801391782` (already on the list in CLAUDE.md), then merge this work into `release/live-1`.
+   Release/live-1 still has functions on Node 20.
+2. Deploy, in this order: functions `extractFromEmail`, `suggestComps`, `smartImportMap`, `foundingStatsOnFeedback` and
+   `foundingStatsNightly`; then hosting. No rules deploy is needed.
+3. Mark each founding writer as they are let in:
+   `ALLOW_LIVE_FIRESTORE=1 node scripts/founding-flag.mjs --project gen-lang-client-0801391782 --email <email> --mark --confirm`.
+   The nightly run is a backstop for anyone who redeemed a code or holds a verified waitlist place under their sign-in email.
+4. **Do not run the backfill on prod.** It refuses prod without `--prod`, and it would mark everyone.
+5. Prod's `counters/waitlist.cap` was still 100 (memory, 25 Oct). The flag's cap reads the same field, so set it to 50 first if
+   50 is the number.
+
+## Every gate moved
+| Gate | Before | Now |
+|---|---|---|
+| Submission packages: `db.addPackage`, `canAttachPackages`, `MaterialsField`, Queries ×3, To-do and phone cards | `PACKAGES_OPEN_TO_ALL` or plan | `packagesUnlocked(entitlement)` → `canUse(e,"packages")` |
+| Versions: `VersionsV2Page`, Queries ×2, `PackagesPhone` | `VERSIONS_FOUNDING_ACCESS` or plan | `versionsUnlocked(entitlement)` |
+| Query letters, Comparable titles and the packages page (`MaterialsLock`) | `navLockedFor(user)`, blur and lock card | `readOnly(e, …)`: the page in full and inert, under one line and "See Pro plans" |
+| The Scout (Discover page) | not gated | `MaterialsLock page="scout"` (lock card); nav tag `discoverUnlocked(e)` |
+| The Scout (`suggestComps` callable) | `plan !== "Pro"` | `hasPro(resolveBasis(...))` |
+| Smart email drop: `PasteEmailButton`, `QueryPicker`, App's paste lane | `plan === PRO` | `canUse(e,"emailDrop")` |
+| Smart email drop (`extractFromEmail` callable) | `plan !== "Pro"` | `hasPro(resolveBasis(...))` |
+| Nav Pro marks (`WorkspaceShell`) | `navLockedFor(user)` and the switches | `navLockedFor(entitlement)` |
+| Sidebar plan line and upgrade link, `AccountMenu`, phone account pages | `planLine(plan)` | `planLine(entitlement)`: "Founding writer" / "Pro plan" / "Pro trial" / "Free plan"; the link only when `prompts` |
+| Settings plan card, its "See Pro plans", the comparison CTA, `PlansPage` | `plan === PRO` | `planColumn(e)`, `e.prompts` |
+| Dashboard upsell `OneScreenPro` (mounted nowhere) | `isProUser` | `e.prompts`; its "Unlimited manuscripts" line is gone |
+| Packages founding banner | open-to-all and not paid | the founding flag (`e.basis === "founding"`) |
+| Smart Import: client and `smartImportMap` | Free once; Pro monthly | once per account, any plan (`smartImportUsed`, both sides) |
+
+### The four switches, and what replaced each
+- `PACKAGES_OPEN_TO_ALL` → `canUse(e,"packages")`
+- `VERSIONS_FOUNDING_ACCESS` → `canUse(e,"versions")`
+- `DISCOVER_OPEN_TO_ALL` → `canUse(e,"scout")`
+- `MATERIALS_OPEN_TO_ALL` → `canUse(e,"letters")`
+
+`NAV_OPEN`, `navLockedFor`'s override argument and the `navOpenAid` dev aid went with them. In dev builds only, `__SA_NAV_FREE`
+now stands the account in as a day-15 Free writer (`freeWriterAid`).
+
+## What could not be moved, and why
+- **The CLAUDE.md line ("agents capped by `addAgent`") is NOT corrected.** That line exists only in main's CLAUDE.md; this
+  branch carries the old 955 KB file, and the merge rule takes main's CLAUDE.md, so an edit here would be lost. Main is checked out
+  in `/Users/nickphysick/ScriptAlly-app`, which another live session holds, with 78 dirty files. The change is one line, for
+  whoever next holds main:
+  `- **Free plan limits are code, not copy:** one manuscript on Free (\`FREE_MANUSCRIPT_LIMIT\`); there is no agent cap (\`addAgent\` has none); read the constant before stating a number.`
+- **Housekeeping assist-fill** (`HousekeepingSweep`, and the `assistAgentData` callable) still checks `plan === "Pro"`. It is not
+  in the baked Pro list, and its callable is outside this pass's functions scope. Founding and trial accounts do not get it.
+  Needs a ruling: Pro, or open to everyone.
+- **Read-only is page-level, not control-by-control.** On Free, the Materials pages are inert under one line. Their create and
+  edit controls are disabled, not replaced, which would have meant redesigning each page (out of scope). Versions keeps its own
+  existing lock card over an inert list.
+- **"Which package wins requests"** has no gate of its own: the results show on the read-only packages page.
+- **`AllManuscripts.tsx`** (locked, and rendered by no route) still calls `isProUser` for the comp Scout panel, and **`MsFoot.tsx`**
+  (a Manuscripts page file) keeps a comment naming `PACKAGES_OPEN_TO_ALL`. Both are on the do-not-touch list.
+- **`trialStartDate`** is retired: nothing reads or writes it. The field stays in `src/types.ts` and in the rules allowlist.
+- **The welcome page** (`welcomeCopy.ts`, not in the plan files) still labels the ticket "Founding writer pass". The landing ticket
+  now says "Founding writer place".
+- **Signing up shows no founding status until the nightly run** (or a hand mark). Until then a new founding writer is on the trial,
+  which is full Pro, but may see upgrade prompts. Marking someone at sign-up needs a new trigger, outside this pass's functions
+  scope.
+- **The signed-in pages were not checked in a browser:** the browser pane is not signed in to dev, and I did not sign in. The
+  public `/pricing` page on dev was read live: the new bundle, all seven Pro rows, the corrected FAQ, no "20 agents" and no "pass".
+
+## Greps (literal, comments included, src/ outside tests)
+"20 agents", "twenty agents", "Comp Scout": none. "One a month": none on plan surfaces (the only hits are `analyticsV24`'s query send
+rate, "less than one a month"). "pass" as a plan word: none in the six plan files (comments stripped), and `planWords.test.ts`
+holds that.
+
+## Step 0 report (as it stood when the run stopped, 12 Nov, before the continuation)
 
 12 Nov 2026. Branch `plan-rules-v1`, cut from the dev line's tip `0dbabdc89` (…-clp1-ql2, what dev serves:
 `index-BTbKdg-q.js`). Worktree `/Users/nickphysick/ScriptAlly-prv1`. **No source file edited, no baseline run, nothing deployed.**
