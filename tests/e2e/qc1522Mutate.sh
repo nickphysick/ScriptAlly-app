@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # Query Centre v152.2 — proves each QC1522 lock red (tests/e2e/qc1522.measure.ts):
 #
 #   bash tests/e2e/qc1522Mutate.sh L1 L6 …   each lock against its named break: a page break (PAGE_MUT in the spec: L2 L3 L4

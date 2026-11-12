@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # Query Centre v151.2 — runs a spec on the emulator build, waiting for another session's emulators to finish first.
 #   bash tests/e2e/qc1512Run.sh "<env> node scripts/emu-e2e-inner.mjs <spec> --project=measure --workers=1"
 # ⚠️ The emulator ports (8085 / 9095 / 4321) are shared by every worktree on this machine: wait, never kill.

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # To-do list v53 — prove each TD53 lock red with its named break (TD53_MUTATE=<lock>, applied in the page by
 # todoV53.measure.ts), at 1440 × 900. Needs `npm run dev:emu` serving on 127.0.0.1:3000 (one emulator session for every
 # run). Each line of reports/todo-list-v53/mutation-proofs.txt names the lock, the case it ran, and red or GREEN (a

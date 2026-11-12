@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # To-do list v54 — prove each TD54 lock red with its named break, at 1440 × 900. Needs `npm run dev:emu` serving on
 # 127.0.0.1:3000 (vite's dev server, so a source break is live within a second or two and gone when it is restored).
 # Page-side breaks: TD54_MUTATE=<lock>, applied by todoV54.measure.ts. Source breaks: one line of the shipped code,

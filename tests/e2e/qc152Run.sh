@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # Query Centre v152 — runs a spec on the emulator build, waiting for another session's emulators to finish first.
 #   bash tests/e2e/qc1512Run.sh "<env> node scripts/emu-e2e-inner.mjs <spec> --project=measure --workers=1"
 # ⚠️ Through scripts/emu-guard.mjs (disk pre-flight, logs to /dev/null, cleanup — which removes dist-emu/: build before each run).

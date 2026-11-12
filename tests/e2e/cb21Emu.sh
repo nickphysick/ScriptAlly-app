@@ -1,4 +1,5 @@
 #!/bin/sh
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- bash "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # Corkboard v2.1: the emulator run in two steps — build dist-emu first, THEN wait for the shared emulator ports and
 # start the emulators straight away. `npm run e2e:emu` waits before its 4–7 minute build, and another session can take
 # the fixed ports inside that window (it did, 6 Nov). Same build, same emulators, same inner runner as scripts/emu.mjs.

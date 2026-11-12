@@ -1,4 +1,5 @@
 #!/bin/zsh
+[ -n "${HEAVY_SLOT_TOKEN:-}" ] || exec node "$(git rev-parse --show-toplevel)/scripts/heavy-slot.mjs" run -- zsh "$0" "$@"  # one heavy job at a time: the test slot (scripts/heavy-slot.mjs)
 # To-do list v55 — proves each TD55 lock red: one named break at a time, then the lock must fail.
 #   SA_E2E_BASE_URL=http://127.0.0.1:3000 zsh tests/e2e/td55Mutate.sh        (against `npm run dev:emu`, which hot-reloads)
 # Page-side breaks go through TD55_MUTATE; source breaks are applied to the file and put back from a path-named copy
