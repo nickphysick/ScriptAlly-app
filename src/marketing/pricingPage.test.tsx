@@ -59,8 +59,9 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
     "Then, once we launch:",
     "For as long as you like",
     /* Plan rules v1 (12 Nov): no agent cap, and Pro lists the seven rows the plan table says Pro adds. */
-    "One manuscript", "Unlimited agents", "Unlimited queries and response tracking", "To-do list",
-    "Bring your list across with Smart Import",
+    /* Non-workspace v1 (public-sweep-v1, Pricing "After"): the trial line joins the Free list. */
+    "One manuscript", "Unlimited agents and queries", "Response tracking", "To-do list",
+    "Bring your list across with Smart Import", "Everything in Pro for your first 14 days",
     /* 26 Oct: the Pro card is the ladder (ref pricing-plans-ladder-v1.html, option 3) */
     "Choose how long to start with.", "Everything in Free, plus:",
     "Query letters", "Manuscript versions", "Submission packages", "Which package wins requests",
@@ -80,7 +81,9 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
     ["What happens when my founding campaign ends?",
       "Just drop us a note to let us know you're done. We'd love to hear how it went."],
     ["What's the difference between Free and Pro?",
-      "Free covers the essentials: one manuscript, as many agents as you like, and every query and response tracked. Pro adds the tools that make querying smarter, from query letters, manuscript versions and submission packages to Smart email drop and The Scout."],
+      "Free covers the essentials: one manuscript, as many agents as you like, and every query and response tracked. Pro adds the tools that make querying smarter, from query letters and comparable titles to manuscript versions, submission packages, Smart email drop and The Scout."],
+    ["Is there a free trial?",
+      "Yes. Every new account has everything in Pro for its first 14 days. After that you're on Free, and nothing you made is deleted."],
     ["Is Pro a subscription?",
       /* 26 Oct: the monthly roll-on (ref pricing-plans-ladder-v1.html, its wording panel) */
       "Yes, but a flexible one. You start with a plan that matches how long you expect to be querying, from one month to twelve. If you're still going when it ends, it carries on month by month at £7.99 until you cancel. We'll remind you a week before."],
@@ -105,10 +108,10 @@ describe("pricing v4: the copy is the ref's, word for word", () => {
     expect(PV4_PERKS.map((p) => [p.title, p.body]).flat()).toEqual(BOX.slice(4, 12));
     expect(PV4_STEPS).toEqual(BOX.slice(13, 16));
     expect(PV4_LAUNCH_LINE).toBe(TIERS[0]);
-    expect([...PV4_FREE.list]).toEqual(TIERS.slice(2, 7));
-    expect([...PV4_PRO.list]).toEqual(TIERS.slice(9, 16));
-    expect(PRO_CHOOSE).toBe(TIERS[7]);
-    expect(LADDER_SMALL).toBe(TIERS[16]);
+    expect([...PV4_FREE.list]).toEqual(TIERS.slice(2, 8));
+    expect([...PV4_PRO.list]).toEqual(TIERS.slice(10, 17));
+    expect(PRO_CHOOSE).toBe(TIERS[8]);
+    expect(LADDER_SMALL).toBe(TIERS[17]);
     expect(PV4_FAQ.map((qa) => [qa.q, faqText(qa.a)])).toEqual(FAQ);
   });
 

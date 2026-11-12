@@ -68,7 +68,7 @@ export const PV4_STEPS = ["Sign up", "Receive and confirm your invite", "Log in 
    ⚠️ THE PRICES AND LENGTHS LIVE IN `lib/planRules.ts` (plan rules v1), which the app's plan table reads too. They are
    re-exported here so this page's readers keep their imports. */
 export { PRO_PLANS, perMonth, planFor, PRO_FROM, ROLL_ON_PRICE, planMonths, type ProPlan } from "../lib/planRules";
-import { perMonth, planFor, PRO_FROM, PRO_PLANS, ROLL_ON_PRICE, type ProPlan } from "../lib/planRules";
+import { perMonth, planFor, PRO_FROM, PRO_PLANS, ROLL_ON_PRICE, TRIAL_DAYS, type ProPlan } from "../lib/planRules";
 import { DIFFERING_ROWS } from "../lib/planComparison";
 
 /** "£6.33 a month · save 20%", or the one-month plan's own line — the result card's wording. */
@@ -102,10 +102,11 @@ export const PV4_FREE = {
   sub: "For as long as you like",
   list: [
     "One manuscript",
-    "Unlimited agents",
-    "Unlimited queries and response tracking",
+    "Unlimited agents and queries",
+    "Response tracking",
     "To-do list",
     "Bring your list across with Smart Import",
+    `Everything in Pro for your first ${TRIAL_DAYS} days`, // non-workspace v1 (public-sweep-v1, Pricing "After")
   ],
 } as const;
 
@@ -142,8 +143,13 @@ export const PV4_FAQ: Pv4Question[] = [
   {
     q: "What's the difference between Free and Pro?",
     a: ["Free covers the essentials: one manuscript, as many agents as you like, and every query and response " +
-        "tracked. Pro adds the tools that make querying smarter, from query letters, manuscript versions and " +
-        "submission packages to Smart email drop and The Scout."],
+        "tracked. Pro adds the tools that make querying smarter, from query letters and comparable titles to " +
+        "manuscript versions, submission packages, Smart email drop and The Scout."],
+  },
+  {
+    q: "Is there a free trial?",
+    a: [`Yes. Every new account has everything in Pro for its first ${TRIAL_DAYS} days. After ` +
+        "that you're on Free, and nothing you made is deleted."],
   },
   {
     q: "Is Pro a subscription?",
