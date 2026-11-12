@@ -12,9 +12,10 @@
   box-shadow: 0 0 0 1px #e6dfd4;
   margin: 14px 0 18px;
 }
-/* ⚠️ brand.tsx forces h1/h2/h3 to its own face with !important: the heading needs two classes and !important */
+/* ⚠️ brand.tsx forces h1/h2/h3 to its own face with !important: the heading needs two classes and !important.
+   Faces are READ from the shell's tokens (--sp-type Special Elite, --sp-serif Source Serif 4), never named. */
 .qc151.qc153 .qc155-panel .qc155-h.qc155-h {
-  font-family: "Special Elite", "Courier New", monospace !important;
+  font-family: var(--sp-type) !important;
   font-size: 26px !important;
   font-weight: 400 !important;
   line-height: normal;
@@ -23,7 +24,7 @@
   margin: 0 0 8px;
 }
 .qc151.qc153 .qc155-panel .qc155-p.qc155-p {
-  font-family: "Source Serif 4", Georgia, serif;
+  font-family: var(--sp-serif);
   font-size: 16px;
   line-height: 1.5;
   color: #5b4f47;
@@ -70,17 +71,20 @@
   box-shadow: 0 0 0 1px #ebe5db;
   overflow: hidden;
 }
-/* the band along the top, the white disc where the seal sits, three short bars where Sent and Next sit */
+/* the band along the top, the white disc where the seal sits, three short bars where Sent and Next sit.
+   ⚠️ DEPARTS FROM THE REF'S LAYER ORDER, ON PURPOSE: the ref lists the band first, so it paints over the disc, and its
+   third bar ("55% 86px") lands on the first. The brief names the disc and three bars; the disc is listed above the
+   band here, and the third bar sits in the Next column (the card's right half). */
 .qc151.qc153 .qc155-skc::before {
   content: "";
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(#efe9df 0 62px, transparent 62px),
     radial-gradient(circle at 34px 31px, #fff 0 17px, transparent 18px),
+    linear-gradient(#efe9df 0 62px, transparent 62px),
     linear-gradient(#f3eee6, #f3eee6) 18px 86px / 40% 14px no-repeat,
     linear-gradient(#f3eee6, #f3eee6) 18px 112px / 28% 12px no-repeat,
-    linear-gradient(#f3eee6, #f3eee6) 55% 86px / 34% 14px no-repeat;
+    linear-gradient(#f3eee6, #f3eee6) right 18px top 86px / 34% 14px no-repeat;
 }
 /* one soft highlight sweeping left to right */
 .qc151.qc153 .qc155-skc::after {

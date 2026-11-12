@@ -37,7 +37,8 @@ describe("v155 · the shared panel", () => {
     expect(p).toMatch(/box-shadow:\s*0 0 0 1px #e6dfd4/);
     expect(p).toMatch(/margin:\s*14px 0 18px/);
     const h = rule(".qc151.qc153 .qc155-panel .qc155-h.qc155-h");
-    expect(h).toMatch(/font-family:\s*"Special Elite"[^;]*!important/);
+    expect(h).toMatch(/font-family:\s*var\(--sp-type\)\s*!important/);
+    expect(rule(".qc151.qc153 .qc155-panel .qc155-p.qc155-p")).toMatch(/font-family:\s*var\(--sp-serif\)/);
     expect(h).toMatch(/font-size:\s*26px/);
     expect(h).toMatch(/color:\s*#1c130f/);
     expect(rule(".qc151.qc153 .qc155-panel .qc155-p.qc155-p")).toMatch(/max-width:\s*60ch/);

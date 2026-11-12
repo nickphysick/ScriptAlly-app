@@ -90,8 +90,20 @@ for (const vp of SIZES) {
     writeFileSync(`${DIR}/frames-everyday-${PHASE}-${vp.width}.json`, JSON.stringify(f, null, 1));
     await page.screenshot({ path: `${DIR}/everyday-${PHASE}-${vp.width}.png` });
     if (PHASE === "before") { L.done(0); return; }
-    const a = readFileSync(`${DIR}/everyday-before-${vp.width}.png`), b = readFileSync(`${DIR}/everyday-after-${vp.width}.png`);
-    L.check("S4 the everyday page is byte-identical to the before build", a.equals(b), `${a.length} vs ${b.length} bytes`);
+    const a = readFileSync(`${DIR}/everyday-before-${vp.width}.png`).toString("base64"), b = readFileSync(`${DIR}/everyday-after-${vp.width}.png`).toString("base64");
+    const px = await page.evaluate(async ([a, b]) => {
+      const load = (s: string) => new Promise<HTMLImageElement>((r) => { const i = new Image(); i.onload = () => r(i); i.src = `data:image/png;base64,${s}`; });
+      const [ia, ib] = await Promise.all([load(a), load(b)]);
+      const read = (i: HTMLImageElement) => { const c = document.createElement("canvas"); c.width = i.width; c.height = i.height; const x = c.getContext("2d")!; x.drawImage(i, 0, 0); return x.getImageData(0, 0, i.width, i.height).data; };
+      const da = read(ia), db = read(ib);
+      /* the shell's beta banner (the top 42px) is counted apart: it is not this page, and its text row rasterises
+         differently between builds */
+      let n = 0, banner = 0, x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+      for (let k = 0; k < da.length; k += 4) if (da[k] !== db[k] || da[k + 1] !== db[k + 1] || da[k + 2] !== db[k + 2]) { const p = k / 4, x = p % ia.width, y = Math.floor(p / ia.width); if (y < 42) { banner++; continue; } n++; x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+      return { same: ia.width === ib.width && ia.height === ib.height, n, banner, box: n ? [x0, y0, x1, y1] : null };
+    }, [a, b] as const);
+    writeFileSync(`${DIR}/pixels-everyday-${vp.width}.json`, JSON.stringify(px));
+    L.check("S4 below the banner, the everyday page is pixel-identical to the before build", px.same && px.n === 0, JSON.stringify(px));
     const fb = JSON.parse(readFileSync(`${DIR}/frames-everyday-before-${vp.width}.json`, "utf8"));
     L.check("S4 every frame box unchanged", JSON.stringify(fb) === JSON.stringify(f), JSON.stringify(f));
     const panel = await page.locator(`${PAGE} [data-qc155="panel"]`).count();
@@ -131,6 +143,7 @@ for (const vp of SIZES) {
         chart: { head: q("[data-qc154='goal'] .qc154-gh, [data-qc154='goal'] h3")?.textContent ?? null, text: q("[data-qc154='goal']")?.textContent?.replace(/\s+/g, " ").trim().slice(0, 160) },
         img: document.querySelectorAll(`${sel} [data-qc155='panel'] img, ${sel} [data-qc155='panel'] svg`).length,
         filledBtn: document.querySelectorAll(`${sel} [data-qc155='panel'] button`).length,
+        ch: (() => { if (!p) return 0; const z = document.createElement("span"); z.textContent = "0"; z.style.cssText = "font:inherit;position:absolute;visibility:hidden"; p.appendChild(z); const w = z.getBoundingClientRect().width; z.remove(); return w; })(),
       };
     }, PAGE);
     writeFileSync(`${DIR}/readings-dayone-${vp.width}.json`, JSON.stringify(r, null, 1));
@@ -147,7 +160,8 @@ for (const vp of SIZES) {
     L.check("S2 panel: white, 16px, a 1px #e6dfd4 ring, 34px 30px, 14/18 margins, full width",
       r.panel?.bg === "rgb(255, 255, 255)" && r.panel.r === "16px" && r.panel.sh === "rgb(230, 223, 212) 0px 0px 0px 1px" && r.panel.pad === "34px 30px" && r.panel.mt === "14px" && r.panel.mb === "18px" && near(r.panel.w, r.panel.listW, 0.5), JSON.stringify(r.panel));
     L.check("S2 heading: Special Elite 26px 400 #1c130f, 8px under", /Special Elite/.test(r.head?.f ?? "") && r.head?.s === "26px" && r.head.w === "400" && r.head.c === "rgb(28, 19, 15)" && r.head.mb === "8px", JSON.stringify(r.head));
-    L.check("S2 body: Source Serif 4 16/1.5 #5b4f47, 60ch", /Source Serif 4/.test(r.body?.f ?? "") && r.body?.s === "16px" && r.body.lh === "24px" && r.body.c === "rgb(91, 79, 71)" && r.body.mw === "60ch", JSON.stringify(r.body));
+    /* a computed max-width is in px: 60ch of this face at 16px (its "0" is ~8.31px) */
+    L.check("S2 body: Source Serif 4 16/1.5 #5b4f47, about 60 characters", /Source Serif 4/.test(r.body?.f ?? "") && r.body?.s === "16px" && r.body.lh === "24px" && r.body.c === "rgb(91, 79, 71)" && near(parseFloat(r.body.mw), 60 * r.ch, 0.5), JSON.stringify({ ...r.body, ch: r.ch }));
     L.check("S2 links: navy 600, underline offset 3px", r.links.length === 2 && r.links.every((l) => l.c === "rgb(42, 58, 82)" && l.w === "600" && l.off === "3px"), JSON.stringify(r.links));
     L.check("S2 no illustration and no button in the panel", r.img === 0 && r.filledBtn === 0, `${r.img} img, ${r.filledBtn} buttons`);
     L.check("S2 the rail at 40%, inert, every count 0", r.rail?.op === "0.4" && r.rail.pe === "none" && r.rail.inert && r.rail.nums.every((n) => n === "0"), JSON.stringify(r.rail));
@@ -175,7 +189,7 @@ for (const vp of SIZES) {
     L.check("S1 the panel is the list's first child", r.first === "panel", String(r.first));
     L.check("S1 heading", r.head === "Nothing needs you today.", String(r.head));
     L.check("S1 body names the count and a date, or says nothing is out",
-      /^(\d+ queries are with agents\.|1 query is with an agent\.)( The next reply is expected by \d{1,2} [A-Z][a-z]{2}( ’\d\d)?\.)?$|^Nothing is out with agents right now\.$/.test(r.body ?? ""), String(r.body));
+      /^(\d+ queries are with agents\.|1 query is with an agent\.)( The next reply is expected by \d{1,2} [A-Z][a-z]{2}( \d{4})?\.)?$|^Nothing is out with agents right now\.$/.test(r.body ?? ""), String(r.body));
     L.check("S1 no group needing the writer", !r.groups.some((g) => /^(Offers|Materials requested|Nudge due)$/.test(g ?? "")), JSON.stringify(r.groups));
     L.check("S1 the list carries on", r.groups.length > 0, JSON.stringify(r.groups));
     await page.screenshot({ path: `${DIR}/quiet-after-${vp.width}.png` });
@@ -197,7 +211,9 @@ for (const vp of SIZES) {
       const heads = [...document.querySelectorAll<HTMLElement>(`${sel} [data-qc155='sk-head']`)];
       const grids = [...document.querySelectorAll<HTMLElement>(`${sel} [data-qc155='sk-grid']`)];
       const c0 = cards[0] ? getComputedStyle(cards[0]) : null;
-      const c0a = cards[0] ? getComputedStyle(cards[0], "::after") : null;
+      /* the harness's KILL_MOTION zeroes every animation, so the declared one is read from the sheet */
+      const decl = (() => { for (const sh of [...document.styleSheets]) { try { for (const r of [...sh.cssRules]) { if (r instanceof CSSStyleRule && r.selectorText.includes(".qc155-skc::after")) return { name: r.style.animationName, dur: r.style.animationDuration }; } } catch { /* cross-origin */ } } return null; })();
+      const c0a = decl ? { animationName: decl.name, animationDuration: decl.dur } : null;
       const h0 = heads[0] ? getComputedStyle(heads[0]) : null;
       return {
         busy: list?.getAttribute("aria-busy") ?? null, text: list?.textContent?.trim() ?? null,
@@ -233,7 +249,9 @@ for (const vp of SIZES) {
     L.check("S3 heading bar: 22 × 220, 6px, #ebe5db, 26 above / 14 below", near(sk.head?.h, 22, 0.5) && near(sk.head?.w, 220, 0.5) && sk.head?.r === "6px" && sk.head.bg === "rgb(235, 229, 219)" && sk.head.mt === "26px" && sk.head.mb === "14px", JSON.stringify(sk.head));
     L.check("S3 no spinner", sk.spinners === 0, String(sk.spinners));
     L.check("S3 no words in the list while loading", sk.text === "", JSON.stringify(sk.text));
-    for (const k of ["header", "title", "acts", "forLine", "chart", "toolbar", "bar", "rail"] as const) {
+    /* the harness account has more than one manuscript and no scope, so it draws no "for" line, loaded or not */
+    L.check("S3 forLine: absent loading and loaded on this account (reported)", fLoad.forLine === null && fDone.forLine === null, JSON.stringify(shift.forLine));
+    for (const k of ["header", "title", "acts", "chart", "toolbar", "bar", "rail"] as const) {
       const s = shift[k] as { dx?: number; dy?: number; dw?: number; dh?: number; load?: unknown };
       /* the rail grows with its counts only if it is not reserved; every frame must hold */
       L.check(`S3 ${k} does not move when the data lands`, s.dx === 0 && s.dy === 0 && s.dw === 0 && s.dh === 0, JSON.stringify(s));
@@ -249,7 +267,8 @@ for (const vp of SIZES) {
     await page.waitForSelector(`${PAGE} [data-qc155='sk-card']`, { timeout: 30_000 });
     const a = await page.evaluate((sel) => { const c = document.querySelector(`${sel} [data-qc155='sk-card']`)!; const s = getComputedStyle(c, "::after"); return { anim: s.animationName, content: s.content, display: s.display }; }, PAGE);
     writeFileSync(`${DIR}/readings-reduced-motion.json`, JSON.stringify(a, null, 1));
-    L.check("S3 reduced motion: no sweep", a.anim === "none" || a.display === "none" || a.content === "none", JSON.stringify(a));
+    /* the harness zeroes animation anyway, so the proof is the reduced-motion rule's own display: none on the sweep */
+    L.check("S3 reduced motion: no sweep (the highlight is not drawn)", a.display === "none", JSON.stringify(a));
     await page.screenshot({ path: `${DIR}/loading-reduced-${vp.width}.png` });
     L.done(1);
   });
