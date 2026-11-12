@@ -57,7 +57,7 @@ describe("the phone's menu pages render", () => {
     /* Phone app v3: the Settings index is SettingsV3 (reminders, help and tools, then every desktop section) */
     const set = renderPage(<SettingsV3 />, "/account");
     for (const w of ["Nudge reminders by email", "Call a query gone quiet after", "Import queries", "Help centre", "Give feedback", "Sign out"]) expect(set).toContain(w);
-    for (const w of ["Profile", "Sign-in &amp; security", "Plan &amp; billing", "Notifications", "Preferences", "Tasks", "Your data"]) expect(set).toContain(w);
+    for (const w of ["You", "Preferences", "Emails", "Plan", "Your data"]) expect(set).toContain(w); // non-workspace v1: the five sections
     expect(renderPage(<PlanPhone />, "/plans")).toContain("Founding writer");
     const help = renderPageSeededWith(<HelpPhone />, "/help", { queries: QUERIES });
     expect(help).toContain("Getting started");

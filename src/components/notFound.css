@@ -1,0 +1,23 @@
+/* Non-workspace v1, Phase 1 — the not-found and crash cards (getting-in-v1.html, screens 6 and 7).
+   The card is `.sp-card`; the buttons are `.ph-primary` / `.ph-secondary`. This file lays them out only. */
+.nf-wrap {
+  box-sizing: border-box; flex: 1 1 auto; min-height: 100%;
+  display: flex; align-items: center; justify-content: center; padding: 64px 16px;
+}
+.nf-card {
+  display: grid; grid-template-columns: 120px 1fr; gap: 28px; align-items: start;
+  max-width: 620px; width: 100%; padding: 32px 34px; box-sizing: border-box;
+}
+.nf-art { width: 120px; height: auto; display: block; }
+.nf-h { font-family: var(--sp-type); font-size: 28px; line-height: 1.25; margin: 0 0 10px; color: var(--sp-ink); font-weight: 400; }
+.nf-lede { font-size: 16px; line-height: 1.5; margin: 0 0 22px; color: var(--sp-ink); }
+.nf-acts { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+.nf-links { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.nf-lnk {
+  background: none; border: 0; padding: 0; min-height: 24px; cursor: pointer;
+  font: inherit; font-size: 14px; color: var(--sp-frame); text-decoration: underline; text-underline-offset: 3px;
+}
+@media (max-width: 560px) {
+  .nf-card { grid-template-columns: 1fr; gap: 16px; padding: 24px 20px; }
+  .nf-art { width: 88px; }
+}

@@ -146,7 +146,6 @@ export const ABOUT_PLATES: Record<AboutPlate["slot"], AboutPlate> = {
 /* ══════════════ The founder's note ══════════════
    ⚠️ FIRST PERSON, AND EVERY FACT IN IT IS NICK'S TO CONFIRM. It replaces the one-line sign-off,
    which said the right thing in the third person about the person signing it. */
-export const ABOUT_NOTE_EYEBROW = "A note from the founder";
 export const ABOUT_NOTE_HEADING = "Hello, I'm Nick.";
 export const ABOUT_NOTE_BODY: CopyRun[][] = [
   [
@@ -165,8 +164,8 @@ export const ABOUT_NOTE_BODY: CopyRun[][] = [
   ],
 ];
 export const ABOUT_NOTE_SIGNATURE = "Nick";
-export const ABOUT_FOUNDER_NAME = "Nick Physick";
-export const ABOUT_FOUNDER_ROLE = "Founder";
+/** The line under the signature (public sweep v1). No surname on a public page. */
+export const ABOUT_FOUNDER_ROLE = "Founder, QueryHawk";
 
 /* ══════════════ The way out ══════════════ */
 export const ABOUT_CLOSE_HEADING = "Querying soon, or querying now?";

@@ -397,7 +397,7 @@ describe("sidebar rail v1 — the nav the rail reads", () => {
   it("the settings rail's short labels cover every account section", () => {
     expect(Object.keys(SETTINGS_RAIL_LABELS).sort()).toEqual(ACCOUNT_ROUTES.map((r) => r.id).sort());
     expect(ACCOUNT_ROUTES.map((r) => SETTINGS_RAIL_LABELS[r.id]))
-      .toEqual(["Profile", "Security", "Plan", "Alerts", "Settings", "Tasks", "Your data"]);
+      .toEqual(["You", "Preferences", "Emails", "Plan", "Your data"]); // non-workspace v1: the five sections
   });
   it("Discover and Versions are the Pro pages and Materials the Pro section, each named by its entitlement", () => {
     const pro = nav.flatMap((s) => (s.children ?? []).filter((c) => c.pro).map((c) => `${c.label}:${c.pro}`));

@@ -21,51 +21,6 @@ import React from "react";
    bands, which now draw page-local brush-wash plates in the landing's unframed style; the dashed
    rim and tinted ground it existed to draw are retired with `.mk-illo*`. */
 
-/** Which mark a contact-page tile carries — the address, or one of the three reasons to write. */
-export type ContactTileKind = "mail" | "questions" | "broken" | "privacy";
-
-/* ⚠️ WHOLE CLASS STRINGS, NOT AN INTERPOLATED TONE. A class built as `mk-ctile--${tone}` is
-   invisible to every search for it, and a dead-class sweep then reports three live rules as dead.
-   The tone belongs to the kind: rose for writing to us, grey for a fault, slate for your data. */
-const TILE_CLASS: Record<ContactTileKind, string> = {
-  mail: "mk-ctile mk-ctile--rose mk-ctile--mail",
-  questions: "mk-ctile mk-ctile--rose",
-  broken: "mk-ctile mk-ctile--grey",
-  privacy: "mk-ctile mk-ctile--slate",
-};
-
-/**
- * The rounded tiles on the contact page (17 Sep). They replace the ref's plates, and the
- * speech bubble gains the tail the old open circle never had.
- */
-export const ContactTile: React.FC<{ kind: ContactTileKind }> = ({ kind }) => (
-  <span className={TILE_CLASS[kind]} aria-hidden="true">
-    <svg viewBox="0 0 24 24">
-      {kind === "mail" ? (
-        <>
-          <rect x="3" y="5.5" width="18" height="13" rx="2" />
-          <path d="M3.8 7l8.2 6.2L20.2 7" />
-        </>
-      ) : kind === "questions" ? (
-        <>
-          <path d="M5 5.5h14a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-7.5L7 21v-3.5H5a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2z" />
-          <path d="M7.5 10h9M7.5 13.2h6" />
-        </>
-      ) : kind === "broken" ? (
-        <>
-          <path d="M10.3 4.2 3.3 17a2 2 0 0 0 1.7 3h14a2 2 0 0 0 1.7-3l-7-12.8a2 2 0 0 0-3.4 0z" />
-          <path d="M12 9v4M12 16.5v.5" />
-        </>
-      ) : (
-        <>
-          <path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7z" />
-          <path d="M9.2 12.2l2 2 3.6-4" />
-        </>
-      )}
-    </svg>
-  </span>
-);
-
 /**
  * The six states a query passes through, in pipeline order: outline → half-disc → full disc, with
  * the solid ring for what came back and the page for an offer. Drawn for the status band's
@@ -130,17 +85,3 @@ export const PaperPlane: React.FC = () => (
 /* ⚠️ `IdeaBulb` and `CommitmentTick` ARE DELETED. The bulb's only consumer was About's turn line;
    the tick's was About's three promises, removed 21 Oct with `.mk-ctick`. */
 
-/** Privacy = a shield with a tick. Terms = a document. Straight from the two refs. */
-export const LegalPlate: React.FC<{ doc: "terms" | "privacy" }> = ({ doc }) =>
-  doc === "privacy" ? (
-    <svg viewBox="0 0 24 24">
-      <path d="M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7z" />
-      <path d="M9.2 12.2l2 2 3.6-4" />
-    </svg>
-  ) : (
-    <svg viewBox="0 0 24 24">
-      <path d="M6 3.5h9l4 4v13H6z" />
-      <path d="M15 3.5V8h4" />
-      <path d="M9 12h7M9 15.5h7" />
-    </svg>
-  );

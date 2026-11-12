@@ -44,7 +44,8 @@ import { LandingOnlySite, MarketingPage } from "./marketing/LandingOnlySite";
 import { LANDING_ONLY, AUTH_HASH } from "./lib/siteMode";
 import { pathFor } from "./lib/pathFor";
 import { useHash } from "./lib/useHash";
-import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
+import { readableSignedOut, tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
+import { HelpCentre } from "./components/HelpCentre";
 import { shellForRoute } from "./lib/shellForRoute";
 import { routeBase } from "./lib/helpPath";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
@@ -64,6 +65,9 @@ import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary, ThrowLab } from "./components/ErrorBoundary";
 import { PageBoundary, crashProbe } from "./components/PageBoundary";
+import { redeemKeptCode, JOIN_PREFIX } from "./lib/inviteCode";
+import { SIGNIN_LINK_PATH } from "./lib/authActions";
+import { NotFoundCard } from "./components/NotFoundCard";
 import { closeAgentCard } from "./lib/agentCardStore";
 import { PhoneSectionLanding, phoneSectionFor } from "./components/phone/PhoneSectionLanding";
 import { desktopV5Redirect, phoneV5Redirect } from "./lib/phoneV5";
@@ -285,6 +289,8 @@ function AppContent() {
   const path = location.pathname.replace(/\/+$/, "") || "/";
   /* Query panel v1 — a query opened over another page (the Dashboard) belongs to that page: leaving it closes it */
   useEffect(() => { closeQueryPanel(); }, [path]);
+  /* Non-workspace v1, Phase 1 — a founder's code kept from the invite link is redeemed once there is an account */
+  useEffect(() => { if (currentUser?.id) void redeemKeptCode(); }, [currentUser?.id]);
   const routeKey = path.split("/")[1] || "";
   const params = new URLSearchParams(location.search);
 
@@ -491,6 +497,16 @@ function AppContent() {
     );
   }
 
+  /* Non-workspace v1, Phase 7: the Help centre is readable signed out, in the public shell (someone who cannot sign in
+     can still reach the help). Signed in, it stays a workspace page in the app shell below. */
+  if (!currentUser && readableSignedOut(path)) {
+    return (
+      <MarketingShell user={null} onNavigate={handleNavigate} path={path}>
+        <HelpCentre />
+      </MarketingShell>
+    );
+  }
+
   // Logged-out front door for the app tiers. As a founding-members acquisition page the screen
   // defaults to Create account; an explicit #/login (or #/signin) deep link opens it in sign-in
   // mode instead. (Deep links keep their URL until sign-in — unchanged behaviour.)
@@ -563,8 +579,21 @@ function AppContent() {
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
+  /* An invite link or a sign-in link opened by someone already signed in has done its job: go to the Dashboard. */
+  if (path.startsWith(JOIN_PREFIX) || path === SIGNIN_LINK_PATH) return <Navigate to="/dashboard" replace />;
+  /* Non-workspace v1, Phase 1 (getting-in-v1.html, screen 6): an unknown address says so, in the app's shell, instead
+     of silently landing on the Dashboard — a mistyped or out-of-date link used to look like the app ignoring you. */
   if (!WORKSPACE_PATHS.has(routeBase(path))) {
-    return <Navigate to="/dashboard" replace />;
+    return (
+      <AppShell
+        routeKey="not-found" onNavigate={handleNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+        theme={currentUser?.queriesTheme === "bold" || currentUser?.queriesTheme === "editorial" ? currentUser.queriesTheme : "cappuccino"}
+      >
+        <StagePage name="not-found" active>
+          <NotFoundCard onNavigate={handleNavigate} />
+        </StagePage>
+      </AppShell>
+    );
   }
 
   // ── WHICH SHELL (app-shell pack, Phase 5) — ONE mapping, in one place (lib/shellForRoute).

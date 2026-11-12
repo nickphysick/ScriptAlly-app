@@ -14,80 +14,100 @@ import { readFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import {
-  CONTACT_DOCUMENT_TITLE, CONTACT_EYEBROW, CONTACT_H1, CONTACT_LEDE, CONTACT_MAIL_LABEL,
-  CONTACT_WAYS, CONTACT_TOPICS, CONTACT_FORM_H2, CONTACT_FORM_SUB, CONTACT_FORM_SEND,
-  CONTACT_FINE_PRINT, CONTACT_FIELD_LABELS, CONTACT_PLACEHOLDERS, CONTACT_ART_ALT,
+  CONTACT_DOCUMENT_TITLE, CONTACT_H1, CONTACT_LEDE, CONTACT_MAIL_H2, CONTACT_FOUNDING_H2,
+  CONTACT_FOUNDING_BODY, CONTACT_TOPICS, CONTACT_TOPIC_DETAIL, CONTACT_DATA_WANTS, CONTACT_FORM_H2,
+  CONTACT_FORM_SUB, CONTACT_FORM_SEND, CONTACT_FINE_PRINT, CONTACT_FIELD_LABELS, CONTACT_PLACEHOLDERS,
+  CONTACT_SENT, CONTACT_AGAIN, CONTACT_ART_ALT,
 } from "./contactCopy";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
+/* RE-POINTED (contact redesign v1, 12 Nov): every sentence is design-refs/contact-terms-unsubscribe-v1.html's
+   now, except the two the code made me change (the Feedback note's screenshot, and the sent panel on
+   the mailto path) — each marked where it is asserted. */
 describe("the contact page's copy, verbatim", () => {
-  it("the heading block and the email card", () => {
+  it("the heading and the left column", () => {
     expect(CONTACT_DOCUMENT_TITLE).toBe("Contact — QueryHawk");
-    expect(CONTACT_EYEBROW).toBe("Contact");
     expect(CONTACT_H1, "with its full stop").toBe("Get in touch.");
-    expect(CONTACT_LEDE).toBe(
-      "Questions, problems, ideas — send them across and we'll come back to you within two " +
-        "working days.",
+    expect(CONTACT_LEDE).toBe("Questions, problems, ideas. A person reads every message.");
+    expect(CONTACT_MAIL_H2).toBe("Or email us direct");
+    expect(CONTACT_FOUNDING_H2).toBe("Already a founding writer?");
+    expect(CONTACT_FOUNDING_BODY).toBe(
+      "The Feedback button inside QueryHawk is quicker: it tells us which page you're on, and your note " +
+        "counts towards your rank.",
     );
-    expect(CONTACT_MAIL_LABEL).toBe("Email direct");
-  });
-
-  it("the three reasons, in order", () => {
-    expect(CONTACT_WAYS.map((w) => [w.key, w.heading, w.body])).toEqual([
-      [
-        "questions",
-        "Questions and ideas",
-        "Anything about the app, your account, pricing, or something you'd like to see built. Ideas " +
-          "genuinely shape what gets made next.",
-      ],
-      [
-        "broken",
-        "Something's broken",
-        "Tell us what you were doing, what you expected, and what happened instead. A screenshot helps " +
-          "enormously. Bug reports jump the queue.",
-      ],
-      [
-        "privacy",
-        "Your data",
-        "To access, correct, delete or export anything we hold, choose 'Privacy request' in the form, " +
-          "or email with 'Privacy' in the subject line.",
-      ],
-    ]);
   });
 
   it("the form card", () => {
     expect(CONTACT_FORM_H2).toBe("Send a message");
-    expect(CONTACT_FORM_SUB).toBe("Every field helps us reply properly first time.");
+    expect(CONTACT_FORM_SUB).toBe("We reply within two working days.");
     expect(CONTACT_FIELD_LABELS).toEqual({
+      topic: "What's it about?",
       name: "Your name",
       email: "Email",
-      topic: "What's it about",
+      page: "Which page were you on?",
+      want: "What would you like?",
       message: "Message",
     });
     expect(CONTACT_FORM_SEND).toBe("Send message");
     expect(CONTACT_FINE_PRINT).toEqual([
-      "By sending a message you agree to our ",
-      { link: "privacy policy", to: "privacy" },
-      ". Your details are only ever used to reply.",
+      "Your details are only used to reply. ",
+      { link: "Privacy", to: "privacy" },
     ]);
-    /* No placeholder on the name field: its label says "Your name" now, and a placeholder repeating
-       the label says one thing twice in one box. */
-    expect(CONTACT_PLACEHOLDERS).toEqual({ email: "you@example.com", message: "How can we help?" });
+    expect(CONTACT_PLACEHOLDERS).toEqual({ email: "you@example.com", page: "For example, Queries or the sign-up page" });
+    expect(CONTACT_DATA_WANTS).toEqual([
+      "See what you hold about me", "Correct something", "Send me a copy of my data", "Delete my account and data",
+    ]);
     expect(CONTACT_ART_ALT).toBe("An older hawk at a desk, writing a letter.");
+  });
+
+  it("each topic's prompt and note", () => {
+    expect(CONTACT_TOPIC_DETAIL).toEqual({
+      "A question or an idea": { placeholder: "What would you like to know, or see built?", tip: "" },
+      "Something's broken": {
+        placeholder: "What were you doing, what did you expect, and what happened instead?",
+        /* Not the ref's "sends us the page and a screenshot for you": the screenshot is attached by the writer. */
+        tip: "Bug reports jump the queue. If you're signed in, the Feedback button in the app sends us the " +
+          "page you're on, and you can add a screenshot.",
+      },
+      "Founding writer access": {
+        placeholder: "Anything we should know?",
+        tip: "We're letting founding writers in a few at a time. Tell us the email you joined the waiting " +
+          "list with and we'll check where you are.",
+      },
+      "Your data": {
+        placeholder: "Tell us what you need.",
+        tip: "If you have an account, Settings › Your data lets you take a copy or delete your account " +
+          "straight away, without waiting for us.",
+      },
+      "Something else": { placeholder: "How can we help?", tip: "" },
+    });
+  });
+
+  /* ⚠️ THE MAILTO PATH CLAIMS NO DELIVERY. The ref's "Sent." and "A copy is on its way to you now" are
+     said on neither path: the mail app holds the message, and no function sends a copy. */
+  it("the sent panel, by transport", () => {
+    expect(CONTACT_SENT.mailto.heading).toBe("Over to your mail app.");
+    expect(CONTACT_SENT.mailto.body("m@webb.co.uk")).toBe(
+      "Your message should be open there, ready to send. Once it's sent, we'll reply to m@webb.co.uk " +
+        "within two working days.",
+    );
+    expect(CONTACT_SENT.function.heading).toBe("Sent.");
+    expect(CONTACT_SENT.function.body("m@webb.co.uk")).toBe("We'll reply to m@webb.co.uk within two working days.");
+    for (const w of [CONTACT_SENT.mailto, CONTACT_SENT.function]) expect(w.body("x")).not.toMatch(/copy/i);
+    expect(CONTACT_AGAIN).toBe("Send another message");
   });
 
   /**
    * ⚠️ THE ORDER IS PART OF THE CLAIM. The first topic is the form's default, and it is the
    * commonest and least alarming one on purpose.
    */
-  it("the six topics, in order", () => {
+  it("the five topics, in order", () => {
     expect([...CONTACT_TOPICS]).toEqual([
-      "Question or feedback",
+      "A question or an idea",
       "Something's broken",
       "Founding writer access",
-      "Billing or account",
-      "Privacy request",
+      "Your data",
       "Something else",
     ]);
   });

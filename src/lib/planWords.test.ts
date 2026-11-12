@@ -16,7 +16,7 @@ const code = (p: string) => strip(readFileSync(join(ROOT, p), "utf8"));
 
 const PLAN_FILES = [
   "src/marketing/pricingCopy.ts", "src/marketing/landingCopy.ts", "src/marketing/PricingPage.tsx",
-  "src/components/PlansPage.tsx", "src/components/plans/PlanComparison.tsx", "src/lib/planComparison.ts", "src/lib/planRules.ts",
+  "src/components/PlansPage.tsx", "src/components/plans/PlanTable.tsx", "src/lib/planComparison.ts", "src/lib/planRules.ts",
 ];
 
 const walk = (dir: string): string[] => readdirSync(join(ROOT, dir)).flatMap((n) => {

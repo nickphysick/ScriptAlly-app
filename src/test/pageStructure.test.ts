@@ -36,6 +36,8 @@ export const PAGE_SOURCES = [
   "components/AccountSettings.tsx",
   "components/PlansPage.tsx",
   "components/HelpCentre.tsx",
+  "components/help/HelpHome.tsx", // non-workspace v1, Phase 7 — the Help centre home, also signed out
+  "components/help/HelpArticlePage.tsx", // non-workspace v1, Phase 7 — one article, also signed out
   // funnel MVP phase 1: Pricing.tsx left this census by being deleted — it was a developer
   // sandbox on a public route. TODO(phase-5): the real public pricing page rejoins here.
   "components/Auth.tsx",
@@ -52,6 +54,7 @@ export const PAGE_SOURCES = [
   "components/phone/v5/TodayV5.tsx",
   "components/phone/v5/TodoV5.tsx",
   "components/phone/v5/MaterialsV5.tsx",
+  "components/NotFoundCard.tsx", // non-workspace v1, Phase 1 — the in-app not-found screen
 ];
 
 const read = (rel: string) => readFileSync(resolve(__dirname, "..", rel), "utf8");

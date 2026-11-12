@@ -10,7 +10,7 @@
  * Pure module: no React, no Firebase — App.tsx branches on tierForPath, and the tests lock
  * the resolution table.
  */
-import { routeBase } from "../lib/helpPath";
+import { HELP_PATH, routeBase } from "../lib/helpPath";
 import { ACCOUNT_SECTION_PATHS } from "../lib/accountRoutes";
 
 /**
@@ -59,4 +59,13 @@ export function tierForPath(path: string): RouteTier {
   /* Help Centre v1 — an article (`/help/{slug}`) is the Help Centre to every exact-path table */
   if (WORKSPACE_PATHS.has(routeBase(path))) return "workspace";
   return null;
+}
+
+/**
+ * Non-workspace v1, Phase 7 — a workspace path that a signed-out visitor may still READ, in the public shell: the Help
+ * centre and its articles. Its tier is unchanged ("workspace": signed in, it is an app page in the app shell); App asks
+ * this only when there is no user, ahead of the sign-in screen.
+ */
+export function readableSignedOut(path: string): boolean {
+  return routeBase(path) === HELP_PATH;
 }

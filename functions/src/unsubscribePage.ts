@@ -33,22 +33,22 @@ const words = (outcome: UnsubscribeOutcome | null): Words => {
     return {
       title: "You're not on the list",
       heading: "You're not on the list.",
-      body: "This link doesn't match anyone we're holding a place for — you may have unsubscribed " +
+      body: "This link doesn't match anyone we're holding a place for. You may have unsubscribed " +
             "already, or the address may never have been added. Either way, there's nothing to do.",
     };
   }
   if (outcome.released) {
     return {
       title: "You're unsubscribed",
-      heading: "That's done — you're off the list.",
+      heading: "That's done. You're off the list.",
       body: "We won't email you about founding access again. Your founding place has gone back to " +
-            "the list for someone else.",
+            "the list for another writer.",
     };
   }
   /* Pending, waiting, or a second click on a link already used. */
   return {
     title: "You're unsubscribed",
-    heading: "That's done — you're off the list.",
+    heading: "That's done. You're off the list.",
     body: "We won't email you about founding access again. You hadn't confirmed a founding place, " +
           "so there was nothing to give back.",
   };
@@ -71,12 +71,18 @@ export const unsubscribePage = (outcome: UnsubscribeOutcome | null): string => {
   p{margin:0 0 14px;font-size:16px;line-height:1.6}
   .quiet{color:#6d5348;font-size:14px;margin:0}
   a{color:#7c3a2a}
+  .top{max-width:520px;margin:10vh auto 0;font:400 34px/1.2 'Special Elite','Courier New',monospace;padding:0 16px}
+  .top + .card{margin-top:18px}
+  @media(max-width:560px){.card{margin-left:16px;margin-right:16px}}
+  .go{display:inline-block;padding:10px 18px;border-radius:10px;border:1px solid #2d3a50;color:#2d3a50;text-decoration:none;min-height:24px}
 </style>
 </head><body>
+<p class="top">Unsubscribed.</p>
 <div class="card">
   <h1>${esc(w.heading)}</h1>
   <p>${esc(w.body)}</p>
-  <p class="quiet">If that wasn't you, or you'd like to talk to a person, write to
+  <p><a class="go" href="https://queryhawk.net/">Go to QueryHawk</a></p>
+  <p class="quiet">If this wasn't you, write to
     <a href="mailto:${esc(SUPPORT_EMAIL)}">${esc(SUPPORT_EMAIL)}</a>.</p>
 </div>
 </body></html>`;

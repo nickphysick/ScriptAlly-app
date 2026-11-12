@@ -5,9 +5,10 @@
  * Help system v1 — THE ARTICLE MAP: the help articles this pack links to, which three a page offers under "On this
  * page" in the Help menu, which one each guide item's "Learn more" opens, and the What's new entries.
  *
- * Help Centre v1 — THE INDEX IS BUILT FROM THE ARTICLES THEMSELVES (`content/help/articles.ts`): every written article
- *    is live, its read time is computed from its words, and a slug a guide item or the Help menu names must be one of
- *    them (lock HC1-C5). A link to a slug that is not written goes to /help, never to a route that 404s.
+ * Help Centre v1 — THE INDEX IS BUILT FROM THE ARTICLES THEMSELVES (`content/help/articles.ts`): every PUBLISHED
+ *    article is live (non-workspace v1, Phase 7: a draft is not), its read time is computed from its words, and a slug
+ *    a guide item or the Help menu names must be written (lock HC1-C5). A link to a slug that is not published goes to
+ *    /help, never to the not-found screen: the Help menu leaves a draft out, and "Learn more" opens the Help centre.
  */
 import { HELP_ARTICLE_LIST } from "../content/help/articles";
 import { readTime } from "../content/help/model";
@@ -23,7 +24,7 @@ export const HELP_ARTICLES: Record<string, HelpArticle> = Object.fromEntries(
   HELP_ARTICLE_LIST.map((a) => [a.slug, { slug: a.slug, title: a.title, read: readTime(a) }]),
 );
 
-/** The slugs with a page in the Help Centre: every article written. */
+/** The slugs with a page in the Help Centre: every article published. */
 export const LIVE_ARTICLES: ReadonlySet<string> = new Set<string>(HELP_ARTICLE_LIST.map((a) => a.slug));
 
 /** Where an article link goes: its page if it exists, else the Help Centre. */

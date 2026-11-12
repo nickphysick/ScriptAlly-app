@@ -109,5 +109,26 @@ export async function client({ project, database }) {
     return v != null ? Number(v) : null;
   }
 
-  return { listAccounts, lookupEmail, readFounding, writeFounding, readCap };
+  /** One document's fields as plain values (strings, numbers, booleans, timestamps as ISO), or null when absent. */
+  async function readDoc(path) {
+    const d = await call(`${FS}/${path}`);
+    if (!d) return null;
+    const out = {};
+    for (const [k, v] of Object.entries(d.fields ?? {})) {
+      out[k] = v.stringValue ?? (v.integerValue != null ? Number(v.integerValue) : undefined) ?? v.doubleValue
+        ?? v.booleanValue ?? v.timestampValue ?? null;
+    }
+    return out;
+  }
+
+  /**
+   * Create one document, refusing if it already exists (the write carries `currentDocument.exists: false`, so a
+   * second founder's code can never overwrite the first). `fields` are Firestore REST values. Non-workspace v1, 9d.
+   */
+  async function createDoc(path, fields) {
+    const write = { update: { name: `${DOCS}/${path}`, fields }, currentDocument: { exists: false } };
+    await call(`https://firestore.googleapis.com/v1/${DOCS}:commit`, { method: "POST", body: JSON.stringify({ writes: [write] }) });
+  }
+
+  return { listAccounts, lookupEmail, readFounding, writeFounding, readCap, readDoc, createDoc };
 }

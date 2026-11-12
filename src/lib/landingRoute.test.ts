@@ -65,14 +65,15 @@ describe("Phase 4 · a first-ever load with empty persistence", () => {
     expect(PATH_FOR).toMatch(/default:\s*return "\/dashboard";/);
   });
 
-  it("resolves to Dashboard on an unknown path", () => {
+  it("an unknown path shows the not-found screen (non-workspace v1, Phase 1 — re-pointed from the Dashboard redirect)", () => {
     /* the guard sits below every early return, so this is the last word for any path the
        workspace does not name. Help Centre v1 retarget: the guard asks `routeBase(path)` so an article
        (`/help/{slug}`) is the Help Centre; the law (an unnamed path lands on the Dashboard) is unchanged. */
     const G = "if (!WORKSPACE_PATHS.has(routeBase(path))) {";
     expect(code).toContain(G);
     const guard = code.slice(code.indexOf(G));
-    expect(guard.slice(0, 120)).toContain('<Navigate to="/dashboard" replace />');
+    expect(guard.slice(0, 600)).toContain("<NotFoundCard onNavigate={handleNavigate} />");
+    expect(guard.slice(0, 120)).not.toContain('<Navigate to="/dashboard" replace />');
   });
 
   it("resolves to Dashboard once auth completes on a marketing route", () => {

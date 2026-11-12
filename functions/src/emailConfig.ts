@@ -16,6 +16,10 @@ export const PUBLIC_URL_ENV = "WAITLIST_PUBLIC_URL";
 export const REPLY_TO_ENV = "WAITLIST_REPLY_TO";
 export const FROM_ENV = "WAITLIST_FROM";
 export const CONTACT_ENV = "WAITLIST_CONTACT_EMAIL";
+/** Non-workspace v1, 9b: the sender of every email that is not one of the four founding emails. */
+export const ACCOUNT_FROM_ENV = "ACCOUNT_FROM";
+/** Non-workspace v1, 9b: the app's own origin, for links into the app (/join, /account, /dashboard). */
+export const APP_URL_ENV = "APP_PUBLIC_URL";
 
 /**
  * ⚠️ "at", NOT "@" — some mail clients render a second `@` in a display name as a second address,
@@ -40,6 +44,32 @@ export const DEFAULT_FROM = "Nick at QueryHawk <nick@queryhawk.net>";
  * and each environment states it explicitly.
  */
 export const SUPPORT_EMAIL = "hello@queryhawk.net";
+
+/**
+ * ⚠️ THE SENDER SPLIT (non-workspace v1, 9b; ref design-refs/emails-v1.html). The four founding emails — confirm,
+ * welcome, reserve list and the invite — come from Nick, because they are one person writing to fifty. Everything
+ * else (account emails, reminders, the weekly summary, plan notices) comes from the product. One map decides it,
+ * `SENDER_OF`, and `sendEmail` reads it, so a template cannot pick its own sender.
+ * Same "at, not @" care as DEFAULT_FROM: the display name is the bare brand.
+ */
+export const DEFAULT_ACCOUNT_FROM = "QueryHawk <hello@queryhawk.net>";
+
+/** Every message the product sends, by name. `feedback` keeps its own overrides (betaFeedback, feedbackNotes). */
+export type EmailKind =
+  | "confirm" | "welcome" | "waiting" | "invite"
+  | "signin" | "reset" | "newEmail" | "emailChanged"
+  | "nudge" | "weekly" | "trialEnding" | "planEnding"
+  | "feedback";
+
+export type Sender = "founding" | "account";
+
+export const SENDER_OF: Readonly<Record<EmailKind, Sender>> = {
+  confirm: "founding", welcome: "founding", waiting: "founding", invite: "founding",
+  signin: "account", reset: "account", newEmail: "account", emailChanged: "account",
+  nudge: "account", weekly: "account", trialEnding: "account", planEnding: "account",
+  /* Unchanged from before the split: feedback mail names its own sender and reply route by override. */
+  feedback: "founding",
+};
 
 /* ══════════════ Paths ══════════════ */
 
@@ -75,6 +105,14 @@ export interface MailConfig {
    * answers; each environment states it explicitly.
    */
   contactEmail: string;
+  /** The product's sender (`ACCOUNT_FROM`, else `DEFAULT_ACCOUNT_FROM`). Replies go to the same address. */
+  accountFrom: string;
+  /**
+   * The app's origin (`APP_PUBLIC_URL`), or `null` when unset — and then every email that links into the app
+   * REFUSES, exactly as a missing `publicUrl` does. No fallback to the landing origin: on prod that is a different
+   * site, and a guessed host is the dead link this file exists to prevent.
+   */
+  appUrl: string | null;
 }
 
 type Env = Record<string, string | undefined>;
@@ -93,8 +131,16 @@ export const resolveMailConfig = (env: Env): MailConfig => {
     replyTo: replyTo || from,
     publicUrl: publicUrl || null,
     contactEmail: clean(env[CONTACT_ENV]) || SUPPORT_EMAIL,
+    accountFrom: clean(env[ACCOUNT_FROM_ENV]) || DEFAULT_ACCOUNT_FROM,
+    appUrl: clean(env[APP_URL_ENV]) || null,
   };
 };
+
+/** Who a message comes from and where its replies go, by kind. Read by `sendEmail`; nothing else picks a sender. */
+export const senderFor = (cfg: MailConfig, kind: EmailKind): { from: string; replyTo: string } =>
+  SENDER_OF[kind] === "account"
+    ? { from: cfg.accountFrom, replyTo: cfg.accountFrom }
+    : { from: cfg.from, replyTo: cfg.replyTo };
 
 /**
  * LOGGED, NEVER THROWN. An unset `WAITLIST_REPLY_TO` falls back to the from-address, which is fine:
@@ -130,3 +176,30 @@ export const verifyLink = (cfg: MailConfig, token: string): string | null =>
 
 export const unsubscribeLink = (cfg: MailConfig, token: string): string | null =>
   link(cfg.publicUrl, UNSUBSCRIBE_PATH, token);
+
+/* ══════════════ Links into the app (non-workspace v1) ══════════════ */
+
+/** Paths in the app an email links to. The origin is `appUrl`; the path is a constant (see the note on VERIFY_PATH). */
+export const APP_PATHS = {
+  join: "/join/",
+  signInLink: "/signin-link",
+  emailSettings: "/account/emails",
+  profile: "/account/profile",
+  plan: "/account/plan",
+  plans: "/plans",
+  dashboard: "/dashboard",
+} as const;
+
+/** An absolute link into the app, or `null` when the app's origin is unknown or malformed. */
+export const appLink = (cfg: MailConfig, path: string): string | null => {
+  if (!cfg.appUrl || !path) return null;
+  try {
+    return new URL(path, cfg.appUrl).toString();
+  } catch {
+    return null;
+  }
+};
+
+/** The founder's invite link: `<app>/join/<CODE>` (the route `src/lib/inviteCode.ts` reads). */
+export const inviteLink = (cfg: MailConfig, code: string): string | null =>
+  code && /^[A-Z0-9-]+$/.test(code) ? appLink(cfg, `${APP_PATHS.join}${code}`) : null;

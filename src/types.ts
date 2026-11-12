@@ -181,7 +181,8 @@ export interface User {
   /* Settings → Preferences. IANA zone only; date format and week-start are deliberately absent —
      they would be display claims against 93 call sites that all render en-GB (lib/accountPrefs).
      Resolved at READ time (`resolveTimeZone`), never backfilled. */
-  workspacePrefs?: { timezone?: string };
+  /** `clock`: a query's clock, in weeks (non-workspace v1, Phase 3 — read only through lib/queryClock). */
+  workspacePrefs?: { timezone?: string; clock?: { replyWeeks?: number; nudgeAfterWeeks?: number; checkBackWeeks?: number; quietWeeks?: number } };
   /* Settings → Your data. The scheduled-deletion window: when it was asked for, and the date
      after which a purge job may run. ⚠️ NO SUCH JOB EXISTS — this records the request and the
      cancel path only (see lib/accountDeletion). */

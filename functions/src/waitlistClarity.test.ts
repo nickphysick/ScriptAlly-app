@@ -46,7 +46,8 @@ describe("WLC-4 · the welcome email", () => {
   });
 });
 
-describe("WLC-4 · the confirm email is left as it is", () => {
+/* Non-workspace v1 (emails-v1.html): the one loose word — the blush panel's "waiting list" — is now "reserve list". */
+describe("WLC-4 · the confirm email is left as it is, but for the one loose word", () => {
   const m = ok(prepareConfirm(PROD, "tok", "unsub")) as Mail;
   it("its subject and its lines", () => {
     expect(m.subject).toBe("Confirm your founding place");
@@ -54,8 +55,9 @@ describe("WLC-4 · the confirm email is left as it is", () => {
     for (const s of [
       "One click and you're on the list.",
       "Thanks for putting your name down as a QueryHawk founding writer. There's just one thing left to do.",
-      "Your place isn't held until you click. There are fifty founding places and they go in the order people confirm. If the last one goes while this sits in your inbox, you'll go on the waiting list instead, and I'll let you know.",
+      "Your place isn't held until you click. There are fifty founding places and they go in the order people confirm. If the last one goes while this sits in your inbox, you'll go on the reserve list instead, and I'll let you know.",
     ]) expect(w).toContain(s);
+    expect(w).not.toMatch(/waiting list/i);
   });
 });
 

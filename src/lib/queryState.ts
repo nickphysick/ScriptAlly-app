@@ -27,6 +27,7 @@ import { QueryStatus } from "../types";
 import { courtOf } from "./qcSummary";
 import { CLOSE_UNDATED_DAYS } from "./nudgeWindow";
 import { anyToMs } from "./qcStages";
+import { queryClock, CLOCK_DEFAULTS, CLOCK_QUIET_PATH, QUIET_CHOICES } from "./queryClock";
 
 const DAY = 86_400_000;
 
@@ -42,14 +43,15 @@ export const STATE_BAND: Record<QueryState, string> = {
 };
 
 /** the quiet window, in weeks (§1.4): the setting's choices and its default */
-export const QUIET_WEEKS = [2, 3, 4, 6, 8] as const;
-export const DEFAULT_QUIET_WEEKS = 4;
-export const QUIET_WEEKS_PATH = "todoPrefs.queries.quietWeeks";
-/** v153.3 — the one write that sets the window (Settings → Preferences → Queries), a single leaf */
+/* Non-workspace v1, Phase 3: the window is the query clock's (lib/queryClock) — stored at workspacePrefs.clock, with the
+   v153.3 leaf still honoured. These names stay so every reader is unchanged. */
+export const QUIET_WEEKS = QUIET_CHOICES;
+export const DEFAULT_QUIET_WEEKS = CLOCK_DEFAULTS.quietWeeks;
+export const QUIET_WEEKS_PATH = CLOCK_QUIET_PATH;
+/** The one write that sets the window (Settings → Preferences → A query's clock), a single leaf */
 export const quietWeeksPaths = (w: number): Record<string, number> => ({ [QUIET_WEEKS_PATH]: w });
-export function quietWeeksOf(user: { todoPrefs?: unknown } | null | undefined): number {
-  const v = ((user?.todoPrefs as { queries?: { quietWeeks?: unknown } } | undefined)?.queries?.quietWeeks);
-  return typeof v === "number" && (QUIET_WEEKS as readonly number[]).includes(v) ? v : DEFAULT_QUIET_WEEKS;
+export function quietWeeksOf(user: { todoPrefs?: unknown; workspacePrefs?: unknown } | null | undefined): number {
+  return queryClock(user).quietWeeks;
 }
 
 export interface StateInput {

@@ -2,42 +2,45 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact — the public marketing route at /contact. First built from
- * design-refs/scriptally-contact.html; rebuilt on 17 Sep to a written brief, so that ref no longer
- * describes the layout.
+ * Contact — the public marketing route at /contact. Rebuilt to design-refs/contact-terms-unsubscribe-v1.html
+ * (non-workspace v1, Phase 6): the heading and one line, the address and the founding writers' route on
+ * the left, and a form whose topic is a row of choices, each with its own prompt.
  *
  * ⚠️ IT IS PUBLIC AND HAS TO BE. Someone locked out of their account, or asking for that account
  * to be deleted, cannot sign in to ask. Putting this behind the auth gate would close the one door
  * that must stay open — which is also why the privacy policy points at it by name.
  *
- * ⚠️ NO PHONE FIELD AND NO FIRST/LAST SPLIT. Both are in the drawer of things a contact form
- * habitually asks for and never uses; a name is one field because a name is one thing, and there
- * is no phone to ring.
+ * ⚠️ NO PHONE FIELD AND NO FIRST/LAST SPLIT. A name is one field because a name is one thing, and
+ * there is no phone to ring.
  *
  * ⚠️ THE TRANSPORT IS A CONSTANT, NOT A BRANCH THIS FILE DECIDES. `CONTACT_TRANSPORT` picks
- * between the mail client and the deployed callable; the form's behaviour is otherwise identical,
- * so neither path is the one that only gets exercised in production.
+ * between the mail client and the deployed callable; the form's behaviour is otherwise identical.
+ * It is "mailto" today (`sendContactMessage` is not deployed), and the sent panel says so.
+ *
+ * ⚠️ EVERY STEP'S STATE IS `contactForm.ts`'s REDUCER. This file renders it and moves focus where the
+ * reducer says; `ContactFormView` is pure props so a string render can show each state.
  */
 
-import React, { useState } from "react";
-import { useEffect } from "react";
+import React, { useEffect, useReducer } from "react";
 import {
-  CONTACT_DOCUMENT_TITLE, CONTACT_EYEBROW, CONTACT_H1, CONTACT_LEDE, CONTACT_MAIL_LABEL,
-  CONTACT_WAYS, CONTACT_TOPICS, CONTACT_FORM_H2, CONTACT_FORM_SUB, CONTACT_FORM_SEND,
-  CONTACT_FINE_PRINT, CONTACT_FIELD_LABELS, CONTACT_PLACEHOLDERS, CONTACT_ART_ALT, CONTACT_WAYS_H2,
+  CONTACT_DOCUMENT_TITLE, CONTACT_H1, CONTACT_LEDE, CONTACT_MAIL_H2, CONTACT_FOUNDING_H2,
+  CONTACT_FOUNDING_BODY, CONTACT_TOPICS, CONTACT_TOPIC_DETAIL, CONTACT_PAGE_TOPIC, CONTACT_DATA_TOPIC,
+  CONTACT_DATA_WANTS, CONTACT_FORM_H2, CONTACT_FORM_SUB, CONTACT_FORM_SEND, CONTACT_FORM_SENDING,
+  CONTACT_FINE_PRINT, CONTACT_FIELD_LABELS, CONTACT_OPTIONAL, CONTACT_PLACEHOLDERS, CONTACT_SENT,
+  CONTACT_AGAIN, CONTACT_FAILED_GENERIC, CONTACT_FAILED_TOO_SOON, CONTACT_ART_ALT, ContactTopic,
 } from "./contactCopy";
 import { usePhone } from "./usePhone";
 import { Runs } from "./CopyRuns";
-import { ContactTile } from "./marketingMarks";
-import { LEGAL_ENTITY_NAME, REGISTERED_ADDRESS, SUPPORT_EMAIL } from "../lib/companyInfo";
+import { SUPPORT_EMAIL } from "../lib/companyInfo";
 import {
   CONTACT_TRANSPORT, CONTACT_HONEYPOT_FIELD, CONTACT_LAST_SENT_KEY, CONTACT_MAX,
-  ContactDraft, ContactField, contactMailto, isRateLimited, looksAutomated, validateContact,
+  ContactDraft, contactExtras, contactMailto, isRateLimited, looksAutomated, validateContact,
 } from "../lib/contactTransport";
+import {
+  CONTACT_IDS, ContactAction, ContactFormState, contactInitial, contactReducer,
+} from "./contactForm";
 
-type SendState = "idle" | "sending" | "sent" | "failed";
-
-const EMPTY: ContactDraft = { name: "", email: "", topic: CONTACT_TOPICS[0], message: "", trap: "" };
+type Nav = (tab: string, subPageName?: string) => void;
 
 /**
  * The Archivist at a writing desk. The version is the first eight hex digits of the file's md5 —
@@ -46,6 +49,8 @@ const EMPTY: ContactDraft = { name: "", email: "", topic: CONTACT_TOPICS[0], mes
  */
 const ARCHIVIST = { src: "/images/contact-archivist.png", version: "a603d9cb", width: 800, height: 800 };
 
+const EXTRA_TOPICS = { page: CONTACT_PAGE_TOPIC, data: CONTACT_DATA_TOPIC, firstWant: CONTACT_DATA_WANTS[0] };
+
 const readLastSent = (): number | null => {
   try {
     const raw = window.localStorage.getItem(CONTACT_LAST_SENT_KEY);
@@ -53,19 +58,166 @@ const readLastSent = (): number | null => {
   } catch { return null; }
 };
 
-export const ContactPage: React.FC<{
-  onNavigate: (tab: string, subPageName?: string) => void;
-}> = ({ onNavigate }) => {
-  const [draft, setDraft] = useState<ContactDraft>(EMPTY);
-  const [errors, setErrors] = useState<Partial<Record<ContactField, string>>>({});
-  const [state, setState] = useState<SendState>("idle");
-  const [notice, setNotice] = useState("");
+/**
+ * The form card, or the sent panel in its place — every state the reducer can be in, from props
+ * alone. `onSubmit` is the page's send; nothing here reaches a network or a mail client.
+ */
+export const ContactFormView: React.FC<{
+  state: ContactFormState;
+  dispatch: (a: ContactAction) => void;
+  onSubmit: () => void;
+  onNavigate: Nav;
+}> = ({ state, dispatch, onSubmit, onNavigate }) => {
+  const { draft, errors, status } = state;
+
+  if (status === "sent") {
+    const words = CONTACT_SENT[CONTACT_TRANSPORT];
+    return (
+      <section className="mk-formcard mk-cdone" aria-labelledby="cf-done-h" role="status">
+        <h2 id="cf-done-h" className="mk-formh2">{words.heading}</h2>
+        <p className="mk-csub">{words.body(state.sentTo)}</p>
+        {words.fallback && (
+          <p className="mk-csub">{words.fallback}<a className="mk-cmail" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.</p>
+        )}
+        <button id={CONTACT_IDS.again} type="button" className="mk-btn mk-cagain" onClick={() => dispatch({ type: "again" })}>
+          {CONTACT_AGAIN}
+        </button>
+      </section>
+    );
+  }
+
+  const topic = draft.topic as ContactTopic;
+  const detail = CONTACT_TOPIC_DETAIL[topic] ?? CONTACT_TOPIC_DETAIL[CONTACT_TOPICS[0]];
+  const set = (field: keyof ContactDraft) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => dispatch({ type: "edit", field, value: e.target.value });
+
+  /* Arrow keys move the choice (and focus) round the row, as a radio group does. */
+  const onTopicKey = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+    const i = CONTACT_TOPICS.indexOf(topic);
+    const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    dispatch({ type: "topic", topic: CONTACT_TOPICS[(i + step + CONTACT_TOPICS.length) % CONTACT_TOPICS.length] });
+  };
+
+  const err = (field: "name" | "email" | "message", id: string) =>
+    errors[field] ? <span id={`${id}-err`} className="mk-fielderr">{errors[field]}</span> : null;
+
+  /* ⚠️ A REAL <form>, so Enter sends from any field and the region is named by its own heading.
+     `noValidate` because the words come from `validateContact`, not from the browser's bubbles. */
+  return (
+    <form
+      className="mk-formcard"
+      aria-labelledby="cf-title"
+      noValidate
+      onSubmit={(e) => { e.preventDefault(); onSubmit(); }}
+    >
+      <h2 id="cf-title" className="mk-formh2">{CONTACT_FORM_H2}</h2>
+      <p className="mk-csub">{CONTACT_FORM_SUB}</p>
+
+      <div className="mk-field">
+        <span id="cf-topic-l" className="mk-flabel">{CONTACT_FIELD_LABELS.topic}</span>
+        <div className="mk-jychips" role="radiogroup" aria-labelledby="cf-topic-l">
+          {CONTACT_TOPICS.map((t) => (
+            <button
+              key={t} id={CONTACT_IDS.topic(t)} type="button" className="mk-jychip" role="radio"
+              aria-checked={t === topic} tabIndex={t === topic ? 0 : -1}
+              onClick={() => dispatch({ type: "topic", topic: t })} onKeyDown={onTopicKey}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {detail.tip && (
+        <div className="mk-callout">
+          <span className="mk-corule" aria-hidden="true" />
+          <p>{detail.tip}</p>
+        </div>
+      )}
+
+      <div className="mk-field">
+        <label htmlFor={CONTACT_IDS.name}>{CONTACT_FIELD_LABELS.name}</label>
+        <input
+          id={CONTACT_IDS.name} type="text" autoComplete="name" maxLength={CONTACT_MAX.name}
+          value={draft.name} onChange={set("name")}
+          aria-invalid={!!errors.name} aria-describedby={errors.name ? "cf-name-err" : undefined}
+        />
+        {err("name", CONTACT_IDS.name)}
+      </div>
+
+      <div className="mk-field">
+        <label htmlFor={CONTACT_IDS.email}>{CONTACT_FIELD_LABELS.email}</label>
+        <input
+          id={CONTACT_IDS.email} type="email" autoComplete="email" maxLength={CONTACT_MAX.email}
+          placeholder={CONTACT_PLACEHOLDERS.email} value={draft.email} onChange={set("email")}
+          aria-invalid={!!errors.email} aria-describedby={errors.email ? "cf-email-err" : undefined}
+        />
+        {err("email", CONTACT_IDS.email)}
+      </div>
+
+      {topic === CONTACT_PAGE_TOPIC && (
+        <div className="mk-field">
+          <label htmlFor={CONTACT_IDS.page}>
+            {CONTACT_FIELD_LABELS.page} <span className="mk-foptional">{CONTACT_OPTIONAL}</span>
+          </label>
+          <input
+            id={CONTACT_IDS.page} type="text" maxLength={CONTACT_MAX.name}
+            placeholder={CONTACT_PLACEHOLDERS.page} value={draft.page ?? ""} onChange={set("page")}
+          />
+        </div>
+      )}
+      {topic === CONTACT_DATA_TOPIC && (
+        <div className="mk-field">
+          <label htmlFor={CONTACT_IDS.want}>{CONTACT_FIELD_LABELS.want}</label>
+          <select id={CONTACT_IDS.want} value={draft.want || CONTACT_DATA_WANTS[0]} onChange={set("want")}>
+            {CONTACT_DATA_WANTS.map((w) => <option key={w} value={w}>{w}</option>)}
+          </select>
+        </div>
+      )}
+
+      <div className="mk-field">
+        <label htmlFor={CONTACT_IDS.message}>{CONTACT_FIELD_LABELS.message}</label>
+        <textarea
+          id={CONTACT_IDS.message} maxLength={CONTACT_MAX.message}
+          placeholder={detail.placeholder} value={draft.message} onChange={set("message")}
+          aria-invalid={!!errors.message} aria-describedby={errors.message ? "cf-msg-err" : undefined}
+        />
+        {err("message", CONTACT_IDS.message)}
+      </div>
+
+      {/* ⚠️ THE HONEYPOT. Off-screen rather than `display:none` — some bots skip hidden
+          fields but fill positioned ones — labelled for anyone reading the markup, and
+          excluded from the tab order and the accessibility tree so no person meets it. */}
+      <div className="mk-trap" aria-hidden="true">
+        <label htmlFor="cf-website">Leave this field empty</label>
+        <input
+          id="cf-website" name={CONTACT_HONEYPOT_FIELD} type="text" tabIndex={-1}
+          autoComplete="off" value={draft.trap ?? ""} onChange={set("trap")}
+        />
+      </div>
+
+      <button type="submit" className="mk-cbtn" disabled={status === "sending"}>
+        {status === "sending" ? CONTACT_FORM_SENDING : CONTACT_FORM_SEND}
+      </button>
+
+      {status === "failed" && (
+        <p id={CONTACT_IDS.notice} className="mk-cstate mk-cstate--bad" role="alert" tabIndex={-1}>{state.notice}</p>
+      )}
+
+      <p className="mk-cfine"><Runs runs={CONTACT_FINE_PRINT} onNavigate={onNavigate} /></p>
+    </form>
+  );
+};
+
+export const ContactPage: React.FC<{ onNavigate: Nav }> = ({ onNavigate }) => {
+  const [state, dispatch] = useReducer(contactReducer, undefined, contactInitial);
   /* ⚠️ ON A PHONE THE TOP OF THE PAGE IS PRICING'S (public pages on phones v1, Nick's pick 7B): a white
-     card over the navy holding the heading, the lede and the email, with the desk hawk perched on its
-     corner. It wears Pricing's own classes — `.mk-pvm`, `.mk-pvbox`, `.mk-pvart`, `.mk-pvin`,
-     `.mk-pvh1`, `.mk-pvsub` — so the two pages share one set of rules rather than a copy, and
-     `.mk-sheet:has(.mk-pvm)` starts the sheet below the navy exactly as it does there. The desktop
-     render (and every unit test, which renders without `matchMedia`) is unchanged. */
+     card over the navy holding the heading and the lede, with the desk hawk perched on its corner. It
+     wears Pricing's own classes, and `.mk-sheet:has(.mk-pvm)` starts the sheet below the navy exactly
+     as it does there. The desktop render (and every unit test) is unchanged by it. */
   const phone = usePhone();
 
   useEffect(() => {
@@ -74,70 +226,59 @@ export const ContactPage: React.FC<{
     return () => { document.title = prev; };
   }, []);
 
-  const set = (key: keyof ContactDraft) => (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
-  ) => setDraft((d) => ({ ...d, [key]: e.target.value }));
+  /* Focus goes where the reducer's last step says: the first field that needs something, the sent
+     panel's button, the message box, the chosen topic, or the failure's own sentence. Keyed on the
+     whole state, so pressing Send twice on the same mistake moves focus back to it twice; an edit
+     sets `focus` to null, so typing never moves it. */
+  useEffect(() => {
+    if (state.focus) document.getElementById(state.focus)?.focus({ preventScroll: state.focus.startsWith("cf-topic-") });
+  }, [state]);
 
   const send = async () => {
+    const draft = state.draft;
     /* A bot sees success and learns nothing. The draft is not sent and nothing is recorded. */
-    if (looksAutomated(draft)) { setState("sent"); return; }
+    if (looksAutomated(draft)) { dispatch({ type: "sent" }); return; }
 
     const found = validateContact(draft);
-    setErrors(found);
-    if (Object.keys(found).length > 0) return;
+    if (Object.keys(found).length > 0) { dispatch({ type: "invalid", errors: found }); return; }
 
     if (isRateLimited(readLastSent(), Date.now())) {
-      setState("failed");
-      setNotice("That's already on its way — give it a moment before sending another.");
+      dispatch({ type: "failed", notice: CONTACT_FAILED_TOO_SOON });
       return;
     }
+
+    const extras = contactExtras(draft, EXTRA_TOPICS);
 
     if (CONTACT_TRANSPORT === "mailto") {
-      /* The mail client is the transport: the writer's own outbox is the record, and nothing is
-         claimed to have been delivered that has not been. */
-      window.location.href = contactMailto(SUPPORT_EMAIL, draft);
+      /* The mail client is the transport: the writer's own outbox is the record, and the sent
+         panel says the message is waiting there — nothing is claimed to have been delivered. */
+      window.location.href = contactMailto(SUPPORT_EMAIL, draft, extras);
       try { window.localStorage.setItem(CONTACT_LAST_SENT_KEY, String(Date.now())); } catch { /* private mode */ }
-      setState("sent");
+      dispatch({ type: "sent" });
       return;
     }
 
-    setState("sending");
+    dispatch({ type: "sending" });
     try {
-      /* `getFunctions(undefined, …)` — the repo's own shape for every callable (smartImport,
-         suggestComps, extractFromEmail, assistAgentData), which resolves the default app rather
-         than importing one. Loaded lazily so a public page that will usually never send does not
-         pull the functions SDK into the marketing bundle. */
+      /* `getFunctions(undefined, …)` — the repo's own shape for every callable, which resolves the
+         default app rather than importing one. Loaded lazily so a public page that will usually
+         never send does not pull the functions SDK into the marketing bundle. */
       const { getFunctions, httpsCallable } = await import("firebase/functions");
       const call = httpsCallable(getFunctions(undefined, "europe-west2"), "sendContactMessage");
       await call({
         name: draft.name,
         email: draft.email,
         topic: draft.topic,
-        message: draft.message,
+        message: [draft.message.trim(), ...extras].join("\n\n"),
         [CONTACT_HONEYPOT_FIELD]: draft.trap ?? "",
       });
       try { window.localStorage.setItem(CONTACT_LAST_SENT_KEY, String(Date.now())); } catch { /* private mode */ }
-      setState("sent");
+      dispatch({ type: "sent" });
     } catch (e) {
-      /* ⚠️ A FAILURE SAYS SO AND KEEPS THE WORDS. Clearing the form on an error would lose the
-         message the writer just typed, which is the one thing they cannot get back. */
-      setState("failed");
-      setNotice(
-        (e as { message?: string })?.message ||
-        "That didn't send. Please try again, or email us directly.",
-      );
+      /* ⚠️ A FAILURE SAYS SO AND KEEPS THE WORDS — the reducer's "failed" touches no field. */
+      dispatch({ type: "failed", notice: (e as { message?: string })?.message || CONTACT_FAILED_GENERIC });
     }
   };
-
-  const mailCard = (
-    <div className="mk-cmailcard">
-      <ContactTile kind="mail" />
-      <div>
-        <p className="mk-cmaillabel">{CONTACT_MAIL_LABEL}</p>
-        <a className="mk-cmail" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
-      </div>
-    </div>
-  );
 
   return (
     <div>
@@ -147,11 +288,8 @@ export const ContactPage: React.FC<{
             <img className="mk-pvart" src={ARCHIVIST.src + "?v=" + ARCHIVIST.version} alt=""
                  width={ARCHIVIST.width} height={ARCHIVIST.height} />
             <div className="mk-pvin">
-              {/* Hidden on phones by the small-capitals rule; kept in the DOM, as on desktop. */}
-              <p className="mk-ckicker">{CONTACT_EYEBROW}</p>
               <h1 id="mk-ch1" className="mk-pvh1">{CONTACT_H1}</h1>
               <p className="mk-pvsub">{CONTACT_LEDE}</p>
-              {mailCard}
             </div>
           </section>
         </div>
@@ -160,25 +298,14 @@ export const ContactPage: React.FC<{
         <div className="mk-contactsplit">
           <div className="mk-cleft">
             {!phone && (<>
-              <p className="mk-ckicker">{CONTACT_EYEBROW}</p>
               <h1 className="mk-ch1">{CONTACT_H1}</h1>
               <p className="mk-clede">{CONTACT_LEDE}</p>
-              {mailCard}
             </>)}
-            {phone && <h2 className="mk-waysh">{CONTACT_WAYS_H2}</h2>}
-
-            {/* The three reasons are headings in their own right: a reader jumping by heading
-                lands on each, and on the form's, in the order the page reads. */}
-            <div className="mk-ways">
-              {CONTACT_WAYS.map((way) => (
-                <div className="mk-way" key={way.key}>
-                  <ContactTile kind={way.key} />
-                  <div>
-                    <h2 className="mk-wayh">{way.heading}</h2>
-                    <p className="mk-waybody">{way.body}</p>
-                  </div>
-                </div>
-              ))}
+            <div className="mk-cways">
+              <h2 className="mk-wayh">{CONTACT_MAIL_H2}</h2>
+              <p className="mk-waybody"><a className="mk-cmail" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></p>
+              <h2 className="mk-wayh">{CONTACT_FOUNDING_H2}</h2>
+              <p className="mk-waybody">{CONTACT_FOUNDING_BODY}</p>
             </div>
 
             {/* On a phone the hawk perches on the opening card instead (above), so it is drawn once. */}
@@ -194,95 +321,9 @@ export const ContactPage: React.FC<{
             )}
           </div>
 
-          {/* ⚠️ A REAL <form> NOW (17 Sep), so Enter sends from any field and the region is named
-              by its own heading. `noValidate` because the words come from `validateContact`, not
-              from the browser's own bubbles — and the submit is intercepted, so nothing navigates. */}
-          <form
-            className="mk-formcard"
-            aria-labelledby="cf-title"
-            noValidate
-            onSubmit={(e) => { e.preventDefault(); void send(); }}
-          >
-            <h2 id="cf-title" className="mk-formh2">{CONTACT_FORM_H2}</h2>
-            <p className="mk-csub">{CONTACT_FORM_SUB}</p>
-
-            <div className="mk-field">
-              <label htmlFor="cf-name">{CONTACT_FIELD_LABELS.name}</label>
-              <input
-                id="cf-name" type="text" autoComplete="name" maxLength={CONTACT_MAX.name}
-                value={draft.name} onChange={set("name")}
-                aria-invalid={!!errors.name} aria-describedby={errors.name ? "cf-name-err" : undefined}
-              />
-              {errors.name && <span id="cf-name-err" className="mk-fielderr">{errors.name}</span>}
-            </div>
-
-            <div className="mk-field">
-              <label htmlFor="cf-email">{CONTACT_FIELD_LABELS.email}</label>
-              <input
-                id="cf-email" type="email" autoComplete="email" maxLength={CONTACT_MAX.email} required
-                placeholder={CONTACT_PLACEHOLDERS.email} value={draft.email} onChange={set("email")}
-                aria-invalid={!!errors.email} aria-describedby={errors.email ? "cf-email-err" : undefined}
-              />
-              {errors.email && <span id="cf-email-err" className="mk-fielderr">{errors.email}</span>}
-            </div>
-
-            <div className="mk-field">
-              <label htmlFor="cf-topic">{CONTACT_FIELD_LABELS.topic}</label>
-              <select id="cf-topic" value={draft.topic} onChange={set("topic")}>
-                {CONTACT_TOPICS.map((topic) => <option key={topic} value={topic}>{topic}</option>)}
-              </select>
-            </div>
-
-            <div className="mk-field">
-              <label htmlFor="cf-msg">{CONTACT_FIELD_LABELS.message}</label>
-              <textarea
-                id="cf-msg" maxLength={CONTACT_MAX.message} required
-                placeholder={CONTACT_PLACEHOLDERS.message} value={draft.message} onChange={set("message")}
-                aria-invalid={!!errors.message} aria-describedby={errors.message ? "cf-msg-err" : undefined}
-              />
-              {errors.message && <span id="cf-msg-err" className="mk-fielderr">{errors.message}</span>}
-            </div>
-
-            {/* ⚠️ THE HONEYPOT. Off-screen rather than `display:none` — some bots skip hidden
-                fields but fill positioned ones — labelled for anyone reading the markup, and
-                excluded from the tab order and the accessibility tree so no person meets it. */}
-            <div className="mk-trap" aria-hidden="true">
-              <label htmlFor="cf-website">Leave this field empty</label>
-              <input
-                id="cf-website" name={CONTACT_HONEYPOT_FIELD} type="text" tabIndex={-1}
-                autoComplete="off" value={draft.trap ?? ""} onChange={set("trap")}
-              />
-            </div>
-
-            <button
-              type="submit" className="mk-cbtn"
-              disabled={state === "sending" || state === "sent"}
-            >
-              {state === "sending" ? "Sending…" : state === "sent" ? "Sent" : CONTACT_FORM_SEND}
-            </button>
-
-            {state === "sent" && (
-              <p className="mk-cstate" role="status">
-                {CONTACT_TRANSPORT === "mailto"
-                  ? "Your mail client should have opened with the message ready to send."
-                  : "Thank you — that's with us. You'll hear back within two working days."}
-              </p>
-            )}
-            {state === "failed" && <p className="mk-cstate mk-cstate--bad" role="alert">{notice}</p>}
-
-            <p className="mk-cfine"><Runs runs={CONTACT_FINE_PRINT} onNavigate={onNavigate} /></p>
-          </form>
-        </div>
-
-        {/* Below both columns, above the footer; its hairline is its own top edge. */}
-        <div className="mk-svcline">
-          <p>
-            <strong>Service information.</strong> QueryHawk is operated by {LEGAL_ENTITY_NAME},{" "}
-            {REGISTERED_ADDRESS}, United Kingdom.
-          </p>
+          <ContactFormView state={state} dispatch={dispatch} onSubmit={() => void send()} onNavigate={onNavigate} />
         </div>
       </main>
-
     </div>
   );
 };

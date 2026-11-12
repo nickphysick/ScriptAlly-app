@@ -9,32 +9,24 @@
  * About and Contact would have gone unreachable from two of them. Adding a page is one edit here.
  *
  * Rebuilt 17 Sep: a full-width band on its own ground, the brand column beside Product, Company
- * and Legal, and a three-cell base line.
+ * and Legal, and a three-cell base line. Trimmed to design-refs/contact-terms-unsubscribe-v1.html
+ * (12 Nov): the status-glyph row under the tagline, "Open QueryHawk" and "Cookie choices" are gone.
  */
 
 import React from "react";
 import { FOOTER_TAGLINE, SUPPORT_EMAIL } from "../lib/companyInfo";
 import { BRAND_MARK, BRAND_MARK_SMALL, artUrl } from "./brandArt";
-import { PaperPlane, StatusGlyph, STATUS_GLYPH_COUNT } from "./marketingMarks";
-import { LANDING_ONLY } from "../lib/siteMode";
-import { analyticsAvailable, reopenConsent } from "./analytics";
+import { PaperPlane } from "./marketingMarks";
 
 export const MarketingFooter: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
   /**
    * The waiting-list landing page's footer (waitlist v1, 31 Oct; refs landing-desktop-v5 and
-   * landing-mobile-v7): the brand, the tagline, the glyph row, © and "Made in the UK", and Privacy —
-   * the three link columns and the support address go, because that page links nowhere else. Cookie
-   * choices stays beside Privacy (it opens the consent bar; it goes nowhere).
+   * landing-mobile-v7): the brand, the tagline, © and "Made in the UK", and Privacy — the three link
+   * columns and the support address go, because that page links nowhere else.
    */
   waitlist?: boolean;
 }> = ({ onNavigate, waitlist = false }) => {
-  /* ⚠️ `#/login`, NOT `#/signup`. The nav stopped pointing at account creation because there is no
-     self-serve product behind it yet (see `marketingNav.ts`); this link was the one place in the
-     chrome still opening it. App.tsx turns `#/login` into sign-in for a visitor and into the
-     dashboard for someone already signed in, which is what "Open QueryHawk" means to both. */
-  const openApp = () => { window.location.hash = "#/login"; };
-
   /* Features is an in-page anchor on "/" and the way home from anywhere else — the nav's own rule,
      restated, so the two links named Features cannot behave differently. */
   const toFeatures = () => {
@@ -65,11 +57,6 @@ export const MarketingFooter: React.FC<{
               <span className="mk-wordmark">QueryHawk</span>
             </div>
             <p className="mk-foottag">{FOOTER_TAGLINE}</p>
-            {/* A signature, not a control: the six states restate nothing a reader needs, so the
-                whole row is hidden from the accessibility tree. */}
-            <div className="mk-footglyphs" aria-hidden="true">
-              {Array.from({ length: STATUS_GLYPH_COUNT }, (_, i) => <StatusGlyph key={i} index={i} />)}
-            </div>
           </div>
 
           {!waitlist && (<>
@@ -78,8 +65,6 @@ export const MarketingFooter: React.FC<{
             <ul>
               <li><button type="button" onClick={toFeatures}>Features</button></li>
               <li><button type="button" onClick={() => onNavigate("pricing")}>Pricing</button></li>
-              {/* Landing-only: there is no app to open (src/lib/siteMode.ts). */}
-              {!LANDING_ONLY && <li><button type="button" onClick={openApp}>Open QueryHawk</button></li>}
             </ul>
           </div>
 
@@ -97,9 +82,6 @@ export const MarketingFooter: React.FC<{
             <ul>
               <li><button type="button" onClick={() => onNavigate("privacy")}>Privacy</button></li>
               <li><button type="button" onClick={() => onNavigate("terms")}>Terms</button></li>
-              {analyticsAvailable() && (
-                <li><button type="button" onClick={reopenConsent}>Cookie choices</button></li>
-              )}
             </ul>
           </div>
           </>)}
@@ -116,7 +98,6 @@ export const MarketingFooter: React.FC<{
           {waitlist ? (
             <p className="mk-footlegal">
               <button type="button" className="mk-footmail" onClick={() => onNavigate("privacy")}>Privacy</button>
-              {analyticsAvailable() && <button type="button" className="mk-footmail" onClick={reopenConsent}>Cookie choices</button>}
             </p>
           ) : (
             <a className="mk-footmail" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>

@@ -58,7 +58,7 @@ export const InkAccountMenu = forwardRef<HTMLDivElement, InkAccountMenuProps>(
       <button type="button" className="sa-mi am-row" role="menuitem" onClick={go("/account")}>
         <Settings aria-hidden="true" /><span>Settings</span>
       </button>
-      <button type="button" className="sa-mi am-row" role="menuitem" onClick={go("/account/tasks")}>
+      <button type="button" className="sa-mi am-row" role="menuitem" onClick={go("/account/preferences")}>
         <SlidersHorizontal aria-hidden="true" /><span>Task settings</span>
       </button>
       <button type="button" className="sa-mi am-row" role="menuitem" onClick={go("/help")}>

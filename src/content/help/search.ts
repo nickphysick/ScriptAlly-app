@@ -10,10 +10,15 @@
  *           Help Centre's order — so "partial" lists "Partial requested" before "Partial sent".
  * ⚠️ A STATUS OR TERM IS NOT A PAGE: its hit opens the article its definition already links to (the Status key, List
  *    health, Response policy), never a route of its own.
+ * ⚠️ PUBLISHED ONLY (non-workspace v1, Phase 7): `HELP_ARTICLE_LIST` holds no drafts, and a term whose article is a
+ *    draft is left out, so no hit opens the not-found screen.
+ *
+ * `searchArticles` is the Help centre home's search (design-refs/help-centre-v1): articles only, the same three bands,
+ * the same words (title, lede, steps, body, tip), every match.
  */
 import { GLOSSARY } from "../../lib/glossary";
-import { HELP_ARTICLE_LIST } from "./articles";
-import { HELP_AREAS, articleText } from "./model";
+import { HELP_ARTICLE_LIST, articleBySlug } from "./articles";
+import { HELP_AREAS, articleText, type HelpArticle } from "./model";
 
 export interface HelpHit {
   /** the article it opens */
@@ -26,7 +31,7 @@ export interface HelpHit {
 interface Entry extends HelpHit { text: string; band: number }
 
 const ENTRIES: readonly Entry[] = [
-  ...Object.values(GLOSSARY).map((g): Entry => ({
+  ...Object.values(GLOSSARY).filter((g) => !!articleBySlug(g.article)).map((g): Entry => ({
     slug: g.article, title: g.title, eyebrow: g.status ? "STATUS KEY" : "DEFINITION",
     text: `${g.title} ${g.body}`, band: g.status ? 0 : 1,
   })),
@@ -58,4 +63,19 @@ export function searchHelp(q: string, limit = SEARCH_LIMIT): HelpHit[] {
     if (out.length >= limit) break;
   }
   return out;
+}
+
+/** Every published article the words are in: a title that starts with them, then one that contains them, then the rest. */
+export function searchArticles(q: string): HelpArticle[] {
+  const term = q.trim().toLowerCase();
+  if (!term) return [];
+  return HELP_ARTICLE_LIST
+    .map((a, i) => {
+      const t = a.title.toLowerCase();
+      const rank = t.startsWith(term) ? 0 : t.includes(term) ? 1 : articleText(a).toLowerCase().includes(term) ? 2 : -1;
+      return { a, i, rank };
+    })
+    .filter((x) => x.rank >= 0)
+    .sort((x, y) => x.rank - y.rank || x.i - y.i)
+    .map((x) => x.a);
 }

@@ -117,7 +117,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* Named for where it sits, not what colour it is — the value is a decision, the mechanism is
      not. Changing the surface below the break is this one line. */
   --mk-lower: #f2eee8;
-  --mk-card: #fffefb;
   --mk-parch: #fdfaf5;
   /* The ink at 13% — the one hairline on a light surface. Pre-computed alpha, no `color-mix()`. */
   --mk-hair: rgba(28, 19, 15, .13);
@@ -143,9 +142,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* ⚠️ `--mk-band-a` IS DELETED TOO (landing colours v2). It was About's commitment strip's tan
      fill; that strip is a band holding three cards, which is what the stone band is, so it reads
      `--mk-stone` and the last of the retired parchment band's two stops is gone. */
-  --mk-centre: #f6e4da;
-  --mk-sage: #e9ede6;
-  --mk-sage-t: #5a6e58;
+  /* `--mk-centre`, `--mk-sage`, `--mk-sage-t` and `--mk-card` are deleted (12 Nov): their last readers
+     were the document card and Contact's tiles. */
   --mk-cta: #f5e2da;
   --mk-cta-bd: #e8c8bc;
   --mk-cta-hov: #f8e9e2;
@@ -211,11 +209,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* The ink pill's hover, shared by the nav's CTA and the contact form's button — one value for
      one job, rather than the same literal typed twice. */
   --mk-ink-hov: #2c1f19;
-  /* The contact page's icon tiles: the grey behind the warning mark, and the pale slate and slate
-     of the privacy mark — the app's own Pro-chip pair. The rose tile reads `--mk-centre`. */
-  --mk-tile-grey: #eceae7;
-  --mk-slate: #6a89a7;
-  --mk-slate-pale: #e7eef3;
+  /* The contact page's tile tokens (`--mk-tile-grey`, `--mk-slate`, `--mk-slate-pale`) are deleted with
+     the tiles (12 Nov). */
   /* The display ink for statement type. `--mk-head` (mocha) is the page-furniture heading colour
      and stays; a 52px+ statement wants the darker end, and the two are not interchangeable. */
   --mk-nearblack: #1c130f;
@@ -640,9 +635,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    on the section and a full viewport wide; the sheet clips whatever a scrollbar makes it overhang.
    ⚠️ THE PAIR IS ONE MECHANISM: `z-index: -1` here and `isolation: isolate` on the sheet. Either
    alone is wrong — see the note there.
-   Contact and the two legal pages are one section each, so the whole page is the opening. */
-.mk-fwhero, .mk-contact, .mk-docplane { position: relative; }
-.mk-fwhero::before, .mk-contact::before, .mk-docplane::before {
+   Contact is one section, so the whole page is the opening. (The legal pages left the group on
+   12 Nov: both open on privacy.css's navy drawer, which paints its own ground.) */
+.mk-fwhero, .mk-contact { position: relative; }
+.mk-fwhero::before, .mk-contact::before {
   content: ""; position: absolute; z-index: -1; top: 0; bottom: 0;
   left: calc(50% - 50vw); width: 100vw; pointer-events: none;
   background-color: var(--mk-hero-ground);
@@ -942,10 +938,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   align-items: center; padding: 88px 0 76px;
 }
 .mk-fwcol { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-.mk-fweyebrow {
-  font-family: "JetBrains Mono", monospace; font-size: .68rem; letter-spacing: .26em;
-  text-transform: uppercase; color: var(--mk-muted); margin: 0 0 22px;
-}
 /* ⚠️ TWO CLASSES AND `!important`, AND BOTH ARE REQUIRED. `src/lib/brand.tsx` injects a rule at
    runtime on every route giving `h1:not(.wsh-title)` the brand heading font with `!important`.
    That selector is 0-1-1; a bare `.mk-fwh1` is 0-1-0, so between two important declarations it
@@ -994,17 +986,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-fwcard {
   display: flex; flex-direction: column;
   background: #fff; border-radius: 14px; padding: 26px 28px 24px;
-}
-/* ⚠️ SCOPED TO `.mk-fwcard`, AND THAT IS THE ONLY REASON IT APPLIES. `.mk-fwcard p` is 0-1-1 — a
-   class and an element — while a bare `.mk-fwk` is 0-1-0, so the generic paragraph rule OUTRANKS
-   the specific one on every property it happens to set. Measured before that was fixed: the
-   kicker rendered at 15.68px in `--mk-muted` where its own rule asked for .55rem in
-   `--mk-kicker`. The mono face, the tracking and the uppercase came through — because the generic
-   rule does not set those — which is exactly why it still looked like a kicker and nobody
-   noticed. A half-applied treatment looks intentional. */
-.mk-fwcard .mk-fwk {
-  font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: .18em;
-  text-transform: uppercase; color: var(--mk-claim-accent); margin: 0 0 10px;
 }
 /* Two classes and `!important` for the same reason as the h1 — brand.tsx forces every bare `h2`
    to the brand family, and only a selector of two classes outranks it. */
@@ -1604,14 +1585,15 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-pv4 .mk-jyopt:hover { background: var(--mk-hero-ground); border-color: rgba(28, 19, 15, .22); }
 .mk-pv4 .mk-jyopt[aria-pressed="true"] { background: var(--mk-hero-ground); border-color: var(--mk-navy); box-shadow: inset 0 0 0 1px var(--mk-navy); }
 .mk-pv4 .mk-jyopt[aria-pressed="true"]::before { box-shadow: inset 0 0 0 5px var(--mk-navy); }
-.mk-pv4 .mk-jychips { display: flex; flex-wrap: wrap; gap: 8px; }
-.mk-pv4 .mk-jychip {
+.mk-pv4 .mk-jychips, .mk-contact .mk-jychips { display: flex; flex-wrap: wrap; gap: 8px; }
+/* Contact's topic row wears the same chips (role="radio", so `aria-checked` is its pressed state). */
+.mk-pv4 .mk-jychip, .mk-contact .mk-jychip {
   height: 42px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--mk-hair); background: #fff;
   font-size: .95rem; font-weight: 600; color: var(--mk-body); cursor: pointer;
   transition: background .15s, color .15s, border-color .15s;
 }
-.mk-pv4 .mk-jychip:hover { background: #faf8f4; }
-.mk-pv4 .mk-jychip[aria-pressed="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: #fff; }
+.mk-pv4 .mk-jychip:hover, .mk-contact .mk-jychip:hover { background: #faf8f4; }
+.mk-pv4 .mk-jychip[aria-pressed="true"], .mk-contact .mk-jychip[aria-checked="true"] { background: var(--mk-navy); border-color: var(--mk-navy); color: #fff; }
 /* The agents: the stepper, "or", and "I don't know", which dims the stepper while it is chosen. */
 .mk-pv4 .mk-jyagents { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
 .mk-pv4 .mk-jyor { font-style: italic; color: rgba(28, 19, 15, .56); }
@@ -1699,7 +1681,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    loses at equal specificity. */
 @media (prefers-reduced-motion: reduce) {
   .mk-pv4 .mk-jyins, .mk-pv4 .mk-pv4how:not([hidden]) { animation: none; }
-  .mk-pv4 .mk-jyprog span, .mk-pv4 .mk-jyopt, .mk-pv4 .mk-jyopt::before, .mk-pv4 .mk-jychip { transition: none; }
+  .mk-pv4 .mk-jyprog span, .mk-pv4 .mk-jyopt, .mk-pv4 .mk-jyopt::before, .mk-pv4 .mk-jychip, .mk-contact .mk-jychip { transition: none; }
 }
 /* The ref stacks the answer cards at 1100px, as it always has; the result stacks at 900. */
 @media (max-width: 1100px) { .mk-pv4 .mk-jyopts { grid-template-columns: 1fr; } }
@@ -2226,10 +2208,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-size: 16.5px; line-height: 1.6; color: rgba(var(--mk-cream-rgb), .62);
   margin: 18px 0 0; max-width: 34ch;
 }
-/* The six states as the status band draws them — a signature rather than a control, so the row is
-   hidden from the accessibility tree and dimmed as a group. */
-.mk-footglyphs { display: flex; gap: 14px; margin: 22px 0 0; color: var(--mk-cream); opacity: .5; }
-.mk-footglyphs svg { width: 19px; height: 19px; display: block; flex: none; }
 /* No `!important` needed: brand.tsx forces h1, h2 and h3, and these are h4. */
 .mk-footcol h4 {
   font-family: "Special Elite", cursive; font-weight: 400; font-size: 15px;
@@ -2277,83 +2255,23 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-footmail { justify-self: start; }
 }
 
-/* ══════════════ Document shell (privacy, terms) ══════════════ */
-.mk-docplane { max-width: 860px; margin: 0 auto; padding: 44px 56px 10px; width: 100%; }
-
-/* The ribbon reads as a notice, not as body copy — the reader must not mistake a working draft for
-   finished policy. Same reasoning as the `.mk-legalnotice` it replaces. */
-.mk-draftribbon {
-  display: flex; align-items: flex-start; gap: 14px; margin-bottom: 20px;
-  padding: 14px 18px; border-radius: 12px;
-  background: var(--mk-parch); border: 1px solid var(--mk-bd);
-}
-.mk-drtag {
-  flex: none; font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mk-rust); font-weight: 500;
-  border: 1px solid rgba(162, 69, 42, 0.28); border-radius: 999px; padding: 5px 10px;
-}
-.mk-draftribbon p { font-size: 12.5px; font-weight: 300; line-height: 1.6; color: var(--mk-muted); }
-
-.mk-doccard {
-  background: var(--mk-card); border: 1px solid var(--mk-hair); border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 1px 2px rgba(58, 28, 20, 0.04), 0 5px 18px rgba(58, 28, 20, 0.06);
-}
-.mk-docband {
-  display: flex; align-items: center; gap: 16px;
-  padding: 26px 34px; background: var(--mk-parch); border-bottom: 1px solid var(--mk-hair);
-}
-.mk-docplate {
-  flex: none; width: 44px; height: 44px; border-radius: 12px;
-  display: grid; place-items: center;
-  background: var(--mk-centre); border: 1px solid var(--mk-bd);
-}
-.mk-docplate svg { width: 22px; height: 22px; fill: none; stroke: var(--mk-rust); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.mk-doceyebrow {
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-label);
-}
-.mk-doctitle {
-  font-family: "Playfair Display", Georgia, serif; font-size: 30px; font-weight: 500;
-  line-height: 1.15; color: var(--mk-head); margin-top: 6px;
-}
-.mk-docmeta {
-  margin-left: auto; align-self: flex-start; text-align: right;
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .12em;
-  text-transform: uppercase; color: var(--mk-label);
-}
-
-.mk-docbody { padding: 30px 34px 36px; }
-.mk-doclede {
-  font-family: "Playfair Display", Georgia, serif; font-size: 17px; font-style: italic;
-  font-weight: 400; line-height: 1.6; color: var(--mk-head);
-  padding-bottom: 22px; border-bottom: 1px solid var(--mk-hair);
-}
-.mk-docsection { margin-top: 28px; }
-.mk-seclabel {
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
-  color: var(--mk-label);
-}
-.mk-sectitle {
-  font-family: "Playfair Display", Georgia, serif; font-size: 19px; font-weight: 500;
-  color: var(--mk-head); margin-top: 4px;
-}
-.mk-docsection p { font-size: 14px; font-weight: 300; line-height: 1.75; color: var(--mk-body); margin-top: 10px; }
-.mk-docsection ul { list-style: none; margin: 12px 0 0; padding: 0; display: flex; flex-direction: column; gap: 9px; }
-.mk-docsection li {
-  position: relative; padding-left: 20px; font-size: 14px; font-weight: 300; line-height: 1.7; color: var(--mk-body);
-}
-.mk-docsection li::before {
-  content: ""; position: absolute; left: 2px; top: 10px; width: 6px; height: 6px; border-radius: 50%;
-  background: var(--mk-sage); border: 1px solid var(--mk-sage-t);
-}
-.mk-docsection strong { color: var(--mk-ink); font-weight: 500; }
+/* ══════════════ The legal pages' shared pieces ══════════════
+   The document card (`DocumentShell`) is deleted (12 Nov): Terms and Privacy both draw privacy.css's
+   layout. What stays here is the in-copy link, the working-draft ribbon and the pulled-out clause. */
 .mk-doclink {
   background: none; border: none; padding: 0; cursor: pointer; font: inherit;
   color: var(--mk-rust); text-decoration: underline; text-underline-offset: 2px;
 }
 .mk-doclink:hover { color: var(--mk-head); }
-.mk-docsection a { color: var(--mk-rust); text-decoration: underline; text-underline-offset: 2px; }
+/* The ribbon reads as a notice, not as body copy — the reader must not mistake a working draft for
+   finished terms. It heads the Terms' body, above the contents and the sections. */
+.mk-draftribbon {
+  display: flex; align-items: baseline; gap: 14px; margin: 0 0 36px;
+  padding: 14px 18px; border-radius: 14px;
+  background: var(--mk-parch); border: 1px solid var(--mk-bd);
+}
+.mk-drtag { flex: none; font-family: var(--mk-f-sans); font-size: 14px; font-weight: 600; color: var(--mk-rust); }
+.mk-draftribbon p { margin: 0; font-family: var(--mk-f-sans); font-size: 14px; line-height: 1.55; color: var(--mk-body); }
 
 /* A pulled-out clause — the sentence a reader should not be able to skim past. */
 .mk-callout {
@@ -2362,14 +2280,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 .mk-corule { flex: none; width: 3px; border-radius: 2px; background: var(--mk-rust); opacity: .55; }
 .mk-callout p { margin-top: 0; font-size: 13.5px; }
-
-@media (max-width: 760px) {
-  .mk-docplane { padding: 30px 22px 6px; }
-  .mk-docband { padding: 20px 22px; flex-wrap: wrap; }
-  .mk-doctitle { font-size: 25px; }
-  .mk-docmeta { margin-left: 0; width: 100%; text-align: left; }
-  .mk-docbody { padding: 24px 22px 30px; }
-}
 
 /* ══════════════ About (rebuilt 21 Oct; ref claude/about-page-v1.html) ══════════════
    Top to bottom: the aim in large type beside the fireside drawing, the skills gap on a navy band,
@@ -2488,10 +2398,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-aplate.mk-noteart { aspect-ratio: 1 / 1; max-width: 440px; justify-self: center; }
 .mk-noteart .mk-aplatewash { transform: rotate(-8deg) scale(1.1, 1.3); }
 .mk-notecol { min-width: 0; max-width: 560px; }
-.mk-notekick {
-  font-family: "JetBrains Mono", monospace; font-weight: 400; font-size: .72rem;
-  letter-spacing: .24em; text-transform: uppercase; color: var(--mk-muted); margin: 0 0 20px;
-}
 .mk-scope .mk-noteh {
   font-family: "Special Elite", cursive !important; font-weight: 400; font-size: 38px;
   line-height: 1.2; color: var(--mk-nearblack); margin: 0 0 6px;
@@ -2505,14 +2411,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   font-family: "Caveat", cursive; font-weight: 600; font-size: 46px; line-height: 1;
   color: var(--mk-rust); margin: 22px 0 0; transform: rotate(-4deg); transform-origin: left center;
 }
-/* The sign-off follows `IdentityLine`'s law without importing it: the hairline is its OWN element,
-   never a border on either label, so it holds its place whatever the two labels do. */
-.mk-signoff { display: flex; align-items: center; justify-content: flex-start; gap: 12px; margin-top: 14px; }
-.mk-signname { font-family: "Playfair Display", Georgia, serif; font-size: 18px; font-weight: 500; color: var(--mk-ink); }
-.mk-signrule { flex: 0 0 auto; width: 1px; height: 15px; background: var(--mk-bd); }
-.mk-signrole {
-  font-family: "JetBrains Mono", monospace; font-size: 8px; letter-spacing: .14em;
-  text-transform: uppercase; color: var(--mk-label);
+/* The role under the signature (public sweep v1): one line of secondary text, no rule beside it. */
+.mk-signoff.mk-signrole {
+  font-family: var(--mk-f-sans); font-size: 14px; color: var(--mk-ink); margin: 14px 0 0;
 }
 
 /* ── The way out: one quiet card, one action ── */
@@ -2570,20 +2471,14 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-sechead h2 { font-size: 23px; }
 }
 
-/* ══════════════ Contact — the address, three reasons, and a form card ══════════════
+/* ══════════════ Contact — the address, the founding route, and a form card (contact redesign v1) ══════════════
    ⚠️ ONE AUTHORITATIVE BLOCK, REWRITTEN RATHER THAN PATCHED (17 Sep). Every contact rule was
-   deleted and restated here. `.mk-wayplate`, `.mk-cleft h1` and the old `.mk-way strong`/`span`
-   pair went with the markup that rendered them.
-   ⚠️ THE PAGE IS ITS OWN CONTAINER, AND IT IS THE STANDARD ONE — 1180 wide with 56px gutters — so
-   the service line under the two columns shares their edges without restating them. */
+   deleted and restated here. The redesign (12 Nov) deleted the kicker, the email card, the three
+   ways with their tiles and the service line, and restyled the field labels in sentence case.
+   ⚠️ THE PAGE IS ITS OWN CONTAINER, AND IT IS THE STANDARD ONE — 1180 wide with 56px gutters. */
 .mk-contact { max-width: 1180px; margin: 0 auto; padding: 80px 56px 88px; }
 .mk-contactsplit {
   display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 64px; align-items: start;
-}
-/* The kicker is About's, value for value — the two company pages open the same way. */
-.mk-ckicker {
-  font-family: "JetBrains Mono", monospace; font-weight: 400; font-size: .72rem;
-  letter-spacing: .24em; text-transform: uppercase; color: var(--mk-muted); margin: 0 0 18px;
 }
 /* ⚠️ TWO CLASSES AND `!important`, HERE AND ON BOTH h2 RULES BELOW. brand.tsx forces every
    `h1:not(.wsh-title)`, `h2` and `h3` into the brand face with `!important`; the h1 selector is
@@ -2595,43 +2490,20 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* `ch` on the element that sets its own size, so the measure tracks the type it measures. */
 .mk-clede { font-size: 19px; line-height: 1.65; color: var(--mk-muted); margin: 20px 0 0; max-width: 42ch; }
 
-.mk-cmailcard {
-  display: flex; align-items: center; gap: 16px; margin: 32px 0 0;
-  background: #fff; border-radius: 14px; padding: 18px 22px;
-  /* White on paper white has no edge of its own; the vision cards' hairline gives it one. */
-  box-shadow: 0 0 0 1px rgba(28, 19, 15, .06);
-}
-.mk-cmaillabel {
-  margin: 0 0 3px; font-size: 12.5px; font-weight: 600; letter-spacing: .08em;
-  text-transform: uppercase; color: var(--mk-muted);
-}
 .mk-cmail {
   font-size: 19px; color: var(--mk-nearblack); overflow-wrap: anywhere;
   text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
 }
 .mk-cmail:hover { color: var(--mk-claim-accent); }
 
-/* The three reasons: a hairline above them, then one row each — the tile, then the words. */
-.mk-ways { margin: 36px 0 0; padding: 32px 0 0; border-top: 1px solid var(--mk-hair); display: grid; gap: 24px; }
-.mk-way { display: grid; grid-template-columns: 40px minmax(0, 1fr); column-gap: 24px; align-items: start; }
-.mk-way .mk-wayh {
+/* The address and the founding writers' route: a hairline above them, then two short headed paragraphs. */
+.mk-cways { margin: 32px 0 0; padding: 28px 0 0; border-top: 1px solid var(--mk-hair); }
+.mk-cways .mk-wayh + .mk-waybody + .mk-wayh { margin-top: 26px; }
+.mk-cways .mk-wayh {
   font-family: "Special Elite", cursive !important; font-weight: 400;
   font-size: 20px; line-height: 1.3; color: var(--mk-nearblack); margin: 0; text-wrap: balance;
 }
 .mk-waybody { font-size: 16.5px; line-height: 1.6; color: var(--mk-muted); margin: 6px 0 0; }
-
-/* The icon tiles. The glyphs are stroke-only and take their colour from the tile, per
-   `marketingMarks` — no hex lives in the component. */
-.mk-ctile { width: 40px; height: 40px; border-radius: 11px; display: grid; place-items: center; flex: none; }
-.mk-ctile svg { width: 20px; height: 20px; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-.mk-ctile--mail { width: 44px; height: 44px; border-radius: 12px; }
-.mk-ctile--mail svg { width: 22px; height: 22px; }
-.mk-ctile--rose { background: var(--mk-centre); }
-.mk-ctile--rose svg { stroke: var(--mk-claim-accent); }
-.mk-ctile--grey { background: var(--mk-tile-grey); }
-.mk-ctile--grey svg { stroke: var(--mk-nearblack); }
-.mk-ctile--slate { background: var(--mk-slate-pale); }
-.mk-ctile--slate svg { stroke: var(--mk-slate); }
 
 /* The Archivist — whole, at its own ratio, capped and left-aligned. */
 .mk-cart { display: block; width: 100%; max-width: 300px; height: auto; margin: 40px 0 0; }
@@ -2647,10 +2519,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 }
 .mk-csub { font-size: 16px; line-height: 1.55; color: var(--mk-muted); margin: 8px 0 0; }
 .mk-field { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; }
-.mk-field label {
-  font-size: 12.5px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase;
-  color: var(--mk-muted);
+.mk-field label, .mk-field .mk-flabel {
+  font-size: 14.5px; font-weight: 600; color: var(--mk-nearblack);
 }
+.mk-foptional { font-weight: 400; color: var(--mk-muted); }
 .mk-field input, .mk-field select, .mk-field textarea {
   font-family: inherit; font-size: 17px; color: var(--mk-ink);
   background: #fff; border: 1px solid var(--mk-bd); border-radius: 10px; padding: 13px 15px;
@@ -2682,6 +2554,12 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-cstate--bad { color: var(--mk-rust); }
 .mk-cfine { margin: 16px 0 0; font-size: 14px; line-height: 1.55; color: var(--mk-muted); }
 .mk-cfine .mk-doclink { font-size: inherit; }
+/* The topic's note is the legal pages' pulled-out clause, at the form's secondary size. */
+.mk-formcard .mk-callout { margin-top: 18px; }
+.mk-formcard .mk-callout p { font-size: 15px; line-height: 1.55; color: var(--mk-body); }
+/* The sent panel: the form card's heading and lines, then the tier's quiet button at full width. */
+.mk-cdone .mk-csub { margin-top: 12px; }
+.mk-cdone .mk-cagain { display: flex; justify-content: center; width: 100%; margin: 24px 0 0; min-height: 48px; font-size: 16px; }
 /* ⚠️ 17px ON PHONES TOO. mobileShell.css holds every text control at 16px below md with
    `!important` — a floor against iOS zooming on focus. 17 is above that floor, so the brief's size
    keeps the floor's purpose; the selector repeats its `:not()` chain plus this page's class
@@ -2691,11 +2569,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-field textarea,
   .mk-field select { font-size: 17px !important; }
 }
-
-/* Under both columns and above the footer; the hairline is the line's own edge. */
-.mk-svcline { margin: 64px 0 0; padding: 24px 0 0; border-top: 1px solid var(--mk-hair); }
-.mk-svcline p { margin: 0; font-size: 14px; line-height: 1.6; color: var(--mk-muted); }
-.mk-svcline strong { color: var(--mk-ink); font-weight: 600; }
 
 /* ⚠️ WIDENING-TO-NARROWING, AND THE ORDER IS THE CASCADE: all four blocks are equal specificity,
    and a media query confers none. The reduced-motion override sits after the rule it overrides
@@ -2710,7 +2583,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 @media (max-width: 560px) {
   .mk-contact .mk-ch1 { font-size: 33px; }
   .mk-formcard { padding: 24px 20px 22px; }
-  .mk-cmailcard { flex-direction: column; align-items: flex-start; gap: 12px; }
   .mk-cart { max-width: 220px; margin-left: auto; margin-right: auto; }
 }
 
@@ -2733,11 +2605,11 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
    reads `.mk-s3n`'s text, and contactPage.test reads the kicker on the desktop render.
    The rest stay and read as sentence case in the body face at a size a phone can read. */
 @media (max-width: 760px) {
-  .mk-s3n, .mk-ckicker, .mk-fweyebrow, .mk-doceyebrow { display: none; }
+  .mk-s3n { display: none; }
 
   /* Pills and kickers: 14px, weight 600. Each keeps its own colour. */
-  .mk-ccpill, .mk-claimkicker, .mk-notekick,
-  .mk-pvm .mk-pvtag, .mk-pvm .mk-pvmorelbl, .mk-pvm .mk-pvstepsh, .mk-fwcard .mk-fwk {
+  .mk-ccpill, .mk-claimkicker,
+  .mk-pvm .mk-pvtag, .mk-pvm .mk-pvmorelbl, .mk-pvm .mk-pvstepsh {
     font-family: var(--mk-f-sans); font-size: 14px; font-weight: 600;
     letter-spacing: 0; text-transform: none;
   }
@@ -2745,13 +2617,13 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   .mk-pvm .mk-pvmore { letter-spacing: 0; text-transform: none; }
 
   /* Field labels: 14.5px, weight 600, in ink. */
-  .mk-field label, .mk-cmaillabel {
+  .mk-field label, .mk-field .mk-flabel {
     font-family: var(--mk-f-sans); font-size: 14.5px; font-weight: 600;
     letter-spacing: 0; text-transform: none; color: var(--mk-nearblack);
   }
 
   /* Small print: 12.5px. */
-  .mk-drtag, .mk-docmeta, .mk-signrole, .mk-pvlayer .mk-pvjscount {
+  .mk-pvlayer .mk-pvjscount {
     font-family: var(--mk-f-sans); font-size: 12.5px; letter-spacing: 0; text-transform: none;
   }
 
@@ -2762,8 +2634,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 
   /* ⚠️ FOUR MORE THE BRIEF DID NOT LIST, FOUND BY THE CENSUS (P2/P3). Each only shows with a live
      founding count, which is why the review's shots never had them: the closing card's "38 places
-     left" (11px mono capitals), the join bar's count (11px), Pricing's counter line (9.9px capitals),
-     and the legal pages' section numbers (8px). Same treatment as the list above. */
+     left" (11px mono capitals), the join bar's count (11px), and Pricing's counter line (9.9px
+     capitals). (The legal pages' 8px section numbers went with the document card, 12 Nov.) */
   .mk-ccard .mk-places span, .mk-pvm .mk-pvcount .mk-fmmeta {
     font-family: var(--mk-f-sans); font-size: 13px; letter-spacing: 0; text-transform: none;
   }
@@ -2771,7 +2643,6 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* And Pricing's sticky founding bar ("38 places left · Founding writers"), mono capitals at .6rem,
      found by PP1's walk down the page (the bar only shows once the box has scrolled away). */
   .mk-pvlayer.mk-pvstick p { font-family: var(--mk-f-sans); font-size: 13px; letter-spacing: 0; text-transform: none; }
-  .mk-seclabel { font-family: var(--mk-f-sans); font-size: 12.5px; letter-spacing: 0; }
 }
 
 /* ── B1: the footer and Contact's button ──
@@ -2795,11 +2666,10 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 /* ── B2: Contact on phones (Nick's picks 7B, 8B, 9B) ──
    The opener is Pricing's card (see `ContactPage.tsx`): it wears `.mk-pvm`/`.mk-pvbox`/`.mk-pvart`/
    `.mk-pvh1`/`.mk-pvsub`, so every value up there is Pricing's own rule, not a copy. Only what differs
-   is stated: the email card's spacing inside it. (Pricing's 46px foot room under the card stays, as
-   the board draws it.) Below the card: "How can we help?" over the three ways as white cards, then
-   the form in Pricing's card dress — the box's radius, hairline and shadow, through the same tokens. */
+   is stated. (Pricing's 46px foot room under the card stays, as the board draws it.) Below the card:
+   the address and the founding writers' route, then the form in Pricing's card dress — the box's
+   radius, hairline and shadow, through the same tokens. */
 @media (max-width: 760px) {
-  .mk-pvm .mk-cmailcard { margin: 16px 0 18px; }
   .mk-contact { padding-top: 6px; }
   /* ⚠️ THE SHEET NO LONGER CLIPS HERE, SO THE GROUND MUST NOT REACH ITS CORNERS. `.mk-sheet:has(.mk-pvm)`
      is `overflow: visible` (the card rises out of it), and Contact's full-bleed ground layer then
@@ -2807,14 +2677,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      run of this block. On a phone `.mk-contact` IS the sheet's width, so the layer takes that width
      and the sheet's own 18px bottom radius instead of 100vw. */
   .mk-contact::before { left: 0; width: 100%; border-radius: 0 0 18px 18px; }
-  /* Two classes and `!important` on the family: brand.tsx forces every bare h2 with `!important`. */
-  .mk-contact .mk-waysh {
-    font-family: var(--mk-f-display) !important; font-weight: 400; font-size: 1.4rem; line-height: 1.25;
-    color: var(--mk-nearblack); margin: 6px 0 12px;
-  }
-  .mk-ways { gap: 12px; }
-  .mk-way { background: #fff; border-radius: 16px; padding: 18px; box-shadow: var(--mk-pv-perklift); }
-  .mk-way .mk-wayh { font-size: 1.08rem; }
+  .mk-cways .mk-wayh { font-size: 1.08rem; }
 
   .mk-formcard { border-radius: 20px; border: 1px solid var(--mk-pv-cardline); box-shadow: var(--mk-pv-cardlift); }
   .mk-formcard .mk-formh2 { font-size: 1.6rem; }

@@ -17,7 +17,7 @@
  */
 import { describe, it, expect } from "vitest";
 import {
-  FOUNDERS_DOCUMENT_TITLE, FOUNDERS_EYEBROW, FOUNDERS_H1, FOUNDERS_LEDE, FOUNDERS_ART_ALT,
+  FOUNDERS_DOCUMENT_TITLE, FOUNDERS_H1, FOUNDERS_LEDE, FOUNDERS_ART_ALT,
   FOUNDERS_DEAL, FOUNDERS_HONEST_LEAD, FOUNDERS_HONEST, FOUNDERS_SIGNOFF,
 } from "./foundersCopy";
 import { CopyRun } from "./CopyRuns";
@@ -27,9 +27,10 @@ const text = (runs: CopyRun[]) =>
   runs.map((r) => (typeof r === "string" ? r : "b" in r ? r.b : "em" in r ? r.em : r.link)).join("");
 
 describe("the hero", () => {
-  it("eyebrow and headline", () => {
+  /* RE-POINTED (public sweep v1): the eyebrow is gone; the headline stands alone. */
+  it("no eyebrow, and the headline", async () => {
     expect(FOUNDERS_DOCUMENT_TITLE).toBe("Founding Writers — QueryHawk");
-    expect(FOUNDERS_EYEBROW).toBe("For founding writers");
+    expect("FOUNDERS_EYEBROW" in (await import("./foundersCopy")), "the eyebrow's constant is gone").toBe(false);
     expect(FOUNDERS_H1).toBe("Help get things off the ground.");
   });
 
@@ -116,9 +117,10 @@ describe("the deal", () => {
     }
   });
 
-  it("kickers and headings, verbatim", () => {
-    /* REWRITTEN (26 Oct, landing on phones v1 C3): the interim terms, until the page is redesigned. */
-    expect(FOUNDERS_DEAL.map((c) => c.kicker)).toEqual(["The deal", "For your friends", "A direct line"]);
+  /* RE-POINTED (public sweep v1): the three labels above the cards are gone — each heading already
+     says what its label said — so no card carries a kicker. */
+  it("no kickers, and the headings verbatim", () => {
+    for (const card of FOUNDERS_DEAL) expect("kicker" in card, `${card.key} carries no kicker`).toBe(false);
     expect(FOUNDERS_DEAL.map((c) => c.heading)).toEqual([
       "A free campaign",
       "An Early Bird discount",

@@ -190,12 +190,10 @@ export function morePageFor(sections: readonly ShellSection[], hit: ShellHit | n
  * full sidebar and the aria-labels keep `ACCOUNT_ROUTES`' own names.
  */
 export const SETTINGS_RAIL_LABELS: Readonly<Record<string, string>> = {
-  profile: "Profile",
-  security: "Security",
+  profile: "You",
+  preferences: "Preferences",
+  emails: "Emails",
   plan: "Plan",
-  notifications: "Alerts",
-  preferences: "Settings",
-  tasks: "Tasks",
   data: "Your data",
 };
 

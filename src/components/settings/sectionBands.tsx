@@ -22,7 +22,7 @@
  * rail that shows it.
  */
 import React from "react";
-import { User as UserIcon, Shield, CreditCard, Bell, SlidersHorizontal, ListChecks, Database } from "lucide-react";
+import { User as UserIcon, CreditCard, Bell, SlidersHorizontal, Database } from "lucide-react";
 import { AccountSectionId } from "../../lib/accountRoutes";
 
 export interface SectionBand {
@@ -41,13 +41,11 @@ export interface SectionBand {
  * missing section is a worse fault than a plainer sentence.
  */
 export const SECTION_BANDS: Record<AccountSectionId, SectionBand> = {
-  profile: { name: "Profile", sub: "Your name and where you write from", Icon: UserIcon },
-  security: { name: "Sign-in & security", sub: "How you access your account", Icon: Shield },
-  plan: { name: "Plan & billing", sub: "What your plan includes", Icon: CreditCard },
-  notifications: { name: "Notifications", sub: "What QueryHawk emails you about", Icon: Bell },
-  preferences: { name: "Preferences", sub: "How your workspace behaves", Icon: SlidersHorizontal },
-  tasks: { name: "Tasks", sub: "What reaches your to-do list", Icon: ListChecks },
-  data: { name: "Your data", sub: "Export or remove what's stored", Icon: Database },
+  profile: { name: "You", sub: "Your name, where you write from and how you sign in", Icon: UserIcon },
+  preferences: { name: "Preferences", sub: "How long QueryHawk waits, and what reaches your list", Icon: SlidersHorizontal },
+  emails: { name: "Emails", sub: "What we email you about", Icon: Bell },
+  plan: { name: "Plan", sub: "What your plan includes", Icon: CreditCard },
+  data: { name: "Your data", sub: "Take a copy, bring more in, or remove the lot", Icon: Database },
 };
 
 /* ⚠️ NO INITIALS HELPER LIVES HERE. `initialsOf` in `lib/searchSuggestionsCore` is the app's one

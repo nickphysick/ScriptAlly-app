@@ -385,7 +385,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
      ⚠️ AND IT IS THE ONE CONDITION FOR ALL THREE CHANGES — the nav layer, the window's surface and
      the top bar's controls. Three booleans would be three things to get out of step; the class on
      `.ws-app` is what the stylesheet keys every one of them off. */
-  const settingsMode = isAccountPath(pathname);
+  /* non-workspace v1, Phase 4: the Plans page sits inside settings mode, with Plan lit in the rail */
+  const settingsMode = isAccountPath(pathname) || pathname === "/plans";
   /**
    * ⚠️ THE DASHBOARD IS A MODE TOO, AND IT IS THE SETTINGS MODE'S PATTERN RATHER THAN A SECOND ONE.
    * One condition, DERIVED from the route and never held as state — a boolean would have to be
@@ -421,7 +422,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
    * with `:has()`, is the cover itself: no signal travels upward, and there is nothing to forget to
    * send.
    */
-  const settingsSection: AccountSectionId | null = accountSectionForPath(pathname);
+  const settingsSection: AccountSectionId | null = accountSectionForPath(pathname) ?? (pathname === "/plans" ? "plan" : null);
 
   /* ⚠️ THE EXIT GOES TO THE DASHBOARD, NOT `history.back()`. Back is where you CAME from, which on
      a deep link into `/account/security` from an email is outside the app entirely — and on a

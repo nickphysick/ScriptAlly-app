@@ -2,166 +2,122 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Help Centre v1, Part B — the home: search first, the writer's page guides as cards, the six areas, the rail.
+ * The Help centre home (non-workspace v1, Phase 7; ref: design-refs/help-centre-v1.html, the Redesign view). Search
+ * answers in place of the page's middle; otherwise "For you right now" (the page guide you are part-way through) and
+ * "Browse by subject". The rail: the Status key, New in QueryHawk, Still stuck?.
+ *
+ * ⚠️ PUBLISHED ARTICLES ONLY. Every list here reads `HELP_ARTICLE_LIST`, which holds no drafts, so a subject with no
+ *    published article is not shown, and a "People often ask" chip that finds nothing is not offered.
+ * ⚠️ SIGNED OUT, THIS PAGE IS IN THE PUBLIC SHELL: nothing here that needs an account is drawn (the guide card, the
+ *    done ticks, "Everything that's changed"); "Tell us" and "Tell us what's missing" go to the Contact page instead
+ *    of the feedback pop-up, which only the app shell mounts.
+ * ⚠️ ONE FILLED BUTTON PER VIEW: "Carry on" on the home, "Tell us what's missing" on an empty search (which replaces
+ *    the home's middle, so the two never show together). Everything else is `.ph-secondary` or a link.
+ *
+ * Built from: `.ph-primary` / `.ph-secondary` (shell/pageHeader.css), `StatusDot` (via `StatusKeyList`), the Help
+ * Centre's own cards (helpCentre.css), the page-guide model (`guideCard`, `requestGuideOpen`).
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { WHATS_NEW, markWhatsNewSeen } from "../../lib/helpArticles";
+import { Search } from "lucide-react";
+import { markWhatsNewSeen } from "../../lib/helpArticles";
 import { GUIDE_PAGES, guideCard, type GuideCard } from "../../lib/pageChecklist";
-import { readLearned, readSkipped, requestGuideOpen, restartGuideLocal, setGuidesOff, useGuidesOff } from "../../lib/guideHub";
-import { lastRouteOutsideHelp } from "../../lib/routeTrail";
+import { readSkipped, requestGuideOpen, useGuidesOff } from "../../lib/guideHub";
 import { openFeedback } from "../../lib/feedbackStore";
-import { HELP_ARTICLE_LIST } from "../../content/help/articles";
-import { HELP_AREAS, readTime, type HelpArticle, type HelpAreaId } from "../../content/help/model";
-import { searchHelp, type HelpHit } from "../../content/help/search";
-import { StatusKeyList, askNick, longDate, shortDate, useGuideFacts } from "./helpShared";
+import { HELP_ARTICLE_LIST, articleBySlug } from "../../content/help/articles";
+import { HELP_AREAS, readTime, type HelpArticle } from "../../content/help/model";
+import { searchArticles } from "../../content/help/search";
+import { RAIL_KEY, StatusKeyList, askNick, useGuideFacts } from "./helpShared";
 
-const CHIPS: readonly { label: string; q: string }[] = [
-  { label: "Partial requested", q: "partial" },
-  { label: "Import a spreadsheet", q: "import" },
-  { label: "Pin the list", q: "pin" },
-  { label: "List health", q: "health" },
-  { label: "When to nudge", q: "nudge" },
+/** The ref's words, in its order. */
+export const HELP_HOME = {
+  h1: "How can we help?",
+  sub: "Short answers and step-by-step guides to QueryHawk.",
+  searchLabel: "Search the Help centre",
+  clear: "Clear search",
+  ask: "People often ask:",
+  forYou: "For you right now",
+  carryOn: "Carry on",
+  start: "Start",
+  browse: "Browse by subject",
+  hits: (n: number, q: string) => `${n} ${n === 1 ? "answer" : "answers"} for "${q}"`,
+  none: (q: string) => `Nothing for "${q}" yet`,
+  noneBody: "We haven't written that one. Tell us what you were looking for and we'll add it.",
+  noneAct: "Tell us what's missing",
+  keyH: "Status key",
+  keyLink: "Every ring explained",
+  newH: "New in QueryHawk",
+  newLink: "Everything that's changed",
+  stuckH: "Still stuck?",
+  stuckBody: "Tell us and a person will reply within two working days.",
+  stuckAct: "Tell us",
+} as const;
+
+/** "People often ask" — the ref's four. Each is offered only while it finds a published article. */
+export const HELP_CHIPS = ["Partial requested", "Import a spreadsheet", "When to nudge", "Founder's code"] as const;
+
+/** New in QueryHawk — as the ref shows it. */
+export const HELP_NEWS: readonly { title: string; line: string }[] = [
+  { title: "Agency names survive an import in capitals", line: "Fixed 6 Nov, after a founding writer's note" },
+  { title: "Query letters has its own page", line: "Added 12 Nov" },
 ];
 
-function HelpSearch({ inputRef }: { inputRef: React.RefObject<HTMLInputElement | null> }) {
-  const navigate = useNavigate();
-  const [q, setQ] = useState("");
-  const [open, setOpen] = useState(false);
-  const [k, setK] = useState(-1);
-  const boxRef = useRef<HTMLDivElement | null>(null);
-  const hits: HelpHit[] = useMemo(() => searchHelp(q), [q]);
-  const go = (h: HelpHit) => { setOpen(false); navigate(`/help/${h.slug}`); };
+const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
-  useEffect(() => {
-    const down = (e: PointerEvent) => { if (!boxRef.current?.contains(e.target as Node)) setOpen(false); };
-    window.addEventListener("pointerdown", down);
-    return () => window.removeEventListener("pointerdown", down);
-  }, []);
+/** The guide the writer is part-way through, else the first not started; null when none has a next step. */
+export function guideForNow(cards: readonly GuideCard[]): GuideCard | null {
+  const open = cards.filter((c) => !c.finished && c.next);
+  return open.find((c) => c.n > 0) ?? open[0] ?? null;
+}
 
-  const fill = (v: string) => { setQ(v); setK(-1); setOpen(true); inputRef.current?.focus(); };
-  const term = q.trim();
-  const mark = (title: string) => {
-    const i = title.toLowerCase().indexOf(term.toLowerCase());
-    if (!term || i < 0) return title;
-    return <>{title.slice(0, i)}<mark>{title.slice(i, i + term.length)}</mark>{title.slice(i + term.length)}</>;
-  };
-
+function ArticleLink({ a, done, onOpen }: { a: HelpArticle; done: boolean; onOpen: () => void }) {
   return (
-    <>
-      <div className="hc-search" ref={boxRef} data-hc="search">
-        <span className="hc-sglyph" aria-hidden="true">⌕</span>
-        <input ref={inputRef} type="search" value={q} aria-label="Search help" autoComplete="off" data-hc="search-input"
-          placeholder="Try 'partial requested' or 'import a spreadsheet'"
-          role="combobox" aria-expanded={open && !!term} aria-controls="hc-results"
-          aria-activedescendant={k >= 0 ? `hc-res-${k}` : undefined}
-          onChange={(e) => { setQ(e.target.value); setK(-1); setOpen(true); }}
-          onFocus={() => setOpen(true)}
-          onKeyDown={(e) => {
-            if (e.key === "Escape") { if (open && term) { e.stopPropagation(); setOpen(false); } return; }
-            if (!hits.length) return;
-            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
-              e.preventDefault(); setOpen(true);
-              setK((x) => (x + (e.key === "ArrowDown" ? 1 : -1) + hits.length) % hits.length);
-            } else if (e.key === "Enter") {
-              e.preventDefault(); go(hits[k >= 0 ? k : 0]);
-            }
-          }} />
-        <kbd className="hc-kbd" aria-hidden="true">/</kbd>
-        {open && term ? (
-          <div className="hc-results" id="hc-results" role="listbox" data-hc="results">
-            {hits.length ? hits.map((h, i) => (
-              <button key={`${h.slug}-${h.title}`} id={`hc-res-${i}`} type="button" role="option" aria-selected={i === k}
-                className={`hc-res${i === k ? " k" : ""}`} data-hc="result" onMouseEnter={() => setK(i)} onClick={() => go(h)}>
-                <small>{h.eyebrow}</small>{mark(h.title)}
-              </button>
-            )) : (
-              <div className="hc-nores" data-hc="no-results">
-                Nothing matches "{term}". Try a status name or a page name, or{" "}
-                <button type="button" className="hc-linkb" data-hc="ask-nick" onClick={() => { setOpen(false); askNick(term); }}><b>ask us</b></button>.
-              </div>
-            )}
-          </div>
-        ) : null}
-      </div>
-      <div className="hc-chips">
-        <span className="hc-chiplab">People often ask:</span>
-        {CHIPS.map((c) => <button key={c.q} type="button" className="hc-chip" data-hc="chip" onClick={() => fill(c.q)}>{c.label}</button>)}
-      </div>
-    </>
+    <button type="button" className="hc-alink" data-hc="area-article" data-slug={a.slug} onClick={onOpen}>
+      <span className="hc-tk" aria-hidden="true">{done ? "✓" : ""}</span>
+      <span className="hc-at">{a.title}</span>
+      <span className="hc-lt">{readTime(a)}</span>
+    </button>
   );
 }
 
-function GuideCardView({ c, cur, learned, onStart, onRestart }: {
-  c: GuideCard; cur: boolean; learned: string | null; onStart: () => void; onRestart: () => void;
+/** The page's middle while a search is typed: the answers, or the ref's empty state with its one filled button. */
+export function SearchAnswers({ term, hits, onOpen, onTellMissing }: {
+  term: string; hits: readonly HelpArticle[]; onOpen: (slug: string) => void; onTellMissing: () => void;
 }) {
   return (
-    <div className={`hc-gcard${c.finished ? " fin" : ""}${cur ? " cur" : ""}`} data-hc="guide-card" data-page={c.page}
-      data-n={c.n} data-total={c.total}>
-      {cur ? <span className="hc-here" data-hc="here">YOU WERE HERE</span> : null}
-      <div className="hc-gtop">
-        <div><div className="hc-eyb hc-eyb--mute">{c.group}</div><h3 className="hc-gname">{c.page}</h3></div>
-        {c.finished ? <span className="hc-stamp">Learned</span> : <span className="hc-gn" data-hc="guide-n">{c.n}/{c.total}</span>}
-      </div>
-      <div className="hc-gsegs" aria-hidden="true">{c.segs.map((on, i) => <i key={i} className={on ? "on" : undefined} />)}</div>
-      <p className="hc-gnext">
-        {c.finished
-          ? <>{learned ? `Learned ${longDate(learned)}.` : "Learned."} Everything on this page is yours.</>
-          : c.n === 0
-            ? <>Starts with: <b>{c.first}</b></>
-            : <>Up next: <b>{c.next ?? c.first}</b></>}
-      </p>
-      <div className="hc-gacts">
-        {c.finished ? null : (
-          <button type="button" className="hc-bnav" data-hc="guide-start" onClick={onStart}>
-            {c.n ? "Resume" : "Start"} on {c.page}
-          </button>
-        )}
-        {c.finished || c.n > 0
-          ? <button type="button" className="hc-bghost" data-hc="guide-restart" onClick={onRestart}>Restart</button>
-          : null}
-      </div>
-    </div>
-  );
-}
-
-function AreaCard({ id, articleDone }: { id: HelpAreaId; articleDone: (a: HelpArticle) => boolean }) {
-  const navigate = useNavigate();
-  const area = HELP_AREAS.find((a) => a.id === id)!;
-  const list = HELP_ARTICLE_LIST.filter((a) => a.area === id);
-  const [all, setAll] = useState(false);
-  const shown = all ? list : list.slice(0, 5);
-  return (
-    <div className="hc-area" data-hc="area" data-area={id}>
-      <div className="hc-eyb hc-eyb--mute">{area.eyebrow}</div>
-      <h3 className="hc-ah">{area.heading}</h3>
-      <ul>
-        {shown.map((a) => (
-          <li key={a.slug}>
-            <button type="button" data-hc="area-article" data-slug={a.slug} onClick={() => navigate(`/help/${a.slug}`)}>
-              <span className="hc-tk">{articleDone(a) ? "✓" : ""}</span>
-              <span className="hc-at">{a.title}</span>
-              <span className="hc-lt">{readTime(a)}</span>
+    <>
+      <h2 className="hc-h2 hc-h2" aria-live="polite" data-hc="search-head">{hits.length ? HELP_HOME.hits(hits.length, term) : HELP_HOME.none(term)}</h2>
+      {hits.length ? (
+        <div className="hc-hits" data-hc="results">
+          {hits.map((a) => (
+            <button key={a.slug} type="button" className="hc-hit" data-hc="result" data-slug={a.slug} onClick={() => onOpen(a.slug)}>
+              <b>{a.title}</b>
+              <span>{a.lede}</span>
+              <small>{HELP_AREAS.find((x) => x.id === a.area)?.name} · {readTime(a)}</small>
             </button>
-          </li>
-        ))}
-      </ul>
-      {list.length > 5 && !all
-        ? <button type="button" className="hc-all" data-hc="area-all" onClick={() => setAll(true)}>All {list.length} articles</button>
-        : null}
-    </div>
+          ))}
+        </div>
+      ) : (
+        <div className="hc-rcard hc-none" data-hc="no-results">
+          <p>{HELP_HOME.noneBody}</p>
+          <button type="button" className="ph-primary" data-hc="tell-missing" onClick={onTellMissing}>{HELP_HOME.noneAct}</button>
+        </div>
+      )}
+    </>
   );
 }
 
 export function HelpHome() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { db, user, counts, articleDone } = useGuideFacts();
+  const { user, counts, articleDone } = useGuideFacts();
+  const signedIn = !!user;
   const off = useGuidesOff();
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const newsRef = useRef<HTMLDivElement | null>(null);
-  const [said, setSaid] = useState("");
-  const [, bump] = useState(0);
+  const newsRef = useRef<HTMLElement | null>(null);
+  const [q, setQ] = useState("");
+  const term = q.trim();
+  const hits = useMemo(() => searchArticles(term), [term]);
 
   /* "/" anywhere on the page focuses the search (not while typing somewhere else) */
   useEffect(() => {
@@ -176,8 +132,7 @@ export function HelpHome() {
     return () => window.removeEventListener("keydown", key);
   }, []);
 
-  /* /help#whats-new: scroll to it; /help#search: focus the search. What's new is seen when it is opened by its link or
-     scrolled into view. */
+  /* /help#whats-new (the Help menu, the dashboard footer): scroll to New in QueryHawk; /help#search: focus the search */
   useEffect(() => {
     if (location.hash === "#whats-new") {
       markWhatsNewSeen();
@@ -186,83 +141,104 @@ export function HelpHome() {
       requestAnimationFrame(() => inputRef.current?.focus());
     }
   }, [location.hash]);
-  useEffect(() => {
-    const el = newsRef.current;
-    if (!el || typeof IntersectionObserver === "undefined") return undefined;
-    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { markWhatsNewSeen(); io.disconnect(); } });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
 
-  const from = (location.state as { from?: string } | null)?.from ?? lastRouteOutsideHelp();
-  const cards = GUIDE_PAGES.map((g) => ({ g, c: guideCard(g, user, counts, readSkipped(g.page)) }));
-  const steps = cards.reduce((t, x) => t + x.c.n, 0);
-  const total = cards.reduce((t, x) => t + x.c.total, 0);
-  const learned = cards.filter((x) => x.c.finished).length;
+  const open = (slug: string) => navigate(`/help/${slug}`);
+  const done = (a: HelpArticle) => signedIn && articleDone(a);
+  const chips = HELP_CHIPS.filter((c) => searchArticles(c).length > 0);
+  const guide = signedIn && !off ? guideForNow(GUIDE_PAGES.map((g) => guideCard(g, user, counts, readSkipped(g.page)))) : null;
+  const areas = HELP_AREAS.map((ar) => ({ ar, list: HELP_ARTICLE_LIST.filter((a) => a.area === ar.id) })).filter((x) => x.list.length > 0);
+  const tellUs = () => (signedIn ? openFeedback() : navigate("/contact"));
+  const tellMissing = () => (signedIn ? askNick(term) : navigate("/contact"));
 
-  const start = (page: string, route: string) => { navigate(route); requestGuideOpen(page); };
-  const restart = (page: string) => {
-    const g = GUIDE_PAGES.find((x) => x.page === page)!;
-    restartGuideLocal(page);
-    void db.updateUserPaths(g.restart).catch(() => { /* the next visit still shows it (the local flag) */ });
-    setSaid(""); window.setTimeout(() => setSaid(`${page} guide restarted`), 30);
-    bump((n) => n + 1);
-  };
+  const main = term ? (
+    <SearchAnswers term={term} hits={hits} onOpen={open} onTellMissing={tellMissing} />
+  ) : (
+    <>
+      {guide ? (
+        <>
+          <h2 className="hc-h2 hc-h2">{HELP_HOME.forYou}</h2>
+          <div className="hc-now">
+            <div className="hc-rcard hc-nowc" data-hc="guide-card" data-page={guide.page} data-n={guide.n} data-total={guide.total}>
+              <b>{guide.page} guide: {guide.n} of {guide.total} done</b>
+              <div className="hc-gsegs" aria-hidden="true">{guide.segs.map((on, i) => <i key={i} className={on ? "on" : undefined} />)}</div>
+              <span>Up next: {lowerFirst(guide.next ?? guide.first)}.</span>
+              <button type="button" className="ph-primary" data-hc="guide-start"
+                onClick={() => { navigate(guide.route); requestGuideOpen(guide.page); }}>
+                {guide.n ? HELP_HOME.carryOn : HELP_HOME.start}
+              </button>
+            </div>
+          </div>
+        </>
+      ) : null}
+      <h2 className="hc-h2 hc-h2">{HELP_HOME.browse}</h2>
+      <div className="hc-areas">
+        {areas.map(({ ar, list }) => (
+          <section key={ar.id} className="hc-area" data-hc="area" data-area={ar.id}>
+            <h3 className="hc-ah hc-ah">{ar.name}</h3>
+            <p className="hc-asub">{ar.heading}</p>
+            <ul>{list.slice(0, 4).map((a) => <li key={a.slug}><ArticleLink a={a} done={done(a)} onOpen={() => open(a.slug)} /></li>)}</ul>
+            {list.length > 4
+              ? <button type="button" className="hc-all" data-hc="area-all" onClick={() => open(list[0].slug)}>All {list.length} in {ar.name}</button>
+              : null}
+          </section>
+        ))}
+      </div>
+    </>
+  );
 
   return (
     <div className="hc" data-hc="home">
-      <div className="hc-top">
+      <header className="hc-top">
         <div>
-          <div className="hc-eyb">Help Centre</div>
-          <h1 className="hc-h1">How can we help?</h1>
-          <p className="hc-sub">Guides for every page, short answers, and a key to every status. Search, or pick up a guide where you left it.</p>
-          <HelpSearch inputRef={inputRef} />
+          <h1 className="hc-h1 hc-h1">{HELP_HOME.h1}</h1>
+          <p className="hc-sub">{HELP_HOME.sub}</p>
+          <div className="hc-search" data-hc="search">
+            <Search className="hc-sglyph" size={18} aria-hidden="true" />
+            <input ref={inputRef} type="text" value={q} aria-label={HELP_HOME.searchLabel} placeholder={HELP_HOME.searchLabel}
+              autoComplete="off" data-hc="search-input"
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Escape" && q) { e.stopPropagation(); setQ(""); } }} />
+            {q ? (
+              <button type="button" className="hc-clear" aria-label={HELP_HOME.clear} data-hc="clear"
+                onClick={() => { setQ(""); inputRef.current?.focus(); }}>×</button>
+            ) : null}
+          </div>
+          {chips.length ? (
+            <div className="hc-chips">
+              <span className="hc-chiplab">{HELP_HOME.ask}</span>
+              {chips.map((c) => <button key={c} type="button" className="hc-chip" data-hc="chip" onClick={() => { setQ(c); inputRef.current?.focus(); }}>{c}</button>)}
+            </div>
+          ) : null}
         </div>
-        <div className="hc-artslot" aria-hidden="true">Illustration slot<br />The Archivist with a lamp, reading the manual</div>
-      </div>
-
-      <div className="hc-sech">
-        <h2 className="hc-h2">Your guides</h2>
-        <span className="hc-meta" data-hc="guides-meta"><b>{steps}/{total}</b> steps · {learned} of {cards.length} pages learned</span>
-        <span className="hc-sp" />
-        <button type="button" className="hc-linkb" data-hc="guides-off" onClick={() => setGuidesOff(!off)}>
-          {off ? "Turn page guides back on" : "Turn off page guides"}
-        </button>
-      </div>
-      <div className="hc-guides" data-hc="guides">
-        {cards.map(({ g, c }) => (
-          <GuideCardView key={g.page} c={c} cur={!!from && from === g.route} learned={readLearned(g.page)}
-            onStart={() => start(g.page, g.route)} onRestart={() => restart(g.page)} />
-        ))}
-      </div>
+        <img className="hc-artimg" src="/images/contact-list-archivist.webp" alt="" />
+      </header>
 
       <div className="hc-cols">
-        <div>
-          <div className="hc-sech"><h2 className="hc-h2">Browse by part of the app</h2></div>
-          <div className="hc-areas">
-            {HELP_AREAS.map((a) => <AreaCard key={a.id} id={a.id} articleDone={articleDone} />)}
-          </div>
-        </div>
+        <div className="hc-main" data-hc="main">{main}</div>
         <aside className="hc-rail">
-          <div className="hc-rcard">
-            <h3 className="hc-rh">Status key</h3>
-            <StatusKeyList />
-          </div>
-          <div className="hc-rcard" id="whats-new" ref={newsRef} data-hc="whats-new">
-            <h3 className="hc-rh">What's new</h3>
+          <section className="hc-rcard">
+            <h3 className="hc-rh hc-rh">{HELP_HOME.keyH}</h3>
+            <StatusKeyList rows={RAIL_KEY} />
+            {articleBySlug("status-key")
+              ? <p className="hc-rlink"><button type="button" className="hc-linkb" onClick={() => open("status-key")}>{HELP_HOME.keyLink}</button></p>
+              : null}
+          </section>
+          <section className="hc-rcard" id="whats-new" ref={newsRef} data-hc="whats-new">
+            <h3 className="hc-rh hc-rh">{HELP_HOME.newH}</h3>
             <ul className="hc-new">
-              {WHATS_NEW.slice(0, 3).map((e) => <li key={e.id}><span className="hc-d">{shortDate(e.date)}</span>{e.title}</li>)}
+              {HELP_NEWS.map((n) => <li key={n.title}>{n.title}<small>{n.line}</small></li>)}
             </ul>
-          </div>
-          <div className="hc-rcard ink" data-hc="stuck">
-            <h3 className="hc-rh">Still stuck?</h3>
-            <p>QueryHawk is in beta and every message reaches the founder. Replies usually within a day.</p>
-            <button type="button" className="hc-bw" data-hc="give-feedback" onClick={() => openFeedback()}>Give feedback</button>
-          </div>
+            {signedIn
+              ? <p className="hc-rlink"><button type="button" className="hc-linkb" data-hc="news-all" onClick={() => navigate("/your-notes")}>{HELP_HOME.newLink}</button></p>
+              : null}
+          </section>
+          <section className="hc-rcard" data-hc="stuck">
+            <h3 className="hc-rh hc-rh">{HELP_HOME.stuckH}</h3>
+            <p>{HELP_HOME.stuckBody}</p>
+            <button type="button" className="ph-secondary" data-hc="give-feedback" onClick={tellUs}>{HELP_HOME.stuckAct}</button>
+          </section>
         </aside>
       </div>
-      <div className="hc-live" aria-live="polite">{said}</div>
     </div>
   );
 }
-
