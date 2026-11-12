@@ -57,8 +57,14 @@ export const TodayV4: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
   const first = useMemo(() => firstSentMs(rows), [rows]);
   const streak = useMemo(() => streakLine(rows, currentUser?.queryingGoals, now), [rows, currentUser?.queryingGoals, now]);
   const c = v.counts;
-  const tasks = v.ordered;
-  const state = todayState(v.qs.length, tasks.length, !!did);
+  /* a DEV-ONLY review aid (PA4-4): `window.__SA_PA4_TODAY = { tasks: 0 | queries: 0 | healthPct | did }` feeds the same
+     derivations emptied inputs, so the measurement can render each of Today's states. The MODE test is at the call site,
+     so a production build folds it away. */
+  const aid: { tasks?: number; queries?: number; healthPct?: number; did?: boolean } | null = import.meta.env.MODE !== "production" && typeof window !== "undefined"
+    ? ((window as unknown as { __SA_PA4_TODAY?: { tasks?: number; queries?: number; healthPct?: number; did?: boolean } }).__SA_PA4_TODAY ?? null) : null;
+  const tasks = aid?.tasks === 0 ? [] : v.ordered;
+  const shownDid: Did | null = did ?? (aid?.did && v.ordered[0] ? { head: "Done", next: v.ordered[1]?.key ?? null, queryId: v.ordered[0].query?.id ?? null, done: 1 } : null);
+  const state = todayState(aid?.queries === 0 ? 0 : v.qs.length, tasks.length, !!shownDid);
 
   usePhoneBandExtra("/dashboard", c.you > 0 ? <span className="pa4-pill" data-pa4="mini-pill">{c.you} need you</span> : null, [c.you]);
 
@@ -131,7 +137,8 @@ export const TodayV4: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
         <Link4 rule pa4="see-all" onClick={() => openV3({ type: "tasks" })}>See all {tasks.length}</Link4>
       </LapCard>
     );
-  } else if (state === "after" && did) {
+  } else if (state === "after" && shownDid) {
+    const did = shownDid;
     const nextT = did.next ? tasks.find((t) => t.key === did.next) ?? null : tasks[0] ?? null;
     const total = did.done + tasks.length;
     const q = did.queryId ? v.byId.get(did.queryId) ?? null : null;
@@ -203,7 +210,7 @@ export const TodayV4: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
         <div className="pa4-inset">
           <RingCard qs={v.qs} c={c} next={nr} onCourt={(k) => navigate(`/queries?court=${k}`)} />
           {closest.length ? <ClosestCard rows={closest} total={live.length} now={now} onAll={() => navigate("/queries?view=birds")} /> : null}
-          {health && health.pct < 100 ? (
+          {health && (aid?.healthPct ?? health.pct) < 100 ? (
             <div className="pa4-card" style={{ marginTop: 16, padding: "24px 24px 8px" }} data-pa4="health" data-pct={health.pct}>
               <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
                 <img src={CAST.archivist} alt="" style={{ width: 48, height: 48, borderRadius: "50%", objectFit: "cover", background: "var(--pa-fill)" }} />

@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "PA4-4",
+  "where": "everyday: tasks on the board (population)",
+  "ok": true,
+  "detail": "tasks 103"
+ },
+ {
+  "lock": "PA4-4",
+  "where": "everyday",
+  "ok": true,
+  "detail": "{\"state\":\"everyday\",\"tasks\":103,\"upNext\":true,\"stamp\":false,\"cont\":false,\"whos\":false,\"first\":false,\"ring\":true,\"health\":true}"
+ },
+ {
+  "lock": "PA4-4",
+  "where": "List health shows below 100% (population)",
+  "ok": true,
+  "detail": "{\"state\":\"everyday\",\"tasks\":103,\"upNext\":true,\"stamp\":false,\"cont\":false,\"whos\":false,\"first\":false,\"ring\":true,\"health\":true}"
+ },
+ {
+  "lock": "PA4-4",
+  "where": "List health absent at 100%",
+  "ok": true,
+  "detail": "{\"state\":\"everyday\",\"tasks\":103,\"upNext\":true,\"stamp\":false,\"cont\":false,\"whos\":false,\"first\":false,\"ring\":true,\"health\":false}"
+ },
+ {
+  "lock": "PA4-4",
+  "where": "straight after a task",
+  "ok": true,
+  "detail": "{\"state\":\"after\",\"tasks\":103,\"upNext\":false,\"stamp\":true,\"cont\":true,\"whos\":false,\"first\":false,\"ring\":true,\"health\":true}"
+ },
+ {
+  "lock": "PA4-4",
+  "where": "a quiet day: no task card",
+  "ok": true,
+  "detail": "{\"state\":\"quiet\",\"tasks\":0,\"upNext\":false,\"stamp\":false,\"cont\":false,\"whos\":true,\"first\":false,\"ring\":true,\"health\":true}"
+ },
+ {
+  "lock": "PA4-4",
+  "where": "day one",
+  "ok": true,
+  "detail": "{\"state\":\"dayone\",\"tasks\":103,\"upNext\":false,\"stamp\":false,\"cont\":false,\"whos\":false,\"first\":true,\"ring\":false,\"health\":false}"
+ },
+ {
+  "lock": "PA4-10",
+  "where": "Today (stamp, ring)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-10",
+  "where": "Birds-eye (the pulsing ring)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-10",
+  "where": "Birds-eye has rings to stop (population)",
+  "ok": true,
+  "detail": "42 rings"
+ },
+ {
+  "lock": "PA4-10",
+  "where": "the query page",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-10",
+  "where": "the quick log",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-10",
+  "where": "without the setting the ring still pulses (control)",
+  "ok": true,
+  "detail": "42 animations"
+ }
+]

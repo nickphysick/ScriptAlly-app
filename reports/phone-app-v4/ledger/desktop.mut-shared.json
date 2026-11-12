@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "PA4-11",
+  "where": "dashboard DOM",
+  "ok": true,
+  "detail": "483718 chars, identical"
+ },
+ {
+  "lock": "PA4-11",
+  "where": "dashboard pixels",
+  "ok": false,
+  "detail": "129416 of 1484784 pixels differ"
+ },
+ {
+  "lock": "PA4-11",
+  "where": "queries DOM",
+  "ok": true,
+  "detail": "481166 chars, identical"
+ },
+ {
+  "lock": "PA4-11",
+  "where": "queries pixels",
+  "ok": false,
+  "detail": "63793 of 1484784 pixels differ"
+ },
+ {
+  "lock": "PA4-11",
+  "where": "agents DOM",
+  "ok": true,
+  "detail": "481801 chars, identical"
+ },
+ {
+  "lock": "PA4-11",
+  "where": "agents pixels",
+  "ok": false,
+  "detail": "73208 of 1484784 pixels differ"
+ },
+ {
+  "lock": "PA4-11",
+  "where": "todo DOM",
+  "ok": true,
+  "detail": "478882 chars, identical"
+ },
+ {
+  "lock": "PA4-11",
+  "where": "todo pixels",
+  "ok": false,
+  "detail": "74817 of 1484784 pixels differ"
+ }
+]

@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "PA4-5",
+  "where": "list shows rows, no bars",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-5",
+  "where": "the switch swaps to bars",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-5",
+  "where": "groups (population 3)",
+  "ok": true,
+  "detail": "you:23 agent:10 quiet:37"
+ },
+ {
+  "lock": "PA4-5",
+  "where": "How close orders you closest first (23 bars)",
+  "ok": true,
+  "detail": "1.86 1.54 1.32 1.32 1.29 1.23 1.22 1.20 1.01 – – – – – – – – – – – – – –"
+ },
+ {
+  "lock": "PA4-5",
+  "where": "you: every bar past its date has the ring (9 past)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-5",
+  "where": "How close orders agent closest first (10 bars)",
+  "ok": true,
+  "detail": "0.98 0.96 0.93 0.93 0.89 0.32 – – – –"
+ },
+ {
+  "lock": "PA4-5",
+  "where": "agent: every bar past its date has the ring (0 past)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-5",
+  "where": "How close orders quiet closest first (37 bars)",
+  "ok": true,
+  "detail": "Infinity Infinity Infinity Infinity 10.77 8.69 7.41 6.01 5.55 5.15 4.19 4.01 3.77 3.32 3.23 3.22 2.93 2.63 2.09 1.97 1.95 1.93 1.92 1.92 1.89 1.80 1.79 1.70 1.70 1.47 1.46 1.38 1.35 0.77 0.76 – –"
+ },
+ {
+  "lock": "PA4-5",
+  "where": "quiet: every bar past its date has the ring (33 past)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-5",
+  "where": "some query is past its date (population)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-5",
+  "where": "Today's preview shows three bars",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "PA4-5",
+  "where": "the preview opens the Birds-eye view",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries?view=birds"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "Today: full screen with a back arrow",
+  "ok": true,
+  "detail": "{\"w\":390,\"h\":844,\"top\":0,\"back\":true,\"state\":\"quiet\",\"name\":\"Bea Halloran\",\"label\":\"Close this query\"}"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "Today: the button is the next step (quiet)",
+  "ok": true,
+  "detail": "Close this query vs Close this query"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "Queries: full screen with a back arrow",
+  "ok": true,
+  "detail": "{\"w\":390,\"h\":844,\"top\":0,\"back\":true,\"state\":\"agent\",\"name\":\"Wren Calloway\",\"label\":\"Log Wren’s reply\"}"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "Queries: the button is the next step (agent)",
+  "ok": true,
+  "detail": "Log Wren’s reply vs Log Wren’s reply"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "Queries (with you): full screen with a back arrow",
+  "ok": true,
+  "detail": "{\"w\":390,\"h\":844,\"top\":0,\"back\":true,\"state\":\"offer\",\"name\":\"Tom Ellery\",\"label\":\"Record your answer\"}"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "Queries (with you): the button is the next step (offer)",
+  "ok": true,
+  "detail": "Record your answer vs Record your answer"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "Birds-eye: full screen with a back arrow",
+  "ok": true,
+  "detail": "{\"w\":390,\"h\":844,\"top\":0,\"back\":true,\"state\":\"materials\",\"name\":\"Rachel Lin\",\"label\":\"Mark partial sent\"}"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "Birds-eye: the button is the next step (materials)",
+  "ok": true,
+  "detail": "Mark partial sent vs Mark (partial|full|revision) sent"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "Agents: full screen with a back arrow",
+  "ok": true,
+  "detail": "{\"w\":390,\"h\":844,\"top\":0,\"back\":true,\"state\":\"agent\",\"name\":\"David Marsh\",\"label\":\"Log David’s reply\"}"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "Agents: the button is the next step (agent)",
+  "ok": true,
+  "detail": "Log David’s reply vs Log David’s reply"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "search: full screen with a back arrow",
+  "ok": true,
+  "detail": "{\"w\":390,\"h\":844,\"top\":0,\"back\":true,\"state\":\"closed\",\"name\":\"Tom Ellery\",\"label\":null}"
+ },
+ {
+  "lock": "PA4-6",
+  "where": "search: the button is the next step (closed)",
+  "ok": true,
+  "detail": "null vs null"
+ }
+]

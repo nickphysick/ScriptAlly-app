@@ -74,7 +74,7 @@ export const QueryPageV4: React.FC<{ v: V3Query; nowMs: number; quietWeeks: numb
   const weekNow = waiting ? Math.max(1, Math.min(weeksAll, Math.ceil((nowMs - (start as number)) / WEEK))) : 0;
 
   return (
-    <div className="pa4-page pa4" role="dialog" aria-modal="true" aria-label={v.row.agentName} data-pa4="qpage" data-pa3="qsheet" data-id={v.id} data-court={v.court} data-fresh={fresh ? "1" : "0"}>
+    <div className="pa4-page pa4" role="dialog" aria-modal="true" aria-label={v.row.agentName} data-pa4="qpage" data-pa3="qsheet" data-id={v.id} data-court={v.court} data-state={v.state} data-fresh={fresh ? "1" : "0"}>
       <div className="pa4-topbar" data-pa4="qtop">
         <IconBtn label="Back" n="back" pa4="back" onClick={closeV3} />
         <Seal name={v.row.agentName} size={40} />
