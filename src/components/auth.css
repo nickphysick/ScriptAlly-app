@@ -1,0 +1,58 @@
+/* Non-workspace v1, Phase 1 — getting in (getting-in-v1.html). Scoped to the account card so the set-up screens'
+   fields are unchanged. The ref's fixes: no tiny mono capitals over the fields (the phone's sans label, at every
+   width), and a boxed field like every other input in the app instead of a dashed typewriter rule. */
+.sf .sf-authcard .sf-lab {
+  font-family: var(--font-sans); font-size: 15px; font-weight: 600; line-height: 1.35;
+  letter-spacing: 0; text-transform: none; color: var(--ink-on-light);
+}
+.sf .sf-authcard .sf-in {
+  font-family: var(--font-sans); font-size: 16px; line-height: 1.3;
+  border: 1px solid var(--sf-ink34); border-radius: 8px; background: #fff;
+  padding: 11px 12px; margin-top: 6px; min-height: 44px;
+}
+.sf .sf-authcard .sf-in:focus { border: 1px solid var(--sp-anthracite); box-shadow: 0 0 0 2px rgba(42, 58, 82, .18); }
+.sf .sf-authcard .sf-field.is-bad .sf-in { border: 1px solid var(--sf-rust); }
+.sf .sf-authcard .sf-inwrap--eye .sf-in { padding-right: 44px; }
+.sf .sf-authcard .sf-eye { right: 6px; top: calc(50% + 3px); width: 32px; height: 32px; }
+.sf .sf-authcard .sf-or { font-family: var(--font-sans); font-size: 14px; letter-spacing: 0; text-transform: none; }
+.sf .sf-authcard .au-code { font-family: var(--sp-mono); letter-spacing: .06em; }
+.sf .sf-authcard .sf-err { display: flex; flex-wrap: wrap; gap: 0 4px; }
+
+.au-hint { font-weight: 400; font-size: 14px; color: var(--sf-ink58); }
+.au-hint--below { display: block; margin: 6px 0 0; }
+.au-gap { margin-top: 22px; }
+
+.au-codeok {
+  display: flex; align-items: center; gap: 8px; margin: 14px 0 0; padding: 10px 12px; border-radius: 8px;
+  background: rgba(42, 58, 82, .07); font-size: 15px; color: var(--ink-on-light);
+}
+.au-codeok svg, .au-gets svg { width: 18px; height: 18px; flex: none; color: var(--sp-anthracite); }
+
+.au-locked {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 6px 0 0; padding: 11px 12px;
+  border: 1px dashed var(--sf-ink34); border-radius: 8px; font-size: 16px;
+}
+.au-locked b { font-weight: 600; overflow-wrap: anywhere; }
+
+.au-gets { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 10px; }
+.au-gets li { display: flex; gap: 10px; align-items: flex-start; font-size: 16px; line-height: 1.4; }
+.sf-offer .au-gets svg { color: currentColor; margin-top: 2px; }
+
+.au-done { text-align: left; }
+.au-big {
+  display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(42, 58, 82, .1); color: var(--sp-anthracite); margin-bottom: 14px;
+}
+.au-big svg { width: 22px; height: 22px; }
+.au-done .sf-btn { margin-top: 18px; }
+
+.au-solowrap { display: flex; justify-content: center; padding: 24px 0; }
+.au-solowrap .sf-authcard { max-width: 560px; width: 100%; }
+.au-solo { display: grid; grid-template-columns: 96px 1fr; gap: 22px; align-items: start; }
+.au-port { width: 96px; height: auto; display: block; }
+.au-port--offer { width: 140px; margin-top: 24px; }
+.au-acts { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+@media (max-width: 560px) {
+  .au-solo { grid-template-columns: 1fr; }
+  .au-port { width: 72px; }
+}

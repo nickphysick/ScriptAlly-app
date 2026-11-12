@@ -48,7 +48,7 @@ export interface Account { uid: string; email?: string | null; createdMs?: numbe
 export interface RecomputeDeps { listUsers?: () => Promise<Account[]> }
 
 /** Every sign-in account's uid and email (the Admin SDK pages through them; the volume is small). */
-async function listAllUsers(): Promise<Account[]> {
+export async function listAllUsers(): Promise<Account[]> {
   const out: Account[] = [];
   let token: string | undefined;
   do {

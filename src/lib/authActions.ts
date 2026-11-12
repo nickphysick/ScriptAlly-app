@@ -7,7 +7,10 @@
 // privacy-preserving password reset, client-side validation and a Firebase-error -> friendly-copy
 // map. Kept deliberately OUT of db.tsx — its login/signup/logout (and their offline fallbacks) are
 // owned by a separate work-stream, so nothing here touches those.
-import { GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail } from "firebase/auth";
+import {
+  GoogleAuthProvider, signInWithPopup, sendPasswordResetEmail,
+  sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, sendEmailVerification,
+} from "firebase/auth";
 import { auth } from "./firebase";
 
 /** The email shape check lives in emailShape.ts so the public site can use it without Firebase Auth. */
@@ -71,3 +74,52 @@ export const sendReset = async (email: string): Promise<void> => {
     throw new Error(mapAuthError(err?.code));
   }
 };
+
+/* ══ Non-workspace v1, Phase 1 — "Email me a sign-in link instead" (getting-in-v1.html, screen 3) ══
+   ⚠️ FIREBASE'S OWN EMAIL-LINK SIGN-IN FOR NOW; Phase 9 moves who sends the email to our own branded path.
+   ⚠️ SAME DEVICE AND OTHER DEVICE BOTH END WELL: the address is kept on this device when the link is sent, so opening
+   it here signs straight in; opening it elsewhere asks for the address once (EmailLinkScreen in Auth.tsx). */
+export const SIGNIN_LINK_PATH = "/signin-link";
+export const SIGNIN_EMAIL_KEY = "qh.signInEmail";
+
+export const keptSignInEmail = (): string | null => { try { return localStorage.getItem(SIGNIN_EMAIL_KEY); } catch { return null; } };
+const keepSignInEmail = (email: string | null) => {
+  try { if (email) localStorage.setItem(SIGNIN_EMAIL_KEY, email); else localStorage.removeItem(SIGNIN_EMAIL_KEY); } catch { /* private window */ }
+};
+
+export const sendSignInLink = async (email: string): Promise<void> => {
+  const to = email.trim();
+  try {
+    await sendSignInLinkToEmail(auth, to, { url: `${window.location.origin}${SIGNIN_LINK_PATH}`, handleCodeInApp: true });
+    keepSignInEmail(to);
+  } catch (err: any) {
+    throw new Error(mapAuthError(err?.code));
+  }
+};
+
+/** Is this page load the arrival from a sign-in link? */
+export const arrivedFromSignInLink = (href: string = typeof window !== "undefined" ? window.location.href : ""): boolean => {
+  try { return !!href && isSignInWithEmailLink(auth, href); } catch { return false; }
+};
+
+/** Finish a sign-in link. Resolves on success (the auth listener takes over); throws friendly copy otherwise. */
+export const finishSignInLink = async (email: string): Promise<void> => {
+  try {
+    await signInWithEmailLink(auth, email.trim(), window.location.href);
+    keepSignInEmail(null);
+    window.history.replaceState(null, "", "/dashboard");
+  } catch (err: any) {
+    const code = err?.code;
+    if (code === "auth/invalid-action-code" || code === "auth/expired-action-code") throw new Error(SIGNIN_LINK_SPENT);
+    if (code === "auth/invalid-email") throw new Error(SIGNIN_LINK_WRONG_EMAIL);
+    throw new Error(mapAuthError(code));
+  }
+};
+/** One confirmation email to the signed-in account's address (a founding writer who chose another address). */
+export const sendConfirmation = async (): Promise<void> => {
+  if (auth.currentUser) await sendEmailVerification(auth.currentUser);
+};
+
+/* Words I had to write (the ref has no screen for these two). */
+export const SIGNIN_LINK_SPENT = "That sign-in link has been used or has run out. Ask for a new one below.";
+export const SIGNIN_LINK_WRONG_EMAIL = "That isn't the address the link was sent to. Try the one you asked us to send it to.";

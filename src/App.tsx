@@ -64,6 +64,9 @@ import { TopNavPanelData } from "./components/shell/TopNavPanelData";
 import { Onboarding } from "./components/Onboarding";
 import { ErrorBoundary, ThrowLab } from "./components/ErrorBoundary";
 import { PageBoundary, crashProbe } from "./components/PageBoundary";
+import { redeemKeptCode, JOIN_PREFIX } from "./lib/inviteCode";
+import { SIGNIN_LINK_PATH } from "./lib/authActions";
+import { NotFoundCard } from "./components/NotFoundCard";
 import { closeAgentCard } from "./lib/agentCardStore";
 import { PhoneSectionLanding, phoneSectionFor } from "./components/phone/PhoneSectionLanding";
 import { PhoneMaterialsHost } from "./components/phone/materials/PhoneMaterialsHost";
@@ -283,6 +286,8 @@ function AppContent() {
   const path = location.pathname.replace(/\/+$/, "") || "/";
   /* Query panel v1 — a query opened over another page (the Dashboard) belongs to that page: leaving it closes it */
   useEffect(() => { closeQueryPanel(); }, [path]);
+  /* Non-workspace v1, Phase 1 — a founder's code kept from the invite link is redeemed once there is an account */
+  useEffect(() => { if (currentUser?.id) void redeemKeptCode(); }, [currentUser?.id]);
   const routeKey = path.split("/")[1] || "";
   const params = new URLSearchParams(location.search);
 
@@ -557,8 +562,21 @@ function AppContent() {
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
+  /* An invite link or a sign-in link opened by someone already signed in has done its job: go to the Dashboard. */
+  if (path.startsWith(JOIN_PREFIX) || path === SIGNIN_LINK_PATH) return <Navigate to="/dashboard" replace />;
+  /* Non-workspace v1, Phase 1 (getting-in-v1.html, screen 6): an unknown address says so, in the app's shell, instead
+     of silently landing on the Dashboard — a mistyped or out-of-date link used to look like the app ignoring you. */
   if (!WORKSPACE_PATHS.has(routeBase(path))) {
-    return <Navigate to="/dashboard" replace />;
+    return (
+      <AppShell
+        routeKey="not-found" onNavigate={handleNavigate} searchQuery={searchQuery} setSearchQuery={setSearchQuery}
+        theme={currentUser?.queriesTheme === "bold" || currentUser?.queriesTheme === "editorial" ? currentUser.queriesTheme : "cappuccino"}
+      >
+        <StagePage name="not-found" active>
+          <NotFoundCard onNavigate={handleNavigate} />
+        </StagePage>
+      </AppShell>
+    );
   }
 
   // ── WHICH SHELL (app-shell pack, Phase 5) — ONE mapping, in one place (lib/shellForRoute).

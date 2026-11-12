@@ -20,7 +20,11 @@ import { MONTHS_SHORT } from "./dates";
 export const BETA_MODE = true;
 
 /**
- * ⚠️ THE INVITE GATE IS BUILT AND NOT ARMED, AND IT IS A SEPARATE FLAG FOR A REASON.
+ * ⚠️ NON-WORKSPACE V1 (12 Nov): ARMED ON DEV ONLY — on when the bundle targets `scriptally-dev`, off on prod, locally
+ * and in the emulator. `redeemInviteCode` ships to dev in the same deploy. Prod's gate is Nick's to arm.
+ * Signing in is never gated: the gate stands only in front of creating an account.
+ *
+ * ⚠️ THE INVITE GATE IS A SEPARATE FLAG FOR A REASON.
  *
  * `BETA_MODE` is safe to ship true: it draws the strip and the feedback dock, and the worst a
  * writer meets if the feedback function is undeployed is a send that reports its own failure. The
@@ -34,7 +38,7 @@ export const BETA_MODE = true;
  * Nick: deploy `functions:redeemInviteCode` and `firestore:rules`, seed at least one
  * `inviteCodes/{CODE}` document, redeem a code end to end, THEN set this true.
  */
-export const INVITE_GATE_ENABLED = false;
+export const INVITE_GATE_ENABLED: boolean = import.meta.env.VITE_FIREBASE_PROJECT_ID === "scriptally-dev";
 
 /**
  * Where the strip's dismissal is remembered.

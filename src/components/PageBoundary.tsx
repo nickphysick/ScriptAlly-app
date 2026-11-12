@@ -25,6 +25,8 @@
 import React, { Component, Fragment, type ReactNode } from "react";
 import { reportBoundaryError } from "../lib/errorReporting";
 import { devCrashTrigger, type CrashTrigger } from "../lib/devCrashTrigger";
+import { openFeedback } from "../lib/feedbackStore";
+import "./notFound.css";
 
 const crashTrigger: CrashTrigger | null = import.meta.env.MODE !== "production" ? devCrashTrigger : null;
 
@@ -33,12 +35,16 @@ export function crashProbe(name: string): ReactNode {
   return crashTrigger ? crashTrigger.probe(name) : null;
 }
 
+/* Non-workspace v1, Phase 1 — the ref's words (getting-in-v1.html, screen 7). "We've been sent the details" is true
+   where the build reports (a DSN on dev and prod, `sentryEnabled`). */
 export const PAGE_FALLBACK = {
-  heading: "This page hit a problem",
-  body: "The rest of QueryHawk is fine, and nothing you'd saved has been lost. Try loading the page again.",
+  heading: "This page hit a problem.",
+  body: "The rest of QueryHawk is fine, and nothing you'd saved has been lost. We've been sent the details.",
   retry: "Try again",
-  reload: "Reload QueryHawk",
+  tell: "Tell us what you were doing",
+  home: "Go to your Dashboard",
 } as const;
+export const PORT_ART = { src: "/images/hawk-portrait.webp", width: 160, height: 160 };
 
 export const PANEL_FALLBACK = {
   line: "This panel hit a problem.",
@@ -92,8 +98,9 @@ export class PageBoundary extends Component<Props, State> {
     this.props.onClose?.();
   };
 
-  private reload = () => {
-    if (typeof window !== "undefined") window.location.reload();
+  /* A hard navigation: the boundary sits outside any router hook, and a crashed page is the moment to start clean. */
+  private home = () => {
+    if (typeof window !== "undefined") window.location.assign("/dashboard");
   };
 
   render() {
@@ -124,16 +131,19 @@ export class PageBoundary extends Component<Props, State> {
       );
     }
     return (
-      <div
-        data-boundary-fallback={name}
-        style={{ boxSizing: "border-box", flex: "1 1 auto", minHeight: "100%", display: "flex", alignItems: "center", justifyContent: "center", padding: "64px 24px" }}
-      >
-        <div className="sp-card" role="alert" style={{ maxWidth: 460, padding: "28px 30px" }}>
-          <h2 style={{ fontSize: 24, lineHeight: 1.3, margin: "0 0 10px" }}>{PAGE_FALLBACK.heading}</h2>
-          <p style={{ fontSize: 15, lineHeight: 1.5, margin: "0 0 22px" }}>{PAGE_FALLBACK.body}</p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            <button type="button" className="ph-primary" onClick={() => this.reset()}>{PAGE_FALLBACK.retry}</button>
-            <button type="button" className="ph-secondary" onClick={this.reload}>{PAGE_FALLBACK.reload}</button>
+      <div className="nf-wrap" data-boundary-fallback={name}>
+        <div className="sp-card nf-card" role="alert">
+          <img className="nf-art" src={PORT_ART.src} width={PORT_ART.width} height={PORT_ART.height} alt="" />
+          <div>
+            <h2 className="nf-h">{PAGE_FALLBACK.heading}</h2>
+            <p className="nf-lede">{PAGE_FALLBACK.body}</p>
+            <div className="nf-acts">
+              <button type="button" className="ph-primary" onClick={() => this.reset()}>{PAGE_FALLBACK.retry}</button>
+              <button type="button" className="ph-secondary" onClick={() => openFeedback()}>{PAGE_FALLBACK.tell}</button>
+            </div>
+            <ul className="nf-links">
+              <li><button type="button" className="nf-lnk" onClick={this.home}>{PAGE_FALLBACK.home}</button></li>
+            </ul>
           </div>
         </div>
       </div>

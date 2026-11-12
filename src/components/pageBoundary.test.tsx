@@ -43,16 +43,17 @@ describe("PageBoundary — the page fallback", () => {
     expect(html(inst)).toBe("<p>the page</p>");
   });
 
-  it("shows the page fallback, in the page's own words, with both buttons", () => {
+  it("shows the page fallback in the getting-in ref's words (non-workspace v1), with both buttons", () => {
     const inst = make({ name: "queries", children: <p>page contents</p> });
     fail(inst);
     const out = html(inst);
     expect(out).not.toContain("page contents");
     expect(out).toContain(PAGE_FALLBACK.heading);
-    expect(out).toContain("The rest of QueryHawk is fine, and nothing you&#x27;d saved has been lost. Try loading the page again.");
+    expect(out).toContain("The rest of QueryHawk is fine, and nothing you&#x27;d saved has been lost. We&#x27;ve been sent the details.");
     expect(out).toMatch(/<button[^>]*class="ph-primary"[^>]*>Try again<\/button>/);
-    expect(out).toMatch(/<button[^>]*class="ph-secondary"[^>]*>Reload QueryHawk<\/button>/);
-    expect(out).toContain('class="sp-card"');
+    expect(out).toMatch(/<button[^>]*class="ph-secondary"[^>]*>Tell us what you were doing<\/button>/);
+    expect(out).toContain(">Go to your Dashboard<");
+    expect(out).toContain('class="sp-card nf-card"');
     expect(out).toContain('data-boundary-fallback="queries"');
   });
 

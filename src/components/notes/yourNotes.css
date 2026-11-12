@@ -31,6 +31,8 @@
 
 /* ── the header: the Query Centre's, with a dashed placeholder in the art slot ──────────────────────────────────── */
 .yn .yn-hdw .qc1531-hd { padding-bottom: 18px; }
+/* Non-workspace v1, Phase 1: the title in the typewriter face, like the Query Centre's since 9 Nov (it was the book face). */
+.yn .yn-hdw h1.qc1531-t { font-family: var(--sp-type) !important; font-weight: 400 !important; }
 .yn .yn-art { display: grid; place-items: center; }
 .yn .yn-ph {
   width: 190px; height: 230px; border-radius: 22px; border: 2px dashed #cdbfb0; background: rgba(255, 255, 255, 0.45);
@@ -90,7 +92,7 @@
 /* the chips: the band's "Your last note" chip, one per status */
 .yn .yn-oc, .yn-layer .yn-oc { display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; white-space: nowrap; font: normal 600 12.5px var(--sp-serif) !important; }
 .yn-oc svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
-.yn-oc.ok { background: #e1ebe1; color: #355a3a; }
+.yn-oc.ok { background: #f6e2d9; color: #7a3f31; } /* non-workspace v1: no green — the terra chip */
 .yn-oc.rd { background: #efe7df; color: #6b5a4e; }
 .yn-oc.pl { background: #f6e2d9; color: #7a3f31; }
 .yn-oc.wt { background: #fff; color: var(--yn-muted); box-shadow: inset 0 0 0 1px #e2d6cc; }
@@ -185,7 +187,7 @@
   .yn .yn-hdw .qc1531-hd { display: flex; flex-direction: column; align-items: stretch; gap: 18px; }
   .yn .yn-art { justify-items: start; }
   .yn .yn-ph { width: 120px; height: 140px; }
-  .yn .yn-hdw h1.qc1531-t { margin: 0; font: 600 38px/1.1 var(--font-serif) !important; }
+  .yn .yn-hdw h1.qc1531-t { margin: 0; font: 400 38px/1.1 var(--sp-type) !important; } /* non-workspace v1: the typewriter face, like every other page's title */
   .yn .yn-hdw .qc1531-for { display: flex; align-items: center; gap: 12px; margin: 6px 0 12px; }
   .yn .yn-hdw .qc1531-for i { flex: 1 1 0; height: 1px; background: #cfc5b7; }
   .yn .yn-hdw .qc1531-for span { font: 400 18px var(--sp-type) !important; }

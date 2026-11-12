@@ -48,6 +48,7 @@ export const PAGE_SOURCES = [
   "marketing/Landing.tsx",
   "marketing/MarketingShell.tsx",
   "components/shell/AppShell.tsx",
+  "components/NotFoundCard.tsx", // non-workspace v1, Phase 1 — the in-app not-found screen
 ];
 
 const read = (rel: string) => readFileSync(resolve(__dirname, "..", rel), "utf8");
