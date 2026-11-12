@@ -116,7 +116,7 @@ describe("the callable refuses a malformed request BEFORE the entitlement is rea
   }
   it("a good photo request does read it, and reaches mapPages with the pages", async () => {
     await run({ pages: [page(), page(PNG, "image/png")] });
-    expect(world.reads).toEqual(["users/u1", "users/u1/private/entitlement"]);
+    expect(world.reads).toEqual(["users/u1/private/entitlement"]); // plan rules v1: the plan is not read — once per account
     expect(world.mapPages).toHaveBeenCalledTimes(1);
     expect((world.mapPages as any).mock.calls[0][1].map((p: any) => p.mediaType)).toEqual(["image/jpeg", "image/png"]);
     expect(world.mapSheet).not.toHaveBeenCalled();
@@ -141,11 +141,36 @@ describe("one entitlement for both inputs (locked)", () => {
     const release = { path: ENT, value: { smartImportPending: "<delete>" } };
     expect(world.writes).toEqual([claim, release, claim, release, claim, release]);
   });
-  it("a spent free import refuses photos exactly as it refuses a sheet", async () => {
+  it("a spent import refuses photos exactly as it refuses a sheet", async () => {
     world.store["users/u1/private/entitlement"] = { smartImportFreeUsed: true };
-    await expect(run({ pages: [page()] })).rejects.toMatchObject({ code: "resource-exhausted", details: { reason: "free_used" } });
+    await expect(run({ pages: [page()] })).rejects.toMatchObject({ code: "resource-exhausted", details: { reason: "used" } });
     expect(world.mapPages).not.toHaveBeenCalled();
   });
+
+  /* PLAN RULES v1 — ONCE PER ACCOUNT ON EVERY PLAN: the first call spends the one import, and the second is refused,
+     whether the account is Free, paid Pro, founding or on its trial. The plan is not even read. */
+  for (const [who, user, ent] of [
+    ["Free", { plan: "Free" }, {}],
+    ["paid Pro", { plan: "Pro" }, {}],
+    ["founding", { plan: "Free" }, { founding: true }],
+    ["an old Pro month on record", { plan: "Pro" }, { smartImportLastUsedMonth: "2026-10" }],
+  ] as const) {
+    it(`${who}: the second call is refused`, async () => {
+      world.store["users/u1"] = { ...user };
+      world.store["users/u1/private/entitlement"] = { ...ent };
+      const first = await run({ sheetText: "Agent,Agency\nClara,Pemberton" }).then(() => "ok", (e: any) => e.details?.reason);
+      if (who === "an old Pro month on record") {
+        expect(first, "an account that used one under the old rule has none left").toBe("used");
+        return;
+      }
+      expect(first).toBe("ok");
+      const consumed = world.writes.find((w) => (w.value as Record<string, unknown>).smartImportFreeUsed === true);
+      expect(consumed, "the first call spends the one import").toBeTruthy();
+      world.store["users/u1/private/entitlement"] = { ...ent, smartImportFreeUsed: true };
+      await expect(run({ sheetText: "Agent,Agency\nClara,Pemberton" })).rejects.toMatchObject({ code: "resource-exhausted", details: { reason: "used" } });
+      expect(world.reads).not.toContain("users/u1");
+    });
+  }
   it("the sheet path still goes to mapSheet", async () => {
     await run({ sheetText: "Agent,Agency\nClara,Pemberton" });
     expect(world.mapSheet).toHaveBeenCalledTimes(1);

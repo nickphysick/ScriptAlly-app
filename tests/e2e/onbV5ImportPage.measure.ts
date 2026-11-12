@@ -27,7 +27,6 @@ const P1_SCREENS: Screen[] = [
   /* v9: set-up no longer shows the v5 book step (OB9 B1–B4); the Import page's is held by F2. */
   /* v9: the fork and the hand-off are redrawn (OB9 F1). */
   { id: "used-free", q: "s=used-free", mode: "full" },
-  { id: "used-pro", q: "s=used-pro", mode: "full" },
   { id: "unreadable", q: "s=unreadable", mode: "full" },
   { id: "nothing", q: "s=nothing", mode: "full" },
   { id: "unloaded", q: "s=unloaded", mode: "full" },
@@ -81,7 +80,7 @@ for (const vp of P1_VIEWPORTS) {
       const diffs: string[] = [];
       /* Phone last screens v1 (2B): below 768px the dead ends' actions moved into the set-up frame's pinned
          foot by design, so their markup differs from this capture there (PLS1 L2 holds the new shape). */
-      const PHONE_MOVED = new Set(["used-free", "used-pro", "unreadable", "nothing", "unloaded", "flow-nothing"]);
+      const PHONE_MOVED = new Set(["used-free", "unreadable", "nothing", "unloaded", "flow-nothing"]);
       for (const s of P1_SCREENS) {
         if (vp.width < 768 && PHONE_MOVED.has(s.id)) continue;
         await reach(page, s);
@@ -215,11 +214,10 @@ for (const vp of VIEWPORTS) {
 }
 
 /* ════ D2 · each tile's button calls its own handler; the entitlement decides the first ═════════ */
+/* plan rules v1: one Smart Import per account on every plan — two states, no month */
 const ENTITLEMENTS = [
-  { reason: "free_available", fact: "1 Smart Import available", disabled: false },
-  { reason: "free_used", fact: "Smart Import already used", disabled: true },
-  { reason: "pro_available", fact: "1 Smart Import available", disabled: false },
-  { reason: "pro_month_used", fact: "Available 1 Nov", disabled: true },
+  { reason: "available", fact: "1 Smart Import available", disabled: false },
+  { reason: "used", fact: "Smart Import already used", disabled: true },
 ] as const;
 
 test.describe("D2", () => {

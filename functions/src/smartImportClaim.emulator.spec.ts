@@ -64,7 +64,7 @@ describe("Smart Import: claim, then call", () => {
       settle(call()).then((o) => { if (!o.ok) refusedSoFar += 1; return o; }));
     /* Hold the winner inside the model step until the other four have all been answered, so each
        of them met its live claim — released earlier, a loser whose transaction retried after the
-       winner had finished would (correctly) be told free_used instead. */
+       winner had finished would (correctly) be told used instead. */
     await vi.waitFor(() => expect(refusedSoFar).toBe(4), { timeout: 15_000 });
     expect(core.mapSheet).toHaveBeenCalledTimes(1);
     release();
@@ -131,20 +131,19 @@ describe("Smart Import: claim, then call", () => {
     expect("smartImportPending" in after).toBe(false);
   });
 
-  it("the existing refusals are unchanged: a spent free import is free_used, before any claim", async () => {
+  it("a spent import is refused as used, before any claim (plan rules v1)", async () => {
     await db.doc(ENT).set({ smartImportFreeUsed: true });
     const r = await settle(call());
-    expect(r.ok ? null : r.e.details?.reason).toBe("free_used");
+    expect(r.ok ? null : r.e.details?.reason).toBe("used");
     expect(core.mapSheet).not.toHaveBeenCalled();
     expect("smartImportPending" in (await ent())).toBe(false);
   });
 
-  it("Pro: this month's import used is pro_month_used", async () => {
+  it("Pro: an import on record under the old monthly rule leaves none (plan rules v1: once per account)", async () => {
     await db.doc(`users/${UID}`).set({ plan: "Pro" });
-    const month = new Date().toISOString().slice(0, 7);
-    await db.doc(ENT).set({ smartImportLastUsedMonth: month });
+    await db.doc(ENT).set({ smartImportLastUsedMonth: "2026-10" });
     const r = await settle(call());
-    expect(r.ok ? null : r.e.details?.reason).toBe("pro_month_used");
+    expect(r.ok ? null : r.e.details?.reason).toBe("used");
     expect(core.mapSheet).not.toHaveBeenCalled();
   });
 });

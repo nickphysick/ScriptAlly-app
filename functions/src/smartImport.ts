@@ -10,6 +10,7 @@
  *   cd functions && npm install && npm run build
  *   firebase deploy --only functions
  */
+import { smartImportUsed } from "./entitlementCore";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { FieldValue } from "firebase-admin/firestore";
@@ -27,8 +28,9 @@ const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
 // and the one initializeApp() now live in ./firestore, which also names the database explicitly —
 // this function calls admin.firestore() nowhere, and neither may any other (locked).
 
-// Pro source of truth — the SAME field extractFromEmail reads: User.plan === "Pro" (UserPlan.PRO).
-const PRO_PLAN = "Pro";
+// Plan rules v1: Smart Import is once per account on EVERY plan, so the plan is not read here at all. The rule is
+// `smartImportUsed` in ./entitlementCore — the one server copy, mirrored by the client and run beside it in
+// src/lib/smartImportEntitlement.test.ts.
 
 /**
  * How long a claim (`smartImportPending`) holds before it is treated as abandoned. Longer than the
@@ -36,19 +38,6 @@ const PRO_PLAN = "Pro";
  * crashed instance — whose `finally` never ran — locks nobody out for long.
  */
 export const PENDING_CLAIM_MS = 6 * 60 * 1000;
-
-/** Current UTC calendar month as "YYYY-MM". */
-function utcMonth(d = new Date()): string {
-  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`;
-}
-
-/** First day (UTC) of the month AFTER the given "YYYY-MM", as ISO "YYYY-MM-DD" — the next-available
- *  date a Pro user can import again. Date.UTC's month arg is 0-based, so passing the 1-based month
- *  number lands on the first of the following month. */
-function firstOfNextMonth(month: string): string {
-  const [y, m] = month.split("-").map(Number);
-  return new Date(Date.UTC(y, m, 1)).toISOString().slice(0, 10);
-}
 
 export const smartImportMap = onCall(
   // 300s, measured rather than guessed (reports/smart-import-quickfixes/): a 150-row sheet took 88–104s
@@ -75,16 +64,12 @@ export const smartImportMap = onCall(
     }
 
     // ── Entitlement gate (server-enforced, before the costly AI call) ─────────────────────────────
-    // Free: 1 lifetime. Pro: 1 per UTC calendar month. The Pro allowance is independent of the
-    // free-once, so a free user who has spent their import and upgrades can import immediately.
-    // Plan is read from the user doc; usage lives in the ADMIN-ONLY subdoc users/{uid}/private/
-    // entitlement (the client can't write OR delete it, and it survives a user-doc delete-recreate —
-    // tamper-proof). A blocked attempt throws a structured HttpsError the client branches on.
-    const userSnap = await db.doc(`users/${uid}`).get();
-    const isPro = userSnap.get("plan") === PRO_PLAN;
-
+    // Plan rules v1: ONE per account, on every plan (founding, Pro, trial or Free) — the monthly Pro
+    // allowance is retired. Usage lives in the ADMIN-ONLY subdoc users/{uid}/private/entitlement (the
+    // client can't write OR delete it, and it survives a user-doc delete-recreate — tamper-proof). An
+    // account that used either old allowance has used its one. A blocked attempt throws a structured
+    // HttpsError the client branches on (`reason: "used"`).
     const entRef = db.doc(`users/${uid}/private/entitlement`);
-    const month = utcMonth();
 
     /* ⚠️ CLAIM, THEN CALL — IN ONE TRANSACTION, BEFORE THE MODEL IS REACHED. The old shape read the
        entitlement, called the model, and only then wrote the used flag, so five calls fired together
@@ -94,11 +79,8 @@ export const smartImportMap = onCall(
        not use up the writer's one free read. */
     const blocked = await db.runTransaction(async (tx) => {
       const snap = await tx.get(entRef);
-      if (isPro) {
-        if (snap.get("smartImportLastUsedMonth") === month) return "pro_month_used" as const;
-      } else if (snap.get("smartImportFreeUsed") === true) {
-        return "free_used" as const;
-      }
+      const usage = { smartImportFreeUsed: snap.get("smartImportFreeUsed"), smartImportLastUsedMonth: snap.get("smartImportLastUsedMonth") };
+      if (smartImportUsed(usage)) return "used" as const;
       const pending = snap.get("smartImportPending");
       if (typeof pending?.toMillis === "function" && Date.now() - pending.toMillis() < PENDING_CLAIM_MS) {
         return "in_progress" as const;
@@ -106,15 +88,9 @@ export const smartImportMap = onCall(
       tx.set(entRef, { smartImportPending: FieldValue.serverTimestamp() }, { merge: true });
       return null;
     });
-    if (blocked === "pro_month_used") {
-      throw new HttpsError("resource-exhausted", "This month's Smart Import has been used.", {
-        reason: "pro_month_used",
-        nextAvailable: firstOfNextMonth(month),
-      });
-    }
-    if (blocked === "free_used") {
-      throw new HttpsError("resource-exhausted", "Your free Smart Import has been used.", {
-        reason: "free_used",
+    if (blocked === "used") {
+      throw new HttpsError("resource-exhausted", "Your Smart Import has been used.", {
+        reason: "used",
       });
     }
     if (blocked === "in_progress") {
@@ -134,7 +110,7 @@ export const smartImportMap = onCall(
       try {
         await entRef.set(
           {
-            ...(isPro ? { smartImportLastUsedMonth: month } : { smartImportFreeUsed: true }),
+            smartImportFreeUsed: true,
             smartImportPending: FieldValue.delete(),
           },
           { merge: true }

@@ -39,7 +39,6 @@ export const SCREENS: Array<{ id: string; q: string; form: "account" | "setup" }
   { id: "confirm", q: "s=confirm", form: "setup" },
   { id: "confirm-pro", q: "s=confirm&plan=pro", form: "setup" },
   { id: "used-free", q: "s=used-free", form: "setup" },
-  { id: "used-pro", q: "s=used-pro", form: "setup" },
   { id: "unreadable", q: "s=unreadable", form: "setup" },
   { id: "nothing", q: "s=nothing&errs=1", form: "setup" },
   { id: "unloaded", q: "s=unloaded", form: "setup" },
@@ -542,8 +541,6 @@ test.describe("OB1", () => {
     const want: Record<string, { chip: string; fail: boolean; title: string; presses: Array<[string, string]> }> = {
       "used-free": { chip: "Smart Import already used", fail: false, title: "You've used your Smart Import.",
         presses: [[":is(.sf-dead, .sf-foothost) .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="template"]', "useTemplate"]] },
-      "used-pro": { chip: "Smart Import already used", fail: false, title: "Next Smart Import next month",
-        presses: [[":is(.sf-dead, .sf-foothost) .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"]] },
       unreadable: { chip: "File couldn't be read", fail: true, title: "We couldn't read that one.",
         presses: [[":is(.sf-dead, .sf-foothost) .sf-link:not([data-act])", "back"], ['[data-act="byhand"]', "byhand"], ['[data-act="download"]', "download"]] },
       nothing: { chip: "Nothing imported", fail: true, title: "That didn't work.", presses: [['[data-act="review"]', "review"]] },

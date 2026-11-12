@@ -9,7 +9,7 @@
  *
  *   #/onb-lab?s=frame&form=setup&flow=B&at=list&ms=1
  *   #/onb-lab?s=frame&form=account&mode=signin
- *   #/onb-lab?s=import-page&ent=free_available|free_used|pro_available|pro_month_used
+ *   #/onb-lab?s=import-page&ent=available|used
  *   #/onb-lab?s=photos — the real ImportFlow behind the fork, for photos (smart-import-photos-v1):
  *     choose files on [data-picker="photos"]; set window.__SA_SMART_IMPORT_MOCK to read them.
  *
@@ -31,7 +31,7 @@ import type { V9Stage } from "../../lib/onboardingV9";
 import { BranchB } from "./BranchB";
 import { CaptureFork } from "./CaptureFork";
 import { ConfirmScreen } from "./ConfirmScreen";
-import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
+import { UsedFree, Unreadable, NothingImported, Unloaded } from "./DeadEnd";
 import { emptyManuscriptFields } from "./ManuscriptFields";
 import { ManuscriptStatus } from "../../types";
 import { LabReading, LabImporting, LabOverview, LabReview, labCommit, labFixture, LAB_FILE, LAB_UID } from "./OnbLabImport";
@@ -141,7 +141,6 @@ const LabPhotos: React.FC = () => {
       />
       {screen === "idle" && (
         <CaptureFork
-          tier="free"
           onChooseFile={() => flowRef.current?.chooseFile()} onDropFile={(f) => flowRef.current?.dropFile(f)}
           onUsePhotos={() => flowRef.current?.openPhotos()} onDropPhotos={(fs) => flowRef.current?.dropPhotos(fs)}
           onUploadTemplate={labSpy("templatePicker")} onAddByHand={labSpy("byhand")} onBack={labSpy("back")}
@@ -232,7 +231,6 @@ export const OnbLab: React.FC = () => {
     return (
       <LabSetup flow="B" at="list" manuscript plan={tier === "pro" ? UserPlan.PRO : UserPlan.FREE}>
         <CaptureFork
-          tier={tier}
           onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onUsePhotos={labSpy("usePhotos")} onDropPhotos={labSpy("pickPhotos")} onUploadTemplate={labSpy("templatePicker")}
           onAddByHand={labSpy("byhand")} onBack={labSpy("back")} onNothingYet={labSpy("skip")}
           onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
@@ -245,7 +243,6 @@ export const OnbLab: React.FC = () => {
   /* The dead ends of "Your list" — each its own screen, each handler a spy. */
   const dead: Record<string, React.ReactNode> = {
     "used-free": <UsedFree onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onUseTemplate={labSpy("useTemplate")} />,
-    "used-pro": <UsedProMonth nextLabel="1 November 2026" onBack={labSpy("back")} onAddByHand={labSpy("byhand")} />,
     unreadable: <Unreadable onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onDownload={labSpy("download")} />,
     nothing: (
       <NothingImported
@@ -255,7 +252,7 @@ export const OnbLab: React.FC = () => {
     ),
     unloaded: <Unloaded onAddByHand={labSpy("byhand")} onRestart={labSpy("restart")} />,
   };
-  if (dead[s]) return <LabSetup flow="B" at="list" manuscript plan={s === "used-pro" ? UserPlan.PRO : UserPlan.FREE}>{dead[s]}</LabSetup>;
+  if (dead[s]) return <LabSetup flow="B" at="list" manuscript plan={UserPlan.FREE}>{dead[s]}</LabSetup>;
 
   /* The import's steps (part 2). Each sits where `Onboarding` puts it: on "Your list", with the
      manuscript card showing. */
@@ -265,13 +262,8 @@ export const OnbLab: React.FC = () => {
   /* The Import page (part 3): its tiles in each entitlement state, every press a spy. The flow's
      own screens are the ones above; on the real route they render in the app's sheet. */
   if (s === "import-page") {
-    const reason = (q.get("ent") ?? "free_available") as SmartImportEntitlement["reason"];
-    const ent: SmartImportEntitlement = {
-      allowed: reason === "free_available" || reason === "pro_available",
-      reason,
-      tier: reason.startsWith("pro") ? "pro" : "free",
-      ...(reason === "pro_month_used" ? { nextAvailable: "2026-11-01" } : {}),
-    } as SmartImportEntitlement;
+    const reason: SmartImportEntitlement["reason"] = q.get("ent") === "used" ? "used" : "available";
+    const ent: SmartImportEntitlement = { allowed: reason === "available", reason };
     /* `fx=` mounts the shared flow on its summary over a fixture, with a stand-in commit, so the
        in-app Cancel and the end of an import can be driven without an account. `live=1` leaves the
        tiles' real handlers on (the lab has no manuscript, so a press opens the book step). */

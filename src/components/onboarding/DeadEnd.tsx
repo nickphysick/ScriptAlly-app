@@ -26,7 +26,6 @@ export const CHIP_UNLOADED = "Step didn't load";
 
 export const USED_FREE_TITLE = "You've used your Smart Import.";
 export const USED_FREE_TEXT = "The template is always free, and reads your sheet exactly. Or add your agents by hand for now.";
-export const USED_PRO_TITLE = "Next Smart Import next month";
 export const UNREADABLE_TITLE = "We couldn't read that one.";
 export const UNREADABLE_TEXT = "Use the template, or add your agents by hand. Nothing has been saved.";
 export const NOTHING_TITLE = "That didn't work.";
@@ -64,21 +63,12 @@ const Primary: React.FC<{ act: string; onClick: () => void; children: React.Reac
   <button type="button" className="sf-btn" data-act={act} onClick={onClick}>{children}</button>
 );
 
-/** Free tier, Smart Import already used. Leads with the template; no Upgrade. */
+/** Smart Import already used — on any plan (plan rules v1: once per account). Leads with the template; no Upgrade. */
 export const UsedFree: React.FC<{ onBack: () => void; onAddByHand: () => void; onUseTemplate: () => void }> = ({ onBack, onAddByHand, onUseTemplate }) => (
   <DeadEndCard kind="used-free" chip={CHIP_USED} title={USED_FREE_TITLE}
     left={<BackLink onClick={onBack} />}
     actions={<><Quiet act="byhand" onClick={onAddByHand}>Add by hand</Quiet><Primary act="template" onClick={onUseTemplate}>Use the template</Primary></>}>
     <p>{USED_FREE_TEXT}</p>
-  </DeadEndCard>
-);
-
-/** Pro, this month's Smart Import already used. The built words and date. */
-export const UsedProMonth: React.FC<{ nextLabel: string; onBack: () => void; onAddByHand: () => void }> = ({ nextLabel, onBack, onAddByHand }) => (
-  <DeadEndCard kind="used-pro" chip={CHIP_USED} title={USED_PRO_TITLE}
-    left={<BackLink onClick={onBack} />}
-    actions={<Primary act="byhand" onClick={onAddByHand}>Add them by hand</Primary>}>
-    <p>You've used this month's Smart Import. Your next one is available on <strong>{nextLabel}</strong>. You can add agents by hand in the meantime.</p>
   </DeadEndCard>
 );
 

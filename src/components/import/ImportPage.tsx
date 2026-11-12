@@ -33,7 +33,6 @@ import { useScriptAllyDb } from "../../lib/db";
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import type { SmartImportEntitlement } from "../../lib/smartImportEntitlement";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
-import { dayMonth } from "../../lib/dates";
 import { CAPTURE_PHOTOS_ACTION } from "../../lib/captureFork";
 import { IMPORT_TITLE, IMPORT_SUB, TILE_SMART, TILE_TEMPLATE, TILE_MATCH, IMPORT_FOOTNOTE, IMPORT_FOOTNOTE_SECOND, smartFactLine } from "../../lib/importPage";
 
@@ -188,7 +187,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
       )}
     >
       {showTiles && phone ? (
-        <ImportDoorsPhone lede={IMPORT_SUB} smartAllowed={entitlement.allowed} smartFact={smartFactLine(entitlement, dayMonth)}
+        <ImportDoorsPhone lede={IMPORT_SUB} smartAllowed={entitlement.allowed} smartFact={smartFactLine(entitlement)}
           onSmart={chooseSmart} onDownload={download} onUpload={chooseTemplate} onMatch={openMatcher}
           onByHand={() => openQueryDrawer({ mode: "log", ...(manuscript ? { manuscriptId: manuscript.id } : {}) })}
           footnote={`${IMPORT_FOOTNOTE} ${IMPORT_FOOTNOTE_SECOND}`} />
@@ -205,7 +204,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
                   <button type="button" className="impg-btn" data-act="smart" onClick={chooseSmart} disabled={!entitlement.allowed}>{TILE_SMART.action}</button>
                   <button type="button" className="impg-btn impg-btn--line" data-act="photos" onClick={usePhotos} disabled={!entitlement.allowed}>{CAPTURE_PHOTOS_ACTION}</button>
                 </div>
-                <p className="impg-fact" data-impg="fact">{smartFactLine(entitlement, dayMonth)}</p>
+                <p className="impg-fact" data-impg="fact">{smartFactLine(entitlement)}</p>
               </div>
             </section>
             <section className="impg-tile" data-impg="tile" data-tile="template" aria-labelledby="impg-t-template">

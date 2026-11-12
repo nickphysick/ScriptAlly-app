@@ -31,8 +31,6 @@ import { StepColumn, OpenTitle, BackLink } from "./setupParts";
 import "./v9/onbV9.css";
 
 export interface CaptureForkProps {
-  /** The writer's Smart Import tier, from the entitlement. */
-  tier: "free" | "pro";
   /** "Import a spreadsheet": open the Smart import picker. */
   onChooseFile: () => void;
   /** A file dropped on the Smart import tile: the same thing the picker's choice runs. */
@@ -70,7 +68,7 @@ const Tile: React.FC<{ option: CaptureOption; fact: string; at: number; drop?: R
 );
 
 export const CaptureFork: React.FC<CaptureForkProps> = ({
-  tier, onChooseFile, onDropFile, onUsePhotos, onDropPhotos, onUploadTemplate, onAddByHand, onBack, onNothingYet, onOpenImportDesk, onDownloadTemplate,
+  onChooseFile, onDropFile, onUsePhotos, onDropPhotos, onUploadTemplate, onAddByHand, onBack, onNothingYet, onOpenImportDesk, onDownloadTemplate,
 }) => {
   const download = onDownloadTemplate ?? (() => { void downloadTemplate(TEMPLATE_FILENAME); });
   const [over, setOver] = useState(false);
@@ -93,15 +91,15 @@ export const CaptureFork: React.FC<CaptureForkProps> = ({
     <StepColumn wide screen="fork">
       <OpenTitle title={CAPTURE_HEADING} sub={CAPTURE_SUB} />
       <div className="sf-tiles">
-        <Tile option="smart" fact={captureFact("smart", tier)} at={0.2} drop={dropProps} over={over}>
+        <Tile option="smart" fact={captureFact("smart")} at={0.2} drop={dropProps} over={over}>
           <button type="button" className="sf-btn sf-btn--sm" data-act="smart" onClick={onChooseFile}>{CAPTURE_SMART_ACTION}</button>
           <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="photos" onClick={onUsePhotos}>{CAPTURE_PHOTOS_ACTION}</button>
         </Tile>
-        <Tile option="template" fact={captureFact("template", tier)} at={0.35}>
+        <Tile option="template" fact={captureFact("template")} at={0.35}>
           <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="download" onClick={download}>{CAPTURE_TEMPLATE_DOWNLOAD}</button>
           <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="upload" onClick={onUploadTemplate}>{CAPTURE_TEMPLATE_UPLOAD}</button>
         </Tile>
-        <Tile option="byhand" fact={captureFact("byhand", tier)} at={0.5}>
+        <Tile option="byhand" fact={captureFact("byhand")} at={0.5}>
           <button type="button" className="sf-btn sf-btn--sm sf-btn--line" data-act="byhand" onClick={onAddByHand}>{CAPTURE_HAND_ACTION}</button>
         </Tile>
       </div>

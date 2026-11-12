@@ -573,15 +573,8 @@ export const AccountSettings: React.FC<{
   /* ⚠️ THE ALLOWANCE COMES FROM THE HOOK, NEVER FROM PLAN + USAGE READ AGAIN HERE. The policy is
      stated once in `getSmartImportEntitlement` and mirrored server-side in the callable; a third
      reading of the same two fields on this page would be free to disagree with both — and the
-     failure is a settings page telling a writer they have an import that the function then refuses.
-     ⚠️ AND THE DATE FORMATTER IS PASSED IN. `smartImportLine` is pure and node-testable; taking a
-     locale format inside it would make its output depend on the machine running it. */
-  const smartImport = smartImportLine(
-    useSmartImportEntitlement(),
-    (iso) => new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
-      day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
-    }),
-  );
+     failure is a settings page telling a writer they have an import that the function then refuses. */
+  const smartImport = smartImportLine(useSmartImportEntitlement());
 
   /** Every task pref commits instantly with the standard receipt — the same model as every other
    *  toggle and select on this page. */

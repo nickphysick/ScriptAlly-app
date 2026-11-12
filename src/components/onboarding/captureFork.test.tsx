@@ -27,9 +27,9 @@ import { confirmFileLead } from "../../lib/smartImportConfirm";
 const here = dirname(fileURLToPath(import.meta.url));
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#x27;").replace(/"/g, "&quot;");
 const noop = () => {};
-const fork = (_was: CaptureOption, tier: "free" | "pro" = "free") =>
+const fork = (_was: CaptureOption) =>
   renderToStaticMarkup(
-    <CaptureFork tier={tier} onChooseFile={noop} onDropFile={noop} onUsePhotos={noop} onDropPhotos={noop} onUploadTemplate={noop}
+    <CaptureFork onChooseFile={noop} onDropFile={noop} onUsePhotos={noop} onDropPhotos={noop} onUploadTemplate={noop}
                  onAddByHand={noop} onBack={noop} onNothingYet={noop} onOpenImportDesk={noop} onDownloadTemplate={noop} />,
   ).replace(/<!-- -->/g, "");
 const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
@@ -75,7 +75,7 @@ describe("W1 the fork's words", () => {
   });
 
   it("never grades the writer, and never congratulates", () => {
-    const all = text(fork("smart")) + text(fork("byhand", "pro"));
+    const all = text(fork("smart")) + text(fork("byhand"));
     for (const word of [/\brecommended\b/i, /\bbest for\b/i, /\bgreat\b/i, /\bwell done\b/i, /\bperfect\b/i, /\beasy\b/i, /\bsimply\b/i]) {
       expect(all, String(word)).not.toMatch(word);
     }
@@ -141,22 +141,21 @@ describe("K1 three tiles, no radio, no ring", () => {
     expect(call).toContain("onAddByHand={onAddByHand}");
     expect(call).toContain("onNothingYet={onSkip}");
     expect(call).not.toContain("ringed=");
-    expect(call).toContain("tier={entitlement.tier}");
+    expect(call).not.toContain("tier="); // plan rules v1: the fork no longer takes a tier
     expect(f).toMatch(/data-picker="smart"[\s\S]*?pickFile\(f\)/);
     expect(f).toMatch(/data-picker="template"[\s\S]*?pickTemplateFile\(f\)/);
   });
 });
 
-describe("K2 the fact line states cost, from the tier", () => {
-  it("Smart import reads the entitlement's tier", () => {
-    expect(captureFact("smart", "free")).toBe("Uses your one Smart Import");
-    expect(captureFact("smart", "pro")).toBe("Uses this month's Smart Import");
-    expect(fork("smart", "free")).toContain('<p class="sf-fact" data-fact="smart">Uses your one Smart Import</p>');
-    expect(fork("smart", "pro")).toContain(`<p class="sf-fact" data-fact="smart">${esc("Uses this month's Smart Import")}</p>`);
+describe("K2 the fact line states cost — one Smart Import per account, on every plan (plan rules v1)", () => {
+  it("Smart import states the one import", () => {
+    expect(captureFact("smart")).toBe("Uses your one Smart Import");
+    expect(fork("smart")).toContain('<p class="sf-fact" data-fact="smart">Uses your one Smart Import</p>');
+    expect(fork("smart")).not.toContain("this month");
   });
   it("the other two are always free", () => {
-    expect(captureFact("template", "free")).toBe("Always free");
-    expect(captureFact("byhand", "pro")).toBe("Always free · Ends set-up");
+    expect(captureFact("template")).toBe("Always free");
+    expect(captureFact("byhand")).toBe("Always free · Ends set-up");
   });
 });
 

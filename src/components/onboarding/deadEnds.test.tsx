@@ -9,9 +9,9 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { renderToStaticMarkup } from "react-dom/server";
 import {
-  UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded,
+  UsedFree, Unreadable, NothingImported, Unloaded,
   CHIP_USED, CHIP_UNREADABLE, CHIP_NOTHING, CHIP_UNLOADED,
-  USED_FREE_TITLE, USED_FREE_TEXT, USED_PRO_TITLE, UNREADABLE_TITLE, UNREADABLE_TEXT, NOTHING_TITLE, UNLOADED_TITLE, UNLOADED_TEXT,
+  USED_FREE_TITLE, USED_FREE_TEXT, UNREADABLE_TITLE, UNREADABLE_TEXT, NOTHING_TITLE, UNLOADED_TITLE, UNLOADED_TEXT,
 } from "./DeadEnd";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -24,15 +24,14 @@ const OUTCOME = { queriesImported: 0, agentsCreated: 0, agentsMerged: 0, queries
 
 const STATES = {
   usedFree: r(<UsedFree onBack={noop} onAddByHand={noop} onUseTemplate={noop} />),
-  usedPro: r(<UsedProMonth nextLabel="1 November 2026" onBack={noop} onAddByHand={noop} />),
   unreadable: r(<Unreadable onBack={noop} onAddByHand={noop} onDownload={noop} />),
   nothing: r(<NothingImported outcome={OUTCOME} skippedReasons={["No agent or agency name"]} onBackToReview={noop} />),
   unloaded: r(<Unloaded onAddByHand={noop} onRestart={noop} />),
 };
 
 describe("E1 each dead end is one card: chip, title, text, foot", () => {
-  it("renders all five (the sweep is not vacuous)", () => {
-    expect(Object.keys(STATES)).toHaveLength(5);
+  it("renders all four (the sweep is not vacuous; plan rules v1 retired Pro's monthly dead end)", () => {
+    expect(Object.keys(STATES)).toHaveLength(4);
     for (const [name, h] of Object.entries(STATES)) {
       expect(h.match(/class="sf-card sf-dead"/g) ?? [], `${name}: one card`).toHaveLength(1);
       expect(h, `${name}: a chip`).toMatch(/class="sf-chip( sf-chip--fail)?"/);
@@ -53,11 +52,9 @@ describe("E1 each dead end is one card: chip, title, text, foot", () => {
     expect(h, "the primary is the template").toMatch(/<button[^>]*class="sf-btn"[^>]*>Use the template<\/button>/);
   });
 
-  it("Smart Import used, Pro's month: the built title, sentence and date", () => {
-    const h = STATES.usedPro;
-    expect(USED_PRO_TITLE).toBe("Next Smart Import next month");
-    expect(text(h)).toContain("You've used this month's Smart Import. Your next one is available on 1 November 2026. You can add agents by hand in the meantime.");
-    expect(buttons(h)).toEqual(["‹ Back", "Add them by hand"]);
+  it("plan rules v1: there is no Pro monthly dead end — the component and its title are gone", () => {
+    const src = readFileSync(resolve(here, "DeadEnd.tsx"), "utf8");
+    expect(src).not.toMatch(/UsedProMonth|USED_PRO_TITLE|this month's Smart Import/);
   });
 
   it("file couldn't be read: a failure chip, and no claim about whether the import was spent", () => {

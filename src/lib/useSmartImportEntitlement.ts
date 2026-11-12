@@ -11,6 +11,6 @@ import { useScriptAllyDb } from "./db";
 import { getSmartImportEntitlement, SmartImportEntitlement } from "./smartImportEntitlement";
 
 export function useSmartImportEntitlement(): SmartImportEntitlement {
-  const { currentUser, smartImportUsage } = useScriptAllyDb();
-  return getSmartImportEntitlement(currentUser?.plan, smartImportUsage);
+  const { smartImportUsage } = useScriptAllyDb();
+  return getSmartImportEntitlement(smartImportUsage);
 }

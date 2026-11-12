@@ -15,6 +15,7 @@
  * fork, the Import page's tiles); while the flow is `idle` it renders only its two file pickers,
  * which the host opens through the ref.
  */
+import { isUsedRefusal } from "../../lib/smartImportEntitlement";
 import { armMentorIntro, disarmMentorIntro } from "../../lib/mentorIntro";
 import React, { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import type { DraftMeta } from "../../lib/importDraft";
@@ -54,7 +55,7 @@ import { ConfirmScreen } from "../onboarding/ConfirmScreen";
 import { PhotosScreen } from "../onboarding/PhotosScreen";
 import { MAX_PAGES, PHOTOS_WORDS, createUrlRegistry, isImageFile, movePage, type ReviewPhoto } from "../../lib/photoImport";
 import { preparePhoto, fitPhotos } from "../../lib/photoPrepare";
-import { UsedFree, UsedProMonth, Unreadable, NothingImported, Unloaded } from "../onboarding/DeadEnd";
+import { UsedFree, Unreadable, NothingImported, Unloaded } from "../onboarding/DeadEnd";
 import { aiRefusalReason, IMPORT_IN_PROGRESS_MESSAGE } from "../../lib/aiRefusal";
 
 /** UX-only floor so the post-import loader is held for a deliberate minimum (never a fake delay on
@@ -65,7 +66,8 @@ const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve,
 export type ImportFlowScreen = "idle" | "confirm" | "photos" | "blocked" | "reading" | "overview" | "review" | "fallback" | "importing" | "done";
 
 /** A blocked Smart Import attempt — the structured reason the gate (or the pre-check) surfaced. */
-type Blocked = { reason: "free_used" | "pro_month_used"; nextAvailable?: string };
+/* plan rules v1: one Smart Import per account on every plan — the one way to be blocked is to have used it */
+type Blocked = { reason: "used" };
 
 /** What the host can ask of the flow while it is idle. */
 export interface ImportFlowHandle {
@@ -215,7 +217,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   /* Photos chosen (or dropped) → the same client gate as a file; then the photos screen. */
   const photosAllowed = (): boolean => {
     if (entitlement.allowed) return true;
-    setBlocked({ reason: entitlement.reason as Blocked["reason"], nextAvailable: entitlement.nextAvailable });
+    setBlocked({ reason: "used" });
     setScreen("blocked");
     return false;
   };
@@ -328,7 +330,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   // The server re-checks regardless — this is UX, not the enforcement.
   const pickFile = (file: File) => {
     if (!entitlement.allowed) {
-      setBlocked({ reason: entitlement.reason as Blocked["reason"], nextAvailable: entitlement.nextAvailable });
+      setBlocked({ reason: "used" });
       setScreen("blocked");
       return;
     }
@@ -388,8 +390,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       // UI shows the right thing, not a raw error. (Covers a client/server race: client thought it was
       // allowed but the server had already consumed it.)
       const reason = e?.details?.reason;
-      if (reason === "free_used" || reason === "pro_month_used") {
-        setBlocked({ reason, nextAvailable: e?.details?.nextAvailable });
+      if (isUsedRefusal(reason)) {
+        setBlocked({ reason: "used" });
         setScreen("blocked");
         return;
       }
@@ -429,8 +431,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       setExtractComplete(true);
     } catch (e: any) {
       const reason = e?.details?.reason;
-      if (reason === "free_used" || reason === "pro_month_used") {
-        setBlocked({ reason, nextAvailable: e?.details?.nextAvailable });
+      if (isUsedRefusal(reason)) {
+        setBlocked({ reason: "used" });
         setScreen("blocked");
         return;
       }
@@ -622,21 +624,15 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
 
   if (screen === "blocked" && blocked) {
     const backToFork = () => { setBlocked(null); toStart(); };
-    if (blocked.reason === "free_used") {
-      return (
-        <UsedFree
-          onBack={backToFork}
-          onAddByHand={onAddByHand}
-          /* Back to the start, where the template tile is: what the writer
-             has just been told they can still do. */
-          onUseTemplate={() => { setBlocked(null); onUseTemplate?.(); toStart(); }}
-        />
-      );
-    }
-    const nextLabel = blocked.nextAvailable
-      ? new Date(`${blocked.nextAvailable}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" })
-      : "next month";
-    return <UsedProMonth nextLabel={nextLabel} onBack={backToFork} onAddByHand={onAddByHand} />;
+    return (
+      <UsedFree
+        onBack={backToFork}
+        onAddByHand={onAddByHand}
+        /* Back to the start, where the template tile is: what the writer
+           has just been told they can still do. */
+        onUseTemplate={() => { setBlocked(null); onUseTemplate?.(); toStart(); }}
+      />
+    );
   }
 
   if (screen === "reading") {

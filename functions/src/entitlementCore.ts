@@ -38,3 +38,13 @@ export function entitlementBasis(f: EntitlementFacts): EntitlementBasis {
 /** Every Pro feature (Query letters, versions, packages, their results, comps, the Scout, Smart email drop). */
 export const hasPro = (b: EntitlementBasis): boolean => b !== "free";
 
+
+/**
+ * SMART IMPORT IS ONCE PER ACCOUNT, ON EVERY PLAN (plan rules v1). The monthly Pro allowance is retired, and an
+ * account that ever used either old allowance has used its one: the free-once flag, or any Pro month on record. An
+ * account that imported more than once under the old rule keeps its data and simply has none left. Mirrors
+ * `smartImportUsed` in src/lib/smartImportEntitlement.ts (`smartImportEntitlement.test.ts` runs both).
+ */
+export interface SmartImportFields { smartImportFreeUsed?: unknown; smartImportLastUsedMonth?: unknown }
+export const smartImportUsed = (e: SmartImportFields | null | undefined): boolean =>
+  e?.smartImportFreeUsed === true || (typeof e?.smartImportLastUsedMonth === "string" && e.smartImportLastUsedMonth !== "");

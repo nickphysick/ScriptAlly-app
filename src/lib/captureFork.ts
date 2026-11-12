@@ -80,8 +80,9 @@ export const CAPTURE_HAND_ACTION = "Add an agent";
  * The fact line under a tile: what it costs, and nothing else. Smart import's depends on the
  * writer's tier, read from the entitlement — never a guess, and never hard-coded to free.
  */
-export function captureFact(option: CaptureOption, tier: "free" | "pro"): string {
-  if (option === "smart") return tier === "pro" ? "Uses this month's Smart Import" : "Uses your one Smart Import";
+export function captureFact(option: CaptureOption): string {
+  /* plan rules v1: one Smart Import per account, on every plan */
+  if (option === "smart") return "Uses your one Smart Import";
   if (option === "template") return "Always free";
   return "Always free · Ends set-up";
 }

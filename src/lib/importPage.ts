@@ -33,12 +33,10 @@ export const TILE_MATCH = {
  * The Smart import tile's fact line, from the entitlement.
  *   allowed                 → "1 Smart Import available"
  *   free, already used      → "Smart Import already used"
- *   Pro, this month's used  → "Available {date}" (the entitlement's `nextAvailable`), or
- *                             "Available next month" when the entitlement carries no date.
+ *   used (any plan)         → "Smart Import already used" — once per account (plan rules v1)
  */
-export function smartFactLine(e: Pick<SmartImportEntitlement, "allowed" | "reason" | "nextAvailable">, shortDate: (iso: string) => string): string {
+export function smartFactLine(e: Pick<SmartImportEntitlement, "allowed">): string {
   if (e.allowed) return "1 Smart Import available";
-  if (e.reason === "pro_month_used") return e.nextAvailable ? `Available ${shortDate(e.nextAvailable)}` : "Available next month";
   return "Smart Import already used";
 }
 

@@ -22,7 +22,6 @@ import { planLine } from "../../../lib/shellSidebar";
 import { PLAN_ROWS } from "../../../lib/planComparison";
 import { smartImportLine } from "../../../lib/smartImportEntitlement";
 import { useSmartImportEntitlement } from "../../../lib/useSmartImportEntitlement";
-import { dayMonth } from "../../../lib/dates";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
 import { resolveScopedManuscript } from "../../../lib/shellSidebar";
 import { GUIDE_PAGES, guideCard } from "../../../lib/pageChecklist";
@@ -46,7 +45,7 @@ export const PlanPhone: React.FC = () => {
   const ent = useSmartImportEntitlement();
   /* plan rules v1: which column is this account's, from the resolver */
   const pro = planColumn(entitlement) === "pro";
-  const smart = smartImportLine(ent, (iso) => dayMonth(iso));
+  const smart = smartImportLine(ent);
   return (
     <div className="pa-pg" data-pa="plan">
       <div className="pa-pgbody">

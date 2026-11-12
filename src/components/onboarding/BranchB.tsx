@@ -162,7 +162,6 @@ export const BranchB: React.FC<BranchBProps> = ({
       />
       {flowScreen === "idle" && (
         <CaptureFork
-          tier={entitlement.tier}
           onChooseFile={() => flowRef.current?.chooseFile()}
           onDropFile={(f) => flowRef.current?.dropFile(f)}
           onUsePhotos={() => flowRef.current?.openPhotos()}

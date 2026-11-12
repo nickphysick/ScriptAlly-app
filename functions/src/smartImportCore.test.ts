@@ -117,8 +117,9 @@ describe("the callable delegates to the core (locked)", () => {
     expect(src).not.toContain("SYSTEM_PROMPT");
   });
   it("keeps its gate and its consume-on-success", () => {
-    expect(src).toContain('reason: "pro_month_used"');
-    expect(src).toContain('reason: "free_used"');
+    /* plan rules v1: one refusal for every plan — the account's one Smart Import is used */
+    expect(src).toContain('reason: "used"');
+    expect(src).not.toContain('reason: "pro_month_used"');
     expect(src.indexOf("await consume()")).toBeGreaterThan(src.indexOf("outcome.failure"));
   });
 });
