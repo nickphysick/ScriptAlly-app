@@ -5,7 +5,7 @@
 
 import { MONTHS_SHORT } from "./dates";
 import { findExistingAgent } from "./importDuplicates";
-import React, { createContext, useCallback, useContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useCallback, useContext, useMemo, useState, useEffect, useRef } from "react";
 import {
   User,
   UserPlan,
@@ -48,7 +48,7 @@ import {
 
 import { seedCommunityAgentsIfEmpty, localSeedCommunityAgents } from "./seedCommunityAgents";
 import { narratesManuscriptWrite } from "./manuscriptFeed";
-import { packagesUnlocked } from "./entitlements";
+import { packagesUnlocked, resolveEntitlement, type Entitlement } from "./entitlements";
 import { versionAtLogging } from "./versionsV2";
 
 import {
@@ -252,6 +252,8 @@ export interface AddQueryOpts {
 interface DbContextType {
   currentUser: User | null;
   smartImportUsage: SmartImportUsage | null;
+  /** Plan rules v1 — what this account has: founding flag, then plan, then the 14-day trial (lib/entitlements). */
+  entitlement: Entitlement;
   authReady: boolean;
   collectionsReady: boolean;
   /** ADDITIVE (Contact list principles v1): how the agents listener stands — "failed" once it errored (the listener is
@@ -581,6 +583,16 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   // users/{uid}/private/entitlement (the client never writes it). null === not yet loaded / absent,
   // which the entitlement helper reads as "not used".
   const [smartImportUsage, setSmartImportUsage] = useState<SmartImportUsage | null>(null);
+  /* Plan rules v1 — the entitlement's three facts. The private doc's first snapshot (present or absent) is what makes the
+     founding answer known; until then the resolver says `pending`. The creation time is the sign-in account's own. */
+  const [entitlementLoaded, setEntitlementLoaded] = useState(false);
+  const [accountCreatedMs, setAccountCreatedMs] = useState<number | null>(null);
+  const [entitlementNowMs, setEntitlementNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    /* The trial ends while the app may be open: re-read the clock every ten minutes. */
+    const t = setInterval(() => setEntitlementNowMs(Date.now()), 10 * 60 * 1000);
+    return () => clearInterval(t);
+  }, []);
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
   const [versions, setVersions] = useState<ManuscriptVersion[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -646,6 +658,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         // No authenticated user — show the Auth screen
         setCurrentUser(null);
         setSmartImportUsage(null);
+        setEntitlementLoaded(false);
+        setAccountCreatedMs(null);
         setAuthReady(true);          // auth resolved: definitively logged out
         setCollectionsReady(false);  // next sign-in starts in the loading state
         setAgentsRead("ok");
@@ -673,6 +687,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       }
 
       const uid = firebaseUser.uid;
+      { const t = Date.parse(firebaseUser.metadata.creationTime ?? ""); setAccountCreatedMs(Number.isNaN(t) ? null : t); }
 
       // Track first-load of the collections the dashboard's empty-state depends on, so the UI can
       // tell "still loading" from "genuinely empty" (kills the empty-state flicker on boot).
@@ -759,7 +774,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         // the server gate is the real enforcement, so we just log and leave usage null.
         unsubEntitlement = onSnapshot(doc(db, "users", uid, "private", "entitlement"), (snap) => {
           setSmartImportUsage(snap.exists() ? (snap.data() as SmartImportUsage) : null);
+          setEntitlementLoaded(true);
         }, (error) => {
+          /* A read error leaves the founding answer unknown for good; resolve it as "not founding" rather than hang in
+             `pending` (which opens everything). The server enforces its own gates either way. */
+          setEntitlementLoaded(true);
           handleFirestoreError(error, OperationType.GET, `users/${uid}/private/entitlement`);
         });
 
@@ -4046,11 +4065,19 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   };
 
+  const entitlement = useMemo(() => resolveEntitlement({
+    founding: !currentUser || !entitlementLoaded ? null : smartImportUsage?.founding === true,
+    plan: currentUser?.plan,
+    createdMs: accountCreatedMs,
+    nowMs: entitlementNowMs,
+  }), [currentUser, entitlementLoaded, smartImportUsage, accountCreatedMs, entitlementNowMs]);
+
   return (
     <DbContext.Provider
       value={{
         currentUser,
         smartImportUsage,
+        entitlement,
         authReady,
         collectionsReady,
         agentsRead,

@@ -218,6 +218,13 @@ export interface GenreSuggestion {
 export interface SmartImportUsage {
   smartImportFreeUsed?: boolean;        // lifetime free-once flag (Free tier)
   smartImportLastUsedMonth?: string;    // "YYYY-MM" (UTC) of the most recent Pro import
+  /** Plan rules v1 — a founding writer: everything, no trial clock, no upgrade prompts. Server-written only (foundingStats'
+   *  backstop, scripts/founding-flag.mjs, the dev backfill). Absent reads as not founding; `false` is an explicit unmark. */
+  founding?: boolean;
+  /** When the flag was set (a Firestore server timestamp). */
+  foundingSince?: unknown;
+  /** Who set it: "invite" | "waitlist" | "admin" | "backfill". */
+  foundingSource?: string;
 }
 
 export enum ManuscriptStatus {

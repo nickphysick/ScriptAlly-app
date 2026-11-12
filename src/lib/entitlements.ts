@@ -14,6 +14,7 @@
  */
 import { User, UserPlan } from "../types";
 import type { ProEntitlement } from "./workspaceShell";
+import { TRIAL_DAYS, type ProFeature } from "./planRules";
 
 export const PACKAGES_OPEN_TO_ALL = true;
 
@@ -94,3 +95,58 @@ export function navLockedFor(
   for (const k of Object.keys(NAV_OPEN) as ProEntitlement[]) if (!(open[k] ?? NAV_OPEN[k])) out.add(k);
   return out;
 }
+
+/* ══════════════ Plan rules v1 — the one resolver ══════════════
+   ⚠️ FOUNDING FLAG, THEN PLAN, THEN THE TRIAL WINDOW — and nothing else decides what an account has. The server mirrors
+   this in `functions/src/entitlementCore.ts`; `entitlementsAgree.test.ts` runs both over the same cases.
+   ⚠️ THE FOUNDING FLAG is `users/{uid}/private/entitlement.founding`, written only by the server. THE TRIAL is 14 days
+   from the sign-in account's creation (auth metadata), derived, never stored: `trialStartDate` is not read. */
+export const DAY_MS = 86_400_000;
+
+export type EntitlementBasis = "founding" | "pro" | "trial" | "free";
+
+export interface EntitlementFacts {
+  founding: boolean;
+  plan: string | null | undefined;
+  /** The sign-in account's creation time, ms. Null when unknown, which never grants a trial. */
+  createdMs: number | null;
+  nowMs: number;
+}
+
+/** Founding first, then a paid plan, then the first 14 days (day 1 to day 14), then Free. */
+export function entitlementBasis(f: EntitlementFacts): EntitlementBasis {
+  if (f.founding) return "founding";
+  if (f.plan === UserPlan.PRO) return "pro";
+  if (f.createdMs != null && f.nowMs - f.createdMs < TRIAL_DAYS * DAY_MS) return "trial";
+  return "free";
+}
+
+/**
+ * What the app reads. `pending` is the moment before the private entitlement doc has loaded: nothing is locked and no
+ * upgrade prompt is drawn, so a founding writer never sees a flash of Free.
+ */
+export interface Entitlement {
+  basis: EntitlementBasis | "pending";
+  /** Every Pro feature is open (founding, Pro, trial — and pending). */
+  pro: boolean;
+  /** Upgrade prompts may be drawn: trial and Free only. Never founding, never Pro, never pending. */
+  prompts: boolean;
+  /** When the trial ends (ms), for a trial account; otherwise null. */
+  trialEndsMs: number | null;
+}
+
+export function resolveEntitlement(f: Omit<EntitlementFacts, "founding"> & { founding: boolean | null }): Entitlement {
+  if (f.founding === null) return { basis: "pending", pro: true, prompts: false, trialEndsMs: null };
+  const basis = entitlementBasis({ ...f, founding: f.founding });
+  return {
+    basis,
+    pro: basis !== "free",
+    prompts: basis === "trial" || basis === "free",
+    trialEndsMs: basis === "trial" && f.createdMs != null ? f.createdMs + TRIAL_DAYS * DAY_MS : null,
+  };
+}
+
+/** May this account use (create and edit in) a Pro feature? One answer for all seven: Pro work is all-or-nothing. */
+export const canUse = (e: Entitlement, _feature: ProFeature): boolean => e.pro;
+/** A Pro page on Free: it opens and its lists show, and nothing in it can be created or edited. */
+export const readOnly = (e: Entitlement, feature: ProFeature): boolean => !canUse(e, feature);
