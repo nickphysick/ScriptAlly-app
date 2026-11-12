@@ -40,3 +40,18 @@ describe("scripts/founding-flag.mjs", () => {
     expect(src("scripts/lib/adminRest.mjs")).toContain("requireLiveOptIn(project)");
   });
 });
+
+describe("scripts/backfill-founding-flags.mjs", () => {
+  const s = src("scripts/backfill-founding-flags.mjs");
+  it("refuses production without --prod, before it reads anything", () => {
+    expect(s).toContain('if (t.isProd && !flag("--prod"))');
+    expect(s.indexOf('!flag("--prod")')).toBeLessThan(s.indexOf("await client(t)"));
+  });
+  it("passes the cap only with --over-cap, and writes only after --confirm", () => {
+    expect(s).toContain('const overCap = flag("--over-cap")');
+    expect(s.indexOf('flag("--confirm")')).toBeLessThan(s.indexOf("writeFounding("));
+  });
+  it("leaves an explicit unmark alone", () => {
+    expect(s).toContain("if (current === false) { unmarked++; return; }");
+  });
+});
