@@ -102,6 +102,7 @@ const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
 import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklist";
 import { useAgentsHold } from "../../lib/contactLoadHold";
+import { readClpFigures, readClpState } from "../../lib/contactPrinciplesReview";
 import { CONTACT_ADD_FIRST, CONTACT_CHECKLIST, CONTACT_NEEDS_AN_AGENT, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, GUIDE_UNHIDE_PATH, contactGuideOf, guideDonePath, nextGuideAfter, type ContactGuideKey } from "../../lib/pageChecklist";
 import { readSkipped } from "../../lib/guideHub";
 import { downloadAgentsCsv } from "../../lib/agentCsv";
@@ -620,7 +621,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
   const banner = useMemo(() => bannerFigures(hk), [hk]);
   /* v26 A — the header's sentence: every agent on file, the ones queried, the ones waiting on the writer */
-  const headFigures = useMemo(() => headerFigures(factsAll), [factsAll]);
+  const headFigures0 = useMemo(() => headerFigures(factsAll), [factsAll]);
+  /* Contact list principles v1 — a DEV-ONLY review aid: `window.__SA_CLP_FIG = { n, q, y }` puts the headline's figures
+     (and only the headline's) at those numbers, so CLP2 can render each case. Gated here, at the call site. */
+  const clpFig = import.meta.env.MODE !== "production" ? readClpFigures() : null;
+  const headFigures = clpFig ?? headFigures0;
   /* v26 A — "Show me who": the Missing details quick pick (Part E's own), then the list card into view */
   const showMissing = useCallback(() => {
     setFilters((f) => (pickOn(f) === "missing" ? f : applyPick(f, "missing")));

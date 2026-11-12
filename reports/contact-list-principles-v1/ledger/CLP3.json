@@ -1,0 +1,22 @@
+[
+ {
+  "where": "a base reading exists",
+  "ok": true,
+  "detail": "reports/contact-list-principles-v1/ledger/qc-header-base.json"
+ },
+ {
+  "where": "title text",
+  "ok": true,
+  "detail": "88 queries sent vs 88 queries sent"
+ },
+ {
+  "where": "title font",
+  "ok": true,
+  "detail": "\"Special Elite\", \"Courier New\", Courier, monospace|54px|400|rgb(28, 19, 15)|56.7px vs \"Special Elite\", \"Courier New\", Courier, monospace|54px|400|rgb(28, 19, 15)|56.7px"
+ },
+ {
+  "where": "the for line's font",
+  "ok": true,
+  "detail": "null vs null"
+ }
+]

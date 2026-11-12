@@ -1,0 +1,29 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list principles v1 (design-refs/contact-list-principles-v1/, the pp layer) — the Contact list as built (v27)
+ * with Nick's desktop UI principles on top. EVERY RULE IS SCOPED TO THE CONTACT LIST: `.cl27` for the page, and
+ * `.cl262-card` for the agent card (AgentCard262 — the shared AgentPaperCard sheet, which Housekeeping and the comps
+ * page also read, is not touched). The Query Centre shares the header and rail classes (`:is(.qc151, .cl27)`), so
+ * nothing here names `.qc151` (CLP3).
+ *
+ * ⚠️ brand.tsx names a face on h1 and bare spans at runtime: every face here carries `!important`.
+ */
+
+/* ── 1 · the header: one filled button, a live headline ──────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .cl27 .cl26-health[data-ground="light"] .cl26-open,
+  .cl27 .cl26-health[data-ground="light"] .cl26-open:hover {
+    background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52;
+  }
+  .cl27 .cl26-health[data-ground="light"] .cl26-open:hover { background: #f4f6f9; }
+  .cl27 .cl26-health[data-ground="light"] .cl26-open:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+  .cl27 .qc1531-hd h1.qc1531-t.clp-t {
+    margin: 0; font: 400 36px/1.15 var(--sp-type) !important; color: var(--ink, #1c130f); white-space: normal; letter-spacing: 0;
+  }
+  .cl27 .qc1531-hd h1.qc1531-t.clp-t b { font: inherit !important; font-weight: 400 !important; color: #a2452a; }
+  .cl27 .qc1531-for.clp-for span b { font: 400 21px/1.25 var(--sp-type) !important; color: var(--ink, #1c130f); }
+  .cl27 .qc1531-for.clp-for span.clp-under { font: italic 400 19px/1.25 var(--sp-serif) !important; color: var(--mut, #5b4f47); white-space: normal; max-width: 100%; }
+}

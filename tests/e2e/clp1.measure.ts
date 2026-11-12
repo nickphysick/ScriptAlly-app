@@ -22,7 +22,7 @@
  *   CLP14 reduced motion: no running animations
  *
  * ⚠️ EVERY READ STARTS FROM THE VISIBLE COPY (every workspace page stays mounted) — `.aglist` is the Contact list's.
- * ⚠️ `CLP_MUTATE=<lock>` applies a named break; a lock that stays green under its own break is unproved.
+ * ⚠️ `CLP_MUTATE=<lock>[,<lock>…]` applies each named break; a lock that stays green under its own break is unproved.
  * ⚠️ CLP7 and CLP8 WRITE: each restores in the same run through the Undo it is locking (the emulator is re-imported
  *    by every e2e:emu run in any case).
  */
@@ -32,7 +32,8 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { openApp } from "./pageHeaderV2Lib";
 
 const DIR = "reports/contact-list-principles-v1";
-const MUT = process.env.CLP_MUTATE ?? "";
+/** one break or several (`CLP_MUTATE=CLP1,CLP4`): each test applies only its own lock's break */
+const MUTS = (process.env.CLP_MUTATE ?? "").split(",").map((x) => x.trim()).filter(Boolean);
 const BASE = process.env.CLP_BASE === "1";
 const VP = { width: 1440, height: 900 };
 const RUN = `Clp${Date.now().toString(36).slice(-5)}`;
@@ -43,7 +44,7 @@ class Ledger {
   check(where: string, ok: unknown, detail: string) { this.rows.push({ where, ok: !!ok, detail }); }
   done(floor: number) {
     mkdirSync(`${DIR}/ledger`, { recursive: true });
-    writeFileSync(`${DIR}/ledger/${BASE ? "base-" : ""}${MUT ? `mut-${MUT}-` : ""}${this.name}.json`, JSON.stringify(this.rows, null, 1));
+    writeFileSync(`${DIR}/ledger/${BASE ? "base-" : ""}${MUTS.includes(this.name) ? "mut-" : ""}${this.name}.json`, JSON.stringify(this.rows, null, 1));
     for (const r of this.rows.filter((x) => !x.ok).slice(0, 40)) console.log(`  ✗ ${this.name} · ${r.where} — ${r.detail}`);
     console.log(`[${this.name}] ${this.rows.filter((r) => r.ok).length}/${this.rows.length} green`);
     expect(this.rows.length, `${this.name}: fewer readings than it claims`).toBeGreaterThanOrEqual(floor);
@@ -54,7 +55,7 @@ const emu = (cmd: string): string => execFileSync("node", ["tests/e2e/aa1Emu.mjs
 const css = (page: Page, rule: string) => page.addStyleTag({ content: rule });
 
 async function mut(page: Page, lock: string) {
-  if (MUT !== lock) return;
+  if (!MUTS.includes(lock)) return;
   switch (lock) {
     case "CLP1": await css(page, ".cl26-health .cl26-open{background:#2a3a52 !important;box-shadow:none !important}"); break;
     case "CLP2": await page.evaluate(() => { const t = [...document.querySelectorAll<HTMLElement>(".aglist [data-clp='headline']")].find((e) => e.offsetHeight); if (t) t.textContent = "41 agents on file"; }); break;
@@ -178,7 +179,7 @@ test("CLP3 · the Query Centre's header title: font and text as the base run rea
     return { text: t.textContent?.trim(), font: `${s.fontFamily}|${s.fontSize}|${s.fontWeight}|${s.color}|${s.lineHeight}`, forFont: f ? `${getComputedStyle(f).fontFamily}|${getComputedStyle(f).fontSize}` : null };
   });
   const file = `${DIR}/ledger/qc-header-base.json`;
-  if (BASE && !MUT) { mkdirSync(`${DIR}/ledger`, { recursive: true }); writeFileSync(file, JSON.stringify(r, null, 1)); }
+  if (BASE && !MUTS.length) { mkdirSync(`${DIR}/ledger`, { recursive: true }); writeFileSync(file, JSON.stringify(r, null, 1)); }
   L.check("a base reading exists", existsSync(file), file);
   const b = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : {};
   L.check("title text", r.text === b.text, `${r.text} vs ${b.text}`);
