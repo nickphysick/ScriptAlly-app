@@ -1,0 +1,17 @@
+[
+ {
+  "where": "population: rated and unrated agents in the list",
+  "ok": true,
+  "detail": "27 rated of 41"
+ },
+ {
+  "where": "in fit order",
+  "ok": true,
+  "detail": "41 in order"
+ },
+ {
+  "where": "unrated last",
+  "ok": true,
+  "detail": "26 / 27"
+ }
+]

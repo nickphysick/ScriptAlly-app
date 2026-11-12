@@ -1,0 +1,32 @@
+[
+ {
+  "where": "every section opens",
+  "ok": true,
+  "detail": "[\"contact\",\"genres\",\"wishlist\",\"materials\",\"how\"]"
+ },
+ {
+  "where": "Contact details first",
+  "ok": true,
+  "detail": "[\"contact\",\"genres\",\"wishlist\",\"materials\",\"how\"]"
+ },
+ {
+  "where": "the band says EDITING",
+  "ok": true,
+  "detail": "chip"
+ },
+ {
+  "where": "the nudge line, inside the section",
+  "ok": true,
+  "detail": "Also changesQuery Centre and Birds-eye view: your query's reply expected no date → 21 Oct, so it becomes past the date a"
+ },
+ {
+  "where": "two changes, by name",
+  "ok": true,
+  "detail": "2 · city, response time · moves 1 nudge"
+ },
+ {
+  "where": "moves a nudge",
+  "ok": true,
+  "detail": "city, response time · moves 1 nudge"
+ }
+]

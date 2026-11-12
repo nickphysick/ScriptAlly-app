@@ -78,7 +78,7 @@ async function mut(page: Page, lock: string) {
 }
 
 /* ═════════ H1 · the header ═════════ */
-test("CL26-H1 · (re-pointed by v27) the open header: title, the for line, two buttons, the ring beside them; no At a glance, no title card", async ({ page }) => {
+test("CL26-H1 · (re-pointed by v27 and principles v1) the open header: title, the for line, two buttons, the ring beside them; no At a glance, no title card", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("H1");
   for (const vp of SIZES) {
@@ -103,8 +103,9 @@ test("CL26-H1 · (re-pointed by v27) the open header: title, the for line, two b
     L.check(`${vp.width} header found`, !!r, "no header");
     if (!r) continue;
     L.check(`${vp.width} on the page's ground (no panel)`, r.bg === "rgba(0, 0, 0, 0)" && r.panel === 0, `${r.bg}, ${r.panel} panels`);
-    L.check(`${vp.width} title`, /^\d+ agents? on file$/.test(String(r.title)), String(r.title));
-    L.check(`${vp.width} the for line`, /^you’ve queried \d+$/.test(r.line), r.line);
+    /* re-pointed by Contact list principles v1: the title is the live headline, the count line moved beneath it */
+    L.check(`${vp.width} title`, /^(?:\d+ needs? you\. (?:\d+ not queried yet\.|Everyone’s been queried\.)|Nothing needs you right now\. (?:\d+ not queried yet\.|Everyone’s been queried\.)|\d agents? so far\. (?:Not|Neither|None) queried yet\.)$/.test(String(r.title)), String(r.title));
+    L.check(`${vp.width} the for line`, /^\d+ agents? on file · you’ve queried \d+$/.test(r.line), r.line);
     L.check(`${vp.width} two buttons`, JSON.stringify(r.btns) === JSON.stringify(["+ Add an agent", "Discover agents"]), JSON.stringify(r.btns));
     L.check(`${vp.width} ring beside the text`, r.ringRightOfText, "the ring is under the title block");
     L.check(`${vp.width} no At a glance`, r.glance === 0, String(r.glance));

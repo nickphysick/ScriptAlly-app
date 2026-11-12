@@ -1,0 +1,32 @@
+[
+ {
+  "where": "1512 scrolled (precondition)",
+  "ok": true,
+  "detail": "1200 · card at -838.46875"
+ },
+ {
+  "where": "1512 the band is held at the scroller's top",
+  "ok": true,
+  "detail": "117.75 vs 105.75"
+ },
+ {
+  "where": "1512 the headings are on screen under it",
+  "ok": true,
+  "detail": "226.75"
+ },
+ {
+  "where": "1280 scrolled (precondition)",
+  "ok": true,
+  "detail": "1200 · card at -838.46875"
+ },
+ {
+  "where": "1280 the band is held at the scroller's top",
+  "ok": true,
+  "detail": "117.75 vs 105.75"
+ },
+ {
+  "where": "1280 the headings are on screen under it",
+  "ok": true,
+  "detail": "226.75"
+ }
+]

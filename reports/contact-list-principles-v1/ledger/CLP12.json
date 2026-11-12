@@ -47,6 +47,6 @@
  {
   "where": "two filters: both named, the line, Clear and Just remove",
   "ok": true,
-  "detail": "[\"No agents match “zzqx” and “Genre: Literary fiction”.Two filters together left nobody. Take one off, or clear them both.Clear the filtersJust remove “Genre: Literary fiction”\"]"
+  "detail": "[\"No agents match “zzqx” and “Literary fiction”.Two filters together left nobody. Take one off, or clear them both.Clear the filtersJust remove “Literary fiction”\"]"
  }
 ]

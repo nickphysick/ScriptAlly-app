@@ -1,0 +1,27 @@
+[
+ {
+  "where": "the typed amount stays",
+  "ok": true,
+  "detail": "200"
+ },
+ {
+  "where": "the floor line",
+  "ok": true,
+  "detail": "At least 500 words for the opening sample."
+ },
+ {
+  "where": "a rust ring",
+  "ok": true,
+  "detail": "rgb(162, 69, 42) 0px 0px 0px 2px inset"
+ },
+ {
+  "where": "Add waits",
+  "ok": true,
+  "detail": "add"
+ },
+ {
+  "where": "chapters snaps to 3",
+  "ok": true,
+  "detail": "3"
+ }
+]

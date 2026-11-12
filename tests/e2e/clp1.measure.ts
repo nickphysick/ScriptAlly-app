@@ -60,7 +60,8 @@ async function mut(page: Page, lock: string) {
   switch (lock) {
     case "CLP1": await css(page, ".cl26-health .cl26-open{background:#2a3a52 !important;box-shadow:none !important}"); break;
     case "CLP2": await page.evaluate(() => { const t = [...document.querySelectorAll<HTMLElement>(".aglist [data-clp='headline']")].find((e) => e.offsetHeight); if (t) t.textContent = "41 agents on file"; }); break;
-    case "CLP3": await css(page, ".qc151 .qc1531-hd h1.qc1531-t{font-size:36px !important}"); break;
+    /* inline !important: a later Query Centre rule (v154's typewriter title) outranks any sheet-level break */
+    case "CLP3": await page.evaluate(() => { for (const t of document.querySelectorAll<HTMLElement>(".qc151 .qc1531-hd h1.qc1531-t")) t.style.setProperty("font-size", "36px", "important"); }); break;
     case "CLP4": await css(page, ".cl27 .cl26-whot small{font-size:11px !important;text-transform:uppercase !important}"); break;
     case "CLP5": await css(page, ".cl27 .cl26-q--nq{color:rgba(28,19,15,.5) !important}"); break;
     case "CLP9": await page.evaluate(() => { for (const r of document.querySelectorAll<HTMLElement>(".aglist [data-cl26='row']")) r.addEventListener("keydown", (e) => { if (e.key === "ArrowDown") e.stopImmediatePropagation(); }, true); }); break;

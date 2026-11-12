@@ -1,0 +1,52 @@
+[
+ {
+  "where": "loading: skeleton rows inside the list's frame",
+  "ok": false,
+  "detail": "0 rows"
+ },
+ {
+  "where": "loading: no spinner",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "loading: the bar reads Agents",
+  "ok": true,
+  "detail": "Agents"
+ },
+ {
+  "where": "can't load: the copy",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "can't load: the bar reads Agents",
+  "ok": true,
+  "detail": "Agents"
+ },
+ {
+  "where": "day one: the panel's copy",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "day one: the rows above it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "one filter: No agents match “zzqx”. and only Clear",
+  "ok": false,
+  "detail": "[]"
+ },
+ {
+  "where": "the bar: 0 of n agents",
+  "ok": true,
+  "detail": "0 of 53 agents"
+ },
+ {
+  "where": "two filters: both named, the line, Clear and Just remove",
+  "ok": false,
+  "detail": "[]"
+ }
+]

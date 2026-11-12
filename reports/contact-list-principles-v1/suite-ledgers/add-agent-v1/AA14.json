@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: the add panel",
+  "ok": true,
+  "detail": "111 elements"
+ },
+ {
+  "where": "the add panel: none",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "WeekSlider fill is navy",
+  "ok": true,
+  "detail": "linear-gradient(90deg, rgb(42, 58, 82) 0%, rgb(42, 58, 82) 4%, rgb(231, 221, 208) 4%, rgb(231, 221, 208) 100%)"
+ },
+ {
+  "where": "WeekSlider thumb is navy (every thumb rule)",
+  "ok": true,
+  "detail": "rgb(42, 58, 82)"
+ },
+ {
+  "where": "its readout is not burgundy",
+  "ok": true,
+  "detail": "rgb(168, 154, 138)"
+ },
+ {
+  "where": "population: the card in edit mode",
+  "ok": true,
+  "detail": "193 elements"
+ },
+ {
+  "where": "card edit mode: none",
+  "ok": true,
+  "detail": "[]"
+ }
+]

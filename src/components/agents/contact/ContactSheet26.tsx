@@ -170,7 +170,8 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   const named: { label: string; drop: () => void }[] = [
     ...(findText ? [{ label: findText, drop: () => p.onSearch("") }] : []),
     ...(p.setChip ? [{ label: p.setChip.label, drop: p.setChip.onDrop }] : []),
-    ...applied.map((a) => ({ label: a.label, drop: () => p.onFilters(a.drop(p.filters)) })),
+    /* the sentence names the genre itself, as the mock does ("Domestic noir"), not the chip's "Genre: …" */
+    ...applied.map((a) => ({ label: a.label.replace(/^Genre:\s*/, ""), drop: () => p.onFilters(a.drop(p.filters)) })),
   ];
   const none = noMatchCopy(named.map((n) => n.label));
   const groupChanged = p.group !== "letter";

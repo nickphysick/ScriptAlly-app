@@ -21,10 +21,15 @@
   .cl27 .cl26-health[data-ground="light"] .cl26-open:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 
   .cl27 .qc1531-hd h1.qc1531-t.clp-t {
-    margin: 0; font: 400 36px/1.15 var(--sp-type) !important; color: var(--ink, #1c130f); white-space: normal; letter-spacing: 0;
+    margin: 0; font: 400 36px/1.15 var(--sp-type) !important; color: var(--ink, #1c130f); white-space: normal; letter-spacing: 0; text-wrap: balance;
   }
   .cl27 .qc1531-hd h1.qc1531-t.clp-t b { font: inherit !important; font-weight: 400 !important; color: #a2452a; }
-  .cl27 .qc1531-for.clp-for span b { font: 400 21px/1.25 var(--sp-type) !important; color: var(--ink, #1c130f); }
+  /* the count line beneath, as the mock's pp-for: no flanking rules, muted italic serif, the numbers in the typewriter */
+  .cl27 .qc1531-for.clp-for { justify-content: flex-start; gap: 0; margin: 8px 0 16px; }
+  .cl27 .qc1531-for.clp-for > i { display: none; }
+  :is(.cl27) .qc1531-for.clp-for span { max-width: 100%; font: italic 400 17px/1.4 var(--sp-serif) !important; color: var(--mut, #5b4f47); }
+  .cl27 .qc1531-for.clp-for span em { margin: 0; font: inherit !important; color: inherit; }
+  .cl27 .qc1531-for.clp-for span b { font: normal 400 18px/1.4 var(--sp-type) !important; color: var(--ink, #1c130f); }
   .cl27 .qc1531-for.clp-for span.clp-under { font: italic 400 19px/1.25 var(--sp-serif) !important; color: var(--mut, #5b4f47); white-space: normal; max-width: 100%; }
 }
 
