@@ -157,8 +157,12 @@ describe("the rendered states", () => {
   /* ⚠️ RETARGETED (ink shell v1): the full-width row retires and "Upgrade" folds into the PLAN line —
      the second line, so the name keeps line one's full width (the starvation Option D fixed was the pill
      sharing the NAME's line). The row cost 44px the ink sidebar needs for its feedback card. */
-  it("⚠️ Upgrade sits in the plan line, never on the name's line, and the row is gone", () => {
+  it("⚠️ Upgrade sits in the plan line, never on the name's line, and the row is gone", async () => {
+    /* plan rules v1: the upgrade link is drawn for a Free (or trial) writer only — a founding writer is never sold to */
+    const smoke = await import("../../test/pageSmoke");
+    smoke.useFreeWriterDb();
     const html = renderShell(0);
+    smoke.restoreSmokeUser();
     const name = html.indexOf('class="ws-n"');
     const line = html.indexOf('class="ws-acctline"');
     const link = html.indexOf('class="ws-uplink"');

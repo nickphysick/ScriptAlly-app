@@ -73,7 +73,7 @@ import { HelpMenu } from "./HelpMenu";
 import { registerFeedbackAnchor, setFeedbackPage } from "../../lib/feedbackStore";
 import { SidebarRail } from "./SidebarRail";
 import { railTile } from "../../lib/railTile";
-import { navOpenAid, railCountAid } from "../../lib/railReviewAid";
+import { railCountAid } from "../../lib/railReviewAid";
 import { navLockedFor, planColumn } from "../../lib/entitlements";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
@@ -849,7 +849,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   /* the nav entitlements this account does NOT have (sidebar materials v1): empty while every switch is open to all.
      ⚠️ the review aid is gated HERE, at the call site, so a production build drops it */
   const proLocked = useMemo(
-    () => navLockedFor(entitlement, import.meta.env.MODE !== "production" ? navOpenAid() : undefined),
+    () => navLockedFor(entitlement),
     [entitlement],
   );
   const name = currentUser?.name ?? "";

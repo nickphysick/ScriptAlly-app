@@ -18,15 +18,15 @@ import { UserPlan } from "../../types";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { navLockedFor } from "../../lib/entitlements";
 
-const user: { plan: UserPlan } = { plan: UserPlan.FREE };
-const ent = (basis: "free" | "pro"): Entitlement => ({ basis, pro: basis === "pro", prompts: basis === "free", trialEndsMs: null });
+const user: { plan: UserPlan; founding: boolean } = { plan: UserPlan.FREE, founding: true };
+const ent = (basis: "free" | "pro" | "founding" | "trial"): Entitlement => ({ basis, pro: basis !== "free", prompts: basis === "free" || basis === "trial", trialEndsMs: null });
 vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
     tasks: [], userTasks: [], queries: [], agents: [], manuscripts: [], packages: [],
     versions: [], activities: [], taskFlags: [], notes: [], logout: () => {},
     currentUser: { id: "u1", name: "Isla Morven", email: "i@example.com", plan: user.plan },
     /* plan rules v1: the shell reads the resolved entitlement — a day-15 Free writer, or a paid Pro one */
-    entitlement: ent(user.plan === UserPlan.PRO ? "pro" : "free"),
+    entitlement: ent(user.founding ? "founding" : user.plan === UserPlan.PRO ? "pro" : "free"),
   }),
 }));
 import { WorkspaceShell } from "./WorkspaceShell";
@@ -40,7 +40,7 @@ const render = (path: string) => renderToStaticMarkup(
   </MemoryRouter>,
 );
 const G = globalThis as unknown as { __SA_NAV_FREE?: unknown };
-afterEach(() => { delete G.__SA_NAV_FREE; user.plan = UserPlan.FREE; });
+afterEach(() => { delete G.__SA_NAV_FREE; user.plan = UserPlan.FREE; user.founding = true; });
 
 /** the full sidebar's rows that carry a tag, by their accessible name */
 const taggedRows = (h: string) => [...h.matchAll(/<button[^>]*class="ws-ni[^"]*"[^>]*aria-label="([^"]+)"[^>]*>(?:(?!<\/button>).)*ws-qpro/gs)].map((m) => m[1]);
@@ -48,7 +48,7 @@ const taggedRows = (h: string) => [...h.matchAll(/<button[^>]*class="ws-ni[^"]*"
 const taggedHeads = (h: string) => [...h.matchAll(/<div class="ws-glabel">([^<]+)<span class="ws-qpro ws-gpro"/g)].map((m) => m[1]);
 
 describe("sidebar materials v1 — the nav's Pro marks", () => {
-  it("a founding writer (every switch open, as today) sees no mark anywhere", () => {
+  it("a founding writer sees no mark anywhere (plan rules v1: the flag, not a switch)", () => {
     const h = render("/manuscripts/versions");
     expect(h).toContain("ws-glabel"); /* the full sidebar rendered */
     expect(h).toContain('data-shell="rail"'); /* and the rail */
@@ -57,7 +57,7 @@ describe("sidebar materials v1 — the nav's Pro marks", () => {
   });
 
   it("a Free writer sees the Pro tag on the rail's Letters item only, and the sidebar's three tags", () => {
-    G.__SA_NAV_FREE = true;
+    user.founding = false;
     const h = render("/manuscripts/versions");
     const items = [...h.matchAll(/<button[^>]*class="wsr-ni[^"]*"[^>]*data-go="([^"]+)"(?:(?!<\/button>).)*?<\/button>/gs)];
     expect(items.filter((m) => m[0].includes("wsr-pro")).map((m) => m[1])).toEqual(["m-letters"]);
@@ -84,17 +84,14 @@ describe("sidebar materials v1 — the nav's Pro marks", () => {
     expect(render("/queries")).toMatch(/class="wsr-ni wsr-on"[^>]*data-go="q-centre"/);
   });
 
-  it("a paid Pro writer sees none, even with the switches shut", () => {
-    G.__SA_NAV_FREE = true;
+  it("a paid Pro writer sees none", () => {
+    user.founding = false;
     user.plan = UserPlan.PRO;
     expect(render("/manuscripts/versions")).not.toContain('data-shell="pro"');
   });
 
-  it("navLockedFor: empty today; every entitlement for a Free writer once the switches shut; empty for Pro", () => {
-    const shut = { discover: false, packages: false, versions: false, materials: false } as const;
-    expect([...navLockedFor(ent("free"))]).toEqual([]);
-    expect([...navLockedFor(ent("free"), shut)].sort()).toEqual(["discover", "materials", "packages", "versions"]);
-    expect([...navLockedFor(ent("pro"), shut)]).toEqual([]);
-    expect([...navLockedFor(ent("free"), { materials: false })]).toEqual(["materials"]);
+  it("navLockedFor: every entitlement for a Free writer; none for founding, trial or Pro", () => {
+    expect([...navLockedFor(ent("free"))].sort()).toEqual(["discover", "materials", "packages", "versions"]);
+    for (const b of ["founding", "trial", "pro"] as const) expect([...navLockedFor(ent(b))], b).toEqual([]);
   });
 });

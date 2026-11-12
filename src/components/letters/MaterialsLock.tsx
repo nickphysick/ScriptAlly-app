@@ -5,7 +5,7 @@
  * Query letters v1, Part E; plan rules v1 (12 Nov) — the Pro gate for the Materials pages and the Scout. On Query
  * letters, Comparable titles and Submission packages a writer without Pro sees their own work READ-ONLY: the page in
  * full, inert, under one line and a "See Pro plans" link. On the Scout they see the lock card (design-refs/query-letters-v1,
- * 06 and 07). Nobody sees either while the page's open-to-all switch is on.
+ * 06 and 07). Founding writers, paid Pro and trial accounts see neither.
  *
  * ⚠️ MOUNTED FROM THE PAGE SHELL (App.tsx), NEVER INSIDE A PAGE'S OWN FILE: Comparable titles and Submission packages
  * are other packs' pages and are not edited here.
@@ -21,10 +21,8 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
-import { navLockedFor, readOnly } from "../../lib/entitlements";
+import { readOnly } from "../../lib/entitlements";
 import type { ProFeature } from "../../lib/planRules";
-import type { ProEntitlement } from "../../lib/workspaceShell";
-import { navOpenAid } from "../../lib/railReviewAid";
 import "./materialsLock.css";
 
 export type MaterialsPage = "letters" | "comps" | "packages" | "scout";
@@ -86,15 +84,11 @@ export const MaterialsLockGate: React.FC<{ page: MaterialsPage; locked: boolean;
 };
 
 const FEATURE: Record<MaterialsPage, ProFeature> = { letters: "letters", comps: "comps", packages: "packages", scout: "scout" };
-const NAV: Record<MaterialsPage, ProEntitlement> = { letters: "materials", comps: "materials", packages: "materials", scout: "discover" };
 
-/**
- * The gate with the signed-in writer's entitlement (plan rules v1: the one resolver). Founding writers, paid Pro and
- * trial accounts never see it. While the nav's open-to-all switch for the page is on, nobody does.
- */
+/** The gate with the signed-in writer's entitlement (plan rules v1: the one resolver). Founding writers, paid Pro and
+ *  trial accounts never see it. The nav's Pro mark for the same page (`navLockedFor`) is the same answer. */
 export const MaterialsLock: React.FC<{ page: MaterialsPage; children: React.ReactNode }> = ({ page, children }) => {
   const { entitlement } = useScriptAllyDb();
-  const open = import.meta.env.MODE !== "production" ? navOpenAid() : undefined;
-  const locked = readOnly(entitlement, FEATURE[page]) && navLockedFor(entitlement, open).has(NAV[page]);
+  const locked = readOnly(entitlement, FEATURE[page]);
   return <MaterialsLockGate page={page} locked={locked}>{children}</MaterialsLockGate>;
 };

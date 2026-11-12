@@ -95,7 +95,7 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       def: "a-list",
       children: [
         { id: "a-list", label: "Contact list", path: "/agents", icon: "people", rail: true, railLabel: "Agents" },
-        /* Pro, dormant: nothing gates Discover (`DISCOVER_OPEN_TO_ALL`) */
+        /* Pro (plan rules v1): the Scout — gated by the resolver, and the page by MaterialsLock page="scout" */
         { id: "a-disc", label: "Discover", path: "/agents/discover", icon: "compass", pro: "discover" },
       ],
     },

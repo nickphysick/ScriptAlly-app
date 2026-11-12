@@ -144,9 +144,9 @@ describe("§3 · the gate is wired, and open", () => {
   const free: Entitlement = { basis: "free", pro: false, prompts: true, trialEndsMs: null };
   const pro: Entitlement = { basis: "pro", pro: true, prompts: false, trialEndsMs: null };
 
-  it("⚠️ is OPEN today for everyone — beta grants Pro, so the feature ships available", () => {
+  it("plan rules v1: open to Pro (and founding and trial, through the resolver); closed on day-15 Free", () => {
     expect(canAttachPackages(pro)).toBe(true);
-    expect(canAttachPackages(free)).toBe(true);
+    expect(canAttachPackages(free)).toBe(false);
   });
 
   it("⚠️ but the row routes THROUGH it — flipping the predicate to false hides the row entirely", () => {
@@ -330,8 +330,8 @@ describe("§3 · the derived count, and §5 · the gate on its affordance", () =
   });
 
   /** §5 — the affordance routes through the same one predicate the Query Centre's menu row uses. */
-  it("⚠️ the Attach affordance is gated by the ONE predicate, which is open today", () => {
-    expect(canAttachPackages({ basis: "free", pro: false, prompts: true, trialEndsMs: null })).toBe(true);
+  it("⚠️ the Attach affordance is gated by the ONE predicate (plan rules v1: the resolver)", () => {
+    expect(canAttachPackages({ basis: "free", pro: false, prompts: true, trialEndsMs: null })).toBe(false);
     expect(canAttachPackages({ basis: "pro", pro: true, prompts: false, trialEndsMs: null })).toBe(true);
   });
 });

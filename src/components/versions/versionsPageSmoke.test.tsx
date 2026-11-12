@@ -34,6 +34,8 @@ const V2 = { id: "bv-2", name: "Dual timeline", kind: "revision", createdDate: "
 const Q = (id: string, status: QueryStatus, extra: Record<string, unknown> = {}) => ({ id, userId: "u1", manuscriptId: "m1", agentId: "a1", packageId: "", status, dateSent: "2026-09-10T00:00:00.000Z", personalisationNotes: "", sendMethod: "Email", materialsWanted: [], ...extra });
 const base = (plan: UserPlan) => ({
   currentUser: { id: "u1", name: "Isla Morven", email: "x@example.com", plan, onboardingComplete: true },
+  /* plan rules v1: a founding writer (every dev account); the locked case spies on versionsUnlocked */
+  entitlement: { basis: "founding", pro: true, prompts: false, trialEndsMs: null },
   authReady: true, collectionsReady: true, versions: [], communityAgents: [], journalEntries: [], notes: [], dismissedTasks: [], taskFlags: [], tasks: [], userTasks: [], packages: [],
   agents: [{ id: "a1", userId: "u1", name: "Ada Reader", agency: "Reader & Co", genres: [] }], activities: [],
 });

@@ -14,8 +14,8 @@
  *
  * Reuses: MaterialsEditor (the editor), MountPanel (the clipping card, for the pink-band explainer),
  * BrandDropdown (the package picker), and the existing Query.packageId link. isPro reads the one
- * package entitlement, `packagesUnlocked` (lib/entitlements.ts) — open to all while
- * PACKAGES_OPEN_TO_ALL. No billing/enforcement here.
+ * package entitlement, `packagesUnlocked` (lib/entitlements.ts) — the one resolver (plan rules v1).
+ * No billing/enforcement here.
  */
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";

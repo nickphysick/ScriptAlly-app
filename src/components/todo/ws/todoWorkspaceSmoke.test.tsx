@@ -23,6 +23,7 @@ vi.mock("../../../lib/db", () => ({
     collectionsReady: true,
     tasks: [], userTasks: seed.userTasks, queries: [], agents: [], manuscripts: [], packages: [], versions: [], activities: [], taskFlags: [],
     currentUser: { id: "u1", name: "Nick Physick", plan: UserPlan.FREE },
+    entitlement: { basis: "founding", pro: true, prompts: false, trialEndsMs: null }, // plan rules v1
     addUserTask: async () => undefined, updateUserTask: async () => undefined, deleteUserTask: async () => undefined, restoreUserTask: async () => undefined,
     upsertTaskFlag: async () => undefined, dismissTask: async () => undefined, restoreTaskFlag: async () => undefined, updateUserProfile: async () => undefined,
     resolveTaskFlag: async () => undefined, reconcileStamps: async () => ({ lifted: [], stamped: [] }),

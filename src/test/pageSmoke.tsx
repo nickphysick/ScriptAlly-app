@@ -75,8 +75,9 @@ const DB_DATA: Record<string, unknown> = {
   authReady: true,
   collectionsReady: true,
   smartImportUsage: null,
-  /* plan rules v1: the resolved entitlement every gate reads — a day-15 Free writer, so the smoke sees the Free page */
-  entitlement: { basis: "free", pro: false, prompts: true, trialEndsMs: null },
+  /* plan rules v1: the resolved entitlement every gate reads — a founding writer, as every dev account is after the
+     backfill, so the smoke sees each page in full (the Free states have their own locks) */
+  entitlement: { basis: "founding", pro: true, prompts: false, trialEndsMs: null },
   manuscripts: [],
   versions: [],
   packages: [],
@@ -227,10 +228,19 @@ const withExtra = (more: Record<string, unknown>): Record<string, unknown> => ne
 
 /** Render as a logged-out visitor until `restoreSmokeUser()`. Pair them in beforeEach/afterEach. */
 export const useSignedOutDb = () => { signedOut = true; };
-export const restoreSmokeUser = () => { signedOut = false; };
+export const restoreSmokeUser = () => { signedOut = false; freeWriter = false; };
+
+/** Plan rules v1: render as a day-15 Free writer (upgrade prompts, read-only Pro pages) until `restoreSmokeUser()`. */
+let freeWriter = false;
+export const useFreeWriterDb = () => { freeWriter = true; };
+const FREE_ENTITLEMENT = { basis: "free", pro: false, prompts: true, trialEndsMs: null };
+const asFree = (db: Record<string, unknown>) => new Proxy(db, { get: (t, k) => (k === "entitlement" ? FREE_ENTITLEMENT : (t as Record<string | symbol, unknown>)[k]) });
 
 export const dbMock = () => ({
-  useScriptAllyDb: () => (signedOut ? signedOutDbStub : seeded ? (extra ? withExtra(extra) : seededDbStub) : dbStub),
+  useScriptAllyDb: () => {
+    const db = signedOut ? signedOutDbStub : seeded ? (extra ? withExtra(extra) : seededDbStub) : dbStub;
+    return freeWriter ? asFree(db) : db;
+  },
   DbProvider: ({ children }: { children?: React.ReactNode }) => children as React.ReactElement,
 });
 

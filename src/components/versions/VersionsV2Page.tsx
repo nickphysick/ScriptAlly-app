@@ -35,7 +35,7 @@ import {
   type VersionFields,
 } from "../../lib/bookVersions";
 import { buildRows } from "../../lib/analytics";
-import { versionsUnlocked, VERSIONS_FOUNDING_ACCESS } from "../../lib/entitlements";
+import { versionsUnlocked } from "../../lib/entitlements";
 import { VERSION_NOT_SURE, firstSaveMessage, hasGoneOut, packagesHolding, versionsModel } from "../../lib/versionsV2";
 import {
   VERSIONS_CHECKLIST, VERSIONS_GUIDE_HIDDEN_PATH, VERSIONS_GUIDE_SEEN_PATH, VERSIONS_GUIDE_UNHIDE_PATH, VERSIONS_LOCKED, VERSIONS_STEP_TEXT,
@@ -77,7 +77,7 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
   const navigate = useNavigate();
   const stored = useMemo(() => { try { return localStorage.getItem(ACTIVE_MS_KEY); } catch { return null; } }, [location.key]);
   const ms = useMemo(() => scopedManuscript(manuscripts, stored), [manuscripts, stored]);
-  const locked = reviewFree() || !versionsUnlocked(db.entitlement, VERSIONS_FOUNDING_ACCESS);
+  const locked = reviewFree() || !versionsUnlocked(db.entitlement);
 
   const msQueries = useMemo(() => (ms ? (queries as Query[]).filter((q) => q.manuscriptId === ms.id) : []), [ms, queries]);
   const rows = useMemo(() => new Map(buildRows(msQueries, activities, agents as Agent[], Date.now()).map((r) => [r.id, r])), [msQueries, activities, agents]);

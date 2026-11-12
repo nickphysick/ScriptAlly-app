@@ -13,17 +13,16 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { UserPlan } from "../../types";
 
-const state: { plan: UserPlan; shut: boolean } = { plan: UserPlan.FREE, shut: false };
+const state: { plan: UserPlan; shut: boolean } = { plan: UserPlan.FREE, shut: false }; // shut = a day-15 Free writer
 vi.mock("../../lib/db", () => ({ useScriptAllyDb: () => ({
   currentUser: { id: "u1", plan: state.plan },
   /* plan rules v1: the gate reads the resolved entitlement — paid Pro, or a day-15 Free writer */
   entitlement: state.plan === UserPlan.PRO
     ? { basis: "pro", pro: true, prompts: false, trialEndsMs: null }
-    : { basis: "free", pro: false, prompts: true, trialEndsMs: null },
+    : state.shut
+      ? { basis: "free", pro: false, prompts: true, trialEndsMs: null }
+      : { basis: "founding", pro: true, prompts: false, trialEndsMs: null },
 }) }));
-vi.mock("../../lib/railReviewAid", () => ({
-  navOpenAid: () => (state.shut ? { discover: false, packages: false, versions: false, materials: false } : undefined),
-}));
 
 import { MaterialsLock, LOCK_COPY, READ_ONLY_LINE, type MaterialsPage } from "./MaterialsLock";
 
@@ -60,7 +59,7 @@ describe("the Materials lock", () => {
     expect(text(h)).toContain(LOCK_COPY.scout.h);
     expect(text(h)).toContain("Not now");
   });
-  it("a founding writer (the switch open, as today) sees none, and the page renders as it is", () => {
+  it("a founding writer sees none, and the page renders as it is", () => {
     for (const p of PAGES) {
       const h = render(p);
       expect(h).not.toContain("data-mlk");
