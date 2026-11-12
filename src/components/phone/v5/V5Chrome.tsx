@@ -30,7 +30,7 @@ const ICON: Record<V3Tab, string> = {
   materials: "M6 3h9l4 4v14H6zM14 3v5h5M9 13h6M9 17h6",
   profile: "M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M4 21a8 8 0 0 1 16 0",
 };
-const FEEDBACK_ICON = "M4 5h16v11H9l-5 4z";
+export const FEEDBACK_ICON = "M4 5h16v11H9l-5 4z";
 const Ic: React.FC<{ d: string }> = ({ d }) => <svg className="pa4-ic" viewBox="0 0 24 24" aria-hidden="true"><path d={d} /></svg>;
 
 /** the To do badge's words for a screen reader */

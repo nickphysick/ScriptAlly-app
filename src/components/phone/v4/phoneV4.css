@@ -270,93 +270,14 @@
   }
 }
 
-/* ── PHONE APP v4.1 — Today's header (design-refs/phone-app-v4-1/phone-today-v4-1.html, `.hl` · `.hr` · `.hc` · `.hl-m`) ── */
-@media (max-width: 767.98px) {
-  .pa4-hero.pa41-hd { padding-bottom: 40px; }
-  .pa41-hr { position: relative; margin: 8px 0 8px 96px; text-align: right; z-index: 3; }
-  .pa41-hr.one { min-height: 152px; display: flex; align-items: flex-end; justify-content: flex-end; }
-  .pa41-fig { display: flex; align-items: center; justify-content: flex-end; gap: 16px; }
-  .pa41-cap { white-space: nowrap; text-align: right; }
-  .pa41-capt { display: block; font-size: 0.875rem; line-height: 1.43; color: #fff; font-weight: 600; }
-  .pa41-chg { display: block; font-size: 0.875rem; line-height: 1.43; color: var(--pa-blush); }
-  .pa4 .pa41-n { font: 400 5rem/1.05 var(--pa-type) !important; color: #fff; }
-  .pa41-hr > .pa41-need { margin-top: 4px; }
-  .pa4 .pa41-need { display: inline-flex; align-items: center; min-height: 48px; }
-  .pa41-need > span { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 8px 0 14px; border-radius: 20px; background: var(--pa-blush); color: var(--pa-ink); font-size: 1rem; font-weight: 600; }
-  /* the board's compact pill (`.needp.sm`), for a count that would wrap the full one */
-  .pa41-need.sm > span { min-height: 36px; padding: 0 8px 0 12px; font-size: 0.875rem; }
-  .pa41-need i { width: 8px; height: 8px; border-radius: 50%; background: var(--pa-rust); }
-  .pa41-need .pa4-chev { width: 18px; height: 18px; color: var(--pa-ink); }
-  /* the chart: full width, fading in from behind the Mentor, to a dot at Today */
-  .pa41-ch { position: relative; height: 96px; margin: 0 -24px; }
-  .pa41-ch svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
-    -webkit-mask-image: linear-gradient(90deg, transparent 8%, #000 34%); mask-image: linear-gradient(90deg, transparent 8%, #000 34%); }
-  .pa41-line { stroke-dasharray: 1; stroke-dashoffset: 0; animation: pa41-line 1.2s cubic-bezier(0.65, 0, 0.35, 1) both; }
-  .pa41-area { animation: pa41-fade 0.6s 0.9s both; }
-  .pa41-dot { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px var(--pa-blush); animation: pa41-fade 0.3s 1.1s both; }
-  .pa4 .pa41-tag { position: absolute; right: 12px; font: 400 0.875rem/1.43 var(--pa-type) !important; color: #fff; animation: pa41-fade 0.3s 1.2s both; }
-  .pa41-x { position: absolute; left: 0; right: 0; bottom: -28px; height: 20px; }
-  .pa4 .pa41-x span { position: absolute; transform: translateX(-50%); font: 400 0.875rem/1.43 var(--pa-type) !important; color: var(--pa-onnavy); white-space: nowrap; }
-  /* the Mentor: mirrored, fixed to the left edge, his feet on the chart's baseline */
-  .pa41-mentor { position: absolute; left: -16px; bottom: 40px; width: 116px; height: auto; transform: scaleX(-1); filter: drop-shadow(8px 10px 12px rgba(0, 0, 0, 0.35)); z-index: 2; animation: pa41-fade 0.5s 0.3s both; pointer-events: none; }
-  .pa41-hd.one .pa41-mentor { bottom: 24px; }
-  /* the first card sits below the header, nothing over the months (PA41-4) */
-  .pa4-today .pa4-lapcard.pa41-below { margin-top: 16px; }
-  @keyframes pa41-line { from { stroke-dashoffset: 1; } }
-  @keyframes pa41-fade { from { opacity: 0; } }
-  @media (prefers-reduced-motion: reduce) {
-    .pa41-line, .pa41-area, .pa41-dot, .pa41-tag, .pa41-mentor { animation: none !important; }
-  }
-}
-
-/* ── PHONE APP v4.1 — the Birds-eye card (phone-today-v4-1.html, `.be*`) ── */
-@media (max-width: 767.98px) {
-  .pa41-be { margin-top: 16px; padding: 0; overflow: hidden; }
-  .pa41-be-hd { display: flex; align-items: center; padding: 20px 16px 0 24px; }
-  .pa41-be-hd img { width: 64px; margin: -6px -2px -10px 0; }
-  .pa41-be-st { display: flex; margin: 12px 16px; }
-  .pa4 .pa41-be-st button { flex: 1; min-width: 0; min-height: 64px; padding: 8px 8px 8px 12px; text-align: left; border-left: 1px solid var(--pa-rule); }
-  .pa4 .pa41-be-st button:first-child { border-left: 0; padding-left: 8px; }
-  .pa4 .pa41-be-st b { display: block; font-size: 1.75rem; line-height: 1.1; }
-  .pa41-be-st .pa4-s { display: flex; align-items: flex-start; gap: 6px; }
-  .pa41-be-st i { flex: none; width: 8px; height: 8px; margin-top: 0.45em; border-radius: 50%; }
-  .pa41-be-rl { position: relative; height: 44px; margin: 0 16px; background: var(--pa-navy-deep); border-radius: 12px; overflow: hidden; }
-  .pa4 .pa41-be-m span { position: absolute; top: 0; height: 44px; padding: 4px 0 0 8px; border-left: 1px solid rgba(255, 255, 255, 0.22); font: 400 0.875rem/1.43 var(--pa-type) !important; color: #fff; }
-  .pa41-be-m span:first-child { border-left: 0; }
-  .pa4 .pa41-be-rl b { position: absolute; bottom: 3px; transform: translateX(-50%); padding: 0 8px; border-radius: 10px; background: #fff; color: var(--pa-navy-deep); font: 400 0.875rem/1.5 var(--pa-type) !important; white-space: nowrap; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); }
-  .pa41-be-body { position: relative; padding: 4px 0 8px; }
-  .pa41-be-now { position: absolute; top: 0; bottom: 0; width: 2px; margin-left: -1px; background: var(--pa-ink); z-index: 2; }
-  .pa4 .pa41-be-r { display: block; width: 100%; padding: 12px 16px 10px; text-align: left; position: relative; min-height: 48px; }
-  .pa41-be-r + .pa41-be-r { border-top: 1px solid var(--pa-rule); }
-  .pa41-be-t { display: flex; align-items: center; gap: 10px; padding: 0 8px; position: relative; z-index: 3; }
-  .pa41-be-nm { flex: none; max-width: 52%; font-size: 1rem; font-weight: 600; overflow-wrap: anywhere; }
-  .pa41-be-say { flex: 1; min-width: 0; text-align: right; background: rgba(255, 255, 255, 0.92); border-radius: 10px; padding: 0 4px; overflow-wrap: anywhere; }
-  .pa41-be-say.hot { color: var(--pa-rust); }
-  .pa41-be-tr { display: block; position: relative; height: 20px; margin-top: 8px; border-radius: 6px; background: rgba(31, 38, 51, 0.04); clip-path: inset(0 0 0 0); }
-  .pa41-b { position: absolute; top: 0; height: 100%; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(31, 38, 51, 0.1); }
-  .pa41-b.past { opacity: 0.6; }
-  .pa41-b.rem { opacity: 0.45; }
-  .pa41-ov { position: absolute; top: calc(50% - 1px); height: 2px; background: var(--pa-navy); }
-  .pa41-bc { position: absolute; top: calc(50% - 9px); width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 4px var(--pa-navy); animation: pa41-pulse 1.8s ease-out infinite; }
-  @keyframes pa41-pulse { 0% { box-shadow: inset 0 0 0 4px var(--pa-navy), 0 0 0 0 rgba(42, 58, 82, 0.5); } 100% { box-shadow: inset 0 0 0 4px var(--pa-navy), 0 0 0 9px rgba(42, 58, 82, 0); } }
-  .pa41-be-nx { display: flex; align-items: center; gap: 12px; margin: 4px 24px 0; padding: 12px 0; border-top: 1px solid var(--pa-rule); }
-  .pa41-be-nx .pa4-s { color: var(--pa-ink); }
-  /* the once-a-day replay */
-  .pa41-be.play .pa41-be-tr { animation: pa41-draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) both; }
-  .pa41-be.play .pa41-be-now { animation: pa41-now 1.6s cubic-bezier(0.65, 0, 0.35, 1) both; }
-  .pa41-be.play .pa41-be-rl b { animation: pa41-fade 0.4s 1.4s both; }
-  .pa41-be.play .pa41-be-say { animation: pa41-fade 0.4s calc(1.3s + var(--k-d, 0s)) both; }
-  @keyframes pa41-draw { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
-  @keyframes pa41-now { from { left: 16px; } }
-  @media (prefers-reduced-motion: reduce) {
-    .pa41-be.play .pa41-be-tr, .pa41-be.play .pa41-be-now, .pa41-be.play .pa41-be-rl b, .pa41-be.play .pa41-be-say, .pa41-bc { animation: none !important; }
-  }
-}
+/* (Phone app v5, Phase B: v4.1's Today header and Birds-eye card are retired — TodayHeaderV5 and BirdsBlockV5 replace
+   them, with their own rules in phoneV5.css. The full view's pulse keyframes, which lived with the card, are below.) */
 
 /* ── PHONE APP v4.1 — the full Birds-eye view (phone-birds-eye-v1.html). Positions are CSS variables on the root
    (--ppd px per day, --x the track's offset, --cur the replay's clip day, --now today's day), so a drag or a replay
    moves the track without a React render. ── */
 @media (max-width: 767.98px) {
+  @keyframes pa41-pulse { 0% { box-shadow: inset 0 0 0 4px var(--pa-navy), 0 0 0 0 rgba(42, 58, 82, 0.5); } 100% { box-shadow: inset 0 0 0 4px var(--pa-navy), 0 0 0 9px rgba(42, 58, 82, 0); } }
   .pa41v { --ppd: 4; --x: 0; --cur: 0; --now: 0; --tot: 300; --ll: 0px; --stick: calc(64px + env(safe-area-inset-top, 0px)); position: relative; background: #fff; }
   .pa41v-hd { padding-bottom: 16px; }
   .pa41v-ht { display: flex; align-items: flex-end; position: relative; min-height: 104px; }

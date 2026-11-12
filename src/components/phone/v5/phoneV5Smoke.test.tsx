@@ -6,12 +6,15 @@
  * `src/test/pageSmoke.tsx` for why these exist and why they assert almost nothing. The node environment has no
  * matchMedia, so the routes take their desktop path; the phone pieces are smoked directly. The rendered checks
  * (pinning, sizes, reachability) are Phase H's measurement.
+ * Phase B: Today's header (TodayHeaderV5) and the Queries tab's Birds-eye block (BirdsBlockV5) — populated, filtered,
+ * one row, none.
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { renderPage, renderPageSeeded } from "../../../test/pageSmoke";
+import { SMOKE_USER, renderPage, renderPageSeeded, renderPageSeededWith } from "../../../test/pageSmoke";
+import { QueryStatus, SubmissionMethod } from "../../../types";
 
 vi.mock("../../../lib/db", async () => (await import("../../../test/pageSmoke")).dbMock());
 vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSmoke")).firebaseMock());
@@ -22,7 +25,10 @@ import { pinnedAt } from "./V5Tabs";
 import { TodayV5 } from "./TodayV5";
 import { TodoV5 } from "./TodoV5";
 import { MaterialsV5 } from "./MaterialsV5";
-import { V3Provider } from "../v3/V3Provider";
+import { V3Provider, useV3Data } from "../v3/V3Provider";
+import { TodayHeaderV5 } from "./TodayHeaderV5";
+import { BirdsBlockV5 } from "./BirdsBlockV5";
+import type { BeCourt } from "../../../lib/phoneV5";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
 const P = (n: React.ReactNode) => <V3Provider on now={NOW}>{n}</V3Provider>;
@@ -90,10 +96,18 @@ describe("Phone app v5 renders", () => {
     expect(full.match(/data-pa5="tab"/g)?.length).toBe(3);
     for (const w of ["Queries", "Agents", "Activity"]) expect(full).toContain(`>${w}</button>`);
     expect(full).toMatch(/aria-selected="true"[^>]*data-pa5="tab" data-tab="queries"/);
-    expect(full).toContain("Birds-eye view");
+    /* Phase B: v5's header and the Birds-eye block on the page (no card, no title); no Up next card on Today */
+    expect(full).toContain('data-pa5="today-hd"');
+    expect(full).toContain('data-pa5="be"');
+    expect(full).not.toContain("Birds-eye view");
+    expect(full).not.toContain('data-pa4="up-next"');
+    expect(full).not.toContain('data-pa4="quiet"');
     expect(full).toContain("See all queries");
     expect(full).toContain("Active queries");
-    expect(full).toContain('data-pa41="header"');
+    expect(full).toContain("of your campaign");
+    /* day one: no block, the day-one card */
+    expect(empty).not.toContain('data-pa5="be"');
+    expect(empty).toContain('data-pa4="dayone"');
   });
   it("Today's Agents tab is the Agents page's body; its Activity tab is Lately", () => {
     onTab("agents");
@@ -127,6 +141,101 @@ describe("Phone app v5 renders", () => {
       expect(html, tab).not.toContain("Your packages");
       vi.unstubAllGlobals();
     }
+  });
+});
+
+/* ── Phase B: the header and the Birds-eye block ── */
+const DAY = 86_400_000;
+const iso = (d: number) => new Date(NOW + d * DAY).toISOString();
+/** n open queries to one agent each, sent over the last weeks, their reply dates spread either side of today */
+const QS = (n: number) => ({
+  agents: Array.from({ length: n }, (_, i) => ({ id: `ag${i}`, userId: SMOKE_USER.id, name: `Agent Number${i}`, agency: `Agency ${i}`, email: "", status: "Active", responseTimeWeeks: 1 + (i % 6) })),
+  queries: Array.from({ length: n }, (_, i) => ({
+    id: `qq${i}`, userId: SMOKE_USER.id, manuscriptId: "m1", agentId: `ag${i}`, packageId: "", personalisationNotes: "",
+    status: i % 4 === 1 ? QueryStatus.PARTIAL_REQUESTED : QueryStatus.QUERIED, dateSent: iso(-10 - i * 3),
+    sendMethod: SubmissionMethod.EMAIL, expectedSendDate: iso(-2 + i), materialsWanted: ["Query Letter"],
+  })),
+});
+const Block: React.FC<{ f?: BeCourt | null }> = ({ f = null }) => { const v = useV3Data(); return <BirdsBlockV5 qs={v.qs} c={v.counts} nowMs={v.now} initialFilter={f} />; };
+const rowsOf = (html: string) => html.match(/data-pa5="be-row"/g)?.length ?? 0;
+
+describe("Phone app v5, Phase B — Today's header and the Birds-eye block", () => {
+  it("the header: Today, the campaign day, feedback and search, the need pill, the figure, the chart and the Mentor", () => {
+    const series = [{ endMs: NOW - 14 * DAY, active: 2 }, { endMs: NOW - 7 * DAY, active: 4 }, { endMs: NOW, active: 3 }];
+    const html = renderPage(<div className="pa4 pa5"><TodayHeaderV5 day="Day 40 of your campaign" streakWeeks={3} active={3} change={-1} need={7} series={series} dayOne={false}
+      onNeed={() => {}} onFeedback={() => {}} onSearch={() => {}} /></div>);
+    expect(html).toContain(">Today</h1>");
+    expect(html).toContain("Day 40 of your campaign");
+    expect(html).toContain('aria-label="Give feedback"');
+    expect(html).toContain('data-pa5="feedback-btn"');
+    expect(html).toContain('aria-label="Search"');
+    expect(html).toMatch(/data-pa5="need" data-n="7"/);
+    expect(html).toContain("7 things need you");
+    expect(html).toContain('data-pa5="streak"');
+    expect(html).toContain("Active queries");
+    expect(html).toContain("▼ 1 on last week");
+    expect(html).toContain('data-pa5="chart"');
+    expect(html).toContain('data-pa5="mentor"');
+    /* need before figure (left, then right); nothing at zero */
+    expect(html.indexOf('data-pa5="need"')).toBeLessThan(html.indexOf('data-pa5="figure"'));
+    const quiet = renderPage(<TodayHeaderV5 day="Day 2 of your campaign" streakWeeks={0} active={1} change={null} need={0} series={series} dayOne={false}
+      onNeed={() => {}} onFeedback={() => {}} onSearch={() => {}} />);
+    expect(quiet).not.toContain('data-pa5="need"');
+    expect(quiet).not.toContain('data-pa5="streak"');
+    expect(quiet).not.toContain('data-pa5="change"');
+    const one = renderPage(<TodayHeaderV5 day="Getting started" streakWeeks={0} active={0} change={null} need={0} series={[]} dayOne
+      onNeed={() => {}} onFeedback={() => {}} onSearch={() => {}} />);
+    expect(one).toContain("first query down.");
+    expect(one).not.toContain('data-pa5="chart"');
+    expect(one).not.toContain('data-pa5="figure"');
+  });
+  it("the block, populated: three figures, the label, up to eight rows nearest their date, the ruler, the line, the footer", () => {
+    const html = renderPageSeededWith(P(<Block />), "/dashboard", QS(11));
+    expect(html.match(/data-pa5="be-count"/g)?.length).toBe(3);
+    for (const w of ["with you", "with agents", "gone quiet"]) expect(html).toContain(w);
+    expect(html).toContain("Nearest their date");
+    expect(rowsOf(html)).toBe(8);
+    expect(html).toContain('data-pa5="be-pill"');
+    expect(html).toContain('data-pa5="be-now"');
+    expect(html).not.toContain('data-pa5="be-few"');
+    expect(html).toMatch(/All \d+ queries, against their dates/);
+    /* every row carries its engine dates; past-date rows carry on (deeper segment) and none draws a ring or a chip */
+    const dues = [...html.matchAll(/data-pa5="be-row"[^>]*data-due="(\d*)"/g)].map((m) => (m[1] ? Number(m[1]) : Infinity));
+    expect(dues).toEqual([...dues].sort((a, b) => a - b));
+    expect(html).toContain('data-past="1"');
+    expect(html).toContain('data-pa5="be-deep"');
+    expect(html).not.toMatch(/beacon|pa41-bc|pa41-ov/);
+    /* the asked rows' current stage is a hollow ring on the mini track */
+    expect(html).toContain('data-asked="1"');
+    expect(html).toContain('data-pa5="mini-ring"');
+    /* surnames, not full names, in the rows */
+    expect(html).toContain("<b>Number0</b>");
+    expect(html).not.toMatch(/overdue|\blate\b/i);
+  });
+  it("the block, filtered: the group's rows only, its figure lifted and pressed, Show all, the footer carries the filter", () => {
+    const all = renderPageSeededWith(P(<Block />), "/dashboard", QS(11));
+    const court = (all.match(/data-pa5="be-row"[^>]*data-court="(you|agent|quiet)"/) ?? [])[1] as BeCourt;
+    expect(court).toBeTruthy();
+    const html = renderPageSeededWith(P(<Block f={court} />), "/dashboard", QS(11));
+    expect(html).toMatch(new RegExp(`aria-pressed="true"[^>]*data-pa5="be-count" data-k="${court}"`));
+    expect(html).toContain('data-pa5="be-showall"');
+    const courts = [...html.matchAll(/data-pa5="be-row"[^>]*data-court="(\w+)"/g)].map((m) => m[1]);
+    expect(courts.length).toBeGreaterThan(0);
+    expect(courts.every((k) => k === court)).toBe(true);
+    expect(html).toContain(`data-court="${court}"`);
+    expect(html).toMatch(/data-pa5="be-foot" data-court="(you|agent|quiet)"/);
+  });
+  it("the block with one query: one row, the explainer, the singular footer; a zero figure is disabled", () => {
+    const html = renderPageSeeded(P(<Block />), "/dashboard");
+    expect(rowsOf(html)).toBe(1);
+    expect(html).toContain("Each query you log gets a line here. The bar fills as the days pass.");
+    expect(html).toContain("Your query, against its date");
+    expect(html).toMatch(/disabled=""[^>]*data-pa5="be-count"[^>]*data-n="0"/);
+  });
+  it("the block with no queries: nothing on Today's Queries tab but the way to the list", () => {
+    const html = renderPage(P(<TodayV5 />), "/dashboard");
+    expect(html).not.toContain('data-pa5="be"');
+    expect(html).not.toContain('data-pa5="be-row"');
   });
 });
 

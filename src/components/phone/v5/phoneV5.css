@@ -34,3 +34,105 @@
   body.pa41-land .pa4-ph.pa5-phs { position: relative; }
   body.pa5-phs .pa41v.land { --stick: 0px; }
 }
+
+/* ── PHASE B — TODAY'S HEADER (phone-hub-v5.html `H({...})` F1: `.hl`, `titleRow`, `.needp`, `fig`, `chartL`, `.hl-m`).
+   Type in rem; the typewriter rules carry two classes and !important (brand.tsx forces a face on bare headings). ── */
+@media (max-width: 767.98px) {
+  .pa5-hd {
+    position: relative; overflow: hidden; color: #fff; background-color: var(--pa-navy); background-image: var(--pa-doodle);
+    padding: max(52px, calc(env(safe-area-inset-top, 0px) + 16px)) 24px 40px;
+  }
+  .pa5-hd .pa5-hd-sh { position: absolute; left: -90px; top: 120px; width: 280px; opacity: 0.06; transform: rotate(-8deg); pointer-events: none; }
+  .pa5-hd-t { display: flex; align-items: flex-start; gap: 8px; position: relative; z-index: 3; }
+  .pa5-hd-t .pa4-ib { margin-top: -4px; }
+  .pa5 .pa5-hd .pa5-hd-h { margin: 0; font: 400 2rem/1.1 var(--pa-type) !important; color: #fff; letter-spacing: 0; overflow-wrap: anywhere; }
+  .pa5-hd .pa5-hd-day { margin-top: 4px; color: var(--pa-onnavy); }
+  /* the need row: the pill and the streak on the left, the figure on the right; it wraps rather than overflows */
+  .pa5-hd-r { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 4px 12px; margin-top: 4px; position: relative; z-index: 3; }
+  .pa5-hd-l { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+  .pa5-hd-l .pa4-pill { margin-top: 4px; }
+  .pa5 .pa5-need { display: inline-flex; align-items: center; min-height: 48px; max-width: 100%; }
+  .pa5-need > span { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 4px 8px 4px 12px; border-radius: 18px; background: var(--pa-blush); color: var(--pa-ink); font-size: 0.875rem; line-height: 1.3; font-weight: 600; }
+  .pa5-need i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--pa-rust); }
+  .pa5-need .pa4-chev { width: 18px; height: 18px; color: var(--pa-ink); }
+  .pa5-hd-fig { margin-left: auto; text-align: right; }
+  .pa5 .pa5-hd .pa5-hd-n { display: block; font: 400 3.5rem/1 var(--pa-type) !important; color: #fff; }
+  .pa5-hd .pa5-hd-cap { color: #fff; font-weight: 600; }
+  .pa5-hd .pa5-hd-chg { color: var(--pa-blush); }
+  .pa5-hd-one { position: relative; z-index: 3; min-height: 152px; display: flex; align-items: flex-end; justify-content: flex-end; margin-left: 96px; text-align: right; }
+  /* the chart (v4.1's): full width, fading in from behind the Mentor, to a dot at Today */
+  .pa5-ch { position: relative; height: 150px; margin: 20px -24px 0; }
+  .pa5-ch svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
+    -webkit-mask-image: linear-gradient(90deg, transparent 8%, #000 34%); mask-image: linear-gradient(90deg, transparent 8%, #000 34%); }
+  .pa5-ch-l { stroke-dasharray: 1; stroke-dashoffset: 0; animation: pa5-line 1.2s cubic-bezier(0.65, 0, 0.35, 1) both; }
+  .pa5-ch-a { animation: pa5-fade 0.6s 0.9s both; }
+  .pa5-ch-d { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px var(--pa-blush); animation: pa5-fade 0.3s 1.1s both; }
+  .pa5 .pa5-ch-tag { position: absolute; right: 12px; font: 400 0.875rem/1.43 var(--pa-type) !important; color: #fff; animation: pa5-fade 0.3s 1.2s both; }
+  .pa5-ch-x { position: absolute; left: 0; right: 0; bottom: -28px; height: 20px; }
+  .pa5 .pa5-ch-x span { position: absolute; transform: translateX(-50%); font: 400 0.875rem/1.43 var(--pa-type) !important; color: var(--pa-onnavy); white-space: nowrap; }
+  /* the Mentor: mirrored, fixed to the left edge, his feet on the chart's baseline (ref MW 92) */
+  .pa5-hd-m { position: absolute; left: -16px; bottom: 40px; width: 92px; height: auto; transform: scaleX(-1); filter: drop-shadow(8px 10px 12px rgba(0, 0, 0, 0.35)); z-index: 2; animation: pa5-fade 0.5s 0.3s both; pointer-events: none; }
+  .pa5-hd.one .pa5-hd-m { bottom: 24px; }
+  @keyframes pa5-line { from { stroke-dashoffset: 1; } }
+  @keyframes pa5-fade { from { opacity: 0; } }
+
+  /* ── PHASE B — THE BIRDS-EYE BLOCK (ref `.sm`, `.bed-*` light, `.tk`, `.mt`): straight on the page ── */
+  .pa5-be { position: relative; }
+  .pa5-be-sm { padding: 4px 8px; }
+  .pa5-be-sb { display: flex; gap: 3px; height: 10px; margin-bottom: 10px; }
+  .pa5-be-sb i { border-radius: 5px; transition: opacity 0.2s; }
+  .pa5-be-sn { display: flex; gap: 6px; margin: 0 -8px; }
+  .pa5 .pa5-be-sn button { flex: 1 1 0; min-width: 0; min-height: 56px; padding: 4px 8px; border-radius: 12px; text-align: left; color: var(--pa-ink); }
+  .pa5 .pa5-be-sn b { display: block; font-size: 1.875rem; line-height: 1.1; }
+  .pa5-be-sn span { display: flex; align-items: center; gap: 6px; font-size: 0.875rem; line-height: 1.3; color: var(--pa-muted); overflow-wrap: anywhere; }
+  .pa5-be-sn span i { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+  .pa5 .pa5-be-sn button.on { background: #fff; box-shadow: 0 1px 2px rgba(31, 38, 51, 0.06), 0 4px 12px rgba(31, 38, 51, 0.08); }
+  .pa5-be-sn button.on span { color: var(--pa-ink); font-weight: 600; }
+  .pa5 .pa5-be-sn button:disabled { cursor: default; color: var(--pa-faint); }
+  .pa5-be-sn button:disabled span { color: var(--pa-faint); }
+  .pa5-be-sn button:disabled span i { opacity: 0.4; }
+  .pa5-be-l { display: flex; align-items: center; min-height: 32px; padding: 0 8px; font-size: 0.875rem; line-height: 1.43; color: var(--pa-ink); font-weight: 600; }
+  .pa5-be-l > span { flex: 1; min-width: 0; }
+  .pa5 .pa5-be-x { min-height: 48px; margin: -8px 0; padding: 0 4px; font-weight: 600; color: var(--pa-navy); }
+  .pa5-be-b { position: relative; padding: 0 0 4px; border-top: 1px solid var(--pa-rule); }
+  /* the ruler: the Today pill on top, the months under it */
+  .pa5-be-r { display: flex; height: 2.75rem; }
+  .pa5-be-r > span { flex: none; width: 116px; }
+  .pa5-be-m { flex: 1; position: relative; }
+  .pa5 .pa5-be-m em { position: absolute; top: 1.375rem; font: 400 0.875rem/1.43 var(--pa-type) !important; font-style: normal; color: var(--pa-muted); white-space: nowrap; }
+  .pa5 .pa5-be-m strong { position: absolute; top: 0; z-index: 2; transform: translateX(-50%); padding: 0 6px; border-radius: 0.625rem; background: var(--pa-navy); color: #fff; font: 400 0.875rem/1.3 var(--pa-type) !important; white-space: nowrap; }
+  /* a row: 28px edge to edge (the one exception to 48), the 116px name column, then the 12px track */
+  .pa5 .pa5-be-row { display: flex; align-items: center; width: 100%; height: 28px; color: var(--pa-ink); border-bottom: 1px solid var(--pa-fill); text-align: left; }
+  .pa5-be-row.op { background: #fff; border-bottom-color: transparent; }
+  .pa5-be-nm { flex: none; width: 116px; display: flex; align-items: center; gap: 6px; padding-left: 6px; overflow: hidden; white-space: nowrap; font-size: 0.875rem; }
+  .pa5-be-nm b { min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+  .pa5-mt { flex: none; width: 37px; height: 14px; }
+  .pa5-be-tk { flex: 1; position: relative; height: 12px; }
+  .pa5-be-tk i { position: absolute; top: 0; height: 12px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(31, 38, 51, 0.12); }
+  .pa5-be-tk .pa5-be-p { opacity: 0.45; }
+  .pa5-be-tk .pa5-be-rm { opacity: 0.4; min-width: 4px; }
+  .pa5-be-tk .pa5-be-rm.off { border-radius: 4px 0 0 4px; -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent); mask-image: linear-gradient(90deg, #000 80%, transparent); }
+  .pa5-be-tk .pa5-be-s { min-width: 4px; }
+  /* past its date: the bar carries on from the notch to today, a deeper tone of the same fill */
+  .pa5-be-tk .pa5-be-dp { filter: brightness(0.8) saturate(1.5); border-radius: 0 4px 4px 0; box-shadow: none; }
+  .pa5-be-tk s { position: absolute; top: -2px; width: 2px; height: 16px; margin-left: -1px; border-radius: 1px; background: rgba(31, 38, 51, 0.55); }
+  /* the today line: from the pill to the last row, above the bars, below an opened row's detail */
+  .pa5-be-now { position: absolute; top: 1.3rem; bottom: 4px; width: 1.5px; margin-left: -0.75px; background: var(--pa-navy); opacity: 0.6; z-index: 1; pointer-events: none; }
+  .pa5-be-d { display: flex; align-items: center; gap: 8px; position: relative; z-index: 3; background: #fff; padding: 4px 4px 8px 8px; border-bottom: 1px solid var(--pa-rule); border-radius: 0 0 12px 12px; animation: pa5-bedd 0.18s ease-out; }
+  .pa5-be-who b { font-weight: 600; overflow-wrap: anywhere; }
+  .pa5-be-d .pa5-be-say { color: var(--pa-ink); overflow-wrap: anywhere; }
+  .pa5 .pa5-be-o { flex: none; min-height: 48px; min-width: 48px; padding: 0 12px; font-weight: 600; color: var(--pa-navy); }
+  @keyframes pa5-bedd { from { opacity: 0; transform: translateY(-4px); } }
+  .pa5-be-few { padding: 12px 8px 0; }
+  .pa5 .pa5-be-f { display: flex; width: 100%; min-height: 52px; align-items: center; justify-content: space-between; gap: 8px; padding: 0 8px; font-weight: 600; color: var(--pa-navy); text-align: left; }
+  /* the once-a-day replay (v4.1's): the bars draw in and the line slides from the name column */
+  .pa5-be.play .pa5-be-tk { animation: pa5-draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) both; }
+  .pa5-be.play .pa5-be-now { animation: pa5-now 1.6s cubic-bezier(0.65, 0, 0.35, 1) both; }
+  .pa5-be.play .pa5-be-m strong { animation: pa5-fade 0.4s 1.4s both; }
+  @keyframes pa5-draw { from { clip-path: inset(-4px 100% -4px 0); } to { clip-path: inset(-4px 0 -4px 0); } }
+  @keyframes pa5-now { from { left: 116px; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pa5-ch-l, .pa5-ch-a, .pa5-ch-d, .pa5-ch-tag, .pa5-hd-m, .pa5-be-d, .pa5-be-tk, .pa5-be-now, .pa5-be-m strong, .pa5-be-sb i { animation: none !important; transition: none !important; }
+  }
+}
