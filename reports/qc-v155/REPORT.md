@@ -19,7 +19,7 @@ Design ref `design-refs/query-centre-v155.html`, sha256 `dc384d58…6e79e818`, v
 | 3 · loading skeleton | `3a8a593b8` |
 | 4 · measured, two fixes | `c2b9fe46f` |
 | 4 · report + screens | this commit |
-| dev line merge | `7efd8d88a` on `dev/…-qc154-qc1541-pa4-qc155` |
+| dev line merges | `7efd8d88a`, then `da2a05a60` on `dev/…-qc154-qc1541-pa4-qc155` |
 
 ## Gates against baseline
 
@@ -89,7 +89,7 @@ If the queries read errors, `lib/db.tsx` marks it loaded anyway ("don't hang the
 
 ## Dev, and how to see each state
 
-Dev serves `index-BFB1ptDH.js`, deployed from `dev/…-qc154-qc1541-pa4-qc155` at `7efd8d88a` (pushed). That is the dev line that was served before (`index-CzLH0sbg.js`, rebuilt byte-identical before the merge) plus v155. Open https://scriptally-dev.web.app/queries at 768px wide or more, open the browser console, run one line, then reload:
+Dev serves `index-CLC0PZ_h.js`, deployed from `dev/…-qc154-qc1541-pa4-qc155` at `da2a05a60` (pushed; the first v155 deploy, `7efd8d88a`, served `index-BFB1ptDH.js`). That is the dev line that was served before (`index-CzLH0sbg.js`, rebuilt byte-identical before the merge) plus v155. Open https://scriptally-dev.web.app/queries at 768px wide or more, open the browser console, run one line, then reload:
 
 - **Quiet:** `localStorage.setItem("sa.qc155.state", "quiet")`. Rows in Offers, Materials requested and Nudge due are hidden from the list.
 - **Day one:** `localStorage.setItem("sa.qc155.state", "first")`. Alternatively, pick a manuscript with no queries; that state is real, not an aid.
