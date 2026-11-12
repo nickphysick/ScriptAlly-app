@@ -1,0 +1,7 @@
+[
+ {
+  "name": "S3 reduced motion: no sweep (the highlight is not drawn)",
+  "ok": true,
+  "got": "{\"anim\":\"none\",\"content\":\"\\\"\\\"\",\"display\":\"none\"}"
+ }
+]

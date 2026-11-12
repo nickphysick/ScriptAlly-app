@@ -147,6 +147,10 @@ for (const vp of SIZES) {
       };
     }, PAGE);
     writeFileSync(`${DIR}/readings-dayone-${vp.width}.json`, JSON.stringify(r, null, 1));
+    const fr = await frames(page);
+    writeFileSync(`${DIR}/frames-dayone-${vp.width}.json`, JSON.stringify(fr, null, 1));
+    const fe = JSON.parse(readFileSync(`${DIR}/frames-everyday-after-${vp.width}.json`, "utf8"));
+    L.check("S2 the header's height is the populated page's", near(fr.header?.h, fe.header.h, 0.01) && near(fr.toolbar?.y, fe.toolbar.y, 0.01), `day one ${fr.header?.h} · populated ${fe.header.h}; toolbar y ${fr.toolbar?.y} vs ${fe.toolbar.y}`);
     console.log(JSON.stringify(r, null, 1));
     L.check("S2 the title reads No queries yet", r.title === "No queries yet", String(r.title));
     L.check("S2 both header buttons stay", r.btns.join("|") === "+ Log a query|Record a response", r.btns.join("|"));

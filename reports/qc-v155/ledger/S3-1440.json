@@ -1,0 +1,82 @@
+[
+ {
+  "name": "S3 the list is aria-busy while loading",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "S3 the placeholders are hidden from screen readers",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "S3 two groups: 2 cards then 6",
+  "ok": true,
+  "got": "[2,6]"
+ },
+ {
+  "name": "S3 3-across, 14px gaps",
+  "ok": true,
+  "got": "310.656px 310.672px 310.656px / 14px"
+ },
+ {
+  "name": "S3 card: 168px, 16px, white, a 1px #ebe5db ring, a 1.3s sweep",
+  "ok": true,
+  "got": "{\"h\":168,\"r\":\"16px\",\"bg\":\"rgb(255, 255, 255)\",\"sh\":\"rgb(235, 229, 219) 0px 0px 0px 1px\",\"anim\":\"qc155-sweep\",\"dur\":\"1.3s\"}"
+ },
+ {
+  "name": "S3 heading bar: 22 × 220, 6px, #ebe5db, 26 above / 14 below",
+  "ok": true,
+  "got": "{\"h\":22,\"w\":220,\"r\":\"6px\",\"bg\":\"rgb(235, 229, 219)\",\"mt\":\"26px\",\"mb\":\"14px\"}"
+ },
+ {
+  "name": "S3 no spinner",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "S3 no words in the list while loading",
+  "ok": true,
+  "got": "\"\""
+ },
+ {
+  "name": "S3 forLine: absent loading and loaded on this account (reported)",
+  "ok": true,
+  "got": "{\"load\":null,\"done\":null}"
+ },
+ {
+  "name": "S3 header does not move when the data lands",
+  "ok": true,
+  "got": "{\"dx\":0,\"dy\":0,\"dw\":0,\"dh\":0}"
+ },
+ {
+  "name": "S3 title does not move when the data lands",
+  "ok": true,
+  "got": "{\"dx\":0,\"dy\":0,\"dw\":0,\"dh\":0}"
+ },
+ {
+  "name": "S3 acts does not move when the data lands",
+  "ok": true,
+  "got": "{\"dx\":0,\"dy\":0,\"dw\":0,\"dh\":0}"
+ },
+ {
+  "name": "S3 chart does not move when the data lands",
+  "ok": true,
+  "got": "{\"dx\":0,\"dy\":0,\"dw\":0,\"dh\":0}"
+ },
+ {
+  "name": "S3 toolbar does not move when the data lands",
+  "ok": true,
+  "got": "{\"dx\":0,\"dy\":0,\"dw\":0,\"dh\":0}"
+ },
+ {
+  "name": "S3 bar does not move when the data lands",
+  "ok": true,
+  "got": "{\"dx\":0,\"dy\":0,\"dw\":0,\"dh\":0}"
+ },
+ {
+  "name": "S3 rail does not move when the data lands",
+  "ok": true,
+  "got": "{\"dx\":0,\"dy\":0,\"dw\":0,\"dh\":0}"
+ }
+]
