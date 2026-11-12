@@ -1,0 +1,10 @@
+[
+ {
+  "lock": "§4 · (own) the Contact list's header is its own — its geometry is CL15-1's",
+  "route": "/agents",
+  "size": "1920",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"own\":true,\"shared\":0}"
+ }
+]

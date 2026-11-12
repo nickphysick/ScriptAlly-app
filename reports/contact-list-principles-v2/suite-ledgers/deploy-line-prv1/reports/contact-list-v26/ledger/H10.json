@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "H10",
+  "where": "Group: exactly Letter, Status, No grouping",
+  "ok": true,
+  "detail": "[\"Letter\",\"Status\",\"No grouping\"]"
+ },
+ {
+  "lock": "H10",
+  "where": "Group: text (population)",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "H10",
+  "where": "Group: typewriter, upright",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H10",
+  "where": "Sort: exactly the four",
+  "ok": false,
+  "detail": "[\"Surname\",\"Date added\",\"Reply time\",\"Query status\",\"Agent fit\"]"
+ },
+ {
+  "lock": "H10",
+  "where": "Sort: text (population)",
+  "ok": true,
+  "detail": "8"
+ },
+ {
+  "lock": "H10",
+  "where": "Sort: typewriter, upright",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "H10",
+  "where": "the rail: the four quick picks, Missing details among them",
+  "ok": true,
+  "detail": "[\"Your move\",\"Ready to query\",\"Waiting to hear back\",\"Missing details\"]"
+ },
+ {
+  "lock": "H10",
+  "where": "no Filters menu on the page",
+  "ok": true,
+  "detail": "a Filters menu is mounted"
+ }
+]

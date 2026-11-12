@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "§4.5 · choosing a book writes the shared key",
+  "route": "/agents",
+  "size": "1440",
+  "state": "switcher",
+  "ok": true,
+  "detail": "null → cv25-ms-empty"
+ },
+ {
+  "lock": "§4.5 · …the switcher shows the new book",
+  "route": "/agents",
+  "size": "1440",
+  "state": "switcher",
+  "ok": true,
+  "detail": "Murphy's Day Out / Murphy's Day Out"
+ },
+ {
+  "lock": "§4.5 · …and the page shows what a fresh load of that book shows",
+  "route": "/agents",
+  "size": "1440",
+  "state": "switcher",
+  "ok": false,
+  "detail": "changed false · equals fresh true"
+ }
+]

@@ -1,0 +1,28 @@
+{
+ "busy": "true",
+ "text": "",
+ "hidden": "true",
+ "perGrid": [
+  2,
+  6
+ ],
+ "cols": "424px 424px 424px",
+ "gap": "14px",
+ "card": {
+  "h": 168,
+  "r": "16px",
+  "bg": "rgb(255, 255, 255)",
+  "sh": "rgb(235, 229, 219) 0px 0px 0px 1px",
+  "anim": "qc155-sweep",
+  "dur": "1.3s"
+ },
+ "head": {
+  "h": 22,
+  "w": 220,
+  "r": "6px",
+  "bg": "rgb(235, 229, 219)",
+  "mt": "26px",
+  "mb": "14px"
+ },
+ "spinners": 0
+}

@@ -1,0 +1,18 @@
+[
+ {
+  "lock": "§2 · the mock rendered with its fonts",
+  "route": "mock",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"hdT\":18,\"hdH\":271.734375,\"frame\":{\"l\":384,\"r\":1304,\"w\":920},\"art\":{\"l\":979.4132029339853,\"r\":1304,\"t\":86.734375,\"b\":362.734375,\"w\":324.58679706601464,\"h\":276},\"eyebrowT\":26,\"titleT\":24,\"rule\":362.734375,\"railT\":25,\"rail\":{\"l\":1053.921875,\"r\":1393.921875,\"w\":340},\"countsT\":25,\"fonts\":true}"
+ },
+ {
+  "lock": "§4 · (own) the Contact list's header is its own — its geometry is CL15-1's",
+  "route": "/agents",
+  "size": "1440",
+  "state": "expanded",
+  "ok": true,
+  "detail": "{\"own\":true,\"shared\":0}"
+ }
+]

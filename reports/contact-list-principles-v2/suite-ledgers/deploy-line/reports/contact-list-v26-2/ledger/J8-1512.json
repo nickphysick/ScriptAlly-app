@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "J8-1512",
+  "where": "the card sits scrolled (400)",
+  "ok": true,
+  "detail": "400"
+ },
+ {
+  "lock": "J8-1512",
+  "where": "stepping ×3 holds How",
+  "ok": true,
+  "detail": "152.8125 → 152.8125"
+ },
+ {
+  "lock": "J8-1512",
+  "where": "Submit by holds How",
+  "ok": true,
+  "detail": "152.8125 → 152.8125"
+ },
+ {
+  "lock": "J8-1512",
+  "where": "opening Materials keeps it, or only reveals it (heading stays in view)",
+  "ok": true,
+  "detail": "47.015625 → 47.015625 (How 152.8125 → 224.515625)"
+ },
+ {
+  "lock": "J8-1512",
+  "where": "never sent to the top",
+  "ok": true,
+  "detail": "406"
+ }
+]

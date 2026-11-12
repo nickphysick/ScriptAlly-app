@@ -1,0 +1,252 @@
+[
+ {
+  "where": "population: the list has rows",
+  "ok": true,
+  "detail": "53"
+ },
+ {
+  "where": "population: pressable controls of every kind",
+  "ok": true,
+  "detail": "[\"pick\",\"genre\",\"tile\",\"open-only\"]"
+ },
+ {
+  "where": "pick:you rows = its count (7)",
+  "ok": true,
+  "detail": "7 rows, band 7, control said 7"
+ },
+ {
+  "where": "pick:you the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "pick:you Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "pick:ready rows = its count (35)",
+  "ok": true,
+  "detail": "35 rows, band 35, control said 35"
+ },
+ {
+  "where": "pick:ready the rail says what is on",
+  "ok": true,
+  "detail": "2 on"
+ },
+ {
+  "where": "pick:ready Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "pick:wait rows = its count (7)",
+  "ok": true,
+  "detail": "7 rows, band 7, control said 7"
+ },
+ {
+  "where": "pick:wait the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "pick:wait Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "pick:missing rows = its count (52)",
+  "ok": true,
+  "detail": "52 rows, band 52, control said 52"
+ },
+ {
+  "where": "pick:missing the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "pick:missing Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "tile:you rows = its count (7)",
+  "ok": true,
+  "detail": "7 rows, band 7, control said 7"
+ },
+ {
+  "where": "tile:you leaves only its group",
+  "ok": true,
+  "detail": "[\"you\"]"
+ },
+ {
+  "where": "tile:you the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "tile:you Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "tile:agent rows = its count (4)",
+  "ok": true,
+  "detail": "4 rows, band 4, control said 4"
+ },
+ {
+  "where": "tile:agent leaves only its group",
+  "ok": true,
+  "detail": "[\"agent\"]"
+ },
+ {
+  "where": "tile:agent the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "tile:agent Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "tile:none rows = its count (39)",
+  "ok": true,
+  "detail": "39 rows, band 39, control said 39"
+ },
+ {
+  "where": "tile:none leaves only its group",
+  "ok": true,
+  "detail": "[\"none\"]"
+ },
+ {
+  "where": "tile:none the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "tile:none Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "tile:closed rows = its count (3)",
+  "ok": true,
+  "detail": "3 rows, band 3, control said 3"
+ },
+ {
+  "where": "tile:closed leaves only its group",
+  "ok": true,
+  "detail": "[\"closed\"]"
+ },
+ {
+  "where": "tile:closed the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "tile:closed Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "open-only rows = its count (49)",
+  "ok": true,
+  "detail": "49 rows, band 49, control said 49"
+ },
+ {
+  "where": "open-only the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "open-only Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "genre:literary-fiction rows = its count (29)",
+  "ok": true,
+  "detail": "29 rows, band 29, control said 29"
+ },
+ {
+  "where": "genre:literary-fiction every row carries the genre",
+  "ok": true,
+  "detail": "literary fiction"
+ },
+ {
+  "where": "genre:literary-fiction the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "genre:literary-fiction Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "genre:thriller rows = its count (22)",
+  "ok": true,
+  "detail": "22 rows, band 22, control said 22"
+ },
+ {
+  "where": "genre:thriller every row carries the genre",
+  "ok": true,
+  "detail": "thriller"
+ },
+ {
+  "where": "genre:thriller the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "genre:thriller Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "genre:crime rows = its count (1)",
+  "ok": true,
+  "detail": "1 rows, band 1, control said 1"
+ },
+ {
+  "where": "genre:crime every row carries the genre",
+  "ok": true,
+  "detail": "crime"
+ },
+ {
+  "where": "genre:crime the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "genre:crime Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "genre:suspense rows = its count (1)",
+  "ok": true,
+  "detail": "1 rows, band 1, control said 1"
+ },
+ {
+  "where": "genre:suspense every row carries the genre",
+  "ok": true,
+  "detail": "suspense"
+ },
+ {
+  "where": "genre:suspense the rail says what is on",
+  "ok": true,
+  "detail": "1 on"
+ },
+ {
+  "where": "genre:suspense Reset restores the whole list",
+  "ok": true,
+  "detail": "53 vs 53"
+ },
+ {
+  "where": "a second click on a tile clears it",
+  "ok": true,
+  "detail": "the tile is still on"
+ }
+]

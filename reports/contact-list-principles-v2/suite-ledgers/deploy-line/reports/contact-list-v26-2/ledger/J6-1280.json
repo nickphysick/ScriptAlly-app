@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "J6-1280",
+  "where": "genres · chips to pick (4 offered, 0 chosen)",
+  "ok": true,
+  "detail": "4+0"
+ },
+ {
+  "lock": "J6-1280",
+  "where": "genres · typed words left unpicked are no genre",
+  "ok": true,
+  "detail": "0 → 0"
+ },
+ {
+  "lock": "J6-1280",
+  "where": "one sample unit chosen",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "J6-1280",
+  "where": "reply tops out at 26",
+  "ok": true,
+  "detail": "26 weeks"
+ },
+ {
+  "lock": "J6-1280",
+  "where": "reply floors at 1",
+  "ok": true,
+  "detail": "1 week"
+ },
+ {
+  "lock": "J6-1280",
+  "where": "door Closed reveals Reopens",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J6-1280",
+  "where": "door Open hides Reopens",
+  "ok": true,
+  "detail": ""
+ }
+]

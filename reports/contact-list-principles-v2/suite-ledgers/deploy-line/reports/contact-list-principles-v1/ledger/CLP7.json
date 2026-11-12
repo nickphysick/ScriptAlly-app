@@ -1,0 +1,42 @@
+[
+ {
+  "where": "the panel closed",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "the new row is in view",
+  "ok": true,
+  "detail": "{\"row\":true,\"inView\":true,\"tint\":true,\"stamp\":\"ADDED 12 NOV\",\"panel\":0,\"toast\":[{\"text\":\"Quill Clpsyt4t added to your listUNDO✕\",\"undo\":true}],\"role\":\"status\"}"
+ },
+ {
+  "where": "the row is tinted",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "where": "the rust postmark over it: ADDED and the date",
+  "ok": true,
+  "detail": "ADDED 12 NOV"
+ },
+ {
+  "where": "one snackbar: “{Name} added to your list”, with Undo",
+  "ok": true,
+  "detail": "[{\"text\":\"Quill Clpsyt4t added to your listUNDO✕\",\"undo\":true}]"
+ },
+ {
+  "where": "role=status",
+  "ok": true,
+  "detail": "status"
+ },
+ {
+  "where": "and says “{Name} removed”",
+  "ok": true,
+  "detail": "[\"Quill Clpsyt4t removed✕\"]"
+ },
+ {
+  "where": "Undo removed the agent (emulator)",
+  "ok": true,
+  "detail": "0"
+ }
+]

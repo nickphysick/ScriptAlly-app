@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "J10-1280",
+  "where": "✕ asks",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J10-1280",
+  "where": "Keep editing keeps the change",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "J10-1280",
+  "where": "Esc asks",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J10-1280",
+  "where": "› asks",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "J10-1280",
+  "where": "Discard goes on to the next agent",
+  "ok": true,
+  "detail": "cv25-agent-06 → cv25-agent-05"
+ },
+ {
+  "lock": "J10-1280",
+  "where": "another row asks",
+  "ok": true,
+  "detail": ""
+ }
+]

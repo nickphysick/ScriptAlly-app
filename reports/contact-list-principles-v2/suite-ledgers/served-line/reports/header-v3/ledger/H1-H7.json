@@ -1,0 +1,434 @@
+[
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "kind null · absent"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "null · null"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/todo/corkboard @1512",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "\"null\" vs \" \""
+ },
+ {
+  "lock": "H3 N is the number of cards the page draws",
+  "where": "/todo/corkboard @1512",
+  "ok": true,
+  "detail": "0 vs 0 cards"
+ },
+ {
+  "lock": "H7 every number panel is 260 tall (±4)",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/todo/corkboard @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/todo/corkboard @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 a light-header route shows its own header (contactV17 A1 holds it)",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "its own header"
+ },
+ {
+  "lock": "H1 a light-header route shows its own header (contactV17 A1 holds it)",
+  "where": "/agents @1512",
+  "ok": false,
+  "detail": "its own header"
+ },
+ {
+  "lock": "H1 a light-header route shows its own header (contactV17 A1 holds it)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "its own header"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "kind null · 112,130 1360×251"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0) · 0px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "panel 112.0–1472.0 · column 112.0–1472.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "24.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/manuscripts @1512",
+  "ok": false,
+  "detail": "0 line(s) \"\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "kind null · absent"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "null · null"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "0 line(s) \"\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/manuscripts/comps @1512",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "kind null · absent"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "null · null"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "H2 the number is 120 (±1)",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "H2 the words are 34 (±1)",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "H2 the words start 16 right of the number (±2)",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "H2 the words read as the page's",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "H2 the subline is outside the h1",
+  "where": "/todo/corkboard @1280",
+  "ok": true,
+  "detail": "inside false"
+ },
+ {
+  "lock": "H2 the h1's name is the number and its words",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "\"null\" vs \" \""
+ },
+ {
+  "lock": "H3 N is the number of cards the page draws",
+  "where": "/todo/corkboard @1280",
+  "ok": true,
+  "detail": "0 vs 0 cards"
+ },
+ {
+  "lock": "H7 every number panel is 260 tall (±4)",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/todo/corkboard @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/todo/corkboard @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 a light-header route shows its own header (contactV17 A1 holds it)",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "its own header"
+ },
+ {
+  "lock": "H1 a light-header route shows its own header (contactV17 A1 holds it)",
+  "where": "/agents @1280",
+  "ok": false,
+  "detail": "its own header"
+ },
+ {
+  "lock": "H1 a light-header route shows its own header (contactV17 A1 holds it)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "its own header"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "kind null · 112,130 1128×251"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "rgba(0, 0, 0, 0) · 0px"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "panel 112.0–1240.0 · column 112.0–1240.0"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "24.0"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/manuscripts @1280",
+  "ok": false,
+  "detail": "0 line(s) \"\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H1 the header is the shared panel",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "kind null · absent"
+ },
+ {
+  "lock": "H1 surface, radius 14",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "null · null"
+ },
+ {
+  "lock": "H1 edges are the content column's (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "H1 top is 28 below the sheet's top (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "—"
+ },
+ {
+  "lock": "H4 the title is 50 (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "lock": "H4 it runs to two lines at most",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "0 line(s) \"\""
+ },
+ {
+  "lock": "H4 there is no number element",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no stamp",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H5 no faces row",
+  "where": "/manuscripts/comps @1280",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "H6 population: several routes carry a drawing",
+  "where": "all",
+  "ok": false,
+  "detail": "0 readings"
+ },
+ {
+  "lock": "H2 population: every number page carries a subline",
+  "where": "all",
+  "ok": false,
+  "detail": "0 sublines"
+ }
+]

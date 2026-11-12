@@ -1,0 +1,201 @@
+{
+ "page": {
+  "bg": "rgb(246, 243, 238)",
+  "img": "linear-gradient(rgba(246, 243, 238, 0.45), rgba(246, 243, 238, 0.45)), url(\"http://127.0.0.1:4321/images/qc/doodle-tile.svg\")"
+ },
+ "fade": "linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0))",
+ "queried": {
+  "bg": "rgb(255, 255, 255)",
+  "shadow": "rgb(233, 223, 206) 0px 3px 0px 0px inset, rgb(240, 234, 224) 0px -1px 0px 0px inset"
+ },
+ "partial": {
+  "bg": "rgb(236, 214, 210)",
+  "shadow": "none"
+ },
+ "full": {
+  "bg": "rgb(217, 225, 234)",
+  "shadow": "none"
+ },
+ "others": [
+  {
+   "st": "Offer",
+   "tone": "heather",
+   "bg": "rgb(231, 214, 220)"
+  },
+  {
+   "st": "Offer",
+   "tone": "heather",
+   "bg": "rgb(231, 214, 220)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Revise & Resubmit",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Requested",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Full Requested",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Full Sent",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Partial Sent",
+   "tone": "rose",
+   "bg": "rgb(236, 214, 210)"
+  },
+  {
+   "st": "Full Sent",
+   "tone": "blue",
+   "bg": "rgb(217, 225, 234)"
+  }
+ ],
+ "seal": {
+  "bg": "rgb(255, 255, 255)",
+  "color": "rgb(42, 58, 82)",
+  "shadow": "rgb(197, 204, 214) 0px 0px 0px 1.5px inset",
+  "font": "\"Special Elite\", \"Courier New\", Courier, monospace",
+  "w": 38,
+  "h": 38
+ },
+ "rail": {
+  "body": {
+   "bg": "rgba(0, 0, 0, 0)",
+   "shadow": "none",
+   "pl": "0px",
+   "pr": "0px"
+  },
+  "secs": [
+   {
+    "k": "quick",
+    "bb": "1px solid rgb(228, 222, 212)",
+    "pb": "6px"
+   },
+   {
+    "k": "where",
+    "bb": "1px solid rgb(228, 222, 212)",
+    "pb": "6px"
+   },
+   {
+    "k": "sent",
+    "bb": "1px solid rgb(228, 222, 212)",
+    "pb": "6px"
+   },
+   {
+    "k": "more",
+    "bb": "0px none rgb(28, 19, 15)",
+    "pb": "6px"
+   }
+  ],
+  "pos": "relative"
+ },
+ "bar": {
+  "bg": "rgba(0, 0, 0, 0)",
+  "shadow": "none",
+  "blur": "none",
+  "pl": "0px",
+  "pr": "0px",
+  "h": 54,
+  "left": 0,
+  "firstBtn": 3,
+  "lastBtn": 0
+ },
+ "find": {
+  "bg": "rgb(255, 255, 255)",
+  "shadow": "rgb(227, 221, 211) 0px 0px 0px 1px inset"
+ },
+ "chart": {
+  "pill": null,
+  "line": "3 more to hit your goal this week.",
+  "head": "0 of 3 this week"
+ },
+ "cool": []
+}

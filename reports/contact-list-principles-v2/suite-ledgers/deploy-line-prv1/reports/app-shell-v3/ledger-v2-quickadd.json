@@ -1,0 +1,42 @@
+[
+ {
+  "lock": "§4.6 · no quick-add card exists at rest",
+  "route": "/agents",
+  "size": "1440",
+  "state": "add-door",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "§4.6 · no Paste-a-link pill — the secondary is View all agents",
+  "route": "/agents",
+  "size": "1440",
+  "state": "add-door",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "§4.6 · + Add an agent opens the centred card directly, name focused",
+  "route": "/agents",
+  "size": "1440",
+  "state": "add-door",
+  "ok": false,
+  "detail": "{\"addCard\":false,\"quick\":false,\"focused\":\"\"}"
+ },
+ {
+  "lock": "§4.6 · and drops no quick-add on the way",
+  "route": "/agents",
+  "size": "1440",
+  "state": "add-door",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "§4.6 · Escape closes the card",
+  "route": "/agents",
+  "size": "1440",
+  "state": "add-door",
+  "ok": true,
+  "detail": ""
+ }
+]

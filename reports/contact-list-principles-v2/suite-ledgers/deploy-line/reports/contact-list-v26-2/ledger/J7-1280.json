@@ -1,0 +1,14 @@
+[
+ {
+  "lock": "J7-1280",
+  "where": "an Also note shows (3)",
+  "ok": true,
+  "detail": "1 changeresponse time · moves 1 nudge"
+ },
+ {
+  "lock": "J7-1280",
+  "where": "the bar names the nudges the note moves",
+  "ok": true,
+  "detail": "1 moved · 3 note lines · 1 changeresponse time · moves 1 nudge"
+ }
+]

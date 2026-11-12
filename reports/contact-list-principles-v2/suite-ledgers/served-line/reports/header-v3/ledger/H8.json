@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/todo/corkboard @1512",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/queries @1512",
+  "ok": true,
+  "detail": "112,136 1360×198 → 112,136 1360×198"
+ },
+ {
+  "lock": "H8 precondition: it was read while loading, then loaded",
+  "where": "/queries @1512",
+  "ok": false,
+  "detail": "first false · last false"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "112,136 1360×200 (loading) → 112,136 1360×200"
+ },
+ {
+  "lock": "H8 precondition: it was read while loading, then loaded",
+  "where": "/agents @1512",
+  "ok": true,
+  "detail": "first true · last false"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/queries/analytics @1512",
+  "ok": true,
+  "detail": "104,142 1376×179 (loading) → 104,142 1376×179"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts @1512",
+  "ok": true,
+  "detail": "112,130 1360×251 → 112,130 1360×251"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts/comps @1512",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/todo/corkboard @1280",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/queries @1280",
+  "ok": true,
+  "detail": "112,136 1128×198 → 112,136 1128×198"
+ },
+ {
+  "lock": "H8 precondition: it was read while loading, then loaded",
+  "where": "/queries @1280",
+  "ok": false,
+  "detail": "first false · last false"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "112,136 1128×200 (loading) → 112,136 1128×200"
+ },
+ {
+  "lock": "H8 precondition: it was read while loading, then loaded",
+  "where": "/agents @1280",
+  "ok": true,
+  "detail": "first true · last false"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/queries/analytics @1280",
+  "ok": true,
+  "detail": "104,142 1144×223 (loading) → 104,142 1144×223"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts @1280",
+  "ok": true,
+  "detail": "112,130 1128×251 → 112,130 1128×251"
+ },
+ {
+  "lock": "H8 the header's box is the same first seen and settled (±1)",
+  "where": "/manuscripts/comps @1280",
+  "ok": false,
+  "detail": "absent → absent"
+ },
+ {
+  "lock": "H8 population: the held pages were read loading",
+  "where": "all",
+  "ok": true,
+  "detail": "4"
+ }
+]
