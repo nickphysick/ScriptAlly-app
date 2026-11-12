@@ -75,3 +75,25 @@
   75% { opacity: .9; }
   100% { opacity: 0; transform: rotate(-12deg) scale(1); }
 }
+
+/* ── 4 · keyboard and the card ───────────────────────────────────────────────────────────────────────────────────── */
+.cl27 .cl26-row:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; border-radius: 6px; }
+.cl27 .cl26-row:focus { position: relative; z-index: 1; }
+
+.cl262-card.cl262-card.apc .apc-sec h5 {
+  font: 600 15px/1.3 var(--sp-serif) !important; text-transform: none; letter-spacing: 0; color: #1c130f;
+}
+.cl262-card.cl262-card.apc .apc-ag, .cl262-card.cl262-card.apc.apc--panel .apc-ag {
+  font: 400 14px/1.35 var(--sp-serif) !important; text-transform: none; letter-spacing: 0; color: #5b4f47;
+}
+.cl262-card.cl262-card.apc .apc-chip, .cl262-card.cl262-card.apc .apc-mat {
+  font: 400 14px/1.2 var(--sp-type) !important; text-transform: none; letter-spacing: 0;
+}
+.cl262-card.cl262-card.apc .apc-st { font: 400 14px/1 var(--sp-type) !important; text-transform: none; letter-spacing: 0; }
+/* the meta lines (the foot's "Added 1 Feb 2026", the head's meta): 13px serif in sentence case (they were 10.5px mono capitals) */
+.cl262-card.cl262-card.apc .apc-meta { font: 400 13px/1.3 var(--sp-serif) !important; text-transform: none; letter-spacing: 0; color: #5b4f47; }
+.cl262-card.cl262-card .aap-fit--band .aap-stars { gap: 0; }
+.cl262-card.cl262-card .aap-fit--band .aap-stars button {
+  display: inline-grid; place-items: center; width: 26px; height: 26px; padding: 0; border-radius: 6px; box-sizing: border-box;
+}
+.cl262-card.cl262-card .aap-fit--band .aap-stars button:hover { background: rgba(255, 255, 255, .14); transform: none; }

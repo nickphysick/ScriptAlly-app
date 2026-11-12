@@ -909,6 +909,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   useEffect(() => {
     if (fullOn && cardId) { setBookReq({ id: cardId, seq: Date.now() }); setCardId(null); }
   }, [fullOn, cardId]);
+  /* principles v1 — Esc (or ✕) closes the card and focus goes back to its row, unless it has already gone somewhere real */
+  const lastCard = useRef<string | null>(null);
+  useEffect(() => {
+    const was = lastCard.current;
+    lastCard.current = cardId;
+    if (!was || cardId) return;
+    requestAnimationFrame(() => {
+      const ae = document.activeElement;
+      if (ae && ae !== document.body && document.contains(ae)) return;
+      const row = [...document.querySelectorAll<HTMLElement>(`.aglist [data-cl26='row'][data-id="${CSS.escape(was)}"]`)].find((el) => el.offsetHeight > 0);
+      row?.focus({ preventScroll: true });
+    });
+  }, [cardId]);
   /* an agent that is no longer on file closes its card */
   useEffect(() => { if (cardId && collectionsReady && !agents.some((a) => a.id === cardId)) setCardId(null); }, [cardId, agents, collectionsReady]);
   const titleOf = useCallback((msId: string) => manuscripts.find((m) => m.id === msId)?.title?.trim() || "Untitled manuscript", [manuscripts]);

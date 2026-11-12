@@ -291,7 +291,19 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
     <div role="row" tabIndex={0} className="cl26-row" data-cl26="row" data-cl24="row" data-id={a.id} data-k={x.stand} aria-current={p.openId === a.id ? "true" : undefined}
       aria-label={`${name}${agency ? `, ${agency}` : ""}`}
       onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; open(); }}
-      onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(); } }}>
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); return; }
+        /* principles v1 — ↑ ↓ move between the rows the list draws, in drawn order, kept clear of the pinned headings */
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          const rows = [...(e.currentTarget.closest("[data-cl26='rows']")?.querySelectorAll<HTMLElement>("[data-cl26='row']") ?? [])];
+          const next = rows[rows.indexOf(e.currentTarget) + (e.key === "ArrowDown" ? 1 : -1)];
+          if (!next) return;
+          e.preventDefault();
+          next.focus({ preventScroll: true });
+          rowIntoView(next);
+        }
+      }}>
       <span role="cell" className="cl26-who" data-cl26="agent">
         <Disc26 x={x} />
         <span className="cl26-whot"><b data-cl26="name" data-cl252="name">{name}</b>{sub ? <small data-cl26="agency">{sub}</small> : null}
@@ -314,6 +326,16 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
     </div>
   );
 };
+
+/** a row into view under the pin: `nearest`, then lifted clear of the pinned block (the band, index and headings) */
+function rowIntoView(row: HTMLElement) {
+  row.scrollIntoView({ block: "nearest" });
+  const pin = row.closest("[data-cl26='card']")?.querySelector<HTMLElement>("[data-cl26='pin']");
+  const sc = row.closest<HTMLElement>(".wpg-scroll");
+  if (!pin || !sc) return;
+  const under = pin.getBoundingClientRect().bottom - row.getBoundingClientRect().top;
+  if (under > 0) sc.scrollTop -= under;
+}
 
 /* ── C · the index row ──────────────────────────────────────────────────────────────────────────────────────────── */
 /* It names exactly the sections the list draws, in the same order (the one `sections` partition). A–Z under Letter by

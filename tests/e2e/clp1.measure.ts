@@ -65,7 +65,7 @@ async function mut(page: Page, lock: string) {
     case "CLP5": await css(page, ".cl27 .cl26-q--nq{color:rgba(28,19,15,.5) !important}"); break;
     case "CLP9": await page.evaluate(() => { for (const r of document.querySelectorAll<HTMLElement>(".aglist [data-cl26='row']")) r.addEventListener("keydown", (e) => { if (e.key === "ArrowDown") e.stopImmediatePropagation(); }, true); }); break;
     case "CLP10": await css(page, ".cl262-card .aap-fit--band .aap-stars button{width:auto !important;height:auto !important}"); break;
-    case "CLP11": await css(page, ".cl262-card.apc .apc-sec h5{font:500 10px/1.2 'JetBrains Mono',monospace !important;text-transform:uppercase !important}"); break;
+    case "CLP11": await css(page, ".cl262-card.cl262-card.cl262-card.apc .apc-sec h5{font:500 10px/1.2 'JetBrains Mono',monospace !important;text-transform:uppercase !important}"); break;
     case "CLP12": await css(page, ".cl27 [data-clp='state']{display:none !important}"); break;
     case "CLP13": await css(page, ".cl27 .qc153-cl{grid-template-columns:268px minmax(0,1fr) !important}"); break;
     case "CLP14": await css(page, ".cl27 .clp-sk i{animation:clp-sk 1.2s linear infinite !important}"); break;

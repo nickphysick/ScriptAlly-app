@@ -18,5 +18,10 @@
   "where": "never stacks",
   "ok": true,
   "detail": "1"
+ },
+ {
+  "where": "restored: the agent's rating as it was",
+  "ok": true,
+  "detail": "null → null"
  }
 ]
