@@ -1,0 +1,37 @@
+[
+ {
+  "where": "agency line",
+  "ok": true,
+  "detail": "7.91:1"
+ },
+ {
+  "where": "Not queried status",
+  "ok": true,
+  "detail": "6.11:1"
+ },
+ {
+  "where": "closed row's name",
+  "ok": true,
+  "detail": "6.11:1"
+ },
+ {
+  "where": "closed row's agency",
+  "ok": true,
+  "detail": "6.11:1"
+ },
+ {
+  "where": "closed row's status",
+  "ok": true,
+  "detail": "18.27:1"
+ },
+ {
+  "where": "column heading",
+  "ok": true,
+  "detail": "7.53:1"
+ },
+ {
+  "where": "What they want heading",
+  "ok": true,
+  "detail": "7.53:1"
+ }
+]

@@ -7,6 +7,9 @@
  * switch, the export at its foot). It renders the Query Centre's own rail classes (`qc153-*`, `qc1533-*`); `QcRail153`
  * itself is not used and does not change.
  *
+ * Contact list principles v1: Where they stand and Submissions sit (in that order) behind a full-width "More filters" row
+ * at the foot of the sections; Most used and Genres stay on show.
+ *
  *   Most used         the four quick picks (`PICKS26`), radio, through `applyPick`
  *   Where they stand  four tiles over the page's set (`SetKey[] | null`) — the same state the applied row's chip shows
  *   Genres            every genre on file, multi-select, written as the Filters menu wrote them; a genre the book in
@@ -19,7 +22,7 @@
  * ⚠️ ITS HOOKS ARE `data-cl27`, NEVER `data-qc153`: every workspace page stays mounted, so a Query Centre probe that
  *    counts `[data-qc153=…]` across the document would otherwise count this rail too.
  */
-import React, { useState } from "react";
+import React, { useEffect, useId, useState } from "react";
 import type { AgentFacts, ContactFilters } from "../../../lib/contactList";
 import { SET_LABEL, SET_ORDER, type SetKey } from "../../../lib/contactV24";
 import { PICKS26 } from "../../../lib/contactV26";
@@ -27,6 +30,7 @@ import { applyPick, pickOn, railCounts, railExport, railOn, railShowing, toggleG
 import "../../queries/centre/qcv153.css";
 import "../../queries/centre/qcv1531.css";
 import "./contactV27.css";
+import "./contactPrinciples.css";
 
 const CHEVRON = <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 4.5 6 7.5 9 4.5" /></svg>;
 /** the tile's descriptions, read as their titles */
@@ -56,6 +60,13 @@ export interface ContactRail27Props {
 export const ContactRail27: React.FC<ContactRail27Props> = (p) => {
   const [open, setOpen] = useState<Record<Sec, boolean>>({ quick: true, where: true, genres: true, subs: true });
   const f = p.filters;
+  /* Contact list principles v1 — Where they stand and Submissions fold behind "More filters", held the way the rail holds
+     its sections (this component's state, for as long as the page is mounted). A filter set in either opens it: on
+     arrival, and whenever one is applied from elsewhere (the applied row, a link). Folding never clears a filter. */
+  const moreApplied = !!p.sets?.length || f.open === "open";
+  const [more, setMore] = useState(moreApplied);
+  const moreId = useId();
+  useEffect(() => { if (moreApplied) setMore(true); }, [moreApplied]);
   const on = railOn(f, p.sets);
   const counts = railCounts(p.all, f, p.sets, p.pool, p.genreLabel);
   const pick = pickOn(f);
@@ -95,26 +106,6 @@ export const ContactRail27: React.FC<ContactRail27Props> = (p) => {
           ) : null}
         </section>
 
-        <section className={`qc153-rsec${open.where ? " is-open" : ""}`} data-cl27="rail-sec" data-k="where">
-          {head("where", "Where they stand")}
-          {open.where ? (
-            <div className="qc153-rbody qc1533-where">
-              <div className="qc153-courts" role="group" aria-label="Where they stand">
-                {SET_ORDER.map((k) => {
-                  const isOn = !!p.sets?.includes(k);
-                  const n = counts.where[k];
-                  return (
-                    <button key={k} type="button" aria-pressed={isOn} className={`qc153-court${isOn ? " is-on" : ""}${!isOn && n === 0 ? " is-zero" : ""}`}
-                      data-cl27="tile" data-k={k} data-n={n} title={SET_TITLE[k]} disabled={loading || (!isOn && n === 0)} onClick={() => p.onSets(toggleSet(p.sets, k))}>
-                      <b>{n}</b><span>{SET_LABEL[k]}</span>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
-        </section>
-
         <section className={`qc153-rsec${open.genres ? " is-open" : ""}`} data-cl27="rail-sec" data-k="genres">
           {head("genres", "Genres")}
           {open.genres ? (
@@ -136,25 +127,50 @@ export const ContactRail27: React.FC<ContactRail27Props> = (p) => {
           ) : null}
         </section>
 
-        <section className={`qc153-rsec${open.subs ? " is-open" : ""}`} data-cl27="rail-sec" data-k="subs">
-          {head("subs", "Submissions")}
-          {open.subs ? (
-            <div className="qc153-rbody">
-              {(() => {
-                const isOn = f.open === "open";
-                const n = counts.open;
-                return (
-                  <button type="button" role="switch" aria-checked={isOn} className={`qc153-fr qc153-fr--sw${isOn ? " is-on" : ""}${!isOn && n === 0 ? " is-zero" : ""}`}
-                    data-cl27="open-only" data-n={n} disabled={loading || (!isOn && n === 0)} onClick={() => p.onFilters(toggleOpen(f))}>
-                    <span className="qc153-tx">Open to queries only</span>
-                    <span className="qc153-n">{n}</span>
-                    <span className="qc153-sw2" aria-hidden="true" />
-                  </button>
-                );
-              })()}
-            </div>
-          ) : null}
-        </section>
+        <div id={moreId} data-clp="more-body" hidden={!more || undefined}>
+          <section className={`qc153-rsec${open.where ? " is-open" : ""}`} data-cl27="rail-sec" data-k="where">
+            {head("where", "Where they stand")}
+            {open.where ? (
+              <div className="qc153-rbody qc1533-where">
+                <div className="qc153-courts" role="group" aria-label="Where they stand">
+                  {SET_ORDER.map((k) => {
+                    const isOn = !!p.sets?.includes(k);
+                    const n = counts.where[k];
+                    return (
+                      <button key={k} type="button" aria-pressed={isOn} className={`qc153-court${isOn ? " is-on" : ""}${!isOn && n === 0 ? " is-zero" : ""}`}
+                        data-cl27="tile" data-k={k} data-n={n} title={SET_TITLE[k]} disabled={loading || (!isOn && n === 0)} onClick={() => p.onSets(toggleSet(p.sets, k))}>
+                        <b>{n}</b><span>{SET_LABEL[k]}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
+          </section>
+
+          <section className={`qc153-rsec${open.subs ? " is-open" : ""}`} data-cl27="rail-sec" data-k="subs">
+            {head("subs", "Submissions")}
+            {open.subs ? (
+              <div className="qc153-rbody">
+                {(() => {
+                  const isOn = f.open === "open";
+                  const n = counts.open;
+                  return (
+                    <button type="button" role="switch" aria-checked={isOn} className={`qc153-fr qc153-fr--sw${isOn ? " is-on" : ""}${!isOn && n === 0 ? " is-zero" : ""}`}
+                      data-cl27="open-only" data-n={n} disabled={loading || (!isOn && n === 0)} onClick={() => p.onFilters(toggleOpen(f))}>
+                      <span className="qc153-tx">Open to queries only</span>
+                      <span className="qc153-n">{n}</span>
+                      <span className="qc153-sw2" aria-hidden="true" />
+                    </button>
+                  );
+                })()}
+              </div>
+            ) : null}
+          </section>
+        </div>
+        <button type="button" className="clp-mf" data-clp="more" aria-expanded={more} aria-controls={moreId} onClick={() => setMore((m) => !m)}>
+          <span>More filters<small>Where they stand, submissions</small></span><i aria-hidden="true">{CHEVRON}</i>
+        </button>
 
         <div className="qc153-rft" data-cl27="rail-foot">
           <span data-cl27="rail-showing">{railShowing(p.showing, p.all.length, on > 0)}</span>

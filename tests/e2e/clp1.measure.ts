@@ -30,6 +30,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { openApp } from "./pageHeaderV2Lib";
+import { KILL_MOTION_ID } from "./measure";
 
 const DIR = "reports/contact-list-principles-v1";
 /** one break or several (`CLP_MUTATE=CLP1,CLP4`): each test applies only its own lock's break */
@@ -263,15 +264,18 @@ test("CLP6 · More filters folds and unfolds Where they stand and Submissions, a
     const c = await rail();
     L.check("folding with a tile on keeps it applied (n on)", c.secs.length === 2 && (await page.locator(".aglist [data-cl27='rail-on']:visible").count()) === 1, JSON.stringify(c.secs));
     await page.locator(".aglist [data-cl27='rail-reset']:visible").click();
-    await page.locator(".aglist [data-clp='more']:visible").click().catch(() => {});
-    await page.locator(".aglist [data-cl27='open-only']:not([disabled]):visible").click();
-    await page.locator(".aglist [data-clp='more']:visible").click();
-    await page.reload();
-    await page.locator(".aglist [data-cl26='row']").first().waitFor({ timeout: 30_000 });
-    await page.waitForTimeout(800);
-    const d = await rail();
-    L.check("opening the page with one applied opens More filters", d.more?.exp === "true" && d.secs.includes("subs"), JSON.stringify(d));
-    await page.locator(".aglist [data-cl27='rail-reset']:visible").click().catch(() => {});
+    /* arriving with one applied: the dashboard's Agents-on-file link (`?status=closed` sets the Closed tile) */
+    const p2 = await page.context().newPage();
+    await p2.setViewportSize(VP);
+    await openApp(p2, "/agents?status=closed", VP);
+    await p2.locator(".aglist [data-cl26='row']").first().waitFor({ timeout: 30_000 });
+    await p2.waitForTimeout(800);
+    const d = await p2.evaluate(() => {
+      const r = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='rail']")].find((e) => e.offsetHeight)!;
+      return { exp: r.querySelector("[data-clp='more']")?.getAttribute("aria-expanded"), secs: [...r.querySelectorAll<HTMLElement>("[data-cl27='rail-sec']")].filter((s) => s.offsetHeight > 0).map((s) => s.dataset.k), on: r.querySelector("[data-cl27='tile'][data-k='closed']")?.getAttribute("aria-pressed") };
+    });
+    L.check("arriving with one applied (?status=closed) opens More filters", d.exp === "true" && d.secs.includes("where") && d.on === "true", JSON.stringify(d));
+    await p2.close();
   }
   L.done(6);
 });
@@ -515,6 +519,9 @@ test("CLP14 · reduced motion: no running animations on the page", async ({ page
   const L = new Ledger("CLP14");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await openCl(page, VP, { state: "loading" });
+  /* the harness kills motion on every page it opens (measure.ts KILL_MOTION): take it off, or this lock reads nothing */
+  const unkill = (p: Page) => p.evaluate((id) => { for (const st of document.querySelectorAll("style")) if ((st.textContent ?? "").startsWith(`/*${id}*/`)) st.remove(); }, KILL_MOTION_ID);
+  await unkill(page);
   await mut(page, "CLP14");
   await page.waitForTimeout(500);
   const a = await page.evaluate(() => document.getAnimations().filter((x) => x.playState === "running").map((x) => (x as CSSAnimation).animationName ?? x.constructor.name));
@@ -522,6 +529,7 @@ test("CLP14 · reduced motion: no running animations on the page", async ({ page
   const p2 = await page.context().newPage();
   await p2.emulateMedia({ reducedMotion: "reduce" });
   await openCl(p2, VP);
+  await unkill(p2);
   await p2.locator(".aglist [data-cl26='row']:visible").first().click();
   await p2.locator("[data-cl262='fit'] [data-star]").first().waitFor({ timeout: 15_000 });
   await p2.waitForTimeout(1200);
