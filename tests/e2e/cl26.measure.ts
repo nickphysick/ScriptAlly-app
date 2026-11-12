@@ -90,11 +90,14 @@ test("CL26-H1 · (re-pointed by v27 and principles v1) the open header: title, t
       const main = hd.querySelector<HTMLElement>("[data-cl27='main']")!;
       const ring = hd.querySelector<HTMLElement>("[data-cl26='ring']")!;
       const lr = main.getBoundingClientRect(), rr = ring.getBoundingClientRect();
+      /* re-pointed (principles v2): the column order is the laid-out one — List health is then pulled into the column gap by
+         a transform (CLP18), never nearer the headline's text than 24px (CLP20) — so the nudge is taken back out here */
+      const nx = new DOMMatrixReadOnly(((t) => (t === "none" ? undefined : t))(getComputedStyle(hd.querySelector<HTMLElement>("[data-cl27='health']")!).transform)).m41;
       return {
         bg: getComputedStyle(hd).backgroundColor,
         title: hd.querySelector("[data-cl26='title']")?.textContent?.trim(), line: hd.querySelector("[data-cl27='for']")?.textContent?.replace(/\s+/g, " ").trim() ?? "",
         btns: [...hd.querySelectorAll("[data-cl26='add'], [data-cl26='discover']")].map((b) => b.textContent?.trim()),
-        ringRightOfText: rr.left >= lr.right - 1 && rr.top < lr.bottom,
+        ringRightOfText: rr.left - nx >= lr.right - 1 && rr.top < lr.bottom,
         panel: document.querySelectorAll(".aglist [data-cl26='panel']").length,
         glance: document.querySelectorAll(".aglist [data-cl251='cell'], .aglist [data-cl251='glance']").length,
         titleCard: document.querySelectorAll(".aglist .cl25-hd, .aglist .phc").length,
@@ -115,11 +118,12 @@ test("CL26-H1 · (re-pointed by v27 and principles v1) the open header: title, t
 });
 
 /* ═════════ H2 · the ring ═════════ */
-test("CL26-H2 · (re-pointed by v27) the ring's colour is healthTone's on the light ground, its arc the score; the pill; the archivist with no disc", async ({ page }) => {
+test("CL26-H2 · (re-pointed by v27, then principles v2) the ring navy at every score, its arc the score; the pill navy on white; the archivist with no disc", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("H2");
   /* v27 — the header is on the page's ground: RING_TONES' light tones (the ref's), no longer the on-navy ones */
-  const ARC: Record<number, string> = { 93: "rgb(78, 125, 96)", 72: "rgb(201, 118, 93)", 44: "rgb(162, 69, 42)" };
+  /* principles v2 — the brand pair at every score: the arc navy (no longer healthTone's green / rust) */
+  const ARC: Record<number, string> = { 93: "rgb(42, 58, 82)", 72: "rgb(42, 58, 82)", 44: "rgb(42, 58, 82)" };
   for (const pct of [93, 72, 44]) {
     await openCl26(page, SIZES[0], { health: pct });
     await mut(page, "H2");
@@ -142,7 +146,7 @@ test("CL26-H2 · (re-pointed by v27) the ring's colour is healthTone's on the li
     L.check(`${pct} arc colour`, r.stroke === ARC[pct], r.stroke);
     L.check(`${pct} arc length ∝ score (±1%)`, Math.abs(r.share - pct / 100) <= 0.01, String(r.share));
     L.check(`${pct} pill`, r.pill === `${pct}%`, String(r.pill));
-    L.check(`${pct} pill ink on cream`, r.pillInk === "rgb(28, 19, 15)" && r.pillBg === "rgb(244, 238, 229)", `${r.pillInk} on ${r.pillBg}`);
+    L.check(`${pct} pill navy on white (principles v2)`, r.pillInk === "rgb(42, 58, 82)" && r.pillBg === "rgb(255, 255, 255)", `${r.pillInk} on ${r.pillBg}`);
     L.check(`${pct} ring 124`, near(r.ringH, 124, 0.5), String(r.ringH));
     L.check(`${pct} no disc behind the archivist`, r.ringBg === "rgba(0, 0, 0, 0)" && r.archBg === "rgba(0, 0, 0, 0)", `${r.ringBg} / ${r.archBg}`);
     L.check(`${pct} archivist 100 wide, centred`, near(r.archW, 100, 0.6) && near(r.archMid, r.ringMid, 1), `${r.archW} at ${r.archMid} vs ${r.ringMid}`);
