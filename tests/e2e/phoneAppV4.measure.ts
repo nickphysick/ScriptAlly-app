@@ -147,7 +147,7 @@ test.describe("PA4 probe", () => {
       });
       console.log("JITTER", JSON.stringify(r));
     }
-    if (process.env.PA4_SHOTS?.includes("birds")) { await go(page, "/queries"); await tap(page, '[data-pa4="view"][data-k="bird"]'); await shot("birds"); await tap(page, '[data-pa4="be-bar"]'); await shot("birds-peek"); await tap(page, '[data-pa4="peek-open"]'); await shot("qpage"); }
+    if (process.env.PA4_SHOTS?.includes("birds")) { await go(page, "/queries"); await tap(page, '[data-pa4="view"][data-k="bird"]'); await page.waitForTimeout(1500); await shot("birds-replay"); await page.waitForTimeout(3500); await shot("birds"); await tap(page, '[data-pa41="vtop"]'); await shot("birds-open"); await tap(page, '[data-pa41="zoom"][data-k="6m"]'); await shot("birds-6m"); }
     if (process.env.PA4_SHOTS?.includes("search")) { await go(page, "/queries"); await tap(page, '[data-pa4="search"]'); await page.keyboard.type("a"); await shot("search"); }
     if (process.env.PA4_SHOTS?.includes("plus")) {
       await go(page, "/dashboard"); await tap(page, '[data-pa4="plus"]'); await shot("plus");

@@ -15,7 +15,9 @@ import type { Query } from "../types";
 import type { QcRow } from "./qcSummary";
 import { aggregateLedger, dailyLedger } from "./oneScreen";
 import { BVD_DEFAULT, bvdGroups, type BvdGroupOut } from "./qcBirdsDrawer";
-import { tileCourt } from "./qcSummary";
+import { STAGE_NAME, tileCourt } from "./qcSummary";
+import { currentWords } from "./qcTimeline";
+import { dayMonth } from "./dates";
 
 const DAY = 86_400_000;
 const WEEK = 7 * DAY;
@@ -78,3 +80,29 @@ export function firstTimeToday(key: string, nowMs: number): boolean {
     return true;
   } catch { return false; }
 }
+
+/* ── the full view's words ── */
+const startDay = (ms: number): number => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+/** a current bar's long label: the desktop's own sentence, except a passed date, which the phone never calls overdue */
+export function longLabel(row: QcRow, nowMs: number): string {
+  if (row.expectedMs != null && row.expectedMs < startDay(nowMs)) return `${STAGE_NAME[row.status] ?? row.status} · date was ${dayMonth(row.expectedMs)}`;
+  return currentWords(row, nowMs);
+}
+/** the sentence about the next date, in an expanded row */
+export function nextSentence(row: QcRow, nowMs: number): string {
+  if (row.expectedMs == null) return tileCourt(row.status) === "you" ? "No send-by date set for this one yet." : "No reply date set for this one yet.";
+  const when = dayMonth(row.expectedMs);
+  const say = shortSay(row, nowMs);
+  if (say.past) return tileCourt(row.status) === "you" ? `This was to be done by ${when}.` : `A reply was expected by ${when}.`;
+  const rest = say.text.replace(/^(Send|Reply|Decide) /, "");
+  if (row.expectedKind === "offer") return `Your decision is due by ${when}, ${rest}.`;
+  return tileCourt(row.status) === "you" ? `Yours to send by ${when}, ${rest}.` : `Reply expected by ${when}, ${rest}.`;
+}
+/** the stage a query stood at on a given day (its history's spans), or null before it went out */
+export function stageOn(row: QcRow, dayMs: number): string | null {
+  let k: string | null = null;
+  for (const s of row.history.spans) if (s.startMs <= dayMs) k = String(s.status);
+  if (k == null && row.sentMs != null && row.sentMs <= dayMs) k = String(row.status);
+  return k;
+}
+export const ZOOM_DAYS = [["6w", "6 weeks", 42], ["3m", "3 months", 90], ["6m", "6 months", 182]] as const;

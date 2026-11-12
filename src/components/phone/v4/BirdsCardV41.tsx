@@ -33,10 +33,12 @@ export function barPieces(bars: readonly TlBar[], w: BarsIn): { past: { l: numbe
   const c = bars.find((b) => b.current);
   if (!c) return { past, cur: null };
   const l = p(c.fromMs), t = p(w.nowMs);
+  /* past its date the bar ends at the date; the overrun line carries on to today */
+  const end = p(c.overFromMs ?? c.toMs);
   return {
     past,
     cur: {
-      l, rem: Math.max(0, p(c.toMs) - l), solid: Math.max(0, Math.min(t, p(c.toMs)) - l), status: String(c.status),
+      l, rem: c.overFromMs != null ? 0 : Math.max(0, end - l), solid: Math.max(0, Math.min(t, end) - l), status: String(c.status),
       over: c.overFromMs != null ? { l: p(c.overFromMs), w: Math.max(0, t - p(c.overFromMs)) } : null,
     },
   };
