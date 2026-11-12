@@ -136,3 +136,38 @@ line restyle and the headline's balanced wrap); `page-*.png` were retaken on the
     own tip, da2a05a60, without this branch (run on a detached checkout of it). The content column is 16px wider each side
     than v155's recorded before reading, so the reading was taken in a different setup.
 - The brief says to deploy only if all of them are green, so nothing was deployed. Served hash after: unchanged, `index-CLC0PZ_h.js`.
+- Nick then said to deploy if the three reds fail identically with and without this branch. They differ in one reading (below), so it is still not deployed.
+
+## The three existing reds, side by side (Nick's condition for the deploy, 12 Nov)
+
+Each was run on the branch dev serves, `…-pa4-qc155` @ da2a05a60 without cl-principles-v1, and on `…-qc155-clp1`
+@ 6a649f4ed. Both runs used a fresh emulator import, one through the test slot each.
+
+| Red | Dev's branch (da2a05a60) | -clp1 (6a649f4ed) | Same? |
+|---|---|---|---|
+| CL26-H10 "Sort: exactly the four" | `["Surname","Date added","Reply time","Query status","Agent fit"]` | `["Surname","Date added","Reply time","Query status","Agent fit"]` | yes. All 8 of H10's readings are identical, 1 red in each. |
+| S4 · 1440 "pixel-identical to the before build" | `{"same":true,"n":206197,"banner":1535,"box":[52,129,1416,891]}` | `{"same":true,"n":206203,"banner":1535,"box":[28,129,1416,891]}` | **no**: 6 pixels and the box's left edge |
+| S4 · 1440 "every frame box unchanged" | header x 112 w 1288 … list x 408 w 992 h 2885.25 | the same, to the hundredth | yes |
+| S4 · 1920 "pixel-identical to the before build" | run 1 `{"n":798208,…,"box":[52,106,1911,1071]}`; run 2 `{"n":798214,…,"box":[28,106,1911,1071]}` | `{"n":798214,…,"box":[28,106,1911,1071]}` | the same as dev's own second run |
+| S4 · 1920 "every frame box unchanged" | header x 198 w 1596 … list x 494 w 1300 h 2984.78 | the same | yes |
+
+**The one difference, and its cause.** A direct pixel diff of the two runs' 1440 screenshots finds 6 pixels. All are in the
+navy sidebar (x 28–70, rows 147 and 420), and each is off by 1–3 in one colour channel (e.g. 27,34,48 against 28,35,51). Nothing
+in cl-principles-v1 touches the shell or the sidebar. Dev's own branch gave two different 1920 readings in two runs (box
+x 52, then 28), and v155's report records the same: "run to run, 0, then 190, then 6 pixels differed. The last 6 are all at x
+28–56, which is the shell's sidebar icons". It is rendering noise in the shell's sidebar icons. **Not deployed anyway**: the
+condition was "if any differs, don't deploy", and a failed deploy check is a stop (CLAUDE.md). The call is Nick's.
+
+### The reds, as pre-existing, for their own prompt (not fixed here)
+
+1. **CL26-H10** (`tests/e2e/cl26.measure.ts`, "Sort: exactly the four"). First red at **58e569322**, "Add agent v1 — Phase 6:
+   ordering by Agent fit" (9 Nov). It added `{ key: "rating", label: "Agent fit" }` to `CL_SORT_FIELDS` (lib/cardsSort.ts), so
+   the Contact list's sort menu has five options. The lock still says four. Unrelated to this prompt's header change: the
+   readings are identical with and without it.
+2. **qc155 S4 · 1440** and 3. **qc155 S4 · 1920** (`tests/e2e/qc155.measure.ts`, "pixel-identical to the before build",
+   "every frame box unchanged"). The before reading (`reports/qc-v155/*-before-*`, recorded at **fe89b2afe**) was taken on
+   branch `query-centre-v155`, which is not on the pa4 dev line. On the dev line the page content is 16px further out each
+   side (header x 128 w 1256 in the reading, x 112 w 1288 on the line), so S4 has been red there since **7efd8d88a**, "Merge
+   query-centre-v155 into the dev line (…-qc1541-pa4)". That is inferred from the frames: I didn't run S4 on the
+   `query-centre-v155` branch itself, but its report says it passed there. The sidebar pixel noise above is a second,
+   smaller cause of red in the same check.
