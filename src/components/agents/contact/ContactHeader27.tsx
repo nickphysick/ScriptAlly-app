@@ -13,20 +13,20 @@
  * `.qc151` (`:is(.qc151, .cl27)`, the same specificity), so the two headers cannot drift. contactV27.css holds only the
  * Contact list's differences (the 200px art column, the mirrored bird, List health on the light ground).
  *
- * ⚠️ v26's sentence ("… and 5 are waiting on you") is gone: "waiting on you" is the rail's Your move pill and tile.
+ * Contact list principles v1: the title is `clHeadline`'s sentence ("5 need you. 19 not queried yet."), from the same
+ * `stand` the rail's Where they stand tiles count; "{n} agents on file · you've queried {q}" sits beneath it.
  * ⚠️ The buttons keep every hook the v26 ones carried (`data-cl26`, `data-cl24`, `data-cl17`), and the add button's ref.
  */
 import React from "react";
 import type { HeaderFigures } from "../../../lib/contactV26";
+import { clHeadline } from "../../../lib/contactPrinciples";
 import { ContactHealth26 } from "./ContactHealth26";
 import "../../queries/centre/qcv1531.css";
 import "./contactV27.css";
+import "./contactPrinciples.css";
 
 /** the header's drawing — the existing asset, mirrored in CSS (`.cl27-art img`), for now */
 export const CL27_HEADER_ART = "/images/contact/discover-binoculars-bird.webp";
-
-/** "41 agents on file", "1 agent on file" */
-export const onFileTitle = (n: number): string => `${n} ${n === 1 ? "agent" : "agents"} on file`;
 
 export const ContactHeader27: React.FC<{
   loading: boolean;
@@ -38,17 +38,25 @@ export const ContactHeader27: React.FC<{
   onDiscover?: () => void;
   onOpenHealth: () => void;
   onShowWho: () => void;
-}> = ({ loading, figures: f, health, onAdd, addRef, onDiscover, onOpenHealth, onShowWho }) => (
+}> = ({ loading, figures: f, health, onAdd, addRef, onDiscover, onOpenHealth, onShowWho }) => {
+  const h = f ? clHeadline(f) : null;
+  return (
   <header className="cl24-hd qc1531-hd cl27-hd" data-cl26="header" data-cl27="header" data-own-header=""
     data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
     <div className="qc1531-art cl27-art" data-cl27="art" aria-hidden="true">
       <img src={CL27_HEADER_ART} alt="" width={200} draggable={false} />
     </div>
     <div className="qc1531-main" data-cl27="main">
-      <h1 className="qc1531-t" data-page-title="true" data-cl26="title" data-cl27="title">{f ? onFileTitle(f.n) : " "}</h1>
-      <p className="qc1531-for" data-cl27="for">
+      {/* Contact list principles v1 — the title is a sentence from the writer's own numbers (`clHeadline`), the "need
+          you" part in rust; the count moves underneath. Day one says so, with the line beneath in words. */}
+      <h1 className="qc1531-t clp-t" data-page-title="true" data-cl26="title" data-cl27="title" data-clp="headline">
+        {h ? <>{h.lead ? <><b>{h.lead}</b> </> : null}{h.rest}</> : " "}
+      </h1>
+      <p className="qc1531-for clp-for" data-cl27="for">
         <i aria-hidden="true" />
-        {f ? <span><em>you’ve queried</em> {f.q}</span> : <span aria-hidden="true">&nbsp;</span>}
+        {!f || !h ? <span aria-hidden="true">&nbsp;</span>
+          : h.dayOne ? <span className="clp-under">{h.under}</span>
+          : <span><b>{f.n}</b> {f.n === 1 ? "agent" : "agents"} on file · <em>you’ve queried</em> <b>{f.q}</b></span>}
         <i aria-hidden="true" />
       </p>
       <div className="qc1531-acts">
@@ -63,4 +71,5 @@ export const ContactHeader27: React.FC<{
       <ContactHealth26 health={health} onOpenHealth={onOpenHealth} onShowWho={onShowWho} ground="light" />
     </div>
   </header>
-);
+  );
+};

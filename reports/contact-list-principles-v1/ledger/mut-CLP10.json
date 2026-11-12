@@ -1,0 +1,32 @@
+[
+ {
+  "where": "five stars",
+  "ok": true,
+  "detail": "[[16.3,16.3],[16.3,16.3],[16.3,16.3],[16.3,16.3],[16.3,16.3]]"
+ },
+ {
+  "where": "star 1 ≥ 24×24",
+  "ok": false,
+  "detail": "16.3×16.3"
+ },
+ {
+  "where": "star 2 ≥ 24×24",
+  "ok": false,
+  "detail": "16.3×16.3"
+ },
+ {
+  "where": "star 3 ≥ 24×24",
+  "ok": false,
+  "detail": "16.3×16.3"
+ },
+ {
+  "where": "star 4 ≥ 24×24",
+  "ok": false,
+  "detail": "16.3×16.3"
+ },
+ {
+  "where": "star 5 ≥ 24×24",
+  "ok": false,
+  "detail": "16.3×16.3"
+ }
+]

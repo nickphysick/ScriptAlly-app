@@ -71,7 +71,7 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
   /* ⚠️ FROM THE ADD JOURNEY'S FINISH SCREEN (`preview`) A HAND-OFF FIRST FINISHES THE ADD: on the Contact list the page's
      own card answers an edit request (the interceptor), which leaves the store's new-agent session — and its panel —
      standing behind the card unless the add is completed first (found by AA9) */
-  const finishAdd = useCallback(() => { if (o.preview) completeNewAgent(agentId); }, [o.preview, agentId]);
+  const finishAdd = useCallback(() => { if (o.preview) completeNewAgent(agentId, "handoff"); }, [o.preview, agentId]);
   const openEdit = useCallback((tab?: AgentCardTab, focus?: AgentCardField) => {
     finishAdd();
     openAgentCard(agentId, { tab: tab ?? "who", ...(focus ? { focus } : {}), host: "panel", from: "button" });

@@ -1,0 +1,32 @@
+[
+ {
+  "where": "folded: Most used and Genres only",
+  "ok": true,
+  "detail": "[\"quick\",\"genres\"]"
+ },
+ {
+  "where": "the row: More filters · Where they stand, submissions · collapsed",
+  "ok": true,
+  "detail": "{\"exp\":\"false\",\"text\":\"More filtersWhere they stand, submissions\",\"w\":268,\"rw\":268}"
+ },
+ {
+  "where": "the row is full width",
+  "ok": true,
+  "detail": "{\"exp\":\"false\",\"text\":\"More filtersWhere they stand, submissions\",\"w\":268,\"rw\":268}"
+ },
+ {
+  "where": "unfolded: all four, expanded",
+  "ok": true,
+  "detail": "{\"secs\":[\"quick\",\"genres\",\"where\",\"subs\"],\"more\":{\"exp\":\"true\",\"text\":\"More filtersWhere they stand, submissions\",\"w\":268,\"rw\":268}}"
+ },
+ {
+  "where": "folding with a tile on keeps it applied (n on)",
+  "ok": true,
+  "detail": "[\"quick\",\"genres\"]"
+ },
+ {
+  "where": "arriving with one applied (?status=closed) opens More filters",
+  "ok": true,
+  "detail": "{\"exp\":\"true\",\"secs\":[\"quick\",\"genres\",\"where\",\"subs\"],\"on\":\"true\"}"
+ }
+]

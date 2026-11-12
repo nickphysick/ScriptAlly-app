@@ -359,10 +359,3 @@ const Card: React.FC<{ x: AgentFacts; p: ContactSheet24Props }> = ({ x, p }) => 
   );
 };
 
-/** the loading beat: the sheet's own bar and a few row shapes, inert */
-export const SheetSkeleton: React.FC = () => (
-  <div className="cl24-sheet cl24-sk" data-cl24="skeleton" aria-hidden="true">
-    <div className="cl24-bar" />
-    {[0, 1, 2, 3, 4].map((i) => <div key={i} className="cl24-skr"><i /><i /><i /></div>)}
-  </div>
-);

@@ -17,6 +17,7 @@
  *    above and the card's white sides beside it, so rows never show around it; at rest the mask is off.
  * ⚠️ ONE READER, ON SCROLL (rAF, capture): whether the pin is stuck, and the section nearest the pinned headings.
  */
+import { bandCount, noMatchCopy } from "../../../lib/contactPrinciples";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
@@ -33,6 +34,7 @@ import type { Group26Key } from "../../../lib/contactListMemory";
 import { GROUP26_OPTIONS, drawnSections, sections, type Section } from "../../../lib/contactV26";
 import type { StatusKey } from "../../../lib/contactList";
 import "./contactV26.css";
+import "./contactPrinciples.css";
 
 export const GROUP26_LABEL: Record<Group26Key, string> = { letter: "Letter", status: "Status", none: "No grouping" };
 
@@ -67,6 +69,12 @@ export interface ContactSheet26Props {
   setChip?: { label: string; onDrop: () => void } | null;
   /** E — the applied row's "Clear filters" (the filters and any such set; Find is the band's own) */
   onClearFilters: () => void;
+  /** principles v1 — the list's frame draws loading (skeleton rows) or can't-load in place of the rows; default "list" */
+  state?: "list" | "loading" | "error";
+  /** principles v1 — can't load's "Try again" */
+  onRetry?: () => void;
+  /** principles v1 — day one (three or fewer agents, none queried): the panel under the rows, its outline add */
+  dayOne?: { onAdd: () => void } | null;
 }
 
 const I = {
@@ -155,6 +163,17 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
 
   /* E — one count per applied-filters chip (the pick "Ready to query" sets two filters, and shows two chips) */
   const applied = useMemo(() => appliedFilters(p.filters, (k) => p.genreWord(k) || k), [p.filters, p]); // eslint-disable-line react-hooks/exhaustive-deps
+  const state = p.state ?? "list";
+  /* principles v1 — what is applied, in the order the band and applied row draw it (Find, a set, the filters), each with
+     the way to take just that one off: the no-matches state names them and offers to remove the last */
+  const findText = p.search.trim();
+  const named: { label: string; drop: () => void }[] = [
+    ...(findText ? [{ label: findText, drop: () => p.onSearch("") }] : []),
+    ...(p.setChip ? [{ label: p.setChip.label, drop: p.setChip.onDrop }] : []),
+    /* the sentence names the genre itself, as the mock does ("Domestic noir"), not the chip's "Genre: …" */
+    ...applied.map((a) => ({ label: a.label.replace(/^Genre:\s*/, ""), drop: () => p.onFilters(a.drop(p.filters)) })),
+  ];
+  const none = noMatchCopy(named.map((n) => n.label));
   const groupChanged = p.group !== "letter";
   const sortChanged = p.sortKey !== "surname" || p.reversed;
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
@@ -164,7 +183,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
       <div className="cl26-frame" data-cl26="frame">
         <div className="cl26-pin" data-cl26="pin" ref={pinRef} data-stuck={stuck ? "" : undefined}>
           <div className="cl26-band" data-cl26="band" ref={bandRef}>
-            <b className="cl26-count" data-cl26="count" data-n={p.pool.length}>{p.pool.length} {p.pool.length === 1 ? "agent" : "agents"}</b>
+            <b className="cl26-count" data-cl26="count" data-n={p.pool.length}>{bandCount(p.pool.length, p.all.length, state)}</b>
             <label className="cl26-find" data-cl26="find" data-cl24="find" data-nb1="find">
               {I.find}
               <input value={p.search} onChange={(e) => p.onSearch(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
@@ -210,10 +229,29 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
           </div>
         </div>
 
-        {p.pool.length === 0 ? (
-          <div className="cl26-none" data-cl26="none" role="status">
-            No agents match{p.search.trim() ? ` “${p.search.trim()}”` : ""}.
-            <button type="button" data-cl26="reset" onClick={p.onClearAll}>Clear search and filters</button>
+        {state === "loading" ? (
+          /* principles v1 — skeleton rows (a disc, two lines, two cells), shimmering; no spinner */
+          <div data-clp="state" data-k="loading" aria-busy="true" aria-label="Loading your agents">
+            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="clp-sk" aria-hidden="true">
+                <i className="c" /><span><i style={{ width: `${70 - i * 4}%` }} /><i className="s" /></span><span><i style={{ width: "55%" }} /></span><span><i style={{ width: "65%" }} /></span>
+              </div>
+            ))}
+          </div>
+        ) : state === "error" ? (
+          <div className="clp-msg" data-clp="state" data-k="error" role="alert">
+            <h3>Your agents didn’t load.</h3>
+            <p>Nothing’s been lost. It’s usually the connection. Try again, and if it keeps happening, let us know through Give feedback.</p>
+            <div className="clp-acts"><button type="button" className="clp-btn" data-clp="retry" onClick={p.onRetry}>Try again</button></div>
+          </div>
+        ) : p.pool.length === 0 ? (
+          <div className="clp-msg" data-cl26="none" data-clp="state" data-k="none" role="status">
+            <h3>{none.title}</h3>
+            {none.line ? <p>{none.line}</p> : null}
+            <div className="clp-acts">
+              <button type="button" className="clp-btn" data-cl26="reset" onClick={p.onClearAll}>Clear the filters</button>
+              {none.removeLast ? <button type="button" className="clp-btn l" data-clp="remove-last" onClick={named[named.length - 1].drop}>{none.removeLast}</button> : null}
+            </div>
           </div>
         ) : (
           <div className="cl26-body" role="rowgroup" data-cl26="rows" data-cl24="table" data-kind={drawn[0]?.kind ?? "all"}>
@@ -240,6 +278,12 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
             ))}
           </div>
         )}
+        {state === "list" && p.dayOne && p.pool.length > 0 ? (
+          <div className="clp-next" data-clp="state" data-k="day1">
+            <p><b>Add the agents you’re thinking about querying</b>, even if you’re not ready yet. With a few more on file, your list can show who fits your book and who’s open now.</p>
+            <button type="button" className="clp-btn" data-clp="day1-add" onClick={p.dayOne.onAdd}>+ Add another agent</button>
+          </div>
+        ) : null}
       </div>
 
       {pop.open === "sort" && pop.anchor ? (
@@ -291,7 +335,19 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
     <div role="row" tabIndex={0} className="cl26-row" data-cl26="row" data-cl24="row" data-id={a.id} data-k={x.stand} aria-current={p.openId === a.id ? "true" : undefined}
       aria-label={`${name}${agency ? `, ${agency}` : ""}`}
       onClick={(e) => { if ((e.target as HTMLElement).closest("button, a")) return; open(); }}
-      onKeyDown={(e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); open(); } }}>
+      onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); return; }
+        /* principles v1 — ↑ ↓ move between the rows the list draws, in drawn order, kept clear of the pinned headings */
+        if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+          const rows = [...(e.currentTarget.closest("[data-cl26='rows']")?.querySelectorAll<HTMLElement>("[data-cl26='row']") ?? [])];
+          const next = rows[rows.indexOf(e.currentTarget) + (e.key === "ArrowDown" ? 1 : -1)];
+          if (!next) return;
+          e.preventDefault();
+          next.focus({ preventScroll: true });
+          rowIntoView(next);
+        }
+      }}>
       <span role="cell" className="cl26-who" data-cl26="agent">
         <Disc26 x={x} />
         <span className="cl26-whot"><b data-cl26="name" data-cl252="name">{name}</b>{sub ? <small data-cl26="agency">{sub}</small> : null}
@@ -314,6 +370,16 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
     </div>
   );
 };
+
+/** a row into view under the pin: `nearest`, then lifted clear of the pinned block (the band, index and headings) */
+function rowIntoView(row: HTMLElement) {
+  row.scrollIntoView({ block: "nearest" });
+  const pin = row.closest("[data-cl26='card']")?.querySelector<HTMLElement>("[data-cl26='pin']");
+  const sc = row.closest<HTMLElement>(".wpg-scroll");
+  if (!pin || !sc) return;
+  const under = pin.getBoundingClientRect().bottom - row.getBoundingClientRect().top;
+  if (under > 0) sc.scrollTop -= under;
+}
 
 /* ── C · the index row ──────────────────────────────────────────────────────────────────────────────────────────── */
 /* It names exactly the sections the list draws, in the same order (the one `sections` partition). A–Z under Letter by

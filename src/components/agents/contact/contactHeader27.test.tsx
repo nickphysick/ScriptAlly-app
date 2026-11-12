@@ -11,7 +11,7 @@ import { describe, expect, it } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ContactHeader26 } from "./ContactHeader26";
-import { ContactHeader27, CL27_HEADER_ART, onFileTitle } from "./ContactHeader27";
+import { ContactHeader27, CL27_HEADER_ART } from "./ContactHeader27";
 import { RING_TONES } from "../../../lib/contactV256";
 
 const noop = () => {};
@@ -56,11 +56,9 @@ describe("v27 — List health is v26's block", () => {
 
 describe("v27 — the header's content", () => {
   const html = v27({ pct: 86, gaps: 29 });
-  it("the title and the rule-flanked line; the old sentence is gone", () => {
-    expect(onFileTitle(41)).toBe("41 agents on file");
-    expect(onFileTitle(1)).toBe("1 agent on file");
-    expect(html).toContain(">41 agents on file</h1>");
-    expect(html).toMatch(/<p class="qc1531-for" data-cl27="for"><i aria-hidden="true"><\/i><span><em>you’ve queried<\/em> 22<\/span><i aria-hidden="true"><\/i><\/p>/);
+  it("the title is the live headline (Contact list principles v1); the count line moves underneath", () => {
+    expect(html).toContain('data-clp="headline"><b>5 need you.</b> 19 not queried yet.</h1>');
+    expect(html).toMatch(/<p class="qc1531-for clp-for" data-cl27="for"><i aria-hidden="true"><\/i><span><b>41<\/b> agents on file · <em>you’ve queried<\/em> <b>22<\/b><\/span><i aria-hidden="true"><\/i><\/p>/);
     expect(html).not.toContain("waiting on you");
   });
   it("the drawing is the binoculars bird (one constant)", () => {
@@ -72,6 +70,6 @@ describe("v27 — the header's content", () => {
     expect(html).toMatch(/class="qc1531-b qc1531-b--g" data-cl26="discover" data-cl24="discover"[^>]*>Discover agents</);
   });
   it("the h1 keeps data-page-title (the folder tab and the page guide read it)", () => {
-    expect(html).toMatch(/<h1 class="qc1531-t" data-page-title="true"/);
+    expect(html).toMatch(/<h1 class="qc1531-t clp-t" data-page-title="true"/);
   });
 });

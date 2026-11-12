@@ -40,6 +40,7 @@ const changeCount = (changed: readonly (keyof CardDraft)[]) => changeNames(chang
 /** an inline field's ask, as a field the card opens at */
 const INLINE_FOCUS: Record<InlineField, AgentCardField> = { wishlist: "wishlist", genres: "genres", replies: "reply", email: "email", website: "website", form: "website", social: "mswl" };
 import "./contactV262.css";
+import "./contactPrinciples.css";
 
 /** the band's slate, for every agent (v26.2 ruling) */
 export const CARD262_BAND = "#5e7189";

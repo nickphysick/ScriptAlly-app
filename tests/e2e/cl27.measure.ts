@@ -106,8 +106,9 @@ test("CL27-H1 · the open header: the mirrored bird, the title block, List healt
     L.check(`${vp.width} art | title block | List health, left to right`, !!(r.art && r.main && r.health && r.art.r <= r.main.l && r.main.r <= r.health.l + 1), JSON.stringify([r.art, r.main, r.health]));
     L.check(`${vp.width} the binoculars bird`, String(r.src).includes("discover-binoculars-bird.webp") && near(r.imgW, 200, 1), `${r.src} ${r.imgW}`);
     L.check(`${vp.width} mirrored`, r.transform === "matrix(-1, 0, 0, 1, 0, 0)", r.transform);
-    L.check(`${vp.width} title`, /^\d+ agents? on file$/.test(String(r.title)) && /Playfair/.test(r.titleFont) && r.titleSize === "54px", `${r.title} · ${r.titleFont.slice(0, 20)} ${r.titleSize}`);
-    L.check(`${vp.width} you've queried`, /^you’ve queried \d+$/.test(String(r.forLine)), String(r.forLine));
+    /* re-pointed by Contact list principles v1 (CLP2): the live headline in the typewriter at 36px, the count line beneath */
+    L.check(`${vp.width} title`, /^(?:\d+ needs? you\. (?:\d+ not queried yet\.|Everyone’s been queried\.)|Nothing needs you right now\. (?:\d+ not queried yet\.|Everyone’s been queried\.)|\d agents? so far\. (?:Not|Neither|None) queried yet\.)$/.test(String(r.title)) && /Special Elite/.test(r.titleFont) && r.titleSize === "36px", `${r.title} · ${r.titleFont.slice(0, 20)} ${r.titleSize}`);
+    L.check(`${vp.width} you've queried`, /^\d+ agents? on file · you’ve queried \d+$/.test(String(r.forLine)), String(r.forLine));
     L.check(`${vp.width} the two buttons keep their hooks; Add is navy`, r.add === 1 && r.disc === 1 && r.addBg === "rgb(42, 58, 82)", `${r.add}/${r.disc} ${r.addBg}`);
   }
   L.done(18);
@@ -136,7 +137,8 @@ test("CL27-R1 · the rail: 268px, beside the list, the band has no Filters; stil
     if (!a) continue;
     L.check(`${vp.width} 268 wide`, near(a.w, 268, 0.5), String(a.w));
     L.check(`${vp.width} the list starts 28 after it`, near(a.gap, 28, 1), String(a.gap));
-    L.check(`${vp.width} sections in order`, JSON.stringify(a.secs) === JSON.stringify(["quick", "where", "genres", "subs"]), JSON.stringify(a.secs));
+    /* re-pointed by Contact list principles v1: Where they stand and Submissions sit after Genres, behind More filters */
+    L.check(`${vp.width} sections in order`, JSON.stringify(a.secs) === JSON.stringify(["quick", "genres", "where", "subs"]), JSON.stringify(a.secs));
     L.check(`${vp.width} no Filters button in the band`, a.filters === 0, String(a.filters));
     const sc = await scroller(page);
     const y = await scrollTo(page, 1200);
@@ -147,6 +149,12 @@ test("CL27-R1 · the rail: 268px, beside the list, the band has no Filters; stil
   }
   L.done(14);
 });
+
+/** principles v1 — Where they stand and Submissions are behind More filters: unfold it before pressing them */
+const openMore = async (page: Page) => {
+  const m = page.locator(`${VIS} [data-clp='more'][aria-expanded='false']`);
+  if (await m.count()) { await m.first().click(T); await page.waitForTimeout(200); }
+};
 
 /* ═════════ R2 · every control is the list's own count ═════════ */
 type Ctl = { sel: string; k: string; n: number };
@@ -167,6 +175,7 @@ test("CL27-R2 · every rail control leaves exactly the rows it counted; tiles an
   const run: Ctl[] = [...ctls.filter((c) => c.sel !== "genre"), ...ctls.filter((c) => c.sel === "genre").slice(0, 8)];
   for (const c of run) {
     await openCl26(page, vp);
+    await openMore(page);
     await mut(page, "R2");
     const sel = `${VIS} [data-cl27='${c.sel}']${c.k ? `[data-k='${c.k}']` : ""}`;
     const claimed = Number(await page.locator(sel).first().getAttribute("data-n"));
@@ -189,6 +198,7 @@ test("CL27-R2 · every rail control leaves exactly the rows it counted; tiles an
   }
   /* a second press on a tile clears it */
   await openCl26(page, vp);
+  await openMore(page);
   const t = `${VIS} [data-cl27='tile'][data-k='${(ctls.find((c) => c.sel === "tile") ?? { k: "none" }).k}']`;
   await page.locator(t).first().click(T); await page.waitForTimeout(400);
   await page.locator(t).first().click(T); await page.waitForTimeout(400);

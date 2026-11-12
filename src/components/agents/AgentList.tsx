@@ -54,7 +54,6 @@ const setsLabel = (sets: readonly SetKey[]): string => (sets.length === 2 && set
 import { ContactLogFlow } from "./contact/ContactLogFlow";
 import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
 import { GLANCE_SETS } from "../../lib/contactV25";
-import { SheetSkeleton } from "./contact/ContactSheet24";
 import { ContactSheet26 } from "./contact/ContactSheet26";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
 import { bookSteps, stepDate } from "../../lib/contactBook";
@@ -102,6 +101,11 @@ const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
 import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklist";
 import { useAgentsHold } from "../../lib/contactLoadHold";
+import { readClpFigures, readClpState } from "../../lib/contactPrinciplesReview";
+import { isDayOne } from "../../lib/contactPrinciples";
+import { undoAgentAdd } from "../../lib/scoutStore";
+import { agentPrimary } from "../../lib/agentDisplay";
+import { Stamp } from "../phone/v4/V4Parts";
 import { CONTACT_ADD_FIRST, CONTACT_CHECKLIST, CONTACT_NEEDS_AN_AGENT, GUIDE_HIDDEN_PATH, GUIDE_SEEN_PATH, GUIDE_UNHIDE_PATH, contactGuideOf, guideDonePath, nextGuideAfter, type ContactGuideKey } from "../../lib/pageChecklist";
 import { readSkipped } from "../../lib/guideHub";
 import { downloadAgentsCsv } from "../../lib/agentCsv";
@@ -116,6 +120,12 @@ import "./agentList.css";
 /** v16 §E — the device key the shared full-screen hook remembers under (Comparable titles has its own) */
 /** v16 E's key: the shared pin hook reads it once and moves it to `sa.pinList.agents` (v138.6) */
 export const CONTACTS_FULL_KEY = "sa.contactsFull";
+/** principles v1 — the frame's empty pool while loading or failed (one constant, so no render makes a new array) */
+const NO_FACTS: readonly AgentFacts[] = [];
+/** principles v1 — the page's snackbar channel and lifetime (a new one replaces the old; they never stack) */
+const CLP_TOAST = "contact-list";
+const CLP_TOAST_MS = 5000;
+const MONTH3 = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
 const DISCOVER = RAIL_GROUPS.flatMap((g) => g.items).find((i) => i.path === "/agents/discover");
 
@@ -137,7 +147,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const { key: locationKey } = useLocation();
   const {
     agents, queries, manuscripts, activities, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
-    currentUser, updateUserPaths, deleteAgent, taskFlags,
+    currentUser, updateUserPaths, deleteAgent, taskFlags, agentsRead, retryAgents,
   } = useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -370,8 +380,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      production build never reaches the module. */
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
-  const showEmpty = pageState === "blank" || (pageState === "list" && lhOverride === 0);
-  const showList = pageState === "list" && !showEmpty;
+  /* Contact list principles v1 — THE LIST'S FRAME STATE: loading (the settling beat, or a retry under way) and can't load
+     (the agents listener errored: until now an error drew the blank account's page, as if nothing were on file) draw inside
+     the list's own frame, under its navy bar, with the header in its loading shape. The dev-only aid `__SA_CLP_STATE`
+     forces one (gated here, at the call site). */
+  const clpForced = import.meta.env.MODE !== "production" ? readClpState() : null;
+  const frameState: "loading" | "error" | null = clpForced === "loading" || clpForced === "error" ? clpForced
+    : !sandbox && agentsRead === "failed" && agents.length === 0 ? "error"
+    : !sandbox && agentsRead === "retrying" && agents.length === 0 ? "loading"
+    : pageState === "settling" ? "loading" : null;
+  const showEmpty = !frameState && (pageState === "blank" || (pageState === "list" && lhOverride === 0));
+  const showList = pageState === "list" && !showEmpty && !frameState;
+  const showFrame = showList || frameState !== null;
   /* v16 §E — full screen is on only over a list, on this page's own route */
   const fullOn = full && showList;
   const fullRef = useRef(fullOn);
@@ -569,6 +589,15 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, []);
 
 
+  /* Contact list principles v1 — an add FINISHED HERE (the journey's Done) lands on the list, not in a panel: the new row
+     comes into view, tinted powder, phone v4's rust postmark ("ADDED" and the date) lands on it, and the page's snackbar
+     offers Undo — `undoAgentAdd`, exactly what `addAgent` created (the agent and its AGENT_ADDED row), never the delete
+     path's compensating "You deleted" record. */
+  const [justAdded, setJustAdded] = useState<string | null>(null);
+  /* the page's snackbar (declared here, above every reader) */
+  const { showToast } = useToast();
+  const [stampAt, setStampAt] = useState<{ left: number; top: number; date: string } | null>(null);
+
   /* `onHkRemind` is declared further down; the act handler reads it through a ref, never a TDZ read */
   const remindRef = useRef<(a: Agent) => void>(() => {});
   /* the card's aftermath ON THE LIST: a save's notice (with the card's Undo) and FLIP, an add's ring,
@@ -580,8 +609,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       beginSaveChoreography(e.after);
     } else if (e.type === "added") {
       tickGuide.current("add");
-      /* v18.3 §D — added from the panel: the panel switches to the new agent's Profile once the list holds it */
-      if (addFromHere.current) addedInPanel.current = e.agentId;
+      /* principles v1 — the journey's Done: the row, the postmark and the snackbar (below). v18.3 §D still holds for a
+         hand-off (the finish screen's edit doors): the panel follows the add once the list holds it. */
+      if (addFromHere.current) { if (e.how === "done") setJustAdded(e.agentId); else addedInPanel.current = e.agentId; }
       addFromHere.current = false;
     } else if (e.type === "undone") {
       undoSave.current = null;
@@ -590,6 +620,35 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       setNotice({ text: `Couldn’t delete ${e.name} — try again.`, kind: "failed", agentId: e.agentId, canUndo: false });
     }
   }), [beginSaveChoreography]);
+
+  useEffect(() => {
+    const id = justAdded;
+    if (!id) return;
+    const a = agents.find((x) => x.id === id);
+    if (!a) return; /* waits for the list to hold it */
+    setJustAdded(null);
+    const name = agentPrimary(a);
+    const uid = currentUser?.id ?? null;
+    showToast({
+      message: `${name} added to your list`, duration: CLP_TOAST_MS, replaces: CLP_TOAST, undoneMessage: `${name} removed`,
+      ...(uid ? { undo: async () => { await undoAgentAdd(uid, id); } } : {}),
+    });
+    /* two frames: the row is drawn by the render the new agent caused */
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const row = [...document.querySelectorAll<HTMLElement>(`.aglist [data-cl26='row'][data-id="${CSS.escape(id)}"]`)].find((el) => el.offsetHeight > 0);
+      if (!row) return; /* filtered out of view: the snackbar alone says so */
+      row.scrollIntoView({ block: "center" });
+      row.removeAttribute("data-clp-new");
+      void row.offsetWidth;
+      row.setAttribute("data-clp-new", "");
+      window.setTimeout(() => row.removeAttribute("data-clp-new"), 2300);
+      const r = row.getBoundingClientRect();
+      const d = new Date();
+      setStampAt({ left: r.left + r.width * 0.56 - 37, top: r.top + r.height / 2 - 37, date: `${d.getDate()} ${MONTH3[d.getMonth()]}` });
+      window.setTimeout(() => setStampAt(null), 1700);
+      row.focus({ preventScroll: true });
+    }));
+  }, [justAdded, agents]); // eslint-disable-line react-hooks/exhaustive-deps -- showToast and the uid are read once, at the add
 
   /* the new-agent form left without an add: a later add elsewhere is not this page's */
   useEffect(() => { if (!cardReq && !addedInPanel.current) addFromHere.current = false; }, [cardReq]);
@@ -620,7 +679,17 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* v24 A2 — the banner's figures: Housekeeping's gap count, the agents they belong to, and four faces */
   const banner = useMemo(() => bannerFigures(hk), [hk]);
   /* v26 A — the header's sentence: every agent on file, the ones queried, the ones waiting on the writer */
-  const headFigures = useMemo(() => headerFigures(factsAll), [factsAll]);
+  const headFigures0 = useMemo(() => headerFigures(factsAll), [factsAll]);
+  /* Contact list principles v1 — a DEV-ONLY review aid: `window.__SA_CLP_FIG = { n, q, y }` puts the headline's figures
+     (and only the headline's) at those numbers, so CLP2 can render each case. Gated here, at the call site. */
+  const clpFig = import.meta.env.MODE !== "production" ? readClpFigures() : null;
+  /* principles v1 — day one: three or fewer agents, none queried. The dev aid's "day1" draws it over the harness account
+     with its first two not-queried agents (the list and the headline both read that pair; nothing is written) */
+  const day1Facts = useMemo(() => (clpForced === "day1" ? factsAll.filter((x) => x.stand === "none").slice(0, 2) : null), [clpForced, factsAll]);
+  const headFigures = clpFig ?? (day1Facts ? headerFigures(day1Facts) : headFigures0);
+  const dayOneHere = isDayOne(headFigures);
+  const listAll = day1Facts ?? factsAll;
+  const listPool = day1Facts ?? visibleFacts;
   /* v26 A — "Show me who": the Missing details quick pick (Part E's own), then the list card into view */
   const showMissing = useCallback(() => {
     setFilters((f) => (pickOn(f) === "missing" ? f : applyPick(f, "missing")));
@@ -858,6 +927,19 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   useEffect(() => {
     if (fullOn && cardId) { setBookReq({ id: cardId, seq: Date.now() }); setCardId(null); }
   }, [fullOn, cardId]);
+  /* principles v1 — Esc (or ✕) closes the card and focus goes back to its row, unless it has already gone somewhere real */
+  const lastCard = useRef<string | null>(null);
+  useEffect(() => {
+    const was = lastCard.current;
+    lastCard.current = cardId;
+    if (!was || cardId) return;
+    requestAnimationFrame(() => {
+      const ae = document.activeElement;
+      if (ae && ae !== document.body && document.contains(ae)) return;
+      const row = [...document.querySelectorAll<HTMLElement>(`.aglist [data-cl26='row'][data-id="${CSS.escape(was)}"]`)].find((el) => el.offsetHeight > 0);
+      row?.focus({ preventScroll: true });
+    });
+  }, [cardId]);
   /* an agent that is no longer on file closes its card */
   useEffect(() => { if (cardId && collectionsReady && !agents.some((a) => a.id === cardId)) setCardId(null); }, [cardId, agents, collectionsReady]);
   const titleOf = useCallback((msId: string) => manuscripts.find((m) => m.id === msId)?.title?.trim() || "Untitled manuscript", [manuscripts]);
@@ -865,7 +947,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* ── v25.2 C · editing inside the agent card ── */
   const editOpts = useEditOptions(scoped?.genre ?? null);
   const { saveDraft } = useAgentSave({ writeAgent: sandbox?.writeAgent, editCtx: hkEditCtx });
-  const { showToast } = useToast();
   /* the open card's stored notes (the retired centred editor's Notes, kept in the edit mode) */
   const notesAgent = cardId ? agents.find((a) => a.id === cardId) ?? null : null;
   const cardNotes = useAgentNotes(notesAgent, currentUser?.id ?? null, writeAgentPatch);
@@ -893,7 +974,9 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         const r = await saveDraft(agent, base, { ...base, ...change }, { emit: false });
         if (!r.ok) { showToast({ message: `Couldn’t save that: ${(r as { error: string }).error}` }); return false; }
         const undo = r.undo;
-        showToast({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, ...(undo ? { undo: async () => { await undo(); } } : {}) });
+        /* principles v1 — the page's one snackbar channel: about 5 seconds, a new one replaces the old */
+        showToast({ message: change.rating !== undefined ? fitToast(change.rating) : `Saved to ${first}’s profile`, duration: CLP_TOAST_MS, replaces: CLP_TOAST,
+          ...(undo ? { undo: async () => { await undo(); } } : {}) });
         return true;
       },
       /* Add agent v1 Phase 5 — the long form is retired: the card's own sections are the editor (`form` below) */
@@ -1039,46 +1122,46 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
         {/* v138.6 §A — a pinned list hides its header from the first frame, settling included (a restored pin must not
             flash the header while the list loads) */}
-        <div className="clv-group cl27" data-v24="" data-v25="" data-v26="" data-v27="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
-          aria-busy={pageState === "settling" || undefined}
-          inert={pageState === "settling" || undefined}>
+        <div className="clv-group cl27" data-v24="" data-v25="" data-v26="" data-v27="" data-full={full && showFrame ? "" : undefined} data-loading={frameState === "loading" ? "" : undefined}
+          aria-busy={frameState === "loading" || undefined}
+          inert={frameState === "loading" || undefined}>
         {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
             card that is the page's figures and its group filter (the strip's own `glance` state). Over a LIST
             only, and while settling: the blank account's page is ContactEmpty. */}
         {/* v27 — THE QUERY CENTRE'S OPEN HEADER, the Contact list's content (supersedes v26's navy panel): the mirrored
             bird, "{n} agents on file" over "you've queried {q}" and the two buttons, and v26's List health unchanged. */}
-        {(showList || pageState === "settling") && (
-          <ContactHeader27 loading={pageState !== "list"} figures={pageState === "list" ? headFigures : null}
-            health={pageState === "list" ? health : null} addRef={addBtnRef} onAdd={openAdd}
+        {showFrame && (
+          <ContactHeader27 loading={!showList} figures={showList ? headFigures : null}
+            health={showList ? health : null} addRef={addBtnRef} onAdd={openAdd}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
             onOpenHealth={openHk} onShowWho={showMissing} />
         )}
-        {pageState === "settling" && <SheetSkeleton />}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
             `settling` draws the header's fixed shape with both lines empty and nothing below it. The
             filtered "No agents match." branch below is reachable only with agents on file. */}
-        {!showList ? null : (
+        {!showFrame ? null : (
         <>
 
         {/* v16 §C — THE LIST IS THE PAGE. It breaks out of the column to 24px from the page sheet's edges (capped at
             1600, centred): the ink control bar, the white filter row with the count at its right, the letter tabs,
             then the rows. The title bar, its hawk and its two pills are gone. */}
-        {showList && (
+        {showFrame && (
         <>
         {/* v26 B — THE LIST IS ONE BIG CARD: the landing page's framed card opening on a navy band (count, Find, Filters,
             Group, Sort). The List / Cards switch, Cards and Full screen (the address book) are retired. */}
         {/* v27 — TWO COLUMNS, the Query Centre's (`qc153-cl`): the filter rail (sticky), then the list, unchanged */}
         <div className="qc153-cl" data-cl27="columns">
         <div className="qc153-railcol" data-cl27="rail-column">
-          <ContactRail27 all={factsAll} filters={filters} onFilters={setFilters} sets={sets} onSets={setSets} pool={inPool}
-            genreLabel={(k, raw) => genreLabel(raw, personalGenres) || k} genreHit={bookHit} showing={visibleFacts.length}
+          <ContactRail27 all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} onSets={setSets} pool={inPool}
+            genreLabel={(k, raw) => genreLabel(raw, personalGenres) || k} genreHit={bookHit} showing={frameState ? 0 : listPool.length}
             onReset={clearRailFilters}
             onExport={() => downloadAgentsCsv(visibleFacts, (raw) => genreLabel(raw, personalGenres))} />
         </div>
         <div className="qc153-main" data-cl27="list-column">
-        <ContactSheet26 pool={visibleFacts} all={factsAll} group={group26} onGroup={setGroup26}
+        <ContactSheet26 pool={frameState ? NO_FACTS : listPool} all={frameState ? NO_FACTS : listAll} group={group26} onGroup={setGroup26}
+          state={frameState ?? "list"} onRetry={retryAgents} dayOne={dayOneHere ? { onAdd: openAdd } : null}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
           filters={filters} onFilters={setFilters} onClearAll={clearFilters} search={search} onSearch={setSearch}
           genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit}
@@ -1157,6 +1240,10 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       </div>
 
 
+      {/* principles v1 — the postmark over the new row (fixed, where the row was measured; gone after 1.7s) */}
+      {stampAt ? (
+        <div className="clp-stamp-at" data-clp="stamp" style={{ left: stampAt.left, top: stampAt.top }}><Stamp word="ADDED" date={stampAt.date} /></div>
+      ) : null}
       {/* the card itself is app-level now — AgentCardHost, mounted once by App (Agent card v1 §2) */}
     </div>
   );
