@@ -564,3 +564,24 @@ describe("landing copy — verbatim locks", () => {
     FOUNDING_GETS.forEach((g, i) => expect(g.startsWith(FOUNDING_GET_LEADS[i]), g).toBe(true));
   });
 });
+
+/**
+ * Public sweep v1: the bird's-eye demo's first two rows say when the reply was expected, with no
+ * verdict. Every other row is unchanged.
+ */
+describe("the bird's-eye demo states dates, never a verdict", () => {
+  it("the first two rows say when the reply was expected", async () => {
+    const { BE_DESK_ROWS } = await import("./landingCopy");
+    expect(BE_DESK_ROWS.map((r) => r[3])).toEqual([
+      "Reply expected 5 weeks ago",
+      "Reply expected 12 days ago",
+      "Send the full by 6 Nov",
+      "Reply to the offer by 9 Nov",
+      "Send the partial by 12 Nov",
+      "Reply due 23 Nov",
+      "Reply due 2 Dec",
+      "Reply due 28 Nov",
+    ]);
+    for (const r of BE_DESK_ROWS) expect(r[3]).not.toMatch(/overdue/i);
+  });
+});

@@ -36,7 +36,7 @@ import { Runs } from "./CopyRuns";
 import { FoundingSignup, FoundingCounter } from "./FoundingSignup";
 import { FoundingBand } from "./FoundingBand";
 import {
-  FOUNDERS_DOCUMENT_TITLE, FOUNDERS_EYEBROW, FOUNDERS_H1, FOUNDERS_LEDE, FOUNDERS_ART_ALT,
+  FOUNDERS_DOCUMENT_TITLE, FOUNDERS_H1, FOUNDERS_LEDE, FOUNDERS_ART_ALT,
   FOUNDERS_DEAL, FOUNDERS_HONEST_LEAD, FOUNDERS_HONEST, FOUNDERS_SIGNOFF,
 } from "./foundersCopy";
 
@@ -76,7 +76,6 @@ export const FoundersPage: React.FC<{
             use and reintroduce the crop the earth needed `object-fit` to avoid. */}
         <header className="mk-fwhero">
           <div className="mk-fwcol">
-            <p className="mk-fweyebrow">{FOUNDERS_EYEBROW}</p>
             <h1 className="mk-fwh1">{FOUNDERS_H1}</h1>
             <p className="mk-fwlede"><Runs runs={FOUNDERS_LEDE} onNavigate={onNavigate} /></p>
 
@@ -107,7 +106,6 @@ export const FoundersPage: React.FC<{
         <section className="mk-fwdeal" aria-label="What founding writers get">
           {FOUNDERS_DEAL.map((card) => (
             <div key={card.key} className="mk-fwcard">
-              <p className="mk-fwk">{card.kicker}</p>
               <h2>{card.heading}</h2>
               <p>{card.body}</p>
             </div>

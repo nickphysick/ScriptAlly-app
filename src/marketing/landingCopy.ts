@@ -128,8 +128,8 @@ export const PHONE_STORY = {
    them any more. Dead copy is worse than no copy — it reads as live product wording to whoever
    opens the file next, and the house rule is to trace a symbol to a rendered root before keeping it.
    ⚠️ THE GLYPHS ARE NOT RETIRED AND MUST NOT BE. `StatusGlyph` and `STATUS_GLYPH_COUNT`
-   (`marketingMarks.tsx`) still draw the footer's signature row — six marks, `aria-hidden`. The
-   footer's own lock used to reconcile that count against `STATUS_STEPS.length`; with the copy gone
+   (`marketingMarks.tsx`) still draw the app footer's signature row (`AppFooter.tsx`) — six marks,
+   `aria-hidden`; the public footer dropped its row on 12 Nov. The footer's own lock used to reconcile that count against `STATUS_STEPS.length`; with the copy gone
    it reconciles against the glyph table itself, which is the derivation that actually owns the six.
    Recoverable from the commit that removed them if the states ever want describing again. */
 
@@ -672,8 +672,8 @@ export const BE_STAGE_RGB: Record<BeStage, readonly [number, number, number]> = 
 /** The window's rows (phones draw all eight, the desktop band the first seven) — [left %, width %, stage,
     sentence, ghost line widths %] — and the one in focus. */
 export const BE_DESK_ROWS: ReadonlyArray<readonly [number, number, BeStage, string, readonly [number, number] | null]> = [
-  [0, 64, "q", "Reply 5 weeks overdue", [78, 52]],
-  [8, 56, "ps", "Reply 12 days overdue", [64, 46]],
+  [0, 64, "q", "Reply expected 5 weeks ago", [78, 52]],
+  [8, 56, "ps", "Reply expected 12 days ago", [64, 46]],
   [30, 42, "fr", "Send the full by 6 Nov", null],
   [42, 34, "o", "Reply to the offer by 9 Nov", [58, 40]],
   [48, 32, "pr", "Send the partial by 12 Nov", [72, 50]],
