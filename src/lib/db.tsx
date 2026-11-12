@@ -5,7 +5,7 @@
 
 import { MONTHS_SHORT } from "./dates";
 import { findExistingAgent } from "./importDuplicates";
-import React, { createContext, useContext, useState, useEffect, useRef } from "react";
+import React, { createContext, useCallback, useContext, useState, useEffect, useRef } from "react";
 import {
   User,
   UserPlan,
@@ -254,6 +254,12 @@ interface DbContextType {
   smartImportUsage: SmartImportUsage | null;
   authReady: boolean;
   collectionsReady: boolean;
+  /** ADDITIVE (Contact list principles v1): how the agents listener stands — "failed" once it errored (the listener is
+   *  dead: Firestore ends a listener on its error), "retrying" while `retryAgents` waits for its first loaded snapshot.
+   *  Optional so the page sandboxes and test contexts need not carry it (absent reads as "ok"). */
+  agentsRead?: "ok" | "failed" | "retrying";
+  /** re-subscribe the agents listener after it failed (the Contact list's "Try again") */
+  retryAgents?: () => void;
   /** ADDITIVE (Query Centre v11): the global activity feed has delivered — or failed, or the net fired. */
   activitiesReady: boolean;
   manuscripts: Manuscript[];
@@ -590,6 +596,10 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   //                  delivered their first snapshot. Lets the dashboard tell "loading" from "empty".
   const [authReady, setAuthReady] = useState<boolean>(false);
   const [collectionsReady, setCollectionsReady] = useState<boolean>(false);
+  const [agentsRead, setAgentsRead] = useState<"ok" | "failed" | "retrying">("ok");
+  /* the agents listener's own (re)subscribe, set by the auth effect for the signed-in user; null when signed out */
+  const resubAgentsRef = useRef<(() => void) | null>(null);
+  const retryAgents = useCallback(() => { resubAgentsRef.current?.(); }, []);
   /**
    * ⚠️ ADDITIVE, AND SEPARATE FROM `collectionsReady` ON PURPOSE (Query Centre v11, 19 Sep). That flag
    * is the dashboard's "loading or empty?" answer and must not start waiting on a fourth collection.
@@ -638,6 +648,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setSmartImportUsage(null);
         setAuthReady(true);          // auth resolved: definitively logged out
         setCollectionsReady(false);  // next sign-in starts in the loading state
+        setAgentsRead("ok");
+        resubAgentsRef.current = null;
         setActivitiesReady(false);
         if (readinessNetRef.current) { clearTimeout(readinessNetRef.current); readinessNetRef.current = null; }
         try { localStorage.removeItem("scriptally_was_authed"); } catch {}
@@ -794,16 +806,24 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           handleFirestoreError(error, OperationType.GET, `users/${uid}/packages`);
         });
 
-        // Agents snapshot reader
-        unsubAgents = onSnapshot(collection(db, "users", uid, "agents"), (snap) => {
-          const arr: Agent[] = [];
-          snap.forEach(d => arr.push(d.data() as Agent));
-          setAgents(arr);
-          if (snapshotIsLoaded(snap)) { aLoaded = true; markCollectionsLoaded(); }
-        }, (error) => {
-          aLoaded = true; markCollectionsLoaded();
-          handleFirestoreError(error, OperationType.GET, `users/${uid}/agents`);
-        });
+        // Agents snapshot reader — a function, so the Contact list's "Try again" can re-subscribe it after an error
+        // (Firestore ends a listener on its error; Contact list principles v1)
+        const subAgents = () => {
+          unsubAgents();
+          unsubAgents = onSnapshot(collection(db, "users", uid, "agents"), (snap) => {
+            const arr: Agent[] = [];
+            snap.forEach(d => arr.push(d.data() as Agent));
+            setAgents(arr);
+            if (snapshotIsLoaded(snap)) { aLoaded = true; markCollectionsLoaded(); setAgentsRead("ok"); }
+          }, (error) => {
+            aLoaded = true; markCollectionsLoaded();
+            setAgentsRead("failed");
+            handleFirestoreError(error, OperationType.GET, `users/${uid}/agents`);
+          });
+        };
+        setAgentsRead("ok");
+        subAgents();
+        resubAgentsRef.current = () => { setAgentsRead("retrying"); subAgents(); };
 
         // Queries snapshot reader
         unsubQueries = onSnapshot(collection(db, "users", uid, "queries"), (snap) => {
@@ -4033,6 +4053,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         smartImportUsage,
         authReady,
         collectionsReady,
+        agentsRead,
+        retryAgents,
         activitiesReady,
         manuscripts,
         versions,

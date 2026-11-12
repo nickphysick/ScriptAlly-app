@@ -169,12 +169,6 @@
   .cl24-card:focus-visible > .apc { box-shadow: 0 0 0 2px #2a3a52, 0 18px 34px -22px rgba(28, 19, 15, 0.45); }
   .cl24-card[aria-current="true"] > .apc { box-shadow: 0 0 0 2px #2a3a52, 0 26px 40px -24px #1c130f8c; }
 
-  /* the loading shape */
-  .cl24-sk .cl24-skr { display: flex; gap: 22px; align-items: center; height: 82px; padding: 0 26px; border-bottom: 1px solid rgba(28, 19, 15, 0.07); }
-  .cl24-sk .cl24-skr i { display: block; height: 14px; border-radius: 7px; background: #f1ede7; }
-  .cl24-sk .cl24-skr i:first-child { width: 44px; height: 44px; border-radius: 50%; }
-  .cl24-sk .cl24-skr i:nth-child(2) { width: 220px; }
-  .cl24-sk .cl24-skr i:nth-child(3) { width: 140px; }
 }
 /* ≤1440 of window: Replies in and Added hide, Filters and Full screen go icon-only, the prefixes drop (the Query Centre's) */
 @media (min-width: 768px) and (max-width: 1440px) {

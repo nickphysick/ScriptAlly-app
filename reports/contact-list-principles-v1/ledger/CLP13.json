@@ -1,0 +1,37 @@
+[
+ {
+  "where": "the page content is under 1000px",
+  "ok": true,
+  "detail": "912"
+ },
+ {
+  "where": "the rail is above the list",
+  "ok": true,
+  "detail": "[{\"l\":112,\"r\":960,\"t\":435.5,\"b\":736.046875},{\"l\":112,\"r\":960,\"t\":754.046875,\"b\":4761.046875}]"
+ },
+ {
+  "where": "the rail is full width, not sticky",
+  "ok": true,
+  "detail": "static [{\"l\":112,\"r\":960,\"t\":435.5,\"b\":736.046875},{\"l\":112,\"r\":960,\"t\":754.046875,\"b\":4761.046875}]"
+ },
+ {
+  "where": "no sideways scroll",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "where": "no overlapping boxes",
+  "ok": true,
+  "detail": "[false,false,false,false]"
+ },
+ {
+  "where": "at 1440 the rail stays beside the list",
+  "ok": true,
+  "detail": "{\"beside\":true,\"inner\":1352}"
+ },
+ {
+  "where": "at 1280 the rail stays beside the list",
+  "ok": true,
+  "detail": "{\"beside\":true,\"inner\":1192}"
+ }
+]

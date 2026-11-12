@@ -1,0 +1,12 @@
+[
+ {
+  "where": "loading under reduced motion: nothing running",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "card open under reduced motion: nothing running",
+  "ok": true,
+  "detail": "[]"
+ }
+]

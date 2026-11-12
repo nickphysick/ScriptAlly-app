@@ -1,0 +1,52 @@
+[
+ {
+  "where": "loading: skeleton rows inside the list's frame",
+  "ok": true,
+  "detail": "7 rows"
+ },
+ {
+  "where": "loading: no spinner",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "loading: the bar reads Agents",
+  "ok": true,
+  "detail": "Agents"
+ },
+ {
+  "where": "can't load: the copy",
+  "ok": true,
+  "detail": "[\"Your agents didn’t load.Nothing’s been lost. It’s usually the connection. Try again, and if it keeps happening, let us know through Give feedback.Try again\"]"
+ },
+ {
+  "where": "can't load: the bar reads Agents",
+  "ok": true,
+  "detail": "Agents"
+ },
+ {
+  "where": "day one: the panel's copy",
+  "ok": true,
+  "detail": "[\"Add the agents you’re thinking about querying, even if you’re not ready yet. With a few more on file, your list can show who fits your book and who’s open now.+ Add another agent\"]"
+ },
+ {
+  "where": "day one: the rows above it",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "one filter: No agents match “zzqx”. and only Clear",
+  "ok": true,
+  "detail": "[\"No agents match “zzqx”.Clear the filters\"]"
+ },
+ {
+  "where": "the bar: 0 of n agents",
+  "ok": true,
+  "detail": "0 of 53 agents"
+ },
+ {
+  "where": "two filters: both named, the line, Clear and Just remove",
+  "ok": true,
+  "detail": "[\"No agents match “zzqx” and “Genre: Literary fiction”.Two filters together left nobody. Take one off, or clear them both.Clear the filtersJust remove “Genre: Literary fiction”\"]"
+ }
+]

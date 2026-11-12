@@ -54,7 +54,6 @@ const setsLabel = (sets: readonly SetKey[]): string => (sets.length === 2 && set
 import { ContactLogFlow } from "./contact/ContactLogFlow";
 import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
 import { GLANCE_SETS } from "../../lib/contactV25";
-import { SheetSkeleton } from "./contact/ContactSheet24";
 import { ContactSheet26 } from "./contact/ContactSheet26";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
 import { bookSteps, stepDate } from "../../lib/contactBook";
@@ -103,6 +102,7 @@ import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcut
 import { PageChecklist, type ChecklistTarget } from "../shell/guide/PageChecklist";
 import { useAgentsHold } from "../../lib/contactLoadHold";
 import { readClpFigures, readClpState } from "../../lib/contactPrinciplesReview";
+import { isDayOne } from "../../lib/contactPrinciples";
 import { undoAgentAdd } from "../../lib/scoutStore";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { Stamp } from "../phone/v4/V4Parts";
@@ -120,6 +120,8 @@ import "./agentList.css";
 /** v16 §E — the device key the shared full-screen hook remembers under (Comparable titles has its own) */
 /** v16 E's key: the shared pin hook reads it once and moves it to `sa.pinList.agents` (v138.6) */
 export const CONTACTS_FULL_KEY = "sa.contactsFull";
+/** principles v1 — the frame's empty pool while loading or failed (one constant, so no render makes a new array) */
+const NO_FACTS: readonly AgentFacts[] = [];
 /** principles v1 — the page's snackbar channel and lifetime (a new one replaces the old; they never stack) */
 const CLP_TOAST = "contact-list";
 const CLP_TOAST_MS = 5000;
@@ -145,7 +147,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const { key: locationKey } = useLocation();
   const {
     agents, queries, manuscripts, activities, collectionsReady, userTasks, addUserTask, deleteUserTask, resolveTaskFlag,
-    currentUser, updateUserPaths, deleteAgent, taskFlags,
+    currentUser, updateUserPaths, deleteAgent, taskFlags, agentsRead, retryAgents,
   } = useScriptAllyDb();
 
   /* ⚠️ THE MANUSCRIPT IS THE SWITCHER'S OWN (v11 §10) — the SAME resolver the shell's chip
@@ -378,8 +380,18 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
      production build never reaches the module. */
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const lhOverride = import.meta.env.MODE !== "production" ? useLivingCountOverride() : null;
-  const showEmpty = pageState === "blank" || (pageState === "list" && lhOverride === 0);
-  const showList = pageState === "list" && !showEmpty;
+  /* Contact list principles v1 — THE LIST'S FRAME STATE: loading (the settling beat, or a retry under way) and can't load
+     (the agents listener errored: until now an error drew the blank account's page, as if nothing were on file) draw inside
+     the list's own frame, under its navy bar, with the header in its loading shape. The dev-only aid `__SA_CLP_STATE`
+     forces one (gated here, at the call site). */
+  const clpForced = import.meta.env.MODE !== "production" ? readClpState() : null;
+  const frameState: "loading" | "error" | null = clpForced === "loading" || clpForced === "error" ? clpForced
+    : !sandbox && agentsRead === "failed" && agents.length === 0 ? "error"
+    : !sandbox && agentsRead === "retrying" && agents.length === 0 ? "loading"
+    : pageState === "settling" ? "loading" : null;
+  const showEmpty = !frameState && (pageState === "blank" || (pageState === "list" && lhOverride === 0));
+  const showList = pageState === "list" && !showEmpty && !frameState;
+  const showFrame = showList || frameState !== null;
   /* v16 §E — full screen is on only over a list, on this page's own route */
   const fullOn = full && showList;
   const fullRef = useRef(fullOn);
@@ -671,7 +683,13 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   /* Contact list principles v1 — a DEV-ONLY review aid: `window.__SA_CLP_FIG = { n, q, y }` puts the headline's figures
      (and only the headline's) at those numbers, so CLP2 can render each case. Gated here, at the call site. */
   const clpFig = import.meta.env.MODE !== "production" ? readClpFigures() : null;
-  const headFigures = clpFig ?? headFigures0;
+  /* principles v1 — day one: three or fewer agents, none queried. The dev aid's "day1" draws it over the harness account
+     with its first two not-queried agents (the list and the headline both read that pair; nothing is written) */
+  const day1Facts = useMemo(() => (clpForced === "day1" ? factsAll.filter((x) => x.stand === "none").slice(0, 2) : null), [clpForced, factsAll]);
+  const headFigures = clpFig ?? (day1Facts ? headerFigures(day1Facts) : headFigures0);
+  const dayOneHere = isDayOne(headFigures);
+  const listAll = day1Facts ?? factsAll;
+  const listPool = day1Facts ?? visibleFacts;
   /* v26 A — "Show me who": the Missing details quick pick (Part E's own), then the list card into view */
   const showMissing = useCallback(() => {
     setFilters((f) => (pickOn(f) === "missing" ? f : applyPick(f, "missing")));
@@ -1104,46 +1122,46 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v13 §8 — the loading beat: the group draws its own components as shimmering shapes, inert */}
         {/* v138.6 §A — a pinned list hides its header from the first frame, settling included (a restored pin must not
             flash the header while the list loads) */}
-        <div className="clv-group cl27" data-v24="" data-v25="" data-v26="" data-v27="" data-full={full && (showList || pageState === "settling") ? "" : undefined} data-loading={pageState === "settling" ? "" : undefined}
-          aria-busy={pageState === "settling" || undefined}
-          inert={pageState === "settling" || undefined}>
+        <div className="clv-group cl27" data-v24="" data-v25="" data-v26="" data-v27="" data-full={full && showFrame ? "" : undefined} data-loading={frameState === "loading" ? "" : undefined}
+          aria-busy={frameState === "loading" || undefined}
+          inert={frameState === "loading" || undefined}>
         {/* v17 §A — THE ONE LIGHT HEADER, on the page colour: the title block, the cut-out hawk, and the summary
             card that is the page's figures and its group filter (the strip's own `glance` state). Over a LIST
             only, and while settling: the blank account's page is ContactEmpty. */}
         {/* v27 — THE QUERY CENTRE'S OPEN HEADER, the Contact list's content (supersedes v26's navy panel): the mirrored
             bird, "{n} agents on file" over "you've queried {q}" and the two buttons, and v26's List health unchanged. */}
-        {(showList || pageState === "settling") && (
-          <ContactHeader27 loading={pageState !== "list"} figures={pageState === "list" ? headFigures : null}
-            health={pageState === "list" ? health : null} addRef={addBtnRef} onAdd={openAdd}
+        {showFrame && (
+          <ContactHeader27 loading={!showList} figures={showList ? headFigures : null}
+            health={showList ? health : null} addRef={addBtnRef} onAdd={openAdd}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
             onOpenHealth={openHk} onShowWho={showMissing} />
         )}
-        {pageState === "settling" && <SheetSkeleton />}
         <div className="clv-main" ref={mainColRef}>
 
         {/* LIVING HEADERS §3 — the blank account is `ContactEmpty` above, in place of this whole group;
             `settling` draws the header's fixed shape with both lines empty and nothing below it. The
             filtered "No agents match." branch below is reachable only with agents on file. */}
-        {!showList ? null : (
+        {!showFrame ? null : (
         <>
 
         {/* v16 §C — THE LIST IS THE PAGE. It breaks out of the column to 24px from the page sheet's edges (capped at
             1600, centred): the ink control bar, the white filter row with the count at its right, the letter tabs,
             then the rows. The title bar, its hawk and its two pills are gone. */}
-        {showList && (
+        {showFrame && (
         <>
         {/* v26 B — THE LIST IS ONE BIG CARD: the landing page's framed card opening on a navy band (count, Find, Filters,
             Group, Sort). The List / Cards switch, Cards and Full screen (the address book) are retired. */}
         {/* v27 — TWO COLUMNS, the Query Centre's (`qc153-cl`): the filter rail (sticky), then the list, unchanged */}
         <div className="qc153-cl" data-cl27="columns">
         <div className="qc153-railcol" data-cl27="rail-column">
-          <ContactRail27 all={factsAll} filters={filters} onFilters={setFilters} sets={sets} onSets={setSets} pool={inPool}
-            genreLabel={(k, raw) => genreLabel(raw, personalGenres) || k} genreHit={bookHit} showing={visibleFacts.length}
+          <ContactRail27 all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} onSets={setSets} pool={inPool}
+            genreLabel={(k, raw) => genreLabel(raw, personalGenres) || k} genreHit={bookHit} showing={frameState ? 0 : listPool.length}
             onReset={clearRailFilters}
             onExport={() => downloadAgentsCsv(visibleFacts, (raw) => genreLabel(raw, personalGenres))} />
         </div>
         <div className="qc153-main" data-cl27="list-column">
-        <ContactSheet26 pool={visibleFacts} all={factsAll} group={group26} onGroup={setGroup26}
+        <ContactSheet26 pool={frameState ? NO_FACTS : listPool} all={frameState ? NO_FACTS : listAll} group={group26} onGroup={setGroup26}
+          state={frameState ?? "list"} onRetry={retryAgents} dayOne={dayOneHere ? { onAdd: openAdd } : null}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
           filters={filters} onFilters={setFilters} onClearAll={clearFilters} search={search} onSearch={setSearch}
           genreWord={(raw) => genreLabel(raw, personalGenres)} genreHit={bookHit}

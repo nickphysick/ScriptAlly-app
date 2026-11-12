@@ -191,8 +191,6 @@
 .cl26-q svg, .cl26-q .cl24-nq { flex: none; width: 16px; height: 16px; }
 .cl26-q--nq, .cl26-q--shut { color: rgba(28, 19, 15, .5); }
 .cl26-chev { font: 400 20px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, .35); text-align: center; }
-.cl26-none { padding: 40px 22px; font: italic 400 16px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, .6); }
-.cl26-none button { margin-left: 12px; border: 0; background: none; padding: 0; cursor: pointer; text-decoration: underline; font: 400 14.5px/1 var(--sp-type) !important; color: #2a3a52; }
 
 
 /* ═════════ C · the index row ═════════ */

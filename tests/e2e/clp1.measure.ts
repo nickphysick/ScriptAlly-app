@@ -471,8 +471,12 @@ test("CLP12 · each state renders its copy", async ({ page }) => {
   const one = await text(p, ".aglist [data-clp='state'][data-k='none']");
   L.check("one filter: No agents match “zzqx”. and only Clear", one.length === 1 && one[0].startsWith("No agents match “zzqx”.") && one[0].includes("Clear the filters") && !one[0].includes("Just remove"), JSON.stringify(one));
   L.check("the bar: 0 of n agents", /^0 of \d+ agents$/.test(String(await count(p))), String(await count(p)));
-  await p.locator(".aglist [data-cl27='genre']:not([disabled])").first().click().catch(() => {});
+  /* a genre first (with Find on, every genre counts 0 and is disabled), then Find again */
+  await p.locator(".aglist [data-cl26='find'] input:visible").fill("");
   await p.waitForTimeout(400);
+  await p.locator(".aglist [data-cl27='genre']:not([disabled]):visible").first().click({ timeout: 10_000 });
+  await p.locator(".aglist [data-cl26='find'] input:visible").fill("zzqx");
+  await p.waitForTimeout(500);
   const two = await text(p, ".aglist [data-clp='state'][data-k='none']");
   L.check("two filters: both named, the line, Clear and Just remove", two.length === 1 && /^No agents match “zzqx” and “[^”]+”\./.test(two[0]) && two[0].includes("Two filters together left nobody. Take one off, or clear them both.") && /Just remove “[^”]+”/.test(two[0]), JSON.stringify(two));
   await c.close();
@@ -506,12 +510,19 @@ test("CLP13 · page content under 1000px: the rail above the list, no sideways s
   L.check("the rail is full width, not sticky", !!r.rail && !!r.list && Math.abs((r.rail.r - r.rail.l) - (r.list.r - r.list.l)) <= 4 && r.railPos !== "sticky", `${r.railPos} ${JSON.stringify([r.rail, r.list])}`);
   L.check("no sideways scroll", !r.sideways, String(r.sideways));
   L.check("no overlapping boxes", r.overlaps.every((x) => !x), JSON.stringify(r.overlaps));
-  /* and at 1440 the columns stand */
-  await page.setViewportSize(VP);
-  await page.waitForTimeout(600);
-  const w = await page.evaluate(() => { const r = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='rail']")].find((e) => e.offsetHeight)!.getBoundingClientRect(); const l = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl26='card']")].find((e) => e.offsetHeight)!.getBoundingClientRect(); return r.right <= l.left; });
-  L.check("at 1440 the rail stays beside the list", w, String(w));
-  L.done(6);
+  /* and at 1440 and 1280 the columns stand */
+  for (const vp of [VP, { width: 1280, height: 800 }]) {
+    await page.setViewportSize(vp);
+    await page.waitForTimeout(600);
+    const w = await page.evaluate(() => {
+      const r = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='rail']")].find((e) => e.offsetHeight)!.getBoundingClientRect();
+      const l = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl26='card']")].find((e) => e.offsetHeight)!.getBoundingClientRect();
+      const inner = [...document.querySelectorAll<HTMLElement>(".aglist .agl-inner")].find((e) => e.offsetHeight)!.getBoundingClientRect().width;
+      return { beside: r.right <= l.left, inner: Math.round(inner) };
+    });
+    L.check(`at ${vp.width} the rail stays beside the list`, w.beside, JSON.stringify(w));
+  }
+  L.done(7);
 });
 
 /* ═════════ CLP14 · reduced motion ═════════ */
