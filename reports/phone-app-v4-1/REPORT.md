@@ -111,3 +111,12 @@ plus `domain.test` "D0", red on the served branch). At the end: `tsc` 0, `functi
 
 Seven worktrees besides the primary existed when this pack began (over CLAUDE.md's five); they belong to other sessions
 and were left alone. This pack's own worktrees (`ScriptAlly-pa41`, `ScriptAlly-pa41-base`) are removed.
+
+## Dev deploy (12 Nov)
+
+Dev had moved during the pack: it served `index-CLC0PZ_h.js` from `dev/…-pa4-qc155` (Query Centre v155 on v4); a rebuild
+matched it byte for byte. v4.1 was merged onto it as **`dev/…-pa4-qc155-pa41` @ `02b4a22de`** (pushed; the merge was
+clean). On the merged tree: `tsc` 0; 111 phone, Query Centre, shell and dashboard spec files green; PA41-7…10 and 13
+green (18 readings — the phone's bars still equal the v155 desktop's). Built from a clean checkout of the pushed tip and
+deployed hosting-only with the served hash checked in the same command: **dev now serves `index-DjGo0pfu.js`** (matches
+the build). Branch `phone-app-v4-1` is pushed and not merged to main. Prod is untouched.
