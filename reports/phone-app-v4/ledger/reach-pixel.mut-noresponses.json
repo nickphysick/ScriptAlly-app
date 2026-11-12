@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "PA4-8",
+  "where": "Responses in 2 taps",
+  "ok": false,
+  "detail": "no [data-pa4=\"you-row\"][data-path=\"/queries/responses\"]"
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Analytics in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Packages in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Query letters in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Synopses and comps in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Your book in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Corkboard in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Wall of no in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Streaks and goals in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Settings in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Help centre in 3 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Import queries in 3 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Discover in 3 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Everyone on your list in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Every task in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "Add an agent in 2 taps",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA4-8",
+  "where": "An agent replied in 2 taps",
+  "ok": true,
+  "detail": ""
+ }
+]

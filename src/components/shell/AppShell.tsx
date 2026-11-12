@@ -40,11 +40,12 @@ import { ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChrome";
 import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
 import { ACCOUNT_ROUTES } from "../../lib/accountRoutes";
-import { V3Header, V3TabBarHost } from "../phone/v3/V3Chrome";
+import { V4MiniBar, V4PushedHeader, V4TabBar } from "../phone/v4/V4Chrome";
 import { V3Provider } from "../phone/v3/V3Provider";
 import { V3Layer } from "../phone/v3/V3Layer";
 import { renderJourney } from "../phone/v3/JourneysV3";
 import { renderAgents } from "../phone/v3/AgentsV3";
+import { renderV4 } from "../phone/v4/renderV4";
 import { openV3, closeV3, v3Overlay } from "../phone/v3/v3Store";
 import { v3IsRoot, v3RootTitle, v3TabFor } from "../../lib/phoneV3Nav";
 import { PhoneBandContext } from "../phone/phoneBandStore";
@@ -373,6 +374,12 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
   const phoneNav = useIsMobile();
   /* a navigation closes any v3 sheet or journey still open (the ref's `go` clears the overlay) */
   useEffect(() => { if (phoneNav) closeV3(); }, [pathname, phoneNav]);
+  /* Phone app v4: a root page's navy header runs to the top edge (phoneV4.css reads the class) */
+  useEffect(() => {
+    const on = phoneNav && v3IsRoot(pathname);
+    document.body.classList.toggle("pa4-root", on);
+    return () => document.body.classList.remove("pa4-root");
+  }, [pathname, phoneNav]);
   const [bandSlots, setBandSlots] = useState<Record<string, React.ReactNode | null>>({});
   const setBandSlot = useCallback((path: string, node: React.ReactNode | null) => {
     setBandSlots((prev) => (prev[path] === node ? prev : { ...prev, [path]: node }));
@@ -541,19 +548,22 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             Cancel and Done live in it (MobileDetailSpec) until each is rebuilt. At 768px and up `phoneNav` is false and
             this renders exactly what it did before. */}
         {phoneNav && activeMobileDetail === null ? (
-          <V3Header
-            root={v3IsRoot(pathname)}
-            title={bandTitle}
-            routeKey={pathname}
-            scroller={() => stageRef.current}
-            onSearch={() => openV3({ type: "search" })}
-            onBack={() => {
-              const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
-              if (idx > 0) navigate(-1); else goPath(v3TabFor(pathname) === "today" ? "/dashboard" : "/you");
-            }}
-            extra={bandExtras[pathname] ?? null}
-            slot={bandSlots[pathname] ?? null}
-          />
+          /* Phone app v4: a root page draws its own navy header, so the shell draws only the slim bar that stands in for
+             it past 300px; a pushed page keeps a navy header with its back arrow */
+          v3IsRoot(pathname) ? (
+            <V4MiniBar title={bandTitle} pathname={pathname} scroller={() => stageRef.current}
+              extra={bandExtras[pathname] ?? null} onSearch={() => openV3({ type: "search" })} />
+          ) : (
+            <V4PushedHeader
+              title={bandTitle}
+              onBack={() => {
+                const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
+                if (idx > 0) navigate(-1); else goPath(v3TabFor(pathname) === "today" ? "/dashboard" : v3TabFor(pathname) === "agents" ? "/agents" : "/you");
+              }}
+              extra={bandExtras[pathname] ?? null}
+              slot={bandSlots[pathname] ?? null}
+            />
+          )
         ) : (
         <div className="ws-mobilebar">
           <ShellTopBar
@@ -620,8 +630,9 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       {/* The floating tab-bar capsule (<md). It stands down while the active route shows a
           pushed detail screen (baked decision 5) — the detail's own affordances take the foot. */}
       {phoneNav ? (
-        <V3TabBarHost
+        <V4TabBar
           pathname={pathname}
+          scroller={() => stageRef.current}
           /* a tap on the tab you are on, at its own page, takes it back to the top (ref `ACT.tab`) */
           onGo={(path, tab) => {
             if (tab === v3TabFor(pathname) && v3IsRoot(pathname) && stageRef.current) { stageRef.current.scrollTo({ top: 0, behavior: "smooth" }); return; }
@@ -647,7 +658,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       />
       )}
 
-      {phoneNav ? <V3Layer render={(o) => renderJourney(o) ?? renderAgents(o)} /> : null}
+      {phoneNav ? <V3Layer render={(o) => renderV4(o) ?? renderJourney(o) ?? renderAgents(o)} /> : null}
       {/* Phone app v2 (Part 1D) — THE PHONE'S SHEETS. The menu REPLACES the "you" sheet (Mobile Pass 1, concept
           frame 07): every row it offered is still reachable — To-do is a tab, packages are the Materials tile, and
           Import, Settings, Help, Sign out and Upgrade (Plan & billing) are in the menu. Phones only; at 768px and up

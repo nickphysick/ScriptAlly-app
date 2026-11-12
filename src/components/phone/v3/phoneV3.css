@@ -19,64 +19,7 @@
   }
   .pa3 [hidden] { display: none !important; }
 
-  /* ── the header (ref `.hd`) ── */
-  .pa3-hd {
-    position: relative; z-index: 5; flex: none; box-sizing: border-box; contain: inline-size; width: 100%;
-    background: var(--pa-navy); color: #fff; font-family: var(--pa-sans);
-    display: flex; align-items: center; gap: 10px;
-    padding: calc(16px + env(safe-area-inset-top, 0px)) 20px 14px; transition: padding 0.2s;
-  }
-  .pa3-hd .pa3-ht {
-    flex: 1; min-width: 0; margin: 0; padding-top: 4px; color: #fff;
-    font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 30px; line-height: 1.1; letter-spacing: 0;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: font-size 0.2s;
-  }
-  .pa3-hd.sm { padding: calc(9px + env(safe-area-inset-top, 0px)) 20px 9px; }
-  .pa3-hd.sm .pa3-ht { font-size: 19px; }
-  /* ⚠️ PA3-1 holds the shrunk header to 56px: the ref's 40px buttons in a 9+9 row make 58, so they step to 38 when small */
-  .pa3-hd.sm .pa3-ib { width: 38px; height: 38px; }
-  .pa3-hd.sub .pa3-ht { font-size: 21px; }
-  .pa3-ib {
-    flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center;
-    padding: 0; border: 0; background: none; color: #fff; cursor: pointer;
-  }
-  .pa3-ib:active { background: rgba(255, 255, 255, 0.12); }
-  .pa3-ib svg, .pa3-ic {
-    width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round;
-  }
-  .pa3-hd .pa3-back { margin-left: -10px; }
-  .pa3-hd .pa3-search { margin-right: -8px; }
-  /* a pushed page's own key figure, under the header on navy (ref `.hero` on Analytics and a package) */
   .pa3-pslot { background: var(--pa-navy); color: #fff; padding: 12px 20px 22px; overflow: hidden; }
-
-  /* ── the docked bar (ref `#tabs`) ── */
-  .pa3-tabs {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 40; box-sizing: border-box;
-    display: flex; background: #fff; border-top: 1px solid var(--pa-rule);
-    padding: 6px 6px calc(8px + env(safe-area-inset-bottom, 0px)); font-family: var(--pa-sans);
-  }
-  .pa3-tb {
-    flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 48px; padding: 4px 0;
-    border: 0; background: none; cursor: pointer; color: var(--pa-faint);
-    font: 500 11px/1.2 var(--pa-sans) !important;
-  }
-  .pa3-tb svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
-  .pa3-tb.on { color: var(--pa-navy); font-weight: 600 !important; }
-  .pa3-tw { position: relative; width: 52px; height: 28px; border-radius: 14px; display: grid; place-items: center; }
-  /* ref #e3e8ef → nearest token --pa-st-slate */
-  .pa3-tb.on .pa3-tw { background: var(--pa-st-slate); }
-  .pa3-bd {
-    position: absolute; top: -3px; right: 4px; min-width: 17px; height: 17px; box-sizing: border-box; border-radius: 9px;
-    background: var(--pa-blush); color: var(--pa-ink); font: 600 10.5px/17px var(--pa-sans) !important; text-align: center; padding: 0 4px;
-  }
-  .pa3-plus { flex: none; width: 64px; display: flex; justify-content: center; align-items: center; border: 0; background: none; padding: 0; cursor: pointer; }
-  .pa3-plus span {
-    width: 50px; height: 50px; border-radius: 50%; background: var(--pa-blush); color: var(--pa-ink); display: grid; place-items: center;
-    box-shadow: 0 4px 12px rgba(138, 74, 60, 0.22);
-  }
-  .pa3-plus svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; }
-  .pa3-plus:active span { transform: scale(0.95); }
-
   /* ── type and common parts (ref "type and common parts") ── */
   /* ⚠️ THE PAGE'S OWN WIDTH IS ITS CONTAINER'S (carried over from the retired dashPhone.css, measured again here: 458px
      at 390). The shell's columns are flex items at `min-width: auto`, so any unbreakable line inside reaches them as a
@@ -148,57 +91,8 @@
   .pa3 .pa3-lrow .pa3-icw { flex: none; width: 40px; height: 40px; border-radius: 12px; background: var(--pa-fill); display: grid; place-items: center; color: var(--pa-navy); }
   .pa3 .pa3-fold { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 14px; font-size: 14.5px; font-weight: 500; color: var(--pa-navy); }
 
-  /* ── Today's hero (ref `.hero`) ── */
-  .pa3-hero { background: var(--pa-navy); color: #fff; padding: 2px 20px 22px; }
-  .pa3-hero .pa3-tg { display: inline-flex; background: rgba(255, 255, 255, 0.1); border-radius: 16px; padding: 3px; margin-bottom: 12px; }
-  /* ref #d5dbe5 / #c5cedb (muted text on navy) → nearest token --pa-st-slate */
-  .pa3 .pa3-hero .pa3-tg button { height: 28px; padding: 0 13px; border-radius: 14px; font-size: 13px; font-weight: 500; color: var(--pa-st-slate); }
-  .pa3 .pa3-hero .pa3-tg button.on { background: #fff; color: var(--pa-navy); font-weight: 600; }
-  .pa3-hero .pa3-big { display: flex; align-items: flex-end; gap: 10px; }
-  .pa3-hero .pa3-big b { font: 400 50px/0.85 var(--pa-type); }
-  .pa3-hero .pa3-big span { font-size: 15px; color: var(--pa-st-slate); padding-bottom: 3px; }
-  .pa3-hero svg.pa3-sp { display: block; width: 100%; height: 54px; margin-top: 10px; }
-  .pa3-split { display: flex; gap: 3px; height: 8px; margin-top: 14px; }
-  .pa3-split i { border-radius: 4px; min-width: 6px; }
-  .pa3-legend { display: flex; margin-top: 9px; }
-  .pa3 .pa3-legend button { flex: 1; color: #fff; font-size: 12.5px; line-height: 1.3; }
-  .pa3-legend b { display: block; font: 400 20px/1.1 var(--pa-type); }
-  .pa3-legend i { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 6px; }
-  .pa3-legend span { color: var(--pa-st-slate); }
-  .pa3-feed .pa3-row { min-height: 54px; padding: 10px 14px; }
-  .pa3-feed .pa3-gl { width: 32px; height: 32px; }
-  .pa3-feed .pa3-row + .pa3-row::before { left: 58px; }
-  .pa3-feed .pa3-row .pa3-t { font-size: 14.5px; font-weight: 500; white-space: normal; }
-  .pa3 .pa3-beta { display: flex; gap: 10px; align-items: center; margin-top: 26px; padding: 12px 14px; border-radius: 14px; background: var(--pa-blush-wash); font-size: 13.5px; line-height: 1.4; width: 100%; box-sizing: border-box; }
-  .pa3-beta b { flex: none; font: 600 10.5px/1 var(--pa-sans); letter-spacing: 0.08em; border: 1.5px solid var(--pa-rust); color: var(--pa-rust); border-radius: 10px; padding: 4px 7px; }
-  .pa3-pinic { flex: none; color: var(--pa-rust); }
 
-  /* ── Birds-eye (ref `.be`) ── */
-  .pa3 .pa3-be { display: block; width: 100%; padding: 13px 14px; box-sizing: border-box; }
-  .pa3-be + .pa3-be { border-top: 1px solid var(--pa-rule); }
-  .pa3-be .pa3-top { display: flex; justify-content: space-between; gap: 10px; font-size: 14.5px; font-weight: 600; }
-  .pa3-be .pa3-top span { font-weight: 400; color: var(--pa-muted); font-size: 13px; white-space: nowrap; }
-  .pa3-be .pa3-bar { height: 8px; border-radius: 4px; background: var(--pa-fill); margin-top: 8px; overflow: hidden; }
-  .pa3-be .pa3-bar i { display: block; height: 100%; border-radius: 4px; background: var(--pa-navy); }
-  .pa3-be .pa3-bar i.past { background: var(--pa-blush); }
-
-  /* ── You (ref "library") ── */
-  .pa3-tiles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
-  .pa3 .pa3-tile { background: #fff; border-radius: 16px; box-shadow: var(--pa-sh); padding: 14px; min-height: 104px; display: flex; flex-direction: column; box-sizing: border-box; min-width: 0; }
-  .pa3-tile .pa3-ic { color: var(--pa-navy); margin-bottom: auto; }
-  .pa3-tile b { font-size: 15.5px; font-weight: 600; margin-top: 12px; }
-  .pa3-tile span { font-size: 13px; color: var(--pa-muted); margin-top: 1px; }
-  .pa3 .pa3-book { display: flex; gap: 14px; align-items: center; padding: 14px; width: 100%; box-sizing: border-box; }
-  .pa3-cover {
-    flex: none; width: 52px; height: 76px; box-sizing: border-box; border-radius: 3px 6px 6px 3px; background: var(--pa-navy); overflow: hidden;
-    box-shadow: inset 4px 0 0 rgba(255, 255, 255, 0.12), 2px 3px 8px rgba(31, 38, 51, 0.25); color: #fff;
-    font: 400 8.5px/1.2 var(--pa-type); padding: 12px 6px 0 10px; overflow-wrap: anywhere;
-  }
-  .pa3 .pa3-show { background: var(--pa-navy); border-radius: 16px; padding: 14px 14px 0; color: #fff; box-shadow: var(--pa-sh); display: block; width: 100%; box-sizing: border-box; }
-  .pa3-show small { font-size: 13px; color: var(--pa-st-slate); }
-  .pa3-show .pa3-in { background: #fff; color: var(--pa-ink); border-radius: 12px 12px 0 0; margin-top: 12px; padding: 14px; }
-  .pa3-show .pa3-in b { display: block; font: 400 21px/1.2 var(--pa-type); }
-  .pa3-show .pa3-in span { font-size: 13.5px; color: var(--pa-muted); }
+  /* ── Settings rows (v3's You page retired to phone/v4/YouV4.tsx) ── */
   .pa3-kv { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; font-size: 14.5px; }
   .pa3-kv + .pa3-kv { border-top: 1px solid var(--pa-rule); }
   .pa3-kv > span { color: var(--pa-muted); }
@@ -206,16 +100,7 @@
 
   /* ── overlays: sheets, full screens (ref "overlays") ── */
   .pa3-layer { position: fixed; inset: 0; z-index: 1000; font-family: var(--pa-sans); color: var(--pa-ink); }
-  .pa3-scrim { position: absolute; inset: 0; background: rgba(20, 26, 36, 0.45); animation: pa3-fade 0.2s; }
-  .pa3-sheet {
-    position: absolute; left: 0; right: 0; bottom: 0; max-height: 92%; overflow-y: auto; overflow-x: hidden; background: var(--pa-page);
-    border-radius: 24px 24px 0 0; box-shadow: var(--pa-sh-up); scrollbar-width: none; overscroll-behavior: contain;
-    animation: pa3-up 0.32s var(--pa-spring); padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
-  .pa3-sheet::-webkit-scrollbar, .pa3-full .pa3-body::-webkit-scrollbar { display: none; }
-  .pa3-sheet .pa3-grab { position: sticky; top: 0; z-index: 3; height: 22px; display: grid; place-items: center; }
-  .pa3-sheet .pa3-grab::after { content: ""; width: 38px; height: 5px; border-radius: 3px; background: rgba(31, 38, 51, 0.2); }
-  .pa3-sheet .pa3-pad { padding: 0 16px 22px; }
+  .pa3-full .pa3-body::-webkit-scrollbar { display: none; }
   .pa3 .pa3-h3 { font-family: var(--pa-type) !important; font-weight: 400 !important; font-size: 23px; line-height: 1.2; margin: 4px 4px 4px; color: var(--pa-ink); }
   .pa3-lead { font-size: 14.5px; color: var(--pa-muted); margin: 0 4px 16px; line-height: 1.45; }
   .pa3-full { position: absolute; inset: 0; background: var(--pa-page); display: flex; flex-direction: column; animation: pa3-up 0.32s var(--pa-spring); }
@@ -273,61 +158,7 @@
   .pa3 .pa3-stars button.on { color: var(--pa-navy); }
   .pa3-stars span { margin-left: 10px; font-size: 14px; color: var(--pa-muted); }
 
-  /* ── the query sheet (ref `.qh` … `.links`) ── */
-  .pa3-qh { padding: 28px 18px 16px; margin-top: -22px; }
-  .pa3-who { display: flex; gap: 12px; align-items: center; }
-  .pa3-who b { display: block; font: 400 23px/1.15 var(--pa-type); }
-  .pa3-who span { font-size: 14px; color: var(--pa-ink-2); }
-  .pa3 .pa3-qh .pa3-x { margin-left: auto; color: var(--pa-ink); background: rgba(255, 255, 255, 0.55); }
-  .pa3-trk { display: flex; align-items: center; margin-top: 16px; }
-  .pa3-trk .pa3-nd { flex: none; display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11.5px; color: var(--pa-ink-2); width: 48px; }
-  .pa3-trk .pa3-nd i { width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 2px rgba(28, 19, 15, 0.3); display: grid; place-items: center; color: #fff; }
-  .pa3-trk .pa3-nd.on i { background: var(--pa-ink); box-shadow: none; }
-  .pa3-trk .pa3-nd.on { font-weight: 600; color: var(--pa-ink); }
-  .pa3-trk .pa3-nd svg { width: 13px; height: 13px; stroke-width: 3; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
-  .pa3-trk .pa3-ln { flex: 1; height: 2px; background: rgba(28, 19, 15, 0.2); margin: 0 -8px 17px; }
-  .pa3-trk .pa3-ln.on { background: var(--pa-ink); }
-  .pa3-stline { margin-top: 14px; font-size: 14.5px; }
-  .pa3-stline b { font-weight: 600; }
-  .pa3-next { margin: 14px 0 4px; background: #fff; border-radius: 16px; box-shadow: var(--pa-sh); padding: 14px; }
-  .pa3-next small { font-size: 12.5px; font-weight: 600; color: var(--pa-rust); }
-  .pa3-next b { display: block; font-size: 17px; line-height: 1.3; margin: 3px 0 2px; }
-  .pa3-next p { margin: 0 0 12px; font-size: 14px; color: var(--pa-muted); line-height: 1.4; }
-  .pa3-next .pa3-acts { display: flex; gap: 8px; }
-  .pa3 .pa3-next .pa3-acts .pa3-pill { height: 42px; border-radius: 21px; flex: 1; min-width: 0; }
-  .pa3-th { display: flex; flex-direction: column; gap: 6px; padding: 4px 2px; }
-  .pa3-bub { max-width: 82%; padding: 9px 12px 7px; border-radius: 16px; font-size: 14.5px; line-height: 1.35; background: #fff; box-shadow: 0 1px 1px rgba(31, 38, 51, 0.08); align-self: flex-end; border-bottom-right-radius: 5px; overflow-wrap: anywhere; }
-  .pa3-bub.them { align-self: flex-start; border-radius: 16px; border-bottom-left-radius: 5px; }
-  .pa3-bub small { display: block; font-size: 12.5px; color: var(--pa-muted); margin-top: 1px; }
-  .pa3-bub time { display: block; text-align: right; font-size: 11px; color: var(--pa-muted); margin-top: 2px; }
-  .pa3-gap { font-size: 12px; color: var(--pa-muted); padding: 2px 6px; }
-  .pa3-gap.r { text-align: right; }
-  .pa3-links { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 14px 4px 0; font-size: 14.5px; font-weight: 500; color: var(--pa-navy); }
-  .pa3 .pa3-links button { text-decoration: underline; text-underline-offset: 3px; }
-  .pa3 .pa3-links .dz { color: var(--pa-rust); margin-left: auto; }
-
-  /* ── the agent sheet's header (ref `.ah`) ── */
-  .pa3-ah { background: var(--pa-navy); color: #fff; margin-top: -22px; padding: 30px 18px 16px; }
-  .pa3-ah .pa3-who span { color: var(--pa-st-slate); }
-  .pa3-ah .pa3-who .pa3-seal { background: #fff; color: var(--pa-navy); }
-  .pa3-facts { display: flex; gap: 8px; margin-top: 14px; }
-  .pa3-facts div { flex: 1; min-width: 0; background: rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 9px 10px; font-size: 12px; color: var(--pa-st-slate); }
-  .pa3-facts b { display: block; color: #fff; font-size: 14.5px; font-weight: 600; margin-top: 1px; overflow-wrap: anywhere; }
-  .pa3-tags { display: flex; gap: 6px; flex-wrap: wrap; }
-  .pa3-tag { height: 28px; padding: 0 11px; border-radius: 14px; background: var(--pa-fill); font-size: 13px; display: inline-flex; align-items: center; max-width: 100%; box-sizing: border-box; }
-  .pa3-disc { background: #fff; border-radius: 16px; box-shadow: var(--pa-sh); overflow: hidden; margin-bottom: 12px; }
-  .pa3-disc .pa3-band { background: var(--pa-st-slate); padding: 8px 14px; font-size: 12.5px; font-weight: 600; color: var(--pa-navy); }
-  .pa3-disc .pa3-in { padding: 14px; }
-
   /* ── snackbar and celebration (ref `#snack`, `.cele`) ── */
-  .pa3-snack {
-    position: fixed; left: 14px; right: 14px; bottom: calc(86px + env(safe-area-inset-bottom, 0px)); z-index: 1100;
-    background: var(--pa-navy-deep); color: #fff; border-radius: 26px; height: 52px; display: flex; align-items: center; gap: 10px;
-    padding: 0 8px 0 10px; font: 14.5px var(--pa-sans); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25); animation: pa3-up 0.3s var(--pa-spring);
-  }
-  .pa3-snack img { width: 34px; height: 34px; border-radius: 50%; background: #fff; }
-  .pa3-snack span { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .pa3-snack button { color: var(--pa-blush); font-weight: 600; padding: 8px 12px; background: none; border: 0; font: 600 14.5px var(--pa-sans); cursor: pointer; }
   .pa3-cele { position: absolute; inset: 0; background: var(--pa-navy); color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 30px; animation: pa3-fade 0.25s; box-sizing: border-box; overflow-y: auto; }
   .pa3-cele img { width: 128px; height: 128px; border-radius: 50%; background: #fff; animation: pa3-pop 0.5s var(--pa-spring); }
   .pa3 .pa3-cele .pa3-h3 { font-size: 30px; line-height: 1.15; margin: 24px 0 8px; color: #fff; }
@@ -340,6 +171,6 @@
   @keyframes pa3-fade { from { opacity: 0; } to { opacity: 1; } }
   @keyframes pa3-pop { from { transform: scale(0.6); opacity: 0; } to { transform: none; opacity: 1; } }
   @media (prefers-reduced-motion: reduce) {
-    .pa3-hd, .pa3-hd .pa3-ht, .pa3-sheet, .pa3-full, .pa3-scrim, .pa3-snack, .pa3-cele, .pa3-cele img { animation: none !important; transition: none !important; }
+    .pa3-full, .pa3-cele, .pa3-cele img { animation: none !important; transition: none !important; }
   }
 }

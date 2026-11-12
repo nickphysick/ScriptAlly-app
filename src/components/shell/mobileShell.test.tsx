@@ -218,13 +218,14 @@ describe("the app-feel layer (Phase 6)", () => {
 
 /* ⚠️ RE-POINTED 11 NOV (Phone app v3): the menu behind the initials (PhoneMenu) RETIRES with the initials themselves.
    The claim that survives is the same one: nothing it offered became unreachable. Each of its doors now has a home on
-   the You tab, its Settings page or Today. The rendered walk is tests/e2e/phoneAppV3.measure.ts. */
+   the You tab, its Settings page or Today. The rendered walk is tests/e2e/phoneAppV4.measure.ts (PA4-8). */
 describe("the retired menu — everything it offered is still reachable", () => {
-  const you = readFileSync(resolve(__dirname, "../phone/v3/YouV3.tsx"), "utf8");
+  const you = readFileSync(resolve(__dirname, "../phone/v4/YouV4.tsx"), "utf8");
   it("the shell no longer mounts the menu, the band or the book sheet on a phone", () => {
     for (const gone of [/<PhoneMenu\b/, /<PhoneBand\s/, /<PhoneBookSheet\b/, /setMenuOpen\(/]) expect(appShell, String(gone)).not.toMatch(gone);
-    expect(appShell).toContain("<V3Header");
-    expect(appShell).toContain("<V3TabBarHost");
+    expect(appShell).toContain("<V4MiniBar");
+    expect(appShell).toContain("<V4PushedHeader");
+    expect(appShell).toContain("<V4TabBar");
   });
   it("You reaches Responses, Analytics, Streaks and goals, the book, packages, letters and comps, and Settings", () => {
     for (const path of ['"/queries/responses"', '"/queries/analytics"', '"/goals"', '"/manuscripts"', '"/queries/packages"', '"/manuscripts#materials"', '"/manuscripts#comps"', '"/account"']) {

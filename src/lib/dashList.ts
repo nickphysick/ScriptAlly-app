@@ -25,7 +25,7 @@ import { agentInitials, agentPrimary } from "./agentDisplay";
 import { elapsedWhole } from "./elapsed";
 import { stateFor, type State } from "./queryCardFacts";
 import { buildQcRows, STAGE_NAME, type QcRow } from "./qcSummary";
-import { GAP_TARGET, hasPassedOn, hkModel, type GapKey, type HkAgentCtx, type HkItem } from "./contactHousekeeping";
+import { GAP_TARGET, hasPassedOn, hkModel, type GapKey, type HkAgentCtx, type HkItem, type HkModel } from "./contactHousekeeping";
 import { contactPrefsOf } from "./contactPrefs";
 import { fitsGenre } from "./contactStrip";
 import { bookGenres } from "./genreMatch";
@@ -319,7 +319,7 @@ export interface HouseInput {
  * is the Contact list's own (`AgentList` builds the same five facts inline; this is that rule,
  * stated here because that file is the Contact list's).
  */
-export function houseItems(i: HouseInput): ListItem[] {
+export function houseModel(i: HouseInput): HkModel {
   const msId = i.manuscript?.id ?? null;
   const book = bookGenres(i.manuscript);
   const reopen = new Set(i.userTasks.filter((t) => t.agentId && !t.done && (t.dueDate ?? "").trim()).map((t) => t.agentId as string));
@@ -330,7 +330,11 @@ export function houseItems(i: HouseInput): ListItem[] {
     passedOn: hasPassedOn(a, i.queries as Query[], msId),
     hasReopenTask: reopen.has(a.id),
   });
-  const model = hkModel(i.agents, ctxOf, contactPrefsOf(i.user, i.now));
+  return hkModel(i.agents, ctxOf, contactPrefsOf(i.user, i.now));
+}
+/** Phone app v4 reads the same model for List health (`houseModel`); this turns it into the list's items */
+export function houseItems(i: HouseInput): ListItem[] {
+  const model = houseModel(i);
   const byGap = new Map<GapKey, HkItem[]>();
   for (const it of model.items) byGap.set(it.gap, [...(byGap.get(it.gap) ?? []), it]);
   return [...byGap.entries()].map(([gap, items]) => {

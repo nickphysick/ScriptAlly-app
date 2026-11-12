@@ -73,18 +73,3 @@ export const TaskRowV3: React.FC<{ t: WsTask; line: string; status: string | nul
 );
 
 /** the ref's line chart: a straight polyline with its fill, the last point a blush dot (ref `spark`) */
-export const Spark: React.FC<{ values: readonly number[] }> = ({ values }) => {
-  const w = 350, h = 54;
-  if (values.length < 2) return <svg className="pa3-sp" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true" />;
-  const mx = Math.max(...values, 1);
-  const pts = values.map((v, k) => [k * w / (values.length - 1), h - 6 - (v / mx) * (h - 14)] as const);
-  const p = pts.map((q) => `${q[0].toFixed(1)},${q[1].toFixed(1)}`).join(" ");
-  const l = pts[pts.length - 1];
-  return (
-    <svg className="pa3-sp" viewBox={`0 0 ${w} ${h}`} preserveAspectRatio="none" aria-hidden="true" data-pa3="spark" data-values={values.join(",")}>
-      <polygon points={`0,${h} ${p} ${w},${h}`} fill="rgba(255,255,255,.09)" />
-      <polyline points={p} fill="none" stroke="#fff" strokeWidth="2" vectorEffect="non-scaling-stroke" />
-      <circle cx={l[0] - 4} cy={l[1]} r="4" fill="var(--pa-blush)" />
-    </svg>
-  );
-};

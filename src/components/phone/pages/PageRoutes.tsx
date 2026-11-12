@@ -5,7 +5,8 @@
  * The menu pages choose their page by width, as `/todo` does (TodoRoute): the desktop pages from 768px up, the phone's
  * own pages (Phone app v2, Part 7) below it. One is mounted at a time.
  */
-import { SettingsV3, YouV3 } from "../v3/YouV3";
+import { SettingsV3 } from "../v3/YouV3";
+import { YouV4 } from "../v4/YouV4";
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useIsMobile } from "../../shell/mobileChrome";
@@ -37,7 +38,7 @@ export const AnalyticsRoute: React.FC<React.ComponentProps<typeof QueryAnalytics
 
 /** Streaks & goals has no desktop page yet: a computer goes to the dashboard (listed for Nick) */
 /** Phone app v3 — You: the phone's fifth place; a computer has no You page and is sent to the dashboard */
-export const YouRoute: React.FC = () => (useIsMobile() ? <YouV3 /> : <Navigate to="/dashboard" replace />);
+export const YouRoute: React.FC = () => (useIsMobile() ? <YouV4 /> : <Navigate to="/dashboard" replace />);
 
 export const GoalsRoute: React.FC = () => (useIsMobile() ? <GoalsPhone /> : <Navigate to="/dashboard" replace />);
 

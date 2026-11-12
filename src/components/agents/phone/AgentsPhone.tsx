@@ -12,7 +12,6 @@
  *
  * Missing facts are left out — never a dash, never "Unknown".
  */
-import { AgentsSeg } from "../../phone/v3/AgentsV3";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
@@ -52,7 +51,14 @@ function useDiscoverFace(): { live: boolean; aid: DevAid } {
   return { live: (aid.face ?? (DISCOVER_LIVE ? "live" : "soon")) === "live", aid };
 }
 
-/* ══ Discover (Phone app v3: under the Agents tab's "Your list | Discover" switch) ══ */
+/** Phone app v4: Discover's own count for the Agents tab's row (the Scout's queue while Discover is live; 0 otherwise) */
+export function useDiscoverCount(): number {
+  const face = useDiscoverFace();
+  const s = useScout(face.live ? face.aid : NO_AID);
+  return face.live ? s.queue.length : 0;
+}
+
+/* ══ Discover (Phone app v4: pushed from the Agents tab) ══ */
 export const DiscoverPhone: React.FC = () => {
   const navigate = useNavigate();
   const face = useDiscoverFace();
@@ -87,7 +93,6 @@ export const DiscoverPhone: React.FC = () => {
   return (
     <div className="pa-agents" data-pa="discover">
       <div className="pa-agbody">
-        <div className="pa3" style={{ padding: "0 0 4px" }}><AgentsSeg on="disc" /></div>
         {!face.live ? (
           <section className="pa-dsoon" data-pa="d-soon">
             <span className="pa-dspot" aria-hidden="true">{PI.scope}</span>

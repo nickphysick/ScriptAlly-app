@@ -1,0 +1,332 @@
+/* ── PHONE APP v4 (design-refs/phone-app-v4/) — THE ONE SYSTEM, below 768px only. Every value is the boards' own rule
+   (`.d .d2 .h .b .s .cta .link .card .tap .tb .mini .pill .chipb .seal .sheet .peek .act .snack`), on the phone tokens.
+   ⚠️ TYPE IS IN rem, so the phone's own text-size setting scales it (PA4-3). Nothing is under 0.875rem except the tab
+      labels (0.75rem) — PA4-2.
+   ⚠️ ONE FILLED BUTTON PER SCREEN (`.pa4-cta`, navy, 56px, a pill). Everything else is a `.pa4-link` (48px) or a row.
+      Blush is an accent, never a button (PA4-1).
+   ⚠️ TWO CLASSES AND !important ON EVERY TYPEWRITER RULE: brand.tsx forces a family on bare h1/h2/h3 with !important.
+   Nothing here applies at 768px and up. ── */
+@media (max-width: 767.98px) {
+  body.pa4-on .sv2-stagepad { padding-bottom: calc(88px + env(safe-area-inset-bottom, 0px)) !important; }
+  /* a root page draws its own navy header to the top edge: the stage loses the shell's top gap there */
+  body.pa4-on.pa4-root .sv2-stagepad { padding-top: 0 !important; }
+
+  .pa4 { font-family: var(--pa-sans); color: var(--pa-ink); box-sizing: border-box; contain: inline-size; width: 100%; min-width: 0; }
+  .pa4 *, .pa4-layer * { box-sizing: border-box; }
+  .pa4 :is(p, span, div, button, label, b, small, li, input, textarea, a, time, strong, em, i):where(:not([class*="aap-"]):not([class*="ssp"]):not([class*="sa-"])),
+  .pa4-layer :is(p, span, div, button, label, b, small, li, input, textarea, a, time, strong, em, i):where(:not([class*="aap-"]):not([class*="ssp"]):not([class*="sa-"])) { font-family: inherit; }
+  :where(.pa4, .pa4-layer) :where(button) { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+  .pa4 [hidden], .pa4-layer [hidden] { display: none !important; }
+  .pa4 p, .pa4-layer p { margin: 0; }
+
+  /* ── type: display 28 · header headline 24 · title 20/600 · body 16 · secondary 14 ── */
+  .pa4 .pa4-d, .pa4-layer .pa4-d { font: 400 1.75rem/1.2 var(--pa-type) !important; margin: 0; letter-spacing: 0; }
+  .pa4 .pa4-d2, .pa4-layer .pa4-d2 { font: 400 1.5rem/1.33 var(--pa-type) !important; margin: 0; letter-spacing: 0; }
+  .pa4 .pa4-h, .pa4-layer .pa4-h { font: 600 1.25rem/1.3 var(--pa-sans) !important; margin: 0; letter-spacing: 0; }
+  .pa4-b { font-size: 1rem; line-height: 1.5; }
+  .pa4-s { font-size: 0.875rem; line-height: 1.43; color: var(--pa-muted); }
+  .pa4 .pa4-T, .pa4-layer .pa4-T { font-family: var(--pa-type) !important; font-weight: 400 !important; }
+  .pa4 .pa4-n, .pa4-layer .pa4-n { font: 400 1.25rem/1.2 var(--pa-type) !important; display: block; }
+  .pa4-body { color: var(--pa-body); }
+
+  /* ── the one filled button, the text link, the row ── */
+  .pa4 .pa4-cta, .pa4-layer .pa4-cta {
+    display: flex; align-items: center; justify-content: center; width: 100%; min-height: 56px; border-radius: 28px;
+    background: var(--pa-navy); color: #fff; font: 600 1.0625rem/1.25 var(--pa-sans); padding: 8px 16px; text-align: center;
+  }
+  .pa4 .pa4-cta:disabled, .pa4-layer .pa4-cta:disabled { opacity: 0.45; cursor: default; }
+  .pa4 .pa4-link, .pa4-layer .pa4-link {
+    display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; min-height: 48px; padding: 8px 0;
+    font: 600 1rem/1.3 var(--pa-sans); color: var(--pa-navy); text-align: center;
+  }
+  .pa4 .pa4-link.sb, .pa4-layer .pa4-link.sb { justify-content: space-between; text-align: left; border-top: 1px solid var(--pa-rule); min-height: 56px; }
+  .pa4 .pa4-link.rule, .pa4-layer .pa4-link.rule { border-top: 1px solid var(--pa-rule); min-height: 56px; }
+  .pa4-chev { flex: none; width: 20px; height: 20px; color: var(--pa-chev); }
+  .pa4-ic { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .pa4 .pa4-tap, .pa4-layer .pa4-tap { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 64px; text-align: left; padding: 8px 0; }
+  .pa4-tap + .pa4-tap { border-top: 1px solid var(--pa-rule); }
+  .pa4-tap .pa4-x { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .pa4-tap .pa4-x > b { display: block; font-size: 1rem; line-height: 1.5; font-weight: 600; }
+  .pa4 .pa4-ib, .pa4-layer .pa4-ib, .pa4-mini .pa4-ib, .pa4-ph .pa4-ib, .pa4-topbar .pa4-ib { flex: none; width: 48px; height: 48px; display: grid; place-items: center; border-radius: 50%; color: inherit; }
+
+  /* ── cards: white, 24px radius, soft shadow; the first overlaps the header ── */
+  .pa4-card { background: #fff; border-radius: 24px; box-shadow: var(--pa-card-sh); }
+  .pa4-inset { padding: 0 16px; }
+  .pa4-lapcard { margin-top: -56px; padding: 24px 24px 8px; position: relative; }
+  .pa4-pad24 { padding: 24px; }
+  .pa4-sec { margin: 32px 8px 12px; }
+  .pa4-sec.tight { margin-top: 16px; }
+
+  /* ── the header: navy, the faint doodle, the faint white hawk shadow, the cast on the right edge ── */
+  .pa4-hero {
+    position: relative; overflow: hidden; color: #fff; background-color: var(--pa-navy); background-image: var(--pa-doodle);
+    padding: max(56px, calc(env(safe-area-inset-top, 0px) + 16px)) 24px 24px;
+  }
+  .pa4-hero.lap { padding-bottom: 88px; }
+  .pa4-hero .pa4-shadow { position: absolute; left: -90px; top: 120px; width: 280px; opacity: 0.06; transform: rotate(-8deg); pointer-events: none; }
+  .pa4-hero .pa4-top { display: flex; align-items: center; gap: 8px; min-height: 48px; margin-bottom: 8px; position: relative; }
+  .pa4-hero .pa4-top > .pa4-s { flex: 1; color: var(--pa-onnavy); }
+  .pa4-hero .pa4-head { display: flex; align-items: flex-end; position: relative; min-height: 136px; }
+  .pa4-hero .pa4-head > div { flex: 1; min-width: 0; padding-bottom: 8px; overflow-wrap: anywhere; }
+  .pa4-hero .pa4-kick { color: var(--pa-onnavy); margin-bottom: 8px; }
+  .pa4-hero .pa4-sub { color: var(--pa-onnavy); margin-top: 8px; }
+  .pa4-hero .pa4-cast { flex: none; height: auto; margin: 0 -16px -6px 4px; filter: drop-shadow(-8px 10px 12px rgba(0, 0, 0, 0.35)); }
+  .pa4-hero .pa4-corner { position: absolute; right: -12px; top: -44px; }
+  .pa4-hero .pa4-after { position: relative; margin-top: 24px; }
+  .pa4-pill { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 12px; border-radius: 16px; background: rgba(255, 255, 255, 0.14); color: #fff; font-size: 0.875rem; font-weight: 600; white-space: nowrap; }
+  .pa4-pill svg { width: 16px; height: 16px; fill: var(--pa-blush); }
+
+  /* ── the four-stage journey track (on navy) ── */
+  .pa4-jr { display: flex; align-items: center; }
+  .pa4-jr i { flex: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; }
+  .pa4-jr i.end { background: var(--pa-blush); }
+  .pa4-jr i.e { background: none; box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.55); }
+  .pa4-jr u { flex: 1; height: 2px; background: rgba(255, 255, 255, 0.55); }
+  .pa4-jr u.e { background: rgba(255, 255, 255, 0.25); }
+  .pa4-jl { display: flex; justify-content: space-between; margin-top: 8px; gap: 4px; }
+  .pa4-jl span { font-size: 0.875rem; line-height: 1.43; color: var(--pa-onnavy); min-width: 4rem; }
+  .pa4-jl span:nth-child(2), .pa4-jl span:nth-child(3) { text-align: center; }
+  .pa4-jl span:last-child { text-align: right; }
+  .pa4 .pa4-jl b { display: block; font: 400 1.25rem/1.2 var(--pa-type) !important; color: #fff; }
+
+  /* ── the switch (List | Birds-eye) and the chips ── */
+  .pa4-bsw { display: flex; min-height: 48px; border-radius: 24px; background: rgba(255, 255, 255, 0.14); padding: 0; }
+  /* each half is a 48px target; the white pill is its content box, drawn 4px in as on the board */
+  .pa4 .pa4-bsw button { flex: 1; display: grid; place-items: center; border-radius: 24px; padding: 4px; background-clip: content-box; font-size: 1rem; font-weight: 600; color: #fff; text-align: center; min-height: 48px; }
+  .pa4 .pa4-bsw button.on { background: #fff; color: var(--pa-navy); }
+  .pa4-chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; padding: 8px 16px 0; }
+  .pa4-chips::-webkit-scrollbar, .pa4-hs::-webkit-scrollbar { display: none; }
+  .pa4 .pa4-chip, .pa4-layer .pa4-chip { flex: none; min-height: 48px; display: flex; align-items: center; }
+  .pa4-chip > span { min-height: 36px; padding: 0 14px; border-radius: 18px; background: #fff; box-shadow: inset 0 0 0 1.5px var(--pa-rule); display: flex; align-items: center; gap: 6px; font-size: 0.875rem; font-weight: 600; white-space: nowrap; color: var(--pa-ink); }
+  .pa4-chip.on > span { background: var(--pa-navy); color: #fff; box-shadow: none; }
+  .pa4-chip i { font-style: normal; font-weight: 400; opacity: 0.85; }
+  .pa4-hs { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; margin: 0 -16px; padding: 4px 16px 16px; }
+  .pa4-grp { display: flex; align-items: baseline; gap: 8px; padding: 24px 24px 4px; }
+
+  /* ── seals and inbox rows ── */
+  .pa4-seal { flex: none; border-radius: 50%; background: var(--pa-fill); color: var(--pa-ink); font-weight: 600; display: grid; place-items: center; position: relative; font-size: 1rem; }
+  .pa4-seal.dk { background: var(--pa-navy); color: #fff; }
+  .pa4-seal .pa3-gl { position: absolute; right: -4px; bottom: -4px; box-shadow: 0 0 0 2px var(--pa-page); }
+  .pa4 .pa4-ib2, .pa4-layer .pa4-ib2 { display: flex; gap: 16px; align-items: center; width: 100%; min-height: 72px; padding: 8px 24px; text-align: left; }
+  .pa4-ib2 .pa4-x { flex: 1; min-width: 0; }
+  .pa4-ib2 .pa4-l1 { display: flex; align-items: baseline; gap: 8px; }
+  .pa4-ib2 .pa4-nm { flex: 1; min-width: 0; font-size: 1rem; line-height: 1.5; font-weight: 500; overflow-wrap: anywhere; }
+  .pa4-ib2.un .pa4-nm { font-weight: 700; }
+  .pa4-ib2 .pa4-pv { display: block; font-size: 0.875rem; line-height: 1.43; color: var(--pa-muted); overflow-wrap: anywhere; }
+  .pa4-ib2.un .pa4-pv { color: var(--pa-ink); }
+  .pa4-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--pa-blush); box-shadow: 0 0 0 1.5px var(--pa-rust); }
+  .pa4-prog { display: block; height: 4px; border-radius: 2px; background: var(--pa-fill); margin-top: 6px; overflow: hidden; }
+  .pa4-prog i { display: block; height: 100%; border-radius: 2px; background: var(--pa-navy); }
+  .pa4-tag { display: inline-flex; align-items: center; min-height: 32px; padding: 0 12px; border-radius: 16px; background: var(--pa-fill); font-size: 0.875rem; overflow-wrap: anywhere; }
+  .pa4-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+  .pa4-stars { color: var(--pa-navy); letter-spacing: 2px; font-size: 1rem; }
+  .pa4-stars i { font-style: normal; color: var(--pa-star-off); }
+
+  /* ── the navy ring card ── */
+  .pa4-ring { margin-top: 16px; padding: 24px; background: var(--pa-navy); color: #fff; border-radius: 24px; }
+  .pa4-ring .pa4-rw { display: flex; align-items: center; gap: 24px; }
+  .pa4-ring svg.r { width: 104px; height: 104px; flex: none; }
+  .pa4 .pa4-ring button.rr { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; color: #fff; }
+  .pa4-ring button.rr + button.rr { border-top: 1px solid rgba(255, 255, 255, 0.14); }
+  .pa4-ring button.rr i { width: 12px; height: 12px; border-radius: 50%; flex: none; }
+  .pa4-ring button.rr .pa4-s { flex: 1; color: var(--pa-onnavy); }
+  .pa4-ring .nx { display: flex; align-items: center; gap: 12px; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.14); }
+  .pa4-ring .nx .pa4-s { color: #fff; }
+  .pa4-ring circle.arc { animation: pa4-sweep 0.7s ease-out both; }
+  @keyframes pa4-sweep { from { stroke-dasharray: 0 201.1; } }
+
+  /* ── the figures row, the streak, the paper cards ── */
+  .pa4-figs { display: flex; }
+  .pa4-figs > div { flex: 1; min-width: 0; padding: 0 16px; }
+  .pa4-figs > div + div { border-left: 1px solid var(--pa-rule); }
+  .pa4-figs > div:first-child { padding-left: 0; }
+  .pa4 .pa4-figs b { display: block; font: 400 1.75rem/1.15 var(--pa-type) !important; }
+  .pa4-ck { flex: none; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; color: #fff; background: var(--pa-navy); }
+  .pa4-ck.off { background: none; box-shadow: inset 0 0 0 2px var(--pa-rule); }
+  .pa4-ck svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+  .pa4 .pa4-paper { flex: none; width: 164px; background: var(--pa-paper); border-radius: 6px; box-shadow: 0 1px 2px rgba(31, 38, 51, 0.05), 0 8px 20px rgba(31, 38, 51, 0.10); padding: 16px; text-align: left; min-height: 48px; }
+  .pa4-paper u { display: block; height: 4px; border-radius: 2px; background: var(--pa-fill); margin-top: 8px; text-decoration: none; }
+  .pa4-paper .dear { font: 0.875rem/1.2 var(--pa-serif); color: var(--pa-body); }
+  .pa4 .pa4-paper .m { display: block; margin-top: 16px; font: 400 1.375rem/1.3 var(--pa-type) !important; overflow-wrap: anywhere; }
+  .pa4-paper .m.hot { color: var(--pa-rust); }
+
+  /* ── founding road ── */
+  .pa4-found { margin-top: 16px; padding: 24px; background: var(--pa-blush-wash); border-radius: 24px; }
+  .pa4-road { display: flex; align-items: flex-start; justify-content: space-between; position: relative; margin-bottom: 16px; }
+  .pa4-road > i { position: absolute; left: 24px; right: 24px; top: 27px; height: 2px; background: rgba(31, 38, 51, 0.14); }
+  .pa4-road > i.f { right: auto; background: var(--pa-navy); }
+  .pa4-road > div { position: relative; text-align: center; width: 56px; }
+  .pa4-road img { width: 48px; height: 48px; margin-top: 4px; border-radius: 50%; object-fit: cover; background: #fff; filter: grayscale(1) contrast(0.6) brightness(1.25); box-shadow: 0 0 0 2px var(--pa-blush-wash); }
+  .pa4-road > div.on img { width: 56px; height: 56px; margin-top: 0; filter: none; box-shadow: 0 0 0 3px var(--pa-navy); }
+  .pa4-road > div.got img { filter: none; }
+  .pa4 .pa4-fb { flex: 1; min-height: 48px; padding: 0 12px; border-radius: 24px; background: #fff; color: var(--pa-ink); font-weight: 600; font-size: 0.875rem; text-align: center; white-space: nowrap; }
+
+  /* ── the postmark stamp: the one confirm motion ── */
+  .pa4-stamp {
+    position: absolute; right: 20px; top: -22px; width: 88px; height: 88px; border-radius: 50%; border: 2.5px solid var(--pa-rust);
+    color: var(--pa-rust); display: grid; place-content: center; text-align: center; transform: rotate(-12deg); background: var(--pa-stamp-ground);
+    animation: pa4-stampin 0.35s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+  }
+  .pa4-stamp::before { content: ""; position: absolute; inset: 4px; border: 1px solid var(--pa-rust); border-radius: 50%; }
+  .pa4 .pa4-stamp b, .pa4-layer .pa4-stamp b { display: block; font: 400 1.125rem/1.1 var(--pa-type) !important; }
+  .pa4 .pa4-stamp span, .pa4-layer .pa4-stamp span { font: 400 0.875rem/1.15 var(--pa-type) !important; }
+  @keyframes pa4-stampin { from { transform: rotate(-12deg) scale(2.2); opacity: 0; } }
+  .pa4-pips { display: flex; gap: 4px; margin-bottom: 16px; }
+  .pa4-pips i { flex: 1; height: 4px; border-radius: 2px; background: var(--pa-fill); }
+  .pa4-pips i.on { background: var(--pa-navy); }
+
+  /* ── the tab bar: v3's order; it slides away on a scroll down and comes back on any scroll up ── */
+  .pa4-tb {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: center; background: #fff;
+    border-top: 1px solid var(--pa-rule); padding: 8px 8px calc(16px + env(safe-area-inset-bottom, 0px)); transition: transform 0.25s;
+    font-family: var(--pa-sans);
+  }
+  .pa4-tb.hide { transform: translateY(100%); }
+  .pa4-tb > button { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; min-height: 48px; font: 500 0.75rem/1.2 var(--pa-sans); color: var(--pa-tab); background: none; border: 0; padding: 0; cursor: pointer; }
+  .pa4-tb > button.on { color: var(--pa-navy); font-weight: 600; }
+  .pa4-tb > button.p { flex: none; width: 64px; }
+  .pa4-tb > button.p > span { width: 48px; height: 48px; border-radius: 50%; background: var(--pa-navy); color: #fff; display: grid; place-items: center; }
+
+  /* ── past 300px a slim navy bar with the page name replaces the header ── */
+  .pa4-mini {
+    position: fixed; left: 0; right: 0; top: 0; z-index: 45; background: var(--pa-navy); color: #fff; display: flex; align-items: center; gap: 8px;
+    padding: max(8px, env(safe-area-inset-top, 0px)) 12px 8px 24px; min-height: calc(64px + env(safe-area-inset-top, 0px));
+    transform: translateY(-100%); transition: transform 0.22s; font-family: var(--pa-sans); box-sizing: border-box;
+  }
+  .pa4-mini.on { transform: none; }
+  .pa4-mini .t { flex: 1; min-width: 0; font: 400 1.25rem/1.2 var(--pa-type) !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .pa4-mini button { color: #fff; }
+
+  /* ── a pushed page's header (back arrow, the page's name) ── */
+  .pa4-ph {
+    position: relative; z-index: 5; flex: none; width: 100%; contain: inline-size; background: var(--pa-navy); color: #fff; font-family: var(--pa-sans);
+    display: flex; align-items: center; gap: 4px; padding: max(8px, calc(env(safe-area-inset-top, 0px) + 4px)) 4px 8px; min-height: 64px; box-sizing: border-box;
+  }
+  .pa4-ph .t { flex: 1; min-width: 0; margin: 0; font: 400 1.25rem/1.2 var(--pa-type) !important; color: #fff; overflow-wrap: anywhere; padding: 0 4px; }
+  .pa4-ph .pa4-ib { color: #fff; }
+
+  /* ── the layer: sheets, full-screen pages, the snackbar ── */
+  .pa4-layer { position: fixed; inset: 0; z-index: 1000; font-family: var(--pa-sans); color: var(--pa-ink); }
+  .pa4-scrim { position: absolute; inset: 0; background: rgba(20, 26, 36, 0.5); animation: pa4-fade 0.2s; }
+  .pa4-sheet {
+    position: absolute; left: 0; right: 0; bottom: 0; max-height: 92%; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; overscroll-behavior: contain;
+    background: var(--pa-page); border-radius: 24px 24px 0 0; padding: 8px 16px calc(24px + env(safe-area-inset-bottom, 0px)); animation: pa4-up 0.32s var(--pa-spring);
+  }
+  .pa4-grab { width: 40px; height: 4px; border-radius: 2px; background: rgba(31, 38, 51, 0.22); margin: 4px auto 20px; }
+  .pa4-page { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--pa-page); animation: pa4-in 0.28s var(--pa-spring); }
+  .pa4-page > .pa4-scroll { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; }
+  .pa4-topbar { flex: none; background: var(--pa-navy); color: #fff; display: flex; align-items: center; gap: 4px; padding: max(8px, calc(env(safe-area-inset-top, 0px) + 4px)) 4px 8px; }
+  .pa4-topbar .pa4-ib { color: #fff; }
+  .pa4-topbar .who { flex: 1; min-width: 0; padding-left: 8px; }
+  .pa4-topbar .who b { display: block; font-size: 1rem; line-height: 1.25; font-weight: 600; overflow-wrap: anywhere; }
+  .pa4-topbar .who .pa4-s { color: var(--pa-onnavy); display: block; }
+  .pa4-band { flex: none; padding: 16px 24px; }
+  .pa4-band .row { display: flex; align-items: center; gap: 16px; }
+  .pa4-band .pa4-s { color: var(--pa-body); }
+  .pa4-tr4 { display: flex; align-items: center; flex: 1; min-width: 0; }
+  .pa4-tr4 i { flex: none; width: 14px; height: 14px; border-radius: 50%; background: none; box-shadow: inset 0 0 0 2px rgba(28, 19, 15, 0.3); }
+  .pa4-tr4 i.on { background: #1c130f; box-shadow: none; }
+  .pa4-tr4 u { flex: 1; height: 2px; background: rgba(28, 19, 15, 0.2); }
+  .pa4-tr4 u.on { background: #1c130f; }
+  .pa4-th { display: flex; flex-direction: column; gap: 8px; padding: 16px; }
+  .pa4-bub { max-width: 82%; padding: 10px 14px 8px; border-radius: 18px; background: #fff; box-shadow: 0 1px 2px rgba(31, 38, 51, 0.08); align-self: flex-end; border-bottom-right-radius: 6px; overflow-wrap: anywhere; }
+  .pa4-bub.t { align-self: flex-start; border-bottom-right-radius: 18px; border-bottom-left-radius: 6px; }
+  .pa4-bub > .pa4-b, .pa4-bub > .pa4-s { display: block; }
+  .pa4-bub time { display: block; text-align: right; margin-top: 2px; }
+  .pa4-bub.new { animation: pa4-stampin 0.35s both; transform-origin: right bottom; }
+  .pa4-gap { padding: 4px 8px; }
+  .pa4-gap.r { text-align: right; }
+  .pa4-act { flex: none; background: #fff; border-top: 1px solid var(--pa-rule); padding: 12px 16px calc(20px + env(safe-area-inset-bottom, 0px)); }
+  .pa4-snack {
+    position: fixed; left: 16px; right: 16px; bottom: calc(148px + env(safe-area-inset-bottom, 0px)); z-index: 1100; min-height: 48px; border-radius: 24px;
+    background: var(--pa-navy-deep); color: #fff; display: flex; align-items: center; gap: 8px; padding: 4px 8px 4px 20px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    font: 0.875rem/1.43 var(--pa-sans); animation: pa4-up 0.3s var(--pa-spring);
+  }
+  .pa4-snack.low { bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .pa4-snack > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .pa4-snack > button { flex: none; min-height: 48px; min-width: 48px; padding: 0 12px; color: var(--pa-blush); font: 600 1rem var(--pa-sans); background: none; border: 0; cursor: pointer; }
+  .pa4-peek { position: sticky; bottom: 0; background: #fff; border-radius: 24px 24px 0 0; padding: 24px 16px 16px; box-shadow: 0 -8px 32px rgba(31, 38, 51, 0.18); z-index: 3; }
+  .pa4-peek .f3 { display: flex; gap: 8px; margin-bottom: 16px; }
+  .pa4-peek .f3 > div { flex: 1; min-width: 0; background: var(--pa-page); border-radius: 16px; padding: 12px; overflow-wrap: anywhere; }
+  .pa4-kv { display: flex; align-items: center; gap: 16px; width: 100%; min-height: 56px; text-align: left; padding: 8px 0; }
+  .pa4-kv + .pa4-kv, .pa4-kv + .pa4-ed, .pa4-ed + .pa4-kv { border-top: 1px solid var(--pa-rule); }
+  .pa4-kv .k { flex: none; width: 7rem; max-width: 40%; }
+  .pa4-kv .v { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .pa4-sw { flex: none; width: 48px; height: 28px; border-radius: 14px; background: var(--pa-switch-off); position: relative; }
+  .pa4-sw::after { content: ""; position: absolute; left: 3px; top: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform 0.15s; }
+  .pa4-sw.on { background: var(--pa-navy); }
+  .pa4-sw.on::after { transform: translateX(20px); }
+  .pa4 .pa4-face, .pa4-layer .pa4-face { flex: none; width: 64px; min-height: 88px; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+  .pa4-face .rg { border-radius: 50%; padding: 3px; }
+  .pa4-face.on .rg { box-shadow: 0 0 0 2.5px var(--pa-navy); }
+  .pa4-face .pa4-s { max-width: 64px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pa4-face.on .pa4-s { color: var(--pa-ink); font-weight: 600; }
+  .pa4-field { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; border-radius: 24px; background: #fff; color: var(--pa-muted); padding: 0 16px; box-shadow: inset 0 0 0 1.5px var(--pa-rule); }
+  .pa4-field input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: 1rem var(--pa-sans); color: var(--pa-ink); min-height: 48px; }
+  .pa4-empty { padding: 16px 0; color: var(--pa-body); }
+
+  /* ── Birds-eye bars ── */
+  .pa4-bwrap { padding: 0 24px; }
+  .pa4 .pa4-brow { display: block; width: 100%; min-height: 68px; padding: 10px 0 12px; text-align: left; transition: opacity 0.2s; }
+  .pa4-brow.dimd { opacity: 0.3; }
+  /* the name and the words wrap rather than clip, so a larger text size never cuts them (PA4-3) */
+  .pa4-brow .l { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 8px; }
+  .pa4-brow .l b { flex: 0 1 auto; min-width: 0; font-size: 1rem; font-weight: 600; overflow-wrap: anywhere; }
+  .pa4-brow .l .pa4-s { flex: 1 1 auto; min-width: 0; text-align: right; overflow-wrap: anywhere; }
+  .pa4-brow .l .pa4-s.you { color: var(--pa-ink); }
+  .pa4-btr { display: block; position: relative; height: 14px; margin-top: 10px; border-radius: 7px; background: rgba(31, 38, 51, 0.05); }
+  .pa4-btr.end { margin-right: 9px; }
+  .pa4-btr i { position: absolute; top: 0; height: 14px; border-radius: 7px; }
+  .pa4-btr .bpast { opacity: 0.75; box-shadow: inset 0 0 0 1px rgba(31, 38, 51, 0.18); }
+  .pa4-btr .brem { box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.35); }
+  .pa4-btr .bdone { background: var(--pa-navy); }
+  .pa4-btr .bover { top: 6px; height: 2px; border-radius: 0; background: var(--pa-navy); }
+  .pa4-btr .btick { top: -5px; height: 24px; width: 2px; margin-left: -1px; border-radius: 1px; background: var(--pa-rust); }
+  .pa4-btr .bbeacon { top: -2px; width: 18px; height: 18px; margin-left: -9px; border-radius: 50%; background: var(--pa-page); box-shadow: inset 0 0 0 3px var(--pa-rust); animation: pa4-bpulse 1.8s ease-out infinite; }
+  @keyframes pa4-bpulse { 0% { box-shadow: inset 0 0 0 3px var(--pa-rust), 0 0 0 0 rgba(138, 74, 60, 0.45); } 100% { box-shadow: inset 0 0 0 3px var(--pa-rust), 0 0 0 10px rgba(138, 74, 60, 0); } }
+  .pa4-bscroll { overflow-x: auto; scrollbar-width: none; }
+  .pa4-bscroll::-webkit-scrollbar { display: none; }
+  .pa4-bmon { position: relative; height: 48px; margin-top: 16px; }
+  .pa4 .pa4-bmon span { position: absolute; top: 0; height: 28px; display: grid; place-items: center; font: 400 0.875rem/1 var(--pa-type) !important; color: var(--pa-body); border-radius: 6px; overflow: hidden; }
+  .pa4-bmon span.alt { background: rgba(42, 58, 82, 0.07); }
+  .pa4-bmon b { position: absolute; top: 26px; transform: translateX(-50%); font: 600 0.875rem/1.3 var(--pa-sans); color: #fff; background: var(--pa-rust); border-radius: 9px; padding: 0 8px; white-space: nowrap; }
+
+  @keyframes pa4-up { from { transform: translateY(40px); opacity: 0; } }
+  @keyframes pa4-in { from { transform: translateX(24px); opacity: 0; } }
+  @keyframes pa4-fade { from { opacity: 0; } }
+
+  /* ── the v3 parts v4 keeps (the reply journey, the add-agent steps, Settings, the + sheet's flows) take the system ── */
+  .pa4-layer .pa3-btn, .pa4 .pa3-btn { min-height: 56px; height: auto; border-radius: 28px; background: var(--pa-navy); color: #fff; font: 600 1.0625rem/1.25 var(--pa-sans); }
+  .pa4-layer .pa3-btn.q, .pa4 .pa3-btn.q { background: none; color: var(--pa-navy); min-height: 48px; box-shadow: none; font-size: 1rem; }
+  .pa4-layer .pa3-later { min-height: 48px; font-size: 1rem; }
+  .pa4-layer.pa3 .pa3-btn[disabled], .pa4-layer .pa3 .pa3-btn[disabled] { background: var(--pa-navy); color: #fff; opacity: 0.45; }
+  .pa4-layer .pa3-lab small { font-size: 0.875rem; }
+  .pa4-layer .pa3-field input { min-height: 48px; font-size: 1rem; }
+  .pa4-layer .pa3-h3, .pa4 .pa3-h3 { font: 400 1.75rem/1.2 var(--pa-type) !important; }
+  .pa4-layer .pa3-lead, .pa4-layer .pa3-lab, .pa4-layer .pa3-opt small, .pa4-layer .pa3-tip, .pa4-layer .pa3-sofar button,
+  .pa4 .pa3-s, .pa4-layer .pa3-s, .pa4 .pa3-note, .pa4-layer .pa3-note, .pa4 .pa3-kv, .pa4-layer .pa3-kv, .pa4-layer .pa3-err, .pa4-layer .pa3-empty, .pa4 .pa3-empty { font-size: 0.875rem; }
+  .pa4-layer .pa3-opt, .pa4-layer .pa3-field input, .pa4 .pa3-t, .pa4-layer .pa3-t { font-size: 1rem; }
+  .pa4-layer .pa3-opt { min-height: 56px; }
+  .pa4-layer .pa3-sofar button { min-height: 48px; }
+  .pa4-layer .pa3-bar > span { font: 400 1.25rem/1.2 var(--pa-type) !important; }
+  .pa4-layer .pa3-top, .pa4-layer .pa3-cele { background: var(--pa-navy); }
+  .pa4-layer .pa3-cele p { font-size: 1rem; }
+  .pa4-layer .pa3-cele .pa3-btn { background: #fff; color: var(--pa-navy); }
+  .pa4-layer .pa3-cele .pa3-btn.q { background: none; color: #fff; }
+  .pa4 .pa3-sec .pa3-h2, .pa4-layer .pa3-sec .pa3-h2 { font: 600 1.25rem/1.3 var(--pa-sans) !important; }
+  .pa4 .pa3-row, .pa4-layer .pa3-row { min-height: 64px; }
+  .pa4 .pa3-chip, .pa4-layer .pa3-chip, .pa4 .pa3-pill, .pa4-layer .pa3-pill { min-height: 48px; font-size: 0.875rem; }
+  .pa4 .pa3-seg button, .pa4-layer .pa3-seg button { min-height: 48px; font-size: 0.875rem; }
+  .pa4 .pa3-ib, .pa4-layer .pa3-ib { width: 48px; height: 48px; }
+  .pa4 .pa3-sw, .pa4-layer .pa3-sw { min-width: 48px; min-height: 28px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pa4 *, .pa4-layer *, .pa4-tb, .pa4-mini, .pa4-layer { animation: none !important; transition: none !important; }
+  }
+}
+@media (max-width: 767.98px) {
+  .pa4-ringw { position: relative; flex: none; width: 104px; height: 104px; display: block; }
+  .pa4-ringn { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .pa4 .pa4-ringn b { font: 400 1.5rem/1 var(--pa-type) !important; color: #fff; }
+  .pa4-ringn span { font-size: 0.875rem; color: var(--pa-onnavy); }
+}

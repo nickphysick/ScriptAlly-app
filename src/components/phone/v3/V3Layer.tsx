@@ -10,9 +10,8 @@ import React, { useEffect, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { closeV3, clearV3Snack, subscribeV3, v3Overlay, v3Seq, v3Snack, type V3Overlay } from "./v3Store";
 import { useV3Data } from "./V3Provider";
-import { QuerySheetV3 } from "./QuerySheetV3";
-import { SearchV3 } from "./SearchV3";
-import { HAWK_SRC } from "./V3Parts";
+import { QueryPageV4 } from "../v4/QueryPageV4";
+import { SearchV4 } from "../v4/SearchV4";
 
 export interface V3Panels {
   /** the panels later phases add (+, journeys, agent sheet); each returns null when it does not draw this overlay */
@@ -35,21 +34,22 @@ export const V3Layer: React.FC<V3Panels> = ({ render }) => {
   let full = false;
   if (o?.type === "query") {
     const q = v.byId.get(o.id);
-    body = q ? <QuerySheetV3 v={q} nowMs={v.now} quietWeeks={v.quietWeeks} /> : null;
+    body = q ? <QueryPageV4 v={q} nowMs={v.now} quietWeeks={v.quietWeeks} /> : null;
+    full = true;
   } else if (o?.type === "search") {
-    body = <SearchV3 />;
+    body = <SearchV4 />;
     full = true;
   } else if (o) {
     body = render?.(o) ?? null;
-    full = o.type === "log" || o.type === "reply" || o.type === "add";
+    full = o.type === "reply" || o.type === "add" || o.type === "tasks" || o.type === "agents-all";
   }
   if (!body && !snack) return null;
   return createPortal(
-    <div className="pa3 pa3-layer pa-layer" data-pa3="layer" style={body ? undefined : { pointerEvents: "none", inset: "auto" }}>
-      {body ? (<React.Fragment key={seq}>{full ? null : <div className="pa3-scrim" data-pa3="scrim" onClick={closeV3} />}{body}</React.Fragment>) : null}
+    <div className="pa3 pa3-layer pa-layer pa4-layer" data-pa3="layer" data-pa4="layer" style={body ? undefined : { pointerEvents: "none", inset: "auto" }}>
+      {body ? (<React.Fragment key={seq}>{full ? null : <div className="pa4-scrim" data-pa3="scrim" onClick={closeV3} />}{body}</React.Fragment>) : null}
       {snack ? (
-        <div className="pa3-snack" role="status" data-pa3="snack" style={{ pointerEvents: "auto" }}>
-          <img src={HAWK_SRC} alt="" />
+        /* Phone app v4: the snackbar keeps Undo and loses the hawk (the board's `.snack`) */
+        <div className={`pa4-snack${o?.type === "query" ? "" : " low"}`} role="status" data-pa3="snack" data-pa4="snack" style={{ pointerEvents: "auto" }}>
           <span>{snack.msg}</span>
           {snack.undo ? <button type="button" data-pa3="undo" onClick={() => { const u = snack.undo!; clearV3Snack(); void u(); }}>Undo</button> : null}
         </div>

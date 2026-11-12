@@ -205,3 +205,25 @@ export function taskLine(t: WsTask, q: V3Query | null): string {
   const parts = [agency && agency !== "No agency" ? agency : t.agentName && !t.title.includes(firstOf(t.agentName)) ? t.agentName : "", q?.short ?? ""];
   return parts.filter(Boolean).join(" · ");
 }
+
+/* ── Phone app v4: the step as a button (added; nothing above changes) ── */
+
+export type V3ActKind = "sent" | "nudge" | "close" | "offer" | "reply";
+export interface V3Act { label: string; kind: V3ActKind }
+/** the one filled button for a query's next step, and the one link beneath it; null on a closed query. Each opens the
+ *  app's existing journey (the query drawer, or v3's reply journey). */
+export function nextActs(q: Pick<V3Query, "state" | "row">): { primary: V3Act; second: V3Act | null } | null {
+  const first = firstOf(q.row.agentName);
+  switch (q.state) {
+    case "materials": {
+      const what = q.row.status === QueryStatus.PARTIAL_REQUESTED ? "partial" : q.row.status === QueryStatus.FULL_REQUESTED ? "full" : "revision";
+      return { primary: { label: `Mark ${what} sent`, kind: "sent" }, second: { label: `${first} replied again`, kind: "reply" } };
+    }
+    case "offer": return { primary: { label: "Record your answer", kind: "offer" }, second: null };
+    case "nudge": return { primary: { label: `I’ve nudged ${first}`, kind: "nudge" }, second: { label: "Close this query", kind: "close" } };
+    case "quiet": return { primary: { label: "Close this query", kind: "close" }, second: { label: `I’ve nudged ${first}`, kind: "nudge" } };
+    case "agent": return { primary: { label: `Log ${first}’s reply`, kind: "reply" }, second: { label: "Close this query", kind: "close" } };
+    case "closed": return null;
+    default: { const unhandled: never = q.state; return unhandled; }
+  }
+}

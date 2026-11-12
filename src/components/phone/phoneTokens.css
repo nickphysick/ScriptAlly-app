@@ -32,6 +32,20 @@
     --pa-st-grey: #e4e1db;
     /* Phone app v3: the ref's rust (`--rust`), for its one warm accent (Your next step, the BETA mark, a pin, the danger link). No phone token held a warm colour, so the nearest would have lost the meaning. */
     --pa-rust: #8a4a3c;
+    /* Phone app v4 — the boards' values that had no token (design-refs/phone-app-v4/, `:root`); the report lists each */
+    --pa-body: #4a4f5a;
+    --pa-onnavy: #c9d2df;
+    --pa-chev: #a9a49b;
+    /* ⚠️ the boards' tab label #7b7f88 is 4.0:1 on white, under 4.5 — the muted token (5.0:1) stands in (report) */
+    --pa-tab: var(--pa-muted);
+    --pa-star-off: #d4cec3;
+    --pa-switch-off: #c9ccd3;
+    --pa-paper: #fffdf8;
+    --pa-stamp-ground: #fffdf9;
+    --pa-ring-agent: #8fa3bf;
+    --pa-ring-quiet: #56677f;
+    --pa-card-sh: 0 1px 2px rgba(31, 38, 51, 0.05), 0 12px 32px rgba(31, 38, 51, 0.10);
+    --pa-doodle: url("/images/phone/doodle-navy.svg");
     /* type: Special Elite (the app's own face) for titles and numbers; the system stack for everything read or tapped */
     /* ⚠️ THE FACE IS READ FROM `--sp-type`, NEVER NAMED HERE — a stylesheet naming the family is a new owner, which
        marketingTokens.test refuses; `--sp-type` is declared at :root (primitives.css), so it resolves on a portal too */
