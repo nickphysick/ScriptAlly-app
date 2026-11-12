@@ -269,7 +269,7 @@
 .mk-foot--wl .mk-footlegal { display: flex; gap: 16px; margin: 0; }
 .mk-foot--wl .mk-footlegal .mk-footmail { background: none; border: 0; padding: 0; cursor: pointer; font: inherit; color: inherit; text-decoration: underline; }
 @media (max-width: 760px) {
-  .mk-foot--wl .mk-footglyphs, .mk-foot--wl .mk-footmade { display: none; }
+  .mk-foot--wl .mk-footmade { display: none; }
 }
 
 /* ═════════════ Desktop (761px and up) ═════════════ */

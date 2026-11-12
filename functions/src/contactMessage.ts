@@ -35,18 +35,17 @@ const MAX = { name: 120, email: 254, message: 4000, topic: 64 };
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /**
- * The six the form offers. Anything else is rejected rather than stored as free text.
+ * The five the form offers (contact redesign v1, 12 Nov). Anything else is rejected rather than stored as free text.
  * ⚠️ `functions/` cannot import `src/`, so this is a COPY of `CONTACT_TOPICS` in
  * src/marketing/contactCopy.ts — and `contactCopy.test.ts` reads this file and fails if the two
  * differ. Without that, a topic added to the form alone would be refused here with "Please choose
  * a topic" the day the form started sending through this function.
  */
 const TOPICS = new Set([
-  "Question or feedback",
+  "A question or an idea",
   "Something's broken",
   "Founding writer access",
-  "Billing or account",
-  "Privacy request",
+  "Your data",
   "Something else",
 ]);
 

@@ -70,7 +70,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   ["/welcome?v=waiting", () => <WelcomePage onNavigate={noNavigate} />, "So close. You&#x27;re on the reserve list."],
   ["/welcome?v=expired", () => <WelcomePage onNavigate={noNavigate} />, "That link&#x27;s 48 hours are up."],
   ["/welcome?v=unknown", () => <WelcomePage onNavigate={noNavigate} />, "We don&#x27;t recognise that link."],
-  ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Terms of Service"],
+  /* Retarget (12 Nov): the Terms take Privacy's layout, titled "Terms" over "The short version". */
+  ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Nothing is charged unless you choose a plan."],
   /* Retarget (privacy page v1, 2 Nov): the page's title is "Privacy". */
   ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "The short version"],
 ];
@@ -202,7 +203,7 @@ describe("the public pricing page sells nothing and writes nothing", () => {
  */
 describe("the legal pages are honest about being drafts", () => {
   /* ⚠️ THE TERMS ONLY, SINCE PRIVACY PAGE v1 (2 Nov): /privacy states a named controller, the checked
-     region and no placeholder, so it carries no ribbon (PRIV-1); the Terms still have their placeholders. */
+     region and no placeholder, so it carries no ribbon (PRIV-1). The Terms keep the ribbon until review. */
   for (const doc of ["terms"] as const) {
     it(`/${doc} carries the working-draft ribbon while the copy is unreviewed`, () => {
       const html = renderPage(<LegalPage doc={doc} onNavigate={noNavigate} />, `/${doc}`);
@@ -216,14 +217,18 @@ describe("the legal pages are honest about being drafts", () => {
     });
 
     /**
-     * ⚠️ THE PLACEHOLDERS RENDER AS PLACEHOLDERS. An invented entity name or address would make
-     * the page look finished, and a legal page that looks finished and is not is the one nobody
-     * chases. Both documents name the operating entity in their first section.
+     * RE-POINTED (12 Nov, design-refs/contact-terms-unsubscribe-v1.html). The law was "nothing unconfirmed
+     * is stated as fact": it was kept by rendering the entity and address as visible brackets. The
+     * ref names who runs QueryHawk as Privacy does — Nick, in London, first name only — so the
+     * Terms state no entity or address at all, invented or bracketed, and the ribbon still says the
+     * document is unreviewed.
      */
-    it(`/${doc} still shows its unfilled entity placeholders`, () => {
+    it(`/${doc} states no entity or address it has not confirmed`, () => {
       const html = renderPage(<LegalPage doc={doc} onNavigate={noNavigate} />, `/${doc}`);
-      expect(html).toContain("[LEGAL ENTITY NAME]");
-      expect(html).toContain("[REGISTERED / TRADING ADDRESS]");
+      expect(html).not.toContain("[LEGAL ENTITY NAME]");
+      expect(html).not.toContain("[REGISTERED / TRADING ADDRESS]");
+      expect(html).toContain("which is run by Nick in London, UK.");
+      expect(html).toContain("Working draft");
     });
   }
 
@@ -526,16 +531,19 @@ describe("the hero", () => {
  */
 /* "the status band" is RETIRED (waitlist v1, 31 Oct): its heading is feature row 1's now, beside the
    Birds-eye window. The absence is asserted, and the glyph marks still draw in the footer. */
-describe("the status band is gone, and its glyphs survive in the footer", () => {
+describe("the status band is gone, and the public footer draws no glyph row", () => {
   it("renders no status band and no #pulse anchor", () => {
     const h = renderPage(<Landing onNavigate={noNavigate} />, "/");
     expect(h).not.toMatch(/["\s`]mk-statband["\s`]/);
     expect(h).not.toContain('id="pulse"');
   });
-  it("and the glyphs themselves still draw, in the footer", () => {
+  /* RE-POINTED (contact redesign v1, 12 Nov): the ref drops the row from the public footer — it means
+     nothing to a visitor who has not used the app. The marks still draw in the app's footer
+     (appFooter.test.tsx). */
+  it("and the public footer no longer draws the glyph row", () => {
     expect(renderPage(
       <MarketingShell user={null as never} onNavigate={noNavigate} path="/"><div /></MarketingShell>, "/"),
-      "the footer's signature row").toContain('class="mk-footglyphs"');
+      "the footer's signature row is gone").not.toContain("mk-footglyphs");
   });
 });
 

@@ -243,7 +243,9 @@ const LOWER_READERS = [
      About left this group on 21 Oct: its hero sits directly on a navy band, so it has no lower
      ground to fade into and paints its own flat ground (`.mk-ahero::before`). */
   /* Pricing left this group on 21 Oct (pricing v3): it opens on a navy band, like About. */
-  ".mk-fwhero::before, .mk-contact::before, .mk-docplane::before",
+  /* The legal pages left this group on 12 Nov: `.mk-docplane` is deleted with the document card, and
+     both now open on privacy.css's navy drawer. */
+  ".mk-fwhero::before, .mk-contact::before",
   /* the lower surface itself. (The status band and the carded desktop hero were readers until both were
      retired by waitlist v1, 31 Oct; the new hero's band is in waitlist.css and reads the token there.) */
   ".mk-lower",
@@ -768,8 +770,9 @@ describe("every specific rule on /founders outranks the generic one beside it", 
    * The lesson is the one this repo already records about symptom reports: scan for the fault
    * CLASS, do not treat the element you were pointed at as the search space.
    */
+  /* RE-POINTED (public sweep v1): the cards' kicker is deleted, so `.mk-fwcard .mk-fwk` left this
+     list; the last case below asserts it stays gone, scoped or bare. */
   const SCOPED = [
-    ".mk-fwcard .mk-fwk",
     ".mk-fwhonest .mk-fwmark", ".mk-fwhonest .mk-fwlead", ".mk-fwhonest .mk-fwsign",
   ];
 
@@ -790,6 +793,11 @@ describe("every specific rule on /founders outranks the generic one beside it", 
         `${bare} must not be declared unscoped — .mk-fwhonest p would outrank it`,
       ).toBe(false);
     }
+  });
+
+  it("the cards' kicker and the hero's eyebrow are declared nowhere (public sweep v1)", () => {
+    expect(marketing).not.toMatch(/\.mk-fwk\b/);
+    expect(marketing).not.toMatch(/\.mk-fweyebrow\b/);
   });
 
   /** The generic rules that do the outranking are still there — not a licence to delete them. */
@@ -1043,6 +1051,8 @@ describe("the feature rows set their own type, and nothing else uses its familie
     expect(ruleOwners("Special Elite").sort()).toEqual([
       ".mk-claimband .mk-claimh2",
       ".mk-contact .mk-ch1",
+      /* RE-POINTED (12 Nov): Contact's three reasons became two headed lines, `.mk-cways`. */
+      ".mk-cways .mk-wayh",
       ".mk-footcol h4",
       ".mk-formcard .mk-formh2",
       ".mk-frow h3",
@@ -1067,7 +1077,6 @@ describe("the feature rows set their own type, and nothing else uses its familie
       ".mk-sechead h2",
       ".mk-vh3",
       ".mk-visionh2",
-      ".mk-way .mk-wayh",
     ]);
     expect(ruleOwners("Source Serif 4").sort())
       /* About's body copy joined on 21 Oct, for the same reason as the headings above. */
