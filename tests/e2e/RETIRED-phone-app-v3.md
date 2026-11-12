@@ -16,3 +16,10 @@ longer exist. Its subjects are measured again by `tests/e2e/phoneAppV4.measure.t
 | PA3-11 desktop | PA4-11 |
 
 The ledgers and pairs stay in `reports/phone-app-v3/` as the record of what v3 measured.
+
+## Retired with Phone app v4.1 (12 Nov 2026)
+
+In `tests/e2e/phoneAppV4.measure.ts`: PA4-5 (the "How close" Birds-eye) and PA4-6 (whose Birds-eye door went through
+the retired peek) are skipped; the `birds-peek` screen and PA4-10's Birds-eye/query-page motion checks are removed.
+Their subjects are measured by `tests/e2e/phoneAppV41.measure.ts` (PA41-7…13). PA4-6's other doors stand in the
+retired describe for the record.

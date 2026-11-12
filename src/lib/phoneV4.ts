@@ -4,8 +4,6 @@
  *
  * Phone app v4 (design-refs/phone-app-v4/) — THE FIGURES v4 ADDS, below 768px only. Every one is read from an engine the
  * app already has, and none restates its rule:
- *   - the journey track: the Analytics page's own four rungs (`funnelStages` over `buildRows`);
- *   - "how close" a query is to its date: the Birds-eye engine's own fraction (`eyeProgress`);
  *   - best fit: the writer's own Agent fit order (`fitOrder`), over agents with no query yet;
  *   - the streak: the Goals page's own (`weekStreak`).
  * What is added here is ORDER and WORDS. lib/phoneV3.ts stays the source of every court, line and step.
@@ -13,75 +11,14 @@
  * ⚠️ COPY (PA4-9): never "overdue" or "late"; a passed date is "N wks past its date".
  */
 import { QueryStatus, type Agent, type Query, type QueryingGoalEntry } from "../types";
-import { funnelStages, type AnalyticsRow } from "./analytics";
-import { eyeProgress } from "./qcBirdsEye";
+import type { AnalyticsRow } from "./analytics";
 import { fitOrder } from "./agentFit";
 import { weekStreak } from "./milestones";
 import { dayMonth } from "./dates";
-import type { V3Court, V3Query } from "./phoneV3";
+import type { V3Query } from "./phoneV3";
 
 const DAY = 86_400_000;
 const WEEK = 7 * DAY;
-
-/* ── the journey track ── */
-export interface TrackCounts { queried: number; requested: number; full: number; offer: number }
-/** the Analytics page's four rungs: queried, asked for more (a partial or straight to full), full, offer */
-export function trackCounts(rows: readonly AnalyticsRow[]): TrackCounts {
-  const s = funnelStages(rows as AnalyticsRow[]);
-  const n = (k: string) => s.find((x) => x.key === k)?.count ?? 0;
-  return { queried: n("queried"), requested: n("requested"), full: n("full"), offer: n("offer") };
-}
-
-/* ── how close each open query is to its date ── */
-export interface Closeness {
-  q: V3Query;
-  /** how far through the window (1 = the date); null when nothing dates it */
-  f: number | null;
-  /** the window's start and end, for the dated views */
-  fromMs: number | null;
-  toMs: number | null;
-  /** past its date */
-  past: boolean;
-}
-export function closeness(q: V3Query, nowMs: number): Closeness {
-  const p = eyeProgress(q.row, nowMs);
-  const fromMs = q.row.stageStartMs ?? q.row.sentMs ?? null;
-  const toMs = q.row.expectedMs ?? null;
-  return { q, f: p.dated ? p.f : null, fromMs, toMs, past: p.dated && p.f != null && p.f >= 1 };
-}
-/** closest first; an undated query last, then by name */
-export const byCloseness = (a: Closeness, b: Closeness): number => {
-  if (a.f == null && b.f == null) return a.q.row.agentName.localeCompare(b.q.row.agentName);
-  if (a.f == null) return 1;
-  if (b.f == null) return -1;
-  return b.f - a.f || a.q.row.agentName.localeCompare(b.q.row.agentName);
-};
-export interface BirdsGroup { court: V3Court; rows: Closeness[] }
-/** the Birds-eye view's groups: the open courts, each closest first */
-export function birdsGroups(qs: readonly V3Query[], nowMs: number): BirdsGroup[] {
-  return (["you", "agent", "quiet"] as V3Court[]).map((court) => ({
-    court, rows: qs.filter((q) => q.court === court).map((q) => closeness(q, nowMs)).sort(byCloseness),
-  })).filter((g) => g.rows.length);
-}
-/** Today's preview: the open queries furthest through, across every court */
-export function closestOpen(qs: readonly V3Query[], nowMs: number, n = 3): Closeness[] {
-  return qs.filter((q) => q.court !== "closed").map((q) => closeness(q, nowMs)).filter((c) => c.f != null).sort(byCloseness).slice(0, n);
-}
-
-/** the words at a bar's right end: what is left, or how far past the date it is */
-export function closeWords(c: Closeness, nowMs: number): string {
-  if (c.toMs == null) return "No date saved";
-  const d = c.toMs - nowMs;
-  if (d < 0) {
-    const w = Math.max(1, Math.round(-d / WEEK));
-    return -d < WEEK ? `${Math.max(1, Math.round(-d / DAY))} ${Math.round(-d / DAY) === 1 ? "day" : "days"} past its date` : `${w} ${w === 1 ? "wk" : "wks"} past its date`;
-  }
-  const days = Math.round(d / DAY);
-  const verb = c.q.court === "you" ? (c.q.state === "offer" ? "Decide" : "Send") : "Reply";
-  if (days < 14) return `${verb} in ${days} ${days === 1 ? "day" : "days"}`;
-  const w = Math.round(days / 7);
-  return `${verb} in ${w} wks`;
-}
 
 /* ── the next reply expected ── */
 /** the with-the-agent query whose expected date is soonest and still ahead; null when none is */

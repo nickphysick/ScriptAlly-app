@@ -1,0 +1,194 @@
+[
+ {
+  "lock": "PA41-1",
+  "where": "390x844 · tasks on the board (population)",
+  "ok": true,
+  "detail": "{\"need\":103,\"up\":103,\"tab\":103,\"rows\":103}"
+ },
+ {
+  "lock": "PA41-1",
+  "where": "390x844 · need pill = task rows = Up next's N = the tab",
+  "ok": true,
+  "detail": "{\"need\":103,\"up\":103,\"tab\":103,\"rows\":103}"
+ },
+ {
+  "lock": "PA41-2",
+  "where": "390x844 · open queries (population)",
+  "ok": true,
+  "detail": "{\"all\":88,\"closed\":18}"
+ },
+ {
+  "lock": "PA41-2",
+  "where": "390x844 · figure = card counts = open courts",
+  "ok": true,
+  "detail": "{\"n\":70,\"sum\":70} · {\"all\":88,\"closed\":18}"
+ },
+ {
+  "lock": "PA41-3",
+  "where": "390x844 · the chart has a series (population 135 weeks)",
+  "ok": true,
+  "detail": "{\"s\":[70,70,70],\"len\":135,\"change\":null,\"d\":0}"
+ },
+ {
+  "lock": "PA41-3",
+  "where": "390x844 · change = last − previous (hidden at 0)",
+  "ok": true,
+  "detail": "{\"s\":[70,70,70],\"len\":135,\"change\":null,\"d\":0}"
+ },
+ {
+  "lock": "PA41-4",
+  "where": "390x844 · month labels (population 4)",
+  "ok": true,
+  "detail": "{\"n\":4,\"lowest\":380.015625,\"leadTop\":408,\"mentorRight\":100,\"firstLeft\":143.828125,\"hits\":[]}"
+ },
+ {
+  "lock": "PA41-4",
+  "where": "390x844 · the first card starts below the months",
+  "ok": true,
+  "detail": "{\"n\":4,\"lowest\":380.015625,\"leadTop\":408,\"mentorRight\":100,\"firstLeft\":143.828125,\"hits\":[]}"
+ },
+ {
+  "lock": "PA41-4",
+  "where": "390x844 · nothing over a month label; the first label clear of the Mentor",
+  "ok": true,
+  "detail": "{\"n\":4,\"lowest\":380.015625,\"leadTop\":408,\"mentorRight\":100,\"firstLeft\":143.828125,\"hits\":[]}"
+ },
+ {
+  "lock": "PA41-6",
+  "where": "390x844 · card rows (population 5)",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "PA41-6",
+  "where": "390x844 · past their date first, then by due date",
+  "ok": true,
+  "detail": "P2025-09-27 P2026-01-01 P2026-01-01 P2026-01-01 P2026-01-01"
+ },
+ {
+  "lock": "PA41-6",
+  "where": "390x844 · the today line meets every row",
+  "ok": true,
+  "detail": "{\"top\":256.84375,\"bottom\":662.84375,\"x\":227.59375}"
+ },
+ {
+  "lock": "PA41-5",
+  "where": "390x844 · /dashboard",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"text\":\"Today7070\",\"title\":\"Today\",\"buttons\":2,\"search\":1}"
+ },
+ {
+  "lock": "PA41-5",
+  "where": "390x844 · /queries",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"text\":\"Queries7070\",\"title\":\"Queries\",\"buttons\":2,\"search\":1}"
+ },
+ {
+  "lock": "PA41-5",
+  "where": "390x844 · /agents",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"text\":\"Agents7070\",\"title\":\"Agents\",\"buttons\":2,\"search\":1}"
+ },
+ {
+  "lock": "PA41-5",
+  "where": "390x844 · /you",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"text\":\"You7070\",\"title\":\"You\",\"buttons\":2,\"search\":1}"
+ },
+ {
+  "lock": "PA41-1",
+  "where": "360x740 · tasks on the board (population)",
+  "ok": true,
+  "detail": "{\"need\":103,\"up\":103,\"tab\":103,\"rows\":103}"
+ },
+ {
+  "lock": "PA41-1",
+  "where": "360x740 · need pill = task rows = Up next's N = the tab",
+  "ok": true,
+  "detail": "{\"need\":103,\"up\":103,\"tab\":103,\"rows\":103}"
+ },
+ {
+  "lock": "PA41-2",
+  "where": "360x740 · open queries (population)",
+  "ok": true,
+  "detail": "{\"all\":88,\"closed\":18}"
+ },
+ {
+  "lock": "PA41-2",
+  "where": "360x740 · figure = card counts = open courts",
+  "ok": true,
+  "detail": "{\"n\":70,\"sum\":70} · {\"all\":88,\"closed\":18}"
+ },
+ {
+  "lock": "PA41-3",
+  "where": "360x740 · the chart has a series (population 135 weeks)",
+  "ok": true,
+  "detail": "{\"s\":[70,70,70],\"len\":135,\"change\":null,\"d\":0}"
+ },
+ {
+  "lock": "PA41-3",
+  "where": "360x740 · change = last − previous (hidden at 0)",
+  "ok": true,
+  "detail": "{\"s\":[70,70,70],\"len\":135,\"change\":null,\"d\":0}"
+ },
+ {
+  "lock": "PA41-4",
+  "where": "360x740 · month labels (population 4)",
+  "ok": true,
+  "detail": "{\"n\":4,\"lowest\":380.015625,\"leadTop\":408,\"mentorRight\":100,\"firstLeft\":131.8125,\"hits\":[]}"
+ },
+ {
+  "lock": "PA41-4",
+  "where": "360x740 · the first card starts below the months",
+  "ok": true,
+  "detail": "{\"n\":4,\"lowest\":380.015625,\"leadTop\":408,\"mentorRight\":100,\"firstLeft\":131.8125,\"hits\":[]}"
+ },
+ {
+  "lock": "PA41-4",
+  "where": "360x740 · nothing over a month label; the first label clear of the Mentor",
+  "ok": true,
+  "detail": "{\"n\":4,\"lowest\":380.015625,\"leadTop\":408,\"mentorRight\":100,\"firstLeft\":131.8125,\"hits\":[]}"
+ },
+ {
+  "lock": "PA41-6",
+  "where": "360x740 · card rows (population 5)",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "PA41-6",
+  "where": "360x740 · past their date first, then by due date",
+  "ok": true,
+  "detail": "P2025-09-27 P2026-01-01 P2026-01-01 P2026-01-01 P2026-01-01"
+ },
+ {
+  "lock": "PA41-6",
+  "where": "360x740 · the today line meets every row",
+  "ok": true,
+  "detail": "{\"top\":214.859375,\"bottom\":620.859375,\"x\":209.59375}"
+ },
+ {
+  "lock": "PA41-5",
+  "where": "360x740 · /dashboard",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"text\":\"Today7070\",\"title\":\"Today\",\"buttons\":2,\"search\":1}"
+ },
+ {
+  "lock": "PA41-5",
+  "where": "360x740 · /queries",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"text\":\"Queries7070\",\"title\":\"Queries\",\"buttons\":2,\"search\":1}"
+ },
+ {
+  "lock": "PA41-5",
+  "where": "360x740 · /agents",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"text\":\"Agents7070\",\"title\":\"Agents\",\"buttons\":2,\"search\":1}"
+ },
+ {
+  "lock": "PA41-5",
+  "where": "360x740 · /you",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"text\":\"You7070\",\"title\":\"You\",\"buttons\":2,\"search\":1}"
+ }
+]

@@ -12,7 +12,6 @@
  */
 import React from "react";
 import { V3Glyph } from "../v3/V3Parts";
-import type { TrackCounts } from "../../../lib/phoneV4";
 import "./phoneV4.css";
 
 /** the app's own art files, by the names the boards were built from */
@@ -116,46 +115,3 @@ export const Seal: React.FC<{ name: string; size?: number; dark?: boolean; statu
 export const Stamp: React.FC<{ word: string; date: string; style?: React.CSSProperties }> = ({ word, date, style }) => (
   <div className="pa4-stamp" data-pa4="stamp" role="img" aria-label={`${word} ${date}`} style={style}><b>{word}</b><span>{date}</span></div>
 );
-
-/* ── the four-stage journey track ── */
-export const JourneyTrack: React.FC<{ c: TrackCounts; empty?: boolean }> = ({ c, empty }) => (
-  <div data-pa4="track">
-    <div className="pa4-jr" aria-hidden="true">
-      {[0, 1, 2, 3].map((k) => (
-        <React.Fragment key={k}>
-          {k ? <u className={empty ? "e" : ""} /> : null}
-          <i className={empty ? "e" : k === 3 ? "end" : ""} />
-        </React.Fragment>
-      ))}
-    </div>
-    <div className="pa4-jl">
-      {([["queried", c.queried], ["asked for more", c.requested], ["full", c.full], ["offer", c.offer]] as const).map(([l, n]) => (
-        <span key={l} data-pa4="track-n" data-k={l}><b>{n}</b>{l}</span>
-      ))}
-    </div>
-  </div>
-);
-
-/* ── the ring: three arcs over the live queries ── */
-export const Ring: React.FC<{ parts: { n: number; colour: string }[]; label: string; total: number }> = ({ parts, label, total }) => {
-  const C = 2 * Math.PI * 32;
-  const sum = parts.reduce((s, p) => s + p.n, 0) || 1;
-  const gap = parts.filter((p) => p.n > 0).length > 1 ? 2.4 : 0;
-  let at = 0;
-  return (
-    <span className="pa4-ringw" role="img" aria-label={label} data-pa4="ring">
-      <svg className="r" viewBox="0 0 80 80" aria-hidden="true">
-        <g transform="rotate(-90 40 40)" fill="none" strokeWidth="10">
-          {parts.map((p, k) => {
-            const len = (p.n / sum) * C;
-            const el = p.n > 0 ? <circle key={k} className="arc" cx="40" cy="40" r="32" stroke={p.colour} strokeDasharray={`${Math.max(0, len - gap)} ${C}`} strokeDashoffset={-at} /> : null;
-            at += len;
-            return el;
-          })}
-        </g>
-      </svg>
-      {/* the figure is HTML over the ring, so its type is the system's (an SVG text size is not the page's) */}
-      <span className="pa4-ringn" aria-hidden="true"><b>{total}</b><span>live</span></span>
-    </span>
-  );
-};

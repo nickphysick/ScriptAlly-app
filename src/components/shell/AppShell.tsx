@@ -552,7 +552,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
              it past 300px; a pushed page keeps a navy header with its back arrow */
           v3IsRoot(pathname) ? (
             <V4MiniBar title={bandTitle} pathname={pathname} scroller={() => stageRef.current}
-              extra={bandExtras[pathname] ?? null} onSearch={() => openV3({ type: "search" })} />
+              onSearch={() => openV3({ type: "search" })} />
           ) : (
             <V4PushedHeader
               title={bandTitle}

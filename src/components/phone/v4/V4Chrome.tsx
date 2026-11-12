@@ -89,14 +89,15 @@ export const V4TabBar: React.FC<{
   );
 };
 
-/** past 300px on a root page: the slim navy bar with the page's name, the page's pill and search */
-export const V4MiniBar: React.FC<{ title: string; pathname: string; scroller: () => HTMLElement | null; extra?: React.ReactNode; onSearch: () => void }> = ({ title, pathname, scroller, extra, onSearch }) => {
+/** past 300px on a root page: the slim navy bar — the tab's name (tap it to go back to the top) and search, nothing else
+ *  (Phone app v4.1, baked decision 4) */
+export const V4MiniBar: React.FC<{ title: string; pathname: string; scroller: () => HTMLElement | null; onSearch: () => void }> = ({ title, pathname, scroller, onSearch }) => {
   const { y } = useStageScroll(scroller, pathname);
   const on = y > V4_MINI_AT;
   return (
     <div className={`pa4-mini${on ? " on" : ""}`} data-pa4="mini" data-on={on ? "1" : "0"} aria-hidden={on ? undefined : true}>
-      <span className="t">{title}</span>
-      {extra}
+      <button type="button" className="t" data-pa41="mini-title" tabIndex={on ? 0 : -1}
+        onClick={() => scroller()?.scrollTo({ top: 0, behavior: "smooth" })}>{title}</button>
       <IconBtn label="Search" n="search" pa4="mini-search" onClick={onSearch} />
     </div>
   );

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { bestFit, byCloseness, closeWords, closestOpen, dayN, nextReply, repliesAhead, type Closeness } from "./phoneV4";
+import { bestFit, dayN, nextReply, repliesAhead } from "./phoneV4";
 import { todayState } from "../components/phone/v4/todayState";
 import type { V3Query } from "./phoneV3";
 import { QueryStatus, type Agent, type Query } from "../types";
@@ -13,16 +13,6 @@ const vq = (id: string, court: V3Query["court"], o: { start?: number; exp?: numb
 });
 
 describe("phone v4 figures", () => {
-  it("closest first, undated last; a passed date says how far past, never overdue", () => {
-    const a = vq("a", "agent", { exp: NOW + 10 * DAY }), b = vq("b", "you", { exp: NOW - 15 * DAY }), u = vq("u", "agent", { exp: null });
-    const top = closestOpen([a, b, u, vq("c", "closed")], NOW, 3);
-    expect(top.map((x) => x.q.id)).toEqual(["b", "a"]);
-    expect(closeWords(top[0], NOW)).toBe("2 wks past its date");
-    expect(closeWords(top[0], NOW)).not.toMatch(/overdue|late/i);
-    expect(closeWords(top[1], NOW)).toBe("Reply in 10 days");
-    const xs: Closeness[] = [{ q: u, f: null, fromMs: null, toMs: null, past: false }, top[1]];
-    expect(xs.sort(byCloseness)[0].q.id).toBe("a");
-  });
   it("the next reply is the soonest with-the-agent date still ahead", () => {
     const qs = [vq("p", "agent", { reply: NOW - DAY }), vq("x", "agent", { reply: NOW + 9 * DAY }), vq("y", "agent", { reply: NOW + 3 * DAY }), vq("z", "you", { reply: NOW + DAY })];
     expect(nextReply(qs, NOW)?.id).toBe("y");

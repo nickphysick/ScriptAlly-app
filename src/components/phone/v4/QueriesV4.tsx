@@ -15,7 +15,7 @@ import { openV3, openV3Query } from "../v3/v3Store";
 import { COURT_LABEL, courtRows, V3_COURTS, type V3Court, type V3Query } from "../../../lib/phoneV3";
 import { QueryStatus } from "../../../types";
 import { CAST, Cta, Hero, IconBtn, LapCard, Link4, Seal } from "./V4Parts";
-import { BirdsViewV4 } from "./BirdsV4";
+import { BirdsViewV41 } from "./BirdsViewV41";
 import "./phoneV4.css";
 
 const DAY = 86_400_000;
@@ -99,7 +99,7 @@ export const QueriesV4: React.FC = () => {
   return (
     <div className="pa4 pa4-queries" data-pa4="queries" data-chip={chip} data-view={bird ? "bird" : "list"}>
       {bird ? (
-        <BirdsViewV4 switcher={<ViewSwitch bird onPick={setBird} />} corner={corner} />
+        <BirdsViewV41 switcher={<ViewSwitch bird onPick={setBird} />} corner={corner} />
       ) : (<>
         <Hero pa4="queries-hero" kick="Queries"
           head={<>{c.you} need{c.you === 1 ? "s" : ""} you.<br />{c.agent} {c.agent === 1 ? "is" : "are"} with agents.</>}
