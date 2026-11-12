@@ -302,7 +302,7 @@ export const BirdsViewV41: React.FC<{ switcher: React.ReactNode; corner: React.R
                   const acts = nextActs(r.q);
                   const isOpen = open === r.q.id;
                   return (
-                    <div key={r.q.id} className={`pa41v-row${stageOf && !shownStage ? " pre" : ""}${isOpen ? " open" : ""}`} data-pa41="vrow" data-id={r.q.id}>
+                    <div key={r.q.id} className={`pa41v-row${stageOf && !shownStage ? " pre" : ""}${isOpen ? " open" : ""}`} data-pa41="vrow" data-id={r.q.id} data-state={r.q.state} data-name={r.row.agentName}>
                       <button type="button" className="pa41v-top" data-pa41="vtop" aria-expanded={isOpen} onClick={() => onTop(r.q.id)}>
                         <span key={popOf[r.q.id] ?? 0} className={popOf[r.q.id] ? "pa41v-pop" : ""}><V3Glyph status={shownStage ?? String(r.row.status)} size={28} label={false} /></span>
                         <span className="pa41v-who"><b>{r.row.agentName}</b><i>{r.row.agency && r.row.agency !== "No agency" ? r.row.agency : ""}</i></span>

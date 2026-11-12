@@ -93,14 +93,14 @@ export const TodayHeaderV41: React.FC<HeaderProps> = ({ day, streakWeeks, active
             <b className="pa41-n" data-pa41="figure" data-n={active} aria-label={`${active} active queries`}>{shown}</b>
           </div>
           {need > 0 ? (
-            <button type="button" className="pa41-need" data-pa41="need" data-n={need} onClick={onNeed}>
+            <button type="button" className={`pa41-need${need >= 100 ? " sm" : ""}`} data-pa41="need" data-n={need} onClick={onNeed}>
               <span><i aria-hidden="true" />{needWords(need)}<Chev /></span>
             </button>
           ) : null}
         </div>
       )}
       {!dayOne && ch ? (
-        <div className="pa41-ch" data-pa41="chart" data-weeks={series.length}>
+        <div className="pa41-ch" data-pa41="chart" data-weeks={series.length} data-series={series.map((p) => p.active).join(",")}>
           <svg viewBox={`0 0 ${CH_W} ${CH_H}`} preserveAspectRatio="none" aria-hidden="true">
             <defs><linearGradient id="pa41-ga" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="var(--pa-blush)" stopOpacity=".32" /><stop offset="1" stopColor="var(--pa-blush)" stopOpacity="0" /></linearGradient></defs>
             <path className="pa41-area" d={ch.area} fill="url(#pa41-ga)" />

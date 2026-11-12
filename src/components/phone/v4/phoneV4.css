@@ -273,7 +273,7 @@
 /* ── PHONE APP v4.1 — Today's header (design-refs/phone-app-v4-1/phone-today-v4-1.html, `.hl` · `.hr` · `.hc` · `.hl-m`) ── */
 @media (max-width: 767.98px) {
   .pa4-hero.pa41-hd { padding-bottom: 40px; }
-  .pa41-hr { position: relative; margin: 8px 0 8px 112px; text-align: right; z-index: 3; }
+  .pa41-hr { position: relative; margin: 8px 0 8px 96px; text-align: right; z-index: 3; }
   .pa41-hr.one { min-height: 152px; display: flex; align-items: flex-end; justify-content: flex-end; }
   .pa41-fig { display: flex; align-items: center; justify-content: flex-end; gap: 16px; }
   .pa41-cap { white-space: nowrap; text-align: right; }
@@ -283,6 +283,8 @@
   .pa41-hr > .pa41-need { margin-top: 4px; }
   .pa4 .pa41-need { display: inline-flex; align-items: center; min-height: 48px; }
   .pa41-need > span { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 8px 0 14px; border-radius: 20px; background: var(--pa-blush); color: var(--pa-ink); font-size: 1rem; font-weight: 600; }
+  /* the board's compact pill (`.needp.sm`), for a count that would wrap the full one */
+  .pa41-need.sm > span { min-height: 36px; padding: 0 8px 0 12px; font-size: 0.875rem; }
   .pa41-need i { width: 8px; height: 8px; border-radius: 50%; background: var(--pa-rust); }
   .pa41-need .pa4-chev { width: 18px; height: 18px; color: var(--pa-ink); }
   /* the chart: full width, fading in from behind the Mentor, to a dot at Today */

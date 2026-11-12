@@ -1,0 +1,332 @@
+[
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · Today header · population",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · Today header · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · Today header · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · Today header · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the card · population",
+  "ok": true,
+  "detail": "21"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the card · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the card · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the card · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view · population",
+  "ok": true,
+  "detail": "195"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view, a row open · population",
+  "ok": true,
+  "detail": "196"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view, a row open · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view, a row open · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view at 6 months · population",
+  "ok": true,
+  "detail": "195"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view at 6 months · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view at 6 months · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "390x844 · the view at 6 months · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · Today header · population",
+  "ok": true,
+  "detail": "9"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · Today header · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · Today header · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · Today header · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the card · population",
+  "ok": true,
+  "detail": "21"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the card · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the card · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the card · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view · population",
+  "ok": true,
+  "detail": "193"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view, a row open · population",
+  "ok": true,
+  "detail": "194"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view, a row open · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view, a row open · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view at 6 months · population",
+  "ok": true,
+  "detail": "193"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view at 6 months · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view at 6 months · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "360x740 · the view at 6 months · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view · population",
+  "ok": true,
+  "detail": "193"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view, a row open · population",
+  "ok": true,
+  "detail": "192"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view, a row open · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view, a row open · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view at 6 months · population",
+  "ok": true,
+  "detail": "193"
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view at 6 months · text ≥ 14px",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view at 6 months · targets ≥ 48",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · the view at 6 months · nothing past the right edge at 125%",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-11",
+  "where": "740x360 · landscape: the desktop layout (184px names, no tab bar)",
+  "ok": true,
+  "detail": "{\"land\":true,\"tb\":\"none\",\"names\":184}"
+ },
+ {
+  "lock": "PA41-12",
+  "where": "the header",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-12",
+  "where": "the card: no replay, nothing running",
+  "ok": true,
+  "detail": "play 0 · "
+ },
+ {
+  "lock": "PA41-12",
+  "where": "rings to stop (population)",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "lock": "PA41-12",
+  "where": "the view: opens settled on today, nothing running",
+  "ok": true,
+  "detail": "{\"replay\":\"done\",\"pill\":\"Today\"} · "
+ },
+ {
+  "lock": "PA41-12",
+  "where": "control: without the setting the view replays",
+  "ok": true,
+  "detail": "running"
+ }
+]

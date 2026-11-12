@@ -212,7 +212,6 @@ type Screen = { where: string; open: (page: Page) => Promise<void> };
 const tabScreens = (vp: { width: number; height: number }): Screen[] => [
   ...["/dashboard", "/queries", "/agents", "/you"].map((p) => ({ where: p, open: async (page: Page) => { void vp; await go(page, p); } })),
   { where: "birds", open: async (page) => { await go(page, "/queries"); await tap(page, '[data-pa4="view"][data-k="bird"]'); } },
-  { where: "birds-peek", open: async (page) => { await tap(page, '[data-pa4="be-bar"]'); } },
   { where: "birds-6m", open: async (page) => { await go(page, "/queries"); await tap(page, '[data-pa4="zoom"][data-k="m6"]'); } },
   { where: "query-page", open: async (page) => { await go(page, "/queries"); await tap(page, '[data-pa4="view"][data-k="list"]'); await tap(page, '[data-pa4="qrow"]'); } },
   { where: "agent-sheet", open: async (page) => { await go(page, "/agents"); await tap(page, '[data-pa4="fit-card"]'); } },
@@ -342,22 +341,15 @@ test.describe("PA4 Today and motion", () => {
     let an = await live();
     L.check("PA4-10", "Today (stamp, ring)", an.length === 0, an.join(", "));
     await setAid(page, null);
-    await go(page, "/queries"); await tap(page, '[data-pa4="view"][data-k="bird"]'); await page.waitForTimeout(300);
-    an = await live();
-    L.check("PA4-10", "Birds-eye (the pulsing ring)", an.length === 0, an.join(", "));
-    const beacons = await page.locator('[data-pa4="beacon"]').filter({ visible: true }).count();
-    L.check("PA4-10", "Birds-eye has rings to stop (population)", beacons > 0, `${beacons} rings`);
-    await tap(page, '[data-pa4="be-bar"]'); await tap(page, '[data-pa4="peek-open"]'); await page.waitForTimeout(300);
-    an = await live();
-    L.check("PA4-10", "the query page", an.length === 0, an.join(", "));
+    /* (v4.1: the Birds-eye rings and the query page reached from them are PA41-12's) */
     await go(page, "/dashboard"); await tap(page, '[data-pa4="plus"]'); await tap(page, '[data-pa4="face"]'); await page.waitForTimeout(300);
     an = await live();
     L.check("PA4-10", "the quick log", an.length === 0, an.join(", "));
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    await go(page, "/queries"); await page.waitForTimeout(200);
+    await go(page, "/queries?view=birds"); await page.waitForTimeout(200);
     const moving = await page.evaluate(() => document.getAnimations().length);
     L.check("PA4-10", "without the setting the ring still pulses (control)", moving > 0, `${moving} animations`);
-    L.done(13);
+    L.done(10);
   });
 });
 
@@ -372,7 +364,10 @@ function expectedLabel(state: string, name: string): string | null {
   if (state === "materials") return "Mark (partial|full|revision) sent";
   return null;
 }
+/* ⚠️ RETIRED BY PHONE APP v4.1: the "How close" view, its bars and its peek are gone; the Birds-eye view and its doors
+   to the query page are measured by tests/e2e/phoneAppV41.measure.ts (PA41-7…10). */
 test.describe("PA4 Birds-eye and the query page", () => {
+  test.skip(true, "retired by Phone app v4.1 (tests/e2e/phoneAppV41.measure.ts)");
   test.skip(OTHER_MODE || !!process.env.PA4_ONLY && process.env.PA4_ONLY !== "birds", "another mode");
   test("PA4-5 · PA4-6", async ({ page }, info) => {
     test.skip(!isPhoneProject(info.project.name), "phone projects only");
