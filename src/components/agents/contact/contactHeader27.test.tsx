@@ -47,9 +47,13 @@ describe("v27 — List health is v26's block", () => {
     expect(html).toContain("<em>29</em> details missing");
     expect(html).toContain("Show me who →");
   });
-  it("on the light ground the ring takes RING_TONES' light tones (the ref's); v26's navy panel keeps its own", () => {
-    expect(v27({ pct: 86, gaps: 3 })).toContain(`stroke:${RING_TONES.good.light.arc}`);
-    expect(v27({ pct: 86, gaps: 3 })).toContain(`stroke:${RING_TONES.good.light.track}`);
+  /* re-pointed (principles v2): the light ground is the brand pair at every score, no longer RING_TONES' light tones */
+  it("on the light ground the ring is navy on soft pink at any score; v26's navy panel keeps its own", () => {
+    for (const pct of [44, 72, 86]) {
+      expect(v27({ pct, gaps: 3 })).toContain("stroke:#2a3a52");
+      expect(v27({ pct, gaps: 3 })).toContain("stroke:#ecc0ae");
+      expect(v27({ pct, gaps: 3 })).not.toContain(`stroke:${RING_TONES.good.light.arc}`);
+    }
     expect(v26({ pct: 86, gaps: 3 })).toContain(`stroke:${RING_TONES.good.navy.arc}`);
   });
 });

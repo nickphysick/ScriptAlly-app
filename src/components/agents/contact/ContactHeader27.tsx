@@ -16,8 +16,14 @@
  * Contact list principles v1: the title is `clHeadline`'s sentence ("5 need you. 19 not queried yet."), from the same
  * `stand` the rail's Where they stand tiles count; "{n} agents on file · you've queried {q}" sits beneath it.
  * ⚠️ The buttons keep every hook the v26 ones carried (`data-cl26`, `data-cl24`, `data-cl17`), and the add button's ref.
+ *
+ * Contact list principles v2: List health NUDGED IN — `healthNudge` (lib/contactPrinciples2) from the measured boxes,
+ * written to the right column as `--clp2-nudge` (a transform, so the headline's column never changes). Measured on every
+ * render, on the header's and the group's resize, and once the fonts are in. Written straight to the element, never to
+ * state: a transform moves no layout, so the measurement cannot feed back into itself.
  */
-import React from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { healthNudge } from "../../../lib/contactPrinciples2";
 import type { HeaderFigures } from "../../../lib/contactV26";
 import { clHeadline } from "../../../lib/contactPrinciples";
 import { ContactHealth26 } from "./ContactHealth26";
@@ -40,8 +46,46 @@ export const ContactHeader27: React.FC<{
   onShowWho: () => void;
 }> = ({ loading, figures: f, health, onAdd, addRef, onDiscover, onOpenHealth, onShowWho }) => {
   const h = f ? clHeadline(f) : null;
+  const hdRef = useRef<HTMLElement>(null);
+  const nudge = useCallback(() => {
+    const hd = hdRef.current;
+    const rc = hd?.querySelector<HTMLElement>("[data-cl27='health']");
+    const block = rc?.querySelector<HTMLElement>("[data-cl26='health']");
+    const main = hd?.querySelector<HTMLElement>("[data-cl27='main']");
+    if (!hd || !rc || !block || !main) return;
+    const applied = new DOMMatrixReadOnly(getComputedStyle(rc).transform === "none" ? undefined : getComputedStyle(rc).transform).m41;
+    const b = block.getBoundingClientRect();
+    const m = main.getBoundingClientRect();
+    /* the headline block's ink: each text node's line boxes, and each button's own box. ⚠️ Never one range over the
+       whole block — a range's rects include the border box of every element it contains, and the title's spans the
+       column, which reads as "the text reaches the column's edge". */
+    let inkR = m.left;
+    const rg = document.createRange();
+    const tw = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
+    for (let t = tw.nextNode(); t; t = tw.nextNode()) {
+      if (!(t.textContent ?? "").trim()) continue;
+      rg.selectNodeContents(t);
+      for (const r of rg.getClientRects()) if (r.width > 0) inkR = Math.max(inkR, r.right);
+    }
+    for (const btn of main.querySelectorAll<HTMLElement>("button")) { const r = btn.getBoundingClientRect(); if (r.width > 0) inkR = Math.max(inkR, r.right); }
+    const frame = hd.parentElement?.querySelector<HTMLElement>("[data-cl26='frame']");
+    const fr = frame && frame.offsetHeight > 0 ? frame.getBoundingClientRect().right : null;
+    const n = healthNudge({ blockL: b.left - applied, blockR: b.right - applied, frameR: fr, inkR, stacked: b.top >= m.bottom - 0.5 });
+    rc.style.setProperty("--clp2-nudge", `${n}px`);
+  }, []);
+  useLayoutEffect(() => { nudge(); });
+  useEffect(() => {
+    const hd = hdRef.current;
+    if (!hd || typeof ResizeObserver === "undefined") return undefined;
+    const ro = new ResizeObserver(() => nudge());
+    ro.observe(hd);
+    if (hd.parentElement) ro.observe(hd.parentElement);
+    let live = true;
+    void document.fonts?.ready.then(() => { if (live) nudge(); });
+    return () => { live = false; ro.disconnect(); };
+  }, [nudge]);
   return (
-  <header className="cl24-hd qc1531-hd cl27-hd" data-cl26="header" data-cl27="header" data-own-header=""
+  <header ref={hdRef} className="cl24-hd qc1531-hd cl27-hd" data-cl26="header" data-cl27="header" data-own-header=""
     data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
     <div className="qc1531-art cl27-art" data-cl27="art" aria-hidden="true">
       <img src={CL27_HEADER_ART} alt="" width={200} draggable={false} />

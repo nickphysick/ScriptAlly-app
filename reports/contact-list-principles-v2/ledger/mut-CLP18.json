@@ -1,0 +1,12 @@
+[
+ {
+  "where": "1440 block right edge 32px (±2) inside the frame",
+  "ok": false,
+  "detail": "frame 1390.0 − block 1400.0 = -10.00"
+ },
+ {
+  "where": "1280 block right edge 32px (±2) inside the frame",
+  "ok": false,
+  "detail": "frame 1230.0 − block 1240.0 = -10.00"
+ }
+]

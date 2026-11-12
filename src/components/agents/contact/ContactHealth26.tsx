@@ -8,21 +8,22 @@
  *
  * ⚠️ ONE BLOCK, TWO GROUNDS. `ground="navy"` is v26's panel (the ring in the on-navy tones, the pill ringed in navy);
  *    `ground="light"` is v27's open header on the page colour, which the ref draws in the SAME table's light tones
- *    (`RING_TONES[...].light`, already used by v25.6 on a light ground) with the pill ringed in the page colour. The
+ *    (principles v2: the brand pair, `BRAND_RING`, at every score; the pill navy on white). The
  *    markup, the text and every `data-cl26` hook are identical on both.
  * ⚠️ THE SCORE AND THE COUNT ARE HOUSEKEEPING'S OWN (`listHealth` over `hkModel`), handed in — never recomputed here.
  */
 import React from "react";
 import { RING26, RING26_C, RING26_R, ringArc, ring26Colours } from "../../../lib/contactV26";
-import { ringColours } from "../../../lib/contactV256";
+import { BRAND_RING } from "../../../lib/contactPrinciples2";
 import "./contactV26.css";
 
 export const ARCHIVIST26 = "/images/contact-list-archivist.webp";
 
 export type HealthGround = "navy" | "light";
-/** the ring's arc and track on each ground (navy is v26's own `ring26Colours`) */
+/** the ring's arc and track on each ground (navy is v26's own `ring26Colours`, drawn by no mounted surface today).
+ *  principles v2 — the light ground is the brand pair at every score: navy arc, soft pink track (no green). */
 export const healthColours = (pct: number, ground: HealthGround): { arc: string; track: string } =>
-  (ground === "navy" ? ring26Colours(pct) : ringColours(pct, "light"));
+  (ground === "navy" ? ring26Colours(pct) : { ...BRAND_RING });
 
 export const ContactHealth26: React.FC<{
   /** Housekeeping's score and gap count, or null while loading */

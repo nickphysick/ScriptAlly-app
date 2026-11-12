@@ -1,0 +1,17 @@
+[
+ {
+  "where": "1440 ring centre − headline block centre within 2px",
+  "ok": true,
+  "detail": "ring 233.6 main 233.6 Δ 0.01"
+ },
+ {
+  "where": "1280 ring centre − headline block centre within 2px",
+  "ok": true,
+  "detail": "ring 233.6 main 233.6 Δ 0.00"
+ },
+ {
+  "where": "1100 ring centre − headline block centre within 2px",
+  "ok": false,
+  "detail": "ring 346.4 main 201.1 Δ 145.34"
+ }
+]

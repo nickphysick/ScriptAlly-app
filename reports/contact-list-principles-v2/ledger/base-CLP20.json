@@ -1,0 +1,32 @@
+[
+ {
+  "where": "1440 headline text → ring ≥ 24px",
+  "ok": true,
+  "detail": "“7 need you. 39 not queried yet.” ink 911.6 ring 1079.5 gap 167.94"
+ },
+ {
+  "where": "1280 headline text → ring ≥ 24px",
+  "ok": true,
+  "detail": "“7 need you. 39 not queried yet.” ink 646.7 ring 919.5 gap 272.77"
+ },
+ {
+  "where": "1100 headline text → ring ≥ 24px",
+  "ok": true,
+  "detail": "“7 need you. 39 not queried yet.” ink 689.3 ring 739.5 gap 50.17"
+ },
+ {
+  "where": "1440 long headline text → ring ≥ 24px",
+  "ok": true,
+  "detail": "“23 need you. 31 not queried yet.” ink 931.8 ring 1079.5 gap 147.73"
+ },
+ {
+  "where": "1280 long headline text → ring ≥ 24px",
+  "ok": true,
+  "detail": "“23 need you. 31 not queried yet.” ink 646.7 ring 919.5 gap 272.77"
+ },
+ {
+  "where": "1100 long headline text → ring ≥ 24px",
+  "ok": true,
+  "detail": "“23 need you. 31 not queried yet.” ink 706.1 ring 739.5 gap 33.36"
+ }
+]
