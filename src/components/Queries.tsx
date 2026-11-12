@@ -88,7 +88,6 @@ import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contac
 import { QcCentre, clearQcViewMemory, readBirdsEyeOpen } from "./queries/centre/QcCentre";
 import { QcEmpty } from "./queries/centre/QcEmpty";
 import { AgentDisc } from "./shared/AgentDisc";
-import { QcEmpty138 } from "./queries/centre/QcEmpty138";
 import { QcExhibit } from "./queries/centre/QcExhibit";
 import { qcHeaderCopy } from "../lib/livingHeaders";
 import { useLivingCountOverride } from "../lib/livingHeaderReview";
@@ -5403,6 +5402,8 @@ export const Queries: React.FC<{
      and no search, the page's or the shell's. Declared up here, below everything it reads. */
   const filtersOn155 = qc140Chips.length > 0 || qcF138.where != null || qcTerm !== "";
   const state155: State155 | null = showGridSkeleton ? null
+    /* §2 day one: the manuscript's own rows (never the searched view: a search that matches nothing is not day one) */
+    : qcLivingRows.length === 0 ? { kind: "first" }
     : quietNow155({ rows: qcScoped, view: qcView150, filtersOn: filtersOn155 }) ? { kind: "quiet", body: quietBody155(qcScoped, qcNow138) }
     : null;
   /* v138 §A–B — the desktop header: the title block, the glyph row, the filter row and the pinned row */
@@ -7408,7 +7409,9 @@ export const Queries: React.FC<{
             REAL page is drawn — `QcCentre` with placeholders inside its cards — so the first-run branch
             must not answer until the data has: `queries` is `[]` during the load, and "No queries yet"
             would be the page stating a fact about an account it has not read. */}
-        {!qcLoad.loading && ((lhOverride === null && emptyKind === "first") || lhOverride === 0) ? (
+        {/* v155 §2 — the desktop's day one is drawn by QcPage151 itself (header, chart, toolbar, rail and the panel), so this
+            first-run branch is the phone's only; v138's desktop empty page (QcEmpty138) is retired with it */}
+        {!qcLoad.loading && !qcDesk && ((lhOverride === null && emptyKind === "first") || lhOverride === 0) ? (
           /**
            * LIVING HEADERS §3 — THE EMPTY PAGE: the shared header with no page title and no rule, the
            * same two buttons and the same courier in the same places, then the exhibition of what the
@@ -7417,15 +7420,6 @@ export const Queries: React.FC<{
            * reachable (this repo's replacement rule).
            */
           <div data-qc-fade={fadeIn ? "in" : undefined}>
-            {qcDesk ? (
-              /* v138 §I — the desktop's empty page: the navy header, How it works, Ways to get started */
-              <QcEmpty138
-                logRef={logTriggerRef}
-                manuscriptTitle={heroBookTitle(trackedManuscript, manuscripts)}
-                onLog={() => openCreate()}
-                onImport={() => onNavigate?.("import")}
-              />
-            ) : (
             <QcEmpty
               logRef={logTriggerRef}
               manuscriptTitle={heroBookTitle(trackedManuscript, manuscripts)}
@@ -7435,7 +7429,6 @@ export const Queries: React.FC<{
               /* §4 — the page's own components over a sample constant, mounted ONLY here */
               exhibition={<QcExhibit />}
             />
-            )}
           </div>
         ) : (
         <>

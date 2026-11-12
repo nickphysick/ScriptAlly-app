@@ -6,7 +6,8 @@ import React from "react";
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
-import { QuietPanel155 } from "./QcState155";
+import { FirstPanel155, QuietPanel155 } from "./QcState155";
+import { QcHeader1531 } from "./QcHeader1531";
 
 const DIR = new URL("./", import.meta.url);
 const read = (f: string) => { try { return readFileSync(new URL(f, DIR), "utf8"); } catch { return ""; } };
@@ -59,5 +60,45 @@ describe("v155 §1 · the quiet state on the page", () => {
   });
   it("its review aid is gated on the build mode at the call site", () => {
     expect(queries).toContain('import.meta.env.MODE !== "production" ? qcStateAid() : null');
+  });
+});
+
+describe("v155 §2 · day one", () => {
+  const html = renderToStaticMarkup(<FirstPanel155 onImport={() => {}} />);
+  it("the panel's heading and body, exactly", () => {
+    expect(html).toContain(">No queries yet.</h2>");
+    const text = html.replace(/<[^>]+>/g, "");
+    expect(text).toContain("Log your first query and it will appear here, with the date a reply is expected. Already keeping a tracker somewhere? Bring it in with Smart import or use our template.");
+  });
+  it("both links have the right hrefs: the Import page and the template's download", () => {
+    expect(html).toMatch(/<a href="\/import"[^>]*>Bring it in with Smart import<\/a>/);
+    expect(html).toMatch(/<a href="\/QueryHawk-pipeline-import-template.xlsx"[^>]*download=""[^>]*>use our template<\/a>/);
+    expect(html).not.toMatch(/<(img|svg|button)\b/);
+  });
+  it("the header's title reads No queries yet at 0, and the count line otherwise", () => {
+    const hd = (sent: number) => renderToStaticMarkup(<QcHeader1531 loading={false} onLog={() => {}} onRecord={() => {}} counts={{ ms: "The Salt Road", sent, active: 0, heardPct: 0 }} />);
+    expect(hd(0)).toMatch(/data-qc151="title">No queries yet<\/h1>/);
+    expect(hd(0)).toContain("The Salt Road");
+    expect(hd(0)).toContain("+ Log a query");
+    expect(hd(0)).toContain("Record a response");
+    expect(hd(3)).toMatch(/data-qc151="title">3 queries sent<\/h1>/);
+  });
+  it("the list draws the panel and nothing else: no group headings, no rows, no no-match line", () => {
+    const list = page.slice(page.indexOf('data-qc151="table"'));
+    expect(page).toContain('const first155 = p.state155?.kind === "first";');
+    expect(list).toMatch(/\{first155 \? <FirstPanel155 onImport=\{p\.onImport\} \/> : empty \? \(/);
+  });
+  it("the rail recedes and is inert, and Birds-eye gives way to the panel", () => {
+    expect(page).toMatch(/data-qc153="rail-column"[^>]*inert=\{first155 \|\| undefined\}/);
+    expect(rule(".qc151.qc153 .qc153-railcol[data-qc155-inert]")).toMatch(/opacity:\s*0?\.4/);
+    expect(rule(".qc151.qc153 .qc153-railcol[data-qc155-inert]")).toMatch(/pointer-events:\s*none/);
+    expect(page).toContain("{birds && !first155 ? (");
+  });
+  it("is decided from the manuscript's own rows, never the searched view, and never while loading", () => {
+    expect(queries).toContain('qcLivingRows.length === 0 ? { kind: "first" }');
+  });
+  it("replaces the desktop's earlier empty page: the first-run branch is the phone's only", () => {
+    expect(queries).not.toMatch(/<QcEmpty138[\s/>]|from "\.\/queries\/centre\/QcEmpty138"/);
+    expect(queries).toMatch(/\{!qcLoad\.loading && !qcDesk && \(\(lhOverride === null && emptyKind === "first"\) \|\| lhOverride === 0\) \? \(/);
   });
 });

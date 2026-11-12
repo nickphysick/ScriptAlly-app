@@ -13,6 +13,7 @@
  */
 import React from "react";
 import type { CountLine1512 } from "./QcPage151";
+import { FIRST_TITLE_155 } from "../../../lib/qc155";
 import "./qcv1531.css";
 import "./qcv1534.css";
 
@@ -30,7 +31,8 @@ export const QcHeader1531: React.FC<{
   <header className="qc1531-hd" data-qc151="header" data-qc1531="header" data-qcv="open-header" data-own-header="">
     <div className="qc1531-art" aria-hidden="true"><img src={ARMCHAIR_HAWK} alt="" width={190} /></div>
     <div className="qc1531-main">
-      <h1 className="qc1531-t" data-page-title="true" data-qc151="title">{counts ? sentTitle(counts.sent) : " "}</h1>
+      {/* v155 §2 — day one: "No queries yet" in place of "0 queries sent", in the same box */}
+      <h1 className="qc1531-t" data-page-title="true" data-qc151="title">{counts ? (counts.sent === 0 ? FIRST_TITLE_155 : sentTitle(counts.sent)) : " "}</h1>
       {counts?.ms ? (
         <p className="qc1531-for" data-qc1531="for"><i aria-hidden="true" /><span><em>for</em> {counts.ms}</span><i aria-hidden="true" /></p>
       ) : null}

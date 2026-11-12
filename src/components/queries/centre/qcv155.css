@@ -43,3 +43,9 @@
   outline-offset: 2px;
   border-radius: 2px;
 }
+
+/* ── §2 day one: the rail recedes to 40% and takes no pointer (the column is also `inert`, out of the tab order) ── */
+.qc151.qc153 .qc153-railcol[data-qc155-inert] {
+  opacity: 0.4;
+  pointer-events: none;
+}
