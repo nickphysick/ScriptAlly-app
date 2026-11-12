@@ -268,3 +268,137 @@ export function queriedAgo(ms: number, nowMs: number): string {
   const m = Math.round(d / 30.44);
   return `queried ${m} ${m === 1 ? "month" : "months"} ago`;
 }
+
+/* ═══ Phase D — TO DO, THE UP NEXT CARD (phone-hub-v5.html `todoPh`, `cardHTML`; phone-upnext-v1.html's script) ═══
+   Pure. The tasks are the To-do workspace's own (`useV3().ordered`, the dock badge's array); nothing here records
+   anything. What is added: today's local order ("Not now" sends a card to the back, for today only), the swipe's axis
+   and threshold, the card's date chips and the stamp's word. ⚠️ COPY: never "overdue" or "late". */
+
+/** "Not now" for today: the keys sent to the back, in the order they were sent. Another day starts empty. */
+export interface TodoOrder { day: string; back: string[] }
+export const TODO_ORDER_KEY = "pa5.todo.order";
+
+/** the saved order if it is today's, else today's empty one (a malformed value is treated as none) */
+export function orderForDay(saved: unknown, todayYmd: string): TodoOrder {
+  const o = saved as Partial<TodoOrder> | null;
+  if (!o || typeof o !== "object" || o.day !== todayYmd || !Array.isArray(o.back)) return { day: todayYmd, back: [] };
+  return { day: todayYmd, back: o.back.filter((k): k is string => typeof k === "string") };
+}
+/** the card to the back of today's pile: out of wherever it was, onto the end */
+export function sendToBack(o: TodoOrder, key: string, todayYmd: string): TodoOrder {
+  const base = o.day === todayYmd ? o.back : [];
+  return { day: todayYmd, back: [...base.filter((k) => k !== key), key] };
+}
+/**
+ * The pile, top first: any key brought back to the front (an Undo restored its task) first, then the workspace's own
+ * order without the ones sent back, then those, in the order they were sent. Only keys still in `keys` appear: a task
+ * that left the list leaves the pile, and a new one takes its place in the workspace's order.
+ */
+export function deckOrder(keys: readonly string[], back: readonly string[], front: readonly string[] = []): string[] {
+  const live = new Set(keys);
+  const f = front.filter((k, i) => live.has(k) && front.indexOf(k) === i);
+  const b = back.filter((k, i) => live.has(k) && !f.includes(k) && back.indexOf(k) === i);
+  const lead = new Set([...f, ...b]);
+  return [...f, ...keys.filter((k) => !lead.has(k)), ...b];
+}
+export function readTodoOrder(todayYmd: string): TodoOrder {
+  try { const raw = window.localStorage.getItem(TODO_ORDER_KEY); return orderForDay(raw ? JSON.parse(raw) : null, todayYmd); }
+  catch { return { day: todayYmd, back: [] }; }
+}
+export function saveTodoOrder(o: TodoOrder): void {
+  try { window.localStorage.setItem(TODO_ORDER_KEY, JSON.stringify(o)); } catch { /* storage refused: the order holds for this visit */ }
+}
+
+/** the prototype's drag: the axis is decided on the first few pixels; a vertical start is the page's scroll */
+export const SWIPE_SLOP = 8;
+export function dragAxis(dx: number, dy: number, slop: number = SWIPE_SLOP): "x" | "y" | null {
+  if (Math.abs(dx) > slop && Math.abs(dx) > Math.abs(dy)) return "x";
+  if (Math.abs(dy) > slop) return "y";
+  return null;
+}
+/** past a third of the card's width it commits: right opens the task's journey, left is "Not now"; short of it, back */
+export function swipeOutcome(dx: number, width: number): "do" | "later" | "back" {
+  const w = width / 3;
+  if (!(w > 0)) return "back";
+  if (dx > w) return "do";
+  if (dx < -w) return "later";
+  return "back";
+}
+/** the "Do it" / "Later" labels fade in with the drag (the prototype's 110px) */
+export const dragLabel = (dx: number): { l: number; r: number } => ({ l: Math.min(1, Math.max(0, -dx / 110)), r: Math.min(1, Math.max(0, dx / 110)) });
+
+const ymdUtc = (ymd: string): number => { const [y, m, d] = ymd.slice(0, 10).split("-").map(Number); return Date.UTC(y, (m || 1) - 1, d || 1); };
+const ymdOfMs = (ms: number): string => { const d = new Date(ms); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+const dayDiff = (fromYmd: string, toYmd: string): number => Math.round((ymdUtc(toYmd) - ymdUtc(fromYmd)) / DAY_MS);
+/** "8 days", "3 weeks", "2 months" — whole days between two calendar days */
+function spanDays(d: number): string {
+  if (d < 14) return `${d} ${d === 1 ? "day" : "days"}`;
+  if (d < 63) return `${Math.round(d / 7)} weeks`;
+  const m = Math.max(1, Math.round(d / 30.44));
+  return `${m} ${m === 1 ? "month" : "months"}`;
+}
+/** "20 Nov", with the year when it is not this year's */
+function dayLabel(ymd: string, todayYmd: string): string {
+  const [y, m, d] = ymd.slice(0, 10).split("-").map(Number);
+  return `${d} ${MONTHS_SHORT[(m || 1) - 1]}${ymd.slice(0, 4) === todayYmd.slice(0, 4) ? "" : ` ${y}`}`;
+}
+const relWords = (d: number): string => (d === 0 ? "today" : d === 1 ? "tomorrow" : d === -1 ? "yesterday" : d > 0 ? `in ${spanDays(d)}` : `${spanDays(-d)} ago`);
+
+export interface TodoChipIn {
+  kind: string;
+  /** the task's own date (the workspace's: the tray dial's day, or an own task's due date) */
+  dueYmd: string | null;
+  /** the query's reply date as the phone reads it (V3Query.replyMs) */
+  replyMs: number | null;
+  /** Gone quiet: days since the last thing was sent */
+  quietDays: number | null;
+}
+const BY: Record<string, string> = { offer: "Decide by", send: "Send by", rr: "Send by", nudge: "Nudge by", own: "Do by" };
+/**
+ * The card's two chips: the date in words ("Decide by 20 Nov") and how far off it is ("in 8 days"). A passed date is
+ * said plainly ("Reply was due 21 Oct", "3 weeks ago"), never as a verdict. Null where the task has no date to read.
+ */
+export function todoChips(t: TodoChipIn, nowMs: number): { lead: string; rel: string } | null {
+  const today = ymdOfMs(nowMs);
+  if (t.kind === "fix" || t.kind === "batch") return null;
+  /* gone quiet, or a nudge whose reply date has passed: the reply date, else the last send */
+  if (t.kind === "quiet" || t.kind === "nudge") {
+    if (t.replyMs != null && Number.isFinite(t.replyMs) && ymdOfMs(t.replyMs) < today) {
+      const r = ymdOfMs(t.replyMs);
+      return { lead: `Reply was due ${dayLabel(r, today)}`, rel: relWords(dayDiff(today, r)) };
+    }
+    if (t.kind === "quiet") {
+      if (t.quietDays == null || !(t.quietDays >= 0)) return null;
+      const s = ymdOfMs(nowMs - t.quietDays * DAY_MS);
+      return { lead: `Last sent ${dayLabel(s, today)}`, rel: relWords(dayDiff(today, s)) };
+    }
+  }
+  if (!t.dueYmd || !/^\d{4}-\d{2}-\d{2}/.test(t.dueYmd)) return null;
+  const ymd = t.dueYmd.slice(0, 10);
+  const d = dayDiff(today, ymd);
+  const by = BY[t.kind];
+  const lead = d < 0 ? `Was due ${dayLabel(ymd, today)}` : by ? `${by} ${dayLabel(ymd, today)}` : `Due ${dayLabel(ymd, today)}`;
+  return { lead, rel: relWords(d) };
+}
+
+/** the stamp's word, from the task's verb (the workspace's own `type`); an own task is "Done" */
+export function stampWord(t: { kind: string; type: string | null }): string {
+  if (t.kind === "own") return "Done";
+  switch (t.type) {
+    case "Send": return "Sent";
+    case "Decide": return "Answered";
+    case "Nudge": return "Nudged";
+    case "Close": return "Closed";
+    case "Fill in": return "Saved";
+    default: return "Done";
+  }
+}
+
+/** today's cleared acts: the To-do workspace's own `done` (todoCleared `clearedThisWeek`) from London's midnight */
+export const doneToday = <T extends { at: number }>(done: readonly T[], dayStartMs: number): T[] => done.filter((a) => a.at >= dayStartMs);
+
+/** the header's line: "7 things need you · 2 done today"; with nothing done, only the first half */
+export function todoHeadLine(need: number, done: number): string {
+  const first = need > 0 ? `${need} ${need === 1 ? "thing needs" : "things need"} you` : "Nothing needs you";
+  return done > 0 ? `${first} · ${done} done today` : first;
+}

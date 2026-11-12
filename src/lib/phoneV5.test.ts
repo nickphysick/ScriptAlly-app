@@ -270,3 +270,115 @@ describe("phone v5 Agents tab (Phase C)", () => {
     expect(queriedAgo(now - 90 * D, now)).toBe("queried 3 months ago");
   });
 });
+
+/* ── Phase D — To do: today's order, the swipe, the chips, the stamp, the header line ── */
+import {
+  TODO_ORDER_KEY, deckOrder, doneToday, dragAxis, dragLabel, orderForDay, readTodoOrder, saveTodoOrder, sendToBack, stampWord,
+  swipeOutcome, todoChips, todoHeadLine,
+} from "./phoneV5";
+import { vi, afterEach as afterEachD } from "vitest";
+
+describe("phone v5 To do (Phase D)", () => {
+  afterEachD(() => { vi.unstubAllGlobals(); });
+  const K = ["a", "b", "c", "d"];
+  it("Not now: the card goes to the back of today's order, and the rest keep the workspace's order", () => {
+    let o = orderForDay(null, "2026-11-12");
+    expect(deckOrder(K, o.back)).toEqual(K);
+    o = sendToBack(o, "a", "2026-11-12");
+    expect(deckOrder(K, o.back)).toEqual(["b", "c", "d", "a"]);
+    o = sendToBack(o, "b", "2026-11-12");
+    expect(deckOrder(K, o.back)).toEqual(["c", "d", "a", "b"]);
+    /* round the whole pile: every card sent back still cycles */
+    o = sendToBack(sendToBack(o, "c", "2026-11-12"), "d", "2026-11-12");
+    expect(deckOrder(K, o.back)).toEqual(["a", "b", "c", "d"]);
+    o = sendToBack(o, "a", "2026-11-12");
+    expect(deckOrder(K, o.back)[0]).toBe("b");
+    expect(deckOrder(K, o.back)).toHaveLength(4);
+  });
+  it("the order follows the list: a task that left it leaves the pile; a new one takes its workspace place", () => {
+    const o = sendToBack(orderForDay(null, "2026-11-12"), "a", "2026-11-12");
+    expect(deckOrder(["b", "c"], o.back)).toEqual(["b", "c"]);
+    expect(deckOrder(["n", "a", "b"], o.back)).toEqual(["n", "b", "a"]);
+  });
+  it("a task brought back (its Undo) goes on top, even over the workspace's order and today's back", () => {
+    const o = sendToBack(orderForDay(null, "2026-11-12"), "c", "2026-11-12");
+    expect(deckOrder(K, o.back, ["c"])).toEqual(["c", "a", "b", "d"]);
+    expect(deckOrder(K, [], ["d", "zz"])).toEqual(["d", "a", "b", "c"]);
+  });
+  it("the order resets each day, and a malformed saved value is none", () => {
+    const o = sendToBack(orderForDay(null, "2026-11-12"), "a", "2026-11-12");
+    expect(orderForDay(o, "2026-11-12").back).toEqual(["a"]);
+    expect(orderForDay(o, "2026-11-13").back).toEqual([]);
+    expect(sendToBack(o, "b", "2026-11-13")).toEqual({ day: "2026-11-13", back: ["b"] });
+    expect(orderForDay({ day: "2026-11-12", back: "a" }, "2026-11-12").back).toEqual([]);
+    expect(orderForDay("junk", "2026-11-12").back).toEqual([]);
+    expect(orderForDay({ day: "2026-11-12", back: ["a", 3] }, "2026-11-12").back).toEqual(["a"]);
+  });
+  it("the saved order round-trips through storage, and refused storage is today's empty order", () => {
+    const store = new Map<string, string>();
+    vi.stubGlobal("window", { localStorage: { getItem: (k: string) => store.get(k) ?? null, setItem: (k: string, v: string) => { store.set(k, v); } } });
+    saveTodoOrder({ day: "2026-11-12", back: ["x"] });
+    expect(store.has(TODO_ORDER_KEY)).toBe(true);
+    expect(readTodoOrder("2026-11-12").back).toEqual(["x"]);
+    expect(readTodoOrder("2026-11-13").back).toEqual([]);
+    vi.stubGlobal("window", { localStorage: { getItem: () => { throw new Error("no"); }, setItem: () => { throw new Error("no"); } } });
+    expect(readTodoOrder("2026-11-12")).toEqual({ day: "2026-11-12", back: [] });
+    expect(() => saveTodoOrder({ day: "2026-11-12", back: [] })).not.toThrow();
+  });
+  it("the swipe: the axis is decided on the first 8px; it commits past a third of the card's width", () => {
+    expect(dragAxis(4, 2)).toBeNull();
+    expect(dragAxis(9, 3)).toBe("x");
+    expect(dragAxis(-9, 3)).toBe("x");
+    expect(dragAxis(3, 9)).toBe("y");
+    expect(dragAxis(10, 12)).toBe("y");
+    expect(swipeOutcome(121, 360)).toBe("do");
+    expect(swipeOutcome(120, 360)).toBe("back");
+    expect(swipeOutcome(-121, 360)).toBe("later");
+    expect(swipeOutcome(-119, 360)).toBe("back");
+    expect(swipeOutcome(0, 360)).toBe("back");
+    expect(swipeOutcome(500, 0)).toBe("back");
+    expect(dragLabel(55)).toEqual({ l: 0, r: 0.5 });
+    expect(dragLabel(-220)).toEqual({ l: 1, r: 0 });
+  });
+  it("the chips: the date in words and how far off; a passed date said plainly, never late or overdue", () => {
+    const now = new Date(2026, 10, 12, 12).getTime();
+    expect(todoChips({ kind: "offer", dueYmd: "2026-11-20", replyMs: null, quietDays: null }, now)).toEqual({ lead: "Decide by 20 Nov", rel: "in 8 days" });
+    expect(todoChips({ kind: "send", dueYmd: "2026-11-12", replyMs: null, quietDays: null }, now)).toEqual({ lead: "Send by 12 Nov", rel: "today" });
+    expect(todoChips({ kind: "own", dueYmd: "2026-11-13", replyMs: null, quietDays: null }, now)).toEqual({ lead: "Do by 13 Nov", rel: "tomorrow" });
+    expect(todoChips({ kind: "other", dueYmd: "2027-01-10", replyMs: null, quietDays: null }, now)).toEqual({ lead: "Due 10 Jan 2027", rel: "in 8 weeks" });
+    expect(todoChips({ kind: "send", dueYmd: "2026-10-21", replyMs: null, quietDays: null }, now)).toEqual({ lead: "Was due 21 Oct", rel: "3 weeks ago" });
+    expect(todoChips({ kind: "quiet", dueYmd: null, replyMs: new Date(2026, 9, 21, 12).getTime(), quietDays: 40 }, now)).toEqual({ lead: "Reply was due 21 Oct", rel: "3 weeks ago" });
+    expect(todoChips({ kind: "nudge", dueYmd: "2026-11-12", replyMs: new Date(2026, 10, 11, 12).getTime(), quietDays: null }, now)).toEqual({ lead: "Reply was due 11 Nov", rel: "yesterday" });
+    expect(todoChips({ kind: "quiet", dueYmd: null, replyMs: null, quietDays: 5 }, now)).toEqual({ lead: "Last sent 7 Nov", rel: "5 days ago" });
+    /* nothing to read: no chip */
+    expect(todoChips({ kind: "quiet", dueYmd: null, replyMs: null, quietDays: null }, now)).toBeNull();
+    expect(todoChips({ kind: "fix", dueYmd: "2026-11-20", replyMs: null, quietDays: null }, now)).toBeNull();
+    expect(todoChips({ kind: "batch", dueYmd: null, replyMs: null, quietDays: null }, now)).toBeNull();
+    expect(todoChips({ kind: "send", dueYmd: null, replyMs: null, quietDays: null }, now)).toBeNull();
+    expect(todoChips({ kind: "send", dueYmd: "", replyMs: null, quietDays: null }, now)).toBeNull();
+    for (let d = -90; d <= 90; d += 1) {
+      const ymd = new Date(2026, 10, 12 + d, 12);
+      const s = `${ymd.getFullYear()}-${String(ymd.getMonth() + 1).padStart(2, "0")}-${String(ymd.getDate()).padStart(2, "0")}`;
+      for (const kind of ["offer", "send", "rr", "nudge", "quiet", "own", "other"]) {
+        const c = todoChips({ kind, dueYmd: s, replyMs: ymd.getTime(), quietDays: Math.max(0, -d) }, now);
+        expect(`${c?.lead} ${c?.rel}`).not.toMatch(/overdue|late/i);
+      }
+    }
+  });
+  it("the stamp's word follows the task's verb; an own task is Done", () => {
+    expect(stampWord({ kind: "send", type: "Send" })).toBe("Sent");
+    expect(stampWord({ kind: "offer", type: "Decide" })).toBe("Answered");
+    expect(stampWord({ kind: "nudge", type: "Nudge" })).toBe("Nudged");
+    expect(stampWord({ kind: "quiet", type: "Close" })).toBe("Closed");
+    expect(stampWord({ kind: "batch", type: "Fill in" })).toBe("Saved");
+    expect(stampWord({ kind: "own", type: "Send" })).toBe("Done");
+    expect(stampWord({ kind: "other", type: null })).toBe("Done");
+  });
+  it("the header line, and done today from the day's start", () => {
+    expect(todoHeadLine(7, 2)).toBe("7 things need you · 2 done today");
+    expect(todoHeadLine(1, 0)).toBe("1 thing needs you");
+    expect(todoHeadLine(0, 3)).toBe("Nothing needs you · 3 done today");
+    expect(todoHeadLine(0, 0)).toBe("Nothing needs you");
+    expect(doneToday([{ at: 99 }, { at: 100 }, { at: 150 }], 100)).toEqual([{ at: 100 }, { at: 150 }]);
+  });
+});

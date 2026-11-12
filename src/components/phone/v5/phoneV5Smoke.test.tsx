@@ -124,7 +124,7 @@ describe("Phone app v5 renders", () => {
     expect(activity).toContain("See all replies");
     expect(activity).not.toContain('data-pa4="founding"');
   });
-  it("To do: the task list, and its empty line", () => {
+  it("To do: the Up next card, and its empty line (Phase D's own smokes are below)", () => {
     const empty = renderPage(P(<TodoV5 />), "/todo");
     expect(empty).toContain('data-pa5="todo"');
     expect(empty).toContain("That’s everything for today.");
@@ -381,5 +381,81 @@ describe("Housekeeping's fix handlers are one shared hook (Nick, 12 Nov)", () =>
   it("the founding writer card left Today for Profile", () => {
     expect(read("./TodayV5.tsx")).not.toContain("FoundingCard");
     expect(read("../v4/YouV4.tsx")).toContain("<FoundingCardV5 uid={currentUser?.id ?? null} />");
+  });
+});
+
+/* ── Phase D — To do: the Up next card ── */
+const TD = (id: string, text: string, due: string, done = false) => ({
+  id, userId: SMOKE_USER.id, text, done, dueDate: due, createdAt: iso(-5), updatedAt: iso(-1), ...(done ? { completedAt: iso(0) } : {}),
+});
+const ownTasks = (n: number) => ({
+  userTasks: [TD("u1", "Read the contract", "2026-11-05"), TD("u2", "Ring the bank", "2026-11-11"), TD("u3", "Print the pages", "2026-11-10"), TD("u4", "Check the address", "2026-11-09")]
+    .slice(0, n).concat([TD("u9", "Post the letter", "2026-11-10", true)]),
+});
+describe("Phone app v5, Phase D — To do", () => {
+  it("populated: the header, one card with its fill, chips, line, verb and Not now, the edges, Then and Done today", () => {
+    const html = renderPageSeededWith(P(<TodoV5 />), "/todo", ownTasks(4));
+    expect(html).toMatch(/data-pa5="todo" data-n="4" data-done="1"/);
+    expect(html).toContain(">To do</h1>");
+    expect(html).toContain("4 things need you · 1 done today");
+    expect(html).toContain('aria-label="Search"');
+    expect(html.match(/data-pa5="todo-card"/g)?.length).toBe(1);
+    expect(html).toMatch(/data-pa5="todo-card" data-key="[^"]+" data-i="1" data-total="4"/);
+    expect(html).toContain("1 of 4");
+    expect(html).toContain('data-pa5="todo-fill"');
+    expect(html).toContain('data-pa5="todo-chips"');
+    expect(html).toContain("Was due 5 Nov");
+    expect(html).toContain('data-pa5="todo-verb"');
+    expect(html).toContain(">Mark done</button>");
+    expect(html).toContain('data-pa5="todo-later"');
+    expect(html).toContain("Not now, show the next one");
+    expect(html).toContain(">Later</span>");
+    expect(html).toContain(">Do it</span>");
+    expect(html.match(/data-pa5="todo-edge"/g)?.length).toBe(2);
+    expect(html).toContain(">Then</h2>");
+    expect(html.match(/data-pa5="todo-then-row"/g)?.length).toBe(3);
+    expect(html).toContain(">Done today</h2>");
+    expect(html.match(/data-pa5="todo-done-row"/g)?.length).toBe(1);
+    expect(html).toContain("<s class=\"pa4-b\">Post the letter</s>");
+    expect(html).not.toContain('data-pa5="todo-empty"');
+    expect(html).not.toContain('data-pa5="todo-stamp"');
+    expect(text(html)).not.toMatch(/overdue|\blate\b/i);
+  });
+  it("one task: the card, no edges, no Then", () => {
+    const html = renderPageSeededWith(P(<TodoV5 />), "/todo", { userTasks: [TD("u2", "Ring the bank", "2026-11-11")] });
+    expect(html).toContain("1 thing needs you");
+    expect(html).not.toContain("done today");
+    expect(html.match(/data-pa5="todo-card"/g)?.length).toBe(1);
+    expect(html).toContain('data-total="1"');
+    expect(html).not.toContain('data-pa5="todo-edge"');
+    expect(html).not.toContain('data-pa5="todo-then-row"');
+    expect(html).not.toContain('data-pa5="todo-done-row"');
+  });
+  it("empty: that's everything for today, and Done today still shows", () => {
+    const html = renderPageSeededWith(P(<TodoV5 />), "/todo", ownTasks(0));
+    expect(html).toContain('data-pa5="todo-empty"');
+    expect(html).toContain("That’s everything for today.");
+    expect(html).toContain("Nothing needs you · 1 done today");
+    expect(html).not.toContain('data-pa5="todo-card"');
+    expect(html.match(/data-pa5="todo-done-row"/g)?.length).toBe(1);
+  });
+  it("the card's button and its right swipe call the same open function; nothing on the page writes", () => {
+    const src = readFileSync(resolve(__dirname, "./TodoV5.tsx"), "utf8");
+    /* the button */
+    expect(src).toMatch(/data-pa5="todo-verb"[^>]*onClick=\{tap\(openJourney\)\}/);
+    /* the swipe: a right commit calls the same function, and nothing else opens the card's journey */
+    expect(src).toContain('if (out === "do") openJourney();');
+    expect(src.match(/openJourney\(\)/g)?.length).toBe(1);
+    expect(src.match(/openTask\(top\.t, true\)/g)?.length).toBe(1);
+    /* the journey is the existing one, with the save and the cancel told apart by PhoneTaskScreen's own callbacks */
+    expect(src).toContain("<PhoneTaskScreen core={core} tasks={deck} startKey={opened.t.key} now={now} onClose={onClose} onDid={onDid} />");
+    /* no writer is imported, and none is called */
+    const imports = src.match(/^import[^;]+;/gm) ?? [];
+    for (const i of imports) expect(i).not.toMatch(/lib\/db|firebase|recomputeQuery|queryActions|drawerStore|useWsCore|wsFlows|taskFlags|Write|update|add|delete/i);
+    /* the code, without its comments (the header names the snackbar it relies on) */
+    const code = src.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+    expect(code).not.toMatch(/core\.(snoozeTask|dismissWrite|ownDoneWrite|makeFlow|bringBackWrite|db)\b/);
+    expect(code).not.toMatch(/showUndoBar|updateUserTask|upsertTaskFlag|setDoc|updateDoc|addDoc|deleteDoc/);
+    expect(code).toContain("onDid={onDid}");
   });
 });
