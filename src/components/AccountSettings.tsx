@@ -55,6 +55,7 @@ import { deskPrefPaths, type DeskPrefPatch } from "../lib/userPaths";
 import { useSmartImportEntitlement } from "../lib/useSmartImportEntitlement";
 import { optionalTaskTypes, staleOptionLabel } from "../lib/accountTasks";
 import { countryName } from "../lib/territory";
+import { startEmailChange, pendingEmailChange, settlePendingEmailChange, signOutOtherDevices } from "../lib/authActions";
 import { settingsHeadline } from "../lib/settingsHeadline";
 import { saveEmailToggle, finishQuerying, EMAIL_LABEL, type EmailToggle } from "../lib/settingsSaves";
 import { DAY_MS } from "../lib/entitlements";
@@ -203,6 +204,16 @@ export const AccountSettings: React.FC<{
   const [showDelete, setShowDelete] = useState(false);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [tzOpen, setTzOpen] = useState(false);
+  /* Phase 5 — change email and other devices */
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [newEmail, setNewEmail] = useState("");
+  const [emailPw, setEmailPw] = useState("");
+  const [emailErr, setEmailErr] = useState<string | null>(null);
+  const [emailBusy, setEmailBusy] = useState(false);
+  const [pending, setPending] = useState(() => pendingEmailChange());
+  const [outAll, setOutAll] = useState(false);
+  const [outBusy, setOutBusy] = useState(false);
+  useEffect(() => { void settlePendingEmailChange().then((done) => { if (done) setPending(null); }); }, []);
   const smartImportUsedUp = useSmartImportEntitlement().reason === "used";
 
   /* ── the stamp: the Contact list's desktop postmark, at the control that changed ─────────────────── */
@@ -373,6 +384,33 @@ export const AccountSettings: React.FC<{
     } catch { failed("your email settings"); }
   };
 
+  const submitEmailChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = newEmail.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { setEmailErr("That doesn't look like an email address."); return; }
+    if (v.toLowerCase() === currentUser.email.toLowerCase()) { setEmailErr("That's the address you already use."); return; }
+    if (pwMode !== "federated-only" && !emailPw) { setEmailErr("Enter your password, so we know it's you."); return; }
+    setEmailErr(null); setEmailBusy(true);
+    try {
+      await startEmailChange(v, pwMode !== "federated-only" ? emailPw : null);
+      setPending({ from: currentUser.email, to: v });
+      setEmailOpen(false); setNewEmail(""); setEmailPw("");
+      showToast({ message: `Confirmation sent to ${v}`, replaces: "settings-saved" });
+    } catch (err: any) {
+      setEmailErr(err?.message || "Something went wrong. Please try again.");
+    } finally { setEmailBusy(false); }
+  };
+  const outEverywhere = async (el: HTMLElement) => {
+    setOutBusy(true);
+    try {
+      await signOutOtherDevices();
+      setOutAll(true);
+      saved(el, "Signed out on your other devices");
+    } catch (err: any) {
+      showToast({ message: err?.message || "Something went wrong. Please try again.", replaces: "settings-saved" });
+    } finally { setOutBusy(false); }
+  };
+
   /* ── sections ───────────────────────────────────────────────────────────────────────────────────── */
   const joined = longDate(authFacts?.createdAt);
   const emailVerified = authFacts?.emailVerified ?? true;
@@ -413,10 +451,35 @@ export const AccountSettings: React.FC<{
           control={
             <>
               {emailVerified ? <Chip><Check style={{ width: 13, height: 13 }} aria-hidden="true" />Confirmed</Chip> : <Chip warn><AlertTriangle style={{ width: 13, height: 13 }} aria-hidden="true" />Not confirmed yet</Chip>}
-              <button type="button" data-acct="email-open" onClick={() => onNavigate("contact")} className="acct-btn acct-btn--ghost" style={ghostBtn}>Change email</button>
+              {!emailOpen && !pending && <button type="button" data-acct="email-open" onClick={() => setEmailOpen(true)} className="acct-btn acct-btn--ghost" style={ghostBtn}>Change email</button>}
             </>
           }
         />
+        {pending && (
+          <SettingsNote>
+            <span data-acct="email-pending">We've emailed <b>{pending.to}</b>. Your sign-in changes once you've confirmed it from there, and we'll let <b>{pending.from}</b> know when it has.</span>
+          </SettingsNote>
+        )}
+        {emailOpen && (
+          <div className="sc-row sc-row--full">
+            <form onSubmit={submitEmailChange} noValidate data-acct="email-form" style={{ display: "grid", gap: 10, maxWidth: 460 }}>
+              <label htmlFor="acct-newemail" style={{ fontSize: 15, fontWeight: 600 }}>New email address</label>
+              <input id="acct-newemail" type="email" autoComplete="email" autoFocus value={newEmail} onChange={(e) => { setNewEmail(e.target.value); setEmailErr(null); }} className="acct-input" style={inputStyle} aria-invalid={emailErr ? true : undefined} aria-describedby={emailErr ? "acct-newemail-e" : undefined} />
+              {pwMode !== "federated-only" && (
+                <>
+                  <label htmlFor="acct-emailpw" style={{ fontSize: 15, fontWeight: 600 }}>Your password</label>
+                  <input id="acct-emailpw" type="password" autoComplete="current-password" value={emailPw} onChange={(e) => { setEmailPw(e.target.value); setEmailErr(null); }} className="acct-input" style={inputStyle} />
+                </>
+              )}
+              {emailErr && <span id="acct-newemail-e" className="acct-err" role="alert">{emailErr}</span>}
+              <p style={{ ...helpText, margin: 0 }}>We'll send a confirmation to the new address. Nothing changes until you confirm it there.</p>
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+                <button type="submit" disabled={emailBusy} className="acct-btn acct-btn--primary" style={primaryBtn}>{emailBusy ? "Sending…" : "Send confirmation"}</button>
+                <button type="button" onClick={() => { setEmailOpen(false); setEmailErr(null); }} className="acct-btn acct-btn--ghost" style={ghostBtn}>Cancel</button>
+              </div>
+            </form>
+          </div>
+        )}
         {!emailVerified && (
           <SettingsRow
             label="Confirm this address"
@@ -440,8 +503,8 @@ export const AccountSettings: React.FC<{
         )}
         <SettingsRow
           label="Other devices"
-          description="Signs you out everywhere except here. Handy if you've lost a laptop or used a shared computer."
-          control={<button type="button" data-acct="outall" disabled className="acct-btn acct-btn--ghost" style={{ ...ghostBtn, opacity: 0.5, cursor: "default" }}><LogOut style={{ width: 14, height: 14 }} aria-hidden="true" />Sign out of all other devices</button>}
+          description={outAll ? "Done. You're only signed in here now." : "Signs you out everywhere except here. Handy if you've lost a laptop or used a shared computer."}
+          control={<button type="button" data-acct="outall" disabled={outBusy} onClick={(e) => void outEverywhere(e.currentTarget)} className="acct-btn acct-btn--ghost" style={ghostBtn}><LogOut style={{ width: 14, height: 14 }} aria-hidden="true" />Sign out of all other devices</button>}
         />
       </SettingsCard>
     </>
