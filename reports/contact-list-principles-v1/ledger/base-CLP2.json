@@ -1,0 +1,72 @@
+[
+ {
+  "where": "harness: the sentence from the rows' own stands",
+  "ok": false,
+  "detail": "53 agents on file ≠ 7 need you. 39 not queried yet."
+ },
+ {
+  "where": "harness: typewriter, 36px, ink",
+  "ok": false,
+  "detail": "\"Playfair Display\", Georgia, s 54px rgb(28, 19, 15)"
+ },
+ {
+  "where": "harness: the need-you part in rust",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "harness: the count line underneath",
+  "ok": false,
+  "detail": "you’ve queried 14"
+ },
+ {
+  "where": "case {\"n\":41,\"q\":22,\"y\":5}",
+  "ok": false,
+  "detail": "53 agents on file"
+ },
+ {
+  "where": "case {\"n\":41,\"q\":22,\"y\":5} count line",
+  "ok": false,
+  "detail": "you’ve queried 14"
+ },
+ {
+  "where": "case {\"n\":12,\"q\":12,\"y\":1}",
+  "ok": false,
+  "detail": "53 agents on file"
+ },
+ {
+  "where": "case {\"n\":12,\"q\":12,\"y\":1} count line",
+  "ok": false,
+  "detail": "you’ve queried 14"
+ },
+ {
+  "where": "case {\"n\":41,\"q\":22,\"y\":0}",
+  "ok": false,
+  "detail": "53 agents on file"
+ },
+ {
+  "where": "case {\"n\":41,\"q\":22,\"y\":0} count line",
+  "ok": false,
+  "detail": "you’ve queried 14"
+ },
+ {
+  "where": "case {\"n\":9,\"q\":9,\"y\":0}",
+  "ok": false,
+  "detail": "53 agents on file"
+ },
+ {
+  "where": "case {\"n\":9,\"q\":9,\"y\":0} count line",
+  "ok": false,
+  "detail": "you’ve queried 14"
+ },
+ {
+  "where": "case {\"n\":2,\"q\":0,\"y\":0}",
+  "ok": false,
+  "detail": "53 agents on file"
+ },
+ {
+  "where": "case {\"n\":2,\"q\":0,\"y\":0} line beneath",
+  "ok": false,
+  "detail": "you’ve queried 14"
+ }
+]

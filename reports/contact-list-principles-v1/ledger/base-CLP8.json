@@ -1,0 +1,22 @@
+[
+ {
+  "where": "saved on the click (emulator)",
+  "ok": true,
+  "detail": "null → 3"
+ },
+ {
+  "where": "one snackbar: “Agent fit: good fit”, with Undo",
+  "ok": true,
+  "detail": "[{\"text\":\"Agent fit: good fitUNDO✕\",\"undo\":true}]"
+ },
+ {
+  "where": "Undo restored the old rating (emulator)",
+  "ok": true,
+  "detail": "null → 3 → null"
+ },
+ {
+  "where": "never stacks",
+  "ok": false,
+  "detail": "3"
+ }
+]

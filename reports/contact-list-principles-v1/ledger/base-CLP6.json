@@ -1,0 +1,17 @@
+[
+ {
+  "where": "folded: Most used and Genres only",
+  "ok": false,
+  "detail": "[\"quick\",\"where\",\"genres\",\"subs\"]"
+ },
+ {
+  "where": "the row: More filters · Where they stand, submissions · collapsed",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "the row is full width",
+  "ok": false,
+  "detail": "null"
+ }
+]
