@@ -22,7 +22,6 @@ import { QueriesV4 } from "./QueriesV4";
 import { AgentsV4, AgentsListPageV4 } from "./AgentsV4";
 import { YouV4 } from "./YouV4";
 import { QuickLogV4 } from "./QuickLogV4";
-import { BirdsViewV41 } from "./BirdsViewV41";
 import { V3Provider } from "../v3/V3Provider";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
@@ -67,11 +66,6 @@ describe("Phone app v4 renders", () => {
       for (const w of ["Who did you query?", "Other", "An agent replied", "Pin a note"]) expect(html).toContain(w);
     }
   });
-  it("the Birds-eye view: the zooms, the ruler, and the drawer's groups with the phone's name for the first", () => {
-    for (const html of [renderPage(P(<BirdsViewV41 switcher={null} corner={null} />), "/queries"), renderPageSeeded(P(<BirdsViewV41 switcher={null} corner={null} />), "/queries")]) {
-      for (const w of ["Birds-eye view", "6 weeks", "3 months", "6 months", "Today"]) expect(html).toContain(w);
-      /* the words a writer reads (the engine's group key, data-k="overdue", is an attribute) */
-      expect(html.replace(/<[^>]+>/g, " ")).not.toMatch(/overdue/i);
-    }
-  });
+  /* (v4.1's full Birds-eye view is retired — Phone app v5 Phase E rebuilt it as BirdsViewV5; its smoke is in
+     phoneV5Smoke.test.tsx.) */
 });

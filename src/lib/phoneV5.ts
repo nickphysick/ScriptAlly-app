@@ -402,3 +402,78 @@ export function todoHeadLine(need: number, done: number): string {
   const first = need > 0 ? `${need} ${need === 1 ? "thing needs" : "things need"} you` : "Nothing needs you";
   return done > 0 ? `${first} · ${done} done today` : first;
 }
+
+/* ═══ Phase E — THE FULL BIRDS-EYE VIEW (phone-birds-eye-dense-v1.html's rows; v4.1's engine, replay, pan and expansion)
+   Pure. The rows, their groups and their dates are the desktop engine's (`phoneGroups` → `beLine`); a row's bar is the
+   block's own `beTrack`, read in days instead of percent so the view can pan and zoom it. Nothing here decides a date. */
+
+/** the three spans (v4.1's zoom chips, renamed): how many days the track shows across its width */
+export type BvSpan = "1m" | "3m" | "6m";
+export const BV_SPANS: readonly { k: BvSpan; label: string; days: number }[] = [
+  { k: "1m", label: "1 month", days: 30 }, { k: "3m", label: "3 months", days: 90 }, { k: "6m", label: "6 months", days: 182 },
+];
+/** it opens on 3 months the first time; after that on the last span chosen */
+export const BV_SPAN_FIRST: BvSpan = "3m";
+export const BV_SPAN_KEY = "pa5.birds-view.span";
+export const isBvSpan = (x: string | null | undefined): x is BvSpan => x === "1m" || x === "3m" || x === "6m";
+export const bvSpanDays = (k: BvSpan): number => (BV_SPANS.find((s) => s.k === k) ?? BV_SPANS[1]).days;
+export function readBvSpan(): BvSpan {
+  try { const v = window.localStorage.getItem(BV_SPAN_KEY); return isBvSpan(v) ? v : BV_SPAN_FIRST; } catch { return BV_SPAN_FIRST; }
+}
+export function saveBvSpan(k: BvSpan): void {
+  try { window.localStorage.setItem(BV_SPAN_KEY, k); } catch { /* storage refused: the span is this visit's only */ }
+}
+
+/** the name column: 116px on a phone held upright (mini track + surname); landscape keeps v4.1's wider 184px (full name) */
+export const BV_NAME_W = 116;
+export const BV_NAME_W_LAND = 184;
+
+/** a group over five folds to "Show N more" */
+export const BV_FOLD_AT = 5;
+export function bvFold<T>(rows: readonly T[], shown: boolean, at: number = BV_FOLD_AT): { rows: T[]; more: number } {
+  if (shown || rows.length <= at) return { rows: [...rows], more: 0 };
+  return { rows: rows.slice(0, at), more: rows.length - at };
+}
+
+/** arriving from Today with a filter: only that group's queries, by the phone's own court (`V3Query.court`, the rule the
+ *  block's figures count by) */
+export function bvFilter<T extends { court: string }>(rows: readonly T[], court: BeCourt | null): T[] {
+  return court ? rows.filter((r) => r.court === court) : [...rows];
+}
+/** the line that says a filter is on: "With agents · 12" */
+export const bvFilterLabel = (court: BeCourt, n: number): string => `${BE_GROUP_NAME[court]} · ${n}`;
+
+/**
+ * The address after the List | Birds-eye switch (or "Show all"): the view in `view`, the filter in `court` only where
+ * that view can show it (the list: any of its chips but "all"; Birds-eye: with you / with agents / gone quiet). A chosen
+ * query (`focus`) is dropped; anything else is kept.
+ */
+export function bvSwitchSearch(search: string, bird: boolean, chip: string): string {
+  const p = new URLSearchParams(search);
+  p.delete("focus");
+  if (bird) p.set("view", "birds"); else p.delete("view");
+  const keep = bird ? isBeCourt(chip) : !!chip && chip !== "all";
+  if (keep) p.set("court", chip); else p.delete("court");
+  const s = p.toString();
+  return s ? `?${s}` : "";
+}
+
+/** one row's bar in DAYS from the track's start (the block's `beTrack` over the view's whole extent, read in days) */
+export interface BvTrack {
+  past: { l: number; w: number; status: string }[];
+  cur: null | { l: number; solid: number; rem: number; notch: number | null; deep: null | { l: number; w: number }; off: boolean; status: string };
+  t: number;
+}
+export function bvTrackDays(line: Pick<BeLine, "past" | "cur" | "dueMs" | "row">, ext: { fromMs: number; toMs: number }, nowMs: number): BvTrack {
+  const k = (ext.toMs - ext.fromMs) / DAY_MS / 100;
+  const tk = beTrack(line, ext, nowMs);
+  const c = tk.cur;
+  return {
+    t: tk.t * k,
+    past: tk.past.map((b) => ({ l: b.l * k, w: b.w * k, status: b.status })),
+    cur: c ? {
+      l: c.l * k, solid: c.solid * k, rem: c.rem * k, notch: c.notch == null ? null : c.notch * k,
+      deep: c.deep ? { l: c.deep.l * k, w: c.deep.w * k } : null, off: c.off, status: c.status,
+    } : null,
+  };
+}

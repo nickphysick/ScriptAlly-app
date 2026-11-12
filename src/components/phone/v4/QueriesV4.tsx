@@ -15,7 +15,8 @@ import { openV3, openV3Query } from "../v3/v3Store";
 import { COURT_LABEL, courtRows, V3_COURTS, type V3Court, type V3Query } from "../../../lib/phoneV3";
 import { QueryStatus } from "../../../types";
 import { CAST, Cta, Hero, IconBtn, LapCard, Link4, Seal } from "./V4Parts";
-import { BirdsViewV41 } from "./BirdsViewV41";
+import { BirdsViewV5 } from "../v5/BirdsViewV5";
+import { bvSwitchSearch, isBeCourt } from "../../../lib/phoneV5";
 import "./phoneV4.css";
 
 const DAY = 86_400_000;
@@ -67,6 +68,12 @@ export const QueriesV4: React.FC = () => {
   const chip: Chip = chipPick ?? (isChip(asked) ? asked : "all");
   const [bird, setBirdState] = useState<boolean>(() => askedView === "birds" || (askedView == null && !asked && readView() === "bird"));
   const setBird = (b: boolean) => { setBirdState(b); saveView(b ? "bird" : "list"); };
+  /* Phone app v5, Phase E: the switch (and the view's "Show all") rewrites the address, so `court` only names a filter
+     the view on show can carry — the list any chip but All, Birds-eye with you / with agents / gone quiet */
+  const pickView = (b: boolean, ch: string = chip) => {
+    setBird(b);
+    navigate({ pathname: loc.pathname, search: bvSwitchSearch(loc.search, b, ch) }, { replace: true });
+  };
   /* a fresh `?court=` or `?view=` from Today wins over what was last tapped here */
   const [seen, setSeen] = useState(loc.search);
   if (loc.search !== seen) {
@@ -99,12 +106,13 @@ export const QueriesV4: React.FC = () => {
   return (
     <div className="pa4 pa4-queries" data-pa4="queries" data-chip={chip} data-view={bird ? "bird" : "list"}>
       {bird ? (
-        <BirdsViewV41 switcher={<ViewSwitch bird onPick={setBird} />} corner={corner} />
+        <BirdsViewV5 switcher={<ViewSwitch bird onPick={(b) => pickView(b)} />} corner={corner}
+          court={isBeCourt(chip) ? chip : null} onShowAll={() => pickView(true, "all")} />
       ) : (<>
         <Hero pa4="queries-hero" kick="Queries"
           head={<>{c.you} need{c.you === 1 ? "s" : ""} you.<br />{c.agent} {c.agent === 1 ? "is" : "are"} with agents.</>}
           cast={{ src: CAST.courier, width: 124, style: { margin: "0 -22px -4px 0" } }} corner={corner}
-          after={<ViewSwitch bird={false} onPick={setBird} />} />
+          after={<ViewSwitch bird={false} onPick={(b) => pickView(b)} />} />
         <div className="pa4-chips" role="tablist" data-pa4="chips">
           {CHIPS.map((k) => (
             <button key={k} type="button" role="tab" aria-selected={chip === k} className={`pa4-chip${chip === k ? " on" : ""}`} data-pa4="chip" data-k={k} data-count={c[k]} onClick={() => setChip(k)}>

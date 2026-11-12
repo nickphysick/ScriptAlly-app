@@ -382,3 +382,75 @@ describe("phone v5 To do (Phase D)", () => {
     expect(doneToday([{ at: 99 }, { at: 100 }, { at: 150 }], 100)).toEqual([{ at: 100 }, { at: 150 }]);
   });
 });
+
+/* ── Phase E — the full Birds-eye view: the spans and their memory, the filter, the fold, the switch's address, the bar in days ── */
+import {
+  BV_SPANS, BV_SPAN_FIRST, BV_SPAN_KEY, bvFilter, bvFilterLabel, bvFold, bvSpanDays, bvSwitchSearch, bvTrackDays, isBvSpan, readBvSpan, saveBvSpan,
+} from "./phoneV5";
+import { afterEach as afterEachE } from "vitest";
+
+describe("phone v5 full Birds-eye view (Phase E)", () => {
+  afterEachE(() => { vi.unstubAllGlobals(); });
+  const store = (init: Record<string, string> = {}) => {
+    const m = { ...init };
+    vi.stubGlobal("window", { localStorage: { getItem: (k: string) => m[k] ?? null, setItem: (k: string, v: string) => { m[k] = v; } } });
+    return m;
+  };
+  it("the spans: 1 month, 3 months, 6 months, read as days for the zoom", () => {
+    expect(BV_SPANS.map((s) => s.label)).toEqual(["1 month", "3 months", "6 months"]);
+    expect(BV_SPANS.map((s) => s.k).map(bvSpanDays)).toEqual([30, 90, 182]);
+    expect(isBvSpan("6w")).toBe(false);
+    expect(BV_SPAN_FIRST).toBe("3m");
+  });
+  it("it opens on 3 months the first time, then on the last span chosen; storage refusing is not a crash", () => {
+    const m = store();
+    expect(readBvSpan()).toBe("3m");
+    saveBvSpan("1m");
+    expect(m[BV_SPAN_KEY]).toBe("1m");
+    expect(readBvSpan()).toBe("1m");
+    store({ [BV_SPAN_KEY]: "garbage" });
+    expect(readBvSpan()).toBe("3m");
+    vi.stubGlobal("window", { localStorage: { getItem: () => { throw new Error("refused"); }, setItem: () => { throw new Error("refused"); } } });
+    expect(readBvSpan()).toBe("3m");
+    expect(() => saveBvSpan("6m")).not.toThrow();
+  });
+  it("the filter keeps only that court's queries; none keeps all", () => {
+    const rows = [{ id: "a", court: "you" }, { id: "b", court: "agent" }, { id: "c", court: "quiet" }, { id: "d", court: "agent" }];
+    expect(bvFilter(rows, "agent").map((r) => r.id)).toEqual(["b", "d"]);
+    expect(bvFilter(rows, "you").map((r) => r.id)).toEqual(["a"]);
+    expect(bvFilter(rows, null)).toHaveLength(4);
+    expect(bvFilterLabel("quiet", 3)).toBe("Gone quiet · 3");
+  });
+  it("a group over five folds to Show N more; five or fewer never folds; shown is everything", () => {
+    const xs = [1, 2, 3, 4, 5, 6, 7, 8];
+    expect(bvFold(xs, false)).toEqual({ rows: [1, 2, 3, 4, 5], more: 3 });
+    expect(bvFold(xs, true)).toEqual({ rows: xs, more: 0 });
+    expect(bvFold([1, 2, 3, 4, 5], false)).toEqual({ rows: [1, 2, 3, 4, 5], more: 0 });
+  });
+  it("the switch's address: the view, and a court only where the view can carry it; a chosen query is dropped", () => {
+    expect(bvSwitchSearch("?view=birds&court=agent", false, "agent")).toBe("?court=agent");
+    expect(bvSwitchSearch("?court=agent", true, "agent")).toBe("?court=agent&view=birds");
+    expect(bvSwitchSearch("?view=birds&court=agent", true, "all")).toBe("?view=birds");
+    expect(bvSwitchSearch("", true, "closed")).toBe("?view=birds");
+    expect(bvSwitchSearch("?view=birds", false, "all")).toBe("");
+    expect(bvSwitchSearch("?view=birds&focus=q1", false, "closed")).toBe("?court=closed");
+  });
+  it("a row's bar in days is the block's own beTrack, over the view's extent", () => {
+    const ext = { fromMs: NOW - 40 * DAY, toMs: NOW + 60 * DAY };
+    const run = bvTrackDays(line({ start: -10, due: 10 }), ext, NOW);
+    expect(run.t).toBeCloseTo(40);
+    expect(run.cur!.l).toBeCloseTo(30);
+    expect(run.cur!.solid).toBeCloseTo(10);
+    expect(run.cur!.rem).toBeCloseTo(20);
+    expect(run.cur!.notch).toBeCloseTo(50);
+    expect(run.cur!.deep).toBeNull();
+    /* past its date: the notch at the date, the deeper segment from it to today */
+    const past = bvTrackDays(line({ start: -20, due: -6, overdue: true }), ext, NOW);
+    expect(past.cur!.notch).toBeCloseTo(34);
+    expect(past.cur!.deep!.l).toBeCloseTo(34);
+    expect(past.cur!.deep!.w).toBeCloseTo(6);
+    /* the same figures as the block's percent, scaled */
+    const pc = beTrack(line({ start: -20, due: -6, overdue: true }), ext, NOW);
+    expect(past.cur!.solid).toBeCloseTo(pc.cur!.solid);
+  });
+});

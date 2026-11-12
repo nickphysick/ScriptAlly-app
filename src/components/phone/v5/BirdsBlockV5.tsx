@@ -42,7 +42,7 @@ const reduced = (): boolean => { try { return window.matchMedia("(prefers-reduce
 
 /** the mini four-stage track (ref `mt`): four dots joined, filled to the current stage; the current a larger dot, or a
  *  hollow ring when the agent has asked for something */
-const MiniTrack: React.FC<{ status: string }> = ({ status }) => {
+export const MiniTrack: React.FC<{ status: string }> = ({ status }) => {
   const n = miniStage(status), ring = hasAsked(status);
   const X = [5, 14, 23, 32];
   return (

@@ -107,4 +107,3 @@ export function stageOn(row: QcRow, dayMs: number): string | null {
   if (k == null && row.sentMs != null && row.sentMs <= dayMs) k = String(row.status);
   return k;
 }
-export const ZOOM_DAYS = [["6w", "6 weeks", 42], ["3m", "3 months", 90], ["6m", "6 months", 182]] as const;

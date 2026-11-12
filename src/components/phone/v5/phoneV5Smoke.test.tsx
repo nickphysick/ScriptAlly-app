@@ -8,6 +8,7 @@
  * (pinning, sizes, reachability) are Phase H's measurement.
  * Phase B: Today's header (TodayHeaderV5) and the Queries tab's Birds-eye block (BirdsBlockV5) — populated, filtered,
  * one row, none.
+ * Phase E: the full Birds-eye view (BirdsViewV5) — populated, filtered, landscape; and the list's switch into it.
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
@@ -31,6 +32,8 @@ import { BirdsBlockV5 } from "./BirdsBlockV5";
 import type { BeCourt } from "../../../lib/phoneV5";
 import { AgentsTabV5 } from "./AgentsTabV5";
 import { GapsSheetV5 } from "./GapsSheetV5";
+import { BirdsViewV5 } from "./BirdsViewV5";
+import { QueriesV4 } from "../v4/QueriesV4";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
 const P = (n: React.ReactNode) => <V3Provider on now={NOW}>{n}</V3Provider>;
@@ -457,5 +460,99 @@ describe("Phone app v5, Phase D — To do", () => {
     expect(code).not.toMatch(/core\.(snoozeTask|dismissWrite|ownDoneWrite|makeFlow|bringBackWrite|db)\b/);
     expect(code).not.toMatch(/showUndoBar|updateUserTask|upsertTaskFlag|setDoc|updateDoc|addDoc|deleteDoc/);
     expect(code).toContain("onDid={onDid}");
+  });
+});
+
+/* ── Phase E: the full Birds-eye view (BirdsViewV5) ── */
+const View: React.FC<{ court?: BeCourt | null }> = ({ court = null }) => <BirdsViewV5 switcher={<i data-t="sw" />} corner={<i data-t="corner" />} court={court} onShowAll={() => {}} />;
+const vrows = (html: string) => html.match(/data-pa5="bv-row"/g)?.length ?? 0;
+/* a phone with storage that remembers, held upright or on its side */
+const phone = (w: number, h: number, store: Record<string, string> = {}) => vi.stubGlobal("window", {
+  innerWidth: w, innerHeight: h,
+  sessionStorage: { getItem: () => null, setItem: () => {} },
+  localStorage: { getItem: (k: string) => store[k] ?? null, setItem: (k: string, v: string) => { store[k] = v; } },
+  matchMedia: () => ({ matches: false, addEventListener: () => {}, removeEventListener: () => {} }),
+});
+
+describe("Phone app v5, Phase E — the full Birds-eye view", () => {
+  it("populated: the switch and search only in the header, the spans opening on 3 months, the ruler's pill, groups that fold at five", () => {
+    const html = renderPageSeededWith(P(<View />), "/queries/all", QS(14));
+    expect(html).toContain('data-pa5="birds-view"');
+    expect(html).toContain('data-span="3m"');
+    /* the header holds what it is given (the switch, search) and nothing of v4.1's: no title, no live/past sentence, no art */
+    const head = html.slice(html.indexOf('data-pa5="bv-head"'), html.indexOf("</header>"));
+    expect(head).toContain('data-t="sw"');
+    expect(head).toContain('data-t="corner"');
+    expect(head).not.toMatch(/<h1|<img|live quer/);
+    expect(html).not.toContain("Birds-eye view</h1>");
+    /* the spans: three, 3 months pressed; v4.1's zoom chips are gone */
+    expect(html.match(/data-pa5="bv-span"/g)?.length).toBe(3);
+    for (const w of ["1 month", "3 months", "6 months"]) expect(html).toContain(w);
+    expect(html).toMatch(/aria-pressed="true" data-pa5="bv-span" data-k="3m"|data-pa5="bv-span" data-k="3m" aria-pressed="true"/);
+    expect(html).not.toContain("6 weeks");
+    /* the ruler, the pill and the line; every row carries its engine dates and court */
+    for (const k of ["bv-track", "bv-today", "bv-now", "bv-names"]) expect(html).toContain(`data-pa5="${k}"`);
+    expect(html).toMatch(/data-pa5="bv-row" data-pa41="vrow" data-id="qq\d+" data-court="(you|agent|quiet)" data-from="\d+" data-due="\d*" data-past="[01]"/);
+    /* groups: the first is the phone's "Past its date"; a heading carries its count; one over five folds */
+    expect(html).toContain("Past its date");
+    const groups = [...html.matchAll(/data-pa5="bv-group" data-k="(\w+)" data-n="(\d+)"/g)].map((m) => [m[1], Number(m[2])] as const);
+    expect(groups.length).toBeGreaterThan(0);
+    expect(groups.reduce((a, g) => a + g[1], 0)).toBe(14);
+    const folds = [...html.matchAll(/data-pa5="bv-fold" data-n="(\d+)"/g)].map((m) => Number(m[1]));
+    expect(folds.length).toBe(groups.filter((g) => g[1] > 5).length);
+    expect(folds.length).toBeGreaterThan(0);
+    expect(vrows(html)).toBe(groups.reduce((a, g) => a + Math.min(5, g[1]), 0));
+    for (const n of folds) expect(html).toContain(`Show ${n} more`);
+    /* past its date: the bar carries on (the deeper segment) — no beacon, no overrun line, no text in a bar */
+    expect(html).toContain('data-past="1"');
+    expect(html).toContain('data-pa5="bv-deep"');
+    expect(html).toContain('data-pa5="bv-notch"');
+    expect(html).not.toMatch(/beacon|pa41v-bc|pa41v-ov|pa41v-lb|data-lb=/);
+    /* the name column: the mini track and the surname, outside the moving track */
+    expect(html).toMatch(/data-pa5="bv-names"><svg class="pa5-mt"[\s\S]*?<b>Number\d+<\/b><\/span><span class="pa5bv-trk"/);
+    expect(html.replace(/<[^>]+>/g, " ")).not.toMatch(/overdue|\blate\b/i);
+    /* nothing filtered, so no "Show all" */
+    expect(html).not.toContain('data-pa5="bv-showall"');
+  });
+  it("filtered from Today: only that group's queries, the filter named, and Show all", () => {
+    const all = renderPageSeededWith(P(<View />), "/queries/all", QS(14));
+    const court = (all.match(/data-pa5="bv-row"[^>]*data-court="(you|agent|quiet)"/) ?? [])[1] as BeCourt;
+    expect(court).toBeTruthy();
+    const html = renderPageSeededWith(P(<View court={court} />), "/queries/all", QS(14));
+    expect(html).toContain(`data-court="${court}"`);
+    expect(html).toContain('data-pa5="bv-filter"');
+    expect(html).toContain('data-pa5="bv-showall"');
+    const courts = [...html.matchAll(/data-pa5="bv-row"[^>]*data-court="(\w+)"/g)].map((m) => m[1]);
+    expect(courts.length).toBeGreaterThan(0);
+    expect(courts.every((k) => k === court)).toBe(true);
+    const n = Number((html.match(/data-pa5="birds-view"[^>]*data-n="(\d+)"/) ?? [])[1]);
+    expect(n).toBeGreaterThan(0);
+    expect(n).toBeLessThan(14);
+  });
+  it("the last span chosen is what it opens on", () => {
+    phone(390, 844, { "pa5.birds-view.span": "6m" });
+    expect(renderPageSeededWith(P(<View />), "/queries/all", QS(6))).toContain('data-span="6m"');
+  });
+  it("landscape: the land class, the spans in the header row, the full name in the column", () => {
+    phone(740, 360);
+    const html = renderPageSeededWith(P(<View />), "/queries/all", QS(6));
+    expect(html).toMatch(/class="pa5 pa5bv land"/);
+    const head = html.slice(html.indexOf('data-pa5="bv-head"'), html.indexOf("</header>"));
+    expect(head).toContain('data-pa5="bv-spans"');
+    expect(html).toMatch(/data-pa5="bv-names"><svg[\s\S]*?<b>Agent Number\d+<\/b>/);
+    vi.unstubAllGlobals();
+    phone(390, 844);
+    const up = renderPageSeededWith(P(<View />), "/queries/all", QS(6));
+    expect(up).not.toMatch(/class="pa5 pa5bv land"/);
+    expect(up.slice(up.indexOf('data-pa5="bv-head"'), up.indexOf("</header>"))).not.toContain('data-pa5="bv-spans"');
+  });
+  it("the list's Birds-eye switch lands on the v5 view, carrying a filter from Today", () => {
+    const html = renderPageSeededWith(P(<QueriesV4 />), "/queries/all?view=birds&court=agent", QS(8));
+    expect(html).toContain('data-view="bird"');
+    expect(html).toContain('data-pa5="birds-view"');
+    expect(html).toMatch(/data-pa5="birds-view"[^>]*data-court="agent"/);
+    const list = renderPageSeededWith(P(<QueriesV4 />), "/queries/all?court=agent", QS(8));
+    expect(list).toContain('data-view="list"');
+    expect(list).not.toContain('data-pa5="birds-view"');
   });
 });

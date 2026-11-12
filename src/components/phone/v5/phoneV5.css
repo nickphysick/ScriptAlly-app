@@ -29,10 +29,10 @@
 
   /* ── the full list of queries: its header stays at the top, and the Birds-eye ruler sticks under its measured height ── */
   .pa4-ph.pa5-phs { position: sticky; top: 0; z-index: 30; }
-  body.pa5-phs .pa41v { --stick: var(--pa5-ph-h, 0px); }
-  /* landscape Birds-eye (v4.1): the header scrolls away and the ruler takes the top edge, as before */
+  body.pa5-phs .pa5bv { --stick: var(--pa5-ph-h, 0px); }
+  /* landscape Birds-eye (v4.1's, kept in Phase E): the header scrolls away and the ruler takes the top edge, as before */
   body.pa41-land .pa4-ph.pa5-phs { position: relative; }
-  body.pa5-phs .pa41v.land { --stick: 0px; }
+  body.pa5-phs .pa5bv.land { --stick: 0px; }
 }
 
 /* ── PHASE B — TODAY'S HEADER (phone-hub-v5.html `H({...})` F1: `.hl`, `titleRow`, `.needp`, `fig`, `chartL`, `.hl-m`).
@@ -250,5 +250,92 @@
 
   @media (prefers-reduced-motion: reduce) {
     .pa5-dkc, .pa5-dkc *, .pa5-dks .pa4-stamp { animation: none !important; transition: none !important; }
+  }
+}
+
+/* ── PHASE E — THE FULL BIRDS-EYE VIEW (phone-birds-eye-dense-v1.html's rows; v4.1's moving parts). Positions are CSS
+   variables on the root (--ppd px per day, --x the tracks' offset, --cur the replay's clip day, --now today's day, --tot
+   the track's days, --nw the name column), so a drag or a replay moves the tracks without a React render.
+   ⚠️ THE NAME COLUMN IS OUTSIDE EVERY TRACK: only `.pa5bv-cv` moves. The today line's lane starts right of the column and
+   sits above the bars; the group headings, the fold and an opened row's detail sit above the lane, opaque, so the line
+   never crosses text. Rows are 28px; the ruler 1.75rem; a heading 1.5rem (PA5-8: at least 18 rows in sight). ── */
+@media (max-width: 767.98px) {
+  .pa5bv { --ppd: 3; --x: 0; --cur: 0; --now: 0; --tot: 300; --nw: 116px; --rh: 1.75rem; --stick: calc(64px + env(safe-area-inset-top, 0px)); position: relative; background: #fff; }
+  .pa5bv-hd { display: flex; align-items: center; gap: 4px; padding: 4px 4px 8px 16px; background: var(--pa-navy); color: #fff; }
+  .pa5bv-sw { flex: 1; min-width: 0; }
+  .pa5bv-cn { flex: none; color: #fff; }
+  .pa5bv-cn .pa4-ib { color: #fff; }
+  .pa5bv-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; padding: 0 4px 0 12px; background: var(--pa-page); border-bottom: 1px solid var(--pa-rule); }
+  .pa5 .pa5bv-rp { margin-left: auto; color: var(--pa-navy); }
+  .pa5bv-rp svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pa5bv-flt { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 4px 0 16px; background: var(--pa-page); border-bottom: 1px solid var(--pa-rule); font-size: 0.875rem; font-weight: 600; color: var(--pa-ink); }
+  .pa5bv-flt > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .pa5 .pa5bv-all { flex: none; min-height: 48px; padding: 0 12px; font-weight: 600; color: var(--pa-navy); }
+
+  .pa5bv-body { position: relative; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  .pa5bv-cv { position: absolute; left: 0; top: 0; height: 100%; width: calc(var(--tot) * var(--ppd) * 1px); transform: translateX(calc(var(--x) * 1px)); will-change: transform; }
+
+  /* the ruler sticks (so the "Today" pill stays in sight); the month names and the pill share its one line */
+  .pa5bv-ruler { position: sticky; top: var(--stick); z-index: 6; display: flex; height: var(--rh); background: var(--pa-navy-deep); }
+  .pa5bv-gut { flex: none; width: var(--nw); }
+  .pa5bv-rv { flex: 1; min-width: 0; position: relative; overflow: hidden; }
+  .pa5bv-mo { position: absolute; top: 0; height: 100%; left: calc(var(--s) * var(--ppd) * 1px); width: calc(var(--w) * var(--ppd) * 1px); border-left: 1px solid rgba(255, 255, 255, 0.25); }
+  .pa5 .pa5bv-mo b { position: absolute; left: 6px; top: 0.25rem; font: 400 0.875rem/1.25rem var(--pa-type) !important; color: #fff; white-space: nowrap; }
+  .pa5 .pa5bv-pill { position: absolute; top: 0.25rem; z-index: 2; left: calc(var(--now) * var(--ppd) * 1px); transform: translateX(-50%); padding: 0 7px; border-radius: 0.625rem; background: #fff; color: var(--pa-navy-deep); font: 400 0.875rem/1.25rem var(--pa-type) !important; white-space: nowrap; }
+
+  .pa5bv-content { position: relative; }
+  .pa5bv-lane { position: absolute; left: var(--nw); right: 0; top: 0; bottom: 0; overflow: hidden; pointer-events: none; z-index: 3; }
+  .pa5bv-ml { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(31, 38, 51, 0.06); left: calc(var(--s) * var(--ppd) * 1px); }
+  .pa5bv-now { position: absolute; top: 0; bottom: 0; width: 1.5px; margin-left: -0.75px; background: var(--pa-navy); opacity: 0.6; left: calc(var(--now) * var(--ppd) * 1px); }
+
+  .pa5bv-gh { position: sticky; top: calc(var(--stick) + var(--rh)); z-index: 5; display: flex; align-items: center; gap: 8px; min-height: 1.5rem; padding: 0 16px; background: var(--pa-page); border-bottom: 1px solid var(--pa-rule); }
+  .pa5 .pa5bv-gt { margin: 0; font: 400 0.875rem/1.25rem var(--pa-type) !important; color: var(--pa-ink); }
+  .pa5bv-gh > span { font-size: 0.875rem; line-height: 1.25rem; color: var(--pa-muted); }
+
+  .pa5bv-row { position: relative; border-bottom: 1px solid var(--pa-fill); transition: opacity 0.35s; }
+  .pa5bv-row.pre { opacity: 0.18; }
+  .pa5 .pa5bv-top { display: flex; align-items: center; width: 100%; height: 27px; padding: 0; color: var(--pa-ink); text-align: left; background: #fff; }
+  .pa5bv-nm { flex: none; width: var(--nw); display: flex; align-items: center; gap: 6px; padding-left: 6px; overflow: hidden; white-space: nowrap; font-size: 0.875rem; line-height: 1; }
+  .pa5bv-nm b { min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+  .pa5bv-trk { flex: 1; min-width: 0; position: relative; display: block; height: 27px; overflow: hidden; cursor: grab; }
+  .pa5bv-clip { clip-path: inset(0 calc((var(--tot) - var(--cur)) * var(--ppd) * 1px) 0 0); }
+  .pa5bv-trk i { position: absolute; top: 7.5px; height: 12px; border-radius: 4px; left: calc(var(--s) * var(--ppd) * 1px); width: calc(var(--w) * var(--ppd) * 1px); box-shadow: inset 0 0 0 1px rgba(31, 38, 51, 0.12); }
+  .pa5bv-trk .pa5bv-p { opacity: 0.45; }
+  .pa5bv-trk .pa5bv-rm { opacity: 0.4; min-width: 4px; }
+  .pa5bv-trk .pa5bv-rm.off { border-radius: 4px 0 0 4px; -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent); mask-image: linear-gradient(90deg, #000 80%, transparent); }
+  .pa5bv-trk .pa5bv-s { min-width: 4px; }
+  .pa5bv-trk .pa5bv-dp { filter: brightness(0.8) saturate(1.5); border-radius: 0 4px 4px 0; box-shadow: none; }
+  .pa5bv-trk s { position: absolute; top: 5.5px; width: 2px; height: 16px; margin-left: -1px; border-radius: 1px; background: rgba(31, 38, 51, 0.55); left: calc(var(--s) * var(--ppd) * 1px); }
+
+  /* an opened row: v4.1's expansion, led by the block's detail; opaque and above the today line */
+  .pa5bv-d { position: relative; z-index: 4; background: #fff; padding: 4px 16px 8px; border-top: 1px solid var(--pa-fill); animation: pa5-bedd 0.18s ease-out; }
+  .pa5bv-who b { font-weight: 600; overflow-wrap: anywhere; }
+  .pa5bv-d .pa5bv-say { color: var(--pa-ink); overflow-wrap: anywhere; }
+  .pa5bv-xpi { margin: 8px 0; padding: 4px 12px; border-radius: 16px; background: var(--pa-page); }
+  .pa5bv-st { display: flex; align-items: center; gap: 12px; min-height: 48px; }
+  .pa5bv-st + .pa5bv-st { border-top: 1px solid var(--pa-rule); }
+  .pa5bv-st b { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .pa5bv-st.old b { font-weight: 400; color: var(--pa-body); }
+  .pa5bv-nx { margin: 4px 0 8px; }
+
+  .pa5 .pa5bv-fold { position: relative; z-index: 4; display: flex; align-items: center; width: 100%; min-height: 48px; padding: 0 16px; background: #fff; border-bottom: 1px solid var(--pa-rule); font-weight: 600; color: var(--pa-navy); text-align: left; }
+  .pa5bv-empty { padding: 16px 24px; }
+  .pa5bv-end { height: 120px; }
+  .pa5 .pa5bv-btt { position: fixed; left: 50%; bottom: calc(104px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); min-height: 48px; padding: 0 20px; border-radius: 24px; background: var(--pa-navy-deep); color: #fff; font-weight: 600; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); z-index: 8; white-space: nowrap; }
+
+  /* landscape (v4.1's): one header row with the spans, a wider name column with the full name, no dock */
+  .pa5bv.land { --stick: 0px; }
+  .pa5bv.land .pa5bv-hd { padding: max(4px, env(safe-area-inset-top, 0px)) 8px 4px 16px; }
+  .pa5bv.land .pa5bv-sw { flex: 0 1 260px; }
+  .pa5bv.land .pa5bv-ctl { flex: 1; background: none; border: 0; padding: 0; }
+  .pa5bv.land .pa5bv-ctl .pa4-chip > span { background: rgba(255, 255, 255, 0.14); color: #fff; box-shadow: none; }
+  .pa5bv.land .pa5bv-ctl .pa4-chip.on > span { background: #fff; color: var(--pa-navy); }
+  .pa5bv.land .pa5bv-rp { color: #fff; }
+  .pa5bv.land .pa5bv-btt { bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+  body.pa41-land .pa4-tb, body.pa41-land .pa4-mini { display: none !important; }
+  body.pa41-land .sv2-stagepad { padding-bottom: 0 !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pa5bv *, .pa5bv-d, .pa5bv-row { animation: none !important; transition: none !important; }
   }
 }
