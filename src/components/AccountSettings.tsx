@@ -48,7 +48,9 @@ import "./agents/contact/contactPrinciples.css"; // the desktop postmark stamp (
 import { CountryCombobox } from "./forms";
 import { PlanTable } from "./plans/PlanTable";
 import { todoPrefs, STALE_MONTHS_CHOICES } from "../lib/todoPrefs";
-import { QUIET_WEEKS, quietWeeksOf, quietWeeksPaths } from "../lib/queryState";
+import { QUIET_WEEKS, quietWeeksPaths } from "../lib/queryState";
+import { queryClock, CLOCK_DEFAULTS } from "../lib/queryClock";
+import { ClockTimeline, wk } from "./settings/ClockTimeline";
 import { deskPrefPaths, type DeskPrefPatch } from "../lib/userPaths";
 import { useSmartImportEntitlement } from "../lib/useSmartImportEntitlement";
 import { optionalTaskTypes, staleOptionLabel } from "../lib/accountTasks";
@@ -234,7 +236,8 @@ export const AccountSettings: React.FC<{
   const pwMode = passwordMode(authFacts?.providerIds ?? ["password"]);
   const pendingDeletion = scheduledDeletion(currentUser.scheduledDeletion);
   const prefs = todoPrefs(currentUser.todoPrefs);
-  const quietWeeks = quietWeeksOf(currentUser);
+  const clock = queryClock(currentUser);
+  const quietWeeks = clock.quietWeeks;
   const notify = notifyPrefs(currentUser.notifyPrefs);
   const newsOn = marketingGranted(currentUser.marketingConsent);
   const timezone = resolveTimeZone(currentUser.workspacePrefs?.timezone);
@@ -446,12 +449,24 @@ export const AccountSettings: React.FC<{
 
   const prefsSection = (
     <>
-      <SettingsCard heading="A query's clock" headingId="acct-h-preferences" blurb="How long QueryHawk waits before it suggests your next move. An agent's own response time always comes first.">
+      <SettingsCard
+        heading="A query's clock" headingId="acct-h-preferences"
+        blurb="How long QueryHawk waits before it suggests your next move. An agent's own response time always comes first."
+        note={clock.quietWeeks !== CLOCK_DEFAULTS.quietWeeks
+          ? <>You've changed these from the usual timings. <button type="button" style={linkBtn} onClick={(e) => void saveQuietWeeks(CLOCK_DEFAULTS.quietWeeks, e.currentTarget)}>Put them back</button></>
+          : "These are the usual timings. Change any of them to suit how you query."}
+      >
+        <SettingsRow label="" full><ClockTimeline clock={clock} /></SettingsRow>
+        {/* ⚠️ THREE FIXED FIGURES, NOT CONTROLS (Phase 3 partly landed): their readers are not on the one clock yet, and a
+            control that changes nothing is a dead control. See lib/queryClock. */}
+        <SettingsRow label="Reply expected within" description="Used only when an agent hasn't said how long they take." control={<span className="sc-val" data-clock="reply">{wk(clock.replyWeeks)}</span>} />
+        <SettingsRow label="Suggest a nudge" description="Once the reply date has passed." control={<span className="sc-val" data-clock="nudge">{wk(clock.nudgeAfterWeeks)} after</span>} />
+        <SettingsRow label="After a nudge, check back in" description="When QueryHawk suggests nudging again if there's still no reply." control={<span className="sc-val" data-clock="check">{wk(clock.checkBackWeeks)}</span>} />
         <SettingsRow
           label="A query goes quiet after"
-          description="Counted from the reply date. Quiet queries drop to the back, and QueryHawk suggests closing them."
+          description="Counted from the reply date or your last nudge, whichever is later. Quiet queries drop to the back, and QueryHawk suggests closing them."
           control={
-            <select id="pf-quiet" className="acct-input sc-grow" style={inputStyle} aria-label="A query goes quiet after" value={quietWeeks} onChange={(e) => void saveQuietWeeks(Number(e.target.value), e.currentTarget)}>
+            <select id="pf-quiet" className="acct-input sc-grow" style={inputStyle} aria-label="A query goes quiet after" value={clock.quietWeeks} onChange={(e) => void saveQuietWeeks(Number(e.target.value), e.currentTarget)}>
               {QUIET_WEEKS.map((w) => <option key={w} value={w}>{w} weeks</option>)}
             </select>
           }
