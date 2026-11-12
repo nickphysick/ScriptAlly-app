@@ -21,7 +21,7 @@
  *   AA13  "Who are you querying?": Agent fit high first, unrated last, then the shorter response time, then the name
  *   AA14  no green and no #7c3a2a in the add panel or card edit mode; WeekSlider's fill and thumb are #2a3a52
  *
- * ⚠️ EMULATOR ONLY: the add needs the Pro plan (the Free plan's cap is 5 agents and the harness holds 53), set by
+ * ⚠️ EMULATOR ONLY: the add once needed the Pro plan for the agent cap, which plan rules v1.1 removed (13 Nov); the plan is still set by
  *    `aa1Emu.mjs pro` on this run's emulator, which imports the committed snapshot and exports nothing.
  * ⚠️ `AA_MUTATE=<lock>` applies that lock's named break in the page; a lock green under its own break is unproved.
  */

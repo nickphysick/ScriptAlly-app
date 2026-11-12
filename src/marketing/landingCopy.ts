@@ -562,7 +562,7 @@ export const PRICING_TIERS: PricingTier[] = [
     summary: "Everything you need to run one manuscript's campaign.",
     after: ["No card. It stays free."],
     /* ⚠️ PLAN RULES v1: BOTH LISTS ARE READ FROM THE PLAN TABLE (`lib/planComparison`), never typed here — what Free
-       includes is every row it has, and what it lacks is the rows Pro adds. No agent cap (there is none in the code). */
+       includes is every row it has, and what it lacks is the rows Pro adds. No agent cap (none in the code since v1.1; planLimits.test.ts). */
     includes: PLAN_ROWS.filter((r) => r.free.kind !== "absent").map((r) => r.label),
     excludes: DIFFERING_ROWS.map((r) => ({ label: r.label, note: r.sub })),
     action: "Available at launch",

@@ -50,6 +50,7 @@ import {
 import { seedCommunityAgentsIfEmpty, localSeedCommunityAgents } from "./seedCommunityAgents";
 import { narratesManuscriptWrite } from "./manuscriptFeed";
 import { packagesUnlocked, resolveEntitlement, type Entitlement } from "./entitlements";
+import { manuscriptLimitError } from "./manuscripts";
 import { versionAtLogging } from "./versionsV2";
 
 import {
@@ -1592,12 +1593,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   ): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Authentication status required." };
 
-    if (!bypassLimits && currentUser.plan === UserPlan.FREE && manuscripts.length >= 1) {
-      return {
-        success: false,
-        error: "Free tier is limited to 1 manuscript. Please upgrade to Pro to track multiple scripts!"
-      };
-    }
+    const limitErr = bypassLimits ? null : manuscriptLimitError(entitlement.pro, manuscripts.length);
+    if (limitErr) return { success: false, error: limitErr };
 
     /* ⚠️ SUCCESS IS THE MANUSCRIPT WRITE ALONE (timeline writer fix v1) — lib/manuscriptWrite.ts.
        The feed entry is narration: a failed one no longer reports a landed save as a failure, so the
@@ -2223,7 +2220,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     return { lifted, stamped };
   };
 
-  // Agent Actions with Free limits
+  // Agent Actions (no plan limit)
   const addAgent = async (
     a: Omit<Agent, "id" | "userId" | "dateAdded" | "lastCheckedDate"> & { id?: string },
     bypassLimits: boolean = false
@@ -2239,12 +2236,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       if (twin) return { success: true, id: twin.id };
     }
 
-    if (!bypassLimits && currentUser.plan === UserPlan.FREE && agents.length >= 5) {
-      return {
-        success: false,
-        error: "Free tier is capped at 5 agents. Upgrade to QueryHawk Pro for unlimited research!"
-      };
-    }
+    /* ⚠️ PLAN RULES v1.1 (13 Nov, Nick) — THERE IS NO AGENT LIMIT on any plan; the plan table says "Unlimited" on both.
+       `bypassLimits` is kept for the callers that pass it and limits nothing here. planLimits.test.ts fails on a cap. */
+    void bypassLimits;
 
     const id = a.id || "agent-" + Math.random().toString(36).substr(2, 9);
     const rawAg: Agent = {

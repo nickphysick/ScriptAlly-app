@@ -7,8 +7,7 @@
  * line, and the sentence shown when the manuscript could not be created.
  */
 import { agentAgencyLine } from "./agentDisplay";
-import { manuscriptLimitError, FREE_MANUSCRIPT_LIMIT } from "./manuscripts";
-import { UserPlan } from "../types";
+import { MANUSCRIPT_LIMIT_ERROR } from "./manuscripts";
 
 /**
  * The line under a query's agent in the review. A named agent with no agency reads "No agency"
@@ -29,7 +28,7 @@ export type ImportSource = "smart" | "template";
 /** Shown when the manuscript could not be created for a reason that is not the plan's limit. */
 export const MANUSCRIPT_ERROR = "Couldn't set up your manuscript. Nothing's lost. Try again, or use the Import page.";
 /** The build's own limit message (lib/manuscripts), as the host raises it. */
-export const MANUSCRIPT_LIMIT_MESSAGE = manuscriptLimitError(UserPlan.FREE, FREE_MANUSCRIPT_LIMIT) ?? "";
+export const MANUSCRIPT_LIMIT_MESSAGE = MANUSCRIPT_LIMIT_ERROR;
 /** What to show: the host's limit message when that is what stopped it, else the sentence above. */
 export function manuscriptErrorLine(hostError: string | null | undefined): string {
   return hostError && MANUSCRIPT_LIMIT_MESSAGE && hostError === MANUSCRIPT_LIMIT_MESSAGE ? hostError : MANUSCRIPT_ERROR;

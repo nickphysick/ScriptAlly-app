@@ -367,36 +367,6 @@ test("the add card (§11.9): a name OR an agency, the duplicate blocks with its 
   bump(8);
 });
 
-test("§11.9 the free cap surfaces IN the card — Add refuses, says why, and writes nothing", async ({ page }) => {
-  await openRoute(page, "/agents", { width: 1440, height: 900 });
-  const scope = await visiblePage(page, ".agl-wpg");
-  const { execSync } = await import("node:child_process");
-  /* ⚠️ THE PRECONDITION IS THE PREMISE: this lock exists because the harness account is FREE at
-     34 agents, where `addAgent`'s own cap refuses a sixth. A client cannot flip its plan (the
-     rules' billing guard — which is also why harnessPlan.mjs can no longer arrange a Pro window),
-     so the cap IS this fixture's write path, and the full after-add choreography is proven on
-     the lab over known content instead. If the account ever reads Pro, this case must be
-     re-thought, not skipped. */
-  const plan = /plan: (\w+)/.exec(execSync("node tests/e2e/harnessPlan.mjs", { encoding: "utf8" }))?.[1];
-  expect(plan, "the cap lock's premise: a Free account at the cap").toBe("Free");
-  await openAddCard(page, scope);
-  await page.waitForSelector(ADD);
-  await page.fill(`${ADD} [data-ae="name"]`, "Zz Probe Agent");
-  await page.fill(`${ADD} [data-ae="agency"]`, "Probe & Co");
-  await page.keyboard.press("Tab");
-  await page.click('[data-ac="card"] [data-ae="save"]');
-  /* the refusal lands in the foot, and the card STAYS — a closed card would read as a successful
-     add that silently was not */
-  await expect(page.locator('[data-ac="card"] [data-ae="sum-bad"]')).toContainText("capped at 5");
-  expect(await page.locator(ADD).count(), "the card closed on a refused add").toBe(1);
-  await page.click('[data-ac="card"] [data-ae="cancel"]');
-  await page.click('[data-ac="card"] [data-ae="discard"]');
-  await page.waitForSelector('[data-ac="card"]', { state: "detached" });
-  const out = execSync("node tests/e2e/cleanupProbeAgent.mjs", { encoding: "utf8" });
-  expect(out, "a refused add still wrote the agent").toContain("deleted 0 agent");
-  bump(5);
-});
-
 test("§11.9 after adding (the lab, over known content) — under its letter, centred, ringed", async ({ page }) => {
   /* the lab mounts the REAL page over the fixture with a local addAgent, no sign-in, no account
      writes — the choreography (band, scroll, ring) is the page's own; only the writer is local */

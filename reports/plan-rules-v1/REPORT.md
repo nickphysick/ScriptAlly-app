@@ -1,5 +1,20 @@
 # Plan rules v1 — final report
 
+## v1.1 (13 Nov) — the agent cap, and both Free limits off the stored plan
+
+v1 claimed `addAgent` had no cap and shipped "Unlimited" agents on Free (plan table, `/pricing`, landing tiers). It had one:
+Free refused a sixth agent. Both Free limits also read the stored `plan`, so a founding writer or trial stored as Free
+was held to 1 manuscript and 5 agents. Nick ruled (13 Nov): remove the cap.
+
+- `addAgent` has no limit on any plan (`bypassLimits` kept for its callers, unused).
+- The one manuscript limit is `manuscriptLimitError(entitlement.pro, count)` in `lib/manuscripts.ts`; db.addManuscript, the
+  add form, onboarding and import all call it. Pending counts as Pro, so nothing is refused before the entitlement loads.
+- Lock: `src/lib/planLimits.test.ts` — no agent-count limit anywhere in `src/` or `functions/src/`, no count gated on the
+  stored plan, every caller passes `entitlement.pro`. Its two patterns match both old lines at `848668af2` (red before).
+- e2e: `contactV11` §11.9 "the free cap surfaces IN the card" deleted (with no cap it would write a real agent);
+  `addAgentV1`'s header note corrected.
+- Gates: tsc clean; Vitest 12060 passed, 3 failed — the baseline three (emuGuard, firestoreTarget); build clean.
+
 12 Nov 2026. Branch `plan-rules-v1` (pushed, tip in the log below), cut from the dev line's tip `0dbabdc89`.
 **On dev:** https://scriptally-dev.web.app serves `index-nf9qrdAM.js`, built from a clean checkout of `9dddd36c0`
 (pushed as `plan-rules-v1` and as `dev/…-pa41-clp1-ql2-prv1`). It replaced `index-BTbKdg-q.js` (…-clp1-ql2, this branch's base).
@@ -203,8 +218,8 @@ client-only.
    Firebase Auth's `metadata.creationTime`. The server can read it through `getAuth()`; the client can read it on
    `auth.currentUser` and nowhere else. "Derived, never stored" means choosing one of these. `subscriptionStatus`
    already has a `"trialing"` value that nothing would then set.
-3. **"There is no agent cap"**: true in the code. CLAUDE.md's "agents capped by `addAgent`" is stale; `addAgent`
-   has no limit. Only the copy says "Up to 20 agents" (two places in `pricingCopy.ts`).
+3. **"There is no agent cap"**: ⚠️ CORRECTED 13 Nov — this was FALSE. `addAgent` refused a sixth agent on a stored Free plan
+   (`agents.length >= 5`), and the copy said "Up to 20 agents". v1 shipped "Unlimited" against a 5 cap. Fixed in v1.1 below.
 4. **"Smart email drop" and "The Scout" are client-only gates**: false. `extractFromEmail` is gated on the server, so
    a trial or founding writer would be refused there unless `functions/` changes too. `suggestComps` is the same: it
    refuses non-Pro on the server (`SUGGESTIONS_REQUIRE_PRO`, line 72).

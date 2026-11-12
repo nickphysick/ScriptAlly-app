@@ -69,7 +69,7 @@ const IconColumns = () => (
 );
 
 export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
-  const { manuscripts, currentUser, addManuscript } = useScriptAllyDb();
+  const { manuscripts, currentUser, addManuscript, entitlement: planEntitlement } = useScriptAllyDb();
   const liveEntitlement = useSmartImportEntitlement();
   const entitlement = lab?.entitlement ?? liveEntitlement;
   /* Phone app v2 Part 8B: below 768px only the doors are the phone's (ImportDoorsPhone); every press below is this
@@ -101,7 +101,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
     if (lab?.ensure) return lab.ensure();
     if (manuscript) return manuscript.id;
     return ensureManuscriptOnce(created.current, !!draft, async () => {
-      const limit = manuscriptLimitError(currentUser?.plan, manuscripts.length);
+      const limit = manuscriptLimitError(planEntitlement.pro, manuscripts.length);
       if (limit) { setHostError(limit); return null; }
       const res = await addManuscript(buildManuscriptPayload({
         title: draft!.title.trim() || "Untitled manuscript",

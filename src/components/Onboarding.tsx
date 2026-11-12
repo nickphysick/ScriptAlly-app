@@ -137,7 +137,7 @@ export const WelcomeStageScreen: React.FC<{
 };
 
 export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
-  const { currentUser, manuscripts, addManuscript, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, manuscripts, addManuscript, updateUserProfile, entitlement } = useScriptAllyDb();
 
   const STORAGE_KEY = `scriptally_onboarding_progress_${currentUser?.id || "anon"}`;
 
@@ -245,7 +245,7 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
   // shared Free-tier limit check, then the same addManuscript the rest of the app uses.
   // Returns the new manuscript id, or null when the save didn't land.
   const saveBranchManuscript = async (fields: ManuscriptFieldsState, status: ManuscriptStatus): Promise<string | null> => {
-    const limitErr = manuscriptLimitError(currentUser?.plan, manuscripts.length);
+    const limitErr = manuscriptLimitError(entitlement.pro, manuscripts.length);
     if (limitErr) {
       setBranchError(limitErr);
       return null;
