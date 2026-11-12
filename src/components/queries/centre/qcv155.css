@@ -1,0 +1,45 @@
+/*
+ * Query Centre v155 (design-refs/query-centre-v155.html) — the quiet state, day one and the loading skeleton.
+ * Values are the ref's `.zpanel`, `.zsk`, `.zskh` and `.zskg`. The everyday page is not touched by anything here: every
+ * rule is scoped to an element only these states draw.
+ */
+
+/* ── the shared panel ── */
+.qc151.qc153 .qc155-panel.qc155-panel {
+  padding: 34px 30px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 0 1px #e6dfd4;
+  margin: 14px 0 18px;
+}
+/* ⚠️ brand.tsx forces h1/h2/h3 to its own face with !important: the heading needs two classes and !important */
+.qc151.qc153 .qc155-panel .qc155-h.qc155-h {
+  font-family: "Special Elite", "Courier New", monospace !important;
+  font-size: 26px !important;
+  font-weight: 400 !important;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #1c130f;
+  margin: 0 0 8px;
+}
+.qc151.qc153 .qc155-panel .qc155-p.qc155-p {
+  font-family: "Source Serif 4", Georgia, serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #5b4f47;
+  margin: 0;
+  max-width: 60ch;
+}
+.qc151.qc153 .qc155-panel .qc155-p a {
+  font: inherit;
+  color: #2a3a52;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.qc151.qc153 .qc155-panel .qc155-p a:focus-visible {
+  outline: 2px solid #2a3a52;
+  outline-offset: 2px;
+  border-radius: 2px;
+}

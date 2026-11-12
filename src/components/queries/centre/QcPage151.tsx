@@ -34,6 +34,7 @@ import { QcCard154 } from "./QcCard154";
 import { QcBar153 } from "./QcBar153";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
 import { sectionSwatch, standWords } from "../../../lib/qc153";
+import { QuietPanel155 } from "./QcState155";
 import "./qcv151.css";
 import "./qcv1522.css";
 import "./qcv153.css";
@@ -137,7 +138,12 @@ export interface QcPage151Props {
   onBeGroup: (g: BeGroup) => void;
   beSort: BeSort;
   onBeSort: (s: BeSort) => void;
+  /** v155 — the list's state, decided by the page from the data (lib/qc155): null is the everyday list */
+  state155?: State155 | null;
 }
+
+/** v155 — the states the list draws besides the everyday one */
+export type State155 = { kind: "quiet"; body: string };
 
 /* ── the status track (v151 §7) ── */
 export const Track151: React.FC<{ row: Pick<QcRow, "status" | "furthest"> }> = ({ row }) => {
@@ -433,6 +439,8 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
             </div></div>
           ) : (
             <div className="qc153-list" data-qc151="table" data-qcv="list">
+              {/* v155 §1 — nothing needs you: the panel above the first group, the list carrying on beneath it */}
+              {p.state155?.kind === "quiet" && !empty ? <QuietPanel155 body={p.state155.body} /> : null}
               {empty ? (
                 <div className="qc151-emp" data-qc151="no-matches">
                   <b>No queries match</b>

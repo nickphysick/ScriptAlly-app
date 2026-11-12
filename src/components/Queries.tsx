@@ -127,7 +127,7 @@ import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
 import { expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
-import { QcPage151, Track151 } from "./queries/centre/QcPage151";
+import { QcPage151, Track151, type State155 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { QcRail153 } from "./queries/centre/QcRail153";
 import { QcGoal154 } from "./queries/centre/QcGoal154";
@@ -135,6 +135,8 @@ import { weekGoal154 } from "../lib/qc154goal";
 import { railCounts } from "../lib/qc153Rail";
 import { slipTone } from "../lib/qc153";
 import { nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
+import { NEEDS_YOU_155, quietBody155, quietNow155 } from "../lib/qc155";
+import { qcStateAid } from "../lib/qcReviewAid155";
 import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
 import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
 import { qcPlanAid } from "../lib/qcReviewAid1522";
@@ -2654,7 +2656,12 @@ export const Queries: React.FC<{
       const rows = buildQcRows(
         import.meta.env.MODE === "production" ? (queries as Query[]) : padLiveQueries(queries as Query[], agents, Date.now()),
         agents, activities, Date.now());
-      return qmPhone ? rows : stampRows(rows, agents, { quietWeeks: qcQuietWeeks, nowMs: Date.now() });
+      if (qmPhone) return rows;
+      const stamped = stampRows(rows, agents, { quietWeeks: qcQuietWeeks, nowMs: Date.now() });
+      /* v155 — a dev-only review aid (lib/qcReviewAid155): the quiet state or day one, by taking rows away. The mode
+         check is here so a production build drops the module. */
+      const aid155 = import.meta.env.MODE !== "production" ? qcStateAid() : null;
+      return aid155 === "first" ? [] : aid155 === "quiet" ? stamped.filter((r) => { const s = stateOf(r); return !(s && NEEDS_YOU_155.has(s)); }) : stamped;
     },
     [queries, agents, activities, qcQuietWeeks, qmPhone],
   );
@@ -5392,6 +5399,12 @@ export const Queries: React.FC<{
      when NO skeleton had been shown, the inverse of what the page does now. `useQcLoad` is the one
      model; these names survive as plain consts because the unreachable three-column pane reads them. */
   const showGridSkeleton = qcLoad.loading;
+  /* v155 — the desktop list's state, from the data (lib/qc155). Nothing narrowing it means no chip, no "Where it stands"
+     and no search, the page's or the shell's. Declared up here, below everything it reads. */
+  const filtersOn155 = qc140Chips.length > 0 || qcF138.where != null || qcTerm !== "";
+  const state155: State155 | null = showGridSkeleton ? null
+    : quietNow155({ rows: qcScoped, view: qcView150, filtersOn: filtersOn155 }) ? { kind: "quiet", body: quietBody155(qcScoped, qcNow138) }
+    : null;
   /* v138 §A–B — the desktop header: the title block, the glyph row, the filter row and the pinned row */
   /* v149 Part A — the header card and the "waiting on you" banner (the Versions page's own components); the hero
      (QcHeader138) and the breakdown card (QcWhereCard) are no longer drawn on this page */
@@ -8075,6 +8088,7 @@ export const Queries: React.FC<{
                 ? (strip151.length ? "filtered" as const : qcF138.where === "closed" ? "closed" as const : null) : null;
               return (
                 <QcPage151
+                  state155={state155}
                   loading={showGridSkeleton}
                   counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
                   /* v154 — the weekly goal chart replaces the stage ring: the writer's own sends (every manuscript, as the
