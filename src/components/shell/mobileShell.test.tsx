@@ -220,7 +220,10 @@ describe("the app-feel layer (Phase 6)", () => {
    The claim that survives is the same one: nothing it offered became unreachable. Each of its doors now has a home on
    the You tab, its Settings page or Today. The rendered walk is tests/e2e/phoneAppV4.measure.ts (PA4-8). */
 describe("the retired menu — everything it offered is still reachable", () => {
-  const you = readFileSync(resolve(__dirname, "../phone/v4/YouV4.tsx"), "utf8");
+  /* Phone app v5, Phase G: You is Profile (ProfileV5, its rows in lib/phoneV5 PROFILE_ROWS); packages, letters and comps
+     moved to the Materials tab (its own dock place) */
+  const you = readFileSync(resolve(__dirname, "../phone/v5/ProfileV5.tsx"), "utf8") + readFileSync(resolve(__dirname, "../../lib/phoneV5.ts"), "utf8");
+  const nav = readFileSync(resolve(__dirname, "../../lib/phoneV3Nav.ts"), "utf8");
   it("the shell no longer mounts the menu, the band or the book sheet on a phone", () => {
     for (const gone of [/<PhoneMenu\b/, /<PhoneBand\s/, /<PhoneBookSheet\b/, /setMenuOpen\(/]) expect(appShell, String(gone)).not.toMatch(gone);
     /* Phone app v5: the dock and the slim bar are v5's (V5Dock, V5MiniBar replace V4TabBar, V4MiniBar) */
@@ -228,9 +231,12 @@ describe("the retired menu — everything it offered is still reachable", () => 
     expect(appShell).toContain("<V4PushedHeader");
     expect(appShell).toContain("<V5Dock");
   });
-  it("You reaches Responses, Analytics, Streaks and goals, the book, packages, letters and comps, and Settings", () => {
-    for (const path of ['"/queries/responses"', '"/queries/analytics"', '"/goals"', '"/manuscripts"', '"/queries/packages"', '"/manuscripts#materials"', '"/manuscripts#comps"', '"/account"']) {
+  it("Profile reaches Responses, Analytics, Streaks and goals, the book, Your notes and Settings; Materials is a dock place", () => {
+    for (const path of ['"/queries/responses"', '"/queries/analytics"', '"/goals"', '"/manuscripts"', '"/your-notes"', '"/account"']) {
       expect(you, path).toContain(path);
     }
+    /* packages, letters and comps: the Materials tab (Packages · Letters · Versions · Comps) */
+    expect(nav).toContain('{ key: "materials", label: "Materials", path: "/materials" }');
+    for (const t of ['label: "Packages"', 'label: "Letters"', 'label: "Comps"']) expect(you, t).toContain(t);
   });
 });

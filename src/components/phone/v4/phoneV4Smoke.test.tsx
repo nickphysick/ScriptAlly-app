@@ -20,7 +20,6 @@ import { V4PushedHeader } from "./V4Chrome";
 import { Cta, Hero } from "./V4Parts";
 import { QueriesV4 } from "./QueriesV4";
 import { AgentsV4, AgentsListPageV4 } from "./AgentsV4";
-import { YouV4 } from "./YouV4";
 import { QuickLogV4 } from "./QuickLogV4";
 import { V3Provider } from "../v3/V3Provider";
 
@@ -55,12 +54,8 @@ describe("Phone app v4 renders", () => {
     expect(one).toMatch(/data-pa4="agrp" data-k="querying"/);
     expect(one).not.toMatch(/data-pa4="agrp" data-k="toquery"/);
   });
-  it("You: early days in words, and the rows for every page v3 reached", () => {
-    const empty = renderPage(<YouV4 />, "/you");
-    expect(empty).toContain("Nothing sent yet.");
-    const full = renderPageSeeded(<YouV4 />, "/you");
-    for (const w of ["See the full picture", "What’s landing", "Wall of no", "Packages", "Responses", "Query letters", "Synopses and comps"]) expect(full).toContain(w);
-  });
+  /* (v4's You page is retired — Phone app v5 Phase G re-laid it as Profile, ProfileV5; its smoke is in
+     phoneV5Smoke.test.tsx. Packages, letters and comps are the Materials tab now.) */
   it("the quick log opens on who, with the two quiet links", () => {
     for (const html of [renderPage(P(<QuickLogV4 />), "/dashboard"), renderPageSeeded(P(<QuickLogV4 />), "/dashboard")]) {
       for (const w of ["Who did you query?", "Other", "An agent replied", "Pin a note"]) expect(html).toContain(w);

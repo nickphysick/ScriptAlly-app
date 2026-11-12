@@ -466,3 +466,37 @@
   .pa5m-pick { padding: 8px 24px 24px; }
   .pa5m-pick .pa5m-h { margin-bottom: 8px; }
 }
+
+/* ── PHASE G — PROFILE (no ref: v4's You under v5's header) and THE FEEDBACK SHEET (phone-feedback-v1.html section 1:
+   `.sheet`, `.seg`, `.ta`, `.stamp`, `.cta`, `.link`). The sheet lives in the overlay layer, so it is scoped by `.pa5-fb`.
+   Every target 48px; nothing under 0.875rem; the note is at least 16px so iOS does not zoom. ── */
+@media (max-width: 767.98px) {
+  /* Profile's header: v5's, with room under it for the figures card to lap it (v4's LapCard, -56px) */
+  .pa5-hd.pa5p-hd { padding-bottom: 88px; }
+  .pa5p-hd .pa5p-book { color: #fff; font-weight: 600; margin-top: 8px; overflow-wrap: anywhere; }
+
+  .pa5-fb { padding: 8px 16px calc(20px + env(safe-area-inset-bottom, 0px)); }
+  .pa5-fb .pa4-grab { margin-bottom: 16px; }
+  .pa5-fb .pa5-fb-h { margin: 0 8px 4px; outline: none; }
+  .pa5-fb .pa5-fb-about { margin: 0 8px 16px; overflow-wrap: anywhere; }
+  .pa5-fb-kinds { display: flex; gap: 8px; margin-bottom: 12px; }
+  .pa5-fb .pa5-fb-kinds > button {
+    flex: 1 1 0; min-width: 0; min-height: 48px; padding: 4px 8px; border-radius: 24px; background: #fff; color: var(--pa-ink);
+    box-shadow: inset 0 0 0 1.5px var(--pa-rule); font: 600 0.9375rem/1.2 var(--pa-sans); text-align: center; overflow-wrap: anywhere; cursor: pointer;
+  }
+  .pa5-fb .pa5-fb-kinds > button.on { background: var(--pa-navy); color: #fff; box-shadow: none; }
+  .pa5-fb .pa5-fb-ta {
+    display: block; width: 100%; box-sizing: border-box; min-height: 120px; resize: vertical; border: 0; border-radius: 16px; background: #fff;
+    box-shadow: inset 0 0 0 1.5px var(--pa-rule); padding: 14px 16px; color: var(--pa-ink); font: 400 max(16px, 1rem)/1.5 var(--pa-sans) !important;
+  }
+  .pa5-fb .pa5-fb-ta:focus { outline: none; box-shadow: inset 0 0 0 2px var(--pa-navy); }
+  .pa5-fb .pa5-fb-rank { margin: 12px 8px 0; }
+  .pa5-fb .pa5-fb-err { margin: 12px 8px 0; color: var(--pa-rust); }
+  .pa5-fb-sent { text-align: center; }
+  .pa5-fb-stamp { display: flex; justify-content: center; margin: 8px 0 16px; }
+  .pa5-fb .pa5-fb-ty { margin-bottom: 4px; }
+  .pa5-fb .pa5-fb-line { margin: 0 16px 20px; }
+  @media (prefers-reduced-motion: reduce) {
+    .pa5-fb, .pa5-fb * { animation: none !important; transition: none !important; }
+  }
+}

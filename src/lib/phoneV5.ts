@@ -19,6 +19,8 @@ import type { V2Version } from "./bookVersions";
 import { VERSIONS_FOUNDING_ACCESS, versionsUnlocked } from "./entitlements";
 import { stageTint, type BeLine } from "./qc150";
 import { MONTHS_SHORT } from "./dates";
+import { canSend, composeFor, type ComposeKey } from "./foundingCard";
+import type { FeedbackKind } from "./beta";
 
 export type TodayTab = "queries" | "agents" | "activity";
 export const TODAY_TABS: readonly { key: TodayTab; label: string }[] = [
@@ -631,3 +633,46 @@ export const VERSIONS_LOCK = {
   plans: "See plans",
   small: "Plans run only while you’re querying.",
 };
+
+/* ═══ Phase G — PROFILE AND FEEDBACK (Profile has no ref; phone-feedback-v1.html section 1 for the sheet) ═══
+   Pure. Profile's rows; where a note was written, in plain words; the sheet's three kinds and the callable's own kind
+   string for each (COMPOSE's mapping, the desktop panel's and the founding card's). */
+
+/** Profile's rows. What's landing and the materials rows (Packages, Query letters, Synopses and comps) are Materials now. */
+export const PROFILE_ROWS: readonly { label: string; path: string }[] = [
+  { label: "Responses", path: "/queries/responses" }, { label: "Your book", path: "/manuscripts" },
+  { label: "Corkboard", path: "/todo/corkboard" }, { label: "Settings", path: "/account" },
+];
+/** the writer's notes page (notes/YourNotesPage.tsx; routed in App.tsx) */
+export const YOUR_NOTES_PATH = "/your-notes";
+
+/** "About: {screen}" — the screen the sheet was opened over: the tab's name and, on a page with tabs, the tab chosen. */
+export function feedbackAbout(pathname: string, tabs: { today?: string | null; materials?: string | null } = {}, fallback?: string | null): string {
+  const p = pathname.replace(/\/+$/, "") || "/";
+  if (p === "/dashboard") {
+    const t = TODAY_TABS.find((x) => x.key === tabs.today);
+    return t ? `Today · ${t.label}` : "Today";
+  }
+  if (p === MATERIALS_PATH) {
+    const t = MAT_TABS.find((x) => x.key === tabs.materials);
+    return t ? `Materials · ${t.label}` : "Materials";
+  }
+  if (p === "/todo") return "To do";
+  if (p === "/you") return "Profile";
+  const f = (fallback ?? "").trim();
+  return f || "QueryHawk";
+}
+
+/** the sheet's three kinds, in the ref's order and words; it opens on "An idea" unless a door names one */
+export const FB_KINDS: readonly { key: ComposeKey; label: string }[] = [
+  { key: "like", label: "I like" }, { key: "dont", label: "I don’t like" }, { key: "idea", label: "An idea" },
+];
+export const FB_FIRST: ComposeKey = "idea";
+/** ⚠️ the kind SENT is COMPOSE's (the callable's own string): like → "Something I liked", don't → "Something's broken"
+ *  (the panel's default chip; the sheet draws no chips), idea → "An idea" */
+export const fbKindFor = (k: ComposeKey): FeedbackKind => composeFor(k).kind;
+export const isComposeKey = (x: unknown): x is ComposeKey => x === "like" || x === "dont" || x === "idea";
+/** Send is ready with words in the note (within the callable's limit) and nothing already on its way */
+export const fbReady = (text: string, sending: boolean): boolean => canSend(text) && !sending;
+/** the line under "Thank you.": Your notes shows each note as Not read yet · Read · Planned · Now in the app (BUCKETS) */
+export const FB_SENT_LINE = "You’ll see on Your notes when this one has been read, and if it makes it into the app.";

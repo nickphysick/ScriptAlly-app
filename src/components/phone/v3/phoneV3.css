@@ -92,7 +92,7 @@
   .pa3 .pa3-fold { display: flex; align-items: center; gap: 8px; width: 100%; padding: 12px 14px; font-size: 14.5px; font-weight: 500; color: var(--pa-navy); }
 
 
-  /* ── Settings rows (v3's You page retired to phone/v4/YouV4.tsx) ── */
+  /* ── Settings rows (v3's You page retired; Profile is phone/v5/ProfileV5.tsx) ── */
   .pa3-kv { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 14px; font-size: 14.5px; }
   .pa3-kv + .pa3-kv { border-top: 1px solid var(--pa-rule); }
   .pa3-kv > span { color: var(--pa-muted); }

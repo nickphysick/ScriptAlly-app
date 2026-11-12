@@ -9,7 +9,7 @@
  *     and comes back on any scroll up (v4's behaviour, kept). The badge sits on To do and counts To do's tasks —
  *     `useV3().ordered`, the same array Today's need pill counts. + is v4's quick log.
  *   - The slim bar on every root: the tab's name (tap it to go back to the top) and search; on Today the feedback
- *     button too (the speech bubble; for now it opens the app's one feedback panel). On a page with a tab strip
+ *     button too (the speech bubble; it opens the phone feedback sheet, FeedbackSheetV5). On a page with a tab strip
  *     (Today, Materials) it comes on exactly when the strip reaches it; elsewhere past 300px, as v4.1. It measures its
  *     own height and publishes it for the strip to stick under.
  */

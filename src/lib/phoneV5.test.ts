@@ -588,3 +588,51 @@ describe("phone v5 Materials (Phase F) — letters, comps, versions", () => {
     expect(desk).toContain(`<small>${VERSIONS_LOCK.small}</small>`);
   });
 });
+
+/* ── Phase G — Profile and the feedback sheet ── */
+import { FB_FIRST, FB_KINDS, PROFILE_ROWS, YOUR_NOTES_PATH, fbKindFor, fbReady, feedbackAbout, isComposeKey } from "./phoneV5";
+import { COMPOSE } from "./foundingCard";
+import { FEEDBACK_KINDS, FEEDBACK_MAX } from "./beta";
+
+describe("phone v5 Profile and feedback (Phase G)", () => {
+  it("About: the screen in plain words, with the tab chosen where the page has tabs", () => {
+    expect(feedbackAbout("/dashboard", { today: "queries" })).toBe("Today · Queries");
+    expect(feedbackAbout("/dashboard", { today: "agents" })).toBe("Today · Agents");
+    expect(feedbackAbout("/dashboard/", { today: "activity" })).toBe("Today · Activity");
+    expect(feedbackAbout("/dashboard")).toBe("Today");
+    expect(feedbackAbout("/dashboard", { today: "nonsense" })).toBe("Today");
+    expect(feedbackAbout("/materials", { materials: "letters" })).toBe("Materials · Letters");
+    expect(feedbackAbout("/materials", { materials: "comps", today: "queries" })).toBe("Materials · Comps");
+    expect(feedbackAbout("/todo")).toBe("To do");
+    expect(feedbackAbout("/you")).toBe("Profile");
+    expect(feedbackAbout("/queries/responses", {}, "Responses")).toBe("Responses");
+    expect(feedbackAbout("/somewhere", {}, "  ")).toBe("QueryHawk");
+  });
+  it("the three kinds, in the ref's order and words, open on An idea, and send COMPOSE's own kind string", () => {
+    expect(FB_KINDS.map((k) => k.label)).toEqual(["I like", "I don’t like", "An idea"]);
+    expect(FB_FIRST).toBe("idea");
+    for (const k of FB_KINDS) {
+      expect(fbKindFor(k.key)).toBe(COMPOSE.find((c) => c.key === k.key)!.kind);
+      expect(FEEDBACK_KINDS as readonly string[]).toContain(fbKindFor(k.key));
+    }
+    expect(fbKindFor("like")).toBe("Something I liked");
+    expect(fbKindFor("dont")).toBe("Something's broken");
+    expect(fbKindFor("idea")).toBe("An idea");
+    expect(isComposeKey("dont")).toBe(true);
+    expect(isComposeKey("broken")).toBe(false);
+  });
+  it("Send is ready with words, within the limit, and not while sending", () => {
+    expect(fbReady("", false)).toBe(false);
+    expect(fbReady("   \n", false)).toBe(false);
+    expect(fbReady("Pin a query", false)).toBe(true);
+    expect(fbReady("Pin a query", true)).toBe(false);
+    expect(fbReady("x".repeat(FEEDBACK_MAX + 1), false)).toBe(false);
+  });
+  it("Profile's rows: Responses, Your book, Corkboard, Settings — the materials rows are Materials now", () => {
+    expect(PROFILE_ROWS.map((r) => r.label)).toEqual(["Responses", "Your book", "Corkboard", "Settings"]);
+    expect(PROFILE_ROWS.map((r) => r.path)).toEqual(["/queries/responses", "/manuscripts", "/todo/corkboard", "/account"]);
+    for (const r of PROFILE_ROWS) expect(v3TabFor(r.path)).toBe("profile");
+    expect(v3TabFor(YOUR_NOTES_PATH)).toBe("profile");
+    for (const gone of ["/queries/packages", "/manuscripts#materials", "/manuscripts#comps"]) expect(PROFILE_ROWS.map((r) => r.path)).not.toContain(gone);
+  });
+});

@@ -9,6 +9,8 @@
  * Phase B: Today's header (TodayHeaderV5) and the Queries tab's Birds-eye block (BirdsBlockV5) — populated, filtered,
  * one row, none.
  * Phase E: the full Birds-eye view (BirdsViewV5) — populated, filtered, landscape; and the list's switch into it.
+ * Phase G: Profile (ProfileV5) for a founding writer and for everyone else, and the feedback sheet (FeedbackSheetV5)
+ * composing and sent. ⚠️ NOTHING HERE SENDS A NOTE: lib/sendFeedback is mocked, and a static render clicks nothing.
  */
 import { describe, it, expect, vi, afterEach } from "vitest";
 import React from "react";
@@ -20,6 +22,14 @@ import { QueryStatus, SubmissionMethod } from "../../../types";
 vi.mock("../../../lib/db", async () => (await import("../../../test/pageSmoke")).dbMock());
 vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSmoke")).firebaseMock());
 vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pageSmoke")).toastMock());
+/* Phase G: the founding writer's stats are switchable (a static render runs no effect, so the live hook never loads), and
+   the one send path is a mock — no test reaches the callable */
+const FS = vi.hoisted(() => ({ read: null as null | { loading: boolean; error: boolean; stats: Record<string, unknown> } }));
+vi.mock("../../../lib/foundingStats", async (orig) => {
+  const real = await orig<typeof import("../../../lib/foundingStats")>();
+  return { ...real, useFoundingStats: () => FS.read ?? { loading: true, error: false, stats: real.ZERO_STATS } };
+});
+vi.mock("../../../lib/sendFeedback", () => ({ sendFeedback: vi.fn(async () => {}), feedbackContext: () => ({ route: "", viewport: "", browser: "", browserName: "", appVersion: "" }) }));
 
 import { V5Dock, V5MiniBar, pinPageFor, todoLabel } from "./V5Chrome";
 import { pinnedAt } from "./V5Tabs";
@@ -38,6 +48,8 @@ import { PackagesPhonePage } from "../../packages/phone/PackagesPhone";
 import { usePk26Model } from "../../packages/v26/usePk26Model";
 import { ComponentType } from "../../../types";
 import { packageMetrics } from "../../../lib/packageMetrics";
+import { ProfileV5 } from "./ProfileV5";
+import { FeedbackSheetV5, FbSentV5 } from "./FeedbackSheetV5";
 
 const NOW = Date.parse("2026-11-11T12:00:00Z");
 const P = (n: React.ReactNode) => <V3Provider on now={NOW}>{n}</V3Provider>;
@@ -249,7 +261,8 @@ describe("Phone app v5 is what the phone mounts", () => {
     expect(shell).toContain("<V5Dock");
     expect(shell).toContain("<V5MiniBar");
     expect(shell).not.toMatch(/<V4TabBar|<V4MiniBar/);
-    expect(shell).toContain('onFeedback={pathname === "/dashboard" ? () => openFeedback() : undefined}');
+    /* Phase G: the slim bar's speech bubble opens the phone's feedback sheet, About the page and its chosen tab */
+    expect(shell).toContain('onFeedback={pathname === "/dashboard" ? () => openFeedbackHere(pathname) : undefined}');
   });
   it("the router asks phoneV5Redirect before the unknown-path guard, and To do is no longer sent to Today", () => {
     const at = app.indexOf("phoneV5Redirect(path, location.search, location.hash)");
@@ -379,7 +392,8 @@ describe("Housekeeping's fix handlers are one shared hook (Nick, 12 Nov)", () =>
   });
   it("the founding writer card left Today for Profile", () => {
     expect(read("./TodayV5.tsx")).not.toContain("FoundingCard");
-    expect(read("../v4/YouV4.tsx")).toContain("<FoundingCardV5 uid={currentUser?.id ?? null} />");
+    /* Phase G: Profile is ProfileV5 (YouV4 is retired) */
+    expect(read("./ProfileV5.tsx")).toContain("<FoundingCardV5 uid={currentUser?.id ?? null} />");
   });
 });
 
@@ -725,5 +739,110 @@ describe("Phone app v5, Phase F — Materials", () => {
     const syn = renderPageSeededWith(<PageAt />, "/queries/packages?mat=S1", MAT_DATA);
     expect(syn).toContain("Save as a new synopsis");
     expect(syn).not.toContain("Comps in this letter");
+  });
+});
+
+/* ── Phase G — Profile and the feedback sheet ── */
+const FOUNDING = { loading: false, error: false, stats: { contributions: 1, waiting: 0, tier: "fledgling", nextTier: "archivist", toNext: 2, topPct: null, foundingNo: 23, joinedAt: null, lastSentAt: null } };
+describe("Phone app v5, Phase G — Profile", () => {
+  afterEach(() => { FS.read = null; });
+  it("a writer who is not a founding writer: the header, figures, streak, Wall of no, Your notes and the four rows; no founding card", () => {
+    FS.read = { loading: false, error: false, stats: { ...FOUNDING.stats, foundingNo: null } };
+    const empty = renderPage(<ProfileV5 />, "/you");
+    expect(empty).toContain('data-pa5="profile"');
+    expect(empty).toContain(">Profile</h1>");
+    expect(empty).toContain("Nothing sent yet.");
+    const html = renderPageSeeded(<ProfileV5 />, "/you");
+    expect(html).toContain(">Profile</h1>");
+    expect(html).toMatch(/Since \d{1,2} [A-Z][a-z]{2} · day \d+/);
+    expect(html).toContain('aria-label="Settings"');
+    for (const w of ["See the full picture", "Wall of no", "Open the wall", "Your notes"]) expect(html).toContain(w);
+    expect(html).toContain('data-pa4="streak-card"');
+    expect(html).toMatch(/data-pa5="your-notes-row" data-path="\/your-notes"/);
+    const rows = [...html.matchAll(/data-pa5="profile-row" data-pa4="you-row" data-path="([^"]+)"/g)].map((m) => m[1]);
+    expect(rows).toEqual(["/queries/responses", "/manuscripts", "/todo/corkboard", "/account"]);
+    expect(html).not.toContain('data-pa5="founding"');
+    /* What's landing and the materials rows left for Materials */
+    for (const gone of ["What’s landing", "Query letters", "Synopses and comps", 'data-path="/queries/packages"']) expect(html).not.toContain(gone);
+  });
+  it("a founding writer: the founding card sits after the Wall of no, before Your notes", () => {
+    FS.read = FOUNDING;
+    const html = renderPageSeeded(<ProfileV5 />, "/you");
+    expect(html).toContain('data-pa5="founding"');
+    expect(html).toContain("Your feedback shapes QueryHawk");
+    expect(html.indexOf('data-pa4="wall"')).toBeLessThan(html.indexOf('data-pa5="founding"'));
+    expect(html.indexOf('data-pa5="founding"')).toBeLessThan(html.indexOf('data-pa5="your-notes-row"'));
+    expect(html.match(/data-pa4="fb" data-k=/g)?.length).toBe(3);
+  });
+});
+
+describe("Phone app v5, Phase G — the feedback sheet", () => {
+  afterEach(() => { FS.read = null; });
+  it("composing: the title, About, three kinds opening on An idea, the note, Send disabled while empty; no rank line for others", () => {
+    FS.read = { loading: false, error: false, stats: { ...FOUNDING.stats, foundingNo: null } };
+    const html = renderPage(<FeedbackSheetV5 about="Today · Queries" kind={null} />, "/dashboard");
+    expect(html).toMatch(/data-pa5="fb-sheet" data-about="Today · Queries"/);
+    expect(html).toContain("Tell us what you think");
+    expect(html).toContain("About: Today · Queries");
+    const kinds = [...html.matchAll(/aria-pressed="(true|false)" data-pa5="fb-kind" data-k="(\w+)" data-kind="([^"]+)">([^<]+)</g)].map((m) => [m[2], m[1], m[3], m[4]]);
+    expect(kinds).toEqual([["like", "false", "Something I liked", "I like"], ["dont", "false", "Something&#x27;s broken", "I don’t like"], ["idea", "true", "An idea", "An idea"]]);
+    expect(html).toMatch(/<textarea[^>]*data-pa5="fb-note"[^>]*aria-label="What would you add\?"/);
+    expect(html).toMatch(/data-pa5="fb-send" disabled=""/);
+    expect(html).not.toContain('data-pa5="fb-rank"');
+    expect(html).not.toContain('data-pa5="fb-sent"');
+  });
+  it("preset from the founding card, with the founding writer's rank line (the card's own derivation)", () => {
+    FS.read = FOUNDING;
+    const html = renderPage(<FeedbackSheetV5 about="Profile" kind="dont" />, "/you");
+    expect(html).toMatch(/aria-pressed="true" data-pa5="fb-kind" data-k="dont"/);
+    expect(html).toMatch(/data-pa5="fb-rank">Two more notes and you become an Archivist\.</);
+  });
+  it("sent: the stamp, Thank you., the Your notes line, Done and See your notes", () => {
+    const html = renderPage(<FbSentV5 date="12 Nov" onDone={() => {}} onNotes={() => {}} />, "/dashboard");
+    expect(html).toContain('data-pa5="fb-sent"');
+    expect(html).toContain('aria-label="Sent 12 Nov"');
+    expect(html).toContain("Thank you.");
+    expect(html).toContain("You’ll see on Your notes when this one has been read, and if it makes it into the app.");
+    expect(html).toMatch(/data-pa5="fb-done"[^>]*>Done</);
+    expect(html).toMatch(/data-pa5="fb-notes-link"[^>]*>See your notes</);
+  });
+});
+
+/* source locks: the one send path, and which doors open the sheet */
+describe("Phone app v5, Phase G — the sheet sends through the app's one feedback writer", () => {
+  const rd = (p: string) => readFileSync(resolve(__dirname, p), "utf8");
+  const sheet = rd("./FeedbackSheetV5.tsx");
+  const dock = rd("../../shell/FeedbackDock.tsx");
+  it("the sheet and the desktop panel both call sendFeedback from lib/sendFeedback, with the same fixed fields", () => {
+    for (const src of [sheet, dock]) {
+      expect(src).toMatch(/import \{[^}]*\bsendFeedback\b[^}]*\} from "\.\.\/\.\.\/(\.\.\/)?lib\/sendFeedback";/);
+      expect(src.match(/await sendFeedback\(\{/g)?.length).toBe(1);
+    }
+    expect(sheet).toContain('kind: fbKindFor(key), message: note.trim(), severity: "", wantsReply: true,');
+    expect(sheet).toContain('pageName: about, screenshotPath: "", ...feedbackContext(),');
+    expect(dock).toContain('severity: "", wantsReply: true');
+  });
+  it("the sheet calls no other writer", () => {
+    expect(sheet).not.toMatch(/httpsCallable|firebase\/firestore|firebase\/storage|useScriptAllyDb\(\)\.(add|update|delete|set)|\b(addDoc|setDoc|updateDoc|deleteDoc|uploadBytes|addFeedbackNote|markFeedbackSeen)\b/);
+    expect(sheet).not.toMatch(/\bupdate[A-Z]\w*\(|\bcommit[A-Z]\w*\(/);
+  });
+  it("Today's header and slim bar, and the founding card, open the sheet — not the desktop panel", () => {
+    const today = rd("./TodayV5.tsx");
+    expect(today).toContain('onFeedback={() => openFeedbackSheet(feedbackAbout("/dashboard", { today: tab }))}');
+    expect(today).not.toContain("openFeedback()");
+    const card = rd("./FoundingCardV5.tsx");
+    expect(card).toContain('onClick={() => openFeedbackSheet(feedbackAbout("/you"), x.key)}');
+    expect(card).not.toMatch(/openFeedback\(|setFeedbackDraft/);
+    expect(rd("../v4/renderV4.tsx")).toContain('if (o.type === "feedback") return <FeedbackSheetV5 about={o.about} kind={o.kind ?? null} />;');
+  });
+  it("the founding writer's road is on Profile only: not on Today or its tabs", () => {
+    for (const f of ["./TodayV5.tsx", "./AgentsTabV5.tsx", "./TodayHeaderV5.tsx", "./BirdsBlockV5.tsx", "./TodoV5.tsx", "./MaterialsV5.tsx"]) expect(rd(f), f).not.toContain("FoundingCard");
+    expect(rd("./ProfileV5.tsx")).toContain("<FoundingCardV5 ");
+  });
+  it("/you is Profile, and YouV4 is gone", () => {
+    const routes = rd("../pages/PageRoutes.tsx");
+    expect(routes).toContain("useIsMobile() ? <ProfileV5 /> :");
+    expect(routes).not.toMatch(/import \{ YouV4 \}|<YouV4/);
+    expect(() => rd("../v4/YouV4.tsx")).toThrow();
   });
 });

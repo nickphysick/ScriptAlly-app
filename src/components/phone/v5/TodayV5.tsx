@@ -39,11 +39,11 @@ import { Chev, Cta, LapCard as LapCard0, Link4 } from "../v4/V4Parts";
 import { QRowV4 } from "../v4/QueriesV4";
 import { V5TabStrip } from "./V5Tabs";
 import { AgentsTabV5 } from "./AgentsTabV5";
-import { openFeedback } from "../../../lib/feedbackStore";
+import { openFeedbackSheet } from "./FeedbackSheetV5";
 import { TodayHeaderV5 } from "./TodayHeaderV5";
 import { BirdsBlockV5 } from "./BirdsBlockV5";
 import { QUERIES_ALL_PATH } from "../../../lib/phoneV3Nav";
-import { TODAY_TAB_KEY, TODAY_TABS, isTodayTab, readTab, saveTab, type TodayTab } from "../../../lib/phoneV5";
+import { TODAY_TAB_KEY, TODAY_TABS, feedbackAbout, isTodayTab, readTab, saveTab, type TodayTab } from "../../../lib/phoneV5";
 
 import { todayState } from "../v4/todayState";
 import "../v4/phoneV4.css";
@@ -94,7 +94,7 @@ export const TodayV5: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
   const hero = (
     <TodayHeaderV5 day={first != null ? `Day ${dayN(first, now)} of your campaign` : "Getting started"} streakWeeks={streak.weeks}
       active={c.active} change={weekChange(series)} need={tasks.length} series={series} dayOne={state === "dayone"}
-      onNeed={() => navigate("/todo")} onFeedback={() => openFeedback()} onSearch={() => openV3({ type: "search" })} />
+      onNeed={() => navigate("/todo")} onFeedback={() => openFeedbackSheet(feedbackAbout("/dashboard", { today: tab }))} onSearch={() => openV3({ type: "search" })} />
   );
 
   /* ── above the tabs: only day one keeps a card (no queries yet) ── */

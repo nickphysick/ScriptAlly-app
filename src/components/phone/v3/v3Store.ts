@@ -8,6 +8,7 @@
  */
 import type { AgentGroup } from "../../../lib/phoneV5";
 import type { GroupKey } from "../../../lib/contactHousekeeping";
+import type { ComposeKey } from "../../../lib/foundingCard";
 
 export type V3Overlay =
   | { type: "query"; id: string }
@@ -22,7 +23,9 @@ export type V3Overlay =
      ("tasks") is the To do tab now, an address of its own (`/todo`) */
   | { type: "agents-all"; group?: AgentGroup }
   /* Phone app v5: Housekeeping's gap-filling session, as a sheet (opened at a group's gaps, or at the first gap) */
-  | { type: "gaps"; group?: GroupKey };
+  | { type: "gaps"; group?: GroupKey }
+  /* Phone app v5, Phase G: the feedback sheet, over the screen it names ("About: …"), opened on a kind or on "An idea" */
+  | { type: "feedback"; about: string; kind?: ComposeKey };
 
 export interface V3Snack { msg: string; undo?: () => Promise<void> | void }
 

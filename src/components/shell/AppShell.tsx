@@ -31,7 +31,7 @@ import { BetaStrip } from "./BetaStrip";
 import { DeletionBanner } from "../settings/DeletionBanner";
 import { FeedbackDock } from "./FeedbackDock";
 import { useNewReplies } from "../../lib/yourNotesStore";
-import { notifyFeedbackSent, openFeedback, subscribeFeedback } from "../../lib/feedbackStore";
+import { notifyFeedbackSent, subscribeFeedback } from "../../lib/feedbackStore";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
@@ -42,6 +42,7 @@ import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
 import { ACCOUNT_ROUTES } from "../../lib/accountRoutes";
 import { V4PushedHeader } from "../phone/v4/V4Chrome";
 import { V5Dock, V5MiniBar } from "../phone/v5/V5Chrome";
+import { openFeedbackHere } from "../phone/v5/FeedbackSheetV5";
 import { V3Provider } from "../phone/v3/V3Provider";
 import { V3Layer } from "../phone/v3/V3Layer";
 import { renderJourney } from "../phone/v3/JourneysV3";
@@ -559,7 +560,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
           v3IsRoot(pathname) ? (
             <V5MiniBar title={bandTitle} pathname={pathname} scroller={() => stageRef.current}
               onSearch={() => openV3({ type: "search" })}
-              onFeedback={pathname === "/dashboard" ? () => openFeedback() : undefined} />
+              onFeedback={pathname === "/dashboard" ? () => openFeedbackHere(pathname) : undefined} />
           ) : (
             <V4PushedHeader
               title={bandTitle}
