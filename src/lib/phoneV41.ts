@@ -5,16 +5,17 @@
  * Phone app v4.1 (design-refs/phone-app-v4-1/) — WHAT TODAY'S HEADER AND THE BIRDS-EYE VIEWS READ, below 768px only.
  * Every figure is an engine the app already has; nothing here restates a rule:
  *   - the chart's weekly active queries: the dashboard's own ledger (`dailyLedger` → `aggregateLedger`, lib/oneScreen);
- *   - the bars, months and week ticks: the desktop Birds-eye timeline's own (`tlRow`, `extentOf`, `monthBands`,
- *     `weekTicks`, lib/qcTimeline);
- *   - the groups and their order: the desktop drawer's own (`bvdGroups` with its default view, lib/qcBirdsDrawer).
+ *   - the bars and the groups: the desktop Birds-eye view's own — the one the Query Centre shows at 768px and up
+ *     (`beLine`, `beGroups` with its defaults, urgency by due date, lib/qc150). (The drawer and `tlRow` are only
+ *     mounted below 768px, where no phone page now shows them.)
  * What is added here is WORDS and the windows the phone draws.
  * ⚠️ COPY (PA41-13): never "overdue" or "late". The drawer's first group is named "Past its date" on the phone.
  */
 import type { Query } from "../types";
 import type { QcRow } from "./qcSummary";
 import { aggregateLedger, dailyLedger } from "./oneScreen";
-import { BVD_DEFAULT, bvdGroups, type BvdGroupOut } from "./qcBirdsDrawer";
+import { beGroups, type BeGroupOut } from "./qc150";
+import type { EyeRow } from "./qcBirdsEye";
 import { STAGE_NAME, tileCourt } from "./qcSummary";
 import { currentWords } from "./qcTimeline";
 import { dayMonth } from "./dates";
@@ -41,12 +42,13 @@ export const needWords = (n: number): string => `${n} ${n === 1 ? "thing needs" 
 
 /* ── the Birds-eye rows: the drawer's own groups, in its own order ── */
 export const PHONE_GROUP_LABEL: Record<string, string> = { overdue: "Past its date", upcoming: "Upcoming", watch: "Watch and wait", nodate: "No date" };
-export function phoneGroups(rows: readonly QcRow[], nowMs: number): BvdGroupOut[] {
-  return bvdGroups(rows, BVD_DEFAULT, nowMs).map((g) => ({ ...g, label: PHONE_GROUP_LABEL[g.key] ?? g.label }));
+/** the desktop view's own groups at its own defaults (urgency, by due date), the first renamed */
+export function phoneGroups(rows: readonly QcRow[], nowMs: number): BeGroupOut[] {
+  return beGroups(rows, "urgency", "due", nowMs).map((g) => ({ ...g, label: PHONE_GROUP_LABEL[g.key] ?? g.label }));
 }
-/** the card's rows: the most urgent open queries — past their date first, then soonest due (the drawer's order) */
-export function urgentRows(rows: readonly QcRow[], nowMs: number, n = 5): QcRow[] {
-  return phoneGroups(rows, nowMs).flatMap((g) => g.rows.map((r) => r.row)).slice(0, n);
+/** the card's rows: the most urgent open queries — past their date first, then soonest due (the desktop view's order) */
+export function urgentRows(rows: readonly QcRow[], nowMs: number, n = 5): EyeRow[] {
+  return phoneGroups(rows, nowMs).flatMap((g) => g.rows).slice(0, n);
 }
 
 /** the short line after a name: "Send in 7 days", "Reply in 3 wks", "3 wks past its date", "No date" */

@@ -4,9 +4,10 @@
  *
  * Phone app v4.1 — THE FULL BIRDS-EYE VIEW (design-refs/phone-app-v4-1/phone-birds-eye-v1.html, a working prototype whose
  * behaviour is the spec): every open query on real dates, the phone version of the desktop drawer.
- *   - THE ENGINE IS THE DESKTOP'S: the extent (`extentOf`), months and week ticks (`monthBands`, `weekTicks`), each row's
- *     bars (`tlRow`) and the groups in their order (`bvdGroups`, urgency by default). Nothing here restates a rule
- *     (PA41-7); the first group is named "Past its date" (PA41-13).
+ *   - THE ENGINE IS THE DESKTOP VIEW'S (the Query Centre's Birds-eye at 768px and up, lib/qc150): each row's line
+ *     (`beLine`), the range (`beScale`), the groups in their order (`beGroups`, urgency by due date). Months and week
+ *     ticks are lib/qcTimeline's calendar helpers. Nothing here restates a rule (PA41-7); the first group is named
+ *     "Past its date" (PA41-13).
  *   - Drag sideways to move through time, with inertia; vertical scroll is never captured (PA41-9).
  *   - Zoom (6 weeks / 3 months / 6 months) animates about the centre; "Back to today" appears when today is off-screen.
  *   - Once a day it replays the campaign: the today line sweeps from the first query to today (3.4s, cubic), bars clip
@@ -20,7 +21,8 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { MONTHS_SHORT, dayMonth } from "../../../lib/dates";
-import { extentOf, monthBands, tlRow, weekTicks, type TlRow } from "../../../lib/qcTimeline";
+import { monthBands, weekTicks } from "../../../lib/qcTimeline";
+import { beLine, beScale, type BeLine } from "../../../lib/qc150";
 import { STAGE_NAME, type QcRow } from "../../../lib/qcSummary";
 import { ZOOM_DAYS, firstTimeToday, longLabel, nextSentence, phoneGroups, shortSay, stageOn } from "../../../lib/phoneV41";
 import { nextActs, type V3Query } from "../../../lib/phoneV3";
@@ -45,7 +47,11 @@ const useLandscape = (): boolean => {
   return l;
 };
 
-interface RowM { q: V3Query; row: QcRow; tl: TlRow; group: string }
+/** a past bar's stage: the history span that starts where the bar does */
+const pastStatus = (row: QcRow, fromMs: number, i: number): string =>
+  String(row.history.spans.find((s) => s.startMs === fromMs)?.status ?? row.history.spans.filter((s) => !s.current)[i]?.status ?? row.status);
+
+interface RowM { q: V3Query; row: QcRow; line: BeLine; group: string }
 
 export const BirdsViewV41: React.FC<{ switcher: React.ReactNode; corner: React.ReactNode }> = ({ switcher, corner }) => {
   const v = useV3Data();
@@ -57,8 +63,9 @@ export const BirdsViewV41: React.FC<{ switcher: React.ReactNode; corner: React.R
   /* ── the engine ── */
   const byId = v.byId;
   const groups = useMemo(() => phoneGroups(v.qs.map((q) => q.row as QcRow), now), [v.qs, now]);
-  const rows: RowM[] = useMemo(() => groups.flatMap((g) => g.rows.map((e) => ({ q: byId.get(e.id)!, row: e.row, tl: tlRow(e.row, now), group: g.key }))).filter((r) => r.q), [groups, byId, now]);
-  const ext = useMemo(() => extentOf(rows.map((r) => r.row), now), [rows, now]);
+  const rows: RowM[] = useMemo(() => groups.flatMap((g) => g.rows.map((e) => ({ q: byId.get(e.id)!, row: e.row, line: beLine(e, now), group: g.key }))).filter((r) => r.q), [groups, byId, now]);
+  /* the desktop view's own range (beScale) at its widest zoom, so the track's extent is the same at every zoom */
+  const ext = useMemo(() => { const sc = beScale(rows.map((r) => r.line), 182, 182, now); return { fromMs: sc.r0, toMs: sc.r1, days: Math.max(1, Math.round((sc.r1 - sc.r0) / DAY)) }; }, [rows, now]);
   const day = useCallback((ms: number) => (ms - ext.fromMs) / DAY, [ext.fromMs]);
   const T = day(startDay(now));
   const TOT = ext.days;
@@ -290,11 +297,10 @@ export const BirdsViewV41: React.FC<{ switcher: React.ReactNode; corner: React.R
                 <div className="pa41v-gh"><h2 className="pa4-T pa41v-gt">{g.label}</h2><span className="pa4-s">{mine.length}</span></div>
                 {(folded ? mine.slice(0, FOLD_AT) : mine).map((r) => {
                   const say = shortSay(r.row, now);
-                  const cur = r.tl.bars.find((b) => b.current);
+                  const cur = r.line.cur;
                   const shownStage = stageOf ? stageOf[r.q.id] : String(r.row.status);
                   const acts = nextActs(r.q);
                   const isOpen = open === r.q.id;
-                  const torn = cur?.torn === "end" || r.row.expectedMs == null;
                   return (
                     <div key={r.q.id} className={`pa41v-row${stageOf && !shownStage ? " pre" : ""}${isOpen ? " open" : ""}`} data-pa41="vrow" data-id={r.q.id}>
                       <button type="button" className="pa41v-top" data-pa41="vtop" aria-expanded={isOpen} onClick={() => onTop(r.q.id)}>
@@ -303,24 +309,28 @@ export const BirdsViewV41: React.FC<{ switcher: React.ReactNode; corner: React.R
                         <span className={`pa4-T pa41v-say${say.past ? " hot" : ""}`} data-pa41="say">{say.text}</span>
                       </button>
                       <div className="pa41v-trk" aria-hidden="true"><div className="pa41v-cv pa41v-clip">
-                        {r.tl.bars.filter((b) => !b.current).map((b) => (
-                          <i key={b.key} className="pa41v-bar past" style={{ ["--s" as string]: S(b.fromMs), ["--w" as string]: Math.max(1.5, (b.toMs - b.fromMs) / DAY), background: statusFill(String(b.status)) } as React.CSSProperties} />
+                        {r.line.past.map((b, i) => (
+                          <i key={b.key} className="pa41v-bar past" data-pa41="past" data-from={b.fromMs} data-to={b.toMs} style={{ ["--s" as string]: S(b.fromMs), ["--w" as string]: Math.max(1.5, (b.toMs - b.fromMs) / DAY), background: statusFill(pastStatus(r.row, b.fromMs, i)) } as React.CSSProperties} />
                         ))}
-                        {cur ? (torn ? (<>
-                          <i className="pa41v-bar nod" data-pa41="cur" data-from={cur.fromMs} data-to={cur.toMs} style={{ ["--s" as string]: S(cur.fromMs), ["--w" as string]: T - S(cur.fromMs) + 6, background: statusFill(String(cur.status)) } as React.CSSProperties} />
-                          <span className="pa41v-lb" data-lb="" data-s={S(cur.fromMs)} data-w={Math.max(1, T - S(cur.fromMs))} data-long={cur.label} data-short={cur.label} style={{ ["--s" as string]: S(cur.fromMs), ["--w" as string]: Math.max(1, T - S(cur.fromMs)) } as React.CSSProperties}><span /></span>
-                        </>) : (<>
-                          {/* past its date the bar ends at the date and the overrun line runs on to today (the prototype's
-                              drawing); the bar's own dates stay the engine's, on data-from / data-to (PA41-7) */}
-                          {cur.overFromMs == null ? <i className="pa41v-bar rem" style={{ ["--s" as string]: S(cur.fromMs), ["--w" as string]: (cur.toMs - cur.fromMs) / DAY, background: statusFill(String(cur.status)) } as React.CSSProperties} /> : null}
-                          <i className="pa41v-bar" data-pa41="cur" data-from={cur.fromMs} data-to={cur.toMs} style={{ ["--s" as string]: S(cur.fromMs), ["--w" as string]: Math.max(0, Math.min(T, S(cur.overFromMs ?? cur.toMs)) - S(cur.fromMs)), background: statusFill(String(cur.status)) } as React.CSSProperties} />
-                          {cur.overFromMs != null ? (<>
-                            <i className="pa41v-ov" style={{ ["--s" as string]: S(cur.overFromMs), ["--w" as string]: T - S(cur.overFromMs) } as React.CSSProperties} />
-                            <i className="pa41v-bc" data-pa41="beacon" style={{ ["--s" as string]: T } as React.CSSProperties} />
-                          </>) : null}
-                          <span className="pa41v-lb" data-lb="" data-s={S(cur.fromMs)} data-w={((cur.overFromMs ?? cur.toMs) - cur.fromMs) / DAY} data-long={longLabel(r.row, now)} data-short={STAGE_NAME[r.row.status] ?? String(r.row.status)}
-                            style={{ ["--s" as string]: S(cur.fromMs), ["--w" as string]: ((cur.overFromMs ?? cur.toMs) - cur.fromMs) / DAY } as React.CSSProperties}><span /></span>
-                        </>)) : null}
+                        {cur ? (r.line.dueMs == null ? (<>
+                          <i className="pa41v-bar nod" data-pa41="cur" data-from={cur.fromMs} data-to={cur.toMs} style={{ ["--s" as string]: S(cur.fromMs), ["--w" as string]: T - S(cur.fromMs) + 6, background: statusFill(String(r.row.status)) } as React.CSSProperties} />
+                          <span className="pa41v-lb" data-lb="" data-s={S(cur.fromMs)} data-w={Math.max(1, T - S(cur.fromMs))} data-long={cur.stage} data-short={cur.stage} style={{ ["--s" as string]: S(cur.fromMs), ["--w" as string]: Math.max(1, T - S(cur.fromMs)) } as React.CSSProperties}><span /></span>
+                        </>) : (() => {
+                          /* past its date the bar ends at the date and the overrun line runs on to today (the prototype's
+                             drawing); the bar's own dates stay the engine's, on data-from / data-to (PA41-7) */
+                          const due = r.line.dueMs;
+                          const w = (due - cur.fromMs) / DAY;
+                          return (<>
+                            {cur.overdue ? null : <i className="pa41v-bar rem" style={{ ["--s" as string]: S(cur.fromMs), ["--w" as string]: w, background: statusFill(String(r.row.status)) } as React.CSSProperties} />}
+                            <i className="pa41v-bar" data-pa41="cur" data-from={cur.fromMs} data-to={cur.toMs} style={{ ["--s" as string]: S(cur.fromMs), ["--w" as string]: Math.max(0, Math.min(T, S(due)) - S(cur.fromMs)), background: statusFill(String(r.row.status)) } as React.CSSProperties} />
+                            {cur.overdue ? (<>
+                              <i className="pa41v-ov" style={{ ["--s" as string]: S(due), ["--w" as string]: T - S(due) } as React.CSSProperties} />
+                              <i className="pa41v-bc" data-pa41="beacon" style={{ ["--s" as string]: T } as React.CSSProperties} />
+                            </>) : null}
+                            <span className="pa41v-lb" data-lb="" data-s={S(cur.fromMs)} data-w={w} data-long={longLabel(r.row, now)} data-short={cur.stage}
+                              style={{ ["--s" as string]: S(cur.fromMs), ["--w" as string]: w } as React.CSSProperties}><span /></span>
+                          </>);
+                        })()) : null}
                       </div></div>
                       <div className="pa41v-xp" data-pa41="expand"><div>
                         {isOpen ? (
