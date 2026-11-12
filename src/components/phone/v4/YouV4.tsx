@@ -56,7 +56,7 @@ export const YouV4: React.FC = () => {
     : [[String(c.sent), c.sent === 1 ? "query sent" : "queries sent"], [String(c.more), "asked for more"], [asked != null ? `${asked}%` : "—", "request rate"]];
 
   return (
-    <div className="pa4 pa4-you" data-pa4="you" data-early={early ? "1" : "0"}>
+    <div className="pa4 pa4-you" data-pa4="you" data-pa5="profile" data-early={early ? "1" : "0"}>
       <Hero pa4="you-hero" lap kick="Your campaign" head={ms?.title?.trim() || "Your book"}
         sub={first != null ? `Since ${dayMonth(first)} · day ${dayN(first, nowMs)}` : "No queries sent yet"}
         cast={{ src: CAST.archivist, width: 128, style: { margin: "0 -20px 0 0" } }}

@@ -15,8 +15,8 @@ export type V3Overlay =
   | { type: "add"; editId?: string; name?: string }
   | { type: "note" }
   | { type: "search" }
-  /* Phone app v4: pushed pages drawn by the layer (back arrow, the page's name) */
-  | { type: "tasks" }
+  /* Phone app v4: pushed pages drawn by the layer (back arrow, the page's name). Phone app v5: the task list
+     ("tasks") is the To do tab now, an address of its own (`/todo`) */
   | { type: "agents-all" };
 
 export interface V3Snack { msg: string; undo?: () => Promise<void> | void }

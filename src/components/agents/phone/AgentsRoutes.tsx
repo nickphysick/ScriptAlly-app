@@ -13,8 +13,10 @@ import { DiscoverPhone } from "./AgentsPhone";
 import { AgentsV4 } from "../../phone/v4/AgentsV4";
 
 export const AgentsRoute: React.FC<React.ComponentProps<typeof Agents>> = (props) =>
-  /* Phone app v4: below 768px the Agents tab (AgentsV4); at 768px and up the Contact list, unchanged */
-  useIsMobile() ? <AgentsV4 /> : <Agents {...props} />;
+  /* Phone app v4: below 768px the Agents tab (AgentsV4); at 768px and up the Contact list, unchanged.
+     Phone app v5: on a phone `/agents` lands on Today's Agents tab, which renders AgentsV4's body itself, so this slot
+     draws it only if it is ever on screen (a second copy, hidden, would only double the page). */
+  useIsMobile() ? (props.active ? <AgentsV4 /> : null) : <Agents {...props} />;
 
 export const DiscoverRoute: React.FC<React.ComponentProps<typeof DiscoverPage>> = (props) =>
   useIsMobile() ? <DiscoverPhone /> : <DiscoverPage {...props} />;

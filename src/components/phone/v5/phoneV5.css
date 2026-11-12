@@ -1,0 +1,36 @@
+/* ── PHONE APP v5 (design-refs/phone-app-v5/) — below 768px only, on the phone tokens (phoneTokens.css). Phase A: the
+   dock's badge, the tab strip that pins under the slim bar, the full list's pinned header.
+   ⚠️ TYPE IS IN rem (the phone's own text size scales it). Nothing under 0.875rem except the dock's labels and badge.
+   Nothing here applies at 768px and up. ── */
+@media (max-width: 767.98px) {
+  /* ── the dock (ref `.tb`, `.bdg`): the badge rides on To do's icon ── */
+  .pa5-dock .pa5-dic { position: relative; display: grid; place-items: center; }
+  .pa5-dock .pa5-bdg {
+    position: absolute; top: -6px; left: 50%; margin-left: 6px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box;
+    border-radius: 9px; background: var(--pa-blush); color: var(--pa-ink); font: 700 0.75rem/18px var(--pa-sans); font-style: normal; text-align: center;
+  }
+
+  /* ── the tab strip (ref `.stabs`): sticks under the slim bar; its `top` is the bar's measured height (V5TabStrip) ── */
+  .pa5-tabs-mark { height: 0; }
+  .pa5-tabs {
+    position: sticky; top: 0; z-index: 20; display: flex; background: var(--pa-page); border-bottom: 1px solid var(--pa-rule);
+    padding: 0 8px; font-family: var(--pa-sans);
+  }
+  .pa5 .pa5-tabs > button {
+    flex: 1 1 0; min-width: 0; min-height: 52px; padding: 0 4px; position: relative; background: none; border: 0; cursor: pointer; text-align: center;
+    font: 600 1rem/1.25 var(--pa-sans); color: var(--pa-muted); overflow-wrap: anywhere;
+  }
+  .pa5 .pa5-tabs > button.on { color: var(--pa-navy); }
+  .pa5 .pa5-tabs > button.on::after { content: ""; position: absolute; left: 20%; right: 20%; bottom: -1px; height: 3px; border-radius: 2px; background: var(--pa-navy); }
+  .pa5-tabs.pin { box-shadow: 0 6px 12px -8px rgba(20, 26, 36, 0.3); }
+
+  /* ── Today: room between the lead card and the strip ── */
+  .pa5 [data-pa41="lead"] { padding-bottom: 24px; }
+
+  /* ── the full list of queries: its header stays at the top, and the Birds-eye ruler sticks under its measured height ── */
+  .pa4-ph.pa5-phs { position: sticky; top: 0; z-index: 30; }
+  body.pa5-phs .pa41v { --stick: var(--pa5-ph-h, 0px); }
+  /* landscape Birds-eye (v4.1): the header scrolls away and the ruler takes the top edge, as before */
+  body.pa41-land .pa4-ph.pa5-phs { position: relative; }
+  body.pa5-phs .pa41v.land { --stick: 0px; }
+}

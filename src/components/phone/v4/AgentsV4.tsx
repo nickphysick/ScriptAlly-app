@@ -55,7 +55,12 @@ const Face: React.FC<{ name: string; status?: string | null; on?: boolean; onTap
 );
 export { Face as FaceV4 };
 
-export const AgentsV4: React.FC = () => {
+/* Phone app v5: inside Today's Agents tab the page has no header of its own, so its first card sits flat under the tabs */
+const FlatCard: React.FC<React.ComponentProps<typeof LapCard>> = ({ style, ...p }) => <LapCard {...p} style={{ marginTop: 16, ...style }} />;
+
+/** `bare` (Phone app v5): the Agents page's body without its header, for Today's Agents tab. The header's sentence
+ *  becomes the first line and its + becomes an "Add an agent" row, so nothing the header held is lost. */
+export const AgentsV4: React.FC<{ bare?: boolean }> = ({ bare = false }) => {
   const v = useV3Data();
   const navigate = useNavigate();
   const { agents, queries } = v.core.db;
@@ -69,11 +74,14 @@ export const AgentsV4: React.FC = () => {
     ? <>{fits.length} still to query.<br />{queried} queried.</>
     : `All ${agents.length} queried.`;
 
+  const Lap = bare ? FlatCard : LapCard;
   return (
-    <div className="pa4 pa4-agents" data-pa4="agents" data-tq={fits.length}>
-      <Hero pa4="agents-hero" lap kick="Agents" head={head} cast={{ src: CAST.scout, width: 112 }} corner={corner} />
+    <div className="pa4 pa4-agents" data-pa4="agents" data-tq={fits.length} data-bare={bare ? "1" : undefined}>
+      {bare
+        ? <p className="pa4-b pa4-body" style={{ padding: "16px 24px 0" }} data-pa4="agents-line">{head}</p>
+        : <Hero pa4="agents-hero" lap kick="Agents" head={head} cast={{ src: CAST.scout, width: 112 }} corner={corner} />}
       {top ? (
-        <LapCard pa4="best-fit">
+        <Lap pa4="best-fit">
           <div className="pa4-s" style={{ marginBottom: 16 }}>Best fit on your list</div>
           <div style={{ display: "flex", gap: 16, alignItems: "center", marginBottom: 16 }}>
             <Seal name={top.name} size={56} />
@@ -84,9 +92,9 @@ export const AgentsV4: React.FC = () => {
           <div className="pa4-s" style={{ marginBottom: 24 }}>{[replyWords(top.responseTimeWeeks) ? `Replies in about ${replyWords(top.responseTimeWeeks)}` : "No reply time saved", howWords(top.submissionMethod, top.submissionMethodOther)?.toLowerCase().replace(/^by /, "takes queries by ")].filter(Boolean).join(" · ")}</div>
           <Cta pa4="fit-log" onClick={() => openV3({ type: "log", agentId: top.id })}>Log a query to {firstOf(top.name)}</Cta>
           <Link4 pa4="fit-card" style={{ minHeight: 56 }} onClick={() => openV3Agent(top.id)}>Open {firstOf(top.name)}’s card</Link4>
-        </LapCard>
+        </Lap>
       ) : (
-        <LapCard pa4="all-queried">
+        <Lap pa4="all-queried">
           {discover > 0 ? (<>
             <h2 className="pa4-h" style={{ marginBottom: 8 }}>The Scout has found {discover} more</h2>
             <p className="pa4-b pa4-body" style={{ marginBottom: 24 }}>Agents open to submissions who represent books like yours.</p>
@@ -98,7 +106,7 @@ export const AgentsV4: React.FC = () => {
             <Cta pa4="add-next" onClick={() => openV3({ type: "add" })}>Add an agent</Cta>
             <div style={{ height: 16 }} />
           </>)}
-        </LapCard>
+        </Lap>
       )}
       <div className="pa4-inset">
         {fits.length > 1 ? (<>
@@ -129,6 +137,12 @@ export const AgentsV4: React.FC = () => {
             <button type="button" className="pa4-tap" style={{ minHeight: 72 }} data-pa4="discover" onClick={() => navigate("/agents/discover")}>
               <img src={CAST.scout} alt="" style={{ width: 40, height: 40, borderRadius: "50%", background: "var(--pa-st-slate)", objectFit: "cover", objectPosition: "top" }} />
               <span className="pa4-x"><b>Discover</b><span className="pa4-s">{discover} {discover === 1 ? "agent" : "agents"} the Scout matched to your book</span></span><Chev />
+            </button>
+          ) : null}
+          {bare ? (
+            <button type="button" className="pa4-tap" style={{ minHeight: 72 }} data-pa4="add-agent" onClick={() => openV3({ type: "add" })}>
+              <Seal name="+" size={40} />
+              <span className="pa4-x"><b>Add an agent</b></span><Chev />
             </button>
           ) : null}
         </div>

@@ -84,14 +84,20 @@ function usePkNav() {
 }
 
 /* ═══ THE HUB ════════════════════════════════════════════════════════════════════════════════════════════════════ */
-export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
+/** Phone app v5: the Materials tab shows the hub one part at a time — its packages (with the band's "going out with new
+ *  queries" card on top), its letters and synopses, its versions, its comps. Every page they open is still this file's,
+ *  at `/queries/packages?…`, drawn by the copy mounted in the packages slot. */
+export type PkSection = "packages" | "letters" | "versions" | "comps";
+const SECTION_SHELVES: Record<Exclude<PkSection, "packages">, ShelfKind[]> = { letters: ["let", "syn"], versions: ["ver"], comps: ["comp"] };
+
+export const PackagesPhone: React.FC<{ active: boolean; section?: PkSection }> = ({ active, section }) => {
   const model = usePk26Model();
   const nav = usePkNav();
   const { params } = nav;
   const pk = model.active;
 
   /* the band: the line, and the active package card laid over the band's foot (ref `.apk`) */
-  usePhoneBandSlot(PACKAGES_PATH, (
+  const band = (
     <div data-pa="pk-band">
       <div className="pa-pksub">What you send agents, and what’s working</div>
       {pk ? (
@@ -122,7 +128,9 @@ export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
         </div>
       )}
     </div>
-  ), [pk?.id, pk?.packageName, pk?.colour, pk?.icon, model.figPk, model.letters, model.synopses, model.versionRows]);
+  );
+  /* in a Materials section the card is drawn in the page (the packages section), never in a band */
+  usePhoneBandSlot(section ? "" : PACKAGES_PATH, section ? null : band, [section, pk?.id, pk?.packageName, pk?.colour, pk?.icon, model.figPk, model.letters, model.synopses, model.versionRows]);
 
   /* What's landing (4A): the desktop's own ranking; a card whose sample is under the desktop's minimum is left out */
   const usage = useUsage(model);
@@ -133,9 +141,7 @@ export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
   /* the page in front: one of the detail pages, keyed by the address */
   const page = active ? pageFor(params) : null;
 
-  return (
-    <div className="pa-pk" data-pa="packages">
-      <div className="pa-pkbody">
+  const packagesPart = (<>
         <div className="pa-shd pa-shd--first"><h2 className="pa-h2">What’s landing</h2><button type="button" className="pa-link" data-pa="pk-how" onClick={() => setHowOpen(true)}>How it works</button></div>
         <Landing cards={showcases.cards} hidden={showcases.hidden} />
 
@@ -146,8 +152,15 @@ export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
           </div>
         ) : <p className="pa-sub pa-pknone" data-pa="pk-none">No packages yet.</p>}
         <button type="button" className="pa-btn pri blk pa-hb pa-mt12" data-pa="pk-build" onClick={() => nav.open("build", "new")}>{PI.plus}Build a package</button>
+  </>);
 
-        <Shelves model={model} usage={usage} onOpen={nav.open} />
+  return (
+    <div className="pa-pk" data-pa="packages" data-section={section}>
+      {section === "packages" ? <div className="pa3-pslot" data-pa5="mat-going-out">{band}</div> : null}
+      <div className="pa-pkbody">
+        {!section || section === "packages" ? packagesPart : null}
+        {!section ? <Shelves model={model} usage={usage} onOpen={nav.open} />
+          : section !== "packages" ? <Shelves model={model} usage={usage} onOpen={nav.open} only={SECTION_SHELVES[section]} /> : null}
       </div>
 
       <MobileSheet open={howOpen} onClose={() => setHowOpen(false)} ariaLabel="How it works" pa={{ height: "auto", white: true }}>
@@ -313,7 +326,9 @@ function useUsage(model: Pk26Model): Usage {
 }
 
 /* ── the shelves (3A): Versions, Query letters, Synopses, Comps — paper cards, the in-use one ringed ── */
-const Shelves: React.FC<{ model: Pk26Model; usage: Usage; onOpen: (k: string, v: string) => void }> = ({ model, usage, onOpen }) => {
+type ShelfKind = "ver" | "let" | "syn" | "comp";
+const Shelves: React.FC<{ model: Pk26Model; usage: Usage; onOpen: (k: string, v: string) => void; only?: ShelfKind[] }> = ({ model, usage, onOpen, only }) => {
+  const shows = (k: ShelfKind) => !only || only.includes(k);
   const { currentUser } = useScriptAllyDb();
   const verOpen = versionsUnlocked(currentUser);
   const lines = (n: number, more: number) => (n ? <>In {plural(n, "query", "queries")}{more ? <> · <em>{plural(more, "request")}</em></> : null}</> : "Not sent yet");
@@ -334,15 +349,15 @@ const Shelves: React.FC<{ model: Pk26Model; usage: Usage; onOpen: (k: string, v:
   const factsLine = (k: "let" | "syn" | "ver", id: string) => { const f = model.pieceFacts(k, id); return lines(f.n, f.more); };
   return (
     <>
-      {verOpen ? shelf("Versions", "ver", model.versionRows.map((v) => ({ id: v.id, name: v.name, s: factsLine("ver", v.id), inUse: v.inUse })), "", PI.book, "Version", "New version", () => onOpen("ver", "new"), "ver") : (
+      {!shows("ver") ? null : verOpen ? shelf("Versions", "ver", model.versionRows.map((v) => ({ id: v.id, name: v.name, s: factsLine("ver", v.id), inUse: v.inUse })), "", PI.book, "Version", "New version", () => onOpen("ver", "new"), "ver") : (
         <section data-pa="pk-shelf" data-kind="ver" data-locked="1">
           <div className="pa-shd"><h2 className="pa-h2">Versions</h2></div>
           <div className="pa-lockn" data-pa="pk-ver-locked">{lockI}<span>Versions are part of Pro. Keep each draft you send, and see which one gets requests.</span></div>
         </section>
       )}
-      {shelf("Query letters", "let", model.letters.map((m) => ({ id: m.id, name: m.name, s: factsLine("let", m.id), inUse: m.inUse })), "l", PI.doc, "Query letter", "New letter", () => onOpen("edit", "new-let"), "mat")}
-      {shelf("Synopses", "syn", model.synopses.map((m) => ({ id: m.id, name: m.name, s: factsLine("syn", m.id), inUse: m.inUse })), "l", PI.note, "Synopsis", "New synopsis", () => onOpen("edit", "new-syn"), "mat")}
-      {shelf("Comps", "comp", usage.comps.map((c, i) => {
+      {shows("let") && shelf("Query letters", "let", model.letters.map((m) => ({ id: m.id, name: m.name, s: factsLine("let", m.id), inUse: m.inUse })), "l", PI.doc, "Query letter", "New letter", () => onOpen("edit", "new-let"), "mat")}
+      {shows("syn") && shelf("Synopses", "syn", model.synopses.map((m) => ({ id: m.id, name: m.name, s: factsLine("syn", m.id), inUse: m.inUse })), "l", PI.note, "Synopsis", "New synopsis", () => onOpen("edit", "new-syn"), "mat")}
+      {shows("comp") && shelf("Comps", "comp", usage.comps.map((c, i) => {
         const u = usage.byKey.get(compKey(c, i));
         const age = compAge(c, currentYear());
         return { id: compKey(c, i), name: c.title, s: <>{[c.author, c.year].filter(Boolean).join(" · ")}{u?.queries.length ? <> · <em>In {plural(u.queries.length, "query", "queries")}</em></> : age ? " · Over five years old" : null}</>, inUse: false };

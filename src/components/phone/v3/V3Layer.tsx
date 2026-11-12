@@ -41,7 +41,7 @@ export const V3Layer: React.FC<V3Panels> = ({ render }) => {
     full = true;
   } else if (o) {
     body = render?.(o) ?? null;
-    full = o.type === "reply" || o.type === "add" || o.type === "tasks" || o.type === "agents-all";
+    full = o.type === "reply" || o.type === "add" || o.type === "agents-all";
   }
   if (!body && !snack) return null;
   return createPortal(

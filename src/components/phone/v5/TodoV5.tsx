@@ -2,26 +2,34 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Phone app v4 — "SEE ALL N": the pushed page holding v3's grouped task list (the To-do workspace's own groups, offers
- * named apart, housekeeping folded — lib/phoneV3 `todayGroups`). A row opens the task screen, as in v3.
+ * Phone app v5, Phase A — TO DO, the dock's second tab (`/todo` below 768px). For now it holds v4's grouped task list
+ * (the To-do workspace's own groups, offers named apart, housekeeping folded — lib/phoneV3 `todayGroups`), which was
+ * Today's pushed "See all N" page (TasksPageV4, replaced by this page). A row opens the task screen, as before.
+ * Phase D replaces the body with the Up next card (design-refs/phone-app-v5/phone-hub-v5.html `todoPh`).
+ *
+ * The count in the header is the dock badge's count: `useV3().ordered`, the same array Today's need pill counts.
  */
 import React, { useState } from "react";
 import { useV3Data } from "../v3/V3Provider";
 import { V3Glyph } from "../v3/V3Parts";
-import { closeV3 } from "../v3/v3Store";
 import { PhoneTaskScreen } from "../../todo/phone/PhoneTaskScreen";
 import { taskLine } from "../../../lib/phoneV3";
-import { V4Page } from "./V4Chrome";
-import { Chev, Link4 } from "./V4Parts";
-import "./phoneV4.css";
+import { needWords } from "../../../lib/phoneV41";
+import { CAST, Chev, Hero, IconBtn, Link4 } from "../v4/V4Parts";
+import { openV3 } from "../v3/v3Store";
+import "../v4/phoneV4.css";
+import "./phoneV5.css";
 
-export const TasksPageV4: React.FC = () => {
+export const TodoV5: React.FC = () => {
   const v = useV3Data();
   const [open, setOpen] = useState<string | null>(null);
   const [houseOpen, setHouseOpen] = useState(false);
+  const n = v.ordered.length;
+  const corner = <IconBtn label="Search" n="search" pa4="search" onClick={() => openV3({ type: "search" })} />;
   return (
-    <V4Page title={`Your ${v.ordered.length} ${v.ordered.length === 1 ? "task" : "tasks"}`} onBack={closeV3} pa4="tasks-page">
-      <div className="pa4-inset" style={{ paddingTop: 8, paddingBottom: 32 }}>
+    <div className="pa4 pa5 pa5-todo" data-pa5="todo" data-tasks={n}>
+      <Hero pa4="todo-hero" kick="To do" head={n ? needWords(n) : "Nothing needs you today."} cast={{ src: CAST.mentor, width: 112 }} corner={corner} />
+      <div className="pa4-inset" style={{ paddingTop: 8, paddingBottom: 32 }} data-pa4="tasks-page">
         {v.groups.length ? v.groups.map((g) => {
           const shut = g.folded && !houseOpen;
           return (
@@ -42,9 +50,9 @@ export const TasksPageV4: React.FC = () => {
               </div>
             </React.Fragment>
           );
-        }) : <p className="pa4-b pa4-empty" style={{ padding: 24 }}>Nothing needs you today.</p>}
+        }) : <p className="pa4-b pa4-empty" style={{ padding: 24 }}>That’s everything for today.</p>}
       </div>
       {open ? <PhoneTaskScreen core={v.core} tasks={v.ordered} startKey={open} now={v.now} onClose={() => setOpen(null)} /> : null}
-    </V4Page>
+    </div>
   );
 };

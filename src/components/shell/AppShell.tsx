@@ -31,7 +31,7 @@ import { BetaStrip } from "./BetaStrip";
 import { DeletionBanner } from "../settings/DeletionBanner";
 import { FeedbackDock } from "./FeedbackDock";
 import { useNewReplies } from "../../lib/yourNotesStore";
-import { notifyFeedbackSent, subscribeFeedback } from "../../lib/feedbackStore";
+import { notifyFeedbackSent, openFeedback, subscribeFeedback } from "../../lib/feedbackStore";
 import { WorkspaceShell } from "./WorkspaceShell";
 import { workspaceSections } from "../../lib/workspaceNav";
 import { AccountMenu } from "./AccountMenu";
@@ -40,14 +40,15 @@ import { ShellScope, useShellNavCounts } from "./ShellSidebar";
 import { MobileChromeContext, MobileDetailSpec, useIsMobile } from "./mobileChrome";
 import { BottomTabBar, isMenuPage, tabFor } from "../BottomTabBar";
 import { ACCOUNT_ROUTES } from "../../lib/accountRoutes";
-import { V4MiniBar, V4PushedHeader, V4TabBar } from "../phone/v4/V4Chrome";
+import { V4PushedHeader } from "../phone/v4/V4Chrome";
+import { V5Dock, V5MiniBar } from "../phone/v5/V5Chrome";
 import { V3Provider } from "../phone/v3/V3Provider";
 import { V3Layer } from "../phone/v3/V3Layer";
 import { renderJourney } from "../phone/v3/JourneysV3";
 import { renderAgents } from "../phone/v3/AgentsV3";
 import { renderV4 } from "../phone/v4/renderV4";
 import { openV3, closeV3, v3Overlay } from "../phone/v3/v3Store";
-import { v3IsRoot, v3RootTitle, v3TabFor } from "../../lib/phoneV3Nav";
+import { QUERIES_ALL_PATH, v3BackFor, v3IsRoot, v3RootTitle, v3TabFor } from "../../lib/phoneV3Nav";
 import { PhoneBandContext } from "../phone/phoneBandStore";
 import { PhoneComposeHost } from "../phone/PhoneComposeFlow";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
@@ -397,6 +398,8 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
     if (section) return section.label;
     if (pathname === "/account") return "Settings";
     if (pathname === "/plans") return "Plan & billing";
+    /* Phone app v5: the full list of queries, pushed from Today's Queries tab */
+    if (pathname === QUERIES_ALL_PATH) return "Queries";
     return shellCrumbForPath(pathname)?.page ?? "QueryHawk";
   }, [pathname]);
 
@@ -549,16 +552,21 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             this renders exactly what it did before. */}
         {phoneNav && activeMobileDetail === null ? (
           /* Phone app v4: a root page draws its own navy header, so the shell draws only the slim bar that stands in for
-             it past 300px; a pushed page keeps a navy header with its back arrow */
+             it once scrolled; a pushed page keeps a navy header with its back arrow.
+             Phone app v5: the slim bar is on every root (on Today and Materials it comes on as their tab strip reaches it);
+             on Today it carries the feedback button. The full list of queries keeps its header pinned (its Birds-eye ruler
+             sticks under it), and a back arrow with no history goes to its tab's root (Today on the right tab). */
           v3IsRoot(pathname) ? (
-            <V4MiniBar title={bandTitle} pathname={pathname} scroller={() => stageRef.current}
-              onSearch={() => openV3({ type: "search" })} />
+            <V5MiniBar title={bandTitle} pathname={pathname} scroller={() => stageRef.current}
+              onSearch={() => openV3({ type: "search" })}
+              onFeedback={pathname === "/dashboard" ? () => openFeedback() : undefined} />
           ) : (
             <V4PushedHeader
               title={bandTitle}
+              sticky={pathname === QUERIES_ALL_PATH}
               onBack={() => {
                 const idx = (window.history.state as { idx?: number } | null)?.idx ?? 0;
-                if (idx > 0) navigate(-1); else goPath(v3TabFor(pathname) === "today" ? "/dashboard" : v3TabFor(pathname) === "agents" ? "/agents" : "/you");
+                if (idx > 0) navigate(-1); else goPath(v3BackFor(pathname));
               }}
               extra={bandExtras[pathname] ?? null}
               slot={bandSlots[pathname] ?? null}
@@ -630,7 +638,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
       {/* The floating tab-bar capsule (<md). It stands down while the active route shows a
           pushed detail screen (baked decision 5) — the detail's own affordances take the foot. */}
       {phoneNav ? (
-        <V4TabBar
+        <V5Dock
           pathname={pathname}
           scroller={() => stageRef.current}
           /* a tap on the tab you are on, at its own page, takes it back to the top (ref `ACT.tab`) */

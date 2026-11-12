@@ -14,6 +14,7 @@ import React, { useEffect, useState } from "react";
 import "./ToDoPage";
 import type { ToDoPageProps } from "./ToDoPage";
 import { TodoWorkspace } from "./ws/TodoWorkspace";
+import { TodoV5 } from "../phone/v5/TodoV5";
 
 const QUERY = "(min-width: 768px)";
 
@@ -26,7 +27,6 @@ export const TodoRoute: React.FC<ToDoPageProps> = (props) => {
     m.addEventListener("change", on);
     return () => m.removeEventListener("change", on);
   }, []);
-  /* Phone app v3: To-do has no page of its own on a phone — `/todo` lands on Today (App.tsx), and its tasks are Today's.
-     The slot stays mounted (every workspace page does), so below 768px it renders nothing. */
-  return desk ? <TodoWorkspace onNavigate={props.onNavigate} /> : null;
+  /* Phone app v5: below 768px `/todo` is the dock's To do tab again (TodoV5); v3/v4 had sent it to Today */
+  return desk ? <TodoWorkspace onNavigate={props.onNavigate} /> : <TodoV5 />;
 };

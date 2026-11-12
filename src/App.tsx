@@ -65,6 +65,8 @@ import { ErrorBoundary, ThrowLab } from "./components/ErrorBoundary";
 import { PageBoundary, crashProbe } from "./components/PageBoundary";
 import { closeAgentCard } from "./lib/agentCardStore";
 import { PhoneSectionLanding, phoneSectionFor } from "./components/phone/PhoneSectionLanding";
+import { desktopV5Redirect, phoneV5Redirect } from "./lib/phoneV5";
+import { MaterialsRoute } from "./components/phone/v5/MaterialsV5";
 import { PhoneMaterialsHost } from "./components/phone/materials/PhoneMaterialsHost";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
@@ -547,12 +549,16 @@ function AppContent() {
      `?pkg=`/`?version=` item). Read like Part 8B's account index above, without a hook, because this
      sits among early returns. `replace`, so the back gesture returns to wherever the link was opened. */
   const isPhoneNow = typeof window !== "undefined" && !!window.matchMedia?.("(max-width: 767.98px)").matches;
+  /* Phone app v5: the dock is Today · To do · Materials · Profile. Below 768px `/queries` and `/agents` land on Today
+     on that tab (their full lists are pushed), and packages, letters, versions and comps land on Materials on theirs;
+     a deep link that names one thing keeps going where it went (lib/phoneV5). At 768px and up the two new addresses
+     (`/queries/all`, `/materials`) send a computer where it went before they existed. */
+  const v5Redirect = isPhoneNow ? phoneV5Redirect(path, location.search, location.hash) : desktopV5Redirect(path, location.search);
+  if (v5Redirect) return <Navigate to={v5Redirect} replace />;
   const phoneSection = isPhoneNow ? phoneSectionFor(path) : null;
   if (phoneSection) return <Navigate to={`/manuscripts${location.search}#${phoneSection}`} replace />;
-  /* Phone app v3: To-do has no page of its own on a phone — its tasks are Today's (the Corkboard keeps its address) */
-  if (isPhoneNow && routeBase(path) === "/todo") return <Navigate to={`/dashboard${location.search}`} replace />;
-  /* Phone app v3: the query letters live in the book page's materials on a phone (read and reword there) */
-  if (isPhoneNow && path === "/materials/letters") return <Navigate to="/manuscripts#materials" replace />;
+  /* (Phone app v3 sent `/todo` to Today and `/materials/letters` to the book page on a phone. Phone app v5: To do is a
+     dock tab again, and the letters are Materials' Letters tab — phoneV5Redirect above.) */
 
   // Any unknown path lands on the dashboard. All the early returns above (dev labs, marketing,
   // auth, onboarding, focus) run first, so a logged-out deep link keeps its URL until sign-in.
@@ -752,8 +758,9 @@ function AppContent() {
 
         {/* Sidebar materials v1 (6 Nov) — the Materials section's own route. Query letters is a placeholder until the
             Query letters pack; Comparable titles and Submission packages keep their old addresses. */}
+        {/* Phone app v5: below 768px `/materials` is the dock's Materials tab (MaterialsRoute chooses by width) */}
         <StagePage name="materials" active={routeKey === "materials"}>
-          <MaterialsLock page="letters"><QueryLettersPage active={routeKey === "materials"} /></MaterialsLock>
+          <MaterialsRoute><MaterialsLock page="letters"><QueryLettersPage active={routeKey === "materials"} /></MaterialsLock></MaterialsRoute>
         </StagePage>
 
         {/* Secondary pages mount on demand (same lifecycle as the old conditional render).

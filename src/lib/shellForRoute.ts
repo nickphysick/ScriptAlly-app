@@ -46,6 +46,8 @@ export const WORKSPACE_SHELL_PATHS = new Set([
   "/plans",   // Plan & billing
   "/help",    // Help centre
   "/you",     // You — a phone tab (Phone app v3); a computer is sent to the dashboard
+  "/queries/all", // Phone app v5 — the full list of queries, pushed from Today (a computer is sent to /queries)
+  "/materials",   // Phone app v5 — the Materials tab (a computer is sent to the dashboard)
   "/goals",   // Streaks & goals — a phone page (Phone app v2 Part 7D); a computer is sent to the dashboard
   /* Settings' six sections are routes of their own. Spread rather than restated: an unmapped
      path throws here in development, so a hand-typed list is a dev-only crash waiting on the

@@ -9,11 +9,8 @@
  * ⚠️ A ROOT PAGE DRAWS ITS OWN HEADER (the navy card with its cast member), so the shell draws none there — only the
  *    slim bar once the page is scrolled.
  */
-import React, { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { subscribeV3, v3Overlay } from "../v3/v3Store";
-import { V3_TABS, v3TabFor, type V3Tab } from "../../../lib/phoneV3Nav";
-import { useV3Maybe } from "../v3/V3Provider";
-import { I4, IconBtn, type V4IconName } from "./V4Parts";
+import React, { useEffect, useRef, useState } from "react";
+import { IconBtn } from "./V4Parts";
 import "./phoneV4.css";
 
 export const V4_HIDE_AT = 80;
@@ -47,73 +44,35 @@ export function useStageScroll(scroller: () => HTMLElement | null, routeKey: str
   return st;
 }
 
-const TAB_ICON: Record<V3Tab, V4IconName> = { today: "today", queries: "queries", agents: "agents", you: "user" };
+/* Phone app v5: the dock (V4TabBar) and the slim bar (V4MiniBar) are replaced by V5Dock and V5MiniBar
+   (components/phone/v5/V5Chrome.tsx), which read the scroll through useStageScroll above. */
 
-export const V4TabBar: React.FC<{
-  pathname: string; onGo: (path: string, tab: V3Tab) => void; onPlus: () => void; hidden?: boolean;
-  scroller: () => HTMLElement | null;
-}> = ({ pathname, onGo, onPlus, hidden, scroller }) => {
-  const v = useV3Maybe();
-  const o = useSyncExternalStore(subscribeV3, v3Overlay, v3Overlay);
-  const { y, down } = useStageScroll(scroller, pathname);
-  const on = v3TabFor(pathname);
+/** a pushed page's header: back, the page's name, the page's one icon.
+ *  Phone app v5: `sticky` keeps it at the top (the full list of queries, whose Birds-eye ruler sticks under it); its
+ *  measured height is published as `--pa5-ph-h` for that ruler. */
+export const V4PushedHeader: React.FC<{ title: string; onBack: () => void; extra?: React.ReactNode; slot?: React.ReactNode; sticky?: boolean }> = ({ title, onBack, extra, slot, sticky }) => {
+  const ref = useRef<HTMLElement>(null);
   useEffect(() => {
-    document.body.classList.add("pa4-on", "pa3-on");
-    return () => document.body.classList.remove("pa4-on", "pa3-on");
-  }, []);
-  if (hidden) return null;
-  const tucked = down && y > V4_HIDE_AT;
-  const badge = v?.ordered.length ?? 0;
-  const tab = (t: (typeof V3_TABS)[number]) => {
-    const active = on === t.key;
-    return (
-      <button key={t.key} type="button" className={active ? "on" : ""} data-pa4="tab" data-pa3="tab" data-tab={t.key}
-        aria-current={active ? "page" : undefined}
-        aria-label={t.key === "today" && badge > 0 ? `Today, ${badge} ${badge === 1 ? "task" : "tasks"}` : t.label}
-        onClick={() => onGo(t.path, t.key)}>
-        <I4 n={TAB_ICON[t.key]} />{t.label}
-      </button>
-    );
-  };
+    const el = ref.current;
+    if (!sticky || !el) return undefined;
+    const put = () => document.body.style.setProperty("--pa5-ph-h", `${el.offsetHeight}px`);
+    put();
+    document.body.classList.add("pa5-phs");
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(put);
+    ro?.observe(el);
+    return () => { ro?.disconnect(); document.body.classList.remove("pa5-phs"); document.body.style.removeProperty("--pa5-ph-h"); };
+  }, [sticky]);
   return (
-    <nav className={`pa4-tb${tucked ? " hide" : ""}`} aria-label="Primary" data-pa4="tabbar" data-pa3="tabbar" data-tucked={tucked ? "1" : "0"}>
-      {tab(V3_TABS[0])}
-      {tab(V3_TABS[1])}
-      <button type="button" className="p" data-pa4="plus" data-pa3="plus" aria-label={o?.type === "plus" ? "Close" : "Log a query"}
-        aria-haspopup="dialog" aria-expanded={o?.type === "plus"} onClick={onPlus}>
-        <span><I4 n="plus" /></span>
-      </button>
-      {tab(V3_TABS[2])}
-      {tab(V3_TABS[3])}
-    </nav>
+    <>
+      <header ref={ref} className={`pa4-ph${sticky ? " pa5-phs" : ""}`} data-pa4="pushed-header" data-pa3="header" data-root="0" data-sticky={sticky ? "1" : undefined}>
+        <IconBtn label="Back" n="back" pa4="back" onClick={onBack} />
+        <h1 className="t" data-pa3="title">{title}</h1>
+        {extra}
+      </header>
+      {slot ? <div className="pa3-pslot" data-pa3="page-slot">{slot}</div> : null}
+    </>
   );
 };
-
-/** past 300px on a root page: the slim navy bar — the tab's name (tap it to go back to the top) and search, nothing else
- *  (Phone app v4.1, baked decision 4) */
-export const V4MiniBar: React.FC<{ title: string; pathname: string; scroller: () => HTMLElement | null; onSearch: () => void }> = ({ title, pathname, scroller, onSearch }) => {
-  const { y } = useStageScroll(scroller, pathname);
-  const on = y > V4_MINI_AT;
-  return (
-    <div className={`pa4-mini${on ? " on" : ""}`} data-pa4="mini" data-on={on ? "1" : "0"} aria-hidden={on ? undefined : true}>
-      <button type="button" className="t" data-pa41="mini-title" tabIndex={on ? 0 : -1}
-        onClick={() => scroller()?.scrollTo({ top: 0, behavior: "smooth" })}>{title}</button>
-      <IconBtn label="Search" n="search" pa4="mini-search" onClick={onSearch} />
-    </div>
-  );
-};
-
-/** a pushed page's header: back, the page's name, the page's one icon */
-export const V4PushedHeader: React.FC<{ title: string; onBack: () => void; extra?: React.ReactNode; slot?: React.ReactNode }> = ({ title, onBack, extra, slot }) => (
-  <>
-    <header className="pa4-ph" data-pa4="pushed-header" data-pa3="header" data-root="0">
-      <IconBtn label="Back" n="back" pa4="back" onClick={onBack} />
-      <h1 className="t" data-pa3="title">{title}</h1>
-      {extra}
-    </header>
-    {slot ? <div className="pa3-pslot" data-pa3="page-slot">{slot}</div> : null}
-  </>
-);
 
 /** a pushed page the layer draws over everything (the task list, everyone on the list): back arrow, name, its own scroll */
 export const V4Page: React.FC<{ title: string; onBack: () => void; pa4: string; children: React.ReactNode; foot?: React.ReactNode; extra?: React.ReactNode }> = ({ title, onBack, pa4, children, foot, extra }) => (

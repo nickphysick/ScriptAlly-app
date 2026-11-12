@@ -6,12 +6,10 @@
  */
 import React from "react";
 import type { V3Overlay } from "../v3/v3Store";
-import { TasksPageV4 } from "./TasksPageV4";
 import { QuickLogV4 } from "./QuickLogV4";
 import { AgentSheetV4, AgentsListPageV4 } from "./AgentsV4";
 
 export function renderV4(o: V3Overlay): React.ReactNode {
-  if (o.type === "tasks") return <TasksPageV4 />;
   if (o.type === "plus") return <QuickLogV4 />;
   if (o.type === "log") return <QuickLogV4 agentId={o.agentId} />;
   if (o.type === "agents-all") return <AgentsListPageV4 />;
