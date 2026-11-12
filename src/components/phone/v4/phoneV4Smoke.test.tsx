@@ -41,7 +41,8 @@ describe("Phone app v4 renders", () => {
     expect(empty).toContain("Log your first query");
     expect(empty).toContain('data-state="dayone"');
     const full = renderPageSeeded(P(<TodayV4 />), "/dashboard");
-    expect(full).toContain("Where your queries are");
+    expect(full).toContain("Birds-eye view");
+    expect(full).toContain("Open the Birds-eye view");
     expect(full).toContain("Lately");
     expect(full).toContain("Active queries");
     expect(full).toContain('data-pa41="header"');

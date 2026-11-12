@@ -53,11 +53,6 @@ export function birdsGroups(qs: readonly V3Query[], nowMs: number): BirdsGroup[]
     court, rows: qs.filter((q) => q.court === court).map((q) => closeness(q, nowMs)).sort(byCloseness),
   })).filter((g) => g.rows.length);
 }
-/** Today's preview: the open queries furthest through, across every court */
-export function closestOpen(qs: readonly V3Query[], nowMs: number, n = 3): Closeness[] {
-  return qs.filter((q) => q.court !== "closed").map((q) => closeness(q, nowMs)).filter((c) => c.f != null).sort(byCloseness).slice(0, n);
-}
-
 /** the words at a bar's right end: what is left, or how far past the date it is */
 export function closeWords(c: Closeness, nowMs: number): string {
   if (c.toMs == null) return "No date saved";

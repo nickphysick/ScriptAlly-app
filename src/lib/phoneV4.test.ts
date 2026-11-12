@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { bestFit, byCloseness, closeWords, closestOpen, dayN, nextReply, repliesAhead, type Closeness } from "./phoneV4";
+import { bestFit, byCloseness, closeness, closeWords, dayN, nextReply, repliesAhead, type Closeness } from "./phoneV4";
 import { todayState } from "../components/phone/v4/todayState";
 import type { V3Query } from "./phoneV3";
 import { QueryStatus, type Agent, type Query } from "../types";
@@ -15,7 +15,7 @@ const vq = (id: string, court: V3Query["court"], o: { start?: number; exp?: numb
 describe("phone v4 figures", () => {
   it("closest first, undated last; a passed date says how far past, never overdue", () => {
     const a = vq("a", "agent", { exp: NOW + 10 * DAY }), b = vq("b", "you", { exp: NOW - 15 * DAY }), u = vq("u", "agent", { exp: null });
-    const top = closestOpen([a, b, u, vq("c", "closed")], NOW, 3);
+    const top = [a, b].map((q) => closeness(q, NOW)).sort(byCloseness);
     expect(top.map((x) => x.q.id)).toEqual(["b", "a"]);
     expect(closeWords(top[0], NOW)).toBe("2 wks past its date");
     expect(closeWords(top[0], NOW)).not.toMatch(/overdue|late/i);

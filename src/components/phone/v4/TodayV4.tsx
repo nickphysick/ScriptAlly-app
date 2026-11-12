@@ -21,7 +21,7 @@ import { openV3, openV3Query } from "../v3/v3Store";
 import { PhoneTaskScreen } from "../../todo/phone/PhoneTaskScreen";
 import { taskLine, type V3Query } from "../../../lib/phoneV3";
 import { buildRows } from "../../../lib/analytics";
-import { closestOpen, dayN, firstSentMs, nextReply, repliesAhead, streakLine, bestFit, type Closeness } from "../../../lib/phoneV4";
+import { dayN, firstSentMs, nextReply, repliesAhead, streakLine, bestFit } from "../../../lib/phoneV4";
 import { activeSeries, weekChange } from "../../../lib/phoneV41";
 import { TodayHeaderV41 } from "./TodayHeaderV41";
 import { feedEntries } from "../../../lib/dashFeed";
@@ -35,11 +35,11 @@ import { COMPOSE, RANK_NAMES, nextStep, type ComposeKey } from "../../../lib/fou
 import { feedbackDraft, openFeedback, setFeedbackDraft } from "../../../lib/feedbackStore";
 import { QueryStatus, type Activity } from "../../../types";
 import type { WsTask } from "../../../lib/todoWs";
-import { CAST, Chev, Cta, I4, LapCard as LapCard0, Link4, RANK_HEADS, Ring, Stamp } from "./V4Parts";
+import { CAST, Chev, Cta, LapCard as LapCard0, Link4, RANK_HEADS, Stamp } from "./V4Parts";
 
 /* v4.1: Today's first card sits below the header — nothing overlaps the chart's months (PA41-4) */
 const LapCard: React.FC<React.ComponentProps<typeof LapCard0>> = ({ style, ...p }) => <LapCard0 {...p} style={{ marginTop: 16, ...style }} />;
-import { BirdBar } from "./BirdsV4";
+import { BirdsCardV41 } from "./BirdsCardV41";
 import { todayState } from "./todayState";
 import "./phoneV4.css";
 
@@ -81,8 +81,6 @@ export const TodayV4: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
 
   const feed = useMemo(() => (loading ? [] : feedEntries({ activities, queries, agents, manuscripts, now: new Date(now), seenAt: null, honestDates: true })
     .filter((e) => !e.app).slice(0, 4)), [loading, activities, queries, agents, manuscripts, now]);
-  const closest = useMemo(() => closestOpen(v.qs, now, 3), [v.qs, now]);
-  const live = useMemo(() => v.qs.filter((q) => q.court !== "closed"), [v.qs]);
   const nr = useMemo(() => nextReply(v.qs, now), [v.qs, now]);
   const toQuery = useMemo(() => bestFit(agents, queries).length, [agents, queries]);
 
@@ -200,8 +198,8 @@ export const TodayV4: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
       {loading ? null : <div ref={upRef} data-pa41="lead" style={{ scrollMarginTop: 72 }}>{lead}</div>}
       {loading || state === "dayone" ? null : (
         <div className="pa4-inset">
-          <RingCard qs={v.qs} c={c} next={nr} onCourt={(k) => navigate(`/queries?court=${k}`)} />
-          {closest.length ? <ClosestCard rows={closest} total={live.length} now={now} onAll={() => navigate("/queries?view=birds")} /> : null}
+          {/* v4.1: the Birds-eye card replaces the ring card (and v4's Closest-to-their-date preview), carrying its counts */}
+          <BirdsCardV41 qs={v.qs} c={c} next={nr} nowMs={now} />
           {health && (aid?.healthPct ?? health.pct) < 100 ? (
             <div className="pa4-card" style={{ marginTop: 16, padding: "24px 24px 8px" }} data-pa4="health" data-pct={health.pct}>
               <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
@@ -236,45 +234,6 @@ export const TodayV4: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
     </div>
   );
 };
-
-/* ── Where your queries are ── */
-const RingCard: React.FC<{ qs: readonly V3Query[]; c: ReturnType<typeof useV3Data>["counts"]; next: V3Query | null; onCourt: (k: "you" | "agent" | "quiet") => void }> = ({ c, next, onCourt }) => {
-  const parts = [
-    { k: "you" as const, n: c.you, colour: "var(--pa-blush)", l: "with you" },
-    { k: "agent" as const, n: c.agent, colour: "var(--pa-ring-agent)", l: "with the agent" },
-    { k: "quiet" as const, n: c.quiet, colour: "var(--pa-ring-quiet)", l: "gone quiet" },
-  ];
-  return (
-    <div className="pa4-ring" data-pa4="ring-card">
-      <h2 className="pa4-h" style={{ marginBottom: 16 }}>Where your queries are</h2>
-      <div className="pa4-rw">
-        <Ring parts={parts} total={c.active} label={parts.map((p) => `${p.n} ${p.l}`).join(", ")} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {parts.map((p) => (
-            <button key={p.k} type="button" className="rr" data-pa4="court" data-k={p.k} data-count={p.n} onClick={() => onCourt(p.k)}>
-              <i style={{ background: p.colour }} /><b className="pa4-n" style={{ width: 28, textAlign: "left" }}>{p.n}</b><span className="pa4-s" style={{ textAlign: "left" }}>{p.l}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      {next ? (
-        <div className="nx" data-pa4="next-reply"><I4 n="clock" style={{ width: 20, height: 20, color: "var(--pa-blush)" }} /><span className="pa4-s">Next reply expected: <b>{next.row.agentName}, by {dayMonth(next.replyMs as number)}</b></span></div>
-      ) : null}
-    </div>
-  );
-};
-
-/* ── Closest to their date (the Birds-eye preview) ── */
-const ClosestCard: React.FC<{ rows: Closeness[]; total: number; now: number; onAll: () => void }> = ({ rows, total, now, onAll }) => (
-  <div className="pa4-card" style={{ marginTop: 16, padding: "24px 24px 8px" }} data-pa4="closest">
-    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
-      <div style={{ flex: 1 }}><h2 className="pa4-h">Closest to their date</h2><div className="pa4-s">From your Birds-eye view</div></div>
-      <img src={CAST.beHead} alt="" style={{ width: 56, margin: "-8px -4px 0 0" }} />
-    </div>
-    <div style={{ paddingTop: 8 }}>{rows.map((r) => <BirdBar key={r.q.id} c={r} now={now} onTap={() => openV3Query(r.q.id)} />)}</div>
-    <Link4 sb pa4="closest-all" onClick={onAll}>See all {total} in the Birds-eye view</Link4>
-  </div>
-);
 
 /* ── Founding writer ── */
 const FoundingCard: React.FC<{ uid: string | null }> = ({ uid }) => {
