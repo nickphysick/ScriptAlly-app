@@ -7,7 +7,7 @@
  {
   "where": "the new row is in view",
   "ok": true,
-  "detail": "{\"row\":true,\"inView\":true,\"tint\":true,\"stamp\":\"ADDED 12 NOV\",\"panel\":0,\"toast\":[{\"text\":\"Quill Clpg96tm added to your listUNDO✕\",\"undo\":true}],\"role\":\"status\"}"
+  "detail": "{\"row\":true,\"inView\":true,\"tint\":true,\"stamp\":\"ADDED 12 NOV\",\"panel\":0,\"toast\":[{\"text\":\"Quill Clph8gok added to your listUNDO✕\",\"undo\":true}],\"role\":\"status\"}"
  },
  {
   "where": "the row is tinted",
@@ -22,7 +22,7 @@
  {
   "where": "one snackbar: “{Name} added to your list”, with Undo",
   "ok": true,
-  "detail": "[{\"text\":\"Quill Clpg96tm added to your listUNDO✕\",\"undo\":true}]"
+  "detail": "[{\"text\":\"Quill Clph8gok added to your listUNDO✕\",\"undo\":true}]"
  },
  {
   "where": "role=status",
@@ -30,13 +30,13 @@
   "detail": "status"
  },
  {
+  "where": "and says “{Name} removed”",
+  "ok": true,
+  "detail": "[\"Quill Clph8gok removed✕\"]"
+ },
+ {
   "where": "Undo removed the agent (emulator)",
   "ok": true,
   "detail": "0"
- },
- {
-  "where": "and says “{Name} removed”",
-  "ok": true,
-  "detail": "[\"Quill Clpg96tm removed✕\"]"
  }
 ]

@@ -317,11 +317,12 @@ test("CLP7 · after an add: the row in view, the postmark, the snackbar; Undo re
   L.check("role=status", r.role === "status", String(r.role));
   if (r.toast.length) {
     await page.locator(".sa-toast .sa-toast-undo").first().click();
-    await page.waitForTimeout(1500);
-    const left = JSON.parse(emu("agents")) as { name: string }[];
-    L.check("Undo removed the agent (emulator)", !left.some((a) => a.name === name), String(left.filter((a) => a.name === name).length));
+    /* the snackbar first (it lives 5s), then the emulator (a node process: slow under load) */
+    await page.locator(".sa-toast", { hasText: `${name} removed` }).first().waitFor({ timeout: 4000 }).catch(() => {});
     const t2 = await page.locator(".sa-toast").allTextContents();
     L.check("and says “{Name} removed”", t2.some((t) => t.includes(`${name} removed`)), JSON.stringify(t2));
+    const left = JSON.parse(emu("agents")) as { name: string }[];
+    L.check("Undo removed the agent (emulator)", !left.some((a) => a.name === name), String(left.filter((a) => a.name === name).length));
   }
   L.done(8);
 });
