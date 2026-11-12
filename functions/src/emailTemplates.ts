@@ -27,7 +27,7 @@
  */
 
 import { RenderedEmail } from "./email";
-import { MailConfig, unsubscribeLink, verifyLink } from "./emailConfig";
+import { APP_PATHS, MailConfig, appLink, inviteLink, unsubscribeLink, verifyLink } from "./emailConfig";
 import {
   BRAND_NAME, CONFIRM_CTA, CONFIRM_EXPIRY, CONFIRM_HEADING, CONFIRM_LEAD, CONFIRM_NEXT,
   CONFIRM_LINK_HELP, CONFIRM_NOT_HELD, CONFIRM_NOT_YOU, CONFIRM_PREHEADER, CONFIRM_SUBJECT, FOOT_LINE, PASS_LABEL,
@@ -36,6 +36,24 @@ import {
   WAITING_PREHEADER, WAITING_SORRY, WAITING_SUBJECT, WELCOME_GET_HEADING, WELCOME_HEADING,
   WELCOME_LEAD, WELCOME_NEXT, WELCOME_NEXT_HEADING, WELCOME_NOTE, WELCOME_PERKS, WELCOME_PREHEADER,
   contactLine, contactText, passNumber, passOf, welcomeSubject,
+  ACCOUNT_REASON, EMAIL_SETTINGS_LABEL, accountContactLine, accountContactText,
+  INVITE_CTA, INVITE_EXPIRY, INVITE_FIRST, INVITE_FIRST_HEADING, INVITE_HEADING, INVITE_LEAD, INVITE_PREHEADER,
+  INVITE_SUBJECT, INVITE_THEN, INVITE_THEN_HEADING, UNSUBSCRIBE_NOTE_INVITE, inviteCodeNote,
+  SIGNIN_CTA, SIGNIN_EXPIRY, SIGNIN_HEADING, SIGNIN_LEAD, SIGNIN_NOT_YOU, SIGNIN_PREHEADER, SIGNIN_SUBJECT,
+  RESET_CTA, RESET_EXPIRY, RESET_HEADING, RESET_LEAD, RESET_NOT_YOU, RESET_PREHEADER, RESET_SUBJECT,
+  NEW_EMAIL_CTA, NEW_EMAIL_EXPIRY, NEW_EMAIL_HEADING, NEW_EMAIL_LEAD, NEW_EMAIL_NOT_YOU, NEW_EMAIL_PREHEADER,
+  NEW_EMAIL_SUBJECT,
+  EMAIL_CHANGED_FINE, EMAIL_CHANGED_FROM, EMAIL_CHANGED_HEADING, EMAIL_CHANGED_LEAD, EMAIL_CHANGED_NOT_YOU,
+  EMAIL_CHANGED_PREHEADER, EMAIL_CHANGED_SUBJECT, EMAIL_CHANGED_TO, EMAIL_CHANGED_WHEN,
+  NUDGE_AGENT, NUDGE_CHANGE_WHEN, NUDGE_CTA, NUDGE_EXPECTED, NUDGE_HEARD, NUDGE_MANUSCRIPT, NUDGE_NO_REPLY,
+  NUDGE_SENT, NUDGE_SINCE, NUDGE_TURN_OFF, nudgeHeading, nudgePreheader, nudgeSetting, nudgeSubject,
+  WEEKLY_COMING, WEEKLY_CTA, WEEKLY_HAPPENED, WEEKLY_OUT, WEEKLY_QUIET, WEEKLY_REQUESTS, WEEKLY_TURN_OFF,
+  comingNudge, comingReplies, comingSend, happenedNo, happenedOffer, happenedRequest, happenedSent,
+  weeklyHeading, weeklyPreheader, weeklyRequestsValue, weeklySubject,
+  TRIAL_CTA, TRIAL_HAPPY, TRIAL_KEEPS, TRIAL_KEEPS_HEADING, TRIAL_PREHEADER, TRIAL_READ_ONLY,
+  TRIAL_READ_ONLY_HEADING, trialHeading, trialLead, trialPro, trialSubject,
+  PLAN_CTA, PLAN_ENDS, PLAN_FINISHED, PLAN_LABEL, PLAN_STOP, PLAN_THEN, planEndingHeading, planEndingLead,
+  planEndingPreheader, planEndingSubject, planStopValue, planThenValue, planValue,
 } from "./emailCopy";
 
 /* ══════════════ Refusal ══════════════ */
@@ -202,9 +220,9 @@ const footer = (cfg: MailConfig, unsubUrl: string, unsubNote: string) => {
   );
 };
 
-/** The whole message: ground, logo row, card (with an optional pass), footer. */
+/** The whole message: ground, logo row, card (with an optional pass), footer. `foot` replaces the founding footer. */
 const shell = (cfg: MailConfig, o: {
-  preheader: string; pass?: string; body: string; unsubUrl: string; unsubNote: string;
+  preheader: string; pass?: string; body: string; unsubUrl?: string; unsubNote?: string; foot?: string;
 }) => {
   const logo = asset(cfg, EMAIL_LOGO)!;
   return (
@@ -224,7 +242,7 @@ const shell = (cfg: MailConfig, o: {
     `<table ${TABLE} width="100%">` + (o.pass ?? "") +
     `<tr><td style="padding:30px 28px 28px">${o.body}</td></tr></table>` +
     `</td></tr>` +
-    footer(cfg, o.unsubUrl, o.unsubNote) +
+    (o.foot ?? footer(cfg, o.unsubUrl!, o.unsubNote!)) +
     `</table>` +
     `<!--[if mso]></td></tr></table><![endif]-->` +
     `</td></tr></table></body></html>`
@@ -378,6 +396,449 @@ export const prepareWaiting = (cfg: MailConfig, unsubToken: string): Prepared =>
         WAITING_HEADING, "", WAITING_LEAD, "", WAITING_NOTE.join(""), "",
         WAITING_NOTHING_TO_DO, "", WAITING_SORRY, "", textSignature,
       ].join("\n") + textFoot(cfg, unsubUrl!, UNSUBSCRIBE_NOTE_WAITING),
+    },
+  };
+};
+
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════
+   NON-WORKSPACE v1 (12 Nov): nine more, on the same shell (ref design-refs/emails-v1.html).
+   ⚠️ THE HEADINGS ARE LIVE SERIF TEXT, NOT THE REF'S TYPEWRITER. EM-7 holds for every email: a live typewriter
+      line is Courier in every client, and these headings carry names and dates, so they cannot be pre-drawn
+      images the way the founding headings are. The navy rule under each is the ref's, as a table cell.
+   ⚠️ THE ACTION LINK IS PRINTED UNDER THE EXPIRY LINE, small and muted, as the ref draws it.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+const heading1 = (text: string) =>
+  `<h1 style="margin:0 0 14px;font-family:${SERIF};font-size:27px;line-height:1.25;font-weight:600;color:${INK}">${esc(text)}</h1>` +
+  `<table ${TABLE} style="margin:0 0 20px"><tr><td width="44" height="3" bgcolor="${NAVY}" ` +
+  `style="width:44px;height:3px;background:${NAVY};border-radius:3px;font-size:0;line-height:0">&nbsp;</td></tr></table>`;
+
+const small = (text: string, margin = "0 0 4px") => para(esc(text), { size: 14.5, colour: MUTED, margin });
+
+const linkLine = (url: string) =>
+  `<p style="margin:0 0 20px;font-family:${SANS};font-size:11.5px;line-height:1.5;color:${MUTED};word-break:break-all">` +
+  `<a href="${esc(url)}" style="color:${MUTED};text-decoration:none;word-break:break-all">${esc(url)}</a></p>`;
+
+/** A list: "✓" or "•" in rust in its own cell, then an optional bold lead and the rest. */
+const list = (rows: readonly (readonly [string, string])[], mark: "tick" | "dot") =>
+  `<table ${TABLE} style="margin:0 0 20px">` +
+  rows.map(([b, rest]) =>
+    `<tr><td valign="top" style="padding:5px 10px 5px 0;font-family:${SANS};font-size:16px;line-height:1.45;` +
+    `font-weight:700;color:${RUST}">${mark === "tick" ? "&#10003;" : "&#8226;"}</td>` +
+    `<td style="padding:5px 0;font-family:${SERIF};font-size:16px;line-height:1.45;color:${INK}">` +
+    `${b ? `<b>${esc(b)}</b>` : ""}${esc(rest)}</td></tr>`).join("") +
+  `</table>`;
+const textList = (rows: readonly (readonly [string, string])[], mark: "tick" | "dot") =>
+  rows.map(([b, r]) => `${mark === "tick" ? "✓" : "•"} ${b}${r}`);
+
+/** The facts table: a hairline box, label left in muted serif, value right; the value is already-escaped HTML. */
+const facts = (rows: readonly (readonly [string, string])[]) =>
+  `<table ${TABLE} width="100%" style="margin:4px 0 20px;border:1px solid #e6e0d8;border-radius:14px">` +
+  `<tr><td style="padding:6px 18px"><table ${TABLE} width="100%">` +
+  rows.map(([label, value], i) => {
+    const rule = i ? "border-top:1px solid #efeae3;" : "";
+    return `<tr><td valign="top" width="38%" style="padding:9px 10px 9px 0;font-family:${SERIF};font-size:15px;` +
+      `line-height:1.45;color:${MUTED};${rule}">${esc(label)}</td>` +
+      `<td valign="top" style="padding:9px 0;font-family:${SERIF};font-size:15.5px;line-height:1.45;color:${INK};${rule}">${value}</td></tr>`;
+  }).join("") +
+  `</table></td></tr></table>`;
+const textFacts = (rows: readonly (readonly [string, string])[]) => rows.map(([l, v]) => `${l}: ${v}`);
+
+const footLink = (url: string, label: string) =>
+  `<a href="${esc(url)}" style="color:${FOOT_FAINT};text-decoration:underline">${esc(label)}</a>`;
+
+/** The product's footer: the short contact line, then (account emails) why it came, or (reminders) the switches. */
+const productFoot = (cfg: MailConfig, o: { reason: boolean; links: readonly (readonly [string, string])[] }) => {
+  const [a, addr, b] = accountContactLine(cfg.contactEmail);
+  return (
+    `<tr><td style="padding:18px 26px 0">` +
+    `<p style="margin:0 0 8px;font-family:${SERIF};font-size:13.5px;line-height:1.6;color:${FOOT_INK}">` +
+    `${esc(a)}<a href="mailto:${esc(addr)}" style="color:${FOOT_INK};text-decoration:underline">${esc(addr)}</a>${esc(b)}</p>` +
+    `<p style="margin:0;font-family:${SANS};font-size:12.5px;line-height:1.55;color:${FOOT_FAINT}">` +
+    (o.reason ? `${esc(ACCOUNT_REASON)} ` : "") +
+    o.links.map(([label, url]) => footLink(url, label)).join(" · ") +
+    `<br>${esc(FOOT_LINE)}</p></td></tr>`
+  );
+};
+const productTextFoot = (cfg: MailConfig, o: { reason: boolean; links: readonly (readonly [string, string])[] }) =>
+  `\n\n---\n${accountContactText(cfg.contactEmail)}\n\n` +
+  (o.reason ? `${ACCOUNT_REASON}\n` : "") +
+  o.links.map(([label, url]) => `${label}: ${url}`).join("\n") + `\n${FOOT_LINE}\n`;
+
+const needsLogo = (cfg: MailConfig) => (asset(cfg, EMAIL_LOGO) ? [] : ["imageUrl"]);
+const need = (pairs: Record<string, unknown>): string[] => Object.entries(pairs).filter(([, v]) => !v).map(([k]) => k);
+
+/* ══════════════ Shared helpers for names and dates ══════════════ */
+
+/** "m•••@newmail.example": the first character, three dots, the whole domain. The old inbox sees enough to recognise it. */
+export const maskEmail = (email: string): string => {
+  const e = email.trim();
+  const at = e.lastIndexOf("@");
+  if (at < 1) return "•••";
+  return `${e.charAt(0)}•••${e.slice(at)}`;
+};
+
+/** "Thursday 12 November, 6.47pm", in UK time. */
+export const formatWhen = (ms: number): string => {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London", weekday: "long", day: "numeric", month: "long", hour: "numeric", minute: "2-digit", hour12: false,
+  }).formatToParts(new Date(ms)).map((p) => [p.type, p.value]));
+  const h24 = Number(parts.hour) % 24;
+  const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+  return `${parts.weekday} ${parts.day} ${parts.month}, ${h12}.${parts.minute}${h24 < 12 ? "am" : "pm"}`;
+};
+
+/** An agent as the emails name one: "Eleanor Whitfield, Greenfield Literary", or the name alone. */
+export interface AgentRef { name: string; agency?: string | null }
+const agentText = (a: AgentRef): string => (a.agency ? `${a.name}, ${a.agency}` : a.name);
+
+/* ══════════════ 4 · The invite (founding; from Nick) ══════════════ */
+
+export interface InviteArgs {
+  /** The founder's code, already normalised: QH-XXXX-XXXX. */
+  code: string;
+  /** The writer's stored founding number, or null (then the email has no pass). */
+  foundingNo: number | null;
+  cap: number;
+  /** The writer's waitlist unsubscribe token (`unsubscribeToken(docId, salt)`). */
+  unsubToken: string;
+}
+
+export const prepareInvite = (cfg: MailConfig, a: InviteArgs): Prepared => {
+  const joinUrl = inviteLink(cfg, a.code);
+  const unsubUrl = unsubscribeLink(cfg, a.unsubToken);
+  const missing = [...need({ joinUrl, unsubscribeUrl: unsubUrl }), ...needsImages(cfg)];
+  if (missing.length) return { ok: false, missing };
+
+  const n = a.foundingNo;
+  const passImage = n != null ? passImageFor(n) : null;
+  const passHtml = n == null ? undefined : passImage ? passImg(cfg, passImage) : pass(cfg, passNumber(n), passOf(a.cap));
+  const [codeBold, codeRest] = inviteCodeNote(a.code);
+  const body =
+    heading1(INVITE_HEADING) +
+    para(esc(INVITE_LEAD)) +
+    button(joinUrl!, INVITE_CTA) +
+    small(INVITE_EXPIRY, "0 0 6px") +
+    linkLine(joinUrl!) +
+    note(codeBold, codeRest) +
+    subheading(INVITE_FIRST_HEADING) +
+    list(INVITE_FIRST, "dot") +
+    subheading(INVITE_THEN_HEADING, "6px 0 8px") +
+    para(esc(INVITE_THEN), { margin: "0 0 4px" });
+
+  return {
+    ok: true,
+    email: {
+      headers: listUnsubscribe(unsubUrl!),
+      subject: INVITE_SUBJECT,
+      html: shell(cfg, { preheader: INVITE_PREHEADER, pass: passHtml, body, unsubUrl: unsubUrl!, unsubNote: UNSUBSCRIBE_NOTE_INVITE }),
+      text: [
+        ...(n != null ? [`${PASS_LABEL}: ${passNumber(n)} ${passOf(a.cap)}`, ""] : []),
+        INVITE_HEADING, "", INVITE_LEAD, "",
+        `${INVITE_CTA}: ${joinUrl}`, "", INVITE_EXPIRY, "",
+        `${codeBold}${codeRest}`, "",
+        INVITE_FIRST_HEADING, ...textList(INVITE_FIRST, "dot"), "",
+        INVITE_THEN_HEADING, INVITE_THEN,
+      ].join("\n") + textFoot(cfg, unsubUrl!, UNSUBSCRIBE_NOTE_INVITE),
+    },
+  };
+};
+
+/* ══════════════ 5–7 · The three action-link account emails ══════════════ */
+
+interface ActionCopy {
+  subject: string; preheader: string; heading: string; lead: string; cta: string; expiry: string; notYou: string;
+}
+
+const actionEmail = (cfg: MailConfig, c: ActionCopy, link: string | null): Prepared => {
+  const settingsUrl = appLink(cfg, APP_PATHS.emailSettings);
+  const missing = [...need({ link, settingsUrl }), ...needsLogo(cfg)];
+  if (missing.length) return { ok: false, missing };
+  const foot = { reason: true, links: [[EMAIL_SETTINGS_LABEL, settingsUrl!]] as const };
+  const body =
+    heading1(c.heading) + para(esc(c.lead)) + button(link!, c.cta) +
+    small(c.expiry, "0 0 6px") + linkLine(link!) + small(c.notYou);
+  return {
+    ok: true,
+    email: {
+      subject: c.subject,
+      html: shell(cfg, { preheader: c.preheader, body, foot: productFoot(cfg, foot) }),
+      text: [c.heading, "", c.lead, "", `${c.cta}: ${link}`, "", c.expiry, "", c.notYou].join("\n") + productTextFoot(cfg, foot),
+    },
+  };
+};
+
+/** `link` is the Firebase action link the Admin SDK generated. */
+export const prepareSignIn = (cfg: MailConfig, link: string | null): Prepared => actionEmail(cfg, {
+  subject: SIGNIN_SUBJECT, preheader: SIGNIN_PREHEADER, heading: SIGNIN_HEADING, lead: SIGNIN_LEAD,
+  cta: SIGNIN_CTA, expiry: SIGNIN_EXPIRY, notYou: SIGNIN_NOT_YOU,
+}, link);
+
+export const prepareReset = (cfg: MailConfig, link: string | null): Prepared => actionEmail(cfg, {
+  subject: RESET_SUBJECT, preheader: RESET_PREHEADER, heading: RESET_HEADING, lead: RESET_LEAD,
+  cta: RESET_CTA, expiry: RESET_EXPIRY, notYou: RESET_NOT_YOU,
+}, link);
+
+export const prepareNewEmail = (cfg: MailConfig, link: string | null): Prepared => actionEmail(cfg, {
+  subject: NEW_EMAIL_SUBJECT, preheader: NEW_EMAIL_PREHEADER, heading: NEW_EMAIL_HEADING, lead: NEW_EMAIL_LEAD,
+  cta: NEW_EMAIL_CTA, expiry: NEW_EMAIL_EXPIRY, notYou: NEW_EMAIL_NOT_YOU,
+}, link);
+
+/* ══════════════ 8 · The address was changed (to the OLD address) ══════════════ */
+
+export interface EmailChangedArgs { oldEmail: string; newEmail: string; whenMs: number }
+
+export const prepareEmailChanged = (cfg: MailConfig, a: EmailChangedArgs): Prepared => {
+  const settingsUrl = appLink(cfg, APP_PATHS.emailSettings);
+  const missing = [...need({ oldEmail: a.oldEmail, newEmail: a.newEmail, settingsUrl }), ...needsLogo(cfg)];
+  if (missing.length) return { ok: false, missing };
+  /* ⚠️ THE NEW ADDRESS IS PART-HIDDEN ON PURPOSE: this goes to an inbox that may no longer be the writer's. */
+  const rows = [
+    [EMAIL_CHANGED_FROM, a.oldEmail], [EMAIL_CHANGED_TO, maskEmail(a.newEmail)], [EMAIL_CHANGED_WHEN, formatWhen(a.whenMs)],
+  ] as const;
+  const foot = { reason: true, links: [[EMAIL_SETTINGS_LABEL, settingsUrl!]] as const };
+  const body =
+    heading1(EMAIL_CHANGED_HEADING) + para(esc(EMAIL_CHANGED_LEAD)) +
+    facts(rows.map(([l, v]) => [l, esc(v)] as const)) +
+    para(esc(EMAIL_CHANGED_FINE)) +
+    note(EMAIL_CHANGED_NOT_YOU[0], EMAIL_CHANGED_NOT_YOU[1]).replace("margin:8px 0 22px", "margin:8px 0 4px");
+  return {
+    ok: true,
+    email: {
+      subject: EMAIL_CHANGED_SUBJECT,
+      html: shell(cfg, { preheader: EMAIL_CHANGED_PREHEADER, body, foot: productFoot(cfg, foot) }),
+      text: [
+        EMAIL_CHANGED_HEADING, "", EMAIL_CHANGED_LEAD, "", ...textFacts(rows), "",
+        EMAIL_CHANGED_FINE, "", EMAIL_CHANGED_NOT_YOU.join(""),
+      ].join("\n") + productTextFoot(cfg, foot),
+    },
+  };
+};
+
+/* ══════════════ 9 · A nudge is due ══════════════ */
+
+/** One query whose nudge falls due today. Every date is a phrase the scheduler has already formatted ("5 November"). */
+export interface NudgeItem {
+  agent: AgentRef;
+  manuscriptTitle: string;
+  sentOn: string;
+  replyExpectedBy: string;
+  /** Absolute link to this query in the app. */
+  queryUrl: string;
+}
+
+export interface NudgeArgs {
+  items: readonly NudgeItem[];
+  /** The writer's own setting, as a phrase: "one week". */
+  nudgeAfter: string;
+  turnOffUrl: string;
+  changeWhenUrl: string;
+  /** Optional RFC 8058 target. Pass it only when that URL accepts the one-click POST. */
+  listUnsubscribeUrl?: string;
+}
+
+export const prepareNudge = (cfg: MailConfig, a: NudgeArgs): Prepared => {
+  const settingsUrl = appLink(cfg, APP_PATHS.emailSettings);
+  const missing = [
+    ...(a.items.length ? [] : ["items"]),
+    ...(a.items.every((i) => i.queryUrl) ? [] : ["queryUrl"]),
+    ...need({ nudgeAfter: a.nudgeAfter, turnOffUrl: a.turnOffUrl, changeWhenUrl: a.changeWhenUrl, settingsUrl }),
+    ...needsLogo(cfg),
+  ];
+  if (missing.length) return { ok: false, missing };
+
+  const names = a.items.map((i) => i.agent.name);
+  const rowsOf = (i: NudgeItem) => [
+    [NUDGE_AGENT, i.agent], [NUDGE_MANUSCRIPT, i.manuscriptTitle], [NUDGE_SENT, i.sentOn],
+    [NUDGE_EXPECTED, i.replyExpectedBy], [NUDGE_SINCE, NUDGE_NO_REPLY],
+  ] as const;
+  const htmlRows = (i: NudgeItem) => rowsOf(i).map(([l, v]) => [l, typeof v === "string" ? esc(v)
+    : `<b>${esc(v.name)}</b>${v.agency ? `<br>${esc(v.agency)}` : ""}`] as const);
+  const textRows = (i: NudgeItem) => rowsOf(i).map(([l, v]) => [l, typeof v === "string" ? v : agentText(v)] as const);
+  const setting = nudgeSetting(a.nudgeAfter);
+  const one = a.items.length === 1;
+  const body = heading1(nudgeHeading(names)) + (one
+    ? facts(htmlRows(a.items[0])) + para(esc(setting)) + button(a.items[0].queryUrl, NUDGE_CTA)
+    : a.items.map((i) => facts(htmlRows(i)) + button(i.queryUrl, NUDGE_CTA).replace("margin:6px 0 10px", "margin:-6px 0 26px")).join("") +
+      para(esc(setting))) +
+    small(NUDGE_HEARD);
+  const foot = { reason: false, links: [[NUDGE_TURN_OFF, a.turnOffUrl], [NUDGE_CHANGE_WHEN, a.changeWhenUrl], [EMAIL_SETTINGS_LABEL, settingsUrl!]] as const };
+  const textItems = a.items.flatMap((i) => [...textFacts(textRows(i)), `${NUDGE_CTA}: ${i.queryUrl}`, ""]);
+  return {
+    ok: true,
+    email: {
+      ...(a.listUnsubscribeUrl ? { headers: listUnsubscribe(a.listUnsubscribeUrl) } : {}),
+      subject: nudgeSubject(names),
+      html: shell(cfg, { preheader: nudgePreheader(a.items.map((i) => i.replyExpectedBy)), body, foot: productFoot(cfg, foot) }),
+      text: [nudgeHeading(names), "", ...textItems, setting, "", NUDGE_HEARD].join("\n") + productTextFoot(cfg, foot),
+    },
+  };
+};
+
+/* ══════════════ 10 · The weekly summary ══════════════ */
+
+/** What came in, or went out, last week. The counts in the subject and heading are DERIVED from this list. */
+export type WeeklyHappened =
+  | { kind: "request"; stage: "partial" | "full"; agent: AgentRef }
+  | { kind: "no"; agent: AgentRef }
+  | { kind: "offer"; agent: AgentRef }
+  | { kind: "sent"; agentNames: readonly string[] };
+
+/** What is due this week. Dates are phrases ("Friday 13 November"). */
+export type WeeklyComing =
+  | { kind: "send"; stage: "partial" | "full"; agentName: string; by: string }
+  | { kind: "nudge"; agentName: string; on: string }
+  | { kind: "replies"; agentNames: readonly string[] };
+
+export interface WeeklyArgs {
+  /** "Monday 2 to Sunday 8 November". */
+  weekPhrase: string;
+  happened: readonly WeeklyHappened[];
+  coming: readonly WeeklyComing[];
+  /** Where the campaign stands: plain counts. */
+  standing: { queriesOut: number; requests: number; sent: number; quiet: number };
+  turnOffUrl: string;
+  listUnsubscribeUrl?: string;
+}
+
+const happenedLine = (h: WeeklyHappened): [string, string] => {
+  switch (h.kind) {
+    case "request": return happenedRequest(h.stage, agentText(h.agent));
+    case "no": return happenedNo(agentText(h.agent));
+    case "offer": return happenedOffer(agentText(h.agent));
+    case "sent": return happenedSent(h.agentNames);
+    default: { const unhandled: never = h; throw new Error(`unknown weekly line ${JSON.stringify(unhandled)}`); }
+  }
+};
+const comingLine = (c: WeeklyComing): [string, string] => {
+  switch (c.kind) {
+    case "send": return comingSend(c.stage, c.agentName, c.by);
+    case "nudge": return comingNudge(c.agentName, c.on);
+    case "replies": return comingReplies(c.agentNames);
+    default: { const unhandled: never = c; throw new Error(`unknown weekly line ${JSON.stringify(unhandled)}`); }
+  }
+};
+
+export const prepareWeekly = (cfg: MailConfig, a: WeeklyArgs): Prepared => {
+  const settingsUrl = appLink(cfg, APP_PATHS.emailSettings);
+  const dashboardUrl = appLink(cfg, APP_PATHS.dashboard);
+  const missing = [
+    ...(a.happened.length || a.coming.length ? [] : ["happenedOrComing"]),
+    ...need({ weekPhrase: a.weekPhrase, turnOffUrl: a.turnOffUrl, settingsUrl, dashboardUrl }),
+    ...needsLogo(cfg),
+  ];
+  if (missing.length) return { ok: false, missing };
+
+  const replies = a.happened.filter((h) => h.kind !== "sent").length;
+  const requests = a.happened.filter((h) => h.kind === "request").length;
+  const happened = a.happened.map(happenedLine);
+  const coming = a.coming.map(comingLine);
+  const s = a.standing;
+  const standing = [[WEEKLY_OUT, String(s.queriesOut)], [WEEKLY_REQUESTS, weeklyRequestsValue(s.requests, s.sent)], [WEEKLY_QUIET, String(s.quiet)]] as const;
+  const heading = weeklyHeading(replies, requests);
+  const body =
+    heading1(heading) +
+    para(esc(a.weekPhrase), { size: 14.5, colour: MUTED, margin: "0 0 18px" }) +
+    (happened.length ? subheading(WEEKLY_HAPPENED) + list(happened, "dot") : "") +
+    (coming.length ? subheading(WEEKLY_COMING) + list(coming, "dot") : "") +
+    facts(standing.map(([l, v]) => [l, esc(v)] as const)) +
+    button(dashboardUrl!, WEEKLY_CTA);
+  const foot = { reason: false, links: [[WEEKLY_TURN_OFF, a.turnOffUrl], [EMAIL_SETTINGS_LABEL, settingsUrl!]] as const };
+  return {
+    ok: true,
+    email: {
+      ...(a.listUnsubscribeUrl ? { headers: listUnsubscribe(a.listUnsubscribeUrl) } : {}),
+      subject: weeklySubject(replies, requests),
+      html: shell(cfg, { preheader: weeklyPreheader(coming.length), body, foot: productFoot(cfg, foot) }),
+      text: [
+        heading, a.weekPhrase, "",
+        ...(happened.length ? [WEEKLY_HAPPENED, ...textList(happened, "dot"), ""] : []),
+        ...(coming.length ? [WEEKLY_COMING, ...textList(coming, "dot"), ""] : []),
+        ...textFacts(standing), "", `${WEEKLY_CTA}: ${dashboardUrl}`,
+      ].join("\n") + productTextFoot(cfg, foot),
+    },
+  };
+};
+
+/* ══════════════ 11 · The trial is ending (for launch; template only, no sender) ══════════════ */
+
+export interface TrialEndingArgs {
+  /** "Thursday" — the day the 14 days end. */
+  endsWeekday: string;
+  /** "Thursday 26 November" — the first day on Free. */
+  freeFrom: string;
+  /** The cheapest Pro price, as the Pricing page states it: "£3.75". */
+  fromPrice: string;
+}
+
+export const prepareTrialEnding = (cfg: MailConfig, a: TrialEndingArgs): Prepared => {
+  const settingsUrl = appLink(cfg, APP_PATHS.emailSettings);
+  const plansUrl = appLink(cfg, APP_PATHS.plans);
+  const missing = [...need({ endsWeekday: a.endsWeekday, freeFrom: a.freeFrom, fromPrice: a.fromPrice, settingsUrl, plansUrl }), ...needsLogo(cfg)];
+  if (missing.length) return { ok: false, missing };
+  const keeps = TRIAL_KEEPS.map((t) => ["", t] as const);
+  const readOnly = TRIAL_READ_ONLY.map((t) => ["", t] as const);
+  const foot = { reason: true, links: [[EMAIL_SETTINGS_LABEL, settingsUrl!]] as const };
+  const body =
+    heading1(trialHeading(a.endsWeekday)) + para(esc(trialLead(a.freeFrom))) +
+    subheading(TRIAL_KEEPS_HEADING) + list(keeps, "tick") +
+    subheading(TRIAL_READ_ONLY_HEADING, "6px 0 8px") + list(readOnly, "dot") +
+    para(esc(trialPro(a.fromPrice))) + button(plansUrl!, TRIAL_CTA) + small(TRIAL_HAPPY);
+  return {
+    ok: true,
+    email: {
+      subject: trialSubject(a.endsWeekday),
+      html: shell(cfg, { preheader: TRIAL_PREHEADER, body, foot: productFoot(cfg, foot) }),
+      text: [
+        trialHeading(a.endsWeekday), "", trialLead(a.freeFrom), "",
+        TRIAL_KEEPS_HEADING, ...textList(keeps, "tick"), "",
+        TRIAL_READ_ONLY_HEADING, ...textList(readOnly, "dot"), "",
+        trialPro(a.fromPrice), "", `${TRIAL_CTA}: ${plansUrl}`, "", TRIAL_HAPPY,
+      ].join("\n") + productTextFoot(cfg, foot),
+    },
+  };
+};
+
+/* ══════════════ 12 · The plan is ending (for launch; template only, no sender) ══════════════ */
+
+export interface PlanEndingArgs {
+  /** "6-month". */
+  plan: string;
+  /** "6 months". */
+  duration: string;
+  /** "19 May". */
+  ends: string;
+  /** "Wednesday 19 May". */
+  endsLong: string;
+  /** "£7.99". */
+  monthly: string;
+  /** "19th". */
+  chargeDay: string;
+}
+
+export const preparePlanEnding = (cfg: MailConfig, a: PlanEndingArgs): Prepared => {
+  const settingsUrl = appLink(cfg, APP_PATHS.emailSettings);
+  const manageUrl = appLink(cfg, APP_PATHS.plan);
+  const missing = [...need({ ...a, settingsUrl, manageUrl }), ...needsLogo(cfg)];
+  if (missing.length) return { ok: false, missing };
+  const rows = [
+    [PLAN_LABEL, planValue(a.duration)], [PLAN_ENDS, a.endsLong],
+    [PLAN_THEN, planThenValue(a.monthly, a.chargeDay)], [PLAN_STOP, planStopValue(a.ends)],
+  ] as const;
+  const foot = { reason: true, links: [[EMAIL_SETTINGS_LABEL, settingsUrl!]] as const };
+  const body =
+    heading1(planEndingHeading(a.plan, a.ends)) + para(esc(planEndingLead(a.monthly))) +
+    facts(rows.map(([l, v]) => [l, esc(v)] as const)) + button(manageUrl!, PLAN_CTA) + small(PLAN_FINISHED);
+  return {
+    ok: true,
+    email: {
+      subject: planEndingSubject(a.plan, a.ends),
+      html: shell(cfg, { preheader: planEndingPreheader(a.monthly), body, foot: productFoot(cfg, foot) }),
+      text: [
+        planEndingHeading(a.plan, a.ends), "", planEndingLead(a.monthly), "", ...textFacts(rows), "",
+        `${PLAN_CTA}: ${manageUrl}`, "", PLAN_FINISHED,
+      ].join("\n") + productTextFoot(cfg, foot),
     },
   };
 };

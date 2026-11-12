@@ -23,7 +23,7 @@
 
 import { defineSecret } from "firebase-functions/params";
 import { createHash } from "crypto";
-import { MailConfig, resolveMailConfig, replyToWarning } from "./emailConfig";
+import { EmailKind, MailConfig, SENDER_OF, resolveMailConfig, replyToWarning, senderFor } from "./emailConfig";
 
 /**
  * ⚠️ A DEPLOY-TIME PRECONDITION, NOT A RUNTIME ONE. A function referencing a secret that does not
@@ -37,7 +37,7 @@ const RESEND_ENDPOINT = "https://api.resend.com/emails";
 const SEND_TIMEOUT_MS = 10_000;
 
 /** Which message this is. Renderers live in `emailTemplates.ts`; this file only sends. */
-export type EmailTemplate = "confirm" | "welcome" | "waiting" | "feedback";
+export type EmailTemplate = EmailKind;
 
 /** What a renderer produces. Both parts are required — see the plain-text note below. */
 export interface RenderedEmail {
@@ -95,10 +95,13 @@ export const sendEmail = async (
   overrides: SendOverrides = {},
 ): Promise<SendOutcome> => {
   const base: MailConfig = resolveMailConfig(env);
+  /* ⚠️ THE SENDER SPLIT (non-workspace v1, 9b): the kind decides who it is from — Nick for the four founding
+     emails, the product for everything else (`SENDER_OF`). An explicit override still wins (feedback mail). */
+  const sender = senderFor(base, template);
   const cfg = {
     ...base,
-    from: overrides.from || base.from,
-    replyTo: overrides.replyTo === undefined ? base.replyTo : overrides.replyTo ?? undefined,
+    from: overrides.from || sender.from,
+    replyTo: overrides.replyTo === undefined ? sender.replyTo : overrides.replyTo ?? undefined,
   };
   const toHash = recipientHash(to);
   const started = Date.now();
@@ -106,7 +109,7 @@ export const sendEmail = async (
   /* LOGGED, NOT THROWN — see `replyToWarning`. A reply then goes to the from-address, which is a
      real mailbox; the line only makes the missing key visible. An explicit override (feedback mail)
      is the caller's own decision and is not warned about. */
-  const warning = overrides.replyTo === undefined ? replyToWarning(env) : null;
+  const warning = overrides.replyTo === undefined && SENDER_OF[template] === "founding" ? replyToWarning(env) : null;
   if (warning) console.warn(JSON.stringify({ event: "email.config", warning }));
 
   const key = RESEND_API_KEY.value();

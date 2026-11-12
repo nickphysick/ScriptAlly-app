@@ -1,5 +1,6 @@
 /**
- * emailCopy — the words in the three emails, and nothing else.
+ * emailCopy — the words in every email, and nothing else (three founding emails from 1 Nov; nine more from
+ * non-workspace v1, 12 Nov — ref design-refs/emails-v1.html, which also moved email 1's "waiting list" to "reserve list").
  *
  * ⚠️ EDIT THE WORDS HERE AND NOWHERE ELSE, the same discipline `landingCopy.ts` and
  * `foundersCopy.ts` carry. A template that inlines its own sentences is a template whose wording
@@ -70,7 +71,7 @@ export const CONFIRM_EXPIRY = "This link works for 48 hours.";
 export const CONFIRM_NOT_HELD: [string, string] = [
   "Your place isn't held until you click.",
   " There are fifty founding places and they go in the order people confirm. If the last one goes " +
-  "while this sits in your inbox, you'll go on the waiting list instead, and I'll let you know.",
+  "while this sits in your inbox, you'll go on the reserve list instead, and I'll let you know.",
 ];
 export const CONFIRM_NEXT =
   "Once you've confirmed, you'll get your founding writer pass, and your invite follows when your wave opens.";
@@ -136,3 +137,214 @@ export const WAITING_NOTHING_TO_DO =
   "You don't need to do anything else. Your address stays on the reserve list, and you can take it off any " +
   "time with the link below.";
 export const WAITING_SORRY = "Sorry we couldn't fit you in this time, and thank you for signing up.";
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════
+   NON-WORKSPACE v1 (12 Nov) — nine more, verbatim from design-refs/emails-v1.html.
+   ⚠️ "founder's code", never "invite code". ⚠️ No "overdue", and no drafted nudge: the reminders state dates
+   and stop there (QueryHawk never writes for the writer). ⚠️ No gendered pronoun for an agent anywhere.
+   ══════════════════════════════════════════════════════════════════════════════════════════════════════ */
+
+/* ══════════════ Shared by the product's emails (sender: QueryHawk) ══════════════ */
+
+/** The account emails' contact line: [before, address, after]. Shorter than the founding one; no "I read every one". */
+export const accountContactLine = (supportEmail: string): [string, string, string] => [
+  "Something not right? Just reply, or write to ", supportEmail, ".",
+];
+export const accountContactText = (supportEmail: string): string => accountContactLine(supportEmail).join("");
+export const ACCOUNT_REASON = "You're getting this because it's about your account.";
+export const EMAIL_SETTINGS_LABEL = "Email settings";
+
+/* ══════════════ 4 · The invite (founding; sender: Nick) ══════════════ */
+
+export const INVITE_SUBJECT = "Your QueryHawk invite: your wave is open";
+export const INVITE_PREHEADER = "Set up your account. The link works for 48 hours.";
+export const INVITE_HEADING = "Your wave is open.";
+export const INVITE_LEAD =
+  "QueryHawk is ready for you. Set up your account, bring your querying across, and tell me what you find.";
+export const INVITE_CTA = "Set up my account";
+export const INVITE_EXPIRY =
+  "This link works for 48 hours. If it runs out, your place is still yours: ask for a fresh link on the sign-in page.";
+/** Bold lead, then the rest. The code rides in the button; it is printed once, here, as the fallback. */
+export const inviteCodeNote = (code: string): [string, string] => [
+  `Your founder's code is ${code}.`,
+  " The button fills it in for you. Keep this email in case you're ever asked to type it.",
+];
+export const INVITE_FIRST_HEADING = "A good first ten minutes";
+export const INVITE_FIRST: readonly (readonly [string, string])[] = [
+  ["Bring your list across", " with Smart Import, or start from the template"],
+  ["Add your manuscript", ", so every query has something to belong to"],
+  ["Log the queries you've already sent", ", and QueryHawk works out what's due and when"],
+];
+export const INVITE_THEN_HEADING = "Then tell me what you find";
+export const INVITE_THEN =
+  "There's a Feedback button on every page. Use it for anything that's wrong, missing or slow. That's the whole point of being a founding writer.";
+export const UNSUBSCRIBE_NOTE_INVITE = "This gives up your founding place.";
+
+/* ══════════════ 5 · Sign-in link ══════════════ */
+
+export const SIGNIN_SUBJECT = "Your QueryHawk sign-in link";
+export const SIGNIN_PREHEADER = "It works once, for the next hour.";
+export const SIGNIN_HEADING = "Here's your sign-in link.";
+export const SIGNIN_LEAD = "Use it on this device and you're straight in. No password needed.";
+export const SIGNIN_CTA = "Sign in to QueryHawk";
+export const SIGNIN_EXPIRY = "It works once, for the next hour.";
+export const SIGNIN_NOT_YOU = "Didn't ask for this? Ignore it. Nobody can sign in without this email.";
+
+/* ══════════════ 6 · New password ══════════════ */
+
+export const RESET_SUBJECT = "Choose a new QueryHawk password";
+export const RESET_PREHEADER = "The link works for the next hour.";
+export const RESET_HEADING = "Choose a new password.";
+export const RESET_LEAD =
+  "Someone asked to reset the password for this QueryHawk account. If that was you, choose a new one here.";
+export const RESET_CTA = "Choose a new password";
+export const RESET_EXPIRY = "This link works for the next hour.";
+export const RESET_NOT_YOU = "Wasn't you? Ignore this and your password stays as it is.";
+
+/* ══════════════ 7 · Confirm a new address (to the new address) ══════════════ */
+
+export const NEW_EMAIL_SUBJECT = "Confirm your new email address";
+export const NEW_EMAIL_PREHEADER = "One click and QueryHawk uses this address from now on.";
+export const NEW_EMAIL_HEADING = "Confirm this is your address.";
+export const NEW_EMAIL_LEAD =
+  "You asked to change your QueryHawk email address to this one. Confirm it and it becomes the address you sign in with, and where our emails go.";
+export const NEW_EMAIL_CTA = "Confirm this address";
+export const NEW_EMAIL_EXPIRY = "This link works for 24 hours. Until you click, nothing changes.";
+export const NEW_EMAIL_NOT_YOU = "Didn't ask for this? Ignore it and nothing happens.";
+
+/* ══════════════ 8 · The address was changed (to the old address) ══════════════ */
+
+export const EMAIL_CHANGED_SUBJECT = "Your QueryHawk email address was changed";
+export const EMAIL_CHANGED_PREHEADER = "If this was you, there is nothing to do.";
+export const EMAIL_CHANGED_HEADING = "Your email address was changed.";
+export const EMAIL_CHANGED_LEAD = "Your QueryHawk account now uses a different email address.";
+export const EMAIL_CHANGED_FROM = "Changed from";
+export const EMAIL_CHANGED_TO = "Changed to";
+export const EMAIL_CHANGED_WHEN = "When";
+export const EMAIL_CHANGED_FINE = "If that was you, there's nothing to do.";
+export const EMAIL_CHANGED_NOT_YOU: [string, string] = [
+  "Wasn't you?",
+  " Reply to this email straight away and I'll put it back and lock the account while we sort it out.",
+];
+
+/* ══════════════ 9 · A nudge is due ══════════════
+   ⚠️ One email however many fall due that morning. The ref draws one; the several-at-once words are ours. */
+
+export const nudgeSubject = (agentNames: readonly string[]): string =>
+  agentNames.length === 1 ? `A nudge is due: ${agentNames[0]}` : `Nudges are due: ${namesList(agentNames)}`;
+export const nudgePreheader = (replyExpectedBy: readonly string[]): string =>
+  replyExpectedBy.length === 1
+    ? `A reply was expected by ${replyExpectedBy[0]}.`
+    : `${capitalise(numberWord(replyExpectedBy.length))} replies were expected by now. The dates are inside.`;
+export const nudgeHeading = (agentNames: readonly string[]): string =>
+  agentNames.length === 1 ? `A nudge to ${agentNames[0]} is due.` : `Nudges to ${namesList(agentNames)} are due.`;
+export const NUDGE_AGENT = "Agent";
+export const NUDGE_MANUSCRIPT = "Manuscript";
+export const NUDGE_SENT = "Query sent";
+export const NUDGE_EXPECTED = "Reply expected by";
+export const NUDGE_SINCE = "Since then";
+export const NUDGE_NO_REPLY = "No reply logged";
+/** `after` is the writer's own setting, as a phrase ("one week"). */
+export const nudgeSetting = (after: string): string =>
+  `You've set QueryHawk to suggest a nudge ${after} after the reply date. That's today.`;
+export const NUDGE_CTA = "Open this query";
+export const NUDGE_HEARD = "Already heard back? Log the reply and this reminder goes away.";
+export const NUDGE_TURN_OFF = "Turn off nudge reminders";
+export const NUDGE_CHANGE_WHEN = "Change when a nudge is suggested";
+
+/* ══════════════ 10 · The weekly summary ══════════════
+   ⚠️ Plain counts with no judgement attached. The ref draws one week (two replies, one a request); the other
+   shapes of a week (no replies, every reply a request, one thing coming up) are ours, in the same grammar. */
+
+export const weeklySubject = (replies: number, requests: number): string =>
+  `Your week in querying: ${repliesPhrase(replies, requests, false)}`;
+export const weeklyHeading = (replies: number, requests: number): string =>
+  `Last week: ${repliesPhrase(replies, requests, true)}.`;
+export const weeklyPreheader = (upcoming: number): string =>
+  upcoming === 0 ? "And nothing due this week." :
+    `And ${numberWord(upcoming)} ${upcoming === 1 ? "thing" : "things"} coming up this week.`;
+export const WEEKLY_HAPPENED = "What happened";
+export const WEEKLY_COMING = "Coming up this week";
+export const WEEKLY_OUT = "Queries out";
+export const WEEKLY_REQUESTS = "Requests so far";
+export const weeklyRequestsValue = (requests: number, sent: number): string =>
+  `${requests}, from ${sent} ${sent === 1 ? "query" : "queries"} sent`;
+export const WEEKLY_QUIET = "Gone quiet";
+export const WEEKLY_CTA = "Open your dashboard";
+export const WEEKLY_TURN_OFF = "Turn off the weekly summary";
+
+/** A line in "What happened": [bold lead, rest]. */
+export const happenedRequest = (stage: "partial" | "full", agent: string): [string, string] =>
+  [stage === "full" ? "Full requested" : "Partial requested", ` by ${agent}`];
+export const happenedNo = (agent: string): [string, string] => ["A no", ` from ${agent}`];
+export const happenedOffer = (agent: string): [string, string] => ["An offer", ` from ${agent}`];
+export const happenedSent = (agents: readonly string[]): [string, string] =>
+  [`${capitalise(numberWord(agents.length))} ${agents.length === 1 ? "query" : "queries"} sent`, `, to ${namesList(agents)}`];
+/** A line in "Coming up this week": [bold lead, rest]. Dates arrive as phrases ("Friday 13 November"). */
+export const comingSend = (stage: "partial" | "full", agent: string, by: string): [string, string] =>
+  [stage === "full" ? "Send the full" : "Send the partial", ` to ${agent} by ${by}`];
+export const comingNudge = (agent: string, on: string): [string, string] => ["A nudge is due", ` to ${agent} on ${on}`];
+export const comingReplies = (agents: readonly string[]): [string, string] =>
+  [`${capitalise(numberWord(agents.length))} ${agents.length === 1 ? "reply" : "replies"} expected`, `, from ${namesList(agents)}`];
+
+/* ══════════════ 11 · The trial is ending (for launch) ══════════════ */
+
+export const TRIAL_DAYS = 14;
+export const trialSubject = (endsWeekday: string): string => `Your ${TRIAL_DAYS} days of Pro end on ${endsWeekday}`;
+export const TRIAL_PREHEADER = "Nothing is deleted. Here is what changes.";
+export const trialHeading = (endsWeekday: string): string => `Your ${TRIAL_DAYS} days of Pro end on ${endsWeekday}.`;
+export const trialLead = (freeFrom: string): string => `From ${freeFrom} you're on Free. Nothing you've made is deleted.`;
+export const TRIAL_KEEPS_HEADING = "What carries on";
+export const TRIAL_KEEPS: readonly string[] = [
+  "One manuscript, with unlimited agents and queries",
+  "Response tracking, your to-do list and reminders",
+  "Everything you've already imported",
+];
+export const TRIAL_READ_ONLY_HEADING = "What you can read but not change";
+export const TRIAL_READ_ONLY: readonly string[] = [
+  "Your query letters, manuscript versions and submission packages",
+  "Your comparable titles",
+];
+export const trialPro = (fromPrice: string): string => `Pro keeps all of that working, from ${fromPrice} a month.`;
+export const TRIAL_CTA = "See the plans";
+export const TRIAL_HAPPY = "Happy on Free? Do nothing. We won't charge you, because we don't have your card.";
+
+/* ══════════════ 12 · The plan is ending (for launch) ══════════════ */
+
+/** `plan` is the plan's length as an adjective ("6-month"); `ends` the short date ("19 May"). */
+export const planEndingSubject = (plan: string, ends: string): string => `Your ${plan} plan ends on ${ends}`;
+export const planEndingPreheader = (monthly: string): string => `It carries on monthly at ${monthly} unless you cancel.`;
+export const planEndingHeading = (plan: string, ends: string): string => `Your ${plan} plan ends on ${ends}.`;
+export const planEndingLead = (monthly: string): string =>
+  `After that, Pro carries on month by month at ${monthly} until you cancel.`;
+export const PLAN_LABEL = "Plan";
+export const planValue = (duration: string): string => `Pro, ${duration}`;
+export const PLAN_ENDS = "Ends";
+export const PLAN_THEN = "Then";
+export const planThenValue = (monthly: string, chargeDay: string): string => `${monthly} a month, taken on the ${chargeDay}`;
+export const PLAN_STOP = "To stop it";
+export const planStopValue = (ends: string): string => `Cancel any time before ${ends}`;
+export const PLAN_CTA = "Manage my plan";
+export const PLAN_FINISHED = "Finished querying? Cancel and you keep everything on Free.";
+
+/* ══════════════ Small grammar ══════════════ */
+
+const NUMBER_WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
+/** "two" up to ten, then digits — the ref's "two replies", "Three queries sent". */
+export const numberWord = (n: number): string => (Number.isInteger(n) && n >= 0 && n <= 10 ? NUMBER_WORDS[n] : String(n));
+const capitalise = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
+/** "A", "A and B", "A, B and C". */
+export const namesList = (names: readonly string[]): string =>
+  names.length <= 1 ? (names[0] ?? "") : `${names.slice(0, -1).join(", ")} and ${names[names.length - 1]}`;
+
+/** "two replies, one a request" (subject) / "two replies, one of them a request" (heading). */
+const repliesPhrase = (replies: number, requests: number, ofThem: boolean): string => {
+  if (replies <= 0) return "no replies";
+  const head = `${numberWord(replies)} ${replies === 1 ? "reply" : "replies"}`;
+  if (requests <= 0) return head;
+  if (replies === 1) return `${head}, a request`;
+  if (requests >= replies) return `${head}, ${replies === 2 ? "both" : "all"} requests`;
+  const k = numberWord(requests);
+  const what = requests === 1 ? "a request" : "requests";
+  return ofThem ? `${head}, ${k} of them ${what}` : `${head}, ${k} ${what}`;
+};

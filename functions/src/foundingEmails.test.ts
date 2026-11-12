@@ -26,7 +26,7 @@ const words = (html: string) => html
   .replace(/<!--[\s\S]*?-->/g, " ").replace(/<img\b[^>]*\balt="([^"]*)"[^>]*>/g, " $1 ")
   .replace(/<\/?(a|b|span|u)\b[^>]*>/g, "").replace(/<[^>]+>/g, " ")
   .replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&lt;/g, "<").replace(/&gt;/g, ">")
-  .replace(/&#10003;/g, "✓").replace(/&nbsp;/g, " ").replace(/&#8199;|&#847;/g, "")
+  .replace(/&#10003;/g, "✓").replace(/&#8226;/g, "•").replace(/&nbsp;/g, " ").replace(/&#8199;|&#847;/g, "")
   .replace(/\s+/g, " ");
 const flat = (s: string) => s.replace(/\s+/g, " ");
 
@@ -45,7 +45,7 @@ const EXPECT = {
       "Thanks for putting your name down as a QueryHawk founding writer. There's just one thing left to do.",
       "Confirm my place",
       "This link works for 48 hours.",
-      "Your place isn't held until you click. There are fifty founding places and they go in the order people confirm. If the last one goes while this sits in your inbox, you'll go on the waiting list instead, and I'll let you know.",
+      "Your place isn't held until you click. There are fifty founding places and they go in the order people confirm. If the last one goes while this sits in your inbox, you'll go on the reserve list instead, and I'll let you know.",
       "Once you've confirmed, you'll get your founding writer pass, and your invite follows when your wave opens.",
       "Didn't ask for this? Just ignore it. Nothing happens without that click, and we won't write again.",
       /* privacy page v1: the sign-off, and the link as text under a hairline */
@@ -328,5 +328,292 @@ describe("EM-10 · failures log structured lines a Cloud Logging alert can match
     expect(wl, "no unstructured error line left").not.toMatch(/console\.error\("waitlist: request failed:"/);
     const em = readFileSync(join(process.cwd(), "functions/src/email.ts"), "utf8");
     for (const outcome of ["no-key", "rejected"]) expect(em).toMatch(new RegExp(`console\\.error\\(JSON\\.stringify\\(\\{[\\s\\S]{0,80}event: "email\\.send"[\\s\\S]{0,80}outcome: "${outcome}"`));
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════
+   NON-WORKSPACE v1 (12 Nov) — EM-11 to EM-14: all twelve emails (design-refs/emails-v1.html).
+   ⚠️ THE EXPECTED WORDS ARE TYPED FROM THE REF, NOT IMPORTED FROM emailCopy (the inputs are emailSamples'). ══════ */
+
+import { renderSamples } from "./emailSamples";
+import { SENDER_OF, type EmailKind } from "./emailConfig";
+import { sendEmail } from "./email";
+import { afterEach } from "vitest";
+
+const SAMPLES = Object.fromEntries(renderSamples().map((s) => [s.id, s]));
+const mail = (id: string) => ok(SAMPLES[id].prepared);
+
+const PRODUCT_FOOT = ["Something not right? Just reply, or write to hello@queryhawk.net.", "QueryHawk · Made in the UK, for writers"];
+const ACCOUNT_FOOT = [...PRODUCT_FOOT, "You're getting this because it's about your account.", "Email settings"];
+
+const TWELVE: Record<string, { subject: string; preheader: string; strings: string[] }> = {
+  "01-confirm": { subject: "Confirm your founding place", preheader: "One click and your place is yours. The link works for 48 hours.", strings: EXPECT.confirm.strings as unknown as string[] },
+  "02-welcome": { subject: "You're on the list: founding writer No. 14", preheader: "Your founding writer pass is inside.", strings: EXPECT.welcome.strings as unknown as string[] },
+  "03-reserve": { subject: "You're on the founding writers' reserve list", preheader: "The fifty places went, but you're on the reserve list.", strings: EXPECT.waiting.strings as unknown as string[] },
+  "04-invite": {
+    subject: "Your QueryHawk invite: your wave is open",
+    preheader: "Set up your account. The link works for 48 hours.",
+    strings: [
+      "Founding writer pass: No. 14 of 50",
+      "Your wave is open.",
+      "QueryHawk is ready for you. Set up your account, bring your querying across, and tell me what you find.",
+      "Set up my account",
+      "This link works for 48 hours. If it runs out, your place is still yours: ask for a fresh link on the sign-in page.",
+      "https://scriptally-app.web.app/join/QH-7K2M-9XTD",
+      "Your founder's code is QH-7K2M-9XTD. The button fills it in for you. Keep this email in case you're ever asked to type it.",
+      "A good first ten minutes",
+      "Bring your list across with Smart Import, or start from the template",
+      "Add your manuscript, so every query has something to belong to",
+      "Log the queries you've already sent, and QueryHawk works out what's due and when",
+      "Then tell me what you find",
+      "There's a Feedback button on every page. Use it for anything that's wrong, missing or slow. That's the whole point of being a founding writer.",
+      "This gives up your founding place.",
+      ...FOOT,
+    ],
+  },
+  "05-signin": {
+    subject: "Your QueryHawk sign-in link",
+    preheader: "It works once, for the next hour.",
+    strings: [
+      "Here's your sign-in link.",
+      "Use it on this device and you're straight in. No password needed.",
+      "Sign in to QueryHawk",
+      "It works once, for the next hour.",
+      "Didn't ask for this? Ignore it. Nobody can sign in without this email.",
+      ...ACCOUNT_FOOT,
+    ],
+  },
+  "06-reset": {
+    subject: "Choose a new QueryHawk password",
+    preheader: "The link works for the next hour.",
+    strings: [
+      "Choose a new password.",
+      "Someone asked to reset the password for this QueryHawk account. If that was you, choose a new one here.",
+      "This link works for the next hour.",
+      "Wasn't you? Ignore this and your password stays as it is.",
+      ...ACCOUNT_FOOT,
+    ],
+  },
+  "07-new-email": {
+    subject: "Confirm your new email address",
+    preheader: "One click and QueryHawk uses this address from now on.",
+    strings: [
+      "Confirm this is your address.",
+      "You asked to change your QueryHawk email address to this one. Confirm it and it becomes the address you sign in with, and where our emails go.",
+      "Confirm this address",
+      "This link works for 24 hours. Until you click, nothing changes.",
+      "Didn't ask for this? Ignore it and nothing happens.",
+      ...ACCOUNT_FOOT,
+    ],
+  },
+  "08-email-changed": {
+    subject: "Your QueryHawk email address was changed",
+    preheader: "If this was you, there is nothing to do.",
+    strings: [
+      "Your email address was changed.",
+      "Your QueryHawk account now uses a different email address.",
+      "Changed from", "maya.ellison@example.com",
+      "Changed to", "m•••@newmail.example",
+      "When", "Thursday 12 November, 6.47pm",
+      "If that was you, there's nothing to do.",
+      "Wasn't you? Reply to this email straight away and I'll put it back and lock the account while we sort it out.",
+      ...ACCOUNT_FOOT,
+    ],
+  },
+  "09-nudge": {
+    subject: "A nudge is due: Eleanor Whitfield",
+    preheader: "A reply was expected by 5 November.",
+    strings: [
+      "A nudge to Eleanor Whitfield is due.",
+      "Agent", "Eleanor Whitfield", "Greenfield Literary",
+      "Manuscript", "The Salt Road",
+      "Query sent", "10 September",
+      "Reply expected by", "5 November",
+      "Since then", "No reply logged",
+      "You've set QueryHawk to suggest a nudge one week after the reply date. That's today.",
+      "Open this query",
+      "Already heard back? Log the reply and this reminder goes away.",
+      "Turn off nudge reminders", "Change when a nudge is suggested", "Email settings",
+      ...PRODUCT_FOOT,
+    ],
+  },
+  "10-weekly": {
+    subject: "Your week in querying: two replies, one a request",
+    preheader: "And three things coming up this week.",
+    strings: [
+      "Last week: two replies, one of them a request.",
+      "Monday 2 to Sunday 8 November",
+      "What happened",
+      "Full requested by Eleanor Whitfield, Greenfield Literary",
+      "A no from Tom Aldous, Aldous & Finch",
+      "Three queries sent, to Priya Raman, James Okafor and Clare Mott",
+      "Coming up this week",
+      "Send the full to Eleanor Whitfield by Friday 13 November",
+      "A nudge is due to Hannah Reyes on Thursday 12 November",
+      "Two replies expected, from Daniel Shaw and Lucy Marsh",
+      "Queries out", "14",
+      "Requests so far", "3, from 22 queries sent",
+      "Gone quiet", "2",
+      "Open your dashboard",
+      "Turn off the weekly summary", "Email settings",
+      ...PRODUCT_FOOT,
+    ],
+  },
+  "11-trial-ending": {
+    subject: "Your 14 days of Pro end on Thursday",
+    preheader: "Nothing is deleted. Here is what changes.",
+    strings: [
+      "Your 14 days of Pro end on Thursday.",
+      "From Thursday 26 November you're on Free. Nothing you've made is deleted.",
+      "What carries on",
+      "✓ One manuscript, with unlimited agents and queries",
+      "✓ Response tracking, your to-do list and reminders",
+      "✓ Everything you've already imported",
+      "What you can read but not change",
+      "• Your query letters, manuscript versions and submission packages",
+      "• Your comparable titles",
+      "Pro keeps all of that working, from £3.75 a month.",
+      "See the plans",
+      "Happy on Free? Do nothing. We won't charge you, because we don't have your card.",
+      ...ACCOUNT_FOOT,
+    ],
+  },
+  "12-plan-ending": {
+    subject: "Your 6-month plan ends on 19 May",
+    preheader: "It carries on monthly at £7.99 unless you cancel.",
+    strings: [
+      "Your 6-month plan ends on 19 May.",
+      "After that, Pro carries on month by month at £7.99 until you cancel.",
+      "Plan", "Pro, 6 months",
+      "Ends", "Wednesday 19 May",
+      "Then", "£7.99 a month, taken on the 19th",
+      "To stop it", "Cancel any time before 19 May",
+      "Manage my plan",
+      "Finished querying? Cancel and you keep everything on Free.",
+      ...ACCOUNT_FOOT,
+    ],
+  },
+};
+
+describe("EM-11 · all twelve emails: subject, preview line and every string, verbatim, HTML and text", () => {
+  it("there are twelve, in the ref's order", () => {
+    expect(Object.keys(SAMPLES)).toEqual(Object.keys(TWELVE));
+  });
+  for (const [id, e] of Object.entries(TWELVE)) {
+    it(id, () => {
+      const m = mail(id);
+      expect(m.subject).toBe(e.subject);
+      expect(words(m.html)).toContain(e.preheader);
+      for (const s of e.strings) {
+        expect(words(m.html), `${id} HTML: ${s}`).toContain(s);
+        expect(flat(m.text), `${id} text: ${s}`).toContain(s);
+      }
+      for (const part of [m.subject, m.html, m.text]) {
+        expect(part, "reserve list, never waiting list").not.toMatch(/waiting list/i);
+        expect(part).not.toMatch(/Founding Writer|invite code|overdue/);
+        expect(part, "no gendered pronoun for an agent").not.toMatch(/\b(he|she|him|her|his|hers)\b/i);
+      }
+    });
+  }
+  it("the nudge, several at once: one email, every agent named, each with its own link", () => {
+    const base = { agent: { name: "", agency: null }, manuscriptTitle: "The Salt Road", sentOn: "1 September", replyExpectedBy: "", queryUrl: "" };
+    const p = ok(prepareNudge(PROD_APP, {
+      items: [
+        { ...base, agent: { name: "Eleanor Whitfield", agency: null }, replyExpectedBy: "5 November", queryUrl: "https://scriptally-app.web.app/q/1" },
+        { ...base, agent: { name: "Tom Aldous", agency: null }, replyExpectedBy: "6 November", queryUrl: "https://scriptally-app.web.app/q/2" },
+      ],
+      nudgeAfter: "one week", turnOffUrl: "https://scriptally-app.web.app/x", changeWhenUrl: "https://scriptally-app.web.app/y",
+    }));
+    expect(p.subject).toBe("Nudges are due: Eleanor Whitfield and Tom Aldous");
+    expect(words(p.html)).toContain("Nudges to Eleanor Whitfield and Tom Aldous are due.");
+    expect(p.html).toContain('href="https://scriptally-app.web.app/q/1"');
+    expect(p.html).toContain('href="https://scriptally-app.web.app/q/2"');
+  });
+  it("the weekly counts are derived from the lines, never passed in", () => {
+    const p = ok(prepareWeekly(PROD_APP, {
+      weekPhrase: "w", coming: [],
+      happened: [
+        { kind: "request", stage: "partial", agent: { name: "A" } }, { kind: "request", stage: "full", agent: { name: "B" } },
+        { kind: "no", agent: { name: "C" } },
+      ],
+      standing: { queriesOut: 1, requests: 1, sent: 1, quiet: 0 }, turnOffUrl: "https://scriptally-app.web.app/x",
+    }));
+    expect(p.subject).toBe("Your week in querying: three replies, two requests");
+    expect(words(p.html)).toContain("Last week: three replies, two of them requests.");
+    expect(words(p.html)).toContain("And nothing due this week.");
+  });
+});
+
+import { prepareNudge, prepareWeekly, prepareSignIn, prepareInvite } from "./emailTemplates";
+const PROD_APP = resolveMailConfig({ WAITLIST_PUBLIC_URL: "https://queryhawk.net", APP_PUBLIC_URL: "https://scriptally-app.web.app" });
+
+describe("EM-12 · the image rules hold for all twelve", () => {
+  const WANT_IMAGES: Record<string, number> = {
+    "01-confirm": 4, "02-welcome": 4, "03-reserve": 4, "04-invite": 2,
+    "05-signin": 1, "06-reset": 1, "07-new-email": 1, "08-email-changed": 1,
+    "09-nudge": 1, "10-weekly": 1, "11-trial-ending": 1, "12-plan-ending": 1,
+  };
+  for (const [id, n] of Object.entries(WANT_IMAGES)) {
+    it(`${id}: ${n} image(s), each absolute https PNG on the public origin with width, height and alt; no SVG, class, flex, rgba; no live typewriter`, () => {
+      const m = mail(id);
+      const imgs = m.html.match(/<img\b[^>]*>/g) ?? [];
+      expect(imgs.length).toBe(n);
+      for (const img of imgs) {
+        expect(img).toMatch(/\ssrc="https:\/\/queryhawk\.net\/images\/[^"]+\.png\?v=[0-9a-f]{8}"/);
+        expect(img).toMatch(/\swidth="\d+(\.\d+)?"/);
+        expect(img).toMatch(/\sheight="\d+(\.\d+)?"/);
+        expect(img).toMatch(img.includes("queryhawk-logo") ? /\salt=""/ : /\salt="[^"]+"/);
+      }
+      expect(m.html).not.toMatch(/<svg|<style|class="|display:\s*flex|position:\s*absolute|rgba\(|\.webp/i);
+      expect(m.html.replace(/<img\b[^>]*>/g, ""), "EM-7 for all twelve").not.toMatch(/Special Elite|Courier/);
+      expect(m.text.length).toBeGreaterThan(80);
+    });
+  }
+  it("the invite's pass is the writer's own numbered image", () => {
+    expect(imgsOf(mail("04-invite").html).map((i) => file(i.src))).toEqual(["queryhawk-logo-60.png", "pass-14.png"]);
+  });
+  it("a link missing refuses the whole message: no app origin, no invite, no account email", () => {
+    const noApp = resolveMailConfig({ WAITLIST_PUBLIC_URL: "https://queryhawk.net" });
+    expect(prepareInvite(noApp, { code: "QH-7K2M-9XTD", foundingNo: 14, cap: 50, unsubToken: "u" })).toEqual({ ok: false, missing: ["joinUrl"] });
+    expect(prepareSignIn(noApp, "https://x.example/l")).toEqual({ ok: false, missing: ["settingsUrl"] });
+    expect(prepareSignIn(PROD_APP, null)).toEqual({ ok: false, missing: ["link"] });
+  });
+  it("only the founding emails carry the one-click unsubscribe headers; the account emails do not", () => {
+    for (const id of ["01-confirm", "02-welcome", "03-reserve", "04-invite"]) expect(mail(id).headers?.["List-Unsubscribe-Post"], id).toBe("List-Unsubscribe=One-Click");
+    for (const id of ["05-signin", "06-reset", "07-new-email", "08-email-changed", "11-trial-ending", "12-plan-ending"]) expect(mail(id).headers, id).toBeUndefined();
+  });
+});
+
+describe("EM-13 · the sender split: four founding emails from Nick, everything else from QueryHawk", () => {
+  const NICK = "Nick at QueryHawk <nick@queryhawk.net>";
+  const QH = "QueryHawk <hello@queryhawk.net>";
+  const KINDS: Record<string, EmailKind> = Object.fromEntries(renderSamples().map((s) => [s.id, s.kind]));
+  const FROM: Record<string, string> = {
+    "01-confirm": NICK, "02-welcome": NICK, "03-reserve": NICK, "04-invite": NICK,
+    "05-signin": QH, "06-reset": QH, "07-new-email": QH, "08-email-changed": QH,
+    "09-nudge": QH, "10-weekly": QH, "11-trial-ending": QH, "12-plan-ending": QH,
+  };
+  afterEach(() => { vi.unstubAllGlobals(); vi.restoreAllMocks(); });
+  for (const [id, from] of Object.entries(FROM)) {
+    it(`${id} is from ${from}`, async () => {
+      process.env.RESEND_API_KEY = "test-key";
+      vi.spyOn(console, "info").mockImplementation(() => {});
+      const stub = vi.fn(async (_u: string, _i?: RequestInit) => ({ ok: true, status: 200, json: async () => ({ id: "x" }) }) as unknown as Response);
+      vi.stubGlobal("fetch", stub);
+      await sendEmail("someone@example.com", KINDS[id], mail(id), { RESEND_API_KEY: "test-key", WAITLIST_REPLY_TO: "nick@queryhawk.net" });
+      const body = JSON.parse(String(stub.mock.calls[0][1]?.body));
+      expect(body.from).toBe(from);
+      expect(body.reply_to).toBe(from === QH ? QH : "nick@queryhawk.net");
+    });
+  }
+  it("one map decides it, and ACCOUNT_FROM overrides the product's sender per environment", async () => {
+    expect(Object.entries(SENDER_OF).filter(([, v]) => v === "founding").map(([k]) => k).sort())
+      .toEqual(["confirm", "feedback", "invite", "waiting", "welcome"]);
+    process.env.RESEND_API_KEY = "test-key";
+    vi.spyOn(console, "info").mockImplementation(() => {});
+    const stub = vi.fn(async (_u: string, _i?: RequestInit) => ({ ok: true, status: 200, json: async () => ({ id: "x" }) }) as unknown as Response);
+    vi.stubGlobal("fetch", stub);
+    await sendEmail("a@b.com", "signin", mail("05-signin"), { RESEND_API_KEY: "k", ACCOUNT_FROM: "QueryHawk <dev@example.com>" });
+    expect(JSON.parse(String(stub.mock.calls[0][1]?.body)).from).toBe("QueryHawk <dev@example.com>");
   });
 });

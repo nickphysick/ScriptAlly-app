@@ -10,6 +10,7 @@ import { STAGE_RESPONSE_WINDOWS } from "./queryAmbient";
 import { NUDGE_GRACE_DAYS } from "./taskPrecedence";
 import { DEFAULT_CHECKBACK_DAYS } from "./todoWalk";
 import { clockCaption } from "../components/settings/ClockTimeline";
+import { SERVER_CLOCK_DEFAULTS } from "../../functions/src/reminderEmails";
 
 const DAY = 86_400_000;
 const NOW = Date.parse("2026-11-12T12:00:00Z");
@@ -84,4 +85,8 @@ describe("one source for the four numbers", () => {
     expect(s).not.toMatch(/quietWeeks\s*[:=]\s*\d/);
     expect(s).not.toMatch(/\b(replyWeeks|nudgeAfterWeeks|checkBackWeeks)\s*[:=]\s*\d/);
   });
+});
+
+describe("the server's reminder clock is the app's clock (9e)", () => {
+  it("same four defaults", () => expect({ ...SERVER_CLOCK_DEFAULTS }).toEqual({ ...CLOCK_DEFAULTS }));
 });

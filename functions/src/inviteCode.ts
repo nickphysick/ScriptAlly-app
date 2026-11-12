@@ -24,6 +24,8 @@ import * as admin from "firebase-admin";
 import type { Firestore } from "firebase-admin/firestore";
 import { db } from "./firestore";
 import { listAllUsers, markFoundingFlags, type Account } from "./foundingStats";
+import { RESEND_API_KEY } from "./email";
+import { IP_HASH_SALT } from "./waitlistMail";
 
 const FieldValue = admin.firestore.FieldValue;
 
@@ -126,8 +128,10 @@ export async function freshLink(store: Firestore, rawCode: unknown, deps: CodeDe
   return { ok: true };
 }
 
+/* Non-workspace v1, 9d: the fresh-link path now SENDS the invite, so the callable binds the mail key and the salt
+   the invite's unsubscribe link is signed with (both already exist wherever the waitlist function deploys). */
 export const redeemInviteCode = onCall(
-  { region: "europe-west2", timeoutSeconds: 60, memory: "256MiB" },
+  { region: "europe-west2", timeoutSeconds: 60, memory: "256MiB", secrets: [RESEND_API_KEY, IP_HASH_SALT] },
   async (request) => {
     const data = (request.data ?? {}) as Record<string, unknown>;
     const mode = data.mode === "redeem" || data.mode === "fresh" ? data.mode : "check";
