@@ -178,3 +178,17 @@ condition was "if any differs, don't deploy", and a failed deploy check is a sto
    dev's branch read 206197 (x 52) twice. The varying pixels are 6 at most, each 1–3 off in one colour channel, in the
    shell's sidebar icons (v155's own report saw 0, 190 and 6). A reliable S4 would mask the shell's sidebar, or compare the
    page's own scrollport only.
+
+## Dev deploy — done (12 Nov, on Nick's go)
+
+- Nick's go named the before hash `index-CLC0PZ_h.js`, but dev had moved again by the time of the deploy. It served
+  **`index-DjGo0pfu.js`**, Phone app v4.1 (`dev/…-pa4-qc155-pa41` @ 02b4a22de, phone-only, 6 commits that touch no file here).
+  Deploying `…-qc155-clp1` would have taken v4.1 off dev. So, by the house rule, this branch was merged into the served
+  branch as **`dev/…-pa4-qc155-pa41-clp1`** (merge 0e1b2a9f5, clean, pushed).
+- On it, before the deploy: tsc 0; both builds clean; Vitest 3 failed (the baseline's 3); CLP1–14 all green; cl27 green;
+  Phone app v4.1's own locks (phoneAppV41, iphone / measure / pixel) green.
+- Deployed hosting only, from a clean checkout of the pushed tip: `firebase deploy --only hosting --config firebase.dev.json
+  --project scriptally-dev`.
+- **Served before: `index-DjGo0pfu.js`. Served after: `index-Bq5D30Du.js`**, the hash the build produced. The served
+  `AppRoot-C-xMzppH.js` chunk carries the new code ("Where they stand, submissions", "didn't load", `undoneMessage`).
+- Not merged to main; prod untouched.
