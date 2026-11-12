@@ -1,0 +1,115 @@
+/*
+ * Query Centre v155 (design-refs/query-centre-v155.html) — the quiet state, day one and the loading skeleton.
+ * Values are the ref's `.zpanel`, `.zsk`, `.zskh` and `.zskg`. The everyday page is not touched by anything here: every
+ * rule is scoped to an element only these states draw.
+ */
+
+/* ── the shared panel ── */
+.qc151.qc153 .qc155-panel.qc155-panel {
+  padding: 34px 30px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 0 1px #e6dfd4;
+  margin: 14px 0 18px;
+}
+/* ⚠️ brand.tsx forces h1/h2/h3 to its own face with !important: the heading needs two classes and !important.
+   Faces are READ from the shell's tokens (--sp-type Special Elite, --sp-serif Source Serif 4), never named. */
+.qc151.qc153 .qc155-panel .qc155-h.qc155-h {
+  font-family: var(--sp-type) !important;
+  font-size: 26px !important;
+  font-weight: 400 !important;
+  line-height: normal;
+  letter-spacing: normal;
+  color: #1c130f;
+  margin: 0 0 8px;
+}
+.qc151.qc153 .qc155-panel .qc155-p.qc155-p {
+  font-family: var(--sp-serif);
+  font-size: 16px;
+  line-height: 1.5;
+  color: #5b4f47;
+  margin: 0;
+  max-width: 60ch;
+}
+.qc151.qc153 .qc155-panel .qc155-p a {
+  font: inherit;
+  color: #2a3a52;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.qc151.qc153 .qc155-panel .qc155-p a:focus-visible {
+  outline: 2px solid #2a3a52;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ── §2 day one: the rail recedes to 40% and takes no pointer (the column is also `inert`, out of the tab order) ── */
+.qc151.qc153 .qc153-railcol[data-qc155-inert] {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ── §3 loading: the skeleton (the ref's .zskh / .zskg / .zsk). The grid is the real list's own `.qc154-grid`, so its
+   columns and breakpoints are the cards'; only the gap is restated. ── */
+.qc151.qc153 .qc155-skh {
+  height: 22px;
+  width: 220px;
+  border-radius: 6px;
+  background: #ebe5db;
+  margin: 26px 0 14px;
+}
+.qc151.qc153 .qc155-skg.qc155-skg {
+  gap: 14px;
+}
+.qc151.qc153 .qc155-skc {
+  position: relative;
+  height: 168px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 0 0 1px #ebe5db;
+  overflow: hidden;
+}
+/* the band along the top, the white disc where the seal sits, three short bars where Sent and Next sit.
+   ⚠️ DEPARTS FROM THE REF'S LAYER ORDER, ON PURPOSE: the ref lists the band first, so it paints over the disc, and its
+   third bar ("55% 86px") lands on the first. The brief names the disc and three bars; the disc is listed above the
+   band here, and the third bar sits in the Next column (the card's right half). */
+.qc151.qc153 .qc155-skc::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 34px 31px, #fff 0 17px, transparent 18px),
+    linear-gradient(#efe9df 0 62px, transparent 62px),
+    linear-gradient(#f3eee6, #f3eee6) 18px 86px / 40% 14px no-repeat,
+    linear-gradient(#f3eee6, #f3eee6) 18px 112px / 28% 12px no-repeat,
+    linear-gradient(#f3eee6, #f3eee6) right 18px top 86px / 34% 14px no-repeat;
+}
+/* one soft highlight sweeping left to right */
+.qc151.qc153 .qc155-skc::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.7) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: qc155-sweep 1.3s infinite;
+}
+@keyframes qc155-sweep {
+  to { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qc151.qc153 .qc155-skc::after {
+    animation: none;
+    display: none;
+  }
+}
+
+/* while loading, the rail and the chart hold their final boxes and show no figures: the numbers arrive with the data */
+.qc151.qc153 .qc153-railcol[data-qc155-busy] .qc153-n,
+.qc151.qc153 .qc153-railcol[data-qc155-busy] [data-qc153="court"] b {
+  visibility: hidden;
+}
+.qc151.qc153 .qc154-wkc[data-qc155="goal-hold"] > * {
+  visibility: hidden;
+}

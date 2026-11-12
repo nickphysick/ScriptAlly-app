@@ -34,6 +34,7 @@ import { QcCard154 } from "./QcCard154";
 import { QcBar153 } from "./QcBar153";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
 import { sectionSwatch, standWords } from "../../../lib/qc153";
+import { FirstPanel155, QuietPanel155, Skeleton155 } from "./QcState155";
 import "./qcv151.css";
 import "./qcv1522.css";
 import "./qcv153.css";
@@ -137,7 +138,12 @@ export interface QcPage151Props {
   onBeGroup: (g: BeGroup) => void;
   beSort: BeSort;
   onBeSort: (s: BeSort) => void;
+  /** v155 — the list's state, decided by the page from the data (lib/qc155): null is the everyday list */
+  state155?: State155 | null;
 }
+
+/** v155 — the states the list draws besides the everyday one */
+export type State155 = { kind: "quiet"; body: string } | { kind: "first" } | { kind: "loading"; show: boolean };
 
 /* ── the status track (v151 §7) ── */
 export const Track151: React.FC<{ row: Pick<QcRow, "status" | "furthest"> }> = ({ row }) => {
@@ -282,6 +288,10 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   });
 
   const birds = p.view === "birds";
+  /* v155 §2 — day one: the panel alone in the list (in either view), the rail receded and inert */
+  const first155 = p.state155?.kind === "first";
+  /* v155 §3 — loading: the list is busy and draws nothing until the skeleton is due (200ms), then the placeholders */
+  const loading155 = p.state155?.kind === "loading";
   const filtersOn = p.filterCount > 0;
   const groupOpt = p.group === "none" ? { label: "No grouping" } : GROUP_1522.find((o) => o.key === p.group);
   const beGroupDef = p.beGroup === "urgency";
@@ -415,12 +425,12 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
 
       {/* v153 — two columns: the filter rail (sticky) and the list column */}
       <div className="qc153-cl" data-qc153="columns">
-        <div className="qc153-railcol" data-qc153="rail-column">{p.rail ?? null}</div>
+        <div className="qc153-railcol" data-qc153="rail-column" inert={first155 || undefined} data-qc155-inert={first155 ? "" : undefined} data-qc155-busy={loading155 ? "" : undefined}>{p.rail ?? null}</div>
         <div className="qc153-main" data-qc153="list-column">
           {/* v154 §6 — the slim bar sticks on a strip of the page's own ground that ends in a 22px fade */}
           <div className="qc154-tbw" data-qc154="toolbar" ref={tbRef}>{controlLine}</div>
 
-          {birds ? (
+          {birds && !first155 && !loading155 ? (
             <div className="qc151-be sa-slip" data-qc151="birds-card"><div className="sa-slip-in">
               {p.birdsEmpty ? (
                 <div className="qc151-emp" data-qc151="birds-empty">
@@ -432,8 +442,10 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
               ) : p.birds}
             </div></div>
           ) : (
-            <div className="qc153-list" data-qc151="table" data-qcv="list">
-              {empty ? (
+            <div className="qc153-list" data-qc151="table" data-qcv="list" aria-busy={loading155 || undefined}>
+              {/* v155 §1 — nothing needs you: the panel above the first group, the list carrying on beneath it */}
+              {p.state155?.kind === "quiet" && !empty ? <QuietPanel155 body={p.state155.body} /> : null}
+              {loading155 ? (p.state155?.kind === "loading" && p.state155.show ? <Skeleton155 /> : null) : first155 ? <FirstPanel155 onImport={p.onImport} /> : empty ? (
                 <div className="qc151-emp" data-qc151="no-matches">
                   <b>No queries match</b>
                   <i>{[...p.pills.map((g) => pillWords(g).value), ...(p.find.trim() ? [`“${p.find.trim()}”`] : []), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>

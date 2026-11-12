@@ -97,4 +97,4 @@ height, no 0-week streak, the line by streak, and the warm fade mid-scroll in Of
 
 ## Dev
 
-https://scriptally-dev.web.app. See the Phase 5 commit message for the served bundle.
+https://scriptally-dev.web.app serves `index-DN1T-SE6.js`, built from `dev/…-laq131-qc154-qc1541` (a7bbf38eb, pushed). That is the dev line dev was serving (`…-qc154`, `index-hyqKHEqz.js`) with this branch merged in. The merge was clean; on the merged tree tsc was 0 and the Query Centre specs passed (354). The served CSS and JS chunks carry the v154.1 values and the new copy.

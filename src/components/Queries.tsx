@@ -88,7 +88,6 @@ import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contac
 import { QcCentre, clearQcViewMemory, readBirdsEyeOpen } from "./queries/centre/QcCentre";
 import { QcEmpty } from "./queries/centre/QcEmpty";
 import { AgentDisc } from "./shared/AgentDisc";
-import { QcEmpty138 } from "./queries/centre/QcEmpty138";
 import { QcExhibit } from "./queries/centre/QcExhibit";
 import { qcHeaderCopy } from "../lib/livingHeaders";
 import { useLivingCountOverride } from "../lib/livingHeaderReview";
@@ -129,7 +128,7 @@ import { METHODS as EDIT_METHODS, type AgentDetails } from "./queries/centre/QcC
 import type { RowSpec } from "./reading-pane/QueryTimeline";
 import { expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
-import { QcPage151, Track151 } from "./queries/centre/QcPage151";
+import { QcPage151, Track151, type State155 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { QcRail153 } from "./queries/centre/QcRail153";
 import { QcGoal154 } from "./queries/centre/QcGoal154";
@@ -137,6 +136,8 @@ import { weekGoal154 } from "../lib/qc154goal";
 import { railCounts } from "../lib/qc153Rail";
 import { slipTone } from "../lib/qc153";
 import { nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
+import { NEEDS_YOU_155, quietBody155, quietNow155 } from "../lib/qc155";
+import { qcStateAid } from "../lib/qcReviewAid155";
 import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
 import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
 import { qcPlanAid } from "../lib/qcReviewAid1522";
@@ -198,7 +199,7 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
 import { QueryPanelHost, PICKER_PANEL_ID } from "./queries/QueryPanelHost";
 import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, queryPanelBack, releaseRightPanel, subscribeQueryPanel, subscribeResponsePicker, subscribeRightPanel } from "../lib/queryPanelStore";
-import { useQcLoad } from "./queries/centre/useQcLoad";
+import { QC155_LOAD, useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
   DEFAULT_SORT, buildQcRows, courtTiles, rowsForTile, tileCourt, filterForStatusParam, filterOptions,
@@ -2645,7 +2646,8 @@ export const Queries: React.FC<{
   /* ⚠️ ONE LOADING MODEL FOR THE BROWSING PAGE (v11): no flash under 150ms, a 400ms floor once shown,
      and one entrance when the data lands. "Ready" includes the ACTIVITY FEED — every gauge and every
      calendar bar is dated from it, so drawn before it lands they would re-lay themselves out. */
-  const qcLoad = useQcLoad(collectionsReady && activitiesReady);
+  /* v155 §3 — the desktop page shows its skeleton only after 200ms and swaps straight to the list (QC155_LOAD) */
+  const qcLoad = useQcLoad(collectionsReady && activitiesReady, qcDesk ? QC155_LOAD : undefined);
   /* v138 §H — one staggered entrance on the first mount, once the data is ready */
   const qc138In = useEntrance138(routeActive && qcDesk && collectionsReady && activitiesReady && !qcLoad.loading);
   /* LIVING HEADERS — a DEV-ONLY review aid (lib/livingHeaderReview): render the hero as if the page
@@ -2670,7 +2672,12 @@ export const Queries: React.FC<{
       const rows = buildQcRows(
         import.meta.env.MODE === "production" ? (queries as Query[]) : padLiveQueries(queries as Query[], agents, Date.now()),
         agents, activities, Date.now());
-      return qmPhone ? rows : stampRows(rows, agents, { quietWeeks: qcQuietWeeks, nowMs: Date.now() });
+      if (qmPhone) return rows;
+      const stamped = stampRows(rows, agents, { quietWeeks: qcQuietWeeks, nowMs: Date.now() });
+      /* v155 — a dev-only review aid (lib/qcReviewAid155): the quiet state or day one, by taking rows away. The mode
+         check is here so a production build drops the module. */
+      const aid155 = import.meta.env.MODE !== "production" ? qcStateAid() : null;
+      return aid155 === "first" ? [] : aid155 === "quiet" ? stamped.filter((r) => { const s = stateOf(r); return !(s && NEEDS_YOU_155.has(s)); }) : stamped;
     },
     [queries, agents, activities, qcQuietWeeks, qmPhone],
   );
@@ -5409,6 +5416,14 @@ export const Queries: React.FC<{
      when NO skeleton had been shown, the inverse of what the page does now. `useQcLoad` is the one
      model; these names survive as plain consts because the unreachable three-column pane reads them. */
   const showGridSkeleton = qcLoad.loading;
+  /* v155 — the desktop list's state, from the data (lib/qc155). Nothing narrowing it means no chip, no "Where it stands"
+     and no search, the page's or the shell's. Declared up here, below everything it reads. */
+  const filtersOn155 = qc140Chips.length > 0 || qcF138.where != null || qcTerm !== "";
+  const state155: State155 | null = showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }
+    /* §2 day one: the manuscript's own rows (never the searched view: a search that matches nothing is not day one) */
+    : qcLivingRows.length === 0 ? { kind: "first" }
+    : quietNow155({ rows: qcScoped, view: qcView150, filtersOn: filtersOn155 }) ? { kind: "quiet", body: quietBody155(qcScoped, qcNow138) }
+    : null;
   /* v138 §A–B — the desktop header: the title block, the glyph row, the filter row and the pinned row */
   /* v149 Part A — the header card and the "waiting on you" banner (the Versions page's own components); the hero
      (QcHeader138) and the breakdown card (QcWhereCard) are no longer drawn on this page */
@@ -7406,7 +7421,9 @@ export const Queries: React.FC<{
             REAL page is drawn — `QcCentre` with placeholders inside its cards — so the first-run branch
             must not answer until the data has: `queries` is `[]` during the load, and "No queries yet"
             would be the page stating a fact about an account it has not read. */}
-        {!qcLoad.loading && ((lhOverride === null && emptyKind === "first") || lhOverride === 0) ? (
+        {/* v155 §2 — the desktop's day one is drawn by QcPage151 itself (header, chart, toolbar, rail and the panel), so this
+            first-run branch is the phone's only; v138's desktop empty page (QcEmpty138) is retired with it */}
+        {!qcLoad.loading && !qcDesk && ((lhOverride === null && emptyKind === "first") || lhOverride === 0) ? (
           /**
            * LIVING HEADERS §3 — THE EMPTY PAGE: the shared header with no page title and no rule, the
            * same two buttons and the same courier in the same places, then the exhibition of what the
@@ -7415,15 +7432,6 @@ export const Queries: React.FC<{
            * reachable (this repo's replacement rule).
            */
           <div data-qc-fade={fadeIn ? "in" : undefined}>
-            {qcDesk ? (
-              /* v138 §I — the desktop's empty page: the navy header, How it works, Ways to get started */
-              <QcEmpty138
-                logRef={logTriggerRef}
-                manuscriptTitle={heroBookTitle(trackedManuscript, manuscripts)}
-                onLog={() => openCreate()}
-                onImport={() => onNavigate?.("import")}
-              />
-            ) : (
             <QcEmpty
               logRef={logTriggerRef}
               manuscriptTitle={heroBookTitle(trackedManuscript, manuscripts)}
@@ -7433,7 +7441,6 @@ export const Queries: React.FC<{
               /* §4 — the page's own components over a sample constant, mounted ONLY here */
               exhibition={<QcExhibit />}
             />
-            )}
           </div>
         ) : (
         <>
@@ -8086,6 +8093,7 @@ export const Queries: React.FC<{
                 ? (strip151.length ? "filtered" as const : qcF138.where === "closed" ? "closed" as const : null) : null;
               return (
                 <QcPage151
+                  state155={state155}
                   loading={showGridSkeleton}
                   counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
                   /* v154 — the weekly goal chart replaces the stage ring: the writer's own sends (every manuscript, as the

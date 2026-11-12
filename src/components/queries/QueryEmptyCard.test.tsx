@@ -93,9 +93,10 @@ describe("the page puts each card only in the slot the selector names", () => {
     expect(branch).not.toContain("QueryEmptyCard");
     /* what it draws instead is the empty page's own locks (`QcEmpty`, living headers §3)'s claim, not this file's — bounded,
        because a tag name is a prefix of every longer one */
-    /* v138 §I re-point: on the desktop the branch opens on QcEmpty138 (the phone's QcEmpty follows it), and the
-       slice's end anchor is now that fork's own ") : (" — the claim, an empty page and never this card, is unchanged */
-    expect(branch).toMatch(/<QcEmpty138[\s/>]/);
+    /* v155 §2 re-point: the desktop's day one is QcPage151's own panel, so this branch is the phone's and opens on
+       QcEmpty alone (v138's QcEmpty138 is retired); the claim, an empty page and never this card, is unchanged */
+    expect(branch).toMatch(/<QcEmpty[\s/>]/);
+    expect(branch).not.toMatch(/<QcEmpty138[\s/>]/);
   });
 
   it("the view slot is the selector's `filtered`, then `nomatch` — the card, then the plain line", () => {
