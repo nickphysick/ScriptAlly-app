@@ -48,6 +48,10 @@ export const PAGE_SOURCES = [
   "marketing/Landing.tsx",
   "marketing/MarketingShell.tsx",
   "components/shell/AppShell.tsx",
+  // Phone app v5, Phase A: the phone's Today (the hub), To do and Materials tabs
+  "components/phone/v5/TodayV5.tsx",
+  "components/phone/v5/TodoV5.tsx",
+  "components/phone/v5/MaterialsV5.tsx",
 ];
 
 const read = (rel: string) => readFileSync(resolve(__dirname, "..", rel), "utf8");

@@ -25,14 +25,16 @@ const rules = css.replace(/\/\*[\s\S]*?\*\//g, "");
 const dash58Css = readFileSync(resolve(__dirname, "./v58/dash58.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
 describe("below 768px the dashboard is the phone page", () => {
-  /* Phone app v4 (11 Nov): the phone page is Today (TodayV4); DashPhone and TodayV4 are retired */
-  it("Dashboard renders TodayV4 when useIsMobile says so, and Dash58 otherwise", () => {
+  /* Phone app v4 (11 Nov): the phone page is Today (TodayV4); DashPhone is retired.
+     Phone app v5 (12 Nov): Today is the hub (TodayV5, components/phone/v5/), which replaces TodayV4 */
+  it("Dashboard renders TodayV5 when useIsMobile says so, and Dash58 otherwise", () => {
     expect(dash).toContain('import { useIsMobile } from "./shell/mobileChrome"');
     expect(dash).toContain("const phone = useIsMobile();");
     const branch = dash.indexOf("{phone ? (");
     expect(branch, "the phone branch must exist").toBeGreaterThan(-1);
-    expect(dash.indexOf("<TodayV4", branch)).toBeGreaterThan(branch);
-    expect(dash.indexOf("<Dash58", branch)).toBeGreaterThan(dash.indexOf("<TodayV4", branch));
+    expect(dash.indexOf("<TodayV5", branch)).toBeGreaterThan(branch);
+    expect(dash.indexOf("<Dash58", branch)).toBeGreaterThan(dash.indexOf("<TodayV5", branch));
+    expect(dash).not.toContain("<TodayV4");
     expect(dash).not.toContain("<DashPhone");
   });
 

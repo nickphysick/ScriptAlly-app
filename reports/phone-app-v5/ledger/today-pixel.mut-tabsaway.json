@@ -1,0 +1,446 @@
+[
+ {
+  "lock": "PA5-1",
+  "where": "390x844 · the dock reads Today, To do, +, Materials, Profile",
+  "ok": true,
+  "detail": "{\"words\":[\"Today\",\"To do\",\"\",\"Materials\",\"Profile\"],\"plus\":\"Log a query\",\"badges\":[{\"tab\":\"todo\",\"n\":103}],\"need\":103}"
+ },
+ {
+  "lock": "PA5-1",
+  "where": "390x844 · tasks (population)",
+  "ok": true,
+  "detail": "103"
+ },
+ {
+  "lock": "PA5-1",
+  "where": "390x844 · one badge, on To do = To do's tasks = the need pill",
+  "ok": true,
+  "detail": "[{\"tab\":\"todo\",\"n\":103}] · todo 103 · need 103"
+ },
+ {
+  "lock": "PA41-3",
+  "where": "390x844 · (kept) the change = last week − the one before (series of 135)",
+  "ok": true,
+  "detail": "{\"len\":135,\"change\":null,\"d\":0,\"fig\":70}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /dashboard past the header: bar and tabs pinned",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":-239.8,\"scroll\":641}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /dashboard → agents: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":337}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /dashboard → activity: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":337}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /dashboard → queries: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":337}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /materials past the header: bar and tabs pinned",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":-239.8,\"scroll\":545}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /materials → letters: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":241}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /materials → versions: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":241}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /materials → comps: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":241}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "390x844 · /materials → packages: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":241}"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · counts and rows (population you 23, agent 10, quiet 37; 8 rows)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-2",
+  "where": "390x844 · (kept) the three counts add up to the header's active figure",
+  "ok": true,
+  "detail": "23+10+37 vs 70"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · the rows, nearest their date first (8)",
+  "ok": true,
+  "detail": "2025-09-27 2026-01-01 2026-01-01 2026-01-01 2026-01-01 2026-03-02 2026-04-10 2026-04-15"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · you: only that group's rows (8 of 23)",
+  "ok": true,
+  "detail": "8 rows · you · \"With you · the 8 nearest their date\""
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · you again: every row back",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · agent: only that group's rows (8 of 10)",
+  "ok": true,
+  "detail": "8 rows · agent · \"With agents · the 8 nearest their date\""
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · agent again: every row back",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · quiet: only that group's rows (8 of 37)",
+  "ok": true,
+  "detail": "8 rows · quiet · \"Gone quiet · the 8 nearest their date\""
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · quiet again: every row back",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · zero counts (population 2)",
+  "ok": true,
+  "detail": "[{\"k\":\"you\",\"n\":0,\"dis\":true},{\"k\":\"agent\",\"n\":1,\"dis\":false},{\"k\":\"quiet\",\"n\":0,\"dis\":true}]"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · you 0: disabled, and a tap filters nothing",
+  "ok": true,
+  "detail": "disabled true · filter \"\""
+ },
+ {
+  "lock": "PA5-4",
+  "where": "390x844 · quiet 0: disabled, and a tap filters nothing",
+  "ok": true,
+  "detail": "disabled true · filter \"\""
+ },
+ {
+  "lock": "PA5-5",
+  "where": "390x844 · six sent this week (population 6; picked 6)",
+  "ok": true,
+  "detail": "[\"cv25-q-09\",\"probe-dangling-pkg\",\"probe-goalstress-today\",\"probe-un-both\",\"probe-un-noagent\",\"probe-un-noms\"]"
+ },
+ {
+  "lock": "PA5-5",
+  "where": "390x844 · every bar ≥ 4px",
+  "ok": true,
+  "detail": "19.9, 19.8, 12.1, 6.9, 19.8, 19.8"
+ },
+ {
+  "lock": "PA5-5",
+  "where": "390x844 · today in the left half of the track",
+  "ok": true,
+  "detail": "{\"lineX\":180.390625,\"tk\":{\"l\":132,\"w\":242}}"
+ },
+ {
+  "lock": "PA5-5",
+  "where": "390x844 · six: no explainer",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "PA5-5",
+  "where": "390x844 · one query: one row and the explainer",
+  "ok": true,
+  "detail": "{\"n\":1,\"few\":\"Each query you log gets a line here. The bar fills as the days pass.\"}"
+ },
+ {
+  "lock": "PA5-6",
+  "where": "390x844 · rows past their date (population 0 dated in the window, 8 before it)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-6",
+  "where": "390x844 · the notch at the date, the deeper segment from it to today",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA5-6",
+  "where": "390x844 · a date before the window: no notch, the deeper segment in from the edge to today",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA5-6",
+  "where": "390x844 · no ring on a bar, no beacon anywhere",
+  "ok": true,
+  "detail": "{\"rings\":0,\"beacons\":0}"
+ },
+ {
+  "lock": "PA5-7",
+  "where": "390x844 · text in the block (population 21)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-7",
+  "where": "390x844 · the today line crosses no text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-7",
+  "where": "390x844 · opened details over the line (population 3)",
+  "ok": true,
+  "detail": "3 of 3"
+ },
+ {
+  "lock": "PA5-1",
+  "where": "360x740 · the dock reads Today, To do, +, Materials, Profile",
+  "ok": true,
+  "detail": "{\"words\":[\"Today\",\"To do\",\"\",\"Materials\",\"Profile\"],\"plus\":\"Log a query\",\"badges\":[{\"tab\":\"todo\",\"n\":103}],\"need\":103}"
+ },
+ {
+  "lock": "PA5-1",
+  "where": "360x740 · tasks (population)",
+  "ok": true,
+  "detail": "103"
+ },
+ {
+  "lock": "PA5-1",
+  "where": "360x740 · one badge, on To do = To do's tasks = the need pill",
+  "ok": true,
+  "detail": "[{\"tab\":\"todo\",\"n\":103}] · todo 103 · need 103"
+ },
+ {
+  "lock": "PA41-3",
+  "where": "360x740 · (kept) the change = last week − the one before (series of 135)",
+  "ok": true,
+  "detail": "{\"len\":135,\"change\":null,\"d\":0,\"fig\":70}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /dashboard past the header: bar and tabs pinned",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":-239.8,\"scroll\":641}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /dashboard → agents: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":337}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /dashboard → activity: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":337}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /dashboard → queries: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":337}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /materials past the header: bar and tabs pinned",
+  "ok": false,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":-239.8,\"scroll\":545}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /materials → letters: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":241}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /materials → versions: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":241}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /materials → comps: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":241}"
+ },
+ {
+  "lock": "PA5-3",
+  "where": "360x740 · /materials → packages: still pinned",
+  "ok": true,
+  "detail": "{\"on\":\"1\",\"barTop\":0,\"barBottom\":64,\"stripTop\":64.2,\"scroll\":241}"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · counts and rows (population you 23, agent 10, quiet 37; 8 rows)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA41-2",
+  "where": "360x740 · (kept) the three counts add up to the header's active figure",
+  "ok": true,
+  "detail": "23+10+37 vs 70"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · the rows, nearest their date first (8)",
+  "ok": true,
+  "detail": "2025-09-27 2026-01-01 2026-01-01 2026-01-01 2026-01-01 2026-03-02 2026-04-10 2026-04-15"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · you: only that group's rows (8 of 23)",
+  "ok": true,
+  "detail": "8 rows · you · \"With you · the 8 nearest their date\""
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · you again: every row back",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · agent: only that group's rows (8 of 10)",
+  "ok": true,
+  "detail": "8 rows · agent · \"With agents · the 8 nearest their date\""
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · agent again: every row back",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · quiet: only that group's rows (8 of 37)",
+  "ok": true,
+  "detail": "8 rows · quiet · \"Gone quiet · the 8 nearest their date\""
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · quiet again: every row back",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · zero counts (population 2)",
+  "ok": true,
+  "detail": "[{\"k\":\"you\",\"n\":0,\"dis\":true},{\"k\":\"agent\",\"n\":1,\"dis\":false},{\"k\":\"quiet\",\"n\":0,\"dis\":true}]"
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · you 0: disabled, and a tap filters nothing",
+  "ok": true,
+  "detail": "disabled true · filter \"\""
+ },
+ {
+  "lock": "PA5-4",
+  "where": "360x740 · quiet 0: disabled, and a tap filters nothing",
+  "ok": true,
+  "detail": "disabled true · filter \"\""
+ },
+ {
+  "lock": "PA5-5",
+  "where": "360x740 · six sent this week (population 6; picked 6)",
+  "ok": true,
+  "detail": "[\"cv25-q-09\",\"probe-dangling-pkg\",\"probe-goalstress-today\",\"probe-un-both\",\"probe-un-noagent\",\"probe-un-noms\"]"
+ },
+ {
+  "lock": "PA5-5",
+  "where": "360x740 · every bar ≥ 4px",
+  "ok": true,
+  "detail": "17.4, 17.3, 10.6, 6, 17.3, 17.3"
+ },
+ {
+  "lock": "PA5-5",
+  "where": "360x740 · today in the left half of the track",
+  "ok": true,
+  "detail": "{\"lineX\":174.390625,\"tk\":{\"l\":132,\"w\":212}}"
+ },
+ {
+  "lock": "PA5-5",
+  "where": "360x740 · six: no explainer",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "lock": "PA5-5",
+  "where": "360x740 · one query: one row and the explainer",
+  "ok": true,
+  "detail": "{\"n\":1,\"few\":\"Each query you log gets a line here. The bar fills as the days pass.\"}"
+ },
+ {
+  "lock": "PA5-6",
+  "where": "360x740 · rows past their date (population 0 dated in the window, 8 before it)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-6",
+  "where": "360x740 · the notch at the date, the deeper segment from it to today",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA5-6",
+  "where": "360x740 · a date before the window: no notch, the deeper segment in from the edge to today",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "PA5-6",
+  "where": "360x740 · no ring on a bar, no beacon anywhere",
+  "ok": true,
+  "detail": "{\"rings\":0,\"beacons\":0}"
+ },
+ {
+  "lock": "PA5-7",
+  "where": "360x740 · text in the block (population 21)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-7",
+  "where": "360x740 · the today line crosses no text",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "PA5-7",
+  "where": "360x740 · opened details over the line (population 3)",
+  "ok": true,
+  "detail": "3 of 3"
+ }
+]

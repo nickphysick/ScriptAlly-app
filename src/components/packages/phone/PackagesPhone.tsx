@@ -23,15 +23,21 @@ import { useScriptAllyDb } from "../../../lib/db";
 import { usePk26Model, type Pk26Model } from "../v26/usePk26Model";
 import { usePackagesModel } from "../v4/usePackagesModel";
 import { PhoneLetterEditor } from "../../phone/materials/PhoneLetterEditor";
-import { packageStage, STAGE_LABEL, isLocked, packageQueries, type Facts } from "../../../lib/packagesV40";
+import { packageStage, STAGE_LABEL, isLocked, canMakeActive, canRetire } from "../../../lib/packagesV40";
 import { packageShowcases, bestPiece, thresholdWords, type Fig } from "../../../lib/packagesV38";
-import { MIN_SENDS_FOR_CLAIM } from "../../../lib/packageMetrics";
+import { MIN_SENDS_FOR_CLAIM, formatRate, packageMetrics } from "../../../lib/packageMetrics";
+import { bestClaim, compsWords, letterCompCount, materialFacts, materialQueries, paragraphs, pieceChip, pieceResult, pkgPieces, type PieceKey, type PkgPiece } from "../../../lib/phoneV5";
+import { sentRecordOf } from "../../../lib/queryActions/sentRecord";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
+import { I4, Chev, Link4 } from "../../phone/v4/V4Parts";
+import "../../phone/v4/phoneV4.css";
+import "../../phone/v5/phoneV5.css";
 import { PACKAGE_ICONS } from "../packageIcons";
 /* v42: the guide is How it works's four stations (v41's five steps are deleted) */
 import { HOW_STATIONS as HOW_STEPS, PACKAGE_NAVY } from "../../../lib/packagesV42";
-import { compUsage, compKey, letterFixed, MAX_LETTER_COMPS } from "../../../lib/compUsage";
+import { compUsage, compKey, compsInLetter, letterFixed, MAX_LETTER_COMPS } from "../../../lib/compUsage";
 import { compAge, currentYear } from "../../../lib/compsPage";
-import { withCompAdded } from "../../../lib/comps";
+import { withCompAdded, withCompEdited, type CompDraft } from "../../../lib/comps";
 import { withCompIds } from "../../../lib/compUsage";
 import { normalizeComp } from "../../../lib/comps";
 import { readVersions, setInUse, archiveVersion, editVersion } from "../../../lib/bookVersions";
@@ -84,6 +90,9 @@ function usePkNav() {
 }
 
 /* ═══ THE HUB ════════════════════════════════════════════════════════════════════════════════════════════════════ */
+/** Phone app v5, Phase F: the Materials tab (phone/v5/MaterialsV5) draws its own four tabs, so this hub is drawn only
+ *  under one of its pages (`/queries/packages` with no page is sent to Materials). Every page below is still this
+ *  file's, at `/queries/packages?…`, drawn by the copy mounted in the packages slot. */
 export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
   const model = usePk26Model();
   const nav = usePkNav();
@@ -91,7 +100,7 @@ export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
   const pk = model.active;
 
   /* the band: the line, and the active package card laid over the band's foot (ref `.apk`) */
-  usePhoneBandSlot(PACKAGES_PATH, (
+  const band = (
     <div data-pa="pk-band">
       <div className="pa-pksub">What you send agents, and what’s working</div>
       {pk ? (
@@ -122,7 +131,8 @@ export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
         </div>
       )}
     </div>
-  ), [pk?.id, pk?.packageName, pk?.colour, pk?.icon, model.figPk, model.letters, model.synopses, model.versionRows]);
+  );
+  usePhoneBandSlot(PACKAGES_PATH, band, [pk?.id, pk?.packageName, pk?.colour, pk?.icon, model.figPk, model.letters, model.synopses, model.versionRows]);
 
   /* What's landing (4A): the desktop's own ranking; a card whose sample is under the desktop's minimum is left out */
   const usage = useUsage(model);
@@ -133,9 +143,7 @@ export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
   /* the page in front: one of the detail pages, keyed by the address */
   const page = active ? pageFor(params) : null;
 
-  return (
-    <div className="pa-pk" data-pa="packages">
-      <div className="pa-pkbody">
+  const packagesPart = (<>
         <div className="pa-shd pa-shd--first"><h2 className="pa-h2">What’s landing</h2><button type="button" className="pa-link" data-pa="pk-how" onClick={() => setHowOpen(true)}>How it works</button></div>
         <Landing cards={showcases.cards} hidden={showcases.hidden} />
 
@@ -146,7 +154,12 @@ export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
           </div>
         ) : <p className="pa-sub pa-pknone" data-pa="pk-none">No packages yet.</p>}
         <button type="button" className="pa-btn pri blk pa-hb pa-mt12" data-pa="pk-build" onClick={() => nav.open("build", "new")}>{PI.plus}Build a package</button>
+  </>);
 
+  return (
+    <div className="pa-pk" data-pa="packages">
+      <div className="pa-pkbody">
+        {packagesPart}
         <Shelves model={model} usage={usage} onOpen={nav.open} />
       </div>
 
@@ -158,10 +171,21 @@ export const PackagesPhone: React.FC<{ active: boolean }> = ({ active }) => {
         </div>
       </MobileSheet>
 
-      {page ? createPortal(
-        <div className="pa-layer pa-pkpage" data-pa="pk-page" data-page={page.kind}>
-          <PageBody kind={page.kind} id={page.id} model={model} usage={usage} nav={nav} />
-        </div>, document.body) : null}
+      {page ? createPortal(<PackagesPhonePage model={model} />, document.body) : null}
+    </div>
+  );
+};
+
+/** The page in front, keyed by the address (`?pkg=` / `?build=` / `?mat=` …), as a full-screen layer — portalled by
+ *  PackagesPhone; exported so the render smokes can draw a page without a portal. */
+export const PackagesPhonePage: React.FC<{ model: Pk26Model }> = ({ model }) => {
+  const nav = usePkNav();
+  const usage = useUsage(model);
+  const page = pageFor(nav.params);
+  if (!page) return null;
+  return (
+    <div className="pa-layer pa-pkpage" data-pa="pk-page" data-page={page.kind}>
+      <PageBody kind={page.kind} id={page.id} model={model} usage={usage} nav={nav} />
     </div>
   );
 };
@@ -178,9 +202,9 @@ function pageFor(p: URLSearchParams): { kind: PageKind; id: string } | null {
 const PageBody: React.FC<{ kind: PageKind; id: string; model: Pk26Model; usage: Usage; nav: ReturnType<typeof usePkNav> }> = ({ kind, id, model, usage, nav }) => {
   if (kind === "edit") return <EditorPage id={id} onDone={nav.back} />;
   if (!model.collectionsReady) return <Sub title="" onBack={nav.back}><p className="pa-sub">Loading…</p></Sub>;
-  if (kind === "pkg") { const p = model.msPkgs.find((x) => x.id === id); return p ? <PackagePage model={model} p={p} nav={nav} usage={usage} /> : <Gone onBack={nav.back} />; }
+  if (kind === "pkg") { const p = model.msPkgs.find((x) => x.id === id); return p ? <PackagePage model={model} p={p} nav={nav} /> : <Gone onBack={nav.back} />; }
   if (kind === "build") return <BuilderPage model={model} id={id} nav={nav} />;
-  if (kind === "mat") { const m = model.lettersAll.find((x) => x.id === id) ?? model.synopsesAll.find((x) => x.id === id); return m ? <MaterialPage model={model} m={m} nav={nav} usage={usage} /> : <Gone onBack={nav.back} />; }
+  if (kind === "mat") { const m = model.lettersAll.find((x) => x.id === id) ?? model.synopsesAll.find((x) => x.id === id); return m ? <MaterialPage model={model} m={m} nav={nav} /> : <Gone onBack={nav.back} />; }
   if (kind === "ver") return <VersionPage model={model} id={id} nav={nav} />;
   if (kind === "comps") return <CompsPage model={model} usage={usage} nav={nav} />;
   if (kind === "compsin") return <CompsInLetter model={model} letterId={id} nav={nav} />;
@@ -351,68 +375,111 @@ const Shelves: React.FC<{ model: Pk26Model; usage: Usage; onOpen: (k: string, v:
   );
 };
 
-/* ═══ A PACKAGE (ref `PAGES.pkgpage`) ════════════════════════════════════════════════════════════════════════════ */
-const PackagePage: React.FC<{ model: Pk26Model; p: SubmissionPackage; nav: ReturnType<typeof usePkNav>; usage: Usage }> = ({ model, p, nav }) => {
-  const { queries } = useScriptAllyDb();
+/* ═══ A PACKAGE — Phone app v5, Phase F (design-refs/phone-app-v5/phone-materials-v1.html P2) ═══════════════════════
+   ⚠️ HOW IT'S DOING IS packageMetrics' OWN (`packageMetrics`: the queries whose `packageId` is this package — sent,
+   asked for more, the rate by `formatRate`), so the card, the header and this page cannot disagree. "Best of your N
+   packages" is said only by lib/phoneV5 `bestClaim` (strongestPackage, at MIN_SENDS_FOR_CLAIM, strictly ahead).
+   What an agent receives: the three slots (an unfilled slot "" says so, isSlotFilled). A package that has not gone out
+   swaps a piece in the builder, opened on that slot (`?build=<id>&slot=`); one that has gone out is locked
+   (`isLocked`), so a piece opens its own page. The opening sample line is true: the log journey keeps the portion's
+   own control in package mode (queryActions/journeys/LogJourney.tsx, "HOW MUCH OF THE BOOK"). Sent to: the same
+   queries, newest first. One button sets it going out with new queries (Packages' `makeActive` = db
+   `setActivePackage`), where `canMakeActive` allows; on the active one it says so instead. */
+/* Escape leaves the page — last, after any sheet opened over it (one cascade: lib/escapeStack) */
+const PushBar: React.FC<{ title: string; onBack: () => void; right?: React.ReactNode }> = ({ title, onBack, right }) => {
+  useEscapeLayer(true, onBack, ESC_LEVEL.pageMode);
+  return (
+    <div className="pa5m-bar" data-pa5="push-bar">
+      <button type="button" className="pa4-ib" aria-label="Back" data-pa="pk-back" onClick={onBack}><I4 n="back" /></button>
+      <b className="pa5m-bart">{title}</b>
+      {right ?? <span className="pa5m-barsp" />}
+    </div>
+  );
+};
+
+const PackagePage: React.FC<{ model: Pk26Model; p: SubmissionPackage; nav: ReturnType<typeof usePkNav> }> = ({ model, p, nav }) => {
+  const { queries, agents } = useScriptAllyDb();
+  const [all, setAll] = useState(false);
   const stage = packageStage(p);
   const locked = isLocked(p);
   const isActive = model.active?.id === p.id;
-  const f: Facts = model.facts(p);
-  const qs = packageQueries(p, model.msQueries).filter((q) => q.status !== "Withdrawn");
-  const funnel = funnelOf(qs.map((q) => q.id), model.rowsById);
-  const passed = qs.filter((q) => q.status === "Rejected").length;
-  const waiting = qs.filter((q) => !["Rejected", "No Response", "Withdrawn", "Signed"].includes(String(q.status))).length;
+  const stat = packageMetrics(p.id, queries);
+  const best = bestClaim(p.id, model.msPkgs, queries);
+  const books = readVersions(model.activeMs);
+  const pieces = pkgPieces(p, [...model.lettersAll, ...model.synopsesAll].map((m) => ({ id: m.id, versionName: m.name })), books);
   const letter = model.lettersAll.find((m) => m.id === p.queryLetterVersionId) ?? null;
-  const letterComps = letter?.compIds ? model.comps.filter((c) => c.id && letter.compIds!.includes(c.id)).map((c) => c.title) : [];
-  const ver = model.versionRows.find((v) => v.id === p.bookVersionId) ?? null;
+  const ver = books.find((v) => v.id === p.bookVersionId) ?? null;
   const extras = model.extras.filter((e) => (p.extraIds ?? []).includes(e.id));
-  void queries;
+  const sentTo = queries.filter((q) => q.packageId === p.id).sort((a, b) => String(b.dateSent ?? "").localeCompare(String(a.dateSent ?? "")));
+  const shown = all ? sentTo : sentTo.slice(0, 3);
+  const swap = (k: PieceKey) => nav.navigate({ pathname: PACKAGES_PATH, search: `?build=${encodeURIComponent(p.id)}&slot=${k}` }, { state: { pk2: true } });
   const copy = async () => { const id = await model.duplicate(p); if (id) nav.replace("pkg", id); };
+  const ICO: Record<PieceKey, [string, string]> = { let: ["L", "var(--pa-st-pink)"], syn: ["S", "var(--pa-st-sand)"], ver: ["M", "var(--pa-st-slate)"] };
+  const line = (x: PkgPiece): string => {
+    if (!x.set) return "Not set";
+    if (x.k === "let") { const n = letter ? letterCompCount(letter) : null; return [pieceChip(x), n == null ? null : compsWords(n).toLowerCase()].filter(Boolean).join(" · "); }
+    if (x.k === "ver") return [pieceChip(x), ver?.changes[0] ?? null].filter(Boolean).join(" · ");
+    return pieceChip(x);
+  };
   return (
-    <>
-      <div className="pa-band pa-band--page pa-pkband" style={{ background: PACKAGE_NAVY }} data-pa="pkg-band" data-pc={PACKAGE_NAVY}>
-        <div className="pa-bandrow"><button type="button" className="pa-ring" aria-label="Back" data-pa="pk-back" onClick={nav.back}>{PI.back}</button><span className="pa-grow" /></div>
-        <div className="pa-pkhead">
-          <span className="pa-pkic big" aria-hidden="true">{pkIcon(p)}</span>
-          <div><h1 className="pa-bt" data-pa="pkg-name">{p.packageName}</h1>
-            <div className="pa-pkstate" data-pa="pkg-state" data-stage={stage}>{stage === "out" ? "🔒 " : ""}{STAGE_LABEL[stage]}{isActive ? " · new queries use it" : ""}</div></div>
-        </div>
-      </div>
-      <div className="pa-pksubbody pa-pkpgbody">
-        <div className="pa-fsum" data-pa="pkg-figs">
-          <div><b>{f.n}</b><span>{f.n === 1 ? "query" : "queries"}</span></div>
-          <div><b>{f.more}</b><span>asked for more</span></div>
-          <div><b>{f.pct != null ? `${f.pct}%` : "–"}</b><span>{f.pct != null ? "request rate" : `rate after ${MIN_SENDS_FOR_CLAIM + 1} sent`}</span></div>
-        </div>
-        <div className="pa-shd"><h2 className="pa-h2">How far it gets</h2><span className="pa-sub">{f.n} sent</span></div>
-        <div className="pa-card"><Funnel f={funnel} />{f.n ? <p className="pa-sub pa-mt12" data-pa="pkg-passed">{passed ? `${plural(passed, "agent")} passed` : "Nobody has passed"} and {waiting ? `${waiting} ${waiting === 1 ? "is" : "are"} still waiting` : "nobody is still waiting"}.</p> : null}</div>
-        <div className="pa-shd"><h2 className="pa-h2">What’s in it</h2></div>
-        <div className="pa-card pa-pad0" data-pa="pkg-contents">
-          {ver ? <button type="button" className="pa-mslot" data-pa="pkg-piece" data-k="ver" onClick={() => nav.open("ver", ver.id)}>{mi(PI.book, "#e3ebf0")}<span className="t"><b>{ver.name}</b><small>Version · the pages come from this</small></span><span className="pa-chev">{PI.chev}</span></button> : null}
-          {letter ? <button type="button" className="pa-mslot" data-pa="pkg-piece" data-k="let" onClick={() => nav.open("mat", letter.id)}>{mi(PI.doc, MPINK)}<span className="t"><b>{letter.name}</b><small>Query letter{letterComps.length ? ` · names ${letterComps.join(" and ")}` : ""}</small></span><span className="pa-chev">{PI.chev}</span></button> : null}
-          {p.synopsisVersionId ? <button type="button" className="pa-mslot" data-pa="pkg-piece" data-k="syn" onClick={() => nav.open("mat", p.synopsisVersionId)}>{mi(PI.note, MPINK)}<span className="t"><b>{model.matName("syn", p.synopsisVersionId)}</b><small>Synopsis</small></span><span className="pa-chev">{PI.chev}</span></button> : null}
-          {extras.length ? <div className="pa-mslot" data-pa="pkg-piece" data-k="ext">{mi(PI.plus)}<span className="t"><b>Also sends</b><small>{extras.map((e) => e.name).join(" · ")}</small></span></div> : null}
-          {!ver && !letter && !p.synopsisVersionId && !extras.length ? <p className="pa-sub" style={{ padding: "12px 16px" }}>Nothing in it yet.</p> : null}
-        </div>
-        {locked ? (
-          <>
-            <div className="pa-lockn" data-pa="pkg-locked">{lockI}<span>It’s gone out, so it’s locked: changing it would muddle its numbers. Make a copy to try something different.</span></div>
-            <div className="pa-row2">
-              <button type="button" className="pa-btn pri pa-hb" data-pa="pkg-copy" onClick={() => void copy()}>Make a copy</button>
-              {stage !== "retired" ? <button type="button" className="pa-btn sec" data-pa="pkg-stop" onClick={() => void model.retire(p).then((ok) => { if (ok) nav.back(); })}>Stop using it</button> : null}
-            </div>
-          </>
-        ) : (
-          <div className="pa-row2 pa-mt12">
-            <button type="button" className="pa-btn pri pa-hb" data-pa="pkg-edit" onClick={() => nav.open("build", p.id)}>Edit</button>
-            {!isActive && stage === "ready" ? <button type="button" className="pa-btn sec" data-pa="pkg-use" onClick={() => void model.makeActive(p)}>Use for new queries</button> : null}
+    <div className="pa4 pa5 pa5m-page" data-pa5="pkg-page" data-id={p.id} data-stage={stage} data-sent={stat.sent} data-requests={stat.requests}>
+      <PushBar title={p.packageName} onBack={nav.back} />
+      <div className="pa5m-pgb">
+        <div className="pa4-card pa5m-how" data-pa5="pkg-how">
+          <div className="pa4-s">How it’s doing</div>
+          <div className="pa5m-figs">
+            <div><b>{stat.sent}</b><span className="pa4-s">{stat.sent === 1 ? "query sent" : "queries sent"}</span></div>
+            <div><b>{stat.requests}</b><span className="pa4-s">asked for more</span></div>
+            <div><b>{formatRate(stat.requestRate)}</b><span className="pa4-s">request rate</span></div>
           </div>
-        )}
-        {locked && !isActive && stage === "out" ? <button type="button" className="pa-btn sec blk pa-mt10" data-pa="pkg-use" onClick={() => void model.makeActive(p)}>Use for new queries</button> : null}
-        <div className="pa-shd"><h2 className="pa-h2">Queries it went with</h2><span className="pa-sub">{qs.length}</span></div>
-        <QueryRows ids={qs.map((q) => q.id)} model={model} />
+          {best ? <p className="pa4-s pa5m-best" data-pa5="pkg-best">{best}</p> : null}
+        </div>
+
+        <h2 className="pa5m-h pa5m-sec">What an agent receives</h2>
+        <div className="pa4-card pa5m-list" data-pa5="pkg-receives">
+          {pieces.map((x) => {
+            const opensPiece = locked && x.set && x.id;
+            const go = !locked ? () => swap(x.k) : opensPiece ? () => nav.open(x.k === "ver" ? "ver" : "mat", x.id!) : undefined;
+            const inner = (<>
+              <span className="pa5m-ico" style={{ background: ICO[x.k][1] }} aria-hidden="true">{ICO[x.k][0]}</span>
+              <span className="pa4-x"><span className="pa4-s" style={{ display: "block" }}>{x.label}</span><b>{line(x)}</b></span>
+              {go ? <Chev /> : null}
+            </>);
+            return go
+              ? <button key={x.k} type="button" className="pa4-tap" data-pa5="pkg-slot" data-k={x.k} data-set={x.set ? "1" : "0"} onClick={go}>{inner}</button>
+              : <div key={x.k} className="pa4-tap" data-pa5="pkg-slot" data-k={x.k} data-set={x.set ? "1" : "0"}>{inner}</div>;
+          })}
+          {extras.length ? <div className="pa4-tap" data-pa5="pkg-slot" data-k="ext"><span className="pa5m-ico" aria-hidden="true">+</span><span className="pa4-x"><span className="pa4-s" style={{ display: "block" }}>Also sends</span><b>{extras.map((e) => e.name).join(" · ")}</b></span></div> : null}
+        </div>
+        <p className="pa4-s pa5m-note" data-pa5="pkg-sample">The opening sample is set per agent when you log a query.</p>
+        {locked ? <p className="pa4-s pa5m-note" data-pa5="pkg-locked">It’s gone out, so it’s locked: changing it would muddle its numbers. Make a copy to try something different.</p> : null}
+
+        <h2 className="pa5m-h pa5m-sec">Sent to</h2>
+        {sentTo.length ? (
+          <div className="pa4-card pa5m-list" data-pa5="pkg-sent" data-n={sentTo.length}>
+            {shown.map((q) => {
+              const a = agents.find((x) => x.id === q.agentId);
+              return (
+                <button key={q.id} type="button" className="pa4-tap" data-pa5="pkg-sent-row" data-id={q.id} onClick={() => nav.navigate({ pathname: "/queries", search: `?q=${encodeURIComponent(q.id)}` })}>
+                  <span className="pa4-x"><b>{a?.name || a?.agency || "An agent no longer on file"}</b><span className="pa4-s">{STAGE_NAME[q.status] ?? String(q.status)}</span></span><Chev />
+                </button>
+              );
+            })}
+            {sentTo.length > 3 && !all ? <Link4 rule pa4="pkg-sent-all" data-pa5="pkg-sent-all" onClick={() => setAll(true)}>See all {sentTo.length}</Link4> : null}
+          </div>
+        ) : <p className="pa4-s pa5m-note" data-pa5="pkg-sent-none">Not sent yet.</p>}
       </div>
-    </>
+      <div className="pa5m-act" data-pa5="pkg-act">
+        {isActive ? <button type="button" className="pa4-cta" disabled data-pa5="pkg-set-active" data-on="1">Going out with new queries ✓</button>
+          : canMakeActive(p, model.active?.id) ? <button type="button" className="pa4-cta" data-pa5="pkg-set-active" data-on="0" onClick={() => void model.makeActive(p)}>Use for new queries</button>
+          : null}
+        {!locked ? <Link4 pa4="pkg-change" data-pa5="pkg-change" onClick={() => nav.open("build", p.id)}>Change what’s in it</Link4>
+          : <>
+            <Link4 pa4="pkg-copy" data-pa5="pkg-copy" onClick={() => void copy()}>Make a copy</Link4>
+            {canRetire(p, model.active?.id) ? <Link4 pa4="pkg-stop" data-pa5="pkg-stop" onClick={() => void model.retire(p).then((ok) => { if (ok) nav.back(); })}>Stop using it</Link4> : null}
+          </>}
+      </div>
+    </div>
   );
 };
 
@@ -467,7 +534,8 @@ const BuilderPage: React.FC<{ model: Pk26Model; id: string; nav: ReturnType<type
   const [let_, setLet] = useState<string>(() => existing?.queryLetterVersionId ?? "");
   const [syn, setSyn] = useState<string>(() => existing?.synopsisVersionId ?? "");
   const [ext, setExt] = useState<string[]>(() => existing?.extraIds ?? []);
-  const [pick, setPick] = useState<Slot | null>(null);
+  /* Phone app v5: a package's page opens the builder on the piece it swaps (`&slot=let|syn|ver`) */
+  const [pick, setPick] = useState<Slot | null>(() => { const s = nav.params.get("slot"); return s === "ver" || s === "let" || s === "syn" ? s : null; });
   const [renaming, setRenaming] = useState(false);
   const [saving, setSaving] = useState(false);
   const done: Record<Slot, boolean> = { ver: !!ver, let: !!let_, syn: !!syn, ext: ext.length > 0 };
@@ -583,61 +651,101 @@ const Picker: React.FC<{
   );
 };
 
-/* ═══ A LETTER OR A SYNOPSIS (ref `PAGES.letter`) ════════════════════════════════════════════════════════════════ */
-const MaterialPage: React.FC<{ model: Pk26Model; m: Pk26Model["lettersAll"][number]; nav: ReturnType<typeof usePkNav>; usage: Usage }> = ({ model, m, nav }) => {
+/* ═══ A LETTER OR A SYNOPSIS — Phone app v5, Phase F (phone-materials-v1.html P4) ═══════════════════════════════════
+   The wording to read; for a letter, the comps it mentions as chips, picked from the Comps list and written through
+   the letter's own writer (db `updateVersion(id, { compIds })`, as Comps in a letter does), read-only once the letter
+   is fixed (compUsage `letterFixed`); its result, the desktop's per-piece figure (lib/phoneV5 `materialFacts` — a
+   query sent without a package counts here, on its letter, and on no package); "Edit the wording" (v4's plain-text
+   editor, `?edit=`) and "Save as a new letter" (Packages' own `saveMaterial(…, "new")`, the desktop's save-as-new). */
+const MaterialPage: React.FC<{ model: Pk26Model; m: Pk26Model["lettersAll"][number]; nav: ReturnType<typeof usePkNav> }> = ({ model, m, nav }) => {
+  const db = useScriptAllyDb();
   const { showToast } = useToast();
-  const f = model.pieceFacts(m.kind, m.id);
-  const v = useScriptAllyDb().versions.find((x) => x.id === m.id);
-  const comps = m.kind === "let" && m.compIds ? model.comps.filter((c) => c.id && m.compIds!.includes(c.id)) : [];
-  const earlier = (m.kind === "let" ? model.lettersAll : model.synopsesAll).filter((x) => x.id !== m.id);
   const [more, setMore] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const v = db.versions.find((x) => x.id === m.id) ?? null;
+  const isLet = m.kind === "let";
+  const word = isLet ? "letter" : "synopsis";
+  const f = materialFacts(m.kind, m.id, model.msQueries, model.pieceCtx, model.rowsById);
+  const r = pieceResult(f);
+  const qs = materialQueries(m.kind, m.id, model.msQueries, model.pieceCtx);
+  const inPk = [...new Set(qs.map((q) => sentRecordOf(q).packageId).filter((x): x is string => !!x))].map((id) => model.msPkgs.find((p) => p.id === id)?.packageName).filter(Boolean) as string[];
+  const alone = qs.some((q) => !sentRecordOf(q).packageId);
+  const lastMs = Math.max(0, ...qs.map((q) => model.rowsById.get(q.id)?.sentMs ?? 0));
+  const usedLine = [inPk.length ? `Sent in ${inPk.join(" and ")}` : null, alone ? "sent on its own" : null, lastMs ? `last used ${dayMonth(lastMs)}` : null].filter(Boolean).join(" · ");
+  const act = model.active;
+  const inAct = !!act && (isLet ? act.queryLetterVersionId : act.synopsisVersionId) === m.id;
+  const fixed = isLet && !!v && letterFixed(v, db.queries, db.versions, db.packages);
+  const ids = (m.compIds ?? []).slice();
+  const named = isLet ? compsInLetter(model.comps, v) : [];
+  const free = model.comps.filter((c) => !!c.id && !ids.includes(c.id));
+  const setComps = async (next: string[]) => {
+    const err = await db.updateVersion(m.id, { compIds: next });
+    if (err) showToast({ message: err });
+  };
   const copyText = async () => { try { await navigator.clipboard.writeText(m.text); showToast({ message: "Copied the text." }); } catch { showToast({ message: "Couldn’t copy. Select the text and copy it instead." }); } };
-  const newVersion = () => nav.open("edit", m.id);
+  const saveNew = async () => {
+    if (saving) return;
+    setSaving(true);
+    await model.saveMaterial(m, { name: m.name, summary: m.summary, text: m.text, compIds: m.compIds }, "new");
+    setSaving(false);
+  };
+  const paras = paragraphs(m.text);
   return (
-    <Sub title={m.name} onBack={nav.back}>
-      <div className="pa-matmeta"><span className="pa-sub">{[v?.createdDate ? `Edited ${dayMonth(v.createdDate)}` : null, m.words != null ? `${m.words.toLocaleString("en-GB")} words` : null].filter(Boolean).join(" · ")}</span>{m.inUse ? <span className="pa-inuse">In use</span> : m.retired ? <span className="pa-lc draft">Put away</span> : null}</div>
-      <div className="pa-paper" data-pa="mat-text">{m.text || <span className="pa-sub">No text yet.</span>}</div>
-      <div className="pa-acts3" data-pa="mat-acts">
-        <button type="button" data-pa="mat-edit" onClick={() => nav.open("edit", m.id)}>{PI.edit}Edit</button>
-        <button type="button" data-pa="mat-new" onClick={newVersion}>{PI.plus}New version</button>
-        <button type="button" data-pa="mat-copy" onClick={() => void copyText()}>{PI.share}Copy text</button>
-        <button type="button" data-pa="mat-more" onClick={() => setMore(true)}>{PI.more}More</button>
+    <div className="pa4 pa5 pa5m-page" data-pa5="letter-page" data-id={m.id} data-kind={m.kind} data-sent={r.sent} data-requests={r.more}>
+      <PushBar title={m.name} onBack={nav.back} right={<button type="button" className="pa4-ib" aria-label="More" data-pa="mat-more" onClick={() => setMore(true)}><span aria-hidden="true" className="pa5m-dots">⋯</span></button>} />
+      <div className="pa5m-pgb">
+        {inAct || m.retired ? <div className="pa5m-chips" style={{ marginBottom: 12 }}>{inAct ? <span className="pa5m-tag use">In {act!.packageName}</span> : null}{m.retired ? <span className="pa5m-tag">Put away</span> : null}</div> : null}
+        <div className="pa5m-read" data-pa5="letter-text">
+          {paras.length ? paras.map((t, i) => <p key={i}>{t}</p>) : <p className="pa4-s">No wording yet.</p>}
+        </div>
+        {isLet ? (
+          <>
+            <h2 className="pa5m-h pa5m-sec">Comps in this letter</h2>
+            <div className="pa5m-chips" data-pa5="letter-comps" data-n={named.length} data-fixed={fixed ? "1" : "0"}>
+              {named.map((c) => fixed
+                ? <span key={c.id} className="pa5m-tag b2" data-pa5="letter-comp" data-id={c.id}>{c.title}</span>
+                : <button key={c.id} type="button" className="pa5m-tag b2 x" data-pa5="letter-comp" data-id={c.id} aria-label={`Take ${c.title} out of this letter`}
+                    onClick={() => void setComps(ids.filter((x) => x !== c.id))}>{c.title}<span aria-hidden="true">×</span></button>)}
+              {!fixed && ids.length < MAX_LETTER_COMPS ? <button type="button" className="pa5m-tag add" data-pa5="letter-comp-add" onClick={() => setAdding(true)}>+ Add</button> : null}
+            </div>
+            {fixed ? <p className="pa4-s pa5m-note">{m.name} has gone out, so the comps it names are fixed. Save it as a new letter to change them.</p>
+              : !named.length ? <p className="pa4-s pa5m-note">{m.compIds ? "This letter names no comps." : "Not noted yet."}</p> : null}
+          </>
+        ) : null}
+        <h2 className="pa5m-h pa5m-sec">How it’s doing</h2>
+        <div className="pa4-card pa5m-how" data-pa5="letter-result">
+          <div className="pa4-b">{r.of ? <><b className="pa5m-big">{r.big} {r.of}</b> asked for more</> : r.words}</div>
+          {usedLine ? <div className="pa4-s">{usedLine.charAt(0).toUpperCase() + usedLine.slice(1)}</div> : null}
+        </div>
       </div>
-      <div className="pa-fsum pa-mt14" data-pa="mat-figs">
-        <div><b>{f.n}</b><span>{f.n === 1 ? "query" : "queries"}</span></div>
-        <div><b>{f.more}</b><span>asked for more</span></div>
-        <div><b>{f.pct != null ? `${f.pct}%` : "–"}</b><span>{f.pct != null ? "request rate" : "rate after 5 sent"}</span></div>
+      <div className="pa5m-act" data-pa5="letter-act">
+        <button type="button" className="pa4-cta" data-pa5="letter-edit" onClick={() => nav.open("edit", m.id)}>Edit the wording</button>
+        <Link4 pa4="letter-new" data-pa5="letter-new" disabled={saving} onClick={() => void saveNew()}>Save as a new {word}</Link4>
       </div>
-      {m.kind === "let" ? (
-        <>
-          <div className="pa-shd"><h2 className="pa-h2">Comps it names</h2><button type="button" className="pa-link" data-pa="mat-comps" onClick={() => nav.open("compsin", m.id)}>Change</button></div>
-          {comps.length ? <div className="pa-pcwrap" data-pa="mat-comp-chips">{comps.map((c) => <span key={c.id} className="pa-pc">{PI.pages}{c.title}</span>)}</div> : <p className="pa-sub">{m.compIds ? "This letter names no comps." : "Not recorded yet."}</p>}
-        </>
-      ) : null}
-      <div className="pa-shd"><h2 className="pa-h2">In these packages</h2></div>
-      {m.inPackages.length ? (
-        <div className="pa-card pa-pad0">{m.inPackages.map((p) => (
-          <button key={p.id} type="button" className="pa-pkrow" onClick={() => nav.open("pkg", p.id)}><span className="pa-pkic sm" style={{ background: PACKAGE_NAVY }} data-pc={PACKAGE_NAVY} aria-hidden="true">{pkIcon(p)}</span><span className="pa-pkrt"><b>{p.packageName}</b></span><LcTag p={p} /></button>
-        ))}</div>
-      ) : <p className="pa-sub">Not in a package yet.</p>}
-      {earlier.length ? (
-        <>
-          <div className="pa-shd"><h2 className="pa-h2">{m.kind === "let" ? "Other letters" : "Other synopses"}</h2></div>
-          <div className="pa-card pa-pad0">{earlier.map((x) => {
-            const fx = model.pieceFacts(x.kind, x.id);
-            return <button key={x.id} type="button" className="pa-mslot" onClick={() => nav.replace("mat", x.id)}>{mi(m.kind === "let" ? PI.doc : PI.note, MPINK)}<span className="t"><b>{x.name}</b><small>{fx.n ? `${plural(fx.n, "query", "queries")} · ${plural(fx.more, "request")}` : "Not sent yet"}</small></span><span className="pa-chev">{PI.chev}</span></button>;
-          })}</div>
-        </>
-      ) : null}
-      <MobileSheet open={more} onClose={() => setMore(false)} ariaLabel="More" pa={{ height: "auto", drag: false, z: 1100 }}>
-        <h2 className="pa-sht">{m.name}</h2>
-        <div className="pa-group">
-          {m.retired
-            ? <button type="button" className="pa-li" onClick={() => { setMore(false); void model.bringBack(m); }}><span className="pa-ico">{PI.plus}</span><span className="pa-lt">Bring it back</span></button>
-            : <button type="button" className="pa-li" data-pa="mat-putaway" onClick={() => { setMore(false); void model.putAwayMat(m); }}><span className="pa-ico">{PI.closeq}</span><span className="pa-lt">Put it away</span></button>}
+
+      <MobileSheet open={adding} onClose={() => setAdding(false)} ariaLabel="Add a comp to this letter" pa={{ height: "auto", white: true, z: 1100 }}>
+        <div className="pa4-layer pa5m-pick" data-pa5="letter-comp-pick">
+          <h2 className="pa5m-h">Add a comp</h2>
+          {free.map((c) => (
+            <button key={c.id} type="button" className="pa4-tap" data-pa5="letter-comp-pick-row" data-id={c.id} onClick={() => { setAdding(false); void setComps([...ids, c.id!]); }}>
+              <span className="pa4-x"><b>{c.title}</b>{c.author || c.year ? <span className="pa4-s">{[c.author, c.year].filter(Boolean).join(" · ")}</span> : null}</span><Chev />
+            </button>
+          ))}
+          {!free.length ? <p className="pa4-s" style={{ padding: "8px 0" }}>{model.comps.length ? "Every comp on your list is in this letter." : "No comps yet."}</p> : null}
+          <Link4 rule pa4="letter-comp-list" onClick={() => { setAdding(false); nav.navigate({ pathname: "/materials", search: "?tab=comps" }); }}>Your comps list</Link4>
         </div>
       </MobileSheet>
-    </Sub>
+      <MobileSheet open={more} onClose={() => setMore(false)} ariaLabel="More" pa={{ height: "auto", drag: false, z: 1100 }}>
+        <div className="pa4-layer pa5m-pick">
+          <h2 className="pa5m-h">{m.name}</h2>
+          <button type="button" className="pa4-tap" data-pa="mat-copy" onClick={() => { setMore(false); void copyText(); }}><span className="pa4-x"><b>Copy the text</b></span></button>
+          {m.retired
+            ? <button type="button" className="pa4-tap" onClick={() => { setMore(false); void model.bringBack(m); }}><span className="pa4-x"><b>Bring it back</b></span></button>
+            : <button type="button" className="pa4-tap" data-pa="mat-putaway" onClick={() => { setMore(false); void model.putAwayMat(m); }}><span className="pa4-x"><b>Put it away</b></span></button>}
+        </div>
+      </MobileSheet>
+    </div>
   );
 };
 
@@ -774,24 +882,37 @@ const CompsPage: React.FC<{ model: Pk26Model; usage: Usage; nav: ReturnType<type
   );
 };
 /** "Add a comp" — the desktop form's fields (CompForm / CompDraft): media, title, author or creator, publisher, year,
- *  what it shares with your book, and in your own words. Written the desktop's way (withCompAdded, withCompIds). */
-const CompForm: React.FC<{ open: boolean; model: Pk26Model; onClose: () => void }> = ({ open, model, onClose }) => {
+ *  what it shares with your book, and in your own words. Written the desktop's way (withCompAdded, withCompIds).
+ *  Phone app v5: with `edit` (the comp's index) the same form edits that comp, the desktop's way too (`withCompEdited`,
+ *  which merges onto the stored comp, so its id and every field the form does not carry survive). */
+const EMPTY_COMP = { media: "book", title: "", author: "", publisher: "", year: "", shares: "", note: "" };
+export const CompForm: React.FC<{ open: boolean; model: Pk26Model; onClose: () => void; edit?: number | null }> = ({ open, model, onClose, edit = null }) => {
   const db = useScriptAllyDb();
   const { showToast } = useToast();
-  const [d, setD] = useState({ media: "book", title: "", author: "", publisher: "", year: "", shares: "", note: "" });
+  const start = edit != null ? model.comps[edit] ?? null : null;
+  const [d, setD] = useState(() => (start ? {
+    media: String(start.media ?? "book").toLowerCase(), title: start.title ?? "", author: start.author ?? "", publisher: start.publisher ?? "",
+    year: start.year ? String(start.year) : "", shares: start.matchAxis ?? "", note: start.note ?? "",
+  } : EMPTY_COMP));
   const set = (k: keyof typeof d) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => setD({ ...d, [k]: e.target.value });
   const ok = d.title.trim() && (!d.year || /^\d{4}$/.test(d.year));
   const save = async () => {
     const ms = model.activeMs;
     if (!ms || !ok) return;
+    if (start && edit != null) {
+      const draft = { title: d.title.trim(), author: d.author, publisher: d.publisher, year: d.year ? Number(d.year) : undefined, note: d.note, matchAxis: d.shares.trim() || undefined, media: d.media === "book" ? undefined : d.media } as CompDraft;
+      try { await db.updateManuscript(ms.id, { comps: withCompIds(withCompEdited([...model.comps], edit, draft).map(normalizeComp)) }); showToast({ message: `Saved ${draft.title}.` }); onClose(); }
+      catch { showToast({ message: "Couldn’t save that change. Check your connection and try again." }); }
+      return;
+    }
     const comp: CompTitle = normalizeComp({ title: d.title, author: d.author, publisher: d.publisher, ...(d.year ? { year: Number(d.year) } : {}), note: d.note, ...(d.shares.trim() ? { matchAxis: d.shares.trim() } : {}), ...(d.media !== "book" ? { media: d.media } : {}), source: "user" } as unknown as CompTitle);
-    try { await db.updateManuscript(ms.id, { comps: withCompIds(withCompAdded([...model.comps], comp)).map(normalizeComp) }); showToast({ message: `Added ${comp.title}.` }); onClose(); setD({ media: "book", title: "", author: "", publisher: "", year: "", shares: "", note: "" }); }
+    try { await db.updateManuscript(ms.id, { comps: withCompIds(withCompAdded([...model.comps], comp)).map(normalizeComp) }); showToast({ message: `Added ${comp.title}.` }); onClose(); setD(EMPTY_COMP); }
     catch { showToast({ message: "Couldn’t save that change. Check your connection and try again." }); }
   };
   return (
-    <MobileSheet open={open} onClose={onClose} ariaLabel="Add a comp" pa={{ height: "92%", white: true, z: 1100 }}>
-      <div data-pa="comp-form">
-        <h2 className="pa-sht">Add a comp</h2>
+    <MobileSheet open={open} onClose={onClose} ariaLabel={start ? `Edit ${start.title}` : "Add a comp"} pa={{ height: "92%", white: true, z: 1100 }}>
+      <div data-pa="comp-form" data-edit={start ? "1" : "0"}>
+        <h2 className="pa-sht">{start ? `Edit ${start.title}` : "Add a comp"}</h2>
         <label className="pa-fld"><span>It’s a</span><select value={d.media} onChange={set("media")}><option value="book">Book</option><option value="film">Film</option><option value="tv">TV</option><option value="other">Other</option></select></label>
         <label className="pa-fld"><span>Title</span><input value={d.title} onChange={set("title")} data-pa="comp-title" /></label>
         <label className="pa-fld"><span>{d.media === "book" ? "Author" : "Creator"}</span><input value={d.author} onChange={set("author")} /></label>

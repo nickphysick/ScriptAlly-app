@@ -6,6 +6,10 @@
  * journeys are opened from anywhere through here and drawn by one host (V3Layer, mounted by the shell on a phone).
  * Opening any of them clears the snackbar (ref `open`: `ui.snack = null`), so it never covers a button.
  */
+import type { AgentGroup } from "../../../lib/phoneV5";
+import type { GroupKey } from "../../../lib/contactHousekeeping";
+import type { ComposeKey } from "../../../lib/foundingCard";
+
 export type V3Overlay =
   | { type: "query"; id: string }
   | { type: "agent"; id: string }
@@ -15,9 +19,13 @@ export type V3Overlay =
   | { type: "add"; editId?: string; name?: string }
   | { type: "note" }
   | { type: "search" }
-  /* Phone app v4: pushed pages drawn by the layer (back arrow, the page's name) */
-  | { type: "tasks" }
-  | { type: "agents-all" };
+  /* Phone app v4: pushed pages drawn by the layer (back arrow, the page's name). Phone app v5: the task list
+     ("tasks") is the To do tab now, an address of its own (`/todo`) */
+  | { type: "agents-all"; group?: AgentGroup }
+  /* Phone app v5: Housekeeping's gap-filling session, as a sheet (opened at a group's gaps, or at the first gap) */
+  | { type: "gaps"; group?: GroupKey }
+  /* Phone app v5, Phase G: the feedback sheet, over the screen it names ("About: …"), opened on a kind or on "An idea" */
+  | { type: "feedback"; about: string; kind?: ComposeKey };
 
 export interface V3Snack { msg: string; undo?: () => Promise<void> | void }
 

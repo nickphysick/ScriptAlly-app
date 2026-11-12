@@ -24,18 +24,18 @@ import { ContactEmptyPage } from "./contact/ContactEmptyPage";
 import { useLivingCountOverride } from "../../lib/livingHeaderReview";
 import { hkAllFilled } from "../../lib/hkReviewAid";
 import { INTRO_PATH_V18, dismissPath, dismissedAtGaps, introSeenOf, listHealth, nextDismissed, tabShown } from "../../lib/contactHealth";
-import { GAP_FOCUS, agentGapAction, agentGapLine, hasPassedOn, hkModel, savedLine, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
+import { GAP_FOCUS, agentGapAction, agentGapLine, hasPassedOn, hkModel, wishlistCheckin, type HkAgentCtx, type HkBook, type HkItem } from "../../lib/contactHousekeeping";
 import {
-  contactPrefsOf, laterPath, readHkView, settledPath, settledRestorePath, showAllPath, wishlistEveryPath, wishlistNextPath,
+  contactPrefsOf, readHkView, wishlistEveryPath, wishlistNextPath,
   writeHkView, type HkView, type WishlistEvery,
 } from "../../lib/contactPrefs";
 import { type FixResult, type HkFix } from "./contact/ContactHousekeeping";
 import { HousekeepingDrawer } from "./contact/HousekeepingDrawer";
+import { useHkFixes } from "./contact/useHkFixes";
 import { fitToast } from "./card/agentPills";
 import { health as healthOf } from "../../lib/listHealth";
-import { applyPatch, cardPatch, draftOf, inversePatch, toContactDraft, type CardDraft } from "../../lib/cardDraft";
+import { draftOf, toContactDraft, type CardDraft } from "../../lib/cardDraft";
 import { alsoChanges } from "../../lib/contactEdit";
-import { commitCardSave } from "../../lib/agentCardSave";
 import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
 import { commitAgentEdits } from "../../lib/saveAgentEdits";
 import { db as firestoreDb } from "../../lib/firebase";
@@ -787,52 +787,12 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   }, [dismissReady, health.gaps, storedDismiss, updateUserPaths]);
   const [hkView, setHkViewRaw] = useState<HkView>(() => readHkView());
   const setHkView = useCallback((v: HkView) => { setHkViewRaw(v); writeHkView(v); }, []);
-  /* ── Housekeeping's fixes — THE CARD'S SAVE PATH (lib/agentCardSave), never `updateAgent`:
-     the snapshot first, the reply-time deadline fan-out in the same batch, the data-quality flag, and
-     a snapshot Undo. In the lab the card's sandbox writer stands in, with the inverse patch as Undo. */
+  /* ── Housekeeping's fixes — lifted verbatim into the shared hook (`useHkFixes`, beside the drawer), which the phone's
+     gap-filling sheet calls too: the card's save path, the snapshot Undo, the sandbox writer in the lab. */
   const personalGenres = currentUser?.personalGenres ?? [];
-  const writeFix = useCallback(async (agent: Agent, patch: AgentEditPatch): Promise<FixResult | { ok: true; undo?: () => Promise<boolean> }> => {
-    if (Object.keys(patch).length === 0) return { ok: false, error: "Nothing to save." };
-    if (sandbox?.writeAgent) {
-      const write = sandbox.writeAgent;
-      const before = { ...agent } as Agent;
-      const r = await write(agent.id, patch);
-      if ("error" in r) return { ok: false, error: r.error };
-      return { ok: true, undo: async () => !("error" in (await write(before.id, inversePatch(before, patch)))) };
-    }
-    if (!currentUser) return { ok: false, error: "Not signed in." };
-    const out = await commitCardSave({ uid: currentUser.id, agent, queries, patch, resolveTaskFlag });
-    if ("error" in out.res) return { ok: false, error: out.res.error };
-    return { ok: true, undo: out.undo };
-  }, [sandbox, currentUser, queries, resolveTaskFlag]);
-
-  const onHkFix = useCallback(async (item: HkItem, fix: HkFix): Promise<FixResult> => {
-    const agent = agents.find((a) => a.id === item.agent.id) ?? item.agent;
-    if (fix.kind === "settled") {
-      const before = hkPrefs.settled;
-      try { await updateUserPaths(settledPath(hkPrefs, agent.id)); } catch (e) { return { ok: false, error: (e as Error).message || "the setting did not save" }; }
-      return { ok: true, line: savedLine(item, { settled: true }), undo: async () => { try { await updateUserPaths(settledRestorePath(before)); return true; } catch { return false; } } };
-    }
-    if (fix.kind === "remind") {
-      const name = (agent.name ?? "").trim() || (agent.agency ?? "").trim();
-      let id: string | undefined;
-      try { id = await addUserTask({ agentId: agent.id, dueDate: fix.on, text: `Check ${name} has reopened to queries` }); } catch (e) { return { ok: false, error: (e as Error).message || "the reminder did not save" }; }
-      return { ok: true, line: savedLine(item, { remindOn: fix.on }), undo: id ? async () => { try { await deleteUserTask(id!); return true; } catch { return false; } } : undefined };
-    }
-    const base = draftOf(agent, personalGenres);
-    const change: Partial<CardDraft> = fix.kind === "weeks" ? { weeks: fix.weeks }
-      : fix.kind === "mats" ? { mats: fix.mats } : fix.kind === "genres" ? { genres: fix.genres }
-      : fix.kind === "agency" ? { agency: fix.agency, agencyUnknown: false } : { wishlist: fix.text };
-    const patch = cardPatch(agent, base, { ...base, ...change }, new Date().toISOString());
-    const r = await writeFix(agent, patch);
-    if ("error" in r) return r;
-    const after = applyPatch(agent, patch);
-    return {
-      ok: true,
-      line: savedLine(item, { weeks: fix.kind === "weeks" ? fix.weeks : undefined, genres: fix.kind === "genres" ? fix.genres : undefined, fitsAfter: fitsGenre(after, hkBook.genres), book: hkBook }),
-      undo: r.undo,
-    };
-  }, [agents, hkPrefs, updateUserPaths, addUserTask, deleteUserTask, personalGenres, writeFix, hkBook]);
+  const { onHkFix, onLater: onHkLater, onShowAll: onHkShowAll, onWishlistStill } = useHkFixes({
+    agents, queries, currentUser, updateUserPaths, addUserTask, deleteUserTask, resolveTaskFlag, hkPrefs, hkToday, hkBook, sandbox,
+  });
   /* v18.3 §F.4 — a Housekeeping save that landed ticks the guide's "Do some housekeeping" */
   const onHkFixGuided = useCallback(async (item: HkItem, fix: HkFix): Promise<FixResult> => {
     const r = await onHkFix(item, fix);
@@ -857,15 +817,6 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
     const t = target[item.gap];
     openPanel(item.agent.id, { tab: t.tab, focus: t.focus, prefill: Object.keys(prefill).length ? prefill : undefined });
   }, [openPanel]);
-
-  const onWishlistStill = useCallback(async (agentId: string) => {
-    const agent = agents.find((a) => a.id === agentId);
-    if (!agent) return;
-    const patch: AgentEditPatch = { mswlCheckedAt: new Date().toISOString() };
-    if (sandbox?.writeAgent) { await sandbox.writeAgent(agentId, patch); return; }
-    if (!currentUser) return;
-    await commitAgentEdits(firestoreDb, currentUser.id, agentId, patch);
-  }, [agents, sandbox, currentUser]);
 
   /* v13 §8 — the page's keys, from the shared registry (and so on the shortcut sheet): H opens
      Housekeeping, / scrolls to the list and focuses Find. Not in a field, not while a card, the drawer
@@ -1095,8 +1046,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
             open={hkOpen} onOpen={openHk} onClose={() => { setHkOpen(false); setHkRun(null); }} runAgent={hkRun}
             view={hkView} onView={setHkView} routeActive={active}
             onFix={onHkFixGuided}
-            onLater={async (item) => { await updateUserPaths(laterPath(item.agent.id, item.gap, hkToday)); }}
-            onShowAll={async () => { await updateUserPaths(showAllPath()); }}
+            onLater={onHkLater}
+            onShowAll={onHkShowAll}
             onCard={onHkCard}
             onAgentCard={(id, tab) => openPanel(id, tab ? { tab } : undefined)}
             alsoFor={hkAlsoFor}

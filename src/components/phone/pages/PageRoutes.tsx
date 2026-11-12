@@ -6,7 +6,7 @@
  * own pages (Phone app v2, Part 7) below it. One is mounted at a time.
  */
 import { SettingsV3 } from "../v3/YouV3";
-import { YouV4 } from "../v4/YouV4";
+import { ProfileV5 } from "../v5/ProfileV5";
 import React from "react";
 import { Navigate } from "react-router-dom";
 import { useIsMobile } from "../../shell/mobileChrome";
@@ -37,8 +37,9 @@ export const AnalyticsRoute: React.FC<React.ComponentProps<typeof QueryAnalytics
   useIsMobile() ? <AnalyticsPhone /> : <QueryAnalytics {...props} />;
 
 /** Streaks & goals has no desktop page yet: a computer goes to the dashboard (listed for Nick) */
-/** Phone app v3 — You: the phone's fifth place; a computer has no You page and is sent to the dashboard */
-export const YouRoute: React.FC = () => (useIsMobile() ? <YouV4 /> : <Navigate to="/dashboard" replace />);
+/** Phone app v3 — You: the phone's fifth place; a computer has no You page and is sent to the dashboard.
+ *  Phone app v5 (Phase G): it is Profile (ProfileV5); v4's YouV4 is retired. */
+export const YouRoute: React.FC = () => (useIsMobile() ? <ProfileV5 /> : <Navigate to="/dashboard" replace />);
 
 export const GoalsRoute: React.FC = () => (useIsMobile() ? <GoalsPhone /> : <Navigate to="/dashboard" replace />);
 

@@ -1,0 +1,502 @@
+/* ── PHONE APP v5 (design-refs/phone-app-v5/) — below 768px only, on the phone tokens (phoneTokens.css). Phase A: the
+   dock's badge, the tab strip that pins under the slim bar, the full list's pinned header.
+   ⚠️ TYPE IS IN rem (the phone's own text size scales it). Nothing under 0.875rem except the dock's labels and badge.
+   Nothing here applies at 768px and up. ── */
+@media (max-width: 767.98px) {
+  /* ── the dock (ref `.tb`, `.bdg`): the badge rides on To do's icon ── */
+  .pa5-dock .pa5-dic { position: relative; display: grid; place-items: center; }
+  .pa5-dock .pa5-bdg {
+    position: absolute; top: -6px; left: 50%; margin-left: 6px; min-width: 18px; height: 18px; padding: 0 5px; box-sizing: border-box;
+    border-radius: 9px; background: var(--pa-blush); color: var(--pa-ink); font: 700 0.75rem/18px var(--pa-sans); font-style: normal; text-align: center;
+  }
+
+  /* ── the tab strip (ref `.stabs`): sticks under the slim bar; its `top` is the bar's measured height (V5TabStrip) ── */
+  .pa5-tabs-mark { height: 0; }
+  .pa5-tabs {
+    position: sticky; top: 0; z-index: 20; display: flex; background: var(--pa-page); border-bottom: 1px solid var(--pa-rule);
+    padding: 0 8px; font-family: var(--pa-sans);
+  }
+  .pa5 .pa5-tabs > button {
+    flex: 1 1 0; min-width: 0; min-height: 52px; padding: 0 4px; position: relative; background: none; border: 0; cursor: pointer; text-align: center;
+    font: 600 1rem/1.25 var(--pa-sans); color: var(--pa-muted); overflow-wrap: anywhere;
+  }
+  .pa5 .pa5-tabs > button.on { color: var(--pa-navy); }
+  .pa5 .pa5-tabs > button.on::after { content: ""; position: absolute; left: 20%; right: 20%; bottom: -1px; height: 3px; border-radius: 2px; background: var(--pa-navy); }
+  .pa5-tabs.pin { box-shadow: 0 6px 12px -8px rgba(20, 26, 36, 0.3); }
+
+  /* ── Today: room between the lead card and the strip ── */
+  .pa5 [data-pa41="lead"] { padding-bottom: 24px; }
+
+  /* ── the full list of queries: its header stays at the top, and the Birds-eye ruler sticks under its measured height ── */
+  .pa4-ph.pa5-phs { position: sticky; top: 0; z-index: 30; }
+  body.pa5-phs .pa5bv { --stick: var(--pa5-ph-h, 0px); }
+  /* landscape Birds-eye (v4.1's, kept in Phase E): the header scrolls away and the ruler takes the top edge, as before */
+  body.pa41-land .pa4-ph.pa5-phs { position: relative; }
+  body.pa5-phs .pa5bv.land { --stick: 0px; }
+}
+
+/* ── PHASE B — TODAY'S HEADER (phone-hub-v5.html `H({...})` F1: `.hl`, `titleRow`, `.needp`, `fig`, `chartL`, `.hl-m`).
+   Type in rem; the typewriter rules carry two classes and !important (brand.tsx forces a face on bare headings). ── */
+@media (max-width: 767.98px) {
+  .pa5-hd {
+    position: relative; overflow: hidden; color: #fff; background-color: var(--pa-navy); background-image: var(--pa-doodle);
+    padding: max(52px, calc(env(safe-area-inset-top, 0px) + 16px)) 24px 40px;
+  }
+  .pa5-hd .pa5-hd-sh { position: absolute; left: -90px; top: 120px; width: 280px; opacity: 0.06; transform: rotate(-8deg); pointer-events: none; }
+  .pa5-hd-t { display: flex; align-items: flex-start; gap: 8px; position: relative; z-index: 3; }
+  .pa5-hd-t .pa4-ib { margin-top: -4px; }
+  .pa5 .pa5-hd .pa5-hd-h { margin: 0; font: 400 2rem/1.1 var(--pa-type) !important; color: #fff; letter-spacing: 0; overflow-wrap: anywhere; }
+  .pa5-hd .pa5-hd-day { margin-top: 4px; color: var(--pa-onnavy); }
+  /* the need row: the pill and the streak on the left, the figure on the right; it wraps rather than overflows */
+  .pa5-hd-r { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 4px 12px; margin-top: 4px; position: relative; z-index: 3; }
+  .pa5-hd-l { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+  .pa5-hd-l .pa4-pill { margin-top: 4px; }
+  .pa5 .pa5-need { display: inline-flex; align-items: center; min-height: 48px; max-width: 100%; }
+  .pa5-need > span { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 4px 8px 4px 12px; border-radius: 18px; background: var(--pa-blush); color: var(--pa-ink); font-size: 0.875rem; line-height: 1.3; font-weight: 600; }
+  .pa5-need i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--pa-rust); }
+  .pa5-need .pa4-chev { width: 18px; height: 18px; color: var(--pa-ink); }
+  .pa5-hd-fig { margin-left: auto; text-align: right; }
+  .pa5 .pa5-hd .pa5-hd-n { display: block; font: 400 3.5rem/1 var(--pa-type) !important; color: #fff; }
+  .pa5-hd .pa5-hd-cap { color: #fff; font-weight: 600; }
+  .pa5-hd .pa5-hd-chg { color: var(--pa-blush); }
+  .pa5-hd-one { position: relative; z-index: 3; min-height: 152px; display: flex; align-items: flex-end; justify-content: flex-end; margin-left: 96px; text-align: right; }
+  /* the chart (v4.1's): full width, fading in from behind the Mentor, to a dot at Today */
+  .pa5-ch { position: relative; height: 150px; margin: 20px -24px 0; }
+  .pa5-ch svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible;
+    -webkit-mask-image: linear-gradient(90deg, transparent 8%, #000 34%); mask-image: linear-gradient(90deg, transparent 8%, #000 34%); }
+  .pa5-ch-l { stroke-dasharray: 1; stroke-dashoffset: 0; animation: pa5-line 1.2s cubic-bezier(0.65, 0, 0.35, 1) both; }
+  .pa5-ch-a { animation: pa5-fade 0.6s 0.9s both; }
+  .pa5-ch-d { position: absolute; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 3px var(--pa-blush); animation: pa5-fade 0.3s 1.1s both; }
+  .pa5 .pa5-ch-tag { position: absolute; right: 12px; font: 400 0.875rem/1.43 var(--pa-type) !important; color: #fff; animation: pa5-fade 0.3s 1.2s both; }
+  .pa5-ch-x { position: absolute; left: 0; right: 0; bottom: -28px; height: 20px; }
+  .pa5 .pa5-ch-x span { position: absolute; transform: translateX(-50%); font: 400 0.875rem/1.43 var(--pa-type) !important; color: var(--pa-onnavy); white-space: nowrap; }
+  /* the Mentor: mirrored, fixed to the left edge, his feet on the chart's baseline (ref MW 92) */
+  .pa5-hd-m { position: absolute; left: -16px; bottom: 40px; width: 92px; height: auto; transform: scaleX(-1); filter: drop-shadow(8px 10px 12px rgba(0, 0, 0, 0.35)); z-index: 2; animation: pa5-fade 0.5s 0.3s both; pointer-events: none; }
+  .pa5-hd.one .pa5-hd-m { bottom: 24px; }
+  @keyframes pa5-line { from { stroke-dashoffset: 1; } }
+  @keyframes pa5-fade { from { opacity: 0; } }
+
+  /* ── PHASE B — THE BIRDS-EYE BLOCK (ref `.sm`, `.bed-*` light, `.tk`, `.mt`): straight on the page ── */
+  .pa5-be { position: relative; }
+  .pa5-be-sm { padding: 4px 8px; }
+  .pa5-be-sb { display: flex; gap: 3px; height: 10px; margin-bottom: 10px; }
+  .pa5-be-sb i { border-radius: 5px; transition: opacity 0.2s; }
+  .pa5-be-sn { display: flex; gap: 6px; margin: 0 -8px; }
+  .pa5 .pa5-be-sn button { flex: 1 1 0; min-width: 0; min-height: 56px; padding: 4px 8px; border-radius: 12px; text-align: left; color: var(--pa-ink); }
+  .pa5 .pa5-be-sn b { display: block; font-size: 1.875rem; line-height: 1.1; }
+  .pa5-be-sn span { display: flex; align-items: center; gap: 6px; font-size: 0.875rem; line-height: 1.3; color: var(--pa-muted); overflow-wrap: anywhere; }
+  .pa5-be-sn span i { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+  .pa5 .pa5-be-sn button.on { background: #fff; box-shadow: 0 1px 2px rgba(31, 38, 51, 0.06), 0 4px 12px rgba(31, 38, 51, 0.08); }
+  .pa5-be-sn button.on span { color: var(--pa-ink); font-weight: 600; }
+  .pa5 .pa5-be-sn button:disabled { cursor: default; color: var(--pa-faint); }
+  .pa5-be-sn button:disabled span { color: var(--pa-faint); }
+  .pa5-be-sn button:disabled span i { opacity: 0.4; }
+  .pa5-be-l { display: flex; align-items: center; min-height: 32px; padding: 0 8px; font-size: 0.875rem; line-height: 1.43; color: var(--pa-ink); font-weight: 600; }
+  .pa5-be-l > span { flex: 1; min-width: 0; }
+  .pa5 .pa5-be-x { min-height: 48px; margin: -8px 0; padding: 0 4px; font-weight: 600; color: var(--pa-navy); }
+  .pa5-be-b { position: relative; padding: 0 0 4px; border-top: 1px solid var(--pa-rule); }
+  /* the ruler: the Today pill on top, the months under it */
+  .pa5-be-r { display: flex; height: 2.75rem; }
+  .pa5-be-r > span { flex: none; width: 116px; }
+  .pa5-be-m { flex: 1; position: relative; }
+  .pa5 .pa5-be-m em { position: absolute; top: 1.375rem; font: 400 0.875rem/1.43 var(--pa-type) !important; font-style: normal; color: var(--pa-muted); white-space: nowrap; }
+  .pa5 .pa5-be-m strong { position: absolute; top: 0; z-index: 2; transform: translateX(-50%); padding: 0 6px; border-radius: 0.625rem; background: var(--pa-navy); color: #fff; font: 400 0.875rem/1.3 var(--pa-type) !important; white-space: nowrap; }
+  /* a row: 28px edge to edge (the one exception to 48), the 116px name column, then the 12px track */
+  .pa5 .pa5-be-row { display: flex; align-items: center; width: 100%; height: 28px; color: var(--pa-ink); border-bottom: 1px solid var(--pa-fill); text-align: left; }
+  .pa5-be-row.op { background: #fff; border-bottom-color: transparent; }
+  .pa5-be-nm { flex: none; width: 116px; display: flex; align-items: center; gap: 6px; padding-left: 6px; overflow: hidden; white-space: nowrap; font-size: 0.875rem; }
+  .pa5-be-nm b { min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+  .pa5-mt { flex: none; width: 37px; height: 14px; }
+  .pa5-be-tk { flex: 1; position: relative; height: 12px; }
+  .pa5-be-tk i { position: absolute; top: 0; height: 12px; border-radius: 4px; box-shadow: inset 0 0 0 1px rgba(31, 38, 51, 0.12); }
+  .pa5-be-tk .pa5-be-p { opacity: 0.45; }
+  .pa5-be-tk .pa5-be-rm { opacity: 0.4; min-width: 4px; }
+  .pa5-be-tk .pa5-be-rm.off { border-radius: 4px 0 0 4px; -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent); mask-image: linear-gradient(90deg, #000 80%, transparent); }
+  .pa5-be-tk .pa5-be-s { min-width: 4px; }
+  /* past its date: the bar carries on from the notch to today, a deeper tone of the same fill */
+  .pa5-be-tk .pa5-be-dp { filter: brightness(0.8) saturate(1.5); border-radius: 0 4px 4px 0; box-shadow: none; }
+  .pa5-be-tk s { position: absolute; top: -2px; width: 2px; height: 16px; margin-left: -1px; border-radius: 1px; background: rgba(31, 38, 51, 0.55); }
+  /* the today line: from the pill to the last row, above the bars, below an opened row's detail */
+  .pa5-be-now { position: absolute; top: 1.3rem; bottom: 4px; width: 1.5px; margin-left: -0.75px; background: var(--pa-navy); opacity: 0.6; z-index: 1; pointer-events: none; }
+  .pa5-be-d { display: flex; align-items: center; gap: 8px; position: relative; z-index: 3; background: #fff; padding: 4px 4px 8px 8px; border-bottom: 1px solid var(--pa-rule); border-radius: 0 0 12px 12px; animation: pa5-bedd 0.18s ease-out; }
+  .pa5-be-who b { font-weight: 600; overflow-wrap: anywhere; }
+  .pa5-be-d .pa5-be-say { color: var(--pa-ink); overflow-wrap: anywhere; }
+  .pa5 .pa5-be-o { flex: none; min-height: 48px; min-width: 48px; padding: 0 12px; font-weight: 600; color: var(--pa-navy); }
+  @keyframes pa5-bedd { from { opacity: 0; transform: translateY(-4px); } }
+  .pa5-be-few { padding: 12px 8px 0; }
+  .pa5 .pa5-be-f { display: flex; width: 100%; min-height: 52px; align-items: center; justify-content: space-between; gap: 8px; padding: 0 8px; font-weight: 600; color: var(--pa-navy); text-align: left; }
+  /* the once-a-day replay (v4.1's): the bars draw in and the line slides from the name column */
+  .pa5-be.play .pa5-be-tk { animation: pa5-draw 1.6s cubic-bezier(0.65, 0, 0.35, 1) both; }
+  .pa5-be.play .pa5-be-now { animation: pa5-now 1.6s cubic-bezier(0.65, 0, 0.35, 1) both; }
+  .pa5-be.play .pa5-be-m strong { animation: pa5-fade 0.4s 1.4s both; }
+  @keyframes pa5-draw { from { clip-path: inset(-4px 100% -4px 0); } to { clip-path: inset(-4px 0 -4px 0); } }
+  @keyframes pa5-now { from { left: 116px; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pa5-ch-l, .pa5-ch-a, .pa5-ch-d, .pa5-ch-tag, .pa5-hd-m, .pa5-be-d, .pa5-be-tk, .pa5-be-now, .pa5-be-m strong, .pa5-be-sb i { animation: none !important; transition: none !important; }
+  }
+}
+
+/* ── PHASE C — TODAY'S AGENTS TAB (phone-hub-v5.html `TABS.Agents`: `sumBar`, `health2` in navy on blush, `.gapn`,
+   `bestFit`) and the gap-filling sheet (`sess`, `.sheet2`, `.seg14`, `.lhr.sm`). The summary wears the Birds-eye
+   block's `.pa5-be-sm` dress. The sheet lives in the overlay layer, so its rules are scoped by `.pa5-gs`. ── */
+@media (max-width: 767.98px) {
+  .pa5-ag { padding: 16px 16px 0; }
+  .pa5-ag-sum { margin-bottom: 8px; }
+  .pa5 .pa5-ag .pa5-hl, .pa5 .pa5-ag .pa5-nq, .pa5 .pa5-ag .pa5-dr { margin-top: 16px; }
+  .pa5-hl { padding: 24px 24px 8px; }
+  .pa5-hl-t { display: flex; align-items: center; gap: 20px; margin-bottom: 8px; }
+  .pa5 .pa5-hl .pa5-hl-g { min-height: 52px; border-top: 1px solid var(--pa-rule); gap: 12px; }
+  .pa5-hl-g .pa4-x { overflow-wrap: anywhere; }
+  .pa5-gapn { flex: none; min-width: 32px; height: 28px; padding: 0 8px; box-sizing: border-box; border-radius: 14px; background: var(--pa-blush); color: var(--pa-ink); display: grid; place-items: center; font-size: 1rem; line-height: 1; }
+  .pa5-nq { padding: 24px 24px 8px; }
+  .pa5-dr { padding: 0 24px; }
+
+  /* the ring (option C): navy arc on a blush track, the figure in the typewriter face; it sweeps in once */
+  .pa5-ring { position: relative; flex: none; display: block; width: 92px; height: 92px; }
+  .pa5-ring.sm { width: 56px; height: 56px; }
+  .pa5-ring svg { display: block; width: 100%; height: 100%; }
+  .pa5-ring-a { animation: pa5-sweep 1s 0.2s cubic-bezier(0.65, 0, 0.35, 1) both; transition: stroke-dasharray 0.4s ease-out; }
+  @keyframes pa5-sweep { from { stroke-dasharray: 0 var(--c); } }
+  .pa5-ring .pa5-ring-n { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font: 400 1.75rem/1 var(--pa-type) !important; color: var(--pa-ink); }
+  .pa5-ring.sm .pa5-ring-n { font-size: 1.125rem !important; }
+  .pa5-ring .pa5-ring-n i { font-style: normal; font-size: 0.875rem; position: relative; top: -0.35em; }
+
+  /* the sheet (`.sheet2`): the ring, "Filling the gaps · n of N", the strip and ✕; then the card and its buttons */
+  .pa5-gs { top: 72px; max-height: none; padding: 8px 16px calc(24px + env(safe-area-inset-bottom, 0px)); }
+  .pa5-gs .pa4-grab { margin-bottom: 16px; }
+  .pa5-gs-hd { display: flex; align-items: center; gap: 12px; margin: 0 8px 16px; }
+  .pa5-gs .pa5-gs-x { flex: none; width: 48px; height: 48px; display: grid; place-items: center; font-size: 1.125rem; color: var(--pa-ink); border-radius: 24px; }
+  /* the progress strip: a segment per gap in the session — saved ones navy, the current one outlined in navy */
+  .pa5-seg { display: flex; gap: 3px; margin-top: 6px; }
+  .pa5-seg i { flex: 1 1 0; min-width: 2px; height: 6px; border-radius: 3px; background: var(--pa-fill); transition: background 0.2s; }
+  .pa5-seg i.on { background: var(--pa-navy); }
+  .pa5-seg i.cur { background: #fff; box-shadow: inset 0 0 0 1.5px var(--pa-navy); }
+  .pa5-gc { padding: 20px 20px 12px; box-shadow: none; }
+  .pa5-gc-who { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+  .pa5-gc-where { background: var(--pa-page); border-radius: 16px; padding: 12px 16px; margin-bottom: 16px; }
+  .pa5-gc-err { color: var(--pa-rust); margin: 12px 0 0; }
+  .pa5-gs .pa4-link:disabled { opacity: 0.45; cursor: default; }
+  .pa5-gs-end { text-align: left; padding-bottom: 20px; }
+
+  /* the drawer's own fix control (HousekeepingDrawer `FocusField`), sized for a finger: every target 48px, no text under 14px */
+  .pa5-gs .hk8-field { gap: 8px; }
+  .pa5-gs .hk8-field .hk8-chip { height: auto; min-height: 48px; padding: 8px 16px; border-radius: 24px; font: 400 1rem/1.25 var(--pa-sans) !important; text-align: left; }
+  .pa5-gs .hk8-field .hk8-chip.on { background: var(--pa-navy); color: #fff; }
+  .pa5-gs .hk8-field .ae-step button { width: 48px; height: 48px; }
+  .pa5-gs .hk8-field .ae-step b { font: 400 1.25rem/1.2 var(--pa-type) !important; min-width: 0; flex: 1; }
+  .pa5-gs .hk8-field .hk8-ta { min-height: 120px; font: 400 1rem/1.45 var(--pa-sans) !important; }
+  .pa5-gs .hk8-field .hk8-in { min-height: 48px; }
+  .pa5-gs .hk8-chips .hk82-date { height: 48px; border-radius: 24px; font: 400 1rem/1 var(--pa-sans) !important; }
+  .pa5-gs .hk8-field .hk81-mats .ae-mtr { min-height: 52px; }
+  .pa5-gs .hk8-field .hk81-mats .ae-mtr > span:not(.ae-mtx) { font: 400 1rem/1.3 var(--pa-sans) !important; }
+  .pa5-gs .hk8-field .hk81-mats .ae-bx { width: 26px; height: 26px; }
+  .pa5-gs .hk8-field .hk81-mats .ae-bx::before { content: ""; position: absolute; inset: -11px; }
+  .pa5-gs .hk8-field .hk81-mats .ae-bx.on::after { left: 9.5px; top: 6px; }
+  .pa5-gs .hk8-field .hk81-mats .ae-step { height: 48px; border-radius: 24px; }
+  .pa5-gs .hk8-field .hk81-mats .ae-step button { width: 48px; height: 48px; }
+  .pa5-gs .hk8-field .hk81-mats input, .pa5-gs .hk8-field .hk81-mats select { min-height: 48px; font-size: 1rem !important; }
+  .pa5-gs .hk81-oncard, .pa5-gs .hk81-refuse { font-size: 0.875rem !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pa5-ring-a, .pa5-seg i, .pa5-gs { animation: none !important; transition: none !important; }
+  }
+}
+
+/* ── PHASE D — TO DO (phone-hub-v5.html `todoPh`: `.hl`, `.dk`, `.dkc`, `.edge`, `.due`, `.dlab`, `.ck-row`; the
+   prototype's stamp `.stmp`, fly-off and rise, phone-upnext-v1.html). Type in rem; typewriter rules two classes + !important. ── */
+@media (max-width: 767.98px) {
+  .pa5-tdh { position: relative; color: #fff; background-color: var(--pa-navy); background-image: var(--pa-doodle); padding: max(52px, calc(env(safe-area-inset-top, 0px) + 16px)) 24px 20px; }
+  .pa5-tdh-t { display: flex; align-items: flex-start; gap: 8px; }
+  .pa5-tdh-t .pa4-ib { margin-top: -4px; color: #fff; }
+  .pa5 .pa5-tdh .pa5-tdh-h { margin: 0; font: 400 2rem/1.1 var(--pa-type) !important; color: #fff; letter-spacing: 0; overflow-wrap: anywhere; }
+  .pa5-tdh .pa5-tdh-s { margin-top: 4px; color: var(--pa-onnavy); overflow-wrap: anywhere; }
+  .pa5-td { padding: 0 16px 32px; }
+
+  /* the pile: the card on top, the edges of up to two behind it */
+  .pa5-dk { position: relative; margin-top: 16px; padding-bottom: 16px; touch-action: pan-y; }
+  .pa5-edge { position: absolute; left: 16px; right: 16px; bottom: 0; height: 40px; border-radius: 24px; background: #fff; box-shadow: 0 1px 2px rgba(31, 38, 51, 0.06), 0 6px 16px rgba(31, 38, 51, 0.06); }
+  .pa5-edge.e1 { left: 8px; right: 8px; bottom: 8px; }
+  .pa5-edge.e2 { opacity: 0.6; }
+  .pa5 .pa5-dkc { position: relative; z-index: 1; padding: 0; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none; cursor: grab; }
+  .pa5-dkc.rise { animation: pa5-rise 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+  @keyframes pa5-rise { from { transform: translateY(14px) scale(0.97); opacity: 0.6; } }
+  .pa5-dlab { position: absolute; top: 20px; z-index: 3; min-height: 32px; padding: 0 12px; border-radius: 16px; font-weight: 700; font-size: 0.9375rem; display: flex; align-items: center; pointer-events: none; }
+  .pa5-dlab.l { right: 16px; background: var(--pa-fill); color: var(--pa-ink); opacity: var(--l, 0); }
+  .pa5-dlab.r { left: 16px; background: var(--pa-navy); color: #fff; opacity: var(--r, 0); }
+  .pa5-dkb { padding: 20px 24px 16px; display: flex; gap: 16px; align-items: center; }
+  .pa5-dkb .pa3-gl { flex: none; }
+  .pa5-dkx { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .pa5-dkx .pa4-s { color: var(--pa-body); }
+  .pa5-dkm { padding: 16px 24px 8px; }
+  .pa5-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .pa5-due { display: inline-flex; align-items: center; min-height: 32px; padding: 4px 12px; border-radius: 16px; background: var(--pa-navy); color: #fff; font-size: 0.875rem; line-height: 1.3; font-weight: 600; overflow-wrap: anywhere; }
+  .pa5-due.soft { background: var(--pa-fill); color: var(--pa-ink); }
+  .pa5 .pa5-dkl { margin: 0 0 20px; color: var(--pa-body); }
+  /* the prototype's stamp: over the card's band, right */
+  .pa5-dks { position: absolute; right: 18px; top: 64px; z-index: 4; width: 88px; height: 88px; pointer-events: none; }
+
+  .pa5-tdempty { margin-top: 16px; padding: 28px 24px; text-align: center; }
+  .pa5 .pa5-tdsec { margin: 24px 8px 4px; }
+  .pa5-ckc { padding: 0 20px; }
+  .pa5 .pa5-ck { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 56px; padding: 8px 0; text-align: left; border-top: 1px solid var(--pa-rule); }
+  .pa5 .pa5-ck:first-child { border-top: 0; }
+  .pa5-ckx { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .pa5-ckx > span, .pa5-ckx > s { display: block; }
+  .pa5-ckb { flex: none; width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 2px var(--pa-switch-off); display: grid; place-items: center; color: #fff; font-size: 0.875rem; font-style: normal; }
+  .pa5 .pa5-ck.done { min-height: 48px; color: var(--pa-muted); }
+  .pa5-ck.done .pa5-ckb { background: var(--pa-navy); box-shadow: none; }
+  .pa5-ck.done s { color: var(--pa-muted); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pa5-dkc, .pa5-dkc *, .pa5-dks .pa4-stamp { animation: none !important; transition: none !important; }
+  }
+}
+
+/* ── PHASE E — THE FULL BIRDS-EYE VIEW (phone-birds-eye-dense-v1.html's rows; v4.1's moving parts). Positions are CSS
+   variables on the root (--ppd px per day, --x the tracks' offset, --cur the replay's clip day, --now today's day, --tot
+   the track's days, --nw the name column), so a drag or a replay moves the tracks without a React render.
+   ⚠️ THE NAME COLUMN IS OUTSIDE EVERY TRACK: only `.pa5bv-cv` moves. The today line's lane starts right of the column and
+   sits above the bars; the group headings, the fold and an opened row's detail sit above the lane, opaque, so the line
+   never crosses text. Rows are 28px; the ruler 1.75rem; a heading 1.5rem (PA5-8: at least 18 rows in sight). ── */
+@media (max-width: 767.98px) {
+  .pa5bv { --ppd: 3; --x: 0; --cur: 0; --now: 0; --tot: 300; --nw: 116px; --rh: 1.75rem; --stick: calc(64px + env(safe-area-inset-top, 0px)); position: relative; background: #fff; }
+  .pa5bv-hd { display: flex; align-items: center; gap: 4px; padding: 4px 4px 8px 16px; background: var(--pa-navy); color: #fff; }
+  .pa5bv-sw { flex: 1; min-width: 0; }
+  .pa5bv-cn { flex: none; color: #fff; }
+  .pa5bv-cn .pa4-ib { color: #fff; }
+  .pa5bv-ctl { display: flex; flex-wrap: wrap; align-items: center; gap: 0 6px; padding: 0 4px 0 12px; background: var(--pa-page); border-bottom: 1px solid var(--pa-rule); }
+  .pa5 .pa5bv-rp { margin-left: auto; color: var(--pa-navy); }
+  .pa5bv-rp svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .pa5bv-flt { display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 4px 0 16px; background: var(--pa-page); border-bottom: 1px solid var(--pa-rule); font-size: 0.875rem; font-weight: 600; color: var(--pa-ink); }
+  .pa5bv-flt > span { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .pa5 .pa5bv-all { flex: none; min-height: 48px; padding: 0 12px; font-weight: 600; color: var(--pa-navy); }
+
+  .pa5bv-body { position: relative; touch-action: pan-y; user-select: none; -webkit-user-select: none; }
+  .pa5bv-cv { position: absolute; left: 0; top: 0; height: 100%; width: calc(var(--tot) * var(--ppd) * 1px); transform: translateX(calc(var(--x) * 1px)); will-change: transform; }
+
+  /* the ruler sticks (so the "Today" pill stays in sight); the month names and the pill share its one line */
+  .pa5bv-ruler { position: sticky; top: var(--stick); z-index: 6; display: flex; height: var(--rh); background: var(--pa-navy-deep); }
+  .pa5bv-gut { flex: none; width: var(--nw); }
+  .pa5bv-rv { flex: 1; min-width: 0; position: relative; overflow: hidden; }
+  .pa5bv-mo { position: absolute; top: 0; height: 100%; left: calc(var(--s) * var(--ppd) * 1px); width: calc(var(--w) * var(--ppd) * 1px); border-left: 1px solid rgba(255, 255, 255, 0.25); }
+  .pa5 .pa5bv-mo b { position: absolute; left: 6px; top: 0.25rem; font: 400 0.875rem/1.25rem var(--pa-type) !important; color: #fff; white-space: nowrap; }
+  .pa5 .pa5bv-pill { position: absolute; top: 0.25rem; z-index: 2; left: calc(var(--now) * var(--ppd) * 1px); transform: translateX(-50%); padding: 0 7px; border-radius: 0.625rem; background: #fff; color: var(--pa-navy-deep); font: 400 0.875rem/1.25rem var(--pa-type) !important; white-space: nowrap; }
+
+  .pa5bv-content { position: relative; }
+  .pa5bv-lane { position: absolute; left: var(--nw); right: 0; top: 0; bottom: 0; overflow: hidden; pointer-events: none; z-index: 3; }
+  .pa5bv-ml { position: absolute; top: 0; bottom: 0; width: 1px; background: rgba(31, 38, 51, 0.06); left: calc(var(--s) * var(--ppd) * 1px); }
+  .pa5bv-now { position: absolute; top: 0; bottom: 0; width: 1.5px; margin-left: -0.75px; background: var(--pa-navy); opacity: 0.6; left: calc(var(--now) * var(--ppd) * 1px); }
+
+  .pa5bv-gh { position: sticky; top: calc(var(--stick) + var(--rh)); z-index: 5; display: flex; align-items: center; gap: 8px; min-height: 1.5rem; padding: 0 16px; background: var(--pa-page); border-bottom: 1px solid var(--pa-rule); }
+  .pa5 .pa5bv-gt { margin: 0; font: 400 0.875rem/1.25rem var(--pa-type) !important; color: var(--pa-ink); }
+  .pa5bv-gh > span { font-size: 0.875rem; line-height: 1.25rem; color: var(--pa-muted); }
+
+  .pa5bv-row { position: relative; border-bottom: 1px solid var(--pa-fill); transition: opacity 0.35s; }
+  .pa5bv-row.pre { opacity: 0.18; }
+  .pa5 .pa5bv-top { display: flex; align-items: center; width: 100%; height: 27px; padding: 0; color: var(--pa-ink); text-align: left; background: #fff; }
+  .pa5bv-nm { flex: none; width: var(--nw); display: flex; align-items: center; gap: 6px; padding-left: 6px; overflow: hidden; white-space: nowrap; font-size: 0.875rem; line-height: 1; }
+  .pa5bv-nm b { min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; }
+  .pa5bv-trk { flex: 1; min-width: 0; position: relative; display: block; height: 27px; overflow: hidden; cursor: grab; }
+  .pa5bv-clip { clip-path: inset(0 calc((var(--tot) - var(--cur)) * var(--ppd) * 1px) 0 0); }
+  .pa5bv-trk i { position: absolute; top: 7.5px; height: 12px; border-radius: 4px; left: calc(var(--s) * var(--ppd) * 1px); width: calc(var(--w) * var(--ppd) * 1px); box-shadow: inset 0 0 0 1px rgba(31, 38, 51, 0.12); }
+  .pa5bv-trk .pa5bv-p { opacity: 0.45; }
+  .pa5bv-trk .pa5bv-rm { opacity: 0.4; min-width: 4px; }
+  .pa5bv-trk .pa5bv-rm.off { border-radius: 4px 0 0 4px; -webkit-mask-image: linear-gradient(90deg, #000 80%, transparent); mask-image: linear-gradient(90deg, #000 80%, transparent); }
+  .pa5bv-trk .pa5bv-s { min-width: 4px; }
+  .pa5bv-trk .pa5bv-dp { filter: brightness(0.8) saturate(1.5); border-radius: 0 4px 4px 0; box-shadow: none; }
+  .pa5bv-trk s { position: absolute; top: 5.5px; width: 2px; height: 16px; margin-left: -1px; border-radius: 1px; background: rgba(31, 38, 51, 0.55); left: calc(var(--s) * var(--ppd) * 1px); }
+
+  /* an opened row: v4.1's expansion, led by the block's detail; opaque and above the today line */
+  .pa5bv-d { position: relative; z-index: 4; background: #fff; padding: 4px 16px 8px; border-top: 1px solid var(--pa-fill); animation: pa5-bedd 0.18s ease-out; }
+  .pa5bv-who b { font-weight: 600; overflow-wrap: anywhere; }
+  .pa5bv-d .pa5bv-say { color: var(--pa-ink); overflow-wrap: anywhere; }
+  .pa5bv-xpi { margin: 8px 0; padding: 4px 12px; border-radius: 16px; background: var(--pa-page); }
+  .pa5bv-st { display: flex; align-items: center; gap: 12px; min-height: 48px; }
+  .pa5bv-st + .pa5bv-st { border-top: 1px solid var(--pa-rule); }
+  .pa5bv-st b { flex: 1; min-width: 0; font-weight: 600; overflow-wrap: anywhere; }
+  .pa5bv-st.old b { font-weight: 400; color: var(--pa-body); }
+  .pa5bv-nx { margin: 4px 0 8px; }
+
+  .pa5 .pa5bv-fold { position: relative; z-index: 4; display: flex; align-items: center; width: 100%; min-height: 48px; padding: 0 16px; background: #fff; border-bottom: 1px solid var(--pa-rule); font-weight: 600; color: var(--pa-navy); text-align: left; }
+  .pa5bv-empty { padding: 16px 24px; }
+  .pa5bv-end { height: 120px; }
+  .pa5 .pa5bv-btt { position: fixed; left: 50%; bottom: calc(104px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); min-height: 48px; padding: 0 20px; border-radius: 24px; background: var(--pa-navy-deep); color: #fff; font-weight: 600; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); z-index: 8; white-space: nowrap; }
+
+  /* landscape (v4.1's): one header row with the spans, a wider name column with the full name, no dock */
+  .pa5bv.land { --stick: 0px; }
+  .pa5bv.land .pa5bv-hd { padding: max(4px, env(safe-area-inset-top, 0px)) 8px 4px 16px; }
+  .pa5bv.land .pa5bv-sw { flex: 0 1 260px; }
+  .pa5bv.land .pa5bv-ctl { flex: 1; background: none; border: 0; padding: 0; }
+  .pa5bv.land .pa5bv-ctl .pa4-chip > span { background: rgba(255, 255, 255, 0.14); color: #fff; box-shadow: none; }
+  .pa5bv.land .pa5bv-ctl .pa4-chip.on > span { background: #fff; color: var(--pa-navy); }
+  .pa5bv.land .pa5bv-rp { color: #fff; }
+  .pa5bv.land .pa5bv-btt { bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+  body.pa41-land .pa4-tb, body.pa41-land .pa4-mini { display: none !important; }
+  body.pa41-land .sv2-stagepad { padding-bottom: 0 !important; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pa5bv *, .pa5bv-d, .pa5bv-row { animation: none !important; transition: none !important; }
+  }
+}
+
+/* ── PHASE F — MATERIALS (phone-materials-v1.html: `.hd`'s bundle, `.paper`, `.bundle`, `.band`, `.stat`, `.tag`, `.sheet`,
+   `.tree`/`.node`/`.chg`, `.book`, `.bar`, `.kv`, `.act`, `.lt`). Type in rem; the typewriter rules carry two classes and
+   !important (brand.tsx). No green; nothing animates. ── */
+@media (max-width: 767.98px) {
+  .pa5m-hd { padding-bottom: 24px; }
+  .pa5 .pa5m-hdpk { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; width: 100%; min-height: 48px; margin-top: 20px; color: #fff; position: relative; z-index: 3; }
+  .pa5m-hdr { flex: 1 1 120px; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; overflow-wrap: anywhere; }
+  .pa5m-hdr .pa4-s { color: var(--pa-onnavy); }
+  .pa5m-hdr .pa5m-hdw { color: #fff; }
+  .pa5 .pa5m-hd .pa5m-hdn { font: 400 2.5rem/1.1 var(--pa-type) !important; color: #fff; }
+  .pa5 .pa5m-hd .pa5m-hdn small { font: 400 1.125rem/1.2 var(--pa-type) !important; }
+  .pa5 .pa5m-hd .pa5m-hdn.none { font: 400 1.5rem/1.2 var(--pa-type) !important; margin-top: 4px; }
+  .pa5m-hdr .pa5m-hdc { font: 600 1.0625rem/1.35 var(--pa-sans); color: #fff; }
+  .pa5m-hdr .pa4-chev { color: var(--pa-onnavy); margin-top: 4px; }
+
+  /* the paper and the banded bundle (ref `.paper`, `.bundle`, `.band`) */
+  .pa5m-paper { display: block; position: relative; background: var(--pa-paper); border-radius: 4px; box-shadow: 0 1px 2px rgba(31, 38, 51, 0.08), 0 6px 14px rgba(31, 38, 51, 0.12); padding: 10px 8px 0; overflow: hidden; }
+  .pa5m-paper em { display: block; font: italic 0.875rem/1.3 var(--pa-serif); color: var(--pa-body); margin-bottom: 6px; white-space: nowrap; overflow: hidden; }
+  .pa5m-paper u { display: block; height: 3px; border-radius: 2px; background: var(--pa-fill); margin-bottom: 5px; text-decoration: none; }
+  .pa5m-bundle { position: relative; display: block; flex: none; width: 170px; height: 150px; }
+  .pa5m-bundle .pa5m-paper { position: absolute; width: 96px; height: 128px; }
+  .pa5m-bundle .p1 { left: 0; top: 14px; transform: rotate(-8deg); }
+  .pa5m-bundle .p2 { left: 38px; top: 6px; transform: rotate(1deg); }
+  .pa5m-bundle .p3 { left: 74px; top: 16px; transform: rotate(9deg); border-top: 8px solid var(--pa-rust); }
+  .pa5 .pa5m-band {
+    position: absolute; left: -6px; right: -10px; top: 72px; min-height: 24px; padding: 0 10px; background: var(--pa-blush); transform: rotate(-2deg);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); font: 400 0.875rem/24px var(--pa-type) !important; color: var(--pa-ink); text-align: center;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .pa5m-bundle.outline .pa5m-paper { background: transparent; box-shadow: none; border: 1.5px dashed rgba(255, 255, 255, 0.55); }
+  .pa5m-bundle.outline .p3 { border-top: 1.5px dashed rgba(255, 255, 255, 0.55); }
+  .pa5m-bundle.outline .pa5m-paper > * { visibility: hidden; }
+  .pa5m-bundle.outline .pa5m-band { background: transparent; box-shadow: none; border: 1.5px dashed rgba(255, 255, 255, 0.55); }
+  .pa5m-bundle.mini { transform: scale(0.6); transform-origin: left top; width: 104px; height: 90px; }
+  .pa5m-bundle.mini .pa5m-paper em { visibility: hidden; }
+
+  /* the tabs' bodies */
+  .pa5m-body { padding: 0 16px 24px; }
+  .pa5 .pa5m-h, .pa5m-pick .pa5m-h { margin: 0; font: 600 1.25rem/1.3 var(--pa-sans) !important; color: var(--pa-ink); letter-spacing: 0; overflow-wrap: anywhere; }
+  .pa5 .pa5m-more { min-height: 56px; margin-top: 16px; }
+  .pa5m-empty { padding: 24px 8px 0; }
+  .pa5m-empty .pa4-s, .pa5m-none { margin-top: 8px; }
+  .pa5m-none { margin: 8px 8px 0; }
+  .pa5m-lede { margin: 16px 8px; }
+  .pa5m-tag { display: inline-flex; align-items: center; min-height: 28px; max-width: 100%; padding: 2px 10px; border-radius: 14px; background: var(--pa-fill); color: var(--pa-ink); font-size: 0.875rem; line-height: 1.3; overflow-wrap: anywhere; }
+  .pa5m-tag.use { background: var(--pa-navy); color: #fff; font-weight: 600; }
+  .pa5m-tag.unset { background: transparent; box-shadow: inset 0 0 0 1.5px var(--pa-rule); color: var(--pa-muted); }
+  .pa5m-tag.b2 { background: #fff; box-shadow: inset 0 0 0 1.5px var(--pa-rule); min-height: 36px; }
+  .pa5 .pa5m-tag.x, .pa5 .pa5m-tag.add { min-height: 48px; border-radius: 24px; padding: 4px 16px; gap: 8px; font-size: 0.875rem; }
+  .pa5 .pa5m-tag.add { background: var(--pa-fill); color: var(--pa-navy); font-weight: 600; }
+  .pa5m-tag.x span { font-size: 1.125rem; line-height: 1; color: var(--pa-muted); }
+  .pa5m-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+
+  /* P1 — the package card and its result badge (ref `.card` + `.stat`) */
+  .pa5 .pa5m-pk { display: block; width: 100%; padding: 44px 16px 16px; margin-top: 28px; position: relative; text-align: left; }
+  .pa5m-stat { position: absolute; right: 16px; top: -14px; max-width: calc(100% - 32px); background: var(--pa-navy); color: #fff; border-radius: 16px; padding: 8px 12px; box-shadow: 0 6px 16px rgba(31, 38, 51, 0.25); text-align: right; }
+  .pa5 .pa5m-stat b { display: block; font: 400 1.375rem/1.1 var(--pa-type) !important; color: #fff; }
+  .pa5 .pa5m-stat b small { font: 400 0.875rem/1.2 var(--pa-type) !important; }
+  .pa5 .pa5m-stat b.none { font: 600 0.875rem/1.3 var(--pa-sans) !important; }
+  .pa5m-stat > span { display: block; font-size: 0.875rem; line-height: 1.3; color: var(--pa-onnavy); }
+  .pa5m-pkh { display: flex; align-items: center; gap: 4px; }
+  .pa5m-pkn { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+
+  /* P3 — the letters and synopses as sheets (ref `.shelf`, `.sheet`) */
+  .pa5m-sh { display: flex; align-items: baseline; gap: 8px; margin: 24px 8px 8px; }
+  .pa5m-sh .pa5m-h { flex: 1; }
+  .pa5m-shelf { display: flex; gap: 12px; overflow-x: auto; scrollbar-width: none; padding: 4px 16px 16px; margin: 0 -16px; }
+  .pa5m-shelf::-webkit-scrollbar { display: none; }
+  .pa5 .pa5m-sheet { flex: none; width: 156px; min-height: 48px; display: flex; flex-direction: column; align-items: stretch; text-align: left; overflow-wrap: anywhere; }
+  .pa5m-sheet .pa5m-paper { height: 150px; padding: 14px 14px 0; margin-bottom: 10px; }
+  .pa5m-sheet .pa5m-paper em { white-space: normal; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-bottom: 8px; }
+  .pa5m-sheet .pa5m-sn { font-size: 1rem; line-height: 1.4; font-weight: 600; }
+  .pa5m-sheet .pa5m-tag { align-self: flex-start; margin-top: 6px; }
+
+  /* P5 — the versions as a tree (ref `.tree`, `.node`, `.chg`) */
+  .pa5m-tree { position: relative; padding-left: 28px; }
+  .pa5m-tree::before { content: ""; position: absolute; left: 11px; top: 24px; bottom: 32px; width: 2px; background: var(--pa-rule); }
+  .pa5m-node { position: relative; margin-bottom: 12px; }
+  .pa5m-node::before { content: ""; position: absolute; left: -24px; top: 22px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 3px var(--pa-navy); }
+  .pa5m-node.use::before { background: var(--pa-navy); }
+  .pa5 .pa5m-nodec { display: block; width: 100%; padding: 16px 16px 14px; border-radius: 20px; text-align: left; }
+  .pa5m-nodet { display: flex; align-items: flex-start; gap: 8px; }
+  .pa5m-x { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .pa5m-chg { display: block; margin-top: 10px; }
+  .pa5m-chg > span { display: flex; gap: 8px; align-items: baseline; font-size: 0.875rem; line-height: 1.43; color: var(--pa-body); overflow-wrap: anywhere; }
+  .pa5m-chg > span::before { content: "+"; font-family: var(--pa-type); color: var(--pa-navy); }
+  .pa5m-res { display: block; margin-top: 10px; font-size: 0.875rem; line-height: 1.43; color: var(--pa-ink); }
+  .pa5 .pa5m-res b { font: 400 1.125rem/1.3 var(--pa-type) !important; }
+  .pa5m-lock { padding: 24px; margin-top: 16px; }
+  .pa5m-lock .pa5m-kick { margin-bottom: 8px; }
+  .pa5m-lock .pa4-body { margin-top: 12px; }
+  .pa5m-lock ul { list-style: none; padding: 0; margin: 16px 0 20px; }
+  .pa5m-lock li { display: flex; gap: 12px; align-items: flex-start; margin: 12px 0; font-size: 1rem; line-height: 1.5; }
+  .pa5m-lock li i { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--pa-navy); color: #fff; display: grid; place-items: center; font: 400 0.875rem/1 var(--pa-type); font-style: normal; }
+  .pa5m-lock .pa5m-c { text-align: center; margin-top: 12px; }
+
+  /* P6 — the comps (ref `.kv` + `.book`) */
+  .pa5m-list { padding: 0 16px; }
+  .pa5 .pa5m-comp { min-height: 96px; }
+  .pa5m-book { flex: none; width: 52px; height: 74px; border-radius: 3px 6px 6px 3px; box-shadow: inset 4px 0 0 rgba(0, 0, 0, 0.18), 0 4px 10px rgba(31, 38, 51, 0.18); display: grid; place-items: center; font: 400 1.125rem/1 var(--pa-type); color: #fff; }
+
+  /* P2 · P4 — the pushed pages (ref `.bar`, `.kv`, `.ico`, `.act`, `.lt`) */
+  .pa5.pa5m-page { min-height: 100%; display: flex; flex-direction: column; background: var(--pa-page); }
+  .pa5m-bar { position: sticky; top: 0; z-index: 3; display: flex; align-items: center; gap: 4px; background: var(--pa-navy); color: #fff; padding: calc(8px + env(safe-area-inset-top, 0px)) 8px 8px; }
+  .pa5 .pa5m-bar .pa5m-bart { flex: 1; min-width: 0; font: 400 1.375rem/1.2 var(--pa-type) !important; overflow-wrap: anywhere; }
+  .pa5m-barsp { flex: none; width: 48px; }
+  .pa5m-dots { font-size: 1.5rem; line-height: 1; }
+  .pa5m-pgb { flex: 1; padding: 16px 16px 24px; }
+  .pa5m-how { padding: 20px; }
+  .pa5m-figs { display: flex; margin-top: 8px; }
+  .pa5m-figs > div { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .pa5m-figs > div + div { border-left: 1px solid var(--pa-rule); padding-left: 12px; }
+  .pa5 .pa5m-figs b { display: block; font: 400 1.75rem/1.1 var(--pa-type) !important; }
+  .pa5m-best { margin-top: 12px; }
+  .pa5 .pa5m-sec { margin: 24px 8px 8px; }
+  .pa5m-ico { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: var(--pa-fill); font: 400 1.125rem/1 var(--pa-type); color: var(--pa-ink); }
+  .pa5m-note { margin: 8px 8px 0; }
+  .pa5m-act { position: sticky; bottom: 0; z-index: 3; background: #fff; border-top: 1px solid var(--pa-rule); padding: 12px 16px calc(16px + env(safe-area-inset-bottom, 0px)); }
+  .pa5m-read { background: var(--pa-paper); border-radius: 6px; box-shadow: 0 1px 2px rgba(31, 38, 51, 0.08), 0 6px 14px rgba(31, 38, 51, 0.12); padding: 24px 20px 8px; overflow-wrap: anywhere; }
+  .pa5 .pa5m-read p { font: 1rem/1.6 var(--pa-serif); color: var(--pa-ink); margin: 0 0 12px; white-space: pre-line; }
+  .pa5 .pa5m-big { font: 400 1.375rem/1.2 var(--pa-type) !important; }
+
+  /* sheets (portalled under <body>, so outside `.pa5`) */
+  .pa5m-pick { padding: 8px 24px 24px; }
+  .pa5m-pick .pa5m-h { margin-bottom: 8px; }
+}
+
+/* ── PHASE G — PROFILE (no ref: v4's You under v5's header) and THE FEEDBACK SHEET (phone-feedback-v1.html section 1:
+   `.sheet`, `.seg`, `.ta`, `.stamp`, `.cta`, `.link`). The sheet lives in the overlay layer, so it is scoped by `.pa5-fb`.
+   Every target 48px; nothing under 0.875rem; the note is at least 16px so iOS does not zoom. ── */
+@media (max-width: 767.98px) {
+  /* Profile's header: v5's, with room under it for the figures card to lap it (v4's LapCard, -56px) */
+  .pa5-hd.pa5p-hd { padding-bottom: 88px; }
+  .pa5p-hd .pa5p-book { color: #fff; font-weight: 600; margin-top: 8px; overflow-wrap: anywhere; }
+
+  .pa5-fb { padding: 8px 16px calc(20px + env(safe-area-inset-bottom, 0px)); }
+  .pa5-fb .pa4-grab { margin-bottom: 16px; }
+  .pa5-fb .pa5-fb-h { margin: 0 8px 4px; outline: none; }
+  .pa5-fb .pa5-fb-about { margin: 0 8px 16px; overflow-wrap: anywhere; }
+  .pa5-fb-kinds { display: flex; gap: 8px; margin-bottom: 12px; }
+  .pa5-fb .pa5-fb-kinds > button {
+    flex: 1 1 0; min-width: 0; min-height: 48px; padding: 4px 8px; border-radius: 24px; background: #fff; color: var(--pa-ink);
+    box-shadow: inset 0 0 0 1.5px var(--pa-rule); font: 600 0.9375rem/1.2 var(--pa-sans); text-align: center; overflow-wrap: anywhere; cursor: pointer;
+  }
+  .pa5-fb .pa5-fb-kinds > button.on { background: var(--pa-navy); color: #fff; box-shadow: none; }
+  .pa5-fb .pa5-fb-ta {
+    display: block; width: 100%; box-sizing: border-box; min-height: 120px; resize: vertical; border: 0; border-radius: 16px; background: #fff;
+    box-shadow: inset 0 0 0 1.5px var(--pa-rule); padding: 14px 16px; color: var(--pa-ink); font: 400 max(16px, 1rem)/1.5 var(--pa-sans) !important;
+  }
+  .pa5-fb .pa5-fb-ta:focus { outline: none; box-shadow: inset 0 0 0 2px var(--pa-navy); }
+  .pa5-fb .pa5-fb-rank { margin: 12px 8px 0; }
+  .pa5-fb .pa5-fb-err { margin: 12px 8px 0; color: var(--pa-rust); }
+  .pa5-fb-sent { text-align: center; }
+  .pa5-fb-stamp { display: flex; justify-content: center; margin: 8px 0 16px; }
+  .pa5-fb .pa5-fb-ty { margin-bottom: 4px; }
+  .pa5-fb .pa5-fb-line { margin: 0 16px 20px; }
+  @media (prefers-reduced-motion: reduce) {
+    .pa5-fb, .pa5-fb * { animation: none !important; transition: none !important; }
+  }
+}

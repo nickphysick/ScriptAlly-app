@@ -51,7 +51,7 @@ import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
 // (settled desk): hero zone → stat row → story/diary → pipeline → Pro banner.
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { Dash58 } from "./dashboard/v58/Dash58";
-import { TodayV4 } from "./phone/v4/TodayV4";
+import { TodayV5 } from "./phone/v5/TodayV5";
 import { useIsMobile } from "./shell/mobileChrome";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
 import "./dashboard/dashboardV37.css";
@@ -1523,8 +1523,8 @@ export const Dashboard: React.FC<{
           banner all leave this page. Day one is §9's job now; loading is §8's per-card
           skeletons, passed down rather than gated up here. */}
       {phone ? (
-      /* Phone app v4: below 768px the dashboard is Today (TodayV4); at 768px and up nothing here changes */
-      <TodayV4 loading={!collectionsReady}
+      /* Phone app v5: below 768px the dashboard is Today, the hub (TodayV5); at 768px and up nothing here changes */
+      <TodayV5 loading={!collectionsReady}
       />
       ) : (
       <Dash58

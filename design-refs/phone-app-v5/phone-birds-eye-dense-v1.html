@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en-GB"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>QueryHawk phone – Birds-eye, denser</title>
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{--page:#f8f6f2;--navy:#2a3a52;--navyd:#1f2c40;--blush:#e8c8bc;--rust:#8a4a3c;--ink:#1f2633;--body:#4a4f5a;--muted:#676b74;--on:#c9d2df;--rule:#ece6dc;--fill:#ece7de;--type:'Special Elite','Courier New',monospace}
+*{box-sizing:border-box;margin:0}body{background:#e9e6e0;font:16px/1.5 system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;color:var(--ink)}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
+.intro{padding:32px 32px 0;max-width:980px}.intro h1{font:400 28px/1.2 var(--type);margin-bottom:8px}.intro p{color:var(--body)}
+.rowx{display:flex;gap:40px;overflow-x:auto;padding:24px 32px 40px;align-items:flex-start}
+.opt{flex:none;width:375px}.opt h2{font:400 20px/1.3 var(--type);margin-bottom:4px}.opt p{font-size:14px;color:var(--body);min-height:84px;margin-bottom:12px}
+.ph{position:relative;width:375px;height:780px;background:#fff;border-radius:40px;box-shadow:0 0 0 10px #141a24,0 24px 48px rgba(20,26,36,.25);overflow:hidden;display:flex;flex-direction:column}
+.T{font-family:var(--type)}.s{font-size:14px;line-height:20px;color:var(--muted)}
+.hd{flex:none;background:var(--navy);color:#fff;padding:44px 16px 8px 24px}
+.hd .r1{display:flex;align-items:center;gap:8px;min-height:48px}
+.hd h3{flex:1;font:400 22px/1.2 var(--type)}
+.bsw{display:flex;height:44px;border-radius:22px;background:rgba(255,255,255,.14);padding:4px;margin:4px 8px 4px 0}.bsw span{flex:1;display:grid;place-items:center;border-radius:18px;font-weight:600;font-size:15px}.bsw .on{background:#fff;color:var(--navy)}
+.ctl{flex:none;display:flex;align-items:center;gap:6px;padding:0 12px;height:52px;background:var(--page);border-bottom:1px solid var(--rule)}
+.chip span{height:34px;padding:0 12px;border-radius:17px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--rule);display:flex;align-items:center;font-size:14px;font-weight:600;white-space:nowrap}.chip.on span{background:var(--navy);color:#fff;box-shadow:none}.chip{height:48px;display:flex;align-items:center}
+.sc{flex:1;overflow-y:auto;scrollbar-width:none;position:relative}.sc::-webkit-scrollbar{display:none}
+.ruler{position:sticky;top:0;z-index:6;height:32px;background:var(--navyd);display:flex}
+.ruler .gut{flex:none}.ruler .rv{flex:1;position:relative;overflow:hidden}
+.mo{position:absolute;top:0;height:32px;border-left:1px solid rgba(255,255,255,.25);padding:6px 0 0 6px;font:400 14px/20px var(--type);color:#fff;white-space:nowrap}
+.pill{position:absolute;top:6px;transform:translateX(-50%);height:20px;padding:0 7px;border-radius:10px;background:#fff;color:var(--navyd);font:400 14px/21px var(--type);z-index:2}
+.body{position:relative}
+.nl{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--ink);z-index:3;pointer-events:none}
+.gh{position:sticky;top:32px;z-index:5;display:flex;align-items:center;gap:8px;height:30px;padding:0 16px;background:rgba(248,246,242,.96);border-bottom:1px solid var(--rule);font:400 15px/1 var(--type)}
+.gh .s{font-family:system-ui}
+.tr{position:relative}
+.b{position:absolute;border-radius:5px}
+.ov{position:absolute;height:2px;background:var(--navy)}
+.rg{position:absolute;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:#fff;box-shadow:inset 0 0 0 3px var(--navy);z-index:4}
+.rg.pul{animation:pulse 1.800s ease-out infinite}
+@keyframes pulse{0%{box-shadow:inset 0 0 0 3px var(--navy),0 0 0 0 rgba(42,58,82,.5)}100%{box-shadow:inset 0 0 0 3px var(--navy),0 0 0 7px rgba(42,58,82,0)}}
+/* A names in bars */
+.A .row{height:28px;position:relative;border-bottom:1px solid #f3efe8}
+.A .tr{position:absolute;left:0;right:0;top:3px;height:22px}
+.A .b{top:0;height:22px}
+.A .nm{position:absolute;top:0;height:22px;font-size:14px;line-height:22px;font-weight:600;white-space:nowrap;padding-left:8px;z-index:5;color:var(--ink);text-shadow:0 0 2px #fff,0 0 4px #fff,0 0 6px #fff}
+.A .nm.out{font-weight:500;color:var(--body)}
+.A .ov{top:10px}.A .rg{top:5px}
+/* B narrow column */
+.B .row{height:28px;display:flex;align-items:center;border-bottom:1px solid #f3efe8}
+.B .nc{flex:none;width:112px;padding-left:12px;display:flex;align-items:center;gap:6px;font-size:14px;line-height:1;white-space:nowrap;overflow:hidden;background:#fff;z-index:4;height:27px}
+.B .nc b{font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.B .tr{flex:1;height:12px}.B .b{top:0;height:12px;border-radius:4px}.B .ov{top:5px}.B .rg{top:0}
+.gl{flex:none;width:14px;height:14px}
+/* C hairlines */
+.C .row{height:17px;position:relative}
+.C .tr{position:absolute;left:0;right:0;top:4px;height:9px}.C .b{top:0;height:9px;border-radius:4.500px}.C .ov{top:3.500px;height:2px}.C .rg{top:-1.500px;width:12px;height:12px}
+.C .row.hi{background:rgba(42,58,82,.06)}
+.loupe{position:absolute;z-index:7;left:16px;right:16px;background:var(--navyd);color:#fff;border-radius:16px;padding:10px 14px;box-shadow:0 10px 28px rgba(0,0,0,.3);display:flex;gap:12px;align-items:center}
+.loupe .s{color:var(--on)}
+.finger{position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(42,58,82,.18);box-shadow:0 0 0 2px rgba(42,58,82,.35);z-index:6;pointer-events:none}
+.tb{flex:none;height:64px;background:#fff;border-top:1px solid var(--rule);display:flex;align-items:center;justify-content:space-around;font-size:12px;color:var(--muted);padding-bottom:6px}.tb .on{color:var(--navy);font-weight:700}
+.tb .p{width:44px;height:44px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-size:24px}
+.key{display:flex;gap:12px;flex-wrap:wrap;padding:12px 16px 24px;font-size:14px;color:var(--muted)}.key i{display:inline-block;width:18px;height:10px;border-radius:3px;vertical-align:-1px;margin-right:6px}
+/* today card */
+.tc{margin:16px;background:#fff;border-radius:24px;box-shadow:0 1px 2px rgba(31,38,51,.06),0 8px 24px rgba(31,38,51,.08);overflow:hidden}
+.tc .hdx{display:flex;align-items:center;padding:18px 16px 10px 20px}
+.today-bg{background:var(--page);flex:1;overflow:hidden}
+</style></head><body>
+<div class="intro"><h1>Birds-eye view, narrow name column</h1><p>The chosen density for the full view and the Today card. Sample data: 26 invented queries.</p></div>
+<div class="rowx" id="out"></div>
+<script>
+const DAY=864e5,D=(m,d,y)=>new Date(y||2026,m-1,d),TODAY=D(11,12),MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const FILL={Q:"#efe3d0",PR:"#edccc4",PS:"#f3dfd9",FR:"#c9d5e2",FS:"#dde5ee",O:"#e8c8bc"};
+const NM=["David Marsh","Elinor Hale","Fenella Strand","Marcus Reed","Noah Bright","Rachel Lin","Daniel O'Rourke","Jonathan Marsh","Imogen Farr","Ana Duarte","Priya Nair","Tom Ellery","Greg Panetta","Rosalind Achebe","Hugo Vance","Sasha Klein","Owen Price","Leah Moretti","Ben Okafor","Clara Wynn","Isla Fraser","Ravi Shah","Maud Ellison","Theo Grant","Nina Boyd","Beatrix Shaw"];
+/* sample: [name, [[stage, days ago]...], due in days (negative = passed, null = none)] */
+const RAW=[["Priya Nair",[["Q",95]],-11],["Hugo Vance",[["Q",88]],-4],["Ana Duarte",[["Q",80],["PR",19]],-5],
+["Rachel Lin",[["Q",42],["PR",4]],10],["Marcus Reed",[["Q",79],["PR",37],["PS",35],["FR",7]],7],["Noah Bright",[["Q",115],["PR",72],["PS",70],["FR",44],["FS",42],["O",6]],8],["Clara Wynn",[["Q",60],["FR",3]],11],["Greg Panetta",[["Q",50],["PR",2]],12],
+["Imogen Farr",[["Q",36]],20],["Tom Ellery",[["Q",135],["PR",86],["PS",84],["FR",24],["FS",22]],48],["Fenella Strand",[["Q",62]],11],["Theo Grant",[["Q",30],["PR",20],["PS",18]],38],["Nina Boyd",[["Q",22]],34],["Sasha Klein",[["Q",68],["PR",33],["PS",31]],25],["Owen Price",[["Q",54]],2],["Leah Moretti",[["Q",14]],42],["Ben Okafor",[["Q",9]],47],["Isla Fraser",[["Q",47]],9],["Ravi Shah",[["Q",40],["PR",28],["PS",26]],30],["Maud Ellison",[["Q",33]],23],["Daniel O'Rourke",[["Q",27]],29],["Jonathan Marsh",[["Q",101],["PR",48],["PS",46]],10],["Rosalind Achebe",[["Q",6]],50],["David Marsh",[["Q",18]],38],["Hattie Cole",[["Q",12]],44],
+["Beatrix Shaw",[["Q",29]],null]];
+const Q=RAW.map(r=>{const st=r[1].map(x=>[x[0],+TODAY-x[1]*DAY]),cur=st[st.length-1][0],due=r[2]===null?null:+TODAY+r[2]*DAY,you=["PR","FR","O"].includes(cur);
+const g=due===null?3:due<+TODAY?0:you?1:2;return{n:r[0],st,due,g,cur}});
+Q.sort((a,b)=>a.g-b.g||((a.due||9e15)-(b.due||9e15)));
+const GN=["Past its date","Upcoming","Watch and wait","No date"];
+function gsvg(k){if(k==="O")return'<path d="M7 3.500h7l4 4V20.500H7z" stroke-linejoin="round"/>';const dash=k==="PR"||k==="FR"?' stroke-dasharray="3.200 3"':'';let h=`<circle cx="12" cy="12" r="9.500"${dash}/>`;if(k[0]==="P")h+='<path d="M12 5.500a6.500 6.500 0 0 1 0 13z" fill="#1f2633" stroke="none"/>';if(k[0]==="F")h+='<circle cx="12" cy="12" r="5.500" fill="#1f2633" stroke="none"/>';return h}
+const glyph=k=>`<svg class="gl" viewBox="0 0 24 24" style="fill:none;stroke:#1f2633;stroke-width:2.200">${gsvg(k)}</svg>`;
+function axis(back,fwd){const a=+TODAY-back*DAY,b=+TODAY+fwd*DAY;return{a,b,p:t=>Math.max(-2,Math.min(102,(t-a)/(b-a)*100)),t:back/(back+fwd)*100}}
+function months(ax){let h="",d=new Date(new Date(ax.a).getFullYear(),new Date(ax.a).getMonth(),1);while(+d<ax.b){const nx=new Date(d.getFullYear(),d.getMonth()+1,1),l=Math.max(0,ax.p(+d)),r=Math.min(100,ax.p(+nx));if(r-l>7)h+=`<span class="mo" style="left:${l}%;width:${r-l}%">${MON[d.getMonth()]}</span>`;d=nx}return h+`<span class="pill" style="left:${ax.t}%">Today</span>`}
+function track(q,ax){let h="";q.st.forEach((s,i)=>{const nx=q.st[i+1];if(nx){const l=ax.p(s[1]),r=ax.p(nx[1]);h+=`<i class="b" style="left:${l}%;width:${Math.max(r-l,.8)}%;background:${FILL[s[0]]};opacity:.55"></i>`}});
+const s=q.st[q.st.length-1],l=ax.p(s[1]);if(q.due===null){h+=`<i class="b" style="left:${l}%;width:${ax.t-l+6}%;background:linear-gradient(90deg,${FILL[s[0]]} 70%,transparent)"></i>`}else{const e=ax.p(q.due);h+=`<i class="b" style="left:${l}%;width:${e-l}%;background:${FILL[s[0]]};opacity:.5"></i><i class="b" style="left:${l}%;width:${Math.max(0,Math.min(ax.t,e)-l)}%;background:${FILL[s[0]]};box-shadow:inset 0 0 0 1px rgba(31,38,51,.12)"></i>`;if(q.due<+TODAY)h+=`<i class="ov" style="left:${e}%;width:${ax.t-e}%"></i><i class="rg pul" style="left:${ax.t}%"></i>`}return h}
+const groups=(rowFn,gut)=>{let h="";GN.forEach((g,gi)=>{const rows=Q.filter(q=>q.g===gi);if(!rows.length)return;h+=`<div class="gh">${g}<span class="s">${rows.length}</span></div>`+rows.map(rowFn).join("")});return h};
+const head=(sub)=>`<div class="hd" style="padding:44px 12px 8px 16px"><div class="r1"><div class="bsw" style="flex:1;margin:0"><span>List</span><span class="on">Birds-eye</span></div><button style="width:48px;height:48px;display:grid;place-items:center;font-size:20px;flex:none" aria-label="Search">⌕</button></div></div><div class="ctl">${["6 wks","3 mths","6 mths"].map((z,i)=>`<button class="chip${i===1?" on":""}"><span>${z}</span></button>`).join("")}<span style="flex:1"></span><button style="width:48px;height:48px;display:grid;place-items:center;color:var(--navy);font-size:22px" aria-label="Replay">↺</button></div>`;
+const tb=`<div class="tb"><span>Today</span><span class="on">Queries</span><span class="p">+</span><span>Agents</span><span>You</span></div>`;
+const AX=axis(70,40);
+/* A */
+const bodyA=`<div class="ruler"><div class="rv">${months(AX)}</div></div><div class="body A">${groups(q=>{const s=q.st[q.st.length-1],l=Math.max(0,AX.p(s[1]));const left=q.due===null?l:Math.max(0,Math.min(l,AX.t-35));return`<div class="row"><div class="tr">${track(q,AX)}<span class="nm" style="left:${Math.max(0,Math.min(l,66))}%">${q.n}</span></div></div>`})}<i class="nl" style="left:${AX.t}%"></i></div>`;
+/* B */
+const AXB=axis(70,40);
+const bodyB=`<div class="ruler"><div class="gut" style="width:112px"></div><div class="rv">${months(AXB)}</div></div><div class="body B">${groups(q=>`<div class="row"><span class="nc">${glyph(q.cur)}<b>${q.n.split(" ").slice(-1)[0]}</b></span><div class="tr" style="position:relative">${track(q,AXB)}</div></div>`)}<i class="nl" style="left:calc(112px + (100% - 112px) * ${AXB.t/100})"></i></div>`;
+/* C */
+const bodyC=`<div class="ruler"><div class="rv">${months(AX)}</div></div><div class="body C">${groups((q,i)=>`<div class="row${q.n==="Ana Duarte"?" hi":""}"><div class="tr">${track(q,AX)}</div></div>`)}<i class="nl" style="left:${AX.t}%"></i></div>`;
+const anaIdx=Q.findIndex(q=>q.n==="Ana Duarte");
+const key=`<div class="key"><span><i style="background:#efe3d0"></i>Queried</span><span><i style="background:#edccc4"></i>Partial</span><span><i style="background:#c9d5e2"></i>Full</span><span><i style="background:#e8c8bc"></i>Offer</span></div>`;
+const phone=(body,extra)=>`<div class="ph">${head("26 live queries · 3 past their date")}<div class="sc">${body}${key}${extra||""}</div>${tb}</div>`;
+/* Today card dense */
+const AXT=axis(56,28),top8=Q.slice(0,8);
+const card=`<div class="tc"><div class="hdx"><div style="flex:1"><div style="font-size:20px;font-weight:600;line-height:1.3">Birds-eye view</div><div class="s">The 8 nearest their date</div></div></div>
+<div style="display:flex;margin:0 16px 12px">${[["5","with you","#e8c8bc"],["16","with agents","#8fa3bf"],["5","gone quiet","#56677f"]].map((x,i)=>`<div style="flex:1;${i?"border-left:1px solid var(--rule);padding-left:12px":""}"><div class="T" style="font-size:26px;line-height:1.1">${x[0]}</div><div class="s"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${x[2]};margin-right:6px"></i>${x[1]}</div></div>`).join("")}</div>
+<div style="position:relative;margin:0 0 4px"><div class="ruler" style="position:relative;margin:0 12px;border-radius:8px"><div class="gut" style="width:104px"></div><div class="rv">${months(AXT)}</div></div><div class="body B" style="margin:4px 12px 0;position:relative">${top8.map(q=>`<div class="row"><span class="nc" style="width:104px;padding-left:4px">${glyph(q.cur)}<b>${q.n.split(" ").slice(-1)[0]}</b></span><div class="tr" style="position:relative">${track(q,AXT)}</div></div>`).join("")}<i class="nl" style="left:calc(104px + (100% - 104px) * ${AXT.t/100})"></i></div></div>
+<button style="display:flex;width:100%;min-height:52px;align-items:center;justify-content:space-between;padding:0 20px;border-top:1px solid var(--rule);font-weight:600;color:var(--navy)">See all 26 in the Birds-eye view <span>›</span></button></div>`;
+const todayPhone=`<div class="ph"><div style="background:var(--navy);height:150px;flex:none;padding:56px 24px 0;color:#fff"><div class="s" style="color:var(--on)">…header and Up next above…</div></div><div class="today-bg sc">${card}</div>${tb}</div>`;
+const OPTS=[
+["Full view","One 28px row per query: a 112px column of status glyph and surname that stays put while you drag, then a 12px bar. Group headings and the ruler stick. Tap a row to open its story.",phone(bodyB)],
+["Today card","The same rows, eight of them, in a 104px column. Tapping a row opens the full view on that query.",todayPhone]];
+document.getElementById("out").innerHTML=OPTS.map(o=>`<div class="opt"><h2>${o[0]}</h2><p>${o[1]}</p>${o[2]}</div>`).join("");
+</script></body></html>
