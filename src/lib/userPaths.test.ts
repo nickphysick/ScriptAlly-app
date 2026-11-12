@@ -72,7 +72,7 @@ describe("deskPrefPaths — one leaf per control", () => {
 describe("the settings page saves by leaf", () => {
   const code = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
   const src = code(readFileSync(resolve(process.cwd(), "src/components/AccountSettings.tsx"), "utf8"));
-  const save = sliceBetween(src, "const saveTodoPref", "savedReceipt(what)", "saveTodoPref's body");
+  const save = sliceBetween(src, "const saveTodoPref", "const saveQuietWeeks", "saveTodoPref's body");
 
   it("through updateUserPaths(deskPrefPaths(…)), never a todoPrefs map", () => {
     expect(save).toMatch(/updateUserPaths\(deskPrefPaths\(patch\)\)/);

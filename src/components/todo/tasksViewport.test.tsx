@@ -475,12 +475,12 @@ describe("⚠️ ONE FORM FOR THE TASK FIELDS, AND IT IS THE SETTINGS PAGE", () 
   });
 
   it("the account menu navigates to the page instead", () => {
-    expect(menu).toContain('go("/account/tasks")');
+    expect(menu).toContain('go("/account/preferences")'); // non-workspace v1: Tasks moved into Preferences
   });
 
-  it("`tasks` is a rail section again, and the Preferences link row is deleted", () => {
-    expect(ACCOUNT_ROUTES.map((r) => r.id)).toContain("tasks");
-    expect(acct).toContain("const tasksSection");
+  it("the task fields live in Preferences (non-workspace v1, re-pointed), and the old link row is deleted", () => {
+    expect(ACCOUNT_ROUTES.map((r) => r.id)).toContain("preferences");
+    expect(acct).toContain('heading="What reaches your list"');
     /* Deleted rather than re-pointed: a link row to a sibling section from inside Preferences is
        clutter when the rail is already the way between sections. */
     expect(acct).not.toContain("taskSettingsRow");

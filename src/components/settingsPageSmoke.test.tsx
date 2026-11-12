@@ -99,9 +99,9 @@ describe("the settings rail carries the ids the panel labels itself with", () =>
   /* ⚠️ EXACTLY ONE TAB IS SELECTED, and it is the one the route names. A rail that selected none
      would still carry all seven ids and pass every assertion above it. */
   it("exactly one tab is selected, and it is the active section", () => {
-    const html = rail("security");
+    const html = rail("emails");
     expect((html.match(/aria-selected="true"/g) ?? []).length).toBe(1);
-    const at = html.indexOf('id="acct-tab-security"');
+    const at = html.indexOf('id="acct-tab-emails"');
     expect(at).toBeGreaterThan(-1);
     expect(html.slice(at, html.indexOf(">", at))).toContain('aria-selected="true"');
   });
@@ -135,6 +135,7 @@ describe("/help renders", () => {
   });
 
   it("…and produces its own chrome", () => {
-    expect(renderPage(<HelpCentre />, "/help")).toContain("Help Centre");
+    /* re-pointed (non-workspace v1, Phase 7): the page's own heading, from design-refs/help-centre-v1 */
+    expect(renderPage(<HelpCentre />, "/help")).toContain("How can we help?");
   });
 });

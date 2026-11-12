@@ -249,7 +249,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
             `/account/tasks` is the one form for those fields, so this is a plain navigation — and
             the dispatch went in the SAME commit as the listener, because an event with no listener
             is a menu row that silently does nothing. */}
-        <button type="button" className="am-row" role="menuitem" onClick={go("/account/tasks")}>
+        <button type="button" className="am-row" role="menuitem" onClick={go("/account/preferences")}>
           <SlidersHorizontal aria-hidden="true" /><span>Task settings</span>
         </button>
         <button type="button" className="am-row" role="menuitem" onClick={go("/help")}>

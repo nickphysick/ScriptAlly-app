@@ -39,12 +39,11 @@ const prefs = (weeks: number) => renderPageSeededWith(
 );
 
 describe("the quiet window lives in Settings", () => {
-  it("Preferences carries a Queries card with the label, the helper and a weeks picker", () => {
+  it("Preferences carries the clock card with the label, the helper and a weeks picker (re-pointed, settings-v2)", () => {
     const h = prefs(4);
-    expect(h).toContain(">Queries<");
-    expect(h).toContain("Treat a query as gone quiet after");
-    expect(h).toContain("Queries with no reply after this long move to Gone quiet.");
-    const sel = h.match(/<select[^>]*aria-label="Treat a query as gone quiet after"[^>]*>([\s\S]*?)<\/select>/);
+    expect(h).toContain("A query&#x27;s clock");
+    expect(h).toContain("A query goes quiet after");
+    const sel = h.match(/<select[^>]*aria-label="A query goes quiet after"[^>]*>([\s\S]*?)<\/select>/);
     expect(sel, "the weeks picker").not.toBeNull();
     const opts = [...sel![1].matchAll(/<option[^>]*value="(\d+)"[^>]*>([^<]*)<\/option>/g)];
     expect(opts.map((o) => Number(o[1]))).toEqual([...QUIET_WEEKS]);

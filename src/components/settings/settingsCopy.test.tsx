@@ -77,15 +77,16 @@ describe("no section speaks the app's own jargon at the reader", () => {
 describe("the copy the brief fixed, verbatim", () => {
   const text = everySection();
 
+  /* Re-pointed to the settings-v2 ref's words (non-workspace v1, Phase 2). */
   const REQUIRED = [
-    "The agent list uses this to tell agents in your country from international ones.",
-    "The address you sign in with.",
+    "Tells your agent list which agents are in your country and which are international.",
+    "The address you sign in with, and where our emails go.",
     "One email each Monday with what happened in the past week.",
-    "Emails about your account itself (sign-in, billing, your data) are always sent.",
-    "Downloads everything QueryHawk holds about your querying",
+    "Sign-in links, confirmations and anything about your data. These always reach you.",
+    "Everything QueryHawk holds about your querying, in one file.",
     "This removes your account and everything in it",
-    "Long-waiting tasks drop to the back so your list leads with what's current. Nothing is deleted.",
-    "Decisions you need to make always appear.",
+    "Anything you don't finish moves to today rather than being left behind.",
+    "When an offer of representation arrives",
   ];
 
   for (const line of REQUIRED) {
