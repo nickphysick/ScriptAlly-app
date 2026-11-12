@@ -145,7 +145,7 @@ const readStars = (page: Page, id: string) => page.evaluate((rid) => {
     name: { ...bx(nm), sw: nm.scrollWidth, cw: nm.clientWidth, to: getComputedStyle(nm).textOverflow, text: nm.textContent },
     row: bx(row), cell: bx(row.querySelector("[data-cl26='agent']")!),
     fit: f ? {
-      ...bx(f), sw: f.scrollWidth, cw: f.clientWidth, size: fs!.fontSize, ls: fs!.letterSpacing, title: f.title, label: f.getAttribute("aria-label"),
+      ...bx(f), sw: f.scrollWidth, cw: f.clientWidth, top: fs!.top, size: fs!.fontSize, ls: fs!.letterSpacing, title: f.title, label: f.getAttribute("aria-label"),
       glyphs: [...f.querySelectorAll<HTMLElement>("i")].map((i) => ({ c: getComputedStyle(i).color, t: i.textContent })),
       buttons: f.querySelectorAll("button").length,
     } : null,
@@ -192,7 +192,9 @@ test("CLP15 · a row with fit 4: four navy stars and one empty after the name; t
     const gap = s?.fit ? s.fit.l - s.name.r : NaN;
     L.check("10px after the name (±1)", Math.abs(gap - 10) <= 1, gap.toFixed(2));
     const nameMid = s ? (s.name.t + s.name.b) / 2 : NaN, fitMid = s?.fit ? (s.fit.t + s.fit.b) / 2 : NaN;
-    L.check("on the name's line, sitting on its middle (±3)", s?.fit ? s.fit.t < s.name.b && s.fit.b > s.name.t && Math.abs(fitMid - nameMid) <= 3 : false, `name mid ${nameMid.toFixed(1)}, stars mid ${fitMid.toFixed(1)}`);
+    /* the prompt's own terms: on the name's line (its baseline), nudged up 3px; the box centres then differ by the two
+       fonts' line boxes (≈3.5px at 18px / 12.5px), so the middle is held to ±5 */
+    L.check("on the name's line, nudged up 3px, on its middle (±5)", s?.fit ? s.fit.t < s.name.b && s.fit.b > s.name.t && s.fit.top === "-3px" && Math.abs(fitMid - nameMid) <= 5 : false, `name mid ${nameMid.toFixed(1)}, stars mid ${fitMid.toFixed(1)}, top ${s?.fit?.top}`);
   }
   /* live: open the card for a rated agent, press another star, the row follows; Undo, and it follows back */
   if (four) {

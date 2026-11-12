@@ -30,6 +30,7 @@ import { usePopover } from "../../shell/ListPills";
 import { GROUP_ICON150 } from "../../queries/centre/QcToolbar140";
 import { GroupMenu, NQ_RING, SetGlyph } from "./ContactSheet24";
 import { GenrePills } from "../../shared/agentRowParts";
+import { FIT_WORDS } from "../card/agentPills";
 import type { Group26Key } from "../../../lib/contactListMemory";
 import { GROUP26_OPTIONS, drawnSections, sections, type Section } from "../../../lib/contactV26";
 import type { StatusKey } from "../../../lib/contactList";
@@ -323,6 +324,16 @@ export const Disc26: React.FC<{ x: AgentFacts; size?: number }> = ({ x, size }) 
   </span>
 );
 
+/** principles v2 — Agent fit by the name: five small stars, display only (fit is set on the card), nothing when unrated */
+export const FitStars: React.FC<{ n: 1 | 2 | 3 | 4 | 5 }> = ({ n }) => {
+  const w = `Agent fit: ${FIT_WORDS[n]}`;
+  return (
+    <span className="clp2-fit" data-clp2="fit" data-n={n} role="img" title={w} aria-label={w}>
+      {[1, 2, 3, 4, 5].map((i) => <i key={i} className={i <= n ? "on" : undefined} aria-hidden="true">★</i>)}
+    </span>
+  );
+};
+
 const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) => {
   const a = x.agent;
   const name = agentPrimary(a);
@@ -350,7 +361,7 @@ const Row26: React.FC<{ x: AgentFacts; p: ContactSheet26Props }> = ({ x, p }) =>
       }}>
       <span role="cell" className="cl26-who" data-cl26="agent">
         <Disc26 x={x} />
-        <span className="cl26-whot"><b data-cl26="name" data-cl252="name">{name}</b>{sub ? <small data-cl26="agency">{sub}</small> : null}
+        <span className="cl26-whot"><span className="clp2-nl"><b data-cl26="name" data-cl252="name">{name}</b>{a.starRating ? <FitStars n={a.starRating} /> : null}</span>{sub ? <small data-cl26="agency">{sub}</small> : null}
           {/* E — while Missing details is on: what this agent is missing, and the door to fill it in */}
           {gaps && gaps.length ? (
             <span className="cl26-miss" data-cl26="missing-line">

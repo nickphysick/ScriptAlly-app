@@ -1,0 +1,57 @@
+[
+ {
+  "where": "the harness has an agent rated 4",
+  "ok": true,
+  "detail": "[null,null,4,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,4,4,4,4,4,1,5,1,2,2,3,4,5,1,2,3,4,3,3,4,4,4,4,4,4,4,4,4]"
+ },
+ {
+  "where": "five glyphs",
+  "ok": true,
+  "detail": "[{\"c\":\"rgb(78, 125, 96)\",\"t\":\"★\"},{\"c\":\"rgb(78, 125, 96)\",\"t\":\"★\"},{\"c\":\"rgb(78, 125, 96)\",\"t\":\"★\"},{\"c\":\"rgb(78, 125, 96)\",\"t\":\"★\"},{\"c\":\"rgb(211, 201, 187)\",\"t\":\"★\"}]"
+ },
+ {
+  "where": "four filled navy, then one empty #d3c9bb",
+  "ok": false,
+  "detail": "[\"rgb(78, 125, 96)\",\"rgb(78, 125, 96)\",\"rgb(78, 125, 96)\",\"rgb(78, 125, 96)\",\"rgb(211, 201, 187)\"]"
+ },
+ {
+  "where": "12.5px, letter-spacing 0.5px",
+  "ok": true,
+  "detail": "12.5px 0.5px"
+ },
+ {
+  "where": "title and aria-label “Agent fit: Great fit”",
+  "ok": true,
+  "detail": "Agent fit: Great fit / Agent fit: Great fit"
+ },
+ {
+  "where": "not buttons",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "10px after the name (±1)",
+  "ok": true,
+  "detail": "10.00"
+ },
+ {
+  "where": "on the name's line, nudged up 3px, on its middle (±5)",
+  "ok": true,
+  "detail": "name mid 493.1, stars mid 489.6, top -3px"
+ },
+ {
+  "where": "after a 2 on the card the row draws two filled",
+  "ok": false,
+  "detail": "[\"rgb(78, 125, 96)\",\"rgb(78, 125, 96)\",\"rgb(211, 201, 187)\",\"rgb(211, 201, 187)\",\"rgb(211, 201, 187)\"]"
+ },
+ {
+  "where": "restored: rated 4 again (emulator)",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "…and the row draws four again",
+  "ok": false,
+  "detail": "[\"rgb(78, 125, 96)\",\"rgb(78, 125, 96)\",\"rgb(78, 125, 96)\",\"rgb(78, 125, 96)\",\"rgb(211, 201, 187)\"]"
+ }
+]

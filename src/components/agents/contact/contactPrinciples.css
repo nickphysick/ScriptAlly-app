@@ -41,6 +41,16 @@
 .cl27 .cl26-row[data-k="closed"] .cl26-whot b,
 .cl27 .cl26-row[data-k="closed"] .cl26-whot small { color: #6b6058; opacity: 1; }
 .cl27 .cl26-th > span { color: #5b4f47; }
+/* principles v2 — Agent fit by the name: the name's line is a row, the name truncating before the stars (which never
+   shrink), the stars 10px after it on its baseline, nudged up 3px to sit on its middle */
+.cl27 .cl26-whot .clp2-nl { display: flex; align-items: baseline; min-width: 0; }
+.cl27 .cl26-whot .clp2-nl > b { flex: 0 1 auto; min-width: 0; }
+.cl27 .clp2-fit {
+  flex: none; position: relative; top: -3px; margin-left: 10px; white-space: nowrap;
+  font: 400 12.5px/1 var(--sp-serif) !important; letter-spacing: .5px; color: #2a3a52;
+}
+.cl27 .clp2-fit i { font-style: normal; color: #d3c9bb; }
+.cl27 .clp2-fit i.on { color: #2a3a52; }
 .cl27 .cl26-ix .cl26-ixe:disabled { opacity: .45; }
 @media (min-width: 768px) {
   .cl27 .qc153-rail .qc1533-pill .qc153-n, .cl27 .qc153-rail .qc153-n { font-size: 13px !important; color: #6b6058; }
