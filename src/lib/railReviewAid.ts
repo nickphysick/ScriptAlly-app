@@ -26,3 +26,12 @@ export function navOpenAid(): { discover: false; packages: false; versions: fals
     ? { discover: false, packages: false, versions: false, materials: false }
     : undefined;
 }
+
+/**
+ * Plan rules v1: `__SA_NAV_FREE` also stands the account in as a day-15 Free writer (not founding, plan Free, created long
+ * ago), because a founding or trial account is Pro through the resolver and would otherwise see no gate at all. It
+ * fabricates the resolver's INPUT, never its answer. A paid Pro plan is left as it is, so Pro still sees nothing.
+ */
+export function freeWriterAid(): boolean {
+  return (globalThis as unknown as { __SA_NAV_FREE?: unknown }).__SA_NAV_FREE === true;
+}

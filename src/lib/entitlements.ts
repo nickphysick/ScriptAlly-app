@@ -12,15 +12,15 @@
  * ⚠️ THE SERVER NEVER GATED PACKAGES — firestore.rules checks only the letter on create and the
  * sent lock; functions/ has no package check. This is a client entitlement only.
  */
-import { User, UserPlan } from "../types";
+import { UserPlan } from "../types";
 import type { ProEntitlement } from "./workspaceShell";
 import { TRIAL_DAYS, type ProFeature } from "./planRules";
 
 export const PACKAGES_OPEN_TO_ALL = true;
 
-/** True when this user may create and attach submission packages. */
-export function packagesUnlocked(user: Pick<User, "plan"> | null | undefined): boolean {
-  return PACKAGES_OPEN_TO_ALL || user?.plan === UserPlan.PRO;
+/** True when this account may create and attach submission packages. */
+export function packagesUnlocked(e: Entitlement): boolean {
+  return PACKAGES_OPEN_TO_ALL || canUse(e, "packages");
 }
 
 /**
@@ -30,8 +30,9 @@ export function packagesUnlocked(user: Pick<User, "plan"> | null | undefined): b
  * the plan: open to all, and not on paid Pro. A paid Pro user is never told the page is a founding perk; when founding
  * access ends (the constant goes false) nobody is.
  */
-export function packagesViaFounding(user: Pick<User, "plan"> | null | undefined): boolean {
-  return PACKAGES_OPEN_TO_ALL && !!user && user.plan !== UserPlan.PRO;
+export function packagesViaFounding(e: Entitlement): boolean {
+  /* Plan rules v1: the founding flag itself, not "open to all and not paid". */
+  return e.basis === "founding";
 }
 
 /**
@@ -43,8 +44,8 @@ export function packagesViaFounding(user: Pick<User, "plan"> | null | undefined)
 export const VERSIONS_FOUNDING_ACCESS = true;
 
 /** True when this user may use the Versions page: Pro, or a founding member while founding access is on. */
-export function versionsUnlocked(user: Pick<User, "plan"> | null | undefined, foundingAccess: boolean = VERSIONS_FOUNDING_ACCESS): boolean {
-  return foundingAccess || user?.plan === UserPlan.PRO;
+export function versionsUnlocked(e: Entitlement, foundingAccess: boolean = VERSIONS_FOUNDING_ACCESS): boolean {
+  return foundingAccess || canUse(e, "versions");
 }
 
 /**
@@ -56,8 +57,8 @@ export function versionsUnlocked(user: Pick<User, "plan"> | null | undefined, fo
 export const DISCOVER_OPEN_TO_ALL = true;
 
 /** True when this user has Discover. */
-export function discoverUnlocked(user: Pick<User, "plan"> | null | undefined): boolean {
-  return DISCOVER_OPEN_TO_ALL || user?.plan === UserPlan.PRO;
+export function discoverUnlocked(e: Entitlement): boolean {
+  return DISCOVER_OPEN_TO_ALL || canUse(e, "scout");
 }
 
 /**
@@ -69,8 +70,8 @@ export function discoverUnlocked(user: Pick<User, "plan"> | null | undefined): b
 export const MATERIALS_OPEN_TO_ALL = true;
 
 /** True when this user has Materials. */
-export function materialsUnlocked(user: Pick<User, "plan"> | null | undefined, open: boolean = MATERIALS_OPEN_TO_ALL): boolean {
-  return open || user?.plan === UserPlan.PRO;
+export function materialsUnlocked(e: Entitlement, open: boolean = MATERIALS_OPEN_TO_ALL): boolean {
+  return open || canUse(e, "letters");
 }
 
 /** Each nav entitlement's open-to-all switch, as it stands today. */
@@ -87,11 +88,11 @@ export const NAV_OPEN: Readonly<Record<ProEntitlement, boolean>> = {
  * switch, which is how a test, and the dev-only review aid, see the nav a Free writer will see once gating returns.
  */
 export function navLockedFor(
-  user: Pick<User, "plan"> | null | undefined,
+  e: Entitlement,
   open: Partial<Record<ProEntitlement, boolean>> = {},
 ): Set<ProEntitlement> {
   const out = new Set<ProEntitlement>();
-  if (user?.plan === UserPlan.PRO) return out;
+  if (e.pro) return out;
   for (const k of Object.keys(NAV_OPEN) as ProEntitlement[]) if (!(open[k] ?? NAV_OPEN[k])) out.add(k);
   return out;
 }
@@ -150,3 +151,6 @@ export function resolveEntitlement(f: Omit<EntitlementFacts, "founding"> & { fou
 export const canUse = (e: Entitlement, _feature: ProFeature): boolean => e.pro;
 /** A Pro page on Free: it opens and its lists show, and nothing in it can be created or edited. */
 export const readOnly = (e: Entitlement, feature: ProFeature): boolean => !canUse(e, feature);
+
+/** Which plan-table column is this account's: founding writers and paid Pro hold Pro; a trial is still on Free. */
+export const planColumn = (e: Entitlement): "free" | "pro" => (e.basis === "founding" || e.basis === "pro" ? "pro" : "free");

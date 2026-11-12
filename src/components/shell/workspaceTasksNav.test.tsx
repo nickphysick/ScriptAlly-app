@@ -27,6 +27,8 @@ vi.mock("../../lib/db", () => ({
     tasks: [], userTasks: [], queries: [], agents: [], manuscripts: [], packages: [],
     versions: [], activities: [], taskFlags: [], notes: [], logout: () => {},
     currentUser: { id: "u1", name: "Nick Physick", email: "n@example.com" },
+    /* plan rules v1: the shell reads the resolved entitlement — a day-15 Free writer */
+    entitlement: { basis: "free", pro: false, prompts: true, trialEndsMs: null },
   }),
 }));
 import { WorkspaceShell } from "./WorkspaceShell";

@@ -64,7 +64,7 @@ export const TopNavShell: React.FC<TopNavShellProps> = ({
   children,
 }) => {
   const { pathname } = useLocation();
-  const { currentUser, logout } = useScriptAllyDb();
+  const { currentUser, logout, entitlement } = useScriptAllyDb();
   const [open, setOpen] = useState<NavMenu["key"] | null>(null);
   const [accountOpen, setAccountOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -240,7 +240,7 @@ export const TopNavShell: React.FC<TopNavShellProps> = ({
                   onClose={() => setAccountOpen(false)}
                   name={currentUser.name}
                   email={currentUser.email}
-                  plan={currentUser.plan}
+                  entitlement={entitlement}
                   onNavigatePath={onNavigatePath}
                   onSignOut={logout}
                 />

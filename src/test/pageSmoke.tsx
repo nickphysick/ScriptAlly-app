@@ -75,6 +75,8 @@ const DB_DATA: Record<string, unknown> = {
   authReady: true,
   collectionsReady: true,
   smartImportUsage: null,
+  /* plan rules v1: the resolved entitlement every gate reads — a day-15 Free writer, so the smoke sees the Free page */
+  entitlement: { basis: "free", pro: false, prompts: true, trialEndsMs: null },
   manuscripts: [],
   versions: [],
   packages: [],

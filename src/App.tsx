@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { canUse } from "./lib/entitlements";
 import React, { useState, useEffect } from "react";
 import { BrowserRouter, Navigate, useLocation, useNavigate } from "react-router-dom";
 import { DbProvider, useScriptAllyDb } from "./lib/db";
@@ -273,7 +274,7 @@ export { pathFor } from "./lib/pathFor";
 // tier is retired — capsule fixes P5).
 
 function AppContent() {
-  const { currentUser, authReady, updateUserProfile } = useScriptAllyDb();
+  const { currentUser, authReady, updateUserProfile, entitlement } = useScriptAllyDb();
 
   // URL routing — replaces the old activeTab/activeSubPage state machine. The path is the single
   // source of truth; pages stay mounted across navigation (StagePage display toggling).
@@ -718,7 +719,7 @@ function AppContent() {
             Contact list (no variant) 2400, Discover (`work`) 1600, Manuscripts (`read`)
             1200 — four width regimes across six pages that share two tokens. */}
         <StagePage name="discover" active={routeKey === "agents" && agentsDiscover} layout="fillColumn">
-          <DiscoverRoute onNavigate={handleNavigate} />
+          <MaterialsLock page="scout"><DiscoverRoute onNavigate={handleNavigate} /></MaterialsLock>
         </StagePage>
         <StagePage name="agents" active={routeKey === "agents" && !agentsDiscover} layout="fill" clip>
           <AgentsRoute searchQuery={searchQuery} onNavigate={handleNavigate} active={routeKey === "agents" && !agentsDiscover} />
@@ -834,7 +835,7 @@ function AppContent() {
       <PageBoundary name="panel:undo-bar" kind="panel" onClose={hideUndoBar}><UndoBar /></PageBoundary>
 
       {/* The Pro paste-an-email lane (v1.1): the existing flow, opened from the drawer's picker. */}
-      {currentUser?.plan === UserPlan.PRO && (
+      {currentUser && canUse(entitlement, "emailDrop") && (
         <PageBoundary name="panel:paste-email" kind="panel" onClose={() => setIsPasteResponseOpen(false)}>
           <PasteEmailFlow
             isOpen={isPasteResponseOpen}

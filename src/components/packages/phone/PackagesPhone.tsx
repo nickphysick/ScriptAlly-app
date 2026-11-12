@@ -314,8 +314,8 @@ function useUsage(model: Pk26Model): Usage {
 
 /* ── the shelves (3A): Versions, Query letters, Synopses, Comps — paper cards, the in-use one ringed ── */
 const Shelves: React.FC<{ model: Pk26Model; usage: Usage; onOpen: (k: string, v: string) => void }> = ({ model, usage, onOpen }) => {
-  const { currentUser } = useScriptAllyDb();
-  const verOpen = versionsUnlocked(currentUser);
+  const { entitlement } = useScriptAllyDb();
+  const verOpen = versionsUnlocked(entitlement);
   const lines = (n: number, more: number) => (n ? <>In {plural(n, "query", "queries")}{more ? <> · <em>{plural(more, "request")}</em></> : null}</> : "Not sent yet");
   const shelf = (title: string, kind: string, items: { id: string; name: string; s: React.ReactNode; inUse: boolean }[], cls: string, ico: React.ReactNode, label: string, add: string, onAdd: () => void, page: string) => (
     <section data-pa="pk-shelf" data-kind={kind}>

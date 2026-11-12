@@ -62,8 +62,8 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
   const location = useLocation();
   const navigate = useNavigate();
   /* v41 B: the founding writer strip — founding writers only, until dismissed (one leaf on the user) */
-  const { currentUser, updateUserPaths } = useScriptAllyDb();
-  const founding = packagesViaFounding(currentUser);
+  const { currentUser, entitlement, updateUserPaths } = useScriptAllyDb();
+  const founding = packagesViaFounding(entitlement);
   const showFounding = founding && !foundingNoteHidden(currentUser);
   const setFoundingHidden = (hidden: boolean) => { void updateUserPaths({ [FOUNDING_NOTE_PATH]: hidden }); };
 

@@ -12,6 +12,7 @@
  * progress (`gettingStartedRows`), the page guides (`GUIDE_PAGES` / `guideCard`, opened as Help opens them) and the
  * articles by area (`HELP_AREAS`, `HELP_ARTICLE_LIST`), with the Help Centre's own search (`searchHelp`).
  */
+import { planColumn } from "../../../lib/entitlements";
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
@@ -40,10 +41,11 @@ import "./pagesPhone.css";
 const Chev = () => <span className="pa-chev" aria-hidden="true">{PI.chev}</span>;
 /* ══ Plan & billing ══ */
 export const PlanPhone: React.FC = () => {
-  const { currentUser } = useScriptAllyDb();
+  const { currentUser, entitlement } = useScriptAllyDb();
   const navigate = useNavigate();
   const ent = useSmartImportEntitlement();
-  const pro = currentUser?.plan === UserPlan.PRO;
+  /* plan rules v1: which column is this account's, from the resolver */
+  const pro = planColumn(entitlement) === "pro";
   const smart = smartImportLine(ent, (iso) => dayMonth(iso));
   return (
     <div className="pa-pg" data-pa="plan">
@@ -51,7 +53,7 @@ export const PlanPhone: React.FC = () => {
         <div className="pa-card pa-plancard" data-pa="plan-card">
           <img className="pa-planimg" src="/images/tier-founding.png" alt="" draggable={false} />
           <div className="pa-plant">Founding writer <span className="pa-lock" data-pa="founding-chip">Founding</span></div>
-          <p className="pa-sub pa-plansub" data-pa="plan-line">{planLine(currentUser?.plan).label}</p>
+          <p className="pa-sub pa-plansub" data-pa="plan-line">{planLine(entitlement).label}</p>
         </div>
         <div className="pa-gl">What your plan includes</div>
         <div className="pa-group" data-pa="plan-rows">

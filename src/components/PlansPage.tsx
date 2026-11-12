@@ -16,7 +16,7 @@ import { MountPanel } from "./MountPanel";
 import { PageHeader } from "./shell/PageHeader";
 import { PlanComparison } from "./plans/PlanComparison";
 import { useScriptAllyDb } from "../lib/db";
-import { isProUser } from "../lib/suggestComps";
+import { planColumn } from "../lib/entitlements";
 import {
   parchment,
   sageBandGradient,
@@ -186,7 +186,7 @@ const FounderCard: React.FC = () => (
 );
 
 export const PlansPage: React.FC = () => {
-  const { currentUser } = useScriptAllyDb();
+  const { entitlement } = useScriptAllyDb();
   return (
   // No bespoke ground (capsule law — fixes P5 re-homing): the page inherits the content capsule.
   <div className="min-h-screen pb-16 font-sans" style={{ color: bodyInk }}>
@@ -227,7 +227,7 @@ export const PlansPage: React.FC = () => {
           No `onSeePlans` here — the CTA would point at this page, so the slot states the tier's
           own locked action word. */}
       <div style={{ marginBottom: 20 }}>
-        <PlanComparison currentPlan={isProUser(currentUser) ? "pro" : "free"} />
+        <PlanComparison currentPlan={planColumn(entitlement)} />
       </div>
 
       {/* founding members */}

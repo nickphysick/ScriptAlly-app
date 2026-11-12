@@ -301,7 +301,7 @@ export const PhoneTaskScreen: React.FC<PhoneTaskScreenProps> = ({ core, tasks, s
           <div className="pa-qwrap tdp-cwrap" data-tdp="card">
             <PreviewQueryCard q={q} row={cardRow} agent={t.agent ?? null} queries={queries} manuscripts={manuscripts} manuscript={ms} packages={packages}
               log={qLog} draft={flow ? (Object.values(A).some((v) => v !== undefined) ? flow.draft : { section: flow.draft.section }) : null}
-              nowMs={now} quietWeeks={quietWeeks} free={!packagesUnlocked(currentUser)} />
+              nowMs={now} quietWeeks={quietWeeks} free={!packagesUnlocked(db.entitlement)} />
           </div>
         ) : null}
       </MobileSheet>

@@ -2,9 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query letters v1, Part E — the Pro lock for the Materials pages (design-refs/query-letters-v1, 06 and 07). A writer
- * without the "materials" entitlement sees the page blurred under a white card: a lock in a berry disc, a heading, a
- * line, an italic Free line, "See Pro plans" and "Not now". Nobody is locked today (MATERIALS_OPEN_TO_ALL is true).
+ * Query letters v1, Part E; plan rules v1 (12 Nov) — the Pro gate for the Materials pages and the Scout. On Query
+ * letters, Comparable titles and Submission packages a writer without Pro sees their own work READ-ONLY: the page in
+ * full, inert, under one line and a "See Pro plans" link. On the Scout they see the lock card (design-refs/query-letters-v1,
+ * 06 and 07). Nobody sees either while the page's open-to-all switch is on.
  *
  * ⚠️ MOUNTED FROM THE PAGE SHELL (App.tsx), NEVER INSIDE A PAGE'S OWN FILE: Comparable titles and Submission packages
  * are other packs' pages and are not edited here.
@@ -13,36 +14,56 @@
  * reached by pointer, keyboard or a screen reader. Unlocked, the gate renders its child and nothing else, so no page's
  * layout changes for anyone today.
  *
- * ⚠️ THE DECISION IS `navLockedFor(user).has("materials")` — the same one that draws the nav's Pro marks — so the page
+ * ⚠️ THE DECISION IS THE RESOLVER'S (`readOnly`), AND THE NAV'S MARK (`navLockedFor`) AGREES WITH IT — so the page
  * and the nav cannot disagree. The dev-only `window.__SA_NAV_FREE` aid (lib/railReviewAid) shows both as a Free writer
  * will see them; the call site carries the MODE gate.
  */
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
-import { navLockedFor } from "../../lib/entitlements";
+import { navLockedFor, readOnly } from "../../lib/entitlements";
+import type { ProFeature } from "../../lib/planRules";
+import type { ProEntitlement } from "../../lib/workspaceShell";
 import { navOpenAid } from "../../lib/railReviewAid";
 import "./materialsLock.css";
 
-export type MaterialsPage = "letters" | "comps" | "packages";
+export type MaterialsPage = "letters" | "comps" | "packages" | "scout";
 
-export const LOCK_COPY: Record<"letters" | "materials", { h: string; body: string; free: string }> = {
-  letters: {
-    h: "Query letters is part of Pro",
-    body: "Keep every version of your letter in one place, pick which one goes with each query, and see which gets agents asking for more.",
-    free: "On Free, your queries still record that a query letter went.",
-  },
-  materials: {
-    h: "Materials is part of Pro",
-    body: "Query letters, comparable titles and submission packages: keep them together, send the right ones with each query, and see what's working.",
-    free: "On Free, your queries still record that a letter, synopsis and pages went.",
+/**
+ * PLAN RULES v1 — PRO WORK ON FREE IS READ-ONLY, NOT LOCKED AWAY. On Query letters, Comparable titles and Submission
+ * packages a Free writer's page opens and its lists show; nothing in it can be created or edited (the page is `inert`),
+ * and one line says so with a "See Pro plans" link. Nothing is deleted. The Scout is different: it is not the writer's
+ * own work, so a Free writer gets the lock card, not a read-only view of it.
+ */
+export const READ_ONLY_LINE: Record<"letters" | "comps" | "packages", string> = {
+  letters: "Your query letters are kept and readable on Free. Writing and editing them is part of Pro.",
+  comps: "Your comparable titles are kept and readable on Free. Adding and editing them is part of Pro.",
+  packages: "Your submission packages are kept and readable on Free. Building and editing them is part of Pro.",
+};
+
+export const LOCK_COPY: Record<"scout", { h: string; body: string; free: string }> = {
+  scout: {
+    h: "The Scout is part of Pro",
+    body: "Agents other writers have verified, and comp titles to consider.",
+    free: "On Free, you can still add agents by hand or bring them in.",
   },
 };
 
 export const MaterialsLockGate: React.FC<{ page: MaterialsPage; locked: boolean; children: React.ReactNode }> = ({ page, locked, children }) => {
   const navigate = useNavigate();
   if (!locked) return <>{children}</>;
-  const c = LOCK_COPY[page === "letters" ? "letters" : "materials"];
+  if (page !== "scout") {
+    return (
+      <div className="mlk mlk--ro" data-mlk={page}>
+        <p className="mlk-ro" role="note" data-mlk="read-only">
+          <span>{READ_ONLY_LINE[page]}</span>{" "}
+          <button type="button" className="mlk-ro-go" data-mlk="plans" onClick={() => navigate("/plans")}>See Pro plans</button>
+        </p>
+        <div className="mlk-page" inert data-mlk="page">{children}</div>
+      </div>
+    );
+  }
+  const c = LOCK_COPY.scout;
   return (
     <div className="mlk" data-mlk={page}>
       <div className="mlk-page" inert aria-hidden="true">{children}</div>
@@ -64,9 +85,16 @@ export const MaterialsLockGate: React.FC<{ page: MaterialsPage; locked: boolean;
   );
 };
 
-/** The gate with the signed-in writer's entitlement. */
+const FEATURE: Record<MaterialsPage, ProFeature> = { letters: "letters", comps: "comps", packages: "packages", scout: "scout" };
+const NAV: Record<MaterialsPage, ProEntitlement> = { letters: "materials", comps: "materials", packages: "materials", scout: "discover" };
+
+/**
+ * The gate with the signed-in writer's entitlement (plan rules v1: the one resolver). Founding writers, paid Pro and
+ * trial accounts never see it. While the nav's open-to-all switch for the page is on, nobody does.
+ */
 export const MaterialsLock: React.FC<{ page: MaterialsPage; children: React.ReactNode }> = ({ page, children }) => {
-  const { currentUser } = useScriptAllyDb();
-  const locked = navLockedFor(currentUser, import.meta.env.MODE !== "production" ? navOpenAid() : undefined).has("materials");
+  const { entitlement } = useScriptAllyDb();
+  const open = import.meta.env.MODE !== "production" ? navOpenAid() : undefined;
+  const locked = readOnly(entitlement, FEATURE[page]) && navLockedFor(entitlement, open).has(NAV[page]);
   return <MaterialsLockGate page={page} locked={locked}>{children}</MaterialsLockGate>;
 };

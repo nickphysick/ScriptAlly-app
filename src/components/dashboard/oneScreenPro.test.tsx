@@ -4,6 +4,7 @@
  *
  * Locks for the Pro banner (v16 §5).
  */
+import { resolveEntitlement, type Entitlement } from "../../lib/entitlements";
 import { describe, it, expect } from "vitest";
 import { sliceBetween } from "../../test/sliceBetween";
 import React from "react";
@@ -15,16 +16,24 @@ import { OneScreenPro } from "./OneScreenPro";
 import { cssRule } from "../../test/cssRule";
 
 const cssRules = readFileSync(resolve(__dirname, "./oneScreen.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-const render = (plan: UserPlan) => renderToStaticMarkup(
-  <OneScreenPro loading={false} currentUser={{ id: "u", name: "N", plan } as any} onNavigate={() => {}} />,
+/* plan rules v1: the banner reads the resolved entitlement, driven here through the real resolver */
+const CREATED = Date.parse("2026-11-01T00:00:00Z");
+const entFor = (basis: "free" | "trial" | "pro" | "founding" | "pending"): Entitlement => resolveEntitlement({
+  founding: basis === "pending" ? null : basis === "founding", plan: basis === "pro" ? UserPlan.PRO : UserPlan.FREE,
+  createdMs: CREATED, nowMs: CREATED + (basis === "trial" ? 1 : 30) * 86_400_000,
+});
+const renderE = (basis: Parameters<typeof entFor>[0]) => renderToStaticMarkup(
+  <OneScreenPro loading={false} entitlement={entFor(basis)} onNavigate={() => {}} />,
 );
+const render = (plan: UserPlan) => renderE(plan === UserPlan.PRO ? "pro" : "free");
 
 describe("§5 · the Pro banner", () => {
   it("free: the headline, the sentence and the route to plans", () => {
     const html = render(UserPlan.FREE);
     expect(html).toContain("QueryHawk Pro");
     expect(html).toContain("More room for the journey");
-    expect(html).toContain("Unlimited manuscripts");
+    expect(html).toContain("Query letters");
+    expect(html).not.toContain("Unlimited manuscripts");
     expect(html).toContain("See what");
   });
 
@@ -34,10 +43,13 @@ describe("§5 · the Pro banner", () => {
     expect(render(UserPlan.PRO)).toBe("");
   });
 
-  it("a user with no plan on file is treated as free, never assumed Pro", () => {
-    expect(renderToStaticMarkup(
-      <OneScreenPro loading={false} currentUser={null} onNavigate={() => {}} />,
-    )).toContain("QueryHawk Pro");
+  it("a founding writer is never sold to, and nothing is sold before the entitlement loads", () => {
+    expect(renderE("founding")).toBe("");
+    expect(renderE("pending")).toBe("");
+  });
+
+  it("a trial account may see it", () => {
+    expect(renderE("trial")).toContain("QueryHawk Pro");
   });
 });
 

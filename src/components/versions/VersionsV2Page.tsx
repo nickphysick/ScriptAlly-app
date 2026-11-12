@@ -77,7 +77,7 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
   const navigate = useNavigate();
   const stored = useMemo(() => { try { return localStorage.getItem(ACTIVE_MS_KEY); } catch { return null; } }, [location.key]);
   const ms = useMemo(() => scopedManuscript(manuscripts, stored), [manuscripts, stored]);
-  const locked = reviewFree() || !versionsUnlocked(currentUser, VERSIONS_FOUNDING_ACCESS);
+  const locked = reviewFree() || !versionsUnlocked(db.entitlement, VERSIONS_FOUNDING_ACCESS);
 
   const msQueries = useMemo(() => (ms ? (queries as Query[]).filter((q) => q.manuscriptId === ms.id) : []), [ms, queries]);
   const rows = useMemo(() => new Map(buildRows(msQueries, activities, agents as Agent[], Date.now()).map((r) => [r.id, r])), [msQueries, activities, agents]);

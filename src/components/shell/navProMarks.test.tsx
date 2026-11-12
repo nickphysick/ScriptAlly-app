@@ -9,6 +9,7 @@
  * Today every switch is open, so a founding writer sees none. A Free writer is rendered with the switches shut
  * (`__SA_NAV_FREE`, the dev-only review aid), which is the nav they will see once gating returns.
  */
+import type { Entitlement } from "../../lib/entitlements";
 import React from "react";
 import { afterEach, describe, it, expect, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -18,11 +19,14 @@ import { workspaceSections } from "../../lib/workspaceNav";
 import { navLockedFor } from "../../lib/entitlements";
 
 const user: { plan: UserPlan } = { plan: UserPlan.FREE };
+const ent = (basis: "free" | "pro"): Entitlement => ({ basis, pro: basis === "pro", prompts: basis === "free", trialEndsMs: null });
 vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
     tasks: [], userTasks: [], queries: [], agents: [], manuscripts: [], packages: [],
     versions: [], activities: [], taskFlags: [], notes: [], logout: () => {},
     currentUser: { id: "u1", name: "Isla Morven", email: "i@example.com", plan: user.plan },
+    /* plan rules v1: the shell reads the resolved entitlement — a day-15 Free writer, or a paid Pro one */
+    entitlement: ent(user.plan === UserPlan.PRO ? "pro" : "free"),
   }),
 }));
 import { WorkspaceShell } from "./WorkspaceShell";
@@ -88,9 +92,9 @@ describe("sidebar materials v1 — the nav's Pro marks", () => {
 
   it("navLockedFor: empty today; every entitlement for a Free writer once the switches shut; empty for Pro", () => {
     const shut = { discover: false, packages: false, versions: false, materials: false } as const;
-    expect([...navLockedFor({ plan: UserPlan.FREE })]).toEqual([]);
-    expect([...navLockedFor({ plan: UserPlan.FREE }, shut)].sort()).toEqual(["discover", "materials", "packages", "versions"]);
-    expect([...navLockedFor({ plan: UserPlan.PRO }, shut)]).toEqual([]);
-    expect([...navLockedFor(null, { materials: false })]).toEqual(["materials"]);
+    expect([...navLockedFor(ent("free"))]).toEqual([]);
+    expect([...navLockedFor(ent("free"), shut)].sort()).toEqual(["discover", "materials", "packages", "versions"]);
+    expect([...navLockedFor(ent("pro"), shut)]).toEqual([]);
+    expect([...navLockedFor(ent("free"), { materials: false })]).toEqual(["materials"]);
   });
 });

@@ -25,6 +25,8 @@
  *   NOT BUILT .... billing (no payment path exists), the account purge itself (no job runs), 2FA
  *                  and passkeys (named in a sentence, never as a disabled control).
  */
+import { planColumn } from "../lib/entitlements";
+import { planLine } from "../lib/shellSidebar";
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
@@ -497,7 +499,7 @@ export const AccountSettings: React.FC<{
   onNavigate: (tab: string, subPageName?: string) => void;
 }> = ({ section, onNavigate }) => {
   const {
-    currentUser, updateUserProfile, updateUserPaths, resetPassword,
+    currentUser, updateUserProfile, updateUserPaths, resetPassword, entitlement,
     agents, queries, manuscripts, versions, packages, activities, notes, userTasks,
     logout,
   } = useScriptAllyDb();
@@ -1034,9 +1036,11 @@ export const AccountSettings: React.FC<{
           both plans, so a meter would invent a limit to measure against. */}
       <SettingsCard heading="Your plan" headingId="acct-h-plan">
         <SettingsRow
-          label={currentUser.plan === UserPlan.PRO ? "Pro" : "Free"}
-          description={planAllowanceLine(currentUser.plan === UserPlan.PRO ? "pro" : "free") + "."}
-          control={<button onClick={() => onNavigate("plans")} className="acct-btn acct-btn--ghost" style={ghostBtn}>See Pro plans</button>}
+          /* plan rules v1: the plan line, the allowance and the one prompt all read the resolver; a founding writer
+             is told so and offered nothing */
+          label={planLine(entitlement).label || "Your plan"}
+          description={planAllowanceLine(planColumn(entitlement)) + "."}
+          control={entitlement.prompts ? <button onClick={() => onNavigate("plans")} className="acct-btn acct-btn--ghost" style={ghostBtn}>See Pro plans</button> : undefined}
         />
         <SettingsRow
           label="Smart Import"
@@ -1061,8 +1065,8 @@ export const AccountSettings: React.FC<{
       >
         <div className="sc-row sc-row--full">
           <PlanComparison
-            currentPlan={currentUser.plan === UserPlan.PRO ? "pro" : "free"}
-            onSeePlans={() => onNavigate("plans")}
+            currentPlan={planColumn(entitlement)}
+            onSeePlans={entitlement.prompts ? () => onNavigate("plans") : undefined}
           />
         </div>
       </SettingsCard>

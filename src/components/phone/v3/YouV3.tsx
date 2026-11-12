@@ -37,7 +37,7 @@ export const LRow: React.FC<{ icon: V3IconName; t: string; s?: string | null; on
 /* ── Settings (ref `PAGES.account`) ── */
 export const SettingsV3: React.FC = () => {
   const navigate = useNavigate();
-  const { currentUser, updateUserProfile, updateUserPaths, logout } = useScriptAllyDb();
+  const { currentUser, updateUserProfile, updateUserPaths, logout, entitlement } = useScriptAllyDb();
   const notify = notifyPrefs(currentUser?.notifyPrefs);
   const quiet = quietWeeksOf(currentUser);
   const name = (currentUser?.name ?? "").trim();
@@ -55,7 +55,7 @@ export const SettingsV3: React.FC = () => {
         <div className="pa3-card">
           <button type="button" className="pa3-row" data-pa3="writer" onClick={() => navigate("/plans")}>
             <span className="pa3-seal">{(name[0] ?? "?").toUpperCase()}</span>
-            <span className="pa3-tx"><span className="pa3-t">{name || "You"}</span><span className="pa3-s">{planLine(currentUser?.plan).label}</span></span>
+            <span className="pa3-tx"><span className="pa3-t">{name || "You"}</span><span className="pa3-s">{planLine(entitlement).label}</span></span>
             <V3I n="chev" className="pa3-ic pa3-chev" />
           </button>
         </div>

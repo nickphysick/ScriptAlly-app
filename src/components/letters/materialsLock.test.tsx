@@ -14,14 +14,23 @@ import { MemoryRouter } from "react-router-dom";
 import { UserPlan } from "../../types";
 
 const state: { plan: UserPlan; shut: boolean } = { plan: UserPlan.FREE, shut: false };
-vi.mock("../../lib/db", () => ({ useScriptAllyDb: () => ({ currentUser: { id: "u1", plan: state.plan } }) }));
+vi.mock("../../lib/db", () => ({ useScriptAllyDb: () => ({
+  currentUser: { id: "u1", plan: state.plan },
+  /* plan rules v1: the gate reads the resolved entitlement — paid Pro, or a day-15 Free writer */
+  entitlement: state.plan === UserPlan.PRO
+    ? { basis: "pro", pro: true, prompts: false, trialEndsMs: null }
+    : { basis: "free", pro: false, prompts: true, trialEndsMs: null },
+}) }));
 vi.mock("../../lib/railReviewAid", () => ({
   navOpenAid: () => (state.shut ? { discover: false, packages: false, versions: false, materials: false } : undefined),
 }));
 
-import { MaterialsLock, LOCK_COPY, type MaterialsPage } from "./MaterialsLock";
+import { MaterialsLock, LOCK_COPY, READ_ONLY_LINE, type MaterialsPage } from "./MaterialsLock";
 
 const PAGES: MaterialsPage[] = ["letters", "comps", "packages"];
+const renderAny = (page: MaterialsPage) => renderToStaticMarkup(
+  <MemoryRouter><MaterialsLock page={page}><button type="button" data-probe="page-button">Save</button></MaterialsLock></MemoryRouter>,
+);
 const render = (page: MaterialsPage) => renderToStaticMarkup(
   <MemoryRouter><MaterialsLock page={page}><button type="button" data-probe="page-button">Save</button></MaterialsLock></MemoryRouter>,
 );
@@ -30,21 +39,26 @@ const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").repl
 beforeEach(() => { state.plan = UserPlan.FREE; state.shut = false; });
 
 describe("the Materials lock", () => {
-  it("a Free writer sees it on all three pages, over an inert page, with the right words", () => {
+  it("a Free writer sees their work READ-ONLY on all three pages: the page in full, inert, under one line and a link", () => {
     state.shut = true;
     for (const p of PAGES) {
       const h = render(p);
       const t = text(h);
       expect(h).toContain(`data-mlk="${p}"`);
-      expect(h).toMatch(/<div class="mlk-page" inert="" aria-hidden="true">/);
+      expect(h).toMatch(/<div class="mlk-page" inert="" data-mlk="page">/);
+      expect(h, "readable: not hidden from assistive tech").not.toContain('aria-hidden="true">');
+      expect(h, "the page itself is drawn").toContain('data-probe="page-button"');
+      expect(h, "no lock card").not.toContain('data-mlk="lock"');
+      expect(t).toContain(READ_ONLY_LINE[p as keyof typeof READ_ONLY_LINE]);
       expect(t).toContain("See Pro plans");
-      expect(t).toContain("Not now");
-      const c = p === "letters" ? LOCK_COPY.letters : LOCK_COPY.materials;
-      expect(t).toContain(c.h); expect(t).toContain(c.free);
     }
-    expect(LOCK_COPY.letters.h).toBe("Query letters is part of Pro");
-    expect(LOCK_COPY.materials.h).toBe("Materials is part of Pro");
-    expect(LOCK_COPY.materials.free).toBe("On Free, your queries still record that a letter, synopsis and pages went.");
+  });
+  it("the Scout gets the lock card instead (not the writer's own work)", () => {
+    state.shut = true;
+    const h = renderAny("scout");
+    expect(h).toContain('data-mlk="lock"');
+    expect(text(h)).toContain(LOCK_COPY.scout.h);
+    expect(text(h)).toContain("Not now");
   });
   it("a founding writer (the switch open, as today) sees none, and the page renders as it is", () => {
     for (const p of PAGES) {
@@ -62,5 +76,6 @@ describe("the Materials lock", () => {
     expect(app).toContain('<MaterialsLock page="letters"><QueryLettersPage');
     expect(app).toContain('<MaterialsLock page="comps"><ComparableTitlesPage');
     expect(app).toContain('<MaterialsLock page="packages"><PackagesRoute');
+    expect(app).toContain('<MaterialsLock page="scout"><DiscoverRoute');
   });
 });

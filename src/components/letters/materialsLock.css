@@ -23,3 +23,11 @@
 .mlk-b2 { background: #fff; color: #1c130f; box-shadow: 0 0 0 1px rgba(28, 19, 15, .14), 0 4px 10px -6px rgba(28, 19, 15, .3); }
 .mlk-over button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 @media (max-width: 760px) { .mlk-over { padding-top: 120px; } }
+
+/* Plan rules v1 — the read-only state: the page shows in full under one line and a "See Pro plans" link. No blur, no
+   card; the page is inert, so nothing in it can be created or edited. */
+.mlk--ro { overflow: visible; }
+.mlk-ro { flex: 0 0 auto; margin: 0; padding: 10px 20px; display: flex; flex-wrap: wrap; align-items: baseline; justify-content: center; gap: 4px 10px;
+  background: #f8e8ea; color: #5c2f3a; font: 400 15px/1.4 var(--sp-serif); text-align: center; border-bottom: 1px solid rgba(143, 74, 90, .18); }
+.mlk-ro-go { border: 0; padding: 0; background: none; color: #2d3a50; font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.mlk-ro-go:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }

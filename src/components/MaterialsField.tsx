@@ -151,9 +151,9 @@ export const MaterialsField: React.FC<MaterialsFieldProps> = ({
   allowCustom,
   onNavigate,
 }) => {
-  const { currentUser, packages, versions } = useScriptAllyDb();
+  const { currentUser, entitlement, packages, versions } = useScriptAllyDb();
   /* founding-member access (lib/entitlements.ts) — the attach lock reads the entitlement */
-  const isPro = packagesUnlocked(currentUser);
+  const isPro = packagesUnlocked(entitlement);
   const [explainerOpen, setExplainerOpen] = useState(false);
   const [picking, setPicking] = useState(false);
 

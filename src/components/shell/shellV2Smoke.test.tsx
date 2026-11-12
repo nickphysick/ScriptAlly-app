@@ -39,6 +39,8 @@ vi.mock("../../lib/db", () => ({
     taskFlags: [],
     notes: [],
     currentUser: { id: "u1", name: "Nick Physick", plan: UserPlan.FREE },
+    /* plan rules v1: the shell reads the resolved entitlement — a day-15 Free writer */
+    entitlement: { basis: "free", pro: false, prompts: true, trialEndsMs: null },
   }),
 }));
 
@@ -100,7 +102,7 @@ describe("v2 shell — smoke renders", () => {
   it("THE PRO UPSELL IS FOLDED INTO THE PLAN LINE — a text link, no row, no pill, no card", () => {
     const col = readFileSync(resolve(__dirname, "./WorkspaceShell.tsx"), "utf8");
     // the plan is stated as fact beside the name, and Upgrade is a plain link in that line
-    expect(col).toContain("planLine(currentUser?.plan)");
+    expect(col).toContain("planLine(entitlement)"); // plan rules v1: the resolver, not the stored plan
     expect(col).toContain("ws-up");
     expect(col).toContain("Upgrade");
     // Pro is a text link HERE and a card in the account menu. Nowhere else.

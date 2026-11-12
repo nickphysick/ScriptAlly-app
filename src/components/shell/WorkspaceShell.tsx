@@ -74,7 +74,7 @@ import { registerFeedbackAnchor, setFeedbackPage } from "../../lib/feedbackStore
 import { SidebarRail } from "./SidebarRail";
 import { railTile } from "../../lib/railTile";
 import { navOpenAid, railCountAid } from "../../lib/railReviewAid";
-import { navLockedFor } from "../../lib/entitlements";
+import { navLockedFor, planColumn } from "../../lib/entitlements";
 
 /** The shared active-manuscript key. ⚠️ Packages, Comps and Manuscripts READ this — a selector
  *  that stops writing it breaks them silently, with no error and simply the wrong book. */
@@ -176,7 +176,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   const { pathname, search } = useLocation();
   /* Help Centre v1 — the trail the Help Centre reads to ring the page the writer came from */
   useEffect(() => { noteRoute(pathname); }, [pathname]);
-  const { manuscripts, queries, agents, currentUser, updateUserProfile } = useScriptAllyDb();
+  const { manuscripts, queries, agents, currentUser, updateUserProfile, entitlement } = useScriptAllyDb();
   /* Dashboard first visit v2 (Part I): the first app load of each calendar day (Europe/London), per writer, per device */
   useEffect(() => {
     const uid = currentUser?.id;
@@ -841,7 +841,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
       </span>
     );
   };
-  const plan = planLine(currentUser?.plan);
+  const plan = planLine(entitlement);
   /* the To-do board's total — the only count in the nav, carried on the To-do list row */
   const boardCount = sections.find((sx) => sx.id === "tasks")?.children?.find((c) => c.id === "list")?.count ?? 0;
   /* ⚠️ the review aid is gated HERE, at the call site, so a production build drops the module */
@@ -849,8 +849,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   /* the nav entitlements this account does NOT have (sidebar materials v1): empty while every switch is open to all.
      ⚠️ the review aid is gated HERE, at the call site, so a production build drops it */
   const proLocked = useMemo(
-    () => navLockedFor(currentUser, import.meta.env.MODE !== "production" ? navOpenAid() : undefined),
-    [currentUser],
+    () => navLockedFor(entitlement, import.meta.env.MODE !== "production" ? navOpenAid() : undefined),
+    [entitlement],
   );
   const name = currentUser?.name ?? "";
   const pageName = barPageName(sections, hit, pathname);
@@ -1114,7 +1114,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
             active={settingsSection}
             onSelect={(id) => pickPage(ACCOUNT_ROUTES.find((r) => r.id === id)!.path)}
             onExit={leaveSettings}
-            plan={currentUser?.plan === UserPlan.PRO ? "pro" : "free"}
+            plan={planColumn(entitlement)}
           />
           {onOpenFeedback && (
             <div className="ws-fbk" data-shell="feedback">

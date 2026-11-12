@@ -50,11 +50,11 @@ export const QueryPageV4: React.FC<{ v: V3Query; nowMs: number; quietWeeks: numb
   const ms = manuscripts.find((m) => m.id === q.manuscriptId) ?? null;
   const log = useQueryLog(currentUser?.id ?? null, v.id);
   const thread = useMemo(() => {
-    const view = buildCardView({ row: v.row, q, ag, ms, events: log, packages: packages ?? [], queries, manuscripts, nowMs, quietWeeks, desk: true, free: !packagesUnlocked(currentUser) });
+    const view = buildCardView({ row: v.row, q, ag, ms, events: log, packages: packages ?? [], queries, manuscripts, nowMs, quietWeeks, desk: true, free: !packagesUnlocked(db.entitlement) });
     const d = view.v152;
     if (!d) return [];
     return buildThread(d.steps, { first: view.first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
-  }, [v.row, q, ag, ms, log, packages, queries, manuscripts, nowMs, quietWeeks, currentUser]);
+  }, [v.row, q, ag, ms, log, packages, queries, manuscripts, nowMs, quietWeeks, currentUser, db.entitlement]);
   const msgs = thread.filter((t) => t.t === "msg").length;
   const sig = querySig(String(v.row.status), v.row.lastMs, msgs);
   const fresh = isFresh(v.id, sig);

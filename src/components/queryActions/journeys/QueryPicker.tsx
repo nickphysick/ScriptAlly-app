@@ -19,6 +19,7 @@
  * otherwise sit under the drawer) — the flow itself is untouched. Free users see no link: the drawer
  * does not sell.
  */
+import { canUse } from "../../../lib/entitlements";
 import { useIsMobile } from "../../shell/mobileChrome";
 import React, { useMemo, useState } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
@@ -33,7 +34,8 @@ export function QueryPicker({ onPick, seed, hadOpen, children }: { onPick: (quer
   /* Phone fixes v1 (5C): no autofocus on a phone (it scrolls the flow to the field) */
   const onPhone = useIsMobile();
   const db = useScriptAllyDb();
-  const isPro = db.currentUser?.plan === UserPlan.PRO;
+  /* plan rules v1: Smart email drop through the one resolver */
+  const isPro = canUse(db.entitlement, "emailDrop");
   /* parking (§6.4): what was typed is the picker's one answer */
   const [typed, setTyped] = useState(seedOf<{ typed: string }>({ seed }).typed ?? "");
   const t = typed.trim().toLowerCase();

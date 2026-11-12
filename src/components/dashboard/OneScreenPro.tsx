@@ -15,16 +15,17 @@
  * the plan and showed to Pro users too; moving it is the moment that stops.
  */
 import React from "react";
-import { User } from "../../types";
-import { isProUser } from "../../lib/suggestComps";
+import type { Entitlement } from "../../lib/entitlements";
 import { Skel } from "./OneScreenPanel";
 
 export const OneScreenPro: React.FC<{
   loading: boolean;
-  currentUser: User | null;
+  /** Plan rules v1: the resolved entitlement. The upsell draws only where it allows prompts (trial, Free) — never for
+   *  a founding writer or a paid Pro one. */
+  entitlement: Entitlement;
   onNavigate: (tab: string, sub?: string) => void;
-}> = ({ loading, currentUser, onNavigate }) => {
-  if (isProUser(currentUser)) return null;
+}> = ({ loading, entitlement, onNavigate }) => {
+  if (!entitlement.prompts) return null;
   return (
     <button type="button" className={`os-card os-probanner${loading ? " isload" : ""}`} onClick={() => onNavigate("plans")}>
       {loading && <Skel bars={["h", ""]} />}
@@ -34,7 +35,8 @@ export const OneScreenPro: React.FC<{
       <span className="os-ptxt">
         <span className="os-plab2">QueryHawk Pro</span>
         <span className="os-phead">More room for the journey</span>
-        <span className="os-pline">Unlimited manuscripts, deeper querying analytics and live agent wishlist matching.</span>
+        {/* plan rules v1: what Pro adds, not "unlimited manuscripts" (1 on both plans) */}
+        <span className="os-pline">Query letters, manuscript versions, submission packages and the Scout.</span>
       </span>
       <span className="os-plink2">See what&rsquo;s included <span className="os-arr">→</span></span>
     </button>

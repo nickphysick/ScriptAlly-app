@@ -590,7 +590,7 @@ export const Queries: React.FC<{
     editActivity,
     updateAgent,
     updateQueryStatus,
-    logNudge, setQueryPackage, updateUserPaths} = useScriptAllyDb();
+    logNudge, setQueryPackage, updateUserPaths, entitlement} = useScriptAllyDb();
   const { showConfirm, showToast } = useToast();
   // Query editing is the app-level Edit Query drawer (the inline isEditMode editor is retired).
   const openEditQuery = useOpenEditQuery();
@@ -5892,7 +5892,7 @@ export const Queries: React.FC<{
        derivation (queries/centre/qcCardView), which the To-do list's preview draws from too. Only the handlers stay here. */
     const view = buildCardView({
       row, q, ag, ms, events: trackingEvents, packages, queries: queries as Query[], manuscripts, nowMs: now, quietWeeks: qcQuietWeeks, desk: qcDesk,
-      free: !packagesUnlocked(currentUser) || (import.meta.env.MODE !== "production" ? qc152DevFree() : false),
+      free: !packagesUnlocked(entitlement) || (import.meta.env.MODE !== "production" ? qc152DevFree() : false),
     });
     const { steps, sv, sent, story, nl, door, evStore, first } = view;
     const v152 = view.v152;
@@ -6053,7 +6053,7 @@ export const Queries: React.FC<{
     };
 
     /* what the material editors offer (§4.4): the book's versions (Pro), the saved letters and synopses, the one in use */
-    const pro1522 = (import.meta.env.MODE !== "production" ? qcPlanAid() : null) ?? versionsUnlocked(currentUser);
+    const pro1522 = (import.meta.env.MODE !== "production" ? qcPlanAid() : null) ?? versionsUnlocked(entitlement);
     const qc152Env = (): MatEnv => ({
       free: !pro1522,
       versions: bookVersionsOf(ms).filter((v) => !(v as { archived?: boolean }).archived)
@@ -8064,7 +8064,7 @@ export const Queries: React.FC<{
                  supersedes v151.1 §6's single label row) */
               /* v152.2 §1.1 — three groupings: Status, Action (the six states, "With the agent" reading "Watch and wait"),
                  Package (Pro or founding); "Next action" is gone and reads as Action */
-              const pkgOk1522 = (import.meta.env.MODE !== "production" ? qcPlanAid() : null) ?? versionsUnlocked(currentUser);
+              const pkgOk1522 = (import.meta.env.MODE !== "production" ? qcPlanAid() : null) ?? versionsUnlocked(entitlement);
               const group1522 = listGroupOf(qcGroup, pkgOk1522);
               const statusGroups = (): Section<QcRow>[] => {
                 const live = qcListGroups(sorted151.filter((r) => !CLOSED_SET.includes(r.status)), "status", now151, qcPackageName).map((g) => ({ key: g.key, label: g.label, rows: g.rows }));
@@ -9658,7 +9658,6 @@ export const Queries: React.FC<{
                                    attribute, which is exactly the leak: the type of each slot
                                    rather than the material in it, and only on hover. `linkedChips`
                                    resolves the real names onto the strip instead. */
-                                const isPro = currentUser?.plan === UserPlan.PRO;
                                 const openPackages = () => onNavigate?.("manuscripts", "Submission packages");
                                 /* §2 — this manuscript's live packages; retired ones are not offered */
                                 const attachablePkgs = attachablePackages(packages, activeQuery.manuscriptId);
@@ -10058,8 +10057,8 @@ export const Queries: React.FC<{
                                          `· Pro` and sent a Free user to the plans page; beta grants
                                          everyone Pro, and the free plan shows no ceilings here. The
                                          gate is `canAttachPackages`, one place, currently open. */
-                                      ...(packageMenuRow(canAttachPackages(currentUser), attachablePkgs.length).length ? ["divider" as const] : []),
-                                      ...packageMenuRow(canAttachPackages(currentUser), attachablePkgs.length).map((r) => ({
+                                      ...(packageMenuRow(canAttachPackages(entitlement), attachablePkgs.length).length ? ["divider" as const] : []),
+                                      ...packageMenuRow(canAttachPackages(entitlement), attachablePkgs.length).map((r) => ({
                                         label: r.label,
                                         onClick: () => {
                                           setAddMatOpen(false);

@@ -23,6 +23,7 @@
  *   cd functions && npm install && npm run build
  *   firebase deploy --only functions:suggestComps --project <named target>
  */
+import { hasPro, resolveBasis } from "./entitlement";
 import { onCall, HttpsError } from "firebase-functions/v2/https";
 import { defineSecret } from "firebase-functions/params";
 import { db } from "./firestore";
@@ -38,9 +39,8 @@ import {
 
 const ANTHROPIC_API_KEY = defineSecret("ANTHROPIC_API_KEY");
 
-/* Master switch — must never ship ungated. */
-const SUGGESTIONS_REQUIRE_PRO = true;
-const PRO_PLAN = "Pro"; // mirrors UserPlan.PRO
+/* Plan rules v1: the Scout is a Pro feature, and who has Pro is `entitlement.ts`'s answer (founding flag, then plan,
+   then the 14-day trial). This file keeps no condition of its own. */
 
 /** Runs per user per calendar day (UTC). A cap the writer cannot reach in ordinary use. */
 const RUNS_PER_DAY = 10;
@@ -68,8 +68,8 @@ export const suggestComps = onCall(
     }
 
     // 3. Plan gate — server-side, because client gating is not a gate on a paid API
-    const userSnap = await db.doc(`users/${uid}`).get();
-    if (SUGGESTIONS_REQUIRE_PRO && userSnap.get("plan") !== PRO_PLAN) {
+    const [userSnap, entSnap] = await Promise.all([db.doc(`users/${uid}`).get(), db.doc(`users/${uid}/private/entitlement`).get()]);
+    if (!hasPro(await resolveBasis(uid, userSnap, entSnap))) {
       throw new HttpsError("permission-denied", "The Scout is a Pro feature.");
     }
 

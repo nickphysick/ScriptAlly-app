@@ -32,6 +32,8 @@ vi.mock("../../lib/db", () => ({
   useScriptAllyDb: () => ({
     manuscripts: msFixture,
     currentUser: { id: "u1", name: "Nick Physick", email: "n@example.com", plan: UserPlan.FREE },
+    /* plan rules v1: the shell reads the resolved entitlement — a day-15 Free writer */
+    entitlement: { basis: "free", pro: false, prompts: true, trialEndsMs: null },
   }),
 }));
 

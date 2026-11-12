@@ -3,6 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { freeWriterAid } from "./railReviewAid";
 import { MONTHS_SHORT } from "./dates";
 import { findExistingAgent } from "./importDuplicates";
 import React, { createContext, useCallback, useContext, useMemo, useState, useEffect, useRef } from "react";
@@ -593,6 +594,17 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     const t = setInterval(() => setEntitlementNowMs(Date.now()), 10 * 60 * 1000);
     return () => clearInterval(t);
   }, []);
+  const entitlement = useMemo(() => {
+    /* ⚠️ the review aid is gated HERE, at the call site, so a production build drops it (lib/railReviewAid) */
+    const asFree = import.meta.env.MODE !== "production" && freeWriterAid();
+    return resolveEntitlement({
+      founding: !currentUser || !entitlementLoaded ? null : asFree ? false : smartImportUsage?.founding === true,
+      plan: currentUser?.plan,
+      createdMs: asFree ? 0 : accountCreatedMs,
+      nowMs: entitlementNowMs,
+    });
+  }, [currentUser, entitlementLoaded, smartImportUsage, accountCreatedMs, entitlementNowMs]);
+
   const [manuscripts, setManuscripts] = useState<Manuscript[]>([]);
   const [versions, setVersions] = useState<ManuscriptVersion[]>([]);
   const [attachments, setAttachments] = useState<Attachment[]>([]);
@@ -1982,11 +1994,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const addPackage = async (p: Omit<SubmissionPackage, "id" | "userId" | "status" | "createdDate">): Promise<{ success: boolean; error?: string; id?: string }> => {
     if (!currentUser) return { success: false, error: "Authentication required." };
 
-    /* founding-member access: open to all while PACKAGES_OPEN_TO_ALL (lib/entitlements.ts) */
-    if (!packagesUnlocked(currentUser)) {
+    /* plan rules v1: the one resolver (lib/entitlements.ts) — founding, Pro or trial */
+    if (!packagesUnlocked(entitlement)) {
       return {
         success: false,
-        error: "Custom Submission Packages & A/B Tracking are premium features. Upgrade to QueryHawk Pro!"
+        error: "Submission packages are part of Pro. On Free, the packages you made stay readable."
       };
     }
 
@@ -4064,13 +4076,6 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       return { success: false, error: "Recorded, but the query could not be re-derived." };
     }
   };
-
-  const entitlement = useMemo(() => resolveEntitlement({
-    founding: !currentUser || !entitlementLoaded ? null : smartImportUsage?.founding === true,
-    plan: currentUser?.plan,
-    createdMs: accountCreatedMs,
-    nowMs: entitlementNowMs,
-  }), [currentUser, entitlementLoaded, smartImportUsage, accountCreatedMs, entitlementNowMs]);
 
   return (
     <DbContext.Provider

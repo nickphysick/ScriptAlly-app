@@ -21,6 +21,7 @@
  * soft pink with a sentence and a button. A Pro user reading a greyed-out upsell learns their
  * money bought them a disabled control.
  */
+import type { Entitlement } from "../../lib/entitlements";
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { placeMenu } from "../../lib/todoMenu";
@@ -36,7 +37,8 @@ export interface AccountMenuProps {
   onClose: () => void;
   name: string;
   email?: string;
-  plan?: UserPlan;
+  /** Plan rules v1: the resolved entitlement (lib/entitlements), which decides the plan line and the upgrade link. */
+  entitlement: Entitlement;
   /** Router-direct navigation — AppShell's goPath. */
   onNavigatePath: (path: string) => void;
   onSignOut: () => void;
@@ -49,7 +51,7 @@ export interface AccountMenuProps {
 }
 
 export const AccountMenu: React.FC<AccountMenuProps> = ({
-  open, onClose, name, email, plan, onNavigatePath, onSignOut, anchor,
+  open, onClose, name, email, entitlement, onNavigatePath, onSignOut, anchor,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number; width?: number } | null>(null);
@@ -140,7 +142,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
   }, [open, onClose, anchor]);
 
   if (!open) return null;
-  const line = planLine(plan);
+  const line = planLine(entitlement);
   const go = (path: string) => () => { onClose(); onNavigatePath(path); };
   /* one way out, shared by both menus — no confirm: leaving is not destructive */
   const signOut = () => { onClose(); onSignOut(); };

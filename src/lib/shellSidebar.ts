@@ -7,6 +7,7 @@
  * stored — and the task ledger reuses the To-do board's own selectors, so the sidebar can
  * never disagree with the page.
  */
+import type { Entitlement } from "./entitlements";
 import { Agent, Manuscript, Query, SubmissionPackage, UserPlan } from "../types";
 import { assembleBoard, ribbonTiles, BoardInput } from "./todoBoard";
 import { groupHousekeeping, hkGapCount } from "./todoHousekeeping";
@@ -138,8 +139,11 @@ export const SHELL_PRO_COPY = "Upgrade to Pro";
  *  Why it wins here: the panel foot is exactly where someone goes when they think about their
  *  account, so the prompt is already in the right place — and a persistent sold-looking row in
  *  permanent chrome is a thing you learn to stop seeing. Pro users get the plan, no link. */
-export function planLine(plan: UserPlan | undefined): { label: string; upgrade: boolean } {
-  return plan === UserPlan.PRO ? { label: "Pro plan", upgrade: false } : { label: "Free plan", upgrade: true };
+export function planLine(e: Entitlement): { label: string; upgrade: boolean } {
+  /* Plan rules v1: the line reads the one resolver. A founding writer is told so and never sold to; a trial is named as
+     one; the upgrade link shows only where the resolver allows prompts (trial and Free). */
+  const label = e.basis === "founding" ? "Founding writer" : e.basis === "pro" ? "Pro plan" : e.basis === "trial" ? "Pro trial" : e.basis === "free" ? "Free plan" : "";
+  return { label, upgrade: e.prompts };
 }
 
 /* `stepManuscript` — the sidebar card's arrows — is retired with the card (page header v2, 27 Sep). */

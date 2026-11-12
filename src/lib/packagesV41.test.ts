@@ -4,20 +4,19 @@
  */
 import { describe, expect, it } from "vitest";
 import { UserPlan, type User } from "../types";
-import { packagesViaFounding } from "./entitlements";
+import { packagesViaFounding, type Entitlement } from "./entitlements";
 import { FOUNDING_NOTE_PATH, foundingNoteHidden, headerSub, railLine, railLineText } from "./packagesV41";
 
 const user = (plan: UserPlan, prefs?: User["todoPrefs"]) => ({ plan, todoPrefs: prefs }) as Pick<User, "plan" | "todoPrefs">;
 
 describe("v41 B · who is a founding writer", () => {
-  it("a non-paid account has the page through founding access, so it is a founding writer", () => {
-    expect(packagesViaFounding(user(UserPlan.FREE))).toBe(true);
+  /* plan rules v1: the founding FLAG decides, through the resolver — not "open to all and not paid" */
+  const e = (basis: Entitlement["basis"]): Entitlement => ({ basis, pro: basis !== "free", prompts: basis === "trial" || basis === "free", trialEndsMs: null });
+  it("a founding account is a founding writer", () => {
+    expect(packagesViaFounding(e("founding"))).toBe(true);
   });
-  it("a paid Pro account never is", () => {
-    expect(packagesViaFounding(user(UserPlan.PRO))).toBe(false);
-  });
-  it("no account, no strip", () => {
-    expect(packagesViaFounding(null)).toBe(false);
+  it("a paid Pro, trial, Free or still-loading account never is", () => {
+    for (const b of ["pro", "trial", "free", "pending"] as const) expect(packagesViaFounding(e(b)), b).toBe(false);
   });
   it("the dismissal is one leaf under todoPrefs, read back as hidden", () => {
     expect(FOUNDING_NOTE_PATH).toBe("todoPrefs.packages.foundingNoteHidden");

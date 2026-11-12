@@ -273,12 +273,13 @@ test("QL2-F3 loading: the skeleton at the columns' final sizes (render harness, 
   }
 });
 
-test("QL2-F2 a Free writer meets the Materials lock on Query letters, as in v1", async ({ page }) => {
+test("QL2-F2 a Free writer sees Query letters read-only (plan rules v1)", async ({ page }) => {
   await page.addInitScript(() => { (window as unknown as { __SA_NAV_FREE?: boolean }).__SA_NAV_FREE = true; });
   await openLetters(page, "cv25-ms");
-  const lock = page.locator('[data-mlk="letters"] [data-mlk="lock"]');
-  await expect(lock).toContainText("Query letters is part of Pro");
-  await expect(lock).toContainText("On Free, your queries still record that a query letter went.");
+  const line = page.locator('[data-mlk="letters"] [data-mlk="read-only"]');
+  await expect(line).toContainText("Your query letters are kept and readable on Free.");
+  await expect(line.locator('[data-mlk="plans"]')).toHaveText("See Pro plans");
+  await expect(page.locator('[data-mlk="letters"] [data-mlk="lock"]')).toHaveCount(0);
   expect(await page.locator('[data-mlk="letters"] .mlk-page').getAttribute("inert")).not.toBeNull();
 });
 

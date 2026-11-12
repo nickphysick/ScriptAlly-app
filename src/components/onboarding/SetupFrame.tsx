@@ -169,7 +169,8 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
     ? [{ id: otherTab.id, label: otherTab.label, path: otherTab.id, icon: null }]
     : [];
   const title = (manuscriptTitle ?? "").trim();
-  const plan = planLine(user?.plan);
+  /* plan rules v1: the dev lab is the one caller that passes `user`; it states paid Pro or Free as a fixture */
+  const plan = planLine({ basis: user?.plan === UserPlan.PRO ? "pro" : "free", pro: user?.plan === UserPlan.PRO, prompts: user?.plan !== UserPlan.PRO, trialEndsMs: null });
   const userName = (user?.name ?? "").trim();
 
   return (

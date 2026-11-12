@@ -300,7 +300,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const quietWeeks = quietWeeksOf(currentUser);
   const cardRows = useMemo(() => new Map(stampedCardRows(queries, agents, activities, quietWeeks, now).map((r) => [r.id, r])),
     [queries, agents, activities, quietWeeks, now]);
-  const cardFree = !packagesUnlocked(currentUser);
+  const cardFree = !packagesUnlocked(db.entitlement);
 
   /* ── the flow on the desk ── */
   const qLog = useQueryLog(currentUser?.id ?? null, (sel?.kind === "batch" ? batchFocus : null) ?? deskT?.query?.id ?? null);

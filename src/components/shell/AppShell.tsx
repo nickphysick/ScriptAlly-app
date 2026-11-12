@@ -239,7 +239,7 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
 export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, searchQuery, setSearchQuery, theme, children }) => {
   // The palette's corpus reads these — already in memory on every route (DbProvider), so the
   // palette never fetches. currentUser/logout feed the mobile you-menu (Mobile Pass 1).
-  const { agents, queries, manuscripts, activities, currentUser, logout, tasks, userTasks, taskFlags } = useScriptAllyDb();
+  const { agents, queries, manuscripts, activities, currentUser, logout, tasks, userTasks, taskFlags, entitlement } = useScriptAllyDb();
 
   /* ⚠️ ONE FIGURE IN THE NAV NOW (Amendment 1, H5). The Queries attention count went with the
      filter children: with the sidebar carrying destinations rather than views, there is nothing
@@ -532,7 +532,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             onClose={() => setAccountOpen(false)}
             name={currentUser?.name ?? ""}
             email={currentUser?.email}
-            plan={currentUser?.plan}
+            entitlement={entitlement}
             onNavigatePath={goPath}
             onSignOut={logout}
             anchor={accountAnchor}
