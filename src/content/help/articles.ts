@@ -11,7 +11,11 @@
  * ⚠️ AN ARTICLE A GUIDE ITEM OR THE HELP MENU LINKS TO MUST BE HERE (lock HC1-C5): `lib/helpArticles` builds the live
  *    list from this file, and a link to a slug missing from it falls back to /help.
  * ⚠️ "Add an agent" is the mock's article (design-refs/help-system-v1), with four sentences corrected where the mock
- *    described something the app does not do; the report lists them.
+ *    described something the app does not do; the report lists them. Its steps take design-refs/help-centre-v1's words
+ *    (non-workspace v1, Phase 7), which are those sentences shortened.
+ * ⚠️ PUBLISHED ONLY LEAVE THIS FILE (non-workspace v1, Phase 7). `WRITTEN_ARTICLES` is every article, drafts included;
+ *    `HELP_ARTICLE_LIST` and `articleBySlug` are the published ones, and every surface reads those, so a draft is never
+ *    listed, searched or reachable (its URL shows the not-found screen). Publishing is deleting `draft: true`.
  */
 import type { HelpArticle } from "./model";
 
@@ -19,7 +23,7 @@ const CL = "Contact list";
 const QC = "Query Centre";
 const D = "2026-10-20";
 
-export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
+export const WRITTEN_ARTICLES: readonly HelpArticle[] = [
   /* ═══════════ Queries ═══════════ */
   {
     slug: "log-a-query", area: "queries", title: "Log a query", draft: true, updated: D,
@@ -95,13 +99,12 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
     guide: { page: CL, key: "add" },
     steps: [
       { title: "Open the editor", body: "On the Contact list, press `+ Add an agent` in the header. The editor slides in from the right so your list stays in view." },
-      { title: "Name and agency", body: "A name or an agency is enough to start. Add the country and city if you know them. Each agent sits on their own, even if two share an agency." },
-      { title: "What they're looking for", body: "On `What they want`, pick genres from the list, and paste their wishlist in their own words. Genres tell QueryHawk which agents take your book's genre." },
-      { title: "Response policy", body: "On `How to query`, set how long they take to reply, and choose `No response means no` or `Always replies`. The reply time is how QueryHawk works out when a query has gone past its expected date; the policy decides what your to-do list suggests after that." },
+      { title: "Name and agency", body: "A name or an agency is enough to start. Add the country and city if you know them." },
+      { title: "What they're looking for", body: "On `What they want`, pick genres from the list, and paste their wishlist in their own words." },
+      { title: "Response policy", body: "On `How to query`, set how long they take to reply, and choose `No response means no` or `Always replies`." },
       { title: "Save", body: "Press `Add to your list`. Any gap List health counts shows up there, ready for later." },
     ],
-    figure: "Screenshot slot: the add-agent editor, filled with an example agent",
-    tip: { label: "QUICKER WITH A LIST", text: "Got agents in a spreadsheet already? Bring them in with Smart import: press ⌘K (Ctrl K on Windows), type Import, and open the page." },
+    tip: { label: "Quicker with a list.", text: "Got agents in a spreadsheet already? Bring them in with Smart import: press ⌘K (Ctrl K on Windows), type Import, and open the page." },
     related: ["smart-import", "list-health", "response-policy", "status-key"],
   },
   {
@@ -271,7 +274,17 @@ export const HELP_ARTICLE_LIST: readonly HelpArticle[] = [
   },
 ];
 
+/** The published articles: the only ones any surface lists, searches or opens. */
+export const HELP_ARTICLE_LIST: readonly HelpArticle[] = WRITTEN_ARTICLES.filter((a) => !a.draft);
+
 const BY_SLUG = new Map(HELP_ARTICLE_LIST.map((a) => [a.slug, a]));
+/** A PUBLISHED article; a draft's slug finds nothing, as an unknown one does. */
 export function articleBySlug(slug: string): HelpArticle | undefined {
   return BY_SLUG.get(slug);
+}
+
+const WRITTEN_BY_SLUG = new Map(WRITTEN_ARTICLES.map((a) => [a.slug, a]));
+/** Any written article, drafts included — for the content's own rules (helpContent.test.ts), never a surface. */
+export function writtenArticleBySlug(slug: string): HelpArticle | undefined {
+  return WRITTEN_BY_SLUG.get(slug);
 }

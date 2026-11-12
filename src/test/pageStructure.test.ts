@@ -36,6 +36,8 @@ export const PAGE_SOURCES = [
   "components/AccountSettings.tsx",
   "components/PlansPage.tsx",
   "components/HelpCentre.tsx",
+  "components/help/HelpHome.tsx", // non-workspace v1, Phase 7 — the Help centre home, also signed out
+  "components/help/HelpArticlePage.tsx", // non-workspace v1, Phase 7 — one article, also signed out
   // funnel MVP phase 1: Pricing.tsx left this census by being deleted — it was a developer
   // sandbox on a public route. TODO(phase-5): the real public pricing page rejoins here.
   "components/Auth.tsx",

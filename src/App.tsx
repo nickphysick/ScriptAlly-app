@@ -44,7 +44,8 @@ import { LandingOnlySite, MarketingPage } from "./marketing/LandingOnlySite";
 import { LANDING_ONLY, AUTH_HASH } from "./lib/siteMode";
 import { pathFor } from "./lib/pathFor";
 import { useHash } from "./lib/useHash";
-import { tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
+import { readableSignedOut, tierForPath, WORKSPACE_PATHS } from "./marketing/routeTiers";
+import { HelpCentre } from "./components/HelpCentre";
 import { shellForRoute } from "./lib/shellForRoute";
 import { routeBase } from "./lib/helpPath";
 import { QUERIES_STATUS_PARAM, parseStatusFilter } from "./lib/queriesFilterParam";
@@ -490,6 +491,16 @@ function AppContent() {
     return (
       <MarketingShell user={currentUser} onNavigate={handleNavigate} path={path}>
         <MarketingPage path={path} onNavigate={handleNavigate} />
+      </MarketingShell>
+    );
+  }
+
+  /* Non-workspace v1, Phase 7: the Help centre is readable signed out, in the public shell (someone who cannot sign in
+     can still reach the help). Signed in, it stays a workspace page in the app shell below. */
+  if (!currentUser && readableSignedOut(path)) {
+    return (
+      <MarketingShell user={null} onNavigate={handleNavigate} path={path}>
+        <HelpCentre />
       </MarketingShell>
     );
   }
