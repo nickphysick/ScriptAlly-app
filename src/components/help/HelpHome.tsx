@@ -20,7 +20,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Search } from "lucide-react";
-import { markWhatsNewSeen } from "../../lib/helpArticles";
+import { markWhatsNewSeen, WHATS_NEW } from "../../lib/helpArticles";
 import { GUIDE_PAGES, guideCard, type GuideCard } from "../../lib/pageChecklist";
 import { readSkipped, requestGuideOpen, useGuidesOff } from "../../lib/guideHub";
 import { openFeedback } from "../../lib/feedbackStore";
@@ -56,11 +56,8 @@ export const HELP_HOME = {
 /** "People often ask" — the ref's four. Each is offered only while it finds a published article. */
 export const HELP_CHIPS = ["Partial requested", "Import a spreadsheet", "When to nudge", "Founder's code"] as const;
 
-/** New in QueryHawk — as the ref shows it. */
-export const HELP_NEWS: readonly { title: string; line: string }[] = [
-  { title: "Agency names survive an import in capitals", line: "Fixed 6 Nov, after a founding writer's note" },
-  { title: "Query letters has its own page", line: "Added 12 Nov" },
-];
+/** New in QueryHawk — as the ref shows it, read from the one list the Help menu's badge also counts. */
+export const HELP_NEWS: readonly { title: string; line: string }[] = WHATS_NEW;
 
 const lowerFirst = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
 
