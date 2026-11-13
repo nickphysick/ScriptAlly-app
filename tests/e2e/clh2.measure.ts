@@ -69,6 +69,8 @@ async function mut(page: Page, lock: string) {
       const g = [...document.querySelectorAll<HTMLElement>(".clv-group.cl27")].find((e) => e.offsetHeight) ?? document.body;
       const d = document.createElement("div"); d.className = "clh2-slim"; d.style.height = "48px"; g.prepend(d);
     }); break;
+    /* v2.1's break: the header's columns put back to v2's (160px, 34px) */
+    case "CLH2-12": await page.addStyleTag({ content: ".clv-group[data-v24][data-v27] > .cl24-hd.cl27-hd{grid-template-columns:160px minmax(0,1fr) auto !important;column-gap:34px !important}" }); break;
     case "CLH2-5": await page.evaluate(() => {
       const acts = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl27='header'] .qc1531-acts")].find((e) => e.offsetHeight);
       const b = document.createElement("button"); b.type = "button"; b.textContent = "Discover agents"; acts?.appendChild(b);
@@ -271,4 +273,39 @@ test("SHOTS3 · scrolled at 1512 × 982, both subheader states", async ({ page }
     expect(r.visible, "the row shows").toBe(true);
     await page.screenshot({ path: `${DIR}/shots/slim-${name}-1512.png`, clip: { x: 0, y: 0, width: VP.width, height: 420 } });
   }
+});
+
+/* ═════════ CLH2-12 · v2.1 — the header lines up with the list ═════════ */
+test("CLH2-12 · the h1 starts on the list card's left edge, the Scout on the filter panel's", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("CLH2-12");
+  for (const vp of [{ width: 1280, height: 800 }, VP, { width: 1728, height: 1117 }]) {
+    await openCl(page, vp);
+    await mut(page, "CLH2-12");
+    const r = await page.evaluate(() => {
+      const vis = (s: string) => [...document.querySelectorAll<HTMLElement>(s)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
+      const l = (e: Element | null) => (e ? e.getBoundingClientRect().left : null);
+      return {
+        h1: l(vis(".aglist [data-cl27='header'] [data-clp='headline']")), art: l(vis(".aglist [data-cl27='art'] img")),
+        card: l(vis(".aglist [data-cl26='card']")), rail: l(vis(".aglist .qc153-rail")),
+        ring: l(vis(".aglist [data-cl27='header'] [data-cl26='ring']")),
+      };
+    });
+    L.check(`${vp.width} everything measured`, [r.h1, r.art, r.card, r.rail].every((x) => typeof x === "number"), JSON.stringify(r));
+    L.check(`${vp.width} the h1 on the list card's left edge (±1)`, r.h1 !== null && r.card !== null && Math.abs(r.h1 - r.card) <= 1, `h1 ${r.h1} card ${r.card}`);
+    L.check(`${vp.width} List health's ring (recorded; v2.1 must not move it)`, r.ring !== null, `ring ${r.ring}`);
+    L.check(`${vp.width} the Scout on the filter panel's left edge (±1)`, r.art !== null && r.rail !== null && Math.abs(r.art - r.rail) <= 1, `art ${r.art} rail ${r.rail}`);
+  }
+  L.done(12);
+});
+
+test("SHOTS4 · the Contact list and the Query Centre at 1512 × 982", async ({ page }) => {
+  test.setTimeout(180_000);
+  mkdirSync(`${DIR}/shots`, { recursive: true });
+  await openCl(page);
+  await page.screenshot({ path: `${DIR}/shots/v21-contact-list-1512.png` });
+  await openApp(page, "/queries", VP);
+  await page.waitForTimeout(2500);
+  await page.mouse.move(3, 3);
+  await page.screenshot({ path: `${DIR}/shots/v21-query-centre-1512.png` });
 });
