@@ -15,8 +15,14 @@ import { onSchedule } from "firebase-functions/v2/scheduler";
 import type { Firestore } from "firebase-admin/firestore";
 import { db } from "./firestore";
 import { prepareNudge, prepareWeekly, type NudgeItem, type WeeklyComing, type WeeklyHappened } from "./emailTemplates";
-import { resolveMailConfig, appLink, APP_PATHS, type MailConfig } from "./emailConfig";
+import { resolveMailConfig, appLink, emailSettingsLink, APP_PATHS, type MailConfig } from "./emailConfig";
 import { sendEmail, RESEND_API_KEY } from "./email";
+import { makeSettingsToken } from "./emailSettingsCore";
+
+/* The secret that signs the email settings link — waitlistMail's IP_HASH_SALT, bound by NAME and read from the
+   environment, because importing waitlistMail would pull the waitlist's mail chain into src/lib/queryClock.test.ts's
+   type-check (it imports this module for the clock parity). */
+const SETTINGS_SECRET = "WAITLIST_IP_SALT";
 
 const DAY = 86_400_000;
 export const SERVER_CLOCK_DEFAULTS = { replyWeeks: 8, nudgeAfterWeeks: 2, checkBackWeeks: 2, quietWeeks: 4 } as const;
@@ -114,18 +120,27 @@ export interface RunDeps {
   flagOn: boolean;
   cfg: MailConfig;
   nowMs: number;
+  /** The account's signed email-settings token (emailSettingsCore), or null — then the links need sign-in. */
+  settingsToken?: (uid: string) => string | null;
 }
 
 /** Plan every writer, and send only when the flag is on. Returns what was planned and what was sent. */
 export async function runReminders(kind: "nudge" | "weekly", deps: RunDeps): Promise<{ planned: number; sent: number }> {
   let planned = 0, sent = 0;
-  const turnOffUrl = appLink(deps.cfg, APP_PATHS.emailSettings) ?? "";
+  const plainSettings = appLink(deps.cfg, APP_PATHS.emailSettings) ?? "";
   const changeWhenUrl = appLink(deps.cfg, "/account/preferences") ?? "";
   for (const u of await deps.listUsers()) {
     const f = await deps.facts(u);
+    /* ⚠️ THIS writer's token: "Turn off" and "Email settings" open the no-sign-in page for this account only. The
+       turn-off link also takes the RFC 8058 one-click POST, so it is the List-Unsubscribe target too. */
+    const token = deps.settingsToken?.(u.uid) ?? null;
+    const signedOff = emailSettingsLink(deps.cfg, token, kind === "nudge" ? "nudges" : "weekly");
+    const settingsUrl = emailSettingsLink(deps.cfg, token);
+    const turnOffUrl = signedOff ?? plainSettings;
+    const signed = signedOff ? { settingsUrl, listUnsubscribeUrl: signedOff } : {};
     const prepared = kind === "nudge"
-      ? (() => { const p = planNudge(f, deps.nowMs, deps.cfg); return p ? prepareNudge(deps.cfg, { ...p, turnOffUrl, changeWhenUrl }) : null; })()
-      : (() => { const p = planWeekly(f, deps.nowMs); return p ? prepareWeekly(deps.cfg, { ...p, turnOffUrl }) : null; })();
+      ? (() => { const p = planNudge(f, deps.nowMs, deps.cfg); return p ? prepareNudge(deps.cfg, { ...p, turnOffUrl, changeWhenUrl, ...signed }) : null; })()
+      : (() => { const p = planWeekly(f, deps.nowMs); return p ? prepareWeekly(deps.cfg, { ...p, turnOffUrl, ...signed }) : null; })();
     if (!prepared || !prepared.ok) continue;
     planned++;
     if (!deps.flagOn) continue;
@@ -152,21 +167,24 @@ async function usersFromStore(store: Firestore): Promise<RUser[]> {
 }
 
 const schedule = (kind: "nudge" | "weekly") => async () => {
+  const secret = process.env[SETTINGS_SECRET] ?? "";
+  const nowMs = Date.now();
   await runReminders(kind, {
+    settingsToken: (uid) => makeSettingsToken(uid, secret, nowMs),
     listUsers: () => usersFromStore(db),
     facts: (u) => factsFromStore(db, u),
     send: (to, k, email) => sendEmail(to, k, email as never),
     flagOn: remindersOn(),
     cfg: resolveMailConfig(process.env),
-    nowMs: Date.now(),
+    nowMs,
   });
 };
 
 export const nudgeReminders = onSchedule(
-  { schedule: "0 8 * * *", timeZone: "Europe/London", region: "europe-west2", timeoutSeconds: 300, memory: "256MiB", secrets: [RESEND_API_KEY] },
+  { schedule: "0 8 * * *", timeZone: "Europe/London", region: "europe-west2", timeoutSeconds: 300, memory: "256MiB", secrets: [RESEND_API_KEY, SETTINGS_SECRET] },
   schedule("nudge"),
 );
 export const weeklySummary = onSchedule(
-  { schedule: "0 8 * * 1", timeZone: "Europe/London", region: "europe-west2", timeoutSeconds: 300, memory: "256MiB", secrets: [RESEND_API_KEY] },
+  { schedule: "0 8 * * 1", timeZone: "Europe/London", region: "europe-west2", timeoutSeconds: 300, memory: "256MiB", secrets: [RESEND_API_KEY, SETTINGS_SECRET] },
   schedule("weekly"),
 );

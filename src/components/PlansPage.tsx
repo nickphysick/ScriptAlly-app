@@ -134,6 +134,7 @@ export const PlansPage: React.FC = () => {
 
   return (
     <div className="acct-page pl-page" data-plans-state={basis === "trial" ? "trial" : viewer}>
+      <div className="acct-plane"><div className="acct-grid">
       <div className="acct-work pl-work">
         <button type="button" className="pl-crumb" onClick={() => navigate("/account/plan")}><ChevronLeft aria-hidden="true" />{PLANS_COPY.crumb}</button>
         <header className="sc-ttl sc-ttl--live" data-plans="headline">
@@ -172,6 +173,7 @@ export const PlansPage: React.FC = () => {
 
         <PlanTable viewer={viewer} />
       </div>
+      </div></div>
     </div>
   );
 };

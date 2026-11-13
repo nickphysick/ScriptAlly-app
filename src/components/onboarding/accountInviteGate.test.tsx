@@ -15,7 +15,7 @@ vi.mock("../toast/ToastProvider", async () => (await import("../../test/pageSmok
 vi.mock("../../lib/beta", async (orig) => ({ ...(await orig<typeof import("../../lib/beta")>()), BETA_MODE: true, INVITE_GATE_ENABLED: true }));
 
 import { Auth } from "../Auth";
-import { CODE_PLACEHOLDER } from "../../lib/inviteCode";
+import { CODE_PLACEHOLDER, CODE_REFUSED, readCodeStatus } from "../../lib/inviteCode";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const text = (h: string) => h.replace(/<!-- -->/g, "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").replace(/&#x27;/g, "'");
@@ -55,12 +55,31 @@ describe("arriving without a code (the typed fallback)", () => {
     expect(CODE_PLACEHOLDER).toBe("QH-XXXX-XXXX");
     expect(text(html)).toContain("Enter your founder's code");
   });
-  it("the three outcomes the ref shows: works, already used (with Sign in instead), not recognised", () => {
+  /* Re-pointed (v1.1): the ref's three outcomes are now two. Nick ruled a used code and an unrecognised one get the
+     same answer and the same sentence, so the form cannot be used to test which codes exist. */
+  it("two outcomes: works, or refused (used and unrecognised are one case, with no Sign in instead variant)", () => {
     const src = readFileSync(resolve(here, "../Auth.tsx"), "utf8");
     expect(src).toMatch(/case "ok":[\s\S]*?go\("invite"/);
-    expect(src).toMatch(/case "used":[\s\S]*?CODE_USED[\s\S]*?setUsedCode\(true\)/);
-    expect(src).toMatch(/case "unknown":[\s\S]*?CODE_UNKNOWN/);
-    expect(src).toMatch(/usedCode && [\s\S]*?CODE_USED_LINK/);
+    expect(src).toMatch(/case "refused":[\s\S]*?setErrs\(\{ code: CODE_REFUSED \}\)/);
+    expect(src).not.toMatch(/case "used"|case "unknown"|usedCode|CODE_USED|CODE_UNKNOWN/);
+  });
+  it("⚠️ a used code and an unrecognised code render byte-identical pages, with the one sentence and no extra link", () => {
+    const page = (wire: unknown) => renderPage(<Auth initialMode="signup" lab={{ code: { code: "QH-7K2M-9XTD", status: readCodeStatus(wire) } }} />, "/");
+    const used = page({ status: "used" });
+    const unknown = page({ status: "unknown" });
+    const refused = page({ status: "refused" });
+    expect(used).toBe(unknown);
+    expect(refused).toBe(unknown);
+    expect(text(used)).toContain(CODE_REFUSED);
+    const errPara = used.slice(used.indexOf('id="au-code-e"'), used.indexOf("</p>", used.indexOf('id="au-code-e"')));
+    expect(errPara.length).toBeGreaterThan(0);
+    expect(errPara).not.toContain("<button");
+  });
+  it("the sentence is the old gate's, with founder's code, and the server says the same words", () => {
+    expect(CODE_REFUSED).toBe("That founder's code isn't one of ours, or it's already been used. Check the email we sent, or ask us to look it up.");
+    const fn = readFileSync(resolve(here, "../../../functions/src/inviteCode.ts"), "utf8");
+    expect(fn).toContain(`refused: ${JSON.stringify(CODE_REFUSED)},`);
+    expect(fn).not.toMatch(/"already-exists"/);
   });
 });
 

@@ -17,7 +17,6 @@ import { LANDING_ONLY } from "../lib/siteMode";
 import { BRAND_MARK, BRAND_MARK_SMALL, artUrl } from "./brandArt";
 import { MarketingFooter } from "./MarketingFooter";
 import { usePhone } from "./usePhone";
-import { ConsentBar } from "./ConsentBar";
 import { CONSENT_EVENT, initAnalytics, trackPageView } from "./analytics";
 import { captureAttribution } from "./attribution";
 import { HERO_CTA, WAITLIST_CTA, HERO_PHONE_JOIN } from "./landingCopy";
@@ -344,7 +343,6 @@ export const MarketingShell: React.FC<{
             : <a href="/privacy" onClick={(e) => { e.preventDefault(); onNavigate("privacy"); }}>Privacy</a>}</p>
         </footer>
       ) : <MarketingFooter onNavigate={onNavigate} waitlist={waitlist} />}
-      <ConsentBar onPrivacy={() => onNavigate("privacy")} />
     </div>
   );
 };

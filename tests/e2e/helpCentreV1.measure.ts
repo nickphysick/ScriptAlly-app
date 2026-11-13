@@ -13,6 +13,18 @@
  *    found, in a finally.
  * ⚠️ NOTHING HERE SENDS FEEDBACK: the article's send is answered by a route stub that records the request, so no
  *    document is written and no email goes.
+ *
+ * RE-POINTED (non-workspace v1, Phase 7 / v1.1) at the rebuilt Help centre (design-refs/help-centre-v1.html). Every
+ * lock is kept; each now asserts what the new page does. Published articles only are listed, searched or reachable, so:
+ *   H2  one "For you right now" card (the guide part-way through), not a card per page; its count is that page's pill's
+ *   H3  'agent' → Add an agent first; 'wishlist' (a body word) → Add an agent; 'partial' opens no draft; nonsense →
+ *       "Nothing for … yet" and "Tell us what's missing" opens the panel with the search text
+ *   C1  the published article (Add an agent): Show me lands with the spotlight and ticks nothing; typing on the page ticks
+ *   C2  an unknown or a draft slug → the not-found screen at the same address
+ *   C3  "Not really" on the published article
+ *   C4  no DRAFT tag is reachable: a draft's URL is not found, and the home lists no draft
+ *   C5  a named slug links to its article once published, else to /help; Learn more on a draft target lands on /help
+ * The run has not been made since the re-point; only `--list` was checked.
  */
 import { expect, test, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
@@ -20,6 +32,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 import { ITEM_ARTICLES, PAGE_ARTICLES, LIVE_ARTICLES, articleHref } from "../../src/lib/helpArticles";
 import { showDrafts } from "../../src/content/help/model";
+import { HELP_ARTICLE_LIST, WRITTEN_ARTICLES, articleBySlug, writtenArticleBySlug } from "../../src/content/help/articles";
 import { GUIDE_PAGES } from "../../src/lib/pageChecklist";
 
 const DIR = "reports/help-centre-v1";
@@ -70,6 +83,13 @@ const hcText = (page: Page) => page.evaluate(() => {
   return el ? el.innerText : null;
 });
 const path = (page: Page) => page.evaluate(() => location.pathname);
+const PUBLISHED = new Set(HELP_ARTICLE_LIST.map((a) => a.slug));
+const DRAFT_SLUGS = WRITTEN_ARTICLES.filter((a) => a.draft).map((a) => a.slug);
+/** the not-found screen on screen, and no article */
+const notFound = (page: Page) => page.evaluate(() => {
+  const nf = [...document.querySelectorAll<HTMLElement>("[data-page='not-found']")].find((e) => e.getBoundingClientRect().height > 0);
+  return { nf: !!nf, h: nf?.querySelector("h1")?.textContent ?? null, article: !!document.querySelector("[data-hc='article']") };
+});
 
 /* ───────────────────────── H · the home ───────────────────────── */
 
@@ -94,7 +114,11 @@ test("HC1-H1 · retired: no FAQ topics, no cheat sheet, no verdict words, no sho
   } finally { L.done(20); }
 });
 
-test("HC1-H2 · guides: a card per page that registers a guide, and the Contact list card's count is its pill's", async ({ page }) => {
+/* RE-POINTED: the home no longer draws a card per guide page. It draws ONE "For you right now" card: the first page in
+   sidebar order whose guide is part-way through (else the first not started). Its count is that page's pill's, and its
+   one filled button goes to that page. (Old: a card per page, in sidebar order, "n/N", the "you were here" ring — the
+   ring has no subject now; replaced by "Carry on lands on the card's page".) */
+test("HC1-H2 · guides: one 'For you right now' card, for the guide part-way through, and its count is its pill's", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("HC1-H2");
   const c0 = flags("contacts");
@@ -102,27 +126,49 @@ test("HC1-H2 · guides: a card per page that registers a guide, and the Contact 
     setGuide("contacts", { seen: true, done: { search: true, pin: true } });
     for (const vp of SIZES) {
       const w = `@${vp.width}`;
-      await open(page, "/agents", vp);
-      const pill = vis(page, "[data-pck='pill']");
-      await pill.waitFor({ timeout: 20_000 });
-      const pillN = (await vis(page, "[data-pck='pill'] [data-pck='count']").innerText()).trim();
+      /* each page's pill, in sidebar order: the card the home should show is the first started-not-finished one */
+      const pills: { page: string; route: string; count: string; state: string }[] = [];
+      for (const g of GUIDE_PAGES) {
+        await open(page, g.route, vp);
+        await vis(page, "[data-pck='pill']").waitFor({ timeout: 20_000 }).catch(() => {});
+        const r = await page.evaluate(() => {
+          const p = [...document.querySelectorAll<HTMLElement>("[data-pck='pill']")].find((e) => e.getBoundingClientRect().height > 0);
+          return { count: p?.querySelector<HTMLElement>("[data-pck='count']")?.innerText.trim() ?? "", state: p?.dataset.state ?? "" };
+        });
+        pills.push({ page: g.page, route: g.route, ...r });
+      }
+      const live = pills.filter((p) => p.state === "live");
+      const want = live.find((p) => !/^0 of /.test(p.count)) ?? live[0] ?? null;
       await open(page, "/help", vp);
-      await vis(page, "[data-hc='guides']").waitFor({ timeout: 15_000 }).catch(() => {});
+      await vis(page, "[data-hc='home']").waitFor({ timeout: 15_000 }).catch(() => {});
       const cards = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-hc='guide-card']")]
         .filter((e) => e.getBoundingClientRect().height > 0).map((e) => ({ page: e.dataset.page, n: e.dataset.n, total: e.dataset.total, text: e.innerText })));
-      L.check(`${w} one card per page with a guide (${GUIDE_PAGES.length})`, cards.length === GUIDE_PAGES.length, `${cards.length} cards`);
-      L.check(`${w} the cards are those pages, in sidebar order`, JSON.stringify(cards.map((c) => c.page)) === JSON.stringify(GUIDE_PAGES.map((g) => g.page)), cards.map((c) => c.page).join(","));
-      const cl = cards.find((c) => c.page === "Contact list");
-      L.check(`${w} Contact list card n of N = the pill's "${pillN}"`, !!cl && `${cl.n} of ${cl.total}` === pillN, cl ? `${cl.n} of ${cl.total}` : "no card");
-      L.check(`${w} the card states it`, !!cl && cl.text.includes(`${cl.n}/${cl.total}`), "");
-      L.check(`${w} the card the writer came from is ringed`, await page.evaluate(() => !!document.querySelector("[data-hc='guide-card'][data-page='Contact list'] [data-hc='here']")), "");
+      L.check(`${w} one card at most`, cards.length <= 1, `${cards.length} cards`);
+      L.check(`${w} the card is the guide part-way through (${want?.page ?? "none"})`, want ? cards[0]?.page === want.page : cards.length === 0, JSON.stringify({ pills, card: cards[0]?.page }));
+      const c = cards[0];
+      L.check(`${w} its n of N = the pill's "${want?.count}"`, !!c && !!want && `${c.n} of ${c.total}` === want.count, c ? `${c.n} of ${c.total}` : "no card");
+      L.check(`${w} the card states it`, !!c && c.text.includes(`${c.page} guide: ${c.n} of ${c.total} done`) && /Up next: /.test(c.text), JSON.stringify(c?.text));
+      L.check(`${w} under "For you right now"`, /For you right now/.test((await hcText(page)) ?? ""), "");
+      const filled = await page.locator(".hc .ph-primary").filter({ visible: true }).count();
+      L.check(`${w} one filled button on the page (none with no card)`, filled === (cards.length ? 1 : 0), `${filled}`);
+      if (c && want) {
+        await vis(page, "[data-hc='guide-start']").click();
+        await page.waitForTimeout(600);
+        L.check(`${w} ${c.n === "0" ? "Start" : "Carry on"} lands on ${want.route}`, (await path(page)) === want.route, await path(page));
+      }
     }
-  } finally { setGuide("contacts", JSON.parse(c0)); L.done(10); }
+  } finally { setGuide("contacts", JSON.parse(c0)); L.done(12); }
 });
 
-test("HC1-H3 · search: 'partial' lists Partial requested first; a body word is found; nonsense asks Nick", async ({ page }) => {
+/* RE-POINTED: the search lists published articles in place of the page's middle. 'partial' (a status whose article is a
+   draft) now opens no draft; 'agent' → "Add an agent" first; the body word is 'wishlist' (Add an agent's steps) because
+   the template article is a draft; nonsense → the ref's empty state, and its button opens the panel as "ask us" did. */
+test("HC1-H3 · search: 'agent' lists Add an agent first; a body word is found; nonsense says 'Nothing for … yet'", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("HC1-H3");
+  const results = (page: Page) => page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-hc='result']")]
+    .filter((e) => e.getBoundingClientRect().height > 0).map((e) => ({ slug: e.dataset.slug ?? "", text: e.innerText })));
+  const head = (page: Page) => page.evaluate(() => (document.querySelector("[data-hc='search-head']") as HTMLElement | null)?.innerText ?? "");
   try {
     for (const vp of SIZES) {
       const w = `@${vp.width}`;
@@ -131,30 +177,35 @@ test("HC1-H3 · search: 'partial' lists Partial requested first; a body word is 
       await input.waitFor({ timeout: 15_000 });
       await input.fill("partial");
       await page.waitForTimeout(150);
-      const first = await page.evaluate(() => (document.querySelector("[data-hc='result']") as HTMLElement | null)?.innerText ?? "");
-      L.check(`${w} 'partial' → Partial requested first`, /Partial requested/.test(first), JSON.stringify(first));
-      const n = await page.locator("[data-hc='result']").count();
-      L.check(`${w} at most seven`, n > 0 && n <= 7, `${n}`);
-      await input.fill("QueryHawk-template");
+      const partial = await results(page);
+      L.check(`${w} 'partial' opens no draft`, partial.every((r) => PUBLISHED.has(r.slug)), JSON.stringify(partial));
+      await input.fill("agent");
       await page.waitForTimeout(150);
-      const tpl = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-hc='result']")].map((e) => e.innerText).join(" | "));
-      L.check(`${w} a word only in a body is found`, /Download the template/.test(tpl), JSON.stringify(tpl));
+      const ag = await results(page);
+      L.check(`${w} 'agent' → Add an agent first`, ag[0]?.slug === "add-an-agent" && /Add an agent/.test(ag[0]?.text ?? ""), JSON.stringify(ag[0]));
+      L.check(`${w} every hit is published`, ag.length > 0 && ag.every((r) => PUBLISHED.has(r.slug)), JSON.stringify(ag.map((r) => r.slug)));
+      await input.fill("wishlist");
+      await page.waitForTimeout(150);
+      const wl = await results(page);
+      L.check(`${w} a word only in a body is found`, wl.length === 1 && wl[0].slug === "add-an-agent", JSON.stringify(wl));
+      L.check(`${w} and counted`, (await head(page)) === '1 answer for "wishlist"', JSON.stringify(await head(page)));
       await input.fill("zzqxv");
       await page.waitForTimeout(150);
+      L.check(`${w} nonsense: the heading`, (await head(page)) === 'Nothing for "zzqxv" yet', JSON.stringify(await head(page)));
       const nores = await page.evaluate(() => (document.querySelector("[data-hc='no-results']") as HTMLElement | null)?.innerText ?? "");
-      L.check(`${w} nonsense: the no-result line`, /Nothing matches "zzqxv"\. Try a status name or a page name, or ask us\./.test(nores), JSON.stringify(nores));
-      await vis(page, "[data-hc='ask-nick']").click();
+      L.check(`${w} nonsense: the line and its button`, nores.includes("We haven't written that one. Tell us what you were looking for and we'll add it.") && nores.includes("Tell us what's missing"), JSON.stringify(nores));
+      await vis(page, "[data-hc='tell-missing']").click();
       await page.locator("[data-fb='panel']").waitFor({ timeout: 8000 }).catch(() => {});
       const fb = await page.evaluate(() => ({
         kind: (document.querySelector("[data-fb='kind'][aria-checked='true']") as HTMLElement | null)?.dataset.k ?? null,
         msg: (document.querySelector("[data-fb='message']") as HTMLTextAreaElement | null)?.value ?? null,
       }));
-      L.check(`${w} ask us opens the panel on Something's confusing`, fb.kind === "Something's confusing", JSON.stringify(fb));
+      L.check(`${w} Tell us what's missing opens the panel on Something's confusing`, fb.kind === "Something's confusing", JSON.stringify(fb));
       L.check(`${w} with the search text as the message`, fb.msg === "zzqxv", JSON.stringify(fb));
       await page.keyboard.press("Escape");
       await page.evaluate(() => { try { sessionStorage.clear(); } catch { /* none */ } });
     }
-  } finally { L.done(12); }
+  } finally { L.done(18); }
 });
 
 test("HC1-H4 · '/' anywhere focuses the search", async ({ page }) => {
@@ -177,6 +228,10 @@ test("HC1-H4 · '/' anywhere focuses the search", async ({ page }) => {
 
 /* ───────────────────────── C · articles ───────────────────────── */
 
+/* RE-POINTED: Add an agent is the one published article. Its meta is "{n} to read · Checked {date}" now (no "✓ You've done
+   this" line); the credit shows as the ✓ beside it in the subject list. "Find an agent" is a draft, so its Show me has no
+   subject: "showing ticks nothing" is asserted on Add an agent's Show me (no done flag written by it), and "the writer's
+   own action ticks" on the Contact list's own search. "Show me again" is replaced by: the button's words never change. */
 test("HC1-C1 · show me: the article's button lands on the page with the spotlight; only the writer's own action ticks", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("HC1-C1");
@@ -185,11 +240,13 @@ test("HC1-C1 · show me: the article's button lands on the page with the spotlig
     for (const vp of SIZES) {
       const w = `@${vp.width}`;
       setGuide("contacts", { seen: true, done: {} });
-      /* Add an agent: credited by an agent on file, so the article says so and offers "Show me again" */
       await open(page, "/help/add-an-agent", vp);
       await vis(page, "[data-hc='showme-go']").waitFor({ timeout: 15_000 });
       const meta = await vis(page, "[data-hc='meta']").innerText();
-      L.check(`${w} add-an-agent: "✓ You've done this" (an agent is on file)`, meta.includes("✓ You've done this"), JSON.stringify(meta));
+      L.check(`${w} add-an-agent: the meta line`, /^\d+ (min|sec) to read · Checked \d{1,2} [A-Z][a-z]+ \d{4}$/.test(meta.trim()), JSON.stringify(meta));
+      const tick = await page.evaluate(() => (document.querySelector("[data-hc='toc'][data-slug='add-an-agent']") as HTMLElement | null)?.innerText ?? "");
+      L.check(`${w} add-an-agent: ✓ in the subject list (an agent is on file)`, tick.includes("✓"), JSON.stringify(tick));
+      L.check(`${w} the button reads "Show me on the page"`, (await vis(page, "[data-hc='showme-go']").innerText()).trim() === "Show me on the page", "");
       await vis(page, "[data-hc='showme-go']").click();
       await page.waitForFunction(() => location.pathname === "/agents", undefined, { timeout: 10_000 }).catch(() => {});
       L.check(`${w} lands on the Contact list`, (await path(page)) === "/agents", await path(page));
@@ -206,19 +263,14 @@ test("HC1-C1 · show me: the article's button lands on the page with the spotlig
       const inHole = !!spot.hole && !!spot.btn && spot.btn.left >= spot.hole.left - 1 && spot.btn.top >= spot.hole.top - 1
         && spot.btn.left + spot.btn.width <= spot.hole.left + spot.hole.width + 1 && spot.btn.top + spot.btn.height <= spot.hole.top + spot.hole.height + 1;
       L.check(`${w} its hole is round "+ Add an agent"`, inHole, JSON.stringify(spot));
+      await page.waitForTimeout(800);
+      /* v1.1: "add" is earned on the Contact list by the agent already on file (the subject list's ✓ above says so), not by
+         Show me; anything else ticked would be Show me's doing. */
+      L.check(`${w} showing it ticked nothing`, Object.keys(JSON.parse(flags("contacts")).done ?? {}).filter((k) => k !== "add").length === 0, flags("contacts"));
       await page.keyboard.press("Escape");
 
-      /* Find an agent: not done; Show me points; nothing ticks until the writer types */
-      await open(page, "/help/find-an-agent", vp);
-      await vis(page, "[data-hc='showme-go']").waitFor({ timeout: 15_000 });
-      L.check(`${w} find-an-agent before: "Part of the Contact list guide"`, (await vis(page, "[data-hc='meta']").innerText()).includes("Part of the Contact list guide"), "");
-      await vis(page, "[data-hc='showme-go']").click();
-      await page.locator("[data-pck='spot'] [data-pck='card']").waitFor({ timeout: 15_000 }).catch(() => {});
-      const t2 = await page.evaluate(() => document.querySelector<HTMLElement>("[data-pck='spot'] [data-pck='card'] b")?.innerText ?? null);
-      L.check(`${w} spotlight on "Search for an agent"`, t2 === "Search for an agent", JSON.stringify(t2));
-      await page.waitForTimeout(800);
-      L.check(`${w} showing it ticked nothing`, !JSON.parse(flags("contacts")).done?.search, flags("contacts"));
-      await page.keyboard.press("Escape");
+      /* the writer's own action: searching on the Contact list ticks "Search for an agent" */
+      L.check(`${w} search not done before`, !JSON.parse(flags("contacts")).done?.search, flags("contacts"));
       const input = page.locator("input[aria-label='Find an agent']");
       if (!(await input.evaluateAll((els) => els.some((e) => e.getBoundingClientRect().width > 4)))) await vis(page, "[data-cl19='find-wrap']").click();
       await vis(page, "input[aria-label='Find an agent']").fill("ab");
@@ -226,27 +278,35 @@ test("HC1-C1 · show me: the article's button lands on the page with the spotlig
       for (let i = 0; i < 20 && !ticked; i++) { await page.waitForTimeout(500); ticked = !!JSON.parse(flags("contacts")).done?.search; }
       L.check(`${w} typing ticks it`, ticked, flags("contacts"));
       await vis(page, "input[aria-label='Find an agent']").fill("");
+      /* "Find an agent" is a draft: its article is not reachable, so the guide teaches it on the page alone */
       await open(page, "/help/find-an-agent", vp);
-      await vis(page, "[data-hc='meta']").waitFor({ timeout: 15_000 });
-      L.check(`${w} find-an-agent after: "✓ You've done this"`, (await vis(page, "[data-hc='meta']").innerText()).includes("✓ You've done this"), "");
-      L.check(`${w} and "Show me again"`, (await vis(page, "[data-hc='showme-go']").innerText()).trim() === "Show me again", "");
+      await page.waitForTimeout(600);
+      const nf = await notFound(page);
+      L.check(`${w} find-an-agent (a draft) is the not-found screen`, nf.nf && !nf.article, JSON.stringify(nf));
+      await open(page, "/help/add-an-agent", vp);
+      await vis(page, "[data-hc='showme-go']").waitFor({ timeout: 15_000 });
+      L.check(`${w} and Add an agent's button still reads "Show me on the page"`, (await vis(page, "[data-hc='showme-go']").innerText()).trim() === "Show me on the page", "");
     }
-  } finally { setGuide("contacts", JSON.parse(c0)); L.done(20); }
+  } finally { setGuide("contacts", JSON.parse(c0)); L.done(24); }
 });
 
-test("HC1-C2 · an unknown slug goes to /help", async ({ page }) => {
-  test.setTimeout(120_000);
+/* RE-POINTED: an unknown slug, and a draft's, used to go to /help; now each shows the not-found screen at its own address. */
+test("HC1-C2 · an unknown or a draft slug shows the not-found screen", async ({ page }) => {
+  test.setTimeout(180_000);
   const L = new Ledger("HC1-C2");
   try {
     for (const vp of SIZES) {
       const w = `@${vp.width}`;
-      await open(page, "/help/nope", vp);
-      await page.waitForTimeout(600);
-      L.check(`${w} the address is /help`, (await path(page)) === "/help", await path(page));
-      L.check(`${w} the home is on screen`, /How can we help\?/.test((await hcText(page)) ?? ""), "");
-      L.check(`${w} no blank article`, await page.evaluate(() => !document.querySelector("[data-hc='article']")), "");
+      for (const slug of ["nope", DRAFT_SLUGS[0]]) {
+        await open(page, `/help/${slug}`, vp);
+        await page.locator("[data-page='not-found']").filter({ visible: true }).first().waitFor({ timeout: 15_000 }).catch(() => {});
+        const nf = await notFound(page);
+        L.check(`${w} /help/${slug}: the address stays`, (await path(page)) === `/help/${slug}`, await path(page));
+        L.check(`${w} /help/${slug}: the not-found screen`, nf.nf && nf.h === "We can't find that page.", JSON.stringify(nf));
+        L.check(`${w} /help/${slug}: no blank article`, !nf.article, "");
+      }
     }
-  } finally { L.done(6); }
+  } finally { L.done(12); }
 });
 
 test("HC1-C3 · Did this help? Not really: kind Article, pageName help/{slug}; the panel keeps four kinds", async ({ page }) => {
@@ -261,7 +321,7 @@ test("HC1-C3 · Did this help? Not really: kind Article, pageName help/{slug}; t
     for (const vp of SIZES) {
       const w = `@${vp.width}`;
       sent.length = 0;
-      await open(page, "/help/list-health", vp);
+      await open(page, "/help/add-an-agent", vp); /* re-pointed: list-health is a draft */
       await vis(page, "[data-hc='helpful-no']").click();
       await vis(page, "[data-hc='helpful-input']").fill("A worked example would help");
       await vis(page, "[data-hc='helpful-send']").click();
@@ -269,52 +329,69 @@ test("HC1-C3 · Did this help? Not really: kind Article, pageName help/{slug}; t
       const s = sent[0];
       L.check(`${w} one send`, sent.length === 1, `${sent.length}`);
       L.check(`${w} kind Article`, s?.kind === "Article", JSON.stringify(s));
-      L.check(`${w} pageName help/list-health`, s?.pageName === "help/list-health", JSON.stringify(s));
+      L.check(`${w} pageName help/add-an-agent`, s?.pageName === "help/add-an-agent", JSON.stringify(s));
+      L.check(`${w} the thanks`, (await page.evaluate(() => (document.querySelector("[data-hc='helpful-sent']") as HTMLElement | null)?.innerText ?? "")).startsWith("Thanks. That's gone to us as a note."), "");
       L.check(`${w} the writer's words`, s?.message === "A worked example would help", JSON.stringify(s));
-      await vis(page, ".ws-fbtn, .ws-fbb, .ws-fbi").click();
+      await vis(page, ".wsr-fb, .ws-fbtn, .ws-fbb, .ws-fbi").click(); /* v1.1: the rail's feedback button is .wsr-fb */
       await page.locator("[data-fb='panel']").waitFor({ timeout: 8000 });
       const kinds = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-fb='panel'] [data-fb='kind']")].map((e) => e.dataset.k));
       L.check(`${w} the panel offers four kinds`, kinds.length === 4, JSON.stringify(kinds));
       L.check(`${w} and never Article`, !kinds.includes("Article"), JSON.stringify(kinds));
       await page.keyboard.press("Escape");
     }
-  } finally { L.done(12); }
+  } finally { L.done(14); }
 });
 
-test("HC1-C4 · drafts: a DRAFT tag on this dev build, none on a reviewed article, never in production", async ({ page }) => {
-  test.setTimeout(120_000);
+/* RE-POINTED: drafts are unreachable, so no DRAFT tag can be shown on any build. "A drafted article carries DRAFT" is
+   replaced by: a draft's URL is the not-found screen, with no tag on screen, and the home lists no draft. */
+test("HC1-C4 · drafts: unreachable on every build, so no DRAFT tag is ever on screen", async ({ page }) => {
+  test.setTimeout(180_000);
   const L = new Ledger("HC1-C4");
   try {
     L.check("production never shows it", showDrafts("production") === false, "");
-    L.check("a dev build does", showDrafts("development") === true, "");
+    L.check("a dev build would", showDrafts("development") === true, "");
     for (const vp of SIZES) {
       const w = `@${vp.width}`;
       await open(page, "/help/find-an-agent", vp);
-      await vis(page, "[data-hc='meta']").waitFor({ timeout: 15_000 });
-      L.check(`${w} a drafted article carries DRAFT`, await page.locator("[data-hc='draft']").filter({ visible: true }).count() === 1, "");
+      await page.waitForTimeout(600);
+      const nf = await notFound(page);
+      L.check(`${w} a drafted article's URL is not found`, nf.nf && !nf.article, JSON.stringify(nf));
+      L.check(`${w} and carries no DRAFT`, await page.locator("[data-hc='draft']").filter({ visible: true }).count() === 0, "");
       await open(page, "/help/add-an-agent", vp);
       await vis(page, "[data-hc='meta']").waitFor({ timeout: 15_000 });
-      L.check(`${w} the reviewed article does not`, await page.locator("[data-hc='draft']").filter({ visible: true }).count() === 0, "");
+      L.check(`${w} the reviewed article carries none`, await page.locator("[data-hc='draft']").filter({ visible: true }).count() === 0, "");
+      await open(page, "/help", vp);
+      await vis(page, "[data-hc='home']").waitFor({ timeout: 15_000 }).catch(() => {});
+      const draftSet = new Set(DRAFT_SLUGS);
+      const listed = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-hc] [data-slug]")].map((e) => e.dataset.slug ?? ""));
+      L.check(`${w} the home lists no draft`, listed.length > 0 && listed.every((s) => !draftSet.has(s)), JSON.stringify(listed));
     }
-  } finally { L.done(6); }
+  } finally { L.done(10); }
 });
 
-test("HC1-C5 · live: every slug a link names has a page, and a guide row's Learn more lands on its article", async ({ page }) => {
+/* RE-POINTED: a named slug must be WRITTEN; it is live and links to /help/{slug} only once published, else to /help. A
+   published one renders its article; a draft's URL is the not-found screen. "Search for an agent → Learn more" names
+   find-an-agent, a draft, so it now lands on the Help centre home. */
+test("HC1-C5 · live: every slug a link names is written; published ones have a page, and a draft's Learn more lands on /help", async ({ page }) => {
   test.setTimeout(420_000);
   const L = new Ledger("HC1-C5");
   const c0 = flags("contacts");
   try {
     const named = [...new Set([...Object.values(ITEM_ARTICLES).flatMap((m) => Object.values(m)), ...Object.values(PAGE_ARTICLES).flat()])];
     for (const s of named) {
-      L.check(`${s} is live`, LIVE_ARTICLES.has(s), "");
-      L.check(`${s} links to /help/${s}`, articleHref(s) === `/help/${s}`, articleHref(s));
+      const pub = !!articleBySlug(s);
+      L.check(`${s} is written`, !!writtenArticleBySlug(s), "");
+      L.check(`${s} is live only if published (${pub})`, LIVE_ARTICLES.has(s) === pub, "");
+      L.check(`${s} links to ${pub ? `/help/${s}` : "/help"}`, articleHref(s) === (pub ? `/help/${s}` : "/help"), articleHref(s));
     }
     const vp = SIZES[0];
     for (const s of named) {
       await open(page, `/help/${s}`, vp);
       await page.waitForTimeout(300);
-      const got = await page.evaluate(() => ({ p: location.pathname, slug: document.querySelector<HTMLElement>("[data-hc='article']")?.dataset.slug ?? null }));
-      L.check(`/help/${s} renders that article`, got.p === `/help/${s}` && got.slug === s, JSON.stringify(got));
+      const got = await page.evaluate(() => ({ p: location.pathname, slug: document.querySelector<HTMLElement>("[data-hc='article']")?.dataset.slug ?? null,
+        nf: [...document.querySelectorAll<HTMLElement>("[data-page='not-found']")].some((e) => e.getBoundingClientRect().height > 0) }));
+      if (articleBySlug(s)) L.check(`/help/${s} renders that article`, got.p === `/help/${s}` && got.slug === s && !got.nf, JSON.stringify(got));
+      else L.check(`/help/${s} (a draft) is the not-found screen`, got.p === `/help/${s}` && got.slug === null && got.nf, JSON.stringify(got));
     }
     setGuide("contacts", { seen: true, done: {} });
     for (const v of SIZES) {
@@ -325,8 +402,8 @@ test("HC1-C5 · live: every slug a link names has a page, and a guide row's Lear
       await page.locator("[data-pck='popover']").waitFor({ timeout: 8000 });
       await page.locator("[data-pck='item'][data-k='search'] [data-pck='learn']").evaluate((e) => (e as HTMLElement).click());
       await page.waitForTimeout(600);
-      const got = await page.evaluate(() => ({ p: location.pathname, t: document.querySelector<HTMLElement>("[data-hc='article'] h1")?.innerText ?? null }));
-      L.check(`${w} Search for an agent → Learn more → /help/find-an-agent`, got.p === "/help/find-an-agent" && got.t === "Find an agent", JSON.stringify(got));
+      const got = await page.evaluate(() => ({ p: location.pathname, home: !!document.querySelector("[data-hc='home']"), article: !!document.querySelector("[data-hc='article']") }));
+      L.check(`${w} Search for an agent → Learn more → /help (find-an-agent is a draft)`, got.p === "/help" && got.home && !got.article, JSON.stringify(got));
     }
-  } finally { setGuide("contacts", JSON.parse(c0)); L.done(35); }
+  } finally { setGuide("contacts", JSON.parse(c0)); L.done(45); }
 });

@@ -51,13 +51,18 @@ export interface WhatsNewEntry {
   /** ISO date it shipped */
   date: string;
   title: string;
+  /** The line under it on the Help home ("Fixed 6 Nov, after a founding writer's note"). */
+  line: string;
 }
 
-/** Newest first. Facts about what shipped, in the writer's words. */
+/**
+ * In the ref's order (not by date — the badge reads dates, not order). Facts about what shipped, in the writer's words.
+ * ⚠️ ONE LIST (non-workspace v1.1, 7c): the Help home's "New in QueryHawk" (help-centre-v1 ref) and the Help menu's
+ * badge both read this, so the badge never counts entries the page does not show.
+ */
 export const WHATS_NEW: readonly WhatsNewEntry[] = [
-  { id: "help-system", date: "2026-10-19", title: "Help on every page: definitions, page guides and a quicker way to send feedback" },
-  { id: "pin-lists", date: "2026-10-18", title: "Pin the list on the Contact list and the Query Centre to give it the whole page" },
-  { id: "list-health", date: "2026-10-14", title: "List health on the Contact list, and Housekeeping to fill the gaps one at a time" },
+  { id: "agency-caps-import", date: "2026-11-06", title: "Agency names survive an import in capitals", line: "Fixed 6 Nov, after a founding writer's note" },
+  { id: "query-letters-page", date: "2026-11-12", title: "Query letters has its own page", line: "Added 12 Nov" },
 ];
 
 export const WHATS_NEW_SEEN_KEY = "sa.whatsNew.seen";

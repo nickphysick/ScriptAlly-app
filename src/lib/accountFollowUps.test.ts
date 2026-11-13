@@ -47,3 +47,13 @@ describe("other devices: this device signs back in on the fresh session", () => 
     expect(s).not.toMatch(/data-acct="outall" disabled className/);
   });
 });
+
+describe("the pending email-change panel (non-workspace v1.1, 5a)", () => {
+  const s = readFileSync(resolve(__dirname, "../components/AccountSettings.tsx"), "utf8");
+  const panel = s.slice(s.indexOf('data-acct="email-pending"'), s.indexOf("</SettingsNote>", s.indexOf('data-acct="email-pending"')));
+  it("ends with the way out, and draws no cancel control", () => {
+    expect(panel.length).toBeGreaterThan(50);
+    expect(panel).toContain("Changed your mind? Ignore that email and nothing changes.");
+    expect(panel).not.toMatch(/<button|Cancel/);
+  });
+});

@@ -21,7 +21,7 @@
  * ⚠️ THE CODE NEVER WRITES FOR THE WRITER: these are action links and notices, nothing drafted.
  */
 import type { SendOutcome, RenderedEmail } from "./email";
-import { APP_PATHS, EmailKind, MailConfig, resolveMailConfig } from "./emailConfig";
+import { APP_PATHS, EmailKind, MailConfig, emailSettingsLink, resolveMailConfig } from "./emailConfig";
 import { Prepared, prepareEmailChanged, prepareNewEmail, prepareReset, prepareSignIn } from "./emailTemplates";
 import { createHash } from "crypto";
 
@@ -69,6 +69,8 @@ export interface AccountEmailDeps {
     take: (uid: string, currentEmail: string) => Promise<{ oldEmail: string; newEmail: string } | null>;
   };
   minAnswerMs?: number;
+  /** The account's signed email-settings token (emailSettingsCore.makeSettingsToken), or null: then Settings › Emails. */
+  settingsToken?: (uid: string) => string | null;
 }
 
 export interface AccountEmailRequest {
@@ -164,11 +166,14 @@ export async function handleAccountEmail(req: AccountEmailRequest, deps: Account
         let user: AuthUserLite | null = null;
         try { user = await deps.auth.getUserByEmail(email); } catch (e) { if (!isNotFound(e)) throw e; }
         if (!user || user.disabled) return settle("no-account");
+        /* The account's own no-sign-in settings link: this goes to the account's current address. (Not for newEmail,
+           an address not yet confirmed, nor emailChanged, an inbox that may no longer be the writer's.) */
+        const settingsUrl = emailSettingsLink(cfg, deps.settingsToken?.(user.uid) ?? null);
         if (k === "signin") {
-          return settle((await sendPrepared(deps, email, "signin", prepareSignIn(cfg, signInLink))) ? "sent" : "not-sent");
+          return settle((await sendPrepared(deps, email, "signin", prepareSignIn(cfg, signInLink, settingsUrl))) ? "sent" : "not-sent");
         }
         const link = await deps.auth.generatePasswordResetLink(email, { url: `${origin}/` });
-        return settle((await sendPrepared(deps, email, "reset", prepareReset(cfg, link))) ? "sent" : "not-sent");
+        return settle((await sendPrepared(deps, email, "reset", prepareReset(cfg, link, settingsUrl))) ? "sent" : "not-sent");
       } catch (e) {
         /* ⚠️ AFTER THE LOOKUP NOTHING IS THROWN: a failure here would only happen for a real account. */
         console.error(JSON.stringify({ event: "account.email", kind: k, outcome: "error", code: String((e as { code?: unknown })?.code ?? "") }));

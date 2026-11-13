@@ -13,9 +13,10 @@
  * ⚠️ NO PHONE FIELD AND NO FIRST/LAST SPLIT. A name is one field because a name is one thing, and
  * there is no phone to ring.
  *
- * ⚠️ THE TRANSPORT IS A CONSTANT, NOT A BRANCH THIS FILE DECIDES. `CONTACT_TRANSPORT` picks
- * between the mail client and the deployed callable; the form's behaviour is otherwise identical.
- * It is "mailto" today (`sendContactMessage` is not deployed), and the sent panel says so.
+ * ⚠️ IT SENDS THROUGH `sendContactMessage`, AND THE MAIL APP IS THE FALLBACK (13 Nov). `sendContact`
+ * (lib/contactTransport.ts) calls the callable first; on any failure the form says plainly the message
+ * did not send, keeps every word, and offers the writer's own mail app with the message written out.
+ * "Sent." appears only after the callable returned.
  *
  * ⚠️ EVERY STEP'S STATE IS `contactForm.ts`'s REDUCER. This file renders it and moves focus where the
  * reducer says; `ContactFormView` is pure props so a string render can show each state.
@@ -27,14 +28,15 @@ import {
   CONTACT_FOUNDING_BODY, CONTACT_TOPICS, CONTACT_TOPIC_DETAIL, CONTACT_PAGE_TOPIC, CONTACT_DATA_TOPIC,
   CONTACT_DATA_WANTS, CONTACT_FORM_H2, CONTACT_FORM_SUB, CONTACT_FORM_SEND, CONTACT_FORM_SENDING,
   CONTACT_FINE_PRINT, CONTACT_FIELD_LABELS, CONTACT_OPTIONAL, CONTACT_PLACEHOLDERS, CONTACT_SENT,
-  CONTACT_AGAIN, CONTACT_FAILED_GENERIC, CONTACT_FAILED_TOO_SOON, CONTACT_ART_ALT, ContactTopic,
+  CONTACT_AGAIN, CONTACT_FAILED_GENERIC, CONTACT_FAILED_MAIL_LINK, CONTACT_FAILED_MAIL_TAIL,
+  CONTACT_FAILED_TOO_SOON, CONTACT_ART_ALT, ContactTopic,
 } from "./contactCopy";
 import { usePhone } from "./usePhone";
 import { Runs } from "./CopyRuns";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 import {
-  CONTACT_TRANSPORT, CONTACT_HONEYPOT_FIELD, CONTACT_LAST_SENT_KEY, CONTACT_MAX,
-  ContactDraft, contactExtras, contactMailto, isRateLimited, looksAutomated, validateContact,
+  CONTACT_HONEYPOT_FIELD, CONTACT_LAST_SENT_KEY, CONTACT_MAX, ContactCall,
+  ContactDraft, contactExtras, contactMailto, isRateLimited, looksAutomated, sendContact, validateContact,
 } from "../lib/contactTransport";
 import {
   CONTACT_IDS, ContactAction, ContactFormState, contactInitial, contactReducer,
@@ -50,6 +52,20 @@ type Nav = (tab: string, subPageName?: string) => void;
 const ARCHIVIST = { src: "/images/contact-archivist.png", version: "a603d9cb", width: 800, height: 800 };
 
 const EXTRA_TOPICS = { page: CONTACT_PAGE_TOPIC, data: CONTACT_DATA_TOPIC, firstWant: CONTACT_DATA_WANTS[0] };
+
+/**
+ * The real callable. The app and the functions SDK are loaded on the first send only, so a public page
+ * that is usually never sent from does not carry them; the app is `lib/firebase`'s one instance (as
+ * `appCheck.ts` does), so the public site needs no app of its own. Any failure here — the import
+ * included — is a failed send, and `sendContact` turns it into the mail app's offer.
+ */
+const callSendContactMessage: ContactCall = async (payload) => {
+  const [{ getFunctions, httpsCallable }, { app }] = await Promise.all([
+    import("firebase/functions"),
+    import("../lib/firebase"),
+  ]);
+  return httpsCallable(getFunctions(app, "europe-west2"), "sendContactMessage")(payload);
+};
 
 const readLastSent = (): number | null => {
   try {
@@ -71,14 +87,10 @@ export const ContactFormView: React.FC<{
   const { draft, errors, status } = state;
 
   if (status === "sent") {
-    const words = CONTACT_SENT[CONTACT_TRANSPORT];
     return (
       <section className="mk-formcard mk-cdone" aria-labelledby="cf-done-h" role="status">
-        <h2 id="cf-done-h" className="mk-formh2">{words.heading}</h2>
-        <p className="mk-csub">{words.body(state.sentTo)}</p>
-        {words.fallback && (
-          <p className="mk-csub">{words.fallback}<a className="mk-cmail" href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.</p>
-        )}
+        <h2 id="cf-done-h" className="mk-formh2">{CONTACT_SENT.heading}</h2>
+        <p className="mk-csub">{CONTACT_SENT.body(state.sentTo)}</p>
         <button id={CONTACT_IDS.again} type="button" className="mk-btn mk-cagain" onClick={() => dispatch({ type: "again" })}>
           {CONTACT_AGAIN}
         </button>
@@ -206,6 +218,16 @@ export const ContactFormView: React.FC<{
       {status === "failed" && (
         <p id={CONTACT_IDS.notice} className="mk-cstate mk-cstate--bad" role="alert" tabIndex={-1}>{state.notice}</p>
       )}
+      {/* ⚠️ THE MAIL APP, OFFERED — never opened for the writer. The link is built from the draft as it
+          stands now, so everything typed (the topic's extra answer too) is in the message it opens. */}
+      {status === "failed" && state.offerMail && (
+        <p className="mk-cstate mk-cstate--mail">
+          <a id={CONTACT_IDS.mail} className="mk-cmail" href={contactMailto(SUPPORT_EMAIL, draft, contactExtras(draft, EXTRA_TOPICS))}>
+            {CONTACT_FAILED_MAIL_LINK}
+          </a>
+          {CONTACT_FAILED_MAIL_TAIL}
+        </p>
+      )}
 
       <p className="mk-cfine"><Runs runs={CONTACT_FINE_PRINT} onNavigate={onNavigate} /></p>
     </form>
@@ -247,37 +269,17 @@ export const ContactPage: React.FC<{ onNavigate: Nav }> = ({ onNavigate }) => {
       return;
     }
 
-    const extras = contactExtras(draft, EXTRA_TOPICS);
-
-    if (CONTACT_TRANSPORT === "mailto") {
-      /* The mail client is the transport: the writer's own outbox is the record, and the sent
-         panel says the message is waiting there — nothing is claimed to have been delivered. */
-      window.location.href = contactMailto(SUPPORT_EMAIL, draft, extras);
+    dispatch({ type: "sending" });
+    const outcome = await sendContact(SUPPORT_EMAIL, draft, contactExtras(draft, EXTRA_TOPICS), callSendContactMessage);
+    if (outcome.kind === "sent") {
       try { window.localStorage.setItem(CONTACT_LAST_SENT_KEY, String(Date.now())); } catch { /* private mode */ }
       dispatch({ type: "sent" });
       return;
     }
-
-    dispatch({ type: "sending" });
-    try {
-      /* `getFunctions(undefined, …)` — the repo's own shape for every callable, which resolves the
-         default app rather than importing one. Loaded lazily so a public page that will usually
-         never send does not pull the functions SDK into the marketing bundle. */
-      const { getFunctions, httpsCallable } = await import("firebase/functions");
-      const call = httpsCallable(getFunctions(undefined, "europe-west2"), "sendContactMessage");
-      await call({
-        name: draft.name,
-        email: draft.email,
-        topic: draft.topic,
-        message: [draft.message.trim(), ...extras].join("\n\n"),
-        [CONTACT_HONEYPOT_FIELD]: draft.trap ?? "",
-      });
-      try { window.localStorage.setItem(CONTACT_LAST_SENT_KEY, String(Date.now())); } catch { /* private mode */ }
-      dispatch({ type: "sent" });
-    } catch (e) {
-      /* ⚠️ A FAILURE SAYS SO AND KEEPS THE WORDS — the reducer's "failed" touches no field. */
-      dispatch({ type: "failed", notice: (e as { message?: string })?.message || CONTACT_FAILED_GENERIC });
-    }
+    /* ⚠️ A FAILURE SAYS SO, KEEPS THE WORDS (the reducer's "failed" touches no field) AND OFFERS THE
+       MAIL APP. The server's own sentence is not shown: whatever went wrong, the writer's next step is
+       the same. */
+    dispatch({ type: "failed", notice: CONTACT_FAILED_GENERIC, offerMail: true });
   };
 
   return (

@@ -1,13 +1,27 @@
-/* A query's clock (non-workspace v1, Phase 3). The ink band for the line; no new colours. */
+/* A query's clock (non-workspace v1, Phase 3; v1.1 item 3). The ink band for the line; no new colours.
+   ⚠️ EVERY STRETCH HAS A DRAWN MINIMUM (24px, no negative margin), so two labels' boxes are never closer than that,
+   whatever the timings; above the minimum the stretches keep their proportions (flex-grow = weeks). The line runs
+   under the nodes from dot to dot. Below 600px the four labels cannot sit in a row, so the clock stands upright.
+   Measured in tests/e2e/nw11.measure.ts. */
 .ct { padding: 6px 0 4px; }
-.ct-line { display: flex; align-items: flex-start; gap: 0; overflow-x: auto; padding-bottom: 4px; }
+.ct-line { display: flex; align-items: flex-start; padding: 24px 0 4px; }
 .ct-node { flex: none; position: relative; z-index: 1; display: grid; justify-items: center; gap: 3px; width: 92px; text-align: center; }
 .ct-node i { display: block; width: 12px; height: 12px; border-radius: 50%; background: var(--ink-band); margin-top: 6px; }
 .ct-node--end i { background: #fff; box-shadow: inset 0 0 0 2px var(--ink-band); }
 .ct-node b { font-size: 14px; font-weight: 600; line-height: 1.2; }
 .ct-node small { font-size: 14px; color: rgba(28, 19, 15, .62); }
-.ct-seg { position: relative; min-width: 40px; height: 24px; margin: 0 -40px; }
-.ct-seg::before { content: ""; position: absolute; left: 40px; right: 40px; top: 11px; height: 2px; background: var(--ink-band); }
+.ct-seg { position: relative; flex-basis: 0; min-width: 24px; height: 24px; margin: 0; }
+.ct-seg::before { content: ""; position: absolute; left: -40px; right: -40px; top: 11px; height: 2px; background: var(--ink-band); }
 .ct-s3::before { background: repeating-linear-gradient(90deg, var(--ink-band) 0 6px, transparent 6px 11px); }
-.ct-seg span { position: absolute; left: 0; right: 0; top: -14px; text-align: center; font-size: 14px; color: rgba(28, 19, 15, .62); }
+.ct-seg span { position: absolute; left: 50%; transform: translateX(-50%); top: -18px; white-space: nowrap; font-size: 14px; line-height: 16px; color: rgba(28, 19, 15, .62); }
 .ct-cap { margin: 10px 0 0; font-size: 16px; }
+
+@media (max-width: 600px) {
+  .ct-line { flex-direction: column; align-items: stretch; padding: 0; }
+  .ct-node { width: auto; grid-template-columns: 12px auto 1fr; justify-items: start; align-items: center; column-gap: 10px; text-align: left; }
+  .ct-node i { margin-top: 0; }
+  .ct-seg { flex: none !important; min-width: 0; min-height: 52px; height: auto; margin-left: 5px; border-left: 2px solid var(--ink-band); }
+  .ct-s3 { border-left-style: dashed; }
+  .ct-seg::before { display: none; }
+  .ct-seg span { position: static; transform: none; display: block; padding-left: 15px; line-height: 20px; margin: 16px 0; }
+}

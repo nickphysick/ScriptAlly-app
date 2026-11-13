@@ -40,6 +40,8 @@
 .mk-pv-short li { display: flex; gap: 10px; font: 400 17px/1.45 var(--mk-f-serif); color: #fff; }
 .mk-pv-short li span { font: inherit; color: inherit; }
 .mk-pv-short svg { flex: none; margin-top: 2px; }
+/* The Terms' lede, where Privacy has "The short version" (13 Nov). */
+.mk-pv .mk-pv-lede { max-width: 760px; margin: 0; font: 400 19px/1.55 var(--mk-f-serif); color: #fff; }
 
 /* ── The body: the contents beside the sections ── */
 .mk-pv-body { margin-top: -36px; padding: 90px 0 70px; }
@@ -89,6 +91,7 @@
   .mk-pv-short { padding: 18px; }
   .mk-pv-short ul { grid-template-columns: 1fr; }
   .mk-pv-short li { font-size: 16px; }
+  .mk-pv .mk-pv-lede { font-size: 17px; }
   .mk-pv-body { padding: 70px 0 50px; }
   .mk-pv-grid { grid-template-columns: 1fr; gap: 26px; }
   .mk-pv-toc { position: static; padding: 16px 18px; border-radius: 16px; background: #fff; }

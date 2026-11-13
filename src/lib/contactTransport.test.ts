@@ -2,12 +2,13 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The contact form's pure layer — validation, the honeypot, the rate limit and the `mailto:`.
+ * The contact form's pure layer — validation, the honeypot, the rate limit, the `mailto:`, and the send
+ * (the callable first, the mail app only on failure).
  */
 import { describe, it, expect } from "vitest";
 import {
-  CONTACT_MIN_INTERVAL_MS, CONTACT_MAX, CONTACT_MIN_MESSAGE, ContactDraft,
-  contactExtras, contactMailto, isRateLimited, looksAutomated, validateContact,
+  CONTACT_HONEYPOT_FIELD, CONTACT_MIN_INTERVAL_MS, CONTACT_MAX, CONTACT_MIN_MESSAGE, ContactDraft, ContactPayload,
+  contactExtras, contactMailto, contactPayload, isRateLimited, looksAutomated, sendContact, validateContact,
 } from "./contactTransport";
 import { CONTACT_TOPICS, CONTACT_PAGE_TOPIC, CONTACT_DATA_TOPIC, CONTACT_DATA_WANTS } from "../marketing/contactCopy";
 
@@ -117,5 +118,46 @@ describe("the mailto", () => {
     expect(contactExtras(draft({ topic: CONTACT_DATA_TOPIC, page: "Queries" }), T), "the select opens on the first answer")
       .toEqual(["Request: See what you hold about me"]);
     expect(contactExtras(draft({ page: "Queries", want: "Correct something" }), T)).toEqual([]);
+  });
+});
+
+/**
+ * ⚠️ THE CALLABLE FIRST, THE MAIL APP ONLY ON A FAILURE (13 Nov). `sendContact` is the page's whole
+ * send: it calls `sendContactMessage` with the draft, and only when that call throws — for any
+ * reason — does it hand back the `mailto:` with everything typed, for the form to offer.
+ */
+describe("sendContact: the callable, then the mail app only on failure", () => {
+  const T = { page: CONTACT_PAGE_TOPIC, data: CONTACT_DATA_TOPIC, firstWant: CONTACT_DATA_WANTS[0] };
+  const typed = draft({ topic: CONTACT_PAGE_TOPIC, page: "Queries", trap: "" });
+  const extras = contactExtras(typed, T);
+
+  it("a call that returns is sent, with the server's contract, and no mailto is made", async () => {
+    const calls: ContactPayload[] = [];
+    const out = await sendContact("hello@queryhawk.net", typed, extras, async (p) => { calls.push(p); return { data: { ok: true } }; });
+    expect(out).toEqual({ kind: "sent" });
+    expect(calls).toEqual([{
+      name: "Marianne Webb", email: "m@webb.co.uk", topic: CONTACT_PAGE_TOPIC,
+      message: "The dates on my imported queries are a day out.\n\nPage: Queries", website: "",
+    }]);
+    expect(Object.keys(calls[0]).sort(), "exactly the fields sendContactMessage reads")
+      .toEqual(["email", "message", "name", "topic", CONTACT_HONEYPOT_FIELD].sort());
+  });
+
+  it("any failure — a missing function, a refusal, a network drop — is failed, with everything typed in the mailto", async () => {
+    for (const err of [new Error("functions/not-found"), Object.assign(new Error("x"), { code: "functions/resource-exhausted" }), new TypeError("Failed to fetch")]) {
+      let n = 0;
+      const out = await sendContact("hello@queryhawk.net", typed, extras, async () => { n += 1; throw err; });
+      expect(n, "one attempt, no retry behind the writer's back").toBe(1);
+      expect(out).toEqual({ kind: "failed", mailto: contactMailto("hello@queryhawk.net", typed, extras) });
+      const body = decodeURIComponent(out.kind === "failed" ? out.mailto : "");
+      for (const w of ["The dates on my imported queries are a day out.", "From: Marianne Webb <m@webb.co.uk>", "Topic: Something's broken", "Page: Queries"]) {
+        expect(body, w).toContain(w);
+      }
+    }
+  });
+
+  it("the payload carries the honeypot to the server under its own field name", () => {
+    expect(contactPayload(draft({ trap: "http://spam" }))[CONTACT_HONEYPOT_FIELD]).toBe("http://spam");
+    expect(CONTACT_HONEYPOT_FIELD).toBe("website");
   });
 });

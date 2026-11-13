@@ -17,14 +17,15 @@ import {
   CONTACT_DOCUMENT_TITLE, CONTACT_H1, CONTACT_LEDE, CONTACT_MAIL_H2, CONTACT_FOUNDING_H2,
   CONTACT_FOUNDING_BODY, CONTACT_TOPICS, CONTACT_TOPIC_DETAIL, CONTACT_DATA_WANTS, CONTACT_FORM_H2,
   CONTACT_FORM_SUB, CONTACT_FORM_SEND, CONTACT_FINE_PRINT, CONTACT_FIELD_LABELS, CONTACT_PLACEHOLDERS,
-  CONTACT_SENT, CONTACT_AGAIN, CONTACT_ART_ALT,
+  CONTACT_SENT, CONTACT_AGAIN, CONTACT_ART_ALT, CONTACT_FAILED_GENERIC, CONTACT_FAILED_MAIL_LINK,
+  CONTACT_FAILED_MAIL_TAIL,
 } from "./contactCopy";
 
 const here = dirname(fileURLToPath(import.meta.url));
 
 /* RE-POINTED (contact redesign v1, 12 Nov): every sentence is design-refs/contact-terms-unsubscribe-v1.html's
-   now, except the two the code made me change (the Feedback note's screenshot, and the sent panel on
-   the mailto path) — each marked where it is asserted. */
+   now, except the ones the code made me change (the Feedback note's screenshot, and the sent and
+   failed states) — each marked where it is asserted. */
 describe("the contact page's copy, verbatim", () => {
   it("the heading and the left column", () => {
     expect(CONTACT_DOCUMENT_TITLE).toBe("Contact — QueryHawk");
@@ -84,18 +85,22 @@ describe("the contact page's copy, verbatim", () => {
     });
   });
 
-  /* ⚠️ THE MAILTO PATH CLAIMS NO DELIVERY. The ref's "Sent." and "A copy is on its way to you now" are
-     said on neither path: the mail app holds the message, and no function sends a copy. */
-  it("the sent panel, by transport", () => {
-    expect(CONTACT_SENT.mailto.heading).toBe("Over to your mail app.");
-    expect(CONTACT_SENT.mailto.body("m@webb.co.uk")).toBe(
-      "Your message should be open there, ready to send. Once it's sent, we'll reply to m@webb.co.uk " +
-        "within two working days.",
-    );
-    expect(CONTACT_SENT.function.heading).toBe("Sent.");
-    expect(CONTACT_SENT.function.body("m@webb.co.uk")).toBe("We'll reply to m@webb.co.uk within two working days.");
-    for (const w of [CONTACT_SENT.mailto, CONTACT_SENT.function]) expect(w.body("x")).not.toMatch(/copy/i);
+  /* RE-POINTED (13 Nov): the form sends through the callable now, so "Sent." is the one sent panel, said
+     only after the server accepted the message. The ref's "A copy is on its way to you now" is still
+     not said: no copy is sent. */
+  it("the sent panel", () => {
+    expect(CONTACT_SENT.heading).toBe("Sent.");
+    expect(CONTACT_SENT.body("m@webb.co.uk")).toBe("We'll reply to m@webb.co.uk within two working days.");
+    expect(CONTACT_SENT.body("x")).not.toMatch(/copy/i);
     expect(CONTACT_AGAIN).toBe("Send another message");
+  });
+
+  /* A failed send says plainly it did not send, and offers the mail app (13 Nov). */
+  it("the failed state", () => {
+    expect(CONTACT_FAILED_GENERIC).toBe("Your message didn't send. Everything you typed is still here.");
+    expect(CONTACT_FAILED_MAIL_LINK + CONTACT_FAILED_MAIL_TAIL)
+      .toBe("Open it in your mail app to send it from there, or press Send message to try again.");
+    expect(CONTACT_FORM_SEND, "the tail names the button it means").toBe("Send message");
   });
 
   /**

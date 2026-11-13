@@ -8,7 +8,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync } from "fs";
 import { resolve, join } from "path";
 import {
-  codeFromPath, formatCodeInput, looksLikeInviteCode, normaliseInviteCode, readCodeStatus, CODE_PLACEHOLDER,
+  codeFromPath, formatCodeInput, looksLikeInviteCode, normaliseInviteCode, readCodeStatus, codeError, CODE_PLACEHOLDER, CODE_REFUSED,
 } from "./inviteCode";
 
 describe("normalising and masking a code", () => {
@@ -41,9 +41,14 @@ describe("the code in the invite link", () => {
 });
 
 describe("reading the server's answer", () => {
-  it("anything unrecognised is unknown, never ok", () => {
-    expect(readCodeStatus(null).status).toBe("unknown");
-    expect(readCodeStatus({ status: "yes" }).status).toBe("unknown");
+  /* Re-pointed (v1.1): "unknown" and "used" are one outcome, "refused". */
+  it("anything unrecognised is refused, never ok — and a used code reads the same as an unknown one", () => {
+    expect(readCodeStatus(null).status).toBe("refused");
+    expect(readCodeStatus({ status: "yes" }).status).toBe("refused");
+    expect(readCodeStatus({ status: "used" })).toEqual(readCodeStatus({ status: "unknown" }));
+    expect(readCodeStatus({ status: "used" })).toEqual({ status: "refused" });
+    expect(codeError(readCodeStatus({ status: "used" }))).toBe(CODE_REFUSED);
+    expect(codeError(readCodeStatus({ status: "ok", email: null }))).toBeUndefined();
     expect(readCodeStatus({ status: "ok", email: "a@b.co", foundingNo: 3 })).toEqual({ status: "ok", email: "a@b.co", name: null, foundingNo: 3 });
   });
 });

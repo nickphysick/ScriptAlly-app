@@ -23,8 +23,8 @@ import { SetupFrame, ACCOUNT_GROUP } from "./onboarding/SetupFrame";
 import { BETA_MODE, INVITE_GATE_ENABLED } from "../lib/beta";
 import {
   CODE_ACCEPTED, CODE_CONTINUE, CODE_HAVE_ACCOUNT, CODE_HEADING, CODE_LABEL, CODE_LEDE, CODE_NO_CODE, CODE_NO_CODE_LINK,
-  CODE_PLACEHOLDER, CODE_SHORT, CODE_UNKNOWN, CODE_UNREACHABLE, CODE_USED, CODE_USED_LINK, CODE_LENGTH, INVITE_LEDE,
-  callFoundersCode, codeFromPath, formatCodeInput, keepCode, keptCode, normaliseInviteCode, readCodeStatus,
+  CODE_PLACEHOLDER, CODE_REFUSED, CODE_SHORT, CODE_UNREACHABLE, CODE_LENGTH, INVITE_LEDE,
+  callFoundersCode, codeError, codeFromPath, formatCodeInput, keepCode, keptCode, normaliseInviteCode, readCodeStatus,
   type CodeStatus,
 } from "../lib/inviteCode";
 import {
@@ -186,8 +186,11 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
   const [email, setEmail] = useState(lab?.email ?? labOk?.email ?? "");
   const [otherEmail, setOtherEmail] = useState(false);
   const [password, setPassword] = useState("");
-  const [errs, setErrs] = useState<Record<string, string | undefined>>({});
-  const [usedCode, setUsedCode] = useState(false);
+  /* A lab-drawn refusal starts with its sentence, through the same mapping a live answer uses. */
+  const [errs, setErrs] = useState<Record<string, string | undefined>>(() => {
+    const e = codeError(lab?.code?.status ?? null);
+    return e ? { code: e } : {};
+  });
   const [banner, setBanner] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [linkSentTo, setLinkSentTo] = useState<string | null>(null);
@@ -204,7 +207,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
   });
 
   const go = (s: Screen, focusId?: string) => {
-    setScreen(s); setErrs({}); setBanner(null); setUsedCode(false); setLinkSentTo(null); setFreshSent(false);
+    setScreen(s); setErrs({}); setBanner(null); setLinkSentTo(null); setFreshSent(false);
     if (s !== "reset") setResetSentTo(null);
     if (focusId) focusNext(focusId);
   };
@@ -233,15 +236,10 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
         if (s.email) setEmail(s.email);
         go("expired");
         return;
-      case "used":
+      case "refused": /* used or unrecognised: one answer, one sentence, no variant */
         keepCode(null);
         go("code", "au-code");
-        setErrs({ code: CODE_USED }); setUsedCode(true);
-        return;
-      case "unknown":
-        keepCode(null);
-        go("code", "au-code");
-        setErrs({ code: CODE_UNKNOWN });
+        setErrs({ code: CODE_REFUSED });
         return;
       default: {
         const unhandled: never = s;
@@ -265,7 +263,7 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
   /* ── Handlers ───────────────────────────────────────────────────────────────────────────── */
   const onCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setErrs({}); setUsedCode(false);
+    setErrs({});
     const c = normaliseInviteCode(code);
     if (c.length < CODE_LENGTH) { setErrs({ code: CODE_SHORT }); focusNext("au-code"); return; }
     setScreen("checking");
@@ -464,14 +462,11 @@ export const Auth: React.FC<{ initialMode?: "login" | "signup"; lab?: AuthLabSta
               <input
                 className="sf-in au-code" id="au-code" type="text" inputMode="text" autoComplete="off" autoCapitalize="characters"
                 spellCheck={false} maxLength={CODE_LENGTH} placeholder={CODE_PLACEHOLDER} value={code}
-                onChange={(e) => { setCode(formatCodeInput(e.target.value)); if (errs.code) { setErrs({}); setUsedCode(false); } }}
+                onChange={(e) => { setCode(formatCodeInput(e.target.value)); if (errs.code) setErrs({}); }}
                 {...invalid("code", "au-code")}
               />
               {errs.code && (
-                <p className="sf-err" id="au-code-e" role="alert">
-                  {errs.code}
-                  {usedCode && <> <button type="button" className="sf-link sf-link--in" onClick={toSignin}>{CODE_USED_LINK}</button></>}
-                </p>
+                <p className="sf-err" id="au-code-e" role="alert">{errs.code}</p>
               )}
             </div>
             <button type="submit" className="sf-btn sf-btn--full au-gap">{CODE_CONTINUE}</button>

@@ -1,0 +1,19 @@
+From: QueryHawk <hello@queryhawk.net>
+Subject: Your QueryHawk sign-in link
+
+Here's your sign-in link.
+
+Use it on this device and you're straight in. No password needed.
+
+Sign in to QueryHawk: https://scriptally-app.firebaseapp.com/__/auth/action?apiKey=sample&mode=signIn&oobCode=SAMPLE-CODE&continueUrl=https%3A%2F%2Fscriptally-app.web.app%2Fsignin-link&lang=en
+
+It works once, for the next hour.
+
+Didn't ask for this? Ignore it. Nobody can sign in without this email.
+
+---
+Something not right? Just reply, or write to hello@queryhawk.net.
+
+You're getting this because it's about your account.
+Email settings: https://scriptally-app.web.app/account/emails
+QueryHawk · Made in the UK, for writers

@@ -23,7 +23,8 @@ describe("barPageName — the sidebar's own section heading and label", () => {
     expect(name("/materials/letters")).toEqual({ section: "Materials", name: "Query letters" });
     expect(name("/manuscripts/versions")).toEqual({ section: "Your book", name: "Versions" });
     expect(name("/todo/corkboard")).toEqual({ section: "Tasks", name: "Corkboard" });
-    expect(name("/account/profile")).toEqual({ section: "Account", name: "Settings" });
+    expect(name("/account/profile")).toEqual({ section: null, name: "Settings" }); // non-workspace v1.1 (4a): no "Account" label
+    expect(name("/plans")).toEqual({ section: null, name: "Plans" });
   });
   /* ⚠️ THE SIDEBAR HEADS DASHBOARD WITH "WORKSPACE" NOW (sidebar metrics pass); the bar keeps naming it
      alone — a stated difference, flagged for Nick, not an oversight (see barPageName's note). */

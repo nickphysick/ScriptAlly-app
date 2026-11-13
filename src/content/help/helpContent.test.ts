@@ -7,6 +7,8 @@
  * article route reaching every exact-path table.
  */
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "fs";
+import { resolve } from "path";
 import { HELP_ARTICLE_LIST, WRITTEN_ARTICLES, articleBySlug, writtenArticleBySlug } from "./articles";
 import { HELP_AREAS, articleText, guidesOf, parseRuns, readTime, showDrafts, wordCount, type HelpArticle } from "./model";
 import { searchArticles, searchHelp } from "./search";
@@ -92,7 +94,10 @@ describe("the six areas, and the articles in them", () => {
     }
   });
   it("What's new keeps its three entries", () => {
-    expect(WHATS_NEW.map((e) => e.id)).toEqual(["help-system", "pin-lists", "list-health"]);
+    expect(WHATS_NEW.map((e) => e.id)).toEqual(["agency-caps-import", "query-letters-page"]); // non-workspace v1.1: the ref's two
+    /* the Help home shows exactly what the badge counts: HelpHome's HELP_NEWS is this list */
+    expect(readFileSync(resolve(__dirname, "../../components/help/HelpHome.tsx"), "utf8")).toContain("HELP_NEWS: readonly { title: string; line: string }[] = WHATS_NEW;");
+    expect(WHATS_NEW.map((e) => e.title)).toEqual(["Agency names survive an import in capitals", "Query letters has its own page"]);
   });
 });
 

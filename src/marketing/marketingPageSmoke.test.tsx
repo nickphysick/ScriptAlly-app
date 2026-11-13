@@ -70,8 +70,8 @@ const PUBLIC_ROUTES: [path: string, node: () => React.ReactElement, mustContain:
   ["/welcome?v=waiting", () => <WelcomePage onNavigate={noNavigate} />, "So close. You&#x27;re on the reserve list."],
   ["/welcome?v=expired", () => <WelcomePage onNavigate={noNavigate} />, "That link&#x27;s 48 hours are up."],
   ["/welcome?v=unknown", () => <WelcomePage onNavigate={noNavigate} />, "We don&#x27;t recognise that link."],
-  /* Retarget (12 Nov): the Terms take Privacy's layout, titled "Terms" over "The short version". */
-  ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Nothing is charged unless you choose a plan."],
+  /* Retarget (13 Nov): the Terms take Privacy's layout, titled "Terms", with their old wording. */
+  ["/terms", () => <LegalPage doc="terms" onNavigate={noNavigate} />, "Who we are and what you&#x27;re agreeing to"],
   /* Retarget (privacy page v1, 2 Nov): the page's title is "Privacy". */
   ["/privacy", () => <LegalPage doc="privacy" onNavigate={noNavigate} />, "The short version"],
 ];
@@ -203,7 +203,7 @@ describe("the public pricing page sells nothing and writes nothing", () => {
  */
 describe("the legal pages are honest about being drafts", () => {
   /* ⚠️ THE TERMS ONLY, SINCE PRIVACY PAGE v1 (2 Nov): /privacy states a named controller, the checked
-     region and no placeholder, so it carries no ribbon (PRIV-1). The Terms keep the ribbon until review. */
+     region and no placeholder, so it carries no ribbon (PRIV-1); the Terms still have their placeholders. */
   for (const doc of ["terms"] as const) {
     it(`/${doc} carries the working-draft ribbon while the copy is unreviewed`, () => {
       const html = renderPage(<LegalPage doc={doc} onNavigate={noNavigate} />, `/${doc}`);
@@ -217,18 +217,15 @@ describe("the legal pages are honest about being drafts", () => {
     });
 
     /**
-     * RE-POINTED (12 Nov, design-refs/contact-terms-unsubscribe-v1.html). The law was "nothing unconfirmed
-     * is stated as fact": it was kept by rendering the entity and address as visible brackets. The
-     * ref names who runs QueryHawk as Privacy does — Nick, in London, first name only — so the
-     * Terms state no entity or address at all, invented or bracketed, and the ribbon still says the
-     * document is unreviewed.
+     * ⚠️ THE PLACEHOLDERS RENDER AS PLACEHOLDERS. An invented entity name or address would make
+     * the page look finished, and a legal page that looks finished and is not is the one nobody
+     * chases. Both documents name the operating entity in their first section.
+     * (The 12 Nov ref wording dropped them; Nick restored the old Terms wording on 13 Nov.)
      */
-    it(`/${doc} states no entity or address it has not confirmed`, () => {
+    it(`/${doc} still shows its unfilled entity placeholders`, () => {
       const html = renderPage(<LegalPage doc={doc} onNavigate={noNavigate} />, `/${doc}`);
-      expect(html).not.toContain("[LEGAL ENTITY NAME]");
-      expect(html).not.toContain("[REGISTERED / TRADING ADDRESS]");
-      expect(html).toContain("which is run by Nick in London, UK.");
-      expect(html).toContain("Working draft");
+      expect(html).toContain("[LEGAL ENTITY NAME]");
+      expect(html).toContain("[REGISTERED / TRADING ADDRESS]");
     });
   }
 
@@ -245,7 +242,7 @@ describe("the legal pages are honest about being drafts", () => {
   /**
    * ⚠️ THE POLICY SAYS THERE IS NO COOKIE BANNER AND NO THIRD-PARTY ANALYTICS (restored 31 Oct,
    * when GA was taken off the public site). True only while `.env.production` sets no
-   * `VITE_GA_MEASUREMENT_ID` — `analytics.ts` and the consent bar are dormant without it. The second
+   * `VITE_GA_MEASUREMENT_ID` — `analytics.ts` is dormant without it (the consent bar is deleted, 13 Nov). The second
    * test below holds the two together: set an id and this fails until the policy says so.
    */
   it("the privacy policy covers cookies and local storage, and claims no banner", () => {

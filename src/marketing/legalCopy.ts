@@ -3,19 +3,19 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Terms and Privacy copy. Privacy is privacy page v1's (2 Nov; design-refs/privacy-v1.html). The Terms
- * are design-refs/contact-terms-unsubscribe-v1.html's (12 Nov), in the privacy page's layout: "The
- * short version", then ten numbered sections, six of them opening "In plain words".
+ * are drawn in the privacy page's layout (12 Nov) with the wording they had before it, sentence for
+ * sentence (13 Nov): the lede, then ten numbered sections.
  *
  * ⚠️ THE TERMS ARE A WORKING DRAFT AND SAY SO ON THE PAGE. `LEGAL_COPY_REVIEWED` is false; the ribbon
  * renders because of that one flag. The PRIVACY policy left that state on 2 Nov (privacy page v1): it
  * names its controller (Nick, no surname), states the checked region, and carries no ribbon and no
  * bracketed text (`ribbonOff`; PRIV-1).
  *
- * ⚠️ THE TERMS NO LONGER READ THE ENTITY AND ADDRESS PLACEHOLDERS (12 Nov). The ref names who runs
- * QueryHawk the way Privacy does — Nick, in London — so no bracket renders on /terms. The placeholders
- * in `companyInfo.ts` are untouched; nothing on the public pages reads them now.
+ * ⚠️ THE TERMS' BRACKETED VALUES ARE DELIBERATE AND MUST NOT BE FILLED IN BY GUESSING. They come from
+ * `companyInfo.ts` and render brackets and all, so the page visibly has holes rather than quietly
+ * asserting an entity or an address nobody has confirmed.
  *
- * ⚠️ PRIVACY §4 ("How we use AI") IS NOT OPTIONAL. Four features
+ * ⚠️ PRIVACY §4 ("How we use AI") IS NOT OPTIONAL, AND THE TERMS POINT AT IT BY NUMBER. Four features
  * send content the writer supplies to Anthropic's API (Smart Import, the email drop, comps, agent
  * details). Trimming it would leave the product doing something no surface discloses.
  *
@@ -30,10 +30,9 @@
 
 import { CopyRun } from "./CopyRuns";
 import {
-  DATA_REGION, DELETION_WINDOW_DAYS, PRIVACY_LAST_UPDATED, SUPPORT_EMAIL, supportMailto,
+  DATA_REGION, DELETION_WINDOW_DAYS, LEGAL_ENTITY_NAME, LEGAL_LAST_UPDATED, PRIVACY_LAST_UPDATED,
+  REGISTERED_ADDRESS, SUPPORT_EMAIL, supportMailto,
 } from "../lib/companyInfo";
-import { DELETION_GRACE_DAYS } from "../lib/accountDeletion";
-import { PLAN_LENGTHS_LINE, TRIAL_DAYS } from "../lib/planRules";
 
 /**
  * ⚠️ ONE FLAG, ONE EFFECT. False = the Terms carry the working-draft ribbon (Privacy is `ribbonOff`).
@@ -62,7 +61,9 @@ export interface LegalDocument {
   lastUpdated: string;
   /** The sentence on the working-draft ribbon. */
   draftBody: string;
-  /** "The short version" as ticks, in the navy drawer under the date. */
+  /** Terms only: the plain-English summary, in the navy drawer under the date. */
+  lede?: string;
+  /** Privacy only (privacy page v1): "The short version" as ticks, in the navy drawer under the date. */
   shortVersion?: string[];
   /** Privacy only: true = no working-draft ribbon, whatever `LEGAL_COPY_REVIEWED` says. */
   ribbonOff?: boolean;
@@ -73,15 +74,6 @@ const p = (...runs: CopyRun[]): LegalBlock => ({ kind: "p", runs });
 const list = (...items: CopyRun[][]): LegalBlock => ({ kind: "list", items });
 const callout = (...runs: CopyRun[]): LegalBlock => ({ kind: "callout", runs });
 const navyCallout = (...runs: CopyRun[]): LegalBlock => ({ kind: "callout", runs, tone: "navy" });
-/** The Terms' "In plain words:" line — the blush callout, its lead in bold. */
-const plain = (rest: string): LegalBlock => callout({ b: "In plain words:" }, " " + rest);
-
-/**
- * The Terms' own date. ⚠️ NOT `companyInfo.LEGAL_LAST_UPDATED` ("31 Oct 2026"): the wording changed on
- * 12 Nov and that file is outside this change, so the date lives with the words it dates. The old
- * constant is now read by nothing.
- */
-export const TERMS_LAST_UPDATED = "12 November 2026";
 
 const privacyLink = (label = "privacy policy"): CopyRun => ({ link: label, to: "privacy" });
 const supportLink = (subject?: string): CopyRun => ({
@@ -277,91 +269,102 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
     ],
   },
 
-  /* ⚠️ TERMS v2 (12 Nov; design-refs/contact-terms-unsubscribe-v1.html), word for word except where the
-     code says otherwise: the deletion window is `DELETION_GRACE_DAYS` (14), not the ref's 30, and the
-     trial and plan lengths are read from `planRules`. Still a working draft: `LEGAL_COPY_REVIEWED` is
-     false and the ribbon says so. Each "In plain words" line is the pulled-out callout Privacy uses. */
+  /* ⚠️ THE TERMS' WORDING IS plan-rules-v1's, SENTENCE FOR SENTENCE (13 Nov, Nick): the page took
+     Privacy's layout on 12 Nov, and the words go back exactly as they were. Only the title is
+     "Terms" (was "Terms of Service"), and the mono eyebrow "Legal · Terms" is not drawn (no small
+     uppercase labels). The lede renders in the navy drawer under the date. `legalPage.test.tsx`
+     holds every section's text against the old copy. Still a working draft (`LEGAL_COPY_REVIEWED`). */
   terms: {
     documentTitle: "Terms of Service — QueryHawk",
     title: "Terms",
-    lastUpdated: TERMS_LAST_UPDATED,
-    draftBody: "These terms are a working draft and have not yet been legally reviewed.",
-    shortVersion: [
-      "Your writing and your querying records stay yours.",
-      "QueryHawk keeps records and reminds you. It never writes for you or contacts agents.",
-      "Nothing is charged unless you choose a plan.",
-      "You can take a copy of your data, or leave, at any time.",
-    ],
+    lastUpdated: LEGAL_LAST_UPDATED,
+    draftBody:
+      "These terms are a working draft and have not yet been legally reviewed. Bracketed items " +
+      "are pending confirmation.",
+    lede:
+      "The plain-English promise underneath the legal text: you own everything you put into " +
+      "QueryHawk, we'll be straight with you about what the service does, and neither of us " +
+      "should need a lawyer to understand this page.",
     sections: [
       {
         heading: "Who we are and what you're agreeing to",
         blocks: [
-          plain("this is the deal between you and QueryHawk."),
           p(
-            "These terms are an agreement between you and QueryHawk, which is run by Nick in London, " +
-            "UK. By creating an account or using QueryHawk, you accept them.",
+            "These terms are an agreement between you and ", { b: LEGAL_ENTITY_NAME }, " of ",
+            { b: REGISTERED_ADDRESS },
+            ", United Kingdom. By creating an account or using QueryHawk, you accept them. How we " +
+            "handle your personal data is set out separately in the ", privacyLink(), ".",
           ),
-          p("How we handle your personal data is set out separately in the ", privacyLink("Privacy policy"), "."),
         ],
       },
       {
         heading: "The service",
         blocks: [
-          plain("QueryHawk keeps your querying records and reminds you. You do the querying."),
           p(
-            "QueryHawk helps you record the literary agents you approach, what you sent, and what came " +
-            "back, and reminds you when something needs you.",
+            "QueryHawk is a tool for tracking your literary agent querying process: your agents, " +
+            "queries, manuscripts, submission packages, and the history of each exchange. It's a " +
+            "record-keeper, not an adviser — it reports what you've recorded, and it doesn't " +
+            "guarantee any outcome with any agent or publisher.",
           ),
-          p(
-            "It does not contact agents for you, and it cannot promise any agent will reply or offer " +
-            "representation.",
+          callout(
+            { b: "Early-access notice." },
+            " QueryHawk is newly launched and actively developed. Features may change, and " +
+            "occasional rough edges are part of the deal at this stage. We'll flag significant " +
+            "changes rather than spring them on you.",
           ),
         ],
       },
       {
         heading: "Your account",
         blocks: [
-          p("Keep your sign-in details to yourself, and tell us if you think someone else has used your account."),
+          p(
+            "You need to be 16 or over, give us accurate account details, and keep your sign-in " +
+            "credentials to yourself. You're responsible for what happens under your account; tell " +
+            "us straight away if you think it's been compromised.",
+          ),
         ],
       },
       {
         heading: "Your content",
         blocks: [
-          plain("what you write is yours."),
           p(
-            "Your manuscripts, query letters, notes and records remain yours. You give us permission to " +
-            "store and display them to you so the service can work, and for nothing else.",
+            "Everything you put into QueryHawk — manuscripts, pitches, notes, querying records — " +
+            "remains yours. You grant us only the limited licence needed to store, process, and " +
+            "display it back to you, which is what running the service means. We claim no other " +
+            "rights in your writing, and we do not use your content to train AI models.",
           ),
         ],
       },
       {
         heading: "Acceptable use",
         blocks: [
+          list(
+            ["Don't use QueryHawk to store or transmit anything unlawful, or content you don't have the right to hold."],
+            ["Don't attempt to breach, probe, or overload the service, or access another user's data."],
+            ["Don't resell or scrape the service."],
+          ),
+          p("Breaching these lets us suspend or close the account involved."),
+        ],
+      },
+      {
+        heading: "AI-assisted features",
+        blocks: [
           p(
-            "Use QueryHawk for your own querying. Don't try to break it, copy it wholesale, or use it to " +
-            "send unsolicited messages.",
+            "Some features, such as Smart Import, use third-party AI models to process content you " +
+            "explicitly submit to them — the details are in section 4 of the ", privacyLink(),
+            ". AI-extracted output can contain mistakes; each of these features gives you a review " +
+            "step, and you're responsible for checking the results before relying on them.",
           ),
         ],
       },
       {
-        heading: "Automated features",
+        heading: "Fees",
         blocks: [
-          plain("automation does the admin. It never writes for you."),
           p(
-            "Smart Import and Smart email drop read what you give them and file it in your records. " +
-            "Nothing you store is used to train any model.",
-          ),
-        ],
-      },
-      {
-        heading: "Plans and fees",
-        blocks: [
-          plain("nothing is charged unless you choose a plan."),
-          p("Founding writers use QueryHawk free for their whole querying campaign."),
-          p(
-            `After launch, new accounts begin with ${TRIAL_DAYS} days of Pro and then continue on the Free ` +
-            `plan. Paid plans run for ${PLAN_LENGTHS_LINE} and then roll on to monthly until you stop ` +
-            "them. We remind you a week before a plan ends.",
+            "QueryHawk is currently free to use. A paid Pro tier is planned; when it arrives, its " +
+            "price and what it includes will be stated clearly before you're asked to pay " +
+            "anything, and the free tier will remain genuinely useful. These terms will be updated " +
+            "before any payment is taken.",
           ),
         ],
       },
@@ -369,18 +372,24 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "Availability, and things going wrong",
         blocks: [
           p(
-            "We work hard to keep QueryHawk running and your records safe, but we can't promise it will " +
-            "never be unavailable.",
+            "We work to keep QueryHawk available and your data safe, but as a small, early-stage " +
+            "service it's provided \"as is\" — we can't promise uninterrupted availability. Nothing " +
+            "in these terms excludes liability that can't legally be excluded (such as for death " +
+            "or personal injury caused by negligence, or fraud). Beyond that, our total liability " +
+            "to you is limited to the greater of £100 or the amount you've paid us in the twelve " +
+            "months before the claim. You should keep your own copies of any manuscript files: " +
+            "QueryHawk tracks your querying, it is not your manuscript's only home.",
           ),
         ],
       },
       {
         heading: "Ending things",
         blocks: [
-          plain("you can leave at any time and take your records with you."),
           p(
-            "You can take a copy of your data or delete your account from Settings › Your data. " +
-            `Deletion has a ${DELETION_GRACE_DAYS}-day window in which you can change your mind.`,
+            "You can close your account at any time, and your data will be deleted as described in " +
+            "the privacy policy. We can suspend or close accounts that breach these terms, and " +
+            "we'll give reasonable notice if we ever discontinue the service — with a way to " +
+            "export your records first.",
           ),
         ],
       },
@@ -388,9 +397,13 @@ export const LEGAL_DOCUMENTS: Record<LegalDocumentKey, LegalDocument> = {
         heading: "Changes and governing law",
         blocks: [
           p(
-            "If these terms change in a way that matters, we'll tell you by email before the change " +
-            "takes effect. These terms are governed by the law of England and Wales.",
+            "If we change these terms in a way that matters, we'll tell you in the app or by email " +
+            "before the change takes effect. These terms are governed by the laws of England and " +
+            "Wales, and any disputes belong to the courts of England and Wales — though if you use " +
+            "the service as a consumer elsewhere in the UK, you keep the protections of your home " +
+            "nation's law.",
           ),
+          p("Questions about any of this: ", supportLink(), "."),
         ],
       },
     ],
