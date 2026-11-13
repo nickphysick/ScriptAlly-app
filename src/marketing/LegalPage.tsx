@@ -13,7 +13,8 @@
  * wording after legal review is an edit to that one file with no component work at all.
  *
  * ⚠️ ONE LAYOUT FOR BOTH (12 Nov, design-refs/contact-terms-unsubscribe-v1.html): the Terms take the
- * privacy page's navy drawer, "The short version" and the contents beside numbered sections. The old
+ * privacy page's navy drawer and the contents beside numbered sections, with their own wording (the lede
+ * sits in the drawer where Privacy has "The short version"; 13 Nov). The old
  * document card (`DocumentShell`, `LegalPlate` and the `.mk-doc*` rules) is deleted with the move.
  * Privacy's rendered markup is byte-identical to before (`legalPage.test.tsx` holds its hash).
  *
@@ -74,8 +75,8 @@ export const termsSectionId = (i: number) => `terms-s${i + 1}`;
  * ⚠️ NO BRACKETED PLACEHOLDER AND NO WORKING-DRAFT RIBBON (PRIV-1); the only links are mailto,
  * ico.org.uk and the contents' own anchors (PRIV-2).
  *
- * /terms — the same view (12 Nov), with the full chrome, its own anchors, and the working-draft
- * ribbon at the head of the body while `LEGAL_COPY_REVIEWED` is false.
+ * /terms — the same view (12 Nov), with the full chrome, its own anchors, its lede in the drawer, and
+ * the working-draft ribbon at the head of the body while `LEGAL_COPY_REVIEWED` is false.
  */
 const DocumentView: React.FC<{ doc: LegalDocumentKey; onNavigate: Nav }> = ({ doc, onNavigate }) => {
   const d = LEGAL_DOCUMENTS[doc];
@@ -105,6 +106,7 @@ const DocumentView: React.FC<{ doc: LegalDocumentKey; onNavigate: Nav }> = ({ do
         <div className="mk-pv-in">
           <h1 className="mk-pv-h1">{d.title}</h1>
           <p className="mk-pv-upd">Last updated {d.lastUpdated}</p>
+          {d.lede && <p className="mk-pv-lede">{d.lede}</p>}
           {d.shortVersion && (
             <section className="mk-pv-short" aria-labelledby="mk-pv-short-h">
               <h2 className="mk-pv-shorth" id="mk-pv-short-h">The short version</h2>
