@@ -216,3 +216,75 @@ test.describe("shell nav v3 — the tab strip, measured", () => {
     expect(await count(), "the break (a group label) is seen").toBe(1);
   });
 });
+
+/** The page's guide pill, made visible if the harness account has it hidden or finished (the Help menu's own rows). */
+async function showPill(page: Page): Promise<boolean> {
+  const vis = () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-pck='pill']")].some((e) => e.getBoundingClientRect().width > 0));
+  if (await vis()) return true;
+  await page.locator('.ws-pagebar [data-shell="help"]').click();
+  const row = page.locator('[data-hm="restore"], [data-hm="open-guide"]').first();
+  if (await row.count()) { await row.click(); await page.waitForTimeout(800); await page.keyboard.press("Escape"); await page.waitForTimeout(300); }
+  else await page.keyboard.press("Escape");
+  return vis();
+}
+const pillBg = (page: Page) => page.evaluate(() => {
+  const p = [...document.querySelectorAll<HTMLElement>("[data-pck='pill']")].find((e) => e.getBoundingClientRect().width > 0);
+  return p ? getComputedStyle(p).backgroundColor : null;
+});
+const transparent = (c: string | null) => c === "rgba(0, 0, 0, 0)" || c === "transparent";
+
+test.describe("shell nav v3 — the account menu and the guide pill, measured", () => {
+  test.setTimeout(300_000);
+
+  test("SNV3-A1e the account menu's Your notes row sits between Task settings and Help centre, and goes to /your-notes", async ({ page }) => {
+    await sidebarMode(page, "rail");
+    await openRoute(page, "/dashboard", WIDE);
+    await page.locator(".wsr-av").click();
+    const menu = page.locator('[data-shell="account-menu"]');
+    await expect(menu).toBeVisible();
+    const rows = async () => (await menu.locator('[role="menuitem"] > span').allTextContents()).map((t) => t.trim());
+    const got = await rows();
+    console.log("[SNV3-A1e]", JSON.stringify(got));
+    expect(got).toEqual(["Settings", "Task settings", "Your notes", "Help centre", "Sign out"]);
+    if (SHOTS) await page.screenshot({ path: `${SHOTS}/10-account-menu-open.png` });
+    /* self-check: the row moved below Help centre is seen */
+    await page.evaluate(() => { const m = document.querySelector('[data-shell="account-menu"]')!; const r = m.querySelector('[data-am="your-notes"]')!; m.querySelector('.am-out')!.before(r); });
+    expect(await rows(), "the break (row moved) is seen").not.toEqual(["Settings", "Task settings", "Your notes", "Help centre", "Sign out"]);
+    await menu.locator('[data-am="your-notes"]').click();
+    await expect(page).toHaveURL(/\/your-notes$/);
+    await expect(menu).toHaveCount(0);
+    await expect(page.locator('[data-shell="tabs"] .ws-ftn')).toHaveText("Your notes");
+  });
+
+  test("SNV3-P1 the guide pill's computed background is transparent on the Contact list and the Query Centre", async ({ page }) => {
+    await sidebarMode(page, "rail");
+    for (const route of ["/agents", "/queries"]) {
+      await openRoute(page, route, WIDE);
+      expect(await showPill(page), `${route}: a guide pill is on screen`).toBe(true);
+      const bg = await pillBg(page);
+      console.log(`[SNV3-P1] ${route}`, bg);
+      expect(transparent(bg), `${route}: ${bg}`).toBe(true);
+    }
+    await addCss(page, ".pck-pill { background: #fbeee8 !important }");
+    expect(transparent(await pillBg(page)), "the break (the blush fill) is seen").toBe(false);
+    await dropBreaks(page);
+  });
+
+  test("SNV3-S screenshots at 1512×982", async ({ page }) => {
+    test.skip(!SHOTS, "set SNV3_SHOTS to a folder to write the screenshots");
+    await sidebarMode(page, "rail");
+    const list: [string, string][] = [
+      ["01-dashboard", "/dashboard"], ["02-query-centre", "/queries"], ["03-responses", "/queries/responses"], ["04-contact-list", "/agents"],
+      ["05-query-letters", "/materials/letters"], ["06-comparable-titles", "/manuscripts/comps"], ["07-manuscripts", "/manuscripts"],
+      ["08-todo-list", "/todo"], ["09-your-notes", "/your-notes"],
+    ];
+    for (const [name, route] of list) {
+      await openRoute(page, route, WIDE);
+      if (["/queries", "/agents", "/manuscripts"].includes(route)) await showPill(page);
+      await page.waitForTimeout(600);
+      await page.screenshot({ path: `${SHOTS}/${name}.png` });
+      /* the bar alone, for the comparison with the ref's frames */
+      await page.screenshot({ path: `${SHOTS}/${name}-bar.png`, clip: { x: 0, y: 0, width: 1512, height: 110 } });
+    }
+  });
+});

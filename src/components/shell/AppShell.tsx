@@ -537,6 +537,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             onNavigatePath={goPath}
             onSignOut={logout}
             anchor={accountAnchor}
+            newReplies={newReplies}
           />
         }
       >

@@ -12,7 +12,7 @@
  * the plan line's own word, "Upgrade", to /plans — the page the old block's button opened.
  */
 import React, { forwardRef } from "react";
-import { Settings, SlidersHorizontal, BookOpen, LogOut } from "lucide-react";
+import { Settings, SlidersHorizontal, BookOpen, LogOut, MessageSquareText } from "lucide-react";
 import { initialsOf } from "../../lib/searchSuggestionsCore";
 import { moveInMenu } from "../../lib/menuKeys";
 import "./shellMenus.css";
@@ -25,10 +25,12 @@ export interface InkAccountMenuProps {
   pos: { left: number; top: number; width?: number } | null;
   go: (path: string) => () => void;
   onSignOut: () => void;
+  /** Your notes: replies not yet seen — the same "{n} new" the full sidebar's "See your notes" link shows. */
+  newReplies?: number;
 }
 
 export const InkAccountMenu = forwardRef<HTMLDivElement, InkAccountMenuProps>(
-  ({ name, email, upgrade, pos, go, onSignOut }, ref) => (
+  ({ name, email, upgrade, pos, go, onSignOut, newReplies = 0 }, ref) => (
     <div
       className="am-menu am-menu--ink sa-pop"
       role="menu"
@@ -60,6 +62,12 @@ export const InkAccountMenu = forwardRef<HTMLDivElement, InkAccountMenuProps>(
       </button>
       <button type="button" className="sa-mi am-row" role="menuitem" onClick={go("/account/preferences")}>
         <SlidersHorizontal aria-hidden="true" /><span>Task settings</span>
+      </button>
+      {/* SHELL NAV v3 (13 Nov): Your notes left the nav, so it lives here — between Task settings and Help centre, with
+          the nav's own `notes` glyph (WORKSPACE_ICONS.notes is MessageSquareText) and the sidebar link's "{n} new" */}
+      <button type="button" className="sa-mi am-row" role="menuitem" data-am="your-notes" onClick={go("/your-notes")}>
+        <MessageSquareText aria-hidden="true" /><span>Your notes</span>
+        {newReplies > 0 ? <i className="am-new" data-probe="account-notes-new">{newReplies} new</i> : null}
       </button>
       <button type="button" className="sa-mi am-row" role="menuitem" onClick={go("/help")}>
         <BookOpen aria-hidden="true" /><span>Help centre</span>

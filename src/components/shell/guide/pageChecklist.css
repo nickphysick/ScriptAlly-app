@@ -11,21 +11,29 @@
 /* ── the pill (Help system v1 C.1, "the ring"): 36 tall, radius 18, blush, a 1px rust-28% inset ring (50% on hover and
    while open), padding 0 14px 0 8px, gap 9; a 24px ring (4px stroke, white track, rust arc), "{Page} guide" in the serif
    with the page name at 600, "{n} of {N}" in JetBrains Mono 600 11px rust. The five bars are retired. ── */
+/* ⚠️ SHELL NAV v3 (13 Nov; ref design-refs/shell-nav-v3.html `.b-guide`): AN OUTLINE ON THE INK, NO BLUSH FILL —
+   transparent, a cream 22% hairline, cream 90% type (600 14px serif), the count in terracotta (400 13px serif), an
+   18px ring (cream 20% track, terracotta arc). Behaviour and copy are unchanged. The ref's literals are read as tokens:
+   244,238,229 → --ink-cream-rgb, #d9967a → --ink-terra. */
 .pck-pill {
   all: unset; box-sizing: border-box; cursor: pointer; position: relative; display: inline-flex; align-items: center; gap: 9px; height: 36px;
-  margin-right: 10px; padding: 0 14px 0 8px; border-radius: 18px; background: #fbeee8; color: #1c130f; white-space: nowrap;
-  box-shadow: inset 0 0 0 1px rgba(162, 69, 42, 0.28); transition: background 0.15s, box-shadow 0.15s;
+  margin-right: 10px; padding: 0 14px 0 10px; border-radius: 18px; background: transparent; color: rgba(var(--ink-cream-rgb), 0.9); white-space: nowrap;
+  box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.22); transition: background 0.15s, box-shadow 0.15s;
 }
-.pck-pill:hover, .pck-pill.open { box-shadow: inset 0 0 0 1px rgba(162, 69, 42, 0.5); }
-.pck-pill:focus-visible { outline: 2px solid #a2452a; outline-offset: 3px; }
+.pck-pill:hover, .pck-pill.open { box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.4); }
+.pck-pill:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: 3px; }
 .pck-pill .gr-ring { flex: none; display: block; }
+.pck-pill .gr-ring circle:first-child { stroke: rgba(var(--ink-cream-rgb), 0.2); }
+.pck-pill:not(.all) .gr-arc { stroke: var(--ink-terra); }
 .pck-pill .gr-arc { transition: stroke-dasharray 0.7s cubic-bezier(0.3, 0.7, 0.3, 1); }
-.pck-pill .pck-pt { font: 400 14px/1 var(--sp-serif) !important; color: #1c130f; }
+.pck-pill .pck-pt { font: 600 14px/1 var(--sp-serif) !important; color: rgba(var(--ink-cream-rgb), 0.9); }
 .pck-pill .pck-pt b { font: inherit !important; font-weight: 600 !important; }
-.pck-pill .pck-pn { font: normal 600 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important; color: #a2452a; }
+.pck-pill .pck-pn { font: normal 400 13px/1 var(--sp-serif) !important; color: var(--ink-terra); }
 /* finished in this visit: sage, a sage-ink ring, "{Page}: Learned ✓" */
 .pck-pill.all { background: #e0e5dd; box-shadow: inset 0 0 0 1px rgba(75, 97, 81, 0.35); }
 .pck-pill.all .pck-pn { color: #4b6151; }
+/* shell nav v3: the finished pill keeps today's sage fill (the ref draws only the live one), so it keeps its ink type */
+.pck-pill.all, .pck-pill.all .pck-pt { color: var(--ink-on-light); }
 /* below 1100px of window the words go: the ring and the count */
 @media (max-width: 1099px) { .pck-pill .pck-pt { display: none; } .pck-pill { padding: 0 12px 0 8px; } }
 /* C.2 — the bump (1 → 1.08 → 1, 420ms) and the one-off pulse (two soft blush rings spreading 12px, 1.6s each) */
