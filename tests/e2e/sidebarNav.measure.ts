@@ -68,7 +68,7 @@ test("SB1 short labels in the sidebar, full names everywhere else", async ({ pag
   L.check("the sidebar reads Queries", texts.includes("Queries") && !texts.includes("Query Centre"), JSON.stringify(texts));
   L.check("the sidebar reads Packages", texts.includes("Packages") && !texts.includes("Submission packages"), JSON.stringify(texts));
   const tabName = () => page.evaluate(() => ([...document.querySelectorAll(".ws-ftn[data-page-name]")].find((e) => (e as HTMLElement).offsetParent)?.textContent ?? "").trim());
-  const sibName = (id: string) => page.evaluate((x) => { const e = [...document.querySelectorAll(`.ws-ftsib[data-sib="${x}"]`)].find((y) => (y as HTMLElement).offsetParent); return e ? (e.getAttribute("aria-label") ?? e.textContent ?? "").trim() : null; }, id);
+  const sibName = (id: string) => page.evaluate((x) => { const e = [...document.querySelectorAll(`[data-shell="tabs"] [data-sib="${x}"]`)].find((y) => (y as HTMLElement).offsetParent); return e ? (e.getAttribute("aria-label") ?? e.textContent ?? "").trim() : null; }, id);
   const qcTab = await tabName();
   L.check("the folder tab on /queries reads Query Centre", qcTab === "Query Centre", qcTab);
   const pkSib = await sibName("q-pkg");

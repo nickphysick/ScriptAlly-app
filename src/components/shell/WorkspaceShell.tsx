@@ -38,7 +38,8 @@ import {
   ShellSection, barPageName, openForHit, sectionClick, sectionRowState, shellHitFor, sidebarLabel,
 } from "../../lib/workspaceShell";
 import { searchShortcut } from "./primitives";
-import { FolderTab, TabSibling } from "./FolderTab";
+import { TabStrip, StripTab } from "./FolderTab";
+import { isPageLocked, tabLabelOf } from "../../lib/workspaceNav";
 import { inkTabAid } from "./inkTabAid";
 import { markPinnedToolbars } from "./pinnedToolbar";
 import { BarSwitcher } from "./BarSwitcher";
@@ -788,22 +789,9 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
     else if (searchAnchorRef) (searchAnchorRef as React.MutableRefObject<HTMLButtonElement | null>).current = el;
   }, [searchAnchorRef]);
 
-  /* the folder tab: the page's group label and its OTHER pages, in the sidebar's order */
+  /* SHELL NAV v3 — the tab strip: every page of the current section, in nav order (built below, once the Pro locks
+     are known). Off the nav (Settings, Plans, Help, Import, Your notes) it is the page's one tab. */
   const tabSection = hit ? sections.find((sx) => sx.id === hit.section) ?? null : null;
-  const tabSiblingsBase: TabSibling[] = useMemo(
-    () => (tabSection?.children ?? [])
-      .filter((ch) => ch.id !== hit?.child)
-      .map((ch) => ({ id: ch.id, label: ch.label, path: ch.path, icon: icons[ch.icon ?? ch.id] ?? icons[tabSection!.id] })),
-    [tabSection, hit?.child, icons],
-  );
-  /* ⚠️ THE REVIEW AID IS GATED HERE, AT THE CALL SITE, so a production build drops the module entirely
-     (`import.meta.env.MODE` is replaced statically and the branch is dead). It injects hypothetical
-     pages into the current group for INK6's "lots of pages" overflow; it fabricates INPUT, never output. */
-  const tabSiblings = useMemo(
-    () => (import.meta.env.MODE !== "production" ? inkTabAid(tabSiblingsBase) : tabSiblingsBase),
-    [tabSiblingsBase],
-  );
-  const tabGroup = tabSection ? tabSection.label : null;
 
   /**
    * INK1 — THE BROWSER'S OWN CHROME TAKES THE SHELL'S INK, WHILE THE SHELL IS ON SCREEN AND ONLY AT
@@ -855,6 +843,24 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   );
   const name = currentUser?.name ?? "";
   const pageName = barPageName(sections, hit, pathname);
+  const stripBase: StripTab[] = useMemo(() => {
+    const kids = tabSection?.children ?? [];
+    if (hit?.child && kids.some((c) => c.id === hit.child)) {
+      return kids.map((ch) => ({
+        id: ch.id, label: ch.label, short: tabLabelOf(ch), path: ch.path,
+        icon: icons[ch.icon ?? ch.id] ?? icons[tabSection!.id], locked: isPageLocked(ch, proLocked),
+      }));
+    }
+    return pageName ? [{ id: "__page", label: pageName.name, short: pageName.name, path: pathname, icon: null }] : [];
+  }, [tabSection, hit?.child, icons, proLocked, pageName?.name, pathname]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* ⚠️ THE REVIEW AID IS GATED HERE, AT THE CALL SITE, so a production build drops the module entirely
+     (`import.meta.env.MODE` is replaced statically and the branch is dead). It injects hypothetical
+     pages into the current section for the "lots of pages" overflow; it fabricates INPUT, never output. */
+  const stripTabs = useMemo(
+    () => (import.meta.env.MODE !== "production" ? inkTabAid(stripBase) : stripBase),
+    [stripBase],
+  );
+  const stripCurrent = hit?.child && stripBase.some((t) => t.id === hit.child) ? hit.child : "__page";
   useEffect(() => { setFeedbackPage(pageName?.name ?? null); }, [pageName?.name]);
 
   return (
@@ -1030,11 +1036,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     The rule is the label's own `::after`, so the markup stays one text node. */}
                 {/* Dashboard has no heading (25 Oct): one row on its own, as on the rail */}
                 {sec.noHeading ? null : (
-                  <div className="ws-glabel">
-                    {sec.label}
-                    {/* sidebar materials v1: a Pro SECTION's tag sits after its heading, and its rows carry none */}
-                    {sec.pro && proLocked.has(sec.pro) ? <span className="ws-qpro ws-gpro" data-shell="pro" aria-label="Pro">PRO</span> : null}
-                  </div>
+                  /* shell nav v3: no section carries a Pro mark — the marks are the rows' own */
+                  <div className="ws-glabel">{sec.label}</div>
                 )}
                 {(sec.children ?? []).map((ch) => {
                   const on = hit?.section === sec.id && hit?.child === ch.id;
@@ -1282,18 +1285,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               it hides nothing; the paths that DO report failures keep their own toasts and inline
               errors, and `useSaveState`/`saveSignal` stay for whatever replaces it. */}
           <header ref={barRef} className="ws-pagebar" data-probe="navrow" data-scrolled={barScrolled ? "true" : "false"}>
-              {/* ══ THE FOLDER TAB (ink shell v1) — the current page as paper growing out of the sheet, its
-                  group's other pages as recessed tabs. It names the page; the breadcrumb, the page-name
-                  fade and the bar's hairline are retired with it. */}
-              {pageName && (
-                <FolderTab
-                  /* off-nav routes name their group from barPageName — Settings reads ACCOUNT · Settings */
-                  group={tabGroup ?? pageName.section}
-                  name={pageName.name}
-                  siblings={tabSiblings}
-                  onGo={go}
-                  limitRef={searchFieldRef}
-                />
+              {/* ══ THE TAB STRIP (shell nav v3; ink shell v1's folder tab before it) — the section's pages in nav
+                  order, the current one risen as paper growing out of the sheet. It names the page; the
+                  breadcrumb, the page-name fade and the bar's hairline are retired with it. */}
+              {stripTabs.length > 0 && (
+                <TabStrip tabs={stripTabs} current={stripCurrent} onGo={go} limitRef={searchFieldRef} />
               )}
               <div className="ws-grow" data-shell="spacer" aria-hidden="true" />
               {/* the right: the workspace group (search · Log a query), then Help, set apart. Spacing is

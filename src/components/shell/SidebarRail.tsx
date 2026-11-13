@@ -5,21 +5,22 @@
  * SidebarRail — the 80px labelled rail (sidebar rail v1, 5 Nov; refs design-refs/shell/sidebar-rail-v1.css
  * + .js, the `.qr-c` layer).
  *
- * SIDEBAR RAIL v2 (6 Nov; refs design-refs/sidebar-rail-v2): the five places used most — Dashboard, Queries,
- * Agents, Letters, Tasks — each one click to its own page, then More for everything else (`MorePanel`). An item
- * lights only on its own page; on a page that lives in More, More lights and takes that page's short name. The
- * section cards of rail v1, their trays, their animation and the per-section last-used memory are deleted.
+ * SHELL NAV v3 (13 Nov; ref design-refs/shell-nav-v3.html): the rail is PLACES — one row per section of the nav
+ * (Dashboard, Queries, Agents, Materials, Tasks), labelled and drawn with the section's own label and icon. A row is
+ * lit while the current page belongs to its section; nothing is lit on /your-notes, Settings, Plans, Help or Import.
+ * A click goes to the section's `def` page, or the first page of the section this account is not locked out of
+ * (`railTargetFor`). The pages of a place are the folder tabs in the bar. Rail v2's More panel and per-page rail
+ * flags are deleted. The five rows carry no tooltip: the label is on the row.
  *
- * ⚠️ IT OWNS NO NAVIGATION STATE. Which item is lit is the shell's `hit` (the route); the items and More's groups are
- * `workspaceNav`'s `railItems` / `moreGroups`, read from the one nav model the expanded sidebar reads too.
+ * ⚠️ IT OWNS NO NAVIGATION STATE. Which row is lit is the shell's `hit` (the route); the rows are `workspaceNav`'s
+ * sections, the one nav model the expanded sidebar reads too.
  *
  * ⚠️ EVERY LABEL SETS ITS OWN FONT FAMILY in sidebarRail.css. brand.tsx names a face on every bare
  * `span`; a label that inherited would render in the body sans (it did, in the mock).
  */
 import React from "react";
 import { ShellHit, ShellSection } from "../../lib/workspaceShell";
-import { railItems, railLabelOf, SETTINGS_RAIL_LABELS } from "../../lib/workspaceNav";
-import { RailMore } from "./RailMore";
+import { railSectionFor, railTargetFor, SETTINGS_RAIL_LABELS } from "../../lib/workspaceNav";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../../lib/accountRoutes";
 import "./sidebarRail.css";
 
@@ -32,7 +33,7 @@ export interface SidebarRailProps {
   hit: ShellHit | null;
   /** The To-do board's total — the only count in the nav. */
   todoCount: number;
-  /** Pro pages the user is NOT entitled to: their row carries the Pro tag. Empty today. */
+  /** Pro entitlements the user does NOT have: decides where a row's click lands (`railTargetFor`). */
   locked: ReadonlySet<string>;
   onGo: (path: string) => void;
   /** The expand control (the panel glyph under the hawk). */
@@ -95,32 +96,25 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
   settingsMode, settingsSection, onSettings, onBack, onFeedback, feedbackOpen = false, newReplies = 0, feedbackRef,
   onAccount, initials, who, planLabel, tip, toggleKbd,
 }) => {
-  const page = settingsMode ? null : hit?.child ?? null;
-  const items = railItems(sections);
-  const sectionOf = (id: string) => sections.find((x) => (x.children ?? []).some((c) => c.id === id));
+  const lit = settingsMode ? null : railSectionFor(sections, hit);
 
-  const item = (ch: (typeof items)[number], i: number) => {
-    const on = ch.id === page;
-    const sec = sectionOf(ch.id);
-    /* the Pro tag: the page's own entitlement, or its section's (Letters sits in Materials) — dormant today */
-    const pro = (!!ch.pro && locked.has(ch.pro)) || (!!sec?.pro && locked.has(sec.pro));
-    const count = ch.id === "list" ? todoCount : 0;
+  const row = (sec: ShellSection, i: number) => {
+    const on = sec.id === lit;
+    const count = sec.id === "tasks" ? todoCount : 0;
     return (
-      <React.Fragment key={ch.id}>
+      <React.Fragment key={sec.id}>
         <button
           type="button"
           className={`wsr-ni${on ? " wsr-on" : ""}`}
-          data-go={ch.id}
-          aria-label={ch.label}
+          data-go={sec.id}
+          aria-label={sec.label}
           aria-current={on ? "page" : undefined}
-          onClick={() => onGo(ch.path)}
-          {...tip(ch.label)}
+          onClick={() => onGo(railTargetFor(sec, locked))}
         >
-          <span className="wsr-ic">{icons[ch.icon ?? ch.id]}</span>
-          <span className="wsr-lbl">{railLabelOf(ch)}</span>
+          <span className="wsr-ic">{icons[sec.icon ?? sec.id]}</span>
+          <span className="wsr-lbl">{sec.label}</span>
           {/* v51.1 — the badge is the "needs you" count (boardFigures' cards), not the To-do list's rows: its tooltip says so */}
           {count > 0 && <span className="wsr-ct" data-shell="count" aria-label={`${count} need you now`} title={`${count} need you now`}>{railCount(count)}</span>}
-          {pro && <span className="wsr-pro" data-shell="pro" aria-label="Pro">Pro</span>}
         </button>
         {i === 0 && <div className="wsr-sep" aria-hidden="true" />}
       </React.Fragment>
@@ -149,8 +143,7 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
       </div>
       <div className="wsr-mswrap">{switcher}</div>
       <nav className="wsr-nav" aria-label="Main">
-        {items.map(item)}
-        <RailMore sections={sections} hit={settingsMode ? null : hit} icons={icons} locked={locked} onGo={onGo} disabled={expanded || settingsMode} />
+        {sections.map(row)}
       </nav>
       <nav className="wsr-setnav" aria-label="Settings">
         <button type="button" className="wsr-ni wsr-back" onClick={onBack} aria-label="Back to the app">

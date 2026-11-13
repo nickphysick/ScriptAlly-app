@@ -2,12 +2,11 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The nav's Pro marks (sidebar materials v1, 6 Nov). A mark is drawn only for an entitlement the writer lacks:
- *   · rail (v2): the "Pro" tag on the Letters item (Materials is Pro); the More panel's marks are its own test;
- *   · full sidebar: a "PRO" tag after the MATERIALS heading, and on the Versions and Discover rows — never on Query
- *     letters, Comparable titles or Submission packages, because their heading already says it.
- * Today every switch is open, so a founding writer sees none. A Free writer is rendered with the switches shut
- * (`__SA_NAV_FREE`, the dev-only review aid), which is the nav they will see once gating returns.
+ * The nav's Pro marks and the rail of places (shell nav v3, 13 Nov; ref design-refs/shell-nav-v3.html).
+ *   · the marks are the PAGES' own: Query letters, Submission packages and Comparable titles carry "materials",
+ *     Versions "versions", Discover "discover"; no section heading carries one, and the rail's rows carry none;
+ *   · the rail is one row per section, lit on any page of that section, nothing lit off the nav; More is gone.
+ * Today every switch is open, so a founding writer sees none. A Free writer is rendered with the switches shut.
  */
 import type { Entitlement } from "../../lib/entitlements";
 import React from "react";
@@ -30,6 +29,7 @@ vi.mock("../../lib/db", () => ({
   }),
 }));
 import { WorkspaceShell } from "./WorkspaceShell";
+import { SidebarRail } from "./SidebarRail";
 
 const ICONS: Record<string, React.ReactNode> = new Proxy({}, { get: (_, key) => <i data-icon={String(key)} /> }) as Record<string, React.ReactNode>;
 const render = (path: string) => renderToStaticMarkup(
@@ -47,41 +47,20 @@ const taggedRows = (h: string) => [...h.matchAll(/<button[^>]*class="ws-ni[^"]*"
 /** the headings that carry a tag */
 const taggedHeads = (h: string) => [...h.matchAll(/<div class="ws-glabel">([^<]+)<span class="ws-qpro ws-gpro"/g)].map((m) => m[1]);
 
-describe("sidebar materials v1 — the nav's Pro marks", () => {
+describe("shell nav v3 — the nav's Pro marks", () => {
   it("a founding writer sees no mark anywhere (plan rules v1: the flag, not a switch)", () => {
     const h = render("/manuscripts/versions");
     expect(h).toContain("ws-glabel"); /* the full sidebar rendered */
     expect(h).toContain('data-shell="rail"'); /* and the rail */
     expect(h).not.toContain('data-shell="pro"');
-    expect(h).not.toContain("wsr-pro");
   });
 
-  it("a Free writer sees the Pro tag on the rail's Letters item only, and the sidebar's three tags", () => {
+  it("a Free writer sees the tag on each locked page's own row, none on a heading, none on the rail", () => {
     user.founding = false;
     const h = render("/manuscripts/versions");
-    const items = [...h.matchAll(/<button[^>]*class="wsr-ni[^"]*"[^>]*data-go="([^"]+)"(?:(?!<\/button>).)*?<\/button>/gs)];
-    expect(items.filter((m) => m[0].includes("wsr-pro")).map((m) => m[1])).toEqual(["m-letters"]);
-    /* full sidebar: the MATERIALS heading, then Discover and Versions; no Materials row carries its own */
-    expect(taggedHeads(h)).toEqual(["Materials"]);
-    expect(taggedRows(h)).toEqual(["Discover", "Versions"]);
-  });
-
-  it("sidebar rail v2: More is a menu button, lit and named by the More page you are on", () => {
-    const more = (path: string) => render(path).match(/<button[^>]*data-go="more"[^>]*>(?:(?!<\/button>).)*<\/button>/s)![0];
-    const r = more("/queries/responses");
-    expect(r).toContain('aria-haspopup="menu"');
-    expect(r).toContain('aria-expanded="false"');
-    expect(r).toContain("wsr-on");
-    expect(r).toContain(">Responses<");
-    expect(r).toContain('aria-label="More: Responses"');
-    const q = more("/queries");
-    expect(q).not.toContain("wsr-on");
-    expect(q).toContain(">More<");
-    expect(more("/manuscripts/comps")).toContain(">Comps<");
-    /* the rail item lights only on its own page */
-    const h = render("/queries/responses");
-    expect(h).not.toMatch(/class="wsr-ni wsr-on"[^>]*data-go="q-centre"/);
-    expect(render("/queries")).toMatch(/class="wsr-ni wsr-on"[^>]*data-go="q-centre"/);
+    expect(taggedHeads(h)).toEqual([]);
+    expect(taggedRows(h)).toEqual(["Discover", "Query letters", "Submission packages", "Comparable titles", "Versions"]);
+    expect(h).not.toContain("wsr-pro");
   });
 
   it("a paid Pro writer sees none", () => {
@@ -95,3 +74,71 @@ describe("sidebar materials v1 — the nav's Pro marks", () => {
     for (const b of ["founding", "trial", "pro"] as const) expect([...navLockedFor(ent(b))], b).toEqual([]);
   });
 });
+
+/* ══ SNV3-R — the rail of places ══ */
+const railRows = (h: string) => [...h.matchAll(/<button[^>]*class="(wsr-ni[^"]*)"[^>]*data-go="([^"]+)"(?:(?!<\/button>).)*?<\/button>/gs)];
+const NAV_PATHS = workspaceSections({ todo: 0 }).flatMap((s) => (s.children ?? []).map((c) => [c.path, s.id] as const));
+
+describe("shell nav v3 — the rail is five places", () => {
+  it("SNV3-R1 five rows with the baked labels, in order, and no More", () => {
+    const h = render("/dashboard");
+    const rows = railRows(h);
+    expect(rows.map((m) => m[2])).toEqual(["workspace", "queries", "agents", "materials", "tasks"]);
+    expect(rows.map((m) => m[0].match(/<span class="wsr-lbl">([^<]+)</)![1])).toEqual(["Dashboard", "Queries", "Agents", "Materials", "Tasks"]);
+    expect(h).not.toContain('data-go="more"');
+    expect(h).not.toContain("wsm-");
+  });
+
+  it("SNV3-R2 on each of the thirteen pages the right row is lit, and only that one", () => {
+    expect(NAV_PATHS).toHaveLength(13);
+    for (const [path, sec] of NAV_PATHS) {
+      const lit = railRows(render(path)).filter((m) => /\bwsr-on\b/.test(m[1])).map((m) => m[2]);
+      expect(lit, path).toEqual([sec]);
+    }
+  });
+
+  it("SNV3-R3 nothing is lit on /your-notes or /account", () => {
+    for (const path of ["/your-notes", "/account"]) {
+      expect(railRows(render(path)).filter((m) => /\bwsr-on\b/.test(m[1])).map((m) => m[2]), path).toEqual([]);
+    }
+  });
+
+  it("SNV3-R4 the five rows carry no tooltip", () => {
+    const tipProps = { "data-tip": "x" };
+    const el = SidebarRail(railProps({ tip: () => tipProps })) as React.ReactElement;
+    const rows = findButtons(el).filter((b) => typeof b.props["data-go"] === "string");
+    expect(rows).toHaveLength(5);
+    for (const r of rows) expect(r.props["data-tip"], String(r.props["data-go"])).toBeUndefined();
+  });
+
+  it("SNV3-R5 the Materials row sends a writer with Materials locked to /manuscripts", () => {
+    const went: string[] = [];
+    const locked = navLockedFor(ent("free"));
+    const el = SidebarRail(railProps({ locked, onGo: (p: string) => went.push(p) })) as React.ReactElement;
+    const btn = findButtons(el).find((b) => b.props["data-go"] === "materials")!;
+    (btn.props.onClick as () => void)();
+    expect(went).toEqual(["/manuscripts"]);
+    const open: string[] = [];
+    const el2 = SidebarRail(railProps({ onGo: (p: string) => open.push(p) })) as React.ReactElement;
+    (findButtons(el2).find((b) => b.props["data-go"] === "materials")!.props.onClick as () => void)();
+    expect(open).toEqual(["/materials/letters"]);
+  });
+});
+
+type El = React.ReactElement<Record<string, unknown>>;
+function findButtons(node: unknown, out: El[] = []): El[] {
+  if (Array.isArray(node)) { for (const n of node) findButtons(n, out); return out; }
+  if (!node || typeof node !== "object" || !("props" in (node as object))) return out;
+  const el = node as El;
+  if (el.type === "button") out.push(el);
+  findButtons(el.props.children, out);
+  return out;
+}
+function railProps(over: Record<string, unknown>): React.ComponentProps<typeof SidebarRail> {
+  return {
+    sections: workspaceSections({ todo: 0 }), icons: ICONS, hit: null, todoCount: 0, locked: new Set<string>(),
+    onGo: () => {}, onExpand: () => {}, expanded: false, switcher: null, markSrc: "", settingsMode: false,
+    settingsSection: null, onSettings: () => {}, onBack: () => {}, initials: "IM", who: "Isla", planLabel: "",
+    tip: () => ({}), toggleKbd: "", ...over,
+  } as React.ComponentProps<typeof SidebarRail>;
+}

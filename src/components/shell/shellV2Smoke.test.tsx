@@ -118,7 +118,7 @@ describe("v2 shell — smoke renders", () => {
     expect(html).toContain("sv2-topbar");
     expect(html).toContain("sv2-tuck");        // the bar's only chrome control
     expect(html).toContain("sv2-crumb");
-    expect(html).toContain("Your book</span>"); // the section — the workspace nav's name (sidebar rail v1)
+    expect(html).toContain("Materials</span>"); // the section — the workspace nav's name (shell nav v3: Manuscripts is in Materials)
     expect(html).toContain("<b>Manuscripts</b>"); // the page, bold and inert
     expect(html).toContain("sv2-vr");
     expect(html).toContain("sv2-scope");

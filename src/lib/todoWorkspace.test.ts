@@ -101,8 +101,8 @@ describe("the app sidebar's TASKS section", () => {
 
   /* sidebar metrics pass: ACCOUNT left the nav (Settings is the foot's gear again), so Tasks is last. */
   it("sits below MATERIALS, last of the work sections — and no To-do row survives under Workspace", () => {
-    /* sidebar materials v1 (6 Nov): Tasks after Your book (`book`) and Materials (`materials`). Your notes v1 (9 Nov): Founding writer joins as the last section, after Tasks — its one page lives in More */
-    expect(nav.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "book", "materials", "tasks", "founding"]);
+    /* shell nav v3 (13 Nov): five sections, Tasks last */
+    expect(nav.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials", "tasks"]);
     expect(nav.find((s) => s.id === "workspace")!.children!.map((c) => c.id)).toEqual(["dash"]);
   });
 

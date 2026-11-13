@@ -31,40 +31,27 @@ async function shot(page: Page, name: string, clip?: { x: number; y: number; wid
 }
 const WIDE = { width: 1512, height: 982 };
 
-/** The visible text of the folder tab's sibling links (the measuring copy is aria-hidden and skipped). */
-async function tabSiblings(page: Page): Promise<string[]> {
+/** Shell nav v3: the strip's tabs, left to right, by their full names (the measuring copy is a span, not the nav). */
+async function stripTabs(page: Page): Promise<string[]> {
   return page.evaluate(() => {
-    const row = document.querySelector<HTMLElement>('[data-shell="tab-siblings"]');
+    const row = document.querySelector<HTMLElement>('[data-shell="tabs"]');
     if (!row) return [];
-    return [...row.querySelectorAll<HTMLElement>(".ws-ftsib")]
-      .filter((b) => !b.classList.contains("ws-ftmore"))
-      .map((b) => (b.getAttribute("aria-label") || b.textContent || "").trim());
+    return [...row.querySelectorAll<HTMLElement>("[data-tab]")].map((b) => (b.getAttribute("aria-label") || "").trim());
   });
 }
 
 test.describe("sidebar rail v1 — Phase 1, the nav model", () => {
-  test("SR1.1 the folder tab follows the sections", async ({ page }) => {
-    await openRoute(page, "/manuscripts", WIDE);
-    await expect(page.locator(".ws-ftn")).toHaveText("Manuscripts");
-    const ms = await tabSiblings(page);
-    console.log("[SR1.1] /manuscripts siblings", JSON.stringify(ms));
-    /* sidebar materials v1 (6 Nov): Your book = Manuscripts · Versions; Materials = Query letters · Comps · Packages */
-    expect(ms).toEqual(["Versions"]);
-    await openRoute(page, "/manuscripts/versions", WIDE);
-    await expect(page.locator(".ws-ftn")).toHaveText("Versions");
-    expect(await tabSiblings(page)).toEqual(["Manuscripts"]);
-    await openRoute(page, "/materials/letters", WIDE);
-    await expect(page.locator(".ws-ftn")).toHaveText("Query letters");
-    const ql = await tabSiblings(page);
-    console.log("[SR1.1] /materials/letters siblings", JSON.stringify(ql));
-    expect(ql).toEqual(["Comparable titles", "Submission packages"]);
-    await openRoute(page, "/queries/packages", WIDE);
-    await expect(page.locator(".ws-ftn")).toHaveText("Submission packages");
-    const pk = await tabSiblings(page);
-    console.log("[SR1.1] /queries/packages siblings", JSON.stringify(pk));
-    expect(pk).toEqual(["Query letters", "Comparable titles"]);
+  /* shell nav v3 (13 Nov): the strip is the section's pages in nav order, whichever is current */
+  test("SR1.1 the tab strip follows the sections", async ({ page }) => {
+    const MATERIALS = ["Query letters", "Submission packages", "Comparable titles", "Versions", "Manuscripts"];
+    for (const [route, name] of [["/manuscripts", "Manuscript"], ["/manuscripts/versions", "Versions"], ["/materials/letters", "Letters"], ["/queries/packages", "Packages"]]) {
+      await openRoute(page, route, WIDE);
+      await expect(page.locator('[data-shell="tabs"] .ws-ftn')).toHaveText(name);
+      const t = await stripTabs(page);
+      console.log(`[SR1.1] ${route}`, JSON.stringify(t));
+      expect(t, route).toEqual(MATERIALS);
+    }
   });
-
   test("SR1.2 the palette lists the nav's pages by the nav's names", async ({ page }) => {
     await openRoute(page, "/dashboard", WIDE);
     await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");
@@ -161,8 +148,8 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
     }
     expect(all.length).toBeGreaterThan(30);
     const texts = new Set(all.map((f) => f.text));
-    /* sidebar rail v2: the five places and More, which takes the More page's short name (Versions here) */
-    for (const t of ["Dashboard", "Queries", "Agents", "Letters", "Tasks", "More", "Versions", "Feedback"]) {
+    /* shell nav v3: the five places, by their sections' names */
+    for (const t of ["Dashboard", "Queries", "Agents", "Materials", "Tasks", "Feedback"]) {
       expect([...texts], `label "${t}" was measured`).toContain(t);
     }
     const cut = all.filter((f) => f.lines !== 1 || !f.inside || f.overflow > 0);
@@ -177,7 +164,7 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
   test("SR2.2 the nav scrolls only on a short window, with the head and foot in view", async ({ page }) => {
     await onRail(page);
     await breakCss(page, "scroll", ".wsr-nav .wsr-ni { height: 92px !important }");
-    /* sidebar rail v2: six items, so the nav fits from 760 up; 640 is reported, and keeps its head and foot */
+    /* shell nav v3: five rows, so the nav fits from 760 up; 640 is reported, and keeps its head and foot */
     for (const h of [982, 900, 760, 640]) {
       await openRoute(page, "/queries", { width: 1512, height: h });
       const r = await navScroll(page);
@@ -192,7 +179,7 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
     await onRail(page);
     await breakCss(page, "fullshow", ".set-mode .ws-panel > .ws-pin { opacity: 1 !important }");
     await openRoute(page, "/help", WIDE);
-    if (broken("offnav")) await page.evaluate(() => document.querySelector(".wsr-ni[data-go=a-list]")?.classList.add("wsr-on"));
+    if (broken("offnav")) await page.evaluate(() => document.querySelector(".wsr-ni[data-go=agents]")?.classList.add("wsr-on"));
     expect(await page.locator(".wsr .wsr-on").count(), "/help lights nothing").toBe(0);
     await openRoute(page, "/account/profile", WIDE);
     await expect(page.locator(".wsr.wsr-settings")).toHaveCount(1);
@@ -210,7 +197,7 @@ test.describe("sidebar rail v1 — Phase 2, the rail", () => {
     await onRail(page);
     await page.addInitScript(() => { (window as unknown as { __SA_RAIL_COUNT?: number }).__SA_RAIL_COUNT = 128; });
     await openRoute(page, "/queries", WIDE);
-    const ct = page.locator('.wsr-ni[data-go="list"] .wsr-ct');
+    const ct = page.locator('.wsr-ni[data-go="tasks"] .wsr-ct');
     if (broken("count")) await ct.evaluate((e) => { e.textContent = "128"; });
     await expect(ct).toHaveText("99+");
   });
@@ -503,168 +490,53 @@ test.describe("sidebar rail v1 — Phase 3, RAIL · FLOAT · PINNED", () => {
   });
 });
 
-/* ── Phase 4 — screenshots (SR_SHOTS=<dir>; skipped without it) ─────────────────────────────────────── */
-test.describe("sidebar rail v2 — screenshots", () => {
-  test.use({ deviceScaleFactor: 2 });
-  test.skip(!SHOTS, "SR_SHOTS names the folder");
-
-  test("RV2 screenshots at 1512×982: rail, More open, a More page, pinned, keyboard focus, a Free writer", async ({ page }) => {
-    test.skip(!SHOTS, "set SR_SHOTS to a folder to write the screenshots");
-    const full = async (name: string) => { await page.waitForTimeout(600); await page.screenshot({ path: `${SHOTS}/${name}.png` }); };
-    await onRail(page);
-    await openMoving(page, "/queries");
-    await full("01-rail-query-centre");
-    await page.locator('[data-go="more"]').click();
-    await expect(page.locator('[data-shell="more"]')).toBeVisible();
-    await full("02-more-open");
-    await page.locator('[data-shell="more"] [data-go="q-responses"]').click();
-    await expect(page).toHaveURL(/\/queries\/responses$/);
-    await full("03-more-page-responses");
-    await expandFromRail(page);
-    await page.locator(".ws-pinbtn").click();
-    await expect.poll(() => mode(page)).toBe("pinned");
-    await full("04-pinned");
-    await page.locator(".ws-pinbtn").click();
-    await expect.poll(() => mode(page)).toBe("rail");
-    await page.mouse.move(700, 500);
-    await page.locator('[data-go="more"]').focus();
-    await page.keyboard.press("Enter");
-    await page.keyboard.press("ArrowDown");
-    await full("05-keyboard-focus");
-    await page.keyboard.press("Escape");
-    await page.addInitScript(() => { (globalThis as unknown as { __SA_NAV_FREE?: boolean }).__SA_NAV_FREE = true; });
-    await openMoving(page, "/materials/letters");
-    await page.locator('[data-go="more"]').click();
-    await expect(page.locator('[data-shell="more"] [data-shell="pro"]').first()).toBeVisible();
-    await full("06-free-writer");
-  });
-});
+/* RV2 (rail v2 screenshots: More open, a More page) retired by shell nav v3 (13 Nov) — More is gone. */
 
 /* ── Part D of sidebar materials v1: the two new cards ── */
 test.describe("sidebar materials v1 — the regrouped rail", () => {
-  test("SR6.1 the rail is five places and More, each one click to its own page", async ({ page }) => {
+  /* shell nav v3 (13 Nov): one row per section; a row lights on every page of its section */
+  test("SR6.1 the rail is five places, each lit on every page of its section", async ({ page }) => {
     await onRail(page);
     await openRoute(page, "/dashboard", WIDE);
     const labels = (await page.locator(".wsr-nav .wsr-ni .wsr-lbl").allTextContents()).map((t) => t.trim());
     console.log("[SR6.1] rail", JSON.stringify(labels));
-    expect(labels).toEqual(["Dashboard", "Queries", "Agents", "Letters", "Tasks", "More"]);
+    expect(labels).toEqual(["Dashboard", "Queries", "Agents", "Materials", "Tasks"]);
     await expect(page.locator(".wsr-nav .wsr-sep")).toHaveCount(1);
-    await page.locator('.wsr-ni[data-go="m-letters"]').click();
+    await expect(page.locator('[data-go="more"]')).toHaveCount(0);
+    await page.locator('.wsr-ni[data-go="materials"]').click();
     await expect(page).toHaveURL(/\/materials\/letters$/);
-    await expect(page.locator('.wsr-ni[data-go="m-letters"]')).toHaveClass(/wsr-on/);
+    await expect(page.locator('.wsr-ni[data-go="materials"]')).toHaveClass(/wsr-on/);
     await expect(page.locator('.wsr-nav .wsr-on')).toHaveCount(1);
     await expect(page.locator('[data-ql="page"]')).toBeVisible();
+    await openRoute(page, "/manuscripts", WIDE);
+    if (broken("lit")) await page.evaluate(() => document.querySelector(".wsr-ni[data-go=materials]")?.classList.remove("wsr-on"));
+    await expect(page.locator('.wsr-ni[data-go="materials"]')).toHaveClass(/wsr-on/);
+    await openRoute(page, "/your-notes", WIDE);
+    await expect(page.locator('.wsr-nav .wsr-on')).toHaveCount(0);
+  });
+  test("SR6.3 a Free writer's Materials row goes to Manuscripts, the first page not locked", async ({ page }) => {
+    await onRail(page);
+    await page.addInitScript(() => { (globalThis as unknown as { __SA_NAV_FREE?: boolean }).__SA_NAV_FREE = true; });
+    await openRoute(page, "/dashboard", WIDE);
+    await page.locator('.wsr-ni[data-go="materials"]').click();
+    await expect(page).toHaveURL(/\/manuscripts$/);
   });
   test("SR6.2 the full sidebar groups Materials under one heading with the full names", async ({ page }) => {
     await startPinned(page);
     await openRoute(page, "/materials/letters", WIDE);
     const heads = (await page.locator(".ws-pin .ws-glabel").allTextContents()).map((t) => t.trim());
-    expect(heads).toEqual(["Queries", "Agents", "Your book", "Materials", "Tasks"]);
+    expect(heads).toEqual(["Queries", "Agents", "Materials", "Tasks"]);
     const names = await page.locator(".ws-pin .ws-ni").evaluateAll((els) => els.map((e) => (e.querySelector(".ws-lbl")?.textContent ?? "").trim()));
     console.log("[SR6.2] full sidebar rows", JSON.stringify(names));
-    expect(names).toEqual(["Dashboard", "Queries", "Responses", "Analytics", "Contact list", "Discover", "Manuscripts", "Versions",
-      "Query letters", "Comparable titles", "Submission packages", "To-do list", "Corkboard"]);
+    expect(names).toEqual(["Dashboard", "Queries", "Responses", "Analytics", "Contact list", "Discover",
+      "Query letters", "Submission packages", "Comparable titles", "Versions", "Manuscripts", "To-do list", "Corkboard"]);
     await expect(page.locator('.ws-pin .ws-ni.on')).toHaveAttribute("aria-label", "Query letters");
     /* a founding writer sees no Pro mark */
     expect(await page.locator('[data-shell="pro"]').count()).toBe(0);
   });
 });
 
-/* ── sidebar rail v2: More ── */
-test.describe("sidebar rail v2 — More", () => {
-  const panel = (page: Page) => page.locator('[data-shell="more"]');
-  const more = (page: Page) => page.locator('.wsr [data-go="more"]');
-
-  test("RV2.1 hover opens after a beat, and leaving both closes it", async ({ page }) => {
-    await onRail(page);
-    await openMoving(page, "/queries");
-    await more(page).hover();
-    await expect(panel(page)).toBeVisible();
-    await expect(more(page)).toHaveAttribute("aria-expanded", "true");
-    const g = await page.evaluate(() => {
-      const p = document.querySelector<HTMLElement>('[data-shell="more"]')!.getBoundingClientRect();
-      const r = document.querySelector<HTMLElement>(".wsr")!.getBoundingClientRect();
-      const b = document.querySelector<HTMLElement>('.wsr [data-go="more"]')!.getBoundingClientRect();
-      return { gap: p.left - r.right, dTop: b.top - p.top, w: p.width, inside: p.bottom <= innerHeight };
-    });
-    console.log("[RV2.1] panel", JSON.stringify(g));
-    expect(g.gap).toBeCloseTo(8, 0);
-    expect(g.w).toBe(248);
-    expect(g.inside).toBe(true);
-    const heads = (await panel(page).locator(".wsm-h").allTextContents()).map((t) => t.trim());
-    expect(heads).toEqual(["Queries", "Agents", "Your book", "Materials", "Tasks"]);
-    const rows = (await panel(page).locator('[role="menuitem"] .wsm-lbl').allTextContents()).map((t) => t.trim());
-    expect(rows).toEqual(["Responses", "Analytics", "Discover", "Manuscripts", "Versions", "Comparable titles", "Submission packages", "Corkboard"]);
-    await expect(panel(page)).toContainText("The pages you use most live on the rail.");
-    await page.mouse.move(900, 500);
-    await expect(panel(page)).toHaveCount(0);
-  });
-
-  test("RV2.2 a click holds it open; a click outside closes it", async ({ page }) => {
-    await onRail(page);
-    await openMoving(page, "/queries");
-    await more(page).click();
-    await expect(panel(page)).toBeVisible();
-    await page.mouse.move(900, 500);
-    await page.waitForTimeout(500);
-    await expect(panel(page), "held after the pointer leaves").toBeVisible();
-    await clickPage(page);
-    await expect(panel(page)).toHaveCount(0);
-  });
-
-  test("RV2.3 the keyboard: Enter opens on the first row, arrows move, Escape closes and returns focus to More", async ({ page }) => {
-    await onRail(page);
-    await openMoving(page, "/queries");
-    await page.mouse.move(900, 500);
-    await more(page).focus();
-    await page.keyboard.press("Enter");
-    await expect(panel(page)).toBeVisible();
-    await expect(panel(page).locator('[role="menuitem"]').first()).toBeFocused();
-    await page.keyboard.press("ArrowDown");
-    await expect(panel(page).locator('[data-go="q-analytics"]')).toBeFocused();
-    await page.keyboard.press("End");
-    await expect(panel(page).locator('[data-go="noteboard"]')).toBeFocused();
-    await page.keyboard.press("Escape");
-    await expect(panel(page)).toHaveCount(0);
-    await expect(more(page)).toBeFocused();
-  });
-
-  test("RV2.4 choosing Responses lands there, with More lit and named Responses", async ({ page }) => {
-    await onRail(page);
-    await openMoving(page, "/queries");
-    await more(page).click();
-    await panel(page).locator('[data-go="q-responses"]').click();
-    await expect(page).toHaveURL(/\/queries\/responses$/);
-    await expect(panel(page)).toHaveCount(0);
-    await expect(more(page)).toHaveClass(/wsr-on/);
-    await expect(more(page).locator(".wsr-lbl")).toHaveText("Responses");
-    await expect(page.locator('.wsr-nav .wsr-on')).toHaveCount(1);
-    await more(page).click();
-    await expect(panel(page).locator('[aria-current="page"]')).toHaveAttribute("data-go", "q-responses");
-  });
-
-  test("RV2.5 a Free writer sees the Pro marks on Letters and in the panel", async ({ page }) => {
-    await onRail(page);
-    await page.addInitScript(() => { (globalThis as unknown as { __SA_NAV_FREE?: boolean }).__SA_NAV_FREE = true; });
-    await openMoving(page, "/queries");
-    await expect(page.locator('.wsr-ni[data-go="m-letters"] .wsr-pro')).toBeVisible();
-    await more(page).click();
-    const marked = await panel(page).locator('[data-shell="pro"]').evaluateAll((els) => els.map((e) => {
-      const row = e.closest("[data-go]"); return row ? row.getAttribute("data-go") : `heading:${(e.parentElement?.textContent ?? "").replace("Pro", "").trim()}`;
-    }));
-    console.log("[RV2.5] marks", JSON.stringify(marked));
-    expect(marked.sort()).toEqual(["a-disc", "heading:Materials", "m-ver"]);
-  });
-
-  test("RV2.6 the panel never opens while the sidebar is pinned or floating", async ({ page }) => {
-    await startPinned(page);
-    await openMoving(page, "/queries");
-    await expect.poll(() => mode(page)).toBe("pinned");
-    await page.locator('.wsr [data-go="more"]').evaluate((b) => { (b as HTMLElement).dispatchEvent(new MouseEvent("click", { bubbles: true })); });
-    await page.waitForTimeout(400);
-    await expect(panel(page)).toHaveCount(0);
-  });
-});
+/* RV2.1–RV2.6 (sidebar rail v2: More) retired by shell nav v3 (13 Nov) — More, its panel and its keyboard are deleted. */
 
 /* ── the pinned sidebar fits at 1512×982 (Nick's ruling, 25 Oct): every row AND the full feedback card ── */
 test.describe("sidebar rail v1 — the full sidebar's height", () => {
@@ -684,9 +556,9 @@ test.describe("sidebar rail v1 — the full sidebar's height", () => {
         cardBottom: card?.getBoundingClientRect().bottom ?? 0, vh: innerHeight, spare: nav.clientHeight - nav.scrollHeight };
     });
     console.log("[SR5]", JSON.stringify(r));
-    /* sidebar materials v1 (6 Nov): Dashboard and twelve pages, under six groups */
+    /* shell nav v3 (13 Nov): Dashboard and twelve pages, under five groups (Dashboard has no heading) */
     expect(r.rows).toBe(13);
-    expect(r.heads, "five group headings").toBe(5);
+    expect(r.heads, "four group headings").toBe(4);
     expect(r.card, "the full feedback card shows").toBe(true);
     expect(r.cut, "rows outside the nav's box").toEqual([]);
     expect(r.sh, "the nav does not scroll").toBeLessThanOrEqual(r.ch);

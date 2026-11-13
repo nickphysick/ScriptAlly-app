@@ -10,7 +10,8 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { QueryStatus } from "../types";
-import { workspaceSections, workspacePageForPath, moreGroups, morePageFor, railItems, railLabelOf, SETTINGS_RAIL_LABELS } from "./workspaceNav";
+import { workspaceSections, workspacePageForPath, railSectionFor, railTargetFor, tabLabelOf, SETTINGS_RAIL_LABELS } from "./workspaceNav";
+import { TODO_ROUTES } from "./todoRoutes";
 import { ACCOUNT_ROUTES } from "./accountRoutes";
 import {
   CLOSED_QUERY_STATUSES, QUERIES_STATUS_PARAM, attentionCount, filterStateFor, isOverdueForReply,
@@ -96,7 +97,7 @@ describe("The IA renders what exists — and nothing else", () => {
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks", "founding"]); /* sidebar materials v1, 6 Nov; Your notes v1, 9 Nov */
+      .toEqual(["workspace", "queries", "agents", "materials", "tasks"]); /* shell nav v3, 13 Nov: five sections */
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -128,7 +129,7 @@ describe("The IA renders what exists — and nothing else", () => {
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks", "founding"]); /* sidebar materials v1, 6 Nov; Your notes v1, 9 Nov */
+      .toEqual(["workspace", "queries", "agents", "materials", "tasks"]); /* shell nav v3, 13 Nov: five sections */
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -142,7 +143,7 @@ describe("The IA renders what exists — and nothing else", () => {
      they made the nav a second control surface for a page that already had one, so the two could
      disagree about what you were looking at — and they forced counts into a navigation column,
      which is how a nav becomes a dashboard. Two real destinations now. */
-  it("Queries carries exactly Query Centre, Responses and Analytics; Packages moved to Materials (sidebar materials v1)", () => {
+  it("Queries carries exactly Query Centre, Responses and Analytics; Packages is in Materials", () => {
     /* Responses v2 (15 Oct) is a routed page with its own slot, so it is a destination, not a filter.
        Sidebar materials v1 (6 Nov): Submission packages left Queries for the Materials section; its address stays. */
     expect(byId("queries").children!.map((c) => c.label)).toEqual(["Query Centre", "Responses", "Analytics"]);
@@ -150,13 +151,12 @@ describe("The IA renders what exists — and nothing else", () => {
     expect(byId("queries").children!.find((c) => c.id === "q-centre")).toMatchObject({ label: "Query Centre", navLabel: "Queries" });
     expect(sidebarLabel(byId("agents").children![0])).toBe("Contact list");
     expect(byId("workspace").noHeading).toBe(true);
-    expect(byId("book").label).toBe("Your book");
-    expect(byId("book").children!.map((c) => c.label)).toEqual(["Manuscripts", "Versions"]);
+    /* shell nav v3 (13 Nov): no "Your book" — Manuscripts and Versions are Materials' last two pages */
+    expect(NAV.map((s) => s.id)).not.toContain("book");
     expect(byId("materials").label).toBe("Materials");
-    expect(byId("materials").children!.map((c) => c.label)).toEqual(["Query letters", "Comparable titles", "Submission packages"]);
-    /* the full sidebar prints the full names in Materials (6 Nov) */
-    expect(byId("materials").children!.map(sidebarLabel)).toEqual(["Query letters", "Comparable titles", "Submission packages"]);
-    expect(byId("materials").children!.map((c) => c.path)).toEqual(["/materials/letters", "/manuscripts/comps", "/queries/packages"]);
+    /* the full sidebar prints the full names in Materials */
+    expect(byId("materials").children!.map(sidebarLabel)).toEqual(["Query letters", "Submission packages", "Comparable titles", "Versions", "Manuscripts"]);
+    expect(byId("materials").children!.map((c) => c.path)).toEqual(["/materials/letters", "/queries/packages", "/manuscripts/comps", "/manuscripts/versions", "/manuscripts"]);
   });
 
   it("no filter child survives in the nav", () => {
@@ -181,7 +181,7 @@ describe("The IA renders what exists — and nothing else", () => {
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks", "founding"]); /* sidebar materials v1, 6 Nov; Your notes v1, 9 Nov */
+      .toEqual(["workspace", "queries", "agents", "materials", "tasks"]); /* shell nav v3, 13 Nov: five sections */
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -209,7 +209,7 @@ describe("The IA renders what exists — and nothing else", () => {
        describe four different things. A pre-existing artefact of an earlier bulk retarget; left
        as found rather than widened here. */
     expect(secs.map((s) => s.id))
-      .toEqual(["workspace", "queries", "agents", "book", "materials", "tasks", "founding"]); /* sidebar materials v1, 6 Nov; Your notes v1, 9 Nov */
+      .toEqual(["workspace", "queries", "agents", "materials", "tasks"]); /* shell nav v3, 13 Nov: five sections */
     // every section is a GROUP: children always, a path never (a label does not navigate)
     for (const s of secs) {
       expect(s.children && s.children.length, `${s.id} must have items`).toBeGreaterThan(0);
@@ -332,21 +332,71 @@ describe("`Needs attention` is the past-reply-window set — ONE derivation, bot
   });
 });
 
-/* ══ SIDEBAR RAIL v1 (5 Nov), regrouped by SIDEBAR MATERIALS v1 (6 Nov) — the section list, the rail's labels, the
-   dormant Pro marks ══ */
-describe("sidebar rail v1 — the nav the rail reads", () => {
+/* ══ SHELL NAV v3 (13 Nov; ref design-refs/shell-nav-v3.html) — five sections, the rail's five places, the tab
+   strip's short names, Pro marks on pages ══ */
+describe("shell nav v3 — the model everything reads", () => {
   const nav = workspaceSections({ todo: 4 });
-  it("six sections, most-used first: Your book and Materials are separate; no Calendar", () => {
-    /* Your notes v1 (9 Nov): Founding writer joins as the last section, after Tasks — its one page lives in More */
-    expect(nav.map((s) => s.label)).toEqual(["Workspace", "Queries", "Agents", "Your book", "Materials", "Tasks", "Founding writer"]);
-    expect(nav.find((s) => s.id === "founding")!.children!.map((c) => [c.label, c.path, !!c.rail])).toEqual([["Your notes", "/your-notes", false]]);
-    const labels = nav.flatMap((s) => (s.children ?? []).map((c) => c.label));
-    expect(labels).not.toContain("Calendar");
-    expect(nav.find((s) => s.label === "Your book")!.children!.map((c) => c.label)).toEqual(["Manuscripts", "Versions"]);
-    expect(nav.find((s) => s.label === "Materials")!.children!.map((c) => c.label)).toEqual(["Query letters", "Comparable titles", "Submission packages"]);
-    expect(nav.find((s) => s.id === "tasks")!.children!.map((c) => c.label)).toEqual(["To-do list", "Corkboard"]);
+  const pages = (id: string) => nav.find((s) => s.id === id)!.children!.map((c) => c.label);
+  it("SNV3-M1 exactly five sections, in the baked order, with the baked labels", () => {
+    expect(nav.map((s) => s.id)).toEqual(["workspace", "queries", "agents", "materials", "tasks"]);
+    expect(nav.map((s) => s.label)).toEqual(["Dashboard", "Queries", "Agents", "Materials", "Tasks"]);
+    expect(nav.map((s) => s.label)).not.toContain("Your book");
+    expect(nav.map((s) => s.label)).not.toContain("Founding writer");
   });
-  it("every section and row names its own icon, and each is drawn; Your book is Library, Materials Mail, Query letters FilePenLine", () => {
+  it("SNV3-M2 the pages of each section, in the baked order", () => {
+    expect(pages("workspace")).toEqual(["Dashboard"]);
+    expect(pages("queries")).toEqual(["Query Centre", "Responses", "Analytics"]);
+    expect(pages("agents")).toEqual(["Contact list", "Discover"]);
+    expect(pages("materials")).toEqual(["Query letters", "Submission packages", "Comparable titles", "Versions", "Manuscripts"]);
+    expect(pages("tasks")).toEqual(["To-do list", "Corkboard"]);
+    expect(nav.find((s) => s.id === "tasks")!.children!.map((c) => c.id)).toEqual(TODO_ROUTES.map((r) => r.id));
+  });
+  it("SNV3-M3 no page in two sections; every nav path in shellForRoute's workspace routes is in exactly one; /your-notes in none", () => {
+    const all = nav.flatMap((s) => (s.children ?? []).map((c) => c.path));
+    expect(new Set(all).size).toBe(all.length);
+    expect(all).toHaveLength(13);
+    for (const p of all) {
+      expect([...WORKSPACE_SHELL_PATHS], p).toContain(p);
+      expect(nav.filter((s) => (s.children ?? []).some((c) => c.path === p)), p).toHaveLength(1);
+    }
+    expect(all).not.toContain("/your-notes");
+    expect(WORKSPACE_SHELL_PATHS.has("/your-notes"), "Your notes is still a routed page").toBe(true);
+    expect(workspacePageForPath("/your-notes")).toBeNull();
+  });
+  it("SNV3-M4 the tab strip's short names: Letters, Packages, Comps, Manuscript; every other page its label", () => {
+    expect(nav.flatMap((s) => (s.children ?? []).map(tabLabelOf))).toEqual([
+      "Dashboard", "Query Centre", "Responses", "Analytics", "Contact list", "Discover",
+      "Letters", "Packages", "Comps", "Versions", "Manuscript", "To-do list", "Corkboard",
+    ]);
+    /* `label` stays the full name for the palette, the title, the crumbs and aria-labels */
+    expect(pages("materials")).toContain("Comparable titles");
+  });
+  it("SNV3-M5 Pro marks are the pages' own; no section carries one", () => {
+    const pro = nav.flatMap((s) => (s.children ?? []).filter((c) => c.pro).map((c) => `${c.label}:${c.pro}`));
+    expect(pro).toEqual(["Discover:discover", "Query letters:materials", "Submission packages:materials", "Comparable titles:materials", "Versions:versions"]);
+    expect(nav.some((s) => "pro" in s)).toBe(false);
+  });
+  it("SNV3-M6 no per-page rail flags survive", () => {
+    for (const c of nav.flatMap((s) => s.children ?? [])) {
+      expect("rail" in c, c.id).toBe(false);
+      expect("railLabel" in c, c.id).toBe(false);
+    }
+  });
+  it("SNV3-M7 a rail row goes to its def page, or the first unlocked page of its section", () => {
+    const none = new Set<string>();
+    expect(nav.map((s) => railTargetFor(s, none))).toEqual(["/dashboard", "/queries", "/agents", "/materials/letters", "/todo"]);
+    const free = new Set(["discover", "packages", "versions", "materials"]);
+    expect(railTargetFor(nav.find((s) => s.id === "materials")!, free)).toBe("/manuscripts");
+    expect(railTargetFor(nav.find((s) => s.id === "agents")!, free)).toBe("/agents");
+  });
+  it("SNV3-M8 the lit row is the current page's section, and nothing off the nav", () => {
+    for (const s of nav) for (const c of s.children ?? []) {
+      expect(railSectionFor(nav, shellHitFor(nav, c.path)), c.path).toBe(s.id);
+    }
+    expect(railSectionFor(nav, shellHitFor(nav, "/your-notes"))).toBeNull();
+    expect(railSectionFor(nav, null)).toBeNull();
+  });
+  it("every section and row names its own icon, and each is drawn; Materials is Mail, Query letters FilePenLine", () => {
     const appShell = readFileSync(resolve(__dirname, "../components/shell/AppShell.tsx"), "utf8");
     const at = appShell.indexOf("const WORKSPACE_ICONS");
     expect(at, "WORKSPACE_ICONS moved").toBeGreaterThan(-1);
@@ -356,42 +406,15 @@ describe("sidebar rail v1 — the nav the rail reads", () => {
       expect(block, `${s.id}: ${s.icon}`).toContain(`${s.icon}:`);
       for (const c of s.children ?? []) expect(block, `${c.id}: ${c.icon}`).toContain(`${c.icon}:`);
     }
-    expect(nav.find((s) => s.label === "Your book")!.icon).toBe("library");
     expect(nav.find((s) => s.label === "Materials")!.icon).toBe("mail");
     expect(block).toContain("mail: <Mail ");
     expect(block).toContain("letter: <FilePenLine ");
     expect(nav.find((s) => s.id === "materials")!.children![0].icon).toBe("letter");
   });
-  it("sidebar rail v2: five places on the rail, in order, by their short names", () => {
-    const items = railItems(nav);
-    expect(items.map((c) => c.id)).toEqual(["dash", "q-centre", "a-list", "m-letters", "list"]);
-    expect(items.map(railLabelOf)).toEqual(["Dashboard", "Queries", "Agents", "Letters", "Tasks"]);
-    expect(items.map((c) => c.label)).toEqual(["Dashboard", "Query Centre", "Contact list", "Query letters", "To-do list"]);
-  });
-  it("sidebar rail v2: everything else is in More, grouped by its section, with its short name", () => {
-    const g = moreGroups(nav).map((x) => [x.section.label, x.pages.map(railLabelOf)]);
-    expect(g).toEqual([
-      ["Queries", ["Responses", "Analytics"]],
-      ["Agents", ["Discover"]],
-      ["Your book", ["Manuscripts", "Versions"]],
-      ["Materials", ["Comps", "Packages"]],
-      ["Tasks", ["Corkboard"]],
-      ["Founding writer", ["Your notes"]], /* Your notes v1, 9 Nov */
-    ]);
-    expect(moreGroups(nav).flatMap((x) => x.pages.map((p) => p.label))).toContain("Comparable titles");
-    /* every page is on the rail or in More, exactly once */
-    const all = nav.flatMap((s) => (s.children ?? []).map((c) => c.id)).sort();
-    expect([...railItems(nav).map((c) => c.id), ...moreGroups(nav).flatMap((x) => x.pages.map((p) => p.id))].sort()).toEqual(all);
-  });
-  it("sidebar rail v2: More lights on a More page only", () => {
-    expect(morePageFor(nav, { section: "queries", child: "q-responses" })?.id).toBe("q-responses");
-    expect(morePageFor(nav, { section: "queries", child: "q-centre" })).toBeNull();
-    expect(morePageFor(nav, null)).toBeNull();
-  });
   it("the full sidebar's short label: Queries (25 Oct), every other row its full name", () => {
     expect(nav.flatMap((s) => (s.children ?? []).map((c) => sidebarLabel(c)))).toEqual([
       "Dashboard", "Queries", "Responses", "Analytics", "Contact list", "Discover",
-      "Manuscripts", "Versions", "Query letters", "Comparable titles", "Submission packages", "To-do list", "Corkboard", "Your notes",
+      "Query letters", "Submission packages", "Comparable titles", "Versions", "Manuscripts", "To-do list", "Corkboard",
     ]);
   });
   it("the settings rail's short labels cover every account section", () => {
@@ -399,14 +422,10 @@ describe("sidebar rail v1 — the nav the rail reads", () => {
     expect(ACCOUNT_ROUTES.map((r) => SETTINGS_RAIL_LABELS[r.id]))
       .toEqual(["You", "Preferences", "Emails", "Plan", "Your data"]); // non-workspace v1: the five sections
   });
-  it("Discover and Versions are the Pro pages and Materials the Pro section, each named by its entitlement", () => {
-    const pro = nav.flatMap((s) => (s.children ?? []).filter((c) => c.pro).map((c) => `${c.label}:${c.pro}`));
-    expect(pro).toEqual(["Discover:discover", "Versions:versions"]);
-    expect(nav.filter((s) => s.pro).map((s) => `${s.label}:${s.pro}`)).toEqual(["Materials:materials"]);
-  });
-  it("Query letters is a nav page with its own name in every reader", () => {
+  it("every Materials page names Materials as its section in every reader (the phone's title included)", () => {
     expect(workspacePageForPath("/materials/letters")).toEqual({ section: "Materials", page: "Query letters", single: false });
     expect(workspacePageForPath("/manuscripts/comps")).toEqual({ section: "Materials", page: "Comparable titles", single: false });
-    expect(workspacePageForPath("/manuscripts/versions")).toEqual({ section: "Your book", page: "Versions", single: false });
+    expect(workspacePageForPath("/manuscripts/versions")).toEqual({ section: "Materials", page: "Versions", single: false });
+    expect(workspacePageForPath("/manuscripts")).toEqual({ section: "Materials", page: "Manuscripts", single: false });
   });
 });

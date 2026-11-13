@@ -511,7 +511,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
       aria-haspopup="dialog" aria-expanded={open && !closing}
       aria-label={finished ? `${page} guide: learned` : `${page} guide, ${n} of ${items.length} done`}
       onClick={() => { setNote(null); if (open && closing) cancelShrink(); else if (open) closePop(false); else { setSure(false); setOpen(true); } }}>
-      <GuideRing n={n} total={items.length} size={24} colour={finished ? "#4b6151" : "#a2452a"} track="#ffffff" className="pck-ring" />
+      <GuideRing n={n} total={items.length} size={18} stroke={2.7} colour={finished ? "#4b6151" : "#a2452a"} track="#ffffff" className="pck-ring" />
       {finished
         ? <span className="pck-pt"><b>{page}:</b> Learned</span>
         : <span className="pck-pt"><b>{page}</b> guide</span>}

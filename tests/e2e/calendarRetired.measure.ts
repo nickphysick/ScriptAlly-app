@@ -20,7 +20,7 @@ for (const width of [1280, 1512]) {
     const read = await page.evaluate(() => {
       const vis = (e: Element) => { const r = (e as HTMLElement).getBoundingClientRect(); return r.width > 0 && r.height > 0; };
       const rows = [...document.querySelectorAll(".ws-ni")].filter(vis).map((e) => e.getAttribute("aria-label") ?? (e.textContent ?? "").trim());
-      const sibs = [...document.querySelectorAll('[data-shell="tab-siblings"] [data-sib]')].filter(vis)
+      const sibs = [...document.querySelectorAll('[data-shell="tabs"] [data-sib]')].filter(vis)
         .map((e) => ({ id: (e as HTMLElement).dataset.sib, text: (e.getAttribute("aria-label") ?? e.textContent ?? "").trim() }));
       const tabName = [...document.querySelectorAll(".ws-ftn")].filter(vis).map((e) => (e.textContent ?? "").trim());
       return { rows, sibs, tabName };
