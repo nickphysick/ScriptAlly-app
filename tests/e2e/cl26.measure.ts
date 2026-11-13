@@ -369,7 +369,7 @@ test("CL26-H9 · the margin follows the sort: letters; weeks to 12, then 12+ and
 });
 
 /* ═════════ H10 · the menus ═════════ */
-test("CL26-H10 · Group is Letter, Status, No grouping; Sort the four (every word the typewriter, upright); the rail's four quick picks (v27)", async ({ page }) => {
+test("CL26-H10 · Group is Letter, Status, No grouping; Sort the five (every word the typewriter, upright); the rail's four quick picks (v27)", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("H10");
   await openCl26(page, SIZES[0]);
@@ -399,7 +399,8 @@ test("CL26-H10 · Group is Letter, Status, No grouping; Sort the four (every wor
   await shut();
   await page.locator(`${VIS} [data-cl26='sort']`).first().click(T); await page.waitForTimeout(400);
   const so = await page.evaluate(() => [...document.querySelectorAll("[data-cl26='sort-menu'] [data-sc='opt'] b")].map((b) => b.textContent?.trim()));
-  L.check("Sort: exactly the four", JSON.stringify(so) === JSON.stringify(["Surname", "Date added", "Reply time", "Query status"]), JSON.stringify(so));
+  /* re-pointed 13 Nov: five entries since principles v2 added Agent fit (the menu is unchanged) */
+  L.check("Sort: exactly the five", JSON.stringify(so) === JSON.stringify(["Surname", "Date added", "Reply time", "Query status", "Agent fit"]), JSON.stringify(so));
   f = await fonts("[data-cl26='sort-menu']");
   L.check("Sort: text (population)", f.n > 4, String(f.n));
   L.check("Sort: typewriter, upright", f.bad.length === 0, f.bad.slice(0, 3).join(" | "));
