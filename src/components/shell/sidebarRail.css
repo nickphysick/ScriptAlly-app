@@ -78,6 +78,10 @@
     transition: background-color 0.14s ease, color 0.14s ease;
   }
   .wsr-setnav .wsr-ni { height: 54px; margin-bottom: 2px; }
+  /* non-workspace v1.1 (4b): "Preferences" (66.8px bold at 11.5px) had 0.6px clear in a 68px item. The settings
+     items take the rail's own 4px on each side (76px, inside the unchanged 80px rail); the label keeps its size and
+     the other labels' letter-spacing. Measured in tests/e2e/nw11.measure.ts. */
+  .wsr-setnav .wsr-ni { width: calc(100% + 8px); margin-left: -4px; margin-right: -4px; padding: 0; }
 
   .wsr-ic {
     display: grid; place-items: center; width: 48px; height: 30px; border-radius: 15px; opacity: 0.6;
