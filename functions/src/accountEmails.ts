@@ -23,6 +23,8 @@ import { db } from "./firestore";
 import { RESEND_API_KEY, sendEmail } from "./email";
 import { consumeRateLimit } from "./waitlistStore";
 import { AccountEmailDeps, AccountEmailError, handleAccountEmail } from "./accountEmailsCore";
+import { IP_HASH_SALT } from "./waitlistMail";
+import { makeSettingsToken } from "./emailSettingsCore";
 
 const PENDING = "accountEmailChanges";
 
@@ -42,6 +44,12 @@ const realDeps = (): AccountEmailDeps => {
     },
     allow: async (key) => (await consumeRateLimit(db, key, Date.now())).allowed,
     send: (to, kind, rendered) => sendEmail(to, kind, rendered),
+    /* Non-workspace v1.1: the sign-in and reset emails' "Email settings" link opens the no-sign-in page. */
+    settingsToken: (uid) => {
+      let secret = "";
+      try { secret = IP_HASH_SALT.value(); } catch { secret = ""; }
+      return makeSettingsToken(uid, secret, Date.now());
+    },
     pending: {
       put: async (uid, v) => { await db.doc(`${PENDING}/${uid}`).set(v); },
       take: (uid, currentEmail) => db.runTransaction(async (tx) => {
@@ -58,7 +66,7 @@ const realDeps = (): AccountEmailDeps => {
 };
 
 export const sendAccountEmail = onCall(
-  { region: "europe-west2", timeoutSeconds: 30, memory: "256MiB", secrets: [RESEND_API_KEY] },
+  { region: "europe-west2", timeoutSeconds: 30, memory: "256MiB", secrets: [RESEND_API_KEY, IP_HASH_SALT] },
   async (request) => {
     const data = (request.data ?? {}) as Record<string, unknown>;
     try {

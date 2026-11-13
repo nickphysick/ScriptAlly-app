@@ -190,6 +190,23 @@ export const APP_PATHS = {
   dashboard: "/dashboard",
 } as const;
 
+/**
+ * The no-sign-in email settings page (emailSettings.ts), served on the app's origin by a hosting rewrite. Non-workspace
+ * v1.1: every non-founding email's "Email settings" and "Turn off …" links go here with the account's signed token.
+ */
+export const EMAIL_SETTINGS_PAGE_PATH = "/api/email-settings";
+
+/** The page's link for a token, optionally a "Turn off" link for one email; null without an origin or a token. */
+export const emailSettingsLink = (cfg: MailConfig, token: string | null, off?: "nudges" | "weekly" | "news"): string | null => {
+  if (!token) return null;
+  const base = appLink(cfg, EMAIL_SETTINGS_PAGE_PATH);
+  if (!base) return null;
+  const u = new URL(base);
+  u.searchParams.set("t", token);
+  if (off) u.searchParams.set("off", off);
+  return u.toString();
+};
+
 /** An absolute link into the app, or `null` when the app's origin is unknown or malformed. */
 export const appLink = (cfg: MailConfig, path: string): string | null => {
   if (!cfg.appUrl || !path) return null;

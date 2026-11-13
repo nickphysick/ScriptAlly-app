@@ -14,3 +14,4 @@ export { foundingStatsOnFeedback, foundingStatsNightly } from "./foundingStats";
 export { importDraftsCleanup } from "./importDrafts";
 export { signOutOtherDevices } from "./signOutOthers";
 export { nudgeReminders, weeklySummary } from "./reminderEmails";
+export { emailSettings } from "./emailSettings";

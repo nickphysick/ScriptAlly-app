@@ -179,10 +179,20 @@ describe("AE-4 · one callable, wired once", () => {
   it("index exports sendAccountEmail; it binds the mail key and goes through sendEmail, the shared rate limit and `db`", () => {
     expect(src("index.ts")).toContain('export { sendAccountEmail } from "./accountEmails";');
     const s = src("accountEmails.ts");
-    expect(s).toMatch(/secrets: \[RESEND_API_KEY\]/);
+    /* Re-pointed (v1.1, 5b): the salt is bound too — it signs the no-sign-in email settings link. */
+    expect(s).toMatch(/secrets: \[RESEND_API_KEY, IP_HASH_SALT\]/);
     expect(s).toContain('import { db } from "./firestore";');
     expect(s).toContain('import { consumeRateLimit } from "./waitlistStore";');
     expect(s).toMatch(/send: \(to, kind, rendered\) => sendEmail\(to, kind, rendered\)/);
+  });
+  it("v1.1: the sign-in and reset emails' Email settings link is this account's no-sign-in link", async () => {
+    for (const kind of ["signin", "reset"] as const) {
+      const r = rig();
+      r.deps.settingsToken = (uid) => `tok-${uid}`;
+      await ask(r, kind, { email: KNOWN });
+      const html = (r.send.mock.calls[0] as unknown as [string, string, { html: string }])[2].html;
+      expect(html).toContain("https://scriptally-app.web.app/api/email-settings?t=tok-u1");
+    }
   });
   it("the Admin SDK makes all three kinds of link (no hand-built action URL)", () => {
     const s = src("accountEmails.ts");

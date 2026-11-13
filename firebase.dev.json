@@ -27,6 +27,13 @@
         }
       },
       {
+        "source": "/api/email-settings",
+        "function": {
+          "functionId": "emailSettings",
+          "region": "europe-west2"
+        }
+      },
+      {
         "regex": "^/(?:[^a].*|a(?:[^s].*|s(?:[^s].*|s(?:[^e].*|e(?:[^t].*|t(?:[^s].*|s(?:[^/].*)?)?)?)?)?)?)?$",
         "destination": "/index.html"
       }

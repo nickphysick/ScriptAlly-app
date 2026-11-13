@@ -551,8 +551,9 @@ interface ActionCopy {
   subject: string; preheader: string; heading: string; lead: string; cta: string; expiry: string; notYou: string;
 }
 
-const actionEmail = (cfg: MailConfig, c: ActionCopy, link: string | null): Prepared => {
-  const settingsUrl = appLink(cfg, APP_PATHS.emailSettings);
+/* `settingsUrl`, when given, is the account's no-sign-in settings link (emailSettingsLink); else Settings › Emails. */
+const actionEmail = (cfg: MailConfig, c: ActionCopy, link: string | null, signedSettingsUrl?: string | null): Prepared => {
+  const settingsUrl = signedSettingsUrl || appLink(cfg, APP_PATHS.emailSettings);
   const missing = [...need({ link, settingsUrl }), ...needsLogo(cfg)];
   if (missing.length) return { ok: false, missing };
   const foot = { reason: true, links: [[EMAIL_SETTINGS_LABEL, settingsUrl!]] as const };
@@ -570,15 +571,15 @@ const actionEmail = (cfg: MailConfig, c: ActionCopy, link: string | null): Prepa
 };
 
 /** `link` is the Firebase action link the Admin SDK generated. */
-export const prepareSignIn = (cfg: MailConfig, link: string | null): Prepared => actionEmail(cfg, {
+export const prepareSignIn = (cfg: MailConfig, link: string | null, settingsUrl?: string | null): Prepared => actionEmail(cfg, {
   subject: SIGNIN_SUBJECT, preheader: SIGNIN_PREHEADER, heading: SIGNIN_HEADING, lead: SIGNIN_LEAD,
   cta: SIGNIN_CTA, expiry: SIGNIN_EXPIRY, notYou: SIGNIN_NOT_YOU,
-}, link);
+}, link, settingsUrl);
 
-export const prepareReset = (cfg: MailConfig, link: string | null): Prepared => actionEmail(cfg, {
+export const prepareReset = (cfg: MailConfig, link: string | null, settingsUrl?: string | null): Prepared => actionEmail(cfg, {
   subject: RESET_SUBJECT, preheader: RESET_PREHEADER, heading: RESET_HEADING, lead: RESET_LEAD,
   cta: RESET_CTA, expiry: RESET_EXPIRY, notYou: RESET_NOT_YOU,
-}, link);
+}, link, settingsUrl);
 
 export const prepareNewEmail = (cfg: MailConfig, link: string | null): Prepared => actionEmail(cfg, {
   subject: NEW_EMAIL_SUBJECT, preheader: NEW_EMAIL_PREHEADER, heading: NEW_EMAIL_HEADING, lead: NEW_EMAIL_LEAD,
@@ -636,10 +637,12 @@ export interface NudgeArgs {
   changeWhenUrl: string;
   /** Optional RFC 8058 target. Pass it only when that URL accepts the one-click POST. */
   listUnsubscribeUrl?: string;
+  /** The account's no-sign-in settings link (emailSettingsLink). Absent: Settings › Emails, which needs sign-in. */
+  settingsUrl?: string | null;
 }
 
 export const prepareNudge = (cfg: MailConfig, a: NudgeArgs): Prepared => {
-  const settingsUrl = appLink(cfg, APP_PATHS.emailSettings);
+  const settingsUrl = a.settingsUrl || appLink(cfg, APP_PATHS.emailSettings);
   const missing = [
     ...(a.items.length ? [] : ["items"]),
     ...(a.items.every((i) => i.queryUrl) ? [] : ["queryUrl"]),
@@ -700,6 +703,8 @@ export interface WeeklyArgs {
   standing: { queriesOut: number; requests: number; sent: number; quiet: number };
   turnOffUrl: string;
   listUnsubscribeUrl?: string;
+  /** As NudgeArgs.settingsUrl. */
+  settingsUrl?: string | null;
 }
 
 const happenedLine = (h: WeeklyHappened): [string, string] => {
@@ -721,7 +726,7 @@ const comingLine = (c: WeeklyComing): [string, string] => {
 };
 
 export const prepareWeekly = (cfg: MailConfig, a: WeeklyArgs): Prepared => {
-  const settingsUrl = appLink(cfg, APP_PATHS.emailSettings);
+  const settingsUrl = a.settingsUrl || appLink(cfg, APP_PATHS.emailSettings);
   const dashboardUrl = appLink(cfg, APP_PATHS.dashboard);
   const missing = [
     ...(a.happened.length || a.coming.length ? [] : ["happenedOrComing"]),
