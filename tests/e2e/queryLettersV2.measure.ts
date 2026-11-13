@@ -49,7 +49,8 @@ test("QL2-1 the header is the shared OpenHeader, its columns over the desk's", a
     await expect(P(page).locator('[data-ql="desk"]')).toBeVisible();
     const t = await leftOf(page, '[data-ql="page"] h1.qc1531-t');
     const mid = await leftOf(page, '[data-ql="page"] [data-ql="letter"]');
-    const use = await leftOf(page, '[data-ql="page"] [data-ql="in-use"]');
+    /* v2.1: the third column holds the Top tip (it was v2's in-use block) */
+    const use = await leftOf(page, '[data-ql="page"] [data-ql="tip-block"]');
     const rail = await leftOf(page, '[data-ql="page"] [data-ql="rail"]');
     const cols = await P(page).locator('[data-ql="desk"]').evaluate((e) => getComputedStyle(e).gridTemplateColumns);
     console.log(`[QL2-1] ${size.width}: title ${t} letter ${mid} in-use ${use} rail ${rail} desk "${cols}"`);
@@ -75,7 +76,8 @@ test("QL2-3 selecting a row shows that letter in full with its own figures", asy
   const n = await P(page).locator('[data-ql="row"]').count();
   expect(n).toBeGreaterThanOrEqual(4);
   /* the in-use letter is selected by default */
-  const useName = (await P(page).locator('[data-ql="in-use-name"] b').innerText()).trim();
+  /* v2.1: the in-use letter is the row with the flag (the header's in-use block is gone) */
+  const useName = (await P(page).locator('[data-ql="row"]:has([data-ql="flag"]) .qlp-row-n').innerText()).trim();
   await expect(P(page).locator('[data-ql="row"][aria-current="true"]')).toContainText(useName);
   await row(page, "cv25-let-1").click();
   await expect(row(page, "cv25-let-1")).toHaveAttribute("aria-current", "true");
@@ -204,7 +206,8 @@ test("QL2-6 + QL2-8 a new version of a sent letter, then the next-step card", as
   await row(page, "cv25-let-2").click();
   const parentText = await sheetText(page);
   const parentFig = await row(page, "cv25-let-2").locator('[data-ql="row-figure"]').innerText();
-  const useBefore = (await P(page).locator('[data-ql="in-use-name"] b').innerText()).trim();
+  const inUseName = () => P(page).locator('[data-ql="row"]:has([data-ql="flag"]) .qlp-row-n'); // v2.1: the flagged row
+  const useBefore = (await inUseName().innerText()).trim();
   await P(page).locator('[data-ql="new-version"]').click();
   await expect(P(page).locator('[data-ql="row-new"]')).toContainText("Not saved yet · a copy of Query letter v2");
   await expect(P(page).locator('[data-ql="ed-status"]')).toContainText("Word for word the same as Query letter v2 so far");
@@ -227,10 +230,10 @@ test("QL2-6 + QL2-8 a new version of a sent letter, then the next-step card", as
   await expect(P(page).locator('[data-ql="use"]')).toHaveCount(0);
   await shot(page, "06-next-step");
   await card.locator('[data-ql="next-use"]').click();
-  await expect(P(page).locator('[data-ql="in-use-name"] b')).toHaveText(name);
+  await expect(inUseName()).toHaveText(name);
   await expect(card).toHaveCount(0);
   await toast(page, `New queries now go out with ${name}.`).getByRole("button", { name: /undo/i }).click();
-  await expect(P(page).locator('[data-ql="in-use-name"] b')).toHaveText(useBefore);
+  await expect(inUseName()).toHaveText(useBefore);
   /* the parent is unchanged */
   await row(page, "cv25-let-2").click();
   expect(await sheetText(page)).toBe(parentText);

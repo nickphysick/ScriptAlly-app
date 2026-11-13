@@ -30,6 +30,8 @@ import { letterDiff } from "../../lib/letterDiff";
 import { StatusDot } from "../StatusDot";
 import { CompLetterPicker, type PickerRequest } from "../manuscripts/comps25/CompLetterPicker";
 import { ARROW, BOOK, BOX, CLIP, COPY, DOC, FILM, Ic, LOCK, PEN, STAMP, TICK, fmtDay, plural } from "./letterBits";
+
+const QUILL = "/images/dash/quill.png";
 import "../manuscripts/comps25/compsV25.css";
 
 /** The editor's state. `kind`: "new" (blank or an upload), "copy" (a new version of `from`), "edit" (a draft, `id`). */
@@ -47,6 +49,10 @@ export interface EdState {
   file: string | null;
   /** an upload whose text was read */
   fileRead: boolean;
+  /** v2.1: a file chosen for an EXISTING letter ("Upload the file" on a letter with no text), to be recorded by name */
+  fileNew: boolean;
+  /** the text a file brought in, while the writer has not changed it (the "Text pulled from…" line) */
+  fileText: string | null;
   guard: boolean;
   err: string | null;
 }
@@ -133,13 +139,16 @@ export const LetterView: React.FC<{
   onDiff: () => void;
   next: { current: string } | null;
   firstNote: number | null;
-  fileOnly: boolean;
+  /** v2.1: on the in-use letter, when the active package holds a different one (`packageLetterDiffers`) */
+  pkgLine: { id: string; pkg: string; letter: string } | null;
+  onPkg: (pkgId: string) => void;
+  onUploadFor: () => void;
   onCopy: () => void;
   onNewVersion: () => void;
   onEdit: () => void;
   onUse: () => void;
   onNotYet: () => void;
-}> = ({ letter, facts, parent, inUse, justSaved, diff, onDiff, next, firstNote, fileOnly, onCopy, onNewVersion, onEdit, onUse, onNotYet }) => {
+}> = ({ letter, facts, parent, inUse, justSaved, diff, onDiff, next, firstNote, pkgLine, onPkg, onUploadFor, onCopy, onNewVersion, onEdit, onUse, onNotYet }) => {
   const text = letter.contentDraft ?? "";
   const hasText = !!text.trim();
   const locked = facts.direct;
@@ -158,6 +167,12 @@ export const LetterView: React.FC<{
         <div>
           <h2 className="qlp-lt-name" data-ql="letter-name">{letter.versionName}</h2>
           <p className="qlp-lt-meta" data-ql="letter-meta">{meta.join(" · ")}</p>
+          {pkgLine && (
+            <p className="qlp-lt-pkg" data-ql="pkg-letter">
+              Package sends go with{" "}
+              <a href={`${PACKAGES_PATH}?pkg=${pkgLine.id}`} onClick={(e) => { e.preventDefault(); onPkg(pkgLine.id); }}>{pkgLine.pkg}</a>'s letter: {pkgLine.letter}
+            </p>
+          )}
         </div>
         <div className="qlp-lt-acts">
           {hasText && <button type="button" className="qlp-b2" data-ql="copy-text" onClick={onCopy}><Ic d={CLIP} />Copy the text</button>}
@@ -176,14 +191,31 @@ export const LetterView: React.FC<{
         </div>
       )}
       {firstNote != null && <p className="qlp-first-note" data-ql="first-note" role="status">{firstLetterNote(firstNote)}</p>}
-      {fileOnly ? (
-        <div className="qlp-filebox" data-ql="filebox">
-          <Ic d={DOC} w={1.6} />
-          <h3 className="qlp-h3f">{letter.fileName ?? "Kept in a file"}</h3>
-          <p>This letter is kept in a file, so there is nothing to read here yet. Paste its text in and you can read it, copy it and compare it with your other letters.</p>
-          <button type="button" className="qlp-b2" data-ql="paste-text" onClick={onEdit}><Ic d={PEN} />Paste the text</button>
+      {!hasText ? (<>
+        {/* v2.1, the "no words yet" sheet: any letter with no text saved (kept in a file, or a name only) */}
+        {locked && (
+          <div className="qlp-lt-bar">
+            <span className="qlp-lock" data-ql="lock-line"><Ic d={LOCK} /><span>This letter has gone out. Its name and results are on record, but not its words.</span></span>
+          </div>
+        )}
+        <div className="qlp-paper qlp-paper--nt" data-ql="sheet" data-state={locked ? "sent-no-text" : "no-text"}>
+          <img src={QUILL} alt="" />
+          <h3 className="qlp-nt-h">{locked ? "What did this letter say?" : "The words aren't here yet"}</h3>
+          <p>
+            {letter.fileName ? `It's kept in ${letter.fileName}. ` : ""}
+            {locked
+              ? `Add the text you sent and you can read it here, copy it and compare it with your other letters. Its ${facts.sent === 1 ? "1 query and its result" : `${facts.sent} queries and their results`} stay exactly as they are.`
+              : "Paste the text in and you can read it here, copy it and compare it with your other letters."}
+          </p>
+          <div className="qlp-nt-a">
+            {locked
+              ? <button type="button" className="qlp-b2" data-ql="add-text" onClick={onEdit}><Ic d={PEN} />Add the text you sent</button>
+              : <button type="button" className="qlp-b2" data-ql="paste-text" onClick={onEdit}><Ic d={PEN} />Paste the text</button>}
+            <button type="button" className="qlp-b2" data-ql="upload-for" onClick={onUploadFor}><Ic d={DOC} w={1.6} />Upload the file</button>
+          </div>
+          {locked && <p className="qlp-nt-n">You can add it once. After that it locks, like any letter that has gone out.</p>}
         </div>
-      ) : (<>
+      </>) : (<>
         <div className="qlp-lt-bar">
           {locked
             ? <span className="qlp-lock" data-ql="lock-line"><Ic d={LOCK} /><span>This letter has gone out, so its text stays as it was sent. To change it, start a new version from it.</span></span>
@@ -232,7 +264,7 @@ export const LetterEditor: React.FC<{
   const w = countWords(ed.text);
   const dirty = ed.text !== ed.orig || ed.name !== ed.origName || ed.changes.join("|") !== ed.origChanges.join("|");
   let lead: React.ReactNode;
-  if (ed.file && ed.kind === "new" && ed.text === ed.orig) {
+  if (ed.file && ed.fileText != null && ed.text === ed.fileText) {
     lead = ed.fileRead
       ? `Text pulled from ${ed.file}. Have a quick read to check it came through properly`
       : `${ed.file} is kept by name: paste the text below if you'd like to read it here.`;

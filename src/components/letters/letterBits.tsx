@@ -3,11 +3,11 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Query letters v2 — the small shared pieces of the letter desk: the day format, the file-only test and the line icons
- * (the ref's own set, design-refs/query-letters-v2). `fmtDay` and `isFileOnly` moved here from v1's LetterCard, which
- * this pack deletes; their behaviour is unchanged.
+ * (the ref's own set, design-refs/query-letters-v2). `fmtDay` moved here from v1's LetterCard, which this pack
+ * deleted; its behaviour is unchanged. (v2's `isFileOnly` went with the file box in v2.1: any letter with no text
+ * now shows the no-words sheet.)
  */
 import React from "react";
-import type { ManuscriptVersion } from "../../types";
 import { dayMonth, formatDate } from "../../lib/dates";
 
 export const fmtDay = (iso: string | undefined): string => {
@@ -16,10 +16,6 @@ export const fmtDay = (iso: string | undefined): string => {
   if (Number.isNaN(d.getTime())) return "";
   return d.getFullYear() === new Date().getFullYear() ? dayMonth(d) : formatDate(d, { day: "numeric", month: "short", year: "numeric" });
 };
-
-/** A letter with no text here: the writer keeps it elsewhere and named the file. */
-export const isFileOnly = (v: ManuscriptVersion): boolean =>
-  !v.contentDraft?.trim() && (v.contentType === "ref" || v.contentType === "file" || v.contentType === "link" || !!v.fileName);
 
 export const Ic: React.FC<{ d: React.ReactNode; w?: number }> = ({ d, w = 1.9 }) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={w} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{d}</svg>

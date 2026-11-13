@@ -34,7 +34,7 @@ import {
 } from "../../lib/queryLetters";
 import { OpenHeader } from "../shell/OpenHeader";
 import { LetterRows, LetterView, LetterEditor, ReadRail, WriteRail, DayOne, DeskSkeleton, type EdState } from "./LetterDesk";
-import { isFileOnly } from "./letterBits";
+import { TopTip } from "./TopTip";
 import "./queryLetters.css";
 
 export const QUERY_LETTERS_TITLE = "Query letters";
@@ -49,7 +49,7 @@ const isTextFile = (f: File) => /\.(txt|md|text)$/i.test(f.name) || f.type.start
 
 /** the editor has something a leave would lose */
 export const edDirty = (e: EdState): boolean =>
-  e.text !== e.orig || e.name !== e.origName || e.changes.join("|") !== e.origChanges.join("|");
+  e.text !== e.orig || e.name !== e.origName || e.changes.join("|") !== e.origChanges.join("|") || e.fileNew;
 /** a leave asks first: changes, or a new letter from nothing that has text or a file in it (the ref's `leaveEd`) */
 export const edNeedsGuard = (e: EdState): boolean =>
   edDirty(e) || (e.kind === "new" && (!!e.text.trim() || !!e.file));
@@ -98,7 +98,6 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
   /* ── page state ── */
   const [selId, setSelId] = useState<string | null>(null);
   const [showRetired, setShowRetired] = useState(false);
-  const [picker, setPicker] = useState(false);
   const [diff, setDiff] = useState(false);
   const [ed, setEd] = useState<EdState | null>(null);
   const [next, setNext] = useState<string | null>(null);
@@ -111,7 +110,8 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
   const fileRef = useRef<HTMLInputElement>(null);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
-  const pickRef = useRef<HTMLDivElement>(null);
+  /* "Upload the file" on a letter with no text: the letter the next chosen file is for */
+  const uploadFor = useRef<string | null>(null);
   usePortHeight(pageRef, active);
 
   /* selection defaults to the in-use letter, and falls back to it when the selected letter goes */
@@ -126,16 +126,19 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
   const start = (kind: EdState["kind"], letter: ManuscriptVersion | null, file?: { name: string; text: string } | null) => {
     const names = live.map((l) => l.versionName);
     const name = kind === "edit" ? letter?.versionName ?? "" : nextVersionName((kind === "copy" ? letter?.versionName : use?.versionName) ?? "Query letter v0", names);
-    const text = kind === "new" ? file?.text ?? "" : letter?.contentDraft ?? "";
+    const saved = kind === "new" ? "" : letter?.contentDraft ?? "";
+    /* a file read into the editor (an upload, or "Upload the file" on a letter with no text) is the starting text */
+    const text = file?.text ? file.text : saved;
     const changes = kind === "edit" ? [...(letter?.changes ?? [])].slice(0, 3) : [];
     while (changes.length < 3) changes.push("");
     setEd({
       kind, id: kind === "edit" ? letter?.id ?? null : null, from: kind === "copy" ? letter?.id ?? null : null,
-      name, text, changes, orig: text, origName: name, origChanges: [...changes],
-      file: kind === "new" ? file?.name ?? null : kind === "edit" ? letter?.fileName ?? null : null, fileRead: !!file?.text,
+      name, text, changes, orig: kind === "new" ? text : saved, origName: name, origChanges: [...changes],
+      file: file?.name ?? (kind === "edit" ? letter?.fileName ?? null : null), fileRead: !!file?.text,
+      fileNew: !!file && kind === "edit", fileText: file ? file.text : null,
       guard: false, err: null,
     });
-    setNext(null); setDiff(false); setPicker(false);
+    setNext(null); setDiff(false);
     requestAnimationFrame(() => { const ta = taRef.current; if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); } });
   };
   const exit = () => { setEd(null); thenRef.current = null; };
@@ -175,20 +178,22 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
     if (e.kind === "edit" && !edDirty(e)) { exit(); then?.(); return; }
     const text = e.text.replace(/\s+$/, "");
     const name = e.name.trim() || e.origName;
-    if (!text.trim() && !(e.kind === "new" && e.file)) { setEd({ ...e, err: EMPTY_LETTER, guard: false }); return; }
+    if (!text.trim() && !(e.kind === "new" && e.file) && !(e.kind === "edit" && e.fileNew)) { setEd({ ...e, err: EMPTY_LETTER, guard: false }); return; }
     const changes = e.changes.map((c) => c.trim()).filter(Boolean).slice(0, 8).map((c) => c.slice(0, 80));
     saving.current = true;
     try {
       if (e.kind === "edit") {
         const l = byId(e.id);
         if (!l) { exit(); return; }
-        /* ⚠️ A SENT LETTER'S TEXT IS NEVER WRITTEN — the change is a new version (updateVersion refuses it too) */
-        if (facts.get(l.id)?.direct) { setEd({ ...e, guard: false, err: SENT_LOCKED }); return; }
+        /* ⚠️ A SENT LETTER'S TEXT IS NEVER WRITTEN — the change is a new version (updateVersion refuses it too). v2.1's one
+           exception: a sent letter whose saved text is empty takes its text ONCE (`contentWriteAllowed`). */
+        if (facts.get(l.id)?.direct && l.contentDraft?.trim()) { setEd({ ...e, guard: false, err: SENT_LOCKED }); return; }
         const fields: Record<string, unknown> = {};
         const before: Record<string, unknown> = {};
         const put = (k: keyof ManuscriptVersion, val: unknown) => { fields[k] = val; before[k] = l[k] ?? deleteField(); };
         if (name !== l.versionName) put("versionName", name.slice(0, 256));
-        if (text !== (l.contentDraft ?? "")) { put("contentDraft", text); put("contentType", "text"); put("wordCount", countWords(text)); }
+        if (text !== (l.contentDraft ?? "") && text.trim()) { put("contentDraft", text); put("contentType", "text"); put("wordCount", countWords(text)); }
+        if (e.fileNew && e.file && e.file !== l.fileName) put("fileName", e.file);
         if (l.parentId && changes.join("|") !== (l.changes ?? []).join("|")) put("changes", changes.length ? changes : deleteField());
         if (!Object.keys(fields).length) { exit(); then?.(); return; }
         const err = await updateVersion(l.id, fields as Parameters<typeof updateVersion>[1]);
@@ -196,7 +201,7 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
         exit();
         setFlash(l.id);
         setJustSaved((s) => new Set(s).add(l.id));
-        showToast({ message: `Saved ${name}.`, undo: async () => { await updateVersion(l.id, before as Parameters<typeof updateVersion>[1]); } });
+        showToast({ message: `Saved ${name}.`, undo: async () => { await updateVersion(l.id, before as Parameters<typeof updateVersion>[1], { restoring: true }); } });
         then?.();
       } else {
         const id = await create({ name, text, file: e.file, from: e.kind === "copy" ? e.from : null, changes: e.kind === "copy" ? changes : [] });
@@ -213,7 +218,7 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
     leave(() => { setSelId(id); setDiff(false); setNext(null); setFirstNote((f) => (f?.id === id ? f : null)); });
   };
   const useForNew = async (id: string) => {
-    setPicker(false); setNext(null);
+    setNext(null);
     if (!ms || id === use?.id) return;
     const before = ms.inUseLetterId;
     await updateManuscriptQuiet(ms.id, { inUseLetterId: id });
@@ -231,18 +236,22 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
   const newLetter = () => leave(() => start("new", null));
   const newVersion = (l: ManuscriptVersion) => leave(() => start("copy", l));
   /* "Paste the text" on a file-only letter: its own editor while it is a draft; a sent one becomes a new version */
-  const editLetter = (l: ManuscriptVersion) => leave(() => start(facts.get(l.id)?.direct ? "copy" : "edit", l));
-  const upload = () => leave(() => fileRef.current?.click());
+  /* a sent letter WITH text changes only by a new version; one with no text takes its words once (v2.1) */
+  const editLetter = (l: ManuscriptVersion) => leave(() => start(facts.get(l.id)?.direct && l.contentDraft?.trim() ? "copy" : "edit", l));
+  const uploadForLetter = (l: ManuscriptVersion) => leave(() => { uploadFor.current = l.id; fileRef.current?.click(); });
+  const upload = () => leave(() => { uploadFor.current = null; fileRef.current?.click(); });
   const onFile = async (file: File | undefined) => {
     if (fileRef.current) fileRef.current.value = "";
     if (!file) return;
     /* today's behaviour, unchanged: a text file's contents are read; any other file is kept by name */
     const text = isTextFile(file) ? await file.text() : "";
-    start("new", null, { name: file.name, text });
+    const target = byId(uploadFor.current);
+    uploadFor.current = null;
+    if (target) start("edit", target, { name: file.name, text });
+    else start("new", null, { name: file.name, text });
   };
 
   /* ── keyboard, route change, tab close ── */
-  useEscapeLayer(picker && active, () => setPicker(false), ESC_LEVEL.page);
   useEscapeLayer(!!ed && active, () => { if (ed?.guard) keepEditing(); else leave(null); }, ESC_LEVEL.pageMode);
   useEffect(() => {
     if (!ed || !active) return undefined;
@@ -260,12 +269,6 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [dirtyNow]);
-  useEffect(() => {
-    if (!picker) return undefined;
-    const down = (e: PointerEvent) => { if (!pickRef.current?.contains(e.target as Node)) setPicker(false); };
-    document.addEventListener("pointerdown", down, true);
-    return () => document.removeEventListener("pointerdown", down, true);
-  }, [picker]);
 
   /* ── render ── */
   const loading = !collectionsReady;
@@ -274,39 +277,9 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
   const title = loading ? " " : empty ? NO_LETTERS_TITLE : lettersTitle(live.length);
   const note = earlyNote(live.map((v) => ({ name: v.versionName, sent: facts.get(v.id)?.sent ?? 0 })));
 
-  const inUseBlock = use && !loading ? (
-    <div className="qlp-wk" data-ql="in-use">
-      <div className="qlp-wkh">
-        <span className="qlp-wkt" data-ql="in-use-name"><b>{use.versionName}</b> in use</span>
-        {live.length > 1 && (
-          <div className="qlp-chw" ref={pickRef}>
-            <button type="button" className="qlp-lnk" data-ql="change" aria-expanded={picker} onClick={() => setPicker((o) => !o)}>Change</button>
-            {picker && (
-              <div className="qlp-pick" role="listbox" aria-label="Letter for new queries" data-ql="picker">
-                {pageOrder(live, null).map((v) => (
-                  <button key={v.id} type="button" role="option" aria-selected={v.id === use.id} className="qlp-pick-o" onClick={() => void useForNew(v.id)}>
-                    <b>{v.versionName}</b>
-                    <span>{(facts.get(v.id)?.sent ?? 0) ? `${facts.get(v.id)?.sent} sent` : "Not sent yet"}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      <p className="qlp-wkn" data-ql="in-use-line">
-        Going out with new queries. {useFacts && useFacts.sent > 0 ? `${useFacts.more} of ${useFacts.sent} asked for more so far.` : "Not sent yet."}
-      </p>
-      {differs && (
-        <p className="qlp-wkn qlp-wkpk" data-ql="pkg-letter">
-          Package sends go with{" "}
-          <a href={`${PACKAGES_PATH}?pkg=${differs.pkg.id}`} onClick={(e) => { e.preventDefault(); navigate(`${PACKAGES_PATH}?pkg=${differs.pkg.id}`); }}>
-            {differs.pkg.packageName}
-          </a>'s letter: {differs.letter.versionName}
-        </p>
-      )}
-    </div>
-  ) : null;
+  /* v2.1: the header's third column is the Top tip. Which letter goes out is shown by its row's flag and changed by "Use for
+     new queries" on the letter; the package line sits on the in-use letter in the middle column. */
+  const tipBlock = !loading && !empty ? <TopTip /> : null;
 
   const selFacts = selLetter ? facts.get(selLetter.id) : undefined;
   const edParent = ed ? (ed.kind === "copy" ? byId(ed.from) : ed.kind === "edit" ? byId(byId(ed.id)?.parentId) : null) : null;
@@ -326,7 +299,7 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
             <button type="button" className="qc1531-b qc1531-b--n" data-ql="new" onClick={newLetter}>+ New letter</button>
             <button type="button" className="qc1531-b qc1531-b--g" data-ql="upload" onClick={upload}>Upload a file</button>
           </>}
-          ring={inUseBlock}
+          ring={tipBlock}
         />
         <input ref={fileRef} type="file" hidden accept=".txt,.md,.doc,.docx,.pdf,.rtf,.odt,text/*" data-ql="file-input" onChange={(e) => void onFile(e.target.files?.[0])} />
       </div>
@@ -354,7 +327,9 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
                 justSaved={justSaved.has(selLetter.id)} diff={diff} onDiff={() => setDiff((d) => !d)}
                 next={next === selLetter.id && selLetter.id !== use?.id ? { current: use?.versionName ?? "" } : null}
                 firstNote={firstNote?.id === selLetter.id ? firstNote.n : null}
-                fileOnly={isFileOnly(selLetter)}
+                pkgLine={selLetter.id === use?.id && differs ? { id: differs.pkg.id, pkg: differs.pkg.packageName, letter: differs.letter.versionName } : null}
+                onPkg={(id) => navigate(`${PACKAGES_PATH}?pkg=${id}`)}
+                onUploadFor={() => uploadForLetter(selLetter)}
                 onCopy={() => void copyText(selLetter)} onNewVersion={() => newVersion(selLetter)} onEdit={() => editLetter(selLetter)}
                 onUse={() => void useForNew(selLetter.id)} onNotYet={() => setNext(null)}
               />

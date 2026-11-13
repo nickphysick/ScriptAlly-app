@@ -130,7 +130,7 @@ import { computeResponseDeadline } from "./responseDeadline";
    than each filtering the three slot fields for itself. */
 import { packagesUsingVersion, isPackageLocked, LOCKED_PACKAGE_FIELDS, LOCKED_NOTE, LOCKED_WHY, materialsLinkWrites } from "./packageMetrics";
 import { contentsChanged } from "./packageEditions";
-import { isVersionSent } from "./versionLock";
+import { contentWriteAllowed, isVersionSent } from "./versionLock";
 import { letterFixed } from "./compUsage";
 import { writerExpectedWrite, WRITER_EXPECTED_FIELD, WRITER_EXPECTED_SET_AT_FIELD } from "./expectedDate";
 import { buildHoldingReplyWrites, HOLDING_REPLY_TYPE } from "./holdingReply";
@@ -1920,7 +1920,12 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
        caller's job, through `addVersion`; this refusal is the backstop that says so rather than
        rewriting what an agent received. A rename and the writer's note are labels, not content. */
     const content = (["contentDraft", "fileAttached", "fileName", "contentType", "contentLink", "wordCount"] as const).some((k) => k in fields);
-    if (content && isVersionSent(id, queries, packages)) {
+    /* Query letters v2.1: ONE exception, `contentWriteAllowed` — a sent version whose saved text is empty may have its text
+       added once (and that add undone); once it has text it is fixed like any other. */
+    if (content && isVersionSent(id, queries, packages) && !contentWriteAllowed({
+      sent: true, savedText: versions.find((v) => v.id === id)?.contentDraft,
+      hasIncomingText: "contentDraft" in fields, incomingText: fields.contentDraft, restoring: opts?.restoring,
+    })) {
       return "This version has been sent, so its content stays as it went. Edit it to make the next version.";
     }
     /* ⚠️ A SENT LETTER'S RECORDED COMPS ARE FIXED (comps v25, Part A). A change is a new version of the
