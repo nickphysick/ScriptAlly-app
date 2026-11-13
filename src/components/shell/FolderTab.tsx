@@ -427,7 +427,9 @@ export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRe
           </span>
         )}
       </nav>
-      {/* the measurer: every tab resting (named and icon-only), the current one risen, and a "+N" — seen by nothing */}
+      {/* the measurer: every tab resting (named and icon-only), the current one risen, and a "+N" — seen by nothing.
+          ⚠️ IT CARRIES NONE OF THE LIVE TAB'S HOOKS (`.ws-ftab`, `.ws-ftn`, `data-tab`): its boxes are real, so a probe
+          that lists every sized `.ws-ftn` read the current page's name twice. */}
       <span className="ws-fttabs ws-ftmeasure" ref={measureRef} aria-hidden="true">
         {tabs.map((t) => (
           <React.Fragment key={t.id}>
@@ -436,8 +438,8 @@ export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRe
           </React.Fragment>
         ))}
         {tabs[curIdx] && (
-          <span className="ws-ftab ws-fttab is-cur" data-ftm-cur={tabs[curIdx].id}>
-            <b className="ws-ftn">{tabs[curIdx].short}</b>{tabs[curIdx].locked && PRO_TAG}
+          <span className="ws-fttab is-cur" data-ftm-cur={tabs[curIdx].id}>
+            <span className="ws-fttl">{tabs[curIdx].short}</span>{tabs[curIdx].locked && PRO_TAG}
           </span>
         )}
         <span className="ws-fttab ws-ftmore" data-ftm-more="">+9</span>

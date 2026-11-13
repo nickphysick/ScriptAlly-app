@@ -32,8 +32,11 @@
 /* finished in this visit: sage, a sage-ink ring, "{Page}: Learned ✓" */
 .pck-pill.all { background: #e0e5dd; box-shadow: inset 0 0 0 1px rgba(75, 97, 81, 0.35); }
 .pck-pill.all .pck-pn { color: #4b6151; }
-/* shell nav v3: the finished pill keeps today's sage fill (the ref draws only the live one), so it keeps its ink type */
-.pck-pill.all, .pck-pill.all .pck-pt { color: var(--ink-on-light); }
+/* shell nav v3: the finished pill is the same outline on the ink — no fill; its ✓ and its full ring take the sage
+   (`--sage`, the light sage that reads on the ink; the old #4b6151 was made for the sage fill) */
+.pck-pill.pck-pill.all { background: transparent; box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.22); }
+.pck-pill.all .pck-pn.pck-pn { color: var(--sage); }
+.pck-pill.all .gr-arc { stroke: var(--sage); }
 /* below 1100px of window the words go: the ring and the count */
 @media (max-width: 1099px) { .pck-pill .pck-pt { display: none; } .pck-pill { padding: 0 12px 0 8px; } }
 /* C.2 — the bump (1 → 1.08 → 1, 420ms) and the one-off pulse (two soft blush rings spreading 12px, 1.6s each) */

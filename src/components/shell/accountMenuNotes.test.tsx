@@ -65,5 +65,7 @@ describe("shell nav v3 — the guide pill is an outline on the ink (`.b-guide`)"
     expect(pill).toMatch(/padding: 0 14px 0 10px;/);
     expect(rule(".pck-pill .pck-pn")).toMatch(/color: var\(--ink-terra\);/);
     expect(css).not.toMatch(/\.pck-pill \{[^}]*#fbeee8/);
+    /* the finished pill is an outline too (the Query Centre's guide was finished for the e2e harness: SNV3-P1) */
+    expect(rule(".pck-pill.pck-pill.all")).toMatch(/background: transparent;/);
   });
 });
