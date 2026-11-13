@@ -142,3 +142,14 @@ describe("⚠️ the non-founding emails carry the account's token", () => {
     expect(src).toMatch(/prepareEmailChanged\(cfg, \{/);
   });
 });
+
+describe("v1.1: the page at the function's own URL (no hosting rewrite)", () => {
+  it("EMAIL_SETTINGS_URL wins over the app origin", () => {
+    const cfg = resolveMailConfig({ APP_PUBLIC_URL: "https://scriptally-dev.web.app" } as never);
+    const was = process.env.EMAIL_SETTINGS_URL;
+    process.env.EMAIL_SETTINGS_URL = "https://europe-west2-scriptally-dev.cloudfunctions.net/emailSettings";
+    try {
+      expect(emailSettingsLink(cfg, "TOKEN", "weekly")).toBe("https://europe-west2-scriptally-dev.cloudfunctions.net/emailSettings?t=TOKEN&off=weekly");
+    } finally { if (was === undefined) delete process.env.EMAIL_SETTINGS_URL; else process.env.EMAIL_SETTINGS_URL = was; }
+  });
+});
