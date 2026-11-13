@@ -31,40 +31,27 @@ async function shot(page: Page, name: string, clip?: { x: number; y: number; wid
 }
 const WIDE = { width: 1512, height: 982 };
 
-/** The visible text of the folder tab's sibling links (the measuring copy is aria-hidden and skipped). */
-async function tabSiblings(page: Page): Promise<string[]> {
+/** Shell nav v3: the strip's tabs, left to right, by their full names (the measuring copy is a span, not the nav). */
+async function stripTabs(page: Page): Promise<string[]> {
   return page.evaluate(() => {
-    const row = document.querySelector<HTMLElement>('[data-shell="tab-siblings"]');
+    const row = document.querySelector<HTMLElement>('[data-shell="tabs"]');
     if (!row) return [];
-    return [...row.querySelectorAll<HTMLElement>(".ws-ftsib")]
-      .filter((b) => !b.classList.contains("ws-ftmore"))
-      .map((b) => (b.getAttribute("aria-label") || b.textContent || "").trim());
+    return [...row.querySelectorAll<HTMLElement>("[data-tab]")].map((b) => (b.getAttribute("aria-label") || "").trim());
   });
 }
 
 test.describe("sidebar rail v1 — Phase 1, the nav model", () => {
-  test("SR1.1 the folder tab follows the sections", async ({ page }) => {
-    await openRoute(page, "/manuscripts", WIDE);
-    await expect(page.locator(".ws-ftn")).toHaveText("Manuscripts");
-    const ms = await tabSiblings(page);
-    console.log("[SR1.1] /manuscripts siblings", JSON.stringify(ms));
-    /* sidebar materials v1 (6 Nov): Your book = Manuscripts · Versions; Materials = Query letters · Comps · Packages */
-    expect(ms).toEqual(["Versions"]);
-    await openRoute(page, "/manuscripts/versions", WIDE);
-    await expect(page.locator(".ws-ftn")).toHaveText("Versions");
-    expect(await tabSiblings(page)).toEqual(["Manuscripts"]);
-    await openRoute(page, "/materials/letters", WIDE);
-    await expect(page.locator(".ws-ftn")).toHaveText("Query letters");
-    const ql = await tabSiblings(page);
-    console.log("[SR1.1] /materials/letters siblings", JSON.stringify(ql));
-    expect(ql).toEqual(["Comparable titles", "Submission packages"]);
-    await openRoute(page, "/queries/packages", WIDE);
-    await expect(page.locator(".ws-ftn")).toHaveText("Submission packages");
-    const pk = await tabSiblings(page);
-    console.log("[SR1.1] /queries/packages siblings", JSON.stringify(pk));
-    expect(pk).toEqual(["Query letters", "Comparable titles"]);
+  /* shell nav v3 (13 Nov): the strip is the section's pages in nav order, whichever is current */
+  test("SR1.1 the tab strip follows the sections", async ({ page }) => {
+    const MATERIALS = ["Query letters", "Submission packages", "Comparable titles", "Versions", "Manuscripts"];
+    for (const [route, name] of [["/manuscripts", "Manuscript"], ["/manuscripts/versions", "Versions"], ["/materials/letters", "Letters"], ["/queries/packages", "Packages"]]) {
+      await openRoute(page, route, WIDE);
+      await expect(page.locator('[data-shell="tabs"] .ws-ftn')).toHaveText(name);
+      const t = await stripTabs(page);
+      console.log(`[SR1.1] ${route}`, JSON.stringify(t));
+      expect(t, route).toEqual(MATERIALS);
+    }
   });
-
   test("SR1.2 the palette lists the nav's pages by the nav's names", async ({ page }) => {
     await openRoute(page, "/dashboard", WIDE);
     await page.keyboard.press(process.platform === "darwin" ? "Meta+k" : "Control+k");

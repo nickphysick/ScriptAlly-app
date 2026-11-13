@@ -368,14 +368,14 @@ test.describe("your menu", () => {
 
 test.describe("settings", () => {
   /* ── MS12 · the shell ─────────────────────────────────────────────────────────────────────────── */
-  test("MS12 · the tab says ACCOUNT · Settings; Back to app once, in the bar; no Playfair in the sidebar", async ({ page }) => {
+  test("MS12 · the tab says Settings (shell nav v3: no group label); Back to app once, in the bar; no Playfair in the sidebar", async ({ page }) => {
     for (const w of WIDTHS) {
       await inkOpen(page, "/account/profile", w, { scope: "ms12" });
       const tab = await page.evaluate(() => ({
         g: (document.querySelector(".ws-ftab .ws-ftg, .ws-ftab small") as HTMLElement | null)?.innerText ?? "",
         n: (document.querySelector(".ws-ftab .ws-ftn") as HTMLElement | null)?.innerText ?? "",
       }));
-      expect(tab.g, `${w}: the tab's group`).toBe("ACCOUNT");
+      expect(tab.g, `${w}: no group label on the tab (shell nav v3)`).toBe("");
       expect(tab.n, `${w}: the tab's page`).toBe("Settings");
       const backs = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("button, a")]
         .filter((e) => /Back to app/.test(e.innerText) && e.getBoundingClientRect().width > 0 && getComputedStyle(e).visibility !== "hidden")

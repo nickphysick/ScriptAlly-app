@@ -91,72 +91,9 @@ test.describe("ink shell", () => {
     }
   });
 
-  /* ── INK6 · tab fit ───────────────────────────────────────────────────────────────────────────── */
-  /* ⚠️ RETARGETED FROM THE BRIEF'S "full names fit for every group at 1280" — a FALSE PREMISE, measured:
-     on all three Materials pages the row needs 643–656px of a 597px limit (bar-relative) with the
-     sidebar expanded, so its last sibling drops to an icon (the fit rule working). The lock asserts
-     what holds and is stronger: full names everywhere at 1440 and 1710, and at 1280 a sibling is named
-     EXACTLY when the measured row fits — the rule checked against its own arithmetic. */
-  test("INK6 · full names at 1440 and 1710 for every group (and by the arithmetic at 1280); an eight-page group goes names → icons → +N", async ({ page }) => {
-    const report: string[] = [];
-    for (const w of WIDTHS) {
-      for (const route of [...ROUTES, "/manuscripts", "/queries/packages", "/queries/analytics", "/agents/discover", "/todo/corkboard"]) {
-        await inkOpen(page, route, w, { scope: "ink6" });
-        const r = await page.evaluate(() => {
-          const bar = document.querySelector(".ws-pagebar")!.getBoundingClientRect();
-          const tab = document.querySelector(".ws-ftab")?.getBoundingClientRect();
-          const lim = document.querySelector(".ws-sfield")!.getBoundingClientRect().left - bar.left - 24;
-          const meas = [...document.querySelectorAll<HTMLElement>(".ws-ftmeasure [data-ftm]")].filter((e) => e.dataset.ftm !== "__icon").map((e) => e.getBoundingClientRect().width);
-          const modes = [...document.querySelectorAll(".ws-ftsibs:not(.ws-ftmeasure) > [data-sib], .ws-ftsibs:not(.ws-ftmeasure) .ws-ftmore")].map((x) => (x.classList.contains("ws-ftmore") ? "more" : x.getAttribute("data-mode")!));
-          const need = tab ? tab.right - bar.left + 16 + meas.reduce((a, b) => a + b + 6, 0) - (meas.length ? 6 : 0) : 0;
-          return { modes, need, lim };
-        });
-        const allFull = r.modes.every((m) => m === "full");
-        report.push(`${w} ${route}: ${r.modes.join(",") || "—"} (need ${Math.round(r.need)} / limit ${Math.round(r.lim)})`);
-        if (w >= 1440) expect(allFull, `${w} ${route}: ${r.modes.join(",")}`).toBe(true);
-        else expect(allFull, `${w} ${route}: named iff it fits (need ${r.need}, limit ${r.lim})`).toBe(r.need <= r.lim);
-      }
-    }
-    console.log(report.join("\n"));
-    await page.addInitScript(() => { (window as unknown as { __SA_INK_TABS: number }).__SA_INK_TABS = 5; });
-    const seen = new Set<string>();
-    for (const [w, collapsed] of [[1710, true], [1440, false], [1280, false], [1100, false], [960, false], [860, false]] as [number, boolean][]) {
-      await inkOpen(page, "/manuscripts", w, { collapsed });
-      const sib = page.locator(".ws-ftsibs:not(.ws-ftmeasure) > [data-sib], .ws-ftsibs:not(.ws-ftmeasure) .ws-ftmore");
-      const modes = await sib.evaluateAll((e) => e.map((x) => (x.classList.contains("ws-ftmore") ? "more" : x.getAttribute("data-mode")!)));
-      const seq = modes.join(" ");
-      expect(seq, `${w}: ${seq}`).toMatch(/^(full ?)*(ic ?)*(more)?$/);
-      modes.forEach((m) => seen.add(m));
-      /* the order and the current page — the visible tabs, then the menu, are the sidebar's order less the page */
-      const name = await page.locator(".ws-ftn").innerText();
-      const visible = await page.locator(".ws-ftsibs:not(.ws-ftmeasure) > [data-sib]").evaluateAll((e) => e.map((x) => x.getAttribute("aria-label")!));
-      let menu: string[] = [];
-      if (modes.includes("more")) {
-        await page.locator(".ws-ftmore").click();
-        await applyMutation(page, "ink6");
-        if (MUTATE === "ink6-current") {
-          await page.evaluate((n) => { const m = document.querySelector(".ws-ftmenu"); const b = document.createElement("button"); b.setAttribute("role", "menuitem"); b.textContent = n; m?.appendChild(b); }, name);
-        }
-        menu = await page.locator(".ws-ftmenu [role='menuitem']").allInnerTexts();
-        await page.keyboard.press("Escape");
-      }
-      expect([...visible, ...menu], `${w}: the current page is never among the siblings`).not.toContain(name);
-      const nav = await page.locator("#ws-sidebar .ws-nav").evaluate((n) => {
-        const out: string[] = []; let grp = false;
-        for (const el of [...n.children]) {
-          if (el.classList.contains("ws-glabel")) grp = /materials/i.test(el.textContent ?? "");
-          else if (grp) out.push(el.getAttribute("aria-label")!);
-        }
-        return out;
-      });
-      const sidebarOrder = nav.filter((l) => l !== name);
-      const tabs = [...visible, ...menu].filter((l) => sidebarOrder.includes(l));
-      expect(tabs, `${w}: the real pages keep the sidebar's order`).toEqual(sidebarOrder);
-    }
-    expect([...seen].sort(), "the eight-page group exercised every branch").toEqual(["full", "ic", "more"]);
-  });
+  /* ── INK6 · tab fit — RETIRED by shell nav v3 (13 Nov): the sibling row is replaced by the tab strip, whose fit
+     (current never icon or "+N", resting tabs give way from the right) is SNV3-F1/F2 in shellNavV3.measure.ts. ── */
 
-  /* ── INK7 · search ────────────────────────────────────────────────────────────────────────────── */
   test("INK7 · search is 168px, 12px before Log a query, at one x on every route; a click opens the palette", async ({ page }) => {
     for (const w of WIDTHS) {
       const xs: number[] = [];

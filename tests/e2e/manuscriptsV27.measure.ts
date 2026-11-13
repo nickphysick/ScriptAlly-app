@@ -345,7 +345,7 @@ for (const vp of VPS) {
     });
     expect(row, "a Versions row in the sidebar").toBeTruthy(); ck();
     expect(row!.pro, "its PRO tag").toBe(true); ck();
-    const tab = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".ws-ftsib")].some((e) => e.getBoundingClientRect().width > 0 && (e.getAttribute("aria-label") === "Versions" || e.textContent === "Versions")));
+    const tab = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('[data-shell="tabs"] [data-tab]')].some((e) => e.getBoundingClientRect().width > 0 && (e.getAttribute("aria-label") === "Versions" || e.textContent === "Versions")));
     expect(tab, "Versions in the Materials tabs").toBe(true); ck();
     /* Versions v1 (22 Oct) replaced the interim page: its header and copy are VER1's (tests/e2e/versionsV1.measure.ts).
        What stays here is v27's claim that the route renders a Versions page with "+ New version". */
