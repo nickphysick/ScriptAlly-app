@@ -264,7 +264,9 @@ test("HC1-C1 · show me: the article's button lands on the page with the spotlig
         && spot.btn.left + spot.btn.width <= spot.hole.left + spot.hole.width + 1 && spot.btn.top + spot.btn.height <= spot.hole.top + spot.hole.height + 1;
       L.check(`${w} its hole is round "+ Add an agent"`, inHole, JSON.stringify(spot));
       await page.waitForTimeout(800);
-      L.check(`${w} showing it ticked nothing`, Object.keys(JSON.parse(flags("contacts")).done ?? {}).length === 0, flags("contacts"));
+      /* v1.1: "add" is earned on the Contact list by the agent already on file (the subject list's ✓ above says so), not by
+         Show me; anything else ticked would be Show me's doing. */
+      L.check(`${w} showing it ticked nothing`, Object.keys(JSON.parse(flags("contacts")).done ?? {}).filter((k) => k !== "add").length === 0, flags("contacts"));
       await page.keyboard.press("Escape");
 
       /* the writer's own action: searching on the Contact list ticks "Search for an agent" */
@@ -330,7 +332,7 @@ test("HC1-C3 · Did this help? Not really: kind Article, pageName help/{slug}; t
       L.check(`${w} pageName help/add-an-agent`, s?.pageName === "help/add-an-agent", JSON.stringify(s));
       L.check(`${w} the thanks`, (await page.evaluate(() => (document.querySelector("[data-hc='helpful-sent']") as HTMLElement | null)?.innerText ?? "")).startsWith("Thanks. That's gone to us as a note."), "");
       L.check(`${w} the writer's words`, s?.message === "A worked example would help", JSON.stringify(s));
-      await vis(page, ".ws-fbtn, .ws-fbb, .ws-fbi").click();
+      await vis(page, ".wsr-fb, .ws-fbtn, .ws-fbb, .ws-fbi").click(); /* v1.1: the rail's feedback button is .wsr-fb */
       await page.locator("[data-fb='panel']").waitFor({ timeout: 8000 });
       const kinds = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-fb='panel'] [data-fb='kind']")].map((e) => e.dataset.k));
       L.check(`${w} the panel offers four kinds`, kinds.length === 4, JSON.stringify(kinds));
