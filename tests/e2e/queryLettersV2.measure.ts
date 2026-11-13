@@ -291,7 +291,9 @@ test("QL2-11 below 768px the route still redirects to Materials on the phone", a
   await openLetters(page, "cv25-ms");
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/materials/letters");
-  await expect(page).toHaveURL(/\/manuscripts#materials/, { timeout: 20_000 });
+  /* Phone app v5 (8985b5e3a) sends the letters to Materials' Letters tab (lib/phoneV5.ts, phoneV5Redirect); v2 asserted
+     v3's `/manuscripts#materials`. The lock is that the phone never gets the desk, wherever v5 points it. */
+  await expect(page).toHaveURL(/\/materials(\?tab=letters)?$/, { timeout: 20_000 });
   await expect(page.locator('[data-ql="desk"]:visible')).toHaveCount(0);
 });
 
