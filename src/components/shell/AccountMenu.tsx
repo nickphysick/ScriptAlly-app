@@ -48,10 +48,12 @@ export interface AccountMenuProps {
    * triggers sit at opposite ends of the screen.
    */
   anchor?: HTMLElement | null;
+  /** Shell nav v3: Your notes' unseen replies, for the ink menu's "Your notes" row. */
+  newReplies?: number;
 }
 
 export const AccountMenu: React.FC<AccountMenuProps> = ({
-  open, onClose, name, email, entitlement, onNavigatePath, onSignOut, anchor,
+  open, onClose, name, email, entitlement, onNavigatePath, onSignOut, anchor, newReplies = 0,
 }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState<{ left: number; top: number; width?: number } | null>(null);
@@ -157,6 +159,7 @@ export const AccountMenu: React.FC<AccountMenuProps> = ({
         pos={pos}
         go={go}
         onSignOut={signOut}
+        newReplies={newReplies}
       />,
       document.body,
     );

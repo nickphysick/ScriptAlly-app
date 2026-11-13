@@ -188,13 +188,10 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   tasks: <ListChecks aria-hidden="true" />,
   queries: <Send aria-hidden="true" />,
   agents: <Users aria-hidden="true" />,
-  /* sidebar materials v1 (6 Nov): "Your book" (id `book`) and "Materials" are two sections; the rail reads each
-     section's own `icon` key (library, mail), and these group keys stay for any reader that falls back to the id */
-  book: <Library aria-hidden="true" />,
+  /* the rail reads each section's own `icon` key (mail for Materials); the group key stays for any reader that falls
+     back to the id. Shell nav v3 (13 Nov) deleted the `book` and `founding` keys with their sections. */
   materials: <Mail aria-hidden="true" />,
   manuscript: <Library aria-hidden="true" />,
-  /* Your notes v1 — the Founding writer section's rib (and its one row, `notes`, below) */
-  founding: <MessageSquareText aria-hidden="true" />,
   /* ACCOUNT joined the nav when Settings came up out of the foot (audit pack P5). BOTH keys are
      added — the group's and the row's — per the parallel-surface warning below; adding the
      section without its glyph is the quiet half of that failure.
@@ -233,7 +230,7 @@ export const WORKSPACE_ICONS: Record<string, React.ReactNode> = {
   folder: <Book aria-hidden="true" />,
   /* Manuscripts v27 Part E — Versions: the mock's ⇆ */
   versions: <ArrowLeftRight aria-hidden="true" />,
-  /* Your notes v1 — the Founding writer section and its one page */
+  /* Your notes v1 — the page's glyph; shell nav v3: the account menu's "Your notes" row draws it */
   notes: <MessageSquareText aria-hidden="true" />,
   settings: <Settings aria-hidden="true" />,
 };
@@ -540,6 +537,7 @@ export const AppShell: React.FC<AppShellProps> = ({ routeKey, onNavigate, search
             onNavigatePath={goPath}
             onSignOut={logout}
             anchor={accountAnchor}
+            newReplies={newReplies}
           />
         }
       >

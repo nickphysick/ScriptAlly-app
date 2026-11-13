@@ -33,14 +33,9 @@ export interface ShellChild {
   /** The sidebar row's SHORT label, where it differs (Nick's ruling, 25 Oct: "Queries", "Packages"). The sidebar
    *  ALONE reads it — `sidebarLabel()` — so the page keeps its full name everywhere else. */
   navLabel?: string;
-  /**
-   * SIDEBAR RAIL v2 (6 Nov): the page has its own item on the 80px rail. Five pages carry it (Dashboard, Query
-   * Centre, Contact list, Query letters, To-do list); every other page lives in the rail's More panel, under its
-   * section. The rail, the More panel and the expanded sidebar all read this one model.
-   */
-  rail?: true;
-  /** The page's short name on the rail (its item's label, or More's label while you are on it). Absent = `label`. */
-  railLabel?: string;
+  /** SHELL NAV v3 (13 Nov): the page's short name in the folder tab strip ONLY ("Letters", "Packages", "Comps",
+   *  "Manuscript"). Absent = `label`. The palette, the document title, breadcrumbs and aria-labels keep `label`. */
+  tabLabel?: string;
   /** Where it goes, search included (e.g. "/queries?status=attention"). */
   path: string;
   count?: number;
@@ -55,7 +50,8 @@ export interface ShellChild {
   pro?: ProEntitlement;
 }
 
-/** The entitlements a nav mark can name (lib/entitlements). "materials" covers a whole SECTION (sidebar materials v1). */
+/** The entitlements a nav mark can name (lib/entitlements). Shell nav v3: every mark is a PAGE's; "materials" is
+ *  carried by Query letters, Submission packages and Comparable titles. */
 export type ProEntitlement = "discover" | "packages" | "versions" | "materials";
 
 export interface ShellSection {
@@ -68,14 +64,11 @@ export interface ShellSection {
   def?: string;
   count?: number;
   urgent?: boolean;
-  /** The sidebar draws no heading over this group (Dashboard's, 25 Oct). The label stays: the folder tab and every
+  /** The sidebar draws no heading over this group (Dashboard's, 25 Oct). The label stays: the rail row and every
    *  section lookup still read it. */
   noHeading?: boolean;
   /** The section's own icon key in WORKSPACE_ICONS (sidebar rail v1: the rail draws one row per section). */
   icon?: string;
-  /** A Pro SECTION (Materials, 6 Nov): the rail's section row and the full sidebar's group heading carry the tag,
-   *  and its rows carry none of their own. Dormant like a row's: drawn only when the user is not entitled. */
-  pro?: ProEntitlement;
 }
 
 /** The text the SIDEBAR prints for a row — its short `navLabel` where it has one, else its full `label`. */
@@ -317,7 +310,8 @@ export function openForHit(hit: ShellHit | null): string | null {
  *
  * Routes outside the nav name themselves from the table below — the words their own headers use.
  */
-export const OFF_NAV_NAMES: Record<string, string> = { "/import": "Import", "/plans": "Plans", "/help": "Help centre" };
+/* Shell nav v3: /your-notes left the nav (it has no section now), so its tab names it from here */
+export const OFF_NAV_NAMES: Record<string, string> = { "/import": "Import", "/plans": "Plans", "/help": "Help centre", "/your-notes": "Your notes" };
 
 export function barPageName(
   sections: ShellSection[],

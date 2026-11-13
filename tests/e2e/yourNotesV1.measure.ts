@@ -109,7 +109,7 @@ for (const vp of SIZES) {
   });
 }
 
-test("YN-M4 the rail's More panel and the Dashboard band's link", async ({ page }) => {
+test("YN-M4 the Dashboard band's link (shell nav v3: More is retired; the account menu's row is SNV3-A1)", async ({ page }) => {
   const vp = SIZES[0];
   await openApp(page, "/dashboard", vp);
   const link = page.locator('[data-d2="fw-all-notes"]').first();
@@ -119,16 +119,7 @@ test("YN-M4 the rail's More panel and the Dashboard band's link", async ({ page 
   if (band) await page.screenshot({ path: `${SHOTS}/dash-band-link.png`, clip: { x: band.x, y: band.y, width: band.w, height: band.h } });
   await link.click();
   await expect(page).toHaveURL(/\/your-notes$/);
-  /* the rail's More button: hover opens the panel */
-  const more = page.locator('[data-go="more"]').first();
-  if (await more.isVisible()) {
-    await more.click();
-    await page.locator('[data-shell="more"]').waitFor();
-    await expect(page.locator('[data-shell="more"] [data-go="notes"]')).toHaveText(/Your notes/);
-    await page.screenshot({ path: `${SHOTS}/rail-more.png` });
-  } else {
-    readings["M4-more"] = "the rail was not on screen (the full sidebar is pinned); the More panel was not captured";
-  }
+  /* shell nav v3 (13 Nov): the rail's More panel is retired; Your notes is in the account menu (shellNavV3.measure.ts) */
 });
 
 test("YN-M5 the empty page", async ({ page }) => {

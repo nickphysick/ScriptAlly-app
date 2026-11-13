@@ -43,6 +43,11 @@
   }
   .am-menu--ink .am-iplan-a:hover { color: var(--ink-cream-92); }
   .am-menu--ink .am-iplan-a:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: 2px; border-radius: 3px; }
+  /* shell nav v3: the Your notes row's "{n} new" — the full sidebar link's mark (inkShell.css `.ws-fblink i`) */
+  .am-menu--ink .am-new {
+    margin-left: auto; font-style: normal; padding: 1px 7px; border-radius: 999px; background: var(--ink-terra);
+    color: var(--ink-shell); font-weight: 600; font-size: 11px; line-height: 1.4; white-space: nowrap;
+  }
   /* the foot row stays lit while its menu is open */
   .ws-pfrow.is-lit { background: rgba(var(--ink-cream-rgb), 0.09); border-radius: 10px; }
 }

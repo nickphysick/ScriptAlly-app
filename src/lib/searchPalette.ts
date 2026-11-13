@@ -155,6 +155,8 @@ export const PALETTE_PAGES: PaletteItem[] = [
       run: { kind: "path", path: ch.path },
     };
   })),
+  /* Shell nav v3 (13 Nov): Your notes left the nav's sections, so the palette names it here — its contents unchanged */
+  { id: "page:your-notes", group: "Pages", kind: "page", title: "Your notes", subtitle: NAV_PAGE_META["/your-notes"].subtitle, run: { kind: "path", path: "/your-notes" } },
   { id: "page:import", group: "Pages", kind: "page", title: "Import", subtitle: "Bring in queries from a spreadsheet", run: { kind: "path", path: "/import" } },
   { id: "page:account", group: "Pages", kind: "page", title: "Account", subtitle: "Your details and preferences", run: { kind: "path", path: "/account" } },
   { id: "page:plans", group: "Pages", kind: "page", title: "Plans", subtitle: "What Pro adds", run: { kind: "path", path: "/plans" } },
