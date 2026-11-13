@@ -457,7 +457,7 @@ export const AccountSettings: React.FC<{
         />
         {pending && (
           <SettingsNote>
-            <span data-acct="email-pending">We've emailed <b>{pending.to}</b>. Your sign-in changes once you've confirmed it from there, and we'll let <b>{pending.from}</b> know when it has.</span>
+            <span data-acct="email-pending">We've emailed <b>{pending.to}</b>. Your sign-in changes once you've confirmed it from there, and we'll let <b>{pending.from}</b> know when it has. Changed your mind? Ignore that email and nothing changes.</span>
           </SettingsNote>
         )}
         {emailOpen && (
