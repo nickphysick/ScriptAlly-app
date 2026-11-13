@@ -332,7 +332,8 @@ export function barPageName(
     if (!sec || !name) return null;
     return { section: gi > 0 ? sec.label : null, name };
   }
-  if (isAccountPath(pathname)) return { section: "Account", name: "Settings" };
+  /* non-workspace v1.1 (4a): a plain name, like the Plans tab — no small-capitals "Account" label in settings mode */
+  if (isAccountPath(pathname)) return { section: null, name: "Settings" };
   const n = OFF_NAV_NAMES[routeBase(pathname.replace(/\/+$/, "") || "/")];
   return n ? { section: null, name: n } : null;
 }
