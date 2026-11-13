@@ -11,9 +11,9 @@
  * ⚠️ THE TOPIC LIST IS A CONTRACT WITH THE SERVER, NOT A LABEL SET. `sendContactMessage` keeps its
  * own copy and rejects anything outside it, so the two must match exactly; a test reads both.
  *
- * ⚠️ THE FORM DOES NOT SEND BY ITSELF. `CONTACT_TRANSPORT` is "mailto": Send opens the writer's own
- * mail app with the message written out. Nothing here may say a message has been sent or delivered
- * on that path — the sent state's words are chosen by transport below.
+ * ⚠️ THE FORM SENDS THROUGH `sendContactMessage`, AND OFFERS THE MAIL APP ONLY WHEN THAT FAILS
+ * (13 Nov). "Sent." is said only after the callable returned; a failure says plainly the message did
+ * not send, keeps every word, and offers the writer's own mail app with the message written out.
  */
 
 import { CopyRun } from "./CopyRuns";
@@ -109,30 +109,22 @@ export const CONTACT_PLACEHOLDERS = {
 } as const;
 
 /**
- * What the form says once Send has done its job, by transport.
- *
- * ⚠️ ON "mailto" NOTHING HAS BEEN SENT YET: the writer's mail app has the message and the writer
- * presses send there. So that state says so, and never "Sent." — and the ref's "A copy is on its way
- * to you now" is said on neither path, because neither sends one.
+ * What the form says once `sendContactMessage` has accepted the message — the only state that may
+ * say "Sent.". The ref's "A copy is on its way to you now" is not said: no copy is sent.
  */
 export const CONTACT_SENT = {
-  mailto: {
-    heading: "Over to your mail app.",
-    body: (email: string) =>
-      "Your message should be open there, ready to send. Once it's sent, we'll reply to " + email +
-      " within two working days.",
-    fallback: "If nothing opened, email us at ",
-  },
-  function: {
-    heading: "Sent.",
-    body: (email: string) => `We'll reply to ${email} within two working days.`,
-    fallback: "",
-  },
+  heading: "Sent.",
+  body: (email: string) => `We'll reply to ${email} within two working days.`,
 } as const;
 export const CONTACT_AGAIN = "Send another message";
 
-/** The failed state's words. A failure keeps everything the writer typed (`lib/contactForm.ts`). */
-export const CONTACT_FAILED_GENERIC = "That didn't send. Please try again, or email us directly.";
+/**
+ * The failed state's words. A failure keeps everything the writer typed (`contactForm.ts`), and the
+ * offer opens the writer's own mail app with the same message written out (`contactMailto`).
+ */
+export const CONTACT_FAILED_GENERIC = "Your message didn't send. Everything you typed is still here.";
+export const CONTACT_FAILED_MAIL_LINK = "Open it in your mail app";
+export const CONTACT_FAILED_MAIL_TAIL = " to send it from there, or press Send message to try again.";
 export const CONTACT_FAILED_TOO_SOON =
   "That's already on its way — give it a moment before sending another.";
 

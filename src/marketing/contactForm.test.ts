@@ -30,6 +30,19 @@ describe("a failed send keeps everything the writer typed", () => {
     expect(after.status).toBe("failed");
     expect(after.notice).toBe("That didn't send.");
     expect(after.focus).toBe(CONTACT_IDS.notice);
+    expect(after.offerMail, "a too-soon refusal offers no mail app").toBe(false);
+  });
+
+  /* RE-POINTED (13 Nov): a failed SEND also offers the mail app — and still touches no field. */
+  it("a failed send offers the mail app, keeps every field, and typing afterwards keeps the offer", () => {
+    const before = typed();
+    const after = contactReducer(contactReducer(before, { type: "sending" }), { type: "failed", notice: "n", offerMail: true });
+    expect(after.draft).toEqual(before.draft);
+    expect(after.offerMail).toBe(true);
+    const edited = contactReducer(after, { type: "edit", field: "message", value: "More words." });
+    expect(edited.offerMail).toBe(true);
+    expect(edited.draft).toEqual({ ...before.draft, message: "More words." });
+    expect(contactReducer(edited, { type: "sending" }).offerMail, "a new attempt withdraws it").toBe(false);
   });
 
   it("and after a send that was sending when it failed", () => {

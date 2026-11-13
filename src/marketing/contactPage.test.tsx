@@ -19,7 +19,10 @@ vi.mock("../components/toast/ToastProvider", async () => (await import("../test/
 
 import { ContactPage, ContactFormView } from "./ContactPage";
 import { MarketingShell } from "./MarketingShell";
-import { CONTACT_TOPICS, CONTACT_ART_ALT } from "./contactCopy";
+import {
+  CONTACT_TOPICS, CONTACT_ART_ALT, CONTACT_FAILED_GENERIC, CONTACT_PAGE_TOPIC, CONTACT_DATA_TOPIC, CONTACT_DATA_WANTS,
+} from "./contactCopy";
+import { contactExtras, contactMailto } from "../lib/contactTransport";
 import { contactInitial, contactReducer, ContactFormState } from "./contactForm";
 import { SUPPORT_EMAIL } from "../lib/companyInfo";
 
@@ -111,29 +114,64 @@ describe("the contact form", () => {
 
 describe("the sent and failed states", () => {
   /**
-   * ⚠️ THE TRANSPORT IS THE MAIL APP, AND THE SENT PANEL SAYS SO. Nothing has been delivered when the
-   * mail app opens, so the panel never says "Sent." and never promises a copy.
+   * RE-POINTED (13 Nov): the form sends through `sendContactMessage`, so the sent panel is "Sent." —
+   * and the page reaches it only from a call that returned (the source lock below).
    */
-  it("the sent panel replaces the form, names the reply address, and claims no delivery", () => {
+  it("the sent panel replaces the form, says Sent., names the reply address, and promises no copy", () => {
     const sent = contactReducer({ ...contactInitial(), draft: { ...contactInitial().draft, email: "m@webb.co.uk" } }, { type: "sent" });
     const h = view(sent);
     expect(h).not.toContain("<form");
-    expect(h).toContain('<h2 id="cf-done-h" class="mk-formh2">Over to your mail app.</h2>');
-    expect(h).toContain("we&#x27;ll reply to m@webb.co.uk within two working days.");
-    expect(h).toContain(`If nothing opened, email us at <a class="mk-cmail" href="mailto:${SUPPORT_EMAIL}">${SUPPORT_EMAIL}</a>.`);
+    expect(h).toContain('<h2 id="cf-done-h" class="mk-formh2">Sent.</h2>');
+    expect(h).toContain("We&#x27;ll reply to m@webb.co.uk within two working days.");
     expect(h).toMatch(/<button id="cf-again" type="button" class="mk-btn mk-cagain">Send another message<\/button>/);
-    expect(h).not.toMatch(/>Sent\.<|copy is on its way/);
+    expect(h).not.toMatch(/copy is on its way|Over to your mail app/);
   });
 
-  /** ⚠️ The render half of contactForm.test's lock: the failed form still shows every word typed. */
-  it("a failed send shows its notice over the words the writer typed", () => {
+  /**
+   * ⚠️ The render half of contactForm.test's lock: the failed form still shows every word typed, says
+   * plainly it did not send, and OFFERS the mail app — a link whose message is everything typed, the
+   * topic's extra answer included, built from the draft as it stands.
+   */
+  it("a failed send shows its notice over the words the writer typed, and offers the mail app with all of them", () => {
     const filled = { ...contactInitial().draft, name: "Marianne Webb", email: "m@webb.co.uk", topic: "Something's broken", message: "The dates are a day out.", page: "Queries" };
-    const h = view(contactReducer({ ...contactInitial(), draft: filled }, { type: "failed", notice: "That didn&#x27;t send." }));
+    const state = contactReducer({ ...contactInitial(), draft: filled }, { type: "failed", notice: CONTACT_FAILED_GENERIC, offerMail: true });
+    const h = view(state);
     expect(h).toContain('value="Marianne Webb"');
     expect(h).toContain('value="m@webb.co.uk"');
     expect(h).toContain('value="Queries"');
     expect(h).toContain(">The dates are a day out.</textarea>");
-    expect(h).toMatch(/<p id="cf-notice" class="mk-cstate mk-cstate--bad" role="alert" tabindex="-1">/);
+    expect(h).toContain('<p id="cf-notice" class="mk-cstate mk-cstate--bad" role="alert" tabindex="-1">Your message didn&#x27;t send. Everything you typed is still here.</p>');
+    const link = /<p class="mk-cstate mk-cstate--mail"><a id="cf-mail" class="mk-cmail" href="([^"]+)">Open it in your mail app<\/a> to send it from there, or press Send message to try again\.<\/p>/.exec(h);
+    expect(link, "the mail app is offered").toBeTruthy();
+    const expected = contactMailto(SUPPORT_EMAIL, filled, contactExtras(filled, { page: CONTACT_PAGE_TOPIC, data: CONTACT_DATA_TOPIC, firstWant: CONTACT_DATA_WANTS[0] }));
+    expect(link![1].replace(/&#x27;/g, "'").replace(/&amp;/g, "&")).toBe(expected);
+    const body = decodeURIComponent(expected);
+    for (const w of ["The dates are a day out.", "From: Marianne Webb <m@webb.co.uk>", "Topic: Something's broken", "Page: Queries"]) expect(body, w).toContain(w);
+    expect(h.match(/class="mk-cbtn"/g) ?? [], "one filled button: the offer is a link").toHaveLength(1);
+  });
+
+  it("a too-soon refusal offers no mail app (nothing failed to send)", () => {
+    const h = view(contactReducer(contactInitial(), { type: "failed", notice: "x" }));
+    expect(h).not.toContain("cf-mail");
+  });
+
+  /**
+   * ⚠️ THE PAGE CALLS THE CALLABLE FIRST AND NEVER OPENS THE MAIL APP ITSELF. Read from source (no DOM
+   * here): the send goes through `sendContact` with the real `sendContactMessage` callable, "sent" is
+   * dispatched only on its `sent` outcome, and nothing assigns a `mailto:` to the window.
+   */
+  it("send() calls sendContactMessage through sendContact, and only a returned call is sent", () => {
+    const src = readFileSync(resolve(dirname(fileURLToPath(import.meta.url)), "ContactPage.tsx"), "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+    expect(src).toMatch(/httpsCallable\(getFunctions\(app, "europe-west2"\), "sendContactMessage"\)\(payload\)/);
+    const send = /const send = async \(\) => \{([\s\S]*?)\n  \};/.exec(src);
+    expect(send, "the page's send").toBeTruthy();
+    const body = send![1];
+    expect(body).toMatch(/await sendContact\(SUPPORT_EMAIL, draft, contactExtras\(draft, EXTRA_TOPICS\), callSendContactMessage\)/);
+    expect(body.indexOf('if (outcome.kind === "sent")'), "sent only on the sent outcome")
+      .toBeLessThan(body.indexOf('dispatch({ type: "sent" });\n      return;'));
+    expect(body).toContain('dispatch({ type: "failed", notice: CONTACT_FAILED_GENERIC, offerMail: true })');
+    expect(src, "the page never opens the mail app for the writer").not.toMatch(/location(\.href)?\s*=/);
   });
 });
 

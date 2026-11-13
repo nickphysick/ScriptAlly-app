@@ -13,7 +13,8 @@
  *
  * ⚠️ A FAILED SEND KEEPS EVERYTHING THE WRITER TYPED. Clearing the form on an error would lose the
  * one thing they cannot get back. `contactForm.test.ts` holds this, and the failed state takes focus
- * to its own notice so it is read out.
+ * to its own notice so it is read out. A failed SEND also offers the mail app, its link built from the
+ * same draft (13 Nov); typing afterwards clears nothing.
  */
 
 import { ContactDraft, ContactField } from "../lib/contactTransport";
@@ -27,6 +28,9 @@ export interface ContactFormState {
   status: ContactStatus;
   /** The failed state's sentence. */
   notice: string;
+  /** A failed send offers the writer's mail app beside the notice. The link is built from the draft
+   *  as it stands at render, so a word changed after the failure travels too. */
+  offerMail: boolean;
   /** The address the sent panel names. */
   sentTo: string;
   /** The id the page moves focus to after this step, or null to leave it where it is. */
@@ -38,7 +42,7 @@ export type ContactAction =
   | { type: "topic"; topic: ContactTopic }
   | { type: "invalid"; errors: Partial<Record<ContactField, string>> }
   | { type: "sending" }
-  | { type: "failed"; notice: string }
+  | { type: "failed"; notice: string; offerMail?: boolean }
   | { type: "sent" }
   | { type: "again" };
 
@@ -47,13 +51,13 @@ export const CONTACT_EMPTY: ContactDraft = {
 };
 
 export const contactInitial = (): ContactFormState => ({
-  draft: { ...CONTACT_EMPTY }, errors: {}, status: "idle", notice: "", sentTo: "", focus: null,
+  draft: { ...CONTACT_EMPTY }, errors: {}, status: "idle", notice: "", offerMail: false, sentTo: "", focus: null,
 });
 
 /** The ids the reducer hands focus to. The page renders each exactly once. */
 export const CONTACT_IDS = {
   name: "cf-name", email: "cf-email", message: "cf-msg", page: "cf-page", want: "cf-want",
-  notice: "cf-notice", again: "cf-again",
+  notice: "cf-notice", mail: "cf-mail", again: "cf-again",
   topic: (t: ContactTopic) => `cf-topic-${CONTACT_TOPICS.indexOf(t)}`,
 } as const;
 
@@ -74,11 +78,11 @@ export function contactReducer(s: ContactFormState, a: ContactAction): ContactFo
       return { ...s, errors: a.errors, status: "idle", focus: first ? CONTACT_IDS[first] : null };
     }
     case "sending":
-      return { ...s, errors: {}, status: "sending", notice: "", focus: null };
+      return { ...s, errors: {}, status: "sending", notice: "", offerMail: false, focus: null };
     case "failed":
-      return { ...s, status: "failed", notice: a.notice, focus: CONTACT_IDS.notice };
+      return { ...s, status: "failed", notice: a.notice, offerMail: !!a.offerMail, focus: CONTACT_IDS.notice };
     case "sent":
-      return { ...s, errors: {}, status: "sent", notice: "", sentTo: s.draft.email.trim(), focus: CONTACT_IDS.again };
+      return { ...s, errors: {}, status: "sent", notice: "", offerMail: false, sentTo: s.draft.email.trim(), focus: CONTACT_IDS.again };
     case "again":
       return {
         ...contactInitial(),

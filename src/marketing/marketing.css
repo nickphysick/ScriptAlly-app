@@ -2552,6 +2552,9 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-cbtn:disabled:hover { background: var(--mk-nearblack); }
 .mk-cstate { margin: 14px 0 0; font-size: 15px; line-height: 1.55; color: var(--mk-muted); }
 .mk-cstate--bad { color: var(--mk-rust); }
+/* A failed send's offer of the mail app (13 Nov): a link under the notice, never a second filled button. */
+.mk-cstate--mail { margin-top: 6px; }
+.mk-cstate--mail .mk-cmail { font-size: inherit; }
 .mk-cfine { margin: 16px 0 0; font-size: 14px; line-height: 1.55; color: var(--mk-muted); }
 .mk-cfine .mk-doclink { font-size: inherit; }
 /* The topic's note is the legal pages' pulled-out clause, at the form's secondary size. */
