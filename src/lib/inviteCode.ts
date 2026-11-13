@@ -13,9 +13,10 @@
  * sessionStorage, so the writer never types it and is never asked for it twice. The typed screen is
  * the fallback for a writer who arrives without the link.
  *
- * ⚠️ THREE OUTCOMES, AS THE REF DRAWS THEM: works, already used, not recognised. The old gate gave the
- * last two one sentence (so the form could not be used to test codes); the ref separates them, and the
- * ref is the authority. Listed for Nick in reports/non-workspace-v1/REPORT.md.
+ * ⚠️ ONE OUTCOME FOR A CODE THAT DOESN'T WORK (Nick, non-workspace v1.1). A used code and an unrecognised
+ * code get the same answer from the server ("refused") and the same sentence here, so the form cannot be
+ * used to test which codes exist. There is no "Sign in instead" variant for a used code. Only an UNUSED
+ * code reached by its link can be "expired".
  */
 
 /** The code's shape: QH, then two groups of four. */
@@ -38,9 +39,9 @@ export const CODE_NO_CODE_LINK = "Join the waiting list";
 export const CODE_HAVE_ACCOUNT = "Already have an account? ";
 
 export const CODE_SHORT = "Enter the whole code from your invite email. It looks like QH-XXXX-XXXX.";
-export const CODE_USED = "That code has already been used to create an account.";
-export const CODE_USED_LINK = "Sign in instead";
-export const CODE_UNKNOWN = "We don't recognise that code. Check it against your invite email, or copy and paste it.";
+/** ⚠️ The one sentence for a used code AND an unrecognised one (functions/src/inviteCode.ts MSG.refused says the same). */
+export const CODE_REFUSED =
+  "That founder's code isn't one of ours, or it's already been used. Check the email we sent, or ask us to look it up.";
 /** Words I had to write: the server could not answer. */
 export const CODE_UNREACHABLE = "We couldn't check your code just now. Try again in a moment.";
 
@@ -85,10 +86,9 @@ export function codeFromPath(path: string): string | null {
 export type CodeStatus =
   | { status: "ok"; email: string | null; name: string | null; foundingNo: number | null }
   | { status: "expired"; email: string | null; foundingNo: number | null }
-  | { status: "used" }
-  | { status: "unknown" };
+  | { status: "refused" };
 
-/** Read a check answer defensively: anything unrecognised is "unknown", never "ok". */
+/** Read a check answer defensively: anything unrecognised is "refused", never "ok" (an older server's "used" too). */
 export function readCodeStatus(data: unknown): CodeStatus {
   const d = (data ?? {}) as Record<string, unknown>;
   const str = (v: unknown) => (typeof v === "string" && v ? v : null);
@@ -96,9 +96,13 @@ export function readCodeStatus(data: unknown): CodeStatus {
   switch (d.status) {
     case "ok": return { status: "ok", email: str(d.email), name: str(d.name), foundingNo: num(d.foundingNo) };
     case "expired": return { status: "expired", email: str(d.email), foundingNo: num(d.foundingNo) };
-    case "used": return { status: "used" };
-    default: return { status: "unknown" };
+    default: return { status: "refused" };
   }
+}
+
+/** The error a code screen shows for an answer: the one sentence for "refused", nothing otherwise. */
+export function codeError(s: CodeStatus | null): string | undefined {
+  return s?.status === "refused" ? CODE_REFUSED : undefined;
 }
 
 /** The visit's kept code, read and written defensively (private windows throw). */
@@ -113,7 +117,7 @@ export function keepCode(code: string | null): void {
  * Once signed in, redeem the visit's kept code against this account (App calls this when a user appears).
  * ⚠️ AFTER THE ACCOUNT EXISTS, so the server can bind the code to a uid and set the founding flag through the one
  * setter — whichever way the writer signed up (password, Google, a sign-in link). A failure keeps the code for the
- * next sign-in; a used or unknown answer clears it.
+ * next sign-in; a refusal (used or unrecognised, one answer) clears it.
  */
 export async function redeemKeptCode(): Promise<"none" | "redeemed" | "refused" | "kept"> {
   const code = keptCode();
@@ -124,7 +128,7 @@ export async function redeemKeptCode(): Promise<"none" | "redeemed" | "refused" 
     return "redeemed";
   } catch (e) {
     const c = (e as { code?: string })?.code ?? "";
-    if (/not-found|already-exists/.test(c)) { keepCode(null); return "refused"; }
+    if (/not-found/.test(c)) { keepCode(null); return "refused"; }
     return "kept";
   }
 }
