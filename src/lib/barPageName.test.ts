@@ -17,11 +17,12 @@ describe("barPageName — the sidebar's own section heading and label", () => {
   it("names each page under its heading", () => {
     expect(name("/agents")).toEqual({ section: "Agents", name: "Contact list" });
     expect(name("/queries")).toEqual({ section: "Queries", name: "Query Centre" });
-    /* sidebar materials v1 (6 Nov): Comps and Packages are in Materials (their addresses unchanged); Versions in Your book */
+    /* shell nav v3 (13 Nov): every materials page and the book's two are in Materials (their addresses unchanged) */
     expect(name("/manuscripts/comps")).toEqual({ section: "Materials", name: "Comparable titles" });
     expect(name("/queries/packages")).toEqual({ section: "Materials", name: "Submission packages" });
     expect(name("/materials/letters")).toEqual({ section: "Materials", name: "Query letters" });
-    expect(name("/manuscripts/versions")).toEqual({ section: "Your book", name: "Versions" });
+    expect(name("/manuscripts/versions")).toEqual({ section: "Materials", name: "Versions" });
+    expect(name("/manuscripts")).toEqual({ section: "Materials", name: "Manuscripts" });
     expect(name("/todo/corkboard")).toEqual({ section: "Tasks", name: "Corkboard" });
     expect(name("/account/profile")).toEqual({ section: "Account", name: "Settings" });
   });

@@ -1030,11 +1030,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     The rule is the label's own `::after`, so the markup stays one text node. */}
                 {/* Dashboard has no heading (25 Oct): one row on its own, as on the rail */}
                 {sec.noHeading ? null : (
-                  <div className="ws-glabel">
-                    {sec.label}
-                    {/* sidebar materials v1: a Pro SECTION's tag sits after its heading, and its rows carry none */}
-                    {sec.pro && proLocked.has(sec.pro) ? <span className="ws-qpro ws-gpro" data-shell="pro" aria-label="Pro">PRO</span> : null}
-                  </div>
+                  /* shell nav v3: no section carries a Pro mark — the marks are the rows' own */
+                  <div className="ws-glabel">{sec.label}</div>
                 )}
                 {(sec.children ?? []).map((ch) => {
                   const on = hit?.section === sec.id && hit?.child === ch.id;

@@ -70,9 +70,9 @@ describe("⚠️ the TASKS section renders — same grammar, two rows, in order"
      left the nav: Settings is the foot's gear again (reversing P5, Nick's call). */
   it("the groups run in the work's order — Dashboard first on its own, Tasks last, no Account", () => {
     const labels = [...html.matchAll(/ws-glabel[^>]*>([^<]+)</g)].map((m) => m[1]);
-    /* Submission packages v26 (25 Oct): the Materials group is "Your book" now. Dashboard sits on its own with NO
-       heading (Nick's ruling, 25 Oct): the "Workspace" heading is gone, and Dashboard's row comes before every heading. */
-    expect(labels).toEqual(["Queries", "Agents", "Your book", "Materials", "Tasks", "Founding writer"]); /* sidebar materials v1, 6 Nov; Your notes v1 (9 Nov): Founding writer joins as the last section, after Tasks — its one page lives in More */
+    /* Dashboard sits on its own with NO heading (Nick's ruling, 25 Oct), and its row comes before every heading.
+       Shell nav v3 (13 Nov): five sections — no "Your book", no "Founding writer". */
+    expect(labels).toEqual(["Queries", "Agents", "Materials", "Tasks"]);
     expect(html).toContain(">Dashboard<");
     expect(html.indexOf(">Dashboard<")).toBeLessThan(html.indexOf("ws-glabel"));
     // the nav renders no Settings row; the foot's gear is the door (SB5)

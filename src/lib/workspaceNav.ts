@@ -57,20 +57,21 @@ const TASKS_ICON: Record<string, string> = {
 };
 
 export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
-  /* ⚠️ SIDEBAR MATERIALS v1 (6 Nov): six sections — Dashboard · Queries · Agents · Your book · Materials · Tasks.
-     The rail, the full sidebar, the folder tab, the ⌘K palette and the crumbs all read this one list. There is no
-     Calendar (retired 29 Oct). Each section names its own icon for the rail's section row. */
+  /* ⚠️ SHELL NAV v3 (13 Nov; ref design-refs/shell-nav-v3.html): FIVE sections — Dashboard · Queries · Agents ·
+     Materials · Tasks — and they are the rail's five rows, one per section. The rail, the full sidebar, the folder
+     tabs, the ⌘K palette and the crumbs all read this one list. "Your book" is gone (Manuscripts and Versions are the
+     last two pages of Materials) and "Founding writer" is gone from the nav (/your-notes is reached from the account
+     menu, the feedback pop-up and the full sidebar's "See your notes" link). No page changed its address. */
   return [
     {
       id: "workspace",
-      label: "Workspace",
+      label: "Dashboard",
       icon: "dash",
       def: "dash",
-      /* ⚠️ DASHBOARD SITS ON ITS OWN, WITH NO HEADING (Nick's ruling, 25 Oct). The label stays "Workspace" because
-         the folder tab still names the group; the rail names the row by its page. */
+      /* ⚠️ DASHBOARD SITS ON ITS OWN, WITH NO HEADING in the full sidebar (Nick's ruling, 25 Oct). */
       noHeading: true,
       children: [
-        { id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash", rail: true },
+        { id: "dash", label: "Dashboard", path: "/dashboard", icon: "dash" },
       ],
     },
     {
@@ -79,10 +80,9 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       icon: "send",
       def: "q-centre",
       children: [
-        /* ⚠️ A SHORT LABEL IN THE FULL SIDEBAR ONLY (Nick's ruling, 25 Oct; kept 6 Nov): "Queries". `label` is
-           still the page's full name, which the folder tab, the bar, breadcrumbs and the palette read. The rail
-           has its own short label (`railLabel`). */
-        { id: "q-centre", label: "Query Centre", navLabel: "Queries", path: "/queries", icon: "send", rail: true, railLabel: "Queries" },
+        /* ⚠️ A SHORT LABEL IN THE FULL SIDEBAR ONLY (Nick's ruling, 25 Oct): "Queries". `label` is still the page's
+           full name, which the tab strip, breadcrumbs and the palette read. */
+        { id: "q-centre", label: "Query Centre", navLabel: "Queries", path: "/queries", icon: "send" },
         /* Responses v2 (15 Oct): every agent answer for the book in scope */
         { id: "q-responses", label: "Responses", path: "/queries/responses", icon: "replies" },
         { id: "q-analytics", label: "Analytics", path: "/queries/analytics", icon: "chart" },
@@ -94,38 +94,27 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
       icon: "people",
       def: "a-list",
       children: [
-        { id: "a-list", label: "Contact list", path: "/agents", icon: "people", rail: true, railLabel: "Agents" },
+        { id: "a-list", label: "Contact list", path: "/agents", icon: "people" },
         /* Pro (plan rules v1): the Scout — gated by the resolver, and the page by MaterialsLock page="scout" */
         { id: "a-disc", label: "Discover", path: "/agents/discover", icon: "compass", pro: "discover" },
       ],
     },
-    /* ⚠️ "YOUR BOOK" — the manuscript and its versions (sidebar materials v1, 6 Nov). Its id is "book"; until 6 Nov it
-       was "materials", which now names the Materials section below. Stored last-used entries keyed "materials" that
-       name a Your-book page were dropped by the rail's memory, retired with the section cards (sidebar rail v2). */
-    {
-      id: "book",
-      label: "Your book",
-      icon: "library",
-      def: "m-ms",
-      children: [
-        { id: "m-ms", label: "Manuscripts", path: "/manuscripts", icon: "library" },
-        /* Manuscripts v27 Part E — Versions on its own page. Pro, dormant under founding access. */
-        { id: "m-ver", label: "Versions", path: "/manuscripts/versions", icon: "versions", pro: "versions" },
-      ],
-    },
-    /* ⚠️ MATERIALS (sidebar materials v1, 6 Nov): what goes out with a query. The whole SECTION is Pro ("materials"),
-       so its rows carry no Pro mark of their own. Comps and Packages keep their old addresses (/manuscripts/comps,
-       /queries/packages): only the nav regroups. Query letters is new, at /materials/letters. */
+    /* ⚠️ MATERIALS: what goes out with a query, then the book itself. The Pro marks are the PAGES' own (shell nav v3):
+       the three materials pages carry "materials", Versions "versions", Manuscripts none — so a Free writer's rail
+       click on Materials lands on Manuscripts. The section carries no mark. Comps and Packages keep their old
+       addresses (/manuscripts/comps, /queries/packages). `tabLabel` is the tab strip's short name only. */
     {
       id: "materials",
       label: "Materials",
       icon: "mail",
       def: "m-letters",
-      pro: "materials",
       children: [
-        { id: "m-letters", label: "Query letters", path: "/materials/letters", icon: "letter", rail: true, railLabel: "Letters" },
-        { id: "m-comps", label: "Comparable titles", path: "/manuscripts/comps", icon: "books", railLabel: "Comps" },
-        { id: "q-pkg", label: "Submission packages", path: "/queries/packages", icon: "folder", railLabel: "Packages" },
+        { id: "m-letters", label: "Query letters", tabLabel: "Letters", path: "/materials/letters", icon: "letter", pro: "materials" },
+        { id: "q-pkg", label: "Submission packages", tabLabel: "Packages", path: "/queries/packages", icon: "folder", pro: "materials" },
+        { id: "m-comps", label: "Comparable titles", tabLabel: "Comps", path: "/manuscripts/comps", icon: "books", pro: "materials" },
+        /* Manuscripts v27 Part E — Versions on its own page. Pro, dormant under founding access. */
+        { id: "m-ver", label: "Versions", path: "/manuscripts/versions", icon: "versions", pro: "versions" },
+        { id: "m-ms", label: "Manuscripts", tabLabel: "Manuscript", path: "/manuscripts", icon: "library" },
       ],
     },
     /* ⚠️ ITS ROWS ARE `TODO_ROUTES` — the one definition of the To-do pages. The count rides the To-do list row
@@ -140,49 +129,40 @@ export function workspaceSections(input: WorkspaceNavInput): ShellSection[] {
         label: r.label,
         path: r.path,
         icon: TASKS_ICON[r.id],
-        ...(r.id === "list" ? { count: input.todo || undefined, urgent: true as const, rail: true as const, railLabel: "Tasks" } : {}),
+        ...(r.id === "list" ? { count: input.todo || undefined, urgent: true as const } : {}),
       })),
-    },
-    /* ⚠️ YOUR NOTES v1 (9 Nov): the founding writer's record of their notes. Never a rail item: it lives under More ›
-       Founding writer, and the full sidebar's Give feedback card links to it as well. */
-    {
-      id: "founding",
-      label: "Founding writer",
-      icon: "notes",
-      def: "notes",
-      children: [
-        { id: "notes", label: "Your notes", path: "/your-notes", icon: "notes" },
-      ],
     },
     /* There is no Account section: Settings is the account's own furniture, reached from the foot. */
   ];
 }
 
-/* ══ SIDEBAR RAIL v2 (6 Nov): five places and More ══════════════════════════════════════════════════════════════
-   The rail draws the pages flagged `rail`, in nav order; More holds every other page, grouped by its section. The
-   section cards, their trays and the per-section last-used memory of rail v1 are deleted. */
+/* ══ SHELL NAV v3 (13 Nov): the rail is PLACES — one row per section ═══════════════════════════════════════════
+   Rail v2's per-page `rail` flags, its More panel (moreGroups, morePageFor) and its short rail labels are deleted. */
 
-/** The rail's own items, in nav order. */
-export function railItems(sections: readonly ShellSection[]): ShellChild[] {
-  return sections.flatMap((s) => (s.children ?? []).filter((c) => c.rail));
+/** A page's name in the tab strip. Absent `tabLabel` = `label`. */
+export const tabLabelOf = (c: Pick<ShellChild, "label" | "tabLabel">): string => c.tabLabel ?? c.label;
+
+/** True when this page is Pro and the account is not entitled to it. */
+export const isPageLocked = (c: Pick<ShellChild, "pro">, locked: ReadonlySet<string>): boolean => !!c.pro && locked.has(c.pro);
+
+/**
+ * Where a rail row goes: the section's `def` page, or — when that page is locked for this account — the first page
+ * of the section that is not. No per-section memory of the last page. A section whose every page is locked still
+ * goes to `def` (locked pages are shown locked, never hidden).
+ */
+export function railTargetFor(section: ShellSection, locked: ReadonlySet<string>): string {
+  const kids = section.children ?? [];
+  const def = kids.find((c) => c.id === section.def) ?? kids[0];
+  if (!def) return section.path ?? "/dashboard";
+  if (!isPageLocked(def, locked)) return def.path;
+  return (kids.find((c) => !isPageLocked(c, locked)) ?? def).path;
 }
 
-/** The More panel's groups: each section's pages that are not on the rail, in nav order; empty sections left out. */
-export function moreGroups(sections: readonly ShellSection[]): { section: ShellSection; pages: ShellChild[] }[] {
-  return sections
-    .map((section) => ({ section, pages: (section.children ?? []).filter((c) => !c.rail) }))
-    .filter((g) => g.pages.length > 0);
-}
-
-/** A page's short rail name. */
-export const railLabelOf = (c: Pick<ShellChild, "label" | "railLabel">): string => c.railLabel ?? c.label;
-
-/** The More page you are on (lights More, which takes its short name), or null. */
-export function morePageFor(sections: readonly ShellSection[], hit: ShellHit | null): ShellChild | null {
+/** The section whose rail row is lit: the current page's own section, or null (settings, /your-notes, Help…). */
+export function railSectionFor(sections: readonly ShellSection[], hit: ShellHit | null): string | null {
   if (!hit?.child) return null;
   const sec = sections.find((s) => s.id === hit.section);
-  const ch = sec?.children?.find((c) => c.id === hit.child);
-  return ch && !ch.rail ? ch : null;
+  return sec && (sec.children ?? []).some((c) => c.id === hit.child) ? sec.id : null;
 }
 
 /**

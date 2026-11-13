@@ -110,12 +110,6 @@
     font: 600 9px/15px var(--font-mono, "JetBrains Mono", monospace); text-align: center;
     box-shadow: 0 0 0 2px var(--ink-shell);
   }
-  /* the Pro tag: small, sentence case, outlined in cream so it never competes with the terracotta */
-  .wsr-pro {
-    position: absolute; top: 0; left: calc(50% + 10px); padding: 0 4px; height: 13px; border-radius: 4px;
-    font: 600 8.5px/13px "Inter", system-ui, sans-serif; letter-spacing: 0.02em; color: rgba(var(--ink-cream-rgb), 0.78);
-    background: var(--ink-shell); box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.32);
-  }
 
   /* ── the foot: Feedback, then the avatar ── */
   .wsr-fb {
@@ -194,7 +188,6 @@
      no nav scroll (Nick, 25 Oct): the e2e lock SR5 measures it. The rail's own rows are untouched. */
   .ws-panel .ws-pin .ws-glabel, .ws-panel .ws-pin .ws-nav > .ws-ni:first-child + .ws-glabel { margin: 13px 10px 5px; }
   .ws-panel .ws-pin .ws-ni { height: 32px; }
-  .ws-panel .ws-pin .ws-gpro { margin-left: 8px; letter-spacing: 0.1em; }
   .ws-panel .ws-pin .ws-ni { color: rgba(var(--ink-cream-rgb), 0.58); }
   .ws-panel .ws-pin .ws-ni .ws-ic { opacity: 0.5; transition: opacity 0.12s ease; }
   .ws-panel .ws-pin .ws-ni .ws-ic svg { transition: stroke-width 0.18s ease; }
