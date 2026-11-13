@@ -14,9 +14,14 @@
   /* the v24 placement rule (`.clv-group[data-v24] > .cl24-hd`, 0-3-0) makes the header a flex column; the open header
      is the Query Centre's grid, restated here at 0-5-0 with the ref's columns: a 200px drawing, the title block, List
      health at its own width */
+  /* header v2.1 — the list's columns, stated once for the Contact list: the filter column and the gap after it (the list's
+     `.qc153-cl`, 268px and 28px; the Query Centre's header uses the same two). The header takes them, so the headline
+     starts on the list card's left edge and the Scout on the filter panel's. */
+  .cl27 { --cl27-filter-col: 268px; --cl27-filter-gap: 28px; }
   .clv-group[data-v24][data-v27] > .cl24-hd.cl27-hd {
-    /* header v2 — the drawing is 160 wide (was 200) */
-    display: grid; grid-template-columns: 160px minmax(0, 1fr) auto; align-items: center; column-gap: 34px; padding: 0 0 4px;
+    /* header v2 — the drawing is 160 wide (was 200), left-aligned in the filter column (v2.1) */
+    display: grid; grid-template-columns: var(--cl27-filter-col) minmax(0, 1fr) auto; align-items: center;
+    column-gap: var(--cl27-filter-gap); padding: 0 0 4px;
     /* Phase 3 — 30px under the scroller's top, where the Query Centre's header sits (and the ref's); v24's was 24 */
     margin-top: 30px;
   }
