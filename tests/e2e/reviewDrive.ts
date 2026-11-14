@@ -80,8 +80,10 @@ export async function answerStrip(r: Locator) {
     const tile = order ? r.locator('[data-step="sent"]') : r.locator(".o9-stop.is-miss").first();
     const step = await tile.getAttribute("data-step");
     await tile.click();
-    if (step === "sent") await r.locator('[data-strip="waive"]').click();
-    else { await r.locator('[data-strip="date"]').fill("today"); await r.locator('[data-strip="save"]').click(); }
+    /* two-door import v1: the popover's buttons can sit under the review's sticky bar — pressed on the element */
+    const press = (sel: string) => r.locator(sel).evaluate((e) => (e as HTMLElement).click());
+    if (step === "sent") await press('[data-strip="waive"]');
+    else { await r.locator('[data-strip="date"]').fill("today"); await press('[data-strip="save"]'); }
   }
   await confirm.click();
 }

@@ -204,6 +204,8 @@
   font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .8);
 }
 @media (max-width: 1079.98px) { .sf .sf-tiles.sf-doors { grid-template-columns: minmax(0, 1fr); } }
+/* brand.tsx names a bare <span> as sans on every route: the line's sentence inherits the serif */
+.sf .sf-quiet > span { font-family: inherit; }
 
 /* ── the Smart Import hand-off: the card, and what happens next beside it ── */
 .sf .o9-conf { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr); gap: 28px; align-items: start; max-width: 1140px; }

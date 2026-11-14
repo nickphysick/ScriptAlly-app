@@ -46,6 +46,8 @@
   margin: 24px 0 0; padding: 14px 18px; border-radius: 12px; background: #f4efe9; /* the set-up frame's --sf-note, which is scoped to .sf and does not reach here */
   font: 400 15.5px/1.45 var(--sp-serif); color: var(--impg-ink72);
 }
+/* brand.tsx names a bare <span> as sans on every route: the line's sentence inherits the serif */
+.impg .impg-quiet > span { font-family: inherit; }
 .impg .impg-link { background: none; border: 0; padding: 0; font: inherit; color: var(--ink-on-light); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .impg .impg-foot { margin: 28px 0 0; max-width: 560px; font: 400 15.5px/1.5 var(--sp-serif); color: var(--impg-ink72); }
 
