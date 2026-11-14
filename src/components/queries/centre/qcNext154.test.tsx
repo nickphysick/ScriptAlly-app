@@ -9,9 +9,10 @@ import { card154, row154 } from "./qc154.fixture";
 
 const DAY = 86_400_000;
 const NOW = new Date(2026, 10, 8, 12).getTime();
-const nextBox = (h: string) => h.match(/<div[^>]*data-k="next"[\s\S]*?<\/button><\/span><\/div>/)?.[0] ?? "";
-/** the box at rest: the hover overlay taken out */
-const atRest = (box: string) => box.replace(/<span class="qc154-act"[\s\S]*?<\/button><\/span>/, "");
+const nextBox = (h: string) => h.match(/<div[^>]*data-k="next"[\s\S]*?class="qc1561-tip"[^>]*>[^<]*<\/span><\/button><\/div>/)?.[0] ?? "";
+/** the box at rest: the hover action taken out */
+/* v156.1: the action is the arrow chip (a button in the box), not v154's overlay */
+const atRest = (box: string) => box.replace(/<button[^>]*class="qc1561-chip"[\s\S]*?<\/button>/, "");
 
 describe("the v154 Next box", () => {
   it("overdue (Nudge due): Next · Response overdue · Send nudge now; no bar and no button at rest", () => {
@@ -25,7 +26,8 @@ describe("the v154 Next box", () => {
     expect(rest).not.toContain("qc154-bar");
     expect(rest).not.toContain("<button");
     /* the nudge is the hover's alone */
-    expect(box).toContain("Nudge →");
+    /* v156.1: the hover action is the arrow chip, named "Nudge" */
+    expect(box).toContain('aria-label="Nudge"');
   });
 
   it("waiting, no reminder: Reply expected by · the date · the bar, and nothing under the bar", () => {

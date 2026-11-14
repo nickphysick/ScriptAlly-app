@@ -4,8 +4,8 @@
  *
  * Query Centre v156 §3 (design-refs/query-centre-v156.html) — THE COLLAPSED HEADER. Once the navy panel has scrolled
  * out from under the top of the scroll area, a slim 60px bar takes its place: "26 queries sent" and "for Murphy's Day
- * Out" on the left; "2 of 3 this week", the streak (hidden at 0) and a navy "+ Log a query" on the right. "Record a
- * response" is not in it.
+ * Out" on the left; on the right (v156.1 §1) the flame (none without a streak), "6 week streak", its plain line, and a
+ * navy "+ Log a query". "Record a response" is not in it.
  *
  * ⚠️ THE CONTACT LIST'S SLIM ROW'S READER AND OFFSET (shell/slimReveal, extracted from ContactSlimRow): the same moment
  *    (the panel's foot passing under the bar's line) and the same `--pin-cover` written on the list's columns
@@ -17,11 +17,12 @@
  * ⚠️ HIDDEN IS INERT: `inert` and `aria-hidden` while it is not shown, so its button is not in the Tab order.
  */
 import React, { useLayoutEffect, useRef } from "react";
-import { streakWords, type WeekGoal154 } from "../../../lib/qc154goal";
+import type { WeekGoal154 } from "../../../lib/qc154goal";
+import { streakLead } from "../../../lib/qc1561";
 import { useSlimReveal } from "../../shell/slimReveal";
 import { FIRST_TITLE_155 } from "../../../lib/qc155";
 import { sentTitle } from "./QcHeader1531";
-import { FLAME_156 } from "./QcLine156";
+import { FLAME_1561 } from "./QcLine156";
 import "./qcv156.css";
 
 const header = (row: HTMLElement) => row.parentElement?.querySelector<HTMLElement>(":scope > [data-qc1531='header']");
@@ -36,6 +37,7 @@ export const QcSlim156: React.FC<{
   logDisabled?: boolean;
 }> = ({ sent, ms, goal, onLog, logDisabled = false }) => {
   const ref = useRef<HTMLDivElement>(null);
+  const lead = goal ? streakLead(goal) : null;
   const shown = useSlimReveal(ref, { header, cover, extra: 12 });
   /* the ground's reach: from the page content's edges out to the scroller's (the sheet's) */
   useLayoutEffect(() => {
@@ -61,10 +63,13 @@ export const QcSlim156: React.FC<{
         {ms ? <i data-qc156="slim-for">for {ms}</i> : null}
       </p>
       <div className="qc156-sa">
-        {goal ? <>
-          <span className="qc156-sw" data-qc156="slim-week"><b>{goal.now} of {goal.goal}</b><em>this week</em></span>
-          {!goal.empty && goal.streak > 0 ? <span className="qc156-sk" data-qc156="slim-streak">{FLAME_156}{streakWords(goal.streak)}</span> : null}
-        </> : null}
+        {/* v156.1 §1 — the streak leads here too: the flame (none without a streak), the streak, its plain line */}
+        {lead ? (
+          <span className="qc1561-sw" data-qc156="slim-week">
+            {lead.flame ? <FLAME_1561 className="qc1561-sfl" width={17} height={22} /> : null}
+            <b data-qc156="slim-streak">{lead.title}</b><em data-qc156="slim-line">{lead.line}</em>
+          </span>
+        ) : null}
         <button type="button" className="qc156-sb" data-qc156="slim-log" disabled={logDisabled} onClick={onLog}>+ Log a query</button>
       </div>
     </div>

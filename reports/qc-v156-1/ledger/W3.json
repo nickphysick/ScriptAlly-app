@@ -1,0 +1,252 @@
+[
+ {
+  "name": "1920: chips on the page — Answer the offer, Send your partial, Send your revision, Send your full, Nudge, Open the card, Close it",
+  "ok": true,
+  "got": "7"
+ },
+ {
+  "name": "1920 offer:Answer the offer: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1920 offer:Answer the offer: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1920 offer:Answer the offer: its accessible name is the action's label",
+  "ok": true,
+  "got": "Answer the offer"
+ },
+ {
+  "name": "1920 sent:Send your partial: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1920 sent:Send your partial: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1920 sent:Send your partial: its accessible name is the action's label",
+  "ok": true,
+  "got": "Send your partial"
+ },
+ {
+  "name": "1920 sent:Send your revision: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1920 sent:Send your revision: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1920 sent:Send your revision: its accessible name is the action's label",
+  "ok": true,
+  "got": "Send your revision"
+ },
+ {
+  "name": "1920 sent:Send your full: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1920 sent:Send your full: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1920 sent:Send your full: its accessible name is the action's label",
+  "ok": true,
+  "got": "Send your full"
+ },
+ {
+  "name": "1920 nudge:Nudge: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1920 nudge:Nudge: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1920 nudge:Nudge: its accessible name is the action's label",
+  "ok": true,
+  "got": "Nudge"
+ },
+ {
+  "name": "1920 open:Open the card: the Next box keeps its fill on hover (rgb(251, 249, 245))",
+  "ok": true,
+  "got": "rgb(251, 249, 245) → rgb(251, 249, 245)"
+ },
+ {
+  "name": "1920 open:Open the card: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(251, 249, 245)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1920 open:Open the card: its accessible name is the action's label",
+  "ok": true,
+  "got": "Open the card"
+ },
+ {
+  "name": "1920 close:Close it: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1920 close:Close it: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1920 close:Close it: its accessible name is the action's label",
+  "ok": true,
+  "got": "Close it"
+ },
+ {
+  "name": "1920: Tab reaches the chip; focused, it shows with a ring and its tooltip",
+  "ok": true,
+  "got": "chip {\"op\":\"1\",\"ring\":\"solid\",\"tip\":\"1\"}"
+ },
+ {
+  "name": "1920: clicking \"Answer the offer\" runs the action — the card opens on its composer",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "1920: \"Open the card\" opens the card, with no composer",
+  "ok": true,
+  "got": "{\"open\":true,\"comp\":false}"
+ },
+ {
+  "name": "1440: chips on the page — Answer the offer, Send your partial, Send your revision, Send your full, Nudge, Open the card, Close it",
+  "ok": true,
+  "got": "7"
+ },
+ {
+  "name": "1440 offer:Answer the offer: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1440 offer:Answer the offer: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1440 offer:Answer the offer: its accessible name is the action's label",
+  "ok": true,
+  "got": "Answer the offer"
+ },
+ {
+  "name": "1440 sent:Send your partial: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1440 sent:Send your partial: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1440 sent:Send your partial: its accessible name is the action's label",
+  "ok": true,
+  "got": "Send your partial"
+ },
+ {
+  "name": "1440 sent:Send your revision: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1440 sent:Send your revision: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1440 sent:Send your revision: its accessible name is the action's label",
+  "ok": true,
+  "got": "Send your revision"
+ },
+ {
+  "name": "1440 sent:Send your full: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1440 sent:Send your full: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1440 sent:Send your full: its accessible name is the action's label",
+  "ok": true,
+  "got": "Send your full"
+ },
+ {
+  "name": "1440 nudge:Nudge: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1440 nudge:Nudge: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1440 nudge:Nudge: its accessible name is the action's label",
+  "ok": true,
+  "got": "Nudge"
+ },
+ {
+  "name": "1440 open:Open the card: the Next box keeps its fill on hover (rgb(251, 249, 245))",
+  "ok": true,
+  "got": "rgb(251, 249, 245) → rgb(251, 249, 245)"
+ },
+ {
+  "name": "1440 open:Open the card: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(251, 249, 245)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1440 open:Open the card: its accessible name is the action's label",
+  "ok": true,
+  "got": "Open the card"
+ },
+ {
+  "name": "1440 close:Close it: the Next box keeps its fill on hover (rgb(246, 238, 232))",
+  "ok": true,
+  "got": "rgb(246, 238, 232) → rgb(246, 238, 232)"
+ },
+ {
+  "name": "1440 close:Close it: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow",
+  "ok": true,
+  "got": "{\"rest\":\"0\",\"bg\":\"rgb(246, 238, 232)\",\"op\":\"1\",\"w\":32,\"h\":32,\"r\":8,\"bt\":8,\"fill\":\"rgb(42, 58, 82)\",\"radius\":\"50%\",\"shadow\":\"rgba(28, 19, 15, 0.45) 0px 6px 14px -6px\",\"overlay\":false}"
+ },
+ {
+  "name": "1440 close:Close it: its accessible name is the action's label",
+  "ok": true,
+  "got": "Close it"
+ },
+ {
+  "name": "1440: Tab reaches the chip; focused, it shows with a ring and its tooltip",
+  "ok": true,
+  "got": "chip {\"op\":\"1\",\"ring\":\"solid\",\"tip\":\"1\"}"
+ },
+ {
+  "name": "1440: clicking \"Answer the offer\" runs the action — the card opens on its composer",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "1440: \"Open the card\" opens the card, with no composer",
+  "ok": true,
+  "got": "{\"open\":true,\"comp\":false}"
+ }
+]
