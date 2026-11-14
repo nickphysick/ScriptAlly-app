@@ -210,6 +210,11 @@ const readOverflow = (page: Page, root: string) => page.evaluate((rs) => {
     titleOverflow: m ? Math.max(0, t.right - m.right, m.left - t.left) : null,
     titleClipped: h1 ? h1.scrollWidth > h1.clientWidth + 1 || h1.scrollHeight > h1.clientHeight + 1 : null,
     headerClipped: hd ? hd.scrollHeight > hd.clientHeight + 1 : null,
+    /* what reaches past the sheet's right edge (the widest three), so a red names its cause */
+    past: [...sc.querySelectorAll<HTMLElement>("*")].map((e) => ({ e, r: e.getBoundingClientRect().right }))
+      .filter((x) => x.r > sc.getBoundingClientRect().left + sc.clientWidth + 1 && x.e.getBoundingClientRect().width > 0)
+      .sort((a, b) => b.r - a.r).slice(0, 3)
+      .map((x) => `${x.e.tagName.toLowerCase()}.${String(x.e.className).split(" ").slice(0, 2).join(".")} → ${Math.round(x.r - (sc.getBoundingClientRect().left + sc.clientWidth))}px${x.e.closest(".wsnh") ? " (in the header)" : ""}`),
   };
 }, root);
 
