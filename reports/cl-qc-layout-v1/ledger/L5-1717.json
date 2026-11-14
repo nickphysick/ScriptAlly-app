@@ -1,0 +1,37 @@
+[
+ {
+  "name": "at least two genres with agents on the harness",
+  "ok": true,
+  "got": "literary-fiction:29 thriller:22 crime:1 suspense:1"
+ },
+ {
+  "name": "literary-fiction alone shows its count",
+  "ok": true,
+  "got": "29 vs 29"
+ },
+ {
+  "name": "counts update: All agents is the list under the genre",
+  "ok": true,
+  "got": "All agents 29"
+ },
+ {
+  "name": "literary-fiction OR thriller: at least either, at most both",
+  "ok": true,
+  "got": "A 29 · B 22 · A∪B 51"
+ },
+ {
+  "name": "every row shown carries one of the two genres",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "unticking both restores the total",
+  "ok": true,
+  "got": "53 of 53"
+ },
+ {
+  "name": "\"your book\" shows on every genre the rows tick, and on no other",
+  "ok": true,
+  "got": "tagged [thriller] · ticked in rows [thriller]"
+ }
+]

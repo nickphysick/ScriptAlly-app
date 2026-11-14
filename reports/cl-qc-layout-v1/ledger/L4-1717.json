@@ -1,0 +1,52 @@
+[
+ {
+  "name": "the population is not empty",
+  "ok": true,
+  "got": "53 agents, 53 rows"
+ },
+ {
+  "name": "you: its count = the list it shows",
+  "ok": true,
+  "got": "view 7 · bar 7 · rows 7"
+ },
+ {
+  "name": "you: one view at a time",
+  "ok": true,
+  "got": "1 checked"
+ },
+ {
+  "name": "ready: its count = the list it shows",
+  "ok": true,
+  "got": "view 35 · bar 35 · rows 35"
+ },
+ {
+  "name": "ready: one view at a time",
+  "ok": true,
+  "got": "1 checked"
+ },
+ {
+  "name": "wait: its count = the list it shows",
+  "ok": true,
+  "got": "view 7 · bar 7 · rows 7"
+ },
+ {
+  "name": "wait: one view at a time",
+  "ok": true,
+  "got": "1 checked"
+ },
+ {
+  "name": "missing: its count = the list it shows",
+  "ok": true,
+  "got": "view 52 · bar 52 · rows 52"
+ },
+ {
+  "name": "missing: one view at a time",
+  "ok": true,
+  "got": "1 checked"
+ },
+ {
+  "name": "a view, then All agents, restores the total",
+  "ok": true,
+  "got": "53 of 53"
+ }
+]
