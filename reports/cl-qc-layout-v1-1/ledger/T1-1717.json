@@ -1,0 +1,102 @@
+[
+ {
+  "name": "view label: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 15.5px 400 · CL \"Source Serif 4\" 15.5px 400"
+ },
+ {
+  "name": "view label (on): face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 15.5px 700 · CL \"Source Serif 4\" 15.5px 700"
+ },
+ {
+  "name": "view count: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Special Elite\" 14px 400 · CL \"Special Elite\" 14px 400"
+ },
+ {
+  "name": "sub-heading (Refine): face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Special Elite\" 16px 400 · CL \"Special Elite\" 16px 400"
+ },
+ {
+  "name": "sub-heading note: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 12.5px 600 · CL \"Source Serif 4\" 12.5px 600"
+ },
+ {
+  "name": "sub-label: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 14px 400 · CL \"Source Serif 4\" 14px 400"
+ },
+ {
+  "name": "tick-box label: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 15px 400 · CL \"Source Serif 4\" 15px 400"
+ },
+ {
+  "name": "tick-box count: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Special Elite\" 13.5px 400 · CL \"Special Elite\" 13.5px 400"
+ },
+ {
+  "name": "More filters: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 15px 700 · CL \"Source Serif 4\" 15px 700"
+ },
+ {
+  "name": "foot showing: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 14px 400 · CL \"Source Serif 4\" 14px 400"
+ },
+ {
+  "name": "foot export: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 14px 600 · CL \"Source Serif 4\" 14px 600"
+ },
+ {
+  "name": "bar count: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 15px 400 · CL \"Source Serif 4\" 15px 400"
+ },
+ {
+  "name": "Find placeholder: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 15.5px 400 · CL \"Source Serif 4\" 15.5px 400"
+ },
+ {
+  "name": "Find input: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 15.5px 400 · CL \"Source Serif 4\" 15.5px 400"
+ },
+ {
+  "name": "chip label (Sort): face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 14.5px 600 · CL \"Source Serif 4\" 14.5px 600"
+ },
+ {
+  "name": "chip label (Group): face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Source Serif 4\" 14.5px 600 · CL \"Source Serif 4\" 14.5px 600"
+ },
+ {
+  "name": "slim title: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Special Elite\" 24px 400 · CL \"Special Elite\" 24px 400"
+ },
+ {
+  "name": "slim subline: the Query Centre's rule (it draws none on the harness)",
+  "ok": true,
+  "got": "CL \"Source Serif 4\" 16px 400 italic"
+ },
+ {
+  "name": "slim button: face, size and weight = the Query Centre's",
+  "ok": true,
+  "got": "QC \"Special Elite\" 16px 400 · CL \"Special Elite\" 16px 400"
+ },
+ {
+  "name": "the Contact list's own nodes: your book serif, List health typewriter + serif, the ruled line serif, the slim ring's words the streak type",
+  "ok": true,
+  "got": "{\"yourBook\":\"\\\"Source Serif 4\\\"\",\"healthTitle\":\"\\\"Special Elite\\\"\",\"healthMissing\":\"\\\"Source Serif 4\\\"\",\"ruled\":\"\\\"Source Serif 4\\\"\",\"slimHealth\":\"\\\"Special Elite\\\"\",\"slimHealthWords\":\"\\\"Source Serif 4\\\"\"}"
+ }
+]

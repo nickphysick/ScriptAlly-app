@@ -1,0 +1,32 @@
+[
+ {
+  "name": "left 22px corner: outside the curve is the page's ground (ΔE ≤ 2), inside it white",
+  "ok": true,
+  "got": "outside ΔE 0.00, inside ΔE 0.00"
+ },
+ {
+  "name": "left 13px frame corner: the arc's pixels are its pixels at rest (ΔE ≤ 3), white outside it",
+  "ok": true,
+  "got": "arc ΔE 0.00, outside it ΔE 0.00"
+ },
+ {
+  "name": "right 22px corner: outside the curve is the page's ground (ΔE ≤ 2), inside it white",
+  "ok": true,
+  "got": "outside ΔE 0.00, inside ΔE 0.00"
+ },
+ {
+  "name": "right 13px frame corner: the arc's pixels are its pixels at rest (ΔE ≤ 3), white outside it",
+  "ok": true,
+  "got": "arc ΔE 0.00, outside it ΔE 0.00"
+ },
+ {
+  "name": "the pinned top (its ring row, the white top and the frame's top line, corners included) matches the top at rest (≤ 0.5%)",
+  "ok": true,
+  "got": "15/15228 px = 0.099%"
+ },
+ {
+  "name": "the pinned heading row matches the row at rest (≤ 0.5%)",
+  "ok": true,
+  "got": "0/53298 px = 0.000%"
+ }
+]

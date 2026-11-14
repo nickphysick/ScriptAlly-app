@@ -1,0 +1,1057 @@
+
+> react-example@0.0.0 e2e:emu
+> node scripts/emu.mjs e2e tests/e2e/clq11.measure.ts --reporter=line
+
+[heavy-slot] sweep (on acquire): nothing left over.
+vite v6.4.6 building for emulator...
+transforming...
+✓ 4034 modules transformed.
+../../../../../../../Users/nickphysick/ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js (14422:32): Use of eval in "../../../../../../../Users/nickphysick/ScriptAlly-app/node_modules/lottie-web/build/player/lottie.js" is strongly discouraged as it poses security risks and may cause issues with minification.
+rendering chunks...
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/auth/dist/esm/index.esm.js is dynamically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/accountEmail.ts but also statically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/AccountSettings.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/accountAuthFacts.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/authActions.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/db.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/firebase.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/firestore/dist/esm/index.esm.js is dynamically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/events.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/foundingNotes.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/foundingStats.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/qc152Write.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/yourNotesStore.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/yourNotesStore.ts but also statically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/EditQueryDrawer.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/ImportCsv.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/Queries.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/RecordResponseFocusForm.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/agents/card/useAgentNotes.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/emailImport/PasteEmailFlow.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/letters/LetterDesk.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/letters/QueryLettersPage.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/manuscripts/ComparableTitlesPage.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/manuscripts/v12/Msv21Dialogs.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/manuscripts/v28/MsEditDrawer.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/packages/v26/usePk26Model.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/packages/v4/usePackagesModel.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/queries/centre/LogStagesHost.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/queries/phone/EditQueryPhone.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/queryActions/journeys/LogJourney.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/queryActions/journeys/OfferJourney.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/todo/useDockActivity.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/todo/ws/WsBatch54.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/todo/ws/WsPreview.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/todo/ws/wsFlows.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/activityWrite.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/agentCardSave.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/agentCardSnapshot.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/db.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/emailImportCommit.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/entryDeleteWrite.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/firebase.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/importDraft.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/importEvent.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/manuscriptWrite.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/nudgeUndo.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/nudgeWrite.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/practiceQuery.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/qc1522Write.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/qc152Write.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/queryActions/closeSave.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/queryActions/respondSave.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/queryActions/sendBy.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/queryActions/sentCorrect.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/queryActions/snapshot.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/queryActions/stepSaves.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/recomputeQuery.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/recordResponse.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/saveAgentEdits.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/saveQueryEdits.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/scoutStore.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/seedCommunityAgents.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/firebase.ts is dynamically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/shell/FeedbackDock.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/accountEmail.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/events.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/foundingNotes.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/foundingStats.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/yourNotesStore.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/yourNotesStore.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/marketing/ContactPage.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/marketing/appCheck.ts but also statically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/AccountSettings.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/EditQueryDrawer.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/ImportCsv.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/Queries.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/RecordResponseFocusForm.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/agents/AgentList.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/agents/card/AgentCardHost.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/agents/card/HostAgentCard.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/agents/card/useAgentNotes.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/agents/contact/useHkFixes.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/emailImport/PasteEmailFlow.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/queries/centre/LogStagesHost.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/queries/phone/EditQueryPhone.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/queryActions/journeys/LogJourney.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/queryActions/journeys/OfferJourney.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/todo/useDockActivity.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/todo/ws/WsPreview.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/accountAuthFacts.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/agentCardSave.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/agentCardSnapshot.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/authActions.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/db.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/emailImportCommit.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/entryDeleteWrite.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/importDraft.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/qc152Write.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/queryActions/respondSave.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/queryActions/snapshot.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/queryActions/stepSaves.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/recomputeQuery.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/recordResponse.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/scoutStore.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/seedCommunityAgents.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/smartImportCommit.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/storage/dist/esm/index.esm.js is dynamically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/shell/FeedbackDock.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/firebase.ts but also statically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/db.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/shell/AppShell.tsx is dynamically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/onboarding/HandoffNav.tsx but also statically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/App.tsx, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/firebase/functions/dist/esm/index.esm.js is dynamically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/components/help/HelpArticlePage.tsx, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/accountEmail.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/authActions.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/inviteCode.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/sendFeedback.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/yourNotesStore.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/marketing/ContactPage.tsx but also statically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/aiCallable.ts, dynamic import will not move module into another chunk.
+
+[plugin vite:reporter] 
+(!) /Users/nickphysick/ScriptAlly-app/node_modules/xlsx/xlsx.mjs is dynamically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/importReadRoute.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/templateFile.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/templateImport.ts but also statically imported by /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/sheetText.ts, /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/src/lib/smartImport.ts, dynamic import will not move module into another chunk.
+
+computing gzip size...
+dist-emu/assets/gu-SbvrH0uZ.svg                        4.19 kB │ gzip:     1.76 kB
+dist-emu/assets/gu-Di1JYREk.svg                        4.33 kB │ gzip:     1.84 kB
+dist-emu/assets/sz-D39eIL5d.svg                        4.63 kB │ gzip:     1.92 kB
+dist-emu/assets/sz-qxMwa2gs.svg                        4.66 kB │ gzip:     1.92 kB
+dist-emu/assets/kg-B0FsxZiL.svg                        4.74 kB │ gzip:     1.92 kB
+dist-emu/assets/kg-CjfitMyT.svg                        4.79 kB │ gzip:     1.95 kB
+dist-emu/assets/gq-Cag8QTk2.svg                        4.94 kB │ gzip:     2.02 kB
+dist-emu/assets/gq-CPnMO1hT.svg                        5.07 kB │ gzip:     2.12 kB
+dist-emu/assets/zm-D8B-0kdx.svg                        5.31 kB │ gzip:     2.25 kB
+dist-emu/assets/nf-DGrQb42O.svg                        5.37 kB │ gzip:     2.37 kB
+dist-emu/assets/zm-BmsW91ne.svg                        5.42 kB │ gzip:     2.27 kB
+dist-emu/assets/cy-bZuP8hmf.svg                        5.47 kB │ gzip:     2.37 kB
+dist-emu/assets/cy-DJKnEFYW.svg                        5.51 kB │ gzip:     2.42 kB
+dist-emu/assets/nf-Dl00mlk2.svg                        5.56 kB │ gzip:     2.46 kB
+dist-emu/assets/ki-p_fAQGbS.svg                        5.63 kB │ gzip:     1.64 kB
+dist-emu/assets/ki-fuIMkEYQ.svg                        5.81 kB │ gzip:     1.70 kB
+dist-emu/assets/ms-DxciGbUu.svg                        5.83 kB │ gzip:     2.55 kB
+dist-emu/assets/ms-B-w7hFKu.svg                        5.91 kB │ gzip:     2.50 kB
+dist-emu/assets/zw-CSuuaw9K.svg                        6.17 kB │ gzip:     2.46 kB
+dist-emu/assets/zw-U0m7oJ5e.svg                        6.19 kB │ gzip:     2.49 kB
+dist-emu/index.html                                    6.23 kB │ gzip:     2.21 kB
+dist-emu/assets/br-Dr5rMAMb.svg                        6.75 kB │ gzip:     2.21 kB
+dist-emu/assets/tc-CJHJmJj1.svg                        7.09 kB │ gzip:     2.99 kB
+dist-emu/assets/kz-CwKXYZ8s.svg                        7.09 kB │ gzip:     2.92 kB
+dist-emu/assets/kz-Dkyx6q-p.svg                        7.10 kB │ gzip:     2.91 kB
+dist-emu/assets/tc-dtelpZmc.svg                        7.12 kB │ gzip:     2.99 kB
+dist-emu/assets/kh-BeWfuE30.svg                        7.12 kB │ gzip:     2.72 kB
+dist-emu/assets/kh-BBvObpUS.svg                        7.12 kB │ gzip:     2.74 kB
+dist-emu/assets/br-Cu5YU29T.svg                        7.14 kB │ gzip:     2.41 kB
+dist-emu/assets/li-CHdhvNcr.svg                        7.32 kB │ gzip:     2.96 kB
+dist-emu/assets/li-CMlf0YU8.svg                        7.34 kB │ gzip:     2.97 kB
+dist-emu/assets/xk-Cdz2uTvR.svg                        7.74 kB │ gzip:     3.05 kB
+dist-emu/assets/pt-DZ2ADgIR.svg                        8.00 kB │ gzip:     3.25 kB
+dist-emu/assets/xk-Bj15g7cp.svg                        8.27 kB │ gzip:     3.26 kB
+dist-emu/assets/pt-BTevY6N2.svg                        8.37 kB │ gzip:     3.27 kB
+dist-emu/assets/vi-BSdsyIxY.svg                        8.45 kB │ gzip:     3.55 kB
+dist-emu/assets/vi-BC_zcciE.svg                        8.52 kB │ gzip:     3.59 kB
+dist-emu/assets/eg-YC70hswZ.svg                        8.73 kB │ gzip:     3.55 kB
+dist-emu/assets/eg-DwOkwyQ0.svg                        8.74 kB │ gzip:     3.57 kB
+dist-emu/assets/aw-W0PWLK5p.svg                        9.00 kB │ gzip:     1.67 kB
+dist-emu/assets/gb-wls-CK0XlKT-.svg                    9.01 kB │ gzip:     4.03 kB
+dist-emu/assets/gb-wls-Bxz9hxvX.svg                    9.10 kB │ gzip:     4.14 kB
+dist-emu/assets/im--VPIqfkF.svg                        9.13 kB │ gzip:     3.51 kB
+dist-emu/assets/im-Dd9p-0-T.svg                        9.70 kB │ gzip:     3.81 kB
+dist-emu/assets/sa-DnlyVVKx.svg                        9.85 kB │ gzip:     4.19 kB
+dist-emu/assets/sa-Dh79zbT9.svg                        9.97 kB │ gzip:     4.25 kB
+dist-emu/assets/vg-ClZ-0KpG.svg                       10.00 kB │ gzip:     4.14 kB
+dist-emu/assets/vg-C7xY6pic.svg                       10.02 kB │ gzip:     4.14 kB
+dist-emu/assets/aw-CLCX8uk5.svg                       10.36 kB │ gzip:     1.79 kB
+dist-emu/assets/lk-DUkgV9Tq.svg                       10.72 kB │ gzip:     4.46 kB
+dist-emu/assets/lk-DSQoDxn_.svg                       10.74 kB │ gzip:     4.46 kB
+dist-emu/assets/md-DRlxvNwm.svg                       11.13 kB │ gzip:     2.84 kB
+dist-emu/assets/md-DTi94M3M.svg                       11.24 kB │ gzip:     2.71 kB
+dist-emu/assets/sx-RKKs0ph6.svg                       12.16 kB │ gzip:     4.12 kB
+dist-emu/assets/sx-nDhIaDNb.svg                       12.21 kB │ gzip:     4.30 kB
+dist-emu/assets/search-icon-BO3cLelW.png              12.28 kB
+dist-emu/assets/mt-YDa8zgzO.svg                       12.71 kB │ gzip:     5.37 kB
+dist-emu/assets/ht-DIMg4gti.svg                       13.30 kB │ gzip:     4.75 kB
+dist-emu/assets/bn-B6T3O78g.svg                       13.34 kB │ gzip:     5.64 kB
+dist-emu/assets/pn-BPAlH32D.svg                       13.44 kB │ gzip:     4.93 kB
+dist-emu/assets/ht-pweRl6ZP.svg                       13.46 kB │ gzip:     4.82 kB
+dist-emu/assets/bn-CPQcA8Ol.svg                       13.47 kB │ gzip:     5.68 kB
+dist-emu/assets/pn-DgxdtieE.svg                       13.47 kB │ gzip:     4.98 kB
+dist-emu/assets/eac-CwGQsyAM.svg                      13.63 kB │ gzip:     4.81 kB
+dist-emu/assets/eac-h4QKADRE.svg                      13.64 kB │ gzip:     4.81 kB
+dist-emu/assets/mt-YqzKx9xl.svg                       13.93 kB │ gzip:     5.86 kB
+dist-emu/assets/ir-Q03Mij62.svg                       15.30 kB │ gzip:     2.28 kB
+dist-emu/assets/ir-cCIgaNf6.svg                       15.40 kB │ gzip:     2.24 kB
+dist-emu/assets/sm-BKrUHzrq.svg                       15.54 kB │ gzip:     5.35 kB
+dist-emu/assets/sm-DGBIRFB_.svg                       15.68 kB │ gzip:     5.27 kB
+dist-emu/assets/dm-Cbhezfe1.svg                       15.79 kB │ gzip:     3.08 kB
+dist-emu/assets/py-mNzh0mZC.svg                       16.18 kB │ gzip:     5.77 kB
+dist-emu/assets/package-mark-C48rszvc.png             16.24 kB
+dist-emu/assets/dm-DPPHwW2M.svg                       16.27 kB │ gzip:     3.23 kB
+dist-emu/assets/py-BKi5dxWt.svg                       16.36 kB │ gzip:     5.84 kB
+dist-emu/assets/ni-CcFCSQxm.svg                       17.25 kB │ gzip:     5.36 kB
+dist-emu/assets/ni-BX2WCaNt.svg                       17.29 kB │ gzip:     5.43 kB
+dist-emu/assets/un-Bqg4Cbbh.svg                       18.70 kB │ gzip:     7.44 kB
+dist-emu/assets/af-Bc2fqp73.svg                       18.98 kB │ gzip:     7.68 kB
+dist-emu/assets/un-DabL4p35.svg                       19.00 kB │ gzip:     7.58 kB
+dist-emu/assets/af-C77Rf6cE.svg                       19.19 kB │ gzip:     7.76 kB
+dist-emu/assets/om-nN8zP2Bu.svg                       22.21 kB │ gzip:     4.38 kB
+dist-emu/assets/om-DcqxRdQL.svg                       22.22 kB │ gzip:     4.37 kB
+dist-emu/assets/gb-nir-D4gikpNq.svg                   22.28 kB │ gzip:     5.97 kB
+dist-emu/assets/bm-DvNWWcPM.svg                       22.39 kB │ gzip:     7.17 kB
+dist-emu/assets/bm-BeYgB2z9.svg                       22.46 kB │ gzip:     7.18 kB
+dist-emu/assets/mp-CrOApEqW.svg                       22.57 kB │ gzip:     6.98 kB
+dist-emu/assets/io-BImhNBcd.svg                       22.72 kB │ gzip:     4.11 kB
+dist-emu/assets/dg-DqkWLbnk.svg                       22.72 kB │ gzip:     4.11 kB
+dist-emu/assets/mp-CuaQmCLf.svg                       22.80 kB │ gzip:     7.02 kB
+dist-emu/assets/io-13HOfeJD.svg                       23.02 kB │ gzip:     4.11 kB
+dist-emu/assets/dg-CJPJrjiZ.svg                       23.02 kB │ gzip:     4.11 kB
+dist-emu/assets/ky-BqaZHuhf.svg                       23.37 kB │ gzip:     8.57 kB
+dist-emu/assets/ky-Dpsu1myA.svg                       23.39 kB │ gzip:     8.56 kB
+dist-emu/assets/gb-nir-vEp1ZXy6.svg                   23.92 kB │ gzip:     5.49 kB
+dist-emu/assets/fj-DEAVMg38.svg                       24.10 kB │ gzip:     9.09 kB
+dist-emu/assets/fj-u3dAPoew.svg                       24.14 kB │ gzip:     9.13 kB
+dist-emu/assets/arab-C4CYPgyC.svg                     24.43 kB │ gzip:     8.53 kB
+dist-emu/assets/bt-SxWnbWW0.svg                       24.50 kB │ gzip:     9.95 kB
+dist-emu/assets/arab-C-KgnQEz.svg                     24.59 kB │ gzip:     8.58 kB
+dist-emu/assets/bt-BTo4qm10.svg                       24.78 kB │ gzip:    10.09 kB
+dist-emu/assets/es-ga-D9xG2hYr.svg                    28.21 kB │ gzip:     6.26 kB
+dist-emu/assets/sh-ta-BFo5zkKU.svg                    28.29 kB │ gzip:    10.82 kB
+dist-emu/assets/es-ga-DXhVZ333.svg                    28.34 kB │ gzip:     6.26 kB
+dist-emu/assets/fk-B-RvQ4Hz.svg                       28.49 kB │ gzip:     8.83 kB
+dist-emu/assets/va-s7kyhqIM.svg                       28.66 kB │ gzip:     9.67 kB
+dist-emu/assets/va-B9-hqIE-.svg                       28.72 kB │ gzip:     9.68 kB
+dist-emu/assets/fk-nuUF_Ak3.svg                       28.74 kB │ gzip:     9.20 kB
+dist-emu/assets/sh-ta-CPJublpi.svg                    28.78 kB │ gzip:    11.03 kB
+dist-emu/assets/ec-CaVOFQ3t.svg                       28.78 kB │ gzip:     6.83 kB
+dist-emu/assets/ad-Blhdm5jl.svg                       29.14 kB │ gzip:    10.60 kB
+dist-emu/assets/ec-cwfBJlvF.svg                       29.35 kB │ gzip:     6.72 kB
+dist-emu/assets/as-Dekqy8Of.svg                       30.45 kB │ gzip:    11.46 kB
+dist-emu/assets/ad-B18i8NGa.svg                       30.51 kB │ gzip:    11.15 kB
+dist-emu/assets/hr-fzLfaANM.svg                       30.73 kB │ gzip:    13.14 kB
+dist-emu/assets/as-BTEVCXG-.svg                       30.98 kB │ gzip:    11.62 kB
+dist-emu/assets/hr-BpiVVBoV.svg                       31.28 kB │ gzip:    13.31 kB
+dist-emu/assets/gt-BLpn5qMn.svg                       31.35 kB │ gzip:    11.30 kB
+dist-emu/assets/gt-CJo5DI-7.svg                       31.35 kB │ gzip:    11.30 kB
+dist-emu/assets/gs-DiiNa0F5.svg                       31.50 kB │ gzip:    11.41 kB
+dist-emu/assets/gs-DOgYbHsY.svg                       31.92 kB │ gzip:    11.09 kB
+dist-emu/assets/je-DyWbhIiC.svg                       34.19 kB │ gzip:     9.81 kB
+dist-emu/assets/sh-hl-CgxUDvtv.svg                    34.78 kB │ gzip:    12.58 kB
+dist-emu/assets/je-vXe0Dr49.svg                       35.03 kB │ gzip:    10.03 kB
+dist-emu/assets/sh-hl-CqtQPzWZ.svg                    35.43 kB │ gzip:    12.88 kB
+dist-emu/assets/tm-DGBJvQay.svg                       38.22 kB │ gzip:    11.99 kB
+dist-emu/assets/tm-C_WSgUcv.svg                       38.35 kB │ gzip:    12.09 kB
+dist-emu/assets/do-B86d445t.svg                       40.35 kB │ gzip:    14.40 kB
+dist-emu/assets/do-DeRnbj4d.svg                       41.34 kB │ gzip:    14.76 kB
+dist-emu/assets/bz-BCKHR4_q.svg                       42.51 kB │ gzip:    15.61 kB
+dist-emu/assets/bz-CoBdB-p8.svg                       42.68 kB │ gzip:    15.60 kB
+dist-emu/assets/me-Cv4Gwqah.svg                       56.37 kB │ gzip:    21.28 kB
+dist-emu/assets/me-CfGorN3b.svg                       56.95 kB │ gzip:    21.57 kB
+dist-emu/assets/sh-ac-D4dW4I_5.svg                    73.47 kB │ gzip:    27.81 kB
+dist-emu/assets/sh-ac-Bt-fym5d.svg                    75.38 kB │ gzip:    28.72 kB
+dist-emu/assets/sv-CJIHhYwF.svg                       77.27 kB │ gzip:    21.83 kB
+dist-emu/assets/sv-RZ39q5hO.svg                       77.72 kB │ gzip:    22.08 kB
+dist-emu/assets/mx-CvCwYHGF.svg                       80.21 kB │ gzip:    27.77 kB
+dist-emu/assets/es-d5m8M5h8.svg                       80.96 kB │ gzip:    14.80 kB
+dist-emu/assets/es-BuSGTZm_.svg                       82.15 kB │ gzip:    15.47 kB
+dist-emu/assets/mx-Cc8Ccfe8.svg                       84.75 kB │ gzip:    29.50 kB
+dist-emu/assets/bo-CcUiMqkJ.svg                      102.88 kB │ gzip:    24.83 kB
+dist-emu/assets/bo-Dry0C6UA.svg                      104.73 kB │ gzip:    25.14 kB
+dist-emu/assets/send-BSv9TXgM.png                    111.74 kB
+dist-emu/assets/rs-CnTO3ehk.svg                      181.48 kB │ gzip:    49.93 kB
+dist-emu/assets/rs-BfwKwXtn.svg                      181.63 kB │ gzip:    50.19 kB
+dist-emu/assets/comps-tray-archivist-Bc4l5m3c.png  1,016.30 kB
+dist-emu/assets/hero-archivist-BUwAFifB.png        1,147.82 kB
+dist-emu/assets/AppRoot-Cpd4ka71.css               3,433.52 kB │ gzip:   629.74 kB
+dist-emu/assets/importDraft-CnG1WaCM.js                2.44 kB │ gzip:     1.26 kB
+dist-emu/assets/index.esm-DoENyC5u.js                 26.71 kB │ gzip:     6.25 kB
+dist-emu/assets/purify.es-CAi2OJFm.js                 30.47 kB │ gzip:    11.73 kB
+dist-emu/assets/index.es-VZ5T1Stt.js                 159.77 kB │ gzip:    53.56 kB
+dist-emu/assets/html2canvas.esm-QH1iLAAe.js          202.38 kB │ gzip:    48.04 kB
+dist-emu/assets/index-B1654RG3.js                    330.60 kB │ gzip:   107.11 kB
+dist-emu/assets/heic2any-Dct6Edqe.js               1,352.90 kB │ gzip:   341.24 kB
+dist-emu/assets/AppRoot-DA6Qh2nI.js                7,658.93 kB │ gzip: 2,188.13 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 1m 47s
+[emu-guard] 38.1 GB free. Debug logs: /dev/null.
+i  emulators: Starting emulators: auth, firestore, storage
+i  emulators: Detected demo project ID "demo-scriptally", emulated services will use a demo configuration and attempts to access non-emulated services for this project will fail.
+i  firestore: Importing data from /private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/tests/emulator-data/firestore_export/firestore_export.overall_export_metadata
+i  firestore: Firestore Emulator logging to firestore-debug.log
+✔  firestore: Firestore Emulator was started in standard edition.
+✔  firestore: Firestore Emulator UI websocket is running on 9150.
+⚠  Unexpected rules runtime error: Picked up JAVA_TOOL_OPTIONS: -Xmx1536m -XX:ActiveProcessorCount=2
+
+Could not find metadata directory at "/private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/tests/emulator-data/storage_export/metadata" and/or blobs directory at "/private/tmp/claude-501/-Users-nickphysick--claude-spares-spare-Evck5j/ef817faf-b3a5-4e43-ade9-90f81ca61f86/scratchpad/clq11-base/tests/emulator-data/storage_export/blobs".
+i  Running script: node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/clq11.measure.ts' '--reporter=line'
+auth emulator: harness@scriptally.test (uid LS4ymFFCEvhN82advZQJ5zkr7sv2) ready
+  ➜  Local:   http://127.0.0.1:4321/
+
+Running 2 tests using 1 worker
+
+[1/2] [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate
+[2/2] [measure] › tests/e2e/clq11.measure.ts:160:3 › Step 0 — the readings
+[measure] › tests/e2e/clq11.measure.ts:160:3 › Step 0 — the readings
+{
+ "qc-1440-type": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "24px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim subline": null,
+  "slim right figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "18px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim right words": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "italic"
+  },
+  "slim button": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  }
+ },
+ "qc-1440-slim": {
+  "cls": "qc156-slim",
+  "h": 60,
+  "titleSize": "24px",
+  "btnH": 40,
+  "groundLeft": 80,
+  "groundRight": 1432,
+  "sheetLeft": 80,
+  "sheetRight": 1432,
+  "_gl": 80
+ },
+ "qc-1440-slimType": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "24px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim subline": null,
+  "slim right figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "18px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim right words": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "italic"
+  },
+  "slim button": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  }
+ },
+ "cl-1440-type": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": null,
+  "slim subline": null,
+  "slim right figure": null,
+  "slim right words": null,
+  "slim button": null
+ },
+ "cl-1440-slim": {
+  "cls": "clh2-slim",
+  "h": 48,
+  "titleSize": "19px",
+  "btnH": 34,
+  "groundLeft": 98,
+  "groundRight": 1414,
+  "sheetLeft": 80,
+  "sheetRight": 1432,
+  "_gl": 98
+ },
+ "cl-1440-slimType": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Sans 3\", system-ui, -apple-system, sans-serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": null,
+  "slim subline": null,
+  "slim right figure": null,
+  "slim right words": null,
+  "slim button": null
+ },
+ "cl-1440-beside": {
+  "col": {
+   "x": 408,
+   "y": -183.375,
+   "r": 1400,
+   "b": 3837.625,
+   "w": 992,
+   "h": 4021
+  },
+  "strip": {
+   "x": 408,
+   "y": 153.75,
+   "r": 1400,
+   "b": 245.75,
+   "w": 992,
+   "h": 92
+  },
+  "heads": {
+   "x": 419,
+   "y": 270.75,
+   "r": 1389,
+   "b": 312.75,
+   "w": 970,
+   "h": 42
+  },
+  "ground": [
+   242,
+   238,
+   232
+  ],
+  "rows": [
+   "y=154 L(242,238,232) R(242,238,232)",
+   "y=158 L(242,238,232) R(242,238,232)",
+   "y=162 L(242,238,232) R(242,238,232)",
+   "y=166 L(215,210,205) R(215,210,205)",
+   "y=170 L(215,210,205) R(215,210,205)",
+   "y=174 L(215,210,205) R(215,210,205)",
+   "y=178 L(215,210,205) R(215,210,205)",
+   "y=182 L(215,210,205) R(215,210,205)",
+   "y=186 L(215,210,205) R(215,210,205)",
+   "y=190 L(215,210,205) R(215,210,205)",
+   "y=194 L(215,210,205) R(215,210,205)",
+   "y=198 L(215,210,205) R(215,210,205)",
+   "y=202 L(215,210,205) R(215,210,205)",
+   "y=206 L(215,210,205) R(215,210,205)",
+   "y=210 L(215,210,205) R(215,210,205)",
+   "y=214 L(215,210,205) R(215,210,205)",
+   "y=218 L(215,210,205) R(215,210,205)",
+   "y=222 L(215,210,205) R(215,210,205)",
+   "y=226 L(215,210,205) R(215,210,205)",
+   "y=230 L(215,210,205) R(215,210,205)",
+   "y=234 L(215,210,205) R(215,210,205)",
+   "y=238 L(215,210,205) R(215,210,205)",
+   "y=242 L(215,210,205) R(215,210,205)",
+   "y=246 L(215,210,205) R(215,210,205)",
+   "y=250 L(215,210,205) R(215,210,205)",
+   "y=254 L(215,210,205) R(215,210,205)",
+   "y=258 L(215,210,205) R(215,210,205)",
+   "y=262 L(215,210,205) R(215,210,205)",
+   "y=266 L(215,210,205) R(215,210,205)",
+   "y=270 L(215,210,205) R(215,210,205)"
+  ]
+ },
+ "qc-1717-type": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "sub-label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "tick-box count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "13.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "More filters": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "More filters summary": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot showing": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "foot export": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "bar count": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "bar count figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "17px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find input": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Find placeholder": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "chip label (Sort)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "chip label (Group)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "14.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "slim title": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "24px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim subline": null,
+  "slim right figure": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "18px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "slim right words": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15px",
+   "weight": "400",
+   "style": "italic"
+  },
+  "slim button": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  }
+ },
+ "qc-1717-slim": {
+  "cls": "qc156-slim",
+  "h": 60,
+  "titleSize": "24px",
+  "btnH": 40,
+  "groundLeft": 80,
+  "groundRight": 1709,
+  "sheetLeft": 80,
+  "sheetRight": 1709,
+  "_gl": 80
+ },
+ "qc-1717-slimType": {
+  "views heading": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "21px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "Reset": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "13.5px",
+   "weight": "600",
+   "style": "normal"
+  },
+  "view label (on)": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "700",
+   "style": "normal"
+  },
+  "view label": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "15.5px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "view count": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "14px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading (Refine)": {
+   "family": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "size": "16px",
+   "weight": "400",
+   "style": "normal"
+  },
+  "sub-heading note": {
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "12.5px",
+   "weight": "600
+
+  2 passed (53.2s)
+✔  Script exited successfully (code 0)
+i  emulators: Shutting down emulators.
+i  firestore: Stopping Firestore Emulator
+i  auth: Stopping Authentication Emulator
+i  storage: Stopping Storage Emulator
+i  hub: Stopping emulator hub
+i  logging: Stopping Logging Emulator
+exit 0

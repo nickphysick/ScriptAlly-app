@@ -1,0 +1,37 @@
+[
+ {
+  "name": "Query Centre: shown at 600px, the shared bar",
+  "ok": true,
+  "got": "qc156-slim"
+ },
+ {
+  "name": "Query Centre: 60 ±1 tall, title 24px, button 40 ±1",
+  "ok": true,
+  "got": "60 · 24px · 40"
+ },
+ {
+  "name": "Query Centre: its ground from the sheet's left edge to its right ±1",
+  "ok": true,
+  "got": "ground 80–1432 · sheet 80–1432"
+ },
+ {
+  "name": "Contact list: shown at 600px, the shared bar",
+  "ok": true,
+  "got": "qc156-slim"
+ },
+ {
+  "name": "Contact list: 60 ±1 tall, title 24px, button 40 ±1",
+  "ok": true,
+  "got": "60 · 24px · 40"
+ },
+ {
+  "name": "Contact list: its ground from the sheet's left edge to its right ±1",
+  "ok": true,
+  "got": "ground 80–1432 · sheet 80–1432"
+ },
+ {
+  "name": "the Contact list's equals the Query Centre's",
+  "ok": true,
+  "got": "CL 60/24px/40 · QC 60/24px/40"
+ }
+]

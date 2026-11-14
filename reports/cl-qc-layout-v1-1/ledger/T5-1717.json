@@ -1,0 +1,12 @@
+[
+ {
+  "name": "at rest: base vs this build, 0.0% of the sheet (1629×887; an exact render within 3 attempts)",
+  "ok": true,
+  "got": "attempts: 0 px"
+ },
+ {
+  "name": "at 600px: base vs this build, 0.0% of the sheet (1629×887; an exact render within 3 attempts)",
+  "ok": true,
+  "got": "attempts: 0 px"
+ }
+]

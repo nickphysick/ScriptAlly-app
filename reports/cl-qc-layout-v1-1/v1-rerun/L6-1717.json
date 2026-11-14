@@ -1,0 +1,32 @@
+[
+ {
+  "name": "at rest: the frame's line, 200 samples from y=591 to 990 (frame x 418.0–1667.0), ΔE ≤ 3",
+  "ok": true,
+  "got": "worst ΔE 0.00 at —"
+ },
+ {
+  "name": "while scrolled 600px the bar's strip is stuck and the card's pin is pinned",
+  "ok": true,
+  "got": "{\"pinTop\":247.75,\"stickyTop\":142,\"port\":105.75,\"stuck\":true}"
+ },
+ {
+  "name": "while pinned (600px): the frame's line, 360 samples from y=272 to 990 (frame x 418.0–1667.0), ΔE ≤ 3",
+  "ok": true,
+  "got": "worst ΔE 0.00 at —"
+ },
+ {
+  "name": "after 600px and back: the frame's line, 200 samples from y=591 to 990 (frame x 418.0–1667.0), ΔE ≤ 3",
+  "ok": true,
+  "got": "worst ΔE 0.00 at —"
+ },
+ {
+  "name": "after the Query Centre and back: the frame's line, 200 samples from y=591 to 990 (frame x 418.0–1667.0), ΔE ≤ 3",
+  "ok": true,
+  "got": "worst ΔE 0.00 at —"
+ },
+ {
+  "name": "after the Query Centre and back, pinned: the frame's line, 360 samples from y=272 to 990 (frame x 418.0–1667.0), ΔE ≤ 3",
+  "ok": true,
+  "got": "worst ΔE 0.00 at —"
+ }
+]
