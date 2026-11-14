@@ -130,4 +130,17 @@ The three reds are the baseline's own: `emuGuard.test` (1) and `firestoreTarget.
 
 ## Deploy
 
-Recorded in the follow-up commit (the dev branch and the served bundle).
+- **Dev branch:** `dev/srm1-plv3-qc156-clq1` @ `785c02903`, pushed. It is the served line `dev/srm1-plv3-qc156` (`d5f5a8015`) plus this branch, a fast-forward, so there is no merge commit. `cl-qc-layout-v1` is pushed at the same commit.
+- **Built and deployed** from a clean detached checkout of the pushed tip (`npm run build:dev`, then `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`). The build printed no error or warning lines.
+- **Dev serves `index-ApIDS8ju.js`.** The served hash matched the build's. "your book", "within this view", `data-clq` and "agents on file" are in the served `AppRoot-DUrrJfBm.js`.
+- Before this deploy, dev served `index-P-Ljb31B.js` (Query Centre v156 line).
+- **Not merged to main. Prod untouched.** The next dev deploy must contain `dev/srm1-plv3-qc156-clq1`, or the Contact list loses this layout on dev.
+- This report-only commit was not redeployed: the bundle is the same.
+
+## Not done / left open
+
+- **CLP13** (the 200%-zoom stacking) has its rules re-pointed to the new header but was **not re-measured**.
+- **Below 1440** (the Query Centre's grid at 1100–1300) was not measured; the locks run at 1440 and 1717 as the brief asks.
+- **`ContactHeader26`** (v26's navy header, mounted by no route) still exists. With v26's ring colours retired it would draw cream over soft pink. Out of scope; left alone.
+- **The slim row** stays 48px (the Query Centre's is 60), as built. The brief kept its behaviour.
+- **At merge,** the lasting decisions here go to `docs/decisions/contact-list.md` and `query-centre.md` (this line has no `docs/decisions/` for either yet).
