@@ -18,10 +18,11 @@
  *    `--pin-cover`, and writing it where the row reads it would feed back.
  * ⚠️ HIDDEN IS INERT: `inert` and `aria-hidden` while it is not shown, so none of its controls are in the Tab order.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import type { HeaderFigures } from "../../../lib/contactV26";
 import { clHeadline } from "../../../lib/contactPrinciples";
 import { healthColours } from "./ContactHealth26";
+import { useSlimReveal } from "../../shell/slimReveal";
 
 /** the 24px ring's geometry: the ref's (viewBox 46, r 19, stroke 7) */
 const SLIM_R = 19;
@@ -51,44 +52,16 @@ export const ContactSlimRow: React.FC<{
   onAdd: () => void;
 }> = (p) => (useDesktop() ? <SlimRow {...p} /> : null);
 
+const slimHeader = (row: HTMLElement) => row.parentElement?.querySelector<HTMLElement>("[data-cl27='header']");
+const slimCover = (row: HTMLElement) => row.parentElement?.querySelector<HTMLElement>(":scope > .clv-main");
+
 const SlimRow: React.FC<React.ComponentProps<typeof ContactSlimRow>> = ({ figures, health, onNotQueried, onOpenHealth, onAdd }) => {
   const ref = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(false);
+  /* the reader and the offset are shared with the Query Centre's collapsed header (shell/slimReveal, extracted from here
+     unchanged): shown once the header has gone under the row's line; while shown, `--pin-cover` on `.clv-main` */
+  const shown = useSlimReveal(ref, { header: slimHeader, cover: slimCover });
   const h = clHeadline(figures);
   const c = healthColours(health.pct, "light");
-
-  /* ONE READER: has the header gone under the row's line (the row's sticky top plus its height) */
-  const read = useCallback(() => {
-    const row = ref.current;
-    const sc = row?.closest<HTMLElement>(".wpg-scroll");
-    const hd = row?.parentElement?.querySelector<HTMLElement>("[data-cl27='header']");
-    if (!row || !sc || !hd || hd.offsetHeight === 0) return;
-    const line = sc.getBoundingClientRect().top + (parseFloat(getComputedStyle(row).top) || 0) + row.offsetHeight;
-    setShown(hd.getBoundingClientRect().bottom <= line);
-  }, []);
-  useEffect(() => {
-    const row = ref.current;
-    const sc = row?.closest<HTMLElement>(".wpg-scroll");
-    if (!sc) return undefined;
-    let raf = 0;
-    const on = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(read); };
-    read();
-    sc.addEventListener("scroll", on, { passive: true });
-    window.addEventListener("resize", on);
-    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(on);
-    ro?.observe(sc);
-    return () => { cancelAnimationFrame(raf); sc.removeEventListener("scroll", on); window.removeEventListener("resize", on); ro?.disconnect(); };
-  }, [read]);
-
-  /* the offset the toolbar, the margin labels and the rail sit under, while the row shows */
-  useLayoutEffect(() => {
-    const row = ref.current;
-    const main = row?.parentElement?.querySelector<HTMLElement>(":scope > .clv-main");
-    if (!row || !main) return undefined;
-    if (shown) main.style.setProperty("--pin-cover", `${(parseFloat(getComputedStyle(row).top) || 0) + row.offsetHeight}px`);
-    else main.style.removeProperty("--pin-cover");
-    return () => { main.style.removeProperty("--pin-cover"); };
-  }, [shown]);
 
   return (
     <div ref={ref} className="clh2-slim" data-clh2="slim" data-shown={shown ? "" : undefined}

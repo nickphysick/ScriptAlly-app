@@ -8110,7 +8110,7 @@ export const Queries: React.FC<{
                   loading={showGridSkeleton}
                   counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
                   /* v156 §2 — "this week" as a line on the navy header (v154's bar chart is gone) */
-                  ring={<QcLine156 m={goal156} />}
+                  ring={<QcLine156 m={goal156} />} goal={goal156}
                   view={qcView150} onView={pickView150}
                   onLog={() => onNavigate?.("queries", "Log a query")}
                   onRecord={() => onNavigate?.("queries", "Record a response")}

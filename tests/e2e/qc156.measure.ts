@@ -216,4 +216,84 @@ test.describe("Query Centre v156", () => {
     }
     L.done(25);
   });
+  /* V4 (§3) — the collapsed header: hidden and inert at rest and while the panel is still under its line; shown once
+     the panel has gone; 60px, the sheet's full width; the toolbar's top meets its bottom within 1px at three scroll
+     positions; the filter column's card 14px under the toolbar's bar; reduced motion drops the slide. And the Contact
+     list's slim row still behaves as before (the shared reader). */
+  test("V4 — the collapsing header", async ({ page }) => {
+    test.skip(PHASE === "before", "after only");
+    const L = new Ledger("V4");
+    const read = () => page.evaluate(([sel, sc]) => {
+      const root = document.querySelector<HTMLElement>(sel as string)!;
+      const port = document.querySelector<HTMLElement>(sc as string)!;
+      const slim = root.querySelector<HTMLElement>("[data-qc156='slim']");
+      const tbw = root.querySelector<HTMLElement>("[data-qc154='toolbar']")!;
+      const bar = root.querySelector<HTMLElement>("[data-qc153='bar']")!;
+      const rail = root.querySelector<HTMLElement>(".qc153-rail")!;
+      const hd = root.querySelector<HTMLElement>("[data-qc1531='header']")!;
+      const r = (e: Element) => e.getBoundingClientRect();
+      const cs = slim ? getComputedStyle(slim) : null;
+      const before = slim ? getComputedStyle(slim, "::before") : null;
+      const pr = r(port);
+      return {
+        shown: !!slim?.hasAttribute("data-shown"), opacity: cs?.opacity, vis: cs?.visibility, inert: !!slim?.inert, hidden: slim?.getAttribute("aria-hidden"),
+        slimTop: slim ? r(slim).top - pr.top : null, slimBottom: slim ? r(slim).bottom - pr.top : null, slimH: slim ? r(slim).height : null,
+        slimL: slim ? r(slim).left : null, slimR: slim ? r(slim).right : null, rootL: r(root).left, rootR: r(root).right,
+        groundL: slim && before ? r(slim).left + parseFloat(before.left) : null, groundR: slim && before ? r(slim).right - parseFloat(before.right) : null,
+        portL: pr.left, portR: pr.left + port.clientWidth, groundBg: before?.backgroundColor, hair: before?.boxShadow,
+        tbwTop: r(tbw).top - pr.top, barTop: r(bar).top - pr.top, railTop: r(rail).top - pr.top, railPos: getComputedStyle(rail).position,
+        hdBottom: r(hd).bottom - pr.top, transition: cs?.transitionDuration,
+      };
+    }, [PAGE, SCROLL]);
+    for (const vp of SIZES) {
+      await openQc(page, vp);
+      const w = vp.width;
+      const a = await read();
+      L.check(`${w}: at rest the bar is hidden, inert and aria-hidden`, !a.shown && a.opacity === "0" && a.vis === "hidden" && a.inert && a.hidden === "true", JSON.stringify({ shown: a.shown, op: a.opacity, vis: a.vis, inert: a.inert }));
+      if (w === 1920) await page.screenshot({ path: `${SHOTS}/v4-rest-1920.png` });
+      /* mid-collapse: the panel's foot still below the bar's line */
+      await scrollTo(page, Math.max(0, a.hdBottom - (a.slimBottom ?? 72) - 60));
+      const m = await read();
+      L.check(`${w}: mid-collapse (panel foot ${m.hdBottom.toFixed(0)} below the line ${m.slimBottom?.toFixed(0)}) the bar stays hidden`, !m.shown && m.hdBottom > (m.slimBottom ?? 0), `${m.shown}`);
+      if (w === 1920) await page.screenshot({ path: `${SHOTS}/v4-mid-1920.png` });
+      for (const y of [a.hdBottom + 40, 1400, 2600]) {
+        await scrollTo(page, y);
+        const c = await read();
+        L.check(`${w} @${Math.round(y)}: shown, 60px, under the lip`, c.shown && c.opacity === "1" && !c.inert && Math.abs((c.slimH ?? 0) - 60) < 0.5 && Math.abs((c.slimTop ?? 0) - 12) < 1, `shown ${c.shown} h ${c.slimH} top ${c.slimTop}`);
+        L.check(`${w} @${Math.round(y)}: the toolbar's top meets the bar's bottom within 1px`, Math.abs(c.tbwTop - (c.slimBottom ?? 0)) <= 1, `toolbar ${c.tbwTop.toFixed(2)} · bar bottom ${c.slimBottom?.toFixed(2)} · controls ${c.barTop.toFixed(2)}`);
+        if (c.railPos === "sticky") L.check(`${w} @${Math.round(y)}: the filter column's card pins 14px under the toolbar's bar`, Math.abs(c.railTop - c.barTop - 14) <= 1, `rail ${c.railTop.toFixed(2)} · bar ${c.barTop.toFixed(2)}`);
+      }
+      const c = await read();
+      L.check(`${w}: the ground spans the sheet; the content is inset to the page's edges`, Math.abs((c.groundL ?? 0) - c.portL) <= 1 && Math.abs((c.groundR ?? 0) - c.portR) <= 1 && Math.abs((c.slimL ?? 0) - c.rootL) <= 1 && Math.abs((c.slimR ?? 0) - c.rootR) <= 1,
+        `ground ${c.groundL}–${c.groundR} · sheet ${c.portL}–${c.portR} · content ${c.slimL}–${c.slimR} · page ${c.rootL}–${c.rootR}`);
+      L.check(`${w}: the page colour with the #e0d9ce hairline`, c.groundBg === "rgb(246, 243, 238)" && /rgb\(224, 217, 206\) 0px -1px 0px 0px inset/.test(c.hair ?? ""), `${c.groundBg} ${c.hair}`);
+      if (w === 1920) {
+        await page.screenshot({ path: `${SHOTS}/v4-collapsed-1920.png` });
+        /* keyboard: the bar's button takes focus once shown */
+        await page.locator(`${PAGE} [data-qc156='slim-log']`).focus();
+        const f = await page.evaluate(() => document.activeElement?.getAttribute("data-qc156"));
+        L.check("1920: the collapsed bar's + Log a query takes focus", f === "slim-log", `${f}`);
+      }
+      await scrollTo(page, 0);
+      const z = await read();
+      L.check(`${w}: back at the top it hides again`, !z.shown && z.inert, `${z.shown}`);
+    }
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await openQc(page, SIZES[0]);
+    const rm = await read();
+    L.check("reduced motion: no slide (transition none)", rm.transition === "0s", `${rm.transition}`);
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+
+    /* the Contact list after the extraction: the same row, the same moment */
+    await openRoute(page, "/agents", SIZES[0]);
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: `${SHOTS}/after-cl-1920.png` });
+    const cl0 = await page.evaluate(() => { const r = document.querySelector<HTMLElement>("[data-clh2='slim']"); return { h: r?.getBoundingClientRect().height, top: r ? getComputedStyle(r).top : null, shown: r?.hasAttribute("data-shown") }; });
+    await page.evaluate(() => { const s = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().width > 0 && e.querySelector("[data-clh2='slim']")); if (s) s.scrollTop = 800; });
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${SHOTS}/after-cl-1920-scrolled.png` });
+    const cl1 = await page.evaluate(() => { const r = document.querySelector<HTMLElement>("[data-clh2='slim']"); const m = document.querySelector<HTMLElement>(".clv-main"); return { h: r?.getBoundingClientRect().height, shown: r?.hasAttribute("data-shown"), cover: m?.style.getPropertyValue("--pin-cover") }; });
+    L.check("Contact list: the slim row is hidden at rest and shown at 800, 48px, writing --pin-cover 60px", cl0.shown === false && cl1.shown === true && cl0.h === 48 && cl1.h === 48 && cl1.cover === "60px", JSON.stringify({ cl0, cl1 }));
+    L.done(25);
+  });
 });
