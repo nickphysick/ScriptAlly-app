@@ -146,4 +146,12 @@ menu low in a short window, which no section has at the sizes measured. Tasks ha
 
 ## Dev deploy
 
-DEV_DEPLOY
+Deployed 14 Nov from a clean detached checkout of the pushed tip `e1e296379` (`npm run build:dev`, then
+`firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`). Before the deploy, dev served
+`index-Bh4UTjIK.js` (the `…-snv3` line this branch was cut from); the deploy command checked that and would have
+stopped on anything else.
+
+- **Dev now serves `index-BRmlF1iZ.js`.** The menu is in `AppRoot-CJ_L5X7g.js` / `AppRoot-DFyhL5gO.css`, and both
+  are served (200).
+- Hosting only: no functions or rules changed.
+- Not merged to main. Prod untouched.
