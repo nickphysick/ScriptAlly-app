@@ -169,19 +169,21 @@ describe("/materials/letters renders the letter desk", () => {
     expect(h).not.toContain('data-ql="row"');
   });
 
-  it("v2.1: an unsent letter with no text shows the no-words sheet, not a blank one", () => {
+  it("v2.4: an unsent letter with no text says 'No text saved', not a blank sheet", () => {
     state.data = { ...populated(), manuscripts: [MS({ inUseLetterId: "lf" })], versions: [...populated().versions, L("lf", "Voice-led", "2026-11-05T10:00:00.000Z", { contentDraft: undefined, contentType: "ref", fileName: "voice.docx" })] };
     const h = render();
     const t = text(h);
     expect(h).toContain('data-state="no-text"');
-    expect(t).toContain("The words aren't here yet It's kept in voice.docx. Paste the text in and you can read it here, copy it and compare it with your other letters.");
+    /* RE-POINTED (v2.4): v2.1's "The words aren't here yet" copy → the ref's "No text saved" */
+    expect(t).toContain("No text saved It's kept in voice.docx. Paste your letter in, or upload the file.");
+    expect(t).not.toContain("The words aren't here yet");
     expect(h).toContain('data-ql="paste-text"');
     expect(h).toContain('data-ql="upload-for"');
     expect(h).not.toContain('data-ql="filebox"');
     expect(h).not.toContain('data-ql="lock-line"');
   });
 
-  it("v2.1: a sent letter with no text asks what it said, once, with its queries counted", () => {
+  it("v2.4: a sent letter with no text says it has gone out, 'No text saved', and that it can be added once", () => {
     state.data = {
       ...populated(), manuscripts: [MS({ inUseLetterId: "lb" })],
       versions: [...populated().versions, L("lb", "Covering letter 4", "2026-08-21T10:00:00.000Z", { contentDraft: undefined, contentType: "ref" })],
@@ -190,9 +192,10 @@ describe("/materials/letters renders the letter desk", () => {
     const h = render();
     const t = text(h);
     expect(h).toContain('data-state="sent-no-text"');
-    expect(t).toContain("This letter has gone out. Its name and results are on record, but not its words.");
-    expect(t).toContain("What did this letter say? Add the text you sent and you can read it here, copy it and compare it with your other letters. Its 2 queries and their results stay exactly as they are.");
-    expect(t).toContain("You can add it once. After that it locks, like any letter that has gone out.");
+    /* RE-POINTED (v2.4): the lock line, heading and paragraph are the ref's; the note beneath is removed */
+    expect(t).toContain("This letter has gone out. No text saved Add the text you sent, or upload the file. You can do this once, and its results won't change.");
+    expect(t).not.toContain("What did this letter say?");
+    expect(t).not.toContain("You can add it once");
     expect(h).toContain('data-ql="add-text"');
     expect(h).toContain('data-ql="new-version"');
   });

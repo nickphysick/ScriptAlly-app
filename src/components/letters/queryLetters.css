@@ -58,14 +58,14 @@
 /* v2.1 · the package line, on the in-use letter */
 .qlp .qlp-lt-pkg { margin-top: 4px; font-size: 14px; color: var(--ql-t72); }
 .qlp-lt-pkg a { color: var(--ql-navy); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, .4); }
-/* v2.1 · the "no words yet" sheet: faint ruled lines, the quill, a heading, a paragraph, two buttons */
-.qlp-paper.qlp-paper--nt { min-height: 460px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; white-space: normal;
-  background-image: repeating-linear-gradient(#fff 0 31px, rgba(28, 19, 15, .05) 31px 32px); background-position: 0 24px; }
+/* v2.4 · "No text saved" (the ref's `.paper.nt`): no lined paper and no fill of its own (the workspace's paper-white
+   shows through), a 1.5px dashed edge, 14px corners, no shadow; the quill, a heading, one paragraph, two buttons */
+.qlp-paper.qlp-paper--nt { min-height: 380px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; white-space: normal;
+  background: none; border: 1.5px dashed #cfc5b7; border-radius: 14px; box-shadow: none; }
 .qlp-paper--nt img { width: 76px; }
 .qlp h3.qlp-nt-h { margin-top: 14px; font: 400 24px/1.25 var(--sp-type) !important; color: var(--ql-ink) !important; }
-.qlp .qlp-paper--nt p { max-width: 470px; margin: 10px auto 0; color: var(--ql-t72); background: #fff; box-shadow: 0 0 0 8px #fff; }
+.qlp .qlp-paper--nt p { max-width: 470px; margin: 10px auto 0; color: var(--ql-t72); }
 .qlp-nt-a { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 22px; }
-.qlp .qlp-paper--nt .qlp-nt-n { margin-top: 16px; font-size: 14px; color: var(--ql-t62); }
 
 /* buttons */
 .qlp-b1, .qlp-b2 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; white-space: nowrap; font-family: var(--sp-type) !important; font-weight: 400; }
@@ -92,7 +92,6 @@
 .qlp-work .qlp-lt-top { padding-top: 0; }
 /* the 760 caps come off inside the workspace: the title row, the status line and the sheet fill the letter area */
 .qlp-work :is(.qlp-lt-top, .qlp-lt-bar, .qlp-paper, .qlp-ed-top, .qlp-ed-status) { max-width: none; }
-.qlp-work .qlp-paper--nt { background: none; }
 .qlp h2.qlp-h2 { font: 400 22px/1.15 var(--sp-type) !important; color: var(--ql-ink) !important; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--ql-navy); }
 .qlp-list { position: sticky; top: 16px; display: flex; flex-direction: column; min-width: 0;
   /* many letters: the list scrolls inside its own sticky column (the scroll port's height, published by the page) */
