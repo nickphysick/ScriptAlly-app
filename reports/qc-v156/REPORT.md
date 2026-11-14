@@ -8,7 +8,7 @@ Ref: `design-refs/query-centre-v156.html`, sha256 `5dd77dae…ec0b`, which match
 
 1. **The Contact list has no "Views" panel to reuse.** On the dev line, and on every branch I checked, the Contact list's filter column is `ContactRail27`: a "Filter" card with Most used pills, Genres, a "More filters · Where they stand, submissions" row and a foot. Nothing reads "Views", "Refine" or "within this view". So §6's "reuse the Contact list's Views panel component" could not be done as written.
    - What I did instead: `QcViews156` is drawn from the v156 ref over the rail bones both pages already share (`qc153-rail` card and stickiness, `qc153-rbd` head with Reset, `qc153-rft` foot). Its look lives in `qcv156.css`, scoped to `.qc156-views`, so the Contact list's rail is unchanged.
-   - ⚠️ While I worked, the worktree-claim hook named another session holding the primary checkout: "Contact list — Query Centre layout v1 (navy header, Views panel, light list…)". A Contact list Views panel looks to be in progress there. The two should become one component when both land. That is deferred (below).
+   - ⚠️ The reuse runs the other way. Another session's "Contact list — Query Centre layout v1" brief extends *this* panel and the navy header onto the Contact list. It stopped at its Step 0 on 14 Nov to wait for v156 on dev (memory `cl-qc-layout-v1-waiting`). v156 is now on dev; its served `AppRoot-BIOQODDI.js` carries "within this view". That run should build from `QcViews156` / `QcSlim156` rather than copy them.
 2. **The Contact list's collapsed bar is 48px, not 60.** The prompt asks for 60px *and* "build it from the Contact list's so the two pages match". I followed the explicit 60px and the ref's type sizes.
    - What is shared is the behaviour: the reader (when to show) and the offset (`--pin-cover`). Both are extracted from `ContactSlimRow` into `shell/slimReveal.ts` (`useSlimReveal`), unchanged, and both pages call it.
    - The two bars' visuals still differ: 48 vs 60px tall, 19 vs 24px titles.
@@ -133,7 +133,7 @@ The tab, its fillet and the sheet read `--ws-page` through `--ink-tab` / `--ink-
 
 ## Deferred (named)
 
-- **One Views component for both pages:** converge `QcViews156` with the Contact list's Views panel from the session now building it (premise 1). The same applies to the slim bars' visuals (48 vs 60px).
+- **One Views component for both pages:** the waiting Contact list run (premise 1) should extract `QcViews156`'s card into a shared component rather than copy it. The same applies to the slim bars' visuals (48 vs 60px).
 - **Dead CSS left in the older Query Centre sheets** (the brief said not to touch them): `qcv154.css` / `qcv1541.css` rail and goal-chart rules, and `qcv155.css`'s `.qc154-wkc[data-qc155="goal-hold"]`. They match nothing now and need a cleanup pass.
 - **A stale comment in `ContactRail27.tsx`** (Contact list, left alone) says `QcRail153` "is not used and does not change". `QcRail153` is now deleted.
 - **Merge to main**, and moving the decisions below into `docs/decisions/query-centre.md` at merge (this line predates the CLAUDE.md diet, so there is no `docs/decisions/` here).
