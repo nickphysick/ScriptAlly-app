@@ -39,6 +39,7 @@ import "./qcv151.css";
 import "./qcv1522.css";
 import "./qcv153.css";
 import "./qcv1541.css";
+import "./qcv156.css";
 
 const LIST_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>;
 const BIRDS_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M4 12h14M4 17h6" /><circle cx="14" cy="7" r="1.6" /><circle cx="19" cy="12" r="1.6" /><circle cx="11" cy="17" r="1.6" /></svg>;
@@ -245,6 +246,8 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
       let cur: HTMLElement | null = null;
       root.querySelectorAll<HTMLElement>("[data-qc154='head']").forEach((h) => { if (h.getBoundingClientRect().top < line) cur = h; });
       const c = cur as HTMLElement | null;
+      /* v156 §5 — the strip paints the page only once stuck, so at rest nothing clips the header panel's shadow */
+      if (tb.hasAttribute("data-qc156-stuck") !== stuck) tb.toggleAttribute("data-qc156-stuck", stuck);
       const on = stuck && !!c;
       setTbOn(on);
       if (on && c) {

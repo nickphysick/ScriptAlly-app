@@ -1,0 +1,72 @@
+[
+ {
+  "name": "1920: a Queried card's band is the sand fill",
+  "ok": true,
+  "got": "rgb(239, 231, 218) / none"
+ },
+ {
+  "name": "1920: the Queried seal is navy, cream initials, double ring",
+  "ok": true,
+  "got": "rgb(42, 58, 82) / rgb(244, 238, 229) / rgb(255, 255, 255) 0px 0px 0px 3px, rgba(42, 58, 82, 0.35) 0px 0px 0px 4px"
+ },
+ {
+  "name": "1920: every seal on the page is navy",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "1920: the tab is the page's colour",
+  "ok": true,
+  "got": "tab rgb(246, 243, 238) · page rgb(246, 243, 238) · sheet rgb(246, 243, 238)"
+ },
+ {
+  "name": "1920: the toolbar's strip paints nothing at rest",
+  "ok": true,
+  "got": "none / rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "1920: no clipping ancestor between the header and the scroller",
+  "ok": true,
+  "got": "div.wpg-scroll auto/auto"
+ },
+ {
+  "name": "1920: stuck, the strip paints the page with its fade",
+  "ok": false,
+  "got": "true linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0) 100%)"
+ },
+ {
+  "name": "1440: a Queried card's band is the sand fill",
+  "ok": true,
+  "got": "rgb(239, 231, 218) / none"
+ },
+ {
+  "name": "1440: the Queried seal is navy, cream initials, double ring",
+  "ok": true,
+  "got": "rgb(42, 58, 82) / rgb(244, 238, 229) / rgb(255, 255, 255) 0px 0px 0px 2.5px, rgba(42, 58, 82, 0.35) 0px 0px 0px 3.5px"
+ },
+ {
+  "name": "1440: every seal on the page is navy",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "1440: the tab is the page's colour",
+  "ok": true,
+  "got": "tab rgb(246, 243, 238) · page rgb(246, 243, 238) · sheet rgb(246, 243, 238)"
+ },
+ {
+  "name": "1440: the toolbar's strip paints nothing at rest",
+  "ok": true,
+  "got": "none / rgba(0, 0, 0, 0)"
+ },
+ {
+  "name": "1440: no clipping ancestor between the header and the scroller",
+  "ok": true,
+  "got": "div.wpg-scroll auto/auto"
+ },
+ {
+  "name": "1440: stuck, the strip paints the page with its fade",
+  "ok": false,
+  "got": "true linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0) 100%)"
+ }
+]

@@ -1,0 +1,286 @@
+{
+ "qc-1920-rest": {
+  "header": {
+   "x": 198,
+   "y": 135.8,
+   "w": 1596,
+   "h": 198.2
+  },
+  "headerMarginBottom": "0px",
+  "headerBg": "rgba(0, 0, 0, 0)",
+  "headerShadow": "none",
+  "tab": {
+   "text": "Query Centre",
+   "cls": "ws-ftab ws-fttab is-cur is-first",
+   "bg": "rgb(242, 238, 232)",
+   "box": {
+    "x": 80,
+    "y": 65.8,
+    "w": 170.1,
+    "h": 41
+   }
+  },
+  "sheet": {
+   "bg": "rgb(242, 238, 232)"
+  },
+  "port": {
+   "bg": "rgb(246, 243, 238)",
+   "img": "linear-gradient(rgba(246, 243, 238, 0.45), rgba(246, 243, 238, 0.45)), url(\"http://127.0.0",
+   "top": 105.8
+  },
+  "toolbar": {
+   "box": {
+    "x": 494,
+    "y": 347.9,
+    "w": 1300,
+    "h": 92
+   },
+   "top": "0px",
+   "bg": "linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0))",
+   "bgc": "rgba(0, 0, 0, 0)",
+   "stuck": false
+  },
+  "rail": {
+   "box": {
+    "x": 198,
+    "y": 359.9,
+    "w": 268,
+    "h": 1329.8
+   },
+   "top": "0px",
+   "position": "relative"
+  },
+  "clips": [
+   "div.wpg-scroll auto/auto",
+   "div.wpg.qc-wpg.qc-wpg--v11 hidden/hidden",
+   "div.w-full auto/auto",
+   "div.w-full.flex.flex-col.overflow-hidden.font-sans.relative.queries-container-theme hidden/hidden",
+   "div. hidden/hidden",
+   "div.ws-wbody.sv2-stagepad auto/auto",
+   "div.ws-window hidden/hidden",
+   "div.ws-main hidden/hidden",
+   "div.sv2-app.ws-host hidden/hidden",
+   "div.t-capp.sa-shellframe hidden/hidden"
+  ],
+  "pinCover": "12px"
+ },
+ "qc-1920-scrolled": {
+  "header": {
+   "x": 198,
+   "y": -564.3,
+   "w": 1596,
+   "h": 198.2
+  },
+  "headerMarginBottom": "0px",
+  "headerBg": "rgba(0, 0, 0, 0)",
+  "headerShadow": "none",
+  "tab": {
+   "text": "Query Centre",
+   "cls": "ws-ftab ws-fttab is-cur is-first",
+   "bg": "rgb(242, 238, 232)",
+   "box": {
+    "x": 80,
+    "y": 65.8,
+    "w": 170.1,
+    "h": 41
+   }
+  },
+  "sheet": {
+   "bg": "rgb(242, 238, 232)"
+  },
+  "port": {
+   "bg": "rgb(246, 243, 238)",
+   "img": "linear-gradient(rgba(246, 243, 238, 0.45), rgba(246, 243, 238, 0.45)), url(\"http://127.0.0",
+   "top": 105.8
+  },
+  "toolbar": {
+   "box": {
+    "x": 494,
+    "y": 105.8,
+    "w": 1300,
+    "h": 92
+   },
+   "top": "0px",
+   "bg": "linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0))",
+   "bgc": "rgba(0, 0, 0, 0)",
+   "stuck": false
+  },
+  "rail": {
+   "box": {
+    "x": 198,
+    "y": -340.1,
+    "w": 268,
+    "h": 1329.8
+   },
+   "top": "0px",
+   "position": "relative"
+  },
+  "clips": [
+   "div.wpg-scroll auto/auto",
+   "div.wpg.qc-wpg.qc-wpg--v11 hidden/hidden",
+   "div.w-full auto/auto",
+   "div.w-full.flex.flex-col.overflow-hidden.font-sans.relative.queries-container-theme hidden/hidden",
+   "div. hidden/hidden",
+   "div.ws-wbody.sv2-stagepad auto/auto",
+   "div.ws-window hidden/hidden",
+   "div.ws-main hidden/hidden",
+   "div.sv2-app.ws-host hidden/hidden",
+   "div.t-capp.sa-shellframe hidden/hidden"
+  ],
+  "pinCover": "12px"
+ },
+ "qc-1440-rest": {
+  "header": {
+   "x": 112,
+   "y": 135.8,
+   "w": 1288,
+   "h": 198.2
+  },
+  "headerMarginBottom": "0px",
+  "headerBg": "rgba(0, 0, 0, 0)",
+  "headerShadow": "none",
+  "tab": {
+   "text": "Query Centre",
+   "cls": "ws-ftab ws-fttab is-cur is-first",
+   "bg": "rgb(242, 238, 232)",
+   "box": {
+    "x": 80,
+    "y": 65.8,
+    "w": 170.1,
+    "h": 41
+   }
+  },
+  "sheet": {
+   "bg": "rgb(242, 238, 232)"
+  },
+  "port": {
+   "bg": "rgb(246, 243, 238)",
+   "img": "linear-gradient(rgba(246, 243, 238, 0.45), rgba(246, 243, 238, 0.45)), url(\"http://127.0.0",
+   "top": 105.8
+  },
+  "toolbar": {
+   "box": {
+    "x": 408,
+    "y": 347.9,
+    "w": 992,
+    "h": 92
+   },
+   "top": "0px",
+   "bg": "linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0))",
+   "bgc": "rgba(0, 0, 0, 0)",
+   "stuck": false
+  },
+  "rail": {
+   "box": {
+    "x": 112,
+    "y": 359.9,
+    "w": 268,
+    "h": 1329.8
+   },
+   "top": "0px",
+   "position": "relative"
+  },
+  "clips": [
+   "div.wpg-scroll auto/auto",
+   "div.wpg.qc-wpg.qc-wpg--v11 hidden/hidden",
+   "div.w-full auto/auto",
+   "div.w-full.flex.flex-col.overflow-hidden.font-sans.relative.queries-container-theme hidden/hidden",
+   "div. hidden/hidden",
+   "div.ws-wbody.sv2-stagepad auto/auto",
+   "div.ws-window hidden/hidden",
+   "div.ws-main hidden/hidden",
+   "div.sv2-app.ws-host hidden/hidden",
+   "div.t-capp.sa-shellframe hidden/hidden"
+  ],
+  "pinCover": "12px"
+ },
+ "qc-1440-scrolled": {
+  "header": {
+   "x": 112,
+   "y": -564.3,
+   "w": 1288,
+   "h": 198.2
+  },
+  "headerMarginBottom": "0px",
+  "headerBg": "rgba(0, 0, 0, 0)",
+  "headerShadow": "none",
+  "tab": {
+   "text": "Query Centre",
+   "cls": "ws-ftab ws-fttab is-cur is-first",
+   "bg": "rgb(242, 238, 232)",
+   "box": {
+    "x": 80,
+    "y": 65.8,
+    "w": 170.1,
+    "h": 41
+   }
+  },
+  "sheet": {
+   "bg": "rgb(242, 238, 232)"
+  },
+  "port": {
+   "bg": "rgb(246, 243, 238)",
+   "img": "linear-gradient(rgba(246, 243, 238, 0.45), rgba(246, 243, 238, 0.45)), url(\"http://127.0.0",
+   "top": 105.8
+  },
+  "toolbar": {
+   "box": {
+    "x": 408,
+    "y": 105.8,
+    "w": 992,
+    "h": 92
+   },
+   "top": "0px",
+   "bg": "linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0))",
+   "bgc": "rgba(0, 0, 0, 0)",
+   "stuck": false
+  },
+  "rail": {
+   "box": {
+    "x": 112,
+    "y": -340.1,
+    "w": 268,
+    "h": 1329.8
+   },
+   "top": "0px",
+   "position": "relative"
+  },
+  "clips": [
+   "div.wpg-scroll auto/auto",
+   "div.wpg.qc-wpg.qc-wpg--v11 hidden/hidden",
+   "div.w-full auto/auto",
+   "div.w-full.flex.flex-col.overflow-hidden.font-sans.relative.queries-container-theme hidden/hidden",
+   "div. hidden/hidden",
+   "div.ws-wbody.sv2-stagepad auto/auto",
+   "div.ws-window hidden/hidden",
+   "div.ws-main hidden/hidden",
+   "div.sv2-app.ws-host hidden/hidden",
+   "div.t-capp.sa-shellframe hidden/hidden"
+  ],
+  "pinCover": "12px"
+ },
+ "cl-rest": {
+  "slim": {
+   "x": 198,
+   "y": 123.75,
+   "w": 1596,
+   "h": 48
+  },
+  "slimTop": "12px",
+  "rail": {
+   "x": 198,
+   "y": 322.375,
+   "w": 268,
+   "h": 495.421875
+  }
+ },
+ "cl-scrolled": {
+  "slim": {
+   "x": 198,
+   "y": 117.75,
+   "w": 1596,
+   "h": 48
+  },
+  "shown": true
+ }
+}

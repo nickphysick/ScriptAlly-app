@@ -1,0 +1,43 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v156 (design-refs/query-centre-v156.html, read from the rendered page at 1920) — the launch look: full
+ * stage colour on the cards, one page colour for tab and sheet, the navy header panel, "this week" as a line, the
+ * collapsing header and the Views panel. Desktop only (768px and up), like every Query Centre rule since v131.
+ *
+ * ⚠️ OVERRIDES WIN ON SPECIFICITY, NOT ON BUNDLE ORDER: each selector is one class (or a repeated class) above the
+ *    v153.4 / v154 / v154.1 rule it replaces. The older sheets are not edited.
+ * ⚠️ qcv156.test.ts reads these rules by their exact selectors.
+ */
+
+/* ── §4 · cards: full stage colour and navy seals (v154.1's quiet Queried band and white seal reversed) ─────────── */
+@media (min-width: 768px) {
+  /* a Queried card's band is its stage's sand (`--tone`, v154's), like every other stage: no white, no edge, no hairline */
+  .qc151.qc153 .qc154-card.qc154-card[data-status="Queried"] .qc154-hd { background: var(--tone); box-shadow: none; }
+  /* the seal: solid navy, cream initials (the typewriter, from v154's rule), the white-then-navy double ring */
+  .qc151.qc153 .qc154-card.qc154-card .qc154-seal.qc154-seal { background: #2a3a52; color: #f4eee5; box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(42, 58, 82, 0.35); }
+}
+@container (max-width: 380px) {
+  .qc151.qc153 .qc154-card.qc154-card .qc154-seal.qc154-seal { box-shadow: 0 0 0 2.5px #fff, 0 0 0 3.5px rgba(42, 58, 82, 0.35); }
+}
+
+/* ── §5 · one page colour. The tab, its fillet and the sheet read `--ws-page` through `--ink-tab` / `--ink-sheet`
+   (inkShell.css), declared on `.ws-main`; the Query Centre retones that token there while its page is the one on
+   screen (decided by what is rendered, as inkShell's own header-sheet rule is: a hidden page's slot carries
+   `data-stage-off`). The scroll area then paints the same token, so tab and sheet are one piece. ──────────────── */
+@media (min-width: 768px) {
+  .ws-app:has(.qc-wpg--v11:not([data-stage-off] *)) .ws-main { --ws-page-rgb: 246, 243, 238; --ws-page: rgb(var(--ws-page-rgb)); }
+  .ws-window .qc-wpg.qc-wpg--v11.qc-wpg--v11.qc-wpg--v11 > .wpg-scroll.wpg-scroll {
+    background-color: var(--ws-page);
+    background-image: linear-gradient(rgba(var(--ws-page-rgb), 0.45), rgba(var(--ws-page-rgb), 0.45)), url("/images/qc/doodle-tile.svg");
+  }
+
+  /* nothing clips the header panel's shadow: the toolbar's strip reached 12px up over the header's foot and painted the
+     page there at rest. At rest it paints nothing; once stuck (QcPage151 sets `data-qc156-stuck`) it takes the page's
+     colour and its 22px fade, as v154 drew it. */
+  .qc151.qc153 .qc154-tbw.qc154-tbw.qc154-tbw { background: none; }
+  .qc151.qc153 .qc154-tbw.qc154-tbw.qc154-tbw[data-qc156-stuck] {
+    background: linear-gradient(to bottom, var(--ws-page) 0, var(--ws-page) calc(100% - 22px), rgba(var(--ws-page-rgb), 0) 100%);
+  }
+}
