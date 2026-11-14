@@ -9,7 +9,7 @@
  *    `.col` (`width: min(100%, 1360px); padding-inline: clamp(20px, 3.2vw, 52px)`). The full-width bands keep their
  *    content in that column and reach the sheet's edges with a spread shadow clipped to their own height (the Contact
  *    list v15 band's method), so nothing here has to know the sheet's width.
- * ⚠️ THE SHARED PIECES KEEP THEIR OWN STYLESHEETS (pageHeaderCard.css, qcv150.css). The rules below only size them to
+ * ⚠️ THE SHARED PIECES KEEP THEIR OWN STYLESHEETS (qcv150.css; the header's are the Query Centre's). The rules below only size them to
  *    this page, scoped under `.rsp5`, as the Query Centre and the Contact list scope their own.
  * ⚠️ brand.tsx forces h1–h3 into its serif with !important and names bare spans as the body sans: each face is stated
  *    with two classes and !important.
@@ -52,24 +52,8 @@
 }
 .rsp5-art.rsp5-art--sm { width: 64px; height: 64px; font-size: 9.5px; }
 
-/* ═════ the title card (`.tc`) — the shared PageHeaderCard at the reference's size ═════ */
-.rsp5 .rsp5-card.phc.phc {
-  margin-top: 22px; padding: 34px 44px 34px 46px; gap: 24px; border-radius: 22px; background: var(--r5-paper);
-  grid-template-columns: minmax(0, 1fr) auto;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset, 0 10px 30px -18px rgba(28, 19, 15, 0.35), 0 0 0 1px var(--r5-i06);
-}
-.rsp5 .rsp5-card.phc.phc.phc h1 { font: 400 54px/1 var(--r5-machine) !important; letter-spacing: -0.01em; }
-.rsp5 .rsp5-card .hl { background: linear-gradient(transparent 58%, var(--r5-blush) 58%, var(--r5-blush) 92%, transparent 92%); padding: 0 6px; margin-left: -6px; }
-.rsp5 .rsp5-card .phc-tx > p { margin: 16px 0 0; max-width: 56ch; font: 400 18.5px/1.5 var(--r5-serif); color: var(--r5-i72); }
-.rsp5 .rsp5-card .phc-tx > p b { font-weight: 600; color: var(--r5-ink); }
-.rsp5 .rsp5-card .phc-b { gap: 12px; margin-top: 24px; flex-wrap: wrap; }
-.rsp5 .rsp5-card .phc-b button { height: 48px; padding: 0 22px; border-radius: 12px; font: 400 16px var(--r5-machine) !important; white-space: nowrap; }
-.rsp5 .rsp5-card .phc-p { background: var(--r5-navy); color: #fff; box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); }
-.rsp5 .rsp5-card .phc-p:hover { background: #22314a; }
-.rsp5 .rsp5-card .phc-s { border: 0; background: #fff; box-shadow: inset 0 0 0 1px var(--r5-i16); }
-.rsp5 .rsp5-card .phc-s:hover { box-shadow: inset 0 0 0 1px var(--r5-i45); }
-.rsp5 .rsp5-card .phc-art { height: auto; display: block; }
-.rsp5 .rsp5-card .phc-art img { display: block; width: 300px; max-width: 100%; height: auto; margin: -10px 0 -18px; filter: none; }
+/* ═════ the header: Workspace headers v1 put the shared navy header here (shell/WorkspaceNavyHeader, dressed by the
+   Query Centre's sheets); the title card's rules went with the title card. ═════ */
 
 /* ═════ at a glance (`.glance`, `.gc`) — the shared GlanceCards at the reference's size ═════ */
 .rsp5 .rsp5-glance { margin-top: 44px; }
@@ -109,14 +93,7 @@
 @media (max-width: 1180px) {
   .rsp5 .rsp5-glance .qc150-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
-@media (max-width: 900px) {
-  .rsp5 .rsp5-card.phc.phc { grid-template-columns: minmax(0, 1fr); }
-  .rsp5 .rsp5-card .phc-art img { width: 200px; justify-self: end; margin-top: -8px; }
-  .rsp5 .rsp5-card.phc.phc.phc h1 { font-size: 40px !important; }
-}
 @media (max-width: 560px) {
-  .rsp5 .rsp5-card.phc.phc { padding: 24px 20px; }
-  .rsp5 .rsp5-card .phc-art img { width: 150px; }
   .rsp5 .rsp5-glance .qc150-cards { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) { .rsp5 .rsp5-glance .qc150-c { transition: none; } }

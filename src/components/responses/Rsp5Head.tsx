@@ -2,13 +2,13 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Responses v5 Phase 2 (design-refs/responses-v5/responses-v5.html, `header` and `glance`) — THE TITLE CARD and AT A
- * GLANCE.
+ * Responses v5 Phase 2 (design-refs/responses-v5/responses-v5.html, `glance`) — AT A GLANCE; and the page's header
+ * (Workspace headers v1).
  *
- * ⚠️ BOTH ARE THE SHARED COMPONENTS, NOT COPIES: the title card is `shared/PageHeaderCard` (Versions' and the Query
- *    Centre's) and the four cards are `shared/GlanceCards` (the Query Centre's v150.1 stat cards, lifted by Contact list
- *    v25). This file names the Responses page's own words, tints and figures; the look of both lives with them, and
- *    responses5.css only sizes them to the reference.
+ * ⚠️ BOTH ARE THE SHARED COMPONENTS, NOT COPIES: the header is `shell/WorkspaceNavyHeader` (Workspace headers v1: the
+ *    Query Centre's navy header; it replaced the title card) and the four cards are `shared/GlanceCards` (the Query
+ *    Centre's v150.1 stat cards, lifted by Contact list v25). This file names the Responses page's own words and
+ *    figures; the look of both lives with them, and responses5.css only sizes the cards to the reference.
  * ⚠️ THE HEAD'S SHORT FACT ("3 your move") RIDES IN THE CARD'S `doodle` SLOT, which takes any node: GlanceCards has no
  *    slot named for it, and editing a shared component is out of this pack's scope.
  * ⚠️ A CARD IS NAVIGATION, NOT A FILTER: every card is `pressable: false` (no `aria-pressed`). Passed and No reply also
@@ -16,12 +16,11 @@
  * ⚠️ THE FOUR COUNTS SUM TO answered + still waiting (`pageCounts`). Withdrawn and Signed are not on the page.
  */
 import React, { useMemo } from "react";
-import { PageHeaderCard } from "../shared/PageHeaderCard";
+import { WorkspaceNavyHeader, WsnhFigure, WsnhWords } from "../shell/WorkspaceNavyHeader";
 import { GlanceCards, type GlanceItem } from "../shared/GlanceCards";
 import type { PageCounts, RespRowInput } from "../../lib/responses";
 import "../queries/centre/qcv150.css";
 
-export const RSP5_HAWK = { src: "/images/responses/responses-wall-hawk.webp", version: "e223df95" } as const;
 export type GlanceKey = "more" | "passed" | "noReply" | "waiting";
 export const GLANCE_LABEL: Record<GlanceKey, string> = { more: "Asked for more", passed: "Passed", noReply: "No reply", waiting: "Still waiting" };
 export const GLANCE_ORDER: readonly GlanceKey[] = ["more", "passed", "noReply", "waiting"];
@@ -36,26 +35,50 @@ export interface GlanceFacts {
   goneQuiet: number;
 }
 
-export const Rsp5TitleCard: React.FC<{
+/** Workspace headers v1: "18 responses" — the agents who have answered (the glance line's "heard back from") */
+export const responsesTitle = (n: number): string => `${n} ${n === 1 ? "response" : "responses"}`;
+/** the empty page's headline (its own paragraph does not fit one line) */
+export const RSP_EMPTY_TITLE = "No responses yet";
+
+/* Workspace headers v1 (design-refs/workspace-headers-v1, "Responses") — the navy header: the count of agents who have
+   answered, the book on the ruled line, Record and Share, and on the right the agents who asked for more and how many
+   are waiting on you. Every figure is the page's own: `page.replies` and `page.more` (the glance line's), `yourMove`
+   (the glance card's "your move"). Empty: the same header with "No responses yet" and that state's two buttons. */
+export const RspHeader: React.FC<{
   msTitle: string | null;
-  empty: boolean;
   loading: boolean;
+  empty: boolean;
+  heard: number;
+  more: number;
+  yourMove: number;
   onRecord: () => void;
-  /** populated: scroll to the wall · empty: open the Query Centre */
-  onSecond: () => void;
-}> = ({ msTitle, empty, loading, onRecord, onSecond }) => {
-  const book = <b data-rsp5="ms">{msTitle || "your book"}</b>;
+  onQueryCentre: () => void;
+  onWall: () => void;
+  onSeeThem: () => void;
+}> = ({ msTitle, loading, empty, heard, more, yourMove, onRecord, onQueryCentre, onWall, onSeeThem }) => {
+  const title = empty ? RSP_EMPTY_TITLE : responsesTitle(heard);
   return (
-    <PageHeaderCard className="rsp5-card" titleId="rsp5T" art={`${RSP5_HAWK.src}?v=${RSP5_HAWK.version}`}
-      data={{ "data-rsp5": "title-card", "data-own-header": "" }} titleData={{ "data-page-title": "true", "data-rsp5": "title" }}
-      title={<span className="hl">Responses</span>}
-      body={empty
-        ? <>Nothing back from agents on {book} yet. When the first answer arrives, record it here and this page starts to fill up.</>
-        : <>Every answer from agents on {book}: who wants to read on, who passed, and what the answers have in common.</>}
-      primary={{ label: "+ Record a response", onClick: onRecord, disabled: loading, data: { "data-rsp5": "record" } }}
-      secondary={empty
-        ? { label: "Open the Query Centre", onClick: onSecond, data: { "data-rsp5": "to-qc" } }
-        : { label: "Share your wall of no", onClick: onSecond, disabled: loading, data: { "data-rsp5": "to-wall" } }} />
+    <WorkspaceNavyHeader page="responses" art="responses-header" loading={loading}
+      title={title}
+      forLine={msTitle ? { lead: "for", text: msTitle } : null}
+      actions={<>
+        <button type="button" className="qc1531-b qc1531-b--n" data-rsp5="record" disabled={loading} onClick={onRecord}>+ Record a response</button>
+        {empty
+          ? <button type="button" className="qc1531-b qc1531-b--g" data-rsp5="to-qc" onClick={onQueryCentre}>Open the Query Centre</button>
+          : <button type="button" className="qc1531-b qc1531-b--g" data-rsp5="to-wall" disabled={loading} onClick={onWall}>Share your wall of no</button>}
+      </>}
+      right={empty ? null : <>
+        <WsnhFigure>{more}</WsnhFigure>
+        <WsnhWords lead={more === 1 ? "agent" : "agents"} name="asked for more"
+          sub={<><b data-rsp5="hd-move">{yourMove}</b> {yourMove === 1 ? "is" : "are"} waiting on you</>}>
+          <button type="button" className="qc1531-b qc1531-b--g" data-rsp5="see-them" onClick={onSeeThem}>See them</button>
+        </WsnhWords>
+      </>}
+      bar={{
+        title,
+        aside: empty ? null : <><b>{more} asked for more</b><em>{yourMove} waiting on you</em></>,
+        button: { label: "+ Record a response", onClick: onRecord },
+      }} />
   );
 };
 
