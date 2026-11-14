@@ -1,0 +1,29 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v156.1 (design-refs/query-centre-v156-1.html, read from the rendered page at 1920) — the streak leads
+ * the top right, the card's Sent and Next boxes line up, and an arrow chip replaces the navy Next box on hover.
+ * Desktop only (768px and up). The older sheets (qcv154 … qcv156) are not edited: each rule here wins on specificity.
+ * ⚠️ qcv1561.test.ts reads these rules by their exact selectors.
+ */
+
+/* ── §1 · the streak leads: a filled flame (38 × 48), the streak (typewriter 32, cream) and its plain line (italic
+   15.5) 14px beside it; 6px under, v156's line, its dot an HTML disc (10px) so it stays round at any width — rust
+   beside the flame, cream without one. ─────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151 .qc1561-hd { display: flex; align-items: center; gap: 14px; min-height: 48px; }
+  .qc151 .qc1561-fl { flex: none; display: block; width: 38px; height: 48px; }
+  .qc151 .qc1561-st { font: 400 32px/1.05 var(--sp-type) !important; color: #fbf7f0; white-space: nowrap; }
+  .qc151 .qc1561-sl { margin-top: 4px; font: italic 400 15.5px/1.35 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.88); }
+  .qc151 .qc1561-gr { position: relative; margin-top: 6px; }
+  .qc151 .qc1561-gr .qc156-ln { margin-top: 0; }
+  .qc151 .qc1561-dot { position: absolute; width: 10px; height: 10px; border-radius: 50%; transform: translate(-50%, -50%); background: #f4eee5; pointer-events: none; }
+  .qc151 .qc1561-wk[data-flame] .qc1561-dot { background: #dd7446; }
+
+  /* the collapsed bar's right side: the flame (17 × 22), the streak (typewriter 18, ink), its line (italic 15) */
+  .qc151 .qc1561-sw { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
+  .qc151 .qc1561-sfl { flex: none; display: block; width: 17px; height: 22px; }
+  .qc151 .qc1561-sw b { font: 400 18px/1 var(--sp-type) !important; color: #1c130f; }
+  .qc151 .qc1561-sw em { font: italic 400 15px/1.2 var(--sp-serif) !important; color: #5b4f47; }
+}

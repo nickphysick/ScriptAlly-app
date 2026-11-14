@@ -47,19 +47,10 @@ export interface WeekGoal154 {
 const asUtc = (d: string): Date => new Date(`${d}T00:00:00Z`);
 const addDays = (d: string, n: number): string => new Date(asUtc(d).getTime() + n * DAY).toISOString().slice(0, 10);
 /** "3 Nov" */
-export const weekDay = (d: string): string => `${Number(d.slice(8, 10))} ${MONTHS_SHORT[Number(d.slice(5, 7)) - 1]}`;
 export const monthOf = (d: string): string => MONTHS_SHORT[Number(d.slice(5, 7)) - 1];
 
 /** the headline's words */
-export const goalHeadline = (m: Pick<WeekGoal154, "now" | "goal">): string => `${m.now} of ${m.goal} this week`;
-export const streakWords = (k: number): string => `${k}-week streak`;
 /** v154.1: with no streak to keep, the line speaks of this week alone (never "keeps the streak going") */
-export const goalNudge = (left: number, streak: number): string =>
-  left <= 0 ? "Goal met — nice work."
-    : streak > 0 ? (left === 1 ? "One more keeps the streak going." : `${left} more keeps the streak going.`)
-      : left === 1 ? "One more to hit your goal this week." : `${left} more to hit your goal this week.`;
-export const goalLineWords = (goal: number): string => `your goal · ${goal} a week`;
-export const barTip = (w: Pick<GoalWeek154, "start" | "count">): string => `w/c ${weekDay(w.start)} · ${w.count} sent`;
 
 export function weekGoal154(sentMs: readonly (number | null)[], entries: readonly QueryingGoalEntry[] | undefined, nowMs: number, span = CHART_WEEKS): WeekGoal154 {
   const g = resolveGoal(entries ? [...entries] : undefined, new Date(nowMs));
@@ -90,9 +81,3 @@ export function weekGoal154(sentMs: readonly (number | null)[], entries: readonl
 }
 
 /** month labels under the first week of each month; the first bar's only when no other label crowds it */
-export function monthLabels(weeks: readonly Pick<GoalWeek154, "start">[], minGap = 3): { i: number; label: string }[] {
-  const out: { i: number; label: string }[] = [];
-  for (let i = 1; i < weeks.length; i++) if (monthOf(weeks[i].start) !== monthOf(weeks[i - 1].start)) out.push({ i, label: monthOf(weeks[i].start) });
-  if (weeks.length && Number(weeks[0].start.slice(8, 10)) <= 7 && (out.length === 0 || out[0].i >= minGap)) out.unshift({ i: 0, label: monthOf(weeks[0].start) });
-  return out;
-}

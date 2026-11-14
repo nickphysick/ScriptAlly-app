@@ -2,12 +2,12 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v156 — a DEV-ONLY review aid for the header's "this week" line: it fabricates INPUT (the send dates fed
+ * Query Centre v156 (copy as v156.1 counts it) — a DEV-ONLY review aid for the header's "this week" line: it fabricates INPUT (the send dates fed
  * to `weekGoal154`), never the model, so the streak maths and the copy are the real ones. Set before load:
  *   window.__SA_QC156_GOAL = "streak" | "none" | "met"   (or localStorage "sa.qc156.goal")
- *     streak  the goal met in each of the last six weeks, one short this week   → "One more keeps the streak going."
- *     none    one send last week, one this week                                 → "[m] more to hit your goal this week."
- *     met     the goal met in the last six weeks and this one                   → "Goal met — nice work."
+ *     streak  the goal met in each of the last six weeks, one short this week   → "6 week streak" / "1 more this week to keep it going."
+ *     none    one send last week, one this week                                 → "No streak yet" / "2 more this week starts one."
+ *     met     the goal met in the last six weeks and this one                   → "7 week streak" / "You’ve hit your target this week."
  * ⚠️ THE CALL SITE CARRIES THE MODE GATE (Queries.tsx), so a production build drops this module.
  */
 const DAY = 86_400_000;
