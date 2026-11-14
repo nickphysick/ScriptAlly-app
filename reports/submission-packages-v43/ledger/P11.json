@@ -1,0 +1,76 @@
+{
+ "green": [
+  {
+   "where": "1280: the scroller does not scroll sideways",
+   "ok": true,
+   "detail": "1192 > 1192"
+  },
+  {
+   "where": "1280: the document does not",
+   "ok": true,
+   "detail": "1280 > 1280"
+  },
+  {
+   "where": "1280: the right block shows",
+   "ok": true,
+   "detail": "{\"sw\":1192,\"cw\":1192,\"dw\":1280,\"ww\":1280,\"go\":{\"l\":938.03125,\"r\":1210},\"mainR\":910.03125,\"tClip\":false}"
+  },
+  {
+   "where": "1280: …clear of the title block",
+   "ok": true,
+   "detail": "{\"sw\":1192,\"cw\":1192,\"dw\":1280,\"ww\":1280,\"go\":{\"l\":938.03125,\"r\":1210},\"mainR\":910.03125,\"tClip\":false}"
+  },
+  {
+   "where": "1280: the title is not clipped",
+   "ok": true,
+   "detail": "false"
+  },
+  {
+   "where": "1024: the scroller does not scroll sideways",
+   "ok": true,
+   "detail": "936 > 936"
+  },
+  {
+   "where": "1024: the document does not",
+   "ok": true,
+   "detail": "1024 > 1024"
+  },
+  {
+   "where": "1024: the right block hides under 1100",
+   "ok": true,
+   "detail": "{\"sw\":936,\"cw\":936,\"dw\":1024,\"ww\":1024,\"go\":null,\"mainR\":926,\"tClip\":false}"
+  },
+  {
+   "where": "820: the scroller does not scroll sideways",
+   "ok": true,
+   "detail": "732 > 732"
+  },
+  {
+   "where": "820: the document does not",
+   "ok": true,
+   "detail": "820 > 820"
+  },
+  {
+   "where": "820: the right block hides under 1100",
+   "ok": true,
+   "detail": "{\"sw\":732,\"cw\":732,\"dw\":820,\"ww\":820,\"go\":null,\"mainR\":722,\"tClip\":false}"
+  }
+ ],
+ "red": [
+  {
+   "where": "820: the scroller does not scroll sideways",
+   "ok": false,
+   "detail": "1534 > 732"
+  },
+  {
+   "where": "820: the document does not",
+   "ok": true,
+   "detail": "820 > 820"
+  },
+  {
+   "where": "820: the right block hides under 1100",
+   "ok": false,
+   "detail": "{\"sw\":1534,\"cw\":732,\"dw\":820,\"ww\":820,\"go\":{\"l\":478.03125,\"r\":750},\"mainR\":450.03125,\"tClip\":true}"
+  }
+ ]
+}

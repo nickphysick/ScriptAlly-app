@@ -1,0 +1,86 @@
+{
+ "green": [
+  {
+   "where": "pk40-ready: population",
+   "ok": true,
+   "detail": "433 elements"
+  },
+  {
+   "where": "pk40-ready: done discs found",
+   "ok": true,
+   "detail": "2"
+  },
+  {
+   "where": "pk40-ready: every done disc navy",
+   "ok": true,
+   "detail": "[\"rgb(45, 58, 80)\",\"rgb(45, 58, 80)\"]"
+  },
+  {
+   "where": "pk40-ready: nothing green",
+   "ok": true,
+   "detail": "[]"
+  },
+  {
+   "where": "pk40-std: population",
+   "ok": true,
+   "detail": "446 elements"
+  },
+  {
+   "where": "pk40-std: done discs found",
+   "ok": true,
+   "detail": "3"
+  },
+  {
+   "where": "pk40-std: every done disc navy",
+   "ok": true,
+   "detail": "[\"rgb(45, 58, 80)\",\"rgb(45, 58, 80)\",\"rgb(45, 58, 80)\"]"
+  },
+  {
+   "where": "pk40-std: nothing green",
+   "ok": true,
+   "detail": "[]"
+  }
+ ],
+ "red": [
+  {
+   "where": "pk40-ready: population",
+   "ok": true,
+   "detail": "433 elements"
+  },
+  {
+   "where": "pk40-ready: done discs found",
+   "ok": true,
+   "detail": "2"
+  },
+  {
+   "where": "pk40-ready: every done disc navy",
+   "ok": false,
+   "detail": "[\"rgb(62, 125, 90)\",\"rgb(62, 125, 90)\"]"
+  },
+  {
+   "where": "pk40-ready: nothing green",
+   "ok": false,
+   "detail": "[\"SPAN.p93-sn background-color rgb(62, 125, 90)\"]"
+  },
+  {
+   "where": "pk40-std: population",
+   "ok": true,
+   "detail": "446 elements"
+  },
+  {
+   "where": "pk40-std: done discs found",
+   "ok": true,
+   "detail": "3"
+  },
+  {
+   "where": "pk40-std: every done disc navy",
+   "ok": false,
+   "detail": "[\"rgb(62, 125, 90)\",\"rgb(62, 125, 90)\",\"rgb(62, 125, 90)\"]"
+  },
+  {
+   "where": "pk40-std: nothing green",
+   "ok": false,
+   "detail": "[\"SPAN.p93-sn background-color rgb(62, 125, 90)\"]"
+  }
+ ]
+}

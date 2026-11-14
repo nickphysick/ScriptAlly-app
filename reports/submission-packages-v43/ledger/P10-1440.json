@@ -1,0 +1,116 @@
+{
+ "green": [
+  {
+   "where": "headline",
+   "ok": true,
+   "detail": "No packages yet"
+  },
+  {
+   "where": "no header buttons",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "where": "no right block",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "where": "three steps",
+   "ok": true,
+   "detail": "[\"Pick the pieces.\",\"Send it with your queries.\",\"See what gets replies.\"]"
+  },
+  {
+   "where": "exactly one filled button",
+   "ok": true,
+   "detail": "[\"Add a letter to send it\"]"
+  },
+  {
+   "where": "no hero",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "where": "steps left = header left",
+   "ok": true,
+   "detail": "112 vs 112"
+  },
+  {
+   "where": "workspace left = headline left",
+   "ok": true,
+   "detail": "408 vs 408"
+  },
+  {
+   "where": "workspace right = header right",
+   "ok": true,
+   "detail": "1400 vs 1400"
+  },
+  {
+   "where": "header → desk 48",
+   "ok": true,
+   "detail": "48"
+  },
+  {
+   "where": "Results left/right = the header's",
+   "ok": true,
+   "detail": "{\"l\":112,\"r\":1400,\"t\":1232.09375,\"b\":1355.703125,\"h\":123.609375}"
+  }
+ ],
+ "red": [
+  {
+   "where": "headline",
+   "ok": false,
+   "detail": "null"
+  },
+  {
+   "where": "no header buttons",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "where": "no right block",
+   "ok": false,
+   "detail": "-1"
+  },
+  {
+   "where": "three steps",
+   "ok": true,
+   "detail": "[\"Pick the pieces.\",\"Send it with your queries.\",\"See what gets replies.\"]"
+  },
+  {
+   "where": "exactly one filled button",
+   "ok": true,
+   "detail": "[\"Add a letter to send it\"]"
+  },
+  {
+   "where": "no hero",
+   "ok": false,
+   "detail": "1"
+  },
+  {
+   "where": "steps left = header left",
+   "ok": false,
+   "detail": "112 vs undefined"
+  },
+  {
+   "where": "workspace left = headline left",
+   "ok": false,
+   "detail": "408 vs undefined"
+  },
+  {
+   "where": "workspace right = header right",
+   "ok": false,
+   "detail": "1400 vs undefined"
+  },
+  {
+   "where": "header → desk 48",
+   "ok": false,
+   "detail": "105.75"
+  },
+  {
+   "where": "Results left/right = the header's",
+   "ok": false,
+   "detail": "{\"l\":112,\"r\":1400,\"t\":918.953125,\"b\":1042.5625,\"h\":123.609375}"
+  }
+ ]
+}

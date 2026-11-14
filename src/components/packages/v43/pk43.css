@@ -92,6 +92,9 @@
    lead, the name in the typewriter at 30, the sent line, an outline "Change" 38 tall; the menu a white 300-wide
    listbox under it. Hidden under 1100 wide — the list's flag still names the package. ══ */
 @media (min-width: 768px) {
+  /* the right column takes the block's own width (≤ 384), not the Query Centre's 400–560 for "this week": at 1280 the
+     QC's 400 floor left "4 packages" 6px short of its own width (P11). The art column and gap stay the QC's. */
+  .pk43 .qc151.qc153 > .qc1531-hd.pk43-hd.pk43-hd { grid-template-columns: 268px minmax(0, 1fr) auto; }
   .pk43 .qc1531-hd.pk43-hd > .qc1531-rc { align-items: center; min-width: 0; }
   .pk43 .pk43-go { position: relative; display: grid; grid-template-columns: 76px minmax(0, 1fr); column-gap: 20px; align-items: center; min-width: 0; max-width: 384px; color: #f4eee5; }
   .pk43 .pk43-go-ic { width: 76px; height: 76px; border-radius: 20px; display: grid; place-items: center; background: rgba(244, 238, 229, .1); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .45); color: #f4eee5; }

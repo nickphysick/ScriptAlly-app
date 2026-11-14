@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "L11",
+  "where": "pk40-ms: the list (v43, re-pointed from the tiles) renders",
+  "ok": true,
+  "detail": "the list (v43, re-pointed from the tiles)"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-ms: results renders",
+  "ok": true,
+  "detail": "results"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-ms: the builder renders",
+  "ok": true,
+  "detail": "builder"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-new: day one (the brand-new page; v43, re-pointed from v26's hero) renders",
+  "ok": true,
+  "detail": "day one (the brand-new page; v43, re-pointed from v26's hero)"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-new: results renders",
+  "ok": true,
+  "detail": "results"
+ },
+ {
+  "lock": "L11",
+  "where": "pk40-new: the builder renders",
+  "ok": true,
+  "detail": "builder"
+ },
+ {
+  "lock": "L11",
+  "where": "no console errors",
+  "ok": true,
+  "detail": "[]"
+ }
+]

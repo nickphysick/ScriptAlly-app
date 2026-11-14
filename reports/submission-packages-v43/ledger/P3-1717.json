@@ -1,0 +1,66 @@
+{
+ "green": [
+  {
+   "where": "population: header, rows, workspace, Results",
+   "ok": true,
+   "detail": "{\"hd\":{\"l\":112,\"r\":1677,\"t\":143.75,\"b\":370.890625,\"h\":227.140625},\"title\":{\"l\":408,\"r\":1347.03125,\"t\":182.34375,\"b\":239.03125,\"h\":56.6875},\"rows\":{\"l\":112,\"r\":380,\"t\":470.1875,\"b\":994.1875,\"h\":524},\"steps\":null,\"work\":{\"l\":408,\"r\":1677,\"t\":418.890625,\"b\":1315.578125,\"h\":896.6875},\"desk\":{\"l\":112,\"r\":1677,\"t\":418.890625,\"b\":1315.578125,\"h\":896.6875},\"res\":{\"l\":112,\"r\":1677,\"t\":1363.578125,\"b\":2817.3125,\"h\":1453.734375}}"
+  },
+  {
+   "where": "list left = header left",
+   "ok": true,
+   "detail": "112 vs 112"
+  },
+  {
+   "where": "workspace left = headline left",
+   "ok": true,
+   "detail": "408 vs 408"
+  },
+  {
+   "where": "workspace right = header right",
+   "ok": true,
+   "detail": "1677 vs 1677"
+  },
+  {
+   "where": "Results left = header left",
+   "ok": true,
+   "detail": "112 vs 112"
+  },
+  {
+   "where": "Results right = header right",
+   "ok": true,
+   "detail": "1677 vs 1677"
+  }
+ ],
+ "red": [
+  {
+   "where": "population: header, rows, workspace, Results",
+   "ok": true,
+   "detail": "{\"hd\":{\"l\":112,\"r\":1677,\"t\":143.75,\"b\":370.890625,\"h\":227.140625},\"title\":{\"l\":408,\"r\":1347.03125,\"t\":182.34375,\"b\":239.03125,\"h\":56.6875},\"rows\":{\"l\":112,\"r\":1677,\"t\":448.1875,\"b\":972.1875,\"h\":524},\"steps\":null,\"work\":{\"l\":112,\"r\":1677,\"t\":1044.1875,\"b\":1940.875,\"h\":896.6875},\"desk\":{\"l\":112,\"r\":1677,\"t\":396.890625,\"b\":1940.875,\"h\":1543.984375},\"res\":{\"l\":112,\"r\":1677,\"t\":1966.875,\"b\":3420.609375,\"h\":1453.734375}}"
+  },
+  {
+   "where": "list left = header left",
+   "ok": true,
+   "detail": "112 vs 112"
+  },
+  {
+   "where": "workspace left = headline left",
+   "ok": false,
+   "detail": "112 vs 408"
+  },
+  {
+   "where": "workspace right = header right",
+   "ok": true,
+   "detail": "1677 vs 1677"
+  },
+  {
+   "where": "Results left = header left",
+   "ok": true,
+   "detail": "112 vs 112"
+  },
+  {
+   "where": "Results right = header right",
+   "ok": true,
+   "detail": "1677 vs 1677"
+  }
+ ]
+}

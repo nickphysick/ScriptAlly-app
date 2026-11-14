@@ -160,12 +160,13 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       {/* v41 Phase 1: the page is the Dashboard v2 / Contact list language — no header card, explainer, raised panel or
           label tiles (each is replaced by a v41 part, below) */}
       <div ref={rootRef} className={`p6 p41 pk43${dayOne ? " pk43--day1" : ""}`} data-pk26="page" data-pk41="page" data-pk43-state={dayOne ? "day-one" : "packages"}>
+        {/* v43 Phase 4: the Query Centre's collapsed bar, FIRST in the page (as the Query Centre's and To-do's) so it is
+            sticky for the whole page; it takes no space and shows once the navy header has gone under the sheet's lip */}
+        {dayOne ? null : <Pk43Slim title={packagesTitle(live.length)} going={going?.packageName ?? null} onNew={() => setDialog({ m: "new" })} />}
         {/* day one: the same header, "No packages yet", no buttons and no right block */}
         <Pk43Header title={dayOne ? DAY_ONE_TITLE : packagesTitle(live.length)} msTitle={activeMs?.title ?? null}
           onNew={dayOne ? null : () => setDialog({ m: "new" })} onHow={dayOne ? null : () => setHow(true)}
           right={!dayOne && going ? <Pk43GoingOut model={model} going={going} onChosen={chosen} /> : null} />
-        {/* v43 Phase 4: the Query Centre's collapsed bar, shown once the navy header has gone under the sheet's lip */}
-        {dayOne ? null : <Pk43Slim title={packagesTitle(live.length)} going={going?.packageName ?? null} onNew={() => setDialog({ m: "new" })} />}
         {/* v43 Phase 2: the desk, 268 / 28 under the header — "Your packages" on the left (v42's stat tiles are retired),
             the open package in ONE workspace surface on the right, so its left edge is the headline's. With no live
             package, v42's empty card takes the builder's place in the workspace. */}

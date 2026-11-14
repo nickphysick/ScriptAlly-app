@@ -62,7 +62,7 @@ class Ledger {
 
 /* Each lock's break, applied in the page. */
 const MUTATIONS: Record<string, { css?: string; js?: string }> = {
-  L1: { js: `new MutationObserver((_, o) => { const h = document.querySelector('[data-pk41="header"]'); if (h && !h.querySelector('[data-pk41="batch"]')) { const d = document.createElement("div"); d.setAttribute("data-pk41", "batch"); h.appendChild(d); } }).observe(document, { subtree: true, childList: true });` },
+  L1: { js: `new MutationObserver((_, o) => { const h = document.querySelector('[data-pk43="header"]'); if (h && !h.querySelector('[data-pk41="batch"]')) { const d = document.createElement("div"); d.setAttribute("data-pk41", "batch"); h.appendChild(d); } }).observe(document, { subtree: true, childList: true });` },
   L2: { css: `.p41 .p42-tile { flex: none !important; width: 320px !important; max-width: none !important; }` },
   L3: { css: `.p41 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr) !important; } .p41 .p42-band-sg { background: #fff !important; }` },
   L4: { css: `.p41 .p41-ic { background: #583a5a !important; } .p41 .p41-bld .p93-bh-ic { background: #2e5641 !important; }` },
@@ -79,7 +79,7 @@ async function open(page: Page, size: { width: number; height: number }, opts: {
   if (m?.js) await page.addInitScript(m.js);
   if (m?.css) await page.addInitScript((css) => document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st); }), m.css);
   await openRoute(page, "/queries/packages", size);
-  await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 });
+  await page.locator(`${pg} [data-pk43="header"]`).first().waitFor({ state: "visible", timeout: 30_000 });
   await page.waitForTimeout(900);
 }
 const SC = `[...document.querySelectorAll(".wpg-scroll")].find((x) => x.querySelector('[data-pk41="page"]'))`;
@@ -93,7 +93,7 @@ async function scrollTo(page: Page, sel: string, offset = 0) {
   await page.waitForTimeout(350);
 }
 const near = (a: number | undefined | null, b: number, t = 1) => typeof a === "number" && Math.abs(a - b) <= t;
-const tile = (page: Page, id: string) => page.locator(`${pg} [data-pk42-tile="${id}"]`).first();
+const tile = (page: Page, id: string) => page.locator(`${pg} [data-pk43-row="${id}"]`).first();
 const openPkg = async (page: Page, id: string) => { await tile(page, id).click(); await page.waitForTimeout(600); };
 const dump = () => JSON.parse(seed("--dump").trim().split("\n").pop()!) as Record<string, { createdDate?: string; status?: string } | null>;
 
@@ -112,7 +112,7 @@ for (const size of SIZES) {
     const r = await page.evaluate((sc) => {
       const s = (0, eval)(sc) as HTMLElement; const root = document.querySelector('[data-pk41="page"]') as HTMLElement;
       return {
-        tiles: root.querySelectorAll("[data-pk42-tile]").length,
+        tiles: root.querySelectorAll("[data-pk43-row]").length,
         gone: ['[data-pk41="rail"]', '[data-pk41="batch"]', "[data-pk41-row]", '[data-pk41="batch-change"]', '[data-pk41="batch-picker"]', '[data-pk39="dlg-cols"]'].map((q) => [q, document.querySelectorAll(q).length] as const),
         scrollW: s.scrollWidth, clientW: s.clientWidth, docW: document.documentElement.scrollWidth, winW: innerWidth,
       };
@@ -130,7 +130,7 @@ for (const size of SIZES) {
       L.check(`${where}: no swatch`, n?.col === 0, `${n?.col}`);
       L.check(`${where}: no Colour field`, n?.label === 0, `${n?.label}`);
     };
-    await page.locator(`${pg} [data-pk41="new"]`).click(); await page.waitForTimeout(700);
+    await page.locator(`${pg} [data-pk43="new"]`).click(); await page.waitForTimeout(700);
     await noColour("New drawer", '[data-pk391="pd"]');
     await page.keyboard.press("Escape"); await page.waitForTimeout(500);
     await openPkg(page, "pk40-ready"); await scrollTo(page, '[data-pk41="builder-frame"]', 40);
@@ -143,7 +143,7 @@ for (const size of SIZES) {
     L.done(19);
   });
 
-  test(`L2 tiles · ${at}`, async ({ page }) => {
+  /* RETIRED by Submission packages v43 — see tests/e2e/RETIRED-submission-packages-v43.md */ test.skip(`L2 tiles · ${at}`, async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger(`L2-${at}`);
     seed();
@@ -153,15 +153,15 @@ for (const size of SIZES) {
     await open(page, size);
     const g = await page.evaluate(() => {
       const q = (s: string) => document.querySelector(`[data-pk41="page"] ${s}`) as HTMLElement | null;
-      const rows = q('[data-pk42="tiles"]'), hd = q('[data-pk41="header"]'), bld = q('[data-pk41="builder"]');
+      const rows = q('[data-pk43="list"]'), hd = q('[data-pk43="header"]'), bld = q('[data-pk41="builder"]');
       const r = (e: Element | null) => (e ? e.getBoundingClientRect() : null);
-      const tiles = [...document.querySelectorAll('[data-pk41="page"] [data-pk42-tile]')] as HTMLElement[];
+      const tiles = [...document.querySelectorAll('[data-pk41="page"] [data-pk43-row]')] as HTMLElement[];
       return {
         rows: r(rows) ? { t: r(rows)!.top, b: r(rows)!.bottom } : null, hd: r(hd)?.bottom ?? null, bld: r(bld)?.top ?? null, inside: !!(bld && rows && bld.contains(rows)),
         ids: tiles.map((t) => t.dataset.pk42Tile!), widths: tiles.map((t) => t.getBoundingClientRect().width),
         foot: Object.fromEntries(tiles.map((t) => [t.dataset.pk42Tile!, [t.querySelector(".p42-big")?.textContent ?? "", t.querySelector(".p42-bl")?.textContent ?? ""].join(" ").trim()])),
         cb: tiles.filter((t) => t.querySelector('[data-pk42="current-batch"]')).map((t) => t.dataset.pk42Tile!),
-        link: q('[data-pk42="retired-toggle"]')?.textContent ?? null,
+        link: q('[data-pk43="retired-toggle"]')?.textContent ?? null,
       };
     });
     L.check("population: the row, the header and the builder", !!g.rows && g.hd !== null && g.bld !== null, JSON.stringify([g.rows, g.hd, g.bld]));
@@ -180,10 +180,10 @@ for (const size of SIZES) {
     L.check("exactly one Current batch", g.cb.length === 1, JSON.stringify(g.cb));
     L.check("…and it is the active package", g.cb[0] === stored && !!stored, `${g.cb[0]} / ${stored}`);
     L.check("Retired (1)", g.link === "Retired (1)", `${g.link}`);
-    await page.locator(`${pg} [data-pk42="retired-toggle"]`).click(); await page.waitForTimeout(400);
+    await page.locator(`${pg} [data-pk43="retired-toggle"]`).click(); await page.waitForTimeout(400);
     const op = await page.evaluate(() => { const t = document.querySelector('[data-pk41="page"] [data-pk42-tile="pk40-old"]'); return t ? Number(getComputedStyle(t).opacity) : null; });
     L.check("shown: the retired tile at 65%", near(op, 0.65, 0.02), `${op}`);
-    await page.locator(`${pg} [data-pk42="retired-toggle"]`).click(); await page.waitForTimeout(400);
+    await page.locator(`${pg} [data-pk43="retired-toggle"]`).click(); await page.waitForTimeout(400);
     L.check("hidden again", (await tile(page, "pk40-old").count()) === 0, "still there");
     /* a click opens that package and does not move the page */
     await setScroll(page, 60);
@@ -197,14 +197,14 @@ for (const size of SIZES) {
     L.check("the open tile computes the 2px navy ring", ring.startsWith(`${NAVY} 0px 0px 0px 2px`), ring);
     /* no retired package: no link */
     fix("--one-package");
-    await page.reload(); await page.locator(`${pg} [data-pk42="tiles"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(800);
-    L.check("no retired: no Retired link", (await page.locator(`${pg} [data-pk42="retired-toggle"]`).count()) === 0, "present");
-    L.check("one package: one tile", (await page.locator(`${pg} [data-pk42-tile]`).count()) === 1, String(await page.locator(`${pg} [data-pk42-tile]`).count()));
+    await page.reload(); await page.locator(`${pg} [data-pk43="list"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(800);
+    L.check("no retired: no Retired link", (await page.locator(`${pg} [data-pk43="retired-toggle"]`).count()) === 0, "present");
+    L.check("one package: one tile", (await page.locator(`${pg} [data-pk43-row]`).count()) === 1, String(await page.locator(`${pg} [data-pk43-row]`).count()));
     seed();
     L.done(23);
   });
 
-  test(`L3 builder · ${at}`, async ({ page }) => {
+  /* RETIRED by Submission packages v43 — see tests/e2e/RETIRED-submission-packages-v43.md */ test.skip(`L3 builder · ${at}`, async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger(`L3-${at}`);
     seed();
@@ -241,7 +241,7 @@ for (const size of SIZES) {
     L.check("a Ready package offers “Use for current batch”", (await use.count()) === 1 && (await use.textContent())?.trim() === "Use for current batch", "missing");
     await use.click(); await page.waitForTimeout(1800);
     L.check("…which sets the active package", activeStored() === "pk40-ready", `${activeStored()}`);
-    const cb = await page.evaluate(() => [...document.querySelectorAll('[data-pk41="page"] [data-pk42-tile]')].filter((t) => t.querySelector('[data-pk42="current-batch"]')).map((t) => (t as HTMLElement).dataset.pk42Tile));
+    const cb = await page.evaluate(() => [...document.querySelectorAll('[data-pk41="page"] [data-pk43-row]')].filter((t) => t.querySelector('[data-pk42="current-batch"]')).map((t) => (t as HTMLElement).dataset.pk42Tile));
     L.check("…and the tag moves to that tile", JSON.stringify(cb) === JSON.stringify(["pk40-ready"]), JSON.stringify(cb));
     L.check("…and its button goes", (await page.locator(`${pg} [data-pk42="use-batch"]`).count()) === 0, "still there");
     seed();
@@ -304,7 +304,7 @@ for (const size of SIZES) {
       const d = document.querySelector('[data-pk391="pd"]');
       return d ? { h: d.querySelector("#p6-pdT")?.textContent ?? null, sub: d.querySelector('[data-pk42="drawer-sub"]')?.textContent ?? null, hint: d.querySelector('[data-pk42="icon-hint"]')?.textContent ?? null, col: d.querySelectorAll("[data-col]").length, icons: d.querySelectorAll('[data-pk391="pd-ics"] [role=radio]').length } : null;
     });
-    await page.locator(`${pg} [data-pk41="new"]`).click(); await page.waitForTimeout(700);
+    await page.locator(`${pg} [data-pk43="new"]`).click(); await page.waitForTimeout(700);
     const n = await read();
     L.check("New: open", !!n, "missing");
     L.check("New: the title", n?.h === "Making a new package", `${n?.h}`);
@@ -330,35 +330,31 @@ for (const size of SIZES) {
   test(`L6 empty · ${at}`, async ({ page }) => {
     test.setTimeout(240_000);
     const L = new Ledger(`L6-${at}`);
-    seed(); fix("--no-packages");
+    /* v43 (re-pointed): with no package at all the page is DAY ONE (pk43 P10 holds it), so this case keeps only its
+       "only retired packages" half — the card, "Retired (1)" and no builder */
+    seed(); fix("--retired-only");
     await open(page, size);
     const read = () => page.evaluate(() => {
       const q = (s: string) => document.querySelector(`[data-pk41="page"] ${s}`) as HTMLElement | null;
       const c = q('[data-pk42="empty"]');
       return { card: !!c && c.getBoundingClientRect().height > 0, h: q('[data-pk42="empty-title"]')?.textContent ?? null, btn: q('[data-pk42="empty-new"]')?.textContent ?? null,
-        tiles: document.querySelectorAll('[data-pk41="page"] [data-pk42-tile]').length, builder: document.querySelectorAll('[data-pk41="page"] [data-pk41="builder"]').length, link: q('[data-pk42="retired-toggle"]')?.textContent ?? null };
+        tiles: document.querySelectorAll('[data-pk41="page"] [data-pk43-row]').length, builder: document.querySelectorAll('[data-pk41="page"] [data-pk41="builder"]').length, link: q('[data-pk43="retired-toggle"]')?.textContent ?? null };
     });
     const a = await read();
-    L.check("no packages: the card", a.card, String(a.card));
+    L.check("only retired: the card", a.card, String(a.card));
     L.check("its heading", a.h === "No packages yet", `${a.h}`);
     L.check("its button", a.btn === "+ New package", `${a.btn}`);
     L.check("no tiles", a.tiles === 0, `${a.tiles}`);
-    L.check("no builder", a.builder === 0, `${a.builder}`);
-    L.check("no Retired link", a.link === null, `${a.link}`);
     const btn = page.locator(`${pg} [data-pk42="empty-new"]`).first();
     const canPress = (await btn.count()) > 0 && (await btn.isVisible());
     if (canPress) { await btn.click(); await page.waitForTimeout(700); }
     const drw = page.locator('[data-pk391="pd"] #p6-pdT');
     L.check("the button opens the New drawer", canPress && (await drw.count()) > 0 && ((await drw.textContent()) ?? "") === "Making a new package", canPress ? "not open" : "no visible button");
     await page.keyboard.press("Escape"); await page.waitForTimeout(400);
-    seed(); fix("--retired-only");
-    await page.reload(); await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1200);
-    const b = await read();
-    L.check("only retired: the card", b.card, String(b.card));
-    L.check("only retired: Retired (1)", b.link === "Retired (1)", `${b.link}`);
-    L.check("only retired: no builder", b.builder === 0, `${b.builder}`);
+    L.check("only retired: Retired (1)", a.link === "Retired (1)", `${a.link}`);
+    L.check("only retired: no builder", a.builder === 0, `${a.builder}`);
     seed();
-    L.done(10);
+    L.done(7);
   });
 
   test(`L7 how it works · ${at}`, async ({ page, browser }) => {
@@ -367,7 +363,7 @@ for (const size of SIZES) {
     await open(page, size);
     await liftMotionSuppression(page);
     const st4 = () => page.evaluate(() => { const e = document.querySelector('[data-pk42-station="4"]'); return e ? Number(getComputedStyle(e).opacity) : null; });
-    await page.locator(`${pg} [data-pk41="how"]`).click();
+    await page.locator(`${pg} [data-pk43="how"]`).click();
     const t0 = Date.now();
     await page.locator('[data-pk42="hw"]').waitFor({ state: "visible", timeout: 5000 });
     await page.waitForTimeout(Math.max(0, 1000 - (Date.now() - t0)));
@@ -395,7 +391,7 @@ for (const size of SIZES) {
       const p2 = await ctx.newPage();
       await open(p2, size, { reduce: true });
       await liftMotionSuppression(p2);
-      await p2.locator(`${pg} [data-pk41="how"]`).click();
+      await p2.locator(`${pg} [data-pk43="how"]`).click();
       await p2.locator('[data-pk42="hw"]').waitFor({ state: "visible", timeout: 5000 }); await p2.waitForTimeout(150);
       const ops = await p2.evaluate(() => [1, 2, 3, 4].map((n) => { const e = document.querySelector(`[data-pk42-station="${n}"]`); return e ? Number(getComputedStyle(e).opacity) : null; }));
       L.check("reduced motion: all four stations fully visible at open", ops.every((o) => o === 1), JSON.stringify(ops));
@@ -419,9 +415,8 @@ for (const size of SIZES) {
     L.check("…on one line (≤ 60 tall)", (r.bh ?? 99) <= 60, `${r.bh}`);
     L.check("…its text not cut", r.sw !== null && r.cw !== null && r.sw <= r.cw, `${r.sw} / ${r.cw}`);
     L.check("the folder tab takes the strip's pink", r.tab === "rgb(251, 239, 233)", `${r.tab}`);
-    L.check("the hawk is pinned (fixed)", r.hawk && r.pos === "fixed", `${r.pos}`);
-    L.check("…212 ±2 tall", near(r.hh, 212, 2), `${r.hh}`);
-    L.check("…on the viewport's foot ±1", near(r.hb, r.vh), `${r.hb} / ${r.vh}`);
-    L.done(7);
+    /* v43 (re-pointed): the pinned hawk is retired (pk43 P6 holds "nothing pinned") */
+    L.check("no pinned hawk", !r.hawk, String(r.hawk));
+    L.done(5);
   });
 }

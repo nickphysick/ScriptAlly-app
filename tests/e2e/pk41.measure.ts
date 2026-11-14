@@ -79,7 +79,7 @@ async function open(page: Page, size: { width: number; height: number }) {
   if (m?.js) await page.addInitScript(m.js);
   if (m?.css) await page.addInitScript((css) => document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = css; document.head.appendChild(st); }), m.css);
   await openRoute(page, "/queries/packages", size);
-  await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 });
+  await page.locator(`${pg} [data-pk43="header"]`).first().waitFor({ state: "visible", timeout: 30_000 });
   await page.waitForTimeout(900);
 }
 const SC = `[...document.querySelectorAll(".wpg-scroll")].find((x) => x.querySelector('[data-pk41="page"]'))`;
@@ -111,7 +111,7 @@ for (const size of SIZES) {
       return {
         img: cs.backgroundImage, scrollW: s.scrollWidth, clientW: s.clientWidth, docW: document.documentElement.scrollWidth, winW: innerWidth,
         gone: ['[data-pk39="hd-card"]', '[data-pk38="labels"]', '[data-pk392="panel"]', '[data-pk39="tip"]', '[data-pk39="kicker"]', ".p8-bnr", ".p9-ag3", '[data-pk41="list"]', '[data-pk41="list-bar"]', "[data-pk41-tab]", '[data-pk41="rail"]', '[data-pk41="batch"]'].map((q) => [q, root.querySelectorAll(q).length]),
-        headerImgs: root.querySelectorAll('[data-pk41="header"] img').length, kicker: root.textContent?.includes("Build, view and edit") ?? false, rows: root.querySelectorAll("[data-pk42-tile]").length, /* v42: the stat tiles (re-pointed from the rail rows) */
+        headerImgs: root.querySelectorAll('[data-pk43="header"] img').length, kicker: root.textContent?.includes("Build, view and edit") ?? false, rows: root.querySelectorAll("[data-pk43-row]").length, /* v42: the stat tiles (re-pointed from the rail rows) */
       };
     }, SC);
     const [ours, theirs] = await Promise.all(["/images/packages/packages-pattern.svg", "/images/contact/doodle-tile.svg"].map((u) => page.evaluate(async (u) => (await (await fetch(u)).text()).match(/stroke-opacity="([\d.]+)"/)?.[1] ?? null, u)));
@@ -121,7 +121,8 @@ for (const size of SIZES) {
     L.check("pattern at the Contact list's opacity", !!ours && ours === theirs, `packages ${ours} · contact ${theirs}`);
     for (const [q, n] of r.gone) L.check(`retired: ${q}`, n === 0, `${n} in the DOM`);
     L.check("no BUILD, VIEW AND EDIT", !r.kicker, String(r.kicker));
-    L.check("no header art", r.headerImgs === 0, `${r.headerImgs}`);
+    /* v43 (re-pointed): the Archivist stands in the navy header — exactly one drawing there (was: no header art) */
+    L.check("the header's one drawing", r.headerImgs === 1, `${r.headerImgs}`);
     L.check("no horizontal overflow (scroller)", r.scrollW <= r.clientW, `${r.scrollW} > ${r.clientW}`);
     L.check("no horizontal overflow (document)", r.docW <= r.winW, `${r.docW} > ${r.winW}`);
     L.done(14);
@@ -156,12 +157,12 @@ for (const size of SIZES) {
     L.check("✕ hides it", (await page.locator('[data-pk41="banner"]').count()) === 0, "still there");
     const stored = JSON.parse(fix("--banner").trim().split("\n").pop()!).hidden;
     L.check("the dismissal is stored on the user", stored === true, String(stored));
-    await page.reload(); await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
+    await page.reload(); await page.locator(`${pg} [data-pk43="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
     L.check("…and stays hidden after a reload", (await page.locator('[data-pk41="banner"]').count()) === 0, "back after reload");
     const tab2 = await page.evaluate(() => { const t = document.querySelector(".ws-ftab"); return t ? getComputedStyle(t).backgroundColor : null; });
     L.check("the folder tab is cream again", tab2 !== "rgb(251, 239, 233)", `${tab2}`);
     /* How it works brings it back */
-    await page.locator(`${pg} [data-pk41="how"]`).click(); await page.waitForTimeout(500);
+    await page.locator(`${pg} [data-pk43="how"]`).click(); await page.waitForTimeout(500);
     const link = page.locator('[data-pk41="show-founding"]');
     L.check("How it works offers the note back", (await link.count()) === 1, `${await link.count()}`);
     if (await link.count()) { await link.click(); await page.waitForTimeout(1500); }
@@ -174,14 +175,14 @@ for (const size of SIZES) {
     L.done(15);
   });
 
-  test(`L3 header · ${at}`, async ({ page }) => {
+  /* RETIRED by Submission packages v43 — see tests/e2e/RETIRED-submission-packages-v43.md */ test.skip(`L3 header · ${at}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L3-${at}`);
     seed();
     await open(page, size);
     const h = await page.evaluate(() => {
       const root = document.querySelector('[data-pk41="page"]') as HTMLElement;
-      const el = root.querySelector('[data-pk41="header"]') as HTMLElement, sub = el.querySelector('[data-pk41="sub"]') as HTMLElement, ttl = el.querySelector('[data-pk41="title"]') as HTMLElement;
+      const el = root.querySelector('[data-pk43="header"]') as HTMLElement, sub = el.querySelector('[data-pk41="sub"]') as HTMLElement, ttl = el.querySelector('[data-pk41="title"]') as HTMLElement;
       const res = root.querySelector('[data-pk41="results"]') as HTMLElement | null, resTop = res ? res.getBoundingClientRect().top : Infinity;
       const NAVY = "rgb(45, 58, 80)";
       /* every box above the results that paints the navy as its own ground, and is at least 200 × 40 */
@@ -210,7 +211,7 @@ for (const size of SIZES) {
     seed();
     await open(page, size);
     const g = await page.evaluate(() => {
-      const hd = document.querySelector('[data-pk41="page"] [data-pk41="header"]') as HTMLElement, bt = document.querySelector('[data-pk41="page"] [data-pk41="batch"]') as HTMLElement | null;
+      const hd = document.querySelector('[data-pk41="page"] [data-pk43="header"]') as HTMLElement, bt = document.querySelector('[data-pk41="page"] [data-pk41="batch"]') as HTMLElement | null;
       const a = hd.getBoundingClientRect(), b = bt?.getBoundingClientRect();
       return { inside: !!bt && hd.contains(bt), l: b ? b.left - a.left : null, r: b ? a.right - b.right : null, bot: b ? a.bottom - b.bottom : null };
     });
@@ -237,7 +238,7 @@ for (const size of SIZES) {
     L.check("its letter", !!steps.let && (chips.let ?? "").endsWith(steps.let), `${chips.let} / ${steps.let}`);
     L.check("its synopsis", size.width > 1400 ? !!steps.syn && (chips.syn ?? "").endsWith(steps.syn) && chips.synShown : !chips.synShown, `${chips.syn} / ${steps.syn} shown ${chips.synShown}`);
     /* Change: another package through the existing writer */
-    await scrollTo(page, '[data-pk41="header"]', 300);
+    await scrollTo(page, '[data-pk43="header"]', 300);
     await page.locator(`${pg} [data-pk41="batch-change"]`).click(); await page.waitForTimeout(300);
     const opts = await page.locator('[data-pk41="batch-picker"] [data-pk41-pick]').evaluateAll((els) => els.map((e) => e.getAttribute("data-pk41-pick")));
     L.check("Change lists the Ready and Out-with-agents packages", JSON.stringify([...opts].sort()) === JSON.stringify(["pk40-ready", "pk40-std", "pk40-std2"]), JSON.stringify(opts));
@@ -249,11 +250,11 @@ for (const size of SIZES) {
     L.check("…and the manuscript's active package is written", stored2 === "pk40-ready", `${stored2}`);
     /* no active package */
     fix("--no-active");
-    await page.reload(); await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
+    await page.reload(); await page.locator(`${pg} [data-pk43="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
     L.check("no active package: “Choose one →”", (await page.locator(`${pg} [data-pk41="batch-choose"]`).textContent())?.trim() === "Choose one →", "missing");
     /* no packages */
     fix("--no-packages");
-    await page.reload(); await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
+    await page.reload(); await page.locator(`${pg} [data-pk43="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
     L.check("no packages: the strip is absent", (await page.locator(`${pg} [data-pk41="batch"]`).count()) === 0, "present");
     seed();
     L.done(15);
@@ -316,7 +317,7 @@ for (const size of SIZES) {
     L.check("its rows scroll inside it", st.oy === "auto" || st.oy === "scroll", st.oy);
     /* no packages: the empty line; nothing retired */
     fix("--no-packages");
-    await page.reload(); await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
+    await page.reload(); await page.locator(`${pg} [data-pk43="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
     const z = await page.evaluate(() => ({ rail: document.querySelectorAll('[data-pk41="page"] [data-pk41="rail"]').length, ret: document.querySelectorAll('[data-pk41="page"] [data-pk41="retired-toggle"]').length }));
     L.check("no packages: no rail (the first-run builder only) and no Retired", z.ret === 0, `${z.rail} rail · ${z.ret} retired`);
     seed();
@@ -376,7 +377,7 @@ for (const size of SIZES) {
     L.done(7);
   });
 
-  test(`L8 hawk · ${at}`, async ({ page }) => {
+  /* RETIRED by Submission packages v43 — see tests/e2e/RETIRED-submission-packages-v43.md */ test.skip(`L8 hawk · ${at}`, async ({ page }) => {
     test.setTimeout(180_000);
     const L = new Ledger(`L8-${at}`);
     await open(page, size);
@@ -412,7 +413,7 @@ for (const size of SIZES) {
     test.setTimeout(180_000);
     const L = new Ledger(`L9-${at}`);
     await open(page, size);
-    await page.locator(`${pg} [data-pk41="how"]`).click(); await page.waitForTimeout(500);
+    await page.locator(`${pg} [data-pk43="how"]`).click(); await page.waitForTimeout(500);
     const titles: string[] = []; let text = "";
     for (let i = 0; i < 6; i++) {
       const t = (await page.locator('[data-pk41="hw-title"]').textContent())?.trim() ?? "";
@@ -442,7 +443,7 @@ async function proHasBanner(browser: Browser, size: { width: number; height: num
     await p.getByRole("button", { name: /^Sign in$/ }).last().click();
     await expect(p.locator("#au-pw")).toHaveCount(0, { timeout: 30_000 });
     await p.goto("/queries/packages");
-    const header = await p.locator('[data-pk41="page"] [data-pk41="header"], [data-pk26="hero"]').first().waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
+    const header = await p.locator('[data-pk41="page"] [data-pk43="header"], [data-pk26="hero"]').first().waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
     await p.waitForTimeout(2000);
     return { header, banner: await p.locator('[data-pk41="banner"]').count() };
   } finally { await ctx.close(); }
