@@ -1,0 +1,44 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * The rail menu (shell rail menu v1, 14 Nov; design-refs/shell-rail-menu-v1.html — `.rmenu`, `.rm-row`,
+ * `.rm-row.cur`, `.rm-pro`, values read from the ref's CSS). Ground, radius and shadow are the retired More panel's.
+ * Portalled to document.body, so every rule is scoped to `.rmenu` and the menu hands inheritance back from brand.tsx
+ * itself. Over the page and the rail (z 72, as More was), under any dialog.
+ */
+.rmenu {
+  /* ⚠️ NO `overflow` HERE: it would clip the ::before bridge below, and the gap it covers would close the menu (SRM-E3
+     caught exactly that). The longest menu is five rows, 204px. */
+  position: fixed; z-index: 72; box-sizing: border-box; width: 224px;
+  padding: 8px; border-radius: 14px; background: #1f2a3b;
+  box-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.6), 0 6px 14px -6px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.08);
+  display: flex; flex-direction: column; gap: 2px;
+  font-family: var(--sp-serif);
+  opacity: 0; transform: translateX(-6px);
+}
+/* it enters over 160ms ease-out; it leaves at once (unmounted) */
+.rmenu.is-in { opacity: 1; transform: none; transition: opacity 0.16s ease-out, transform 0.16s ease-out; }
+/* the bridge: the space between the row's right edge and the menu belongs to the menu, so the pointer never
+   crosses a dead gap on its way over (RailMenu.tsx sets --rm-bridge from the measured row) */
+.rmenu::before {
+  content: ""; position: absolute; top: 0; bottom: 0; right: 100%; width: var(--rm-bridge, 8px);
+}
+.rmenu *, .rmenu *::before, .rmenu *::after { box-sizing: border-box; }
+.rmenu :where(span, p, div, button) { font-family: inherit; }
+.rmenu .rm-row {
+  flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; height: 36px;
+  padding: 0 12px; border: 0; border-radius: 8px; background: transparent; color: rgba(var(--ink-cream-rgb), 0.86);
+  font: 400 15px/1 var(--sp-serif); text-align: left; white-space: nowrap; cursor: pointer;
+}
+.rmenu .rm-row:hover { background: rgba(var(--ink-cream-rgb), 0.07); color: rgba(var(--ink-cream-rgb), 0.95); }
+.rmenu .rm-row.cur { background: rgba(var(--ink-terra-rgb), 0.2); color: var(--ink-bright); font-weight: 600; }
+.rmenu .rm-row:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: -2px; }
+.rmenu .rm-lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: inherit; color: inherit; }
+.rmenu .rm-pro {
+  flex: none; padding: 0 5px; height: 15px; border-radius: 4px;
+  font: 600 9px/15px Inter, system-ui, sans-serif; letter-spacing: 0.02em; color: rgba(var(--ink-cream-rgb), 0.78);
+  box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.32);
+}
+
+@media (prefers-reduced-motion: reduce) { .rmenu, .rmenu.is-in { transition: none; transform: none; } }

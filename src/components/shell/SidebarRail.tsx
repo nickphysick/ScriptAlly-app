@@ -12,6 +12,9 @@
  * (`railTargetFor`). The pages of a place are the folder tabs in the bar. Rail v2's More panel and per-page rail
  * flags are deleted. The five rows carry no tooltip: the label is on the row.
  *
+ * SHELL RAIL MENU v1 (14 Nov; ref design-refs/shell-rail-menu-v1.html): hovering a row whose section has more than one
+ * page opens that section's pages beside the rail (RailMenu.tsx). The row's click still goes to `railTargetFor`.
+ *
  * ⚠️ IT OWNS NO NAVIGATION STATE. Which row is lit is the shell's `hit` (the route); the rows are `workspaceNav`'s
  * sections, the one nav model the expanded sidebar reads too.
  *
@@ -22,6 +25,7 @@ import React from "react";
 import { ShellHit, ShellSection } from "../../lib/workspaceShell";
 import { railSectionFor, railTargetFor, SETTINGS_RAIL_LABELS } from "../../lib/workspaceNav";
 import { ACCOUNT_ROUTES, AccountSectionId } from "../../lib/accountRoutes";
+import { RailMenuApi, useRailMenu } from "./RailMenu";
 import "./sidebarRail.css";
 
 /** The handlers a rail anchor takes for its tooltip — the shell's `railTipFor`, already bound. */
@@ -89,10 +93,20 @@ const settingsIcon = (id: string) => (
 /** "99+" above 99. */
 export const railCount = (n: number): string => (n > 99 ? "99+" : String(n));
 
-export const SidebarRail: React.FC<SidebarRailProps> = ({
+/** The rail with its menu. The menu never opens while the full sidebar is floating or pinned, nor on the settings
+ *  rail. The view below is the rail itself, hook-free, so a source test can call it as a function. */
+export const SidebarRail: React.FC<SidebarRailProps> = (props) => {
+  const rm = useRailMenu({
+    sections: props.sections, hit: props.hit, locked: props.locked, onGo: props.onGo,
+    disabled: props.expanded || props.settingsMode,
+  });
+  return <SidebarRailView {...props} rm={rm} />;
+};
+
+export const SidebarRailView: React.FC<SidebarRailProps & { rm: RailMenuApi }> = ({
   sections, icons, hit, todoCount, locked, onGo, onExpand, expandRef, expanded, switcher, markSrc,
   settingsMode, settingsSection, onSettings, onBack, onFeedback, feedbackOpen = false, newReplies = 0, feedbackRef,
-  onAccount, initials, who, planLabel, tip, toggleKbd,
+  onAccount, initials, who, planLabel, tip, toggleKbd, rm,
 }) => {
   const lit = settingsMode ? null : railSectionFor(sections, hit);
 
@@ -107,7 +121,8 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
           data-go={sec.id}
           aria-label={sec.label}
           aria-current={on ? "page" : undefined}
-          onClick={() => onGo(railTargetFor(sec, locked))}
+          {...rm.rowProps(sec)}
+          onClick={() => { rm.close(); onGo(railTargetFor(sec, locked)); }}
         >
           <span className="wsr-ic">{icons[sec.icon ?? sec.id]}</span>
           <span className="wsr-lbl">{sec.label}</span>
@@ -143,6 +158,7 @@ export const SidebarRail: React.FC<SidebarRailProps> = ({
       <nav className="wsr-nav" aria-label="Main">
         {sections.map(row)}
       </nav>
+      {rm.menu}
       <nav className="wsr-setnav" aria-label="Settings">
         <button type="button" className="wsr-ni wsr-back" onClick={onBack} aria-label="Back to the app">
           <span className="wsr-ic">{BACK_ICON}</span>

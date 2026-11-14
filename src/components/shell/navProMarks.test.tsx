@@ -29,7 +29,8 @@ vi.mock("../../lib/db", () => ({
   }),
 }));
 import { WorkspaceShell } from "./WorkspaceShell";
-import { SidebarRail } from "./SidebarRail";
+import { SidebarRailView } from "./SidebarRail";
+import { NO_RAIL_MENU } from "./RailMenu";
 
 const ICONS: Record<string, React.ReactNode> = new Proxy({}, { get: (_, key) => <i data-icon={String(key)} /> }) as Record<string, React.ReactNode>;
 const render = (path: string) => renderToStaticMarkup(
@@ -105,7 +106,7 @@ describe("shell nav v3 — the rail is five places", () => {
 
   it("SNV3-R4 the five rows carry no tooltip", () => {
     const tipProps = { "data-tip": "x" };
-    const el = SidebarRail(railProps({ tip: () => tipProps })) as React.ReactElement;
+    const el = SidebarRailView(railProps({ tip: () => tipProps })) as React.ReactElement;
     const rows = findButtons(el).filter((b) => typeof b.props["data-go"] === "string");
     expect(rows).toHaveLength(5);
     for (const r of rows) expect(r.props["data-tip"], String(r.props["data-go"])).toBeUndefined();
@@ -114,12 +115,12 @@ describe("shell nav v3 — the rail is five places", () => {
   it("SNV3-R5 the Materials row sends a writer with Materials locked to /manuscripts", () => {
     const went: string[] = [];
     const locked = navLockedFor(ent("free"));
-    const el = SidebarRail(railProps({ locked, onGo: (p: string) => went.push(p) })) as React.ReactElement;
+    const el = SidebarRailView(railProps({ locked, onGo: (p: string) => went.push(p) })) as React.ReactElement;
     const btn = findButtons(el).find((b) => b.props["data-go"] === "materials")!;
     (btn.props.onClick as () => void)();
     expect(went).toEqual(["/manuscripts"]);
     const open: string[] = [];
-    const el2 = SidebarRail(railProps({ onGo: (p: string) => open.push(p) })) as React.ReactElement;
+    const el2 = SidebarRailView(railProps({ onGo: (p: string) => open.push(p) })) as React.ReactElement;
     (findButtons(el2).find((b) => b.props["data-go"] === "materials")!.props.onClick as () => void)();
     expect(open).toEqual(["/materials/letters"]);
   });
@@ -134,11 +135,11 @@ function findButtons(node: unknown, out: El[] = []): El[] {
   findButtons(el.props.children, out);
   return out;
 }
-function railProps(over: Record<string, unknown>): React.ComponentProps<typeof SidebarRail> {
+function railProps(over: Record<string, unknown>): React.ComponentProps<typeof SidebarRailView> {
   return {
     sections: workspaceSections({ todo: 0 }), icons: ICONS, hit: null, todoCount: 0, locked: new Set<string>(),
     onGo: () => {}, onExpand: () => {}, expanded: false, switcher: null, markSrc: "", settingsMode: false,
     settingsSection: null, onSettings: () => {}, onBack: () => {}, initials: "IM", who: "Isla", planLabel: "",
-    tip: () => ({}), toggleKbd: "", ...over,
-  } as React.ComponentProps<typeof SidebarRail>;
+    tip: () => ({}), toggleKbd: "", rm: NO_RAIL_MENU, ...over,
+  } as React.ComponentProps<typeof SidebarRailView>;
 }
