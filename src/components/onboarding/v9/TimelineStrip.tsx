@@ -26,6 +26,7 @@ import {
 } from "../../../lib/importTimeline";
 import { readTypedDate, localToday, tileDate, longDate } from "../../../lib/importTypedDate";
 import { DateCalendar } from "./DatePick";
+import { datesOutOfOrder, orderSentence } from "../../../lib/importRules";
 import { useEscapeLayer, ESC_LEVEL } from "../../../lib/escapeStack";
 import { StatusDot } from "../../StatusDot";
 import "./timelineStrip.css";
@@ -178,7 +179,9 @@ export const TimelineStrip: React.FC<{ query: ReviewQuery; onChange: (next: Revi
   const sentSub = query.sentWaived && !query.sentDate ? STRIP_WORDS.noDate : query.sentDate ? tileDate(query.sentDate) : STRIP_WORDS.addDate;
   const sentCls = `${query.sentDate || query.sentWaived ? "" : " is-miss"}${latest === null ? " is-now" : ""}`;
   const stands = whereItStands(query);
-  const bad = eventBeforeSent(query);
+  /* two-door import v1: the warning covers any step dated before the one it follows */
+  const beforeSent = eventBeforeSent(query);
+  const bad = beforeSent || datesOutOfOrder({ sentDate: query.sentDate, timeline: events });
   return (
     <div className="o9-stripw" data-strip-for={query.id}>
       <div className="o9-strip" ref={stripRef} data-strip="strip">
@@ -194,7 +197,7 @@ export const TimelineStrip: React.FC<{ query: ReviewQuery; onChange: (next: Revi
         </div>
       </div>
       <p className="o9-stands" data-strip="stands">
-        {bad ? <span className="o9-warn">{STRIP_WORDS.before}</span>
+        {bad ? <span className="o9-warn">{beforeSent ? STRIP_WORDS.before : orderSentence({ sentDate: query.sentDate, timeline: events })}</span>
           : <>{STRIP_WORDS.stands} <b>{stands.stage}</b>, {stands.court}. {STRIP_WORDS.pressAny}</>}
       </p>
     </div>

@@ -34,7 +34,7 @@ import { reviewTallies } from "../../lib/smartImportReviewModel";
 import { ImportingLoader } from "./ImportingLoader";
 import { ImportOverview } from "./ImportOverview";
 import { SmartImportReview } from "./SmartImportReview";
-import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES, REVIEW_FIXTURE_CLEAR, REVIEW_FIXTURE_GATE, REVIEW_FIXTURE_NAMELESS, REVIEW_FIXTURE_TIMELINE, REVIEW_FIXTURE_V12 } from "./SmartImportReviewFixture";
+import { REVIEW_FIXTURE, REVIEW_FIXTURE_DUPES, REVIEW_FIXTURE_CLEAR, REVIEW_FIXTURE_GATE, REVIEW_FIXTURE_NAMELESS, REVIEW_FIXTURE_TIMELINE, REVIEW_FIXTURE_V12, REVIEW_FIXTURE_TWODOOR } from "./SmartImportReviewFixture";
 
 declare global {
   interface Window { __onbLab?: { calls: Array<{ name: string; arg?: unknown }>; result?: unknown } }
@@ -53,7 +53,7 @@ const labPiles = (complete: boolean) => {
   return { agents: t.agents.total, queries: t.queries.total };
 };
 export const labFixture = (fx: string | null): SmartImportResult =>
-  fx === "dupes" ? REVIEW_FIXTURE_DUPES : fx === "clear" ? REVIEW_FIXTURE_CLEAR : fx === "gate" ? REVIEW_FIXTURE_GATE : fx === "nameless" ? REVIEW_FIXTURE_NAMELESS : fx === "timeline" ? REVIEW_FIXTURE_TIMELINE : fx === "v12" ? REVIEW_FIXTURE_V12 : REVIEW_FIXTURE;
+  fx === "dupes" ? REVIEW_FIXTURE_DUPES : fx === "clear" ? REVIEW_FIXTURE_CLEAR : fx === "gate" ? REVIEW_FIXTURE_GATE : fx === "nameless" ? REVIEW_FIXTURE_NAMELESS : fx === "timeline" ? REVIEW_FIXTURE_TIMELINE : fx === "v12" ? REVIEW_FIXTURE_V12 : fx === "twodoor" ? REVIEW_FIXTURE_TWODOOR : REVIEW_FIXTURE;
 
 const SAMPLE: { messy: string; name: string; agency: string; date: string; status: QueryStatus }[] = [
   { messy: 'J. Carter · Carter & Vale · "replied, wants pages" · 44621', name: "Jamal Carter", agency: "Carter & Vale", date: "1 Mar 2022", status: QueryStatus.PARTIAL_REQUESTED },
@@ -138,8 +138,9 @@ export const LabImporting: React.FC<{ done: boolean; loop: boolean; intro?: bool
   return <ImportingLoader complete={complete} onProceed={spy("proceed")} />;
 };
 
-export const LabOverview: React.FC<{ fx: string | null; title: string; rows?: number | null }> = ({ fx, title, rows }) => (
-  <ImportOverview result={labFixture(fx)} manuscriptTitle={title} fileName={LAB_FILE} rowCount={rows ?? null} onContinue={spy("continue")} />
+/* two-door import v1: `read=headings` shows the headings route's line; the bar's import is a spy */
+export const LabOverview: React.FC<{ fx: string | null; title: string; read?: "smart" | "template" }> = ({ fx, title, read }) => (
+  <ImportOverview result={labFixture(fx)} manuscriptTitle={title} fileName={LAB_FILE} source={read ?? "smart"} onContinue={spy("continue")} onImport={spy("import")} />
 );
 
 /* The timeline fixture's two pages, drawn plain, so "See the whole page" has a page to open. */

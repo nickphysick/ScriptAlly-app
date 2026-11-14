@@ -49,13 +49,15 @@ describe('validateSmartImport — drop-and-report (never silently write a bad ro
     expect(r.skipped[0].reason).toMatch(/no agent name or agency/);
   });
 
-  it('flags out-of-order dates (sent date after a later timeline event) but STILL imports the row', () => {
+  /* RE-POINTED (two-door import v1): validation no longer writes a "kept as given" warning. The row
+     still validates; the review asks "Dates out of order" (importRules.test.ts, lock Q1). */
+  it('validates out-of-order dates (sent date after a later timeline event); the review asks about them', () => {
     const r = validateSmartImport(result([agent()], [query({
       sentDate: '2026-05-01',
       timeline: [{ type: QueryStatus.PARTIAL_REQUESTED, date: '2026-01-01', raw: null }],
     })]));
     expect(r.importable).toHaveLength(1);
-    expect(r.dateWarnings.length).toBeGreaterThan(0);
+    expect("dateWarnings" in r).toBe(false);
   });
 
   it('accepts every canonical QueryStatus value', () => {

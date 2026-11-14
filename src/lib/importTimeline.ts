@@ -21,6 +21,7 @@ import type { ReviewReasonCode } from "../types/smartImport";
 import type { ReviewQuery, ReviewTimelineEvent } from "./smartImportReviewModel";
 import { STAGE_NAME, tileCourt } from "./qcSummary";
 import { monthHint } from "./importTypedDate";
+import { datesOutOfOrder } from "./importRules";
 
 /** The event types the pop-over offers, in the order a query moves through them, with their labels. */
 export const STRIP_EVENT_TYPES: { type: QueryStatus; label: string }[] = [
@@ -110,12 +111,16 @@ export function whereItStands(q: ReviewQuery): { stage: string; court: "with the
 export const eventBeforeSent = (q: ReviewQuery): boolean =>
   !!q.sentDate && stripEvents(q).some((e) => !!e.date && day(e.date) < day(q.sentDate));
 
+/** The query as the strip shows it (the status as its last step), for the order check. */
+const stripLine = (q: ReviewQuery) => ({ sentDate: q.sentDate, timeline: stripEvents(q) });
+
 /** What the strip still needs before it is answered, first thing first; null when it is answered. */
 export type StripNeed = "sent" | "dates" | "order";
 export function stripNeed(q: ReviewQuery): StripNeed | null {
   if (!q.sentDate && !q.sentWaived) return "sent";
   if (stripEvents(q).some((e) => !e.date)) return "dates";
-  if (eventBeforeSent(q)) return "order";
+  /* two-door import v1: any step dated before the step it follows, not only before the query was sent */
+  if (eventBeforeSent(q) || datesOutOfOrder(stripLine(q))) return "order";
   return null;
 }
 
@@ -126,7 +131,7 @@ export const STRIP_WORDS = {
   before: "An event is dated before the query was sent.",
   needSent: "Add the date you sent it first",
   needDates: "Add a date for every step",
-  needOrder: "Fix the dates first",
+  needOrder: "Press a date to change it",
   yes: "Yes, that's right",
   sent: "Query sent",
   noDate: "No date",

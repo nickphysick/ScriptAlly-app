@@ -51,9 +51,9 @@ export const openQueryQuestions = (queries: readonly ReviewQuery[]): QueryQuesti
 export type QuestionFamily = "confirm" | "missing" | "status" | "crossed" | "mark" | "other";
 export function questionFamily(code: ReviewReasonCode): QuestionFamily {
   switch (code) {
-    case "ambiguous-date": case "ambiguous-response-date": case "serial-outlier": case "two-dates": return "confirm";
+    case "ambiguous-date": case "ambiguous-response-date": case "serial-outlier": case "two-dates": case "dates-out-of-order": return "confirm";
     case "no-date": case "unreadable-date": case "unreadable-response-date": case "missing-day": return "missing";
-    case "status-direction": case "status-wording": return "status";
+    case "status-direction": case "status-wording": case "outcome-missing": return "status";
     case "crossed-out": return "crossed";
     case "mark-unclear": return "mark";
     default: return "other";
@@ -69,31 +69,6 @@ export function familyCounts(questions: readonly QueryQuestion[]): FamilyCounts 
 // ── Words ──────────────────────────────────────────────────────────────────────────────────────
 const s = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 const sentence = (parts: string[]) => parts.join(", ");
-
-/** The summary's line for the agents that need an answer. Zero parts are dropped. */
-export function agentsAnswerLine(questions: readonly AgentQuestion[]): string {
-  const n = (ask: AgentAsk) => questions.filter((q) => q.ask === ask).length;
-  const noAgency = n("no-agency"), nameless = n("nameless"), mapping = n("mapping"), reading = n("reading"), illegible = n("illegible");
-  const parts: string[] = [];
-  if (reading > 0) parts.push(`${reading} ${reading === 1 ? "has a name" : "have names"} to check.`);
-  if (illegible > 0) parts.push(`${illegible} ${illegible === 1 ? "has an agency" : "have agencies"} we couldn't make out.`);
-  if (noAgency > 0) parts.push(`${noAgency} ${noAgency === 1 ? "has" : "have"} no agency. Add it, or say you're carrying on without one.`);
-  if (nameless > 0) parts.push(`${s(nameless, "row has", "rows have")} no agent or agency. Name ${nameless === 1 ? "it" : "them"}, or remove ${nameless === 1 ? "it" : "them"}.`);
-  if (mapping > 0) parts.push(`${mapping} ${mapping === 1 ? "has a detail" : "have a detail"} to check.`);
-  return parts.join(" ");
-}
-/** The summary's line for the queries that need an answer. Zero parts are dropped. */
-export function queriesAnswerLine(questions: readonly QueryQuestion[]): string {
-  const c = familyCounts(questions);
-  const parts: string[] = [];
-  if (c.confirm > 0) parts.push(s(c.confirm, "date to confirm", "dates to confirm"));
-  if (c.missing > 0) parts.push(s(c.missing, "date missing", "dates missing"));
-  if (c.status > 0) parts.push(s(c.status, "status to clarify", "statuses to clarify"));
-  if (c.crossed > 0) parts.push(s(c.crossed, "crossed-out line", "crossed-out lines"));
-  if (c.mark > 0) parts.push(s(c.mark, "mark to explain", "marks to explain"));
-  if (c.other > 0) parts.push(s(c.other, "detail to check", "details to check"));
-  return parts.length ? `${sentence(parts)}. One pick each.` : "";
-}
 
 /** "Coming up": what is left after the question on show, as chips. */
 export function comingUpQueries(rest: readonly QueryQuestion[]): string[] {
@@ -120,11 +95,19 @@ export function reviewSubline(open: number, ready: number, step: "agents" | "que
   return need + rest;
 }
 
-/** The bar's primary: its label carries the count while anything is open. */
-export const gatePrimary = (step: "agents" | "queries", open: number): string => {
-  const base = step === "agents" ? "Continue to queries" : "Import and get started";
-  return open > 0 ? `${base} · ${open} to answer first` : base;
+/** The bar's primary: its label carries the count while anything is open. Two-door import v1: on the
+ *  queries step it is "Answer {n} questions to import", then "Import {a} agents and {q} queries". */
+export const gatePrimary = (step: "agents" | "queries", open: number, will?: { agents: number; queries: number }): string => {
+  if (step === "agents") return open > 0 ? `Continue to queries · ${open} to answer first` : "Continue to queries";
+  if (open > 0) return `Answer ${s(open, "question", "questions")} to import`;
+  return will ? `Import ${s(will.agents, "agent", "agents")} and ${s(will.queries, "query", "queries")}` : "Import and get started";
 };
+/** The queries step's head while anything is open (two-door import v1, screen 3). */
+export const questionsHead = (n: number): string => (n === 1 ? "question for you" : "questions for you");
+export const QUESTIONS_SUB = "Everything else is ready. Nothing is saved until you import.";
+/** The read screen's bar (screen 2): "{n} questions for you" and its button. */
+export const readBarLead = (n: number): string => `${n === 1 ? "question" : "questions"} for you`;
+export const readBarAction = (n: number): string => (n === 1 ? "Answer it" : "Answer them");
 export const gateHint = (step: "agents" | "queries", open: number): string =>
   step === "agents"
     ? `Answer the ${open} above first. "Carry on without an agency" counts as an answer.`
@@ -157,19 +140,6 @@ export function answeredLine(kinds: readonly AnswerKind[]): string {
 export const allAnsweredHead = (n: number): string => `All ${n} answered.`;
 export const writeHint = (agents: number, queries: number): string =>
   `${s(agents, "agent", "agents")} and ${s(queries, "query", "queries")} will be written. The dashboard opens when it's done.`;
-
-/** The summary's paragraph. Clauses whose count is 0 are dropped; with none, the file read cleanly. */
-export function summaryLead(n: { decisions: number; agentAnswers: number; queryAnswers: number }): { before: string; clauses: string[]; after: string } | { clean: string } {
-  const clauses: string[] = [];
-  if (n.decisions > 0) clauses.push(n.decisions === 1 ? "1 agent needs a decision" : `${n.decisions} agents need a decision`);
-  if (n.agentAnswers > 0) clauses.push(n.agentAnswers === 1 ? "1 agent needs an answer" : `${n.agentAnswers} agents need an answer`);
-  if (n.queryAnswers > 0) clauses.push(n.queryAnswers === 1 ? "1 query needs an answer" : `${n.queryAnswers} queries need an answer`);
-  if (clauses.length === 0) return { clean: "It all read cleanly. Your history's ready to come straight in." };
-  return { before: "Most of it's ready to go. ", clauses, after: ". Each one is a quick pick, and then everything lands at once." };
-}
-/** The mark's line: the row count where the path knows it. */
-export const readLine = (rows: number | null | undefined): string =>
-  typeof rows === "number" ? `${s(rows, "row", "rows")}, read and sorted. Nothing is saved yet.` : "Read and sorted. Nothing is saved yet.";
 
 /** Duplicates, all sorted: what was decided, and how many agents go forward. */
 export function duplicatesDoneLine(n: { merged: number; kept: number; forward: number }): string {

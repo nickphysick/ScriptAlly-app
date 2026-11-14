@@ -1,0 +1,5 @@
+   × R2 the dates decide the status > a status that disagrees with its dates is overruled by them 5ms
+   × R2 the dates decide the status > a blank status (read as Queried) where a later step is dated takes that step 1ms
+   ✓ R2 the dates decide the status > a status further on than its dates is not a disagreement (its own step is simply undated) 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 1 passed | 17 skipped (20)

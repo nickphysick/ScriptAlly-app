@@ -279,7 +279,7 @@ export const OnbLab: React.FC = () => {
   if (s === "importing") return <LabSetup flow="B" at="list" manuscript exit="none" appMode handingOff={q.get("handoff") === "1"}><LabImporting done={q.get("done") === "1"} loop={q.get("loop") === "1"} intro={q.get("intro") === "1"} /></LabSetup>;
   if (s === "photos") return <LabPhotos />;
   if (s === "flow") return <LabFlow fx={q.get("fx")} skip={Number(q.get("skip") ?? 0)} none={q.get("none") === "1"} floorMs={Number(q.get("floor") ?? 600)} />;
-  if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} rows={q.get("rows") ? Number(q.get("rows")) : null} />, "ask");
+  if (s === "overview") return imp(<LabOverview fx={q.get("fx")} title={LAB_TITLE} read={q.get("read") === "headings" ? "template" : "smart"} />, "ask");
   if (s === "review") return imp(<LabReview fx={q.get("fx")} />, "ask");
 
   if (s === "frame" && q.get("form") === "account") {

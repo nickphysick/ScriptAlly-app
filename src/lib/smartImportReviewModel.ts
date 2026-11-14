@@ -384,6 +384,11 @@ export function queryReasonText(code: ReviewReasonCode, q: ReviewQuery): string 
     case "mark-unclear":
       if (q.markRaw && q.markMeaning) return `There's a "${q.markRaw}" after this line, and your key says ${q.markRaw} means "${q.markMeaning}". Is that right?`;
       return `There's a "${q.markRaw ?? "mark"}" beside this line. Where does this one stand?`;
+    /* Two-door import v1: the deck draws both itself (DeckQuestions); these lines are the fallback. */
+    case "dates-out-of-order":
+      return "A step is dated before the step it follows. Which date needs changing?";
+    case "outcome-missing":
+      return "Something happened after this was sent, and your sheet doesn't say what. What was it?";
   }
 }
 
@@ -413,6 +418,8 @@ export function focusReasonMeta(key: FocusReasonKey): { pill: string } {
     case "illegible-agency":   return { pill: "Agency to check" };
     case "crossed-out":        return { pill: "Crossed out" };
     case "mark-unclear":       return { pill: "Mark to explain" };
+    case "dates-out-of-order": return { pill: "Dates out of order" };
+    case "outcome-missing":    return { pill: "Outcome missing" };
   }
 }
 

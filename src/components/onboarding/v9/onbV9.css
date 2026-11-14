@@ -314,6 +314,9 @@
 .sf .o9-ask { margin: 0; font-family: var(--sp-type); font-size: 23px; line-height: 1.25; color: var(--ink-on-light); }
 .sf .o9-ask--said { font-size: 20px; }
 .sf .o9-raw { font-family: var(--sp-mono); font-size: 15px; background: var(--im-pill); padding: 2px 7px; border-radius: 5px; }
+/* two-door import v1: the sheet's own date cells above a date question (the mock's .raws) */
+.sf .o9-raws { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
+.sf .o9-raws .o9-raw { font-size: 14px; overflow-wrap: anywhere; }
 .sf .o9-why { margin: -8px 0 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); max-width: 62ch; }
 .sf .o9-ans { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; }
 .sf .o9-ans .o9-ansfld { flex: 1 1 260px; margin: 0; }

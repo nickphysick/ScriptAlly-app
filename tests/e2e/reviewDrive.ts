@@ -53,6 +53,10 @@ export async function answerQuery(r: Locator, opts: { date?: string; undated?: b
   const typeDate = async (iso: string) => { await fillDate(r, iso); await press(/^Save date$/); };
   switch (code) {
     case "timeline": return answerStrip(r);
+    /* two-door import v1: the three new cards */
+    case "dates-out-of-order": return answerOrder(r);
+    case "date-to-confirm": return tap(r.locator("[data-reading]").first());
+    case "outcome-missing": return tap(r.locator("[data-outcome]").first());
     case "missing-day": return press(/^Keep as month$/);
     case "serial-outlier": return press(/^That's right$/);
     case "no-date": return opts.date ? typeDate(opts.date) : press(/^(I don't have this date|Leave undated)$/);
@@ -71,12 +75,30 @@ export async function answerQuery(r: Locator, opts: { date?: string; undated?: b
 export async function answerStrip(r: Locator) {
   const confirm = r.locator('[data-strip="confirm"]');
   for (let i = 0; i < 12 && !(await confirm.isEnabled()); i++) {
-    const order = /Fix the dates first/.test((await confirm.textContent()) ?? "");
+    /* two-door import v1: "Fix the dates first" now reads "Press a date to change it" */
+    const order = /Fix the dates first|Press a date to change it/.test((await confirm.textContent()) ?? "");
     const tile = order ? r.locator('[data-step="sent"]') : r.locator(".o9-stop.is-miss").first();
     const step = await tile.getAttribute("data-step");
     await tile.click();
     if (step === "sent") await r.locator('[data-strip="waive"]').click();
     else { await r.locator('[data-strip="date"]').fill("today"); await r.locator('[data-strip="save"]').click(); }
+  }
+  await confirm.click();
+}
+
+/**
+ * Dates out of order (two-door import v1): the button stays disabled until the dates run in order.
+ * The quickest honest fix: move each dated step that comes before the query's sent date to the sent
+ * date itself (typed day first), then "Yes, that's right".
+ */
+export async function answerOrder(r: Locator) {
+  const confirm = r.locator('[data-order="confirm"]');
+  for (let i = 0; i < 6 && !(await confirm.isEnabled()); i++) {
+    const sent = ((await r.locator('[data-step="sent"] small').textContent()) ?? "").trim();
+    const tiles = r.locator('.o9-stop[data-step]:not([data-step="sent"]):not([data-step="new"])');
+    await tiles.first().click();
+    await r.locator('[data-strip="date"]').fill(sent || "today");
+    await r.locator('[data-strip="save"]').click();
   }
   await confirm.click();
 }

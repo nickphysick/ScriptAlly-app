@@ -231,9 +231,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   /** Cells the template parser could not read. Each date flag is also a reason on its own query,
    *  which is what the review renders. */
   const [, setTemplateFlags] = useState<TemplateFlag[]>([]);
-  /** The file's row count, when it is known without reading the file again: the template parse
-   *  returns it; a Smart import does not (its sample is capped at eight rows). */
-  const [rowsRead, setRowsRead] = useState<number | null>(null);
   /** Rows of the file the account already holds (same agent, manuscript and sent day). They are
    *  taken out before the summary, so the summary and the review count only what will be written. */
   const [already, setAlready] = useState<AlreadyRow[]>([]);
@@ -371,7 +368,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     try {
       const parsed = await readTemplateFile(file);
       setTemplateFlags(parsed.flags);
-      setRowsRead(parsed.rowsRead);
       if (takeRead(parsed.result) === "fresh") setScreen("overview");
     } catch (e) {
       console.error("Template parse failed:", e);
@@ -380,7 +376,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   };
 
   const runMapping = async (file: File) => {
-    setRawSample([]); setExtractComplete(false); setValidated(null); setRowsRead(null);
+    setRawSample([]); setExtractComplete(false); setValidated(null);
     setImportSource("smart");
     setConfirmNote(null);
     setScreen("reading"); // the scatter-settle loader takes over from here
@@ -425,7 +421,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     setPhotoBusy(false);
     if (!fitted) { setPhotoMessage(PHOTOS_WORDS.tooLarge); return; }
     setReadPhotos(ready.map((p) => ({ shown: photos.indexOf(p) + 1, url: p.url!, width: p.width, height: p.height })));
-    setRawSample([]); setExtractComplete(false); setValidated(null); setRowsRead(null);
+    setRawSample([]); setExtractComplete(false); setValidated(null);
     setImportSource("smart");
     setScreen("reading");
     try {
@@ -533,7 +529,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       dropDraft();
       setResumeSnap(undefined);
       setPendingFile(null); setValidated(null); setRawSample([]); setExtractComplete(false); setOutcome(null);
-      setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setRowsRead(null); setFileName("");
+      setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setFileName("");
       setAlready([]); setNothingNew(false);
       setScreen("idle");
     },
@@ -688,8 +684,9 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         result={validated.result}
         manuscriptTitle={manuscriptTitle}
         fileName={fileName}
-        rowCount={rowsRead}
+        source={importSource}
         onContinue={() => setScreen("review")}
+        onImport={handleImport}
         onCancel={onCancel}
       />
     );

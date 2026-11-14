@@ -1,0 +1,22 @@
+   × R1 each settlement rule: input → saved value → count > status from dates: a Queried status with a dated full request is saved as Full requested 4ms
+   × R1 each settlement rule: input → saved value → count > request added: a full sent with no request recorded is listed, and the commit writes the request undated 3ms
+   × R1 each settlement rule: input → saved value → count > agency blank: a named agent with no agency is saved with none, and asks nothing 0ms
+   × R1 each settlement rule: input → saved value → count > sent undated: no sent date and nothing in the cell is saved undated, and asks nothing 0ms
+   × R1 each settlement rule: input → saved value → count > response time: an agent with none in the file is left not known (listed only) 0ms
+   × R1 each settlement rule: input → saved value → count > no year: 22/9 is read as the most recent 22 September, and its question goes 1ms
+   × R1 each settlement rule: input → saved value → count > a count of 0 renders no line, and every settled kind renders its words 5ms
+   × R2 the dates decide the status > a status that disagrees with its dates is overruled by them 0ms
+   × R2 the dates decide the status > a blank status (read as Queried) where a later step is dated takes that step 0ms
+   ✓ R2 the dates decide the status > a status further on than its dates is not a disagreement (its own step is simply undated) 0ms
+   × Q3 what is no longer asked, and what still is > a blank agency and a missing sent date open no question 1ms
+   ✓ Q3 what is no longer asked, and what still is > a nameless agent and a two-way date still do 0ms
+   ✓ Q3 what is no longer asked, and what still is > an unreadable date with words in it is still asked 0ms
+   × Q1 (model) dates out of order > is raised as the query's first question, with the mock's sentence 0ms
+   ✓ Q1 (model) dates out of order > cannot be confirmed while the dates are out of order; once in order it holds the corrected dates 0ms
+   ✓ Q1 (model) dates out of order > a partial sent before its request is out of order too 0ms
+   ✓ Q2 (model) each new question opens the gate, and its answer closes it > date to confirm: 9/22/2026 proposes 22 September 2026 0ms
+   ✓ Q2 (model) each new question opens the gate, and its answer closes it > outcome missing: a full sent with a last response asks, and an answer closes it 0ms
+   ✓ Q2 (model) each new question opens the gate, and its answer closes it > outcome missing is not asked where the sheet names the outcome or the step is a request 0ms
+   ✓ Q2 (model) each new question opens the gate, and its answer closes it > the outcome answers are the app's four closed outcomes, with the app's labels 0ms
+⎯⎯⎯⎯⎯⎯ Failed Tests 11 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  11 failed | 9 passed (20)

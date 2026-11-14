@@ -34,6 +34,10 @@ import { TimelineStrip } from "./TimelineStrip";
 import { STRIP_WORDS, stripNeed, stripButton, cardCalendarStart } from "../../../lib/importTimeline";
 import { localToday } from "../../../lib/importTypedDate";
 import { DatePick } from "./DatePick";
+import {
+  datesOutOfOrder, orderSentence, ORDER_WORDS, monthFirstReading, notAMonth, DATE_CONFIRM_WORDS,
+  OUTCOME_CHOICES, OUTCOME_WORDS,
+} from "../../../lib/importRules";
 import "./onbV9.css";
 
 export const DECK_WORDS = {
@@ -362,3 +366,65 @@ export const StripQuestion: React.FC<{ query: ReviewQuery; agentName: string | n
     </div>
   );
 };
+
+// ── Two-door import v1 (ref design-refs/two-door-import-v1/, screen 3) ──────────────────────────
+/** What the sheet said for a query's dates, quoted back: the sent cell and each event's cell. */
+const RawDates: React.FC<{ query: ReviewQuery }> = ({ query }) => {
+  const raws = [query.sentDateRaw, ...query.timeline.map((e) => e.raw)].map((r) => (r ?? "").trim()).filter(Boolean);
+  if (raws.length === 0) return null;
+  return <p className="o9-raws" data-im="deck-raws">{[...new Set(raws)].map((r) => <Raw key={r}>{r}</Raw>)}</p>;
+};
+
+/** Dates out of order. The strip, changed in place; the button stays disabled, and says how to fix it,
+ *  until the dates run in order (decision E: there is no "keep as given"). */
+export const OrderQuestion: React.FC<{ query: ReviewQuery; onChange: (q: ReviewQuery) => void; onConfirm: () => void; today?: string }> = ({ query, onChange, onConfirm, today }) => {
+  const bad = datesOutOfOrder(query);
+  return (
+    <div className="o9-q o9-q--strip" data-reason="dates-out-of-order" data-strip-host>
+      <RawDates query={query} />
+      <Ask>{bad ? <>{orderSentence(query)} {ORDER_WORDS.which}</> : ORDER_WORDS.fixed}</Ask>
+      <TimelineStrip query={query} onChange={onChange} today={today} />
+      <div className="o9-striprow">
+        <button type="button" className="sf-btn" disabled={bad} onClick={onConfirm} data-order="confirm">{bad ? ORDER_WORDS.press : ORDER_WORDS.yes}</button>
+      </div>
+    </div>
+  );
+};
+
+/** Date to confirm: a date that only reads month first. "Yes, …" saves the month-first reading; "No, I'll
+ *  change it" opens the date field. A date that reads both ways keeps the two-way question. */
+export const DateConfirmQuestion: React.FC<{ query: ReviewQuery; code: ReviewReasonCode; onResolve: (sentDate: string) => void }> = ({ query, code, onResolve }) => {
+  const [typing, setTyping] = useState(false);
+  const today = localToday();
+  const reading = monthFirstReading(query.sentDateRaw, today);
+  if (!reading) return null;
+  return (
+    <div className="o9-q" data-reason="date-to-confirm" data-code={code}>
+      <RawDates query={query} />
+      <Ask>{DATE_CONFIRM_WORDS.ask(reading)}</Ask>
+      <Why>{DATE_CONFIRM_WORDS.why(notAMonth(query.sentDateRaw))}</Why>
+      <div className="o9-ans">
+        <button type="button" className="o9-pick" data-reading={reading} onClick={() => onResolve(reading)}>{DATE_CONFIRM_WORDS.yes(reading)}</button>
+        {typing
+          ? <DateField query={query} onSave={onResolve} />
+          : <button type="button" className="o9-pick" data-act="change-date" onClick={() => setTyping(true)}>{DATE_CONFIRM_WORDS.change}</button>}
+      </div>
+    </div>
+  );
+};
+
+/** Outcome missing: a dated reply after a step the writer sent, with nothing to say what it was. The four
+ *  answers are the app's own closed outcomes, each with its StatusDot. */
+export const OutcomeQuestion: React.FC<{ query: ReviewQuery; onAnswer: (s: QueryStatus) => void }> = ({ query, onAnswer }) => (
+  <div className="o9-q" data-reason="outcome-missing">
+    <RawDates query={query} />
+    <Ask>{OUTCOME_WORDS.ask(query)}</Ask>
+    <div className="o9-ans" role="group" aria-label="Outcome">
+      {OUTCOME_CHOICES.map((o) => (
+        <button type="button" className="o9-pick" key={o.status} data-outcome={o.status} onClick={() => onAnswer(o.status)}>
+          <StatusDot status={o.status} overrideSize={17} />{o.label}
+        </button>
+      ))}
+    </div>
+  </div>
+);

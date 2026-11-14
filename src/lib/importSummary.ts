@@ -16,16 +16,23 @@
 import { QueryStatus } from "../types";
 import { courtOf, STAGE_NAME } from "./qcSummary";
 import { parseModel } from "./smartImportReviewModel";
+import { applyImportRules, type RulesOutcome } from "./importRules";
 import type { ReviewAgent, ReviewQuery } from "./smartImportReviewModel";
 import type { SmartImportResult } from "../types/smartImport";
 
 /**
- * The working model the summary counts: the file as read, the same model the review opens on.
+ * The working model the summary counts: the file as read, with QueryHawk's rules applied — the same
+ * model the review opens on (two-door import v1: `applyImportRules` runs straight after `parseModel`,
+ * on both routes). `settled` is what the rules settled, for "Sorted for you".
  */
+export function ruledModel(result: SmartImportResult, today?: string): RulesOutcome {
+  return applyImportRules(parseModel(result), today);
+}
 export function summaryModel(result: SmartImportResult): { agents: ReviewAgent[]; queries: ReviewQuery[] } {
   /* v9: the review asks about a row with no agent and no agency, where it used to set it aside by
      itself. So the summary counts it too, as an agent that needs an answer. */
-  return parseModel(result);
+  const { agents, queries } = ruledModel(result);
+  return { agents, queries };
 }
 
 export type AgentStanding = "live" | "closed" | "none";
@@ -44,31 +51,6 @@ export function agentKey(agents: readonly ReviewAgent[], queries: readonly Revie
   const key: AgentKey = { total: live.length, live: 0, closed: 0, none: 0 };
   for (const a of live) key[agentStanding(a.id, queries)] += 1;
   return key;
-}
-
-/** The key line's words: every agent is in exactly one clause, and "not queried" is said only
- *  when there is one. */
-export const agentKeyParts = (k: AgentKey): { n: number; text: string }[] => [
-  { n: k.live, text: "with a live query" },
-  { n: k.closed, text: "closed" },
-  ...(k.none > 0 ? [{ n: k.none, text: "not queried" }] : []),
-];
-
-const initialsOf = (name: string): string => {
-  const p = name.trim().split(/\s+/).filter(Boolean);
-  if (p.length === 0) return "–";
-  return ((p[0][0] ?? "") + (p.length > 1 ? p[p.length - 1][0] ?? "" : "")).toUpperCase();
-};
-
-export interface AgentDisc { id: string; initials: string; standing: AgentStanding }
-export const DISC_MAX = 8;
-/** Up to eight agents by initials — live first, then closed, then not queried, each group in the
- *  file's order — and how many are left over. */
-export function agentDiscs(agents: readonly ReviewAgent[], queries: readonly ReviewQuery[]): { discs: AgentDisc[]; rest: number } {
-  const live = agents.filter((a) => !a.deleted);
-  const all: AgentDisc[] = live.map((a) => ({ id: a.id, initials: initialsOf(a.name || a.agency), standing: agentStanding(a.id, queries) }));
-  const ordered = (["live", "closed", "none"] as const).flatMap((s) => all.filter((d) => d.standing === s));
-  return { discs: ordered.slice(0, DISC_MAX), rest: Math.max(0, ordered.length - DISC_MAX) };
 }
 
 export type CourtKey = "agents" | "you" | "closed";
@@ -110,28 +92,8 @@ export const IMPORT_STEP_LABEL: Record<ImportStepId, string> = { duplicates: "Du
 export const importSteps = (hadDuplicates: boolean): ImportStepId[] =>
   hadDuplicates ? ["duplicates", "agents", "queries", "import"] : ["agents", "queries", "import"];
 
-/** The caption under a step on the summary: how much there is to do there. */
-export function stepCaption(id: ImportStepId, n: { sets: number; agentsOpen: number; queriesOpen: number }): string {
-  if (id === "import") return "You confirm";
-  if (id === "duplicates") return n.sets === 0 ? "Ready to go" : n.sets === 1 ? "1 set" : `${n.sets} sets`;
-  const open = id === "agents" ? n.agentsOpen : n.queriesOpen;
-  /* v9: nothing flagged is optional. */
-  return open === 0 ? "Ready to go" : `${open} to answer`;
-}
-
 /** "A possible duplicate set" count: one per leader of an unresolved cluster. */
 export const duplicateSets = (agents: readonly ReviewAgent[]): number =>
   agents.filter((a) => !a.deleted && a.mergeWith.length > 0 && !a.mergeResolved).length;
 
-/** The tier sentences. Words: the pack's table; the counts are the caller's. */
-export const TIER_TEXT = {
-  agentsReady: "Read cleanly. Good to import as they are.",
-  agentsFix: (sets: number) => `${sets} possible duplicate set${sets === 1 ? "" : "s"} to merge. Sorted on the duplicates step.`,
-  queriesReady: "Dates read, statuses clear. Good to import as they are.",
-} as const;
-
-/* v9: "Chances to sharpen" is "Need an answer". Its sentences are built from the questions
-   themselves (lib/reviewGate), so the summary says what is in each group. */
-export const TIER_NAME = { ready: "Ready to go", fix: "A quick fix", ask: "Need an answer" } as const;
-export const SUMMARY_TITLE = "We've read your file.";
-export const SUMMARY_PRIMARY = { work: "Let's work through it", clear: "Bring it in" } as const;
+export const SUMMARY_TITLE = "We've read your file";

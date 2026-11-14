@@ -202,3 +202,35 @@ export const REVIEW_FIXTURE_V12: SmartImportResult = {
     { agentRef: "v6", status: QueryStatus.QUERIED, sentDate: "2026-08-12", sentDateRaw: "12/8" },
   ],
 };
+
+/**
+ * Two-door import v1 (ref design-refs/two-door-import-v1/, screen 3): the three new questions the deck
+ * asks, beside rows the rules settle without asking. Sample names, as in the mock.
+ *   Kirsten Vale   a full requested before the query was sent → Dates out of order
+ *   Owen Pryce     "9/22", which reads only month first        → Date to confirm
+ *   Hannah Biddle  a reply after the full was sent, unnamed    → Outcome missing
+ *   Tobias Wren    no agency                                  → settled (saved with none)
+ *   Nadia Okafor   Queried, with a dated partial request      → settled (the dates decide)
+ *   Imogen Faulks  no sent date                               → settled (saved undated)
+ */
+export const REVIEW_FIXTURE_TWODOOR: SmartImportResult = {
+  agents: [
+    { ref: "kv", name: "Kirsten Vale", agency: "Vale Agency", responseTimeWeeks: 8 },
+    { ref: "op", name: "Owen Pryce", agency: "Greaves", responseTimeWeeks: 6 },
+    { ref: "hb", name: "Hannah Biddle", agency: "Greaves Lit", responseTimeWeeks: 6 },
+    { ref: "tw", name: "Tobias Wren", agency: "" },
+    { ref: "no", name: "Nadia Okafor", agency: "Okafor Lit", responseTimeWeeks: 4 },
+    { ref: "if", name: "Imogen Faulks", agency: "Castle Street Literary", responseTimeWeeks: 12 },
+  ],
+  queries: [
+    { agentRef: "kv", status: QueryStatus.FULL_REQUESTED, sentDate: "2026-08-30", sentDateRaw: "queried 30/8",
+      timeline: [{ type: QueryStatus.FULL_REQUESTED, date: "2026-08-15", raw: "FULL 15/8" }] },
+    { agentRef: "op", status: QueryStatus.QUERIED, sentDate: null, sentDateRaw: "9/22", reasons: ["unreadable-date"] },
+    { agentRef: "hb", status: QueryStatus.FULL_SENT, sentDate: "2026-07-14", sentDateRaw: "14/7",
+      timeline: [{ type: QueryStatus.FULL_SENT, date: "2026-10-09", raw: "9/10" }], reasons: ["outcome-missing"] },
+    { agentRef: "tw", status: QueryStatus.NO_RESPONSE, sentDate: "2026-05-02" },
+    { agentRef: "no", status: QueryStatus.QUERIED, sentDate: "2026-06-01",
+      timeline: [{ type: QueryStatus.PARTIAL_REQUESTED, date: "2026-06-20", raw: null }] },
+    { agentRef: "if", status: QueryStatus.QUERIED, sentDate: null },
+  ],
+};
