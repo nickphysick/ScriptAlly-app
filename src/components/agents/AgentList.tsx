@@ -46,7 +46,7 @@ import {
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeaderQc } from "./contact/ContactHeaderQc";
-import { ContactSlimRow } from "./contact/ContactSlimRow";
+import { ContactSlimBar } from "./contact/ContactSlimBar";
 import { ContactViews } from "./contact/ContactViews";
 import { useTallRail } from "../shell/useTallRail";
 import { headerFigures } from "../../lib/contactV26";
@@ -1090,7 +1090,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* Contact list header v2 — the slim pinned row once the header has scrolled away (desktop only; never on day one,
             on the empty page or while loading) */}
         {showList && !dayOneHere && (
-          <ContactSlimRow figures={headFigures} health={health} onNotQueried={showNotQueried} onOpenHealth={openHk} onAdd={openAdd} />
+          <ContactSlimBar figures={headFigures} health={health} onNotQueried={showNotQueried} onOpenHealth={openHk} onAdd={openAdd} />
         )}
         {showFrame && (
           <ContactHeaderQc loading={!showList} figures={showList ? headFigures : null}

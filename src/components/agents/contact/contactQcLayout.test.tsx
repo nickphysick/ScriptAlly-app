@@ -151,8 +151,9 @@ describe("Phase 4 · the card's line never breaks", () => {
   });
   it("the pin sits under the bar's strip (its height published by the bar)", () => {
     expect(read("./contactPrinciples.css")).toContain(".cl27 .cl26-pin { top: calc(var(--pin-cover, 12px) - 12px + var(--clq-strip, 34px) - 22px); }");
-    /* stuck, the strip's last 22px paint nothing (the pin is there) */
-    expect(read("./contactQcLayout.css")).toMatch(/\.cl27 \.qc154-tbw(\.qc154-tbw){4}\[data-qc156-stuck\] \{\s*background: linear-gradient\(to bottom, var\(--ws-page\) 0, var\(--ws-page\) calc\(100% - 22px\), transparent calc\(100% - 22px\)\);/);
+    /* v1.1 — stuck, the strip paints no fade; its ground reaches 14px past the column and stops 23px above its foot */
+    expect(read("./contactQcLayout.css")).toMatch(/\.cl27 \.qc154-tbw(\.qc154-tbw){4}\[data-qc156-stuck\] \{ background: none; \}/);
+    expect(read("./contactQcLayout.css")).toMatch(/\.cl27 \.qc154-tbw\[data-qc156-stuck\]::before \{\s*content: ""; position: absolute; z-index: -1; top: 0; bottom: 23px; left: -14px; right: -14px; background: var\(--ws-page\);/);
     expect(read("./ContactBar.tsx")).toContain('cover.style.setProperty("--clq-strip"');
   });
   it("the strip's stuck is re-read on mount, scroll, resize, the page shown again, visibility and --pin-cover — never only on scroll", () => {
@@ -174,5 +175,50 @@ describe("the Query Centre's rules name the Contact list at the same specificity
     /* no bare page-only selector is left for the parts both pages mount */
     expect(css("qcv156.css")).not.toMatch(/(^|\n)\s*\.qc151\.qc153 > \.qc1531-hd/);
     expect(css("qcv156.css")).not.toMatch(/(^|\n)\s*\.qc151 \.qc156-v/);
+  });
+});
+
+/* ═════════ QC layout v1.1 (design-refs/contact-list-pinned-v8/) ═════════ */
+import { Bar as SlimBarCL } from "./ContactSlimBar";
+import { ContactSheet26 } from "./ContactSheet26";
+
+describe("v1.1 Phase 1 · the type guard", () => {
+  it("the Query Centre's guard, scoped to the four shared pieces, in contactQcLayout.css (never a Query Centre sheet)", () => {
+    const css = read("./contactQcLayout.css");
+    expect(css).toContain(".cl27 :is(.qc1531-hd, .qc156-views, .qc154-tbw, .qc156-slim) :where(span, p, div, label, td, th, b, i, em, small, button, input) { font-family: inherit; }");
+    expect(css).toContain(".cl27 :is(.qc1531-hd, .qc156-views, .qc154-tbw, .qc156-slim) { font: 400 16px/1.45 var(--sp-serif); }");
+    expect(read("../../queries/centre/qcv151.css")).not.toMatch(/\.cl27/);
+  });
+});
+
+describe("v1.1 Phase 2 · the collapsed bar is the Query Centre's", () => {
+  const html = (f = { n: 17, q: 12, y: 0 }) => renderToStaticMarkup(<SlimBarCL figures={f} health={{ pct: 16, gaps: 61 }} onNotQueried={noop} onOpenHealth={noop} onAdd={noop} />);
+  it("shell/SlimBar's markup: the title, the subline (still the filter button), List health in the streak's slot, + Add an agent", () => {
+    const h = html();
+    expect(h).toMatch(/^<div class="qc156-slim" data-clh2="slim" inert="" aria-hidden="true"><p class="qc156-st"><b data-clh2="slim-title">17 agents on file<\/b><i data-clh2="slim-sub"><button type="button" class="clq-snq" data-clh2="slim-notq">5 not yet queried<\/button><\/i><\/p>/);
+    expect(h).toMatch(/<button type="button" class="qc156-sw clq-sh" data-clh2="slim-health"[^>]*aria-label="List health 16%. Open Housekeeping"><svg[\s\S]*?<\/svg><b>16%<\/b><em>list health<\/em><\/button>/);
+    expect(h).toMatch(/<button type="button" class="qc156-sb" data-clh2="slim-add">\+ Add an agent<\/button><\/div><\/div>$/);
+    expect(html({ n: 17, q: 17, y: 0 })).toContain('<i data-clh2="slim-sub">All of them queried</i>');
+  });
+  it("the old 48px slim row is gone", () => {
+    expect(() => read("./ContactSlimRow.tsx")).toThrow();
+    expect(read("./contactPrinciples.css")).not.toMatch(/\.clh2-slim/);
+  });
+});
+
+describe("v1.1 Phase 3 · the cap", () => {
+  const sheet = renderToStaticMarkup(<ContactSheet26 pool={[]} all={[]} group="none" sortKey="surname" reversed={false} onSort={noop}
+    filters={emptyContactFilters()} onFilters={noop} onClearAll={noop} search="" onSearch={noop} genreWord={(r) => r} genreHit={() => false}
+    openId={null} onOpen={noop} wouldShow={() => 0} gapsOf={() => null} onFill={noop} setChip={null} onClearFilters={noop} onExport={noop} />);
+  it("the card's top is one sticky block: the cap › the white top › the frame's top › the rows it pins; then the rows' frame", () => {
+    expect(sheet).toMatch(/<section class="cl26-card"[^>]*><div class="cl26-pin clq-cap" data-cl26="pin" data-clq="cap"><div class="clq-capin"><div class="clq-captop">[\s\S]*?data-cl26="heads"[\s\S]*?<\/div><\/div><\/div><div class="cl26-frame" data-cl26="frame">/);
+  });
+  it("the cap paints the ground and its ring only while pinned (at rest the card is today's card)", () => {
+    const css = read("./contactQcLayout.css");
+    expect(css).toContain(".cl27 .cl26-card > .clq-cap { margin: 0 -24px; padding: 0 14px; }");
+    expect(css).toContain(".cl27 .cl26-card > .clq-cap[data-clq-stuck] { background: var(--ws-page); }");
+    expect(css).toContain(".cl27 .clq-cap[data-clq-stuck] > .clq-capin { box-shadow: 0 0 0 1px #1c130f14; }");
+    expect(css).toContain(".cl27 .clq-capin > .clq-captop { border: 1px solid #e3d5c9; border-bottom: 0; border-radius: 13px 13px 0 0; overflow: hidden; }");
+    expect(read("./ContactBar.tsx")).toContain('cap.toggleAttribute("data-clq-stuck", c)');
   });
 });

@@ -61,13 +61,13 @@ async function mut(page: Page, lock: string) {
       const hb = hd?.querySelector<HTMLElement>(".cl26-hb");
       const b = document.createElement("button"); b.type = "button"; b.textContent = "Open"; hb?.appendChild(b);
     }); break;
-    case "CLH2-8": await page.addStyleTag({ content: ".clv-group.cl27 > .clh2-slim{opacity:1 !important;visibility:visible !important;transform:none !important}" });
-      await page.evaluate(() => document.querySelectorAll(".clh2-slim").forEach((e) => { e.removeAttribute("inert"); e.removeAttribute("aria-hidden"); })); break;
+    case "CLH2-8": await page.addStyleTag({ content: ".clv-group.cl27 > .qc156-slim{opacity:1 !important;visibility:visible !important;transform:none !important}" });
+      await page.evaluate(() => document.querySelectorAll("[data-clh2='slim']").forEach((e) => { e.removeAttribute("inert"); e.removeAttribute("aria-hidden"); })); break;
     case "CLH2-9": await page.addStyleTag({ content: ".cl27 .cl26-pin{top:12px !important} .cl27 .qc153-rail{top:24px !important}" }); break;
-    case "CLH2-10": await page.addStyleTag({ content: ".clv-group.cl27 > .clh2-slim{opacity:1 !important;visibility:visible !important;transform:none !important}" }); break;
+    case "CLH2-10": await page.addStyleTag({ content: ".clv-group.cl27 > .qc156-slim{opacity:1 !important;visibility:visible !important;transform:none !important}" }); break;
     case "CLH2-11": await page.evaluate(() => {
       const g = [...document.querySelectorAll<HTMLElement>(".clv-group.cl27")].find((e) => e.offsetHeight) ?? document.body;
-      const d = document.createElement("div"); d.className = "clh2-slim"; d.style.height = "48px"; g.prepend(d);
+      const d = document.createElement("div"); d.className = "qc156-slim"; d.setAttribute("data-clh2", "slim"); d.style.height = "60px"; g.prepend(d);
     }); break;
     /* v2.1's break: the header's columns put back to v2's (160px, 34px) */
     case "CLH2-12": await page.addStyleTag({ content: ".clv-group[data-v24][data-v27] > .cl24-hd.cl27-hd{grid-template-columns:160px minmax(0,1fr) auto !important;column-gap:34px !important}" }); break;
@@ -194,7 +194,7 @@ test("SHOTS · the header at 1512 × 982 and 1728 × 1117", async ({ page }) => 
 const readSlim = (page: Page) => page.evaluate(() => {
   const vis = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find((e) => e.getBoundingClientRect().height > 0) ?? null;
   const sc = vis(".agl-wpg .wpg-scroll");
-  const row = document.querySelector<HTMLElement>(".aglist .clh2-slim") ?? [...document.querySelectorAll<HTMLElement>(".clh2-slim")].find((e) => e.closest(".aglist")) ?? null;
+  const row = document.querySelector<HTMLElement>(".aglist [data-clh2='slim']") ?? [...document.querySelectorAll<HTMLElement>("[data-clh2='slim']")].find((e) => e.closest(".aglist")) ?? null;
   const pin = vis(".aglist .cl26-pin"), rail = vis(".aglist .qc153-rail");
   const t0 = sc?.getBoundingClientRect().top ?? 0;
   const rr = row?.getBoundingClientRect();
@@ -230,7 +230,8 @@ test("CLH2-8/9/10 · the slim row: hidden and inert at the top; shown above the 
     const b = await readSlim(page);
     L9.check(`${vp.width} scrolled 600 (population: the scroller moved)`, b.scrollTop !== null && b.scrollTop >= 590, String(b.scrollTop));
     L9.check(`${vp.width} visible, its controls focusable`, b.visible && !b.inert && b.focusable === 3, `visible=${b.visible} inert=${b.inert} focusable=${b.focusable}`);
-    L9.check(`${vp.width} 48px high`, b.h !== null && Math.abs(b.h - 48) < 0.5, String(b.h));
+    /* RE-POINTED (Contact list QC layout v1.1): the collapsed bar is the Query Centre's, 60px (clq11 T2) */
+    L9.check(`${vp.width} 60px high (the Query Centre's bar)`, b.h !== null && Math.abs(b.h - 60) < 0.5, String(b.h));
     L9.check(`${vp.width} its bottom at or above the pinned toolbar's top`, b.rowBottom !== null && b.pinTop !== null && b.rowBottom <= b.pinTop + 0.5, `row ${b.rowBottom} toolbar ${b.pinTop}`);
     L9.check(`${vp.width} the filter rail's top below it`, b.rowBottom !== null && b.railTop !== null && b.railTop >= b.rowBottom - 0.5, `row ${b.rowBottom} rail ${b.railTop}`);
     await scrollTo(page, 0);
@@ -249,16 +250,16 @@ test("CLH2-11 · below 768px the slim row never renders", async ({ page }) => {
   const L = new Ledger("CLH2-11");
   /* signed in on the desktop page (the population: the row is there at 1512), then the window narrowed under 768 */
   await openCl(page);
-  const wide = await page.evaluate(() => document.querySelectorAll(".aglist .clh2-slim").length);
+  const wide = await page.evaluate(() => document.querySelectorAll(".aglist [data-clh2='slim']").length);
   L.check("1512: the row is in the page (population)", wide === 1, String(wide));
   for (const vp of [{ width: 767, height: 900 }, { width: 390, height: 844 }]) {
     await page.setViewportSize(vp);
     await page.waitForTimeout(800);
     await mut(page, "CLH2-11");
-    const n0 = await page.evaluate(() => document.querySelectorAll(".clh2-slim").length);
+    const n0 = await page.evaluate(() => document.querySelectorAll("[data-clh2='slim']").length);
     await page.evaluate(() => { for (const sc of document.querySelectorAll<HTMLElement>(".wpg-scroll")) sc.scrollTo({ top: 600 }); window.scrollTo({ top: 600 }); });
     await page.waitForTimeout(600);
-    const n1 = await page.evaluate(() => document.querySelectorAll(".clh2-slim").length);
+    const n1 = await page.evaluate(() => document.querySelectorAll("[data-clh2='slim']").length);
     L.check(`${vp.width} none at the top`, n0 === 0, String(n0));
     L.check(`${vp.width} none after scrolling`, n1 === 0, String(n1));
   }

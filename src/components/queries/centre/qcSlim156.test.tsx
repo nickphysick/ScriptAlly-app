@@ -43,10 +43,12 @@ describe("the collapsed header", () => {
     const page = src("QcPage151.tsx");
     expect(page).toMatch(/ref=\{rootRef\}>\s*\{\/\*[^]*?\*\/\}\s*\{slim156\}/);
   });
-  it("the reader is the Contact list's, shared: both rows call shell/slimReveal", () => {
-    expect(src("QcSlim156.tsx")).toMatch(/useSlimReveal\(ref, \{ header, cover, extra: 12 \}\)/);
-    const cl = src("../../agents/contact/ContactSlimRow.tsx");
-    expect(cl).toMatch(/useSlimReveal\(ref, \{ header: slimHeader, cover: slimCover \}\)/);
+  /* RE-POINTED (Contact list QC layout v1.1): both pages mount the one bar, shell/SlimBar, which calls the shared reader */
+  it("the reader is shared: both pages mount shell/SlimBar, which calls shell/slimReveal, with the toolbar strip's 12px", () => {
+    expect(src("../../shell/SlimBar.tsx")).toMatch(/useSlimReveal\(ref, \{ header, cover, extra \}\)/);
+    expect(src("QcSlim156.tsx")).toMatch(/<SlimBar hook="data-qc156" header=\{header\} cover=\{cover\} extra=\{12\}/);
+    const cl = src("../../agents/contact/ContactSlimBar.tsx");
+    expect(cl).toMatch(/<SlimBar hook="data-clh2" header=\{header\} cover=\{cover\} extra=\{12\}/);
     expect(cl).not.toMatch(/addEventListener\("scroll"/);
   });
 });

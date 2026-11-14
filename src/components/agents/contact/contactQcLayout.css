@@ -37,11 +37,13 @@
   .cl27 > .qc1531-hd .qc1531-for .clp-under { white-space: normal; }
 
   /* ── List health on the navy (ref v6/v7: `.qh-lh`, `.qh-ring`, `.qh-arch`, `.qh-pct`, `.qh-lw`) ── */
-  /* L1 · THE HEADER IS THE QUERY CENTRE'S HEIGHT. Its height is set by its right-hand block, "this week" (QcLine156:
-     qcv156 §2 — the 44px figure, 10 + 74px line, 6px + one 12.5/1.35 caption line, 14px + the 34px footer), 198.875px;
-     List health is shorter (140), so its column holds that height and the block centres in it. A change to the Query
-     Centre's line block moves this number: clq1.measure.ts L1 measures both headers. */
-  .cl27 .clq-rc { display: flex; align-items: center; margin: 0 22px 0 40px; min-height: calc(44px + 10px + 74px + 6px + 12.5px * 1.35 + 14px + 34px); }
+  /* L1 · THE HEADER IS THE QUERY CENTRE'S HEIGHT. v1.1 — since v156.1 the Query Centre's header is as tall as its
+     drawing (the armchair hawk, 360×347, at 190 wide: 183.14px) plus the panel's 22px top and bottom; its streak block
+     is shorter. The binoculars bird (523×512) is 186.0px at the same width, so it takes the hawk's layout height —
+     equal negative margins above and below, the drawing itself unscaled and centred — and the header's row is set by the
+     same 183.14px. List health (140) and the title block are shorter still. clq1.measure.ts L1 measures both headers. */
+  .cl27 .clq-art img { margin-block: calc((190px * 347 / 360 - 190px * 512 / 523) / 2); }
+  .cl27 .clq-rc { display: flex; align-items: center; margin: 0 22px 0 40px; }
   .cl27 .clq-rc .cl26-health[data-fill] { height: auto; gap: 22px; align-self: center; }
   .cl27 .clq-rc .cl26-ring { margin-top: -10px; }
   .cl27 .clq-rc .cl26-ring:focus-visible { outline: 2px solid #e8bdb4; outline-offset: 4px; border-radius: 50%; }
@@ -82,6 +84,9 @@
    `.cl27`). The Sort chip shows the field's name: `SortChipButton`'s "Sorted by" is not drawn. ────────────────────── */
 @media (min-width: 768px) {
   .cl27 .qc153-bar .clq-sort .sc-sby { display: none; }
+  /* v1.1 — the field's name in the Query Centre chip's own type (`.qc153-dd`: 14.5px serif, its `b` 600), not the shared
+     sort chip's 15px (shell/sortChip.css `.sc-chip .sc-f`) */
+  .cl27 .qc153-bar .qc153-dd.clq-sort .sc-f { font: 600 14.5px/1 var(--sp-serif) !important; }
   .cl27 .qc153-bar .clq-sort :is(svg) { flex: none; width: 15px; height: 15px; }
   .cl27 .qc153-bar .clq-sort .sc-dir { font-style: normal; color: var(--mut, #5b4f47); }
   /* the card 22px under the bar (the ref's `.tb { margin-bottom: 22px }`): the bar's own 4px, then 18 */
@@ -92,10 +97,65 @@
    the stuck mask is deleted (contactV26.css) and the pin sits under the bar's strip (contactPrinciples.css). ──────── */
 @media (min-width: 768px) {
   .cl27 .cl26-card .cl26-frame { border-color: #e3d5c9; }
-  /* stuck, the strip paints the page solid down to the bar's foot and NOTHING in its last 22px: the Query Centre fades
-     its cards out there, but here the card's own pin rises into that band (contactPrinciples.css), so a fade would only
-     tint the card's edge and show rows between the bar and the pin */
-  .cl27 .qc154-tbw.qc154-tbw.qc154-tbw.qc154-tbw.qc154-tbw[data-qc156-stuck] {
-    background: linear-gradient(to bottom, var(--ws-page) 0, var(--ws-page) calc(100% - 22px), transparent calc(100% - 22px));
+  /* v1.1 — STUCK, THE STRIP'S GROUND reaches 14px past the list column on each side (inside the 28px gap, never into
+     the Views panel), from its top to 1px above the bar's foot; its last 22px (the Query Centre's fade) paint nothing,
+     because the card's cap rises into them (and the 1px above the cap is the cap's own, for the card's top ring). So the card's outer ring and shadow never show beside or above the bar. */
+  .cl27 .qc154-tbw.qc154-tbw.qc154-tbw.qc154-tbw.qc154-tbw[data-qc156-stuck] { background: none; }
+  .cl27 .qc154-tbw[data-qc156-stuck]::before {
+    content: ""; position: absolute; z-index: -1; top: 0; bottom: 23px; left: -14px; right: -14px; background: var(--ws-page);
   }
+}
+
+/* ── v1.1 Phase 1 · the Query Centre's type guard, for the pieces both pages share ──────────────────────────────────
+   brand.tsx names the body face on a blanket `p, span, div, button, input, label …` selector; the Query Centre undoes it
+   for its page (qcv151.css: `.qc151 :where(…) { font-family: inherit }`), and nothing did for `.cl27`, so the shared
+   header, Views panel, bar and collapsed bar fell to Source Sans 3 here. Scoped to those four pieces, so the list rows'
+   own faces are untouched. `:where()` keeps the guard at the Query Centre's own weight (0-2-0 here: `.cl27` + `:is()`). */
+@media (min-width: 768px) {
+  .cl27 :is(.qc1531-hd, .qc156-views, .qc154-tbw, .qc156-slim) :where(span, p, div, label, td, th, b, i, em, small, button, input) { font-family: inherit; }
+  /* …and what they inherit is the Query Centre page root's type (qcv151.css `.qc151`), set on each piece's own root: the
+     brand rule names a bare `div` too, so a piece inside `.clv-group` would otherwise inherit the body face from it */
+  .cl27 :is(.qc1531-hd, .qc156-views, .qc154-tbw, .qc156-slim) { font: 400 16px/1.45 var(--sp-serif); }
+}
+
+/* ── v1.1 Phase 2 · the Query Centre's collapsed bar (shell/SlimBar; its rules are qcv156.css §3, which name `.cl27`) ──
+   The group is a grid: the bar spans the header's row and the list's, so it stays sticky for the whole page (a sticky
+   item is held inside its grid area), as header v2's slim row did. */
+@media (min-width: 768px) {
+  .clv-group.cl27 > .qc156-slim { grid-column: 1 / -1; grid-row: 1 / 3; align-self: start; }
+  /* List health in the slot the Query Centre gives its streak, in the streak's type (.qc156-sw b / em) */
+  .cl27 .qc156-slim .clq-sh {
+    all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 10px 0 6px;
+    border-radius: 9px; color: #1c130f; white-space: nowrap;
+  }
+  .cl27 .qc156-slim .clq-sh svg { flex: none; display: block; align-self: center; }
+  .cl27 .qc156-slim .clq-sh:hover { background: rgba(28, 19, 15, 0.05); }
+  .cl27 .qc156-slim .clq-sh:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  /* the subline's "{x} not yet queried" is still the button onto that filter: the subline's own type, underlined */
+  .cl27 .qc156-slim .clq-snq {
+    all: unset; cursor: pointer; font: inherit !important; color: inherit;
+    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; text-decoration-color: rgba(91, 79, 71, 0.45);
+  }
+  .cl27 .qc156-slim .clq-snq:hover { text-decoration-color: #5b4f47; }
+  .cl27 .qc156-slim .clq-snq:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 2px; }
+}
+
+/* ── v1.1 Phase 3 · THE CAP: the card's top as one sticky block (ref `.card2`, `.cap`, `.capin`, `.captop`, `.rowsf`) ──
+   The card keeps its white body, ring and shadow (contactV26.css) with its top 10px moved into the cap. The cap
+   (`.cl26-pin`, sticky under the strip: contactPrinciples.css) paints the page's ground across its whole box, 14px past
+   the card on each side; on it, the white rounded top (22px corners) with its 1px ring, top and sides only, and inside
+   that the frame's rounded top (13px) with its #e3d5c9 line. The rows' frame continues the sides and closes the foot.
+   Whatever scrolls behind the cap (the card's own white body, the rows) never shows through its corners. */
+@media (min-width: 768px) {
+  .cl27 .cl26-card { padding: 0 10px 10px; }
+  .cl27 .cl26-card > .clq-cap { margin: 0 -24px; padding: 0 14px; }
+  .cl27 .clq-cap > .clq-capin { padding: 10px 10px 0; border-radius: 22px 22px 0 0; background: #fff; clip-path: inset(-2px -2px 0 -2px); }
+  /* PINNED ONLY (`data-clq-stuck`, ContactBar's reader): at rest the card draws its own ring and shadow exactly as today,
+     so the cap paints nothing of its own there. Pinned, the cap paints the page's ground (its box, and the 1px above it
+     where the card's top ring sits) and the white top draws the ring the card's own scrolled-away top no longer can. */
+  .cl27 .cl26-card > .clq-cap[data-clq-stuck] { background: var(--ws-page); }
+  .cl27 .cl26-card > .clq-cap[data-clq-stuck]::before { content: ""; position: absolute; z-index: -1; left: 0; right: 0; top: -1px; height: 1px; background: var(--ws-page); }
+  .cl27 .clq-cap[data-clq-stuck] > .clq-capin { box-shadow: 0 0 0 1px #1c130f14; }
+  .cl27 .clq-capin > .clq-captop { border: 1px solid #e3d5c9; border-bottom: 0; border-radius: 13px 13px 0 0; overflow: hidden; }
+  .cl27 .cl26-card > .clq-cap + .cl26-frame.cl26-frame { border-top: 0; border-radius: 0 0 13px 13px; }
 }

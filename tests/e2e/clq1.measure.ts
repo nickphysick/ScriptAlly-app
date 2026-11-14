@@ -123,7 +123,13 @@ async function lineReading(page: Page, label: string, led: Ledger, shot: string)
      pin starts): sample from there down */
   const stuck = await page.locator(`${CL} [data-clq='toolbar'][data-qc156-stuck]`).count() > 0;
   const stripFoot = b.strip && stuck ? b.strip.b - 22 : 0;
-  const top = Math.ceil(Math.max(fr.y + 14, stripFoot + 1, b.slim ? b.slim.b + 1 : 0));
+  /* v1.1 — the frame's line begins at the cap's rounded top (`.clq-captop`), below the cap's white 10px edge */
+  const capTop = await page.evaluate((cl) => {
+    const r = [...document.querySelectorAll<HTMLElement>(cl)].find((e) => e.getBoundingClientRect().width > 0);
+    const t = r?.querySelector<HTMLElement>("[data-clq='cap'] .clq-captop");
+    return t ? t.getBoundingClientRect().top : null;
+  }, CL);
+  const top = Math.ceil(Math.max(fr.y + 14, capTop !== null ? capTop + 14 : 0, stuck ? stripFoot + 1 : 0, b.slim ? b.slim.b + 1 : 0));
   const bot = Math.floor(Math.min(fr.b - 14, vp.height - 2, portFoot - 2));
   let worst = 0, worstAt = "", n = 0;
   for (const side of ["left", "right"] as const) {

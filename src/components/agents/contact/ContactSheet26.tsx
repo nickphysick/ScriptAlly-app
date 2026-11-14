@@ -141,7 +141,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
     const sc = cardRef.current?.closest<HTMLElement>(".wpg-scroll");
     if (!el || !pin || !sc) return;
     /* where the pin will sit once there: under the slim pinned row, which shows as soon as the header is gone */
-    const slim = cardRef.current?.closest<HTMLElement>(".clv-group")?.querySelector<HTMLElement>(":scope > .clh2-slim");
+    const slim = cardRef.current?.closest<HTMLElement>(".clv-group")?.querySelector<HTMLElement>(":scope > .qc156-slim"); /* the collapsed bar (QC layout v1.1) */
     const ahead = slim && !slim.hasAttribute("data-shown") ? slim.offsetHeight : 0;
     const delta = el.getBoundingClientRect().top - (sc.getBoundingClientRect().top + pinTopOf(pin) + ahead + pin.offsetHeight);
     const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -178,8 +178,13 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
 
   return (
     <section className="cl26-card" data-cl26="card" ref={cardRef} data-kind={drawn[0]?.kind ?? "all"}>
-      <div className="cl26-frame" data-cl26="frame">
-        <div className="cl26-pin" data-cl26="pin" ref={pinRef}>
+      {/* QC layout v1.1 — THE CAP: the card's top as one sticky block (ref `.cap`/`.capin`/`.captop`). It paints the page's
+          ground 14px past the card on each side; on it sit the card's white rounded top with its ring (`.clq-capin`) and
+          the frame's rounded top with its line (`.clq-captop`), holding the index, applied and heading rows. Pinned, it
+          sits directly under the bar's strip, so the card looks as it does at rest: it begins at the headings, and the
+          rows scrolling behind never show through the corners. The rows' frame below continues its sides. */}
+      <div className="cl26-pin clq-cap" data-cl26="pin" data-clq="cap" ref={pinRef}>
+        <div className="clq-capin"><div className="clq-captop">
           {p.group !== "none" && drawn.length > 0 ? <Index26 secs={secs} current={current ?? drawn[0]?.key ?? null} onJump={jump} /> : null}
           {applied.length > 0 || p.setChip ? (
             <div className="cl26-ap" data-cl26="applied" role="status">
@@ -208,7 +213,9 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
             </span>
             <span aria-hidden="true" />
           </div>
-        </div>
+        </div></div>
+      </div>
+      <div className="cl26-frame" data-cl26="frame">
 
         {state === "loading" ? (
           /* principles v1 — skeleton rows (a disc, two lines, two cells), shimmering; no spinner */

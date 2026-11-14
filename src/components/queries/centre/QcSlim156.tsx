@@ -11,16 +11,18 @@
  *    (the panel's foot passing under the bar's line) and the same `--pin-cover` written on the list's columns
  *    (`.qc153-cl`), so the toolbar pins directly under the bar and the Views panel 14px under the toolbar. `extra` is
  *    the toolbar strip's 12px (its top is `--pin-cover` − 12, qcv154.css §6).
+ * ⚠️ THE BAR IS THE SHARED `shell/SlimBar` (Contact list — QC layout v1.1 extracted it from here, markup unchanged); this
+ *    file says only what the Query Centre puts in it. The Contact list mounts the same bar.
  * ⚠️ IT TAKES NO SPACE: sticky at the root's top with its own height given back in a negative margin, so the page at
  *    rest is exactly as it was. Its ground reaches the sheet's full width (`--qc156-bl` / `--qc156-br`, measured);
  *    its content stays inset to the page content's edges.
  * ⚠️ HIDDEN IS INERT: `inert` and `aria-hidden` while it is not shown, so its button is not in the Tab order.
  */
-import React, { useLayoutEffect, useRef } from "react";
+import React from "react";
 import type { WeekGoal154 } from "../../../lib/qc154goal";
 import { streakLead } from "../../../lib/qc1561";
-import { useSlimReveal } from "../../shell/slimReveal";
 import { FIRST_TITLE_155 } from "../../../lib/qc155";
+import { SlimBar } from "../../shell/SlimBar";
 import { sentTitle } from "./QcHeader1531";
 import { FLAME_1561 } from "./QcLine156";
 import "./qcv156.css";
@@ -36,42 +38,18 @@ export const QcSlim156: React.FC<{
   onLog: () => void;
   logDisabled?: boolean;
 }> = ({ sent, ms, goal, onLog, logDisabled = false }) => {
-  const ref = useRef<HTMLDivElement>(null);
   const lead = goal ? streakLead(goal) : null;
-  const shown = useSlimReveal(ref, { header, cover, extra: 12 });
-  /* the ground's reach: from the page content's edges out to the scroller's (the sheet's) */
-  useLayoutEffect(() => {
-    const row = ref.current;
-    const sc = row?.closest<HTMLElement>(".wpg-scroll");
-    if (!row || !sc) return undefined;
-    const put = () => {
-      const r = row.getBoundingClientRect(), s = sc.getBoundingClientRect();
-      row.style.setProperty("--qc156-bl", `${Math.max(0, r.left - s.left)}px`);
-      row.style.setProperty("--qc156-br", `${Math.max(0, s.left + sc.clientWidth - r.right)}px`);
-    };
-    put();
-    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(put);
-    ro?.observe(sc);
-    window.addEventListener("resize", put);
-    return () => { ro?.disconnect(); window.removeEventListener("resize", put); };
-  }, []);
   return (
-    <div ref={ref} className="qc156-slim" data-qc156="slim" data-shown={shown ? "" : undefined}
-      inert={!shown || undefined} aria-hidden={!shown || undefined}>
-      <p className="qc156-st">
-        <b data-qc156="slim-title">{sent === 0 ? FIRST_TITLE_155 : sentTitle(sent)}</b>
-        {ms ? <i data-qc156="slim-for">for {ms}</i> : null}
-      </p>
-      <div className="qc156-sa">
-        {/* v156.1 §1 — the streak leads here too: the flame (none without a streak), the streak, its plain line */}
-        {lead ? (
-          <span className="qc1561-sw" data-qc156="slim-week">
-            {lead.flame ? <FLAME_1561 className="qc1561-sfl" width={17} height={22} /> : null}
-            <b data-qc156="slim-streak">{lead.title}</b><em data-qc156="slim-line">{lead.line}</em>
-          </span>
-        ) : null}
-        <button type="button" className="qc156-sb" data-qc156="slim-log" disabled={logDisabled} onClick={onLog}>+ Log a query</button>
-      </div>
-    </div>
+    <SlimBar hook="data-qc156" header={header} cover={cover} extra={12}
+      title={sent === 0 ? FIRST_TITLE_155 : sentTitle(sent)}
+      sub={ms ? { node: <>for {ms}</>, probe: "slim-for" } : null}
+      /* v156.1 §1 — the streak leads here too: the flame (none without a streak), the streak, its plain line */
+      right={lead ? (
+        <span className="qc1561-sw" data-qc156="slim-week">
+          {lead.flame ? <FLAME_1561 className="qc1561-sfl" width={17} height={22} /> : null}
+          <b data-qc156="slim-streak">{lead.title}</b><em data-qc156="slim-line">{lead.line}</em>
+        </span>
+      ) : null}
+      button={{ label: "+ Log a query", onClick: onLog, disabled: logDisabled, probe: "slim-log" }} />
   );
 };
