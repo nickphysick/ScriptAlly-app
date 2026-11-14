@@ -1,0 +1,21 @@
+# Baseline 2026-11-14T18:32:18Z at 30cd0e49e (served line c24562273 + two-door-import's walk and report commits), functions/node_modules linked
+## tsc
+0
+tsc exit=0
+## vite build (landing)
+19:✓ built in 1.73s
+exit=0
+## vite build --mode development (app)
+193:✓ built in 14.98s
+exit=0
+## vitest
+   × emulator runs go through the guard > no recipe under tests/ starts an emulator without the guard 166ms
+   × every e2e and script entry point carries the live guard > every file that creates a Firebase app goes through fsTarget, or only ever names a demo- project 8ms
+   × every e2e and script entry point carries the live guard > no file that creates an app reads .env.development itself — only fsTarget does, behind the opt-in 8ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/test/emuGuard.test.ts > emulator runs go through the guard > no recipe under tests/ starts an emulator without the guard
+ FAIL  src/test/firestoreTarget.test.ts > every e2e and script entry point carries the live guard > every file that creates a Firebase app goes through fsTarget, or only ever names a demo- project
+ FAIL  src/test/firestoreTarget.test.ts > every e2e and script entry point carries the live guard > no file that creates an app reads .env.development itself — only fsTarget does, behind the opt-in
+ Test Files  2 failed | 863 passed | 1 skipped (866)
+      Tests  3 failed | 12523 passed | 4 skipped (12530)
+vitest exit=1
