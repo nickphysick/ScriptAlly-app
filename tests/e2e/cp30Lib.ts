@@ -42,7 +42,8 @@ export async function openCp(page: Page, vp: Vp, o: { ms?: string } = {}) {
   await page.evaluate(async () => { await document.fonts.ready; });
   await page.evaluate(LIB);
   await page.waitForFunction(() => {
-    try { const t = (window as any).__q('[data-cp="top"]'); return !!t && t.getAttribute("data-top") !== "loading"; } catch { return false; }
+    /* RE-POINTED (Workspace headers v1, 14 Nov): `[data-cp="top"]` is gone; readiness is the page's own `data-state` (`[data-cpv="page"]`) leaving "loading" */
+    try { const t = (window as any).__cp(); return !!t && t.matches('[data-cpv="page"]') && t.getAttribute("data-state") !== "loading"; } catch { return false; }
   }, null, { timeout: 30_000 }).catch(() => undefined);
   await page.waitForTimeout(400);
 }
