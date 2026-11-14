@@ -148,4 +148,46 @@ test.describe("Query Centre v156.1", () => {
     }
     L.done(36);
   });
+  /* W2 (§2) — in every row of cards, all the Sent and Next boxes share one top and one bottom (within 1px), are 86px
+     at least, padded 10 12 11; no value or line is cut short by the new padding. Screens of each group. */
+  test("W2 — the boxes line up", async ({ page }) => {
+    test.skip(PHASE === "before", "after only");
+    const L = new Ledger("W2");
+    for (const vp of SIZES) {
+      await openQc(page, vp);
+      /* open the folded groups so every card is measured */
+      const more = page.locator(`${PAGE} [data-qc153='show-all']`);
+      for (let i = 0; i < 6 && (await more.count()) > 0; i++) await more.first().click({ timeout: 5_000 });
+      await page.waitForTimeout(500);
+      const r = await page.evaluate((sel) => {
+        const rows = new Map<string, { top: number; bottom: number; h: number; pad: string; mixed: string }[]>();
+        let cut = 0; const cuts: string[] = [];
+        document.querySelectorAll<HTMLElement>(`${sel} [data-qc154="grid"]`).forEach((g, gi) => {
+          g.querySelectorAll<HTMLElement>(`[data-qc154="card"]`).forEach((c) => {
+            const key = `${gi}:${Math.round(c.getBoundingClientRect().top)}`;
+            c.querySelectorAll<HTMLElement>("[data-qc154='fact']").forEach((f) => {
+              const b = f.getBoundingClientRect();
+              const list = rows.get(key) ?? []; rows.set(key, list);
+              list.push({ top: b.top, bottom: b.bottom, h: b.height, pad: getComputedStyle(f).padding, mixed: f.querySelector("[data-qc154='nudge-on']") ? "nudge" : f.querySelector("[data-qc154='window']") ? "bar" : "plain" });
+              f.querySelectorAll<HTMLElement>(":scope > b, :scope > em").forEach((t) => { if (t.scrollWidth > t.clientWidth + 1) { cut++; if (cuts.length < 5) cuts.push(`${c.dataset.id}: ${t.textContent}`); } });
+            });
+          });
+        });
+        const out = [...rows.entries()].map(([k, l]) => ({ k, n: l.length, dTop: Math.max(...l.map((x) => x.top)) - Math.min(...l.map((x) => x.top)), dBot: Math.max(...l.map((x) => x.bottom)) - Math.min(...l.map((x) => x.bottom)), minH: Math.min(...l.map((x) => x.h)), pads: [...new Set(l.map((x) => x.pad))], kinds: [...new Set(l.map((x) => x.mixed))] }));
+        return { rows: out, cut, cuts };
+      }, PAGE);
+      const bad = r.rows.filter((x) => x.dTop > 1 || x.dBot > 1);
+      const mixed = r.rows.filter((x) => x.kinds.length > 1);
+      L.check(`${vp.width}: ${r.rows.length} rows — every box shares its row's top and bottom within 1px`, r.rows.length > 0 && bad.length === 0, bad.length ? JSON.stringify(bad.slice(0, 3)) : `worst ${Math.max(...r.rows.map((x) => Math.max(x.dTop, x.dBot))).toFixed(2)}px`);
+      L.check(`${vp.width}: ${mixed.length} rows mix box contents (${[...new Set(mixed.flatMap((x) => x.kinds))].join(", ")}) and still line up`, mixed.length > 0 && mixed.every((x) => x.dTop <= 1 && x.dBot <= 1), JSON.stringify(mixed.slice(0, 2)));
+      const pad = vp.width === 1920 ? "10px 12px 11px" : "10px 8px 11px"; /* the narrow card keeps 8px at the sides */
+      L.check(`${vp.width}: every box at least 86px, one padding per row (${pad})`, r.rows.every((x) => x.minH >= 85.5 && x.pads.length === 1 && x.pads[0] === pad), JSON.stringify([...new Set(r.rows.flatMap((x) => x.pads))]) + ` min ${Math.min(...r.rows.map((x) => x.minH)).toFixed(2)}`);
+      L.check(`${vp.width}: no value or line cut short`, r.cut === 0, `${r.cut} ${r.cuts.join(" | ")}`);
+      if (vp.width === 1920) {
+        const groups = await page.locator(`${PAGE} [data-qc1511="group"]`).all();
+        for (const [i, g] of groups.entries()) await g.screenshot({ path: `${SHOTS}/w2-group-${i + 1}-${await g.getAttribute("data-k")}-1920.png` });
+      }
+    }
+    L.done(8);
+  });
 });

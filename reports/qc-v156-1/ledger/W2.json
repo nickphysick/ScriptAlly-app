@@ -1,0 +1,42 @@
+[
+ {
+  "name": "1920: 30 rows — every box shares its row's top and bottom within 1px",
+  "ok": true,
+  "got": "worst 0.00px"
+ },
+ {
+  "name": "1920: 2 rows mix box contents (plain, bar) and still line up",
+  "ok": true,
+  "got": "[{\"k\":\"3:-2931\",\"n\":6,\"dTop\":0,\"dBot\":0,\"minH\":86,\"pads\":[\"10px 12px 11px\"],\"kinds\":[\"plain\",\"bar\"]},{\"k\":\"3:-2709\",\"n\":6,\"dTop\":0,\"dBot\":0,\"minH\":86,\"pads\":[\"10px 12px 11px\"],\"kinds\":[\"plain\",\"bar\"]}]"
+ },
+ {
+  "name": "1920: every box at least 86px, one padding per row (10px 12px 11px)",
+  "ok": true,
+  "got": "[\"10px 12px 11px\"] min 86.00"
+ },
+ {
+  "name": "1920: no value or line cut short",
+  "ok": true,
+  "got": "0 "
+ },
+ {
+  "name": "1440: 30 rows — every box shares its row's top and bottom within 1px",
+  "ok": true,
+  "got": "worst 0.00px"
+ },
+ {
+  "name": "1440: 2 rows mix box contents (plain, bar) and still line up",
+  "ok": true,
+  "got": "[{\"k\":\"3:2396\",\"n\":6,\"dTop\":0,\"dBot\":0,\"minH\":86,\"pads\":[\"10px 8px 11px\"],\"kinds\":[\"plain\",\"bar\"]},{\"k\":\"3:2614\",\"n\":6,\"dTop\":0,\"dBot\":0,\"minH\":86,\"pads\":[\"10px 8px 11px\"],\"kinds\":[\"plain\",\"bar\"]}]"
+ },
+ {
+  "name": "1440: every box at least 86px, one padding per row (10px 8px 11px)",
+  "ok": true,
+  "got": "[\"10px 8px 11px\"] min 86.00"
+ },
+ {
+  "name": "1440: no value or line cut short",
+  "ok": true,
+  "got": "0 "
+ }
+]
