@@ -26,6 +26,7 @@ import { MatTab1533, Track153 } from "./QcSlip153";
 import "./qcv153.css";
 import "./qcv1531.css";
 import "./qcv154.css";
+import "./qcv1561.css";
 
 const BELL = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M8 2.5a4 4 0 0 0-4 4v2.5L2.8 11h10.4L12 9V6.5a4 4 0 0 0-4-4zM6.5 13a1.5 1.5 0 0 0 3 0" /></svg>;
 
@@ -50,6 +51,7 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
   /* the slip's rule: a navy or nudge act is the button's words; anything else opens the card */
   const cta = act && act.tone !== "plain" ? act : null;
   const open = () => onOpen(r.id);
+  const actLabel = cta ? cta.label : "Open the card";
   return (
     <div className={`qc154-card${selected ? " is-sel" : ""}${popOpen ? " has-pop" : ""}`} id={`query-row-${r.id}`} data-qc154="card" data-qcv="row" data-id={r.id}
       data-tone={slipTone(r.status)} data-status={r.status} role="button" tabIndex={0}
@@ -88,11 +90,15 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
               <span className="qc154-fl">Next</span>
               <b>{nx.value}</b>{nx.line ? <em>{nx.line}</em> : null}
             </>}
-            <span className="qc154-act" data-qc154="act-wrap" aria-hidden="true">
-              {cta
-                ? <button type="button" tabIndex={-1} className="qc154-actb" data-qc154="act" data-mode={cta.mode} onClick={(e) => { e.stopPropagation(); onAct(r.id, cta.mode); }}>{cta.label} →</button>
-                : <button type="button" tabIndex={-1} className="qc154-actb" data-qc154="act" data-mode="open" onClick={(e) => { e.stopPropagation(); open(); }}>Open the card →</button>}
-            </span>
+            {/* v156.1 §3 — the action is a 32px arrow chip in the box's corner, a real button named by the action's label (the
+                label also its tooltip); its click runs the action and stops there, so the card's own click (the slide-out)
+                does not run as well. The box keeps its content and colour. */}
+            <button type="button" className="qc1561-chip" data-qc154="act" data-mode={cta ? cta.mode : "open"} aria-label={actLabel}
+              onClick={(e) => { e.stopPropagation(); if (cta) onAct(r.id, cta.mode); else open(); }}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.stopPropagation(); }}>
+              <span className="qc1561-arr" aria-hidden="true">→</span>
+              <span className="qc1561-tip" aria-hidden="true">{actLabel}</span>
+            </button>
           </div>
         </div>
       </div>

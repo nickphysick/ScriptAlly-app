@@ -17,18 +17,20 @@ const STREAK = weekGoal154([at(10, 26), at(10, 27), at(10, 28), at(11, 2), at(11
 const src = (f: string) => readFileSync(resolve(__dirname, f), "utf8");
 
 describe("the collapsed header", () => {
-  it("left: the title and the manuscript; right: n of goal this week, the streak and + Log a query — no Record a response", () => {
+  it("left: the title and the manuscript; right (v156.1): the flame, the streak, its line and + Log a query — no n of goal, no Record a response", () => {
     const h = renderToStaticMarkup(<QcSlim156 sent={26} ms="Murphy’s Day Out" goal={STREAK} onLog={() => {}} />);
     expect(h).toContain('data-qc156="slim-title">26 queries sent</b>');
     expect(h).toContain('data-qc156="slim-for">for Murphy’s Day Out</i>');
-    expect(h).toContain("<b>2 of 3</b><em>this week</em>");
-    expect(h).toMatch(/data-qc156="slim-streak"[^>]*>[\s\S]*?<\/svg>2-week streak<\/span>/);
+    expect(h).toMatch(/<svg class="qc1561-sfl" viewBox="0 0 24 30" width="17" height="22"/);
+    expect(h).toContain('data-qc156="slim-streak">2 week streak</b><em data-qc156="slim-line">1 more this week to keep it going.</em>');
+    expect(h).not.toMatch(/ of 3|this week<\/em>|-week streak/);
     expect(h).toContain(">+ Log a query</button>");
     expect(h).not.toContain("Record a response");
   });
-  it("no streak, no streak item; no manuscript, no for line", () => {
+  it("no streak: no flame, \"No streak yet\" and its line; no manuscript, no for line", () => {
     const h = renderToStaticMarkup(<QcSlim156 sent={1} ms={null} goal={weekGoal154([at(9, 1)], WEEKLY3, NOW)} onLog={() => {}} />);
-    expect(h).not.toContain("slim-streak");
+    expect(h).not.toContain("qc1561-sfl");
+    expect(h).toContain('data-qc156="slim-streak">No streak yet</b><em data-qc156="slim-line">3 this week starts one.</em>');
     expect(h).not.toContain("slim-for");
     expect(h).toContain(">1 query sent</b>");
   });
