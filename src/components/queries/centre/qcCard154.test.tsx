@@ -28,22 +28,33 @@ describe("the v154 card", () => {
     expect(h.match(/data-qc154="fact"/g)?.length).toBe(2);
   });
 
-  it("on hover the Next box becomes the slip's action, with the slip's label, and nothing else is a button at rest", () => {
+  it("v156.1 §3: the action is a real button — a 32px arrow chip in the Next box — named by the action's label", () => {
     const act: RowAct = { tone: "navy", label: "Send your partial", mode: "sent" };
     const h = card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"), act);
-    const nx = h.match(/<div[^>]*data-k="next"[\s\S]*?<\/button><\/span><\/div>/)?.[0] ?? "";
-    expect(nx).toContain('data-qc154="act"');
-    expect(nx).toContain('data-mode="sent"');
-    expect(nx).toContain("Send your partial →");
-    /* a plain act (Record a response) is the slip's "Open the card →" */
+    const chip = h.match(/<button[^>]*class="qc1561-chip"[^>]*>[\s\S]*?<\/button>/)?.[0] ?? "";
+    expect(chip).toContain('data-qc154="act"');
+    expect(chip).toContain('data-mode="sent"');
+    expect(chip).toContain('aria-label="Send your partial"');
+    expect(chip).not.toContain("tabindex");
+    expect(chip).toMatch(/<span class="qc1561-tip" aria-hidden="true">Send your partial<\/span>/);
+    /* inside the Next box, which keeps its content: no navy overlay, nothing hidden from assistive tech */
+    expect(h).toMatch(/data-k="next"[\s\S]*?class="qc1561-chip"/);
+    expect(h).not.toContain("qc154-act");
+    expect(h).not.toContain("Send your partial →");
+    /* a plain act (Record a response) is the slip's "Open the card" */
     const plain = card154(row154(QueryStatus.QUERIED, "agent"), { tone: "plain", label: "Record a response", mode: "resp" });
-    expect(plain).toContain("Open the card →");
-    expect(plain).not.toContain("Record a response →");
-    /* the sheet hides it at rest and shows it on hover or focus-within, except while the track is hovered */
-    const css = readFileSync(new URL("./qcv154.css", import.meta.url), "utf8");
-    expect(css).toMatch(/\.qc154-act\s*\{[^}]*opacity:\s*0/);
-    expect(css).toMatch(/\.qc154-card:hover \.qc154-act,\s*\.qc154-card:focus-within \.qc154-act\s*\{[^}]*opacity:\s*1/);
-    expect(css).toMatch(/\.qc154-card:has\(\.qc154-trkw:hover\) \.qc154-act/);
+    expect(plain).toContain('aria-label="Open the card"');
+    expect(plain).toContain('data-mode="open"');
+    /* its click runs the action and stops there: the card's own click (the slide-out) does not also run */
+    const src = readFileSync(new URL("./QcCard154.tsx", import.meta.url), "utf8");
+    expect(src).toMatch(/className="qc1561-chip"[\s\S]*?onClick=\{\(e\) => \{ e\.stopPropagation\(\);/);
+    /* the sheet: hidden at rest, risen 4px; shown on hover or focus-within over 150ms; always shown without hover; no
+       rise under reduced motion; the Next box never turns navy */
+    const css = readFileSync(new URL("./qcv1561.css", import.meta.url), "utf8");
+    expect(css).toMatch(/\.qc151 \.qc1561-chip\s*\{[^}]*opacity:\s*0;[^}]*transform:\s*translateY\(4px\);[^}]*transition:\s*opacity 150ms, transform 150ms/);
+    expect(css).toMatch(/\.qc151 \.qc154-card:hover \.qc1561-chip,\s*\.qc151 \.qc154-card:focus-within \.qc1561-chip\s*\{[^}]*opacity:\s*1;[^}]*transform:\s*none/);
+    expect(css).toMatch(/@media \(hover: none\)\s*\{[^}]*\.qc1561-chip[^{]*\{[^}]*opacity:\s*1/);
+    expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*\.qc1561-chip[^{]*\{[^}]*transform:\s*none/);
   });
 
   it("draws no rust, and the rose band's ink is #5f433d", () => {

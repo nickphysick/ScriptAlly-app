@@ -190,4 +190,86 @@ test.describe("Query Centre v156.1", () => {
     }
     L.done(8);
   });
+  /* W3 (§3) — the arrow chip: the Next box keeps its fill on hover; the chip hidden at rest, shown (32px, 8px in) on
+     hover and on keyboard focus; named by the action's label; a click runs the action (the card opens on that action's
+     composer) rather than only opening the card. One card per action kind, hovered, and the focused chip, on screen. */
+  test("W3 — the arrow chip", async ({ page }) => {
+    test.skip(PHASE === "before", "after only");
+    const L = new Ledger("W3");
+    for (const vp of SIZES) {
+      const w = vp.width;
+      await openQc(page, vp);
+      const more = page.locator(`${PAGE} [data-qc153='show-all']`);
+      for (let i = 0; i < 6 && (await more.count()) > 0; i++) await more.first().click({ timeout: 5_000 });
+      await page.waitForTimeout(400);
+      /* one card per action kind */
+      const kinds = await page.evaluate((sel) => {
+        const seen = new Map<string, { id: string; label: string }>();
+        document.querySelectorAll<HTMLElement>(`${sel} [data-qc154="card"]`).forEach((c) => {
+          const b = c.querySelector<HTMLElement>(".qc1561-chip"); if (!b) return;
+          const k = `${b.dataset.mode}:${b.getAttribute("aria-label")}`;
+          if (!seen.has(k)) seen.set(k, { id: c.dataset.id!, label: b.getAttribute("aria-label")! });
+        });
+        return [...seen.entries()].map(([k, v]) => ({ k, ...v }));
+      }, PAGE);
+      L.check(`${w}: chips on the page — ${kinds.map((x) => x.label).join(", ")}`, kinds.length >= 2, `${kinds.length}`);
+      for (const { k, id, label } of kinds) {
+        const card = page.locator(`${PAGE} [data-qc154="card"][data-id="${id}"]`);
+        const chip = card.locator(".qc1561-chip");
+        await card.scrollIntoViewIfNeeded();
+        await page.mouse.move(2, 2);
+        await page.waitForTimeout(250);
+        const rest = await card.evaluate((c) => { const n = c.querySelector<HTMLElement>("[data-qc154='fact'][data-k='next']")!; const b = c.querySelector<HTMLElement>(".qc1561-chip")!; return { bg: getComputedStyle(n).backgroundColor, op: getComputedStyle(b).opacity }; });
+        await card.locator("[data-qc154='band']").hover();
+        await page.waitForTimeout(350);
+        const hov = await card.evaluate((c) => {
+          const n = c.querySelector<HTMLElement>("[data-qc154='fact'][data-k='next']")!; const b = c.querySelector<HTMLElement>(".qc1561-chip")!;
+          const nb = n.getBoundingClientRect(), bb = b.getBoundingClientRect(); const cs = getComputedStyle(b);
+          return { bg: getComputedStyle(n).backgroundColor, op: cs.opacity, w: bb.width, h: bb.height, r: nb.right - bb.right, bt: nb.bottom - bb.bottom, fill: cs.backgroundColor, radius: cs.borderRadius, shadow: cs.boxShadow, overlay: !!c.querySelector(".qc154-act") };
+        });
+        L.check(`${w} ${k}: the Next box keeps its fill on hover (${rest.bg})`, rest.bg === hov.bg && !hov.overlay, `${rest.bg} → ${hov.bg}`);
+        L.check(`${w} ${k}: hidden at rest, shown on hover — 32px navy disc, 8px in, the soft shadow`, rest.op === "0" && hov.op === "1" && Math.abs(hov.w - 32) < 0.5 && Math.abs(hov.h - 32) < 0.5 && Math.abs(hov.r - 8) < 1 && Math.abs(hov.bt - 8) < 1 && hov.fill === "rgb(42, 58, 82)" && hov.radius === "50%" && /rgba\(28, 19, 15, 0\.45\) 0px 6px 14px -6px/.test(hov.shadow), JSON.stringify({ rest: rest.op, ...hov }));
+        await expect(chip).toHaveAccessibleName(label);
+        L.check(`${w} ${k}: its accessible name is the action's label`, true, label);
+        if (w === 1920) await card.screenshot({ path: `${SHOTS}/w3-hover-${k.split(":")[0]}-1920.png` });
+      }
+      /* keyboard: Tab from the card reaches its chip, which shows while focused */
+      const first = kinds[0];
+      await page.mouse.move(2, 2);
+      const card = page.locator(`${PAGE} [data-qc154="card"][data-id="${first.id}"]`);
+      await card.focus();
+      let focused = "";
+      for (let i = 0; i < 4 && focused !== "chip"; i++) {
+        await page.keyboard.press("Tab");
+        focused = await page.evaluate(() => (document.activeElement?.classList.contains("qc1561-chip") ? "chip" : document.activeElement?.className ?? ""));
+      }
+      const kb = await card.evaluate((c) => { const b = c.querySelector<HTMLElement>(".qc1561-chip")!; return { op: getComputedStyle(b).opacity, ring: getComputedStyle(b).outlineStyle, tip: getComputedStyle(b.querySelector(".qc1561-tip")!).opacity }; });
+      L.check(`${w}: Tab reaches the chip; focused, it shows with a ring and its tooltip`, focused === "chip" && kb.op === "1" && kb.ring === "solid" && kb.tip === "1", `${focused} ${JSON.stringify(kb)}`);
+      if (w === 1920) await card.screenshot({ path: `${SHOTS}/w3-focus-chip-1920.png` });
+      /* a click runs the action: the card opens on the action's composer (not just the card) */
+      const act = kinds.find((x) => !x.k.startsWith("open"));
+      if (act) {
+        await page.locator(`${PAGE} [data-qc154="card"][data-id="${act.id}"] [data-qc154='band']`).hover();
+        await page.locator(`${PAGE} [data-qc154="card"][data-id="${act.id}"] .qc1561-chip`).click();
+        await page.waitForTimeout(1200);
+        const comp = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>("[data-qc1522='composer']")].some((e) => e.getBoundingClientRect().width > 0));
+        L.check(`${w}: clicking "${act.label}" runs the action — the card opens on its composer`, comp, `${comp}`);
+        if (w === 1920) await page.screenshot({ path: `${SHOTS}/w3-after-click-1920.png` });
+        await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      }
+      const plain = kinds.find((x) => x.k.startsWith("open"));
+      if (plain) {
+        await openQc(page, vp);
+        for (let i = 0; i < 6 && (await more.count()) > 0; i++) await more.first().click({ timeout: 5_000 });
+        await page.locator(`${PAGE} [data-qc154="card"][data-id="${plain.id}"]`).scrollIntoViewIfNeeded();
+        await page.locator(`${PAGE} [data-qc154="card"][data-id="${plain.id}"] [data-qc154='band']`).hover();
+        await page.locator(`${PAGE} [data-qc154="card"][data-id="${plain.id}"] .qc1561-chip`).click();
+        await page.waitForTimeout(1200);
+        const st = await page.evaluate(() => ({ open: /[?&]q=/.test(location.href) || [...document.querySelectorAll<HTMLElement>("[data-qc1522]")].some((e) => e.getBoundingClientRect().width > 0), comp: [...document.querySelectorAll<HTMLElement>("[data-qc1522='composer']")].some((e) => e.getBoundingClientRect().width > 0) }));
+        L.check(`${w}: "Open the card" opens the card, with no composer`, st.open && !st.comp, JSON.stringify(st));
+        await page.keyboard.press("Escape"); await page.waitForTimeout(400);
+      }
+    }
+    L.done(12);
+  });
 });
