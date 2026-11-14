@@ -76,8 +76,8 @@ async function mutate(page: Page) {
     if (l === "L3") css('.tws .tws-wq[data-tws54-view="table"] { padding-top: 16px !important; }');
     /* a break that must outlive re-renders runs now AND on a timer (a timer alone fires after an immediate read) */
     const keep = (f: () => void) => { f(); window.setInterval(f, 100); };
-    if (l === "L4") keep(() => { const i = document.querySelector<HTMLImageElement>('[data-tws54="art"]'); if (i && !i.src.includes("armchair")) { i.src = "/images/qc/qc-armchair-hawk.png?v=1"; i.parentElement!.style.background = "#eee"; } });
-    if (l === "L5") keep(() => { const b = document.querySelector('[data-tws54="legend-row"][data-k="nudge"] [data-tws54="legend-n"]'); if (b && b.textContent !== "99") b.textContent = "99"; });
+    if (l === "L4") keep(() => { const i = document.querySelector<HTMLImageElement>('[data-tws56="art"]'); if (i && !i.src.includes("armchair")) { i.src = "/images/qc/qc-armchair-hawk.png?v=1"; i.parentElement!.style.background = "#eee"; } });
+    if (l === "L5") keep(() => { const b = document.querySelector('[data-tws56="seg"][data-k="nudge"]'); if (b && !b.getAttribute("aria-label")?.startsWith("99")) b.setAttribute("aria-label", "99 nudges due"); });
     if (l === "L12") window.setInterval(() => { const pg = document.querySelector("[data-tdp]"); if (pg && !pg.querySelector("[data-tws54]")) { const r = document.createElement("div"); r.setAttribute("data-tws54", "header"); pg.appendChild(r); } }, 100);
   }, MUT);
 }
@@ -130,9 +130,10 @@ for (const vp of SIZES) {
     expect(r.hd, "L1 · the header is there").toBeGreaterThan(150);
     expect(r.over, "L1 · the page scrolls by no more than the header's height").toBeLessThanOrEqual(r.hd);
     expect(r.over, "L1 · and it does scroll (the header leaves)").toBeGreaterThan(100);
-    expect(Math.abs(r.top - 12), "L1 · scrolled, the frame's top is 12px under the window's").toBeLessThanOrEqual(1);
+    /* v56 re-pointed: the workspace pins 12px under the 60px slim bar (72px), its foot still 12px above the window's */
+    expect(Math.abs(r.top - 72), "L1 · scrolled, the frame's top is 12px under the slim bar (72px)").toBeLessThanOrEqual(1);
     expect(Math.abs(r.bottom - 12), "L1 · and its foot 12px above the window's").toBeLessThanOrEqual(1);
-    expect(r.hdBottom, "L1 · the header has gone above the frame").toBeLessThanOrEqual(12.5);
+    expect(r.hdBottom, "L1 · the header has gone under the slim bar").toBeLessThanOrEqual(60.5);
     note(`L1-${vp.width}`, r);
   });
 }
@@ -172,7 +173,9 @@ for (const vp of SIZES) {
     await toBottom(page);
     const r = await page.evaluate(() => {
       const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-      const stickies = [...root.querySelectorAll<HTMLElement>("*")].filter((e) => getComputedStyle(e).position === "sticky" && e.getAttribute("data-tws") !== "workspace");
+      /* v56 re-pointed: the slim bar is excluded with the workspace — both are the page's own pins on its scroller (L4 of
+         todoV56.measure.ts measures the bar's place), not a header inside one of the To-do's boxes */
+      const stickies = [...root.querySelectorAll<HTMLElement>("*")].filter((e) => getComputedStyle(e).position === "sticky" && e.getAttribute("data-tws") !== "workspace" && e.getAttribute("data-tws56") !== "slim");
       const out: { sel: string; box: string; gap: number; topAt: string; owned: boolean; scrolled: number }[] = [];
       for (const st of stickies) {
         let box: HTMLElement | null = st.parentElement;
@@ -197,19 +200,20 @@ for (const vp of SIZES) {
   });
 }
 
-/* ══ L4 · the illustration is the new asset, on nothing ══════════════════════════════════════════════════════ */
+/* ══ L4 · the illustration is the new asset, on nothing ══════════════════════════════════════════════════════
+   v56 re-pointed: the asset is v56's cut-out (todo-desk-hawk-cut.webp, 480px, 41,296 bytes) on the navy panel. */
 test("L4 · the hawk at the desk, no box behind it", async ({ page }) => {
   await open(page, { width: 1440, height: 900 });
   const r = await page.evaluate(async () => {
-    const img = document.querySelector<HTMLImageElement>('[data-tws54="art"]')!;
+    const img = document.querySelector<HTMLImageElement>('[data-tws56="art"]')!;
     const cs = (e: Element) => getComputedStyle(e);
     const bytes = (await (await fetch(img.src)).arrayBuffer()).byteLength;
     const chain = [img, img.parentElement!].map((e) => ({ bg: cs(e).backgroundColor, img: cs(e).backgroundImage, radius: cs(e).borderRadius, shadow: cs(e).boxShadow, border: cs(e).borderTopWidth }));
     return { src: img.getAttribute("src"), natural: img.naturalWidth, width: img.getBoundingClientRect().width, bytes, chain };
   });
-  expect(r.src, "L4 · the new asset").toContain("/images/todo/todo-desk-hawk.webp");
+  expect(r.src, "L4 · the new asset").toContain("/images/todo/todo-desk-hawk-cut.webp");
   expect(r.natural, "L4 · it loaded (480px WebP)").toBe(480);
-  expect(r.bytes, "L4 · the file shipped with this pack").toBe(48592);
+  expect(r.bytes, "L4 · the file shipped with v56").toBe(41296);
   expect(Math.round(r.width), "L4 · the armchair hawk's 190px").toBe(190);
   for (const c of r.chain) {
     expect(c.bg, "L4 · no fill behind it").toBe("rgba(0, 0, 0, 0)");
@@ -220,16 +224,18 @@ test("L4 · the hawk at the desk, no box behind it", async ({ page }) => {
   note("L4", r);
 });
 
-/* ══ L5 · "need you" = waiting + nudges + quiet; the legend's counts are the tray's ═══════════════════════════ */
+/* ══ L5 · "need you" = waiting + nudges + quiet; the ring's counts are the tray's ═══════════════════════════════
+   v56 re-pointed: there is no legend; each segment names its count ("2 agents waiting"), "to tidy" is housekeeping's. */
 test("L5 · the ring and the legend match the tray", async ({ page }) => {
   await open(page, { width: 1440, height: 900 });
   const r = await page.evaluate(() => {
     const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
-    const leg = (k: string) => Number(root.querySelector(`[data-tws54="legend-row"][data-k="${k}"] [data-tws54="legend-n"]`)?.textContent ?? NaN);
+    const leg = (k: string) => k === "house" ? Number(root.querySelector('[data-tws56="house"]')?.textContent ?? 0)
+      : Number(root.querySelector(`[data-tws56="seg"][data-k="${k}"]`)?.getAttribute("aria-label")?.match(/^\d+/)?.[0] ?? 0);
     const tray = (k: string) => Number(root.querySelector(`[data-tws-group="${k}"] .tws-gb em`)?.textContent ?? 0);
     const todo = Number(root.querySelector('[data-tws="todo-count"]')?.textContent ?? NaN);
     return {
-      need: Number(root.querySelector('[data-tws54="need"]')?.textContent ?? NaN),
+      need: Number(root.querySelector('[data-tws56="need"]')?.textContent ?? NaN),
       legend: { wait: leg("wait"), nudge: leg("nudge"), quiet: leg("quiet"), house: leg("house") },
       tray: { wait: tray("wait"), nudge: tray("nudge"), quiet: tray("quiet"), house: tray("house") },
       title: root.querySelector('[data-tws54="title"]')?.textContent, todo,

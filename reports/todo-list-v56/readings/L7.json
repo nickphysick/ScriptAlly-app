@@ -1,0 +1,44 @@
+{
+ "click-wait": {
+  "scrollTop": 193,
+  "scrollMax": 193,
+  "listTop": 235.875,
+  "listBottom": 879.875,
+  "headTop": 237.875
+ },
+ "click-nudge": {
+  "scrollTop": 193,
+  "scrollMax": 193,
+  "listTop": 235.875,
+  "listBottom": 879.875,
+  "headTop": 243.625
+ },
+ "click-quiet": {
+  "scrollTop": 193,
+  "scrollMax": 193,
+  "listTop": 235.875,
+  "listBottom": 879.875,
+  "headTop": 244.140625
+ },
+ "Enter-wait": {
+  "scrollTop": 193,
+  "scrollMax": 193,
+  "listTop": 235.875,
+  "listBottom": 879.875,
+  "headTop": 237.875
+ },
+ "Enter-nudge": {
+  "scrollTop": 193,
+  "scrollMax": 193,
+  "listTop": 235.875,
+  "listBottom": 879.875,
+  "headTop": 243.625
+ },
+ "Enter-quiet": {
+  "scrollTop": 193,
+  "scrollMax": 193,
+  "listTop": 235.875,
+  "listBottom": 879.875,
+  "headTop": 244.140625
+ }
+}
