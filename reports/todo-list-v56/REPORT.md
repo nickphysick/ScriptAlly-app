@@ -12,9 +12,9 @@ served `index-BQC9KmLH.js` from it; the worktree was level, 0 behind). Ref `desi
    "this week" is 161.4 tall since v156.1 shortened it. The ref and the Contact list hold v156's 198.875 in the right
    column, which made this header **242.9** (measured, first Phase 1 build). Fix: the cut-out's cell holds the armchair
    hawk's height (`calc(190px * 347 / 360)`, read against the png by `wsHeader56.test`), and the ring block holds none.
-   Measured after: **227.125 = 227.125** at both widths. ⚠️ The Contact list's header has the same stale 198.875 and
-   is therefore taller than the Query Centre's on this line — not changed here (out of scope; the Contact list session
-   in `ScriptAlly-clq11` is working on that page).
+   Measured after: **227.125 = 227.125** at both widths. The Contact list carried the same stale 198.875 on c24562273;
+   its own v1.1 (now on the dev line, see Deploy) removed it and holds the armchair hawk's height the same way
+   (`contactQcLayout.css` line 45), measured 227.2 against 227.1 by that session.
 2. **"Each segment brings that group's header into the tray's view" via the group's rows.** In the tray the rows are
    the group heading's *siblings*, not its children (`[data-tws-group]` wraps only the heading). Only matters to the
    locks; `jump` itself was right.
@@ -138,7 +138,23 @@ L10's "before" is the base build's own shots (`l10-base/`, taken by this file wi
 scrolled with the bar showing, 1280 with the ring alone; Query Centre and Contact list before (`dev-before-*`) and after
 (`dev-after-*`). Emulator shots of the same states are in `shots/`.
 
-## Dev
+## Deploy
 
-- Before: `index-BQC9KmLH.js` (dev/srm1-plv3-qc156-clq1-tdi-qc1561-tdi, c24562273).
-- After: see "Deploy" below.
+- **Before:** dev served `index-BQC9KmLH.js` (dev/srm1-plv3-qc156-clq1-tdi-qc1561-tdi, c24562273) when this started.
+  While Phase 3 ran, the Contact list session deployed its v1.1 on top of that line: dev served **`index-Cu3Fye3s.js`**
+  from `dev/srm1-plv3-qc156-clq1-tdi-qc1561-tdi-clq11` (cc13a414b) at the moment of this deploy. (The `dev-before-*`
+  shots were taken from `index-BQC9KmLH.js`, before that.)
+- So v56 was merged **onto the served branch**, not deployed over it: **`dev/srm1-plv3-qc156-clq1-tdi-qc1561-tdi-clq11-td56`**,
+  merge **1607812c3** (cc13a414b + todo-list-v56). Conflicts, all from the slim bar both branches lifted:
+  `shell/SlimBar.tsx` and `QcSlim156.tsx` merged clean (identical on both sides); `qcv156.css` §3 resolved to
+  `:is(.qc151.qc153, .cl27, .tws56)` / `:is(.qc151, .cl27, .tws56)` (16 selectors, same specificity); `qcSlim156.test`
+  took the Contact list's re-point; `wsSlim56.test`'s selector count accepts the `.cl27`.
+- On the merged tree before deploying: tsc 0 errors; the touched unit tests 140 files / 1643 passed; on its emulator
+  build **todoV56 L1–L9, L11 and the Contact list's `clq11.measure.ts` (T1–T5 at 1440 and 1717) all green** (19 passed).
+  L10 was left out there: its "before" shots predate the Contact list's own change to its page.
+- Built (`npm run build:dev`) from a clean checkout of the pushed tip and deployed hosting only
+  (`firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`).
+- **After:** dev serves **`index-Ipyz7Xi7.js`** — equal to the build's own `dist/index.html`.
+- An earlier branch `dev/srm1-plv3-qc156-clq1-tdi-qc1561-tdi-td56` (c61a7ad8c, v56 on c24562273 without the Contact
+  list's v1.1) was pushed before dev moved and was never deployed; it is superseded by the `…-clq11-td56` branch.
+- Nothing merged to main. Prod untouched.
