@@ -7,12 +7,14 @@
  */
 @media (min-width: 768px) {
   /* ── D2 · the header scrolls away; the workspace pins ────────────────────────────────────────────────────────
-     ⚠️ THE WORKSPACE IS EXACTLY THE SCROLLPORT LESS ITS TWO 12px MARGINS (--tws-port, the scroller's own clientHeight:
-        never 100vh), sticky 12px under the scroller's top. With the header above it in the flow, the page can scroll by
-        the header's height and no further: once it has, the workspace's own top is at 12px and it fills the window.
-        Everything inside keeps v53's rules — the tray, the questions and the card scroll in their own boxes. */
+     ⚠️ v56: THE WORKSPACE IS EXACTLY THE SCROLLPORT LESS THE SLIM BAR AND TWO 12px MARGINS (--tws-port, the scroller's
+        own clientHeight: never 100vh), sticky 72px under the scroller's top — the 60px bar (WsSlim56, on the scroller's
+        top) and 12px. Its height is the same at rest and scrolled, so nothing jumps when the bar appears. With the
+        header above it in the flow, the page can scroll by the header's height less 34 and no further: once it has, the
+        workspace's top is 12px under the bar and its foot 12px above the scroller's. Everything inside keeps v53's
+        rules — the tray, the questions and the card scroll in their own boxes. (v54/v55: 12px and less 24px.) */
   .tws { height: auto; display: block; padding-block: 0 12px; }
-  .tws .tws-ws { position: sticky; top: 12px; height: calc(var(--tws-port, 800px) - 24px); min-height: 0; }
+  .tws .tws-ws { position: sticky; top: 72px; height: calc(var(--tws-port, 800px) - 84px); min-height: 0; }
 }
 
 @media (min-width: 768px) {

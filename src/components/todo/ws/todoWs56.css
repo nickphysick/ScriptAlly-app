@@ -45,6 +45,13 @@
   .tws56-hdw .tws56-words small em { font: 400 17px/1 var(--sp-type) !important; font-style: normal !important; color: #e8bdb4; }
 }
 @media (min-width: 768px) and (prefers-reduced-motion: reduce) { .tws56-seg { transition: none; } }
+
+/* ── Phase 2 · the slim bar (WsSlim56: the Query Centre's bar, qcv156.css §3, through shell/SlimBar) ─────────────── */
+@media (min-width: 768px) {
+  /* on the scroller's own top: the Query Centre's sits under its toolbar's lip (`--pin-cover`, 12px); this page has no
+     lip, so the bar is at 0 and the workspace 12px under its foot (todoWs54.css D2: 72px) */
+  .tws.tws56 > .qc156-slim.qc156-slim { top: 0; }
+}
 /* a narrow header (under 1200 wide: the full sidebar pinned at 1440): the ring alone, so the title is never crowded. The
    header is the container (qcv1561.css names `.tws56-hdw > .qc1531-hd` beside the Query Centre's). */
 @container (max-width: 1199.98px) {

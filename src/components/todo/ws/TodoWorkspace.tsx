@@ -49,6 +49,7 @@ import TagsPane from "../TagsSheet";
 import "./todoWs.css";
 import "./todoWs54.css";
 import { WsHeader56 } from "./WsHeader56";
+import { WsSlim56 } from "./WsSlim56";
 import { WsBatch54 } from "./WsBatch54";
 import { openingView, type BatchView } from "../../../lib/todoBatch54";
 import { devBatchCap } from "../../../lib/todoBatchReviewAid";
@@ -809,7 +810,10 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   return (
     <div ref={rootRef} className="tws-root" data-tws="root">
       <WorkspacePageGrid className="tws-wpg" scrollLabel="To-do list" masthead={null}>
-        <div className="tws" data-tws="page">
+        <div className="tws tws56" data-tws="page">
+          {/* v56: the slim bar, first in the page so it is sticky for the whole page; it takes no space and shows once
+              the navy panel has gone under it */}
+          <WsSlim56 todo={all.length} bd={bd} book={statBook} onAdd={openAdd} />
           {/* v56: the page header is the Query Centre's navy panel — the hawk at the desk, "{n} things to do", "for {book}"
               between rules (one book only), "+ Add a task" and "Quick fill", the ring and "What needs doing". A segment
               settles the page on the pinned workspace, then scrolls the tray to its group. */}
