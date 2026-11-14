@@ -46,6 +46,10 @@
      (a 7px label for builders) is not shown on this page. */
   .qlp .qlp-hd .art--query-letters-header { width: 190px; }
   .qlp .qlp-hd .art--query-letters-header .art-phk { display: none; }
+  /* v2.4 · the step from header to content (the ref's `.sp48 .head`): 48 under the header, larger than any gap inside
+     the content (30), and the header casts the ref's soft card shadow. This page only: the Query Centre's and the
+     Contact list's headers keep their 30 and their shadow. */
+  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd.qlp-hd { margin-bottom: 48px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }
 }
 
 .qlp-lnk { padding: 0; border: 0; background: none; color: var(--ql-navy) !important; font-size: 16px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, .4); min-height: 32px; }
@@ -74,7 +78,7 @@
 .qlp-b2 svg, .qlp-b1 svg { width: 16px; height: 16px; flex: none; }
 
 /* ── the desk: letters · the letter · how it's doing ─────────────────────────────────────────────────────────── */
-.qlp-desk { display: grid; grid-template-columns: 280px minmax(0, 1fr) 380px; gap: 36px; align-items: start; padding-top: 6px; }
+.qlp-desk { display: grid; grid-template-columns: 280px minmax(0, 1fr) 380px; gap: 36px; align-items: start; padding-top: 0; }
 .qlp h2.qlp-h2 { font: 400 22px/1.15 var(--sp-type) !important; color: var(--ql-ink) !important; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--ql-navy); }
 .qlp-list { position: sticky; top: 16px; display: flex; flex-direction: column; min-width: 0;
   /* many letters: the list scrolls inside its own sticky column (the scroll port's height, published by the page) */
@@ -186,7 +190,7 @@ textarea.qlp-paper--edit { resize: vertical; min-height: 520px; box-shadow: 0 0 
 .qlp .qlp-none { font-style: italic; color: var(--ql-t62); font-size: 14px; }
 
 /* ── day one ─────────────────────────────────────────────────────────────────────────────────────────────────── */
-.qlp-first { display: grid; grid-template-columns: 280px minmax(0, 760px); gap: 36px; align-items: start; padding-top: 12px; justify-content: start; }
+.qlp-first { display: grid; grid-template-columns: 270px minmax(0, 760px); gap: 30px; align-items: start; padding-top: 0; justify-content: start; }
 .qlp-steps { list-style: none; counter-reset: qls; margin: 8px 0 0; padding: 0; display: grid; gap: 24px; }
 .qlp-steps li { counter-increment: qls; position: relative; padding-left: 52px; color: var(--ql-t72); }
 .qlp-steps li::before { content: counter(qls); position: absolute; left: 0; top: -2px; width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
