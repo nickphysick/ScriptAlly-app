@@ -451,7 +451,7 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     /* Submission packages v26 (25 Oct): the root is `.p6` and states NO inline style at all — what it says about
        its width lives in pk26.css / pk40.generated.css, which the chain above reads. v41 adds `.p41`; v43 adds
        `.pk43`, whose measure (the workspace's, both sides) and padding live in packages/v43/pk43.css §0 */
-    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className={`p6 p41 pk43${empty ? " p6-new" : ""}`} data-pk26="page"');
+    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className={`p6 p41 pk43${dayOne ? " pk43--day1" : ""}`} data-pk26="page"');
     expect(pkg, "Packages styles its root inline — invisible to every stylesheet lock").not.toMatch(/data-pk26="page"[^>]*style=/);
   });
 

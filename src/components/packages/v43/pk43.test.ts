@@ -128,3 +128,12 @@ describe("PK43 P5 (source) — the bar is the Query Centre's; qcv156.css §3 nam
     expect(page.indexOf("<Pk43Slim")).toBeLessThan(page.indexOf('data-pk43="desk"'));
   });
 });
+
+/* ── P10 (source half) ── */
+describe("PK43 P10 (source) — day one is the same header and desk; v26's hero is retired", () => {
+  it("Pk26Hero is gone from the page and its file deleted", () => {
+    expect(page).not.toContain("Pk26Hero");
+    expect(existsSync(resolve(SRC, "components/packages/v26/Pk26Header.tsx"))).toBe(false);
+    expect(files.filter((f) => /\.tsx?$/.test(f) && !f.endsWith("pk43.test.ts") && /Pk26Hero|Pk26Header/.test(readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "")))).toEqual([]);
+  });
+});

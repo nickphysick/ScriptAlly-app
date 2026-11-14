@@ -16,9 +16,8 @@ const FILES = [
   "src/components/agents/contact/ContactExhibit.tsx",
   "src/components/todo/v2/TodoExhibit.tsx",
   "src/components/packages/PackagesExhibit.tsx",
-  /* Submission packages v26 (25 Oct): the empty state's animation (and How it works) is fixed sample content — a
-     letter, a synopsis, pages and an agent drawn from constants — never a record */
-  "src/components/packages/v26/Pk26Header.tsx",
+  /* (Submission packages v26's Pk26Header.tsx — the empty state's animation — was here; v43 retires that hero and
+     deletes the file, so its entry goes with it) */
   "src/components/shell/LivingExhibition.tsx",
 ];
 const DATA_PATHS = [/useScriptAllyDb/, /from "[^"]*lib\/db"/, /firebase/, /\bfetch\(/, /onSnapshot/, /getDocs?\(/, /useContext\(/];

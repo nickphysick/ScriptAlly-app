@@ -19,6 +19,12 @@
  *    place letters, synopses and versions are listed, and `?tab=let|syn|ver` opens it on that list. A label opens
  *    any live package in the builder (one that has gone out opens LOCKED); a retired label, the builder's "Figures"
  *    and every showcase open the package drawer (Pk38Drawer). Every figure is packageReplies' (lib/packagesV38).
+ * ══ v43 (14 Nov; ref design-refs/submission-packages-v43/) ══ THE QUERY CENTRE'S LAYOUT: its navy header (Pk43Header,
+ *    the Archivist standing in it; the right block says what new queries go out with, and Change), a 268 / 28 desk —
+ *    "Your packages" as Query letters' rows (Pk43List) beside the builder in one workspace surface — Results at the
+ *    header's width, and the Query Centre's collapsed bar (Pk43Slim). Day one (no package at all): the same header
+ *    with no buttons, three steps beside the draft first package. The stat tiles, v41's header, the pinned hawk and
+ *    v26's hero are retired. Layout only: the builder, the model and every figure are v42's. CSS: packages/v43/pk43.css.
  * ⚠️ THE CSS IS GENERATED from the ref's computed styles (packages/v26/pk40.generated.css; scripts/pk40/), so the
  *    markup below mirrors the ref's element for element, with the `p6-` prefix. Change the ref, regenerate.
  * ⚠️ OPEN TO ALL (D7). Nothing on this page reads the plan; the PRO tag is visual, as on Versions.
@@ -27,15 +33,15 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { useLocation, useNavigate } from "react-router-dom";
 import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { usePk26Model } from "./packages/v26/usePk26Model";
-import { Pk26Hero } from "./packages/v26/Pk26Header";
 import { Pk42HowItWorks } from "./packages/v42/Pk42HowItWorks";
 import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
 import { Pk41Banner } from "./packages/v41/Pk41Banner";
 import { Pk43Header } from "./packages/v43/Pk43Header";
-import { packagesTitle } from "../lib/packagesV43";
+import { DAY_ONE_TITLE, packagesTitle } from "../lib/packagesV43";
 import { Pk43List } from "./packages/v43/Pk43List";
 import { Pk43GoingOut } from "./packages/v43/Pk43GoingOut";
 import { Pk43Slim } from "./packages/v43/Pk43Slim";
+import { Pk43DayOne } from "./packages/v43/Pk43DayOne";
 import { Pk42Empty } from "./packages/v42/Pk42Empty";
 import { useScriptAllyDb } from "../lib/db";
 import { packagesViaFounding } from "../lib/entitlements";
@@ -67,7 +73,7 @@ import "./packages/v43/pk43.css";
 
 export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab: string, sub?: string) => void }> = ({ active: routeActive = true }) => {
   const model = usePk26Model();
-  const { activeMs, live, active, msId, msPkgs, collectionsReady, letters, synopses, versionRows, comps } = model;
+  const { activeMs, live, active, msId, msPkgs, collectionsReady } = model;
   const location = useLocation();
   const navigate = useNavigate();
   /* v41 B: the founding writer strip — founding writers only, until dismissed (one leaf on the user) */
@@ -125,8 +131,9 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
     setPending(null);
   }, [pending, msPkgs, retired]);
 
-  /* the empty state: a writer with no letters or synopses yet (only once every collection has answered) */
-  const empty = !!activeMs && collectionsReady && letters.length === 0 && synopses.length === 0;
+  /* v43 Phase 5 · DAY ONE: the manuscript has no package at all (only once every collection has answered). v26's
+     "empty" (no letters or synopses yet) and its hero are retired: the page is the same desk either way. */
+  const dayOne = !!activeMs && collectionsReady && msPkgs.length === 0;
   const goQueries = (ids: string[]) => navigate({ pathname: "/queries", search: ids.length ? `?ids=${encodeURIComponent(ids.join(","))}` : "" });
   const goVersions = () => navigate("/manuscripts/versions");
   const goComps = () => navigate("/manuscripts/comps");
@@ -138,7 +145,7 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
   const openNewMaterial = (k: "let" | "syn" | "ver") => setDrawer(k === "ver" ? { m: "newver", parentId: null } : { m: "newmat", kind: k });
   /* v42 F: the builder shows a live package — or, on the brand-new page with no package at all, v39.3's draft first
      package (the hero's "build" scrolls to it, as built). Otherwise the empty card takes the tiles' and builder's place. */
-  const showBuilder = live.length > 0 || (empty && msPkgs.length === 0);
+  const showBuilder = live.length > 0 || dayOne;
   /* the package new queries go out with: the manuscript's active package, when it is live */
   const goingId = active && live.some((p) => p.id === active.id) ? active.id : null;
   const going = goingId ? live.find((p) => p.id === goingId) ?? null : null;
@@ -152,17 +159,18 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       {showFounding ? <Pk41Banner onDismiss={() => setFoundingHidden(true)} /> : null}
       {/* v41 Phase 1: the page is the Dashboard v2 / Contact list language — no header card, explainer, raised panel or
           label tiles (each is replaced by a v41 part, below) */}
-      <div ref={rootRef} className={`p6 p41 pk43${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
-        {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
-          : <Pk43Header title={packagesTitle(live.length)} msTitle={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)}
-              right={going ? <Pk43GoingOut model={model} going={going} onChosen={chosen} /> : null} />}
+      <div ref={rootRef} className={`p6 p41 pk43${dayOne ? " pk43--day1" : ""}`} data-pk26="page" data-pk41="page" data-pk43-state={dayOne ? "day-one" : "packages"}>
+        {/* day one: the same header, "No packages yet", no buttons and no right block */}
+        <Pk43Header title={dayOne ? DAY_ONE_TITLE : packagesTitle(live.length)} msTitle={activeMs?.title ?? null}
+          onNew={dayOne ? null : () => setDialog({ m: "new" })} onHow={dayOne ? null : () => setHow(true)}
+          right={!dayOne && going ? <Pk43GoingOut model={model} going={going} onChosen={chosen} /> : null} />
         {/* v43 Phase 4: the Query Centre's collapsed bar, shown once the navy header has gone under the sheet's lip */}
-        {empty ? null : <Pk43Slim title={packagesTitle(live.length)} going={going?.packageName ?? null} onNew={() => setDialog({ m: "new" })} />}
+        {dayOne ? null : <Pk43Slim title={packagesTitle(live.length)} going={going?.packageName ?? null} onNew={() => setDialog({ m: "new" })} />}
         {/* v43 Phase 2: the desk, 268 / 28 under the header — "Your packages" on the left (v42's stat tiles are retired),
             the open package in ONE workspace surface on the right, so its left edge is the headline's. With no live
             package, v42's empty card takes the builder's place in the workspace. */}
         <div className="pk43-desk" data-pk43="desk">
-          {empty || !msPkgs.length ? null : <Pk43List model={model} openId={current?.id ?? null} goingId={goingId} stamp={stamp}
+          {dayOne ? <Pk43DayOne /> : !msPkgs.length ? null : <Pk43List model={model} openId={current?.id ?? null} goingId={goingId} stamp={stamp}
             showRetired={showRetired} onShowRetired={setShowRetired} onSelect={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)}
             onNew={() => setDialog({ m: "new" })} />}
           <div className="pk43-work" data-pk43="work" data-pk41="workspace">

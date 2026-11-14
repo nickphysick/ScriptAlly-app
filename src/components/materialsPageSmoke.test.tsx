@@ -201,7 +201,7 @@ describe("/manuscripts/comps renders", () => {
 });
 
 /* Submission packages v26 (25 Oct): the page lives at /queries/packages. Smoked empty (no manuscript; a manuscript
-   with no letters or synopses — the promise and its animation) and POPULATED (a letter in a sent package), because
+   with no package — v43's day one) and POPULATED (a letter in a sent package), because
    the builder, its packing list and Results only execute once there is something to put in a package. */
 describe("/queries/packages renders", () => {
   const LETTER = { id: "v1", manuscriptId: "m1", userId: "u1", componentType: ComponentType.QUERY_LETTER, versionName: "Hook-first", fileAttached: false, createdDate: "2026-01-02T00:00:00.000Z", notes: "Names two comps", contentDraft: "Dear agent" };
@@ -211,13 +211,23 @@ describe("/queries/packages renders", () => {
     expect(() => renderPage(<SubmissionPackages />, "/queries/packages")).not.toThrow();
   });
 
-  it("a manuscript with no letters or synopses is the empty state: the promise, its steps and the animation", () => {
+  /* v43 Phase 5 (re-pointed from v26's empty state, whose hero is retired): a manuscript with no package at all is DAY
+     ONE — the navy header with "No packages yet" and no buttons, three steps beside the draft first package */
+  it("a manuscript with no package is day one: the navy header, no buttons, three steps and the draft package", () => {
     setActiveManuscript();
     const html = renderPageSeeded(<SubmissionPackages />, "/queries/packages");
-    expect(html).toContain('data-pk26="hero"');
-    expect(html).toContain("Build your first package");
-    expect(html).toContain('class="p6-pb-stage p6-an"');
-    expect(html).not.toContain('data-pk26="header"');
+    expect(html).not.toContain('data-pk26="hero"');
+    expect(html).not.toContain("Build your first package");
+    expect(html).toContain('data-pk43-state="day-one"');
+    expect(html).toContain('data-pk43="title" tabindex="-1">No packages yet</h1>');
+    expect(html).not.toContain('data-pk43="new"');
+    expect(html).not.toContain('data-pk43="how"');
+    expect(html).not.toContain('data-pk43="going-out"');
+    expect(html.match(/data-pk43="day-one-step"/g)?.length).toBe(3);
+    expect(html).toContain("Pick the pieces.");
+    expect(html).toContain("Send it with your queries.");
+    expect(html).toContain("See what gets replies.");
+    expect(html).not.toContain('data-pk43="list"');
     /* v38: one page, no tabs — the labels row, the builder (a draft first package) and Results, empty: the band's
        empty line, no totals and the dashed "Nothing to show yet." (L7's unit half) */
     expect(html).not.toContain('data-pk26="tabs"');
