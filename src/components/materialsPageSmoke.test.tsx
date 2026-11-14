@@ -255,12 +255,16 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk41="rail"');
     expect(html).not.toContain('data-pk41-row=');
     expect(html).not.toContain('data-pk41="batch"');
-    /* v42 C: the stat tiles, between the header and the builder; this draft package's tile names what it still needs */
-    expect(html).toContain('data-pk42="tiles"');
-    expect(html).toContain('data-pk42-tile="pk1"');
-    expect(html).toContain(">pieces in<");
-    expect(html.indexOf('data-pk42="tiles"')).toBeLessThan(html.indexOf('data-pk41="builder"'));
-    expect(html.indexOf('data-pk43="header"')).toBeLessThan(html.indexOf('data-pk42="tiles"'));
+    /* v43 Phase 2 (re-pointed from v42 C's stat tiles, retired): "Your packages", a list on the left of the desk, then
+       the builder in the workspace beside it; this draft package's row names what it still needs */
+    expect(html).not.toContain('data-pk42="tiles"');
+    expect(html).not.toContain("p42-tile");
+    expect(html).toContain('data-pk43="list"');
+    expect(html).toContain('data-pk43-row="pk1"');
+    expect(html).toContain("<b>1 of 2</b> pieces in");
+    expect(html.indexOf('data-pk43="list"')).toBeLessThan(html.indexOf('data-pk41="builder"'));
+    expect(html.indexOf('data-pk43="header"')).toBeLessThan(html.indexOf('data-pk43="desk"'));
+    expect(html.indexOf('data-pk43="work"')).toBeLessThan(html.indexOf('data-pk41="builder"'));
     expect(html).not.toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');
     expect(html).toContain(">Standard UK<");

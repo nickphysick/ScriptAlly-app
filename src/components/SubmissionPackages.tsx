@@ -33,7 +33,7 @@ import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
 import { Pk41Banner } from "./packages/v41/Pk41Banner";
 import { Pk43Header } from "./packages/v43/Pk43Header";
 import { packagesTitle } from "../lib/packagesV43";
-import { Pk42Tiles } from "./packages/v42/Pk42Tiles";
+import { Pk43List } from "./packages/v43/Pk43List";
 import { Pk42Empty } from "./packages/v42/Pk42Empty";
 import { useScriptAllyDb } from "../lib/db";
 import { packagesViaFounding } from "../lib/entitlements";
@@ -60,6 +60,7 @@ import "./queries/centre/qcv1531.css";
 import "./queries/centre/qcv1534.css";
 import "./queries/centre/qcv154.css";
 import "./queries/centre/qcv156.css";
+import "./letters/queryLetters.css";
 import "./packages/v43/pk43.css";
 
 export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab: string, sub?: string) => void }> = ({ active: routeActive = true }) => {
@@ -136,6 +137,8 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
   /* v42 F: the builder shows a live package — or, on the brand-new page with no package at all, v39.3's draft first
      package (the hero's "build" scrolls to it, as built). Otherwise the empty card takes the tiles' and builder's place. */
   const showBuilder = live.length > 0 || (empty && msPkgs.length === 0);
+  /* the package new queries go out with: the manuscript's active package, when it is live */
+  const goingId = active && live.some((p) => p.id === active.id) ? active.id : null;
 
   return (
     <WorkspacePageGrid className="pk39-wpg" scrollLabel="Submission packages" masthead={null}>
@@ -145,21 +148,22 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       <div ref={rootRef} className={`p6 p41 pk43${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
           : <Pk43Header title={packagesTitle(live.length)} msTitle={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
-        {/* v42 F: no live package — the empty card in place of the tiles and the builder */}
-        {showBuilder ? null : <Pk42Empty onNew={() => setDialog({ m: "new" })} />}
-        {/* v42 C: the stat tiles, a row on the page between the header and the builder (not on the brand-new page); with
-            only retired packages, just the "Retired (n)" link */}
-        {empty || !msPkgs.length ? null : <Pk42Tiles model={model} currentId={current?.id ?? null} showRetired={showRetired} onShowRetired={setShowRetired}
-          onSelect={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)} />}
-        {/* v42 A: the rail is retired; the open package takes the column's full width */}
-        {showBuilder ? (
-          <div className="p42-ws" data-pk41="workspace">
-            <Pk26Builder model={model} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep} onScreen={routeActive}
-              onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
-              onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
-              onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />
+        {/* v43 Phase 2: the desk, 268 / 28 under the header — "Your packages" on the left (v42's stat tiles are retired),
+            the open package in ONE workspace surface on the right, so its left edge is the headline's. With no live
+            package, v42's empty card takes the builder's place in the workspace. */}
+        <div className="pk43-desk" data-pk43="desk">
+          {empty || !msPkgs.length ? null : <Pk43List model={model} openId={current?.id ?? null} goingId={goingId} stamp={false}
+            showRetired={showRetired} onShowRetired={setShowRetired} onSelect={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)}
+            onNew={() => setDialog({ m: "new" })} />}
+          <div className="pk43-work" data-pk43="work" data-pk41="workspace">
+            {showBuilder ? (
+              <Pk26Builder model={model} current={current} onSelect={setCurId} onFigures={(p) => setPkdId(p.id)} askStep={askStep} onScreen={routeActive}
+                onDuplicate={copy} onEditPackage={(p, focus) => setDialog({ m: "edit", id: p.id, ...(focus ? { focus } : {}) })}
+                onOpenMaterial={(k, id) => setDrawer(k === "ext" ? { m: "ext", id } : { m: "mat", kind: k, id })}
+                onNewMaterial={openNewMaterial} onOpenVersions={goVersions} onOpenComps={goComps} />
+            ) : <Pk42Empty onNew={() => setDialog({ m: "new" })} />}
           </div>
-        ) : null}
+        </div>
         <Pk41Results model={model} onOpenPkg={(p) => setPkdId(p.id)} onOpenMaterial={(k, id) => setDrawer({ m: "mat", kind: k, id })}
           onOpenVersions={goVersions} onSeeQueries={goQueries} onAnalytics={goAnalytics} />
       </div>

@@ -39,3 +39,44 @@ describe("PK43 P6 — the Archivist stands in the header; nothing is pinned", ()
     expect(readFileSync(resolve(SRC, "lib/packagesV43.ts"), "utf8")).toContain('HAWK_STANDING = "/images/packages/packages-hawk-standing.png"');
   });
 });
+
+/* ── P7 / P9 (source halves) ── */
+const css = (f: string) => readFileSync(resolve(SRC, f), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+const decl = (sheet: string, sel: string) => {
+  const m = new RegExp(`(?:^|\\n)\\s*${sel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*\\{([^}]*)\\}`).exec(sheet);
+  return m ? m[1].split(";").map((d) => d.trim()).filter(Boolean) : null;
+};
+
+describe("PK43 P7 (source) — the list is Query letters' rows, reused; the stat tiles are gone", () => {
+  const ql = css("components/letters/queryLetters.css");
+  const pk = css("components/packages/v43/pk43.css");
+  it("the stat tiles' component and rules are deleted", () => {
+    expect(existsSync(resolve(SRC, "components/packages/v42/Pk42Tiles.tsx"))).toBe(false);
+    expect(css("components/packages/v42/pk42.css")).not.toMatch(/\.p42-tile|\.p42-tiles|\.p42-cb|\.p42-bw/);
+    expect(page).not.toContain("Pk42Tiles");
+    expect(page).toContain('import "./letters/queryLetters.css"');
+  });
+  it("the --ql-* tokens this page states equal the letters page's", () => {
+    const toks = (s: string, root: string) => Object.fromEntries([...(decl(s, root) ?? []).join(";").matchAll(/(--ql-[\w-]+)\s*:\s*([^;]+)/g)].map((m) => [m[1], m[2].trim()]));
+    const a = toks(ql, ".qlp"), b = toks(pk, ".pk43");
+    expect(Object.keys(b).length).toBe(9);
+    expect(b).toEqual(Object.fromEntries(Object.keys(b).map((k) => [k, a[k]])));
+  });
+  it("the three root-scoped row rules are restated with the letters page's values", () => {
+    for (const [q, p] of [[".qlp .qlp-row-n", ".pk43 .qlp-row-n"], [".qlp .qlp-row-f b", ".pk43 .qlp-row-f b"]] as const) {
+      expect(decl(ql, q), q).not.toBeNull();
+      expect(decl(pk, p), p).toEqual(decl(ql, q));
+    }
+    const h = decl(pk, ".pk43 h2.qlp-h2")!, hq = decl(ql, ".qlp h2.qlp-h2")!;
+    /* the letters page's own reset supplies margin 0 above; this page states it in the rule */
+    expect(h.filter((d) => !d.startsWith("margin"))).toEqual(hq.filter((d) => !d.startsWith("margin")));
+  });
+});
+
+describe("PK43 P9 (source) — no green in the builder on this page", () => {
+  it("the step disc, the open step and the status dot are navy here", () => {
+    const s = css("components/packages/v41/pk41.css");
+    expect(s).toMatch(/\.p41 \.p41-bld \.p93-done \.p93-sn \{ background: #2d3a50; color: #f4eee5; \}/);
+    for (const g of ["#3e7d5a", "#4e6b58", "#f3f6f2", "#7fc89a"]) expect(s, g).not.toContain(g);
+  });
+});
