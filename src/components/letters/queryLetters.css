@@ -45,6 +45,9 @@
      will fill, 190 × 142, centred in the art column as the Query Centre's drawing is. No caption: the slot's mono key
      (a 7px label for builders) is not shown on this page. */
   .qlp .qlp-hd .art--query-letters-header { width: 190px; }
+  /* the box is exactly 190 × 142 with its dashed edge inside it (ArtSlot's ratio box puts the 1.5px border outside the
+     padding-top ratio, which made it 144 tall) — the size the drawing will fill */
+  .qlp .qlp-hd .art--query-letters-header .art-box { box-sizing: border-box; height: 142px; padding-top: 0 !important; }
   .qlp .qlp-hd .art--query-letters-header .art-phk { display: none; }
   /* v2.4 · the step from header to content (the ref's `.sp48 .head`): 48 under the header, larger than any gap inside
      the content (30), and the header casts the ref's soft card shadow. This page only: the Query Centre's and the

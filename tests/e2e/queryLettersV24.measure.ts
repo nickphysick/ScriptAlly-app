@@ -180,29 +180,28 @@ test("QL24-6b at 1200 the panel sits under the letter in the same surface, full 
 });
 
 test("QL24-6c selecting each letter, and opening and cancelling an editor, never moves or resizes the workspace", async ({ page }) => {
+  /* measured against the desk, not the viewport: a row click or the editor's focus may scroll the page */
+  const place = async () => {
+    const d = await rect(page, '[data-ql="page"] [data-ql="desk"]');
+    const w = await rect(page, '[data-ql="page"] [data-ql="work"]');
+    return [Math.round(w.x - d.x), Math.round(w.y - d.y), Math.round(w.w)];
+  };
   await openLetters(page, W1717);
   const ids = await P(page).locator('[data-ql="row"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-id")));
   expect(ids.length).toBeGreaterThanOrEqual(5);
-  const base = await rect(page, '[data-ql="page"] [data-ql="work"]');
-  const seen = new Set<string>();
+  const base = await place();
   for (const id of ids) {
     await row(page, id!).click();
-    await page.evaluate(() => window.scrollTo(0, 0));
-    const r = await rect(page, '[data-ql="page"] [data-ql="work"]');
-    seen.add(`${Math.round(r.x)},${Math.round(r.w)}`);
-    expect(Math.round(r.x), id!).toBe(Math.round(base.x));
-    expect(Math.round(r.w), id!).toBe(Math.round(base.w));
+    expect(await place(), id!).toEqual(base);
   }
   await row(page, "ql1-draft").click();
-  const top0 = (await rect(page, '[data-ql="page"] [data-ql="work"]')).y;
   await P(page).locator('[data-ql="edit"]').click();
   await expect(P(page).locator('[data-ql="ed-text"]')).toBeVisible();
-  const ed = await rect(page, '[data-ql="page"] [data-ql="work"]');
-  expect([Math.round(ed.x), Math.round(ed.w), Math.round(ed.y)]).toEqual([Math.round(base.x), Math.round(base.w), Math.round(top0)]);
+  expect(await place(), "editing").toEqual(base);
   await P(page).locator('[data-ql="cancel"]').click();
-  const back = await rect(page, '[data-ql="page"] [data-ql="work"]');
-  expect([Math.round(back.x), Math.round(back.w), Math.round(back.y)]).toEqual([Math.round(base.x), Math.round(base.w), Math.round(top0)]);
-  console.log("[QL24-6c] rows", ids.length, "positions seen", [...seen].join(" | "));
+  await expect(P(page).locator('[data-ql="ed-text"]')).toHaveCount(0);
+  expect(await place(), "after cancel").toEqual(base);
+  console.log("[QL24-6c] rows", ids.length, "place (x, y from the desk; width)", JSON.stringify(base));
 });
 
 test("QL24-7 day one: the same 48px, the headline, no buttons and no tip", async ({ page }) => {
