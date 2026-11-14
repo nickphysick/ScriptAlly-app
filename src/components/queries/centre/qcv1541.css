@@ -53,8 +53,8 @@
      are v153's, so its height at rest is unchanged (54px, measured before and after). The search field is white with
      a fine ring; its hover deepens the ring and its focus keeps v153's navy ring (both restated here, since this rule
      outranks v153's). ──────────────────────────────────────────────────────────────────────────────────────────── */
-  .qc151.qc153 .qc154-tbw > .qc153-bar.qc153-bar { background: none; box-shadow: none; backdrop-filter: none; padding-left: 0; padding-right: 0; }
-  .qc151.qc153 .qc153-bar .qc153-find.qc153-find { background: #fff; box-shadow: inset 0 0 0 1px #e3ddd3; }
-  .qc151.qc153 .qc153-bar .qc153-find.qc153-find:hover { box-shadow: inset 0 0 0 1px #d3cabd; }
-  .qc151.qc153 .qc153-bar .qc153-find.qc153-find:focus-within { box-shadow: inset 0 0 0 1.5px #2a3a52, 0 0 0 4px rgba(42, 58, 82, 0.08); }
+  :is(.qc151.qc153, .cl27) .qc154-tbw > .qc153-bar.qc153-bar { background: none; box-shadow: none; backdrop-filter: none; padding-left: 0; padding-right: 0; }
+  :is(.qc151.qc153, .cl27) .qc153-bar .qc153-find.qc153-find { background: #fff; box-shadow: inset 0 0 0 1px #e3ddd3; }
+  :is(.qc151.qc153, .cl27) .qc153-bar .qc153-find.qc153-find:hover { box-shadow: inset 0 0 0 1px #d3cabd; }
+  :is(.qc151.qc153, .cl27) .qc153-bar .qc153-find.qc153-find:focus-within { box-shadow: inset 0 0 0 1.5px #2a3a52, 0 0 0 4px rgba(42, 58, 82, 0.08); }
 }

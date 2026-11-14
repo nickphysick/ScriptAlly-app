@@ -13,7 +13,6 @@
  */
 import type { AgentFacts, ContactFilters, SortKey, StatusKey } from "./contactList";
 import { GROUP_OPTIONS, QUICK_PICKS, STATUS_GROUP_ORDER, STATUS_LABEL, addedMs, surnameInitial } from "./contactList";
-import { healthTone, RING_TONES } from "./contactV256";
 import { formatDate } from "./dates";
 import { SET_LABEL, SET_ORDER, type SetKey } from "./contactV24";
 
@@ -36,9 +35,8 @@ export const RING26_R = (RING26.box - RING26.stroke) / 2;
 export const RING26_C = 2 * Math.PI * RING26_R;
 /** the arc's length in viewBox units for a score (clamped 0–100) */
 export const ringArc = (pct: number): number => (Math.max(0, Math.min(100, pct)) / 100) * RING26_C;
-/** v26's track is cream at .16 on the navy (v25.6's was .18); the arc is `healthTone`'s on-navy colour */
-export const RING26_TRACK = "rgba(244, 238, 229, 0.16)";
-export const ring26Colours = (pct: number): { arc: string; track: string } => ({ arc: RING_TONES[healthTone(pct)].navy.arc, track: RING26_TRACK });
+/* QC layout v1 — v26's on-navy ring colours (`ring26Colours`, `RING26_TRACK`) are retired: the navy ring is the brand's
+   pair turned for the navy (`NAVY_RING`, ContactHealth26) at every score */
 
 /* ══ Part E · the quick picks ════════════════════════════════════════════════════════════════════════════════════ */
 

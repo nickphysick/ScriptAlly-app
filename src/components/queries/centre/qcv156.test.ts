@@ -44,14 +44,15 @@ describe("v156 §5 · one page colour, and nothing clipping the header's shadow"
     expect(r).not.toMatch(/#f6f3ee|246, 243, 238\)/);
   });
   it("the toolbar's wrapper paints nothing at rest, and the page colour with its 22px fade only once stuck", () => {
-    expect(rule(".qc151.qc153 .qc154-tbw.qc154-tbw.qc154-tbw")).toMatch(/background:\s*none/);
-    expect(rule(".qc151.qc153 .qc154-tbw.qc154-tbw.qc154-tbw[data-qc156-stuck]"))
+    expect(rule(":is(.qc151.qc153, .cl27) .qc154-tbw.qc154-tbw.qc154-tbw")).toMatch(/background:\s*none/);
+    expect(rule(":is(.qc151.qc153, .cl27) .qc154-tbw.qc154-tbw.qc154-tbw[data-qc156-stuck]"))
       .toMatch(/background:\s*linear-gradient\(to bottom, var\(--ws-page\) 0, var\(--ws-page\) calc\(100% - 22px\), rgba\(var\(--ws-page-rgb\), 0\) 100%\)/);
   });
 });
 
 describe("v156 §1–2 · the navy header panel and its line", () => {
-  const hd = ".qc151.qc153 > .qc1531-hd.qc1531-hd";
+  /* QC layout v1 — the navy panel's rules name the Contact list (`.cl27`) beside the page, at the same specificity */
+  const hd = ":is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd";
   it("one navy panel: #2a3a52, 20px radius, the ref's shadow, 8px above and 30px below, padding 22 30 22 0", () => {
     const r = rule(hd);
     expect(r).toMatch(/background:\s*#2a3a52/);

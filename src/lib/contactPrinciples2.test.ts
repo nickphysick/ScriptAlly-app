@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 import { describe, expect, it } from "vitest";
-import { BRAND_RING, NUDGE_CLEAR, NUDGE_INSET, healthNudge } from "./contactPrinciples2";
-import { healthColours } from "../components/agents/contact/ContactHealth26";
+import { BRAND_RING } from "./contactPrinciples2";
+import { healthColours, NAVY_RING } from "../components/agents/contact/ContactHealth26";
 
 describe("principles v2 — the List health ring in brand colours", () => {
   it("navy arc, soft pink track at every score on the light ground (it no longer follows the score)", () => {
@@ -13,24 +13,9 @@ describe("principles v2 — the List health ring in brand colours", () => {
   });
 });
 
-describe("principles v2 — List health nudged in (healthNudge)", () => {
-  /* 1440 as built (R0-base.json): block 1079.5–1400, frame right 1390, headline text ends 911.6 */
-  const at1440 = { blockL: 1079.5, blockR: 1400, frameR: 1390, inkR: 911.6, stacked: false };
-  it("pulls the block to 32px inside the frame's right edge — 42px, since it overhangs by 10", () => {
-    const n = healthNudge(at1440);
-    expect(n).toBe(42);
-    expect(at1440.frameR - (at1440.blockR - n)).toBe(NUDGE_INSET);
+describe("QC layout v1 — the List health ring on the navy", () => {
+  it("a cream arc over the soft pink at 55%, at every score (v26's green, amber and red on navy are retired)", () => {
+    for (let p = 0; p <= 100; p++) expect(healthColours(p, "navy")).toEqual({ arc: "#f4eee5", track: "rgba(232, 189, 180, 0.55)" });
+    expect(NAVY_RING).toEqual({ arc: "#f4eee5", track: "rgba(232, 189, 180, 0.55)" });
   });
-  it("never nearer the headline's text than 24px: the nudge shrinks instead", () => {
-    const tight = { ...at1440, inkR: 1079.5 - 30 };
-    const n = healthNudge(tight);
-    expect(n).toBe(6);
-    expect(tight.blockL - n - tight.inkR).toBe(NUDGE_CLEAR);
-  });
-  it("no room at all: no nudge, never a push to the right", () => {
-    expect(healthNudge({ ...at1440, inkR: 1079.5 - 10 })).toBe(0);
-    expect(healthNudge({ ...at1440, frameR: 1500 })).toBe(0);
-  });
-  it("stacked: none", () => expect(healthNudge({ ...at1440, stacked: true })).toBe(0));
-  it("no frame drawn: the plain 32px", () => expect(healthNudge({ ...at1440, frameR: null })).toBe(32));
 });

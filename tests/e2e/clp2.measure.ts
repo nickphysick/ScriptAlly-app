@@ -259,7 +259,8 @@ test("CLP17 · a long name truncates and all five stars stay inside the row, unc
 });
 
 /* ═════════ CLP18 + CLP19 + CLP20 · List health nudged in ═════════ */
-test("CLP18 · the List health block 32px inside the list frame's right edge at 1440 and 1280", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): List health is no longer nudged (healthNudge is deleted): it sits in the Query Centre's right-hand column. Held now by clq1 L1. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CLP18 · the List health block 32px inside the list frame's right edge at 1440 and 1280", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("CLP18");
   for (const vp of [VP, { width: 1280, height: 800 }]) {
@@ -272,7 +273,8 @@ test("CLP18 · the List health block 32px inside the list frame's right edge at 
   L.done(2);
 });
 
-test("CLP19 · the ring's centre within 2px of the headline block's", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): the ring sits in the navy header's right-hand column, centred in it. Held now by clq1 L3. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CLP19 · the ring's centre within 2px of the headline block's", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("CLP19");
   /* the side-by-side header only: under 1000px of page content (1100 here) the header stacks and the ring has its own row */
@@ -286,7 +288,8 @@ test("CLP19 · the ring's centre within 2px of the headline block's", async ({ p
   L.done(2);
 });
 
-test("CLP20 · at least 24px between the headline and the ring at 1440, 1280 and 1100", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): the nudge is deleted (the column keeps the headline clear). Held now by clq1 L1. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CLP20 · at least 24px between the headline and the ring at 1440, 1280 and 1100", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("CLP20");
   /* the harness's own headline, and a long one through the dev aid (its words fill the column) */
@@ -305,7 +308,8 @@ test("CLP20 · at least 24px between the headline and the ring at 1440, 1280 and
 });
 
 /* ═════════ CLP21 + CLP22 · the ring in brand colours, no green ═════════ */
-test("CLP21 · the header ring: arc navy, track soft pink; the score ink in its centre (header v2)", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): the header ring is cream over soft pink on the navy, the score on the pill. Held now by contactQcLayout.test Phase 1; contactPrinciples2.test. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CLP21 · the header ring: arc navy, track soft pink; the score ink in its centre (header v2)", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("CLP21");
   await openCl(page);

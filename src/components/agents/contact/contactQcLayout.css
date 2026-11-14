@@ -1,0 +1,101 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contact list — Query Centre layout v1 (design-refs/contact-list-qc-layout-v7/contact-list-qc-layout-v7.html). The
+ * page wears the Query Centre's own rules: its header, Views panel and bar sheets name `.cl27` beside `.qc151.qc153`
+ * (`:is(…)`, the same specificity), so the two pages cannot drift. THIS SHEET HOLDS ONLY WHAT IS THE CONTACT LIST'S OWN:
+ * the mirrored bird, List health on the navy (the one block the Query Centre does not have — the ref's literals hold
+ * here), the ruled line's button, and the list card's frame. Desktop only (768px and up), like those sheets.
+ *
+ * ⚠️ brand.tsx names a face on h1 and bare spans at runtime: every face here carries `!important`.
+ */
+
+/* ── Phase 1 · the navy header ─────────────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  /* the header is the group's first row (the v24 placement rule names `.cl24-hd`, which this header does not carry); its
+     margins are the Query Centre's (8px above, 30px below: qcv156 §1). The list sits the panel's 30px below it, the
+     panel's margin alone, as the Query Centre's columns do (`> .qc1531-hd + .qc153-cl { margin-top: 0 }`). */
+  .clv-group.cl27 > .qc1531-hd.clq-hd { grid-column: 1 / -1; grid-row: 1; box-sizing: border-box; width: auto; min-width: 0; }
+  .clv-group.cl27[data-v27] > .qc1531-hd.clq-hd + .clv-main { margin-top: 0; }
+  .cl27 .clv-main > .qc153-cl { margin-top: 0; }
+  /* the page's own 30px above the header, as the Query Centre's root has it (qcv151.css `.qc151 { padding-top: 30px }`) */
+  .clv-group.cl27[data-v27] { padding-top: 30px; }
+  /* the bird faces the headline */
+  .cl27 .clq-art img { transform: scaleX(-1); }
+
+  /* "{x} not yet queried" — still the button onto that filter (header v2), now the ruled line's own words on the navy */
+  .cl27 > .qc1531-hd .qc1531-for .clq-nq {
+    all: unset; cursor: pointer; font: inherit !important; color: inherit;
+    text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; text-decoration-color: rgba(244, 238, 229, 0.45);
+  }
+  .cl27 > .qc1531-hd .qc1531-for .clq-nq:hover { text-decoration-color: #f4eee5; }
+  .cl27 > .qc1531-hd .qc1531-for .clq-nq:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; border-radius: 2px; }
+  .cl27 > .qc1531-hd .qc1531-for .clq-nq:disabled { cursor: default; }
+  /* the ruled line's words are the Query Centre's italic serif (its `em`), at its size; day one's line wraps */
+  .cl27 > .qc1531-hd .qc1531-for > span { font: italic 400 19px/1.25 var(--sp-serif) !important; color: #f4eee5; }
+  .cl27 > .qc1531-hd .qc1531-for .clp-under { white-space: normal; }
+
+  /* ── List health on the navy (ref v6/v7: `.qh-lh`, `.qh-ring`, `.qh-arch`, `.qh-pct`, `.qh-lw`) ── */
+  /* L1 · THE HEADER IS THE QUERY CENTRE'S HEIGHT. Its height is set by its right-hand block, "this week" (QcLine156:
+     qcv156 §2 — the 44px figure, 10 + 74px line, 6px + one 12.5/1.35 caption line, 14px + the 34px footer), 198.875px;
+     List health is shorter (140), so its column holds that height and the block centres in it. A change to the Query
+     Centre's line block moves this number: clq1.measure.ts L1 measures both headers. */
+  .cl27 .clq-rc { display: flex; align-items: center; margin: 0 22px 0 40px; min-height: calc(44px + 10px + 74px + 6px + 12.5px * 1.35 + 14px + 34px); }
+  .cl27 .clq-rc .cl26-health[data-fill] { height: auto; gap: 22px; align-self: center; }
+  .cl27 .clq-rc .cl26-ring { margin-top: -10px; }
+  .cl27 .clq-rc .cl26-ring:focus-visible { outline: 2px solid #e8bdb4; outline-offset: 4px; border-radius: 50%; }
+  /* the archivist breaks out above the ring's top edge: 118 wide (105 tall), his foot 43px over the ring's foot, so
+     his head clears the ring's top by 8px. (The ref draws 30px, which leaves his box 5px INSIDE the ring's top.) */
+  .cl27 .clq-rc .cl26-ring .cl26-arch { bottom: 43px; width: 118px; }
+  .cl27 .clq-rc .cl26-ring .cl26-pct {
+    bottom: -9px; padding: 6px 12px 5px; background: #f4eee5; color: #1c130f;
+    font: 400 16px/1 var(--sp-type) !important;
+    box-shadow: 0 0 0 2.5px #e8bdb4, 0 0 0 7.5px #2a3a52;
+  }
+  .cl27 .clq-rc .cl26-hw { gap: 0; }
+  .cl27 .clq-rc .cl26-ht { font: 400 28px/1.2 var(--sp-type) !important; color: #f4eee5; font-weight: 400; }
+  .cl27 .clq-rc .cl26-hm { margin: 6px 0 14px; font: italic 400 17px/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.75) !important; }
+  .cl27 .clq-rc .cl26-hm em { font: 400 17px/1 var(--sp-type) !important; font-style: normal !important; color: #e8bdb4; }
+  .cl27 .clq-rc .cl26-hb { margin: 0; }
+  .cl27 .clq-rc .cl26-fill {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 38px; padding: 0 16px;
+    border-radius: 9px; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.8); color: #f4eee5;
+    font: 400 16px/1 var(--sp-type) !important; white-space: nowrap;
+  }
+  .cl27 .clq-rc .cl26-fill:hover { background: rgba(244, 238, 229, 0.08); }
+  .cl27 .clq-rc .cl26-fill:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+}
+
+/* ── Phase 2 · the Views panel (the Query Centre's own card, `shell/ViewsPanel`; its look is qcv156.css §6) ───────── */
+@media (min-width: 768px) {
+  /* a genre the book in scope carries: a small powder tag after its name (the ref's `.yb`; the rows' chips keep the ✓) */
+  .cl27 .qc156-views .clq-yb {
+    display: inline-flex; align-items: center; height: 19px; padding: 0 7px; border-radius: 999px; background: #e3e8ef; color: #1f2c40;
+    font: 400 12.5px/1 var(--sp-serif) !important; white-space: nowrap;
+  }
+  .cl27 .qc156-views .qc156-vc.is-on .clq-yb { background: #e3e8ef; }
+  .cl27 .qc156-views .clq-none { display: block; padding: 6px 0 4px; font: italic 400 14px/1.4 var(--sp-serif) !important; color: #8a8076; }
+}
+
+/* ── Phase 3 · the light bar above the list (the Query Centre's `.qc154-tbw` strip and `.qc153-bar`; their rules name
+   `.cl27`). The Sort chip shows the field's name: `SortChipButton`'s "Sorted by" is not drawn. ────────────────────── */
+@media (min-width: 768px) {
+  .cl27 .qc153-bar .clq-sort .sc-sby { display: none; }
+  .cl27 .qc153-bar .clq-sort :is(svg) { flex: none; width: 15px; height: 15px; }
+  .cl27 .qc153-bar .clq-sort .sc-dir { font-style: normal; color: var(--mut, #5b4f47); }
+  /* the card 22px under the bar (the ref's `.tb { margin-bottom: 22px }`): the bar's own 4px, then 18 */
+  .cl27 .qc153-main > .qc154-tbw + .cl26-card { margin-top: 18px; }
+}
+
+/* ── Phase 4 · the card's frame never breaks: the line is the lighter #e3d5c9 (the ref), and nothing paints over it —
+   the stuck mask is deleted (contactV26.css) and the pin sits under the bar's strip (contactPrinciples.css). ──────── */
+@media (min-width: 768px) {
+  .cl27 .cl26-card .cl26-frame { border-color: #e3d5c9; }
+  /* stuck, the strip paints the page solid down to the bar's foot and NOTHING in its last 22px: the Query Centre fades
+     its cards out there, but here the card's own pin rises into that band (contactPrinciples.css), so a fade would only
+     tint the card's edge and show rows between the bar and the pin */
+  .cl27 .qc154-tbw.qc154-tbw.qc154-tbw.qc154-tbw.qc154-tbw[data-qc156-stuck] {
+    background: linear-gradient(to bottom, var(--ws-page) 0, var(--ws-page) calc(100% - 22px), transparent calc(100% - 22px));
+  }
+}

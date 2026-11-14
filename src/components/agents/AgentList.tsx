@@ -45,9 +45,10 @@ import {
   useAgentCardRequest,
 } from "../../lib/agentCardStore";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { ContactHeader27 } from "./contact/ContactHeader27";
+import { ContactHeaderQc } from "./contact/ContactHeaderQc";
 import { ContactSlimRow } from "./contact/ContactSlimRow";
-import { ContactRail27 } from "./contact/ContactRail27";
+import { ContactViews } from "./contact/ContactViews";
+import { useTallRail } from "../shell/useTallRail";
 import { headerFigures } from "../../lib/contactV26";
 import { SET_LABEL } from "../../lib/contactV24";
 /** v26 E — a set the page narrowed to from a link, in the applied row's words ("Querying" for Your move + With the agent) */
@@ -56,6 +57,7 @@ import { ContactLogFlow } from "./contact/ContactLogFlow";
 import { hostContactLog, type ContactLogSeed } from "../../lib/contactLogStore";
 import { GLANCE_SETS } from "../../lib/contactV25";
 import { ContactSheet26 } from "./contact/ContactSheet26";
+import { ContactBar } from "./contact/ContactBar";
 import { AgentCard24, AgentCardWide24, type AgentCard24Props } from "./contact/AgentCard24";
 import { bookSteps, stepDate } from "../../lib/contactBook";
 import { heardWords, replyWeeksOf, storyBlocks } from "../../lib/contactStory255";
@@ -393,6 +395,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const showEmpty = !frameState && (pageState === "blank" || (pageState === "list" && lhOverride === 0));
   const showList = pageState === "list" && !showEmpty && !frameState;
   const showFrame = showList || frameState !== null;
+  /* QC layout v1 — the Views panel pins as the Query Centre's does, and scrolls with the page when taller than the port */
+  useTallRail(mainColRef, `${showFrame}-${frameState}`);
   /* v16 §E — full screen is on only over a list, on this page's own route */
   const fullOn = full && showList;
   const fullRef = useRef(fullOn);
@@ -748,7 +752,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       case "add": return { el: vis(".aglist [data-cl24='add']") ?? vis("[data-cl24='band-add']"), text: "Start here. Name and agency are enough; the rest can wait." };
       case "search": return { el: vis(".aglist [data-cl26='find']"), text: "Type a name or an agency. The list narrows as you type." };
       /* v26 C — the index row under the band (full screen is retired) */
-      case "pin": return { el: vis(".aglist [data-cl26='index']") ?? vis(".aglist [data-cl26='group']"), text: "Press a letter to jump to it. Change the sort and the row follows: weeks, months or statuses." };
+      case "pin": return { el: vis(".aglist [data-cl26='index']") ?? vis(".aglist [data-clq='group']"), text: "Press a letter to jump to it. Change the sort and the row follows: weeks, months or statuses." };
       case "open": return { el: row(), text: "Click any agent. Their card opens on the right." };
       /* the card is portalled with its panel (outside .aglist); full screen's wide card has its own Edit agent */
       case "edit": return { el: vis("[data-cl24='panel'] [data-cl24='link'][data-k='edit']") ?? vis("[data-cl24='wide-edit']") ?? row(), text: "Press Edit agent. Everything on the card can be changed there." };
@@ -1089,7 +1093,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
           <ContactSlimRow figures={headFigures} health={health} onNotQueried={showNotQueried} onOpenHealth={openHk} onAdd={openAdd} />
         )}
         {showFrame && (
-          <ContactHeader27 loading={!showList} figures={showList ? headFigures : null}
+          <ContactHeaderQc loading={!showList} figures={showList ? headFigures : null}
             health={showList ? health : null} addRef={addBtnRef} onAdd={openAdd}
             onDiscover={DISCOVER && onNavigate ? () => onNavigate(DISCOVER.tab, DISCOVER.sub) : undefined}
             onOpenHealth={openHk} onNotQueried={showNotQueried} />
@@ -1109,16 +1113,20 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         <>
         {/* v26 B — THE LIST IS ONE BIG CARD: the landing page's framed card opening on a navy band (count, Find, Filters,
             Group, Sort). The List / Cards switch, Cards and Full screen (the address book) are retired. */}
-        {/* v27 — TWO COLUMNS, the Query Centre's (`qc153-cl`): the filter rail (sticky), then the list, unchanged */}
+        {/* v27 — TWO COLUMNS, the Query Centre's (`qc153-cl`): the Views panel (sticky; QC layout v1), then the list */}
         <div className="qc153-cl" data-cl27="columns">
         <div className="qc153-railcol" data-cl27="rail-column">
-          <ContactRail27 all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} onSets={setSets} pool={inPool}
+          <ContactViews all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} onSets={setSets} pool={inPool}
             genreLabel={(k, raw) => genreLabel(raw, personalGenres) || k} genreHit={bookHit} showing={frameState ? 0 : listPool.length}
             onReset={clearRailFilters}
             onExport={() => downloadAgentsCsv(visibleFacts, (raw) => genreLabel(raw, personalGenres))} />
         </div>
         <div className="qc153-main" data-cl27="list-column">
-        <ContactSheet26 pool={frameState ? NO_FACTS : listPool} all={frameState ? NO_FACTS : listAll} group={group26} onGroup={setGroup26}
+        {/* QC layout v1 — the Query Centre's light bar above the card (count, Find, Sort, Group), on its sticky strip */}
+        <ContactBar shown={frameState ? 0 : listPool.length} loading={frameState !== null} search={search} onSearch={setSearch}
+          sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
+          group={group26} onGroup={setGroup26} />
+        <ContactSheet26 pool={frameState ? NO_FACTS : listPool} all={frameState ? NO_FACTS : listAll} group={group26}
           state={frameState ?? "list"} onRetry={retryAgents} dayOne={dayOneHere ? { onAdd: openAdd } : null}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
           filters={filters} onFilters={setFilters} onClearAll={clearFilters} search={search} onSearch={setSearch}

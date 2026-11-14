@@ -19,7 +19,7 @@ const bar = (extra: Partial<QcBar153Props>) => renderToStaticMarkup(
 
 describe("the sticky toolbar", () => {
   it("is a strip of the ground with a 22px fade, its padding undone by its margins, above the cards", () => {
-    const i = css.indexOf(".qc151.qc153 .qc154-tbw {");
+    const i = css.indexOf(":is(.qc151.qc153, .cl27) .qc154-tbw {");
     const r = css.slice(i, css.indexOf("}", i));
     expect(r).toMatch(/position:\s*sticky/);
     expect(r).toContain("padding: 12px 0 22px; margin: -12px 0 -22px;");
@@ -37,7 +37,7 @@ describe("the sticky toolbar", () => {
     const stuck = bar({ stuckOn: true, stuckGroup: { label: "Materials requested", count: "4" } });
     expect(stuck).toMatch(/class="qc153-cnt qc154-tc is-grp"/);
     expect(stuck).toContain('<span class="qc154-tg" data-qc154="toolbar-group" aria-hidden="true">Materials requested<small>4</small></span>');
-    expect(css).toMatch(/\.qc151 \.qc154-tg \{[^}]*transform: translateY\(5px\)[^}]*#2a3a52/);
+    expect(css).toMatch(/:is\(\.qc151, \.cl27\) \.qc154-tg \{[^}]*transform: translateY\(5px\)[^}]*#2a3a52/);
     expect(css).toMatch(/\.qc154-tc > \.qc154-tn, \.qc154-tc > \.qc154-tg \{[^}]*transition: opacity 0\.25s, transform 0\.25s/);
   });
 

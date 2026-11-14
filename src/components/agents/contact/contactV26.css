@@ -87,47 +87,10 @@
   position: relative; box-sizing: border-box; border: 1px solid #a5837b; border-radius: 13px;
   overflow: clip; overflow-clip-margin: 14px;
 }
-/* the pin: band, index row, applied row and the headings, 12px below the scroller's top */
+/* the pin: the index row, the applied row and the headings, 12px below the scroller's top. QC layout v1 — the navy band
+   (count, Find, Group, Sort) left the card for the Query Centre's light bar above it (ContactBar), and the stuck mask
+   that painted the page colour 14px over the card's sides and 12px above went with it (it broke the frame's line). */
 .cl26-pin { position: sticky; top: 12px; z-index: 6; isolation: isolate; }
-.cl26-pin[data-stuck]::before {
-  content: ""; position: absolute; z-index: -1; left: -14px; right: -14px; top: -12px; bottom: 0; background: var(--ws-page, #f2eee8);
-}
-.cl26-band {
-  box-sizing: border-box; display: flex; align-items: center; gap: 10px; min-height: 62px; padding: 10px 12px 10px 18px;
-  background: #2a3a52; color: #f4eee5; border-radius: 12px 12px 0 0;
-}
-.cl26-pin[data-stuck] .cl26-band { border-radius: 12px 12px 0 0; }
-.cl26-band .cl26-count { flex: none; font: 400 21px/1 var(--sp-type) !important; color: #f4eee5; white-space: nowrap; margin-right: 6px; }
-.cl26-find {
-  flex: 0 1 360px; min-width: 200px; height: 38px; box-sizing: border-box; display: flex; align-items: center; gap: 9px; padding: 0 12px;
-  border-radius: 9px; background: rgba(255, 255, 255, .14); box-shadow: inset 0 0 0 1px rgba(244, 238, 229, .22); color: rgba(244, 238, 229, .8);
-}
-.cl26-find input {
-  flex: 1; min-width: 0; height: 100%; border: 0; outline: 0; background: none; color: #f4eee5;
-  font: italic 400 15.5px/1 var(--sp-serif) !important;
-}
-.cl26-find input::placeholder { color: rgba(244, 238, 229, .7); font-style: italic; }
-.cl26-find:focus-within { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .6); }
-.cl26-sp { flex: 1; }
-.cl26-band .cl26-ch, .cl26-band .cl26-sortw .cl26-ch {
-  position: relative; flex: none; display: inline-flex; align-items: center; gap: 7px; height: 38px; box-sizing: border-box; padding: 0 13px;
-  border: 0; border-radius: 9px; background: #fff; color: #1c130f; cursor: pointer;
-  font: 400 14.5px/1 var(--sp-type) !important;
-}
-.cl26-band .cl26-ch :is(span, b, em, i) { font: inherit !important; font-style: normal !important; color: inherit; }
-.cl26-band .cl26-ch b { font-weight: 400 !important; }
-.cl26-band .cl26-ch svg { flex: none; width: 15px; height: 15px; color: #2a3a52; }
-.cl26-band .cl26-ch .cl26-cv { width: 11px; height: 11px; }
-.cl26-band .cl26-ch[data-on], .cl26-band .cl26-sortw[data-on] .cl26-ch { background: #e3e8ef; box-shadow: inset 0 0 0 1.5px #2a3a52; }
-.cl26-band .cl26-n {
-  display: inline-grid; place-items: center; min-width: 19px; height: 19px; padding: 0 5px; box-sizing: border-box; border-radius: 999px;
-  background: #2a3a52; color: #f4eee5 !important; font: 400 12px/1 var(--sp-type) !important;
-}
-.cl26-band .cl26-sortw .sc-sby { display: inline; }
-.cl26-band .cl26-sortw .sc-dir { font-style: normal; }
-@media (max-width: 1300px) {
-  .cl26-band .cl26-by, .cl26-band .cl26-sortw .sc-sby { display: none !important; }
-}
 
 /* the column headings — inside the pin, so they stick beneath it */
 .cl26-th {

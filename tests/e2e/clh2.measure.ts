@@ -119,7 +119,8 @@ test("CLH2-4 · '{nq} not yet queried' → the list renders exactly nq rows", as
 });
 
 /* ═════════ CLH2-5 · one action, no "need you", no Discover ═════════ */
-test("CLH2-5 · the populated header: one button in its action row; no 'need you', no 'Discover agents'", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): Nick's ruling for the navy header puts two buttons in it (+ Add an agent, Discover agents). Held now by contactQcLayout.test Phase 1. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CLH2-5 · the populated header: one button in its action row; no 'need you', no 'Discover agents'", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("CLH2-5");
   for (const vp of [VP, { width: 1280, height: 720 }]) {
@@ -140,7 +141,8 @@ test("CLH2-5 · the populated header: one button in its action row; no 'need you
 });
 
 /* ═════════ CLH2-6 · List health as the figure ═════════ */
-test("CLH2-6 · List health: no image in the ring, the percentage inside it, one 'Fill the gaps' that opens Housekeeping", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): List health in the navy header is the archivist ring with its pill, not the figure. Held now by clq1 L3; contactQcLayout.test Phase 1. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CLH2-6 · List health: no image in the ring, the percentage inside it, one 'Fill the gaps' that opens Housekeeping", async ({ page }) => {
   test.setTimeout(180_000);
   const L = new Ledger("CLH2-6");
   for (const vp of [VP, { width: 1280, height: 720 }]) {
@@ -276,7 +278,8 @@ test("SHOTS3 · scrolled at 1512 × 982, both subheader states", async ({ page }
 });
 
 /* ═════════ CLH2-12 · v2.1 — the header lines up with the list ═════════ */
-test("CLH2-12 · the h1 starts on the list card's left edge, the Scout on the filter panel's", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): the header is the Query Centre's grid: the headline on the bar's left edge, the bird over the panel. Held now by clq1 L1, L2. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CLH2-12 · the h1 starts on the list card's left edge, the Scout on the filter panel's", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("CLH2-12");
   for (const vp of [{ width: 1280, height: 800 }, VP, { width: 1728, height: 1117 }]) {

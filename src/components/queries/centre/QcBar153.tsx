@@ -12,6 +12,7 @@
  */
 import React from "react";
 import { usePopover } from "../../shell/ListPills";
+import { ListBar } from "../../shell/ListBar";
 import { RadioMenu151 } from "./QcToolbar140";
 import { GROUP_1522, GROUP_MENU_HEAD, PACKAGE_LOCKED_LINE } from "../../../lib/qc1522";
 import { BE_GROUPS, BE_SORTS, type BeGroup, type BeSort } from "../../../lib/qc150";
@@ -23,8 +24,6 @@ import "./qcv153.css";
 export type View153 = "list" | "birds";
 const LIST_I = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2.5 4h11M2.5 8h11M2.5 12h11" /></svg>;
 const BE_I = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M2 4h7M5 8h9M3 12h6" /></svg>;
-const FIND_I = <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" /><path d="m13 13 4 4" /></svg>;
-const CROSS = <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" /></svg>;
 const BE_GROUP_LINE: Record<BeGroup, string> = { urgency: "Overdue, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
 const BE_SORT_LINE: Record<BeSort, string> = { due: "Soonest first", wait: "Oldest query first", agent: "By name" };
 
@@ -59,24 +58,21 @@ export const QcBar153: React.FC<QcBar153Props> = (p) => {
   const sortLabel = birds ? BE_SORTS.find((s) => s.key === p.beSort)?.label ?? "" : barSortOf(p.sort);
   const groupLabel = birds ? BE_GROUPS.find((g) => g.key === p.beGroup)?.label ?? "" : GROUP_1522.find((g) => g.key === p.group)?.label ?? "None";
   return (
-    <div className="qc153-bar" data-qc153="bar" data-qc151="toolbar" data-qcv="ws-head">
+    <ListBar attrs={{ "data-qc153": "bar", "data-qc151": "toolbar", "data-qcv": "ws-head" }}
+      lead={
       <div className="qc153-vsw" role="group" aria-label="View" data-qc151="switch">
         <button type="button" aria-pressed={!birds} data-v="list" disabled={p.loading} onClick={() => p.onView("list")}>{LIST_I}List</button>
         <button type="button" aria-pressed={birds} data-v="birds" disabled={p.loading} onClick={() => p.onView("birds")}>{BE_I}Birds-eye</button>
-      </div>
-      {/* v154 §6 — the count and, stuck, the current group cross-fade in one cell; the group is the eye's, not the
-          screen reader's (the headings already name it) */}
+      </div>}
+      /* v154 §6 — the count and, stuck, the current group cross-fade in one cell; the group is the eye's, not the
+         screen reader's (the headings already name it) */
+      count={
       <span className={`qc153-cnt qc154-tc${p.stuckOn ? " is-grp" : ""}`} data-qc153="count" data-stuck={p.stuckOn ? "" : undefined}>
         <span className="qc154-tn" aria-live="polite">{p.loading ? " " : narrowed ? <><b>{p.showing}</b> of <b>{p.total}</b></> : <><b>{p.total}</b> {p.total === 1 ? "query" : "queries"}</>}</span>
         <span className="qc154-tg" data-qc154="toolbar-group" aria-hidden="true">{p.stuckGroup ? <>{p.stuckGroup.label}<small>{p.stuckGroup.count}</small></> : null}</span>
-      </span>
-      <label className="qc153-find" data-qc151="find" data-qc140="find">
-        {FIND_I}
-        <input ref={p.findRef} value={p.find} onChange={(e) => p.onFind(e.target.value)} placeholder={FIND_PLACEHOLDER} aria-label={FIND_PLACEHOLDER} autoComplete="off" disabled={p.loading} />
-        {p.find
-          ? <button type="button" className="qc153-findx" aria-label="Clear the search" data-qc151="find-clear" onClick={() => p.onFind("")}>{CROSS}</button>
-          : <kbd aria-hidden="true">/</kbd>}
-      </label>
+      </span>}
+      find={{ value: p.find, onChange: p.onFind, placeholder: FIND_PLACEHOLDER, inputRef: p.findRef, disabled: p.loading,
+        attrs: { "data-qc151": "find", "data-qc140": "find" }, clearAttrs: { "data-qc151": "find-clear" } }}>
       <button type="button" className="qc153-dd" data-qc153="sort" aria-haspopup="menu" aria-expanded={pop.open === "sort"} disabled={p.loading}
         aria-label={`Sort: ${sortLabel}`} onClick={(e) => pop.toggle("sort", e.currentTarget)}>
         <span aria-hidden="true">⇅</span><b>{sortLabel}</b>
@@ -105,6 +101,6 @@ export const QcBar153: React.FC<QcBar153Props> = (p) => {
             })}
             onPick={(v) => { p.onGroup(v as GroupBy); pop.close(); }} />
       ) : null}
-    </div>
+    </ListBar>
   );
 };

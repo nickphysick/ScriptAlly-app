@@ -75,7 +75,9 @@ describe("/agents renders", () => {
   /** The toolbar's tripwire, moved here from the blank account with the empty-state build. */
   it("…and the toolbar returns as soon as there is one agent", () => {
     const html = renderPageSeeded(list(), "/agents");
-    expect(html).toContain("Filter");
+    /* QC layout v1 — the toolbar is the Query Centre's light bar and the filter column its Views panel */
+    expect(html).toContain('data-clq="bar"');
+    expect(html).toContain("<b>Views</b>");
     expect(html).not.toContain("These are the people who will champion your words.");
   });
 });

@@ -51,7 +51,8 @@ test("CLP shots · the mock beside the page at 1440 and 1280", async ({ page }) 
   }
 });
 
-test("CLP shots · each state", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): its frames read the band's count. Held now by clq1 screens. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CLP shots · each state", async ({ page }) => {
   test.setTimeout(300_000);
   const vp = { width: 1440, height: 900 };
   for (const k of ["loading", "error", "day1"]) {

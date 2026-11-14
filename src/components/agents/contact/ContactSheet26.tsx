@@ -11,40 +11,40 @@
  *   D  the rows       three columns (Agent · What they want · Your query) and a margin labelling each section
  *   E  the menus      Group (Letter · Status · No grouping), Sort (the four)
  *
- * ⚠️ THE PIN IS ONE STICKY BLOCK — the band, the index row, the applied row and the column headings — 12px below the
+ * Contact list — Query Centre layout v1: THE BAND IS GONE. Count, Find, Sort and Group are the Query Centre's light bar
+ *    above the card (ContactBar); the card opens on the index row (when grouped), the applied row and the headings.
+ * ⚠️ THE PIN IS ONE STICKY BLOCK — (v26: the band,) the index row, the applied row and the column headings — 12px below the
  *    scroller's top. It sits inside the frame, which clips (`overflow: clip`, never `hidden`: hidden would make the frame
- *    a scroll container and the pin would stick to it). While it is stuck a page-coloured mask behind it covers the 12px
- *    above and the card's white sides beside it, so rows never show around it; at rest the mask is off.
- * ⚠️ ONE READER, ON SCROLL (rAF, capture): whether the pin is stuck, and the section nearest the pinned headings.
+ *    a scroll container and the pin would stick to it). QC layout v1 — it sits under the bar's strip (`--clq-strip`,
+ *    published by ContactBar), so the strip's page colour covers what scrolls above it and NOTHING PAINTS OVER THE CARD'S
+ *    EDGE: v26's page-coloured mask (14px each side, over the frame's line and the card's white) and the `stuck` reading
+ *    that switched it on are deleted. The line runs unbroken at rest and while pinned.
+ * ⚠️ ONE READER, ON SCROLL (rAF, capture): the section nearest the pinned headings.
  */
-import { bandCount, noMatchCopy } from "../../../lib/contactPrinciples";
+import { noMatchCopy } from "../../../lib/contactPrinciples";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { type AgentFacts, type ContactFilters, type SortKey, appliedFilters } from "../../../lib/contactList";
 import { STAGE_NAME } from "../../../lib/qcSummary";
-import { CL_SORT_FIELDS } from "../../../lib/cardsSort";
-import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
-import { usePopover } from "../../shell/ListPills";
-import { GROUP_ICON150 } from "../../queries/centre/QcToolbar140";
-import { GroupMenu, NQ_RING, SetGlyph } from "./ContactSheet24";
+import { NQ_RING, SetGlyph } from "./ContactSheet24";
 import { GenrePills } from "../../shared/agentRowParts";
 import { FIT_WORDS } from "../card/agentPills";
 import type { Group26Key } from "../../../lib/contactListMemory";
-import { GROUP26_OPTIONS, drawnSections, sections, type Section } from "../../../lib/contactV26";
+import { drawnSections, sections, type Section } from "../../../lib/contactV26";
 import type { StatusKey } from "../../../lib/contactList";
 import "./contactV26.css";
 import "./contactPrinciples.css";
 
-export const GROUP26_LABEL: Record<Group26Key, string> = { letter: "Letter", status: "Status", none: "No grouping" };
+/* QC layout v1 — GROUP26_LABEL moved with the Group chip to ContactBar */
+export { GROUP26_LABEL } from "./ContactBar";
 
 export interface ContactSheet26Props {
   /** the agents the list shows, already filtered and sorted */
   pool: readonly AgentFacts[];
   all: readonly AgentFacts[];
   group: Group26Key;
-  onGroup: (g: Group26Key) => void;
   sortKey: SortKey;
   reversed: boolean;
   onSort: (v: { key: SortKey; reversed: boolean }) => void;
@@ -78,11 +78,6 @@ export interface ContactSheet26Props {
   dayOne?: { onAdd: () => void } | null;
 }
 
-const I = {
-  cv: <svg className="cl26-cv" viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>,
-  find: <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>,
-};
-
 /** the stage words in Your query: the app's own names; not queried and closed-to-queries are their own */
 export function queryWords(x: AgentFacts): { kind: "nq" | "shut" | "stage"; words: string; status?: QueryStatus } {
   const q = x.q;
@@ -94,10 +89,8 @@ export function queryWords(x: AgentFacts): { kind: "nq" | "shut" | "stage"; word
 const pinTopOf = (pin: HTMLElement): number => { const v = parseFloat(getComputedStyle(pin).top); return Number.isFinite(v) ? v : 12; };
 
 export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
-  const pop = usePopover<"filters" | "group" | "sort">();
   const cardRef = useRef<HTMLElement>(null);
   const pinRef = useRef<HTMLDivElement>(null);
-  const bandRef = useRef<HTMLDivElement>(null);
   const byId = useMemo(() => new Map(p.all.map((x) => [x.agent.id, x])), [p.all]);
   /* C/D — THE ONE PARTITION: the index names these and the list draws these, in this order */
   const secs = useMemo(() => sections(p.pool, p.group, p.sortKey, p.reversed), [p.pool, p.group, p.sortKey, p.reversed]);
@@ -118,17 +111,15 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
     return () => ro.disconnect();
   }, []);
 
-  /* ONE READER: is the pin stuck. Contact list header v2: the pin's sticky top is read off the pin itself
-     (`var(--pin-cover, 12px)`: the lip's 12px, or below the slim pinned row while it shows), never a literal */
-  const [stuck, setStuck] = useState(false);
+  /* ONE READER: the section nearest the pinned headings. Contact list header v2: the pin's sticky top is read off the pin
+     itself (`var(--pin-cover, 12px)` and the bar's strip), never a literal. QC layout v1 — no `stuck`: nothing paints
+     differently when the pin is stuck (the mask it switched on is deleted). */
   const read = useCallback(() => {
     const pin = pinRef.current, card = cardRef.current;
     const sc = card?.closest<HTMLElement>(".wpg-scroll");
     if (!pin || !card || !sc) return;
     const top = sc.getBoundingClientRect().top;
     const at = pinTopOf(pin);
-    const s = pin.getBoundingClientRect().top <= top + at + 0.5 && card.getBoundingClientRect().top < top + at;
-    setStuck((v) => (v === s ? v : s));
     /* the section nearest the pinned headings: the last one whose top has reached the headings' foot */
     const line = top + at + pin.offsetHeight + 2;
     let cur: string | null = null;
@@ -183,31 +174,12 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
     ...applied.map((a) => ({ label: a.label.replace(/^Genre:\s*/, ""), drop: () => p.onFilters(a.drop(p.filters)) })),
   ];
   const none = noMatchCopy(named.map((n) => n.label));
-  const groupChanged = p.group !== "letter";
-  const sortChanged = p.sortKey !== "surname" || p.reversed;
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
 
   return (
     <section className="cl26-card" data-cl26="card" ref={cardRef} data-kind={drawn[0]?.kind ?? "all"}>
       <div className="cl26-frame" data-cl26="frame">
-        <div className="cl26-pin" data-cl26="pin" ref={pinRef} data-stuck={stuck ? "" : undefined}>
-          <div className="cl26-band" data-cl26="band" ref={bandRef}>
-            <b className="cl26-count" data-cl26="count" data-n={p.pool.length}>{bandCount(p.pool.length, p.all.length, state)}</b>
-            <label className="cl26-find" data-cl26="find" data-cl24="find" data-nb1="find">
-              {I.find}
-              <input value={p.search} onChange={(e) => p.onSearch(e.target.value)} placeholder="Find an agent or agency" aria-label="Find an agent or agency" autoComplete="off" />
-            </label>
-            <span className="cl26-sp" aria-hidden="true" />
-            {/* v27 — the Filters button is retired: the filter rail beside the list (ContactRail27) is the one way in */}
-            <button type="button" className="cl26-ch" data-cl26="group" data-on={groupChanged ? "" : undefined} aria-haspopup="menu" aria-expanded={pop.open === "group"}
-              aria-label={`Grouped by ${GROUP26_LABEL[p.group]}. Change the grouping`} onClick={(e) => pop.toggle("group", e.currentTarget)}>
-              {GROUP_ICON150}<span className="cl26-by">Grouped by</span><b>{GROUP26_LABEL[p.group]}</b>{I.cv}
-            </button>
-            <span className="cl26-sortw" data-on={sortChanged ? "" : undefined}>
-              <SortChipButton fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} open={pop.open === "sort"} className="cl26-ch cl26-sort" ns="cl26"
-                onToggle={(a) => pop.toggle("sort", a)} />
-            </span>
-          </div>
+        <div className="cl26-pin" data-cl26="pin" ref={pinRef}>
           {p.group !== "none" && drawn.length > 0 ? <Index26 secs={secs} current={current ?? drawn[0]?.key ?? null} onJump={jump} /> : null}
           {applied.length > 0 || p.setChip ? (
             <div className="cl26-ap" data-cl26="applied" role="status">
@@ -295,13 +267,6 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
         ) : null}
       </div>
 
-      {pop.open === "sort" && pop.anchor ? (
-        <SortChipMenu anchor={pop.anchor} fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} ns="cl26" heading="Sort by" note={null}
-          onChange={(v) => p.onSort(v as { key: SortKey; reversed: boolean })} />
-      ) : null}
-      {pop.open === "group" && pop.anchor ? (
-        <GroupMenu anchor={pop.anchor} options={GROUP26_OPTIONS} value={p.group} className="cl26-gpop" onPick={(g) => { p.onGroup(g); pop.close(); }} />
-      ) : null}
     </section>
   );
 };

@@ -16,7 +16,8 @@ const page = read("QcPage151.tsx");
 const bare = css.replace(/\/\*[\s\S]*?\*\//g, "").replace(/@media[^{]*\{/g, "");
 /** the declarations of the first rule whose selector list contains `sel` exactly */
 const rule = (sel: string): string => {
-  for (const m of bare.matchAll(/([^{}]+)\{([^}]*)\}/g)) if (m[1].split(",").some((s) => s.trim() === sel)) return m[2];
+  /* split at the list's own commas, never one inside `:is(…)` (QC layout v1 names `.cl27` there) */
+  for (const m of bare.matchAll(/([^{}]+)\{([^}]*)\}/g)) if (m[1].split(/,(?![^(]*\))/).some((s) => s.trim() === sel)) return m[2];
   return "";
 };
 
@@ -74,14 +75,14 @@ describe("v154.1 · the rail recedes, the toolbar opens up", () => {
     expect(rule(".qc151.qc153 .qc153-rail .qc153-rsec.qc153-rsec:last-of-type")).toMatch(/border-bottom:\s*0/);
   });
   it("the toolbar has no container and no side padding; the search field is white with a fine ring", () => {
-    const t = rule(".qc151.qc153 .qc154-tbw > .qc153-bar.qc153-bar");
+    const t = rule(":is(.qc151.qc153, .cl27) .qc154-tbw > .qc153-bar.qc153-bar");
     expect(t).toMatch(/background:\s*none/);
     expect(t).toMatch(/box-shadow:\s*none/);
     expect(t).toMatch(/backdrop-filter:\s*none/);
     expect(t).toMatch(/padding-left:\s*0/);
     expect(t).toMatch(/padding-right:\s*0/);
     expect(t).not.toMatch(/padding-(?:top|bottom)|height/);
-    const f = rule(".qc151.qc153 .qc153-bar .qc153-find.qc153-find");
+    const f = rule(":is(.qc151.qc153, .cl27) .qc153-bar .qc153-find.qc153-find");
     expect(f).toMatch(/background:\s*#fff\b/);
     expect(f).toContain("box-shadow: inset 0 0 0 1px #e3ddd3");
   });

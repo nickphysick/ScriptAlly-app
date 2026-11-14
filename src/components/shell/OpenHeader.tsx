@@ -25,8 +25,9 @@ export const OpenHeader: React.FC<{
   artClassName?: string;
   title: React.ReactNode;
   titleAttrs?: Attrs;
-  /** the rule-flanked line: "<em>for</em> Murphy's Day Out", or nothing */
-  forLine?: { lead: string; text: React.ReactNode; attrs?: Attrs } | null;
+  /** the rule-flanked line: "<em>for</em> Murphy's Day Out", or nothing. With no `lead` the line is the text alone
+   *  (the Contact list's "All of them queried"); the Query Centre's markup, with a lead, is unchanged. */
+  forLine?: { lead?: string; text: React.ReactNode; attrs?: Attrs } | null;
   actions: React.ReactNode;
   ring?: React.ReactNode;
 }> = ({ className, attrs, art, artClassName, title, titleAttrs, forLine, actions, ring = null }) => (
@@ -35,7 +36,7 @@ export const OpenHeader: React.FC<{
     <div className="qc1531-main">
       <h1 className="qc1531-t" data-page-title="true" {...titleAttrs}>{title}</h1>
       {forLine ? (
-        <p className="qc1531-for" {...forLine.attrs}><i aria-hidden="true" /><span><em>{forLine.lead}</em> {forLine.text}</span><i aria-hidden="true" /></p>
+        <p className="qc1531-for" {...forLine.attrs}><i aria-hidden="true" /><span>{forLine.lead ? <><em>{forLine.lead}</em> {forLine.text}</> : forLine.text}</span><i aria-hidden="true" /></p>
       ) : null}
       <div className="qc1531-acts">{actions}</div>
     </div>

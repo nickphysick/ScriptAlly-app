@@ -233,8 +233,8 @@
   .qc153-vsw button[aria-pressed="true"] { background: var(--navy); color: #fff; font-weight: 600 !important; }
   .qc153-vsw button:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
   .qc153-vsw button:disabled { cursor: default; }
-  .qc151 .qc153-cnt { flex: none; padding: 0 6px 0 4px; font: 400 15px/1 var(--sp-serif) !important; color: var(--mut); white-space: nowrap; }
-  .qc151 .qc153-cnt b { font: 400 17px/1 var(--sp-type) !important; color: var(--ink); }
+  :is(.qc151, .cl27) .qc153-cnt { flex: none; padding: 0 6px 0 4px; font: 400 15px/1 var(--sp-serif) !important; color: var(--mut); white-space: nowrap; }
+  :is(.qc151, .cl27) .qc153-cnt b { font: 400 17px/1 var(--sp-type) !important; color: var(--ink); }
   .qc153-find {
     flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 8px 0 14px; border-radius: 12px;
     background: #f7f3ee; color: var(--mut); transition: background 0.15s, box-shadow 0.15s;

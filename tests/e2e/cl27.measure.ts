@@ -70,13 +70,14 @@ const shown = (page: Page) => page.evaluate(() => {
   const card = [...document.querySelectorAll<HTMLElement>(".aglist [data-cl26='card']")].find((e) => e.getBoundingClientRect().height > 0)!;
   const rows = [...card.querySelectorAll<HTMLElement>("[data-cl26='row']")];
   return {
-    n: rows.length, count: Number(card.querySelector<HTMLElement>("[data-cl26='count']")?.dataset.n ?? "-1"),
+    n: rows.length, count: Number((card.closest<HTMLElement>(".qc153-main") ?? card).querySelector<HTMLElement>("[data-clq='count']") /* QC layout v1: the light bar's count */?.dataset.n ?? "-1"),
     stands: [...new Set(rows.map((r) => r.dataset.k ?? ""))], texts: rows.map((r) => (r.textContent ?? "").toLowerCase()),
   };
 });
 
 /* ═════════ H1 · the header ═════════ */
-test("CL27-H1 · the open header: the mirrored bird, the title block, List health — three columns on the page's ground", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): the v27 open header is replaced by the navy header. Held now by clq1 L1, L3. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CL27-H1 · the open header: the mirrored bird, the title block, List health — three columns on the page's ground", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new L27("H1");
   for (const vp of SIZES) {
@@ -119,7 +120,8 @@ test("CL27-H1 · the open header: the mirrored bird, the title block, List healt
 });
 
 /* ═════════ R1 · the rail ═════════ */
-test("CL27-R1 · the rail: 268px, beside the list, the band has no Filters; still in view after 1200px of scroll", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): the v27 rail is replaced by the Views panel (the band is gone). Held now by clq1 L2; contactQcLayout.test Phase 2. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CL27-R1 · the rail: 268px, beside the list, the band has no Filters; still in view after 1200px of scroll", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new L27("R1");
   for (const vp of SIZES) {
@@ -164,7 +166,8 @@ const openMore = async (page: Page) => {
 
 /* ═════════ R2 · every control is the list's own count ═════════ */
 type Ctl = { sel: string; k: string; n: number };
-test("CL27-R2 · every rail control leaves exactly the rows it counted; tiles and genres leave only theirs; Reset restores the list", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): the v27 rail's controls are the Views panel's. Held now by clq1 L4, L5. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CL27-R2 · every rail control leaves exactly the rows it counted; tiles and genres leave only theirs; Reset restores the list", async ({ page }) => {
   test.setTimeout(600_000);
   const L = new L27("R2");
   const vp = SIZES[0];
@@ -214,7 +217,8 @@ test("CL27-R2 · every rail control leaves exactly the rows it counted; tiles an
 });
 
 /* ═════════ R3 · the list's headings still stick ═════════ */
-test("CL27-R3 · the column headings stick under the band in the narrower column", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): the headings stick under the light bar's strip now, not the band. Held now by clq1 L6 (pinned). tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CL27-R3 · the column headings stick under the band in the narrower column", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new L27("R3");
   for (const vp of SIZES) {
@@ -237,7 +241,8 @@ test("CL27-R3 · the column headings stick under the band in the narrower column
 });
 
 /* ═════════ the report's screens ═════════ */
-test("CL27 shots — the top of the page, and scrolled with a filter on", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): its frames are the v27 header and rail. Held now by clq1 screens. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CL27 shots — the top of the page, and scrolled with a filter on", async ({ page }) => {
   test.skip(!!MUT, "screens are for an unmutated run");
   test.setTimeout(240_000);
   for (const vp of SIZES) {

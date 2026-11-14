@@ -36,6 +36,7 @@ import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib
 import { sectionSwatch, standWords } from "../../../lib/qc153";
 import { FirstPanel155, QuietPanel155, Skeleton155 } from "./QcState155";
 import { QcSlim156 } from "./QcSlim156";
+import { useTallRail } from "../../shell/useTallRail";
 import type { WeekGoal154 } from "../../../lib/qc154goal";
 import "./qcv151.css";
 import "./qcv1522.css";
@@ -269,22 +270,9 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     on();
     return () => { document.removeEventListener("scroll", on, true); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); window.clearTimeout(clear); };
   }, []);
-  /* v154 §6 — the rail sticks 14px under the toolbar's top; taller than the scrollport, it scrolls with the page */
-  useEffect(() => {
-    const root = rootRef.current;
-    const rail = root?.querySelector<HTMLElement>(".qc153-rail");
-    if (!root || !rail) return undefined;
-    const port = root.closest<HTMLElement>(".wpg-scroll");
-    const fit = () => {
-      const room = (port?.clientHeight ?? window.innerHeight) - 14 - (parseFloat(getComputedStyle(root).getPropertyValue("--pin-cover")) || 12);
-      rail.toggleAttribute("data-qc154-tall", rail.offsetHeight > room);
-    };
-    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(fit);
-    ro?.observe(rail); if (port) ro?.observe(port);
-    window.addEventListener("resize", fit);
-    fit();
-    return () => { ro?.disconnect(); window.removeEventListener("resize", fit); };
-  }, [p.rail]);
+  /* v154 §6 — the rail sticks 14px under the toolbar's top; taller than the scrollport, it scrolls with the page
+     (shell/useTallRail, extracted from here unchanged; the Contact list's Views panel uses it too) */
+  useTallRail(rootRef, p.rail);
 
   /* §6 — a group's rows fold away under its header, for the session */
   const [collapsed, setCollapsed] = useState<Set<string>>(readCollapsed);

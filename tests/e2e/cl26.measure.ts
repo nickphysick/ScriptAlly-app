@@ -34,7 +34,7 @@ const listState = (page: Page) => page.evaluate(() => {
     k: b.dataset.k ?? "", n: Number(b.dataset.n), off: b.disabled, cur: b.getAttribute("aria-current") === "true",
   })) : null;
   const rows = card.querySelectorAll("[data-cl26='row']").length;
-  const count = Number(card.querySelector<HTMLElement>("[data-cl26='count']")?.dataset.n ?? "-1");
+  const count = Number((card.closest<HTMLElement>(".qc153-main") ?? card).querySelector<HTMLElement>("[data-clq='count']") /* QC layout v1: the light bar's count */?.dataset.n ?? "-1");
   return { secs, entries, rows, count };
 });
 
@@ -77,7 +77,8 @@ async function mut(page: Page, lock: string) {
 }
 
 /* ═════════ H1 · the header ═════════ */
-test("CL26-H1 · (re-pointed by v27 and principles v1) the open header: title, the for line, two buttons, the ring beside them; no At a glance, no title card", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): the v27 open header is replaced by the navy header. Held now by clq1 L1, L3; contactQcLayout.test Phase 1. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CL26-H1 · (re-pointed by v27 and principles v1) the open header: title, the for line, two buttons, the ring beside them; no At a glance, no title card", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("H1");
   for (const vp of SIZES) {
@@ -171,7 +172,8 @@ test("CL26-H3 · the ring and Fill the gaps open Housekeeping; neither filters",
 });
 
 /* ═════════ H4 · the band ═════════ */
-test("CL26-H4 · the band: count, Find, Group, Sort (v27: Filters retired to the rail); no List / Cards, no Full screen; the count is the rows drawn", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): the navy band left the card for the light bar above it. Held now by clq1 L2; contactQcLayout.test Phase 3. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CL26-H4 · the band: count, Find, Group, Sort (v27: Filters retired to the rail); no List / Cards, no Full screen; the count is the rows drawn", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("H4");
   for (const vp of SIZES) {
@@ -369,7 +371,8 @@ test("CL26-H9 · the margin follows the sort: letters; weeks to 12, then 12+ and
 });
 
 /* ═════════ H10 · the menus ═════════ */
-test("CL26-H10 · Group is Letter, Status, No grouping; Sort the five (every word the typewriter, upright); the rail's four quick picks (v27)", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): its menus open from the light bar now, and the rail's quick picks are the Views list. Held now by contactQcLayout.test Phases 2–3; clq1 L4. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CL26-H10 · Group is Letter, Status, No grouping; Sort the five (every word the typewriter, upright); the rail's four quick picks (v27)", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("H10");
   await openCl26(page, SIZES[0]);
@@ -413,7 +416,8 @@ test("CL26-H10 · Group is Letter, Status, No grouping; Sort the five (every wor
 });
 
 /* ═════════ H11 · the applied row ═════════ */
-test("CL26-H11 · Missing details + a genre: two chips and Clear; every row says what it is missing; dropping a chip updates the count", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): it picked Missing details and a genre in the v27 rail. Held now by clq1 L4, L5. tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CL26-H11 · Missing details + a genre: two chips and Clear; every row says what it is missing; dropping a chip updates the count", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("H11");
   await openCl26(page, SIZES[0]);
@@ -447,7 +451,8 @@ const STATES: [string, Open26][] = [
   ["01-page", {}], ["03-health-48", { health: 48 }], ["04-grouped-status", { group: "status" }], ["05-sorted-reply", { sort: "reply" }],
   ["06-sorted-added", { sort: "added" }], ["07-no-grouping", { group: "none" }], ["xx-sorted-status", { sort: "status" }],
 ];
-test("CL26 shots — the page in each state", async ({ page }) => {
+/* RETIRED (Contact list QC layout v1, 14 Nov): its frames are the band and the rail. Held now by clq1 screens (reports/cl-qc-layout-v1/shots). tests/e2e/RETIRED-contact-list-qc-layout-v1.md */
+test.skip("CL26 shots — the page in each state", async ({ page }) => {
   test.skip(!!MUT, "screens are for an unmutated run");
   test.setTimeout(400_000);
   for (const [name, o] of STATES) {
