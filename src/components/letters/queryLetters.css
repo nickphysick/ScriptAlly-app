@@ -6,8 +6,9 @@
  * and drawer code in the ref are out of scope). Faces are READ from the app: --sp-type (Special Elite), --sp-serif
  * (Source Serif). ⚠️ lib/brand.tsx forces h1/h2 faces with `!important` and names bare spans and paragraphs as the sans,
  * so the page hands inheritance back once (`:where`) and every heading states its face with two classes.
- * ⚠️ THE SHARED HEADER IS `shell/OpenHeader` and its rules are the Query Centre's (qcv1531.css). Every difference here
- *    is scoped to this page's wrapper (`.qlp .qlp-hd`); nothing in queries/centre/ is edited.
+ * ⚠️ THE HEADER IS THE QUERY CENTRE'S NAVY HEADER (v2.4): `shell/OpenHeader` in a `.qc151.qc153` wrapper, dressed by the
+ *    Query Centre's own sheets. Every difference here is scoped to this page (`.qlp …`); nothing in queries/centre/ is
+ *    edited and the Query Centre's look does not change.
  * ⚠️ BARS AND MARKS ARE NAVY (#2a3a52). No rust or red on this page.
  */
 .qlp {
@@ -32,30 +33,19 @@
 .qlp > * { max-width: calc(var(--work-max) - 2 * var(--work-gutter)); margin-inline: auto; }
 .qlp :focus-visible { outline: 2px solid var(--ql-navy); outline-offset: 2px; }
 
-/* ── the header: OpenHeader on this page's grid, so its three columns sit over the desk's three ───────────────── */
-.qlp .qc1531-hd.qlp-hd { grid-template-columns: 280px minmax(0, 1fr) 380px; align-items: start; gap: 36px; padding: 0 0 22px; }
-.qlp .qlp-hd .qlp-art { display: grid; place-items: center; align-self: center; }
-.qlp .qlp-hd .qlp-art img { display: block; width: 190px; height: auto; filter: drop-shadow(0 14px 14px rgba(28, 19, 15, .12)); }
-.qlp .qc151 .qlp-hd h1.qc1531-t { font: 400 54px/1.05 var(--sp-type) !important; letter-spacing: 0; outline: none; }
-.qlp .qc151 .qlp-hd .qc1531-b--n:hover { background: #1f2c3f; }
+/* ── the header (v2.4): the Query Centre's navy header as built (qcv1534 §2–3, qcv156 §1), reached through the
+   `.qc151.qc153` wrapper. This page's one difference: two parts, the drawing and the title block, so the right-hand
+   column the Query Centre keeps for "this week" is dropped (OpenHeader always renders `.qc1531-rc`; it stays empty
+   and takes no room). The art column (268) and its gap (28) stay the Query Centre's. Its height is the built one. ── */
+@media (min-width: 768px) {
+  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd.qlp-hd { grid-template-columns: 268px minmax(0, 1fr); min-height: 227px; }
+  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd > .qc1531-rc { display: none; }
+  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd h1.qc1531-t { outline: none; }
+}
 
-/* the third column: v2.1's Top tip (design-refs/query-letters-v2-1): its head over a 2px navy rule, one white card, five marks */
-.qlp-wk { width: 380px; max-width: 100%; margin-top: 14px; }
-.qlp-wkh { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 10px; padding-bottom: 8px; border-bottom: 2px solid var(--ql-navy); }
-.qlp .qlp-wkt { min-width: 0; font: 400 19px/1.15 var(--sp-type); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qlp .qlp-wkt b { font: 400 22px/1.15 var(--sp-type); }
 .qlp-lnk { padding: 0; border: 0; background: none; color: var(--ql-navy) !important; font-size: 16px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, .4); min-height: 32px; }
 .qlp-lnk--sm { font-size: 14px; margin-top: 10px; }
 
-/* v2.1 · the Top tip */
-.qlp-tip { display: flex; gap: 14px; align-items: flex-start; padding: 14px 16px; border-radius: 14px; background: #fff;
-  box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 10px 22px -16px rgba(28, 19, 15, .4); min-height: 118px; }
-.qlp-tip img { width: 40px; flex: none; }
-.qlp .qlp-tip b { display: block; font: 400 18px/1.25 var(--sp-type); color: var(--ql-ink); }
-.qlp .qlp-tip p { margin-top: 4px; font-size: 15px; line-height: 1.45; color: var(--ql-t72); }
-.qlp-tipd { display: flex; gap: 6px; margin-top: 10px; }
-.qlp-tipd i { width: 18px; height: 4px; border-radius: 2px; background: rgba(28, 19, 15, .16); }
-.qlp-tipd i.on { background: var(--ql-navy); }
 /* v2.1 · the package line, on the in-use letter */
 .qlp .qlp-lt-pkg { margin-top: 4px; font-size: 14px; color: var(--ql-t72); }
 .qlp-lt-pkg a { color: var(--ql-navy); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, .4); }
@@ -223,14 +213,9 @@ textarea.qlp-paper--edit { resize: vertical; min-height: 520px; box-shadow: 0 0 
 /* the ref's narrower desktop: the rail drops under the letter below 1320px */
 @media (max-width: 1320px) {
   .qlp-desk { grid-template-columns: 280px minmax(0, 1fr); }
-  .qlp .qc1531-hd.qlp-hd { grid-template-columns: 190px minmax(0, 1fr); }
-  .qlp .qlp-hd .qc1531-rc { grid-column: 2; }
   .qlp-desk > .qlp-rail { grid-column: 2; position: static; max-width: 760px; width: 100%; }
 }
 @media (max-width: 900px) {
-  .qlp .qc1531-hd.qlp-hd { grid-template-columns: 1fr; }
-  .qlp .qlp-hd .qc1531-rc { grid-column: auto; }
-  .qlp .qc151 .qlp-hd h1.qc1531-t { font-size: 36px !important; white-space: normal; }
   .qlp-desk, .qlp-first { grid-template-columns: 1fr; gap: 24px; }
   .qlp-desk > .qlp-list, .qlp-desk > .qlp-rail { position: static; grid-column: auto; max-height: none; }
   .qlp-paper { padding: 32px 24px; }

@@ -34,7 +34,12 @@ import {
 } from "../../lib/queryLetters";
 import { OpenHeader } from "../shell/OpenHeader";
 import { LetterRows, LetterView, LetterEditor, ReadRail, WriteRail, DayOne, DeskSkeleton, type EdState } from "./LetterDesk";
-import { TopTip } from "./TopTip";
+/* v2.4: the Query Centre's navy header, reused: `shell/OpenHeader` in a `.qc151.qc153` wrapper, dressed by the Query
+   Centre's own sheets (the Contact list's `ContactHeaderQc` reaches the same rules through `.cl27`) */
+import "../queries/centre/qcv1531.css";
+import "../queries/centre/qcv1534.css";
+import "../queries/centre/qcv154.css";
+import "../queries/centre/qcv156.css";
 import "./queryLetters.css";
 
 export const QUERY_LETTERS_TITLE = "Query letters";
@@ -277,16 +282,16 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
   const title = loading ? " " : empty ? NO_LETTERS_TITLE : lettersTitle(live.length);
   const note = earlyNote(live.map((v) => ({ name: v.versionName, sent: facts.get(v.id)?.sent ?? 0 })));
 
-  /* v2.1: the header's third column is the Top tip. Which letter goes out is shown by its row's flag and changed by "Use for
-     new queries" on the letter; the package line sits on the in-use letter in the middle column. */
-  const tipBlock = !loading && !empty ? <TopTip /> : null;
+  /* v2.4: the header is two parts, the drawing and the title block. Nothing in its right-hand block: v2.1's Top tip is
+     gone and nothing replaces it. Which letter goes out is shown by its row's flag and changed by "Use for new queries"
+     on the letter; the package line sits on the in-use letter in the middle column. */
 
   const selFacts = selLetter ? facts.get(selLetter.id) : undefined;
   const edParent = ed ? (ed.kind === "copy" ? byId(ed.from) : ed.kind === "edit" ? byId(byId(ed.id)?.parentId) : null) : null;
 
   return (
     <div ref={pageRef} className={`qlp${empty ? " qlp--empty" : ""}`} data-ql="page" data-state={loading ? "loading" : empty ? "empty" : "filled"}>
-      <div className="qc151 qlp-hdw">
+      <div className="qc151 qc153 qlp-hdw">
         <OpenHeader
           className="qlp-hd"
           attrs={{ "data-ql": "header", "data-own-header": "" }}
@@ -299,7 +304,6 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
             <button type="button" className="qc1531-b qc1531-b--n" data-ql="new" onClick={newLetter}>+ New letter</button>
             <button type="button" className="qc1531-b qc1531-b--g" data-ql="upload" onClick={upload}>Upload a file</button>
           </>}
-          ring={tipBlock}
         />
         <input ref={fileRef} type="file" hidden accept=".txt,.md,.doc,.docx,.pdf,.rtf,.odt,text/*" data-ql="file-input" onChange={(e) => void onFile(e.target.files?.[0])} />
       </div>

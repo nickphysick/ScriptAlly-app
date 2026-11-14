@@ -22,8 +22,6 @@ vi.mock("../../lib/firebase", async () => (await import("../../test/pageSmoke"))
 vi.mock("../toast/ToastProvider", async () => (await import("../../test/pageSmoke")).toastMock());
 
 import { QueryLettersPage, NO_LETTERS_TITLE } from "./QueryLettersPage";
-import { TIPS } from "./TopTip";
-import { LETTER_MIN_SENT } from "../../lib/queryLetters";
 import { WORKSPACE_PATHS } from "../../marketing/routeTiers";
 import { WORKSPACE_SHELL_PATHS } from "../../lib/shellForRoute";
 
@@ -62,7 +60,7 @@ describe("/materials/letters renders the letter desk", () => {
     queries: [Q("q1", QueryStatus.QUERIED, { sentVersions: ["l2"] }), Q("q2", QueryStatus.PARTIAL_REQUESTED, { sentVersions: ["l2"] })],
   });
 
-  it("populated: the shared open header, the Top tip, the rows in page order, the in-use letter selected and read in full", () => {
+  it("populated: the Query Centre's navy header (no tip), the rows in page order, the in-use letter selected and read in full", () => {
     state.data = populated();
     const h = render();
     const t = text(h);
@@ -71,9 +69,10 @@ describe("/materials/letters renders the letter desk", () => {
     expect(t).toContain("for Harbour of Glass");
     expect(t).toContain("+ New letter");
     expect(t).toContain("Upload a file");
-    /* v2.1: the third column is the Top tip; v2's in-use block and its picker are gone */
-    expect(h).toContain('data-ql="tip"');
-    expect(t).toContain("Top tip Next tip Mark what you personalise");
+    /* v2.4: the Query Centre's navy header (OpenHeader in a .qc151.qc153 wrapper); no tip, no in-use block, no picker */
+    expect(h).toMatch(/<div class="qc151 qc153 qlp-hdw"><header class="qc1531-hd qlp-hd"/);
+    expect(h).not.toContain('data-ql="tip');
+    expect(t).not.toContain("Top tip");
     expect(h).not.toContain('data-ql="in-use"');
     expect(h).not.toContain('data-ql="change"');
     expect(t).not.toContain("Going out with new queries");
@@ -168,11 +167,6 @@ describe("/materials/letters renders the letter desk", () => {
     expect(h).toContain('data-state="loading"');
     expect(h).toContain('data-ql="skeleton"');
     expect(h).not.toContain('data-ql="row"');
-  });
-
-  it("v2.1: tip 4 reads LETTER_MIN_SENT, never a typed number", () => {
-    expect(TIPS[3].text).toBe(`A letter needs about ${LETTER_MIN_SENT} queries out before its figures mean much. Before that, one reply swings them.`);
-    expect(TIPS.map((x) => x.title)).toEqual(["Mark what you personalise", "Don't overwrite, save a version", "Pick it when you log", "Give it time", "Copy from here"]);
   });
 
   it("v2.1: an unsent letter with no text shows the no-words sheet, not a blank one", () => {
