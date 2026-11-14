@@ -231,7 +231,9 @@ for (const vp of SIZES) {
       const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
       const d = root.querySelector<HTMLElement>('[data-tws="desk"]')!.getBoundingClientRect();
       const f = root.querySelector<HTMLElement>('[data-tws="footer"]')!.getBoundingClientRect();
-      const leg = (k: string) => Number(root.querySelector(`[data-tws54="legend-row"][data-k="${k}"] [data-tws54="legend-n"]`)?.textContent ?? NaN);
+      /* v56 re-pointed: no legend — the header's ring names each group's count, "to tidy" is housekeeping's */
+      const leg = (k: string) => k === "house" ? Number(root.querySelector('[data-tws56="house"]')?.textContent ?? 0)
+        : Number(root.querySelector(`[data-tws56="seg"][data-k="${k}"]`)?.getAttribute("aria-label")?.match(/^\d+/)?.[0] ?? 0);
       return {
         tray: root.querySelector<HTMLElement>('[data-tws="tray"]')!.getBoundingClientRect().width,
         desk: d.width,
@@ -311,11 +313,13 @@ test("L7 · a request reads its true days waiting (not 0) in the tray and the le
     const figs = [...root.querySelectorAll<HTMLElement>('[data-tws="list"] [data-tws-row]')]
       .filter((e) => /days? waiting/.test(e.querySelector('[data-tws="figure"]')?.textContent ?? ""))
       .map((e) => Number(e.querySelector('[data-tws="figure"] b')?.textContent ?? NaN));
-    const note = root.querySelector('[data-tws54="legend-row"][data-k="wait"]')?.textContent ?? "";
-    return { figs, note };
+    /* v56 re-pointed: the legend (and its "longest wait" note) is not rendered; `needRows` keeps the note's rule and
+       daysWaiting55.test.ts locks it. Here: no legend on the page, and the rows stay the evidence. */
+    const legend = root.querySelectorAll('[data-tws54="legend-row"], .qc1531-lg').length;
+    return { figs, legend };
   });
   expect(r.figs, "L7 · no request reads 0 days waiting").not.toContain(0);
-  expect(r.note, "L7 · the legend's note is the longest wait the rows show").toContain(`${Math.max(...r.figs)} days`);
+  expect(r.legend, "L7 · no legend is rendered (v56)").toBe(0);
   expect(Math.max(...r.figs), "L7 · which is at least Jonathan's").toBeGreaterThanOrEqual(days);
   await row.click();
   await page.mouse.move(1100, 120);

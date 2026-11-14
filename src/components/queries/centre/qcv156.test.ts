@@ -52,7 +52,8 @@ describe("v156 §5 · one page colour, and nothing clipping the header's shadow"
 
 describe("v156 §1–2 · the navy header panel and its line", () => {
   /* QC layout v1 — the navy panel's rules name the Contact list (`.cl27`) beside the page, at the same specificity */
-  const hd = ":is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd";
+  /* To-do v56 re-pointed: the To-do list's header (`.tws56-hdw`) joins them, the same specificity again */
+  const hd = ":is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd";
   it("one navy panel: #2a3a52, 20px radius, the ref's shadow, 8px above and 30px below, padding 22 30 22 0", () => {
     const r = rule(hd);
     expect(r).toMatch(/background:\s*#2a3a52/);

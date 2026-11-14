@@ -44,7 +44,9 @@ describe("the collapsed header", () => {
     expect(page).toMatch(/ref=\{rootRef\}>\s*\{\/\*[^]*?\*\/\}\s*\{slim156\}/);
   });
   it("the reader is the Contact list's, shared: both rows call shell/slimReveal", () => {
-    expect(src("QcSlim156.tsx")).toMatch(/useSlimReveal\(ref, \{ header, cover, extra: 12 \}\)/);
+    /* To-do v56 re-pointed: the bar renders through the shared shell/SlimBar, which calls the reader with what it is given */
+    expect(src("QcSlim156.tsx")).toMatch(/<SlimBar hook="data-qc156" header=\{header\} cover=\{cover\} extra=\{12\}/);
+    expect(src("../../shell/SlimBar.tsx")).toMatch(/useSlimReveal\(ref, \{ header, cover, extra \}\)/);
     const cl = src("../../agents/contact/ContactSlimRow.tsx");
     expect(cl).toMatch(/useSlimReveal\(ref, \{ header: slimHeader, cover: slimCover \}\)/);
     expect(cl).not.toMatch(/addEventListener\("scroll"/);

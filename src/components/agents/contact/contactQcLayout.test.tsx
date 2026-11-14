@@ -166,10 +166,11 @@ describe("Phase 4 · the card's line never breaks", () => {
 describe("the Query Centre's rules name the Contact list at the same specificity", () => {
   const css = (f: string) => read(`../../queries/centre/${f}`);
   it("the navy panel, the Views card and the strip", () => {
-    expect(css("qcv156.css")).toContain(":is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd {");
+    /* To-do v56 re-pointed: the header rules name the To-do list's header (`.tws56-hdw`) too, at the same specificity */
+    expect(css("qcv156.css")).toContain(":is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd {");
     expect(css("qcv156.css")).toContain(":is(.qc151.qc153, .cl27) .qc153-rail.qc156-views {");
     expect(css("qcv156.css")).toContain(":is(.qc151.qc153, .cl27) .qc154-tbw.qc154-tbw.qc154-tbw[data-qc156-stuck] {");
-    expect(css("qcv1534.css")).toContain(":is(.qc151.qc153, .cl27) .qc1531-hd { grid-template-columns: 268px");
+    expect(css("qcv1534.css")).toContain(":is(.qc151.qc153, .cl27, .tws56-hdw) .qc1531-hd { grid-template-columns: 268px");
     expect(css("qcv154.css")).toContain(":is(.qc151.qc153, .cl27) .qc154-tbw {");
     /* no bare page-only selector is left for the parts both pages mount */
     expect(css("qcv156.css")).not.toMatch(/(^|\n)\s*\.qc151\.qc153 > \.qc1531-hd/);

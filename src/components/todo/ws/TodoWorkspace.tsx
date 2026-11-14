@@ -48,11 +48,11 @@ import { AnchoredPanel } from "../AnchoredPanel";
 import TagsPane from "../TagsSheet";
 import "./todoWs.css";
 import "./todoWs54.css";
-import { WsHeader54 } from "./WsHeader54";
+import { WsHeader56 } from "./WsHeader56";
+import { WsSlim56 } from "./WsSlim56";
 import { WsBatch54 } from "./WsBatch54";
 import { openingView, type BatchView } from "../../../lib/todoBatch54";
 import { devBatchCap } from "../../../lib/todoBatchReviewAid";
-import { needRows } from "../../../lib/todoHeader54";
 import "./todoWs55.css";
 import { WsTrayHead55, SVG_EXPAND } from "./WsTrayHead55";
 import { filterLine, stripCounts } from "../../../lib/todoTrayHead55";
@@ -425,8 +425,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     });
   };
 
-  /* v54 (D1): the legend's rows, read off the same category sections as the bar */
-  const needRowsV = useMemo(() => needRows(wsSections(all, "category"), bd, now), [all, bd, now]);
+  /* v56: the header's (and the slim bar's) "+ Add a task" — one action */
+  const openAdd = () => { setMile(null); setAdding(true); };
+  /* v56: settle the page on the pinned workspace (the header scrolled away), the page's own scroller to its end */
+  const settle = () => {
+    const sc = rootRef.current?.querySelector<HTMLElement>(".wpg-scroll");
+    if (!sc) return;
+    const reduce = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    sc.scrollTo({ top: sc.scrollHeight - sc.clientHeight, behavior: reduce ? "auto" : "smooth" });
+  };
   /* v54 (D1): "Quick fill" opens the "Fill in what you sent" batch (there is one: v51.1 folds every gap into it) */
   const quickFill = () => { setTab("todo"); go("materials-batch"); setBatchView("table"); };
   /* D9: a pick is remembered (todoPrefs.batchView, one leaf) and used from then on */
@@ -803,13 +810,17 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   return (
     <div ref={rootRef} className="tws-root" data-tws="root">
       <WorkspacePageGrid className="tws-wpg" scrollLabel="To-do list" masthead={null}>
-        <div className="tws" data-tws="page">
-          {/* v54 (D1): the page header, in the Query Centre's dress — the hawk at the desk, "{n} things to do", "for {book}"
-              between rules (one book only), "+ Add a task" and "Quick fill", the ring and "What needs doing". */}
-          <WsHeader54 todo={all.length} bd={bd} rows={needRowsV} book={statBook}
-            onAdd={() => { setMile(null); setAdding(true); }}
+        <div className="tws tws56" data-tws="page">
+          {/* v56: the slim bar, first in the page so it is sticky for the whole page; it takes no space and shows once
+              the navy panel has gone under it */}
+          <WsSlim56 todo={all.length} bd={bd} book={statBook} onAdd={openAdd} />
+          {/* v56: the page header is the Query Centre's navy panel — the hawk at the desk, "{n} things to do", "for {book}"
+              between rules (one book only), "+ Add a task" and "Quick fill", the ring and "What needs doing". A segment
+              settles the page on the pinned workspace, then scrolls the tray to its group. */}
+          <WsHeader56 todo={all.length} bd={bd} book={statBook}
+            onAdd={openAdd}
             onQuickFill={all.some((x) => x.key === "materials-batch") ? () => quickFill() : null}
-            onJump={(k) => jump(k)} />
+            onJump={(k) => { settle(); jump(k); }} />
 
           <div className="tws-ws" data-tws="workspace" data-slim={slim ? "" : undefined}>
             {slim ? (

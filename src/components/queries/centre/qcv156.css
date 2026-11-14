@@ -47,24 +47,24 @@
    v153.4's three-column grid stays: the hawk over the filter column, the title block on the list's left edge, "this
    week" against the list's right edge. The doodles do not show through: the panel is solid. ────────────────────── */
 @media (min-width: 768px) {
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd {
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd {
     --ink: #fbf7f0; --mut: #f4eee5;
     margin: 8px 0 30px; padding: 22px 30px 22px 0; border-radius: 20px; background: #2a3a52; color: #f4eee5;
     box-shadow: 0 22px 34px -22px rgba(28, 19, 15, 0.55);
   }
   /* the list's columns sit the panel's 30px below it, the panel's margin alone (v153's 26px top margin would collapse
      into it on one layout and add to it on another) */
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd + .qc153-cl { margin-top: 0; }
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd h1.qc1531-t { color: #fbf7f0 !important; }
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd .qc1531-for i { background: rgba(244, 238, 229, 0.35); }
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd .qc1531-for span,
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd .qc1531-for em { color: #f4eee5; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd + .qc153-cl { margin-top: 0; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd h1.qc1531-t { color: #fbf7f0 !important; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd .qc1531-for i { background: rgba(244, 238, 229, 0.35); }
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd .qc1531-for span,
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd .qc1531-for em { color: #f4eee5; }
   /* the buttons, inverted for navy: "+ Log a query" the page's one filled button, "Record a response" a cream ring */
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd .qc1531-b--n { background: #f4eee5; color: #2a3a52; }
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd .qc1531-b--n:hover { background: #fbf7f0; }
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd .qc1531-b--g { background: transparent; color: #f4eee5; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.6); }
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd .qc1531-b--g:hover { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.9); background: rgba(244, 238, 229, 0.06); }
-  :is(.qc151.qc153, .cl27) > .qc1531-hd.qc1531-hd .qc1531-b:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd .qc1531-b--n { background: #f4eee5; color: #2a3a52; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd .qc1531-b--n:hover { background: #fbf7f0; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd .qc1531-b--g { background: transparent; color: #f4eee5; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.6); }
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd .qc1531-b--g:hover { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.9); background: rgba(244, 238, 229, 0.06); }
+  :is(.qc151.qc153, .cl27, .tws56-hdw) > .qc1531-hd.qc1531-hd .qc1531-b:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
 }
 
 /* ── §2 · "this week" as a line, straight on the navy (QcLine156): the ref's .zalt, 380 wide against the list's right
@@ -93,39 +93,39 @@
    content inset to the page content's edges. It fades and slides in over 180ms; under reduced motion it simply
    appears. Above the toolbar (z 30) and every card; under the drawers. ─────────────────────────────────────────── */
 @media (min-width: 768px) {
-  .qc151.qc153 > .qc156-slim {
+  :is(.qc151.qc153, .tws56) > .qc156-slim {
     position: sticky; top: var(--pin-cover, 12px); z-index: 40; box-sizing: border-box; height: 60px; margin-bottom: -60px;
     display: flex; align-items: center; gap: 14px;
     opacity: 0; transform: translateY(-6px); pointer-events: none; visibility: hidden;
     transition: opacity 180ms ease-out, transform 180ms ease-out, visibility 0s linear 180ms;
   }
-  .qc151.qc153 > .qc156-slim::before {
+  :is(.qc151.qc153, .tws56) > .qc156-slim::before {
     content: ""; position: absolute; z-index: -1; top: 0; bottom: 0;
     left: calc(-1 * var(--qc156-bl, 0px)); right: calc(-1 * var(--qc156-br, 0px));
     background: var(--ws-page); box-shadow: inset 0 -1px 0 #e0d9ce;
   }
-  .qc151.qc153 > .qc156-slim[data-shown] {
+  :is(.qc151.qc153, .tws56) > .qc156-slim[data-shown] {
     opacity: 1; transform: none; pointer-events: auto; visibility: visible;
     transition: opacity 180ms ease-out, transform 180ms ease-out, visibility 0s;
   }
-  .qc151 .qc156-st { margin: 0; display: flex; align-items: baseline; gap: 14px; min-width: 0; white-space: nowrap; overflow: hidden; }
-  .qc151 .qc156-st b { flex: none; font: 400 24px/1.2 var(--sp-type) !important; color: #1c130f; }
-  .qc151 .qc156-st i { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: italic 400 16px/1.2 var(--sp-serif) !important; color: #5b4f47; }
-  .qc151 .qc156-sa { flex: none; margin-left: auto; display: flex; align-items: center; }
-  .qc151 .qc156-sw { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
-  .qc151 .qc156-sw b { font: 400 18px/1 var(--sp-type) !important; color: #1c130f; }
-  .qc151 .qc156-sw em { font: italic 400 15px/1 var(--sp-serif) !important; color: #5b4f47; }
+  :is(.qc151, .tws56) .qc156-st { margin: 0; display: flex; align-items: baseline; gap: 14px; min-width: 0; white-space: nowrap; overflow: hidden; }
+  :is(.qc151, .tws56) .qc156-st b { flex: none; font: 400 24px/1.2 var(--sp-type) !important; color: #1c130f; }
+  :is(.qc151, .tws56) .qc156-st i { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: italic 400 16px/1.2 var(--sp-serif) !important; color: #5b4f47; }
+  :is(.qc151, .tws56) .qc156-sa { flex: none; margin-left: auto; display: flex; align-items: center; }
+  :is(.qc151, .tws56) .qc156-sw { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+  :is(.qc151, .tws56) .qc156-sw b { font: 400 18px/1 var(--sp-type) !important; color: #1c130f; }
+  :is(.qc151, .tws56) .qc156-sw em { font: italic 400 15px/1 var(--sp-serif) !important; color: #5b4f47; }
   .qc151 .qc156-sk { display: flex; align-items: center; gap: 5px; margin-left: 16px; white-space: nowrap; font: 600 13.5px/1 var(--sp-serif) !important; color: #2a3a52; }
-  .qc151 .qc156-sb {
+  :is(.qc151, .tws56) .qc156-sb {
     all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 40px; margin-left: 26px; padding: 0 18px;
     border-radius: 10px; background: #2a3a52; color: #fbf7f0; font: 400 16px/1 var(--sp-type) !important; white-space: nowrap;
   }
-  .qc151 .qc156-sb:hover { background: #334763; }
-  .qc151 .qc156-sb:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
-  .qc151 .qc156-sb:disabled { opacity: 0.55; cursor: default; }
+  :is(.qc151, .tws56) .qc156-sb:hover { background: #334763; }
+  :is(.qc151, .tws56) .qc156-sb:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  :is(.qc151, .tws56) .qc156-sb:disabled { opacity: 0.55; cursor: default; }
 }
 @media (min-width: 768px) and (prefers-reduced-motion: reduce) {
-  .qc151.qc153 > .qc156-slim, .qc151.qc153 > .qc156-slim[data-shown] { transition: none; transform: none; }
+  :is(.qc151.qc153, .tws56) > .qc156-slim, :is(.qc151.qc153, .tws56) > .qc156-slim[data-shown] { transition: none; transform: none; }
 }
 
 /* ── §6 · the Views panel (QcViews156) in the filter column: one white card, 18px radius, a 1px #e3dbcf ring and a
