@@ -424,12 +424,6 @@ export const Onboarding: React.FC<OnboardingProps> = ({ onComplete }) => {
                   await finishOnboarding();
                 }
               }}
-              onOpenImportDesk={async () => {
-                // Escape hatch into the Import desk: create the manuscript first (best-effort), then finish.
-                await ensureBranchBManuscript();
-                sessionStorage.setItem("scriptally_post_onboarding_tab", "import");
-                await finishOnboarding();
-              }}
               /* The import ends on the dashboard, which is the absence of a post-onboarding hatch. */
               onImportComplete={() => { void finishOnboarding(); }}
               error={branchError}

@@ -119,7 +119,7 @@ const LabFlow: React.FC<{ fx: string | null; skip: number; none: boolean; floorM
         <BranchB
           lab={lab}
           onSkip={labSpy("skip")} onExit={labSpy("back")} onSaveBook={async () => false} onEnsureManuscript={async () => "lab-ms"}
-          onAddByHand={labSpy("byhand")} onOpenImportDesk={labSpy("importDesk")}
+          onAddByHand={labSpy("byhand")}
           onExitMode={setExit} onImporting={setImporting} onHandoff={() => setHandingOff(true)}
           onImportComplete={(_o, destination) => { labSpy("importComplete")(destination); setArrived(true); }}
         />
@@ -143,8 +143,7 @@ const LabPhotos: React.FC = () => {
         <CaptureFork
           onChooseFile={() => flowRef.current?.chooseFile()} onDropFile={(f) => flowRef.current?.dropFile(f)}
           onUsePhotos={() => flowRef.current?.openPhotos()} onDropPhotos={(fs) => flowRef.current?.dropPhotos(fs)}
-          onUploadTemplate={labSpy("templatePicker")} onAddByHand={labSpy("byhand")} onBack={labSpy("back")}
-          onNothingYet={labSpy("later")} onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
+          onBack={labSpy("back")} onNothingYet={labSpy("later")} onDownloadTemplate={labSpy("download")}
         />
       )}
     </LabSetup>
@@ -231,9 +230,8 @@ export const OnbLab: React.FC = () => {
     return (
       <LabSetup flow="B" at="list" manuscript plan={tier === "pro" ? UserPlan.PRO : UserPlan.FREE}>
         <CaptureFork
-          onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onUsePhotos={labSpy("usePhotos")} onDropPhotos={labSpy("pickPhotos")} onUploadTemplate={labSpy("templatePicker")}
-          onAddByHand={labSpy("byhand")} onBack={labSpy("back")} onNothingYet={labSpy("skip")}
-          onOpenImportDesk={labSpy("importDesk")} onDownloadTemplate={labSpy("download")}
+          onChooseFile={labSpy("picker")} onDropFile={labSpy("pickFile")} onUsePhotos={labSpy("usePhotos")} onDropPhotos={labSpy("pickPhotos")}
+          onBack={labSpy("back")} onNothingYet={labSpy("skip")} onDownloadTemplate={labSpy("download")}
         />
       </LabSetup>
     );

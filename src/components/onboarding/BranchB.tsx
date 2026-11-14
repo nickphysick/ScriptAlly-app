@@ -4,9 +4,8 @@
  *
  * Branch B — "Already querying":
  *   B2 · The book you're querying — full manuscript field set; status set to Querying silently.
- *   B3 · Bring it across — Smart Import primary (upload → AI mapping → review → confirm),
- *        "Add them by hand" secondary, downloadable template, Import-desk escape hatch, and a
- *        template-first fallback layout when the mapping call fails.
+ *   B3 · Bring it across — two doors (two-door import v1): "I have a list" (one picker; the file's
+ *        headings decide whether Smart Import reads it) and "I'm starting fresh" (the dashboard).
  * The review screen matches scriptally-smart-import-review.html; nothing writes before confirm.
  *
  * Since onboarding v5 part 3 the import itself is `components/import/ImportFlow` — the same flow the
@@ -36,11 +35,8 @@ export interface BranchBProps {
   /** Create-or-reuse the manuscript from the held details, returning its id (null if it couldn't be
    *  created). Idempotent — call it at the commit ending; every imported query attaches to this id. */
   onEnsureManuscript: () => Promise<string | null>;
-  /** Pre-selected capture option: deep/interest → "smart", early → "byhand". */
-  /** "Add them by hand" — drops into the existing add-agents flow. */
+  /** "Add them by hand", offered by the import's dead ends — drops into the existing add-agents flow. */
   onAddByHand: () => void;
-  /** Escape hatch — finish onboarding into the Import desk (ImportCsv). */
-  onOpenImportDesk: () => void;
   /** Import committed — parent finishes onboarding to the dashboard. */
   /**
    * Import committed — the parent finishes onboarding.
@@ -98,7 +94,7 @@ export const exitModeFor = (screen: string): ExitMode =>
 type B3Screen = "ack" | "book" | "list";
 
 export const BranchB: React.FC<BranchBProps> = ({
-  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, onAddByHand, onOpenImportDesk, onImportComplete, error, onStage, onExitMode, onImporting, onHandoff, lab, stage = "early", stageTitle = "", name, startAt,
+  onSkip, onExit, onSaveBook, initialBook, onEnsureManuscript, onAddByHand, onImportComplete, error, onStage, onExitMode, onImporting, onHandoff, lab, stage = "early", stageTitle = "", name, startAt,
 }) => {
   const entitlement = useSmartImportEntitlement();
 
@@ -166,11 +162,8 @@ export const BranchB: React.FC<BranchBProps> = ({
           onDropFile={(f) => flowRef.current?.dropFile(f)}
           onUsePhotos={() => flowRef.current?.openPhotos()}
           onDropPhotos={(fs) => flowRef.current?.dropPhotos(fs)}
-          onUploadTemplate={() => flowRef.current?.chooseTemplate()}
-          onAddByHand={onAddByHand}
           onBack={() => setScreen("book")}
           onNothingYet={onSkip}
-          onOpenImportDesk={onOpenImportDesk}
         />
       )}
     </>

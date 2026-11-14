@@ -120,8 +120,9 @@ describe("Phase 4 · the hatch that actually sends a new account elsewhere", () 
        B's manual add) now write no hatch at all, because the dashboard is the absence of one. */
     const agents = onboarding.match(new RegExp(`sessionStorage\\.setItem\\("${KEY}", "agents"\\)`, "g")) ?? [];
     expect(agents.length, "no exit writes the Contact-list hatch").toBe(0);
-    /* and the other two go elsewhere, so "the hatch always means agents" is not the claim */
-    expect(onboarding).toContain(`sessionStorage.setItem("${KEY}", "import")`);
+    /* RE-POINTED (two-door import v1): the import desk's exit went with the fork's matcher
+       footnote, so no set-up exit writes a hatch now — every one ends on the dashboard. */
+    expect(onboarding).not.toContain(`sessionStorage.setItem("${KEY}", "import")`);
     /* RE-POINTED (onboarding v5, baked decision 4): the "Smart Import already used" card no longer
        offers Upgrade — it leads with the template — so set-up has no exit to the plans page and
        this hatch value is gone with the prop that wrote it. */
@@ -136,8 +137,9 @@ describe("Phase 4 · the hatch that actually sends a new account elsewhere", () 
        dashboard silently, which is the one failure mode this key has */
     const values = [...onboarding.matchAll(new RegExp(`setItem\\("${KEY}", "([^"]+)"\\)`, "g"))]
       .map((m) => m[1]);
-    /* v60: only the import desk's exit writes one now */
-    expect(values.length).toBeGreaterThan(0);
+    /* RE-POINTED (two-door import v1): the import desk's exit was the last writer, and it went
+       with the fork's matcher footnote. Should one come back, every value must still resolve. */
+    expect(values).toEqual([]);
     /* the bridge's own case labels — a hatch value with no case falls through to the dashboard
        silently, which is the one failure mode this key has */
     for (const v of new Set(values)) {

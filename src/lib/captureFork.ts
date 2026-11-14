@@ -2,89 +2,64 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * The capture fork — three ways to bring an existing list across (ref:
- * design-refs/scriptally-onboarding-fork.html). Pure: copy, tags and the primary's label, with no
- * React and no db, so the wording and the button contract can be locked without rendering.
- *
- * ⚠️ THE PRIMARY'S LABEL CHANGES WITH THE CHOICE, AND THAT IS THE WHOLE POINT OF DERIVING IT.
- * A fixed "Continue" would send a writer who picked "Add them by hand" into a file picker, and a
- * writer who picked the template into a form. The button says what it will do.
- *
- * ⚠️ THE TAGS STATE A FACT ABOUT COST, NOT A RECOMMENDATION. "Uses your free taster" is the honest
- * thing to say beside Smart Import when the taster is one-shot; "Always free, no limit" is what
- * makes the template a real alternative rather than a consolation. The app reports; it does not
- * appraise — so "Best for a messy list" describes the INPUT, never the writer.
+ * The capture fork — two doors (two-door import v1; ref design-refs/two-door-import-v1/): "I have a
+ * list" and "I'm starting fresh". Pure: copy and the button contract, with no React and no db, so the
+ * wording can be locked without rendering.
  */
 
-export type CaptureOption = "smart" | "template" | "byhand";
+export type CaptureOption = "list" | "fresh";
 
-/** Fixed order: the three tiles are peers, not a default with two fallbacks. */
-export const CAPTURE_OPTIONS: CaptureOption[] = ["smart", "template", "byhand"];
+/** Fixed order (two-door import v1): a writer either has a list or is starting fresh. The template is
+ *  not a door of its own: a file that already uses our column headings is recognised on upload
+ *  (lib/importReadRoute) and read straight in, with no Smart Import run. */
+export const CAPTURE_OPTIONS: CaptureOption[] = ["list", "fresh"];
 
 /**
- * One tile (onboarding v5). ⚠️ THERE IS NO `primaryLabel`, NO `fit` TAG AND NO REVEAL ANY MORE. The
- * fork was a radio group with one shared primary whose label changed with the choice; it is three
- * tiles now, each with its own buttons, so there is nothing to choose before acting. The fact line
- * states COST and nothing else — no "recommended", no "best for".
+ * One door. ⚠️ THERE IS NO `primaryLabel`, NO `fit` TAG AND NO REVEAL. Each door has its own
+ * buttons, so there is nothing to choose before acting. The fact line states COST and nothing else.
  */
 export interface CaptureChoice {
   key: CaptureOption;
   title: string;
-  /** Three short lines (onboarding v9): what it takes, what it does, what it asks of you. */
+  /** Three short lines: what it takes, what it does, what it asks of you. */
   lines: [string, string, string];
 }
 
-export const CAPTURE_HEADING = "How shall we capture your existing agents & queries?";
-export const CAPTURE_SUB =
-  "Whichever you pick, you can add, import and edit agents and queries at any time afterwards. " +
-  "Nothing here is permanent.";
-
-/** The quiet exit for a writer with nothing to bring across. */
-export const CAPTURE_LATER = "I've nothing to capture yet";
-
-/** The line under the tiles: a spreadsheet with unusual columns belongs on the Import page. */
-export const CAPTURE_ESCAPE_PREFIX = "Keep a spreadsheet with unusual columns? You can ";
-export const CAPTURE_ESCAPE_LINK = "match them up yourself";
-export const CAPTURE_ESCAPE_SUFFIX = " on the Import page once you're in.";
+export const CAPTURE_HEADING = "How shall we capture your list?";
+export const CAPTURE_SUB = "Bring the list you already keep, or start a new one here.";
 
 export const CAPTURE_CHOICES: Record<CaptureOption, CaptureChoice> = {
-  smart: {
-    key: "smart",
-    title: "Smart import.",
-    /* smart-import-photos-v1: the first line widens to name photos; the other two are unchanged. */
-    lines: ["A spreadsheet, or photos of your list", "QueryHawk reads it for you", "You check it before anything's saved"],
+  list: {
+    key: "list",
+    title: "I have a list",
+    lines: ["A spreadsheet, a document, or a photo of your notebook", "Smart Import reads it into your database", "You answer a few questions, only where it matters"],
   },
-  template: {
-    key: "template",
-    title: "Our template.",
-    lines: ["A ready-made sheet to fill in", "Set columns, read exactly, every time", "Upload it back whenever you're done"],
-  },
-  byhand: {
-    key: "byhand",
-    title: "Add by hand.",
-    lines: ["Straight to the agent form", "Quickest for a handful of agents", "Add more at any time"],
+  fresh: {
+    key: "fresh",
+    title: "I'm starting fresh",
+    lines: ["Add agents as you find them", "Log each query when you send it", "Nothing to prepare"],
   },
 };
 
-/** Each tile's buttons, in order. The first is the tile's main action. */
-export const CAPTURE_SMART_ACTION = "Import a spreadsheet";
-/** The Smart import tile's second button (smart-import-photos-v1): the same import, the same
- *  allowance and the same review, read from photos of the list. */
+/** Door one's buttons, in order. The first is the page's one filled navy button. */
+export const CAPTURE_UPLOAD_ACTION = "Upload a file";
+/** Door one's second button: the same door, read from photos of the list. */
 export const CAPTURE_PHOTOS_ACTION = "Use photos";
-export const CAPTURE_TEMPLATE_DOWNLOAD = "Download the template";
-export const CAPTURE_TEMPLATE_UPLOAD = "Upload my sheet";
-export const CAPTURE_HAND_ACTION = "Add an agent";
+/** Door one's caption, under its buttons. */
+export const CAPTURE_LIST_CAPTION = "It doesn't need tidying first.";
+/** Door two's one button: what "I've nothing to capture yet" did — set-up ends on the dashboard. */
+export const CAPTURE_FRESH_ACTION = "Take me to my dashboard";
 
+/** The quiet line under the doors: the headings sheet, for a writer who keeps a spreadsheet. */
+export const CAPTURE_QUIET_LINE = "Keeping your list in a spreadsheet? Use our column headings and it's read straight in.";
+export const CAPTURE_QUIET_LINK = "Download the headings";
 
 /**
- * The fact line under a tile: what it costs, and nothing else. Smart import's depends on the
- * writer's tier, read from the entitlement — never a guess, and never hard-coded to free.
+ * Door one's fact line: what it costs, and nothing else. A headings file costs nothing, but the
+ * door's main read is Smart Import, and that is what the line states (plan rules v1: one per account).
  */
 export function captureFact(option: CaptureOption): string {
-  /* plan rules v1: one Smart Import per account, on every plan */
-  if (option === "smart") return "Uses your one Smart Import";
-  if (option === "template") return "Always free";
-  return "Always free · Ends set-up";
+  return option === "list" ? "Uses your one Smart Import" : "";
 }
 
 /** The file types the picker accepts, and so the only ones a drop is taken for. */

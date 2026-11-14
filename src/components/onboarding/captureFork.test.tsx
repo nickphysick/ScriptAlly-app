@@ -1,5 +1,5 @@
 /**
- * "Your list" (onboarding v5, part 1): three tiles, each with its own buttons — and the confirm.
+ * "Your list": two doors (two-door import v1) — and the confirm.
  *
  * REWRITTEN with the step it locks. The fork was a radio group with a reveal and one shared
  * primary; this file used to assert exactly that (three radios, one checked, a primary whose label
@@ -15,8 +15,8 @@ import { fileURLToPath } from "url";
 import { renderToStaticMarkup } from "react-dom/server";
 import * as lib from "../../lib/captureFork";
 import {
-  CaptureOption, CAPTURE_OPTIONS, CAPTURE_CHOICES, CAPTURE_HEADING, CAPTURE_SUB, CAPTURE_LATER,
-  CAPTURE_ESCAPE_PREFIX, CAPTURE_ESCAPE_LINK, CAPTURE_ESCAPE_SUFFIX, captureFact, acceptsDroppedFile,
+  CaptureOption, CAPTURE_OPTIONS, CAPTURE_CHOICES, CAPTURE_HEADING, CAPTURE_SUB,
+  CAPTURE_QUIET_LINE, CAPTURE_QUIET_LINK, captureFact, acceptsDroppedFile,
 } from "../../lib/captureFork";
 import { CaptureFork } from "./CaptureFork";
 import {
@@ -27,84 +27,90 @@ import { confirmFileLead } from "../../lib/smartImportConfirm";
 const here = dirname(fileURLToPath(import.meta.url));
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/'/g, "&#x27;").replace(/"/g, "&quot;");
 const noop = () => {};
-const fork = (_was: CaptureOption) =>
+const fork = (_was?: CaptureOption) =>
   renderToStaticMarkup(
-    <CaptureFork onChooseFile={noop} onDropFile={noop} onUsePhotos={noop} onDropPhotos={noop} onUploadTemplate={noop}
-                 onAddByHand={noop} onBack={noop} onNothingYet={noop} onOpenImportDesk={noop} onDownloadTemplate={noop} />,
+    <CaptureFork onChooseFile={noop} onDropFile={noop} onUsePhotos={noop} onDropPhotos={noop}
+                 onBack={noop} onNothingYet={noop} onDownloadTemplate={noop} />,
   ).replace(/<!-- -->/g, "");
-const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ");
+const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").replace(/&#x27;/g, "'");
 
-describe("W1 the fork's words", () => {
-  it("the heading and subline are the built ones, verbatim", () => {
-    expect(CAPTURE_HEADING).toBe("How shall we capture your existing agents & queries?");
-    const h = fork("smart");
+/* REWRITTEN (two-door import v1): "Your list" is two doors. The template tile, the by-hand tile, the
+   "I've nothing to capture yet" link and the matcher footnote are gone; the template is a file the
+   picker recognises (lib/importReadRoute), offered here only as the quiet headings line. */
+describe("W1 the fork's words (two-door import v1)", () => {
+  it("the heading and subline are the mock's, verbatim", () => {
+    expect(CAPTURE_HEADING).toBe("How shall we capture your list?");
+    expect(CAPTURE_SUB).toBe("Bring the list you already keep, or start a new one here.");
+    const h = fork();
     expect(h).toContain(`<h1 class="sf-title">${esc(CAPTURE_HEADING)}</h1>`);
     expect(h).toContain(`<p class="sf-sub">${esc(CAPTURE_SUB)}</p>`);
   });
 
-  it("the tile titles end with a full stop, as the Contact list's tiles do", () => {
-    expect(CAPTURE_OPTIONS.map((k) => CAPTURE_CHOICES[k].title)).toEqual(["Smart import.", "Our template.", "Add by hand."]);
+  it("two doors, in order, with the table's titles and bullets", () => {
+    expect(CAPTURE_OPTIONS).toEqual(["list", "fresh"]);
+    expect(CAPTURE_OPTIONS.map((k) => CAPTURE_CHOICES[k].title)).toEqual(["I have a list", "I'm starting fresh"]);
+    expect(CAPTURE_CHOICES.list.lines).toEqual(["A spreadsheet, a document, or a photo of your notebook", "Smart Import reads it into your database", "You answer a few questions, only where it matters"]);
+    expect(CAPTURE_CHOICES.fresh.lines).toEqual(["Add agents as you find them", "Log each query when you send it", "Nothing to prepare"]);
+    expect(fork().match(/<li>/g) ?? []).toHaveLength(6);
   });
 
-  /* RE-POINTED (onboarding v9): each tile's paragraph became three short lines. */
-  it("each tile states three short lines, and no paragraph", () => {
-    /* RE-POINTED (smart-import-photos-v1): the first line widens to name photos. */
-    expect(CAPTURE_CHOICES.smart.lines).toEqual(["A spreadsheet, or photos of your list", "QueryHawk reads it for you", "You check it before anything's saved"]);
-    expect(CAPTURE_CHOICES.template.lines).toEqual(["A ready-made sheet to fill in", "Set columns, read exactly, every time", "Upload it back whenever you're done"]);
-    expect(CAPTURE_CHOICES.byhand.lines).toEqual(["Straight to the agent form", "Quickest for a handful of agents", "Add more at any time"]);
-    const h = fork("smart");
-    expect(h.match(/<li>/g) ?? []).toHaveLength(9);
-    expect(h).not.toContain("sf-tilep");
-  });
-
-  it("each tile's buttons carry the table's labels", () => {
-    const h = fork("smart");
-    for (const label of ["Import a spreadsheet", "Use photos", "Download the template", "Upload my sheet", "Add an agent"]) {
+  it("each door's buttons and the caption carry the table's words", () => {
+    const h = fork();
+    for (const label of ["Upload a file", "Use photos", "Take me to my dashboard", "Download the headings"]) {
       expect(h).toMatch(new RegExp(`<button[^>]*>${label}</button>`));
     }
-    expect(h, "the old shared primaries are gone").not.toMatch(/Continue to review|Take me to the agent form|Upload my filled-in sheet/);
+    expect(text(h)).toContain("It doesn't need tidying first.");
+    expect(h, "the three-tile buttons are gone").not.toMatch(/Import a spreadsheet|Download the template|Upload my sheet|Add an agent/);
   });
 
-  it("the line under the tiles names the Import page", () => {
-    expect(CAPTURE_ESCAPE_PREFIX + CAPTURE_ESCAPE_LINK + CAPTURE_ESCAPE_SUFFIX)
-      .toBe("Keep a spreadsheet with unusual columns? You can match them up yourself on the Import page once you're in.");
-    /* Static markup escapes the apostrophe; the words are compared as a reader sees them. */
-    const seen = text(fork("smart")).replace(/&#x27;/g, "'");
-    expect(seen).toContain("on the Import page once you're in.");
-    expect(seen).toContain(CAPTURE_LATER);
+  it("the quiet line under the doors: one sentence and one link", () => {
+    expect(CAPTURE_QUIET_LINE).toBe("Keeping your list in a spreadsheet? Use our column headings and it's read straight in.");
+    expect(CAPTURE_QUIET_LINK).toBe("Download the headings");
+    const h = fork();
+    const at = h.indexOf('data-sf="quiet"');
+    expect(at).toBeGreaterThan(h.indexOf('data-tile="fresh"'));
+    expect(text(h)).toContain(CAPTURE_QUIET_LINE);
+  });
+
+  it("the old exits are gone from the fork", () => {
+    const t = text(fork());
+    expect(t).not.toContain("I've nothing to capture yet");
+    expect(t).not.toMatch(/match them up yourself|unusual columns/);
+    for (const gone of ["CAPTURE_LATER", "CAPTURE_ESCAPE_PREFIX", "CAPTURE_ESCAPE_LINK", "CAPTURE_ESCAPE_SUFFIX", "CAPTURE_TEMPLATE_UPLOAD", "CAPTURE_HAND_ACTION"]) {
+      expect(gone in lib, `${gone} is deleted`).toBe(false);
+    }
   });
 
   it("never grades the writer, and never congratulates", () => {
-    const all = text(fork("smart")) + text(fork("byhand"));
+    const all = text(fork());
     for (const word of [/\brecommended\b/i, /\bbest for\b/i, /\bgreat\b/i, /\bwell done\b/i, /\bperfect\b/i, /\beasy\b/i, /\bsimply\b/i]) {
       expect(all, String(word)).not.toMatch(word);
     }
   });
 });
 
-describe("K1 three tiles, no radio, no ring", () => {
-  it("draws three tiles and no radio group", () => {
-    const h = fork("smart");
-    expect(h.match(/<section class="sf-tile /g) ?? []).toHaveLength(3);
+describe("K1 two doors, one filled navy button, no ring (lock D1's unit half)", () => {
+  it("draws two doors and no radio group", () => {
+    const h = fork();
+    expect(h.match(/<section class="sf-tile /g) ?? []).toHaveLength(2);
     expect(h).not.toContain('role="radio"');
-    expect(h).not.toContain('role="radiogroup"');
     expect(h).not.toContain("aria-pressed");
-    expect(h).not.toContain("aria-checked");
   });
 
-  /* RE-POINTED (onboarding v9): no tile is pre-selected, so there is no ring and no drop zone
-     hanging from the ringed tile. Each tile opens on an illustration slot instead. */
-  it("no tile is ringed on arrival, and each opens on its illustration slot", () => {
-    const h = fork("smart");
+  it("exactly one filled button: Upload a file; every other button is a line or a link", () => {
+    const buttons = [...fork().matchAll(/<button[^>]*class="([^"]*)"[^>]*>([^<]*)<\/button>/g)];
+    const filled = buttons.filter((m) => /\bsf-btn\b/.test(m[1]) && !/sf-btn--line/.test(m[1]));
+    expect(filled.map((m) => m[2])).toEqual(["Upload a file"]);
+  });
+
+  it("no door is ringed on arrival, and each opens on its illustration slot", () => {
+    const h = fork();
     expect(h).not.toContain("is-ringed");
-    expect(h).not.toContain("data-ringed");
-    expect(h).not.toContain('data-sf="drop"');
-    expect([...h.matchAll(/data-slot="fork-(\w+)"/g)].map((m) => m[1])).toEqual(["smart", "template", "byhand"]);
-    expect(text(h), "no words promise a drop").not.toMatch(/drop your file/i);
+    expect([...h.matchAll(/data-slot="fork-(\w+)"/g)].map((m) => m[1])).toEqual(["list", "fresh"]);
   });
 
-  it("every tile's buttons are live", () => {
-    expect(fork("smart")).not.toMatch(/<button[^>]*disabled/);
+  it("every button is live", () => {
+    expect(fork()).not.toMatch(/<button[^>]*disabled/);
   });
 
   it("a drop is taken only for a type the picker offers", () => {
@@ -112,21 +118,16 @@ describe("K1 three tiles, no radio, no ring", () => {
     for (const no of ["agents.pdf", "notes.txt", "csv", "sheet.numbers"]) expect(acceptsDroppedFile(no), no).toBe(false);
   });
 
-  it("the Smart import tile takes a dropped file itself", () => {
+  it("door one takes a dropped file itself", () => {
     const src = readFileSync(resolve(here, "CaptureFork.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     expect(src).toMatch(/onDrop: \(e\) =>/);
-    expect(src).toMatch(/<Tile option="smart"[^>]*drop=\{dropProps\}/);
-    /* RE-POINTED (smart-import-photos-v1): a spreadsheet in the drop is taken as before (the first
-       one); with none, the images go to the photos screen. The rule is classifyDrop's, tested there. */
+    expect(src).toMatch(/<Door option="list"[^>]*drop=\{dropProps\}/);
     expect(src).toMatch(/classifyDrop\(Array\.from\(e\.dataTransfer\?\.files \?\? \[\]\)\)/);
     expect(src).toMatch(/if \(drop\.kind === "sheet"\) onDropFile\(drop\.file\)/);
     expect(src).toMatch(/else if \(drop\.kind === "photos"\) onDropPhotos\(drop\.files\)/);
   });
 
-  /* Part 3 moved the pickers and their handlers into ImportFlow; the fork reaches them through the
-     flow's ref. The law is unchanged (each press has its own handler) and now spans the seam, so
-     both halves are asserted. */
-  it("BranchB wires each press to its own handler", () => {
+  it("BranchB wires each press to its own handler, and door two to what 'nothing yet' did", () => {
     const b = readFileSync(resolve(here, "BranchB.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     const f = readFileSync(resolve(here, "../import/ImportFlow.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     const at = b.indexOf("<CaptureFork");
@@ -136,38 +137,17 @@ describe("K1 three tiles, no radio, no ring", () => {
     expect(f).toContain("chooseFile: () => fileInputRef.current?.click(),");
     expect(call).toContain("onDropFile={(f) => flowRef.current?.dropFile(f)}");
     expect(f).toContain("dropFile: pickFile,");
-    expect(call).toContain("onUploadTemplate={() => flowRef.current?.chooseTemplate()}");
-    expect(f).toContain("chooseTemplate: () => templateInputRef.current?.click(),");
-    expect(call).toContain("onAddByHand={onAddByHand}");
     expect(call).toContain("onNothingYet={onSkip}");
-    expect(call).not.toContain("ringed=");
-    expect(call).not.toContain("tier="); // plan rules v1: the fork no longer takes a tier
+    expect(call).not.toMatch(/onUploadTemplate|onAddByHand|onOpenImportDesk/);
     expect(f).toMatch(/data-picker="smart"[\s\S]*?pickFile\(f\)/);
-    expect(f).toMatch(/data-picker="template"[\s\S]*?pickTemplateFile\(f\)/);
   });
 });
 
-describe("K2 the fact line states cost — one Smart Import per account, on every plan (plan rules v1)", () => {
-  it("Smart import states the one import", () => {
-    expect(captureFact("smart")).toBe("Uses your one Smart Import");
-    expect(fork("smart")).toContain('<p class="sf-fact" data-fact="smart">Uses your one Smart Import</p>');
-    expect(fork("smart")).not.toContain("this month");
-  });
-  it("the other two are always free", () => {
-    expect(captureFact("template")).toBe("Always free");
-    expect(captureFact("byhand")).toBe("Always free · Ends set-up");
-  });
-});
-
-describe("what lost its last reader is deleted, not left", () => {
-  it("the lib no longer exports the reveal's copy, the fit tags or the shared primary's label", () => {
-    for (const gone of ["capturePrimaryLabel", "TEMPLATE_STEPS", "TEMPLATE_TASTER_NOTE", "HAND_NOTE"]) {
-      expect(gone in lib, `${gone} is deleted`).toBe(false);
-    }
-    const src = readFileSync(resolve(here, "../../lib/captureFork.ts"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
-    expect(src).not.toMatch(/primaryLabel\s*:/);
-    expect(src).not.toMatch(/kind:\s*"fit"/);
-    expect(src).not.toMatch(/\btags\b/);
+describe("K2 the fact line states cost — one Smart Import per account (plan rules v1)", () => {
+  it("door one states the one import; door two has no fact line", () => {
+    expect(captureFact("list")).toBe("Uses your one Smart Import");
+    expect(fork()).toContain('<p class="sf-fact" data-fact="list">Uses your one Smart Import</p>');
+    expect(fork()).not.toContain('data-fact="fresh"');
   });
 });
 
