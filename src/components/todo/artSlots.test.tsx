@@ -47,6 +47,8 @@ const NAMES: ArtSlotName[] = [
   "dash-scout-binoculars",
   // Dashboard feed v1: the Top tip's header — a real asset
   "dash-mentor-pointing",
+  // RE-POINTED (Workspace headers v1, 14 Nov): the navy header's drawing on six workspace pages — placeholders, 190 × 142
+  "responses-header", "analytics-header", "discover-header", "comps-header", "versions-header", "manuscripts-header",
 ];
 
 describe("⚠️ ONE component, TEN slots — the briefs are the contract", () => {
