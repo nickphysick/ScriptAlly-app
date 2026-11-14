@@ -74,7 +74,11 @@ test.setTimeout(240_000);
 test.beforeAll(() => { if (CAPTURE) fx("--seed"); });
 
 for (const vp of SIZES) {
-  test(`QC149-L0 · Versions unchanged by the extraction @ ${vp.width}`, async ({ browser, baseURL }) => {
+  /* RETIRED (Workspace headers v1, 14 Nov): its subject is the Versions page's PageHeaderCard (`[data-vv2="title"]`, `#hbT`,
+     its tag, body and art) rendering as it did before the v149 extraction. The Versions page no longer renders
+     PageHeaderCard — it opens on the shared navy header — so every part it compares is gone. Successor:
+     tests/e2e/wsHeaders.measure.ts H1 + H7 "versions". */
+  test.skip(`QC149-L0 · Versions unchanged by the extraction @ ${vp.width}`, async ({ browser, baseURL }) => {
     mkdirSync(DIR, { recursive: true });
     const ctx = await ctxFor(browser, baseURL!, vp);
     const page = await ctx.newPage();

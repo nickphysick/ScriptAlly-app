@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Versions v2 — "{n} versions saved" (P3; the ref's `lanes()`): the in-use version pinned first as a navy index card,
+ * Versions v2 — "Your versions" (P3; "{n} versions saved" until Workspace headers v1 moved the count to the header; the ref's `lanes()`): the in-use version pinned first as a navy index card,
  * then the rest, newest or oldest first; search over names and changes; three icon actions per card; archived
  * versions folded at the foot.
  *
@@ -55,12 +55,12 @@ export const V2List: React.FC<V2ListProps> = ({ ms, m, locked, onOpen, onEdit, o
   const byId = new Map(m.versions.map((v) => [v.id, v]));
   const origWords = ms.wordCount > 0 ? ms.wordCount : 0;
   const wordsOf = (v: V2Version) => (v.original ? origWords : v.wordCount ?? 0);
-  const n = live.length;
 
   return (
     <section className="cx-sec first is-full" id="secTiles" data-vv2="list-sec" aria-labelledby="msRH">
       <div className="cx-sh db-sh">
-        <h2 id="msRH"><span id="vCnt">{n}</span> <span id="vWord">{n === 1 ? "version" : "versions"}</span> saved</h2>
+        {/* Workspace headers v1: the header says the count; the panel's heading names the list */}
+        <h2 id="msRH">Your versions</h2>
         <label className="db-s">
           <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="7" cy="7" r="4.6" fill="none" stroke="currentColor" strokeWidth={1.5} /><path d="M10.5 10.5l3 3" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" /></svg>
           <input id="dbQ" type="search" placeholder="Search names and changes" aria-label="Search versions" value={query} onChange={(e) => setQuery(e.target.value)} disabled={locked} data-vv2="search" />

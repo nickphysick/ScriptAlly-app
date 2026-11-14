@@ -43,10 +43,9 @@ import {
 } from "../../lib/pageChecklist";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { PageChecklist } from "../shell/guide/PageChecklist";
-import { PageHeaderCard } from "../shared/PageHeaderCard";
+import { WorkspaceNavyHeader, WsnhFigure, WsnhWords } from "../shell/WorkspaceNavyHeader";
 import { PageAlertBanner } from "../shared/PageAlertBanner";
-import heroArt from "../../assets/manuscripts/hero-archivist.png";
-import { agentLine, today } from "./v2Bits";
+import { agentLine, msDay, shortDay, today } from "./v2Bits";
 import { V2List } from "./V2List";
 import { V2Tree } from "./V2Tree";
 import { V2Tracking } from "./V2Tracking";
@@ -107,7 +106,7 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
     /* v2.2 A3 — "Add a version" points at the title card's button, or at the empty state's dashed row when that is the
        one on screen and the title card's has scrolled away */
     const onScreen = (e: HTMLElement | null) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.height > 0 && r.bottom > 0 && r.top < innerHeight; };
-    const titleBtn = page?.querySelector<HTMLElement>('[data-vv2="title"] [data-vv2="new"]') ?? null;
+    const titleBtn = page?.querySelector<HTMLElement>('[data-wsnh-page="versions"] [data-vv2="new"]') ?? null;
     const dashed = page?.querySelector<HTMLElement>('button[data-vv2="first"]') ?? null;
     const el = k === "add" ? (dashed && !onScreen(titleBtn) && onScreen(dashed) ? dashed : titleBtn)
       : k === "edit" ? rowsEl[0]?.querySelector<HTMLElement>('[data-vv2="edit"]') ?? null
@@ -231,6 +230,14 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
   const attrs = { "data-page": "v", "data-tier": locked ? "free" : "pro", "data-ms": fresh ? "fresh" : "full" };
   const state = !collectionsReady ? "loading" : locked ? "locked" : fresh ? (msQueries.length ? "pre" : "fresh") : "filled";
 
+  /* the header's figures, as the list shows them: the live versions' count (the list's heading counted them), and the
+     version in use with its queries sent and the day of the last (V2List's own `f.n` and `msDay(f.lastMs)`) */
+  const liveN = m.live.length;
+  const vTitle = !ms ? "No manuscript yet" : fresh ? "No versions yet" : `${liveN} ${liveN === 1 ? "version" : "versions"}`;
+  const inUseV = !fresh ? m.versions.find((v) => v.id === m.inUse) ?? null : null;
+  const inUseF = inUseV ? m.facts.get(inUseV.id) : undefined;
+  const inUse = inUseV ? { name: inUseV.name, sent: inUseF?.n ?? 0, last: inUseF?.n ? shortDay(msDay(inUseF.lastMs)) : "" } : null;
+
   const dv = lastDrawer.current;
   const drawerV = dv?.kind === "version" ? m.versions.find((v) => v.id === dv.id) ?? null : null;
   const formEdit = dv?.kind === "form" && dv.edit ? m.versions.find((v) => v.id === dv.edit) ?? null : null;
@@ -247,12 +254,25 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
             quiet={!!drawer || !!modal} empty={fresh} />
         ) : null}
         <div className="ms25">
-          {/* v2.2 A — the title card (S31): replaces the living header, its Compare and "?" buttons and the donut */}
-          <PageHeaderCard classPrefix="hb" titleId="hbT" data={{ "data-vv2": "title" }} titleData={{ "data-page-title": "true" }}
-            title="Versions" tag="Pro" art={heroArt}
-            body={<>Save each version of <b>{ms?.title ?? "your manuscript"}</b> as it changes. QueryHawk records which one went out with every query, so you can see which gets agents asking for more.</>}
-            primary={{ label: fresh ? "+ Save your first version" : "+ New version", data: { "data-vv2": "new" }, disabled: !ms || locked, onClick: () => openForm(null) }}
-            secondary={{ label: "How it works", data: { "data-vv2": "how" }, onClick: () => setModal({ kind: "how" }) }} />
+          {/* Workspace headers v1 (14 Nov) — the shared navy header (it replaced v2.2 A's title card): "<n> versions"
+              of the book; New version and How it works; on the right the version in use, as the list pins it */}
+          <WorkspaceNavyHeader page="versions" art="versions-header" loading={!collectionsReady}
+            title={vTitle}
+            forLine={ms ? { lead: "of", text: ms.title } : null}
+            actions={<>
+              <button type="button" className="qc1531-b qc1531-b--n" data-vv2="new" disabled={!ms || locked} onClick={() => openForm(null)}>{fresh ? "+ Save your first version" : "+ New version"}</button>
+              <button type="button" className="qc1531-b qc1531-b--g" data-vv2="how" onClick={() => setModal({ kind: "how" })}>How it works</button>
+            </>}
+            right={inUse ? <>
+              <WsnhFigure>{inUse.sent}</WsnhFigure>
+              <WsnhWords lead="Going out with new queries" name={<span data-vv2="hd-use">{inUse.name}</span>}
+                sub={inUse.sent ? <><b data-vv2="hd-sent">{inUse.sent}</b> {inUse.sent === 1 ? "query" : "queries"} sent{inUse.last ? ` · last ${inUse.last}` : ""}</> : "Not sent yet"} />
+            </> : null}
+            bar={ms ? {
+              title: vTitle,
+              aside: inUse ? <><b>{inUse.name}</b><em>goes out with new queries</em></> : null,
+              button: { label: fresh ? "+ Save your first version" : "+ New version", onClick: () => openForm(null), disabled: locked },
+            } : null} />
 
           <div className="mc lockwrap">
             {locked ? (

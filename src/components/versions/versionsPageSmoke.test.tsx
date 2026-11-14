@@ -50,9 +50,11 @@ describe("/manuscripts/versions renders", () => {
     const h = render();
     const t = text(h);
     expect(h).toContain('data-state="filled"');
-    /* v2.2 A — the title card replaces the living header and its donut */
-    expect(h).toContain('data-vv2="title"');
-    expect(t).toContain("Save each version of Harbour of Glass as it changes.");
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the title card is the shared navy header — the count, "of {book}" */
+    expect(h).toContain('data-wsnh-page="versions"');
+    expect(h).toContain('>3 versions</h1>');
+    expect(t).toContain("of Harbour of Glass");
+    expect(h).not.toContain('data-vv2="title"');
     expect(t).toContain("+ New version");
     expect(t).toContain("How it works");
     expect(t).not.toContain("— Versions —");
@@ -60,7 +62,9 @@ describe("/manuscripts/versions renders", () => {
     expect(t).not.toContain("Sent with queries so far");
     expect(h).not.toContain('data-vv2="donut"');
     expect(t).toContain("1 query is out with agents without a version assigned.");
-    expect(t).toContain("3 versions saved");
+    /* RE-POINTED (Workspace headers v1): the list's heading names it; the header carries the count */
+    expect(t).toContain("Your versions");
+    expect(t).not.toContain("versions saved");
     const rows = h.match(/data-vv2="row" data-id="([^"]+)"/g) ?? [];
     expect(rows.length).toBe(3);
     expect(rows[0]).toContain('"bv-2"');
