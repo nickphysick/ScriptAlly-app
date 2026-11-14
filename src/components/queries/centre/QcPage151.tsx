@@ -35,10 +35,13 @@ import { QcBar153 } from "./QcBar153";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
 import { sectionSwatch, standWords } from "../../../lib/qc153";
 import { FirstPanel155, QuietPanel155, Skeleton155 } from "./QcState155";
+import { QcSlim156 } from "./QcSlim156";
+import type { WeekGoal154 } from "../../../lib/qc154goal";
 import "./qcv151.css";
 import "./qcv1522.css";
 import "./qcv153.css";
 import "./qcv1541.css";
+import "./qcv156.css";
 
 const LIST_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>;
 const BIRDS_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M4 12h14M4 17h6" /><circle cx="14" cy="7" r="1.6" /><circle cx="19" cy="12" r="1.6" /><circle cx="11" cy="17" r="1.6" /></svg>;
@@ -82,6 +85,8 @@ type Pop151 = "group" | "begroup" | "besort";
 
 export interface QcPage151Props {
   loading: boolean;
+  /** v156 §3 — the week model the header's line draws, for the collapsed header's "n of goal" and streak */
+  goal?: WeekGoal154 | null;
   view: View151;
   onView: (v: View151) => void;
   onLog: () => void;
@@ -245,6 +250,8 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
       let cur: HTMLElement | null = null;
       root.querySelectorAll<HTMLElement>("[data-qc154='head']").forEach((h) => { if (h.getBoundingClientRect().top < line) cur = h; });
       const c = cur as HTMLElement | null;
+      /* v156 §5 — the strip paints the page only once stuck, so at rest nothing clips the header panel's shadow */
+      if (tb.hasAttribute("data-qc156-stuck") !== stuck) tb.toggleAttribute("data-qc156-stuck", stuck);
       const on = stuck && !!c;
       setTbOn(on);
       if (on && c) {
@@ -418,8 +425,14 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
       beGroup={p.beGroup} onBeGroup={p.onBeGroup} beSort={p.beSort} onBeSort={p.onBeSort}
       stuckGroup={birds ? null : tbGrp} stuckOn={!birds && tbOn} />
   );
+  /* v156 §3 — not while loading (its figures arrive with the data) */
+  const slim156 = p.counts && !p.loading
+    ? <QcSlim156 sent={p.counts.sent} ms={p.counts.ms || null} goal={p.goal ?? null} onLog={p.onLog} logDisabled={p.logDisabled} />
+    : null;
   return (
     <div className="qc151 qc153" data-qc151="page" data-view={p.view} ref={rootRef}>
+      {/* v156 §3 — the collapsed header: sticky for the whole page, taking no space, shown once the panel has gone */}
+      {slim156}
       {/* v153.1 — the header on the page's own ground: the hawk, the title block and the stage ring card */}
       <QcHeader1531 loading={p.loading} onLog={p.onLog} onRecord={p.onRecord} logDisabled={p.logDisabled} logRef={p.logRef} counts={p.counts} ring={p.ring} />
 

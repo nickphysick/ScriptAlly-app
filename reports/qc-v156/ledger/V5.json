@@ -1,0 +1,152 @@
+[
+ {
+  "name": "1920: the card is white, 268 wide, 18px radius, the #e3dbcf ring",
+  "ok": true,
+  "got": "rgb(255, 255, 255) 268 18px rgb(227, 219, 207) 0px 0px 0px 1px, rgba(28, 19, 15, 0.35) 0px 18px 30px -24px"
+ },
+ {
+  "name": "1920: Views over the 2px navy rule",
+  "ok": true,
+  "got": "rgb(42, 58, 82) 0px -2px 0px 0px inset"
+ },
+ {
+  "name": "1920: it pins (sticky; 703px tall)",
+  "ok": true,
+  "got": "sticky"
+ },
+ {
+  "name": "1920: All queries is selected at rest; its count is what shows",
+  "ok": true,
+  "got": "all · 88"
+ },
+ {
+  "name": "1920: you replaces the last view and shows its 22",
+  "ok": true,
+  "got": "you · showing 22"
+ },
+ {
+  "name": "1920: over replaces the last view and shows its 41",
+  "ok": true,
+  "got": "over · showing 41"
+ },
+ {
+  "name": "1920: wait replaces the last view and shows its 13",
+  "ok": true,
+  "got": "wait · showing 13"
+ },
+ {
+  "name": "1920: offers replaces the last view and shows its 2",
+  "ok": true,
+  "got": "offers · showing 2"
+ },
+ {
+  "name": "1920: All queries clears the view",
+  "ok": true,
+  "got": "all · 88"
+ },
+ {
+  "name": "1920: ticking q and pr shows the union (38 + 6)",
+  "ok": true,
+  "got": "44"
+ },
+ {
+  "name": "1920: Reset clears the ticks",
+  "ok": true,
+  "got": "88"
+ },
+ {
+  "name": "1920: More filters is closed at rest",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "1920: More filters opens on What you sent and Dates",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "1920: Tab reaches the five views, every status tick box and More filters",
+  "ok": true,
+  "got": "view:all:none view:you:solid view:over:solid view:wait:solid view:offers:solid status:q:solid status:pr:solid status:ps:solid status:fr:solid status:fs:solid status:of:solid status:rj:solid status:nr:solid more::solid export::solid null::solid"
+ },
+ {
+  "name": "1920: focus rings show on every view Tab reaches",
+  "ok": true,
+  "got": "view:you:solid view:over:solid view:wait:solid view:offers:solid"
+ },
+ {
+  "name": "1920: scrolled, the card pins 14px under the toolbar",
+  "ok": true,
+  "got": "card 203.75 bar 189.75"
+ },
+ {
+  "name": "1440: the card is white, 268 wide, 18px radius, the #e3dbcf ring",
+  "ok": true,
+  "got": "rgb(255, 255, 255) 268 18px rgb(227, 219, 207) 0px 0px 0px 1px, rgba(28, 19, 15, 0.35) 0px 18px 30px -24px"
+ },
+ {
+  "name": "1440: Views over the 2px navy rule",
+  "ok": true,
+  "got": "rgb(42, 58, 82) 0px -2px 0px 0px inset"
+ },
+ {
+  "name": "1440: it pins (sticky; 703px tall)",
+  "ok": true,
+  "got": "sticky"
+ },
+ {
+  "name": "1440: All queries is selected at rest; its count is what shows",
+  "ok": true,
+  "got": "all · 88"
+ },
+ {
+  "name": "1440: you replaces the last view and shows its 22",
+  "ok": true,
+  "got": "you · showing 22"
+ },
+ {
+  "name": "1440: over replaces the last view and shows its 41",
+  "ok": true,
+  "got": "over · showing 41"
+ },
+ {
+  "name": "1440: wait replaces the last view and shows its 13",
+  "ok": true,
+  "got": "wait · showing 13"
+ },
+ {
+  "name": "1440: offers replaces the last view and shows its 2",
+  "ok": true,
+  "got": "offers · showing 2"
+ },
+ {
+  "name": "1440: All queries clears the view",
+  "ok": true,
+  "got": "all · 88"
+ },
+ {
+  "name": "1440: ticking q and pr shows the union (38 + 6)",
+  "ok": true,
+  "got": "44"
+ },
+ {
+  "name": "1440: Reset clears the ticks",
+  "ok": true,
+  "got": "88"
+ },
+ {
+  "name": "1440: More filters is closed at rest",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "1440: More filters opens on What you sent and Dates",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "1440: scrolled, the card pins 14px under the toolbar",
+  "ok": true,
+  "got": "card 203.75 bar 189.75"
+ }
+]

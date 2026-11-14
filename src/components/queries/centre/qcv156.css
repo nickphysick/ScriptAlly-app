@@ -1,0 +1,215 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v156 (design-refs/query-centre-v156.html, read from the rendered page at 1920) — the launch look: full
+ * stage colour on the cards, one page colour for tab and sheet, the navy header panel, "this week" as a line, the
+ * collapsing header and the Views panel. Desktop only (768px and up), like every Query Centre rule since v131.
+ *
+ * ⚠️ OVERRIDES WIN ON SPECIFICITY, NOT ON BUNDLE ORDER: each selector is one class (or a repeated class) above the
+ *    v153.4 / v154 / v154.1 rule it replaces. The older sheets are not edited.
+ * ⚠️ qcv156.test.ts reads these rules by their exact selectors.
+ */
+
+/* ── §4 · cards: full stage colour and navy seals (v154.1's quiet Queried band and white seal reversed) ─────────── */
+@media (min-width: 768px) {
+  /* a Queried card's band is its stage's sand (`--tone`, v154's), like every other stage: no white, no edge, no hairline */
+  .qc151.qc153 .qc154-card.qc154-card[data-status="Queried"] .qc154-hd { background: var(--tone); box-shadow: none; }
+  /* the seal: solid navy, cream initials (the typewriter, from v154's rule), the white-then-navy double ring */
+  .qc151.qc153 .qc154-card.qc154-card .qc154-seal.qc154-seal { background: #2a3a52; color: #f4eee5; box-shadow: 0 0 0 3px #fff, 0 0 0 4px rgba(42, 58, 82, 0.35); }
+}
+@container (max-width: 380px) {
+  .qc151.qc153 .qc154-card.qc154-card .qc154-seal.qc154-seal { box-shadow: 0 0 0 2.5px #fff, 0 0 0 3.5px rgba(42, 58, 82, 0.35); }
+}
+
+/* ── §5 · one page colour. The tab, its fillet and the sheet read `--ws-page` through `--ink-tab` / `--ink-sheet`
+   (inkShell.css), declared on `.ws-main`; the Query Centre retones that token there while its page is the one on
+   screen (decided by what is rendered, as inkShell's own header-sheet rule is: a hidden page's slot carries
+   `data-stage-off`). The scroll area then paints the same token, so tab and sheet are one piece. ──────────────── */
+@media (min-width: 768px) {
+  .ws-app:has(.qc-wpg--v11:not([data-stage-off] *)) .ws-main { --ws-page-rgb: 246, 243, 238; --ws-page: rgb(var(--ws-page-rgb)); }
+  .ws-window .qc-wpg.qc-wpg--v11.qc-wpg--v11.qc-wpg--v11 > .wpg-scroll.wpg-scroll {
+    background-color: var(--ws-page);
+    background-image: linear-gradient(rgba(var(--ws-page-rgb), 0.45), rgba(var(--ws-page-rgb), 0.45)), url("/images/qc/doodle-tile.svg");
+  }
+
+  /* nothing clips the header panel's shadow: the toolbar's strip reached 12px up over the header's foot and painted the
+     page there at rest. At rest it paints nothing; once stuck (QcPage151 sets `data-qc156-stuck`) it takes the page's
+     colour and its 22px fade, as v154 drew it. */
+  .qc151.qc153 .qc154-tbw.qc154-tbw.qc154-tbw { background: none; }
+  .qc151.qc153 .qc154-tbw.qc154-tbw.qc154-tbw[data-qc156-stuck] {
+    background: linear-gradient(to bottom, var(--ws-page) 0, var(--ws-page) calc(100% - 22px), rgba(var(--ws-page-rgb), 0) 100%);
+  }
+}
+
+/* ── §1 · the navy header panel: one panel across the content width (the filter column and the list column), 8px
+   above and 30px below; 22px top and bottom, 30px right, none on the left (the hawk's 268px column is its margin).
+   v153.4's three-column grid stays: the hawk over the filter column, the title block on the list's left edge, "this
+   week" against the list's right edge. The doodles do not show through: the panel is solid. ────────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 > .qc1531-hd.qc1531-hd {
+    --ink: #fbf7f0; --mut: #f4eee5;
+    margin: 8px 0 30px; padding: 22px 30px 22px 0; border-radius: 20px; background: #2a3a52; color: #f4eee5;
+    box-shadow: 0 22px 34px -22px rgba(28, 19, 15, 0.55);
+  }
+  /* the list's columns sit the panel's 30px below it, the panel's margin alone (v153's 26px top margin would collapse
+     into it on one layout and add to it on another) */
+  .qc151.qc153 > .qc1531-hd.qc1531-hd + .qc153-cl { margin-top: 0; }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd h1.qc1531-t { color: #fbf7f0 !important; }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-for i { background: rgba(244, 238, 229, 0.35); }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-for span,
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-for em { color: #f4eee5; }
+  /* the buttons, inverted for navy: "+ Log a query" the page's one filled button, "Record a response" a cream ring */
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-b--n { background: #f4eee5; color: #2a3a52; }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-b--n:hover { background: #fbf7f0; }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-b--g { background: transparent; color: #f4eee5; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.6); }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-b--g:hover { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.9); background: rgba(244, 238, 229, 0.06); }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-b:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+}
+
+/* ── §2 · "this week" as a line, straight on the navy (QcLine156): the ref's .zalt, 380 wide against the list's right
+   edge. 44px typewriter headline with its italic on the same baseline; a 74px line; the caption 6px under it; the
+   footer 14px under that over a fine rule. ─────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151 .qc156-wk { box-sizing: border-box; width: 380px; max-width: 100%; color: #f4eee5; }
+  .qc151 .qc156-big { display: flex; align-items: baseline; gap: 12px; min-height: 44px; }
+  .qc151 .qc156-big b { font: 400 44px/1 var(--sp-type) !important; color: #fbf7f0; white-space: nowrap; }
+  .qc151 .qc156-big small { font: italic 400 17px/1.2 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.85); white-space: nowrap; }
+  .qc151 .qc156-ln { display: block; width: 100%; height: 74px; margin-top: 10px; overflow: visible; }
+  .qc151 .qc156-cap { display: flex; justify-content: space-between; margin-top: 6px; font: 400 12.5px/1.35 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.65); }
+  .qc151 .qc156-ft {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid rgba(244, 238, 229, 0.22); min-height: 34px; box-sizing: border-box;
+  }
+  .qc151 .qc156-ft b { display: flex; align-items: center; gap: 6px; flex: none; font: 600 15px/1.4 var(--sp-serif) !important; color: #fbf7f0; white-space: nowrap; }
+  .qc151 .qc156-ft b svg { flex: none; }
+  .qc151 .qc156-ft em { margin-left: auto; font: italic 400 15px/1.4 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.88); text-align: right; }
+  /* loading: the rows hold their final boxes and show nothing until the data lands (v155 §3) */
+  .qc151 .qc156-wk[data-qc155="goal-hold"] > * { visibility: hidden; }
+}
+
+/* ── §3 · the collapsed header (QcSlim156): a 60px bar sticky under the sheet's lip, taking no space (its height given
+   back below it), on the page's colour across the sheet's full width with a #e0d9ce hairline along its foot; its
+   content inset to the page content's edges. It fades and slides in over 180ms; under reduced motion it simply
+   appears. Above the toolbar (z 30) and every card; under the drawers. ─────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 > .qc156-slim {
+    position: sticky; top: var(--pin-cover, 12px); z-index: 40; box-sizing: border-box; height: 60px; margin-bottom: -60px;
+    display: flex; align-items: center; gap: 14px;
+    opacity: 0; transform: translateY(-6px); pointer-events: none; visibility: hidden;
+    transition: opacity 180ms ease-out, transform 180ms ease-out, visibility 0s linear 180ms;
+  }
+  .qc151.qc153 > .qc156-slim::before {
+    content: ""; position: absolute; z-index: -1; top: 0; bottom: 0;
+    left: calc(-1 * var(--qc156-bl, 0px)); right: calc(-1 * var(--qc156-br, 0px));
+    background: var(--ws-page); box-shadow: inset 0 -1px 0 #e0d9ce;
+  }
+  .qc151.qc153 > .qc156-slim[data-shown] {
+    opacity: 1; transform: none; pointer-events: auto; visibility: visible;
+    transition: opacity 180ms ease-out, transform 180ms ease-out, visibility 0s;
+  }
+  .qc151 .qc156-st { margin: 0; display: flex; align-items: baseline; gap: 14px; min-width: 0; white-space: nowrap; overflow: hidden; }
+  .qc151 .qc156-st b { flex: none; font: 400 24px/1.2 var(--sp-type) !important; color: #1c130f; }
+  .qc151 .qc156-st i { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: italic 400 16px/1.2 var(--sp-serif) !important; color: #5b4f47; }
+  .qc151 .qc156-sa { flex: none; margin-left: auto; display: flex; align-items: center; }
+  .qc151 .qc156-sw { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
+  .qc151 .qc156-sw b { font: 400 18px/1 var(--sp-type) !important; color: #1c130f; }
+  .qc151 .qc156-sw em { font: italic 400 15px/1 var(--sp-serif) !important; color: #5b4f47; }
+  .qc151 .qc156-sk { display: flex; align-items: center; gap: 5px; margin-left: 16px; white-space: nowrap; font: 600 13.5px/1 var(--sp-serif) !important; color: #2a3a52; }
+  .qc151 .qc156-sb {
+    all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 40px; margin-left: 26px; padding: 0 18px;
+    border-radius: 10px; background: #2a3a52; color: #fbf7f0; font: 400 16px/1 var(--sp-type) !important; white-space: nowrap;
+  }
+  .qc151 .qc156-sb:hover { background: #334763; }
+  .qc151 .qc156-sb:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .qc151 .qc156-sb:disabled { opacity: 0.55; cursor: default; }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .qc151.qc153 > .qc156-slim, .qc151.qc153 > .qc156-slim[data-shown] { transition: none; transform: none; }
+}
+
+/* ── §6 · the Views panel (QcViews156) in the filter column: one white card, 18px radius, a 1px #e3dbcf ring and a
+   soft shadow, 268 wide, pinned as the rail was. Views over Reset on a 2px navy rule; the five views (38px rows, 17px
+   icons, the count in the typewriter; navy with cream text when selected, #f6f2ec on hover); Refine with its Status
+   tick boxes; the More filters row; the foot. Every value read from the ref at 1920. Scoped to `.qc156-views`, so the
+   Contact list's rail (which shares the `qc153-*` bones) does not change. ─────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc153-rail.qc156-views {
+    box-sizing: border-box; width: 268px; padding: 0; border-radius: 18px; background: #fff; overflow: hidden;
+    box-shadow: 0 0 0 1px #e3dbcf, 0 18px 30px -24px rgba(28, 19, 15, 0.35); color: #1c130f;
+  }
+  .qc151.qc153 .qc156-views.qc156-views .qc153-rin { max-height: none; overflow: visible; border: 0; border-radius: 0; background: none; }
+  .qc151.qc153 .qc156-views.qc156-views .qc156-vh {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 16px 18px 12px; background: none;
+    box-shadow: inset 0 -2px 0 #2a3a52;
+  }
+  .qc151.qc153 .qc156-views .qc156-vh b { font: 400 21px/1 var(--sp-type) !important; color: #1c130f; }
+  .qc151.qc153 .qc156-views .qc156-vh .qc153-rst { margin-left: auto; font: 600 13.5px/1.4 var(--sp-serif) !important; color: #a59c91; }
+
+  .qc151 .qc156-vl { padding: 10px 8px 8px; display: flex; flex-direction: column; }
+  .qc151 .qc156-vr {
+    all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 11px; height: 38px; padding: 0 10px; border-radius: 9px;
+    font: 400 15.5px/1.2 var(--sp-serif) !important; color: #1c130f;
+  }
+  .qc151 .qc156-vr svg { flex: none; width: 17px; height: 17px; color: #5b4f47; }
+  .qc151 .qc156-vr span { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc151 .qc156-vr em { flex: none; font: 400 14px/1 var(--sp-type) !important; font-style: normal; color: #8a8076; }
+  .qc151 .qc156-vr:hover:not(.is-on):not(:disabled) { background: #f6f2ec; }
+  .qc151 .qc156-vr.is-on { background: #2a3a52; color: #fbf7f0; font-weight: 700 !important; }
+  .qc151 .qc156-vr.is-on svg, .qc151 .qc156-vr.is-on em { color: #f4eee5; }
+  .qc151 .qc156-vr:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+  .qc151 .qc156-vr:disabled { cursor: default; }
+
+  .qc151 .qc156-vs { padding: 14px 18px 10px; border-top: 1px solid #ebe5db; }
+  .qc151 .qc156-vsh { display: flex; align-items: baseline; justify-content: space-between; margin: 0 0 8px; font: 400 16px/1.1 var(--sp-type) !important; color: #1c130f; }
+  .qc151 .qc156-vsh small { font: 600 12.5px/1.3 var(--sp-serif) !important; color: #8a8076; }
+  .qc151 .qc156-vsl { margin: 0 0 4px; font: 400 14px/1.4 var(--sp-serif) !important; color: #6f655c; }
+  .qc151 .qc156-mb .qc156-vsl { margin-top: 8px; }
+  .qc151 .qc156-vc {
+    all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; height: 32px;
+    font: 400 15px/1.2 var(--sp-serif) !important; color: #1c130f;
+  }
+  .qc151 .qc156-ck {
+    flex: none; display: grid; place-items: center; width: 17px; height: 17px; border-radius: 4.5px; background: #fff; color: #fbf7f0;
+    box-shadow: inset 0 0 0 1.5px #b9ae9f;
+  }
+  .qc151 .qc156-vc.is-on .qc156-ck { background: #2a3a52; box-shadow: none; }
+  .qc151 .qc156-vct { flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .qc151 .qc156-vct > * { flex: none; }
+  .qc151 .qc156-vc em { flex: none; font: 400 13.5px/1 var(--sp-type) !important; font-style: normal; color: #8a8076; }
+  .qc151 .qc156-vc:hover:not(:disabled) .qc156-ck { box-shadow: inset 0 0 0 1.5px #8a8076; }
+  .qc151 .qc156-vc.is-on:hover .qc156-ck { box-shadow: none; }
+  .qc151 .qc156-vc:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 4px; }
+  .qc151 .qc156-vc:disabled { cursor: default; opacity: 0.45; }
+  .qc151 .qc156-mb { padding: 0 18px 10px; }
+  .qc151 .qc156-mb[hidden] { display: none; }
+
+  .qc151 .qc156-mf {
+    all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 8px; width: 100%; padding: 13px 18px;
+    border-top: 1px solid #ebe5db; font: 400 14px/1.4 var(--sp-serif) !important; color: #6f655c;
+  }
+  .qc151 .qc156-mf > span { flex: 1 1 auto; display: flex; align-items: baseline; gap: 8px; }
+  .qc151 .qc156-mf small { font: 400 14px/1.4 var(--sp-serif) !important; color: #6f655c; }
+  .qc151 .qc156-mf b { flex: none; font: 700 15px/1.4 var(--sp-serif) !important; color: #1c130f; }
+  .qc151 .qc156-mf i { flex: none; display: grid; color: #6f655c; transition: transform 0.15s; }
+  .qc151 .qc156-mf[aria-expanded="true"] i { transform: rotate(180deg); }
+  .qc151 .qc156-mf:hover { background: #faf7f2; }
+  .qc151 .qc156-mf:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
+  .qc151 .qc156-mb + .qc156-mf { border-top: 1px solid #ebe5db; }
+
+  .qc151.qc153 .qc156-views.qc156-views .qc156-vf {
+    display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 12px 18px 14px; border-top: 1px solid #ebe5db;
+    font: 400 14px/1.4 var(--sp-serif) !important; color: #6f655c;
+  }
+  .qc151 .qc156-exp {
+    all: unset; cursor: pointer; font: 600 14px/1.4 var(--sp-serif) !important; color: #1c130f; text-decoration: underline; text-underline-offset: 3px;
+  }
+  .qc151 .qc156-exp:disabled { cursor: default; opacity: 0.5; text-decoration: none; }
+  .qc151 .qc156-exp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 2px; }
+
+  /* loading: the card holds its rows and shows no figures until the data lands (v155 §3) */
+  .qc151.qc153 .qc153-railcol[data-qc155-busy] .qc156-views em,
+  .qc151.qc153 .qc153-railcol[data-qc155-busy] .qc156-views [data-qc156="showing"],
+  .qc151.qc153 .qc153-railcol[data-qc155-busy] .qc156-views .qc156-exp { visibility: hidden; }
+}
+@media (prefers-reduced-motion: reduce) { .qc151 .qc156-mf i { transition: none; } }
