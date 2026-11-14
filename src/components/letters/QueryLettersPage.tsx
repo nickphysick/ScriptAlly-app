@@ -33,6 +33,7 @@ import {
   packageLetterDiffers, pageOrder, resolveLetters, type LetterFacts,
 } from "../../lib/queryLetters";
 import { OpenHeader } from "../shell/OpenHeader";
+import { ArtSlot } from "../todo/ArtSlot";
 import { LetterRows, LetterView, LetterEditor, ReadRail, WriteRail, DayOne, DeskSkeleton, type EdState } from "./LetterDesk";
 /* v2.4: the Query Centre's navy header, reused: `shell/OpenHeader` in a `.qc151.qc153` wrapper, dressed by the Query
    Centre's own sheets (the Contact list's `ContactHeaderQc` reaches the same rules through `.cl27`) */
@@ -49,7 +50,6 @@ export const SAVE_FAILED = "That letter didn't save. Check your connection and t
 export const SENT_LOCKED = "This letter has gone out, so its text stays as it was sent. To change it, start a new version from it.";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
-const COURIER = "/images/dash/courier.png";
 const isTextFile = (f: File) => /\.(txt|md|text)$/i.test(f.name) || f.type.startsWith("text/");
 
 /** the editor has something a leave would lose */
@@ -295,7 +295,7 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
         <OpenHeader
           className="qlp-hd"
           attrs={{ "data-ql": "header", "data-own-header": "" }}
-          art={<img src={COURIER} alt="" />}
+          art={<ArtSlot name="query-letters-header" />}
           artClassName="qlp-art"
           title={title}
           titleAttrs={{ "data-ql": "title", tabIndex: "-1" }}

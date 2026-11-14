@@ -41,6 +41,11 @@
   .qlp .qc151.qc153 > .qc1531-hd.qlp-hd.qlp-hd { grid-template-columns: 268px minmax(0, 1fr); min-height: 227px; }
   .qlp .qc151.qc153 > .qc1531-hd.qlp-hd > .qc1531-rc { display: none; }
   .qlp .qc151.qc153 > .qc1531-hd.qlp-hd h1.qc1531-t { outline: none; }
+  /* v2.4 · the drawing is a placeholder for now: the app's ArtSlot (hatched paper, dashed edge) in the box the drawing
+     will fill, 190 × 142, centred in the art column as the Query Centre's drawing is. No caption: the slot's mono key
+     (a 7px label for builders) is not shown on this page. */
+  .qlp .qlp-hd .art--query-letters-header { width: 190px; }
+  .qlp .qlp-hd .art--query-letters-header .art-phk { display: none; }
 }
 
 .qlp-lnk { padding: 0; border: 0; background: none; color: var(--ql-navy) !important; font-size: 16px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, .4); min-height: 32px; }
