@@ -106,3 +106,25 @@ describe("PK43 P8 (source) — Change offers only packages that can go out; the 
     expect(USE_FOR_BATCH).toBe("Use for new queries");
   });
 });
+
+/* ── P5 (source half) ── */
+describe("PK43 P5 (source) — the bar is the Query Centre's; qcv156.css §3 names this page and changes nothing else", () => {
+  const q = readFileSync(resolve(SRC, "components/queries/centre/qcv156.css"), "utf8");
+  const at = q.indexOf("/* ── §3 · the collapsed header");
+  const s3 = q.slice(at, q.indexOf("/* ── §", at + 10) > at ? q.indexOf("/* ── §", at + 10) : undefined);
+  it("every list in §3 that names To-do's root names this page's too, and no list names it without To-do's", () => {
+    const lists = [...s3.matchAll(/:is\(([^)]*)\)/g)].map((m) => m[1]);
+    expect(lists.length).toBeGreaterThanOrEqual(16);
+    for (const l of lists) expect(l.includes(".pk43"), l).toBe(l.includes(".tws56"));
+    expect(q.slice(0, q.indexOf("/* ── §3"))).not.toContain(".pk43");
+  });
+  it("with `, .pk43` taken out, §3 reads as it did for To-do v56 (same rules, same specificity)", () => {
+    expect(s3.replace(/, \.pk43\)/g, ")")).not.toContain("pk43");
+  });
+  it("the page mounts the shared SlimBar through Pk43Slim, a direct child of the page root", () => {
+    const slim = readFileSync(resolve(SRC, "components/packages/v43/Pk43Slim.tsx"), "utf8");
+    expect(slim).toMatch(/import \{ SlimBar \} from "\.\.\/\.\.\/shell\/SlimBar"/);
+    expect(page.indexOf("<Pk43Slim")).toBeGreaterThan(page.indexOf('data-pk41="page"'));
+    expect(page.indexOf("<Pk43Slim")).toBeLessThan(page.indexOf('data-pk43="desk"'));
+  });
+});

@@ -125,3 +125,12 @@
 @media (min-width: 768px) and (max-width: 1099.98px) {
   .pk43 .pk43-go { display: none; }
 }
+
+/* ══ §4 · the collapsed bar (Phase 4): the Query Centre's (`shell/SlimBar`, qcv156.css §3, this page's root named in
+   its lists). It sits 12 under the scroller's top (the sheet's lip) and is 60 tall, so it covers the first 72px of the
+   port. Nothing lands under it: the list sticks at a constant 84 (72 + 12), and every scroll to a part of the page
+   (`?pkg=`, `?tab=tracking`, "Edit in the builder") leaves 84 above its target. ══ */
+@media (min-width: 768px) {
+  .pk43 .pk43-desk > .pk43-list { top: 84px; max-height: calc(var(--wpg-port-h, 100vh) - 100px); }
+  .pk43 :is([data-pk26="builder"], [data-pk26="results"], [data-pk43="desk"]) { scroll-margin-top: 84px; }
+}

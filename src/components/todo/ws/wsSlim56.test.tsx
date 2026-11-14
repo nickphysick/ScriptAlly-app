@@ -35,9 +35,10 @@ describe("the To-do list's slim bar (WsSlim56)", () => {
     expect(read("todoWs54.css")).toContain(".tws .tws-ws { position: sticky; top: 72px; height: calc(var(--tws-port, 800px) - 84px); min-height: 0; }");
     expect(read("todoWs56.css")).toContain(".tws.tws56 > .qc156-slim.qc156-slim { top: 0; }");
     const qc = read("../../queries/centre/qcv156.css");
-    /* on the dev line the bar's rules also name the Contact list (`.cl27`, cl-qc-layout-v1.1), beside `.tws56` */
-    expect(qc.match(/:is\(\.qc151\.qc153, (?:\.cl27, )?\.tws56\) > \.qc156-slim/g)?.length).toBe(5);
-    expect(qc).toMatch(/:is\(\.qc151, (?:\.cl27, )?\.tws56\) \.qc156-sb \{/);
+    /* on the dev line the bar's rules also name the Contact list (`.cl27`, cl-qc-layout-v1.1), beside `.tws56`; and
+       Submission packages v43 (`.pk43`) after it — the same lists, the same specificity */
+    expect(qc.match(/:is\(\.qc151\.qc153, (?:\.cl27, )?\.tws56(?:, \.pk43)?\) > \.qc156-slim/g)?.length).toBe(5);
+    expect(qc).toMatch(/:is\(\.qc151, (?:\.cl27, )?\.tws56(?:, \.pk43)?\) \.qc156-sb \{/);
     expect(qc).not.toMatch(/(^|\n)\s*\.qc151\.qc153 > \.qc156-slim/);
   });
 });

@@ -35,6 +35,7 @@ import { Pk43Header } from "./packages/v43/Pk43Header";
 import { packagesTitle } from "../lib/packagesV43";
 import { Pk43List } from "./packages/v43/Pk43List";
 import { Pk43GoingOut } from "./packages/v43/Pk43GoingOut";
+import { Pk43Slim } from "./packages/v43/Pk43Slim";
 import { Pk42Empty } from "./packages/v42/Pk42Empty";
 import { useScriptAllyDb } from "../lib/db";
 import { packagesViaFounding } from "../lib/entitlements";
@@ -155,6 +156,8 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
           : <Pk43Header title={packagesTitle(live.length)} msTitle={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)}
               right={going ? <Pk43GoingOut model={model} going={going} onChosen={chosen} /> : null} />}
+        {/* v43 Phase 4: the Query Centre's collapsed bar, shown once the navy header has gone under the sheet's lip */}
+        {empty ? null : <Pk43Slim title={packagesTitle(live.length)} going={going?.packageName ?? null} onNew={() => setDialog({ m: "new" })} />}
         {/* v43 Phase 2: the desk, 268 / 28 under the header — "Your packages" on the left (v42's stat tiles are retired),
             the open package in ONE workspace surface on the right, so its left edge is the headline's. With no live
             package, v42's empty card takes the builder's place in the workspace. */}
