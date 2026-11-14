@@ -10,7 +10,7 @@
 import { test, expect, type Page, type Browser } from "@playwright/test";
 import { readFileSync, existsSync, mkdirSync, appendFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { session, snapshot, enterSetup, restore, ACCOUNT_EMAIL } from "./importFixesAccount.mjs";
+import { session, snapshot, enterSetup, restore, readImported, ACCOUNT_EMAIL } from "./importFixesAccount.mjs";
 import { answerAgents, answerQueries } from "./reviewDrive";
 
 const OUT = resolve(process.cwd(), "reports/two-door-import");
@@ -94,11 +94,16 @@ test("WALK · set-up to the dashboard through the headings route, with template-
     await shot(page, "3-review-answered");
     await page.locator('[data-im="review"] [data-im="primary"]').click();
 
-    // the dashboard
-    await page.locator('#ws-sidebar, .ws-work').first().waitFor({ timeout: 60_000 });
+    // the importing loader, then the real dashboard (not the ghost behind the loader)
+    await page.locator(".os-root.d58:not(.is-ghost)").first().waitFor({ timeout: 60_000 });
+    await page.waitForFunction(() => !document.querySelector(".sf-sheet"), null, { timeout: 30_000 }).catch(() => {});
     await page.waitForTimeout(2500);
     await shot(page, "4-dashboard");
-    record("walk", { fork, read, review, ready, calls });
+    const stored = await readImported(before);
+    const rows = stored.queries.map((q: Record<string, unknown>) => String(q.status)).sort();
+    record("walk", { fork, read, review, ready, calls, stored: { queries: stored.queries.length, statuses: rows, lines: stored.lines } });
+    expect(stored.queries.length, "the five rows were written").toBe(5);
+    expect(rows, "Marianne Webb's reply was named: the first outcome offered, Passed").toContain("Rejected");
 
     expect(fork.tiles).toBe(2);
     expect(fork.heading).toBe("How shall we capture your list?");
