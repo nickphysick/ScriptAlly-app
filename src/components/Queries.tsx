@@ -131,13 +131,14 @@ import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151, type State155 } from "./queries/centre/QcPage151";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { QcRail153 } from "./queries/centre/QcRail153";
-import { QcGoal154 } from "./queries/centre/QcGoal154";
-import { weekGoal154 } from "../lib/qc154goal";
+import { QcLine156 } from "./queries/centre/QcLine156";
+import { weekGoal154, type WeekGoal154 } from "../lib/qc154goal";
 import { railCounts } from "../lib/qc153Rail";
 import { slipTone } from "../lib/qc153";
 import { nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
 import { NEEDS_YOU_155, quietBody155, quietNow155 } from "../lib/qc155";
 import { qcStateAid } from "../lib/qcReviewAid155";
+import { goalAidSends, qcGoalAid } from "../lib/qcReviewAid156";
 import { packagesUnlocked, versionsUnlocked } from "../lib/entitlements";
 import { ACTION_LABEL, CLOSED_SET, listGroupOf, savedGroupOf } from "../lib/qc1522";
 import { qcPlanAid } from "../lib/qcReviewAid1522";
@@ -519,6 +520,16 @@ const pastWhen = (outcome: ResponseOutcome | null, reached: RespStepId): boolean
   const order = stepsFor(outcome);
   return order.indexOf(reached) > order.indexOf("when");
 };
+
+
+/** v156 §2 — the writer's own sends (every manuscript, as the Streaks & goals card counts them) against their weekly
+ *  target. A dev-only review aid (lib/qcReviewAid156) fabricates the send dates for the streak / no-streak / met
+ *  screens; the mode check is here, at the aid's one call site, so a production build drops the module. */
+function goal156Of(sentMs: (number | null)[], goals: Parameters<typeof weekGoal154>[1], nowMs: number): WeekGoal154 {
+  const raw = weekGoal154(sentMs, goals, nowMs);
+  const aid = import.meta.env.MODE !== "production" ? qcGoalAid() : null;
+  return aid ? weekGoal154(goalAidSends(aid, raw.goal, nowMs), goals, nowMs) : raw;
+}
 
 export const Queries: React.FC<{
   searchQuery: string;
@@ -8089,6 +8100,8 @@ export const Queries: React.FC<{
               /* v153 — the rail's faceted counts, over what the rail does not own (scope, search, the older narrowings) */
               const railBase = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn));
               const railN = railCounts(railBase, qcF138, qc138Counts.sent.map((o) => o.key), (r, g) => matches138(r, g, now151));
+              /* v156 §2 — the header's line and the collapsed bar's "n of goal" (goal156Of) */
+              const goal156 = showGridSkeleton ? null : goal156Of(queries.map((q) => anyToMs(q.dateSent)), currentUser?.queryingGoals, now151);
               const beEmpty = !showGridSkeleton && qcBeOrder.length === 0
                 ? (strip151.length ? "filtered" as const : qcF138.where === "closed" ? "closed" as const : null) : null;
               return (
@@ -8096,9 +8109,8 @@ export const Queries: React.FC<{
                   state155={state155}
                   loading={showGridSkeleton}
                   counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
-                  /* v154 — the weekly goal chart replaces the stage ring: the writer's own sends (every manuscript, as the
-                     Streaks & goals card counts them) against their weekly target; filtering by stage is the rail's */
-                  ring={<QcGoal154 m={showGridSkeleton ? null : weekGoal154(queries.map((q) => anyToMs(q.dateSent)), currentUser?.queryingGoals, now151)} />}
+                  /* v156 §2 — "this week" as a line on the navy header (v154's bar chart is gone) */
+                  ring={<QcLine156 m={goal156} />}
                   view={qcView150} onView={pickView150}
                   onLog={() => onNavigate?.("queries", "Log a query")}
                   onRecord={() => onNavigate?.("queries", "Record a response")}

@@ -41,3 +41,49 @@
     background: linear-gradient(to bottom, var(--ws-page) 0, var(--ws-page) calc(100% - 22px), rgba(var(--ws-page-rgb), 0) 100%);
   }
 }
+
+/* ── §1 · the navy header panel: one panel across the content width (the filter column and the list column), 8px
+   above and 30px below; 22px top and bottom, 30px right, none on the left (the hawk's 268px column is its margin).
+   v153.4's three-column grid stays: the hawk over the filter column, the title block on the list's left edge, "this
+   week" against the list's right edge. The doodles do not show through: the panel is solid. ────────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 > .qc1531-hd.qc1531-hd {
+    --ink: #fbf7f0; --mut: #f4eee5;
+    margin: 8px 0 30px; padding: 22px 30px 22px 0; border-radius: 20px; background: #2a3a52; color: #f4eee5;
+    box-shadow: 0 22px 34px -22px rgba(28, 19, 15, 0.55);
+  }
+  /* the list's columns sit the panel's 30px below it, the panel's margin alone (v153's 26px top margin would collapse
+     into it on one layout and add to it on another) */
+  .qc151.qc153 > .qc1531-hd.qc1531-hd + .qc153-cl { margin-top: 0; }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd h1.qc1531-t { color: #fbf7f0 !important; }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-for i { background: rgba(244, 238, 229, 0.35); }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-for span,
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-for em { color: #f4eee5; }
+  /* the buttons, inverted for navy: "+ Log a query" the page's one filled button, "Record a response" a cream ring */
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-b--n { background: #f4eee5; color: #2a3a52; }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-b--n:hover { background: #fbf7f0; }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-b--g { background: transparent; color: #f4eee5; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.6); }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-b--g:hover { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.9); background: rgba(244, 238, 229, 0.06); }
+  .qc151.qc153 > .qc1531-hd.qc1531-hd .qc1531-b:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+}
+
+/* ── §2 · "this week" as a line, straight on the navy (QcLine156): the ref's .zalt, 380 wide against the list's right
+   edge. 44px typewriter headline with its italic on the same baseline; a 74px line; the caption 6px under it; the
+   footer 14px under that over a fine rule. ─────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151 .qc156-wk { box-sizing: border-box; width: 380px; max-width: 100%; color: #f4eee5; }
+  .qc151 .qc156-big { display: flex; align-items: baseline; gap: 12px; min-height: 44px; }
+  .qc151 .qc156-big b { font: 400 44px/1 var(--sp-type) !important; color: #fbf7f0; white-space: nowrap; }
+  .qc151 .qc156-big small { font: italic 400 17px/1.2 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.85); white-space: nowrap; }
+  .qc151 .qc156-ln { display: block; width: 100%; height: 74px; margin-top: 10px; overflow: visible; }
+  .qc151 .qc156-cap { display: flex; justify-content: space-between; margin-top: 6px; font: 400 12.5px/1.35 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.65); }
+  .qc151 .qc156-ft {
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-top: 14px; padding-top: 12px;
+    border-top: 1px solid rgba(244, 238, 229, 0.22); min-height: 34px; box-sizing: border-box;
+  }
+  .qc151 .qc156-ft b { display: flex; align-items: center; gap: 6px; flex: none; font: 600 15px/1.4 var(--sp-serif) !important; color: #fbf7f0; white-space: nowrap; }
+  .qc151 .qc156-ft b svg { flex: none; }
+  .qc151 .qc156-ft em { margin-left: auto; font: italic 400 15px/1.4 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.88); text-align: right; }
+  /* loading: the rows hold their final boxes and show nothing until the data lands (v155 §3) */
+  .qc151 .qc156-wk[data-qc155="goal-hold"] > * { visibility: hidden; }
+}

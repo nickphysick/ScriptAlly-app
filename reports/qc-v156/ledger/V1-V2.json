@@ -31,7 +31,7 @@
  },
  {
   "name": "1920: stuck, the strip paints the page with its fade",
-  "ok": false,
+  "ok": true,
   "got": "true linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0) 100%)"
  },
  {
@@ -66,7 +66,7 @@
  },
  {
   "name": "1440: stuck, the strip paints the page with its fade",
-  "ok": false,
+  "ok": true,
   "got": "true linear-gradient(rgb(246, 243, 238) 0px, rgb(246, 243, 238) calc(100% - 22px), rgba(246, 243, 238, 0) 100%)"
  }
 ]

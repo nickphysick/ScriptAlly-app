@@ -34,10 +34,11 @@ class Ledger {
   }
 }
 
-async function openQc(page: Page, vp: { width: number; height: number }) {
-  await page.addInitScript(() => {
+async function openQc(page: Page, vp: { width: number; height: number }, goal?: "streak" | "none" | "met") {
+  await page.addInitScript((g) => {
     try { localStorage.setItem("sa.guide.queries", "1"); localStorage.setItem("sa.guide.queries-explainer", "1"); } catch { /* private */ }
-  });
+    if (g) (window as unknown as Record<string, unknown>).__SA_QC156_GOAL = g;
+  }, goal ?? null);
   await openRoute(page, "/queries", vp);
   await page.waitForSelector(`${PAGE} [data-qc153="bar"]`, { timeout: 60_000 });
   const b = page.locator(`${PAGE} [data-qc153="bar"] button[data-v="list"]`);
@@ -158,5 +159,61 @@ test.describe("Query Centre v156", () => {
       await scrollTo(page, 0);
     }
     L.done(14);
+  });
+  /* V3 (§1–2) — the navy panel: fill, radius, shadow, 8px above and 30px below, the three columns on the page's grid
+     (hawk over the filter column, the title on the list's left edge, the week block on the list's right edge); the
+     line with its text alternative; the three header screens (streak, none, met) through the dev-only aid. */
+  test("V3 — the navy header and its line", async ({ page }) => {
+    test.skip(PHASE === "before", "after only");
+    const L = new Ledger("V3");
+    for (const vp of SIZES) {
+      await openQc(page, vp);
+      const r = await page.evaluate((sel) => {
+        const root = document.querySelector<HTMLElement>(sel)!;
+        const hd = root.querySelector<HTMLElement>("[data-qc1531='header']")!;
+        const b = (e: Element | null | undefined) => { const x = e?.getBoundingClientRect(); return x ? { l: x.left, r: x.right, t: x.top, b: x.bottom, w: x.width, h: x.height } : null; };
+        const cs = getComputedStyle(hd);
+        const line = root.querySelector<SVGElement>("[data-qc156='line']");
+        const rootTop = root.getBoundingClientRect().top;
+        return {
+          bg: cs.backgroundColor, radius: cs.borderRadius, shadow: cs.boxShadow, mt: cs.marginTop, pad: cs.padding,
+          hd: b(hd), root: b(root), aboveRoot: hd.getBoundingClientRect().top - rootTop,
+          cols: b(root.querySelector(".qc153-cl")), rail: b(root.querySelector("[data-qc153='rail-column']")), list: b(root.querySelector("[data-qc153='list-column']")),
+          art: b(root.querySelector(".qc1531-art img")), title: b(root.querySelector("[data-qc151='title']")), wk: b(root.querySelector("[data-qc156='week']")),
+          titleInk: getComputedStyle(root.querySelector("[data-qc151='title']")!).color,
+          logBg: getComputedStyle(root.querySelector("[data-qc151='log']")!).backgroundColor, logInk: getComputedStyle(root.querySelector("[data-qc151='log']")!).color,
+          recBg: getComputedStyle(root.querySelector("[data-qc151='record']")!).backgroundColor, recRing: getComputedStyle(root.querySelector("[data-qc151='record']")!).boxShadow,
+          lineH: line?.getBoundingClientRect().height ?? 0, alt: line?.getAttribute("aria-label") ?? "", pts: (line?.querySelector("[data-qc156='stroke']")?.getAttribute("d") ?? "").split(/[ML]/).filter(Boolean).length,
+          bars: root.querySelectorAll("[data-qc154='bar']").length, head: root.querySelector("[data-qc156='week-headline']")?.textContent ?? "",
+        };
+      }, PAGE);
+      const w = vp.width;
+      L.check(`${w}: the panel is navy, 20px radius, the ref's shadow`, r.bg === "rgb(42, 58, 82)" && r.radius === "20px" && r.shadow === "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px", `${r.bg} / ${r.radius} / ${r.shadow}`);
+      L.check(`${w}: padding 22 30 22 0, 8px above`, r.pad === "22px 30px 22px 0px" && r.mt === "8px", `${r.pad} / ${r.mt}`);
+      L.check(`${w}: it spans the content width (filter column + list column)`, !!r.cols && !!r.hd && Math.abs(r.hd.l - r.cols.l) < 1 && Math.abs(r.hd.r - r.cols.r) < 1, `hd ${r.hd?.l}–${r.hd?.r} · cols ${r.cols?.l}–${r.cols?.r}`);
+      L.check(`${w}: 30px between the panel and the columns`, !!r.cols && !!r.hd && Math.abs(r.cols.t - r.hd.b - 30) < 1, `${(r.cols!.t - r.hd!.b).toFixed(2)}`);
+      L.check(`${w}: the hawk is 190 wide, centred over the filter column, inside the panel`, !!r.art && !!r.rail && Math.abs(r.art.w - 190) < 1 && Math.abs((r.art.l + r.art.r) / 2 - (r.rail.l + r.rail.r) / 2) < 1.5 && r.art.t >= r.hd!.t && r.art.b <= r.hd!.b, `art ${r.art?.l}–${r.art?.r} · rail ${r.rail?.l}–${r.rail?.r}`);
+      L.check(`${w}: the title starts on the list column's left edge`, !!r.title && !!r.list && Math.abs(r.title.l - r.list.l) < 1, `${r.title?.l} vs ${r.list?.l}`);
+      L.check(`${w}: the week block ends 30px inside the panel (the list's right edge)`, !!r.wk && Math.abs(r.wk.r - (r.hd!.r - 30)) < 1, `${r.wk?.r} vs ${r.hd!.r - 30}`);
+      L.check(`${w}: the panel is about 237px tall (ref 243 with its paragraph hidden)`, r.hd!.h > 225 && r.hd!.h < 250, `${r.hd!.h.toFixed(1)}`);
+      L.check(`${w}: cream title, inverted buttons`, r.titleInk === "rgb(251, 247, 240)" && r.logBg === "rgb(244, 238, 229)" && r.logInk === "rgb(42, 58, 82)" && r.recBg === "rgba(0, 0, 0, 0)" && /rgba\(244, 238, 229, 0\.6\) 0px 0px 0px 1\.5px inset/.test(r.recRing), `${r.titleInk} · ${r.logBg}/${r.logInk} · ${r.recBg} ${r.recRing}`);
+      L.check(`${w}: the line is 74px with 20 points and a text alternative; no bars`, Math.abs(r.lineH - 74) < 0.5 && r.pts === 20 && /^Queries sent per week over the last 20 weeks\. This week: \d+ of \d+\.$/.test(r.alt) && r.bars === 0, `${r.lineH} · ${r.pts} · "${r.alt}" · bars ${r.bars}`);
+      L.check(`${w}: the headline reads "n of goal sent this week"`, /^\d+ of \d+sent this week$/.test(r.head), r.head);
+      if (w === 1920) await page.screenshot({ path: `${SHOTS}/v3-page-1920.png` });
+    }
+    for (const g of ["streak", "none", "met"] as const) {
+      await page.context().clearCookies().catch(() => {});
+      await openQc(page, SIZES[0], g);
+      const t = await page.evaluate((sel) => ({
+        streak: document.querySelector(`${sel} [data-qc156='streak']`)?.textContent ?? null,
+        nudge: document.querySelector(`${sel} [data-qc156='nudge']`)?.textContent ?? null,
+        head: document.querySelector(`${sel} [data-qc156='week-headline'] b`)?.textContent ?? null,
+      }), PAGE);
+      const want = g === "streak" ? /keeps the streak going\.$/ : g === "met" ? /^Goal met — nice work\.$/ : /more to hit your goal this week\.$/;
+      L.check(`aid ${g}: ${t.head} · ${t.streak ?? "no streak"} · ${t.nudge}`, want.test(t.nudge ?? "") && (g === "none" ? t.streak === null : /^6-week streak$/.test(t.streak ?? "")), `${t.head} · ${t.streak} · ${t.nudge}`);
+      const box = await page.locator(`${PAGE} [data-qc1531='header']`).boundingBox();
+      if (box) await page.screenshot({ path: `${SHOTS}/v3-header-${g}-1920.png`, clip: { x: box.x - 20, y: box.y - 20, width: box.width + 40, height: box.height + 60 } });
+    }
+    L.done(25);
   });
 });
