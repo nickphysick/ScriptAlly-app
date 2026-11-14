@@ -54,14 +54,16 @@ describe("the Free and Pro columns agree with canUse for every Pro feature", () 
 });
 
 describe("each of the four account states renders its own headline", () => {
+  /* re-pointed (plans v3): the headlines are design-refs/plans-v3.html's; the Pro one is written for the run, since
+     the ref's "until <date>" is a bought end date the app does not hold */
   const head = (k: keyof typeof STATES) => { ENT = STATES[k]; const h = html(<PlansPage />); const m = h.match(/<h1 class="sc-ttl-h">([^<]*)<\/h1>/); return m?.[1]; };
-  it("founding", () => expect(head("founding")).toBe("You're a founding writer. Nothing to choose, nothing to pay."));
-  it("in the 14 days: Free, with the days of Pro left", () => {
-    expect(head("trial")).toBe("You're on the Free plan.");
-    expect(html(<PlansPage />)).toContain("You have 5 days of Pro left.");
+  it("founding", () => expect(head("founding")).toBe("The early bird gets the worm."));
+  it("in the 14 days: the days of Pro left, in the headline", () => {
+    expect(head("trial")).toBe("You have 5 days of Pro left.");
+    expect(html(<PlansPage />)).toContain("After that you're on Free. Nothing you've made is deleted.");
   });
-  it("Free", () => { expect(head("free")).toBe("You're on the Free plan."); expect(html(<PlansPage />)).not.toContain("of Pro left"); });
-  it("Pro", () => expect(head("pro")).toBe("You're on Pro. Everything's included."));
+  it("Free", () => { expect(head("free")).toBe("You're on Free."); expect(html(<PlansPage />)).not.toContain("of Pro left"); });
+  it("Pro", () => expect(head("pro")).toBe("You're on Pro."));
   it("four different pages", () => {
     const pages = (Object.keys(STATES) as (keyof typeof STATES)[]).map((k) => { ENT = STATES[k]; return html(<PlansPage />).match(/data-plans-state="([a-z]+)"/)?.[1]; });
     expect(pages).toEqual(["founding", "trial", "free", "pro"]);

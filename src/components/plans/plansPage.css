@@ -1,38 +1,104 @@
-/* The Plans page (non-workspace v1, Phase 4; design-refs/plans-v2.html). Layout only; the cards are settings' own. */
+/* The Plans page (plans v3; design-refs/plans-v3.html). Three plan cards and closed rows under them. The cards are the
+   page's own `.pl-tier` (white, and navy for Pro); the founding card's pink is the founding pass's, named here once.
+   ⚠️ NO LOOSE COLOUR LITERALS FOR THE FOUNDING CARD — read the four tokens below. */
+.pl-page {
+  /* the founding pass's pink (the marketing side's --mk-join) — the founding card's border */
+  --pl-found: #e8b4a3;
+  /* the ref's paler tint — the founding card's body */
+  --pl-found-body: #f3cfc3;
+  /* the ref's palest — the founding card's illustration panel */
+  --pl-found-art: #fdf4ef;
+  /* after launch, the closed founding pass: paler again */
+  --pl-found-closed: #f8e6df;
+}
 .pl-work { display: grid; gap: 18px; }
-.pl-crumb { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 14px; min-height: 24px; color: var(--sp-ink); }
+.pl-crumb { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; font-size: 14px; min-height: 24px; color: var(--sp-ink); justify-self: start; }
 .pl-crumb svg { width: 16px; height: 16px; }
-.pl-then h2 { font-family: var(--sp-type); font-weight: 400; font-size: 22px; margin: 8px 0 4px; }
-.pl-then p { margin: 0; font-size: 16px; }
-.pl-tiers { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-.pl-tier { background: #fff; border: 1px solid #e0d5c8; border-radius: 12px; padding: 20px; }
+.pl-crumb:focus-visible { outline: 2px solid var(--ink-band); outline-offset: 2px; }
+
+/* ── the header: stacked on this page, the subheader at 18px under the h1 ──
+   ⚠️ THE SETTINGS CHASSIS SETS `.acct-page .sc-ttl` TO A FLEX ROW at ≥768 (0-2-0 / 0-3-0); these name one class more. */
+.acct-page.pl-page .sc-ttl { display: block; }
+.acct-page.pl-page .sc-ttl .sc-ttl-d { margin: 12px 0 0; font-size: 18px; }
+
+/* ── the three cards ── */
+.pl3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: stretch; margin-top: 26px; padding: 6px 0 10px; }
+.pl-tier { background: #fff; border: 1px solid #e0d5c8; border-radius: 18px; color: var(--sp-ink); display: flex; flex-direction: column; overflow: hidden; }
 .pl-tier--pro { background: var(--ink-band); color: var(--ink-cream); border-color: var(--ink-band); }
-.pl-tier h3 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0; font-family: var(--sp-type); font-weight: 400; font-size: 24px; }
-.pl-tier .plt-chip svg { width: 14px; height: 14px; }
-.pl-price { margin-top: 10px; display: flex; align-items: baseline; gap: 8px; }
-.pl-price b { font-size: 30px; font-weight: 600; }
-.pl-price span { font-size: 16px; }
-.pl-sub { margin: 4px 0 0; font-size: 14px; opacity: .8; }
+.pl3-found { background: var(--pl-found-body); border-color: var(--pl-found); color: var(--sp-ink); }
+
+.pl3-art { position: relative; height: 176px; display: flex; align-items: flex-end; justify-content: center; background: var(--ink-paper); border-bottom: 1px solid rgba(28, 19, 15, .08); }
+.pl-tier--pro .pl3-art { background: var(--ink-cream); }
+.pl3-found .pl3-art { background: var(--pl-found-art); }
+.pl3-art img { height: 164px; width: auto; display: block; }
+.pl3-pill { position: absolute; top: 12px; left: 12px; padding: 4px 12px; border-radius: 999px; font-size: 14px; line-height: 1.4; background: #fff; color: var(--sp-ink); box-shadow: 0 0 0 1px rgba(28, 19, 15, .12); }
+.is-lead .pl3-pill { background: var(--ink-band); color: var(--ink-cream); box-shadow: none; font-weight: 600; }
+.pl3-art .plt-chip { position: absolute; top: 12px; right: 12px; background: #fff; color: var(--sp-ink); box-shadow: 0 0 0 1px rgba(28, 19, 15, .12); }
+.pl3-art .plt-chip svg { width: 14px; height: 14px; }
+
+.pl3-in { padding: 22px 24px 24px; display: flex; flex-direction: column; flex: 1; }
+/* ⚠️ brand.tsx forces h1/h2/h3 to the brand serif with `!important`: the typewriter takes two classes and `!important` */
+.pl-page .pl-tier h3 { margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 26px; line-height: 1.2; }
+.pl3-tag { margin: 6px 0 0; font-size: 16px; line-height: 1.4; min-height: 45px; opacity: .86; }
+.pl-price { margin-top: 14px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.pl-price b { font-size: 38px; line-height: 1; font-weight: 600; }
+.pl-price span { font-size: 16px; opacity: .85; }
+.pl-sub { margin: 4px 0 0; font-size: 14px; opacity: .8; min-height: 20px; }
 .pl-tier hr { border: 0; border-top: 1px solid currentColor; opacity: .15; margin: 16px 0; }
 .pl-feat { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 16px; }
 .pl-feat li { display: flex; gap: 8px; align-items: flex-start; }
 .pl-feat svg { width: 16px; height: 16px; flex: none; margin-top: 3px; }
 .pl-lead { font-weight: 600; }
-.pl-len { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
-.pl-len button { all: unset; cursor: pointer; display: grid; gap: 2px; text-align: center; padding: 8px 4px; min-height: 24px; border-radius: 10px; border: 1px solid rgba(244, 238, 229, .3); position: relative; }
+
+/* the length picker, two by two */
+.pl-len { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-top: 14px; }
+.pl-len button { all: unset; cursor: pointer; display: grid; gap: 2px; text-align: center; padding: 8px 4px; min-height: 24px; border-radius: 10px; border: 1px solid rgba(244, 238, 229, .3); }
 .pl-len button[aria-checked="true"] { background: var(--ink-cream); color: var(--ink-band); }
 .pl-len button:focus-visible { outline: 2px solid var(--ink-cream); outline-offset: 2px; }
-.pl-len em { font-style: normal; font-size: 12px; }
-.pl-len b { font-size: 14px; }
-.pl-len span { font-size: 14px; }
-.pl-small { font-size: 14px; margin: 0; }
-.pl-incl { list-style: none; margin: 0; padding: 4px 0 8px; display: grid; gap: 8px; font-size: 16px; }
-.pl-incl li { display: flex; gap: 8px; }
-.pl-incl svg { width: 16px; height: 16px; flex: none; margin-top: 3px; }
+.pl-len b, .pl-len span { font-size: 14px; }
+
+.pl3-foot { margin-top: auto; padding-top: 18px; font-size: 14px; }
+.pl3-foot .plt-cream { display: block; text-align: center; box-sizing: border-box; width: 100%; }
+.pl3-foot .plt-cream:focus-visible { outline: 2px solid var(--ink-cream); outline-offset: 2px; }
+
+/* ── the lead card, and the cards that step back ──
+   ⚠️ EXACTLY ONE `.is-lead` PER VIEWER (plansModel). Its transform is the only rotation on the page. */
+.pl3 .is-lead { position: relative; z-index: 1; transform: rotate(-1.4deg) translateY(-10px); box-shadow: 0 0 0 2px var(--ink-terra-deep), 0 30px 44px -22px rgba(28, 19, 15, .55); }
+.pl3 .pl-tier--pro.is-lead { box-shadow: 0 0 0 2px var(--ink-band), 0 30px 44px -22px rgba(28, 19, 15, .55); }
+.pl3 .is-wait { opacity: .8; filter: saturate(.85); transform: scale(.97); box-shadow: none; }
+/* the closed founding pass steps back further: paler, its words and picture faded */
+.pl3 .is-closed { background: var(--pl-found-closed); }
+.pl3 .is-closed .pl3-in { opacity: .6; }
+.pl3 .is-closed .pl3-art img { opacity: .55; }
+
+/* ── the closed rows under the cards ── */
+.pl3-more { margin-top: 4px; border-top: 1px solid rgba(28, 19, 15, .1); }
+.pl3-more > details { border-bottom: 1px solid rgba(28, 19, 15, .1); }
+.pl3-more > details > summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 0; font-size: 17px; font-weight: 600; min-height: 24px; }
+.pl3-more > details > summary::-webkit-details-marker { display: none; }
+.pl3-more > details > summary svg { width: 18px; height: 18px; flex: none; }
+.pl3-more > details[open] > summary svg { transform: rotate(180deg); }
+.pl3-more > details > summary:focus-visible { outline: 2px solid var(--ink-band); outline-offset: 2px; }
+.pl3-more .plt { margin-bottom: 18px; }
+
+/* the questions, inside "Questions" */
 .pl-q { border-top: 1px solid #efe6db; padding: 12px 0; }
+.pl-q:first-of-type { border-top: 0; }
+.pl-q:last-child { margin-bottom: 8px; }
 .pl-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 10px; font-weight: 600; font-size: 16px; min-height: 24px; }
+.pl-q summary::-webkit-details-marker { display: none; }
 .pl-q summary svg { width: 18px; height: 18px; flex: none; }
 .pl-q[open] summary svg { transform: rotate(180deg); }
 .pl-q p { margin: 8px 0 0; font-size: 16px; }
-.pl-btn { display: inline-flex; align-items: center; padding: 9px 16px; min-height: 36px; border-radius: 8px; }
-@media (max-width: 767.98px) { .pl-tiers { grid-template-columns: 1fr; } .pl-len { grid-template-columns: repeat(2, 1fr); } }
+
+/* ── narrow: one column, the lead card first and tilted less; nothing scaled ── */
+@media (max-width: 900px) {
+  .pl3 { grid-template-columns: minmax(0, 1fr); }
+  .pl3 .is-lead { order: -1; transform: rotate(-0.8deg); }
+  .pl3 .is-wait { transform: none; }
+}
+/* below md the route draws the phone's own plan page; this page reaches this width only in #/plans-lab, at the ref's
+   16px gutter */
+@media (max-width: 767.98px) {
+  .acct-page.pl-page .acct-plane { padding: 22px 16px 40px; }
+}

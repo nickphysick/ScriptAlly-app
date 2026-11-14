@@ -75,6 +75,7 @@ import { MaterialsRoute } from "./components/phone/v5/MaterialsV5";
 import { PhoneMaterialsHost } from "./components/phone/materials/PhoneMaterialsHost";
 import { StatusDotDemo } from "./components/StatusDotDemo";
 import { PlansPage } from "./components/PlansPage";
+import { PlansLab } from "./components/plans/PlansLab";
 import { QueryStatus, SubmissionMethod, UserPlan } from "./types";
 // TEMP: Form11Drawer review harness (#/drawer-lab) — renders the Edit Agent / Edit Query drawers over
 // a mock record so the shared shell can be eyeballed without signing in. DEV only.
@@ -417,6 +418,12 @@ function AppContent() {
   }
   if (import.meta.env.MODE !== "production" && hash.startsWith("#/onb-lab")) {
     return <OnbLab />;
+  }
+  /* #/plans-lab — the Plans page for any viewer (plans v3). Today every account is a founding writer, so the three
+     after-launch states and the selling flag can be seen and measured nowhere else; `?v=founding|trial|free|pro`,
+     `&days=N`, `&sell=1`. MODE first, as the labs above. */
+  if (import.meta.env.MODE !== "production" && hash.startsWith("#/plans-lab")) {
+    return <PlansLab hash={hash} />;
   }
   // Dev-only notes review surface (PostIt / quick-add / editor) — local state, no persistence.
   if (hash === "#/notes-lab" && import.meta.env.DEV) {
