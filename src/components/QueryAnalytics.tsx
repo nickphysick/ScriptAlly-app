@@ -29,7 +29,7 @@ import { analyticsModel } from "../lib/analyticsModel";
 import { openQueryDrawer } from "../lib/queryActions/drawerStore";
 import { limitForReview } from "../lib/analyticsReviewAid";
 import { Glance, SectionTab, Skeleton, TipProvider, useReveal } from "./analytics/A17Frame";
-import { A21Header, usePhone } from "./analytics/A21Header";
+import { AnHeader, usePhone } from "./analytics/A21Header";
 import { A21Desk } from "./analytics/A21Desk";
 import { Sx } from "./analytics/A24Frame";
 import { S1Body, s1Readings } from "./analytics/A24S1";
@@ -116,7 +116,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
       </p>
     );
   } else if (empty) {
-    body = <A21Empty title={manuscript?.title || null} onImport={() => onNavigate?.("import")} />;
+    body = <A21Empty onImport={() => onNavigate?.("import")} />;
   } else {
     /* v24 §C: seven question sections, each answering its question in its first sentence */
     const h = heads(v24);
@@ -141,11 +141,13 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
       <WorkspacePageGrid className="qa-wpg" scrollLabel="Analytics" masthead={null}>
         <div className={pageClass} ref={pageRef} data-a17="page" data-sent={model.sent} data-dated={v.dated} data-ms={manuscript?.id ?? ""} data-phase={load.phase}>
           <TipProvider>
-            {/* v21 §A: the desktop opens on the light header; the phone keeps v17's band (decision 5) */}
-            {!phone && !empty && manuscript !== null ? (
-              <A21Header loading={load.loading} sent={model.sent} replies={v24.tally.all} msTitle={manuscript.title || null}
-                rows={load.loading ? null : v21.standing} inside={load.loading ? null : ringOf(v24.keeping)}
-                onRecord={record} onRead={() => go(0)} onRing={() => go(3)} />
+            {/* Workspace headers v1: the desktop opens on the shared navy header, in every state; the phone keeps v17's
+                band (decision 5) */}
+            {!phone ? (
+              <AnHeader loading={load.loading} empty={empty} noMs={!load.loading && manuscript === null}
+                sent={model.sent} replies={v24.tally.all} msTitle={manuscript?.title || null}
+                ring={load.loading ? null : ringOf(v24.keeping)}
+                onRecord={record} onRead={() => go(0)} onLog={() => openQueryDrawer({ mode: "log" })} onImport={() => onNavigate?.("import")} />
             ) : null}
             {phone && !empty ? <PageHeader
               variant="full"

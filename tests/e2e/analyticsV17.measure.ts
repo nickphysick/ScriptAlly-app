@@ -240,7 +240,8 @@ test("AN17-16 · thin sample", async ({ page }) => {
     /* every FIGURE: the strip's numbers, the readings, the records' values, the funnel counts */
     /* REWRITTEN (analytics v21): on the desktop the strip is the desk, and the records are v21's */
     /* REWRITTEN (analytics v24): the readings are v24's (`reading-fig`); the funnel and the records are deleted */
-    const figs = [...p.querySelectorAll<HTMLElement>('[data-a21="desk-figure"], [data-a21="desk-n"], [data-a24="reading-fig"], [data-a21="card-n"]')]
+    /* RE-POINTED (Workspace headers v1, 14 Nov): `[data-a21="card-n"]` dropped — the header's four-row legend is gone, with no figure in its place */
+    const figs = [...p.querySelectorAll<HTMLElement>('[data-a21="desk-figure"], [data-a21="desk-n"], [data-a24="reading-fig"]')]
       .filter((e) => e.getBoundingClientRect().width > 0)
       /* ⚠️ EXEMPT BY RULING (analytics v24.1): "Replies due"'s two row chips show a zero as "0" — the prompt states it
          ("Zeros show as '0'; the rows stay") and AN24-B2 asserts it. The only figures on the page the rule spares. */

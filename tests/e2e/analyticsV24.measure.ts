@@ -157,15 +157,16 @@ test("AN24-A3 · ring", async ({ page }) => {
   for (const w of [1512, 1280]) {
     await open(page, w);
     const m = await model(page);
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the ring left the white card for the navy header's right block — `[data-wsnh="right"]`'s ring, arc, figure, name and sub-line */
     const r = await page.evaluate(() => {
-      const c = [...document.querySelectorAll<HTMLElement>('[data-a21="card"]')].find((e) => e.getBoundingClientRect().height > 0);
+      const c = [...document.querySelectorAll<HTMLElement>('[data-wsnh-page="analytics"] [data-wsnh="right"]')].find((e) => e.getBoundingClientRect().height > 0);
       if (!c) return null;
-      const arc = c.querySelector<SVGCircleElement>('[data-a21="ring-arc"]');
+      const arc = c.querySelector<SVGCircleElement>('[data-wsnh="ring-arc"]');
       return {
-        label: c.querySelector('[data-a21="ring-label"]')?.textContent ?? null, sub: c.querySelector('[data-a21="ring-sub"]')?.textContent ?? null,
-        dash: arc ? parseFloat(arc.getAttribute("stroke-dasharray") ?? "0") : null, r: arc ? Number(arc.getAttribute("r")) : 34,
-        pct: c.querySelector('[data-a21="ring-pct"]')?.textContent ?? null,
-        strokes: [...c.querySelectorAll<SVGCircleElement>('[data-a21="ring"] circle')].map((x) => getComputedStyle(x).stroke),
+        label: c.querySelector('[data-wsnh="name"]')?.textContent ?? null, sub: c.querySelector('[data-wsnh="sub"]')?.textContent ?? null,
+        dash: arc ? parseFloat(arc.getAttribute("stroke-dasharray") ?? "0") : null, r: arc ? Number(arc.getAttribute("r")) : 50,
+        pct: c.querySelector('[data-wsnh="ring-pct"]')?.textContent ?? null,
+        strokes: [...c.querySelectorAll<SVGCircleElement>('[data-wsnh="ring"] circle')].map((x) => getComputedStyle(x).stroke),
       };
     });
     const ww = `${w}`;
@@ -178,17 +179,23 @@ test("AN24-A3 · ring", async ({ page }) => {
     else {
       const share = k.kept.length / placed;
       const want = share * 2 * Math.PI * r.r;
-      L.check("A3 the arc is kept ÷ placed (±1%)", ww, r.dash !== null && Math.abs(r.dash - want) <= 2 * Math.PI * r.r * 0.01, `${r.dash} vs ${want.toFixed(2)}`);
+      /* the shared ring draws no arc at 0% (the track alone), so a missing arc reads as a zero-length one */
+      L.check("A3 the arc is kept ÷ placed (±1%)", ww, Math.abs((r.dash ?? 0) - want) <= 2 * Math.PI * r.r * 0.01, `${r.dash} vs ${want.toFixed(2)}`);
       L.check("A3 the figure is the share", ww, r.pct === `${Math.round(share * 100)}%`, `${r.pct}`);
       L.check("A3 the line is 'kept of the placed replies'", ww, r.sub === `${k.kept.length} of the ${placed} ${placed === 1 ? "reply" : "replies"}`, `${r.sub}`);
     }
     L.check("A3 no rust in the ring", ww, r.strokes.every((s) => !RUSTS.includes(s)), r.strokes.join(" "));
+    /* RETIRED (Workspace headers v1, 14 Nov): "pressing it scrolls S4 into view" — v21's ring panel was a button; the
+       shared header's ring is a figure (aria-hidden, no handler), and "See what happened ↓" (`[data-a21="read"]`) is the
+       way down. Successor: tests/e2e/wsHeaders.measure.ts H6 "analytics". The block, as it stood:
     await page.locator('[data-a21="ring-panel"]:visible').first().click();
     await page.waitForTimeout(1200);
     const at = await secTop(page, 3);
     L.check("A3 pressing it scrolls S4 into view", ww, !!at && at.top > -60 && at.top < at.h * 0.5, `${at?.top.toFixed(0)}`);
+    */
   }
-  L.done(10);
+  /* RE-POINTED (Workspace headers v1, 14 Nov): floor 10 → 8 — one reading per width went with the retired scroll check */
+  L.done(8);
 });
 
 /* ════════════ B1 · the desk ════════════ */
@@ -589,7 +596,10 @@ test.describe("AN24-I1", () => {
       L.check(`I1 ${w <= 760 ? "no arrows on the phone" : "two arrows"}`, ww, r.arrows === (w <= 760 ? 0 : 2), `${r.arrows}`);
       L.check("I1 three art slots and three tiles", ww, r.slots === 3 && r.tiles === 3, `${r.slots} ${r.tiles}`);
       L.check("I1 v21's example card is gone", ww, !r.example, `${r.example}`);
-      L.check("I1 the navy panel's Archivist and the three ways stand", ww, /analytics-archivist\.webp/.test(r.art) && r.ways === 3, `${r.art} ${r.ways}`);
+      /* RETIRED (Workspace headers v1, 14 Nov): the navy panel's Archivist (`[data-a21="empty-art"]`) — the panel is the
+         page's navy header in its day-one state now. Successor: tests/e2e/wsHeaders.measure.ts H9 "analytics".
+         The three ways still stand: */
+      L.check("I1 the three ways stand", ww, r.ways === 3, `${r.ways}`);
       L.check("I1 the tiles' numbers are not counted", ww, r.sent === "0", `${r.sent}`);
     }
     const written = execSync("node tests/e2e/seedAn21.mjs count", { encoding: "utf8" }).trim();
@@ -600,8 +610,9 @@ test.describe("AN24-I1", () => {
 
 /* ════════════ v24.1 · B2 thin, R1 replies, R2 dates — on seeded manuscripts (tests/e2e/seedAn24.mjs), restored in the run ════════════ */
 const readHeader = (page: Page) => page.evaluate(() => {
-  const h = [...document.querySelectorAll<HTMLElement>('[data-a21="title"]')].find((e) => e.getBoundingClientRect().height > 0);
-  const t = (h?.getAttribute("aria-label") ?? "").match(/^(\d+) quer(?:y|ies), (no|\d+) repl/);
+  /* RE-POINTED (Workspace headers v1, 14 Nov): the headline is the navy header's title (`[data-wsnh="title"]`), read by aria-label or its text */
+  const h = [...document.querySelectorAll<HTMLElement>('[data-wsnh-page="analytics"] [data-wsnh="title"]')].find((e) => e.getBoundingClientRect().height > 0);
+  const t = (h?.getAttribute("aria-label") || (h?.textContent ?? "").replace(/\s+/g, " ").trim()).match(/^(\d+) quer(?:y|ies), (no|\d+) repl/);
   return t ? { sent: Number(t[1]), replies: t[2] === "no" ? 0 : Number(t[2]) } : null;
 });
 test.describe("AN24 v24.1 fixtures", () => {
