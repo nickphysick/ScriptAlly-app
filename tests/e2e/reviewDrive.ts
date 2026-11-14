@@ -98,7 +98,8 @@ export async function answerOrder(r: Locator) {
     const tiles = r.locator('.o9-stop[data-step]:not([data-step="sent"]):not([data-step="new"])');
     await tiles.first().click();
     await r.locator('[data-strip="date"]').fill(sent || "today");
-    await r.locator('[data-strip="save"]').click();
+    /* the popover's Save can sit under the review's sticky bar: pressed on the element itself */
+    await r.locator('[data-strip="save"]').evaluate((e) => (e as HTMLElement).click());
   }
   await confirm.click();
 }

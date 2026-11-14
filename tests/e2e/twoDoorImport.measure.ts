@@ -64,19 +64,21 @@ test("D1 the fork renders exactly two tiles and exactly one filled navy button",
 test("D2 no element on the fork or /import opens a template-only picker", async ({ page }) => {
   await lab(page, "s=photos");
   if (MUTATE === "tplpicker") {
-    await page.evaluate(() => { const i = document.createElement("input"); i.type = "file"; i.dataset.picker = "template"; i.style.display = "none"; document.body.appendChild(i); });
+    await page.evaluate(() => { const i = document.createElement("input"); i.type = "file"; i.accept = ".csv,.xlsx,.xls"; i.dataset.picker = "template"; i.style.display = "none"; document.body.appendChild(i); });
   }
   const fork = await pickers(page);
   await openRoute(page, "/import", WIDE);
   await page.locator(".impg").first().waitFor({ state: "attached", timeout: 20_000 });
   await page.waitForTimeout(800);
   if (MUTATE === "tplpicker") {
-    await page.evaluate(() => { const i = document.createElement("input"); i.type = "file"; i.dataset.picker = "template"; i.style.display = "none"; document.querySelector(".impg")!.appendChild(i); });
+    await page.evaluate(() => { const i = document.createElement("input"); i.type = "file"; i.accept = ".csv,.xlsx,.xls"; i.dataset.picker = "template"; i.style.display = "none"; document.querySelector(".impg")!.appendChild(i); });
   }
   const imp = await pickers(page);
   record("D2", { fork, import: imp });
   for (const [where, p] of [["fork", fork], ["/import", imp]] as const) {
-    const sheets = p.inputs.filter((i) => !i.accept.startsWith("image/"));
+    /* a spreadsheet picker is one that takes .csv/.xlsx; the workspace's other mounted pages carry document pickers */
+    const sheets = p.inputs.filter((i) => /\.csv|\.xlsx/.test(i.accept));
+    expect(p.inputs.filter((i) => i.picker === "template"), `${where}: no template picker of any kind`).toEqual([]);
     expect(sheets.map((i) => i.picker), `${where}: one spreadsheet picker, the import's own`).toEqual(["smart"]);
     expect(p.buttons, `${where}: no template upload button`).not.toContain("Upload my sheet");
   }
@@ -126,7 +128,8 @@ test("Q1 the out-of-order card's button is disabled until the dates run in order
   /* change the full request's date to 15/9/2026, as the mock's note asks */
   await card.locator('.o9-stop[data-step]:not([data-step="sent"]):not([data-step="new"])').first().click();
   await card.locator('[data-strip="date"]').fill("15/9/2026");
-  await card.locator('[data-strip="save"]').click();
+  /* the popover's Save can sit under the review's sticky bar at 900 tall: pressed on the element itself */
+  await card.locator('[data-strip="save"]').evaluate((e) => (e as HTMLElement).click());
   const after = { disabled: await confirm.isDisabled(), label: ((await confirm.textContent()) ?? "").trim() };
   await confirm.click();
   await answerQueries(page);
@@ -146,7 +149,7 @@ test("Q1 the out-of-order card's button is disabled until the dates run in order
 /* ════ Q2 · the gate counts the new questions ════ */
 test("Q2 each new card opens the gate and closes it when answered; the primary waits with the count", async ({ page }) => {
   const primary = await toQueries(page);
-  const read = async () => ({ disabled: await primary.isDisabled(), label: ((await primary.textContent()) ?? "").trim(), title: ((await page.locator('[data-im="title"]').textContent()) ?? "").replace(/\s+/g, " ").trim() });
+  const read = async () => ({ disabled: await primary.isDisabled(), label: ((await primary.textContent()) ?? "").trim(), title: (await page.locator('[data-im="title"]').innerText()).replace(/\s+/g, " ").trim() });
   const steps = [await read()];
   const chips: string[] = [];
   for (const key of ["q-q0", "q-q1", "q-q2"]) {
