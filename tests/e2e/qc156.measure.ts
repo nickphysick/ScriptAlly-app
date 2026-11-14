@@ -242,6 +242,8 @@ test.describe("Query Centre v156", () => {
         groundL: slim && before ? r(slim).left + parseFloat(before.left) : null, groundR: slim && before ? r(slim).right - parseFloat(before.right) : null,
         portL: pr.left, portR: pr.left + port.clientWidth, groundBg: before?.backgroundColor, hair: before?.boxShadow,
         tbwTop: r(tbw).top - pr.top, barTop: r(bar).top - pr.top, railTop: r(rail).top - pr.top, railPos: getComputedStyle(rail).position,
+        /* sticky lets go at its column's foot: the card resting on it is not a pin reading */
+        railAtFoot: r(rail).bottom >= (rail.parentElement?.getBoundingClientRect().bottom ?? 0) - 1,
         hdBottom: r(hd).bottom - pr.top, transition: cs?.transitionDuration,
       };
     }, [PAGE, SCROLL]);
@@ -261,7 +263,7 @@ test.describe("Query Centre v156", () => {
         const c = await read();
         L.check(`${w} @${Math.round(y)}: shown, 60px, under the lip`, c.shown && c.opacity === "1" && !c.inert && Math.abs((c.slimH ?? 0) - 60) < 0.5 && Math.abs((c.slimTop ?? 0) - 12) < 1, `shown ${c.shown} h ${c.slimH} top ${c.slimTop}`);
         L.check(`${w} @${Math.round(y)}: the toolbar's top meets the bar's bottom within 1px`, Math.abs(c.tbwTop - (c.slimBottom ?? 0)) <= 1, `toolbar ${c.tbwTop.toFixed(2)} · bar bottom ${c.slimBottom?.toFixed(2)} · controls ${c.barTop.toFixed(2)}`);
-        if (c.railPos === "sticky") L.check(`${w} @${Math.round(y)}: the filter column's card pins 14px under the toolbar's bar`, Math.abs(c.railTop - c.barTop - 14) <= 1, `rail ${c.railTop.toFixed(2)} · bar ${c.barTop.toFixed(2)}`);
+        if (c.railPos === "sticky" && !c.railAtFoot) L.check(`${w} @${Math.round(y)}: the filter column's card pins 14px under the toolbar's bar`, Math.abs(c.railTop - c.barTop - 14) <= 1, `rail ${c.railTop.toFixed(2)} · bar ${c.barTop.toFixed(2)}`);
       }
       const c = await read();
       L.check(`${w}: the ground spans the sheet; the content is inset to the page's edges`, Math.abs((c.groundL ?? 0) - c.portL) <= 1 && Math.abs((c.groundR ?? 0) - c.portR) <= 1 && Math.abs((c.slimL ?? 0) - c.rootL) <= 1 && Math.abs((c.slimR ?? 0) - c.rootR) <= 1,
@@ -295,5 +297,92 @@ test.describe("Query Centre v156", () => {
     const cl1 = await page.evaluate(() => { const r = document.querySelector<HTMLElement>("[data-clh2='slim']"); const m = document.querySelector<HTMLElement>(".clv-main"); return { h: r?.getBoundingClientRect().height, shown: r?.hasAttribute("data-shown"), cover: m?.style.getPropertyValue("--pin-cover") }; });
     L.check("Contact list: the slim row is hidden at rest and shown at 800, 48px, writing --pin-cover 60px", cl0.shown === false && cl1.shown === true && cl0.h === 48 && cl1.h === 48 && cl1.cover === "60px", JSON.stringify({ cl0, cl1 }));
     L.done(25);
+  });
+  /* V5 (§6) — the Views panel: the card (268, white, 18px radius, the ring), pinned on scroll; a view replaces the
+     last and All queries clears it (the toolbar's count follows each); two statuses show the union; More filters opens
+     and shows its groups; Tab reaches every view and tick box. Screens: at rest, each view, More open; Birds-eye. */
+  test("V5 — the Views panel", async ({ page }) => {
+    test.skip(PHASE === "before", "after only");
+    const L = new Ledger("V5");
+    const V = `${PAGE} [data-qc156='views']`;
+    const showing = async () => Number((await page.locator(`${V} [data-qc156='showing']`).textContent())?.match(/\d+/)?.[0] ?? -1);
+    const checked = () => page.evaluate((v) => [...document.querySelectorAll(`${v} [data-qc156='view'][aria-checked='true']`)].map((e) => e.getAttribute("data-k")), V);
+    const viewN = (k: string) => page.locator(`${V} [data-qc156='view'][data-k='${k}']`).getAttribute("data-n").then(Number);
+    for (const vp of SIZES) {
+      const w = vp.width;
+      await openQc(page, vp);
+      const card = await page.evaluate((v) => {
+        const e = document.querySelector<HTMLElement>(v)!; const cs = getComputedStyle(e); const r = e.getBoundingClientRect();
+        return { w: r.width, h: r.height, bg: cs.backgroundColor, radius: cs.borderRadius, shadow: cs.boxShadow, pos: cs.position, rule: getComputedStyle(e.querySelector("[data-qc156='views-head']")!).boxShadow };
+      }, V);
+      L.check(`${w}: the card is white, 268 wide, 18px radius, the #e3dbcf ring`, card.bg === "rgb(255, 255, 255)" && Math.abs(card.w - 268) < 0.5 && card.radius === "18px" && /rgb\(227, 219, 207\) 0px 0px 0px 1px/.test(card.shadow), `${card.bg} ${card.w} ${card.radius} ${card.shadow}`);
+      L.check(`${w}: Views over the 2px navy rule`, /rgb\(42, 58, 82\) 0px -2px 0px 0px inset/.test(card.rule), card.rule);
+      L.check(`${w}: it pins (sticky; ${card.h.toFixed(0)}px tall)`, card.pos === "sticky", card.pos);
+      if (w === 1920) await page.screenshot({ path: `${SHOTS}/v5-rest-1920.png` });
+      const all = await showing();
+      L.check(`${w}: All queries is selected at rest; its count is what shows`, JSON.stringify(await checked()) === '["all"]' && (await viewN("all")) === all, `${await checked()} · ${all}`);
+      for (const k of ["you", "over", "wait", "offers"]) {
+        const n = await viewN(k);
+        if (n === 0) continue;
+        await page.locator(`${V} [data-qc156='view'][data-k='${k}']`).click();
+        await page.waitForTimeout(300);
+        const c = await checked(); const sh = await showing();
+        L.check(`${w}: ${k} replaces the last view and shows its ${n}`, JSON.stringify(c) === JSON.stringify([k]) && sh === n, `${c} · showing ${sh}`);
+        await page.screenshot({ path: `${SHOTS}/v5-view-${k}-${w}.png` });
+      }
+      await page.locator(`${V} [data-qc156='view'][data-k='all']`).click();
+      await page.waitForTimeout(300);
+      L.check(`${w}: All queries clears the view`, JSON.stringify(await checked()) === '["all"]' && (await showing()) === all, `${await checked()} · ${await showing()}`);
+      /* two statuses: the union */
+      const st = await page.evaluate((v) => [...document.querySelectorAll(`${v} [data-qc156='status']`)].map((e) => ({ k: e.getAttribute("data-k")!, n: Number(e.getAttribute("data-n")) })), V);
+      if (st.length >= 2) {
+        const [a, b] = st;
+        await page.locator(`${V} [data-qc156='status'][data-k='${a.k}']`).click();
+        await page.locator(`${V} [data-qc156='status'][data-k='${b.k}']`).click();
+        await page.waitForTimeout(300);
+        L.check(`${w}: ticking ${a.k} and ${b.k} shows the union (${a.n} + ${b.n})`, (await showing()) === a.n + b.n, `${await showing()}`);
+        await page.locator(`${V} [data-qc156='reset']`).click();
+        await page.waitForTimeout(300);
+        L.check(`${w}: Reset clears the ticks`, (await showing()) === all, `${await showing()}`);
+      }
+      /* More filters */
+      const mb = page.locator(`${V} [data-qc156='more-body']`);
+      L.check(`${w}: More filters is closed at rest`, !(await mb.isVisible()), "");
+      await page.locator(`${V} [data-qc156='more']`).click();
+      await page.waitForTimeout(200);
+      L.check(`${w}: More filters opens on What you sent and Dates`, (await mb.isVisible()) && (await mb.textContent())!.includes("What you sent") && (await mb.textContent())!.includes("Dates"), "");
+      if (w === 1920) await page.screenshot({ path: `${SHOTS}/v5-more-open-1920.png` });
+      await page.locator(`${V} [data-qc156='more']`).click();
+      /* keyboard: Tab from Reset reaches every view and every tick box */
+      if (w === 1920) {
+        await page.locator(`${V} [data-qc156='view'][data-k='all']`).focus();
+        const seen: string[] = [];
+        for (let i = 0; i < 16; i++) {
+          const f = await page.evaluate(() => { const e = document.activeElement as HTMLElement | null; const ring = e ? getComputedStyle(e).outlineStyle : ""; return `${e?.getAttribute("data-qc156")}:${e?.getAttribute("data-k") ?? ""}:${ring}`; });
+          seen.push(f);
+          await page.keyboard.press("Tab");
+        }
+        const views = seen.filter((x) => x.startsWith("view:")).length, ticks = seen.filter((x) => x.startsWith("status:")).length;
+        L.check("1920: Tab reaches the five views, every status tick box and More filters", views === 5 && ticks === st.length && seen.some((x) => x.startsWith("more:")), seen.join(" "));
+        /* the first was focused by script, which is not keyboard modality (:focus-visible stays off); every one Tab reached rings */
+        L.check("1920: focus rings show on every view Tab reaches", seen.slice(1).filter((x) => x.startsWith("view:")).every((x) => x.endsWith(":solid")), seen.slice(1, 5).join(" "));
+      }
+      /* pinned: scrolled, the card sits 14px under the toolbar's controls */
+      await scrollTo(page, 1600);
+      const pin = await page.evaluate(([v, sel]) => { const c = document.querySelector<HTMLElement>(v as string)!.getBoundingClientRect(); const b = document.querySelector<HTMLElement>(`${sel} [data-qc153='bar']`)!.getBoundingClientRect(); return { c: c.top, b: b.top }; }, [V, PAGE]);
+      L.check(`${w}: scrolled, the card pins 14px under the toolbar`, Math.abs(pin.c - pin.b - 14) <= 1, `card ${pin.c} bar ${pin.b}`);
+      if (w === 1920) await page.screenshot({ path: `${SHOTS}/v5-collapsed-1920.png` });
+      await scrollTo(page, 0);
+      /* Birds-eye */
+      await page.locator(`${PAGE} [data-qc153="bar"] button[data-v="birds"]`).click();
+      await page.waitForTimeout(800);
+      await page.screenshot({ path: `${SHOTS}/v5-birds-${w}.png` });
+      await scrollTo(page, 900);
+      await page.screenshot({ path: `${SHOTS}/v5-birds-scrolled-${w}.png` });
+      await scrollTo(page, 0);
+      await page.locator(`${PAGE} [data-qc153="bar"] button[data-v="list"]`).click();
+      await page.waitForTimeout(400);
+    }
+    L.done(20);
   });
 });

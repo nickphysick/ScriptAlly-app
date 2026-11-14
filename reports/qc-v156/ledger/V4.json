@@ -20,6 +20,11 @@
   "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
  },
  {
+  "name": "1920 @321: the filter column's card pins 14px under the toolbar's bar",
+  "ok": true,
+  "got": "rail 98.00 · bar 84.00"
+ },
+ {
   "name": "1920 @1400: shown, 60px, under the lip",
   "ok": true,
   "got": "shown true h 60 top 12"
@@ -30,6 +35,11 @@
   "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
  },
  {
+  "name": "1920 @1400: the filter column's card pins 14px under the toolbar's bar",
+  "ok": true,
+  "got": "rail 98.00 · bar 84.00"
+ },
+ {
   "name": "1920 @2600: shown, 60px, under the lip",
   "ok": true,
   "got": "shown true h 60 top 12"
@@ -38,6 +48,11 @@
   "name": "1920 @2600: the toolbar's top meets the bar's bottom within 1px",
   "ok": true,
   "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
+ },
+ {
+  "name": "1920 @2600: the filter column's card pins 14px under the toolbar's bar",
+  "ok": true,
+  "got": "rail 98.00 · bar 84.00"
  },
  {
   "name": "1920: the ground spans the sheet; the content is inset to the page's edges",
@@ -80,6 +95,11 @@
   "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
  },
  {
+  "name": "1440 @321: the filter column's card pins 14px under the toolbar's bar",
+  "ok": true,
+  "got": "rail 98.00 · bar 84.00"
+ },
+ {
   "name": "1440 @1400: shown, 60px, under the lip",
   "ok": true,
   "got": "shown true h 60 top 12"
@@ -88,6 +108,11 @@
   "name": "1440 @1400: the toolbar's top meets the bar's bottom within 1px",
   "ok": true,
   "got": "toolbar 72.00 · bar bottom 72.00 · controls 84.00"
+ },
+ {
+  "name": "1440 @1400: the filter column's card pins 14px under the toolbar's bar",
+  "ok": true,
+  "got": "rail 98.00 · bar 84.00"
  },
  {
   "name": "1440 @2600: shown, 60px, under the lip",
