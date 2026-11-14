@@ -9,7 +9,7 @@
  *
  *   npm run e2e:emu -- tests/e2e/queryLettersV24.measure.ts --project=measure --workers=1
  *
- * Locks (the brief's §5): QL24-1 the same header primitive, equal measurements · QL24-2 the Query Centre's header is
+ * Locks (the brief's §5): QL24-1 the same header primitive, equal measurements, the same top · QL24-1b the title block's spacing · QL24-2 the Query Centre's header is
  * unchanged · QL24-3 the drawing sits where the Query Centre's and the Contact list's do · QL24-4 no tip · QL24-6/6a/6b/6c the step and the workspace · QL24-7 day
  * one · QL24-8/9/10 "No text saved". (QL24-5 is src/components/letters/ql24.test.ts.) Every population is counted first.
  */
@@ -46,7 +46,10 @@ async function headerReading(page: Page, hd: string) {
   const look = await css(page, hd, ["border-top-left-radius", "background-color"]);
   const h1 = await css(page, `${hd} h1.qc1531-t`, ["font-size", "font-family"]);
   const btn = await rect(page, `${hd} .qc1531-b`);
-  return { height: Math.round(box.h), radius: look["border-top-left-radius"], bg: look["background-color"], h1: h1["font-size"], face: h1["font-family"], button: Math.round(btn.h) };
+  const n = await css(page, `${hd} .qc1531-b--n`, ["color", "background-color"]);
+  const g = await css(page, `${hd} .qc1531-b--g`, ["color", "background-color"]);
+  // `top`: where the header starts on the page (the shell above it is the same on every workspace page)
+  return { top: Math.round(box.y), height: Math.round(box.h), radius: look["border-top-left-radius"], bg: look["background-color"], h1: h1["font-size"], face: h1["font-family"], button: Math.round(btn.h), primary: n, secondary: g };
 }
 const QC_HD = '[data-qc151="page"] > .qc1531-hd';
 const QL_HD = '[data-ql="page"] .qc151.qc153 > .qc1531-hd';
@@ -68,6 +71,38 @@ test("QL24-1 the page's header is the Query Centre's navy header, measured equal
   console.log("[QL24-1] Query letters", JSON.stringify(ql));
   expect(ql).toEqual(qc);
   await shot(page, "01-rest");
+});
+
+/** the title block's rhythm, measured from the header: the headline, the "for" line and the buttons, the gaps between
+ *  them, and where the block's middle sits against the header's */
+async function titleBlock(page: Page, hd: string) {
+  return page.locator(hd).first().evaluate((h) => {
+    const hb = h.getBoundingClientRect();
+    const r = (sel: string) => (h.querySelector(sel) as HTMLElement).getBoundingClientRect();
+    const t = r("h1.qc1531-t"), f = r(".qc1531-for"), a = r(".qc1531-acts"), m = r(".qc1531-main");
+    const r1 = (x: number) => Math.round(x * 10) / 10;
+    return { titleToFor: r1(f.top - t.bottom), forToButtons: r1(a.top - f.bottom), forMargin: getComputedStyle(h.querySelector(".qc1531-for") as HTMLElement).margin,
+      middleOff: r1(m.top + m.height / 2 - (hb.top + hb.height / 2)) };
+  });
+}
+
+test("QL24-1b the title, the for line and the buttons are spaced as the Contact list's (1440, 1717)", async ({ page }) => {
+  for (const vp of [W1440, W1717]) {
+    await page.addInitScript(() => { try { localStorage.setItem("scriptally_active_manuscript_id", "cv25-ms"); } catch { /* */ } });
+    await openRoute(page, "/agents", vp);
+    await expect(page.locator(`${CL_HD} .qc1531-for`)).toBeVisible({ timeout: 30_000 });
+    const cl = await titleBlock(page, CL_HD);
+    await openLetters(page, vp);
+    await expect(page.locator(`${QL_HD} .qc1531-for`)).toBeVisible();
+    const ql = await titleBlock(page, QL_HD);
+    console.log(`[QL24-1b] ${vp.width}`, JSON.stringify({ cl, ql }));
+    // qcv1531's own margins reach the line (the page's reset once wiped them: 0 and 0)
+    expect(ql.forMargin).toBe("8px 0px 12px");
+    expect(Math.round(ql.titleToFor)).toBe(Math.round(cl.titleToFor));
+    expect(Math.round(ql.forToButtons)).toBe(Math.round(cl.forToButtons));
+    // the block is centred in the header as the Contact list's is (to the pixel)
+    expect(Math.abs(ql.middleOff - cl.middleOff)).toBeLessThanOrEqual(1);
+  }
 });
 
 test("QL24-2 the Query Centre's header markup and computed styles are unchanged", async ({ page }) => {

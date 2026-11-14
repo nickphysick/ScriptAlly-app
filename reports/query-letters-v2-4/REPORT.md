@@ -125,6 +125,31 @@ bytes. Prod is not touched.
 - **To change the drawing later:** replace the file and update `?v=`. If the new drawing's proportions differ, update
   the 369/400 in the `margin-block` rule in `queryLetters.css`.
 
+## The header aligned (14 Nov, later): it was squashed and 28px low
+
+Nick: "the header, subheader and buttons are more squashed than on other pages." I measured all three headers in
+the browser at 1717. This was missed earlier because QL24-1 compared heights, sizes and colours, but not the spacing
+inside the title block or the header's position on the page.
+
+| | header top | title → "for" line | line → buttons | line's margin |
+|---|---|---|---|---|
+| Query Centre | 143.8 | (no line in this state) | | |
+| Contact list | 143.8 | 7.9 | 12 | 8px 0 12px |
+| Query letters, before | **171.8** | **0** | **0** | **0** |
+| Query letters, after | 144 | 8 | 12 | 8px 0 12px |
+
+- **Squash cause:** the page's own reset `.qlp :is(h1, h2, h3, h4, p) { margin: 0 }` (0,1,1) outranked qcv1531's
+  `.qc1531-for { margin: 8px 0 12px }` (0,1,0) inside the shared header. That reset and `.qlp button` now stop at the
+  header (`:not(.qc1531-hd *)`), so the header is styled only by the Query Centre's sheets.
+- **Drop cause:** `.qlp` had `padding-top: 28px` on top of the wrapper's own 30. It is now 0.
+- **Locks:**
+  - QL24-1 now also compares the header's top on the page and both buttons' colours with the Query Centre's.
+  - New QL24-1b checks at 1440 and 1717 that the title-to-line and line-to-buttons gaps, the line's margin and the
+    block's centring equal the Contact list's.
+  - QL2, QL21 and QL24: 32 passed.
+- The "for" line is 27.3 tall here and 23.8 on the Contact list. That is correct: Query letters uses the Query
+  Centre's own 21px line; the Contact list sets a 19px italic one.
+
 ## Screenshots (`shots/`)
 
 The ref is `design-refs/query-letters-v2-4/query-letters-v2-4-1717.png`. The rest state is shot at 1717 only, because

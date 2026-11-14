@@ -18,7 +18,9 @@
   position: relative; box-sizing: border-box; min-width: 0;
   /* the ground fills the scroll port even when the page is short (day one): `100%` has no sized parent to resolve against */
   min-height: max(100%, var(--qlp-port-h, 0px));
-  padding: 28px var(--work-gutter) 64px;
+  /* no top padding: the header's wrapper (.qc151.qc153) brings the Query Centre's own 30, so the navy header starts
+     where the Query Centre's and the Contact list's do (QL24-1 measures its top on all three) */
+  padding: 0 var(--work-gutter) 64px;
   font: 16px/1.5 var(--sp-serif); color: var(--ql-ink);
   /* the Query Centre's ground: the cool off-white with the doodle tile under an even .45 wash (qcv1534) */
   background-color: #f5f5f3;
@@ -28,8 +30,11 @@
 }
 .qlp :where(span, p, div, b, i, em, small, button, a, label, li, ul, ol, input, textarea, article, nav, aside, section, kbd) { font-family: inherit; }
 .qlp *, .qlp *::before, .qlp *::after { box-sizing: border-box; }
-.qlp :is(h1, h2, h3, h4, p) { margin: 0; }
-.qlp button { cursor: pointer; color: inherit; }
+/* the page's resets stop at the shared navy header: it is dressed by the Query Centre's sheets alone. (Unscoped, the
+   margin reset outranked qcv1531's `.qc1531-for { margin: 8px 0 12px }` and squashed the title, the "for" line and
+   the buttons together.) */
+.qlp :is(h1, h2, h3, h4, p):not(.qc1531-hd *) { margin: 0; }
+.qlp button:not(.qc1531-hd *) { cursor: pointer; color: inherit; }
 .qlp > * { max-width: calc(var(--work-max) - 2 * var(--work-gutter)); margin-inline: auto; }
 .qlp :focus-visible { outline: 2px solid var(--ql-navy); outline-offset: 2px; }
 
