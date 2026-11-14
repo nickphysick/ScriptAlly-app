@@ -124,6 +124,8 @@ test.describe("Query Centre v156.1", () => {
             dot: dot ? getComputedStyle(dot).backgroundColor : null, dotW: b(dot)?.width, dotH: b(dot)?.height,
             cap: q("[data-qc156='caption']")?.textContent, alt: q("[data-qc156='line']")?.getAttribute("aria-label"),
             old: !!q(".qc156-big") || !!q(".qc156-ft"),
+            wkW: b(q("[data-qc156='week']"))?.width, rcW: b(q(".qc1531-rc"))?.width,
+            wkL: b(q("[data-qc156='week']"))?.left, titleR: (() => { const t = q("[data-qc151='title']"); if (!t) return null; const rg = document.createRange(); rg.selectNodeContents(t); return rg.getBoundingClientRect().right; })(),
           };
         }, PAGE);
         const w = want[g]; const t = `${vp.width} ${g}`;
@@ -132,6 +134,8 @@ test.describe("Query Centre v156.1", () => {
         L.check(`${t}: type — streak 32px Special Elite cream, line 15.5px italic`, /^32px "?Special Elite"? rgb\(251, 247, 240\)$/.test(r.stFont) && r.slFont === "15.5px italic rgba(244, 238, 229, 0.88)", `${r.stFont} · ${r.slFont}`);
         L.check(`${t}: 6px to the graph; the dot ${w.dot}, round`, Math.abs((r.toGraph ?? 0) - 6) < 1 && r.dot === w.dot && r.dotW === r.dotH, `${r.toGraph} · ${r.dot} ${r.dotW}×${r.dotH}`);
         L.check(`${t}: caption "your target · 3 a week"; alt names the streak; no v156 headline or footer`, (r.cap ?? "").includes("your target · 3 a week") && (r.alt ?? "").startsWith(`${w.st}. ${w.sl} Queries sent per week`) && !r.old, `${r.cap} · ${r.alt}`);
+        const wantW = vp.width === 1920 ? Math.min(560, r.rcW ?? 0) : 380; /* the narrower header keeps v156's 380 */
+        L.check(`${t}: the block is ${wantW.toFixed(0)}px and clears the title`, Math.abs((r.wkW ?? 0) - wantW) < 1 && (r.titleR ?? 0) <= (r.wkL ?? 0), `${r.wkW} of ${r.rcW} · title ends ${r.titleR} · block starts ${r.wkL}`);
         if (vp.width === 1920) {
           const hd = await page.locator(`${PAGE} [data-qc1531='header']`).boundingBox();
           if (hd) await page.screenshot({ path: `${SHOTS}/w1-header-${g}-1920.png`, clip: { x: hd.x - 20, y: hd.y - 20, width: hd.width + 40, height: hd.height + 60 } });
@@ -146,7 +150,7 @@ test.describe("Query Centre v156.1", () => {
         if (vp.width === 1920) await page.screenshot({ path: `${SHOTS}/w1-slim-${g}-1920.png`, clip: { x: 80, y: 100, width: 1840, height: 120 } });
       }
     }
-    L.done(36);
+    L.done(42);
   });
   /* W2 (§2) — in every row of cards, all the Sent and Next boxes share one top and one bottom (within 1px), are 86px
      at least, padded 10 12 11; no value or line is cut short by the new padding. Screens of each group. */
@@ -271,5 +275,49 @@ test.describe("Query Centre v156.1", () => {
       }
     }
     L.done(12);
+  });
+  /* W4 — the screens for the side-by-side: the header in its three situations and the collapsed bar at 1440 and 1920,
+     a hovered card of each kind at 1440, Birds-eye (unchanged); and the ref's own frames (its "Show it when" switch,
+     a hovered card, the collapse). Asserts only that Birds-eye has no chip. */
+  test("W4 — screens", async ({ page }) => {
+    test.skip(PHASE === "before", "after only");
+    const L = new Ledger("W4");
+    for (const vp of SIZES) {
+      for (const g of ["streak", "met", "none"] as const) {
+        await openQc(page, vp, g);
+        await page.screenshot({ path: `${SHOTS}/w4-page-${g}-${vp.width}.png` });
+        await scrollTo(page, 900);
+        await page.screenshot({ path: `${SHOTS}/w4-collapsed-${g}-${vp.width}.png` });
+      }
+      await scrollTo(page, 0);
+      if (vp.width === 1440) {
+        const ids = await page.evaluate((sel) => { const m = new Map<string, string>(); document.querySelectorAll<HTMLElement>(`${sel} [data-qc154="card"]`).forEach((c) => { const b = c.querySelector<HTMLElement>(".qc1561-chip"); if (b && !m.has(b.dataset.mode!)) m.set(b.dataset.mode!, c.dataset.id!); }); return [...m.entries()]; }, PAGE);
+        for (const [mode, id] of ids) {
+          const c = page.locator(`${PAGE} [data-qc154="card"][data-id="${id}"]`);
+          await c.scrollIntoViewIfNeeded(); await c.locator("[data-qc154='band']").hover(); await page.waitForTimeout(300);
+          await c.screenshot({ path: `${SHOTS}/w4-hover-${mode}-1440.png` });
+        }
+      }
+      await page.mouse.move(2, 2);
+      await page.locator(`${PAGE} [data-qc153="bar"] button[data-v="birds"]`).click();
+      await page.waitForTimeout(800);
+      await page.screenshot({ path: `${SHOTS}/w4-birds-${vp.width}.png` });
+      const chips = await page.locator(`${PAGE} [data-qc151="birds-card"] .qc1561-chip`).count();
+      L.check(`${vp.width}: Birds-eye draws no chip (unchanged)`, chips === 0, `${chips}`);
+      await page.locator(`${PAGE} [data-qc153="bar"] button[data-v="list"]`).click();
+    }
+    /* the ref's frames */
+    await page.setViewportSize(SIZES[0]);
+    await page.goto(`file://${process.cwd()}/design-refs/query-centre-v156-1.html`);
+    await page.evaluate(() => document.fonts.ready);
+    for (const v of ["go", "hit", "none"]) {
+      await page.locator(`button[data-v="${v}"]`).click(); await page.waitForTimeout(400);
+      await page.screenshot({ path: `${SHOTS}/ref-${v}-1920.png` });
+    }
+    await page.locator(".qc").first().hover(); await page.waitForTimeout(400);
+    await page.locator(".qc").first().screenshot({ path: `${SHOTS}/ref-hover-1920.png` });
+    await page.evaluate(() => window.scrollTo(0, 700)); await page.waitForTimeout(500);
+    await page.screenshot({ path: `${SHOTS}/ref-collapsed-1920.png` });
+    L.done(2);
   });
 });

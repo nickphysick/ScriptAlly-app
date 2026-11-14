@@ -12,6 +12,10 @@
    15.5) 14px beside it; 6px under, v156's line, its dot an HTML disc (10px) so it stays round at any width — rust
    beside the flame, cream without one. ─────────────────────────────────────────────────────────────────────────── */
 @media (min-width: 768px) {
+  /* the block fills the header's third column (the ref's 560 at 1920) where the header has room for the title beside
+     it; on a narrower header (1440's 1288) it keeps v156's 380, or it would run into "88 queries sent". The line
+     stretches with it, which is why its dot is a disc and not part of the drawing. The header is the container. */
+  .qc151.qc153 > .qc1531-hd.qc1531-hd { container-type: inline-size; }
   .qc151 .qc1561-hd { display: flex; align-items: center; gap: 14px; min-height: 48px; }
   .qc151 .qc1561-fl { flex: none; display: block; width: 38px; height: 48px; }
   .qc151 .qc1561-st { font: 400 32px/1.05 var(--sp-type) !important; color: #fbf7f0; white-space: nowrap; }
@@ -73,4 +77,7 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .qc151 .qc1561-chip, .qc151 .qc154-card:hover .qc1561-chip, .qc151 .qc1561-tip { transform: none; transition: opacity 150ms; }
+}
+@container (min-width: 1380px) {
+  .qc151 .qc156-wk.qc1561-wk { width: 100%; max-width: 560px; }
 }

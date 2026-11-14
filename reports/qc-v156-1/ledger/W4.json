@@ -1,0 +1,12 @@
+[
+ {
+  "name": "1920: Birds-eye draws no chip (unchanged)",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "1440: Birds-eye draws no chip (unchanged)",
+  "ok": true,
+  "got": "0"
+ }
+]

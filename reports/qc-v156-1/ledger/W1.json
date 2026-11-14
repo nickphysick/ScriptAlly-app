@@ -25,6 +25,11 @@
   "got": "Junyour target · 3 a weekNov · 6 week streak. 1 more this week to keep it going. Queries sent per week over the last 20 weeks."
  },
  {
+  "name": "1920 streak: the block is 560px and clears the title",
+  "ok": true,
+  "got": "560 of 560 · title ends 915.25 · block starts 1204"
+ },
+ {
   "name": "1920 streak: collapsed bar — 17 × 22 flame, \"6 week streak\", its line; no \"n of goal\"",
   "ok": true,
   "got": "true true 17×22 6 week streak / 1 more this week to keep it going."
@@ -53,6 +58,11 @@
   "name": "1920 met: caption \"your target · 3 a week\"; alt names the streak; no v156 headline or footer",
   "ok": true,
   "got": "Junyour target · 3 a weekNov · 7 week streak. You’ve hit your target this week. Queries sent per week over the last 20 weeks."
+ },
+ {
+  "name": "1920 met: the block is 560px and clears the title",
+  "ok": true,
+  "got": "560 of 560 · title ends 915.25 · block starts 1204"
  },
  {
   "name": "1920 met: collapsed bar — 17 × 22 flame, \"7 week streak\", its line; no \"n of goal\"",
@@ -85,6 +95,11 @@
   "got": "Junyour target · 3 a weekNov · No streak yet. 2 more this week starts one. Queries sent per week over the last 20 weeks."
  },
  {
+  "name": "1920 none: the block is 560px and clears the title",
+  "ok": true,
+  "got": "560 of 560 · title ends 915.25 · block starts 1204"
+ },
+ {
   "name": "1920 none: collapsed bar — no flame, \"No streak yet\", its line; no \"n of goal\"",
   "ok": true,
   "got": "true false undefined×undefined No streak yet / 2 more this week starts one."
@@ -113,6 +128,11 @@
   "name": "1440 streak: caption \"your target · 3 a week\"; alt names the streak; no v156 headline or footer",
   "ok": true,
   "got": "Junyour target · 3 a weekNov · 6 week streak. 1 more this week to keep it going. Queries sent per week over the last 20 weeks."
+ },
+ {
+  "name": "1440 streak: the block is 380px and clears the title",
+  "ok": true,
+  "got": "380 of 560 · title ends 829.25 · block starts 990"
  },
  {
   "name": "1440 streak: collapsed bar — 17 × 22 flame, \"6 week streak\", its line; no \"n of goal\"",
@@ -145,6 +165,11 @@
   "got": "Junyour target · 3 a weekNov · 7 week streak. You’ve hit your target this week. Queries sent per week over the last 20 weeks."
  },
  {
+  "name": "1440 met: the block is 380px and clears the title",
+  "ok": true,
+  "got": "380 of 560 · title ends 829.25 · block starts 990"
+ },
+ {
   "name": "1440 met: collapsed bar — 17 × 22 flame, \"7 week streak\", its line; no \"n of goal\"",
   "ok": true,
   "got": "true true 17×22 7 week streak / You’ve hit your target this week."
@@ -173,6 +198,11 @@
   "name": "1440 none: caption \"your target · 3 a week\"; alt names the streak; no v156 headline or footer",
   "ok": true,
   "got": "Junyour target · 3 a weekNov · No streak yet. 2 more this week starts one. Queries sent per week over the last 20 weeks."
+ },
+ {
+  "name": "1440 none: the block is 380px and clears the title",
+  "ok": true,
+  "got": "380 of 560 · title ends 829.25 · block starts 990"
  },
  {
   "name": "1440 none: collapsed bar — no flame, \"No streak yet\", its line; no \"n of goal\"",
