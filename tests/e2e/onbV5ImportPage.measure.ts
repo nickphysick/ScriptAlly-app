@@ -185,10 +185,11 @@ for (const vp of VIEWPORTS) {
       expect(r!.h1).toBe("Bring your list across.");
       expect(r!.panelButtons, "no button in the panel").toBe(0);
       expect(r!.headerSheets, "no header sheet under the panel").toBe(0);
-      expect(r!.tiles.length, "exactly three tiles").toBe(3);
-      expect(r!.tiles.map((t) => t.id)).toEqual(["smart", "template", "match"]);
+      /* RE-POINTED (two-door import v1): two tiles; the template is the quiet headings line under them */
+      expect(r!.tiles.length, "exactly two tiles").toBe(2);
+      expect(r!.tiles.map((t) => t.id)).toEqual(["smart", "match"]);
       expect(r!.tiles.map((t) => t.title)).toEqual(["Smart import.", "Our template.", "Match your own columns."]);
-      expect(r!.tiles.map((t) => t.buttons)).toEqual([["Import a spreadsheet"], ["Download the template", "Upload my sheet"], ["Match columns"]]);
+      expect(r!.tiles.map((t) => t.buttons)).toEqual([["Import a spreadsheet", "Use photos"], ["Match columns"]]);
       expect(r!.sub).toBe("Agents, queries and dates from the spreadsheet you already keep. You check everything before it's saved.");
       expect(r!.footnote).toBe("An import adds to what you already have. An agent already on your contact list isn't added again.");
       expect(r!.order).toEqual(["header", "tiles", "footnote"]);
@@ -288,7 +289,7 @@ test.describe("D3", () => {
     record("D3", "1440x900", "ways", seen);
     for (const [way, r] of Object.entries(seen)) {
       expect((r as { path: string }).path, way).toBe("/import");
-      expect((r as { tiles: number }).tiles, `${way} lands on the three tiles`).toBe(3);
+      expect((r as { tiles: number }).tiles, `${way} lands on the two tiles`).toBe(2);
     }
   });
 });
@@ -383,7 +384,7 @@ test.describe("F1", () => {
     await page.waitForFunction(() => [...document.querySelectorAll('.impg [data-impg="tile"]')].filter((e) => (e as HTMLElement).offsetParent !== null).length === 3, null, { timeout: 10_000 });
     const back = await flowState(page);
     expect(back.screen).toBe("idle");
-    expect(back.tiles).toBe(3);
+    expect(back.tiles).toBe(2);
   });
 
   test("F1 the Smart import tile opens its confirm step; Back returns to the tiles", async ({ page }) => {
@@ -430,7 +431,7 @@ test.describe("F2", () => {
     await page.getByRole("button", { name: /^Continue$/ }).click();
     await expect(page.getByText("Give it a title")).toBeVisible();
     await page.getByRole("button", { name: /Back/ }).first().click();
-    expect(await tilesShown(page)).toBe(3);
+    expect(await tilesShown(page)).toBe(2);
     expect(await labCalls(page)).toEqual([]);
   });
 });
