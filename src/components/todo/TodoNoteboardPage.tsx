@@ -38,7 +38,7 @@ import { openQueryPanel } from "../../lib/queryPanelStore";
 import { loadHoldForReview, onlyForReview } from "../../lib/corkboardReviewAid";
 import { NoteColour, UserTask } from "../../types";
 import { formatDate } from "../../lib/dates";
-import { CbHeader } from "./corkboard/CbHeader";
+import { CbHeader, CbNavyHeader, useCbWide } from "./corkboard/CbHeader";
 import { CbToolRow } from "./corkboard/CbToolRow";
 import { CbWall, type WallNote } from "./corkboard/CbWall";
 import { CbPiles } from "./corkboard/CbPiles";
@@ -496,6 +496,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
 
   const nothingMatches = view === "board" && narrowing && matching.size === 0;
   const empty = settled && board.length === 0;
+  const wide = useCbWide();
 
   return (
     <div className="t-f12 spine-root">
@@ -504,14 +505,19 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
       <div className="tdb-wrap today-off nb-scope cb2" ref={rootRef}>
         <WorkspacePageGrid className="tpl-wpg nb-wpg" scrollLabel="Corkboard" masthead={null}>
           <div className="nb-group cb2-page" data-cb="page" data-cb2="page" data-loading={settled ? undefined : ""}>
-            <CbHeader
-              count={settled ? board.length : null}
-              glance={glanceOf(board)}
-              special={special}
-              onSpecial={(k) => setSpecial((cur) => (cur === k ? null : k))}
-              onNew={(c) => openComposer(c)}
-              onTask={openTaskComposer}
-            />
+            {/* Workspace headers v1: the desktop opens on the shared navy header; the phone keeps its panel */}
+            {wide ? (
+              <CbNavyHeader count={settled ? board.length : null} onNew={(c) => openComposer(c)} onTask={openTaskComposer} />
+            ) : (
+              <CbHeader
+                count={settled ? board.length : null}
+                glance={glanceOf(board)}
+                special={special}
+                onSpecial={(k) => setSpecial((cur) => (cur === k ? null : k))}
+                onNew={(c) => openComposer(c)}
+                onTask={openTaskComposer}
+              />
+            )}
             {empty ? <CbEmpty onKeep={(ex) => void keepExample(ex)} /> : (
               <>
                 <CbToolRow

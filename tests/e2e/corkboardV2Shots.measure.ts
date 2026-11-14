@@ -22,7 +22,8 @@ test.describe("CB2 shots", () => {
     await only(page);
     for (const vp of [{ width: 1512, height: 982 }, { width: 1280, height: 800 }]) {
       await open(page, ROUTE, vp);
-      await expect(page.locator('.cb2:visible [data-cb2="header"]')).toBeVisible();
+      /* RE-POINTED (Workspace headers v1, 14 Nov): at ≥768px the page opens on the shared navy header */
+      await expect(page.locator('.cb2:visible [data-wsnh-page="corkboard"]')).toBeVisible();
       await page.screenshot({ path: `${SHOTS}/01-board-${vp.width}.png` });
     }
   });
@@ -91,8 +92,12 @@ test.describe("CB2 shots", () => {
     await page.waitForTimeout(300);
     await page.screenshot({ path: `${SHOTS}/07-turn-into-task-1512.png` });
     await page.keyboard.press("Escape");
+    /* RETIRED (Workspace headers v1, 14 Nov): the linked filter's shot at 1512 — the At a glance rows (`[data-glance]`) left
+       the desktop with the old panel (the phone keeps them; CB3 drives the filter at 390). Successor:
+       tests/e2e/wsHeaders.measure.ts H7 "corkboard". As it stood:
     await page.locator('.cb2:visible [data-glance="linked"]').click();
     await page.waitForTimeout(500);
     await page.screenshot({ path: `${SHOTS}/08-filter-linked-1512.png` });
+    */
   });
 });

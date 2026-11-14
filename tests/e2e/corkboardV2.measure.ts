@@ -59,7 +59,10 @@ test("CB1 colours: the five papers, and the old three mapped when read with no w
   L.done(19);
 });
 
-test("CB2 header: the Contact list's panel, the counts, and no zero glance row", async ({ page }) => {
+/* RETIRED (Workspace headers v1, 14 Nov): its subject is the desktop's old panel header — the Contact list's panel geometry, the
+   "Corkboard" title, the board sentence and the At a glance rows, all replaced at ≥768px by the shared navy header (the phone keeps
+   the panel). Successor: tests/e2e/wsHeaders.measure.ts H1 + H6 + H7 "corkboard". */
+test.skip("CB2 header: the Contact list's panel, the counts, and no zero glance row", async ({ page }) => {
   const L = new Ledger("CB2");
   await only(page);
   for (const vp of SIZES) {
@@ -110,8 +113,10 @@ test("CB2 header: the Contact list's panel, the counts, and no zero glance row",
 test("CB3 glance filter: linked to agents leaves exactly the linked notes at full opacity, and clears", async ({ page }) => {
   const L = new Ledger("CB3");
   await only(page);
-  for (const vp of SIZES) {
-    await open(page, ROUTE, vp);
+  /* RE-POINTED (Workspace headers v1, 14 Nov): the At a glance rows are the phone panel's only now (the desktop opens on the
+     navy header, which has none), so the filter is driven at 390 instead of at the two desktop sizes */
+  for (const vp of [{ width: 390, height: 844 }]) {
+    await openPhone(page, ROUTE, vp);
     await page.locator(`${PAGE} [data-glance="linked"]`).click();
     await page.waitForTimeout(500);
     const on = await readWall(page);
@@ -122,7 +127,7 @@ test("CB3 glance filter: linked to agents leaves exactly the linked notes at ful
     await page.waitForTimeout(500);
     L.check("CB3", `${sz(vp)} cleared`, (await readWall(page)).every((n) => n.opacity > 0.9), "every note back at full");
   }
-  L.done(6);
+  L.done(3); /* RE-POINTED (Workspace headers v1, 14 Nov): one size, three readings */
 });
 
 test("CB4 font: a post-it's words are Special Elite", async ({ page }) => {
@@ -300,8 +305,10 @@ test("CB11 empty: Pick a colour to start and four examples; Keep this creates a 
   const L = new Ledger("CB11");
   await only(page, "cb2none-");
   await open(page, ROUTE, SIZES[0]);
-  L.check("CB11", "pick", await page.locator(`${PAGE} [data-cb2="pick"]`).count() === 1, "Pick a colour to start");
-  L.check("CB11", "heading", (await page.locator(`${PAGE} [data-cb2="pick"] h2`).textContent())?.trim() === "Pick a colour to start", "its words");
+  /* RE-POINTED (Workspace headers v1, 14 Nov): on the desktop the empty board opens on the navy header's day-one state —
+     "No notes yet" and + New note only, with no colour picker ("Pick a colour to start" is the phone panel's now) */
+  L.check("CB11", "pick", await page.locator(`${PAGE} [data-cb2="pick"]`).count() === 0 && await page.locator(`${PAGE} [data-cb2="new-note"]`).count() === 1 && await page.locator(`${PAGE} [data-cb2="add-task"]`).count() === 0, "+ New note only, no picker");
+  L.check("CB11", "heading", (await page.locator(`${PAGE} [data-wsnh="title"]`).textContent())?.trim() === "No notes yet", "its words");
   L.check("CB11", "examples", await page.locator(`${PAGE} [data-cb2-example]`).count() === 4, "four examples");
   L.check("CB11", "no wall", await page.locator(`${PAGE} [data-cb2="wall"]`).count() === 0, "no wall");
   await page.locator(`${PAGE} [data-cb2="keep"]`).first().click();

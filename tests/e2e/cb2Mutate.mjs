@@ -20,6 +20,8 @@ const M = {
     "  const notesAll = useMemo(() => sortNotes(userTasks), [userTasks]);",
     "  const notesAll = useMemo(() => sortNotes(userTasks), [userTasks]);\n  useEffect(() => { for (const n of notesAll) if (n.colour && !(NOTE_COLOURS as readonly string[]).includes(n.colour)) void setUserTaskColour(n.id, paperOf(n.colour)); }, [notesAll]); // eslint-disable-line",
   ]],
+  /* RETIRED (Workspace headers v1, 14 Nov): CB2 is skipped (the desktop's sentence went with the old panel; the anchor now
+     lives in the phone's CbHeader only). Successor: tests/e2e/wsHeaders.measure.ts H6 "corkboard". Kept for the record; skipped below. */
   CB2: ["Hard-code \"13\"", "src/components/todo/corkboard/CbHeader.tsx", ["boardSentence(count, glance.onTodo)", "boardSentence(13, glance.onTodo)"]],
   CB3: ["Filter on tags", PAGE, ["&& (!special || inGlance(n, special))", "&& (!special || (n.tags ?? []).length > 0)"]],
   CB4: ["Inherit the serif", "src/components/todo/corkboard/corkboard.css", ["font: 400 17px/1.42 var(--cb2-type) !important;", "font: 400 17px/1.42 var(--cb2-serif) !important;"]],
@@ -49,7 +51,9 @@ const M = {
 const names = process.argv.slice(2).length ? process.argv.slice(2) : Object.keys(M);
 mkdirSync("reports/corkboard-v2", { recursive: true });
 mkdirSync("/tmp/cb2mut", { recursive: true });
+const RETIRED = new Set(["CB2"]);
 for (const name of names) {
+  if (RETIRED.has(name)) { console.log(`SKIPPED ${name} — retired (Workspace headers v1, 14 Nov)`); continue; }
   const [what, file, ...edits] = M[name];
   const backup = `/tmp/cb2mut/${file.replace(/\//g, "-")}`;
   copyFileSync(file, backup);

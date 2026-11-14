@@ -38,7 +38,8 @@ const PAGES: { route: string; col: string; blocks: string[] }[] = [
   { route: "/materials/letters", col: ".qlp > .qlp-head", blocks: [".qlp > .qlp-head"] },
   { route: "/manuscripts/comps", col: ".cp30", blocks: [] } /* comps v30 renders .cp30 (re-pointed, workspace width v2) */,
   { route: "/todo", col: ".tws", blocks: [".tws-hd", ".tws-ws"] },
-  { route: "/todo/corkboard", col: ".cb2-hd", blocks: [".cb2-hd", ".cb2-wallwrap"] },
+  /* RE-POINTED (Workspace headers v1, 14 Nov): at ≥768px the page header is the shared navy header (`.cb2 .wsnh`), not `.cb2-hd` */
+  { route: "/todo/corkboard", col: ".cb2 .wsnh", blocks: [".cb2 .wsnh", ".cb2-wallwrap"] },
   { route: "/manuscripts", col: ".ms27", blocks: [] }, /* the root IS the column (no inner block to hold to its edges) */
 ];
 /** Pages with their own width (§0.3's flagged list): W1 and W6 only. */
@@ -54,7 +55,7 @@ const label = (s: (typeof SIZES)[number]) => `${s.width}×${s.height} ${s.open ?
 async function mutate(page: Page) {
   const css: string[] = [];
   if (broken("indent")) css.push(".ws-pagebar .ws-ftab { left: 40px !important; }");
-  if (broken("banner")) css.push(".qc151, .cl24-hd, .rsp5, .a17-flow, .dv1-ae, .vv2 .mh, .qlp > .qlp-head, .cv-group, .tws, .cb2-hd { margin-inline: -20px !important; width: auto !important; }");
+  if (broken("banner")) css.push(".qc151, .cl24-hd, .rsp5, .a17-flow, .dv1-ae, .vv2 .mh, .qlp > .qlp-head, .cv-group, .tws, .cb2 .wsnh { margin-inline: -20px !important; width: auto !important; }"); /* RE-POINTED (Workspace headers v1, 14 Nov): .cb2-hd → .cb2 .wsnh */
   if (broken("cap1100")) css.push(":root { --work-max: 1164px !important; }");
   if (broken("gutter24")) css.push(":root { --work-gutter: 24px !important; }");
   if (broken("row1500")) css.push(".qc151 > *, .clv-main, .rsp5 > *, .cb2-wallwrap, .tws { min-width: 1500px !important; }");
