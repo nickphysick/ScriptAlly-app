@@ -1,0 +1,15 @@
+
+> react-example@0.0.0 e2e
+> node scripts/emu-guard.mjs npx playwright test tests/e2e/plansV3Shots.measure.ts --workers=1 -g dev route
+
+[heavy-slot] sweep (on acquire): nothing left over.
+[emu-guard] 46.8 GB free. Debug logs: /dev/null.
+
+Running 2 tests using 1 worker
+
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (18.8s)
+route viewer: founding | bundle: /assets/index-C1eM6OE5.js
+route 390 draws this page: 0
+  ✓  2 [measure] › tests/e2e/plansV3Shots.measure.ts:43:1 › plans v3 shots · dev route, as the e2e account (41.7s)
+
+  2 passed (1.0m)

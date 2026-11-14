@@ -1,0 +1,42 @@
+## B1 card order (founding: Pro before Founding writer)
+exit 1; red: 2
+× plans v3 — each viewer: card order, exactly one lead, the lead's pill > founding 9ms
+× plans v3 — the founding view > the founding card carries 'Your plan' and the thank-you foot 1ms
+
+## B2 two leads (Free also lead in founding)
+exit 1; red: 2
+× plans v3 — each viewer: card order, exactly one lead, the lead's pill > founding 9ms
+× plans v3 — the ✨ > exactly one per state, and it is aria-hidden 4ms
+
+## B3 lead pill text (Open now -> Open)
+exit 1; red: 1
+× plans v3 — each viewer: card order, exactly one lead, the lead's pill > founding 10ms
+
+## B4 picker on the founding view's Pro card
+exit 1; red: 1
+× plans v3 — the founding view > no length picker, no Questions, no 'Your founding place', none of the removed sections 5ms
+
+## B5 Questions row in the founding view
+exit 1; red: 2
+× plans v3 — the founding view > no length picker, no Questions, no 'Your founding place', none of the removed sections 12ms
+× plans v3 — the founding view > one closed row, 'Compare every feature', holding the real PlanTable 4ms
+
+## B6 Compare open on load
+exit 1; red: 1
+× plans v3 — the founding view > one closed row, 'Compare every feature', holding the real PlanTable 10ms
+
+## B7 Choose Pro with selling off
+exit 1; red: 1
+× plans v3 — selling > selling off: no 'Choose Pro' in any state, and the Not-on-sale chip stands in for it where Pro is offered 34ms
+
+## B8 the sparkle not aria-hidden
+exit 1; red: 5
+× plans v3 — each viewer: card order, exactly one lead, the lead's pill > founding 12ms
+× plans v3 — each viewer: card order, exactly one lead, the lead's pill > trial 10ms
+× plans v3 — each viewer: card order, exactly one lead, the lead's pill > free 5ms
+× plans v3 — each viewer: card order, exactly one lead, the lead's pill > pro 6ms
+× plans v3 — the ✨ > exactly one per state, and it is aria-hidden 16ms
+
+## B9 a typed number
+exit 1; red: 1
+× plans v3 — numbers are read, never typed > no price, trial length or cap appears as a literal in the page's copy 7ms
