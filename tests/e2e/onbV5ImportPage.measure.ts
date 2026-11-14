@@ -359,7 +359,7 @@ test.describe("F1", () => {
   test("F1 the template tile starts the flow in the app's sheet", async ({ page }) => {
     await openImport(page, { width: 1440, height: 900 });
     const book = await page.evaluate(() => { const id = localStorage.getItem("scriptally_active_manuscript_id"); return id; });
-    await page.locator('.impg input[data-picker="template"]').setInputFiles(FIXTURE("template-iso.csv"));
+    await page.locator('.impg input[data-picker="smart"]').setInputFiles(FIXTURE("template-iso.csv"));
     await page.locator('.impg [data-im="summary"]').waitFor({ timeout: 20_000 });
     if (MUTATE === "F1") {
       /* the named break: the set-up frame mounted in the app */

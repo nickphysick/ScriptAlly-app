@@ -94,7 +94,8 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   const created = useRef<ManuscriptIdCache>({ id: null });
   const needsBook = !manuscript && !draft && !lab?.flow;
   const openPicker = (kind: "smart" | "photos" | "template") =>
-    kind === "smart" ? flowRef.current?.chooseFile() : kind === "photos" ? flowRef.current?.openPhotos() : flowRef.current?.chooseTemplate();
+    /* two-door import v1: one picker reads both — a file with our headings goes to the template parser */
+    kind === "photos" ? flowRef.current?.openPhotos() : flowRef.current?.chooseFile();
   const start = (kind: "smart" | "photos" | "template") => { if (needsBook) setBook(kind); else openPicker(kind); };
 
   const ensureManuscript = async (): Promise<string | null> => {
