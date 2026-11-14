@@ -99,9 +99,10 @@ const PAGES: Record<string, PageDef> = {
     oldColumn: "[data-cp='notice'], [data-cp='shelf'] { margin-inline: 24px !important; }", init: scope(MS), emptyInit: scope(MS_EMPTY), ready: "[data-cp='shelf']",
   },
   versions: {
+    /* Harbour of Glass (msv12-ms): the harness book with versions on file (Murphy's Day Out has none in the model) */
     route: "/manuscripts/versions", root: "[data-vv2='page']", first: "[data-vv2='banner'], [data-vv2='list-sec']", old: "[data-vv2='title']",
     head: /^(\d+) versions?$/, figure: "[data-vv2='list'] [data-vv2='row']", empty: "[data-vv2='empty']", gone: ["[data-vv2='title']", "#vCnt"],
-    oldColumn: "[data-vv2='banner'], [data-vv2='list-sec'] { margin-inline: 48px !important; }", init: scope(MS), emptyInit: scope(MS_EMPTY), ready: "[data-vv2='list-sec']",
+    oldColumn: "[data-vv2='banner'], [data-vv2='list-sec'] { margin-inline: 48px !important; }", init: scope("msv12-ms"), emptyInit: scope(MS_EMPTY), ready: "[data-vv2='list-sec']",
   },
   manuscripts: {
     route: "/manuscripts", root: "[data-msv12='page']", first: "[data-ms27='book']", old: "[data-ms27='header']",
@@ -159,6 +160,8 @@ const readHeader = (page: Page, root: string, hdSel: string) => page.evaluate(([
     titleFamily: h1 ? getComputedStyle(h1).fontFamily : null, titleLines: h1 && tb ? Math.round(tb.height / parseFloat(getComputedStyle(h1).lineHeight || "1")) : null,
     titleText: h1?.textContent?.replace(/\s+/g, " ").trim() ?? null,
     buttonH: btn ? btn.getBoundingClientRect().height : null,
+    grid: cs.gridTemplateColumns, artDisplay: (() => { const a = hd.querySelector<HTMLElement>(".qc1531-art"); return a ? getComputedStyle(a).display : null; })(),
+    rightW: (() => { const a = hd.querySelector<HTMLElement>(".qc1531-rc"); return a ? a.getBoundingClientRect().width : null; })(),
   };
 }, [root, hdSel] as const);
 
@@ -386,6 +389,15 @@ for (const key of PAGE_KEYS) {
           expect.soft(rest.inert && rest.ariaHidden === "true", "H5 at rest: inert and aria-hidden").toBe(true);
           expect.soft(rest.visibility, "H5 at rest: hidden").toBe("hidden");
         }
+        /* a page shorter than 600px of scroll (the Manuscripts book, a small Corkboard) gets room at its foot for the
+           reading — a measurement aid appended to the page root, removed after; the product is not changed */
+        const pad = await page.evaluate((rs) => {
+          const r = [...document.querySelectorAll<HTMLElement>(rs)].find((e) => e.getBoundingClientRect().width > 0)!;
+          const sc = r.closest<HTMLElement>(".wpg-scroll")!;
+          if (sc.scrollHeight - sc.clientHeight >= 620) return 0;
+          const s = document.createElement("div"); s.id = "wsh-pad"; s.style.height = "900px"; r.appendChild(s); return 900;
+        }, d.root);
+        out.pad = pad;
         await scrollTo(page, d.root, 600);
         const bar = (await readBar(page, d.root, "[data-wsnh='slim']")) as Reading | null;
         out.bar = bar;
@@ -398,7 +410,10 @@ for (const key of PAGE_KEYS) {
           expect.soft(near(bar.buttonH, 40) && near(bar.buttonH, q.buttonH), `H5 button ${bar.buttonH} (Query Centre ${q.buttonH})`).toBe(true);
           expect.soft(bar.buttonBg, "H5 the button is the Query Centre's navy").toBe(q.buttonBg);
           expect.soft(near(bar.groundLeft, 0) && near(bar.groundRight, 0), `H5 the ground reaches the sheet's edges (${bar.groundLeft}, ${bar.groundRight})`).toBe(true);
-          expect.soft(bar.groundBg, "H5 the ground is the Query Centre's").toBe(q.groundBg);
+          /* the Query Centre retones its own page colour (qcv156 §5); these pages keep the default page colour, as the
+             Contact list's and To-do's bars do (Step 0) */
+          const cl = (before()[String(vp.width)]?.cl as { bar: Reading } | undefined)?.bar;
+          expect.soft(bar.groundBg, "H5 the ground is the default page colour (the Contact list's bar's)").toBe(cl?.groundBg);
           expect.soft(near(bar.top, q.top), `H5 the bar sits where the Query Centre's does (${bar.top} vs ${q.top})`).toBe(true);
           expect.soft(bar.titleText, "H5 the bar's title is the headline").toBe(title);
         }

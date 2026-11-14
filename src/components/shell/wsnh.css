@@ -19,6 +19,9 @@
 
   /* ── §2 · Query letters v2.4's additions, as built there ──────────────────────────────────────────────────── */
   .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { min-height: 227px; margin-bottom: 48px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }
+  /* the right block takes its own width (the ref's `auto` column, at most 440), not the Query Centre's 400–560 track
+     sized for "this week": the title block keeps the room its buttons need */
+  .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { grid-template-columns: 268px minmax(0, 1fr) auto; }
   .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd--two { grid-template-columns: 268px minmax(0, 1fr); }
   .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd--two > .qc1531-rc { display: none; }
   /* the drawing's box: exactly 190 × 142 with its dashed edge inside it, no caption (Query letters v2.4's recipe) */
@@ -28,8 +31,10 @@
   /* the Query Centre's own spacing on the ruled line, restated where a page resets every paragraph's margin
      (`.ms27 :is(h1, h2, p, …)` outranks qcv1531's one-class rule) */
   .qc151.qc153.wsnh > .qc1531-hd .qc1531-for { margin: 8px 0 12px; }
-  /* a title that may wrap (Manuscripts: a book's name): two lines at the same size, the header growing to fit */
-  .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd--wrap h1.qc1531-t { white-space: normal; overflow-wrap: anywhere; }
+  /* a headline longer than its column wraps at the same size and the header grows: it never runs under the right block
+     or off the sheet (the Query Centre's own titles are short enough never to need it) */
+  .qc151.qc153.wsnh > .qc1531-hd h1.qc1531-t { white-space: normal; overflow-wrap: break-word; }
+  .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd--wrap h1.qc1531-t { overflow-wrap: anywhere; }
 
   /* ── §3 · the right block (the ref's `.cb`): a figure or ring, then the words; cream on the navy ──────────── */
   .qc151.qc153.wsnh .wsnh-rc { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 20px; align-items: center; max-width: 440px; color: #f4eee5; }
