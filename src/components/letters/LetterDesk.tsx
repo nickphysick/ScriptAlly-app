@@ -514,15 +514,18 @@ export const DeskSkeleton: React.FC = () => (
       <i className="qlp-sk qlp-sk--h2" />
       {[0, 1, 2].map((i) => <i key={i} className="qlp-sk qlp-sk--row" />)}
     </div>
-    <div className="qlp-mid">
-      <i className="qlp-sk qlp-sk--name" />
-      <i className="qlp-sk qlp-sk--meta" />
-      <i className="qlp-sk qlp-sk--paper" />
-    </div>
-    <div className="qlp-rail">
-      <i className="qlp-sk qlp-sk--h2" />
-      <i className="qlp-sk qlp-sk--cells" />
-      <i className="qlp-sk qlp-sk--list" />
+    {/* v2.4: the workspace's two-part shape, so nothing jumps when the letters arrive */}
+    <div className="qlp-work" data-ql="work">
+      <div className="qlp-mid">
+        <i className="qlp-sk qlp-sk--name" />
+        <i className="qlp-sk qlp-sk--meta" />
+        <i className="qlp-sk qlp-sk--paper" />
+      </div>
+      <div className="qlp-rail">
+        <i className="qlp-sk qlp-sk--h2" />
+        <i className="qlp-sk qlp-sk--cells" />
+        <i className="qlp-sk qlp-sk--list" />
+      </div>
     </div>
   </div>
 );

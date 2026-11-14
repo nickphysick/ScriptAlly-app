@@ -274,7 +274,7 @@ test("QL24-L loading: the skeleton takes the two-part shape (render harness, the
     const cols = await page.locator('[data-ql="skeleton"]').evaluate((e) => getComputedStyle(e).gridTemplateColumns);
     console.log(`[QL24-L] ${size.width}: skeleton columns "${cols}"`);
     expect(cols.split(" ").length).toBe(2);
-    expect(cols.split(" ")[0]).toBe("270px");
+    expect(cols.split(" ")[0]).toBe("268px"); // the Query Centre's list column under the same header (the ref drew 270 under a 300 column)
     await expect(page.locator('[data-ql="skeleton"] [data-ql="work"]')).toHaveCount(1);
     await shot(page, "06-loading");
   }

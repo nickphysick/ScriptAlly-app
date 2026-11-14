@@ -318,34 +318,37 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
             flash={flash} stamp={stamp} justSaved={justSaved} note={note}
             showRetired={showRetired} onToggleRetired={() => setShowRetired((s) => !s)} onSelect={select}
           />
-          <section className="qlp-mid" data-ql="letter" aria-live="polite">
+          {/* v2.4 · one workspace: the letter and its side panel on one surface, beside the list */}
+          <div className="qlp-work" data-ql="work">
+            <section className="qlp-mid" data-ql="letter" aria-live="polite">
+              {ed ? (
+                <LetterEditor
+                  ed={ed} taRef={taRef} parentName={edParent?.versionName ?? null}
+                  onChange={(patch) => setEd((cur) => (cur ? { ...cur, ...patch, err: null } : cur))}
+                  onSave={() => void save()} onCancel={() => leave(null)} onKeep={keepEditing} onDiscard={discard}
+                />
+              ) : selLetter && selFacts ? (
+                <LetterView
+                  letter={selLetter} facts={selFacts} parent={byId(selLetter.parentId)} inUse={selLetter.id === use?.id}
+                  justSaved={justSaved.has(selLetter.id)} diff={diff} onDiff={() => setDiff((d) => !d)}
+                  next={next === selLetter.id && selLetter.id !== use?.id ? { current: use?.versionName ?? "" } : null}
+                  firstNote={firstNote?.id === selLetter.id ? firstNote.n : null}
+                  pkgLine={selLetter.id === use?.id && differs ? { id: differs.pkg.id, pkg: differs.pkg.packageName, letter: differs.letter.versionName } : null}
+                  onPkg={(id) => navigate(`${PACKAGES_PATH}?pkg=${id}`)}
+                  onUploadFor={() => uploadForLetter(selLetter)}
+                  onCopy={() => void copyText(selLetter)} onNewVersion={() => newVersion(selLetter)} onEdit={() => editLetter(selLetter)}
+                  onUse={() => void useForNew(selLetter.id)} onNotYet={() => setNext(null)}
+                />
+              ) : null}
+            </section>
             {ed ? (
-              <LetterEditor
-                ed={ed} taRef={taRef} parentName={edParent?.versionName ?? null}
-                onChange={(patch) => setEd((cur) => (cur ? { ...cur, ...patch, err: null } : cur))}
-                onSave={() => void save()} onCancel={() => leave(null)} onKeep={keepEditing} onDiscard={discard}
-              />
-            ) : selLetter && selFacts ? (
-              <LetterView
-                letter={selLetter} facts={selFacts} parent={byId(selLetter.parentId)} inUse={selLetter.id === use?.id}
-                justSaved={justSaved.has(selLetter.id)} diff={diff} onDiff={() => setDiff((d) => !d)}
-                next={next === selLetter.id && selLetter.id !== use?.id ? { current: use?.versionName ?? "" } : null}
-                firstNote={firstNote?.id === selLetter.id ? firstNote.n : null}
-                pkgLine={selLetter.id === use?.id && differs ? { id: differs.pkg.id, pkg: differs.pkg.packageName, letter: differs.letter.versionName } : null}
-                onPkg={(id) => navigate(`${PACKAGES_PATH}?pkg=${id}`)}
-                onUploadFor={() => uploadForLetter(selLetter)}
-                onCopy={() => void copyText(selLetter)} onNewVersion={() => newVersion(selLetter)} onEdit={() => editLetter(selLetter)}
-                onUse={() => void useForNew(selLetter.id)} onNotYet={() => setNext(null)}
-              />
-            ) : null}
-          </section>
-          {ed ? (
-            <WriteRail ed={ed} parentName={edParent?.versionName ?? null} sentBefore={ed.kind === "edit" && (facts.get(ed.id ?? "")?.sent ?? 0) > 0}
-              onChanges={(changes) => setEd((cur) => (cur ? { ...cur, changes } : cur))} />
-          ) : selLetter && selFacts && ms ? (
-            <ReadRail ms={ms} letter={selLetter} facts={selFacts} parent={byId(selLetter.parentId)} isFirst={selLetter.id === firstId}
-              onNewVersion={(id) => { const l = byId(id); if (l) newVersion(l); }} />
-          ) : <aside className="qlp-rail" />}
+              <WriteRail ed={ed} parentName={edParent?.versionName ?? null} sentBefore={ed.kind === "edit" && (facts.get(ed.id ?? "")?.sent ?? 0) > 0}
+                onChanges={(changes) => setEd((cur) => (cur ? { ...cur, changes } : cur))} />
+            ) : selLetter && selFacts && ms ? (
+              <ReadRail ms={ms} letter={selLetter} facts={selFacts} parent={byId(selLetter.parentId)} isFirst={selLetter.id === firstId}
+                onNewVersion={(id) => { const l = byId(id); if (l) newVersion(l); }} />
+            ) : <aside className="qlp-rail" />}
+          </div>
         </div>
       )}
     </div>

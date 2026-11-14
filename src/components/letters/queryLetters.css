@@ -78,7 +78,21 @@
 .qlp-b2 svg, .qlp-b1 svg { width: 16px; height: 16px; flex: none; }
 
 /* ── the desk: letters · the letter · how it's doing ─────────────────────────────────────────────────────────── */
-.qlp-desk { display: grid; grid-template-columns: 280px minmax(0, 1fr) 380px; gap: 36px; align-items: start; padding-top: 0; }
+/* v2.4 · one list, one workspace (the ref's `.one`). The list and the workspace beside it; the workspace's left edge
+   sits under the headline. The ref draws 270 + 30 under a 300 header column; the built header's columns are the Query
+   Centre's 268 + 28, so the desk takes the Query Centre's own list column and gap, as the ref's note asks ("as the list
+   does on the other two pages"). */
+.qlp-desk { display: grid; grid-template-columns: 268px minmax(0, 1fr); gap: 28px; align-items: start; padding-top: 0; }
+.qlp-work { display: grid; grid-template-columns: minmax(0, 1fr) 340px; align-items: start; min-width: 0;
+  background: #fbf9f5; border-radius: 18px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 18px 34px -26px rgba(28, 19, 15, .4); }
+.qlp-work > .qlp-mid { padding: 26px 32px 36px; min-width: 0; }
+.qlp-work > .qlp-rail { position: sticky; top: 16px; align-self: stretch; padding: 26px 26px 30px; border-left: 1px solid rgba(28, 19, 15, .1); }
+.qlp .qlp-work > .qlp-rail h2.qlp-h2 { border-bottom: 0; padding-bottom: 0; margin-bottom: 14px; font: 400 22px/1.15 var(--sp-type) !important; }
+.qlp .qlp-work h2.qlp-lt-name { font: 400 26px/1.15 var(--sp-type) !important; }
+.qlp-work .qlp-lt-top { padding-top: 0; }
+/* the 760 caps come off inside the workspace: the title row, the status line and the sheet fill the letter area */
+.qlp-work :is(.qlp-lt-top, .qlp-lt-bar, .qlp-paper, .qlp-ed-top, .qlp-ed-status) { max-width: none; }
+.qlp-work .qlp-paper--nt { background: none; }
 .qlp h2.qlp-h2 { font: 400 22px/1.15 var(--sp-type) !important; color: var(--ql-ink) !important; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--ql-navy); }
 .qlp-list { position: sticky; top: 16px; display: flex; flex-direction: column; min-width: 0;
   /* many letters: the list scrolls inside its own sticky column (the scroll port's height, published by the page) */
@@ -221,12 +235,13 @@ textarea.qlp-paper--edit { resize: vertical; min-height: 520px; box-shadow: 0 0 
 
 /* the ref's narrower desktop: the rail drops under the letter below 1320px */
 @media (max-width: 1320px) {
-  .qlp-desk { grid-template-columns: 280px minmax(0, 1fr); }
-  .qlp-desk > .qlp-rail { grid-column: 2; position: static; max-width: 760px; width: 100%; }
+  /* the side panel drops under the letter, inside the same surface, full width, ruled along its top */
+  .qlp-work { grid-template-columns: minmax(0, 1fr); }
+  .qlp-work > .qlp-rail { position: static; border-left: 0; border-top: 1px solid rgba(28, 19, 15, .1); }
 }
 @media (max-width: 900px) {
   .qlp-desk, .qlp-first { grid-template-columns: 1fr; gap: 24px; }
-  .qlp-desk > .qlp-list, .qlp-desk > .qlp-rail { position: static; grid-column: auto; max-height: none; }
+  .qlp-desk > .qlp-list { position: static; grid-column: auto; max-height: none; }
   .qlp-paper { padding: 32px 24px; }
 }
 @media (prefers-reduced-motion: reduce) {
