@@ -120,4 +120,15 @@ The three reds are the baseline's own: `emuGuard.test` (1) and `firestoreTarget.
 
 ## Deploy
 
-Recorded in the follow-up commit (the dev branch and the served bundle).
+- **Dev branch:** `dev/srm1-plv3-qc156-clq1-tdi-qc1561-tdi-clq11` @ `775153954`, pushed. It is the served line (`c24562273`) plus this branch, a fast-forward. `cl-qc-layout-v1-1` is pushed at the same commit.
+- **Built and deployed** from a clean detached checkout of the pushed tip (`npm run build:dev`, then `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`). The build printed no error or warning lines.
+- **Dev serves `index-Cu3Fye3s.js`.** The served hash matched the build's, and `data-clq-stuck`, `clq-capin`, `slim-health` and "agents on file" are in the served `AppRoot-BAXTgJm0.js`.
+- Before this deploy, dev served `index-BQC9KmLH.js` (two-door import on the v156.1 line).
+- **Not merged to main. Prod untouched.** The next dev deploy must contain this branch, or the Contact list loses v1.1 on dev.
+- This report-only commit was not redeployed: the bundle is the same.
+
+## Not done / left open
+
+- **The header height now follows the Query Centre's drawing** (premise 7). Swapping either page's drawing moves it; L1 will catch it.
+- **CLP13** (200% zoom) still has not been re-measured since v1.
+- **Below 1440** was not measured; the locks run at 1440 and 1717 as the brief asks.
