@@ -196,7 +196,7 @@ test("WALK · template-mixed.csv through the gated review to the dashboard", asy
     await page.locator('[data-o9="genre"] [data-genre="thriller"]').click();
     await page.locator('[data-o9="book-card"] [data-act="continue"]').click();
     await page.locator('[data-act="upload"]').waitFor({ timeout: 20_000 });
-    await page.locator('input[type="file"][data-picker="template"]').setInputFiles(FX("template-mixed.csv"));
+    await page.locator('input[type="file"][data-picker="smart"]').setInputFiles(FX("template-mixed.csv"));
 
     // the summary
     await page.locator('[data-im="summary"]').waitFor({ timeout: 30_000 });

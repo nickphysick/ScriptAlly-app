@@ -193,6 +193,17 @@
 }
 .sf .o9-waylist li::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--sp-anthracite); transform: translateY(-2px); }
 .sf .o9-wayacts { flex-direction: row; flex-wrap: wrap; margin: auto 0 0; }
+/* Two-door import v1 (ref design-refs/two-door-import-v1/, screen 1): two doors at the mock's
+   measure, door one's caption under its buttons, and the quiet headings line under the doors. */
+.sf .sf-tiles.sf-doors { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; max-width: 1040px; }
+.sf .sf-doors .o9-wayslot { aspect-ratio: auto; height: 190px; }
+.sf .sf-cap { font-family: var(--sp-serif); font-size: 15px; line-height: 1.45; color: var(--sf-ink58); margin: 10px 0 0; }
+.sf .sf-quiet {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 18px;
+  max-width: 1040px; margin: 22px 0 0; padding: 14px 18px; border-radius: 12px; background: var(--sf-note);
+  font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .8);
+}
+@media (max-width: 1079.98px) { .sf .sf-tiles.sf-doors { grid-template-columns: minmax(0, 1fr); } }
 
 /* ── the Smart Import hand-off: the card, and what happens next beside it ── */
 .sf .o9-conf { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(280px, .9fr); gap: 28px; align-items: start; max-width: 1140px; }
@@ -303,6 +314,9 @@
 .sf .o9-ask { margin: 0; font-family: var(--sp-type); font-size: 23px; line-height: 1.25; color: var(--ink-on-light); }
 .sf .o9-ask--said { font-size: 20px; }
 .sf .o9-raw { font-family: var(--sp-mono); font-size: 15px; background: var(--im-pill); padding: 2px 7px; border-radius: 5px; }
+/* two-door import v1: the sheet's own date cells above a date question (the mock's .raws) */
+.sf .o9-raws { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
+.sf .o9-raws .o9-raw { font-size: 14px; overflow-wrap: anywhere; }
 .sf .o9-why { margin: -8px 0 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); max-width: 62ch; }
 .sf .o9-ans { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; }
 .sf .o9-ans .o9-ansfld { flex: 1 1 260px; margin: 0; }

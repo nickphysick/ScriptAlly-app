@@ -46,7 +46,7 @@ exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/
   "cells": "1450:c293cde67e3ca567",
   "csv": "524:520559dc5c9fd3b5",
   "sample": "436:da47e60eb49db7fc",
-  "template": "1343:a0ba3effbe3b30d7",
+  "template": "1373:23a348e707e7e2c7",
 }
 `;
 
@@ -55,7 +55,7 @@ exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/
   "cells": "1450:bd585e534c09e3e5",
   "csv": "524:153793415f02d455",
   "sample": "436:d7250cdf66861281",
-  "template": "1182:6ae20914d3417a9c",
+  "template": "1212:61375cbe06b9f89a",
 }
 `;
 
@@ -64,7 +64,7 @@ exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/
   "cells": "2332:e4de6ae012afbd3c",
   "csv": "484:091c35cb30c35814",
   "sample": "434:988f0bb5bbcac019",
-  "template": "2352:42fed4a5eeee2675",
+  "template": "2370:5beba07969b5fba0",
 }
 `;
 
@@ -73,7 +73,7 @@ exports[`the spreadsheet readers' output is pinned across the xlsx swap > tests/
   "cells": "2364:d39b276161815996",
   "csv": "524:153793415f02d455",
   "sample": "436:d7250cdf66861281",
-  "template": "1182:6ae20914d3417a9c",
+  "template": "1212:61375cbe06b9f89a",
 }
 `;
 

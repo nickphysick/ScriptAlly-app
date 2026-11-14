@@ -1,0 +1,8 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (20.1s)
+  ✓  2 [measure] › tests/e2e/twoDoorImport.measure.ts:40:1 › D1 the fork renders exactly two tiles and exactly one filled navy button (3.3s)
+  ✓  3 [measure] › tests/e2e/twoDoorImport.measure.ts:64:1 › D2 no element on the fork or /import opens a template-only picker (7.6s)
+  ✓  4 [measure] › tests/e2e/twoDoorImport.measure.ts:87:1 › H2 a headings file goes straight to the read screen: no callable request, no ConfirmScreen (2.6s)
+  ✓  5 [measure] › tests/e2e/twoDoorImport.measure.ts:122:1 › Q1 the out-of-order card's button is disabled until the dates run in order, then the model holds them (6.1s)
+  ✓  6 [measure] › tests/e2e/twoDoorImport.measure.ts:149:1 › Q2 each new card opens the gate and closes it when answered; the primary waits with the count (5.2s)
+  6 passed (48.4s)
+exit=0

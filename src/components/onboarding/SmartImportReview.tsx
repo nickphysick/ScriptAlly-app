@@ -35,11 +35,11 @@ import { agentPrimary, AGENT_NOT_SPECIFIED } from "../../lib/agentDisplay";
 import {
   ReviewAgent, ReviewQuery, CheckReason, openCrossedOthers, applyCrossedAnswer, settleAgentReason,
   resolveReason, fmtDate,
-  dupNoteOpen, dupNoteKept, parseModel, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
+  dupNoteOpen, dupNoteKept, modelToResult, autoSetAsideRows, applyAgentRemoval, seedUnidentifiedSetAside,
   removeDuplicateRecord, buildClusters, mergedAwayByKeeper,
   rowsIdentical, derivedCurrentStatus, applyDuplicateCollapse, originalsOf, fullerIdentity,
 } from "../../lib/smartImportReviewModel";
-import { importSteps } from "../../lib/importSummary";
+import { importSteps, ruledModel } from "../../lib/importSummary";
 import { ReconcileCard, ReconcileCardRow } from "./ReconcileCard";
 import { Chip, Stepper } from "./ImportParts";
 import { AgentRow, QueryRow, DupeOpen, DupeKept, DupeMerged, PhoneDupePick } from "./reviewRows";
@@ -49,14 +49,19 @@ import { PhonePin } from "./setupParts";
 import { useSetupBand, useSetupFootHost } from "./SetupFrame";
 import { useIsMobile } from "../shell/mobileChrome";
 import { ReviewDeck, DeckCard } from "./v9/ReviewDeck";
-import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS, ReadingQuestion, IllegibleAgencyQuestion, StripQuestion } from "./v9/DeckQuestions";
+import { AgencyQuestion, NamelessQuestion, MappingQuestion, QueryQuestion, Answered, DECK_WORDS, ReadingQuestion, IllegibleAgencyQuestion, StripQuestion, OrderQuestion, OutcomeQuestion, DateConfirmQuestion } from "./v9/DeckQuestions";
+import { confirmOrder, answerOutcome, monthFirstReading } from "../../lib/importRules";
+import { localToday } from "../../lib/importTypedDate";
+
+/** The month-first card's chip (two-door import v1): the reason's own pill names a date that is needed. */
+const DATE_TO_CONFIRM = "Date to confirm";
 import { stripEligible, showsStrip, confirmStrip, STRIP_CHIP } from "../../lib/importTimeline";
 import { PhotoLead, PageView } from "./v9/PhotoSnip";
 import type { ReviewPhoto } from "../../lib/photoImport";
 import "./photoImport.css";
 import {
   agentAsk, AgentAsk, AGENT_ASK_CHIP, openAgentQuestions, openQueryQuestions, questionFamily,
-  comingUpAgents, comingUpQueries, reviewSubline, gatePrimary, gateHint,
+  comingUpAgents, comingUpQueries, reviewSubline, gatePrimary, gateHint, questionsHead, QUESTIONS_SUB,
   answerKind, answeredLine, allAnsweredHead, writeHint, duplicatesDoneLine, duplicatesNextHint,
 } from "../../lib/reviewGate";
 import { STAGE_NAME } from "../../lib/qcSummary";
@@ -165,7 +170,8 @@ export interface SmartImportReviewProps {
 type Step = "duplicates" | "agents" | "queries";
 
 export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, manuscriptTitle, onBack, error, onImport, onCancel, resume, onChange, photos }) => {
-  const initial = useMemo(() => parseModel(result), [result]);
+  /* two-door import v1: the review opens on the model with QueryHawk's rules applied, as the read screen counted it */
+  const initial = useMemo(() => ruledModel(result), [result]);
   /* the names and agencies as the file gave them: a merge fills in the fuller name (v1.2.1) only
      where the writer has changed neither */
   const originals = useMemo(() => originalsOf(initial.agents), [initial]);
@@ -640,6 +646,13 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
       sub: `${originOf(q)} · ${statusAsk ? (q.sentDate ? fmtDate(q.sentDate) : "Undated") : STAGE_NAME[q.status]}`,
       chip: open ? focusReasonMeta(code).pill : "Answered",
     };
+    /* Two-door import v1: the three questions the rules and the readers raise, each its own card. */
+    if (open && code === "dates-out-of-order") return [{ ...base, body: (
+      <OrderQuestion query={q} onChange={replaceQuery} onConfirm={() => replaceQuery(confirmOrder(q))} />) }];
+    if (open && code === "outcome-missing") return [{ ...base, body: (
+      <OutcomeQuestion query={q} onAnswer={(s) => replaceQuery(answerOutcome(q, s))} />) }];
+    if (open && (code === "unreadable-date" || code === "no-date") && monthFirstReading(q.sentDateRaw, localToday())) return [{ ...base, chip: DATE_TO_CONFIRM, body: (
+      <DateConfirmQuestion query={q} code={code} onResolve={(iso) => resolveQueryReason(q.id, code, { sentDate: iso })} />) }];
     /* A query with a timeline is asked about it whole: one card, the strip, one button. */
     if (showsStrip(q, stripIds.current)) {
       const agent = agents.find((x) => x.id === q.agentRef);
@@ -694,6 +707,22 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
           <span className="im-num" data-im="title-n">{active.length}</span>
           <span className="im-words">agents for your contact list</span>
           <span className="im-sub" data-im="title-sub">{reviewSubline(agentOpen, readyAgents.length, "agents")}</span>
+        </h1>
+      </header>
+    )
+    ) : qNeed > 0 ? (
+      /* two-door import v1 (screen 3): while anything is open the step is headed by the questions left */
+      isMobile ? (
+      <header className="im-ohead im-ohead--sm im-phead">
+        <h1 className="im-h1" data-im="title"><span data-im="title-n">{qNeed}</span> {questionsHead(qNeed)}.</h1>
+        <p data-im="title-sub">{QUESTIONS_SUB}</p>
+      </header>
+    ) : (
+      <header className="im-ohead im-ohead--sm">
+        <h1 className="im-stack" data-im="title">
+          <span className="im-num" data-im="title-n">{qNeed}</span>
+          <span className="im-words">{questionsHead(qNeed)}</span>
+          <span className="im-sub" data-im="title-sub">{QUESTIONS_SUB}</span>
         </h1>
       </header>
     )
@@ -845,7 +874,7 @@ export const SmartImportReview: React.FC<SmartImportReviewProps> = ({ result, ma
             )}
             {screen === "queries" && (
               /* Commit seam: onImport(modelToResult(...)) → the host's loader. */
-              <button type="button" className="sf-btn" onClick={onImportClick} disabled={!canImport} data-im="primary">{gatePrimary("queries", qNeed)}</button>
+              <button type="button" className="sf-btn" onClick={onImportClick} disabled={!canImport} data-im="primary">{gatePrimary("queries", qNeed, { agents: active.length, queries: qActive.length })}</button>
             )}
           </div>
           </PhonePin>

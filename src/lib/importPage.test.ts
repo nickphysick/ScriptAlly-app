@@ -38,9 +38,13 @@ describe("W1 · the Import page's words", () => {
   });
   it("the page renders these constants and no words of its own for them", () => {
     const page = code("src/components/import/ImportPage.tsx");
-    for (const c of ["{IMPORT_TITLE}", "{IMPORT_SUB}", "{TILE_SMART.title}", "{TILE_SMART.text}", "{TILE_SMART.action}", "{TILE_TEMPLATE.title}", "{TILE_TEMPLATE.text}", "{TILE_TEMPLATE.download}", "{TILE_TEMPLATE.upload}", "{TILE_TEMPLATE.fact}", "{TILE_MATCH.title}", "{TILE_MATCH.text}", "{TILE_MATCH.action}", "{TILE_MATCH.fact}", "smartFactLine(entitlement)"]) {
+    /* RE-POINTED (two-door import v1): the desktop page has no template tile; its download is the fork's
+       quiet line. TILE_TEMPLATE stays for the phone's doors (ImportDoorsPhone), which this build leaves. */
+    for (const c of ["{IMPORT_TITLE}", "{IMPORT_SUB}", "{TILE_SMART.title}", "{TILE_SMART.text}", "{TILE_SMART.action}", "{TILE_MATCH.title}", "{TILE_MATCH.text}", "{TILE_MATCH.action}", "{TILE_MATCH.fact}", "smartFactLine(entitlement)", "{CAPTURE_QUIET_LINE}", "{CAPTURE_QUIET_LINK}"]) {
       expect(page, c).toContain(c);
     }
+    expect(page).not.toContain("TILE_TEMPLATE");
+    expect(page, "no template upload on the desktop page").not.toContain('data-act="upload"');
     expect(page).not.toMatch(/recommended|Upgrade/i);
   });
 });

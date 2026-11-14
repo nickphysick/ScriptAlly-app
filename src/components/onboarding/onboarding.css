@@ -459,7 +459,6 @@
 .sf .sf-dropuline { text-decoration: underline; text-underline-offset: 3px; font-family: inherit; }
 .sf .sf-droptypes { font-family: var(--sp-mono); font-size: 9px; letter-spacing: .18em; text-transform: uppercase; color: rgba(28, 19, 15, .5); margin: 8px 0 0; }
 .sf .sf-under-tiles { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin: 26px 0 0; }
-.sf .sf-escape { font-family: var(--sp-serif); font-size: 15px; line-height: 1.5; color: var(--sf-ink72); margin: 22px 0 0; }
 @media (max-width: 1079.98px) { .sf .sf-tiles { grid-template-columns: minmax(0, 1fr); } }
 
 /* ── The confirm: the file row ── */

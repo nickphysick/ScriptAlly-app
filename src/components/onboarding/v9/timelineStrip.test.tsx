@@ -62,10 +62,11 @@ describe("TS-B2 the card: one question, the strip, one button that says what is 
     const h = html(<StripQuestion query={setSentDate(kirsten, "2026-08-30")} agentName="Kirsten Vale" onChange={noop} onConfirm={noop} today={T} />);
     expect(h).toMatch(/<button type="button" class="sf-btn" data-strip="confirm">Yes, that's right</);
   });
-  it("an event before the sent date: the rust line, and Fix the dates first", () => {
+  /* RE-POINTED (two-door import v1): the order button reads "Press a date to change it" */
+  it("an event before the sent date: the rust line, and Press a date to change it", () => {
     const h = html(<StripQuestion query={setSentDate(kirsten, "2026-09-18")} agentName="Kirsten Vale" onChange={noop} onConfirm={noop} today={T} />);
     expect(h).toContain('<span class="o9-warn">An event is dated before the query was sent.</span>');
-    expect(h).toContain(">Fix the dates first<");
+    expect(h).toContain(">Press a date to change it<");
   });
   it("an agency-only agent: this query's timeline", () => {
     expect(html(<StripQuestion query={kirsten} agentName={null} onChange={noop} onConfirm={noop} today={T} />)).toContain("Is this query's timeline right?");

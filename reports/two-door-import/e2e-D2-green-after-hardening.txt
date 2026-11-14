@@ -1,0 +1,4 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.5s)
+  ✓  2 [measure] › tests/e2e/twoDoorImport.measure.ts:64:1 › D2 no element on the fork or /import opens a template-only picker (6.0s)
+  2 passed (23.4s)
+exit=0

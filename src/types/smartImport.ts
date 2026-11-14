@@ -64,7 +64,10 @@ export type ReviewReasonCode =
   | "check-reading"       // a name or agency that reads more than one way (goes with ParsedAgent.readings)
   | "illegible-agency"    // an agency is there but can't be made out; any legible start is in agency
   | "crossed-out"         // the entry is struck through
-  | "mark-unclear";       // a symbol beside the entry (✗ ? ! …) whose meaning isn't plain (markRaw)
+  | "mark-unclear"        // a symbol beside the entry (✗ ? ! …) whose meaning isn't plain (markRaw)
+  // Client-only (two-door import v1): raised on the review model, never by the function.
+  | "dates-out-of-order"  // a dated step earlier than the step before it (lib/importRules)
+  | "outcome-missing";    // a dated response after a step the writer sent, with no outcome named (template parser)
 
 export const REVIEW_REASON_CODES: readonly ReviewReasonCode[] = [
   "two-dates", "missing-day", "serial-outlier", "no-date",
@@ -72,6 +75,7 @@ export const REVIEW_REASON_CODES: readonly ReviewReasonCode[] = [
   "status-direction", "status-wording",
   "check-name", "needs-identifying",
   "check-reading", "illegible-agency", "crossed-out", "mark-unclear",
+  "dates-out-of-order", "outcome-missing",
 ];
 
 /** A later pipeline event lifted from a note (conservative): the event, its code-parsed date

@@ -1,0 +1,7 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.4s)
+  ✘  2 [measure] › tests/e2e/twoDoorImport.measure.ts:64:1 › D2 no element on the fork or /import opens a template-only picker (6.2s)
+    Error: fork: no template picker of any kind
+  1 failed
+  1 passed (23.5s)
+Error: Script "node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/twoDoorImport.measure.ts' '-g' 'D2'" exited with code 1
+exit=1

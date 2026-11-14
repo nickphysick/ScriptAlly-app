@@ -46,6 +46,7 @@ import { fmtDate, reviewTallies } from "../../lib/smartImportReviewModel";
 import { summaryModel } from "../../lib/importSummary";
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
+import { readRouteOfFile } from "../../lib/importReadRoute";
 import { buildImportNotice, saveImportNotice } from "../../lib/importNotice";
 import { splitDuplicates, ALREADY_REASON } from "../../lib/importDuplicates";
 
@@ -71,11 +72,9 @@ type Blocked = { reason: "used" };
 
 /** What the host can ask of the flow while it is idle. */
 export interface ImportFlowHandle {
-  /** Open the Smart Import file picker. */
+  /** Open the import's one file picker. The file's headings decide how it is read (lib/importReadRoute). */
   chooseFile: () => void;
-  /** Open the template file picker. */
-  chooseTemplate: () => void;
-  /** A file dropped on the host's drop zone: the Smart Import path. */
+  /** A file dropped on the host's drop zone: the same as the picker's choice. */
   dropFile: (file: File) => void;
   /** "Use photos" (smart-import-photos-v1.1): the photos screen, empty. It never opens the picker:
    *  that opens only from the screen's own "Choose photos" or "Add a page", in their click. */
@@ -155,7 +154,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [blocked, setBlocked] = useState<Blocked | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const templateInputRef = useRef<HTMLInputElement>(null);
 
   /* ── Photos (smart-import-photos-v1) ─────────────────────────────────────────────────────────
      The writer's own pages, held in memory for the flow and NOWHERE else: never uploaded but to
@@ -233,9 +231,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   /** Cells the template parser could not read. Each date flag is also a reason on its own query,
    *  which is what the review renders. */
   const [, setTemplateFlags] = useState<TemplateFlag[]>([]);
-  /** The file's row count, when it is known without reading the file again: the template parse
-   *  returns it; a Smart import does not (its sample is capped at eight rows). */
-  const [rowsRead, setRowsRead] = useState<number | null>(null);
   /** Rows of the file the account already holds (same agent, manuscript and sent day). They are
    *  taken out before the summary, so the summary and the review count only what will be written. */
   const [already, setAlready] = useState<AlreadyRow[]>([]);
@@ -325,10 +320,19 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   };
   const [nothingNew, setNothingNew] = useState(false);
 
-  // File chosen → gate it on the client first. If already used, go straight to the blocked screen
-  // (no wasted call); otherwise hold the file and ask for an explicit confirm before spending it.
+  /* File chosen (two-door import v1) → its first sheet's headings decide the reader, BEFORE anything
+     else. QueryHawk's own headings go straight to the template parser: no confirm, no entitlement
+     check, no charge. Anything else is the Smart Import path below, exactly as before. */
+  const pickFile = (file: File) => { void routeFile(file); };
+  const routeFile = async (file: File) => {
+    if ((await readRouteOfFile(file)) === "headings") { await pickTemplateFile(file); return; }
+    pickSmartFile(file);
+  };
+
+  // A Smart Import file → gate it on the client first. If already used, go straight to the blocked
+  // screen (no wasted call); otherwise hold the file and ask for an explicit confirm before spending it.
   // The server re-checks regardless — this is UX, not the enforcement.
-  const pickFile = (file: File) => {
+  const pickSmartFile = (file: File) => {
     if (!entitlement.allowed) {
       setBlocked({ reason: "used" });
       setScreen("blocked");
@@ -345,7 +349,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   };
 
   /**
-   * The template path — parsed HERE, in the browser, with no call to anything.
+   * The headings path — parsed HERE, in the browser, with no call to anything. Reached from the one
+   * picker when the file's headings are the template's (two-door import v1); there is no picker of its own.
    *
    * ⚠️ IT DOES NOT TOUCH THE ENTITLEMENT, AND THAT IS THE PROMISE THE FORK MAKES IN WORDS. No
    * gate check, no confirm beat, no spend: the columns are set, so reading them needs no model.
@@ -363,7 +368,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     try {
       const parsed = await readTemplateFile(file);
       setTemplateFlags(parsed.flags);
-      setRowsRead(parsed.rowsRead);
       if (takeRead(parsed.result) === "fresh") setScreen("overview");
     } catch (e) {
       console.error("Template parse failed:", e);
@@ -372,7 +376,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
   };
 
   const runMapping = async (file: File) => {
-    setRawSample([]); setExtractComplete(false); setValidated(null); setRowsRead(null);
+    setRawSample([]); setExtractComplete(false); setValidated(null);
     setImportSource("smart");
     setConfirmNote(null);
     setScreen("reading"); // the scatter-settle loader takes over from here
@@ -417,7 +421,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     setPhotoBusy(false);
     if (!fitted) { setPhotoMessage(PHOTOS_WORDS.tooLarge); return; }
     setReadPhotos(ready.map((p) => ({ shown: photos.indexOf(p) + 1, url: p.url!, width: p.width, height: p.height })));
-    setRawSample([]); setExtractComplete(false); setValidated(null); setRowsRead(null);
+    setRawSample([]); setExtractComplete(false); setValidated(null);
     setImportSource("smart");
     setScreen("reading");
     try {
@@ -517,7 +521,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
 
   useImperativeHandle(ref, () => ({
     chooseFile: () => fileInputRef.current?.click(),
-    chooseTemplate: () => templateInputRef.current?.click(),
     dropFile: pickFile,
     openPhotos,
     dropPhotos: pickPhotos,
@@ -526,7 +529,7 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       dropDraft();
       setResumeSnap(undefined);
       setPendingFile(null); setValidated(null); setRawSample([]); setExtractComplete(false); setOutcome(null);
-      setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setRowsRead(null); setFileName("");
+      setCommitError(null); setManuscriptFailed(false); setImportComplete(false); setBlocked(null); setFileName("");
       setAlready([]); setNothingNew(false);
       setScreen("idle");
     },
@@ -542,8 +545,8 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     },
   }));
 
-  /* The two pickers. One element each, rendered by whichever screen can open one — the fork, and
-     the confirm's "Change" — so a press always has an input to click. */
+  /* The pickers: the one file picker and the two photo pickers. One element each, rendered by whichever
+     screen can open one — the fork, and the confirm's "Change" — so a press always has an input to click. */
   const pickers = (
     <>
       <input
@@ -553,14 +556,6 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         style={{ display: "none" }}
         data-picker="smart"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) pickFile(f); e.target.value = ""; }}
-      />
-      <input
-        ref={templateInputRef}
-        type="file"
-        accept=".csv,.xlsx,.xls"
-        style={{ display: "none" }}
-        data-picker="template"
-        onChange={(e) => { const f = e.target.files?.[0]; if (f) void pickTemplateFile(f); e.target.value = ""; }}
       />
       {/* Photos: images only, several at once, and NO `capture` attribute — so a phone offers the
           camera and the library both. */}
@@ -689,8 +684,9 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
         result={validated.result}
         manuscriptTitle={manuscriptTitle}
         fileName={fileName}
-        rowCount={rowsRead}
+        source={importSource}
         onContinue={() => setScreen("review")}
+        onImport={handleImport}
         onCancel={onCancel}
       />
     );

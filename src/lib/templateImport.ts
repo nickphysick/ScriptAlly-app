@@ -114,6 +114,9 @@ export function ambiguousReadings(raw: string): string[] {
  * `rows` are objects keyed by the sheet's own headings — whatever the reader produced. Matching is
  * done here so a heading with stray case or spacing still lands.
  */
+/** The steps the writer takes: a response dated after one of these names no outcome of its own. */
+const WRITER_STEPS = new Set<QueryStatus>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT]);
+
 export function parseTemplateRows(rows: Record<string, unknown>[]): TemplateParse {
   const flags: TemplateFlag[] = [];
   const agents: ParsedAgent[] = [];
@@ -237,10 +240,14 @@ export function parseTemplateRows(rows: Record<string, unknown>[]): TemplatePars
     const responseRaw = cell(row, "Date of last response");
     const response = parseTemplateDate(responseRaw);
     const timeline: ParsedQuery["timeline"] = [];
+    /* Two-door import v1: a response date on a row with a blank status is no longer dropped. It rides
+       as a dated step after the query (Queried) so the review can ask what it was. An unreadable
+       status still has no step: its own question comes first. */
+    const eventType: QueryStatus | null = status ?? (responseRaw && !statusUnread ? QueryStatus.QUERIED : null);
     /* A response date that could not be read still gets its (undated) event when there is a status
        to hang it on, so the review has somewhere to put the writer's answer. */
-    if ((response === "ambiguous" || (response === null && responseRaw)) && status) {
-      timeline.push({ type: status, date: null, raw: responseRaw });
+    if ((response === "ambiguous" || (response === null && responseRaw)) && eventType) {
+      timeline.push({ type: eventType, date: null, raw: responseRaw });
       reasons.push(response === "ambiguous" ? "ambiguous-response-date" : "unreadable-response-date");
     }
     if (response === "ambiguous") {
@@ -253,9 +260,12 @@ export function parseTemplateRows(rows: Record<string, unknown>[]): TemplatePars
         row: sheetRow, column: "Date of last response", value: responseRaw, reason: "unreadable-date",
         message: `We couldn't read "${responseRaw}" as a date. Try YYYY-MM-DD.`,
       });
-    } else if (response && status) {
-      timeline.push({ type: status, date: response.iso, raw: responseRaw });
+    } else if (response && eventType) {
+      timeline.push({ type: eventType, date: response.iso, raw: responseRaw });
     }
+    /* Two-door import v1: "the date of last response" on a step the WRITER took (the query, a partial
+       or a full sent) is a reply the sheet never names. It is asked ("Outcome missing"), never guessed. */
+    if (eventType && responseRaw && WRITER_STEPS.has(eventType)) reasons.push("outcome-missing");
 
     const materials = cell(row, "Materials sent");
     const written = cell(row, "Notes");

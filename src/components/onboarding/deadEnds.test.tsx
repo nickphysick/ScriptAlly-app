@@ -120,7 +120,8 @@ describe("E1 BranchB wires each dead end to the built routes", () => {
   });
   it("'Back to the review' returns to the review, and by-hand is the parent's handler everywhere", () => {
     expect(b).toContain('onBackToReview={() => setScreen("review")}');
-    expect(((b + branchOnly).match(/onAddByHand=\{onAddByHand\}/g) ?? []).length).toBeGreaterThanOrEqual(5);
+    /* RE-POINTED (two-door import v1): the fork's by-hand tile is gone, so one fewer site passes it */
+    expect(((b + branchOnly).match(/onAddByHand=\{onAddByHand\}/g) ?? []).length).toBeGreaterThanOrEqual(4);
   });
   it("the old card is no longer drawn by any screen in BranchB", () => {
     for (const file of [b, branchOnly]) {

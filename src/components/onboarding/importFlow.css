@@ -273,6 +273,22 @@
   padding: 16px 0 18px; border-top: 1px solid rgba(var(--im-text-rgb), .14);
 }
 .sf .im-nextbar .im-steps { flex: 1 1 420px; }
+/* two-door import v1 (screen 2): how it was read, "Sorted for you", the bar's count */
+.sf .im-read .im-ohead { grid-template-columns: minmax(0, 1fr); }
+.sf .im-howread { font-family: var(--sp-serif); font-size: 16px; line-height: 1.5; color: var(--sf-ink72); margin: 0; }
+.sf .im-read .o9-mtxt [data-im="file"] { font-family: var(--sp-serif); font-size: 18px; color: rgba(var(--im-text-rgb), .7); }
+.sf .im-read .im-pop { padding: 22px 30px; }
+.sf .im-listhead--quiet { background: var(--im-pill); color: var(--ink-on-light); border-bottom: 1px solid rgba(var(--im-text-rgb), .08); }
+.sf .im-listhead--quiet b { font-family: var(--sp-type); font-weight: 400; font-size: 19px; }
+.sf .im-listhead--quiet .im-saside { font-family: var(--sp-serif); font-style: italic; font-size: 14.5px; color: rgba(var(--im-text-rgb), .66); }
+.sf .im-srow { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 20px; border-top: 1px solid rgba(var(--im-text-rgb), .08); }
+.sf .im-sorted .im-listhead + .im-srow { border-top: 0; }
+.sf .im-srow b { display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 16.5px; line-height: 1.2; color: var(--ink-on-light); }
+.sf .im-srow small { display: block; font-family: var(--sp-serif); font-style: italic; font-size: 13.5px; color: rgba(var(--im-text-rgb), .62); margin-top: 2px; }
+.sf .im-stick { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--sp-anthracite); color: var(--im-cream); }
+.sf .im-sn { font-family: var(--sp-type); font-size: 20px; color: var(--ink-on-light); }
+.sf .im-tal { margin: 0; font-family: var(--sp-serif); font-size: 15.5px; color: rgba(var(--im-text-rgb), .72); }
+.sf .im-tal b { font-family: var(--sp-type); font-weight: 400; font-size: 28px; line-height: 1; color: var(--ink-on-light); margin-right: 5px; }
 .sf .im-nextgo { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
 @media (max-width: 1079.98px) {
   .sf .im-pops { grid-template-columns: 1fr; }

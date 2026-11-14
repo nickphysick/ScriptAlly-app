@@ -1,0 +1,7 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.4s)
+  ✘  2 [measure] › tests/e2e/twoDoorImport.measure.ts:150:1 › Q2 each new card opens the gate and closes it when answered; the primary waits with the count (4.0s)
+    Error: the deck has no card q-q2
+  1 failed
+  1 passed (21.2s)
+Error: Script "node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/twoDoorImport.measure.ts' '-g' 'Q2'" exited with code 1
+exit=1

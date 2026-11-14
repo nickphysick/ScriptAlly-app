@@ -12,7 +12,7 @@
   color: var(--impg-ink);
 }
 .impg .impg-tiles {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; box-sizing: border-box;
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; box-sizing: border-box; /* two tiles since two-door import v1 */
 }
 .impg .impg-tile {
   display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: 16px; align-items: start; box-sizing: border-box;
@@ -40,6 +40,13 @@
 .impg .impg-tile .impg-fact {
   margin: 14px 0 0; font-family: var(--sp-mono); font-size: 9px; line-height: 1.5; letter-spacing: .14em; text-transform: uppercase; color: var(--impg-ink50);
 }
+/* two-door import v1: the fork's quiet headings line, on the Import page */
+.impg .impg-quiet {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 18px;
+  margin: 24px 0 0; padding: 14px 18px; border-radius: 12px; background: #f4efe9; /* the set-up frame's --sf-note, which is scoped to .sf and does not reach here */
+  font: 400 15.5px/1.45 var(--sp-serif); color: var(--impg-ink72);
+}
+.impg .impg-link { background: none; border: 0; padding: 0; font: inherit; color: var(--ink-on-light); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .impg .impg-foot { margin: 28px 0 0; max-width: 560px; font: 400 15.5px/1.5 var(--sp-serif); color: var(--impg-ink72); }
 
 /* 28 under the panel. ⚠️ THE GAP UNDER A HEADER IS THE GRID'S ALONE (its spacer's height): the page

@@ -31,7 +31,7 @@ vi.mock("firebase/firestore", () => ({
 import { QueryStatus } from "../../types";
 import type { SmartImportResult } from "../../types/smartImport";
 import { parseModel, modelToResult, applyCrossedAnswer, settleAgentReason, openCrossedOthers } from "../../lib/smartImportReviewModel";
-import { agentAsk, openAgentQuestions, openQueryQuestions, AGENT_ASK_CHIP, queriesAnswerLine, comingUpQueries } from "../../lib/reviewGate";
+import { agentAsk, openAgentQuestions, openQueryQuestions, AGENT_ASK_CHIP, comingUpQueries } from "../../lib/reviewGate";
 import { focusReasonMeta } from "../../lib/smartImportReviewModel";
 import { ReadingQuestion, IllegibleAgencyQuestion, QueryQuestion, crossedAllLabel, markWording, splitReading } from "./v9/DeckQuestions";
 import { PhotoLead, CUT_FROM_BANDS } from "./v9/PhotoSnip";
@@ -81,7 +81,6 @@ describe("the model: agent questions move onto the agent", () => {
   it("a crossed-out line and a mark are asked on the Queries step, each a question the gate counts", () => {
     expect(openQueryQuestions(m.queries.filter((q) => !q.removed)).map((q) => q.code)).toEqual(["crossed-out", "crossed-out", "mark-unclear"]);
     expect([focusReasonMeta("crossed-out").pill, focusReasonMeta("mark-unclear").pill]).toEqual(["Crossed out", "Mark to explain"]);
-    expect(queriesAnswerLine(openQueryQuestions(m.queries))).toBe("2 crossed-out lines, 1 mark to explain. One pick each.");
     expect(comingUpQueries(openQueryQuestions(m.queries).slice(1))).toEqual(["1 more crossed-out line", "1 more mark to explain"]);
   });
   it("src, lineRaw and markRaw ride the review's query", () => {

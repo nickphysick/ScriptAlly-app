@@ -1,0 +1,7 @@
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.5s)
+  ✘  2 [measure] › tests/e2e/twoDoorImport.measure.ts:88:1 › H2 a headings file goes straight to the read screen: no callable request, no ConfirmScreen (17.0s)
+    Error: the read screen opens
+  1 failed
+  1 passed (34.2s)
+Error: Script "node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/twoDoorImport.measure.ts' '-g' 'H2'" exited with code 1
+exit=1

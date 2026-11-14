@@ -1,0 +1,10 @@
+   × H1 one picker, two readers > template-dmy.csv and template-iso.csv route to the headings reader 19ms
+   ✓ H1 one picker, two readers > smart-messy.xlsx routes to Smart Import 7ms
+   ✓ H1 one picker, two readers > a headings file with one column renamed routes to Smart Import 1ms
+   × H1 one picker, two readers > case and spacing do not count; a missing heading or an extra one does 0ms
+   ✓ H1 one picker, two readers > names no heading of its own: the template's columns are read from templateColumns 0ms
+   ✓ H2 the headings route never touches Smart Import (source) > the picked file is routed before anything else 0ms
+   ✓ H2 the headings route never touches Smart Import (source) > the template parser's path names no entitlement, confirm or Smart Import call 0ms
+   ✓ H2 the headings route never touches Smart Import (source) > there is one file picker: no template-only input and no chooseTemplate 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 6 passed (8)
