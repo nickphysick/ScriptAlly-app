@@ -30,6 +30,8 @@ import type { ReviewReasonCode } from "../types/smartImport";
 import type { ReviewAgent, ReviewQuery, ReviewTimelineEvent } from "./smartImportReviewModel";
 import { impliedRungs } from "./impliedRungs";
 import { readTypedDate, localToday } from "./importTypedDate";
+/* the app's one short-month table (lib/dates): "Sep", never "Sept" (the mock's "22 Sept" is not ported) */
+import { MONTHS_SHORT } from "./dates";
 
 export type SettledKind = "status-from-dates" | "request-added" | "agency-blank" | "sent-undated" | "response-time" | "no-year";
 export interface Settled { kind: SettledKind; count: number }
@@ -232,7 +234,6 @@ export const ordinal = (n: number): string => {
   return `${n}${suffix}`;
 };
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-const MONTHS_SHORT = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sept", "Oct", "Nov", "Dec"];
 const ymd = (iso: string) => day(iso).split("-").map(Number) as [number, number, number];
 /** The month-first card's words, from the proposed reading and the number that cannot be a month. */
 export const DATE_CONFIRM_WORDS = {

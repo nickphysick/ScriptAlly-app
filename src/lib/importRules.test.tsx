@@ -155,7 +155,7 @@ describe("Q2 (model) each new question opens the gate, and its answer closes it"
     expect(monthFirstReading("22/09/2026", TODAY)).toBeNull();
     expect(DATE_CONFIRM_WORDS.ask("2026-09-22")).toBe("Is this 22 September 2026?");
     expect(DATE_CONFIRM_WORDS.why(22)).toBe("Dates are read day first, and there's no 22nd month.");
-    expect(DATE_CONFIRM_WORDS.yes("2026-09-22")).toBe("Yes, 22 Sept 2026");
+    expect(DATE_CONFIRM_WORDS.yes("2026-09-22"), "the app's short month, not the mock's Sept").toBe("Yes, 22 Sep 2026");
     const t = parseTemplateRows([{ "Agent name": "Owen Pryce", Agency: "Greaves", Status: "Queried", "Date sent": "9/22/2026" }]);
     const r = ruled(t.result);
     expect(openQueryQuestions(r.queries).map((q) => q.code)).toEqual(["unreadable-date"]);
