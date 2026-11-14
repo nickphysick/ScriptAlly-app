@@ -22,8 +22,6 @@ vi.mock("../../lib/firebase", async () => (await import("../../test/pageSmoke"))
 vi.mock("../toast/ToastProvider", async () => (await import("../../test/pageSmoke")).toastMock());
 
 import { QueryLettersPage, NO_LETTERS_TITLE } from "./QueryLettersPage";
-import { TIPS } from "./TopTip";
-import { LETTER_MIN_SENT } from "../../lib/queryLetters";
 import { WORKSPACE_PATHS } from "../../marketing/routeTiers";
 import { WORKSPACE_SHELL_PATHS } from "../../lib/shellForRoute";
 
@@ -62,7 +60,7 @@ describe("/materials/letters renders the letter desk", () => {
     queries: [Q("q1", QueryStatus.QUERIED, { sentVersions: ["l2"] }), Q("q2", QueryStatus.PARTIAL_REQUESTED, { sentVersions: ["l2"] })],
   });
 
-  it("populated: the shared open header, the Top tip, the rows in page order, the in-use letter selected and read in full", () => {
+  it("populated: the Query Centre's navy header (no tip), the rows in page order, the in-use letter selected and read in full", () => {
     state.data = populated();
     const h = render();
     const t = text(h);
@@ -71,9 +69,10 @@ describe("/materials/letters renders the letter desk", () => {
     expect(t).toContain("for Harbour of Glass");
     expect(t).toContain("+ New letter");
     expect(t).toContain("Upload a file");
-    /* v2.1: the third column is the Top tip; v2's in-use block and its picker are gone */
-    expect(h).toContain('data-ql="tip"');
-    expect(t).toContain("Top tip Next tip Mark what you personalise");
+    /* v2.4: the Query Centre's navy header (OpenHeader in a .qc151.qc153 wrapper); no tip, no in-use block, no picker */
+    expect(h).toMatch(/<div class="qc151 qc153 qlp-hdw"><header class="qc1531-hd qlp-hd"/);
+    expect(h).not.toContain('data-ql="tip');
+    expect(t).not.toContain("Top tip");
     expect(h).not.toContain('data-ql="in-use"');
     expect(h).not.toContain('data-ql="change"');
     expect(t).not.toContain("Going out with new queries");
@@ -170,24 +169,21 @@ describe("/materials/letters renders the letter desk", () => {
     expect(h).not.toContain('data-ql="row"');
   });
 
-  it("v2.1: tip 4 reads LETTER_MIN_SENT, never a typed number", () => {
-    expect(TIPS[3].text).toBe(`A letter needs about ${LETTER_MIN_SENT} queries out before its figures mean much. Before that, one reply swings them.`);
-    expect(TIPS.map((x) => x.title)).toEqual(["Mark what you personalise", "Don't overwrite, save a version", "Pick it when you log", "Give it time", "Copy from here"]);
-  });
-
-  it("v2.1: an unsent letter with no text shows the no-words sheet, not a blank one", () => {
+  it("v2.4: an unsent letter with no text says 'No text saved', not a blank sheet", () => {
     state.data = { ...populated(), manuscripts: [MS({ inUseLetterId: "lf" })], versions: [...populated().versions, L("lf", "Voice-led", "2026-11-05T10:00:00.000Z", { contentDraft: undefined, contentType: "ref", fileName: "voice.docx" })] };
     const h = render();
     const t = text(h);
     expect(h).toContain('data-state="no-text"');
-    expect(t).toContain("The words aren't here yet It's kept in voice.docx. Paste the text in and you can read it here, copy it and compare it with your other letters.");
+    /* RE-POINTED (v2.4): v2.1's "The words aren't here yet" copy → the ref's "No text saved" */
+    expect(t).toContain("No text saved It's kept in voice.docx. Paste your letter in, or upload the file.");
+    expect(t).not.toContain("The words aren't here yet");
     expect(h).toContain('data-ql="paste-text"');
     expect(h).toContain('data-ql="upload-for"');
     expect(h).not.toContain('data-ql="filebox"');
     expect(h).not.toContain('data-ql="lock-line"');
   });
 
-  it("v2.1: a sent letter with no text asks what it said, once, with its queries counted", () => {
+  it("v2.4: a sent letter with no text says it has gone out, 'No text saved', and that it can be added once", () => {
     state.data = {
       ...populated(), manuscripts: [MS({ inUseLetterId: "lb" })],
       versions: [...populated().versions, L("lb", "Covering letter 4", "2026-08-21T10:00:00.000Z", { contentDraft: undefined, contentType: "ref" })],
@@ -196,9 +192,10 @@ describe("/materials/letters renders the letter desk", () => {
     const h = render();
     const t = text(h);
     expect(h).toContain('data-state="sent-no-text"');
-    expect(t).toContain("This letter has gone out. Its name and results are on record, but not its words.");
-    expect(t).toContain("What did this letter say? Add the text you sent and you can read it here, copy it and compare it with your other letters. Its 2 queries and their results stay exactly as they are.");
-    expect(t).toContain("You can add it once. After that it locks, like any letter that has gone out.");
+    /* RE-POINTED (v2.4): the lock line, heading and paragraph are the ref's; the note beneath is removed */
+    expect(t).toContain("This letter has gone out. No text saved Add the text you sent, or upload the file. You can do this once, and its results won't change.");
+    expect(t).not.toContain("What did this letter say?");
+    expect(t).not.toContain("You can add it once");
     expect(h).toContain('data-ql="add-text"');
     expect(h).toContain('data-ql="new-version"');
   });

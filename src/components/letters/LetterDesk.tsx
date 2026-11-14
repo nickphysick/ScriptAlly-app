@@ -192,20 +192,20 @@ export const LetterView: React.FC<{
       )}
       {firstNote != null && <p className="qlp-first-note" data-ql="first-note" role="status">{firstLetterNote(firstNote)}</p>}
       {!hasText ? (<>
-        {/* v2.1, the "no words yet" sheet: any letter with no text saved (kept in a file, or a name only) */}
+        {/* "No text saved" (v2.4; v2.1's "no words yet" sheet): any letter with no text saved (kept in a file, or a name only) */}
         {locked && (
           <div className="qlp-lt-bar">
-            <span className="qlp-lock" data-ql="lock-line"><Ic d={LOCK} /><span>This letter has gone out. Its name and results are on record, but not its words.</span></span>
+            <span className="qlp-lock" data-ql="lock-line"><Ic d={LOCK} /><span>This letter has gone out.</span></span>
           </div>
         )}
         <div className="qlp-paper qlp-paper--nt" data-ql="sheet" data-state={locked ? "sent-no-text" : "no-text"}>
           <img src={QUILL} alt="" />
-          <h3 className="qlp-nt-h">{locked ? "What did this letter say?" : "The words aren't here yet"}</h3>
+          <h3 className="qlp-nt-h">No text saved</h3>
           <p>
             {letter.fileName ? `It's kept in ${letter.fileName}. ` : ""}
             {locked
-              ? `Add the text you sent and you can read it here, copy it and compare it with your other letters. Its ${facts.sent === 1 ? "1 query and its result" : `${facts.sent} queries and their results`} stay exactly as they are.`
-              : "Paste the text in and you can read it here, copy it and compare it with your other letters."}
+              ? "Add the text you sent, or upload the file. You can do this once, and its results won't change."
+              : "Paste your letter in, or upload the file."}
           </p>
           <div className="qlp-nt-a">
             {locked
@@ -213,7 +213,6 @@ export const LetterView: React.FC<{
               : <button type="button" className="qlp-b2" data-ql="paste-text" onClick={onEdit}><Ic d={PEN} />Paste the text</button>}
             <button type="button" className="qlp-b2" data-ql="upload-for" onClick={onUploadFor}><Ic d={DOC} w={1.6} />Upload the file</button>
           </div>
-          {locked && <p className="qlp-nt-n">You can add it once. After that it locks, like any letter that has gone out.</p>}
         </div>
       </>) : (<>
         <div className="qlp-lt-bar">
@@ -514,15 +513,18 @@ export const DeskSkeleton: React.FC = () => (
       <i className="qlp-sk qlp-sk--h2" />
       {[0, 1, 2].map((i) => <i key={i} className="qlp-sk qlp-sk--row" />)}
     </div>
-    <div className="qlp-mid">
-      <i className="qlp-sk qlp-sk--name" />
-      <i className="qlp-sk qlp-sk--meta" />
-      <i className="qlp-sk qlp-sk--paper" />
-    </div>
-    <div className="qlp-rail">
-      <i className="qlp-sk qlp-sk--h2" />
-      <i className="qlp-sk qlp-sk--cells" />
-      <i className="qlp-sk qlp-sk--list" />
+    {/* v2.4: the workspace's two-part shape, so nothing jumps when the letters arrive */}
+    <div className="qlp-work" data-ql="work">
+      <div className="qlp-mid">
+        <i className="qlp-sk qlp-sk--name" />
+        <i className="qlp-sk qlp-sk--meta" />
+        <i className="qlp-sk qlp-sk--paper" />
+      </div>
+      <div className="qlp-rail">
+        <i className="qlp-sk qlp-sk--h2" />
+        <i className="qlp-sk qlp-sk--cells" />
+        <i className="qlp-sk qlp-sk--list" />
+      </div>
     </div>
   </div>
 );

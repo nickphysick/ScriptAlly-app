@@ -16,14 +16,11 @@
  */
 import { test, expect, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
 import { openRoute } from "./measure";
 
 const W1440 = { width: 1440, height: 900 };
 const W1920 = { width: 1920, height: 1080 };
 const SHOTS = process.env.QL21_SHOTS ?? "";
-const MIN_SENT = Number(/export const LETTER_MIN_SENT = (\d+);/.exec(readFileSync("src/lib/queryLetters.ts", "utf8"))![1]);
-const TIP_KEY = "scriptally_ql_tip";
 
 async function shot(page: Page, name: string) {
   if (!SHOTS) return;
@@ -38,7 +35,6 @@ async function openLetters(page: Page, size = W1440) {
 const P = (page: Page) => page.locator('[data-ql="page"]');
 const row = (page: Page, id: string) => P(page).locator(`[data-ql="row"][data-id="${id}"]`);
 const toast = (page: Page, text: string | RegExp) => page.locator(".sa-toast", { hasText: text });
-const third = (page: Page) => P(page).locator('header[data-ql="header"] .qc1531-rc');
 const figs = async (page: Page) => (await P(page).locator('[data-ql="cells"]').innerText()).replace(/\s+/g, " ").trim();
 
 test.describe.configure({ mode: "default" }); // independent: every lock reports its own red or green (one worker, in order)
@@ -47,54 +43,8 @@ test.beforeAll(() => {
   execSync("node tests/e2e/seedQueryLettersV21.mjs", { stdio: "inherit" });
 });
 
-test("QL21-1 the header's third column is the Top tip card, with no in-use block, Change link or picker", async ({ page }) => {
-  for (const size of [W1440, W1920]) {
-    await openLetters(page, size);
-    await expect(third(page)).toHaveCount(1);
-    const tip = third(page).locator('[data-ql="tip"]');
-    await expect(tip).toBeVisible();
-    await expect(third(page)).toContainText("Top tip");
-    await expect(third(page).locator('[data-ql="tip-next"]')).toHaveText("Next tip");
-    await expect(tip.locator("img")).toHaveAttribute("src", /\/images\/dash\/quill\.png/);
-    for (const probe of ['[data-ql="in-use"]', '[data-ql="change"]', '[data-ql="picker"]', '[data-ql="in-use-line"]']) {
-      await expect(P(page).locator(probe), probe).toHaveCount(0);
-    }
-    await expect(third(page)).not.toContainText("in use");
-    await shot(page, "01-header-tip");
-  }
-});
-
-test("QL21-2 Next tip walks 1→5 and wraps; the navy mark follows; a reload keeps the position", async ({ page }) => {
-  await page.addInitScript((k) => { if (!sessionStorage.getItem("ql21-cleared")) { try { localStorage.removeItem(k as string); } catch { /* */ } sessionStorage.setItem("ql21-cleared", "1"); } }, TIP_KEY);
-  await openLetters(page);
-  const titles = ["Mark what you personalise", "Don't overwrite, save a version", "Pick it when you log", "Give it time", "Copy from here"];
-  const marks = third(page).locator('[data-ql="tip-marks"] i');
-  await expect(marks).toHaveCount(5);
-  for (let i = 0; i < 6; i++) {
-    const at = i % 5;
-    await expect(third(page).locator('[data-ql="tip-title"]')).toHaveText(titles[at]);
-    const on = await marks.evaluateAll((els) => els.map((e) => e.classList.contains("on")));
-    expect(on.indexOf(true)).toBe(at);
-    expect(on.filter(Boolean).length).toBe(1);
-    expect(await marks.nth(at).evaluate((e) => getComputedStyle(e).backgroundColor)).toBe("rgb(42, 58, 82)");
-    if (i < 5) await third(page).locator('[data-ql="tip-next"]').click();
-  }
-  /* now on tip 1 again after the wrap; move to tip 3 and reload */
-  await third(page).locator('[data-ql="tip-next"]').click();
-  await third(page).locator('[data-ql="tip-next"]').click();
-  await expect(third(page).locator('[data-ql="tip-title"]')).toHaveText(titles[2]);
-  await page.reload();
-  await expect(P(page)).toBeVisible({ timeout: 30_000 });
-  await expect(third(page).locator('[data-ql="tip-title"]')).toHaveText(titles[2]);
-});
-
-test("QL21-3 tip 4's number is LETTER_MIN_SENT", async ({ page }) => {
-  await page.addInitScript((k) => { try { localStorage.setItem(k as string, "3"); } catch { /* */ } }, TIP_KEY);
-  await openLetters(page);
-  await expect(third(page).locator('[data-ql="tip-title"]')).toHaveText("Give it time");
-  expect(MIN_SENT).toBeGreaterThan(0);
-  await expect(third(page).locator('[data-ql="tip-text"]')).toHaveText(`A letter needs about ${MIN_SENT} queries out before its figures mean much. Before that, one reply swings them.`);
-});
+/* QL21-1, QL21-2 and QL21-3 RETIRED (Query letters v2.4): the Top tip they measured is removed from the page; v2.4's
+   QL24-4 and ql24.test.ts lock its absence. */
 
 test("QL21-4 + QL21-5 Use for new queries with Undo; the package line on the in-use letter, both populations", async ({ page }) => {
   await openLetters(page);
@@ -127,8 +77,8 @@ test("QL21-6 an unsent letter with no text shows the no-words sheet, never an em
     await row(page, "ql21-blank-file").click();
     const sheet = P(page).locator('[data-ql="sheet"]');
     await expect(sheet).toHaveCount(1);
-    await expect(sheet).toContainText("The words aren't here yet");
-    await expect(sheet).toContainText("It's kept in Murphy_query_voice.docx. Paste the text in and you can read it here, copy it and compare it with your other letters.");
+    await expect(sheet).toContainText("No text saved"); // RE-POINTED (v2.4): was v2.1's "The words aren't here yet"
+    await expect(sheet).toContainText("It's kept in Murphy_query_voice.docx. Paste your letter in, or upload the file."); // RE-POINTED (v2.4)
     await expect(sheet.locator('[data-ql="paste-text"]')).toHaveText("Paste the text");
     await expect(sheet.locator('[data-ql="upload-for"]')).toHaveText("Upload the file");
     await expect(P(page).locator('[data-ql="lock-line"]')).toHaveCount(0);
@@ -143,11 +93,12 @@ test("QL21-6 an unsent letter with no text shows the no-words sheet, never an em
 test("QL21-7 + QL21-8 a sent letter with no text: add the text you sent, once; figures unchanged; Undo; then it locks", async ({ page }) => {
   await openLetters(page);
   await row(page, "ql21-blank-sent").click();
-  await expect(P(page).locator('[data-ql="lock-line"]')).toHaveText("This letter has gone out. Its name and results are on record, but not its words.");
+  await expect(P(page).locator('[data-ql="lock-line"]')).toHaveText("This letter has gone out."); // RE-POINTED (v2.4)
   const sheet = P(page).locator('[data-ql="sheet"]');
-  await expect(sheet).toContainText("What did this letter say?");
-  await expect(sheet).toContainText("Add the text you sent and you can read it here, copy it and compare it with your other letters. Its 1 query and its result stay exactly as they are.");
-  await expect(sheet).toContainText("You can add it once. After that it locks, like any letter that has gone out.");
+  /* RE-POINTED (v2.4): the ref's "No text saved" heading and paragraph; the note beneath is removed */
+  await expect(sheet).toContainText("No text saved");
+  await expect(sheet).toContainText("Add the text you sent, or upload the file. You can do this once, and its results won't change.");
+  await expect(sheet).not.toContainText("You can add it once");
   const before = await figs(page);
   console.log("[QL21-7] figures before:", before);
   expect(before).toMatch(/^1 sent/);
@@ -183,7 +134,7 @@ test("QL21-7 + QL21-8 a sent letter with no text: add the text you sent, once; f
   await page.setViewportSize(W1440);
   /* Undo restores the empty text, and the add-once state with it */
   await toast(page, "Saved Covering letter 4.").getByRole("button", { name: /undo/i }).click();
-  await expect(P(page).locator('[data-ql="sheet"]')).toContainText("What did this letter say?");
+  await expect(P(page).locator('[data-ql="sheet"]')).toContainText("No text saved"); // RE-POINTED (v2.4)
   expect(await figs(page)).toBe(before);
 });
 
@@ -199,5 +150,5 @@ test("QL21-6b Upload the file on a no-text letter loads a text file into the edi
   await expect(P(page).locator('[data-ql="ed-status"]')).toContainText("Text pulled from voice.txt");
   await page.keyboard.press("Escape");
   await P(page).locator('[data-ql="g-drop"]').click();
-  await expect(P(page).locator('[data-ql="sheet"]')).toContainText("The words aren't here yet");
+  await expect(P(page).locator('[data-ql="sheet"]')).toContainText("No text saved"); // RE-POINTED (v2.4)
 });

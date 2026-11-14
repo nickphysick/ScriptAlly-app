@@ -33,8 +33,14 @@ import {
   packageLetterDiffers, pageOrder, resolveLetters, type LetterFacts,
 } from "../../lib/queryLetters";
 import { OpenHeader } from "../shell/OpenHeader";
+import { ArtSlot } from "../todo/ArtSlot";
 import { LetterRows, LetterView, LetterEditor, ReadRail, WriteRail, DayOne, DeskSkeleton, type EdState } from "./LetterDesk";
-import { TopTip } from "./TopTip";
+/* v2.4: the Query Centre's navy header, reused: `shell/OpenHeader` in a `.qc151.qc153` wrapper, dressed by the Query
+   Centre's own sheets (the Contact list's `ContactHeaderQc` reaches the same rules through `.cl27`) */
+import "../queries/centre/qcv1531.css";
+import "../queries/centre/qcv1534.css";
+import "../queries/centre/qcv154.css";
+import "../queries/centre/qcv156.css";
 import "./queryLetters.css";
 
 export const QUERY_LETTERS_TITLE = "Query letters";
@@ -44,7 +50,6 @@ export const SAVE_FAILED = "That letter didn't save. Check your connection and t
 export const SENT_LOCKED = "This letter has gone out, so its text stays as it was sent. To change it, start a new version from it.";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
-const COURIER = "/images/dash/courier.png";
 const isTextFile = (f: File) => /\.(txt|md|text)$/i.test(f.name) || f.type.startsWith("text/");
 
 /** the editor has something a leave would lose */
@@ -277,20 +282,20 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
   const title = loading ? " " : empty ? NO_LETTERS_TITLE : lettersTitle(live.length);
   const note = earlyNote(live.map((v) => ({ name: v.versionName, sent: facts.get(v.id)?.sent ?? 0 })));
 
-  /* v2.1: the header's third column is the Top tip. Which letter goes out is shown by its row's flag and changed by "Use for
-     new queries" on the letter; the package line sits on the in-use letter in the middle column. */
-  const tipBlock = !loading && !empty ? <TopTip /> : null;
+  /* v2.4: the header is two parts, the drawing and the title block. Nothing in its right-hand block: v2.1's Top tip is
+     gone and nothing replaces it. Which letter goes out is shown by its row's flag and changed by "Use for new queries"
+     on the letter; the package line sits on the in-use letter in the middle column. */
 
   const selFacts = selLetter ? facts.get(selLetter.id) : undefined;
   const edParent = ed ? (ed.kind === "copy" ? byId(ed.from) : ed.kind === "edit" ? byId(byId(ed.id)?.parentId) : null) : null;
 
   return (
     <div ref={pageRef} className={`qlp${empty ? " qlp--empty" : ""}`} data-ql="page" data-state={loading ? "loading" : empty ? "empty" : "filled"}>
-      <div className="qc151 qlp-hdw">
+      <div className="qc151 qc153 qlp-hdw">
         <OpenHeader
           className="qlp-hd"
           attrs={{ "data-ql": "header", "data-own-header": "" }}
-          art={<img src={COURIER} alt="" />}
+          art={<ArtSlot name="query-letters-header" />}
           artClassName="qlp-art"
           title={title}
           titleAttrs={{ "data-ql": "title", tabIndex: "-1" }}
@@ -299,7 +304,6 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
             <button type="button" className="qc1531-b qc1531-b--n" data-ql="new" onClick={newLetter}>+ New letter</button>
             <button type="button" className="qc1531-b qc1531-b--g" data-ql="upload" onClick={upload}>Upload a file</button>
           </>}
-          ring={tipBlock}
         />
         <input ref={fileRef} type="file" hidden accept=".txt,.md,.doc,.docx,.pdf,.rtf,.odt,text/*" data-ql="file-input" onChange={(e) => void onFile(e.target.files?.[0])} />
       </div>
@@ -314,34 +318,37 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
             flash={flash} stamp={stamp} justSaved={justSaved} note={note}
             showRetired={showRetired} onToggleRetired={() => setShowRetired((s) => !s)} onSelect={select}
           />
-          <section className="qlp-mid" data-ql="letter" aria-live="polite">
+          {/* v2.4 · one workspace: the letter and its side panel on one surface, beside the list */}
+          <div className="qlp-work" data-ql="work">
+            <section className="qlp-mid" data-ql="letter" aria-live="polite">
+              {ed ? (
+                <LetterEditor
+                  ed={ed} taRef={taRef} parentName={edParent?.versionName ?? null}
+                  onChange={(patch) => setEd((cur) => (cur ? { ...cur, ...patch, err: null } : cur))}
+                  onSave={() => void save()} onCancel={() => leave(null)} onKeep={keepEditing} onDiscard={discard}
+                />
+              ) : selLetter && selFacts ? (
+                <LetterView
+                  letter={selLetter} facts={selFacts} parent={byId(selLetter.parentId)} inUse={selLetter.id === use?.id}
+                  justSaved={justSaved.has(selLetter.id)} diff={diff} onDiff={() => setDiff((d) => !d)}
+                  next={next === selLetter.id && selLetter.id !== use?.id ? { current: use?.versionName ?? "" } : null}
+                  firstNote={firstNote?.id === selLetter.id ? firstNote.n : null}
+                  pkgLine={selLetter.id === use?.id && differs ? { id: differs.pkg.id, pkg: differs.pkg.packageName, letter: differs.letter.versionName } : null}
+                  onPkg={(id) => navigate(`${PACKAGES_PATH}?pkg=${id}`)}
+                  onUploadFor={() => uploadForLetter(selLetter)}
+                  onCopy={() => void copyText(selLetter)} onNewVersion={() => newVersion(selLetter)} onEdit={() => editLetter(selLetter)}
+                  onUse={() => void useForNew(selLetter.id)} onNotYet={() => setNext(null)}
+                />
+              ) : null}
+            </section>
             {ed ? (
-              <LetterEditor
-                ed={ed} taRef={taRef} parentName={edParent?.versionName ?? null}
-                onChange={(patch) => setEd((cur) => (cur ? { ...cur, ...patch, err: null } : cur))}
-                onSave={() => void save()} onCancel={() => leave(null)} onKeep={keepEditing} onDiscard={discard}
-              />
-            ) : selLetter && selFacts ? (
-              <LetterView
-                letter={selLetter} facts={selFacts} parent={byId(selLetter.parentId)} inUse={selLetter.id === use?.id}
-                justSaved={justSaved.has(selLetter.id)} diff={diff} onDiff={() => setDiff((d) => !d)}
-                next={next === selLetter.id && selLetter.id !== use?.id ? { current: use?.versionName ?? "" } : null}
-                firstNote={firstNote?.id === selLetter.id ? firstNote.n : null}
-                pkgLine={selLetter.id === use?.id && differs ? { id: differs.pkg.id, pkg: differs.pkg.packageName, letter: differs.letter.versionName } : null}
-                onPkg={(id) => navigate(`${PACKAGES_PATH}?pkg=${id}`)}
-                onUploadFor={() => uploadForLetter(selLetter)}
-                onCopy={() => void copyText(selLetter)} onNewVersion={() => newVersion(selLetter)} onEdit={() => editLetter(selLetter)}
-                onUse={() => void useForNew(selLetter.id)} onNotYet={() => setNext(null)}
-              />
-            ) : null}
-          </section>
-          {ed ? (
-            <WriteRail ed={ed} parentName={edParent?.versionName ?? null} sentBefore={ed.kind === "edit" && (facts.get(ed.id ?? "")?.sent ?? 0) > 0}
-              onChanges={(changes) => setEd((cur) => (cur ? { ...cur, changes } : cur))} />
-          ) : selLetter && selFacts && ms ? (
-            <ReadRail ms={ms} letter={selLetter} facts={selFacts} parent={byId(selLetter.parentId)} isFirst={selLetter.id === firstId}
-              onNewVersion={(id) => { const l = byId(id); if (l) newVersion(l); }} />
-          ) : <aside className="qlp-rail" />}
+              <WriteRail ed={ed} parentName={edParent?.versionName ?? null} sentBefore={ed.kind === "edit" && (facts.get(ed.id ?? "")?.sent ?? 0) > 0}
+                onChanges={(changes) => setEd((cur) => (cur ? { ...cur, changes } : cur))} />
+            ) : selLetter && selFacts && ms ? (
+              <ReadRail ms={ms} letter={selLetter} facts={selFacts} parent={byId(selLetter.parentId)} isFirst={selLetter.id === firstId}
+                onNewVersion={(id) => { const l = byId(id); if (l) newVersion(l); }} />
+            ) : <aside className="qlp-rail" />}
+          </div>
         </div>
       )}
     </div>

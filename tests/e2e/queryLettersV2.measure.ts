@@ -48,14 +48,15 @@ test("QL2-1 the header is the shared OpenHeader, its columns over the desk's", a
     await expect(hd.locator("h1.qc1531-t")).toHaveText(/^\d+ query letters?$/);
     await expect(P(page).locator('[data-ql="desk"]')).toBeVisible();
     const t = await leftOf(page, '[data-ql="page"] h1.qc1531-t');
-    const mid = await leftOf(page, '[data-ql="page"] [data-ql="letter"]');
+    /* RE-POINTED (v2.4): the headline sits over the WORKSPACE's left edge (the letter and its panel are one surface);
+       there is no right-hand header block to measure against the rail any more */
+    const mid = await leftOf(page, '[data-ql="page"] [data-ql="work"]');
     /* v2.1: the third column holds the Top tip (it was v2's in-use block) */
-    const use = await leftOf(page, '[data-ql="page"] [data-ql="tip-block"]');
     const rail = await leftOf(page, '[data-ql="page"] [data-ql="rail"]');
     const cols = await P(page).locator('[data-ql="desk"]').evaluate((e) => getComputedStyle(e).gridTemplateColumns);
-    console.log(`[QL2-1] ${size.width}: title ${t} letter ${mid} in-use ${use} rail ${rail} desk "${cols}"`);
+    console.log(`[QL2-1] ${size.width}: title ${t} workspace ${mid} rail ${rail} desk "${cols}"`);
     expect(Math.abs(t - mid)).toBeLessThanOrEqual(1);
-    expect(Math.abs(use - rail)).toBeLessThanOrEqual(1);
+    expect(rail).toBeGreaterThan(mid);
     await shot(page, "01-everyday");
   }
 });
@@ -268,8 +269,9 @@ test("QL2-F3 loading: the skeleton at the columns' final sizes (render harness, 
     const cols = await sk.evaluate((e) => getComputedStyle(e).gridTemplateColumns);
     const ground = await page.locator('[data-ql="page"]').evaluate((e) => getComputedStyle(e).backgroundImage);
     console.log(`[QL2-F3] ${size.width}: skeleton columns "${cols}"`);
-    expect(cols.split(" ")[0]).toBe("280px");
-    expect(cols.split(" ")[2]).toBe("380px");
+    /* RE-POINTED (v2.4): the two-part desk, the list at the Query Centre's 268 */
+    expect(cols.split(" ")[0]).toBe("268px");
+    expect(cols.split(" ").length).toBe(2);
     expect(ground).toContain("doodle-tile");
     await expect(page.locator('[role="progressbar"], .spinner, [class*="spin"]')).toHaveCount(0);
     await shot(page, "08-loading");
