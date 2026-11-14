@@ -10,7 +10,7 @@
  *   npm run e2e:emu -- tests/e2e/queryLettersV24.measure.ts --project=measure --workers=1
  *
  * Locks (the brief's §5): QL24-1 the same header primitive, equal measurements · QL24-2 the Query Centre's header is
- * unchanged · QL24-3 the placeholder drawing · QL24-4 no tip · QL24-6/6a/6b/6c the step and the workspace · QL24-7 day
+ * unchanged · QL24-3 the drawing sits where the Query Centre's and the Contact list's do · QL24-4 no tip · QL24-6/6a/6b/6c the step and the workspace · QL24-7 day
  * one · QL24-8/9/10 "No text saved". (QL24-5 is src/components/letters/ql24.test.ts.) Every population is counted first.
  */
 import { test, expect, type Page } from "@playwright/test";
@@ -50,6 +50,7 @@ async function headerReading(page: Page, hd: string) {
 }
 const QC_HD = '[data-qc151="page"] > .qc1531-hd';
 const QL_HD = '[data-ql="page"] .qc151.qc153 > .qc1531-hd';
+const CL_HD = '.clv-group.cl27 > .qc1531-hd';
 
 test.describe.configure({ mode: "default" }); // independent: every lock reports its own red or green (one worker, in order)
 test.beforeAll(() => {
@@ -97,17 +98,51 @@ test("QL24-2 the Query Centre's header markup and computed styles are unchanged"
   await shot(page, "qc-header-after");
 });
 
-test("QL24-3 the header's drawing is the query-letters-header placeholder, 190 × 142, hidden from readers; no courier", async ({ page }) => {
-  await openLetters(page, W1717);
-  const slot = P(page).locator('.qc1531-art [data-art="query-letters-header"]');
-  await expect(slot).toHaveCount(1);
-  const b = await rect(page, '[data-ql="page"] .qc1531-art [data-art="query-letters-header"]');
-  console.log("[QL24-3] slot", JSON.stringify(b));
-  expect(Math.round(b.w)).toBe(190);
-  expect(Math.round(b.h)).toBe(142);
-  expect(await slot.evaluate((e) => !!e.closest("[aria-hidden='true']"))).toBe(true);
-  expect(await P(page).locator('.qc1531-hd img[src*="courier"]').count()).toBe(0);
-  expect((await slot.innerText()).trim()).toBe("");
+/** where a header's drawing sits, measured from its own header's top-left: the art cell, and the drawing's box and
+ *  centre (the drawing is centred in its cell, so its centre is what the eye lines up) */
+async function artReading(page: Page, hd: string) {
+  return page.locator(hd).first().evaluate((h) => {
+    const hb = h.getBoundingClientRect();
+    const cell = h.querySelector(".qc1531-art") as HTMLElement;
+    const img = cell.querySelector("img") as HTMLImageElement;
+    const c = cell.getBoundingClientRect(), i = img.getBoundingClientRect();
+    const r1 = (n: number) => Math.round(n * 10) / 10;
+    return {
+      cell: { x: r1(c.left - hb.left), y: r1(c.top - hb.top), w: r1(c.width), h: r1(c.height) },
+      img: { w: r1(i.width), cx: r1(i.left + i.width / 2 - hb.left), cy: r1(i.top + i.height / 2 - hb.top) },
+      loaded: img.complete && img.naturalWidth > 0, natural: img.naturalWidth, hidden: !!img.closest("[aria-hidden='true']"),
+    };
+  });
+}
+const art = (r: Awaited<ReturnType<typeof artReading>>) => ({ cell: r.cell, img: r.img });
+
+test("QL24-3 the header's drawing sits where the Query Centre's and the Contact list's do (1440, 1717)", async ({ page }) => {
+  for (const vp of [W1440, W1717]) {
+    await openRoute(page, "/queries", vp);
+    await expect(page.locator(QC_HD)).toBeVisible({ timeout: 30_000 });
+    await page.waitForFunction((sel) => { const i = document.querySelector(`${sel} .qc1531-art img`) as HTMLImageElement | null; return !!i && i.complete && i.naturalWidth > 0; }, QC_HD);
+    const qc = await artReading(page, QC_HD);
+    await openRoute(page, "/agents", vp);
+    await expect(page.locator(CL_HD)).toBeVisible({ timeout: 30_000 });
+    await page.waitForFunction((sel) => { const i = document.querySelector(`${sel} .qc1531-art img`) as HTMLImageElement | null; return !!i && i.complete && i.naturalWidth > 0; }, CL_HD);
+    const cl = await artReading(page, CL_HD);
+    await openLetters(page, vp);
+    await page.waitForFunction((sel) => { const i = document.querySelector(`${sel} .qc1531-art img`) as HTMLImageElement | null; return !!i && i.complete && i.naturalWidth > 0; }, QL_HD);
+    const ql = await artReading(page, QL_HD);
+    console.log(`[QL24-3] ${vp.width}`, JSON.stringify({ qc, cl, ql }));
+    // the drawing itself: the hawk at the desk, loaded, 190 wide, hidden from readers; no placeholder, no courier
+    expect(ql.loaded).toBe(true);
+    expect(ql.natural).toBe(400);
+    expect(ql.hidden).toBe(true);
+    expect(await P(page).locator(".qc1531-hd [data-art]").count()).toBe(0);
+    expect(await P(page).locator('.qc1531-hd img[src*="courier"]').count()).toBe(0);
+    expect(await P(page).locator('.qc1531-hd img[src*="query-letters-header"]').count()).toBe(1);
+    // where it sits: the same cell and the same drawing box and centre as both other headers
+    expect(art(ql)).toEqual(art(qc));
+    // the Contact list's cell is its own margin recipe's 183.2 (512/523 vs 347/360): equal to the whole pixel
+    const px = (r: Awaited<ReturnType<typeof artReading>>) => JSON.parse(JSON.stringify(art(r), (_k, v) => typeof v === "number" ? Math.round(v) : v));
+    expect(px(ql)).toEqual(px(cl));
+  }
 });
 
 test("QL24-4 nothing in the header's right-hand block: no tip, anywhere on the page", async ({ page }) => {

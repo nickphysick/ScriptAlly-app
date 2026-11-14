@@ -70,7 +70,7 @@ Locks, each red then green: `mutation-proofs.jsonl`.
 - QL24-1: same header primitive and measurements as the Query Centre (227 / 20px / navy / 54px / 46).
 - QL24-2: the Query Centre header is unchanged. 24 elements match `qc-header-before.json`. The red was qcv156's navy
   shifted by one channel, done in the measurement worktree.
-- QL24-3: the placeholder.
+- QL24-3: the drawing sits where the Query Centre's and the Contact list's do (rewritten for the art; see below).
 - QL24-4: no tip.
 - QL24-5: `ql24.test.ts`, which checks nothing is left of the tip.
 - QL24-6 / 6a / 6b / 6c: the step and the workspace.
@@ -90,10 +90,36 @@ The built header is reused, so where the ref differs, the built value wins:
 | art column | 268 (+ 28 gap) | 300 |
 | shadow | the ref's | `0 22px 36px -26px rgba(28,19,15,.55)` |
 
-## When the illustration arrives — one file
+## The drawing (14 Nov, later): the hawk at the writing desk, "for now"
 
-`src/components/todo/ArtSlot.tsx`: add `src` to the `query-letters-header` brief and put the image in `public/`. The
-slot then draws the image instead of the dashed box, still 190 × 142. Nothing on the page changes.
+Nick supplied the illustration, a hawk with glasses on a chain, writing at a desk, with an envelope beside the
+paper. It replaces the placeholder and is drawn the way the Query Centre and the Contact list draw theirs. Branch
+`query-letters-v2-4-art`, cut from the served dev line.
+
+- **Asset:** `public/images/letters/query-letters-header.webp`. Cropped from Nick's 1000 × 1000 transparent webp to the
+  drawing's own bounds (922 × 849, as the other two drawings are cropped), resized to 400 × 369 (2× its 190 display),
+  43 KB, alpha kept.
+- **Markup:** a plain `<img alt="" width={190}>` in OpenHeader's art cell, the same pattern as `QcHeader1531` and
+  `ContactHeaderQc`. The source is `QL_HEADER_ART` in `QueryLettersPage.tsx`, with `?v=` set to the first 8 hex digits
+  of its sha-256.
+- **Alignment:** `.qc1531-art img` (qcv1531) gives the width of 190; qcv1534 centres it in the 268 column. Its box is
+  then made as tall as the Query Centre's armchair hawk (183.14) with equal `margin-block`, the Contact list's recipe.
+- **The placeholder is deleted.** The `query-letters-header` ArtSlot slot, its census entry and its CSS are gone.
+  `ArtSlot.tsx` and `artSlots.test.tsx` are back to how they were before v2.4.
+- **Lock QL24-3, rewritten.** At 1440 and 1717 it reads each page's art cell, the drawing's width and its centre,
+  all measured from that page's own header. Readings (the same at both widths):
+
+  | | cell (x, y, w, h) | drawing (w, centre) |
+  |---|---|---|
+  | Query Centre | 39, 22, 190, 183.1 | 190, (134, 113.6) |
+  | Contact list | 39, 22, 190, 183.2 | 190, (134, 113.6) |
+  | Query letters | 39, 22, 190, 183.1 | 190, (134, 113.6) |
+
+  Query letters must equal the Query Centre exactly. It must equal the Contact list to the whole pixel, because that
+  page's own margin recipe gives 183.2. This lock is visual, so it has no red proof (CLAUDE.md: red proofs are only
+  for logic locks).
+- **To change the drawing later:** replace the file and update `?v=`. If the new drawing's proportions differ, update
+  the 369/400 in the `margin-block` rule in `queryLetters.css`.
 
 ## Screenshots (`shots/`)
 

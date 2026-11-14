@@ -40,8 +40,7 @@ export type ArtSlotName =
   | "dash-mentor-standing"   // Dashboard first visit v1: the Mentor beside the top tip
   | "dash-courier-letter"    // Dashboard first visit v1: the set-up card's "Yes" path
   | "dash-scout-binoculars"  // Dashboard first visit v1: the set-up card's "Not yet" path
-  | "dash-mentor-pointing"   // Dashboard feed v1: the Mentor and the chick, pointing, in the Top tip's header
-  | "query-letters-header"; // Query letters v2.4: the navy header's drawing (Nick's ruling: a header slot here) — not supplied yet
+  | "dash-mentor-pointing";  // Dashboard feed v1: the Mentor and the chick, pointing, in the Top tip's header
 
 interface SlotBrief {
   /** The illustrator's brief, one line — rendered as the placeholder's own caption. */
@@ -178,15 +177,6 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
     caption: "A letter rack, filed and waiting for one to be drawn out",
     w: 210, h: 150,
     alt: "A rack of filed letters, none drawn out",
-  },
-  /* Query letters v2.4 (14 Nov): the navy header's drawing, in the Query Centre header's art column. ⚠️ A HEADER SLOT,
-     against this file's "NOT in page headers" — Nick's ruling for this page, which postdates that rule and the navy
-     headers it was written before. 190 × 142 (4:3), the box the illustration will fill. When it lands, give this
-     brief its `src` and nothing else moves. */
-  "query-letters-header": {
-    caption: "The Query letters header — a drawing for the navy panel beside the page title, about letters going out.",
-    w: 190, h: 142,
-    alt: "A drawing of query letters going out",
   },
 };
 

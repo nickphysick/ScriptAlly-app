@@ -41,14 +41,11 @@
   .qlp .qc151.qc153 > .qc1531-hd.qlp-hd.qlp-hd { grid-template-columns: 268px minmax(0, 1fr); min-height: 227px; }
   .qlp .qc151.qc153 > .qc1531-hd.qlp-hd > .qc1531-rc { display: none; }
   .qlp .qc151.qc153 > .qc1531-hd.qlp-hd h1.qc1531-t { outline: none; }
-  /* v2.4 · the drawing is a placeholder for now: the app's ArtSlot (hatched paper, dashed edge) in the box the drawing
-     will fill, 190 × 142, centred in the art column as the Query Centre's drawing is. No caption: the slot's mono key
-     (a 7px label for builders) is not shown on this page. */
-  .qlp .qlp-hd .art--query-letters-header { width: 190px; }
-  /* the box is exactly 190 × 142 with its dashed edge inside it (ArtSlot's ratio box puts the 1.5px border outside the
-     padding-top ratio, which made it 144 tall) — the size the drawing will fill */
-  .qlp .qlp-hd .art--query-letters-header .art-box { box-sizing: border-box; height: 142px; padding-top: 0 !important; }
-  .qlp .qlp-hd .art--query-letters-header .art-phk { display: none; }
+  /* the drawing sits where the Query Centre's and the Contact list's do: 190 wide (qcv1531's `.qc1531-art img`),
+     centred in the 268 art column (qcv1534), in a box exactly as tall as the Query Centre's armchair hawk (360 × 347
+     drawn at 190 = 183.14). This drawing is 400 × 369 (175.28 at 190), so it takes the difference as equal margins
+     — the Contact list's recipe (contactQcLayout.css) for its taller bird. */
+  .qlp .qlp-art img { margin-block: calc((190px * 347 / 360 - 190px * 369 / 400) / 2); }
   /* v2.4 · the step from header to content (the ref's `.sp48 .head`): 48 under the header, larger than any gap inside
      the content (30), and the header casts the ref's soft card shadow. This page only: the Query Centre's and the
      Contact list's headers keep their 30 and their shadow. */

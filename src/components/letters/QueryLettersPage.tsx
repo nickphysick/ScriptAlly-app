@@ -33,7 +33,10 @@ import {
   packageLetterDiffers, pageOrder, resolveLetters, type LetterFacts,
 } from "../../lib/queryLetters";
 import { OpenHeader } from "../shell/OpenHeader";
-import { ArtSlot } from "../todo/ArtSlot";
+/** The navy header's drawing (14 Nov, Nick, "for now"): the hawk at the writing desk, cropped to the drawing, 400 wide.
+ *  Drawn as the Query Centre's and the Contact list's are: an <img> 190 wide in the shared header's art column. Swap
+ *  the file and bump `?v=` (its sha-256, first 8) to change it. */
+export const QL_HEADER_ART = "/images/letters/query-letters-header.webp?v=ebdfd65b";
 import { LetterRows, LetterView, LetterEditor, ReadRail, WriteRail, DayOne, DeskSkeleton, type EdState } from "./LetterDesk";
 /* v2.4: the Query Centre's navy header, reused: `shell/OpenHeader` in a `.qc151.qc153` wrapper, dressed by the Query
    Centre's own sheets (the Contact list's `ContactHeaderQc` reaches the same rules through `.cl27`) */
@@ -295,7 +298,7 @@ export const QueryLettersPage: React.FC<{ active?: boolean }> = ({ active = true
         <OpenHeader
           className="qlp-hd"
           attrs={{ "data-ql": "header", "data-own-header": "" }}
-          art={<ArtSlot name="query-letters-header" />}
+          art={<img src={QL_HEADER_ART} alt="" width={190} height={175} draggable={false} data-ql="art" />}
           artClassName="qlp-art"
           title={title}
           titleAttrs={{ "data-ql": "title", tabIndex: "-1" }}
