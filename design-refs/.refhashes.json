@@ -1167,7 +1167,10 @@
     "design-refs/contact-list-qc-layout-v7/contact-list-qc-layout-v7.html": "d8dc350ddfb849d3b1b05a4252f7167ee750ae982b1ddfd27d504156412b1bf9",
     "design-refs/contact-list-qc-layout-v7/contact-list-qc-layout-v7-1717.png": "0da8bcbbbb40da823494db88771aa95f598a8220ac1d554f4b739d1555cfe476",
     "design-refs/two-door-import-v1/two-door-import-v1.html": "16230090f634f6b201fb7ff75f2e8439d6c09a445118251161d4e51426070e38",
-    "design-refs/query-centre-v156-1.html": "f602064d1592ce719c893a0a27fd66572d2fab9003aec92d81f2f7f6b5fdd8c9"
+    "design-refs/query-centre-v156-1.html": "f602064d1592ce719c893a0a27fd66572d2fab9003aec92d81f2f7f6b5fdd8c9",
+    "design-refs/contact-list-pinned-v8/contact-list-pinned-v8.html": "d8acc15b3ba835e631e4e1491cbd73c416f1272facc1b92791c414faea5f596c",
+    "design-refs/contact-list-pinned-v8/contact-list-pinned-v8-rest-1717.png": "e15eee5345004b96e45a737afdd833a57c60c470e004faec4173a79ddc950ae2",
+    "design-refs/contact-list-pinned-v8/contact-list-pinned-v8-scrolled-1717.png": "3e5d9c25dfea648fd97096c32749660968709b5afd75ef685cba1b49cb097dd7"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
