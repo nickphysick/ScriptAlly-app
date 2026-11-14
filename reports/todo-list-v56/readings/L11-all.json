@@ -1,0 +1,7 @@
+{
+ "base": "c24562273",
+ "paths": [
+  "src/components/todo/ws"
+ ],
+ "out": "src/components/todo/ws/TodoWorkspace.tsx\nsrc/components/todo/ws/WsHeader54.tsx\nsrc/components/todo/ws/WsHeader56.tsx\nsrc/components/todo/ws/WsSlim56.tsx\nsrc/components/todo/ws/todoWorkspaceSmoke.test.tsx\nsrc/components/todo/ws/todoWs.css\nsrc/components/todo/ws/todoWs54.css\nsrc/components/todo/ws/todoWs56.css\nsrc/components/todo/ws/wsHeader56.test.tsx\nsrc/components/todo/ws/wsSlim56.test.tsx"
+}

@@ -109,7 +109,8 @@ describe("one count on the page, and the badge says what it counts", () => {
     const w = ws();
     expect(w).toContain("const seq = useMemo(() => sections.flatMap((s) => s.tasks), [sections]);");
     expect(w).toContain("<WsTrayHead55 tab={tab} onTab={(t) => { setTab(t); setMenuState(false); }} todo={all.length}");
-    expect(w).toContain("<WsHeader54 todo={all.length}");
+    /* v56 re-pointed: the header is WsHeader56 (the navy panel), still counting every task */
+    expect(w).toContain("<WsHeader56 todo={all.length}");
     expect(w).toMatch(/<b>\{seqPos \+ 1\}<\/b>\/\{seq\.length\}/);
     expect(w, "the tab no longer reads the board's card count").not.toContain("boardFigures(");
   });

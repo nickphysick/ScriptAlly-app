@@ -54,8 +54,8 @@
 .tws *, .tws-layer * { box-sizing: border-box; }
 .tws :where(p, span, div, label, button, input, textarea) { font-family: inherit; }
 
-/* v54 (D1): the thin header (.tws-hd, .tws-ttl, .tws-tsub, .tws-addb) is retired — the page header is WsHeader54 in the
-   Query Centre's dress (todoWs54.css). `tws-hd` and `tws-addb` survive on it as class names only, with no rules. */
+/* v54 (D1): the thin header (.tws-hd, .tws-ttl, .tws-tsub, .tws-addb) is retired — the page header is WsHeader56, the
+   Query Centre's navy panel (todoWs56.css). `tws-hd` and `tws-addb` survive on it as class names only, with no rules. */
 .tws-sp { flex: 1; min-width: 8px; }
 
 
