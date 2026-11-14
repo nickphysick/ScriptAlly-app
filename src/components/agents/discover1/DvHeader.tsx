@@ -4,20 +4,20 @@
  *
  * Discover v1 — the two-state header (ref design-refs/discover-v1/discover-v1.html).
  *
- *   · POPULATED (the Scout is live): the light header — eyebrow "— DISCOVER — PRO", the title, "for {book}", Tune the
- *     Scout · Share my agents, "How the Scout finds agents", and the white card on the right: three rows (To review ·
- *     Added to your list · Not for you) over a bar, and the "Picks reviewed" ring.
+ *   · POPULATED (the Scout is live): Workspace headers v1 (14 Nov) — the shared navy header (`DvNavyHeader`, below):
+ *     the title, "for {book}", Tune the Scout · Share my agents, and on the right the "Picks reviewed" ring with
+ *     "How the Scout finds agents". (v1's light header, its eyebrow and its three-row card are gone.)
  *   · EMPTY (coming soon): the navy panel — "The Scout is out looking", the paragraph, Tell me when it's ready · How
  *     the Scout works, and the binoculars bird on its disc.
  *
  * ⚠️ PAGE-LOCAL. The shared LightHeader / EmptyPanel live on the Comparable titles v28 branch, not on main; these are
  *    copies under `dv1-` (lift candidates once that branch lands), and nothing here edits a shared rule.
  * ⚠️ THE RING'S FIGURES ARE THE QUEUE'S OWN (`scoutTally`). With nothing decided there is NO arc element at all — a
- *    zero-length arc with a round cap paints a dot. With nothing at all the centre reads "—".
+ *    zero-length arc with a round cap paints a dot (WsnhRing draws none at 0). With nothing at all the centre is a dash.
  * ⚠️ THE TITLE KEEPS `data-page-title` (the hook the shell reads for "has the title scrolled past?").
  */
 import React from "react";
-import "../../shell/pageHeroFrame.css";
+import { WorkspaceNavyHeader, WsnhRing, WsnhWords } from "../../shell/WorkspaceNavyHeader";
 import type { ScoutTally } from "../../../lib/scout";
 import { considerWords } from "../../../lib/scout";
 
@@ -25,110 +25,47 @@ export const DV_EYEBROW = "— Discover —";
 export const DV_ART = { src: "/images/contact/discover-binoculars-bird.png", version: 1 };
 export const DV_FACE = { src: "/images/discover/scout-face.webp", version: 1 };
 
-/** the ring: an 84 viewBox, r 36, stroke 8, round caps (the mock's) */
-export const DRING = { box: 84, r: 36, w: 8 } as const;
-export const DRING_C = 2 * Math.PI * DRING.r;
-
 export const ProTag: React.FC = () => <span className="dv1-pro" data-dv1="pro">PRO</span>;
-
-export const ReviewRing: React.FC<{ tally: ScoutTally | null }> = ({ tally }) => {
-  const c = DRING.box / 2;
-  const pct = tally?.pct ?? null;
-  const decided = tally?.decided ?? 0;
-  const arc = pct == null ? 0 : (DRING_C * pct) / 100;
-  return (
-    <span className="dv1-rg" data-dv1="ring">
-      <svg viewBox={`0 0 ${DRING.box} ${DRING.box}`} aria-hidden="true">
-        <circle data-dv1="ring-track" cx={c} cy={c} r={DRING.r} fill="none" stroke="#e9e2d8" strokeWidth={DRING.w} />
-        {decided > 0 && arc > 0 ? (
-          <circle data-dv1="ring-arc" cx={c} cy={c} r={DRING.r} fill="none" stroke="#2a3a52" strokeWidth={DRING.w} strokeLinecap="round"
-            strokeDasharray={`${arc.toFixed(2)} ${DRING_C.toFixed(2)}`} transform={`rotate(-90 ${c} ${c})`} />
-        ) : null}
-      </svg>
-      <b className="dv1-rp" data-dv1="ring-pct">{tally == null ? "" : pct == null ? "—" : <span>{pct}<small>%</small></span>}</b>
-    </span>
-  );
-};
-
-export const DvSummaryCard: React.FC<{
-  tally: ScoutTally | null;
-  onPassed: () => void;
-}> = ({ tally, onPassed }) => {
-  const loading = tally == null;
-  const t = tally ?? { toReview: 0, added: 0, passed: 0, decided: 0, total: 0, pct: null };
-  /* ⚠️ LOADING DRAWS PLACEHOLDER FIGURES IN TRANSPARENT INK — the real figures' own boxes, so nothing moves when they land */
-  const sub = loading ? "0 of 0 decided" : t.total === 0 ? "nothing to decide yet" : `${t.decided} of ${t.total} decided`;
-  return (
-    <div className="dv1-card" data-dv1="card" data-loading={loading ? "" : undefined}>
-      <div className="dv1-c1" role="group" aria-label="Where the Scout's picks stand">
-        <div className="dv1-bar" aria-hidden="true" data-dv1="bar">
-          <i className="dv1-sg dv1-sg--rv" style={{ flex: `${loading ? 1 : t.toReview} 1 0` }} />
-          <i className="dv1-sg dv1-sg--ad" style={{ flex: `${loading ? 1 : t.added} 1 0` }} />
-          <i className="dv1-sg dv1-sg--pa" style={{ flex: `${loading ? 1 : t.passed} 1 0` }} />
-        </div>
-        <ul>
-          <li data-dv1="row" data-k="review"><span className="dv1-sq dv1-sg--rv" /><b data-dv1="n">{loading ? "0" : t.toReview}</b>To review</li>
-          <li data-dv1="row" data-k="added"><span className="dv1-sq dv1-sg--ad" /><b data-dv1="n">{loading ? "0" : t.added}</b>Added to your list</li>
-          <li data-dv1="row" data-k="passed">
-            <button type="button" className="dv1-pf" data-dv1="passed-row" disabled={loading || t.passed === 0} onClick={onPassed}
-              aria-label={loading ? "Not for you" : `${t.passed} not for you. See the agents you passed on`}>
-              <span className="dv1-sq dv1-sg--pa" /><b data-dv1="n">{loading ? "0" : t.passed}</b>Not for you
-            </button>
-          </li>
-        </ul>
-      </div>
-      <div className="dv1-c2">
-        <ReviewRing tally={tally} />
-        <p className="dv1-rl">Picks reviewed</p>
-        <p className="dv1-rs" data-dv1="ring-sub">{sub}</p>
-      </div>
-    </div>
-  );
-};
 
 export type HeaderTitle = { kind: "count"; n: number } | { kind: "done" } | { kind: "none" } | { kind: "loading" };
 
-export const DvHeader: React.FC<{
+/* Workspace headers v1 (design-refs/workspace-headers-v1, "Discover") — the live page's navy header: "<n> agents to
+   consider" for the book; Tune and Share; on the right the "Picks reviewed" ring, "<n> of <n> decided" and the link to
+   how the Scout finds agents. The three-row legend beside the ring is gone. Every figure is `scoutTally`'s, as before.
+   With nothing to consider yet (no picks, none decided) there is no right block. */
+export const dvTitle = (t: HeaderTitle): string => t.kind === "count" ? `${t.n} ${considerWords(t.n)}` : t.kind === "done" ? "You’re up to date"
+  : t.kind === "none" ? "Nothing to consider yet" : " ";
+export const DvNavyHeader: React.FC<{
   title: HeaderTitle;
   msTitle: string | null;
   tally: ScoutTally | null;
   onTune: () => void;
   onShare: () => void;
   onHow: () => void;
-  onPassed: () => void;
-}> = ({ title, msTitle, tally, onTune, onShare, onHow, onPassed }) => {
+}> = ({ title, msTitle, tally, onTune, onShare, onHow }) => {
   const loading = title.kind === "loading";
-  const label = title.kind === "count" ? `${title.n} ${considerWords(title.n)}` : title.kind === "done" ? "You’re up to date"
-    : title.kind === "none" ? "Nothing to consider yet" : "Discover";
+  const words = dvTitle(title);
+  const right = !loading && tally && title.kind !== "none";
   return (
-    <header className="dv1-hd phf" data-dv1="header" data-own-header="" data-loading={loading ? "" : undefined} aria-busy={loading || undefined}>
-      <div className="dv1-hrow">
-        <div className="dv1-ht" data-dv1="title-block">
-          <p className="dv1-k" data-dv1="eyebrow">{DV_EYEBROW}<ProTag /></p>
-          <h1 className="dv1-title" data-page-title="" data-dv1="title" tabIndex={-1} aria-label={label}>
-            <span aria-hidden="true">
-              {title.kind === "count" ? <><b data-dv1="title-n">{title.n}</b> {considerWords(title.n)}</>
-                /* header rules v1.1: the placeholder is one digit wide, the width of the loaded title for a count under ten.
-                   At a 1512 window the column beside the card is too tight for "00 agents to consider" on one line, and
-                   the header shrank by a line as the data landed. */
-                : title.kind === "loading" ? <span className="dv1-blank" data-dv1="title-blank">0 agents to consider</span>
-                : label}
-            </span>
-          </h1>
-          <p className="dv1-by" data-dv1="byline">
-            <i aria-hidden="true" />
-            {msTitle ? <><em>for</em> <span className="dv1-ms" data-dv1="ms">{msTitle}</span></> : <em>choose a manuscript in the sidebar</em>}
-            <i aria-hidden="true" />
-          </p>
-          <div className="dv1-hb" data-dv1="acts">
-            <button type="button" className="dv1-p1" data-dv1="tune" disabled={loading} onClick={onTune}>Tune the Scout</button>
-            <button type="button" className="dv1-p2" data-dv1="share" disabled={loading} onClick={onShare}>Share my agents</button>
-          </div>
-          <button type="button" className="dv1-hwl" data-dv1="how" onClick={onHow}><i aria-hidden="true">?</i>How the Scout finds agents</button>
-        </div>
-        <DvSummaryCard tally={loading ? null : tally} onPassed={onPassed} />
-      </div>
-    </header>
+    <WorkspaceNavyHeader page="discover" art="discover-header" loading={loading}
+      title={words}
+      forLine={msTitle ? { lead: "for", text: msTitle } : { text: "choose a manuscript in the sidebar" }}
+      actions={<>
+        <button type="button" className="qc1531-b qc1531-b--n" data-dv1="tune" disabled={loading} onClick={onTune}>Tune the Scout</button>
+        <button type="button" className="qc1531-b qc1531-b--g" data-dv1="share" disabled={loading} onClick={onShare}>Share my agents</button>
+      </>}
+      right={right ? <>
+        <WsnhRing pct={tally.pct} />
+        <WsnhWords lead="The Scout’s" name="Picks reviewed"
+          sub={tally.total === 0 ? "nothing to decide yet" : <><b data-dv1="hd-decided">{tally.decided}</b> of {tally.total} decided</>}>
+          <button type="button" className="wsnh-lnk" data-dv1="how" onClick={onHow}>How the Scout finds agents</button>
+        </WsnhWords>
+      </> : null}
+      bar={{
+        title: words,
+        aside: right && tally.total > 0 ? <b>{tally.decided} of {tally.total} picks reviewed</b> : null,
+        button: { label: "Tune the Scout", onClick: onTune, disabled: loading },
+      }} />
   );
 };
 

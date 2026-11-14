@@ -124,20 +124,22 @@ for (const vp of VPS) {
       const ctx = await ctxFor(browser, baseURL!, vp);
       const page = await ctx.newPage();
       await openPage(page);
-      const labels = await page.locator('[data-ms27="acts"] button').allInnerTexts();
-      const names = await page.locator('[data-ms27="acts"] button').evaluateAll((b) => b.map((e) => e.getAttribute("aria-label")));
+      /* RE-POINTED (Workspace headers v1, 14 Nov): the actions are the navy header's buttons (`[data-ms27="edit"]`, `"full"`), not `[data-ms27="acts"]` */
+      const ACTS = '[data-wsnh-page="manuscripts"] :is([data-ms27="edit"], [data-ms27="full"])';
+      const labels = await page.locator(ACTS).allInnerTexts();
+      const names = await page.locator(ACTS).evaluateAll((b) => b.map((e) => e.getAttribute("aria-label")));
       const pageText = await page.locator('[data-ms27="page"]').innerText();
       /* the labels first, so a wrong label is a named red rather than a click that waits out the test */
       console.log(`A1 ${vp.width} labels`, JSON.stringify({ labels, names }));
       expect(labels).toEqual(["Edit", "View summary"]);
       expect(names).toEqual(["Edit the book's details", "View the book's summary"]);
-      await page.locator('[data-ms27="acts"] button', { hasText: /^View summary$/ }).click();
+      await page.locator(ACTS, { hasText: /^View summary$/ }).click();
       await page.waitForSelector('[data-ms27bx="root"]');
       await page.waitForTimeout(1000);
       const bookText = await page.locator('[data-ms27bx="root"]').innerText();
       const bookEdit = (await page.locator('[data-ms27bx="edit"]').innerText()).trim();
       await closeBook(page);
-      await page.locator('[data-ms27="acts"] button', { hasText: /^Edit$/ }).click();
+      await page.locator(ACTS, { hasText: /^Edit$/ }).click();
       await page.waitForSelector('[data-hdr="ms-edit"].is-in [data-ms21="edit-dialog"]', { timeout: 10_000 });
       /* ⚠️ read it once it has stopped moving: mid-slide the right edge read −656, and "≤ 12" passed on it */
       await page.waitForFunction(() => { const d = document.querySelector<HTMLElement>('[data-hdr="ms-edit"]'); return !!d && d.getAnimations({ subtree: false }).every((a) => a.playState !== "running") && d.getBoundingClientRect().right <= innerWidth; }, null, { timeout: 5_000 });

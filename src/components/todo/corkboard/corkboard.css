@@ -86,6 +86,20 @@
   font: 400 12.5px/1.2 var(--cb2-serif) !important; color: var(--cb2-c55) !important;
 }
 
+/* ═════════ B · the desktop's navy header (Workspace headers v1): its right block, "Pick a colour" and the five
+   swatches, as the ref's `.sw` draws them (46px papers under a cream ring, the name beneath). The header itself is the
+   Query Centre's (shell/WorkspaceNavyHeader); the panel above is the phone's. ═════════ */
+@media (min-width: 768px) {
+  .cb2 .cb2-hpick { display: flex; flex-direction: column; }
+  .cb2 .cb2-hsws { display: flex; gap: 10px; margin-top: 12px; }
+  .cb2 .cb2-hsw { all: unset; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .cb2 .cb2-hsw i { display: block; width: 46px; height: 46px; border-radius: 6px; box-shadow: 0 0 0 2px rgba(244, 238, 229, .5); transition: transform .15s; }
+  .cb2 .cb2-hsw:hover i { transform: translateY(-2px); }
+  .cb2 .cb2-hsw span { font: 400 14px/1 var(--cb2-serif) !important; color: rgba(244, 238, 229, .85); }
+  .cb2 .cb2-hsw:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; border-radius: 6px; }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) { .cb2 .cb2-hsw i { transition: none; } }
+
 /* ═════════ B · the tool row ═════════ */
 .cb2-fr { display: flex; align-items: center; gap: 8px; margin-top: 32px; position: relative; z-index: 25; flex-wrap: nowrap; }
 .cb2-find {

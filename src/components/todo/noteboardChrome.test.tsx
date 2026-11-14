@@ -92,7 +92,10 @@ describe("⚠️ the band is REHOMED, not drawn — the chassis already owns the
   it("the header sentence is v13's (Corkboard v2 supersedes v4's subline, which is no longer drawn)", () => {
     seed.userTasks = [note({ id: "a" })];
     const html = render();
-    expect(html).toContain("note on your board.");
+    /* RE-POINTED (Workspace headers v1, 14 Nov): at 768px and up the header is the shared navy header — "1 note", "on
+       your board" on its ruled line; the v13 sentence is the phone panel's */
+    expect(html).toContain(">1 note</h1>");
+    expect(html).toContain("on your board");
     expect(html).not.toContain(CORKBOARD_SUBLINE);
     expect(html).not.toContain(NOTEBOARD_SUBTITLE);
   });
@@ -117,12 +120,14 @@ describe("⚠️ the FILTERED count exists only while something narrows; the boa
     seed.userTasks = [note({ id: "a" }), note({ id: "b" })];
     const html = render();
     /* RE-POINTED (Corkboard v2): the count is the header's sentence ("2 notes on your board."), stated once */
-    expect(html).toContain("<b>2</b> notes on your board.");
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the navy header's headline ("2 notes"), stated once; "on your board"
+       is its ruled line */
+    expect(html).toContain(">2 notes</h1>");
     expect([...html.matchAll(/on your board/g)].length).toBe(1);
     expect(html).not.toMatch(/["\s`](nb-fcount|cb2-fcount)["\s`]/);
     expect(html).not.toMatch(/["\s`]tpl-eyebrow["\s`]/);
     seed.userTasks = [note({ id: "a" })];
-    expect(render()).toContain("<b>One</b> note on your board.");
+    expect(render()).toContain(">1 note</h1>");
   });
 
   it("…and the source only mounts the count behind the narrowing condition", () => {

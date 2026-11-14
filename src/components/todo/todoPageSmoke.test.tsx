@@ -185,8 +185,11 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
        it. The teaching state on the page is the workflow. */
     /* RE-POINTED (Corkboard v2): the empty header is v13's ("Pick a colour to start"); the examples beneath it are
        Part G's and are held by corkboardV2Page.test.tsx */
-    expect(html).toContain("Jot down anything worth remembering while you query.");
-    expect(html).toContain("Pick a colour to start");
+    /* RE-POINTED (Workspace headers v1, 14 Nov): at 768px and up the empty board's header is the shared navy header
+       ("No notes yet", + New note, no right block); the v13 sentence and "Pick a colour to start" are the phone panel's
+       (held by corkboardV2Page.test.tsx's phone render) */
+    expect(html).toContain(">No notes yet</h1>");
+    expect(html).not.toContain("Pick a colour to start");
     expect(html).not.toContain("<aside");             // the contract's optional sidebar, absent
   });
 

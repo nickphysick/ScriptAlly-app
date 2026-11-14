@@ -77,6 +77,7 @@ const MUTATIONS: Record<string, string> = {
   "HR1-4": `.qc138-hd .qc138-hawk { height: calc(var(--hero-art-h) + 20px) !important; }`,
   /* RE-POINTED (Submission packages v26), and again (To-do list v51): the To-do hero it broke is gone; Analytics' card is
      the right item on the shared width token, so breaking its width is the same law */
+  /* RETIRED with HR1-1…7 (Workspace headers v1, 14 Nov): `.a21-lh`, `.a21-card` and `.dv1-hd` are gone */
   "HR1-5": `.a21-lh .a21-card { width: 200px !important; }`,
   "HR1-6": `.a21-desk { margin-top: 54px !important; }`,
   "HR1-7": `.dv1-hd h1.dv1-title { margin-left: 4px !important; }`,
@@ -142,7 +143,12 @@ const measure = (page: Page, m: PageMap) => page.evaluate((m) => {
 const near = (a: number | undefined, b: number, t: number) => typeof a === "number" && Math.abs(a - b) <= t;
 
 test.describe("Header rules v1.1", () => {
-  test("HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs", async ({ page }) => {
+  /* RETIRED (Workspace headers v1, 14 Nov): every page left in PAGES (Analytics' `[data-a21='header']`, Discover's
+     `[data-dv1='header']`, and Responses, whose open hero was already gone) now opens on the shared navy header, which is
+     held to the Query Centre's header rather than to the v1.1 hero geometry (eyebrow at 36, the H5 text column, the
+     right item's inset). The lock has no subject left. Successor: tests/e2e/wsHeaders.measure.ts H1 + H3 + H4
+     "analytics", "responses", "discover". */
+  test.skip("HR1-1…7 · one collect pass: the oracle, the top, the column, the art, the right item, the gap and the pairs", async ({ page }) => {
     test.setTimeout(1_500_000);
     flags(`--restore '${JSON.stringify({ seen: true, done: { log: true, find: true, open: true, pin: true, resp: true, birds: true } })}'`);
     const L = Object.fromEntries(["HR1-1", "HR1-2", "HR1-3", "HR1-4", "HR1-5", "HR1-6", "HR1-7"].map((k) => [k, new Ledger(k)])) as Record<string, Ledger>;

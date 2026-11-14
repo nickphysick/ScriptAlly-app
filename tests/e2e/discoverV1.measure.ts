@@ -26,7 +26,9 @@ const READ = (sel: Record<string, string>) => `(() => { const o = {}; const H = 
 type Boxes = Record<string, { x: number; y: number; w: number; h: number; fs: number } | null>;
 
 for (const vp of SIZES) {
-  test(`B1 · the header against the ref at ${vp.width}`, async ({ page }) => {
+  /* RETIRED (Workspace headers v1, 14 Nov): its subject is v1's light header against the v1 mock — the eyebrow, byline,
+     the three-row card and its ring column — replaced by the shared navy header. Successor: tests/e2e/wsHeaders.measure.ts H1 + H7 "discover". */
+  test.skip(`B1 · the header against the ref at ${vp.width}`, async ({ page }) => {
     const L = new Ledger(`B1-${vp.width}`);
     await openDiscover(page, vp, "live");
     await mutate(page, "B1");
@@ -44,7 +46,10 @@ for (const vp of SIZES) {
     L.done(Object.keys(APP).length);
   });
 
-  test(`B1 · loading → loaded moves nothing at ${vp.width}`, async ({ page }) => {
+  /* RETIRED (Workspace headers v1, 14 Nov): its subject is v1's light header holding its parts' boxes from the loading face
+     (`[data-dv1="header"][data-loading]`) to the loaded one; the shared header has no `data-loading` and none of those
+     parts. Successor: tests/e2e/wsHeaders.measure.ts H1 + H7 "discover". */
+  test.skip(`B1 · loading → loaded moves nothing at ${vp.width}`, async ({ page }) => {
     const L = new Ledger(`B1-load-${vp.width}`);
     await openDiscover(page, vp, "live", { holdMs: 4000 });
     await mutate(page, "B1");
@@ -68,13 +73,20 @@ for (const vp of SIZES) {
 }
 
 /* ── B2 · the ring's figures are the queue's own counts; "none" draws no arc ── */
+/* RE-POINTED (Workspace headers v1, 14 Nov): the ring is the navy header's (`[data-wsnh="ring"]`, `"ring-pct"`, `"ring-arc"`,
+   the sub-line `[data-wsnh="sub"]` with `[data-dv1="hd-decided"]`); the three-row legend is gone, so the counts are read
+   off the sub-line ("<decided> of <total> decided") and the title's leading figure (To review). With nothing to consider
+   the header has no right block at all. */
 const CARD = `(() => {
   const { q, qa } = window.__dv1();
-  const n = (k) => Number((q('[data-dv1="row"][data-k="' + k + '"] [data-dv1="n"]')?.textContent ?? "").trim());
-  const t = q('[data-dv1="title-n"]');
-  return { review: n("review"), added: n("added"), passed: n("passed"), title: t ? Number(t.textContent) : null,
-    pct: (q('[data-dv1="ring-pct"]')?.textContent ?? "").trim(), sub: (q('[data-dv1="ring-sub"]')?.textContent ?? "").trim(),
-    arcs: qa('[data-dv1="ring-arc"]').length, dash: q('[data-dv1="ring-arc"]')?.getAttribute("stroke-dasharray") ?? null };
+  const H = '[data-wsnh-page="discover"] ';
+  const sub = (q(H + '[data-wsnh="sub"]')?.textContent ?? "").replace(/\\s+/g, " ").trim();
+  const m = sub.match(/^(\\d+) of (\\d+) decided$/);
+  const t = (q(H + '[data-wsnh="title"]')?.textContent ?? "").match(/^(\\d+)/);
+  return { ring: !!q(H + '[data-wsnh="ring"]'), decided: m ? Number(m[1]) : (sub === "nothing to decide yet" ? 0 : NaN), total: m ? Number(m[2]) : (sub === "nothing to decide yet" ? 0 : NaN),
+    title: t ? Number(t[1]) : null,
+    pct: (q(H + '[data-wsnh="ring-pct"]')?.textContent ?? "").trim(), sub,
+    arcs: qa(H + '[data-wsnh="ring-arc"]').length, dash: q(H + '[data-wsnh="ring-arc"]')?.getAttribute("stroke-dasharray") ?? null };
 })()`;
 test("B2 · the ring states the queue's own counts, in every state", async ({ page }) => {
   const L = new Ledger("B2");
@@ -83,13 +95,22 @@ test("B2 · the ring states the queue's own counts, in every state", async ({ pa
   for (const state of ["live", "done", "none"] as const) {
     await openDiscover(page, vp, state);
     await mutate(page, "B2");
-    const c = (await page.evaluate(CARD)) as { review: number; added: number; passed: number; title: number | null; pct: string; sub: string; arcs: number; dash: string | null };
-    const decided = c.added + c.passed, total = c.review + decided;
+    const c = (await page.evaluate(CARD)) as { ring: boolean; decided: number; total: number; title: number | null; pct: string; sub: string; arcs: number; dash: string | null };
+    const decided = c.decided, total = c.total;
     seen.add(state);
-    L.check("B2", `${state} the rows are numbers`, [c.review, c.added, c.passed].every(Number.isFinite), JSON.stringify(c));
-    if (state === "live") L.check("B2", "live title = To review", c.title === c.review, `${c.title} vs ${c.review}`);
+    if (!c.ring) {
+      /* nothing to consider: the header draws no right block — no ring, no figure, no arc */
+      L.check("B2", `${state} no right block: no figure`, c.pct === "" && c.sub === "", JSON.stringify(c));
+      L.check("B2", `${state} no right block: no arc is drawn`, c.arcs === 0, `${c.arcs} arc(s)`);
+      L.check("B2", `${state} no right block only when nothing is to be considered`, state === "none", state);
+      L.check("B2", `${state} the title states no count`, c.title === null, String(c.title));
+      continue;
+    }
+    L.check("B2", `${state} the sub-line's figures are numbers`, [decided, total].every(Number.isFinite), JSON.stringify(c));
+    if (state === "live") L.check("B2", "live title = To review", c.title === total - decided, `${c.title} vs ${total} − ${decided}`);
     if (total === 0) {
-      L.check("B2", `${state} nothing at all: the centre is a dash`, c.pct === "—", c.pct);
+      /* the shared ring's dash is an en dash (WsnhRing), v1's was an em dash */
+      L.check("B2", `${state} nothing at all: the centre is a dash`, c.pct === "–", c.pct);
       L.check("B2", `${state} nothing at all: no arc is drawn`, c.arcs === 0, `${c.arcs} arc(s), dash ${c.dash}`);
       L.check("B2", `${state} nothing at all: the line says so`, c.sub === "nothing to decide yet", c.sub);
     } else {
@@ -132,9 +153,10 @@ test("C1 · the lead card's facts reflow at a card of 665, whatever the window",
 });
 
 /* ── C2 · deciding stamps, slides, and the counter counts what was decided here ── */
+/* RE-POINTED (Workspace headers v1, 14 Nov): the title's count is the navy header's title's leading figure ("7 agents to consider"), not `[data-dv1="title-n"]` */
 const LEAD = `(() => { const { q } = window.__dv1(); const st = q('[data-dv1="stamp"]'); return { name: q('[data-dv1="lead-name"]')?.textContent?.trim() ?? null,
   pick: q('[data-dv1="pick-n"]')?.textContent?.trim() ?? null, stampOn: !!st && st.classList.contains("on"), stamp: st?.textContent?.trim() ?? "",
-  out: !!q('[data-dv1="lead"].is-out'), title: q('[data-dv1="title-n"]')?.textContent ?? null }; })()`;
+  out: !!q('[data-dv1="lead"].is-out'), title: (q('[data-wsnh-page="discover"] [data-wsnh="title"]')?.textContent ?? "").match(/^\\d+/)?.[0] ?? null }; })()`;
 type LeadR = { name: string | null; pick: string | null; stampOn: boolean; stamp: string; out: boolean; title: string | null };
 test("C2 · deciding stamps the card, it leaves, and the counter reads Pick 2 of n", async ({ page }) => {
   const L = new Ledger("C2");
@@ -241,7 +263,11 @@ test("C4 · Tune writes one leaf per change and the queue follows the lens", asy
 });
 
 /* ── C5 · the passed list holds in-date passes; Bring back deletes the decision (the owned account) ── */
-test("C5 · the passed list and Bring back", async ({ browser, baseURL }) => {
+/* RETIRED (Workspace headers v1, 14 Nov): its opener was the header card's "Not for you" row (`[data-dv1="passed-row"]`),
+   gone with v1's light header. The passed list is now opened only from the picks' done view ("Look again at the <n> you
+   passed on", `[data-dv1="look-again"]`), which this fixture (a live queue) never reaches. Successor: tests/e2e/wsHeaders.measure.ts
+   H7 "discover" (the row is gone); the modal and Bring back have no rendered lock until a done-view fixture exists. */
+test.skip("C5 · the passed list and Bring back", async ({ browser, baseURL }) => {
   const L = new Ledger("C5");
   seedOwned();
   const { ctx, page } = await ownedPage(browser, baseURL!, SIZES[0]);
@@ -383,7 +409,8 @@ test("E2 · Tell me when it's ready writes one leaf and reads back", async ({ br
     await page.waitForTimeout(1500);
     const b = dumpOwned() as Record<string, any>;
     L.check("E2", "pressed again, the leaf is off and the others still stand", b.notifyPrefs?.discover === false && b.notifyPrefs?.nudges === false && b.notifyPrefs?.weeklyDigest === true, JSON.stringify(b.notifyPrefs));
-    L.check("E2", "the live face never mounted while the flag is off", (await page.locator('[data-dv1="header"]').count()) === 0, "");
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the live face's header is the shared navy header (`[data-wsnh-page="discover"]`) */
+    L.check("E2", "the live face never mounted while the flag is off", (await page.locator('[data-wsnh-page="discover"]').count()) === 0, "");
   } finally { await ctx.close(); seedOwned(); }
   L.done(7);
 });

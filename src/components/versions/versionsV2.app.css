@@ -86,11 +86,8 @@ body > .vv2[data-vv2="layer"] {
   .vv2 .wt-pg { grid-column:1/-1 }
 }
 
-/* ══ v2.2 A — the title card (design-refs/versions-v2-2 `.hb`, S31), ported from the mock's source text ══
-   (the mock's own `.db-new,.db-ghost{display:none}` is not ported: the app's list heading never had either) */
-/* ⚠️ the card's look moved to src/components/shared/pageHeaderCard.css (Query Centre v149, lock QC149-L0); the page
-   renders it through PageHeaderCard with classPrefix "hb", and keeps only where it sits */
-.vv2 .hb { margin:24px 24px 0 }
+/* ══ the header: Workspace headers v1 (14 Nov) put the shared navy header here (shell/WorkspaceNavyHeader, dressed by
+   the Query Centre's sheets) in place of v2.2 A's title card, whose one rule (where it sat) went with it ══ */
 .vv2 #vWarn, .vv2 .wb { margin-top:20px }
 
 /* ══ v2.2 B — the list section in the tinted panel (the mock's `body[data-ct=d] #secTiles`, S32). The mock sets

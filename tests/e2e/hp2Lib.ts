@@ -27,7 +27,9 @@ export const OPEN_HEADER = ["/queries"] as const;
 /* Analytics v21 (16 Oct): /queries/analytics joins — its desktop header is the centred light header (AN21 A1); its PHONE
    page keeps v17's band in the v2 panel, so P7 at 390 still reads it. */
 export const LIGHT_HEADER: readonly string[] = ["/agents", "/queries", "/todo", "/queries/analytics"];
-export const LIGHT_HEADER_SEL = '[data-cl17="header"], [data-cl17="empty-header"], [data-qc138="header"], [data-qc138="empty-header"], [data-tws="header"], [data-a21="header"], [data-a21="empty-panel"]';
+/* RE-POINTED (Workspace headers v1, 14 Nov): Analytics' desktop header (populated and day one) is the shared navy header
+   (`[data-wsnh-page="analytics"]`); `[data-a21="header"]` and `[data-a21="empty-panel"]` are gone */
+export const LIGHT_HEADER_SEL = '[data-cl17="header"], [data-cl17="empty-header"], [data-qc138="header"], [data-qc138="empty-header"], [data-tws="header"], [data-wsnh-page="analytics"]';
 /* RE-POINTED (Discover v1, 18 Oct): /agents/discover LEFT this list — its header is page-local (OWN_HEADER_ROUTES), the
    light two-state header or the navy panel, never the shared panel P1 measures; DV1 B1 holds it. It contributed 26 of the
    base run's 351 readings, so the floor (320) still stands at 325 without it. */

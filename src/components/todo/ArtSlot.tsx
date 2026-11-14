@@ -40,7 +40,10 @@ export type ArtSlotName =
   | "dash-mentor-standing"   // Dashboard first visit v1: the Mentor beside the top tip
   | "dash-courier-letter"    // Dashboard first visit v1: the set-up card's "Yes" path
   | "dash-scout-binoculars"  // Dashboard first visit v1: the set-up card's "Not yet" path
-  | "dash-mentor-pointing";  // Dashboard feed v1: the Mentor and the chick, pointing, in the Top tip's header
+  | "dash-mentor-pointing"   // Dashboard feed v1: the Mentor and the chick, pointing, in the Top tip's header
+  /* Workspace headers v1 (14 Nov): the navy header's drawing on six more workspace pages (the Corkboard reuses
+     "corkboard-header") — placeholders until the cut-outs arrive */
+  | "responses-header" | "analytics-header" | "discover-header" | "comps-header" | "versions-header" | "manuscripts-header";
 
 interface SlotBrief {
   /** The illustrator's brief, one line — rendered as the placeholder's own caption. */
@@ -167,6 +170,40 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
     w: 317, h: 260,
     src: "/images/dash/mentor-pointing.png?v=1",
     alt: "The Mentor hawk pointing, with a chick beside him",
+  },
+  /* Workspace headers v1 (14 Nov): the shared navy header's drawing (shell/WorkspaceNavyHeader), in the Query Centre
+     header's art column. ⚠️ HEADER SLOTS, against this file's "NOT in page headers" — Nick's ruling for the navy
+     headers (as Query letters v2.4's was), which postdates that rule. 190 × 142 (4:3), the box each drawing will fill.
+     When one lands, give its brief a `src` and nothing else moves. */
+  "responses-header": {
+    caption: "The Responses header — the wall-building hawk, cut out, for the navy panel beside the page title.",
+    w: 190, h: 142,
+    alt: "The hawk building a wall of replies",
+  },
+  "analytics-header": {
+    caption: "The Analytics header — the Archivist with his ledger, cut out, for the navy panel.",
+    w: 190, h: 142,
+    alt: "The Archivist hawk reading his ledger",
+  },
+  "discover-header": {
+    caption: "The Discover header — the Scout with his binoculars, cut out, for the navy panel.",
+    w: 190, h: 142,
+    alt: "The Scout hawk looking through binoculars",
+  },
+  "comps-header": {
+    caption: "The Comparable titles header — the Archivist carrying books, cut out, for the navy panel.",
+    w: 190, h: 142,
+    alt: "The Archivist hawk carrying a stack of books",
+  },
+  "versions-header": {
+    caption: "The Versions header — the Scribe writing in his book, cut out, for the navy panel.",
+    w: 190, h: 142,
+    alt: "The Scribe hawk writing in a book",
+  },
+  "manuscripts-header": {
+    caption: "The Manuscripts header — the Scribe with his quill, cut out, for the navy panel.",
+    w: 190, h: 142,
+    alt: "The Scribe hawk holding a quill",
   },
   "dash-scout-binoculars": {
     caption: "The scout hawk with binoculars.",

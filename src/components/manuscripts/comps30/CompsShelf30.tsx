@@ -181,6 +181,8 @@ export const CompsShelf30: React.FC<{
   onOpen: (key: string) => void;
   onPick: (key: string) => void;
   onAdd: () => void;
+  /** Workspace headers v1: "How comp tracking works", moved here from the header */
+  onHow: () => void;
 }> = (p) => {
   const total = p.rows.length;
   const isFiltered = filtered(p.filter);
@@ -193,6 +195,7 @@ export const CompsShelf30: React.FC<{
           <h2 className="cp30-h2" id="cp30-shelf-h">Your shelf<small data-cp="shelf-count">{total} {total === 1 ? "title" : "titles"}</small></h2>
           <p>Every comp you might name in a letter. Choose one to see the letters and queries it went out with.</p>
         </div>
+        <button type="button" className="cp30-lnk cp30-shhow" data-cp="how" data-cx-key="how" onClick={p.onHow}>How comp tracking works</button>
       </div>
 
       <div className="cp30-tool" data-cp="tools">

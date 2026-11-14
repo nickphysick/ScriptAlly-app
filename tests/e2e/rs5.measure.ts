@@ -115,7 +115,10 @@ async function openRef(page: Page, height: number, cardW: number) {
 }
 
 /* ═════════════ A ═════════════ */
-test("A1 title card", async ({ page }) => {
+/* RETIRED (Workspace headers v1, 14 Nov): the title card is gone — the page's header is the shared navy header, held to
+   the Query Centre's by tests/e2e/wsHeaders.measure.ts (H1, H3–H9 "responses"). Kept, skipped, so its readings stay on
+   record. */
+test.skip("A1 title card", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("A1");
   for (const size of SIZES) {
@@ -153,7 +156,8 @@ test("A2 glance", async ({ page }) => {
       await page.locator(`[data-rsp5="card"][data-k="${k}"] [data-rsp5="hit"]`).click();
       await page.waitForTimeout(1300);
       const t = await offTop(page, `[data-rsp5-sec="${sec}"]`);
-      L.check(`@${size.width} ${k} → ${sec}`, near(t, 20, 6), `section top ${t?.toFixed(1)}`);
+      /* RE-POINTED (Workspace headers v1): the section lands 20 clear of the collapsed bar (its 12px sticky top + 60) */
+      L.check(`@${size.width} ${k} → ${sec}`, near(t, 92, 6), `section top ${t?.toFixed(1)}`);
       if (seg) {
         const p = await ev<string | null>(page, `document.querySelector('[data-rsp5="seg-btn"][data-k="${seg}"]')?.getAttribute('aria-pressed') ?? null`);
         L.check(`@${size.width} ${k} sets the wall to ${seg}`, p === "true", `aria-pressed ${p}`);

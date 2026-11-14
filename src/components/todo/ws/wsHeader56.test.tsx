@@ -59,7 +59,8 @@ describe("the navy header (WsHeader56)", () => {
 describe("the sheets: the Query Centre's rules name the To-do header, at the same specificity", () => {
   const qc = (f: string) => read(`../../queries/centre/${f}`);
   it("the panel, its type and buttons, the grid, the art, the right column and the container", () => {
-    expect(qc("qcv156.css").match(/:is\(\.qc151\.qc153, \.cl27, \.tws56-hdw\) > \.qc1531-hd\.qc1531-hd/g)?.length).toBe(11);
+    /* Workspace headers v1 re-pointed: the lists also name the shared navy header (`.wsnh`) */
+    expect(qc("qcv156.css").match(/:is\(\.qc151\.qc153, \.cl27, \.tws56-hdw(?:, \.wsnh)?\) > \.qc1531-hd\.qc1531-hd/g)?.length).toBe(11);
     expect(qc("qcv1534.css")).toContain(":is(.qc151.qc153, .cl27, .tws56-hdw) .qc1531-hd h1.qc1531-t { font: 400 54px/1.05 var(--sp-type) !important;");
     expect(qc("qcv1534.css")).toContain(":is(.qc151.qc153, .cl27, .tws56-hdw) .qc1531-hd { grid-template-columns: 268px minmax(0, 1fr) minmax(400px, 560px); column-gap: 28px; }");
     expect(qc("qcv1534.css")).toContain(":is(.qc151.qc153, .cl27, .tws56-hdw) .qc1531-art { justify-self: center; }");

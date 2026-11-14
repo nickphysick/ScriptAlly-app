@@ -1,5 +1,5 @@
 /**
- * Analytics v21 — the AN21 locks that stand in v24 (A1 header, A2 card, L1 overflow). A3 and B1 were rewritten
+ * Analytics v21 — the AN21 locks that stand in v24 (A1 header, A2 card, L1 overflow; A1 and A2 retired by Workspace headers v1). A3 and B1 were rewritten
  * as AN24-A3 and AN24-B1, and C1, D1, E1, F1, G1 and I1 were retired with the sections they measured
  * (tests/e2e/RETIRED-analytics-v24.md; the new locks are tests/e2e/analyticsV24.measure.ts).
  *
@@ -92,7 +92,8 @@ async function overflow(page: Page) {
 }
 
 /* ════════════ A1 · header ════════════ */
-test("AN21-A1 · header", async ({ page }) => {
+/* RETIRED (Workspace headers v1, 14 Nov): its subject is v21's light header (Special Elite 40/50/56px title, the shadow image, the white card inside it), replaced by the shared navy header. Successor: tests/e2e/wsHeaders.measure.ts H1 + H6 "analytics". */
+test.skip("AN21-A1 · header", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("an21-a1");
   for (const w of [1920, 1512, 1280, 1180]) {
@@ -128,7 +129,8 @@ test("AN21-A1 · header", async ({ page }) => {
 });
 
 /* ════════════ A2 · the card ════════════ */
-test("AN21-A2 · card", async ({ page }) => {
+/* RETIRED (Workspace headers v1, 14 Nov): its subject is the header's white card and four-row legend ("Where the queries stand"), deleted with the light header. Successor: tests/e2e/wsHeaders.measure.ts H6 + H7 "analytics". */
+test.skip("AN21-A2 · card", async ({ page }) => {
   const L = new Ledger("an21-a2");
   for (const w of [1512, 1280]) {
     await open(page, w);

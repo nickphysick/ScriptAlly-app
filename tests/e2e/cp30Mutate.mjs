@@ -4,12 +4,18 @@
  * (tests/e2e/cp30.measure.ts). The unit locks' source mutations are in reports/comps-v30/REPORT.md §F.
  */
 export const MUTATIONS = {
+  /* RETIRED (Workspace headers v1, 14 Nov): H1 is retired in cp30.measure.ts (v30's title card is gone) and is skipped there.
+     Successor: tests/e2e/wsHeaders.measure.ts H3 "comps" (its own break: the page's old column). Kept for the record. */
   /* the shelf states a width of its own and stops on the column's right edge */
   H1: { css: ".cp30 .cp30-grid { margin-right: 40px; }" },
   /* the ready state loses its pill */
-  H2: { js: "document.querySelector('.cp30-badge')?.remove()" },
+  /* RE-POINTED (Workspace headers v1, 14 Nov): the pill is the navy header's ring figure now */
+  H2: { js: "document.querySelector('[data-wsnh-page=\"comps\"] [data-wsnh=\"ring-pct\"]')?.remove()" },
   /* a pill drawn when it is too soon to say */
-  "H2-early": { js: "(() => { const d = document.querySelector('[data-cp=\"disc\"]'); const b = document.createElement('span'); b.className = 'cp30-badge'; b.setAttribute('data-cp', 'hl-badge'); b.textContent = '33%'; d.appendChild(b); })()" },
+  /* RE-POINTED (Workspace headers v1, 14 Nov): the disc is gone; the break draws a ring into the navy header instead */
+  "H2-early": { js: "(() => { const d = document.querySelector('[data-wsnh-page=\"comps\"]'); const b = document.createElement('span'); b.setAttribute('data-wsnh', 'ring'); b.textContent = '33%'; d.appendChild(b); })()" },
+  /* RETIRED (Workspace headers v1, 14 Nov): H3 is retired in cp30.measure.ts (`[data-cp="lead"]` is gone) and is skipped there;
+     this break's target no longer exists. Successor: tests/e2e/wsHeaders.measure.ts H6 "comps". Kept for the record. */
   /* a figure where the rule says a word */
   H3: { js: "(() => { const p = document.querySelector('[data-cp=\"lead\"]'); for (const n of p.childNodes) if (n.nodeType === 3) n.textContent = n.textContent.replace('Two have', '2 have'); })()" },
   /* the toolbar wraps onto a second row */

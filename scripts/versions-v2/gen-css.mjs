@@ -38,7 +38,10 @@ const out = [];
 out.push(`/* ══ GENERATED from design-refs/versions-v2/versions-v2.html by scripts/versions-v2/{extract-css,gen-css}.mjs ══
    ${kept.length} of the ref's rules: exactly those that match its Versions DOM across all five states and every overlay,
    in the ref's order, scoped under .vv2. Do not edit by hand — regenerate. App-side overrides live in versionsV2.app.css. */`);
-out.push(`.vv2 :where(*:not(svg, svg *)) { all: revert; }`);
+/* Workspace headers v1 (14 Nov): the shared navy header (`.wsnh`) is dressed by the Query Centre's own one-class rules,
+   which a 0-1-0 revert would undo, so it is left out of the restore */
+out.push(`/* Workspace headers v1: the shared navy header (\`.wsnh\`, the Query Centre's own one-class rules) is not reverted */`);
+out.push(`.vv2 :where(*:not(svg, svg *, .wsnh, .wsnh *)) { all: revert; }`);
 out.push(`.vv2 :where(svg) { display: revert; vertical-align: revert; }`);
 out.push(`.vv2 { color: var(--ink); font-family: var(--serif); font-size: 15px; line-height: 1.5; }`);
 out.push(`.vv2.vv2 :is(h1, h2, h3, h4, h5, h6) { font-family: inherit !important; }`);

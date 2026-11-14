@@ -41,10 +41,14 @@ describe("A1 — the page is two containers and nothing else", () => {
     expect(html).not.toContain('data-probe="app-footer"');
     expect(text(html)).not.toMatch(/What's landing|What’s landing|Comparable|Recent activity|\+ New version|Add manuscript/);
   });
-  it("the header: eyebrow, the title, the byline and two buttons — no How it works", () => {
-    expect(html).toMatch(/data-ms27="eyebrow">— Manuscripts —</);
-    expect(html).toMatch(/<h1 class="ms27-h1" id="ms27-title" data-page-title="" data-ms27="title">The Smoke Test<\/h1>/);
-    expect(html).toMatch(/data-ms27="byline"><i aria-hidden="true"><\/i><em>by<\/em> /);
+  /* RE-POINTED (Workspace headers v1, 14 Nov): the hero is the shared navy header — the title, "by {author}" on its
+     ruled line, the two buttons; the eyebrow is gone, and the details card is its right block as words */
+  it("the header: the title, the byline and two buttons — no eyebrow, no How it works", () => {
+    expect(html).not.toContain('data-ms27="eyebrow"');
+    expect(html).not.toContain('data-ms27="header"');
+    expect(html).toMatch(/<h1 class="qc1531-t" data-page-title="true" data-wsnh="title">The Smoke Test<\/h1>/);
+    expect(html).toMatch(/<p class="qc1531-for" data-wsnh="for"><i aria-hidden="true"><\/i><span><em>by<\/em> /);
+    expect(html).toContain('data-ms27="hd-genre"');
     /* v28.1: the buttons read Edit and View summary */
     expect(html).toMatch(/aria-label="Edit the book&#x27;s details"[^>]*>Edit<\/button>/);
     expect(html).toMatch(/aria-label="View the book&#x27;s summary"[^>]*>View summary<\/button>/);

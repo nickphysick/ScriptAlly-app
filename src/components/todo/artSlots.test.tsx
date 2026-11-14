@@ -47,6 +47,8 @@ const NAMES: ArtSlotName[] = [
   "dash-scout-binoculars",
   // Dashboard feed v1: the Top tip's header — a real asset
   "dash-mentor-pointing",
+  // RE-POINTED (Workspace headers v1, 14 Nov): the navy header's drawing on six workspace pages — placeholders, 190 × 142
+  "responses-header", "analytics-header", "discover-header", "comps-header", "versions-header", "manuscripts-header",
 ];
 
 describe("⚠️ ONE component, TEN slots — the briefs are the contract", () => {
@@ -193,6 +195,9 @@ describe("⚠️ each slot's TRIGGER — the conditions, named", () => {
     /* RE-POINTED (Corkboard v2, 6 Nov): the header's drawing is the ring's own slot now (lib/corkboard
        CORKBOARD_RING_ART, null until supplied), so the page mounts no ArtSlot. Both briefs stay registered. */
     expect([...noteboard.matchAll(/<ArtSlot /g)].length).toBe(0);
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the desktop's navy header mounts `corkboard-header` through the shared
+       header (shell/WorkspaceNavyHeader's ArtSlot, boxed at 190 × 142 there); the page itself still mounts none */
+    expect(readFileSync(join(here, "corkboard", "CbHeader.tsx"), "utf8")).toContain('art="corkboard-header"');
     expect(ART_SLOTS["corkboard-header"]).toBeDefined();
     expect(ART_SLOTS["noteboard-empty"]).toBeDefined();
     expect([ART_SLOTS["corkboard-header"].w, ART_SLOTS["corkboard-header"].h]).toEqual([250, 136]);

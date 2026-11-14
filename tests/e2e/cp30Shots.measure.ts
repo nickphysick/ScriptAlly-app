@@ -28,7 +28,8 @@ for (const vp of SIZES) {
     await page.evaluate(() => (window as any).__q('[data-cp="card"]').click());
     await page.waitForTimeout(600); await shot("06-drawer");
     await page.keyboard.press("Escape"); await page.waitForTimeout(400);
-    await scrollTo(page, '[data-cp="top"]', 0);
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the page's top is the shared navy header, not `[data-cp="top"]` */
+    await scrollTo(page, '[data-wsnh-page="comps"]', 0);
     await page.evaluate(() => (window as any).__q('[data-cp="how"]').click());
     await page.waitForTimeout(500); await shot("07-how");
     await page.keyboard.press("Escape");

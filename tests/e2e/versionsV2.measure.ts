@@ -55,7 +55,8 @@ for (const vp of VPS) {
       await openV2(page);
       await closePop(page);
       const r = await page.evaluate(() => ({
-        count: document.querySelector("#vCnt")?.textContent,
+        /* RE-POINTED (Workspace headers v1): the count is the navy header's headline ("4 versions"), not the list's #vCnt */
+        count: document.querySelector('[data-wsnh-page="versions"] [data-wsnh="title"]')?.textContent?.match(/^\d+/)?.[0],
         banner: document.querySelector('[data-vv2="banner"] .wb-h')?.textContent,
       }));
       console.log(`S01 ${vp.width}`, JSON.stringify(r));
@@ -64,11 +65,13 @@ for (const vp of VPS) {
       /* the faces, read off the page: a token cycle once made every one resolve to nothing with every other lock green */
       const type = await page.evaluate(() => {
         const f = (s: string) => { const e = document.querySelector(s); return e ? { family: getComputedStyle(e).fontFamily, size: parseFloat(getComputedStyle(e).fontSize) } : null; };
-        return { h1: f("#hbT"), h2: f("#msRH"), body: f('[data-vv2="title"] .hb-tx > p'), pill: f('[data-vv2="list"] .db-ch li') };
+        return { h1: f('[data-wsnh-page="versions"] [data-wsnh="title"]'), h2: f("#msRH"), body: f('[data-vv2="list"] .db-r'), pill: f('[data-vv2="list"] .db-ch li') };
       });
       console.log(`S01 type ${vp.width}`, JSON.stringify(type));
       expect(type.h1!.family).toMatch(/Special Elite/);
-      expect(type.h1!.size).toBe(34);
+      /* RE-POINTED (Workspace headers v1): the Query Centre's 54px headline; the title card's paragraph is gone, so the
+         serif is read off a list row */
+      expect(type.h1!.size).toBe(54);
       expect(type.h2!.family).toMatch(/Special Elite/);
       expect(type.body!.family).toMatch(/Source Serif 4/);
       expect(type.pill!.family).toMatch(/Source Serif 4/);
@@ -445,18 +448,21 @@ for (const vp of VPS) {
 
     /* ══ v2.2 — the title card, the tinted list panel, the empty states (design-refs/versions-v2-2, S31–S37) ══ */
     const card = async (page: Page) => page.evaluate(() => {
-      const c = document.querySelector('[data-vv2="title"]');
+      /* RE-POINTED (Workspace headers v1): the title card is the shared navy header */
+      const c = document.querySelector('[data-wsnh-page="versions"]');
       const t = (s: string) => c?.querySelector(s)?.textContent?.replace(/\s+/g, " ").trim() ?? null;
       return {
         card: !!c,
         hero: document.querySelectorAll('[data-vv2="header"], .mh.vh, #msH1').length,
         donut: document.querySelectorAll('[data-vv2="donut"], .hpie, .mh-r').length,
-        h1: t("h1"), tag: t(".hb-tag"), line: t(".hb-tx > p"),
+        h1: t("h1"), tag: t(".hb-tag"), line: t(".hb-tx > p"), forLine: t(".qc1531-for"),
         buttons: [...(c?.querySelectorAll("button") ?? [])].map((b) => b.textContent?.replace(/\s+/g, " ").trim()),
       };
     });
 
-    test("T1 — no header hero and no donut; the title card states Versions, PRO, the title and both buttons", async ({ browser, baseURL }) => {
+    /* RE-POINTED (Workspace headers v1): the navy header states the count, "of {book}" and both buttons; no PRO tag and no
+       paragraph (the navy header has neither) */
+    test("T1 — no header hero and no donut; the navy header states the count, the book and both buttons", async ({ browser, baseURL }) => {
       test.skip(!run("T1"));
       const ctx = await ctxFor(browser, baseURL!, vp);
       const page = await ctx.newPage();
@@ -468,18 +474,20 @@ for (const vp of VPS) {
       expect(a.card, "the title card is on the page").toBe(true);
       expect(a.hero, "the header hero is gone from the DOM").toBe(0);
       expect(a.donut, "the donut is gone from the DOM").toBe(0);
-      expect(a.h1).toBe("Versions Pro");
-      expect(a.tag).toBe("Pro");
-      expect(a.line).toBe("Save each version of Tide Tables as it changes. QueryHawk records which one went out with every query, so you can see which gets agents asking for more.");
-      expect(a.buttons).toEqual(["+ New version", "How it works"]);
+      expect(a.h1).toBe(`${facts().live} versions`);
+      expect(a.tag).toBe(null);
+      expect(a.line).toBe(null);
+      expect(a.forLine).toBe("of Tide Tables");
+      expect(a.buttons.slice(0, 2)).toEqual(["+ New version", "How it works"]);
       await openV2(page, VER2_FRESH);
       await closePop(page);
       expect(await page.locator('[data-vv2="empty"]').count(), "population: a book with no versions").toBe(1);
       const b = await card(page);
       console.log(`T1 fresh ${vp.width}`, JSON.stringify(b));
       expect(b.buttons).toEqual(["+ Save your first version", "How it works"]);
-      expect(b.line).toContain("Dead Reckoning");
-      await page.locator('[data-vv2="title"] [data-vv2="how"]').click();
+      expect(b.h1).toBe("No versions yet");
+      expect(b.forLine).toContain("Dead Reckoning");
+      await page.locator('[data-wsnh-page="versions"] [data-vv2="how"]').click();
       await expect(page.locator(".cx-explain h4")).toHaveText("How version tracking works", { timeout: 5000 });
       await ctx.close();
     });
@@ -618,8 +626,8 @@ for (const vp of VPS) {
           const h = JSON.parse(document.querySelector('[data-pck="dim"]')!.getAttribute("data-hole")!);
           const x = h.left + h.width / 2, y = h.top + h.height / 2;
           const hit = document.elementsFromPoint(x, y).find((e) => !e.closest('[data-pck="spot"]')) as HTMLElement | undefined;
-          const btn = hit?.closest<HTMLElement>('[data-vv2="title"] button, button[data-vv2="first"]') ?? null;
-          return { hole: h, inView: y > 0 && y < innerHeight && x > 0 && x < innerWidth, btn: btn ? btn.textContent?.replace(/\s+/g, " ").trim() : null, where: btn?.closest('[data-vv2="title"]') ? "title" : btn ? "empty" : hit?.className ?? null };
+          const btn = hit?.closest<HTMLElement>('[data-wsnh-page="versions"] button, button[data-vv2="first"]') ?? null;
+          return { hole: h, inView: y > 0 && y < innerHeight && x > 0 && x < innerWidth, btn: btn ? btn.textContent?.replace(/\s+/g, " ").trim() : null, where: btn?.closest('[data-wsnh-page="versions"]') ? "title" : btn ? "empty" : hit?.className ?? null };
         });
         console.log(`T6 ${ms ?? "ver2-ms"} ${vp.width}`, JSON.stringify(r));
         expect(r.inView, "the hole is on screen").toBe(true);

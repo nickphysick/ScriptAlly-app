@@ -41,19 +41,22 @@ describe("/queries/analytics renders", () => {
     expect(html).toContain("At a glance");
   });
 
-  it("v21 §A: the desktop opens on the page's own light header — no panel, no band, no illustration but the shadow", () => {
+  /* RE-POINTED (Workspace headers v1, 14 Nov): v21's light header ("— ANALYTICS —", the shadow, the white card) is the
+     shared navy header now; its words and figures are the same. */
+  it("the desktop opens on the shared navy header: the headline, the book, the two buttons, the ring; no legend", () => {
     setActiveManuscript();
     const html = renderPageSeeded(<QueryAnalytics />, ROUTE);
     /* the node render has no matchMedia, so it is the desktop; the phone's v17 band is a live-width branch */
-    expect(html).toContain('data-a21="header"');
+    expect(html).toContain('data-wsnh-page="analytics"');
     expect(html).toContain('data-own-header=""');
-    expect(html).toContain("— ANALYTICS —");
-    expect(html).toMatch(/data-page-title=""[^>]*aria-label="1 query, no replies"/);
-    expect(html).not.toContain('data-hpanel=""');
-    expect(html).not.toContain('data-band=""');
-    const header = html.slice(html.indexOf('data-a21="header"'), html.indexOf('data-a21="card"'));
-    expect(header.match(/<img /g)?.length).toBe(1);
-    expect(header).toContain('data-a21="shadow"');
+    expect(html).toMatch(/<h1 class="qc1531-t" data-page-title="true" data-wsnh="title">1 query, no replies<\/h1>/);
+    expect(html).toContain("+ Record a response");
+    expect(html).toContain("See what happened");
+    expect(html).toContain("Replied on time");
+    expect(html).not.toContain('data-a21="header"');
+    expect(html).not.toContain('data-a21="counts"');
+    expect(html).not.toContain("— ANALYTICS —");
+    expect(html.match(/<h1\b/g)?.length).toBe(1);
   });
 
   it("v24: the seven question sections are there, in order, and the note closes the page", () => {

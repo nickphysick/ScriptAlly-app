@@ -18,7 +18,6 @@ import { QueryStatus } from "../../types";
 import { goneQuiet, nextExpected, plural, respDate, waitingRows, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
 import { MONTHS_SHORT } from "../../lib/dates";
-import { Rsp5TitleCard } from "./Rsp5Head";
 import { ReqCard } from "./RspCarousel";
 import { NoteCard } from "./Rsp5Words";
 import { Tally } from "./RspNos";
@@ -59,15 +58,12 @@ export function exampleNote(nowMs: number): Item {
 const dayMon = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
 
 export const RspEmpty: React.FC<{
-  msTitle: string | null;
   rows: readonly QcRow[];
   nowMs: number;
   /** the agent's stated reply time, for the next-reply card */
   weeksOf: (r: QcRow) => number | null;
-  onRecord: () => void;
-  onQueryCentre: () => void;
   onTodo: () => void;
-}> = ({ msTitle, rows, nowMs, weeksOf, onRecord, onQueryCentre, onTodo }) => {
+}> = ({ rows, nowMs, weeksOf, onTodo }) => {
   const wait = waitingRows(rows).slice().sort((a, b) => (a.sentMs ?? 0) - (b.sentMs ?? 0));
   const firstSent = wait.find((r) => r.sentMs != null)?.sentMs ?? null;
   const next = nextExpected(rows, nowMs);
@@ -77,7 +73,6 @@ export const RspEmpty: React.FC<{
   const ex = <span className="rsp5-exm">Example</span>;
   return (
     <div className="rsp5-empty" data-rsp5="empty">
-      <Rsp5TitleCard msTitle={msTitle} empty loading={false} onRecord={onRecord} onSecond={onQueryCentre} />
       <section className="rsp5-sec" data-rsp5="wait" aria-labelledby="rsp5-wait-h">
         <div className="rsp5-h2row"><div className="rsp5-h2"><h2 id="rsp5-wait-h" className="rsp5-h2t">While you wait</h2></div></div>
         <div className="rsp5-wyw">

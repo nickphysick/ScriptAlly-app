@@ -41,14 +41,46 @@ const note = (id: string, over: Partial<UserTask> = {}): UserTask => ({
 });
 const render = () =>
   renderToStaticMarkup(<MemoryRouter initialEntries={["/todo/corkboard"]}><TodoNoteboardPage onNavigate={() => {}} /></MemoryRouter>);
+/** Workspace headers v1: the phone's panel (the page below 768px), by a `matchMedia` that answers "narrow" */
+const renderPhone = () => {
+  const g = globalThis as unknown as { window?: unknown };
+  const had = "window" in g, before = g.window;
+  g.window = { ...((before as object) ?? {}), matchMedia: () => ({ matches: false, addEventListener() {}, removeEventListener() {} }) };
+  try { return render(); } finally { if (had) g.window = before; else delete g.window; }
+};
 const plain = (h: string) => h.replace(/<[^>]+>/g, "").replace(/&#x27;/g, "’");
 
 afterEach(() => { seed.userTasks = []; });
 
-describe("the header", () => {
-  it("counts the board and the notes on the to-do list", () => {
+/* RE-POINTED (Workspace headers v1, 14 Nov): from 768px up the page opens on the shared navy header — "3 notes", "on
+   your board", the two buttons, Pick a colour on the right. The panel below is the phone's, and these hold it there. */
+describe("the desktop's navy header", () => {
+  it("the count, on your board, + New note and Add a task, and Pick a colour with five swatches", () => {
     seed.userTasks = [note("a", { dueDate: "2026-11-09", colour: "butter" }), note("b"), note("c")];
     const html = render();
+    expect(html).toContain('data-wsnh-page="corkboard"');
+    expect(html).toContain(">3 notes</h1>");
+    expect(plain(html)).toContain("on your board");
+    expect(html).toContain('data-cb2="add-task"');
+    expect(html).not.toContain('data-cb2="header"');
+    expect(plain(html)).toContain("Pick a colour");
+    for (const name of ["butter", "blush", "powder", "sand", "stone"]) expect(html, name).toContain(`aria-label="New ${name} note"`);
+    expect([...html.matchAll(/class="cb2-hsw"/g)].length).toBe(5);
+    expect(html.match(/<h1\b/g)?.length).toBe(1);
+  });
+  it("empty: No notes yet, only + New note, no right block", () => {
+    seed.userTasks = [];
+    const html = render();
+    expect(html).toContain(">No notes yet</h1>");
+    expect(html).not.toContain('data-cb2="add-task"');
+    expect(html).not.toContain('data-wsnh="right"');
+  });
+});
+
+describe("the phone's panel", () => {
+  it("counts the board and the notes on the to-do list", () => {
+    seed.userTasks = [note("a", { dueDate: "2026-11-09", colour: "butter" }), note("b"), note("c")];
+    const html = renderPhone();
     expect(html).toContain('data-cb2="header"');
     expect(plain(html)).toContain("Corkboard");
     expect(plain(html)).toContain("3 notes on your board. 1 is on your to-do list.");
@@ -57,7 +89,7 @@ describe("the header", () => {
 
   it("At a glance shows only the rows that are not zero", () => {
     seed.userTasks = [note("a", { pinned: true }), note("b")];
-    const html = render();
+    const html = renderPhone();
     expect(html).toContain('data-cb2="glance"');
     expect(html).toContain('data-glance="pinned"');
     expect(html).not.toContain('data-glance="linked"');
@@ -66,7 +98,7 @@ describe("the header", () => {
 
   it("with no rows to show it is Pick a colour: five named swatches, each a button", () => {
     seed.userTasks = [note("a"), note("b")];
-    const html = render();
+    const html = renderPhone();
     expect(html).toContain('data-cb2="pick"');
     expect(plain(html)).toContain("Pick a colour");
     for (const name of ["butter", "blush", "powder", "sand", "stone"]) expect(html, name).toContain(`aria-label="New ${name} note"`);
@@ -75,14 +107,15 @@ describe("the header", () => {
 
   it("the ring shows the art slot while the drawing is not supplied", () => {
     seed.userTasks = [note("a")];
-    expect(plain(render())).toContain("Art to come");
+    expect(plain(renderPhone())).toContain("Art to come");
   });
 });
 
 describe("the empty page", () => {
   it("Pick a colour to start, only + New note, and the four examples from the app's own data, each with Keep this", () => {
     seed.userTasks = [];
-    const html = render();
+    /* RE-POINTED (Workspace headers v1): the sentence and "Pick a colour to start" are the phone panel's */
+    const html = renderPhone();
     expect(plain(html)).toContain("Jot down anything worth remembering while you query.");
     expect(plain(html)).toContain("Pick a colour to start");
     expect(html).not.toContain('data-cb2="add-task"');

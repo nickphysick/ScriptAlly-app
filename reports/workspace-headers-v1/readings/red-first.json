@@ -1,0 +1,1020 @@
+{
+ "built-1440": {
+  "qc": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.875,
+    "height": 227.125,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 829.25,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "88 queries sent",
+    "buttonH": 46
+   },
+   "barAtRest": {
+    "shown": false,
+    "inert": true,
+    "ariaHidden": "true",
+    "visibility": "hidden",
+    "opacity": "0",
+    "top": 24,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "88 queries sent",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(246, 243, 238)"
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "88 queries sent",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(246, 243, 238)"
+   }
+  },
+  "cl": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.90625,
+    "height": 227.15625,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 867,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "53 agents on file",
+    "buttonH": 23.75
+   },
+   "barAtRest": {
+    "shown": false,
+    "inert": true,
+    "ariaHidden": "true",
+    "visibility": "hidden",
+    "opacity": "0",
+    "top": 24,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "53 agents on file",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "53 agents on file",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "todo": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 113.75,
+    "bottom": 340.875,
+    "height": 227.125,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 852.015625,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "104 things to do",
+    "buttonH": 46
+   },
+   "barAtRest": {
+    "shown": false,
+    "inert": true,
+    "ariaHidden": "true",
+    "visibility": "hidden",
+    "opacity": "0",
+    "top": -6,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "104 things to do",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 0,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "104 things to do",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "letters": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.859375,
+    "height": 227.109375,
+    "width": 1288,
+    "scLeft": 0,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 821.8125,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "3 query letters",
+    "buttonH": 46
+   },
+   "barAtRest": {
+    "missing": ".qc156-slim"
+   },
+   "bar": {
+    "missing": ".qc156-slim"
+   }
+  }
+ },
+ "responses-1440": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1400,
+   "top": 482.9375,
+   "bottom": 687.984375,
+   "tag": "DIV",
+   "cls": "rsp5-glance"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     ".rsp5-card .phc-tx > p",
+     1
+    ],
+    [
+     "[data-rsp5='title-card']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "analytics-1440": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1400,
+   "top": 364.75,
+   "bottom": 558.390625,
+   "tag": "DIV",
+   "cls": "a21-desk"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-a21='counts']",
+     1
+    ],
+    [
+     "[data-a21='header']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "discover-1440": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1400,
+   "top": 364.75,
+   "bottom": 439.125,
+   "tag": "DIV",
+   "cls": "dv1-note-b"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-dv1='row']",
+     3
+    ],
+    [
+     "[data-dv1='header']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "comps-1440": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1400,
+   "top": 404.71875,
+   "bottom": 476.71875,
+   "tag": "DIV",
+   "cls": "cp30-note"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-cp='lead']",
+     1
+    ],
+    [
+     "[data-cp='top']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "versions-1440": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": null,
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-vv2='title']",
+     1
+    ],
+    [
+     "#vCnt",
+     0
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "manuscripts-1440": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1400,
+   "top": 129.75,
+   "bottom": 441.25,
+   "tag": "SECTION",
+   "cls": "ms27-bkx"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-ms27='header']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "corkboard-1440": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1400,
+   "top": 346.6875,
+   "bottom": 390.6875,
+   "tag": "DIV",
+   "cls": "cb2-fr"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-cb2='panel']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "built-1717": {
+  "qc": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.875,
+    "height": 227.125,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 829.25,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "88 queries sent",
+    "buttonH": 46
+   },
+   "barAtRest": {
+    "shown": false,
+    "inert": true,
+    "ariaHidden": "true",
+    "visibility": "hidden",
+    "opacity": "0",
+    "top": 24,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "88 queries sent",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(246, 243, 238)"
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "88 queries sent",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(246, 243, 238)"
+   }
+  },
+  "cl": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.90625,
+    "height": 227.15625,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 867,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "53 agents on file",
+    "buttonH": 23.75
+   },
+   "barAtRest": {
+    "shown": false,
+    "inert": true,
+    "ariaHidden": "true",
+    "visibility": "hidden",
+    "opacity": "0",
+    "top": 24,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "53 agents on file",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "53 agents on file",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "todo": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 113.75,
+    "bottom": 340.875,
+    "height": 227.125,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 852.015625,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "104 things to do",
+    "buttonH": 46
+   },
+   "barAtRest": {
+    "shown": false,
+    "inert": true,
+    "ariaHidden": "true",
+    "visibility": "hidden",
+    "opacity": "0",
+    "top": -6,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "104 things to do",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 0,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "104 things to do",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "letters": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.859375,
+    "height": 227.109375,
+    "width": 1565,
+    "scLeft": 0,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 821.8125,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "3 query letters",
+    "buttonH": 46
+   },
+   "barAtRest": {
+    "missing": ".qc156-slim"
+   },
+   "bar": {
+    "missing": ".qc156-slim"
+   }
+  }
+ },
+ "responses-1717": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1677,
+   "top": 482.9375,
+   "bottom": 687.984375,
+   "tag": "DIV",
+   "cls": "rsp5-glance"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     ".rsp5-card .phc-tx > p",
+     1
+    ],
+    [
+     "[data-rsp5='title-card']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "analytics-1717": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1677,
+   "top": 386.75,
+   "bottom": 592.390625,
+   "tag": "DIV",
+   "cls": "a21-desk"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-a21='counts']",
+     1
+    ],
+    [
+     "[data-a21='header']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "discover-1717": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1677,
+   "top": 386.75,
+   "bottom": 456.75,
+   "tag": "DIV",
+   "cls": "dv1-note-b"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-dv1='row']",
+     3
+    ],
+    [
+     "[data-dv1='header']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "comps-1717": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1677,
+   "top": 404.71875,
+   "bottom": 476.71875,
+   "tag": "DIV",
+   "cls": "cp30-note"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-cp='lead']",
+     1
+    ],
+    [
+     "[data-cp='top']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "versions-1717": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": null,
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-vv2='title']",
+     1
+    ],
+    [
+     "#vCnt",
+     0
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "manuscripts-1717": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1677,
+   "top": 129.75,
+   "bottom": 463.25,
+   "tag": "SECTION",
+   "cls": "ms27-bkx"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-ms27='header']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "corkboard-1717": {
+  "header": {
+   "missing": "[data-wsnh='header']"
+  },
+  "first": {
+   "left": 112,
+   "right": 1677,
+   "top": 346.6875,
+   "bottom": 390.6875,
+   "tag": "DIV",
+   "cls": "cb2-fr"
+  },
+  "h7": {
+   "h1": 1,
+   "old": 1,
+   "gone": [
+    [
+     "[data-cb2='panel']",
+     1
+    ]
+   ]
+  },
+  "barAtRest": {
+   "missing": "[data-wsnh='slim']"
+  },
+  "bar": {
+   "missing": "[data-wsnh='slim']"
+  }
+ },
+ "responses-H8": {
+  "820": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 6,
+   "titleClipped": false,
+   "headerClipped": null
+  },
+  "1024": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 6,
+   "titleClipped": false,
+   "headerClipped": null
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 6,
+   "titleClipped": false,
+   "headerClipped": null
+  }
+ },
+ "responses-H9": {
+  "header": false,
+  "right": false,
+  "lines": null,
+  "title": null,
+  "body": true,
+  "h1s": 1
+ },
+ "analytics-H8": {
+  "820": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false
+  },
+  "1024": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": true
+  }
+ },
+ "analytics-H9": {
+  "header": false,
+  "right": false,
+  "lines": null,
+  "title": null,
+  "body": true,
+  "h1s": 1
+ },
+ "discover-H8": {
+  "820": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false
+  },
+  "1024": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": true
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": true
+  }
+ },
+ "comps-H8": {
+  "820": {
+   "scroller": 396,
+   "doc": 0,
+   "titleOverflow": 69.03125,
+   "titleClipped": true,
+   "headerClipped": null
+  },
+  "1024": {
+   "scroller": 192,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": null
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": null
+  }
+ },
+ "comps-H9": {
+  "header": false,
+  "right": false,
+  "lines": null,
+  "title": null,
+  "body": true,
+  "h1s": 1
+ },
+ "versions-H8": {
+  "820": {
+   "scroller": 8,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": null
+  },
+  "1024": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": null
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": null
+  }
+ },
+ "versions-H9": {
+  "header": false,
+  "right": false,
+  "lines": null,
+  "title": null,
+  "body": true,
+  "h1s": 1
+ },
+ "manuscripts-H8": {
+  "820": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 258.65625,
+   "titleClipped": true,
+   "headerClipped": false
+  },
+  "1024": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 54.65625,
+   "titleClipped": true,
+   "headerClipped": false
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false
+  },
+  "long": null
+ },
+ "corkboard-H8": {
+  "820": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false
+  },
+  "1024": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false
+  }
+ },
+ "corkboard-H9": {
+  "header": false,
+  "right": false,
+  "lines": null,
+  "title": null,
+  "body": true,
+  "h1s": 1
+ }
+}

@@ -179,10 +179,14 @@ describe("/manuscripts/comps renders", () => {
     expect(html, "the query line is still on the page").not.toContain("Your query line");
     /* comps v30: the navy title card with its highlight, the shelf of cards with each card's stat card, the Scout section;
        the steps open in a pop-up, so none are on the page. */
-    expect(html, "the title card did not render").toContain('data-cp="top"');
-    expect(html, "the lead did not count the comps").toContain("One comp on file");
-    expect(html, "the highlight did not run").toMatch(/data-hl="(ready|soon|none)"/);
-    expect(html, "the pop-up's link did not render").toContain('data-cp="how"');
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the title card is the shared navy header; its headline is the count,
+       its paragraph and early highlight blocks are gone (the leader shows only once there is one), and "How comp
+       tracking works" sits on the shelf's heading row. */
+    expect(html, "the navy header did not render").toContain('data-wsnh-page="comps"');
+    expect(html, "the headline did not count the comps").toContain(">1 comp on file</h1>");
+    expect(html, "the title card is still on the page").not.toContain('data-cp="top"');
+    expect(html, "the header's paragraph is still on the page").not.toContain('data-cp="lead"');
+    expect(html, "the pop-up's link did not render").toMatch(/data-cp="shelf"[\s\S]*data-cp="how"/);
     expect(html, "the steps are on the page").not.toContain('data-cp="how-steps"');
     expect(html, "the shelf did not render").toContain("Your shelf");
     expect(html, "the comp's card did not render").toMatch(/data-cp="card"[^>]*>[\s\S]*The Smoke Comp/);

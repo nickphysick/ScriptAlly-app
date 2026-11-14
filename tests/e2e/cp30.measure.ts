@@ -46,10 +46,12 @@ async function mutate(page: Page, lock: string) {
 
 /* ══ the locks ══════════════════════════════════════════════════════════════════════════════ */
 
-type Lock = { name: string; setup?: string[]; ms?: string; run: (page: Page, vp: Vp, mut: () => Promise<void>) => Promise<void> };
+type Lock = { name: string; retired?: string; setup?: string[]; ms?: string; run: (page: Page, vp: Vp, mut: () => Promise<void>) => Promise<void> };
 
 const LOCKS: Lock[] = [
-  { name: "H1", run: async (page, vp, mut) => {
+  /* RETIRED (Workspace headers v1, 14 Nov): its subject is v30's navy title card's edges against the column (`[data-cp="top"]`),
+     replaced by the shared navy header. Successor: tests/e2e/wsHeaders.measure.ts H3 "comps". */
+  { name: "H1", retired: "v30's title card (`[data-cp=\"top\"]`) is gone", run: async (page, vp, mut) => {
     await mut();
     const r = await ev<{ top: any; grid: any; col: any }>(page, `(() => {
       const col = window.__cp(); const cs = getComputedStyle(col);
@@ -64,20 +66,25 @@ const LOCKS: Lock[] = [
   } },
   { name: "H2", run: async (page, vp, mut) => {
     await mut();
-    const r = await ev<{ kind: string; badge: string | null; title: string }>(page, `({ kind: window.__q('[data-cp="hl"]').getAttribute("data-hl"),
-      badge: window.__q('[data-cp="hl-badge"]')?.textContent ?? null, title: window.__q('[data-cp="hl-title"]').textContent })`);
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the leader block renders only when ready (`[data-cp="hl"]`'s data-hl is gone), and its rate is the navy header's ring figure (`[data-wsnh="ring-pct"]`) in place of the disc's pill */
+    const r = await ev<{ kind: string; badge: string | null; title: string }>(page, `({ kind: window.__q('[data-cp="hl-title"]') ? "ready" : "none",
+      badge: window.__q('[data-wsnh-page="comps"] [data-wsnh="ring-pct"]')?.textContent ?? null, title: window.__q('[data-cp="hl-title"]')?.textContent ?? null })`);
     /* Tidewater and Salt Road tie at 6 of 9: the writer's own order decides */
     check("H2", vp, "ready, Tidewater, its rate on the disc", r, { kind: "ready", badge: `${pct(FIX.v2.asked, FIX.v2.sent)}%`, title: "The Tidewater Line" });
   } },
   { name: "H2-early", setup: ["--empty", "--variant", "early"], run: async (page, vp, mut) => {
     /* the app's persistent cache paints the previous seed first; wait for the early fixture to arrive (3 queries) */
-    await page.waitForFunction(() => { try { return (window as any).__q('[data-cp="hl"]').getAttribute("data-hl") !== "ready"; } catch { return false; } }, null, { timeout: 15_000 }).catch(() => undefined);
+    /* RE-POINTED (Workspace headers v1, 14 Nov): there is no "soon" block any more — too soon to say is the header with no
+       leader at all: no leader title and no ring (`[data-wsnh="ring"]`) in the navy header */
+    await page.waitForFunction(() => { try { return !(window as any).__q('[data-cp="hl-title"]'); } catch { return false; } }, null, { timeout: 15_000 }).catch(() => undefined);
     await mut();
-    const r = await ev<{ kind: string; badge: boolean; title: string }>(page, `({ kind: window.__q('[data-cp="hl"]').getAttribute("data-hl"),
-      badge: !!window.__q('[data-cp="hl-badge"]'), title: window.__q('[data-cp="hl-title"]').textContent })`);
-    check("H2-early", vp, "too soon: no pill", r, { kind: "soon", badge: false, title: "Too soon to say" });
+    const r = await ev<{ kind: string; badge: boolean; title: string | null }>(page, `({ kind: window.__q('[data-cp="hl-title"]') ? "ready" : "none",
+      badge: !!window.__q('[data-wsnh-page="comps"] [data-wsnh="ring"]'), title: window.__q('[data-cp="hl-title"]')?.textContent ?? null })`);
+    check("H2-early", vp, "too soon: no leader, no ring", r, { kind: "none", badge: false, title: null });
   } },
-  { name: "H3", run: async (page, vp, mut) => {
+  /* RETIRED (Workspace headers v1, 14 Nov): its subject is the title card's lead paragraph (`[data-cp="lead"]`), dropped from
+     the navy header. Successor: tests/e2e/wsHeaders.measure.ts H6 "comps" (the headline "<n> comps on file"). */
+  { name: "H3", retired: "the header's paragraph (`[data-cp=\"lead\"]`) is gone", run: async (page, vp, mut) => {
     await mut();
     const t = await ev<string>(page, `window.__q('[data-cp="lead"]').textContent`);
     check("H3", vp, "the lead sentence", t, "Seven comps on file for Murphy's Day Out. Two have gone out with your queries, and five are waiting to be used.");
@@ -159,7 +166,8 @@ const LOCKS: Lock[] = [
     const r = await ev<{ letter: string; card: string; hl: string }>(page, `(() => { const fig = (e) => { const c = e.cloneNode(true); c.querySelectorAll("small").forEach((x) => x.remove()); return c.textContent.trim(); }; return {
       letter: fig(window.__q('[data-letter="cp30-let-2"] [data-cp="letter-rate"]')),
       card: fig(window.__q('[data-cp="card"][data-key="${FIX.sentComp}"] .cp30-k')),
-      hl: window.__q('[data-cp="hl-badge"]').textContent }; })()`);
+      /* RE-POINTED (Workspace headers v1, 14 Nov): the header's rate is the navy header's ring figure, not the disc's pill */
+      hl: window.__q('[data-wsnh-page="comps"] [data-wsnh="ring-pct"]').textContent }; })()`);
     const want = `${pct(FIX.v2.asked, FIX.v2.sent)}%`;
     check("L2", vp, "letter, card and header agree with the fixture", r, { letter: want, card: want, hl: want });
   } },
@@ -215,8 +223,9 @@ const LOCKS: Lock[] = [
   } },
   { name: "E1", ms: MS_EMPTY, run: async (page, vp, mut) => {
     await mut();
-    const r = await ev<string[]>(page, `[...window.__cp().children].map((e) => e.getAttribute("data-cp") || e.className.split(" ")[0])`);
-    check("E1", vp, "the empty page: panel, steps, footer", r, ["top", "how-steps", "af"]);
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the page's first child is the shared header's root (`[data-wsnh="root"]`), not v30's `[data-cp="top"]` */
+    const r = await ev<string[]>(page, `[...window.__cp().children].map((e) => e.getAttribute("data-cp") || e.getAttribute("data-wsnh") || e.className.split(" ")[0])`);
+    check("E1", vp, "the empty page: header, steps, footer", r, ["root", "how-steps", "af"]);
   } },
   { name: "SC1", run: async (page, vp, mut) => {
     await mut();
@@ -241,6 +250,8 @@ for (const vp of SIZES) {
   test(`CP30 at ${vp.width}`, async ({ page }) => {
     let lastSetup = "";
     for (const lock of LOCKS) {
+      /* a retired lock (Workspace headers v1) neither runs nor counts; its reason stands on its entry */
+      if (lock.retired) { console.log(`CP30 ${lock.name} retired: ${lock.retired}`); continue; }
       for (const mutated of PROVE ? [false, true] : [false]) {
         const setup = (lock.setup ?? ["--empty"]).join(" ");
         if (setup !== lastSetup || lock.name === "SC1") { seed(...(lock.setup ?? ["--empty"])); lastSetup = setup; }

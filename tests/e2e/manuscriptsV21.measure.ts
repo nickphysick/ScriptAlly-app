@@ -114,7 +114,8 @@ async function openAt(page: Page, route: string, vp: { width: number; height: nu
   await expect(page.locator(".ws-work").first()).toBeVisible({ timeout: 30_000 });
   await page.waitForFunction(
     (sel) => [...document.querySelectorAll(sel)].some((e) => e.getBoundingClientRect().height > 0),
-    route === "/agents" ? ".cl15-hd" : '[data-ms21="header"]', { timeout: 30_000 },
+    /* RE-POINTED (Workspace headers v1, 14 Nov): `[data-ms21="header"]` is gone; the page is ready once its navy header stands outside the loading state */
+    route === "/agents" ? ".cl15-hd" : '[data-ms21="page"]:not([data-state="loading"]) [data-wsnh-page="manuscripts"]', { timeout: 30_000 },
   );
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(1500);
@@ -606,9 +607,13 @@ test("E1 empty", async ({ browser }) => {
   try {
     for (const vp of VPS) {
       await openMs(p, vp, null);
-      await expect(p.locator('[data-ms21="header"]:visible h1')).toHaveText("Let's add your book");
+      /* RE-POINTED (Workspace headers v1, 14 Nov): the empty header is the navy header — its title `[data-wsnh="title"]` and its one button */
+      await expect(p.locator('[data-wsnh-page="manuscripts"]:visible [data-wsnh="title"]')).toHaveText("Let's add your book");
+      /* RETIRED (Workspace headers v1, 14 Nov): the header's sub line (`[data-ms21="sub"]`, EMPTY_SUB) is no longer drawn.
+         Successor: tests/e2e/wsHeaders.measure.ts H9 "manuscripts". The assertion, as it stood:
       expect((await texts(p, '[data-ms21="sub"]'))[0]).toBe("Title, word count, genre and a line about it. It takes a minute, and everything else in QueryHawk hangs off it.");
-      expect(await p.locator('[data-ms21="header"]:visible button').count(), "one button").toBe(1);
+      */
+      expect(await p.locator('[data-wsnh-page="manuscripts"]:visible button').count(), "one button").toBe(1);
       expect((await texts(p, '[data-ms21="banner"] p'))[0]).toBe("Here's what this page does once your book is in.");
       const pv = await p.evaluate(() => [...document.querySelectorAll('[data-ms21="preview"]')].filter((e) => e.getBoundingClientRect().height > 0).map((a) => ({
         title: a.querySelector("h3")?.textContent ?? "", ghostHidden: a.querySelector('[data-ms21="ghost"]')?.getAttribute("aria-hidden"),
@@ -619,9 +624,12 @@ test("E1 empty", async ({ browser }) => {
       for (const sel of ['[data-ms21="book"]', '[data-ms21="activity"]', '[data-ms21="versions"]', '[data-ms21="materials"]']) {
         expect(await p.locator(`${sel}:visible`).count(), `${sel} is not drawn with no manuscript`).toBe(0);
       }
+      /* RETIRED (Workspace headers v1, 14 Nov): "the banner is 72 (60) under the hairline" — the old header's spacing; the
+         first section now sits 48 under the navy header. Successor: tests/e2e/wsHeaders.measure.ts H4 "manuscripts". As it stood:
       const hd = await one(p, '[data-ms21="header"]'), ban = await one(p, '[data-ms21="banner"]');
       expect(Math.abs(ban.y - hd.b - (wide(vp.width) ? 72 : 60)), "the banner is 72 (60) under the hairline").toBeLessThanOrEqual(1);
-      ck(13 + pv.length * 3 - 3);
+      */
+      ck(11 + pv.length * 3 - 3);
       await noOverflow(p, `E1 @ ${vp.width}`);
       await shot(p, `05-empty-${vp.width}`);
     }
@@ -638,7 +646,8 @@ test("E1 empty", async ({ browser }) => {
     await dlg.locator("#ms21-a-version").fill("Opening on the pier");
     await dlg.locator('[data-ms21="save"]').click();
     await expect(dlg).toHaveCount(0, { timeout: 15_000 });
-    await expect(p.locator('[data-ms21="header"]:visible h1'), "the page becomes the filled state").toHaveText("The Glass Tide", { timeout: 15_000 });
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the filled title is the navy header's */
+    await expect(p.locator('[data-wsnh-page="manuscripts"]:visible [data-wsnh="title"]'), "the page becomes the filled state").toHaveText("The Glass Tide", { timeout: 15_000 });
     await expect(p.locator('[data-ms21="vcard"][data-front]:visible [data-ms21="vname"]'), "the first version is named as typed").toHaveText("Opening on the pier");
     await expect(p.locator('[data-ms21-fact="version"]:visible dd')).toHaveText("Opening on the pier");
     await expect(p.getByText("The Glass Tide added.").first()).toBeVisible();
@@ -656,14 +665,18 @@ test("E2 deleted", async ({ browser }) => {
   const { ctx: c, page: p } = await accountContext(browser, baseURL, DELETE_EMAIL);
   try {
     await openMs(p, VPS[0], null);
-    await expect(p.locator('[data-ms21="header"]:visible h1'), "the book is shown first").toHaveText(DELETE_MS_TITLE);
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the title is the navy header's `[data-wsnh="title"]`, filled and just deleted */
+    await expect(p.locator('[data-wsnh-page="manuscripts"]:visible [data-wsnh="title"]'), "the book is shown first").toHaveText(DELETE_MS_TITLE);
     seedNow("--delete-ms");
-    await expect(p.locator('[data-ms21="header"]:visible h1'), "the just-deleted title").toHaveText("Add your book again", { timeout: 30_000 });
+    await expect(p.locator('[data-wsnh-page="manuscripts"]:visible [data-wsnh="title"]'), "the just-deleted title").toHaveText("Add your book again", { timeout: 30_000 });
+    /* RETIRED (Workspace headers v1, 14 Nov): the deleted sub line (`[data-ms21="sub"]`, deletedSub) is no longer drawn.
+       Successor: tests/e2e/wsHeaders.measure.ts H9 "manuscripts". As it stood:
     expect((await texts(p, '[data-ms21="sub"]'))[0]).toBe(`${DELETE_MS_TITLE} has been deleted, along with its queries and materials. Add a manuscript to start again.`);
+    */
     await expect(p.getByText(`${DELETE_MS_TITLE} deleted.`).first(), "the toast on arrival").toBeVisible();
     expect(await p.locator('[data-ms21="page"]:visible').getAttribute("data-state")).toBe("deleted");
     expect(await p.locator('[data-ms21="preview"]:visible').count(), "the previews show").toBe(3);
-    ck(6);
+    ck(5);
     await shot(p, "06-deleted-1512");
   } finally {
     await c.close();

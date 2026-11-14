@@ -27,7 +27,7 @@ import type { QcRow } from "../../lib/qcSummary";
 import { openQueryDrawer, type DrawerMode } from "../../lib/queryActions/drawerStore";
 import { openResponsePicker, responsePickerHosted } from "../../lib/queryPanelStore";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
-import { Rsp5Glance, Rsp5TitleCard, type GlanceFacts, type GlanceKey } from "./Rsp5Head";
+import { Rsp5Glance, RspHeader, type GlanceFacts, type GlanceKey } from "./Rsp5Head";
 import { RspCarousel } from "./RspCarousel";
 import { Rsp5Band, Rsp5Showcase } from "./Rsp5Insights";
 import { Rsp5Timing } from "./Rsp5Timing";
@@ -128,7 +128,11 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     const el = pageRef.current?.querySelector<HTMLElement>(`[data-rsp5-sec="${id}"]`);
     const sc = el?.closest<HTMLElement>(".wpg-scroll");
     if (!el || !sc) return;
-    sc.scrollTo({ top: sc.scrollTop + el.getBoundingClientRect().top - sc.getBoundingClientRect().top - 20, behavior: reduced() ? "auto" : "smooth" });
+    /* Workspace headers v1: clear of the collapsed bar, which is shown wherever a section lands (its sticky top + its
+       height, read off the bar itself), then the same 20 */
+    const bar = pageRef.current?.querySelector<HTMLElement>("[data-wsnh='slim']");
+    const cover = bar ? (parseFloat(getComputedStyle(bar).top) || 0) + bar.offsetHeight : 0;
+    sc.scrollTo({ top: sc.scrollTop + el.getBoundingClientRect().top - sc.getBoundingClientRect().top - cover - 20, behavior: reduced() ? "auto" : "smooth" });
   }, []);
   const pressGlance = useCallback((k: GlanceKey) => {
     if (k === "passed" || k === "noReply") { setKind(k); goSection("wall"); }
@@ -141,15 +145,18 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
           list width, as packages v4's `.ppv-page > .pk4-col` does */}
       <div className="rsp-page">
       <div className="rsp rsp5" data-rsp="page" ref={pageRef}>
+        {/* Workspace headers v1: the navy header, one for every state (loading, empty, filled) */}
+        <RspHeader msTitle={msTitle} loading={!ready} empty={ready && counts.answered === 0}
+          heard={model.page.replies} more={model.page.more} yourMove={model.glance.yourMove}
+          onRecord={openRecordPicker} onQueryCentre={() => navigate("/queries")} onWall={() => goSection("wall")} onSeeThem={() => goSection("more")} />
         {/* Part F · nothing answered for this book: the empty page, and none of the populated page's parts. It
             switches to the populated page the moment the first answer is recorded, with no reload. */}
         {ready && counts.answered === 0 ? (
-          <RspEmpty msTitle={msTitle} rows={model.rows} nowMs={nowMs} onRecord={openRecordPicker}
+          <RspEmpty rows={model.rows} nowMs={nowMs}
             weeksOf={(r) => { const a = agents.find((x) => x.id === r.query.agentId); return a?.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null; }}
-            onQueryCentre={() => navigate("/queries")} onTodo={() => navigate("/todo")} />
+            onTodo={() => navigate("/todo")} />
         ) : (
           <>
-            <Rsp5TitleCard msTitle={msTitle} empty={false} loading={!ready} onRecord={openRecordPicker} onSecond={() => goSection("wall")} />
             <Rsp5Glance facts={ready ? model.glance : null} onCard={pressGlance} />
             {ready ? (
               <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle}

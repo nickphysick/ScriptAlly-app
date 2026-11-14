@@ -22,9 +22,13 @@ test.afterAll(() => { flags(`--restore '${original}'`); });
 const PAGES: [string, string, string, string?][] = [
   ["contacts", "/agents", "[data-cl17='header']"],
   ["queries", "/queries", "[data-qc138='header']"],
+  /* RETIRED (Workspace headers v1, 14 Nov): Analytics and Discover open on the shared navy header, not the v1.1 hero these
+     rule lines are drawn for (`[data-a21='header']`, `[data-dv1='header']` are gone). Successor: tests/e2e/wsHeaders.measure.ts
+     H1 "analytics", "discover" (and its Step 0 "as built" shots). The entries, as they stood:
   ["analytics", "/queries/analytics", "[data-a21='header']"],
-  ["responses", "/queries/responses", "[data-rsp='header']"],
   ["discover", "/agents/discover", "[data-dv1='header']", "live"],
+  */
+  ["responses", "/queries/responses", "[data-rsp='header']"],
   /* Submission packages left the shared hero with v26 (25 Oct); its own shots are pk26Shots.measure.ts */
   /* RETIRED (To-do list v51): the To-do list has no hero header; its page is shot by todoWs.measure.ts */
 ];

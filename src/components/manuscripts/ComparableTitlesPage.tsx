@@ -60,7 +60,6 @@ import "./comps30/comps30.css";
 /** Shared with the sidebar's switcher and the packages page — the section's one active-manuscript key. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 export const COMPS_ROUTE = "/manuscripts/comps";
-export { COMPS_HEADER_ART } from "./comps30/CompsTop30";
 
 /** Not letter-ready: a book with no publisher, or anything with no year. */
 export const compMissingDetails = (c: CompTitle): boolean => !ready(c);
@@ -315,7 +314,7 @@ export const ComparableTitlesPage: React.FC<{
     <WorkspacePageGrid scrollLabel="Comparable titles" masthead={null}>
       <div className="cpv-page cp30" data-cpv="page" data-cp="page" data-state={loading ? "loading" : empty ? "empty" : listed ? "listed" : "none"} ref={pageRef}>
         <CompsTop30 state={top} addRef={primaryRef}
-          onAdd={activeMs ? openAdd : () => undefined} onPick={() => openPicker(null)} onHow={() => setHow(true)} onExplain={() => setExplain(true)}
+          onAdd={activeMs ? openAdd : () => undefined} onPick={() => openPicker(null)} onExplain={() => setExplain(true)}
           onOpen={(key) => setDrawer({ mode: "view", key })} onLetters={toLetters} />
         {empty ? <CompsHow30 headingId="cp30-how-h" /> : null}
         {listed ? (
@@ -327,7 +326,7 @@ export const ComparableTitlesPage: React.FC<{
               onFilter={setFilter} onSort={setSort} onMode={setMode}
               onOpen={(key) => setDrawer({ mode: "view", key })}
               onPick={(key) => openPicker(null, key)}
-              onAdd={openAdd}
+              onAdd={openAdd} onHow={() => setHow(true)}
             />
             {letters.length ? (
               <CompsLetters30 cards={cards} average={average} bandRef={landRef}

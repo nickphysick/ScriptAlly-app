@@ -13,11 +13,15 @@
  * Left: "Corkboard", the sentence (`boardSentence`), "+ New note" and "Add a task" (the second is absent while the
  * board is empty). Right: the ring with its art slot, then At a glance (`glanceRows`; a zero row is not shown) — or,
  * with no rows to show, Pick a colour (five swatches, each starting a note in that paper).
+ *
+ * ⚠️ WORKSPACE HEADERS v1 (14 Nov): ON A PHONE ONLY. From 768px up the page opens on `CbNavyHeader` (below), the shared
+ *    navy header; this panel stays for the phone, which the workspace headers do not reach.
  */
 import React from "react";
 import { boardSentence, glanceRows, type Glance, type GlanceKey, CORKBOARD_RING_ART } from "../../../lib/corkboard";
 import { NOTE_PAPERS } from "../../../lib/noteboard";
 import type { NoteColour } from "../../../types";
+import { WorkspaceNavyHeader, WsnhWords } from "../../shell/WorkspaceNavyHeader";
 
 export interface CbHeaderProps {
   /** null while the notes are loading: the sentence holds its box and the right-hand side is hidden */
@@ -83,3 +87,53 @@ export const CbHeader: React.FC<CbHeaderProps> = ({ count, glance, special, onSp
     </header>
   );
 };
+
+/* ══ Workspace headers v1 (design-refs/workspace-headers-v1, "Corkboard") — the desktop's navy header: "<n> notes"
+   (the board's count, as the sentence counted it) "on your board"; + New note and Add a task (none while the board is
+   empty, as before); on the right "Pick a colour" and the five swatches, each starting a note in that paper, as the
+   panel's did. The bar: the headline and + New note. Empty: "No notes yet", + New note, no right block. ══ */
+export const cbTitle = (n: number): string => `${n} ${n === 1 ? "note" : "notes"}`;
+export const CB_EMPTY_TITLE = "No notes yet";
+export const CbNavyHeader: React.FC<{ count: number | null; onNew: (colour?: NoteColour) => void; onTask: () => void }> = ({ count, onNew, onTask }) => {
+  const loading = count === null;
+  const empty = count === 0;
+  const title = loading ? " " : empty ? CB_EMPTY_TITLE : cbTitle(count);
+  return (
+    <WorkspaceNavyHeader page="corkboard" art="corkboard-header" loading={loading}
+      title={title}
+      forLine={{ text: "on your board" }}
+      actions={<>
+        <button type="button" className="qc1531-b qc1531-b--n" data-cb2="new-note" onClick={() => onNew()}>+ New note</button>
+        {empty ? null : <button type="button" className="qc1531-b qc1531-b--g" data-cb2="add-task" disabled={loading} onClick={onTask}>Add a task</button>}
+      </>}
+      right={empty ? null : (
+        <div className="cb2-hpick" data-cb2="pick">
+          <WsnhWords name="Pick a colour" />
+          <div className="cb2-hsws">
+            {NOTE_PAPERS.map((p) => (
+              <button key={p.v} type="button" className="cb2-hsw" data-paper={p.v} aria-label={`New ${p.name.toLowerCase()} note`} onClick={() => onNew(p.v)}>
+                <i style={{ background: p.hex }} aria-hidden="true" /><span aria-hidden="true">{p.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+      bar={{ title, button: { label: "+ New note", onClick: () => onNew() } }} />
+  );
+};
+
+/** at 768px and up the page opens on the navy header; below it, on the phone's panel. With no `matchMedia` (a node
+ *  render) it is the desktop, as the rest of the desktop pages assume. */
+export function useCbWide(): boolean {
+  const q = "(min-width: 768px)";
+  const [on, setOn] = React.useState(() => typeof window === "undefined" || typeof window.matchMedia !== "function" || window.matchMedia(q).matches);
+  React.useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") return undefined;
+    const m = window.matchMedia(q);
+    const put = () => setOn(m.matches);
+    put();
+    m.addEventListener("change", put);
+    return () => m.removeEventListener("change", put);
+  }, []);
+  return on;
+}

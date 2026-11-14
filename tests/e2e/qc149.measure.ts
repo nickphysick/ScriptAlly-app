@@ -21,7 +21,8 @@ const run = (id: string) => !ONLY || ONLY.split(",").includes(id);
 const near = (a: number | undefined, b: number | undefined, tol = 1) => a != null && b != null && Math.abs(a - b) <= tol;
 const WHERE: Record<string, string> = { you: "With you", agent: "With the agent", quiet: "Gone quiet", closed: "Closed" };
 
-/** the Versions page's header card, read once per size: L1 holds the Query Centre's to it */
+/** the Versions page's header card, read once per size: L1 holds the Query Centre's to it
+ *  (RETIRED with L1, Workspace headers v1, 14 Nov: `[data-vv2='title']` is gone) */
 async function versionsCard(page: Page, vp: { width: number; height: number }) {
   await openApp(page, "/manuscripts/versions", vp);
   await page.locator("[data-vv2='title']").first().waitFor({ timeout: 30_000 }).catch(() => {});
@@ -38,7 +39,11 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
   const narrow = vp.width <= 1440;
   const inset = narrow ? 24 : 32;
   test.describe(`QC149 @ ${vp.width}`, () => {
-    test("L1 · the header card is the Versions card, 22 below the content top as Versions sits; the hero and breakdown are gone", async ({ page }) => {
+    /* RETIRED (Workspace headers v1, 14 Nov): its subject is the Query Centre's v149 card held to the Versions page's
+       PageHeaderCard (`[data-vv2='title']`, `#hbT`) — its top, radius, ground, shadow and title face. The Versions page no
+       longer renders PageHeaderCard (it opens on the shared navy header), so the comparison has no second party.
+       Successor: tests/e2e/wsHeaders.measure.ts H1 "versions" (the Versions header equals the Query Centre's). */
+    test.skip("L1 · the header card is the Versions card, 22 below the content top as Versions sits; the hero and breakdown are gone", async ({ page }) => {
       test.skip(!run("L1"));
       const L = new Ledger(`L1-${vp.width}`);
       const ver = await versionsCard(page, vp);

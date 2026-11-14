@@ -119,7 +119,8 @@ describe("PK43 P5 (source) — the bar is the Query Centre's; qcv156.css §3 nam
     expect(q.slice(0, q.indexOf("/* ── §3"))).not.toContain(".pk43");
   });
   it("with `, .pk43` taken out, §3 reads as it did for To-do v56 (same rules, same specificity)", () => {
-    expect(s3.replace(/, \.pk43\)/g, ")")).not.toContain("pk43");
+    /* RE-POINTED (Workspace headers v1, at the merge): the shared navy header's `.wsnh` follows `.pk43` in the lists */
+    expect(s3.replace(/, \.pk43(?=[,)])/g, "")).not.toContain("pk43");
   });
   it("the page mounts the shared SlimBar through Pk43Slim, a direct child of the page root", () => {
     const slim = readFileSync(resolve(SRC, "components/packages/v43/Pk43Slim.tsx"), "utf8");

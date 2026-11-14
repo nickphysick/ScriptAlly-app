@@ -37,8 +37,9 @@ describe("the To-do list's slim bar (WsSlim56)", () => {
     const qc = read("../../queries/centre/qcv156.css");
     /* on the dev line the bar's rules also name the Contact list (`.cl27`, cl-qc-layout-v1.1), beside `.tws56`; and
        Submission packages v43 (`.pk43`) after it — the same lists, the same specificity */
-    expect(qc.match(/:is\(\.qc151\.qc153, (?:\.cl27, )?\.tws56(?:, \.pk43)?\) > \.qc156-slim/g)?.length).toBe(5);
-    expect(qc).toMatch(/:is\(\.qc151, (?:\.cl27, )?\.tws56(?:, \.pk43)?\) \.qc156-sb \{/);
+    /* Workspace headers v1 re-pointed: and the shared navy header (`.wsnh`) after them */
+    expect(qc.match(/:is\(\.qc151\.qc153, (?:\.cl27, )?\.tws56(?:, \.pk43)?(?:, \.wsnh)?\) > \.qc156-slim/g)?.length).toBe(5);
+    expect(qc).toMatch(/:is\(\.qc151, (?:\.cl27, )?\.tws56(?:, \.pk43)?(?:, \.wsnh)?\) \.qc156-sb \{/);
     expect(qc).not.toMatch(/(^|\n)\s*\.qc151\.qc153 > \.qc156-slim/);
   });
 });
