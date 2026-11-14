@@ -80,3 +80,29 @@ describe("PK43 P9 (source) — no green in the builder on this page", () => {
     for (const g of ["#3e7d5a", "#4e6b58", "#f3f6f2", "#7fc89a"]) expect(s, g).not.toContain(g);
   });
 });
+
+/* ── P8 (source half) ── */
+import { canGoOut } from "./Pk43GoingOut";
+import { USE_FOR_BATCH } from "../../../lib/packagesV42";
+import type { SubmissionPackage } from "../../../types";
+const pkg = (over: Partial<SubmissionPackage>): SubmissionPackage => ({
+  id: "p", userId: "u", manuscriptId: "m", packageName: "P", queryLetterVersionId: "", synopsisVersionId: "",
+  samplePagesVersionId: "", status: "Active", createdDate: "2026-01-01", ...over,
+});
+
+describe("PK43 P8 (source) — Change offers only packages that can go out; the builder says it the same way", () => {
+  it("a draft (no version or no letter) is not offered; Ready and Out are", () => {
+    expect(canGoOut(pkg({}))).toBe(false);
+    expect(canGoOut(pkg({ queryLetterVersionId: "l" }))).toBe(false);
+    expect(canGoOut(pkg({ bookVersionId: "v" }))).toBe(false);
+    expect(canGoOut(pkg({ bookVersionId: "v", queryLetterVersionId: "l" }))).toBe(true);
+    expect(canGoOut(pkg({ bookVersionId: "v", queryLetterVersionId: "l", firstSentAt: "2026-02-01" } as Partial<SubmissionPackage>))).toBe(true);
+  });
+  it("Change and the builder's button call the one writer, makeActive", () => {
+    const go = readFileSync(resolve(SRC, "components/packages/v43/Pk43GoingOut.tsx"), "utf8");
+    expect(go).toContain("void model.makeActive(p);");
+    expect(go).toContain("model.live.filter(canGoOut)");
+    expect(readFileSync(resolve(SRC, "components/packages/v26/Pk393Builder.tsx"), "utf8")).toContain("model.makeActive(p)}>{USE_FOR_BATCH}");
+    expect(USE_FOR_BATCH).toBe("Use for new queries");
+  });
+});

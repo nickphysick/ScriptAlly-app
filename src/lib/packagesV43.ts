@@ -22,8 +22,6 @@ export const NO_NOTE = "No note yet";
 
 /* ══ the header's right block and Change (Phase 3) ══ */
 export const GO_OUT_LEAD = "New queries go out with";
-/** "5 sent · 2 asked for more", or "Not sent yet". */
-export const goOutLine = (sent: number, asked: number) => (sent > 0 ? `${sent} sent · ${asked} asked for more` : "Not sent yet");
 export const CHANGE = "Change";
 export const CHANGE_NOTE = "A package needs a version and a letter before it can go out.";
 /** A line in the Change menu: "5 sent" or "not sent yet". */

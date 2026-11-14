@@ -86,3 +86,42 @@
   .pk43 .pk43-desk > .pk43-list { position: static; max-height: none; }
   .pk43 .pk43-work { padding: 22px 20px; }
 }
+
+/* ══ §3 · the header's right block (Phase 3): what new queries go out with, in the Query Centre's ring column
+   (`.qc1531-rc`, right-aligned to the header's content edge). The ref's `.cb`: a 76 outlined icon tile, the italic
+   lead, the name in the typewriter at 30, the sent line, an outline "Change" 38 tall; the menu a white 300-wide
+   listbox under it. Hidden under 1100 wide — the list's flag still names the package. ══ */
+@media (min-width: 768px) {
+  .pk43 .qc1531-hd.pk43-hd > .qc1531-rc { align-items: center; min-width: 0; }
+  .pk43 .pk43-go { position: relative; display: grid; grid-template-columns: 76px minmax(0, 1fr); column-gap: 20px; align-items: center; min-width: 0; max-width: 384px; color: #f4eee5; }
+  .pk43 .pk43-go-ic { width: 76px; height: 76px; border-radius: 20px; display: grid; place-items: center; background: rgba(244, 238, 229, .1); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .45); color: #f4eee5; }
+  .pk43 .pk43-go-ic .pk43-go-pic { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+  .pk43 .pk43-go-t { min-width: 0; }
+  .pk43 .pk43-go-k { display: block; font: italic 400 17px/1.2 var(--sp-serif); color: rgba(244, 238, 229, .8); }
+  .pk43 .pk43-go-n { display: block; margin-top: 6px; font: 400 30px/1.1 var(--sp-type); color: #fbf7f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pk43 .pk43-go-s { display: block; margin-top: 6px; font: italic 400 17px/1.3 var(--sp-serif); color: rgba(244, 238, 229, .8); }
+  .pk43 .pk43-go-s b { font: 400 19px/1 var(--sp-type); font-style: normal; color: #f4eee5; }
+  .pk43 .pk43-go-ch {
+    display: inline-flex; align-items: center; height: 38px; margin-top: 12px; padding: 0 16px; border: 0; border-radius: 10px; cursor: pointer;
+    background: none; color: #f4eee5; font: 400 17px/1 var(--sp-type); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .6);
+  }
+  .pk43 .pk43-go-ch:hover { background: rgba(244, 238, 229, .06); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .9); }
+  .pk43 .pk43-go-ch:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+  .pk43 .pk43-pick {
+    position: absolute; z-index: 20; top: calc(100% + 8px); right: 0; width: 300px; padding: 6px; box-sizing: border-box;
+    background: #fff; color: #1c130f; border-radius: 12px; box-shadow: 0 0 0 1px #e6dfd5, 0 18px 36px -16px rgba(28, 19, 15, .4);
+  }
+  .pk43 .pk43-pick [role="option"] {
+    display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: 10px; min-height: 40px; padding: 9px 10px;
+    border: 0; border-radius: 8px; background: none; text-align: left; cursor: pointer; color: #1c130f;
+  }
+  .pk43 .pk43-pick [role="option"]:hover { background: #faf6f1; }
+  .pk43 .pk43-pick [role="option"][aria-selected="true"] { background: #f8e8ea; }
+  .pk43 .pk43-pick [role="option"]:focus-visible { outline: 2px solid #2a3a52; outline-offset: 0; }
+  .pk43 .pk43-pick b { min-width: 0; font: 400 16px/1.2 var(--sp-type); overflow-wrap: anywhere; }
+  .pk43 .pk43-pick span { flex: none; font: italic 14px/1.2 var(--sp-serif); color: rgba(28, 19, 15, .62); }
+  .pk43 .pk43-pick p { margin: 0; padding: 8px 10px 6px; font: 14px/1.45 var(--sp-serif); color: rgba(28, 19, 15, .62); }
+}
+@media (min-width: 768px) and (max-width: 1099.98px) {
+  .pk43 .pk43-go { display: none; }
+}

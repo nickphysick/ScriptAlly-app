@@ -34,6 +34,7 @@ import { Pk41Banner } from "./packages/v41/Pk41Banner";
 import { Pk43Header } from "./packages/v43/Pk43Header";
 import { packagesTitle } from "../lib/packagesV43";
 import { Pk43List } from "./packages/v43/Pk43List";
+import { Pk43GoingOut } from "./packages/v43/Pk43GoingOut";
 import { Pk42Empty } from "./packages/v42/Pk42Empty";
 import { useScriptAllyDb } from "../lib/db";
 import { packagesViaFounding } from "../lib/entitlements";
@@ -139,6 +140,11 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
   const showBuilder = live.length > 0 || (empty && msPkgs.length === 0);
   /* the package new queries go out with: the manuscript's active package, when it is live */
   const goingId = active && live.some((p) => p.id === active.id) ? active.id : null;
+  const going = goingId ? live.find((p) => p.id === goingId) ?? null : null;
+  /* v43 Phase 3: after Change, the list's flag stamps in on its new row */
+  const [stamp, setStamp] = useState(false);
+  useEffect(() => { if (!stamp) return undefined; const t = window.setTimeout(() => setStamp(false), 600); return () => window.clearTimeout(t); }, [stamp]);
+  const chosen = (p: (typeof msPkgs)[number]) => { setCurId(p.id); setStamp(true); };
 
   return (
     <WorkspacePageGrid className="pk39-wpg" scrollLabel="Submission packages" masthead={null}>
@@ -147,12 +153,13 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
           label tiles (each is replaced by a v41 part, below) */}
       <div ref={rootRef} className={`p6 p41 pk43${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
-          : <Pk43Header title={packagesTitle(live.length)} msTitle={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
+          : <Pk43Header title={packagesTitle(live.length)} msTitle={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)}
+              right={going ? <Pk43GoingOut model={model} going={going} onChosen={chosen} /> : null} />}
         {/* v43 Phase 2: the desk, 268 / 28 under the header — "Your packages" on the left (v42's stat tiles are retired),
             the open package in ONE workspace surface on the right, so its left edge is the headline's. With no live
             package, v42's empty card takes the builder's place in the workspace. */}
         <div className="pk43-desk" data-pk43="desk">
-          {empty || !msPkgs.length ? null : <Pk43List model={model} openId={current?.id ?? null} goingId={goingId} stamp={false}
+          {empty || !msPkgs.length ? null : <Pk43List model={model} openId={current?.id ?? null} goingId={goingId} stamp={stamp}
             showRetired={showRetired} onShowRetired={setShowRetired} onSelect={(p) => setCurId(p.id)} onOpenRetired={(p) => setPkdId(p.id)}
             onNew={() => setDialog({ m: "new" })} />}
           <div className="pk43-work" data-pk43="work" data-pk41="workspace">
