@@ -1,0 +1,96 @@
+{
+ "green": [
+  {
+   "where": "population: four pages at two sizes",
+   "ok": true,
+   "detail": "8"
+  },
+  {
+   "where": "Query Centre @1440: a header found",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "where": "Query Centre @1440: header and bars equal before.json",
+   "ok": true,
+   "detail": "differs (after.json)"
+  },
+  {
+   "where": "Contact list @1440: a header found",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "where": "Contact list @1440: header and bars equal before.json",
+   "ok": true,
+   "detail": "differs (after.json)"
+  },
+  {
+   "where": "To-do @1440: a header found",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "where": "To-do @1440: header and bars equal before.json",
+   "ok": true,
+   "detail": "differs (after.json)"
+  },
+  {
+   "where": "Query letters @1440: a header found",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "where": "Query letters @1440: header and bars equal before.json",
+   "ok": true,
+   "detail": "differs (after.json)"
+  },
+  {
+   "where": "Query Centre @1717: a header found",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "where": "Query Centre @1717: header and bars equal before.json",
+   "ok": true,
+   "detail": "differs (after.json)"
+  },
+  {
+   "where": "Contact list @1717: a header found",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "where": "Contact list @1717: header and bars equal before.json",
+   "ok": true,
+   "detail": "differs (after.json)"
+  },
+  {
+   "where": "To-do @1717: a header found",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "where": "To-do @1717: header and bars equal before.json",
+   "ok": true,
+   "detail": "differs (after.json)"
+  },
+  {
+   "where": "Query letters @1717: a header found",
+   "ok": true,
+   "detail": "none"
+  },
+  {
+   "where": "Query letters @1717: header and bars equal before.json",
+   "ok": true,
+   "detail": "differs (after.json)"
+  }
+ ],
+ "red": [
+  {
+   "where": "Query Centre @1440: header equals before.json",
+   "ok": false,
+   "detail": "differs"
+  }
+ ]
+}

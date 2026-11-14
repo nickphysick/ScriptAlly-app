@@ -28,7 +28,7 @@ async function open(page: Page, size: { width: number; height: number }, reduce 
   if (reduce) await page.emulateMedia({ reducedMotion: "reduce" });
   await page.addInitScript(() => { try { localStorage.setItem("scriptally_active_manuscript_id", "pk40-ms"); } catch { /* */ } });
   await openRoute(page, "/queries/packages", size);
-  await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 });
+  await page.locator(`${pg} [data-pk43="header"]`).first().waitFor({ state: "visible", timeout: 30_000 });
   await page.waitForTimeout(1200);
 }
 const scroller = `[...document.querySelectorAll(".wpg-scroll")].find((x) => x.querySelector('[data-pk41="page"]'))`;
@@ -41,10 +41,10 @@ async function scrollTo(page: Page, sel: string, offset = 0) {
 }
 const top = (page: Page) => page.evaluate((sc) => { const s = (0, eval)(sc) as HTMLElement; if (s) s.scrollTop = 0; }, scroller).then(() => page.waitForTimeout(300));
 const shot = (page: Page, name: string, w: number) => page.screenshot({ path: `${DIR}/${name}-${w}.png` });
-const openPkg = async (page: Page, id: string) => { await page.locator(`${pg} [data-pk42-tile="${id}"]`).first().click(); await page.waitForTimeout(500); };
+const openPkg = async (page: Page, id: string) => { await page.locator(`${pg} [data-pk43-row="${id}"]`).first().click(); await page.waitForTimeout(500); };
 
 for (const size of SIZES) {
-  test(`the states at ${size.width}`, async ({ page }) => {
+  /* RETIRED by Submission packages v43 — see tests/e2e/RETIRED-submission-packages-v43.md */ test.skip(`the states at ${size.width}`, async ({ page }) => {
     test.setTimeout(300_000);
     seed();
     await open(page, size);
@@ -59,15 +59,15 @@ for (const size of SIZES) {
     }
     if (want("06-retired-shown")) {
       await top(page);
-      await page.locator(`${pg} [data-pk42="retired-toggle"]`).click(); await page.waitForTimeout(400);
+      await page.locator(`${pg} [data-pk43="retired-toggle"]`).click(); await page.waitForTimeout(400);
       await shot(page, "06-retired-shown", size.width);
-      await page.locator(`${pg} [data-pk42="retired-toggle"]`).click(); await page.waitForTimeout(300);
+      await page.locator(`${pg} [data-pk43="retired-toggle"]`).click(); await page.waitForTimeout(300);
     }
     if (want("07-results")) { await scrollTo(page, '[data-pk41="results"]', 60); await shot(page, "07-results", size.width); }
     if (want("08-results-tables")) { await scrollTo(page, '[data-pk41="table-pc"]', 260); await shot(page, "08-results-tables", size.width); }
     if (want("09-drawer-new")) {
       await top(page);
-      await page.locator(`${pg} [data-pk41="new"]`).first().click(); await page.waitForTimeout(700);
+      await page.locator(`${pg} [data-pk43="new"]`).first().click(); await page.waitForTimeout(700);
       await shot(page, "09-drawer-new", size.width); await page.keyboard.press("Escape"); await page.waitForTimeout(400);
     }
     if (want("10-icon-picker")) {
@@ -78,7 +78,7 @@ for (const size of SIZES) {
     if (want("11-how")) {
       await top(page);
       await liftMotionSuppression(page);
-      await page.locator(`${pg} [data-pk41="how"]`).first().click(); await page.waitForTimeout(5500);
+      await page.locator(`${pg} [data-pk43="how"]`).first().click(); await page.waitForTimeout(5500);
       await shot(page, "11-how-it-works-mid", size.width);
       await page.waitForTimeout(8000);
       await shot(page, "12-how-it-works-end", size.width);

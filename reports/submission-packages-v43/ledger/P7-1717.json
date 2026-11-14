@@ -1,0 +1,86 @@
+{
+ "green": [
+  {
+   "where": "population: at least three live rows",
+   "ok": true,
+   "detail": "4"
+  },
+  {
+   "where": "one row per live package, in the tiles' order",
+   "ok": true,
+   "detail": "[\"pk40-draft\",\"pk40-ready\",\"pk40-std2\",\"pk40-std\"]"
+  },
+  {
+   "where": "exactly one aria-current",
+   "ok": true,
+   "detail": "[\"pk40-std\"]"
+  },
+  {
+   "where": "exactly one berry flag, on the going-out row",
+   "ok": true,
+   "detail": "[\"pk40-std\"]"
+  },
+  {
+   "where": "no stat tiles",
+   "ok": true,
+   "detail": "0"
+  },
+  {
+   "where": "the third row opens the third package in the builder",
+   "ok": true,
+   "detail": "{\"ids\":[\"pk40-draft\",\"pk40-ready\",\"pk40-std2\",\"pk40-std\"],\"cur\":[\"pk40-std2\"],\"flags\":[\"pk40-std\"],\"tiles\":0,\"open\":\"pk40-std2\",\"toggle\":\"Retired (1)\"}"
+  },
+  {
+   "where": "Retired (1)",
+   "ok": true,
+   "detail": "Retired (1)"
+  },
+  {
+   "where": "Retired (n) adds n rows",
+   "ok": true,
+   "detail": "[\"pk40-draft\",\"pk40-ready\",\"pk40-std2\",\"pk40-std\",\"pk40-old\"]"
+  },
+  {
+   "where": "…and says Hide retired",
+   "ok": true,
+   "detail": "Hide retired"
+  },
+  {
+   "where": "Hide retired removes them",
+   "ok": true,
+   "detail": "[\"pk40-draft\",\"pk40-ready\",\"pk40-std2\",\"pk40-std\"]"
+  },
+  {
+   "where": "the open row: the 2px navy ring",
+   "ok": true,
+   "detail": "rgb(42, 58, 82) 0px 0px 0px 2px, rgba(28, 19, 15, 0.4) 0px 10px 22px -16px"
+  }
+ ],
+ "red": [
+  {
+   "where": "population: at least three live rows",
+   "ok": false,
+   "detail": "0"
+  },
+  {
+   "where": "one row per live package, in the tiles' order",
+   "ok": false,
+   "detail": "[]"
+  },
+  {
+   "where": "exactly one aria-current",
+   "ok": false,
+   "detail": "[]"
+  },
+  {
+   "where": "exactly one berry flag, on the going-out row",
+   "ok": false,
+   "detail": "[]"
+  },
+  {
+   "where": "no stat tiles",
+   "ok": false,
+   "detail": "4"
+  }
+ ]
+}

@@ -6,7 +6,7 @@
  * re-seeded before each case that writes, so "Draft one" starts empty; cleaned in afterAll by manuscript.
  *
  *   L10 Steps: on an empty package the version step is open; picking a version opens the letter step; picking a letter
- *       closes every step and shows two green discs; each pick writes once (one Write to that package, and the writer's
+ *       closes every step and shows two navy discs (v43; were green); each pick writes once (one Write to that package, and the writer's
  *       one toast)
  *   L11 Preview: the body quotes the chosen letter's STORED TEXT, never its summary; the pages attachment names the
  *       chosen version; toggling an extra adds and removes its attachment; "To" is a real agent not queried for this book
@@ -73,8 +73,8 @@ async function open(page: Page, pkg: string) {
   await openRoute(page, "/queries/packages", SIZE);
   /* v41: the labels row is retired — a package opens from its row in the list (re-pointed; the law is unchanged) */
   /* v42: the rail is retired; a package opens from its stat tile — re-pointed */
-  await page.locator('[data-pk42="tiles"]').first().waitFor({ state: "visible", timeout: 30_000 });
-  await page.locator(`[data-pk26="page"] [data-pk42-tile="${pkg}"]`).first().click();
+  await page.locator('[data-pk43="list"]').first().waitFor({ state: "visible", timeout: 30_000 });
+  await page.locator(`[data-pk26="page"] [data-pk43-row="${pkg}"]`).first().click();
   await page.waitForTimeout(900);
   /* bring the builder into view: hover and clicks then land on the steps */
   await page.evaluate(() => { const sc = [...document.querySelectorAll(".wpg-scroll")].find((x) => x.querySelector('[data-pk26="page"]')) as HTMLElement; const k = sc?.querySelector('[data-pk41="builder-frame"]'); if (sc && k) sc.scrollTop += k.getBoundingClientRect().top - sc.getBoundingClientRect().top - 12; });
@@ -122,7 +122,8 @@ test("L10 the version step opens first; a version opens the letter step; a lette
   s = await state(page);
   const w2 = writes.length - w1;
   L.check("picking a letter closes every step", s.every((x) => !x.open), JSON.stringify(s));
-  L.check("…and shows two green discs (#3e7d5a)", s.filter((x) => x.done && x.disc === "rgb(62, 125, 90)").length === 2, JSON.stringify(s));
+  /* v43 (re-pointed): no green on the page — a filled step's disc is navy with a cream tick (pk43 P9) */
+  L.check("…and shows two navy discs (#2d3a50)", s.filter((x) => x.done && x.disc === "rgb(45, 58, 80)").length === 2, JSON.stringify(s));
   L.check("…with ONE write to the package", w2 === 1, `${w2} writes`);
   L.done(7);
 });
@@ -132,7 +133,8 @@ test("L11 the body quotes the letter's text, the pages name the version, an extr
   test.setTimeout(240_000);
   const L = new Ledger("L11");
   seed();
-  const roster = JSON.parse(seed("--agents")) as { agents: { id: string; name: string; agency: string }[]; queried: string[] };
+  /* the last line: on the emulator the auth SDK prints its WARNING line first */
+  const roster = JSON.parse(seed("--agents").trim().split("\n").pop()!) as { agents: { id: string; name: string; agency: string }[]; queried: string[] };
   await open(page, "pk40-ready");
   const r = await page.evaluate((p) => {
     const root = document.querySelector(p)!;

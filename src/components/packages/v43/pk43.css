@@ -1,0 +1,155 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v43 (design-refs/submission-packages-v43) — the page on the Query Centre's layout: the navy header
+ * with the Archivist standing in it, the list of packages on the left of a 268 / 28 desk with the builder in one
+ * workspace surface beside it, Results at the header's full width, and the Query Centre's collapsed bar.
+ * ⚠️ THE HEADER AND THE BAR ARE THE QUERY CENTRE'S, as built: `shell/OpenHeader` in a `.qc151.qc153` wrapper and
+ *    `shell/SlimBar`, dressed by queries/centre/qcv1534 / qcv156. Every difference here is scoped to this page
+ *    (`.pk43 …`); the one edit outside is this page's root added to qcv156.css §3's `:is(…)` lists.
+ * ⚠️ THE MEASURE IS THE WORKSPACE'S (`--work-max` / `--work-gutter`), as Query letters': v41's 1288 cap and the 150px
+ *    kept clear for the pinned hawk are gone with the hawk.
+ */
+
+/* ══ §0 · the page: the workspace measure, both sides; no top padding (the header's `.qc151` wrapper brings the
+   Query Centre's own 30, so the navy header starts where the other four pages' do) ══ */
+@media (min-width: 768px) {
+  .pk39-wpg > .wpg-scroll > .p6.p41.pk43 {
+    box-sizing: border-box; width: 100%; max-width: var(--work-max); margin: 0 auto;
+    padding: 0 var(--work-gutter) 96px;
+  }
+}
+
+/* ══ §1 · the header (Phase 1): the Query Centre's, three columns (art 268, the title block, the right block). Two
+   differences, both Query letters v2.4's: 48 under the header (more than any gap in the content) and its softer
+   card shadow. The drawing: the Archivist with his boxes (356 × 440), drawn 220 tall, standing on the header's
+   bottom edge. Its box in the art column is exactly the Query Centre's armchair hawk's (360 × 347 drawn at 190 =
+   183.14), so the header's height is the built one: the bottom margin reaches through the header's 22px padding to
+   its edge, and the top margin takes the rest. ══ */
+@media (min-width: 768px) {
+  .pk43 .qc151.qc153 > .qc1531-hd.pk43-hd.pk43-hd { margin-bottom: 48px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }
+  .pk43 .qc151.qc153 > .qc1531-hd.pk43-hd h1.qc1531-t { outline: none; }
+  .pk43 .pk43-art { align-self: stretch; display: flex; align-items: flex-end; }
+  .pk43 .pk43-art img {
+    width: auto; height: 220px;
+    margin-top: calc(190px * 347 / 360 + 22px - 220px); margin-bottom: -22px;
+  }
+}
+
+/* ══ §2 · the desk (Phase 2): Query letters v2.4's, 268 / 28, so the workspace's left edge is the headline's. ══
+   The LIST is Query letters' list and rows (`.qlp-list`, `.qlp-row`, `.qlp-flag`, `.qlp-row-f`, `.qlp-bar`; queryLetters.css,
+   imported by the page), reused as built. Their colours are the `--ql-*` tokens and three of their rules hang off the
+   letters page's root (`.qlp …`), so this page states the same tokens and those three rules once, with the same values
+   (pk43.test.ts holds them equal to queryLetters.css). The row adds the package's navy icon tile beside the name.
+   The WORKSPACE is Query letters' surface (`.qlp-work`): #fbf9f5, radius 18, a hairline and the paper shadow, 26 / 32
+   inside; the builder sits in it as built (v42's white `.p42-bw` container is retired). */
+.pk43 {
+  --ql-ink: #1c130f; --ql-navy: #2a3a52; --ql-btn: #2d3a50; --ql-cream: #f4eee5;
+  --ql-berry: #8f4a5a; --ql-blush: #f8e8ea;
+  --ql-t62: rgba(28, 19, 15, .62); --ql-t72: rgba(28, 19, 15, .72); --ql-line: rgba(28, 19, 15, .12);
+}
+.pk43 h2.qlp-h2 { font: 400 22px/1.15 var(--sp-type) !important; color: var(--ql-ink) !important; margin: 0 0 16px; padding-bottom: 8px; border-bottom: 2px solid var(--ql-navy); }
+.pk43 .qlp-row-n { display: block; font: 400 20px/1.2 var(--sp-type); overflow-wrap: anywhere; }
+.pk43 .qlp-row-f b { font: 400 16px/1 var(--sp-type); color: var(--ql-ink); }
+@media (min-width: 768px) {
+  .pk43 .pk43-desk { display: grid; grid-template-columns: 268px minmax(0, 1fr); gap: 28px; align-items: start; }
+  /* the list: sticky in its column while the workspace beside it is taller (QL's `.qlp-list`: top 16, its own scroll) */
+  .pk43 .pk43-list { grid-column: 1; }
+  .pk43 .pk43-work { grid-column: 2; }
+  .pk43 .pk43-row { font: 16px/1.5 var(--sp-serif); color: var(--ql-ink); cursor: pointer; }
+  .pk43 .pk43-row-h { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+  .pk43 .pk43-row-t { min-width: 0; }
+  .pk43 .pk43-row .p41-ic.pk43-ic { flex: none; width: 32px; height: 32px; border-radius: 8px; margin-top: 1px; }
+  .pk43 .pk43-row .p41-ic.pk43-ic .p41-pic { width: 16px; height: 16px; }
+  .pk43 .pk43-row--ret { opacity: .62; }
+  .pk43 .pk43-row:focus-visible { outline: 2px solid var(--ql-navy); outline-offset: 2px; }
+  .pk43 .pk43-list-f { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
+  .pk43 .pk43-list-f .qlp-lnk { font-family: var(--sp-serif); cursor: pointer; }
+
+  .pk43 .pk43-work {
+    min-width: 0; box-sizing: border-box; padding: 26px 32px;
+    background: #fbf9f5; border-radius: 18px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 18px 34px -26px rgba(28, 19, 15, .4);
+  }
+  /* with no live package, v42's empty card fills the workspace (Phase 5) */
+  .pk43 .pk43-work > .p42-emp { margin: 0; }
+  /* Results at the header's full width, 48 under the desk */
+  .pk43 .pk43-desk + .p41-res { margin-top: 48px; }
+}
+/* under 1320 the builder's two cards (the steps and the preview) stack; under 900 the list goes above the workspace */
+@media (min-width: 768px) and (max-width: 1320px) {
+  .pk43 .p41-bld .p93-b { grid-template-columns: minmax(0, 1fr); }
+}
+@media (min-width: 768px) and (max-width: 900px) {
+  .pk43 .pk43-desk { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+  .pk43 .pk43-list, .pk43 .pk43-work { grid-column: 1; }
+  .pk43 .pk43-desk > .pk43-list { position: static; max-height: none; }
+  .pk43 .pk43-work { padding: 22px 20px; }
+}
+
+/* ══ §3 · the header's right block (Phase 3): what new queries go out with, in the Query Centre's ring column
+   (`.qc1531-rc`, right-aligned to the header's content edge). The ref's `.cb`: a 76 outlined icon tile, the italic
+   lead, the name in the typewriter at 30, the sent line, an outline "Change" 38 tall; the menu a white 300-wide
+   listbox under it. Hidden under 1100 wide — the list's flag still names the package. ══ */
+@media (min-width: 768px) {
+  /* the right column takes the block's own width (≤ 384), not the Query Centre's 400–560 for "this week": at 1280 the
+     QC's 400 floor left "4 packages" 6px short of its own width (P11). The art column and gap stay the QC's. */
+  .pk43 .qc151.qc153 > .qc1531-hd.pk43-hd.pk43-hd { grid-template-columns: 268px minmax(0, 1fr) auto; }
+  .pk43 .qc1531-hd.pk43-hd > .qc1531-rc { align-items: center; min-width: 0; }
+  .pk43 .pk43-go { position: relative; display: grid; grid-template-columns: 76px minmax(0, 1fr); column-gap: 20px; align-items: center; min-width: 0; max-width: 384px; color: #f4eee5; }
+  .pk43 .pk43-go-ic { width: 76px; height: 76px; border-radius: 20px; display: grid; place-items: center; background: rgba(244, 238, 229, .1); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .45); color: #f4eee5; }
+  .pk43 .pk43-go-ic .pk43-go-pic { width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linejoin: round; stroke-linecap: round; }
+  .pk43 .pk43-go-t { min-width: 0; }
+  .pk43 .pk43-go-k { display: block; font: italic 400 17px/1.2 var(--sp-serif); color: rgba(244, 238, 229, .8); }
+  .pk43 .pk43-go-n { display: block; margin-top: 6px; font: 400 30px/1.1 var(--sp-type); color: #fbf7f0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pk43 .pk43-go-s { display: block; margin-top: 6px; font: italic 400 17px/1.3 var(--sp-serif); color: rgba(244, 238, 229, .8); }
+  .pk43 .pk43-go-s b { font: 400 19px/1 var(--sp-type); font-style: normal; color: #f4eee5; }
+  .pk43 .pk43-go-ch {
+    display: inline-flex; align-items: center; height: 38px; margin-top: 12px; padding: 0 16px; border: 0; border-radius: 10px; cursor: pointer;
+    background: none; color: #f4eee5; font: 400 17px/1 var(--sp-type); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .6);
+  }
+  .pk43 .pk43-go-ch:hover { background: rgba(244, 238, 229, .06); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .9); }
+  .pk43 .pk43-go-ch:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+  .pk43 .pk43-pick {
+    position: absolute; z-index: 20; top: calc(100% + 8px); right: 0; width: 300px; padding: 6px; box-sizing: border-box;
+    background: #fff; color: #1c130f; border-radius: 12px; box-shadow: 0 0 0 1px #e6dfd5, 0 18px 36px -16px rgba(28, 19, 15, .4);
+  }
+  .pk43 .pk43-pick [role="option"] {
+    display: flex; width: 100%; align-items: baseline; justify-content: space-between; gap: 10px; min-height: 40px; padding: 9px 10px;
+    border: 0; border-radius: 8px; background: none; text-align: left; cursor: pointer; color: #1c130f;
+  }
+  .pk43 .pk43-pick [role="option"]:hover { background: #faf6f1; }
+  .pk43 .pk43-pick [role="option"][aria-selected="true"] { background: #f8e8ea; }
+  .pk43 .pk43-pick [role="option"]:focus-visible { outline: 2px solid #2a3a52; outline-offset: 0; }
+  .pk43 .pk43-pick b { min-width: 0; font: 400 16px/1.2 var(--sp-type); overflow-wrap: anywhere; }
+  .pk43 .pk43-pick span { flex: none; font: italic 14px/1.2 var(--sp-serif); color: rgba(28, 19, 15, .62); }
+  .pk43 .pk43-pick p { margin: 0; padding: 8px 10px 6px; font: 14px/1.45 var(--sp-serif); color: rgba(28, 19, 15, .62); }
+}
+@media (min-width: 768px) and (max-width: 1099.98px) {
+  .pk43 .pk43-go { display: none; }
+}
+
+/* ══ §4 · the collapsed bar (Phase 4): the Query Centre's (`shell/SlimBar`, qcv156.css §3, this page's root named in
+   its lists). It sits 12 under the scroller's top (the sheet's lip) and is 60 tall, so it covers the first 72px of the
+   port. Nothing lands under it: the list sticks at a constant 84 (72 + 12), and every scroll to a part of the page
+   (`?pkg=`, `?tab=tracking`, "Edit in the builder") leaves 84 above its target. ══ */
+@media (min-width: 768px) {
+  .pk43 .pk43-desk > .pk43-list { top: 84px; max-height: calc(var(--wpg-port-h, 100vh) - 100px); }
+  .pk43 :is([data-pk26="builder"], [data-pk26="results"], [data-pk43="desk"]) { scroll-margin-top: 84px; }
+}
+
+/* ══ §5 · day one (Phase 5; ref screen 05): no package at all. The same header, "No packages yet", no buttons and no
+   right block; 48 under it the same desk, three numbered steps in the list's column (navy discs, the step in the
+   typewriter, one line in the serif) beside the workspace holding the draft first package. ══ */
+@media (min-width: 768px) {
+  .pk43 .pk43-d1 { grid-column: 1; list-style: none; margin: 0; padding: 4px 0 0; display: flex; flex-direction: column; gap: 26px; }
+  .pk43 .pk43-d1 li { display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: 16px; align-items: start; }
+  .pk43 .pk43-d1-n { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #2d3a50; color: #f4eee5; font: 400 17px/1 var(--sp-type); }
+  .pk43 .pk43-d1-t b { display: block; font: 400 21px/1.25 var(--sp-type); color: var(--ql-ink); }
+  .pk43 .pk43-d1-t span { display: block; margin-top: 4px; font: 400 16.5px/1.5 var(--sp-serif); color: var(--ql-t72); }
+  /* no buttons on day one: the title block keeps its rhythm without the empty button row */
+  .pk43.pk43--day1 .qc1531-hd.pk43-hd .qc1531-acts:empty { display: none; }
+}
+@media (min-width: 768px) and (max-width: 900px) {
+  .pk43 .pk43-d1 { gap: 16px; }
+}

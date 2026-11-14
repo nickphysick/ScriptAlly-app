@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Submission packages v42 (design-refs/submission-packages-v42/) — the page's words and the small derivations its new
- * parts read: the stat tiles' foot, the builder's "Use for current batch", the empty card, the drawers' copy and How it
+ * parts read: the list rows' figure (v43; were the stat tiles'), the builder's "Use for new queries", the empty card, the drawers' copy and How it
  * works. Nothing here stores or counts anything new: the figures are packageReplies' (lib/packagesV38, read through
  * v41's `railLine`), the stage is v40's, and the current batch is the manuscript's `activePackageId`.
  */
@@ -13,7 +13,7 @@ import type { RailLine } from "./packagesV41";
 export const PACKAGE_NAVY = "#2d3a50";
 
 /* ══ Part C · the stat tiles ══ */
-export const CURRENT_BATCH = "Current batch";
+/* v43: v42's "Current batch" tag is retired with the tiles; the list's flag says "Going out with new queries" (packagesV43). */
 export const retiredLink = (n: number, shown: boolean) => (shown ? "Hide retired" : `Retired (${n})`);
 /** A tile's foot: the figure (typewriter) and its label (serif), in its stage's words. */
 export type TileFoot = { big: string; label: string };
@@ -26,7 +26,8 @@ export function tileFoot(l: RailLine, has: { version: boolean; letter: boolean }
 }
 
 /* ══ Part D · the builder ══ */
-export const USE_FOR_BATCH = "Use for current batch";
+/** v43: was "Use for current batch" (the words are packagesV43's USE_FOR_NEW; the writer is still `makeActive`). */
+export { USE_FOR_NEW as USE_FOR_BATCH } from "./packagesV43";
 export const STEPS_BAND = "Pick each piece";
 
 /* ══ Part E · the drawers and the icon popover ══ */

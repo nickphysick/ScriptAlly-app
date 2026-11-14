@@ -26,7 +26,7 @@ test.afterAll(() => { execFileSync("node", ["tests/e2e/pk41Fixture.mjs", "--show
 async function open(page: Page, size: { width: number; height: number }, banner = true) {
   await page.addInitScript(() => { try { localStorage.setItem("scriptally_active_manuscript_id", "pk40-ms"); } catch { /* */ } });
   await openRoute(page, "/queries/packages", size);
-  await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 });
+  await page.locator(`${pg} [data-pk43="header"]`).first().waitFor({ state: "visible", timeout: 30_000 });
   if (!banner) {
     const x = page.locator('[data-pk41="banner-x"]').first();
     if (await x.count()) await x.click();
@@ -45,7 +45,7 @@ const shot = (page: Page, name: string, w: number) => page.screenshot({ path: `$
 const openPkg = async (page: Page, id: string) => { await page.locator(`${pg} [data-pk41-row="${id}"]`).first().click(); await page.waitForTimeout(500); };
 
 for (const size of SIZES) {
-  test(`the states at ${size.width}`, async ({ page }) => {
+  /* RETIRED by Submission packages v43 — see tests/e2e/RETIRED-submission-packages-v43.md */ test.skip(`the states at ${size.width}`, async ({ page }) => {
     test.setTimeout(300_000);
     seed();
     await open(page, size);
@@ -58,7 +58,7 @@ for (const size of SIZES) {
       await shot(page, "04-builder-ready-linking", size.width);
     }
     if (want("05-rail-retired-shown")) {
-      await scrollTo(page, '[data-pk41="header"]', 400);
+      await scrollTo(page, '[data-pk43="header"]', 400);
       await page.locator(`${pg} [data-pk41="retired-toggle"]`).click(); await page.waitForTimeout(400);
       await shot(page, "05-rail-retired-shown", size.width);
       await page.locator(`${pg} [data-pk41="retired-toggle"]`).click(); await page.waitForTimeout(300);
@@ -66,12 +66,12 @@ for (const size of SIZES) {
     if (want("06-results")) { await scrollTo(page, '[data-pk41="results"]', 60); await shot(page, "06-results", size.width); }
     if (want("07-results-tables")) { await scrollTo(page, '[data-pk41="table-pc"]', 260); await shot(page, "07-results-tables", size.width); }
     if (want("08-drawer-new")) {
-      await scrollTo(page, '[data-pk41="header"]', 200);
-      await page.locator(`${pg} [data-pk41="new"]`).first().click(); await page.waitForTimeout(700);
+      await scrollTo(page, '[data-pk43="header"]', 200);
+      await page.locator(`${pg} [data-pk43="new"]`).first().click(); await page.waitForTimeout(700);
       await shot(page, "08-drawer-new", size.width); await page.keyboard.press("Escape"); await page.waitForTimeout(400);
     }
     if (want("09-how")) {
-      await page.locator(`${pg} [data-pk41="how"]`).first().click(); await page.waitForTimeout(600);
+      await page.locator(`${pg} [data-pk43="how"]`).first().click(); await page.waitForTimeout(600);
       for (let i = 1; i <= 5; i++) {
         await shot(page, `${8 + i < 10 ? "0" : ""}${8 + i}-how-it-works-${i}`, size.width);
         if (i < 5) { await page.keyboard.press("ArrowRight"); await page.waitForTimeout(500); }
@@ -79,7 +79,7 @@ for (const size of SIZES) {
       await page.keyboard.press("Escape"); await page.waitForTimeout(300);
     }
     if (want("14-banner")) {
-      await scrollTo(page, '[data-pk41="header"]', 400);
+      await scrollTo(page, '[data-pk43="header"]', 400);
       const x = page.locator('[data-pk41="banner-x"]').first();
       if (await x.count()) { await x.click(); await page.waitForTimeout(500); }
       await shot(page, "14-banner-dismissed", size.width);
@@ -89,7 +89,7 @@ for (const size of SIZES) {
     for (const [name, arg] of [["15-no-active-package", "--no-active"], ["16-no-packages", "--no-packages"]] as const) {
       if (!want(name)) continue;
       execFileSync("node", ["tests/e2e/pk41Fixture.mjs", arg], { stdio: "pipe" });
-      await page.reload(); await page.locator(`${pg} [data-pk41="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
+      await page.reload(); await page.locator(`${pg} [data-pk43="header"]`).first().waitFor({ state: "visible", timeout: 30_000 }); await page.waitForTimeout(1500);
       await shot(page, name, size.width);
       seed();
     }

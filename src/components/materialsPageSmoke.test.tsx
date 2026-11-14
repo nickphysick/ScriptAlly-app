@@ -201,7 +201,7 @@ describe("/manuscripts/comps renders", () => {
 });
 
 /* Submission packages v26 (25 Oct): the page lives at /queries/packages. Smoked empty (no manuscript; a manuscript
-   with no letters or synopses — the promise and its animation) and POPULATED (a letter in a sent package), because
+   with no package — v43's day one) and POPULATED (a letter in a sent package), because
    the builder, its packing list and Results only execute once there is something to put in a package. */
 describe("/queries/packages renders", () => {
   const LETTER = { id: "v1", manuscriptId: "m1", userId: "u1", componentType: ComponentType.QUERY_LETTER, versionName: "Hook-first", fileAttached: false, createdDate: "2026-01-02T00:00:00.000Z", notes: "Names two comps", contentDraft: "Dear agent" };
@@ -211,13 +211,23 @@ describe("/queries/packages renders", () => {
     expect(() => renderPage(<SubmissionPackages />, "/queries/packages")).not.toThrow();
   });
 
-  it("a manuscript with no letters or synopses is the empty state: the promise, its steps and the animation", () => {
+  /* v43 Phase 5 (re-pointed from v26's empty state, whose hero is retired): a manuscript with no package at all is DAY
+     ONE — the navy header with "No packages yet" and no buttons, three steps beside the draft first package */
+  it("a manuscript with no package is day one: the navy header, no buttons, three steps and the draft package", () => {
     setActiveManuscript();
     const html = renderPageSeeded(<SubmissionPackages />, "/queries/packages");
-    expect(html).toContain('data-pk26="hero"');
-    expect(html).toContain("Build your first package");
-    expect(html).toContain('class="p6-pb-stage p6-an"');
-    expect(html).not.toContain('data-pk26="header"');
+    expect(html).not.toContain('data-pk26="hero"');
+    expect(html).not.toContain("Build your first package");
+    expect(html).toContain('data-pk43-state="day-one"');
+    expect(html).toContain('data-pk43="title" tabindex="-1">No packages yet</h1>');
+    expect(html).not.toContain('data-pk43="new"');
+    expect(html).not.toContain('data-pk43="how"');
+    expect(html).not.toContain('data-pk43="going-out"');
+    expect(html.match(/data-pk43="day-one-step"/g)?.length).toBe(3);
+    expect(html).toContain("Pick the pieces.");
+    expect(html).toContain("Send it with your queries.");
+    expect(html).toContain("See what gets replies.");
+    expect(html).not.toContain('data-pk43="list"');
     /* v38: one page, no tabs — the labels row, the builder (a draft first package) and Results, empty: the band's
        empty line, no totals and the dashed "Nothing to show yet." (L7's unit half) */
     expect(html).not.toContain('data-pk26="tabs"');
@@ -241,21 +251,30 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk392="panel"');
     expect(html).not.toContain('data-pk38="labels"');
     expect(html).toContain('data-pk41="page"');
-    /* v41 C: the navy header (no art) */
-    expect(html).toContain('data-pk41="header"');
-    expect(html).toContain("What each agent receives for <b>");
+    /* v43 Phase 1 (re-pointed from v41 C's own header): the Query Centre's navy header, the live packages counted, the
+       manuscript on the ruled line, the Archivist standing in it; nothing pinned */
+    expect(html).not.toContain('data-pk41="header"');
+    expect(html).toContain('data-pk43="header"');
+    expect(html).toContain('data-pk43="title" tabindex="-1">1 package</h1>');
+    expect(html).toContain("<em>for</em> The Smoke Test");
+    expect(html).toContain('data-pk43="art"');
+    expect(html).not.toContain("p41-perch");
     /* v41 (workspace): the full-width list with its headings and per-row buttons is retired; the rail replaces it */
     expect(html).not.toContain('data-pk41="list"');
     /* v42 A: the rail and the header's batch strip are retired, element and rule */
     expect(html).not.toContain('data-pk41="rail"');
     expect(html).not.toContain('data-pk41-row=');
     expect(html).not.toContain('data-pk41="batch"');
-    /* v42 C: the stat tiles, between the header and the builder; this draft package's tile names what it still needs */
-    expect(html).toContain('data-pk42="tiles"');
-    expect(html).toContain('data-pk42-tile="pk1"');
-    expect(html).toContain(">pieces in<");
-    expect(html.indexOf('data-pk42="tiles"')).toBeLessThan(html.indexOf('data-pk41="builder"'));
-    expect(html.indexOf('data-pk41="header"')).toBeLessThan(html.indexOf('data-pk42="tiles"'));
+    /* v43 Phase 2 (re-pointed from v42 C's stat tiles, retired): "Your packages", a list on the left of the desk, then
+       the builder in the workspace beside it; this draft package's row names what it still needs */
+    expect(html).not.toContain('data-pk42="tiles"');
+    expect(html).not.toContain("p42-tile");
+    expect(html).toContain('data-pk43="list"');
+    expect(html).toContain('data-pk43-row="pk1"');
+    expect(html).toContain("<b>1 of 2</b> pieces in");
+    expect(html.indexOf('data-pk43="list"')).toBeLessThan(html.indexOf('data-pk41="builder"'));
+    expect(html.indexOf('data-pk43="header"')).toBeLessThan(html.indexOf('data-pk43="desk"'));
+    expect(html.indexOf('data-pk43="work"')).toBeLessThan(html.indexOf('data-pk41="builder"'));
     expect(html).not.toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');
     expect(html).toContain(">Standard UK<");
