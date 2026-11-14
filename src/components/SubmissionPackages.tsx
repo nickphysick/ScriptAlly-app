@@ -29,10 +29,10 @@ import { WorkspacePageGrid } from "./shell/WorkspacePageGrid";
 import { usePk26Model } from "./packages/v26/usePk26Model";
 import { Pk26Hero } from "./packages/v26/Pk26Header";
 import { Pk42HowItWorks } from "./packages/v42/Pk42HowItWorks";
-import { Pk41Hawk } from "./packages/v41/Pk41Hawk";
 import { Pk26Builder, type LibTab } from "./packages/v26/Pk26Builder";
 import { Pk41Banner } from "./packages/v41/Pk41Banner";
-import { Pk41Header } from "./packages/v41/Pk41Header";
+import { Pk43Header } from "./packages/v43/Pk43Header";
+import { packagesTitle } from "../lib/packagesV43";
 import { Pk42Tiles } from "./packages/v42/Pk42Tiles";
 import { Pk42Empty } from "./packages/v42/Pk42Empty";
 import { useScriptAllyDb } from "../lib/db";
@@ -55,6 +55,12 @@ import "./packages/v26/pk392.css";
 import "./packages/v26/pk393.css";
 import "./packages/v41/pk41.css";
 import "./packages/v42/pk42.css";
+/* v43: the Query Centre's navy header (the sheets it is dressed by, as Query letters imports them) */
+import "./queries/centre/qcv1531.css";
+import "./queries/centre/qcv1534.css";
+import "./queries/centre/qcv154.css";
+import "./queries/centre/qcv156.css";
+import "./packages/v43/pk43.css";
 
 export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab: string, sub?: string) => void }> = ({ active: routeActive = true }) => {
   const model = usePk26Model();
@@ -136,9 +142,9 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       {showFounding ? <Pk41Banner onDismiss={() => setFoundingHidden(true)} /> : null}
       {/* v41 Phase 1: the page is the Dashboard v2 / Contact list language — no header card, explainer, raised panel or
           label tiles (each is replaced by a v41 part, below) */}
-      <div ref={rootRef} className={`p6 p41${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
+      <div ref={rootRef} className={`p6 p41 pk43${empty ? " p6-new" : ""}`} data-pk26="page" data-pk41="page">
         {empty ? <Pk26Hero onBuild={() => part("builder")?.scrollIntoView({ block: "start", behavior: "smooth" })} onHow={() => setHow(true)} />
-          : <Pk41Header title={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
+          : <Pk43Header title={packagesTitle(live.length)} msTitle={activeMs?.title ?? null} onNew={() => setDialog({ m: "new" })} onHow={() => setHow(true)} />}
         {/* v42 F: no live package — the empty card in place of the tiles and the builder */}
         {showBuilder ? null : <Pk42Empty onNew={() => setDialog({ m: "new" })} />}
         {/* v42 C: the stat tiles, a row on the page between the header and the builder (not on the brand-new page); with
@@ -162,8 +168,6 @@ export const SubmissionPackages: React.FC<{ active?: boolean; onNavigate?: (tab:
       <Pk38Drawer model={model} p={routeActive ? pkdPkg : null} onClose={() => setPkdId(null)} onCopy={copy} onEdit={editIn} onSeeQueries={goQueries} />
       <Pk42HowItWorks open={routeActive && how} onClose={() => setHow(false)}
         onShowFounding={founding && foundingNoteHidden(currentUser) ? () => setFoundingHidden(false) : undefined} />
-      {/* v41 G: the Archivist, pinned bottom-right while this page is on screen (portalled; desktop only, by CSS) */}
-      <Pk41Hawk on={routeActive && !empty} />
     </WorkspacePageGrid>
   );
 };

@@ -1,0 +1,38 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Submission packages v43 (design-refs/submission-packages-v43) — the page on the Query Centre's layout: the navy header
+ * with the Archivist standing in it, the list of packages on the left of a 268 / 28 desk with the builder in one
+ * workspace surface beside it, Results at the header's full width, and the Query Centre's collapsed bar.
+ * ⚠️ THE HEADER AND THE BAR ARE THE QUERY CENTRE'S, as built: `shell/OpenHeader` in a `.qc151.qc153` wrapper and
+ *    `shell/SlimBar`, dressed by queries/centre/qcv1534 / qcv156. Every difference here is scoped to this page
+ *    (`.pk43 …`); the one edit outside is this page's root added to qcv156.css §3's `:is(…)` lists.
+ * ⚠️ THE MEASURE IS THE WORKSPACE'S (`--work-max` / `--work-gutter`), as Query letters': v41's 1288 cap and the 150px
+ *    kept clear for the pinned hawk are gone with the hawk.
+ */
+
+/* ══ §0 · the page: the workspace measure, both sides; no top padding (the header's `.qc151` wrapper brings the
+   Query Centre's own 30, so the navy header starts where the other four pages' do) ══ */
+@media (min-width: 768px) {
+  .pk39-wpg > .wpg-scroll > .p6.p41.pk43 {
+    box-sizing: border-box; width: 100%; max-width: var(--work-max); margin: 0 auto;
+    padding: 0 var(--work-gutter) 96px;
+  }
+}
+
+/* ══ §1 · the header (Phase 1): the Query Centre's, three columns (art 268, the title block, the right block). Two
+   differences, both Query letters v2.4's: 48 under the header (more than any gap in the content) and its softer
+   card shadow. The drawing: the Archivist with his boxes (356 × 440), drawn 220 tall, standing on the header's
+   bottom edge. Its box in the art column is exactly the Query Centre's armchair hawk's (360 × 347 drawn at 190 =
+   183.14), so the header's height is the built one: the bottom margin reaches through the header's 22px padding to
+   its edge, and the top margin takes the rest. ══ */
+@media (min-width: 768px) {
+  .pk43 .qc151.qc153 > .qc1531-hd.pk43-hd.pk43-hd { margin-bottom: 48px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }
+  .pk43 .qc151.qc153 > .qc1531-hd.pk43-hd h1.qc1531-t { outline: none; }
+  .pk43 .pk43-art { align-self: stretch; display: flex; align-items: flex-end; }
+  .pk43 .pk43-art img {
+    width: auto; height: 220px;
+    margin-top: calc(190px * 347 / 360 + 22px - 220px); margin-bottom: -22px;
+  }
+}

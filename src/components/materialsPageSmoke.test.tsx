@@ -241,9 +241,14 @@ describe("/queries/packages renders", () => {
     expect(html).not.toContain('data-pk392="panel"');
     expect(html).not.toContain('data-pk38="labels"');
     expect(html).toContain('data-pk41="page"');
-    /* v41 C: the navy header (no art) */
-    expect(html).toContain('data-pk41="header"');
-    expect(html).toContain("What each agent receives for <b>");
+    /* v43 Phase 1 (re-pointed from v41 C's own header): the Query Centre's navy header, the live packages counted, the
+       manuscript on the ruled line, the Archivist standing in it; nothing pinned */
+    expect(html).not.toContain('data-pk41="header"');
+    expect(html).toContain('data-pk43="header"');
+    expect(html).toContain('data-pk43="title" tabindex="-1">1 package</h1>');
+    expect(html).toContain("<em>for</em> The Smoke Test");
+    expect(html).toContain('data-pk43="art"');
+    expect(html).not.toContain("p41-perch");
     /* v41 (workspace): the full-width list with its headings and per-row buttons is retired; the rail replaces it */
     expect(html).not.toContain('data-pk41="list"');
     /* v42 A: the rail and the header's batch strip are retired, element and rule */
@@ -255,7 +260,7 @@ describe("/queries/packages renders", () => {
     expect(html).toContain('data-pk42-tile="pk1"');
     expect(html).toContain(">pieces in<");
     expect(html.indexOf('data-pk42="tiles"')).toBeLessThan(html.indexOf('data-pk41="builder"'));
-    expect(html.indexOf('data-pk41="header"')).toBeLessThan(html.indexOf('data-pk42="tiles"'));
+    expect(html.indexOf('data-pk43="header"')).toBeLessThan(html.indexOf('data-pk42="tiles"'));
     expect(html).not.toContain("Bundle it. Send it. Know what went.");
     expect(html).toContain('data-pk26="open"');
     expect(html).toContain(">Standard UK<");
