@@ -28,6 +28,8 @@
 .ms27 :is(h1, h2, p, dl, dt, dd) { margin: 0; }
 .ms27 button { font: inherit; color: inherit; }
 .ms27-bkp { padding-top: 24px; padding-bottom: 48px; display: grid; gap: 24px; }
+/* Workspace headers v1: under the navy header the book starts the header's 48 below it (its own margin), not 72 */
+.ms27 > .wsnh ~ .ms27-bkp { padding-top: 0; }
 
 /* ── the header (header rules v1.1: art 14 · text column --hero-text-x · stack --hero-stack-h) ── */
 .ms27-mh {

@@ -16,6 +16,7 @@ import React from "react";
 import heroArt from "../../../assets/manuscripts/hero-archivist.png";
 import type { CardRow } from "../../../lib/manuscriptV27";
 import { QuotedLine } from "../v28/QuotedLine";
+import { WorkspaceNavyHeader, WsnhFigure, WsnhWords } from "../../shell/WorkspaceNavyHeader";
 
 /* ══ the header ════════════════════════════════════════════════════════════════════════════════ */
 
@@ -42,59 +43,69 @@ export const V27Hero: React.FC<{
   </header>
 );
 
-/* ══ the book container ═══════════════════════════════════════════════════════════════════════ */
-
-export const BookContainer: React.FC<{
-  title: string;
-  byline: string | null;
-  rows: CardRow[];
-  words: string | null;
-  logline: string;
-  onEdit: () => void;
-  onView: (opener: HTMLElement) => void;
-  onAddLogline: () => void;
-}> = ({ title, byline, rows, words, logline, onEdit, onView, onAddLogline }) => {
-  const view = (e: React.MouseEvent<HTMLElement>) => onView(e.currentTarget);
-  const top = rows.filter((r) => r.key !== "words");
-  const w = rows.find((r) => r.key === "words")!;
+/* ══ the navy header (Workspace headers v1, 14 Nov) ═════════════════════════════════════════════════════════════
+   The shared navy header (shell/WorkspaceNavyHeader) in place of the hero above the book card: the book's title (two
+   lines at most, the header growing; never clipped, never smaller), "by {author}", Edit and View summary, and on the
+   right the details card as words — the word count large, then the genre and "{age} · {status} since {day}". Every
+   value is `cardRows`'s, as the card showed it. With no book: "Let's add your book" (or "Add your book again") and
+   the one button that state offers. */
+export const MsHeader: React.FC<
+  | { kind: "loading" }
+  | { kind: "empty"; title: string; onAdd: () => void }
+  | { kind: "book"; title: string; byline: string | null; rows: CardRow[]; words: string | null; onEdit: () => void; onView: (opener: HTMLElement) => void }
+> = (p) => {
+  if (p.kind === "loading") {
+    return <WorkspaceNavyHeader page="manuscripts" art="manuscripts-header" loading title=" " actions={null} bar={null} />;
+  }
+  if (p.kind === "empty") {
+    return (
+      <WorkspaceNavyHeader page="manuscripts" art="manuscripts-header" title={p.title}
+        actions={<button type="button" className="qc1531-b qc1531-b--n" data-ms21="add" onClick={p.onAdd}>+ Add your manuscript</button>}
+        bar={{ title: p.title, button: { label: "+ Add your manuscript", onClick: p.onAdd } }} />
+    );
+  }
+  const row = (k: CardRow["key"]) => p.rows.find((r) => r.key === k)!;
+  const genre = row("genre"), age = row("age"), status = row("status"), since = row("since");
+  const facts = <>{age.value} · {since.muted ? status.value : <>{status.value.toLowerCase()} since <b data-ms27="hd-since">{since.value}</b></>}</>;
   return (
-    <section className="ms27-bkx" aria-labelledby="ms27-title" data-ms27="book">
-      <V27Hero
-        eyebrow="— Manuscripts —" title={title} byline={byline}
-        acts={(
-          <>
-            <button type="button" className="ms27-p1" data-ms27="edit" aria-label="Edit the book's details" onClick={onEdit}>Edit</button>
-            <button type="button" className="ms27-p2" data-ms27="full" aria-label="View the book's summary" onClick={view}>View summary</button>
-          </>
-        )}
-        right={(
-          <button type="button" className="ms27-bf" data-ms27="card" aria-label="See the book's full details" onClick={view}>
-            <dl>
-              {top.map((r) => (
-                <React.Fragment key={r.key}>
-                  <dt>{r.label}</dt>
-                  <dd className={r.muted ? "is-muted" : undefined} data-row={r.key}>{r.dot ? <i className="ms27-sd" aria-hidden="true" /> : null}{r.value}</dd>
-                </React.Fragment>
-              ))}
-              <dt className="ms27-cw">{w.label}</dt>
-              <dd className={`ms27-cw${w.muted ? " is-muted" : ""}`} data-row="words">{w.value}</dd>
-            </dl>
-            <i className="ms27-dv" aria-hidden="true" />
-            <span className="ms27-wc" data-ms27="words-big">{words ? <><b>{words}</b><small>words</small></> : <small>No word count yet</small>}</span>
-          </button>
-        )}
-      />
-      <div className="ms27-bkl" data-ms27="logline">
-        {logline.trim() ? (
-          /* v28.1: "Read it all" is gone (the details card still opens the book view); the line takes the strip's
-             full width and closes with a rust ” */
-          <p className="ms27-lg"><QuotedLine text={logline} /></p>
-        ) : (
-          <p className="ms27-lg is-empty">No logline yet. <button type="button" className="ms27-lnk" data-ms27="add-logline" onClick={onAddLogline}>Add one</button></p>
-        )}
-      </div>
-    </section>
+    <WorkspaceNavyHeader page="manuscripts" art="manuscripts-header" wrap
+      title={p.title}
+      forLine={p.byline ? { lead: "by", text: p.byline } : null}
+      actions={<>
+        <button type="button" className="qc1531-b qc1531-b--n" data-ms27="edit" aria-label="Edit the book's details" onClick={p.onEdit}>Edit</button>
+        <button type="button" className="qc1531-b qc1531-b--g" data-ms27="full" aria-label="View the book's summary" onClick={(e) => p.onView(e.currentTarget)}>View summary</button>
+      </>}
+      right={<>
+        {p.words ? <WsnhFigure small>{p.words}</WsnhFigure> : null}
+        <WsnhWords lead={p.words ? "words" : "No word count yet"} name={<span data-ms27="hd-genre">{genre.value}</span>} sub={facts} />
+      </>}
+      bar={{
+        title: p.title,
+        aside: <>{p.words ? <b>{p.words} words</b> : null}<em>{status.value}</em></>,
+        button: { label: "Edit", onClick: p.onEdit },
+      }} />
   );
 };
+
+/* ══ the book container ═══════════════════════════════════════════════════════════════════════ */
+
+/* Workspace headers v1: the hero and its details card left the container for the navy header above it; the card keeps
+   the logline strip, as before */
+export const BookContainer: React.FC<{
+  logline: string;
+  onAddLogline: () => void;
+}> = ({ logline, onAddLogline }) => (
+  <section className="ms27-bkx" aria-label="The book's logline" data-ms27="book">
+    <div className="ms27-bkl" data-ms27="logline">
+      {logline.trim() ? (
+        /* v28.1: "Read it all" is gone (the details card still opens the book view); the line takes the strip's
+           full width and closes with a rust ” */
+        <p className="ms27-lg"><QuotedLine text={logline} /></p>
+      ) : (
+        <p className="ms27-lg is-empty">No logline yet. <button type="button" className="ms27-lnk" data-ms27="add-logline" onClick={onAddLogline}>Add one</button></p>
+      )}
+    </div>
+  </section>
+);
 
 /* The coming-soon strip (SoonStrip) is retired by Manuscripts v28 Part F: the page foot is v28/MsFoot. */

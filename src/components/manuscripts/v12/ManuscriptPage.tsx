@@ -30,10 +30,10 @@ import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { AppFooter } from "../../shell/AppFooter";
 import { PageChecklist, type FlowCard } from "../../shell/guide/PageChecklist";
 import { useToast } from "../../toast/ToastProvider";
-import { EmptyPreviews, MsBanner, MsOpenHeader } from "./Msv21Parts";
+import { EmptyPreviews, MsBanner } from "./Msv21Parts";
 import { Msv21AddManuscript } from "./Msv21Dialogs";
 import { MsEditDrawer, type EditField } from "../v28/MsEditDrawer";
-import { BookContainer } from "../v27/Msv27Parts";
+import { BookContainer, MsHeader } from "../v27/Msv27Parts";
 import { MsFoot } from "../v28/MsFoot";
 import { BookView, type BookField } from "../v27/BookView";
 import heroArt from "../../../assets/manuscripts/hero-archivist.png";
@@ -157,14 +157,14 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
   );
 
   /* nothing is known yet: neither state is drawn, so the empty state never flashes before a book */
-  if (!ms && !collectionsReady) return grid(null, "loading");
+  if (!ms && !collectionsReady) return grid(<MsHeader kind="loading" />, "loading");
 
   if (!ms) {
     return grid(
       <>
-        <MsOpenHeader title={deleted ? DELETED_TITLE : EMPTY_TITLE} sub={deleted ? deletedSub(deleted.title) : EMPTY_SUB}>
-          <button type="button" className="ms21-b1" data-ms21="add" onClick={() => setAddOpen(true)}>+ Add your manuscript</button>
-        </MsOpenHeader>
+        {/* Workspace headers v1: the navy header, with no book — its title and the one button (the sub line went with
+            the old header: EMPTY_SUB / deletedSub are no longer drawn) */}
+        <MsHeader kind="empty" title={deleted ? DELETED_TITLE : EMPTY_TITLE} onAdd={() => setAddOpen(true)} />
         <div className="ms21-emptyb" data-ms21="empty">
           <MsBanner big>Here's what this page does once your book is in.</MsBanner>
           <EmptyPreviews />
@@ -202,11 +202,10 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
             { label: "Build a package", onClick: toPackages, attrs: { "data-ms27": "final-packages" } },
           ],
         }} />
+      <MsHeader kind="book" title={ms.title} byline={author} rows={cardRows(ms, since)} words={words}
+        onEdit={() => openEdit()} onView={() => setBookOpen(true)} />
       <div className="ms27-bkp" data-ms27="sections">
-        <BookContainer
-          title={ms.title} byline={author} rows={cardRows(ms, since)} words={words} logline={ms.logline ?? ""}
-          onEdit={() => openEdit()} onView={() => setBookOpen(true)} onAddLogline={() => openEdit("logline")}
-        />
+        <BookContainer logline={ms.logline ?? ""} onAddLogline={() => openEdit("logline")} />
         <MsFoot onVersions={toVersions} onPackages={toPackages} />
       </div>
 

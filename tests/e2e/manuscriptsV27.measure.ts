@@ -33,11 +33,15 @@ test.describe.configure({ mode: "serial" });
 
 let asserts = 0;
 const ck = (n = 1) => { asserts += n; };
-const FLOOR = 104; /* v28: A4 retired (its 10 copy and alignment asserts moved to MSV28-F1 and msv28Smoke); Versions v1: E1's interim-page asserts (3 × 2) moved to VER1 */
+const FLOOR = 63; /* v28: A4 retired (its 10 copy and alignment asserts moved to MSV28-F1 and msv28Smoke); Versions v1: E1's interim-page asserts (3 × 2) moved to VER1.
+   RE-POINTED (Workspace headers v1, 14 Nov): 104 → 63 — A2 retired (16 × 2), B1's details-card opener retired (5 × 2), A3 reads three facts at both widths (+1 at 1280) */
 
 const VPS = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
 const MUTATE = process.env.MS27_MUTATE ?? "";
 const CSS_MUT: Record<string, string> = {
+  /* RETIRED (Workspace headers v1, 14 Nov): a2 broke the hero inside the book container (`.ms27-mh`, gone), and a3 the
+     details card's grid (`.ms27-bf`, gone); A2 is skipped and A3 now reads the navy header, so neither break has a target.
+     Successor: tests/e2e/wsHeaders.measure.ts H1 + H6 "manuscripts". Kept for the record. */
   a2: ".ms27-bkx .ms27-mh{--ms27-ins:max(64px,calc((100cqw - 900px)/2))!important}",
   a3: "@container ms27 (max-width:1152px){.ms27 .ms27-bf{grid-template-columns:minmax(0,1fr) 1px 128px!important}.ms27-bf .ms27-wc,.ms27-bf .ms27-dv{display:flex!important}.ms27 .ms27-bf .ms27-cw{display:none!important}}",
   b1: ".ms27-bx.open .ms27-bx-cover{transform:none!important}",
@@ -161,7 +165,10 @@ for (const vp of VPS) {
     expect(r.outside, "Submission packages is named only in the page foot").not.toMatch(/Submission package/); ck();
   });
 
-  test(`MSV27-A2 header ${w}`, async () => {
+  /* RETIRED (Workspace headers v1, 14 Nov): its subject is v27's hero inside the book container — the eyebrow, title,
+     byline and actions stack, the art 22 in and the details card 40 inside the right edge — replaced by the shared navy
+     header above the container. Successor: tests/e2e/wsHeaders.measure.ts H1 + H3 + H7 "manuscripts". */
+  test.skip(`MSV27-A2 header ${w}`, async () => {
     await openAt(page, "/manuscripts", vp);
     const g = await page.evaluate(() => {
       const q = (s: string) => { const e = document.querySelector<HTMLElement>(s); if (!e) return null; const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom, h: r.height }; };
@@ -194,31 +201,27 @@ for (const vp of VPS) {
 
   test(`MSV27-A3 card ${w}`, async () => {
     await openAt(page, "/manuscripts", vp);
+    /* RE-POINTED (Workspace headers v1, 14 Nov): the details card is gone; its facts are the navy header's right block —
+       the word count as its figure (`[data-wsnh="figure"]`), the genre as its name (`[data-ms27="hd-genre"]`) and
+       "<age> · querying since <date>" as its sub-line (`[data-wsnh="sub"]`), the same at both widths. The card's
+       narrow-sheet rule (no large figure under 1512, words as a row) has no successor. */
     const r = await page.evaluate(() => {
-      const card = document.querySelector('[data-ms27="card"]')!;
-      const vis = (e: Element) => e.getBoundingClientRect().height > 0 && getComputedStyle(e).display !== "none";
-      return {
-        rows: [...card.querySelectorAll("dd")].filter(vis).map((d) => [d.getAttribute("data-row"), (d as HTMLElement).innerText.trim()]),
-        big: vis(card.querySelector('[data-ms27="words-big"]')!),
-        bigText: (card.querySelector('[data-ms27="words-big"] b') as HTMLElement | null)?.innerText ?? null,
-      };
+      const hd = [...document.querySelectorAll<HTMLElement>('[data-wsnh-page="manuscripts"]')].find((e) => e.getBoundingClientRect().height > 0)!;
+      const t = (s: string) => (hd.querySelector<HTMLElement>(s)?.innerText ?? "").replace(/\s+/g, " ").trim();
+      return { genre: t('[data-ms27="hd-genre"]'), sub: t('[data-wsnh="sub"]'), fig: t('[data-wsnh="figure"]') };
     });
-    const wantTop = [["genre", MS.genre], ["age", MS.ageCategory], ["status", "Querying"], ["since", SINCE]];
-    if (w === 1512) {
-      expect(r.rows).toEqual(wantTop); ck();
-      expect(r.big, "the large count").toBe(true); ck();
-      expect(r.bigText).toBe(WORDS); ck();
-    } else {
-      expect(r.rows).toEqual([...wantTop, ["words", WORDS]]); ck();
-      expect(r.big, "no large figure on a narrow sheet").toBe(false); ck();
-    }
+    expect(r.genre).toBe(MS.genre); ck();
+    expect(r.sub).toBe(`${MS.ageCategory} · querying since ${SINCE}`); ck();
+    expect(r.fig).toBe(WORDS); ck();
   });
 
   /* MSV27-A4 (the coming-soon strip's alignment and copy) is retired by v28 Part F: MSV28-F1 measures the foot that
      replaced it, and v28/msv28Smoke.test.tsx locks its copy */
   test(`MSV27-B1 the book opens ${w}`, async () => {
     /* v28.1: "Read it all" is gone; View summary and the details card are the two ways in */
-    for (const opener of ['[data-ms27="full"]', '[data-ms27="card"]']) {
+    /* RETIRED (Workspace headers v1, 14 Nov): the details card (`[data-ms27="card"]`) as an opener — the card is gone and
+       View summary (`[data-ms27="full"]`, now a header button) is the one way in. Successor: tests/e2e/wsHeaders.measure.ts H7 "manuscripts". */
+    for (const opener of ['[data-ms27="full"]']) {
       await openAt(page, "/manuscripts", vp, { motion: true });
       await page.locator(opener).click();
       await page.waitForTimeout(1800);
