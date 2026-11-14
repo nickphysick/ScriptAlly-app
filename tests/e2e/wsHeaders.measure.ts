@@ -288,6 +288,9 @@ async function mutate(page: Page, key: string) {
         walk(rules);
       }
     }
+    /* H5b · the bar's §3 rules gone from these pages: the prescribed break (`.wsnh` out of §3) cannot redden H5, because
+       the wrapper also carries `.qc151.qc153`, which §3's lists already name; this drops every §3 bar rule's reach here */
+    if (m === "H5b") css(".qc151.qc153.wsnh > .qc156-slim.qc156-slim { all: revert !important; } .qc151.qc153.wsnh > .qc156-slim::before { content: none !important; }");
     /* H6 · the headline's figure off by one */
     if (all || m === "H6") {
       const bump = () => { for (const h of document.querySelectorAll<HTMLElement>("[data-wsnh='title']")) { const t = h.textContent ?? ""; const n = t.match(/^\d+/); if (n && !h.dataset.bumped) { h.dataset.bumped = "1"; h.textContent = t.replace(/^\d+/, String(+n[0] + 1)); } } };
