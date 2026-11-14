@@ -385,4 +385,67 @@ test.describe("Query Centre v156", () => {
     }
     L.done(20);
   });
+  /* V6 (§7, v155's states) — day one: the panel reads "No queries yet", the Views card is dimmed and inert with every
+     count 0; quiet: v155's panel; loading: the panel and the card render straight away and do not move when the data
+     lands. Plus the ref's own frames for the side-by-side. */
+  test("V6 — v155's states, and the ref's frames", async ({ page }) => {
+    test.skip(PHASE === "before", "after only");
+    const L = new Ledger("V6");
+    const boxes = () => page.evaluate((sel) => {
+      const b = (q: string) => { const e = document.querySelector<HTMLElement>(`${sel} ${q}`); if (!e) return null; const r = e.getBoundingClientRect(); return [+r.x.toFixed(1), +r.y.toFixed(1), +r.width.toFixed(1), +r.height.toFixed(1)].join(","); };
+      return { header: b("[data-qc1531='header']"), week: b("[data-qc156='week']"), views: b("[data-qc156='views']"), toolbar: b("[data-qc154='toolbar']") };
+    }, PAGE);
+    for (const vp of SIZES) {
+      const w = vp.width;
+      /* day one */
+      await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_QC_STATE = "first"; });
+      await openRoute(page, "/queries", vp);
+      await page.waitForSelector(`${PAGE} [data-qc156='views']`, { timeout: 60_000 });
+      await page.waitForTimeout(800);
+      const d = await page.evaluate((sel) => {
+        const col = document.querySelector<HTMLElement>(`${sel} [data-qc153='rail-column']`)!;
+        return {
+          title: document.querySelector(`${sel} [data-qc151='title']`)?.textContent, op: getComputedStyle(col).opacity, inert: col.inert,
+          counts: [...col.querySelectorAll("[data-qc156='view']")].map((e) => e.getAttribute("data-n")),
+        };
+      }, PAGE);
+      L.check(`${w} day one: "No queries yet" on the navy panel`, d.title === "No queries yet", `${d.title}`);
+      L.check(`${w} day one: the Views card dimmed, inert, every view at 0`, d.op === "0.4" && d.inert && d.counts.every((n) => n === "0"), JSON.stringify(d));
+      await page.screenshot({ path: `${SHOTS}/v6-dayone-${w}.png` });
+      /* quiet */
+      await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_QC_STATE = "quiet"; });
+      await openRoute(page, "/queries", vp);
+      await page.waitForSelector(`${PAGE} [data-qc154="card"]`, { timeout: 60_000 }).catch(() => {});
+      await page.waitForTimeout(800);
+      L.check(`${w} quiet: v155's panel is drawn`, await page.locator(`${PAGE} .qc155-panel`).first().isVisible().catch(() => false), "");
+      await page.screenshot({ path: `${SHOTS}/v6-quiet-${w}.png` });
+      await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_QC_STATE = undefined; });
+      /* loading: held 2.5s */
+      await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_QC_HOLD_MS = 2500; });
+      await page.setViewportSize(vp);
+      await page.goto("/queries");
+      await page.waitForSelector(`${PAGE} [data-qc156='views']`, { timeout: 60_000 });
+      await page.waitForTimeout(300);
+      const busy = await boxes();
+      const shownBusy = await page.evaluate((sel) => !!document.querySelector(`${sel} [data-qc155='goal-hold']`), PAGE);
+      await page.screenshot({ path: `${SHOTS}/v6-loading-${w}.png` });
+      await page.waitForSelector(`${PAGE} [data-qc154="card"]`, { timeout: 60_000 });
+      await page.waitForTimeout(600);
+      const done = await boxes();
+      L.check(`${w} loading: the panel and the card are there before the data (week held)`, !!busy.header && !!busy.views && shownBusy, JSON.stringify(busy));
+      L.check(`${w} loading: nothing moves when the data lands`, busy.header === done.header && busy.week === done.week && busy.toolbar === done.toolbar && busy.views?.split(",").slice(0, 3).join() === done.views?.split(",").slice(0, 3).join(),
+        `${JSON.stringify(busy)} → ${JSON.stringify(done)}`);
+      await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_QC_HOLD_MS = undefined; });
+    }
+    /* the ref's own frames, for the side-by-side (mock chrome and data are the ref's) */
+    await page.setViewportSize(SIZES[0]);
+    await page.goto(`file://${process.cwd()}/design-refs/query-centre-v156.html`);
+    await page.evaluate(() => document.fonts.ready);
+    await page.waitForTimeout(800);
+    await page.screenshot({ path: `${SHOTS}/ref-rest-1920.png` });
+    await page.evaluate(() => window.scrollTo(0, 700));
+    await page.waitForTimeout(600);
+    await page.screenshot({ path: `${SHOTS}/ref-collapsed-1920.png` });
+    L.done(10);
+  });
 });
