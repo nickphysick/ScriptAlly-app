@@ -96,6 +96,10 @@ Nick supplied the illustration, a hawk with glasses on a chain, writing at a des
 paper. It replaces the placeholder and is drawn the way the Query Centre and the Contact list draw theirs. Branch
 `query-letters-v2-4-art`, cut from the served dev line.
 
+**Dev:** serves `index-BFDbAS9o.js` (was `index-DTfFPD0T.js`) from
+`dev/srm1-plv3-qc156-clq1-tdi-qc1561-tdi-clq11-td56-ql24-art` @ cd64e8684. The asset is served as `image/webp`, 43,276
+bytes. Prod is not touched.
+
 - **Asset:** `public/images/letters/query-letters-header.webp`. Cropped from Nick's 1000 × 1000 transparent webp to the
   drawing's own bounds (922 × 849, as the other two drawings are cropped), resized to 400 × 369 (2× its 190 display),
   43 KB, alpha kept.
