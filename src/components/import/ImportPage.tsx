@@ -31,6 +31,8 @@ import { PanelHeader } from "../shell/PanelHeader";
 import { ImportFlow, type ImportFlowHandle, type ImportFlowProps, type ImportFlowScreen } from "./ImportFlow";
 import { ImportCsv } from "../ImportCsv";
 import { useScriptAllyDb } from "../../lib/db";
+import { LoadFailed } from "../notes/LoadFailed";
+import { useLoadFailure } from "../notes/useLoadFailure";
 import { useSmartImportEntitlement } from "../../lib/useSmartImportEntitlement";
 import type { SmartImportEntitlement } from "../../lib/smartImportEntitlement";
 import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
@@ -67,6 +69,10 @@ const IconColumns = () => (
 export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   const { manuscripts, currentUser, addManuscript, entitlement: planEntitlement } = useScriptAllyDb();
   const liveEntitlement = useSmartImportEntitlement();
+  /* overnight fixes v1, Part 2 — while a read is down the page is the error: importing over a read that failed is how a
+     writer ends up with duplicates. Never in the labs, which have no reads. */
+  const liveFail = useLoadFailure();
+  const importFail = lab ? null : liveFail;
   const entitlement = lab?.entitlement ?? liveEntitlement;
   /* Phone app v2 Part 8B: below 768px only the doors are the phone's (ImportDoorsPhone); every press below is this
      page's own handler, and the flow, the book step and the matcher are untouched */
@@ -126,14 +132,14 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
      Smart Import's upload: the picker opens, inside the press's activation window */
   const startAsked = !lab && new URLSearchParams(loc.search).get("start") === "smart";
   useEffect(() => {
-    if (!startAsked) return;
+    if (!startAsked || importFail) return; /* asked again once the reads are back: the parameter stays until then */
     navigate("/import", { replace: true });
     setView("tiles");
     start("smart");
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startAsked]);
+  }, [startAsked, !!importFail]);
   useEffect(() => {
-    if (!resumeAsked || !currentUser) return;
+    if (!resumeAsked || !currentUser || importFail) return;
     let live = true;
     /* loaded when first needed: it brings Firebase, and this page mounts in labs that have none */
     void import("../../lib/importDraft").then((m) => m.loadDraft(currentUser.id)).then((d) => {
@@ -145,7 +151,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
       flowRef.current?.resume(d);
     }).catch(() => { if (live) navigate("/import", { replace: true }); });
     return () => { live = false; };
-  }, [resumeAsked, currentUser, navigate]);
+  }, [resumeAsked, currentUser, navigate, !!importFail]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* ── Leaving part-way ── "Cancel" asks with the drawer's own words; Discard drops the read file. */
   const [asking, setAsking] = useState(false);
@@ -155,9 +161,27 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   /* smart-import-photos-v1: the same Smart Import, read from photos of the list. */
   const usePhotos = act("usePhotos", () => start("photos"));
   const download = act("download", () => { void downloadTemplate(TEMPLATE_FILENAME); });
-  const chooseTemplate = act("templatePicker", () => start("template"));
   const openMatcher = act("matcher", () => setView("matcher"));
   const showTiles = !inFlow && !book;
+
+  /* overnight fixes v1, Part 2 — the error in the tiles' and the flow's place; the header stays. A flow already under
+     way is left to finish (its review holds what was read before the fault). */
+  if (importFail && !inFlow) {
+    return (
+      <WorkspacePageGrid
+        className="impg impg-wpg" scrollLabel="Import"
+        masthead={phone ? null : (
+          <PanelHeader
+            kind="title" slim className="ph ph--compact ph--panel"
+            attrs={{ "data-probe": "page-header", "data-size": "compact", "data-impg": "header" }}
+            title={IMPORT_TITLE} sub={IMPORT_SUB}
+          />
+        )}
+      >
+        <LoadFailed words={importFail.words} onRetry={importFail.retry} busy={importFail.busy} probe="import" />
+      </WorkspacePageGrid>
+    );
+  }
 
   if (view === "matcher") {
     /* The matcher opens with its own open title under a "‹ Back to import" link: no panel header. */
@@ -185,7 +209,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
     >
       {showTiles && phone ? (
         <ImportDoorsPhone lede={IMPORT_SUB} smartAllowed={entitlement.allowed} smartFact={smartFactLine(entitlement)}
-          onSmart={chooseSmart} onDownload={download} onUpload={chooseTemplate} onMatch={openMatcher}
+          onSmart={chooseSmart} onMatch={openMatcher}
           onByHand={() => openQueryDrawer({ mode: "log", ...(manuscript ? { manuscriptId: manuscript.id } : {}) })}
           footnote={`${IMPORT_FOOTNOTE} ${IMPORT_FOOTNOTE_SECOND}`} />
       ) : null}

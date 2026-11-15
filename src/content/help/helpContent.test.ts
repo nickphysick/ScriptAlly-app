@@ -123,7 +123,9 @@ describe("HC1-C4 (unit) · a DRAFT tag on dev builds, never in production", () =
   });
   it("the drafts are the ones the pack names as drafted", () => {
     expect(WRITTEN_ARTICLES.filter((a) => !a.draft).map((a) => a.slug)).toEqual(["add-an-agent"]);
-    expect(WRITTEN_ARTICLES.filter((a) => a.draft).length).toBe(26);
+    /* RE-POINTED (overnight fixes v1, Part 1): 26 → 25, the "Download the template" draft went with the template */
+    expect(WRITTEN_ARTICLES.filter((a) => a.draft).length).toBe(25);
+    expect(WRITTEN_ARTICLES.map((a) => a.slug)).not.toContain("download-the-template");
   });
 });
 

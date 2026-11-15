@@ -23,12 +23,11 @@ export const QUIET_HEAD_155 = "Nothing needs you today.";
 export const QUIET_NONE_155 = "Nothing is out with agents right now.";
 export const FIRST_TITLE_155 = "No queries yet";
 export const FIRST_HEAD_155 = "No queries yet.";
-/** the day-one body, in its three runs: the two links sit between them */
+/** the day-one body, in two runs with the Smart import link between them (overnight fixes v1: the template's link
+ *  went with the template, 14 Nov) */
 export const FIRST_BODY_155 = {
   lead: "Log your first query and it will appear here, with the date a reply is expected. Already keeping a tracker somewhere? ",
   importLink: "Bring it in with Smart import",
-  mid: " or ",
-  templateLink: "use our template",
   tail: ".",
 } as const;
 

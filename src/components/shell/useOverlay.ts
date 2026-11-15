@@ -37,7 +37,7 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import { lockStageScroll } from "../../lib/stageScroll";
 
 /** Everything focusable, as the union of what the two extracted copies looked for. */
-const FOCUSABLE =
+export const FOCUSABLE =
   'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
 /**
@@ -48,7 +48,8 @@ const FOCUSABLE =
  */
 let inertDepth = 0;
 
-function sealBackground(): () => void {
+/** Exported (overnight fixes v1, Part 7) so the drawers share this one count: `useDrawerFocus` seals through it too. */
+export function sealBackground(): () => void {
   const root = typeof document === "undefined" ? null : document.getElementById("root");
   if (!root) return () => {};
   inertDepth += 1;

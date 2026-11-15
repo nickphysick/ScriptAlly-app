@@ -423,11 +423,11 @@
 
 /* ══ v12 P5 — the empty state: the three ways in, the banner, and the two live previews ══════ */
 
-/* the ways (the mock's .ways4/.cd): three doors below the header's rule. The bare `cd` class
+/* the ways (the mock's .ways4/.cd): two doors below the header's rule (the template's went, 14 Nov). The bare `cd` class
    rides alongside for §10.7, collision-checked against the whole bundle. */
 .clv-ways {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 16px;
   margin: 22px 0 0;
 }

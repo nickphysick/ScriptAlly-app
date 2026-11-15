@@ -49,6 +49,8 @@ import { EmptyFeed } from "../fv2/EmptyFeed";
 import { FirstVisitTour } from "../fv2/FirstVisitTour";
 import { ExampleDashboard } from "../fv2/ExampleDashboard";
 import { ResumeCard } from "../fv2/ResumeCard";
+import { LoadFailed } from "../../notes/LoadFailed";
+import type { PageLoadFailure } from "../../notes/useLoadFailure";
 import { ReminderAsk, ReminderDone } from "../fv2/ReminderAsk";
 import { FinishLine } from "../fv2/FinishLine";
 import { logEvent } from "../../../lib/events";
@@ -85,6 +87,8 @@ import "../v2/dash2Feed.css";
 
 export interface Dash58Props {
   loading: boolean;
+  /** overnight fixes v1, Part 2 — a read that failed (the host's `useLoadFailure`); absent in labs and the example */
+  loadFailure?: PageLoadFailure | null;
   queries: Query[];
   agents: Agent[];
   manuscripts: Manuscript[];
@@ -196,7 +200,7 @@ const FeedSkeleton: React.FC = () => (
 export const Dash58: React.FC<Dash58Props> = ({
   loading: dataLoading, queries, agents: agentsIn, manuscripts, tasks, userTasks, activities, taskFlags, currentUser,
   activeManuscript, onNavigate, now: nowProp, versions = [], smartImportUsage = null,
-  onFoundingSeen, onPrefs, onGoal, onAnswer, example = false,
+  onFoundingSeen, onPrefs, onGoal, onAnswer, example = false, loadFailure,
 }) => {
   /* one clock per mount: a new Date on every render would rebuild every derivation below */
   const [mountedAt] = useState(() => new Date());
@@ -209,6 +213,9 @@ export const Dash58: React.FC<Dash58Props> = ({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const held = import.meta.env.MODE !== "production" ? useDashHold() : false;
   const loading = dataLoading || held;
+  /* overnight fixes v1, Part 2 — a failed read: the grid gives way to the error (never the set-up card or the empty
+     feed, both of which offer an import), and the band's figures show nothing rather than 0 */
+  const loadFail = loadFailure ?? null;
   const aid = import.meta.env.MODE !== "production" ? dashAid() : NO_AID;
   /* v60: the dev aid's "no agents" hands the page none (the day-one state); production never reads it */
   const agents = aid.noAgents ? NO_AGENTS : agentsIn;
@@ -632,7 +639,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               with the taller of the other two columns). Before the first query the middle holds the set-up card and the
               right the empty feed. */}
           <Dash2Band loading={loading} title={title} author={author} buttons={!pre}
-            weeks={loading ? null : wholeWeeksQuerying(scopedQueries, now)}
+            weeks={loading || loadFail ? null : wholeWeeksQuerying(scopedQueries, now)}
             onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")} />
           {/* ⚠️ DASHBOARD v2.2 (Part A; ref design-refs/dashboard-v2-2): the founding writer is a full-width band under the
               navy header, never a card inside a column. */}
@@ -642,6 +649,7 @@ export const Dash58: React.FC<Dash58Props> = ({
             /* Part E: the fold is `todoPrefs.dash.foundingFolded`, one dotted leaf; absent onPrefs → this view's only */
             folded={prefs.foundingFolded} onFold={onPrefs && !example ? (f) => onPrefs(foundingFoldWrite(f)) : undefined}
             onAllNotes={example ? undefined : () => navigate("/your-notes")} />
+          {loadFail ? <LoadFailed words={loadFail.words} onRetry={loadFail.retry} busy={loadFail.busy} probe="dashboard" /> : (
           <div className="d2-grid" data-d2="grid">
             <div className="d2-col d2-left" data-d2="left">
               {gsSheetOpen && (
@@ -684,7 +692,8 @@ export const Dash58: React.FC<Dash58Props> = ({
             </div>
             <FirstWinStamp uid={currentUser?.id ?? null} active={onDash && !loading && !example && !rootRef.current?.closest(".im-ghost")} shown={prefs.wins} onPrefs={onPrefs} />
           </div>
-          {tour !== null && onDash && <FirstVisitTour stop={tour} onNext={nextStop} onSkip={() => endTour("skipped")} />}
+          )}
+          {tour !== null && onDash && !loadFail && <FirstVisitTour stop={tour} onNext={nextStop} onSkip={() => endTour("skipped")} />}
           </>)}
         </div>
       </DashPopupProvider>

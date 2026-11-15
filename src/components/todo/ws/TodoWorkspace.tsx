@@ -49,6 +49,8 @@ import TagsPane from "../TagsSheet";
 import "./todoWs.css";
 import "./todoWs54.css";
 import { WsHeader56 } from "./WsHeader56";
+import { LoadFailed } from "../../notes/LoadFailed";
+import { useLoadFailure } from "../../notes/useLoadFailure";
 import { WsSlim56 } from "./WsSlim56";
 import { WsBatch54 } from "./WsBatch54";
 import { openingView, type BatchView } from "../../../lib/todoBatch54";
@@ -104,6 +106,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     addUserTask, updateUserTask, deleteUserTask, restoreUserTask, upsertTaskFlag, dismissTask, restoreTaskFlag, updateUserProfile, updateUserPaths,
   } = db;
 
+  /* overnight fixes v1, Part 2 — non-null while a read this page draws from is down (lib/loadFailure) */
+  const loadFail = useLoadFailure();
   /* the clock, re-read each minute */
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const id = window.setInterval(() => setNow(Date.now()), 60000); return () => window.clearInterval(id); }, []);
@@ -817,11 +821,13 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
           {/* v56: the page header is the Query Centre's navy panel — the hawk at the desk, "{n} things to do", "for {book}"
               between rules (one book only), "+ Add a task" and "Quick fill", the ring and "What needs doing". A segment
               settles the page on the pinned workspace, then scrolls the tray to its group. */}
-          <WsHeader56 todo={all.length} bd={bd} book={statBook}
+          <WsHeader56 todo={loadFail ? null : all.length} bd={bd} book={statBook}
             onAdd={openAdd}
             onQuickFill={all.some((x) => x.key === "materials-batch") ? () => quickFill() : null}
             onJump={(k) => { settle(); jump(k); }} />
 
+          {/* overnight fixes v1, Part 2 — a failed read: the error in the workspace's place, never "Nothing to do yet." */}
+          {loadFail ? <LoadFailed words={loadFail.words} onRetry={loadFail.retry} busy={loadFail.busy} probe="todo" /> : (
           <div className="tws-ws" data-tws="workspace" data-slim={slim ? "" : undefined}>
             {slim ? (
               /* v55 (D5): the tray as a 64px strip — » and one round count per category group (the name is its
@@ -860,6 +866,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
               ) : null}
             </section>
           </div>
+          )}
         </div>
       </WorkspacePageGrid>
       {offPop && offRows.length ? <SwitchedOffPop rows={offRows} opener={offPop} onClose={() => setOffPop(null)} onTurnOn={(r) => void turnOn(r)} /> : null}

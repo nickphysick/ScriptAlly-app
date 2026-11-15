@@ -28,6 +28,7 @@ export interface ShellState { step: number; seen: number[]; of: number }
 
 export { QUILL_SRC, QadHead, backWords } from "./QadHead";
 import { QadHead, backWords } from "./QadHead";
+import { useDrawerFocus } from "../shell/useDrawerFocus";
 /** The save button holds its busy state this long before the write goes (the mock's 420ms). */
 export const SAVE_BEAT_MS = 420;
 
@@ -67,6 +68,10 @@ export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, 
   const fromStep = prevStep.current;
   useEffect(() => { prevStep.current = step; });
   const bodyRef = useRef<HTMLDivElement>(null);
+  /* overnight fixes v1, Part 7 — the drawer on its own is modal (its scrim): focus in, Tab wraps, the page is inert,
+     focus back to the opener. Stepped into a panel, the panel's SidePanel does this instead. */
+  const rootRef = useRef<HTMLElement>(null);
+  useDrawerFocus(rootRef, open && !panel, { modal: true });
 
   /* The step can outrun the steps when a journey's answer removes some (a response type changed). */
   const cur = Math.min(step, last);
@@ -151,7 +156,7 @@ export function DrawerShell({ view, mode, open, initialStep, initialSeen, from, 
   return (
     <>
       {panel ? null : <div className="qad-scrim" onClick={leave} data-qad-scrim />}
-      <aside className={`qad-drawer${panel ? " qad-drawer--panel" : ""}`} role={panel ? "group" : "dialog"} aria-modal={panel ? undefined : "true"} aria-label={panel ? panel.title : view.title}
+      <aside ref={rootRef} className={`qad-drawer${panel ? " qad-drawer--panel" : ""}`} role={panel ? "group" : "dialog"} aria-modal={panel ? undefined : "true"} aria-label={panel ? panel.title : view.title}
         data-qad-drawer={mode} data-qp-step={panel ? mode : undefined}>
         {/* Query panel v2 §D — ONE HEAD, in both homes: the ink header, the quill in its blush disc, the close and the
             white agent card. Stepped into the query's panel it leads with "← Back to {first}'s query". */}

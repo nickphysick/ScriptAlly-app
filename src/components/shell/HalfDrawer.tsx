@@ -12,10 +12,11 @@
  *
  * ⚠️ THE DIM FOLLOWS THIS COMPONENT ON BOTH PAGES (the rulings' one exception to "the mock wins").
  */
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import "./halfDrawer.css";
+import { useDrawerFocus } from "./useDrawerFocus";
 
 export const HalfDrawer: React.FC<{
   probe: string;
@@ -42,11 +43,15 @@ export const HalfDrawer: React.FC<{
     return () => cancelAnimationFrame(id);
   }, [open]);
   useEscapeLayer(open, onClose, ESC_LEVEL.pageDrawer);
+  /* overnight fixes v1, Part 7 — modal (its dim): focus in, Tab wraps, the page is inert, focus back to the opener */
+  const rootRef = useRef<HTMLElement>(null);
+  useDrawerFocus(rootRef, open, { modal: true });
   if (!open || typeof document === "undefined") return null;
   return createPortal(
     <>
       <div className={`hdr-dim${shown ? " is-in" : ""}`} data-hdr="dim" data-hdr-of={probe} onClick={onDim ?? onClose} aria-hidden="true" />
       <aside
+        ref={rootRef}
         className={`hdr${shown ? " is-in" : ""}`} data-hdr={probe} role="dialog" aria-modal="true" aria-label={label}
         style={{ width }}
       >

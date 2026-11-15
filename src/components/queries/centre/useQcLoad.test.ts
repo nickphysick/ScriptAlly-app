@@ -99,7 +99,8 @@ describe("the hook", () => {
     expect(page).toContain("const qcLoad = useQcLoad(collectionsReady && activitiesReady, qcDesk ? QC155_LOAD : undefined);");
     expect(page, "the first-run branch must not answer while the page is still loading").toContain('{!qcLoad.loading && !qcDesk && ((lhOverride === null && emptyKind === "first") || lhOverride === 0) ? (');
     /* v155 §2 — the desktop's day one is QcPage151's, and it too waits for the data: `state155` is null while loading */
-    expect(page).toContain('const state155: State155 | null = showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }');
+    /* RE-POINTED (overnight fixes v1, Part 2): a failed read comes first; loading still holds day one back */
+    expect(page).toContain('const state155: State155 | null = qcLoadFail ? { kind: "error", words: qcLoadFail.words, busy: qcLoadFail.busy, retry: qcLoadFail.retry }\n    : showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }');
     /* ⚠️ RETARGETED (living headers §3): the dev count override can also ask for the empty page, and
        it waits for the load exactly as the real condition does — the guard is outside both. */
     for (const gone of ["useSkeleton(", "<QueryCentreSkeleton", "SKELETON_FLOOR_MS);"]) expect(page, `${gone} — a second loading model on this page`).not.toContain(gone);

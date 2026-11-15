@@ -8,15 +8,14 @@
  * ⚠️ THE EXAMPLE AGENT IS FIXED SAMPLE CONTENT, LABELLED AS AN EXAMPLE (`EXAMPLE_AGENT`): plain words in this
  *    file, drawn with the agent panel's own index-card styles. It is never an `Agent`, never written anywhere
  *    and never counted; nothing here reads the writer's data except the manuscript's title.
- * ⚠️ THE THREE WAYS ARE WIRED TO THE EXISTING DOORS: Smart import is the Import page (one free Smart Import
- *    comes with every account: lib/smartImportConfirm), the template is the same download `ContactWays` offers,
- *    and adding by hand is the page's own "+ Add an agent".
+ * ⚠️ THE TWO WAYS ARE WIRED TO THE EXISTING DOORS: Smart import is the Import page (one free Smart Import
+ *    comes with every account: lib/smartImportConfirm), and adding by hand is the page's own "+ Add an agent".
+ *    (The template's tile went on 14 Nov, overnight fixes v1.)
  * ⚠️ PAGE-LOCAL. The Query Centre has no empty page in this shape to share; "How it works" and "Ways to get
  *    started" are lift candidates (the v17 report lists them).
  */
 import React from "react";
 import { CONTACT_DISC_HAWK } from "./ContactOpenHeader";
-import { CONTACT_TEMPLATE_HREF } from "./ContactWays";
 import { CONTACT_EYEBROW } from "./ContactLightHeader";
 import { AgentDisc } from "../../shared/AgentDisc";
 import "../panel/agentPanel.css";
@@ -115,11 +114,6 @@ export const ContactEmptyPage: React.FC<{
           <p>Paste your spreadsheet or a list of agents. QueryHawk sorts it into agents, agencies and anything you{"’"}ve queried, for you to check.</p>
           <button type="button" data-cl17="way-import" onClick={onImport}>Start a Smart import</button>
           <small>One free import comes with your account</small>
-        </div>
-        <div className="cl17-way" data-cl17="way" data-k="template">
-          <h3>Use our template</h3>
-          <p>Fill in a ready-made spreadsheet at your own pace, then upload it.</p>
-          <a data-cl17="way-template" href={CONTACT_TEMPLATE_HREF} download>Download the template</a>
         </div>
         <div className="cl17-way" data-cl17="way" data-k="add">
           <h3>Add one by hand</h3>

@@ -53,7 +53,8 @@ describe("v155 §1 · the quiet state on the page", () => {
     expect(list.indexOf("<QuietPanel155")).toBeLessThan(list.indexOf("p.sections.map("));
   });
   it("is decided from the data (lib/qc155) and never while loading", () => {
-    expect(queries).toContain('const state155: State155 | null = showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }');
+    /* RE-POINTED (overnight fixes v1, Part 2): a failed read is decided first, then loading, as before */
+    expect(queries).toContain('const state155: State155 | null = qcLoadFail ? { kind: "error", words: qcLoadFail.words, busy: qcLoadFail.busy, retry: qcLoadFail.retry }\n    : showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }');
     expect(queries).toContain("quietNow155({ rows: qcScoped, view: qcView150, filtersOn: filtersOn155 })");
     expect(queries).toContain("state155={state155}");
   });
@@ -70,11 +71,15 @@ describe("v155 §2 · day one", () => {
   it("the panel's heading and body, exactly", () => {
     expect(html).toContain(">No queries yet.</h2>");
     const text = html.replace(/<[^>]+>/g, "");
-    expect(text).toContain("Log your first query and it will appear here, with the date a reply is expected. Already keeping a tracker somewhere? Bring it in with Smart import or use our template.");
+    /* RE-POINTED (overnight fixes v1, 14 Nov ruling): the template's clause went with the template */
+    expect(text).toContain("Log your first query and it will appear here, with the date a reply is expected. Already keeping a tracker somewhere? Bring it in with Smart import.");
+    expect(text).not.toMatch(/template/i);
   });
-  it("both links have the right hrefs: the Import page and the template's download", () => {
+  /* RE-POINTED (overnight fixes v1): one link now, the Import page; no download of the template */
+  it("one link, to the Import page, and no template download", () => {
     expect(html).toMatch(/<a href="\/import"[^>]*>Bring it in with Smart import<\/a>/);
-    expect(html).toMatch(/<a href="\/QueryHawk-pipeline-import-template.xlsx"[^>]*download=""[^>]*>use our template<\/a>/);
+    expect(html.match(/<a\b/g) ?? []).toHaveLength(1);
+    expect(html).not.toMatch(/pipeline-import-template|download=""/);
     expect(html).not.toMatch(/<(img|svg|button)\b/);
   });
   it("the header's title reads No queries yet at 0, and the count line otherwise", () => {
@@ -91,10 +96,11 @@ describe("v155 §2 · day one", () => {
     expect(list).toMatch(/: first155 \? <FirstPanel155 onImport=\{p\.onImport\} \/> : empty \? \(/);
   });
   it("the rail recedes and is inert, and Birds-eye gives way to the panel", () => {
-    expect(page).toMatch(/data-qc153="rail-column"[^>]*inert=\{first155 \|\| undefined\}/);
+    /* RE-POINTED (overnight fixes v1, Part 2): the rail is inert on day one and on a failed read alike */
+    expect(page).toMatch(/data-qc153="rail-column"[^>]*inert=\{first155 \|\| !!error155 \|\| undefined\}/);
     expect(rule(".qc151.qc153 .qc153-railcol[data-qc155-inert]")).toMatch(/opacity:\s*0?\.4/);
     expect(rule(".qc151.qc153 .qc153-railcol[data-qc155-inert]")).toMatch(/pointer-events:\s*none/);
-    expect(page).toContain("{birds && !first155 && !loading155 ? (");
+    expect(page).toContain("{birds && !first155 && !loading155 && !error155 ? (");
   });
   it("is decided from the manuscript's own rows, never the searched view, and never while loading", () => {
     expect(queries).toContain('qcLivingRows.length === 0 ? { kind: "first" }');
@@ -130,7 +136,8 @@ describe("v155 §3 · the loading skeleton", () => {
   it("the list is aria-busy while loading, and draws the skeleton only once it is due", () => {
     expect(page).toMatch(/data-qc151="table" data-qcv="list" aria-busy=\{loading155 \|\| undefined\}/);
     expect(page).toContain('const loading155 = p.state155?.kind === "loading";');
-    expect(page).toMatch(/\{loading155 \? \(p\.state155\?\.kind === "loading" && p\.state155\.show \? <Skeleton155 \/> : null\) : first155/);
+    /* RE-POINTED (overnight fixes v1, Part 2): the error is drawn first, then loading, then day one */
+    expect(page).toMatch(/\{error155 \? <LoadFailed [^}]*\}[^\n]*\n\s+: loading155 \? \(p\.state155\?\.kind === "loading" && p\.state155\.show \? <Skeleton155 \/> : null\) : first155/);
     expect(queries).toContain('showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }');
   });
   it("is the ref's shape: heading bar, 3-across grid, 168px cards, one 1.3s sweep, none under reduced motion", () => {

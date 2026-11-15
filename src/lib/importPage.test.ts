@@ -6,7 +6,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { IMPORT_TITLE, IMPORT_SUB, TILE_SMART, TILE_TEMPLATE, TILE_MATCH, IMPORT_FOOTNOTE, IMPORT_FOOTNOTE_SECOND, smartFactLine } from "./importPage";
+import { IMPORT_TITLE, IMPORT_SUB, TILE_SMART, TILE_MATCH, IMPORT_FOOTNOTE, IMPORT_FOOTNOTE_SECOND, smartFactLine } from "./importPage";
 
 const code = (file: string) => readFileSync(resolve(process.cwd(), file), "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
 
@@ -15,9 +15,9 @@ describe("W1 · the Import page's words", () => {
     expect(IMPORT_TITLE).toBe("Bring your list across.");
     expect(IMPORT_SUB).toBe("Agents, queries and dates from the spreadsheet you already keep. You check everything before it's saved.");
   });
-  it("the three tiles", () => {
+  it("the two tiles (overnight fixes v1: the template's words went with its last door, the phone's, 14 Nov)", () => {
     expect(TILE_SMART).toEqual({ title: "Smart import.", text: "Any layout, any wording. QueryHawk reads the sheet and shows you everything before anything is saved.", action: "Import a spreadsheet" });
-    expect(TILE_TEMPLATE).toEqual({ title: "Our template.", text: "Set columns, read exactly. Use it as often as you like to add agents and queries in bulk.", download: "Download the template", upload: "Upload my sheet", fact: "Always free · No limit" });
+    expect(code("src/lib/importPage.ts"), "no template tile's words remain").not.toContain("TILE_TEMPLATE");
     expect(TILE_MATCH).toEqual({ title: "Match your own columns.", text: "Keep a sheet with unusual columns? Tell QueryHawk which column is which.", action: "Match columns", fact: "CSV · Always free" });
   });
   it("the Smart import tile's fact line, for each entitlement", () => {
@@ -39,7 +39,7 @@ describe("W1 · the Import page's words", () => {
   it("the page renders these constants and no words of its own for them", () => {
     const page = code("src/components/import/ImportPage.tsx");
     /* RE-POINTED (two-door import v1): the desktop page has no template tile; its download is the fork's
-       quiet line. TILE_TEMPLATE stays for the phone's doors (ImportDoorsPhone), which this build leaves. */
+       quiet line. (TILE_TEMPLATE went with the phone's template group, overnight fixes v1.) */
     for (const c of ["{IMPORT_TITLE}", "{IMPORT_SUB}", "{TILE_SMART.title}", "{TILE_SMART.text}", "{TILE_SMART.action}", "{TILE_MATCH.title}", "{TILE_MATCH.text}", "{TILE_MATCH.action}", "{TILE_MATCH.fact}", "smartFactLine(entitlement)", "{CAPTURE_QUIET_LINE}", "{CAPTURE_QUIET_LINK}"]) {
       expect(page, c).toContain(c);
     }

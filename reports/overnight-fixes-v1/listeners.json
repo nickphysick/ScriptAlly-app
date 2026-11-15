@@ -1,0 +1,168 @@
+{
+ "rows": [
+  {
+   "label": "1 · after load (/queries)",
+   "opens": 3,
+   "added": 24,
+   "removed": 5,
+   "open": 19,
+   "commits": 2
+  },
+  {
+   "label": "2 · after 13 workspace pages",
+   "opens": 3,
+   "added": 24,
+   "removed": 5,
+   "open": 19,
+   "commits": 2
+  },
+  {
+   "label": "3 · after the query panel ×20 (opened 0)",
+   "opens": 3,
+   "added": 24,
+   "removed": 5,
+   "open": 19,
+   "commits": 2
+  },
+  {
+   "label": "4 · after the agent card ×20 (opened 20)",
+   "opens": 3,
+   "added": 44,
+   "removed": 25,
+   "open": 19,
+   "commits": 2
+  },
+  {
+   "label": "5 · idle 1 min",
+   "opens": 3,
+   "added": 44,
+   "removed": 25,
+   "open": 19,
+   "commits": 3
+  },
+  {
+   "label": "5 · idle 2 min",
+   "opens": 3,
+   "added": 44,
+   "removed": 25,
+   "open": 19,
+   "commits": 3
+  },
+  {
+   "label": "5 · idle 3 min",
+   "opens": 3,
+   "added": 44,
+   "removed": 25,
+   "open": 19,
+   "commits": 3
+  },
+  {
+   "label": "5 · idle 4 min",
+   "opens": 3,
+   "added": 44,
+   "removed": 25,
+   "open": 19,
+   "commits": 3
+  },
+  {
+   "label": "5 · idle 5 min",
+   "opens": 3,
+   "added": 44,
+   "removed": 25,
+   "open": 19,
+   "commits": 3
+  }
+ ],
+ "top": [
+  [
+   "users/*/agents/*/notes",
+   20
+  ],
+  [
+   "doc:users/*",
+   4
+  ],
+  [
+   "doc:test/*",
+   2
+  ],
+  [
+   "doc:users/*/private/*",
+   1
+  ],
+  [
+   "users/*/manuscripts",
+   1
+  ],
+  [
+   "users/*/versions",
+   1
+  ],
+  [
+   "users/*/attachments",
+   1
+  ],
+  [
+   "users/*/packages",
+   1
+  ],
+  [
+   "users/*/agents",
+   1
+  ],
+  [
+   "users/*/queries",
+   1
+  ],
+  [
+   "users/*/activities",
+   1
+  ],
+  [
+   "users/*/journalEntries",
+   1
+  ],
+  [
+   "users/*/notes",
+   1
+  ],
+  [
+   "users/*/tasks",
+   1
+  ],
+  [
+   "users/*/dismissedTasks",
+   1
+  ],
+  [
+   "users/*/taskFlags",
+   1
+  ],
+  [
+   "communityAgents",
+   1
+  ],
+  [
+   "doc:foundingStats/*",
+   1
+  ],
+  [
+   "betaFeedback",
+   1
+  ],
+  [
+   "doc:importDrafts/*",
+   1
+  ],
+  [
+   "users/*/queries/*/activity",
+   1
+  ]
+ ],
+ "requests": {
+  "POST /google.firestore.v1.Firestore/Listen/channel": 54,
+  "GET /google.firestore.v1.Firestore/Listen/channel": 9,
+  "POST /google.firestore.v1.Firestore/Write/channel": 3,
+  "GET /google.firestore.v1.Firestore/Write/channel": 1
+ }
+}

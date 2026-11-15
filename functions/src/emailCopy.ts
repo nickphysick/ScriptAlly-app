@@ -171,7 +171,7 @@ export const inviteCodeNote = (code: string): [string, string] => [
 ];
 export const INVITE_FIRST_HEADING = "A good first ten minutes";
 export const INVITE_FIRST: readonly (readonly [string, string])[] = [
-  ["Bring your list across", " with Smart Import, or start from the template"],
+  ["Bring your list across", " with Smart Import, or add your agents by hand"],
   ["Add your manuscript", ", so every query has something to belong to"],
   ["Log the queries you've already sent", ", and QueryHawk works out what's due and when"],
 ];

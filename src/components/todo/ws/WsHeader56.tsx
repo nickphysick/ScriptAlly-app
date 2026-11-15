@@ -41,7 +41,7 @@ const onKey = (go: () => void) => (e: React.KeyboardEvent) => {
 };
 
 /** the ring on navy: three segments, each a button; the need-you figure in its centre */
-export const NeedRing56: React.FC<{ bd: Breakdown; onJump: (k: RingKey56) => void }> = ({ bd, onJump }) => {
+export const NeedRing56: React.FC<{ bd: Breakdown; onJump: (k: RingKey56) => void; blank?: boolean }> = ({ bd, onJump, blank = false }) => {
   const arcs = needArcs(bd);
   const seg = (k: RingKey56) => ({
     "data-tws56": "seg", "data-k": k, role: "button", tabIndex: 0, className: "tws56-seg",
@@ -58,7 +58,7 @@ export const NeedRing56: React.FC<{ bd: Breakdown; onJump: (k: RingKey56) => voi
             ? <circle key={k} {...seg(k)} cx={RING_GEO.c} cy={RING_GEO.c} r={RING_GEO.r}><title>{segLabel56(k, bd[k])}</title></circle>
             : <path key={k} {...seg(k)} d={a.d}><title>{segLabel56(k, bd[k])}</title></path>;
         })}
-        <text className="tws56-midn" data-tws56="need" x="105" y="118" textAnchor="middle" aria-hidden="true">{needYou(bd)}</text>
+        <text className="tws56-midn" data-tws56="need" x="105" y="118" textAnchor="middle" aria-hidden="true">{blank ? "" : needYou(bd)}</text>
         <text className="tws56-midl" x="105" y="142" textAnchor="middle" aria-hidden="true">need you</text>
       </svg>
     </div>
@@ -66,7 +66,9 @@ export const NeedRing56: React.FC<{ bd: Breakdown; onJump: (k: RingKey56) => voi
 };
 
 export const WsHeader56: React.FC<{
-  todo: number; bd: Breakdown; book: string | null;
+  /** null: the count is not known (overnight fixes v1, Part 2: a read failed), so the title and the ring's figure are
+   *  blank, never 0 — the Query Centre header's own " " while it has no counts */
+  todo: number | null; bd: Breakdown; book: string | null;
   onAdd: () => void; onQuickFill: (() => void) | null; onJump: (k: RingKey56) => void;
 }> = ({ todo, bd, book, onAdd, onQuickFill, onJump }) => {
   const parts = wordsLine56(bd);
@@ -77,7 +79,7 @@ export const WsHeader56: React.FC<{
         attrs={{ "data-tws56": "header" }}
         art={<img src={TODO_HEADER_ART} alt="" width={TODO_ART_W} draggable={false} data-tws56="art" />}
         artClassName="tws56-art"
-        title={thingsTitle(todo)}
+        title={todo === null ? " " : thingsTitle(todo)}
         titleAttrs={{ "data-tws54": "title" }}
         forLine={book ? { lead: "for", text: book, attrs: { "data-tws54": "for" } } : null}
         actions={<>
@@ -86,10 +88,10 @@ export const WsHeader56: React.FC<{
         </>}
         ring={
           <div className="tws56-rc" data-tws56="rc">
-            <NeedRing56 bd={bd} onJump={onJump} />
+            <NeedRing56 bd={bd} onJump={onJump} blank={todo === null} />
             <div className="tws56-words" data-tws56="words">
               <b>What needs doing</b>
-              {parts.length ? (
+              {parts.length && todo !== null ? (
                 <small data-tws56="line">
                   {parts.map((p, i) => (
                     <React.Fragment key={p.key}>{i ? " · " : null}<em data-tws56={p.key}>{p.n}</em> {p.words}</React.Fragment>

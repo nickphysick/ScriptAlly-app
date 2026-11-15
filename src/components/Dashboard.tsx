@@ -51,6 +51,7 @@ import { deskNotice, sidebarBoardTiles } from "../lib/shellSidebar";
 // (settled desk): hero zone → stat row → story/diary → pipeline → Pro banner.
 import { agentPrimary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
 import { Dash58 } from "./dashboard/v58/Dash58";
+import { useLoadFailure } from "./notes/useLoadFailure";
 import { TodayV5 } from "./phone/v5/TodayV5";
 import { useIsMobile } from "./shell/mobileChrome";
 import { StatCardFull, useStatDefs } from "./dashboard/DashboardStatsRow";
@@ -477,6 +478,8 @@ export const Dashboard: React.FC<{
   setSearchQuery
 }) => {
   const openEditQuery = useOpenEditQuery();
+  /* overnight fixes v1, Part 2 — a failed read, for Dash58 to draw in its grid's place */
+  const loadFailure = useLoadFailure();
   const {
     currentUser,
     collectionsReady,
@@ -1529,6 +1532,7 @@ export const Dashboard: React.FC<{
       ) : (
       <Dash58
         loading={!collectionsReady}
+        loadFailure={loadFailure}
         queries={queries}
         agents={agents}
         manuscripts={manuscripts}

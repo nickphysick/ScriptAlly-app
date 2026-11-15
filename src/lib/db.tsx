@@ -169,6 +169,21 @@ async function testConnection() {
 testConnection();
 
 /**
+ * DEV-ONLY REVIEW AID (overnight fixes v1, Part 2): `window.__SA_LF = { fail: ["queries"], mutate?: "emptyonerror" }`
+ * makes a collection listener take its error path instead of subscribing, so the LF locks can show a failed read on
+ * the emulator. `mutate: "emptyonerror"` is the lock's named mutation: the old behaviour, where an error drew an empty
+ * list. Read at subscribe time, so "Try again" after the fault is lifted subscribes for real. Each caller gates on
+ * `import.meta.env.MODE !== "production"` at the call site, so a production build never reaches this.
+ */
+type ForcedRead = "queries" | "agents" | "manuscripts";
+function forcedReadFault(name: ForcedRead): null | { mutate: boolean } {
+  if (typeof window === "undefined") return null;
+  const aid = (window as unknown as { __SA_LF?: { fail?: readonly string[]; mutate?: string } }).__SA_LF;
+  if (!aid?.fail?.includes(name)) return null;
+  return { mutate: aid.mutate === "emptyonerror" };
+}
+
+/**
  * Single source of truth for the MATERIALS_SENT activity description. Used by both
  * updateQueryStatus (sequence skips + direct change) and recordMaterialsSent so the timeline
  * wording can never diverge. A resubmission reads "Revised manuscript (v2) resubmitted to …".
@@ -264,6 +279,12 @@ interface DbContextType {
   agentsRead?: "ok" | "failed" | "retrying";
   /** re-subscribe the agents listener after it failed (the Contact list's "Try again") */
   retryAgents?: () => void;
+  /** ADDITIVE (overnight fixes v1, Part 2): the queries and manuscripts listeners, as `agentsRead` — a failed read never
+   *  resolves to an empty list a page could take for a blank account. Absent reads as "ok". */
+  queriesRead?: "ok" | "failed" | "retrying";
+  manuscriptsRead?: "ok" | "failed" | "retrying";
+  /** re-subscribe every collection listener that failed (the error's "Try again") */
+  retryReads?: () => void;
   /** ADDITIVE (Query Centre v11): the global activity feed has delivered — or failed, or the net fired. */
   activitiesReady: boolean;
   manuscripts: Manuscript[];
@@ -625,6 +646,20 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   /* the agents listener's own (re)subscribe, set by the auth effect for the signed-in user; null when signed out */
   const resubAgentsRef = useRef<(() => void) | null>(null);
   const retryAgents = useCallback(() => { resubAgentsRef.current?.(); }, []);
+  /* overnight fixes v1, Part 2 — the same for queries and manuscripts */
+  const [queriesRead, setQueriesRead] = useState<"ok" | "failed" | "retrying">("ok");
+  const [manuscriptsRead, setManuscriptsRead] = useState<"ok" | "failed" | "retrying">("ok");
+  const resubQueriesRef = useRef<(() => void) | null>(null);
+  const resubManuscriptsRef = useRef<(() => void) | null>(null);
+  const readStateRef = useRef({ agents: "ok", queries: "ok", manuscripts: "ok" } as Record<"agents" | "queries" | "manuscripts", string>);
+  readStateRef.current = { agents: agentsRead, queries: queriesRead, manuscripts: manuscriptsRead };
+  /* re-run each read that failed, and only those (a live listener is not torn down to retry a dead one) */
+  const retryReads = useCallback(() => {
+    const r = readStateRef.current;
+    if (r.agents === "failed") resubAgentsRef.current?.();
+    if (r.queries === "failed") resubQueriesRef.current?.();
+    if (r.manuscripts === "failed") resubManuscriptsRef.current?.();
+  }, []);
   /**
    * ⚠️ ADDITIVE, AND SEPARATE FROM `collectionsReady` ON PURPOSE (Query Centre v11, 19 Sep). That flag
    * is the dashboard's "loading or empty?" answer and must not start waiting on a fourth collection.
@@ -677,6 +712,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setCollectionsReady(false);  // next sign-in starts in the loading state
         setAgentsRead("ok");
         resubAgentsRef.current = null;
+        setQueriesRead("ok"); setManuscriptsRead("ok");
+        resubQueriesRef.current = null; resubManuscriptsRef.current = null;
         setActivitiesReady(false);
         if (readinessNetRef.current) { clearTimeout(readinessNetRef.current); readinessNetRef.current = null; }
         try { localStorage.removeItem("scriptally_was_authed"); } catch {}
@@ -795,16 +832,25 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           handleFirestoreError(error, OperationType.GET, `users/${uid}/private/entitlement`);
         });
 
-        // Manuscripts reader snap
-        unsubManuscripts = onSnapshot(collection(db, "users", uid, "manuscripts"), (snap) => {
-          const arr: Manuscript[] = [];
-          snap.forEach(d => arr.push(d.data() as Manuscript));
-          setManuscripts(arr);
-          if (snapshotIsLoaded(snap)) { mLoaded = true; markCollectionsLoaded(); }
-        }, (error) => {
-          mLoaded = true; markCollectionsLoaded(); // don't hang the loading state on a read error
-          handleFirestoreError(error, OperationType.GET, `users/${uid}/manuscripts`);
-        });
+        // Manuscripts reader snap — a function, so the error's "Try again" can re-subscribe it (overnight fixes v1, Part 2)
+        const subManuscripts = () => {
+          unsubManuscripts();
+          const forced = import.meta.env.MODE !== "production" ? forcedReadFault("manuscripts") : null;
+          if (forced) { unsubManuscripts = () => {}; setManuscripts([]); mLoaded = true; markCollectionsLoaded(); setManuscriptsRead(forced.mutate ? "ok" : "failed"); return; }
+          unsubManuscripts = onSnapshot(collection(db, "users", uid, "manuscripts"), (snap) => {
+            const arr: Manuscript[] = [];
+            snap.forEach(d => arr.push(d.data() as Manuscript));
+            setManuscripts(arr);
+            if (snapshotIsLoaded(snap)) { mLoaded = true; markCollectionsLoaded(); setManuscriptsRead("ok"); }
+          }, (error) => {
+            mLoaded = true; markCollectionsLoaded(); // don't hang the loading state on a read error
+            setManuscriptsRead("failed");
+            handleFirestoreError(error, OperationType.GET, `users/${uid}/manuscripts`);
+          });
+        };
+        setManuscriptsRead("ok");
+        subManuscripts();
+        resubManuscriptsRef.current = () => { setManuscriptsRead("retrying"); subManuscripts(); };
 
         // Versions snapshot reader
         unsubVersions = onSnapshot(collection(db, "users", uid, "versions"), (snap) => {
@@ -842,6 +888,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         // (Firestore ends a listener on its error; Contact list principles v1)
         const subAgents = () => {
           unsubAgents();
+          const forced = import.meta.env.MODE !== "production" ? forcedReadFault("agents") : null;
+          if (forced) { unsubAgents = () => {}; setAgents([]); aLoaded = true; markCollectionsLoaded(); setAgentsRead(forced.mutate ? "ok" : "failed"); return; }
           unsubAgents = onSnapshot(collection(db, "users", uid, "agents"), (snap) => {
             const arr: Agent[] = [];
             snap.forEach(d => arr.push(d.data() as Agent));
@@ -857,16 +905,25 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         subAgents();
         resubAgentsRef.current = () => { setAgentsRead("retrying"); subAgents(); };
 
-        // Queries snapshot reader
-        unsubQueries = onSnapshot(collection(db, "users", uid, "queries"), (snap) => {
-          const arr: Query[] = [];
-          snap.forEach(d => arr.push(d.data() as Query));
-          setQueries(arr);
-          if (snapshotIsLoaded(snap)) { qLoaded = true; markCollectionsLoaded(); }
-        }, (error) => {
-          qLoaded = true; markCollectionsLoaded();
-          handleFirestoreError(error, OperationType.GET, `users/${uid}/queries`);
-        });
+        // Queries snapshot reader — a function, so the error's "Try again" can re-subscribe it (overnight fixes v1, Part 2)
+        const subQueries = () => {
+          unsubQueries();
+          const forced = import.meta.env.MODE !== "production" ? forcedReadFault("queries") : null;
+          if (forced) { unsubQueries = () => {}; setQueries([]); qLoaded = true; markCollectionsLoaded(); setQueriesRead(forced.mutate ? "ok" : "failed"); return; }
+          unsubQueries = onSnapshot(collection(db, "users", uid, "queries"), (snap) => {
+            const arr: Query[] = [];
+            snap.forEach(d => arr.push(d.data() as Query));
+            setQueries(arr);
+            if (snapshotIsLoaded(snap)) { qLoaded = true; markCollectionsLoaded(); setQueriesRead("ok"); }
+          }, (error) => {
+            qLoaded = true; markCollectionsLoaded();
+            setQueriesRead("failed");
+            handleFirestoreError(error, OperationType.GET, `users/${uid}/queries`);
+          });
+        };
+        setQueriesRead("ok");
+        subQueries();
+        resubQueriesRef.current = () => { setQueriesRead("retrying"); subQueries(); };
 
         // Activities snapshot reader
         unsubActivities = onSnapshot(collection(db, "users", uid, "activities"), (snap) => {
@@ -4086,6 +4143,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         collectionsReady,
         agentsRead,
         retryAgents,
+        queriesRead,
+        manuscriptsRead,
+        retryReads,
         activitiesReady,
         manuscripts,
         versions,

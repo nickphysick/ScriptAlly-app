@@ -104,7 +104,10 @@ describe("one derived list, one control that narrows it", () => {
   it("every view hands a selection to the page's one onOpenQuery", () => {
     const at = page.indexOf("<QcCentre");
     expect(at).toBeGreaterThan(-1);
-    const mount = page.slice(at, page.indexOf("FORM MODE", at) > 0 ? page.indexOf("FORM MODE", at) : at + 6000);
+    /* RE-POINTED (overnight fixes v1, Part 2): "FORM MODE" is in a comment, which decls() strips, so the window is the
+       fixed fallback; it was 6000 with the second onOpenQuery 20 characters inside the edge, and Part 2's two
+       `|| qcLoadFail` (26 characters) pushed it out. 6100 restores the margin; the claim is unchanged. */
+    const mount = page.slice(at, page.indexOf("FORM MODE", at) > 0 ? page.indexOf("FORM MODE", at) : at + 6100);
     expect(mount.split("onOpenQuery?.(").length - 1, "a view selects through something other than the page's onOpenQuery").toBeGreaterThanOrEqual(2);
     expect(mount).not.toMatch(/setSelectedQueryId\(/);
   });

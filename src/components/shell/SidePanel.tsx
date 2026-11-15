@@ -18,6 +18,7 @@
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import "./sidePanel.css";
+import { useDrawerFocus } from "./useDrawerFocus";
 
 export const SIDE_SLOT = "[data-side-slot]";
 
@@ -46,6 +47,8 @@ export const SidePanel: React.FC<{
   onScrim?: () => void;
 }> = ({ label, children, step = false, attrs, className, style, dim = false, onScrim }) => {
   const ref = useRef<HTMLElement>(null);
+  /* overnight fixes v1, Part 7 — focus in on open and back on close; modal (trap + inert page) only while dimmed */
+  useDrawerFocus(ref, true, { modal: dim });
   /* the Birds-eye tab and anything else that stands down while a panel is open read this */
   useEffect(() => {
     document.body.classList.add("spanel-open");
@@ -62,7 +65,7 @@ export const SidePanel: React.FC<{
     {/* always mounted while the panel is, so it can fade both ways; inert and clear until an action runs */}
     <div className="spanel-scrim" data-side-scrim="" data-on={dim ? "true" : undefined} aria-hidden="true"
       onClick={() => (onScrim ? onScrim() : window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })))} />
-    <aside ref={ref} className={`spanel${className ? ` ${className}` : ""}`} role="dialog" aria-label={label} style={style} data-side-panel="" data-step={step ? "true" : undefined} data-dim={dim ? "true" : undefined} {...attrs}>
+    <aside ref={ref} className={`spanel${className ? ` ${className}` : ""}`} role="dialog" aria-modal={dim ? "true" : undefined} aria-label={label} style={style} data-side-panel="" data-step={step ? "true" : undefined} data-dim={dim ? "true" : undefined} {...attrs}>
       <div className="spanel-own" data-side-own="" hidden={step || undefined}>{children}</div>
       <div className="spanel-slot" data-side-slot="" />
     </aside>
