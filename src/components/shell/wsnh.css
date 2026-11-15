@@ -16,6 +16,12 @@
 @media (min-width: 768px) {
   /* ── §1 · the wrapper: no box of its own ───────────────────────────────────────────────────────────────────── */
   .wsnh { display: contents; }
+  /* ⚠️ …SO IT DRAWS NO PADDING EITHER (workspace-headers-v1.1). `.qc151` is the Query Centre's page root, and its
+     `padding-top: 30px` (qcv151.css) is what sets that page's header 38 below the sheet's top (30 + the header's own
+     8). On a `display: contents` wrapper the padding is dropped, so these pages' headers sat at 8, 30 higher than the
+     Query Centre's. The header takes the 30 itself, as margin above its own 8. `--wsh11` marks the rule for T1's
+     break (tests/e2e/wsHeaders.measure.ts). */
+  .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { margin-top: calc(30px + 8px); --wsh11: 1; }
 
   /* ── §2 · Query letters v2.4's additions, as built there ──────────────────────────────────────────────────── */
   .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { min-height: 227px; margin-bottom: 48px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }

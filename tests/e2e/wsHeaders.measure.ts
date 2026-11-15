@@ -48,7 +48,11 @@ const BUILT = {
   cl: { route: "/agents", root: ".cl27" },
   todo: { route: "/todo", root: "[data-tws='page']" },
   letters: { route: "/materials/letters", root: "[data-ql='page']" },
+  /* Submission packages v43 (workspace-headers-v1.1: captured from then on, so H2 covers it) */
+  pk: { route: "/queries/packages", root: "[data-pk41='page']" },
 } as const;
+/* recon of only some built pages (merged into before.json, the rest kept): WSH_BUILT=pk */
+const BUILT_ONLY = (process.env.WSH_BUILT ?? "").split(",").filter(Boolean);
 
 /* ── the seven pages ── */
 type PageDef = {
@@ -230,7 +234,7 @@ test.describe("Step 0 · recon", () => {
   for (const vp of SIZES) {
     test(`built headers and bars @${vp.width}`, async ({ page }) => {
       const out: Record<string, Reading> = {};
-      for (const [k, d] of Object.entries(BUILT)) {
+      for (const [k, d] of Object.entries(BUILT).filter(([k]) => !BUILT_ONLY.length || BUILT_ONLY.includes(k))) {
         await page.addInitScript(() => { try { localStorage.setItem("sa.guide.queries", "1"); localStorage.setItem("sa.guide.queries-explainer", "1"); } catch { /* private */ } });
         await scope(MS)(page);
         await open(page, d.route, d.root, vp, "header.qc1531-hd");
@@ -241,7 +245,7 @@ test.describe("Step 0 · recon", () => {
         out[k] = { header: hd, barAtRest: rest, bar };
       }
       const all = existsSync(BEFORE) ? before() : {};
-      all[String(vp.width)] = out;
+      all[String(vp.width)] = { ...(all[String(vp.width)] ?? {}), ...out };
       writeFileSync(BEFORE, JSON.stringify(all, null, 1));
       note(`built-${vp.width}`, out);
     });
@@ -484,3 +488,145 @@ for (const key of PAGE_KEYS) {
     });
   });
 }
+
+/* ══ Workspace headers v1.1 — block T: every navy header sits the same distance from the top of the sheet ═══════════
+ *   npm run e2e:emu -- tests/e2e/wsHeaders.measure.ts --project=measure --workers=1 --grep "T ·"
+ *   WSH_T=recon   Step 0: writes reports/workspace-headers-v1-1/step0.json and the Query Centre's header + bar shots
+ *                 (T3's oracle). Run once, on the served line, before the fix.
+ *   WSH_MUTATE=T1 the fix removed (the wrapper's top restored to what it was) · T2 a −12px top margin on the header
+ *   (reddens Manuscripts only) · T2b the header lifted 50px (every page).
+ * The SHEET is the page's scroller (`.wpg-scroll`): its top edge is the sheet's lip. The oracle is the Query Centre's
+ * own gap, read in the same run. */
+const T_DIR = "reports/workspace-headers-v1-1";
+const T_RECON = process.env.WSH_T === "recon";
+const T_PAGES: { key: string; route: string; root: string; ms: string; face?: string }[] = [
+  { key: "qc", route: "/queries", root: "[data-qc151='page']", ms: MS },
+  { key: "cl", route: "/agents", root: ".clv-group.cl27", ms: MS },
+  { key: "todo", route: "/todo", root: "[data-tws='page']", ms: MS },
+  { key: "letters", route: "/materials/letters", root: "[data-ql='page']", ms: MS },
+  { key: "pk", route: "/queries/packages", root: "[data-pk41='page']", ms: MS },
+  { key: "responses", route: "/queries/responses", root: "[data-rsp='page']", ms: MS },
+  { key: "analytics", route: "/queries/analytics", root: "[data-a17='page']", ms: MS },
+  { key: "discover", route: "/agents/discover", root: "[data-dv1='page']", ms: MS, face: "live" },
+  { key: "comps", route: "/manuscripts/comps", root: "[data-cpv='page']", ms: MS },
+  { key: "versions", route: "/manuscripts/versions", root: "[data-vv2='page']", ms: "msv12-ms" },
+  { key: "manuscripts", route: "/manuscripts", root: "[data-msv12='page']", ms: MS },
+  { key: "corkboard", route: "/todo/corkboard", root: "[data-cb2='page']", ms: MS },
+];
+async function tOpen(page: Page, d: (typeof T_PAGES)[number], vp: { width: number; height: number }) {
+  await page.addInitScript(([m, f]) => {
+    try { localStorage.setItem("scriptally_active_manuscript_id", m); localStorage.setItem("sa.guide.queries", "1"); localStorage.setItem("sa.guide.queries-explainer", "1"); } catch { /* private */ }
+    if (f) (window as unknown as Record<string, unknown>).__SA_DV_STATE = f;
+  }, [d.ms, d.face ?? ""] as const);
+  await open(page, d.route, d.root, vp, "header.qc1531-hd");
+  await page.locator(`${d.root}:visible header.qc1531-hd`).first().waitFor({ state: "visible", timeout: 30_000 });
+  await scrollTo(page, d.root, 0);
+}
+async function tMutate(page: Page) {
+  /* T2b · the prescribed −12 leaves most headers 18–26 below the sheet's top, corners in plain view (only Manuscripts
+     reddens): this one lifts every header past the sheet's edge, so every page's corners are cut. A transform, not a
+     margin: on the `.wsnh` pages a negative margin collapses into the page's first box and stops flush at the top. */
+  if (MUT === "T2b") await page.addStyleTag({ content: "header.qc1531-hd.qc1531-hd.qc1531-hd.qc1531-hd.qc1531-hd.qc1531-hd.qc1531-hd { transform: translateY(-50px) !important; }" });
+  if (MUT === "T2") await page.addStyleTag({ content: "header.qc1531-hd.qc1531-hd.qc1531-hd.qc1531-hd.qc1531-hd.qc1531-hd.qc1531-hd { margin-top: -12px !important; }" });
+  if (MUT === "T1") await page.evaluate(() => {
+    /* the fix's own rules, switched off: every rule this pass added carries `--wsh11` */
+    for (const sh of [...document.styleSheets]) {
+      let rules: CSSRuleList; try { rules = sh.cssRules; } catch { continue; }
+      const walk = (rs: CSSRuleList) => { for (const r of [...rs]) {
+        if (r instanceof CSSStyleRule && r.style.getPropertyValue("--wsh11")) { for (const p of [...r.style]) r.style.removeProperty(p); }
+        else if ("cssRules" in r) walk((r as CSSGroupingRule).cssRules);
+      } };
+      walk(rules);
+    }
+  });
+  if (MUT) await page.waitForTimeout(400);
+}
+/** the gap, the chain that makes it, and the four corners' sample points */
+const readTop = (page: Page, root: string) => page.evaluate((rs) => {
+  const r = [...document.querySelectorAll<HTMLElement>(rs)].find((e) => e.getBoundingClientRect().width > 0)!;
+  const hd = r.querySelector<HTMLElement>("header.qc1531-hd")!;
+  /* the sheet: the header's nearest scrolling ancestor (the page's scroller) */
+  let sc: HTMLElement = document.scrollingElement as HTMLElement;
+  for (let e = hd.parentElement; e; e = e.parentElement) { if (/(auto|scroll)/.test(getComputedStyle(e).overflowY)) { sc = e; break; } }
+  const s = sc.getBoundingClientRect(), b = hd.getBoundingClientRect(), cs = getComputedStyle(hd);
+  const rad = parseFloat(cs.borderTopLeftRadius) || 0;
+  const chain: { el: string; top: number; padTop: string; marTop: string; borTop: string; display: string }[] = [];
+  for (let e: HTMLElement | null = hd; e && e !== sc.parentElement; e = e.parentElement) {
+    const c = getComputedStyle(e);
+    chain.push({ el: `${e.tagName.toLowerCase()}.${String(e.className).trim().split(/\s+/).slice(0, 4).join(".")}`, top: Math.round((e.getBoundingClientRect().top - s.top) * 10) / 10, padTop: c.paddingTop, marTop: c.marginTop, borTop: c.borderTopWidth, display: c.display });
+  }
+  return { sheet: `${sc.tagName.toLowerCase()}.${String(sc.className).trim().split(/\s+/).slice(0, 4).join(".")}`, sheetTop: s.top, headerTop: b.top, gap: Math.round((b.top - s.top) * 10) / 10, left: b.left, right: b.right, bottom: b.bottom, radius: rad, bg: cs.backgroundColor, scrollTop: sc.scrollTop, chain };
+}, root);
+/** RGB at viewport points, off a screenshot (decoded in the page: no image library here) */
+async function samplePx(page: Page, pts: [number, number][]) {
+  const png = (await page.screenshot()).toString("base64");
+  return page.evaluate(async ([b64, ps]) => {
+    const img = new Image(); img.src = `data:image/png;base64,${b64}`; await img.decode();
+    const c = document.createElement("canvas"); c.width = img.width; c.height = img.height;
+    const x = c.getContext("2d")!; x.drawImage(img, 0, 0);
+    const k = img.width / window.innerWidth;
+    return (ps as [number, number][]).map(([px, py]) => [...x.getImageData(Math.round(px * k), Math.round(py * k), 1, 1).data].slice(0, 3));
+  }, [png, pts] as const);
+}
+const dist = (a: number[], b: number[]) => Math.max(...a.map((v, i) => Math.abs(v - b[i])));
+/** each top corner: OUTSIDE the curve (1px in from both edges, past the arc) reads the page beside the header; INSIDE
+ *  (radius in from both edges) reads the navy */
+async function readCorners(page: Page, t: Awaited<ReturnType<typeof readTop>>) {
+  const o = Math.max(1, t.radius * 0.15), i = Math.max(t.radius, 6) + 2;
+  const pts: [number, number][] = [
+    [t.left + o, t.headerTop + o], [t.left + i, t.headerTop + i], [t.left - 8, t.headerTop + i + 10],
+    [t.right - o, t.headerTop + o], [t.right - i, t.headerTop + i], [t.right + 8, t.headerTop + i + 10],
+  ];
+  const px = await samplePx(page, pts);
+  const navy = (t.bg.match(/\d+/g) ?? []).slice(0, 3).map(Number);
+  const side = (n: number) => ({ outside: px[n], inside: px[n + 1], page: px[n + 2], outsideIsPage: dist(px[n], px[n + 2]) <= 14, insideIsNavy: dist(px[n + 1], navy) <= 14 });
+  return { left: side(0), right: side(3), navy };
+}
+
+test.describe("T · the header's distance from the top of the sheet", () => {
+  for (const vp of SIZES) {
+    test(`T1 T2 @${vp.width}`, async ({ page }) => {
+      const rows: Record<string, unknown> = {};
+      let oracle: number | null = null;
+      for (const d of T_PAGES) {
+        await tOpen(page, d, vp);
+        if (d.key !== "qc") await tMutate(page);
+        const t = await readTop(page, d.root);
+        const c = await readCorners(page, t);
+        if (d.key === "qc") oracle = t.gap;
+        rows[d.key] = { ...t, corners: c, diff: oracle === null ? null : Math.round((t.gap - oracle) * 10) / 10 };
+        if (!T_RECON) {
+          expect.soft(near(t.gap, oracle, 1), `T1 ${d.key} @${vp.width}: gap ${t.gap} vs the Query Centre's ${oracle}`).toBe(true);
+          /* the corners are on the sheet at all: a header lifted past the sheet's top samples the shell both outside its
+             curve and beside it, which match */
+          expect.soft(t.headerTop >= t.sheetTop - 0.5, `T2 ${d.key} @${vp.width}: top corners on the sheet (header ${t.headerTop} vs sheet ${t.sheetTop})`).toBe(true);
+          expect.soft(c.left.outsideIsPage && c.right.outsideIsPage, `T2 ${d.key} @${vp.width}: page colour outside both top corners ${JSON.stringify([c.left.outside, c.left.page, c.right.outside, c.right.page])}`).toBe(true);
+          expect.soft(c.left.insideIsNavy && c.right.insideIsNavy, `T2 ${d.key} @${vp.width}: navy inside both top corners ${JSON.stringify([c.left.inside, c.right.inside, c.navy])}`).toBe(true);
+        }
+        if (vp.width === 1440 && !MUT) {
+          mkdirSync(`${T_DIR}/shots/${T_RECON ? "before" : "after"}`, { recursive: true });
+          await page.screenshot({ path: `${T_DIR}/shots/${T_RECON ? "before" : "after"}/top-${d.key}.png`, clip: { x: Math.max(0, t.left - 40), y: Math.max(0, t.sheetTop - 30), width: Math.min(vp.width - Math.max(0, t.left - 40), t.right - t.left + 80), height: 120 } });
+        }
+      }
+      {
+        /* T's readings are its own file, never workspace-headers-v1's `after.json` */
+        const f = `${T_DIR}/${T_RECON ? "step0" : `readings${MUT ? `-${MUT}` : ""}`}.json`;
+        const was = existsSync(f) ? JSON.parse(readFileSync(f, "utf8")) : {};
+        writeFileSync(f, JSON.stringify({ ...was, [String(vp.width)]: rows }, null, 1));
+      }
+    });
+    test(`T3 the Query Centre's header and bar @${vp.width}`, async ({ page }) => {
+      const d = T_PAGES[0];
+      await tOpen(page, d, vp);
+      const hd = page.locator(`${d.root}:visible header.qc1531-hd`).first();
+      const head = await hd.screenshot();
+      await scrollTo(page, d.root, 600);
+      const bar = await page.locator(`${d.root}:visible .qc156-slim`).first().screenshot();
+      const name = (k: string) => `${T_DIR}/qc-${k}-${vp.width}.png`;
+      if (T_RECON) { writeFileSync(name("header"), head); writeFileSync(name("bar"), bar); return; }
+      expect(existsSync(name("header")), "T3 oracle captured (WSH_T=recon)").toBe(true);
+      expect.soft(head.equals(readFileSync(name("header"))), `T3 the Query Centre's header @${vp.width} is pixel-identical`).toBe(true);
+      expect.soft(bar.equals(readFileSync(name("bar"))), `T3 the Query Centre's bar @${vp.width} is pixel-identical`).toBe(true);
+    });
+  }
+});

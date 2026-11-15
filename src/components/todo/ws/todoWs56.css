@@ -17,6 +17,9 @@
   /* `.qc151` is the Query Centre page's root class: it brings 30px of top padding and a container of its own; here it
      only carries the header's scoped rules, so both are put back */
   .tws .qc151.tws56-hdw { flex: none; padding-top: 0; container-type: normal; color: var(--tw-ink); font-family: var(--tw-serif); }
+  /* …but the 30 above the header is the Query Centre's distance from the sheet's top, so it comes back
+     (workspace-headers-v1.1: To-do's header sat at 8, every other navy header at 38). `--wsh11` marks the rule for T1. */
+  .tws .qc151.tws56-hdw.tws56-hdw { padding-top: 30px; --wsh11: 1; }
   /* the ref's grid: the Query Centre's 268 and 28px gap, the third column as wide as its block */
   .qc151.tws56-hdw > .qc1531-hd.tws56-hd { grid-template-columns: 268px minmax(0, 1fr) auto; }
   /* the cut-out on nothing: no disc, no box */

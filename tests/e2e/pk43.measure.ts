@@ -210,7 +210,8 @@ for (const size of SIZES) {
     /* the break: this page's root taken out of qcv156 §3's lists (rewritten in the live stylesheet) */
     L.broken();
     await page.evaluate(() => {
-      const walk = (rules: CSSRuleList) => { for (const r of [...rules]) { if (r instanceof CSSStyleRule && r.selectorText.includes(".pk43)")) r.selectorText = r.selectorText.replace(/, \.pk43\)/g, ")"); else if ("cssRules" in r) walk((r as CSSGroupingRule).cssRules); } };
+      const walk = (rules: CSSRuleList) => { for (const r of [...rules]) { /* `.pk43` is no longer last in §3's lists (workspace-headers-v1 added `.wsnh` after it): match it before `,` or `)` */
+        if (r instanceof CSSStyleRule && /, \.pk43(?=[,)])/.test(r.selectorText)) r.selectorText = r.selectorText.replace(/, \.pk43(?=[,)])/g, ""); else if ("cssRules" in r) walk((r as CSSGroupingRule).cssRules); } };
       for (const s of [...document.styleSheets]) { try { walk(s.cssRules); } catch { /* cross-origin */ } }
     });
     await page.waitForTimeout(300);
