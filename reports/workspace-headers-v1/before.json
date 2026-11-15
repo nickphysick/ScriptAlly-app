@@ -189,6 +189,63 @@
    "bar": {
     "missing": ".qc156-slim"
    }
+  },
+  "pk": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.890625,
+    "height": 227.140625,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 696.265625,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "4 packages",
+    "buttonH": 46,
+    "grid": "268px 934px 0px",
+    "artDisplay": "flex",
+    "rightW": 0
+   },
+   "barAtRest": {
+    "shown": false,
+    "inert": true,
+    "ariaHidden": "true",
+    "visibility": "hidden",
+    "opacity": "0",
+    "top": 6,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "4 packages",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "4 packages",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
   }
  },
  "1717": {
@@ -380,6 +437,63 @@
    },
    "bar": {
     "missing": ".qc156-slim"
+   }
+  },
+  "pk": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.890625,
+    "height": 227.140625,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 696.265625,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "4 packages",
+    "buttonH": 46,
+    "grid": "268px 1211px 0px",
+    "artDisplay": "flex",
+    "rightW": 0
+   },
+   "barAtRest": {
+    "shown": false,
+    "inert": true,
+    "ariaHidden": "true",
+    "visibility": "hidden",
+    "opacity": "0",
+    "top": 6,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "4 packages",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "4 packages",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
    }
   }
  }
