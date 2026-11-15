@@ -28,6 +28,7 @@ import "../dashboard/oneScreen.css";
 import "../dashboard/v58/dash58.css";
 import "../dashboard/v2/dash2.css";
 import "./yourNotes.css";
+import { LoadFailed } from "./LoadFailed";
 import { useScriptAllyDb } from "../../lib/db";
 import { HOW_SLIDES, HOW_TITLE, type ComposeKey } from "../../lib/foundingCard";
 import {
@@ -167,10 +168,7 @@ export const YourNotesView: React.FC<{
               {loading ? (
                 <div className="yn-sk" aria-hidden="true" data-yn="loading"><i /><i /><i /></div>
               ) : error ? (
-                <div className="yn-empty" data-yn="error" role="alert">
-                  <p>{LOAD_FAILED}</p>
-                  <button type="button" className="yn-btn" onClick={retry}>Try again</button>
-                </div>
+                <LoadFailed words={LOAD_FAILED} onRetry={retry} probe="your-notes" />
               ) : empty ? (
                 <div className="yn-empty" data-yn="empty">
                   <h3 className="yn-eh">Nothing sent yet</h3>

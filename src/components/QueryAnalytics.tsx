@@ -40,6 +40,8 @@ import { S5Body, s5Readings } from "./analytics/A24S5";
 import { S6Body } from "./analytics/A24S6";
 import { S7Body } from "./analytics/A24S7";
 import { A21Empty } from "./analytics/A21Empty";
+import { LoadFailed } from "./notes/LoadFailed";
+import { useLoadFailure } from "./notes/useLoadFailure";
 import { buildV21 } from "../lib/analyticsV21";
 import { buildV24, deskV24, heads, ringOf, QUESTIONS } from "../lib/analyticsV24";
 import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
@@ -85,6 +87,9 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
   }, [v21, v24, model]);
 
   const load = useQcLoad(collectionsReady && activitiesReady);
+  /* overnight fixes v1, Part 2 — a failed read: the error in the empty page's place, and the header in its loading
+     shape (no figures, and no "Import the ones you've sent") */
+  const anFail = useLoadFailure();
   const v = model.v17;
   const names = [...QUESTIONS];
 
@@ -107,7 +112,9 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
   useReveal(pageRef, [load.loading, empty, model]);
 
   let body: React.ReactNode;
-  if (load.loading) {
+  if (anFail) {
+    body = <LoadFailed words={anFail.words} onRetry={anFail.retry} busy={anFail.busy} probe="analytics" />;
+  } else if (load.loading) {
     body = <Skeleton />;
   } else if (manuscript === null) {
     body = (
@@ -144,9 +151,9 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
             {/* Workspace headers v1: the desktop opens on the shared navy header, in every state; the phone keeps v17's
                 band (decision 5) */}
             {!phone ? (
-              <AnHeader loading={load.loading} empty={empty} noMs={!load.loading && manuscript === null}
+              <AnHeader loading={load.loading || !!anFail} empty={empty && !anFail} noMs={!load.loading && !anFail && manuscript === null}
                 sent={model.sent} replies={v24.tally.all} msTitle={manuscript?.title || null}
-                ring={load.loading ? null : ringOf(v24.keeping)}
+                ring={load.loading || anFail ? null : ringOf(v24.keeping)}
                 onRecord={record} onRead={() => go(0)} onLog={() => openQueryDrawer({ mode: "log" })} onImport={() => onNavigate?.("import")} />
             ) : null}
             {phone && !empty ? <PageHeader

@@ -129,6 +129,7 @@ import type { RowSpec } from "./reading-pane/QueryTimeline";
 import { expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151, type State155 } from "./queries/centre/QcPage151";
+import { useLoadFailure } from "./notes/useLoadFailure";
 import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { QcViews156 } from "./queries/centre/QcViews156";
 import { QcLine156 } from "./queries/centre/QcLine156";
@@ -5406,6 +5407,9 @@ export const Queries: React.FC<{
    * than delaying it, and so cannot leave a gap for anything else to fill.
    */
   const dataReady = collectionsReady;
+  /* overnight fixes v1, Part 2 — the reads this page draws from; non-null while one is down (lib/loadFailure) */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const qcLoadFail = useLoadFailure();
 
   /**
    * ══ §4/§5 · THE LIVE VIEWS' SKELETON, AND THE ENTRANCE IT GOVERNS ════════════════════════════
@@ -5433,7 +5437,9 @@ export const Queries: React.FC<{
   /* v155 — the desktop list's state, from the data (lib/qc155). Nothing narrowing it means no chip, no "Where it stands"
      and no search, the page's or the shell's. Declared up here, below everything it reads. */
   const filtersOn155 = qc140Chips.length > 0 || qcF138.where != null || qcTerm !== "";
-  const state155: State155 | null = showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }
+  /* overnight fixes v1, Part 2 — a failed read comes first: an error is never drawn as day one (nor as a skeleton forever) */
+  const state155: State155 | null = qcLoadFail ? { kind: "error", words: qcLoadFail.words, busy: qcLoadFail.busy, retry: qcLoadFail.retry }
+    : showGridSkeleton ? { kind: "loading", show: qcDesk && qcLoad.phase === "skeleton" }
     /* §2 day one: the manuscript's own rows (never the searched view: a search that matches nothing is not day one) */
     : qcLivingRows.length === 0 ? { kind: "first" }
     : quietNow155({ rows: qcScoped, view: qcView150, filtersOn: filtersOn155 }) ? { kind: "quiet", body: quietBody155(qcScoped, qcNow138) }
@@ -8105,14 +8111,14 @@ export const Queries: React.FC<{
               const viewAllN = railBase.filter((r) => matches138(r, clearFacet(qcF138, "quick"), now151)).length;
               const railN = railCounts(railBase, qcF138, qc138Counts.sent.map((o) => o.key), (r, g) => matches138(r, g, now151));
               /* v156 §2 — the header's line and the collapsed bar's "n of goal" (goal156Of) */
-              const goal156 = showGridSkeleton ? null : goal156Of(queries.map((q) => anyToMs(q.dateSent)), currentUser?.queryingGoals, now151);
+              const goal156 = showGridSkeleton || qcLoadFail ? null : goal156Of(queries.map((q) => anyToMs(q.dateSent)), currentUser?.queryingGoals, now151);
               const beEmpty = !showGridSkeleton && qcBeOrder.length === 0
                 ? (strip151.length ? "filtered" as const : qcF138.where === "closed" ? "closed" as const : null) : null;
               return (
                 <QcPage151
                   state155={state155}
                   loading={showGridSkeleton}
-                  counts={showGridSkeleton ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
+                  counts={showGridSkeleton || qcLoadFail ? null : { ms: qcLineTitle, sent: qcScoped.length, active: qcScoped.filter((r) => quickOfRow(r, () => whereItStands(r, now151)) !== "closed").length, heardPct: qcBandFig.heardPct }}
                   /* v156 §2 — "this week" as a line on the navy header (v154's bar chart is gone) */
                   ring={<QcLine156 m={goal156} />} goal={goal156}
                   view={qcView150} onView={pickView150}
