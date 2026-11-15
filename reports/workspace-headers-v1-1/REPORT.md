@@ -109,4 +109,10 @@ red at baseline too. The touched unit specs (shell, todo/ws, qcv156: 554 tests) 
 
 ## Deploy
 
-DEPLOY_PLACEHOLDER
+- **Dev branch:** `dev/srm1-plv3-qc156-clq1-tdi-qc1561-tdi-clq11-td56-ql24-align-pk43-wsh1-wsh11`, cut from the
+  served line (22fdb1710, `index-B4FacP2i.js`). Its merge is 953351072. Pushed.
+- **Deployed once** to dev from a clean checkout of that pushed tip, in the scratchpad:
+  `npm run build:dev && firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`.
+  - Before: `index-B4FacP2i.js`. Built: `index-CGBxi7UY.js`. **Served after: `index-CGBxi7UY.js`.**
+- **Not checked on dev:** the measurements above ran on the emulator build of the same tree, and nothing was
+  re-measured live.
