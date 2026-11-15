@@ -1,0 +1,342 @@
+{
+ "responses-1440-H5b": {
+  "header": {
+   "left": 112,
+   "right": 1400,
+   "top": 182.546875,
+   "bottom": 409.546875,
+   "height": 227,
+   "width": 1288,
+   "scLeft": 80,
+   "radius": "20px",
+   "bg": "rgb(42, 58, 82)",
+   "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+   "marginBottom": "48px",
+   "titleLeft": 408,
+   "titleRight": 752.65625,
+   "titleSize": "54px",
+   "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "titleLines": 1,
+   "titleText": "10 responses",
+   "buttonH": 46,
+   "grid": "268px 644.438px 289.562px",
+   "artDisplay": "block",
+   "rightW": 289.5625
+  },
+  "first": {
+   "left": 112,
+   "right": 1400,
+   "top": 457.546875,
+   "bottom": 662.59375,
+   "tag": "DIV",
+   "cls": "rsp5-glance"
+  },
+  "figure": {
+   "body": {
+    "count": 2,
+    "first": "10 of 14"
+   },
+   "fig": 10
+  },
+  "h7": {
+   "h1": 1,
+   "old": 0,
+   "gone": [
+    [
+     ".rsp5-card .phc-tx > p",
+     0
+    ],
+    [
+     "[data-rsp5='title-card']",
+     0
+    ]
+   ]
+  },
+  "barAtRest": {
+   "shown": false,
+   "inert": true,
+   "ariaHidden": "true",
+   "visibility": "visible",
+   "opacity": "1",
+   "top": 0,
+   "height": 68.796875,
+   "titleSize": "24px",
+   "titleText": "10 responses",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  },
+  "pad": 0,
+  "bar": {
+   "shown": true,
+   "inert": false,
+   "ariaHidden": null,
+   "visibility": "visible",
+   "opacity": "1",
+   "top": -600,
+   "height": 68.796875,
+   "titleSize": "24px",
+   "titleText": "10 responses",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  }
+ },
+ "responses-1717-H5b": {
+  "header": {
+   "left": 112,
+   "right": 1677,
+   "top": 182.546875,
+   "bottom": 409.546875,
+   "height": 227,
+   "width": 1565,
+   "scLeft": 80,
+   "radius": "20px",
+   "bg": "rgb(42, 58, 82)",
+   "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+   "marginBottom": "48px",
+   "titleLeft": 408,
+   "titleRight": 752.65625,
+   "titleSize": "54px",
+   "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "titleLines": 1,
+   "titleText": "10 responses",
+   "buttonH": 46,
+   "grid": "268px 921.438px 289.562px",
+   "artDisplay": "block",
+   "rightW": 289.5625
+  },
+  "first": {
+   "left": 112,
+   "right": 1677,
+   "top": 457.546875,
+   "bottom": 662.59375,
+   "tag": "DIV",
+   "cls": "rsp5-glance"
+  },
+  "figure": {
+   "body": {
+    "count": 2,
+    "first": "10 of 14"
+   },
+   "fig": 10
+  },
+  "h7": {
+   "h1": 1,
+   "old": 0,
+   "gone": [
+    [
+     ".rsp5-card .phc-tx > p",
+     0
+    ],
+    [
+     "[data-rsp5='title-card']",
+     0
+    ]
+   ]
+  },
+  "barAtRest": {
+   "shown": false,
+   "inert": true,
+   "ariaHidden": "true",
+   "visibility": "visible",
+   "opacity": "1",
+   "top": 0,
+   "height": 68.796875,
+   "titleSize": "24px",
+   "titleText": "10 responses",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  },
+  "pad": 0,
+  "bar": {
+   "shown": true,
+   "inert": false,
+   "ariaHidden": null,
+   "visibility": "visible",
+   "opacity": "1",
+   "top": -600,
+   "height": 68.796875,
+   "titleSize": "24px",
+   "titleText": "10 responses",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  }
+ },
+ "corkboard-1440-H5b": {
+  "header": {
+   "left": 112,
+   "right": 1400,
+   "top": 182.546875,
+   "bottom": 409.546875,
+   "height": 227,
+   "width": 1288,
+   "scLeft": 80,
+   "radius": "20px",
+   "bg": "rgb(42, 58, 82)",
+   "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+   "marginBottom": "48px",
+   "titleLeft": 408,
+   "titleRight": 603.015625,
+   "titleSize": "54px",
+   "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "titleLines": 1,
+   "titleText": "8 notes",
+   "buttonH": 46,
+   "grid": "268px 639.562px 294.438px",
+   "artDisplay": "block",
+   "rightW": 294.4375
+  },
+  "first": {
+   "left": 112,
+   "right": 1400,
+   "top": 457.546875,
+   "bottom": 501.546875,
+   "tag": "DIV",
+   "cls": "cb2-fr"
+  },
+  "figure": {
+   "body": {
+    "count": 8,
+    "first": "Word count on the title page still says 92,000. It's 88,400 nowRead all#manuscriptAdded 11 Oct"
+   },
+   "fig": 8
+  },
+  "h7": {
+   "h1": 1,
+   "old": 0,
+   "gone": [
+    [
+     "[data-cb2='panel']",
+     0
+    ]
+   ]
+  },
+  "barAtRest": {
+   "shown": false,
+   "inert": true,
+   "ariaHidden": "true",
+   "visibility": "visible",
+   "opacity": "1",
+   "top": 0,
+   "height": 68.796875,
+   "titleSize": "24px",
+   "titleText": "8 notes",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  },
+  "pad": 900,
+  "bar": {
+   "shown": true,
+   "inert": false,
+   "ariaHidden": null,
+   "visibility": "visible",
+   "opacity": "1",
+   "top": -600,
+   "height": 68.796875,
+   "titleSize": "24px",
+   "titleText": "8 notes",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  }
+ },
+ "corkboard-1717-H5b": {
+  "header": {
+   "left": 112,
+   "right": 1677,
+   "top": 182.546875,
+   "bottom": 409.546875,
+   "height": 227,
+   "width": 1565,
+   "scLeft": 80,
+   "radius": "20px",
+   "bg": "rgb(42, 58, 82)",
+   "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+   "marginBottom": "48px",
+   "titleLeft": 408,
+   "titleRight": 603.015625,
+   "titleSize": "54px",
+   "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "titleLines": 1,
+   "titleText": "8 notes",
+   "buttonH": 46,
+   "grid": "268px 916.562px 294.438px",
+   "artDisplay": "block",
+   "rightW": 294.4375
+  },
+  "first": {
+   "left": 112,
+   "right": 1677,
+   "top": 457.546875,
+   "bottom": 501.546875,
+   "tag": "DIV",
+   "cls": "cb2-fr"
+  },
+  "figure": {
+   "body": {
+    "count": 8,
+    "first": "Word count on the title page still says 92,000. It's 88,400 nowRead all#manuscriptAdded 11 Oct"
+   },
+   "fig": 8
+  },
+  "h7": {
+   "h1": 1,
+   "old": 0,
+   "gone": [
+    [
+     "[data-cb2='panel']",
+     0
+    ]
+   ]
+  },
+  "barAtRest": {
+   "shown": false,
+   "inert": true,
+   "ariaHidden": "true",
+   "visibility": "visible",
+   "opacity": "1",
+   "top": 0,
+   "height": 68.796875,
+   "titleSize": "24px",
+   "titleText": "8 notes",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  },
+  "pad": 900,
+  "bar": {
+   "shown": true,
+   "inert": false,
+   "ariaHidden": null,
+   "visibility": "visible",
+   "opacity": "1",
+   "top": -600,
+   "height": 68.796875,
+   "titleSize": "24px",
+   "titleText": "8 notes",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  }
+ }
+}
