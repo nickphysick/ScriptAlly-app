@@ -50,7 +50,21 @@ Flags: (a) no unsubscribe on some path; (b) an effect whose dependencies change 
 
 ## 2. Measurements
 
-The measurement is `tests/e2e/onfListeners.measure.ts` on the emulator, signed in as the harness account, recorded by `tests/e2e/listenTally.ts`. The readings are in `listeners.json` and in §5 of the report.
+The measurement is `tests/e2e/onfListeners.measure.ts` on the emulator, signed in as the harness account, recorded by `tests/e2e/listenTally.ts`. All readings are in `listeners.json`.
+
+| moment | Listen opens | targets added | removed | **open** |
+|---|---|---|---|---|
+| 1 · after load (/queries) | 3 | 24 | 5 | **19** |
+| 2 · after 13 workspace pages | 3 | 24 | 5 | **19** |
+| 3 · after the query panel ×20 | — | — | — | not measured: 0 of 20 panels opened |
+| 4 · after the agent card ×20 (20 opened) | 3 | 44 | 25 | **19** |
+| 5 · idle 1, 2, 3, 4 and 5 min | 3 | 44 | 25 | **19** at every sample |
+
+- **Flat.** No count rises.
+- Each card open added one `users/*/agents/*/notes` target (20 in all), and each close removed it.
+- Visiting every kept-alive page added no target: they read the provider's 14 listeners.
+- Step 3 failed for a selector reason. The cycle clicked `[data-qc151='row']`, the old table's rows; the v156 list's rows are `[data-qcv='row']`, as the Part 7 probe found later.
+  - The 7 November tally covers the same ground: every card's listeners are removed when the card closes (`reports/qc-v152-2/listen-suite.jsonl`).
 
 ## 3. Where the 11 November run hit it, and whether this explains it
 
