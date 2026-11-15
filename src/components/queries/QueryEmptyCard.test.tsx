@@ -23,9 +23,9 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, it, expect } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { QueryEmptyCard, EMPTY_COPY, TEMPLATE_HREF } from "./QueryEmptyCard";
+import { QueryEmptyCard, EMPTY_COPY } from "./QueryEmptyCard";
 import { sliceBetween } from "../../test/sliceBetween";
 
 const REF = readFileSync(join(process.cwd(), "design-refs/query-grid-enhancements-v1.html"), "utf8");
@@ -79,10 +79,13 @@ describe("the card draws its own moment", () => {
     expect(bare, "the way back went too").toContain(esc(EMPTY_COPY.filtered.alt));
   });
 
-  it("the import template's constant survives the retirement — its consumer moved, it did not go", () => {
-    /* ⚠️ ASSERTED HERE BECAUSE THIS FILE IS WHERE THE CONSTANT LIVES; that the HERO renders it is
-       the empty page's own locks (`QcEmpty`, living headers §3)'s claim. Two halves of one route, each asserted where it is. */
-    expect(TEMPLATE_HREF).toBe("/QueryHawk-pipeline-import-template.xlsx");
+  it("the import template is no longer offered from here, but its file still serves (overnight fixes v1, 14 Nov)", () => {
+    /* ⚠️ RE-POINTED: this lock used to keep TEMPLATE_HREF alive for the day-one panel's "use our template" link. The
+       ruling of 14 Nov drops the template as a way in, so the constant went with its last consumer. An old link to
+       the file must not 404, so the asset itself stays in public/. */
+    const card = readFileSync(join(process.cwd(), "src/components/queries/QueryEmptyCard.tsx"), "utf8");
+    expect(card).not.toContain("TEMPLATE_HREF");
+    expect(existsSync(join(process.cwd(), "public/QueryHawk-pipeline-import-template.xlsx"))).toBe(true);
   });
 });
 

@@ -4,11 +4,12 @@
  *
  * IMPORT'S DOORS ON A PHONE (Phone app v2, Part 8B; ref overlays.js `PAGES.import`). Only the doors are the phone's:
  * every press is ImportPage's own handler, so `ImportFlow` keeps every screen and rule (the book step, the review gate,
- * the spent Smart Import's own words). The desktop's three doors are all here, and "Log one by hand" is the fourth.
+ * the spent Smart Import's own words). Smart import, "Match your own columns" and "Log one by hand". The template's
+ * group and its door in the match sheet went on 14 Nov (overnight fixes v1): the template is no longer a way in.
  */
 import React, { useState } from "react";
 import { MobileSheet } from "../../shell/MobileSheet";
-import { TILE_MATCH, TILE_SMART, TILE_TEMPLATE } from "../../../lib/importPage";
+import { TILE_MATCH, TILE_SMART } from "../../../lib/importPage";
 import { PI } from "../phoneIcons";
 import { PHONE_ART } from "../phoneArt";
 import { PhoneArt } from "../PhoneArtSpot";
@@ -18,11 +19,11 @@ const Chev = () => <span className="pa-chev" aria-hidden="true">{PI.chev}</span>
 
 export const ImportDoorsPhone: React.FC<{
   lede: string; smartAllowed: boolean; smartFact: string;
-  onSmart: () => void; onDownload: () => void; onUpload: () => void; onMatch: () => void; onByHand: () => void; footnote: string;
+  onSmart: () => void; onMatch: () => void; onByHand: () => void; footnote: string;
 }> = (p) => {
   /* Phone last screens v1, 6B: "Match your own columns" opens this sheet on a phone instead of the
-     matcher (which needs a wide screen). Its two doors are the page's own Smart import and template
-     upload handlers; the matcher and the desktop tile are unchanged. */
+     matcher (which needs a wide screen). Its door is the page's own Smart import handler (the template's door went,
+     14 Nov); the matcher and the desktop tile are unchanged. */
   const [matchOpen, setMatchOpen] = useState(false);
   const via = (go: () => void) => () => { setMatchOpen(false); go(); };
   return (<>
@@ -35,11 +36,6 @@ export const ImportDoorsPhone: React.FC<{
         <p className="pa-sub">{TILE_SMART.text}</p>
         <button type="button" className="pa-btn pri blk" data-pa="imp-smart-go" disabled={!p.smartAllowed} onClick={p.onSmart}>{PI.upload}{TILE_SMART.action}</button>
         <p className="pa-sub pa-impfact" data-pa="imp-smart-fact">{p.smartFact}</p>
-      </div>
-      <div className="pa-gl">{TILE_TEMPLATE.title.replace(/\.$/, "")} · {TILE_TEMPLATE.fact}</div>
-      <div className="pa-group" data-pa="imp-template">
-        <button type="button" className="pa-li" data-pa="imp-download" onClick={p.onDownload}><span className="pa-ico">{PI.doc}</span><span className="pa-lt">{TILE_TEMPLATE.download}</span><Chev /></button>
-        <button type="button" className="pa-li" data-pa="imp-upload" onClick={p.onUpload}><span className="pa-ico">{PI.upload}</span><span className="pa-lt">{TILE_TEMPLATE.upload}</span><Chev /></button>
       </div>
       <div className="pa-gl">Other ways in</div>
       <div className="pa-group">
@@ -54,17 +50,12 @@ export const ImportDoorsPhone: React.FC<{
       <div className="pa-card pa-imm-card">
         <span className="pa-imm-ph" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 18l5-6 4 4 3-3 4 5" /><circle cx="16" cy="8" r="2" /></svg></span>
         <h2 className="pa-imm-h">Matching columns works best on a computer.</h2>
-        <p className="pa-sub">You line up every column of your sheet with what it holds, which needs a wide screen. On your phone, these two get the same result:</p>
+        <p className="pa-sub">You line up every column of your sheet with what it holds, which needs a wide screen. On your phone, this gets the same result:</p>
       </div>
       <div className="pa-card pa-imm-door">
         <b className="pa-imm-t">{TILE_SMART.title.replace(/\.$/, "")}</b>
         <p className="pa-sub">Any layout. QueryHawk reads it and you check it.</p>
         <button type="button" className="pa-btn pri blk" data-pa="imp-match-smart" disabled={!p.smartAllowed} onClick={via(p.onSmart)}>Import a spreadsheet</button>
-      </div>
-      <div className="pa-card pa-imm-door">
-        <b className="pa-imm-t">{TILE_TEMPLATE.title.replace(/\.$/, "")}</b>
-        <p className="pa-sub">Set columns, read exactly, every time.</p>
-        <button type="button" className="pa-btn sec blk" data-pa="imp-match-template" onClick={via(p.onUpload)}>Upload my sheet</button>
       </div>
     </div>
   </MobileSheet>

@@ -56,10 +56,12 @@ describe("zero queries → the first-query card (the ghost preview is retired)",
     for (const c of clicks) expect(c, `a CTA has a handler of its own: ${c}`).toMatch(/onLog|onImport|onRecord/);
   });
 
-  it("the old welcome pane's routes survive as quiet alternatives, not deletions", () => {
+  /* RE-POINTED (overnight fixes v1, 14 Nov ruling): the import route survives; the template's route was retired on
+     purpose (Smart Import is the one way to bring a list in), so the card no longer carries its href */
+  it("the old welcome pane's import route survives; the template's was retired", () => {
     expect(code).toContain('onImport={() => onNavigate?.("import")}');
     const card = readFileSync(new URL("../components/queries/QueryEmptyCard.tsx", import.meta.url), "utf8");
-    expect(card).toContain("QueryHawk-pipeline-import-template.xlsx");
+    expect(card).not.toContain("QueryHawk-pipeline-import-template.xlsx");
   });
 });
 

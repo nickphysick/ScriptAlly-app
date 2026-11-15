@@ -240,8 +240,8 @@ export const OnbLab: React.FC = () => {
 
   /* The dead ends of "Your list" — each its own screen, each handler a spy. */
   const dead: Record<string, React.ReactNode> = {
-    "used-free": <UsedFree onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onUseTemplate={labSpy("useTemplate")} />,
-    unreadable: <Unreadable onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onDownload={labSpy("download")} />,
+    "used-free": <UsedFree onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onUpload={labSpy("upload")} />,
+    unreadable: <Unreadable onBack={labSpy("back")} onAddByHand={labSpy("byhand")} onUpload={labSpy("upload")} />,
     nothing: (
       <NothingImported
         outcome={{ queriesImported: 0, agentsCreated: 0, agentsMerged: 0, queriesSkipped: 3, errors: q.get("errs") === "1" ? ["Row 4: no agent or agency name.", "Row 9: the date could not be read."] : [] }}

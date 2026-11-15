@@ -15,13 +15,6 @@ export const TILE_SMART = {
   text: "Any layout, any wording. QueryHawk reads the sheet and shows you everything before anything is saved.",
   action: "Import a spreadsheet",
 } as const;
-export const TILE_TEMPLATE = {
-  title: "Our template.",
-  text: "Set columns, read exactly. Use it as often as you like to add agents and queries in bulk.",
-  download: "Download the template",
-  upload: "Upload my sheet",
-  fact: "Always free · No limit",
-} as const;
 export const TILE_MATCH = {
   title: "Match your own columns.",
   text: "Keep a sheet with unusual columns? Tell QueryHawk which column is which.",

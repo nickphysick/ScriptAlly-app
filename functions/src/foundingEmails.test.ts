@@ -362,7 +362,7 @@ const TWELVE: Record<string, { subject: string; preheader: string; strings: stri
       "https://scriptally-app.web.app/join/QH-7K2M-9XTD",
       "Your founder's code is QH-7K2M-9XTD. The button fills it in for you. Keep this email in case you're ever asked to type it.",
       "A good first ten minutes",
-      "Bring your list across with Smart Import, or start from the template",
+      "Bring your list across with Smart Import, or add your agents by hand",
       "Add your manuscript, so every query has something to belong to",
       "Log the queries you've already sent, and QueryHawk works out what's due and when",
       "Then tell me what you find",
@@ -615,5 +615,18 @@ describe("EM-13 · the sender split: four founding emails from Nick, everything 
     vi.stubGlobal("fetch", stub);
     await sendEmail("a@b.com", "signin", mail("05-signin"), { RESEND_API_KEY: "k", ACCOUNT_FROM: "QueryHawk <dev@example.com>" });
     expect(JSON.parse(String(stub.mock.calls[0][1]?.body)).from).toBe("QueryHawk <dev@example.com>");
+  });
+});
+
+/* ══════════════════════════════════════════════════════════════════════════════════════════════════════
+   OVERNIGHT FIXES v1 (15 Nov) — TS3: the invite email offers no template. The ruling of 14 Nov drops the template
+   as a way in, so "or start from the template" became "or add your agents by hand". Read from the RENDERED email
+   (emailSamples' invite), in both the text and the HTML part. ═════════════════════════════════════════════ */
+describe("TS3 · the invite email offers no template", () => {
+  it("the rendered invite names Smart Import and adding by hand, and never the template", () => {
+    const inv = mail("04-invite");
+    expect(inv.text, "the line is there (the lock found its subject)").toContain("Bring your list across with Smart Import, or add your agents by hand");
+    expect(inv.text).not.toMatch(/template/i);
+    expect(inv.html).not.toMatch(/template/i);
   });
 });

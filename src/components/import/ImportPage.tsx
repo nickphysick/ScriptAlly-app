@@ -155,7 +155,6 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
   /* smart-import-photos-v1: the same Smart Import, read from photos of the list. */
   const usePhotos = act("usePhotos", () => start("photos"));
   const download = act("download", () => { void downloadTemplate(TEMPLATE_FILENAME); });
-  const chooseTemplate = act("templatePicker", () => start("template"));
   const openMatcher = act("matcher", () => setView("matcher"));
   const showTiles = !inFlow && !book;
 
@@ -185,7 +184,7 @@ export const ImportPage: React.FC<ImportPageProps> = ({ onNavigate, lab }) => {
     >
       {showTiles && phone ? (
         <ImportDoorsPhone lede={IMPORT_SUB} smartAllowed={entitlement.allowed} smartFact={smartFactLine(entitlement)}
-          onSmart={chooseSmart} onDownload={download} onUpload={chooseTemplate} onMatch={openMatcher}
+          onSmart={chooseSmart} onMatch={openMatcher}
           onByHand={() => openQueryDrawer({ mode: "log", ...(manuscript ? { manuscriptId: manuscript.id } : {}) })}
           footnote={`${IMPORT_FOOTNOTE} ${IMPORT_FOOTNOTE_SECOND}`} />
       ) : null}

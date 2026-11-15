@@ -315,7 +315,7 @@
 .a21-aeic { width: 44px; height: 44px; display: grid; place-items: center; background: #fff; border: 1px solid rgba(28, 19, 15, 0.12); border-radius: 10px; color: var(--sp-ink); box-sizing: border-box; }
 .a17-page .a21-aethree h3 { margin: 14px 0 6px; font: 400 22px/1.25 var(--sp-type) !important; }
 .a17-page .a21-aethree p { margin: 0; font: 400 17px/1.6 var(--sp-serif) !important; color: #4a4039; }
-.a21-aeways { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.a21-aeways { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; } /* overnight fixes v1: two ways in, evenly spaced */
 .a21-aeways > div { background: #fff; border: 1px solid rgba(28, 19, 15, 0.1); border-radius: 18px; padding: 28px 30px; display: flex; flex-direction: column; gap: 10px; }
 .a17-page .a21-aeways h3 { margin: 0; font: 400 26px/1.2 var(--sp-type) !important; }
 .a17-page .a21-aeways p { margin: 0; font: 400 17px/1.6 var(--sp-serif) !important; color: #4a4039; flex: 1; }

@@ -81,7 +81,7 @@ import "./queries/queryCard.css";
 import "./queries/queryCentreGrid.css";
 import "./queries/queryStatTiles.css";
 import type { GridCard } from "./queries/QueryCentreGrid";
-import { QueryEmptyCard, TEMPLATE_HREF } from "./queries/QueryEmptyCard";
+import { QueryEmptyCard } from "./queries/QueryEmptyCard";
 import { heroBookTitle } from "./queries/queryEmptyCopy";
 import { gridEmptyKind, waitingSummary, waitingLine } from "../lib/queryGridEmpty";
 import "./queries/queryViewSwitch.css"; /* position-pinned, as above: the Contact list and To-do still mount the switch */

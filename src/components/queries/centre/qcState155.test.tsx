@@ -70,11 +70,15 @@ describe("v155 §2 · day one", () => {
   it("the panel's heading and body, exactly", () => {
     expect(html).toContain(">No queries yet.</h2>");
     const text = html.replace(/<[^>]+>/g, "");
-    expect(text).toContain("Log your first query and it will appear here, with the date a reply is expected. Already keeping a tracker somewhere? Bring it in with Smart import or use our template.");
+    /* RE-POINTED (overnight fixes v1, 14 Nov ruling): the template's clause went with the template */
+    expect(text).toContain("Log your first query and it will appear here, with the date a reply is expected. Already keeping a tracker somewhere? Bring it in with Smart import.");
+    expect(text).not.toMatch(/template/i);
   });
-  it("both links have the right hrefs: the Import page and the template's download", () => {
+  /* RE-POINTED (overnight fixes v1): one link now, the Import page; no download of the template */
+  it("one link, to the Import page, and no template download", () => {
     expect(html).toMatch(/<a href="\/import"[^>]*>Bring it in with Smart import<\/a>/);
-    expect(html).toMatch(/<a href="\/QueryHawk-pipeline-import-template.xlsx"[^>]*download=""[^>]*>use our template<\/a>/);
+    expect(html.match(/<a\b/g) ?? []).toHaveLength(1);
+    expect(html).not.toMatch(/pipeline-import-template|download=""/);
     expect(html).not.toMatch(/<(img|svg|button)\b/);
   });
   it("the header's title reads No queries yet at 0, and the count line otherwise", () => {

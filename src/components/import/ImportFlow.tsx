@@ -45,7 +45,6 @@ import { ScatterSettleLoader, LoaderCard } from "../onboarding/ScatterSettleLoad
 import { fmtDate, reviewTallies } from "../../lib/smartImportReviewModel";
 import { summaryModel } from "../../lib/importSummary";
 import { readTemplateFile, TemplateFlag } from "../../lib/templateImport";
-import { TEMPLATE_FILENAME, downloadTemplate } from "../../lib/templateFile";
 import { readRouteOfFile } from "../../lib/importReadRoute";
 import { buildImportNotice, saveImportNotice } from "../../lib/importNotice";
 import { splitDuplicates, ALREADY_REASON } from "../../lib/importDuplicates";
@@ -104,8 +103,6 @@ export interface ImportFlowProps {
   onAddByHand: () => void;
   /** The flow has gone back to `idle` — "Back" from its first screen, or a dead end's way out. */
   onBackToStart?: () => void;
-  /** "Use the template instead", from the Smart-Import-already-used screen. */
-  onUseTemplate?: () => void;
   /** Import committed and the loader has finished: the host opens the dashboard. */
   onImportComplete: (outcome: CommitOutcome, destination: "dashboard") => void;
   /** The flow's current screen, reported so the host can set its frame around it. */
@@ -124,7 +121,7 @@ export interface ImportFlowProps {
 }
 
 export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function ImportFlow({
-  manuscriptTitle, manuscriptId, onEnsureManuscript, hostError, onAddByHand, onBackToStart, onUseTemplate, onImportComplete, onScreen, onHandoff, onCancel, lab,
+  manuscriptTitle, manuscriptId, onEnsureManuscript, hostError, onAddByHand, onBackToStart, onImportComplete, onScreen, onHandoff, onCancel, lab,
 }, ref) {
   const { currentUser, agents, queries, addAgent, addQuery, manuscripts } = useScriptAllyDb();
   const entitlement = useSmartImportEntitlement();
@@ -623,9 +620,9 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
       <UsedFree
         onBack={backToFork}
         onAddByHand={onAddByHand}
-        /* Back to the start, where the template tile is: what the writer
-           has just been told they can still do. */
-        onUseTemplate={() => { setBlocked(null); onUseTemplate?.(); toStart(); }}
+        /* overnight fixes v1: "Upload a file" — the same picker as the doors (a headings file is still read free).
+           Back to the start first, so a cancelled picker leaves the writer on the doors. */
+        onUpload={() => { setBlocked(null); toStart(); fileInputRef.current?.click(); }}
       />
     );
   }
@@ -733,11 +730,9 @@ export const ImportFlow = forwardRef<ImportFlowHandle, ImportFlowProps>(function
     <Unreadable
       onBack={() => toStart()}
       onAddByHand={onAddByHand}
-      /* ⚠️ THE SAME FILE THE FORK HANDS OUT, by the same call. This card used to fetch
-         `QueryHawk-pipeline-import-template.xlsx` — the three-tab workbook the Query Centre's and
-         the Contact list's empty states link to — so a writer told "use the template" on the fork
-         and here was given two different sheets. */
-      onDownload={() => { void downloadTemplate(TEMPLATE_FILENAME); }}
+      /* overnight fixes v1: "Upload a file" — the doors' own picker, for another file. It used to hand out the
+         template, which stopped being a way in on 14 Nov. */
+      onUpload={() => { toStart(); fileInputRef.current?.click(); }}
     />
   );
 });

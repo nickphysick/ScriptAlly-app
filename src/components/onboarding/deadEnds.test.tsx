@@ -23,8 +23,8 @@ const buttons = (h: string) => [...h.matchAll(/<button[^>]*>([\s\S]*?)<\/button>
 const OUTCOME = { queriesImported: 0, agentsCreated: 0, agentsMerged: 0, queriesSkipped: 3, errors: ["Row 4: no agent or agency name."] };
 
 const STATES = {
-  usedFree: r(<UsedFree onBack={noop} onAddByHand={noop} onUseTemplate={noop} />),
-  unreadable: r(<Unreadable onBack={noop} onAddByHand={noop} onDownload={noop} />),
+  usedFree: r(<UsedFree onBack={noop} onAddByHand={noop} onUpload={noop} />),
+  unreadable: r(<Unreadable onBack={noop} onAddByHand={noop} onUpload={noop} />),
   nothing: r(<NothingImported outcome={OUTCOME} skippedReasons={["No agent or agency name"]} onBackToReview={noop} />),
   unloaded: r(<Unloaded onAddByHand={noop} onRestart={noop} />),
 };
@@ -40,16 +40,17 @@ describe("E1 each dead end is one card: chip, title, text, foot", () => {
     }
   });
 
-  it("Smart Import used, free: leads with the template and offers no Upgrade", () => {
+  it("Smart Import used, free: leads with Upload a file and offers no Upgrade (RE-POINTED, overnight fixes v1: the template is no longer a way in)", () => {
     const h = STATES.usedFree;
     expect(text(h)).toContain(CHIP_USED);
     expect(h).toContain(`<h1 class="sf-deadh">${USED_FREE_TITLE.replace("'", "&#x27;")}</h1>`);
     expect(USED_FREE_TITLE).toBe("You've used your Smart Import.");
-    expect(USED_FREE_TEXT).toBe("The template is always free, and reads your sheet exactly. Or add your agents by hand for now.");
+    expect(USED_FREE_TEXT).toBe("Add your agents by hand for now.");
     expect(text(h)).toContain(USED_FREE_TEXT);
-    expect(buttons(h)).toEqual(["‹ Back", "Add by hand", "Use the template"]);
+    expect(buttons(h)).toEqual(["‹ Back", "Add by hand", "Upload a file"]);
     expect(text(h)).not.toMatch(/upgrade/i);
-    expect(h, "the primary is the template").toMatch(/<button[^>]*class="sf-btn"[^>]*>Use the template<\/button>/);
+    expect(h, "the primary is Upload a file").toMatch(/<button[^>]*class="sf-btn"[^>]*>Upload a file<\/button>/);
+    expect(text(h)).not.toMatch(/template/i);
   });
 
   it("plan rules v1: there is no Pro monthly dead end — the component and its title are gone", () => {
@@ -61,9 +62,10 @@ describe("E1 each dead end is one card: chip, title, text, foot", () => {
     const h = STATES.unreadable;
     expect(h).toContain(`<p class="sf-chip sf-chip--fail" data-sf="chip">${CHIP_UNREADABLE.replace("'", "&#x27;")}</p>`);
     expect(UNREADABLE_TITLE).toBe("We couldn't read that one.");
-    expect(UNREADABLE_TEXT).toBe("Use the template, or add your agents by hand. Nothing has been saved.");
+    expect(UNREADABLE_TEXT).toBe("Add your agents by hand. Nothing has been saved.");
     expect(text(h)).not.toMatch(/hasn't been used|has not been used|wasn't used|still have your/i);
-    expect(buttons(h)).toEqual(["‹ Back", "Add by hand", "Download the template"]);
+    expect(buttons(h)).toEqual(["‹ Back", "Add by hand", "Upload a file"]);
+    expect(text(h), "RE-POINTED (overnight fixes v1): no template").not.toMatch(/template/i);
   });
 
   it("nothing imported: the built counts, skipped line and errors, and one way on", () => {
@@ -100,8 +102,11 @@ describe("E1 BranchB wires each dead end to the built routes", () => {
   const o = readFileSync(resolve(here, "../Onboarding.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
   /* RE-POINTED (onboarding v9): the fork rings no tile, so BranchB has nothing to set on the way back. */
-  it("'Use the template' returns to the fork", () => {
-    expect(b).toContain('onUseTemplate={() => { setBlocked(null); onUseTemplate?.(); toStart(); }}');
+  /* RE-POINTED (overnight fixes v1): "Use the template" became "Upload a file": back to the fork, then the doors' picker */
+  it("'Upload a file' returns to the fork and opens the doors' own picker", () => {
+    expect(b).toContain('onUpload={() => { setBlocked(null); toStart(); fileInputRef.current?.click(); }}');
+    expect(b).toContain('onUpload={() => { toStart(); fileInputRef.current?.click(); }}');
+    expect(b).not.toContain("onUseTemplate");
     expect(branchOnly).not.toContain("setImportOption");
     /* RE-POINTED (smart-import-photos-v1): toStart also ends the photos (endPhotos revokes their
        URLs). The law is unchanged: it goes back to idle and hands the host its start. */
@@ -132,11 +137,13 @@ describe("E1 BranchB wires each dead end to the built routes", () => {
 });
 
 /* Onboarding v5 part 2, phase 0 — one template file. */
-describe("the unreadable-file card hands out the fork's template", () => {
+/* RE-POINTED (overnight fixes v1): the card no longer hands out any template; its primary is the doors' picker */
+describe("the unreadable-file card offers Upload a file, not a template", () => {
   const branch = readFileSync(resolve(process.cwd(), "src/components/import/ImportFlow.tsx"), "utf8")
     .replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
-  it("calls downloadTemplate(TEMPLATE_FILENAME), as the fork does", () => {
-    expect(branch).toContain("downloadTemplate(TEMPLATE_FILENAME)");
+  it("calls no template download; Upload a file opens the doors' picker", () => {
+    expect(branch).not.toContain("downloadTemplate");
+    expect(branch).toMatch(/<Unreadable[\s\S]{0,200}onUpload=\{\(\) => \{ toStart\(\); fileInputRef\.current\?\.click\(\); \}\}/);
   });
   it("and no longer names the three-tab workbook", () => {
     expect(branch).not.toContain("pipeline-import-template");

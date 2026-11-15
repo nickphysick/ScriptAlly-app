@@ -417,7 +417,7 @@
 .cl17-empty .cl17-mini-k i { display: block; box-sizing: border-box; width: 10px; height: 10px; border-radius: 3px; }
 
 .cl17-empty .cl17-ways { margin-bottom: 56px; }
-.cl17-empty .cl17-ways-g { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 16px; }
+.cl17-empty .cl17-ways-g { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; } /* overnight fixes v1: two ways in (the template tile went, 14 Nov), evenly spaced */
 .cl17-empty .cl17-way { display: flex; flex-direction: column; align-items: flex-start; box-sizing: border-box; min-height: 280px; padding: 28px 28px 26px; border-radius: 18px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
 .cl17-empty .cl17-way h3 { margin: 0 0 8px; font: 400 24px/1.2 var(--sp-type) !important; color: #1c130f; }
 .cl17-empty .cl17-way p { flex: 1 1 auto; margin: 0 0 20px; font: 400 16px/1.5 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.72); }

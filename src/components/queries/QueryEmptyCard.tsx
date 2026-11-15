@@ -35,14 +35,6 @@ export const EMPTY_COPY = {
   },
 } as const;
 
-/**
- * ⚠️ EXPORTED, AND ITS ONE CONSUMER IS NOW THE FEATURE-LED HERO (Phase 2). An earlier pack locked
- * this route as surviving "as a quiet alternative, not a deletion": the importer does not offer the
- * template itself, so dropping it would remove the only in-app way to it. The hero's second link is
- * that route; the constant stays HERE because this file is where the lock that guards it looks.
- */
-export const TEMPLATE_HREF = "/QueryHawk-pipeline-import-template.xlsx";
-
 /** ⚠️ NO LONGER A UNION — the `first` member went with its card (Phase 2). Kept as a named type so
  *  the call site reads the same and a future second moment has somewhere to go. */
 export type QueryEmptyCardProps =

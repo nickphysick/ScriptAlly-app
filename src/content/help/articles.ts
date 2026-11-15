@@ -229,15 +229,8 @@ export const WRITTEN_ARTICLES: readonly HelpArticle[] = [
     lede: "Bring in the queries you've already sent from a spreadsheet, and QueryHawk reads the columns for you.",
     body: "Open the Import page: press ⌘K (Ctrl K on Windows) and type Import. Under Smart import, press `Import a spreadsheet` and choose a .csv, .xlsx or .xls file. QueryHawk works out which column is which and shows you what it found before anything is saved.\n\n"
       + "An agent already on your list isn't added twice. A row it can't read, such as one with no agent name or agency, is left out and listed on your Dashboard so you can see what was skipped.\n\n"
-      + "A free account has one Smart import, and Pro has one each month. The template and matching your own columns are always free.",
-    related: ["download-the-template", "add-an-agent", "log-a-query"],
-  },
-  {
-    slug: "download-the-template", area: "setup", title: "Download the template", draft: true, updated: D,
-    lede: "Prefer to fill in a sheet yourself? Use QueryHawk's template and nothing needs matching.",
-    body: "On the Import page, press `Download the template` to get QueryHawk-template.xlsx. Fill in a row for each query, then press `Upload my sheet`.\n\n"
-      + "The template is always free, with no limit on how often you use it.",
-    related: ["smart-import", "log-a-query"],
+      + "A free account has one Smart import, and Pro has one each month. Matching your own columns is always free.",
+    related: ["add-an-agent", "log-a-query"],
   },
   {
     slug: "your-account-and-data", area: "setup", title: "Your account and data", draft: true, updated: D,
@@ -245,7 +238,7 @@ export const WRITTEN_ARTICLES: readonly HelpArticle[] = [
     body: "Settings has seven sections: Profile, Sign-in & security, Plan & billing, Notifications, Preferences, Tasks and Your data. Your home country is how QueryHawk tells agents at home from agents abroad.\n\n"
       + "Under Your data, `Download a copy` saves everything you've put in as one JSON file.\n\n"
       + "To close your account, type DELETE and press `Schedule deletion`. You have 14 days to change your mind with `Cancel deletion`. During the beta, deletions are completed by hand after that.",
-    related: ["smart-import", "download-the-template"],
+    related: ["smart-import"],
   },
 
   /* ═══════════ Querying basics ═══════════ */
