@@ -72,9 +72,29 @@ export function Toggle({ on, onClick, children, small, style, testId }: { on: bo
   );
 }
 
+/**
+ * Overnight fixes v1, Part 7 — an accessible name from the VISIBLE label. A field's label here is the `Fl` just above
+ * it (a div, not a <label>), so a control names itself after the nearest preceding `.qad-fl` in its own container
+ * (`aria-labelledby`, an id given on the spot). No call site changes, no new words, nothing drawn.
+ */
+let flSeq = 0;
+function labelFromFl(el: HTMLElement | null): void {
+  if (!el || el.hasAttribute("aria-labelledby") || el.hasAttribute("aria-label")) return;
+  for (let n: Element | null = el, hop = 0; n && hop < 3; n = n.parentElement, hop++) {
+    for (let p = n.previousElementSibling; p; p = p.previousElementSibling) {
+      const fl = p.classList.contains("qad-fl") ? p : null;
+      if (fl) {
+        if (!fl.id) fl.id = `qad-fl-${++flSeq}`;
+        el.setAttribute("aria-labelledby", fl.id);
+        return;
+      }
+    }
+  }
+}
+
 export function Radios<K extends string>({ options, value, onPick }: { options: { k: K; title: React.ReactNode; sub: React.ReactNode; tag?: React.ReactNode; tagGo?: boolean }[]; value: K | null; onPick: (k: K) => void }) {
   return (
-    <div className="qad-rads" role="radiogroup">
+    <div className="qad-rads" role="radiogroup" ref={labelFromFl}>
       {options.map((o) => (
         <button key={o.k} type="button" role="radio" aria-checked={value === o.k} className={`qad-rad${value === o.k ? " on" : ""}`} onClick={() => onPick(o.k)} data-qad-rad={o.k}>
           <i /><span><b>{o.title}</b><small>{o.sub}</small></span>
@@ -96,7 +116,9 @@ export function Seg<K extends string>({ options, value, onPick, wide, sm, style 
 }
 
 export function TextBox({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) {
-  return <textarea className="qad-fta" value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)} />;
+  /* Part 7: named after its Fl; with none above it, after its placeholder (the only words it shows) */
+  return <textarea className="qad-fta" value={value} placeholder={placeholder} onChange={(e) => onChange(e.target.value)}
+    ref={(el) => { labelFromFl(el); if (el && !el.hasAttribute("aria-labelledby") && !el.hasAttribute("aria-label") && placeholder) el.setAttribute("aria-label", placeholder); }} />;
 }
 
 /** A value that animates up or down when it changes (`.qad-tick`). */
