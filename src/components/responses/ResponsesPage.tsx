@@ -25,7 +25,7 @@ import { buildQcRows } from "../../lib/qcSummary";
 import { carouselOrder, firstNameOf, offWallIds, goneQuiet, isEarlyDays, noteSplit, pageCounts, respCounts, respItems, stillOut, waitingRows, type NoKind, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
 import { openQueryDrawer, type DrawerMode } from "../../lib/queryActions/drawerStore";
-import { openResponsePicker, responsePickerHosted } from "../../lib/queryPanelStore";
+import { openResponse, responseHosted } from "../../lib/queryPanelStore";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { Rsp5Glance, RspHeader, type GlanceFacts, type GlanceKey } from "./Rsp5Head";
 import { RspCarousel } from "./RspCarousel";
@@ -42,9 +42,9 @@ import "./responses5.css";
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-/** Query panel v2's "Record a response" door: the panel, in its acting look, at the "Who replied?" picker */
+/** "Record a response": Record a response v1's one door — the card frame at "Who replied?" */
 export function openRecordPicker(): void {
-  if (responsePickerHosted()) openResponsePicker(); else openQueryDrawer({ mode: "resp" });
+  openResponse();
 }
 
 export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) => void; routeActive?: boolean }> = ({ routeActive, onNavigate }) => {
@@ -99,7 +99,11 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
   };
   /* a card's own button runs its journey IN the panel: the panel opens on that answer first, then the journey steps in */
   const [pending, setPending] = useState<{ id: string; mode: DrawerMode } | null>(null);
-  const act = useCallback((i: RespItem<QcRow>, mode: DrawerMode) => { setPending({ id: i.id, mode }); openAnswer(i); }, [openAnswer]);
+  const act = useCallback((i: RespItem<QcRow>, mode: DrawerMode) => {
+    /* Record a response v1 — a response is that query's card and its composer (the card takes the answer panel's place) */
+    if (mode === "resp" && responseHosted()) { openResponse({ queryId: i.id, from: "other" }); return; }
+    setPending({ id: i.id, mode }); openAnswer(i);
+  }, [openAnswer]);
   useEffect(() => {
     if (!pending || openId !== pending.id || !openItem) return;
     setPending(null);

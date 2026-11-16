@@ -22,7 +22,7 @@ import { setAsideItems, setAsideLabel, switchedOffRules, RULE_TITLE, type SetAsi
 import { flagKeyForTask, taskFlagId } from "../../../lib/taskFlags";
 import { setAsideRules } from "../../../lib/todoSetAside";
 import { snoozeCardWrites } from "../snoozeWrites";
-import { openQueryPanel } from "../../../lib/queryPanelStore";
+import { openQueryPanel, openResponse, responseHosted } from "../../../lib/queryPanelStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { drawerDoorForTask } from "../../../lib/queryActions/entry";
@@ -225,7 +225,8 @@ export function useWsCore(now: number) {
       db: db as never, snoozeFor: (d) => snoozeTask(sel, d), waitCeiling: limitFor(sel).ceiling,
       said: (m) => flash(m), nudgedOn: facts.nudgedOn, suggestion: sel.kind === "quiet" ? quietSuggestion(facts) : null,
     }, {
-      openPartial: () => { if (sel.query) openQueryDrawer({ mode: "resp", queryId: sel.query.id, preset: { respType: "partial" } } as never); },
+      /* Record a response v1 — the query's card and its composer, on "Asked for the partial" (the phone keeps its drawer) */
+      openPartial: () => { if (!sel.query) return; if (responseHosted()) { openResponse({ queryId: sel.query.id, reply: "req" }); return; } openQueryDrawer({ mode: "resp", queryId: sel.query.id, preset: { respType: "partial" } } as never); },
       openCard: () => { if (sel.agent) openAgentCard(sel.agent.id, { tab: "send" as never, focus: "materials" as never }); },
       openOther: (() => {
         const c = sel.item.card;

@@ -18,7 +18,7 @@ import type { Agent } from "../../types";
 import { QueryStatus } from "../../types";
 import type { QcRow } from "../../lib/qcSummary";
 import { FAR_WORDS, firstAnswer, firstNameOf, hasNote, plural, respDate, type RespItem } from "../../lib/responses";
-import { claimRightPanel, releaseRightPanel, subscribeRightPanel } from "../../lib/queryPanelStore";
+import { claimRightPanel, openResponse, releaseRightPanel, responseHosted, subscribeRightPanel } from "../../lib/queryPanelStore";
 import { askDrawerToLeave, currentDrawerRequest, openQueryDrawer, subscribeDrawer, type DrawerMode } from "../../lib/queryActions/drawerStore";
 import { ESC_LEVEL, useEscapeLayer } from "../../lib/escapeStack";
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
@@ -144,6 +144,8 @@ export const RspPanel: React.FC<{
   const closingEntry = log ? [...log].reverse().find((d) => ((d.data.resultingStatus ?? d.data.type) as string) === r.status)?.id ?? null : null;
   const run = () => {
     const panel = { name: r.agentName, agency: r.agency, first, backLabel: `Back to ${first}` };
+    /* Record a response v1 — a response is the query's card and its composer, in this panel's place */
+    if (act.mode === "resp" && responseHosted()) { openResponse({ queryId: item.id, from: "other" }); return; }
     if (act.mode === "edit" && closingEntry) openQueryDrawer({ mode: "edit", queryId: item.id, entryId: closingEntry, panel });
     else openQueryDrawer({ mode: act.mode, queryId: item.id, panel });
   };

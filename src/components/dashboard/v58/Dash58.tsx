@@ -11,7 +11,7 @@
  * ⚠️ NOTHING HERE WRITES A STATUS. Every action opens the flow that does: the query drawer
  * (`openQueryDrawer`), the agent card, or a route.
  */
-import { openQueryPanel } from "../../../lib/queryPanelStore";
+import { openQueryPanel, openResponse, responseHosted } from "../../../lib/queryPanelStore";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
@@ -336,6 +336,8 @@ export const Dash58: React.FC<Dash58Props> = ({
   );
 
   const run = (a: ListAction) => {
+    /* Record a response v1 — a response is the query's card and its composer, over the dashboard */
+    if (a.kind === "drawer" && a.request.mode === "resp" && a.request.queryId && responseHosted()) { openResponse({ queryId: a.request.queryId, from: "dashboard" }); return; }
     if (a.kind === "drawer") openQueryDrawer({ ...a.request });
     else if (a.kind === "agent") openAgentCard(a.agentId, { tab: a.tab, focus: a.focus, from: "hk", sequence: a.sequence });
     else onNavigate(a.tab, a.sub);

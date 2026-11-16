@@ -34,6 +34,7 @@ import { GAP_FOCUS, agentGaps } from "../../../lib/contactHousekeeping";
 import { contactPrefsOf, itemKey } from "../../../lib/contactPrefs";
 import { destroyManifest } from "../../../lib/cascade";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
+import { agentBack, openResponse, responseHosted } from "../../../lib/queryPanelStore";
 import { closeAgentCard, completeNewAgent, openAgentCard, stepAgentCard, type AgentCardField, type AgentCardTab } from "../../../lib/agentCardStore";
 import { useToast } from "../../toast/ToastProvider";
 import { AgentCard262, type AgentCard262Props, type OpenAt } from "../contact/AgentCard262";
@@ -134,7 +135,8 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
       index: at >= 0 ? at : 0, total: at >= 0 ? seq.length : 1,
       onStep: (dd) => { const n = seq[at + dd]; if (n) stepAgentCard(n); },
       onClose: o.preview ? noop : undefined,
-      onJourney: (mode, queryId) => openQueryDrawer({ mode: mode as "resp", queryId }),
+      /* Record a response v1 — a response is the query's card, in this card's place ("← Back to {first}") */
+      onJourney: (mode, queryId) => { if (mode === "resp" && responseHosted()) { openResponse({ queryId, back: agentBack(agent) }); return; } openQueryDrawer({ mode: mode as "resp", queryId }); },
       onLog: () => { finishAdd(); openQueryDrawer({ mode: "log", agentId: agent.id, ...(msId ? { manuscriptId: msId } : {}) }); },
       onEdit: openEdit,
       onOpenQuery: (queryId) => { closeAgentCard(); navigate(`/queries?q=${encodeURIComponent(queryId)}`); },

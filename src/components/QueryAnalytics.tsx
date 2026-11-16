@@ -44,7 +44,7 @@ import { LoadFailed } from "./notes/LoadFailed";
 import { useLoadFailure } from "./notes/useLoadFailure";
 import { buildV21 } from "../lib/analyticsV21";
 import { buildV24, deskV24, heads, ringOf, QUESTIONS } from "../lib/analyticsV24";
-import { openResponsePicker, responsePickerHosted } from "../lib/queryPanelStore";
+import { openResponse } from "../lib/queryPanelStore";
 import "./analytics/a17.css";
 import "./analytics/a21.css"; /* after a17: v21 restates its desktop rules */
 import "./analytics/a24.css"; /* after a21: v24 adds the seven sections and the steps card */
@@ -94,8 +94,8 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
   const names = [...QUESTIONS];
 
   const phone = usePhone();
-  /** "+ Record a response": query panel v2's picker where the Query Centre hosts it, else the drawer. */
-  const record = React.useCallback(() => { if (responsePickerHosted()) openResponsePicker(); else openQueryDrawer({ mode: "resp" }); }, []);
+  /** "+ Record a response": Record a response v1's one door — the card frame at "Who replied?" */
+  const record = React.useCallback(() => { openResponse(); }, []);
 
   /** Scroll the page's own scroller to a section (or, on the empty page, to the first example). */
   const go = React.useCallback((sec: number) => {
@@ -164,7 +164,7 @@ export const QueryAnalytics: React.FC<{ onNavigate?: (tab: string, sub?: string)
               title="Less guesswork, better results"
               description="Patterns, stats and insights to help you query smarter."
               primary={{ label: "Take a look ↓", onClick: () => go(0) }}
-              secondary={{ label: "Record a response", onClick: () => openQueryDrawer({ mode: "resp" }) }}
+              secondary={{ label: "Record a response", onClick: record }}
               art={<BandDisc />}
             /> : null}
             <div className="a17-flow" data-a17="flow">{body}</div>
