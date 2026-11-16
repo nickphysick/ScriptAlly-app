@@ -1,0 +1,102 @@
+# Clean run (e2e-run2): MSP1–MSP7 + SR2.2
+[MSP1] /queries 1512×982 {"spineFoot":861,"shelfTop":861,"shelfBottom":862,"fbTop":872,"shelfToFb":10,"shelfW":50,"shelfCentre":40,"railCentre":40,"oldSlotTop":103.75,"firstRowTop":103.75,"spineH":152,"transform":"none"}
+[MSP1] /queries 1512×982 hovered matrix(0.992546, -0.121869, 0.121869, 0.992546, -0.365608, -2.97764) spine box {"top":707.1553344726562,"bottom":861.9221801757812,"left":5.3487749099731445,"right":55.634392738342285,"width":50.28561782836914,"height":154.766845703125} rail {"top":41.75,"bottom":982,"left":0,"right":80,"width":80,"height":940.25}
+[MSP1] /materials/letters 1512×982 {"spineFoot":861,"shelfTop":861,"shelfBottom":862,"fbTop":872,"shelfToFb":10,"shelfW":50,"shelfCentre":40,"railCentre":40,"oldSlotTop":103.75,"firstRowTop":103.75,"spineH":152,"transform":"none"}
+[MSP1] /materials/letters 1512×982 hovered matrix(0.992546, -0.121869, 0.121869, 0.992546, -0.365608, -2.97764) spine box {"top":707.1553344726562,"bottom":861.9221801757812,"left":5.3487749099731445,"right":55.634392738342285,"width":50.28561782836914,"height":154.766845703125} rail {"top":41.75,"bottom":982,"left":0,"right":80,"width":80,"height":940.25}
+[MSP1] /queries 1280×720 {"spineFoot":599,"shelfTop":599,"shelfBottom":600,"fbTop":610,"shelfToFb":10,"shelfW":50,"shelfCentre":40,"railCentre":40,"oldSlotTop":99.75,"firstRowTop":99.75,"spineH":152,"transform":"none"}
+[MSP1] /queries 1280×720 hovered matrix(0.992546, -0.121869, 0.121869, 0.992546, -0.365608, -2.97764) spine box {"top":445.15533447265625,"bottom":599.9221801757812,"left":5.3487749099731445,"right":55.634392738342285,"width":50.28561782836914,"height":154.766845703125} rail {"top":41.75,"bottom":720,"left":0,"right":80,"width":80,"height":678.25}
+[MSP1] /materials/letters 1280×720 {"spineFoot":599,"shelfTop":599,"shelfBottom":600,"fbTop":610,"shelfToFb":10,"shelfW":50,"shelfCentre":40,"railCentre":40,"oldSlotTop":99.75,"firstRowTop":99.75,"spineH":152,"transform":"none"}
+[MSP1] /materials/letters 1280×720 hovered matrix(0.992546, -0.121869, 0.121869, 0.992546, -0.365608, -2.97764) spine box {"top":445.15533447265625,"bottom":599.9221801757812,"left":5.3487749099731445,"right":55.634392738342285,"width":50.28561782836914,"height":154.766845703125} rail {"top":41.75,"bottom":720,"left":0,"right":80,"width":80,"height":678.25}
+[MSP2] /queries 1512×982 {"label":{"top":713.5,"bottom":856.71875,"left":88,"right":340.984375,"width":252.984375,"height":143.21875},"railRight":80,"spineMid":785,"text":"Murphy's Day Out\nThriller · 50,000 words\n14 queries since 14 Mar\nAdd a manuscript\ncoming soon"}
+[MSP2] /materials/letters 1512×982 {"label":{"top":713.5,"bottom":856.71875,"left":88,"right":340.984375,"width":252.984375,"height":143.21875},"railRight":80,"spineMid":785,"text":"Murphy's Day Out\nThriller · 50,000 words\n14 queries since 14 Mar\nAdd a manuscript\ncoming soon"}
+[MSP2] /queries 1280×720 {"label":{"top":451.5,"bottom":594.71875,"left":88,"right":340.984375,"width":252.984375,"height":143.21875},"railRight":80,"spineMid":523,"text":"Murphy's Day Out\nThriller · 50,000 words\n14 queries since 14 Mar\nAdd a manuscript\ncoming soon"}
+[MSP2] /materials/letters 1280×720 {"label":{"top":451.5,"bottom":594.71875,"left":88,"right":340.984375,"width":252.984375,"height":143.21875},"railRight":80,"spineMid":523,"text":"Murphy's Day Out\nThriller · 50,000 words\n14 queries since 14 Mar\nAdd a manuscript\ncoming soon"}
+[MSP2.1] 1512×982 solid 2px rgb(157, 183, 216) matrix(0.992546, -0.121869, 0.121869, 0.992546, -0.365608, -2.97764) true
+[MSP2.1] 1280×720 solid 2px rgb(157, 183, 216) matrix(0.992546, -0.121869, 0.121869, 0.992546, -0.365608, -2.97764) true
+[MSP3] {"spineAnims":0,"labelAnims":0,"spineDur":"0s","labelAnim":"none","transform":"matrix(0.992546, -0.121869, 0.121869, 0.992546, -0.365608, -2.97764)","labelOpacity":"1"}
+[MSP] kept seed-ms-1; removed 6 of 7
+[MSP4] after click http://127.0.0.1:4321/manuscripts?m=seed-ms-1 menus open 0 menus in DOM 1
+[MSP4] after M http://127.0.0.1:4321/queries
+[MSP] restored: 7 manuscripts (was 7)
+[MSP] kept seed-ms-1,cv25-ms; removed 5 of 7
+[MSP5] 1512×982 {"menu":{"top":586,"bottom":861.125,"left":70,"right":410,"width":340,"height":275.125},"spineFoot":861,"btnRight":60,"label":false}
+[MSP5] 1280×720 {"menu":{"top":324,"bottom":599.125,"left":70,"right":410,"width":340,"height":275.125},"spineFoot":599,"btnRight":60,"label":false}
+[MSP] restored: 7 manuscripts (was 7)
+[MSP6] {"spineH":72,"btn":{"top":401,"bottom":479,"left":20,"right":60,"width":40,"height":78},"nav":{"top":99.75,"bottom":383,"left":0,"right":80,"width":80,"height":283.25},"fb":{"top":490,"bottom":544,"left":6,"right":74,"width":68,"height":54},"navScrolls":true}
+[MSP6-obs] 1280×540 {"spineH":72,"btnTop":341,"navBottom":323,"nav":{"sh":298,"ch":223},"shelfBottom":420,"fbTop":430,"avBottom":528}
+[MSP6-obs] 1280×480 {"spineH":72,"btnTop":281,"navBottom":263,"nav":{"sh":298,"ch":163},"shelfBottom":360,"fbTop":370,"avBottom":468}
+[MSP] kept none; removed 7 of 7
+[MSP7] {"label":"Add your manuscript","transform":"matrix(0.992546, -0.121869, 0.121869, 0.992546, -0.365608, -2.97764)"}
+[MSP] restored: 7 manuscripts (was 7)
+[SR2.2] 982px {"scrolls":false,"sh":309,"ch":309,"headTop":57.75,"footBottom":970,"vh":982}
+[SR2.2] 900px {"scrolls":false,"sh":298,"ch":298,"headTop":57.75,"footBottom":888,"vh":900}
+[SR2.2] 760px {"scrolls":false,"sh":298,"ch":298,"headTop":57.75,"footBottom":748,"vh":760}
+[SR2.2] 640px {"scrolls":false,"sh":298,"ch":298,"headTop":57.75,"footBottom":628,"vh":640}
+  1 failed
+  10 passed (1.8m)
+
+# MSP4 after the stale-modal finding (e2e-run5)
+[MSP] kept seed-ms-1; removed 6 of 7
+[MSP4] after click http://127.0.0.1:4321/manuscripts?m=seed-ms-1 menus open 0 menus in DOM 1
+[MSP4] before M {"active":"BODY","dialogs":1,"modal":["DIV.d105-how"],"spineW":40,"inert":false}
+[MSP4] stale closed d105-how dialogs taken out of the guard's sight: 1
+[MSP4] after M http://127.0.0.1:4321/manuscripts?m=seed-ms-1
+[MSP] restored: 7 manuscripts (was 7)
+  2 passed (27.6s)
+
+# Red-before, MSP_MUTATE=all (e2e-redbefore)
+    Error: /materials/letters 1280×720: 8px right of the rail
+    Error: /materials/letters 1512×982: 8px right of the rail
+    Error: /queries 1280×720: 8px right of the rail
+    Error: /queries 1512×982: 8px right of the rail
+    Error: /queries 1512×982: hovered, the spine has a matrix
+    Error: /queries 1512×982: the first nav row starts where the slot did
+    Error: /queries 1512×982: the line is 10px above Feedback
+    Error: above Feedback
+    Error: below the nav
+    Error: no animation running on the label
+    Error: shorter than 152
+    Error: the end position, at once
+    Error: the label is fully there at once
+  1 passed (56.1s)
+  4 failed
+  ✘  2 [measure] › tests/e2e/manuscriptSpine.measure.ts:140:3 › manuscript spine v1 › MSP1 the spine stands on the shelf, 10px above Feedback; the nav starts where the tile's slot did; it tips inside the rail (5.1s)
+  ✘  3 [measure] › tests/e2e/manuscriptSpine.measure.ts:182:3 › manuscript spine v1 › MSP2 hovered, the cloth label sits 8px right of the rail, centred on the spine, and reads the book (19.0s)
+  ✘  4 [measure] › tests/e2e/manuscriptSpine.measure.ts:245:3 › manuscript spine v1 › MSP3 reduced motion: no running transition or animation on the tilt or the label (4.5s)
+  ✘  5 [measure] › tests/e2e/manuscriptSpine.measure.ts:339:3 › manuscript spine v1 › MSP6 a 600px-tall window: the spine shortens, stays at least 72px, and overlaps neither the nav nor Feedback (4.9s)
+Error: Script "node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/manuscriptSpine.measure.ts' '--project=measure' '--workers=1' '-g' 'MSP1|MSP2 |MSP3|MSP6'" exited with code 1
+[MSP] MUTATION ON: label-left
+[MSP] MUTATION ON: motion
+[MSP] MUTATION ON: nav
+[MSP] MUTATION ON: shelf
+[MSP] MUTATION ON: short
+[MSP] MUTATION ON: tilt
+
+# Red-before, MSP_MUTATE=motion, MSP3 alone
+[MSP] MUTATION ON: motion
+[MSP3] {"spineAnims":1,"labelAnims":1,"spineDur":"0.22s","labelAnim":"ms-label-in","transform":"matrix(0.999733, -0.0231065, 0.0231065, 0.999733, -0.0131115, -0.567286)","labelOpacity":"0"}
+    Error: no transition running on the spine
+    Error: no animation running on the label
+    Error: the label is fully there at once
+  1 failed
+  1 passed (22.1s)
+Error: Script "node tests/emulator-seed/authUser.mjs && 'node' 'scripts/emu-e2e-inner.mjs' 'tests/e2e/manuscriptSpine.measure.ts' '--project=measure' '--workers=1' '-g' 'MSP3'" exited with code 1
+
+# Unit red-before (manuscriptSpine.test.tsx)
+== MUTATION single (src/components/shell/BarSwitcher.tsx)
+   × MSP-U1 · the rail's spine > one manuscript: a door, not a menu — no aria-haspopup, no menu rendered 36ms
+   × MSP-U1 · the rail's spine > the title is on the cloth; an uploaded cover is not drawn on the rail 1ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  2 failed | 8 passed (10)
+== MUTATION order (src/components/shell/SidebarRail.tsx)
+   × MSP-U2 · the spine's place in the rail > comes after both navs and before Feedback — the tab order is the visual order 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 9 passed (10)
+== MUTATION title (src/components/shell/BarSwitcher.tsx)
+   × MSP-U1 · the rail's spine > named for its book, described by its label, and no native title to double up 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 9 passed (10)
+== MUTATION motion (src/components/shell/manuscriptSpine.css)
+   × MSP-U3 · the stylesheet keeps the brief's constraints > the ref's tilt, its three triggers, and reduced motion without transition or animation 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+      Tests  1 failed | 9 passed (10)
