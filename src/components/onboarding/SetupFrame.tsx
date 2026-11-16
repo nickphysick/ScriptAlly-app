@@ -47,6 +47,13 @@ import { BetaStrip } from "../shell/BetaStrip";
 export const SETUP_GROUP = "Getting set up";
 /** The tab group on the account screens. */
 export const ACCOUNT_GROUP = "Your account";
+/** Shell tabs v2.1 — the account screens' two tabs, in the one order the desktop draws them whichever is current
+ *  ("Create account", then "Sign in"); the current one is marked by the tab's surface alone, so switching moves no tab.
+ *  The ids are the ones Auth's `onTab` takes. Phones keep `FolderTab`'s current-first order. */
+export const ACCOUNT_TABS: readonly { id: string; label: string }[] = [
+  { id: "signup", label: "Create account" },
+  { id: "signin", label: "Sign in" },
+];
 
 export interface SetupFrameProps {
   form: "account" | "setup";
@@ -172,11 +179,17 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
   const siblings: TabSibling[] = otherTab
     ? [{ id: otherTab.id, label: otherTab.label, path: otherTab.id, icon: null }]
     : [];
-  /* the desktop's tabs: the current page, then the other mode's (the order FolderTab always drew) */
-  const stripTabs: StripTab[] = [
-    { id: "__cur", label: name, short: name, path: "__cur", icon: null },
-    ...siblings.map((sb) => ({ id: sb.id, label: sb.label, short: sb.label, path: sb.path, icon: null })),
-  ];
+  /* the desktop's tabs. ⚠️ ON THE ACCOUNT SCREENS THE ORDER IS FIXED (shell tabs v2.1, `ACCOUNT_TABS`): "Create
+     account", then "Sign in", whichever is current — the current tab is the one that is not `otherTab`. Anywhere else
+     (and for an `otherTab` the fixed pair does not name), the current page, then the other mode's. */
+  const fixedPair = form === "account" && !!otherTab && ACCOUNT_TABS.some((t) => t.id === otherTab.id);
+  const stripCurrent = fixedPair ? ACCOUNT_TABS.find((t) => t.id !== otherTab!.id)!.id : "__cur";
+  const stripTabs: StripTab[] = fixedPair
+    ? ACCOUNT_TABS.map((t) => ({ id: t.id, label: t.label, short: t.label, path: t.id, icon: null }))
+    : [
+        { id: "__cur", label: name, short: name, path: "__cur", icon: null },
+        ...siblings.map((sb) => ({ id: sb.id, label: sb.label, short: sb.label, path: sb.path, icon: null })),
+      ];
   const title = (manuscriptTitle ?? "").trim();
   /* plan rules v1: the dev lab is the one caller that passes `user`; it states paid Pro or Free as a fixture */
   const plan = planLine({ basis: user?.plan === UserPlan.PRO ? "pro" : "free", pro: user?.plan === UserPlan.PRO, prompts: user?.plan !== UserPlan.PRO, trialEndsMs: null });
@@ -249,7 +262,7 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
                 <FolderTab group={group} name={name} siblings={siblings} onGo={(id) => onTab?.(id)}
                            limitRef={form === "account" ? noLimit : exitRef} />
               ) : (
-                <TabStrip tabs={stripTabs} current="__cur" onGo={(id) => { if (id !== "__cur") onTab?.(id); }}
+                <TabStrip tabs={stripTabs} current={stripCurrent} onGo={(id) => { if (id !== stripCurrent) onTab?.(id); }}
                           limitRef={form === "account" ? noLimit : exitRef} />
               )}
             </div>
