@@ -38,13 +38,7 @@
   .wsr-lgo:hover .wsr-tog, .wsr-tog:focus-visible { opacity: 1; pointer-events: auto; }
   .wsr-lgo:hover .wsr-home img, .wsr-lgo:has(.wsr-tog:focus-visible) .wsr-home img { opacity: 0; }
 
-  /* ── the manuscript tile ── */
-  .wsr-mswrap { flex: none; display: flex; justify-content: center; margin-top: 12px; }
-  .wsr .wsr-ms {
-    display: block; padding: 6px 10px; border: 0; background: transparent; border-radius: 10px; cursor: pointer;
-    width: auto; height: auto; box-shadow: none;
-  }
-  .wsr .wsr-ms:hover { background: rgba(var(--ink-cream-rgb), 0.06); }
+  /* ── the full sidebar picker's initials tile (the rail's own tile is retired: manuscript spine v1) ── */
   .wsr-init {
     width: 30px; height: 40px; border-radius: 3px; display: grid; place-items: center; position: relative;
     background: var(--ink-cream); color: var(--sp-anthracite, #2a3a52);
@@ -55,8 +49,12 @@
   .wsr-init svg { width: 16px; height: 16px; }
 
   /* ── the nav ── */
+  /* ⚠️ MANUSCRIPT SPINE v1: THE NAV STARTS WHERE THE MANUSCRIPT TILE'S SLOT DID — 12px under the hawk (8 on a short
+     window), the slot's own margin — now that the book stands at the rail's foot. The nav is its content's height and
+     shrinks (then scrolls) only when the spine's slot below it is at its floor (manuscriptSpine.css); the slot
+     takes the free height. */
   .wsr-nav, .wsr-setnav {
-    flex: 1; min-height: 0; overflow-y: auto; margin: 18px -6px 0; padding: 0 6px;
+    flex: 0 1 auto; min-height: 0; overflow-y: auto; margin: 12px -6px 0; padding: 0 6px;
     display: flex; flex-direction: column; scrollbar-width: none;
   }
   .wsr-nav::-webkit-scrollbar, .wsr-setnav::-webkit-scrollbar { display: none; }
@@ -145,7 +143,7 @@
     .wsr-ic { height: 24px !important; }
     .wsr-sep { height: 8px !important; }
     .wsr-sep::after { content: none !important; }
-    .wsr-mswrap { margin-top: 8px; }
+    .wsr-nav, .wsr-setnav { margin-top: 8px; }
   }
 
   /* ── touch screens: no hover, so the expand control sits permanently under the hawk ── */

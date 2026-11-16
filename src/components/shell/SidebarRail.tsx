@@ -44,7 +44,7 @@ export interface SidebarRailProps {
   onExpand: () => void;
   expandRef?: React.Ref<HTMLButtonElement>;
   expanded: boolean;
-  /** The manuscript tile — the shell's BarSwitcher in its rail placement. */
+  /** The manuscript spine — the shell's BarSwitcher in its rail placement, drawn between the nav and Feedback. */
   switcher: React.ReactNode;
   markSrc: string;
   settingsMode: boolean;
@@ -154,7 +154,6 @@ export const SidebarRailView: React.FC<SidebarRailProps & { rm: RailMenuApi }> =
           {PANEL_ICON}
         </button>
       </div>
-      <div className="wsr-mswrap">{switcher}</div>
       <nav className="wsr-nav" aria-label="Main">
         {sections.map(row)}
       </nav>
@@ -183,6 +182,9 @@ export const SidebarRailView: React.FC<SidebarRailProps & { rm: RailMenuApi }> =
           );
         })}
       </nav>
+      {/* MANUSCRIPT SPINE v1: the book stands at the foot of the rail, on its shelf line above Feedback. It comes
+          after both navs in the DOM, so the tab order is the visual order: the nav, the spine, Feedback, the initials. */}
+      {switcher}
       {onFeedback && (
         <button ref={feedbackRef} type="button" className="wsr-fb" data-probe="feedback-rail" onClick={onFeedback} aria-expanded={feedbackOpen} aria-label="Give feedback" {...tip("Give feedback")}>
           <span className="wsr-fbi">{FEEDBACK_ICON}{newReplies > 0 ? <i aria-hidden="true" data-probe="feedback-dot" /> : null}</span>

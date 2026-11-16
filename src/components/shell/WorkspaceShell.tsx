@@ -902,8 +902,6 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 onPick={pickMs}
                 onAdd={() => onNavigate?.("manuscripts", "Add a manuscript")}
                 onOpenActive={() => { if (activeMs) onNavigatePath(manuscriptViewHref(activeMs.id)); }}
-                railTileFor={railTileNode}
-                railTipProps={(title) => railTipFor(title ? `${title} · switch manuscript` : "Add a manuscript", undefined, undefined, 120, !wide)}
               />
             }
             settingsMode={settingsMode}
