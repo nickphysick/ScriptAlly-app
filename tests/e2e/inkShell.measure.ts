@@ -50,7 +50,8 @@ test.describe("ink shell", () => {
       expect(near(v.h - win.b, 8), `sheet bottom inset ${v.h - win.b}`).toBe(true);
       expect(near(win.x, panel.r), "sheet starts at the sidebar's edge").toBe(true);
       const rad = (await css(page, ".ws-window", ["border-top-left-radius", "border-top-right-radius", "border-bottom-right-radius", "border-bottom-left-radius"]))!;
-      expect(rad["border-top-left-radius"]).toBe("0px");
+      /* shell tabs v2 (16 Nov): the top-left corner is round again, 14px — the tabs start 24px in (ST2-A2) */
+      expect(rad["border-top-left-radius"]).toBe("14px");
       for (const k of ["border-top-right-radius", "border-bottom-right-radius", "border-bottom-left-radius"]) expect(rad[k], k).toBe("12px");
       const meta = await page.evaluate(() => document.querySelector('meta[name="theme-color"]')?.getAttribute("content"));
       expect(meta).toBe("#1b2433");

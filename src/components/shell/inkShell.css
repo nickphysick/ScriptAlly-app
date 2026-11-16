@@ -44,13 +44,15 @@
   .ws-main { background: var(--ink-shell); }
 
   /* ⚠️ THE SHEET IS INSET 8 FROM THE RIGHT AND THE BOTTOM AND NOT AT THE TOP — the bar sits directly on
-     it, and the folder tab grows out of its square top-left corner. The inset is the wrapper's padding
-     so the window keeps filling its slot (`flex: 1; min-height: 0`) and every page's height chain is
-     unchanged. */
+     it. The inset is the wrapper's padding so the window keeps filling its slot (`flex: 1; min-height: 0`)
+     and every page's height chain is unchanged.
+     ⚠️ THE TOP-LEFT CORNER IS ROUND AGAIN, 14px (shell tabs v2): the tabs start 24px in, so the corner is
+     open and the ink shows in it. The window's `overflow: hidden` (workspaceShell.css) clips every page to
+     it. ST2-A2 samples a pixel inside the corner. */
   .ws-winwrap { padding: 0 8px 8px 0; box-sizing: border-box; }
   .ws-window {
     background: var(--ink-sheet);
-    border-radius: 0 12px 12px 12px;
+    border-radius: 14px 12px 12px 12px;
   }
 
   /* ⚠️ THE BETA STRIP RETIRES ON THE DESKTOP AND STAYS ON THE PHONE. It carried four things: the Beta
@@ -901,9 +903,11 @@
     z-index: 40;
     width: 80px;
     overflow: hidden;
-    /* lit from above, with a hairline highlight on the right edge (the ref's qr-ground) */
-    background: linear-gradient(180deg, var(--ink-shell-lift) 0, var(--ink-shell-lift-2) 260px, var(--ink-shell) 520px);
-    box-shadow: inset -1px 0 0 rgba(var(--ink-cream-rgb), 0.04);
+    /* ⚠️ ONE INK WITH THE BAR (shell tabs v2, 16 Nov; ref design-refs/shell-tabs-v2.html): the rail reads the bar's
+       own token and nothing else, so the corner where they meet has no seam. The "lit from above" gradient and the
+       hairline on the right edge are retired with their two lift tokens. ST2-A1 measures both. */
+    background: var(--ink-shell);
+    box-shadow: none;
   }
   .ws-panel.sb-ready {
     transition: width 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), margin-right 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.24s ease;
