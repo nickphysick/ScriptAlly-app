@@ -27,6 +27,7 @@ import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { claimRightPanel, releaseRightPanel, subscribeRightPanel } from "../../../lib/queryPanelStore";
 import { prefersReducedMotion } from "../../../lib/agentMotion";
 import { SideScrim } from "../../shell/SidePanel";
+import { useDrawerFocus } from "../../shell/useDrawerFocus";
 import "./contactV262.css";
 
 /** Card offers v1 — the card announces whether any section is open for editing (`detail`: boolean) */
@@ -103,10 +104,18 @@ export const AgentCardPanel262: React.FC<{
   }, [requestClose]);
   /* Card offers v1 — the page dims behind the card: lightly while it is read (visual only: the page stays live, and a row
      still switches the card), to the action level while it is edited (a click there is Escape: the card's own guard) */
+  /* card-offers-v1-merge — the agent card's focus, through overnight fixes v1's drawer hook (the card is not a SidePanel,
+     so it never had it). Focus moves in on open and goes back to the row that opened it on close. While it is only read
+     (the light dim) it is NOT modal: Tab reaches the page and a row click still switches the card. While a section is
+     edited (the action dim) it IS modal: Tab is held inside and the page is inert, and the scrim's click is Escape —
+     the card's own unsaved-changes guard. The scrim and the trap read the same `modal`, so they cannot disagree. */
+  const panelRef = useRef<HTMLDivElement>(null);
+  const modal = !leaving && (editing || cardEditing);
+  useDrawerFocus(panelRef, true, { modal });
   return createPortal(
     <>
-    <SideScrim level={leaving ? "off" : editing || cardEditing ? "action" : "light"} className="cl262-scrim" />
-    <div className="cl262-panel" data-cl262="panel" data-cl24="panel" data-agent-id={agentId} role="dialog" aria-modal="false" aria-label="Agent"
+    <SideScrim level={modal ? "action" : leaving ? "off" : "light"} className="cl262-scrim" />
+    <div ref={panelRef} className="cl262-panel" data-cl262="panel" data-cl24="panel" data-agent-id={agentId} role="dialog" aria-modal={modal ? "true" : "false"} aria-label="Agent"
       data-arrive={arriving ? "" : undefined} data-leave={leaving ? "" : undefined} data-reduce={reduce ? "" : undefined}
       style={box ? { top: box.top, bottom: box.bottom, right: box.right } : undefined}>
       <div className="cl262-lean" data-cl262="lean" data-cl24="agent-card" data-editing={editing ? "" : undefined}>

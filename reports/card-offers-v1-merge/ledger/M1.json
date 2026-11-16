@@ -1,0 +1,32 @@
+[
+ {
+  "where": "the light dim is up",
+  "ok": true,
+  "detail": "light"
+ },
+ {
+  "where": "focus moved into the card",
+  "ok": true,
+  "detail": "card"
+ },
+ {
+  "where": "the page is not inert",
+  "ok": true,
+  "detail": "inert"
+ },
+ {
+  "where": "the card is not aria-modal",
+  "ok": true,
+  "detail": "false"
+ },
+ {
+  "where": "40 Tab presses reach the page",
+  "ok": true,
+  "detail": "card,body,page"
+ },
+ {
+  "where": "a row click switches the card",
+  "ok": true,
+  "detail": "co1-old"
+ }
+]

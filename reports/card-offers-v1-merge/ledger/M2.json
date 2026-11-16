@@ -1,0 +1,37 @@
+[
+ {
+  "where": "the action dim is up",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "where": "the page is inert",
+  "ok": true,
+  "detail": "not inert"
+ },
+ {
+  "where": "the card is aria-modal",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "where": "40 Tab presses never leave the card",
+  "ok": true,
+  "detail": "card"
+ },
+ {
+  "where": "the point clicked is the agent card's scrim",
+  "ok": true,
+  "detail": "418,450"
+ },
+ {
+  "where": "a scrim click on the dirty form shows the guard",
+  "ok": true,
+  "detail": "{\"hit\":\"DIV.spanel-scrim cl262-scrim\",\"bar\":\"class data-cl262 role\",\"focus\":\"<button type=\\\"button\\\" data-cl262=\\\"prev\\\" data-cl24=\\\"prev\\\" aria-label=\\\"Previous ag\"}"
+ },
+ {
+  "where": "the card is still open",
+  "ok": true,
+  "detail": "closed"
+ }
+]
