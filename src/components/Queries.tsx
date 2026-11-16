@@ -6197,6 +6197,7 @@ export const Queries: React.FC<{
         first, fullName: ag?.name || ag?.agency || row.agentName, nowMs: now, email: (ag?.email ?? "").trim(), floorMs, env, pro: pro1522,
         sendKind, sendMats, queriedVia: via === "QueryManager" ? "QueryManager" : via === "Email" ? "Email" : "Other",
         nudgedMs: nudgeMsOf({ ...row, nrmn: !!v152.nrmn }, now), queryOnly: q.status === QueryStatus.QUERIED, remindDays: 14,
+        fullAsked: q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT || q.status === QueryStatus.OFFER,
         passMs: pass?.ms ?? null, passedAfter, restartToMs: now + 28 * 86_400_000,
         offerFromMs: offerStep?.ms ?? null, offerByMs: anyToMs(q.offerResponseDeadline), others,
         openOthers: live1522.length, withPages: others.filter((o) => o.holdsPages).length,

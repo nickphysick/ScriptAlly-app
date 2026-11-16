@@ -52,6 +52,9 @@ export interface ComposerCtx {
   nudgedMs: number | null;
   /* reply: only the query has gone (so the request is for the partial) */
   queryOnly: boolean;
+  /** Record a response v1, Phase 4 — the full is already asked for, sent, or past (Full requested, Full sent, Offer):
+   *  "Asked for the full" is not offered */
+  fullAsked?: boolean;
   /** the request's own reminder, when no deadline is given: the existing send-by default, in days */
   remindDays: number;
   /* reopen */
@@ -302,7 +305,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
       }
       body = <>
         <div className="qc1522-seg qc1522-rts" data-qc1522="reply-types">
-          {REPLIES.map((r) => (
+          {REPLIES.filter((r) => r.k !== "req" || c.queryOnly || !c.fullAsked).map((r) => (
             <button key={r.k} type="button" className={rt === r.k ? "on" : ""} data-v={r.k} onClick={() => { setRt(r.k); touch(); }}>
               <span className="g" aria-hidden="true">{StepGlyph({ status: r.k === "req" && c.queryOnly ? QueryStatus.PARTIAL_REQUESTED : r.status, kind: null })}</span>{r.label(c.queryOnly)}
             </button>

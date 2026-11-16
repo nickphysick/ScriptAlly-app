@@ -161,5 +161,6 @@
 /* §2.6 "+ Add something you sent", under the Materials tab's last row */
 .qc152 .qc1522-madd { display: inline-block; margin: 12px 4px 4px; }
 /* §3.2 the footer's second line wraps to two lines rather than cutting off ("Answer by 9 Oct · 6 to tell") */
-.qc152 [data-qc1522="footer"] .qc152-rft span { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+/* Record a response v1, Phase 4 — the second line may wrap to two lines, and is never cut off with an ellipsis */
+.qc152 [data-qc1522="footer"] .qc152-rft span { white-space: normal; overflow: visible; text-overflow: clip; display: block; }
 .qc152 [data-qc1522="footer"] .qc152-rft b { white-space: normal; }

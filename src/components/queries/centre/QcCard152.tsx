@@ -435,6 +435,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               </div>
               {ft.button ? <button type="button" className={`qc152-rbtn ${ft.button.tone === "navy" ? "nv" : "gh"}`} data-qc152="reply-btn" data-tone={ft.button.tone} data-act={ft.button.act} onClick={() => p.onFoot?.(ft.button!.act)}>{ft.button.label}{ft.button.tone === "navy" ? ARW : null}</button> : null}
               {ft.link ? <button type="button" className="qc1522-flink" data-qc1522="foot-link" data-act={ft.link.act} onClick={() => p.onFoot?.(ft.link!.act)}>{ft.link.label}</button> : null}
+              {ft.replied ? <button type="button" className="qc1522-flink" data-qc1522="foot-replied" data-act="resp" onClick={() => p.onFoot?.("resp")}>{ft.replied.label}</button> : null}
             </div>
           );
         })() : (

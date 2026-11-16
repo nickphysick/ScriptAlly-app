@@ -39,6 +39,9 @@ export interface Foot1522 {
   button: { label: string; tone: "navy" | "outline"; act: FootAct } | null;
   /** the quieter link beside it */
   link: { label: string; act: FootAct } | null;
+  /** Record a response v1, Phase 4 — on a card that is waiting (nudge due, gone quiet): "{first} replied", the commonest
+   *  thing that happens next. "With the agent" already leads with "Record a response". */
+  replied?: { label: string; act: "resp" } | null;
 }
 export interface FootCtx {
   state: QueryState;
@@ -115,7 +118,7 @@ export function footer1522(c: FootCtx): Foot1522 {
       const when = ago == null ? "" : ago === 0 ? " · today" : ` · ${pl(ago, "day")} ago`;
       return { ...none, icon: { k: "clock" }, lead: `No reply from ${f} yet`,
         sub: c.replyMs != null ? `Reply was due ${day(c.replyMs, c.nowMs)}${when}` : "Reply is overdue",
-        button: { label: "Nudge", tone: "navy", act: "nudge" }, link: { label: "Close it", act: "close" } };
+        button: { label: "Nudge", tone: "navy", act: "nudge" }, link: { label: "Close it", act: "close" }, replied: { label: `${f} replied`, act: "resp" } };
     }
     case "agent": {
       let sub: string;
@@ -131,16 +134,16 @@ export function footer1522(c: FootCtx): Foot1522 {
       if (c.nudgeMs != null) {
         const since = c.nudgeMs + c.quietWeeks * 7 * DAY;
         return { ...none, icon: { k: "clock" }, lead, sub: `Nudged ${day(c.nudgeMs, c.nowMs)} · quiet since ${day(since, c.nowMs)}`,
-          button: { label: "Close it", tone: "navy", act: "close" }, link: { label: "Nudge again", act: "nudge" } };
+          button: { label: "Close it", tone: "navy", act: "close" }, link: { label: "Nudge again", act: "nudge" }, replied: { label: `${f} replied`, act: "resp" } };
       }
       const was = c.replyMs != null ? `Reply was due ${day(c.replyMs, c.nowMs)}` : "No reply date";
       if (c.closeLeads) {
         const wk = c.replyMs != null ? Math.floor(calDays(c.nowMs, c.replyMs) / 7) : null;
         return { ...none, icon: { k: "clock" }, lead, sub: wk != null ? `${was} · quiet for ${pl(wk, "week")}` : `${was} · not nudged yet`,
-          button: { label: "Close it", tone: "navy", act: "close" }, link: { label: "Nudge", act: "nudge" } };
+          button: { label: "Close it", tone: "navy", act: "close" }, link: { label: "Nudge", act: "nudge" }, replied: { label: `${f} replied`, act: "resp" } };
       }
       return { ...none, icon: { k: "clock" }, lead, sub: `${was} · not nudged yet`,
-        button: { label: "Nudge", tone: "navy", act: "nudge" }, link: { label: "Close it", act: "close" } };
+        button: { label: "Nudge", tone: "navy", act: "nudge" }, link: { label: "Close it", act: "close" }, replied: { label: `${f} replied`, act: "resp" } };
     }
     default: {
       if (c.phase === "signed" || c.status === QueryStatus.SIGNED) {
