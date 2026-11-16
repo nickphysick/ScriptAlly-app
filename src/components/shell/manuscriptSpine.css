@@ -15,13 +15,15 @@
  */
 @media (min-width: 768px) {
   /* ── the slot: the free height between the nav and Feedback ──
-     ⚠️ `margin-bottom: -2px` BECAUSE FEEDBACK KEEPS ITS OWN 12px TOP MARGIN (sidebarRail.css, untouched): the slot
-     ends at the shelf line's foot, so 12 - 2 = 10px from the line to Feedback's top, as the ref places it.
+     ⚠️ `margin-bottom: 10px` IS THE WHOLE GAP. The slot ends at the shelf line's foot, and the ref puts the line 10px
+     above Feedback's top. Feedback has no margin of its own on the rendered page: `.wsr-fb { margin: 12px 0 }` is
+     outranked by `.wsr button { margin: 0 }` (sidebarRail.css, untouched), measured 0 (MSP1). A -2px written
+     against the declared 12 put the line 2px INSIDE Feedback's box.
      ⚠️ THE FLOOR IS 97px = the 72px shortest spine + the 24px the height rule keeps clear + the 1px line. Below
      that the nav gives way (it shrinks and scrolls), never the spine and never Feedback. */
   .wsr .ws-ms--rail.ms-shelfwrap {
     flex: 1 1 0; min-height: 97px; min-width: 0; width: auto;
-    margin-bottom: -2px;
+    margin-bottom: 10px;
     display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
     container-type: size;
   }
