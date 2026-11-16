@@ -107,7 +107,8 @@ import { QcListTitle150, QcViewSwitch150 } from "./queries/centre/QcListTitle150
 import { QC_SORT_FIELDS } from "../lib/cardsSort";
 import { GROUP_BY_OPTIONS } from "../lib/qcCalView";
 import { eyeRows } from "../lib/qcBirdsEye";
-import { QcWhoReplied149 } from "./queries/centre/QcFlows149";
+import { QcWhoReplied, type WhoRow } from "./queries/centre/QcWhoReplied";
+import { swapCard } from "../lib/cardMotion";
 import { LogStagesHost } from "./queries/centre/LogStagesHost";
 import { logDefaults, pieceVersions, saveLog } from "../lib/queryActions/logSave";
 import { packagesFor } from "../lib/queryActions/packages";
@@ -1860,6 +1861,8 @@ export const Queries: React.FC<{
     setQc1522J({ j: (FOOT_J as Record<string, Journey>)[a] ?? (a as Journey), n: Date.now(), reply });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
+  /* Record a response v1, Phase 3 — the query picked from "Who replied?": its composer's Cancel is "← Someone else" */
+  const whoPickedRef = useRef<string | null>(null);
   /* Log a query v1.1 — a query opened from the list's "Add date": its first undated step's editor opens with the card */
   const qc1522EditPending = useRef<string | null>(null);
   /* v152.2 §1.6 — a list row's button opens that query's card with its composer (the footer's own journey) */
@@ -3067,6 +3070,7 @@ export const Queries: React.FC<{
     const p = qcCardPendingMode.current;
     /* v152.2 — another query's card opens with no composer, no edit and no toast; a list row's action opens its composer */
     setQc1522J(null); setQc1522Edit(null); setQc1522Draft(null); setQc1522Toast(null);
+    if (whoPickedRef.current !== cardQueryId) whoPickedRef.current = null;
     const pj = qc1522Pending.current;
     if (pj && pj.id === cardQueryId) { qc1522Pending.current = null; open1522(pj.a, pj.reply ?? null); }
     if (qc1522EditPending.current && qc1522EditPending.current === cardQueryId) { qc1522EditPending.current = null; setQc1522Edit("__undated"); }
@@ -5928,6 +5932,7 @@ export const Queries: React.FC<{
     else openQueryPanel(id, o.from ?? extPanel?.from ?? "other");
   };
   respOpenRef.current = (r) => {
+    whoPickedRef.current = null;
     if (r.queryId) { respondOn(r.queryId, { from: r.from, back: r.back, reply: r.reply }); return; }
     setQcFlow({ kind: "who" });
   };
@@ -6200,6 +6205,7 @@ export const Queries: React.FC<{
       /* one save: plan it, commit it in one batch, then the toast and its Undo */
       const done1522 = (snap: Snapshot, msg: string, freshId: string | null) => {
         setQc1522J(null); setQc1522Draft(null); setQc1522Edit(null);
+        whoPickedRef.current = null;
         if (freshId) { setQcCardFresh(freshId); window.setTimeout(() => setQcCardFresh(null), 1600); }
         setQc1522Toast({ msg, undo: async () => { await restoreSnapshot(snap); } });
       };
@@ -6282,7 +6288,16 @@ export const Queries: React.FC<{
         composer1522 = (
           <QcComposer1522 key={`${q.id}:${qc1522J.j}:${qc1522J.n}`} journey={qc1522J.j} replyStart={qc1522J.reply ?? null} ctx={ctx} busy={qc152Busy}
             onDraft={setQc1522Draft} onSave={save1522}
-            onClose={() => { setQc1522J(null); setQc1522Draft(null); }}
+            /* came through "Who replied?": one level up is the list again, in the same frame */
+            cancelLabel={whoPickedRef.current === q.id && qc1522J.j === "reply" ? "← Someone else" : undefined}
+            onClose={() => {
+              if (whoPickedRef.current === q.id && qc1522J.j === "reply") {
+                whoPickedRef.current = null;
+                swapCard(-1, () => { setQc1522J(null); setQc1522Draft(null); closeQueryCard(); setQcFlow({ kind: "who" }); });
+                return;
+              }
+              setQc1522J(null); setQc1522Draft(null);
+            }}
             onAddEmail={() => { setQc1522J(null); if (ag) openAgentCard(ag.id, { tab: "who", focus: "email", from: "qc" }); }}
             onEditOffer={() => { setQc1522J(null); setQc1522Edit(offerStep?.activityId ?? null); }} />
         );
@@ -6472,13 +6487,22 @@ export const Queries: React.FC<{
     laqLeaveRef.current = null;
     const now = Date.now();
     if (qcFlow.kind === "who") {
-      /* every live query in the page's scope, once: waiting on the agent first, then those already with the writer */
-      const items = qcScoped.filter((r) => qaIsLive(r.query)).map((r) => ({
-        id: r.id, initials: r.initials, name: r.agentName, agency: r.agency, status: r.status, statusLabel: STAGE_NAME[r.status], you: r.court !== "agent",
-      })).sort((a, b) => a.name.localeCompare(b.name));
+      /* Record a response v1, Phase 3 — every query, on every book: waiting on the agent (longest wait first), then those
+         already with the writer; the closed ones only while something is typed (QcWhoReplied) */
+      const dm = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
+      const rows: WhoRow[] = qcRows.map((r) => {
+        const closed = r.court === "closed";
+        const since = r.stageStartMs ?? r.lastMs ?? r.sentMs ?? 0;
+        return {
+          id: r.id, initials: r.initials, name: r.agentName, agency: r.agencyKey, status: r.status,
+          step: `${closed ? "closed" : (STAGE_NAME[r.status] ?? "").toLowerCase()}${since ? ` ${dm(since)}` : ""}`,
+          group: closed ? "closed" as const : r.court === "agent" ? "wait" as const : "you" as const, sinceMs: since,
+        };
+      });
       return (
-        <QcWhoReplied149 items={items} onClose={() => setQcFlow(null)}
-          onPick={(id) => respondOn(id, { set: routeActive ? qcVisible.map((r) => r.id) : null })} />
+        <QcWhoReplied rows={rows} onClose={() => setQcFlow(null)}
+          onLog={() => setQcFlow({ kind: "log", agentId: null, manuscriptId: null })}
+          onPick={(id) => { whoPickedRef.current = id; swapCard(1, () => respondOn(id, { set: null })); }} />
       );
     }
     /* the book: the one the door named, else the page's (the header's own), else the first that can be queried */

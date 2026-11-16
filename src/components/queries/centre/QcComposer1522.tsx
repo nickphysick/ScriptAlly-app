@@ -92,6 +92,8 @@ export interface QcComposerProps {
   onAddEmail: () => void;
   /** the offer summary's Edit: the offer bubble, edited in place (§2.4) */
   onEditOffer: () => void;
+  /** Record a response v1 — the Cancel button's words ("← Someone else" after "Who replied?"); it still asks first */
+  cancelLabel?: string;
 }
 
 const ARW = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" /></svg>;
@@ -138,7 +140,7 @@ const Seg: React.FC<{ opts: readonly (readonly [string, string])[]; v: string; o
   </div>
 );
 
-export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, replyStart, onDraft, onSave, onClose, busy, onAddEmail, onEditOffer }) => {
+export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, replyStart, onDraft, onSave, onClose, busy, onAddEmail, onEditOffer, cancelLabel }) => {
   const c = ctx;
   const f = c.first;
   const today = sod(c.nowMs);
@@ -215,7 +217,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
   };
 
   let title = "", tall = false, body: React.ReactNode = null, foot: React.ReactNode = null;
-  const cancel = <button type="button" className="qc1522-btn gh" data-qc1522="cancel" onClick={exit}>Cancel</button>;
+  const cancel = <button type="button" className="qc1522-btn gh" data-qc1522="cancel" onClick={exit}>{cancelLabel ?? "Cancel"}</button>;
   const primary = (label: string, p: ComposerSave | null, data = "save", disabled = false) => (
     <button type="button" className="qc1522-btn nv" data-qc1522={data} disabled={disabled || busy || !p} onClick={() => p && void save(p)}>{label}{ARW}</button>
   );
