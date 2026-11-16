@@ -227,19 +227,25 @@ export const FolderTab: React.FC<FolderTabProps> = ({ group, name, siblings, onG
 };
 
 /* ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-   SHELL NAV v3 (13 Nov; ref design-refs/shell-nav-v3.html, `.tabs` `.tab` `.tab.cur` `.fil`) — THE TAB STRIP.
-   The workspace bar's tabs: every page of the current section, in nav order, which NEVER changes. The current page's
-   tab rises where it stands (paper, 41px, 19px) with a 10px lane either side (none on the left when it is first);
-   the others rest (34px, cream 14%, 16px). The fillet is FolderTab's path verbatim: on the right always, mirrored on
-   the left when the current tab is not first. No group label.
+   SHELL NAV v3 (13 Nov) → SHELL TABS v2 (16 Nov; ref design-refs/shell-tabs-v2.html, `.tab`) — THE TAB STRIP.
+   The bar's tabs: every page of the current section, in nav order, which NEVER changes. ONE TAB SHAPE: every tab has
+   the same metrics (the typewriter face at 17px, 40 tall, 20px sides, 2px apart, the first 24px in from the sheet), so
+   nothing moves or resizes when the current page changes. The current page is the only shape: the fill of the sheet
+   beneath it (`--ink-tab`), ink text, 11px top corners and a 10px concave curve into the sheet on BOTH sides. The
+   other pages are words on the ink, with no ground at rest. No group label.
+
+   ⚠️ THE CURVES ARE SVG, NEVER A RADIAL GRADIENT (INK4: a gradient corner is anti-aliased differently from the tab's own
+   border-radius and shows a seam at 3×). The ref draws them as `radial-gradient` pseudo-elements; the shape is the
+   ref's, the drawing is ours. Each curve overlaps the tab body by 1px so no ink can show between them.
 
    ⚠️ THE FIT KEEPS FolderTab's ORDER OF RETREAT — full names, then icons, then "+N" — with two rules of its own: the
    current tab is never icon-only and never in "+N", and resting tabs give way first FROM THE RIGHT. Re-fitting is
    measured before paint and unanimated.
 
    ⚠️ TABS ARE BUTTONS THAT NAVIGATE, SO THEY ARE NOT ARIA TABS: a nav landmark, no `role="tablist"`, and
-   `aria-current="page"` on the current one. `FolderTab` above is the onboarding frame's own tab (SetupFrame) and is
-   left as it was; the workspace bar renders only this.
+   `aria-current="page"` on the current one. Every desktop mount renders this: the workspace bar and SetupFrame
+   (onboarding and the account screens). `FolderTab` above survives only for SetupFrame on a phone, where
+   onboarding.css styles it alone.
    ══════════════════════════════════════════════════════════════════════════════════════════════════════════════════ */
 
 export interface StripTab {
@@ -257,11 +263,28 @@ export interface StripTab {
 export type StripMode = "cur" | "full" | "ic" | "hid";
 
 /** Between tabs (the ref's `.tabs` gap). */
-const STRIP_GAP = 6;
+const STRIP_GAP = 2;
+/** The bar's search field, open and folded to its icon (inkShell.css `.ws-sfield`, `.ws-sfield[data-fold]`;
+ *  `searchFold.test.ts` holds the two equal to the CSS). */
+export const SEARCH_W = 168;
+export const SEARCH_FOLD_W = 38;
+
+/**
+ * Shell tabs v2, Phase 3 — WHEN SPACE RUNS SHORT, SEARCH FOLDS FIRST. Given the room the strip would have beside the open
+ * field and beside the folded one, the plan: if every tab keeps its name next to the open field, nothing folds;
+ * otherwise the field folds and the strip is planned in the larger room (where the old order of retreat — icons, then
+ * "+N" — still applies if even that is not enough). Pure, so it is unit-tested; `TabStrip` feeds it measured widths.
+ */
+export function planWithFold(rest: number[], icon: number[], current: number, cur: number, more: number, roomOpen: number, roomFolded: number): { modes: StripMode[]; folded: boolean } {
+  const open = planStrip(rest, icon, current, cur, more, roomOpen);
+  if (open.every((m) => m === "cur" || m === "full")) return { modes: open, folded: false };
+  return { modes: planStrip(rest, icon, current, cur, more, roomFolded), folded: true };
+}
 
 /**
  * The fit, as a pure function of measured widths. `rest[i]` / `icon[i]` are tab i's resting widths named and
- * icon-only; `cur` is the current tab's risen width INCLUDING its lanes; `more` the "+N" tab's width; `limit` the room
+ * icon-only; `cur` is the current tab's width (the same metrics as a resting tab, measured separately so a PRO tag or a
+ * future difference can never be miscounted); `more` the "+N" tab's width; `limit` the room
  * from the strip's left edge. Resting tabs turn to icons from the right, then leave for "+N" from the right.
  */
 export function planStrip(rest: number[], icon: number[], current: number, cur: number, more: number, limit: number): StripMode[] {
@@ -286,18 +309,22 @@ export interface TabStripProps {
   onGo: (path: string) => void;
   /** The search field — the fit limit is 24px short of its left edge. */
   limitRef: React.RefObject<HTMLElement | null>;
+  /** The workspace bar only: `limitRef` is the search field, which may fold to its icon to keep the tabs named. The
+   *  strip reports whether it needs the fold; the bar draws it. */
+  onFold?: (folded: boolean) => void;
 }
 
 const PRO_TAG = <span className="ws-qpro ws-ftpro" data-shell="pro" aria-label="Pro">PRO</span>;
 
-/** The current tab's fillet, verbatim from FolderTab: right always; mirrored on the left when not first. */
+/** The current tab's curve into the sheet, 10px: a 1px column over the tab body, then the concave quarter (the circle's
+ *  centre is the curve box's top-right). Drawn for the right side; the left one is the same path mirrored in CSS. */
 const fillet = (side: "r" | "l") => (
-  <svg className={side === "r" ? "ws-ftfl" : "ws-ftfl-l"} viewBox="0 0 12 12" preserveAspectRatio="none" width="13" height="12" aria-hidden="true" focusable="false">
-    <path d="M0 0V12H12A12 12 0 0 1 0 0Z" />
+  <svg className={side === "r" ? "ws-ftfl" : "ws-ftfl-l"} viewBox="0 0 11 10" width="11" height="10" aria-hidden="true" focusable="false">
+    <path d="M0 0H1A10 10 0 0 0 11 10H0Z" />
   </svg>
 );
 
-export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRef }) => {
+export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRef, onFold }) => {
   const stripRef = useRef<HTMLElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
   const curIdx = Math.max(0, tabs.findIndex((t) => t.id === current));
@@ -316,16 +343,28 @@ export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRe
     const b = bar.getBoundingClientRect();
     if (b.width <= 0) return;
     const lim = limitRef.current;
-    const limR = lim && lim.getBoundingClientRect().width > 0 ? lim.getBoundingClientRect().left - b.left : b.width;
+    const limBox = lim && lim.getBoundingClientRect().width > 0 ? lim.getBoundingClientRect() : null;
+    const limR = limBox ? limBox.left - b.left : b.width;
     const left = strip.getBoundingClientRect().left - b.left;
     const w = (sel: string) => meas.querySelector<HTMLElement>(sel)?.getBoundingClientRect().width ?? 0;
     const rest = tabs.map((t) => w(`[data-ftm="${t.id}"]`));
     const icon = tabs.map((t) => w(`[data-ftm-ic="${t.id}"]`) || 37);
-    /* the risen tab with its lanes: 10 either side, none on the left when it is first */
-    const cur = w(`[data-ftm-cur="${tabs[curIdx]?.id}"]`) + (curIdx === 0 ? 10 : 20);
-    const next = planStrip(rest, icon, curIdx, cur, w("[data-ftm-more]") || 58, limR - LIMIT_GAP - left);
+    /* the current tab: no lanes any more — its curves sit over the 2px gap and the neighbour's foot, as in the ref */
+    const cur = w(`[data-ftm-cur="${tabs[curIdx]?.id}"]`);
+    const more = w("[data-ftm-more]") || 58;
+    let next: StripMode[];
+    if (onFold && limBox) {
+      /* ⚠️ THE FIELD'S RIGHT EDGE IS THE FIXED ONE (the bar's right group is flush right), so both rooms are read from it
+         and never from its left, which is where the fold itself moves it */
+      const right = limBox.right - b.left;
+      const plan = planWithFold(rest, icon, curIdx, cur, more, right - SEARCH_W - LIMIT_GAP - left, right - SEARCH_FOLD_W - LIMIT_GAP - left);
+      next = plan.modes;
+      onFold(plan.folded);
+    } else {
+      next = planStrip(rest, icon, curIdx, cur, more, limR - LIMIT_GAP - left);
+    }
     setModes((m) => (m.join() === next.join() ? m : next));
-  }, [key, curIdx, limitRef]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [key, curIdx, limitRef, onFold]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useLayoutEffect(() => { fit(); }, [fit]);
   useEffect(() => {
@@ -368,13 +407,13 @@ export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRe
             return (
               <button
                 type="button" key={t.id}
-                className={`ws-ftab ws-fttab is-cur${i === 0 ? " is-first" : ""}`}
+                className="ws-ftab ws-fttab is-cur"
                 data-shell="tab" data-tab={t.id} aria-current="page" aria-label={t.label}
               >
                 <b className="ws-ftn" data-page-name="">{t.short}</b>
                 {t.locked && PRO_TAG}
+                {fillet("l")}
                 {fillet("r")}
-                {i > 0 && fillet("l")}
               </button>
             );
           }

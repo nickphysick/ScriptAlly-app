@@ -29,6 +29,15 @@
      `data-stage-off` (AppShell `StagePage`), and a sheet inside one does not count. */
   .ws-main { --ink-tab: var(--ink-sheet); }
   .ws-app:has([data-header-sheet]:not([data-stage-off] *)) .ws-main { --ink-tab: var(--ws-sheet); }
+  /* ⚠️ SHELL TABS v2 (16 Nov): THE TAB, THE LIP AND THE TOP OF THE SHEET ARE ONE COLOUR ON EVERY ROUTE. Four pages paint
+     a ground of their own over the window instead of retoning `--ws-page` (measured at 1512, every route: Step 0.4 of
+     reports/shell-tabs-v2/REPORT.md), so the tab reads the token that ground starts from — by what is rendered, as above:
+       · the Dashboard and Goals (`.d58.d2`, dash2.css) and Packages (`.pk39-wpg`, pk41.css) — a gradient from #fbf9f5,
+         which is `--ws-sheet`;
+       · Query letters (`.qlp`, queryLetters.css) — `--ws-ground-cool`.
+     ST2-B4 sweeps every route and fails on a new page that paints a ground the tab does not read. */
+  .ws-app:has(:is(.d58.d2, .pk39-wpg):not([data-stage-off] *)) .ws-main { --ink-tab: var(--ws-sheet); }
+  .ws-app:has(.qlp:not([data-stage-off] *)) .ws-main { --ink-tab: var(--ws-ground-cool); }
 
   .ws-app { background: var(--ink-shell); }
   /* ⚠️ THE FRAME PAINTS ITS GROUND INLINE (`--shell-chrome`, AppShell), and an inline style beats any
@@ -44,13 +53,15 @@
   .ws-main { background: var(--ink-shell); }
 
   /* ⚠️ THE SHEET IS INSET 8 FROM THE RIGHT AND THE BOTTOM AND NOT AT THE TOP — the bar sits directly on
-     it, and the folder tab grows out of its square top-left corner. The inset is the wrapper's padding
-     so the window keeps filling its slot (`flex: 1; min-height: 0`) and every page's height chain is
-     unchanged. */
+     it. The inset is the wrapper's padding so the window keeps filling its slot (`flex: 1; min-height: 0`)
+     and every page's height chain is unchanged.
+     ⚠️ THE TOP-LEFT CORNER IS ROUND AGAIN, 14px (shell tabs v2): the tabs start 24px in, so the corner is
+     open and the ink shows in it. The window's `overflow: hidden` (workspaceShell.css) clips every page to
+     it. ST2-A2 samples a pixel inside the corner. */
   .ws-winwrap { padding: 0 8px 8px 0; box-sizing: border-box; }
   .ws-window {
     background: var(--ink-sheet);
-    border-radius: 0 12px 12px 12px;
+    border-radius: 14px 12px 12px 12px;
   }
 
   /* ⚠️ THE BETA STRIP RETIRES ON THE DESKTOP AND STAYS ON THE PHONE. It carried four things: the Beta
@@ -97,90 +108,86 @@
   /* the bar's hairline retires: there is no light bar left for it to sit under */
   .ws-pagebar::after { content: none; display: none; }
 
-  /* ── the folder tab ── */
-  .ws-ftab {
+  /* ══ SHELL TABS v2 (16 Nov; ref design-refs/shell-tabs-v2.html `.tab`) — THE TAB STRIP (FolderTab.tsx `TabStrip`) ══
+     One tab shape. Every tab: the typewriter face at 17px, 40 tall, 20px sides, 2px apart, the first 24px in from the
+     sheet's left edge — and no tab changes size when it becomes current (ST2-B1, B2). The current page is the fill of
+     the sheet directly beneath it (`--ink-tab`), ink text, 11px top corners and a 10px curve into the sheet on both
+     sides (B4, B5). The others have no ground at rest (B3): cream at 76%; hover lifts them to full cream on white 8%.
+     The ref's literals read as tokens: the page → --ink-tab, the ink text → --ink-on-light, the cream →
+     --ink-cream(-rgb), white → --ink-white-rgb; its pale-blue focus ring is the shell's own, --ink-terra.
+     ⚠️ The tab overlaps the sheet by 1px (`bottom: -1px`), as the folder tab always has, so no hairline of ink can show
+     between the current tab and the sheet at any zoom. The strip's own left is 24px; a page that pins its own tab colour
+     (the full-screen lists) sets `--ink-tab` on `.ws-ftab`, never the tab's geometry. */
+  .ws-fttabs {
     position: absolute;
-    left: 0;
+    left: 24px;
     bottom: -1px;
-    box-sizing: border-box;
-    height: 41px;
-    padding: 0 22px;
-    border-radius: 12px 12px 0 0;
-    background: var(--ink-tab);
     display: flex;
-    align-items: center;
-    color: var(--ink-on-light);
-    white-space: nowrap;
-  }
-  .ws-ftnm {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 10px;
-    transition: opacity 0.09s ease, transform 0.09s var(--ink-ease);
-  }
-  .ws-ftnm.is-out { opacity: 0; transform: translateY(4px); }
-  .ws-ftg {
-    font-family: "JetBrains Mono", monospace;
-    font-weight: 500;
-    font-size: 9px;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(var(--ink-shell-rgb), 0.56);
-  }
-  .ws-ftn {
-    font-family: var(--sp-type);
-    font-weight: 400;
-    font-size: 19px;
-    line-height: 1.3;
-  }
-  /* the one fillet: flush with the tab's foot, overlapping its body by 1px */
-  .ws-ftfl {
-    position: absolute;
-    right: -12px;
-    bottom: 0;
-    width: 13px;
-    height: 12px;
-    display: block;
-    fill: var(--ink-tab);
-  }
-
-  /* ── the recessed sibling tabs ── */
-  .ws-ftsibs {
-    position: absolute;
-    bottom: 0;
-    height: 34px;
-    display: flex;
-    gap: 6px;
     align-items: flex-end;
+    gap: 2px;
   }
-  .ws-ftsib {
+  .ws-fttab {
+    position: relative;
+    z-index: 1;
     box-sizing: border-box;
-    height: 34px;
+    height: 40px;
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 0 16px;
+    padding: 3px 20px 0;
+    margin: 0;
     border: 0;
-    border-radius: 10px 10px 0 0;
-    background: rgba(var(--ink-cream-rgb), 0.09);
-    color: var(--ink-cream-66);
+    border-radius: 11px 11px 0 0;
+    background: transparent;
+    color: rgba(var(--ink-cream-rgb), 0.76);
     font-family: var(--sp-type);
     font-weight: 400;
-    font-size: 16px;
+    font-size: 17px;
+    line-height: 1.3;
     white-space: nowrap;
     cursor: pointer;
+    /* colour only — never a size, a padding or a font (B2: the row never moves) */
     transition: background-color 0.14s ease, color 0.14s ease;
   }
-  .ws-ftsib:hover { background: rgba(var(--ink-cream-rgb), 0.16); color: var(--ink-bright); }
-  .ws-ftsib svg { width: 15px; height: 15px; opacity: 0.8; flex: none; }
-  .ws-ftsib--ic { padding: 0 11px; }
-  .ws-ftmore {
+  .ws-fttab:not(.is-cur):hover { background: rgba(var(--ink-white-rgb), 0.08); color: var(--ink-cream); }
+  .ws-fttab:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: -3px; }
+  .ws-fttab:not(.is-cur):focus-visible { color: var(--ink-cream); }
+  .ws-fttab svg { width: 15px; height: 15px; opacity: 0.8; flex: none; }
+  .ws-fttab--ic { padding: 3px 11px 0; }
+  /* the current page: the sheet's fill and ink text, nothing else changes */
+  .ws-fttabs .ws-fttab.is-cur,
+  .ws-ftmeasure .ws-fttab.is-cur {
+    z-index: 2;
+    background: var(--ink-tab);
+    color: var(--ink-on-light);
+    cursor: default;
+  }
+  .ws-fttab .ws-ftn { font: inherit; }
+  .ws-fttab .ws-fttl { font: inherit; }
+  /* the two curves (an SVG each — never a gradient, INK4): 10 × 10 plus the 1px column over the tab body */
+  .ws-fttab .ws-ftfl,
+  .ws-fttab .ws-ftfl-l {
+    position: absolute;
+    bottom: 0;
+    width: 11px;
+    height: 10px;
+    display: block;
+    fill: var(--ink-tab);
+    /* ⚠️ full strength: `.ws-fttab svg` (the icon-only tabs' icons) sets 0.8, and a curve at 0.8 is a grey corner (B5) */
+    opacity: 1;
+    pointer-events: none;
+  }
+  .ws-fttab .ws-ftfl { right: -10px; }
+  .ws-fttab .ws-ftfl-l { left: -10px; transform: scaleX(-1); }
+  /* the small PRO tag after a locked page's name, inside the same 40px */
+  .ws-fttab .ws-ftpro { margin-left: 0; }
+  .ws-fttab.ws-ftmore {
     font-family: "JetBrains Mono", monospace;
     font-weight: 600;
     font-size: 10px;
     letter-spacing: 0.12em;
   }
-  .ws-ftmore-wrap { position: relative; display: inline-flex; align-items: flex-end; height: 34px; }
+  .ws-ftmore-wrap { position: relative; display: inline-flex; align-items: flex-end; height: 40px; }
   /* the "+N" menu is paper */
   .ws-ftmenu {
     position: absolute;
@@ -214,88 +221,9 @@
   }
   .ws-ftmenu button:hover, .ws-ftmenu button:focus-visible { background: var(--shell-menu-on); outline: none; }
   .ws-ftmenu svg { width: 15px; height: 15px; opacity: 0.7; flex: none; }
+  .ws-fttabs .ws-ftmenu .ws-qpro { margin-left: auto; }
   /* the measurer: laid out with the real tabs' type, seen by nothing */
   .ws-ftmeasure { visibility: hidden; pointer-events: none; left: 0; top: 0; bottom: auto; }
-
-  /* ══ SHELL NAV v3 (13 Nov) — THE TAB STRIP (ref design-refs/shell-nav-v3.html: `.tabs` `.tab` `.tab.cur` `.fil`) ══
-     Every page of the section, in nav order; the current tab rises where it stands. Values are the ref's, with its
-     literals read as the tokens they are: #f2eee8 → --ink-tab (one paper with the sheet), #1c130f → --ink-on-light,
-     #fffaf3 → --ink-bright, 244,238,229 → --ink-cream-rgb, Special Elite → --sp-type. The rules above for `.ws-ftab`
-     standing alone, `.ws-ftg` and `.ws-ftsib` are the onboarding frame's FolderTab (SetupFrame); the bar renders none. */
-  .ws-fttabs {
-    position: absolute;
-    left: 0;
-    bottom: -1px;
-    display: flex;
-    align-items: flex-end;
-    gap: 6px;
-  }
-  .ws-fttab {
-    position: relative;
-    z-index: 1;
-    box-sizing: border-box;
-    height: 34px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 16px;
-    border: 0;
-    border-radius: 10px 10px 0 0;
-    font-family: var(--sp-type);
-    font-weight: 400;
-    font-size: 16px;
-    line-height: 1.3;
-    white-space: nowrap;
-    cursor: pointer;
-    /* the old current tab settles and the new one rises in place: 150ms, ease-out (no name swap) */
-    transition: height 0.15s ease-out, padding 0.15s ease-out, margin 0.15s ease-out, font-size 0.15s ease-out,
-      border-radius 0.15s ease-out, background-color 0.15s ease-out, color 0.15s ease-out;
-  }
-  /* ⚠️ THE RESTING GROUND IS SET ON RESTING TABS ONLY: the risen tab takes its paper and ink from `.ws-ftab` above,
-     at 0-1-0, so the Query Centre's and the Contact list's full-screen navy tab (`html[data-…] .ws-ftab`) still wins. */
-  .ws-fttab:not(.is-cur) { background: rgba(var(--ink-cream-rgb), 0.14); color: rgba(var(--ink-cream-rgb), 0.9); }
-  .ws-fttab:not(.is-cur):hover { background: rgba(var(--ink-cream-rgb), 0.2); color: var(--ink-bright); }
-  .ws-fttab:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: -2px; }
-  .ws-fttab svg { width: 15px; height: 15px; opacity: 0.8; flex: none; }
-  .ws-fttab--ic { padding: 0 11px; }
-  /* the risen tab: the sheet's paper; a 10px lane either side so its fillets never sit on a neighbour */
-  .ws-fttabs .ws-fttab.is-cur,
-  .ws-ftmeasure .ws-fttab.is-cur {
-    position: relative;
-    left: auto;
-    bottom: auto;
-    z-index: 2;
-    height: 41px;
-    padding: 0 22px;
-    margin: 0 10px;
-    border-radius: 12px 12px 0 0;
-    font-size: 19px;
-    cursor: default;
-  }
-  .ws-fttabs .ws-fttab.is-cur.is-first { margin-left: 0; }
-  .ws-fttab .ws-ftn { font: inherit; }
-  .ws-fttab .ws-fttl { font: inherit; }
-  .ws-fttab .ws-ftfl,
-  .ws-fttab .ws-ftfl-l {
-    position: absolute;
-    bottom: 0;
-    width: 13px;
-    height: 12px;
-    display: block;
-    fill: var(--ink-tab);
-    opacity: 1;
-  }
-  .ws-fttab .ws-ftfl { right: -12px; }
-  .ws-fttab .ws-ftfl-l { left: -12px; transform: scaleX(-1); }
-  /* the small PRO tag after a locked page's name */
-  .ws-fttab .ws-ftpro { margin-left: 0; }
-  .ws-fttab.ws-ftmore {
-    font-family: "JetBrains Mono", monospace;
-    font-weight: 600;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-  }
-  .ws-fttabs .ws-ftmenu .ws-qpro { margin-left: auto; }
   @media (prefers-reduced-motion: reduce) { .ws-fttab { transition: none; } }
 
   /* ── the right: search · Log a query · (rule) · Help ── */
@@ -323,6 +251,11 @@
     transition: background-color 0.14s ease;
   }
   .ws-sfield:hover { background: rgba(var(--ink-cream-rgb), 0.11); color: var(--ink-cream-66); }
+  /* SHELL TABS v2 · when space runs short, search folds first (TabStrip's fit, `planWithFold`): a 38px icon button, the
+     same height, ring and fill; its right edge stays where it was, so nothing else in the bar moves (ST2-C2) */
+  .ws-pagebar .ws-sfield[data-fold] { width: 38px; padding: 0; gap: 0; justify-content: center; }
+  .ws-pagebar .ws-sfield[data-fold] .ws-sfield-l,
+  .ws-pagebar .ws-sfield[data-fold] .ws-sfield-k { display: none; }
   .ws-sfield svg { flex: none; display: block; }
   .ws-sfield-l { font-family: inherit; flex: 1; text-align: left; }
   .ws-sfield-k {
@@ -901,9 +834,11 @@
     z-index: 40;
     width: 80px;
     overflow: hidden;
-    /* lit from above, with a hairline highlight on the right edge (the ref's qr-ground) */
-    background: linear-gradient(180deg, var(--ink-shell-lift) 0, var(--ink-shell-lift-2) 260px, var(--ink-shell) 520px);
-    box-shadow: inset -1px 0 0 rgba(var(--ink-cream-rgb), 0.04);
+    /* ⚠️ ONE INK WITH THE BAR (shell tabs v2, 16 Nov; ref design-refs/shell-tabs-v2.html): the rail reads the bar's
+       own token and nothing else, so the corner where they meet has no seam. The "lit from above" gradient and the
+       hairline on the right edge are retired with their two lift tokens. ST2-A1 measures both. */
+    background: var(--ink-shell);
+    box-shadow: none;
   }
   .ws-panel.sb-ready {
     transition: width 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), margin-right 0.24s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.24s ease;

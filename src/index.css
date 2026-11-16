@@ -197,6 +197,9 @@
   --ws-page: rgb(var(--ws-page-rgb));
   --ws-sheet: #fbf9f5;
   --ws-band: #fbf9f5;
+  /* the cool off-white ground with the doodle tile (Query letters; the Query Centre v153.4 before it). A token since
+     shell tabs v2 (16 Nov) so the bar's tab can read the same value the page paints (inkShell.css). */
+  --ws-ground-cool: #f5f5f3;
   /* ══ THE INK SHELL (ink shell v1, 6 Oct; ref design-refs/shell/ink-shell-v1.html) ══════════════════
      The frame, the sidebar and the bar are one ink ground; the sheet is the only light surface. These
      tokens are NEW and are the only values the ink chrome reads — every older shell token keeps its
@@ -207,9 +210,6 @@
      ⚠️ THE CREAM TIERS ARE CHANNELS PLUS ALPHA, never `color-mix()` (banned at runtime). The named
      tiers are the ref's; the in-between alphas (6/9/10/16/36%) read the same channels. */
   --ink-shell: #1b2433;
-  /* sidebar rail v1: the sidebar is lit from above — the ink lifts to these two at its top (inkShell.css) */
-  --ink-shell-lift: #232d3f;
-  --ink-shell-lift-2: #1d2637;
   --ink-shell-rgb: 27, 36, 51;
   --ink-cream: #f4eee5;
   --ink-cream-rgb: 244, 238, 229;
@@ -217,6 +217,8 @@
   --ink-cream-66: rgba(244, 238, 229, 0.66);
   --ink-cream-42: rgba(244, 238, 229, 0.42);
   --ink-cream-12: rgba(244, 238, 229, 0.12);
+  /* shell tabs v2: a resting tab's hover ground is white at 8% (the ref's own lift) */
+  --ink-white-rgb: 255, 255, 255;
   --ink-terra: #d9967a;
   --ink-terra-rgb: 217, 150, 122;
   /* Manuscripts v27 Part E — the sidebar's "PRO" tag: the rose of the ref's tag and its 4px dot */

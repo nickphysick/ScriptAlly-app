@@ -23,7 +23,7 @@
   padding: 0 var(--work-gutter) 64px;
   font: 16px/1.5 var(--sp-serif); color: var(--ql-ink);
   /* the Query Centre's ground: the cool off-white with the doodle tile under an even .45 wash (qcv1534) */
-  background-color: #f5f5f3;
+  background-color: var(--ws-ground-cool);
   background-image: linear-gradient(rgba(245, 245, 243, .45), rgba(245, 245, 243, .45)), url("/images/qc/doodle-tile.svg");
   background-repeat: repeat, repeat;
   background-size: auto, 340px 360px;

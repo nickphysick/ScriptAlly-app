@@ -783,6 +783,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   /* the search field is both the palette's anchor (the host's ref) and the folder tab's fit limit */
   const searchFieldRef = useRef<HTMLButtonElement | null>(null);
+  /* shell tabs v2: the strip's fit says when the search must fold to its icon (TabStrip `onFold`) */
+  const [searchFolded, setSearchFolded] = useState(false);
   const setSearchRefs = useCallback((el: HTMLButtonElement | null) => {
     searchFieldRef.current = el;
     if (typeof searchAnchorRef === "function") searchAnchorRef(el);
@@ -1289,19 +1291,23 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   order, the current one risen as paper growing out of the sheet. It names the page; the
                   breadcrumb, the page-name fade and the bar's hairline are retired with it. */}
               {stripTabs.length > 0 && (
-                <TabStrip tabs={stripTabs} current={stripCurrent} onGo={go} limitRef={searchFieldRef} />
+                <TabStrip tabs={stripTabs} current={stripCurrent} onGo={go} limitRef={searchFieldRef} onFold={setSearchFolded} />
               )}
               <div className="ws-grow" data-shell="spacer" aria-hidden="true" />
               {/* the right: the workspace group (search · Log a query), then Help, set apart. Spacing is
                   per-child `margin-left`, so a control that leaves in settings mode takes its space. */}
               <div className="ws-bright">
-                {/* ⚠️ A FIXED 168px FIELD THAT NEVER MOVES (fit rule 5). It opens the existing palette, the
-                    same as ⌘K (bound in `usePalette`); the ref is still the palette's anchor. */}
+                {/* ⚠️ A 168px FIELD WHOSE RIGHT EDGE NEVER MOVES (fit rule 5). It opens the existing palette, the
+                    same as ⌘K (bound in `usePalette`); the ref is still the palette's anchor.
+                    ⚠️ SHELL TABS v2: WHEN THE TABS WOULD NOT KEEP THEIR NAMES, SEARCH FOLDS FIRST to a 38px icon button
+                    (`data-fold`, set by the strip's own fit — `planWithFold`); the tabs and "Log a query" keep their
+                    size. Its aria-label already names it, so the folded button loses nothing for a screen reader. */}
                 <span className="ws-appctl">
                   <button
                     ref={setSearchRefs}
                     type="button"
                     className="ws-search ws-sfield"
+                    data-fold={searchFolded ? "" : undefined}
                     data-probe="search"
                     onClick={onOpenSearch}
                     aria-label="Search (⌘K)"

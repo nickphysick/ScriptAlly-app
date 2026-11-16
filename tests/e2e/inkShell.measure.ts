@@ -24,7 +24,7 @@ async function vp(page: Page) {
 test.describe("ink shell", () => {
 
   /* ── INK1 · frame ─────────────────────────────────────────────────────────────────────────────── */
-  test("INK1 · the frame is ink, the sheet inset 0/8/8 with a square top-left, theme-color, three themes", async ({ page }) => {
+  test("INK1 · the frame is ink, the sheet inset 0/8/8 with a 14px top-left (shell tabs v2), theme-color, three themes", async ({ page }) => {
     for (const w of WIDTHS) {
       await inkOpen(page, "/queries", w, { scope: "ink1" });
       for (const theme of ["t-capp", "t-bold", "t-edn"]) {
@@ -50,7 +50,8 @@ test.describe("ink shell", () => {
       expect(near(v.h - win.b, 8), `sheet bottom inset ${v.h - win.b}`).toBe(true);
       expect(near(win.x, panel.r), "sheet starts at the sidebar's edge").toBe(true);
       const rad = (await css(page, ".ws-window", ["border-top-left-radius", "border-top-right-radius", "border-bottom-right-radius", "border-bottom-left-radius"]))!;
-      expect(rad["border-top-left-radius"]).toBe("0px");
+      /* shell tabs v2 (16 Nov): the top-left corner is round again, 14px — the tabs start 24px in (ST2-A2) */
+      expect(rad["border-top-left-radius"]).toBe("14px");
       for (const k of ["border-top-right-radius", "border-bottom-right-radius", "border-bottom-left-radius"]) expect(rad[k], k).toBe("12px");
       const meta = await page.evaluate(() => document.querySelector('meta[name="theme-color"]')?.getAttribute("content"));
       expect(meta).toBe("#1b2433");
@@ -64,15 +65,22 @@ test.describe("ink shell", () => {
         await inkOpen(page, route, w, { scope: "ink2" });
         const tab = await css(page, ".ws-ftab", ["background-color"]);
         const fl = await css(page, ".ws-ftfl", ["fill"]);
+        const flL = await css(page, ".ws-ftfl-l", ["fill"]);
         const win = await css(page, ".ws-window", ["background-color"]);
         expect(tab, `${route}: a tab is drawn`).not.toBeNull();
         expect(fl, `${route}: the fillet is drawn`).not.toBeNull();
+        /* RE-POINTED (shell tabs v2, 16 Nov): the tab and BOTH its curves are one colour, and that colour is the ground
+           directly beneath it — which on the Dashboard, Goals, Packages and Letters is the page's own, not the window's.
+           The equality with what is painted under the bar is ST2-B4 (pixels, every route); this lock keeps the parts
+           in step with each other, and with the window where nothing paints over it. */
+        expect(flL?.fill, `${route} ${w}: left curve vs tab`).toBe(tab?.["background-color"]);
+        expect(fl!.fill, `${route} ${w}: fillet vs tab`).toBe(tab!["background-color"]);
+        if (["/dashboard", "/goals", "/queries/packages", "/materials/letters"].includes(route)) continue;
         /* RE-POINTED (app shell v2, 9 Oct): the tab and its fillet are still one colour, but on a route whose header
            sits on the header sheet that colour is the SHEET's (#fbf9f5), not the page sheet's — the tab joins the
            header. Elsewhere it is still the page sheet's. SH2 S6 holds the same thing over the whole census. */
         const want = hasHeaderSheet(route) ? "rgb(251, 249, 245)" : win!["background-color"];
         expect(tab!["background-color"], `${route} ${w}: the tab`).toBe(want);
-        expect(fl!.fill, `${route} ${w}: fillet vs tab`).toBe(tab!["background-color"]);
       }
     }
   });
@@ -85,7 +93,8 @@ test.describe("ink shell", () => {
         const tab = (await rect(page, ".ws-ftab"))!;
         const win = (await rect(page, ".ws-window"))!;
         expect(tab, "the tab is drawn").not.toBeNull();
-        expect(near(tab.x, win.x), `tab ${tab.x} vs sheet ${win.x} at ${w} ${collapsed ? "collapsed" : "expanded"}`).toBe(true);
+        /* RE-POINTED (shell tabs v2): the first tab starts 24px in from the sheet's left edge (ST2-B1) */
+        expect(near(tab.x, win.x + 24), `tab ${tab.x} vs sheet ${win.x} + 24 at ${w} ${collapsed ? "collapsed" : "expanded"}`).toBe(true);
         expect(near(tab.b, win.y + 1), "the tab overlaps the sheet by 1px").toBe(true);
       }
     }
@@ -451,7 +460,11 @@ test.describe("ink shell at 3×", () => {
     }
   });
 
-  test("INK4 · the tab at a forced 220px with its label hidden matches the golden within 0.5%", async ({ page }) => {
+  /* ⚠️ RETIRED (shell tabs v2, 16 Nov): the golden is the v1 tab — 41 tall, 12px corners, one 13px fillet on the right.
+     The v2 tab is 40 tall with 11px corners and a 10px curve on both sides, so no capture of it can match; the curves'
+     shape is ST2-B5 (pixels at both feet, a middle tab current). Skipped rather than deleted so the golden's notes stay
+     with it; delete the test and the golden together once v2 is accepted. */
+  test.skip("INK4 · the tab at a forced 220px with its label hidden matches the golden within 0.5%", async ({ page }) => {
     await inkOpen(page, "/todo", 1710, { scope: "ink4" });
     await page.addStyleTag({ content: `
       .ws-ftab { width: 220px !important; }

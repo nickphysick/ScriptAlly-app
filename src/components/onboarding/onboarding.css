@@ -37,8 +37,6 @@
    this element — not the bar — is what the tab stands in. */
 .sf .sf-tabs { position: relative; flex: 1 1 auto; min-width: 0; align-self: stretch; }
 .sf .sf-tabsin { position: absolute; inset: 0; }
-.sf .sf-ftfl-l { display: none; position: absolute; left: -12px; bottom: 0; width: 13px; height: 12px; fill: var(--ink-tab); }
-.sf--account .sf-ftfl-l { display: block; }
 .sf .sf-exit {
   flex: none; align-self: center; margin-left: 16px;
   background: none; border: 0; padding: 0 0 3px; cursor: pointer;
@@ -139,7 +137,6 @@
   .sf .sf-tabs::-webkit-scrollbar { display: none; }
   .sf .sf-exit { align-self: center; margin: 0 6px 0 12px; }
   .sf .sf-tabsin { position: absolute; inset: 0; }
-.sf .sf-ftfl-l { display: none; }
   .sf .ws-winwrap { display: block; padding: 0 8px 8px; }
   .sf .sf-sheet { display: block; overflow: visible; border-radius: 0 12px 12px 12px; background: var(--ink-sheet); }
   .sf .sf-scroll { overflow: visible; padding: 22px 14px 28px; }
