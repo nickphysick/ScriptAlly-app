@@ -24,9 +24,36 @@ export const SIDE_SLOT = "[data-side-slot]";
 
 /* ⚠️ THE DIM IS COUNTED, NOT TOGGLED (Log a query v1.2). Two panels can be mounted at once (the staged log journey opens
    over an agent's or a query's panel), and a toggle let the one closing underneath take `spanel-dim` off the body while
-   the other was still dimming: the shell's bar then rose above the scrim (queryPanelHost.css). */
+   the other was still dimming: the shell's bar then rose above the scrim (queryPanelHost.css). The scrim below holds
+   the count, so the agent card's scrim (not a SidePanel) counts with every SidePanel's. */
 let dims = 0;
 const syncDim = () => { document.body.classList.toggle("spanel-dim", dims > 0); };
+
+/**
+ * The scrim behind a right-hand panel, at one of three levels (Card offers v1 lifted it out of `SidePanel` so the agent
+ * card's panel, which is not a SidePanel, dims through the same element rather than a second one):
+ *   off     clear and inert — browsing a SidePanel
+ *   light   rgba(28,19,15,.16), VISUAL ONLY: pointer events pass through, so the page stays live (the agent card while
+ *           it is read: another row still switches the card)
+ *   action  the existing action dim (.45): a click on it is the Escape key (or the host's `onScrim`), which steps back
+ *           or asks first
+ * Always mounted while its panel is, so it fades both ways. While it is not off it counts towards `body.spanel-dim`,
+ * which drops the shell's bar under it.
+ */
+export const SideScrim: React.FC<{ level: "off" | "light" | "action"; className?: string; onScrim?: () => void }> = ({ level, className, onScrim }) => {
+  useEffect(() => {
+    if (level === "off") return undefined;
+    dims++; syncDim();
+    return () => { dims--; syncDim(); };
+  }, [level === "off"]); // eslint-disable-line react-hooks/exhaustive-deps -- light ↔ action is one dim, not two
+  return (
+    <div className={`spanel-scrim${className ? ` ${className}` : ""}`} data-side-scrim="" data-on={level === "action" ? "true" : level === "light" ? "light" : undefined} aria-hidden="true"
+      onClick={() => {
+        if (level !== "action") return;
+        if (onScrim) onScrim(); else window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true }));
+      }} />
+  );
+};
 
 export const SidePanel: React.FC<{
   label: string;
@@ -54,17 +81,12 @@ export const SidePanel: React.FC<{
     document.body.classList.add("spanel-open");
     return () => { document.body.classList.remove("spanel-open"); };
   }, []);
-  /* …and whether the page is dimmed behind it: the shell's bar rises over the panel only while it is not */
-  useEffect(() => {
-    if (!dim) return undefined;
-    dims++; syncDim();
-    return () => { dims--; syncDim(); };
-  }, [dim]);
+  /* whether the page is dimmed behind it (the scrim holds the count of `body.spanel-dim`): the shell's bar rises over
+     the panel only while it is not */
   return createPortal(
     <>
     {/* always mounted while the panel is, so it can fade both ways; inert and clear until an action runs */}
-    <div className="spanel-scrim" data-side-scrim="" data-on={dim ? "true" : undefined} aria-hidden="true"
-      onClick={() => (onScrim ? onScrim() : window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })))} />
+    <SideScrim level={dim ? "action" : "off"} onScrim={onScrim} />
     <aside ref={ref} className={`spanel${className ? ` ${className}` : ""}`} role="dialog" aria-modal={dim ? "true" : undefined} aria-label={label} style={style} data-side-panel="" data-step={step ? "true" : undefined} data-dim={dim ? "true" : undefined} {...attrs}>
       <div className="spanel-own" data-side-own="" hidden={step || undefined}>{children}</div>
       <div className="spanel-slot" data-side-slot="" />

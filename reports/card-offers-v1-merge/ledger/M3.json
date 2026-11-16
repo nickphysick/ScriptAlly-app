@@ -1,0 +1,17 @@
+[
+ {
+  "where": "✕: focus is back on the row that opened it",
+  "ok": true,
+  "detail": "co1-rt"
+ },
+ {
+  "where": "before Escape, focus is inside the card (it moved in on open)",
+  "ok": true,
+  "detail": "card"
+ },
+ {
+  "where": "Escape: focus is back on the row that opened it",
+  "ok": true,
+  "detail": "co1-rt"
+ }
+]

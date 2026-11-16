@@ -40,7 +40,7 @@ test("CL262 shots — editing", async ({ page }) => {
   await page.locator("[data-cl262='sec'][data-k='how'] [data-aap='weeks'] input[type='range']").first().focus();
   await page.keyboard.press("ArrowRight"); await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(500);
-  await page.screenshot({ path: `${shotDir()}/06-edit-how-also-1512.png` });
+  await page.screenshot({ path: `${shotDir()}/06-edit-how-offer-1512.png` });
   await openCard(page, SIZES[0], { stand: "you" });
   await page.locator("[data-cl262='edit-all']").first().click(); await page.waitForTimeout(600);
   await page.screenshot({ path: `${shotDir()}/07-edit-all-1512.png` });
@@ -266,23 +266,25 @@ test.describe("CL262 locks", () => {
       L.done(7);
     });
 
-    test(`J7 also changes · ${at}`, async ({ page }) => {
+    /* Card offers v1 — the rust "Also changes" box is retired: a reply-time change on a querying agent now says what it
+       does to the query as an OFFER (a live Queried query on the agent's window) or a quiet footnote (a request, or a
+       date of its own), and the bar's second line repeats the choice ("moves 1 query’s dates"), never a nudge count */
+    test(`J7 what a reply-time change says · ${at}`, async ({ page }) => {
       test.setTimeout(180_000);
       const L = new Ledger(`J7-${at}`);
       await openCard(page, vp, { stand: "agent" });
-      if (MUT === "J7") await cssBreak(page, ".cl262-also{display:none!important}");
+      if (MUT === "J7") await cssBreak(page, ".co-offer, .co-quiet{display:none!important}");
       await pressPen(page, "how");
       await stepWeeks(page, "ArrowRight", 2);
       await page.waitForTimeout(400);
       const r = await page.evaluate(() => {
         const c = document.querySelector<HTMLElement>("[data-cl262='panel'] .cl262-card")!;
-        const lines = [...c.querySelectorAll<HTMLElement>("[data-cl262='also'] p")].filter((e) => e.getBoundingClientRect().height > 0).length;
+        const vis = (s: string) => [...c.querySelectorAll<HTMLElement>(s)].filter((e) => e.getBoundingClientRect().height > 0).length;
         const sum = c.querySelector<HTMLElement>("[data-cl262='save-sum']");
-        return { lines, moved: Number(sum?.dataset.moved ?? -1), text: sum?.textContent ?? "" };
+        return { offer: vis("[data-co='rt']"), quiet: vis("[data-co='quiet']"), also: c.querySelectorAll(".cl262-also, [data-cl262='also']").length, extras: sum?.dataset.extras ?? "", text: sum?.textContent ?? "" };
       });
-      L.check(`an Also note shows (${r.lines})`, r.lines > 0, r.text);
-      /* Add agent v1 — the bar counts the NUDGES the reply note moves (the engine's own count), by name */
-      L.check("the bar names the nudges the note moves", r.moved >= 1 && new RegExp(`moves ${r.moved} nudge`).test(r.text), `${r.moved} moved · ${r.lines} note lines · ${r.text}`);
+      L.check(`the change says what it does: an offer or a footnote (${r.offer} · ${r.quiet})`, r.offer + r.quiet > 0 && r.also === 0, r.text);
+      L.check("the bar repeats the choice, never a nudge count", !/moves \d+ nudge/.test(r.text) && (r.offer ? /moves \d+ quer/.test(r.extras) : true), `${r.extras} · ${r.text}`);
       L.done(2);
     });
 
@@ -372,10 +374,15 @@ test.describe("CL262 locks", () => {
       const id1 = await page.locator("[data-cl262='panel']").getAttribute("data-agent-id");
       L.check("Discard goes on to the next agent", !!id1 && id1 !== id0, `${id0} → ${id1}`);
       await dirty();
+      /* Card offers v1 — while a section is edited the page is dimmed at the action level and a click on it is Escape, so
+         a click where another row sits lands on the scrim and asks; the pointer at the row's place, not the row's own click
+         (which waits for a row the scrim is covering) */
       const other = page.locator(`.aglist [data-cl26='row']:not([data-id='${id1}']) [data-cl26='name']`).first();
-      await other.click({ force: false }).catch(() => {});
+      await other.scrollIntoViewIfNeeded().catch(() => {});
+      const ob = await other.boundingBox().catch(() => null);
+      if (ob) await page.mouse.click(ob.x + Math.min(20, ob.width / 2), ob.y + ob.height / 2);
       await page.waitForTimeout(400);
-      L.check("another row asks", (await guardUp()) && (await page.locator("[data-cl262='panel']").getAttribute("data-agent-id")) === id1, "");
+      L.check("another row asks", !!ob && (await guardUp()) && (await page.locator("[data-cl262='panel']").getAttribute("data-agent-id")) === id1, String(!!ob));
       L.done(6);
     });
 

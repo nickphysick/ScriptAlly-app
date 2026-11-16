@@ -1,0 +1,17 @@
+[
+ {
+  "where": "the offer says the nudge stays",
+  "ok": true,
+  "detail": "15 JanYou set this nudge yourself, so it stays."
+ },
+ {
+  "where": "the stored nudge is where the writer put it",
+  "ok": true,
+  "detail": "2027-01-15T12:00:00.000Z vs 2027-01-15T12:00:00.000Z"
+ },
+ {
+  "where": "the toast says the dates moved (the reply date did)",
+  "ok": true,
+  "detail": "Saved · 1 query’s dates movedUNDO✕"
+ }
+]

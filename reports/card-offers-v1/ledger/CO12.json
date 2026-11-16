@@ -1,0 +1,22 @@
+[
+ {
+  "where": "edits made: several things changed",
+  "ok": true,
+  "detail": "n"
+ },
+ {
+  "where": "no Also element",
+  "ok": true,
+  "detail": "count"
+ },
+ {
+  "where": "no \"Also changes\" words",
+  "ok": true,
+  "detail": "text"
+ },
+ {
+  "where": "no rust left edge anywhere",
+  "ok": true,
+  "detail": "0"
+ }
+]

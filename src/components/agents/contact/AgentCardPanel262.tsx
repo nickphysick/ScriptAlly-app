@@ -26,7 +26,12 @@ import { createPortal } from "react-dom";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { claimRightPanel, releaseRightPanel, subscribeRightPanel } from "../../../lib/queryPanelStore";
 import { prefersReducedMotion } from "../../../lib/agentMotion";
+import { SideScrim } from "../../shell/SidePanel";
+import { useDrawerFocus } from "../../shell/useDrawerFocus";
 import "./contactV262.css";
+
+/** Card offers v1 — the card announces whether any section is open for editing (`detail`: boolean) */
+export const CARD_EDITING_EVENT = "sa:cl262-editing";
 
 /** the card's say before the host closes: true lets the close go ahead (no unsaved change, or a confirmed discard) */
 export type CloseGuard = () => boolean;
@@ -83,20 +88,41 @@ export const AgentCardPanel262: React.FC<{
     window.addEventListener("resize", read);
     return () => window.removeEventListener("resize", read);
   }, []);
+  /* Card offers v1 — the card says when it is being edited (its sections are its own state), so the scrim can deepen */
+  const [cardEditing, setCardEditing] = useState(false);
+  /* a LAYOUT effect: it subscribes before the card's (passive) effects run, so a card opened straight into editing is heard */
+  useLayoutEffect(() => {
+    const on = (e: Event) => setCardEditing(!!(e as CustomEvent<boolean>).detail);
+    window.addEventListener(CARD_EDITING_EVENT, on);
+    return () => window.removeEventListener(CARD_EDITING_EVENT, on);
+  }, []);
   /* the card's ✕ asks through the same request */
   useEffect(() => {
     const on = () => requestClose();
     window.addEventListener("sa:cl262-close", on);
     return () => window.removeEventListener("sa:cl262-close", on);
   }, [requestClose]);
+  /* Card offers v1 — the page dims behind the card: lightly while it is read (visual only: the page stays live, and a row
+     still switches the card), to the action level while it is edited (a click there is Escape: the card's own guard) */
+  /* card-offers-v1-merge — the agent card's focus, through overnight fixes v1's drawer hook (the card is not a SidePanel,
+     so it never had it). Focus moves in on open and goes back to the row that opened it on close. While it is only read
+     (the light dim) it is NOT modal: Tab reaches the page and a row click still switches the card. While a section is
+     edited (the action dim) it IS modal: Tab is held inside and the page is inert, and the scrim's click is Escape —
+     the card's own unsaved-changes guard. The scrim and the trap read the same `modal`, so they cannot disagree. */
+  const panelRef = useRef<HTMLDivElement>(null);
+  const modal = !leaving && (editing || cardEditing);
+  useDrawerFocus(panelRef, true, { modal });
   return createPortal(
-    <div className="cl262-panel" data-cl262="panel" data-cl24="panel" data-agent-id={agentId} role="dialog" aria-modal="false" aria-label="Agent"
+    <>
+    <SideScrim level={modal ? "action" : leaving ? "off" : "light"} className="cl262-scrim" />
+    <div ref={panelRef} className="cl262-panel" data-cl262="panel" data-cl24="panel" data-agent-id={agentId} role="dialog" aria-modal={modal ? "true" : "false"} aria-label="Agent"
       data-arrive={arriving ? "" : undefined} data-leave={leaving ? "" : undefined} data-reduce={reduce ? "" : undefined}
       style={box ? { top: box.top, bottom: box.bottom, right: box.right } : undefined}>
       <div className="cl262-lean" data-cl262="lean" data-cl24="agent-card" data-editing={editing ? "" : undefined}>
         {children}
       </div>
-    </div>,
+    </div>
+    </>,
     document.body,
   );
 };
