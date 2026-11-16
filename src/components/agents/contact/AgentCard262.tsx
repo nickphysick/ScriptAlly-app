@@ -16,7 +16,7 @@
  * ⚠️ IT DRAWS FROM THE PAGE'S OWN MODEL (`AgentCard24Props`, `useCardModel`): the call box, the gaps, the story and the
  *    edit kit are the ones the v25 card read, so nothing is derived twice.
  */
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { StatusDot } from "../../StatusDot";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
@@ -29,11 +29,12 @@ import { Notes, type AgentCard24Props, useCardModel } from "./AgentCard24";
 import { YouAndStory } from "./AgentCardParts255";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
-import { requestCardClose } from "./AgentCardPanel262";
+import { CARD_EDITING_EVENT, requestCardClose } from "./AgentCardPanel262";
 import { useAgentForm } from "../card/useAgentForm";
-import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar, changeNames } from "./AgentCard262Edit";
+import { EditContact, EditGenres, EditHow, EditMaterials, EditWishlist, SaveBar, changeNames, type OfferKit } from "./AgentCard262Edit";
 import type { InlineField } from "../card/InlineEdits";
-import type { CardDraft } from "../../../lib/cardDraft";
+import { toContactDraft, type CardDraft } from "../../../lib/cardDraft";
+import { cardOffers, offerPlan, saveExtras, type CardOffers, type CloseChoice, type OfferPlan, type RtChoice } from "../../../lib/cardOffers";
 
 /** changes are counted by the names the writer reads ("how they take queries" is one change, method and words alike) */
 const changeCount = (changed: readonly (keyof CardDraft)[]) => changeNames(changed).length;
@@ -156,13 +157,22 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const [open, setOpen] = useState<Sec262[]>([]);
   const [flash, setFlash] = useState(false);
   const editing = open.length > 0;
+  /* Card offers v1 — the panel deepens its scrim while anything is being edited (and lets it go when the card goes) */
+  useEffect(() => {
+    if (p.preview) return undefined;
+    window.dispatchEvent(new CustomEvent(CARD_EDITING_EVENT, { detail: editing }));
+    return () => { if (editing) window.dispatchEvent(new CustomEvent(CARD_EDITING_EVENT, { detail: false })); };
+  }, [editing, p.preview]);
   const closeAll = useCallback(() => setOpen([]), []);
+  /* Card offers v1 — what the save does with the queries already out: the plan at the moment Save is pressed (set below,
+     every render; declared here so the save's closure never reads it before it exists) */
+  const planRef = useRef<OfferPlan | null>(null);
   const form = useAgentForm({
     mode: "edit", agent: a, personal: kit?.personal ?? [], agents: kit?.agents ?? [],
     alsoFor: kit?.alsoFor ?? (() => []),
     onSave: async (d, base) => {
       if (!kit) return { ok: false, error: "Nothing to save to." };
-      const r = await kit.onSave(d, base);
+      const r = await kit.onSave(d, base, planRef.current);
       if ("error" in r) return r;
       /* the sections close in place, the card leans back, and the frame flashes navy (never sage: no green) */
       closeAll();
@@ -174,6 +184,28 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   });
   const resetRef = useRef(form.reset);
   resetRef.current = form.reset;
+  /* ── Card offers v1 · what this edit does to the queries already out, asked as a choice ──────────────────────────
+     The two choices live for one edit session: they start on Update and on the close offer's suggestion, and reset
+     whenever the sections close (a save, Cancel, a discard). While the slider is dragged the offer holds still and
+     settles on release. */
+  const [rtChoice, setRtChoice] = useState<RtChoice>("update");
+  const [closeChoice, setCloseChoice] = useState<CloseChoice | null>(null);
+  const [dragging, setDragging] = useState(false);
+  useEffect(() => { if (!editing) { setRtChoice("update"); setCloseChoice(null); setDragging(false); } }, [editing]);
+  const settled = useRef<CardOffers | null>(null);
+  const offersNow = useMemo<CardOffers | null>(() => {
+    if (!editing || !kit || !form.dirty) return null;
+    return cardOffers(a, toContactDraft(a, form.base, form.d), p.queries, p.nowMs, { close: closeChoice, titleOf: p.titleOf });
+  }, [editing, kit, form.dirty, form.base, form.d, a, p.queries, p.nowMs, closeChoice, p.titleOf]);
+  if (!dragging) settled.current = offersNow;
+  const offers = dragging ? settled.current : offersNow;
+  const plan = offers ? offerPlan(offers, rtChoice, closeChoice) : null;
+  planRef.current = plan;
+  /* while editing there is always a kit, so a press on the slider holds the offer even before the draft differs */
+  const offerKit: OfferKit | null = editing ? {
+    o: offers ?? { quiet: [] }, rt: rtChoice, close: closeChoice, setRt: setRtChoice, setClose: setCloseChoice, onDrag: setDragging,
+    weeks: form.d.weeks ?? null, nrn: form.d.nrn === true,
+  } : null;
   /* a new agent: nothing open, a fresh draft */
   /* Add agent v1 — only on a REAL change of agent (paging): a mount re-run (StrictMode runs mount effects twice) must not
      close the sections a door's ask has just opened */
@@ -194,10 +226,12 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       return [...cur, k];
     });
   };
-  /** the band's pencil: every section, and Contact details at the top */
-  const openAll = () => {
-    if (!kit) { p.onEdit("who"); return; }
-    opened.current = { k: "contact", all: true };
+  /** the band's pencil: every section, and Contact details at the top — or, from + Website / + Email (Card offers v1),
+   *  every section with the cursor in that field, scrolled into view */
+  const openAll = (focus?: "website" | "email") => {
+    if (!kit) { p.onEdit("who", focus); return; }
+    opened.current = { k: "contact", all: true, focus };
+    setRevealSeq((n) => n + 1);
     setTab("profile");
     setOpen((cur) => { if (!cur.length) resetRef.current(a); return ["contact", "genres", "wishlist", "materials", "how"]; });
   };
@@ -211,7 +245,13 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const applyAsk = (tab?: AgentCardTab, focus?: AgentCardField) => {
     const w = secsFor(tab, focus);
     if (w === "notes") { setTab("notes"); return; }
-    if (w === "all") { openAll(); return; }
+    if (w === "all") {
+      /* Card offers v1 — a door at a contact link lands in it: whichever of website and email is missing first */
+      const site0 = !(a.website ?? "").trim(), mail0 = !(a.email ?? "").trim();
+      const f = focus === "website" || focus === "email" ? (site0 ? "website" : mail0 ? "email" : focus) : undefined;
+      openAll(f);
+      return;
+    }
     for (const k of w) openSec(k);
   };
   const askSeq = useRef(0);
@@ -278,7 +318,9 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
 
   /* revealing and focus: a section opened on its own scrolls into view only by what it needs (plus 90px of air), or its
      heading comes to 70px below the band when it was hidden; its first text field takes focus without scrolling */
-  const opened = useRef<{ k: Sec262; all: boolean } | null>(null);
+  const opened = useRef<{ k: Sec262; all: boolean; focus?: "website" | "email" } | null>(null);
+  /* a reveal asked for while every section is already open changes no state: this makes it a new ask */
+  const [revealSeq, setRevealSeq] = useState(0);
   useEffect(() => {
     const o = opened.current;
     const sc = scrollRef.current;
@@ -286,8 +328,15 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     opened.current = null;
     const el = secEl(sc, o.all ? "contact" : o.k);
     if (!el) return;
-    const field = el.querySelector<HTMLInputElement | HTMLTextAreaElement>("textarea, input[data-ae='name']");
+    const field = o.focus ? el.querySelector<HTMLInputElement>(`input[data-ae='${o.focus}']`)
+      : el.querySelector<HTMLInputElement | HTMLTextAreaElement>("textarea, input[data-ae='name']");
     if (field) { field.focus({ preventScroll: true }); const n = field.value.length; try { field.setSelectionRange(n, n); } catch { /* not a text field */ } }
+    /* Card offers v1 — + Website / + Email: the field itself, brought into view in the card's scroller */
+    if (o.focus && field) {
+      const fr = field.getBoundingClientRect(), b = sc.getBoundingClientRect();
+      if (fr.top < b.top + 70 || fr.bottom > b.bottom - 90) sc.scrollTop += fr.top - b.top - Math.max(70, (b.height - fr.height) / 2);
+      return;
+    }
     /* Add agent v1 — the band pencil (every section) brings Contact details to the top */
     if (o.all) { sc.scrollTop = 0; return; }
     const r = el.getBoundingClientRect(), b = sc.getBoundingClientRect();
@@ -297,7 +346,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (r.top < b.top - 1) by = r.top - b.top - 70;
     else if (r.bottom > b.bottom) by = Math.min(r.bottom - b.bottom + 90, r.top - b.top - 70);
     if (by) sc.scrollBy({ top: by, behavior: reduce ? "auto" : "smooth" });
-  }, [open]);
+  }, [open, revealSeq]);
 
   /* THE DISCARD GUARD: ✕, Esc, paging, another row and leaving the page all ask the draft; with unsaved changes the save
      bar turns rust and nothing else happens until Keep editing or Discard is chosen */
@@ -394,16 +443,16 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         </span>
       )}
       {p.preview ? null : all ? <span className="cl262-editing" data-cl262="editing-chip">Editing</span>
-        : <button type="button" className="cl262-rb" data-cl262="edit-all" aria-label={`Edit everything about ${m.first}`} onClick={openAll}>{IC.pen}</button>}
+        : <button type="button" className="cl262-rb" data-cl262="edit-all" aria-label={`Edit everything about ${m.first}`} onClick={() => openAll()}>{IC.pen}</button>}
       {p.preview ? null : <button type="button" className="cl262-rb" data-cl262="close" data-cl24="close" aria-label="Close the agent" onClick={() => requestCardClose()}><span aria-hidden="true">×</span></button>}
     </span>
   );
   const links = (
     <span className="cl262-links" data-cl262="links">
       {site ? <a href={hrefFor(site) ?? "#"} target="_blank" rel="noopener noreferrer" data-cl262="website"><PaperIcon kind="web" />Website</a>
-        : <button type="button" className="cl262-lk" data-cl262="add-website" onClick={openAll}>+ Website</button>}
+        : <button type="button" className="cl262-lk" data-cl262="add-website" onClick={() => openAll("website")}>+ Website</button>}
       {email ? <a href={`mailto:${email}`} data-cl262="email"><PaperIcon kind="mail" />Email</a>
-        : <button type="button" className="cl262-lk" data-cl262="add-email" onClick={openAll}>+ Email</button>}
+        : <button type="button" className="cl262-lk" data-cl262="add-email" onClick={() => openAll("email")}>+ Email</button>}
     </span>
   );
   const gaps = p.gaps && p.gaps.n > 0 ? p.gaps : null;
@@ -447,7 +496,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
           <span className="apc-chips" data-cl262="materials">{mats.map((c) => <span key={c.label} className="apc-mat"><PaperIcon kind={c.kind} />{c.label}</span>)}</span>
         ) : <Ghost kind="chips" add="+ Add materials" k="materials" onAdd={() => edit("materials")} />}
       </Section>
-      <Section k="how" title={`How ${m.first} works`} onEdit={p.preview ? undefined : () => edit("how")} onDone={() => closeSec("how")} editing={isOpen("how") && kit ? <EditHow form={form} agent={a} kit={kit} first={m.first} /> : undefined}>
+      <Section k="how" title={`How ${m.first} works`} onEdit={p.preview ? undefined : () => edit("how")} onDone={() => closeSec("how")} editing={isOpen("how") && kit ? <EditHow form={form} agent={a} kit={kit} first={m.first} offers={offerKit} /> : undefined}>
         <div className="cl262-tiles" data-cl262="tiles">
           {tiles.map((t) => (
             <span key={t.k} className={`cl262-tile${t.known ? "" : " gap"}`} data-cl262="tile" data-k={t.k} data-known={t.known ? "" : undefined}>
@@ -479,7 +528,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         /* while editing the save bar sits above the foot, which stays: ‹ › must still be pressable, and they ask the guard */
         foot,
         afterScroll: editing ? <SaveBar form={form} first={m.first} guard={guard} onCancel={cancel} onSave={() => void form.save()} onKeep={() => setGuard(null)}
-          onDiscard={() => { const g = guard; discardThen(g ? g.run : () => {}); }} /> : null,
+          onDiscard={() => { const g = guard; discardThen(g ? g.run : () => {}); }} extras={plan ? saveExtras(plan) : []} /> : null,
         band: CARD262_BAND, bandRight, disc: <Disc262 stand={x.stand} initials={data.initials} />,
         meta: meta ? <span className="apc-meta" data-cl262="meta">{meta}</span> : null,
         afterHead: <NextBox s={step} p={p} />, scrollRef,

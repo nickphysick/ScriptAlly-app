@@ -36,4 +36,6 @@
 .spanel-scrim { position: fixed; inset: 0; z-index: 65; background: rgba(28, 19, 15, 0.45); opacity: 0; pointer-events: none; transition: opacity 160ms ease; }
 /* in over 200ms; out a little quicker, so the page is back by the time the query is */
 .spanel-scrim[data-on="true"] { opacity: 1; pointer-events: auto; transition-duration: 200ms; }
+/* Card offers v1 — the light level: a visual dim only, the page beneath stays live */
+.spanel-scrim[data-on="light"] { opacity: 1; background: rgba(28, 19, 15, 0.16); pointer-events: none; transition-duration: 200ms; }
 @media (prefers-reduced-motion: reduce) { .spanel-scrim { transition: none; } }
