@@ -1,0 +1,12 @@
+[
+ {
+  "where": "R12 + sheet: An agent replied opens the phone's own flow",
+  "ok": false,
+  "detail": "{\"flow\":false}"
+ },
+ {
+  "where": "R12 + sheet: no card-frame picker, no composer",
+  "ok": true,
+  "detail": "{\"picker\":0,\"composer\":0}"
+ }
+]

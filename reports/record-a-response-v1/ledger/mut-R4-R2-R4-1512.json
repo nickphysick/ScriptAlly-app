@@ -1,0 +1,77 @@
+[
+ {
+  "where": "R2 population: rows",
+  "ok": true,
+  "detail": "70"
+ },
+ {
+  "where": "R2 every row reachable inside the panel's box",
+  "ok": true,
+  "detail": "outside: "
+ },
+ {
+  "where": "R2 the list has height (not a clipped pop-down)",
+  "ok": true,
+  "detail": "475px"
+ },
+ {
+  "where": "R2 the footer at the panel's foot",
+  "ok": true,
+  "detail": "8px from the panel's bottom"
+ },
+ {
+  "where": "R2 the groups, in order",
+  "ok": true,
+  "detail": "[\"Waiting to hear back · 54\",\"Already with you · 16\"]"
+ },
+ {
+  "where": "R2 the search field has focus on open",
+  "ok": true,
+  "detail": "search"
+ },
+ {
+  "where": "R4 nothing typed: no closed query listed",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "where": "R4 typing finds the closed query",
+  "ok": true,
+  "detail": "{\"rows\":[{\"id\":\"cv25-q-12\",\"g\":\"closed\"}],\"label\":\"Closed · a late reply reopens it\"}"
+ },
+ {
+  "where": "R4 under its own heading",
+  "ok": true,
+  "detail": "Closed · a late reply reopens it"
+ },
+ {
+  "where": "R4 its pick opens Reopen",
+  "ok": true,
+  "detail": "Reopen George’s query"
+ },
+ {
+  "where": "R3 the composer, titled for the agent",
+  "ok": true,
+  "detail": "What did Priya say?"
+ },
+ {
+  "where": "R3 in the same panel (the frame stayed)",
+  "ok": true,
+  "detail": "same true, [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "R3 the panel is that query's",
+  "ok": true,
+  "detail": "cv25-q-03"
+ },
+ {
+  "where": "R3 Cancel reads ← Someone else",
+  "ok": true,
+  "detail": "← Someone else"
+ },
+ {
+  "where": "R3 ← Someone else goes back to the list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":true,\"composer\":null,\"qad\":0,\"who149\":0}"
+ }
+]

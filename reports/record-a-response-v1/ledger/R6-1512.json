@@ -1,0 +1,162 @@
+[
+ {
+  "where": "population: the agent card opens the composer on a Queried query",
+  "ok": true,
+  "detail": "cv25-q-03 · Queried · Priya"
+ },
+ {
+  "where": "R6 the agent card: the request is read back from the query document",
+  "ok": true,
+  "detail": "Partial Requested · persisted true"
+ },
+ {
+  "where": "R6 the agent card: the Undo puts it back to Queried",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "where": "R6 the agent card: the pass is read back from the query document",
+  "ok": true,
+  "detail": "Rejected"
+ },
+ {
+  "where": "R6 the agent card: restored (every document it wrote is back)",
+  "ok": true,
+  "detail": " · Queried"
+ },
+ {
+  "where": "population: the card on Queries opens the composer on a Queried query",
+  "ok": true,
+  "detail": "cv25-q-04 · Queried · Daniel"
+ },
+ {
+  "where": "R6 the card on Queries: the request is read back from the query document",
+  "ok": true,
+  "detail": "Partial Requested · persisted true"
+ },
+ {
+  "where": "R6 the card on Queries: the Undo puts it back to Queried",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "where": "R6 the card on Queries: the pass is read back from the query document",
+  "ok": true,
+  "detail": "Rejected"
+ },
+ {
+  "where": "R6 the card on Queries: restored (every document it wrote is back)",
+  "ok": true,
+  "detail": " · Queried"
+ },
+ {
+  "where": "population: the card on Queries opens the composer on a Partial Sent query",
+  "ok": true,
+  "detail": "seed-query-8 · Partial Sent · David"
+ },
+ {
+  "where": "R6 the card on Queries: the request is read back from the query document",
+  "ok": true,
+  "detail": "Full Requested · persisted true"
+ },
+ {
+  "where": "R6 the card on Queries: the Undo puts it back to Partial Sent",
+  "ok": true,
+  "detail": "Partial Sent"
+ },
+ {
+  "where": "R6 the card on Queries: the pass is read back from the query document",
+  "ok": true,
+  "detail": "Rejected"
+ },
+ {
+  "where": "R6 the card on Queries: restored (every document it wrote is back)",
+  "ok": true,
+  "detail": " · Partial Sent"
+ },
+ {
+  "where": "population: the To-do desk opens the composer on a Partial Sent query",
+  "ok": true,
+  "detail": "seed-query-23 · Partial Sent · Rufus"
+ },
+ {
+  "where": "R6 the To-do desk: the request is read back from the query document",
+  "ok": true,
+  "detail": "Full Requested · persisted true"
+ },
+ {
+  "where": "R6 the To-do desk: the Undo puts it back to Partial Sent",
+  "ok": true,
+  "detail": "Partial Sent"
+ },
+ {
+  "where": "R6 the To-do desk: the pass is read back from the query document",
+  "ok": true,
+  "detail": "Rejected"
+ },
+ {
+  "where": "R6 the To-do desk: restored (every document it wrote is back)",
+  "ok": true,
+  "detail": " · Partial Sent"
+ },
+ {
+  "where": "population: a Responses row opens the composer on a Partial Sent query",
+  "ok": true,
+  "detail": "cv25-q-11 · Partial Sent · Hester"
+ },
+ {
+  "where": "R6 a Responses row: the request is read back from the query document",
+  "ok": true,
+  "detail": "Full Requested · persisted true"
+ },
+ {
+  "where": "R6 a Responses row: the Undo puts it back to Partial Sent",
+  "ok": true,
+  "detail": "Partial Sent"
+ },
+ {
+  "where": "R6 a Responses row: the pass is read back from the query document",
+  "ok": true,
+  "detail": "Rejected"
+ },
+ {
+  "where": "R6 a Responses row: restored (every document it wrote is back)",
+  "ok": true,
+  "detail": " · Partial Sent"
+ },
+ {
+  "where": "population: five doors compared",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "R6 the request: the card on Queries wrote what the agent card wrote",
+  "ok": true,
+  "detail": "5 writes"
+ },
+ {
+  "where": "R6 the pass: the card on Queries wrote what the agent card wrote",
+  "ok": true,
+  "detail": "5 writes"
+ },
+ {
+  "where": "R6 the request: the To-do desk wrote what the card on Queries wrote",
+  "ok": true,
+  "detail": "5 writes"
+ },
+ {
+  "where": "R6 the pass: the To-do desk wrote what the card on Queries wrote",
+  "ok": true,
+  "detail": "5 writes"
+ },
+ {
+  "where": "R6 the request: a Responses row wrote what the card on Queries wrote",
+  "ok": true,
+  "detail": "5 writes"
+ },
+ {
+  "where": "R6 the pass: a Responses row wrote what the card on Queries wrote",
+  "ok": true,
+  "detail": "5 writes"
+ }
+]

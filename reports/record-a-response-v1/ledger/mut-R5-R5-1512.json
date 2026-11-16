@@ -1,0 +1,32 @@
+[
+ {
+  "where": "population: the dashboard's Record a response",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "R5 the picker opens",
+  "ok": true,
+  "detail": "{\"picker\":true,\"none\":null,\"log\":null,\"search\":1,\"rows\":70}"
+ },
+ {
+  "where": "R5 “Nothing’s out with agents yet.”",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "R5 Log a query",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "R5 no search field",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "where": "R5 no rows (the closed one only by searching, and there is no search)",
+  "ok": false,
+  "detail": "70"
+ }
+]

@@ -1,0 +1,117 @@
+[
+ {
+  "where": "the door list is not empty",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "R1 dashboard header: the door is on the page",
+  "ok": true,
+  "detail": "[data-d2='record']"
+ },
+ {
+  "where": "R1 dashboard header: one dialog",
+  "ok": true,
+  "detail": "[\"div.d105-how[]\"] → [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "R1 dashboard header: the card frame",
+  "ok": false,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R1 dashboard header: no old drawer, no v149 list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R1 Analytics header: the door is on the page",
+  "ok": true,
+  "detail": "button:has-text('Record a response')"
+ },
+ {
+  "where": "R1 Analytics header: one dialog",
+  "ok": true,
+  "detail": "[\"div.d105-how[]\"] → [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "R1 Analytics header: the card frame",
+  "ok": false,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R1 Analytics header: no old drawer, no v149 list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R1 Responses header: the door is on the page",
+  "ok": true,
+  "detail": "button:has-text('Record a response')"
+ },
+ {
+  "where": "R1 Responses header: one dialog",
+  "ok": true,
+  "detail": "[\"div.d105-how[]\"] → [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "R1 Responses header: the card frame",
+  "ok": false,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R1 Responses header: no old drawer, no v149 list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R1 Query Centre header: the door is on the page",
+  "ok": true,
+  "detail": "button:has-text('Record a response')"
+ },
+ {
+  "where": "R1 Query Centre header: one dialog",
+  "ok": true,
+  "detail": "[\"div.d105-how[]\"] → [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "R1 Query Centre header: the card frame",
+  "ok": false,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R1 Query Centre header: no old drawer, no v149 list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R1 agent card: the door is on the page",
+  "ok": true,
+  "detail": "[data-cl262='panel'] button:has-text('Record a response')"
+ },
+ {
+  "where": "R1 agent card: one dialog",
+  "ok": true,
+  "detail": "[\"div.d105-how[]\",\"div.cl262-panel[Agent]\"] → [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "R1 agent card: the card frame",
+  "ok": false,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R1 agent card: no old drawer, no v149 list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":false,\"frame\":false,\"picker\":false,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "R1 agent card: the composer opens on the agent's query",
+  "ok": false,
+  "detail": "null"
+ },
+ {
+  "where": "R1 agent card: ← Back to {first}",
+  "ok": false,
+  "detail": "0"
+ }
+]

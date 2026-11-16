@@ -1,0 +1,97 @@
+[
+ {
+  "door": "the agent card",
+  "set": "Queried",
+  "qid": "cv25-q-03",
+  "req": [
+   "update users/{uid}/activities/* {\"activityType\":{\"s\":\"Status Changed\"},\"date\":{\"s\":\"{time}\"},\"description\":{\"s\":\"{name} at {name} requested a partial manuscript\"},\"details\":{\"s\":\"Respond by {day}\"},\"eventKey\":{\"s\":\"partial_requested\"},\"resultingStatus\":{\"s\":\"Partial Requested\"}}",
+   "update users/{uid}/queries/{q}/activity/* {\"agentName\":{\"s\":\"{name}\"},\"eventKey\":{\"s\":\"partial_requested\"},\"manuscriptTitle\":{\"s\":\"{name}\"},\"materialsQuantity\":{\"s\":\"0\"},\"materialsType\":{\"s\":\"pages\"},\"note\":{\"s\":\"Partial manuscript requested\"},\"resultingStatus\":{\"s\":\"Partial Requested\"},\"type\":{\"s\":\"Partial Requested\"}}",
+   "mask [[\"closingNotes\",\"closingReason\",\"expectedSendDate\",\"fullRequestedDate\",\"fullSentDate\",\"fullVersionSent\",\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"offerDate\",\"offerNotes\",\"offerResponseDeadline\",\"partialRequestedDate\",\"partialSentDate\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackText\",\"rejectionFeedbackType\",\"rejectionLesson\",\"rejectionReflection\",\"responseReceivedAt\",\"revisionRound\",\"rrNotes\",\"sendReminderDate\",\"status\"]]",
+   "sets [[\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"responseReceivedAt\",\"revisionRound\",\"status\"]]",
+   "read back update users/{uid}/queries/{q} {\"hasAgentResponded\":{\"booleanValue\":true},\"lastStatusChange\":{\"s\":\"{time}\"},\"materialsRequestedQuantity\":{\"s\":\"0\"},\"materialsRequestedType\":{\"s\":\"pages\"},\"partialRequestedDate\":{\"s\":\"{time}\"},\"revisionRound\":{\"integerValue\":\"1\"},\"status\":{\"s\":\"Partial Requested\"}}"
+  ],
+  "pass": [
+   "update users/{uid}/activities/* {\"activityType\":{\"s\":\"Status Changed\"},\"date\":{\"s\":\"{time}\"},\"description\":{\"s\":\"Rejection received from {name} at {name}\"},\"details\":{\"s\":\"\"},\"eventKey\":{\"s\":\"pass\"},\"resultingStatus\":{\"s\":\"Rejected\"}}",
+   "update users/{uid}/queries/{q}/activity/* {\"agentName\":{\"s\":\"{name}\"},\"eventKey\":{\"s\":\"pass\"},\"feedbackType\":{\"s\":\"detailed\"},\"manuscriptTitle\":{\"s\":\"{name}\"},\"note\":{\"s\":\"Query rejected — detailed feedback recorded\"},\"resultingStatus\":{\"s\":\"Rejected\"},\"type\":{\"s\":\"Rejected\"}}",
+   "mask [[\"closingNotes\",\"closingReason\",\"expectedSendDate\",\"fullRequestedDate\",\"fullSentDate\",\"fullVersionSent\",\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"offerDate\",\"offerNotes\",\"offerResponseDeadline\",\"partialRequestedDate\",\"partialSentDate\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackText\",\"rejectionFeedbackType\",\"rejectionLesson\",\"rejectionReflection\",\"responseReceivedAt\",\"revisionRound\",\"rrNotes\",\"sendReminderDate\",\"status\"]]",
+   "sets [[\"hasAgentResponded\",\"lastStatusChange\",\"rejectedDate\",\"rejectionFeedbackType\",\"responseReceivedAt\",\"revisionRound\",\"status\"]]",
+   "read back update users/{uid}/queries/{q} {\"hasAgentResponded\":{\"booleanValue\":true},\"lastStatusChange\":{\"s\":\"{time}\"},\"rejectedDate\":{\"s\":\"{time}\"},\"rejectionFeedbackType\":{\"s\":\"detailed\"},\"revisionRound\":{\"integerValue\":\"1\"},\"status\":{\"s\":\"Rejected\"}}"
+  ]
+ },
+ {
+  "door": "the card on Queries",
+  "set": "Queried",
+  "qid": "cv25-q-04",
+  "req": [
+   "update users/{uid}/activities/* {\"activityType\":{\"s\":\"Status Changed\"},\"date\":{\"s\":\"{time}\"},\"description\":{\"s\":\"{name} at {name} requested a partial manuscript\"},\"details\":{\"s\":\"Respond by {day}\"},\"eventKey\":{\"s\":\"partial_requested\"},\"resultingStatus\":{\"s\":\"Partial Requested\"}}",
+   "update users/{uid}/queries/{q}/activity/* {\"agentName\":{\"s\":\"{name}\"},\"eventKey\":{\"s\":\"partial_requested\"},\"manuscriptTitle\":{\"s\":\"{name}\"},\"materialsQuantity\":{\"s\":\"0\"},\"materialsType\":{\"s\":\"pages\"},\"note\":{\"s\":\"Partial manuscript requested\"},\"resultingStatus\":{\"s\":\"Partial Requested\"},\"type\":{\"s\":\"Partial Requested\"}}",
+   "mask [[\"closingNotes\",\"closingReason\",\"expectedSendDate\",\"fullRequestedDate\",\"fullSentDate\",\"fullVersionSent\",\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"offerDate\",\"offerNotes\",\"offerResponseDeadline\",\"partialRequestedDate\",\"partialSentDate\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackText\",\"rejectionFeedbackType\",\"rejectionLesson\",\"rejectionReflection\",\"responseReceivedAt\",\"revisionRound\",\"rrNotes\",\"sendReminderDate\",\"status\"]]",
+   "sets [[\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"responseReceivedAt\",\"revisionRound\",\"status\"]]",
+   "read back update users/{uid}/queries/{q} {\"hasAgentResponded\":{\"booleanValue\":true},\"lastStatusChange\":{\"s\":\"{time}\"},\"materialsRequestedQuantity\":{\"s\":\"0\"},\"materialsRequestedType\":{\"s\":\"pages\"},\"partialRequestedDate\":{\"s\":\"{time}\"},\"revisionRound\":{\"integerValue\":\"1\"},\"status\":{\"s\":\"Partial Requested\"}}"
+  ],
+  "pass": [
+   "update users/{uid}/activities/* {\"activityType\":{\"s\":\"Status Changed\"},\"date\":{\"s\":\"{time}\"},\"description\":{\"s\":\"Rejection received from {name} at {name}\"},\"details\":{\"s\":\"\"},\"eventKey\":{\"s\":\"pass\"},\"resultingStatus\":{\"s\":\"Rejected\"}}",
+   "update users/{uid}/queries/{q}/activity/* {\"agentName\":{\"s\":\"{name}\"},\"eventKey\":{\"s\":\"pass\"},\"feedbackType\":{\"s\":\"detailed\"},\"manuscriptTitle\":{\"s\":\"{name}\"},\"note\":{\"s\":\"Query rejected — detailed feedback recorded\"},\"resultingStatus\":{\"s\":\"Rejected\"},\"type\":{\"s\":\"Rejected\"}}",
+   "mask [[\"closingNotes\",\"closingReason\",\"expectedSendDate\",\"fullRequestedDate\",\"fullSentDate\",\"fullVersionSent\",\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"offerDate\",\"offerNotes\",\"offerResponseDeadline\",\"partialRequestedDate\",\"partialSentDate\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackText\",\"rejectionFeedbackType\",\"rejectionLesson\",\"rejectionReflection\",\"responseReceivedAt\",\"revisionRound\",\"rrNotes\",\"sendReminderDate\",\"status\"]]",
+   "sets [[\"hasAgentResponded\",\"lastStatusChange\",\"rejectedDate\",\"rejectionFeedbackType\",\"responseReceivedAt\",\"revisionRound\",\"status\"]]",
+   "read back update users/{uid}/queries/{q} {\"hasAgentResponded\":{\"booleanValue\":true},\"lastStatusChange\":{\"s\":\"{time}\"},\"rejectedDate\":{\"s\":\"{time}\"},\"rejectionFeedbackType\":{\"s\":\"detailed\"},\"revisionRound\":{\"integerValue\":\"1\"},\"status\":{\"s\":\"Rejected\"}}"
+  ]
+ },
+ {
+  "door": "the card on Queries",
+  "set": "Partial Sent",
+  "qid": "seed-query-8",
+  "req": [
+   "update users/{uid}/activities/* {\"activityType\":{\"s\":\"Status Changed\"},\"date\":{\"s\":\"{time}\"},\"description\":{\"s\":\"{name} at {name} requested a full manuscript\"},\"details\":{\"s\":\"Respond by {day}\"},\"eventKey\":{\"s\":\"full_requested\"},\"materials\":[{\"kind\":{\"s\":\"full\"}}],\"resultingStatus\":{\"s\":\"Full Requested\"}}",
+   "update users/{uid}/queries/{q}/activity/* {\"agentName\":{\"s\":\"{name}\"},\"eventKey\":{\"s\":\"full_requested\"},\"manuscriptTitle\":{\"s\":\"{name}\"},\"materials\":[{\"kind\":{\"s\":\"full\"}}],\"note\":{\"s\":\"Full manuscript requested\"},\"resultingStatus\":{\"s\":\"Full Requested\"},\"type\":{\"s\":\"Full Requested\"}}",
+   "mask [[\"closingNotes\",\"closingReason\",\"expectedSendDate\",\"fullRequestedDate\",\"fullSentDate\",\"fullVersionSent\",\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"offerDate\",\"offerNotes\",\"offerResponseDeadline\",\"partialRequestedDate\",\"partialSentDate\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackText\",\"rejectionFeedbackType\",\"rejectionLesson\",\"rejectionReflection\",\"responseReceivedAt\",\"revisionRound\",\"rrNotes\",\"sendReminderDate\",\"status\"]]",
+   "sets [[\"fullRequestedDate\",\"hasAgentResponded\",\"lastStatusChange\",\"responseReceivedAt\",\"revisionRound\",\"status\"]]",
+   "read back update users/{uid}/queries/{q} {\"fullRequestedDate\":{\"s\":\"{time}\"},\"hasAgentResponded\":{\"booleanValue\":true},\"lastStatusChange\":{\"s\":\"{time}\"},\"revisionRound\":{\"integerValue\":\"1\"},\"status\":{\"s\":\"Full Requested\"}}"
+  ],
+  "pass": [
+   "update users/{uid}/activities/* {\"activityType\":{\"s\":\"Status Changed\"},\"date\":{\"s\":\"{time}\"},\"description\":{\"s\":\"Rejection received from {name} at {name}\"},\"details\":{\"s\":\"\"},\"eventKey\":{\"s\":\"pass\"},\"resultingStatus\":{\"s\":\"Rejected\"}}",
+   "update users/{uid}/queries/{q}/activity/* {\"agentName\":{\"s\":\"{name}\"},\"eventKey\":{\"s\":\"pass\"},\"feedbackType\":{\"s\":\"detailed\"},\"manuscriptTitle\":{\"s\":\"{name}\"},\"note\":{\"s\":\"Partial declined — detailed feedback recorded\"},\"resultingStatus\":{\"s\":\"Rejected\"},\"type\":{\"s\":\"Rejected\"}}",
+   "mask [[\"closingNotes\",\"closingReason\",\"expectedSendDate\",\"fullRequestedDate\",\"fullSentDate\",\"fullVersionSent\",\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"offerDate\",\"offerNotes\",\"offerResponseDeadline\",\"partialRequestedDate\",\"partialSentDate\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackText\",\"rejectionFeedbackType\",\"rejectionLesson\",\"rejectionReflection\",\"responseReceivedAt\",\"revisionRound\",\"rrNotes\",\"sendReminderDate\",\"status\"]]",
+   "sets [[\"hasAgentResponded\",\"lastStatusChange\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackType\",\"responseReceivedAt\",\"revisionRound\",\"status\"]]",
+   "read back update users/{uid}/queries/{q} {\"hasAgentResponded\":{\"booleanValue\":true},\"lastStatusChange\":{\"s\":\"{time}\"},\"rejectedDate\":{\"s\":\"{time}\"},\"rejectedFromStatus\":{\"s\":\"Partial Sent\"},\"rejectionFeedbackType\":{\"s\":\"detailed\"},\"revisionRound\":{\"integerValue\":\"1\"},\"status\":{\"s\":\"Rejected\"}}"
+  ]
+ },
+ {
+  "door": "the To-do desk",
+  "set": "Partial Sent",
+  "qid": "seed-query-23",
+  "req": [
+   "update users/{uid}/activities/* {\"activityType\":{\"s\":\"Status Changed\"},\"date\":{\"s\":\"{time}\"},\"description\":{\"s\":\"{name} at {name} requested a full manuscript\"},\"details\":{\"s\":\"Respond by {day}\"},\"eventKey\":{\"s\":\"full_requested\"},\"materials\":[{\"kind\":{\"s\":\"full\"}}],\"resultingStatus\":{\"s\":\"Full Requested\"}}",
+   "update users/{uid}/queries/{q}/activity/* {\"agentName\":{\"s\":\"{name}\"},\"eventKey\":{\"s\":\"full_requested\"},\"manuscriptTitle\":{\"s\":\"{name}\"},\"materials\":[{\"kind\":{\"s\":\"full\"}}],\"note\":{\"s\":\"Full manuscript requested\"},\"resultingStatus\":{\"s\":\"Full Requested\"},\"type\":{\"s\":\"Full Requested\"}}",
+   "mask [[\"closingNotes\",\"closingReason\",\"expectedSendDate\",\"fullRequestedDate\",\"fullSentDate\",\"fullVersionSent\",\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"offerDate\",\"offerNotes\",\"offerResponseDeadline\",\"partialRequestedDate\",\"partialSentDate\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackText\",\"rejectionFeedbackType\",\"rejectionLesson\",\"rejectionReflection\",\"responseReceivedAt\",\"revisionRound\",\"rrNotes\",\"sendReminderDate\",\"status\"]]",
+   "sets [[\"fullRequestedDate\",\"hasAgentResponded\",\"lastStatusChange\",\"responseReceivedAt\",\"revisionRound\",\"status\"]]",
+   "read back update users/{uid}/queries/{q} {\"fullRequestedDate\":{\"s\":\"{time}\"},\"hasAgentResponded\":{\"booleanValue\":true},\"lastStatusChange\":{\"s\":\"{time}\"},\"revisionRound\":{\"integerValue\":\"1\"},\"status\":{\"s\":\"Full Requested\"}}"
+  ],
+  "pass": [
+   "update users/{uid}/activities/* {\"activityType\":{\"s\":\"Status Changed\"},\"date\":{\"s\":\"{time}\"},\"description\":{\"s\":\"Rejection received from {name} at {name}\"},\"details\":{\"s\":\"\"},\"eventKey\":{\"s\":\"pass\"},\"resultingStatus\":{\"s\":\"Rejected\"}}",
+   "update users/{uid}/queries/{q}/activity/* {\"agentName\":{\"s\":\"{name}\"},\"eventKey\":{\"s\":\"pass\"},\"feedbackType\":{\"s\":\"detailed\"},\"manuscriptTitle\":{\"s\":\"{name}\"},\"note\":{\"s\":\"Partial declined — detailed feedback recorded\"},\"resultingStatus\":{\"s\":\"Rejected\"},\"type\":{\"s\":\"Rejected\"}}",
+   "mask [[\"closingNotes\",\"closingReason\",\"expectedSendDate\",\"fullRequestedDate\",\"fullSentDate\",\"fullVersionSent\",\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"offerDate\",\"offerNotes\",\"offerResponseDeadline\",\"partialRequestedDate\",\"partialSentDate\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackText\",\"rejectionFeedbackType\",\"rejectionLesson\",\"rejectionReflection\",\"responseReceivedAt\",\"revisionRound\",\"rrNotes\",\"sendReminderDate\",\"status\"]]",
+   "sets [[\"hasAgentResponded\",\"lastStatusChange\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackType\",\"responseReceivedAt\",\"revisionRound\",\"status\"]]",
+   "read back update users/{uid}/queries/{q} {\"hasAgentResponded\":{\"booleanValue\":true},\"lastStatusChange\":{\"s\":\"{time}\"},\"rejectedDate\":{\"s\":\"{time}\"},\"rejectedFromStatus\":{\"s\":\"Partial Sent\"},\"rejectionFeedbackType\":{\"s\":\"detailed\"},\"revisionRound\":{\"integerValue\":\"1\"},\"status\":{\"s\":\"Rejected\"}}"
+  ]
+ },
+ {
+  "door": "a Responses row",
+  "set": "Partial Sent",
+  "qid": "cv25-q-11",
+  "req": [
+   "update users/{uid}/activities/* {\"activityType\":{\"s\":\"Status Changed\"},\"date\":{\"s\":\"{time}\"},\"description\":{\"s\":\"{name} at {name} requested a full manuscript\"},\"details\":{\"s\":\"Respond by {day}\"},\"eventKey\":{\"s\":\"full_requested\"},\"materials\":[{\"kind\":{\"s\":\"full\"}}],\"resultingStatus\":{\"s\":\"Full Requested\"}}",
+   "update users/{uid}/queries/{q}/activity/* {\"agentName\":{\"s\":\"{name}\"},\"eventKey\":{\"s\":\"full_requested\"},\"manuscriptTitle\":{\"s\":\"{name}\"},\"materials\":[{\"kind\":{\"s\":\"full\"}}],\"note\":{\"s\":\"Full manuscript requested\"},\"resultingStatus\":{\"s\":\"Full Requested\"},\"type\":{\"s\":\"Full Requested\"}}",
+   "mask [[\"closingNotes\",\"closingReason\",\"expectedSendDate\",\"fullRequestedDate\",\"fullSentDate\",\"fullVersionSent\",\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"offerDate\",\"offerNotes\",\"offerResponseDeadline\",\"partialRequestedDate\",\"partialSentDate\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackText\",\"rejectionFeedbackType\",\"rejectionLesson\",\"rejectionReflection\",\"responseReceivedAt\",\"revisionRound\",\"rrNotes\",\"sendReminderDate\",\"status\"]]",
+   "sets [[\"fullRequestedDate\",\"hasAgentResponded\",\"lastStatusChange\",\"responseReceivedAt\",\"revisionRound\",\"status\"]]",
+   "read back update users/{uid}/queries/{q} {\"fullRequestedDate\":{\"s\":\"{time}\"},\"hasAgentResponded\":{\"booleanValue\":true},\"lastStatusChange\":{\"s\":\"{time}\"},\"revisionRound\":{\"integerValue\":\"1\"},\"status\":{\"s\":\"Full Requested\"}}"
+  ],
+  "pass": [
+   "update users/{uid}/activities/* {\"activityType\":{\"s\":\"Status Changed\"},\"date\":{\"s\":\"{time}\"},\"description\":{\"s\":\"Rejection received from {name} at {name}\"},\"details\":{\"s\":\"\"},\"eventKey\":{\"s\":\"pass\"},\"resultingStatus\":{\"s\":\"Rejected\"}}",
+   "update users/{uid}/queries/{q}/activity/* {\"agentName\":{\"s\":\"{name}\"},\"eventKey\":{\"s\":\"pass\"},\"feedbackType\":{\"s\":\"detailed\"},\"manuscriptTitle\":{\"s\":\"{name}\"},\"note\":{\"s\":\"Partial declined — detailed feedback recorded\"},\"resultingStatus\":{\"s\":\"Rejected\"},\"type\":{\"s\":\"Rejected\"}}",
+   "mask [[\"closingNotes\",\"closingReason\",\"expectedSendDate\",\"fullRequestedDate\",\"fullSentDate\",\"fullVersionSent\",\"hasAgentResponded\",\"lastStatusChange\",\"materialsRequestedQuantity\",\"materialsRequestedType\",\"offerDate\",\"offerNotes\",\"offerResponseDeadline\",\"partialRequestedDate\",\"partialSentDate\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackText\",\"rejectionFeedbackType\",\"rejectionLesson\",\"rejectionReflection\",\"responseReceivedAt\",\"revisionRound\",\"rrNotes\",\"sendReminderDate\",\"status\"]]",
+   "sets [[\"hasAgentResponded\",\"lastStatusChange\",\"rejectedDate\",\"rejectedFromStatus\",\"rejectionFeedbackType\",\"responseReceivedAt\",\"revisionRound\",\"status\"]]",
+   "read back update users/{uid}/queries/{q} {\"hasAgentResponded\":{\"booleanValue\":true},\"lastStatusChange\":{\"s\":\"{time}\"},\"rejectedDate\":{\"s\":\"{time}\"},\"rejectedFromStatus\":{\"s\":\"Partial Sent\"},\"rejectionFeedbackType\":{\"s\":\"detailed\"},\"revisionRound\":{\"integerValue\":\"1\"},\"status\":{\"s\":\"Rejected\"}}"
+  ]
+ }
+]

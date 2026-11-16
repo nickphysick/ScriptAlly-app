@@ -1,0 +1,1452 @@
+[
+ {
+  "door": "the agent card",
+  "qid": "cv25-q-03",
+  "reqW": [
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-03/activity/act-lsstlly75",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "type": {
+      "stringValue": "Partial Requested"
+     },
+     "resultingStatus": {
+      "stringValue": "Partial Requested"
+     },
+     "note": {
+      "stringValue": "Partial manuscript requested"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-03"
+     },
+     "agentName": {
+      "stringValue": "Priya Raman"
+     },
+     "manuscriptTitle": {
+      "stringValue": "Murphy's Day Out"
+     },
+     "eventKey": {
+      "stringValue": "partial_requested"
+     },
+     "materialsType": {
+      "stringValue": "pages"
+     },
+     "materialsQuantity": {
+      "stringValue": "0"
+     },
+     "createdAt": {
+      "timestampValue": "2026-11-16T12:00:00.000000000Z"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-lsstlly75",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "id": {
+      "stringValue": "act-lsstlly75"
+     },
+     "userId": {
+      "stringValue": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-03"
+     },
+     "manuscriptId": {
+      "stringValue": "cv25-ms"
+     },
+     "activityType": {
+      "stringValue": "Status Changed"
+     },
+     "description": {
+      "stringValue": "Priya Raman at Raman & Rowe requested a partial manuscript"
+     },
+     "date": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "details": {
+      "stringValue": "Respond by 28 Dec 2026"
+     },
+     "resultingStatus": {
+      "stringValue": "Partial Requested"
+     },
+     "eventKey": {
+      "stringValue": "partial_requested"
+     },
+     "logEntryId": {
+      "stringValue": "act-lsstlly75"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-03",
+    "op": "update",
+    "mask": [
+     "closingNotes",
+     "closingReason",
+     "expectedSendDate",
+     "fullRequestedDate",
+     "fullSentDate",
+     "fullVersionSent",
+     "hasAgentResponded",
+     "lastStatusChange",
+     "materialsRequestedQuantity",
+     "materialsRequestedType",
+     "offerDate",
+     "offerNotes",
+     "offerResponseDeadline",
+     "partialRequestedDate",
+     "partialSentDate",
+     "rejectedDate",
+     "rejectedFromStatus",
+     "rejectionFeedbackText",
+     "rejectionFeedbackType",
+     "rejectionLesson",
+     "rejectionReflection",
+     "responseReceivedAt",
+     "revisionRound",
+     "rrNotes",
+     "sendReminderDate",
+     "status"
+    ],
+    "values": {
+     "materialsRequestedType": {
+      "stringValue": "pages"
+     },
+     "materialsRequestedQuantity": {
+      "stringValue": "0"
+     },
+     "status": {
+      "stringValue": "Partial Requested"
+     },
+     "partialRequestedDate": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "revisionRound": {
+      "integerValue": "1"
+     },
+     "hasAgentResponded": {
+      "booleanValue": true
+     },
+     "responseReceivedAt": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "lastStatusChange": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     }
+    }
+   }
+  ],
+  "passW": [
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-03/activity/act-3saxq690r",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "type": {
+      "stringValue": "Rejected"
+     },
+     "resultingStatus": {
+      "stringValue": "Rejected"
+     },
+     "note": {
+      "stringValue": "Query rejected — detailed feedback recorded"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-03"
+     },
+     "agentName": {
+      "stringValue": "Priya Raman"
+     },
+     "manuscriptTitle": {
+      "stringValue": "Murphy's Day Out"
+     },
+     "eventKey": {
+      "stringValue": "pass"
+     },
+     "feedbackType": {
+      "stringValue": "detailed"
+     },
+     "createdAt": {
+      "timestampValue": "2026-11-16T12:00:00.000000000Z"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-3saxq690r",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "id": {
+      "stringValue": "act-3saxq690r"
+     },
+     "userId": {
+      "stringValue": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-03"
+     },
+     "manuscriptId": {
+      "stringValue": "cv25-ms"
+     },
+     "activityType": {
+      "stringValue": "Status Changed"
+     },
+     "description": {
+      "stringValue": "Rejection received from Priya Raman at Raman & Rowe"
+     },
+     "date": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "details": {
+      "stringValue": ""
+     },
+     "resultingStatus": {
+      "stringValue": "Rejected"
+     },
+     "eventKey": {
+      "stringValue": "pass"
+     },
+     "logEntryId": {
+      "stringValue": "act-3saxq690r"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-03",
+    "op": "update",
+    "mask": [
+     "closingNotes",
+     "closingReason",
+     "expectedSendDate",
+     "fullRequestedDate",
+     "fullSentDate",
+     "fullVersionSent",
+     "hasAgentResponded",
+     "lastStatusChange",
+     "materialsRequestedQuantity",
+     "materialsRequestedType",
+     "offerDate",
+     "offerNotes",
+     "offerResponseDeadline",
+     "partialRequestedDate",
+     "partialSentDate",
+     "rejectedDate",
+     "rejectedFromStatus",
+     "rejectionFeedbackText",
+     "rejectionFeedbackType",
+     "rejectionLesson",
+     "rejectionReflection",
+     "responseReceivedAt",
+     "revisionRound",
+     "rrNotes",
+     "sendReminderDate",
+     "status"
+    ],
+    "values": {
+     "rejectionFeedbackType": {
+      "stringValue": "detailed"
+     },
+     "status": {
+      "stringValue": "Rejected"
+     },
+     "revisionRound": {
+      "integerValue": "1"
+     },
+     "hasAgentResponded": {
+      "booleanValue": true
+     },
+     "responseReceivedAt": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "rejectedDate": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "lastStatusChange": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     }
+    }
+   }
+  ]
+ },
+ {
+  "door": "the card on Queries",
+  "qid": "cv25-q-04",
+  "reqW": [
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-04/activity/act-fs8w8w8qf",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "type": {
+      "stringValue": "Partial Requested"
+     },
+     "resultingStatus": {
+      "stringValue": "Partial Requested"
+     },
+     "note": {
+      "stringValue": "Partial manuscript requested"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-04"
+     },
+     "agentName": {
+      "stringValue": "Daniel O’Rourke"
+     },
+     "manuscriptTitle": {
+      "stringValue": "Murphy's Day Out"
+     },
+     "eventKey": {
+      "stringValue": "partial_requested"
+     },
+     "materialsType": {
+      "stringValue": "pages"
+     },
+     "materialsQuantity": {
+      "stringValue": "0"
+     },
+     "createdAt": {
+      "timestampValue": "2026-11-16T12:00:00.000000000Z"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-fs8w8w8qf",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "id": {
+      "stringValue": "act-fs8w8w8qf"
+     },
+     "userId": {
+      "stringValue": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-04"
+     },
+     "manuscriptId": {
+      "stringValue": "cv25-ms"
+     },
+     "activityType": {
+      "stringValue": "Status Changed"
+     },
+     "description": {
+      "stringValue": "Daniel O’Rourke at Inkwell & Stone requested a partial manuscript"
+     },
+     "date": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "details": {
+      "stringValue": "Respond by 28 Dec 2026"
+     },
+     "resultingStatus": {
+      "stringValue": "Partial Requested"
+     },
+     "eventKey": {
+      "stringValue": "partial_requested"
+     },
+     "logEntryId": {
+      "stringValue": "act-fs8w8w8qf"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-04",
+    "op": "update",
+    "mask": [
+     "closingNotes",
+     "closingReason",
+     "expectedSendDate",
+     "fullRequestedDate",
+     "fullSentDate",
+     "fullVersionSent",
+     "hasAgentResponded",
+     "lastStatusChange",
+     "materialsRequestedQuantity",
+     "materialsRequestedType",
+     "offerDate",
+     "offerNotes",
+     "offerResponseDeadline",
+     "partialRequestedDate",
+     "partialSentDate",
+     "rejectedDate",
+     "rejectedFromStatus",
+     "rejectionFeedbackText",
+     "rejectionFeedbackType",
+     "rejectionLesson",
+     "rejectionReflection",
+     "responseReceivedAt",
+     "revisionRound",
+     "rrNotes",
+     "sendReminderDate",
+     "status"
+    ],
+    "values": {
+     "materialsRequestedType": {
+      "stringValue": "pages"
+     },
+     "materialsRequestedQuantity": {
+      "stringValue": "0"
+     },
+     "expectedSendDate": {
+      "timestampValue": "2026-11-30T12:00:00.000000000Z"
+     },
+     "status": {
+      "stringValue": "Partial Requested"
+     },
+     "partialRequestedDate": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "revisionRound": {
+      "integerValue": "1"
+     },
+     "hasAgentResponded": {
+      "booleanValue": true
+     },
+     "responseReceivedAt": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "lastStatusChange": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     }
+    }
+   }
+  ],
+  "passW": [
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-04/activity/act-k7s8f957l",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "type": {
+      "stringValue": "Rejected"
+     },
+     "resultingStatus": {
+      "stringValue": "Rejected"
+     },
+     "note": {
+      "stringValue": "Query rejected — detailed feedback recorded"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-04"
+     },
+     "agentName": {
+      "stringValue": "Daniel O’Rourke"
+     },
+     "manuscriptTitle": {
+      "stringValue": "Murphy's Day Out"
+     },
+     "eventKey": {
+      "stringValue": "pass"
+     },
+     "feedbackType": {
+      "stringValue": "detailed"
+     },
+     "createdAt": {
+      "timestampValue": "2026-11-16T12:00:00.000000000Z"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-k7s8f957l",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "id": {
+      "stringValue": "act-k7s8f957l"
+     },
+     "userId": {
+      "stringValue": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-04"
+     },
+     "manuscriptId": {
+      "stringValue": "cv25-ms"
+     },
+     "activityType": {
+      "stringValue": "Status Changed"
+     },
+     "description": {
+      "stringValue": "Rejection received from Daniel O’Rourke at Inkwell & Stone"
+     },
+     "date": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "details": {
+      "stringValue": ""
+     },
+     "resultingStatus": {
+      "stringValue": "Rejected"
+     },
+     "eventKey": {
+      "stringValue": "pass"
+     },
+     "logEntryId": {
+      "stringValue": "act-k7s8f957l"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-04",
+    "op": "update",
+    "mask": [
+     "closingNotes",
+     "closingReason",
+     "expectedSendDate",
+     "fullRequestedDate",
+     "fullSentDate",
+     "fullVersionSent",
+     "hasAgentResponded",
+     "lastStatusChange",
+     "materialsRequestedQuantity",
+     "materialsRequestedType",
+     "offerDate",
+     "offerNotes",
+     "offerResponseDeadline",
+     "partialRequestedDate",
+     "partialSentDate",
+     "rejectedDate",
+     "rejectedFromStatus",
+     "rejectionFeedbackText",
+     "rejectionFeedbackType",
+     "rejectionLesson",
+     "rejectionReflection",
+     "responseReceivedAt",
+     "revisionRound",
+     "rrNotes",
+     "sendReminderDate",
+     "status"
+    ],
+    "values": {
+     "rejectionFeedbackType": {
+      "stringValue": "detailed"
+     },
+     "status": {
+      "stringValue": "Rejected"
+     },
+     "revisionRound": {
+      "integerValue": "1"
+     },
+     "hasAgentResponded": {
+      "booleanValue": true
+     },
+     "responseReceivedAt": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "rejectedDate": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "lastStatusChange": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     }
+    }
+   }
+  ]
+ },
+ {
+  "door": "the card on Queries",
+  "qid": "seed-query-8",
+  "reqW": [
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-jb4fl01ll",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "type": {
+      "stringValue": "Full Requested"
+     },
+     "resultingStatus": {
+      "stringValue": "Full Requested"
+     },
+     "note": {
+      "stringValue": "Full manuscript requested"
+     },
+     "queryId": {
+      "stringValue": "seed-query-8"
+     },
+     "agentName": {
+      "stringValue": "David Marsh"
+     },
+     "manuscriptTitle": {
+      "stringValue": "The Smoke Test"
+     },
+     "eventKey": {
+      "stringValue": "full_requested"
+     },
+     "createdAt": {
+      "timestampValue": "2026-11-16T12:00:00.000000000Z"
+     },
+     "materials": {
+      "arrayValue": {
+       "values": [
+        {
+         "mapValue": {
+          "fields": {
+           "kind": {
+            "stringValue": "full"
+           }
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-jb4fl01ll",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "id": {
+      "stringValue": "act-jb4fl01ll"
+     },
+     "userId": {
+      "stringValue": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+     },
+     "queryId": {
+      "stringValue": "seed-query-8"
+     },
+     "manuscriptId": {
+      "stringValue": "seed-ms-1"
+     },
+     "activityType": {
+      "stringValue": "Status Changed"
+     },
+     "description": {
+      "stringValue": "David Marsh at Marsh & Co requested a full manuscript"
+     },
+     "date": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "details": {
+      "stringValue": "Respond by 11 Jan 2027"
+     },
+     "resultingStatus": {
+      "stringValue": "Full Requested"
+     },
+     "eventKey": {
+      "stringValue": "full_requested"
+     },
+     "logEntryId": {
+      "stringValue": "act-jb4fl01ll"
+     },
+     "materials": {
+      "arrayValue": {
+       "values": [
+        {
+         "mapValue": {
+          "fields": {
+           "kind": {
+            "stringValue": "full"
+           }
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8",
+    "op": "update",
+    "mask": [
+     "closingNotes",
+     "closingReason",
+     "expectedSendDate",
+     "fullRequestedDate",
+     "fullSentDate",
+     "fullVersionSent",
+     "hasAgentResponded",
+     "lastStatusChange",
+     "materialsRequestedQuantity",
+     "materialsRequestedType",
+     "offerDate",
+     "offerNotes",
+     "offerResponseDeadline",
+     "partialRequestedDate",
+     "partialSentDate",
+     "rejectedDate",
+     "rejectedFromStatus",
+     "rejectionFeedbackText",
+     "rejectionFeedbackType",
+     "rejectionLesson",
+     "rejectionReflection",
+     "responseReceivedAt",
+     "revisionRound",
+     "rrNotes",
+     "sendReminderDate",
+     "status"
+    ],
+    "values": {
+     "status": {
+      "stringValue": "Full Requested"
+     },
+     "partialRequestedDate": {
+      "stringValue": "2026-08-08T11:00:00.000Z"
+     },
+     "partialSentDate": {
+      "stringValue": "2026-08-22T11:00:00.000Z"
+     },
+     "fullRequestedDate": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "revisionRound": {
+      "integerValue": "1"
+     },
+     "hasAgentResponded": {
+      "booleanValue": true
+     },
+     "responseReceivedAt": {
+      "stringValue": "2026-08-08T11:00:00.000Z"
+     },
+     "lastStatusChange": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     }
+    }
+   }
+  ],
+  "passW": [
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8/activity/act-lm2r5b3v4",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "type": {
+      "stringValue": "Rejected"
+     },
+     "resultingStatus": {
+      "stringValue": "Rejected"
+     },
+     "note": {
+      "stringValue": "Partial declined — detailed feedback recorded"
+     },
+     "queryId": {
+      "stringValue": "seed-query-8"
+     },
+     "agentName": {
+      "stringValue": "David Marsh"
+     },
+     "manuscriptTitle": {
+      "stringValue": "The Smoke Test"
+     },
+     "eventKey": {
+      "stringValue": "pass"
+     },
+     "feedbackType": {
+      "stringValue": "detailed"
+     },
+     "createdAt": {
+      "timestampValue": "2026-11-16T12:00:00.000000000Z"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-lm2r5b3v4",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "id": {
+      "stringValue": "act-lm2r5b3v4"
+     },
+     "userId": {
+      "stringValue": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+     },
+     "queryId": {
+      "stringValue": "seed-query-8"
+     },
+     "manuscriptId": {
+      "stringValue": "seed-ms-1"
+     },
+     "activityType": {
+      "stringValue": "Status Changed"
+     },
+     "description": {
+      "stringValue": "Rejection received from David Marsh at Marsh & Co"
+     },
+     "date": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "details": {
+      "stringValue": ""
+     },
+     "resultingStatus": {
+      "stringValue": "Rejected"
+     },
+     "eventKey": {
+      "stringValue": "pass"
+     },
+     "logEntryId": {
+      "stringValue": "act-lm2r5b3v4"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-8",
+    "op": "update",
+    "mask": [
+     "closingNotes",
+     "closingReason",
+     "expectedSendDate",
+     "fullRequestedDate",
+     "fullSentDate",
+     "fullVersionSent",
+     "hasAgentResponded",
+     "lastStatusChange",
+     "materialsRequestedQuantity",
+     "materialsRequestedType",
+     "offerDate",
+     "offerNotes",
+     "offerResponseDeadline",
+     "partialRequestedDate",
+     "partialSentDate",
+     "rejectedDate",
+     "rejectedFromStatus",
+     "rejectionFeedbackText",
+     "rejectionFeedbackType",
+     "rejectionLesson",
+     "rejectionReflection",
+     "responseReceivedAt",
+     "revisionRound",
+     "rrNotes",
+     "sendReminderDate",
+     "status"
+    ],
+    "values": {
+     "rejectionFeedbackType": {
+      "stringValue": "detailed"
+     },
+     "rejectedFromStatus": {
+      "stringValue": "Partial Sent"
+     },
+     "status": {
+      "stringValue": "Rejected"
+     },
+     "partialRequestedDate": {
+      "stringValue": "2026-08-08T11:00:00.000Z"
+     },
+     "partialSentDate": {
+      "stringValue": "2026-08-22T11:00:00.000Z"
+     },
+     "revisionRound": {
+      "integerValue": "1"
+     },
+     "hasAgentResponded": {
+      "booleanValue": true
+     },
+     "responseReceivedAt": {
+      "stringValue": "2026-08-08T11:00:00.000Z"
+     },
+     "rejectedDate": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "lastStatusChange": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     }
+    }
+   }
+  ]
+ },
+ {
+  "door": "the To-do desk",
+  "qid": "seed-query-23",
+  "reqW": [
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-n83eddput",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "type": {
+      "stringValue": "Full Requested"
+     },
+     "resultingStatus": {
+      "stringValue": "Full Requested"
+     },
+     "note": {
+      "stringValue": "Full manuscript requested"
+     },
+     "queryId": {
+      "stringValue": "seed-query-23"
+     },
+     "agentName": {
+      "stringValue": "Rufus Oyelaran"
+     },
+     "manuscriptTitle": {
+      "stringValue": "The Smoke Test"
+     },
+     "eventKey": {
+      "stringValue": "full_requested"
+     },
+     "createdAt": {
+      "timestampValue": "2026-11-16T12:00:00.000000000Z"
+     },
+     "materials": {
+      "arrayValue": {
+       "values": [
+        {
+         "mapValue": {
+          "fields": {
+           "kind": {
+            "stringValue": "full"
+           }
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-n83eddput",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "id": {
+      "stringValue": "act-n83eddput"
+     },
+     "userId": {
+      "stringValue": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+     },
+     "queryId": {
+      "stringValue": "seed-query-23"
+     },
+     "manuscriptId": {
+      "stringValue": "seed-ms-1"
+     },
+     "activityType": {
+      "stringValue": "Status Changed"
+     },
+     "description": {
+      "stringValue": "Rufus Oyelaran at Oyelaran Books requested a full manuscript"
+     },
+     "date": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "details": {
+      "stringValue": "Respond by 28 Dec 2026"
+     },
+     "resultingStatus": {
+      "stringValue": "Full Requested"
+     },
+     "eventKey": {
+      "stringValue": "full_requested"
+     },
+     "logEntryId": {
+      "stringValue": "act-n83eddput"
+     },
+     "materials": {
+      "arrayValue": {
+       "values": [
+        {
+         "mapValue": {
+          "fields": {
+           "kind": {
+            "stringValue": "full"
+           }
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23",
+    "op": "update",
+    "mask": [
+     "closingNotes",
+     "closingReason",
+     "expectedSendDate",
+     "fullRequestedDate",
+     "fullSentDate",
+     "fullVersionSent",
+     "hasAgentResponded",
+     "lastStatusChange",
+     "materialsRequestedQuantity",
+     "materialsRequestedType",
+     "offerDate",
+     "offerNotes",
+     "offerResponseDeadline",
+     "partialRequestedDate",
+     "partialSentDate",
+     "rejectedDate",
+     "rejectedFromStatus",
+     "rejectionFeedbackText",
+     "rejectionFeedbackType",
+     "rejectionLesson",
+     "rejectionReflection",
+     "responseReceivedAt",
+     "revisionRound",
+     "rrNotes",
+     "sendReminderDate",
+     "status"
+    ],
+    "values": {
+     "status": {
+      "stringValue": "Full Requested"
+     },
+     "partialRequestedDate": {
+      "stringValue": "2026-08-05T11:00:00.000Z"
+     },
+     "partialSentDate": {
+      "stringValue": "2026-08-19T11:00:00.000Z"
+     },
+     "fullRequestedDate": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "revisionRound": {
+      "integerValue": "1"
+     },
+     "hasAgentResponded": {
+      "booleanValue": true
+     },
+     "responseReceivedAt": {
+      "stringValue": "2026-08-05T11:00:00.000Z"
+     },
+     "lastStatusChange": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     }
+    }
+   }
+  ],
+  "passW": [
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23/activity/act-rc54wgjy4",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "type": {
+      "stringValue": "Rejected"
+     },
+     "resultingStatus": {
+      "stringValue": "Rejected"
+     },
+     "note": {
+      "stringValue": "Partial declined — detailed feedback recorded"
+     },
+     "queryId": {
+      "stringValue": "seed-query-23"
+     },
+     "agentName": {
+      "stringValue": "Rufus Oyelaran"
+     },
+     "manuscriptTitle": {
+      "stringValue": "The Smoke Test"
+     },
+     "eventKey": {
+      "stringValue": "pass"
+     },
+     "feedbackType": {
+      "stringValue": "detailed"
+     },
+     "createdAt": {
+      "timestampValue": "2026-11-16T12:00:00.000000000Z"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-rc54wgjy4",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "id": {
+      "stringValue": "act-rc54wgjy4"
+     },
+     "userId": {
+      "stringValue": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+     },
+     "queryId": {
+      "stringValue": "seed-query-23"
+     },
+     "manuscriptId": {
+      "stringValue": "seed-ms-1"
+     },
+     "activityType": {
+      "stringValue": "Status Changed"
+     },
+     "description": {
+      "stringValue": "Rejection received from Rufus Oyelaran at Oyelaran Books"
+     },
+     "date": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "details": {
+      "stringValue": ""
+     },
+     "resultingStatus": {
+      "stringValue": "Rejected"
+     },
+     "eventKey": {
+      "stringValue": "pass"
+     },
+     "logEntryId": {
+      "stringValue": "act-rc54wgjy4"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/seed-query-23",
+    "op": "update",
+    "mask": [
+     "closingNotes",
+     "closingReason",
+     "expectedSendDate",
+     "fullRequestedDate",
+     "fullSentDate",
+     "fullVersionSent",
+     "hasAgentResponded",
+     "lastStatusChange",
+     "materialsRequestedQuantity",
+     "materialsRequestedType",
+     "offerDate",
+     "offerNotes",
+     "offerResponseDeadline",
+     "partialRequestedDate",
+     "partialSentDate",
+     "rejectedDate",
+     "rejectedFromStatus",
+     "rejectionFeedbackText",
+     "rejectionFeedbackType",
+     "rejectionLesson",
+     "rejectionReflection",
+     "responseReceivedAt",
+     "revisionRound",
+     "rrNotes",
+     "sendReminderDate",
+     "status"
+    ],
+    "values": {
+     "rejectionFeedbackType": {
+      "stringValue": "detailed"
+     },
+     "rejectedFromStatus": {
+      "stringValue": "Partial Sent"
+     },
+     "status": {
+      "stringValue": "Rejected"
+     },
+     "partialRequestedDate": {
+      "stringValue": "2026-08-05T11:00:00.000Z"
+     },
+     "partialSentDate": {
+      "stringValue": "2026-08-19T11:00:00.000Z"
+     },
+     "revisionRound": {
+      "integerValue": "1"
+     },
+     "hasAgentResponded": {
+      "booleanValue": true
+     },
+     "responseReceivedAt": {
+      "stringValue": "2026-08-05T11:00:00.000Z"
+     },
+     "rejectedDate": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "lastStatusChange": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     }
+    }
+   }
+  ]
+ },
+ {
+  "door": "a Responses row",
+  "qid": "cv25-q-11",
+  "reqW": [
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-11/activity/act-eco7sm3c6",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "type": {
+      "stringValue": "Full Requested"
+     },
+     "resultingStatus": {
+      "stringValue": "Full Requested"
+     },
+     "note": {
+      "stringValue": "Full manuscript requested"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-11"
+     },
+     "agentName": {
+      "stringValue": "Hester Quinn"
+     },
+     "manuscriptTitle": {
+      "stringValue": "Murphy's Day Out"
+     },
+     "eventKey": {
+      "stringValue": "full_requested"
+     },
+     "createdAt": {
+      "timestampValue": "2026-11-16T12:00:00.000000000Z"
+     },
+     "materials": {
+      "arrayValue": {
+       "values": [
+        {
+         "mapValue": {
+          "fields": {
+           "kind": {
+            "stringValue": "full"
+           }
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-eco7sm3c6",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "id": {
+      "stringValue": "act-eco7sm3c6"
+     },
+     "userId": {
+      "stringValue": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-11"
+     },
+     "manuscriptId": {
+      "stringValue": "cv25-ms"
+     },
+     "activityType": {
+      "stringValue": "Status Changed"
+     },
+     "description": {
+      "stringValue": "Hester Quinn at Quinn Literary requested a full manuscript"
+     },
+     "date": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "details": {
+      "stringValue": "Respond by 28 Dec 2026"
+     },
+     "resultingStatus": {
+      "stringValue": "Full Requested"
+     },
+     "eventKey": {
+      "stringValue": "full_requested"
+     },
+     "logEntryId": {
+      "stringValue": "act-eco7sm3c6"
+     },
+     "materials": {
+      "arrayValue": {
+       "values": [
+        {
+         "mapValue": {
+          "fields": {
+           "kind": {
+            "stringValue": "full"
+           }
+          }
+         }
+        }
+       ]
+      }
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-11",
+    "op": "update",
+    "mask": [
+     "closingNotes",
+     "closingReason",
+     "expectedSendDate",
+     "fullRequestedDate",
+     "fullSentDate",
+     "fullVersionSent",
+     "hasAgentResponded",
+     "lastStatusChange",
+     "materialsRequestedQuantity",
+     "materialsRequestedType",
+     "offerDate",
+     "offerNotes",
+     "offerResponseDeadline",
+     "partialRequestedDate",
+     "partialSentDate",
+     "rejectedDate",
+     "rejectedFromStatus",
+     "rejectionFeedbackText",
+     "rejectionFeedbackType",
+     "rejectionLesson",
+     "rejectionReflection",
+     "responseReceivedAt",
+     "revisionRound",
+     "rrNotes",
+     "sendReminderDate",
+     "status"
+    ],
+    "values": {
+     "status": {
+      "stringValue": "Full Requested"
+     },
+     "fullRequestedDate": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "revisionRound": {
+      "integerValue": "1"
+     },
+     "hasAgentResponded": {
+      "booleanValue": true
+     },
+     "responseReceivedAt": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "lastStatusChange": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     }
+    }
+   }
+  ],
+  "passW": [
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-11/activity/act-66osen6h9",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "type": {
+      "stringValue": "Rejected"
+     },
+     "resultingStatus": {
+      "stringValue": "Rejected"
+     },
+     "note": {
+      "stringValue": "Partial declined — detailed feedback recorded"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-11"
+     },
+     "agentName": {
+      "stringValue": "Hester Quinn"
+     },
+     "manuscriptTitle": {
+      "stringValue": "Murphy's Day Out"
+     },
+     "eventKey": {
+      "stringValue": "pass"
+     },
+     "feedbackType": {
+      "stringValue": "detailed"
+     },
+     "createdAt": {
+      "timestampValue": "2026-11-16T12:00:00.000000000Z"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/activities/act-66osen6h9",
+    "op": "update",
+    "mask": null,
+    "values": {
+     "id": {
+      "stringValue": "act-66osen6h9"
+     },
+     "userId": {
+      "stringValue": "LS4ymFFCEvhN82advZQJ5zkr7sv2"
+     },
+     "queryId": {
+      "stringValue": "cv25-q-11"
+     },
+     "manuscriptId": {
+      "stringValue": "cv25-ms"
+     },
+     "activityType": {
+      "stringValue": "Status Changed"
+     },
+     "description": {
+      "stringValue": "Rejection received from Hester Quinn at Quinn Literary"
+     },
+     "date": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "details": {
+      "stringValue": ""
+     },
+     "resultingStatus": {
+      "stringValue": "Rejected"
+     },
+     "eventKey": {
+      "stringValue": "pass"
+     },
+     "logEntryId": {
+      "stringValue": "act-66osen6h9"
+     }
+    }
+   },
+   {
+    "path": "users/LS4ymFFCEvhN82advZQJ5zkr7sv2/queries/cv25-q-11",
+    "op": "update",
+    "mask": [
+     "closingNotes",
+     "closingReason",
+     "expectedSendDate",
+     "fullRequestedDate",
+     "fullSentDate",
+     "fullVersionSent",
+     "hasAgentResponded",
+     "lastStatusChange",
+     "materialsRequestedQuantity",
+     "materialsRequestedType",
+     "offerDate",
+     "offerNotes",
+     "offerResponseDeadline",
+     "partialRequestedDate",
+     "partialSentDate",
+     "rejectedDate",
+     "rejectedFromStatus",
+     "rejectionFeedbackText",
+     "rejectionFeedbackType",
+     "rejectionLesson",
+     "rejectionReflection",
+     "responseReceivedAt",
+     "revisionRound",
+     "rrNotes",
+     "sendReminderDate",
+     "status"
+    ],
+    "values": {
+     "rejectionFeedbackType": {
+      "stringValue": "detailed"
+     },
+     "rejectedFromStatus": {
+      "stringValue": "Partial Sent"
+     },
+     "status": {
+      "stringValue": "Rejected"
+     },
+     "revisionRound": {
+      "integerValue": "1"
+     },
+     "hasAgentResponded": {
+      "booleanValue": true
+     },
+     "responseReceivedAt": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "rejectedDate": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     },
+     "lastStatusChange": {
+      "stringValue": "2026-11-16T12:00:00.000Z"
+     }
+    }
+   }
+  ]
+ }
+]

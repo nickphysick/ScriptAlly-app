@@ -1,0 +1,57 @@
+[
+ {
+  "where": "R12 + sheet: An agent replied opens the phone's own flow",
+  "ok": true,
+  "detail": "{\"flow\":true}"
+ },
+ {
+  "where": "R12 + sheet: no card-frame picker, no composer",
+  "ok": true,
+  "detail": "{\"picker\":0,\"composer\":0}"
+ },
+ {
+  "where": "R12 + sheet: it saves through the phone's writer (the query reads Rejected)",
+  "ok": true,
+  "detail": "Rejected · 4 writes"
+ },
+ {
+  "where": "R12 + sheet: its Undo puts it back",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "where": "R12 + sheet: restored",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "population: a gone-quiet task on the phone's To do",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "R12 To do: They did reply keeps the phone's tiles",
+  "ok": true,
+  "detail": "{\"tiles\":[\"pass\",\"partial\",\"full\",\"offer\"]}"
+ },
+ {
+  "where": "R12 To do: no card-frame picker, no composer",
+  "ok": true,
+  "detail": "{\"picker\":0,\"composer\":0}"
+ },
+ {
+  "where": "R12 To do: it saves through the tiles' writer (the query reads Rejected)",
+  "ok": true,
+  "detail": "thin-q-close · Rejected · 4 writes"
+ },
+ {
+  "where": "R12 To do: its Undo puts it back",
+  "ok": true,
+  "detail": "Queried"
+ },
+ {
+  "where": "R12 To do: restored",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: the second account exists, with one closed query",
+  "ok": true,
+  "detail": "rr11-empty-1794871558504@scriptally.test"
+ },
+ {
+  "where": "population: the dashboard's Record a response",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "R5 the picker opens",
+  "ok": true,
+  "detail": "{\"picker\":true,\"none\":\"Nothing’s out with agents yet.\",\"log\":\"Log a query\",\"search\":0,\"rows\":0}"
+ },
+ {
+  "where": "R5 “Nothing’s out with agents yet.”",
+  "ok": true,
+  "detail": "Nothing’s out with agents yet."
+ },
+ {
+  "where": "R5 Log a query",
+  "ok": true,
+  "detail": "Log a query"
+ },
+ {
+  "where": "R5 no search field",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "R5 no rows (the closed one only by searching, and there is no search)",
+  "ok": true,
+  "detail": "0"
+ }
+]
