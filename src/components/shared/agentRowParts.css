@@ -64,8 +64,6 @@
 .cl24-br[aria-current="true"] .cl24-dsc--you { --halo: #eef2f7; }
 /* Cards (AgentPaperCard) and the drawer pickers' rows draw their own disc; a your-move one wears the same */
 .apc .apc-disc.cl252-yd { position: relative; background: #2a3a52; color: #f4eee5; --halo: #fff; }
-.qc149f .qc149f-d.cl252-yd { position: relative; background: #2a3a52; color: #f4eee5; box-shadow: none; --halo: #fff; }
-.qc149f .qc149f-ag:hover .qc149f-d.cl252-yd { --halo: #f6f2ec; }
 
 
 /* inside the agent card the genre row's own chip rule (`.qc149c .qc149c-gs span`, qcv149card.css) styles every span:

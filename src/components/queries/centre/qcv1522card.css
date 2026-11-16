@@ -154,6 +154,8 @@
 @media (prefers-reduced-motion: reduce) {
   .qc152 .qc1522-burst { display: none; }
   .qc152 .qc1522-cp, .qc152 .qc152-m.new, .qc152 .qc1522-toast { animation: none; }
+  /* Record a response v1, Phase 6 — reduced motion: the book and tabs fold as a cut, not a slide */
+  .qc152 .qc152-ms, .qc152 .qc152-tabs { transition: none; }
 }
 
 /* the toast and the burst sit over the card's inner frame */
@@ -161,5 +163,18 @@
 /* §2.6 "+ Add something you sent", under the Materials tab's last row */
 .qc152 .qc1522-madd { display: inline-block; margin: 12px 4px 4px; }
 /* §3.2 the footer's second line wraps to two lines rather than cutting off ("Answer by 9 Oct · 6 to tell") */
-.qc152 [data-qc1522="footer"] .qc152-rft span { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+/* Record a response v1, Phase 4 — the second line may wrap to two lines, and is never cut off with an ellipsis */
+.qc152 [data-qc1522="footer"] .qc152-rft span { white-space: normal; overflow: visible; text-overflow: clip; display: block; }
 .qc152 [data-qc1522="footer"] .qc152-rft b { white-space: normal; }
+/* Record a response v1, Phase 5 — the band's ‹ › at either end of the set */
+.qc152 .qc152-x:disabled { opacity: 0.35; cursor: default; }
+/* Record a response v1, Phase 6 — the band's colour cross-fade (lib/cardMotion): the old colour lies under the band's
+   own contents and fades out */
+.qc152 .qc152-band { position: relative; }
+.qc152 .qc152-band > .qcm-fade { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.qc152 .qc152-band > :not(.qcm-fade) { position: relative; z-index: 1; }
+/* Record a response v1 — "← Back to {first}" on the band, when the card took an agent card's place */
+.qc152 .qc152-bkto { all: unset; cursor: pointer; margin-right: 4px; padding: 4px 10px; border-radius: 999px; font: 400 13.5px var(--sp-serif) !important; letter-spacing: 0; text-transform: none; background: rgba(255, 255, 255, 0.16); }
+.qc152 .qc152-band:not(.dk) .qc152-bkto { background: rgba(28, 19, 15, 0.07); }
+.qc152 .qc152-bkto:hover { filter: brightness(1.15); }
+.qc152 .qc152-bkto:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }

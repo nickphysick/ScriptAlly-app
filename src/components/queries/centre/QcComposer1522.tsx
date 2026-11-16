@@ -52,6 +52,9 @@ export interface ComposerCtx {
   nudgedMs: number | null;
   /* reply: only the query has gone (so the request is for the partial) */
   queryOnly: boolean;
+  /** Record a response v1, Phase 4 — the full is already asked for, sent, or past (Full requested, Full sent, Offer):
+   *  "Asked for the full" is not offered */
+  fullAsked?: boolean;
   /** the request's own reminder, when no deadline is given: the existing send-by default, in days */
   remindDays: number;
   /* reopen */
@@ -92,6 +95,8 @@ export interface QcComposerProps {
   onAddEmail: () => void;
   /** the offer summary's Edit: the offer bubble, edited in place (§2.4) */
   onEditOffer: () => void;
+  /** Record a response v1 — the Cancel button's words ("← Someone else" after "Who replied?"); it still asks first */
+  cancelLabel?: string;
 }
 
 const ARW = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" /></svg>;
@@ -138,7 +143,7 @@ const Seg: React.FC<{ opts: readonly (readonly [string, string])[]; v: string; o
   </div>
 );
 
-export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, replyStart, onDraft, onSave, onClose, busy, onAddEmail, onEditOffer }) => {
+export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, replyStart, onDraft, onSave, onClose, busy, onAddEmail, onEditOffer, cancelLabel }) => {
   const c = ctx;
   const f = c.first;
   const today = sod(c.nowMs);
@@ -215,7 +220,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
   };
 
   let title = "", tall = false, body: React.ReactNode = null, foot: React.ReactNode = null;
-  const cancel = <button type="button" className="qc1522-btn gh" data-qc1522="cancel" onClick={exit}>Cancel</button>;
+  const cancel = <button type="button" className="qc1522-btn gh" data-qc1522="cancel" onClick={exit}>{cancelLabel ?? "Cancel"}</button>;
   const primary = (label: string, p: ComposerSave | null, data = "save", disabled = false) => (
     <button type="button" className="qc1522-btn nv" data-qc1522={data} disabled={disabled || busy || !p} onClick={() => p && void save(p)}>{label}{ARW}</button>
   );
@@ -300,7 +305,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
       }
       body = <>
         <div className="qc1522-seg qc1522-rts" data-qc1522="reply-types">
-          {REPLIES.map((r) => (
+          {REPLIES.filter((r) => r.k !== "req" || c.queryOnly || !c.fullAsked).map((r) => (
             <button key={r.k} type="button" className={rt === r.k ? "on" : ""} data-v={r.k} onClick={() => { setRt(r.k); touch(); }}>
               <span className="g" aria-hidden="true">{StepGlyph({ status: r.k === "req" && c.queryOnly ? QueryStatus.PARTIAL_REQUESTED : r.status, kind: null })}</span>{r.label(c.queryOnly)}
             </button>
@@ -403,7 +408,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
   }
 
   return (
-    <div className={`qc1522-cp${tall ? " tall" : ""}`} data-qc1522="composer" data-j={j} role="group" aria-label={title}>
+    <div className={`qc1522-cp${tall ? " tall" : ""}`} data-qc1522="composer" data-j={j} data-dirty={dirty ? "" : undefined} role="group" aria-label={title}>
       <div className="qc1522-ch">
         {back ? <button type="button" className="qc1522-bk" data-qc1522="back" onClick={() => up(() => go(back))}>← Back</button> : null}
         <h3 data-qc1522="composer-title">{title}</h3>

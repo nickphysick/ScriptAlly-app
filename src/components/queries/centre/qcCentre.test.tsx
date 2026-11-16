@@ -133,7 +133,9 @@ describe("⚠️ one house — the open query is the side panel, and its tab bod
        return and the desktop tree place the SAME element; its desktop condition is unchanged, and on the phone page it
        serves only other pages' requests and the practice walk */
     expect(page).toContain("const queryPanelOn = qmPhone");
-    expect(page).toContain(": !!(pipShown || (qcOpenCardNode && cardQueryId) || picking || qcFlowNode);");
+    /* Record a response v1 (16 Nov) — retargeted, same law: the old picker (`picking`) is gone; "Who replied?" is one of
+       the host's flows (`qcFlowNode`), in the same one host */
+    expect(page).toContain(": !!(pipShown || (qcOpenCardNode && cardQueryId) || qcFlowNode);");
     expect(page.split("{queryPanelHost}").length - 1).toBe(2);
     expect(page).not.toContain("<QcQueryModal");
     expect(page).not.toContain("qcDocked === false && (");

@@ -35,7 +35,8 @@
   box-shadow: inset 0 0 0 1.5px rgba(245, 241, 235, 0.5); font: 400 13px/1 var(--sp-type);
 }
 
-.bvd-dim { position: fixed; inset: 0; z-index: 60; background: rgba(28, 19, 15, 0.28); opacity: 0; transition: opacity 0.28s; }
+/* Record a response v1, Phase 5 — the side panel's own dim (.45), in over 240ms */
+.bvd-dim { position: fixed; inset: 0; z-index: 60; background: rgba(28, 19, 15, 0.45); opacity: 0; transition: opacity 0.24s; }
 .bvd-dim.is-in { opacity: 1; }
 .bvd {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 61; box-sizing: border-box;

@@ -113,6 +113,11 @@ export interface QcCard152Props {
   /** Log a query v1.1 — editing in place: the pencil's edit mode (the agent, the agent's details, the notes) */
   editData?: CardEditData;
   onSaveEdits?: (e: CardEdits) => Promise<boolean>;
+  /** Record a response v1, Phase 5 — the grid is behind the dim now, so the band carries ‹ › through the set the card was
+   *  opened from (the ← → keys' set). Absent, or a set of one: no arrows. */
+  stepCard?: { at: number; of: number; go: (d: 1 | -1) => void } | null;
+  /** Record a response v1 — opened from an agent's card, which this card replaced: the band's way back to it */
+  backTo?: { label: string; onBack: () => void } | null;
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
@@ -156,6 +161,9 @@ const TipBox: React.FC<{ x: number; y: number; head: string | null; body: string
 };
 
 /** v152.1 §2.8 — a thread with more than five steps folds its earliest into one button; the last three always show */
+const PREV = <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>;
+const NEXT = <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" /></svg>;
+
 export const FOLD_OVER = 5;
 export const FOLD_KEEP = 3;
 
@@ -384,8 +392,13 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         </div>
         ) : (
         <div className={`qc152-band${dark ? " dk" : ""}`} data-qc152="band" style={{ background: bandBg, color: head.fg }}>
+          {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={p.backTo.onBack}>← {p.backTo.label}</button> : null}
           <span data-qc152="band-word">{d.foot ? bnd.word : r.status === QueryStatus.OFFER ? "OFFER" : STATE_BAND[d.state]}</span>
           {d.state !== "closed" && r.dayN != null ? <span className="qc152-day" data-qc152="day">Day {r.dayN}</span> : <span className="qc152-day" />}
+          {p.stepCard && p.stepCard.of > 1 ? <>
+            <button type="button" className="qc152-x" data-qc152="prev" aria-label="Previous query" title="Previous query" disabled={p.stepCard.at <= 0} onClick={() => p.stepCard!.go(-1)}>{PREV}</button>
+            <button type="button" className="qc152-x" data-qc152="next" aria-label="Next query" title="Next query" disabled={p.stepCard.at >= p.stepCard.of - 1} onClick={() => p.stepCard!.go(1)}>{NEXT}</button>
+          </> : null}
           <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query" title="Edit this query"
             onClick={() => (p.editData ? ed.start() : p.onPencil())}>{PEN}</button>
           <button type="button" className="qc152-x" data-qc149c="close" aria-label="Close the query" title="Close" onClick={p.onClose}>✕</button>
@@ -435,6 +448,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               </div>
               {ft.button ? <button type="button" className={`qc152-rbtn ${ft.button.tone === "navy" ? "nv" : "gh"}`} data-qc152="reply-btn" data-tone={ft.button.tone} data-act={ft.button.act} onClick={() => p.onFoot?.(ft.button!.act)}>{ft.button.label}{ft.button.tone === "navy" ? ARW : null}</button> : null}
               {ft.link ? <button type="button" className="qc1522-flink" data-qc1522="foot-link" data-act={ft.link.act} onClick={() => p.onFoot?.(ft.link!.act)}>{ft.link.label}</button> : null}
+              {ft.replied ? <button type="button" className="qc1522-flink" data-qc1522="foot-replied" data-act="resp" onClick={() => p.onFoot?.("resp")}>{ft.replied.label}</button> : null}
             </div>
           );
         })() : (

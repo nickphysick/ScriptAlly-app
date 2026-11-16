@@ -22,7 +22,7 @@ import { setAsideItems, setAsideLabel, switchedOffRules, RULE_TITLE, type SetAsi
 import { flagKeyForTask, taskFlagId } from "../../../lib/taskFlags";
 import { setAsideRules } from "../../../lib/todoSetAside";
 import { snoozeCardWrites } from "../snoozeWrites";
-import { openQueryPanel } from "../../../lib/queryPanelStore";
+import { openQueryPanel, openResponse, responseHosted } from "../../../lib/queryPanelStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { drawerDoorForTask } from "../../../lib/queryActions/entry";
@@ -225,7 +225,15 @@ export function useWsCore(now: number) {
       db: db as never, snoozeFor: (d) => snoozeTask(sel, d), waitCeiling: limitFor(sel).ceiling,
       said: (m) => flash(m), nudgedOn: facts.nudgedOn, suggestion: sel.kind === "quiet" ? quietSuggestion(facts) : null,
     }, {
+      /* phone: the drawer's own response journey, on the partial, as before */
       openPartial: () => { if (sel.query) openQueryDrawer({ mode: "resp", queryId: sel.query.id, preset: { respType: "partial" } } as never); },
+      /* Record a response v1 — on the desktop "They did reply" opens the query's card and its composer; its save tells
+         this desk. Null where the card is not hosted (the phone), which keeps its own tiles. */
+      openReply: responseHosted() ? () => {
+        if (!sel.query) return;
+        const first = sel.agent ? (sel.agent.name ?? "").trim().split(/\s+/)[0] || "The agent" : "The agent";
+        openResponse({ queryId: sel.query.id, onSaved: () => flash(`${first}’s reply is on the card`) });
+      } : null,
       openCard: () => { if (sel.agent) openAgentCard(sel.agent.id, { tab: "send" as never, focus: "materials" as never }); },
       openOther: (() => {
         const c = sel.item.card;

@@ -26,6 +26,22 @@ import {
   discardAndStart, discardParked, keepParked, resumeQueryDrawer, type OpenRequest, type ParkedJourney,
 } from "../../lib/queryActions/drawerStore";
 import { clashAsk, discardAsk, parkedLine } from "../../lib/queryActions/parking";
+import { openResponse, responseHosted } from "../../lib/queryPanelStore";
+
+/**
+ * Record a response v1, Phase 7 — "Finish later" for a response is retired on the desktop: the reply box is one screen
+ * and asks before throwing anything away. A response parked before that (the chip survives a reload) resumes into that
+ * query's card and its composer, not the old stepped form; the phone resumes its own journey as before.
+ */
+function resume(p: ParkedJourney): void {
+  if (p.req.mode === "resp" && responseHosted()) {
+    const id = p.req.queryId;
+    discardParked();
+    openResponse(id ? { queryId: id } : {});
+    return;
+  }
+  resumeQueryDrawer();
+}
 
 const reduced = (): boolean =>
   typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -67,7 +83,7 @@ export function ParkedChip({ parked, clash, next }: {
     body = (
       <>
         <span className="pk-tx"><b>{c.head}</b><small>{c.sub}</small></span>
-        <button type="button" className="pk-btn gh" data-qad-park="finish" onClick={() => resumeQueryDrawer()}>Finish it</button>
+        <button type="button" className="pk-btn gh" data-qad-park="finish" onClick={() => resume(parked)}>Finish it</button>
         <button type="button" className="pk-btn danger" data-qad-park="swap" onClick={() => discardAndStart()}>Discard and start</button>
       </>
     );
@@ -87,7 +103,7 @@ export function ParkedChip({ parked, clash, next }: {
           <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.3"><path d="M9.5 2l2.5 2.5L5 11.5 2 12l.5-3z" /></svg>
         </span>
         <span className="pk-tx"><b>{parked.title}</b><small>{parkedLine(parked)}</small></span>
-        <button type="button" className="pk-btn" data-qad-park="resume" onClick={() => resumeQueryDrawer()}>Resume</button>
+        <button type="button" className="pk-btn" data-qad-park="resume" onClick={() => resume(parked)}>Resume</button>
         <button type="button" className="pk-x" data-qad-park="x" aria-label="Discard" onClick={() => setAsking(true)}>✕</button>
       </>
     );

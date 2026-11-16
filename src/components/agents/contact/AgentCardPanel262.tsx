@@ -88,14 +88,6 @@ export const AgentCardPanel262: React.FC<{
     window.addEventListener("resize", read);
     return () => window.removeEventListener("resize", read);
   }, []);
-  /* Card offers v1 — the card says when it is being edited (its sections are its own state), so the scrim can deepen */
-  const [cardEditing, setCardEditing] = useState(false);
-  /* a LAYOUT effect: it subscribes before the card's (passive) effects run, so a card opened straight into editing is heard */
-  useLayoutEffect(() => {
-    const on = (e: Event) => setCardEditing(!!(e as CustomEvent<boolean>).detail);
-    window.addEventListener(CARD_EDITING_EVENT, on);
-    return () => window.removeEventListener(CARD_EDITING_EVENT, on);
-  }, []);
   /* the card's ✕ asks through the same request */
   useEffect(() => {
     const on = () => requestClose();
@@ -110,11 +102,13 @@ export const AgentCardPanel262: React.FC<{
      edited (the action dim) it IS modal: Tab is held inside and the page is inert, and the scrim's click is Escape —
      the card's own unsaved-changes guard. The scrim and the trap read the same `modal`, so they cannot disagree. */
   const panelRef = useRef<HTMLDivElement>(null);
-  const modal = !leaving && (editing || cardEditing);
+  /* Record a response v1, Phase 5 — every slide-out dims the whole desk, browsing included: the card's light, live
+     dim is retired, and the scrim and the trap are the action level whenever the card is out */
+  const modal = !leaving;
   useDrawerFocus(panelRef, true, { modal });
   return createPortal(
     <>
-    <SideScrim level={modal ? "action" : leaving ? "off" : "light"} className="cl262-scrim" />
+    <SideScrim level={modal ? "action" : "off"} className="cl262-scrim" />
     <div ref={panelRef} className="cl262-panel" data-cl262="panel" data-cl24="panel" data-agent-id={agentId} role="dialog" aria-modal={modal ? "true" : "false"} aria-label="Agent"
       data-arrive={arriving ? "" : undefined} data-leave={leaving ? "" : undefined} data-reduce={reduce ? "" : undefined}
       style={box ? { top: box.top, bottom: box.bottom, right: box.right } : undefined}>

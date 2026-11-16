@@ -1,0 +1,117 @@
+[
+ {
+  "where": "the door list is not empty",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "dashboard header: the door is on the page",
+  "ok": true,
+  "detail": "[data-d2='record']"
+ },
+ {
+  "where": "dashboard header: one dialog",
+  "ok": true,
+  "detail": "[\"div.d105-how[]\"] → [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "dashboard header: the card frame",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":true,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "dashboard header: no old drawer, no v149 list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":true,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "Analytics header: the door is on the page",
+  "ok": true,
+  "detail": "button:has-text('Record a response')"
+ },
+ {
+  "where": "Analytics header: one dialog",
+  "ok": true,
+  "detail": "[\"div.d105-how[]\"] → [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "Analytics header: the card frame",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":true,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "Analytics header: no old drawer, no v149 list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":true,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "Responses header: the door is on the page",
+  "ok": true,
+  "detail": "button:has-text('Record a response')"
+ },
+ {
+  "where": "Responses header: one dialog",
+  "ok": true,
+  "detail": "[\"div.d105-how[]\"] → [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "Responses header: the card frame",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":true,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "Responses header: no old drawer, no v149 list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":true,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "Query Centre header: the door is on the page",
+  "ok": true,
+  "detail": "button:has-text('Record a response')"
+ },
+ {
+  "where": "Query Centre header: one dialog",
+  "ok": true,
+  "detail": "[\"div.d105-how[]\"] → [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "Query Centre header: the card frame",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":true,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "Query Centre header: no old drawer, no v149 list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":true,\"composer\":null,\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "agent card: the door is on the page",
+  "ok": true,
+  "detail": "[data-cl262='panel'] button:has-text('Record a response')"
+ },
+ {
+  "where": "agent card: one dialog",
+  "ok": true,
+  "detail": "[\"div.d105-how[]\",\"div.cl262-panel[Agent]\"] → [\"div.d105-how[]\",\"aside.spanel[Query] qp\"]"
+ },
+ {
+  "where": "agent card: the card frame",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":false,\"composer\":\"What did Priya say?\",\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "agent card: no old drawer, no v149 list",
+  "ok": true,
+  "detail": "{\"dialogs\":2,\"which\":[\"div.d105-how[]\",\"aside.spanel[Query] qp\"],\"panel\":true,\"frame\":true,\"picker\":false,\"composer\":\"What did Priya say?\",\"qad\":0,\"who149\":0}"
+ },
+ {
+  "where": "agent card: the composer opens on the agent's query",
+  "ok": true,
+  "detail": "What did Priya say?"
+ },
+ {
+  "where": "agent card: ← Back to {first}",
+  "ok": true,
+  "detail": "1"
+ }
+]

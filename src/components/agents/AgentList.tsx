@@ -75,6 +75,7 @@ import { bannerFigures, colleaguesOf, genreFit, inSet, setCounts, setGroups, wid
 import { type AgentFacts, ContactFilters, GroupKey, SORT_OPTIONS, SortKey as ContactSortKey, agentFacts, emptyContactFilters, matchesContactFilters, sortFacts, type SortCtx } from "../../lib/contactList";
 import { bookGenreHit, bookGenres } from "../../lib/genreMatch";
 import { openQueryDrawer } from "../../lib/queryActions/drawerStore";
+import { agentBack, openResponse, responseHosted } from "../../lib/queryPanelStore";
 import { type ContactPop } from "./contact/ContactListControls";
 import { ESC_LEVEL, escapeDepth } from "../../lib/escapeStack";
 import { useAgentSave } from "./card/useAgentSave";
@@ -972,7 +973,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
       genreWord: (raw) => genreLabel(raw, personalGenres), genreHit: bookHit,
       queries: toAgent, titleOf, history: agentHistory({ agent: x.agent, queries: toAgent, activities, notes: [], titleOf, nowMs }),
       index, total, onStep, onClose,
-      onJourney: (mode, queryId) => openQueryDrawer({ mode: mode as "resp", queryId }),
+      /* Record a response v1 — a response is the query's card, in this card's place ("← Back to {first}") */
+      onJourney: (mode, queryId) => { if (mode === "resp" && responseHosted()) { openResponse({ queryId, back: agentBack(x.agent) }); return; } openQueryDrawer({ mode: mode as "resp", queryId }); },
       onLog: () => openQueryDrawer({ mode: "log", agentId: id, ...(scoped?.id ? { manuscriptId: scoped.id } : {}) }),
       onEdit: (tab, focus) => openPanel(id, { tab: tab ?? "who", focus }),
       edit: editKitFor(x.agent),
@@ -1154,7 +1156,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         </div>
         {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}
         {logSeed && active ? (
-          <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)} dim onScrim={() => (logLeave.current ? logLeave.current() : setLogSeed(null))}>
+          <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)} onScrim={() => (logLeave.current ? logLeave.current() : setLogSeed(null))}>
             <ContactLogFlow seed={logSeed} activeMsId={scoped?.id ?? null} onClose={() => setLogSeed(null)} leaveRef={logLeave} />
           </AgentCardPanel24>
         ) : null}

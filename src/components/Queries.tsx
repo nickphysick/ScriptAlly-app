@@ -107,7 +107,8 @@ import { QcListTitle150, QcViewSwitch150 } from "./queries/centre/QcListTitle150
 import { QC_SORT_FIELDS } from "../lib/cardsSort";
 import { GROUP_BY_OPTIONS } from "../lib/qcCalView";
 import { eyeRows } from "../lib/qcBirdsEye";
-import { QcWhoReplied149 } from "./queries/centre/QcFlows149";
+import { QcWhoReplied, type WhoRow } from "./queries/centre/QcWhoReplied";
+import { bandColourNow, savedCard, swapCard } from "../lib/cardMotion";
 import { LogStagesHost } from "./queries/centre/LogStagesHost";
 import { logDefaults, pieceVersions, saveLog } from "../lib/queryActions/logSave";
 import { packagesFor } from "../lib/queryActions/packages";
@@ -126,7 +127,7 @@ import { copyText } from "./agents/contact/ContactCells";
 import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import { METHODS as EDIT_METHODS, type AgentDetails } from "./queries/centre/QcCardEdit152";
 import type { RowSpec } from "./reading-pane/QueryTimeline";
-import { expectedFor, type QcRow } from "../lib/qcSummary";
+import { courtOf, expectedFor, type QcRow } from "../lib/qcSummary";
 import { nextLine } from "../lib/qcRowLines";
 import { QcPage151, Track151, type State155 } from "./queries/centre/QcPage151";
 import { useLoadFailure } from "./notes/useLoadFailure";
@@ -199,8 +200,8 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
-import { QueryPanelHost, PICKER_PANEL_ID } from "./queries/QueryPanelHost";
-import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, queryPanelBack, releaseRightPanel, subscribeQueryPanel, subscribeResponsePicker, subscribeRightPanel } from "../lib/queryPanelStore";
+import { QueryPanelHost } from "./queries/QueryPanelHost";
+import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, openQueryPanelFromAgent, queryPanelBack, releaseRightPanel, responseSaved, subscribeQueryPanel, subscribeResponse, subscribeRightPanel, type PanelBack, type PanelOrigin, type ResponseRequest } from "../lib/queryPanelStore";
 import { QC155_LOAD, useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
 import {
@@ -1637,6 +1638,7 @@ export const Queries: React.FC<{
     /* Query actions v1 — every desk verb whose journey is live finishes in the drawer instead. */
     const mode = verb === "respond" ? "resp" : verb === "marksent" ? "sent" : verb === "nudge" ? "nudge" : "close";
     const qid = selectedQueryId ?? activeQuery?.id;
+    if (qid && mode === "resp" && !qmPhone) { setDeskVerb(null); respOpenRef.current({ queryId: qid }); return; }
     if (qid && DRAWER_LIVE[mode]) { setDeskVerb(null); openQueryDrawer({ mode, queryId: qid }); return; }
     setCorrecting(null);
     correctingTriggerRef.current = anchor;
@@ -1859,10 +1861,12 @@ export const Queries: React.FC<{
     setQc1522J({ j: (FOOT_J as Record<string, Journey>)[a] ?? (a as Journey), n: Date.now(), reply });
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const qcCardPendingMode = useRef<{ id: string; mode: CardMode } | null>(null);
+  /* Record a response v1, Phase 3 — the query picked from "Who replied?": its composer's Cancel is "← Someone else" */
+  const whoPickedRef = useRef<string | null>(null);
   /* Log a query v1.1 — a query opened from the list's "Add date": its first undated step's editor opens with the card */
   const qc1522EditPending = useRef<string | null>(null);
   /* v152.2 §1.6 — a list row's button opens that query's card with its composer (the footer's own journey) */
-  const qc1522Pending = useRef<{ id: string; a: FootAct } | null>(null);
+  const qc1522Pending = useRef<{ id: string; a: FootAct; reply?: ReplyType | null } | null>(null);
   /* v149.1 B3 — the row's "add date" opens the card in edit mode at its undated step */
   const [qcEditUndated, setQcEditUndated] = useState(false);
   /* v149 Part D — the header's two flows in the same panel: a new query, and "Who replied?" */
@@ -2491,34 +2495,21 @@ export const Queries: React.FC<{
     pendingStepRef.current = null;
     openQueryDrawer(p);
   });
+  /* Record a response v1 — the shell's picker in the panel (Query panel v2 §E: `picking`, its "query you had open", the
+     old QueryPicker stepped into the panel's slot) is retired: the shell opens "Who replied?" through `openResponse`. */
   /**
-   * Query panel v2 §E — "RECORD A RESPONSE" FROM THE SHELL'S MENU OPENS THE PANEL AT THE PICKER. With a query open
-   * the picker steps into its panel and lists it first; with none, the panel opens for the picker alone
-   * (`picking`), and becomes the chosen query's when one is picked.
+   * Record a response v1, Phase 2 — THE ONE DOOR (lib/queryPanelStore `openResponse`). Every desktop "Record a response"
+   * arrives here: with a query, that query's card opens with its composer at "reply" (a closed one's at "reopen"); with
+   * none, the card frame opens at "Who replied?". Not on the phone page: its doors keep the phone's own flow.
    */
-  const [picking, setPicking] = useState(false);
-  const openIdRef = useRef<string | null>(null);
-  const queriesRef = useRef<Query[]>([]);
-  const agentsRef = useRef<Agent[]>([]);
-  /* ⚠️ NOT ON THE PHONE PAGE: this page hosts the picker in its own panel, which the phone page does not draw — so while
-     the phone page is on screen it must not claim the picker, and "Record a response" falls through to the drawer. */
-  useEffect(() => (qmPhone ? undefined : subscribeResponsePicker(() => {
-    if (qcFlowGate.current.desk && qcFlowGate.current.active) { setQcFlow({ kind: "who" }); return; }
-    const had = openIdRef.current;
-    const q = had ? queriesRef.current.find((x) => x.id === had) : undefined;
-    const ag = q ? agentsRef.current.find((a) => a.id === q.agentId) : undefined;
-    pendingStepRef.current = { mode: "resp", hadOpen: q?.id, panel: { name: "", agency: "", first: (ag?.name || "").trim().split(/\s+/)[0] ?? "", back: !!q } };
-    setPicking(true);
-    bumpStep((n) => n + 1);
-  })), [qmPhone]);
+  const respOpenRef = useRef<(r: ResponseRequest) => void>(() => {});
+  useEffect(() => (qmPhone ? undefined : subscribeResponse((r) => respOpenRef.current(r))), [qmPhone]);
   /* the picker chose: the panel becomes that query's — `?q` on this page, the store's request anywhere else */
   const pickOpenRef = useRef<(id: string) => void>(() => {});
   useEffect(() => subscribeDrawerPick((id) => pickOpenRef.current(id)), []);
   /* ruling 2 — the serif's real italic, asked for by the app alone (this component is mounted on every workspace
      page and on no public one) */
   useEffect(() => { ensureAppSerifItalic(); }, []);
-  /* the picker's panel goes when its journey does, unless a query took it over */
-  useEffect(() => subscribeDrawer((r) => { if (!r) setPicking(false); }), []);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
      These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
@@ -3059,8 +3050,9 @@ export const Queries: React.FC<{
     const p = qcCardPendingMode.current;
     /* v152.2 — another query's card opens with no composer, no edit and no toast; a list row's action opens its composer */
     setQc1522J(null); setQc1522Edit(null); setQc1522Draft(null); setQc1522Toast(null);
+    if (whoPickedRef.current !== cardQueryId) whoPickedRef.current = null;
     const pj = qc1522Pending.current;
-    if (pj && pj.id === cardQueryId) { qc1522Pending.current = null; open1522(pj.a); }
+    if (pj && pj.id === cardQueryId) { qc1522Pending.current = null; open1522(pj.a, pj.reply ?? null); }
     if (qc1522EditPending.current && qc1522EditPending.current === cardQueryId) { qc1522EditPending.current = null; setQc1522Edit("__undated"); }
     if (p && p.id === cardQueryId) {
       /* v152.2 §5 — on the desktop "respond" is the card's composer, "What did they say?" */
@@ -3080,12 +3072,11 @@ export const Queries: React.FC<{
     const [next, ...rest] = qcBulk.ids;
     bulkWaitRef.current = true;
     setQcBulk({ mode: qcBulk.mode, ids: rest });
+    /* Record a response v1 — a response is the card's composer, each ticked query's in turn */
+    if (qcBulk.mode === "resp" && !qmPhone) { respOpenRef.current({ queryId: next }); return; }
     stepRowRef.current?.({ mode: qcBulk.mode, queryId: next });
   }, [qcBulk, cardQueryId]);
   /* §E — what the picker's listeners read: the query open now, and how a pick opens the panel on it */
-  openIdRef.current = cardQueryId ?? null;
-  queriesRef.current = queries;
-  agentsRef.current = agents;
   pickOpenRef.current = (id: string) => {
     if (id === cardQueryId) return;
     if (routeActive && !extPanel) onOpenQuery?.(id); else openQueryPanel(id, extPanel?.from ?? "other");
@@ -5881,6 +5872,8 @@ export const Queries: React.FC<{
     const q = req.queryId ? queries.find((x) => x.id === req.queryId) : undefined;
     /* the phone has no side panel for a step to wait for — its query sheet opens the drawer over itself */
     if (!q || qmPhone) { openQueryDrawer(req); return; }
+    /* Record a response v1 — on the desktop a response is the card's composer, whichever row or list asked */
+    if (req.mode === "resp") { respondOn(q.id, { set: qcVisible.map((r) => r.id) }); return; }
     const ag = agents.find((a) => a.id === q.agentId);
     const nm = (ag?.name || ag?.agency || "The agent").trim();
     pendingStepRef.current = { ...req, panel: { name: nm, agency: (ag?.name ? ag?.agency ?? "" : "").trim(), first: (ag?.name || "").trim().split(/\s+/)[0] ?? "" } };
@@ -5892,8 +5885,34 @@ export const Queries: React.FC<{
   /* Contact list v16 §F — the query view opened from an agent's panel. Escape and "← Back" return to the agent
      (the agent's panel is still the page's `?agent`, and redraws the moment this one closes); the × closes both. */
   const fromAgent = extPanel?.from === "agent" ? queryPanelBack() : null;
-  const backToAgent = () => closeQueryPanel();
+  /* Record a response v1 — the agent card stood aside for this one (one right-hand panel): "← Back" brings it back */
+  const backToAgent = () => { const b = queryPanelBack(); closeQueryPanel(); if (b) openAgentCard(b.agentId); };
   const closeFromAgent = () => { window.dispatchEvent(new CustomEvent("sa:agent-panel-close")); closeQueryPanel(); };
+  /**
+   * Record a response v1, Phase 2 — A RESPONSE ON ONE QUERY: its card, with the composer at "reply" once the card is on
+   * the page (the existing pending mechanism, `qc1522Pending`); a closed query's composer opens at "reopen", as the
+   * closed card's own Reopen does. `set` is what the band's arrows step through (the door's own list; one query
+   * otherwise). `back`: opened from the agent card, which this card replaces with "← Back to {first}".
+   */
+  const respondOn = (id: string, o: { from?: PanelOrigin; back?: PanelBack; set?: string[] | null; reply?: ReplyType | null } = {}) => {
+    if (isPracticeId(id)) { openPipResp(); return; }
+    const q = queries.find((x) => x.id === id);
+    if (!q) return;
+    const a: FootAct = courtOf(q.status as QueryStatus) === "closed" ? "reopen" : "resp";
+    setQcFlow(null);
+    cardSetRef.current = o.set ?? [id];
+    const reply = a === "resp" ? o.reply ?? null : null;
+    if (id === cardQueryId && (!o.back || fromAgent)) { setQcCardMode("view"); open1522(a, reply); return; }
+    qc1522Pending.current = { id, a, reply };
+    if (o.back) openQueryPanelFromAgent(id, o.back);
+    else if (routeActive && !extPanel) onOpenQuery?.(id);
+    else openQueryPanel(id, o.from ?? extPanel?.from ?? "other");
+  };
+  respOpenRef.current = (r) => {
+    whoPickedRef.current = null;
+    if (r.queryId) { respondOn(r.queryId, { from: r.from, back: r.back, reply: r.reply }); return; }
+    setQcFlow({ kind: "who" });
+  };
   /* ══ v149 Part C — THE QUERY PANEL IS THE QUERY CARD ══════════════════════════════════════════════════════════════
      The panel (QueryPanelHost) is unchanged; on the desktop Query Centre it holds QcQueryCard149 instead of QcOpenCard.
      Every save below is an existing writer under one snapshot with the undo bar: the response journey's save, the
@@ -6155,6 +6174,7 @@ export const Queries: React.FC<{
         first, fullName: ag?.name || ag?.agency || row.agentName, nowMs: now, email: (ag?.email ?? "").trim(), floorMs, env, pro: pro1522,
         sendKind, sendMats, queriedVia: via === "QueryManager" ? "QueryManager" : via === "Email" ? "Email" : "Other",
         nudgedMs: nudgeMsOf({ ...row, nrmn: !!v152.nrmn }, now), queryOnly: q.status === QueryStatus.QUERIED, remindDays: 14,
+        fullAsked: q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT || q.status === QueryStatus.OFFER,
         passMs: pass?.ms ?? null, passedAfter, restartToMs: now + 28 * 86_400_000,
         offerFromMs: offerStep?.ms ?? null, offerByMs: anyToMs(q.offerResponseDeadline), others,
         openOthers: live1522.length, withPages: others.filter((o) => o.holdsPages).length,
@@ -6163,6 +6183,7 @@ export const Queries: React.FC<{
       /* one save: plan it, commit it in one batch, then the toast and its Undo */
       const done1522 = (snap: Snapshot, msg: string, freshId: string | null) => {
         setQc1522J(null); setQc1522Draft(null); setQc1522Edit(null);
+        whoPickedRef.current = null;
         if (freshId) { setQcCardFresh(freshId); window.setTimeout(() => setQcCardFresh(null), 1600); }
         setQc1522Toast({ msg, undo: async () => { await restoreSnapshot(snap); } });
       };
@@ -6170,10 +6191,12 @@ export const Queries: React.FC<{
       const run1522 = async (fn: () => Promise<void>): Promise<boolean> => {
         if (qc152Busy) return false;
         setQc152Busy(true);
+        /* Record a response v1, Phase 6 — the band's colour before the save, so it can cross-fade to the new state */
+        const bandBefore = bandColourNow();
         /* the composer (or the bubble's form) gives way as the save starts: its draft would otherwise sit beside the new
            step the local write has already drawn, until the server answers */
         setQc1522J(null); setQc1522Draft(null); setQc1522Edit(null);
-        try { await fn(); return true; } catch (e) {
+        try { await fn(); savedCard(bandBefore); return true; } catch (e) {
           console.error("v152.2: the save failed", e);
           showToast({ message: "Couldn't save that. Nothing was changed." });
           return false;
@@ -6195,11 +6218,14 @@ export const Queries: React.FC<{
           const plan = planReply(pc, { ...p, queryOnly: q.status === QueryStatus.QUERIED });
           done1522(await commitPlan(uid, plan),
             p.rt === "passed" ? `Closed as passed${p.wall ? " · added to your Wall of no" : ""}` : p.rt === "offer" ? "Offer added" : `${first}’s reply added`, newId(plan));
+          /* Record a response v1 — the door that opened this response hears of it (its own contract: a task, a row) */
+          responseSaved(q.id);
         } else if (p.j === "unpass") {
           if (!pass?.activityId) throw new Error("No pass to take off");
           const feed = await readFeed(uid, q.id);
           const plan = planUnpass({ ...pc, feed }, pass.activityId);
           done1522(await commitPlan(uid, plan), "Pass taken off", null);
+          responseSaved(q.id);
         } else if (p.j === "tell") {
           const feed = await readFeed(uid, q.id);
           let plan = planTell({ ...pc, feed }, others, p.told, p.later, anyToMs(q.offerResponseDeadline));
@@ -6242,7 +6268,16 @@ export const Queries: React.FC<{
         composer1522 = (
           <QcComposer1522 key={`${q.id}:${qc1522J.j}:${qc1522J.n}`} journey={qc1522J.j} replyStart={qc1522J.reply ?? null} ctx={ctx} busy={qc152Busy}
             onDraft={setQc1522Draft} onSave={save1522}
-            onClose={() => { setQc1522J(null); setQc1522Draft(null); }}
+            /* came through "Who replied?": one level up is the list again, in the same frame */
+            cancelLabel={whoPickedRef.current === q.id && qc1522J.j === "reply" ? "← Someone else" : undefined}
+            onClose={() => {
+              if (whoPickedRef.current === q.id && qc1522J.j === "reply") {
+                whoPickedRef.current = null;
+                swapCard(-1, () => { setQc1522J(null); setQc1522Draft(null); closeQueryCard(); setQcFlow({ kind: "who" }); });
+                return;
+              }
+              setQc1522J(null); setQc1522Draft(null);
+            }}
             onAddEmail={() => { setQc1522J(null); if (ag) openAgentCard(ag.id, { tab: "who", focus: "email", from: "qc" }); }}
             onEditOffer={() => { setQc1522J(null); setQc1522Edit(offerStep?.activityId ?? null); }} />
         );
@@ -6360,6 +6395,19 @@ export const Queries: React.FC<{
       } : null } : null;
       card1522.burst = qc1522Burst;
       card1522.onFoot = (a) => open1522(a);
+      /* Record a response v1, Phase 5 — the band's ‹ ›: the set the card was opened from, else the list's order */
+      const set1522 = cardSetRef.current?.includes(q.id) ? cardSetRef.current : order;
+      const at1522 = set1522.indexOf(q.id);
+      card1522.backTo = fromAgent ? { label: `Back to ${fromAgent.first}`, onBack: backToAgent } : null;
+      card1522.stepCard = fromAgent ? null : {
+        at: at1522, of: set1522.length,
+        go: (d) => {
+          const nid = set1522[at1522 + d];
+          if (!nid) return;
+          cardSetRef.current = set1522;
+          if (routeActive && !extPanel) onOpenQuery?.(nid); else openQueryPanel(nid, extPanel?.from ?? "other");
+        },
+      };
     }
 
     return (
@@ -6392,7 +6440,7 @@ export const Queries: React.FC<{
         mode={qcCardMode}
         /* PHONE APP v2, PART 4 — on a phone a response is recorded in the response journey's flow layout, the same
            walk as every other journey; the card's inline form stays the desktop's */
-        onMode={qmPhone ? (m) => { if (m === "respond") openQueryDrawer({ mode: "resp", queryId: q.id }); else setQcCardMode(m); } : setQcCardMode}
+        onMode={qmPhone ? (m) => { if (m === "respond") openQueryDrawer({ mode: "resp", queryId: q.id }); else setQcCardMode(m); } : (m) => { if (m === "respond") open1522("resp"); else setQcCardMode(m); }}
         onClose={qmPhone ? () => setQcCardMode("view") : fromAgent ? closeFromAgent : closeQueryCard}
         onStep={(d) => {
           const nid = order[idx + d];
@@ -6401,7 +6449,7 @@ export const Queries: React.FC<{
           if (qmPhone) { const n = new URLSearchParams(window.location.search); n.set("q", nid); routerNav({ pathname: "/queries", search: `?${n}` }, { replace: true, state: window.history.state?.usr ?? null }); return; }
           cardSetRef.current = order; onOpenQuery?.(nid);
         }}
-        onPrimary={() => { if (!door) return; if (door.mode === "resp" && !qmPhone) setQcCardMode("respond"); else stepRow({ mode: door.mode, queryId: q.id }); }}
+        onPrimary={() => { if (!door) return; if (door.mode === "resp" && !qmPhone) open1522("resp"); else stepRow({ mode: door.mode, queryId: q.id }); }}
         onCloseQuery={() => stepRow({ mode: "close", queryId: q.id })}
         onContactList={() => { if (ag) routerNav(`/agents?agent=${encodeURIComponent(ag.id)}`); else onNavigate?.("agents"); }}
         onCopyEmail={() => {
@@ -6432,19 +6480,22 @@ export const Queries: React.FC<{
     laqLeaveRef.current = null;
     const now = Date.now();
     if (qcFlow.kind === "who") {
-      /* every live query in the page's scope, once: waiting on the agent first, then those already with the writer */
-      const items = qcScoped.filter((r) => qaIsLive(r.query)).map((r) => ({
-        id: r.id, initials: r.initials, name: r.agentName, agency: r.agency, status: r.status, statusLabel: STAGE_NAME[r.status], you: r.court !== "agent",
-      })).sort((a, b) => a.name.localeCompare(b.name));
+      /* Record a response v1, Phase 3 — every query, on every book: waiting on the agent (longest wait first), then those
+         already with the writer; the closed ones only while something is typed (QcWhoReplied) */
+      const dm = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
+      const rows: WhoRow[] = qcRows.map((r) => {
+        const closed = r.court === "closed";
+        const since = r.stageStartMs ?? r.lastMs ?? r.sentMs ?? 0;
+        return {
+          id: r.id, initials: r.initials, name: r.agentName, agency: r.agencyKey, status: r.status,
+          step: `${closed ? "closed" : (STAGE_NAME[r.status] ?? "").toLowerCase()}${since ? ` ${dm(since)}` : ""}`,
+          group: closed ? "closed" as const : r.court === "agent" ? "wait" as const : "you" as const, sinceMs: since,
+        };
+      });
       return (
-        <QcWhoReplied149 items={items} onClose={() => setQcFlow(null)}
-          onPick={(id) => {
-            setQcFlow(null);
-            cardSetRef.current = qcVisible.map((r) => r.id);
-            if (cardQueryId === id) { setQcCardMode("view"); open1522("resp"); return; }
-            qcCardPendingMode.current = { id, mode: "respond" };
-            onOpenQuery?.(id);
-          }} />
+        <QcWhoReplied rows={rows} onClose={() => setQcFlow(null)}
+          onLog={() => setQcFlow({ kind: "log", agentId: null, manuscriptId: null })}
+          onPick={(id) => { whoPickedRef.current = id; swapCard(1, () => respondOn(id, { set: null })); }} />
       );
     }
     /* the book: the one the door named, else the page's (the header's own), else the first that can be queried */
@@ -6792,7 +6843,7 @@ export const Queries: React.FC<{
     );
   })() : null;
   const pipStepOpen = useSyncExternalStore(subscribeDrawer, () => { const r = currentDrawerRequest(); return !!r && isPracticeId(r.queryId) && !!r.panel; }, () => false);
-  const pipShown = !!pipPanel && !((qcOpenCardNode && cardQueryId) || picking || qcFlow);
+  const pipShown = !!pipPanel && !((qcOpenCardNode && cardQueryId) || qcFlow);
   const guideFlowShown = pipFlow ?? guideFlow;
   useEffect(() => { setGuideWalk(!!guideFlowShown || !!walk); }, [guideFlowShown, walk]);
 
@@ -6804,13 +6855,22 @@ export const Queries: React.FC<{
    */
   const queryPanelOn = qmPhone
     ? !!(pipShown || (extPanel && qcOpenCardNode && cardQueryId))
-    : !!(pipShown || (qcOpenCardNode && cardQueryId) || picking || qcFlowNode);
+    : !!(pipShown || (qcOpenCardNode && cardQueryId) || qcFlowNode);
   const queryPanelHost = queryPanelOn ? (
-    <QueryPanelHost id={qcFlowNode && qcFlow ? `__${qcFlow.kind}` : pipShown ? PIP_ID : qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel && !pipShown ? extPanel.from : "queries"}
-      step={qcFlowNode ? false : pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))}
-      /* Log a query v1.2 — the staged journey dims the page as the action drawers do, and a press there runs its leave check */
-      dim={qcFlowNode && qcFlow?.kind === "log" ? true : undefined}
-      onScrim={qcFlowNode && qcFlow?.kind === "log" ? () => (laqLeaveRef.current ? laqLeaveRef.current() : setQcFlow(null)) : undefined}
+    <QueryPanelHost id={qcFlowNode && qcFlow ? `__${qcFlow.kind}` : pipShown ? PIP_ID : cardQueryId ?? ""} from={extPanel && !pipShown ? extPanel.from : "queries"}
+      step={qcFlowNode ? false : pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb}
+      /* Log a query v1.2 — a press on the dimmed page runs the staged journey's leave check. Record a response v1 — on
+         "Who replied?" it closes; on the card it is the Escape key while something is being entered there (the composer's
+         discard strip, the edit layer's ask) and closes the card otherwise */
+      onScrim={qcFlowNode && qcFlow?.kind === "log" ? () => (laqLeaveRef.current ? laqLeaveRef.current() : setQcFlow(null))
+        : qcFlowNode ? () => setQcFlow(null)
+        : pipShown ? undefined
+        : () => {
+          const panel = document.querySelector("[data-qp='panel']");
+          const busy = !!panel?.querySelector("[data-qc1522='composer'][data-dirty], [data-qc152='card'][data-editing], [data-qc1522='step-edit'], [data-qc1522='discard-strip']") || !!qc1522Edit || !!correcting || !!(qaOpen && qaPanel);
+          if (busy) { window.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true, cancelable: true })); return; }
+          (fromAgent ? closeFromAgent : closeQueryCard)();
+        }}
       onClose={qcFlowNode ? () => setQcFlow(null) : pipShown ? () => endWalk(walkRef.current === "done" ? "clear" : "early") : fromAgent ? backToAgent : closeQueryCard}>
       {qcFlowNode ?? (pipShown ? pipPanel : qcOpenCardNode && cardQueryId ? (qmPhone ? qcOpenCardNode : (qcCardNode ?? qcOpenCardNode)) : null)}
     </QueryPanelHost>
@@ -7816,6 +7876,7 @@ export const Queries: React.FC<{
                     setCorrecting(null);
                     /* v1.1 — what happened next is a response, and responses finish in the drawer. */
                     /* Query panel v2 §E — in the panel, not a drawer of its own */
+                    if (activeQuery && !qmPhone) { respOpenRef.current({ queryId: activeQuery.id }); return; }
                     if (activeQuery && DRAWER_LIVE.resp) { stepRow({ mode: "resp", queryId: activeQuery.id }); return; }
                     setIsRecordResponseFocusFormOpen(true);
                   }}

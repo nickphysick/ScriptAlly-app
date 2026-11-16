@@ -5,16 +5,16 @@
       (`--mk-f-*`), as qcv142.css did for the Cards view, and states its colours as literals.
    ⚠️ THE PANEL'S SHAPE IS UNCHANGED (SidePanel / QueryPanelHost): only its surface becomes the card's 7px white mat
       and 20px corners while it holds a card, with the card's inner border at 14px. */
-.spanel.qsp:has(> .spanel-own > .qc149c), .spanel.qsp:has(> .spanel-own > .qc149f) {
+.spanel.qsp:has(> .spanel-own > .qc149c) {
   padding: 7px; border-radius: 20px; background: #fff;
   box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 26px 48px -20px rgba(28, 19, 15, 0.42), 0 70px 90px -50px rgba(28, 19, 15, 0.3);
 }
-.qc149c, .qc149f {
+.qc149c {
   --mk-f-display: var(--sp-type); --mk-f-serif: var(--sp-serif); --mk-f-mono: var(--sp-mono); --mk-f-sans: var(--font-sans);
   flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; color: #1c130f; text-align: left;
   font-family: var(--sp-serif);
 }
-.qc149c .qc149c-in, .qc149f .qc149c-in { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.qc149c .qc149c-in { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
 .qc149c .qc149c-in > * { flex: none; }
 
 /* the band: the court's tint, Day n and × on the right */
@@ -53,7 +53,7 @@
 .qc149c .qc149c-step.gone > .mk-lc-t { text-decoration: line-through; color: #9a948b; }
 
 /* Agent */
-.qc149c .qc149c-pg, .qc149f .qc149c-pg { padding: 18px 20px 8px; }
+.qc149c .qc149c-pg { padding: 18px 20px 8px; }
 .qc149c .qc149c-kv { display: grid; grid-template-columns: 130px 1fr; gap: 13px 14px; margin: 0; }
 .qc149c .qc149c-kv dt { font: 400 10.5px/1.6 var(--sp-mono); letter-spacing: 0.17em; text-transform: uppercase; color: #8f8a82; padding-top: 2px; }
 .qc149c .qc149c-kv dd { margin: 0; font: 400 16.5px/1.35 var(--sp-serif); overflow-wrap: anywhere; }
@@ -147,30 +147,8 @@ textarea.qc149c-inp { height: auto; min-height: 70px; padding: 10px 12px; line-h
 .qc149c .qc149c-kvin { all: unset; box-sizing: border-box; width: 100%; height: 32px; padding: 0 10px; border-radius: 6px; background: #fff; box-shadow: inset 0 0 0 1px #e6dfd5; font: 400 16px var(--sp-serif); }
 .qc149c .qc149c-kvin:focus { box-shadow: inset 0 0 0 1.5px #2a3a52; }
 
-/* ── D · the header flows: the new query card and "Who replied?" ── */
-.qc149f .qc149f-band { display: flex; align-items: center; justify-content: space-between; background: #efe9df; color: #5b524a; }
-.qc149f .qc149f-srch { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 14px; border-radius: 10px; background: #f5f1ea; box-shadow: inset 0 1px 2px rgba(28, 19, 15, 0.08); }
-.qc149f .qc149f-srch input { all: unset; flex: 1; font: 400 17px var(--sp-serif); }
-.qc149f .qc149f-srch input::placeholder { font-style: italic; color: #9a948b; }
-.qc149f .qc149f-srch:focus-within { background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }
-.qc149f .qc149f-ags { flex: 1 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; margin-top: 8px; }
-.qc149f .qc149f-grp { margin: 12px 10px 4px; font: 400 10px/1 var(--sp-mono); letter-spacing: 0.17em; text-transform: uppercase; color: #8f8a82; }
-.qc149f .qc149f-ag { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 9px; }
-.qc149f .qc149f-ag:hover:not([aria-disabled="true"]) { background: #f5f1ea; }
-.qc149f .qc149f-ag:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
-.qc149f .qc149f-ag[aria-disabled="true"] { opacity: 0.45; cursor: default; }
-.qc149f .qc149f-d { flex: none; width: 36px; height: 36px; border-radius: 50%; background: #f6f2ec; box-shadow: inset 0 0 0 1px #e3dbd0; display: grid; place-items: center; font: 400 11px var(--sp-mono); color: #6c675f; }
-.qc149f .qc149f-ag b { display: block; font: 700 17px/1.15 var(--sp-serif); }
-.qc149f .qc149f-ag small { display: block; font: 400 10px/1.3 var(--sp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #8a857e; }
-.qc149f .qc149f-ag em { margin-left: auto; font: 400 10px var(--sp-mono); font-style: normal; letter-spacing: 0.12em; text-transform: uppercase; color: #8f8a82; white-space: nowrap; }
-.qc149f .qc149f-st { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: #efeae2; font: 400 14px var(--sp-serif); white-space: nowrap; }
-.qc149f .qc149f-st.y { background: #f5e6df; }
-.qc149f .qc149f-pg2 { flex: 0 1 auto !important; /* workspace width v2: the form hugs, the footer follows it */ min-height: 0; overflow: auto; padding: 16px 20px 10px; }
-.qc149f .qc149f-pg2 h4 { margin: 4px 0 0; font: 400 10px/1 var(--sp-mono); letter-spacing: 0.17em; text-transform: uppercase; color: #8f8a82; }
-.qc149f .qc149f-ttl { margin: 8px 0 14px; font: 400 26px/1.1 var(--sp-type) !important; }
-.qc149f .qc149c-x { all: unset; cursor: pointer; width: 28px; height: 28px; margin: -6px -8px -6px 0; display: grid; place-items: center; border-radius: 50%; font: 300 22px/1 var(--sp-serif); color: inherit; }
-.qc149f .qc149c-x:hover { background: rgba(28, 19, 15, 0.08); }
-.qc149f select.qc149c-inp { appearance: auto; padding-right: 8px; }
+/* ── D · the header flows ("Who replied?", QcWhoReplied149) are retired: Record a response v1 draws it from the v152 card's
+   own parts (QcWhoReplied.tsx, qcWhoReplied.css). ── */
 
 @media (prefers-reduced-motion: reduce) {
   .qc149c .qc149c-step.fresh, .qc149c-md { animation: none; }

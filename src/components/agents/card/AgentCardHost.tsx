@@ -48,6 +48,7 @@ import { AgentEditPatch, SaveAgentResult, commitAgentEdits } from "../../../lib/
 import { commitCardSave } from "../../../lib/agentCardSave";
 import { commitTypedGenre, hrefFor } from "../../../lib/quickAdd";
 import { openQueryDrawer, provideDock, type OpenRequest } from "../../../lib/queryActions/drawerStore";
+import { agentBack, openResponse, responseHosted } from "../../../lib/queryPanelStore";
 import { agentInitials } from "../../../lib/agentDisplay";
 import { dayMonth } from "../../../lib/dates";
 import { AGENT_GENRES } from "../../../lib/agentOptions";
@@ -383,6 +384,8 @@ const AgentCardSession: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbox })
       return null;
     }
     if (!q) return null;
+    /* Record a response v1 — the query card takes this card's place, with "← Back to {first}"; no dock chip */
+    if (act === "resp" && responseHosted()) { openResponse({ queryId: q.id, back: agentBack(agent) }); return null; }
     openQueryDrawer({ mode: act, queryId: q.id, ...dockHooks() });
     return null;
   }, [agent, qcRows, scoped, navigate, addUserTask, deleteUserTask, openEditor, dockHooks]);

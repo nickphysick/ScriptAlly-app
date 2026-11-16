@@ -456,6 +456,9 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
     });
 
     test("L12 · Who replied? lists every live query once, in two groups, and a pick opens it in respond mode", async ({ page }) => {
+      /* RETIRED by Record a response v1 (16 Nov): QcWhoReplied149 is gone; "Who replied?" is the card-frame picker,
+         measured by recordResponse1.measure.ts (R2–R5) */
+      test.skip(true, "retired: Record a response v1 — see recordResponse1.measure.ts");
       test.skip(!run("L12"));
       const L = new Ledger(`L12-${vp.width}`);
       await openQc(page, vp);
