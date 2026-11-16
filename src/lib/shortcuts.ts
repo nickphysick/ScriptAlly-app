@@ -122,10 +122,13 @@ export function isEditableTarget(t: EventTarget | null): boolean {
   return !!el.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])");
 }
 
-/** A modal is open: anything that declares `aria-modal`, or an open `<dialog>`, and is laid out. */
+/** A modal is open: anything that declares `aria-modal`, or an open `<dialog>`, and is laid out — and is not itself, or
+ *  inside, something inert or `aria-hidden="true"` (a closed dialog kept mounted for its transition still has a box;
+ *  shortcut guard, 16 Nov; locked in shortcutGuard.test.ts). */
 export function modalOpen(): boolean {
   if (typeof document === "undefined") return false;
-  return [...document.querySelectorAll<HTMLElement>('[aria-modal="true"], dialog[open]')].some((e) => e.getBoundingClientRect().width > 0);
+  return [...document.querySelectorAll<HTMLElement>('[aria-modal="true"], dialog[open]')]
+    .some((e) => e.getBoundingClientRect().width > 0 && !e.closest('[inert], [aria-hidden="true"]'));
 }
 
 /** The guard the plain-key global shortcuts share: never in a field, never over a modal. */

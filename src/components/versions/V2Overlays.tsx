@@ -56,7 +56,7 @@ export const DrawerShell: React.FC<{ open: boolean; onClose: () => void; childre
   return (
     <>
       <div className={`cx-dim${open ? " on" : ""}`} id="cxDim" onClick={onClose} />
-      <aside ref={ref} className={`cx-drw${open ? " on" : ""}`} id="cxDrw" role="dialog" aria-modal="true" aria-labelledby="cxDrwT" data-vv2="drawer" data-kind={kind} aria-hidden={!open}>
+      <aside ref={ref} className={`cx-drw${open ? " on" : ""}`} id="cxDrw" role="dialog" aria-modal={open ? "true" : undefined} aria-labelledby="cxDrwT" data-vv2="drawer" data-kind={kind} aria-hidden={!open}>
         {open ? children : null}
       </aside>
     </>
@@ -69,7 +69,7 @@ export const ModalShell: React.FC<{ open: boolean; kind: "m" | "p"; onClose: () 
   useFocusLoop(open, ref, k);
   return (
     <div className={`cx-mdim${open ? " on" : ""}`} id={kind === "m" ? "cxMdim" : "cxPdim"} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div ref={ref} className={kind === "m" ? "cx-modal sm" : "cx-pk"} id={kind === "m" ? "cxModal" : "cxPk"} role="dialog" aria-modal="true" aria-labelledby={kind === "p" ? "cxPkT" : undefined} data-vv2={vv}>
+      <div ref={ref} className={kind === "m" ? "cx-modal sm" : "cx-pk"} id={kind === "m" ? "cxModal" : "cxPk"} role="dialog" aria-modal={open ? "true" : undefined} aria-labelledby={kind === "p" ? "cxPkT" : undefined} data-vv2={vv}>
         {open ? children : null}
       </div>
     </div>

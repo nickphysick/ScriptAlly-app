@@ -10,6 +10,9 @@
  *    `--sp-serif`, `--sp-mono`); it never names a family (marketingTokens.test counts the files that do).
  * ⚠️ ONE ESCAPE STACK: Escape is a layer (`ESC_LEVEL.pageModal`), never a second document listener. Focus is trapped
  *    inside while it is open and returns to the ⓘ that opened it (the card owns that). It reopens at slide 1.
+ * ⚠️ MOUNTED WHILE CLOSED (the closing transition, slide 1 on reopening), so `aria-modal` is set ONLY while open:
+ *    closed, shortcuts.ts modalOpen() counted it on every page (it keeps a 520px box at opacity 0) and every
+ *    plain-key shortcut stood down (shortcut guard, 16 Nov; locked in dash105HowModal.test.tsx).
  */
 import React, { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -50,7 +53,7 @@ export const Dash105How: React.FC<{ open: boolean; onClose: () => void }> = ({ o
     <>
       <div className={`d105-dim${open ? " on" : ""}`} data-d105h="dim" onClick={onClose} aria-hidden="true" />
       <div
-        ref={boxRef} className={`d105-how${open ? " on" : ""}`} data-d105h="modal" role="dialog" aria-modal="true" aria-labelledby={titleId}
+        ref={boxRef} className={`d105-how${open ? " on" : ""}`} data-d105h="modal" role="dialog" aria-modal={open ? "true" : undefined} aria-labelledby={titleId}
         aria-hidden={!open} inert={!open} onKeyDown={onKey} data-slide={i}
       >
         <h2 className="d105-sr2" id={titleId}>{HOW_TITLE}</h2>

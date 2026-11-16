@@ -286,23 +286,13 @@ test.describe("manuscript spine v1", () => {
       await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur());
       console.log("[MSP4] before M", JSON.stringify(await page.evaluate(() => ({
         active: document.activeElement?.tagName, dialogs: document.querySelectorAll('[role="dialog"], [aria-modal="true"]').length,
-        /* shortcuts.ts modalOpen(): what M's guard sees */
-        modal: [...document.querySelectorAll<HTMLElement>('[aria-modal="true"], dialog[open]')].filter((e) => e.getBoundingClientRect().width > 0)
+        /* shortcuts.ts modalOpen(): what M's guard sees (shortcut guard, 16 Nov: an inert / aria-hidden one is not counted) */
+        modal: [...document.querySelectorAll<HTMLElement>('[aria-modal="true"], dialog[open]')]
+          .filter((e) => e.getBoundingClientRect().width > 0 && !e.closest('[inert], [aria-hidden="true"]'))
           .map((e) => `${e.tagName}.${e.className}`.slice(0, 120)),
         spineW: document.querySelector<HTMLElement>('.wsr [data-ms="spine"]')?.getBoundingClientRect().width ?? null,
         inert: !!document.querySelector('.wsr [data-ms="spine"]')?.closest("[inert]"),
       }))));
-      /* ⚠️ A PRE-EXISTING STALE MODAL BLOCKS M, OUTSIDE THIS BRIEF: Dash105How keeps its CLOSED dialog mounted with
-         aria-modal="true" (opacity 0, 520px wide), so shortcuts.ts modalOpen() is true and every plain-key shortcut's
-         guard stands down. M's guard is unchanged here (the brief keeps it), so the closed dialog is taken out of the
-         guard's sight in-page — the fix that file needs — and then M is measured. Logged, not asserted, so the report
-         carries the finding. */
-      const stale = await page.evaluate(() => {
-        const els = [...document.querySelectorAll<HTMLElement>('.d105-how[aria-modal="true"]:not(.on)')];
-        els.forEach((e) => e.setAttribute("aria-modal", "false"));
-        return els.length;
-      });
-      console.log("[MSP4] stale closed d105-how dialogs taken out of the guard's sight:", stale);
       await page.keyboard.press("m");
       await page.waitForTimeout(800);
       console.log("[MSP4] after M", page.url());
