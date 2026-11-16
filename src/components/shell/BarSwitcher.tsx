@@ -25,7 +25,7 @@
 import { menuRows } from "../../lib/menuKeys";
 import "./shellMenus.css";
 import "./manuscriptSpine.css";
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Manuscript, Query } from "../../types";
 import { isWithYou } from "../../lib/qcSummary";
@@ -36,6 +36,7 @@ import { queryingSince } from "../../lib/manuscriptSummary";
 import { dayMonth } from "../../lib/dates";
 import { SHORTCUTS, matchesShortcut, shortcutBlocked, shortcutLabel } from "../../lib/shortcuts";
 import { useOptionalToast } from "../toast/ToastProvider";
+import { SpineLabel } from "./SpineLabel";
 
 /** `StagePage` listens for this and replays its entrance — the existing animation, not a new one. */
 export const STAGE_REPLAY_EVENT = "sa:stage-replay";
@@ -66,6 +67,20 @@ export function switcherFacts(msQueries: readonly Pick<Query, "dateSent">[]): st
   const count = `${n} ${n === 1 ? "query" : "queries"}`;
   const since = queryingSince(msQueries);
   return since ? `Querying since ${dayMonth(since)} · ${count}` : count;
+}
+
+/**
+ * The spine label's facts (manuscript spine v1): "28 queries since 5 Dec", "1 query since 5 Dec", "3 queries" when
+ * nothing has a sent date, or "No queries yet". The same derivations as `switcherFacts` (the book's queries,
+ * `queryingSince`, `dayMonth`) in the label's own order; the menu keeps `switcherFacts`.
+ */
+export function spineFacts(msQueries: readonly Pick<Query, "dateSent">[]): string {
+  const n = msQueries.length;
+  if (n === 0) return "No queries yet";
+  const count = `${n} ${n === 1 ? "query" : "queries"}`;
+  const since = queryingSince(msQueries);
+  const day = since ? dayMonth(since) : "";
+  return day ? `${count} since ${day}` : count;
 }
 
 /**
@@ -134,8 +149,29 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
   const [at, setAt] = useState<{ left: number; top: number } | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
+  /* the empty spine's own ref: `btnRef` is what M looks for, and with no book there is no menu for M to open */
+  const emptyRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const notify = useOptionalToast();
+  /* ⚠️ BELOW `open`: it reads `open` during render (TDZ, CLAUDE.md) */
+  /* the spine's cloth label (manuscript spine v1): shown on pointer hover and on :focus-visible; hidden at once on
+     pointer leave, blur, Escape, click, and whenever the menu is open */
+  const labelId = `ms-spine-label-${useId().replace(/:/g, "")}`;
+  const [tip, setTip] = useState(false);
+  const showTip = rail && tip && !open;
+  useEffect(() => {
+    if (!showTip) return undefined;
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setTip(false); };
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [showTip]);
+  const tipProps = {
+    "aria-describedby": labelId,
+    onPointerEnter: () => setTip(true),
+    onPointerLeave: () => setTip(false),
+    onFocus: (e: React.FocusEvent<HTMLElement>) => { if (e.currentTarget.matches(":focus-visible")) setTip(true); },
+    onBlur: () => setTip(false),
+  };
 
   /* rows a person can choose — Add a manuscript (SOON) is never an arrow-key stop */
   const items = () => menuRows(menuRef.current);
@@ -225,10 +261,11 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
       /* manuscript spine v1, THE EMPTY SPINE: a dashed outline with a plus, standing on the shelf */
       return (
         <div className="ws-ms ws-ms--rail ms-shelfwrap" data-shell="switcher" data-placement={placement}>
-          <button type="button" className="ms-spine-btn" data-ms="spine-empty" onClick={onAdd} aria-label="Add a manuscript">
+          <button ref={emptyRef} type="button" className="ms-spine-btn" data-ms="spine-empty" aria-label="Add a manuscript" {...tipProps} onClick={() => { setTip(false); onAdd(); }}>
             <span className="ms-spine ms-spine--empty" aria-hidden="true">+</span>
           </button>
           <span className="ms-shelf" aria-hidden="true" />
+          <SpineLabel id={labelId} anchor={emptyRef} show={showTip} title="Add your manuscript" lines={[]} soon={false} />
         </div>
       );
     }
@@ -324,7 +361,8 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
           aria-label={`Manuscript: ${active.title}`}
           aria-keyshortcuts={shortcutLabel("switchManuscript")}
           {...(railSingle ? {} : { "aria-haspopup": "menu" as const, "aria-expanded": open })}
-          onClick={() => (railSingle ? onOpenActive() : open ? close(true) : openMenu())}
+          {...tipProps}
+          onClick={() => { setTip(false); if (railSingle) onOpenActive(); else if (open) close(true); else openMenu(); }}
           onKeyDown={railSingle ? undefined : onSpineKey}
         >
           <span className="ms-spine" aria-hidden="true">
@@ -333,6 +371,14 @@ export const BarSwitcher: React.FC<BarSwitcherProps> = ({ manuscripts, queries =
           </span>
         </button>
         <span className="ms-shelf" aria-hidden="true" />
+        <SpineLabel
+          id={labelId}
+          anchor={btnRef}
+          show={showTip}
+          title={active.title}
+          lines={[switcherMeta(active), spineFacts(byMs(active.id))].filter(Boolean)}
+          soon={ADD_MANUSCRIPT_SOON}
+        />
         {railSingle ? null : menuNode}
       </div>
     );

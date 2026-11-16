@@ -87,3 +87,45 @@
 @media (min-width: 768px) and (prefers-reduced-motion: reduce) {
   .wsr .ms-spine { transition: none; }
 }
+
+/* ================= THE LABEL (hover and keyboard focus) =================
+   The ref's .ms-label* rules, with one change of position scheme: the ref's label is `absolute` inside its demo
+   page; this one is portalled to <body> (the sidebar clips) and so is `fixed`, placed by SpineLabel.tsx from the
+   spine's measured rect — left edge 8px right of the rail's right edge, vertically centred on the spine, at least
+   8px inside the window. Nothing in it is clickable.
+   ⚠️ EVERY TEXT ELEMENT NAMES ITS FACE: brand.tsx sets the body sans on every bare `span` and `div`, which beats
+   inheritance, so the "Add a manuscript" span carries a class of its own. */
+@media (min-width: 768px) {
+  .ms-label {
+    position: fixed; left: 0; top: 0; z-index: 87; pointer-events: none;
+    filter: drop-shadow(0 6px 14px rgba(8, 12, 20, .3)) drop-shadow(0 1px 2px rgba(8, 12, 20, .2));
+    transform-origin: 0 50%;
+    animation: ms-label-in .16s ease-out .1s both;
+  }
+  .ms-label[hidden] { display: none; }
+  .ms-label-in {
+    position: relative; background: #34425c; color: #f4eee5; border-radius: 10px; padding: 13px 18px 12px;
+    box-shadow: inset 0 0 0 1px rgba(244, 238, 229, .16); box-sizing: border-box;
+  }
+  .ms-label-nib {
+    position: absolute; left: -6px; top: 50%; width: 12px; height: 12px; margin-top: -6px;
+    transform: rotate(45deg); border-radius: 2px; background: #34425c;
+  }
+  .ms-label-title { display: block; font: 400 17px/1.25 var(--sp-type); white-space: nowrap; }
+  .ms-label-rule {
+    display: block; width: 30px; height: 5px; border-top: 2px solid #d9967a; border-bottom: 1px solid #d9967a;
+    margin: 8px 0 7px; box-sizing: border-box;
+  }
+  .ms-label-line { display: block; font: 400 14px/1.35 var(--sp-serif); color: rgba(255, 253, 244, .8); white-space: nowrap; }
+  .ms-label-soon {
+    display: flex; justify-content: space-between; gap: 22px; margin-top: 11px; padding-top: 9px;
+    border-top: 1px solid rgba(244, 238, 229, .2);
+    font: 400 14px/1.3 var(--sp-serif); color: rgba(255, 253, 244, .72); white-space: nowrap;
+  }
+  .ms-label-soon-t { font-family: inherit; }
+  .ms-label-soon i { font-style: italic; color: #e6ad95; }
+}
+@keyframes ms-label-in { from { opacity: 0; transform: translateX(-7px); } to { opacity: 1; transform: translateX(0); } }
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .ms-label { animation: none; }
+}
