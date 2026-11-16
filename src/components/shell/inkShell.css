@@ -251,6 +251,11 @@
     transition: background-color 0.14s ease;
   }
   .ws-sfield:hover { background: rgba(var(--ink-cream-rgb), 0.11); color: var(--ink-cream-66); }
+  /* SHELL TABS v2 · when space runs short, search folds first (TabStrip's fit, `planWithFold`): a 38px icon button, the
+     same height, ring and fill; its right edge stays where it was, so nothing else in the bar moves (ST2-C2) */
+  .ws-pagebar .ws-sfield[data-fold] { width: 38px; padding: 0; gap: 0; justify-content: center; }
+  .ws-pagebar .ws-sfield[data-fold] .ws-sfield-l,
+  .ws-pagebar .ws-sfield[data-fold] .ws-sfield-k { display: none; }
   .ws-sfield svg { flex: none; display: block; }
   .ws-sfield-l { font-family: inherit; flex: 1; text-align: left; }
   .ws-sfield-k {

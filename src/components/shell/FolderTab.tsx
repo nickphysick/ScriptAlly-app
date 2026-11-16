@@ -264,6 +264,23 @@ export type StripMode = "cur" | "full" | "ic" | "hid";
 
 /** Between tabs (the ref's `.tabs` gap). */
 const STRIP_GAP = 2;
+/** The bar's search field, open and folded to its icon (inkShell.css `.ws-sfield`, `.ws-sfield[data-fold]`;
+ *  `searchFold.test.ts` holds the two equal to the CSS). */
+export const SEARCH_W = 168;
+export const SEARCH_FOLD_W = 38;
+
+/**
+ * Shell tabs v2, Phase 3 — WHEN SPACE RUNS SHORT, SEARCH FOLDS FIRST. Given the room the strip would have beside the open
+ * field and beside the folded one, the plan: if every tab keeps its name next to the open field, nothing folds;
+ * otherwise the field folds and the strip is planned in the larger room (where the old order of retreat — icons, then
+ * "+N" — still applies if even that is not enough). Pure, so it is unit-tested; `TabStrip` feeds it measured widths.
+ */
+export function planWithFold(rest: number[], icon: number[], current: number, cur: number, more: number, roomOpen: number, roomFolded: number): { modes: StripMode[]; folded: boolean } {
+  const open = planStrip(rest, icon, current, cur, more, roomOpen);
+  if (open.every((m) => m === "cur" || m === "full")) return { modes: open, folded: false };
+  return { modes: planStrip(rest, icon, current, cur, more, roomFolded), folded: true };
+}
+
 /**
  * The fit, as a pure function of measured widths. `rest[i]` / `icon[i]` are tab i's resting widths named and
  * icon-only; `cur` is the current tab's width (the same metrics as a resting tab, measured separately so a PRO tag or a
@@ -292,6 +309,9 @@ export interface TabStripProps {
   onGo: (path: string) => void;
   /** The search field — the fit limit is 24px short of its left edge. */
   limitRef: React.RefObject<HTMLElement | null>;
+  /** The workspace bar only: `limitRef` is the search field, which may fold to its icon to keep the tabs named. The
+   *  strip reports whether it needs the fold; the bar draws it. */
+  onFold?: (folded: boolean) => void;
 }
 
 const PRO_TAG = <span className="ws-qpro ws-ftpro" data-shell="pro" aria-label="Pro">PRO</span>;
@@ -304,7 +324,7 @@ const fillet = (side: "r" | "l") => (
   </svg>
 );
 
-export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRef }) => {
+export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRef, onFold }) => {
   const stripRef = useRef<HTMLElement>(null);
   const measureRef = useRef<HTMLSpanElement>(null);
   const curIdx = Math.max(0, tabs.findIndex((t) => t.id === current));
@@ -323,16 +343,28 @@ export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRe
     const b = bar.getBoundingClientRect();
     if (b.width <= 0) return;
     const lim = limitRef.current;
-    const limR = lim && lim.getBoundingClientRect().width > 0 ? lim.getBoundingClientRect().left - b.left : b.width;
+    const limBox = lim && lim.getBoundingClientRect().width > 0 ? lim.getBoundingClientRect() : null;
+    const limR = limBox ? limBox.left - b.left : b.width;
     const left = strip.getBoundingClientRect().left - b.left;
     const w = (sel: string) => meas.querySelector<HTMLElement>(sel)?.getBoundingClientRect().width ?? 0;
     const rest = tabs.map((t) => w(`[data-ftm="${t.id}"]`));
     const icon = tabs.map((t) => w(`[data-ftm-ic="${t.id}"]`) || 37);
     /* the current tab: no lanes any more — its curves sit over the 2px gap and the neighbour's foot, as in the ref */
     const cur = w(`[data-ftm-cur="${tabs[curIdx]?.id}"]`);
-    const next = planStrip(rest, icon, curIdx, cur, w("[data-ftm-more]") || 58, limR - LIMIT_GAP - left);
+    const more = w("[data-ftm-more]") || 58;
+    let next: StripMode[];
+    if (onFold && limBox) {
+      /* ⚠️ THE FIELD'S RIGHT EDGE IS THE FIXED ONE (the bar's right group is flush right), so both rooms are read from it
+         and never from its left, which is where the fold itself moves it */
+      const right = limBox.right - b.left;
+      const plan = planWithFold(rest, icon, curIdx, cur, more, right - SEARCH_W - LIMIT_GAP - left, right - SEARCH_FOLD_W - LIMIT_GAP - left);
+      next = plan.modes;
+      onFold(plan.folded);
+    } else {
+      next = planStrip(rest, icon, curIdx, cur, more, limR - LIMIT_GAP - left);
+    }
     setModes((m) => (m.join() === next.join() ? m : next));
-  }, [key, curIdx, limitRef]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [key, curIdx, limitRef, onFold]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useLayoutEffect(() => { fit(); }, [fit]);
   useEffect(() => {

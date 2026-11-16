@@ -328,8 +328,8 @@ function b2Problems(seen: Map<string, { x: number; w: number }[]>): string[] {
    tab's 22px sides, the size change a "risen" current tab really made. */
 const B2_BREAK = `.ws-fttabs .ws-fttab.is-cur { font-weight: 700 !important; padding-left: 22px !important; padding-right: 22px !important; }`;
 
-/* ⚠️ AT 1280 B2 NEEDS PHASE 3's SEARCH FOLD: Versions and Manuscripts carry a guide pill in the bar's right group, the
-   search moves 228px left, and without the fold Manuscript's tab drops to its icon on those two pages. */
+/* ⚠️ AT 1280 B2 RESTS ON PHASE 3's SEARCH FOLD: Versions and Manuscripts carry a guide pill in the bar's right group,
+   the search moves 228px left, and without the fold Manuscript's tab drops to its icon on those two pages. */
 for (const size of SIZES) {
   test(`ST2-B2 · no tab moves when another becomes current — rail at ${size.width}`, async ({ page }) => {
     test.setTimeout(300_000);
@@ -365,6 +365,84 @@ test("ST2-B4 sweep · every route, one fill under the bar", async ({ page }) => 
     if (p.length) bad.push(`${route}: ${p.join("; ")}`);
   }
   expect(bad).toEqual([]);
+});
+
+/* ════════════════════════════════════════════ PHASE 3 · C1 C2 ════════════════════════════════════════════ */
+
+/** C1: a one-page place renders exactly one tab, and it is current. */
+async function c1Problems(page: Page): Promise<string[]> {
+  const r = await readTabs(page);
+  if (r.tabs.length !== 1) return [`${r.tabs.length} tabs`];
+  return r.tabs[0].cur ? [] : ["the one tab is not current"];
+}
+const C1_BREAK = `.ws-fttabs { display: none !important; }`;
+
+for (const mode of ["rail", "pinned"] as const) {
+  test(`ST2-C1 · a one-page place shows one current tab — ${mode}`, async ({ page }) => {
+    test.setTimeout(180_000);
+    await sidebarMode(page, mode);
+    for (const route of ["/dashboard", "/account", "/plans"]) {
+      for (const size of SIZES) {
+        await openRoute(page, route, size);
+        console.log(`[ST2-C1 ${mode} ${size.width}] ${route}: red ${JSON.stringify(await proveLock(page, `C1 ${route}`, c1Problems, C1_BREAK))}`);
+      }
+    }
+  });
+}
+
+/** C2: no tab is cut short (an icon, a "+N" or a clipped name all count) or reaches the tools. */
+async function c2Problems(page: Page): Promise<string[]> {
+  const r = await readTabs(page);
+  if (!r.search || r.tabs.length < 2) return ["no strip or no search field"];
+  const out: string[] = [];
+  for (const t of r.tabs) {
+    if (t.mode === "ic" || t.mode === "more") out.push(`${t.id} is cut to ${t.mode}`);
+    if (t.sw > t.cw + 0.5) out.push(`${t.id}'s name is clipped (${t.sw} > ${t.cw})`);
+  }
+  const last = r.tabs[r.tabs.length - 1];
+  /* ⚠️ CLEAR BY THE FIT'S OWN 24px, NOT MERELY UNTOUCHED: without the fold the tabs still end inside that gap, so a bare
+     overlap test cannot see the fold removed (measured: red [] on every folded page) */
+  const gap = r.search.x - (last.x + last.w);
+  if (gap < 24 - 0.5) out.push(`${last.id} ends ${gap.toFixed(1)}px short of the search field (< 24)`);
+  for (let i = 1; i < r.tabs.length; i++) if (r.tabs[i].x < r.tabs[i - 1].x + r.tabs[i - 1].w - 0.5) out.push(`${r.tabs[i - 1].id} overlaps ${r.tabs[i].id}`);
+  return out;
+}
+/* the fold removed: the field keeps its full width while the fit still plans for the folded room */
+const C2_BREAK = `.ws-pagebar .ws-sfield[data-fold] { width: 168px !important; padding: 0 12px !important; gap: 10px !important; }
+  .ws-pagebar .ws-sfield[data-fold] .ws-sfield-l, .ws-pagebar .ws-sfield[data-fold] .ws-sfield-k { display: inline !important; }`;
+
+test("ST2-C2 · at 1100 wide no tab is cut or overlapped; search folds first; Log a query keeps its size — rail", async ({ page }) => {
+  test.setTimeout(400_000);
+  await sidebarMode(page, "rail");
+  const capW = async () => page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".ws-pagebar .ws-capb")].find((e) => e.getBoundingClientRect().width > 0)?.getBoundingClientRect().width ?? 0);
+  await openRoute(page, "/materials/letters", WIDE);
+  const capWide = await capW();
+  expect(capWide, "Log a query is drawn").toBeGreaterThan(0);
+  let reds = 0, folds = 0;
+  /* ⚠️ VERSIONS AND MANUSCRIPTS CARRY THE GUIDE PILL (≈232px) IN THE BAR, and at 1100 even the folded field leaves too
+     little room: the strip's old order of retreat then turns Manuscript to its icon. That is reported for a ruling, not
+     hidden: on those two pages the lock holds the ORDER (the field is folded before any tab is cut) and records what is
+     cut; on the six without the pill it holds C2 whole. */
+  const PILLED = new Set(["/manuscripts/versions", "/manuscripts"]);
+  for (const route of ["/materials/letters", "/queries/packages", "/manuscripts/comps", "/manuscripts/versions", "/manuscripts", "/queries", "/queries/responses", "/queries/analytics"]) {
+    await openRoute(page, route, { width: 1100, height: 800 });
+    if (PILLED.has(route)) {
+      const r = await readTabs(page);
+      const cut = r.tabs.filter((t) => t.mode === "ic" || t.mode === "more").map((t) => t.id);
+      const f = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".ws-sfield")].some((e) => e.getBoundingClientRect().width > 0 && e.hasAttribute("data-fold")));
+      if (cut.length) expect(f, `${route}: a tab is cut (${cut}) only once the field has folded`).toBe(true);
+      console.log(`[ST2-C2 1100] ${route} (guide pill): search ${f ? "folded" : "open"} · cut ${JSON.stringify(cut)} · clear by ${(r.search!.x - (r.tabs[r.tabs.length - 1].x + r.tabs[r.tabs.length - 1].w)).toFixed(1)}`);
+      continue;
+    }
+    const folded = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".ws-sfield")].some((e) => e.getBoundingClientRect().width > 0 && e.hasAttribute("data-fold")));
+    if (folded) folds++;
+    expect(Math.abs((await capW()) - capWide), `${route}: Log a query keeps its width`).toBeLessThan(0.5);
+    const red = await proveLock(page, `C2 ${route}`, c2Problems, C2_BREAK, false);
+    if (red.length) reds++;
+    console.log(`[ST2-C2 1100] ${route}: search ${folded ? "folded" : "open"} · red ${JSON.stringify(red)}`);
+  }
+  expect(folds, "the fold is exercised").toBeGreaterThan(0);
+  expect(reds, "C2 sees the fold removed on every page that folds").toBe(folds);
 });
 
 /* ════════════════════════════════════════════ shots ════════════════════════════════════════════ */
