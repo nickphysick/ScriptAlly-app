@@ -12,7 +12,10 @@ Worktree `/Users/nickphysick/ScriptAlly-st2`. Ref `design-refs/shell-tabs-v2.htm
 5. **"The sheet's corner … matching the top-right."** The top-right is 12px, not 14 (the ref's own `.sheettop` says `14px 12px`). The prompt keeps the top-right unchanged, so the build follows the prompt.
 6. **"Bar height (66px)."** The bar is 64px. Unchanged either way.
 7. **"Focus is a 2px pale-blue ring."** The prompt overrides this with the shell's existing focus colour, `--ink-terra`, and the build uses that.
-8. **Where the shell lives.** The rail, the tab strip and the navy headers are on the dev line, 1215 commits ahead of `main`. This work is built on the dev line as a short-lived branch (the prompt's instruction), not on `main` (CLAUDE.md's rule). It cannot land on `main` before the dev line does.
+8. **"Bold the current tab" (B2's mutation) moves nothing.** Special Elite has no bold, and Chrome's synthetic bold keeps the advance widths, so a bold-only current tab moves no tab (measured: red `[]`). The mutation adds the old current tab's 22px sides as well.
+9. **"Selecting each tab changes no tab's x" cannot be read from the tab alone.** On Versions and Manuscripts the bar carries the guide pill (≈232px), which moves the search field 228px left. At 1280, before the fold, that turned Manuscript to its icon. B2 at 1280 holds only because of Phase 3.
+10. **"The sheet's content fades in over 180ms" needs building.** It does not: `.stage-page-on` (AppShell, `pageIn` in index.css) already fades every page in over 180ms ease-out, with no motion under `prefers-reduced-motion`. It also rises 4px, which the prompt does not ask for (an item below).
+11. **Where the shell lives.** The rail, the tab strip and the navy headers are on the dev line, 1215 commits ahead of `main`. This work is built on the dev line as a short-lived branch (the prompt's instruction), not on `main` (CLAUDE.md's rule). It cannot land on `main` before the dev line does.
 
 ## Step 0 · Recon
 
@@ -60,3 +63,69 @@ Measured on the emulators at 1512 × 900 (`tests/e2e/st2Recon.measure.ts`, `st2P
 **Stop gates:** the ref is present with the right hash. The tab is drawn by two components (`TabStrip`, `FolderTab`), and SetupFrame can take `TabStrip` without touching a do-not-touch file. The bar's ink is `--ink-shell`, which `marketingTokens.test.ts:130` pairs with `--mk-ink-shell`. None fired.
 
 **Baseline** (functions deps linked so the harness can sign in): tsc 0 errors · build clean · Vitest 3 failed / 12612 passed across 2 failed files (`emuGuard.test.ts`, `firestoreTarget.test.ts`), both source scans of older scripts (`tests/e2e/cb21Emu.sh`, 25 `.mjs` seeds), all predating this branch.
+## Phase 1 · One ink, and the corner — `4f615409a`
+
+Files: `src/components/shell/inkShell.css` (rail ground, sheet radius), `src/components/shell/sidebarRail.css` (logo lift), `src/index.css` (the two lift tokens deleted), `tests/e2e/inkShell.measure.ts` (INK2's radius 0 → 14), `tests/e2e/shellTabsV2.measure.ts` (new), the Step 0 probes, the ref and `design-refs/.refhashes.json`.
+
+| Lock | red before (the mutation, same run) | green after |
+|---|---|---|
+| A1 one ink | rail bg transparent + gradient #232d3f→…; inset cream-4% shadow; rail top pixel 35,45,63; right edge 43,51,68 | rail `rgb(27,36,51)` = `.ws-main` = `--ink-shell`; no image, no shadow, no border; three pixels ink |
+| A2 corner | radius 0px; pixel 3px in reads the sheet (246,243,238 / 242,238,232) | 14px; pixel ink; top-right still 12 |
+| A3 logo | rail: centre 77.8 vs search 73.8 (4.0 low) | rail and pinned ±0 |
+
+Rail and pinned, 1512 × 900 and 1280 × 800, on `/queries` and Letters. Pinned A3 cannot go red: the pinned logo was 1.0px low, inside A3's own ±1, so restoring it is not a red there (asserted clean, recorded).
+
+## Phase 2 · The tabs — `ae4fb2a26`
+
+Files: `FolderTab.tsx` (`TabStrip`: one shape, two 10px SVG curves, no lanes, gap 2), `inkShell.css` (the strip's rules; the desktop `FolderTab` rules deleted; the per-route `--ink-tab`), `index.css` (`--ws-ground-cool`, `--ink-white-rgb`), `queryLetters.css` (reads `--ws-ground-cool`, value unchanged), `sheetLip.css` (clear at rest), `SetupFrame.tsx` and `onboarding.css` (`TabStrip` from 768px up; its own left fillet gone), and `qcv140.css` / `contactV19.css` / `contactV24.css` (the full-screen navy tab sets `--ink-tab` rather than the old fillet's geometry). Tests: ST2-B*, plus the re-pointed INK1/INK2/INK5/INK4(skip), onbV5 F3/A1, qcV137 E1, `headerSheet`, `tabStrip`, `accountScreens`.
+
+| Lock | red before (mutation, same run) | green after |
+|---|---|---|
+| B1 metrics | current tab at 19px | every tab 40 × 17px; first tab sheet + 24 (±1) |
+| B2 no shift | current tab bold + 22px sides: every tab right of it moves 4.0 and the current widens 4.0 | no tab moves or resizes > 0.5 across Letters → Manuscript and Query Centre → Analytics (1512; 1280 after Phase 3) |
+| B3 quiet | siblings on cream 14%: 2 (Querying) and 4 (Materials) seen | every resting tab alpha 0; population 2 and 4 |
+| B4 one fill | lip at `--ws-page`: Letters 242,238,232 vs tab 245,245,243; Dashboard 242,238,232 vs 251,249,245 | tab = the page 4px under the bar on `/queries`, Letters, Dashboard, Settings; and on all 23 routes (sweep, 1512 rail) |
+| B5 curves | left curve removed: corner reads ink 27,36,51 | both feet read the sheet's fill, ink 8px up; Comps current (3rd of 5) |
+
+All at 1512 × 900 and 1280 × 800, rail and pinned (B2 rail).
+
+## Phase 3 · One-page places and narrow windows — `043f5e638`
+
+Files: `FolderTab.tsx` (`planWithFold`, `onFold`), `WorkspaceShell.tsx` (folded state on `.ws-sfield[data-fold]`), `inkShell.css` (the 38px fold), `searchFold.test.ts`, ST2-C*.
+
+| Lock | red before | green after |
+|---|---|---|
+| C1 single | strip hidden: 0 tabs | Dashboard, Settings, Plans: one tab, current (rail + pinned, 1512 + 1280) |
+| C2 narrow (1100, rail) | fold removed: Manuscript ends 9.7px short of the field (< the fit's 24) on Letters, Packages, Comps | six pages whole, clear by ≥ 24; Querying needs no fold |
+
+- Search folds first. Before Phase 3 it never folded; at 1100 Materials now folds and keeps every name, and Querying keeps the open field.
+- The page fade already existed (false premise 10), so nothing changed there.
+
+## Every mount, now
+
+- **Workspace bar**, every place, rail and pinned: the new strip (shots: `shots/after/rail_*.png`, `pinned_queries.png`; before: `shots/before/`).
+- **Settings / Plans / Help / Dashboard**: one current tab (C1).
+- **SetupFrame, account screens** (`frame_account-signup.png`): the current tab ("Create account") then "Sign in" as a resting word. The order is the one `FolderTab` drew, current first.
+- **SetupFrame, onboarding** (`frame_setup-step.png`): one tab naming the step. **The "GETTING SET UP" group label is gone on the desktop** (an item below).
+- **Phones (< 768)**: unchanged. SetupFrame keeps `FolderTab` there, and the workspace bar is hidden.
+
+## The older suites (shellNavV3, inkShell, sidebarRail, qcV137, onbV5)
+
+These were run on the Phase 2 tree and on the base `ba5242436` in a disposable worktree, with nothing edited during either run. Base: 22 failed / 45 passed. Phase 2: 23 / 44.
+- **Red only with this change:** INK2 and onbV5 F3. Both are re-pointed and green.
+- **Green only with this change:** INK1.
+- **Red on both, for causes already on the base:** INK5 ("sidebar should be collapsed"), INK7 (search x differs on the guide-pill routes), INK8, INK10–INK14, INK16–INK19 (most are the manuscript switcher's strict-mode violation, two `.ws-ms-btn`), onbV5 A1/A3/K1/K2/E1 (A1: the offer headline is now "The hunt begins."), qcV137 E1, sidebarRail SR1.3/SR2.4, and INK4 (now skipped).
+- Where one of these asserted the old tab (INK5's flush edge, A1's selectors, E1's lip colour), the assertion is re-pointed. The older failure still stands ahead of it.
+
+## Gates
+
+At each commit: tsc 0 errors, `vite build` clean, Vitest no worse than the baseline (the same 3 failures in `emuGuard` / `firestoreTarget`). The full Vitest suite ran for Phase 2, and the touched specs for Phases 1 and 3.
+
+## For Nick to rule on
+
+1. **Versions at 1100 wide:** with the guide pill in the bar, the folded search still leaves too little room, and Manuscript drops to its icon (the old order of retreat). Manuscripts, with the same pill, fits. Pinned at 1100, Materials cannot keep five names at any search width (the sheet is 852 wide). Options: let it be, or hide the pill's label at narrow widths.
+2. **The onboarding tab's group label** ("Getting set up" / "Your account") is no longer drawn on the desktop. The one-shape tab has no place for it. Phones keep it.
+3. **The page fade's 4px rise:** the existing entry animation rises 4px as it fades. The ref fades only. Unchanged here.
+4. **INK4's golden** is skipped, not deleted. Delete `design-refs/shell/ink-folder-tab-golden-3x.png` and the test once v2 is accepted.
+5. **The BETA strip** shows above the desktop app on this line, though inkShell.css retires it on the desktop. Out of scope, but every shot carries it.
+6. **Tab order on the account screens** stays current-first, so the two swap places when you switch mode, as before. A fixed order ("Sign in", "Create account") would match "the row never moves".

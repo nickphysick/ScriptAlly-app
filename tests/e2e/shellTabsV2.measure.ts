@@ -460,4 +460,14 @@ test("ST2 shots · the top-left at 1512 × 900", async ({ page }) => {
       await page.screenshot({ path: `${SHOTS}/${mode}${route.replace(/\//g, "_")}.png`, clip: { x: 0, y: top, width: 900, height: 150 } });
     }
   }
+  /* SetupFrame's two forms, through the dev-only onboarding lab (the account screens; a set-up step) */
+  for (const [name, q] of [["account-signup", "s=signup"], ["setup-step", "s=frame&form=setup&flow=B&at=list"]]) {
+    await page.goto("/#/onb-lab?" + q, { waitUntil: "load" });
+    await page.reload({ waitUntil: "load" });
+    await page.waitForSelector("[data-setup-frame]");
+    await page.evaluate(() => (document as Document).fonts.ready);
+    await page.waitForTimeout(800);
+    const bar = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>(".sf .ws-pagebar")].find((e) => e.getBoundingClientRect().width > 0)?.getBoundingClientRect().top ?? 0);
+    await page.screenshot({ path: `${SHOTS}/frame_${name}.png`, clip: { x: 0, y: Math.max(0, bar - 4), width: 1000, height: 150 } });
+  }
 });
