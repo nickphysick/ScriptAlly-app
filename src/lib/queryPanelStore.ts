@@ -52,19 +52,6 @@ export function subscribeQueryPanel(f: () => void): () => void {
   return () => { subs.delete(f); };
 }
 
-/**
- * Query panel v2 §E — "Record a response" from the shell's menu, on any page: the panel opens in its acting look
- * at the picker ("Who replied?"), with the query that was open listed first. The Query Centre's component hosts
- * the panel, so it listens.
- */
-const pickerSubs = new Set<() => void>();
-export function openResponsePicker(): void { for (const f of [...pickerSubs]) f(); }
-export function subscribeResponsePicker(f: () => void): () => void {
-  pickerSubs.add(f);
-  return () => { pickerSubs.delete(f); };
-}
-/** true while something is listening: the shell falls back to the standalone drawer when nothing is */
-export const responsePickerHosted = (): boolean => pickerSubs.size > 0;
 
 /**
  * Record a response v1, Phase 2 — THE ONE DOOR. Every desktop "Record a response" comes here.

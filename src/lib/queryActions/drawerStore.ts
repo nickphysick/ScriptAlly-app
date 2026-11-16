@@ -79,8 +79,6 @@ export interface OpenRequest {
      */
     slot?: string;
   };
-  /** Query panel v2 §E — the picker lists this query first, under "The query you had open". */
-  hadOpen?: string;
   /**
    * The docked card is told when to step aside and when to come back: true while the drawer is on
    * screen, false the moment it is not — saved, cancelled, parked, or hidden by a failed save — so

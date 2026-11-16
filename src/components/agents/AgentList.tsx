@@ -1156,7 +1156,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         </div>
         {/* v25.1 C4 — the top bar's "+ Log a query" opens here, in the agent card's panel, and never leaves the page */}
         {logSeed && active ? (
-          <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)} dim onScrim={() => (logLeave.current ? logLeave.current() : setLogSeed(null))}>
+          <AgentCardPanel24 agentId="__log" onClose={() => setLogSeed(null)} onScrim={() => (logLeave.current ? logLeave.current() : setLogSeed(null))}>
             <ContactLogFlow seed={logSeed} activeMsId={scoped?.id ?? null} onClose={() => setLogSeed(null)} leaveRef={logLeave} />
           </AgentCardPanel24>
         ) : null}

@@ -172,10 +172,10 @@
 /* ── the drawer (portalled: `.d58-layer`) ──────────────────────────────────────────────────── */
 
 .d58-wash {
-  position: fixed; top: 0; right: 0; bottom: 0; left: var(--d58-main-l, 0px); z-index: 60;
-  background: rgba(242, 238, 232, 0.55);
-  -webkit-backdrop-filter: blur(2px); backdrop-filter: blur(2px);
-  opacity: 0; transition: opacity 0.2s ease;
+  /* Record a response v1, Phase 5 — the side panel's own dim (.45) over the whole desk, the sidebar and bar included */
+  position: fixed; top: 0; right: 0; bottom: 0; left: 0; z-index: 60;
+  background: rgba(28, 19, 15, 0.45);
+  opacity: 0; transition: opacity 0.24s ease;
 }
 .d58-drawer {
   position: fixed; top: 0; right: 0; bottom: 0; z-index: 61;

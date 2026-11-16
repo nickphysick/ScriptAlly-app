@@ -408,7 +408,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
   }
 
   return (
-    <div className={`qc1522-cp${tall ? " tall" : ""}`} data-qc1522="composer" data-j={j} role="group" aria-label={title}>
+    <div className={`qc1522-cp${tall ? " tall" : ""}`} data-qc1522="composer" data-j={j} data-dirty={dirty ? "" : undefined} role="group" aria-label={title}>
       <div className="qc1522-ch">
         {back ? <button type="button" className="qc1522-bk" data-qc1522="back" onClick={() => up(() => go(back))}>← Back</button> : null}
         <h3 data-qc1522="composer-title">{title}</h3>

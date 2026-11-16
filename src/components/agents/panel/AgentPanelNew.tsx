@@ -42,7 +42,7 @@ export const AgentPanelNew: React.FC<{ over?: boolean }> = ({ over = false }) =>
     return () => window.removeEventListener("resize", read);
   }, []);
   return (
-    <SidePanel label={edit ? "Edit agent" : "Add an agent"} step={false} dim className={`qsp apn${over ? " apn--over" : ""}${edit ? " apn--edit" : ""}`}
+    <SidePanel label={edit ? "Edit agent" : "Add an agent"} step={false} className={`qsp apn${over ? " apn--over" : ""}${edit ? " apn--edit" : ""}`}
       style={(top != null ? { "--qsp-top": `${top}px` } : {}) as React.CSSProperties}
       attrs={{ "data-ap": edit ? "panel-edit" : "panel-new", "data-ap-acting": edit ? "edit" : "new", "data-ap-over": over ? "drawer" : undefined }}>
       <div className="qad-root qad-root--panel is-open apn-actroot" data-ap="act" data-ap-act={edit ? "edit" : "new"}>

@@ -46,7 +46,7 @@ export const LogStagesPanel: React.FC<{ req: OpenRequest; onClose: () => void }>
   const ms = manuscripts.find((m) => m.id === msId) ?? null;
   if (!ms) return null;
   return (
-    <SidePanel label="Log a query" dim className="qsp" attrs={{ "data-laq": "panel" }} onScrim={() => (leaveRef.current ? leaveRef.current() : closeRef.current())}>
+    <SidePanel label="Log a query" className="qsp" attrs={{ "data-laq": "panel" }} onScrim={() => (leaveRef.current ? leaveRef.current() : closeRef.current())}>
       <LogStagesHost key={`${ms.id}:${req.agentId ?? ""}:${req.instance ?? 0}`} ms={ms} seedAgentId={req.agentId ?? null}
         seedPackageId={req.packageId ?? null} again={req.again ?? null} leaveRef={leaveRef} onClose={() => closeRef.current()}
         onLogged={(queryId, undo) => req.onSaved?.({ mode: "log", queryId, message: "Query logged", sub: "", undo })}

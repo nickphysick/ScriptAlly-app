@@ -157,7 +157,7 @@ export const RspPanel: React.FC<{
     ...r.history.spans.filter((s) => s.status !== QueryStatus.QUERIED && STEP_WORD[s.status]).map((s) => ({ status: s.status, ms: s.startMs })),
   ];
   return (
-    <SidePanel label={`${r.agentName}, answer`} step={acting} dim={acting} className="qsp rsn rsp5-layer"
+    <SidePanel label={`${r.agentName}, answer`} step={acting} className="qsp rsn rsp5-layer"
       style={{ ...(top != null ? { "--qsp-top": `${top}px` } : {}) } as React.CSSProperties}
       attrs={{ "data-rsn": "panel", "data-rsn-id": item.id, "data-group": item.group, "data-rsn-acting": acting ? drawerReq?.mode ?? "step" : undefined }}>
       <aside className="rsp5-drw" data-rsn="card" aria-label={r.agentName}>

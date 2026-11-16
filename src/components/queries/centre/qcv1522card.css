@@ -164,3 +164,5 @@
 /* Record a response v1, Phase 4 — the second line may wrap to two lines, and is never cut off with an ellipsis */
 .qc152 [data-qc1522="footer"] .qc152-rft span { white-space: normal; overflow: visible; text-overflow: clip; display: block; }
 .qc152 [data-qc1522="footer"] .qc152-rft b { white-space: normal; }
+/* Record a response v1, Phase 5 — the band's ‹ › at either end of the set */
+.qc152 .qc152-x:disabled { opacity: 0.35; cursor: default; }
