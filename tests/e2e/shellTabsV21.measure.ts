@@ -285,7 +285,9 @@ async function clickTab(page: Page, text: string) {
 /** G1: both modes, DOM and visual order "Create account", "Sign in"; switching moves no tab by more than 0.5. */
 async function g1Problems(page: Page): Promise<string[]> {
   const out: string[] = [];
-  await openFrame(page, "signup", WIDE);
+  /* ⚠️ NO RELOAD HERE: the frame is opened once by the test, and a reload would drop the mutation's stylesheet. Mode is
+     switched the way a person switches it, by the tab. */
+  if ((await frameTabs(page)).some((x) => x.sel === "tab" && x.cur && x.text === "Sign in")) await clickTab(page, "Create account");
   const read = async (label: string) => {
     const t = (await frameTabs(page)).filter((x) => x.sel === "tab");
     const dom = t.map((x) => x.text);
@@ -305,10 +307,12 @@ async function g1Problems(page: Page): Promise<string[]> {
     if (!u) { out.push(`${t.text} is gone after switching`); continue; }
     if (Math.abs(u.x - t.x) > 0.5 || Math.abs(u.w - t.w) > 0.5) out.push(`${t.text} moved: x ${t.x}→${u.x}, w ${t.w}→${u.w}`);
   }
+  await clickTab(page, "Create account");
   return out;
 }
 test("ST2.1-G1 · the desktop sign-in frame keeps Create account, Sign in in both modes, and switching moves no tab", async ({ page }) => {
   test.setTimeout(180_000);
+  await openFrame(page, "signup", WIDE);
   /* current-first restored, as far as a stylesheet can: the row reversed, so the current tab is always drawn... first
      in one mode, and the other mode's order flips — the visual half of the old behaviour */
   const red = await proveLock(page, "G1", g1Problems, `.sf [data-sf="tabs"] [data-shell="tabs"] { flex-direction: row-reverse !important; }`);
@@ -355,27 +359,28 @@ async function phoneTabs(page: Page) {
   }
   return out;
 }
+/* ⚠️ G3'S MUTATION IS A BUILD, NOT A STYLESHEET. On a phone the account frame draws only the current tab (the other one
+   and the group label are hidden, onboarding.css), so "the fixed order applied on phones" means the phone drawing the
+   desktop's fixed pair — a code change. ST21_G3_MUTANT=1 runs this lock against such a build (SetupFrame's phone branch
+   given the TabStrip with ACCOUNT_TABS, made in the measurement worktree and reverted) and expects it RED. */
+const G3_MUTANT = process.env.ST21_G3_MUTANT === "1";
 test("ST2.1-G3 · on a phone the sign-in frame's tabs are the baseline's", async ({ page }) => {
   test.skip(!!BASELINE, "baseline run");
   test.setTimeout(120_000);
   const base = JSON.parse(fs.readFileSync(G3_FILE, "utf8"));
-  const problems = async (p: Page) => {
-    const now = await phoneTabs(p);
-    const out: string[] = [];
-    for (const mode of ["signup", "signin"]) {
-      const a = JSON.stringify(base[mode]); const b = JSON.stringify(now[mode]);
-      if (!Array.isArray(base[mode]) || (base[mode] as unknown[]).length === 0) out.push(`the baseline has no ${mode} tabs`);
-      if (a !== b) out.push(`${mode}: ${b} ≠ baseline ${a}`);
-    }
-    return out;
-  };
-  /* the fixed order applied on phones: the sign-in screen's row reversed, so "Create account" leads there too */
-  const clean = await problems(page);
-  expect(clean, "G3 on the clean page").toEqual([]);
-  await page.addInitScript(() => { document.addEventListener("DOMContentLoaded", () => { const st = document.createElement("style"); st.textContent = `.sf [data-sf="tabs"] .ws-ftab, .sf [data-sf="tabs"] .sf-tabsin > * { flex-direction: row-reverse !important; }`; document.head.appendChild(st); }); });
-  const red = await problems(page);
-  expect(red.length, "G3 must see the fixed order applied on phones").toBeGreaterThan(0);
-  console.log(`[ST2.1-G3] red ${JSON.stringify(red).slice(0, 400)}`);
+  const now = await phoneTabs(page);
+  const out: string[] = [];
+  for (const mode of ["signup", "signin"]) {
+    const a = JSON.stringify(base[mode]); const b = JSON.stringify(now[mode]);
+    if (!Array.isArray(base[mode]) || (base[mode] as unknown[]).length === 0) out.push(`the baseline has no ${mode} tabs`);
+    if (a !== b) out.push(`${mode}: ${b} ≠ baseline ${a}`);
+  }
+  if (G3_MUTANT) {
+    console.log(`[ST2.1-G3 mutant] red ${JSON.stringify(out).slice(0, 600)}`);
+    expect(out.length, "G3 must see the fixed order applied on phones").toBeGreaterThan(0);
+  } else {
+    expect(out, "G3 on the clean page").toEqual([]);
+  }
 });
 
 /* ════════════════════════════════════ baseline and shots ════════════════════════════════════ */
