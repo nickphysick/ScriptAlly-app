@@ -107,4 +107,7 @@ some width. Not changed here (baked decision 4).
 
 ## Deploy
 
-See the end of this file once deployed.
+Branch `shell-tabs-v2-1`, pushed; stacked on the line dev served (`dev/msp1-st2-rar1` @ `7b98b65f8`, Record a response
+v1 over Manuscript spine v1 and shell tabs v2). Dev hosting deployed from a clean checkout of the pushed tip
+`db03fa563`: served `index-B8GmFPmc.js` checked before, **`index-BgrkJp8g.js`** built and served after (hash match).
+No prod deploy. Not merged to `main` (the shell exists only on the dev line).
