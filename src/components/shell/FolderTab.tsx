@@ -269,16 +269,24 @@ const STRIP_GAP = 2;
 export const SEARCH_W = 168;
 export const SEARCH_FOLD_W = 38;
 
+/** The guide pill folded to its icon (drawn in inkShell.css `.ws-pageslot[data-fold] .pck-pill`;
+ *  `searchFold.test.ts` holds the two equal). */
+export const PILL_FOLD_W = 38;
+
 /**
- * Shell tabs v2, Phase 3 — WHEN SPACE RUNS SHORT, SEARCH FOLDS FIRST. Given the room the strip would have beside the open
- * field and beside the folded one, the plan: if every tab keeps its name next to the open field, nothing folds;
- * otherwise the field folds and the strip is planned in the larger room (where the old order of retreat — icons, then
- * "+N" — still applies if even that is not enough). Pure, so it is unit-tested; `TabStrip` feeds it measured widths.
+ * Shell tabs v2 Phase 3, v2.1 Phase 1 — WHEN SPACE RUNS SHORT THE BAR GIVES UP ROOM IN ORDER: search folds to its icon,
+ * then the guide pill folds to its icon, and only then may a tab lose its name. `rooms[k]` is the room the strip would
+ * have with the first k controls folded (rooms[0]: nothing folded). The level is the first k at which every tab keeps
+ * its name; if none does, the last level, planned with the old order of retreat (icons, then "+N"). Pure, so it is
+ * unit-tested; `TabStrip` feeds it measured widths. Unfolding is the same reading as the window widens, so the pill's
+ * label comes back before the field's.
  */
-export function planWithFold(rest: number[], icon: number[], current: number, cur: number, more: number, roomOpen: number, roomFolded: number): { modes: StripMode[]; folded: boolean } {
-  const open = planStrip(rest, icon, current, cur, more, roomOpen);
-  if (open.every((m) => m === "cur" || m === "full")) return { modes: open, folded: false };
-  return { modes: planStrip(rest, icon, current, cur, more, roomFolded), folded: true };
+export function planWithFolds(rest: number[], icon: number[], current: number, cur: number, more: number, rooms: number[]): { modes: StripMode[]; level: number } {
+  for (let k = 0; k < rooms.length - 1; k++) {
+    const modes = planStrip(rest, icon, current, cur, more, rooms[k]);
+    if (modes.every((m) => m === "cur" || m === "full")) return { modes, level: k };
+  }
+  return { modes: planStrip(rest, icon, current, cur, more, rooms[rooms.length - 1]), level: rooms.length - 1 };
 }
 
 /**
@@ -309,9 +317,10 @@ export interface TabStripProps {
   onGo: (path: string) => void;
   /** The search field — the fit limit is 24px short of its left edge. */
   limitRef: React.RefObject<HTMLElement | null>;
-  /** The workspace bar only: `limitRef` is the search field, which may fold to its icon to keep the tabs named. The
-   *  strip reports whether it needs the fold; the bar draws it. */
-  onFold?: (folded: boolean) => void;
+  /** The workspace bar only: `limitRef` is the search field, which may fold to its icon to keep the tabs named, and
+   *  after it the guide pill in the bar's page slot. The strip reports the fold level it needs (0 none, 1 search,
+   *  2 search and the pill); the bar draws it. */
+  onFold?: (level: number) => void;
 }
 
 const PRO_TAG = <span className="ws-qpro ws-ftpro" data-shell="pro" aria-label="Pro">PRO</span>;
@@ -334,6 +343,8 @@ export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRe
   const moreRef = useRef<HTMLSpanElement>(null);
   const moreBtnRef = useRef<HTMLButtonElement>(null);
   const moreMenuRef = useRef<HTMLSpanElement>(null);
+  /* the guide pill's slot width when open, and which pill it was measured from */
+  const pillOpenRef = useRef<{ el: Element; w: number } | null>(null);
 
   const fit = useCallback(() => {
     const strip = stripRef.current;
@@ -353,13 +364,29 @@ export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRe
     const cur = w(`[data-ftm-cur="${tabs[curIdx]?.id}"]`);
     const more = w("[data-ftm-more]") || 58;
     let next: StripMode[];
-    if (onFold && limBox) {
-      /* ⚠️ THE FIELD'S RIGHT EDGE IS THE FIXED ONE (the bar's right group is flush right), so both rooms are read from it
-         and never from its left, which is where the fold itself moves it */
+    if (onFold && limBox && lim) {
+      /* ⚠️ THE FIELD'S RIGHT EDGE IS FIXED BY WHAT STANDS TO ITS RIGHT, so every room is read from it and never from its
+         left, which is where the fold itself moves it. The guide pill stands to its right: folding the pill moves the
+         field's right edge right by the width the pill gives up, so the rooms are read as if the pill were open
+         (`rightOpen`) or folded (`rightFolded`), whichever it is now. */
       const right = limBox.right - b.left;
-      const plan = planWithFold(rest, icon, curIdx, cur, more, right - SEARCH_W - LIMIT_GAP - left, right - SEARCH_FOLD_W - LIMIT_GAP - left);
+      const slot = lim.closest<HTMLElement>(".ws-bright")?.querySelector<HTMLElement>('[data-shell="page-slot"]') ?? null;
+      const pill = slot?.firstElementChild as HTMLElement | null | undefined;
+      const slotW = slot ? slot.getBoundingClientRect().width : 0;
+      const pillW = pill ? pill.getBoundingClientRect().width : 0;
+      const slotFolded = !!slot?.hasAttribute("data-fold");
+      /* the open pill's slot width, kept from the last time it was seen open (folded, its words are not laid out) */
+      if (pillOpenRef.current && pillOpenRef.current.el !== pill) pillOpenRef.current = null;
+      if (pill && !slotFolded && slotW > 0) pillOpenRef.current = { el: pill, w: slotW };
+      const openW = slotFolded ? (pillOpenRef.current?.w ?? slotW) : slotW;
+      const foldedW = slotFolded ? slotW : slotW - pillW + PILL_FOLD_W;
+      const rightOpen = right + (slotW - openW);
+      const rightFolded = right + (slotW - foldedW);
+      const rooms = [rightOpen - SEARCH_W - LIMIT_GAP - left, rightOpen - SEARCH_FOLD_W - LIMIT_GAP - left];
+      if (pill && slotW > 0) rooms.push(rightFolded - SEARCH_FOLD_W - LIMIT_GAP - left);
+      const plan = planWithFolds(rest, icon, curIdx, cur, more, rooms);
       next = plan.modes;
-      onFold(plan.folded);
+      onFold(plan.level);
     } else {
       next = planStrip(rest, icon, curIdx, cur, more, limR - LIMIT_GAP - left);
     }

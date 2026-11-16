@@ -67,7 +67,7 @@ import { SheetLip } from "./SheetLip";
 import { INK_THEME_COLOR } from "./inkTokens";
 import { registeredPageGuide, requestPageGuide, subscribePageGuide } from "../../lib/pageGuide";
 import { subscribeTourReplay, tourReplay as readTourReplay } from "../../lib/dashTour";
-import { setBarSlot } from "../../lib/barSlot";
+import { setBarSlot, setBarSlotFolded } from "../../lib/barSlot";
 import { claimTopbar, onTopbarClaim, releaseTopbar } from "../../lib/popoverLayer";
 import { AnchoredPortal, useAnchoredPopover } from "./useAnchoredPopover";
 import { HelpMenu } from "./HelpMenu";
@@ -783,8 +783,12 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
 
   /* the search field is both the palette's anchor (the host's ref) and the folder tab's fit limit */
   const searchFieldRef = useRef<HTMLButtonElement | null>(null);
-  /* shell tabs v2: the strip's fit says when the search must fold to its icon (TabStrip `onFold`) */
-  const [searchFolded, setSearchFolded] = useState(false);
+  /* shell tabs v2 / v2.1: the strip's fit says how far the bar must fold (TabStrip `onFold`): 1 folds search to its
+     icon, 2 also folds the guide pill in the page slot. The level is published for the pill's tooltip. */
+  const [foldLevel, setFoldLevel] = useState(0);
+  const searchFolded = foldLevel >= 1;
+  const slotFolded = foldLevel >= 2;
+  useEffect(() => { setBarSlotFolded(slotFolded); }, [slotFolded]);
   const setSearchRefs = useCallback((el: HTMLButtonElement | null) => {
     searchFieldRef.current = el;
     if (typeof searchAnchorRef === "function") searchAnchorRef(el);
@@ -1289,7 +1293,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   order, the current one risen as paper growing out of the sheet. It names the page; the
                   breadcrumb, the page-name fade and the bar's hairline are retired with it. */}
               {stripTabs.length > 0 && (
-                <TabStrip tabs={stripTabs} current={stripCurrent} onGo={go} limitRef={searchFieldRef} onFold={setSearchFolded} />
+                <TabStrip tabs={stripTabs} current={stripCurrent} onGo={go} limitRef={searchFieldRef} onFold={setFoldLevel} />
               )}
               <div className="ws-grow" data-shell="spacer" aria-hidden="true" />
               {/* the right: the workspace group (search · Log a query), then Help, set apart. Spacing is
@@ -1298,7 +1302,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                 {/* ⚠️ A 168px FIELD WHOSE RIGHT EDGE NEVER MOVES (fit rule 5). It opens the existing palette, the
                     same as ⌘K (bound in `usePalette`); the ref is still the palette's anchor.
                     ⚠️ SHELL TABS v2: WHEN THE TABS WOULD NOT KEEP THEIR NAMES, SEARCH FOLDS FIRST to a 38px icon button
-                    (`data-fold`, set by the strip's own fit — `planWithFold`); the tabs and "Log a query" keep their
+                    (`data-fold`, set by the strip's own fit — `planWithFolds`); the tabs and "Log a query" keep their
                     size. Its aria-label already names it, so the folded button loses nothing for a screen reader. */}
                 <span className="ws-appctl">
                   <button
@@ -1346,8 +1350,11 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                   */}
                 <span className="ws-helpwrap" ref={helpWrapRef}>
                   {/* v18.3 §F.1 — THE PAGE SLOT: a page may portal one control here, left of the "?" (`lib/barSlot`). The
-                      shell names no page; an empty slot takes no width. */}
-                  <span className="ws-pageslot" data-shell="page-slot" ref={setBarSlot} />
+                      shell names no page; an empty slot takes no width.
+                      ⚠️ SHELL TABS v2.1: IT FOLDS SECOND. When even the folded search leaves the tabs short, the slot's
+                      control (the guide pill) folds to a 38px icon (`data-fold`; inkShell.css), and only then may a tab
+                      lose its name. "Log a query" and Help never fold. */}
+                  <span className="ws-pageslot" data-shell="page-slot" data-fold={slotFolded ? "" : undefined} ref={setBarSlot} />
                   {/* ⚠️ "?" ALWAYS OPENS THE HELP MENU NOW (follow-up 2, 1c) — Help centre, the page guide
                       where the page has one, and Keyboard shortcuts (the existing ShortcutsSheet, through
                       its own event). It was a direct link to /help on every page without a guide. */}

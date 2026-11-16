@@ -30,7 +30,7 @@
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate } from "react-router-dom";
-import { useBarSlot } from "../../../lib/barSlot";
+import { useBarSlot, useBarSlotFolded } from "../../../lib/barSlot";
 import {
   type ChecklistItem, type DoneMap, cardPlace, dimPath, doneCount, holeFor, nextUndone, scrollDelta,
 } from "../../../lib/pageChecklist";
@@ -151,6 +151,8 @@ const replay = (el: HTMLElement | null, cls: string, ms: number) => {
 
 export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React.ReactElement | null {
   const slot = useBarSlot();
+  /* shell tabs v2.1: folded to its icon by the bar, the pill names itself in a tooltip */
+  const slotFolded = useBarSlotFolded();
   const navigate = useNavigate();
   const off = useGuidesOff();
   const { items, done, page, closeOnFocusOut = false } = p;
@@ -510,6 +512,7 @@ export function PageChecklist<K extends string>(p: PageChecklistProps<K>): React
       data-state={finished ? "done" : "live"}
       aria-haspopup="dialog" aria-expanded={open && !closing}
       aria-label={finished ? `${page} guide: learned` : `${page} guide, ${n} of ${items.length} done`}
+      title={slotFolded ? (finished ? `${page}: Learned ✓` : `${page} guide · ${n} of ${items.length}`) : undefined}
       onClick={() => { setNote(null); if (open && closing) cancelShrink(); else if (open) closePop(false); else { setSure(false); setOpen(true); } }}>
       <GuideRing n={n} total={items.length} size={18} stroke={2.7} colour={finished ? "#4b6151" : "#a2452a"} track="#ffffff" className="pck-ring" />
       {finished

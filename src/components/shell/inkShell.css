@@ -256,6 +256,17 @@
   .ws-pagebar .ws-sfield[data-fold] { width: 38px; padding: 0; gap: 0; justify-content: center; }
   .ws-pagebar .ws-sfield[data-fold] .ws-sfield-l,
   .ws-pagebar .ws-sfield[data-fold] .ws-sfield-k { display: none; }
+  /* SHELL TABS v2.1 · the guide pill folds second (`planWithFolds` level 2; the shell sets `data-fold` on the page slot):
+     a 38px square in the folded search's style — its ring and fill, radius 10 — with only the progress ring left; the
+     words go to its tooltip, its accessible name is unchanged, and it opens the same guide */
+  .ws-pagebar .ws-pageslot[data-fold] .pck-pill {
+    width: 38px; height: 38px; padding: 0; gap: 0; justify-content: center; border-radius: 10px;
+    background: rgba(var(--ink-cream-rgb), 0.07); box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.11);
+  }
+  .ws-pagebar .ws-pageslot[data-fold] .pck-pill:hover,
+  .ws-pagebar .ws-pageslot[data-fold] .pck-pill.open { background: rgba(var(--ink-cream-rgb), 0.11); }
+  .ws-pagebar .ws-pageslot[data-fold] .pck-pill .pck-pt,
+  .ws-pagebar .ws-pageslot[data-fold] .pck-pill .pck-pn { display: none; }
   .ws-sfield svg { flex: none; display: block; }
   .ws-sfield-l { font-family: inherit; flex: 1; text-align: left; }
   .ws-sfield-k {
