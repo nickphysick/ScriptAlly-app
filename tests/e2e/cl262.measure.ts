@@ -374,10 +374,15 @@ test.describe("CL262 locks", () => {
       const id1 = await page.locator("[data-cl262='panel']").getAttribute("data-agent-id");
       L.check("Discard goes on to the next agent", !!id1 && id1 !== id0, `${id0} → ${id1}`);
       await dirty();
+      /* Card offers v1 — while a section is edited the page is dimmed at the action level and a click on it is Escape, so
+         a click where another row sits lands on the scrim and asks; the pointer at the row's place, not the row's own click
+         (which waits for a row the scrim is covering) */
       const other = page.locator(`.aglist [data-cl26='row']:not([data-id='${id1}']) [data-cl26='name']`).first();
-      await other.click({ force: false }).catch(() => {});
+      await other.scrollIntoViewIfNeeded().catch(() => {});
+      const ob = await other.boundingBox().catch(() => null);
+      if (ob) await page.mouse.click(ob.x + Math.min(20, ob.width / 2), ob.y + ob.height / 2);
       await page.waitForTimeout(400);
-      L.check("another row asks", (await guardUp()) && (await page.locator("[data-cl262='panel']").getAttribute("data-agent-id")) === id1, "");
+      L.check("another row asks", !!ob && (await guardUp()) && (await page.locator("[data-cl262='panel']").getAttribute("data-agent-id")) === id1, String(!!ob));
       L.done(6);
     });
 
