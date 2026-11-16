@@ -48,7 +48,7 @@ besides the primary (over the CLAUDE.md threshold of 5); none were cleaned.
 | `e618d4cd1` | Phase 1: cloth spine at the foot of the collapsed rail | `design-refs/.refhashes.json`, `design-refs/shell/manuscript-spine-v1.html`, `src/components/shell/BarSwitcher.tsx`, `SidebarRail.tsx`, `WorkspaceShell.tsx`, `manuscriptSpine.css` (new), `sidebarRail.css` |
 | `a3ce30627` | Phase 2: the cloth label | `src/components/shell/BarSwitcher.tsx`, `SpineLabel.tsx` (new), `manuscriptSpine.css`, `spineFacts.test.ts` (new) |
 | `02b8daebb` | Phase 1 fix: the shelf line 10px above Feedback, as measured | `src/components/shell/manuscriptSpine.css` |
-| PHASE3-SHA | Phase 3: locks, measures and screenshots | `src/components/shell/manuscriptSpine.test.tsx` (new), `tests/e2e/manuscriptSpine.measure.ts` (new), this report, `readings.txt`, `shots/` |
+| `119c5b735` | Phase 3: locks, measures and screenshots | `src/components/shell/manuscriptSpine.test.tsx` (new), `tests/e2e/manuscriptSpine.measure.ts` (new), this report, `readings.txt`, `shots/` |
 
 The fix commit exists because the first measurement found Phase 1 wrong. Phase 1 had set the slot's
 `margin-bottom: -2px`, reasoning from Feedback's declared `.wsr-fb { margin: 12px 0 }`. On the rendered page that
@@ -205,4 +205,12 @@ cut-off row reads as the last one. The spine's title is cut to a few letters at 
 
 ## Dev deploy
 
-PLACEHOLDER-DEPLOY
+- **URL:** https://scriptally-dev.web.app (hosting only; no functions or rules changed)
+- **Build:** `index-266HX-Fg.js`, Sentry release `119c5b735` (the pushed tip of `manuscript-spine-v1`), deployed
+  16 Nov 13:34Z from a clean detached checkout in the scratchpad, `npm run build:dev`.
+- **Before:** dev served `index-BEFE4y63.js` (release `ba5242436`). That is the line this branch was cut from: a
+  rebuild of 72200ba17 differs from the served bundle only by the release stamp and the chunk names, and
+  ba5242436 → 72200ba17 changes no source (only reports). The served hash was checked against `index-BEFE4y63.js`
+  in the deploy command itself, and the served index read `index-266HX-Fg.js` afterwards.
+- **Not merged:** `manuscript-spine-v1` is pushed, and is not merged into the dev line's branch or into `main`.
+  The next session building on dev should stack on `manuscript-spine-v1`.
