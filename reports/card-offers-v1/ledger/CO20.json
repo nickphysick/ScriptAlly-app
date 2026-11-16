@@ -1,0 +1,32 @@
+[
+ {
+  "where": "+ website: the cursor is in the website field",
+  "ok": true,
+  "detail": "website"
+ },
+ {
+  "where": "+ website: the field is in view in the card",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "where": "+ website: Contact details is open",
+  "ok": true,
+  "detail": "contact"
+ },
+ {
+  "where": "+ email: the cursor is in the email field",
+  "ok": true,
+  "detail": "email"
+ },
+ {
+  "where": "+ email: the field is in view in the card",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "where": "+ email: Contact details is open",
+  "ok": true,
+  "detail": "contact"
+ }
+]

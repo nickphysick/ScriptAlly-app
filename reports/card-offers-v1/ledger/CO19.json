@@ -1,0 +1,17 @@
+[
+ {
+  "where": "its scrim is off: clear and inert",
+  "ok": true,
+  "detail": "{\"on\":\"\",\"bg\":\"rgba(28, 19, 15, 0.45)\",\"op\":\"0\",\"pe\":\"none\",\"z\":\"65\"}"
+ },
+ {
+  "where": "no agent-card scrim on the page",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "where": "the shell's bar is not dropped under a dim",
+  "ok": true,
+  "detail": "body"
+ }
+]

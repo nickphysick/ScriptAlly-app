@@ -27,6 +27,6 @@
  {
   "where": "a row click switches the card",
   "ok": true,
-  "detail": "co1-old"
+  "detail": "clicked · co1-old"
  }
 ]

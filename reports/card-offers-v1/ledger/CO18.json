@@ -1,0 +1,22 @@
+[
+ {
+  "where": "the action level while editing",
+  "ok": true,
+  "detail": "{\"on\":\"true\",\"bg\":\"rgba(28, 19, 15, 0.45)\",\"op\":\"1\",\"pe\":\"auto\",\"z\":\"60\"}"
+ },
+ {
+  "where": "the click is Escape: with changes, the rust guard",
+  "ok": true,
+  "detail": "guard"
+ },
+ {
+  "where": "rust #a2452a",
+  "ok": true,
+  "detail": "rgb(162, 69, 42)"
+ },
+ {
+  "where": "the card is still open",
+  "ok": true,
+  "detail": "open"
+ }
+]

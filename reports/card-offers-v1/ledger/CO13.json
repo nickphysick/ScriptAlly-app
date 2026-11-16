@@ -1,0 +1,32 @@
+[
+ {
+  "where": "the toast: Saved · 1 query’s dates moved",
+  "ok": true,
+  "detail": "Saved · 1 query’s dates movedUNDO✕"
+ },
+ {
+  "where": "the agent holds 6 weeks",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "where": "the stored nudge moved to the new window's",
+  "ok": true,
+  "detail": "14 Dec vs 14 Dec"
+ },
+ {
+  "where": "no writer's date was written",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "the card's next step: Queried · expect a reply by the new date",
+  "ok": true,
+  "detail": "Queried · expect a reply by 7 Dec."
+ },
+ {
+  "where": "the Query Centre: reply expected by the new date",
+  "ok": true,
+  "detail": "7 Dec vs 7 Dec"
+ }
+]

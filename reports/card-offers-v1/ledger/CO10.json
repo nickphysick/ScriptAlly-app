@@ -1,0 +1,62 @@
+[
+ {
+  "where": "co1-rt: the closed offer, under Taking queries",
+  "ok": true,
+  "detail": "offer"
+ },
+ {
+  "where": "co1-rt: Suggested on keep",
+  "ok": true,
+  "detail": "[\"keep\"]"
+ },
+ {
+  "where": "co1-rt: the choice starts on the suggestion",
+  "ok": true,
+  "detail": "keep"
+ },
+ {
+  "where": "co1-rt: the lead, the mock's",
+  "ok": true,
+  "detail": "Your query from 26 Oct is still open. Agents who close usually still answer the queries they already have."
+ },
+ {
+  "where": "co1-rt: \"Happens when you save.\"",
+  "ok": true,
+  "detail": "why"
+ },
+ {
+  "where": "co1-rt: the header is sand #f7efe3",
+  "ok": true,
+  "detail": "rgb(247, 239, 227)"
+ },
+ {
+  "where": "co1-old: the closed offer, under Taking queries",
+  "ok": true,
+  "detail": "offer"
+ },
+ {
+  "where": "co1-old: Suggested on close",
+  "ok": true,
+  "detail": "[\"close\"]"
+ },
+ {
+  "where": "co1-old: the choice starts on the suggestion",
+  "ok": true,
+  "detail": "close"
+ },
+ {
+  "where": "co1-old: the lead, the mock's",
+  "ok": true,
+  "detail": "Your query from 8 Sep is still open. It’s ten weeks old, past the date Olive usually replies by, and says no response means no."
+ },
+ {
+  "where": "co1-old: \"Happens when you save.\"",
+  "ok": true,
+  "detail": "why"
+ },
+ {
+  "where": "co1-old: the header is sand #f7efe3",
+  "ok": true,
+  "detail": "rgb(247, 239, 227)"
+ }
+]

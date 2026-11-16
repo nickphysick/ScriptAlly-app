@@ -1,0 +1,42 @@
+[
+ {
+  "where": "the bar: closes 1 query as no reply (the suggestion)",
+  "ok": true,
+  "detail": "closes 1 query as no reply"
+ },
+ {
+  "where": "the toast: Saved · query closed as no reply",
+  "ok": true,
+  "detail": "Saved · query closed as no replyUNDO✕"
+ },
+ {
+  "where": "the query is No Response",
+  "ok": true,
+  "detail": "No Response"
+ },
+ {
+  "where": "its nudge is removed",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "where": "the shared path wrote the closing row (closed_no_reply → No Response), in the log and the feed",
+  "ok": true,
+  "detail": "{\"a\":[{\"type\":\"No Response\",\"eventKey\":\"closed_no_reply\",\"resultingStatus\":\"No Response\"}],\"f\":[{\"eventKey\":\"closed_no_reply\",\"resultingStatus\":\"No Response\"}]}"
+ },
+ {
+  "where": "the agent is closed to queries",
+  "ok": true,
+  "detail": "Closed"
+ },
+ {
+  "where": "the card's next step: Closed · No response, Query again",
+  "ok": true,
+  "detail": "Closed · No response. · Query again"
+ },
+ {
+  "where": "on the Wall of no (the Responses page names Olive)",
+  "ok": true,
+  "detail": "BETA\n\nYou're using QueryHawk before it's finished. Your data is real and kept sa"
+ }
+]

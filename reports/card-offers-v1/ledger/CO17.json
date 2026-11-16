@@ -1,0 +1,27 @@
+[
+ {
+  "where": "one scrim under the card, at the light level",
+  "ok": true,
+  "detail": "{\"on\":\"light\",\"bg\":\"rgba(28, 19, 15, 0.16)\",\"op\":\"1\",\"pe\":\"none\",\"z\":\"60\"}"
+ },
+ {
+  "where": "visual only: pointer events pass through",
+  "ok": true,
+  "detail": "none"
+ },
+ {
+  "where": "under the card (z 60 < 61)",
+  "ok": true,
+  "detail": "60"
+ },
+ {
+  "where": "the row is reachable through the dim (what is under the pointer is the row)",
+  "ok": true,
+  "detail": "row"
+ },
+ {
+  "where": "the row click switched the card",
+  "ok": true,
+  "detail": "cv25-agent-13"
+ }
+]

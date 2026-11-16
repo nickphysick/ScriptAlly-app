@@ -1,0 +1,22 @@
+[
+ {
+  "where": "the safe note is shown",
+  "ok": true,
+  "detail": "safe"
+ },
+ {
+  "where": "its words",
+  "ok": true,
+  "detail": "✓Your full request with Fiona isn’t affected. Closing to new queries doesn’t change a request that’s already in progress, so nothing else moves."
+ },
+ {
+  "where": "powder #e6edf6, navy text",
+  "ok": true,
+  "detail": "colours"
+ },
+ {
+  "where": "no close offer, no options",
+  "ok": true,
+  "detail": "no options"
+ }
+]

@@ -1,0 +1,47 @@
+[
+ {
+  "where": "while the thumb is held the offer does not appear",
+  "ok": true,
+  "detail": "offer 0 · slider 6"
+ },
+ {
+  "where": "released: the offer appears under the slider",
+  "ok": true,
+  "detail": "weeks 6"
+ },
+ {
+  "where": "its header is the mock's",
+  "ok": true,
+  "detail": "You have 1 open query with Sarah. Move its dates too?QueriedSent 26 Oct · Murphy's Day Out"
+ },
+ {
+  "where": "reply expected: old struck through",
+  "ok": true,
+  "detail": "21 Dec vs 21 Dec"
+ },
+ {
+  "where": "reply expected: new is the new window's",
+  "ok": true,
+  "detail": "7 Dec vs 7 Dec"
+ },
+ {
+  "where": "nudge due: the stored nudge, old → new",
+  "ok": true,
+  "detail": "28 Dec → 14 Dec vs 28 Dec → 14 Dec"
+ },
+ {
+  "where": "Update its dates is the default",
+  "ok": true,
+  "detail": "update"
+ },
+ {
+  "where": "the choices are one radiogroup",
+  "ok": true,
+  "detail": "radios"
+ },
+ {
+  "where": "→ moves the choice and the focus to Keep",
+  "ok": true,
+  "detail": "keep · focus keep"
+ }
+]

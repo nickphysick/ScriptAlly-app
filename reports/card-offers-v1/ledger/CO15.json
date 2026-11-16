@@ -1,0 +1,32 @@
+[
+ {
+  "where": "the toast: Saved · your query keeps its dates",
+  "ok": true,
+  "detail": "Saved · your query keeps its datesUNDO✕"
+ },
+ {
+  "where": "the agent holds 6 weeks",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "where": "the old date is held on the query (stamped)",
+  "ok": true,
+  "detail": "21 Dec vs 21 Dec"
+ },
+ {
+  "where": "the nudge is left as it was",
+  "ok": true,
+  "detail": "2026-12-28T12:00:00.000Z vs 2026-12-28T12:00:00.000Z"
+ },
+ {
+  "where": "the card's next step keeps the old date",
+  "ok": true,
+  "detail": "Queried · expect a reply by 21 Dec."
+ },
+ {
+  "where": "the Query Centre keeps the old date",
+  "ok": true,
+  "detail": "21 Dec vs 21 Dec"
+ }
+]
