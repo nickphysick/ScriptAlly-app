@@ -24,14 +24,16 @@ const signin = () => renderPage(<Auth initialMode="login" />, "/").replace(/<!--
 const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").replace(/&#x27;/g, "'");
 
 describe("A1 the account frame: two tabs, a navy panel, one card", () => {
-  it("names the place in the tab and offers the other mode as the recessed tab", () => {
+  it("names the place in the current tab and offers the other mode as the tab beside it (shell tabs v2: the bar's TabStrip)", () => {
     const up = signup();
     expect(up).toContain('data-setup-frame="account"');
-    expect(up).toMatch(/<small class="ws-ftg">Your account<\/small><b class="ws-ftn"[^>]*>Create account<\/b>/);
-    expect(up).toMatch(/<button[^>]*class="ws-ftsib"[^>]*>Sign in<\/button>/);
+    expect(up).toMatch(/<button[^>]*class="ws-ftab ws-fttab is-cur"[^>]*aria-current="page"[^>]*><b class="ws-ftn"[^>]*>Create account<\/b>/);
+    expect(up).toMatch(/<button[^>]*class="ws-fttab"[^>]*data-tab="signin"[^>]*><span class="ws-fttl">Sign in<\/span><\/button>/);
+    /* one tab shape, words only: no group label on the desktop */
+    expect(up.slice(up.indexOf('<nav class="ws-fttabs"'), up.indexOf("</nav>"))).not.toContain("ws-ftg");
     const inn = signin();
     expect(inn).toMatch(/<b class="ws-ftn"[^>]*>Sign in<\/b>/);
-    expect(inn).toMatch(/<button[^>]*class="ws-ftsib"[^>]*>Create account<\/button>/);
+    expect(inn).toMatch(/<button[^>]*class="ws-fttab"[^>]*data-tab="signup"[^>]*><span class="ws-fttl">Create account<\/span><\/button>/);
   });
 
   it("no small mono label above the panel's heading", () => {

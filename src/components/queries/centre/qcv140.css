@@ -241,9 +241,8 @@
 /* ── the folder tab and the sheet's lip, pinned only, on this page only: navy, joined to the band (Contact list v19's
    rule, its own flag). `html[data-qc140-pinned]` is set by Queries.tsx while this list is on screen and pinned. ── */
 @media (min-width: 768px) {
-  html[data-qc140-pinned] .ws-ftab { background: #2a3a52; color: rgb(244, 238, 229); }
-  html[data-qc140-pinned] .ws-ftab .ws-ftg { color: rgba(244, 238, 229, 0.62); }
-  html[data-qc140-pinned] .ws-ftab .ws-ftfl { fill: #2a3a52; width: 14px; height: 14px; right: -13px; }
+  /* shell tabs v2: the tab and both its curves read `--ink-tab`, so the navy is set there — never the curves' geometry */
+  html[data-qc140-pinned] .ws-ftab { --ink-tab: #2a3a52; color: rgb(244, 238, 229); }
   html[data-qc140-pinned] .qc-wpg .wpg-scroll > .sheet-lip { background: #2a3a52; box-shadow: none; }
 }
 

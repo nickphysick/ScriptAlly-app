@@ -171,6 +171,202 @@ for (const mode of ["rail", "pinned"] as const) {
   }
 }
 
+/* ════════════════════════════════════════════ PHASE 2 · B1–B5 ════════════════════════════════════════════ */
+
+interface TabR { id: string; cur: boolean; x: number; w: number; top: number; bottom: number; h: number; font: string; bg: string; text: string; sw: number; cw: number; mode: string }
+async function readTabs(page: Page): Promise<{ tabs: TabR[]; win: { x: number; y: number; w: number } | null; bar: { y: number; b: number } | null; search: { x: number; r: number; w: number } | null; tools: number | null }> {
+  return page.evaluate(() => {
+    const vis = (e: Element | null) => !!e && (e as HTMLElement).getBoundingClientRect().width > 0;
+    const pick = (sel: string) => [...document.querySelectorAll<HTMLElement>(sel)].find(vis) ?? null;
+    const nav = pick('[data-shell="tabs"]');
+    const tabs = nav ? [...nav.querySelectorAll<HTMLElement>("[data-tab], .ws-ftmore")].map((t) => {
+      const r = t.getBoundingClientRect(); const s = getComputedStyle(t);
+      const label = t.querySelector<HTMLElement>(".ws-ftn, .ws-fttl");
+      return { id: t.dataset.tab ?? "more", cur: t.getAttribute("aria-current") === "page", x: r.left, w: r.width, top: r.top, bottom: r.bottom, h: r.height,
+        font: s.fontSize, bg: s.backgroundColor, text: (label?.textContent ?? "").trim(), sw: label ? label.scrollWidth : 0, cw: label ? label.clientWidth : 0,
+        mode: t.classList.contains("ws-ftmore") ? "more" : (t.dataset.mode ?? (t.classList.contains("is-cur") ? "cur" : "full")) };
+    }) : [];
+    const w = pick(".ws-window")?.getBoundingClientRect();
+    const b = pick(".ws-pagebar")?.getBoundingClientRect();
+    const sf = pick(".ws-sfield")?.getBoundingClientRect();
+    const br = pick(".ws-bright")?.getBoundingClientRect();
+    return { tabs, win: w ? { x: w.left, y: w.top, w: w.width } : null, bar: b ? { y: b.top, b: b.bottom } : null,
+      search: sf ? { x: sf.left, r: sf.right, w: sf.width } : null, tools: br ? br.left : null };
+  });
+}
+/** Park the pointer where it hovers nothing (the sheet's bottom-right), so "at rest" is at rest. */
+async function park(page: Page) { const v = page.viewportSize()!; await page.mouse.move(v.width - 30, v.height - 30); await page.waitForTimeout(200); }
+
+/** B1: every tab 40 tall, 17px; the first tab's left is the sheet's left + 24. */
+async function b1Problems(page: Page): Promise<string[]> {
+  const r = await readTabs(page);
+  if (!r.win || r.tabs.length === 0) return ["no tabs or no sheet"];
+  const out: string[] = [];
+  for (const t of r.tabs.filter((x) => x.mode !== "more")) {
+    if (Math.abs(t.h - 40) > 0.5) out.push(`${t.id} is ${t.h.toFixed(1)} tall`);
+    if (t.font !== "17px") out.push(`${t.id} sets ${t.font}`);
+  }
+  const first = r.tabs[0];
+  if (Math.abs(first.x - (r.win.x + 24)) > 1) out.push(`the first tab starts at ${(first.x - r.win.x).toFixed(1)} from the sheet, not 24`);
+  return out;
+}
+const B1_BREAK = `.ws-fttabs .ws-fttab.is-cur { font-size: 19px !important; }`;
+
+/** B3: no resting tab has a ground; at least one resting tab exists. */
+async function b3Problems(page: Page): Promise<string[]> {
+  await park(page);
+  const r = await readTabs(page);
+  const rest = r.tabs.filter((t) => !t.cur);
+  if (rest.length === 0) return ["no resting tab to read (population 0)"];
+  return rest.filter((t) => alphaOf(t.bg) > 0).map((t) => `${t.id} rests on ${t.bg}`);
+}
+const B3_BREAK = `.ws-fttabs .ws-fttab:not(.is-cur) { background: rgba(244, 238, 229, 0.14) !important; }`;
+
+/** The most common colour in a 1px row (patterns and doodles cannot outvote the ground). */
+async function rowMode(page: Page, x: number, y: number, w: number): Promise<RGB> {
+  const png = PNG.sync.read(await page.screenshot({ clip: { x: Math.round(x), y: Math.round(y), width: Math.round(w), height: 1 } }));
+  const n = new Map<string, number>();
+  for (let i = 0; i < png.width; i++) { const k = [png.data[i * 4], png.data[i * 4 + 1], png.data[i * 4 + 2]].join(","); n.set(k, (n.get(k) ?? 0) + 1); }
+  const best = [...n.entries()].sort((a, b) => b[1] - a[1])[0][0];
+  return best.split(",").map(Number) as RGB;
+}
+/** B4: the current tab's fill (read as a pixel inside it, clear of its name) equals the page 4px below the bar. */
+async function b4Problems(page: Page): Promise<string[]> {
+  await park(page);
+  const r = await readTabs(page);
+  const cur = r.tabs.find((t) => t.cur);
+  if (!cur || !r.win || !r.bar) return ["no current tab"];
+  const tabPx = await pixel(page, cur.x + 4, cur.top + cur.h - 6);
+  const out: string[] = [];
+  const parsed = parseRgb(cur.bg);
+  if (!parsed || !near(parsed, tabPx, 2)) out.push(`the tab's computed ${cur.bg} is not its own pixel ${fmt(tabPx)}`);
+  /* +4: inside where the lip lies — at rest the lip paints nothing, so this is the page's own ground. (Not deeper: the
+     Dashboard's ground is a gradient and has moved 2 levels by +16, which is the page, not a seam.) */
+  const under = await rowMode(page, r.win.x + 160, r.bar.b + 4, Math.min(400, r.win.w - 200));
+  if (!near(under, tabPx, 2)) out.push(`the page 4px under the bar reads ${fmt(under)}, the tab ${fmt(tabPx)}`);
+  return out;
+}
+const B4_BREAK = `.sheet-lip, .wpg-scroll > .sheet-lip { background: var(--ws-page) !important; }`;
+
+/** B5: just outside the current tab's bottom corners is the sheet's fill; 8px up, ink. */
+async function b5Problems(page: Page): Promise<string[]> {
+  await park(page);
+  const r = await readTabs(page);
+  const cur = r.tabs.find((t) => t.cur);
+  if (!cur || !r.bar) return ["no current tab"];
+  const ink = hexToRgb((await shell(page)).inkToken);
+  const fill = await pixel(page, cur.x + 4, cur.bottom - 6);
+  /* ⚠️ WHOLE DEVICE ROWS CLEAR OF THE SHEET'S EDGE: the bar can end on a fraction (the BETA strip above it is 41.8px), and
+     a row straddling that edge is a blend of ink and sheet. Two rows up, 1.5px out from the tab, sits well inside the
+     10px curve; the row 8px above it is clear of the curve's box. */
+  const yFoot = Math.floor(r.bar.b) - 2;
+  const out: string[] = [];
+  for (const [side, x] of [["left", Math.ceil(cur.x) - 2], ["right", Math.floor(cur.x + cur.w) + 1]] as const) {
+    const foot = await pixel(page, x, yFoot), up = await pixel(page, x, yFoot - 8);
+    if (!near(foot, fill, 3)) out.push(`${side}: the corner reads ${fmt(foot)}, not the sheet's ${fmt(fill)}`);
+    if (!near(up, ink, 3)) out.push(`${side}: 8px up reads ${fmt(up)}, not ink ${fmt(ink)}`);
+  }
+  return out;
+}
+const B5_BREAK = `.ws-fttabs .ws-fttab .ws-ftfl-l { display: none !important; }`;
+
+for (const mode of ["rail", "pinned"] as const) {
+  for (const size of SIZES) {
+    test(`ST2-B1 B3 B4 B5 · metrics, quiet neighbours, one fill, curves — ${mode} at ${size.width}`, async ({ page }) => {
+      test.setTimeout(300_000);
+      await sidebarMode(page, mode);
+      const log: string[] = [];
+      let b4Reds = 0;
+      for (const route of ["/queries", "/materials/letters", "/dashboard", "/account"]) {
+        await openRoute(page, route, size);
+        log.push(`B1 ${route}: red ${JSON.stringify(await proveLock(page, `B1 ${route}`, b1Problems, B1_BREAK))}`);
+        if (route !== "/dashboard" && route !== "/account") log.push(`B3 ${route}: red ${JSON.stringify(await proveLock(page, `B3 ${route}`, b3Problems, B3_BREAK))}`);
+        /* the lip's old tone differs from the ground only where a page paints its own (Letters, the Dashboard) */
+        const red = await proveLock(page, `B4 ${route}`, b4Problems, B4_BREAK, false);
+        if (red.length) b4Reds++;
+        log.push(`B4 ${route}: red ${JSON.stringify(red)}`);
+      }
+      expect(b4Reds, "B4 must see the lip's old tone on Letters and the Dashboard").toBeGreaterThanOrEqual(2);
+      /* B5 with a middle tab current: Comps, third of five */
+      await openRoute(page, "/manuscripts/comps", size);
+      const r = await readTabs(page);
+      const ci = r.tabs.findIndex((t) => t.cur);
+      expect(ci > 0 && ci < r.tabs.length - 1, `a middle tab is current (${ci} of ${r.tabs.length})`).toBe(true);
+      log.push(`B5 comps: red ${JSON.stringify(await proveLock(page, "B5 comps", b5Problems, B5_BREAK))}`);
+      console.log(`[ST2-B ${mode} ${size.width}]\n  ` + log.join("\n  "));
+    });
+  }
+}
+
+/** B2: selecting each tab in turn moves no tab's x or width by more than 0.5. Clicks the real tabs (navigation only). */
+async function b2Readings(page: Page, ids: string[]): Promise<Map<string, { x: number; w: number }[]>> {
+  const seen = new Map<string, { x: number; w: number }[]>();
+  for (const id of ids) {
+    await page.locator(`[data-shell="tabs"] [data-tab="${id}"]`).filter({ visible: true }).first().click();
+    await page.waitForTimeout(900);
+    await park(page);
+    const r = await readTabs(page);
+    expect(r.tabs.find((t) => t.cur)?.id, `clicking ${id} makes it current`).toBe(id);
+    console.log(`  B2 ${id} current: search ${r.search?.x.toFixed(0)}, tools ${r.tools?.toFixed(0)}, tabs ${r.tabs.map((t) => `${t.id}:${t.mode}@${t.x.toFixed(0)}w${t.w.toFixed(0)}`).join(" ")}`);
+    for (const t of r.tabs) seen.set(t.id, [...(seen.get(t.id) ?? []), { x: t.x, w: t.w }]);
+  }
+  return seen;
+}
+function b2Problems(seen: Map<string, { x: number; w: number }[]>): string[] {
+  const out: string[] = [];
+  if (seen.size < 2) out.push(`population ${seen.size}`);
+  for (const [id, xs] of seen) {
+    const dx = Math.max(...xs.map((v) => v.x)) - Math.min(...xs.map((v) => v.x));
+    const dw = Math.max(...xs.map((v) => v.w)) - Math.min(...xs.map((v) => v.w));
+    if (dx > 0.5) out.push(`${id} moves ${dx.toFixed(2)}px`);
+    if (dw > 0.5) out.push(`${id} changes width by ${dw.toFixed(2)}px (${xs.map((v) => v.w.toFixed(0)).join("/")})`);
+  }
+  return out;
+}
+/* ⚠️ "BOLD THE CURRENT TAB" ALONE CANNOT BE SEEN: the typewriter face has no bold, and Chrome's synthetic bold keeps
+   every advance width — measured, the bold-only mutation moved nothing (red []). The mutation adds the old current
+   tab's 22px sides, the size change a "risen" current tab really made. */
+const B2_BREAK = `.ws-fttabs .ws-fttab.is-cur { font-weight: 700 !important; padding-left: 22px !important; padding-right: 22px !important; }`;
+
+/* ⚠️ AT 1280 B2 NEEDS PHASE 3's SEARCH FOLD: Versions and Manuscripts carry a guide pill in the bar's right group, the
+   search moves 228px left, and without the fold Manuscript's tab drops to its icon on those two pages. */
+for (const size of SIZES) {
+  test(`ST2-B2 · no tab moves when another becomes current — rail at ${size.width}`, async ({ page }) => {
+    test.setTimeout(300_000);
+    await sidebarMode(page, "rail");
+    const log: string[] = [];
+    for (const start of ["/materials/letters", "/queries"]) {
+      await openRoute(page, start, size);
+      const ids = (await readTabs(page)).tabs.filter((t) => t.mode !== "more").map((t) => t.id);
+      expect(ids.length, `${start} has tabs to click`).toBeGreaterThan(1);
+      const clean = b2Problems(await b2Readings(page, ids));
+      expect(clean, `B2 ${start} clean`).toEqual([]);
+      await addCss(page, B2_BREAK);
+      const broken = b2Problems(await b2Readings(page, ids));
+      await dropBreaks(page);
+      log.push(`B2 ${start}: red ${JSON.stringify(broken)}`);
+      expect(broken.length, `B2 ${start} must see a bold current tab`).toBeGreaterThan(0);
+    }
+    console.log(`[ST2-B2 ${size.width}]\n  ` + log.join("\n  "));
+  });
+}
+
+/** B4 across every route at 1512 (rail): the tab and the page under the bar are one colour everywhere. */
+test("ST2-B4 sweep · every route, one fill under the bar", async ({ page }) => {
+  test.setTimeout(900_000);
+  await sidebarMode(page, "rail");
+  const ROUTES = ["/dashboard", "/queries", "/queries/responses", "/queries/analytics", "/queries/packages", "/materials/letters",
+    "/manuscripts/comps", "/manuscripts/versions", "/manuscripts", "/todo", "/todo/corkboard", "/agents", "/agents/discover",
+    "/goals", "/import", "/account", "/account/profile", "/account/preferences", "/account/emails", "/account/plan", "/account/data", "/plans", "/help"];
+  const bad: string[] = [];
+  for (const route of ROUTES) {
+    await openRoute(page, route, WIDE);
+    const p = await b4Problems(page);
+    if (p.length) bad.push(`${route}: ${p.join("; ")}`);
+  }
+  expect(bad).toEqual([]);
+});
+
 /* ════════════════════════════════════════════ shots ════════════════════════════════════════════ */
 
 test("ST2 shots · the top-left at 1512 × 900", async ({ page }) => {

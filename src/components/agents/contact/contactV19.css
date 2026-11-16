@@ -216,9 +216,8 @@
    corner. `html[data-cl19-pinned]` is set by the page while it is on screen and pinned, and removed otherwise, so
    no other page's tab is touched and unpinning leaves no navy curve behind. ── */
 @media (min-width: 768px) {
-  html[data-cl19-pinned] .ws-ftab { background: #2a3a52; color: rgb(244, 238, 229); }
-  html[data-cl19-pinned] .ws-ftab .ws-ftg { color: rgba(244, 238, 229, 0.62); }
-  html[data-cl19-pinned] .ws-ftab .ws-ftfl { fill: #2a3a52; width: 14px; height: 14px; right: -13px; }
+  /* shell tabs v2: the tab and both its curves read `--ink-tab`, so the navy is set there — never the curves' geometry */
+  html[data-cl19-pinned] .ws-ftab { --ink-tab: #2a3a52; color: rgb(244, 238, 229); }
   html[data-cl19-pinned] .agl-wpg .wpg-scroll > .sheet-lip { background: #2a3a52; box-shadow: none; }
 }
 

@@ -11,8 +11,9 @@
  *
  * ⚠️ THE GEOMETRY IS THE APP SHELL'S, BY REUSE AND NOT BY COPY. From 768px up this renders the
  * shell's own class names in the shell's own nesting (`.ws-app` › `.ws-panel` › `.ws-pin` ›
- * `.ws-logo`, and `.ws-main` › `.ws-pagebar` + `.ws-winwrap` › `.ws-window`) and mounts the real
- * `FolderTab`, so the sidebar's width, the brand row's box, the tab, and the sheet's inset and
+ * `.ws-logo`, and `.ws-main` › `.ws-pagebar` + `.ws-winwrap` › `.ws-window`) and mounts the bar's
+ * own `TabStrip` (shell tabs v2; `FolderTab` on a phone, where onboarding.css styles it alone),
+ * so the sidebar's width, the brand row's box, the tab, and the sheet's inset and
  * radius are the declarations in `inkShell.css` — there is no second number to keep in step, and
  * lock F1 measures them against `/dashboard` in the same run. `onboarding.css` adds only what the
  * shell has no word for (the steps, the two-form layout, the phone arrangement).
@@ -20,8 +21,11 @@
  * ⚠️ IT REPLACES `OnboardingHeader`, `OnboardingSpine` AND THE FULL-SCREEN OVERLAY, all deleted in
  * the commit that added this. No ScriptAlly artwork is drawn anywhere in the journey.
  *
- * The frame, the sidebar and the tab do not animate between steps; the tab's name changes in place
- * (`FolderTab`'s own 90ms swap). Only the sheet's contents fade.
+ * The frame, the sidebar and the tab do not animate between steps; the tab's name changes in place.
+ * Only the sheet's contents fade.
+ *
+ * ⚠️ ON THE DESKTOP THE GROUP LABEL IS NOT DRAWN (shell tabs v2: one tab shape, words only). `group`
+ * still reaches the phone's `FolderTab`, which prints it.
  */
 
 import React, { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -30,7 +34,7 @@ import "../shell/primitives.css";
 import "../shell/workspaceShell.css";
 import "../shell/inkShell.css";
 import "./onboarding.css";
-import { FolderTab, TabSibling } from "../shell/FolderTab";
+import { FolderTab, TabSibling, TabStrip, type StripTab } from "../shell/FolderTab";
 import { APP_MARK, artUrl } from "../../lib/appArt";
 import { BETA_MODE, BETA_PILL } from "../../lib/beta";
 import { planLine } from "../../lib/shellSidebar";
@@ -168,6 +172,11 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
   const siblings: TabSibling[] = otherTab
     ? [{ id: otherTab.id, label: otherTab.label, path: otherTab.id, icon: null }]
     : [];
+  /* the desktop's tabs: the current page, then the other mode's (the order FolderTab always drew) */
+  const stripTabs: StripTab[] = [
+    { id: "__cur", label: name, short: name, path: "__cur", icon: null },
+    ...siblings.map((sb) => ({ id: sb.id, label: sb.label, short: sb.label, path: sb.path, icon: null })),
+  ];
   const title = (manuscriptTitle ?? "").trim();
   /* plan rules v1: the dev lab is the one caller that passes `user`; it states paid Pro or Free as a fixture */
   const plan = planLine({ basis: user?.plan === UserPlan.PRO ? "pro" : "free", pro: user?.plan === UserPlan.PRO, prompts: user?.plan !== UserPlan.PRO, trialEndsMs: null });
@@ -230,22 +239,22 @@ export const SetupFrame: React.FC<SetupFrameProps> = ({
               (where there is no sidebar to hold it). */}
           <div className="sf-barbrand"><Brand /></div>
           <div className="sf-tabs" data-sf="tabs">
-            {/* The tab's left-hand fillet. The app's tab is flush to the sheet's left edge and needs
-                none; here it can stand off that edge, so the join gets the mirror of the shell's own
-                drawn path (an SVG, as there — never a pseudo-element or a gradient). */}
-            <svg className="sf-ftfl-l" viewBox="0 0 12 12" preserveAspectRatio="none" width="13" height="12" aria-hidden="true" focusable="false">
-              <path d="M12 0V12H0A12 12 0 0 0 12 0Z" />
-            </svg>
-            {/* `FolderTab` fits its siblings between its own left edge and `limitRef`, collapsing the
-                ones that do not fit. On the account screens the second tab must STAY — it is the only
-                way to the other mode — so there the limit is this box's own width, and on a phone
-                the box is wider than the row and scrolls sideways. */}
+            {/* The tabs fit between their own left edge and `limitRef`, giving way as the bar's do. On the
+                account screens the second tab must STAY — it is the only way to the other mode — so there
+                the limit is this box's own width, and on a phone the box is wider than the row and scrolls
+                sideways. From 768px up this is the bar's own `TabStrip` (both curves are its own, so the
+                frame draws none); on a phone, `FolderTab`, which onboarding.css styles alone. */}
             <div className="sf-tabsin">
-              <FolderTab group={group} name={name} siblings={siblings} onGo={(id) => onTab?.(id)}
-                         limitRef={form === "account" ? noLimit : exitRef} />
+              {isMobile ? (
+                <FolderTab group={group} name={name} siblings={siblings} onGo={(id) => onTab?.(id)}
+                           limitRef={form === "account" ? noLimit : exitRef} />
+              ) : (
+                <TabStrip tabs={stripTabs} current="__cur" onGo={(id) => { if (id !== "__cur") onTab?.(id); }}
+                          limitRef={form === "account" ? noLimit : exitRef} />
+              )}
             </div>
           </div>
-          {/* Hidden, not removed: `FolderTab` measures its room against this box, and the bar's row
+          {/* Hidden, not removed: the tabs measure their room against this box, and the bar's row
               keeps its height from it on a phone. */}
           <button type="button" className="sf-exit" ref={exitRef} onClick={onExit} data-sf="exit"
                   disabled={hideExit || undefined} style={hideExit ? { visibility: "hidden" } : undefined}
