@@ -225,8 +225,15 @@ export function useWsCore(now: number) {
       db: db as never, snoozeFor: (d) => snoozeTask(sel, d), waitCeiling: limitFor(sel).ceiling,
       said: (m) => flash(m), nudgedOn: facts.nudgedOn, suggestion: sel.kind === "quiet" ? quietSuggestion(facts) : null,
     }, {
-      /* Record a response v1 — the query's card and its composer, on "Asked for the partial" (the phone keeps its drawer) */
-      openPartial: () => { if (!sel.query) return; if (responseHosted()) { openResponse({ queryId: sel.query.id, reply: "req" }); return; } openQueryDrawer({ mode: "resp", queryId: sel.query.id, preset: { respType: "partial" } } as never); },
+      /* phone: the drawer's own response journey, on the partial, as before */
+      openPartial: () => { if (sel.query) openQueryDrawer({ mode: "resp", queryId: sel.query.id, preset: { respType: "partial" } } as never); },
+      /* Record a response v1 — on the desktop "They did reply" opens the query's card and its composer; its save tells
+         this desk. Null where the card is not hosted (the phone), which keeps its own tiles. */
+      openReply: responseHosted() ? () => {
+        if (!sel.query) return;
+        const first = sel.agent ? (sel.agent.name ?? "").trim().split(/\s+/)[0] || "The agent" : "The agent";
+        openResponse({ queryId: sel.query.id, onSaved: () => flash(`${first}’s reply is on the card`) });
+      } : null,
       openCard: () => { if (sel.agent) openAgentCard(sel.agent.id, { tab: "send" as never, focus: "materials" as never }); },
       openOther: (() => {
         const c = sel.item.card;

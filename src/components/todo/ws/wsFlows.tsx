@@ -360,7 +360,7 @@ const REPLIES: { k: "pass" | "partial" | "full" | "offer"; label: string; status
   { k: "offer", label: "They made an offer", status: QueryStatus.OFFER },
 ];
 
-function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
+function quietFlow(ctx: FlowCtx, openPartial: () => void, openReply: (() => void) | null): Flow {
   const { t, A, set, today } = ctx;
   const q = t.query!;
   const act = A.act as QuietAct | undefined;
@@ -421,6 +421,17 @@ function quietFlow(ctx: FlowCtx, openPartial: () => void): Flow {
         return { head: "No rush.", msg: `${t.first}’s query stays open. You’ll see this again on ${fmt(until!)} if nothing comes in.`, undo: undo ?? undefined,
           snack: { msg: `Waiting on ${t.first}`, sub: `back on your list ${fmt(until!)}` } };
       },
+    };
+  }
+  /* Record a response v1 — on the desktop a reply is recorded in ONE place, the query's card and its composer
+     (lib/qc1522Write), the same box as on every other page: this desk opens it, and the task leaves the list on its own.
+     The phone (no card to open: `openReply` is null) keeps the tiles below and their save. */
+  if (act === "replied" && openReply) {
+    return {
+      ...base, questions,
+      sentence: <>{t.first} replied. Record what they said on {t.first}’s card.</>,
+      door: { label: `Record what ${t.first} said →`, open: openReply },
+      commit: null,
     };
   }
   if (act === "replied") {
@@ -600,12 +611,12 @@ function materialsFlow(ctx: FlowCtx): Flow {
   };
 }
 
-export function buildFlow(ctx: FlowCtx, doors: { openPartial: () => void; openCard: () => void; openOther: (() => void) | null }): Flow {
+export function buildFlow(ctx: FlowCtx, doors: { openPartial: () => void; openCard: () => void; openOther: (() => void) | null; openReply?: (() => void) | null }): Flow {
   const k = ctx.t.kind;
   if ((k === "send" || k === "rr") && ctx.t.query) return sendFlow(ctx);
   if (k === "offer" && ctx.t.query) return offerFlow(ctx);
   if (k === "nudge" && ctx.t.query) return nudgeFlow(ctx);
-  if (k === "quiet" && ctx.t.query) return quietFlow(ctx, doors.openPartial);
+  if (k === "quiet" && ctx.t.query) return quietFlow(ctx, doors.openPartial, doors.openReply ?? null);
   if (k === "fix" && ctx.t.agent) return fixFlow(ctx, doors.openCard);
   if (k === "batch" && ctx.t.query) return materialsFlow(ctx);
   /* the one-query materials row is filled in on the desk the same way, and is the last of its kind */
