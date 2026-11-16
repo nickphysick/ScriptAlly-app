@@ -9,7 +9,7 @@
  *    "Record a response" opens the query drawer's own picker (report §1).
  */
 import { test, type Page } from "@playwright/test";
-import { openCl24, openQc149, shot } from "./cl251Lib";
+import { openCl24, shot } from "./cl251Lib";
 
 const ON = process.env.CL251_SHOTS === "1";
 const T = { timeout: 8000 };
@@ -60,14 +60,6 @@ for (const w of [1512, 1280]) test(`CL251 screens @ ${w}`, async ({ page }) => {
   await openCl24(page, vp);
   await page.locator("[data-cl24='add']").first().click(T); await page.waitForTimeout(1200);
   await shot(page, "09-add-agent-header-only-1512");
-  /* 05–08 — Recording response, on the Query Centre */
-  await openQc149(page, vp);
-  await page.locator("[data-qc149='record']").first().click(T); await page.waitForTimeout(1200);
-  await shot(page, "05-record-who-1512");
-  await page.locator("[data-qc149f='who-item']").first().click(T); await page.waitForTimeout(1300);
-  await shot(page, "06-record-say-1512");
-  await page.locator("[data-qc149c='resp-opt'][data-k='partial']").first().click(T); await page.waitForTimeout(500);
-  await shot(page, "07-record-partial-1512");
-  await page.locator("[data-qc149c='resp-opt'][data-k='pass']").first().click(T); await page.waitForTimeout(500);
-  await shot(page, "08-record-pass-1512");
+  /* 05–08 (Recording response via QcWhoReplied149) are RETIRED by Record a response v1 (16 Nov): see
+     recordResponse1.measure.ts for the card-frame picker's screenshots */
 });

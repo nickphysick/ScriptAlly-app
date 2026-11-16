@@ -17,9 +17,6 @@ import { SidePanel } from "../shell/SidePanel";
 import { askDrawerToLeave, currentDrawerRequest } from "../../lib/queryActions/drawerStore";
 import "./queryPanelHost.css";
 
-/** The panel's id while it holds only the response picker and no query yet (Query panel v2 §E). */
-export const PICKER_PANEL_ID = "__pick";
-
 export const QueryPanelHost: React.FC<{
   id: string;
   /** which page opened it: "queries" (the list, `?q`), or another page through the store */

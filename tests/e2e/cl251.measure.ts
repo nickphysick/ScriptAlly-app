@@ -179,15 +179,8 @@ test("CL251-B1 B2 B3 · the headers: Logging new query, Recording response and i
       B2.check(`${where} ${k} line`, h?.line === RECORD[k], `${k}: "${h?.line?.slice(0, 50)}…"`);
     }
   };
-  await openQc149(page, vp);
-  await page.locator("[data-qc149='record']").first().click(T).catch(() => {});
-  await page.waitForTimeout(1200);
-  const who = await head(page, "[data-qc149f='who']");
-  B2.check("Who replied population", !!who, `Who replied ${who ? "open" : "missing"}`);
-  B2.check("Who replied", who?.title === "Recording response" && who.line == null && who.imgs === 0, `title "${who?.title}" line "${who?.line}"`);
-  await page.locator("[data-qc149f='who-item']").first().click(T).catch(() => {});
-  await page.waitForTimeout(1300);
-  await recordLines("via Who replied");
+  /* "Who replied?" (QcWhoReplied149) is RETIRED by Record a response v1 (16 Nov): the card-frame picker is measured by
+     recordResponse1.measure.ts (R2–R5). The respond mode read below is from a query card. */
   /* from a query card */
   await openQc149(page, vp);
   await page.locator(".qc138-sheet [data-qcv='row']").first().click(T).catch(() => {});

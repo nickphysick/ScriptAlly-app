@@ -173,3 +173,8 @@
 .qc152 .qc152-band { position: relative; }
 .qc152 .qc152-band > .qcm-fade { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
 .qc152 .qc152-band > :not(.qcm-fade) { position: relative; z-index: 1; }
+/* Record a response v1 — "← Back to {first}" on the band, when the card took an agent card's place */
+.qc152 .qc152-bkto { all: unset; cursor: pointer; margin-right: 4px; padding: 4px 10px; border-radius: 999px; font: 400 13.5px var(--sp-serif) !important; letter-spacing: 0; text-transform: none; background: rgba(255, 255, 255, 0.16); }
+.qc152 .qc152-band:not(.dk) .qc152-bkto { background: rgba(28, 19, 15, 0.07); }
+.qc152 .qc152-bkto:hover { filter: brightness(1.15); }
+.qc152 .qc152-bkto:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }

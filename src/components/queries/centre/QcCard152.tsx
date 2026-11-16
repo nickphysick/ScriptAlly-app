@@ -116,6 +116,8 @@ export interface QcCard152Props {
   /** Record a response v1, Phase 5 — the grid is behind the dim now, so the band carries ‹ › through the set the card was
    *  opened from (the ← → keys' set). Absent, or a set of one: no arrows. */
   stepCard?: { at: number; of: number; go: (d: 1 | -1) => void } | null;
+  /** Record a response v1 — opened from an agent's card, which this card replaced: the band's way back to it */
+  backTo?: { label: string; onBack: () => void } | null;
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
@@ -390,6 +392,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         </div>
         ) : (
         <div className={`qc152-band${dark ? " dk" : ""}`} data-qc152="band" style={{ background: bandBg, color: head.fg }}>
+          {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={p.backTo.onBack}>← {p.backTo.label}</button> : null}
           <span data-qc152="band-word">{d.foot ? bnd.word : r.status === QueryStatus.OFFER ? "OFFER" : STATE_BAND[d.state]}</span>
           {d.state !== "closed" && r.dayN != null ? <span className="qc152-day" data-qc152="day">Day {r.dayN}</span> : <span className="qc152-day" />}
           {p.stepCard && p.stepCard.of > 1 ? <>

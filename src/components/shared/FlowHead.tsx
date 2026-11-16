@@ -8,8 +8,8 @@
  *
  *   Log a query (QcLogStages), every stage            "Logging new query" + the stage's line
  *   Add an agent (AgentEditMode, panel, new agent) "Adding new agent" + its line
- *   Record a response (QcWhoReplied149, then QcQueryCard149's respond mode)
- *                                                    "Recording response"; a line once an answer is picked
+ *   Record a response (QcQueryCard149's respond mode, the phone's) "Recording response"; a line once an answer is picked
+ *   (on the desktop it is the v152.2 card's composer, after QcWhoReplied: Record a response v1)
  *
  * ⚠️ THE LINE FADES IN WHEN IT CHANGES (keyed by its text): 250ms, from 3px up; none under reduced motion.
  * ⚠️ The h3 is forced to the brand serif by brand.tsx: two classes and !important take the typewriter back.

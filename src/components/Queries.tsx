@@ -200,7 +200,7 @@ import { QcList132, QcList132Skeleton, QcDeadEnd } from "./queries/centre/QcList
 /* §2 (v65.6) — `QcOpenCardSkeleton` lost its only consumer when the rail stopped docking the card;
    the page's own loading cover holds the frame now. It survives for its spec and for a future use. */
 import { QcOpenCard } from "./queries/centre/QcOpenCard";
-import { QueryPanelHost, PICKER_PANEL_ID } from "./queries/QueryPanelHost";
+import { QueryPanelHost } from "./queries/QueryPanelHost";
 import { claimRightPanel, closeQueryPanel, currentQueryPanel, openQueryPanel, openQueryPanelFromAgent, queryPanelBack, releaseRightPanel, responseSaved, subscribeQueryPanel, subscribeResponse, subscribeRightPanel, type PanelBack, type PanelOrigin, type ResponseRequest } from "../lib/queryPanelStore";
 import { QC155_LOAD, useQcLoad } from "./queries/centre/useQcLoad";
 import { padLiveQueries } from "./queries/centre/qcReviewAid";
@@ -2495,14 +2495,8 @@ export const Queries: React.FC<{
     pendingStepRef.current = null;
     openQueryDrawer(p);
   });
-  /**
-   * Query panel v2 §E — "RECORD A RESPONSE" FROM THE SHELL'S MENU OPENS THE PANEL AT THE PICKER. With a query open
-   * the picker steps into its panel and lists it first; with none, the panel opens for the picker alone
-   * (`picking`), and becomes the chosen query's when one is picked.
-   */
-  const [picking, setPicking] = useState(false);
-  /* Record a response v1, Phase 5 — the shell's picker subscription (and its "query you had open") is retired: the shell
-     opens "Who replied?" through `openResponse`, below; the top bar is behind the dim while a card is open. */
+  /* Record a response v1 — the shell's picker in the panel (Query panel v2 §E: `picking`, its "query you had open", the
+     old QueryPicker stepped into the panel's slot) is retired: the shell opens "Who replied?" through `openResponse`. */
   /**
    * Record a response v1, Phase 2 — THE ONE DOOR (lib/queryPanelStore `openResponse`). Every desktop "Record a response"
    * arrives here: with a query, that query's card opens with its composer at "reply" (a closed one's at "reopen"); with
@@ -2516,8 +2510,6 @@ export const Queries: React.FC<{
   /* ruling 2 — the serif's real italic, asked for by the app alone (this component is mounted on every workspace
      page and on no public one) */
   useEffect(() => { ensureAppSerifItalic(); }, []);
-  /* the picker's panel goes when its journey does, unless a query took it over */
-  useEffect(() => subscribeDrawer((r) => { if (!r) setPicking(false); }), []);
 
   /* ── v11 · THE SENTENCE'S STATE: one filter, one manuscript scope, one sort ──
      These REPLACE the toolbar's model (turn / status ticks / facets / needs-overdue / sort key) on
@@ -6406,6 +6398,7 @@ export const Queries: React.FC<{
       /* Record a response v1, Phase 5 — the band's ‹ ›: the set the card was opened from, else the list's order */
       const set1522 = cardSetRef.current?.includes(q.id) ? cardSetRef.current : order;
       const at1522 = set1522.indexOf(q.id);
+      card1522.backTo = fromAgent ? { label: `Back to ${fromAgent.first}`, onBack: backToAgent } : null;
       card1522.stepCard = fromAgent ? null : {
         at: at1522, of: set1522.length,
         go: (d) => {
@@ -6850,7 +6843,7 @@ export const Queries: React.FC<{
     );
   })() : null;
   const pipStepOpen = useSyncExternalStore(subscribeDrawer, () => { const r = currentDrawerRequest(); return !!r && isPracticeId(r.queryId) && !!r.panel; }, () => false);
-  const pipShown = !!pipPanel && !((qcOpenCardNode && cardQueryId) || picking || qcFlow);
+  const pipShown = !!pipPanel && !((qcOpenCardNode && cardQueryId) || qcFlow);
   const guideFlowShown = pipFlow ?? guideFlow;
   useEffect(() => { setGuideWalk(!!guideFlowShown || !!walk); }, [guideFlowShown, walk]);
 
@@ -6862,10 +6855,10 @@ export const Queries: React.FC<{
    */
   const queryPanelOn = qmPhone
     ? !!(pipShown || (extPanel && qcOpenCardNode && cardQueryId))
-    : !!(pipShown || (qcOpenCardNode && cardQueryId) || picking || qcFlowNode);
+    : !!(pipShown || (qcOpenCardNode && cardQueryId) || qcFlowNode);
   const queryPanelHost = queryPanelOn ? (
-    <QueryPanelHost id={qcFlowNode && qcFlow ? `__${qcFlow.kind}` : pipShown ? PIP_ID : qcOpenCardNode && cardQueryId ? cardQueryId : PICKER_PANEL_ID} from={extPanel && !pipShown ? extPanel.from : "queries"}
-      step={qcFlowNode ? false : pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb || (picking && !(qcOpenCardNode && cardQueryId))}
+    <QueryPanelHost id={qcFlowNode && qcFlow ? `__${qcFlow.kind}` : pipShown ? PIP_ID : cardQueryId ?? ""} from={extPanel && !pipShown ? extPanel.from : "queries"}
+      step={qcFlowNode ? false : pipShown ? pipStepOpen : (qaOpen && qaPanel) || !!correcting || !!deskVerb}
       /* Log a query v1.2 — a press on the dimmed page runs the staged journey's leave check. Record a response v1 — on
          "Who replied?" it closes; on the card it is the Escape key while something is being entered there (the composer's
          discard strip, the edit layer's ask) and closes the card otherwise */
