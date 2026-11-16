@@ -48,8 +48,9 @@ describe("the tokens", () => {
     expect(ink).toContain(".ws-app:has([data-header-sheet]:not([data-stage-off] *)) .ws-main { --ink-tab: var(--ws-sheet); }");
     expect(ink).not.toContain("sheet-mode");
     expect(read("src/components/shell/AppShell.tsx")).toContain('data-stage-off={active ? undefined : ""}');
-    expect(ink).toMatch(/\.ws-ftab \{[^}]*background: var\(--ink-tab\);/);
-    expect(ink).toMatch(/\.ws-ftfl \{[^}]*fill: var\(--ink-tab\);/);
+    /* shell tabs v2: the current tab and both its curves */
+    expect(ink).toMatch(/\.ws-fttabs \.ws-fttab\.is-cur,\s*\.ws-ftmeasure \.ws-fttab\.is-cur \{[^}]*background: var\(--ink-tab\);/);
+    expect(ink).toMatch(/\.ws-fttab \.ws-ftfl,\s*\.ws-fttab \.ws-ftfl-l \{[^}]*fill: var\(--ink-tab\);/);
     /* the page sheet itself is still the page's colour */
     expect(ink).toMatch(/\.ws-window \{[^}]*background: var\(--ink-sheet\);/);
   });

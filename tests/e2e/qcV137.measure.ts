@@ -154,7 +154,9 @@ test("E1 · lip: a 12px sticky lip in the folder tab's colour on every page, and
     const r = await readSheet(page);
     const w = `${route} ${vp.width}`, b = base[`${route}@${vp.width}`];
     L.check("E1", `${w} lip`, !!r.lip && r.lip.firstChild && r.lip.pos === "sticky" && near(r.lip.h, 12, 0.5) && near(r.lip.top, 0, 0.5) && near(r.lip.w, r.lip.scW, 1), r.lip ? `${r.lip.pos} · ${r.lip.w.toFixed(0)} × ${r.lip.h} at ${r.lip.top} in .${r.scroller}` : "no lip");
-    L.check("E1", `${w} the tab's colour`, !!r.lip && r.lip.bg === r.tabBg && r.tabBg !== "" && r.tabBg !== "rgba(0, 0, 0, 0)", `${r.lip?.bg} vs tab ${r.tabBg}`);
+    /* RE-POINTED (shell tabs v2): at rest the lip paints nothing, so the page's own ground meets the bar (ST2-B4); it
+       takes the tab's colour once content scrolls under it (the "scrolled" check below) */
+    L.check("E1", `${w} clear at rest`, !!r.lip && r.lip.bg === "rgba(0, 0, 0, 0)" && r.tabBg !== "" && r.tabBg !== "rgba(0, 0, 0, 0)", `${r.lip?.bg} at rest · tab ${r.tabBg}`);
     L.check("E1", `${w} inert`, !!r.lip && r.lip.pe === "none" && r.lip.hidden === "true" && r.lip.shadow === "none" && r.lip.z < 60, `${r.lip?.pe} · aria-hidden ${r.lip?.hidden} · ${r.lip?.shadow} · z ${r.lip?.z}`);
     /* the first child's top and the page's h1 are both held; on /queries the h1 is Part A's new title, so only the first child is */
     L.check("E1", `${w} nothing moved`, !!b && near(r.first, b.first, 1) && (route === "/queries" || b.h1 === null || near(r.h1, b.h1, 1)), `first content ${r.first.toFixed(1)} (was ${b?.first.toFixed(1)}) · h1 ${r.h1?.toFixed(1)} (was ${b?.h1?.toFixed(1)})`);
@@ -166,9 +168,9 @@ test("E1 · lip: a 12px sticky lip in the folder tab's colour on every page, and
         sc.style.scrollBehavior = "auto"; sc.scrollTop = 300;
         await new Promise((res) => requestAnimationFrame(() => requestAnimationFrame(res)));
         const lip = sc.querySelector<HTMLElement>(":scope > .sheet-lip");
-        return lip ? { top: lip.getBoundingClientRect().top - win.getBoundingClientRect().top, shadow: getComputedStyle(lip).boxShadow, y: sc.scrollTop } : null;
+        return lip ? { top: lip.getBoundingClientRect().top - win.getBoundingClientRect().top, shadow: getComputedStyle(lip).boxShadow, bg: getComputedStyle(lip).backgroundColor, y: sc.scrollTop } : null;
       });
-      L.check("E1", `${w} scrolled`, !!s && near(s.top, 0, 0.5) && s.shadow !== "none" && s.y > 2, s ? `at ${s.top} · ${s.shadow.slice(0, 40)}` : "no lip");
+      L.check("E1", `${w} scrolled`, !!s && near(s.top, 0, 0.5) && s.shadow !== "none" && s.bg === r.tabBg && s.y > 2, s ? `at ${s.top} · ${s.bg} vs tab ${r.tabBg} · ${s.shadow.slice(0, 40)}` : "no lip");
     } else L.check("E1", `${w} scrolled`, true, `this page does not scroll at ${vp.height} tall (${r.canScroll}px): not exercised`);
   }
   L.done(30);

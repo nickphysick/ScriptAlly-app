@@ -21,7 +21,9 @@
   .wsr button { margin: 0; font: inherit; line-height: normal; appearance: none; -webkit-appearance: none; text-transform: none; letter-spacing: normal; }
 
   /* ── the hawk, and the expand control that takes its place on hover ── */
-  .wsr-lgo { flex: none; height: 34px; display: flex; justify-content: center; position: relative; }
+  /* ⚠️ THE LOGO SHARES THE BAR'S CENTRE LINE (shell tabs v2): `top: -4px` lifts the mark (and its toggle) onto the
+     search field's centre, measured 4.0px low before. Relative, so nothing under it moves. ST2-A3. */
+  .wsr-lgo { flex: none; height: 34px; display: flex; justify-content: center; position: relative; top: -4px; }
   .wsr-home {
     display: grid; place-items: center; width: 40px; height: 40px; margin-top: -3px; padding: 0;
     border: 0; border-radius: 10px; background: transparent; cursor: pointer; transition: background-color 0.14s ease;
@@ -165,7 +167,9 @@
   /* the shadow belongs to the floating sidebar only; pinned, it sits flat beside the page */
   .ws-panel.sr-float { box-shadow: 14px 0 34px rgba(0, 0, 0, 0.3); }
   .ws-panel.sr-wide:not(.sr-float) { box-shadow: none; }
-  .ws-panel .ws-pin .ws-logo { padding: 0 0 0 4px; gap: 6px; }
+  /* the pinned sidebar's logo row onto the same centre line (ST2-A3): it sat 1px low, not 4 like the rail's (measured
+     74.8 against the search field's 73.8); `.ws-logo` is already relative */
+  .ws-panel .ws-pin .ws-logo { padding: 0 0 0 4px; gap: 6px; top: -1px; }
   .ws-panel .ws-pin .ws-logo .ws-bwm { font-size: 17.5px; }
   .ws-acts { display: inline-flex; gap: 2px; flex: none; margin-left: auto; }
   .ws-panel .ws-acts .sb-toggle, .ws-pinbtn {

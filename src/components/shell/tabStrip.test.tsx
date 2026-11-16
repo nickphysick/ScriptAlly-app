@@ -84,9 +84,10 @@ describe("shell nav v3 — the tab strip", () => {
     expect(tabsOf(render("/your-notes"))).toHaveLength(1);
   });
 
-  it("SNV3-T4 the current tab carries the right fillet always, the left one only when it is not first", () => {
+  it("SNV3-T4 (shell tabs v2) the current tab carries both curves wherever it stands — the first tab is inset 24px now", () => {
     const fil = (h: string) => ({ r: (strip(h).match(/class="ws-ftfl"/g) ?? []).length, l: (strip(h).match(/class="ws-ftfl-l"/g) ?? []).length });
-    expect(fil(render("/materials/letters"))).toEqual({ r: 1, l: 0 });
+    expect(fil(render("/materials/letters"))).toEqual({ r: 1, l: 1 });
+    expect(fil(render("/dashboard"))).toEqual({ r: 1, l: 1 });
     expect(fil(render("/manuscripts/comps"))).toEqual({ r: 1, l: 1 });
     expect(fil(render("/manuscripts"))).toEqual({ r: 1, l: 1 });
   });
@@ -109,15 +110,15 @@ describe("planStrip — names, then icons, then +N; resting tabs give way from t
     expect(planStrip(rest, icon, 2, 140, 58, 2000)).toEqual(["full", "full", "cur", "full", "full"]);
   });
   it("turns resting tabs to icons from the right first", () => {
-    /* full: 100+120+140+110+130 + 4×6 = 624; at 560 the last becomes an icon (531) */
+    /* full: 100+120+140+110+130 + 4×2 = 608; at 560 the last becomes an icon (515) */
     expect(planStrip(rest, icon, 2, 140, 58, 560)).toEqual(["full", "full", "cur", "full", "ic"]);
     expect(planStrip(rest, icon, 2, 140, 58, 480)).toEqual(["full", "full", "cur", "ic", "ic"]);
   });
   it("every resting tab is an icon before any leaves for +N, and +N takes them from the right", () => {
-    /* all icons: 4×37 + 140 + 4×6 = 312 */
-    expect(planStrip(rest, icon, 2, 140, 58, 312)).toEqual(["ic", "ic", "cur", "ic", "ic"]);
-    /* one short: the rightmost leaves for +N — 3×37 + 140 + 58 + 4×6 = 333 > 311, so two leave: 2×37 + 140 + 58 + 3×6 = 290 */
-    expect(planStrip(rest, icon, 2, 140, 58, 311)).toEqual(["ic", "ic", "cur", "hid", "hid"]);
+    /* all icons: 4×37 + 140 + 4×2 = 296 */
+    expect(planStrip(rest, icon, 2, 140, 58, 296)).toEqual(["ic", "ic", "cur", "ic", "ic"]);
+    /* one short: the rightmost leaves for +N — 3×37 + 140 + 58 + 4×2 = 317 > 295, so two leave: 2×37 + 140 + 58 + 3×2 = 278 */
+    expect(planStrip(rest, icon, 2, 140, 58, 295)).toEqual(["ic", "ic", "cur", "hid", "hid"]);
     expect(planStrip(rest, icon, 2, 140, 58, 260)).toEqual(["ic", "hid", "cur", "hid", "hid"]);
   });
   it("the current tab is never an icon and never hidden, whatever the room", () => {

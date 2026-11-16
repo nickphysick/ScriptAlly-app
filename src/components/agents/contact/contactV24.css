@@ -297,9 +297,8 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
   .clv-group[data-v24][data-full] > .cl24-hd { display: none; }
   html[data-cl24-full] .agl-wpg .wpg-scroll { overflow: hidden !important; }
   /* the folder tab and the sheet's lip join the navy band (the Query Centre's own pinned rule, this page's flag) */
-  html[data-cl24-full] .ws-ftab { background: #2a3a52; color: rgb(244, 238, 229); }
-  html[data-cl24-full] .ws-ftab .ws-ftg { color: rgba(244, 238, 229, 0.62); }
-  html[data-cl24-full] .ws-ftab .ws-ftfl { fill: #2a3a52; width: 14px; height: 14px; right: -13px; }
+  /* shell tabs v2: the tab and both its curves read `--ink-tab`, so the navy is set there — never the curves' geometry */
+  html[data-cl24-full] .ws-ftab { --ink-tab: #2a3a52; color: rgb(244, 238, 229); }
   .cl24-ab {
     position: fixed; z-index: 50; top: var(--cl24-top, 80px); left: var(--ink-sheet-l, 0px); right: var(--ink-sheet-r, 0px); bottom: var(--ink-sheet-b, 0px);
     display: flex; flex-direction: column; overflow: hidden; border-radius: 0 12px 12px 12px; background: #f2eee8; color: #1c130f;

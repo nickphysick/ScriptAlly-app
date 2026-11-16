@@ -245,7 +245,8 @@ test.describe("OB1", () => {
       expect(s.steps, `flow ${flow || "none"}`).toEqual(steps);
       expect(s.current.length, "exactly one current").toBe(1);
       expect(s.tab, "the tab names the current step").toBe(s.current[0]);
-      expect(s.group).toBe("Getting set up");
+      /* shell tabs v2: on the desktop the frame's tab is the bar's own TabStrip — one shape, words only, no group label */
+      expect(s.group, "no group label on the desktop").toBeUndefined();
     }
   });
 
@@ -295,7 +296,8 @@ test.describe("OB1", () => {
       const read = () => page.evaluate(() => ({
         raised: document.querySelector(".sf .ws-ftn")?.textContent,
         group: document.querySelector(".sf .ws-ftg")?.textContent,
-        other: Array.from(document.querySelectorAll(".sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib")).map((e) => e.textContent),
+        /* shell tabs v2: the desktop's other tab is a TabStrip resting tab; the phone keeps FolderTab's sibling */
+        other: Array.from(document.querySelectorAll('.sf [data-shell="tabs"] .ws-fttab:not(.is-cur), .sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib')).map((e) => e.textContent),
         panel: getComputedStyle(document.querySelector(".sf-offer")!).backgroundColor,
         title: document.querySelector(".sf-offerh")?.textContent,
         email: (document.querySelector("#au-email") as HTMLInputElement).value,
@@ -303,7 +305,7 @@ test.describe("OB1", () => {
       }));
       await page.fill("#au-email", "writer@example.com");
       const up = await read();
-      expect(up.group).toBe("Your account");
+      expect(up.group).toBe(vp.width < 768 ? "Your account" : undefined);
       expect(up.raised).toBe("Create account");
       expect(up.other, `@${vp.width}: exactly one recessed tab`).toEqual(["Sign in"]);
       expect(up.panel).toBe("rgb(45, 58, 80)");
@@ -312,7 +314,7 @@ test.describe("OB1", () => {
       expect(up.old, "the preview and the segmented control are gone").toBe(0);
       /* Phone last screens v1 (1B): below 768px the sibling tab is hidden and the in-card link is the way
          between the two (PLS1 L1 holds the one tab). */
-      await page.click(vp.width < 768 ? '.sf [data-sf="to-signin"]' : ".sf .ws-ftsibs:not(.ws-ftmeasure) .ws-ftsib");
+      await page.click(vp.width < 768 ? '.sf [data-sf="to-signin"]' : '.sf [data-shell="tabs"] .ws-fttab:not(.is-cur)');
       await page.waitForFunction(() => document.querySelector(".sf .ws-ftn")?.textContent === "Sign in");
       const inn = await read();
       expect(inn.other).toEqual(["Create account"]);
