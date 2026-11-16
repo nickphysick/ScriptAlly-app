@@ -129,3 +129,15 @@ At each commit: tsc 0 errors, `vite build` clean, Vitest no worse than the basel
 4. **INK4's golden** is skipped, not deleted. Delete `design-refs/shell/ink-folder-tab-golden-3x.png` and the test once v2 is accepted.
 5. **The BETA strip** shows above the desktop app on this line, though inkShell.css retires it on the desktop. Out of scope, but every shot carries it.
 6. **Tab order on the account screens** stays current-first, so the two swap places when you switch mode, as before. A fixed order ("Sign in", "Create account") would match "the row never moves".
+
+## Dev deploy
+
+The first deploy attempt stopped at the guard. Mid-session, dev moved from `index-BEFE4y63.js` to `index-266HX-Fg.js`, which is Manuscript spine v1 (`manuscript-spine-v1` @ `119c5b735`, deployed 13:34Z by another session).
+
+This work is stacked on that branch as `dev/msp1-st2` @ `ea5eb11c9` (pushed). The merge had one conflict, `design-refs/.refhashes.json`: the spine's file was taken and this ref re-enrolled.
+
+On the merged tree before deploying: all 15 ST2 locks green, tsc 0, the shell, onboarding and marketing unit specs 2034/2034.
+
+Built from a clean checkout of the pushed tip and deployed to `scriptally-dev` hosting. **Dev serves `index-C5jv0Em7.js`**, the hash matching the build. No prod deploy.
+
+An earlier stack, `dev/…-onf1-co1-st2`, was pushed before dev moved. It is superseded and nothing serves it.
