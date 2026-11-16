@@ -108,7 +108,7 @@ import { QC_SORT_FIELDS } from "../lib/cardsSort";
 import { GROUP_BY_OPTIONS } from "../lib/qcCalView";
 import { eyeRows } from "../lib/qcBirdsEye";
 import { QcWhoReplied, type WhoRow } from "./queries/centre/QcWhoReplied";
-import { swapCard } from "../lib/cardMotion";
+import { bandColourNow, savedCard, swapCard } from "../lib/cardMotion";
 import { LogStagesHost } from "./queries/centre/LogStagesHost";
 import { logDefaults, pieceVersions, saveLog } from "../lib/queryActions/logSave";
 import { packagesFor } from "../lib/queryActions/packages";
@@ -6199,10 +6199,12 @@ export const Queries: React.FC<{
       const run1522 = async (fn: () => Promise<void>): Promise<boolean> => {
         if (qc152Busy) return false;
         setQc152Busy(true);
+        /* Record a response v1, Phase 6 — the band's colour before the save, so it can cross-fade to the new state */
+        const bandBefore = bandColourNow();
         /* the composer (or the bubble's form) gives way as the save starts: its draft would otherwise sit beside the new
            step the local write has already drawn, until the server answers */
         setQc1522J(null); setQc1522Draft(null); setQc1522Edit(null);
-        try { await fn(); return true; } catch (e) {
+        try { await fn(); savedCard(bandBefore); return true; } catch (e) {
           console.error("v152.2: the save failed", e);
           showToast({ message: "Couldn't save that. Nothing was changed." });
           return false;

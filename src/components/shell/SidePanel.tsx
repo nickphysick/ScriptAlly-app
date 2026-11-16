@@ -16,7 +16,8 @@
  * ⚠️ ONE CONTAINER, AND A STEP REPLACES ITS CONTENT. `[data-side-slot]` is where an action's form is
  *    portalled; while it holds one the panel carries `data-step` and its own content is hidden, still mounted.
  */
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useLayoutEffect, useRef } from "react";
+import { leaveGhost } from "../../lib/cardMotion";
 import { createPortal } from "react-dom";
 import "./sidePanel.css";
 import { useDrawerFocus } from "./useDrawerFocus";
@@ -69,6 +70,13 @@ export const SidePanel: React.FC<{
   /* overnight fixes v1, Part 7 — focus in on open and back on close (to the control that opened it); Record a response
      v1 — always modal: Tab is held inside and the page is inert */
   useDrawerFocus(ref, true, { modal: true });
+  /* Record a response v1, Phase 6 — closing: a copy slides away (200ms, ease-in) and the dim lifts, while the real panel
+     is already gone, so the page behind is live at once. Taken while the panel is still in the page. */
+  useLayoutEffect(() => () => {
+    const el = ref.current;
+    const scrim = el?.previousElementSibling instanceof HTMLElement && el.previousElementSibling.hasAttribute("data-side-scrim") ? el.previousElementSibling : null;
+    leaveGhost(el, scrim);
+  }, []);
   /* the Birds-eye tab and anything else that stands down while a panel is open read this */
   useEffect(() => {
     document.body.classList.add("spanel-open");

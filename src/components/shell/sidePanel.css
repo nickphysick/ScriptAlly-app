@@ -15,10 +15,11 @@
   display: flex; flex-direction: column; overflow: hidden;
   background: #fff; border-radius: 12px;
   box-shadow: -24px 0 48px -24px rgba(28, 19, 15, 0.45), 0 0 0 1px rgba(28, 19, 15, 0.08);
-  animation: spanelIn 180ms ease-out backwards;
+  /* Record a response v1, Phase 6 — in from the right over 280ms; out over 200ms ease-in (lib/cardMotion leaveGhost) */
+  animation: spanelIn 280ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
 }
 @media (max-width: 1440px) { .spanel { width: min(520px, calc(100vw - 48px)); } }
-@keyframes spanelIn { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: none; } }
+@keyframes spanelIn { from { transform: translateX(calc(100% + 30px)); } to { transform: none; } }
 @media (prefers-reduced-motion: reduce) { .spanel { animation: none; } }
 
 .spanel > .spanel-own, .spanel > .spanel-slot { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }

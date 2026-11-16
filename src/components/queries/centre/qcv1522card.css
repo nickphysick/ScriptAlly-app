@@ -154,6 +154,8 @@
 @media (prefers-reduced-motion: reduce) {
   .qc152 .qc1522-burst { display: none; }
   .qc152 .qc1522-cp, .qc152 .qc152-m.new, .qc152 .qc1522-toast { animation: none; }
+  /* Record a response v1, Phase 6 — reduced motion: the book and tabs fold as a cut, not a slide */
+  .qc152 .qc152-ms, .qc152 .qc152-tabs { transition: none; }
 }
 
 /* the toast and the burst sit over the card's inner frame */
@@ -166,3 +168,8 @@
 .qc152 [data-qc1522="footer"] .qc152-rft b { white-space: normal; }
 /* Record a response v1, Phase 5 — the band's ‹ › at either end of the set */
 .qc152 .qc152-x:disabled { opacity: 0.35; cursor: default; }
+/* Record a response v1, Phase 6 — the band's colour cross-fade (lib/cardMotion): the old colour lies under the band's
+   own contents and fades out */
+.qc152 .qc152-band { position: relative; }
+.qc152 .qc152-band > .qcm-fade { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.qc152 .qc152-band > :not(.qcm-fade) { position: relative; z-index: 1; }
