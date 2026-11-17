@@ -25,6 +25,7 @@ import { QUICK_PICKS, STAND_ROWS, exportLabel, standOn, toggleStand, type QuickK
 import { glyphOfStatus } from "../../../lib/qcBandArt";
 import type { SentOption } from "./QcFilters138";
 import { StageGlyph } from "./StageGlyph";
+import { StatusDot } from "../../StatusDot";
 import { CROSS140, type Qc140Pop } from "./QcToolbar140";
 import { WhereMark } from "./QcWhere141";
 import { WHERE_KEYS, WHERE_LABEL, type WhereKey } from "../../../lib/qcSummary";
@@ -32,8 +33,11 @@ import "../../shell/filterStrip.css";
 
 const plural = (n: number) => (n === 1 ? "query" : "queries");
 
-/** a status chip's glyph: the black stage glyph; No reply has its own (v141 §D) */
-const standGlyph = (key: string) => (key === "rj" ? "cl" : key) as Parameters<typeof StageGlyph>[0]["k"];
+/* status marks v3 — a Status chip's glyph is StatusDot for the row's own status (its first: Full requested, Full
+   sent, Offer), at the strip's 15px and in the chip's colour (`tone="inherit"`, so the chosen chip's white still
+   reaches it). The dashed outer ring the stage glyph drew goes. ⚠️ The applied-filters row below (QcAppliedRow140)
+   still draws StageGlyph: it is reached only through QcList138, which the desktop page does not draw (`bodyless`),
+   and unreachable components are left as they are. */
 
 export interface Qc140FilterModel {
   filters: Qc138Filters;
@@ -159,7 +163,7 @@ const FilterInner: React.FC<{ model: Qc140FilterModel; close: () => void; onRese
               return (
                 <button key={row.key} type="button" className={chip(on)} data-qc140="stand" data-k={row.key} data-opt={`st:${row.key}`} data-n={n}
                   aria-pressed={on} disabled={!on && n === 0} onClick={() => set(toggleStand(f, row))}>
-                  <span className="qc142-fgl" aria-hidden="true"><StageGlyph k={standGlyph(row.key)} /></span>{row.label}<i>{n}</i>
+                  <span className="qc142-fgl" aria-hidden="true"><StatusDot status={row.statuses[0]} overrideSize={15} tone="inherit" decorative /></span>{row.label}<i>{n}</i>
                 </button>
               );
             })}
