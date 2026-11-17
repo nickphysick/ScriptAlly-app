@@ -1177,7 +1177,8 @@
     "design-refs/workspace-headers-v1/workspace-headers-v1.html": "fc9781eafae22e7bca1fb8d006e8e10e5ac7af2310be750b7348481279bcea13",
     "design-refs/card-offers-v1/agent-card-edit-v8.html": "56dff65aa6bce2b83a4159ab0ca90d0f7fe65d0596583074965c30392d6592c7",
     "design-refs/shell/manuscript-spine-v1.html": "3eba93d229acdb30c2d731f999bf635fa354ac05d0af896ad9f0c5ecefd1917f",
-    "design-refs/shell-tabs-v2.html": "977258edd3af3cd341c308e410b2aeaf22c48a8814558ea57825a3f6ac45e4e3"
+    "design-refs/shell-tabs-v2.html": "977258edd3af3cd341c308e410b2aeaf22c48a8814558ea57825a3f6ac45e4e3",
+    "design-refs/responses-v15/responses-v15.html": "ef3a0c3cc2955f1cf31983a6dfe68eff680fe81f3c7430910a88a4a7bd8e50da"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
