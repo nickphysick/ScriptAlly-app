@@ -66,7 +66,7 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
             <span className="qc154-ag" data-qc154="agency">{r.agency}</span>
           </span>
           <span className="qc154-trkw" data-qc154="track" role="img" tabIndex={0} aria-label={`Where it stands: ${word}`} title={word}>
-            <Track153 t={t} label={word} />
+            <Track153 t={t} label={word} status={r.status} />
           </span>
           <span className="qc154-sr" data-qc154="word">{word}</span>
         </div>

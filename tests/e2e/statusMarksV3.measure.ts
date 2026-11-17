@@ -10,6 +10,11 @@
  *                     SM3-5's computed half (tone="inherit" under rgb(47, 74, 105); the default ink), and the contact
  *                     sheet (reports/status-marks-v3/sheet.html, made by statusMarksV3Sheet.tsx) beside the reference.
  *
+ *   SM3_10=today|fixed  (with SM3_PHASE=after) SM3-10: every card's current step's markup is read. `today` writes it to
+ *                     sm3-10-today.json; `fixed` compares every card that is not Revise & Resubmit with that file (byte for
+ *                     byte), and on both a Revise & Resubmit card's current step must hold one circle and the four RR_INNER
+ *                     paths (read from the reference). The R&R crop is retaken as after-rr.png.
+ *
  * Readings to reports/status-marks-v3/. Run through `npm run e2e:emu -- tests/e2e/statusMarksV3.measure.ts`.
  */
 import { test, expect, type Page } from "@playwright/test";
@@ -17,6 +22,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 
 const PHASE = process.env.SM3_PHASE === "after" ? "after" : "before";
+const SM3_10 = process.env.SM3_10 === "today" || process.env.SM3_10 === "fixed" ? process.env.SM3_10 : null;
+const REF_PATHS = JSON.parse(/<pre id="paths">([\s\S]*?)<\/pre>/.exec(readFileSync("design-refs/status-marks-v3.html", "utf8"))?.[1] ?? "{}") as Record<string, unknown>;
+const RR_INNER = REF_PATHS[Object.keys(REF_PATHS).find((k) => k.startsWith("RR_INNER "))!] as string[];
 const DIR = "reports/status-marks-v3";
 const PAGE = ".qc151.qc153";
 const SIZES = [{ width: 1280, height: 900 }, { width: 1512, height: 982 }, { width: 1920, height: 1080 }];
@@ -119,6 +127,32 @@ test(`status marks v3 — the fixture grid (${PHASE})`, async ({ page }) => {
       fourth: fourth.includes(solid) ? "solid" : fourth.includes(outline) ? "outline" : "other",
     };
   }), { sel: PAGE, solid: SEAL_SOLID_HEAD, outline: SEAL_OUTLINE_HEAD });
+  /* ── SM3-10: the current step's markup on every card ───────────────────────────────────────────────────── */
+  let sm310: { rrOk: boolean; rr: unknown[]; changed: string[]; compared: number } | null = null;
+  if (SM3_10) {
+    const cur = await page.evaluate((sel) => Object.fromEntries([...document.querySelectorAll<HTMLElement>(`${sel} [data-qc154="card"]`)].map((c) => {
+      const n = c.querySelector<HTMLElement>('[data-qc153="track"] .qc153-nd--cur')!;
+      const svg = n.querySelector(":scope > span > svg")!;
+      return [c.dataset.id, { status: c.dataset.status, html: n.innerHTML, circles: svg.querySelectorAll("circle").length, paths: [...svg.querySelectorAll("path")].map((p) => p.getAttribute("d")) }];
+    })), PAGE) as Record<string, { status: string; html: string; circles: number; paths: string[] }>;
+    const rr = Object.values(cur).filter((c) => c.status === "Revise & Resubmit");
+    const rrOk = rr.length > 0 && rr.every((c) => c.circles === 1 && JSON.stringify(c.paths) === JSON.stringify(RR_INNER));
+    const changed: string[] = [];
+    let compared = 0;
+    if (SM3_10 === "today") writeFileSync(`${DIR}/sm3-10-today.json`, JSON.stringify(cur, null, 1) + "\n");
+    else {
+      const was = JSON.parse(readFileSync(`${DIR}/sm3-10-today.json`, "utf8")) as typeof cur;
+      for (const [id, c] of Object.entries(was)) {
+        if (c.status === "Revise & Resubmit") continue;
+        compared++;
+        if (cur[id]?.html !== c.html) changed.push(`${id} (${c.status})`);
+      }
+    }
+    sm310 = { rrOk, rr: rr.map((c) => ({ circles: c.circles, paths: c.paths.length })), changed, compared };
+    console.log(`${rrOk ? "✓" : "✗"} SM3-10 R&R current step — ${JSON.stringify(sm310.rr)}`);
+    if (SM3_10 === "fixed") console.log(`${changed.length ? "✗" : "✓"} SM3-10 every other card's current step unchanged — ${compared} compared, ${changed.length} changed ${changed.join(", ")}`);
+    await crop(page, "Revise & Resubmit", "rr");
+  }
   const bad = st.filter((c) => c.nodes !== 4 || c.statusDots !== 4 || c.trackNodes !== 0);
   console.log(`${bad.length ? "✗" : "✓"} SM3-7 structure — ${st.length} cards, four StatusDot svgs and no TrackNode svg on each (${bad.length} not)`);
   const offer = st.filter((c) => c.status === "Offer" || c.status === "Signed");
@@ -153,6 +187,10 @@ test(`status marks v3 — the fixture grid (${PHASE})`, async ({ page }) => {
   await page.setContent(readFileSync("design-refs/status-marks-v3.html", "utf8"));
   await page.locator("table").first().screenshot({ path: `${DIR}/reference-table.png` });
 
+  if (sm310) {
+    expect(sm310.rrOk, "SM3-10: the R&R card's current step is the arrows in a ring").toBe(true);
+    expect(sm310.changed, "SM3-10: another card's current step changed").toEqual([]);
+  }
   expect(worst, "SM3-7: a node, link or svg moved or resized").toBeLessThanOrEqual(0.5);
   expect(bad, "SM3-7: a track not drawn with four StatusDots").toEqual([]);
   expect(offer.length, "an Offer card on the grid").toBeGreaterThan(0);

@@ -69,7 +69,7 @@ SM3-3 and SM3-6 compare against `src/test/fixtures/statusMarksV3.baseline.json`,
 ## Screenshots (fixture grid, emulator harness, 1512 × 982)
 
 - `before-offer.png` / `after-offer.png` — Noah Bright, Offer: the current step's page becomes the solid seal.
-- `before-rr.png` / `after-rr.png` — Iris Kwan, Revise & Resubmit: the fourth step's faded page becomes the faded outline seal. ⚠️ The track draws each STEP's mark (Phase 2 as written), so an R&R card's current step is the Full step's mark; the new arrows are not on the card.
+- `before-rr.png` / `after-rr.png` — Iris Kwan, Revise & Resubmit: the current step is now the arrows in a ring (v3.1, below), and the fourth step's faded page is the faded outline seal.
 - `before-queried.png` / `after-queried.png` — Queried: the fourth step's faded page becomes the faded outline seal.
 - `contact-sheet.png` — all twelve statuses from StatusDot at 12, 13, 16, 24 and 30, the outline seal, and the two SM3-5 probe rows; `reference-table.png` beside it. Row for row the same, including the R&R switch between 15 and 16.
 
@@ -85,6 +85,23 @@ SM3-3 and SM3-6 compare against `src/test/fixtures/statusMarksV3.baseline.json`,
 - **The track's marks are bigger inside the same box.** TrackNode's ring sat at r 14 on a 40 box (70%); StatusDot's at r 10 on 24 (83%). The svg box is unchanged; the ring inside it is a little larger and the same weight.
 - **The filter chips' glyph is the row's first status**: Full requested (also R&R), Full sent (also Resubmitted), Offer (also Signed) — as the stand rows already group them.
 
+## v3.1 — the arrows on an R&R card's current step (17 Nov, Nick's ruling)
+
+Phase 2 drew each step's own mark, so an R&R card's current step was the Full step's mark and the arrows were on no card. Now, on a card whose status is Revise & Resubmit, the current step renders `StatusDot` for Revise & Resubmit (`tone="inherit"`). Nothing else changes: Resubmitted keeps Full Sent's mark, requested statuses keep their solid step marks, and the other three steps of an R&R card are as before.
+
+- **Size.** The current step's svg renders at 20px at 1280, 1512 and 1920 (read off the grid), 17px in a card under 380px (`@container (max-width: 380px)`), and 24px in the log-a-query slip — 16px or more everywhere, so the ringed form throughout and nothing to report. StatusDot picks R&R's form from the size it is GIVEN, and the track gives every step a 12px layout wrapper (the CSS sizes the svg), which would have drawn the small form. So the R&R current step alone is given 17px — the smallest it renders — which also fits the smallest current node (28px).
+- **How the track knows the status.** `Track153` gained an optional `status` prop, passed by its two callers (QcCard154, QcSlip153); `slipTrack` in `lib/` is untouched.
+- **Geometry.** SM3-7 re-run on the fixture grid: 924 node, svg and link boxes at three widths, worst Δ **0px**.
+
+| Lock | Red before the fix | Mutation red | Green |
+|---|---|---|---|
+| SM3-10 (unit, qcTrackMarks.test.tsx) | ✗ "expected 2 to be 1" (the Full mark's two circles) | R&R drawn as Full Sent → "expected 2 to be 1" | ✓ one ring, the four RR_INNER paths from the reference; every other status's current step byte-identical to `src/test/fixtures/qcTrackCurrent.baseline.json` (captured at e08d528d5); the R&R card's other three steps equal Full Sent's |
+| SM3-10 (fixture grid, `SM3_10=today|fixed`) | ✗ R&R current step `{"circles":2,"paths":0}` | — (the "today" run is the old code) | ✓ `{"circles":1,"paths":4}`; the 27 other cards' current-step markup unchanged against `sm3-10-today.json` |
+
+SM3-7's unit check that every step's wrapper is 12px now names the one exception (R&R's current step, 17px) rather than being loosened.
+
+One unrelated red seen once: `marketingLinks.test.tsx` "no source file hardcodes the retired support address" timed out at 6.9s under parallel load (Vitest's default is 5s); alone it passes (15/15, 4.2s). It walks `src/` and nothing it reads changed.
+
 ## Dev
 
-See the wrap-up below for the URL and the served bundle hash.
+See the wrap-up for the URL and the served bundle hash.

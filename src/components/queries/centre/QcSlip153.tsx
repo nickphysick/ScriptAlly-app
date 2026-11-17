@@ -56,20 +56,27 @@ const NODE_TITLE = ["Queried", "Partial", "Full", "Offer"] as const;
    StatusDot's wrapper span is a layout box only, kept at the minimum so it never outgrows the smallest node (21px)
    and pushes the svg off centre. */
 const STEP_WRAP = 12;
+/* status marks v3.1 — A REVISE & RESUBMIT QUERY'S CURRENT STEP IS ITS OWN MARK, the arrows, not the Full step's. Only R&R:
+   Resubmitted keeps Full Sent's mark, and a requested status keeps its step's solid mark (the arrow badge says whose
+   move it is). ⚠️ StatusDot switches R&R's form on the size it is given, so this one wrapper states the smallest size
+   the current step's svg renders at — 17px (a card under 380px; 20 on the grid, 24 in the log-a-query slip) — which
+   draws the ring and fits inside the smallest current node (28px). */
+const RR_CUR_WRAP = 17;
 
 /** the four-step track: ink to the current step, faded future, a dotted line into a skipped step. v154: `label`, when
  *  given, is drawn under the current step only (the card's "Draw the journey" hover shows it; hidden at rest). */
-export const Track153: React.FC<{ t: SlipTrack; label?: string }> = ({ t, label }) => (
+export const Track153: React.FC<{ t: SlipTrack; label?: string; status?: string }> = ({ t, label, status }) => (
   <span className={`qc153-trk${t.ended ? " is-ended" : ""}`} data-qc153="track" data-dir={t.dir}>
     {t.nodes.map((n, i) => {
-      const st = n === "cur" && t.end ? END_STATUS[t.end] : STEP_STATUS[i];
+      const rr = n === "cur" && status === QueryStatus.REVISE_RESUBMIT;
+      const st = n === "cur" && t.end ? END_STATUS[t.end] : rr ? QueryStatus.REVISE_RESUBMIT : STEP_STATUS[i];
       /* the Offer step is the outline seal until the query is at it (Offer or Signed) */
       const reached = i === 3 ? n === "cur" : true;
       return (
         <React.Fragment key={i}>
           {i ? <i className={`qc153-ln qc153-ln--${t.links[i - 1]}`} data-qc153="link" data-state={t.links[i - 1]} aria-hidden="true" /> : null}
           <span className={`qc153-nd qc153-nd--${n}`} data-qc153="node" data-state={n} title={NODE_TITLE[i]}>
-            <StatusDot status={st} overrideSize={STEP_WRAP} tone="inherit" reached={reached} decorative />
+            <StatusDot status={st} overrideSize={rr ? RR_CUR_WRAP : STEP_WRAP} tone="inherit" reached={reached} decorative />
             {n === "cur" ? <b className={`qc153-arw qc153-arw--${t.dir}`} data-qc153="arrow" data-dir={t.dir} aria-hidden="true">{t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}
             {n === "cur" && label ? <span className="qc154-thl" data-qc154="track-label" aria-hidden="true">{label}</span> : null}
           </span>
@@ -186,7 +193,7 @@ export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, p
             </span>}
             {/* v153.2 — the status word beside the track, to its right, on one line */}
             <span className="qc153-st">
-              <Track153 t={t} />
+              <Track153 t={t} status={r.status} />
               <span className="qc153-wd" data-qc153="word">{word}</span>
             </span>
           </span>

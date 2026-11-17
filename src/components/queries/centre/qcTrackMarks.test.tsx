@@ -8,6 +8,7 @@
  * on the fixture grid by tests/e2e/statusMarksV3.measure.ts.
  */
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
 import { QueryStatus } from "../../../types";
 import { card154, row154 } from "./qc154.fixture";
 
@@ -28,7 +29,9 @@ describe("SM3-7 the track draws with StatusDot", () => {
       const n = nodes(h);
       expect(n, s).toHaveLength(4);
       for (const x of n) {
-        expect(x.inner, `${s}: a StatusDot`).toMatch(/^<span aria-hidden="true" style="width:12px;height:12px;flex-shrink:0;display:inline-flex[^"]*"><svg width="12" height="12" viewBox="0 0 24 24"/);
+        /* the wrapper is 12px, except an R&R query's current step (17px, so StatusDot draws the ringed arrows: SM3-10) */
+        const px = s === QueryStatus.REVISE_RESUBMIT && x.state === "cur" ? 17 : 12;
+        expect(x.inner, `${s}: a StatusDot`).toMatch(new RegExp(`^<span aria-hidden="true" style="width:${px}px;height:${px}px;flex-shrink:0;display:inline-flex[^"]*"><svg width="${px}" height="${px}" viewBox="0 0 24 24"`));
         expect(x.inner, `${s}: the track's CSS colours it`).not.toMatch(/color:#/);
       }
       expect(h, s).not.toContain('<svg data-qc153="node"');
@@ -56,5 +59,40 @@ describe("SM3-7 the track draws with StatusDot", () => {
     const marks = [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN].map(cur);
     for (const m of marks) expect(m).toContain('d="M7.5 12h9"');
     expect(new Set(marks).size).toBe(1);
+  });
+});
+
+/* ── SM3-10: the R&R card's current step is the arrows ─────────────────────────────────────────────────────── */
+const refHtml = readFileSync(new URL("../../../../design-refs/status-marks-v3.html", import.meta.url), "utf8");
+const block = JSON.parse(/<pre id="paths">([\s\S]*?)<\/pre>/.exec(refHtml)?.[1] ?? "{}") as Record<string, unknown>;
+const RR_INNER = block[Object.keys(block).find((k) => k.startsWith("RR_INNER "))!] as string[];
+const today = JSON.parse(readFileSync(new URL("../../../test/fixtures/qcTrackCurrent.baseline.json", import.meta.url), "utf8")) as {
+  currentStep: Record<string, string | null>;
+};
+const curOf = (s: QueryStatus) => nodes(card154(row154(s, "agent"))).find((x) => x.state === "cur")!.inner;
+
+describe("SM3-10 the R&R card's current step", () => {
+  it("holds one ring and the four RR_INNER paths (the arrows-in-a-ring form), in the track's colour", () => {
+    expect(RR_INNER).toHaveLength(4);
+    const m = curOf(QueryStatus.REVISE_RESUBMIT);
+    expect((m.match(/<circle\b/g) ?? []).length).toBe(1);
+    expect(m).toContain('<circle cx="12" cy="12" r="10"');
+    expect([...m.matchAll(/<path d="([^"]*)"/g)].map((x) => x[1])).toEqual(RR_INNER);
+    expect(m).not.toMatch(/color:#/);
+    expect(m, "the Full step's mark").not.toContain('r="6.5"');
+  });
+
+  it("every other status's current step is byte-identical to today's (Resubmitted keeps Full Sent's mark)", () => {
+    for (const s of Object.values(QueryStatus)) {
+      if (s === QueryStatus.REVISE_RESUBMIT) continue;
+      expect(curOf(s), s).toBe(today.currentStep[s]);
+    }
+    expect(curOf(QueryStatus.RESUBMITTED)).toBe(today.currentStep[QueryStatus.FULL_SENT]);
+  });
+
+  it("the other three steps of an R&R card are unchanged", () => {
+    const now = nodes(card154(row154(QueryStatus.REVISE_RESUBMIT, "agent"))).filter((x) => x.state !== "cur").map((x) => x.inner);
+    const fs = nodes(card154(row154(QueryStatus.FULL_SENT, "agent"))).filter((x) => x.state !== "cur").map((x) => x.inner);
+    expect(now).toEqual(fs);
   });
 });
