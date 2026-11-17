@@ -29,7 +29,8 @@ import { policyWords } from "../../../lib/qc1531";
 import { materialGroups, materialsName, tabAccent, type MatGroups } from "../../../lib/qc1533";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import type { Agent } from "../../../types";
-import { TrackNode, type TrackNodeKind } from "./StageGlyph";
+import { StatusDot } from "../../StatusDot";
+import { QueryStatus } from "../../../types";
 import "../../containers/framedSlip.css";
 import "./qcv153.css";
 import "./qcv1531.css";
@@ -46,20 +47,29 @@ export const FACT_ICON = {
   policy: <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"><path d="M3.5 2h9v12h-9z" /><path d="M6 5.5h4M6 8h4M6 10.5h2.5" /></svg>,
 } as const;
 
-const LIVE_KIND: readonly TrackNodeKind[] = ["q", "partial", "full", "offer"];
+/* status marks v3 — each step is drawn by StatusDot: the status that step stands for, and a closed query's current
+   step its closed status (the three endings share one mark; the word and the tooltip tell them apart) */
+const STEP_STATUS: readonly QueryStatus[] = [QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.OFFER];
+const END_STATUS: Record<NonNullable<SlipTrack["end"]>, QueryStatus> = { rj: QueryStatus.REJECTED, nr: QueryStatus.NO_RESPONSE, wd: QueryStatus.WITHDRAWN };
 const NODE_TITLE = ["Queried", "Partial", "Full", "Offer"] as const;
+/* ⚠️ THE WRAPPER'S SIZE, NOT THE DRAWING'S. The track's CSS sizes the svg (`.qc153-nd svg`, 17 to 24px by context);
+   StatusDot's wrapper span is a layout box only, kept at the minimum so it never outgrows the smallest node (21px)
+   and pushes the svg off centre. */
+const STEP_WRAP = 12;
 
 /** the four-step track: ink to the current step, faded future, a dotted line into a skipped step. v154: `label`, when
  *  given, is drawn under the current step only (the card's "Draw the journey" hover shows it; hidden at rest). */
 export const Track153: React.FC<{ t: SlipTrack; label?: string }> = ({ t, label }) => (
   <span className={`qc153-trk${t.ended ? " is-ended" : ""}`} data-qc153="track" data-dir={t.dir}>
     {t.nodes.map((n, i) => {
-      const k: TrackNodeKind = n === "cur" ? (t.end ?? (i === 3 ? "offer-on" : LIVE_KIND[i])) : LIVE_KIND[i];
+      const st = n === "cur" && t.end ? END_STATUS[t.end] : STEP_STATUS[i];
+      /* the Offer step is the outline seal until the query is at it (Offer or Signed) */
+      const reached = i === 3 ? n === "cur" : true;
       return (
         <React.Fragment key={i}>
           {i ? <i className={`qc153-ln qc153-ln--${t.links[i - 1]}`} data-qc153="link" data-state={t.links[i - 1]} aria-hidden="true" /> : null}
           <span className={`qc153-nd qc153-nd--${n}`} data-qc153="node" data-state={n} title={NODE_TITLE[i]}>
-            <TrackNode k={k} />
+            <StatusDot status={st} overrideSize={STEP_WRAP} tone="inherit" reached={reached} decorative />
             {n === "cur" ? <b className={`qc153-arw qc153-arw--${t.dir}`} data-qc153="arrow" data-dir={t.dir} aria-hidden="true">{t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}
             {n === "cur" && label ? <span className="qc154-thl" data-qc154="track-label" aria-hidden="true">{label}</span> : null}
           </span>
