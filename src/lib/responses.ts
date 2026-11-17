@@ -418,3 +418,150 @@ export const pctOf = (a: number, b: number): number | null => (b ? Math.round((a
 /** the showcase needs this many answers before it fills in; below it, the warming-up cards */
 export const WARM_NEED = 5;
 export const isEarlyDays = (answered: number): boolean => answered > 0 && answered < WARM_NEED;
+
+/* ══ Responses v15 (design-refs/responses-v15/responses-v15.html) — the answers page rebuilt around what agents said ══
+ * Every figure below is pure and reads the same items (`respItems` over `buildQcRows`) and the page counts above.
+ * ⚠️ "Replies" are asked for more + passed. A no-reply close is the writer's act, not a reply: it is counted in the
+ *    header's "no answer yet" and in the Rejection collection, never in the reply figures.
+ * ⚠️ NO DATE IS INVENTED: an undated first answer drops out of the average; an undated wait has no words and no bar.
+ */
+
+/** The header's tally (ref `header`): one mark per query sent, asked for more first, then passed, then no answer yet. */
+export interface HeaderTally { queried: number; replies: number; more: number; passed: number; unanswered: number; pct: number | null }
+export function headerTally(c: PageCounts): HeaderTally {
+  const replies = c.more + c.passed;
+  return { queried: c.sent, replies, more: c.more, passed: c.passed, unanswered: Math.max(0, c.sent - replies), pct: pctOf(replies, c.sent) };
+}
+/** the tally's mark classes, in the order they are drawn: a (asked for more) · p (passed) · w (no answer yet) */
+export const tallyClasses = (t: HeaderTally): ("a" | "p" | "w")[] =>
+  [...Array<"a">(t.more).fill("a"), ...Array<"p">(t.passed).fill("p"), ...Array<"w">(t.unanswered).fill("w")];
+
+/**
+ * The hand-drawn tally (the ref's `tally(classes, h)`, its seeded jitter unchanged so the marks hold still): four
+ * strokes, then the fifth across them, then a gap. Returns the paths with their class and the drawing's width.
+ */
+export function tallyMarks<C extends string>(classes: readonly C[], h: number): { paths: { cls: C; d: string }[]; width: number } {
+  let s = 7;
+  const r = () => { s = (s * 9301 + 49297) % 233280; return s / 233280 - 0.5; };
+  let x = 4;
+  const top = 6, bot = h - 6, f = (v: number) => v.toFixed(1);
+  const paths: { cls: C; d: string }[] = [];
+  classes.forEach((c, i) => {
+    const k = i % 5;
+    if (k < 4) {
+      const xx = x + k * 11;
+      paths.push({ cls: c, d: `M${f(xx + r() * 3)} ${f(top + r() * 4)}Q${f(xx + r() * 5)} ${h / 2} ${f(xx + r() * 3)} ${f(bot + r() * 4)}` });
+    } else {
+      paths.push({ cls: c, d: `M${x - 6} ${f(bot - 8 + r() * 5)}L${x + 40} ${f(top + 8 + r() * 5)}` });
+      x += 62;
+    }
+  });
+  const w = x + (classes.length % 5 ? (classes.length % 5) * 11 : -14) + 6;
+  return { paths, width: Math.max(w, 60) };
+}
+
+/** a reply: asked for more, or passed */
+export const isReply = (i: RespItem): boolean => i.group !== "noReply";
+
+/** "A first reply has taken {n} days on average": the mean days from the query to the agent's FIRST answer, over the
+ *  replies, rounded. Null when no reply has a dated first answer. */
+export function firstReplyAvg(items: readonly RespItem[]): number | null {
+  let sum = 0, n = 0;
+  for (const i of items) {
+    if (!isReply(i)) continue;
+    const f = firstAnswer(i);
+    if (f) { sum += f.days; n++; }
+  }
+  return n ? Math.round(sum / n) : null;
+}
+/** The line of facts: the average first reply, the replies with a note, and the agents who read past the query. */
+export interface FactsLine { avg: number | null; notes: number; past: number }
+export function factsLine(items: readonly RespItem[]): FactsLine {
+  let notes = 0, past = 0;
+  for (const i of items) {
+    if (!isReply(i)) continue;
+    if (hasNote(i)) notes++;
+    if (i.furthest !== "query") past++;
+  }
+  return { avg: firstReplyAvg(items), notes, past };
+}
+
+/* ── In their words ── */
+export type NoteKind = "all" | "pass" | "req";
+export const NOTE_ADVANCE_MS = 9_000;
+/** the notes for In their words (newest answer first, `noteItems`), narrowed to passes or requests */
+export function notesFor<R extends RespRowInput>(items: readonly RespItem<R>[], kind: NoteKind): RespItem<R>[] {
+  const all = noteItems(items);
+  return kind === "all" ? all : all.filter((i) => (kind === "pass") === (i.group === "passed"));
+}
+/** the switch shows only with more than two notes and both kinds present */
+export function noteSwitch(items: readonly RespItem[]): { all: number; pass: number; req: number } | null {
+  const all = noteItems(items), pass = all.filter((i) => i.group === "passed").length;
+  return all.length > 2 && pass > 0 && pass < all.length ? { all: all.length, pass, req: all.length - pass } : null;
+}
+export const FAR_ON: Record<Furthest, string> = { query: "on the query", partial: "after the partial", full: "after the full" };
+/** "{days} days after you queried · after the partial"; the days drop when either date is missing */
+export function noteStage(i: RespItem): string {
+  return i.waitDays != null ? `${plural(i.waitDays, "day", "days")} after you queried · ${FAR_ON[i.furthest]}` : FAR_ON[i.furthest];
+}
+
+/* ── the Rejection collection ── */
+export type CollSort = "date" | "agent" | "answer" | "took" | "far" | "note";
+export type CollKind = "all" | "passed" | "noReply";
+/** the first press of a heading: dates, waits and depth newest/longest first; words A to Z */
+export const collFirstDir = (k: CollSort): 1 | -1 => (k === "date" || k === "took" || k === "far" ? -1 : 1);
+export const COLL_CUT = 10;
+export const COLL_FIND_ABOVE = 6;
+/** Every pass and no-reply close, less the passes the writer kept off it (`offWallIds`, v152.2 §5). */
+export function collectionOf<R extends RespRowInput>(items: readonly RespItem<R>[], off: ReadonlySet<string>): RespItem<R>[] {
+  return items.filter((i) => isNo(i) && !off.has(i.id));
+}
+/** "How long it took": "{n} days" for a pass, "{n} weeks" for a no reply; null undated */
+export function tookWords(i: RespItem): string | null {
+  if (i.waitDays == null) return null;
+  return i.group === "noReply" ? plural(Math.round(i.waitDays / 7), "week", "weeks") : plural(i.waitDays, "day", "days");
+}
+/** the longest wait in the WHOLE collection (never the filtered view): every bar is scaled to it */
+export function longestWait(coll: readonly RespItem[]): number | null {
+  let m: number | null = null;
+  for (const i of coll) if (i.waitDays != null && (m == null || i.waitDays > m)) m = i.waitDays;
+  return m;
+}
+/** a bar's width in per cent of the longest wait, at least 4 (the ref's floor) */
+export const tookBar = (i: RespItem, longest: number | null): number | null =>
+  i.waitDays == null || !longest ? null : Math.max(4, Math.round((i.waitDays / longest) * 100));
+/** find: the agent, the agency, or a word of the note */
+export function collMatches(i: RespItem, find: string): boolean {
+  const f = find.trim().toLowerCase();
+  return !f || `${i.row.agentName} ${i.row.agency} ${i.note ?? ""}`.toLowerCase().includes(f);
+}
+const FAR_LEVEL: Record<Furthest, number> = { query: 0, partial: 1, full: 2 };
+/** the collection as shown: the kind, the find, and the heading's sort (ties: newest answer first, in that direction) */
+export function listCollection<R extends RespRowInput>(coll: readonly RespItem<R>[], o: { kind: CollKind; find: string; sort: CollSort; dir: 1 | -1 }): RespItem<R>[] {
+  const key: Record<CollSort, (i: RespItem<R>) => number | string> = {
+    date: (i) => i.answerMs ?? 0, agent: (i) => i.row.agentName.toLowerCase(), answer: (i) => i.answer,
+    took: (i) => i.waitDays ?? -1, far: (i) => FAR_LEVEL[i.furthest], note: (i) => (i.note ? 0 : 1),
+  };
+  const k = key[o.sort];
+  return coll.filter((i) => (o.kind === "all" || i.group === o.kind) && collMatches(i, o.find)).sort((a, b) => {
+    const x = k(a), y = k(b);
+    const c = x < y ? -1 : x > y ? 1 : (b.answerMs ?? 0) - (a.answerMs ?? 0) || a.id.localeCompare(b.id);
+    return c * o.dir;
+  });
+}
+/** the month a row was answered in: "November" (with the year when it is not the clock's) */
+export function collMonth(i: RespItem, nowMs: number): { key: string; label: string } {
+  if (i.answerMs == null) return { key: "none", label: "Date not recorded" };
+  const d = new Date(i.answerMs);
+  const y = d.getFullYear() === new Date(nowMs).getFullYear() ? "" : ` ${d.getFullYear()}`;
+  return { key: `${d.getFullYear()}-${d.getMonth()}`, label: `${MONTHS_LONG[d.getMonth()]}${y}` };
+}
+/** a month header's count: every entry in the collection answered that month (the ref counts the whole collection) */
+export function monthCount(coll: readonly RespItem[], key: string, nowMs: number): number {
+  return coll.filter((i) => collMonth(i, nowMs).key === key).length;
+}
+/** the rows on show: the first ten unless all were asked for; a find shows every match */
+export const collShown = <T,>(list: readonly T[], all: boolean, find: string): { rows: T[]; cut: boolean } => {
+  const cut = !all && !find.trim() && list.length > COLL_CUT;
+  return { rows: cut ? list.slice(0, COLL_CUT) : list.slice(), cut };
+};

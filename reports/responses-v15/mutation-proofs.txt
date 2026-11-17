@@ -1,0 +1,11 @@
+# Responses v15 — mutation proofs
+
+Each lock is run under its named mutation (red), then on the real code (green). Unit locks: `npx vitest run <file>`; page locks: `npm run e2e:emu -- tests/e2e/rs15.measure.ts --project=measure` with `RS15_MUTATE=<lock>` (a mutant BUILD where the break is in the source, named per lock).
+
+## Phase A (src/lib/responses15.test.ts)
+
+- A-facts · mutation `isReply` returns true (a no reply counts as a reply) → RED: 3 failed | 13 passed (the line of facts ×3)
+- A-coll · mutation `collectionOf` ignores `off` (offWallIds) → RED: 1 failed | 15 passed (a pass kept off)
+- A-sort · mutation `listCollection` drops `* o.dir` (a heading never reverses) → RED: 2 failed | 14 passed
+- A-scale · mutation `longestWait` reads the no-reply view only (a filtered scale) → RED: 2 failed | 14 passed
+- green on the real code: 36 passed (36) with responses.test.ts
