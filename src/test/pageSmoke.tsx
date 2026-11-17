@@ -251,6 +251,8 @@ export const dbMock = () => ({
  */
 export const toastMock = () => ({
   useToast: () => ({ showToast: () => {}, showConfirm: () => {} }),
+  /* Responses v15: the page reads the optional form (null outside a provider) */
+  useOptionalToast: () => ({ showToast: () => {}, showConfirm: () => {} }),
   ToastProvider: ({ children }: { children?: React.ReactNode }) => children as React.ReactElement,
 });
 

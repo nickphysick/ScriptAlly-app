@@ -291,7 +291,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
           fields.push(fl("What kind of no", <Seg data="pass-kind" v={formNo ? "form" : "personal"} on={(k) => { setFormNo(k === "form"); touch(); }} opts={[["form", "Form"], ["personal", "Personal"]]} />, "k"));
           fields.push(<React.Fragment key="c"><label /><div className="qc1522-chks">
             <label className="qc1522-chk"><input type="checkbox" data-qc1522="open-to-more" checked={openMore} onChange={(e) => { setOpenMore(e.target.checked); touch(); }} /> Open to seeing more work</label>
-            <label className="qc1522-chk"><input type="checkbox" data-qc1522="wall" checked={wall} onChange={(e) => { setWall(e.target.checked); touch(); }} /> Add to my Wall of no</label>
+            <label className="qc1522-chk"><input type="checkbox" data-qc1522="wall" checked={wall} onChange={(e) => { setWall(e.target.checked); touch(); }} /> Add to my Rejection collection</label>
           </div></React.Fragment>);
         }
         if (rt === "rr") fields.push(fl("Resubmit by", <>

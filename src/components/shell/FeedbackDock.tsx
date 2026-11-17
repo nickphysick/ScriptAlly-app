@@ -32,6 +32,7 @@ import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from
 import { useLocation, useNavigate } from "react-router-dom";
 import "./betaChrome.css";
 import "./feedbackPanel.css";
+import "../shared/stripBand.css";
 import "./feedbackPop.css";
 import { AnchoredPortal } from "./useAnchoredPopover";
 import {
@@ -252,7 +253,7 @@ export const FeedbackDock: React.FC<{
   const copy = sentCopy(cardTier(stats), name);
 
   const top = (
-    <div className="d22-top fb3-top">
+    <div className="sband-top sband--rose d22-top fb3-top">
       <Tag foundingNo={stats.foundingNo} />
       <button type="button" className="fb3-x" aria-label={FEEDBACK_CLOSE_LABEL} data-fb="close" onClick={close}>{X}</button>
     </div>

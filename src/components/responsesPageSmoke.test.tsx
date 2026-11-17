@@ -34,21 +34,29 @@ describe("/queries/responses renders", () => {
   it("renders without throwing on an empty account, on the Nothing back yet page", () => {
     const html = renderPage(page(), "/queries/responses");
     expect(html).toContain("While you wait");
+    expect(html).toContain("No responses yet");
   });
 
-  it("renders the Nothing back yet page with a query out", () => {
+  it("renders the Nothing back yet page with a query out: While you wait and the three features", () => {
     const html = renderPageSeeded(page(), "/queries/responses");
-    expect(html).toContain("What this page will show you");
-    expect(html).toContain("query out with an agent");
+    expect(html).toContain("Track your requests");
+    expect(html).toContain("Keep your notes");
+    expect(html).toContain("Rejection collection");
+    expect(html).not.toContain("Agents who want to read on");
   });
 
   it("renders the populated page once an answer is on file, through every section's derivation", () => {
     const html = renderPageSeededWith(page(), "/queries/responses", { queries: ANSWERED });
-    expect(html).toContain("At a glance");
+    expect(html).toContain("2 responses");
+    expect(html).toContain("A word on rejections");
     expect(html).toContain("Agents who want to read on");
-    expect(html).toContain("What your answers tell you");
-    expect(html).toContain("How long agents took");
-    expect(html).toContain("Your wall of no");
+    expect(html).toContain("In their words");
+    expect(html).toContain("Rejection collection");
+    expect(html).toContain("Share your story");
     expect(html).not.toContain("While you wait");
+    /* v5's sections are gone */
+    for (const gone of ["At a glance", "What your answers tell you", "How long agents took"]) expect(html).not.toContain(gone);
+    /* N1 (source half): nothing on the route says the old name */
+    expect(html.toLowerCase()).not.toContain("wall of no");
   });
 });

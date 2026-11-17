@@ -2,42 +2,55 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ══ Responses v2 (route /queries/responses; 15 Oct) ═════════════════════════════════════════════════════════════
- * Ref: design-refs/responses-v4/responses-v4.html. The third Queries tab: every agent answer for the book in scope.
+ * ══ Responses v15 (route /queries/responses; 17 Nov) ═════════════════════════════════════════════════════════════
+ * Ref: design-refs/responses-v15/responses-v15.html. The answers page, rebuilt around what agents said. One scroll, top
+ * to bottom, with no filter panel, no toolbar and no grid of cards:
  *
- *   A · the centred light header (no illustration) and its card: the answer counts and the Reply rate ring
- *   B · Asked for more, as a carousel of large request cards on a paper-white band
- *   C · the nos: the blush banner, the hand-drawn tally, and the list sheet
- *   D · the side panel (query panel v2's container): a card or a row opens the answer; acting dims the page
- *   E · the share-image builder
- *   F · the empty page, and the zero-nos sheet
+ *   1 · the navy header (Workspace headers v1), its right-hand slot the reply count, the rate line and the tally
+ *   2 · A word on rejections (the grey band; only when the Rejection collection has an entry)
+ *   3 · the line of facts (early days: the white note in its place)
+ *   4 · Agents who want to read on (the Query Centre's own grid card, in a row carousel)
+ *   5 · In their words (one note at a time; no notes → no section)
+ *   6 · the Rejection collection (one sortable list; Share your story opens the existing share builder under it)
+ *   Nothing back yet: the header, then While you wait and the three features.
  *
  * ⚠️ EVERY FIGURE COMES FROM `lib/responses`, over the Query Centre's own rows (`buildQcRows`), so this page and the
- *    Query Centre cannot disagree about a status, a date or how far a query got.
+ *    Query Centre cannot disagree about a status, a date or how far a query got (decision 7).
+ * ⚠️ OPENING AN ANSWER is the existing panel (`RspPanel`) and the dimmed desk, by `?answer={id}` so Back works; a
+ *    request card's own action runs its journey as today (decision 5).
+ * ⚠️ `offWallIds`: a pass kept off is counted in the header and the facts and left out of the collection (decision 2).
  * ⚠️ THE BOOK IN SCOPE is the shell's (`scriptally_active_manuscript_id`, through `resolveScopedManuscript`), read on
  *    every render; a switch re-opens the route, so the memo keys on `location.key`.
+ * ⚠️ ONE EVEN GAP (72px) BETWEEN SECTIONS, 30px from the header to the band (responses15.css, `--r15-sg`). Nothing
+ *    inside a section moves.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { buildQcRows } from "../../lib/qcSummary";
-import { carouselOrder, firstNameOf, offWallIds, goneQuiet, isEarlyDays, noteSplit, pageCounts, respCounts, respItems, stillOut, waitingRows, type NoKind, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
+import { pkgKeyOf } from "../../lib/qc138";
+import {
+  carouselOrder, collectionOf, firstNameOf, hasNote, headerTally, isEarlyDays, nextExpected, offWallIds, pageCounts, respCounts,
+  respItems, type RespItem,
+} from "../../lib/responses";
+import { responsesPrefsOf, wordFoldWrite } from "../../lib/responsesPrefs";
 import { openQueryDrawer, type DrawerMode } from "../../lib/queryActions/drawerStore";
 import { openResponse, responseHosted } from "../../lib/queryPanelStore";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
-import { Rsp5Glance, RspHeader, type GlanceFacts, type GlanceKey } from "./Rsp5Head";
-import { RspCarousel } from "./RspCarousel";
-import { Rsp5Band, Rsp5Showcase } from "./Rsp5Insights";
-import { Rsp5Timing } from "./Rsp5Timing";
-import { Rsp5Words } from "./Rsp5Words";
-import { RspPanel } from "./RspPanel";
-import { Rsp5Wall, type AgentFacts } from "./RspNos";
-import { RspEmpty } from "./RspEmpty";
 import { AppFooter } from "../shell/AppFooter";
+import { useOptionalToast } from "../toast/ToastProvider";
+import { RspHeader, type TallyKey } from "./Rsp5Head";
+import { RspWord, type WordStep } from "./RspWord";
+import { RspFacts, RspReadOn } from "./RspReadOn";
+import { RspWords } from "./RspWords";
+import { RspCollection } from "./RspCollection";
+import { RspPanel } from "./RspPanel";
+import { RspEmpty } from "./RspEmpty";
 import "./responses.css";
 import "./responses5.css";
+import "./responses15.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -47,8 +60,12 @@ export function openRecordPicker(): void {
   openResponse();
 }
 
+/** the page's sections, by `data-rsp5-sec` inside this page (every page stays mounted) */
+export type RspSection = "more" | "words" | "wall" | "share";
+
 export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) => void; routeActive?: boolean }> = ({ routeActive, onNavigate }) => {
-  const { queries, activities, agents, manuscripts, collectionsReady, activitiesReady, readQueryActivity } = useScriptAllyDb();
+  const { queries, activities, agents, manuscripts, packages, collectionsReady, activitiesReady, readQueryActivity, currentUser, updateUserPaths } = useScriptAllyDb();
+  const toast = useOptionalToast();
   const navigate = useNavigate();
   const location = useLocation();
   const storedMs = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
@@ -62,26 +79,20 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     const rows = buildQcRows(own, agents, activities, nowMs);
     const items = respItems(rows);
     const counts = respCounts(items), page = pageCounts(items, rows);
-    /* the glance cards' faces: newest answer first (newest query first for the still waiting) */
-    const newest = (g: RespItem<QcRow>["group"]) => items.filter((i) => i.group === g).sort((a, b) => (b.answerMs ?? 0) - (a.answerMs ?? 0)).map((i) => i.row);
-    const waiting = waitingRows(rows).slice().sort((a, b) => (b.sentMs ?? 0) - (a.sentMs ?? 0));
-    const glance: GlanceFacts = {
-      counts: page, rows: { more: newest("more"), passed: newest("passed"), noReply: newest("noReply"), waiting },
-      yourMove: items.filter((i) => i.yourMove).length, withNote: noteSplit(items).withNote, goneQuiet: goneQuiet(rows, nowMs).length,
+    /* v152.2 §5 — a pass whose "Add to my Rejection collection" was unticked is counted, and kept out of the collection */
+    const coll = collectionOf(items, offWallIds(activities as never));
+    return {
+      nowMs, rows, items, counts, page, coll, tally: headerTally(page), more: carouselOrder(items),
+      yourMove: items.filter((i) => i.yourMove).length, nextDueMs: nextExpected(rows, nowMs)?.expectedMs ?? null,
     };
-    /* the timing line's "gone past the reply time the agent gives": the gone-quiet queries that HAVE a reply date */
-    const quietDated = goneQuiet(rows, nowMs).filter((r) => r.expectedMs != null).length;
-    /* v152.2 §5 — a pass whose "Add to my Wall of no" was unticked is counted, and kept off the Wall */
-    const off = offWallIds(activities as never);
-    const wallItems = off.size ? items.filter((i) => !off.has(i.id)) : items;
-    return { nowMs, rows, items, wallItems, counts, page, glance, quietDated, more: carouselOrder(items), out: stillOut(rows) };
     /* location.key: a switch of book re-opens the route, and the book is read from storage */
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [queries, activities, agents, ms?.id, location.key]);
   const { counts, nowMs } = model;
   const msTitle = ms?.title?.trim() || null;
+  const early = isEarlyDays(counts.answered);
 
-  /* ── Part D · the answer open in the side panel: `?answer={queryId}`, so browser Back works ── */
+  /* ── the answer open in the side panel: `?answer={queryId}`, so browser Back works ── */
   const answerParam = new URLSearchParams(location.search).get("answer");
   const openItem = ready && answerParam ? model.items.find((i) => i.id === answerParam) ?? null : null;
   const openId = openItem?.id ?? null;
@@ -90,14 +101,14 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
   }, [navigate]);
   const openAnswer = useCallback((i: RespItem<QcRow>) => { go(i.id, !!answerParam); }, [go, answerParam]);
   const closeAnswer = useCallback(() => go(null), [go]);
-  /* the list's rows as shown (↑ ↓ walk them); a carousel card has no neighbours */
+  /* the collection's rows as shown (↑ ↓ walk them); a card or a note has no neighbours */
   const [visible, setVisible] = useState<string[]>([]);
   const at = openId ? visible.indexOf(openId) : -1;
   const walk = {
     prev: at > 0 ? () => go(visible[at - 1], true) : null,
     next: at >= 0 && at < visible.length - 1 ? () => go(visible[at + 1], true) : null,
   };
-  /* a card's own button runs its journey IN the panel: the panel opens on that answer first, then the journey steps in */
+  /* a card's own action runs its journey IN the panel: the panel opens on that answer first, then the journey steps in */
   const [pending, setPending] = useState<{ id: string; mode: DrawerMode } | null>(null);
   const act = useCallback((i: RespItem<QcRow>, mode: DrawerMode) => {
     /* Record a response v1 — a response is that query's card and its composer (the card takes the answer panel's place) */
@@ -111,74 +122,67 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     openQueryDrawer({ mode: pending.mode, queryId: openItem.id, panel: { name: r.agentName, agency: r.agency, first, backLabel: `Back to ${first}` } });
   }, [pending, openId, openItem]);
 
-  /* the agent's own facts the wall reads (the reply time they give; whether no reply means no) */
-  const agentFacts = useCallback((i: RespItem<QcRow>): AgentFacts => {
-    const a = agents.find((x) => x.id === i.row.query.agentId);
-    return { weeks: a?.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null, nrmn: !!a?.noResponseMeansNo };
-  }, [agents]);
+  /* the package a card names (the Query Centre's own lookup: `pkgKeyOf`, then the stored package's name) */
+  const packageNameOf = useCallback((r: QcRow) => { const k = pkgKeyOf(r as never); return k ? packages.find((p) => p.id === k)?.packageName ?? null : null; }, [packages]);
 
-  /* Passed / No reply: ONE state with the list's segmented control (Part C). Pressing it again clears it. */
-  const [kind, setKind] = useState<NoKind | null>(null);
-  const pressKind = useCallback((k: NoKind) => setKind((x) => (x === k ? null : k)), []);
-
-  /* Asked for more scrolls its carousel band into view; "Share your wall of no" the share sheet */
-  const moreRef = useRef<HTMLElement | null>(null);
-  const scrollTo = (el: HTMLElement | null, block: ScrollLogicalPosition) => el?.scrollIntoView({ block, behavior: reduced() ? "auto" : "smooth" });
-  /* v5 · the sections a glance card or a "→" link goes to, by id inside this page (every page stays mounted) */
+  /* ── the sections a label, a step or a button goes to ── */
   const pageRef = useRef<HTMLDivElement | null>(null);
-  const goSection = useCallback((id: "more" | "timing" | "wall" | "words") => {
-    /* ⚠️ COMPUTED, NOT scrollIntoView: the wall's pin sets the scroller's scroll-padding for keyboard row-walking, and
-       scrollIntoView adds it, so a section landed ~146px down instead of 20 (RS5 A2 found it). */
+  const goSection = useCallback((id: RspSection) => {
+    /* ⚠️ COMPUTED, NOT scrollIntoView: clear of the collapsed bar (Workspace headers v1), which is shown wherever a section
+       lands (its sticky top + its height, read off the bar itself), then 20 */
     const el = pageRef.current?.querySelector<HTMLElement>(`[data-rsp5-sec="${id}"]`);
     const sc = el?.closest<HTMLElement>(".wpg-scroll");
     if (!el || !sc) return;
-    /* Workspace headers v1: clear of the collapsed bar, which is shown wherever a section lands (its sticky top + its
-       height, read off the bar itself), then the same 20 */
     const bar = pageRef.current?.querySelector<HTMLElement>("[data-wsnh='slim']");
     const cover = bar ? (parseFloat(getComputedStyle(bar).top) || 0) + bar.offsetHeight : 0;
     sc.scrollTo({ top: sc.scrollTop + el.getBoundingClientRect().top - sc.getBoundingClientRect().top - cover - 20, behavior: reduced() ? "auto" : "smooth" });
   }, []);
-  const pressGlance = useCallback((k: GlanceKey) => {
-    if (k === "passed" || k === "noReply") { setKind(k); goSection("wall"); }
-    else goSection(k === "more" ? "more" : "timing");
-  }, [goSection]);
+  /* the tally's labels: asked for more → the carousel, passed → the collection, no answer yet → the Query Centre */
+  const pressKey = useCallback((k: TallyKey) => {
+    if (k === "w") navigate("/queries"); else goSection(k === "a" ? "more" : "wall");
+  }, [goSection, navigate]);
+  /* the grey band's three steps: the collection, In their words (when there is a note), Analytics */
+  const hasNotes = model.items.some(hasNote);
+  const pressStep = useCallback((k: WordStep) => {
+    if (k === "shape") navigate("/queries/analytics");
+    else if (k === "keep") goSection("wall");
+    else if (hasNotes) goSection("words");
+    else toast?.showToast({ message: "No notes recorded yet" });
+  }, [goSection, navigate, hasNotes, toast]);
+  /* Share your story (both buttons): the existing share builder, opened under the collection (decision 3) */
+  const [sharing, setSharing] = useState(false);
+  const share = useCallback(() => { setSharing(true); requestAnimationFrame(() => goSection("share")); }, [goSection]);
+  const toggleShare = useCallback(() => setSharing((x) => !x), []);
 
+  const empty = ready && counts.answered === 0;
   return (
     <WorkspacePageGrid scrollLabel="Responses" masthead={null} className="rsp5-wpg">
       {/* the outer element takes the grid's gutter (`.wpg-scroll > *`); the column inside breaks out of it to the
           list width, as packages v4's `.ppv-page > .pk4-col` does */}
       <div className="rsp-page">
-      <div className="rsp rsp5" data-rsp="page" ref={pageRef}>
-        {/* Workspace headers v1: the navy header, one for every state (loading, empty, filled) */}
-        <RspHeader msTitle={msTitle} loading={!ready} empty={ready && counts.answered === 0}
-          heard={model.page.replies} more={model.page.more} yourMove={model.glance.yourMove}
-          onRecord={openRecordPicker} onQueryCentre={() => navigate("/queries")} onWall={() => goSection("wall")} onSeeThem={() => goSection("more")} />
-        {/* Part F · nothing answered for this book: the empty page, and none of the populated page's parts. It
-            switches to the populated page the moment the first answer is recorded, with no reload. */}
-        {ready && counts.answered === 0 ? (
+      <div className="rsp rsp5 rsp15" data-rsp="page" data-rsp15-state={!ready ? "loading" : empty ? "none" : early ? "early" : "full"} ref={pageRef}>
+        <RspHeader msTitle={msTitle} loading={!ready} noReplies={model.tally.replies === 0} tally={model.tally}
+          early={early} nextDueMs={model.nextDueMs} nowMs={nowMs} canShare={ready && model.coll.length > 0}
+          more={model.page.more} yourMove={model.yourMove}
+          onRecord={openRecordPicker} onShare={share} onKey={pressKey} />
+        {/* Nothing back yet: the empty page, and none of the populated page's parts. It switches to the populated page
+            the moment the first answer is recorded, with no reload. */}
+        {!ready ? null : empty ? (
           <RspEmpty rows={model.rows} nowMs={nowMs}
-            weeksOf={(r) => { const a = agents.find((x) => x.id === r.query.agentId); return a?.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null; }}
-            onTodo={() => navigate("/todo")} />
+            weeksOf={(r) => { const a = agents.find((x) => x.id === r.query.agentId); return a?.responseTimeWeeks && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null; }} />
         ) : (
-          <>
-            <Rsp5Glance facts={ready ? model.glance : null} onCard={pressGlance} />
-            {ready ? (
-              <RspCarousel ref={moreRef} items={model.more} nowMs={nowMs} msTitle={msTitle}
-                selectedId={openId} onOpen={openAnswer} onAct={act} />
+          <div className="rsp15-body" data-rsp15="body">
+            {model.coll.length ? (
+              <RspWord n={model.coll.length} folded={responsesPrefsOf(currentUser).wordFolded}
+                onFold={currentUser ? (f) => updateUserPaths(wordFoldWrite(f)) : undefined} onStep={pressStep} />
             ) : null}
-            {ready ? (
-              <>
-                <Rsp5Band counts={model.page} items={model.items} few={isEarlyDays(counts.answered)} />
-                <Rsp5Showcase items={model.items} answered={counts.answered} few={isEarlyDays(counts.answered)} nowMs={nowMs} onGo={goSection} />
-                <Rsp5Timing items={model.items} waiting={model.page.waiting} quiet={model.quietDated} />
-                <Rsp5Words items={model.items} nowMs={nowMs} onOpen={openAnswer} />
-              </>
-            ) : null}
-            {ready ? (
-              <Rsp5Wall items={model.wallItems} nowMs={nowMs} msTitle={msTitle} kind={kind} onKind={setKind} selectedId={openId}
-                onOpen={openAnswer} active={!!routeActive} agentFacts={agentFacts} onVisible={setVisible} />
-            ) : null}
-          </>
+            <RspFacts items={model.items} early={early ? { out: model.page.waiting, queried: model.tally.queried, replies: model.tally.replies } : null}
+              onAnalytics={() => navigate("/queries/analytics")} />
+            <RspReadOn items={model.more} nowMs={nowMs} selectedId={openId} packageNameOf={packageNameOf} onOpen={openAnswer} onAct={act} />
+            <RspWords items={model.items} nowMs={nowMs} msTitle={msTitle} selectedId={openId} panelOpen={!!openItem} onOpen={openAnswer} />
+            <RspCollection coll={model.coll} nowMs={nowMs} msTitle={msTitle} selectedId={openId} sharing={sharing}
+              onShare={toggleShare} onOpen={openAnswer} onVisible={setVisible} />
+          </div>
         )}
         {ready ? <div className="rsp-foot"><AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} /></div> : null}
       </div>

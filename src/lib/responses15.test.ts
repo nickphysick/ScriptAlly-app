@@ -10,7 +10,7 @@ import { describe, expect, it } from "vitest";
 import { QueryStatus } from "../types";
 import {
   collFirstDir, collMonth, collShown, collectionOf, factsLine, firstReplyAvg, headerTally, listCollection, longestWait,
-  monthCount, noteStage, noteSwitch, notesFor, pageCounts, respItems, tallyClasses, tallyMarks, tookBar, tookWords,
+  monthCount, NOTE_ADVANCE_MS, noteStage, noteSwitch, notesFor, pageCounts, respItems, tallyClasses, tallyMarks, tookBar, tookWords,
   type RespRowInput,
 } from "./responses";
 import { FULL, EARLY, WAITING } from "../../tests/e2e/rs15Data.mjs";
@@ -102,6 +102,9 @@ describe("RS15 A · the line of facts", () => {
 });
 
 describe("RS15 A · In their words", () => {
+  it("the advance is nine seconds (decision 10; the page lock shortens it, this holds the real value)", () => {
+    expect(NOTE_ADVANCE_MS).toBe(9_000);
+  });
   it("six notes, newest first: five from passes and the revise and resubmit's", () => {
     const all = notesFor(items, "all");
     expect(all.map((i) => i.row.agentName)).toEqual(["Eleanor Whitlock", "Ben Okafor", "Daniel O’Rourke", "Hugo Lindqvist", "Rafael Costa", "Imogen Hale"]);
