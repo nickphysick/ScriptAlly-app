@@ -28,18 +28,19 @@ Two facts that decide many rows:
 | 9 | lib/qcFoot1522.ts:81,93,100,153; lib/qcThread152.ts:349,355,361 | `AGENT_TINT[..].fill` on `FootIcon` | footer disc | Query Centre, To-do | yes | 2 | yes: disc = card's Band via `--fdisc`; `tint` field removed |
 | 10 | QcCard152.tsx:245-247 | draft `--dr` ternary | dashed draft outline | Query Centre | yes | 2 | yes: agent draft = stage Mark |
 | 11 | queries/centre/qcv152card.css:61, :94 | `.qc152-disc`, `.qc152-av` | agent seals (paper) | Query Centre, To-do | yes | 2 | yes: navy seals (not a stage colour; the prompt's seal rule) |
-| 12 | queries/centre/qcv1522card.css:102, :115 | `.qc1522-sumo`, `.qc1522-ag .tk.on` (old offer sage `#e5eddf`/`#cddcc1`/`#b7cba5`) | offer summary + told ticks in the composer | Query Centre | yes | 2 | see Phase 2 commit |
+| 12 | queries/centre/qcv1522card.css:102, :115 | `.qc1522-sumo`, `.qc1522-ag .tk.on` (old offer sage `#e5eddf`/`#cddcc1`/`#b7cba5`) | offer summary + told ticks in the composer | Query Centre | yes | 2 | yes: the offer's Tint and Edge, ink on them |
 | 13 | lib/qc1512.ts:39-41 → QcWhoReplied.tsx:102 | `STATUS_FILL`, `STATUS_PALE` | Who replied pill cap | Query Centre | yes | 3 | yes: values read `STAGE_COLOURS` |
 | 14 | Queries.tsx:8236 `barKind=legacyTone153`; qcv153.css:273-280; qcv151.css:313-319 | Birds-eye current bar `[data-sk]` | Birds-eye | Query Centre | yes | 3 | yes: `data-sk` = stage; one colour per stage |
-| 15 | lib/qc150.ts:150-156 `stageTint`; qcv150.css:259-260 | `.qc150-t-*` | Birds-eye bar (always overridden by row 14 on desktop) | Query Centre | class applied, colour overridden | 3 | yes: stage keys, table bands |
+| 15 | lib/qc150.ts:150-156 `stageTint`; qcv150.css:259-260 | `.qc150-t-*` | Birds-eye bar (always overridden by row 14 on desktop) | Query Centre | class applied, colour overridden | 3 | yes: the hex rules are removed (row 14 draws the bar); `stageTint` stays — the phone reads it as logic (`hasAsked`) |
 | 16 | QcSlip153.tsx:177 `legacyTone153`; qcv153.css:23-26; lib/qc1533.ts:76-83 `tabAccent` | slip header + paperclip | Log a query's stage picker / slip preview | Query Centre | yes (QcLogStages) | 3 | yes: slip tone = stage, accent = `tabAccent157` |
 | 17 | lib/dash2.ts:99-101 | `BREAKDOWN_COLOR` (queried navy `#2d3a50`) | week breakdown segments + swatches | Dashboard | yes | 4 | yes: Bands |
 | 18 | lib/dashHover.ts:41-47 | `WEEK_GROUPS` colours (queried navy) | OneScreenChart callout | Dashboard | **colours unreachable** (OneScreenChart only under F1Queries) | 4 | yes (one line each) |
 | 19 | responses/RspWords.tsx:30 `noteTone`; responses15.css:130-131 | `p` / `x` tones (old rose) | In their words cards, pills, quote marks | Responses | yes | 4 | yes: tone = stage |
 | 20 | responses/RspPanel.tsx:34 `stripTone`; responses5.css:27-28, 61-64 | `of/you/ag/cl` | Responses slide-out strip | Responses | yes | 4 | yes: strip = stage Band, sheen on offer |
-| 21 | phone/v3/V3Parts.tsx:19-28 `statusFill` → phoneTokens.css `--pa-st-*` | asked pink / sent sand / offer slate / closed+Signed grey | glyph discs, phone query page band + agent bubbles, To-do band, Birds-eye bars | phone | yes | 5 | yes: Band of `stageOf` |
+| 21 | phone/v3/V3Parts.tsx:19-28 `statusFill` → phoneTokens.css `--pa-st-*` | asked pink / sent sand / offer slate / closed+Signed grey | glyph discs, phone query page band + agent bubbles, To-do band, Birds-eye bars | phone | yes | 5 | yes: Band of `stageOf` (Signed now with the offer); the query page strip, agent bubbles and the current Birds-eye segment take the sheen on an offer; the `--pa-st-*` tokens are unchanged (general phone palette) |
 | 22 | phone/PhoneDisc.tsx:17-25 `phoneFill` | same split | phone discs, Responses phone band + pill | phone | yes | 5 | yes: Band of `stageOf` |
 | 23 | QcCard152.tsx:488; QcLogStages.tsx:247 | confetti hexes | celebration confetti | Query Centre | yes | — | no: decorative, allow-listed |
+| 24 | dashboard/v2/dash2Feed.css:21-22; dashboard/f1/df1.css:310-311 | `[data-kind=request/offer] --t` (blue-grey `#e2e7ef`, sand `#f6ecd6`) | feed row wash for an agent's move | Dashboard | yes | 4 | yes: the stage's Tint (request partial, or full for the full and R&R, by the row's `data-status`; offer rose). Moved here from out of scope: the prompt names the feed |
 
 ## Out of scope — the colour means something other than the stage (unchanged)
 
@@ -48,7 +49,6 @@ Two facts that decide many rows:
 | contacts (`SEG_COLOUR`, AgentCard24 `SET_TONE`, agentCard.css, contactV262.css, agentPanel.css) | Contact list segments and sets | with you / with the agent / closed; agent health |
 | lib/qc1511.ts:261-262 `TINT`, `PILL_FILL`; lib/qcCardStory.ts:309 `STRIP_TINT`; QcQueryCard149.tsx:39 `CARD_TONE`; queryPanelHost.css:44-46 `--qp-court`; qcvOpenPanel.css:16-17 | court tones | whose move |
 | v60/Dash60Left.tsx:30 `CLOSED_STONES`, :32 `AGENT_SEG` | closed hoop stones | closed outcome by how far it got |
-| df1.css:310-311, v2/dash2Feed.css:21-22 `[data-kind=request/offer] --t` | feed row tint | event kind (a request may be partial or full) — see the report's rulings |
 | lib/todoHeader54.ts:20 `NEED_FILL`; todoHeader56 `RING56_FILL`; todoWs.css `--tw-*`; todoWs54.css:40 `.tws54-asks` | To-do buckets | task need (wait / nudge / quiet / house) |
 | lib/yourNotes.ts:131-133 | note buckets | read / planned / in the app |
 | queries/centre/qcv153thread.css:31 `.qc153-bkrow` | "Querying <book>" row | the book, not a stage |
@@ -88,7 +88,6 @@ src/components/queries/centre/QcCard152.tsx      confetti
 src/components/queries/centre/QcLogStages.tsx    confetti
 src/components/queries/centre/qcv153thread.css   book row
 src/components/queries/centre/qcv1531.css        dead court tiles
-src/components/queries/centre/qcv153.css         LEGACY slip tones kept for the unreachable ring's family only if still present
 src/lib/qc153.ts                                 LEGACY_TONE_FILL_153 (unreachable ring)
 src/components/todo/ws/todoWs.css                To-do buckets
 src/components/todo/ws/todoWs54.css              To-do asks row

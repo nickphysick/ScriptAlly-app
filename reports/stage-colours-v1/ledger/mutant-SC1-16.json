@@ -1,0 +1,42 @@
+[
+ {
+  "name": "glyph Offer: rgb(239, 205, 201)",
+  "ok": true,
+  "got": "rgb(239, 205, 201)"
+ },
+ {
+  "name": "glyph Full Requested: rgb(183, 201, 222)",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ },
+ {
+  "name": "glyph Partial Requested: rgb(228, 235, 242)",
+  "ok": false,
+  "got": "rgb(245, 230, 223)"
+ },
+ {
+  "name": "glyph Queried: rgb(239, 230, 214)",
+  "ok": true,
+  "got": "rgb(239, 230, 214)"
+ },
+ {
+  "name": "glyph Rejected: rgb(236, 234, 230)",
+  "ok": true,
+  "got": "rgb(236, 234, 230)"
+ },
+ {
+  "name": "phone glyphs cover ≥ 3 stages (offer, full, partial, queried, closed)",
+  "ok": true,
+  "got": "111"
+ },
+ {
+  "name": "phone query page strip found",
+  "ok": true,
+  "got": "{\"status\":\"Offer\",\"bg\":\"rgb(239, 205, 201)\",\"img\":\"linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%), none\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "name": "phone strip Offer: rgb(239, 205, 201)",
+  "ok": true,
+  "got": "rgb(239, 205, 201)"
+ }
+]

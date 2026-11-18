@@ -1,0 +1,52 @@
+[
+ {
+  "name": "Queried: footer disc is rgb(239, 230, 214)",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(239, 230, 214)\",\"img\":\"none\",\"ink\":\"rgb(28, 19, 15)\",\"seal\":false}"
+ },
+ {
+  "name": "Queried: footer mark ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Partial Requested: footer disc is rgb(228, 235, 242)",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(228, 235, 242)\",\"img\":\"none\",\"ink\":\"rgb(28, 19, 15)\",\"seal\":false}"
+ },
+ {
+  "name": "Partial Requested: footer mark ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Full Requested: footer disc is rgb(183, 201, 222)",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(183, 201, 222)\",\"img\":\"none\",\"ink\":\"rgb(28, 19, 15)\",\"seal\":false}"
+ },
+ {
+  "name": "Full Requested: footer mark ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer: footer disc is rgb(239, 205, 201)",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(239, 205, 201)\",\"img\":\"none\",\"ink\":\"rgb(28, 19, 15)\",\"seal\":false}"
+ },
+ {
+  "name": "Offer: footer mark ink",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Rejected: footer disc is rgb(236, 234, 230)",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(236, 234, 230)\",\"img\":\"none\",\"ink\":\"rgb(138, 128, 118)\",\"seal\":false}"
+ },
+ {
+  "name": "Rejected: footer mark ink",
+  "ok": true,
+  "got": "rgb(138, 128, 118)"
+ }
+]

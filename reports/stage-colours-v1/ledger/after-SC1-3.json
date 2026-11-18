@@ -1,0 +1,57 @@
+[
+ {
+  "name": "Queried: strip is rgb(239, 230, 214)",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(239, 230, 214)\",\"img\":\"none\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "name": "Queried: strip text ink, not navy",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Partial Requested: strip is rgb(228, 235, 242)",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(228, 235, 242)\",\"img\":\"none\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "name": "Partial Requested: strip text ink, not navy",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Full Requested: strip is rgb(183, 201, 222)",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(183, 201, 222)\",\"img\":\"none\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "name": "Full Requested: strip text ink, not navy",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer: strip is rgb(239, 205, 201)",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(239, 205, 201)\",\"img\":\"linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%), none\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "name": "Offer: strip text ink, not navy",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer strip has the sheen",
+  "ok": true,
+  "got": "linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%), none"
+ },
+ {
+  "name": "Rejected: strip is rgb(236, 234, 230)",
+  "ok": true,
+  "got": "{\"bg\":\"rgb(236, 234, 230)\",\"img\":\"none\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "name": "Rejected: strip text ink, not navy",
+  "ok": true,
+  "got": "rgb(28, 19, 15)"
+ }
+]

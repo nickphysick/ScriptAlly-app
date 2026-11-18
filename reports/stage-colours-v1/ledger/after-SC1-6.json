@@ -1,0 +1,67 @@
+[
+ {
+  "name": "Partial Requested card · writer \"Queried\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Full Requested card · writer \"Queried\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Full Requested card · writer \"Partial Sent\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Revise & Resubmit card · writer \"Queried\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Revise & Resubmit card · writer \"Partial Sent\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Offer card · writer \"Queried\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Offer card · writer \"Partial Sent\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Offer card · writer \"Full Sent\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Rejected card · writer \"Queried\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Full Sent card · writer \"Queried\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Full Sent card · writer \"Full Sent\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Partial Sent card · writer \"Queried\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ },
+ {
+  "name": "Partial Sent card · writer \"Partial Sent\" is paper",
+  "ok": true,
+  "got": "rgb(246, 243, 238) none"
+ }
+]

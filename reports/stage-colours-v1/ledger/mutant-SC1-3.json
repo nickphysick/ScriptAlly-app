@@ -1,0 +1,52 @@
+[
+ {
+  "name": "a non-quiet Queried card exists",
+  "ok": false,
+  "got": "none"
+ },
+ {
+  "name": "Partial Requested: strip is rgb(228, 235, 242)",
+  "ok": false,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "name": "Partial Requested: strip text ink, not navy",
+  "ok": false,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Full Requested: strip is rgb(183, 201, 222)",
+  "ok": false,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "name": "Full Requested: strip text ink, not navy",
+  "ok": false,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer: strip is rgb(239, 205, 201)",
+  "ok": false,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "name": "Offer: strip text ink, not navy",
+  "ok": false,
+  "got": "rgb(28, 19, 15)"
+ },
+ {
+  "name": "Offer strip has the sheen",
+  "ok": false,
+  "got": "none"
+ },
+ {
+  "name": "Rejected: strip is rgb(236, 234, 230)",
+  "ok": false,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(28, 19, 15)\"}"
+ },
+ {
+  "name": "Rejected: strip text ink, not navy",
+  "ok": false,
+  "got": "rgb(28, 19, 15)"
+ }
+]

@@ -17,7 +17,8 @@ import { openRoute, ensureSignedIn } from "./measure";
 import { STAGE_COLOURS, stageOf, type Stage } from "../../src/lib/stageColours";
 
 const PAGE = ".qc151.qc153";
-const PHASE = process.env.SA_PHASE === "before" ? "before" : "after";
+/** `mutant`: the mutation build (every lock must read red); its shots and ledgers never overwrite the after ones */
+const PHASE = process.env.SA_PHASE === "before" ? "before" : process.env.SA_PHASE === "mutant" ? "mutant" : "after";
 const DIR = "reports/stage-colours-v1";
 const SHOTS = "design-refs/stage-colours-v1/screens";
 const DESK = { width: 1512, height: 982 };
@@ -425,7 +426,7 @@ test.describe("Stage colours v1", () => {
   test("SC1-17 out of scope held — the Contact list is pixel-identical", async ({ page }) => {
     test.skip(PHASE === "before", "after only");
     const L = new Ledger("SC1-17");
-    const a = `${SHOTS}/before-contacts.png`, b = `${SHOTS}/after-contacts.png`;
+    const a = `${SHOTS}/before-contacts.png`, b = `${SHOTS}/${PHASE}-contacts.png`;
     L.check("both Contact list shots exist", existsSync(a) && existsSync(b), "");
     if (existsSync(a) && existsSync(b)) L.check("Contact list: identical bytes", readFileSync(a).equals(readFileSync(b)), `${readFileSync(a).length} / ${readFileSync(b).length}`);
     L.done(2);

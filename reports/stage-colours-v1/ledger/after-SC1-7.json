@@ -1,0 +1,67 @@
+[
+ {
+  "name": "Partial Requested card · agent \"Partial Requested\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested card · agent \"Partial Requested\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Requested card · agent \"Full Requested\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Revise & Resubmit card · agent \"Partial Requested\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Revise & Resubmit card · agent \"Revise & Resubmit\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Offer card · writer \"Queried\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Offer card · agent \"Partial Requested\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Offer card · writer \"Partial Sent\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Offer card · agent \"Full Requested\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Offer card · writer \"Full Sent\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Offer card · \"made an offer\" has the sheen",
+  "ok": true,
+  "got": "linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%), none"
+ },
+ {
+  "name": "Rejected card · agent \"Rejected\" has no sheen",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "Full Sent card · agent \"Full Requested\" has no sheen",
+  "ok": true,
+  "got": "none"
+ }
+]

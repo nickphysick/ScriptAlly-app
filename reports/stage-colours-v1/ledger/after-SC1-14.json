@@ -1,0 +1,62 @@
+[
+ {
+  "name": "carousel cards found (34)",
+  "ok": true,
+  "got": "Offer, Offer, Partial Requested, Revise & Resubmit, Full Requested, Partial Requested, Partial Requested, Partial Requested, Full Requested, Full Requested, Partial Requested, Partial Requested, Full Requested, Full Requested, Full Requested, Full Requested, Queried, Partial Sent, Partial Sent, Partial Sent, Partial Sent, Partial Sent, Full Sent, Queried, Queried, Queried, Queried, Full Requested, Partial Requested, Partial Requested, Offer, Partial Sent, Full Sent, Partial Sent"
+ },
+ {
+  "name": "the Offer card is rose rgb(239, 205, 201) under the sheen",
+  "ok": true,
+  "got": "rgb(239, 205, 201)"
+ },
+ {
+  "name": "a partial card is rgb(228, 235, 242)",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ },
+ {
+  "name": "a Revise and resubmit card is rgb(183, 201, 222)",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ },
+ {
+  "name": "Offer: band rgb(239, 205, 201)",
+  "ok": true,
+  "got": "rgb(239, 205, 201)"
+ },
+ {
+  "name": "Offer: the sheen",
+  "ok": true,
+  "got": "linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%), none"
+ },
+ {
+  "name": "Partial Requested: band rgb(228, 235, 242)",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ },
+ {
+  "name": "Revise & Resubmit: band rgb(183, 201, 222)",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ },
+ {
+  "name": "Full Requested: band rgb(183, 201, 222)",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ },
+ {
+  "name": "Queried: band rgb(239, 230, 214)",
+  "ok": true,
+  "got": "rgb(239, 230, 214)"
+ },
+ {
+  "name": "Partial Sent: band rgb(228, 235, 242)",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ },
+ {
+  "name": "Full Sent: band rgb(183, 201, 222)",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ }
+]
