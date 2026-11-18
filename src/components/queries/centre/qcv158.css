@@ -62,3 +62,29 @@
 .qc152 .nx-items li.none em { font: italic 400 14px var(--sp-serif) !important; color: #7a7066; }
 .qc152 .nx-grp.pend .nx-items { background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .qc152 .nx-grp.pend .nx-items li .r { color: #2a3a52; font-style: normal !important; font-weight: 600 !important; }
+
+/* ── §5 Notes: one list, the writing box fixed at the bottom ── */
+.qc152 .qc152-in > .qc152-body:has(> .qc152-notes > .nx-notes) { display: flex; flex-direction: column; }
+.qc152 .qc152-notes:has(> .nx-notes) { flex: 1 0 auto; display: flex; flex-direction: column; padding: 0; }
+.qc152 .nx-notes { flex: 1 0 auto; min-height: 100%; display: flex; flex-direction: column; padding: 12px 18px 14px; gap: 12px; font-family: var(--sp-serif); color: #1c130f; box-sizing: border-box; }
+.qc152 .nx-nl { flex: 1 1 auto; display: flex; flex-direction: column; gap: 10px; }
+.qc152 .nx-n { position: relative; padding: 10px 14px; border-radius: 12px; background: #f6f3ee; outline: none; }
+.qc152 .nx-n.them { background: var(--bt); box-shadow: inset 0 0 0 1px var(--be); }
+.qc152 .nx-n:focus-visible { box-shadow: 0 0 0 2px #2a3a52; }
+.qc152 .nx-n header { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; font: 400 13.5px var(--sp-serif) !important; color: #55504a; }
+.qc152 .nx-n header span { font: inherit !important; }
+.qc152 .nx-n header b { font: 600 13.5px var(--sp-serif) !important; color: #1c130f; }
+.qc152 .nx-n header .pin { margin-left: auto; color: #2a3a52; font-weight: 600 !important; }
+.qc152 .nx-n p { margin: 0; font: 400 16px/1.45 var(--sp-serif) !important; white-space: pre-wrap; color: #1c130f; }
+.qc152 .nx-n.them p { font-style: italic !important; }
+.qc152 .nx-acts { display: flex; gap: 14px; margin-top: 0; max-height: 0; opacity: 0; overflow: hidden; }
+.qc152 .nx-n:hover .nx-acts, .qc152 .nx-n:focus-within .nx-acts { margin-top: 8px; max-height: 30px; opacity: 1; }
+.qc152 .nx-nempty { margin: auto 0; text-align: center; }
+.qc152 .nx-nempty b { display: block; font: 400 19px var(--sp-type) !important; margin-bottom: 6px; color: #1c130f; }
+.qc152 .nx-nempty span { display: block; max-width: 34ch; margin: 0 auto; font: italic 400 15px/1.45 var(--sp-serif) !important; color: #7a7066; }
+/* the writing box: never scrolls away; it sits where it sits with no notes, 14px above the body's foot */
+.qc152 .nx-nc { position: sticky; bottom: 14px; z-index: 1; box-shadow: 0 -14px 14px -6px #fff, 0 14px 0 2px #fff; flex: none; display: flex; align-items: flex-end; gap: 8px; padding: 8px; border-radius: 14px; background: #f6f3ee; }
+.qc152 .nx-nc textarea { flex: 1; min-width: 0; height: 44px; min-height: 44px; max-height: 120px; resize: none; border: 0; outline: 0; background: #fff; border-radius: 9px; padding: 10px 12px; font: 400 16px/1.4 var(--sp-serif) !important; color: #1c130f; box-shadow: inset 0 0 0 1px #e3dbcf; box-sizing: border-box; }
+.qc152 .nx-nc textarea::placeholder { font-style: italic; color: #9a948b; }
+.qc152 .nx-nc button { all: unset; box-sizing: border-box; cursor: pointer; height: 44px; padding: 0 16px; border-radius: 22px; background: #2a3a52; color: #fff; font: 600 14.5px var(--sp-serif) !important; white-space: nowrap; }
+.qc152 .nx-nc button:disabled { background: #cfc7bc; cursor: default; }

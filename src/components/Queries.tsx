@@ -6436,7 +6436,23 @@ export const Queries: React.FC<{
         total={order.length}
         notes={journalEntries.filter((j) => j.queryId === q.id)
           .sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? "")))
-          .map((j) => ({ id: j.id, text: j.entryText, when: j.createdAt ? fieldDay(new Date(j.createdAt as string).getTime()) : "" }))}
+          .map((j) => ({ id: j.id, text: j.entryText, when: j.createdAt ? fieldDay(new Date(j.createdAt as string).getTime()) : "",
+            ms: j.createdAt ? new Date(j.createdAt as string).getTime() : null, pinned: !!(j as { pinned?: boolean }).pinned }))}
+        /* Query card v158 §5 — a note's actions. Pinning is the journal's own `pinned` (one per query: pinning a note
+           unpins any other); Make it a task and Send to Corkboard copy the text through addUserTask (dated today, or
+           undated: an undated task is a Corkboard note) and leave the note where it is. */
+        onPinNote={(id, on) => {
+          const others = on ? journalEntries.filter((j) => j.queryId === q.id && j.id !== id && (j as { pinned?: boolean }).pinned) : [];
+          void Promise.all([...others.map((j) => pinJournalEntry(j.id, false)), pinJournalEntry(id, on)])
+            .then(() => showToast({ message: on ? "Pinned to the top" : "Unpinned" }));
+        }}
+        onNoteTask={(text) => {
+          const d = new Date();
+          const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+          void addUserTask({ text, queryId: q.id, agentId: ag?.id, manuscriptId: q.manuscriptId, dueDate: today })
+            .then(() => showToast({ message: "On your to-do list for today" }));
+        }}
+        onNoteCork={(text) => { void addUserTask({ text, queryId: q.id }).then(() => showToast({ message: "Pinned to your Corkboard" })); }}
         mode={qcCardMode}
         /* PHONE APP v2, PART 4 — on a phone a response is recorded in the response journey's flow layout, the same
            walk as every other journey; the card's inline form stays the desktop's */

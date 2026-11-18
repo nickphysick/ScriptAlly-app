@@ -32,6 +32,7 @@ import { FlowHead, FLOW_WORDS, RECORD_LINE } from "../../shared/FlowHead";
 import { STAGE_STEPS, stageIndex } from "../../../lib/queriesPhone";
 import { QcCard152, type QcCard152Data, type QcCard152Props } from "./QcCard152";
 import type { ReplyAct } from "../../../lib/qcThread152";
+import { NotesTab158, quotesOf } from "./QcNotes158";
 
 
 /** the band's tint and ink, and the pill's ground, per set (the landing card's With you / With the agent / Closed;
@@ -153,7 +154,12 @@ export interface QcQueryCard149Props {
   primary: { label: string; respond: boolean; close?: boolean } | null;
   index: number;
   total: number;
-  notes: { id: string; text: string; when: string }[];
+  /** the query's journal notes; `ms` and `pinned` feed v158's Notes tab (the older panes read `when`) */
+  notes: { id: string; text: string; when: string; ms?: number | null; pinned?: boolean }[];
+  /** v158 §5 — a note's actions on the desktop card; absent where the card is read-only (the To-do desk's preview) */
+  onPinNote?: (id: string, pinned: boolean) => void;
+  onNoteTask?: (text: string) => void;
+  onNoteCork?: (text: string) => void;
   mode: CardMode;
   onMode: (m: CardMode) => void;
   tab?: CardTab;
@@ -343,7 +349,9 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
       <QcCard152 row={r} nowMs={nowMs} d={v152} first={p.agent.first} msTitle={p.msTitle} bookChips={p.bookChips} packageName={p.packageName}
         wishlist={p.wishlist.text} email={p.contact.email} website={p.contact.website} websiteHref={p.contact.websiteHref}
         tab={tab} onTab={setTab}
-        notes={<NotesPane first={p.agent.first} notes={p.notes} onAdd={p.onAddNote} resetKey={r.id} />}
+        notes={<NotesTab158 first={p.agent.first || "the agent"} nowMs={nowMs} resetKey={r.id} onAdd={p.onAddNote}
+          notes={p.notes.map((n) => ({ id: n.id, text: n.text, ms: n.ms ?? null, pinned: !!n.pinned }))} quotes={quotesOf(v152.steps)}
+          onPin={p.onPinNote ?? null} onTask={p.onNoteTask ?? null} onCork={p.onNoteCork ?? null} />}
         onClose={p.onClose}
         onPencil={() => (p.onPencil152 ? p.onPencil152() : p.onMode("edit"))}
         onEditStep={(id) => (p.onEditStep152 ? p.onEditStep152(id) : (setTab("tracking"), p.onMode("edit")))}
@@ -714,7 +722,7 @@ const AgentPane: React.FC<{ p: QcQueryCard149Props; first: string | null }> = ({
   );
 };
 
-/** the Notes pane: the query's own notes (the journal), newest first, and one field that adds a note on blur */
+/** the Notes pane of the older (phone) card: the query's own notes, newest first, and one field that adds a note on blur */
 const NotesPane: React.FC<{ first: string | null; notes: { id: string; text: string; when: string }[]; onAdd: (t: string) => void; resetKey: string }> = ({ first, notes, onAdd, resetKey }) => {
   const [draft, setDraft] = useState("");
   const ref = useRef<HTMLTextAreaElement>(null);
