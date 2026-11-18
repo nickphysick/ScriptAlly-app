@@ -4,8 +4,11 @@
  *
  * CORKBOARD v2 — the locks, CB1–CB14 (ref design-refs/corkboard-v13/), on the rendered page at 1512 × 982 and
  * 1280 × 800 (CB12 at 390). The fixture is seedCorkboardV2.mjs (`cb2seed-`), seeded and cleaned in the same run;
- * every lock that writes puts the account back before it ends. `CB2_MUTATE=<lock>` names the mutation a run was
- * built with (cb2Mutate.mjs), so its ledger is kept apart.
+ * every lock that writes puts the account back before it ends. `CB2_MUTATE=<lock>` named the mutation a run was
+ * built with (cb2Mutate.mjs, deleted by Corkboard v15), so its ledger is kept apart.
+ *
+ * ⚠️ CORKBOARD v15 (18 Nov): from 768px up the page is Cb15Desk, so only CB12 (the phone) and CB14 (the rules) still
+ *    run here; the rest are `test.skip` with their successor named (tests/e2e/RETIRED-corkboard-v2-1.md).
  */
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync } from "node:fs";
@@ -32,7 +35,9 @@ async function setView(page: Page, v: "board" | "piles") {
   await page.waitForTimeout(700);
 }
 
-test("CB1 colours: the five papers, and the old three mapped when read with no write on load", async ({ page }) => {
+/* RETIRED (Corkboard v15, 18 Nov): the desktop (>=768px) is Cb15Desk now and this case read v2's wall, menu or
+   pop-ups there. Successor: tests/e2e/corkboardV15.measure.ts C19 (legacy papers mapped, no write on load) and C6 (colour), on the v15 wall. */
+test.skip("CB1 colours: the five papers, and the old three mapped when read with no write on load", async ({ page }) => {
   const L = new Ledger("CB1");
   seeder("legacy");
   await only(page);
@@ -110,7 +115,9 @@ test.skip("CB2 header: the Contact list's panel, the counts, and no zero glance 
   L.done(16);
 });
 
-test("CB3 glance filter: linked to agents leaves exactly the linked notes at full opacity, and clears", async ({ page }) => {
+/* RETIRED (Corkboard v15, 18 Nov): the desktop (>=768px) is Cb15Desk now and this case read v2's wall, menu or
+   pop-ups there. Successor: tests/e2e/corkboardV15.measure.ts C1 (each figure filters to exactly its notes; v15 hides what a filter leaves out, v2 faded it). */
+test.skip("CB3 glance filter: linked to agents leaves exactly the linked notes at full opacity, and clears", async ({ page }) => {
   const L = new Ledger("CB3");
   await only(page);
   /* RE-POINTED (Workspace headers v1, 14 Nov): the At a glance rows are the phone panel's only now (the desktop opens on the
@@ -130,7 +137,9 @@ test("CB3 glance filter: linked to agents leaves exactly the linked notes at ful
   L.done(3); /* RE-POINTED (Workspace headers v1, 14 Nov): one size, three readings */
 });
 
-test("CB4 font: a post-it's words are Special Elite", async ({ page }) => {
+/* RETIRED (Corkboard v15, 18 Nov): the desktop (>=768px) is Cb15Desk now and this case read v2's wall, menu or
+   pop-ups there. Successor: tests/e2e/corkboardV15.measure.ts C5 (the words are Special Elite). */
+test.skip("CB4 font: a post-it's words are Special Elite", async ({ page }) => {
   const L = new Ledger("CB4");
   await only(page);
   for (const vp of SIZES) {
@@ -141,7 +150,9 @@ test("CB4 font: a post-it's words are Special Elite", async ({ page }) => {
   L.done(2);
 });
 
-test("CB5 clamp: a long note shows Read all, a short one does not", async ({ page }) => {
+/* RETIRED (Corkboard v15, 18 Nov): the desktop (>=768px) is Cb15Desk now and this case read v2's wall, menu or
+   pop-ups there. Successor: tests/e2e/corkboardV15.measure.ts C5 (only the long note is cut; Read all opens it). */
+test.skip("CB5 clamp: a long note shows Read all, a short one does not", async ({ page }) => {
   const L = new Ledger("CB5");
   await only(page);
   for (const vp of SIZES) {
@@ -154,7 +165,9 @@ test("CB5 clamp: a long note shows Read all, a short one does not", async ({ pag
   L.done(6);
 });
 
-test("CB6 pinned: first in every sort and on top of its pile", async ({ page }) => {
+/* RETIRED (Corkboard v15, 18 Nov): the desktop (>=768px) is Cb15Desk now and this case read v2's wall, menu or
+   pop-ups there. Successor: tests/e2e/corkboardV15.measure.ts C3 (Pinned to top first in every order) and C9 (stacks). */
+test.skip("CB6 pinned: first in every sort and on top of its pile", async ({ page }) => {
   const L = new Ledger("CB6");
   await only(page);
   for (const vp of SIZES) {
@@ -177,7 +190,9 @@ test("CB6 pinned: first in every sort and on top of its pile", async ({ page }) 
   L.done(10);
 });
 
-test("CB7 reorder: one order leaf, My order, and the note lands where the line showed", async ({ page }) => {
+/* RETIRED (Corkboard v15, 18 Nov): the desktop (>=768px) is Cb15Desk now and this case read v2's wall, menu or
+   pop-ups there. Successor: tests/e2e/corkboardV15.measure.ts C7 (a drag writes My order, the note before its target). */
+test.skip("CB7 reorder: one order leaf, My order, and the note lands where the line showed", async ({ page }) => {
   const L = new Ledger("CB7");
   await only(page);
   for (const vp of SIZES) {
@@ -205,7 +220,9 @@ test("CB7 reorder: one order leaf, My order, and the note lands where the line s
   L.done(8);
 });
 
-test("CB8 piles: a drop sets the pile's tag first and keeps the rest; Undo restores; New pile mints", async ({ page }) => {
+/* RETIRED (Corkboard v15, 18 Nov): the desktop (>=768px) is Cb15Desk now and this case read v2's wall, menu or
+   pop-ups there. Successor: tests/e2e/corkboardV15.measure.ts C8 (a drop on a tag keeps the other tags) and C6 (Move to stack, Undo). */
+test.skip("CB8 piles: a drop sets the pile's tag first and keeps the rest; Undo restores; New pile mints", async ({ page }) => {
   const L = new Ledger("CB8");
   await only(page);
   await open(page, ROUTE, SIZES[0]);
@@ -238,7 +255,9 @@ test("CB8 piles: a drop sets the pile's tag first and keeps the rest; Undo resto
   L.done(5);
 });
 
-test("CB9 task: Add a task writes what /todo's composer writes; Turn into a task writes only dueDate (and colour if absent)", async ({ page }) => {
+/* RETIRED (Corkboard v15, 18 Nov): the desktop (>=768px) is Cb15Desk now and this case read v2's wall, menu or
+   pop-ups there. Successor: tests/e2e/corkboardV15.measure.ts C6 (Turn into a task writes the Sunday's date; Undo) — Add a task is still the To-do list's own AddTask, unchanged. */
+test.skip("CB9 task: Add a task writes what /todo's composer writes; Turn into a task writes only dueDate (and colour if absent)", async ({ page }) => {
   const L = new Ledger("CB9");
   await only(page);
   await open(page, ROUTE, SIZES[0]);
@@ -282,7 +301,9 @@ test("CB9 task: Add a task writes what /todo's composer writes; Turn into a task
   L.done(4);
 });
 
-test("CB10 remember: the view and the sort survive a reload", async ({ page }) => {
+/* RETIRED (Corkboard v15, 18 Nov): the desktop (>=768px) is Cb15Desk now and this case read v2's wall, menu or
+   pop-ups there. Successor: tests/e2e/corkboardV15.measure.ts C20 (the view and the order survive a reload). */
+test.skip("CB10 remember: the view and the sort survive a reload", async ({ page }) => {
   const L = new Ledger("CB10");
   await only(page);
   await open(page, ROUTE, SIZES[0]);
@@ -301,7 +322,9 @@ test("CB10 remember: the view and the sort survive a reload", async ({ page }) =
   L.done(3);
 });
 
-test("CB11 empty: Pick a colour to start and four examples; Keep this creates a note and leaves the empty state", async ({ page }) => {
+/* RETIRED (Corkboard v15, 18 Nov): the desktop (>=768px) is Cb15Desk now and this case read v2's wall, menu or
+   pop-ups there. Successor: tests/e2e/corkboardV15.measure.ts C2 (Pick a colour to start) and C11 (day one's three examples, Keep this with Undo). */
+test.skip("CB11 empty: Pick a colour to start and four examples; Keep this creates a note and leaves the empty state", async ({ page }) => {
   const L = new Ledger("CB11");
   await only(page, "cb2none-");
   await open(page, ROUTE, SIZES[0]);

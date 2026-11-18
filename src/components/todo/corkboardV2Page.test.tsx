@@ -54,8 +54,10 @@ afterEach(() => { seed.userTasks = []; });
 
 /* RE-POINTED (Workspace headers v1, 14 Nov): from 768px up the page opens on the shared navy header — "3 notes", "on
    your board", the two buttons, Pick a colour on the right. The panel below is the phone's, and these hold it there. */
+/* RE-POINTED (Corkboard v15, 18 Nov): the right-hand block is the ref's `.brk` — up to three figures, a zero one not
+   shown — or, with none above zero, Pick a colour and the five papers; an empty board says "Pick a colour to start". */
 describe("the desktop's navy header", () => {
-  it("the count, on your board, + New note and Add a task, and Pick a colour with five swatches", () => {
+  it("the count, on your board, + New note and Add a task, and the figures that are not zero", () => {
     seed.userTasks = [note("a", { dueDate: "2026-11-09", colour: "butter" }), note("b"), note("c")];
     const html = render();
     expect(html).toContain('data-wsnh-page="corkboard"');
@@ -63,17 +65,46 @@ describe("the desktop's navy header", () => {
     expect(plain(html)).toContain("on your board");
     expect(html).toContain('data-cb2="add-task"');
     expect(html).not.toContain('data-cb2="header"');
-    expect(plain(html)).toContain("Pick a colour");
-    for (const name of ["butter", "blush", "powder", "sand", "stone"]) expect(html, name).toContain(`aria-label="New ${name} note"`);
-    expect([...html.matchAll(/class="cb2-hsw"/g)].length).toBe(5);
+    expect(html).toContain('data-cb15="figures"');
+    expect(html).toContain('data-fig="onTodo"');
+    expect(html).not.toContain('data-fig="linked"');
+    expect(html).not.toContain('data-fig="pinned"');
+    expect(plain(html)).toContain("1on your to-do list");
+    expect(html).not.toContain('data-cb15="pick"');
     expect(html.match(/<h1\b/g)?.length).toBe(1);
   });
-  it("empty: No notes yet, only + New note, no right block", () => {
+
+  it("a manuscript link is not linked to an agent; an agent and a query are", () => {
+    seed.userTasks = [note("a", { manuscriptId: "m1" }), note("b", { agentId: "x" }), note("c", { queryId: "q" })];
+    const html = render();
+    expect(plain(html)).toContain("2linked to agents");
+  });
+
+  it("with no figure above zero it is Pick a colour and the five papers", () => {
+    seed.userTasks = [note("a"), note("b")];
+    const html = render();
+    expect(html).toContain('data-cb15="pick"');
+    expect(plain(html)).toContain("Pick a colour");
+    expect(plain(html)).not.toContain("Pick a colour to start");
+    for (const name of ["butter", "blush", "powder", "sand", "stone"]) expect(html, name).toContain(`aria-label="New ${name} note"`);
+    expect([...html.matchAll(/class="cb2-hsw"/g)].length).toBe(5);
+  });
+  it("empty: No notes yet, only + New note, and Pick a colour to start; the desk is day one", () => {
     seed.userTasks = [];
     const html = render();
     expect(html).toContain(">No notes yet</h1>");
     expect(html).not.toContain('data-cb2="add-task"');
-    expect(html).not.toContain('data-wsnh="right"');
+    expect(html).toContain('data-wsnh="right"');
+    expect(plain(html)).toContain("Pick a colour to start");
+    expect(plain(html)).toContain("A few to get you going");
+    expect(plain(html)).toContain("General querying advice to start your board. Keep any you like, or write your own.");
+    expect([...html.matchAll(/data-cb15-example="/g)].length).toBe(3);
+    expect([...html.matchAll(/>Keep this</g)].length).toBe(3);
+    for (const t of ["Check each agent’s submission guidelines before you send.", "Send queries in small batches, five or so at a time.", "Address each agent by name, and say in a line why you chose them."]) {
+      expect(plain(html).replace(/&#x27;/g, "’"), t).toContain(t);
+    }
+    expect(plain(html)).toContain("What you can do with a note");
+    expect(html).toContain('data-cb15="ghost-new"');
   });
 });
 

@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "C7",
+  "where": "order written",
+  "ok": true,
+  "detail": "mine · 6/7 · Order saved. Now showing My order."
+ },
+ {
+  "lock": "C7",
+  "where": "wall follows",
+  "ok": true,
+  "detail": "4 cols"
+ },
+ {
+  "lock": "C7",
+  "where": "Order says My order",
+  "ok": true,
+  "detail": "My order"
+ },
+ {
+  "lock": "C7",
+  "where": "pinned line holds",
+  "ok": true,
+  "detail": "no write"
+ },
+ {
+  "lock": "C8",
+  "where": "drop on a tag",
+  "ok": true,
+  "detail": "[\"cb15seed-tag-comps\",\"cb15seed-tag-to-check\"] · Moved to #comps"
+ },
+ {
+  "lock": "C8",
+  "where": "undo",
+  "ok": true,
+  "detail": "[\"cb15seed-tag-agents\",\"cb15seed-tag-to-check\"]"
+ }
+]

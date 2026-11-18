@@ -90,10 +90,10 @@ export const CbMenu: React.FC<CbMenuProps> = ({ anchor, pinned, onTodo, view, pi
       {view === "piles" ? (
         <>
           <hr />
-          <div className="cb2-mlbl" role="presentation">Move to pile</div>
+          <div className="cb2-mlbl" role="presentation">Move to stack</div>
           {piles.map((p) => <React.Fragment key={p.k || "__loose"}>{item(p.name, { a: "pile", k: p.k })}</React.Fragment>)}
           {/* Corkboard v2.1: New pile… ends the group, and opens Start a pile with this note ticked */}
-          {item("New pile…", { a: "newpile" })}
+          {item("New stack…", { a: "newpile" })}
         </>
       ) : null}
       <hr />

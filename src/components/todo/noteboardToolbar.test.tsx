@@ -80,15 +80,15 @@ describe("⚠️ the chip row is DERIVED — #All, then the tags actually in use
   it("the RENDERED row says the same thing, in the same order", () => {
     seed.userTasks = [note("a", "one", ["t-letter"]), note("b", "two", ["t-agents"])];
     const html = render();
-    /* RE-POINTED (Corkboard v2): the chips are the tool row's pills (`data-cb2="chips"`) */
-    const at = html.indexOf('data-cb2="chips"');
+    /* RE-POINTED (Corkboard v15): the desktop's tag pills (`data-cb15="pills"`), which end at "+ New stack" */
+    const at = html.indexOf('data-cb15="pills"');
     expect(at, "no chip row").toBeGreaterThan(-1);        // the anchor, before the slice
-    const stop = html.indexOf('data-cb2="view"', at);
-    expect(stop, "no view switch after the row").toBeGreaterThan(at);
+    const stop = html.indexOf('data-cb15="new-stack"', at);
+    expect(stop, "no + New stack after the row").toBeGreaterThan(at);
     const row = html.slice(at, stop);
     /* the ORDER is a property of the row, so it is read off the row. "All" has no hash (the ref's pill), and
        every pill states its count from the UNFILTERED list. */
-    const labels = ['>All <span class="cb2-chip">2</span>', '>#agents <span class="cb2-chip">1</span>', '>#letter <span class="cb2-chip">1</span>'];
+    const labels = ['>All<em>2</em>', '>#agents<em>1</em>', '>#letter<em>1</em>'];
     for (const [i, label] of labels.entries()) {
       expect(row.indexOf(label), label).toBeGreaterThan(-1);
       if (i > 0) expect(row.indexOf(label)).toBeGreaterThan(row.indexOf(labels[i - 1]));
@@ -127,7 +127,7 @@ describe("⚠️ Board / Column is a segmented toggle — the sentence control i
        and the sort pill — drawn by CbToolRow. The add bar is retired (the header's buttons and swatches add). */
     expect(page).toContain("<CbToolRow");
     const row = readFileSync(join(here, "corkboard/CbToolRow.tsx"), "utf8");
-    for (const control of ["cb2-find", "cb2-pill", "cb2-seg", "Find a note", "Corkboard", "Piles"]) expect(row, control).toContain(control);
+    for (const control of ["cb2-find", "cb2-pill", "cb2-seg", "Find a note", "Corkboard", "Stacks"]) expect(row, control).toContain(control);
     for (const gone of ["cb-addrow", "nb-viewtog", "nb-search", ">Examples<", "Pin a note\n"]) expect(page, gone).not.toContain(gone);
     /* the dropdown the chips replaced is gone — bounded token, never a substring */
     expect(page).not.toMatch(/["\s`]nb-tagwrap["\s`]/);

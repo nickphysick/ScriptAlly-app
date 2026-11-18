@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "C6",
+  "where": "four labelled actions on every note",
+  "ok": true,
+  "detail": "14 notes"
+ },
+ {
+  "lock": "C6",
+  "where": "hover reveals",
+  "ok": true,
+  "detail": "opacity 1"
+ },
+ {
+  "lock": "C6",
+  "where": "pin",
+  "ok": true,
+  "detail": "Pinned to top"
+ },
+ {
+  "lock": "C6",
+  "where": "pin undo",
+  "ok": true,
+  "detail": "undefined"
+ },
+ {
+  "lock": "C6",
+  "where": "colour",
+  "ok": true,
+  "detail": "Colour changed · blush"
+ },
+ {
+  "lock": "C6",
+  "where": "colour undo",
+  "ok": true,
+  "detail": "butter"
+ },
+ {
+  "lock": "C6",
+  "where": "turn into a task",
+  "ok": true,
+  "detail": "This weekby Sun 22 Nov | Next weekby Sun 29 Nov | Laterby Sun 6 Dec · On your to-do list for Sun 22 Nov"
+ },
+ {
+  "lock": "C6",
+  "where": "turn undo",
+  "ok": true,
+  "detail": "undefined"
+ },
+ {
+  "lock": "C6",
+  "where": "take off",
+  "ok": true,
+  "detail": "Taken off your to-do list"
+ },
+ {
+  "lock": "C6",
+  "where": "take off undo",
+  "ok": true,
+  "detail": "2026-11-22"
+ },
+ {
+  "lock": "C6",
+  "where": "more items",
+  "ok": true,
+  "detail": "Edit | Move to front | Move to back | #agents | #letter | #synopsis | #to-check | Loose notes | New stack… | Remove"
+ },
+ {
+  "lock": "C6",
+  "where": "move to front",
+  "ok": true,
+  "detail": "mine · cb15seed-e13 · Moved to the front. Order is now My order."
+ },
+ {
+  "lock": "C6",
+  "where": "front undo",
+  "ok": true,
+  "detail": "{\"sort\":\"new\",\"order\":[]}"
+ },
+ {
+  "lock": "C6",
+  "where": "move to stack",
+  "ok": true,
+  "detail": "[\"cb15seed-tag-letter\"] · Moved to #letter"
+ },
+ {
+  "lock": "C6",
+  "where": "stack undo",
+  "ok": true,
+  "detail": "[\"cb15seed-tag-comps\"]"
+ },
+ {
+  "lock": "C6",
+  "where": "remove",
+  "ok": true,
+  "detail": "Note removed · confirm 0"
+ },
+ {
+  "lock": "C6",
+  "where": "remove undo",
+  "ok": true,
+  "detail": "Most agents close over Christm"
+ },
+ {
+  "lock": "C6",
+  "where": "edit",
+  "ok": true,
+  "detail": "Your note"
+ }
+]

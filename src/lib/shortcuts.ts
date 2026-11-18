@@ -60,6 +60,8 @@ export const SHORTCUTS = {
   contactsHk:       { chords: [k("h")], label: "Open Housekeeping", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsFind:     { chords: [k("/")], label: "Find an agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   corkboardNew:     { chords: [k("n")], label: "New note", scope: "Corkboard", bound: "src/components/todo/TodoNoteboardPage.tsx", inFields: "stands down" },
+  /* Corkboard v15 (desktop): focus Find a note; Escape in the field clears it */
+  corkboardFind:    { chords: [k("/")], label: "Find a note", scope: "Corkboard", bound: "src/components/todo/TodoNoteboardPage.tsx", inFields: "stands down" },
   contactsDown:     { chords: [k("j"), k("ArrowDown")], label: "Next agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsUp:       { chords: [k("k"), k("ArrowUp")], label: "Previous agent", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },
   contactsOpen:     { chords: [k("Enter")], label: "Open the agent's card", scope: "Contact list", bound: "src/components/agents/AgentList.tsx", inFields: "stands down" },

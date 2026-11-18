@@ -188,8 +188,11 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     /* RE-POINTED (Workspace headers v1, 14 Nov): at 768px and up the empty board's header is the shared navy header
        ("No notes yet", + New note, no right block); the v13 sentence and "Pick a colour to start" are the phone panel's
        (held by corkboardV2Page.test.tsx's phone render) */
+    /* RE-POINTED (Corkboard v15, 18 Nov): the empty board's navy header shows "Pick a colour to start" on the right,
+       and the desk is day one — "A few to get you going" and the three examples */
     expect(html).toContain(">No notes yet</h1>");
-    expect(html).not.toContain("Pick a colour to start");
+    expect(html).toContain("Pick a colour to start");
+    expect(html).toContain("A few to get you going");
     expect(html).not.toContain("<aside");             // the contract's optional sidebar, absent
   });
 
@@ -197,9 +200,9 @@ describe("the To-do pages RENDER — the check the source-string tests cannot ma
     seed.userTasks = [{ id: "n1", userId: "u1", text: "Open with the flood", detail: "Chapter one drags.", done: false, createdAt: "2026-08-01T09:00:00Z", updatedAt: "" }];
     const html = render(<TodoNoteboardPage onNavigate={() => {}} />);
     expect(html).toContain("Open with the flood");
-    /* RE-POINTED (Corkboard v2): the wall, and "Added {d Mon}" (v13's wording) */
-    expect(html).toContain('data-cb2="wall"');
-    expect(html).toContain("Added 1 Aug");
+    /* RE-POINTED (Corkboard v15): the desktop's wall, and when it was added ("1 Aug", the ref's wording) */
+    expect(html).toContain('data-cb15="wall"');
+    expect(html).toContain('class="cb15-nwhen">1 Aug<');
   });
 });
 

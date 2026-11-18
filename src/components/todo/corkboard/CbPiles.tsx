@@ -61,12 +61,12 @@ export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wa
       <div className="cb2-piles" data-cb2="piles">
         <div className="cb2-phead" data-cb2="piles-head">
           <div>
-            <h2>Your piles</h2>
+            <h2>Your stacks</h2>
             <p>{piles.some((p) => p.k)
-              ? "A pile is a tag. Open one to see its notes, or drag a note onto another pile to move it."
-              : "A pile gathers notes on the same theme, like agents to look into or synopsis notes. Start one and pick the notes to go in it."}</p>
+              ? "Each stack is a tag. Open one to read it."
+              : "A stack gathers notes on the same theme, like agents to look into or synopsis notes. Start one and pick the notes to go in it."}</p>
           </div>
-          <button type="button" className="cb2-btn cb2-btn--navy cb2-btn--sm2" data-cb2="start-pile-btn" onClick={() => onStart?.()}>+ Start a pile</button>
+          <button type="button" className="cb2-btn cb2-btn--navy cb2-btn--sm2" data-cb2="start-pile-btn" onClick={() => onStart?.()}>+ Start a stack</button>
         </div>
         <div className="cb2-pgrid">
           {piles.map((p) => {
@@ -90,10 +90,10 @@ export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wa
           })}
           <div className="cb2-gwrap">
             <button type="button" className="cb2-ghost" data-cb2="ghost-pile" onClick={() => onStart?.()}>
-              <b>+ Start a pile</b>
+              <b>+ Start a stack</b>
               <small>Name it, then pick the notes</small>
             </button>
-            <div className="cb2-glab">New pile</div>
+            <div className="cb2-glab">New stack</div>
           </div>
         </div>
       </div>
@@ -109,7 +109,7 @@ export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wa
   return (
     <div className="cb2-piles" data-cb2="pile-open">
       <div className="cb2-shelf" data-cb2="shelf">
-        <button type="button" className="cb2-back" data-cb2="all-piles" onClick={() => onOpen(null)}>← All piles</button>
+        <button type="button" className="cb2-back" data-cb2="all-piles" onClick={() => onOpen(null)}>← All stacks</button>
         {piles.map((p) => (
           <button key={p.k || "__loose"} type="button" className={`cb2-mini${p.k === open ? " cb2-mini--on" : ""}${over === p.k ? " cb2-mini--over" : ""}`}
             data-mini={p.k} aria-label={`${label(p.k)}, ${nNotes(p.notes.length)}`} onClick={() => onOpen(p.k)}
@@ -130,7 +130,7 @@ export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wa
           <span className="cb2-sq" aria-hidden="true"><i />+</span>
           {naming ? (
             <span className="cb2-pname">
-              <input ref={nameRef} value={name} placeholder="Name the pile" aria-label="Name the pile" data-cb2="pile-name"
+              <input ref={nameRef} value={name} placeholder="Name the stack" aria-label="Name the stack" data-cb2="pile-name"
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === "Enter") { e.preventDefault(); const id = naming; setNaming(null); if (name.trim()) onNewPile(id, name); }
@@ -138,14 +138,14 @@ export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wa
                 }}
                 onBlur={() => setNaming(null)} />
             </span>
-          ) : <><b>New pile</b><small>drop a note here</small></>}
+          ) : <><b>New stack</b><small>drop a note here</small></>}
         </div>
       </div>
       <div className="cb2-openhead">
         <h2>{label(cur.k)}</h2><span>{nNotes(cur.notes.length)}</span><span className="cb2-grow" />
         {cur.k && !cur.notes.length && canRemove?.(cur.k)
-          ? <button type="button" className="cb2-rmpile" data-cb2="remove-pile" onClick={() => onRemove?.(cur.k)}>Remove pile</button> : null}
-        {cur.k ? <button type="button" className="cb2-btn cb2-btn--sm2" data-cb2="add-notes" onClick={() => onAddNotes?.(cur.k)}>+ Add notes to this pile</button> : null}
+          ? <button type="button" className="cb2-rmpile" data-cb2="remove-pile" onClick={() => onRemove?.(cur.k)}>Remove stack</button> : null}
+        {cur.k ? <button type="button" className="cb2-btn cb2-btn--sm2" data-cb2="add-notes" onClick={() => onAddNotes?.(cur.k)}>+ Add notes to this stack</button> : null}
       </div>
       {cur.notes.length
         ? <CbWall notes={wall} draggable={draggable} reorder={false} menuFor={menuFor} onOpen={onOpenNote} onMenu={onMenu} />
@@ -153,7 +153,7 @@ export const CbPiles: React.FC<CbPilesProps> = ({ piles, label, open, onOpen, wa
           <div className="cb2-pempty" data-cb2="pile-empty"
             onDragOver={draggable ? (e) => e.preventDefault() : undefined}
             onDrop={draggable ? (e) => { e.preventDefault(); const id = e.dataTransfer.getData("text/plain"); if (id) onMove(id, cur.k); } : undefined}>
-            <b>Nothing in this pile yet</b>Add notes with the button above, or drag one here from another pile.
+            <b>Nothing in this stack yet</b>Add notes with the button above, or drag one here from another stack.
           </div>
         )}
     </div>

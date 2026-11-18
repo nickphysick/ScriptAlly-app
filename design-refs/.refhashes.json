@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
     "design-refs/agent-card-housekeeping-v7.html": "d5246918d1e8ba7cefc845505d8c02384dfefc94d8f69fa2132e46d62e48f61e",
@@ -1218,10 +1218,34 @@
     "design-refs/comps-v32/screens/15-day-one-1280@2x.png": "1dea3e7b8266cd4632d8a225ac2fa4a7fc7e3cb5fef1986ca1364dea5fca9100",
     "design-refs/comps-v32/screens/15-day-one-1512@2x.png": "690cd9263751ca6a2561dd31cfeaa5536be1fdb01c1c8ac3731fb89458c16f6e",
     "design-refs/comps-v32/SHA256SUMS": "d9819fcb8a1da7e6e14f9866f4e735ba9212966d974bfb84970a195900e78a78",
-    "design-refs/responses-v15/responses-v15.html": "ef3a0c3cc2955f1cf31983a6dfe68eff680fe81f3c7430910a88a4a7bd8e50da"
+    "design-refs/responses-v15/responses-v15.html": "ef3a0c3cc2955f1cf31983a6dfe68eff680fe81f3c7430910a88a4a7bd8e50da",
+    "design-refs/corkboard-v15/corkboard-v15.html": "1ac9fb0d4a588cebbc586d83397734628aa7d29a13c592d2bab47ff030911fe2",
+    "design-refs/corkboard-v15/screens/01-everyday-top-1512@2x.png": "d02ed28cbe03b17b0f67c6a32848da523147c44119a0aafaccb7791f80a4400e",
+    "design-refs/corkboard-v15/screens/02-note-hover-actions-1512@2x.png": "e3d4309e2c8af76da73eedd868e1b69e55c2eb93a2ed5ff14eb0e30960a1f8e8",
+    "design-refs/corkboard-v15/screens/03-more-menu-1512@2x.png": "fa2dbb4c145f6a2063881d19fcff60aac0b94dc9d99fae07ad5905249bf605d4",
+    "design-refs/corkboard-v15/screens/04-change-colour-1512@2x.png": "842cfd61c799b5e64954d8012981ed86eb8877390c25aeb71e0ba273fac883e0",
+    "design-refs/corkboard-v15/screens/05-turn-into-a-task-1512@2x.png": "5a35d6deaac8e22918e452b5059ff62f969a79fe085a53aba9c89c2246cbac93",
+    "design-refs/corkboard-v15/screens/06-add-a-task-1512@2x.png": "892afe06cff548225205a943413a02431e1f327fb2e24de8d6a3c3be7625eff2",
+    "design-refs/corkboard-v15/screens/07-new-note-link-finder-1512@2x.png": "d836ee5c1f9d899b40422582a6fecf83a940e69d871b13193b7603875b66d07e",
+    "design-refs/corkboard-v15/screens/08-new-note-linked-1512@2x.png": "c7659434a6a98779beefcf3d567482b7bfb53182fa52d0c2e004f3ab51af7c4e",
+    "design-refs/corkboard-v15/screens/09-your-note-edit-1512@2x.png": "da23232fb4d42441e970e2228cff3517c9839b1a77d1c2d2c63965a8a2b0e2c2",
+    "design-refs/corkboard-v15/screens/10-figure-filter-to-do-1512@2x.png": "637bad5cf12720f9f6533e9f311bdb23b5e548738c3de4c353c8b8cf97f58654",
+    "design-refs/corkboard-v15/screens/11-about-one-agent-1512@2x.png": "66d7171afea3a102347b0099c16e08fcdd3d44946fbe842db0290ac9b125bb01",
+    "design-refs/corkboard-v15/screens/12-find-1512@2x.png": "8d1d029e86cc17a49e373a4b84a373d4b137aa3cbb9ace9bdf104093ae60f8a0",
+    "design-refs/corkboard-v15/screens/13-no-notes-match-1512@2x.png": "fc06e555273f3ecab57e9abecf8cca761697050d2b5991ce7090dc4f51bb15c3",
+    "design-refs/corkboard-v15/screens/14-start-a-stack-1512@2x.png": "afb1ee7f61b41f2c925faab4666d49f50a9b2b05e6562d35531c01c5df14d6db",
+    "design-refs/corkboard-v15/screens/15-stacks-1512@2x.png": "59b7a11bf5a0ea29e8a52eb795f16295cd82e7e5838ed8ee284b95f9c1e81564",
+    "design-refs/corkboard-v15/screens/16-stack-open-1512@2x.png": "b01e379bdc213c7edb517b1d1e665d41b0a974e50bcd4ac3dab1c7d6390932c5",
+    "design-refs/corkboard-v15/screens/17-just-started-1512@2x.png": "308efefc4a2e9ccc75b0f6cd8de96a115c5d45ddde81b4a6aac995fa9c941952",
+    "design-refs/corkboard-v15/screens/18-day-one-1512@2x.png": "5989709c448281510d51ad1525b15c06d5d5eba30ef9370d157589182e0fa3cc",
+    "design-refs/corkboard-v15/screens/19-everyday-full-page-1280.png": "708e77ef4be6517ef9eeb824996718dfcee090603b927c7903307d2c76f31490",
+    "design-refs/corkboard-v15/screens/19-everyday-full-page-1512.png": "fa097161bfd12cf00ed373a734cfd77a8ed46daf2422c1bcd0e8dfec38cfc238",
+    "design-refs/corkboard-v15/screens/20-day-one-full-page-1280.png": "058821ac10f583eeb0f840bd803fb427e5bff71b2d430c2b79f2e675a3a37baf",
+    "design-refs/corkboard-v15/screens/20-day-one-full-page-1512.png": "d1f78012625e1385f10bd5d2090c4ebb800ee92a512bee7e858271b2d1236cc7",
+    "design-refs/corkboard-v15/screens/21-everyday-full-page-1100.png": "07a0782358fd92b9a50e9d02573d38721084323cdbc022e50a1cb82e777151ec"
   },
   "superseded": {
-    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",
+    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
     "design-refs/manuscripts/manuscripts-v13.html": "Superseded 9 Oct by design-refs/manuscripts/manuscripts-v21.html (manuscripts v21, the Contact list look); kept for history.",
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history."
   }

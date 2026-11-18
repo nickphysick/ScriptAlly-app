@@ -30,8 +30,12 @@ import { newTag } from "../../lib/todoTags";
 import {
   boardPrefs, chipCounts, dropOrder, frontBack, glance as glanceOf, inGlance, linkFields, linkOf, piles as pilesOf, sortBoard, stillStarted, tagsForPile,
   type BoardSort, type BoardView, type GlanceKey, type NoteLink,
-  dayLabel,
+  dayLabel, figures as figuresOf, inFigure, aboutRows as aboutRowsOf, aboutOf, quietBoard, DAY_ONE_EXAMPLES, addedWhen, sundayOf,
 } from "../../lib/corkboard";
+import { Cb15Desk, type Cb15Agent, type Cb15Link } from "./corkboard/Cb15Desk";
+import { Cb15AddTask, Cb15NoteDialog, Cb15StartStack, Cb15TurnTask, type Cb15Draft } from "./corkboard/Cb15Dialogs";
+import { getStatusLabel } from "../StatusPill";
+import { resolveScopedManuscript } from "../../lib/shellSidebar";
 import { agentPrimary } from "../../lib/agentDisplay";
 import { openAgentCard } from "../../lib/agentCardStore";
 import { openQueryPanel } from "../../lib/queryPanelStore";
@@ -54,6 +58,7 @@ import "./tasksLayout.css";
 import "./taskChrome.css";
 import "./todoNoteboard.css";
 import "./corkboard/corkboard.css";
+import "./corkboard/corkboard15.css";
 
 export interface TodoNoteboardPageProps {
   onNavigate: (tab: string, subPageName?: string) => void;
@@ -106,6 +111,10 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   }, [collectionsReady, storedTasks, settled, holdMs]);
 
   const phone = usePhoneWidth();
+  /* Corkboard v15: from 768px up the desktop page (Cb15Desk and its pop-ups); below it, the phone keeps v2's */
+  const wide = useCbWide();
+  const wideRef = useRef(wide);
+  wideRef.current = wide;
   const [search, setSearch] = useState("");
   const [tagSel, setTagSel] = useState<string | null>(null);
   const [special, setSpecial] = useState<GlanceKey | null>(null);
@@ -250,8 +259,9 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
       }
       await updateUserTask(note.id, { dueDate: due });
       setTaskFor(null);
-      flash(`On your to-do list for ${dayLabel(due)}. The note stays here.`, {
-        label: "Undo", fn: async () => { await updateUserTask(note.id, { dueDate: null }); flash("Taken off your to-do list. The note stays here."); },
+      /* Corkboard v15: the desktop says the ref's words; the phone keeps v2's */
+      flash(wideRef.current ? `On your to-do list for ${dayLabel(due)}` : `On your to-do list for ${dayLabel(due)}. The note stays here.`, {
+        label: "Undo", fn: async () => { await updateUserTask(note.id, { dueDate: null }); flash(wideRef.current ? "Taken off your to-do list" : "Taken off your to-do list. The note stays here."); },
       });
     } catch {
       flash("Couldn’t add that to your tasks — try again?");
@@ -262,7 +272,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     const was = note.dueDate;
     try { await updateUserTask(note.id, { dueDate: null }); }
     catch { flash("Couldn’t detach that — try again?"); return; }
-    flash("Taken off your to-do list. The note stays here.", was ? {
+    flash(wideRef.current ? "Taken off your to-do list" : "Taken off your to-do list. The note stays here.", was ? {
       label: "Undo", fn: async () => { await updateUserTask(note.id, { dueDate: was }); flash("Back on your to-do list"); },
     } : undefined);
   };
@@ -360,8 +370,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     const was = n.tags ?? [];
     const next = tagsForPile(was, ids[0]);
     try { await updateUserTask(n.id, { tags: next }); }
-    catch { flash("Couldn’t start that pile — try again?"); return; }
-    flash(`Started a new pile: #${name.trim().replace(/^#/, "")}`, {
+    catch { flash("Couldn’t start that stack — try again?"); return; }
+    flash(`Started a new stack: #${name.trim().replace(/^#/, "")}`, {
       label: "Undo", fn: async () => { await updateUserTask(n.id, { tags: was.length ? was : null }); },
     });
   };
@@ -385,7 +395,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   };
   const removePile = async (k: string) => {
     try { await updateUserPaths({ "todoPrefs.noteboard.started": prefs.started.filter((x) => x !== k) }); }
-    catch { flash("Couldn’t remove that pile — try again?"); return; }
+    catch { flash("Couldn’t remove that stack — try again?"); return; }
     setOpenPile(null);
     flash(`Removed ${pileName(k)}`, { label: "Undo", fn: async () => { await reStart(k); setOpenPile(k); } });
   };
@@ -399,7 +409,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     let k = sp.k;
     if (!k) {
       const got = await resolveTag(name);
-      if (!got) { flash("Couldn’t start that pile — try again?"); return; }
+      if (!got) { flash("Couldn’t start that stack — try again?"); return; }
       k = got[0];
     }
     const pile = k;
@@ -408,11 +418,11 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     const before = moved.map((n) => [n.id, [...(n.tags ?? [])]] as const);
     try {
       await Promise.all(moved.map((n) => { const next = tagsForPile(n.tags, pile); return updateUserTask(n.id, { tags: next.length ? next : null }); }));
-    } catch { flash(sp.k ? "Couldn’t add those — try again?" : "Couldn’t start that pile — try again?"); return; }
+    } catch { flash(sp.k ? "Couldn’t add those — try again?" : "Couldn’t start that stack — try again?"); return; }
     /* a pile started with no notes is remembered here, so it stays listed while empty (Part C) */
     if (!sp.k && !moved.length && !prefs.started.includes(pile)) {
       try { await updateUserPaths({ "todoPrefs.noteboard.started": [...prefs.started, pile] }); }
-      catch { flash("Couldn’t start that pile — try again?"); return; }
+      catch { flash("Couldn’t start that stack — try again?"); return; }
     }
     setStartFor(null);
     setTagSel(null);
@@ -478,15 +488,215 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     },
   });
 
+
+  /* ══ Corkboard v15 — the desktop (ref design-refs/corkboard-v15/). The same notes, prefs and writes as v2; the desk
+     hides what a filter leaves out (v2 faded it), and every write answers with the ref's words and an Undo. ══ */
+  const [about, setAbout] = useState<string | null>(null);
+  const [draft15, setDraft15] = useState<Cb15Draft | null>(null);
+  const [stack15, setStack15] = useState<{ note: UserTask | null } | null>(null);
+  const findRef = useRef<HTMLInputElement | null>(null);
+  const agentOfQuery = (qid: string) => queries.find((q) => q.id === qid)?.agentId;
+  const agentName = (id: string) => { const a = agents.find((x) => x.id === id); return a ? agentPrimary(a) : "An agent"; };
+  const storedMs = typeof window === "undefined" ? null : (() => { try { return window.localStorage.getItem("scriptally_active_manuscript_id"); } catch { return null; } })();
+  const activeMs = resolveScopedManuscript(manuscripts, storedMs);
+  /** an agent's status: that agent's query on the active manuscript, if there is one (decision 7) */
+  const agentStatus = (agentId: string): { status: string | null; word: string | null } => {
+    const q = activeMs ? queries.find((x) => x.agentId === agentId && x.manuscriptId === activeMs.id) : undefined;
+    return q ? { status: String(q.status), word: getStatusLabel(q.status) } : { status: null, word: null };
+  };
+  const link15 = (n: Pick<UserTask, "agentId" | "queryId" | "manuscriptId">): Cb15Link | null => {
+    const l = linkOf(n);
+    if (!l) return null;
+    if (l.kind === "query") {
+      const q = queries.find((x) => x.id === l.id);
+      const name = q ? agentName(q.agentId) : "A query";
+      return { kind: "query", initials: initials(name), name, status: q ? String(q.status) : null, word: q ? getStatusLabel(q.status) : null };
+    }
+    if (l.kind === "agent") { const name = agentName(l.id); return { kind: "agent", initials: initials(name), name, status: null, word: null }; }
+    const m = manuscripts.find((x) => x.id === l.id);
+    const name = m?.title || "Your manuscript";
+    return { kind: "manuscript", initials: initials(name), name, status: null, word: null };
+  };
+  const agentCard = (id: string, notes: UserTask[]): Cb15Agent => {
+    const a = agents.find((x) => x.id === id);
+    const name = agentName(id);
+    return { id, name, initials: initials(name), agency: a?.agency ?? "", ...agentStatus(id), notes };
+  };
+  const aboutRows15 = useMemo(() => aboutRowsOf(board, agentOfQuery, agentName).filter((r) => agents.some((a) => a.id === r.agentId)),
+    [board, queries, agents]); // eslint-disable-line react-hooks/exhaustive-deps
+  const aboutCards = aboutRows15.map((r) => agentCard(r.agentId, r.notes));
+  const aboutNow = about ? aboutCards.find((c) => c.id === about) ?? agentCard(about, []) : null;
+  const matches15 = (n: UserTask) => {
+    const q = search.trim().toLowerCase();
+    if (q && !(noteMatchesSearch(n, search) || (n.tags ?? []).some((t) => tagLabel(t).toLowerCase().includes(q)) || (link15(n)?.name ?? "").toLowerCase().includes(q))) return false;
+    if (view === "piles") { if (openPile !== null && (n.tags?.[0] ?? "") !== openPile) return false; }
+    else if (tagSel && !(n.tags ?? []).includes(tagSel)) return false;
+    if (special && !inFigure(n, special)) return false;
+    if (about && aboutOf(n, agentOfQuery) !== about) return false;
+    return true;
+  };
+  const shown15 = wide ? board.filter(matches15) : [];
+  const narrowing15 = !!(search.trim() || (view === "board" && tagSel) || special || about);
+  const started15 = started;
+  const pillTags = useMemo(() => {
+    const ids = new Set<string>();
+    for (const n of board) for (const t of n.tags ?? []) if (userTags.some((d) => d.id === t)) ids.add(t);
+    for (const k of started15) ids.add(k);
+    return [...ids].sort((a, b) => tagLabel(a).localeCompare(tagLabel(b))).map((id) => ({ id, n: counts.get(id) ?? 0 }));
+  }, [board, started15.join(","), userTags, counts]); // eslint-disable-line react-hooks/exhaustive-deps
+  const stacks15 = pilesOf(board, tagLabel, started15);
+  const sunday15 = sundayOf(todayLocal());
+  const toTools = () => {
+    const el = rootRef.current?.querySelector<HTMLElement>('[data-cb15="desk"]');
+    if (!el) return;
+    const still = typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    el.scrollIntoView({ block: "start", behavior: still ? "auto" : "smooth" });
+  };
+  const clearFilters = () => { setSearch(""); setTagSel(null); setSpecial(null); setAbout(null); };
+
+  /** "+ New note" on the desktop: the paper as picked, the open stack or tag pill as its stack, the picked agent as
+   *  its link (the ref's openNote) */
+  const openComposer15 = (colour?: NoteColour) => {
+    const k = view === "piles" ? openPile : tagSel;
+    setDraft15({ body: "", colour: colour ?? lastColour(), tag: k ? tagLabel(k) : "", link: about ? { kind: "agent", id: about } : null, pinned: false });
+  };
+  const openEditor15 = (n: UserTask) =>
+    setDraft15({ id: n.id, body: n.text, colour: noteColour(n), tag: firstTagLabel(n, userTags), link: linkOf(n), pinned: !!n.pinned });
+
+  const undoLeaf = (label: string, fn: () => Promise<void>) => ({ label, fn: async () => { await fn(); flash("Undone"); } });
+  const pin15 = async (n: UserTask) => {
+    const next = !n.pinned;
+    try { await updateUserTask(n.id, { pinned: next }); } catch { flash("Couldn’t pin that — try again?"); return; }
+    flash(next ? "Pinned to top" : "Unpinned", undoLeaf("Undo", () => updateUserTask(n.id, { pinned: !next })));
+  };
+  const colour15 = async (n: UserTask, c: NoteColour) => {
+    if (noteColour(n) === c && n.colour !== undefined) return;
+    const receipt = noteReceipt(n);
+    const landed = await setUserTaskColour(n.id, c);
+    if (!landed) { flash("Couldn’t change the colour — try again?"); return; }
+    flash("Colour changed", undoLeaf("Undo", () => restoreUserTask(receipt)));
+  };
+  /** ONE write: the order leaf and the sort leaf together; Undo puts both back */
+  const order15 = async (ids: string[], said: string) => {
+    const was = { order: [...prefs.order], sort };
+    try { await updateUserPaths({ "todoPrefs.noteboard.order": ids, "todoPrefs.noteboard.sort": "mine" }); }
+    catch { flash("Couldn’t save that order — try again?"); return; }
+    flash(said, undoLeaf("Undo", () => updateUserPaths({ "todoPrefs.noteboard.order": was.order, "todoPrefs.noteboard.sort": was.sort })));
+  };
+  const frontBack15 = (n: UserTask, where: "front" | "back") =>
+    void order15(frontBack(board.map((x) => x.id), n.id, where), where === "front" ? "Moved to the front. Order is now My order." : "Moved to the back. Order is now My order.");
+  const reorder15 = (from: string, before: string) =>
+    void order15(dropOrder(board.map((x) => x.id), from, before, false), sort === "mine" ? "Order saved" : "Order saved. Now showing My order.");
+  const remove15 = async (n: UserTask) => {
+    const receipt = noteReceipt(n);
+    try { await deleteUserTask(n.id); } catch { flash("Couldn’t remove that — try again?"); return; }
+    flash("Note removed", undoLeaf("Undo", () => restoreUserTask(receipt)), 8000);
+  };
+  const keep15 = async (i: number) => {
+    const ex = DAY_ONE_EXAMPLES[i];
+    if (!ex) return;
+    let id: string | undefined;
+    try {
+      id = await addUserTask({ text: ex.body });
+      if (id && ex.paper !== "butter") await setUserTaskColour(id, ex.paper);
+    } catch { flash("Couldn’t keep that — try again?"); return; }
+    if (!id) { flash("Couldn’t keep that — try again?"); return; }
+    setFresh(id);
+    const made = id;
+    flash("Kept. It’s your note now.", undoLeaf("Undo", () => deleteUserTask(made)));
+  };
+  /** Start a stack: mint the tag through the app's own minter; with a note, file it there (its other tags kept) */
+  const startStack15 = async (name: string) => {
+    const note = stack15?.note ?? null;
+    const ids = await resolveTag(name).catch(() => undefined);
+    if (!ids) { flash("Couldn’t start that stack — try again?"); return; }
+    const k = ids[0];
+    setStack15(null);
+    if (note) {
+      const was = note.tags ?? [];
+      try { await updateUserTask(note.id, { tags: tagsForPile(was, k) }); } catch { flash("Couldn’t start that stack — try again?"); return; }
+      flash(`Moved to #${name}`, undoLeaf("Undo", () => updateUserTask(note.id, { tags: was.length ? [...was] : null })));
+      return;
+    }
+    if (!prefs.started.includes(k) && !board.some((n) => (n.tags?.[0] ?? "") === k)) {
+      try { await updateUserPaths({ "todoPrefs.noteboard.started": [...prefs.started, k] }); }
+      catch { flash("Couldn’t start that stack — try again?"); return; }
+    }
+    flash(`#${name} is ready. Drag notes onto it.`, undoLeaf("Undo", () => updateUserPaths({ "todoPrefs.noteboard.started": startedRef.current.filter((x) => x !== k) })));
+  };
+  /** Save note: a new one is written plain, then its paper and its pin follow (never part of a create) */
+  const save15 = async () => {
+    const d = draft15;
+    if (!d || saving) return;
+    const body = d.body.trim();
+    if (!body) return;
+    setSaving(true);
+    try {
+      const typed = d.tag.trim().replace(/^#+/, "");
+      if (!d.id) {
+        const tagIds = typed ? await resolveTag(typed) : undefined;
+        const l = d.link;
+        const link = l ? (l.kind === "agent" ? { agentId: l.id } : l.kind === "query" ? { queryId: l.id } : { manuscriptId: l.id }) : {};
+        const id = await addUserTask({ text: body, ...(tagIds ? { tags: tagIds } : {}), ...link });
+        if (!id) { flash("Couldn’t add that note — try again?"); return; }
+        if (d.colour !== "butter") { const landed = await setUserTaskColour(id, d.colour); if (!landed) flash("Added — but the colour didn’t save. It’s butter for now."); }
+        if (d.pinned) await updateUserTask(id, { pinned: true });
+        try { sessionStorage.setItem(LAST, d.colour); } catch { /* private mode */ }
+        setDraft15(null);
+        setFresh(id);
+        /* a new note the filters would hide clears them, so it is seen landing (the ref's rule) */
+        const k = tagIds?.[0] ?? "";
+        const fits = (!search.trim() || body.toLowerCase().includes(search.trim().toLowerCase()))
+          && (view === "piles" ? openPile === null || openPile === k : !tagSel || tagSel === k)
+          && (!special || (special === "pinned" ? d.pinned : special === "linked" ? !!(l && l.kind !== "manuscript") : false))
+          && (!about || (l?.kind === "agent" && l.id === about));
+        if (!fits) { clearFilters(); if (view === "piles") setOpenPile(k); }
+        flash("Note added to your board", undoLeaf("Undo", () => deleteUserTask(id)));
+        return;
+      }
+      const note = userTasks.find((t) => t.id === d.id);
+      if (!note) { setDraft15(null); return; }
+      const receipt = noteReceipt(note);
+      const next = editCommit(note.text, d.body);
+      if (next !== note.text) await updateUserTask(note.id, { text: next });
+      if (d.colour !== noteColour(note)) { const landed = await setUserTaskColour(note.id, d.colour); if (!landed) flash("Saved — but the colour didn’t. Try it again?"); }
+      /* the Stack row sets the FIRST tag and keeps the rest (decision 3) */
+      if (typed.toLowerCase() !== firstTagLabel(note, userTags).toLowerCase()) {
+        const k = typed ? (await resolveTag(typed))?.[0] : "";
+        if (k !== undefined) { const t = tagsForPile(note.tags, k); await updateUserTask(note.id, { tags: t.length ? t : null }); }
+      }
+      const was = linkOf(note);
+      if ((was?.kind ?? "") !== (d.link?.kind ?? "") || (was?.id ?? "") !== (d.link?.id ?? "")) await updateUserTask(note.id, linkFields(d.link));
+      if (!!note.pinned !== d.pinned) await updateUserTask(note.id, { pinned: d.pinned });
+      try { sessionStorage.setItem(LAST, d.colour); } catch { /* private mode */ }
+      setDraft15(null);
+      flash("Note saved", undoLeaf("Undo", () => restoreUserTask(receipt)));
+    } catch {
+      flash("Couldn’t save that — try again?");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   /* N starts a new note — only while this page is the one on screen, never in a field or over a dialog */
   const rootRef = useRef<HTMLDivElement | null>(null);
   const openNew = useRef<() => void>(() => {});
-  openNew.current = () => openComposer();
+  openNew.current = () => (wideRef.current ? openComposer15() : openComposer());
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
-      if (!matchesShortcut(SHORTCUTS.corkboardNew, e) || shortcutBlocked(e)) return;
+      const isNew = matchesShortcut(SHORTCUTS.corkboardNew, e);
+      /* Corkboard v15: "/" focuses Find a note on the desktop — through the registry and its guard, like N */
+      const isFind = matchesShortcut(SHORTCUTS.corkboardFind, e);
+      if ((!isNew && !isFind) || shortcutBlocked(e)) return;
       const root = rootRef.current;
       if (!root || root.getBoundingClientRect().height === 0) return;
+      if (isFind) {
+        const f = wideRef.current ? findRef.current : null;
+        if (!f) return;
+        e.preventDefault();
+        f.focus();
+        return;
+      }
       e.preventDefault();
       openNew.current();
     };
@@ -496,18 +706,19 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
 
   const nothingMatches = view === "board" && narrowing && matching.size === 0;
   const empty = settled && board.length === 0;
-  const wide = useCbWide();
 
   return (
     <div className="t-f12 spine-root">
       {/* ⚠️ THE TOKENS SCOPE HERE, NOT ON THE ROOT: `tasksViewport` requires the exact `className="t-f12 spine-root"`
           on the Tasks pages, so a page that needs a class of its own hangs it one level down. */}
-      <div className="tdb-wrap today-off nb-scope cb2" ref={rootRef}>
+      <div className={`tdb-wrap today-off nb-scope cb2${wide ? " cb15" : ""}`} ref={rootRef}>
         <WorkspacePageGrid className="tpl-wpg nb-wpg" scrollLabel="Corkboard" masthead={null}>
           <div className="nb-group cb2-page" data-cb="page" data-cb2="page" data-loading={settled ? undefined : ""}>
             {/* Workspace headers v1: the desktop opens on the shared navy header; the phone keeps its panel */}
             {wide ? (
-              <CbNavyHeader count={settled ? board.length : null} onNew={(c) => openComposer(c)} onTask={openTaskComposer} />
+              <CbNavyHeader count={settled ? board.length : null} figures={figuresOf(board)} special={special}
+                onSpecial={(k) => { setSpecial((cur) => (cur === k ? null : k)); setOpenPile(null); if (view !== "board") void setBoardView("board"); window.setTimeout(toTools, 0); }}
+                onNew={(c) => openComposer15(c)} onTask={openTaskComposer} />
             ) : (
               <CbHeader
                 count={settled ? board.length : null}
@@ -518,7 +729,53 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
                 onTask={openTaskComposer}
               />
             )}
-            {empty ? <CbEmpty onKeep={(ex) => void keepExample(ex)} /> : (
+            {wide ? (
+              <Cb15Desk
+                settled={settled}
+                board={board}
+                shown={shown15}
+                narrowing={narrowing15}
+                view={view}
+                onView={(v) => { setOpenPile(null); setTagSel(null); void setBoardView(v); }}
+                sort={sort}
+                onSort={(v) => void setBoardSort(v)}
+                find={search}
+                onFind={setSearch}
+                findRef={findRef}
+                tags={pillTags}
+                tag={tagSel}
+                onTag={setTagSel}
+                special={special}
+                onClearSpecial={() => setSpecial(null)}
+                about={aboutNow}
+                onAbout={(id) => { setAbout(id); setTagSel(null); if (id) window.setTimeout(toTools, 0); }}
+                aboutRows={aboutCards}
+                quiet={quietBoard(board)}
+                stacks={stacks15}
+                openStack={openPile}
+                onOpenStack={(k) => { setOpenPile(k); if (k !== null && view !== "piles") void setBoardView("piles"); }}
+                tagLabel={tagLabel}
+                linkOf={link15}
+                added={(n) => addedWhen(n.createdAt, new Date())}
+                fresh={fresh}
+                todayYmd={todayYmd}
+                sundayYmd={sunday15}
+                onNew={() => openComposer15()}
+                onEdit={openEditor15}
+                onOpenLink={openLink}
+                onPin={(n) => void pin15(n)}
+                onColour={(n, c) => void colour15(n, c)}
+                onTask={(n) => setTaskFor(n)}
+                onUntask={(n) => void detachTask(n)}
+                onFrontBack={frontBack15}
+                onReorder={reorder15}
+                onStack={(n, k) => void moveToPile(n.id, k)}
+                onNewStack={(n) => setStack15({ note: n })}
+                onRemove={(n) => void remove15(n)}
+                onKeep={(i) => void keep15(i)}
+                examples={DAY_ONE_EXAMPLES}
+              />
+            ) : empty ? <CbEmpty onKeep={(ex) => void keepExample(ex)} /> : (
               <>
                 <CbToolRow
                   find={search}
@@ -609,8 +866,36 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
         />
       )}
 
-      {taskFor && (
-        <CbTurnTask todayYmd={todayYmd} hex={paperHex(taskFor.colour)} text={taskFor.text} onSave={(due) => void makeTask(due)} onClose={() => setTaskFor(null)} />
+      {taskFor && (wide
+        ? <Cb15TurnTask todayYmd={todayYmd} sundayYmd={sunday15} hex={paperHex(taskFor.colour)} text={taskFor.text} onSave={(due) => void makeTask(due)} onClose={() => setTaskFor(null)} />
+        : <CbTurnTask todayYmd={todayYmd} hex={paperHex(taskFor.colour)} text={taskFor.text} onSave={(due) => void makeTask(due)} onClose={() => setTaskFor(null)} />
+      )}
+
+      {wide && draft15 && (
+        <Cb15NoteDialog
+          draft={draft15}
+          setDraft={setDraft15}
+          saving={saving}
+          stacks={stacks15.filter((p) => p.k).map((p) => tagLabel(p.k))}
+          linkView={(l) => link15({ agentId: l.kind === "agent" ? l.id : undefined, queryId: l.kind === "query" ? l.id : undefined, manuscriptId: l.kind === "manuscript" ? l.id : undefined })!}
+          queries={queries}
+          agents={agents}
+          manuscripts={manuscripts}
+          onTodo={!!(draft15.id && userTasks.find((t) => t.id === draft15.id)?.dueDate)}
+          onSave={() => void save15()}
+          onClose={() => setDraft15(null)}
+          onRemove={() => { const n = userTasks.find((t) => t.id === draft15.id); setDraft15(null); if (n) void remove15(n); }}
+          onTurn={() => { const n = userTasks.find((t) => t.id === draft15.id); setDraft15(null); if (n) setTaskFor(n); }}
+        />
+      )}
+
+      {wide && stack15 && (
+        <Cb15StartStack
+          have={new Set(stacks15.filter((p) => p.k).map((p) => tagLabel(p.k).toLowerCase()))}
+          moving={!!stack15.note}
+          onSave={(name) => void startStack15(name)}
+          onClose={() => setStack15(null)}
+        />
       )}
 
       {compose && (
@@ -629,7 +914,9 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
         />
       )}
 
-      {addingTask && <CbAddTask today={new Date()} onAdd={saveTask} onClose={() => setAddingTask(false)} />}
+      {addingTask && (wide
+        ? <Cb15AddTask today={new Date()} onAdd={saveTask} onClose={() => setAddingTask(false)} />
+        : <CbAddTask today={new Date()} onAdd={saveTask} onClose={() => setAddingTask(false)} />)}
 
 
       {confirmAskNode}

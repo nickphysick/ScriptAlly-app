@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "C3",
+  "where": "population",
+  "ok": true,
+  "detail": "2 pinned"
+ },
+ {
+  "lock": "C3",
+  "where": "mine",
+  "ok": true,
+  "detail": "pinned cb15seed-e1,cb15seed-e2 · rest pinned 0"
+ },
+ {
+  "lock": "C3",
+  "where": "new",
+  "ok": true,
+  "detail": "pinned cb15seed-e1,cb15seed-e2 · rest pinned 0"
+ },
+ {
+  "lock": "C3",
+  "where": "old",
+  "ok": true,
+  "detail": "pinned cb15seed-e1,cb15seed-e2 · rest pinned 0"
+ },
+ {
+  "lock": "C3",
+  "where": "colour",
+  "ok": true,
+  "detail": "pinned cb15seed-e1,cb15seed-e2 · rest pinned 0"
+ }
+]
