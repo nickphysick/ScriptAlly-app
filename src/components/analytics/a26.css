@@ -52,6 +52,13 @@
 .a26-page p { margin: 0; }
 .a26-page button { cursor: pointer; color: inherit; }
 
+/* ── the header's drawing ──
+   ⚠️ The shared header's art column was built for a placeholder slot (wsnh.css sizes `.art-box`); a real image is
+   ArtSlot's `.art-img`, `position: absolute`, which has no positioned box there and anchored to the page corner. Here
+   it sits in flow at the mock's 210px (909 × 795 → 184px tall, inside the header's 227px), centred in the column. */
+.a26-page .wsnh-art .art { position: relative; width: 210px; }
+.a26-page .wsnh-art .art .art-img { position: static; width: 210px !important; height: auto !important; max-height: 200px; object-fit: contain; }
+
 /* ── sections ── */
 .a26-page .a26-sec { margin-top: 64px; }
 .a26-page .a26-sec-h { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
@@ -146,6 +153,8 @@
 .a26-page .a26-two > .a26-rc > .a26-rc-in { flex: 1; display: flex; flex-direction: column; }
 .a26-page .a26-two .a26-pad { flex: 1; display: flex; flex-direction: column; }
 .a26-page .a26-two .a26-means { margin-top: auto; }
+/* the mock: 28px between a card's last block and its foot, however the foot is pushed down */
+.a26-page .a26-two .a26-pad > :nth-last-child(2) { margin-bottom: 28px; }
 .a26-page .a26-two .a26-pad > .a26-means:not(:first-child) { margin-top: auto; }
 .a26-page .a26-key { display: flex; flex-wrap: wrap; gap: 8px 20px; margin-top: 18px; margin-bottom: 28px; font-size: 14.5px; color: var(--a26-body); }
 .a26-page .a26-key > span { display: inline-flex; align-items: center; gap: 8px; }

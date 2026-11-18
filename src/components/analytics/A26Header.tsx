@@ -64,7 +64,8 @@ export const A26Header: React.FC<{
       right={right}
       bar={noMs ? null : filled ? {
         title: "Analytics",
-        aside: <><em>Asked to read more</em> <b data-a26="slim-asked">{asked} of {sent}</b></>,
+        /* the mock: nothing beside the bar until the first reply */
+        aside: replies > 0 ? <><em>Asked to read more</em> <b data-a26="slim-asked">{asked} of {sent}</b></> : null,
         button: { label: "Record a response", onClick: onRecord },
       } : { title: "Analytics", button: { label: "Log your first query", onClick: onLog } }} />
   );
