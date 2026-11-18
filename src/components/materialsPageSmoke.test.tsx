@@ -182,16 +182,24 @@ describe("/manuscripts/comps renders", () => {
     /* RE-POINTED (Workspace headers v1, 14 Nov): the title card is the shared navy header; its headline is the count,
        its paragraph and early highlight blocks are gone (the leader shows only once there is one), and "How comp
        tracking works" sits on the shelf's heading row. */
+    /* RE-POINTED (comps v32, 17 Nov): the headline is "{n} comparable titles"; the shelf is a card of Next up rows with
+       the open comp beside it, then the podium and the Comp-pendium, closed by the Scout strip. v30's paper cards, letter
+       cards and standalone Scout section are retired (tests/e2e/RETIRED-comps-v32.md). */
     expect(html, "the navy header did not render").toContain('data-wsnh-page="comps"');
-    expect(html, "the headline did not count the comps").toContain(">1 comp on file</h1>");
+    expect(html, "the headline did not count the comps").toContain(">1 comparable title</h1>");
     expect(html, "the title card is still on the page").not.toContain('data-cp="top"');
     expect(html, "the header's paragraph is still on the page").not.toContain('data-cp="lead"');
-    expect(html, "the pop-up's link did not render").toMatch(/data-cp="shelf"[\s\S]*data-cp="how"/);
+    expect(html, "How it works is not in the header").toMatch(/data-cp="how"[^>]*>How it works</);
     expect(html, "the steps are on the page").not.toContain('data-cp="how-steps"');
     expect(html, "the shelf did not render").toContain("Your shelf");
-    expect(html, "the comp's card did not render").toMatch(/data-cp="card"[^>]*>[\s\S]*The Smoke Comp/);
-    expect(html, "the card's stat card did not run").toMatch(/data-stat="(sent|draft|shelf)"/);
-    expect(html, "the Scout section did not render").toContain('data-cp="scout"');
+    expect(html, "the comp's row did not render").toMatch(/data-cp="row"[^>]*>[\s\S]*The Smoke Comp/);
+    expect(html, "the row's line did not run").toMatch(/data-cp="row-line"[^>]*>(Not used yet|In a draft letter|Sent to|<b>)/);
+    expect(html, "the open comp did not render").toMatch(/data-cp="open"[^>]*>[\s\S]*Why it compares/);
+    expect(html, "the podium did not render").toContain("The podium");
+    expect(html, "the Comp-pendium did not render").toContain("The Comp-pendium");
+    expect(html, "the Scout strip is not inside the Comp-pendium").toMatch(/data-cp="pendium"[\s\S]*data-cp="scout"/);
+    expect(html, "v30's paper cards are still on the page").not.toContain('data-cp="card"');
+    expect(html, "v30's letter cards are still on the page").not.toContain("Which letter named which comps");
     /* v28's light header, slip and "What's landing" are gone */
     expect(html, "v28's light header is still on the page").not.toContain('data-slh="header"');
     expect(html, "What's landing is still on the page").not.toContain("What’s landing");

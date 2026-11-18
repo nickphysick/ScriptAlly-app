@@ -1,0 +1,264 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Comparable titles v32 (design-refs/comps-v32/comparable-titles-v32.html, the rules after "the page, built from the
+ * Dashboard's parts"). The ref's values ported as they are, under a page-local `cp32-` prefix.
+ *
+ * ⚠️ THE PAGE STATES NO WIDTH AND NO HORIZONTAL PADDING OF ITS OWN (page width v1, W5): the column is the shared rule's.
+ * ⚠️ THE FACES ARE READ, NEVER NAMED: `--sp-type`, `--sp-serif`, `--font-mono` (the tokens' one owner).
+ * ⚠️ brand.tsx forces h1/h2/h3 with !important and names a body face on bare spans: headings here are two classes and
+ *    !important; `.cpv-page`'s `:where()` reset (compsV2.css) and comps30.css's hand spans back.
+ * ⚠️ NOTHING IS CUT OFF: no `text-overflow: ellipsis` anywhere on the page (CP32 S2); titles and lines wrap.
+ * ⚠️ NO GREEN ANYWHERE, NO SMALL UPPERCASE MONO LABELS, ONE NAVY (the header's #2a3a52).
+ * ⚠️ THE DASHBOARD'S CARD IS NOT LIFTED: its sheet is scoped to `.d58.d2` (dashboard/v2/dash2Frame.css), so the card,
+ *    the Next up row, the striped band and the pill switch are built here from the ref's values (lift candidates).
+ */
+
+.cp32 {
+  --c32-type: var(--sp-type); --c32-serif: var(--sp-serif); --c32-mono: var(--font-mono);
+  --c32-ink: #1c130f; --c32-navy: #2a3a52; --c32-btn: #2d3a50; --c32-cream: #f4eee5; --c32-muted: #7d7067; --c32-rose: #a0675a;
+  --c32-oat: #f5f1eb; --c32-hair: #ebe4da; --c32-frame: #e9e3d9;
+}
+
+/* ══ A · the header: this page's headline size and right-hand block only ══════════════════════════════════════════ */
+@media (min-width: 768px) {
+  /* the headline scales so it stays on one line beside the block (seven classes: above wsnh.css §2's five) */
+  .cp32 .qc151.qc153.wsnh.cp32-hdr > .qc1531-hd.wsnh-hd.wsnh-hd h1.qc1531-t { font-size: clamp(44px, 3.6vw, 66px) !important; }
+  /* the ruled by-line wraps rather than cutting the book's name short (nothing on this page ends in an ellipsis) */
+  .cp32 .qc151.qc153.wsnh.cp32-hdr > .qc1531-hd .qc1531-for span { text-overflow: clip; overflow: visible; white-space: normal; max-width: none; flex: 0 1 auto; }
+  /* the collapsed bar's title and aside are short here; they clip rather than end in an ellipsis */
+  .cp32 .qc151.qc153.wsnh.cp32-hdr .wsnh-sw, .cp32 .qc151.qc153.wsnh.cp32-hdr > .qc156-slim .qc156-st b { text-overflow: clip; }
+  /* the right-hand block: one column, 320 wide (the ref's `.cb`) */
+  .cp32 .qc151.qc153.wsnh.cp32-hdr .wsnh-rc { display: block; width: 320px; max-width: 320px; }
+  .cp32 .cp32-cb { display: block; color: #f4eee5; }
+  .cp32 .cp32-cbk { display: block; font: italic 400 17px/1.2 var(--c32-serif) !important; color: rgba(244, 238, 229, .8); }
+  .cp32 .cp32-cbn { display: block; margin-top: 8px; font: 400 26px/1.2 var(--c32-type) !important; color: #fbf7f0; overflow-wrap: anywhere; }
+  .cp32 .cp32-cbn span { display: block; font: inherit !important; }
+  .cp32 .cp32-cbs { display: block; margin-top: 8px; font: italic 400 17px/1.3 var(--c32-serif) !important; color: rgba(244, 238, 229, .8); }
+  .cp32 .qc151.qc153.wsnh.cp32-hdr .cp32-cb .qc1531-b { height: 38px; margin-top: 14px; padding: 0 16px; font-size: 16px !important; }
+}
+@media (min-width: 768px) and (max-width: 1380px) {
+  .cp32 .qc151.qc153.wsnh.cp32-hdr .wsnh-rc { width: auto; max-width: 260px; }
+  .cp32 .cp32-cbn { font-size: 22px !important; }
+}
+
+/* ══ the Dashboard's card: white rim 8, hairline frame, radius 20 / 13, a band across the top ═════════════════════ */
+.cp32 .cp32-rc { padding: 8px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .07); min-width: 0; }
+.cp32 .cp32-rc-in { border: 1px solid var(--c32-frame); border-radius: 13px; overflow: hidden; background: #fff; height: 100%; }
+.cp32 .cp32-rb { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 66px; padding: 14px 28px; }
+.cp32 .cp32-rb h2.cp32-rbt { min-width: 0; margin: 0; overflow-wrap: anywhere; font: 400 23px/1.2 var(--c32-type) !important; color: inherit !important; }
+.cp32 .cp32-rb small { text-align: right; font: 400 15px/1.2 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-rb.is-navy { background: var(--c32-navy); color: #fffaf3; }
+.cp32 .cp32-rb.is-sand { background: #f2e6d8; color: var(--c32-ink); }
+.cp32 .cp32-go { padding: 0; border: 0; background: none; font: 600 15px/1.3 var(--c32-serif); color: var(--c32-ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; min-height: 28px; text-align: left; cursor: pointer; }
+.cp32 .cp32-go:hover { color: var(--c32-btn); }
+.cp32 .cp32-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 18px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #d9d1c5; font: 600 16px/1 var(--c32-serif); color: var(--c32-ink); white-space: nowrap; cursor: pointer; }
+.cp32 .cp32-btn:hover { box-shadow: inset 0 0 0 1px #a99f93; }
+.cp32 .cp32-btn svg { width: 16px; height: 16px; }
+.cp32 .cp32-btn.is-pri { background: var(--c32-btn); color: #fff; box-shadow: none; }
+.cp32 .cp32-btn.is-pri:hover { background: #24324a; }
+.cp32 :focus-visible { outline: 2px solid var(--c32-navy); outline-offset: 2px; }
+
+/* ══ B · the striped band (the Founding writer band's construction) ═══════════════════════════════════════════════ */
+.cp32 .cp32-band { margin-top: 0; padding: 6px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .06); }
+.cp32 .cp32-band-in { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; min-height: 56px; padding: 6px 14px 6px 6px; border-radius: 14px; background: repeating-linear-gradient(118deg, #edd8cd 0 14px, #e6cec1 14px 28px); }
+.cp32 .cp32-bdisc { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; background: #fbf4ee; box-shadow: 0 0 0 2px #b98372; color: #6b3d33; }
+.cp32 .cp32-bdisc svg { width: 20px; height: 20px; }
+.cp32 .cp32-band b { font: 400 20px/1.2 var(--c32-type); }
+.cp32 .cp32-band i { width: 1px; height: 26px; background: rgba(28, 19, 15, .22); }
+.cp32 .cp32-band p { flex: 1; min-width: 240px; margin: 0; font: 400 16px/1.5 var(--c32-serif); color: #4a2f29; }
+.cp32 .cp32-pill { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 18px; border: 0; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .1); font: 600 15.5px/1 var(--c32-serif); color: var(--c32-ink); white-space: nowrap; cursor: pointer; }
+.cp32 .cp32-pill:hover { box-shadow: 0 2px 6px rgba(28, 19, 15, .18); }
+
+/* ══ C · your shelf and the open comp ═════════════════════════════════════════════════════════════════════════════ */
+/* 48 under the header (its own margin); 40 under the band */
+.cp32 .cp32-grid { display: grid; grid-template-columns: 400px minmax(0, 1fr); gap: 40px; align-items: start; scroll-margin-top: 76px; }
+.cp32 .cp32-band + .cp32-grid { margin-top: 40px; }
+.cp32 .cp32-shelf { padding: 24px; }
+.cp32 .cp32-ltools { display: grid; gap: 10px; margin-bottom: 20px; }
+.cp32 .cp32-find { display: flex; align-items: center; gap: 8px; height: 40px; padding: 0 12px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #d9d1c5; }
+.cp32 .cp32-find svg { width: 15px; height: 15px; flex: none; color: var(--c32-muted); }
+.cp32 .cp32-find input { flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: 400 15.5px/1 var(--c32-serif); color: var(--c32-ink); }
+.cp32 .cp32-find:focus-within { box-shadow: inset 0 0 0 2px var(--c32-btn); }
+.cp32 .cp32-sels { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cp32 .cp32-sels select { height: 36px; min-width: 0; padding: 0 26px 0 12px; border: 0; border-radius: 999px; color: var(--c32-ink); cursor: pointer;
+  background: #eae6de url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%231c130f' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='m1 1 4 4 4-4'/%3E%3C/svg%3E") no-repeat right 12px center;
+  appearance: none; font: 600 14px/1 var(--c32-serif); }
+.cp32 .cp32-rows { display: flex; flex-direction: column; gap: 12px; }
+.cp32 .cp32-row { display: flex; align-items: center; gap: 16px; width: 100%; padding: 16px 18px; border: 0; border-radius: 12px; background: var(--c32-oat); color: var(--c32-ink); text-align: left; cursor: pointer; transition: background-color .15s, box-shadow .15s; }
+.cp32 .cp32-row:hover { background: #f0ece5; }
+.cp32 .cp32-row[aria-current="true"] { background: #fff; box-shadow: 0 0 0 2px var(--c32-btn), 0 8px 18px -12px rgba(28, 19, 15, .4); }
+.cp32 .cp32-rdisc { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: #4d443d; }
+.cp32 .cp32-row[aria-current="true"] .cp32-rdisc { background: var(--c32-oat); }
+.cp32 .cp32-rdisc svg { width: 19px; height: 19px; }
+.cp32 .cp32-rowx { flex: 1; min-width: 0; }
+.cp32 .cp32-rown { display: block; font: 600 17px/1.3 var(--c32-serif); overflow-wrap: anywhere; }
+.cp32 .cp32-rows-l { display: block; font: 400 14.5px/1.45 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-rows-l b { font-weight: 600; color: var(--c32-ink); }
+.cp32 .cp32-rowu { display: inline-flex; align-items: center; min-height: 22px; margin-top: 6px; padding: 0 10px; border-radius: 999px; background: #f5e3db; color: #7a3f33; font: 600 12.5px/1.2 var(--c32-serif); }
+.cp32 .cp32-shelf-f { margin: 20px 0 0; padding: 0 4px; }
+.cp32 .cp32-none { margin: 0; padding: 14px 4px; color: var(--c32-muted); }
+
+/* the open comp: sticky under the collapsed bar (60) while the shelf scrolls */
+.cp32 .cp32-work { position: sticky; top: 76px; }
+.cp32 .cp32-tog { display: flex; flex: none; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, .12); }
+.cp32 .cp32-tog button { height: 34px; padding: 0 18px; border: 0; border-radius: 999px; background: none; font: 600 15px/1 var(--c32-serif); color: rgba(255, 250, 243, .78); cursor: pointer; }
+.cp32 .cp32-tog button[aria-pressed="true"] { background: #fffaf3; color: var(--c32-ink); }
+.cp32 .cp32-tog button:focus-visible { outline-color: #e8bdb4; }
+.cp32 .cp32-wk { padding: 28px 32px 36px; }
+.cp32 .cp32-wktop { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.cp32 .cp32-wkby { flex: 1 1 240px; margin: 0; font: italic 400 17px/1.3 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-nums { display: flex; gap: 56px; flex-wrap: wrap; margin-top: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--c32-hair); }
+.cp32 .cp32-nums b { display: block; font: 400 32px/1 var(--c32-type); }
+.cp32 .cp32-nums span { display: block; margin-top: 6px; font: 400 14.5px/1.4 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-wait { padding: 16px 18px; border-radius: 12px; background: var(--c32-oat); color: #4d443d; }
+.cp32 .cp32-wait p { margin: 0; }
+.cp32 .cp32-wait .cp32-btn { margin-top: 12px; }
+.cp32 .cp32-two2 { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr); gap: 56px; margin-top: 32px; align-items: start; }
+.cp32 h3.cp32-h3 { margin: 0 0 16px; font: 400 19px/1.25 var(--c32-type) !important; color: var(--c32-ink); }
+.cp32 .cp32-why p { margin: 0; font: 400 17px/1.5 var(--c32-serif); }
+.cp32 .cp32-why .cp32-gap { color: var(--c32-muted); }
+.cp32 .cp32-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
+.cp32 .cp32-tag { display: inline-flex; align-items: center; min-height: 30px; padding: 0 13px; border-radius: 999px; background: #eae6de; font: 600 14px/1.2 var(--c32-serif); }
+.cp32 .cp32-facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 24px; margin: 28px 0 0; font: 400 15px/1.4 var(--c32-serif); }
+.cp32 .cp32-facts dt { color: var(--c32-muted); }
+.cp32 .cp32-facts dd { margin: 0; }
+.cp32 .cp32-lst { list-style: none; margin: 0; padding: 0; }
+.cp32 .cp32-lst li { display: flex; align-items: center; gap: 16px; min-height: 72px; padding: 14px 0; border-top: 1px solid var(--c32-hair); }
+.cp32 .cp32-lst li:first-child { border-top: 0; padding-top: 2px; }
+.cp32 .cp32-lst .cp32-rdisc { background: var(--c32-oat); width: 38px; height: 38px; }
+.cp32 .cp32-lst .cp32-ini { font: 600 12.5px/1 var(--c32-serif); background: var(--c32-navy); color: #fff; }
+.cp32 .cp32-lstx { flex: 1; min-width: 0; }
+.cp32 .cp32-lstx b { display: block; font: 600 16.5px/1.3 var(--c32-serif); overflow-wrap: anywhere; }
+.cp32 .cp32-lstx > span { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font: 400 14.5px/1.4 var(--c32-serif); color: var(--c32-muted); min-width: 0; }
+.cp32 .cp32-lstx > span svg { flex: none; }
+.cp32 .cp32-lstx > span i { font-style: normal; color: var(--c32-ink); }
+.cp32 .cp32-lstr { flex: none; max-width: 45%; text-align: right; font: 400 14px/1.35 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-lstr b { display: block; font: 400 19px/1.1 var(--c32-type); color: var(--c32-ink); }
+.cp32 .cp32-lstr time { font: 400 12px/1 var(--c32-mono); color: #a39a91; }
+.cp32 .cp32-lstf { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--c32-hair); }
+/* loading: the cards hold their size */
+.cp32 .cp32-sk { display: block; height: 22px; border-radius: 8px; background: #eee9e1; }
+.cp32 .cp32-sk.is-dark { background: rgba(255, 250, 243, .16); }
+.cp32 .cp32-sk-row { height: 74px; margin-bottom: 12px; border-radius: 12px; }
+.cp32 .cp32-sk-blk { height: 88px; margin-bottom: 24px; }
+
+/* ══ D · the podium, on the page itself ═══════════════════════════════════════════════════════════════════════════ */
+.cp32 .cp32-res { margin-top: 96px; }
+.cp32 .cp32-pod { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: end; max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+.cp32 .cp32-podc { display: flex; flex-direction: column; justify-content: flex-end; padding: 0; border: 0; background: none; text-align: left; min-width: 0; color: var(--c32-ink); font: inherit; cursor: pointer; }
+.cp32 .cp32-pcard { position: relative; display: block; margin: 0 26px -10px; padding: 24px 26px 36px; border-radius: 14px 14px 4px 4px; background: #fff; box-shadow: 0 0 0 1px var(--c32-frame), 0 14px 26px -14px rgba(28, 19, 15, .35); transition: transform .18s ease-out, box-shadow .18s ease-out; }
+.cp32 .cp32-podc:nth-child(1) .cp32-pcard { transform: rotate(1.6deg); }
+.cp32 .cp32-podc:nth-child(2) .cp32-pcard { transform: rotate(-1.2deg); }
+.cp32 .cp32-podc:nth-child(3) .cp32-pcard { transform: rotate(-2deg); }
+.cp32 button.cp32-podc:hover .cp32-pcard, .cp32 button.cp32-podc:focus-visible .cp32-pcard { transform: translateY(-6px) rotate(0); box-shadow: 0 0 0 1px #d9d1c5, 0 22px 30px -16px rgba(28, 19, 15, .4); }
+.cp32 button.cp32-podc:focus-visible { outline: 0; }
+.cp32 button.cp32-podc:focus-visible .cp32-pcard { outline: 2px solid var(--c32-btn); outline-offset: 3px; }
+.cp32 .cp32-pcard > .cp32-rdisc { background: var(--c32-oat); margin: 0 0 12px; color: #4d443d; }
+.cp32 .cp32-pcard b { display: block; padding-right: 76px; font: 600 21px/1.25 var(--c32-serif); overflow-wrap: anywhere; }
+.cp32 .cp32-pcard > span:not(.cp32-rdisc):not(.cp32-pmark) { display: block; margin-top: 2px; font: 400 15px/1.4 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-pcard > span.cp32-pres { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #d9d1c5; font-size: 16px; color: var(--c32-ink); }
+.cp32 .cp32-pmark { position: absolute; top: -18px; right: -14px; width: 96px; height: 96px; transform: rotate(9deg); color: var(--c32-navy); }
+.cp32 .cp32-pmark svg { display: block; width: 100%; height: 100%; }
+.cp32 .cp32-pmark text { font-family: var(--c32-type); fill: currentColor; }
+.cp32 .cp32-pstep { position: relative; z-index: 1; display: grid; place-items: center; height: 76px; border-radius: 10px 10px 0 0; background: #eae7e2; color: rgba(28, 19, 15, .5); font: 400 64px/1 var(--c32-type); }
+.cp32 .is-p1 .cp32-pstep { height: 168px; background: var(--c32-navy); color: #fffaf3; font-size: 96px; box-shadow: 0 -10px 24px -14px rgba(27, 36, 51, .5); }
+.cp32 .is-p2 .cp32-pstep { height: 112px; background: #f2e6d8; color: rgba(28, 19, 15, .62); }
+.cp32 .is-p3 .cp32-pstep { height: 76px; }
+.cp32 .cp32-pstep small { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font: 600 13.5px/1 var(--c32-serif); opacity: .85; }
+.cp32 .cp32-podc.is-off { cursor: default; }
+.cp32 .cp32-podc.is-off .cp32-pcard { background: none; box-shadow: none; border: 1.5px dashed #d2cabd; transform: none; color: var(--c32-muted); padding: 22px; font: 400 15px/1.45 var(--c32-serif); }
+.cp32 .cp32-podc.is-off .cp32-pstep { background: repeating-linear-gradient(135deg, #f0ece5, #f0ece5 6px, #e6e1d8 6px, #e6e1d8 12px); color: rgba(28, 19, 15, .35); box-shadow: none; }
+.cp32 .cp32-pod.is-bare { max-width: 640px; }
+.cp32 .cp32-pod.is-bare .is-p1 .cp32-pstep { height: 120px; font-size: 64px; }
+.cp32 .cp32-pod.is-bare .is-p2 .cp32-pstep { height: 84px; font-size: 48px; }
+.cp32 .cp32-pod.is-bare .is-p3 .cp32-pstep { height: 58px; font-size: 40px; }
+.cp32 .cp32-plinth { max-width: 1080px; margin: 0 auto; padding: 22px 24px 18px; border-radius: 4px 4px 14px 14px; background: var(--c32-navy); color: #fffaf3; text-align: center; box-shadow: 0 18px 28px -18px rgba(27, 36, 51, .55); }
+.cp32 .cp32-plinth h2.cp32-plh { margin: 0; font: 400 44px/1.1 var(--c32-type) !important; color: #fffaf3 !important; }
+.cp32 .cp32-plinth-s { margin: 22px auto 0; max-width: 620px; text-align: center; font: 400 17px/1.5 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-res.is-bare .cp32-plinth { max-width: 640px; }
+.cp32 .cp32-res.is-bare .cp32-plinth h2.cp32-plh { font-size: 32px !important; }
+
+/* ══ E · the Comp-pendium: a bound book ═══════════════════════════════════════════════════════════════════════════ */
+.cp32 .cp32-tbl { margin-top: 80px; }
+.cp32 .cp32-tbl > .cp32-rc-in { position: relative; padding-left: 16px; }
+.cp32 .cp32-tbl > .cp32-rc-in::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 16px; background:
+  linear-gradient(90deg, rgba(0, 0, 0, .22), rgba(0, 0, 0, 0) 45%, rgba(255, 255, 255, .08) 70%, rgba(0, 0, 0, .12)),
+  repeating-linear-gradient(0deg, rgba(255, 255, 255, .05) 0 1px, transparent 1px 3px), var(--c32-navy); }
+.cp32 .cp32-cpd { position: relative; display: flex; align-items: center; gap: 20px; padding: 26px 210px 26px 28px; background: #eae7e2; }
+.cp32 .cp32-cpd-ic { flex: none; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; background: var(--c32-navy); color: #fffaf3; box-shadow: 0 0 0 5px rgba(255, 255, 255, .7); }
+.cp32 .cp32-cpd-ic svg { width: 28px; height: 28px; }
+.cp32 .cp32-cpd h2.cp32-cpdh { margin: 0; font: 400 34px/1.15 var(--c32-type) !important; color: var(--c32-ink) !important; }
+.cp32 .cp32-cpd p { margin: 6px 0 0; font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
+.cp32 .cp32-ribbon { position: absolute; top: 0; right: 150px; width: 28px; height: calc(100% + 14px); background: linear-gradient(90deg, #7d3f4e, #96505f 45%, #874655); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 11px), 0 100%); z-index: 1; }
+.cp32 .cp32-tbl table { width: 100%; border-collapse: collapse; }
+.cp32 .cp32-tbl th { padding: 18px 28px; text-align: right; font: 400 14.5px/1.2 var(--c32-serif); color: var(--c32-muted); border-bottom: 1px solid var(--c32-hair); }
+.cp32 .cp32-tbl th:first-child, .cp32 .cp32-tbl td:first-child { text-align: left; }
+.cp32 .cp32-tbl td { padding: 10px 28px; height: 76px; text-align: right; border-bottom: 1px solid var(--c32-hair); font: 400 19px/1 var(--c32-type); }
+.cp32 .cp32-tbl tbody tr:last-child td { border-bottom: 0; }
+.cp32 .cp32-tbl tbody tr { cursor: pointer; }
+.cp32 .cp32-tbl tbody tr:hover { background: #faf8f4; }
+.cp32 .cp32-tbl tbody tr:focus-visible { outline-offset: -2px; }
+.cp32 .cp32-who { display: flex; align-items: center; gap: 14px; }
+.cp32 .cp32-who .cp32-rdisc { background: var(--c32-oat); width: 38px; height: 38px; }
+.cp32 .cp32-who b { display: block; font: 600 16.5px/1.3 var(--c32-serif); overflow-wrap: anywhere; }
+.cp32 .cp32-who em { display: block; font: 400 14px/1.3 var(--c32-serif); font-style: normal; color: var(--c32-muted); }
+.cp32 .cp32-rate { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+.cp32 .cp32-rate em { font: 400 14.5px/1.3 var(--c32-serif); font-style: normal; color: var(--c32-muted); }
+.cp32 .cp32-tr { display: block; width: 140px; flex: none; height: 6px; border-radius: 3px; background: #ebe7df; overflow: hidden; }
+.cp32 .cp32-tr i { display: block; height: 100%; border-radius: 3px; background: var(--c32-btn); }
+.cp32 .cp32-tr.is-na { background: repeating-linear-gradient(135deg, #ece6dc, #ece6dc 4px, #d9d1c4 4px, #d9d1c4 8px); }
+.cp32 .cp32-tbln { margin: 0; padding: 20px 28px 22px; border-top: 1px solid var(--c32-hair); font: 400 15px/1.5 var(--c32-serif); color: var(--c32-muted); }
+/* the Scout closes the book: a blush foot, the bird perched inside it */
+.cp32 .cp32-scout { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; padding: 22px 32px 22px 28px; border-top: 1px solid var(--c32-frame); background: radial-gradient(120% 160% at 0 0, #fbefe9 0%, #f4e0d7 100%); }
+.cp32 .cp32-perch { flex: none; width: 118px; height: auto; margin: -6px 0 -10px; filter: drop-shadow(0 6px 8px rgba(28, 19, 15, .18)); }
+.cp32 .cp32-scout > div { flex: 1; min-width: 260px; }
+.cp32 .cp32-scout h3.cp32-scth { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0; font: 400 23px/1.2 var(--c32-type) !important; color: var(--c32-ink) !important; }
+.cp32 .cp32-scout h3 span { display: inline-flex; align-items: center; height: 26px; padding: 0 12px; border-radius: 13px; background: #fff; color: var(--c32-rose); font: 600 13px/1 var(--c32-serif); }
+.cp32 .cp32-scout p { margin: 6px 0 0; max-width: 680px; font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
+
+/* the app's own footer, 96 under the last card */
+.cp32 > .af { margin-top: 96px; }
+
+/* ══ day one ══════════════════════════════════════════════════════════════════════════════════════════════════════ */
+.cp32 .cp32-first-in { padding: 40px 44px; }
+.cp32 .cp32-first h2.cp32-firsth { margin: 0; font: 400 28px/1.15 var(--c32-type) !important; color: var(--c32-ink) !important; }
+.cp32 .cp32-steps { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
+.cp32 .cp32-steps li { padding: 24px 24px 28px; border-radius: 12px; background: var(--c32-oat); font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
+.cp32 .cp32-slot { display: grid; place-items: center; height: 130px; margin-bottom: 16px; border-radius: 8px; overflow: hidden; background: repeating-linear-gradient(135deg, #fdfbf7, #fdfbf7 6px, #faf6ef 6px, #faf6ef 12px); box-shadow: 0 0 0 1px rgba(28, 19, 15, .08); }
+.cp32 .cp32-slot img { display: block; height: 118px; width: auto; max-width: 100%; }
+.cp32 .cp32-steps li b { display: block; margin-bottom: 6px; font: 600 18px/1.3 var(--c32-serif); color: var(--c32-ink); }
+.cp32 .cp32-stepn { display: inline-grid; place-items: center; width: 28px; height: 28px; margin-right: 10px; border-radius: 50%; background: var(--c32-btn); color: #fff; font: 600 14px/1 var(--c32-serif); vertical-align: 2px; }
+.cp32 .cp32-first-in > p { margin: 32px 0 0; font: 400 16px/1.5 var(--c32-serif); color: var(--c32-muted); }
+
+/* ══ the ref's breakpoints: 1380, 1160, 900 ═══════════════════════════════════════════════════════════════════════ */
+@media (max-width: 1380px) {
+  .cp32 .cp32-pcard { margin-inline: 12px; }
+  .cp32 .cp32-grid { grid-template-columns: 340px minmax(0, 1fr); gap: 32px; }
+  .cp32 .cp32-band + .cp32-grid { margin-top: 40px; }
+  .cp32 .cp32-shelf { padding: 20px; }
+  .cp32 .cp32-wk { padding: 24px 28px 32px; }
+  .cp32 .cp32-two2 { grid-template-columns: 1fr; }
+  .cp32 .cp32-nums { gap: 28px; flex-wrap: nowrap; }
+  .cp32 .cp32-nums b { font-size: 28px; }
+  .cp32 .cp32-nums span { font-size: 14px; }
+}
+@media (max-width: 1160px) {
+  .cp32 .cp32-pod { padding: 0; }
+  .cp32 .cp32-pcard { margin: 0 8px -10px; padding: 16px 16px 26px; }
+  .cp32 .cp32-pcard b { font-size: 18px; padding-right: 0; padding-top: 64px; }
+  .cp32 .cp32-pmark { width: 80px; height: 80px; top: -14px; right: -6px; }
+  .cp32 .cp32-steps { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .cp32 .cp32-work { position: static; }
+  .cp32 .cp32-grid { grid-template-columns: 1fr; }
+  .cp32 .cp32-nums { flex-wrap: wrap; }
+  .cp32 .cp32-cpd { padding-right: 80px; }
+  .cp32 .cp32-ribbon { right: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cp32 .cp32-pcard, .cp32 .cp32-row { transition: none; }
+  .cp32 button.cp32-podc:hover .cp32-pcard, .cp32 button.cp32-podc:focus-visible .cp32-pcard { transform: none; }
+}

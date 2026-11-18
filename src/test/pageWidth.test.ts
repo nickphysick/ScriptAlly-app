@@ -61,6 +61,8 @@ const ROOTS: { file: string; sel: RegExp }[] = [
   { file: "src/components/versions/versionsV2.app.css", sel: /^\.wpg-scroll > \.vv2$/ },
   { file: "src/components/letters/queryLetters.css", sel: /^\.qlp( > \*)?$/ },
   { file: "src/components/todo/ws/todoWs.css", sel: /^\.tws$/ },
+  /* comps v32 (17 Nov): the page's own root states tokens only; the column is the shared rule's */
+  { file: "src/components/manuscripts/comps32/comps32.css", sel: /^\.cp32$/ },
 ];
 /** Roots that sit straight in the scroller and must not override the shared rule anywhere in the tree. */
 const SCROLLER_ROOTS = ["qcv-group", "rsp-page", "a17-page", "clv-group", "dv1-page", "vv2", "cpv-page", "tws", "cb2-page", "ms27"];

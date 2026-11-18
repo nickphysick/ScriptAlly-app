@@ -2,16 +2,17 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Comparable titles v30 (7 Nov; refs design-refs/comps-v30/), a restyle of v28 (17 Oct; design-refs/comps-v28/). Route
+ * Comparable titles v32 (17 Nov; refs design-refs/comps-v32/), a restyle and re-layout of v30 (7 Nov). Route
  * /manuscripts/comps.
  *
- * Comps are TRACKED: a comp has a stable id, a query letter records the comps it mentions, and every
- * query is traced to its letter, so each comp knows which queries it went out with (lib/compUsage).
- * The page (v30): one navy title card (the highlight on its right), the blush notice for letters that went out
- * before their comps were logged, "Your shelf" (one toolbar over paper cards or a list), "Which letter named which
- * comps" (one card per query letter), and the Scout's home at the foot. With no comps: the navy card and "How it
- * works." and nothing else. A card, a list row or a letter's comp opens the comp drawer; "Log comps in a letter"
- * opens the picker. v28's light header, "What's landing", type toggles and floating Scout tab are retired.
+ * Comps are TRACKED: a comp has a stable id, a query letter records the comps it mentions, and every query is traced
+ * to its letter, so each comp knows which queries it went out with (lib/compUsage).
+ * The page (v32): the shared navy header (the current letter's comps on its right), the striped band for a sent letter
+ * whose comps were never chosen, "Your shelf" and the open comp side by side, the podium, and the Comp-pendium closed
+ * by the Scout strip. With no comps: the navy header and the "How it works" card. A shelf row, a podium step or a
+ * Comp-pendium row opens that comp in the card beside the shelf; adding and editing stay in the drawer; the band and
+ * "Add to a letter" open the picker. v30's detail drawer, letter cards, Cards / List switch and Scout section are
+ * retired (tests/e2e/RETIRED-comps-v32.md).
  *
  * ⚠️ STORE FACTS. The order is array position; every figure is derived at render. Every comp write
  * goes through `normalizeComp` and `withCompIds`, so optional fields stay omit-empty and every comp
@@ -21,10 +22,11 @@
  * refusal puts the list back and says so (`lib/compsWrite.ts`).
  *
  * ⚠️ SCOPE IS THE SIDEBAR SWITCHER'S, READ EVERY RENDER, never latched in state.
+ * ⚠️ THE CURRENT LETTER IS `inUseLetter` (lib/queryLetters), the Letters page's "In use for new queries".
  */
 import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { deleteField } from "firebase/firestore";
 import { useScriptAllyDb } from "../../lib/db";
 import { CompTitle, ManuscriptVersion } from "../../types";
@@ -34,12 +36,14 @@ import { isShelvedPresentation } from "../../lib/manuscriptPage";
 import { CompDraft, MAX_COMPS, manuscriptComps, normalizeComp, withCompAdded, withCompEdited, withCompRemoved } from "../../lib/comps";
 import { currentYear } from "../../lib/compsPage";
 import { SAVE_FAILED, runWrite } from "../../lib/compsWrite";
-import { averageAsked, compKey, currentLetter, letterRate, ready, usageModel, withCompIds } from "../../lib/compUsage";
-import { buildRows, letterShort } from "../../lib/compsLibrary";
+import { MAX_LETTER_COMPS, averageAsked, compKey, compsInLetter, letterRate, usageModel, withCompIds } from "../../lib/compUsage";
+import { buildRows } from "../../lib/compsLibrary";
 import {
-  NO_FILTER, filterShelf, highlightOf, letterCards, noticeOf, sortShelf, whereCounts,
+  NO_FILTER, andList, filterShelf, noticeOf, pendiumNote, pendiumOrder, podiumOf, sortShelf, whereCounts,
   type ShelfFilter, type ShelfSort,
 } from "../../lib/compsShelf";
+import { inUseLetter } from "../../lib/queryLetters";
+import { queriesForIds } from "../../lib/queriesFilterParam";
 import { nextVersionName } from "../../lib/versionLock";
 import { escapeDepth } from "../../lib/escapeStack";
 import { useToast } from "../toast/ToastProvider";
@@ -48,21 +52,21 @@ import { CompDrawer, DrawerState } from "./comps25/CompDrawer";
 import { CompLetterPicker, PickerRequest } from "./comps25/CompLetterPicker";
 import { CompsExplainDialog } from "./comps28/CompsExplainDialog";
 import { openerOf, refocus } from "./comps28/refocus";
-import { CompsTop30, type TopState } from "./comps30/CompsTop30";
-import { CompsHow30, CompsHowPop30 } from "./comps30/CompsHow30";
-import { CompsNotice30, CompsShelf30, type ShelfView } from "./comps30/CompsShelf30";
-import { CompsLetters30, CompsScout30 } from "./comps30/CompsLetters30";
+import { CompsHowPop30 } from "./comps30/CompsHow30";
+import { CompsTop32, type TopState32 } from "./comps32/CompsTop32";
+import { CompsBand32 } from "./comps32/CompsBand32";
+import { CompsDeskSkeleton32, CompsOpen32, CompsShelf32, type OpenLetter, type OpenView } from "./comps32/CompsDesk32";
+import { CompsPodium32 } from "./comps32/CompsPodium32";
+import { CompsFirst32, CompsPendium32 } from "./comps32/CompsPendium32";
 import "./compsV2.css";
 import "./comps25/compsV25.css";
 import "./comps28/comps28.css";
 import "./comps30/comps30.css";
+import "./comps32/comps32.css";
 
 /** Shared with the sidebar's switcher and the packages page — the section's one active-manuscript key. */
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 export const COMPS_ROUTE = "/manuscripts/comps";
-
-/** Not letter-ready: a book with no publisher, or anything with no year. */
-export const compMissingDetails = (c: CompTitle): boolean => !ready(c);
 
 export const ComparableTitlesPage: React.FC<{
   onNavigate?: (tab: string, subPageName?: string, opts?: { manuscriptId?: string }) => void;
@@ -70,18 +74,20 @@ export const ComparableTitlesPage: React.FC<{
   const { currentUser, manuscripts, versions, packages, queries, activities, agents, updateManuscript, updateVersion, addVersion, deleteVersion, collectionsReady, updateUserPaths } = useScriptAllyDb();
   const { showToast } = useToast();
   const location = useLocation();
+  const navigate = useNavigate();
   const routeActive = location.pathname === COMPS_ROUTE;
 
   /* ⚠️ EVERY HOOK ABOVE THE FIRST EARLY RETURN. */
   const [filter, setFilter] = useState<ShelfFilter>(NO_FILTER);
   const [sort, setSort] = useState<ShelfSort>("own");
-  /** v30: Cards or List, for the visit only */
-  const [mode, setMode] = useState<ShelfView>("cards");
+  /** v32: the comp open in the card beside the shelf (null: the first in the shown order) */
+  const [openKey, setOpenKey] = useState<string | null>(null);
+  const [openView, setOpenView] = useState<OpenView>("letters");
   const [drawer, setDrawer] = useState<DrawerState | null>(null);
   const [picker, setPicker] = useState<PickerRequest | null>(null);
-  /** the "How comp tracking works" pop-up (comps v27): the steps, one click from the header */
+  /** the "How it works" pop-up, from the header */
   const [how, setHow] = useState(false);
-  /** comps v28: the "What makes a good comp?" pop-up, from the empty panel */
+  /** comps v28: the "What makes a good comp?" pop-up, from the empty header */
   const [explain, setExplain] = useState(false);
   /** the optimistic list while a write is in flight */
   const [pending, setPending] = useState<{ msId: string; comps: CompTitle[] } | null>(null);
@@ -89,15 +95,15 @@ export const ComparableTitlesPage: React.FC<{
   const compsRef = useRef<CompTitle[]>([]);
   const pageRef = useRef<HTMLDivElement | null>(null);
   const findRef = useRef<HTMLInputElement | null>(null);
-  const shelfRef = useRef<HTMLElement | null>(null);
-  const landRef = useRef<HTMLElement | null>(null);
+  const gridRef = useRef<HTMLDivElement | null>(null);
   const primaryRef = useRef<HTMLButtonElement | null>(null);
   const busyRef = useRef(false);
+  /** a row to focus once the page has repainted (a podium step or a Comp-pendium row opened it) */
+  const focusRow = useRef<string | null>(null);
 
   /* a dev-only review aid, gated HERE on the build mode so production never carries the module */
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const held = import.meta.env.MODE !== "production" ? useCompsHold() : false;
-
 
   const selectedMsId = typeof window === "undefined" ? null : localStorage.getItem(ACTIVE_MS_KEY);
   const ordered = [...manuscripts].sort((a, b) => Number(isShelvedPresentation(a)) - Number(isShelvedPresentation(b)));
@@ -120,23 +126,30 @@ export const ComparableTitlesPage: React.FC<{
   }) : []), [model, shown, comps, letters, packages, queries, agents]);
   const view = useMemo(() => sortShelf(filterShelf(rows, filter), sort), [rows, filter, sort]);
   const counts = useMemo(() => whereCounts(rows), [rows]);
-  const nowLetter = activeMs ? currentLetter(activeMs.id, versions) : null;
+  const nowLetter = useMemo(() => inUseLetter(activeMs, versions, packages), [activeMs, versions, packages]);
+  const currentKeys = useMemo(() => {
+    const ids = new Set(compsInLetter(comps, nowLetter).map((c) => c.id));
+    return new Set(comps.flatMap((c, i) => (c.id && ids.has(c.id) ? [compKey(c, i)] : [])));
+  }, [comps, nowLetter]);
   const now = currentYear();
   const notice = noticeOf(model?.unrecorded ?? []);
-  const average = useMemo(() => (activeMs ? averageAsked(activeMs, queries, activities) : { asked: 0, sent: 0, pct: null }), [activeMs, queries, activities]);
-  const cards = useMemo(() => (model ? letterCards(letters, rows, model.sentByLetter, (id) => letterRate(model, id)) : []), [model, letters, rows]);
-  const highlight = useMemo(() => highlightOf(rows), [rows]);
-  const openRow = drawer && drawer.mode !== "add" ? rows.find((r) => r.key === drawer.key) ?? null : null;
+  const places = useMemo(() => podiumOf(rows), [rows]);
+  const book = useMemo(() => pendiumOrder(rows), [rows]);
+  const note = useMemo(() => {
+    if (!model || !activeMs) return null;
+    return pendiumNote(letters, (id) => letterRate(model, id), averageAsked(activeMs, queries, activities).sent);
+  }, [model, activeMs, letters, queries, activities]);
+  /* the open comp: the one chosen, else the first in the shown order */
+  const openRow = rows.find((r) => r.key === openKey) ?? rows.find((r) => r.key === view[0]?.key) ?? rows[0] ?? null;
+  const editRow = drawer && drawer.mode === "edit" ? rows.find((r) => r.key === drawer.key) ?? null : null;
 
   const openAdd = useCallback(() => {
     if (compsRef.current.length >= MAX_COMPS) return;
     setPicker(null);
     setDrawer({ mode: "add" });
   }, []);
-  /* ⚠️ FOCUS GOES BACK WHERE IT CAME FROM (comps v28 §E): the control focused when the FIRST layer opened (a drawer,
-     the picker, a pop-up) takes focus again when the LAST one closes. A hand-over (the drawer to the picker, the
-     pop-up to the picker) keeps a layer open, so it never returns focus half-way. When the opener was re-rendered
-     (a card, a link inside one), the element on screen with the same `data-cx-key` takes it (comps28/refocus). */
+  /* ⚠️ FOCUS GOES BACK WHERE IT CAME FROM (comps v28 §E): the control focused when the FIRST layer opened takes focus
+     again when the LAST one closes; a re-rendered opener is found by its `data-cx-key` (comps28/refocus). */
   const openerRef = useRef<HTMLElement | null>(null);
   const anyLayer = !!drawer || !!picker || how || explain;
   const hadLayer = useRef(false);
@@ -151,14 +164,13 @@ export const ComparableTitlesPage: React.FC<{
   overlayRef.current = anyLayer;
 
   /* the page's keys: N adds, / finds. Never in a field, never over a layer, and only when THIS page is the
-     one on screen (every workspace page stays mounted). v25's F (full screen) is retired with full screen. */
+     one on screen (every workspace page stays mounted). */
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       const add = matchesShortcut(SHORTCUTS.compAdd, e), look = matchesShortcut(SHORTCUTS.compsFind, e);
       if (!add && !look) return;
       if (isEditableTarget(e.target) || overlayRef.current) return;
       if (!pageRef.current || pageRef.current.getBoundingClientRect().height === 0) return;
-      /* anything else open over the page (a menu, another surface's drawer) keeps the key */
       if (escapeDepth() > 0) return;
       if (compsRef.current.length === 0) return;
       e.preventDefault();
@@ -169,6 +181,14 @@ export const ComparableTitlesPage: React.FC<{
     return () => document.removeEventListener("keydown", onKey);
   }, []);
 
+  /* a podium step or a Comp-pendium row opened a comp: its shelf row takes focus once it is painted */
+  useEffect(() => {
+    const k = focusRow.current;
+    if (!k) return;
+    focusRow.current = null;
+    pageRef.current?.querySelector<HTMLElement>(`[data-cp="row"][data-key="${CSS.escape(k)}"]`)?.focus({ preventScroll: true });
+  });
+
   if (!currentUser) return null;
 
   // ── writes ──
@@ -177,7 +197,6 @@ export const ComparableTitlesPage: React.FC<{
     if (!activeMs) return false;
     const msId = activeMs.id;
     const mine = ++seq.current;
-    /* every comp the page writes carries a stable id; one that has an id keeps it (CV25 A1) */
     const clean = withCompIds(next.map(normalizeComp));
     setPending({ msId, comps: clean });
     compsRef.current = clean;
@@ -191,29 +210,28 @@ export const ComparableTitlesPage: React.FC<{
 
   const indexOfKey = (key: string): number => compsRef.current.findIndex((c, i) => compKey(c, i) === key);
 
-  /** `again` ("Add and add another") keeps the drawer open on a cleared form; a plain add closes it. */
+  /** `again` ("Add and add another") keeps the drawer open on a cleared form; a plain add closes it and opens the comp. */
   const add = (draft: CompDraft, o: { again: boolean } = { again: false }) => {
     const [comp] = withCompIds([normalizeComp({ ...draft, source: "user" })]);
     const next = withCompAdded(compsRef.current, comp);
     void commit(next);
-    if (!o.again) setDrawer(null);
+    if (!o.again) { setDrawer(null); setFilter(NO_FILTER); setOpenKey(comp.id!); }
     showToast({
-      message: `Added ${comp.title} to your library.`,
+      message: `Added ${comp.title}.`,
       undo: async () => {
         const at = compsRef.current.findIndex((c) => c.id === comp.id);
-        if (at >= 0) { setDrawer((d) => (d && d.mode !== "add" && d.key === comp.id ? null : d)); await commit(withCompRemoved(compsRef.current, at)); }
+        if (at >= 0) await commit(withCompRemoved(compsRef.current, at));
       },
     });
   };
 
-  const save = (key: string, draft: CompDraft, back: boolean) => {
+  const save = (key: string, draft: CompDraft) => {
     const index = indexOfKey(key);
     if (index < 0) return;
     const before = compsRef.current[index];
     const next = withCompIds(withCompEdited(compsRef.current, index, draft));
     void commit(next);
-    /* comps v28 §E: an edit opened from the drawer returns to that comp's detail; one opened from a card's link closes */
-    setDrawer(back ? { mode: "view", key: next[index].id! } : null);
+    setDrawer(null);
     showToast({
       message: `Saved ${draft.title}.`,
       undo: async () => { await commit(compsRef.current.map((c, i) => (i === index ? { ...before, id: next[index].id } : c))); },
@@ -237,6 +255,17 @@ export const ComparableTitlesPage: React.FC<{
     });
   };
 
+  /** Give the comps a letter is about to record an id first (all of them, in one write), only when one of THOSE has
+   *  none: the comps are not rewritten otherwise (CV25 E2). Null when that write was refused. */
+  const ensureIds = async (at: number[]): Promise<CompTitle[] | null> => {
+    const cur = compsRef.current;
+    if (at.every((i) => cur[i]?.id)) return cur;
+    const withIds = withCompIds(cur.map(normalizeComp));
+    return (await commit(withIds)) ? withIds : null;
+  };
+  /** the page repaints with the new record BEFORE the picker closes, so the focus it gives back finds the opener */
+  const twoFrames = () => new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
   /** Write the ticked comps to ONE letter. A comp with no id yet is given one first. */
   const saveLetter = async (letterId: string, keys: string[]) => {
     if (busyRef.current) return;
@@ -246,23 +275,58 @@ export const ComparableTitlesPage: React.FC<{
     try {
       const cur = compsRef.current;
       const at = keys.map((k) => cur.findIndex((c, i) => compKey(c, i) === k)).filter((i) => i >= 0);
-      let withIds = cur;
-      if (at.some((i) => !cur[i].id)) {
-        withIds = withCompIds(cur.map(normalizeComp));
-        if (!(await commit(withIds))) return;
-      }
+      const withIds = await ensureIds(at);
+      if (!withIds) return;
       const ids = at.map((i) => withIds[i].id!).filter(Boolean);
       const had = Array.isArray(letter.compIds) ? [...letter.compIds] : null;
+      const sent = model?.sentByLetter.get(letterId) ?? 0;
       const err = await updateVersion(letterId, { compIds: ids });
       if (err) { showToast({ message: err }); return; }
-      /* comps v28 §E: the page repaints with the new record BEFORE the picker closes, so the focus it gives back finds
-         the opener as it now is (a card's "Log in a letter" is gone once a letter names that comp) */
-      await new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+      await twoFrames();
       setPicker(null);
+      const titles = ids.map((id) => withIds.find((c) => c.id === id)?.title ?? "").filter(Boolean);
       showToast({
-        message: `Logged ${ids.length} ${ids.length === 1 ? "comp" : "comps"} for ${letterShort(letter.versionName)}.`,
+        message: had === null && sent > 0
+          ? (ids.length ? `Saved. ${sent} ${sent === 1 ? "query" : "queries"} added to ${andList(titles)}.` : `Saved. ${letter.versionName} didn’t mention any comps.`)
+          : `Saved ${letter.versionName}.`,
         /* the version document's record, put back exactly as it was: its list, or no list at all */
         undo: async () => { await updateVersion(letterId, { compIds: had ?? deleteField() }, { restoring: true }); },
+      });
+    } finally {
+      busyRef.current = false;
+    }
+  };
+
+  /** "Add to a letter": put ONE comp into, or take it out of, each unsent letter, as ticked. Sent letters never change. */
+  const saveForComp = async (key: string, letterIds: string[]) => {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    try {
+      const at = indexOfKey(key);
+      const withIds = at < 0 ? null : await ensureIds([at]);
+      if (!withIds || at < 0) return;
+      const id = withIds[at].id!;
+      const want = new Set(letterIds);
+      const changes: { letterId: string; had: string[] | null; next: string[] }[] = [];
+      for (const l of letters) {
+        if ((model?.sentByLetter.get(l.id) ?? 0) > 0) continue;
+        const had = Array.isArray(l.compIds) ? [...l.compIds] : null;
+        const has = !!had?.includes(id);
+        if (want.has(l.id) && !has && (had?.length ?? 0) < MAX_LETTER_COMPS) changes.push({ letterId: l.id, had, next: [...(had ?? []), id] });
+        if (!want.has(l.id) && has) changes.push({ letterId: l.id, had, next: had!.filter((x) => x !== id) });
+      }
+      const done: typeof changes = [];
+      for (const c of changes) {
+        const err = await updateVersion(c.letterId, { compIds: c.next });
+        if (err) { showToast({ message: err }); break; }
+        done.push(c);
+      }
+      await twoFrames();
+      setPicker(null);
+      if (!done.length) return;
+      showToast({
+        message: "Saved.",
+        undo: async () => { for (const c of done) await updateVersion(c.letterId, { compIds: c.had ?? deleteField() }, { restoring: true }); },
       });
     } finally {
       busyRef.current = false;
@@ -293,46 +357,84 @@ export const ComparableTitlesPage: React.FC<{
     }
   };
 
-    // ── render ──
+  // ── render ──
   const loading = !collectionsReady || held;
-  /* ⚠️ THREE STATES, AND LOADING IS NEITHER OF THE OTHER TWO (comps v27, kept in v28). While comps are loading the page
-     is its header and nothing below: an account with comps must never be shown the empty page first. The state is
-     the comp count and nothing else, so the first save and the last remove switch it with no reload. */
+  /* ⚠️ THREE STATES, AND LOADING IS NEITHER OF THE OTHER TWO: an account with comps must never be shown the empty page
+     first. The state is the comp count and nothing else, so the first save and the last remove switch it with no reload. */
   const isEmpty = comps.length === 0;
   const empty = !loading && !!activeMs && isEmpty;
   const listed = !loading && !!activeMs && !isEmpty;
-  const toLetters = () => (landRef.current ?? shelfRef.current)?.scrollIntoView({ behavior: "smooth", block: "start" });
   const openPicker = (letterId: string | null, forKey?: string) => { setDrawer(null); setHow(false); setPicker({ letterId, forKey }); };
-  /* v30 §D: one leaf, read back from the user document, so it survives a reload */
+  /** open a comp from the podium or the Comp-pendium: clear the shelf's filter, open it, bring the cards up */
+  const openFromBelow = (key: string) => {
+    setFilter(NO_FILTER);
+    setOpenKey(key);
+    focusRow.current = key;
+    gridRef.current?.scrollIntoView({ behavior: "auto", block: "start" });
+  };
+  /* v30 §D, kept: one leaf, read back from the user document, so it survives a reload */
   const scoutAsked = !!currentUser.notifyPrefs?.comps;
-  const top: TopState = loading ? { kind: "loading" }
+  const toggleScout = () => {
+    const was = scoutAsked;
+    void updateUserPaths({ "notifyPrefs.comps": !was });
+    showToast({
+      message: was ? "Okay, we won’t let you know." : "We’ll let you know when the Scout is ready.",
+      undo: async () => { await updateUserPaths({ "notifyPrefs.comps": was }); },
+    });
+  };
+  const letterById = new Map(letters.map((l) => [l.id, l]));
+  const openLetters: OpenLetter[] = openRow ? openRow.letters.map((l) => {
+    const v = letterById.get(l.id);
+    return {
+      id: l.id, name: l.name, sent: l.sent,
+      others: compsInLetter(comps, v).filter((c) => c.id !== openRow.comp.id).map((c) => c.title),
+      rate: model ? letterRate(model, l.id) : { asked: 0, sent: 0, pct: null },
+    };
+  }) : [];
+  const sentIn = (key: string): string => {
+    const r = rows.find((x) => x.key === key);
+    const s = r ? r.letters.filter((l) => l.sent) : [];
+    return s.length === 1 ? `Sent in ${s[0].name}` : `Sent in ${s.length} letters`;
+  };
+  const top: TopState32 = loading ? { kind: "loading" }
     : !activeMs ? { kind: "nobook" }
       : isEmpty ? { kind: "empty", book: activeMs.title }
-        : { kind: "listed", book: activeMs.title, total: comps.length, sent: counts.sent, highlight, full };
+        : {
+          kind: "listed", book: activeMs.title, total: comps.length, full,
+          current: nowLetter ? {
+            id: nowLetter.id, name: nowLetter.versionName, sent: model?.sentByLetter.get(nowLetter.id) ?? 0,
+            titles: compsInLetter(comps, nowLetter).map((c) => c.title),
+          } : null,
+        };
 
   return (
     <WorkspacePageGrid scrollLabel="Comparable titles" masthead={null}>
-      <div className="cpv-page cp30" data-cpv="page" data-cp="page" data-state={loading ? "loading" : empty ? "empty" : listed ? "listed" : "none"} ref={pageRef}>
-        <CompsTop30 state={top} addRef={primaryRef}
-          onAdd={activeMs ? openAdd : () => undefined} onPick={() => openPicker(null)} onExplain={() => setExplain(true)}
-          onOpen={(key) => setDrawer({ mode: "view", key })} onLetters={toLetters} />
-        {empty ? <CompsHow30 headingId="cp30-how-h" /> : null}
+      <div className="cpv-page cp30 cp32" data-cpv="page" data-cp="page" data-state={loading ? "loading" : empty ? "empty" : listed ? "listed" : "none"} ref={pageRef}>
+        <CompsTop32 state={top} addRef={primaryRef}
+          onAdd={activeMs ? openAdd : () => undefined} onHow={() => setHow(true)} onExplain={() => setExplain(true)}
+          onSeeLetter={() => onNavigate?.("manuscripts", "Query letters")} />
+        {loading ? <CompsDeskSkeleton32 /> : null}
+        {empty ? <CompsFirst32 /> : null}
         {listed ? (
           <>
-            {notice ? <CompsNotice30 notice={notice} onLog={(id) => openPicker(id)} /> : null}
-            <CompsShelf30
-              rows={rows} view={view} counts={counts} filter={filter} sort={sort} mode={mode} now={now} canAdd={!full}
-              findRef={findRef} headRef={shelfRef}
-              onFilter={setFilter} onSort={setSort} onMode={setMode}
-              onOpen={(key) => setDrawer({ mode: "view", key })}
-              onPick={(key) => openPicker(null, key)}
-              onAdd={openAdd} onHow={() => setHow(true)}
-            />
-            {letters.length ? (
-              <CompsLetters30 cards={cards} average={average} bandRef={landRef}
-                onOpen={(key) => setDrawer({ mode: "view", key })} onLog={(id) => openPicker(id)} />
-            ) : null}
-            <CompsScout30 asked={scoutAsked} onToggle={() => { void updateUserPaths({ "notifyPrefs.comps": !scoutAsked }); }} />
+            {notice ? <CompsBand32 notice={notice} onChoose={(id) => openPicker(id)} /> : null}
+            <div className="cp32-grid" data-cp="grid" ref={gridRef}>
+              <CompsShelf32
+                rows={rows} view={view} counts={counts} filter={filter} sort={sort} openKey={openRow?.key ?? null}
+                currentKeys={currentKeys} canAdd={!full} findRef={findRef}
+                onFilter={setFilter} onSort={setSort} onOpen={(k) => setOpenKey(k)} onAdd={openAdd}
+              />
+              {openRow ? (
+                <CompsOpen32 row={openRow} letters={openLetters} view={openView} now={now}
+                  letterNameOf={(id) => letterById.get(id)?.versionName ?? ""}
+                  onView={setOpenView}
+                  onEdit={(focusNote) => setDrawer({ mode: "edit", key: openRow.key, focusNote })}
+                  onAddToLetter={() => openPicker(null, openRow.key)}
+                  onAllQueries={() => navigate(queriesForIds(openRow.queries.map((q) => q.id), `Sent with ${openRow.comp.title}`))} />
+              ) : null}
+            </div>
+            <CompsPodium32 places={places} sentIn={sentIn} onOpen={openFromBelow} />
+            <CompsPendium32 rows={book} note={note} scoutAsked={scoutAsked} onOpen={openFromBelow} onScout={toggleScout} />
           </>
         ) : null}
         {empty || listed ? <AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} /> : null}
@@ -341,23 +443,20 @@ export const ComparableTitlesPage: React.FC<{
       {activeMs && (
         <>
           <CompDrawer
-            state={routeActive ? drawer : null} row={openRow} comps={comps}
-            removeBlocked={openRow && openRow.where === "sent" ? "It went out in a letter, so it stays on your shelf." : null}
-            letterShortOf={(id) => { const l = letters.find((x) => x.id === id); return l ? letterShort(l.versionName) : ""; }}
+            state={routeActive ? drawer : null} row={editRow} comps={comps}
+            removeBlocked={editRow && editRow.where === "sent" ? "You can’t remove this comp because a letter you’ve sent mentions it." : null}
             onClose={() => setDrawer(null)}
-            onBack={() => setDrawer((d) => (d && d.mode === "edit" && d.back ? { mode: "view", key: d.key } : null))}
-            onEdit={(focusNote) => openRow && setDrawer({ mode: "edit", key: openRow.key, focusNote, back: true })}
-            onPick={() => { if (openRow) openPicker(null, openRow.key); }}
-            onSave={(d) => { if (openRow && drawer?.mode === "edit") save(openRow.key, d, !!drawer.back); }}
+            onSave={(d) => { if (editRow) save(editRow.key, d); }}
             onAdd={add}
-            onRemove={() => openRow && remove(openRow.key)}
-            onShowExisting={(index) => { const c = comps[index]; if (c) setDrawer({ mode: "view", key: compKey(c, index) }); }}
+            onRemove={() => editRow && remove(editRow.key)}
+            onShowExisting={(index) => { const c = comps[index]; if (c) { setDrawer(null); setFilter(NO_FILTER); setOpenKey(compKey(c, index)); } }}
           />
           <CompLetterPicker
             request={routeActive ? picker : null} letters={letters} currentLetterId={nowLetter?.id ?? null} comps={comps} rows={rows} now={now}
             sentByLetter={model?.sentByLetter ?? new Map()}
             onClose={() => setPicker(null)}
             onSave={(letterId, keys) => void saveLetter(letterId, keys)}
+            onSaveForComp={(key, ids) => void saveForComp(key, ids)}
             onNewVersion={(letterId) => void newVersion(letterId)}
             onOpenPackages={() => { setPicker(null); onNavigate?.("manuscripts", "Submission packages"); }}
           />

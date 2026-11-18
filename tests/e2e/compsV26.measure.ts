@@ -63,12 +63,11 @@ async function openAdd(page: Page) {
   await page.waitForSelector('[data-hdr="comp"].is-in', { timeout: 10_000 });
   await page.waitForTimeout(500);
 }
-/** comps v28: a card opens the comp's detail, and its Edit is the form */
+/** RE-POINTED (comps v32, 17 Nov): a shelf row opens the comp beside the shelf, and its Edit opens the form */
 async function openEdit(page: Page, nth: number) {
   await scrollTo(page, '[data-cp="shelf"]', 24);
-  await page.locator(`${P}[data-cp="card"]`).nth(nth).click();
-  await page.waitForSelector('[data-hdr="comp"].is-in', { timeout: 10_000 });
-  await page.locator('[data-cv="drawer-edit"]').click();
+  await page.locator(`${P}[data-cp="row"]`).nth(nth).click();
+  await page.locator(`${P}[data-cp="open-edit"]`).click();
   await page.waitForSelector('[data-hdr="comp"].is-in', { timeout: 10_000 });
   await page.waitForTimeout(500);
 }
@@ -125,7 +124,8 @@ test.describe("Comparable titles v26", () => {
       await closeDrawer(page); await openEdit(page, 1); await mutate(page, "AD1");
       r = await drawer(page);
       L.check(`${w} edit: one heading`, r.headings.length === 1 && r.headings[0].text === "Edit Salt Road" && r.headings[0].inHead, JSON.stringify(r.headings));
-      L.check(`${w} edit: the byline is the subline`, r.sub === "Imogen Hale · Faber · 2023", `${r.sub}`);
+      /* RE-POINTED (comps v32, 17 Nov): the edit drawer's subline is "Update its details."; the byline is on the page */
+      L.check(`${w} edit: the subline`, r.sub === "Update its details.", `${r.sub}`);
       L.check(`${w} edit: buttons`, r.mode === "edit" && r.save?.text === "Save changes" && !!r.remove && !r.again, `${r.save?.text} · remove ${!!r.remove} · again ${!!r.again}`);
     }
     L.done(16);
@@ -334,15 +334,15 @@ test.describe("Comparable titles v26", () => {
     const c = dump().comps.find((x) => x.title === "Salt and Iron")!;
     L.check("stored in matchAxis, joined as today", c.matchAxis === "Tone · Coastal", `${JSON.stringify(c.matchAxis)}`);
     const toast = await page.locator(".sa-toast").last().textContent().catch(() => "");
-    L.check("the toast, with Undo", /Added Salt and Iron to your library\./.test(toast ?? "") && (await page.locator(".sa-toast-undo").count()) > 0, `${toast}`);
+    L.check("the toast, with Undo", /Added Salt and Iron\./.test(toast ?? "") && (await page.locator(".sa-toast-undo").count()) > 0, `${toast}`);
     await page.waitForTimeout(700);
-    /* the comp drawer reads them back as chips */
+    /* RE-POINTED (comps v32, 17 Nov): the comp's details are on the page — its row opens it beside the shelf, where the
+       chips sit under "Why it compares" */
     await scrollTo(page, '[data-cp="shelf"]', 24);
-    await page.locator(`${P}[data-cp="card"][aria-label="Salt and Iron"]`).click();
-    await page.waitForSelector('[data-hdr="comp"].is-in'); await page.waitForTimeout(500);
-    const back = await page.evaluate(() => { const d = document.querySelector('[data-hdr="comp"]')!; return { title: d.querySelector('[data-cv="drawer-title"]')?.textContent, label: d.querySelector('[data-cv="drawer-tags-label"]')?.textContent, chips: [...d.querySelectorAll('[data-cv="drawer-tags"] span')].map((s) => s.textContent) }; });
-    /* comps v30: the chips sit under "Why it compares", with no "Matches on" label of their own (design-refs/comps-v30) */
-    L.check("the drawer reads them back as two chips", back.title === "Salt and Iron" && back.chips.join("|") === "Tone|Coastal", JSON.stringify(back));
+    await page.locator(`${P}[data-cp="row"]`, { hasText: "Salt and Iron" }).click();
+    await page.waitForTimeout(500);
+    const back = await page.evaluate(() => { const d = (window as any).__cv().querySelector('[data-cp="open"]')!; return { title: d.querySelector('[data-cp="open-title"]')?.textContent, chips: [...d.querySelectorAll('[data-cp="tags"] span')].map((s: Element) => s.textContent) }; });
+    L.check("the open comp reads them back as two chips", back.title === "Salt and Iron" && back.chips.join("|") === "Tone|Coastal", JSON.stringify(back));
     L.done(10);
   });
 
@@ -368,15 +368,14 @@ test.describe("Comparable titles v26", () => {
         const back = await page.evaluate((sel) => document.activeElement === document.querySelector(sel), `${P}[data-cp="add"]`);
         L.check(`${w} add: ${name} closes the drawer and returns focus to "Add a comp"`, shut && back, `closed ${shut} · focus on ${await focus()}`);
       }
-      /* edit, opened from a card's detail (comps v28: Escape steps back to the detail, a second closes, focus to the card) */
+      /* RE-POINTED (comps v32, 17 Nov): edit, opened from the open comp's Edit (the detail drawer is retired): one Escape
+         closes it and focus returns to Edit */
       await openEdit(page, 1);
       L.check(`${w} edit: opening puts focus in Title`, (await focus()) === "cpv-f-title", await focus());
-      await page.keyboard.press("Escape"); await page.waitForTimeout(400);
-      L.check(`${w} edit: Escape returns to the detail`, (await page.locator('[data-cv="drawer-body"]').count()) === 1, `detail ${await page.locator('[data-cv="drawer-body"]').count()}`);
       await page.keyboard.press("Escape");
       const shut = await closed();
-      const back = await page.evaluate((sel) => document.activeElement === document.querySelectorAll(sel)[1], `${P}[data-cp="card"]`);
-      L.check(`${w} edit: a second Escape closes it and returns focus to the card`, shut && back, `closed ${shut} · focus on ${await focus()}`);
+      const back = await page.evaluate((sel) => document.activeElement === document.querySelector(sel), `${P}[data-cp="open-edit"]`);
+      L.check(`${w} edit: Escape closes it and returns focus to Edit`, shut && back, `closed ${shut} · focus on ${await focus()}`);
       /* Cmd + Enter at one size, Ctrl + Enter at the other, from the note */
       const key = i === 0 ? "Meta+Enter" : "Control+Enter";
       const n0 = dump().comps.length;

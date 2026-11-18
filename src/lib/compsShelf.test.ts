@@ -11,7 +11,7 @@ import type { CompRow } from "./compsLibrary";
 import { averageAsked, letterRate } from "./compUsage";
 import { analyticsModel } from "./analyticsModel";
 import {
-  NO_FILTER, ageChip, filterShelf, highlightOf, leadLine, letterCards, noticeOf, pickRecord, pickTip, statOf,
+  NO_FILTER, ageChip, filterShelf, noticeOf, pendiumNote, pendiumOrder, pickRecord, pickTip, podiumOf, statOf,
   sortShelf, whereCounts,
 } from "./compsShelf";
 
@@ -77,62 +77,43 @@ describe("CX28 S5 (unit) · filters compose; counts sum", () => {
   it("the where counts sum to the comp count", () => { const c = whereCounts(rows); expect(c.sent + c.draft + c.shelf).toBe(rows.length); expect(c).toEqual({ sent: 1, draft: 1, shelf: 2 }); });
 });
 
-describe("CX28 N1 (unit) · the notice", () => {
-  it("one letter, then several, then none", () => {
-    expect(noticeOf([{ letterId: "L1", name: "Hook-first", queries: 5 }])).toMatchObject({ lead: "Hook-first", button: "Log it now", letterId: "L1" });
-    const two = noticeOf([{ letterId: "L1", name: "A", queries: 5 }, { letterId: "L2", name: "B", queries: 1 }])!;
-    expect(two.lead + two.rest).toBe("2 letters went out with 6 queries before their comps were logged. Log what they named and those queries count too.");
-    expect(two.button).toBe("Log them now");
+describe("CP32 B1 (unit) · the band's letter", () => {
+  it("the unrecorded sent letter with the most queries (ties: the oldest); none, none", () => {
+    expect(noticeOf([{ letterId: "L1", name: "Hook-first", queries: 5 }])).toEqual({ letterId: "L1", name: "Hook-first", queries: 5 });
+    expect(noticeOf([{ letterId: "L1", name: "A", queries: 2 }, { letterId: "L2", name: "B", queries: 7 }, { letterId: "L3", name: "C", queries: 7 }])).toMatchObject({ letterId: "L2" });
     expect(noticeOf([])).toBeNull();
   });
 });
 
-describe("CP30 H3 · the lead sentence's three shapes", () => {
-  const line = (n: number, sent: number) => { const l = leadLine(n, sent); return `${l.before}X${l.after}`; };
-  it("some sent, some waiting; words up to ten, sentence-cased", () => {
-    expect(line(7, 2)).toBe("Seven comps on file for X. Two have gone out with your queries, and five are waiting to be used.");
-    expect(line(12, 11)).toBe("12 comps on file for X. 11 have gone out with your queries, and one is waiting to be used.");
-  });
-  it("singulars, and the 'and' clause dropped when nothing is waiting", () => {
-    expect(line(1, 1)).toBe("One comp on file for X. One has gone out with your queries.");
-    expect(line(3, 1)).toBe("Three comps on file for X. One has gone out with your queries, and two are waiting to be used.");
-    expect(line(4, 4)).toBe("Four comps on file for X. Four have gone out with your queries.");
-  });
-  it("none sent", () => expect(line(3, 0)).toBe("Three comps on file for X. None has gone out with a query yet."));
-});
-
-describe("CP30 H2 · the header's highlight", () => {
+describe("CP32 P (unit) · podiumOf", () => {
   const r = (i: number, q: number, a: number) => row({ title: `C${i}`, index: i, where: q ? "sent" : "none", queries: qs(q), askedForMore: a });
-  it("ready: the best rate among comps with five or more queries; ties go to more queries, then shelf order", () => {
-    expect(highlightOf([r(0, 9, 3), r(1, 5, 4), r(2, 4, 4)])).toEqual({ kind: "ready", key: "k1", title: "C1", pct: 80, asked: 4, queries: 5 });
-    expect(highlightOf([r(0, 5, 2), r(1, 10, 4)])).toMatchObject({ key: "k1" });
-    expect(highlightOf([r(0, 5, 2), r(1, 5, 2)])).toMatchObject({ key: "k0" });
+  const flat = (rows: CompRow[]) => podiumOf(rows).map((p) => [p.row.key, p.place, p.equal, p.pct]);
+  it("order: compRate descending, then more queries, then the writer's order; only comps at READY_AT or more", () => {
+    expect(flat([r(0, 9, 3), r(1, 5, 4), r(2, 4, 4), r(3, 10, 2), r(4, 20, 9)])).toEqual([["k1", 1, false, 80], ["k4", 2, false, 45], ["k0", 3, false, 33]]);
+    expect(flat([r(0, 5, 2), r(1, 10, 4)]).map((x) => x[0])).toEqual(["k1", "k0"]);
   });
-  it("too soon: something out, nothing at five; nothing sent: nothing out", () => {
-    expect(highlightOf([r(0, 3, 1), r(1, 4, 0), r(2, 0, 0)])).toEqual({ kind: "soon", busiest: 4 });
-    expect(highlightOf([r(0, 0, 0)])).toEqual({ kind: "none" });
-    expect(highlightOf([])).toEqual({ kind: "none" });
+  it("ties: equal rates share a place and say so (1, 1, 3)", () => {
+    expect(flat([r(0, 9, 6), r(1, 6, 4), r(2, 20, 11)])).toEqual([["k0", 1, true, 67], ["k1", 1, true, 67], ["k2", 3, false, 55]]);
+    expect(flat([r(0, 5, 1), r(1, 5, 4), r(2, 10, 2)])).toEqual([["k1", 1, false, 80], ["k2", 2, true, 20], ["k0", 2, true, 20]]);
+  });
+  it("under three: only the ranked; none: an empty podium", () => {
+    expect(flat([r(0, 9, 6), r(1, 3, 3)])).toEqual([["k0", 1, false, 67]]);
+    expect(flat([r(0, 4, 4), r(1, 0, 0)])).toEqual([]);
+    expect(flat([])).toEqual([]);
+  });
+  it("the Comp-pendium: ranked in podium order, then the rest by queries, then letters, then the writer's order", () => {
+    const L = (id: string) => ({ id, name: id, short: id, sent: false, packages: [] });
+    const rows = [row({ title: "A", index: 0 }), r(1, 3, 1), r(2, 9, 6), row({ title: "D", index: 3, where: "unsent", letters: [L("x")] }), r(4, 6, 1)];
+    expect(pendiumOrder(rows).map((x) => x.key)).toEqual(["k2", "k4", "k1", "k3", "k0"]);
+  });
+  it("the Comp-pendium's note: letters with comps only, summed; null when none mentioned comps", () => {
+    const rate = (id: string) => ({ L1: { asked: 6, sent: 9, pct: 67 }, L2: { asked: 1, sent: 5, pct: 20 }, L3: { asked: 3, sent: 4, pct: 75 } } as Record<string, { asked: number; sent: number; pct: number }>)[id];
+    expect(pendiumNote([{ id: "L1", compIds: ["a"] }, { id: "L2", compIds: [] }, { id: "L3" }], rate, 24)).toEqual({ lq: 9, lm: 6, tot: 24 });
+    expect(pendiumNote([{ id: "L2", compIds: [] }], rate, 5)).toBeNull();
   });
 });
 
-describe("CP30 L1 (unit) · the letter cards", () => {
-  it("sent letters by queries then name, then drafts; logged, unrecorded and draft-empty", () => {
-    const letters = [
-      { id: "L1", versionName: "Hook-first", createdDate: "1" },
-      { id: "L2", versionName: "Coastal pitch", createdDate: "2", compIds: ["a", "b"] },
-      { id: "L3", versionName: "Tide version", createdDate: "3", compIds: ["a"] },
-      { id: "L4", versionName: "Blank draft", createdDate: "4", compIds: [] },
-      { id: "L5", versionName: "Short and sharp", createdDate: "5", compIds: ["b"] },
-    ];
-    const rows = [row({ title: "A", index: 0, comp: { id: "a", title: "A", year: 2021 } }), row({ title: "B", index: 1, comp: { id: "b", title: "B" } })];
-    const c = letterCards(letters, rows, new Map([["L1", 5], ["L2", 9], ["L5", 5]]), (id) => ({ asked: id === "L2" ? 6 : 0, sent: 0, pct: null }));
-    expect(c.map((x) => [x.name, x.middle])).toEqual([
-      ["Coastal pitch", "logged"], ["Hook-first", "unrecorded"], ["Short and sharp", "logged"], ["Blank draft", "empty"], ["Tide version", "logged"],
-    ]);
-    expect(c[0].comps.map((x) => [x.title, x.year])).toEqual([["A", 2021], ["B", null]]);
-    expect(c[0].rate.asked).toBe(6);
-    expect(c.filter((x) => x.draft).map((x) => x.id)).toEqual(["L4", "L3"]);
-  });
+describe("CP30 L1 (unit) · the rates the page reads", () => {
   it("letterRate is asked ÷ queries for that letter", () => {
     const m = { letterOfQuery: new Map([["q1", "L"], ["q2", "L"], ["q3", "L"], ["q4", "M"]]), asked: new Set(["q1", "q4"]) };
     expect(letterRate(m, "L")).toEqual({ asked: 1, sent: 3, pct: 33 });

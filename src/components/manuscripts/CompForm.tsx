@@ -333,8 +333,9 @@ export const CompFormBody: React.FC<{
         <label className="cf-fld" htmlFor="cpv-f-note">
           <span>In your own words</span>
           <textarea id="cpv-f-note" ref={form.noteRef} rows={3} value={f.note}
-            placeholder="A line on why an agent should think of this book when they read yours."
+            placeholder="What makes it like your book?"
             onChange={(e) => set({ note: e.target.value })} />
+          <small className="cf-hint" data-cf="note-hint">Just for you. Agents don&rsquo;t see this.</small>
         </label>
       </section>
 
@@ -353,7 +354,7 @@ export const CompFormFoot: React.FC<{
   removeBlocked?: string | null;
 }> = ({ form, onCancel, onRemove, removeBlocked }) => (
   <div className="cv-layer cf-foot" data-cf="foot">
-    <span data-cf="foot-line">{!form.hasTitle ? "" : form.state === "ready" ? "Ready for a letter." : "Fill in the rest any time."}</span>
+    <span data-cf="foot-line">{form.mode === "edit" && removeBlocked ? removeBlocked : !form.hasTitle ? "" : form.state === "ready" ? "Ready for a letter." : "Fill in the rest any time."}</span>
     <span className="cf-bt">
       {form.mode === "edit" && (
         <button type="button" className="cf-remove" data-cf="remove" disabled={!!removeBlocked} title={removeBlocked ?? undefined} onClick={onRemove}>Remove</button>

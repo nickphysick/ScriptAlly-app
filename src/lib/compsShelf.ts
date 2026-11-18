@@ -4,16 +4,14 @@
  *
  * Comparable titles v28 (design-refs/comps-v28/comps-v28.html), restyled by v30 (design-refs/comps-v30/): the shelf's
  * own logic, pure. Where a comp is used, its age chip, what its card's stat card says, the shelf's sort and filters,
- * the notice, the header's lead sentence and highlight (v30 §A), the letter cards (v30 §C), and the picker's record
- * and tip. Every figure comes from `lib/compUsage` through `compsLibrary.buildRows`;
+ * the band's letter (v32 §B), the podium and the Comp-pendium (v32 §D, §E), and the picker's record and tip. Every figure comes from `lib/compUsage` through `compsLibrary.buildRows`;
  * nothing here is stored, and no rate is computed anywhere but here and compUsage.
  *
  * ⚠️ "NOW" IS A PARAMETER (`currentYear()` at the call site), so every age is testable. The mock fixes 2026.
  */
 import type { CompTitle } from "../types";
 import type { AskedRate, CompWhere, UnrecordedLetter } from "./compUsage";
-import { letterRecorded } from "./compUsage";
-import type { CompKind, CompRow, LetterLite } from "./compsLibrary";
+import type { CompRow } from "./compsLibrary";
 import { letterShort } from "./compsLibrary";
 
 /* ══ where a comp is used ═════════════════════════════════════════════════════════════════════ */
@@ -22,9 +20,8 @@ import { letterShort } from "./compsLibrary";
 export type ShelfWhere = "sent" | "draft" | "shelf";
 export const shelfWhere = (w: CompWhere): ShelfWhere => (w === "sent" ? "sent" : w === "unsent" ? "draft" : "shelf");
 export const WHERE_ORDER: ShelfWhere[] = ["sent", "draft", "shelf"];
-export const WHERE_LABEL: Record<ShelfWhere, string> = { sent: "In a sent letter", draft: "In a draft letter", shelf: "On your shelf" };
-/** The header card's swatches; the shelf's own chips are the same family. */
-export const WHERE_SWATCH: Record<ShelfWhere, string> = { sent: "#e2e7ef", draft: "#f6e2d8", shelf: "#e4e1db" };
+/** v32: the shelf filter's words ("Sent 2", "In a draft 1", "Not used 4"); the keys are v28's */
+export const WHERE_LABEL: Record<ShelfWhere, string> = { sent: "Sent", draft: "In a draft", shelf: "Not used" };
 
 /** sent · draft · shelf counts; they always sum to the comp count. */
 export function whereCounts(rows: readonly CompRow[]): Record<ShelfWhere, number> {
@@ -129,99 +126,19 @@ export function filterShelf(rows: readonly CompRow[], f: ShelfFilter): CompRow[]
 
 /* ══ the notice ═══════════════════════════════════════════════════════════════════════════════ */
 
-export interface Notice { lead: string; rest: string; button: string; letterId: string }
-/** One banner, whatever the number of unrecorded letters; null when there are none. */
+export interface Notice { letterId: string; name: string; queries: number }
+/** v32 §B: the striped band's one letter — of the sent letters whose comps were never chosen, the one with the most
+ *  queries (ties: the oldest); null when there are none. The next appears once that one is saved. */
 export function noticeOf(u: readonly UnrecordedLetter[]): Notice | null {
   if (!u.length) return null;
-  if (u.length === 1) {
-    const n = u[0].queries;
-    return { lead: u[0].name, rest: ` went out with ${n} ${n === 1 ? "query" : "queries"} before its comps were logged. Log what it named and those queries count too.`, button: "Log it now", letterId: u[0].letterId };
-  }
-  const total = u.reduce((a, l) => a + l.queries, 0);
-  return { lead: `${u.length} letters`, rest: ` went out with ${total} queries before their comps were logged. Log what they named and those queries count too.`, button: "Log them now", letterId: u[0].letterId };
+  const top = u.reduce((best, l) => (l.queries > best.queries ? l : best), u[0]);
+  return { letterId: top.letterId, name: top.name, queries: top.queries };
 }
 
-/* ══ v30 §A · the header's lead sentence and highlight ═════════════════════════════════════════ */
+/* ══ the threshold ════════════════════════════════════════════════════════════════════════════ */
 
 /** A comp or letter needs about this many queries before its figure means much. */
 export const READY_AT = 5;
-
-const WORDS = ["no", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"];
-/** Numbers up to ten as words; above, the figure. */
-export const numberWord = (n: number): string => (n >= 0 && n <= 10 ? WORDS[n] : String(n));
-const cap = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1);
-
-/**
- * The header's line, around the manuscript's title: `{before}<b>{title}</b>{after}`.
- *   "Seven comps on file for X. Two have gone out with your queries, and five are waiting to be used."
- *   "One comp on file for X. One has gone out with your queries."
- *   "Three comps on file for X. None has gone out with a query yet."
- * `sent` is the comps whose letters have gone out (`shelfWhere(r.where) === "sent"`).
- */
-export function leadLine(total: number, sent: number): { before: string; after: string } {
-  const before = `${cap(numberWord(total))} ${total === 1 ? "comp" : "comps"} on file for `;
-  if (sent <= 0) return { before, after: ". None has gone out with a query yet." };
-  const rest = total - sent;
-  const head = sent === 1 ? "One has" : `${cap(numberWord(sent))} have`;
-  const tail = rest > 0 ? `, and ${numberWord(rest)} ${rest === 1 ? "is" : "are"} waiting to be used.` : ".";
-  return { before, after: `. ${head} gone out with your queries${tail}` };
-}
-
-export type Highlight =
-  | { kind: "ready"; key: string; title: string; pct: number; asked: number; queries: number }
-  | { kind: "soon"; busiest: number }
-  | { kind: "none" };
-
-/**
- * The header's right side: the comp agents ask for more with most, among comps with at least `READY_AT` queries.
- * Ties go to more queries, then the writer's own order. With none that ready but something out, "too soon";
- * with nothing out, "nothing sent". Every rate is `compRate`, over compUsage's figures.
- */
-export function highlightOf(rows: readonly CompRow[]): Highlight {
-  const ready = rows.filter((r) => r.queries.length >= READY_AT);
-  if (ready.length) {
-    const best = [...ready].sort((a, b) => (compRate(b)! - compRate(a)!) || (b.queries.length - a.queries.length) || (a.index - b.index))[0];
-    return { kind: "ready", key: best.key, title: best.comp.title, pct: compRate(best)!, asked: best.askedForMore, queries: best.queries.length };
-  }
-  const busiest = rows.reduce((m, r) => Math.max(m, r.queries.length), 0);
-  return busiest > 0 ? { kind: "soon", busiest } : { kind: "none" };
-}
-
-/* ══ v30 §C · which letter named which comps ══════════════════════════════════════════════════ */
-
-export type LetterMiddle = "logged" | "unrecorded" | "empty";
-export interface LetterCard {
-  id: string;
-  name: string;
-  /** the queries it went out with; 0 is a draft */
-  sent: number;
-  draft: boolean;
-  /** logged: its comps are recorded (a sent letter recorded as naming none is logged, with no rows) ·
-   *  unrecorded: it went out before its comps were logged · empty: a draft with no comps chosen */
-  middle: LetterMiddle;
-  /** the comps it names, in the shelf's order */
-  comps: { key: string; title: string; year: number | null; kind: CompKind }[];
-  rate: AskedRate;
-}
-
-/**
- * One card per Query Letter: sent letters by queries (most first, ties by name), then drafts (by name).
- * `rateOf` is compUsage's `letterRate`; this file computes no rate of its own.
- */
-export function letterCards(letters: readonly LetterLite[], rows: readonly CompRow[], sentByLetter: ReadonlyMap<string, number>, rateOf: (letterId: string) => AskedRate): LetterCard[] {
-  const byName = (a: LetterCard, b: LetterCard) => a.name.localeCompare(b.name);
-  const cards = letters.map((l): LetterCard => {
-    const sent = sentByLetter.get(l.id) ?? 0;
-    const recorded = letterRecorded(l);
-    const ids = new Set(recorded ? l.compIds! : []);
-    const comps = rows.filter((r) => !!r.comp.id && ids.has(r.comp.id)).map((r) => ({ key: r.key, title: r.comp.title, year: r.comp.year ?? null, kind: r.kind }));
-    const draft = sent === 0;
-    const middle: LetterMiddle = !draft && !recorded ? "unrecorded" : draft && comps.length === 0 ? "empty" : "logged";
-    return { id: l.id, name: l.versionName, sent, draft, middle, comps, rate: rateOf(l.id) };
-  });
-  const sentCards = cards.filter((c) => !c.draft).sort((a, b) => (b.sent - a.sent) || byName(a, b));
-  return [...sentCards, ...cards.filter((c) => c.draft).sort(byName)];
-}
 
 /** "A and B", "A, B and C". */
 export function andList(xs: readonly string[]): string {
@@ -255,3 +172,76 @@ export function pickTip(ticked: readonly Pick<CompTitle, "title" | "year">[], no
 
 /** The letter a draft chip names, shortened as the picker's chips are. */
 export { letterShort };
+
+/* ══ v32 §D · the podium ══════════════════════════════════════════════════════════════════════ */
+
+export interface PodiumPlace {
+  row: CompRow;
+  /** 1, 2 or 3; equal rates share a place, so two firsts are followed by a third (1, 1, 3) */
+  place: 1 | 2 | 3;
+  /** another comp on the podium has the same rate */
+  equal: boolean;
+  /** `compRate`, never computed again here */
+  pct: number;
+}
+
+/** The ranked comps, best first: at least `READY_AT` queries, by `compRate` descending, then more queries, then the
+ *  writer's own order. Every ranked comp, not only the top three (the Comp-pendium lists them all in this order). */
+export function rankedOf(rows: readonly CompRow[]): CompRow[] {
+  return rows
+    .filter((r) => r.queries.length >= READY_AT)
+    .sort((a, b) => (compRate(b)! - compRate(a)!) || (b.queries.length - a.queries.length) || (a.index - b.index));
+}
+
+/**
+ * The podium: up to three comps from `rankedOf`. A comp's place is one more than the number of comps on the podium
+ * with a higher rate, so equal rates share a place (1, 1, 3) and say so (`equal`).
+ * ⚠️ EVERY RATE IS `compRate`, over compUsage's figures (`CompRow.queries`, `askedForMore`).
+ */
+export function podiumOf(rows: readonly CompRow[]): PodiumPlace[] {
+  const top = rankedOf(rows).slice(0, 3);
+  return top.map((row, i) => {
+    const pct = compRate(row)!;
+    const place = (top.findIndex((x) => compRate(x) === pct) + 1) as 1 | 2 | 3;
+    return { row, place, equal: top.some((x, k) => k !== i && compRate(x) === pct), pct };
+  });
+}
+
+/** v32 §E · the Comp-pendium's order: the ranked comps in podium order, then the rest by queries, then letters,
+ *  then the writer's own order. */
+export function pendiumOrder(rows: readonly CompRow[]): CompRow[] {
+  const ranked = rankedOf(rows);
+  const keys = new Set(ranked.map((r) => r.key));
+  const rest = rows.filter((r) => !keys.has(r.key))
+    .sort((a, b) => (b.queries.length - a.queries.length) || (b.letters.length - a.letters.length) || (a.index - b.index));
+  return [...ranked, ...rest];
+}
+
+/**
+ * v32 §E · the Comp-pendium's note: `lq` of the writer's `tot` queries went with a letter that mentions at least one
+ * comp, and `lm` of those asked for more. Null when no query mentioned comps.
+ * ⚠️ COUNTS ONLY: `lq` and `lm` are `letterRate`'s, per letter, summed; `tot` is `averageAsked`'s denominator.
+ */
+export function pendiumNote(
+  letters: readonly { id: string; compIds?: string[] | null }[],
+  rateOf: (letterId: string) => AskedRate,
+  tot: number,
+): { lq: number; lm: number; tot: number } | null {
+  let lq = 0, lm = 0;
+  for (const l of letters) {
+    if (!Array.isArray(l.compIds) || !l.compIds.length) continue;
+    const r = rateOf(l.id);
+    lq += r.sent; lm += r.asked;
+  }
+  return lq ? { lq, lm, tot } : null;
+}
+
+/** The Query Centre's own status words (moved here from v30's comp drawer, retired). */
+export const queryStatusWord = (s: string): string =>
+  s === "Rejected" ? "Passed" : s === "No Response" ? "Closed with no reply" : s.replace(/ (Requested|Sent)$/, (m) => m.toLowerCase());
+
+/** "7 years old", "1 year old", "this year"; a year ahead of now reads "this year". */
+export const ageWords = (year: number, now: number): string => {
+  const a = Math.max(0, now - year);
+  return a === 0 ? "this year" : a === 1 ? "1 year old" : `${a} years old`;
+};
