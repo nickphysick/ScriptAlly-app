@@ -204,6 +204,9 @@ mutation went red, and `lib/compsShelf.ts` was restored byte-identical (sha chec
 - **Deploy:** hosting only, `--config firebase.dev.json --project scriptally-dev`, from a clean checkout of the pushed
   tip. The served hash (`index-DBGl9D_1.js`) was checked inside the same command before the build and again before the
   deploy.
-- **Dev now serves `index-C2JbkeZI.js`**, which matches the build. The bundle carries the comps page, Responses v15 and
-  Versions v6.
+- **First deploy:** `index-C2JbkeZI.js` from f46f73f71, matching the build. The bundle carries the comps page,
+  Responses v15 and Versions v6.
+- **Second deploy (the copy fix, 2bcef3a7f merged):** `dev/smv31-vv6-cp32` @ **345ccfed1** (pushed). The same guard
+  passed (served = `index-C2JbkeZI.js` before the build and again before the deploy), with tsc 0 and a clean build.
+  **Dev now serves `index-C_PGqmGZ.js`**, which matches the build.
 - **Not merged to main.** Prod is untouched, and Firestore rules are unchanged.
