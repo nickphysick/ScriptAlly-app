@@ -15,6 +15,10 @@ import { FILLED_EMAIL, MS_ID } from "./ms21Fixture.mjs";
 import { assertLocalBundleIsDev } from "./bundleGuard";
 
 test.setTimeout(300_000);
+/* RETIRED (Manuscripts v29, 18 Nov): the whole of MSV281 — A1 (Edit and View summary), A2 (the logline strip) and A3 (the
+   rust closing quote on the strip and in the book view). All three subjects left the page. Successors:
+   tests/e2e/manuscriptsV29.measure.ts L2 and src/components/manuscripts/v29/msv29.test.tsx A1, B2; RETIRED-manuscripts-v28.md. */
+test.beforeEach(() => { test.skip(true, "retired by Manuscripts v29 (RETIRED-manuscripts-v28.md)"); });
 const ONLY = process.env.MSV281_ONLY ?? "";
 const run = (id: string) => !ONLY || id.startsWith(ONLY);
 const pw = () => { for (const l of readFileSync(".env.local", "utf8").split("\n")) { const m = /^\s*SA_E2E_PASSWORD\s*=\s*(.*)$/.exec(l); if (m) return m[1].trim().replace(/^["']|["']$/g, ""); } throw new Error("no pw"); };
@@ -41,7 +45,7 @@ async function openPage(page: Page) {
   await page.goto("/manuscripts");
   await page.evaluate((id) => { localStorage.setItem("scriptally_active_manuscript_id", id); sessionStorage.setItem("sa.guide.autoOpened", "1"); }, MS_ID);
   await page.goto("/manuscripts");
-  await page.waitForSelector('[data-ms27="book"]');
+  await page.waitForSelector('[data-ms29="desk"]');
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(800);
 }
