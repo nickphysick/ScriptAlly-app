@@ -7,14 +7,13 @@
  */
 import { test, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
-import { openLog, panel, settledReady, shot, OUT } from "./laqLib";
+import { carryOnMaterials, openLog, panel, settledReady, shot, OUT } from "./laqLib";
 
 async function walk(page: Page) {
   const id = await settledReady(page);
   await page.locator(`[data-qls="agent"][data-id="${id}"]`).click();
   await page.locator('[data-qls="when-opt"][data-k="today"]').click();
-  if (await page.locator('[data-qls="package"]').count()) await page.locator('[data-qls="package"]').first().click();
-  else await page.locator('[data-qls="pieces-continue"]').click();
+  await carryOnMaterials(page);
   if (await page.locator('[data-qls="root"][data-step="how"]').count()) await page.locator('[data-qls="how-opt"]').first().click();
   await page.locator('[data-qls="root"][data-step="check"]').waitFor();
 }
@@ -36,15 +35,11 @@ test("the stages, screenshot by screenshot", async ({ page }) => {
   await page.locator('[data-qls="when-opt"][data-k="earlier"]').click();
   await shot(page, "05-sent-calendar");
   await page.locator('[data-qls="when-opt"][data-k="today"]').click();
-  await shot(page, "06-materials-packages");
-  const choose = page.locator('[data-qls="choose-pieces"]');
-  if (await choose.count()) await choose.click();
+  /* materials fork v1 — step 3 opens on the fork; the pieces are its Materials tile (the old pieces menu is gone) */
+  await shot(page, "06-materials-fork");
+  await page.locator('[data-qls="fork-tile"][data-k="pcs"]').click();
   await shot(page, "07-materials-pieces");
-  const sample = page.locator('[data-qls="piece"][data-k="sample"]');
-  if ((await sample.getAttribute("data-on")) !== "1") await sample.click();
-  await page.locator('[data-qls="vr"][data-k="sample"]').click();
-  await shot(page, "08-pieces-menu");
-  await page.keyboard.press("Escape");
+  if (!(await page.locator('[data-qls="pieces-continue"]').count())) await page.locator('[data-qls="pc-opt"][data-k="letter"]').first().click();
   await page.locator('[data-qls="pieces-continue"]').click();
   await shot(page, "09-how");
   await page.locator('[data-qls="how-opt"]').first().click();

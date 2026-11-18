@@ -4,8 +4,7 @@
  *
  * Log a query v1.3 — FIDELITY: the reference (design-refs/log-a-query-v1-3/log-a-query-v1-3.html, navy header, "Over
  * the Dashboard, dimmed" so it sits where the app's panel sits) and the build at 1440×900, for screens 01–09:
- *   01  Joanna · the pieces · Opening pages open: 3 chapters of "Prologue cut, flashback first", the Done line in view
- *   02  01 after Done
+ *   01, 02  superseded by materials fork v1 (step 3's own measurement is laqFork.measure.ts)
  *   03  Joanna · Nudge · Unknown (the chips count from the send, Close it waits)
  *   04  03 slid to 6 weeks: the reply date and "Save 6 weeks to Joanna's card", ticked
  *   05  Marcus · Nudge from his card (8 weeks, a week later)
@@ -113,6 +112,7 @@ async function appStart(page: Page, agent: string) {
 }
 async function appToNudge(page: Page, agent: string) {
   await appStart(page, agent);
+  await page.locator('[data-qls="fork-tile"][data-k="pkg"]').click();
   await page.locator('[data-qls="package"][data-id="laq13-pa"]').click();
   if ((await page.locator('[data-qls="root"]').getAttribute("data-step")) === "how") await page.locator('[data-qls="how-opt"]').first().click();
   await expect(page.locator('[data-qls="root"]')).toHaveAttribute("data-step", "nudge");
@@ -174,25 +174,16 @@ test("fidelity — 01 to 09 against the reference", async ({ browser }) => {
   await refOpen(ref);
   await appOpen(app);
 
-  /* 01 — Joanna, the pieces, Opening pages open: 3 chapters of "Prologue cut, flashback first", scrolled to the Done line */
+  /* 01, 02 (the v1.3 pieces with the sample control) are superseded by materials fork v1, whose own measurement is
+     tests/e2e/laqFork.measure.ts; the reference still walks its pieces view to reach Nudge, the app its fork */
   await refJourney(ref, "log", "jl");
   await refClick(ref, '[data-act="custom"]');
-  /* the reference's pieces view opens with Opening pages already ticked and its control open; the app's ticks it here */
-  /* Joanna's card asks for nothing, so the sample opens at 3 chapters in both: nothing to set */
   await refClick(ref, '[data-vr="ver"]'); await refClick(ref, '[data-set="ver:v3"]');
-  await appStart(app, "laq13-jl");
-  await app.locator('[data-qls="choose-pieces"]').click();
-  await app.locator('[data-qls="piece"][data-k="sample"]').click();
-  const ctl = app.locator('[data-qls="sample-control"]');
-  await expect(ctl.locator(".qad-srow .qad-seg button.on")).toHaveText("Chapters");
-  await app.locator('[data-qls="vr"][data-k="ver"]').click();
-  await app.locator('[data-qls="menu"] [data-qls="menu-item"]', { hasText: "Prologue cut, flashback first" }).click();
-  await panel(ref, app, "01", "01-sample-control-done", true);
-
-  /* 02 — after Done */
   await refClick(ref, '[data-act="sampdone"]');
+  await appStart(app, "laq13-jl");
+  await app.locator('[data-qls="fork-tile"][data-k="pcs"]').click();
+  await app.locator('[data-qls="pc-opt"][data-k="ver"]', { hasText: "Prologue cut, flashback first" }).click();
   await app.locator('[data-qls="sample-done-btn"]').click();
-  await panel(ref, app, "02", "02-materials-after-done");
 
   /* 03 — on to Nudge: Unknown */
   await refClick(ref, '[data-act="pieces"]'); await refClick(ref, '[data-via="email"]');
@@ -244,7 +235,8 @@ test("fidelity — 01 to 09 against the reference", async ({ browser }) => {
   await closeApp(app);
 
   writeLedger();
-  expect(reads).toBeGreaterThanOrEqual(150);
+  /* materials fork v1 retired panels 01 and 02 (7 of 9 left): the floor scales from 150 with them */
+  expect(reads).toBeGreaterThanOrEqual(115);
 });
 
 const PAIRS = ["01-sample-control-done", "02-materials-after-done", "03-nudge-no-card-unknown", "04-nudge-no-card-6-weeks", "05-nudge-from-card",

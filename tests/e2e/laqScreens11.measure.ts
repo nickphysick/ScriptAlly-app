@@ -10,7 +10,7 @@
  */
 import { expect, test, type Page } from "@playwright/test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { openLog, panel, settledReady } from "./laqLib";
+import { carryOnMaterials, openLog, panel, settledReady } from "./laqLib";
 import { ensureSignedIn } from "./measure";
 
 const OUT = "reports/log-a-query-v1-1";
@@ -35,13 +35,11 @@ test("logging 01–09", async ({ page }) => {
   await shot(page, "02-sent");
   await page.locator('[data-qls="when-opt"][data-k="today"]').click();
   await shot(page, "03-materials");
-  if (await page.locator('[data-qls="choose-pieces"]').count()) {
-    await page.locator('[data-qls="choose-pieces"]').click();
-    await shot(page, "04-materials-pieces");
-    await page.locator('[data-qls="back-packages"]').click().catch(() => {});
-  }
-  if (await page.locator('[data-qls="package"]').count()) await page.locator('[data-qls="package"]').first().click();
-  else await page.locator('[data-qls="pieces-continue"]').click();
+  /* materials fork v1 — step 3 opens on the fork: the pieces are its Materials tile, Back is the fork */
+  await page.locator('[data-qls="fork-tile"][data-k="pcs"]').click();
+  await shot(page, "04-materials-pieces");
+  await page.locator('[data-qls="foot"] [data-qls="back"]').click();
+  await carryOnMaterials(page);
   if ((await step(page)) === "how") { await shot(page, "05-how"); await page.locator('[data-qls="how-opt"]').first().click(); }
   await expect(P(page)).toHaveAttribute("data-step", "check");
   await shot(page, "06-check");

@@ -8,6 +8,7 @@
  *    fails loudly if the undo is not there — a screenshot is never worth a changed account.
  */
 import { test, expect, type Page } from "@playwright/test";
+import { carryOnMaterials } from "./laqLib";
 import { mkdirSync } from "node:fs";
 import { openQc } from "./nb1Lib";
 import { CARD, SIZES, closePanel, openPanel, rows, tap, undo } from "./qc149Lib";
@@ -74,7 +75,7 @@ for (const vp of SIZES) {
     /* Log a query v1 — the staged journey: Agent, Sent, Materials, How, the check, the celebration; Undo is the celebration's */
     await tap(page, "[data-qls='agent'][data-group='ready']"); await page.waitForTimeout(500);
     await tap(page, "[data-qls='when-opt'][data-k='today']"); await page.waitForTimeout(400);
-    if (await page.locator("[data-qls='package']").count()) await tap(page, "[data-qls='package']"); else await tap(page, "[data-qls='pieces-continue']");
+    await carryOnMaterials(page);
     await page.waitForTimeout(400);
     if (await page.locator("[data-qls='root'][data-step='how']").count()) await tap(page, "[data-qls='how-opt']");
     await page.waitForTimeout(400);

@@ -11,6 +11,7 @@
  *   node tests/e2e/seedLaq13.mjs           # write the fixture
  *   node tests/e2e/seedLaq13.mjs --clean   # remove every laq13- document (and anything logged against them)
  *   node tests/e2e/seedLaq13.mjs --queries <agentId>   # that agent's queries' reply fields, and their card's weeks (read only)
+ *   node tests/e2e/seedLaq13.mjs --materials <agentId> # materials fork v1: that agent's queries' saved materials fields (read only)
  */
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
@@ -38,6 +39,13 @@ if (process.argv.includes("--queries")) {
     writerExpectedDate: x.writerExpectedDate ?? null, responseDeadline: x.responseDeadline ?? null,
   });
   console.log(JSON.stringify({ queries: s.docs.map((d) => ({ id: d.id, ...pick(d.data()) })), agentWeeks: a.exists ? a.data().responseTimeWeeks ?? null : "missing" }));
+  process.exit(0);
+}
+if (process.argv.includes("--materials")) {
+  const aid = process.argv[process.argv.indexOf("--materials") + 1];
+  const s = await db.collection(`users/${uid}/queries`).where("agentId", "==", aid).get();
+  const keys = ["sentHow", "sentPackageId", "sentPackageEdition", "sentPackageName", "packageId", "materialsWanted", "sentMaterials", "sentVersions", "basedOnPackageId", "sentChanges"];
+  console.log(JSON.stringify(s.docs.map((d) => Object.fromEntries(keys.filter((k) => k in d.data()).map((k) => [k, d.data()[k]])))));
   process.exit(0);
 }
 if (process.argv.includes("--clean")) {

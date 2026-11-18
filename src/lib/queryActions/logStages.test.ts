@@ -168,7 +168,7 @@ describe("v1.2 · what {First} asks for", () => {
   it("not ticked: an empty ring and an \"isn't ticked\" line", () => {
     const c = askCard(mr, "pcs", { ...all, synopsisId: null }, PKGS, "Marcus");
     expect(c.kind === "pcs" && c.items[1].mark).toBe("no");
-    expect(c.kind === "pcs" && c.whys).toEqual(["Synopsis isn't ticked."]);
+    expect(c.kind === "pcs" && c.whys).toEqual(["Synopsis isn't chosen."]);
   });
   it("extra: something ticked that the card does not ask for", () => {
     const hannah = { ...mr, syn: false };

@@ -231,7 +231,7 @@ export function askCard(ask: GuidelineAsk | null, view: "pkg" | "pcs", pieces: P
   }
   /* one line per difference, in the order of the asks */
   for (const it of items) {
-    if (it.mark === "no") whys.push(`${it.label} isn't ticked.`);
+    if (it.mark === "no") whys.push(`${it.label} isn't chosen.`);
     else if (it.mark === "diff" && pieces.sample) whys.push(`You're sending the ${lowerFirst(sizeName(pieces.sample))}, not the ${lowerFirst(sampleLabel)}.`);
   }
   const extraBits: string[] = [];

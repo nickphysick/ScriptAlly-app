@@ -48,3 +48,21 @@ export async function settledReady(page: Page): Promise<string> {
     await page.waitForTimeout(150);
   }
 }
+
+/**
+ * Materials fork v1 — through step 3 the way the old drivers went: the first saved package if there is one, else the
+ * pieces (the first letter picked if nothing is). Returns the package's name, or "pieces".
+ */
+export async function carryOnMaterials(page: Page): Promise<string> {
+  const tile = page.locator('[data-qls="fork-tile"][data-k="pkg"]');
+  if (await tile.count()) await tile.click();
+  const rows = page.locator('[data-qls="package"]');
+  if (await rows.count()) {
+    const name = ((await rows.first().locator("b").textContent()) ?? "").trim();
+    await rows.first().click();
+    return name;
+  }
+  if (!(await page.locator('[data-qls="pieces-continue"]').count())) await page.locator('[data-qls="pc-opt"][data-k="letter"]').first().click();
+  await page.locator('[data-qls="pieces-continue"]').click();
+  return "pieces";
+}

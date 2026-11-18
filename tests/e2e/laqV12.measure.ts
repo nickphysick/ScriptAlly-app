@@ -9,10 +9,11 @@
  *          with answers asks "Discard this?"
  *   V12-2  from a package's builder, that package is preselected on the Materials stage, and the ask card shows over it
  *   V12-3  from an agent's card, the agent is set and the journey starts on Sent
- *   V12-4  the ask card's states over the pieces (matches · differs · not ticked · "Use what … asks for"), and over the
- *          packages for an agent whose card says nothing (the quiet note)
- *   V12-5  the sample control: closed when the card states the ask, open as soon as Opening pages is ticked when it
- *          says nothing; a specific section ("Pages 40–64") is what the row, the check and the save say
+ *   V12-4  the ask card's states over the pieces (matches · differs · not chosen · "Use what … asks for"), and over the
+ *          fork for an agent whose card says nothing (the quiet note). Materials fork v1: the card over the packages is
+ *          the fork's; "Choose the pieces" is the Materials tile
+ *   V12-5  the sample control: closed when the card states the ask, open as soon as a version is picked when it says
+ *          nothing; a specific section ("pages 40–64") is what the sample line, the check and the save say
  * Every log is undone in the same run, and a run writing fewer readings than it claims fails.
  */
 import { expect, test, type Page } from "@playwright/test";
@@ -158,7 +159,7 @@ test("V12-4 · V12-5 — the ask card's states, the sample control, and a specif
   ok(/^Your .+ package matches it\.$/.test(pk.foot), `V12-4: a package matches ("${pk.foot}")`);
   ok((await page.locator('[data-qls="asks"]').locator('text=/card asks for/').count()) === 0 && (await page.locator('p[data-qls="asks"]').count()) === 0, "V12-4: the old italic line is gone");
   /* over the pieces: starts from the ask → matches */
-  await page.locator('[data-qls="choose-pieces"]').click();
+  await page.locator('[data-qls="fork-tile"][data-k="pcs"]').click();
   const pcs = async () => ({
     kind: await page.locator('[data-qls="asks"]').getAttribute("data-kind"),
     foot: await page.locator('[data-qls="ask-foot"]').getAttribute("data-k"),
@@ -171,24 +172,24 @@ test("V12-4 · V12-5 — the ask card's states, the sample control, and a specif
   ok(s0.foot === "ok" && s0.marks === "ql:ok syn:ok sample:ok" && s0.btn === 0, `V12-4: matches (${JSON.stringify(s0)})`);
   ok((await text(page, '[data-qls="ask-foot"]')) === "✓ That's what you're sending.", "V12-4: the match line");
   ok((await page.locator('[data-qls="sample-control"]').count()) === 0, "V12-5: the sample control is closed when the card states the ask");
-  /* open the control from the row's pill and send 3 chapters: differs */
-  await page.locator('[data-qls="vr"][data-k="sample"]').click();
-  ok((await page.locator('[data-qls="sample-control"]').count()) === 1, "V12-5: the pill opens the control inline");
+  /* open the control from the sample line's Change and send 3 chapters: differs */
+  await page.locator('[data-qls="sample-change"]').click();
+  ok((await page.locator('[data-qls="sample-control"]').count()) === 1, "V12-5: Change opens the control inline");
   await page.locator('[data-qls="sample-control"] .qad-srow button', { hasText: "Chapters" }).click();
   await page.locator('[data-qls="sample-control"] .qad-presets button', { hasText: /^3$/ }).click();
   const s1 = await pcs();
   READ.V12_4 = { s0, s1 };
   ok(s1.marks === "ql:ok syn:ok sample:diff" && s1.why[0] === "You're sending the first 3 chapters, not the first 10 pages." && s1.btn === 1, `V12-4: differs (${JSON.stringify(s1)})`);
-  /* untick the synopsis: not ticked */
-  await page.locator('[data-qls="piece"][data-k="syn"]').click();
+  /* clear the synopsis (a second tap on the chosen one): not chosen */
+  await page.locator('[data-qls="pc-opt"][data-k="syn"][aria-pressed="true"]').click();
   const s2 = await pcs();
-  ok(s2.marks.includes("syn:no") && s2.why.includes("Synopsis isn't ticked."), `V12-4: not ticked (${JSON.stringify(s2)})`);
+  ok(s2.marks.includes("syn:no") && s2.why.includes("Synopsis isn't chosen."), `V12-4: not chosen (${JSON.stringify(s2)})`);
   /* Use what Marcus asks for: matches again */
   await page.locator('[data-qls="use-ask"]').click();
   const s3 = await pcs();
   Object.assign(READ.V12_4 as object, { s2, s3 });
   ok(s3.foot === "ok", `V12-4: "Use what … asks for" puts the ask back (${JSON.stringify(s3)})`);
-  ok(!(await page.locator('[data-qls="pieces-continue"]').isDisabled()), "V12-4: it never stops Continue");
+  ok((await page.locator('[data-qls="pieces-continue"]').count()) === 1, "V12-4: it never stops Carry on");
   await page.keyboard.press("Escape");
   await expect(R(page)).toHaveCount(0, { timeout: 5_000 });
 
@@ -197,24 +198,23 @@ test("V12-4 · V12-5 — the ask card's states, the sample control, and a specif
   await toMaterials(page, "laq12-jl");
   const nilPk = await page.locator('[data-qls="asks"]').getAttribute("data-kind");
   const nilText = await text(page, '[data-qls="asks"]');
-  ok(nilPk === "nil" && nilText === "Nothing on Joanna's card about what they ask for, so tick what went.", `V12-4: nothing stated, over the packages ("${nilText}")`);
-  await page.locator('[data-qls="choose-pieces"]').click();
+  ok(nilPk === "nil" && nilText === "Nothing on Joanna's card about what they ask for, so tell us what went.", `V12-4: nothing stated, over the fork ("${nilText}")`);
+  await page.locator('[data-qls="fork-tile"][data-k="pcs"]').click();
   ok((await page.locator('[data-qls="asks"]').getAttribute("data-kind")) === "nil" && (await page.locator('[data-qls="use-ask"]').count()) === 0, "V12-4: nothing stated, over the pieces, no button");
-  ok((await page.locator('[data-qls="sample-control"]').count()) === 0, "V12-5: closed until Opening pages is ticked");
-  await page.locator('[data-qls="piece"][data-k="sample"]').click();
-  ok((await page.locator('[data-qls="sample-control"]').count()) === 1, "V12-5: open as soon as Opening pages is ticked, when the card says nothing");
+  ok((await page.locator('[data-qls="sample-control"]').count()) === 0, "V12-5: closed until a version is picked");
+  await page.locator('[data-qls="pc-opt"][data-k="ver"]', { hasText: /^Version 2$/ }).click();
+  ok((await page.locator('[data-qls="sample-control"]').count()) === 1, "V12-5: open as soon as a version is picked, when the card says nothing");
   /* 25 pages from page 40 */
   const ctl = page.locator('[data-qls="sample-control"]');
   await ctl.locator(".qad-srow button", { hasText: "Pages" }).click();
   await ctl.locator(".qad-presets button", { hasText: /^25$/ }).click();
   await ctl.locator(".qad-from button", { hasText: "A specific section" }).click();
   await ctl.locator(".qad-sectline button", { hasText: "Page" }).click();
-  const pill = await text(page, '[data-qls="vr"][data-k="sample"]');
-  const ver = await text(page, '[data-qls="version"]');
+  const pill = await text(page, '[data-qls="sample-line"] p');
+  const ver = await text(page, '[data-qls="pc-opt"][data-k="ver"][aria-pressed="true"]');
   READ.V12_5 = { pill, ver };
-  ok(pill.startsWith("Pages 40–64"), `V12-5: the row names the section ("${pill}")`);
-  /* v1.3 — the Version row is one pill naming the chosen version; the others are in its menu */
-  ok(/Version 2\s*current/.test(ver), `V12-5: the Version row ("${ver}")`);
+  ok(pill === "Sending the pages 40–64 of Version 2.", `V12-5: the sample line names the section ("${pill}")`);
+  ok(ver === "Version 2", `V12-5: the version chosen ("${ver}")`);
   await page.locator('[data-qls="pieces-continue"]').click();
   await page.locator('[data-qls="how-opt"][data-k="Email"]').click();
   await page.locator('[data-qls="nudge-continue"]').click();

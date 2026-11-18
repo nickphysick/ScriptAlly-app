@@ -10,6 +10,7 @@
  */
 import { test, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
+import { carryOnMaterials } from "./laqLib";
 import { openQc } from "./nb1Lib";
 import { openApp } from "./pageHeaderV2Lib";
 import { BASE, CARD, Ledger, MUT, SIZES, box, chipCounts, closePanel, css, mutateCss, openPanel, rows, tap, text, undo } from "./qc149Lib";
@@ -433,8 +434,7 @@ for (const vp of SIZES.filter((v) => !process.env.QC149_SIZE || String(v.width) 
       const agentName = (await text(page, "[data-qls='agent'][data-group='ready'] b")) ?? "";
       await tap(page, "[data-qls='agent'][data-group='ready']");
       await tap(page, "[data-qls='when-opt'][data-k='today']");
-      if (await page.locator("[data-qls='package']").count()) await tap(page, "[data-qls='package']");
-      else await tap(page, "[data-qls='pieces-continue']");
+      await carryOnMaterials(page);
       if (await page.locator("[data-qls='root'][data-step='how']").count()) await tap(page, "[data-qls='how-opt']");
       if (await page.locator("[data-qls='root'][data-step='nudge']").count()) await tap(page, "[data-qls='nudge-continue']");
       L.check("the check, with the preview slip", !!(await box(page, "[data-qls='root'][data-step='check'] [data-qls='preview'] [data-qc153='slip']")), "no check");

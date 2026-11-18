@@ -20,7 +20,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { execSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { openLog, settledReady } from "./laqLib";
+import { carryOnMaterials, openLog, settledReady } from "./laqLib";
 
 const OUT = "reports/log-a-query-v1-1";
 const READ: Record<string, unknown> = {};
@@ -49,8 +49,7 @@ async function toCheck(page: Page) {
   const id = await settledReady(page);
   await page.locator(`[data-qls="agent"][data-id="${id}"]`).click();
   await page.locator('[data-qls="when-opt"][data-k="today"]').click();
-  if (await page.locator('[data-qls="package"]').count()) await page.locator('[data-qls="package"]').first().click();
-  else await page.locator('[data-qls="pieces-continue"]').click();
+  await carryOnMaterials(page);
   if ((await step(page)) === "how") await page.locator('[data-qls="how-opt"]').first().click();
   /* v1.3 — the Nudge stage, on the agent's own defaults */
   if ((await step(page)) === "nudge") await page.locator('[data-qls="nudge-continue"]').click();
@@ -99,10 +98,7 @@ test("LAQ1 · LAQ2 · LAQ3 · LAQ4 · LAQ5 — the stages, the calendar, the ste
   await page.locator('[data-qls="cal-day"][data-day="12"]').click();
   ok((await step(page)) === "what", "LAQ2: picking a day moves on");
   await noFormControls(page, "Materials");
-  const pk = page.locator('[data-qls="package"]');
-  let what: string;
-  if (await pk.count()) { what = ((await pk.first().locator("b").textContent()) ?? "").trim(); await pk.first().click(); }
-  else { await page.locator('[data-qls="pieces-continue"]').click(); what = "pieces"; }
+  const what = await carryOnMaterials(page);
   if ((await step(page)) === "how") { await noFormControls(page, "How"); await page.locator('[data-qls="how-opt"]').first().click(); }
   if ((await step(page)) === "nudge") await page.locator('[data-qls="nudge-continue"]').click();
   await noFormControls(page, "Check");
@@ -167,8 +163,7 @@ test("LAQ9 — the track: node states, keyboard, a finished node opens its stage
   await expectStates("Sent", ["done", "now", "todo", "todo", "todo", "todo"]);
   await page.locator('[data-qls="when-opt"][data-k="today"]').click();
   await expectStates("Materials", ["done", "done", "now", "todo", "todo", "todo"]);
-  if (await page.locator('[data-qls="package"]').count()) await page.locator('[data-qls="package"]').first().click();
-  else await page.locator('[data-qls="pieces-continue"]').click();
+  await carryOnMaterials(page);
   if ((await step(page)) === "how") {
     await expectStates("How", ["done", "done", "done", "now", "todo", "todo"]);
     await page.locator('[data-qls="how-opt"]').first().click();

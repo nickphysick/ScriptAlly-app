@@ -6,9 +6,9 @@
  * `beforeAll` and removed in `afterAll`):
  *   V13-1  MATERIALS NEVER SPILL: "The Long Names" (Bethuses Version, Prologue cut, Flashback first and a 40-character
  *          name), the sample control open, at panel widths 420, 540 and 640 and with each version chosen: the stage body
- *          and every row have scrollWidth == clientWidth and sit inside the body. The version is one pill and a menu;
- *          the control ends with "Sending the … of …." and Done, which closes it and is scrolled into view on opening;
- *          Continue works with the control open.
+ *          and every group and choice have scrollWidth == clientWidth and sit inside the body. Materials fork v1: the
+ *          versions are the third group's choices (the pill and menu are gone); the sample line says "Sending the … of …";
+ *          Done closes the control and is scrolled into view on opening; Carry on works with the control open.
  *   V13-2  Joanna (nothing on her card) → Unknown → 6 weeks → the save to her card ticked → Log: the query has the
  *          reply date and the nudge, and her card says 6 weeks. The slip says "Reply expected by" and the nudge.
  *   V13-3  Marcus (8 weeks) → 10 weeks, the update left unticked → Log: his card still says 8.
@@ -62,6 +62,7 @@ async function toNudge(page: Page, agentId: string) {
   await row.waitFor({ state: "visible", timeout: 60_000 });
   await row.click();
   await page.locator('[data-qls="when-opt"][data-k="today"]').click();
+  await page.locator('[data-qls="fork-tile"][data-k="pkg"]').click();
   await page.locator('[data-qls="package"][data-id="laq13-pa"]').click();
   if ((await step(page)) === "how") await page.locator('[data-qls="how-opt"]').first().click();
   await expect(R(page)).toHaveAttribute("data-step", "nudge");
@@ -89,7 +90,7 @@ async function undo(page: Page) {
 const overflow = (page: Page) => page.evaluate(() => {
   const body = document.querySelector<HTMLElement>('[data-qls="root"] .laq-sb')!;
   const b = body.getBoundingClientRect();
-  const parts = [body, ...body.querySelectorAll<HTMLElement>(".laq-pcs, .laq-pc, .laq-pcw, .laq-qsamp, .laq-vrow, .laq-sdone, .laq-asks, .laq-pc .laq-vr, .laq-vr2")];
+  const parts = [body, ...body.querySelectorAll<HTMLElement>(".laq-grps, .laq-grp2, .laq-opts, .laq-opt, .laq-pcw, .laq-qsamp, .laq-sline, .laq-sdone, .laq-asks")];
   const bad = parts.filter((el) => {
     const r = el.getBoundingClientRect();
     return el.scrollWidth > el.clientWidth + 0 || r.right > b.right + 0.5 || r.left < b.left - 0.5;
@@ -103,56 +104,46 @@ test("V13-1 — Materials never spill: the long version names at 420, 540 and 64
   await page.locator('[data-qls="agent"][data-id="laq13-jl"]').click();
   await page.locator('[data-qls="when-opt"][data-k="today"]').click();
   await expect(R(page)).toHaveAttribute("data-step", "what");
-  /* no packages for this book: the pieces, the letter and synopsis already ticked; ticking Opening pages opens the control */
-  await page.locator('[data-qls="piece"][data-k="sample"]').click();
+  /* materials fork v1 — no packages for this book: the fork's package tile says so and leads to the pieces, as step 3
+     always showed with none; picking a version first opens the control (the card says nothing) */
+  ok((await text(page, '[data-qls="fork-tile"][data-k="pkg"] [data-qls="fork-foot"] > span')) === "No saved packages yet", "V13-1: the package tile says there are none");
+  await page.locator('[data-qls="fork-tile"][data-k="pkg"]').click();
+  ok((await page.locator('[data-qls="pieces"]').count()) === 1 && (await page.locator('[data-qls="back-packages"]').count()) === 0, "V13-1: with none, the package tile leads to the pieces, with no way back to packages");
+  const names = ["Bethuses Version", "Prologue cut", "Flashback first", "The one where the ferry never quite docks"];
+  await page.locator('[data-qls="pc-opt"][data-k="ver"]', { hasText: names[0] }).click();
   await expect(page.locator('[data-qls="sample-control"]')).toHaveCount(1);
   await page.waitForTimeout(700);
   const doneIn = await page.evaluate(() => {
     const d = document.querySelector<HTMLElement>('[data-qls="sample-done"]')!.getBoundingClientRect();
     const b = document.querySelector<HTMLElement>('[data-qls="root"] .laq-sb')!.getBoundingClientRect();
-    return d.top >= b.top - 1 && d.bottom <= b.bottom + 1;
+    const sb = document.querySelector<HTMLElement>('[data-qls="root"] .laq-sb')!;
+    return { in: d.top >= b.top - 1 && d.bottom <= b.bottom + 1, d: [Math.round(d.top), Math.round(d.bottom)], b: [Math.round(b.top), Math.round(b.bottom)], st: sb.scrollTop, sh: sb.scrollHeight, ch: sb.clientHeight };
   });
-  ok(doneIn, "V13-1: opening the control scrolls its Done line into view");
-  ok((await page.locator('[data-qls="version"] .qad-seg').count()) === 0, "V13-1: the version is no longer a seg");
-  const names = ["Bethuses Version", "Prologue cut", "Flashback first", "The one where the ferry never quite docks"];
+  READ.V13_1_done = doneIn;
+  ok(doneIn.in, `V13-1: opening the control scrolls its Done line into view (${JSON.stringify(doneIn)})`);
+  await page.locator('[data-qls="pc-opt"][data-k="letter"]').first().click();
   const rows: Record<string, unknown> = {};
   for (const w of [420, 540, 640]) {
     await page.evaluate((px) => { const p = document.querySelector<HTMLElement>(".spanel:has([data-qls='root'])")!; p.style.setProperty("width", `${px}px`, "important"); }, w);
     for (const nm of names) {
-      await page.locator('[data-qls="vr"][data-k="ver"]').click();
-      const menu = page.locator('[data-qls="menu"][data-k="ver"]');
-      await expect(menu).toBeVisible();
-      if (w === 420 && nm === names[0]) {
-        const head = await text(page, '[data-qls="menu"][data-k="ver"] .laq-ph');
-        const items = await menu.locator('[data-qls="menu-item"]').allTextContents();
-        rows.menu = { head, items };
-        ok(head === "Which version?" && items.length === 4, `V13-1: the pill opens "Which version?" with every version (${items.length})`);
-      }
-      await menu.locator('[data-qls="menu-item"]', { hasText: nm }).click();
+      const o0 = page.locator('[data-qls="pc-opt"][data-k="ver"]', { hasText: nm });
+      if ((await o0.getAttribute("aria-pressed")) !== "true") await o0.click();
       await page.waitForTimeout(150);
       const o = await overflow(page);
-      const pill = await text(page, '[data-qls="vr"][data-k="ver"]');
-      const done = await text(page, '[data-qls="sample-done"] p');
-      rows[`${w} · ${nm}`] = { ...o, pill, done };
+      const done = await text(page, '[data-qls="sample-line"] p');
+      rows[`${w} · ${nm}`] = { ...o, done };
       ok(o.bad.length === 0 && o.bodySW === o.bodyCW, `V13-1 ${w} · ${nm}: nothing wider than the panel (${o.bad.join(" | ") || `${o.n} parts`})`);
-      ok(done === `Sending the first 3 chapters of ${nm}.`, `V13-1 ${w} · ${nm}: the Done line ("${done}")`);
+      ok(done === `Sending the first 3 chapters of ${nm}.`, `V13-1 ${w} · ${nm}: the sample line ("${done}")`);
     }
-    /* the value pill on a row ellipsises inside 58% of the row */
-    const cap = await page.evaluate(() => {
-      const r = document.querySelector<HTMLElement>('[data-qls="piece"][data-k="letter"]')!;
-      const v = r.querySelector<HTMLElement>(".laq-vr")!;
-      return Math.round((v.getBoundingClientRect().width / r.getBoundingClientRect().width) * 100);
-    });
-    ok(cap <= 58, `V13-1 ${w}: the letter's long name stays within 58% of its row (${cap}%)`);
   }
   READ.V13_1 = rows;
-  /* Done closes the control, and the rows show again; Continue works with it open */
+  /* Done closes the control; Change opens it again; Carry on works with it open */
   await page.locator('[data-qls="sample-done-btn"]').click();
   ok((await page.locator('[data-qls="sample-control"]').count()) === 0, "V13-1: Done closes the control");
-  await page.locator('[data-qls="vr"][data-k="sample"]').click();
-  ok((await page.locator('[data-qls="sample-control"]').count()) === 1, "V13-1: the row opens it again");
+  await page.locator('[data-qls="sample-change"]').click();
+  ok((await page.locator('[data-qls="sample-control"]').count()) === 1, "V13-1: Change opens it again");
   await page.locator('[data-qls="pieces-continue"]').click();
-  ok((await step(page)) === "how", "V13-1: Continue works with the control open");
+  ok((await step(page)) === "how", "V13-1: Carry on works with the control open");
   await page.keyboard.press("Escape");
 });
 
