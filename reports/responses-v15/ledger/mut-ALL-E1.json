@@ -1,0 +1,62 @@
+[
+ {
+  "where": "population: six notes",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "where": "one note shown",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1 of 6",
+  "ok": false,
+  "detail": "2 of 6"
+ },
+ {
+  "where": "newest first: Eleanor Whitlock",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the switch and its counts (re-pointed rs5 E1)",
+  "ok": true,
+  "detail": "[\"All6\",\"From passes5\",\"From requests1\"]"
+ },
+ {
+  "where": "the list, newest first",
+  "ok": true,
+  "detail": "[\"Eleanor Whitlock\",\"Ben Okafor\",\"Daniel O’Rourke\",\"Hugo Lindqvist\",\"Rafael Costa\",\"Imogen Hale\"]"
+ },
+ {
+  "where": "the pick: Rafael's note",
+  "ok": true,
+  "detail": "The premise is lovely. The pacing in the sample felt slow to me."
+ },
+ {
+  "where": "5 of 6",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "the stage line",
+  "ok": true,
+  "detail": "86 days after you queried · after the partial"
+ },
+ {
+  "where": "the advance stopped (data-auto 0)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "still 5 of 6 after the interval",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "next → 6 of 6",
+  "ok": false,
+  "detail": ""
+ }
+]

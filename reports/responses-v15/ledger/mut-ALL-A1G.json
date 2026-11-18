@@ -1,0 +1,77 @@
+[
+ {
+  "where": "1512 population: both headers measured",
+  "ok": true,
+  "detail": "{\"rsp\":{\"top\":6,\"left\":112,\"right\":1472,\"h\":227},\"qc\":{\"top\":38,\"left\":112,\"right\":1472,\"h\":227.125}}"
+ },
+ {
+  "where": "1512 top ±1",
+  "ok": false,
+  "detail": "6 vs 38"
+ },
+ {
+  "where": "1512 left ±1",
+  "ok": true,
+  "detail": "112 vs 112"
+ },
+ {
+  "where": "1512 right ±1",
+  "ok": true,
+  "detail": "1472 vs 1472"
+ },
+ {
+  "where": "1512 height ±1",
+  "ok": true,
+  "detail": "227 vs 227.125 · {\"rcW\":540,\"replied\":34,\"rate\":21,\"tally\":58,\"tally-key\":32,\"mainW\":409}"
+ },
+ {
+  "where": "1280 population: both headers measured",
+  "ok": true,
+  "detail": "{\"rsp\":{\"top\":6,\"left\":112,\"right\":1240,\"h\":227},\"qc\":{\"top\":38,\"left\":112,\"right\":1240,\"h\":227.125}}"
+ },
+ {
+  "where": "1280 top ±1",
+  "ok": false,
+  "detail": "6 vs 38"
+ },
+ {
+  "where": "1280 left ±1",
+  "ok": true,
+  "detail": "112 vs 112"
+ },
+ {
+  "where": "1280 right ±1",
+  "ok": true,
+  "detail": "1240 vs 1240"
+ },
+ {
+  "where": "1280 height ±1",
+  "ok": true,
+  "detail": "227 vs 227.125 · {\"rcW\":365,\"replied\":29,\"rate\":38,\"tally\":44,\"tally-key\":32,\"mainW\":409}"
+ },
+ {
+  "where": "1717 population: both headers measured",
+  "ok": true,
+  "detail": "{\"rsp\":{\"top\":6,\"left\":112,\"right\":1677,\"h\":227},\"qc\":{\"top\":38,\"left\":112,\"right\":1677,\"h\":227.125}}"
+ },
+ {
+  "where": "1717 top ±1",
+  "ok": false,
+  "detail": "6 vs 38"
+ },
+ {
+  "where": "1717 left ±1",
+  "ok": true,
+  "detail": "112 vs 112"
+ },
+ {
+  "where": "1717 right ±1",
+  "ok": true,
+  "detail": "1677 vs 1677"
+ },
+ {
+  "where": "1717 height ±1",
+  "ok": true,
+  "detail": "227 vs 227.125 · {\"rcW\":540,\"replied\":34,\"rate\":21,\"tally\":58,\"tally-key\":32,\"mainW\":409}"
+ }
+]

@@ -1,0 +1,77 @@
+[
+ {
+  "where": "row: ?answer= its query",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries/responses?answer=rs15-q-full-eleanor-whitlock"
+ },
+ {
+  "where": "row: the existing panel",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "row: the desk dimmed",
+  "ok": false,
+  "detail": "{\"shown\":false,\"op\":1}"
+ },
+ {
+  "where": "row: Esc closes",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries/responses"
+ },
+ {
+  "where": "row: focus returns",
+  "ok": true,
+  "detail": "<button type=\"button\" class=\"rsp15-rcr\" data-rsp15=\"row\" data-id=\"rs15-q-full-el"
+ },
+ {
+  "where": "card: ?answer= its query",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries/responses?answer=rs15-q-full-clara-beaumont"
+ },
+ {
+  "where": "card: the existing panel",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "card: the desk dimmed",
+  "ok": false,
+  "detail": "{\"shown\":false,\"op\":1}"
+ },
+ {
+  "where": "card: Esc closes",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries/responses"
+ },
+ {
+  "where": "card: focus returns",
+  "ok": true,
+  "detail": "<div class=\"qc154-card\" id=\"query-row-rs15-q-full-clara-beaumont\" data-qc154=\"ca"
+ },
+ {
+  "where": "Open the card: ?answer= its query",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries/responses?answer=rs15-q-full-eleanor-whitlock"
+ },
+ {
+  "where": "Open the card: the existing panel",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Open the card: the desk dimmed",
+  "ok": false,
+  "detail": "{\"shown\":false,\"op\":1}"
+ },
+ {
+  "where": "Open the card: Esc closes",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries/responses"
+ },
+ {
+  "where": "Open the card: focus returns",
+  "ok": true,
+  "detail": "<button type=\"button\" class=\"rsp15-open\" data-rsp15=\"open-card\">Open the card</b"
+ }
+]

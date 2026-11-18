@@ -1,0 +1,42 @@
+[
+ {
+  "where": "population: the page has its collection",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the route",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "no label, title or placeholder",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "where": "population: the builder opened",
+  "ok": true,
+  "detail": "share your story, as an image\n\nsquare\nstory\n\nmost published "
+ },
+ {
+  "where": "the share builder",
+  "ok": true,
+  "detail": "share your story, as an image\n\nsquare\nstory\n\nmost published writers heard no many times before they found their agent. s"
+ },
+ {
+  "where": "population: the tick is on screen",
+  "ok": true,
+  "detail": "Add to my Rejection collection"
+ },
+ {
+  "where": "the tick: Add to my Rejection collection",
+  "ok": true,
+  "detail": "Add to my Rejection collection"
+ },
+ {
+  "where": "the tick has no wall of no",
+  "ok": true,
+  "detail": "Add to my Rejection collection"
+ }
+]

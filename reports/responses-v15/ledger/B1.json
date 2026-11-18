@@ -1,0 +1,67 @@
+[
+ {
+  "where": "present with 15 in the collection",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "strip",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Hide",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "heading",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "body",
+  "ok": true,
+  "detail": "Nobody enjoys a no, and this page holds all of yours. At QueryHawk we treat every rejection as valuable data. We keep it, we learn from it, and we use it to shape your campaign from here."
+ },
+ {
+  "where": "valuable data is bold",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "three steps",
+  "ok": true,
+  "detail": "[\"Keep itEvery answer is logged in your Rejection collection.\",\"Learn from itWhat agents told you is gathered in their words.\",\"Shape what’s nextHow far each query got shows up in Analytics.\"]"
+ },
+ {
+  "where": "Keep it → the collection",
+  "ok": true,
+  "detail": "92.046875"
+ },
+ {
+  "where": "Learn from it → In their words",
+  "ok": true,
+  "detail": "92.046875"
+ },
+ {
+  "where": "Shape what's next → Analytics",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries/analytics"
+ },
+ {
+  "where": "one rejection: …this page holds yours.",
+  "ok": true,
+  "detail": "Nobody enjoys a no, and this page holds yours. At QueryHawk we treat every rejection as valuable data. We keep it, we learn from it, and we use it to shape your campaign from here."
+ },
+ {
+  "where": "population: the asks book has responses",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "absent without a rejection",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -41,7 +41,7 @@ const Pill: React.FC<{ i: Item; nowMs: number }> = ({ i, nowMs }) => (
 
 /** the single quote card (the ref's `qcard` with `big`), for exactly one note */
 const QuoteCard: React.FC<{ i: Item; nowMs: number; selected: boolean; onOpen: () => void }> = ({ i, nowMs, selected, onOpen }) => (
-  <button type="button" className={`rsp15-qt${selected ? " is-sel" : ""}`} data-rsp15="quote-card" data-tone={noteTone(i)} onClick={onOpen}>
+  <button type="button" className={`rsp15-qt${selected ? " is-sel" : ""}`} data-rsp15="quote-card" data-id={i.id} data-tone={noteTone(i)} onClick={onOpen}>
     <span className="rsp15-mk" aria-hidden="true">{"“"}</span>
     <q data-rsp15="note">{i.note}</q>
     <span className="rsp15-by">

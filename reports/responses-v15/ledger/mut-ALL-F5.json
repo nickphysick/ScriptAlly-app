@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: the collection drew",
+  "ok": true,
+  "detail": "15"
+ },
+ {
+  "where": "14 in the collection",
+  "ok": false,
+  "detail": "15"
+ },
+ {
+  "where": "Sarah Kendrick is not in it",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "the header still counts 11 passed",
+  "ok": true,
+  "detail": "11 passed"
+ },
+ {
+  "where": "and 18 responses",
+  "ok": true,
+  "detail": ""
+ }
+]

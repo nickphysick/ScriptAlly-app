@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: bars measured",
+  "ok": true,
+  "detail": "1 1"
+ },
+ {
+  "where": "the longest (Ben Okafor, 157 days) is full",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "Hugo Lindqvist, 16 days: 10%",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "where": "filtered to No reply, the longest there (118 days) is still against 157: 75%",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "where": "a no reply's bar is dashed",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -23,7 +23,11 @@
   /* ⚠️ THE BAND SITS 30 UNDER THE HEADER (the ref's `.oh` margin 30, G1), not Workspace headers v1's 48: the header keeps
      its place and height, and its bottom margin is the body's to state (`.rsp15-body > :first-child`, `.rsp15-ww`) */
   .qc151.qc153.wsnh.rsp15-hd > .qc1531-hd.wsnh-hd.wsnh-hd { margin-bottom: 0; }
-  .qc151.qc153.wsnh.rsp15-hd .wsnh-rc { display: block; width: 100%; max-width: 540px; justify-self: end; }
+  /* the ref's own columns (`.oh`: 268px auto minmax(0,1fr)): the title and buttons keep their width and the tally block
+     takes what is left, so a narrow window narrows the block, never the title (the shared grid's `auto` third column
+     sized itself to the block and squeezed the title at 1280: A1G) */
+  .qc151.qc153.wsnh.rsp15-hd > .qc1531-hd.wsnh-hd.wsnh-hd:not(.wsnh-hd--two) { grid-template-columns: 268px auto minmax(0, 1fr); }
+  .qc151.qc153.wsnh.rsp15-hd .wsnh-rc { display: block; width: 100%; max-width: 540px; min-width: 0; justify-self: end; }
   .rsp15-hd .rsp15-rt { width: 100%; color: #f4eee5; }
   .rsp15-hd .rsp15-rt .rsp15-st { font: 400 32px/1.05 var(--r15-type) !important; color: #fbf7f0; white-space: nowrap; }
   .rsp15-hd .rsp15-rt .rsp15-sl { margin-top: 4px; font: italic 400 15.5px/1.35 var(--r15-serif) !important; color: rgba(244, 238, 229, 0.88); }
@@ -47,6 +51,16 @@
   .rsp15-hd .rsp15-tkey button:focus-visible { outline: 2.5px solid #6a89a7; outline-offset: 2px; }
   .rsp15-hd .rsp15-tkey i { width: 4px; height: 16px; border-radius: 2px; }
   .rsp15-hd .rsp15-tkey b { font: 400 15px/1 var(--r15-type) !important; color: #fbf7f0; }
+}
+/* at 1100 and under the shared header hides its right-hand block (wsnh.css); this page's display rule must not bring it
+   back (L1 found the tally's labels past the edge at 1100) */
+@media (max-width: 1100px) { .qc151.qc153.wsnh.rsp15-hd .wsnh-rc { display: none; } }
+/* a narrower block (under 1400): the header keeps its height (A1G), so the block's own sizes come down */
+@media (min-width: 768px) and (max-width: 1399px) {
+  .rsp15-hd .rsp15-rt .rsp15-st { font-size: 28px !important; }
+  .rsp15-hd .rsp15-rt .rsp15-sl { font-size: 14.5px !important; line-height: 1.3 !important; }
+  .rsp15-hd .rsp15-tally { height: 44px; margin-top: 10px; }
+  .rsp15-hd .rsp15-tkey { margin-top: 4px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .rsp15-hd .rsp15-tally path { transition: none; }

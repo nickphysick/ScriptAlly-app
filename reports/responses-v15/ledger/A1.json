@@ -1,0 +1,112 @@
+[
+ {
+  "where": "1512 population: 34 marks",
+  "ok": true,
+  "detail": "{\"a\":7,\"p\":11,\"w\":16}"
+ },
+ {
+  "where": "1512 marks 7 / 11 / 16",
+  "ok": true,
+  "detail": "{\"a\":7,\"p\":11,\"w\":16}"
+ },
+ {
+  "where": "1512 asked for more first, then passed, then no answer yet",
+  "ok": true,
+  "detail": "aaaaaaapppppppppppwwwwwwwwwwwwwwww"
+ },
+ {
+  "where": "1512 title",
+  "ok": true,
+  "detail": "18 responses"
+ },
+ {
+  "where": "1512 + Record a response",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1512 Share your story",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1512 replied",
+  "ok": true,
+  "detail": "18 of 34 have replied"
+ },
+ {
+  "where": "1512 rate",
+  "ok": true,
+  "detail": "That’s a 53% response rate, counting the passes. 7 asked to read more."
+ },
+ {
+  "where": "1512 labels",
+  "ok": true,
+  "detail": "[\"7 asked for more\",\"11 passed\",\"16 no answer yet\"]"
+ },
+ {
+  "where": "1512 hovering \"passed\" lifts its marks",
+  "ok": true,
+  "detail": "{\"p\":\"1\",\"a\":\"0.25\"}"
+ },
+ {
+  "where": "1280 population: 34 marks",
+  "ok": true,
+  "detail": "{\"a\":7,\"p\":11,\"w\":16}"
+ },
+ {
+  "where": "1280 marks 7 / 11 / 16",
+  "ok": true,
+  "detail": "{\"a\":7,\"p\":11,\"w\":16}"
+ },
+ {
+  "where": "1280 asked for more first, then passed, then no answer yet",
+  "ok": true,
+  "detail": "aaaaaaapppppppppppwwwwwwwwwwwwwwww"
+ },
+ {
+  "where": "1280 title",
+  "ok": true,
+  "detail": "18 responses"
+ },
+ {
+  "where": "1280 + Record a response",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1280 Share your story",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1280 replied",
+  "ok": true,
+  "detail": "18 of 34 have replied"
+ },
+ {
+  "where": "1280 rate",
+  "ok": true,
+  "detail": "That’s a 53% response rate, counting the passes. 7 asked to read more."
+ },
+ {
+  "where": "1280 labels",
+  "ok": true,
+  "detail": "[\"7 asked for more\",\"11 passed\",\"16 no answer yet\"]"
+ },
+ {
+  "where": "1280 hovering \"passed\" lifts its marks",
+  "ok": true,
+  "detail": "{\"p\":\"1\",\"a\":\"0.25\"}"
+ },
+ {
+  "where": "asked for more → the carousel in view",
+  "ok": true,
+  "detail": "92.171875"
+ },
+ {
+  "where": "no answer yet → the Query Centre",
+  "ok": true,
+  "detail": "http://127.0.0.1:4321/queries"
+ }
+]

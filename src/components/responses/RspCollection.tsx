@@ -16,7 +16,8 @@
  * ⚠️ A PASS KEPT OFF (`offWallIds`) IS NOT HERE: the page hands in `collectionOf(items, off)`.
  * ⚠️ SHARE YOUR STORY OPENS THE EXISTING BUILDER (`RspShare`) under the list, unchanged but for its name (decision 3).
  */
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { SHORTCUTS, isEditableTarget, matchesShortcut } from "../../lib/shortcuts";
 import { MONTHS_SHORT } from "../../lib/dates";
 import {
   COLL_FIND_ABOVE, collFirstDir, collMonth, collShown, listCollection, longestWait, monthCount, tookBar, tookWords,
@@ -46,7 +47,21 @@ export const RspCollection: React.FC<{
   onOpen: (i: Item) => void;
   /** the rows as shown, in order (the panel's ↑ ↓ walk them) */
   onVisible?: (ids: string[]) => void;
-}> = ({ coll, nowMs, msTitle, selectedId, sharing, onShare, onOpen, onVisible }) => {
+  /** the route is on screen: `/` focuses the find field (the registry's `respFind`, carried over from v5's list) */
+  active?: boolean;
+}> = ({ coll, nowMs, msTitle, selectedId, sharing, onShare, onOpen, onVisible, active = false }) => {
+  const findRef = useRef<HTMLInputElement | null>(null);
+  useEffect(() => {
+    if (!active) return undefined;
+    const key = (e: KeyboardEvent) => {
+      if (!matchesShortcut(SHORTCUTS.respFind, e) || isEditableTarget(e.target)) return;
+      if (!findRef.current || findRef.current.getClientRects().length === 0) return;
+      e.preventDefault();
+      findRef.current.focus();
+    };
+    document.addEventListener("keydown", key);
+    return () => document.removeEventListener("keydown", key);
+  }, [active]);
   const [sort, setSort] = useState<CollSort>("date");
   const [dir, setDir] = useState<1 | -1>(-1);
   const [kind, setKind] = useState<CollKind>("all");
@@ -85,7 +100,7 @@ export const RspCollection: React.FC<{
         {coll.length > COLL_FIND_ABOVE ? (
           <label className="rsp15-find">
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" /><path d="m13 13 4 4" /></svg>
-            <input data-rsp15="find" placeholder="Find an agent or a word" aria-label="Find in your collection" value={find} onChange={(e) => setFind(e.target.value)} />
+            <input ref={findRef} data-rsp15="find" placeholder="Find an agent or a word" aria-label="Find in your collection" value={find} onChange={(e) => setFind(e.target.value)} />
           </label>
         ) : null}
         {nPass && nNr ? (

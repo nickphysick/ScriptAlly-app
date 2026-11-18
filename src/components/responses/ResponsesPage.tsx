@@ -99,7 +99,14 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
   const go = useCallback((id: string | null, replace = false) => {
     navigate({ pathname: "/queries/responses", search: id ? `?answer=${encodeURIComponent(id)}` : "" }, { replace });
   }, [navigate]);
-  const openAnswer = useCallback((i: RespItem<QcRow>) => { go(i.id, !!answerParam); }, [go, answerParam]);
+  /* the page's root, and the control an answer was opened from, for focus on close (P1) */
+  const pageRef = useRef<HTMLDivElement | null>(null);
+  const opener = useRef<HTMLElement | null>(null);
+  const openAnswer = useCallback((i: RespItem<QcRow>) => {
+    const a = document.activeElement as HTMLElement | null;
+    if (a && pageRef.current?.contains(a)) opener.current = a;
+    go(i.id, !!answerParam);
+  }, [go, answerParam]);
   const closeAnswer = useCallback(() => go(null), [go]);
   /* the collection's rows as shown (↑ ↓ walk them); a card or a note has no neighbours */
   const [visible, setVisible] = useState<string[]>([]);
@@ -108,6 +115,29 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
     prev: at > 0 ? () => go(visible[at - 1], true) : null,
     next: at >= 0 && at < visible.length - 1 ? () => go(visible[at + 1], true) : null,
   };
+  /* ⚠️ FOCUS COMES BACK ONCE THE PAGE IS LIVE AGAIN. The panel's leaving ghost keeps `#root` inert for a few frames
+     after it closes, and a focus() into an inert page does nothing: the panel's own restore and the shared hook's both
+     ran inside that window and focus fell to <body> (P1's trace). So the page waits for the seal to lift, then gives
+     focus back to the control the answer came from, unless something else has taken it. */
+  const wasOpen = useRef<string | null>(null);
+  useEffect(() => {
+    const was = wasOpen.current;
+    wasOpen.current = openId;
+    if (!was || openId) return undefined;
+    let raf = 0, n = 0;
+    const tick = () => {
+      const root = document.getElementById("root");
+      /* this page's panel only (`.rsp5-layer`): another page's closed panel can stay in the DOM */
+      if ((root?.inert || document.querySelector(".spanel.rsp5-layer")) && n++ < 90) { raf = requestAnimationFrame(tick); return; }
+      const a = document.activeElement;
+      if (a && a !== document.body) return;
+      const back = opener.current?.isConnected ? opener.current : pageRef.current?.querySelector<HTMLElement>(`[data-id="${CSS.escape(was)}"]`) ?? null;
+      back?.focus({ preventScroll: true });
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [openId]);
+
   /* a card's own action runs its journey IN the panel: the panel opens on that answer first, then the journey steps in */
   const [pending, setPending] = useState<{ id: string; mode: DrawerMode } | null>(null);
   const act = useCallback((i: RespItem<QcRow>, mode: DrawerMode) => {
@@ -125,8 +155,7 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
   /* the package a card names (the Query Centre's own lookup: `pkgKeyOf`, then the stored package's name) */
   const packageNameOf = useCallback((r: QcRow) => { const k = pkgKeyOf(r as never); return k ? packages.find((p) => p.id === k)?.packageName ?? null : null; }, [packages]);
 
-  /* ── the sections a label, a step or a button goes to ── */
-  const pageRef = useRef<HTMLDivElement | null>(null);
+  /* ── the sections a label, a step or a button goes to (pageRef is declared above, with the opener) ── */
   const goSection = useCallback((id: RspSection) => {
     /* ⚠️ COMPUTED, NOT scrollIntoView: clear of the collapsed bar (Workspace headers v1), which is shown wherever a section
        lands (its sticky top + its height, read off the bar itself), then 20 */
@@ -181,7 +210,7 @@ export const ResponsesPage: React.FC<{ onNavigate?: (tab: string, sub?: string) 
             <RspReadOn items={model.more} nowMs={nowMs} selectedId={openId} packageNameOf={packageNameOf} onOpen={openAnswer} onAct={act} />
             <RspWords items={model.items} nowMs={nowMs} msTitle={msTitle} selectedId={openId} panelOpen={!!openItem} onOpen={openAnswer} />
             <RspCollection coll={model.coll} nowMs={nowMs} msTitle={msTitle} selectedId={openId} sharing={sharing}
-              onShare={toggleShare} onOpen={openAnswer} onVisible={setVisible} />
+              onShare={toggleShare} onOpen={openAnswer} onVisible={setVisible} active={!!routeActive} />
           </div>
         )}
         {ready ? <div className="rsp-foot"><AppFooter onNavigate={(t, sub) => onNavigate?.(t, sub)} /></div> : null}

@@ -1,0 +1,87 @@
+[
+ {
+  "where": "population: 15 rows",
+  "ok": true,
+  "detail": "15"
+ },
+ {
+  "where": "agent: sorted (first Alice Moreno)",
+  "ok": false,
+  "detail": "Eleanor Whitlock"
+ },
+ {
+  "where": "agent: no month headers",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "agent: pressed again, reversed",
+  "ok": false,
+  "detail": "Eleanor Whitlock … Nadia Petrova"
+ },
+ {
+  "where": "answer: sorted (first Alice Moreno)",
+  "ok": false,
+  "detail": "Eleanor Whitlock"
+ },
+ {
+  "where": "answer: no month headers",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "answer: pressed again, reversed",
+  "ok": false,
+  "detail": "Eleanor Whitlock … Nadia Petrova"
+ },
+ {
+  "where": "took: sorted (first Ben Okafor)",
+  "ok": false,
+  "detail": "Eleanor Whitlock"
+ },
+ {
+  "where": "took: no month headers",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "took: pressed again, reversed",
+  "ok": false,
+  "detail": "Eleanor Whitlock … Nadia Petrova"
+ },
+ {
+  "where": "far: sorted (first Ben Okafor)",
+  "ok": false,
+  "detail": "Eleanor Whitlock"
+ },
+ {
+  "where": "far: no month headers",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "far: pressed again, reversed",
+  "ok": false,
+  "detail": "Eleanor Whitlock … Nadia Petrova"
+ },
+ {
+  "where": "note: sorted (first Eleanor Whitlock)",
+  "ok": false,
+  "detail": "Eleanor Whitlock"
+ },
+ {
+  "where": "note: no month headers",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "note: pressed again, reversed",
+  "ok": false,
+  "detail": "Eleanor Whitlock … Nadia Petrova"
+ },
+ {
+  "where": "back to Date: month headers return",
+  "ok": true,
+  "detail": ""
+ }
+]

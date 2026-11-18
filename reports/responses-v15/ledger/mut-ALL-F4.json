@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: ten rows at first",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Show all: 15 rows on show",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "find an agent: Rafael Costa",
+  "ok": true,
+  "detail": "[\"Rafael Costa\"]"
+ },
+ {
+  "where": "find a word of a note: Rafael Costa",
+  "ok": true,
+  "detail": "[\"Rafael Costa\"]"
+ },
+ {
+  "where": "a find shows every match (no Show all)",
+  "ok": true,
+  "detail": "14"
+ }
+]
