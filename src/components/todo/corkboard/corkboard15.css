@@ -35,6 +35,13 @@
 .cb15 .cb15-brk button:hover span, .cb15 .cb15-brk button.cb15-on span { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
 .cb15 .cb15-brk button.cb15-on b { color: var(--c15-terra); }
 .cb15 .cb15-brk button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+/* the narrower desk (the ref at 1280): the figures sit tighter so the title and its two buttons keep one line each */
+@media (max-width: 1440px) {
+  .cb15 .cb15-brk button { min-width: 0; padding: 6px 16px 8px; }
+  .cb15 .cb15-brk button:last-child { padding-right: 4px; }
+  .cb15 .cb15-brk b { font-size: 40px !important; }
+  .cb15 .cb15-brk span { gap: 6px; margin-top: 8px; font-size: 14px !important; }
+}
 .cb15 .cb15-pick { color: #f4eee5; }
 .cb15 .cb15-pick .cb15-st { font: 400 28px/1.05 var(--c15-type) !important; color: #fbf7f0; white-space: nowrap; }
 .cb15 .cb15-pick .cb15-sl { margin-top: 4px; font: italic 400 15.5px/1.35 var(--c15-serif) !important; color: rgba(244, 238, 229, .88); }
