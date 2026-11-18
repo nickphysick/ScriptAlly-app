@@ -1177,7 +1177,15 @@
     "design-refs/workspace-headers-v1/workspace-headers-v1.html": "fc9781eafae22e7bca1fb8d006e8e10e5ac7af2310be750b7348481279bcea13",
     "design-refs/card-offers-v1/agent-card-edit-v8.html": "56dff65aa6bce2b83a4159ab0ca90d0f7fe65d0596583074965c30392d6592c7",
     "design-refs/shell/manuscript-spine-v1.html": "3eba93d229acdb30c2d731f999bf635fa354ac05d0af896ad9f0c5ecefd1917f",
-    "design-refs/shell-tabs-v2.html": "977258edd3af3cd341c308e410b2aeaf22c48a8814558ea57825a3f6ac45e4e3"
+    "design-refs/shell-tabs-v2.html": "977258edd3af3cd341c308e410b2aeaf22c48a8814558ea57825a3f6ac45e4e3",
+    "design-refs/versions-v6/versions-v6.html": "d7ae286d1e2753c4f8b64f84ae3162fe7e2b4969755ffcd0968e145c9599fe5e",
+    "design-refs/versions-v6/screens/01-everyday-1280.png": "7bcc421c42a2c6f3f1751d5f2118dfcc6b9d058a13ead9e433861b9913aefd4b",
+    "design-refs/versions-v6/screens/01-everyday-1512.png": "19a0dfafe41c881c8719d2a2da8acb5a2ac7b6bdfd5ff42154805f0e77af5d59",
+    "design-refs/versions-v6/screens/02-just-started-1512.png": "97d779ead99e3091212fe5c024cc81a89f26c3ede2151cfa2b8a08933bd519bd",
+    "design-refs/versions-v6/screens/03-day-one-1512.png": "ae37087b82329c2f4b6e52c5a8add779438703a5abd8a32d83d1323ea8a364ce",
+    "design-refs/versions-v6/screens/04-map-1512.png": "b45d99b213afe6224df484b973a22a1af71579e6ed8cbef7bf8cc7a92507cf3c",
+    "design-refs/versions-v6/screens/05-new-version-1512.png": "d4b7375f8756fe39495cc4d54260e24415e7ba0f558ee2a1dd81ecddabdf675f",
+    "design-refs/versions-v6/screens/06-archive-1512.png": "523c71e0f9f2bc9df5d82ea809ea4fb4ab98d84fe5994c3d0f0c97d974017379"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

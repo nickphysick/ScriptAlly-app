@@ -2,57 +2,54 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ══ VERSIONS v2 — /manuscripts/versions ═══════════════════════════════════════════════════════════════════════════
+ * ══ VERSIONS v6 — /manuscripts/versions ═══════════════════════════════════════════════════════════════════════════
  *
- * Design authority: design-refs/versions-v2/versions-v2.html (its markup, CSS and copy are ported wholesale; its data is
- * invented), amended by v2.1 (design-refs/versions-v2-1, the warming-up panel) and v2.2 (design-refs/versions-v2-2: the
- * title card, the tinted list panel and the empty states). Supersedes Versions v1, whose page is deleted.
+ * Design authority: design-refs/versions-v6/versions-v6.html (its structure, order, copy, spacing, funnel and
+ * interactions; live path `S.mp = 6`, `S.fs = 2`, `S.co = 8`). It is NOT authority for parts the app already has: the
+ * navy header and slim bar are the shared WorkspaceNavyHeader; the cards, founding band, notice and switch are the
+ * Dashboard's look (page-local copies in v6/V6Parts, each naming its source). Rebuilt from Versions v2.2, whose data
+ * layer is unchanged: every figure is lib/versionsV2, every write lib/bookVersions + one db.writeVersionChange batch.
  *
- * The page: the title card ("Versions" PRO, one line naming the manuscript, New version · How it works, the quill hawk)
- * → the warning banner (queries with no version) → "{n} versions saved" in its tinted panel → the family tree → the navy
- * Tracking & performance band. With no versions: "No versions yet" (a preview of the list) and the comparisons note.
- * Pro (and founding members); Free sees the lock.
+ * The page, top to bottom: the navy header ("Versions", "of {title}", New version · How it works; on the right the
+ * one-line Version map, which opens the family tree in a dialog) → the founding writer band → the notice for queries
+ * with no version recorded → "{n} versions saved" beside the open version and its queries → "Compare your versions".
+ * With no versions: the header without the map, the band, and one How it works card. Pro (and founding writers); Free
+ * sees v2's lock, as built.
  *
- * ⚠️ v2.2 DELETED THE LIVING HEADER AND ITS DONUT ("Sent with queries so far"), and with them the Compare button. The
- *    folder tab already names the page; the title card is the page's one header.
- *
- * ⚠️ THE ROUTE STAYS /manuscripts/versions — the app's routing convention (its siblings are /manuscripts/comps and
- *    /manuscripts/packages, and every route register already lists it). The prompt's "/versions" said to follow it.
- * ⚠️ EVERY FIGURE IS lib/versionsV2, AND EVERY WRITE IS lib/bookVersions' + ONE db.writeVersionChange BATCH, so each Undo
- *    is the snapshot taken before it (absent stays absent).
- * ⚠️ THE STYLESHEET IS GENERATED from the ref (versionsV2.css, scoped to .vv2); app-side differences are in
- *    versionsV2.app.css, each with its reason.
- * ⚠️ NO WRITING ADVICE ANYWHERE (R14). The page reports.
+ * ⚠️ THE ROUTE STAYS /manuscripts/versions, AND THIS FILE KEEPS ITS NAME — App.tsx and every route register import it.
+ * ⚠️ EVERY UNDO IS THE SNAPSHOT TAKEN BEFORE ITS WRITE (absent stays absent).
+ * ⚠️ NO WRITING ADVICE ANYWHERE (R14). The page reports figures.
+ * ⚠️ SPACING: tight inside a section, generous between: header, band and notice 16 apart; 40 before the desk (56 when
+ *    the notice precedes it); 64 before the comparison. S1 measures it.
  */
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
 import { useToast } from "../toast/ToastProvider";
 import type { Agent, Query } from "../../types";
 import { scopedManuscript } from "../../lib/manuscriptSummary";
-import {
-  archiveVersion, bringBackVersion, deleteVersion, editVersion, newBookVersionId, saveNewVersion, setInUse, versionSnapshot,
-  type VersionFields,
-} from "../../lib/bookVersions";
+import { archiveVersion, bringBackVersion, editVersion, newBookVersionId, saveNewVersion, setInUse, versionSnapshot, type VersionFields } from "../../lib/bookVersions";
 import { buildRows } from "../../lib/analytics";
 import { versionsUnlocked } from "../../lib/entitlements";
-import { VERSION_NOT_SURE, firstSaveMessage, hasGoneOut, packagesHolding, versionsModel } from "../../lib/versionsV2";
+import { VERSION_NOT_SURE, firstSaveMessage, hasGoneOut, versionsModel } from "../../lib/versionsV2";
+import type { ListSort, MeasureKey } from "../../lib/versionsV6";
 import {
   VERSIONS_CHECKLIST, VERSIONS_GUIDE_HIDDEN_PATH, VERSIONS_GUIDE_SEEN_PATH, VERSIONS_GUIDE_UNHIDE_PATH, VERSIONS_LOCKED, VERSIONS_STEP_TEXT,
   versionsGuideDonePath, versionsGuideOf, type VersionsGuideKey,
 } from "../../lib/pageChecklist";
 import { WorkspacePageGrid } from "../shell/WorkspacePageGrid";
 import { PageChecklist } from "../shell/guide/PageChecklist";
-import { WorkspaceNavyHeader, WsnhFigure, WsnhWords } from "../shell/WorkspaceNavyHeader";
-import { PageAlertBanner } from "../shared/PageAlertBanner";
-import { agentLine, msDay, shortDay, today } from "./v2Bits";
-import { V2List } from "./V2List";
+import { WorkspaceNavyHeader } from "../shell/WorkspaceNavyHeader";
+import { XMark, agentLine, today } from "./v2Bits";
 import { V2Tree } from "./V2Tree";
-import { V2Tracking } from "./V2Tracking";
-import { V2Empty } from "./V2Empty";
-import { ArchiveConfirm, DrawerShell, Explainer, Layer, ModalShell, Picker, VersionDrawer, VersionForm, type FormSave, type PickerMode } from "./V2Overlays";
+import { Explainer, Layer, ModalShell, Picker, type FormSave, type PickerMode } from "./V2Overlays";
+import { MapBlock, V6Founding, V6Frame, V6Notice } from "./v6/V6Parts";
+import { V6List } from "./v6/V6List";
+import { V6Open, type OpenMode } from "./v6/V6Open";
+import { V6Compare, type Scale } from "./v6/V6Compare";
 import "./versionsV2.css";
 import "./versionsV2.app.css";
+import "./v6/versionsV6.css";
 
 const ACTIVE_MS_KEY = "scriptally_active_manuscript_id";
 const SCROLLS = "/images/versions/versions-scrolls-hawk.webp";
@@ -65,8 +62,10 @@ const reviewFree = (): boolean => {
   try { return sessionStorage.getItem("sa.dev.versionsFree") === "1"; } catch { return false; }
 };
 
-type Drawer = { kind: "version"; id: string } | { kind: "form"; edit: string | null } | null;
-type Modal = { kind: "picker"; mode: PickerMode } | { kind: "confirm"; id: string } | { kind: "how" } | null;
+type Modal = { kind: "picker"; mode: PickerMode } | { kind: "how" } | { kind: "map" } | null;
+
+/** Bring an element to the top of the visible page scroller, under the slim bar (its scroll-margin-top). */
+const scrollToEl = (el: HTMLElement | null) => { if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }); };
 
 export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: string) => void; active?: boolean }> = ({ onNavigate, active = true }) => {
   const db = useScriptAllyDb();
@@ -77,6 +76,8 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
   const stored = useMemo(() => { try { return localStorage.getItem(ACTIVE_MS_KEY); } catch { return null; } }, [location.key]);
   const ms = useMemo(() => scopedManuscript(manuscripts, stored), [manuscripts, stored]);
   const locked = reviewFree() || !versionsUnlocked(db.entitlement);
+  /* the band says "You have full access as a founding writer": only true of a founding writer, so only they see it */
+  const founding = db.entitlement?.basis === "founding";
 
   const msQueries = useMemo(() => (ms ? (queries as Query[]).filter((q) => q.manuscriptId === ms.id) : []), [ms, queries]);
   const rows = useMemo(() => new Map(buildRows(msQueries, activities, agents as Agent[], Date.now()).map((r) => [r.id, r])), [msQueries, activities, agents]);
@@ -84,10 +85,22 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
   const agentById = useMemo(() => new Map((agents as Agent[]).map((a) => [a.id, a])), [agents]);
   const fresh = m.versions.length === 0;
 
-  const [drawer, setDrawer] = useState<Drawer>(null);
   const [modal, setModal] = useState<Modal>(null);
-  const lastDrawer = useRef<Drawer>(null);
-  if (drawer) lastDrawer.current = drawer;
+  const [mode, setMode] = useState<OpenMode>({ kind: "view" });
+  const [picked, setPicked] = useState<string | null>(null);
+  const [sort, setSort] = useState<ListSort>("new");
+  const [measure, setMeasure] = useState<MeasureKey>("rate");
+  const [scale, setScale] = useState<Scale>("own");
+  const [arch, setArch] = useState(false);
+  const [stamp, setStamp] = useState(false);
+  const deskRef = useRef<HTMLDivElement>(null);
+  const mapBtn = useRef<HTMLButtonElement>(null);
+
+  /* the page opens on the version in use; a pick holds until it stops existing (an Undo of its save, say) */
+  const sel = picked && m.versions.some((v) => v.id === picked) ? picked : m.inUse ?? m.live[m.live.length - 1]?.id ?? null;
+  const selV = sel ? m.versions.find((v) => v.id === sel) ?? null : null;
+  useEffect(() => { setArch(false); }, [sel]);
+  useEffect(() => { if (!stamp) return; const t = window.setTimeout(() => setStamp(false), 400); return () => window.clearTimeout(t); }, [stamp]);
 
   /* ── the guide ── */
   const guide = versionsGuideOf(currentUser);
@@ -102,16 +115,15 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
   }, [doneMap, m]);
   const targetFor = useCallback((k: VersionsGuideKey) => {
     const page = document.querySelector<HTMLElement>('[data-vv2="page"]');
-    const rowsEl = [...(page?.querySelectorAll<HTMLElement>('[data-vv2="row"]') ?? [])];
-    /* v2.2 A3 — "Add a version" points at the title card's button, or at the empty state's dashed row when that is the
-       one on screen and the title card's has scrolled away */
+    const q = (s: string) => page?.querySelector<HTMLElement>(s) ?? null;
     const onScreen = (e: HTMLElement | null) => { if (!e) return false; const r = e.getBoundingClientRect(); return r.height > 0 && r.bottom > 0 && r.top < innerHeight; };
-    const titleBtn = page?.querySelector<HTMLElement>('[data-wsnh-page="versions"] [data-vv2="new"]') ?? null;
-    const dashed = page?.querySelector<HTMLElement>('button[data-vv2="first"]') ?? null;
-    const el = k === "add" ? (dashed && !onScreen(titleBtn) && onScreen(dashed) ? dashed : titleBtn)
-      : k === "edit" ? rowsEl[0]?.querySelector<HTMLElement>('[data-vv2="edit"]') ?? null
-        : k === "use" ? rowsEl.find((r) => !r.classList.contains("use"))?.querySelector<HTMLElement>('[data-vv2="use"]') ?? null
-          : rowsEl.find((r) => !r.querySelector(".db-q > em")) ?? rowsEl[0] ?? null;
+    const titleBtn = q('[data-wsnh-page="versions"] [data-vv2="new"]');
+    const first = q('[data-vv6="first"]');
+    const rowsEl = [...(page?.querySelectorAll<HTMLElement>('[data-vv6="row"]') ?? [])];
+    const el = k === "add" ? (first && !onScreen(titleBtn) && onScreen(first) ? first : titleBtn)
+      : k === "edit" ? q('[data-vv6="edit"]')
+        : k === "use" ? q('[data-vv6="use"]') ?? rowsEl.find((r) => !r.querySelector('[data-vv6="in-use-tag"]')) ?? null
+          : rowsEl.find((r) => !r.querySelector(".v6-row-f > em")) ?? rowsEl[0] ?? null;
     return { el, text: VERSIONS_STEP_TEXT[k] };
   }, []);
 
@@ -125,22 +137,21 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
     return before;
   }, [ms, locked, writeVersionChange, showToast]);
 
-  const flash = (id: string) => window.setTimeout(() => {
-    const c = document.getElementById(`card-${id}`);
-    if (!c) return;
-    c.scrollIntoView({ behavior: "smooth", block: "center" });
-    c.classList.add("flash");
-    window.setTimeout(() => c.classList.remove("flash"), 1400);
-  }, 120);
+  const openForm = (edit: string | null) => {
+    if (locked || !ms) return;
+    setMode({ kind: "form", edit });
+    setArch(false);
+    window.setTimeout(() => scrollToEl(deskRef.current), 30);
+  };
 
   const onSave = async (s: FormSave) => {
-    if (!ms) return;
-    const editId = drawer?.kind === "form" ? drawer.edit : null;
+    if (!ms || mode.kind !== "form") return;
+    const editId = mode.edit;
     if (editId) {
       const sent = hasGoneOut(m, editId);
       const before = await write(editVersion(ms, editId, { name: s.name, changes: s.changes, wordCount: s.wordCount, ...(sent || !s.parentId ? {} : { parentId: s.parentId }) }, sent));
       if (!before) return;
-      setDrawer(null);
+      setMode({ kind: "view" });
       tick("edit");
       showToast({ message: `Saved ${s.name}.`, undo: async () => { await writeVersionChange(ms.id, before); } });
       return;
@@ -150,9 +161,9 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
     const earlier = m.sentTotal;
     const before = await write(saveNewVersion(ms, { name: s.name, changes: s.changes, wordCount: s.wordCount, parentId: s.parentId }, today(), { version: id, original: newBookVersionId() }));
     if (!before) return;
-    setDrawer(null);
+    setMode({ kind: "view" });
+    setPicked(id);
     tick("add");
-    flash(id);
     showToast({
       /* v2.2 C4 — with no earlier queries the first save says only that Original came with it (S37) */
       message: first ? firstSaveMessage(s.name, earlier) : `Saved ${s.name}. Add it to a package to send it.`,
@@ -166,29 +177,20 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
     const before = await write(setInUse(ms, id));
     if (!before) return;
     if (old && old !== id) tick("use");
+    setStamp(true);
     const nv = m.versions.find((v) => v.id === id);
-    showToast({ message: `New queries will now go out with ${nv?.name}.`, undo: async () => { await writeVersionChange(ms.id, before); } });
+    showToast({ message: `${nv?.name} is now in use for new queries. Queries already sent don’t change.`, undo: async () => { await writeVersionChange(ms.id, before); } });
   };
 
-  const onBinGo = async (id: string) => {
+  const onArchive = async (id: string) => {
     if (!ms) return;
-    setModal(null);
     const v = m.versions.find((x) => x.id === id);
     if (!v) return;
-    const f = m.facts.get(id)!;
-    if (hasGoneOut(m, id)) {
-      const before = await write(archiveVersion(ms, id, today(), m.inUse));
-      if (!before) return;
-      showToast({ message: `Archived ${v.name}. Its ${f.all.length} ${f.all.length === 1 ? "query stays" : "queries stay"} recorded.`, undo: async () => { await writeVersionChange(ms.id, before); } });
-      return;
-    }
-    const held = packagesHolding(packages, ms.id, id);
-    const before = await write(deleteVersion(ms, id, m.inUse), { packages: held.map((p) => ({ id: p.id, bookVersionId: null })) });
+    const before = await write(archiveVersion(ms, id, today(), m.inUse));
+    setArch(false);
     if (!before) return;
-    showToast({
-      message: `Deleted ${v.name}. It hadn’t gone out, so nothing is lost.`,
-      undo: async () => { await writeVersionChange(ms.id, before, { packages: held.map((p) => ({ id: p.id, bookVersionId: id })) }); },
-    });
+    setPicked(null);
+    showToast({ message: `${v.name} archived.`, undo: async () => { await writeVersionChange(ms.id, before); setPicked(id); } });
   };
 
   const onBringBack = async (id: string) => {
@@ -199,7 +201,7 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
     showToast({ message: `${v?.name} is back in your comparisons.`, undo: async () => { await writeVersionChange(ms.id, before); } });
   };
 
-  const onPicked = async (picks: Map<string, string | null>, mode: PickerMode) => {
+  const onPicked = async (picks: Map<string, string | null>, pm: PickerMode) => {
     if (!ms || locked) return;
     const entries = [...picks];
     const before = entries.map(([qid]) => ({ id: qid, bookVersionId: (msQueries.find((q) => q.id === qid)?.bookVersionId ?? null) as string | null }));
@@ -208,8 +210,8 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
     if (!ok) { showToast({ message: "That didn’t save. Check your connection and try again." }); return; }
     setModal(null);
     const undo = async () => { await writeVersionChange(ms.id, null, { queries: before }); };
-    if (mode.kind === "change") {
-      const who = agentLine(mode.q, agentById).name;
+    if (pm.kind === "change") {
+      const who = agentLine(pm.q, agentById).name;
       const to = entries[0][1] ? m.versions.find((v) => v.id === entries[0][1]) : null;
       showToast({ message: to ? `${who} now counts towards ${to.name}.` : `${who} is out of the comparison until you choose a version.`, undo });
     } else {
@@ -218,60 +220,49 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
     }
   };
 
-  const openVersion = (id: string) => {
+  /** Open a version on the page (from the list, the map or a comparison card); `far` brings the desk into view. */
+  const select = (id: string, far = false) => {
     if (locked) return;
-    setDrawer({ kind: "version", id });
+    setPicked(id);
+    setMode({ kind: "view" });
     if ((m.facts.get(id)?.n ?? 0) > 0) tick("check");
+    if (far) window.setTimeout(() => scrollToEl(deskRef.current), 30);
   };
-  const openForm = (edit: string | null) => { if (!locked) setDrawer({ kind: "form", edit }); };
   const openPicker = () => { if (!locked && m.unrecorded.length) setModal({ kind: "picker", mode: { kind: "assign" } }); };
-  const goPackage = (id: string) => navigate(`/manuscripts/packages?new=1&version=${encodeURIComponent(id)}`);
+  const formClose = () => setMode({ kind: "view" });
+  const formDetails = () => { setMode({ kind: "view" }); onNavigate("manuscripts"); };
 
   const attrs = { "data-page": "v", "data-tier": locked ? "free" : "pro", "data-ms": fresh ? "fresh" : "full" };
   const state = !collectionsReady ? "loading" : locked ? "locked" : fresh ? (msQueries.length ? "pre" : "fresh") : "filled";
-
-  /* the header's figures, as the list shows them: the live versions' count (the list's heading counted them), and the
-     version in use with its queries sent and the day of the last (V2List's own `f.n` and `msDay(f.lastMs)`) */
-  const liveN = m.live.length;
-  const vTitle = !ms ? "No manuscript yet" : fresh ? "No versions yet" : `${liveN} ${liveN === 1 ? "version" : "versions"}`;
   const inUseV = !fresh ? m.versions.find((v) => v.id === m.inUse) ?? null : null;
-  const inUseF = inUseV ? m.facts.get(inUseV.id) : undefined;
-  const inUse = inUseV ? { name: inUseV.name, sent: inUseF?.n ?? 0, last: inUseF?.n ? shortDay(msDay(inUseF.lastMs)) : "" } : null;
-
-  const dv = lastDrawer.current;
-  const drawerV = dv?.kind === "version" ? m.versions.find((v) => v.id === dv.id) ?? null : null;
-  const formEdit = dv?.kind === "form" && dv.edit ? m.versions.find((v) => v.id === dv.edit) ?? null : null;
+  const newLabel = fresh ? "Save your first version" : "New version";
+  const un = m.unrecorded.length;
+  const noop = () => {};
 
   return (
     <WorkspacePageGrid className="vv2-wpg" masthead={null} scrollLabel="Versions">
-      <div className="vv2" data-vv2="page" data-state={state} {...attrs}>
+      <div className="vv2 vv6" data-vv2="page" data-state={state} {...attrs}>
         {ms && collectionsReady ? (
           <PageChecklist page="Versions" items={VERSIONS_CHECKLIST} done={doneMap} seen={guide.seen} hidden={guide.hidden}
             active={active && !locked} ready={collectionsReady} targetFor={targetFor} art={SCROLLS} disabled={disabled}
             onSeen={() => { if (!guide.seen) void updateUserPaths(VERSIONS_GUIDE_SEEN_PATH); }}
             onHide={() => { void updateUserPaths(VERSIONS_GUIDE_HIDDEN_PATH); }}
             onUnhide={() => { void updateUserPaths(VERSIONS_GUIDE_UNHIDE_PATH); }}
-            quiet={!!drawer || !!modal} empty={fresh} />
+            quiet={!!modal} empty={fresh} />
         ) : null}
         <div className="ms25">
-          {/* Workspace headers v1 (14 Nov) — the shared navy header (it replaced v2.2 A's title card): "<n> versions"
-              of the book; New version and How it works; on the right the version in use, as the list pins it */}
           <WorkspaceNavyHeader page="versions" art="versions-header" loading={!collectionsReady}
-            title={vTitle}
+            title="Versions"
             forLine={ms ? { lead: "of", text: ms.title } : null}
             actions={<>
-              <button type="button" className="qc1531-b qc1531-b--n" data-vv2="new" disabled={!ms || locked} onClick={() => openForm(null)}>{fresh ? "+ Save your first version" : "+ New version"}</button>
+              <button type="button" className="qc1531-b qc1531-b--n" data-vv2="new" disabled={!ms || locked} onClick={() => openForm(null)}>{newLabel}</button>
               <button type="button" className="qc1531-b qc1531-b--g" data-vv2="how" onClick={() => setModal({ kind: "how" })}>How it works</button>
             </>}
-            right={inUse ? <>
-              <WsnhFigure>{inUse.sent}</WsnhFigure>
-              <WsnhWords lead="Going out with new queries" name={<span data-vv2="hd-use">{inUse.name}</span>}
-                sub={inUse.sent ? <><b data-vv2="hd-sent">{inUse.sent}</b> {inUse.sent === 1 ? "query" : "queries"} sent{inUse.last ? ` · last ${inUse.last}` : ""}</> : "Not sent yet"} />
-            </> : null}
+            right={!fresh && !locked ? <MapBlock ref={mapBtn} count={m.versions.length} inUse={inUseV?.name ?? null} onOpen={() => setModal({ kind: "map" })} /> : null}
             bar={ms ? {
-              title: vTitle,
-              aside: inUse ? <><b>{inUse.name}</b><em>goes out with new queries</em></> : null,
-              button: { label: fresh ? "+ Save your first version" : "+ New version", onClick: () => openForm(null), disabled: locked },
+              title: "Versions",
+              aside: inUseV ? <><em>In use</em><b data-vv6="slim-inuse">{inUseV.name}</b></> : null,
+              button: { label: newLabel, onClick: () => openForm(null), disabled: locked },
             } : null} />
 
           <div className="mc lockwrap">
@@ -296,51 +287,71 @@ export const VersionsV2Page: React.FC<{ onNavigate: (tab: string, subPage?: stri
             ) : null}
 
             <div className="under" inert={locked || undefined} data-vv2="under">
-              {!fresh && m.unrecorded.length ? (
-                <PageAlertBanner classPrefix="wb" className="is-full" id="msNote" headlineId="msNoteT" facesId="msNoteG" data={{ "data-vv2": "banner" }}
-                  headline={<><b>{m.unrecorded.length} {m.unrecorded.length === 1 ? "query is" : "queries are"} out with agents</b> without a version assigned.</>}
-                  line="Until you say which version went, their replies don’t count towards any version."
-                  faces={m.unrecorded.slice(0, 6).map((q) => { const a = agentLine(q, agentById); return { key: q.id, initials: a.initials, title: `${a.name}${a.agency ? `, ${a.agency}` : ""}` }; })}
-                  action={{ label: "Assign versions", data: { "data-vv2": "assign" }, onClick: openPicker }} />
-              ) : null}
+              <div className="v6-top" data-vv6="top">
+                {founding && !locked ? <V6Founding /> : null}
+                {!fresh && un ? (
+                  <V6Notice probe="notice" title={`${un} ${un === 1 ? "query has" : "queries have"} no version recorded`}
+                    text={`${un === 1 ? "It isn’t" : "They aren’t"} counted on this page until you assign one.`} action="Assign versions" onAction={openPicker} />
+                ) : null}
+              </div>
 
               {ms && !fresh ? (
                 <>
-                  <V2List ms={ms} m={m} locked={locked} onOpen={(id) => openVersion(id)} onEdit={openForm} onUse={(id) => void onUse(id)}
-                    onBin={(id) => setModal({ kind: "confirm", id })} onBringBack={(id) => void onBringBack(id)} />
-                  <V2Tree ms={ms} m={m} onOpen={(id) => openVersion(id)} />
-                  <V2Tracking m={m} rows={rows} onOpen={(id) => openVersion(id)} onPackage={goPackage} onFill={openPicker} queries={msQueries} today={today()} />
+                  <div className={`v6-desk${un ? " after-notice" : ""}`} id="v6-desk" ref={deskRef} data-vv6="desk">
+                    <V6List m={m} sel={mode.kind === "view" ? sel : null} sort={sort} stamp={stamp} locked={locked} onSort={() => setSort((s) => (s === "new" ? "best" : "new"))}
+                      onSelect={(id) => select(id)} onNew={() => openForm(null)} onBringBack={(id) => void onBringBack(id)} />
+                    <V6Open ms={ms} m={m} v={selV} mode={mode} agents={agentById} locked={locked} arch={arch}
+                      onUse={(id) => void onUse(id)} onEdit={(id) => openForm(id)} onArchAsk={setArch} onArchive={(id) => void onArchive(id)}
+                      onMap={() => setModal({ kind: "map" })} onCloseForm={formClose} onSave={(s) => void onSave(s)} onDetails={formDetails} />
+                  </div>
+                  <V6Compare m={m} sel={sel} measure={measure} scale={scale} onMeasure={setMeasure} onScale={setScale} onPick={(id) => select(id, true)} />
                 </>
               ) : null}
 
-              {/* v2.2 C — "No versions yet" (a preview of the list) and the comparisons note (S34–S36) */}
-              {ms && fresh && collectionsReady ? <V2Empty ms={ms} out={m.sentTotal} disabled={locked} onFirst={() => openForm(null)} /> : null}
+              {ms && fresh && collectionsReady ? (
+                mode.kind === "form" ? (
+                  <div className="v6-desk solo" id="v6-desk" ref={deskRef} data-vv6="desk">
+                    <V6Open ms={ms} m={m} v={null} mode={mode} agents={agentById} locked={locked} arch={false}
+                      onUse={noop} onEdit={noop} onArchAsk={noop} onArchive={noop} onMap={noop}
+                      onCloseForm={formClose} onSave={(s) => void onSave(s)} onDetails={formDetails} />
+                  </div>
+                ) : (
+                  <div className="v6-first" data-vv6="day-one">
+                    <V6Frame tone="sand" probe="how" band={<h2 className="v6-bt">How it works</h2>}>
+                      <div className="v6-pad">
+                        <ol className="v6-steps">
+                          <li><b>Save a version</b>Name it and note what you changed in the manuscript.</li>
+                          <li><b>Pick it when you log a query</b>The query records which version you sent.</li>
+                          <li><b>Compare the results</b>See how many agents asked for more with each version.</li>
+                        </ol>
+                        <p className="v6-first-go"><button type="button" className="v6-pill v6-pill--navy" data-vv6="first" disabled={locked} onClick={() => openForm(null)}>Save your first version</button></p>
+                      </div>
+                    </V6Frame>
+                  </div>
+                )
+              ) : null}
             </div>
           </div>
         </div>
 
         <Layer attrs={attrs}>
-          <DrawerShell open={!!drawer} onClose={() => setDrawer(null)} kind={dv?.kind ?? "none"} k={dv && "id" in dv ? dv.id : dv?.kind === "form" ? `f-${dv.edit}` : null}>
-            {ms && dv?.kind === "version" && drawerV ? (
-              <VersionDrawer m={m} v={drawerV} rows={rows} agents={agentById} locked={locked} onClose={() => setDrawer(null)}
-                onEdit={(id) => setDrawer({ kind: "form", edit: id })} onChange={(q) => setModal({ kind: "picker", mode: { kind: "change", q } })} onPackage={goPackage} />
-            ) : null}
-            {ms && dv?.kind === "form" ? (
-              <VersionForm key={dv.edit ?? "new"} ms={ms} m={m} edit={formEdit} earlier={m.sentTotal} onClose={() => setDrawer(null)} onSave={(s) => void onSave(s)}
-                onDetails={() => { setDrawer(null); onNavigate("manuscripts"); }} />
-            ) : null}
-          </DrawerShell>
           <ModalShell open={modal?.kind === "how"} kind="m" onClose={() => setModal(null)} vv="how">
             <Explainer onClose={() => setModal(null)} onNew={() => { setModal(null); openForm(null); }} />
           </ModalShell>
-          <ModalShell open={modal?.kind === "picker" || modal?.kind === "confirm"} kind="p" onClose={() => setModal(null)} vv={modal?.kind ?? undefined} k={modal}>
+          <ModalShell open={modal?.kind === "picker"} kind="p" onClose={() => setModal(null)} vv="picker" k={modal}>
             {modal?.kind === "picker" ? <Picker mode={modal.mode} m={m} agents={agentById} onClose={() => setModal(null)} onSave={(p) => void onPicked(p, modal.mode)} /> : null}
-            {modal?.kind === "confirm" && ms ? (() => {
-              const v = m.versions.find((x) => x.id === modal.id);
-              if (!v) return null;
-              const names = hasGoneOut(m, v.id) ? [] : packagesHolding(packages, ms.id, v.id).map((p) => p.packageName);
-              return <ArchiveConfirm m={m} v={v} packageNames={names} onKeep={() => setModal(null)} onGo={() => void onBinGo(v.id)} />;
-            })() : null}
+          </ModalShell>
+          <ModalShell open={modal?.kind === "map"} kind="map" onClose={() => setModal(null)} vv="map">
+            {modal?.kind === "map" && ms ? (
+              <div className="vv6" data-vv6="map">
+                <div className="v6-mhd">
+                  <h2 id="msTH">How your versions connect</h2>
+                  <p>Each version is shown to the right of the one it started from. The coloured line leads to the version in use.</p>
+                  <button type="button" className="cx-x v6-mx" aria-label="Close" data-first="" data-vv6="map-close" onClick={() => setModal(null)}><XMark /></button>
+                </div>
+                <div className="v6-mbd"><V2Tree ms={ms} m={m} bare onOpen={(id) => { setModal(null); select(id); }} /></div>
+              </div>
+            ) : null}
           </ModalShell>
         </Layer>
       </div>

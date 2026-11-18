@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * /manuscripts/versions — render smokes (Versions v2): the populated page, the page before any version (with queries
+ * /manuscripts/versions — render smokes (Versions v6; re-pointed from v2's): the populated page, the page before any version (with queries
  * already out, and with none) and the locked page each render and carry their own distinctive chrome. Its own fixture
  * rather than pageSmoke's seed: the shared seed's manuscript has no book versions, so it would test the empty path
  * twice. Kept minimal on purpose: a smoke that pins appearance becomes the next false red.
@@ -43,72 +43,73 @@ const render = () => renderToStaticMarkup(<MemoryRouter initialEntries={["/manus
 const text = (h: string) => h.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").replace(/&#x27;/g, "'").replace(/&amp;/g, "&");
 afterEach(() => { vi.restoreAllMocks(); });
 
-describe("/manuscripts/versions renders", () => {
-  it("populated: the title card (no header, no donut), the banner, the list with the in-use card first, the tree and the tracking band", () => {
+describe("/manuscripts/versions renders (Versions v6)", () => {
+  it("populated: the navy header (Versions, of the book, the one-line map), the notice, the list on the in-use version, the open version and the comparison", () => {
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([O, V1, V2], { inUseBookVersionId: "bv-2" })],
       queries: [Q("q1", QueryStatus.QUERIED, { bookVersionId: "bv-1" }), Q("q2", QueryStatus.PARTIAL_REQUESTED, { bookVersionId: "bv-2" }), Q("q3", QueryStatus.QUERIED)] };
     const h = render();
     const t = text(h);
     expect(h).toContain('data-state="filled"');
-    /* RE-POINTED (Workspace headers v1, 14 Nov): the title card is the shared navy header — the count, "of {book}" */
     expect(h).toContain('data-wsnh-page="versions"');
-    expect(h).toContain('>3 versions</h1>');
+    expect(h).toContain('>Versions</h1>');
     expect(t).toContain("of Harbour of Glass");
-    expect(h).not.toContain('data-vv2="title"');
-    expect(t).toContain("+ New version");
+    expect(t).toContain("New version");
     expect(t).toContain("How it works");
-    expect(t).not.toContain("— Versions —");
-    expect(t).not.toContain("versions on file");
-    expect(t).not.toContain("Sent with queries so far");
-    expect(h).not.toContain('data-vv2="donut"');
-    expect(t).toContain("1 query is out with agents without a version assigned.");
-    /* RE-POINTED (Workspace headers v1): the list's heading names it; the header carries the count */
-    expect(t).toContain("Your versions");
-    expect(t).not.toContain("versions saved");
-    const rows = h.match(/data-vv2="row" data-id="([^"]+)"/g) ?? [];
+    /* the map is one line in the header; the tree is not on the page */
+    expect(h).toContain('data-vv6="map-open"');
+    expect(t).toContain("3 versions, Dual timeline in use");
+    expect(h).not.toContain('data-vv2="tree"');
+    /* the founding writer band (a founding entitlement) and the notice */
+    expect(t).toContain("Versions is a QueryHawk Pro feature.");
+    expect(t).toContain("Tell us what you think");
+    expect(t).toContain("1 query has no version recorded");
+    expect(t).toContain("Assign versions");
+    /* the list, opened on the version in use */
+    expect(t).toContain("3 versions saved");
+    const rows = h.match(/data-vv6="row" data-id="([^"]+)" aria-current="([^"]+)"/g) ?? [];
     expect(rows.length).toBe(3);
-    expect(rows[0]).toContain('"bv-2"');
-    expect(t).toContain("How your versions connect");
-    /* v2.1 — one query each is short of 5 each: the band shows the warming-up panel, not the comparison */
-    expect(t).toContain("This fills in once two versions have each gone out with 5 queries.");
-    expect(t).not.toContain("How each version is doing");
-    expect(h).not.toContain('data-vv2="compare"');
+    expect(rows.find((r) => r.includes('aria-current="true"'))).toContain('"bv-2"');
+    expect(h).toContain('data-vv6="open-name">Dual timeline<');
+    expect(t).toContain("This version’s queries and where they stand");
+    /* fewer than two ranked: the comparison's not-yet panel */
+    expect(t).toContain("Compare your versions");
+    expect(t).toContain("Not enough queries yet");
+    /* v2.2's surfaces are gone */
+    expect(t).not.toContain("Your versions,");
+    expect(h).not.toContain('data-vv2="list"');
+    expect(t).not.toContain("Warming up");
   });
-  it("two versions with 5 sent each: the full Tracking & performance section, no warming-up panel, and no Compare (v2.2 A1)", () => {
+  it("two versions with 5 sent each: the tiles and one funnel card per version, ranked first", () => {
     const five = (v: string, p: string) => Array.from({ length: 5 }, (_, i) => Q(`${p}${i}`, QueryStatus.QUERIED, { bookVersionId: v }));
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([O, V1, V2], { inUseBookVersionId: "bv-2" })], queries: [...five("bv-1", "a"), ...five("bv-2", "b")] };
     const h = render();
     const t = text(h);
-    expect(t).toContain("How each version is doing");
-    expect(t).toContain("Which version is out in front?");
-    expect(t).not.toContain("Warming up");
-    expect(h).not.toContain('data-vv2="compare"');
+    expect(t).toContain("Highest request rate");
+    expect(t).toContain("Most sent");
+    expect(t).toContain("Fastest replies");
+    expect(t).toContain("Each to its own scale");
+    expect((h.match(/data-vv6="fcard"/g) ?? []).length).toBe(3);
+    expect(t).toContain("Ranked after 5 more queries");
+    expect(t).not.toContain("Not enough queries yet");
   });
-  it("before any version, with queries out: No versions yet, the line naming them, Original holding them, the comparisons note", () => {
+  it("day one, with queries out: the header without the map, the band, one How it works card, no film", () => {
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([])], queries: [Q("q1", QueryStatus.QUERIED), Q("q2", QueryStatus.REJECTED)] };
     const h = render();
     expect(h).toContain('data-state="pre"');
     const t = text(h);
-    expect(t).toContain("+ Save your first version");
-    expect(t).toContain("No versions yet");
-    expect(t).toContain("You’ve already sent 2 queries . When you save your first version, we’ll count them towards your Original.");
-    expect(t).toContain("already out · they’ll count here");
-    expect(t).toContain("Your versions, compared, right here");
-    /* v2.2 C3 — the three steps, whose first contradicted the Original model, are gone */
-    expect(t).not.toContain("Start tracking versions");
-    expect(t).not.toContain("Save the manuscript as it stands.");
+    expect(t).toContain("Save your first version");
+    expect(h).not.toContain('data-vv6="map-open"');
+    expect(t).toContain("Pick it when you log a query");
+    expect(t).not.toContain("Watch how it works");
+    expect(h).not.toContain('data-vv6="notice"');
   });
-  it("before any version, with nothing sent: the two-row line and Original's None yet", () => {
+  it("day one, nothing sent: the same How it works card", () => {
     state.data = { ...base(UserPlan.PRO), manuscripts: [MS([])], queries: [] };
     const h = render();
     expect(h).toContain('data-state="fresh"');
-    const t = text(h);
-    expect(t).toContain("+ Save your first version");
-    expect(t).toContain("Your list will start with two: your original manuscript, and your first change to it.");
-    expect(t).toContain("None yet");
-    expect(t).not.toContain("already sent");
+    expect(text(h)).toContain("Compare the results");
   });
-  it("locked: the lock card over an inert page", () => {
+  it("locked: the lock card over an inert page, and no founding band", () => {
     vi.spyOn(ent, "versionsUnlocked").mockReturnValue(false);
     state.data = { ...base(UserPlan.FREE), manuscripts: [MS([O, V1])], queries: [Q("q1", QueryStatus.QUERIED)] };
     const h = render();
@@ -116,5 +117,6 @@ describe("/manuscripts/versions renders", () => {
     expect(h).toContain('data-tier="free"');
     expect(text(h)).toContain("Find out which opening gets agents reading on.");
     expect(h).toMatch(/class="under" inert=""/);
+    expect(h).not.toContain('data-vv6="founding"');
   });
 });
