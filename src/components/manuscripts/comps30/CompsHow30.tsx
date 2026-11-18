@@ -28,7 +28,7 @@ export const HOW_STEPS30 = [
     line: "Tick the comps each letter mentions. Once a letter is sent, its comps can’t be changed." },
   { art: "/images/make-querying-simple.png", v: "be581a5e", w: 456, h: 440,
     head: "Track their success and shape your strategy",
-    line: "See which comps went out with the queries that got agents asking for more." },
+    line: "See which comps were in the letters that got agents asking for more." },
 ] as const;
 
 export const CompsHow30: React.FC<{ headingId: string; children?: React.ReactNode }> = ({ headingId, children }) => (

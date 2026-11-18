@@ -1,0 +1,10 @@
+{
+  "readings": 28,
+  "fails": [],
+  "proofs": {
+    "H1": {
+      "1280": true,
+      "1512": true
+    }
+  }
+}

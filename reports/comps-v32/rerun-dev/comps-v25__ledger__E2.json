@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "E2",
+  "where": "opens for the comp: the one unsent letter, unticked and tickable",
+  "ok": true,
+  "detail": "comp · cv25-let-3:false:false"
+ },
+ {
+  "lock": "E2",
+  "where": "nothing ticked yet",
+  "ok": true,
+  "detail": "0 draft letters ticked"
+ },
+ {
+  "lock": "E2",
+  "where": "sent letters are not offered for a comp none of them mentions",
+  "ok": true,
+  "detail": "cv25-let-3:false:false"
+ },
+ {
+  "lock": "E2",
+  "where": "first frame: the letters are chosen when the picker is first drawn",
+  "ok": true,
+  "detail": "0 changes"
+ },
+ {
+  "lock": "E2",
+  "where": "first frame: nothing in the picker changes after it is drawn",
+  "ok": true,
+  "detail": "0 changes"
+ },
+ {
+  "lock": "E2",
+  "where": "the chosen letter has the three",
+  "ok": true,
+  "detail": "[\"cmp_cv25tide\",\"cmp_cv25last\",\"cmp_cv25nine\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "no other letter changed",
+  "ok": true,
+  "detail": "{\"l1\":null,\"l2\":[\"cmp_cv25tide\",\"cmp_cv25salt\"]}"
+ },
+ {
+  "lock": "E2",
+  "where": "the unrecorded letter is still unrecorded",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "E2",
+  "where": "the comps were not rewritten",
+  "ok": true,
+  "detail": "= = = = = = ="
+ },
+ {
+  "lock": "E2",
+  "where": "Undo is offered",
+  "ok": true,
+  "detail": "toast"
+ },
+ {
+  "lock": "E2",
+  "where": "Undo restores every letter exactly",
+  "ok": true,
+  "detail": "[\"cmp_cv25tide\",\"cmp_cv25last\"]"
+ }
+]

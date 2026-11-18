@@ -1,0 +1,618 @@
+{
+ "H2-1440": {
+  "qc": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.875,
+    "height": 227.125,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 829.25,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "88 queries sent",
+    "buttonH": 46,
+    "grid": "268px 374px 560px",
+    "artDisplay": "block",
+    "rightW": 560
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "88 queries sent",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(246, 243, 238)"
+   }
+  },
+  "cl": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.90625,
+    "height": 227.15625,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 867,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "53 agents on file",
+    "buttonH": 23.75,
+    "grid": "268px 374px 560px",
+    "artDisplay": "block",
+    "rightW": 560
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "53 agents on file",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "todo": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.875,
+    "height": 227.125,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 847.984375,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "105 things to do",
+    "buttonH": 46,
+    "grid": "268px 552.359px 381.641px",
+    "artDisplay": "flex",
+    "rightW": 381.640625
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 0,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "105 things to do",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "letters": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.859375,
+    "height": 227.109375,
+    "width": 1288,
+    "scLeft": 0,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 821.8125,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "3 query letters",
+    "buttonH": 46,
+    "grid": "268px 962px",
+    "artDisplay": "block",
+    "rightW": 0
+   },
+   "bar": {
+    "missing": ".qc156-slim"
+   }
+  },
+  "pk": {
+   "header": {
+    "left": 112,
+    "right": 1400,
+    "top": 143.75,
+    "bottom": 370.890625,
+    "height": 227.140625,
+    "width": 1288,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 696.265625,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "4 packages",
+    "buttonH": 46,
+    "grid": "268px 934px 0px",
+    "artDisplay": "flex",
+    "rightW": 0
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "4 packages",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  }
+ },
+ "H2-1717": {
+  "qc": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.875,
+    "height": 227.125,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 829.25,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "88 queries sent",
+    "buttonH": 46,
+    "grid": "268px 651px 560px",
+    "artDisplay": "block",
+    "rightW": 560
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "88 queries sent",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(246, 243, 238)"
+   }
+  },
+  "cl": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.90625,
+    "height": 227.15625,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 867,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "53 agents on file",
+    "buttonH": 23.75,
+    "grid": "268px 651px 560px",
+    "artDisplay": "block",
+    "rightW": 560
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "53 agents on file",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "todo": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.875,
+    "height": 227.125,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 34px -22px",
+    "marginBottom": "30px",
+    "titleLeft": 408,
+    "titleRight": 847.984375,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "105 things to do",
+    "buttonH": 46,
+    "grid": "268px 829.359px 381.641px",
+    "artDisplay": "flex",
+    "rightW": 381.640625
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 0,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "105 things to do",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  },
+  "letters": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.859375,
+    "height": 227.109375,
+    "width": 1565,
+    "scLeft": 0,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 821.8125,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "3 query letters",
+    "buttonH": 46,
+    "grid": "268px 1239px",
+    "artDisplay": "block",
+    "rightW": 0
+   },
+   "bar": {
+    "missing": ".qc156-slim"
+   }
+  },
+  "pk": {
+   "header": {
+    "left": 112,
+    "right": 1677,
+    "top": 143.75,
+    "bottom": 370.890625,
+    "height": 227.140625,
+    "width": 1565,
+    "scLeft": 80,
+    "radius": "20px",
+    "bg": "rgb(42, 58, 82)",
+    "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+    "marginBottom": "48px",
+    "titleLeft": 408,
+    "titleRight": 696.265625,
+    "titleSize": "54px",
+    "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+    "titleLines": 1,
+    "titleText": "4 packages",
+    "buttonH": 46,
+    "grid": "268px 1211px 0px",
+    "artDisplay": "flex",
+    "rightW": 0
+   },
+   "bar": {
+    "shown": true,
+    "inert": false,
+    "ariaHidden": null,
+    "visibility": "visible",
+    "opacity": "1",
+    "top": 12,
+    "height": 60,
+    "titleSize": "24px",
+    "titleText": "4 packages",
+    "buttonH": 40,
+    "buttonBg": "rgb(42, 58, 82)",
+    "groundLeft": 0,
+    "groundRight": 0,
+    "groundBg": "rgb(242, 238, 232)"
+   }
+  }
+ },
+ "comps-1440": {
+  "header": {
+   "left": 112,
+   "right": 1400,
+   "top": 143.75,
+   "bottom": 370.75,
+   "height": 227,
+   "width": 1288,
+   "scLeft": 80,
+   "radius": "20px",
+   "bg": "rgb(42, 58, 82)",
+   "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+   "marginBottom": "48px",
+   "titleLeft": 408,
+   "titleRight": 919.0625,
+   "titleSize": "51.84px",
+   "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "titleLines": 1,
+   "titleText": "7 comparable titles",
+   "buttonH": 46,
+   "grid": "268px 614px 320px",
+   "artDisplay": "block",
+   "rightW": 320
+  },
+  "first": {
+   "left": 112,
+   "right": 1400,
+   "top": 418.75,
+   "bottom": 488.75,
+   "tag": "DIV",
+   "cls": "cp32-band"
+  },
+  "figure": {
+   "body": {
+    "count": 1,
+    "first": "7 titles"
+   },
+   "fig": 7
+  },
+  "h7": {
+   "h1": 1,
+   "old": 0,
+   "gone": [
+    [
+     "[data-cp='lead']",
+     0
+    ],
+    [
+     "[data-cp='top']",
+     0
+    ],
+    [
+     "[data-cp='hl-open']",
+     0
+    ],
+    [
+     "[data-cp='letter-grid']",
+     0
+    ]
+   ]
+  },
+  "barAtRest": {
+   "shown": false,
+   "inert": true,
+   "ariaHidden": "true",
+   "visibility": "hidden",
+   "opacity": "0",
+   "top": 6,
+   "height": 60,
+   "titleSize": "24px",
+   "titleText": "7 comparable titles",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  },
+  "pad": 0,
+  "bar": {
+   "shown": true,
+   "inert": false,
+   "ariaHidden": null,
+   "visibility": "visible",
+   "opacity": "1",
+   "top": 12,
+   "height": 60,
+   "titleSize": "24px",
+   "titleText": "7 comparable titles",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  }
+ },
+ "comps-1717": {
+  "header": {
+   "left": 112,
+   "right": 1677,
+   "top": 143.75,
+   "bottom": 370.75,
+   "height": 227,
+   "width": 1565,
+   "scLeft": 80,
+   "radius": "20px",
+   "bg": "rgb(42, 58, 82)",
+   "shadow": "rgba(28, 19, 15, 0.55) 0px 22px 36px -26px",
+   "marginBottom": "48px",
+   "titleLeft": 408,
+   "titleRight": 1017.34375,
+   "titleSize": "61.812px",
+   "titleFamily": "\"Special Elite\", \"Courier New\", Courier, monospace",
+   "titleLines": 1,
+   "titleText": "7 comparable titles",
+   "buttonH": 46,
+   "grid": "268px 891px 320px",
+   "artDisplay": "block",
+   "rightW": 320
+  },
+  "first": {
+   "left": 112,
+   "right": 1677,
+   "top": 418.75,
+   "bottom": 488.75,
+   "tag": "DIV",
+   "cls": "cp32-band"
+  },
+  "figure": {
+   "body": {
+    "count": 1,
+    "first": "7 titles"
+   },
+   "fig": 7
+  },
+  "h7": {
+   "h1": 1,
+   "old": 0,
+   "gone": [
+    [
+     "[data-cp='lead']",
+     0
+    ],
+    [
+     "[data-cp='top']",
+     0
+    ],
+    [
+     "[data-cp='hl-open']",
+     0
+    ],
+    [
+     "[data-cp='letter-grid']",
+     0
+    ]
+   ]
+  },
+  "barAtRest": {
+   "shown": false,
+   "inert": true,
+   "ariaHidden": "true",
+   "visibility": "hidden",
+   "opacity": "0",
+   "top": 6,
+   "height": 60,
+   "titleSize": "24px",
+   "titleText": "7 comparable titles",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  },
+  "pad": 0,
+  "bar": {
+   "shown": true,
+   "inert": false,
+   "ariaHidden": null,
+   "visibility": "visible",
+   "opacity": "1",
+   "top": 12,
+   "height": 60,
+   "titleSize": "24px",
+   "titleText": "7 comparable titles",
+   "buttonH": 40,
+   "buttonBg": "rgb(42, 58, 82)",
+   "groundLeft": 0,
+   "groundRight": 0,
+   "groundBg": "rgb(242, 238, 232)"
+  }
+ },
+ "comps-H8": {
+  "820": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": [
+    "table. → 51px",
+    "thead. → 51px",
+    "tr. → 51px"
+   ]
+  },
+  "1024": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": []
+  },
+  "1280": {
+   "scroller": 0,
+   "doc": 0,
+   "titleOverflow": 0,
+   "titleClipped": false,
+   "headerClipped": false,
+   "past": []
+  }
+ },
+ "comps-H9": {
+  "header": true,
+  "right": false,
+  "lines": 1,
+  "title": "No comparable titles yet",
+  "body": true,
+  "h1s": 1
+ }
+}
