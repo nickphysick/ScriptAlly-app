@@ -61,6 +61,8 @@ type PageDef = {
   root: string;
   /** the first body section under the header */
   first: string;
+  /** H4's gap under the header, when the page's own brief sets one (Versions v6: 16); 48 otherwise */
+  gap?: number;
   /** the old header's root (H7: absent after) */
   old: string;
   /** H6: the headline's pattern, and the body's figure for the same thing */
@@ -104,9 +106,11 @@ const PAGES: Record<string, PageDef> = {
   },
   versions: {
     /* Harbour of Glass (msv12-ms): the harness book with versions on file (Murphy's Day Out has none in the model) */
-    route: "/manuscripts/versions", root: "[data-vv2='page']", first: "[data-vv2='banner'], [data-vv2='list-sec']", old: "[data-vv2='title']",
-    head: /^(\d+) versions?$/, figure: "[data-vv2='list'] [data-vv2='row']", empty: "[data-vv2='empty']", gone: ["[data-vv2='title']", "#vCnt"],
-    oldColumn: "[data-vv2='banner'], [data-vv2='list-sec'] { margin-inline: 48px !important; }", init: scope("msv12-ms"), emptyInit: scope(MS_EMPTY), ready: "[data-vv2='list-sec']",
+    /* RE-POINTED (Versions v6, 17 Nov): the ref titles the page "Versions" (no figure in the headline), and its first
+       section — the founding band, else the notice, else the desk — sits 16 under the header (VV6 S1), not 48 */
+    route: "/manuscripts/versions", root: "[data-vv2='page']", first: "[data-vv6='founding'], [data-vv6='notice'], [data-vv6='desk']", old: "[data-vv2='title']",
+    head: /^Versions$/, empty: "[data-vv6='day-one']", gone: ["[data-vv2='title']", "#vCnt", "[data-vv2='list-sec']", "[data-vv2='tree']"], gap: 16,
+    oldColumn: "[data-vv6='top'], [data-vv6='desk'] { margin-inline: 48px !important; }", init: scope("msv12-ms"), emptyInit: scope(MS_EMPTY), ready: "[data-vv6='desk']",
   },
   manuscripts: {
     route: "/manuscripts", root: "[data-msv12='page']", first: "[data-ms27='book']", old: "[data-ms27='header']",
@@ -365,7 +369,7 @@ for (const key of PAGE_KEYS) {
         if (has && first) {
           expect.soft(near(first.left, hd.left), `H3 left: ${first.left} vs ${hd.left}`).toBe(true);
           expect.soft(near(first.right, hd.right), `H3 right: ${first.right} vs ${hd.right}`).toBe(true);
-          expect.soft(near(first.top - (hd.bottom as number), 48), `H4 gap: ${first.top - (hd.bottom as number)}`).toBe(true);
+          expect.soft(near(first.top - (hd.bottom as number), d.gap ?? 48), `H4 gap: ${first.top - (hd.bottom as number)}`).toBe(true);
         }
         /* H6 · the headline and its figure */
         const title = has ? String(hd.titleText) : "";
