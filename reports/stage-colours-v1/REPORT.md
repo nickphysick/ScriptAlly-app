@@ -26,7 +26,8 @@
   served, `index-DcWnGsi0.js`).
 - Commits: Phase 1 7a7069f35 · Phase 2 b2f63b28e · Phase 3 f49943306 · Phase 4 771144554 · Phase 5 ced8cf95a · Phase 6
   (this commit).
-- Dev: https://scriptally-dev.web.app (bundle named in the deploy note at the end of the session).
+- Dev: https://scriptally-dev.web.app serves `index-Pg_4FKOG.js`, built from a clean checkout of the pushed tip
+  b2b00f296 (it replaced `index-DcWnGsi0.js`, the base's bundle). Prod and `main` are untouched.
 
 ## 3. The audit
 
