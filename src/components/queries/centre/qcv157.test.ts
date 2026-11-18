@@ -66,3 +66,25 @@ describe("v157 Phase 3 · the track reads on every band", () => {
     expect(all[1]).toMatch(/width:\s*19px;\s*height:\s*19px/);
   });
 });
+
+describe("v157 Phase 4 · the Sent and Next boxes", () => {
+  const v154 = readFileSync(resolve(__dirname, "qcv154.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  it("both boxes centre their contents top to bottom, at every card width (no container query undoes it)", () => {
+    expect(rules(".qc151.qc153 .qc154-card.qc154-card .qc154-f.qc154-f")).toEqual([expect.stringMatching(/justify-content:\s*center/)]);
+    expect(css).not.toMatch(/justify-content:\s*flex-start/);
+  });
+  it("a hot box is white with an inset 1.5px navy outline; the #f6eee8 fill goes", () => {
+    const m = v154.match(/\.qc154-f\.is-hot, \.qc154-f\[data-state="over"\] \{([^}]*)\}/)?.[1] ?? "";
+    expect(m).toMatch(/background:\s*#fff;/);
+    expect(m).toContain("box-shadow: inset 0 0 0 1.5px #2a3a52");
+    expect(v154).not.toContain("#f6eee8");
+  });
+  it("the navy dot after a hot value is removed, and nothing else draws one", () => {
+    expect(v154).not.toMatch(/\.qc154-f[^{]*::after/);
+    expect(css).not.toMatch(/\.qc154-f[^{]*::after/);
+  });
+  it("a box that is not hot keeps #fbf9f5 and no outline", () => {
+    expect(v154).toMatch(/\.qc154-f \{[^}]*background: #fbf9f5;/);
+    expect(v154.match(/\.qc154-f \{([^}]*)\}/)?.[1]).not.toContain("box-shadow");
+  });
+});

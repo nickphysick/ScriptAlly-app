@@ -46,3 +46,9 @@
 @container (max-width: 380px) {
   .qc151.qc153 .qc154-card .qc153-nd:not(.qc153-nd--cur) > span svg { width: 19px; height: 19px; }
 }
+
+/* ── Phase 4 · the Sent and Next boxes centre their contents top to bottom, at every card width. Left alignment, type,
+   gaps and the boxes' outer sizes are v156.1's. A hot box (white, the navy outline) is qcv154.css's own rule. ── */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc154-card.qc154-card .qc154-f.qc154-f { justify-content: center; }
+}
