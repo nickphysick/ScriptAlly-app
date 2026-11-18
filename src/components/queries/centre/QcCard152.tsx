@@ -46,7 +46,7 @@ import { AgentTab158 } from "./QcAgent158";
 import { MaterialsTab158 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
 /* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
-import { bump, easeBg, fadeIn, finishAll, foot as footIn, markPop, reduced, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
+import { bump, easeBg, fadeIn, finishAll, fold, foot as footIn, markPop, reduced, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
 import "./qcv160.css";
 import { useLanding160, type Motion160 } from "./useLanding160";
 
@@ -268,10 +268,17 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const keysAtStart = useRef<Set<string> | null>(null);
   const snap160 = useRef<Snap160 | null>(null);
   const [enter, setEnter] = useState<string[]>([]);
+  /* Phase 3 — the steps an undo (or a delete) took away, still drawn while they fold: each with the keys that stood
+     before it, so it is drawn where it was */
+  type Leaving = { item: ThreadItem; before: string[] };
+  const lastThread = useRef<{ id: string; items: ThreadItem[] }>({ id: r.id, items: thread });
+  const [leaving, setLeaving] = useState<Leaving[]>([]);
   const landing = useLanding160(p.motion, sig160, r.id, {
     start: () => {
       const root = rootRef.current;
+      /* a motion still running ends at once (Undo pressed while the confirm runs): no half-drawn step */
       finishAll(root);
+      if (leaving.length) setLeaving([]);
       snap160.current = root ? readSnap160(root) : null;
       keysAtStart.current = new Set(thread.map((x) => x.key));
     },
@@ -283,6 +290,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
       keysAtStart.current = new Set(thread.map((x) => x.key));
       if (settledNow) { draftSeq.current += 1; lastDraft.current = null; }
       if (reduced()) { snap160.current = readSnap160(root); return; }
+      /* (the fold's elements are drawn by this render: goneNow, below) */
       finishAll(root);
       const was = snap160.current, now = readSnap160(root);
       snap160.current = now;
@@ -297,6 +305,13 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         else entering.push(it.key);
       }
       if (entering.length) { setEnter(entering); window.setTimeout(() => setEnter((x) => x.filter((k) => !entering.includes(k))), 700); }
+      /* Phase 3 — the steps that went fold away: opacity first, then their height and top margin */
+      if (goneNow.length) {
+        setLeaving((x) => [...x.filter((l) => !goneNow.some((g) => g.item.key === l.item.key)), ...goneNow]);
+        const els = goneNow.map((g) => el(g.item.key)).filter((e): e is HTMLElement => !!e);
+        const keys = goneNow.map((g) => g.item.key);
+        fold(root, els, () => setLeaving((x) => x.filter((l) => !keys.includes(l.item.key))));
+      }
       if (was && (was.word !== now.word || was.bg !== now.bg || was.img !== now.img || was.pill !== now.pill)) {
         const band = root.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc152='band']");
         if (band) stripIn(root, band, was);
@@ -332,8 +347,18 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     }
   }
   const showDraft = !!draftIn && !settledNow;
+  /* Phase 3 — the steps this render took away, found in the render that drops them, so their elements are kept (and the
+     thread's scroll-to-end sees them still there) */
+  const goneNow: Leaving[] = (() => {
+    const start = keysAtStart.current;
+    if (!landing.started() || !start || lastThread.current.id !== r.id || reduced()) return [];
+    const now = new Set(thread.map((x) => x.key));
+    const old = lastThread.current.items;
+    return old.flatMap((it, i) => (!now.has(it.key) && start.has(it.key) && !leaving.some((l) => l.item.key === it.key) ? [{ item: it, before: old.slice(0, i).map((x) => x.key) }] : []));
+  })();
   const rk = (k: string) => alias.current.map.get(k) ?? k;
-  useLayoutEffect(() => { if (p.draft) lastDraft.current = p.draft; });
+  useLayoutEffect(() => { if (p.draft) lastDraft.current = p.draft; lastThread.current = { id: r.id, items: thread }; });
+  useLayoutEffect(() => { setLeaving([]); }, [r.id]);
 
   const chips = (cs: ThreadChip[], key: string) => cs.length ? (
     <span className="qc152-chs" data-qc152="chips">
@@ -385,7 +410,13 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   /* §2.8 the fold: with more than five steps, everything before the last three sits behind one button */
   const msgIdx = thread.map((it, i) => (it.t === "msg" ? i : -1)).filter((i) => i >= 0);
   const folded = !unfold && msgIdx.length > FOLD_OVER ? msgIdx.length - FOLD_KEEP : 0;
-  const shown = folded ? thread.slice(msgIdx[folded]) : thread;
+  const shown0 = folded ? thread.slice(msgIdx[folded]) : thread;
+  /* v160 — the leaving steps, each after the nearest step that stood before it and is still drawn */
+  const outKeys = new Set([...leaving, ...goneNow].map((l) => l.item.key));
+  const shown = [...leaving.filter((l) => !goneNow.some((g) => g.item.key === l.item.key)), ...goneNow].reduce<ThreadItem[]>((acc, l) => {
+    const at = (() => { for (let j = l.before.length - 1; j >= 0; j--) { const ix = acc.findIndex((x) => x.key === l.before[j]); if (ix >= 0) return ix + 1; } return 0; })();
+    return [...acc.slice(0, at), l.item, ...acc.slice(at)];
+  }, shown0);
   const trackingPane = (
     <div className={`qc152-th${buildId === r.id ? " build" : ""}`} data-qc152="thread" data-steps={msgIdx.length}>
       {ed.on ? <div className="qc152-trknote" data-qc152="track-note">Steps are edited one at a time: hover a message for ✎ Edit</div> : null}
@@ -396,9 +427,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         if (it.t === "wait") {
           /* v152.2 §2.2 — one italic line on the side of the next message; never a pill or a hairline */
           if (folded && i === 0) return null;
-          return <div key={rk(it.key)} className={`qc1522-lt ${it.side}`} data-qc152="wait" data-qc1522="wait" data-side={it.side} data-label={it.label} data-rk={rk(it.key)} title={it.tip ?? undefined}>{it.label}</div>;
+          const out = outKeys.has(it.key);
+          return <div key={rk(it.key)} className={`qc1522-lt ${it.side}${out ? " qc160-out" : ""}`} data-qc152="wait" data-qc1522="wait" data-side={it.side} data-label={it.label} data-rk={rk(it.key)} title={it.tip ?? undefined}
+            data-leaving={out ? "" : undefined} aria-hidden={out || undefined} inert={out || undefined}>{it.label}</div>;
         }
         if (p.editingId && it.activityId === p.editingId && p.editNode) return <React.Fragment key={it.key}>{p.editNode}</React.Fragment>;
+        const out = outKeys.has(it.key);
         const clip = desk.clip && (it.activityId === desk.clip.key || it.key === desk.clip.key) ? desk.clip : null;
         const checking = !!desk.checkKey && (it.activityId === desk.checkKey || it.key === desk.checkKey);
         const stamped = !!desk.stampKey && (it.activityId === desk.stampKey || it.key === desk.stampKey);
@@ -407,10 +441,10 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             <Bubble side={it.side} status={it.status} kind={it.kind} title={clip ? `You sent ${first} your materials` : it.title} date={it.date} dated={it.dated}
               stamp={it.stamp} viaIcon={it.side === "me" ? viaKind(it.via) : null}
               tint={it.tint} grey={it.grey} initials={r.initials} chips={clip ? clipChip(clip) : chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
-              className={[(p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) && !alias.current.map.has(it.key)) || enter.includes(it.key) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : ""].filter(Boolean).join(" ") || undefined}
+              className={[(p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) && !alias.current.map.has(it.key)) || enter.includes(it.key) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : "", out ? "qc160-out" : ""].filter(Boolean).join(" ") || undefined}
               mark={checking ? <span className="qc153-chkw" data-qc153="checking">Checking</span> : stamped ? <span className="qc153-stamp" data-qc153="logged">Logged</span> : null}
               outer={{ "data-qc152": "msg", "data-rk": rk(it.key), "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId,
-                style: { animationDelay: `${i * 45}ms` } }}
+                ...(out ? { "data-leaving": "", "aria-hidden": true, inert: true } : {}), style: { animationDelay: `${i * 45}ms` } }}
               after={<button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
                 onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>} />
           </React.Fragment>

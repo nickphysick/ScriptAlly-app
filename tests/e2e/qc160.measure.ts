@@ -386,3 +386,90 @@ if (PHASE !== "before") {
   });
 }
 
+
+/* ── Phase 3: undo ── */
+/** after a save of `key` has settled: tag the newest bubble (the one the undo takes away) and the one above it */
+async function tagForUndo(page: Page) {
+  return page.evaluate((s) => {
+    const ms = [...document.querySelectorAll<HTMLElement>(`${s} [data-qc152='thread'] > .qc152-m`)];
+    const w = window as unknown as { __tag?: HTMLElement; __above?: HTMLElement };
+    w.__tag = ms[ms.length - 1]; w.__above = ms[ms.length - 2];
+    return { n: ms.length, title: w.__tag?.querySelector("[data-qc152='msg-title']")?.textContent ?? "", h: w.__tag?.offsetHeight ?? 0 };
+  }, CARD);
+}
+async function sampleUndo(page: Page) {
+  await page.evaluate((s) => {
+    const w = window as unknown as { __us: unknown[]; __usOn: boolean; __tag?: HTMLElement; __above?: HTMLElement };
+    w.__us = []; w.__usOn = true;
+    const t0 = performance.now();
+    const body = document.querySelector<HTMLElement>(`${s} [data-qc152='body']`);
+    const tick = () => {
+      if (!w.__usOn) return;
+      const g = w.__tag, a = w.__above;
+      w.__us.push({ t: performance.now() - t0, in: !!g?.isConnected, leaving: g?.dataset.leaving != null, op: g?.isConnected ? Number(getComputedStyle(g).opacity) : null,
+        h: g?.isConnected ? g.offsetHeight : null, above: a?.isConnected ? a.offsetTop - (body?.scrollTop ?? 0) : null,
+        pe: g?.isConnected ? getComputedStyle(g).pointerEvents : null, waits: document.querySelectorAll(`${s} [data-qc152='thread'] > [data-leaving]`).length });
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, CARD);
+}
+type US = { t: number; in: boolean; leaving: boolean; op: number | null; h: number | null; above: number | null; pe: string | null; waits: number };
+const stopUndo = (page: Page): Promise<US[]> => page.evaluate(() => { const w = window as unknown as { __us: US[]; __usOn: boolean }; w.__usOn = false; return w.__us; });
+
+if (PHASE !== "before") {
+  if (run("7")) test("QC160-7/8 · undo folds the step away; the undo is not held for the motion", async ({ page }) => {
+    const L7 = new Ledger("QC160-7"), L8 = new Ledger("QC160-8");
+    await open(page);
+    await openCard(page, "materials");
+    const before = dump("materials");
+    L7.check("population: the save landed", await saveOne(page, "materials"), "");
+    await page.waitForTimeout(900);
+    const tag = await tagForUndo(page);
+    L7.check("population: the newest bubble is the step just saved", /You sent .* your partial/.test(tag.title) && tag.h > 20, JSON.stringify(tag));
+    /* the Firestore traffic after the press (the restore reads what to put back, then commits one batch) */
+    const reqs: { t: number; kind: string }[] = [];
+    let clickAt = 0;
+    page.on("request", (q) => {
+      if (q.method() !== "POST" || !/127\.0\.0\.1:8085|localhost:8085/.test(q.url())) return;
+      const body = q.postData() ?? "";
+      const kind = /\/Write\/channel/.test(q.url()) && /writes|update|delete/.test(decodeURIComponent(body)) ? "commit" : /\/Listen\/channel/.test(q.url()) && /addTarget/.test(decodeURIComponent(body)) ? "read" : "";
+      if (kind && clickAt) reqs.push({ t: Date.now(), kind });
+    });
+    /* the press, timed by the page (a Playwright click spends its own time on actionability first) */
+    await page.evaluate(() => document.addEventListener("click", (e) => { if ((e.target as Element).closest?.("[data-qc1522='undo']")) (window as unknown as { __press?: number }).__press = Date.now(); }, { capture: true, once: false }));
+    await sampleUndo(page);
+    await page.waitForTimeout(100);
+    clickAt = Date.now();
+    await page.locator(C("[data-qc1522='undo']")).first().click();
+    await page.waitForTimeout(1800);
+    const us = await stopUndo(page);
+    const press = await page.evaluate(() => (window as unknown as { __press?: number }).__press ?? 0);
+    for (const x of reqs) x.t -= press;
+    writeFileSync(`${DIR}/frames/${PHASE}-undo-materials.json`, JSON.stringify(us));
+    const li = us.findIndex((f) => f.leaving);
+    L7.check("population: the undone bubble began to leave", li >= 0, String(li));
+    const t0 = us[li]?.t ?? 0;
+    const at = (ms: number) => us.find((f) => f.t - t0 >= ms);
+    L7.check("at 150ms it is still in the DOM, opacity below 1", !!at(150)?.in && (at(150)?.op ?? 1) < 1, JSON.stringify(at(150)));
+    L7.check("at 350ms its height is under half its original", !!at(350) && (!at(350)!.in || (at(350)!.h ?? 99) < tag.h / 2), `${at(350)?.h} of ${tag.h}`);
+    L7.check("by 500ms it is gone", at(500)?.in === false, JSON.stringify(at(500)));
+    L7.check("it takes no clicks while leaving", us.filter((f) => f.leaving && f.in).length > 3 && us.filter((f) => f.leaving && f.in).every((f) => f.pe === "none"), String(us.filter((f) => f.leaving && f.in).length));
+    const ab = us.filter((f) => f.above != null).map((f) => f.above!);
+    const jump = Math.max(0, ...ab.slice(1).map((v, i) => Math.abs(v - ab[i])));
+    L7.check("the bubble above never moves more than 2px between two frames", ab.length > 10 && jump <= 2, `max step ${jump}px over ${ab.length} frames`);
+    L7.check("its wait line folds with it (the bubble and its line leaving, then gone)", us.some((f) => f.waits >= 2) && us[us.length - 1].waits === 0, JSON.stringify([...new Set(us.map((f) => f.waits))]));
+    /* QC160-8 */
+    let after = dump("materials");
+    for (let i = 0; i < 10 && JSON.stringify(after) !== JSON.stringify(before); i++) { await page.waitForTimeout(800); after = dump("materials"); }
+    L8.check("the stored query is restored, byte for byte", JSON.stringify(after) === JSON.stringify(before), "");
+    const read = reqs.find((x) => x.kind === "read"), commit = reqs.find((x) => x.kind === "commit");
+    L8.check("population: the restore's read and its commit were seen", !!read && !!commit, JSON.stringify(reqs.slice(0, 6)));
+    L8.check("population: the press was timed by the page", press > 0, String(press));
+    /* ⚠️ the restore reads what to put back before it commits (lib/queryActions/snapshot restoreSnapshot) — that read is
+       the undo's only wait, as before v160; nothing in v160 holds it */
+    L8.check("the restore starts at the press (its read goes out within 100ms)", !!read && read.t >= 0 && read.t <= 100, JSON.stringify(read));
+    L8.check("the undo's commit is not held for a motion: it goes out before the fold has run (420ms)", !!commit && commit.t - (t0 - 100 + (clickAt - press)) < 420, JSON.stringify({ commit, foldFromPress: Math.round(t0 - 100 + (clickAt - press)) }));
+    L7.done(9); L8.done(5);
+  });
+}

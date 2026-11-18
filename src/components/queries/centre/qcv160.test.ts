@@ -64,3 +64,28 @@ describe("Query card v160 · Phase 2 — confirm", () => {
   });
 });
 
+describe("Query card v160 · Phase 3 — undo", () => {
+  it("an undone step folds: opacity over 190ms, then its height and margins over 230ms, then it is dropped", () => {
+    const fn = code(MOTION).match(/export function fold[\s\S]*?\n}/)?.[0] ?? "";
+    expect(MOTION).toMatch(/fadeMs: 190, closeMs: 230, ease: "cubic-bezier\(0\.4, 0, 0\.2, 1\)"/);
+    expect(fn).toMatch(/el\.offsetHeight/);
+    expect(fn).toMatch(/height: "0px", marginTop: "0px"/);
+    expect(fn).toMatch(/pointerEvents = "none"/);
+  });
+  it("the steps an undo takes away are found in the render that drops them, and drawn where they stood", () => {
+    expect(CARD).toMatch(/const goneNow: Leaving\[\] =/);
+    expect(CARD).toMatch(/fold\(root, els, /);
+    expect(CARD).toMatch(/data-leaving/);
+  });
+  it("a new save or undo ends a running motion at once and drops what was still leaving", () => {
+    const start = CARD.slice(CARD.indexOf("start: () => {"), CARD.indexOf("land: (kind, first)"));
+    expect(start).toMatch(/finishAll\(root\)/);
+    expect(start).toMatch(/setLeaving\(\[\]\)/);
+  });
+  it("the page's undo is untouched: the toast clears and the restore runs at the press", () => {
+    const u = HOST.slice(HOST.indexOf("card1522.toast = qc1522Toast ?"), HOST.indexOf("card1522.burst ="));
+    expect(u).toMatch(/setQc1522Toast\(null\);\n\s+if \(t\.bump\) setQcMotion160\(\{ kind: "undo", n: Date\.now\(\) \}\);\n[\s\S]*void t\.undo\?\.\(\)/);
+    expect(u).not.toMatch(/setTimeout/);
+  });
+});
+

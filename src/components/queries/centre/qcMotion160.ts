@@ -11,6 +11,7 @@
  *               A second bump ends the running one at once: they never stack.
  *   settle      a draft bubble becoming its step: the final colour fills from the left (background-size), the dashed
  *               edge fades (outline-color), the bubble eases from scale 1.015 to 1.
+ *   fold        an undone step leaving: opacity to 0 (190ms), then its height and top margin close (230ms).
  *   strip/label the band's colour eases (a cross-fade where either end is a gradient), the words fade and rise, the
  *               pill's mark pops.
  *   foot        the footer's new contents fade and rise; its height eases when it changes.
@@ -22,6 +23,7 @@ export const reduced = (): boolean => typeof window !== "undefined" && !!window.
 
 export const BUMP = { ms: 500, peak: 1.022, at: 0.35, ease: "cubic-bezier(0.2, 0.8, 0.2, 1)" } as const;
 export const SETTLE = { ms: 420, ease: "cubic-bezier(0.3, 0.7, 0.2, 1)", lineFrom: 120, lineMs: 300, from: 1.015 } as const;
+export const FOLD = { fadeMs: 190, closeMs: 230, ease: "cubic-bezier(0.4, 0, 0.2, 1)" } as const;
 export const STRIP = { ms: 450, wordMs: 300, wordAt: 100, wordRise: 5, markMs: 400, markAt: 120, markEase: "cubic-bezier(0.2, 0.9, 0.3, 1.2)" } as const;
 export const FOOT = { ms: 320, at: 120, rise: 6 } as const;
 export const TOAST_OUT = { ms: 220, drop: 8 } as const;
@@ -85,6 +87,23 @@ function clear(col: string): string {
 /** a line that appeared in one frame (the "x days later" line, the "Logged" mark): fade it in */
 export function fadeIn(owner: Element, el: HTMLElement): void {
   track(owner, el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: ENTER_FADE, easing: "ease" })).id = "qc160-fadein";
+}
+
+/** Phase 3 — an undone step folds away; `done` drops it from the drawing */
+export function fold(owner: Element, els: HTMLElement[], done: () => void): void {
+  const total = FOLD.fadeMs + FOLD.closeMs, at = FOLD.fadeMs / total;
+  const runs = els.map((el) => {
+    const h = el.offsetHeight, mt = getComputedStyle(el).marginTop, mb = getComputedStyle(el).marginBottom;
+    el.style.pointerEvents = "none";
+    const a = el.animate([
+      { opacity: 1, height: `${h}px`, marginTop: mt, marginBottom: mb, overflow: "hidden", boxSizing: "border-box" },
+      { opacity: 0, height: `${h}px`, marginTop: mt, marginBottom: mb, overflow: "hidden", boxSizing: "border-box", offset: at, easing: FOLD.ease },
+      { opacity: 0, height: "0px", marginTop: "0px", marginBottom: "0px", overflow: "hidden", boxSizing: "border-box" },
+    ], { duration: total, fill: "forwards" });
+    a.id = "qc160-fold";
+    return track(owner, a).finished;
+  });
+  void Promise.allSettled(runs).then(done);
 }
 
 /** Phase 2/3 — the strip: its colour eases (a cross-fade where either end is a gradient) */

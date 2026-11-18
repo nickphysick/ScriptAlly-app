@@ -3,3 +3,5 @@
  * The motion itself is the Web Animations API (./qcMotion160.ts): no var() in a keyframe, no color-mix().
  */
 .qc152 .qc1522-toast.qc160-tout { animation: none; pointer-events: none; }
+/* Phase 3 — a step folding away takes no clicks; its own entrance never replays */
+.qc152 .qc160-out { pointer-events: none; animation: none !important; }
