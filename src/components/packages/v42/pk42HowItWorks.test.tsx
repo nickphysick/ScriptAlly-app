@@ -38,7 +38,10 @@ describe("v42 G · How it works", () => {
   });
   it("none of v41's five-step guide remains on the page", () => {
     const page = strip(readFileSync("src/components/SubmissionPackages.tsx", "utf8"));
-    expect(page).toContain("<Pk42HowItWorks");
+    /* v62 (18 Nov): the page's How it works is v62's storyboard (Pk62How). This pop-up is kept, unmounted, at the
+       brief's word ("do not delete whatever How it works opens today"). */
+    expect(page).toContain("<Pk62How");
+    expect(page).not.toContain("<Pk42HowItWorks");
     expect(page).not.toContain("Pk41HowItWorks");
     const gfx = readFileSync("src/components/packages/v42/Pk42HowItWorks.tsx", "utf8") + readFileSync("src/lib/packagesV42.ts", "utf8");
     for (const old of ["Step 1 of 5", "Set your current batch", "The strip along the bottom of the header"]) expect(gfx).not.toContain(old);

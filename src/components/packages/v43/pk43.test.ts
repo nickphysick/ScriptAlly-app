@@ -18,7 +18,8 @@ const page = readFileSync(resolve(SRC, "components/SubmissionPackages.tsx"), "ut
 describe("PK43 P6 — the Archivist stands in the header; nothing is pinned", () => {
   it("finds the population it reads", () => {
     expect(files.filter((f) => f.endsWith(".css")).length).toBeGreaterThan(100);
-    expect(page).toContain("Pk43Header");
+    /* v62 (18 Nov): the header is v62's, on the same shared OpenHeader */
+    expect(page).toContain("<Pk62Header");
   });
   it("Pk41Hawk no longer resolves, and nothing imports it", async () => {
     expect(existsSync(resolve(SRC, "components/packages/v41/Pk41Hawk.tsx"))).toBe(false);
@@ -30,9 +31,10 @@ describe("PK43 P6 — the Archivist stands in the header; nothing is pinned", ()
     const perch = files.filter((f) => f.endsWith(".css") && /\.p41-perch\b/.test(readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "")));
     expect(perch).toEqual([]);
   });
-  it("v41's header is gone with it: the page renders the shared OpenHeader through Pk43Header", () => {
+  it("v41's header is gone with it: the page renders the shared OpenHeader through Pk62Header (v43's, re-pointed)", () => {
     expect(existsSync(resolve(SRC, "components/packages/v41/Pk41Header.tsx"))).toBe(false);
-    const hd = readFileSync(resolve(SRC, "components/packages/v43/Pk43Header.tsx"), "utf8");
+    expect(existsSync(resolve(SRC, "components/packages/v43/Pk43Header.tsx"))).toBe(false);
+    const hd = readFileSync(resolve(SRC, "components/packages/v62/Pk62Header.tsx"), "utf8");
     expect(hd).toMatch(/import \{ OpenHeader \} from "\.\.\/\.\.\/shell\/OpenHeader"/);
     expect(hd).toContain('className="qc151 qc153 pk43-hdw"');
     expect(hd).toMatch(/src=\{HAWK_STANDING\}/);
@@ -81,29 +83,28 @@ describe("PK43 P9 (source) — no green in the builder on this page", () => {
   });
 });
 
-/* ── P8 (source half) ── */
-import { canGoOut } from "./Pk43GoingOut";
-import { USE_FOR_BATCH } from "../../../lib/packagesV42";
+/* ── P8 (source half), re-pointed to v62 (18 Nov): Pk43GoingOut and the builder are deleted ── */
+import { isFinished } from "../../../lib/packagesV62";
 import type { SubmissionPackage } from "../../../types";
 const pkg = (over: Partial<SubmissionPackage>): SubmissionPackage => ({
   id: "p", userId: "u", manuscriptId: "m", packageName: "P", queryLetterVersionId: "", synopsisVersionId: "",
   samplePagesVersionId: "", status: "Active", createdDate: "2026-01-01", ...over,
 });
 
-describe("PK43 P8 (source) — Change offers only packages that can go out; the builder says it the same way", () => {
-  it("a draft (no version or no letter) is not offered; Ready and Out are", () => {
-    expect(canGoOut(pkg({}))).toBe(false);
-    expect(canGoOut(pkg({ queryLetterVersionId: "l" }))).toBe(false);
-    expect(canGoOut(pkg({ bookVersionId: "v" }))).toBe(false);
-    expect(canGoOut(pkg({ bookVersionId: "v", queryLetterVersionId: "l" }))).toBe(true);
-    expect(canGoOut(pkg({ bookVersionId: "v", queryLetterVersionId: "l", firstSentAt: "2026-02-01" } as Partial<SubmissionPackage>))).toBe(true);
+describe("PK43 P8 (source) — Change offers only packages that can go out; the band says it the same way", () => {
+  it("a draft (no version or no letter) is not offered; finished ones are, sent or not", () => {
+    expect(isFinished(pkg({}))).toBe(false);
+    expect(isFinished(pkg({ queryLetterVersionId: "l" }))).toBe(false);
+    expect(isFinished(pkg({ bookVersionId: "v" }))).toBe(false);
+    expect(isFinished(pkg({ bookVersionId: "v", queryLetterVersionId: "l" }))).toBe(true);
+    expect(isFinished(pkg({ bookVersionId: "v", queryLetterVersionId: "l", firstSentAt: "2026-02-01" } as Partial<SubmissionPackage>))).toBe(true);
   });
-  it("Change and the builder's button call the one writer, makeActive", () => {
-    const go = readFileSync(resolve(SRC, "components/packages/v43/Pk43GoingOut.tsx"), "utf8");
-    expect(go).toContain("void model.makeActive(p);");
-    expect(go).toContain("model.live.filter(canGoOut)");
-    expect(readFileSync(resolve(SRC, "components/packages/v26/Pk393Builder.tsx"), "utf8")).toContain("model.makeActive(p)}>{USE_FOR_BATCH}");
-    expect(USE_FOR_BATCH).toBe("Use for new queries");
+  it("Change and the band's button call the one writer", () => {
+    expect(page).toContain("const options = useMemo(() => live.filter(isFinished), [live]);");
+    expect(page).toContain("if (await act.useForNew(p))");
+    const open = readFileSync(resolve(SRC, "components/packages/v62/Pk62Open.tsx"), "utf8");
+    expect(open).toContain("onClick={() => void act.useForNew(p)}>Use for new queries</button>");
+    expect(readFileSync(resolve(SRC, "components/packages/v62/usePk62Actions.ts"), "utf8")).toContain("!canMakeActive(p, active?.id) || !isFinished(p)");
   });
 });
 
@@ -122,11 +123,11 @@ describe("PK43 P5 (source) — the bar is the Query Centre's; qcv156.css §3 nam
     /* RE-POINTED (Workspace headers v1, at the merge): the shared navy header's `.wsnh` follows `.pk43` in the lists */
     expect(s3.replace(/, \.pk43(?=[,)])/g, "")).not.toContain("pk43");
   });
-  it("the page mounts the shared SlimBar through Pk43Slim, a direct child of the page root", () => {
-    const slim = readFileSync(resolve(SRC, "components/packages/v43/Pk43Slim.tsx"), "utf8");
+  it("the page mounts the shared SlimBar through Pk62Slim (v43's, re-pointed), a direct child of the page root", () => {
+    const slim = readFileSync(resolve(SRC, "components/packages/v62/Pk62Header.tsx"), "utf8");
     expect(slim).toMatch(/import \{ SlimBar \} from "\.\.\/\.\.\/shell\/SlimBar"/);
-    expect(page.indexOf("<Pk43Slim")).toBeGreaterThan(page.indexOf('data-pk41="page"'));
-    expect(page.indexOf("<Pk43Slim")).toBeLessThan(page.indexOf('data-pk43="desk"'));
+    expect(page.indexOf("<Pk62Slim")).toBeGreaterThan(page.indexOf('data-pk62="page"'));
+    expect(page.indexOf("<Pk62Slim")).toBeLessThan(page.indexOf("<Pk62Header"));
   });
 });
 

@@ -100,7 +100,9 @@ test("V12-1 — the Dashboard's door: the staged journey over a dimmed page, the
   ok(true, "V12-1: Discard closes");
 });
 
-test("V12-2 — a package's builder: that package is preselected, under the ask card", async ({ page }) => {
+/* RETIRED (Submission packages v62, 18 Nov): the builder and its "Log a query with it" door are deleted; the v62 page
+   draws no log door. See tests/e2e/RETIRED-submission-packages-v62.md. */
+test.skip("V12-2 — a package's builder: that package is preselected, under the ask card", async ({ page }) => {
   test.setTimeout(300_000);
   await open(page, "/queries/packages?pkg=laq12-pb");
   const btn = page.locator('[data-pk393="primary"]').locator("visible=true").first();

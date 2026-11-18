@@ -450,9 +450,10 @@ describe("the grid — the scroller owns the page (in-flow masthead)", () => {
     const pkg = readFileSync(resolve(__dirname, "../SubmissionPackages.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
     /* Submission packages v26 (25 Oct): the root is `.p6` and states NO inline style at all — what it says about
        its width lives in pk26.css / pk40.generated.css, which the chain above reads. v41 adds `.p41`; v43 adds
-       `.pk43`, whose measure (the workspace's, both sides) and padding live in packages/v43/pk43.css §0 */
-    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className={`p6 p41 pk43${dayOne ? " pk43--day1" : ""}`} data-pk26="page"');
-    expect(pkg, "Packages styles its root inline — invisible to every stylesheet lock").not.toMatch(/data-pk26="page"[^>]*style=/);
+       `.pk43`, whose measure (the workspace's, both sides) and padding live in packages/v43/pk43.css §0. v62 (18 Nov):
+       the root is `.pk43.pk62`; its measure and padding live in packages/v62/pk62.css §0 */
+    expect(pkg, "the Packages root changed shape — this assertion no longer reads it").toContain('className={`pk43 pk62${dayOne ? " k62--day1" : ""}`} data-pk62="page"');
+    expect(pkg, "Packages styles its root inline — invisible to every stylesheet lock").not.toMatch(/data-pk62="page"[^>]*style=/);
   });
 
   /* ⚠️ NO PAGE MAY RE-STATE A WIDTH. The caps lived on five page stylesheets and a per-page gutter

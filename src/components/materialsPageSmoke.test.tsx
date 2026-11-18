@@ -223,102 +223,80 @@ describe("/queries/packages renders", () => {
     expect(() => renderPage(<SubmissionPackages />, "/queries/packages")).not.toThrow();
   });
 
-  /* v43 Phase 5 (re-pointed from v26's empty state, whose hero is retired): a manuscript with no package at all is DAY
-     ONE — the navy header with "No packages yet" and no buttons, three steps beside the draft first package */
-  it("a manuscript with no package is day one: the navy header, no buttons, three steps and the draft package", () => {
+  /* v62 (18 Nov; re-pointed from v43's day one): a manuscript with no package at all is DAY ONE — the navy header with
+     "No packages yet", "+ Make your first package" and How it works, the founding writer's first-visit note, and one
+     framed card holding the storyboard. No list, no open package, no table. */
+  it("a manuscript with no package is day one: the header, the note, and the storyboard card", () => {
     setActiveManuscript();
     const html = renderPageSeeded(<SubmissionPackages />, "/queries/packages");
-    expect(html).not.toContain('data-pk26="hero"');
-    expect(html).not.toContain("Build your first package");
-    expect(html).toContain('data-pk43-state="day-one"');
-    expect(html).toContain('data-pk43="title" tabindex="-1">No packages yet</h1>');
-    expect(html).not.toContain('data-pk43="new"');
-    expect(html).not.toContain('data-pk43="how"');
-    expect(html).not.toContain('data-pk43="going-out"');
-    expect(html.match(/data-pk43="day-one-step"/g)?.length).toBe(3);
-    expect(html).toContain("Pick the pieces.");
-    expect(html).toContain("Send it with your queries.");
-    expect(html).toContain("See what gets replies.");
-    expect(html).not.toContain('data-pk43="list"');
-    /* v38: one page, no tabs — the labels row, the builder (a draft first package) and Results, empty: the band's
-       empty line, no totals and the dashed "Nothing to show yet." (L7's unit half) */
-    expect(html).not.toContain('data-pk26="tabs"');
-    /* v41: the labels row is retired (the package list replaces it) */
-    expect(html).not.toContain('data-pk38="labels"');
-    expect(html).toContain("My first package");
-    /* v41 F: the results band is retired; with nothing sent, Results is its heading over one quiet line */
-    expect(html).toContain(">How your packages are doing<");
-    expect(html).not.toContain('data-pk38="band"');
-    expect(html).toContain('data-pk38="empty"');
-    expect(html).not.toContain('data-pk38="show"');
-    /* v39.1 G: the brand-new page has its own explanation, so no explainer line */
-    expect(html).not.toContain('data-pk39="tip"');
+    expect(html).toContain('data-pk62-state="day-one"');
+    expect(html).toContain('data-pk62="title" tabindex="-1">No packages yet</h1>');
+    expect(html).toContain(">+ Make your first package</button>");
+    expect(html).toContain('data-pk62="how"');
+    expect(html).not.toContain('data-pk62="going-out"');
+    expect(html).toContain('data-pk62="note"');
+    expect(html).toContain("<b>Packages is a Pro page.</b> It’s free for you as a founding writer.");
+    expect(html).not.toContain('data-pk62="pro-tag"');
+    expect(html).toContain('data-pk62="day-one"');
+    expect(html).toContain('data-pk62="storyboard"');
+    expect(html).toContain("“Can you write, and is it for me?”");
+    expect(html).toContain("A package needs a version and a letter before it can go out.");
+    for (const gone of ['data-pk62="list"', 'data-pk62="open"', 'data-pk62="table"', "Founding writer perk", "Tell us what you think"]) expect(html).not.toContain(gone);
   });
 
-  it("populated: the v41 page — no header card, explainer, raised panel or labels; the builder's steps and preview", () => {
+  it("populated, nothing sent: the list, the open package with what it needs, and the table of dashes", () => {
     setActiveManuscript();
     const html = renderPageSeededWith(<SubmissionPackages />, "/queries/packages", { versions: [LETTER], packages: [PACKAGE] });
-    /* v41 A: the v39 header card, the explainer, the raised panel and the labels row are gone from the DOM */
-    expect(html).not.toContain('data-pk39="hd-card"');
-    expect(html).not.toContain('data-pk392="panel"');
-    expect(html).not.toContain('data-pk38="labels"');
-    expect(html).toContain('data-pk41="page"');
-    /* v43 Phase 1 (re-pointed from v41 C's own header): the Query Centre's navy header, the live packages counted, the
-       manuscript on the ruled line, the Archivist standing in it; nothing pinned */
-    expect(html).not.toContain('data-pk41="header"');
-    expect(html).toContain('data-pk43="header"');
-    expect(html).toContain('data-pk43="title" tabindex="-1">1 package</h1>');
+    expect(html).toContain('data-pk62-state="nothing-sent"');
+    expect(html).toContain('data-pk62="title" tabindex="-1">1 package</h1>');
     expect(html).toContain("<em>for</em> The Smoke Test");
-    expect(html).toContain('data-pk43="art"');
-    expect(html).not.toContain("p41-perch");
-    /* v41 (workspace): the full-width list with its headings and per-row buttons is retired; the rail replaces it */
-    expect(html).not.toContain('data-pk41="list"');
-    /* v42 A: the rail and the header's batch strip are retired, element and rule */
-    expect(html).not.toContain('data-pk41="rail"');
-    expect(html).not.toContain('data-pk41-row=');
-    expect(html).not.toContain('data-pk41="batch"');
-    /* v43 Phase 2 (re-pointed from v42 C's stat tiles, retired): "Your packages", a list on the left of the desk, then
-       the builder in the workspace beside it; this draft package's row names what it still needs */
-    expect(html).not.toContain('data-pk42="tiles"');
-    expect(html).not.toContain("p42-tile");
-    expect(html).toContain('data-pk43="list"');
-    expect(html).toContain('data-pk43-row="pk1"');
-    expect(html).toContain("<b>1 of 2</b> pieces in");
-    expect(html.indexOf('data-pk43="list"')).toBeLessThan(html.indexOf('data-pk41="builder"'));
-    expect(html.indexOf('data-pk43="header"')).toBeLessThan(html.indexOf('data-pk43="desk"'));
-    expect(html.indexOf('data-pk43="work"')).toBeLessThan(html.indexOf('data-pk41="builder"'));
-    expect(html).not.toContain("Bundle it. Send it. Know what went.");
-    expect(html).toContain('data-pk26="open"');
-    expect(html).toContain(">Standard UK<");
-    /* v39.3: the steps say what is missing — the version step is open, the letter step is filled — and the preview's
-       primary names only what is missing. Your materials (its card, tabs and rows) and the packing list are retired. */
-    expect(html).toContain('data-pk393-step="ver"');
-    expect(html).toContain('data-pk393-step="let"');
-    expect(html).toContain(">Hook-first<");
-    expect(html).toContain('data-pk393="preview"');
-    expect(html).toContain(">Add a version to send it<");
-    expect(html).not.toContain('data-pk26="lib"');
-    expect(html).not.toContain('data-slot=');
-    expect(html).not.toContain('draggable="true"');
-    expect(html).not.toContain('data-pk26="hero"');
-    /* v39 D–F: the label over two cards, the package's own header (picker tile, name in place, one status, Figures), the
-       quiet foot with the details link, and no stepper row */
-    /* v41 A: no explainer line and no "Build, view and edit" kicker */
-    expect(html).not.toContain('data-pk39="tip"');
-    expect(html).not.toContain("A package is everything one agent receives:");
-    expect(html).not.toContain(">Build, view and edit<");
-    expect(html).toContain('data-pk39="pkg-head"');
-    expect(html).toContain('aria-label="Change icon"'); /* v42 A: icons only */
-    expect(html).toContain('aria-label="Package name"');
-    /* v39.1 C: one status pill replaces v39's three-dot stage */
-    expect((html.match(/data-pk39="status"/g) ?? []).length).toBe(1);
-    expect(html).not.toContain('data-pk39="stage"');
-    expect(html).toContain("1 of 2 needed");
-    expect(html).toContain(">Note, copy or delete…<");
-    expect(html).not.toContain("p6-lc-s");
-    /* no tab bar or tab page */
-    expect(html).not.toContain('data-pk26="tabs"');
-    expect(html).not.toContain('data-pk26="materials"');
+    expect(html).toContain(">+ New package</button>");
+    /* the header's right block shows only a package that can go out — this one has no version */
+    expect(html).not.toContain('data-pk62="going-out"');
+    expect(html).toContain('data-pk62="list"');
+    expect(html).toContain('data-pk62-row="pk1"');
+    expect(html).toContain("Hook-first · no sample yet");
+    expect(html).toContain("Needs a manuscript version");
+    expect(html.indexOf('data-pk62="list"')).toBeLessThan(html.indexOf('data-pk62="open"'));
+    expect(html).toContain("No note yet. Who is this package for?");
+    expect(html).toContain(">Always sent</h4>");
+    expect(html).toContain(">Only if an agent asks</h4>");
+    expect(html).toContain(">Not chosen yet</b>");
+    expect(html).toContain("Names two comps");
+    expect(html).toContain('data-pk62="foot">A package needs a letter and a sample before it can go out.</p>');
+    /* the seeded agent is already queried for this book, so the preview addresses "An agent (example)" */
+    expect(html).toContain("An agent <em>(example)</em>");
+    expect(html).toContain("<p>Dear agent,</p>");
+    expect(html).not.toContain('data-pk62="back"');
+    expect(html).toContain("Nothing sent yet");
+    expect(html).toContain('data-pk62-tr="pk1"');
+    expect(html).not.toContain('data-pk62="totals"');
+    expect(html).not.toMatch(/\d%/);
+  });
+
+  it("populated, sent: In use, As it went, What came back with StatusDot rows, and the totals line", () => {
+    setActiveManuscript();
+    const SENT = { ...PACKAGE, bookVersionId: "bv1", firstSentAt: "2026-01-10T00:00:00.000Z" };
+    const Q = (id: string, status: string) => ({ id, userId: "u1", manuscriptId: "m1", agentId: "a1", packageId: "pk1", status, dateSent: "2026-01-10T00:00:00.000Z", personalisationNotes: "", sendMethod: "Email", responseDeadline: "2026-03-07T00:00:00.000Z", materialsWanted: [] });
+    const html = renderPageSeededWith(<SubmissionPackages />, "/queries/packages", {
+      versions: [LETTER], packages: [SENT],
+      queries: [Q("q1", "Partial Requested"), Q("q2", "Rejected"), Q("q3", "Queried")],
+    });
+    expect(html).toContain('data-pk62-state="sent"');
+    expect(html).toContain('data-pk62="lock-line"');
+    expect(html).toContain("Sent, so it can’t be changed. Make a copy to try something different.");
+    expect(html).toContain("<small>As it went</small>");
+    expect(html).not.toContain('data-pk62="foot"');
+    expect(html).toContain('data-pk62="back"');
+    expect(html).toContain('data-pk62="cells"');
+    expect(html).toContain('data-pk62-rule="1"');
+    expect(html).toContain("2 of 3 have replied. Wait for 2 more before you change anything.");
+    expect(html).toContain("3 agents, 1 still to reply");
+    expect(html).toContain(">Partial requested<");
+    expect(html).toContain(">Passed<");
+    expect(html).toContain("See these in Queries →");
+    expect(html).toContain('data-pk62="totals">3 queries have gone out with a package. 2 agents have replied and 1 asked to read more.</p>');
+    expect(html).not.toMatch(/\d%/);
   });
 });
 

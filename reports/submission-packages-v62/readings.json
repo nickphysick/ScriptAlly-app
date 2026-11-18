@@ -1,0 +1,93 @@
+{
+ "P1": {
+  "title": "3 packages",
+  "rows": 3,
+  "current": 1,
+  "state": "sent",
+  "note": 0,
+  "pro": 0,
+  "percent": false,
+  "green": []
+ },
+ "P1b": {
+  "hasBack": 1,
+  "whoRows": 4,
+  "dots": 4,
+  "verdict": "Too early to say\n\n3 of 4 have replied. Wait for 1 more before you change anything."
+ },
+ "P2": {
+  "pill": 1,
+  "lock": "Retired, so it can’t be changed. Make a copy to try something different.",
+  "toggle": "Hide retired",
+  "steps": 0
+ },
+ "P3": {
+  "id": "cv25-pkg-coast",
+  "back": 0,
+  "foot": "A package needs a letter and a sample before it can go out.",
+  "dashes": 3,
+  "row": "Needs a manuscript version"
+ },
+ "P4": {
+  "state": "day-one",
+  "card": 1,
+  "list": 0,
+  "table": 0,
+  "btn": "+ Make your first package"
+ },
+ "P5": {
+  "focusOk": "how-ok",
+  "inside": true,
+  "back": "how"
+ },
+ "P6": {
+  "focus": "d-name",
+  "back": "new",
+  "hasWords": true
+ },
+ "P7": {
+  "radios": 3,
+  "label": "Close",
+  "expanded": "true"
+ },
+ "P8_1280": {
+  "s1": {
+   "doc": 0,
+   "scroller": 0
+  },
+  "s2": {
+   "doc": 0,
+   "scroller": 0
+  }
+ },
+ "P8_900": {
+  "s1": {
+   "doc": 0,
+   "scroller": 0
+  },
+  "s2": {
+   "doc": 0,
+   "scroller": 0
+  }
+ },
+ "P8_800": {
+  "s1": {
+   "doc": 0,
+   "scroller": 0
+  },
+  "s2": {
+   "doc": 0,
+   "scroller": 0
+  }
+ },
+ "P8_768": {
+  "s1": {
+   "doc": 0,
+   "scroller": 0
+  },
+  "s2": {
+   "doc": 0,
+   "scroller": 0
+  }
+ }
+}
