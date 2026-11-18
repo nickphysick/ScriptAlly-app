@@ -20,7 +20,7 @@ import type { QcRow } from "../../../lib/qcSummary";
 import type { RowAct } from "../../../lib/qc1512";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { queriedFact, slipTone, slipTrack, standWords } from "../../../lib/qc153";
-import { NEXT_WAIT_LABEL, OVERDUE_LINE, OVERDUE_VALUE, nextBox154, nudgeOnLine } from "../../../lib/qc154";
+import { NEXT_WAIT_LABEL, OVERDUE_LINE, OVERDUE_VALUE, QUIET_CHIP, QUIET_LABEL, QUIET_VALUE, chipPress, nextBox154, nudgeOnLine } from "../../../lib/qc154";
 import { materialGroups, tabAccent157 } from "../../../lib/qc1533";
 import { MatTab1533, Track153 } from "./QcSlip153";
 import "./qcv153.css";
@@ -46,16 +46,20 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
   const word = standWords(r);
   const sent = queriedFact(r, nowMs);
   const nx = nextBox154(r, nowMs);
-  const hot = nx.kind === "other" && nx.hot;
+  /* v157 — gone quiet (lib/qc154 `isQuietCard`, through the Next box): the fading band, navy dots on the current step,
+     z's on hover, "Gone quiet · Nudge or close" in a hot box, and a chip that opens the card */
+  const quiet = nx.kind === "quiet";
+  const hot = (nx.kind === "other" && nx.hot) || quiet;
   const mats = materialGroups(r.query, r.status, packageName, r.stageStartMs, nowMs);
   const [popOpen, setPopOpen] = useState(false);
   /* the slip's rule: a navy or nudge act is the button's words; anything else opens the card */
   const cta = act && act.tone !== "plain" ? act : null;
   const open = () => onOpen(r.id);
-  const actLabel = cta ? cta.label : "Open the card";
+  const actLabel = quiet ? QUIET_CHIP : cta ? cta.label : "Open the card";
+  const press = chipPress(quiet, cta);
   return (
     <div className={`qc154-card${selected ? " is-sel" : ""}${popOpen ? " has-pop" : ""}`} id={`query-row-${r.id}`} data-qc154="card" data-qcv="row" data-id={r.id}
-      data-tone={slipTone(r.status)} data-status={r.status} role="button" tabIndex={0}
+      data-tone={slipTone(r.status)} data-status={r.status} data-quiet={quiet ? "" : undefined} role="button" tabIndex={0}
       aria-label={`${r.agentName}, ${r.agency}, ${word}`} aria-pressed={selected}
       onClick={open}
       onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); open(); } }}>
@@ -67,7 +71,7 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
             <span className="qc154-ag" data-qc154="agency">{r.agency}</span>
           </span>
           <span className="qc154-trkw" data-qc154="track" role="img" tabIndex={0} aria-label={`Where it stands: ${word}`} title={word}>
-            <Track153 t={t} label={word} status={r.status} />
+            <Track153 t={t} label={word} status={r.status} quiet={quiet} />
           </span>
           <span className="qc154-sr" data-qc154="word">{word}</span>
         </div>
@@ -84,6 +88,9 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
               <b>{nx.due}</b>
               <u className="qc154-bar" data-qc154="window" aria-hidden="true"><i style={{ width: `${Math.round(nx.bar * 100)}%` }} /></u>
               {nx.nudgeOn ? <em className="qc154-nl" data-qc154="nudge-on">{BELL}{nudgeOnLine(nx.nudgeOn)}</em> : null}
+            </> : nx.kind === "quiet" ? <>
+              <span className="qc154-fl">{QUIET_LABEL}</span>
+              <b>{QUIET_VALUE}</b>{nx.line ? <em data-qc157="quiet-line">{nx.line}</em> : null}
             </> : nx.kind === "over" ? <>
               <span className="qc154-fl">Next</span>
               <b>{OVERDUE_VALUE}</b><em>{OVERDUE_LINE}</em>
@@ -94,8 +101,8 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
             {/* v156.1 §3 — the action is a 32px arrow chip in the box's corner, a real button named by the action's label (the
                 label also its tooltip); its click runs the action and stops there, so the card's own click (the slide-out)
                 does not run as well. The box keeps its content and colour. */}
-            <button type="button" className="qc1561-chip" data-qc154="act" data-mode={cta ? cta.mode : "open"} aria-label={actLabel}
-              onClick={(e) => { e.stopPropagation(); if (cta) onAct(r.id, cta.mode); else open(); }}
+            <button type="button" className="qc1561-chip" data-qc154="act" data-mode={press.kind === "act" ? press.mode : "open"} aria-label={actLabel}
+              onClick={(e) => { e.stopPropagation(); if (press.kind === "act") onAct(r.id, press.mode); else open(); }}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.stopPropagation(); }}>
               <span className="qc1561-arr" aria-hidden="true">→</span>
               <span className="qc1561-tip" aria-hidden="true">{actLabel}</span>
@@ -103,6 +110,8 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
           </div>
         </div>
       </div>
+      {/* v157 — the z's: over the band, crossing the card's top edge, outside the inner card (which clips) */}
+      {quiet ? <span className="qc157-zz" data-qc157="zz" aria-hidden="true"><b>z</b><b>z</b><b>z</b></span> : null}
       {mats ? <span className="qc154-clipw" data-qc154="clip"><MatTab1533 id={r.id} g={mats} status={r.status} accent={tabAccent157(r.status)} onOpen={setPopOpen} /></span> : null}
     </div>
   );

@@ -52,3 +52,43 @@
 @media (min-width: 768px) {
   .qc151.qc153 .qc154-card.qc154-card .qc154-f.qc154-f { justify-content: center; }
 }
+
+/* ── Phase 5 · gone quiet (QcCard154 marks the card `data-quiet`; lib/qc154 `isQuietCard`). Never an offer or a
+   closed card. The band fades from its stage's colour to white; the current step's badge keeps its box and place,
+   navy, holding three white dots (12px); the link after the current step is dotted. The Next box ("Gone quiet ·
+   Nudge or close") is hot, so it takes Phase 4's navy outline. ──────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc154-card.qc154-card[data-quiet] .qc154-hd.qc154-hd { background: linear-gradient(90deg, var(--tone) 0, var(--tone) 26%, #fff 82%); }
+  .qc151.qc153 .qc154-card.qc154-card[data-quiet] .qc153-nd--cur .qc153-arw.qc153-arw { background: #2a3a52; color: #fff; }
+  .qc151.qc153 .qc154-card.qc154-card[data-quiet] .qc153-nd--cur .qc153-arw.qc153-arw svg { width: 12px; height: 12px; }
+  .qc151.qc153 .qc154-card.qc154-card[data-quiet] .qc153-trk:not(.is-ended) .qc153-nd--cur + .qc153-ln.qc153-ln {
+    background: repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.5) 0 2px, transparent 2px 4px);
+  }
+
+  /* the z's: three in the typewriter, navy, placed from the card's top-left corner and painted above the band. They
+     cross the card's top edge, so they sit on the card itself (overflow visible), outside the inner card that clips.
+     At rest hidden and 3px left, 6px low; on hover or keyboard focus each fades and rises into place over 250ms,
+     0 / 90 / 180ms apart, and stays. Nothing loops. A phone has no hover and never shows them. */
+  .qc151.qc153 .qc154-card > .qc157-zz { position: absolute; left: 0; top: 0; z-index: 4; pointer-events: none; color: #2a3a52; }
+  .qc151.qc153 .qc154-card > .qc157-zz > b {
+    position: absolute; font-family: var(--sp-type) !important; font-weight: 400 !important; font-style: normal; line-height: 1; color: #2a3a52;
+    opacity: 0; transform: translate(-3px, 6px); transition: opacity 0.25s ease-out, transform 0.25s ease-out;
+  }
+  .qc151.qc153 .qc154-card > .qc157-zz > b:nth-child(1) { left: 44px; top: 9px; font-size: 12px !important; }
+  .qc151.qc153 .qc154-card > .qc157-zz > b:nth-child(2) { left: 54px; top: -3px; font-size: 15px !important; }
+  .qc151.qc153 .qc154-card > .qc157-zz > b:nth-child(3) { left: 67px; top: -18px; font-size: 19px !important; }
+  .qc151.qc153 .qc154-card[data-quiet]:is(:hover, :focus-visible) > .qc157-zz > b { transform: none; }
+  .qc151.qc153 .qc154-card[data-quiet]:is(:hover, :focus-visible) > .qc157-zz > b:nth-child(1) { opacity: 0.7; }
+  .qc151.qc153 .qc154-card[data-quiet]:is(:hover, :focus-visible) > .qc157-zz > b:nth-child(2) { opacity: 0.85; transition-delay: 0.09s; }
+  .qc151.qc153 .qc154-card[data-quiet]:is(:hover, :focus-visible) > .qc157-zz > b:nth-child(3) { opacity: 1; transition-delay: 0.18s; }
+}
+/* the narrow card: every z 6px further left */
+@container (max-width: 380px) {
+  .qc151.qc153 .qc154-card > .qc157-zz > b:nth-child(1) { left: 38px; }
+  .qc151.qc153 .qc154-card > .qc157-zz > b:nth-child(2) { left: 48px; }
+  .qc151.qc153 .qc154-card > .qc157-zz > b:nth-child(3) { left: 61px; }
+}
+/* reduced motion: they appear in place, with no movement */
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .qc151.qc153 .qc154-card > .qc157-zz > b { transform: none; transition: none; }
+}

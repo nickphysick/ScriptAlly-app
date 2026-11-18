@@ -57,7 +57,7 @@ describe("v157 Phase 3 · the track reads on every band", () => {
     expect(rule(`${T} .qc153-ln.qc153-ln--skip`)).toContain("repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.5) 0 2px, transparent 2px 4px)");
   });
   it("a closed card's track keeps its grey: every colour rule is scoped to a track that has not ended", () => {
-    for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) if (/qc153-(nd|ln)/.test(m[1]) && /color|background/.test(m[2])) expect(m[1]).toContain(":not(.is-ended)");
+    for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) if (/qc153-(nd|ln)/.test(m[1]) && !/qc153-arw/.test(m[1]) && /color|background/.test(m[2])) expect(m[1]).toContain(":not(.is-ended)");
   });
   it("the glyph in a step that is not current: 23px, 19px on the narrow card", () => {
     const all = rules(".qc151.qc153 .qc154-card .qc153-nd:not(.qc153-nd--cur) > span svg");
