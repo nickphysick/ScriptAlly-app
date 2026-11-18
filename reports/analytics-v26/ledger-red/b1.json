@@ -1,0 +1,104 @@
+[
+ {
+  "lock": "B1",
+  "where": "mock cards = model",
+  "ok": true,
+  "detail": "[\"beyond\",\"typical\",\"bestRound\"] vs [\"beyond\",\"typical\",\"bestRound\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "mock beyond iff zone",
+  "ok": true,
+  "detail": "zone 7, card true"
+ },
+ {
+  "lock": "B1",
+  "where": "mock bestRound iff an ask in a round",
+  "ok": true,
+  "detail": "[4,2,1]"
+ },
+ {
+  "lock": "B1",
+  "where": "mock = the sample",
+  "ok": true,
+  "detail": "[\"beyond\",\"typical\",\"bestRound\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "mock links",
+  "ok": true,
+  "detail": "[\"beyond\",\"quiet\",\"best-round\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "inside cards = model",
+  "ok": true,
+  "detail": "[\"beyond\",\"typical\",\"bestRound\"] vs [\"beyond\",\"typical\",\"bestRound\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "inside beyond iff zone",
+  "ok": true,
+  "detail": "zone 1, card true"
+ },
+ {
+  "lock": "B1",
+  "where": "inside bestRound iff an ask in a round",
+  "ok": true,
+  "detail": "[1,3,1]"
+ },
+ {
+  "lock": "B1",
+  "where": "inside: no beyond card (population: an Everyday page)",
+  "ok": false,
+  "detail": "[\"beyond\",\"typical\",\"bestRound\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "inside links",
+  "ok": true,
+  "detail": "[\"beyond\",\"quiet\",\"best-round\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "eight cards = model",
+  "ok": true,
+  "detail": "[\"beyond\",\"typical\"] vs [\"beyond\",\"typical\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "eight beyond iff zone",
+  "ok": false,
+  "detail": "zone 0, card true"
+ },
+ {
+  "lock": "B1",
+  "where": "eight bestRound iff an ask in a round",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "B1",
+  "where": "eight links",
+  "ok": true,
+  "detail": "[\"beyond\",\"quiet\"]"
+ },
+ {
+  "lock": "B1",
+  "where": "link beyond",
+  "ok": true,
+  "detail": "/queries"
+ },
+ {
+  "lock": "B1",
+  "where": "link quiet",
+  "ok": true,
+  "detail": "/account/preferences"
+ },
+ {
+  "lock": "B1",
+  "where": "link best-round",
+  "ok": true,
+  "detail": "/queries"
+ }
+]

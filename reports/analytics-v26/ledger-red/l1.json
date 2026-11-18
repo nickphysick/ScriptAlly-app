@@ -1,0 +1,224 @@
+[
+ {
+  "lock": "L1",
+  "where": "1512 mock population",
+  "ok": true,
+  "detail": "page found"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 mock no overflow",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 mock nothing clipped",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 mock targets ≥ 24",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 early population",
+  "ok": true,
+  "detail": "page found"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 early no overflow",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 early nothing clipped",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 early targets ≥ 24",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 dayone population",
+  "ok": true,
+  "detail": "page found"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 dayone no overflow",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0}"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 dayone nothing clipped",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1512 dayone targets ≥ 24",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 mock population",
+  "ok": true,
+  "detail": "page found"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 mock no overflow",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 mock nothing clipped",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 mock targets ≥ 24",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 early population",
+  "ok": true,
+  "detail": "page found"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 early no overflow",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 early nothing clipped",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 early targets ≥ 24",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 dayone population",
+  "ok": true,
+  "detail": "page found"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 dayone no overflow",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0}"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 dayone nothing clipped",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1280 dayone targets ≥ 24",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 mock population",
+  "ok": true,
+  "detail": "page found"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 mock no overflow",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0}"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 mock nothing clipped",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 mock targets ≥ 24",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 early population",
+  "ok": true,
+  "detail": "page found"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 early no overflow",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0}"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 early nothing clipped",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 early targets ≥ 24",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 dayone population",
+  "ok": true,
+  "detail": "page found"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 dayone no overflow",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0}"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 dayone nothing clipped",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "1920 dayone targets ≥ 24",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "L1",
+  "where": "390 no document overflow",
+  "ok": true,
+  "detail": "{\"doc\":0,\"v26\":false}"
+ }
+]

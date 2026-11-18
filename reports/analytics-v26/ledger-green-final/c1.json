@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "C1",
+  "where": "population",
+  "ok": true,
+  "detail": "27 marks"
+ },
+ {
+  "lock": "C1",
+  "where": "waiting = model",
+  "ok": true,
+  "detail": "13 vs 13"
+ },
+ {
+  "lock": "C1",
+  "where": "waiting = sample",
+  "ok": true,
+  "detail": "13 vs 13"
+ },
+ {
+  "lock": "C1",
+  "where": "reading = model",
+  "ok": true,
+  "detail": "4 vs 4"
+ },
+ {
+  "lock": "C1",
+  "where": "reading = sample",
+  "ok": true,
+  "detail": "4 vs 4"
+ },
+ {
+  "lock": "C1",
+  "where": "offer = model",
+  "ok": true,
+  "detail": "1 vs 1"
+ },
+ {
+  "lock": "C1",
+  "where": "offer = sample",
+  "ok": true,
+  "detail": "1 vs 1"
+ },
+ {
+  "lock": "C1",
+  "where": "ended = model",
+  "ok": true,
+  "detail": "9 vs 9"
+ },
+ {
+  "lock": "C1",
+  "where": "ended = sample",
+  "ok": true,
+  "detail": "9 vs 9"
+ },
+ {
+  "lock": "C1",
+  "where": "sum = sent",
+  "ok": true,
+  "detail": "27"
+ },
+ {
+  "lock": "C1",
+  "where": "every mark a StatusDot",
+  "ok": true,
+  "detail": "27 of 27"
+ },
+ {
+  "lock": "C1",
+  "where": "hover names the agent",
+  "ok": true,
+  "detail": "\"Kit Farrow\" vs \"Kit Farrow\""
+ }
+]

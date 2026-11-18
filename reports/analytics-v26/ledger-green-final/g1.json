@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "G1",
+  "where": "mock population",
+  "ok": true,
+  "detail": "7639 chars"
+ },
+ {
+  "lock": "G1",
+  "where": "mock words",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "G1",
+  "where": "nine population",
+  "ok": true,
+  "detail": "4888 chars"
+ },
+ {
+  "lock": "G1",
+  "where": "nine words",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "G1",
+  "where": "five population",
+  "ok": true,
+  "detail": "5593 chars"
+ },
+ {
+  "lock": "G1",
+  "where": "five words",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "G1",
+  "where": "four population",
+  "ok": true,
+  "detail": "3140 chars"
+ },
+ {
+  "lock": "G1",
+  "where": "four words",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "G1",
+  "where": "early population",
+  "ok": true,
+  "detail": "2226 chars"
+ },
+ {
+  "lock": "G1",
+  "where": "early words",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "G1",
+  "where": "dayone population",
+  "ok": true,
+  "detail": "525 chars"
+ },
+ {
+  "lock": "G1",
+  "where": "dayone words",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "G1",
+  "where": "inside population",
+  "ok": true,
+  "detail": "4781 chars"
+ },
+ {
+  "lock": "G1",
+  "where": "inside words",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "G1",
+  "where": "eight population",
+  "ok": true,
+  "detail": "3265 chars"
+ },
+ {
+  "lock": "G1",
+  "where": "eight words",
+  "ok": true,
+  "detail": "\"null\""
+ },
+ {
+  "lock": "G1",
+  "where": "nogenre population",
+  "ok": true,
+  "detail": "7504 chars"
+ },
+ {
+  "lock": "G1",
+  "where": "nogenre words",
+  "ok": true,
+  "detail": "\"null\""
+ }
+]

@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "D2",
+  "where": "genre = model",
+  "ok": true,
+  "detail": "[[\"Crime and thriller\",5,12],[\"Literary fiction\",1,8],[\"Commercial fiction\",1,7]]"
+ },
+ {
+  "lock": "D2",
+  "where": "genre = sample",
+  "ok": true,
+  "detail": "[[\"Crime and thriller\",5,12],[\"Literary fiction\",1,8],[\"Commercial fiction\",1,7]]"
+ },
+ {
+  "lock": "D2",
+  "where": "note = sample",
+  "ok": true,
+  "detail": "[[\"With a personal note\",5,11],[\"Without one\",2,16]]"
+ },
+ {
+  "lock": "D2",
+  "where": "no genre under 3",
+  "ok": true,
+  "detail": "[[\"Crime and thriller\",5,12],[\"Literary fiction\",1,8],[\"Commercial fiction\",1,7]]"
+ },
+ {
+  "lock": "D2",
+  "where": "foot = unqueried",
+  "ok": true,
+  "detail": "\"34 agents on your list\" · 34"
+ },
+ {
+  "lock": "D2",
+  "where": "unqueried holds the eight who take it",
+  "ok": true,
+  "detail": "34"
+ },
+ {
+  "lock": "D2",
+  "where": "no genres: population Everyday",
+  "ok": true,
+  "detail": "everyday"
+ },
+ {
+  "lock": "D2",
+  "where": "no genres: the one line, no rows, no foot",
+  "ok": true,
+  "detail": "{\"genre\":[],\"note\":[[\"With a personal note\",5,11],[\"Without one\",2,16]],\"foot\":null,\"none\":true}"
+ }
+]

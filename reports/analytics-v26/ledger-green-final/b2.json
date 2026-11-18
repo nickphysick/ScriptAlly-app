@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "B2",
+  "where": "four population",
+  "ok": true,
+  "detail": "replies 4"
+ },
+ {
+  "lock": "B2",
+  "where": "four early",
+  "ok": true,
+  "detail": "{\"state\":\"early\",\"next\":false,\"d\":false,\"nudges\":false,\"early\":true,\"on\":4,\"segs\":5}"
+ },
+ {
+  "lock": "B2",
+  "where": "four segments",
+  "ok": true,
+  "detail": "4 of 5"
+ },
+ {
+  "lock": "B2",
+  "where": "early population",
+  "ok": true,
+  "detail": "replies 0"
+ },
+ {
+  "lock": "B2",
+  "where": "early early",
+  "ok": true,
+  "detail": "{\"state\":\"early\",\"next\":false,\"d\":false,\"nudges\":false,\"early\":true,\"on\":0,\"segs\":5}"
+ },
+ {
+  "lock": "B2",
+  "where": "early segments",
+  "ok": true,
+  "detail": "0 of 5"
+ }
+]

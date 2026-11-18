@@ -1,0 +1,26 @@
+[
+ {
+  "lock": "E2",
+  "where": "population",
+  "ok": true,
+  "detail": "5 rows"
+ },
+ {
+  "lock": "E2",
+  "where": "rows = model",
+  "ok": true,
+  "detail": "[\"No reply since\",\"No reply since\",\"Replied 4 days later\",\"Replied 9 days later\",\"Replied 6 days later\"]"
+ },
+ {
+  "lock": "E2",
+  "where": "sample: 5 sent, replied 4, 6, 9",
+  "ok": true,
+  "detail": "5 · [4,6,9]"
+ },
+ {
+  "lock": "E2",
+  "where": "nine: the nudge after its reply reads No reply since",
+  "ok": true,
+  "detail": "[\"No reply since\",\"Replied 4 days later\"]"
+ }
+]
