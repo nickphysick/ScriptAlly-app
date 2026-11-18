@@ -2,29 +2,32 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Comparable titles v25, Part E: "Comps this letter mentions". A centred dialog, portalled, on the
- * escape stack above the comp drawer.
+ * Comparable titles v25, Part E: the comps a letter mentions. A centred dialog, portalled, on the escape stack above
+ * the comp drawer. Also rendered by the Letters page (letters/LetterDesk.tsx), always with a letter.
  *
  * Three kinds of letter:
  *   - not sent: tick and Save, as often as you like;
- *   - sent, nothing recorded: tick and Save ONCE (the notice says its queries are tracked too);
+ *   - sent, nothing recorded: tick and Save ONCE ("Which comps did it mention?"), or "It didn't mention any";
  *   - sent and recorded: FIXED. The list is read-only and the foot offers "New version of {name}".
+ *
+ * Comps v32: opened for ONE comp (a `forKey` and no letter, from the open comp's "Add to a letter"), it lists the
+ * letters instead — tick the unsent letters that mention it; a sent letter that mentions it shows ticked and locked.
+ * Same dialog, head, list and foot; only the rows are letters. Saving hands the ticked letter ids to `onSaveForComp`.
  *
  * The ticks are the dialog's own draft; nothing is written until Save.
  *
- * Comps v28 §E: each row shows its record (its asked-for-more rate if it has gone out, its age if it is over five
+ * Comps v28 §E: each comp row shows its record (its asked-for-more rate if it has gone out, its age if it is over five
  * years old, else "not sent yet"), and a live tip advises against more than three comps or old ones. The tip
- * NEVER blocks Save. A comp brought by a card's or the drawer's "Log in a letter" is pre-ticked only on an unsent
- * letter (a sent one records what actually went).
+ * NEVER blocks Save.
  */
 import React, { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CompTitle } from "../../../types";
 import { MAX_LETTER_COMPS, compKey, ready } from "../../../lib/compUsage";
 import { CompRow, LetterLite, kindOf, letterShort } from "../../../lib/compsLibrary";
-import { pickRecord, pickTip } from "../../../lib/compsShelf";
+import { andList, pickRecord, pickTip } from "../../../lib/compsShelf";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
-import { CloseButton, KindIcon, LockIcon, TickIcon } from "./marks";
+import { CloseButton, KindIcon, LetterIcon, LockIcon, TickIcon } from "./marks";
 
 export interface PickerRequest { letterId: string | null; forKey?: string }
 
@@ -41,6 +44,8 @@ export const CompLetterPicker: React.FC<{
   onClose: () => void;
   /** write the ticked comps (by their keys) to one letter */
   onSave: (letterId: string, keys: string[]) => void;
+  /** v32: for one comp, the unsent letters ticked to mention it (absent where the host never opens that mode) */
+  onSaveForComp?: (key: string, letterIds: string[]) => void;
   onNewVersion: (letterId: string) => void;
   onOpenPackages: () => void;
 }> = (p) => {
@@ -48,10 +53,18 @@ export const CompLetterPicker: React.FC<{
   const [letterId, setLetterId] = useState<string | null>(null);
   const [ticks, setTicks] = useState<Set<string>>(new Set());
   const keyOfId = useMemo(() => new Map(p.comps.map((c, i) => [c.id ?? "", compKey(c, i)])), [p.comps]);
+  const titleOfId = useMemo(() => new Map(p.comps.flatMap((c) => (c.id ? [[c.id, c.title] as const] : []))), [p.comps]);
   const letter = p.letters.find((l) => l.id === letterId) ?? null;
   const sent = letter ? (p.sentByLetter.get(letter.id) ?? 0) : 0;
   const recorded = !!letter && Array.isArray(letter.compIds);
   const fixed = sent > 0 && recorded;
+  const unrecorded = sent > 0 && !recorded;
+
+  /* v32: one comp, many letters */
+  const forComp = !!p.request && !p.request.letterId && !!p.request.forKey && !!p.onSaveForComp;
+  const compIdx = forComp ? p.comps.findIndex((c, i) => compKey(c, i) === p.request!.forKey) : -1;
+  const comp = compIdx >= 0 ? p.comps[compIdx] : null;
+  const [onLetters, setOnLetters] = useState<Set<string>>(new Set());
 
   /* a letter made a moment ago ("New version") arrives from the store a tick after it is asked for */
   const wantedHere = !!p.request?.letterId && p.letters.some((l) => l.id === p.request!.letterId);
@@ -66,15 +79,19 @@ export const CompLetterPicker: React.FC<{
     setTicks(next);
   };
 
-  /* opening: the letter the door named, else the current one.
-     ⚠️ CHOSEN DURING RENDER, NEVER IN AN EFFECT (comps v26.1). An effect runs after the picker is drawn, so for one
-     frame it stood with no letter, no ticks and "0 logged". Setting state while rendering makes React render again
-     before anything is put on screen, so the first frame drawn is the chosen letter's. */
+  /* opening: the letter the door named, else the current one; for one comp, the unsent letters that mention it.
+     ⚠️ CHOSEN DURING RENDER, NEVER IN AN EFFECT (comps v26.1): the first frame drawn is the chosen state's. */
   const [loaded, setLoaded] = useState<{ request: PickerRequest | null; here: boolean }>({ request: null, here: false });
   const stale = loaded.request !== p.request || (!!p.request && loaded.here !== wantedHere);
   const sync = () => {
     setLoaded({ request: p.request, here: wantedHere });
-    if (p.request) load(p.request.letterId ?? p.currentLetterId ?? p.letters[p.letters.length - 1]?.id ?? null, p.request.forKey);
+    if (!p.request) return;
+    if (forComp) {
+      const id = comp?.id;
+      setOnLetters(new Set(id ? p.letters.filter((l) => (p.sentByLetter.get(l.id) ?? 0) === 0 && l.compIds?.includes(id)).map((l) => l.id) : []));
+      return;
+    }
+    load(p.request.letterId ?? p.currentLetterId ?? p.letters[p.letters.length - 1]?.id ?? null, p.request.forKey);
   };
   if (stale) sync();
 
@@ -92,16 +109,75 @@ export const CompLetterPicker: React.FC<{
   const tip = fixed ? [] : pickTip(p.comps.filter((c, i) => ticks.has(compKey(c, i))), p.now);
   const q = `${sent} ${sent === 1 ? "query" : "queries"}`;
 
+  /* ── v32: the letters, for one comp ── */
+  if (forComp) {
+    const cid = comp?.id ?? null;
+    const can = !!comp && ready(comp);
+    const drafts = p.letters.filter((l) => (p.sentByLetter.get(l.id) ?? 0) === 0);
+    const sentHere = cid ? p.letters.filter((l) => (p.sentByLetter.get(l.id) ?? 0) > 0 && l.compIds?.includes(cid)) : [];
+    const flip = (id: string) => setOnLetters((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+    const others = (l: LetterLite) => (l.compIds ?? []).filter((x) => x !== cid).map((x) => titleOfId.get(x)).filter((t): t is string => !!t);
+    return createPortal(
+      <div className="cv-layer cv-pdim" data-cv="picker-dim" onPointerDown={(e) => { if (e.target === e.currentTarget) p.onClose(); }}>
+        <div className="cv-pk" role="dialog" aria-modal="true" aria-label="Add to a letter" data-cv="picker" data-mode="comp" data-key={p.request!.forKey}>
+          <div className="cv-ph">
+            <div><h3 className="cv-pt">Add to a letter</h3><small>{comp?.title ?? ""}</small></div>
+            <CloseButton className="cv-x" data-cv="picker-close" onClick={p.onClose} />
+          </div>
+          <div className="cv-pn" data-cv="picker-notice">
+            {can ? "Tick the letters that mention this comp. Letters you’ve already sent can’t be changed."
+              : "Add a publisher and a year to this comp before a letter can mention it."}
+          </div>
+          <ul className="cv-tk" data-cv="picker-list">
+            {drafts.map((l) => {
+              const on = onLetters.has(l.id);
+              const room = on || (l.compIds?.length ?? 0) < MAX_LETTER_COMPS;
+              const ok = can && room;
+              const o = others(l);
+              return (
+                <li key={l.id} role="checkbox" aria-checked={on} aria-disabled={!ok} tabIndex={ok ? 0 : -1} data-cv="picker-letter-row" data-letter={l.id}
+                  className={ok ? "" : "is-off"}
+                  onClick={() => { if (ok) flip(l.id); }}
+                  onKeyDown={(e) => { if (ok && (e.key === " " || e.key === "Enter")) { e.preventDefault(); flip(l.id); } }}>
+                  <span className="cv-cbx">{on && <TickIcon />}</span>
+                  <span className={`cv-disc${on ? "" : " is-ring"}`}><LetterIcon /></span>
+                  <span><b>{l.versionName}</b><small>{o.length ? `Also mentions ${andList(o)}` : "No other comps yet"}</small></span>
+                </li>
+              );
+            })}
+            {sentHere.map((l) => (
+              <li key={l.id} role="checkbox" aria-checked="true" aria-disabled="true" tabIndex={-1} data-cv="picker-letter-row" data-letter={l.id} data-sent="true" className="is-ro">
+                <span className="cv-cbx"><TickIcon /></span>
+                <span className="cv-disc"><LockIcon /></span>
+                <span><b>{l.versionName}</b><small>Already sent, so it can’t be changed</small></span>
+              </li>
+            ))}
+          </ul>
+          <div className="cv-pf">
+            <span data-cv="picker-count">{onLetters.size} {onLetters.size === 1 ? "draft letter" : "draft letters"} ticked</span>
+            <div className="cv-bt">
+              <button type="button" className="cv-ghost" data-cv="picker-cancel" onClick={p.onClose}>Cancel</button>
+              <button type="button" className="cv-pillbtn" data-cv="picker-save" disabled={!can} onClick={() => p.onSaveForComp!(p.request!.forKey!, [...onLetters])}>Save</button>
+            </div>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    );
+  }
+
   return createPortal(
     <div className="cv-layer cv-pdim" data-cv="picker-dim" onPointerDown={(e) => { if (e.target === e.currentTarget) p.onClose(); }}>
-      <div className="cv-pk" role="dialog" aria-modal="true" aria-label="Log comps in a letter" data-cv="picker" data-letter={letter?.id ?? ""} data-fixed={fixed ? "true" : "false"}>
+      <div className="cv-pk" role="dialog" aria-modal="true" aria-label={unrecorded ? "Which comps did it mention?" : "Comps in this letter"} data-cv="picker" data-mode={unrecorded ? "unrecorded" : fixed ? "fixed" : "letter"} data-letter={letter?.id ?? ""} data-fixed={fixed ? "true" : "false"}>
         <div className="cv-ph">
-          <div><h3 className="cv-pt">Comps this letter names</h3><small>Choose every comp the letter mentions.</small></div>
+          {unrecorded
+            ? <div><h3 className="cv-pt">Which comps did it mention?</h3><small>{letter!.versionName} · sent with {q}</small></div>
+            : <div><h3 className="cv-pt">Comps in this letter</h3><small>Tick every comp the letter mentions.</small></div>}
           <CloseButton className="cv-x" data-cv="picker-close" onClick={p.onClose} />
         </div>
         {p.letters.length === 0 ? (
           <div className="cv-pempty" data-cv="picker-empty">
-            <p>You haven’t saved a query letter for this book yet. Save one in Submission packages, then log the comps it mentions here.</p>
+            <p>You haven’t saved a query letter for this book yet. Save one in Submission packages, then tick the comps it mentions here.</p>
             <button type="button" className="cv-pillbtn" onClick={p.onOpenPackages}>Open Submission packages</button>
           </div>
         ) : (
@@ -114,9 +190,9 @@ export const CompLetterPicker: React.FC<{
               ))}
             </div>
             {fixed
-              ? <div className="cv-pn" data-cv="picker-notice">{short} has gone out with {q}, so its comps are fixed. To change them, make a new version of the letter.</div>
-              : sent > 0
-                ? <div className="cv-pn" data-cv="picker-notice">{short} has already gone out with {q}. Log what it mentioned and {sent === 1 ? "that query is" : "those queries are"} tracked too.</div>
+              ? <div className="cv-pn" data-cv="picker-notice">{short} has been sent with {q}, so its comps can’t be changed. To change them, make a new version of the letter.</div>
+              : unrecorded
+                ? <div className="cv-pn" data-cv="picker-notice">Tick the comps you mentioned in this letter. You can only set this once, so check before you save.</div>
                 : null}
             <ul className="cv-tk" data-cv="picker-list">
               {p.comps.map((c, i) => {
@@ -153,7 +229,9 @@ export const CompLetterPicker: React.FC<{
               </p>
             ) : null}
             <div className="cv-pf">
-              <span data-cv="picker-count">{ticks.size} {ticks.size === 1 ? "comp" : "comps"} named{ticks.size >= MAX_LETTER_COMPS ? ` · a letter records up to ${MAX_LETTER_COMPS}` : ""}</span>
+              {unrecorded
+                ? <button type="button" className="cv-ghost" data-cv="picker-none" onClick={() => letter && p.onSave(letter.id, [])}>It didn’t mention any</button>
+                : <span data-cv="picker-count">{ticks.size} {ticks.size === 1 ? "comp" : "comps"} ticked{ticks.size >= MAX_LETTER_COMPS ? ` · a letter holds up to ${MAX_LETTER_COMPS}` : ""}</span>}
               <div className="cv-bt">
                 {fixed ? (
                   <>
@@ -162,8 +240,8 @@ export const CompLetterPicker: React.FC<{
                   </>
                 ) : (
                   <>
-                    <button type="button" className="cv-ghost" data-cv="picker-cancel" onClick={p.onClose}>Cancel</button>
-                    <button type="button" className="cv-pillbtn" data-cv="picker-save" disabled={!letter} onClick={() => letter && p.onSave(letter.id, [...ticks])}>Save</button>
+                    {unrecorded ? null : <button type="button" className="cv-ghost" data-cv="picker-cancel" onClick={p.onClose}>Cancel</button>}
+                    <button type="button" className="cv-pillbtn" data-cv="picker-save" disabled={!letter || (unrecorded && ticks.size === 0)} onClick={() => letter && p.onSave(letter.id, [...ticks])}>Save</button>
                   </>
                 )}
               </div>
