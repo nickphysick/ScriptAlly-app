@@ -1243,7 +1243,8 @@
     "design-refs/corkboard-v15/screens/20-day-one-full-page-1280.png": "058821ac10f583eeb0f840bd803fb427e5bff71b2d430c2b79f2e675a3a37baf",
     "design-refs/corkboard-v15/screens/20-day-one-full-page-1512.png": "d1f78012625e1385f10bd5d2090c4ebb800ee92a512bee7e858271b2d1236cc7",
     "design-refs/corkboard-v15/screens/21-everyday-full-page-1100.png": "07a0782358fd92b9a50e9d02573d38721084323cdbc022e50a1cb82e777151ec",
-    "design-refs/todo-list-v57/todoWs57.css": "b6d8e8dbd80d156a0cfb1e94a44ff159f157c7c0cf740e5a8a4e8e8df6c75532"
+    "design-refs/todo-list-v57/todoWs57.css": "b6d8e8dbd80d156a0cfb1e94a44ff159f157c7c0cf740e5a8a4e8e8df6c75532",
+    "design-refs/manuscripts-v29/manuscripts-v29.html": "4ed4f3bae217f9c43b25e8cbe23a322ff7be58b577937f328723c3099d45f960"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
