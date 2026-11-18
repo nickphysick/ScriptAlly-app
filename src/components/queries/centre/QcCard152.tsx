@@ -22,7 +22,7 @@ import { STATE_BAND, type QueryState } from "../../../lib/queryState";
 import { STAGE_COLOURS, STAGE_INK, bandBackground, quietBackground, stageOf } from "../../../lib/stageColours";
 import { isQuietCard } from "../../../lib/qc154";
 import {
-  askChips, buildThread, dayLabel, materialsSummary, materialsTab, replyBox, viaKind,
+  askChips, buildThread, dayLabel, materialGroups, replyBox, viaKind,
   type ReplyAct, type ThreadChip, type ThreadItem, type ThreadStepIn,
 } from "../../../lib/qcThread152";
 import "./qcv152card.css";
@@ -43,6 +43,7 @@ import "./sc1card.css";
 /* Query card v158 — the Agent, Materials and Notes tab bodies */
 import "./qcv158.css";
 import { AgentTab158 } from "./QcAgent158";
+import { MaterialsTab158 } from "./QcMaterials158";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -342,26 +343,13 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
       onCopyEmail={p.onCopyEmail} onField={p.onAgentField} onEdit={() => (p.editData ? ed.start() : p.onPencil())} dbl={dbl} />
   );
 
-  /* §2.7 the Materials tab */
-  const mt = materialsTab(d.steps, { first, nowMs, dueMs: d.dueMs, writerTurn: d.state === "materials" });
+  /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). "Edit what went" opens
+     the same step editor the per-block Edit opened, on the latest sent step. */
+  const groups = materialGroups(d.steps, { nowMs });
+  const lastSent = [...groups].reverse().find((g) => !g.pending && g.activityId)?.activityId ?? null;
   const matPane = (
-    <div className="qc152-mtl" data-qc152="materials-pane">
-      <p className="qc152-msum" data-qc152="mat-summary">{materialsSummary(mt.summary, first)}</p>
-      <ol>
-        {mt.blocks.map((b) => (
-          <li key={b.key} className={b.request ? "rq" : undefined} data-qc152="mat-block" data-request={b.request ? "" : undefined}>
-            <span className="qc152-mg"><StatusDot status={b.status} overrideSize={18} decorative /></span>
-            <div>
-              <div className="qc152-mh"><b>{b.title}{b.pkg && !d.free && p.packageName ? <> <span className="qc152-pkc" data-qc152="pkg-chip">{p.packageName}</span></> : null}</b><span>{b.date}</span></div>
-              <div className="qc152-mc">{b.chips.length ? b.chips.map((c, i) => <i key={i}>{c.label}</i>) : <em>Nothing recorded</em>}</div>
-              {b.note ? <p>{b.note}</p> : null}
-              {b.request ? null : <button type="button" className="qc152-mfx" data-qc152="mat-edit" onClick={() => openStep(b.activityId ?? null)}>Edit</button>}
-            </div>
-          </li>
-        ))}
-      </ol>
-      {queryStepId ? <button type="button" className="qc1522-lk qc1522-madd" data-qc1522="add-sent" onClick={() => openStep(queryStepId)}>+ Add something you sent</button> : null}
-    </div>
+    <MaterialsTab158 groups={groups} packageName={!d.free ? p.packageName ?? null : null}
+      onAddSent={queryStepId ? () => openStep(queryStepId) : null} onEditWent={lastSent ? () => openStep(lastSent) : null} />
   );
 
   return (

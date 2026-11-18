@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { QueryStatus } from "../types";
-import { askChips, buildThread, covers, discFill, materialsSummary, materialsTab, replyBox, sideOf, waitTip, type ThreadStepIn } from "./qcThread152";
+import { askChips, buildThread, covers, discFill, materialGroups, replyBox, sideOf, waitTip, type ThreadStepIn } from "./qcThread152";
 
 const DAY = 86_400_000;
 const NOW = Date.UTC(2026, 9, 8, 12);
@@ -114,15 +114,26 @@ describe("the Agent tab (§2.6): page counts compare properly", () => {
   });
 });
 
-describe("the Materials tab (§2.7)", () => {
-  it("each send is a block; an unsent request is a request block until it is sent", () => {
-    const q = st("q", QueryStatus.QUERIED, 60, { chips: [{ label: "Letter", detail: "" }, { label: "10 pages", detail: "" }] });
-    const pr = st("pr", QueryStatus.PARTIAL_REQUESTED, 16);
-    const open = materialsTab([q, pr], { first: "Clara", nowMs: NOW, dueMs: NOW - 8 * DAY, writerTurn: true });
-    expect(open.blocks.map((b) => [b.title, b.request, b.date])).toEqual([["Query sent", false, "9 Aug"], ["Partial to send", true, "8 days late"]]);
-    expect(materialsSummary(open.summary, "Clara")).toBe("2 things sent to Clara · 1 request to send");
-    const done = materialsTab([q, pr, st("ps", QueryStatus.PARTIAL_SENT, 2)], { first: "Clara", nowMs: NOW, dueMs: null, writerTurn: false });
-    expect(done.blocks.some((b) => b.request)).toBe(false);
+describe("the Materials tab, by what it went with (v158 §4; QC158-8/9's source halves)", () => {
+  const q = st("q", QueryStatus.QUERIED, 60, { chips: [{ label: "Letter", detail: "" }, { label: "10 pages", detail: "" }], via: "by email" });
+  const pr = st("pr", QueryStatus.PARTIAL_REQUESTED, 16, { chips: [{ label: "First 50 pages", detail: "" }] });
+  it("a request not yet answered is its own pending group, headed as it will be once sent", () => {
+    const g = materialGroups([q, pr], { nowMs: NOW });
+    expect(g.map((x) => [x.heading, x.pending, x.when])).toEqual([["With the query", false, "9 Aug, by email"], ["With the partial", true, "asked 22 Sep"]]);
+    expect(g[1].items.map((c) => c.label)).toEqual(["First 50 pages"]);
+  });
+  it("once sent, the request and what was sent are one group, dated when it went and when it was asked for", () => {
+    const g = materialGroups([q, pr, st("ps", QueryStatus.PARTIAL_SENT, 2, { chips: [{ label: "First 50 pages", detail: "" }] })], { nowMs: NOW });
+    expect(g.map((x) => [x.heading, x.pending, x.when])).toEqual([["With the query", false, "9 Aug, by email"], ["With the partial", false, "6 Oct, asked 22 Sep"]]);
+  });
+  it("query, partial and full in the order they happened; a resubmission is its own group in the full stage", () => {
+    const steps = [q, pr, st("ps", QueryStatus.PARTIAL_SENT, 14), st("fr", QueryStatus.FULL_REQUESTED, 10), st("fs", QueryStatus.FULL_SENT, 8),
+      st("rr", QueryStatus.REVISE_RESUBMIT, 5), st("rs", QueryStatus.RESUBMITTED, 1)];
+    const g = materialGroups(steps, { nowMs: NOW });
+    expect(g.map((x) => x.heading)).toEqual(["With the query", "With the partial", "With the full", "With the resubmission"]);
+    expect(g.map((x) => x.kind)).toEqual(["query", "partial", "full", "resub"]);
+    expect(g.every((x) => !x.pending)).toBe(true);
+    expect(g[0].pkg).toBe(true);
   });
 });
 

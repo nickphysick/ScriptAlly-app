@@ -217,25 +217,7 @@
 .qc152 .qc152-askc i.no { background: #fff; box-shadow: inset 0 0 0 1px #c96a4f; color: #8a3a28; }
 .qc152 .qc152-agf q { display: block; font: italic 400 15px/1.45 var(--sp-serif); color: #5f5a53; quotes: "“" "”"; }
 
-/* §2.7 the Materials tab */
-.qc152 .qc152-mtl { padding: 12px 18px; }
-.qc152 .qc152-msum { margin: 0 0 12px; font: 400 14.5px/1.4 var(--sp-serif); color: #6b645c; }
-.qc152 .qc152-mtl ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
-.qc152 .qc152-mtl li { position: relative; display: grid; grid-template-columns: 20px 1fr; gap: 12px; padding: 12px 14px; border-radius: 12px; box-shadow: inset 0 0 0 1px #ece6de; }
-.qc152 .qc152-mtl li.rq { box-shadow: none; outline: 1px dashed #e2a08b; outline-offset: -1px; background: #fdf6f2; }
-.qc152 .qc152-mg { padding-top: 1px; }
-.qc152 .qc152-mh { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
-.qc152 .qc152-mh b { font: 400 16px/1.3 var(--sp-serif); }
-.qc152 .qc152-mh > span { font: 400 10.5px var(--sp-mono) !important; letter-spacing: 0.1em; text-transform: uppercase; color: #8f8a82; }
-.qc152 .qc152-mtl li.rq .qc152-mh > span { color: #a2452a; }
-.qc152 .qc152-pkc { display: inline-block; margin-left: 6px; padding: 2px 7px; border-radius: 4px; background: #ece6f3; font: 400 9px/1.5 var(--sp-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #4f4566; vertical-align: 2px; }
-.qc152 .qc152-mc { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-.qc152 .qc152-mc i { font-style: normal; padding: 5px 9px; border-radius: 6px; background: #f5f1ea; font: 400 9.5px/1.4 var(--sp-mono); letter-spacing: 0.1em; text-transform: uppercase; color: #5f5a53; }
-.qc152 .qc152-mtl li.rq .qc152-mc i { background: #fff; box-shadow: inset 0 0 0 1px #f0d6cb; }
-.qc152 .qc152-mc em { font: italic 400 13.5px/1.4 var(--sp-serif); color: #8f8a82; }
-.qc152 .qc152-mtl li p { margin: 8px 0 0; font: italic 400 13.5px/1.4 var(--sp-serif); color: #8f8a82; }
-.qc152 .qc152-mfx { all: unset; cursor: pointer; position: absolute; right: 12px; bottom: 10px; font: 400 13.5px/1.3 var(--sp-serif); color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; opacity: 0; }
-.qc152 .qc152-mtl li:hover .qc152-mfx, .qc152 .qc152-mfx:focus-visible { opacity: 1; }
+/* §2.7 the Materials tab: v158 §4 (qcv158.css) */
 
 .qc152 .qc152-notes { padding: 0; }
 

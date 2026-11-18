@@ -424,42 +424,63 @@ export function askChips(asks: readonly string[], sent: readonly string[]): { ch
 
 /* ── §2.7 the Materials tab ─────────────────────────────────────────────────────────────────────────────────── */
 
-export interface MatBlock { key: string; activityId?: string; status: QueryStatus; title: string; date: string; chips: ThreadChip[]; request: boolean; note: string | null; pkg: boolean }
-const SEND_OF: Partial<Record<string, QueryStatus>> = {
-  [QueryStatus.PARTIAL_REQUESTED]: QueryStatus.PARTIAL_SENT, [QueryStatus.FULL_REQUESTED]: QueryStatus.FULL_SENT, [QueryStatus.REVISE_RESUBMIT]: QueryStatus.RESUBMITTED,
-};
-const SENDS = new Set<string>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED]);
-const REQ_NAME: Record<string, string> = { [QueryStatus.PARTIAL_REQUESTED]: "Partial", [QueryStatus.FULL_REQUESTED]: "Full", [QueryStatus.REVISE_RESUBMIT]: "Revision" };
-export function materialsTab(steps: readonly ThreadStepIn[], c: { first: string; nowMs: number; dueMs: number | null; writerTurn: boolean }): { blocks: MatBlock[]; summary: { sent: number; requests: number } } {
-  const S = [...steps].sort((a, b) => (a.ms ?? Infinity) - (b.ms ?? Infinity));
-  const blocks: MatBlock[] = [];
-  let sent = 0, requests = 0;
-  S.forEach((s, i) => {
-    if (!s.status || s.kind) return;
-    if (SENDS.has(s.status)) {
-      sent += s.chips.length;
-      blocks.push({ key: s.key, activityId: s.activityId, status: s.status, title: stepTitle(s, c.first), date: s.ms != null ? dayLabel(s.ms, c.nowMs) : "No date", chips: s.chips, request: false, note: null, pkg: s.status === QueryStatus.QUERIED });
-      return;
-    }
-    const send = SEND_OF[s.status];
-    if (!send) return;
-    if (S.slice(i + 1).some((x) => x.status === send)) return;
-    requests++;
-    const due = c.writerTurn ? c.dueMs : null;
-    const date = due != null ? (days(due, c.nowMs) < 0 ? `${pl(-days(due, c.nowMs), "day")} late` : `by ${dayLabel(due, c.nowMs)}`)
-      : s.ms != null ? `asked ${dayLabel(s.ms, c.nowMs)}` : "";
-    blocks.push({
-      key: s.key, activityId: s.activityId, status: s.status, title: `${REQ_NAME[s.status]} to send`,
-      date,
-      chips: s.chips, request: true, pkg: false,
-      note: `${c.first} asked${s.ms != null ? ` on ${dayLabel(s.ms, c.nowMs)}` : ""}. It moves here once you mark it sent.`,
-    });
-  });
-  return { blocks, summary: { sent, requests } };
+/**
+ * v158 §4 — THE MATERIALS TAB, BY WHAT EACH THING WENT WITH: one group per stage that has anything (With the query, With
+ * the partial, With the full; a resubmission after R&R is With the resubmission, in the full stage), in the order they
+ * happened. A request not yet answered is its own group, `pending`, with the heading it will have once sent; once the
+ * writer logs it as sent, the request and what was sent are ONE group (the send takes the request's place). The tab
+ * knows what v152's materialsTab knew; only the setting-out changed.
+ */
+export type MatKind = "query" | "partial" | "full" | "resub";
+export interface MatGroup {
+  key: string;
+  kind: MatKind;
+  heading: string;
+  /** the status whose mark the group's disc draws (and whose stage colours it): the send's, or the request's while pending */
+  status: QueryStatus;
+  /** "28 Sep, by email", "21 Oct, asked 19 Oct", "asked 19 Oct" (pending), "No date" */
+  when: string;
+  items: ThreadChip[];
+  pending: boolean;
+  /** the send's step, for "Edit what went"; null while pending */
+  activityId: string | null;
+  /** the query's group shows the package (when not on Free and one is set) */
+  pkg: boolean;
 }
-export function materialsSummary(s: { sent: number; requests: number }, first: string): string {
-  const a = s.sent ? `${pl(s.sent, "thing")} sent to ${first}` : "Nothing sent yet";
-  return s.requests ? `${a} · ${pl(s.requests, "request")} to send` : a;
+const KIND_OF: Partial<Record<string, MatKind>> = {
+  [QueryStatus.QUERIED]: "query",
+  [QueryStatus.PARTIAL_REQUESTED]: "partial", [QueryStatus.PARTIAL_SENT]: "partial",
+  [QueryStatus.FULL_REQUESTED]: "full", [QueryStatus.FULL_SENT]: "full",
+  [QueryStatus.REVISE_RESUBMIT]: "resub", [QueryStatus.RESUBMITTED]: "resub",
+};
+export const MAT_HEADING: Record<MatKind, string> = { query: "With the query", partial: "With the partial", full: "With the full", resub: "With the resubmission" };
+const SENDS = new Set<string>([QueryStatus.QUERIED, QueryStatus.PARTIAL_SENT, QueryStatus.FULL_SENT, QueryStatus.RESUBMITTED]);
+const REQUESTS = new Set<string>([QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED, QueryStatus.REVISE_RESUBMIT]);
+/** "by email", "through QueryManager" read off the step's method words; anything else is not a method */
+const viaWords = (via: string | null | undefined): string | null => (via && /^(by|through) /i.test(via.trim()) ? via.trim() : null);
+export function materialGroups(steps: readonly ThreadStepIn[], c: { nowMs: number }): MatGroup[] {
+  const S = [...steps].sort((a, b) => (a.ms ?? Infinity) - (b.ms ?? Infinity));
+  const out: MatGroup[] = [];
+  for (const s of S) {
+    if (!s.status || s.kind) continue;
+    const kind = KIND_OF[s.status];
+    if (!kind) continue;
+    if (REQUESTS.has(s.status)) {
+      out.push({ key: s.key, kind, heading: MAT_HEADING[kind], status: s.status, when: s.ms != null ? `asked ${dayLabel(s.ms, c.nowMs)}` : "asked",
+        items: s.chips, pending: true, activityId: null, pkg: false });
+      continue;
+    }
+    if (!SENDS.has(s.status)) continue;
+    const at = out.findIndex((g) => g.pending && g.kind === kind);
+    const asked = at >= 0 ? S.find((x) => x.key === out[at].key)?.ms ?? null : null;
+    const day = s.ms != null ? dayLabel(s.ms, c.nowMs) : "No date";
+    const via = viaWords(s.via);
+    const when = asked != null ? `${day}, asked ${dayLabel(asked, c.nowMs)}` : via ? `${day}, ${via}` : day;
+    const g: MatGroup = { key: s.key, kind, heading: MAT_HEADING[kind], status: s.status, when, items: s.chips, pending: false,
+      activityId: s.activityId ?? null, pkg: s.status === QueryStatus.QUERIED };
+    if (at >= 0) out[at] = g; else out.push(g);
+  }
+  return out;
 }
 /** a request block's date words: "8 days late" / "by 15 Oct" */
 export const requestLate = (dueMs: number | null, nowMs: number) => leftWords(dueMs, nowMs);

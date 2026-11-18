@@ -47,3 +47,18 @@
 .qc152 .nx-tick.no { background: #fff; box-shadow: inset 0 0 0 1.5px #b8afa4; color: transparent; }
 .qc152 .nx-sum { margin: 8px 0 0; font: italic 400 14px var(--sp-serif) !important; color: #55504a; }
 .qc152 .nx-quote { margin: 0; padding: 10px 14px; border-radius: 10px; background: #fbf9f5; border-left: 3px solid #d9cfc1; font: italic 400 16px/1.45 var(--sp-serif) !important; color: #1c130f; white-space: pre-wrap; }
+
+/* ── §4 Materials, by what it went with ── */
+.qc152 .nx-rail { position: relative; }
+.qc152 .nx-rail .nx-grp + .nx-grp { margin-top: 16px; }
+.qc152 .nx-grp { display: grid; grid-template-columns: 34px 1fr; gap: 0 12px; }
+.qc152 .nx-disc { grid-row: 1 / 3; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--d); color: #1c130f; }
+.qc152 .nx-grp h4 { margin: 6px 0 8px; }
+.qc152 .nx-items { margin: 0; padding: 0; list-style: none; border-radius: 10px; background: #fbf9f5; box-shadow: inset 0 0 0 1px #efe9df; min-width: 0; }
+.qc152 .nx-items li { display: flex; align-items: center; gap: 10px; min-height: 40px; padding: 5px 12px; font: 400 15.5px var(--sp-serif) !important; color: #1c130f; box-sizing: border-box; }
+.qc152 .nx-items li + li { border-top: 1px solid #efe9df; }
+.qc152 .nx-items li svg { color: #7a7066; flex: none; }
+.qc152 .nx-items li .r { margin-left: auto; font: italic 400 13.5px var(--sp-serif) !important; color: #7a7066; white-space: nowrap; }
+.qc152 .nx-items li.none em { font: italic 400 14px var(--sp-serif) !important; color: #7a7066; }
+.qc152 .nx-grp.pend .nx-items { background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .nx-grp.pend .nx-items li .r { color: #2a3a52; font-style: normal !important; font-weight: 600 !important; }
