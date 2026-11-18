@@ -236,6 +236,13 @@
   .tws-wf .tws-sb:not(.tws-back) { width: 44px; padding: 0; justify-content: center; }
   .tws-wf .tws-sb span, .tws-wf .tws-sb kbd { display: none; }
 }
+/* v57.1 (18 Nov): with "← Back" in the footer (step 2 on), the labelled footer needs 580px (todoV57 M12, measured), so
+   Snooze and Dismiss go to their icons under 600 there; v57's wider tray had left a 544 column at 1512 and Next 24px
+   over the preview (todoV52 L7) */
+@container twscol (max-width: 599.98px) {
+  .tws-wf:has(.tws-back) .tws-sb:not(.tws-back) { width: 44px; padding: 0; justify-content: center; }
+  .tws-wf:has(.tws-back) .tws-sb span, .tws-wf:has(.tws-back) .tws-sb kbd { display: none; }
+}
 @container twscol (max-width: 399.98px) { .tws-wf em.tws-prog { display: none; } }
 .tws-sb {
   position: relative; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; border: 0; border-radius: 22px;
