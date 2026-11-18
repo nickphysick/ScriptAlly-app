@@ -158,6 +158,9 @@ export const Cb15Desk: React.FC<Cb15DeskProps> = (p) => {
   const sortRef = useRef<HTMLDivElement | null>(null);
   const [pop, setPop] = useState<{ kind: "colour" | "more"; id: string; anchor: HTMLElement } | null>(null);
   const [drag, setDrag] = useState<string | null>(null);
+  /* the dragged note, set SYNCHRONOUSLY on dragstart: the state above only fades it (a beat later, as the ref), and a
+     fast drag can reach its first dragover before that state lands */
+  const dragRef = useRef<string | null>(null);
   const [over, setOver] = useState<string | null>(null); // a note id, or "tag:<k>" for a pill / stack
   const closePop = React.useCallback((back: boolean) => { setPop((x) => { if (x && back) x.anchor.focus(); return null; }); }, []);
 
@@ -207,18 +210,18 @@ export const Cb15Desk: React.FC<Cb15DeskProps> = (p) => {
   useEscapeLayer(sortOpen, () => { setSortOpen(false); sortRef.current?.querySelector("button")?.focus(); }, ESC_LEVEL.dialMenu ?? ESC_LEVEL.pageModal);
 
   const byId = (id: string) => p.board.find((n) => n.id === id);
-  const endDrag = () => { setDrag(null); setOver(null); document.body.classList.remove("cb15-dragging"); };
+  const endDrag = () => { dragRef.current = null; setDrag(null); setOver(null); document.body.classList.remove("cb15-dragging"); };
   const dropTarget = (k: string) => ({
     "data-drop": k,
     onDragOver: (e: React.DragEvent) => {
-      const d = drag ? byId(drag) : undefined;
+      const d = dragRef.current ? byId(dragRef.current) : undefined;
       if (!d || (d.tags?.[0] ?? "") === k) return;
       e.preventDefault();
       if (over !== `tag:${k}`) setOver(`tag:${k}`);
     },
     onDragLeave: () => setOver((o) => (o === `tag:${k}` ? null : o)),
     onDrop: (e: React.DragEvent) => {
-      const d = drag ? byId(drag) : undefined;
+      const d = dragRef.current ? byId(dragRef.current) : undefined;
       e.preventDefault();
       endDrag();
       if (d && (d.tags?.[0] ?? "") !== k) p.onStack(d, k);
@@ -238,20 +241,21 @@ export const Cb15Desk: React.FC<Cb15DeskProps> = (p) => {
         onKeyDown={(e) => { if (e.key === "Enter" && e.target === e.currentTarget) { e.preventDefault(); p.onEdit(n); } }}
         onDragStart={(e) => {
           setPop(null);
+          dragRef.current = n.id;
           e.dataTransfer.effectAllowed = "move";
           try { e.dataTransfer.setData("text/plain", n.id); } catch { /* some browsers refuse */ }
           window.setTimeout(() => { setDrag(n.id); document.body.classList.add("cb15-dragging"); }, 0);
         }}
         onDragEnd={endDrag}
         onDragOver={(e) => {
-          const d = drag ? byId(drag) : undefined;
+          const d = dragRef.current ? byId(dragRef.current) : undefined;
           if (!d || d.id === n.id || !!d.pinned !== !!n.pinned || p.view === "piles") return;
           e.preventDefault();
           if (over !== n.id) setOver(n.id);
         }}
         onDragLeave={() => setOver((o) => (o === n.id ? null : o))}
         onDrop={(e) => {
-          const d = drag ? byId(drag) : undefined;
+          const d = dragRef.current ? byId(dragRef.current) : undefined;
           if (!d || d.id === n.id || !!d.pinned !== !!n.pinned || p.view === "piles") return;
           e.preventDefault();
           endDrag();
