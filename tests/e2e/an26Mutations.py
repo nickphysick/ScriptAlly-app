@@ -60,8 +60,8 @@ M = [
      "<span className=\"a26-mk a26-mk--xs\" aria-hidden=\"true\" data-a26=\"key-mark\">",
      "<span className=\"a26-mk a26-mk--xs\" aria-hidden=\"true\" data-a26=\"key-mark\" data-a26-mark=\"example\">"),
     ("L1", "Fix a card to 1400px wide", "src/components/analytics/a26.css",
-     ".a26-page .a26-rc { padding: 8px;",
-     ".a26-page .a26-rc { min-width: 1400px; padding: 8px;"),
+     "0 6px 18px rgba(28, 19, 15, 0.07); min-width: 0; }",
+     "0 6px 18px rgba(28, 19, 15, 0.07); min-width: 0; width: 1400px; }"),
 ]
 
 if __name__ == "__main__":

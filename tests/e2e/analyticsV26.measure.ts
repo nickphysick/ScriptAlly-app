@@ -398,9 +398,12 @@ test("AN26-L1 layout: no horizontal overflow, nothing clipped, every clickable a
         const d = document.documentElement, sc = root.closest('.wpg-scroll');
         const clipped = [...root.querySelectorAll('.a26-rc-in, .a26-pad, .a26-wh > div, .a26-cm, .a26-tl')].filter((e) => e.scrollWidth > e.clientWidth + 1).map((e) => e.className);
         const small = [...root.querySelectorAll('button, a[href]')].filter((e) => !e.closest('footer, .af') && !String(e.className).startsWith('af-')).filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.width < 24 || b.height < 24); }).map((e) => (e.getAttribute('data-a26') || e.className) + ' ' + Math.round(e.getBoundingClientRect().width) + 'x' + Math.round(e.getBoundingClientRect().height));
-        return { doc: d.scrollWidth - d.clientWidth, sc: sc ? sc.scrollWidth - sc.clientWidth : null, clipped, small };`);
+        const col = root.querySelector('[data-a26="flow"]').getBoundingClientRect();
+        const out = [...root.querySelectorAll('.a26-rc')].filter((e) => { const b = e.getBoundingClientRect(); return b.width > 0 && (b.right > col.right + 1 || b.left < col.left - 1); }).length;
+        return { doc: d.scrollWidth - d.clientWidth, sc: sc ? sc.scrollWidth - sc.clientWidth : null, clipped, small, out };`);
       L.check("L1", `${vp.width} ${k} population`, !!r, "page found");
       L.check("L1", `${vp.width} ${k} no overflow`, r?.doc === 0 && (r?.sc ?? 0) <= 0, JSON.stringify({ doc: r?.doc, sc: r?.sc }));
+      L.check("L1", `${vp.width} ${k} every card inside the column`, r?.out === 0, `${r?.out} outside`);
       L.check("L1", `${vp.width} ${k} nothing clipped`, (r?.clipped?.length ?? 1) === 0, JSON.stringify(r?.clipped?.slice(0, 5)));
       /* the page's own parts: AppFooter is shared and out of this pack (its mail link is 22px tall — listed for Nick) */
       L.check("L1", `${vp.width} ${k} targets ≥ 24`, (r?.small?.length ?? 1) === 0, JSON.stringify(r?.small?.slice(0, 5)));
@@ -413,7 +416,7 @@ test("AN26-L1 layout: no horizontal overflow, nothing clipped, every clickable a
   const phone = await page.evaluate(() => ({ doc: document.documentElement.scrollWidth - document.documentElement.clientWidth, v26: [...document.querySelectorAll<HTMLElement>('[data-a26="page"]')].some((e) => e.getBoundingClientRect().height > 0) }));
   console.log(`L1 390: overflow ${phone.doc}px; v26 page mounted: ${phone.v26}`);
   L.check("L1", "390 no document overflow", phone.doc === 0, JSON.stringify(phone));
-  L.done(37);
+  L.done(46);
 });
 
 test("AN26 screenshots for the report", async ({ page }) => {
