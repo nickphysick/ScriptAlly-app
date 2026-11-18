@@ -68,28 +68,29 @@ describe("the materials band replaces the rail's register (D1)", () => {
      materials beside the open package, to drag from, and the Query letters / Synopses tables, to read and edit. Your
      materials is mounted ONCE, inside the builder; none of the retired surfaces is back; and a put-away material keeps
      its way back — the tables list put-away ones last, tagged, and their drawer offers "Bring it back". */
-  it("⚠️ Your materials once, inside the builder — and none of the retired surfaces", () => {
+  /* ⚠️ RETARGETED ONTO PACKAGES v62 (18 Nov): the builder and its steps are gone. Letters, versions and synopses are
+     picked in the open package's own lists (Pk62Open's Options), mounted once per row; none of the retired surfaces
+     is back; and a put-away material keeps its way back — the lists offer the put-away ones on request, and Open
+     opens their drawer, which offers "Bring it back". */
+  it("⚠️ the pieces are picked in the open package's lists — and none of the retired surfaces", () => {
     const d = decls(page);
-    expect(d.match(/<Pk26Builder\b/g) ?? [], "the builder is mounted exactly once").toHaveLength(1);
-    /* v39.3 RETARGET (the law: one materials surface, inside the builder): Your materials' card is retired and the
-       materials are picked in the builder's steps, mounted exactly once */
-    const builder = decls(read("../components/packages/v26/Pk26Builder.tsx"));
-    expect(builder.match(/<Pk393Builder\b/g) ?? [], "the steps are mounted exactly once").toHaveLength(1);
-    expect(builder, "the retired Your materials card is back").not.toContain('data-pk26="lib"');
-    for (const gone of ["MaterialsSheet", "PkgMaterials", "PageRail", "MaterialsBand", "BuilderRail", "PackagesBand", "TrackingBand", "FootnoteBand"]) {
+    expect(d.match(/<Pk62Open\b/g) ?? [], "the open package is mounted exactly once").toHaveLength(1);
+    const open = decls(read("../components/packages/v62/Pk62Open.tsx"));
+    for (const k of ["let", "ver", "syn"]) expect(open, `the ${k} list`).toContain(`<Options k="${k}"`);
+    for (const gone of ["Pk26Builder", "Pk393Builder", "MaterialsSheet", "PkgMaterials", "PageRail", "MaterialsBand", "BuilderRail", "PackagesBand", "TrackingBand", "FootnoteBand"]) {
       expect(d, `${gone} is back on the page`).not.toMatch(new RegExp(`<${gone}\\b`));
     }
   });
 
   it("⚠️ AND A PUT-AWAY MATERIAL STILL HAS A WAY BACK", () => {
-    /* v38: the Query letters / Synopses tables are gone; Your materials (the builder) lists put-away ones on request */
-    /* v39.3 RETARGET (the law survives the move): the letter and synopsis steps list put-away ones on request, and Open
-       opens their drawer — the retired Your materials card was their only way back */
-    const table = decls(read("../components/packages/v26/Pk393Builder.tsx"));
-    expect(table).toContain("model.lettersAll.filter((m) => m.retired)");
-    expect(table).toContain("model.synopsesAll.filter((m) => m.retired)");
-    expect(table).toContain("<small>Put away</small>");
-    expect(table).toContain("onOpenAway={(id) => props.onOpenMaterial(k as \"let\" | \"syn\", id)}");
+    const d = decls(read("../components/packages/v62/usePk62.ts"));
+    expect(d).toContain("lettersAll.filter((m) => m.retired)");
+    expect(d).toContain("synopsesAll.filter((m) => m.retired)");
+    const open = decls(read("../components/packages/v62/Pk62Open.tsx"));
+    expect(open).toContain("<small>Put away</small>");
+    expect(open).toContain('onOpenAway={(id) => onOpenMaterial("let", id)}');
+    expect(open).toContain('onOpenAway={(id) => onOpenMaterial("syn", id)}');
+    expect(decls(page)).toContain('onOpenMaterial={(k, id) => setMat({ m: "mat", kind: k, id })}');
     const drawer = decls(read("../components/packages/v26/Pk26Drawer.tsx"));
     expect(drawer).toMatch(/data-pk26=\{m\.retired \? "restore" : "put-away"\}/);
     expect(drawer).toContain("if (m.retired) await model.bringBack(m)");
@@ -108,10 +109,10 @@ describe("every entry point names its type (D3)", () => {
   /* v26 (25 Oct): Your materials' "+ Write or paste…" and the tables' "+ Add" both name their kind, and the drawer's
      form is keyed on the material it edits (or on the kind it adds), so a second letter is a fresh mount. */
   it("every + Add names its kind, and the drawer's form is keyed on it", () => {
-    /* v39.3 RETARGET: each step's create link names its kind */
-    expect(decls(read("../components/packages/v26/Pk393Builder.tsx"))).toContain("onNew={() => props.onNewMaterial(k)}");
-    /* v38: the Query letters / Synopses tables (and their + Add) are gone; Your materials' + Add is the one route */
-    expect(decls(page)).toContain('setDrawer(k === "ver" ? { m: "newver", parentId: null } : { m: "newmat", kind: k })');
+    /* v62 RETARGET: each list's create link names its kind */
+    const open = decls(read("../components/packages/v62/Pk62Open.tsx"));
+    for (const k of ["let", "ver", "syn"]) expect(open).toContain(`onNew={() => onNewPiece("${k}")}`);
+    expect(decls(page)).toContain('setMat(k === "ver" ? { m: "newver", parentId: null } : { m: "newmat", kind: k })');
     expect(decls(read("../components/packages/v26/Pk26Drawer.tsx"))).toContain("key={view.m === \"mat\" ? view.id : `new-${view.kind}`}");
   });
 });

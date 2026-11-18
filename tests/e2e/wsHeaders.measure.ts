@@ -49,7 +49,7 @@ const BUILT = {
   todo: { route: "/todo", root: "[data-tws='page']" },
   letters: { route: "/materials/letters", root: "[data-ql='page']" },
   /* Submission packages v43 (workspace-headers-v1.1: captured from then on, so H2 covers it) */
-  pk: { route: "/queries/packages", root: "[data-pk41='page']" },
+  pk: { route: "/queries/packages", root: "[data-pk62='page']" },
 } as const;
 /* recon of only some built pages (merged into before.json, the rest kept): WSH_BUILT=pk */
 const BUILT_ONLY = (process.env.WSH_BUILT ?? "").split(",").filter(Boolean);
@@ -522,7 +522,7 @@ const T_PAGES: { key: string; route: string; root: string; ms: string; face?: st
   { key: "cl", route: "/agents", root: ".clv-group.cl27", ms: MS },
   { key: "todo", route: "/todo", root: "[data-tws='page']", ms: MS },
   { key: "letters", route: "/materials/letters", root: "[data-ql='page']", ms: MS },
-  { key: "pk", route: "/queries/packages", root: "[data-pk41='page']", ms: MS },
+  { key: "pk", route: "/queries/packages", root: "[data-pk62='page']", ms: MS },
   { key: "responses", route: "/queries/responses", root: "[data-rsp='page']", ms: MS },
   { key: "analytics", route: "/queries/analytics", root: "[data-a17='page']", ms: MS },
   { key: "discover", route: "/agents/discover", root: "[data-dv1='page']", ms: MS, face: "live" },
