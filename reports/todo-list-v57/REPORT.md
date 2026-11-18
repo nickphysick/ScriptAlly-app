@@ -95,6 +95,13 @@ snoozed, collapsed; plus pinned at 1280 and 1717. M10's Query Centre and Contact
 ## Dev
 
 - Before: `index-sl2zR2So.js` (`dev/smv31-vv6-cp32-lqmf1-cb15` @ b9226fc5e).
-- After: `index-BGsc0WwG.js` from `dev/smv31-vv6-cp32-lqmf1-cb15-td57` (the served line + `todo-list-v57`).
-  Docs-only commits after the build do not change the bundle. The deploy is checked against this hash.
+- After: **`index-DJ8tuHvN.js`**, built and deployed from a clean scratch checkout of the pushed tip of
+  `dev/smv31-vv6-cp32-lqmf1-cb15-td57` @ `dad7fdbce` (the served line + `todo-list-v57` @ 38a2e0427). Dev then served that
+  hash, and the served `assets/AppRoot-DH_Ozk-b.css` contains `clamp(340px,29%,396px)`, `clamp(390px,42cqw,568px)` and
+  `images/todo/doodle-tile.svg`.
+- ⚠️ An earlier draft of this report predicted `index-BGsc0WwG.js` from a build in the worktree. The bundle's hash
+  changes with every commit, because `vite.config.ts` stamps `git rev-parse --short HEAD` into it, so a hash is only
+  meaningful for the commit it was built from. The `src/` and `public/` trees of the two builds were identical
+  (`git ls-files -s` diff empty). This correction is a docs-only commit on `todo-list-v57` and is not merged onto the dev
+  branch, which stays at the commit the served bundle names.
 - Prod untouched.
