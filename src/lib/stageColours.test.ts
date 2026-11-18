@@ -44,6 +44,37 @@ describe("v157 · the stage table (Stage colours v1: offer rose, and an edge)", 
   });
 });
 
+describe("Stage colours v1 · Phase 2 · the slide-out card", () => {
+  const card = readFileSync("src/components/queries/centre/QcCard152.tsx", "utf8");
+  const sheet = readFileSync("src/components/queries/centre/sc1card.css", "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  it("the card publishes its stage's four colours, and its quiet test is the grid card's", () => {
+    expect(card).toMatch(/\["--band" as string\]: sc\.band, \["--tint" as string\]: sc\.tint, \["--edge" as string\]: sc\.edge, \["--mark" as string\]: sc\.mark/);
+    expect(card).toContain("isQuietCard(r, nowMs)");
+    expect(card).toContain(`import "./sc1card.css";`);
+    expect(card.indexOf(`import "./sc1card.css";`)).toBeGreaterThan(card.indexOf(`import "./qcv153thread.css";`));
+  });
+  it("the label: Tint, a 1px ink-at-9% line, 30px, 14px / 600; the mark ink with no disc", () => {
+    expect(sheet).toMatch(/\.qc152-pill\[data-stage\] \{ height: 30px; background: var\(--tint\); box-shadow: inset 0 0 0 1px rgba\(28, 19, 15, 0\.09\); font: 600 14px\/1/);
+    expect(card).toMatch(/<span className="qc152-cap"><StatusDot status=\{r\.status\} overrideSize=\{17\} tone="ink" decorative \/><\/span>/);
+  });
+  it("the seals are navy with paper initials", () => {
+    expect(sheet).toContain(".qc152 .qc152-disc { background: #2a3a52; color: #f4eee5;");
+    expect(sheet).toContain(".qc152 .qc152-av { background: #2a3a52; color: #f4eee5;");
+  });
+  it("only the agent's offer bubble has the sheen, and it is OFFER_SHEEN restated", () => {
+    const m = sheet.match(/\.qc152 \.qc152-m\.them\[data-status="Offer"\]:not\(\.qc1522-draft\) \.qc152-bx \{\s*background:([^;]*);/);
+    expect(m).not.toBeNull();
+    const norm = (x: string) => x.replace(/\s+/g, "").replace(/0\.(\d)/g, ".$1");
+    expect(norm(m![1])).toBe(norm(OFFER_SHEEN));
+    expect(sheet.match(/linear-gradient\(112deg/g)?.length).toBe(1);
+  });
+  it("the To-do desk shows the same card: WsPreview renders QcQueryCard149, which renders QcCard152", () => {
+    expect(readFileSync("src/components/todo/ws/WsPreview.tsx", "utf8")).toMatch(/<QcQueryCard149\b/);
+    expect(readFileSync("src/components/queries/centre/QcQueryCard149.tsx", "utf8")).toMatch(/<QcCard152\b/);
+    expect(readFileSync("src/components/todo/ws/todoWs.css", "utf8")).not.toMatch(/\.qc152-(band|pill|bx|disc|av|fg|fc)\b[^{]*\{[^}]*background/);
+  });
+});
+
 describe("v157 · the card's stylesheet restates the table", () => {
   const v154 = css("qcv154.css");
   it("each stage's --tone equals its band, and no v153 tone name is left on the card", () => {

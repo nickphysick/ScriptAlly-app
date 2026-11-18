@@ -18,6 +18,7 @@ import { QueryStatus } from "../types";
 import { MONTHS_SHORT } from "./dates";
 import { STAGE_RESPONSE_WINDOWS } from "./queryAmbient";
 import { STATUS_FILL, statusKind } from "./qc1512";
+import { STAGE_COLOURS, stageOf } from "./stageColours";
 import { classifyMaterial } from "./agentMaterials";
 import type { QueryState } from "./queryState";
 import { waitWords } from "./qc1522";
@@ -138,18 +139,18 @@ export function viaKind(via: string | null | undefined): "email" | "form" | "pos
  * passed), its own glyph and its quoted note.
  */
 export const MY_PAPER = "#f6f3ee";
-export const AGENT_TINT: Record<string, { fill: string; edge: string }> = {
-  [QueryStatus.PARTIAL_REQUESTED]: { fill: "#f8e7e0", edge: "#efd2c7" },
-  [QueryStatus.FULL_REQUESTED]: { fill: "#e7edf4", edge: "#cfdae7" },
-  [QueryStatus.REVISE_RESUBMIT]: { fill: "#e7edf4", edge: "#cfdae7" },
-  [QueryStatus.OFFER]: { fill: "#e5eddf", edge: "#cddcc1" },
-  [QueryStatus.REJECTED]: { fill: "#f1efec", edge: "#e3dfd9" },
+/** Stage colours v1 — an agent's reply takes the Band of the stage it moved the query to, with that stage's Edge
+ *  (asked for a partial → partial; the full, or R&R → full; an offer → offer, with the sheen in CSS; a pass → closed).
+ *  Every value is read from lib/stageColours; this file holds no stage hex. */
+export const agentTint = (status: QueryStatus | string): { fill: string; edge: string } => {
+  const c = STAGE_COLOURS[stageOf(status)];
+  return { fill: c.band, edge: c.edge };
 };
 /** a holding reply: white, the agent hairline */
 export const HOLDING_TINT = { fill: "#ffffff", edge: "#e3dbd0" };
 export function tintOf(s: Pick<ThreadStepIn, "status" | "kind">): { fill: string; edge: string } | null {
   if (sideOf(s) === "me") return null;
-  return (s.kind === "holding" ? HOLDING_TINT : s.status ? AGENT_TINT[s.status] : null) ?? AGENT_TINT[QueryStatus.REJECTED];
+  return s.kind === "holding" ? HOLDING_TINT : agentTint(s.status ?? QueryStatus.REJECTED);
 }
 /** a pass and your closes are drawn in grey ink (#8a8076); every other glyph in ink */
 export const greyGlyph = (s: Pick<ThreadStepIn, "status" | "kind">): boolean =>
@@ -293,7 +294,8 @@ export type ReplyAct = "offer" | "sent" | "nudge" | "resp" | "close" | "reopen" 
  * never writes (as v152's reply box).
  */
 export type FootIcon =
-  | { k: "stage"; status: QueryStatus; tint: string }
+  /* the disc behind the mark is the card's stage Band, drawn by CSS from the card's own --band (Stage colours v1) */
+  | { k: "stage"; status: QueryStatus }
   | { k: "ring"; p: number }
   | { k: "clock" }
   | { k: "grey"; status: QueryStatus };
@@ -346,19 +348,19 @@ export function replyBox(c: ReplyCtx): ReplyBox {
       const by = c.dueMs != null ? ` · answer by ${dayLabel(c.dueMs, c.nowMs)}` : "";
       const sub = told ? `You told ${told.toldCount ? pl(told.toldCount, "other", "others") : "others"}${told.via ? ` · ${told.via.replace(/^offer deadline/, "deadline")}` : ""}`
         : w.late ? w.sub : `${w.sub.replace(/ · by .*$/, "")}${by}`;
-      return { ...base, icon: { k: "stage", status: QueryStatus.OFFER, tint: AGENT_TINT[QueryStatus.OFFER].fill }, lead: `${f} made an offer`, sub, late: !told && w.late,
+      return { ...base, icon: { k: "stage", status: QueryStatus.OFFER }, lead: `${f} made an offer`, sub, late: !told && w.late,
         button: "Answer the offer", tone: "navy", act: "offer", second: told ? null : { label: "Tell other agents", act: "tell" } };
     }
     case "materials": {
       if (c.status === QueryStatus.REVISE_RESUBMIT) {
         const rr = lastOf(QueryStatus.REVISE_RESUBMIT);
-        return { ...base, icon: { k: "stage", status: QueryStatus.REVISE_RESUBMIT, tint: AGENT_TINT[QueryStatus.REVISE_RESUBMIT].fill }, lead: "Revise and resubmit",
+        return { ...base, icon: { k: "stage", status: QueryStatus.REVISE_RESUBMIT }, lead: "Revise and resubmit",
           sub: rr?.ms != null ? `${f} asked on ${dayLabel(rr.ms, c.nowMs)}` : `${f} asked for a revision`, button: "Mark revision sent", tone: "navy", act: "sent" };
       }
       const full = c.status === QueryStatus.FULL_REQUESTED;
       const st = full ? QueryStatus.FULL_REQUESTED : QueryStatus.PARTIAL_REQUESTED;
       const w = leftWords(c.dueMs, c.nowMs);
-      return { ...base, icon: { k: "stage", status: st, tint: AGENT_TINT[st].fill }, lead: `Send the ${full ? "full" : "partial"}`, sub: w.sub, late: w.late,
+      return { ...base, icon: { k: "stage", status: st }, lead: `Send the ${full ? "full" : "partial"}`, sub: w.sub, late: w.late,
         button: `Mark ${full ? "full" : "partial"} sent`, tone: "navy", act: "sent" };
     }
     case "nudge": {

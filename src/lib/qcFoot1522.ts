@@ -13,7 +13,7 @@
  */
 import { QueryStatus } from "../types";
 import { MONTHS_SHORT } from "./dates";
-import { AGENT_TINT, type FootIcon } from "./qcThread152";
+import { type FootIcon } from "./qcThread152";
 import type { QueryState } from "./queryState";
 
 const DAY = 86_400_000;
@@ -78,7 +78,7 @@ export function footer1522(c: FootCtx): Foot1522 {
     case "offer": {
       if (c.phase === "deciding") {
         const by = c.dueMs != null ? `Answer by ${day(c.dueMs, c.nowMs)}` : "No answer-by date";
-        return { ...none, icon: { k: "stage", status: QueryStatus.OFFER, tint: AGENT_TINT[QueryStatus.OFFER].fill }, lead: "Deciding",
+        return { ...none, icon: { k: "stage", status: QueryStatus.OFFER }, lead: "Deciding",
           sub: `${by} · ${c.toTell ? `${c.toTell} to tell` : "all agents told"}`,
           button: { label: "Accept or decline", tone: "navy", act: "offer" }, link: c.toTell ? { label: "Tell them", act: "tell" } : null };
       }
@@ -90,14 +90,14 @@ export function footer1522(c: FootCtx): Foot1522 {
         sub = n < 0 ? `${pl(-n, "day")} late · ${by}` : n === 0 ? `Due today · ${by}` : `${pl(n, "day")} left · ${by}`;
         late = n < 0;
       }
-      return { ...none, late, icon: { k: "stage", status: QueryStatus.OFFER, tint: AGENT_TINT[QueryStatus.OFFER].fill }, lead: `${f} made an offer`, sub,
+      return { ...none, late, icon: { k: "stage", status: QueryStatus.OFFER }, lead: `${f} made an offer`, sub,
         button: { label: "Answer the offer", tone: "navy", act: "offer" } };
     }
     case "materials": {
       const rr = c.status === QueryStatus.REVISE_RESUBMIT;
       const full = c.status === QueryStatus.FULL_REQUESTED;
       const st = rr ? QueryStatus.REVISE_RESUBMIT : full ? QueryStatus.FULL_REQUESTED : QueryStatus.PARTIAL_REQUESTED;
-      const icon: FootIcon = { k: "stage", status: st, tint: AGENT_TINT[st].fill };
+      const icon: FootIcon = { k: "stage", status: st };
       if (rr) {
         return { ...none, icon, lead: "Revise and resubmit", sub: c.dueMs != null ? `by ${day(c.dueMs, c.nowMs)}` : `${f} hasn’t set a date`,
           button: { label: "Mark resubmitted", tone: "navy", act: "sent" } };
@@ -150,7 +150,7 @@ export function footer1522(c: FootCtx): Foot1522 {
         const on = c.closedMs != null ? ` · ${day(c.closedMs, c.nowMs)}` : "";
         /* one card on the To-do list, however many agents it names */
         const todo = c.toTell ? " · 1 to-do left" : "";
-        return { ...none, icon: { k: "stage", status: QueryStatus.SIGNED, tint: AGENT_TINT[QueryStatus.OFFER].fill }, lead: "You have an agent",
+        return { ...none, icon: { k: "stage", status: QueryStatus.SIGNED }, lead: "You have an agent",
           sub: `Signed with ${c.fullName}${on}${todo}`, button: null };
       }
       const how = c.closedHow === "passed" ? `${f} passed` : c.closedHow === "withdrawn" ? "You withdrew it" : c.closedHow === "declined" ? "You declined" : "No response";
@@ -163,14 +163,17 @@ export function footer1522(c: FootCtx): Foot1522 {
 
 /* ── §2.1 the band ────────────────────────────────────────────────────────────────────────────────────────────── */
 
+/** the Who replied panel's header (QcWhoReplied): a panel, not a query, so not a stage */
 export const BAND_NAVY = "#2a3a52";
-export const BAND_CLOSED = "#f1efec";
-/** every band is navy with white text, except Gone quiet (the stone-to-white gradient) and Closed (`#f1efec`), in ink */
-export function band1522(state: QueryState, phase: OfferPhase | null, quietBg: string): { bg: string; dark: boolean; word: string } {
-  if (phase === "signed") return { bg: BAND_NAVY, dark: true, word: "OFFER ACCEPTED" };
-  if (state === "quiet") return { bg: quietBg, dark: false, word: "GONE QUIET" };
-  if (state === "closed") return { bg: BAND_CLOSED, dark: false, word: "CLOSED" };
+/**
+ * The strip's words, unchanged since v152.2. Its colour is no longer here (Stage colours v1): the strip is the card's
+ * stage Band in ink (lib/stageColours `bandBackground`), or that band fading to white when the card has gone quiet.
+ */
+export function band1522(state: QueryState, phase: OfferPhase | null): { word: string } {
+  if (phase === "signed") return { word: "OFFER ACCEPTED" };
+  if (state === "quiet") return { word: "GONE QUIET" };
+  if (state === "closed") return { word: "CLOSED" };
   const word = state === "offer" ? (phase === "deciding" ? "DECIDING" : "OFFER")
     : state === "materials" ? "MATERIALS REQUESTED" : state === "nudge" ? "NUDGE DUE" : "WITH THE AGENT";
-  return { bg: BAND_NAVY, dark: true, word };
+  return { word };
 }

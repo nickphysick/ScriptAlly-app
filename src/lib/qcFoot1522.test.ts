@@ -7,6 +7,7 @@
 import { describe, expect, it } from "vitest";
 import { QueryStatus } from "../types";
 import { band1522, footer1522, type FootCtx } from "./qcFoot1522";
+import { readFileSync } from "node:fs";
 import { ACTION_LABEL, GROUP_1522, head1522, listGroupOf, savedGroupOf, waitWords } from "./qc1522";
 
 const DAY = 86_400_000;
@@ -62,12 +63,21 @@ describe("v152.2 §3.2 the footer", () => {
     expect([x.lead, x.sub, x.button?.label]).toEqual(["Closed", "George passed · 5 Oct", "Reopen"]);
     expect(f({ state: "closed", status: QueryStatus.WITHDRAWN, closedHow: "declined", closedMs: NOW }).sub).toBe("You declined · 8 Oct");
   });
-  it("§2.1 bands: navy with white text but Gone quiet and Closed", () => {
-    for (const s of ["offer", "materials", "nudge", "agent"] as const) expect(band1522(s, null, "g")).toMatchObject({ bg: "#2a3a52", dark: true });
-    expect(band1522("quiet", null, "g")).toMatchObject({ bg: "g", dark: false });
-    expect(band1522("closed", null, "g")).toMatchObject({ bg: "#f1efec", dark: false });
-    expect(band1522("closed", "signed", "g")).toMatchObject({ bg: "#2a3a52", word: "OFFER ACCEPTED" });
-    expect(band1522("offer", "deciding", "g").word).toBe("DECIDING");
+  it("§2.1 the strip's words are v152.2's; its colour is the stage's (Stage colours v1), never navy", () => {
+    expect(band1522("quiet", null)).toEqual({ word: "GONE QUIET" });
+    expect(band1522("closed", null)).toEqual({ word: "CLOSED" });
+    expect(band1522("closed", "signed")).toEqual({ word: "OFFER ACCEPTED" });
+    expect(band1522("offer", "deciding").word).toBe("DECIDING");
+    expect(band1522("materials", null).word).toBe("MATERIALS REQUESTED");
+    const card = readFileSync("src/components/queries/centre/QcCard152.tsx", "utf8");
+    expect(card).toContain("const bandBg = quiet ? quietBackground(stage) : bandBackground(stage);");
+    expect(card).toContain("style={{ background: bandBg, color: STAGE_INK }}");
+    expect(card).not.toMatch(/BAND_NAVY|STATE_HEAD/);
+  });
+  it("the footer icon carries no colour of its own: the disc is the card's --fdisc", () => {
+    const foot = readFileSync("src/lib/qcFoot1522.ts", "utf8") + readFileSync("src/lib/qcThread152.ts", "utf8");
+    expect(foot).not.toMatch(/tint: AGENT_TINT|AGENT_TINT/);
+    expect(readFileSync("src/components/queries/centre/QcCard152.tsx", "utf8")).not.toContain("icon.tint");
   });
 });
 

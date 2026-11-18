@@ -18,8 +18,9 @@ import { createPortal } from "react-dom";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { STAGE_NAME, type QcRow } from "../../../lib/qcSummary";
-import { STATE_BAND, STATE_HEAD, QUIET_BAND, type QueryState } from "../../../lib/queryState";
-import { STATUS_FILL, statusKind } from "../../../lib/qc1512";
+import { STATE_BAND, type QueryState } from "../../../lib/queryState";
+import { STAGE_COLOURS, STAGE_INK, bandBackground, quietBackground, stageOf } from "../../../lib/stageColours";
+import { isQuietCard } from "../../../lib/qc154";
 import {
   askChips, buildThread, dayLabel, dayPill, materialsSummary, materialsTab, replyBox, viaKind,
   type ReplyAct, type ThreadChip, type ThreadItem, type ThreadStepIn,
@@ -37,6 +38,8 @@ import {
   type CardEditData, type CardEdits,
 } from "./QcCardEdit152";
 import "./qcv152inplace.css";
+/* Stage colours v1 — last, so the stage colours sit over every earlier layer of the card */
+import "./sc1card.css";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -170,11 +173,16 @@ export const FOLD_KEEP = 3;
 export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const { row: r, nowMs, d } = p;
   const first = p.first || "the agent";
-  /* v152.2 §2.1 — every band is navy with white text, except Gone quiet and Closed */
-  const bnd = band1522(d.state, d.foot?.phase ?? null, QUIET_BAND);
-  const head = { fg: bnd.dark ? "#ffffff" : STATE_HEAD[d.state].fg === "#ffffff" ? "#1c130f" : STATE_HEAD[d.state].fg };
-  const bandBg = bnd.bg;
-  const dark = bnd.dark;
+  /* Stage colours v1 — the strip is the card's stage Band in ink (the sheen on an offer); gone quiet (the grid card's
+     own test, lib/qc154 `isQuietCard`) fades that band to white. Its words are v152.2's. The card publishes its stage's
+     four colours as --band / --tint / --edge / --mark for the pill, the footer disc and the draft outline. */
+  const bnd = band1522(d.state, d.foot?.phase ?? null);
+  const stage = stageOf(r.status);
+  const quiet = stage !== "offer" && isQuietCard(r, nowMs);
+  const bandBg = quiet ? quietBackground(stage) : bandBackground(stage);
+  const sc = STAGE_COLOURS[stage];
+  const stageVars = { ["--band" as string]: sc.band, ["--tint" as string]: sc.tint, ["--edge" as string]: sc.edge, ["--mark" as string]: sc.mark,
+    ["--fdisc" as string]: quiet ? `linear-gradient(90deg, ${sc.band}, #fff)` : sc.band } as React.CSSProperties;
   const jOpen = !!p.composer || !!p.editingId;
   const tip = useTip();
   const view = p.view ?? "read";
@@ -242,9 +250,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     if (!m || m.t !== "msg") return null;
     const prevMs = [...d.steps].filter((x) => x.ms != null).map((x) => x.ms!).sort((a, b) => a - b).pop() ?? null;
     const gap = prevMs != null && p.draft.ms != null ? Math.max(0, Math.round((new Date(p.draft.ms).setHours(0, 0, 0, 0) - new Date(prevMs).setHours(0, 0, 0, 0)) / 86_400_000)) : null;
-    const col = m.side === "me" ? "#b9ad9e"
-      : m.status === QueryStatus.PARTIAL_REQUESTED ? "#e3b8a8" : m.status === QueryStatus.FULL_REQUESTED || m.status === QueryStatus.REVISE_RESUBMIT ? "#a9bdd3"
-      : m.status === QueryStatus.OFFER ? "#a9c094" : "#b9ad9e";
+    /* a draft keeps its dashed outline: the writer's in v152.2's stone, the agent's in the Mark of the stage it moves to */
+    const col = m.side === "me" || !m.status ? "#b9ad9e" : STAGE_COLOURS[stageOf(m.status)].mark;
     return <>
       {gap != null ? <div className={`qc1522-lt ${m.side}`} data-qc1522="draft-wait">{waitWords(gap)}</div> : null}
       <Bubble side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated={m.dated} tint={m.tint} grey={m.grey} initials={r.initials}
@@ -384,14 +391,15 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   return (
     <PopCtx.Provider value={pop}>
     <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view}
-      data-lean={view === "read" && !jOpen && !ed.on ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}>
+      data-lean={view === "read" && !jOpen && !ed.on ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
+      data-stage={stage} data-quiet={quiet ? "" : undefined} style={stageVars}>
       <div ref={inRef} className="qc152-in">
         {ed.on ? (
         <div className="qc152-band is-ed" data-qc152="band" data-edit="">
           <EditStrip n={ed.keys.length} onStop={() => ed.ask()} />
         </div>
         ) : (
-        <div className={`qc152-band${dark ? " dk" : ""}`} data-qc152="band" style={{ background: bandBg, color: head.fg }}>
+        <div className="qc152-band" data-qc152="band" data-stage={stage} data-quiet={quiet ? "" : undefined} style={{ background: bandBg, color: STAGE_INK }}>
           {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={p.backTo.onBack}>← {p.backTo.label}</button> : null}
           <span data-qc152="band-word">{d.foot ? bnd.word : r.status === QueryStatus.OFFER ? "OFFER" : STATE_BAND[d.state]}</span>
           {d.state !== "closed" && r.dayN != null ? <span className="qc152-day" data-qc152="day">Day {r.dayN}</span> : <span className="qc152-day" />}
@@ -409,7 +417,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           <div className="qc152-who">{p.editData ? (
             <Ed k="agent" layer={ed} changed={ed.keys.includes("agent")} label="The agent this query is to"><span className="qc152-nm qcv-open-nm" data-qc149c="name">{edAgent?.name ?? r.agentName}</span></Ed>
           ) : <div className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div>}<div className="qc152-ag">{((edAgent ? edAgent.agency : r.agency) || "").toUpperCase()}</div></div>
-          <span className="qc152-pill" data-qc152="pill"><span className="qc152-cap" style={{ background: STATUS_FILL[statusKind(r.status)] }}><StatusDot status={r.status} overrideSize={17} decorative /></span><span>{STAGE_NAME[r.status]}</span></span>
+          <span className="qc152-pill" data-qc152="pill" data-stage={stage}><span className="qc152-cap"><StatusDot status={r.status} overrideSize={17} tone="ink" decorative /></span><span>{STAGE_NAME[r.status]}</span></span>
         </div>
         {view !== "read" ? p.editBody : <>
         {desk.bookRow ? (
@@ -443,7 +451,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               <div className="qc152-rf" data-qc152="reply-field">
                 {ft.icon.k === "clock" ? <span className="qc152-fc" data-qc152="foot-icon" aria-hidden="true">{CLOCK}</span>
                   : ft.icon.k === "ring" ? <span className="qc152-fr" data-qc152="foot-icon" style={{ ["--p" as string]: String(ft.icon.p) }} aria-hidden="true" />
-                  : <span className={`qc152-fg${ft.icon.k === "grey" ? " grey" : ""}`} data-qc152="foot-icon" style={ft.icon.k === "stage" ? { background: ft.icon.tint } : undefined} aria-hidden="true">{StepGlyph({ status: ft.icon.status, kind: null })}</span>}
+                  : <span className={`qc152-fg${ft.icon.k === "grey" ? " grey" : ""}`} data-qc152="foot-icon" aria-hidden="true">{StepGlyph({ status: ft.icon.status, kind: null })}</span>}
                 <div className="qc152-rft"><b data-qc152="reply-lead">{ft.lead}</b><span data-qc152="reply-sub">{ft.sub}</span></div>
               </div>
               {ft.button ? <button type="button" className={`qc152-rbtn ${ft.button.tone === "navy" ? "nv" : "gh"}`} data-qc152="reply-btn" data-tone={ft.button.tone} data-act={ft.button.act} onClick={() => p.onFoot?.(ft.button!.act)}>{ft.button.label}{ft.button.tone === "navy" ? ARW : null}</button> : null}
@@ -456,7 +464,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           <div className="qc152-rf" data-qc152="reply-field">
             {box.icon.k === "ring" ? <span className="qc152-fr" data-qc152="foot-icon" style={{ ["--p" as string]: String(box.icon.p) }} aria-hidden="true" />
               : box.icon.k === "clock" ? <span className="qc152-fc" data-qc152="foot-icon" aria-hidden="true">{CLOCK}</span>
-              : <span className={`qc152-fg${box.icon.k === "grey" ? " grey" : ""}`} data-qc152="foot-icon" style={box.icon.k === "stage" ? { background: box.icon.tint } : undefined} aria-hidden="true">{StepGlyph({ status: box.icon.status, kind: null })}</span>}
+              : <span className={`qc152-fg${box.icon.k === "grey" ? " grey" : ""}`} data-qc152="foot-icon" aria-hidden="true">{StepGlyph({ status: box.icon.status, kind: null })}</span>}
             <div className="qc152-rft"><b data-qc152="reply-lead">{box.lead}</b><span data-qc152="reply-sub">{box.sub}</span></div>
           </div>
           {box.second ? <button type="button" className="qc152-rbtn gh sm" data-qc152="reply-second" onClick={() => p.onReply(box.second!.act)}>{box.second.label}</button> : null}

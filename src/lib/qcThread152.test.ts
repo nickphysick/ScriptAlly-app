@@ -36,10 +36,11 @@ describe("the thread (v152 §2.3)", () => {
     expect(w.filter((x) => x.t === "wait").map((x) => x.t === "wait" ? [x.label, x.side] : null)).toEqual([["1 day later", "me"]]);
     expect(t.find((x) => x.t === "msg" && x.key === "pr")).toMatchObject({ date: "Not dated", dated: false, stamp: null, dayMs: null });
   });
-  it("v152.1 §2.2 yours paper (no tint), theirs tinted by the reply; a pass and your closes grey", () => {
+  it("v152.1 §2.2 yours paper (no tint), theirs the Band of the stage the reply moved it to (Stage colours v1); a pass and your closes grey", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 90), st("fr", QueryStatus.FULL_REQUESTED, 60), st("rr", QueryStatus.REVISE_RESUBMIT, 40), st("x", QueryStatus.REJECTED, 20)], { ...ctx, state: "closed", replyMs: null });
     const m = t.filter((x) => x.t === "msg") as Extract<(typeof t)[number], { t: "msg" }>[];
-    expect(m.map((x) => x.tint?.fill ?? null)).toEqual([null, "#e7edf4", "#e7edf4", "#f1efec"]);
+    expect(m.map((x) => x.tint?.fill ?? null)).toEqual([null, "#b7c9de", "#b7c9de", "#eceae6"]);
+    expect(m.map((x) => x.tint?.edge ?? null)).toEqual([null, "#9db4cf", "#9db4cf", "#dedbd5"]);
     expect(m.map((x) => x.grey)).toEqual([false, false, false, true]);
     /* v53 (D9): the thread reads as messages */
     expect(m.map((x) => x.title)).toEqual([`You sent ${ctx.first} your query`, `${ctx.first.charAt(0).toUpperCase()}${ctx.first.slice(1)} asked for your full manuscript`,
@@ -74,11 +75,13 @@ describe("the tips on a wait (§2.4)", () => {
 
 describe("v152.1 §3 the footer: where it stands, one bar per state", () => {
   const base = { first: "Priya", nowMs: NOW, replyMs: null as number | null, closedMs: null as number | null, dueMs: null as number | null };
-  it("materials, R&R and the offer: the stage glyph on its tint, a navy action", () => {
-    expect(replyBox({ ...base, state: "materials", status: QueryStatus.FULL_REQUESTED, dueMs: NOW + 7 * DAY })).toMatchObject({ icon: { k: "stage", tint: "#e7edf4" }, lead: "Send the full", sub: "7 days left · by 15 Oct", button: "Mark full sent", tone: "navy" });
+  it("materials, R&R and the offer: the stage glyph (its disc is the card's Band, Stage colours v1), a navy action", () => {
+    /* the icon carries no colour of its own: the card's --fdisc draws the disc */
+    expect(Object.keys(replyBox({ ...base, state: "offer", status: QueryStatus.OFFER, dueMs: NOW + DAY }).icon)).toEqual(["k", "status"]);
+    expect(replyBox({ ...base, state: "materials", status: QueryStatus.FULL_REQUESTED, dueMs: NOW + 7 * DAY })).toMatchObject({ icon: { k: "stage", status: QueryStatus.FULL_REQUESTED }, lead: "Send the full", sub: "7 days left · by 15 Oct", button: "Mark full sent", tone: "navy" });
     expect(replyBox({ ...base, state: "materials", status: QueryStatus.PARTIAL_REQUESTED, dueMs: NOW - 8 * DAY })).toMatchObject({ sub: "8 days late", late: true, button: "Mark partial sent" });
     expect(replyBox({ ...base, first: "Jonathan", state: "materials", status: QueryStatus.REVISE_RESUBMIT, steps: [st("rr", QueryStatus.REVISE_RESUBMIT, 7)] })).toMatchObject({ lead: "Revise and resubmit", sub: "Jonathan asked on 1 Oct", button: "Mark revision sent" });
-    expect(replyBox({ ...base, first: "Tom", state: "offer", status: QueryStatus.OFFER, dueMs: NOW + DAY })).toMatchObject({ icon: { k: "stage", tint: "#e5eddf" }, lead: "Tom made an offer", sub: "1 day left · answer by 9 Oct", button: "Answer the offer", second: { label: "Tell other agents", act: "tell" } });
+    expect(replyBox({ ...base, first: "Tom", state: "offer", status: QueryStatus.OFFER, dueMs: NOW + DAY })).toMatchObject({ icon: { k: "stage", status: QueryStatus.OFFER }, lead: "Tom made an offer", sub: "1 day left · answer by 9 Oct", button: "Answer the offer", second: { label: "Tell other agents", act: "tell" } });
     const told = replyBox({ ...base, first: "Tom", state: "offer", status: QueryStatus.OFFER, dueMs: NOW + DAY, steps: [st("t", null, 1, { kind: "told", toldCount: 6, via: "offer deadline 16 Oct" })] });
     expect(told).toMatchObject({ sub: "You told 6 others · deadline 16 Oct", second: null });
   });
