@@ -18,8 +18,11 @@
   margin: 0 0 8px; padding: 12px 14px; border: 1px solid #ece2d8; border-radius: 12px; background: var(--t);
   box-shadow: 0 1px 2px rgba(28, 19, 15, 0.05); text-align: left; cursor: pointer; color: var(--d2-ink);
 }
-.d58.d2 .d2-feed .df1-crow[data-kind="request"] { --t: #e2e7ef; }
-.d58.d2 .d2-feed .df1-crow[data-kind="offer"] { --t: #f6ecd6; }
+/* Stage colours v1 — an agent's move tints its row with the stage it moved the query to (lib/stageColours Tint):
+   a request partial, or full for the full and R&R; an offer rose */
+.d58.d2 .d2-feed .df1-crow[data-kind="request"] { --t: #f3f6f9; }
+.d58.d2 .d2-feed .df1-crow[data-kind="request"]:is([data-status="Full Requested"], [data-status="Revise & Resubmit"]) { --t: #dfe7f0; }
+.d58.d2 .d2-feed .df1-crow[data-kind="offer"] { --t: #f8e8e5; }
 .d58.d2 .d2-feed .df1-crow:hover { border-color: #d9c8ba; }
 .d58.d2 .d2-feed .df1-crow:focus-visible, .d2-feed .df1-fold:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
 .d58.d2 .d2-feed .df1-cg { display: grid; place-items: center; }

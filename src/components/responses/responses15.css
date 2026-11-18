@@ -126,9 +126,14 @@
   position: absolute; right: 8px; bottom: 8px; width: 32px; height: 32px; border-radius: 50%; background: var(--r15-navy); color: var(--r15-cream);
   display: grid; place-items: center; box-shadow: 0 6px 14px -6px rgba(28, 19, 15, 0.45); opacity: 0; transform: translateY(4px); transition: opacity 0.18s, transform 0.18s;
 }
-/* the stage tones (ref `C`): rose for a request or revision, grey for a closed answer */
-.rsp15 [data-tone="p"] { --st: #ecd6d2; --tk: #5f433d; --dp: #dfbcb3; }
-.rsp15 [data-tone="x"] { --st: #e6e4df; --tk: #55504a; --dp: #cfcbc3; }
+/* Stage colours v1 — the stage tones (lib/stageColours, restated and asserted in stageColours.test.ts): --st the
+   label's Tint, --sb the bubble's Band, --dp the quote mark's Edge; words and marks in ink */
+.rsp15 [data-tone] { --tk: #1c130f; }
+.rsp15 [data-tone="queried"] { --st: #f8f4ed; --sb: #efe6d6; --dp: #e0d2bb; }
+.rsp15 [data-tone="partial"] { --st: #f3f6f9; --sb: #e4ebf2; --dp: #cbd7e4; }
+.rsp15 [data-tone="full"] { --st: #dfe7f0; --sb: #b7c9de; --dp: #9db4cf; }
+.rsp15 [data-tone="offer"] { --st: #f8e8e5; --sb: #efcdc9; --dp: #dfb1ac; }
+.rsp15 [data-tone="closed"] { --st: #f6f5f3; --sb: #eceae6; --dp: #dedbd5; }
 .rsp15 .rsp15-pl {
   margin-left: auto; display: inline-flex; align-items: center; gap: 7px; height: 30px; padding: 0 12px 0 9px; border-radius: 999px;
   background: var(--st); color: var(--tk); font: 600 14px/1 var(--r15-serif) !important; white-space: nowrap;
@@ -347,7 +352,7 @@
 .rsp15 .rsp15-ex > em { position: absolute; right: 14px; top: 10px; font: italic 400 13px/1 var(--r15-serif) !important; color: #756b61; }
 .rsp15 .rsp15-exc.qc151 { padding-top: 0; width: 336px; max-width: 100%; pointer-events: none; }
 .rsp15 .rsp15-bub {
-  position: relative; display: block; max-width: 280px; padding: 14px 16px; border-radius: 16px 16px 16px 4px; background: var(--st); color: var(--r15-ink);
+  position: relative; display: block; max-width: 280px; padding: 14px 16px; border-radius: 16px 16px 16px 4px; background: var(--sb); color: var(--r15-ink);
   font: 400 15px/1.45 var(--r15-serif) !important;
 }
 .rsp15 .rsp15-bub .rsp15-g { float: left; margin-right: 8px; }

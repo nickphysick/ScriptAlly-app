@@ -16,6 +16,7 @@
  * slice are the slice, never a second bucketing that could disagree with the ring.
  * ⚠️ THE AGENT LIST IS `agentQueryStates`, the Agents-on-file ring's own derivation.
  */
+import { STAGE_COLOURS } from "./stageColours";
 import { QueryStatus, type Agent, type Query } from "../types";
 import { agentPrimary, agentSecondary } from "./agentDisplay";
 import type { ClosedBucketKey, ClosedTile } from "./dashClosed";
@@ -39,9 +40,10 @@ const GROUP_OF: Partial<Record<QueryStatus, WeekGroupKey>> = {
   [QueryStatus.OFFER]: "full",
 };
 export const WEEK_GROUPS: readonly { key: WeekGroupKey; label: string; color: string }[] = [
-  { key: "queried", label: "Queried", color: "#2a3a52" },
-  { key: "partial", label: "Partial out", color: "#7f93ab" },
-  { key: "full", label: "Full out", color: "#c7d1dc" },
+  /* Stage colours v1: each group its stage's Band */
+  { key: "queried", label: "Queried", color: STAGE_COLOURS.queried.band },
+  { key: "partial", label: "Partial out", color: STAGE_COLOURS.partial.band },
+  { key: "full", label: "Full out", color: STAGE_COLOURS.full.band },
 ];
 /** the not-dated row's swatch: stone, so it never reads as a fourth stage */
 export const UNDATED_COLOR = "#d9d3ca";

@@ -8,6 +8,7 @@
  * week's breakdown is `weekMix` folded by `weekCallout` (v116's three groups plus "Stage not dated"), and the band's
  * "weeks querying" is whole weeks since the first send. This module only arranges them for the card.
  */
+import { STAGE_COLOURS } from "./stageColours";
 import type { Query } from "../types";
 import { aggregateLedger, dailyLedger, sentAt, type LedgerPoint } from "./oneScreen";
 import { indexActivities, weekMix, type ActivityIndex } from "./dashWeekMix";
@@ -95,9 +96,10 @@ export function dateLabels(weeks: readonly { label: string }[]): { i: number; te
 export interface BreakdownRow { key: WeekGroupKey | "undated"; label: string; color: string; n: number }
 export interface Breakdown { total: number; change: string; rows: BreakdownRow[] }
 
-/** The card's colours (the brief's), keyed to `weekCallout`'s groups. */
+/** The card's colours, keyed to `weekCallout`'s groups: each stage its Band (Stage colours v1, lib/stageColours);
+ *  the not-dated row keeps its stone so it never reads as a fourth stage. */
 export const BREAKDOWN_COLOR: Record<BreakdownRow["key"], string> = {
-  queried: "#2d3a50", partial: "#8592a8", full: "#c9d1dd", undated: "#dcd6cc",
+  queried: STAGE_COLOURS.queried.band, partial: STAGE_COLOURS.partial.band, full: STAGE_COLOURS.full.band, undated: "#dcd6cc",
 };
 
 export const changeText = (d: number): string => (d > 0 ? `+${d} on last week` : d < 0 ? `−${-d} on last week` : "no change");

@@ -76,6 +76,38 @@ describe("Stage colours v1 · Phase 2 · the slide-out card", () => {
   });
 });
 
+describe("Stage colours v1 · Phase 4 · Dashboard and Responses", () => {
+  it("SC1-15 (source) the Dashboard's week breakdown is the stage Bands; navy is not a stage", async () => {
+    const { BREAKDOWN_COLOR } = await import("./dash2");
+    const { WEEK_GROUPS } = await import("./dashHover");
+    expect(BREAKDOWN_COLOR).toMatchObject({ queried: "#efe6d6", partial: "#e4ebf2", full: "#b7c9de" });
+    expect(WEEK_GROUPS.map((g) => g.color)).toEqual(["#efe6d6", "#e4ebf2", "#b7c9de"]);
+  });
+  it("SC1-15 (source) the Dashboard feed tints an agent's move with its stage's Tint, not the old blue-grey or sand", () => {
+    for (const f of ["src/components/dashboard/v2/dash2Feed.css", "src/components/dashboard/f1/df1.css"]) {
+      const c = readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+      expect([f, c.match(/\[data-kind="request"\] \{ --t: (#[0-9a-f]{6}); \}/)?.[1]]).toEqual([f, STAGE_COLOURS.partial.tint]);
+      expect([f, c.match(/\[data-kind="request"\]:is\([^)]*"Revise & Resubmit"\]\) \{ --t: (#[0-9a-f]{6}); \}/)?.[1]]).toEqual([f, STAGE_COLOURS.full.tint]);
+      expect([f, c.match(/\[data-kind="offer"\] \{ --t: (#[0-9a-f]{6}); \}/)?.[1]]).toEqual([f, STAGE_COLOURS.offer.tint]);
+      expect(c).not.toMatch(/#e2e7ef|#f6ecd6/);
+    }
+  });
+  it("SC1-14 (source) Responses: each tone restates the table; R&R is full; the strip is the stage, never whose move", async () => {
+    const r15 = readFileSync("src/components/responses/responses15.css", "utf8");
+    const r5 = readFileSync("src/components/responses/responses5.css", "utf8");
+    for (const [stage, c] of Object.entries(STAGE_COLOURS)) {
+      expect([stage, r15.match(new RegExp(`\\[data-tone="${stage}"\\] \\{ --st: (#[0-9a-f]{6}); --sb: (#[0-9a-f]{6}); --dp: (#[0-9a-f]{6}); \\}`))?.slice(1)]).toEqual([stage, [c.tint, c.band, c.edge]]);
+      const strip = r5.match(new RegExp(`\\.rsp5-dst\\[data-tone="${stage}"\\] \\{([^}]*)\\}`))?.[1] ?? "";
+      expect([stage, strip.match(/#[0-9a-f]{6}/)?.[0]]).toEqual([stage, c.band]);
+    }
+    expect(r5).not.toMatch(/rsp5-dst\[data-tone="(you|ag|of|cl)"\]/);
+    expect(r15).not.toMatch(/\[data-tone="[px]"\]/);
+    const { stripTone } = await import("../components/responses/RspPanel");
+    expect(stripTone({ group: "more", row: { status: QueryStatus.REVISE_RESUBMIT } } as never)).toBe("full");
+    expect(stripTone({ group: "passed", row: { status: QueryStatus.REJECTED } } as never)).toBe("closed");
+  });
+});
+
 describe("v157 · the card's stylesheet restates the table", () => {
   const v154 = css("qcv154.css");
   it("each stage's --tone equals its band, and no v153 tone name is left on the card", () => {

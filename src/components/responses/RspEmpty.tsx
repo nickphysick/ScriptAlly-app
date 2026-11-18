@@ -113,7 +113,7 @@ export const RspEmpty: React.FC<{
         </div>
         <div className="rsp15-ft" data-rsp15="feature" data-k="notes">
           <div className="rsp15-ex" aria-hidden="true" inert><em>Example</em>
-            <span className="rsp15-bub" data-tone="x"><span className="rsp15-g"><StatusDot status={QueryStatus.REJECTED} overrideSize={18} decorative /></span><b>Passed</b><q>{EXAMPLE_NOTE}</q><time>{respDate(nowMs - 3 * DAY, nowMs)}</time></span>
+            <span className="rsp15-bub" data-tone="closed"><span className="rsp15-g"><StatusDot status={QueryStatus.REJECTED} overrideSize={18} decorative /></span><b>Passed</b><q>{EXAMPLE_NOTE}</q><time>{respDate(nowMs - 3 * DAY, nowMs)}</time></span>
           </div>
           <h3 className="rsp15-fth">Keep your notes</h3>
           <p>Anything an agent says about your book is kept with their reply, so you can read them all together.</p>

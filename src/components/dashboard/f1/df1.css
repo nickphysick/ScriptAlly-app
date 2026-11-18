@@ -307,8 +307,10 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
 .d58 .df1-figs b { display: block; margin-top: 1px; font-family: var(--d58-type) !important; font-weight: 400; font-size: 19px; line-height: 1.2; }
 
 .df1-entry { --t: #fdfaf5; }
-.df1-entry[data-kind="request"] { --t: #e2e7ef; }
-.df1-entry[data-kind="offer"] { --t: #f6ecd6; }
+/* Stage colours v1 — the stage's Tint, as the collapsed row's (v2/dash2Feed.css) */
+.df1-entry[data-kind="request"] { --t: #f3f6f9; }
+.df1-entry[data-kind="request"]:is([data-status="Full Requested"], [data-status="Revise & Resubmit"]) { --t: #dfe7f0; }
+.df1-entry[data-kind="offer"] { --t: #f8e8e5; }
 .df1-journey { margin-top: 12px; padding: 14px 14px 10px; border-radius: 10px; background: var(--t); }
 .df1-trk { display: flex; margin: 0; padding: 0; list-style: none; }
 .df1-trk > li { position: relative; flex: 1 1 0; min-width: 0; }

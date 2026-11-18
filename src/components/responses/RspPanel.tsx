@@ -13,6 +13,7 @@
  * ⚠️ EVERY LINE IS A RECORDED FACT: a date nothing records is a dash, never a guess; "as their guidelines say" appears
  *    only where the agent's own record says no reply means no.
  */
+import { stageOf, type Stage } from "../../lib/stageColours";
 import React, { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Agent } from "../../types";
 import { QueryStatus } from "../../types";
@@ -31,8 +32,8 @@ import "./responses5.css";
 type Item = RespItem<QcRow>;
 
 /** the status strip's colour, by the answer (the reference's `col`) */
-export const stripTone = (i: Item): "of" | "you" | "ag" | "cl" =>
-  i.group !== "more" ? "cl" : i.state === "offer" ? "of" : i.yourMove ? "you" : "ag";
+/** Stage colours v1 — the strip is the answer's stage (a pass is `closed`), never whose move it is */
+export const stripTone = (i: Item): Stage => (i.group !== "more" ? "closed" : stageOf(i.row.status));
 
 /** the footer's primary and the journey it runs: a request's own card action, else Edit the response */
 export function panelAct(i: Item): { label: string; mode: DrawerMode } {

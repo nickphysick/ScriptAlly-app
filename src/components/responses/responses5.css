@@ -58,10 +58,17 @@
 .rsp5-layer .rsp5-dnav button:disabled { opacity: 0.35; cursor: default; }
 .rsp5-layer .rsp5-dx { border: 0; background: none; color: var(--r5-cr66); font-size: 22px; line-height: 1; cursor: pointer; padding: 2px 4px; }
 .rsp5-layer .rsp5-dst { flex: none; display: flex; align-items: center; gap: 10px; padding: 13px 20px; font: 400 16px var(--r5-machine) !important; }
-.rsp5-layer .rsp5-dst[data-tone="you"] { background: var(--r5-you); }
-.rsp5-layer .rsp5-dst[data-tone="ag"] { background: var(--r5-ag); }
-.rsp5-layer .rsp5-dst[data-tone="of"] { background: var(--r5-of); }
-.rsp5-layer .rsp5-dst[data-tone="cl"] { background: var(--r5-cl); }
+/* Stage colours v1 — the strip is the stage's Band in ink (lib/stageColours); an offer carries the sheen */
+.rsp5-layer .rsp5-dst[data-tone] { color: #1c130f; }
+.rsp5-layer .rsp5-dst[data-tone="queried"] { background: #efe6d6; }
+.rsp5-layer .rsp5-dst[data-tone="partial"] { background: #e4ebf2; }
+.rsp5-layer .rsp5-dst[data-tone="full"] { background: #b7c9de; }
+.rsp5-layer .rsp5-dst[data-tone="offer"] {
+  background:
+    linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
+    #efcdc9;
+}
+.rsp5-layer .rsp5-dst[data-tone="closed"] { background: #eceae6; }
 /* workspace width v2 (8 Nov): actions follow the content — the body hugs, the footer sits under it */
 .rsp5-layer .rsp5-dbody { flex: 0 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 18px; padding: 18px 20px 20px; }
 .rsp5-layer .rsp5-dbody h5 { margin: 0 0 8px; font: 600 14px/1.3 var(--r5-serif) !important; }

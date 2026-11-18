@@ -14,6 +14,7 @@
  * ⚠️ A NOTE IS WHAT IT IS TODAY (decision 8): `hasNote` — a personal pass or a revision's notes, never summarised.
  * ⚠️ ONE NOTE: a single quote card. NONE: the page renders no section.
  */
+import { stageOf, type Stage } from "../../lib/stageColours";
 import React, { useEffect, useRef, useState } from "react";
 import { NOTE_ADVANCE_MS, noteStage, notesFor, noteSwitch, respDate, type NoteKind, type RespItem } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
@@ -27,7 +28,8 @@ const advanceMs = () => {
   return typeof w === "number" && w > 0 ? w : NOTE_ADVANCE_MS;
 };
 /** the stage tone for a note's pill and its quote mark (the ref's `C` and `DP`): rose for a revision, grey for a pass */
-export const noteTone = (i: Item): "p" | "x" => (i.group === "passed" ? "x" : "p");
+/** Stage colours v1 — a note's tone is its query's stage (a pass is `closed`); the colours are the stage table's */
+export const noteTone = (i: Item): Stage => (i.group === "passed" ? "closed" : stageOf(i.row.status));
 /** the answer's words on the pill: "Passed", or the request's own status word */
 export const answerWord = (i: Item): string => (i.group === "passed" ? "Passed" : STEP_WORD[i.row.status] ?? i.row.status);
 const GO = (flip?: boolean) => (
