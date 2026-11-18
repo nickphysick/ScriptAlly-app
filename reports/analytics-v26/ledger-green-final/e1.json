@@ -1,0 +1,146 @@
+[
+ {
+  "lock": "E1",
+  "where": "population",
+  "ok": true,
+  "detail": "10 reply marks"
+ },
+ {
+  "lock": "E1",
+  "where": "replies = sample weeks",
+  "ok": true,
+  "detail": "[2,3,5,6,7,7,8,9,11,13]"
+ },
+ {
+  "lock": "E1",
+  "where": "reply 0 at 2 wks",
+  "ok": true,
+  "detail": "77.5 vs 77.5"
+ },
+ {
+  "lock": "E1",
+  "where": "reply 1 at 3 wks",
+  "ok": true,
+  "detail": "109.6 vs 109.6"
+ },
+ {
+  "lock": "E1",
+  "where": "reply 2 at 5 wks",
+  "ok": true,
+  "detail": "173.8 vs 173.9"
+ },
+ {
+  "lock": "E1",
+  "where": "reply 3 at 6 wks",
+  "ok": true,
+  "detail": "206.0 vs 206.0"
+ },
+ {
+  "lock": "E1",
+  "where": "reply 4 at 7 wks",
+  "ok": true,
+  "detail": "238.1 vs 238.1"
+ },
+ {
+  "lock": "E1",
+  "where": "reply 5 at 7 wks",
+  "ok": true,
+  "detail": "238.1 vs 238.1"
+ },
+ {
+  "lock": "E1",
+  "where": "reply 6 at 8 wks",
+  "ok": true,
+  "detail": "270.2 vs 270.2"
+ },
+ {
+  "lock": "E1",
+  "where": "reply 7 at 9 wks",
+  "ok": true,
+  "detail": "302.3 vs 302.3"
+ },
+ {
+  "lock": "E1",
+  "where": "reply 8 at 11 wks",
+  "ok": true,
+  "detail": "366.5 vs 366.5"
+ },
+ {
+  "lock": "E1",
+  "where": "reply 9 at 13 wks",
+  "ok": true,
+  "detail": "430.7 vs 430.7"
+ },
+ {
+  "lock": "E1",
+  "where": "waiting marks inside",
+  "ok": true,
+  "detail": "7 vs 7"
+ },
+ {
+  "lock": "E1",
+  "where": "wait 0 at 1 wks",
+  "ok": true,
+  "detail": "45.4"
+ },
+ {
+  "lock": "E1",
+  "where": "wait 1 at 2 wks",
+  "ok": true,
+  "detail": "77.5"
+ },
+ {
+  "lock": "E1",
+  "where": "wait 2 at 3 wks",
+  "ok": true,
+  "detail": "109.6"
+ },
+ {
+  "lock": "E1",
+  "where": "wait 3 at 4 wks",
+  "ok": true,
+  "detail": "141.7"
+ },
+ {
+  "lock": "E1",
+  "where": "wait 4 at 6 wks",
+  "ok": true,
+  "detail": "206.0"
+ },
+ {
+  "lock": "E1",
+  "where": "wait 5 at 8 wks",
+  "ok": true,
+  "detail": "270.2"
+ },
+ {
+  "lock": "E1",
+  "where": "wait 6 at 10 wks",
+  "ok": true,
+  "detail": "334.4"
+ },
+ {
+  "lock": "E1",
+  "where": "beyond = model = sample",
+  "ok": true,
+  "detail": "6"
+ },
+ {
+  "lock": "E1",
+  "where": "typical line at typical",
+  "ok": true,
+  "detail": "239.1"
+ },
+ {
+  "lock": "E1",
+  "where": "band with 10 replies",
+  "ok": true,
+  "detail": "true"
+ },
+ {
+  "lock": "E1",
+  "where": "early: no band, no line, axis 13",
+  "ok": true,
+  "detail": "{\"band\":false,\"typ\":false,\"axis\":13}"
+ }
+]

@@ -65,7 +65,7 @@ const ROOTS: { file: string; sel: RegExp }[] = [
   { file: "src/components/manuscripts/comps32/comps32.css", sel: /^\.cp32$/ },
 ];
 /** Roots that sit straight in the scroller and must not override the shared rule anywhere in the tree. */
-const SCROLLER_ROOTS = ["qcv-group", "rsp-page", "a17-page", "clv-group", "dv1-page", "vv2", "cpv-page", "tws", "cb2-page", "ms27"];
+const SCROLLER_ROOTS = ["qcv-group", "rsp-page", "a26-page", "clv-group", "dv1-page", "vv2", "cpv-page", "tws", "cb2-page", "ms27"];
 /** Workspace width v2 (8 Nov): Manuscripts (`ms27`) and the Dashboard joined the column. Still on the list: Submission
  *  packages (v43: no hawk clearance any more — its root restates the workspace measure, both sides, in packages/v43/
  *  pk43.css §0, over the generated v26 sheets' own), the older Manuscripts roots, and the reading

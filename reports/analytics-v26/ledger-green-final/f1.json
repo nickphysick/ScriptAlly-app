@@ -1,0 +1,32 @@
+[
+ {
+  "lock": "F1",
+  "where": "Most = BENCHMARKS_QUERYTRACKER",
+  "ok": true,
+  "detail": "[\"6%\",\"50%\",\"44\"]"
+ },
+ {
+  "lock": "F1",
+  "where": "You = benchmark",
+  "ok": true,
+  "detail": "[\"26\",\"43\",\"27\"]"
+ },
+ {
+  "lock": "F1",
+  "where": "header line",
+  "ok": true,
+  "detail": "\"Most writers see about 1 in 17.\""
+ },
+ {
+  "lock": "F1",
+  "where": "swapped anchors followed",
+  "ok": true,
+  "detail": "{\"most\":[\"9%\",\"41%\",\"33\"],\"you\":[\"26\",\"43\",\"27\"],\"card\":1,\"hd\":\"Most writers see about 1 in 11.\"}"
+ },
+ {
+  "lock": "F1",
+  "where": "constant off: no F, no header line",
+  "ok": true,
+  "detail": "{\"most\":[],\"you\":[],\"card\":0,\"hd\":null}"
+ }
+]

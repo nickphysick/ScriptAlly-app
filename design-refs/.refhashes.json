@@ -1243,7 +1243,17 @@
     "design-refs/corkboard-v15/screens/20-day-one-full-page-1280.png": "058821ac10f583eeb0f840bd803fb427e5bff71b2d430c2b79f2e675a3a37baf",
     "design-refs/corkboard-v15/screens/20-day-one-full-page-1512.png": "d1f78012625e1385f10bd5d2090c4ebb800ee92a512bee7e858271b2d1236cc7",
     "design-refs/corkboard-v15/screens/21-everyday-full-page-1100.png": "07a0782358fd92b9a50e9d02573d38721084323cdbc022e50a1cb82e777151ec",
-    "design-refs/todo-list-v57/todoWs57.css": "b6d8e8dbd80d156a0cfb1e94a44ff159f157c7c0cf740e5a8a4e8e8df6c75532"
+    "design-refs/todo-list-v57/todoWs57.css": "b6d8e8dbd80d156a0cfb1e94a44ff159f157c7c0cf740e5a8a4e8e8df6c75532",
+    "design-refs/analytics-v26/analytics-v26.html": "27a7a0c4677e95623e503a9d62f69c702ee574edb320aea3403bcf7224c0ebbd",
+    "design-refs/analytics-v26/screens/02-early-1512@2x.png": "d78feebba39accdfc24a6bc110f9914097422cbd150c19454f2b32e12810a08f",
+    "design-refs/analytics-v26/screens/03-day-one-1512@2x.png": "b6ade75e3ca6fc11008c7a9739ceed63a65c054c7b725f1d49a78d8f25fbeb93",
+    "design-refs/analytics-v26/screens/01-everyday-1512@2x.png": "6e03af7cef2b641f4fa6b37d691c803ee39cfa30e18ff20fc22ab500ad1a9799",
+    "design-refs/analytics-v26/screens/02-early-390@2x.png": "e71dd18f0150c7d0ebe474517a67ceb59e34ca691ed1c85f592cf960dc72a744",
+    "design-refs/analytics-v26/screens/02-early-1280@2x.png": "a1bd53805f70db37ef2716e4edee69a65115d60396462d75f7831c0b0648b4ef",
+    "design-refs/analytics-v26/screens/01-everyday-390@2x.png": "7b3744099a9d31bc941d8f09971ea1db678e840cd176d56efe8b40d4fa276284",
+    "design-refs/analytics-v26/screens/03-day-one-1280@2x.png": "b8e6fdd6e3fa0a3d592e48d0ccb3bff3ed80b7d00af5020f7139ac9525bc1e26",
+    "design-refs/analytics-v26/screens/01-everyday-1280@2x.png": "8ff7003dd31c8c784cbab7cf36e67e26daaa1cb54190a3fa4bd19ed1a289321a",
+    "design-refs/analytics-v26/screens/03-day-one-390@2x.png": "6940673793a6a5322d4c8776bfb102903bf5257e71177623ced0ee7f0af53553"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
