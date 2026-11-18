@@ -32,7 +32,8 @@ export async function openComps(page: Page, vp: Vp, o: { ms?: string; collapsed?
   await page.evaluate(async () => { await document.fonts.ready; });
   await page.evaluate(LIB);
   /* comps v28: the shelf's cards (v25's list rows are retired) */
-  if ((o.ms ?? MS) === MS && !o.hold) await page.waitForFunction(() => !!(window as any).__cv().querySelector('[data-cp="card"]'), null, { timeout: 30_000 });
+  /* RE-POINTED (comps v32, 17 Nov): the shelf's paper cards are gone; readiness is its first Next up row */
+  if ((o.ms ?? MS) === MS && !o.hold) await page.waitForFunction(() => !!(window as any).__cv().querySelector('[data-cp="row"]'), null, { timeout: 30_000 });
   await page.waitForTimeout(400);
 }
 

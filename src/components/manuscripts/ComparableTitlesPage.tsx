@@ -255,10 +255,11 @@ export const ComparableTitlesPage: React.FC<{
     });
   };
 
-  /** Give every comp an id before a letter records it; false when that write was refused. */
-  const ensureIds = async (): Promise<CompTitle[] | null> => {
+  /** Give the comps a letter is about to record an id first (all of them, in one write), only when one of THOSE has
+   *  none: the comps are not rewritten otherwise (CV25 E2). Null when that write was refused. */
+  const ensureIds = async (at: number[]): Promise<CompTitle[] | null> => {
     const cur = compsRef.current;
-    if (cur.every((c) => c.id)) return cur;
+    if (at.every((i) => cur[i]?.id)) return cur;
     const withIds = withCompIds(cur.map(normalizeComp));
     return (await commit(withIds)) ? withIds : null;
   };
@@ -274,7 +275,7 @@ export const ComparableTitlesPage: React.FC<{
     try {
       const cur = compsRef.current;
       const at = keys.map((k) => cur.findIndex((c, i) => compKey(c, i) === k)).filter((i) => i >= 0);
-      const withIds = await ensureIds();
+      const withIds = await ensureIds(at);
       if (!withIds) return;
       const ids = at.map((i) => withIds[i].id!).filter(Boolean);
       const had = Array.isArray(letter.compIds) ? [...letter.compIds] : null;
@@ -302,7 +303,7 @@ export const ComparableTitlesPage: React.FC<{
     busyRef.current = true;
     try {
       const at = indexOfKey(key);
-      const withIds = await ensureIds();
+      const withIds = at < 0 ? null : await ensureIds([at]);
       if (!withIds || at < 0) return;
       const id = withIds[at].id!;
       const want = new Set(letterIds);

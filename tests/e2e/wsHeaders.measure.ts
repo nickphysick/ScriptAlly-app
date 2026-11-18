@@ -75,6 +75,8 @@ type PageDef = {
   init?: (page: Page) => Promise<void>;
   emptyInit?: (page: Page) => Promise<void>;
   ready: string;
+  /** the headline's size where a page sets its own (px, by viewport width); absent = the Query Centre's */
+  titleSize?: (w: number) => number;
 };
 const scope = (id: string) => async (page: Page) => {
   await page.addInitScript((m) => { try { localStorage.setItem("scriptally_active_manuscript_id", m); localStorage.setItem("sa.guide.queries", "1"); } catch { /* private */ } }, id);
@@ -97,10 +99,13 @@ const PAGES: Record<string, PageDef> = {
     init: async (page) => { await scope(MS)(page); await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_DV_STATE = "live"; }); },
     ready: "[data-dv1='picks']",
   },
+  /* RE-POINTED (comps v32, 17 Nov): the headline is "{n} comparable titles"; the first section is the striped band or the
+     shelf-and-open-comp grid; v30's highlight ring and "Compare your letters" are gone with the header's right block */
   comps: {
-    route: "/manuscripts/comps", root: "[data-cpv='page']", first: "[data-cp='notice'], [data-cp='shelf']", old: "[data-cp='top']",
-    head: /^(\d+) comps? on file$/, figure: "[data-cp='shelf-count']", empty: "[data-cp='how-steps']", gone: ["[data-cp='lead']", "[data-cp='top']"],
-    oldColumn: "[data-cp='notice'], [data-cp='shelf'] { margin-inline: 24px !important; }", init: scope(MS), emptyInit: scope(MS_EMPTY), ready: "[data-cp='shelf']",
+    route: "/manuscripts/comps", root: "[data-cpv='page']", first: "[data-cp='notice'], [data-cp='grid']", old: "[data-cp='top']",
+    head: /^(\d+) comparable titles?$/, figure: "[data-cp='shelf-count']", empty: "[data-cp='how-steps']", gone: ["[data-cp='lead']", "[data-cp='top']", "[data-cp='hl-open']", "[data-cp='letter-grid']"],
+    oldColumn: "[data-cp='notice'], [data-cp='grid'] { margin-inline: 24px !important; }", init: scope(MS), emptyInit: scope(MS_EMPTY), ready: "[data-cp='shelf']",
+    titleSize: (w) => Math.min(66, Math.max(44, w * 0.036)),
   },
   versions: {
     /* Harbour of Glass (msv12-ms): the harness book with versions on file (Murphy's Day Out has none in the model) */
@@ -356,7 +361,11 @@ for (const key of PAGE_KEYS) {
           const q = qc.header;
           const fields = key === "manuscripts" && (hd.titleLines as number) > 1 ? ["left", "right", "titleLeft", "buttonH"] : ["left", "right", "height", "titleLeft", "buttonH"];
           for (const f of fields) expect.soft(near(hd[f], q[f]), `H1 ${f}: ${hd[f]} vs the Query Centre's ${q[f]}`).toBe(true);
-          for (const f of ["radius", "bg", "titleSize"]) expect.soft(hd[f], `H1 ${f}`).toBe(q[f]);
+          for (const f of ["radius", "bg"]) expect.soft(hd[f], `H1 ${f}`).toBe(q[f]);
+          /* RE-POINTED (comps v32, 17 Nov): Comparable titles sizes its headline on its own page only,
+             clamp(44px, 3.6vw, 66px), so it stays on one line beside its right-hand block (CP32 H1 holds it) */
+          if (d.titleSize) expect.soft(parseFloat(String(hd.titleSize)), `H1 titleSize (this page's own)`).toBeCloseTo(d.titleSize(vp.width), 0);
+          else expect.soft(hd.titleSize, `H1 titleSize`).toBe(q.titleSize);
         }
         /* H3 · the first body section on the header's edges · H4 · 48 under it */
         const first = await readBox(page, d.root, d.first);
