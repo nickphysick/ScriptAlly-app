@@ -51,3 +51,12 @@ Pk26Builder, Pk393Builder, Pk39Labels, Pk38Drawer, Pk26Dialog, Pk41Results, Pk42
 
 P1 everyday (one aria-current row, What came back with one StatusDot per query, no "%", no green painted) · P2 retired via the table and Enter (read-only, retired lock line) · P3 an unsent package (no What came back, its foot, dashes) · P4 day one · P5 How it works (focus on Got it, Tab trapped, Escape returns focus) · P6 New package drawer (focus on Name, Escape returns focus) · P7 a piece list as a radio group · P8 no sideways scroll at 1280, 900, 800, 768. Readings: `readings.json`; screens: `shots/`.
 Not measured on screen: the first-visit note and Pro tag (the harness account is not on the founding basis in the emulator; held by the unit smoke), the Change picker (see §3).
+
+## 7. Branch and dev
+
+- Branch: `submission-packages-v62` (a2e5e4ab3), pushed. Not merged to main.
+- Dev was serving `index-BcOc9gsY.js` from `query-card-v158-1` when this deployed, so v62 was merged onto it as
+  `dev/qc1581-pk62` (987e479ec, pushed) and that was deployed: https://scriptally-dev.web.app serves
+  **`index-D36ukT_K.js`** (checked after the deploy). Hosting only; no rules or functions.
+- Full unit suite on the branch: 12,873 passed; 2 failing cases in `src/test/firestoreTarget.test.ts` name 23 e2e scripts
+  this branch does not modify (e.g. `tests/e2e/cl251Agents.mjs`); not investigated here.
