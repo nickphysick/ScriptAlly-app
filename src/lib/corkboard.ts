@@ -220,3 +220,134 @@ export function stillStarted(started: readonly string[], notes: readonly Pick<Us
   const used = new Set(notes.map(pileOf).filter(Boolean));
   return started.filter((k) => !used.has(k));
 }
+
+/* ══ Corkboard v15 (18 Nov; ref design-refs/corkboard-v15/) — the desktop page rebuilt to the Responses v15 standard,
+   and Piles worded Stacks. Everything the v15 page states comes from these pure functions, so the locks call what the
+   page calls. The phone keeps v2's panel (glance / glanceRows above) and its layout; only its words changed. ══ */
+
+/**
+ * The v15 header's three figures. ⚠️ "LINKED" HERE IS AN AGENT OR A QUERY, NEVER A MANUSCRIPT — a note about the
+ * book is not "linked to an agent" (the ref's `aboutAgent`). v2's `glance` counted every link and still does, for the
+ * phone's panel.
+ */
+export type FigureKey = "linked" | "onTodo" | "pinned";
+export interface Figures { linked: number; onTodo: number; pinned: number }
+type FigNote = Pick<UserTask, "agentId" | "queryId" | "manuscriptId" | "dueDate" | "pinned">;
+/** A note is about an agent when it links to an agent or to a query (a query is always one agent's). */
+export const aboutAgent = (n: Pick<UserTask, "agentId" | "queryId">): boolean => !!(n.queryId || n.agentId);
+export function figures(notes: readonly FigNote[]): Figures {
+  let linked = 0, onTodo = 0, pinned = 0;
+  for (const n of notes) {
+    if (aboutAgent(n)) linked++;
+    if (n.dueDate) onTodo++;
+    if (n.pinned) pinned++;
+  }
+  return { linked, onTodo, pinned };
+}
+export function inFigure(n: FigNote, k: FigureKey): boolean {
+  return k === "linked" ? aboutAgent(n) : k === "onTodo" ? !!n.dueDate : !!n.pinned;
+}
+/** The figures the header shows, in order, each with its words. ⚠️ A FIGURE AT ZERO IS NOT SHOWN. */
+export function figureRows(f: Figures): { k: FigureKey; n: number; words: string }[] {
+  return ([
+    { k: "linked", n: f.linked, words: f.linked === 1 ? "linked to an agent" : "linked to agents" },
+    { k: "onTodo", n: f.onTodo, words: "on your to-do list" },
+    { k: "pinned", n: f.pinned, words: "pinned to top" },
+  ] as const).filter((r) => r.n > 0).map((r) => ({ ...r }));
+}
+/** The chip a figure leaves in the pills while it filters the board. */
+export const FIGURE_CHIP: Readonly<Record<FigureKey, string>> = { linked: "Linked to agents", onTodo: "On your to-do list", pinned: "Pinned to top" };
+
+/**
+ * The wall's two sections, on top of `sortBoard` (pass its output): Pinned to top, then the rest — each keeping the
+ * sort's order. With nothing pinned the page shows one section, "Your notes".
+ */
+export function wallSections<T extends Pick<UserTask, "pinned">>(sorted: readonly T[]): { pinned: T[]; rest: T[] } {
+  return { pinned: sorted.filter((n) => n.pinned), rest: sorted.filter((n) => !n.pinned) };
+}
+
+/** The wall's column count from its own width (the ref's `colCount`): 4 from 1240px, 3 from 900, 2 from 580, else 1. */
+export function columnCount(width: number): number {
+  return width >= 1240 ? 4 : width >= 900 ? 3 : width >= 580 ? 2 : 1;
+}
+/** Deal the items into `n` columns row-major: item i goes to column i mod n, so the wall still reads left to right. */
+export function dealColumns<T>(items: readonly T[], n: number): T[][] {
+  const k = Math.max(1, Math.floor(n));
+  const out: T[][] = Array.from({ length: k }, () => []);
+  items.forEach((x, i) => out[i % k].push(x));
+  return out;
+}
+
+/**
+ * "Who your notes are about": one row per agent, a note linked to a query counted under that query's agent. Most
+ * notes first, then A to Z by name. `agentOfQuery` resolves a query id to its agent id; `name` an agent id to its
+ * name. A note whose query or agent no longer resolves is left out (there is no one to name).
+ */
+export function aboutRows<T extends Pick<UserTask, "agentId" | "queryId">>(
+  notes: readonly T[], agentOfQuery: (queryId: string) => string | undefined, name: (agentId: string) => string,
+): { agentId: string; notes: T[] }[] {
+  const m = new Map<string, T[]>();
+  for (const n of notes) {
+    const a = n.queryId ? agentOfQuery(n.queryId) : n.agentId || undefined;
+    if (!a) continue;
+    if (!m.has(a)) m.set(a, []);
+    m.get(a)!.push(n);
+  }
+  return [...m].map(([agentId, l]) => ({ agentId, notes: l }))
+    .sort((x, y) => y.notes.length - x.notes.length || name(x.agentId).localeCompare(name(y.agentId)));
+}
+/** The agent a note is about, or null (manuscript links and loose notes are about no one). */
+export function aboutOf(n: Pick<UserTask, "agentId" | "queryId">, agentOfQuery: (queryId: string) => string | undefined): string | null {
+  return (n.queryId ? agentOfQuery(n.queryId) : n.agentId) || null;
+}
+
+/**
+ * THE QUIET RULE: true while no note has a link (any kind), a tag or a to-do date. While it holds, "What you can do
+ * with a note" shows under the wall.
+ */
+export function quietBoard(notes: readonly Pick<UserTask, "agentId" | "queryId" | "manuscriptId" | "tags" | "dueDate">[]): boolean {
+  return !notes.some((n) => !!linkOf(n) || (n.tags?.length ?? 0) > 0 || !!n.dueDate);
+}
+
+/** Day one's three examples, word for word (Phase 7), each in its paper. Keep this writes it as a plain note. */
+export const DAY_ONE_EXAMPLES: readonly { body: string; paper: "butter" | "blush" | "powder" }[] = [
+  { body: "Check each agent’s submission guidelines before you send. They all ask for something slightly different.", paper: "butter" },
+  { body: "Send queries in small batches, five or so at a time. Then you can change the letter if it isn’t landing.", paper: "blush" },
+  { body: "Address each agent by name, and say in a line why you chose them.", paper: "powder" },
+];
+
+/** The "Everything else" / "Your notes" sub-line: "{n} notes, newest first", with " of {total}" while filtering. */
+export function sectionLine(n: number, total: number | null, sort: BoardSort): string {
+  return `${n}${total !== null ? ` of ${total}` : ""} ${n === 1 ? "note" : "notes"}, ${SORT_LABEL[sort].toLowerCase()}`;
+}
+
+/** A find's matches in a run of words: the pieces, each marked when it matches (case-insensitive). Total: the pieces
+ *  join back to the words. */
+export function findPieces(text: string, q: string): { t: string; hit: boolean }[] {
+  const needle = q.trim().toLowerCase();
+  if (!needle) return [{ t: text, hit: false }];
+  const out: { t: string; hit: boolean }[] = [];
+  const low = text.toLowerCase();
+  let i = 0;
+  for (;;) {
+    const j = low.indexOf(needle, i);
+    if (j < 0) { if (i < text.length) out.push({ t: text.slice(i), hit: false }); break; }
+    if (j > i) out.push({ t: text.slice(i, j), hit: false });
+    out.push({ t: text.slice(j, j + needle.length), hit: true });
+    i = j + needle.length;
+  }
+  return out.length ? out : [{ t: text, hit: false }];
+}
+
+/** The ref's "when it was added": Today, Yesterday, "{n} days ago" under a week, else "{d} {Mon}". */
+export function addedWhen(createdAt: string | undefined, now: Date): string {
+  if (!createdAt) return "";
+  const at = new Date(createdAt);
+  if (Number.isNaN(at.getTime())) return "";
+  const day = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  const d = Math.round((day(now) - day(at)) / 864e5);
+  if (d <= 0) return "Today";
+  if (d === 1) return "Yesterday";
+  if (d < 7) return `${d} days ago`;
+  return `${at.getDate()} ${MONTHS_SHORT[at.getMonth()]}`;
+}
