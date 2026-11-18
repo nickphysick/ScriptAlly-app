@@ -84,7 +84,7 @@ export const SHORTCUTS = {
   qcAct:            { chords: [k("l")], label: "Start the query's next action", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "stands down" },
   qcLetGo:          { chords: [k("Escape")], label: "Clear the search, then let go of the query", scope: "Query Centre", bound: "src/components/queries/centre/useQcListKeys.ts", inFields: "works" },
   /* Responses v2 — the list of nos */
-  respFind:         { chords: [k("/")], label: "Find an agent in the list of nos", scope: "Responses", bound: "src/components/responses/RspNos.tsx", inFields: "stands down" },
+  respFind:         { chords: [k("/")], label: "Find in your Rejection collection", scope: "Responses", bound: "src/components/responses/RspCollection.tsx", inFields: "stands down" },
   respDown:         { chords: [k("j"), k("ArrowDown")], label: "Next answer, with one open", scope: "Responses", bound: "src/components/responses/RspPanel.tsx", inFields: "stands down" },
   respUp:           { chords: [k("k"), k("ArrowUp")], label: "Previous answer, with one open", scope: "Responses", bound: "src/components/responses/RspPanel.tsx", inFields: "stands down" },
   /* the quick view's keys (Agent card v1 §2–3) — they act only on the card that is open, and only

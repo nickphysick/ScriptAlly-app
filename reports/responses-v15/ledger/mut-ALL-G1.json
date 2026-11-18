@@ -1,0 +1,92 @@
+[
+ {
+  "where": "1280 population: every part",
+  "ok": true,
+  "detail": "{\"head\":30,\"g1\":64,\"g2\":64,\"g3\":64,\"g4\":64}"
+ },
+ {
+  "where": "1280 band 30 under the header",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "where": "1280 band → facts 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1280 facts → read on 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1280 read on → in their words 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1280 in their words → collection 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1512 population: every part",
+  "ok": true,
+  "detail": "{\"head\":30,\"g1\":64,\"g2\":64,\"g3\":64,\"g4\":64}"
+ },
+ {
+  "where": "1512 band 30 under the header",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "where": "1512 band → facts 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1512 facts → read on 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1512 read on → in their words 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1512 in their words → collection 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1717 population: every part",
+  "ok": true,
+  "detail": "{\"head\":30,\"g1\":64,\"g2\":64,\"g3\":64,\"g4\":64}"
+ },
+ {
+  "where": "1717 band 30 under the header",
+  "ok": true,
+  "detail": "30"
+ },
+ {
+  "where": "1717 band → facts 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1717 facts → read on 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1717 read on → in their words 72",
+  "ok": false,
+  "detail": "64"
+ },
+ {
+  "where": "1717 in their words → collection 72",
+  "ok": false,
+  "detail": "64"
+ }
+]

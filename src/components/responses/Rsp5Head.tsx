@@ -2,114 +2,107 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Responses v5 Phase 2 (design-refs/responses-v5/responses-v5.html, `glance`) — AT A GLANCE; and the page's header
- * (Workspace headers v1).
+ * Responses v15 Phase B (design-refs/responses-v15/responses-v15.html, `header`, `tally`) — THE PAGE'S HEADER: the shared
+ * navy workspace header (`shell/WorkspaceNavyHeader`, Workspace headers v1, unchanged) with this page's words, and in
+ * its right-hand slot the reply count, the rate line and the hand-drawn tally (`RspTallyBlock`). v5's At a glance cards
+ * are gone (Analytics owns those figures now).
  *
- * ⚠️ BOTH ARE THE SHARED COMPONENTS, NOT COPIES: the header is `shell/WorkspaceNavyHeader` (Workspace headers v1: the
- *    Query Centre's navy header; it replaced the title card) and the four cards are `shared/GlanceCards` (the Query
- *    Centre's v150.1 stat cards, lifted by Contact list v25). This file names the Responses page's own words and
- *    figures; the look of both lives with them, and responses5.css only sizes the cards to the reference.
- * ⚠️ THE HEAD'S SHORT FACT ("3 your move") RIDES IN THE CARD'S `doodle` SLOT, which takes any node: GlanceCards has no
- *    slot named for it, and editing a shared component is out of this pack's scope.
- * ⚠️ A CARD IS NAVIGATION, NOT A FILTER: every card is `pressable: false` (no `aria-pressed`). Passed and No reply also
- *    set the wall's kind, which the page owns.
- * ⚠️ THE FOUR COUNTS SUM TO answered + still waiting (`pageCounts`). Withdrawn and Signed are not on the page.
+ * ⚠️ THE TALLY IS ONE MARK PER QUERY SENT: asked for more first (terracotta), then passed (cream), then no answer yet
+ *    (faint): `headerTally` + `tallyMarks` (lib/responses), the ref's seeded jitter.
  */
-import React, { useMemo } from "react";
-import { WorkspaceNavyHeader, WsnhFigure, WsnhWords } from "../shell/WorkspaceNavyHeader";
-import { GlanceCards, type GlanceItem } from "../shared/GlanceCards";
-import type { PageCounts, RespRowInput } from "../../lib/responses";
-import "../queries/centre/qcv150.css";
+import React, { useState } from "react";
+import { WorkspaceNavyHeader } from "../shell/WorkspaceNavyHeader";
+import { plural, respDate, tallyClasses, tallyMarks, type HeaderTally } from "../../lib/responses";
 
-export type GlanceKey = "more" | "passed" | "noReply" | "waiting";
-export const GLANCE_LABEL: Record<GlanceKey, string> = { more: "Asked for more", passed: "Passed", noReply: "No reply", waiting: "Still waiting" };
-export const GLANCE_ORDER: readonly GlanceKey[] = ["more", "passed", "noReply", "waiting"];
-export const FACE_CAP = 6;
-
-export interface GlanceFacts {
-  counts: PageCounts;
-  /** the rows behind each card, newest first: their faces */
-  rows: Record<GlanceKey, readonly RespRowInput[]>;
-  yourMove: number;
-  withNote: number;
-  goneQuiet: number;
-}
-
-/** Workspace headers v1: "18 responses" — the agents who have answered (the glance line's "heard back from") */
+/** "18 responses": the agents who replied (asked for more + passed) */
 export const responsesTitle = (n: number): string => `${n} ${n === 1 ? "response" : "responses"}`;
 /** the empty page's headline (its own paragraph does not fit one line) */
 export const RSP_EMPTY_TITLE = "No responses yet";
 
-/* Workspace headers v1 (design-refs/workspace-headers-v1, "Responses") — the navy header: the count of agents who have
-   answered, the book on the ruled line, Record and Share, and on the right the agents who asked for more and how many
-   are waiting on you. Every figure is the page's own: `page.replies` and `page.more` (the glance line's), `yourMove`
-   (the glance card's "your move"). Empty: the same header with "No responses yet" and that state's two buttons. */
+/* Responses v15 (ref `header`) — the navy header (Workspace headers v1, position and height unchanged): the count of
+   agents who replied, the book on the ruled line, Record and Share your story, and on the right the reply count, the
+   rate line and the hand-drawn tally, one mark per query sent. Every figure is `headerTally` (lib/responses).
+   ⚠️ SHARE YOUR STORY HIDES WHEN THE REJECTION COLLECTION IS EMPTY, and opens the existing share builder (decision 3).
+   ⚠️ A LABEL IS NAVIGATION: asked for more → the carousel, passed → the Rejection collection, no answer yet → the Query
+      Centre. Hovering or focusing one lifts its marks (`data-h` on the block). */
+export type TallyKey = "a" | "p" | "w";
+const KEY_SWATCH: Record<TallyKey, string> = { a: "#e7a184", p: "#f4eee5", w: "rgba(244,238,229,.35)" };
+
+export const RspTally: React.FC<{ classes: readonly TallyKey[]; height: number; className?: string; probe?: string }> = ({ classes, height, className = "rsp15-tally", probe = "tally" }) => {
+  const { paths, width } = tallyMarks(classes, height);
+  return (
+    <svg className={className} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="xMinYMid meet" role="img" aria-label={`Tally of ${classes.length}`} data-rsp15={probe}>
+      {paths.map((p, k) => <path key={k} className={p.cls} d={p.d} data-k={p.cls} />)}
+    </svg>
+  );
+};
+
+export const RspTallyBlock: React.FC<{
+  tally: HeaderTally;
+  early: boolean;
+  /** nothing back yet: the next reply's due date (the reply times the agents give), or null */
+  nextDueMs: number | null;
+  nowMs: number;
+  onKey: (k: TallyKey) => void;
+}> = ({ tally: t, early, nextDueMs, nowMs, onKey }) => {
+  const [h, setH] = useState<TallyKey | null>(null);
+  const none = t.replies === 0;
+  const keys: [TallyKey, number, string][] = none ? [["w", t.unanswered, "no answer yet"]]
+    : [["a", t.more, "asked for more"], ["p", t.passed, "passed"], ["w", t.unanswered, "no answer yet"]];
+  return (
+    <div className="rsp15-rt" data-rsp15="tally-block" data-h={h ?? undefined}>
+      <div className="rsp15-st" data-rsp15="replied">{none ? `${plural(t.queried, "query", "queries")} out` : `${t.replies} of ${t.queried} have replied`}</div>
+      <div className="rsp15-sl" data-rsp15="rate">
+        {none
+          ? (nextDueMs != null ? `The next reply is due around ${respDate(nextDueMs, nowMs)}, going by the reply times your agents give.` : null)
+          : early ? "It’s early days. Most of your queries are still with agents."
+          : `That’s a ${t.pct}% response rate, counting the passes. ${t.more} asked to read more.`}
+      </div>
+      <RspTally classes={tallyClasses(t)} height={58} />
+      <div className="rsp15-tkey" data-rsp15="tally-key">
+        {keys.map(([k, n, label]) => (
+          <button key={k} type="button" data-rsp15="tally-label" data-k={k}
+            onMouseEnter={() => setH(k)} onMouseLeave={() => setH(null)} onFocus={() => setH(k)} onBlur={() => setH(null)}
+            onClick={() => onKey(k)}>
+            <i style={{ background: KEY_SWATCH[k] }} aria-hidden="true" /><b>{n}</b> {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
+
 export const RspHeader: React.FC<{
   msTitle: string | null;
   loading: boolean;
-  empty: boolean;
-  heard: number;
+  /** no replies at all (asked for more + passed = 0) */
+  noReplies: boolean;
+  tally: HeaderTally;
+  early: boolean;
+  nextDueMs: number | null;
+  nowMs: number;
+  /** the Rejection collection has at least one entry: Share your story shows */
+  canShare: boolean;
   more: number;
   yourMove: number;
   onRecord: () => void;
-  onQueryCentre: () => void;
-  onWall: () => void;
-  onSeeThem: () => void;
-}> = ({ msTitle, loading, empty, heard, more, yourMove, onRecord, onQueryCentre, onWall, onSeeThem }) => {
-  const title = empty ? RSP_EMPTY_TITLE : responsesTitle(heard);
+  onShare: () => void;
+  onKey: (k: TallyKey) => void;
+}> = ({ msTitle, loading, noReplies, tally, early, nextDueMs, nowMs, canShare, more, yourMove, onRecord, onShare, onKey }) => {
+  const title = noReplies ? RSP_EMPTY_TITLE : responsesTitle(tally.replies);
   return (
-    <WorkspaceNavyHeader page="responses" art="responses-header" loading={loading}
+    <WorkspaceNavyHeader page="responses" art="responses-header" loading={loading} className="rsp15-hd"
       title={title}
       forLine={msTitle ? { lead: "for", text: msTitle } : null}
       actions={<>
         <button type="button" className="qc1531-b qc1531-b--n" data-rsp5="record" disabled={loading} onClick={onRecord}>+ Record a response</button>
-        {empty
-          ? <button type="button" className="qc1531-b qc1531-b--g" data-rsp5="to-qc" onClick={onQueryCentre}>Open the Query Centre</button>
-          : <button type="button" className="qc1531-b qc1531-b--g" data-rsp5="to-wall" disabled={loading} onClick={onWall}>Share your wall of no</button>}
+        {canShare ? <button type="button" className="qc1531-b qc1531-b--g" data-rsp15="share-top" disabled={loading} onClick={onShare}>Share your story</button> : null}
       </>}
-      right={empty ? null : <>
-        <WsnhFigure>{more}</WsnhFigure>
-        <WsnhWords lead={more === 1 ? "agent" : "agents"} name="asked for more"
-          sub={<><b data-rsp5="hd-move">{yourMove}</b> {yourMove === 1 ? "is" : "are"} waiting on you</>}>
-          <button type="button" className="qc1531-b qc1531-b--g" data-rsp5="see-them" onClick={onSeeThem}>See them</button>
-        </WsnhWords>
-      </>}
+      right={tally.queried > 0 ? <RspTallyBlock tally={tally} early={early} nextDueMs={nextDueMs} nowMs={nowMs} onKey={onKey} /> : null}
       bar={{
         title,
-        aside: empty ? null : <><b>{more} asked for more</b><em>{yourMove} waiting on you</em></>,
+        aside: noReplies ? null : <><b>{more} asked for more</b><em>{yourMove} waiting on you</em></>,
         button: { label: "+ Record a response", onClick: onRecord },
       }} />
-  );
-};
-
-const factOf = (k: GlanceKey, f: GlanceFacts): string =>
-  k === "more" ? `${f.yourMove} your move` : k === "passed" ? `${f.withNote} with a note` : k === "noReply" ? "after the wait" : `${f.goneQuiet} gone quiet`;
-
-export const Rsp5Glance: React.FC<{
-  facts: GlanceFacts | null;
-  onCard: (k: GlanceKey) => void;
-}> = ({ facts, onCard }) => {
-  const items = useMemo<GlanceItem[]>(() => GLANCE_ORDER.map((k) => {
-    const n = facts ? facts.counts[k] : 0;
-    const rows = facts ? facts.rows[k] : [];
-    return {
-      key: k, label: GLANCE_LABEL[k], figure: n, total: n, tone: `rs-${k}`, pressable: false,
-      faces: rows.slice(0, FACE_CAP).map((r) => ({ key: r.id, initials: r.initials, title: r.agentName })),
-      swatch: `rsp5-gd rsp5-gd--${k}`,
-      doodle: facts ? <small className="rsp5-gfact" data-rsp5="glance-fact" data-k={k}>{factOf(k, facts)}</small> : null,
-      ariaLabel: `${GLANCE_LABEL[k]}: ${n}. ${k === "more" ? "Go to the requests" : k === "waiting" ? "Go to how long agents took" : "Go to your wall of no"}`,
-    };
-  }), [facts]);
-  const c = facts?.counts;
-  return (
-    <div className="rsp5-glance" data-rsp5="glance-wrap">
-      <GlanceCards items={items} pressed={null} onCard={(k) => onCard(k as GlanceKey)} ready={!!facts} loading={!facts}
-        probe="rsp5" headingId="rsp5-gh" />
-      {c ? (
-        <p className="rsp5-gline" data-rsp5="glance-line">
-          You&rsquo;ve heard back from <b>{c.replies} of {c.sent}</b> agents you&rsquo;ve queried, and <b>{c.more}</b> of them asked to read more.
-        </p>
-      ) : null}
-    </div>
   );
 };

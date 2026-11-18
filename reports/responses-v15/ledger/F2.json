@@ -1,0 +1,87 @@
+[
+ {
+  "where": "population: 15 rows",
+  "ok": true,
+  "detail": "15"
+ },
+ {
+  "where": "agent: sorted (first Alice Moreno)",
+  "ok": true,
+  "detail": "Alice Moreno"
+ },
+ {
+  "where": "agent: no month headers",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "agent: pressed again, reversed",
+  "ok": true,
+  "detail": "William Tate … Alice Moreno"
+ },
+ {
+  "where": "answer: sorted (first Alice Moreno)",
+  "ok": true,
+  "detail": "Alice Moreno"
+ },
+ {
+  "where": "answer: no month headers",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "answer: pressed again, reversed",
+  "ok": true,
+  "detail": "Nadia Petrova … Alice Moreno"
+ },
+ {
+  "where": "took: sorted (first Ben Okafor)",
+  "ok": true,
+  "detail": "Ben Okafor"
+ },
+ {
+  "where": "took: no month headers",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "took: pressed again, reversed",
+  "ok": true,
+  "detail": "Maya Thorne … Ben Okafor"
+ },
+ {
+  "where": "far: sorted (first Ben Okafor)",
+  "ok": true,
+  "detail": "Ben Okafor"
+ },
+ {
+  "where": "far: no month headers",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "far: pressed again, reversed",
+  "ok": true,
+  "detail": "Eleanor Whitlock … Ben Okafor"
+ },
+ {
+  "where": "note: sorted (first Eleanor Whitlock)",
+  "ok": true,
+  "detail": "Eleanor Whitlock"
+ },
+ {
+  "where": "note: no month headers",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "note: pressed again, reversed",
+  "ok": true,
+  "detail": "Nadia Petrova … Eleanor Whitlock"
+ },
+ {
+  "where": "back to Date: month headers return",
+  "ok": true,
+  "detail": ""
+ }
+]

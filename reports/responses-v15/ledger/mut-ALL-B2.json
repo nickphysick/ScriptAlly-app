@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: the band is drawn, open",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "folded: the one line",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "folded: Read",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "still folded after a reload",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "Read opens it again",
+  "ok": true,
+  "detail": ""
+ }
+]

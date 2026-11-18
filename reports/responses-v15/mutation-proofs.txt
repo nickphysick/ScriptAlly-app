@@ -1,0 +1,37 @@
+# Responses v15 — mutation proofs
+
+Each lock is run under its named mutation (red), then on the real code (green). Unit locks: `npx vitest run <file>`; page locks: `npm run e2e:emu -- tests/e2e/rs15.measure.ts --project=measure` with `RS15_MUTATE=<lock>` (a mutant BUILD where the break is in the source, named per lock).
+
+## Phase A (src/lib/responses15.test.ts)
+
+- A-facts · mutation `isReply` returns true (a no reply counts as a reply) → RED: 3 failed | 13 passed (the line of facts ×3)
+- A-coll · mutation `collectionOf` ignores `off` (offWallIds) → RED: 1 failed | 15 passed (a pass kept off)
+- A-sort · mutation `listCollection` drops `* o.dir` (a heading never reverses) → RED: 2 failed | 14 passed
+- A-scale · mutation `longestWait` reads the no-reply view only (a filtered scale) → RED: 2 failed | 14 passed
+- green on the real code: 36 passed (36) with responses.test.ts
+
+## Page locks (tests/e2e/rs15.measure.ts), red under `RS15_MUTATE=ALL` (each lock gets only its own named break), 18 Nov
+
+One emulator run: **21 failed, 1 passed (setup)**. Each lock's ledger: `reports/responses-v15/ledger/mut-ALL-<lock>.json`.
+
+- **A1** · one asked-for-more mark removed from the tally → RED: 18/22 green — e.g. `✗ A1 · 1512 marks 7 / 11 / 16 — {"a":6,"p":11,"w":16}`
+- **A1G** · the Responses header 6px lower → RED: 12/15 green — e.g. `✗ A1G · 1512 top ±1 — 6 vs 38`
+- **B1** · "all of yours" rewritten to "yours" → RED: 11/13 green — e.g. `✗ B1 · body — Nobody enjoys a no, and this page holds yours. At QueryHawk we treat every rejection as valuable data. We keep it, we learn from it, and`
+- **B2** · the fold forced open on the next load → RED: 2/5 green — e.g. `✗ B2 · folded: the one line —`
+- **C1** · the note count one higher → RED: 6/7 green — e.g. `✗ C1 · 6 came with a note — 7 came with a note`
+- **D1** · the carousel band squeezed to 120px (cards clipped) → RED: 14/16 green — e.g. `✗ D1 · 1512 no card clipped vertically (card and paperclip inside the track) — [{"name":"Clara Beaumont","top":265.796875,"bot":389.796875,"tt":281.79`
+- **E1** · the count "1 of" rewritten to "2 of" → RED: 8/12 green — e.g. `✗ E1 · 1 of 6 — 2 of 6`
+- **E2** · the advance interval set to 600000ms (never moves) → RED: 3/5 green — e.g. `✗ E2 · moved on within one interval — 0 → 0`
+- **E3** · the single quote card hidden → RED: 4/5 green — e.g. `✗ E3 · one note: a single quote card —`
+- **F1** · the first two rows swapped → RED: 11/14 green — e.g. `✗ F1 · first ten, newest first — ["Ben Okafor","Eleanor Whitlock","Alice Moreno","Sarah Kendrick","Hugo Lindqvist","Liam Gallagher","Maya Thorne","Raf`
+- **F2** · every heading press stopped before React sees it → RED: 2/17 green — e.g. `✗ F2 · agent: sorted (first Alice Moreno) — Eleanor Whitlock`
+- **F3** · every bar drawn full width → RED: 3/5 green — e.g. `✗ F3 · Hugo Lindqvist, 16 days: 10% — 1`
+- **F4** · rows 11+ hidden (Show all shows nothing more) → RED: 4/5 green — e.g. `✗ F4 · Show all: 15 rows on show —`
+- **F5** · a cloned row named Sarah Kendrick (the kept-off pass) added → RED: 3/5 green — e.g. `✗ F5 · 14 in the collection — 15`
+- **G1** · every gap 64px → RED: 6/18 green — e.g. `✗ G1 · 1280 band → facts 72 — 64`
+- **H1** · While you wait hidden → RED: 15/16 green — e.g. `✗ H1 · While you wait —`
+- **H2** · the early note re-tagged as the line of facts → RED: 6/8 green — e.g. `✗ H2 · the early note —`
+- **N1** · the collection heading rewritten "Your wall of no" → RED: 7/8 green — e.g. `✗ N1 · the route —`
+- **S1** · the share builder's agent names switched on → RED: 4/5 green — e.g. `✗ S1 · agent names off by default —`
+- **P1** · the scrim hidden (the desk not dimmed) → RED: 12/15 green — e.g. `✗ P1 · row: the desk dimmed — {"shown":false,"op":1}`
+- **L1** · the collection list 2400px wide (phone: body children 2400px) → RED: 13/24 green — e.g. `✗ L1 · 1100 nothing wider than the scroller — {"doc":1100,"vw":1100,"sc":2432,"scw":1012,"wide":["DIV.rsp15-rcs[list] -614→1786 \"Date↓Agent↓Answer↓Ho`

@@ -1,0 +1,122 @@
+[
+ {
+  "where": "1100 population: the page measured",
+  "ok": true,
+  "detail": "{\"doc\":1100,\"vw\":1100,\"sc\":2432,\"scw\":1012,\"wide\":[\"DIV.rsp15-rcs[list] -614→1786 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] -614→1786 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 639→1716 \\\"What they said↓\\\"\",\"SPAN.[] 1734→1766 \\\"\\\"\",\"DIV.rsp15-rcm[month] -614→1786 \\\"November3\\\"\"]}"
+ },
+ {
+  "where": "1100 no sideways scroll on the document",
+  "ok": true,
+  "detail": "{\"doc\":1100,\"vw\":1100,\"sc\":2432,\"scw\":1012,\"wide\":[\"DIV.rsp15-rcs[list] -614→1786 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] -614→1786 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 639→1716 \\\"What they said↓\\\"\",\"SPAN.[] 1734→1766 \\\"\\\"\",\"DIV.rsp15-rcm[month] -614→1786 \\\"November3\\\"\"]}"
+ },
+ {
+  "where": "1100 nothing wider than the scroller",
+  "ok": false,
+  "detail": "{\"doc\":1100,\"vw\":1100,\"sc\":2432,\"scw\":1012,\"wide\":[\"DIV.rsp15-rcs[list] -614→1786 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] -614→1786 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 639→1716 \\\"What they said↓\\\"\",\"SPAN.[] 1734→1766 \\\"\\\"\",\"DIV.rsp15-rcm[month] -614→1786 \\\"November3\\\"\"]}"
+ },
+ {
+  "where": "1100 nothing past the viewport's right edge",
+  "ok": false,
+  "detail": "[\"DIV.rsp15-rcs[list] -614→1786 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] -614→1786 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 639→1716 \\\"What they said↓\\\"\",\"SPAN.[] 1734→1766 \\\"\\\"\",\"DIV.rsp15-rcm[month] -614→1786 \\\"November3\\\"\"]"
+ },
+ {
+  "where": "1280 population: the page measured",
+  "ok": true,
+  "detail": "{\"doc\":1280,\"vw\":1280,\"sc\":2432,\"scw\":1192,\"wide\":[\"DIV.rsp15-rcs[list] 17→2417 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 17→2417 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1270→2347 \\\"What they said↓\\\"\",\"I.[] 1372→1380 \\\"↓\\\"\",\"SPAN.[] 2365→2397 \\\"\\\"\"]}"
+ },
+ {
+  "where": "1280 no sideways scroll on the document",
+  "ok": true,
+  "detail": "{\"doc\":1280,\"vw\":1280,\"sc\":2432,\"scw\":1192,\"wide\":[\"DIV.rsp15-rcs[list] 17→2417 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 17→2417 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1270→2347 \\\"What they said↓\\\"\",\"I.[] 1372→1380 \\\"↓\\\"\",\"SPAN.[] 2365→2397 \\\"\\\"\"]}"
+ },
+ {
+  "where": "1280 nothing wider than the scroller",
+  "ok": false,
+  "detail": "{\"doc\":1280,\"vw\":1280,\"sc\":2432,\"scw\":1192,\"wide\":[\"DIV.rsp15-rcs[list] 17→2417 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 17→2417 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1270→2347 \\\"What they said↓\\\"\",\"I.[] 1372→1380 \\\"↓\\\"\",\"SPAN.[] 2365→2397 \\\"\\\"\"]}"
+ },
+ {
+  "where": "1280 nothing past the viewport's right edge",
+  "ok": false,
+  "detail": "[\"DIV.rsp15-rcs[list] 17→2417 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 17→2417 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1270→2347 \\\"What they said↓\\\"\",\"I.[] 1372→1380 \\\"↓\\\"\",\"SPAN.[] 2365→2397 \\\"\\\"\"]"
+ },
+ {
+  "where": "1440 population: the page measured",
+  "ok": true,
+  "detail": "{\"doc\":1440,\"vw\":1440,\"sc\":2432,\"scw\":1352,\"wide\":[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"I.[] 1526→1534 \\\"↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\"]}"
+ },
+ {
+  "where": "1440 no sideways scroll on the document",
+  "ok": true,
+  "detail": "{\"doc\":1440,\"vw\":1440,\"sc\":2432,\"scw\":1352,\"wide\":[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"I.[] 1526→1534 \\\"↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\"]}"
+ },
+ {
+  "where": "1440 nothing wider than the scroller",
+  "ok": false,
+  "detail": "{\"doc\":1440,\"vw\":1440,\"sc\":2432,\"scw\":1352,\"wide\":[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"I.[] 1526→1534 \\\"↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\"]}"
+ },
+ {
+  "where": "1440 nothing past the viewport's right edge",
+  "ok": false,
+  "detail": "[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"I.[] 1526→1534 \\\"↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\"]"
+ },
+ {
+  "where": "1512 population: the page measured",
+  "ok": true,
+  "detail": "{\"doc\":1512,\"vw\":1512,\"sc\":2432,\"scw\":1424,\"wide\":[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"I.[] 1526→1534 \\\"↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\"]}"
+ },
+ {
+  "where": "1512 no sideways scroll on the document",
+  "ok": true,
+  "detail": "{\"doc\":1512,\"vw\":1512,\"sc\":2432,\"scw\":1424,\"wide\":[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"I.[] 1526→1534 \\\"↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\"]}"
+ },
+ {
+  "where": "1512 nothing wider than the scroller",
+  "ok": false,
+  "detail": "{\"doc\":1512,\"vw\":1512,\"sc\":2432,\"scw\":1424,\"wide\":[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"I.[] 1526→1534 \\\"↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\"]}"
+ },
+ {
+  "where": "1512 nothing past the viewport's right edge",
+  "ok": false,
+  "detail": "[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"I.[] 1526→1534 \\\"↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\"]"
+ },
+ {
+  "where": "1717 population: the page measured",
+  "ok": true,
+  "detail": "{\"doc\":1717,\"vw\":1717,\"sc\":2432,\"scw\":1629,\"wide\":[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\",\"DIV.rsp15-rcm[month] 112→2512 \\\"November3\\\"\"]}"
+ },
+ {
+  "where": "1717 no sideways scroll on the document",
+  "ok": true,
+  "detail": "{\"doc\":1717,\"vw\":1717,\"sc\":2432,\"scw\":1629,\"wide\":[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\",\"DIV.rsp15-rcm[month] 112→2512 \\\"November3\\\"\"]}"
+ },
+ {
+  "where": "1717 nothing wider than the scroller",
+  "ok": false,
+  "detail": "{\"doc\":1717,\"vw\":1717,\"sc\":2432,\"scw\":1629,\"wide\":[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\",\"DIV.rsp15-rcm[month] 112→2512 \\\"November3\\\"\"]}"
+ },
+ {
+  "where": "1717 nothing past the viewport's right edge",
+  "ok": false,
+  "detail": "[\"DIV.rsp15-rcs[list] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"DIV.rsp15-rch[heads] 112→2512 \\\"Date↓Agent↓Answer↓How long it \\\"\",\"BUTTON.[head] 1424→2442 \\\"What they said↓\\\"\",\"SPAN.[] 2460→2492 \\\"\\\"\",\"DIV.rsp15-rcm[month] 112→2512 \\\"November3\\\"\"]"
+ },
+ {
+  "where": "756 population: the phone page measured",
+  "ok": true,
+  "detail": "{\"doc\":2400,\"vw\":756}"
+ },
+ {
+  "where": "756 no sideways scroll on the document",
+  "ok": false,
+  "detail": "{\"doc\":2400,\"vw\":756}"
+ },
+ {
+  "where": "756 (phone layout: the desktop scroller is not drawn)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "756 (phone layout: no element sweep)",
+  "ok": true,
+  "detail": ""
+ }
+]
