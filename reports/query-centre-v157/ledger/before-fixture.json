@@ -1,0 +1,22 @@
+[
+ {
+  "name": "harness nudged queries: seed-cal-bang-q, seed-cal-soon-q, thin-q-remind",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "quiet cards on the grid (95 cards): 0",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "at least one quiet card has been nudged",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "at least one quiet card has not",
+  "ok": false,
+  "got": ""
+ }
+]

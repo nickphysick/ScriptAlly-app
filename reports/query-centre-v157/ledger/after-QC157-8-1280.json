@@ -1,0 +1,42 @@
+[
+ {
+  "name": "each quiet card has one aria-hidden, pointer-events: none set of three z's",
+  "ok": true,
+  "got": "[{\"id\":\"thin-q-close\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-query-22\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"msv12-q-1\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"msv12-q-7\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-query-4\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-query-19\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"thin-q-cohort-2\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"thin-q-cohort-1\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"thin-q-cohort-6\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"thin-q-cohort-3\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"thin-q-cohort-5\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"thin-q-cohort-4\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-query-10\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-query-ms2-a\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"rj-nudge\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"thin-q-chase\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-query-ms2-b\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"cv25-q-10\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"cv25-q-05\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-cal-passed20-q\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-query-6\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-pkgq-1\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-pkgq-2\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-query-5\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"cor-undo\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"cor-move-b\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-pkgq-7\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-query-3\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-cal-near-q\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"cv25-q-11\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-pkgq-9\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-query-21\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-pkgq-10\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"msv12-q-5\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"thin-q-remind\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"msv12-q-2\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"probe-dangling-pkg\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"probe-un-noms\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"probe-goalstress-today\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-cal-soon-q\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"seed-cal-bang-q\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"cv25-q-04\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"},{\"id\":\"cv25-q-03\",\"zz\":1,\"hidden\":\"true\",\"zs\":3,\"pe\":\"none\"}]"
+ },
+ {
+  "name": "no other card has any",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "at rest each is opacity 0",
+  "ok": true,
+  "got": "0,0,0"
+ },
+ {
+  "name": "600ms after hover: .7, .85, 1",
+  "ok": true,
+  "got": "0.7,0.85,1"
+ },
+ {
+  "name": "…with no transform",
+  "ok": true,
+  "got": "none | none | none"
+ },
+ {
+  "name": "Special Elite, navy",
+  "ok": true,
+  "got": "\"Special Elite\", \"Courier New\", Courier, monospace rgb(42, 58, 82)"
+ },
+ {
+  "name": "12, 15 and 19px",
+  "ok": true,
+  "got": "12px,15px,19px"
+ },
+ {
+  "name": "no z is clipped: inside the viewport, and inside every clipping ancestor",
+  "ok": true,
+  "got": "[{\"box\":[446,460.4,6.4,12],\"inView\":true,\"cut\":\"\"},{\"box\":[456,448.4,7.9,15],\"inView\":true,\"cut\":\"\"},{\"box\":[469,433.4,10.1,19],\"inView\":true,\"cut\":\"\"}]"
+ }
+]

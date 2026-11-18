@@ -1,0 +1,22 @@
+[
+ {
+  "name": "hot boxes on the page: 65",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "every hot box is white with the inset 1.5px navy outline",
+  "ok": true,
+  "got": "rgb(255, 255, 255) | rgb(42, 58, 82) 0px 0px 0px 1.5px inset"
+ },
+ {
+  "name": "no hot value has ::after content",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "every other box is #fbf9f5 with no outline",
+  "ok": true,
+  "got": "rgb(251, 249, 245) | none"
+ }
+]

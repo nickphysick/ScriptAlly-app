@@ -1,0 +1,22 @@
+[
+ {
+  "name": "an Offer card and a Full Sent card exist",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Offer at rest: the gradient, 260% 100%, x 30%",
+  "ok": false,
+  "got": "{\"image\":\"none\",\"size\":\"auto\",\"x\":\"0%\",\"color\":\"rgb(231, 214, 220)\"}"
+ },
+ {
+  "name": "Offer hovered: x 85%",
+  "ok": false,
+  "got": "0%"
+ },
+ {
+  "name": "a Full Sent card has no gradient",
+  "ok": true,
+  "got": "none"
+ }
+]

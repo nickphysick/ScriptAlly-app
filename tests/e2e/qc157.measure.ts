@@ -206,7 +206,8 @@ test.describe("Query Centre v157", () => {
       L5.check("every hot box is white with the inset 1.5px navy outline", hot.every((g) => g.bg === "rgb(255, 255, 255)" && /rgb\(42, 58, 82\) 0px 0px 0px 1\.5px inset/.test(g.shadow)), [...new Set(hot.map((g) => `${g.bg} | ${g.shadow}`))].join(" ; "));
       L5.check("no hot value has ::after content", hot.every((g) => g.after === "none" || g.after === "normal"), [...new Set(hot.map((g) => g.after))].join(","));
       L5.check("every other box is #fbf9f5 with no outline", cold.every((g) => g.bg === "rgb(251, 249, 245)" && g.shadow === "none"), [...new Set(cold.map((g) => `${g.bg} | ${g.shadow}`))].join(" ; "));
-      L4.done(1); L5.done(4);
+      /* every ledger is written even when an earlier one fails */
+      try { L4.done(1); } finally { L5.done(4); }
     });
 
     test(`QC157-6/7/9 quiet band, step and words — ${w}`, async ({ page }) => {
@@ -242,7 +243,7 @@ test.describe("Query Centre v157", () => {
       L9.check("the nudged quiet cards' line starts “nudged ”", n.length > 0 && n.every((q) => (q.line ?? "").startsWith("nudged ")), n.map((q) => `${q.id}: ${q.line}`).join(" | "));
       /* a query with no reply date (an agent who states no reply window, quiet by the undated 84-day rule) has no line */
       L9.check("the others' line starts “since ”, or there is none (no reply date)", s.some((q) => (q.line ?? "").startsWith("since ")) && s.every((q) => q.line == null || q.line.startsWith("since ")), s.map((q) => `${q.id}: ${q.line}`).join(" | "));
-      L6.done(4); L7.done(4); L9.done(3);
+      try { L6.done(4); } finally { try { L7.done(4); } finally { L9.done(3); } }
     });
 
     test(`QC157-8 z's — ${w}`, async ({ page }) => {
