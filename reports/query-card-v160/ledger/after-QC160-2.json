@@ -2,7 +2,7 @@
  {
   "name": "population: Undo was pressed",
   "ok": true,
-  "got": "76"
+  "got": "73"
  },
  {
   "name": "undo: exactly one scale animation on the frame",
@@ -27,7 +27,7 @@
  {
   "name": "undo: population — frames with the bump running",
   "ok": true,
-  "got": "24"
+  "got": "17"
  },
  {
   "name": "undo: the frame's rotate is unchanged during it",

@@ -45,8 +45,9 @@ import "./qcv158.css";
 import { AgentTab158 } from "./QcAgent158";
 import { MaterialsTab158 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
-/* Query card v160 — the card bumps when a save or an undo lands */
-import { bump } from "./qcMotion160";
+/* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
+import { bump, easeBg, fadeIn, finishAll, foot as footIn, markPop, reduced, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
+import "./qcv160.css";
 import { useLanding160, type Motion160 } from "./useLanding160";
 
 export interface QcCard152Data {
@@ -175,6 +176,20 @@ const TipBox: React.FC<{ x: number; y: number; head: string | null; body: string
 const PREV = <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10 3.5 5.5 8l4.5 4.5" /></svg>;
 const NEXT = <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" /></svg>;
 
+/** v160 — what the strip, the label and the footer looked like, read off the page */
+interface Snap160 { bg: string; img: string; word: string; pill: string; pillBg: string; foot: string; footH: number | null }
+function readSnap160(root: HTMLElement): Snap160 {
+  const band = root.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc152='band']");
+  const pill = root.querySelector<HTMLElement>("[data-qc152='pill']");
+  const ft = root.querySelector<HTMLElement>("[data-qc152='reply']");
+  const bs = band ? getComputedStyle(band) : null;
+  return {
+    bg: bs?.backgroundColor ?? "", img: bs?.backgroundImage ?? "none", word: band?.querySelector("[data-qc152='band-word']")?.textContent ?? "",
+    pill: pill?.textContent ?? "", pillBg: pill ? getComputedStyle(pill).backgroundColor : "",
+    foot: ft ? `${ft.dataset.rows ?? ""}|${ft.textContent ?? ""}` : "", footH: ft ? ft.offsetHeight : null,
+  };
+}
+
 export const FOLD_OVER = 5;
 export const FOLD_KEEP = 3;
 
@@ -239,6 +254,87 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     return () => document.removeEventListener("click", off);
   }, [tip.on]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* ══ v160 — WHEN A SAVE OR AN UNDO LANDS (lib: ./useLanding160, ./qcMotion160) ══════════════════════════════════
+     The landing is the first frame the card's drawing changes; everything below starts in it. The frame bumps once.
+     A draft showing for the save stays on screen until its step arrives, and the step takes the draft's place in the
+     same element (its React key is the draft's), where it settles. A step that arrives without a draft enters with
+     `.new` at once; a wait line that appears fades in. The strip and the label ease when the stage or the word moves;
+     the footer's new contents rise in. */
+  const sig160 = JSON.stringify([r.status, d.state, d.foot?.phase ?? null, thread.filter((x) => x.t === "msg").map((x) => x.key)]);
+  const lastDraft = useRef<ThreadStepIn | null>(null);
+  const draftSeq = useRef(0);
+  const alias = useRef<{ id: string; map: Map<string, string>; col: Map<string, string> }>({ id: r.id, map: new Map(), col: new Map() });
+  if (alias.current.id !== r.id) alias.current = { id: r.id, map: new Map(), col: new Map() };
+  const keysAtStart = useRef<Set<string> | null>(null);
+  const snap160 = useRef<Snap160 | null>(null);
+  const [enter, setEnter] = useState<string[]>([]);
+  const landing = useLanding160(p.motion, sig160, r.id, {
+    start: () => {
+      const root = rootRef.current;
+      finishAll(root);
+      snap160.current = root ? readSnap160(root) : null;
+      keysAtStart.current = new Set(thread.map((x) => x.key));
+    },
+    land: (kind, first) => {
+      const root = rootRef.current;
+      if (!root) return;
+      if (first) bump(root.closest<HTMLElement>(".spanel"));
+      const start = keysAtStart.current ?? new Set<string>();
+      keysAtStart.current = new Set(thread.map((x) => x.key));
+      if (settledNow) { draftSeq.current += 1; lastDraft.current = null; }
+      if (reduced()) { snap160.current = readSnap160(root); return; }
+      finishAll(root);
+      const was = snap160.current, now = readSnap160(root);
+      snap160.current = now;
+      const el = (k: string) => root.querySelector<HTMLElement>(`[data-qc152='thread'] > [data-rk="${CSS.escape(alias.current.map.get(k) ?? k)}"]`);
+      const fresh = thread.filter((x) => !start.has(x.key));
+      const entering: string[] = [];
+      for (const it of fresh) {
+        const e = el(it.key);
+        if (!e) continue;
+        if (it.t === "wait") { if (!(kind === "save" && it.key === settledWait)) fadeIn(root, e); continue; }
+        if (kind === "save" && it.key === settledNow) settle(root, e, alias.current.col.get(it.key) ?? "#b9ad9e");
+        else entering.push(it.key);
+      }
+      if (entering.length) { setEnter(entering); window.setTimeout(() => setEnter((x) => x.filter((k) => !entering.includes(k))), 700); }
+      if (was && (was.word !== now.word || was.bg !== now.bg || was.img !== now.img || was.pill !== now.pill)) {
+        const band = root.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc152='band']");
+        if (band) stripIn(root, band, was);
+        const pill = root.querySelector<HTMLElement>("[data-qc152='pill']");
+        if (pill) easeBg(root, pill, was.pillBg);
+        words(root, [band?.querySelector<HTMLElement>("[data-qc152='band-word']") ?? null, pill?.querySelector<HTMLElement>(":scope > span:not(.qc152-cap)") ?? null]);
+        markPop(root, pill?.querySelector<HTMLElement>(".qc152-cap") ?? null);
+      }
+      const ft = root.querySelector<HTMLElement>("[data-qc152='reply']");
+      if (ft && was && was.foot !== now.foot) footIn(root, ft, was.footH);
+    },
+  });
+  /* the draft is held while its save is under way (the page clears it as the save starts) */
+  const saving = landing.started() === "save";
+  const draftIn = p.draft ?? (saving ? lastDraft.current : null);
+  const draftKey = `__draft:${draftSeq.current}`;
+  const draftCol = (m: { side: string; status: QueryStatus | null }) => (m.side === "me" || !m.status ? "#b9ad9e" : STAGE_COLOURS[stageOf(m.status)].mark);
+  /* the step that arrived for it takes its key */
+  let settledNow: string | null = null, settledWait: string | null = null;
+  if (saving && !p.draft && draftIn && keysAtStart.current) {
+    const start = keysAtStart.current;
+    const tgt = thread.filter((x): x is Extract<ThreadItem, { t: "msg" }> => x.t === "msg" && !start.has(x.key)).pop();
+    if (tgt) {
+      if (!alias.current.map.has(tgt.key)) {
+        alias.current.map.set(tgt.key, draftKey);
+        alias.current.col.set(tgt.key, draftCol(tgt));
+        const w = thread[thread.indexOf(tgt) - 1];
+        if (w && w.t === "wait" && !start.has(w.key)) alias.current.map.set(w.key, `${draftKey}:w`);
+      }
+      settledNow = tgt.key;
+      const w = thread[thread.indexOf(tgt) - 1];
+      settledWait = w && w.t === "wait" && alias.current.map.get(w.key) === `${draftKey}:w` ? w.key : null;
+    }
+  }
+  const showDraft = !!draftIn && !settledNow;
+  const rk = (k: string) => alias.current.map.get(k) ?? k;
+  useLayoutEffect(() => { if (p.draft) lastDraft.current = p.draft; });
+
   const chips = (cs: ThreadChip[], key: string) => cs.length ? (
     <span className="qc152-chs" data-qc152="chips">
       {cs.map((c, i) => (
@@ -250,26 +346,35 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   ) : null;
 
   /* v152.2 §3.1 — the draft: the same derivation as a real step, after its own wait line, with a dashed edge in its colour */
-  const draftNode = (() => {
-    if (!p.draft) return null;
-    const all = buildThread([...d.steps, p.draft], { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
+  const draftNode: React.ReactNode[] = (() => {
+    if (!showDraft || !draftIn) return [];
+    const all = buildThread([...d.steps, draftIn], { first, nowMs, state: d.state, replyMs: d.replyMs, agentWeeks: d.agentWeeks });
     const at = all.findIndex((x) => x.t === "msg" && x.key === "__draft");
     const m = all[at];
-    if (!m || m.t !== "msg") return null;
+    if (!m || m.t !== "msg") return [];
     const prevMs = [...d.steps].filter((x) => x.ms != null).map((x) => x.ms!).sort((a, b) => a - b).pop() ?? null;
-    const gap = prevMs != null && p.draft.ms != null ? Math.max(0, Math.round((new Date(p.draft.ms).setHours(0, 0, 0, 0) - new Date(prevMs).setHours(0, 0, 0, 0)) / 86_400_000)) : null;
+    const gap = prevMs != null && draftIn.ms != null ? Math.max(0, Math.round((new Date(draftIn.ms).setHours(0, 0, 0, 0) - new Date(prevMs).setHours(0, 0, 0, 0)) / 86_400_000)) : null;
     /* a draft keeps its dashed outline: the writer's in v152.2's stone, the agent's in the Mark of the stage it moves to */
-    const col = m.side === "me" || !m.status ? "#b9ad9e" : STAGE_COLOURS[stageOf(m.status)].mark;
-    return <>
-      {gap != null ? <div className={`qc1522-lt ${m.side}`} data-qc1522="draft-wait">{waitWords(gap)}</div> : null}
-      <Bubble side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated={m.dated} tint={m.tint} grey={m.grey} initials={r.initials}
+    const col = draftCol(m);
+    /* v160 — keyed beside the thread's own steps, so the step that arrives for it can take its element */
+    return [
+      gap != null ? <div key={`${draftKey}:w`} className={`qc1522-lt ${m.side}`} data-qc1522="draft-wait" data-rk={`${draftKey}:w`}>{waitWords(gap)}</div> : null,
+      <React.Fragment key={draftKey}><Bubble side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated={m.dated} tint={m.tint} grey={m.grey} initials={r.initials}
         chips={m.chips.length ? <span className="qc152-chs">{m.chips.map((c, k) => <span key={k} className="qc152-ch">{chipIcon(c.label)}{c.label}</span>)}</span> : null}
         via={m.via} quote={m.quote} follows={m.follows} nth={null} sub={m.sub} className="qc1522-draft" stamp={m.stamp} viaIcon={m.side === "me" ? viaKind(m.via) : null}
-        outer={{ "data-qc152": "msg", "data-qc1522": "draft", "data-side": m.side, style: { ["--dr" as string]: col } }} />
-    </>;
+        outer={{ "data-qc152": "msg", "data-qc1522": "draft", "data-side": m.side, "data-rk": draftKey, style: { ["--dr" as string]: col } }} /></React.Fragment>,
+    ];
   })();
 
   const desk = p.desk ?? {};
+  /* v160 — the toast leaving: what it said, held for its 220ms */
+  const prevToast = useRef<{ msg: string; undo: boolean; id: string } | null>(null);
+  const [toastGone, setToastGone] = useState<{ msg: string; undo: boolean; k: number } | null>(null);
+  useLayoutEffect(() => {
+    const was = prevToast.current, now = p.toast ? { msg: p.toast.msg, undo: !!p.toast.onUndo, id: r.id } : null;
+    if (was && was.id === r.id && (!now || now.msg !== was.msg) && !reduced()) setToastGone({ msg: was.msg, undo: was.undo, k: performance.now() });
+    prevToast.current = now;
+  }, [p.toast?.msg, !!p.toast, r.id]); // eslint-disable-line react-hooks/exhaustive-deps
   /* v158: no day pill above a day's first message (each bubble's stamp is its date) and no status line under the newest
      one (the footer says where the query stands); the wait between two messages is "N days later" at the side */
   const clipChip = (c: { items: string[]; version: string | null }) => (
@@ -287,31 +392,30 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
       {folded ? (
         <button type="button" className="qc152-coll" data-qc152="fold" onClick={() => setUnfold(true)}>{folded} earlier {folded === 1 ? "step" : "steps"} · show</button>
       ) : null}
-      {shown.map((it, i) => {
+      {[...shown.map((it, i) => {
         if (it.t === "wait") {
           /* v152.2 §2.2 — one italic line on the side of the next message; never a pill or a hairline */
           if (folded && i === 0) return null;
-          return <div key={it.key} className={`qc1522-lt ${it.side}`} data-qc152="wait" data-qc1522="wait" data-side={it.side} data-label={it.label} title={it.tip ?? undefined}>{it.label}</div>;
+          return <div key={rk(it.key)} className={`qc1522-lt ${it.side}`} data-qc152="wait" data-qc1522="wait" data-side={it.side} data-label={it.label} data-rk={rk(it.key)} title={it.tip ?? undefined}>{it.label}</div>;
         }
         if (p.editingId && it.activityId === p.editingId && p.editNode) return <React.Fragment key={it.key}>{p.editNode}</React.Fragment>;
         const clip = desk.clip && (it.activityId === desk.clip.key || it.key === desk.clip.key) ? desk.clip : null;
         const checking = !!desk.checkKey && (it.activityId === desk.checkKey || it.key === desk.checkKey);
         const stamped = !!desk.stampKey && (it.activityId === desk.stampKey || it.key === desk.stampKey);
         return (
-          <React.Fragment key={it.key}>
+          <React.Fragment key={rk(it.key)}>
             <Bubble side={it.side} status={it.status} kind={it.kind} title={clip ? `You sent ${first} your materials` : it.title} date={it.date} dated={it.dated}
               stamp={it.stamp} viaIcon={it.side === "me" ? viaKind(it.via) : null}
               tint={it.tint} grey={it.grey} initials={r.initials} chips={clip ? clipChip(clip) : chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
-              className={[p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : ""].filter(Boolean).join(" ") || undefined}
+              className={[(p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) && !alias.current.map.has(it.key)) || enter.includes(it.key) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : ""].filter(Boolean).join(" ") || undefined}
               mark={checking ? <span className="qc153-chkw" data-qc153="checking">Checking</span> : stamped ? <span className="qc153-stamp" data-qc153="logged">Logged</span> : null}
-              outer={{ "data-qc152": "msg", "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId,
+              outer={{ "data-qc152": "msg", "data-rk": rk(it.key), "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId,
                 style: { animationDelay: `${i * 45}ms` } }}
               after={<button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
                 onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>} />
           </React.Fragment>
         );
-      })}
-      {draftNode}
+      }), ...draftNode]}
       {desk.typing ? (
         /* v53 (D8): while the To-do's questions are open, the writer is "typing" where the new step will go */
         <div className="qc152-m me qc153-typing" data-qc153="typing"><div className="qc152-bx" data-qc152="bubble"><span className="qc153-dots" aria-label="Being logged"><i /><i /><i /></span></div></div>
@@ -351,12 +455,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
 
   /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). "Edit what went" opens
      the same step editor the per-block Edit opened, on the latest sent step. */
-  /* v160 — a save or an undo lands in the first frame the card's drawing changes: the frame bumps, once */
-  const sig160 = JSON.stringify([r.status, d.state, d.foot?.phase ?? null, thread.filter((x) => x.t === "msg").map((x) => x.key)]);
-  useLanding160(p.motion, sig160, r.id, {
-    land: (_kind, first) => { if (first) bump(rootRef.current?.closest<HTMLElement>(".spanel") ?? null); },
-  });
-
   const groups = materialGroups(d.steps, { nowMs });
   const lastSent = [...groups].reverse().find((g) => !g.pending && g.activityId)?.activityId ?? null;
   const matPane = (
@@ -454,6 +552,13 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               {METHODS.map((m) => <MenuItem key={m.v} data={m.v} on={ed.dr!.details.method === m.v} label={m.label} onPick={() => { ed.patch({ method: m.v }); ed.setOpen(null); }} />)}
             </> : null}
           </EdMenu>
+        ) : null}
+        {toastGone ? (
+          /* v160 — the toast that timed out or was replaced leaves over 220ms (a copy: the live one is already gone) */
+          <div key={toastGone.k} className="qc1522-toast qc160-tout" aria-hidden="true" data-qc160="toast-out"
+            ref={(el) => { if (el && !el.dataset.out) { el.dataset.out = "1"; const k = toastGone.k; toastOut(el, () => setToastGone((g) => (g && g.k === k ? null : g))); } }}>
+            <span>{toastGone.msg}</span>{toastGone.undo ? <button type="button" tabIndex={-1}>Undo</button> : null}
+          </div>
         ) : null}
         {p.toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{p.toast.msg}</span>{p.toast.onUndo ? <button type="button" data-qc1522="undo" onClick={p.toast.onUndo}>Undo</button> : null}</div> : null}
         {p.burst ? <div key={p.burst} className="qc1522-burst" aria-hidden="true" data-qc1522="burst">{Array.from({ length: 46 }, (_, k) => <i key={k} style={{ left: `${(k * 37) % 100}%`, background: ["#f2ebe0", "#f3d3c6", "#d3dce7", "#cbd9be"][k % 4], animationDelay: `${(k % 7) * 0.08}s` }} />)}</div> : null}

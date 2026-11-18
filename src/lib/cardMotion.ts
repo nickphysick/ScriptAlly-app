@@ -2,13 +2,13 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Record a response v1, Phase 6 — THE CARD'S MOTION that CSS alone cannot carry (design-refs/record-a-response-v1/,
+ * Record a response v1, Phase 6 — THE CARD'S MOTION that CSS alone cannot carry (a save's and an undo's landing moved to the card itself in Query card v160,
+ * components/queries/centre/qcMotion160.ts, which replaced `savedCard`) (design-refs/record-a-response-v1/,
  * "Every route and the motion"). Everything else (the slide in, the scrim, the composer's fold and rise, the bubble's
  * pop, the Undo toast) is CSS.
  *
  *   swapCard   "Who replied?" ↔ a query's card: the frame stays; its contents go out 130ms to one side, the new ones come
  *              in 220ms from the other, and the band's colour cross-fades over 300ms
- *   savedCard  after a save: the band cross-fades 420ms, the status pill pops 360ms, the footer swaps in 240ms
  *   leaveGhost the panel and its scrim, closed: a copy slides away 200ms ease-in while the real one is already gone, so
  *              the page behind is live at once and nothing in the app waits on the animation
  *
@@ -52,26 +52,6 @@ export function swapCard(dir: 1 | -1, change: () => void): void {
       }
     }));
   });
-}
-
-/** read before the save: the band's colour now, to fade from */
-export function bandColourNow(): string {
-  const b = bandOf(panelIn());
-  return b ? getComputedStyle(b).backgroundColor : "";
-}
-/** after the save has drawn: the band, the pill and the footer settle into the new state */
-export function savedCard(oldBg: string): void {
-  if (reduced()) return;
-  requestAnimationFrame(() => requestAnimationFrame(() => {
-    const inEl = panelIn();
-    if (!inEl) return;
-    fadeBand(oldBg, 420);
-    inEl.querySelector<HTMLElement>("[data-qc152='pill']")?.animate(
-      [{ transform: "scale(0.88)", opacity: 0.2 }, { transform: "scale(1.05)", opacity: 1, offset: 0.7 }, { transform: "none", opacity: 1 }],
-      { duration: 360, delay: 140, fill: "backwards" });
-    inEl.querySelector<HTMLElement>("[data-qc1522='footer'], [data-qc152='reply']")?.animate(
-      [{ opacity: 0, transform: "translateY(8px)" }, { opacity: 1, transform: "none" }], { duration: 240, delay: 180, fill: "backwards" });
-  }));
 }
 
 /**

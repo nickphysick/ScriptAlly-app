@@ -1,0 +1,5 @@
+/*
+ * Query card v160 — the toast that is leaving (a copy, aria-hidden): no entrance of its own, and no clicks.
+ * The motion itself is the Web Animations API (./qcMotion160.ts): no var() in a keyframe, no color-mix().
+ */
+.qc152 .qc1522-toast.qc160-tout { animation: none; pointer-events: none; }

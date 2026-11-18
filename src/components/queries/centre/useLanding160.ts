@@ -9,8 +9,8 @@
  * frame the change is painted in. A further change inside the next 1.2s (a write that reaches the card in two parts)
  * runs `onLand(kind, false)`: it eases, but the card does not bump twice.
  *
- * ⚠️ Nothing lands on another query: stepping to the next one drops the motion. A save that never draws (it failed)
- *    is dropped after 8s.
+ * ⚠️ Nothing lands on another query: stepping to the next one drops the motion. A save that fails is withdrawn by the
+ *    page (`motion` null); one that never draws is dropped after 8s.
  */
 import { useLayoutEffect, useRef } from "react";
 
@@ -20,11 +20,13 @@ const WINDOW_MS = 1200, GIVE_UP_MS = 8000;
 export function useLanding160(
   motion: Motion160 | null | undefined, sig: string, rId: string,
   on: { start?: (kind: Motion160["kind"]) => void; land: (kind: Motion160["kind"], first: boolean) => void },
-): { pending: () => Motion160["kind"] | null } {
+): { started: () => Motion160["kind"] | null } {
   const seen = useRef<number | null>(motion?.n ?? null);
   const pend = useRef<{ kind: Motion160["kind"]; sig0: string; rId: string; t0: number; landed: number | null } | null>(null);
   useLayoutEffect(() => {
-    if (motion && motion.n !== seen.current) {
+    /* the page withdrew it (the save failed) */
+    if (!motion) { pend.current = null; return; }
+    if (motion.n !== seen.current) {
       seen.current = motion.n;
       pend.current = { kind: motion.kind, sig0: sig, rId, t0: performance.now(), landed: null };
       on.start?.(motion.kind);
@@ -40,5 +42,8 @@ export function useLanding160(
     p.sig0 = sig;
     on.land(p.kind, first);
   });
-  return { pending: () => (pend.current && pend.current.landed == null ? pend.current.kind : null) };
+  /* under way and not yet landed — from the render the motion arrives in (its layout phase has not run yet) */
+  return {
+    started: () => (!motion ? null : motion.n !== seen.current ? motion.kind : pend.current && pend.current.landed == null && pend.current.rId === rId ? pend.current.kind : null),
+  };
 }

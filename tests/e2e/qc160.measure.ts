@@ -104,6 +104,11 @@ async function startTrace(page: Page) {
         msgs: msgs.length, lastId: idOf(last), lastCls: last?.className, lastTitle: last?.querySelector("[data-qc152='msg-title']")?.textContent, lastText: last?.textContent?.slice(0, 60),
         lastBg: cs(bx)?.backgroundColor, lastBorder: cs(bx)?.borderTopStyle, lastOutline: `${cs(bx)?.outlineStyle} ${cs(bx)?.outlineColor}`, lastOp: cs(last)?.opacity, lastH: last?.offsetHeight,
         toast: toast?.textContent, toastOp: cs(toast)?.opacity, anims,
+        ghost: card?.querySelector("[data-qc160='toast-out']")?.textContent ?? null, ghostOp: cs(card?.querySelector<HTMLElement>("[data-qc160='toast-out']") ?? null)?.opacity ?? null,
+        lastBgSize: cs(bx)?.backgroundSize, lastBgImg: cs(bx)?.backgroundImage?.slice(0, 50), lastScale: cs(last)?.scale, lastDraft: last?.dataset.qc1522 === "draft",
+        lastBxAnims: bx ? bx.getAnimations().map((a) => a.id || (a as CSSAnimation).animationName || "?") : [],
+        tagged: (() => { const g = (window as unknown as { __tag?: HTMLElement }).__tag; return g ? { in: g.isConnected, draft: g.dataset.qc1522 === "draft", isLast: g === last, cls: g.className } : null; })(),
+        cardBand: card ? getComputedStyle(card).getPropertyValue("--band").trim() : null,
       });
       requestAnimationFrame(tick);
     };
@@ -291,3 +296,93 @@ if (PHASE !== "before") {
     L.done(4);
   });
 }
+
+/* ── Phase 2: confirm ── */
+type TF = Record<string, unknown> & { t: number };
+const nums = (x: unknown) => (String(x ?? "").match(/[\d.]+/g) ?? []).map(Number).slice(0, 3);
+const probe = (page: Page, v: string) => page.evaluate((c) => { const d = document.createElement("div"); d.style.backgroundColor = c; document.body.appendChild(d); const o = getComputedStyle(d).backgroundColor; d.remove(); return o; }, v);
+/** the agent's reply on q152-agent ("Asked for the partial"): the draft shows, the stage moves (Queried → materials) */
+async function replyWithDraft(page: Page): Promise<{ ok: boolean; tagged: boolean }> {
+  await openCard(page, "agent");
+  await click(page, C("[data-qc152='reply-btn']"), 600);
+  await click(page, C("[data-qc1522='reply-types'] [data-v='req']"), 500);
+  const tagged = await page.evaluate((s) => { const e = document.querySelector<HTMLElement>(`${s} [data-qc1522='draft']`); (window as unknown as { __tag?: HTMLElement }).__tag = e ?? undefined; return !!e; }, CARD);
+  await startTrace(page);
+  await page.waitForTimeout(150);
+  await page.locator(C("[data-qc1522='save']")).first().click();
+  const ok = await waitToast(page);
+  await page.waitForTimeout(1300);
+  return { ok, tagged };
+}
+if (PHASE !== "before") {
+  if (run("5")) test("QC160-5/6 · the draft settles in place; the strip and the label ease", async ({ page }) => {
+    const L5 = new Ledger("QC160-5"), L6 = new Ledger("QC160-6");
+    await open(page);
+    const r = await replyWithDraft(page);
+    const tr = (await stopTrace(page)) as TF[];
+    writeFileSync(`${DIR}/frames/${PHASE}-save-agent.json`, JSON.stringify(tr, null, 0));
+    L5.check("population: a draft was showing, and the save landed", r.tagged && r.ok, JSON.stringify(r));
+    /* the landing: the first frame the band's word changed */
+    const li = tr.findIndex((f, i) => i > 0 && f.bandWord !== tr[i - 1].bandWord);
+    L5.check("population: the landing frame was found", li > 0, String(li));
+    const t0 = tr[li]?.t ?? 0;
+    const after = tr.slice(li);
+    L5.check("the same bubble element stays in the DOM through the save", tr.every((f) => (f.tagged as { in: boolean } | null)?.in === true), JSON.stringify(tr.filter((f) => !(f.tagged as { in: boolean } | null)?.in).slice(0, 1)));
+    L5.check("it is the thread's newest step after the landing, no longer a draft", after.every((f) => (f.tagged as { isLast: boolean; draft: boolean }).isLast && !(f.tagged as { draft: boolean }).draft), JSON.stringify((after[0]?.tagged)));
+    const fill = after.filter((f) => (f.lastBxAnims as string[]).includes("qc160-fill"));
+    L5.check("its background-size animates (the fill runs on the bubble)", fill.length >= 5, String(fill.length));
+    const sizes = after.map((f) => String(f.lastBgSize)).filter((x) => /%/.test(x));
+    L5.check("the fill starts near 0% and reaches 100%", sizes.length > 3 && parseFloat(sizes[0]) < 25 && sizes.some((x) => parseFloat(x) > 95), JSON.stringify([sizes[0], sizes[sizes.length - 1]]));
+    L5.check("the fill's run is 420ms (none after 500ms)", after.filter((f) => f.t - t0 > 520).every((f) => !(f.lastBxAnims as string[]).includes("qc160-fill")), "");
+    const end = after.find((f) => f.t - t0 >= 500)!;
+    const band = await probe(page, String(end?.cardBand ?? ""));
+    L5.check("after 500ms its background is the stage's Band", !!end && end.lastBg === band, `${end?.lastBg} vs ${band} (${end?.cardBand})`);
+    L5.check("after 500ms it has no dashed outline", !!end && !/dashed/.test(String(end.lastOutline)) && end.lastBorder !== "dashed", `${end?.lastOutline} / ${end?.lastBorder}`);
+    L5.check("it eased in from scale 1.015", after.some((f) => parseFloat(String(f.lastScale)) > 1.005 && parseFloat(String(f.lastScale)) <= 1.0151), JSON.stringify(after.slice(0, 4).map((f) => f.lastScale)));
+    L5.check("no new element popped in (no .new on it)", after.every((f) => !/\bnew\b/.test(String((f.tagged as { cls: string }).cls))), "");
+    /* QC160-6 — the strip's colour eases */
+    const from = nums(tr[li - 1]?.bandBg), to = nums(tr[tr.length - 1]?.bandBg);
+    L6.check("population: the save changes the stage (the strip's colour)", from.join() !== to.join(), `${tr[li - 1]?.bandBg} → ${tr[tr.length - 1]?.bandBg}`);
+    L6.check("population: both ends are single colours", !/gradient/.test(String(tr[li - 1]?.bandImg)) && !/gradient/.test(String(tr[tr.length - 1]?.bandImg)), `${tr[li - 1]?.bandImg} / ${tr[tr.length - 1]?.bandImg}`);
+    const at200 = after.find((f) => f.t - t0 >= 190)!;
+    const mid = nums(at200?.bandBg);
+    const between = mid.length === 3 && mid.every((v, k) => (v - from[k]) * (v - to[k]) <= 0) && mid.join() !== from.join() && mid.join() !== to.join();
+    L6.check("at 200ms the strip's background-color is strictly between the old and new", between, `${tr[li - 1]?.bandBg} | ${at200?.bandBg} @${(at200?.t ?? 0) - t0}ms | ${tr[tr.length - 1]?.bandBg}`);
+    const at500 = after.find((f) => f.t - t0 >= 500)!;
+    L6.check("by 500ms it equals the new colour", nums(at500?.bandBg).join() === to.join(), `${at500?.bandBg}`);
+    const pillMid = after.find((f) => f.t - t0 >= 190)?.pillBg, pillA = tr[li - 1]?.pillBg, pillB = tr[tr.length - 1]?.pillBg;
+    L6.check("the label's colour eases too (between at 200ms, where it changes)", pillA === pillB || (pillMid !== pillA && pillMid !== pillB), `${pillA} | ${pillMid} | ${pillB}`);
+    /* the footer: its new contents fade and rise in (from 120ms in, over 320ms) */
+    const fo = after.filter((f) => f.t - t0 > 60 && f.t - t0 < 440).map((f) => Number(f.footOp));
+    L6.check("the footer's new contents fade in (opacity strictly between 0 and 1 during the run)", fo.some((o) => o > 0.02 && o < 0.98), JSON.stringify(fo.slice(0, 10)));
+    L6.check("the footer is fully drawn by 500ms", Number(after.find((f) => f.t - t0 >= 500)?.footOp) === 1, String(after.find((f) => f.t - t0 >= 500)?.footOp));
+    L5.done(11); L6.done(7);
+  });
+
+  if (run("9")) test("QC160-9 · the toast leaves over 220ms (on Undo, and when it times out)", async ({ page }) => {
+    const L = new Ledger("QC160-9");
+    await open(page);
+    await openCard(page, "materials");
+    L.check("population: the save landed", await saveOne(page, "materials"), "");
+    await startTrace(page);
+    await page.waitForTimeout(100);
+    await page.locator(C("[data-qc1522='undo']")).first().click();
+    await page.waitForTimeout(800);
+    let tr = (await stopTrace(page)) as TF[];
+    const ops = tr.map((f) => Number(f.ghostOp ?? (f.toastOp ?? NaN))).filter((x) => !Number.isNaN(x));
+    L.check("on Undo: some frame shows the leaving toast with opacity strictly between 0 and 1", ops.some((o) => o > 0.02 && o < 0.98), JSON.stringify(ops.slice(0, 12)));
+    L.check("on Undo: it has gone by 400ms", tr.filter((f) => f.t > 400 + (tr.find((x) => x.ghost != null)?.t ?? 0)).every((f) => f.ghost == null && f.toast == null), "");
+    seed();
+    await page.reload(); await open(page); await openCard(page, "materials");
+    L.check("population: the second save landed", await saveOne(page, "materials"), "");
+    await page.waitForTimeout(4600);
+    await startTrace(page);
+    await page.waitForTimeout(1400);
+    tr = (await stopTrace(page)) as TF[];
+    const gs = tr.map((f) => Number(f.ghostOp ?? NaN)).filter((x) => !Number.isNaN(x));
+    L.check("timed out: some frame shows it leaving, opacity strictly between 0 and 1", gs.some((o) => o > 0.02 && o < 0.98), JSON.stringify(gs.slice(0, 12)));
+    L.check("timed out: the live toast is gone", tr[tr.length - 1]?.toast == null, String(tr[tr.length - 1]?.toast));
+    L.done(6);
+  });
+}
+

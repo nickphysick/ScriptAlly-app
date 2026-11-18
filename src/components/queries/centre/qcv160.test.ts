@@ -27,10 +27,40 @@ describe("Query card v160 · Phase 1 — the bump", () => {
   });
   it("the card bumps only on a landing's first change, on its own frame", () => {
     expect(CARD).toMatch(/useLanding160\(p\.motion, sig160, r\.id/);
-    expect(code(CARD)).toMatch(/if \(first\) bump\(rootRef\.current\?\.closest<HTMLElement>\("\.spanel"\)/);
+    expect(code(CARD)).toMatch(/if \(first\) bump\(root\.closest<HTMLElement>\("\.spanel"\)\)/);
     expect(LANDING).toMatch(/p\.rId !== rId/);
   });
   it("no var() and no color-mix() in the motion", () => {
     for (const s of [MOTION, LANDING]) { expect(code(s)).not.toMatch(/var\(--/); expect(code(s)).not.toMatch(/color-mix\(/); }
   });
 });
+
+const CSS = read("./qcv160.css");
+const CARD_MOTION = read("../../../lib/cardMotion.ts");
+const HOST = read("../../Queries.tsx");
+describe("Query card v160 · Phase 2 — confirm", () => {
+  it("the draft and the step that arrives for it share one React key, so the element is kept", () => {
+    expect(CARD).toMatch(/<React\.Fragment key=\{draftKey\}><Bubble/);
+    expect(CARD).toMatch(/<React\.Fragment key=\{rk\(it\.key\)\}>/);
+    expect(CARD).toMatch(/alias\.current\.map\.set\(tgt\.key, draftKey\)/);
+    expect(code(CARD)).toMatch(/settle\(root, e, /);
+  });
+  it("the fill is one background-size run on a single-colour layer; the dashed edge fades by outline-color", () => {
+    const fn = code(MOTION).match(/export function settle[\s\S]*?\n}/)?.[0] ?? "";
+    expect(fn).toMatch(/backgroundSize: size/);
+    expect(fn).toMatch(/linear-gradient\(\$\{c\}, \$\{c\}\)/);
+    expect(fn).toMatch(/outlineColor/);
+    expect(MOTION).toMatch(/ms: 420, ease: "cubic-bezier\(0\.3, 0\.7, 0\.2, 1\)", lineFrom: 120, lineMs: 300, from: 1\.015/);
+  });
+  it("Record a response's savedCard is replaced, not kept beside it", () => {
+    expect(CARD_MOTION).not.toMatch(/export function savedCard|export function bandColourNow/);
+    expect(code(HOST)).not.toMatch(/savedCard\(|bandColourNow\(/);
+  });
+  it("everything stays still under reduced motion; the leaving toast has no entrance and takes no clicks", () => {
+    expect(code(CARD)).toMatch(/if \(reduced\(\)\) \{ snap160\.current = readSnap160\(root\); return; \}/);
+    expect(code(MOTION).match(/export function toastOut[\s\S]*?\n}/)?.[0]).toMatch(/if \(reduced\(\)\) \{ done\(\); return; \}/);
+    expect(CSS).toMatch(/\.qc1522-toast\.qc160-tout \{ animation: none; pointer-events: none; \}/);
+    expect(code(CSS)).not.toMatch(/var\(|color-mix\(/);
+  });
+});
+
