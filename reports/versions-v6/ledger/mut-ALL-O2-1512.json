@@ -1,0 +1,152 @@
+[
+ {
+  "where": "Original three pieces",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "Original piece 0 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 114.0"
+ },
+ {
+  "where": "Original piece 1 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 73.3"
+ },
+ {
+  "where": "Original piece 1 ≤ piece 0",
+  "ok": true,
+  "detail": "120.0 / 120.0"
+ },
+ {
+  "where": "Original piece 2 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 8.1"
+ },
+ {
+  "where": "Original piece 2 ≤ piece 1",
+  "ok": true,
+  "detail": "120.0 / 120.0"
+ },
+ {
+  "where": "Prologue cut three pieces",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "Prologue cut piece 0 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 114.0"
+ },
+ {
+  "where": "Prologue cut piece 1 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 76.0"
+ },
+ {
+  "where": "Prologue cut piece 1 ≤ piece 0",
+  "ok": true,
+  "detail": "120.0 / 120.0"
+ },
+ {
+  "where": "Prologue cut piece 2 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 28.5"
+ },
+ {
+  "where": "Prologue cut piece 2 ≤ piece 1",
+  "ok": true,
+  "detail": "120.0 / 120.0"
+ },
+ {
+  "where": "Fast-paced opening three pieces",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "Fast-paced opening piece 0 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 114.0"
+ },
+ {
+  "where": "Fast-paced opening piece 1 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 50.7"
+ },
+ {
+  "where": "Fast-paced opening piece 1 ≤ piece 0",
+  "ok": true,
+  "detail": "120.0 / 120.0"
+ },
+ {
+  "where": "Fast-paced opening piece 2 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 38.0"
+ },
+ {
+  "where": "Fast-paced opening piece 2 ≤ piece 1",
+  "ok": true,
+  "detail": "120.0 / 120.0"
+ },
+ {
+  "where": "World-building first three pieces",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "World-building first piece 0 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 114.0"
+ },
+ {
+  "where": "World-building first piece 1 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 95.0"
+ },
+ {
+  "where": "World-building first piece 1 ≤ piece 0",
+  "ok": true,
+  "detail": "120.0 / 120.0"
+ },
+ {
+  "where": "World-building first piece 2 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 4.0"
+ },
+ {
+  "where": "World-building first piece 2 ≤ piece 1",
+  "ok": true,
+  "detail": "120.0 / 120.0"
+ },
+ {
+  "where": "early Prologue cut three pieces",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "where": "early Prologue cut piece 0 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 114.0"
+ },
+ {
+  "where": "early Prologue cut piece 1 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 38.0"
+ },
+ {
+  "where": "early Prologue cut piece 1 ≤ piece 0",
+  "ok": true,
+  "detail": "120.0 / 120.0"
+ },
+ {
+  "where": "early Prologue cut piece 2 ∝ count",
+  "ok": false,
+  "detail": "120.0 vs 38.0"
+ },
+ {
+  "where": "early Prologue cut piece 2 ≤ piece 1",
+  "ok": true,
+  "detail": "120.0 / 120.0"
+ }
+]

@@ -1,0 +1,27 @@
+[
+ {
+  "where": "both headers found",
+  "ok": true,
+  "detail": "{\"qc\":{\"left\":112,\"right\":1240,\"height\":227.125,\"top\":38},\"vv\":{\"left\":112,\"right\":1240,\"height\":227,\"top\":50}}"
+ },
+ {
+  "where": "left",
+  "ok": true,
+  "detail": "QC 112.0 · Versions 112.0"
+ },
+ {
+  "where": "right",
+  "ok": true,
+  "detail": "QC 1240.0 · Versions 1240.0"
+ },
+ {
+  "where": "height",
+  "ok": true,
+  "detail": "QC 227.1 · Versions 227.0"
+ },
+ {
+  "where": "top",
+  "ok": false,
+  "detail": "QC 38.0 · Versions 50.0"
+ }
+]

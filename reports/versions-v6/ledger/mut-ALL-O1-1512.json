@@ -1,0 +1,147 @@
+[
+ {
+  "where": "population: sent versions",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "Original sent",
+  "ok": true,
+  "detail": "14 vs 14"
+ },
+ {
+  "where": "Original replied",
+  "ok": true,
+  "detail": "9 vs 9"
+ },
+ {
+  "where": "Original asked for more",
+  "ok": true,
+  "detail": "7% vs 7%"
+ },
+ {
+  "where": "Original four counts",
+  "ok": true,
+  "detail": "14,9,1,0 vs 14,9,1,0"
+ },
+ {
+  "where": "Original of sent",
+  "ok": true,
+  "detail": " | 64% of sent | 7% of sent | 0% of sent"
+ },
+ {
+  "where": "Prologue cut sent",
+  "ok": true,
+  "detail": "12 vs 12"
+ },
+ {
+  "where": "Prologue cut replied",
+  "ok": true,
+  "detail": "8 vs 8"
+ },
+ {
+  "where": "Prologue cut asked for more",
+  "ok": true,
+  "detail": "25% vs 25%"
+ },
+ {
+  "where": "Prologue cut four counts",
+  "ok": true,
+  "detail": "12,8,3,1 vs 12,8,3,1"
+ },
+ {
+  "where": "Prologue cut of sent",
+  "ok": true,
+  "detail": " | 67% of sent | 25% of sent | 8% of sent"
+ },
+ {
+  "where": "Fast-paced opening sent",
+  "ok": true,
+  "detail": "9 vs 9"
+ },
+ {
+  "where": "Fast-paced opening replied",
+  "ok": true,
+  "detail": "4 vs 4"
+ },
+ {
+  "where": "Fast-paced opening asked for more",
+  "ok": true,
+  "detail": "33% vs 33%"
+ },
+ {
+  "where": "Fast-paced opening four counts",
+  "ok": true,
+  "detail": "9,4,3,1 vs 9,4,3,1"
+ },
+ {
+  "where": "Fast-paced opening of sent",
+  "ok": true,
+  "detail": " | 44% of sent | 33% of sent | 11% of sent"
+ },
+ {
+  "where": "World-building first sent",
+  "ok": true,
+  "detail": "6 vs 6"
+ },
+ {
+  "where": "World-building first replied",
+  "ok": true,
+  "detail": "5 vs 5"
+ },
+ {
+  "where": "World-building first asked for more",
+  "ok": true,
+  "detail": "0% vs 0%"
+ },
+ {
+  "where": "World-building first four counts",
+  "ok": true,
+  "detail": "6,5,0,0 vs 6,5,0,0"
+ },
+ {
+  "where": "World-building first of sent",
+  "ok": true,
+  "detail": " | 83% of sent | 0% of sent | 0% of sent"
+ },
+ {
+  "where": "population: a version under the minimum",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "early Prologue cut sent",
+  "ok": true,
+  "detail": "3 vs 3"
+ },
+ {
+  "where": "early Prologue cut replied",
+  "ok": true,
+  "detail": "1 vs 1"
+ },
+ {
+  "where": "early Prologue cut asked for more",
+  "ok": false,
+  "detail": "33% vs 1"
+ },
+ {
+  "where": "early Prologue cut no % below the minimum",
+  "ok": false,
+  "detail": "33%"
+ },
+ {
+  "where": "early Prologue cut four counts",
+  "ok": true,
+  "detail": "3,1,1,0 vs 3,1,1,0"
+ },
+ {
+  "where": "early Prologue cut of sent",
+  "ok": true,
+  "detail": " | 33% of sent | 33% of sent | 0% of sent"
+ },
+ {
+  "where": "the wait line counts down",
+  "ok": true,
+  "detail": "Included in the comparison after 2 more queries."
+ }
+]

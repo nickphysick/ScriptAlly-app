@@ -1,0 +1,97 @@
+[
+ {
+  "where": "population: rows",
+  "ok": true,
+  "detail": "14 vs 14"
+ },
+ {
+  "where": "population: three stages or more",
+  "ok": true,
+  "detail": "closed,queried,partial"
+ },
+ {
+  "where": "vv6-q-13 band",
+  "ok": true,
+  "detail": "No Response → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-12 band",
+  "ok": false,
+  "detail": "Queried → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-11 band",
+  "ok": true,
+  "detail": "No Response → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-10 band",
+  "ok": false,
+  "detail": "Queried → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-9 band",
+  "ok": true,
+  "detail": "No Response → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-8 band",
+  "ok": true,
+  "detail": "Rejected → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-7 band",
+  "ok": true,
+  "detail": "Rejected → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-6 band",
+  "ok": true,
+  "detail": "Rejected → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-5 band",
+  "ok": true,
+  "detail": "Rejected → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-4 band",
+  "ok": true,
+  "detail": "Rejected → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-3 band",
+  "ok": true,
+  "detail": "Rejected → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-2 band",
+  "ok": true,
+  "detail": "Rejected → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-1 band",
+  "ok": true,
+  "detail": "Rejected → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "vv6-q-0 band",
+  "ok": false,
+  "detail": "Partial Requested → v6-qi v6-qi--closed"
+ },
+ {
+  "where": "different stages draw differently",
+  "ok": false,
+  "detail": "No Response,Queried,Rejected,Partial Requested"
+ },
+ {
+  "where": "one status, one drawing",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "a row opens its query's card",
+  "ok": true,
+  "detail": "vv6-q-13"
+ }
+]

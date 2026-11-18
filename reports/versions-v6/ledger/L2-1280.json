@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: a version to switch to",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "stored: the target is in use",
+  "ok": true,
+  "detail": "vv6-ms-bv-1"
+ },
+ {
+  "where": "the tag moved",
+  "ok": true,
+  "detail": "[\"vv6-ms-bv-1\"]"
+ },
+ {
+  "where": "the toast says so",
+  "ok": true,
+  "detail": "Prologue cut is now in use for new queries. Queries already sent don’t change.\nUNDO\n✕"
+ },
+ {
+  "where": "Undo restores the stored manuscript exactly",
+  "ok": true,
+  "detail": "equal"
+ }
+]

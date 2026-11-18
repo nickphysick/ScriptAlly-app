@@ -1,0 +1,27 @@
+[
+ {
+  "where": "all four present",
+  "ok": true,
+  "detail": "{\"hdFb\":16,\"fbNo\":16,\"noDesk\":56,\"deskCmp\":64}"
+ },
+ {
+  "where": "header → founding band 16",
+  "ok": true,
+  "detail": "16"
+ },
+ {
+  "where": "band → notice 16",
+  "ok": true,
+  "detail": "16"
+ },
+ {
+  "where": "notice → desk 40–56",
+  "ok": true,
+  "detail": "56"
+ },
+ {
+  "where": "desk → comparison ≥ 56",
+  "ok": true,
+  "detail": "64"
+ }
+]

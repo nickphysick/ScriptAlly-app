@@ -1,0 +1,27 @@
+[
+ {
+  "where": "cards found",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "no horizontal overflow in the scroller",
+  "ok": true,
+  "detail": "1424 vs 1424"
+ },
+ {
+  "where": "none in the document",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "where": "no card past the scroller's right edge",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no card shadow clipped",
+  "ok": true,
+  "detail": ""
+ }
+]

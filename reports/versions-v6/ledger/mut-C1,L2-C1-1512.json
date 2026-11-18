@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: two ranked or more",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "where": "rate: cards in that measure's order",
+  "ok": false,
+  "detail": "vv6-ms-bv-2,vv6-ms-bv-0,vv6-ms-bv-1,vv6-ms-bv-3 vs vv6-ms-bv-2,vv6-ms-bv-1,vv6-ms-bv-0,vv6-ms-bv-3"
+ },
+ {
+  "where": "rate: the tile names the first card",
+  "ok": true,
+  "detail": "vv6-ms-bv-2 vs vv6-ms-bv-2"
+ },
+ {
+  "where": "rate: the chosen tile is pressed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "sent: cards in that measure's order",
+  "ok": false,
+  "detail": "vv6-ms-bv-2,vv6-ms-bv-0,vv6-ms-bv-1,vv6-ms-bv-3 vs vv6-ms-bv-0,vv6-ms-bv-1,vv6-ms-bv-2,vv6-ms-bv-3"
+ },
+ {
+  "where": "sent: the tile names the first card",
+  "ok": true,
+  "detail": "vv6-ms-bv-0 vs vv6-ms-bv-0"
+ },
+ {
+  "where": "sent: the chosen tile is pressed",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,0 +1,42 @@
+[
+ {
+  "where": "population: funnels",
+  "ok": true,
+  "detail": "4 vs 4"
+ },
+ {
+  "where": "every funnel's top on one y",
+  "ok": true,
+  "detail": "611.7,611.7,611.7,611.7"
+ },
+ {
+  "where": "own scale: every first piece full height",
+  "ok": true,
+  "detail": "82.0,82.0,82.0,82.0"
+ },
+ {
+  "where": "opens on own scale",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "same scale: 9 sent ∝",
+  "ok": true,
+  "detail": "52.7 vs 52.7"
+ },
+ {
+  "where": "same scale: 12 sent ∝",
+  "ok": true,
+  "detail": "70.3 vs 70.3"
+ },
+ {
+  "where": "same scale: 14 sent ∝",
+  "ok": true,
+  "detail": "82.0 vs 82.0"
+ },
+ {
+  "where": "same scale: 6 sent ∝",
+  "ok": true,
+  "detail": "35.1 vs 35.1"
+ }
+]

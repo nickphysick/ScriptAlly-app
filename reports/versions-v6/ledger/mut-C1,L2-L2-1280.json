@@ -1,0 +1,27 @@
+[
+ {
+  "where": "population: a version to switch to",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "stored: the target is in use",
+  "ok": false,
+  "detail": "vv6-ms-bv-2"
+ },
+ {
+  "where": "the tag moved",
+  "ok": true,
+  "detail": "[\"vv6-ms-bv-1\"]"
+ },
+ {
+  "where": "the toast says so",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "Undo restores the stored manuscript exactly",
+  "ok": true,
+  "detail": "equal"
+ }
+]

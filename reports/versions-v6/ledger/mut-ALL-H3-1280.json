@@ -1,0 +1,47 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "no tree on the page",
+  "ok": false,
+  "detail": "5"
+ },
+ {
+  "where": "dialog is titled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "one node per treeModel node",
+  "ok": true,
+  "detail": "5 vs 5"
+ },
+ {
+  "where": "picking closes the dialog",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "…and opens that version",
+  "ok": true,
+  "detail": "Prologue cut"
+ },
+ {
+  "where": "Esc closes",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "focus returns to the block",
+  "ok": true,
+  "detail": "<button type=\"button\" class=\"v6-vone\" data-vv6=\"map-open\" aria-haspopup=\"dialog\""
+ },
+ {
+  "where": "an outside press closes",
+  "ok": true,
+  "detail": ""
+ }
+]

@@ -1,0 +1,17 @@
+[
+ {
+  "where": "at the top: hidden",
+  "ok": true,
+  "detail": "{\"found\":true,\"shown\":false,\"text\":\"\"}"
+ },
+ {
+  "where": "past the header: shown",
+  "ok": true,
+  "detail": "{\"found\":true,\"shown\":true,\"text\":\"Versions In use Fast-paced opening New version\"}"
+ },
+ {
+  "where": "names the version in use",
+  "ok": true,
+  "detail": "Versions In use Fast-paced opening New version"
+ }
+]

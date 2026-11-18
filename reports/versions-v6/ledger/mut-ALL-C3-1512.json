@@ -1,0 +1,42 @@
+[
+ {
+  "where": "population: an unranked version",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "where": "Dual timeline: 5 dashed squares",
+  "ok": false,
+  "detail": "0"
+ },
+ {
+  "where": "Dual timeline: no rank",
+  "ok": false,
+  "detail": "9"
+ },
+ {
+  "where": "Dual timeline: ranked after n more",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "population: the early book has one ranked",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "fewer than two ranked: the not-yet panel",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "…one progress row per version",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "where": "…and no cards",
+  "ok": true,
+  "detail": ""
+ }
+]

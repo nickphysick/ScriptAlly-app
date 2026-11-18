@@ -1,0 +1,22 @@
+[
+ {
+  "where": "population",
+  "ok": true,
+  "detail": "5"
+ },
+ {
+  "where": "one row per live version",
+  "ok": true,
+  "detail": "[\"vv6-ms-bv-4\",\"vv6-ms-bv-3\",\"vv6-ms-bv-2\",\"vv6-ms-bv-1\",\"vv6-ms-bv-0\"]"
+ },
+ {
+  "where": "one selected row, the version in use",
+  "ok": true,
+  "detail": "[{\"id\":\"vv6-ms-bv-2\",\"cur\":\"true\"}]"
+ },
+ {
+  "where": "the open card is the selected row's",
+  "ok": true,
+  "detail": "Fast-paced opening"
+ }
+]
