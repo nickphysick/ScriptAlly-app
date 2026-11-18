@@ -115,7 +115,10 @@ Ledger caveat: the QC157-5, -7 and -9 mutation ledgers were not rewritten in the
 
 ## Dev
 
-See the end of this report; it is filled in after the deploy.
+- https://scriptally-dev.web.app serves **`index-YTBrCozr.js`**. I checked it after the deploy against the build's own `dist/index.html`.
+- The build is from `dev/smv31-vv6-cp32-lqmf1-cb15-td57-qc157` @ `e8224054e`: the line dev was serving when I deployed (`…-cb15-td57` @ ea1af66b8, `index-Duin1_a3.js`, To-do v57.1 on Corkboard v15) plus `query-centre-v157`.
+- The merge was clean. On the merged tree tsc is clean and 1,073 Query Centre and To-do unit tests pass.
+- Built in a clean scratchpad checkout of the pushed tip. Hosting only, `--project scriptally-dev`. Prod and `main` are untouched.
 
 ## Not done / follow-ups
 
