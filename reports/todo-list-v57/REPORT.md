@@ -122,4 +122,9 @@ snoozed, collapsed; plus pinned at 1280 and 1717. M10's Query Centre and Contact
   meaningful for the commit it was built from. The `src/` and `public/` trees of the two builds were identical
   (`git ls-files -s` diff empty). This correction is a docs-only commit on `todo-list-v57` and is not merged onto the dev
   branch, which stays at the commit the served bundle names.
+- **v57.1:** `index-DJ8tuHvN.js` → **`index-Duin1_a3.js`**, built and deployed from a clean checkout of the pushed tip of
+  `dev/smv31-vv6-cp32-lqmf1-cb15-td57` @ `ea1af66b8` (dad7fdbce + `todo-list-v57` @ fa6c4b442). Dev then served that hash,
+  and the served `assets/AppRoot-D8kiHIOx.css` carries the rule
+  `@container twscol (max-width: 599.98px){.tws-wf:has(.tws-back) …`. This note is a docs-only commit on
+  `todo-list-v57` and is not merged onto the dev branch.
 - Prod untouched.
