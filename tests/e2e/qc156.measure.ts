@@ -142,7 +142,7 @@ test.describe("Query Centre v156", () => {
           seals: [...new Set(seals)], otherSeal: other ? getComputedStyle(other).backgroundColor : null,
         };
       }, PAGE);
-      L.check(`${vp.width}: a Queried card's band is the sand fill`, r.band === "rgb(239, 231, 218)" && r.bandShadow === "none", `${r.band} / ${r.bandShadow}`);
+      L.check(`${vp.width}: a Queried card's band is the sand fill (v157: #efe6d6)`, r.band === "rgb(239, 230, 214)" && r.bandShadow === "none", `${r.band} / ${r.bandShadow}`);
       L.check(`${vp.width}: the Queried seal is navy, cream initials, double ring`, r.sealBg === "rgb(42, 58, 82)" && r.sealInk === "rgb(244, 238, 229)" && /rgb\(255, 255, 255\) 0px 0px 0px (3|2\.5)px, rgba\(42, 58, 82, 0\.35\)/.test(r.sealRing ?? ""), `${r.sealBg} / ${r.sealInk} / ${r.sealRing}`);
       L.check(`${vp.width}: every seal on the page is navy`, r.seals.length === 1 && r.seals[0] === "rgb(42, 58, 82)", r.seals.join(" | "));
       const rd = await readings(page);

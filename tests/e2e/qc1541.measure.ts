@@ -114,7 +114,7 @@ for (const vp of SIZES) {
 
     /* N2 · quiet Queried bands, quiet seals */
     L.check("N2 a Queried band is white with a sand edge and a hairline", r.queried?.bg === "rgb(255, 255, 255)" && r.queried.shadow === "rgb(233, 223, 206) 0px 3px 0px 0px inset, rgb(240, 234, 224) 0px -1px 0px 0px inset", JSON.stringify(r.queried));
-    L.check("N2 a Partial band keeps its rose", r.partial?.bg === "rgb(236, 214, 210)", JSON.stringify(r.partial));
+    L.check("N2 a Partial band keeps its stage colour (v157: the partial blue, #e4ebf2)", r.partial?.bg === "rgb(228, 235, 242)", JSON.stringify(r.partial));
     L.check("N2 every other stage keeps a coloured band", r.others.length > 0 && r.others.every((o) => o.bg !== "rgb(255, 255, 255)"), JSON.stringify(r.others.slice(0, 6)));
     L.check("N2 the seal: white, navy initials, one 1.5px ring, the typewriter, size unchanged",
       r.seal.bg === "rgb(255, 255, 255)" && r.seal.color === "rgb(42, 58, 82)" && r.seal.shadow === "rgb(197, 204, 214) 0px 0px 0px 1.5px inset" && /Special Elite/i.test(r.seal.font) && (r.seal.w === 38 || r.seal.w === 32), JSON.stringify(r.seal));

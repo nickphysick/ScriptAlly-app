@@ -221,15 +221,17 @@ test.describe("Query Centre v157", () => {
         return { id: c.dataset.id!, status: c.dataset.status!, quiet: c.hasAttribute("data-quiet"), band,
           badge: arw ? getComputedStyle(arw).backgroundColor : "", circles: arw?.querySelectorAll("circle").length ?? 0, paths: arw?.querySelectorAll("path").length ?? 0,
           link: after ? getComputedStyle(after).backgroundImage : "",
-          label: nx.querySelector(".qc154-fl")?.textContent ?? "", value: nx.querySelector("b")?.textContent ?? "", line: nx.querySelector("em")?.textContent ?? null, bar: !!nx.querySelector(".qc154-bar") };
+          state: nx.dataset.state ?? "", label: nx.querySelector(".qc154-fl")?.textContent ?? "", value: nx.querySelector("b")?.textContent ?? "", line: nx.querySelector("em")?.textContent ?? null, bar: !!nx.querySelector(".qc154-bar") };
       }), PAGE);
       const quiet = got.filter((g) => g.quiet);
       L6.check(`quiet cards: ${quiet.length}`, quiet.length >= 2, quiet.map((q) => q.id).join(", "));
       L6.check("every quiet band is a gradient ending in white at 82%", quiet.every((q) => /linear-gradient\(90deg.*rgb\(255, 255, 255\) 82%\)/.test(q.band)), [...new Set(quiet.map((q) => q.band))].join(" ; "));
       const flat = got.filter((g) => !g.quiet && g.status !== "Offer" && g.status !== "Signed");
       L6.check("no other card has a band gradient", flat.every((g) => g.band === "none"), [...new Set(flat.map((g) => g.band))].join(" ; ").slice(0, 300));
-      const twin = flat.find((g) => quiet.some((q) => stageOf(q.status) === stageOf(g.status)));
-      L6.check("a waiting card of a quiet card's stage has a flat band", !!twin && twin.band === "none", twin ? `${twin.id} ${twin.status}` : "none of that stage");
+      /* "waiting" read from the Next box's own state, not the quiet mark: a Queried card still inside its reply window
+         ("wait") or just past it ("over", nudge due) — with the agent, and not gone quiet */
+      const twins = got.filter((g) => g.status === "Queried" && (g.state === "wait" || g.state === "over"));
+      L6.check("waiting Queried cards (in or just past their reply window) have a flat band, beside quiet Queried cards", quiet.some((q) => q.status === "Queried") && twins.length > 0 && twins.every((t) => !t.quiet && t.band === "none"), twins.map((t) => `${t.id}:${t.state}:${t.band}`).join(" ") || "no waiting Queried card");
       L7.check("every quiet badge is navy", quiet.every((q) => q.badge === "rgb(42, 58, 82)"), [...new Set(quiet.map((q) => q.badge))].join(","));
       L7.check("every quiet badge holds three circles and no arrow path", quiet.every((q) => q.circles === 3 && q.paths === 0), quiet.map((q) => `${q.circles}/${q.paths}`).join(" "));
       L7.check("the link after a quiet card's current step is dotted", quiet.every((q) => /repeating-linear-gradient\(90deg, rgba\(28, 19, 15, 0\.5\) 0px, rgba\(28, 19, 15, 0\.5\) 2px, rgba\(0, 0, 0, 0\) 2px, rgba\(0, 0, 0, 0\) 4px\)/.test(q.link)), [...new Set(quiet.map((q) => q.link))].join(" ; "));
@@ -238,7 +240,8 @@ test.describe("Query Centre v157", () => {
       L9.check("every quiet box: Gone quiet · Nudge or close, no bar", quiet.every((q) => q.label === "Gone quiet" && q.value === "Nudge or close" && !q.bar), quiet.map((q) => `${q.label}·${q.value}·${q.bar}`).join(" "));
       const n = quiet.filter((q) => NUDGED.has(q.id)), s = quiet.filter((q) => !NUDGED.has(q.id));
       L9.check("the nudged quiet cards' line starts “nudged ”", n.length > 0 && n.every((q) => (q.line ?? "").startsWith("nudged ")), n.map((q) => `${q.id}: ${q.line}`).join(" | "));
-      L9.check("the others' line starts “since ”", s.length > 0 && s.every((q) => (q.line ?? "").startsWith("since ")), s.map((q) => `${q.id}: ${q.line}`).join(" | "));
+      /* a query with no reply date (an agent who states no reply window, quiet by the undated 84-day rule) has no line */
+      L9.check("the others' line starts “since ”, or there is none (no reply date)", s.some((q) => (q.line ?? "").startsWith("since ")) && s.every((q) => q.line == null || q.line.startsWith("since ")), s.map((q) => `${q.id}: ${q.line}`).join(" | "));
       L6.done(4); L7.done(4); L9.done(3);
     });
 
