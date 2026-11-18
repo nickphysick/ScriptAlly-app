@@ -1,0 +1,74 @@
+{
+  "readings": 188,
+  "fails": [
+    {
+      "lock": "H1",
+      "vp": 1512,
+      "what": "UNPROVED: its mutation did not redden it",
+      "got": "green",
+      "want": "red"
+    }
+  ],
+  "proofs": {
+    "H1": {
+      "1280": true,
+      "1512": false
+    },
+    "H2": {
+      "1280": true,
+      "1512": true
+    },
+    "B1": {
+      "1280": true,
+      "1512": true
+    },
+    "S1": {
+      "1280": true,
+      "1512": true
+    },
+    "S2": {
+      "1280": true,
+      "1512": true
+    },
+    "O1": {
+      "1280": true,
+      "1512": true
+    },
+    "O2": {
+      "1280": true,
+      "1512": true
+    },
+    "P1": {
+      "1280": true,
+      "1512": true
+    },
+    "P2": {
+      "1280": true,
+      "1512": true
+    },
+    "P3": {
+      "1280": true,
+      "1512": true
+    },
+    "C1": {
+      "1280": true,
+      "1512": true
+    },
+    "C2": {
+      "1280": true,
+      "1512": true
+    },
+    "SC1": {
+      "1280": true,
+      "1512": true
+    },
+    "G1": {
+      "1280": true,
+      "1512": true
+    },
+    "W1": {
+      "1280": true,
+      "1512": true
+    }
+  }
+}
