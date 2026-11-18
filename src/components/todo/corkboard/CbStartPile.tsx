@@ -59,14 +59,14 @@ export const CbStartPile: React.FC<CbStartPileProps> = ({ adding, notes, have, i
     <div className="cb2-layer cb2-scrim" data-cb2="start-pile" onMouseDown={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={boxRef} className="cb2-tdlg cb2-sdlg" role="dialog" aria-modal="true" aria-labelledby="cb2-sp-h"
         onKeyDown={(e) => { if (e.key === "Enter" && (e.target as HTMLElement).tagName === "INPUT" && (e.target as HTMLInputElement).type === "text") { e.preventDefault(); save(); } }}>
-        <h2 id="cb2-sp-h" className="cb2-dh">{adding ? `Add notes to ${adding}` : "Start a pile"}</h2>
-        <p className="cb2-lede">{adding ? "Tick the notes to move in. Each one takes this pile’s tag." : "A pile is a tag, so it works with Find and the tag pills too."}</p>
+        <h2 id="cb2-sp-h" className="cb2-dh">{adding ? `Add notes to ${adding}` : "Start a stack"}</h2>
+        <p className="cb2-lede">{adding ? "Tick the notes to move in. Each one takes this stack’s tag." : "A stack is a tag. Notes with the same tag sit together."}</p>
         {adding ? null : (
           <>
             <h4 className="cb2-h4">Name it</h4>
             <label className="cb2-pnin">
               <span aria-hidden="true">#</span>
-              <input ref={nameRef} type="text" value={name} placeholder="agents-to-look-into" autoComplete="off" aria-label="Name the pile" data-cb2="pile-name-in"
+              <input ref={nameRef} type="text" value={name} placeholder="agents-to-look-into" autoComplete="off" aria-label="Name the stack" data-cb2="pile-name-in"
                 onChange={(e) => setName(e.target.value)} />
             </label>
             <div className="cb2-sugg" data-cb2="suggestions">
@@ -74,7 +74,7 @@ export const CbStartPile: React.FC<CbStartPileProps> = ({ adding, notes, have, i
                 <button key={x} type="button" data-sugg={x} onClick={() => { setName(x); nameRef.current?.focus(); }}>#{x}</button>
               ))}
             </div>
-            {clash ? <p className="cb2-clash" data-cb2="clash">There’s already a pile with that name.</p> : null}
+            {clash ? <p className="cb2-clash" data-cb2="clash">There’s already a stack with that name.</p> : null}
           </>
         )}
         <h4 className="cb2-h4 cb2-h4--gap">{adding ? "Your notes" : <>Put notes in it <small>optional</small></>}</h4>
@@ -91,7 +91,7 @@ export const CbStartPile: React.FC<CbStartPileProps> = ({ adding, notes, have, i
         <div className="cb2-dacts">
           <span className="cb2-say" data-cb2="chosen">{sel.size ? `${nNotes(sel.size)} chosen` : ""}</span>
           <button type="button" className="cb2-btn" onClick={onClose}>Cancel</button>
-          <button type="button" className="cb2-btn cb2-btn--navy" data-cb2="start-save" disabled={!ok} onClick={save}>{adding ? "Add to pile" : "Start the pile"}</button>
+          <button type="button" className="cb2-btn cb2-btn--navy" data-cb2="start-save" disabled={!ok} onClick={save}>{adding ? "Add to stack" : "Start stack"}</button>
         </div>
       </div>
     </div>,

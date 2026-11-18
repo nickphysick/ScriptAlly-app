@@ -360,8 +360,8 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     const was = n.tags ?? [];
     const next = tagsForPile(was, ids[0]);
     try { await updateUserTask(n.id, { tags: next }); }
-    catch { flash("Couldn’t start that pile — try again?"); return; }
-    flash(`Started a new pile: #${name.trim().replace(/^#/, "")}`, {
+    catch { flash("Couldn’t start that stack — try again?"); return; }
+    flash(`Started a new stack: #${name.trim().replace(/^#/, "")}`, {
       label: "Undo", fn: async () => { await updateUserTask(n.id, { tags: was.length ? was : null }); },
     });
   };
@@ -385,7 +385,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
   };
   const removePile = async (k: string) => {
     try { await updateUserPaths({ "todoPrefs.noteboard.started": prefs.started.filter((x) => x !== k) }); }
-    catch { flash("Couldn’t remove that pile — try again?"); return; }
+    catch { flash("Couldn’t remove that stack — try again?"); return; }
     setOpenPile(null);
     flash(`Removed ${pileName(k)}`, { label: "Undo", fn: async () => { await reStart(k); setOpenPile(k); } });
   };
@@ -399,7 +399,7 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     let k = sp.k;
     if (!k) {
       const got = await resolveTag(name);
-      if (!got) { flash("Couldn’t start that pile — try again?"); return; }
+      if (!got) { flash("Couldn’t start that stack — try again?"); return; }
       k = got[0];
     }
     const pile = k;
@@ -408,11 +408,11 @@ export const TodoNoteboardPage: React.FC<TodoNoteboardPageProps> = ({ onNavigate
     const before = moved.map((n) => [n.id, [...(n.tags ?? [])]] as const);
     try {
       await Promise.all(moved.map((n) => { const next = tagsForPile(n.tags, pile); return updateUserTask(n.id, { tags: next.length ? next : null }); }));
-    } catch { flash(sp.k ? "Couldn’t add those — try again?" : "Couldn’t start that pile — try again?"); return; }
+    } catch { flash(sp.k ? "Couldn’t add those — try again?" : "Couldn’t start that stack — try again?"); return; }
     /* a pile started with no notes is remembered here, so it stays listed while empty (Part C) */
     if (!sp.k && !moved.length && !prefs.started.includes(pile)) {
       try { await updateUserPaths({ "todoPrefs.noteboard.started": [...prefs.started, pile] }); }
-      catch { flash("Couldn’t start that pile — try again?"); return; }
+      catch { flash("Couldn’t start that stack — try again?"); return; }
     }
     setStartFor(null);
     setTagSel(null);

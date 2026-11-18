@@ -238,7 +238,7 @@ test("CB20 clash: an existing pile's name disables the button and shows the clas
     L.check("CB20", `${sz(vp)} suggestions`, sugg.length <= 6 && !sugg.includes("agents") && !sugg.includes("synopsis") && !sugg.includes("comps"), `suggested ${sugg.join(", ")}`);
     await page.locator(`${DLG} [data-cb2="pile-name-in"]`).fill("#Agents");
     const clash = await page.locator(`${DLG} [data-cb2="clash"]`).textContent().catch(() => null);
-    L.check("CB20", `${sz(vp)} clash line`, clash === "There’s already a pile with that name.", `clash "${clash}"`);
+    L.check("CB20", `${sz(vp)} clash line`, clash === "There’s already a stack with that name.", `clash "${clash}"`);
     L.check("CB20", `${sz(vp)} disabled`, await page.locator(`${DLG} [data-cb2="start-save"]`).isDisabled(), "the button is enabled on a clash");
     await page.locator(`${DLG} [data-cb2="pile-name-in"]`).fill("agents-new");
     L.check("CB20", `${sz(vp)} clear`, (await page.locator(`${DLG} [data-cb2="clash"]`).count()) === 0 && await page.locator(`${DLG} [data-cb2="start-save"]`).isEnabled(), "a fresh name still clashes or stays disabled");

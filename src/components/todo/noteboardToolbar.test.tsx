@@ -127,7 +127,7 @@ describe("⚠️ Board / Column is a segmented toggle — the sentence control i
        and the sort pill — drawn by CbToolRow. The add bar is retired (the header's buttons and swatches add). */
     expect(page).toContain("<CbToolRow");
     const row = readFileSync(join(here, "corkboard/CbToolRow.tsx"), "utf8");
-    for (const control of ["cb2-find", "cb2-pill", "cb2-seg", "Find a note", "Corkboard", "Piles"]) expect(row, control).toContain(control);
+    for (const control of ["cb2-find", "cb2-pill", "cb2-seg", "Find a note", "Corkboard", "Stacks"]) expect(row, control).toContain(control);
     for (const gone of ["cb-addrow", "nb-viewtog", "nb-search", ">Examples<", "Pin a note\n"]) expect(page, gone).not.toContain(gone);
     /* the dropdown the chips replaced is gone — bounded token, never a substring */
     expect(page).not.toMatch(/["\s`]nb-tagwrap["\s`]/);

@@ -70,7 +70,7 @@ export const CbToolRow: React.FC<CbToolRowProps> = ({ find, onFind, chips, tag, 
       <span className="cb2-grow" />
       <div className="cb2-seg" role="group" aria-label="View" data-cb2="view">
         <button type="button" aria-pressed={!piles} data-view="board" onClick={() => onView("board")}><Grid />Corkboard</button>
-        <button type="button" aria-pressed={piles} data-view="piles" onClick={() => onView("piles")}><Stack />Piles</button>
+        <button type="button" aria-pressed={piles} data-view="piles" onClick={() => onView("piles")}><Stack />Stacks</button>
       </div>
       {piles ? null : (
         <div className="cb2-pw" ref={wrap}>
