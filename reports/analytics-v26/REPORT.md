@@ -130,7 +130,9 @@ each lock's red is shown against its own mutation's reading in the ledger, not a
 
 ## Finish
 
-- Branch `analytics-v26`; dev build: see the last section.
+- Branch `analytics-v26` (pushed). **Dev serves `index-DAoT-GtE.js`** from `dev/smv31-vv6-cp32-lqmf1-cb15-td57-qc157-an26` @ 8da5b784e
+  (= what dev served before, `…-qc157` @ e8224054e with Query Centre v157, + analytics-v26 @ f01862941; clean merge;
+  hosting only; the served hash was checked before and after).
 - **For Nick — the harness account ("The Smoke Test", `seed-ms-1`), `harness-figures.json`:** see the next section.
 - **Links that open unfiltered:** "See those {n} in Queries" (beyond and nudges), "See what went out with those
   queries", "See each round in Queries" (all Queries), "See those {n} in Agents" (Contact list). Each wants a filter on
