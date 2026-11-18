@@ -32,7 +32,7 @@
   .qc154-card[data-tone="queried"] { --tone: #efe6d6; }
   .qc154-card[data-tone="partial"] { --tone: #e4ebf2; }
   .qc154-card[data-tone="full"] { --tone: #b7c9de; }
-  .qc154-card[data-tone="offer"] { --tone: #8ea7c6; }
+  .qc154-card[data-tone="offer"] { --tone: #efcdc9; }
   .qc154-card[data-tone="closed"] { --tone: #eceae6; }
 
   .qc154-in { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; border: 1px solid #e3d5c9; border-radius: 13px; }

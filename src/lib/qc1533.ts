@@ -87,7 +87,7 @@ export const TAB_ACCENT_157: Record<Stage, TabAccent> = {
   queried: { accent: "#e0d2bb", ink: "#5e4c36", rest: "#7b6c5a" },
   partial: { accent: "#cbd7e4", ink: "#3d5370", rest: "#60728a" },
   full: { accent: "#9db4cf", ink: "#2a4666", rest: "#506782" },
-  offer: { accent: "#7391b5", ink: "#1b3252", rest: "#445771" },
+  offer: { accent: "#dfb1ac", ink: "#7a3f3c", rest: "#92625f" },
   closed: { accent: "#e0d2bb", ink: "#5e4c36", rest: "#7b6c5a" },
 };
 export const tabAccent157 = (status: QueryStatus | string): TabAccent => TAB_ACCENT_157[stageOf(status)];

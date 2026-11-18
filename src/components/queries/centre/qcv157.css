@@ -12,14 +12,14 @@
  * ⚠️ No `color-mix()`, no `var()` inside `@keyframes`.
  */
 
-/* ── Phase 2 · the foil on an offer: the Offer band (#8ea7c6, the table's) under a white sheen that sits at 30% and
+/* ── Phase 2 · the sheen on an offer (Stage colours v1: rose, lib/stageColours OFFER_SHEEN): the Offer band (#efcdc9, the table's) under a white sheen that sits at 30% and
    moves once to 85% while the card is hovered or keyboard-focused, then stays. Nothing loops. Offer and Signed share
    it (both are the `offer` stage); no other stage has it. ─────────────────────────────────────────────────────── */
 @media (min-width: 768px) {
   .qc151.qc153 .qc154-card.qc154-card[data-tone="offer"] .qc154-hd.qc154-hd {
     background:
-      linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.5) 40%, rgba(255, 255, 255, 0.1) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
-      #8ea7c6;
+      linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
+      #efcdc9;
     box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
     transition: background-position 0.7s ease-out;
   }

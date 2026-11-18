@@ -16,11 +16,11 @@ const rules = (sel: string): string[] => {
 const rule = (sel: string): string => rules(sel)[0] ?? "";
 const OFFER = '.qc151.qc153 .qc154-card.qc154-card[data-tone="offer"] .qc154-hd.qc154-hd';
 
-describe("v157 Phase 2 · the foil on an offer", () => {
+describe("v157 Phase 2 · the sheen on an offer (Stage colours v1: rose)", () => {
   it("the band: the sheen at 30% 0 / 260% 100% over the Offer band, a 1px white inset, a .7s position transition", () => {
     const r = rule(OFFER);
     expect(r.replace(/\s+/g, " ")).toContain(
-      "linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.5) 40%, rgba(255, 255, 255, 0.1) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat, #8ea7c6;",
+      "linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat, #efcdc9;",
     );
     expect(r).toContain("box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5)");
     expect(r).toContain("transition: background-position 0.7s ease-out");

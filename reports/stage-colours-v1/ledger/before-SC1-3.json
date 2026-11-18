@@ -1,0 +1,57 @@
+[
+ {
+  "name": "Queried: strip is rgb(239, 230, 214)",
+  "ok": false,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(255, 255, 255)\"}"
+ },
+ {
+  "name": "Queried: strip text ink, not navy",
+  "ok": false,
+  "got": "rgb(255, 255, 255)"
+ },
+ {
+  "name": "Partial Requested: strip is rgb(228, 235, 242)",
+  "ok": false,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(255, 255, 255)\"}"
+ },
+ {
+  "name": "Partial Requested: strip text ink, not navy",
+  "ok": false,
+  "got": "rgb(255, 255, 255)"
+ },
+ {
+  "name": "Full Requested: strip is rgb(183, 201, 222)",
+  "ok": false,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(255, 255, 255)\"}"
+ },
+ {
+  "name": "Full Requested: strip text ink, not navy",
+  "ok": false,
+  "got": "rgb(255, 255, 255)"
+ },
+ {
+  "name": "Offer: strip is rgb(142, 167, 198)",
+  "ok": false,
+  "got": "{\"bg\":\"rgb(42, 58, 82)\",\"img\":\"none\",\"fg\":\"rgb(255, 255, 255)\"}"
+ },
+ {
+  "name": "Offer: strip text ink, not navy",
+  "ok": false,
+  "got": "rgb(255, 255, 255)"
+ },
+ {
+  "name": "Offer strip has the sheen",
+  "ok": false,
+  "got": "none"
+ },
+ {
+  "name": "Rejected: strip is rgb(236, 234, 230)",
+  "ok": false,
+  "got": "{\"bg\":\"rgb(241, 239, 236)\",\"img\":\"none\",\"fg\":\"rgb(138, 128, 118)\"}"
+ },
+ {
+  "name": "Rejected: strip text ink, not navy",
+  "ok": false,
+  "got": "rgb(138, 128, 118)"
+ }
+]

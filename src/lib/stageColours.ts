@@ -3,25 +3,39 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * Query Centre v157 (design-refs/query-centre-v157.html) — THE SLATE LADDER: the one place a stage's colours are
- * written in TypeScript. Sand for Queried, then three blues getting deeper (partial, full, offer); closed its own grey.
+ * written in TypeScript. Sand for Queried, two blues getting deeper (partial, full), rose for the offer (Stage colours v1,
+ * design-refs/stage-colours-v1/), closed its own grey.
+ *
+ * THE FOUR USES (Stage colours v1): `band` fills a card band, strip, bubble, bar, disc or segment; `tint` fills a label
+ * or a heading wash; `edge` is the 1px line round a band-filled shape; `mark` is a chart's line or dot where a band
+ * would be too pale to read. A status MARK is never a stage colour: it is ink (STAGE_INK).
  *
  * ⚠️ COLOUR IS THE STAGE AND NOTHING ELSE. Whose move it is never changes a band's colour.
  * ⚠️ Revise & Resubmit and Resubmitted are in the Full stage. Offer and Signed share the Offer stage.
- * ⚠️ The grid card reads `band` only. `tint` and `mark` are recorded for the next pack; nothing reads them yet.
  * ⚠️ Where a stylesheet must restate one of these hexes, stageColours.test.ts asserts it equals this table.
  */
 import { QueryStatus } from "../types";
 
 export type Stage = "queried" | "partial" | "full" | "offer" | "closed";
-export interface StageColour { band: string; tint: string; mark: string }
+export interface StageColour { band: string; tint: string; edge: string; mark: string }
 
 export const STAGE_COLOURS: Record<Stage, StageColour> = {
-  queried: { band: "#efe6d6", tint: "#f8f4ed", mark: "#dccdb3" },
-  partial: { band: "#e4ebf2", tint: "#f3f6f9", mark: "#a9bdd2" },
-  full: { band: "#b7c9de", tint: "#dfe7f0", mark: "#7391b3" },
-  offer: { band: "#8ea7c6", tint: "#ccd7e5", mark: "#46668f" },
-  closed: { band: "#eceae6", tint: "#f6f5f3", mark: "#a8a199" },
+  queried: { band: "#efe6d6", tint: "#f8f4ed", edge: "#e0d2bb", mark: "#dccdb3" },
+  partial: { band: "#e4ebf2", tint: "#f3f6f9", edge: "#cbd7e4", mark: "#a9bdd2" },
+  full: { band: "#b7c9de", tint: "#dfe7f0", edge: "#9db4cf", mark: "#7391b3" },
+  offer: { band: "#efcdc9", tint: "#f8e8e5", edge: "#dfb1ac", mark: "#cf9a96" },
+  closed: { band: "#eceae6", tint: "#f6f5f3", edge: "#dedbd5", mark: "#a8a199" },
 };
+
+/** the white sheen over the offer's band, as one layer (position 30% 0, size 260% 100%) */
+export const OFFER_SHEEN_LAYER =
+  "linear-gradient(112deg, rgba(255,255,255,0) 22%, rgba(255,255,255,.55) 40%, rgba(255,255,255,.12) 52%, rgba(255,255,255,0) 66%) 30% 0 / 260% 100% no-repeat";
+/** an offer band, strip or bubble: the sheen over the rose. Every offer surface draws this, and nothing else does. */
+export const OFFER_SHEEN = `${OFFER_SHEEN_LAYER}, ${STAGE_COLOURS.offer.band}`;
+/** a stage's band as a CSS `background`: the sheen on an offer, the flat band otherwise */
+export const bandBackground = (s: Stage): string => (s === "offer" ? OFFER_SHEEN : STAGE_COLOURS[s].band);
+/** gone quiet: the stage's band fading to white (the grid card's v157 stops). An offer is never quiet. */
+export const quietBackground = (s: Stage): string => `linear-gradient(90deg, ${STAGE_COLOURS[s].band} 0, ${STAGE_COLOURS[s].band} 26%, #fff 82%)`;
 
 /** text on every band */
 export const STAGE_INK = "#1c130f";

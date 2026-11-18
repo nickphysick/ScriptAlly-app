@@ -5,22 +5,30 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { QueryStatus } from "../types";
-import { STAGE_COLOURS, STAGE_STATUSES, stageOf } from "./stageColours";
+import { OFFER_SHEEN, OFFER_SHEEN_LAYER, STAGE_COLOURS, STAGE_STATUSES, bandBackground, quietBackground, stageOf } from "./stageColours";
 import { LEGACY_TONE_FILL_153, SLIP_TONE_FILL, legacyTone153, sectionSwatch, slipTone } from "./qc153";
 import { RING_BUCKETS } from "./qc1531";
 import { TAB_ACCENT, TAB_ACCENT_157, tabAccent, tabAccent157 } from "./qc1533";
 
 const css = (f: string) => readFileSync(`src/components/queries/centre/${f}`, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
-describe("v157 · the stage table", () => {
+describe("v157 · the stage table (Stage colours v1: offer rose, and an edge)", () => {
   it("is the pack's table, hex for hex", () => {
     expect(STAGE_COLOURS).toEqual({
-      queried: { band: "#efe6d6", tint: "#f8f4ed", mark: "#dccdb3" },
-      partial: { band: "#e4ebf2", tint: "#f3f6f9", mark: "#a9bdd2" },
-      full: { band: "#b7c9de", tint: "#dfe7f0", mark: "#7391b3" },
-      offer: { band: "#8ea7c6", tint: "#ccd7e5", mark: "#46668f" },
-      closed: { band: "#eceae6", tint: "#f6f5f3", mark: "#a8a199" },
+      queried: { band: "#efe6d6", tint: "#f8f4ed", edge: "#e0d2bb", mark: "#dccdb3" },
+      partial: { band: "#e4ebf2", tint: "#f3f6f9", edge: "#cbd7e4", mark: "#a9bdd2" },
+      full: { band: "#b7c9de", tint: "#dfe7f0", edge: "#9db4cf", mark: "#7391b3" },
+      offer: { band: "#efcdc9", tint: "#f8e8e5", edge: "#dfb1ac", mark: "#cf9a96" },
+      closed: { band: "#eceae6", tint: "#f6f5f3", edge: "#dedbd5", mark: "#a8a199" },
     });
+  });
+  it("SC1-2 (source) the offer is rose under the one sheen; no other stage has it; quiet fades a band to white", () => {
+    expect(STAGE_COLOURS.offer).toEqual({ band: "#efcdc9", tint: "#f8e8e5", edge: "#dfb1ac", mark: "#cf9a96" });
+    expect(OFFER_SHEEN).toBe(`${OFFER_SHEEN_LAYER}, #efcdc9`);
+    expect(OFFER_SHEEN_LAYER).toBe("linear-gradient(112deg, rgba(255,255,255,0) 22%, rgba(255,255,255,.55) 40%, rgba(255,255,255,.12) 52%, rgba(255,255,255,0) 66%) 30% 0 / 260% 100% no-repeat");
+    expect(bandBackground("offer")).toBe(OFFER_SHEEN);
+    for (const s of ["queried", "partial", "full", "closed"] as const) expect(bandBackground(s)).toBe(STAGE_COLOURS[s].band);
+    expect(quietBackground("queried")).toBe("linear-gradient(90deg, #efe6d6 0, #efe6d6 26%, #fff 82%)");
   });
   it("every status is in exactly one stage; R&R and Resubmitted are Full, Signed is Offer, closed is closed", () => {
     for (const s of Object.values(QueryStatus)) expect([s, Object.values(STAGE_STATUSES).filter((l) => l.includes(s)).length]).toEqual([s, 1]);
@@ -49,7 +57,7 @@ describe("v157 · the card's stylesheet restates the table", () => {
 
 describe("v157 · the page's swatches and the paperclip follow the stage", () => {
   it("group swatches: Offers, Materials, Nudge due, Watch and wait, Gone quiet (unchanged), Closed; a Status group its stage", () => {
-    expect(sectionSwatch("attention", "offer")).toBe("#8ea7c6");
+    expect(sectionSwatch("attention", "offer")).toBe("#efcdc9");
     expect(sectionSwatch("attention", "materials")).toBe("#e4ebf2");
     expect(sectionSwatch("attention", "nudge")).toBe("#efe6d6");
     expect(sectionSwatch("attention", "agent")).toBe("#efe6d6");
@@ -62,7 +70,8 @@ describe("v157 · the page's swatches and the paperclip follow the stage", () =>
     expect(tabAccent157(QueryStatus.QUERIED)).toMatchObject({ accent: "#e0d2bb", ink: "#5e4c36" });
     expect(tabAccent157(QueryStatus.PARTIAL_SENT)).toMatchObject({ accent: "#cbd7e4", ink: "#3d5370" });
     expect(tabAccent157(QueryStatus.FULL_REQUESTED)).toMatchObject({ accent: "#9db4cf", ink: "#2a4666" });
-    expect(tabAccent157(QueryStatus.SIGNED)).toMatchObject({ accent: "#7391b5", ink: "#1b3252" });
+    expect(tabAccent157(QueryStatus.SIGNED)).toMatchObject({ accent: "#dfb1ac", ink: "#7a3f3c" });
+    expect(tabAccent157(QueryStatus.OFFER)).toMatchObject({ accent: "#dfb1ac", ink: "#7a3f3c", rest: "#92625f" });
     const mix = (h: string) => [1, 3, 5].map((i) => Math.round(parseInt(h.slice(i, i + 2), 16) * 0.82 + 255 * 0.18));
     for (const a of Object.values(TAB_ACCENT_157)) expect(mix(a.ink)).toEqual([1, 3, 5].map((i) => parseInt(a.rest.slice(i, i + 2), 16)));
     const card = readFileSync("src/components/queries/centre/QcCard154.tsx", "utf8");
