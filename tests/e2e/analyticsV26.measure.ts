@@ -447,3 +447,22 @@ test("AN26 screenshots for the report", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 }); await page.reload(); await page.waitForTimeout(3000);
   await page.screenshot({ path: `${DIR}/shots/phone-390-route.png`, fullPage: false });
 });
+
+test("AN26 harness figures for the report", async ({ page }) => {
+  test.skip(process.env.AN26_HARNESS !== "1", "AN26_HARNESS=1 to read the harness account's figures");
+  test.setTimeout(120_000);
+  await open(page, VPS[0], "seed-ms-1");
+  const m = await model(page);
+  const v = m?.v26;
+  const out = {
+    manuscriptId: m?.manuscriptId, state: v?.state, sent: v?.outcomes?.sent, replies: v?.tally?.all,
+    findings: v?.findings?.map((f: any) => (f.key === "bestRound" ? { key: f.key, best: f.best.index, asked: f.best.asked, of: f.best.ids.length } : f.key === "beyond" ? { key: f.key, n: f.n, slowest: f.slowest } : f)),
+    rounds: v?.rounds?.map((r: any) => ({ index: r.index, n: r.ids.length, months: r.months, asked: r.asked, waiting: r.waiting })) ?? null,
+    whoSaysYes: v?.who && { byGenre: v.who.byGenre, byNote: v.who.byNote, lead: v.who.lead, unqueried: v.who.unqueried },
+    nudgeResults: v?.nudges && { rows: v.nudges.rows.map((r: any) => ({ agent: r.agent, agency: r.agency, at: new Date(r.atMs).toISOString().slice(0, 10), repliedDays: r.repliedDays })), replied: v.nudges.replied, due: v.nudges.due },
+  };
+  mkdirSync(DIR, { recursive: true });
+  writeFileSync(`${DIR}/harness-figures.json`, JSON.stringify(out, null, 1));
+  console.log(JSON.stringify(out));
+  expect(out.manuscriptId).toBe("seed-ms-1");
+});

@@ -249,6 +249,11 @@ describe("nudgeResults — a reply belongs to the last nudge before it", () => {
     const n2 = nudgeResults(model([q], [a1, a2]).items, [...q.acts, a1, a2], []);
     expect(n2.rows.map((r) => r.repliedDays)).toEqual([5, null]);
   });
+  it("two nudge events on one query on the same day are one nudge", () => {
+    const p = walk(60, LIT, false);
+    const twice = [nudgeAct(p.q.id, new Date(NOW - 10 * DAY).toISOString()), nudgeAct(p.q.id, new Date(NOW - 10 * DAY + 60_000).toISOString()), nudgeAct(p.q.id, ago(3))];
+    expect(nudgeResults(model([p], twice).items, [...p.acts, ...twice], []).rows.length).toBe(2);
+  });
   it("lastNudgeSentDate stands in only where the log has no nudge", () => {
     const p = walk(60, LIT, false);
     (p.q as Query).lastNudgeSentDate = ago(10);

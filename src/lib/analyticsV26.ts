@@ -297,6 +297,7 @@ const toMs = (iso: unknown): number | null => {
  *    where the log has none, the query's own dated incoming stages. A nudge's `repliedDays` is the days to the first
  *    reply that belongs to it; a reply before the nudge never counts.
  * `due` = open queries whose FIRST nudge is due and not sent: the task engine's own `nudge_overdue` / `nudge-first`.
+ * Two nudge events on one query on the same calendar day are one nudge.
  */
 export function nudgeResults(items: Enriched[], activities: readonly Activity[], tasks: readonly Task[]): NudgeResults {
   const ids = new Set(items.map((e) => e.row.id));
@@ -309,6 +310,10 @@ export function nudgeResults(items: Enriched[], activities: readonly Activity[],
     if (!nudges.length) { const f = toMs(e.q.lastNudgeSentDate); if (f !== null) nudges = [f]; }
     if (!nudges.length) continue;
     nudges.sort((a, b) => a - b);
+    /* ⚠️ ONE NUDGE PER QUERY PER DAY: a second nudge-sent event on the same query and calendar day is the same nudge
+       logged twice (the harness account carries 40-odd on one query on one day), never a second chase */
+    const day = (t: number) => new Date(t).toDateString();
+    nudges = nudges.filter((t, i) => i === 0 || day(t) !== day(nudges[i - 1]));
     let replies = acts.filter((a) => a.resultingStatus && AGENT_RESPONSE_STATUSES.has(a.resultingStatus as QueryStatus))
       .map((a) => toMs(a.date)).filter((t): t is number => t !== null);
     if (!replies.length) {
