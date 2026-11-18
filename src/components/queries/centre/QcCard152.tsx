@@ -40,6 +40,9 @@ import {
 import "./qcv152inplace.css";
 /* Stage colours v1 — last, so the stage colours sit over every earlier layer of the card */
 import "./sc1card.css";
+/* Query card v158 — the Agent, Materials and Notes tab bodies */
+import "./qcv158.css";
+import { AgentTab158 } from "./QcAgent158";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -128,8 +131,6 @@ const ARW = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="
 const CLOCK = <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M8 4.6V8l2.3 1.4" /></svg>;
 const CLIP = <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M10.5 4.5 5.8 9.2a1.6 1.6 0 0 0 2.3 2.3l5-5a3 3 0 0 0-4.3-4.3L3.6 7.4a4.2 4.2 0 0 0 6 6l3.4-3.4" /></svg>;
 const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
-const MAIL = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
-const WEB = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>;
 
 /** the queries this page session has already opened: the thread builds in only the first time */
 const built = new Set<string>();
@@ -313,10 +314,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
 
   /* §2.6 the Agent tab */
   const ask = askChips(d.asks, d.sentLabels);
-  const lk = (v: string, icon: React.ReactNode, field: "email" | "website", label: string, href?: string | null) => v
-    ? (href ? <a className="qc152-lk" href={href} target="_blank" rel="noreferrer" data-qc152="link">{icon}{v}</a>
-      : <button type="button" className="qc152-lk" data-qc152="link" onClick={field === "email" ? p.onCopyEmail : undefined}>{icon}{v}</button>)
-    : <button type="button" className="qc152-lk miss" data-qc152="add" data-k={field} onClick={() => p.onAgentField(field)}>+ {label}</button>;
   const agentStrip = (
       <div className="qc152-agq" data-qc152="agent-strip">
         <div><small>Queried</small><b>{r.sentMs != null ? dayLabel(r.sentMs, nowMs) : "Not dated"}</b><em>{d.queriedVia ?? "how not recorded"}</em></div>
@@ -332,31 +329,17 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     "data-ed-r": k,
     onDoubleClick: (e: React.MouseEvent<HTMLElement>) => { if (ed.on) return; ed.start(k === "asks" || k === "method" ? k : null, e.currentTarget); },
   } : {};
+  /* v158 §3 — the Agent tab, facts first: three fact boxes, contact, what the agent asks for, the wishlist, two links.
+     Every value is the agent's own record (lib/qcCardView); an unrecorded one is a link that opens the agent's card at it.
+     Double-click on a box or row enters edit mode at that detail, as before. The agent is always named, never a pronoun. */
   const agentPane = ed.on && ed.dr ? (
     <AgentEditPane layer={ed} first={(edAgent?.name ?? p.first ?? "the agent").split(/\s+/)[0]} strip={agentStrip}
       onQueryStep={queryStepId ? () => openStep(queryStepId) : null} />
   ) : (
-    <div className="qc152-agt" data-qc152="agent-pane">
-      {agentStrip}
-      <dl className="qc152-agf">
-        <dt>Replies in</dt>
-        <dd data-qc152="reply-in" {...dbl("weeks")}>{d.agentWeeks != null ? <>About <b>{d.agentWeeks} {d.agentWeeks === 1 ? "week" : "weeks"}</b></> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="reply" onClick={() => p.onAgentField("reply")}>+ Add reply time</button>}
-          {d.nrmn === true ? " · no reply means no" : d.nrmn === false ? " · always replies" : ""}</dd>
-        <dt>Asks for</dt>
-        <dd data-qc152="asks" {...dbl("asks")}>{d.asks.length ? <>
-          <span className="qc152-askc">{ask.chips.map((c) => <i key={c.label} className={c.sent ? "ok" : "no"} data-qc152="ask" data-sent={c.sent ? "" : undefined}>{c.label}</i>)}</span>
-          {ask.missing.length ? <span className="qc152-fitn" data-qc152="ask-missing">You didn’t send {ask.missing.map((x) => x.toLowerCase()).join(", ")}</span>
-            : <span className="qc152-fity" data-qc152="ask-all">✓ You sent everything {first} asks for</span>}
-        </> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="asks" onClick={() => p.onAgentField("materials")}>+ Add what {first} asks for</button>}</dd>
-        <dt>How to submit</dt>
-        <dd {...dbl("method")}>{d.how ?? <button type="button" className="qc152-lk miss" data-qc152="add" data-k="method" onClick={() => p.onAgentField("method")}>+ Add how {first} takes queries</button>}</dd>
-        <dt>Wishlist</dt>
-        <dd {...dbl("wishlist")}>{p.wishlist ? <q data-qc152="wishlist">{p.wishlist}</q> : <button type="button" className="qc152-lk miss" data-qc152="add" data-k="wishlist" onClick={() => p.onAgentField("wishlist")}>+ Add {first}’s wishlist</button>}</dd>
-        <dt>Contact</dt>
-        <dd className="qc152-lks" {...dbl("email")}>{lk(p.email, MAIL, "email", "Email")}{lk(p.website.replace(/^https?:\/\//, "").replace(/\/$/, ""), WEB, "website", "Website", p.websiteHref)}</dd>
-      </dl>
-      <button type="button" className="qc152-open" data-qc152="open-agent" onClick={() => p.onAgentField(null)}>✎ Open {first}’s card</button>
-    </div>
+    <AgentTab158 first={first} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
+      sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} asks={ask} hasAsks={d.asks.length > 0}
+      wishlist={p.wishlist} email={p.email} website={p.website} websiteHref={p.websiteHref ?? null}
+      onCopyEmail={p.onCopyEmail} onField={p.onAgentField} onEdit={() => (p.editData ? ed.start() : p.onPencil())} dbl={dbl} />
   );
 
   /* §2.7 the Materials tab */
