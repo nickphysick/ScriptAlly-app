@@ -82,7 +82,8 @@
 .qc152 .qc152-tabs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
 
 /* the tab body is the only thing that scrolls */
-.qc152 .qc152-in > .qc152-body { flex: 0 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+/* v158: it takes all the room between the tab bar and the footer */
+.qc152 .qc152-in > .qc152-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 
 /* §2.3 the thread */
 .qc152 .qc152-th { display: flex; flex-direction: column; padding: 6px 18px 14px; }
@@ -250,6 +251,6 @@
   .qc152 .qc152-fx { transition: none; }
 }
 
-/* workspace width v2 (8 Nov): while reading, the card is as tall as its content, up to the height it always had, so the
-   footer follows the thread. A journey stepping inside keeps the full height (above): its shell is sized by the slot. */
-.spanel.qsp.qsp:not([data-step]):has(> .spanel-own > [data-qc152]) { height: auto; max-height: var(--qc152-h); }
+/* Query card v158 — the card is always its full height (--qc152-h, above) while reading, in every tab and for every
+   query: it no longer shrinks to a short thread or changes size with the tab, so the footer never moves. (Workspace
+   width v2's `height: auto` while reading is gone.) A journey stepping inside keeps the height it has. */
