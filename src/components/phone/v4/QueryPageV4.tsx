@@ -12,6 +12,7 @@
  *     link beneath it the second action. Both open the app's existing journeys.
  * ⚠️ NO ART ON THIS PAGE (baked decision 4). "Edit query" and "Close this query" stay reachable at the foot of the thread.
  */
+import { STAGE_INK, bandBackground, stageOf } from "../../../lib/stageColours";
 import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
@@ -82,7 +83,7 @@ export const QueryPageV4: React.FC<{ v: V3Query; nowMs: number; quietWeeks: numb
         {ag ? <IconBtn label={`About ${v.row.agentName}`} n="user" pa4="about" onClick={() => openV3Agent(ag.id)} /> : null}
       </div>
       <div className="pa4-scroll">
-        <div className="pa4-band" style={{ background: statusFill(String(v.row.status)) }} data-pa4="band" data-status={v.row.status}>
+        <div className="pa4-band" style={{ background: bandBackground(stageOf(String(v.row.status))), color: STAGE_INK }} data-pa4="band" data-status={v.row.status}>
           <div className="row">
             <V3Glyph status={String(v.row.status)} size={40} bg="rgba(255,255,255,.7)" />
             <div style={{ flex: "none", maxWidth: "50%" }}><h2 className="pa4-h" data-pa4="status">{v.status}</h2><div className="pa4-s">{since != null ? ago(since, nowMs) : closed ? dayMonth(v.row.lastMs) : "Not dated"}</div></div>
@@ -110,7 +111,7 @@ export const QueryPageV4: React.FC<{ v: V3Query; nowMs: number; quietWeeks: numb
             <div key={t.key} className={`pa4-gap pa4-s${t.side === "me" ? " r" : ""}`} data-pa4="wait">{t.label}</div>
           ) : (
             <div key={t.key} className={`pa4-bub${t.side === "them" ? " t" : ""}${fresh && t === lastMsg ? " new" : ""}`} data-pa4="bubble" data-side={t.side}
-              style={t.side === "them" ? { background: statusFill(t.status) } : undefined}>
+              style={t.side === "them" ? { background: t.status ? bandBackground(stageOf(t.status)) : statusFill(t.status) } : undefined}>
               <span className="pa4-b">{t.title}</span>
               {t.chips.length ? <span className="pa4-s">{t.chips.map((c) => c.label).join(", ")}</span> : t.sub ? <span className="pa4-s">{t.sub}</span> : null}
               {t.quote ? <span className="pa4-s">“{t.quote}”</span> : null}

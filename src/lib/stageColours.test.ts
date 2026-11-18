@@ -108,6 +108,27 @@ describe("Stage colours v1 · Phase 4 · Dashboard and Responses", () => {
   });
 });
 
+describe("Stage colours v1 · Phase 5 · the phone", () => {
+  it("SC1-16 (source) the phone's statusFill and disc are the stage Bands; Signed sits with the offer", async () => {
+    const { statusFill } = await import("../components/phone/v3/V3Parts");
+    const { phoneFill } = await import("../components/phone/PhoneDisc");
+    for (const s of Object.values(QueryStatus)) {
+      expect([s, statusFill(s)]).toEqual([s, STAGE_COLOURS[stageOf(s)].band]);
+      expect([s, phoneFill(s)]).toEqual([s, STAGE_COLOURS[stageOf(s)].band]);
+    }
+    expect(statusFill(QueryStatus.PARTIAL_REQUESTED)).toBe("#e4ebf2");
+    expect(statusFill(QueryStatus.SIGNED)).toBe("#efcdc9");
+    expect(statusFill(null)).toBe("#efe6d6");
+  });
+  it("the phone query page's strip and the agent's bubbles are the stage band, the sheen on an offer", () => {
+    const q = readFileSync("src/components/phone/v4/QueryPageV4.tsx", "utf8");
+    expect(q).toContain("style={{ background: bandBackground(stageOf(String(v.row.status))), color: STAGE_INK }} data-pa4=\"band\"");
+    expect(q).toContain("background: t.status ? bandBackground(stageOf(t.status)) : statusFill(t.status)");
+    for (const f of ["src/components/phone/v5/BirdsBlockV5.tsx", "src/components/phone/v5/BirdsViewV5.tsx"])
+      expect([f, /background: bandBackground\(stageOf(Status)?\(String\(cur\.status\)\)\)/.test(readFileSync(f, "utf8"))]).toEqual([f, true]);
+  });
+});
+
 describe("v157 · the card's stylesheet restates the table", () => {
   const v154 = css("qcv154.css");
   it("each stage's --tone equals its band, and no v153 tone name is left on the card", () => {

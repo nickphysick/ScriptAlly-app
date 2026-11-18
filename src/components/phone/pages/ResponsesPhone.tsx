@@ -134,7 +134,7 @@ const ReqMini: React.FC<{ i: Item; nowMs: number; onOpen: () => void }> = ({ i, 
           <span className="pa-av">{i.row.initials}</span>
           <span className="pa-rqwho"><span className="pa-rqname">{i.row.agentName}</span><span className="pa-sub">{i.row.agency}</span></span>
         </span>
-        <span className={`pa-stp pa-fill-${phoneFill(asked)}`} data-pa="resp-pill"><StatusDot status={asked} overrideSize={18} />{STAGE_NAME[asked] ?? String(asked)}</span>
+        <span className="pa-stp" style={{ background: phoneFill(asked) }} data-pa="resp-pill"><StatusDot status={asked} overrideSize={18} />{STAGE_NAME[asked] ?? String(asked)}</span>
         <span className="pa-sub pa-rqnow" data-pa="resp-now">Now: {cardAct(i).label}</span>
       </span>
     </button>
