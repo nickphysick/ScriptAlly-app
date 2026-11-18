@@ -142,8 +142,10 @@ for (const vp of SIZES) {
     const r = await page.evaluate(() => {
       const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
       const b = (s: string) => { const e = root.querySelector<HTMLElement>(s); if (!e) return null; const x = e.getBoundingClientRect(); return { l: x.left, r: x.right, w: x.width }; };
+      /* v57: the content box a percentage (the tray) or a cqw (the preview) resolves against */
+      const cw = (s: string) => { const e = root.querySelector<HTMLElement>(s); if (!e) return null; const c = getComputedStyle(e); return e.getBoundingClientRect().width - parseFloat(c.paddingLeft) - parseFloat(c.paddingRight) - parseFloat(c.borderLeftWidth) - parseFloat(c.borderRightWidth); };
       const sc = root.closest<HTMLElement>(".wpg-scroll")!; const sr = sc.getBoundingClientRect();
-      return { hd: b('[data-tws="header"]'), ws: b('[data-tws="workspace"]'), tray: b('[data-tws="tray"]'), wp: b('[data-tws="side"]'), sc: { l: sr.left, r: sr.right }, sh: sc.scrollHeight, ch: sc.clientHeight, hdH: root.querySelector<HTMLElement>('[data-tws="header"]')?.offsetHeight ?? 0 };
+      return { hd: b('[data-tws="header"]'), ws: b('[data-tws="workspace"]'), tray: b('[data-tws="tray"]'), wp: b('[data-tws="side"]'), wsIn: cw('[data-tws="workspace"]'), deskIn: cw('[data-tws="desk"]'), sc: { l: sr.left, r: sr.right }, sh: sc.scrollHeight, ch: sc.clientHeight, hdH: root.querySelector<HTMLElement>('[data-tws="header"]')?.offsetHeight ?? 0 };
     });
     note(`L1-${vp.width}${MUT ? `-${MUT}` : ""}`, r);
     expect(r.hd && r.ws, "header and workspace are drawn").toBeTruthy();
@@ -153,9 +155,13 @@ for (const vp of SIZES) {
     expect(Math.abs((r.hd!.l - r.sc.l) - (r.sc.r - r.hd!.r)), "L1: centred in the page").toBeLessThanOrEqual(1);
     /* ⚠️ RE-POINTED BY v54 (D2): the page scrolls by at most the header's height (todoV54 L1) */
     expect(r.sh - r.ch, "L1: the page scrolls by no more than the header's height").toBeLessThanOrEqual(r.hdH);
-    expect(Math.abs(r.tray!.w - 340), "L4: the tray is 340").toBeLessThanOrEqual(1);
+    /* ⚠️ RE-POINTED BY v57 (todoWs57.css rules 2 and 8): the tray is clamp(340px, 29%, 396px) of the workspace, the
+       preview clamp(390px, 42cqw, 568px) of the desk — computed from the widths read at this viewport (todoV57 M1, M4) */
+    const tray57 = Math.min(396, Math.max(340, 0.29 * r.wsIn!));
+    const wp57 = Math.min(568, Math.max(390, 0.42 * r.deskIn!));
+    expect(Math.abs(r.tray!.w - tray57), `L4: the tray is clamp(340, 29% of ${r.wsIn}, 396) = ${tray57}`).toBeLessThanOrEqual(1);
     expect(r.wp, "L4: the preview is drawn").not.toBeNull();
-    expect(Math.abs(r.wp!.w - 390), "L4: the preview is 390").toBeLessThanOrEqual(1);
+    expect(Math.abs(r.wp!.w - wp57), `L4: the preview is clamp(390, 42% of ${r.deskIn}, 568) = ${wp57}`).toBeLessThanOrEqual(1);
   });
 }
 
@@ -239,7 +245,9 @@ test("L5 · the collapse: 112, the desk gains it, no hover-open, it survives a r
   expect(Math.abs((await w('[data-tws="tray"]')) - 112), "the collapse survives a reload").toBeLessThanOrEqual(1);
   await page.locator(`${PG} [data-tws="expand"]`).click();
   await page.waitForTimeout(300);
-  expect(Math.abs((await w('[data-tws="tray"]')) - 340), "All tasks restores it").toBeLessThanOrEqual(1);
+  /* ⚠️ RE-POINTED BY v57 (todoWs57.css rule 2): the open tray is clamp(340px, 29%, 396px) of the workspace */
+  const wsIn = await page.locator(`${PG} [data-tws="workspace"]`).evaluate((e) => { const c = getComputedStyle(e); return e.getBoundingClientRect().width - parseFloat(c.paddingLeft) - parseFloat(c.paddingRight) - parseFloat(c.borderLeftWidth) - parseFloat(c.borderRightWidth); });
+  expect(Math.abs((await w('[data-tws="tray"]')) - Math.min(396, Math.max(340, 0.29 * wsIn))), "All tasks restores it").toBeLessThanOrEqual(1);
 });
 
 /* ══ L6 one question · L7 footer button · L8 no auto-advance ═══════════════════════════════════════════════════════ */
