@@ -1,0 +1,17 @@
+[
+ {
+  "name": "foot-replied (resp): a real click opens its journey",
+  "ok": true,
+  "got": "{\"url\":\"http://127.0.0.1:4321/queries?q=seed-cal-near-q\",\"j\":0} → {\"url\":\"http://127.0.0.1:4321/queries?q=seed-cal-near-q\",\"j\":2}"
+ },
+ {
+  "name": "foot-link (close): a real click opens its journey",
+  "ok": true,
+  "got": "{\"url\":\"http://127.0.0.1:4321/queries?q=seed-cal-near-q\",\"j\":0} → {\"url\":\"http://127.0.0.1:4321/queries?q=seed-cal-near-q\",\"j\":2}"
+ },
+ {
+  "name": "reply-btn (nudge): a real click opens its journey",
+  "ok": true,
+  "got": "{\"url\":\"http://127.0.0.1:4321/queries?q=seed-cal-near-q\",\"j\":0} → {\"url\":\"http://127.0.0.1:4321/queries?q=seed-cal-near-q\",\"j\":2}"
+ }
+]

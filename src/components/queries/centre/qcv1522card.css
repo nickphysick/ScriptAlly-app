@@ -165,10 +165,7 @@
 /* the toast and the burst sit over the card's inner frame */
 .qc152 .qc152-in { position: relative; }
 /* §2.6 "+ Add something you sent", under the Materials tab's last row */
-/* §3.2 the footer's second line wraps to two lines rather than cutting off ("Answer by 9 Oct · 6 to tell") */
-/* Record a response v1, Phase 4 — the second line may wrap to two lines, and is never cut off with an ellipsis */
-.qc152 [data-qc1522="footer"] .qc152-rft span { white-space: normal; overflow: visible; text-overflow: clip; display: block; }
-.qc152 [data-qc1522="footer"] .qc152-rft b { white-space: normal; }
+/* the footer's lines wrap rather than cut off: v158.1, qcv152card.css (.qc152-rf / .qc152-rft) */
 /* Record a response v1, Phase 5 — the band's ‹ › at either end of the set */
 .qc152 .qc152-x:disabled { opacity: 0.35; cursor: default; }
 /* Record a response v1, Phase 6 — the band's colour cross-fade (lib/cardMotion): the old colour lies under the band's

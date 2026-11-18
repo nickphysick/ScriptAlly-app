@@ -1,0 +1,17 @@
+[
+ {
+  "name": "a three-action query in the fixture",
+  "ok": true,
+  "got": "seed-cal-near-q"
+ },
+ {
+  "name": "at 504px the three actions are one line",
+  "ok": true,
+  "got": "39,39,39"
+ },
+ {
+  "name": "no label is cut",
+  "ok": true,
+  "got": "[]"
+ }
+]

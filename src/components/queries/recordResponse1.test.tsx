@@ -196,7 +196,10 @@ describe("F1 · {first} replied on every waiting state", () => {
   it("the second line is never clamped with an ellipsis", () => {
     const css = read("src/components/queries/centre/qcv1522card.css");
     expect(css).not.toContain("-webkit-line-clamp: 2");
-    expect(css).toContain(`.qc152 [data-qc1522="footer"] .qc152-rft span { white-space: normal; overflow: visible; text-overflow: clip; display: block; }`);
+    /* v158.1: every footer's lines wrap and the pill grows with them (qcv152card.css), for both footer paths */
+    const card = read("src/components/queries/centre/qcv152card.css");
+    expect(card).toContain(".qc152 .qc152-rft span { font: italic 400 12.5px/1.35 var(--sp-serif); color: #7d7268; white-space: normal; overflow: visible; display: block; }");
+    expect(card).not.toMatch(/\.qc152-rft span \{[^}]*text-overflow: ellipsis/);
   });
 });
 

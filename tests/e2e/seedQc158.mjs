@@ -11,6 +11,8 @@
  *   node tests/e2e/seedQc158.mjs --quotes <queryId>      # a recorded quote on each of the agent's responses
  *   node tests/e2e/seedQc158.mjs --clean                 # remove both
  *   node tests/e2e/seedQc158.mjs --count                 # q158 notes, and tasks whose text starts "q158"
+ *   node tests/e2e/seedQc158.mjs --deciding <queryId>    # v158.1: tellLater on the offer's step, so the card is "deciding"
+ *   node tests/e2e/seedQc158.mjs --undeciding <queryId>  # remove it again (the harness has none)
  */
 import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
@@ -50,6 +52,21 @@ if (process.argv.includes("--count")) {
   const notes = (await getDocs(collection(db, "users", uid, "journalEntries"))).docs.filter((d) => d.id.startsWith("q158-") || String(d.data().entryText ?? "").startsWith("q158"));
   const tasks = (await getDocs(collection(db, "users", uid, "tasks"))).docs.filter((t) => String(t.data().text ?? "").startsWith("q158"));
   console.log(JSON.stringify({ notes: notes.map((d) => ({ id: d.id, text: d.data().entryText, pinned: !!d.data().pinned })), tasks: tasks.map((t) => ({ text: t.data().text, dueDate: t.data().dueDate ?? null })) }));
+  process.exit(0);
+}
+const dc = arg("--deciding") ?? arg("--undeciding");
+if (dc) {
+  const on = process.argv.includes("--deciding");
+  let k = 0;
+  for (const a of (await getDocs(collection(db, "users", uid, "queries", dc[0], "activity"))).docs) {
+    if (String(a.data().resultingStatus ?? "") !== "Offer") continue;
+    await updateDoc(a.ref, { tellLater: on ? true : deleteField() }); k++;
+  }
+  /* two other live queries still to be told of this offer (lib/qcCardView toTell): the deciding footer's "Tell them" */
+  for (const other of ["seed-query-9", "seed-query-20"]) {
+    await updateDoc(doc(db, "users", uid, "queries", other), on ? { offerRefQueryId: dc[0], offerTold: false } : { offerRefQueryId: deleteField(), offerTold: deleteField() }).catch((e) => console.log(`skip ${other}: ${e.code ?? e}`));
+  }
+  console.log(`q158: ${on ? "deciding" : "undeciding"} on ${k} offer step(s) of ${dc[0]}`);
   process.exit(0);
 }
 const n = arg("--notes");

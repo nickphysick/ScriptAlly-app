@@ -1,0 +1,22 @@
+[
+ {
+  "name": "a query whose footer has 1 action",
+  "ok": true,
+  "got": "qc150l9-q"
+ },
+ {
+  "name": "a query whose footer has 2 actions",
+  "ok": true,
+  "got": "seed-query-12"
+ },
+ {
+  "name": "a query whose footer has 3 actions",
+  "ok": true,
+  "got": "seed-cal-near-q"
+ },
+ {
+  "name": "Step 0.6 · the spill: with \"Reply was due 11 Apr 2024 · quiet for 135 weeks\" the text block is 69px against the pill's 52px",
+  "ok": true,
+  "got": "{\"text\":[67,4,140,69],\"pill\":[14,13,209,52]}"
+ }
+]

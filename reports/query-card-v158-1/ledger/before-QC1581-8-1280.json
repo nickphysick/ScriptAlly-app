@@ -1,0 +1,17 @@
+[
+ {
+  "name": "the list holds notes and is scrolled to its end",
+  "ok": true,
+  "got": "q158-n07"
+ },
+ {
+  "name": "the open Pin link is on top at its centre (not under the writing box)",
+  "ok": true,
+  "got": "{\"hit\":true,\"box\":[783,568,92,23]}"
+ },
+ {
+  "name": "a real click at its centre pinned the last note",
+  "ok": true,
+  "got": "[{\"id\":\"q158-n07\",\"text\":\"q158 note 8: why this agent, and what to try next.\",\"pinned\":true}]"
+ }
+]

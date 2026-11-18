@@ -1,0 +1,27 @@
+[
+ {
+  "name": "the To-do desk's preview hides its footer (a read-only picture)",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "the card the To-do desk opens has a three-action footer",
+  "ok": true,
+  "got": "{\"rows\":\"1\",\"n\":3,\"order\":\"reply-btn,foot-link,foot-replied\"}"
+ },
+ {
+  "name": "its footer is two rows",
+  "ok": false,
+  "got": "1"
+ },
+ {
+  "name": "its actions are in place: the replied link, the outlined link action, the navy primary",
+  "ok": false,
+  "got": "reply-btn,foot-link,foot-replied"
+ },
+ {
+  "name": "a To-do task whose card has three actions was found",
+  "ok": true,
+  "got": ""
+ }
+]

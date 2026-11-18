@@ -160,10 +160,11 @@
 /* §2.5 the reply box */
 .qc152 .qc152-rb { display: flex; align-items: center; gap: 12px; padding: 12px 14px 14px; border-top: 1px solid #ece6de; background: #fff; }
 /* v152.1 §3 one bar: a 52px rounded field (#f5f1ea) holding a 32px icon and two lines, then the 52px action */
-.qc152 .qc152-rf { flex: 1; min-width: 0; display: flex; align-items: center; gap: 11px; height: 52px; box-sizing: border-box; padding: 0 16px 0 10px; border-radius: 26px; background: #f5f1ea; }
+/* v158.1: the pill grows with its words (min-height, 8px above and below), so a wrapped line never leaves it or is clipped */
+.qc152 .qc152-rf { flex: 1; min-width: 0; display: flex; align-items: center; gap: 11px; min-height: 52px; box-sizing: border-box; padding: 8px 16px 8px 10px; border-radius: 26px; background: #f5f1ea; }
 .qc152 .qc152-rft { min-width: 0; display: flex; flex-direction: column; }
-.qc152 .qc152-rf b { font: 600 14.5px/1.3 var(--sp-serif); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.qc152 .qc152-rft span { font: italic 400 12.5px/1.35 var(--sp-serif); color: #7d7268; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qc152 .qc152-rf b { font: 600 14.5px/1.3 var(--sp-serif); white-space: normal; overflow: visible; }
+.qc152 .qc152-rft span { font: italic 400 12.5px/1.35 var(--sp-serif); color: #7d7268; white-space: normal; overflow: visible; display: block; }
 .qc152 .qc152-rb.late .qc152-rft span, .qc152 .qc152-rb.late .qc152-fc { color: #a2452a; }
 /* the icon: the reply-time ring (navy on #e3dbcf, its fill the share of the window used), a clock, or the stage's glyph on its tint */
 .qc152 .qc152-fr { flex: none; position: relative; width: 32px; height: 32px; border-radius: 50%; background: conic-gradient(#2a3a52 calc(var(--p) * 360deg), #e3dbcf 0); }
