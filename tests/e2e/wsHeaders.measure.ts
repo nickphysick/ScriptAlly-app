@@ -119,10 +119,13 @@ const PAGES: Record<string, PageDef> = {
     head: /^Versions$/, empty: "[data-vv6='day-one']", gone: ["[data-vv2='title']", "#vCnt", "[data-vv2='list-sec']", "[data-vv2='tree']"], gap: 16,
     oldColumn: "[data-vv6='top'], [data-vv6='desk'] { margin-inline: 48px !important; }", init: scope("msv12-ms"), emptyInit: scope(MS_EMPTY), ready: "[data-vv6='desk']",
   },
+  /* RE-POINTED (Manuscripts v29, 18 Nov): the book container and the page foot are gone; the first section is the desk
+     (the pitch · Details and Your manuscripts), 24 under the header as the v29 ref sets it (its `.head` margin), not 48.
+     The header's own box, title and bar are untouched (MSV29 L1 holds them against the line before the pack). */
   manuscripts: {
-    route: "/manuscripts", root: "[data-msv12='page']", first: "[data-ms27='book']", old: "[data-ms27='header']",
-    head: /^.+$/, gone: ["[data-ms27='header']"],
-    oldColumn: "[data-ms27='book'] { margin-inline: 24px !important; }", init: scope(MS), ready: "[data-ms27='book']",
+    route: "/manuscripts", root: "[data-msv12='page']", first: "[data-ms29='desk']", old: "[data-ms27='header']",
+    head: /^.+$/, gone: ["[data-ms27='header']", "[data-ms27='book']", "[data-ms28='foot']"], gap: 24,
+    oldColumn: "[data-ms29='desk'] { margin-inline: 24px !important; }", init: scope(MS), ready: "[data-ms29='desk']",
   },
   corkboard: {
     route: "/todo/corkboard", root: "[data-cb2='page']", first: "[data-cb2='tools']", old: "[data-cb2='panel']",

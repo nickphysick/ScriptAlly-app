@@ -1,0 +1,23 @@
+{
+ "1280": {
+  "left": 112,
+  "width": 1128,
+  "height": 251,
+  "fromSheet": 38,
+  "top": 144
+ },
+ "1512": {
+  "left": 112,
+  "width": 1360,
+  "height": 227,
+  "fromSheet": 38,
+  "top": 144
+ },
+ "1717": {
+  "left": 112,
+  "width": 1565,
+  "height": 227,
+  "fromSheet": 38,
+  "top": 144
+ }
+}
