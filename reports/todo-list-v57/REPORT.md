@@ -92,6 +92,24 @@ Full readings: `readings/before.json`, `readings/after.json`.
 `before-*` / `after-*` at 1440 and 1920: rest, pinned, check, housekeeping, nudge, quiet (gone quiet), snooze-pop,
 snoozed, collapsed; plus pinned at 1280 and 1717. M10's Query Centre and Contact list pairs are `M10-{before,after}-*`.
 
+## v57.1 — the footer fix (Nick: "fix it here", 18 Nov)
+
+- **Cause, measured** with the new lock M12, which walks a send task and a nudge to the check step at 1440, 1512, 1600,
+  1717 and 1920. With labels, the footer needs **487.1px** without Back and **580.1px** with it. `todoWs.css` dropped
+  Snooze and Dismiss to icons only below a **540** column. Every column from 540 to 580 therefore overflowed with Back
+  showing; at 1512 the column is 543.8.
+- **Fix:** in `todoWs.css`, beside the 540 rule, `@container twscol (max-width: 599.98px)` applies the same icon-only
+  treatment when the footer `:has(.tws-back)` (580 measured, plus 20 spare). Each button keeps its accessible name,
+  title and key. `todoWs57.css` is untouched and still byte-identical to its ref.
+- **After:** at 1512 and 1600, steps 2 on show icons (the footer needs 404.5 in a 543.8/593.9 column) and step 1
+  keeps its labels. At 1717 and 1920 (columns 661.8/679.8) labels show on every step. At 1440 the column is under 540,
+  so icons show throughout, as before. Next sits inside its column on every step at every size.
+- **Run:** `todoV57` (now 19 tests, M1–M12) and `todoV52` together: **27 passed, 2 failed, 9 skipped**. All of v57
+  passes. **todoV52 L6/L7 at 1512 are now green.** The two reds are todoV52 L1's "at most 1320 wide" at 1512 and 1920,
+  which were already red on the base (above). tsc 0, build clean, To-do workspace unit tests 24/24.
+- Not walked: the batch view's footer (`WsBatch54`, "Log it for n queries"), whose primary is wider. The rule applies
+  there too (it keys on `.tws-back`), but M12 does not measure it.
+
 ## Dev
 
 - Before: `index-sl2zR2So.js` (`dev/smv31-vv6-cp32-lqmf1-cb15` @ b9226fc5e).

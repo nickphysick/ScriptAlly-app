@@ -370,6 +370,56 @@ test("M11 · no phone file changed since the served line", async () => {
   expect(out, "M11 · git diff --name-only <base>..HEAD -- the phone folders").toBe("");
 });
 
+/* ══ M12 · v57.1: on every step the footer fits its column and Next stays in it (todoV52 L7 went red at 1512 on step 2:
+   Back + "2 of 4" + Next beside the labelled Snooze and Dismiss needed ~584 in a 544 column) ══════════════════════ */
+const readFoot = (page: Page) => page.evaluate(() => {
+  const root = [...document.querySelectorAll<HTMLElement>('[data-tws="page"]')].find((e) => e.getBoundingClientRect().height > 0)!;
+  const f = root.querySelector<HTMLElement>('[data-tws="footer"]'), col = root.querySelector<HTMLElement>('[data-tws="qcol"]'), p = root.querySelector<HTMLElement>('[data-tws="primary"]');
+  if (!f || !col || !p) return null;
+  const cs = getComputedStyle(f);
+  const kids = [...f.children].filter((c) => getComputedStyle(c).display !== "none") as HTMLElement[];
+  const gap = parseFloat(cs.columnGap) || 0;
+  const need = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight) + kids.reduce((a, c) => a + (c.classList.contains("tws-sp") ? 0 : c.getBoundingClientRect().width), 0) + gap * (kids.length - 1);
+  const c = col.getBoundingClientRect(), r = p.getBoundingClientRect();
+  return {
+    col: Math.round(c.width * 10) / 10, need: Math.round(need * 10) / 10, scroll: f.scrollWidth, client: f.clientWidth,
+    inCol: r.left >= c.left - 0.5 && r.right <= c.right + 0.5, primary: [Math.round(r.left), Math.round(r.right)], colX: [Math.round(c.left), Math.round(c.right)],
+    back: !!f.querySelector('[data-tws="back"]'), labels: [...f.querySelectorAll<HTMLElement>(".tws-sb:not(.tws-back) span")].some((e) => getComputedStyle(e).display !== "none"),
+    label: (p.textContent ?? "").trim(),
+  };
+});
+for (const vp of [{ width: 1440, height: 900 }, { width: 1512, height: 982 }, { width: 1600, height: 1000 }, { width: 1717, height: 1000 }, { width: 1920, height: 1080 }]) {
+  test(`M12 · the footer fits its column on every step, Next inside it (${vp.width})`, async ({ page }) => {
+    await openTodo(page, vp);
+    await scroll(page, TD, "end");
+    const out: Record<string, unknown[]> = {};
+    for (const kind of ["send", "nudge"]) {
+      const steps: unknown[] = [];
+      const title = await pick(page, kind);
+      if (!title) continue;
+      for (let i = 0; i < 8; i++) {
+        await page.waitForTimeout(250);
+        const st = await openStep(page);
+        const f = await readFoot(page);
+        steps.push({ st, ...f });
+        if (f) {
+          expect(f.inCol, `M12 · ${kind} ${st}: Next ${f.primary} inside the column ${f.colX} (needs ${f.need}, has ${f.col})`).toBe(true);
+          expect(f.scroll, `M12 · ${kind} ${st}: the footer does not overflow`).toBeLessThanOrEqual(f.client + 0.5);
+        }
+        if (st === "check" || st === "none") break;
+        await answer(page);
+        const nx = primary(page).and(page.locator("[data-next]"));
+        if (!(await nx.count()) || !(await nx.isEnabled())) break;
+        await nx.click();
+      }
+      out[kind] = steps;
+      await scroll(page, TD, "end");
+    }
+    note(`M12-${vp.width}`, out);
+    expect(Object.keys(out).length, "M12 · at least one task walked").toBeGreaterThan(0);
+  });
+}
+
 /* ══ the shots (Phase 3): before/after pairs at 1440 and 1920 ═════════════════════════════════════════════════ */
 for (const vp of [SIZES[1], SIZES[3]]) {
   test(`shots · the To-do states (${vp.width})`, async ({ page }) => {
