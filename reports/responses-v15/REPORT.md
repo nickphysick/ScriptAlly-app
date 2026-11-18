@@ -166,4 +166,10 @@ stay, as decision 1 allows.
 
 ## 9. Dev
 
-RESULTS-PENDING
+**https://scriptally-dev.web.app/queries/responses** — dev serves **`index-DBGl9D_1.js`** (hash checked on the live site
+after the deploy, in the same command), built from **`dev/smv31-vv6-rsp15` @ `6a9313afc`** = the line dev served when I
+deployed (`dev/smv31-vv6` @ `247a370d4`: Status marks v3.1 + Versions v6, `index-BgE3I6c-.js`) + `responses-v15` @
+`df1de11b1`. Two merge conflicts, both additive (`design-refs/.refhashes.json`; `wsHeaders.measure.ts`'s `gap` field,
+which Versions v6 had added too). Hosting only (no rules or functions changed). Nothing went to `main` or prod.
+
+The worktree `ScriptAlly-rsp15` is removed at the end of the run (branches pushed: `responses-v15`, `dev/smv31-vv6-rsp15`).
