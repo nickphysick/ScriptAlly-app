@@ -1,0 +1,74 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do list v57 — TWEAKS ONLY (Nick, 18 Nov). No markup, behaviour or copy changes: every rule restyles something
+ * v56 already renders. Desktop only (768px up); imported last, after todoWs55.css, so it wins at equal specificity.
+ */
+@media (min-width: 768px) {
+  /* 1 · the page ground: the To-do doodle tile (public/images/todo/doodle-tile.svg, drawn for v10 and no longer used),
+         laid the way the Query Centre lays its own (qcv156.css §5) */
+  .ws-window .tws-wpg > .wpg-scroll.wpg-scroll {
+    background-color: var(--ws-page);
+    background-image: linear-gradient(rgba(var(--ws-page-rgb), 0.45), rgba(var(--ws-page-rgb), 0.45)), url("/images/todo/doodle-tile.svg");
+  }
+
+  /* 2 · the tray is wide enough for a task's title on one line, and grows a little on a big screen */
+  .tws .tws-ws:not([data-slim]) { grid-template-columns: clamp(340px, 29%, 396px) minmax(0, 1fr); }
+
+  /* 3 · every row at full strength (v52 faded the unselected rows to 62% until the tray was hovered: grey on cream) */
+  .tws .tws-ti, .tws .tws-gb { opacity: 1; }
+  .tws .tws-ti[data-muted] { opacity: 0.7; }
+  .tws .tws-ti:hover { box-shadow: 0 0 0 1px var(--tw-hair); }
+  .tws .tws-ti[aria-current="true"], .tws .tws-ti[aria-current="true"]:hover { box-shadow: 0 0 0 1.5px var(--tw-navy), 0 8px 18px -12px rgba(28, 19, 15, 0.4); }
+
+  /* 4 · a hovered row swaps its figure for the two quick actions, instead of the actions half-covering it */
+  .tws .tws-ti:is(:hover, :focus-within):has(.tws-qact) :is(.tws-du, .tws-qf) { visibility: hidden; }
+  .tws .tws-qact { background: none; padding-left: 0; }
+
+  /* 5 · group bands: the count in a chip (the Query Centre's group count), a drawn chevron */
+  .tws .tws-gb em {
+    min-width: 26px; height: 22px; padding: 1px 7px 0; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center;
+    background: rgba(255, 255, 255, 0.62); font: normal 14px var(--tw-type); opacity: 1; color: inherit;
+  }
+  .tws .tws-gb .tws-cv {
+    width: 8px; height: 8px; margin-right: 5px; font-size: 0; opacity: 0.55; border: solid currentColor; border-width: 0 1.6px 1.6px 0;
+    transform: translateY(-2px) rotate(45deg);
+  }
+  .tws .tws-gb[aria-expanded="false"] .tws-cv { transform: translateX(-2px) rotate(-45deg); }
+
+  /* 6 · the list fades out at the foot of the tray instead of being cut off mid-row */
+  .tws .tws-tl {
+    padding-bottom: 30px;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent);
+  }
+
+  /* 7 · the quiet tabs: "Nothing snoozed." and the like, set as a line of the page rather than grey small print */
+  .tws .tws-note { margin: 12px 6px 8px; font-size: 14.5px; line-height: 1.5; }
+  .tws .tws-empty { padding: 44px 16px 12px; font: 400 17px/1.4 var(--tw-type); color: var(--tw-ink2); }
+  .tws .tws-empty::before {
+    content: ""; display: block; width: 44px; height: 44px; margin: 0 auto 14px; border-radius: 50%;
+    background: #fff center / 20px 20px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%232a3a52' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E");
+    box-shadow: inset 0 0 0 1px var(--tw-hair);
+  }
+
+  /* 8 · the desk on a wide screen: the card beside the questions takes the spare width (so it is drawn closer to full
+         size, 540 wide), rather than the questions stretching across an empty column */
+  .tws .tws-wp { width: clamp(390px, 42cqw, 568px); }
+
+  /* 9 · the question headings in the page's own serif (they were the last Playfair Display on the page; the batch
+         view's headings already use this) */
+  .tws .tws-wq h3.tws-qh { font: 600 20px/1.3 var(--tw-serif) !important; letter-spacing: 0; }
+
+  /* 10 · the pop-ups (snooze, dismiss, switched off) portal to the body, where lib/brand's bare-`span` rule set their
+          option labels in the sans face; they take the pop-up's serif, and its heading the typewriter like the filter menu */
+  .tws-layer.tws-pop :is(span, button, kbd) { font-family: inherit; }
+  .tws-layer.tws-pop { font-family: var(--tw-serif); }
+  .tws-layer.tws-pop .tws-ph b { font: 400 17px var(--tw-type); }
+  .tws-layer.tws-pop .tws-po { min-height: 40px; }
+
+  /* 11 · answer tiles sit two across at most, so a long one ("Full manuscript · What Marcus asked for") never gets
+          squeezed into a third column and wrapped over four lines */
+  .tws .tws-tiles[data-desk] { grid-template-columns: repeat(auto-fill, minmax(max(190px, calc(50% - 5px)), 1fr)); }
+}
