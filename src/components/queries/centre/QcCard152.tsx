@@ -45,6 +45,9 @@ import "./qcv158.css";
 import { AgentTab158 } from "./QcAgent158";
 import { MaterialsTab158 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
+/* Query card v160 — the card bumps when a save or an undo lands */
+import { bump } from "./qcMotion160";
+import { useLanding160, type Motion160 } from "./useLanding160";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -126,6 +129,8 @@ export interface QcCard152Props {
   stepCard?: { at: number; of: number; go: (d: 1 | -1) => void } | null;
   /** Record a response v1 — opened from an agent's card, which this card replaced: the band's way back to it */
   backTo?: { label: string; onBack: () => void } | null;
+  /** Query card v160 — a save has started, or Undo was pressed (a new `n` each time): the card moves when it lands */
+  motion?: Motion160 | null;
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
@@ -346,6 +351,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
 
   /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). "Edit what went" opens
      the same step editor the per-block Edit opened, on the latest sent step. */
+  /* v160 — a save or an undo lands in the first frame the card's drawing changes: the frame bumps, once */
+  const sig160 = JSON.stringify([r.status, d.state, d.foot?.phase ?? null, thread.filter((x) => x.t === "msg").map((x) => x.key)]);
+  useLanding160(p.motion, sig160, r.id, {
+    land: (_kind, first) => { if (first) bump(rootRef.current?.closest<HTMLElement>(".spanel") ?? null); },
+  });
+
   const groups = materialGroups(d.steps, { nowMs });
   const lastSent = [...groups].reverse().find((g) => !g.pending && g.activityId)?.activityId ?? null;
   const matPane = (

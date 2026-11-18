@@ -1,0 +1,47 @@
+[
+ {
+  "name": "population: Undo was pressed",
+  "ok": true,
+  "got": "76"
+ },
+ {
+  "name": "undo: exactly one scale animation on the frame",
+  "ok": true,
+  "got": "[{\"uid\":2,\"props\":[\"scale\"],\"dur\":500,\"peak\":1.022,\"play\":\"running\"}]"
+ },
+ {
+  "name": "undo: it animates scale only, never transform",
+  "ok": true,
+  "got": "[\"scale\"]"
+ },
+ {
+  "name": "undo: 500ms",
+  "ok": true,
+  "got": "500"
+ },
+ {
+  "name": "undo: peaks between 1.02 and 1.025",
+  "ok": true,
+  "got": "1.022"
+ },
+ {
+  "name": "undo: population — frames with the bump running",
+  "ok": true,
+  "got": "24"
+ },
+ {
+  "name": "undo: the frame's rotate is unchanged during it",
+  "ok": true,
+  "got": "[\"1.6deg\"]"
+ },
+ {
+  "name": "undo: the frame's translate is unchanged during it",
+  "ok": true,
+  "got": "[\"none\"]"
+ },
+ {
+  "name": "undo: transform is never set on the frame",
+  "ok": true,
+  "got": "[\"none\"]"
+ }
+]

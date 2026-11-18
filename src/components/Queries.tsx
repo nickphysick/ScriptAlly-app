@@ -1850,7 +1850,9 @@ export const Queries: React.FC<{
   const [qc1522J, setQc1522J] = useState<{ j: Journey; n: number; reply?: ReplyType | null } | null>(null);
   const [qc1522Draft, setQc1522Draft] = useState<ThreadStepIn | null>(null);
   const [qc1522Edit, setQc1522Edit] = useState<string | null>(null);
-  const [qc1522Toast, setQc1522Toast] = useState<{ msg: string; undo: (() => Promise<void>) | null } | null>(null);
+  const [qc1522Toast, setQc1522Toast] = useState<{ msg: string; undo: (() => Promise<void>) | null; bump?: boolean } | null>(null);
+  /* Query card v160 — a save has started or Undo was pressed: the card moves when the change lands (QcCard152 `motion`) */
+  const [qcMotion160, setQcMotion160] = useState<{ kind: "save" | "undo"; n: number } | null>(null);
   const [qc1522Burst, setQc1522Burst] = useState<number | null>(null);
   /* the toast lasts 5.2s; opening another composer dismisses it */
   useEffect(() => { if (!qc1522Toast) return undefined; const t = window.setTimeout(() => setQc1522Toast(null), 5200); return () => window.clearTimeout(t); }, [qc1522Toast]);
@@ -6181,16 +6183,18 @@ export const Queries: React.FC<{
         packages: pkgList, packageId: rec0.how === "package" ? rec0.packageId ?? null : null,
       };
       /* one save: plan it, commit it in one batch, then the toast and its Undo */
-      const done1522 = (snap: Snapshot, msg: string, freshId: string | null) => {
+      const done1522 = (snap: Snapshot, msg: string, freshId: string | null, bump = true) => {
         setQc1522J(null); setQc1522Draft(null); setQc1522Edit(null);
         whoPickedRef.current = null;
         if (freshId) { setQcCardFresh(freshId); window.setTimeout(() => setQcCardFresh(null), 1600); }
-        setQc1522Toast({ msg, undo: async () => { await restoreSnapshot(snap); } });
+        setQc1522Toast({ msg, undo: async () => { await restoreSnapshot(snap); }, bump });
       };
       const newId = (plan: { set: { path: string }[] }) => plan.set.find((x) => x.path.includes("/activity/"))?.path.split("/").pop() ?? null;
-      const run1522 = async (fn: () => Promise<void>): Promise<boolean> => {
+      /* `bump`: a save that adds a step or moves the query (Query card v160) — a step's date or materials edit does not */
+      const run1522 = async (fn: () => Promise<void>, bump = true): Promise<boolean> => {
         if (qc152Busy) return false;
         setQc152Busy(true);
+        if (bump) setQcMotion160({ kind: "save", n: Date.now() });
         /* Record a response v1, Phase 6 — the band's colour before the save, so it can cross-fade to the new state */
         const bandBefore = bandColourNow();
         /* the composer (or the bubble's form) gives way as the save starts: its draft would otherwise sit beside the new
@@ -6321,8 +6325,8 @@ export const Queries: React.FC<{
                   pkg: k ? { id: k.id, name: k.packageName, edition: k.edition ?? 1 } : null, pkgChanged: !!pkgList && v.pkgId !== undefined && (v.pkgId ?? null) !== (ctx.packageId ?? null) });
                 plan.query = { ...plan.query, ...dp.query };
               }
-              done1522(await commitPlan(uid, plan), "Step saved", null);
-            })}
+              done1522(await commitPlan(uid, plan), "Step saved", null, false);
+            }, false)}
             onDelete={() => run1522(async () => {
               const [existing, feed] = await Promise.all([readLog(uid, q.id), readFeed(uid, q.id)]);
               const marked = queries.filter((x) => x.offerRefQueryId === q.id).map((x) => x.id);
@@ -6390,10 +6394,12 @@ export const Queries: React.FC<{
       card1522.editNode = edit1522;
       card1522.toast = qc1522Toast ? { msg: qc1522Toast.msg, onUndo: qc1522Toast.undo ? () => {
         const t = qc1522Toast; setQc1522Toast(null);
+        if (t.bump) setQcMotion160({ kind: "undo", n: Date.now() });
         /* a restore the rules refuse writes nothing (one batch): say so, never leave the writer believing it was undone */
         void t.undo?.().catch((e) => { console.error("v152.2 undo refused", (e as { code?: string })?.code ?? e); setQc1522Toast({ msg: "Couldn’t undo that. Nothing was changed.", undo: null }); });
       } : null } : null;
       card1522.burst = qc1522Burst;
+      card1522.motion = qcMotion160;
       card1522.onFoot = (a) => open1522(a);
       /* Record a response v1, Phase 5 — the band's ‹ ›: the set the card was opened from, else the list's order */
       const set1522 = cardSetRef.current?.includes(q.id) ? cardSetRef.current : order;
