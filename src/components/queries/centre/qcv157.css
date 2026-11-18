@@ -1,0 +1,30 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query Centre v157 (design-refs/query-centre-v157.html, read from the rendered page) — the grid card only: the foil on
+ * an offer, the track in ink on every band, the Sent and Next boxes centred with the navy needs-you outline, and gone
+ * quiet. The stage bands themselves are qcv154.css's (`--tone`, from lib/stageColours). Desktop only (768px and up).
+ *
+ * ⚠️ OVERRIDES WIN ON SPECIFICITY, NOT ON BUNDLE ORDER: each selector is a repeated class (or more) above the
+ *    v154 … v156.1 rule it replaces, scoped to the grid card (`.qc154-card`) so the slip, Responses and Birds-eye,
+ *    which share the track, do not change. stageColours.test.ts and qcv157.test.ts read these rules.
+ * ⚠️ No `color-mix()`, no `var()` inside `@keyframes`.
+ */
+
+/* ── Phase 2 · the foil on an offer: the Offer band (#8ea7c6, the table's) under a white sheen that sits at 30% and
+   moves once to 85% while the card is hovered or keyboard-focused, then stays. Nothing loops. Offer and Signed share
+   it (both are the `offer` stage); no other stage has it. ─────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc154-card.qc154-card[data-tone="offer"] .qc154-hd.qc154-hd {
+    background:
+      linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.5) 40%, rgba(255, 255, 255, 0.1) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
+      #8ea7c6;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    transition: background-position 0.7s ease-out;
+  }
+  .qc151.qc153 .qc154-card.qc154-card[data-tone="offer"]:is(:hover, :focus-visible) .qc154-hd.qc154-hd { background-position: 85% 0; }
+}
+@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
+  .qc151.qc153 .qc154-card.qc154-card[data-tone="offer"] .qc154-hd.qc154-hd { transition: none; }
+}
