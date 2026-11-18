@@ -114,7 +114,9 @@ export const RspPanel: React.FC<{
     return () => {
       window.clearTimeout(t);
       const id = idRef.current;
-      const back = [...document.querySelectorAll<HTMLElement>(`[data-rsp5="row"][data-id="${id}"], [data-rsp5="req"][data-id="${id}"] [data-rsp5="req-open"], [data-rsp5="note"][data-id="${id}"]`)]
+      /* Responses v15: the collection's row, the carousel's card (the Query Centre's), a note's Open the card, a single
+         quote card (v5's hooks are retired) */
+      const back = [...document.querySelectorAll<HTMLElement>(`[data-rsp15="row"][data-id="${id}"], [data-rsp15="track"] > [data-qc154="card"][data-id="${id}"], [data-rsp15="words-note"][data-id="${id}"] [data-rsp15="open-card"], [data-rsp15="quote-card"][data-id="${id}"]`)]
         .find((e) => e.getBoundingClientRect().height > 0);
       back?.focus({ preventScroll: true });
     };

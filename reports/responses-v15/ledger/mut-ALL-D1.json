@@ -1,0 +1,82 @@
+[
+ {
+  "where": "1512 population: 7 cards",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "where": "1512 your move first, then the newest answer",
+  "ok": true,
+  "detail": "[\"Clara Beaumont\",\"Tom Ellery\",\"Jonathan Marsh\",\"Daniel O’Rourke\",\"Marcus Webb\",\"Sophie Dunn\",\"Mei Tanaka\"]"
+ },
+ {
+  "where": "1512 the Query Centre's own card (data-qcv=\"row\", id query-row-…)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1512 the line",
+  "ok": true,
+  "detail": "7 asked to read more. 4 are waiting on you."
+ },
+ {
+  "where": "1512 arrows above three",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1512 dots above three",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1512 no card clipped vertically (card and paperclip inside the track)",
+  "ok": false,
+  "detail": "[{\"name\":\"Clara Beaumont\",\"top\":265.796875,\"bot\":389.796875,\"tt\":281.796875,\"tb\":401.796875},{\"name\":\"Tom Ellery\",\"top\":265.796875,\"bot\":389.796875,\"tt\":281.796875,\"tb\":401.796875},{\"name\":\"Jonathan Marsh\",\"top\":265.796875,\"bot\":389.796875,\"tt\":281.796875,\"tb\":401.796875},{\"name\":\"Daniel O’Rourke\",\"top\":265.796875,\"bot\":389.796875,\"tt\":281.796875,\"tb\":401.796875},{\"name\":\"Marcus Webb\",\"top\":265.796875,\"bot\":389.796875,\"tt\":281.796875,\"tb\":401.796875},{\"name\":\"Sophie Dunn\",\"top\":265.796875,\"bot\":389.796875,\"tt\":281.796875,\"tb\":401.796875},{\"name\":\"Mei Tanaka\",\"top\":265.796875,\"bot\":389.796875,\"tt\":281.796875,\"tb\":401.796875}]"
+ },
+ {
+  "where": "1280 population: 7 cards",
+  "ok": true,
+  "detail": "7"
+ },
+ {
+  "where": "1280 your move first, then the newest answer",
+  "ok": true,
+  "detail": "[\"Clara Beaumont\",\"Tom Ellery\",\"Jonathan Marsh\",\"Daniel O’Rourke\",\"Marcus Webb\",\"Sophie Dunn\",\"Mei Tanaka\"]"
+ },
+ {
+  "where": "1280 the Query Centre's own card (data-qcv=\"row\", id query-row-…)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1280 the line",
+  "ok": true,
+  "detail": "7 asked to read more. 4 are waiting on you."
+ },
+ {
+  "where": "1280 arrows above three",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1280 dots above three",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "1280 no card clipped vertically (card and paperclip inside the track)",
+  "ok": false,
+  "detail": "[{\"name\":\"Clara Beaumont\",\"top\":265.921875,\"bot\":389.921875,\"tt\":281.921875,\"tb\":401.921875},{\"name\":\"Tom Ellery\",\"top\":265.921875,\"bot\":389.921875,\"tt\":281.921875,\"tb\":401.921875},{\"name\":\"Jonathan Marsh\",\"top\":265.921875,\"bot\":389.921875,\"tt\":281.921875,\"tb\":401.921875},{\"name\":\"Daniel O’Rourke\",\"top\":265.921875,\"bot\":389.921875,\"tt\":281.921875,\"tb\":401.921875},{\"name\":\"Marcus Webb\",\"top\":265.921875,\"bot\":389.921875,\"tt\":281.921875,\"tb\":401.921875},{\"name\":\"Sophie Dunn\",\"top\":265.921875,\"bot\":389.921875,\"tt\":281.921875,\"tb\":401.921875},{\"name\":\"Mei Tanaka\",\"top\":265.921875,\"bot\":389.921875,\"tt\":281.921875,\"tb\":401.921875}]"
+ },
+ {
+  "where": "two cards: population",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "two cards: no arrows, no dots",
+  "ok": true,
+  "detail": ""
+ }
+]

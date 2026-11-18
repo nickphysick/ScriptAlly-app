@@ -18,7 +18,8 @@ import type { QcRow } from "../../lib/qcSummary";
 type Item = RespItem<QcRow>;
 export type Shape = "square" | "story";
 export interface ShareOpts { shape: Shape; names: boolean; book: boolean; quiet: boolean }
-export const SHARE_FILE = "queryhawk-wall-of-no.png";
+/** Responses v15 (decision 1): the builder's own words name the Rejection collection, the file included */
+export const SHARE_FILE = "queryhawk-rejection-collection.png";
 export const TILE_SRC = "/images/responses/responses-wall-tile.webp";
 
 const ROTS = [-1.6, 1.2, -0.7, 1.8, -1.2, 0.6, -1.9, 1.4, -0.9];
@@ -55,7 +56,7 @@ export function drawShare(canvas: HTMLCanvasElement, nos: readonly Item[], o: Sh
   vg.addColorStop(0, "rgba(10,13,19,.8)"); vg.addColorStop(0.32, "rgba(10,13,19,.12)"); vg.addColorStop(0.72, "rgba(10,13,19,.25)"); vg.addColorStop(1, "rgba(10,13,19,.9)");
   g.fillStyle = vg; g.fillRect(0, 0, W, H);
   g.fillStyle = "#f4eee5"; g.font = `600 34px ${F.serif}`; g.textBaseline = "top"; g.fillText("QueryHawk", 64, 56);
-  g.font = `400 ${H > W ? 150 : 124}px ${F.type}`; g.fillText("Wall of no", 58, H > W ? 150 : 118);
+  g.font = `400 ${H > W ? 150 : 124}px ${F.type}`; g.fillText("Rejection collection", 58, H > W ? 150 : 118, W - 116);
   const cols = H > W ? 4 : 5, cw = (W - 128 - (cols - 1) * 18) / cols, ch = cw * 1.25, top = H > W ? 390 : 300;
   const rowsFit = Math.max(1, Math.floor((H - (H > W ? 440 : 250) - top) / (ch + 20)));
   const show = list.slice(0, cols * rowsFit);
@@ -85,7 +86,7 @@ export function drawShare(canvas: HTMLCanvasElement, nos: readonly Item[], o: Sh
   });
   if (list.length > show.length) {
     g.fillStyle = "rgba(244,238,229,.75)"; g.font = `500 22px ${F.mono}`; g.textBaseline = "top";
-    g.fillText(`+ ${list.length - show.length} MORE ON THE WALL`, 64, top + rowsFit * (ch + 20));
+    g.fillText(`+ ${list.length - show.length} MORE IN THE COLLECTION`, 64, top + rowsFit * (ch + 20));
   }
   const firstQ = nos.reduce<number | null>((m, x) => (x.queriedMs != null && (m == null || x.queriedMs < m) ? x.queriedMs : m), null);
   const r = list.filter((x) => x.group !== "noReply").length, n = list.length - r;
@@ -143,9 +144,9 @@ export const RspShare = React.forwardRef<HTMLElement, { nos: Item[]; title: stri
   };
   const set = (p: Partial<ShareOpts>) => setO((x) => ({ ...x, ...p }));
   return (
-    <section className="rsp-ws rsp-share" ref={ref} data-rsp="share" aria-label="Share your wall">
+    <section className="rsp-ws rsp-share" ref={ref} data-rsp="share" aria-label="Share your story">
       <div className="rsp-wsh">
-        <p className="rsp-say">Share your wall<span className="rsp-dim">, as an image</span></p>
+        <p className="rsp-say">Share your story<span className="rsp-dim">, as an image</span></p>
         <div className="rsp-seg" role="group" aria-label="Shape">
           <button type="button" data-rsp="shape" data-shape="square" aria-pressed={o.shape === "square"} onClick={() => set({ shape: "square" })}>Square</button>
           <button type="button" data-rsp="shape" data-shape="story" aria-pressed={o.shape === "story"} onClick={() => set({ shape: "story" })}>Story</button>
@@ -156,7 +157,7 @@ export const RspShare = React.forwardRef<HTMLElement, { nos: Item[]; title: stri
           {src ? <img src={src} alt="Preview of the image you'll share" data-rsp="preview-img" /> : <span className="rsp-prev-wait" aria-hidden="true" />}
         </div>
         <div>
-          <p className="rsp-lede">Most published writers heard no many times before they found their agent. Sharing your wall shows writers who are just starting out that it{"’"}s a normal part of the process.</p>
+          <p className="rsp-lede">Most published writers heard no many times before they found their agent. Sharing your Rejection collection shows writers who are just starting out that it{"’"}s a normal part of the process.</p>
           <div className="rsp-opt">
             <label htmlFor="rsp-o-names"><b>Agent names</b><small>Off by default, so nobody is named in public by surprise</small></label>
             <input type="checkbox" className="rsp-tg" id="rsp-o-names" data-rsp="opt-names" checked={o.names} onChange={(e) => set({ names: e.target.checked })} />

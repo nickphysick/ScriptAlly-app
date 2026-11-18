@@ -22,6 +22,7 @@
  * ⚠️ NO HEADINGS: brand.tsx forces a face on bare h1–h3; the band's names are spans.
  */
 import React, { useEffect, useRef, useState } from "react";
+import "../../shared/stripBand.css";
 import "./dash2Founding.css";
 import { cardTier, useFoundingStats } from "../../../lib/foundingStats";
 import { composeFor, RANK_NAMES, type ComposeKey } from "../../../lib/foundingCard";
@@ -164,7 +165,7 @@ export const Dash2Founding: React.FC<{
   if (showFolded) {
     const fs = foldStatus(tier, done);
     return (
-      <section {...common} className="d22-fw is-folded" data-folded="1">
+      <section {...common} className="sband sband--rose d22-fw is-folded" data-folded="1">
         <div className="d22-strip">
           <span className="d22-fbadge" aria-hidden="true">{busy ? null : <Art tier={tier} />}</span>
           {tag}
@@ -180,8 +181,8 @@ export const Dash2Founding: React.FC<{
   }
 
   return (
-    <section {...common} className={`d22-fw${top ? " is-top" : ""}`} data-folded="0" data-up={up ? "1" : undefined}>
-      <div className="d22-top">
+    <section {...common} className={`sband sband--rose d22-fw${top ? " is-top" : ""}`} data-folded="0" data-up={up ? "1" : undefined}>
+      <div className="sband-top d22-top">
         {tag}
         <span className="d22-prize">
           {ICONS.idea}
@@ -190,7 +191,7 @@ export const Dash2Founding: React.FC<{
         </span>
         {foldBtn}
       </div>
-      <div className="d22-body">
+      <div className="sband-body d22-body">
         <div className="d22-me" data-d2="fw-top">
           <span ref={badgeRef} className={`d22-badge${up ? " is-hatch" : ""}`} data-d2="fw-badge" aria-hidden="true">
             {busy ? null : up ? (

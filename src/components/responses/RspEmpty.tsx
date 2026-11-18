@@ -2,121 +2,130 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Responses v5 Phase 9 (ref `emptyPage`) — NOTHING BACK YET: the title card's empty variant, "While you wait" (three
- * cards from the writer's own queries) and "What this page will show you" (three rows, each a real component of this
- * page on an oat panel tagged Example).
+ * Responses v15 Phase G (ref `empty`) — NOTHING BACK YET: "While you wait" (every query still out on a line of dates,
+ * at the reply date its agent gives) and three features, each with an example: "Track your requests", "Keep your
+ * notes" and "Rejection collection".
  *
- * ⚠️ THE WAITING FIGURES ARE THE QUERY CENTRE'S: `waitingRows`, `nextExpected` (the row's own expected reply date) and
- *    `goneQuiet` (D6). The next-reply card is left out when no expected reply date lies ahead.
- * ⚠️ THE EXAMPLES ARE FIXED, CLEARLY FAKE AND NEVER THE WRITER'S: `EXAMPLE_*` below, with dates set relative to today so
- *    "10 days left" stays true of the example. They are inert: no opener, no data-id, no button in the tab order.
- * ⚠️ THE PAGE SWITCHES TO THE POPULATED ONE the moment the first answer is recorded, with no reload (the page decides,
- *    from live data, as v2 did).
+ * ⚠️ THE WAITING FIGURES ARE THE QUERY CENTRE'S, as v5's were: `waitingRows`, the row's own expected reply date
+ *    (`expectedMs` with `expectedKind === "reply"`, from `expectedFor`) and `nextExpected`. A query whose agent gives no
+ *    reply time is named in the chips instead of placed on the line. Nothing is invented.
+ * ⚠️ THE EXAMPLES ARE FIXED, CLEARLY FAKE AND NEVER THE WRITER'S (the ref's own two agents), with dates relative to
+ *    today. They are inert: no opener, no data-id, nothing in the tab order.
+ * ⚠️ THE NEXT REPLY'S DOT DOES NOT PULSE: the ref loops a pulse on it, and this page's motion only confirms (decision
+ *    13). It keeps the ref's ring.
  */
 import React from "react";
 import { QueryStatus } from "../../types";
-import { goneQuiet, nextExpected, plural, respDate, waitingRows, type RespItem } from "../../lib/responses";
+import { MONTHS_LONG, nextExpected, respDate, waitingRows } from "../../lib/responses";
 import type { QcRow } from "../../lib/qcSummary";
-import { MONTHS_SHORT } from "../../lib/dates";
-import { ReqCard } from "./RspCarousel";
-import { NoteCard } from "./Rsp5Words";
-import { Tally } from "./RspNos";
+import { QcCard154 } from "../queries/centre/QcCard154";
+import { StatusDot } from "../StatusDot";
 
-type Item = RespItem<QcRow>;
 const DAY = 86_400_000;
-export const RESPONSES_HAWK = { src: "/images/responses/responses-wall-hawk.webp", version: "e223df95" } as const;
+const sod = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const days = (a: number, b: number) => Math.round((sod(b) - sod(a)) / DAY);
 
-/** a fake row for an example: only the fields the example components read */
-function fakeRow(name: string, agency: string, initials: string, status: QueryStatus, steps: [QueryStatus, number][], nowMs: number, extra: Partial<QcRow> = {}): QcRow {
-  const spans = steps.map(([s, d], i, a) => ({ status: s, startMs: nowMs - d * DAY, endMs: a[i + 1] ? nowMs - a[i + 1][1] * DAY : null, current: i === a.length - 1 }));
+/** a fake row for the example card: the fields the Query Centre's card reads, dated from today */
+export function exampleRequestRow(nowMs: number): QcRow {
+  const sent = nowMs - 42 * DAY, asked = nowMs - 5 * DAY;
+  const spans = [
+    { status: QueryStatus.QUERIED, startMs: sent, endMs: asked, current: false },
+    { status: QueryStatus.PARTIAL_REQUESTED, startMs: asked, endMs: null, current: true },
+  ];
   return {
-    id: `example-${initials}`, query: {} as QcRow["query"], status, agentName: name, agency, initials, sentMs: spans[0].startMs,
-    history: { spans, currentStartMs: spans[spans.length - 1].startMs, dated: true }, dayN: steps[0][1], furthest: "partial",
-    expectedMs: null, expectedKind: null, ...extra,
-  } as QcRow;
+    id: "example-cb", status: QueryStatus.PARTIAL_REQUESTED, agentName: "Clara Beaumont", agency: "Harbour Lane", initials: "CB",
+    query: { id: "example-cb", status: QueryStatus.PARTIAL_REQUESTED, dateSent: new Date(sent).toISOString(), partialRequestedDate: new Date(asked).toISOString(), materialsWanted: [] },
+    sentMs: sent, history: { spans, currentStartMs: asked, dated: true }, dayN: 42, furthest: "partial",
+    expectedMs: null, expectedKind: null, stageStartMs: asked,
+  } as unknown as QcRow;
 }
-/** Jonathan Marsh at The Marsh Agency: asked for the full after the partial, ten days left to send */
-export function exampleRequest(nowMs: number): Item {
-  const row = fakeRow("Jonathan Marsh", "The Marsh Agency", "JM", QueryStatus.FULL_REQUESTED,
-    [[QueryStatus.QUERIED, 118], [QueryStatus.PARTIAL_REQUESTED, 94], [QueryStatus.PARTIAL_SENT, 92], [QueryStatus.FULL_REQUESTED, 4]], nowMs);
-  return {
-    id: row.id, row, group: "more", answer: "full", state: "toSend", yourMove: true, answerMs: nowMs - 4 * DAY, queriedMs: row.sentMs,
-    waitDays: 114, pagesSentMs: null, dueMs: nowMs + 10 * DAY, afterPartial: true, personal: false, note: null, furthest: "partial",
-  };
-}
-/** Mei Takahashi at Takahashi Literary: a pass with a note, after the partial */
-export function exampleNote(nowMs: number): Item {
-  const row = fakeRow("Mei Takahashi", "Takahashi Literary", "MT", QueryStatus.REJECTED,
-    [[QueryStatus.QUERIED, 64], [QueryStatus.PARTIAL_REQUESTED, 48], [QueryStatus.PARTIAL_SENT, 46], [QueryStatus.REJECTED, 28]], nowMs);
-  return {
-    id: row.id, row, group: "passed", answer: "passed", state: null, yourMove: false, answerMs: nowMs - 28 * DAY, queriedMs: row.sentMs,
-    waitDays: 36, pagesSentMs: null, dueMs: null, afterPartial: false, personal: true, furthest: "partial",
-    note: "The opening pages are tense and well paced. I didn’t connect with Murphy as strongly as I’d hoped, and I need to love a lead to take a book on.",
-  };
-}
+export const EXAMPLE_NOTE = "I enjoyed Murphy’s voice a great deal, but I didn’t connect with the opening chapters as strongly as I’d hoped.";
 
-const dayMon = (ms: number) => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
+interface Dot { r: QcRow; due: number; weeks: number | null; level: number; quiet: boolean; next: boolean }
 
 export const RspEmpty: React.FC<{
   rows: readonly QcRow[];
   nowMs: number;
-  /** the agent's stated reply time, for the next-reply card */
+  /** the agent's stated reply time, for a dot's tooltip */
   weeksOf: (r: QcRow) => number | null;
-  onTodo: () => void;
-}> = ({ rows, nowMs, weeksOf, onTodo }) => {
-  const wait = waitingRows(rows).slice().sort((a, b) => (a.sentMs ?? 0) - (b.sentMs ?? 0));
-  const firstSent = wait.find((r) => r.sentMs != null)?.sentMs ?? null;
+}> = ({ rows, nowMs, weeksOf }) => {
+  const wait = waitingRows(rows);
+  const isDated = (r: QcRow) => r.expectedKind === "reply" && r.expectedMs != null;
+  const dated = wait.filter(isDated).sort((a, b) => a.expectedMs! - b.expectedMs!);
+  const undated = wait.filter((r) => !isDated(r)).sort((a, b) => (a.sentMs ?? 0) - (b.sentMs ?? 0));
   const next = nextExpected(rows, nowMs);
-  const nextWeeks = next ? weeksOf(next) : null;
-  const quiet = goneQuiet(rows, nowMs).length;
-  const faces = wait; /* oldest query first, as the reference */
-  const ex = <span className="rsp5-exm">Example</span>;
+  const quiet = dated.filter((r) => r.expectedMs! < nowMs).length;
+  /* the line: from the first of the month of the earliest date shown to a fortnight past the last (the ref's Oct →
+     Feb), so every dot and Today sit inside it */
+  const lo = Math.min(nowMs, ...dated.map((r) => r.expectedMs!));
+  const hi = Math.max(nowMs, ...dated.map((r) => r.expectedMs!)) + 14 * DAY;
+  const t0d = new Date(lo); t0d.setDate(1); t0d.setHours(0, 0, 0, 0);
+  const t0 = t0d.getTime(), span = Math.max(1, days(t0, hi));
+  const x = (ms: number) => `${((days(t0, ms) / span) * 100).toFixed(2)}%`;
+  let lastX = -99, lvl = 0;
+  const dots: Dot[] = dated.map((r) => {
+    const px = days(t0, r.expectedMs!);
+    lvl = px - lastX < 5 ? lvl + 1 : 0; lastX = px;
+    return { r, due: r.expectedMs!, weeks: weeksOf(r), level: lvl, quiet: r.expectedMs! < nowMs, next: !!next && next.id === r.id };
+  });
+  const months: number[] = [];
+  for (let m = new Date(t0d.getFullYear(), t0d.getMonth() + 1, 1); m.getTime() < hi; m = new Date(m.getFullYear(), m.getMonth() + 1, 1)) months.push(m.getTime());
   return (
-    <div className="rsp5-empty" data-rsp5="empty">
-      <section className="rsp5-sec" data-rsp5="wait" aria-labelledby="rsp5-wait-h">
-        <div className="rsp5-h2row"><div className="rsp5-h2"><h2 id="rsp5-wait-h" className="rsp5-h2t">While you wait</h2></div></div>
-        <div className="rsp5-wyw">
-          <div className="rsp5-wy" data-rsp5="wait-out">
-            <b>{wait.length}</b>
-            <span className="rsp5-wyl">{wait.length === 1 ? "query out with an agent" : "queries out with agents"}</span>
-            {firstSent != null ? <span className="rsp5-wys">The first went out on {respDate(firstSent, nowMs)}.</span> : null}
-            <span className="rsp5-faces">
-              {faces.slice(0, 7).map((r) => <span key={r.id} className="rsp5-face rsp5-face--q" title={r.agentName}>{r.initials}</span>)}
-              {faces.length > 7 ? <i className="rsp5-more">+{faces.length - 7}</i> : null}
-            </span>
+    <div className="rsp15-empty" data-rsp15="empty">
+      <section className="rsp15-ww" data-rsp15="wait" aria-labelledby="rsp15-wait-h">
+        <h2 id="rsp15-wait-h" className="rsp15-wwt">While you wait</h2>
+        <p data-rsp15="wait-line">{wait.length === 1 ? "Your query is with an agent." : `Your ${wait.length} queries are with agents.`}{dated.length ? " Here’s when each agent says they’ll reply by." : ""}</p>
+        {dated.length ? (
+          <div className="rsp15-tl" data-rsp15="timeline">
+            <div className="rsp15-ax" />
+            {months.map((m) => <span key={m} className="rsp15-mo" style={{ ["--x" as string]: x(m) }}>{MONTHS_LONG[new Date(m).getMonth()]}</span>)}
+            <span className="rsp15-now" style={{ ["--x" as string]: x(nowMs) }}><span>Today</span></span>
+            {dots.map((d) => {
+              const n = Math.abs(days(nowMs, d.due));
+              return (
+                <span key={d.r.id} tabIndex={0} className={`rsp15-dot${d.quiet ? " is-q" : ""}${d.next ? " is-nx" : ""}`} data-rsp15="wait-dot"
+                  style={{ ["--x" as string]: x(d.due), ["--y" as string]: `${75 - d.level * 40}px` }}
+                  aria-label={`${d.r.agentName}, ${d.quiet ? `their reply time passed ${n} days ago` : `reply due ${respDate(d.due, nowMs)}`}`}>
+                  {d.r.initials}
+                  <span className="rsp15-tip" aria-hidden="true"><b>{d.r.agentName}</b><em>{d.r.agency}</em>
+                    {d.r.sentMs != null ? `Queried ${respDate(d.r.sentMs, nowMs)}` : ""}{d.weeks ? ` · they say ${d.weeks} weeks` : ""}
+                    <u className={d.quiet ? "is-q" : undefined}>{d.quiet ? `Their reply time passed ${n} days ago` : `Reply due ${respDate(d.due, nowMs)} · in ${n} days`}</u>
+                  </span>
+                </span>
+              );
+            })}
           </div>
-          {next && next.expectedMs != null ? (
-            <div className="rsp5-wy" data-rsp5="wait-next">
-              <b>{dayMon(next.expectedMs)}</b>
-              <span className="rsp5-wyl">the next reply you can expect</span>
-              <span className="rsp5-wys">{next.agentName} at {next.agency}{nextWeeks ? ` gives ${plural(nextWeeks, "week", "weeks")}` : ""}.</span>
-            </div>
-          ) : null}
-          <div className={`rsp5-wy${quiet ? " is-hot" : ""}`} data-rsp5="wait-quiet" data-n={quiet}>
-            <b>{quiet}</b>
-            <span className="rsp5-wyl">{quiet === 1 ? "agent has" : "agents have"} gone quiet</span>
-            <span className="rsp5-wys">{quiet ? "They’re past the reply time they give. A nudge, or closing the query, is on your To-do list." : "Nobody is past the reply time they give."}</span>
-            {quiet ? <button type="button" className="rsp5-go" data-rsp5="to-todo" onClick={onTodo}>Open your To-do list {"→"}</button> : null}
-          </div>
+        ) : null}
+        <div className="rsp15-wfacts" data-rsp15="wait-facts">
+          {next && next.expectedMs != null
+            ? <span>Next reply due <b>{respDate(next.expectedMs, nowMs)}</b> · {quiet} past the time their agent gives{undated.length ? " · No reply time given:" : ""}</span>
+            : undated.length ? <span>No reply time given:</span> : null}
+          {undated.map((r) => <span key={r.id} className="rsp15-ch" data-rsp15="wait-chip">{r.agentName}{r.sentMs != null ? ` · queried ${respDate(r.sentMs, nowMs)}` : ""}</span>)}
         </div>
       </section>
-      <section className="rsp5-sec" data-rsp5="feats" aria-labelledby="rsp5-feats-h">
-        <div className="rsp5-h2row"><div className="rsp5-h2"><h2 id="rsp5-feats-h" className="rsp5-h2t">What this page will show you</h2></div></div>
-        <div className="rsp5-feats">
-          <div className="rsp5-ft" data-rsp5="feat" data-k="requests">
-            <div className="rsp5-ftx"><h3>Track your requests</h3><p>See who asked for pages, what they want and when to send it.</p></div>
-            <div className="rsp5-fpic" aria-hidden="true">{ex}<ReqCard i={exampleRequest(nowMs)} nowMs={nowMs} example /></div>
+      <div className="rsp15-three" data-rsp15="features">
+        <div className="rsp15-ft" data-rsp15="feature" data-k="requests">
+          <div className="rsp15-ex" aria-hidden="true" inert><em>Example</em>
+            <div className="qc151 qc153 rsp15-exc"><QcCard154 row={exampleRequestRow(nowMs)} nowMs={nowMs} selected={false} packageName={null} act={null} onOpen={() => {}} onAct={() => {}} /></div>
           </div>
-          <div className="rsp5-ft rsp5-ft--rev" data-rsp5="feat" data-k="notes">
-            <div className="rsp5-ftx"><h3>Keep your notes</h3><p>Every personal note from an agent, saved in one place.</p></div>
-            <div className="rsp5-fpic" aria-hidden="true">{ex}<NoteCard i={exampleNote(nowMs)} nowMs={nowMs} example /></div>
-          </div>
-          <div className="rsp5-ft" data-rsp5="feat" data-k="tally">
-            <div className="rsp5-ftx"><h3>Rejection collection</h3><p>Each no adds a mark to your wall. Share it when you&rsquo;re ready.</p></div>
-            <div className="rsp5-fpic" aria-hidden="true">{ex}<div className="rsp5-extally"><Tally n={13} ghosts={false} /><div className="rsp5-tcap">10 passes, 3 no reply</div></div></div>
-          </div>
+          <h3 className="rsp15-fth">Track your requests</h3>
+          <p>When an agent asks for pages, their card sits at the top until you{"’"}ve sent them.</p>
         </div>
-      </section>
+        <div className="rsp15-ft" data-rsp15="feature" data-k="notes">
+          <div className="rsp15-ex" aria-hidden="true" inert><em>Example</em>
+            <span className="rsp15-bub" data-tone="x"><span className="rsp15-g"><StatusDot status={QueryStatus.REJECTED} overrideSize={18} decorative /></span><b>Passed</b><q>{EXAMPLE_NOTE}</q><time>{respDate(nowMs - 3 * DAY, nowMs)}</time></span>
+          </div>
+          <h3 className="rsp15-fth">Keep your notes</h3>
+          <p>Anything an agent says about your book is kept with their reply, so you can read them all together.</p>
+        </div>
+        <div className="rsp15-ft" data-rsp15="feature" data-k="collection">
+          <div className="rsp15-ex" aria-hidden="true" inert><em>Example</em>
+            <div className="rsp15-minis">{[-2, 1.5, -1].map((r) => <span key={r} className="rsp15-mini" style={{ transform: `rotate(${r}deg)` }}><span /><span /></span>)}</div>
+          </div>
+          <h3 className="rsp15-fth">Rejection collection</h3>
+          <p>Every pass is kept in your Rejection collection. Rejections are part of querying, and you can share it when you{"’"}re ready.</p>
+        </div>
+      </div>
     </div>
   );
 };

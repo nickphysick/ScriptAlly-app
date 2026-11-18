@@ -1,0 +1,82 @@
+[
+ {
+  "where": "population: the none state",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "While you wait",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "its line",
+  "ok": true,
+  "detail": "Your 12 queries are with agents. Here’s when each agent says they’ll reply by."
+ },
+ {
+  "where": "ten dots on the line, two chips (no reply time given)",
+  "ok": true,
+  "detail": "10 2"
+ },
+ {
+  "where": "the three features",
+  "ok": true,
+  "detail": "[\"Track your requests\",\"Keep your notes\",\"Rejection collection\"]"
+ },
+ {
+  "where": "title: No responses yet",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "12 queries out",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the next reply due line",
+  "ok": true,
+  "detail": "The next reply is due around 2 Dec, going by the reply times your agents give."
+ },
+ {
+  "where": "no Share your story",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "none of the populated page: word",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "none of the populated page: facts",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "none of the populated page: read-on",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "none of the populated page: words",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "none of the populated page: collection",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the first answer switches the page live",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "with no reload",
+  "ok": true,
+  "detail": ""
+ }
+]

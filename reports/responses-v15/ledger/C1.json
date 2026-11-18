@@ -1,0 +1,37 @@
+[
+ {
+  "where": "population: three facts",
+  "ok": true,
+  "detail": "{\"avg\":\"A first reply has taken 36 days on average\",\"notes\":\"6 came with a note\",\"past\":\"9 agents read past the query\"}"
+ },
+ {
+  "where": "A first reply has taken 36 days on average",
+  "ok": true,
+  "detail": "A first reply has taken 36 days on average"
+ },
+ {
+  "where": "6 came with a note",
+  "ok": true,
+  "detail": "6 came with a note"
+ },
+ {
+  "where": "9 agents read past the query",
+  "ok": true,
+  "detail": "9 agents read past the query"
+ },
+ {
+  "where": "More in Analytics →",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "early: the note",
+  "ok": true,
+  "detail": "It’s early days. 7 of your 9 queries are still with agents, and 2 replies is too few to read anything into."
+ },
+ {
+  "where": "early: no line of facts",
+  "ok": true,
+  "detail": ""
+ }
+]

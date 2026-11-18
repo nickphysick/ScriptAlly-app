@@ -1,0 +1,72 @@
+[
+ {
+  "where": "population: six headings",
+  "ok": true,
+  "detail": "[\"Date\",\"Agent\",\"Answer\",\"How long it took\",\"Got as far as\",\"What they said\"]"
+ },
+ {
+  "where": "Date · Agent · Answer · How long it took · Got as far as · What they said",
+  "ok": true,
+  "detail": "[\"Date\",\"Agent\",\"Answer\",\"How long it took\",\"Got as far as\",\"What they said\"]"
+ },
+ {
+  "where": "the count: 15",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "11 passed · 4 no reply",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "first ten, newest first",
+  "ok": false,
+  "detail": "[\"Ben Okafor\",\"Eleanor Whitlock\",\"Alice Moreno\",\"Sarah Kendrick\",\"Hugo Lindqvist\",\"Liam Gallagher\",\"Maya Thorne\",\"Rafael Costa\",\"William Tate\",\"Imogen Hale\"]"
+ },
+ {
+  "where": "population: ten stamps on show",
+  "ok": true,
+  "detail": "[10,10,10,9,9,9,9,9,8,8]"
+ },
+ {
+  "where": "a note, No note, Closed after the wait",
+  "ok": false,
+  "detail": "[\"“Such a close call. The ending didn’t quite land for me, but I’d be glad to see your next book.”\",\"“I enjoyed Murphy’s voice a great deal, but I didn’t connect with the opening chapters as strongly as I’d hoped.”\",\"Closed after the wait\",\"No note\"]"
+ },
+ {
+  "where": "took: days for a pass, weeks for a no reply",
+  "ok": false,
+  "detail": "[\"157 days\",\"23 days\",\"13 weeks\"]"
+ },
+ {
+  "where": "the track in every row",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "Show all 15",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "find shows above six",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "All / Passed / No reply",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no package text in the collection (re-pointed rs5 F1)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "month headers: each month on show, counted over the whole collection",
+  "ok": true,
+  "detail": "[\"November3\",\"October5\",\"September3\"] vs [\"November3\",\"October5\",\"September3\"]"
+ }
+]

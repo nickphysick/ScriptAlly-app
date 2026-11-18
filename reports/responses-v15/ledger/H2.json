@@ -1,0 +1,42 @@
+[
+ {
+  "where": "population: the early state",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the header's early line",
+  "ok": true,
+  "detail": "It’s early days. Most of your queries are still with agents."
+ },
+ {
+  "where": "2 of 9 have replied",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "the early note",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no line of facts",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "one request card, no arrows",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "no In their words (no notes)",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "where": "not the Nothing back yet page",
+  "ok": true,
+  "detail": ""
+ }
+]

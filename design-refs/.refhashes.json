@@ -1217,7 +1217,8 @@
     "design-refs/comps-v32/screens/14-nothing-sent-full-1512@2x.png": "88f720f2c75ccc1d3ba452c75dc99693d1928656aaecbd7f67cf0b34857b3ab1",
     "design-refs/comps-v32/screens/15-day-one-1280@2x.png": "1dea3e7b8266cd4632d8a225ac2fa4a7fc7e3cb5fef1986ca1364dea5fca9100",
     "design-refs/comps-v32/screens/15-day-one-1512@2x.png": "690cd9263751ca6a2561dd31cfeaa5536be1fdb01c1c8ac3731fb89458c16f6e",
-    "design-refs/comps-v32/SHA256SUMS": "d9819fcb8a1da7e6e14f9866f4e735ba9212966d974bfb84970a195900e78a78"
+    "design-refs/comps-v32/SHA256SUMS": "d9819fcb8a1da7e6e14f9866f4e735ba9212966d974bfb84970a195900e78a78",
+    "design-refs/responses-v15/responses-v15.html": "ef3a0c3cc2955f1cf31983a6dfe68eff680fe81f3c7430910a88a4a7bd8e50da"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",

@@ -61,7 +61,7 @@ type PageDef = {
   root: string;
   /** the first body section under the header */
   first: string;
-  /** H4's gap under the header, when the page's own brief sets one (Versions v6: 16); 48 otherwise */
+  /** H4's gap under the header, when the page's own brief sets one (Versions v6: 16; Responses v15: 30); 48 otherwise */
   gap?: number;
   /** the old header's root (H7: absent after) */
   old: string;
@@ -85,9 +85,11 @@ const scope = (id: string) => async (page: Page) => {
 };
 const PAGES: Record<string, PageDef> = {
   responses: {
-    route: "/queries/responses", root: "[data-rsp='page']", first: "[data-rsp5='glance-wrap']", old: "[data-rsp5='title-card']",
-    head: /^(\d+) responses?$/, figure: "[data-rsp5='glance-line'] b", empty: "[data-rsp5='empty']", gone: [".rsp5-card .phc-tx > p", "[data-rsp5='title-card']"],
-    oldColumn: "[data-rsp5='glance-wrap'] { margin-inline: 24px !important; }", init: scope(MS), emptyInit: scope(MS_EMPTY), ready: "[data-rsp5='glance-line']",
+    /* RE-POINTED (Responses v15, 17 Nov): the glance cards are gone; the first section is the body's first part, and the
+       headline's figure is the header's own "{n} of {m} have replied" (tests/e2e/RETIRED-responses-v15.md) */
+    route: "/queries/responses", root: "[data-rsp='page']", first: "[data-rsp15='body'] > :first-child", old: "[data-rsp5='title-card']",
+    head: /^(\d+) responses?$/, figure: "[data-rsp15='replied']", empty: "[data-rsp15='empty']", gone: [".rsp5-card .phc-tx > p", "[data-rsp5='title-card']", "[data-rsp5='glance-wrap']"],
+    oldColumn: "[data-rsp15='body'] { margin-inline: 24px !important; }", init: scope(MS), emptyInit: scope(MS_EMPTY), ready: "[data-rsp15='body'], [data-rsp15='empty']", gap: 30,
   },
   analytics: {
     route: "/queries/analytics", root: "[data-a17='page']", first: "[data-a21='desk']", old: "[data-a21='header']",
@@ -378,7 +380,7 @@ for (const key of PAGE_KEYS) {
         if (has && first) {
           expect.soft(near(first.left, hd.left), `H3 left: ${first.left} vs ${hd.left}`).toBe(true);
           expect.soft(near(first.right, hd.right), `H3 right: ${first.right} vs ${hd.right}`).toBe(true);
-          expect.soft(near(first.top - (hd.bottom as number), d.gap ?? 48), `H4 gap: ${first.top - (hd.bottom as number)}`).toBe(true);
+          expect.soft(near(first.top - (hd.bottom as number), d.gap ?? 48), `H4 gap: ${first.top - (hd.bottom as number)} (want ${d.gap ?? 48})`).toBe(true);
         }
         /* H6 · the headline and its figure */
         const title = has ? String(hd.titleText) : "";
