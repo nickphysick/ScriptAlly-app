@@ -39,3 +39,30 @@ describe("v157 Phase 2 · the foil on an offer", () => {
     for (const m of css.matchAll(/([^{}]+)\{[^{}]*linear-gradient\(112deg/g)) { expect(m[1]).toContain('[data-tone="offer"]'); expect(m[1]).not.toMatch(/data-tone="(queried|partial|full|closed)"/); }
   });
 });
+
+describe("v157 Phase 3 · the track reads on every band", () => {
+  const v154 = readFileSync(resolve(__dirname, "qcv154.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
+  const T = ".qc151.qc153 .qc154-card .qc153-trk:not(.is-ended)";
+  it("no per-stage ink colours the card's track: --tink is gone and the card's track ink is #1c130f", () => {
+    expect(v154).not.toContain("--tink");
+    expect(v154).toMatch(/\.qc154-card \.qc153-trk \{ --ink: #1c130f;/);
+  });
+  it("a reached step and the current step ink; not yet reached and skipped ink at .42", () => {
+    expect(rule(`${T} .qc153-nd.qc153-nd`)).toMatch(/color:\s*#1c130f/);
+    expect(rule(`${T} .qc153-nd.qc153-nd--fut,\n  ${T} .qc153-nd.qc153-nd--skip`)).toMatch(/color:\s*rgba\(28, 19, 15, 0\.42\)/);
+  });
+  it("links: reached ink, not reached ink at .3, into a skipped step dotted ink at .5", () => {
+    expect(rule(`${T} .qc153-ln.qc153-ln`)).toMatch(/background:\s*rgba\(28, 19, 15, 0\.3\)/);
+    expect(rule(`${T} .qc153-ln.qc153-ln--done`)).toMatch(/background:\s*#1c130f/);
+    expect(rule(`${T} .qc153-ln.qc153-ln--skip`)).toContain("repeating-linear-gradient(90deg, rgba(28, 19, 15, 0.5) 0 2px, transparent 2px 4px)");
+  });
+  it("a closed card's track keeps its grey: every colour rule is scoped to a track that has not ended", () => {
+    for (const m of css.matchAll(/([^{}]+)\{([^{}]*)\}/g)) if (/qc153-(nd|ln)/.test(m[1]) && /color|background/.test(m[2])) expect(m[1]).toContain(":not(.is-ended)");
+  });
+  it("the glyph in a step that is not current: 23px, 19px on the narrow card", () => {
+    const all = rules(".qc151.qc153 .qc154-card .qc153-nd:not(.qc153-nd--cur) > span svg");
+    expect(all).toHaveLength(2);
+    expect(all[0]).toMatch(/width:\s*23px;\s*height:\s*23px/);
+    expect(all[1]).toMatch(/width:\s*19px;\s*height:\s*19px/);
+  });
+});

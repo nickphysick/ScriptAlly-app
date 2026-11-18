@@ -28,12 +28,12 @@
   /* an open paperclip raises its card over its neighbours, never over the sticky toolbar (z 30) */
   .qc154-card.has-pop, .qc154-card:has(.qc1533-tw:hover) { z-index: 25; }
   /* v157 — the stage's band on the slate ladder (lib/stageColours `STAGE_COLOURS[stage].band`; stageColours.test.ts
-     asserts each hex here equals the table) and the track's ink (until v157 Phase 3, the v153 tone's) */
-  .qc154-card[data-tone="queried"] { --tone: #efe6d6; --tink: #6f5c45; }
-  .qc154-card[data-tone="partial"] { --tone: #e4ebf2; --tink: #5f433d; }
-  .qc154-card[data-tone="full"] { --tone: #b7c9de; --tink: #34506e; }
-  .qc154-card[data-tone="offer"] { --tone: #8ea7c6; --tink: #653f56; }
-  .qc154-card[data-tone="closed"] { --tone: #eceae6; --tink: #6f5c45; }
+     asserts each hex here equals the table). The track is ink on every band (qcv157.css); no per-stage ink. */
+  .qc154-card[data-tone="queried"] { --tone: #efe6d6; }
+  .qc154-card[data-tone="partial"] { --tone: #e4ebf2; }
+  .qc154-card[data-tone="full"] { --tone: #b7c9de; }
+  .qc154-card[data-tone="offer"] { --tone: #8ea7c6; }
+  .qc154-card[data-tone="closed"] { --tone: #eceae6; }
 
   .qc154-in { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; border: 1px solid #e3d5c9; border-radius: 13px; }
 
@@ -48,10 +48,10 @@
   .qc151 .qc154-ag { display: block; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .qc154-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-  /* the track: v153's, at the ref's size (26px steps, 34px current, 10px links, 14px apart), in the tone's ink */
+  /* the track: v153's, at the ref's size (26px steps, 34px current, 10px links, 14px apart), in ink (v157) */
   .qc154-trkw { position: relative; flex: none; display: flex; align-items: center; cursor: default; outline: none; border-radius: 20px; }
   .qc154-trkw:focus-visible { box-shadow: 0 0 0 2px var(--navy); }
-  .qc154-card .qc153-trk { --ink: var(--tink); gap: 0; }
+  .qc154-card .qc153-trk { --ink: #1c130f; gap: 0; }
   .qc154-card .qc153-nd--cur { width: 34px; height: 34px; }
   .qc154-card .qc153-nd--cur svg { width: 20px; height: 20px; }
   .qc154-card .qc153-nd--cur .qc153-arw { box-sizing: border-box; top: -5px; right: -5px; width: 19px; height: 19px; padding: 0; place-items: center; overflow: hidden; }
