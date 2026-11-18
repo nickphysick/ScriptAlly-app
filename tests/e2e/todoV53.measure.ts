@@ -347,6 +347,7 @@ async function cardFace(page: Page, sel: string) {
       pill: (card.querySelector('[data-qc152="pill"]')?.textContent ?? "").trim(),
       title: (bub?.querySelector('[data-qc152="msg-title"]')?.textContent ?? "").trim(),
       stamp: (bub?.querySelector('[data-qc152="msg-date"]')?.textContent ?? "").trim(),
+      /* v158: the status line under the thread is gone (the footer says it); this reads that nothing draws one */
       status: (card.querySelector('[data-qc153="status-line"]')?.textContent ?? "").trim(),
     };
   }, sel);
@@ -503,7 +504,7 @@ test("L13 · the Query Centre card shows the same message wording and stamps", a
      every message the Query Centre draws is drawn on the To-do's card with the same words and the same stamp */
   for (const m of qc!) expect(todo, `L13 · “${m}” is on the To-do's card in the same words, with the same stamp`).toContain(m);
   for (const m of qc!) expect(m.split(" | ")[0], "L13 · a message, never a bare label").toMatch(/^(You |The agent |[A-Z][a-z’'-]+ )/);
-  expect(pills, "L13 · day pills").toBeGreaterThan(0);
+  expect(pills, "L13 · no day pills (v158: each bubble's stamp is its date)").toBe(0);
   expect(waits.join(" "), "L13 · no Same day").not.toMatch(/Same day/);
 });
 

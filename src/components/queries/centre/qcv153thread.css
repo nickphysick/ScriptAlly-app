@@ -8,8 +8,6 @@
 
 /* ── one bubble ── */
 .qc152 .qc152-th { gap: 6px; }
-.qc152 .qc152-th > .qc152-m.me + .qc152-m.them, .qc152 .qc152-th > .qc152-m.them + .qc152-m.me,
-.qc152 .qc152-th > .qc152-m.them + .qc152-dp, .qc152 .qc152-th > .qc152-m.me + .qc152-dp { margin-top: 6px; }
 .qc152 .qc152-bx { padding: 7px 10px 7px 12px; border-radius: 14px; min-width: 0; }
 .qc152 .qc152-m.them .qc152-bx { border-bottom-left-radius: 4px; }
 .qc152 .qc152-m.me .qc152-bx { border-bottom-right-radius: 4px; }
@@ -22,10 +20,6 @@
 .qc152 .qc152-m.them .qc152-ts { color: #5d6b7c; }
 .qc152 .qc152-via { display: inline-flex; font-style: normal; color: inherit; }
 .qc152 .qc152-tsp .qc152-via { display: inline-flex; }
-/* the day pill; "x days later" stays for real gaps */
-.qc152 .qc152-dp { align-self: center; margin: 6px 0 2px; padding: 3px 10px; border-radius: 8px; background: #f3efe8; font: 400 12.5px/1.3 var(--sp-serif); color: #7a7066; }
-/* the wait, as a status line under the newest message */
-.qc152 .qc153-sl { align-self: center; margin: 6px 0 2px; font: italic 400 13.5px/1.35 var(--sp-serif); color: #7a7066; text-align: center; }
 
 /* ── D8: the To-do desk's dress ── */
 .qc152 .qc153-bkrow { display: flex; align-items: baseline; gap: 8px; margin: 0 16px; padding: 7px 12px; border-radius: 10px; background: #f2ebe0; white-space: nowrap; overflow: hidden; min-width: 0; }

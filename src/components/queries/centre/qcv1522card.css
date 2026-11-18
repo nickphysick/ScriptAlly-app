@@ -14,9 +14,13 @@
 .qc152 .qc152-band:not(.dk) .qc152-x:hover { background: rgba(28, 19, 15, 0.13); }
 
 /* §2.2 a wait: one italic line, no hairline and no pill, on the side of the next message */
-.qc152 .qc1522-lt { margin: 12px 0 5px; font: italic 400 12.5px/1.3 var(--sp-serif) !important; color: #a59a90; }
+/* v158: italic serif 13px #8a8076, 14px above and 5px below; right-aligned above the writer's bubble, left-aligned and
+   past the seal above the agent's. Nothing before the first message; "Same day" is never drawn. */
+.qc152 .qc1522-lt { margin: 14px 6px 5px; font: italic 400 13px/1.2 var(--sp-serif) !important; color: #8a8076; }
 .qc152 .qc1522-lt.me { align-self: flex-end; margin-right: 6px; text-align: right; }
-.qc152 .qc1522-lt.them { align-self: flex-start; margin-left: 40px; }
+.qc152 .qc1522-lt.them { align-self: flex-start; margin-left: 40px; text-align: left; }
+/* two messages on one day: 14px apart, no line */
+.qc152 .qc152-th > .qc152-m + .qc152-m { margin-top: 14px; }
 .qc152 .qc152-th { display: flex; flex-direction: column; }
 .qc152 .qc152-th > .qc152-m.me { align-self: flex-end; }
 .qc152 .qc152-th > .qc152-m.them { align-self: flex-start; }

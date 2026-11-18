@@ -162,12 +162,11 @@ describe("v53 (D9) — the thread reads as messages", () => {
     const every = all.map(([s]) => msgTitle(s, "the agent")).join(" ");
     expect(every).not.toMatch(/\b(he|she|him|her|his|hers)\b/i);
   });
-  it("the stamp and the day pill", async () => {
-    const { stampOf, dayPill } = await import("./qcThread152");
+  it("the stamp: its year only when it is not this year's; the day pill is gone (v158)", async () => {
+    const mod = await import("./qcThread152");
     const now = new Date(2026, 10, 8, 15).getTime();
-    expect(stampOf(new Date(2024, 3, 2, 9).getTime())).toBe("2 Apr");
-    expect(dayPill(new Date(2026, 10, 8, 9).getTime(), now)).toBe("Today");
-    expect(dayPill(new Date(2026, 10, 7, 23).getTime(), now)).toBe("Yesterday");
-    expect(dayPill(new Date(2024, 3, 2, 9).getTime(), now)).toBe("2 April 2024");
+    expect(mod.stampOf(new Date(2026, 3, 2, 9).getTime(), now)).toBe("2 Apr");
+    expect(mod.stampOf(new Date(2024, 3, 2, 9).getTime(), now)).toBe("2 Apr 2024");
+    expect("dayPill" in mod).toBe(false);
   });
 });

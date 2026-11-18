@@ -86,7 +86,8 @@
 .qc152 .qc152-in > .qc152-body { flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 
 /* §2.3 the thread */
-.qc152 .qc152-th { display: flex; flex-direction: column; padding: 6px 18px 14px; }
+/* v158: 16px above the first bubble; spare room sits below the last */
+.qc152 .qc152-th { display: flex; flex-direction: column; padding: 16px 18px 14px; }
 .qc152 .qc152-th.build > * { animation: qc152Bin 0.38s cubic-bezier(0.2, 0.9, 0.3, 1.1) both; }
 @keyframes qc152Bin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 .qc152 .qc152-m { position: relative; display: flex; align-items: flex-start; gap: 8px; max-width: 90%; }
@@ -184,7 +185,7 @@
 .qc152 .qc152-rbtn:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 @media (max-width: 1400px) {
   .qc152 .qc152-bx { min-width: 0; }
-  .qc152 .qc152-th { padding: 6px 14px 12px; }
+  .qc152 .qc152-th { padding: 16px 14px 12px; }
   .qc152 .qc152-rbtn { padding: 0 13px 0 15px; font-size: 13.5px; }
 }
 

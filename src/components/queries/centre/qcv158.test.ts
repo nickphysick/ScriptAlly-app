@@ -22,4 +22,18 @@ describe("QC158-1/2 (source) one height", () => {
   });
 });
 
-void card;
+describe("QC158-3/4 (source) Tracking: no day pill, no status line, the wait at the side", () => {
+  it("the card draws no day pill and no status line, and no stylesheet styles either", () => {
+    expect(card()).not.toMatch(/qc152-dp|day-pill|qc153-sl|status-line|statusLine/);
+    const all = ["qcv152card.css", "qcv1522card.css", "qcv153thread.css"].map(css).join("\n");
+    expect(all).not.toMatch(/\.qc152-dp|\.qc153-sl/);
+  });
+  it("the wait: italic serif 13px #8a8076, 14px above and 5px below; the agent's side past the seal; one-day messages 14px apart", () => {
+    const c = css("qcv1522card.css");
+    expect(c).toMatch(/\.qc152 \.qc1522-lt \{ margin: 14px 6px 5px; font: italic 400 13px\/1\.2 var\(--sp-serif\) !important; color: #8a8076; \}/);
+    expect(c).toMatch(/\.qc152 \.qc1522-lt\.me \{ align-self: flex-end;[^}]*text-align: right;/);
+    expect(c).toMatch(/\.qc152 \.qc1522-lt\.them \{ align-self: flex-start; margin-left: 40px;/);
+    expect(c).toMatch(/\.qc152 \.qc152-th > \.qc152-m \+ \.qc152-m \{ margin-top: 14px; \}/);
+    expect(css("qcv152card.css")).toMatch(/\.qc152 \.qc152-th \{ display: flex; flex-direction: column; padding: 16px 18px 14px; \}/);
+  });
+});

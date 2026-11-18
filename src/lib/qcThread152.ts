@@ -116,16 +116,8 @@ export function msgTitle(s: Pick<ThreadStepIn, "status" | "kind"> & { toldCount?
     default: return "A step";
   }
 }
-/** v53 (D9): a bubble's short stamp ("2 Apr"), and the day pill above each day's messages ("Today", "Yesterday", "2 April 2024") */
-export const stampOf = (ms: number): string => { const d = new Date(ms); return `${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`; };
-const MONTHS_FULL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-export function dayPill(ms: number, nowMs: number): string {
-  const n = days(nowMs, ms);
-  if (n === 0) return "Today";
-  if (n === 1) return "Yesterday";
-  const d = new Date(ms);
-  return `${d.getDate()} ${MONTHS_FULL[d.getMonth()]} ${d.getFullYear()}`;
-}
+/** a bubble's corner stamp: "2 Apr", with the year only when it is not this year's (v158; the v53 day pill is gone) */
+export const stampOf = (ms: number, nowMs: number): string => dayLabel(ms, nowMs);
 /** v53 (D9): how a writer's step went, read off the step's own method words ("by email", "by online form", "by post") */
 export function viaKind(via: string | null | undefined): "email" | "form" | "post" | null {
   const v = (via ?? "").toLowerCase();
@@ -275,7 +267,7 @@ export function buildThread(steps: readonly ThreadStepIn[], c: ThreadCtx): Threa
     out.push({
       t: "msg", key: s.key, activityId: s.activityId, side: sideOf(s), status: s.status, kind: s.kind,
       title: msgTitle(s, c.first), sub: s.sub ?? null, date: s.ms != null ? dayLabel(s.ms, c.nowMs) : "Not dated", dated: s.ms != null,
-      stamp: s.ms != null ? stampOf(s.ms) : null, dayMs: s.ms != null ? midnight(s.ms) : null,
+      stamp: s.ms != null ? stampOf(s.ms, c.nowMs) : null, dayMs: s.ms != null ? midnight(s.ms) : null,
       chips: s.chips, via: s.via ?? null, tint: tintOf(s), grey: greyGlyph(s),
       quote: sideOf(s) === "them" && (s.quote ?? "").trim() ? s.quote!.trim() : null,
       follows: s.kind === "nudge" ? (q0?.ms != null ? `Query sent · ${dayLabel(q0.ms, c.nowMs)}` : "Query sent") : null,

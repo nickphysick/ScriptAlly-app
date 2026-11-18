@@ -22,7 +22,7 @@ import { STATE_BAND, type QueryState } from "../../../lib/queryState";
 import { STAGE_COLOURS, STAGE_INK, bandBackground, quietBackground, stageOf } from "../../../lib/stageColours";
 import { isQuietCard } from "../../../lib/qc154";
 import {
-  askChips, buildThread, dayLabel, dayPill, materialsSummary, materialsTab, replyBox, viaKind,
+  askChips, buildThread, dayLabel, materialsSummary, materialsTab, replyBox, viaKind,
   type ReplyAct, type ThreadChip, type ThreadItem, type ThreadStepIn,
 } from "../../../lib/qcThread152";
 import "./qcv152card.css";
@@ -262,10 +262,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   })();
 
   const desk = p.desk ?? {};
-  let lastDay: number | null = null;
-  /* v53 (D9): the line under the newest message says what the wait is, while it is with the agent */
-  const statusLine = d.state === "agent" || d.state === "nudge"
-    ? `Waiting for ${first}${d.replyMs != null ? ` · reply expected by ${dayLabel(d.replyMs, nowMs)}` : ""}` : null;
+  /* v158: no day pill above a day's first message (each bubble's stamp is its date) and no status line under the newest
+     one (the footer says where the query stands); the wait between two messages is "N days later" at the side */
   const clipChip = (c: { items: string[]; version: string | null }) => (
     <span className="qc153-clip" data-qc153="clip" tabIndex={0}>{CLIP}{c.items.length}
       <span className="qc153-clippop" role="tooltip" data-qc153="clip-pop">{c.items.map((x) => <span key={x}>{x}</span>)}{c.version ? <span>{c.version}</span> : null}</span>
@@ -288,15 +286,11 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           return <div key={it.key} className={`qc1522-lt ${it.side}`} data-qc152="wait" data-qc1522="wait" data-side={it.side} data-label={it.label} title={it.tip ?? undefined}>{it.label}</div>;
         }
         if (p.editingId && it.activityId === p.editingId && p.editNode) return <React.Fragment key={it.key}>{p.editNode}</React.Fragment>;
-        /* v53 (D9): a small centred day pill above each day's first message */
-        const pill = it.dayMs != null && it.dayMs !== lastDay ? <div className="qc152-dp" data-qc152="day-pill">{dayPill(it.dayMs, nowMs)}</div> : null;
-        if (it.dayMs != null) lastDay = it.dayMs;
         const clip = desk.clip && (it.activityId === desk.clip.key || it.key === desk.clip.key) ? desk.clip : null;
         const checking = !!desk.checkKey && (it.activityId === desk.checkKey || it.key === desk.checkKey);
         const stamped = !!desk.stampKey && (it.activityId === desk.stampKey || it.key === desk.stampKey);
         return (
           <React.Fragment key={it.key}>
-            {pill}
             <Bubble side={it.side} status={it.status} kind={it.kind} title={clip ? `You sent ${first} your materials` : it.title} date={it.date} dated={it.dated}
               stamp={it.stamp} viaIcon={it.side === "me" ? viaKind(it.via) : null}
               tint={it.tint} grey={it.grey} initials={r.initials} chips={clip ? clipChip(clip) : chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
@@ -314,7 +308,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         /* v53 (D8): while the To-do's questions are open, the writer is "typing" where the new step will go */
         <div className="qc152-m me qc153-typing" data-qc153="typing"><div className="qc152-bx" data-qc152="bubble"><span className="qc153-dots" aria-label="Being logged"><i /><i /><i /></span></div></div>
       ) : null}
-      {statusLine ? <div className="qc153-sl" data-qc153="status-line">{statusLine}</div> : null}
     </div>
   );
 
