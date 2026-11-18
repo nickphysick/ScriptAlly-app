@@ -1,0 +1,22 @@
+[
+ {
+  "name": "harness nudged queries: seed-cal-bang-q, seed-cal-soon-q, thin-q-remind",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "quiet cards on the grid (88 cards): 43",
+  "ok": true,
+  "got": "thin-q-close, seed-query-22, msv12-q-1, msv12-q-7, seed-query-4, seed-query-19, thin-q-cohort-2, thin-q-cohort-1, thin-q-cohort-6, thin-q-cohort-3, thin-q-cohort-5, thin-q-cohort-4, seed-query-10, seed-query-ms2-a, rj-nudge, thin-q-chase, seed-query-ms2-b, cv25-q-10, cv25-q-05, seed-cal-passed20-q, seed-query-6, seed-pkgq-1, seed-pkgq-2, seed-query-5, cor-undo, cor-move-b, seed-pkgq-7, seed-query-3, seed-cal-near-q, cv25-q-11, seed-pkgq-9, seed-query-21, seed-pkgq-10, msv12-q-5, thin-q-remind, msv12-q-2, probe-dangling-pkg, probe-un-noms, probe-goalstress-today, seed-cal-soon-q, seed-cal-bang-q, cv25-q-04, cv25-q-03"
+ },
+ {
+  "name": "at least one quiet card has been nudged",
+  "ok": true,
+  "got": "thin-q-remind, seed-cal-soon-q, seed-cal-bang-q"
+ },
+ {
+  "name": "at least one quiet card has not",
+  "ok": true,
+  "got": "thin-q-close, seed-query-22, msv12-q-1, msv12-q-7, seed-query-4, seed-query-19, thin-q-cohort-2, thin-q-cohort-1, thin-q-cohort-6, thin-q-cohort-3, thin-q-cohort-5, thin-q-cohort-4, seed-query-10, seed-query-ms2-a, rj-nudge, thin-q-chase, seed-query-ms2-b, cv25-q-10, cv25-q-05, seed-cal-passed20-q, seed-query-6, seed-pkgq-1, seed-pkgq-2, seed-query-5, cor-undo, cor-move-b, seed-pkgq-7, seed-query-3, seed-cal-near-q, cv25-q-11, seed-pkgq-9, seed-query-21, seed-pkgq-10, msv12-q-5, msv12-q-2, probe-dangling-pkg, probe-un-noms, probe-goalstress-today, cv25-q-04, cv25-q-03"
+ }
+]

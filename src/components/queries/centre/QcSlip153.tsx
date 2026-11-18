@@ -24,9 +24,9 @@ import React, { useEffect, useRef, useState } from "react";
 import type { QcRow } from "../../../lib/qcSummary";
 import type { RowAct } from "../../../lib/qc1512";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
-import { heardFact, nextFact, queriedFact, slipTone, slipTrack, standWords, type SlipTrack } from "../../../lib/qc153";
+import { heardFact, legacyTone153, nextFact, queriedFact, slipTrack, standWords, type SlipTrack } from "../../../lib/qc153";
 import { policyWords } from "../../../lib/qc1531";
-import { materialGroups, materialsName, tabAccent, type MatGroups } from "../../../lib/qc1533";
+import { materialGroups, materialsName, tabAccent, type MatGroups, type TabAccent } from "../../../lib/qc1533";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import type { Agent } from "../../../types";
 import { StatusDot } from "../../StatusDot";
@@ -37,6 +37,8 @@ import "./qcv1531.css";
 
 const A_IN = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.5 3.5 4 12M4 5.5V12h6.5" /></svg>;
 const A_OUT = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3.5 12.5 12 4M5.5 4H12v6.5" /></svg>;
+/* v157 — a quiet card's badge: three white dots in place of the arrow */
+const A_QUIET = <svg viewBox="0 0 12 12" fill="currentColor"><circle cx="2.6" cy="6" r="1.25" /><circle cx="6" cy="6" r="1.25" /><circle cx="9.4" cy="6" r="1.25" /></svg>;
 const A_END = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M4 8h8" /></svg>;
 
 export const FACT_ICON = {
@@ -64,8 +66,9 @@ const STEP_WRAP = 12;
 const RR_CUR_WRAP = 17;
 
 /** the four-step track: ink to the current step, faded future, a dotted line into a skipped step. v154: `label`, when
- *  given, is drawn under the current step only (the card's "Draw the journey" hover shows it; hidden at rest). */
-export const Track153: React.FC<{ t: SlipTrack; label?: string; status?: string }> = ({ t, label, status }) => (
+ *  given, is drawn under the current step only (the card's "Draw the journey" hover shows it; hidden at rest).
+ *  v157: `quiet` (the grid card's gone quiet) draws three dots in the current step's badge in place of the arrow. */
+export const Track153: React.FC<{ t: SlipTrack; label?: string; status?: string; quiet?: boolean }> = ({ t, label, status, quiet }) => (
   <span className={`qc153-trk${t.ended ? " is-ended" : ""}`} data-qc153="track" data-dir={t.dir}>
     {t.nodes.map((n, i) => {
       const rr = n === "cur" && status === QueryStatus.REVISE_RESUBMIT;
@@ -77,7 +80,7 @@ export const Track153: React.FC<{ t: SlipTrack; label?: string; status?: string 
           {i ? <i className={`qc153-ln qc153-ln--${t.links[i - 1]}`} data-qc153="link" data-state={t.links[i - 1]} aria-hidden="true" /> : null}
           <span className={`qc153-nd qc153-nd--${n}`} data-qc153="node" data-state={n} title={NODE_TITLE[i]}>
             <StatusDot status={st} overrideSize={rr ? RR_CUR_WRAP : STEP_WRAP} tone="inherit" reached={reached} decorative />
-            {n === "cur" ? <b className={`qc153-arw qc153-arw--${t.dir}`} data-qc153="arrow" data-dir={t.dir} aria-hidden="true">{t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}
+            {n === "cur" ? <b className={`qc153-arw qc153-arw--${t.dir}${quiet ? " qc153-arw--quiet" : ""}`} data-qc153="arrow" data-dir={t.dir} data-quiet={quiet ? "" : undefined} aria-hidden="true">{quiet ? A_QUIET : t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}
             {n === "cur" && label ? <span className="qc154-thl" data-qc154="track-label" aria-hidden="true">{label}</span> : null}
           </span>
         </React.Fragment>
@@ -91,7 +94,8 @@ const CLIP = <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWi
 export const POP_FLIP_BELOW = 200;
 
 /** v153.3 — the paperclip tab and its pop-up: the materials, grouped by when they went */
-export const MatTab1533: React.FC<{ id: string; g: MatGroups; status: string; onOpen: (open: boolean) => void }> = ({ id, g, status, onOpen }) => {
+/** v157: `accent`, when given, replaces the v153 tone's (the grid card passes its stage's, lib/qc1533 `tabAccent157`) */
+export const MatTab1533: React.FC<{ id: string; g: MatGroups; status: string; accent?: TabAccent; onOpen: (open: boolean) => void }> = ({ id, g, status, accent, onOpen }) => {
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
   const btn = useRef<HTMLButtonElement>(null);
@@ -104,7 +108,7 @@ export const MatTab1533: React.FC<{ id: string; g: MatGroups; status: string; on
   const hide = () => setOpen(false);
   useEffect(() => { onOpen(open); }, [open, onOpen]);
   useEscapeLayer(open, () => { hide(); btn.current?.focus(); }, ESC_LEVEL.page);
-  const a = tabAccent(status);
+  const a = accent ?? tabAccent(status);
   const popId = `qc1533-pop-${id}`;
   return (
     <span className="qc1533-tw" ref={wrap} onPointerEnter={show} onPointerLeave={() => { if (!wrap.current?.contains(document.activeElement)) hide(); }}
@@ -170,7 +174,7 @@ export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, p
   const open = () => onOpen(r.id);
   return (
     <div className={`sa-slip qc153-slip${selected ? " is-sel" : ""}${popOpen ? " has-pop" : ""}${preview ? " is-preview" : ""}`} id={preview ? undefined : `query-row-${r.id}`}
-      data-qc153="slip" data-qcv={preview ? "preview" : "row"} data-id={r.id} data-tone={slipTone(r.status)} data-status={r.status}
+      data-qc153="slip" data-qcv={preview ? "preview" : "row"} data-id={r.id} data-tone={legacyTone153(r.status)} data-status={r.status}
       {...(preview
         ? { role: "group", "aria-label": `Preview: ${r.agentName}, ${r.agency}, ${word}` }
         : { role: "button", tabIndex: 0, "aria-label": `${r.agentName}, ${r.agency}, ${word}`, "aria-pressed": selected, onClick: open,

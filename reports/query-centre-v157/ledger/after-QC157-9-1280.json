@@ -1,0 +1,17 @@
+[
+ {
+  "name": "every quiet box: Gone quiet · Nudge or close, no bar",
+  "ok": true,
+  "got": "Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false Gone quiet·Nudge or close·false"
+ },
+ {
+  "name": "the nudged quiet cards' line starts “nudged ”",
+  "ok": true,
+  "got": "thin-q-remind: nudged 18 Sep | seed-cal-soon-q: nudged 12 Oct | seed-cal-bang-q: nudged 25 Sep"
+ },
+ {
+  "name": "the others' line starts “since ”, or there is none (no reply date)",
+  "ok": true,
+  "got": "thin-q-close: since 27 Sep 2025 | seed-query-22: since 1 Jan | msv12-q-1: since 1 Jan | msv12-q-7: since 1 Jan | seed-query-4: since 1 Jan | seed-query-19: since 2 Mar | thin-q-cohort-2: since 10 Apr | thin-q-cohort-1: since 15 Apr | thin-q-cohort-6: since 16 May | thin-q-cohort-3: since 17 May | thin-q-cohort-5: since 21 May | thin-q-cohort-4: since 9 Jun | seed-query-10: since 28 Jun | seed-query-ms2-a: since 27 Jul | rj-nudge: since 10 Aug | thin-q-chase: since 19 Aug | seed-query-ms2-b: since 24 Aug | cv25-q-10: since 26 Aug | cv25-q-05: since 26 Aug | seed-cal-passed20-q: since 8 Sep | seed-query-6: since 12 Sep | seed-pkgq-1: since 19 Sep | seed-pkgq-2: since 21 Sep | seed-query-5: since 23 Sep | cor-undo: since 26 Sep | cor-move-b: since 28 Sep | seed-pkgq-7: since 29 Sep | seed-query-3: since 4 Oct | seed-cal-near-q: since 4 Oct | cv25-q-11: since 4 Oct | seed-pkgq-9: since 11 Oct | seed-query-21: since 14 Oct | seed-pkgq-10: since 16 Oct | msv12-q-5: since 16 Oct | msv12-q-2: since 20 Oct | probe-dangling-pkg: since 15 Nov | probe-un-noms: since 15 Nov | probe-goalstress-today: since 18 Nov | cv25-q-04: null | cv25-q-03: null"
+ }
+]

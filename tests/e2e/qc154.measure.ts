@@ -67,7 +67,7 @@ async function cards(page: Page) {
     const vis = [...c.querySelectorAll<HTMLElement>("*")].filter((e) => e.childElementCount === 0 && e.offsetParent && getComputedStyle(e).opacity !== "0" && !e.closest(".qc154-sr,.qc154-act,.qc154-thl"))
       .map((e) => e.textContent?.trim()).filter(Boolean).join(" | ");
     return {
-      id: c.dataset.id, status: c.dataset.status, tone: c.dataset.tone, grp: c.closest("section")?.getAttribute("data-k"),
+      id: c.dataset.id, status: c.dataset.status, tone: c.dataset.tone, quiet: c.hasAttribute("data-quiet"), grp: c.closest("section")?.getAttribute("data-k"),
       x: +(r.x - grid.x).toFixed(1), y: +r.y.toFixed(1), w: +r.width.toFixed(1), h: +r.height.toFixed(1),
       band: getComputedStyle(hd).backgroundColor, bandH: +hd.getBoundingClientRect().height.toFixed(1),
       next: nx.dataset.state, nextText: [...nx.children].filter((e) => !e.classList.contains("qc154-act")).map((e) => e.textContent?.trim()).join(" · "),
@@ -95,7 +95,9 @@ for (const vp of SIZES) {
     L.check("cards sit in three columns", xs.length === 3 || all.length < 3, xs.join(", "));
     for (const c of all) {
       L.check(`${c.id}: no status word on show`, !!c.word && !c.visible.split(" | ").includes(c.word), `${c.word} · ${c.visible.slice(0, 120)}`);
-      L.check(`${c.id}: band in the stage tone`, ({ sand: "rgb(239, 231, 218)", rose: "rgb(236, 214, 210)", blue: "rgb(217, 225, 234)", heather: "rgb(231, 214, 220)" } as Record<string, string>)[c.tone ?? ""] === c.band, `${c.tone} ${c.band}`);
+      /* v157: the slate ladder (lib/stageColours); a quiet card's band is a gradient with no flat colour (QC157-1 reads its
+         first stop) */
+      L.check(`${c.id}: band in the stage tone`, ({ queried: "rgb(239, 230, 214)", partial: "rgb(228, 235, 242)", full: "rgb(183, 201, 222)", offer: "rgb(142, 167, 198)", closed: "rgb(236, 234, 230)" } as Record<string, string>)[c.tone ?? ""] === c.band || (c.quiet && c.band === "rgba(0, 0, 0, 0)"), `${c.tone} ${c.band}`);
       L.check(`${c.id}: no fact cut, nothing wrapped`, c.cut.length === 0, c.cut.join("; ") || "none");
     }
     /* screens: each group at this width */
@@ -126,7 +128,8 @@ for (const vp of SIZES) {
       L.check(`${c.id} waiting: nothing under the bar, or the planned nudge`, c.nudgeLine === null || /^Nudge on \d/.test(c.nudgeLine), String(c.nudgeLine));
     }
     L.check("no card says 'counts as a pass' or 'Nudge reminder: now'", !all.some((c) => /counts as a pass|Nudge reminder: now/i.test(c.nextText)), "checked");
-    L.check("states present (population)", by("wait").length + by("over").length + by("other").length === all.length, `wait ${by("wait").length} · over ${by("over").length} · other ${by("other").length}`);
+    /* v157: a gone-quiet card's Next box is its own state, "quiet" */
+    L.check("states present (population)", by("wait").length + by("over").length + by("other").length + by("quiet").length === all.length, `wait ${by("wait").length} · over ${by("over").length} · quiet ${by("quiet").length} · other ${by("other").length}`);
     for (const k of ["wait", "over", "other"]) {
       const c = by(k)[0];
       if (!c) { L.check(`a ${k} card to screen`, true, "none in the harness"); continue; }

@@ -6,12 +6,12 @@ const span = (status: QueryStatus, startMs: number) => ({ status, startMs, endMs
 const hist = (...s: QueryStatus[]) => ({ spans: s.map((x, i) => span(x, 1000 + i)), currentStartMs: null, dated: true });
 
 describe("the slip's header colour is the stage", () => {
-  it("maps every status to its stage's tint", () => {
+  it("maps every status to its stage on the slate ladder (v157): closed is its own stage, not sand", () => {
     const want: Record<string, string> = {
-      [QueryStatus.QUERIED]: "sand", [QueryStatus.PARTIAL_REQUESTED]: "rose", [QueryStatus.PARTIAL_SENT]: "rose",
-      [QueryStatus.FULL_REQUESTED]: "blue", [QueryStatus.FULL_SENT]: "blue", [QueryStatus.REVISE_RESUBMIT]: "blue",
-      [QueryStatus.RESUBMITTED]: "blue", [QueryStatus.OFFER]: "heather", [QueryStatus.SIGNED]: "heather",
-      [QueryStatus.REJECTED]: "sand", [QueryStatus.NO_RESPONSE]: "sand", [QueryStatus.WITHDRAWN]: "sand",
+      [QueryStatus.QUERIED]: "queried", [QueryStatus.PARTIAL_REQUESTED]: "partial", [QueryStatus.PARTIAL_SENT]: "partial",
+      [QueryStatus.FULL_REQUESTED]: "full", [QueryStatus.FULL_SENT]: "full", [QueryStatus.REVISE_RESUBMIT]: "full",
+      [QueryStatus.RESUBMITTED]: "full", [QueryStatus.OFFER]: "offer", [QueryStatus.SIGNED]: "offer",
+      [QueryStatus.REJECTED]: "closed", [QueryStatus.NO_RESPONSE]: "closed", [QueryStatus.WITHDRAWN]: "closed",
     };
     for (const s of Object.values(QueryStatus)) expect([s, slipTone(s)]).toEqual([s, want[s]]);
   });

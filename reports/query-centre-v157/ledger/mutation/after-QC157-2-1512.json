@@ -1,0 +1,22 @@
+[
+ {
+  "name": "an Offer card and a Full Sent card exist",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "Offer at rest: the gradient, 260% 100%, x 30%",
+  "ok": true,
+  "got": "{\"image\":\"linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.5) 40%, rgba(255, 255, 255, 0.1) 52%, rgba(255, 255, 255, 0) 66%), none\",\"size\":\"260% 100%, auto\",\"x\":\"30%, 0%\",\"color\":\"rgb(142, 167, 198)\"}"
+ },
+ {
+  "name": "Offer hovered: x 85%",
+  "ok": true,
+  "got": "85%, 85%"
+ },
+ {
+  "name": "a Full Sent card has no gradient",
+  "ok": false,
+  "got": "linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.5) 40%, rgba(255, 255, 255, 0.1) 52%, rgba(255, 255, 255, 0) 66%), none"
+ }
+]

@@ -20,7 +20,8 @@ import { formatQueryMaterial } from "./materials";
 import { partialAsked } from "./qcCardStory";
 import { anyToMs } from "./qcStages";
 import { shortDate } from "./qc151";
-import { slipTone, type SlipTone } from "./qc153";
+import { legacyTone153, type LegacyTone153 } from "./qc153";
+import { stageOf, type Stage } from "./stageColours";
 
 export interface TabChip { name: string; asked: boolean }
 export interface MatGroup { kind: "query" | "asked" | "sent"; label: string; chips: TabChip[]; pkg: string | null }
@@ -72,13 +73,24 @@ export function materialGroups(q: MatQuery, status: QueryStatus | string, packag
 
 export interface TabAccent { accent: string; ink: string; rest: string }
 /** `rest` is the ink 82% over white, worked out here rather than with `color-mix()` at run time */
-export const TAB_ACCENT: Record<SlipTone, TabAccent> = {
+export const TAB_ACCENT: Record<LegacyTone153, TabAccent> = {
   sand: { accent: "#e0d2bb", ink: "#5e4c36", rest: "#7b6c5a" },
   rose: { accent: "#ddb9b1", ink: "#5f433d", rest: "#7c6560" },
   blue: { accent: "#bccbdc", ink: "#2e4864", rest: "#546980" },
   heather: { accent: "#d4b7c2", ink: "#653f56", rest: "#816274" },
 };
-export const tabAccent = (status: QueryStatus | string): TabAccent => TAB_ACCENT[slipTone(status)];
+/** the v153 accent, by the v153 tone: the log-a-query slip preview's (not drawn on the Query Centre grid) */
+export const tabAccent = (status: QueryStatus | string): TabAccent => TAB_ACCENT[legacyTone153(status)];
+/** v157 — the grid card's accent follows its stage on the slate ladder. Closed keeps Queried's sand accent (the pack
+ *  names four; a closed card's was sand before, and stays so). */
+export const TAB_ACCENT_157: Record<Stage, TabAccent> = {
+  queried: { accent: "#e0d2bb", ink: "#5e4c36", rest: "#7b6c5a" },
+  partial: { accent: "#cbd7e4", ink: "#3d5370", rest: "#60728a" },
+  full: { accent: "#9db4cf", ink: "#2a4666", rest: "#506782" },
+  offer: { accent: "#7391b5", ink: "#1b3252", rest: "#445771" },
+  closed: { accent: "#e0d2bb", ink: "#5e4c36", rest: "#7b6c5a" },
+};
+export const tabAccent157 = (status: QueryStatus | string): TabAccent => TAB_ACCENT_157[stageOf(status)];
 
 /** "3 materials", "1 material" — the tab's accessible name */
 export const materialsName = (n: number): string => `${n} material${n === 1 ? "" : "s"}`;

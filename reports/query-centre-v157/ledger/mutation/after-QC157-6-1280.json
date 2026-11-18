@@ -1,0 +1,22 @@
+[
+ {
+  "name": "quiet cards: 48",
+  "ok": true,
+  "got": "seed-query-2, probe-un-both, probe-un-noagent, cv25-q-14, cv25-q-13, thin-q-close, seed-query-22, msv12-q-1, msv12-q-7, seed-query-4, seed-query-19, thin-q-cohort-2, thin-q-cohort-1, thin-q-cohort-6, thin-q-cohort-3, thin-q-cohort-5, thin-q-cohort-4, seed-query-10, seed-query-ms2-a, rj-nudge, thin-q-chase, seed-query-ms2-b, cv25-q-10, cv25-q-05, seed-cal-passed20-q, seed-query-6, seed-pkgq-1, seed-pkgq-2, seed-query-5, cor-undo, cor-move-b, seed-pkgq-7, seed-query-3, seed-cal-near-q, cv25-q-11, seed-pkgq-9, seed-query-21, seed-pkgq-10, msv12-q-5, thin-q-remind, msv12-q-2, probe-dangling-pkg, probe-un-noms, probe-goalstress-today, seed-cal-soon-q, seed-cal-bang-q, cv25-q-04, cv25-q-03"
+ },
+ {
+  "name": "every quiet band is a gradient ending in white at 82%",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%) ; linear-gradient(90deg, rgb(183, 201, 222) 0px, rgb(183, 201, 222) 26%, rgb(255, 255, 255) 82%) ; linear-gradient(90deg, rgb(228, 235, 242) 0px, rgb(228, 235, 242) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "no other card has a band gradient",
+  "ok": false,
+  "got": "none ; linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.5) 40%, rgba(255, 255, 255, 0.1) 52%, rgba(255, 255, 255, 0) 66%), none"
+ },
+ {
+  "name": "a waiting Queried card (inside its reply window) has a flat band, beside quiet Queried cards",
+  "ok": false,
+  "got": "no waiting Queried card"
+ }
+]
