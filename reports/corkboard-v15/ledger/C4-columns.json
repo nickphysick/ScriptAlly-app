@@ -1,0 +1,92 @@
+[
+ {
+  "lock": "C4",
+  "where": "1717x1000 count",
+  "ok": true,
+  "detail": "4 columns at 1565px · 12 notes"
+ },
+ {
+  "lock": "C4",
+  "where": "1717x1000 deal",
+  "ok": true,
+  "detail": "row-major"
+ },
+ {
+  "lock": "C4",
+  "where": "1717x1000 min-height",
+  "ok": true,
+  "detail": "0 notes under 196px"
+ },
+ {
+  "lock": "C4",
+  "where": "1512x982 count",
+  "ok": true,
+  "detail": "4 columns at 1360px · 12 notes"
+ },
+ {
+  "lock": "C4",
+  "where": "1512x982 deal",
+  "ok": true,
+  "detail": "row-major"
+ },
+ {
+  "lock": "C4",
+  "where": "1512x982 min-height",
+  "ok": true,
+  "detail": "0 notes under 196px"
+ },
+ {
+  "lock": "C4",
+  "where": "1280x800 count",
+  "ok": true,
+  "detail": "3 columns at 1128px · 12 notes"
+ },
+ {
+  "lock": "C4",
+  "where": "1280x800 deal",
+  "ok": true,
+  "detail": "row-major"
+ },
+ {
+  "lock": "C4",
+  "where": "1280x800 min-height",
+  "ok": true,
+  "detail": "0 notes under 196px"
+ },
+ {
+  "lock": "C4",
+  "where": "1000x800 count",
+  "ok": true,
+  "detail": "2 columns at 848px · 12 notes"
+ },
+ {
+  "lock": "C4",
+  "where": "1000x800 deal",
+  "ok": true,
+  "detail": "row-major"
+ },
+ {
+  "lock": "C4",
+  "where": "1000x800 min-height",
+  "ok": true,
+  "detail": "0 notes under 196px"
+ },
+ {
+  "lock": "C4",
+  "where": "reached 4",
+  "ok": true,
+  "detail": "seen 4, 3, 2"
+ },
+ {
+  "lock": "C4",
+  "where": "reached 3",
+  "ok": true,
+  "detail": "seen 4, 3, 2"
+ },
+ {
+  "lock": "C4",
+  "where": "reached 2",
+  "ok": true,
+  "detail": "seen 4, 3, 2"
+ }
+]

@@ -1,0 +1,68 @@
+[
+ {
+  "lock": "C9",
+  "where": "population",
+  "ok": true,
+  "detail": "[[\"#agents\",6],[\"#comps\",2],[\"#ideas\",0],[\"#letter\",2],[\"#synopsis\",1],[\"#to-check\",2],[\"Loose notes\",1]]"
+ },
+ {
+  "lock": "C9",
+  "where": "1512x982 overview",
+  "ok": true,
+  "detail": "[[\"#agents\",6],[\"#comps\",2],[\"#ideas\",0],[\"#letter\",2],[\"#synopsis\",1],[\"#to-check\",2],[\"Loose notes\",1]]"
+ },
+ {
+  "lock": "C9",
+  "where": "1512x982 empty stack dashed",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C9",
+  "where": "1512x982 start tile",
+  "ok": true,
+  "detail": "+ Start a stackName it and add notes"
+ },
+ {
+  "lock": "C9",
+  "where": "1512x982 open",
+  "ok": true,
+  "detail": "2/2 · 5 other stacks · All stacks"
+ },
+ {
+  "lock": "C9",
+  "where": "1512x982 empty open",
+  "ok": true,
+  "detail": "Nothing in this stack yet"
+ },
+ {
+  "lock": "C9",
+  "where": "1280x800 overview",
+  "ok": true,
+  "detail": "[[\"#agents\",6],[\"#comps\",2],[\"#ideas\",0],[\"#letter\",2],[\"#synopsis\",1],[\"#to-check\",2],[\"Loose notes\",1]]"
+ },
+ {
+  "lock": "C9",
+  "where": "1280x800 empty stack dashed",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "C9",
+  "where": "1280x800 start tile",
+  "ok": true,
+  "detail": "+ Start a stackName it and add notes"
+ },
+ {
+  "lock": "C9",
+  "where": "1280x800 open",
+  "ok": true,
+  "detail": "2/2 · 5 other stacks · All stacks"
+ },
+ {
+  "lock": "C9",
+  "where": "1280x800 empty open",
+  "ok": true,
+  "detail": "Nothing in this stack yet"
+ }
+]

@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "C15",
+  "where": "desktop",
+  "ok": true,
+  "detail": "||||"
+ },
+ {
+  "lock": "C15",
+  "where": "phone",
+  "ok": true,
+  "detail": "|"
+ },
+ {
+  "lock": "C16",
+  "where": "everyday 1280x800",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0,\"notes\":14}"
+ },
+ {
+  "lock": "C16",
+  "where": "everyday 1512x982",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0,\"notes\":14}"
+ },
+ {
+  "lock": "C16",
+  "where": "everyday 1717x1000",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0,\"notes\":14}"
+ },
+ {
+  "lock": "C16",
+  "where": "busy 1280x800",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0,\"notes\":60}"
+ },
+ {
+  "lock": "C16",
+  "where": "busy 1512x982",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0,\"notes\":60}"
+ },
+ {
+  "lock": "C16",
+  "where": "busy 1717x1000",
+  "ok": true,
+  "detail": "{\"doc\":0,\"sc\":0,\"notes\":60}"
+ },
+ {
+  "lock": "C17",
+  "where": "No notes match",
+  "ok": true,
+  "detail": "No notes match"
+ },
+ {
+  "lock": "C17",
+  "where": "Show all notes",
+  "ok": true,
+  "detail": "all back"
+ },
+ {
+  "lock": "C17",
+  "where": "matches marked",
+  "ok": true,
+  "detail": "4 marks"
+ },
+ {
+  "lock": "C18",
+  "where": "targets",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "C18",
+  "where": "focus ring and actions on focus",
+  "ok": true,
+  "detail": "{\"o\":\"solid\",\"a\":\"1\"}"
+ }
+]

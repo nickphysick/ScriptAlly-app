@@ -1,0 +1,18 @@
+# red-before: tests/e2e/corkboardV15.measure.ts against the base build (345ccfed1 + the v15 locks, their helpers and lib/corkboard's pure layer only; suite run unserialised so every lock ran)
+- waiting for locator('.cb15 [data-cb15="desk"]:visible').first() to be visible
+1 passed (5.8m)
+13 failed
+✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (1.3s)
+✘   2 [measure] › tests/e2e/corkboardV15.measure.ts:63:1 › C1 figures: the header's three figures are figures() of the board, and each filters to exactly its notes (24.7s)
+✘   3 [measure] › tests/e2e/corkboardV15.measure.ts:95:1 › C2 zero figures are not shown; Pick a colour with no figure; Pick a colour to start on an empty board (24.5s)
+✘   4 [measure] › tests/e2e/corkboardV15.measure.ts:121:1 › C3 pinned: Pinned to top holds exactly the pinned notes, first, in every order; Everything else holds none (24.4s)
+✘   5 [measure] › tests/e2e/corkboardV15.measure.ts:143:1 › C4 columns: 4 / 3 / 2 from the wall's width, and note i in column i mod n, row i div n (24.5s)
+✘   6 [measure] › tests/e2e/corkboardV15.measure.ts:166:1 › C5 clamp: only the long note is cut and shows Read all, which opens it (24.5s)
+✘   7 [measure] › tests/e2e/corkboardV15.measure.ts:187:1 › C6 actions: each hover action writes, says so, and its Undo puts the note back (24.4s)
+✘   8 [measure] › tests/e2e/corkboardV15.measure.ts:271:1 › C7 drag: a drop within Everything else writes My order with the note before its target; C8 a drop on a tag files it and keeps its other tags (24.3s)
+✘   9 [measure] › tests/e2e/corkboardV15.measure.ts:309:1 › C9 stacks: one per first tag A to Z then Loose notes; an open stack shows its notes; an empty stack says so (24.5s)
+✘  10 [measure] › tests/e2e/corkboardV15.measure.ts:346:1 › C10 about: one card per agent (query notes under their agent), most first; a card filters to that agent's notes (24.3s)
+✘  11 [measure] › tests/e2e/corkboardV15.measure.ts:373:1 › C11 day one: exactly the three examples, Keep this writes one with Undo; C12 the quiet rule shows What you can do (24.3s)
+✘  12 [measure] › tests/e2e/corkboardV15.measure.ts:403:1 › C13 pop-up: focus starts inside, Tab and Shift+Tab stay inside, Escape closes and focus returns; C14 N and / stand down in fields (24.5s)
+✘  13 [measure] › tests/e2e/corkboardV15.measure.ts:450:1 › C15 words: no pile on the desktop or the phone; C16 no sideways overflow (1280, 1512, 1717, 60 notes); C17 No notes match; C18 targets and focus rings (24.5s)
+✘  14 [measure] › tests/e2e/corkboardV15.measure.ts:531:1 › C19 papers: the five paint their hexes and the old three read as butter, blush and powder, with no write on load; C20 the view and the order survive a reload (24.9s)

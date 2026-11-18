@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "C19",
+  "where": "every note paints its paper",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "C19",
+  "where": "cb15seed-old1 reads butter",
+  "ok": true,
+  "detail": "rgb(250, 240, 207)"
+ },
+ {
+  "lock": "C19",
+  "where": "cb15seed-old1 still stored old",
+  "ok": true,
+  "detail": "yellow"
+ },
+ {
+  "lock": "C19",
+  "where": "cb15seed-old2 reads blush",
+  "ok": true,
+  "detail": "rgb(245, 226, 216)"
+ },
+ {
+  "lock": "C19",
+  "where": "cb15seed-old2 still stored old",
+  "ok": true,
+  "detail": "pink"
+ },
+ {
+  "lock": "C19",
+  "where": "cb15seed-old3 reads powder",
+  "ok": true,
+  "detail": "rgb(226, 231, 239)"
+ },
+ {
+  "lock": "C19",
+  "where": "cb15seed-old3 still stored old",
+  "ok": true,
+  "detail": "sage"
+ },
+ {
+  "lock": "C19",
+  "where": "no task write on load",
+  "ok": true,
+  "detail": "0 write(s)"
+ },
+ {
+  "lock": "C20",
+  "where": "view and order remembered",
+  "ok": true,
+  "detail": "stacks · Oldest first"
+ }
+]
