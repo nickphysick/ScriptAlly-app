@@ -44,6 +44,7 @@ import "./sc1card.css";
 import "./qcv158.css";
 import { AgentTab158 } from "./QcAgent158";
 import { MaterialsTab158 } from "./QcMaterials158";
+import { Foot } from "./QcFoot1581";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -128,8 +129,8 @@ export interface QcCard152Props {
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
-const ARW = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" /></svg>;
-const CLOCK = <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M8 4.6V8l2.3 1.4" /></svg>;
+
+
 const CLIP = <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><path d="M10.5 4.5 5.8 9.2a1.6 1.6 0 0 0 2.3 2.3l5-5a3 3 0 0 0-4.3-4.3L3.6 7.4a4.2 4.2 0 0 0 6 6l3.4-3.4" /></svg>;
 const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
 
@@ -408,32 +409,19 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         </div>
         {ed.on ? <SaveBar keys={ed.keys} nudge={ed.nudge} busy={ed.busy} onCancel={() => ed.ask()} onSave={() => void ed.save()} />
           : p.composer ? p.composer : d.foot ? (() => {
-          /* v152.2 §3.2 — the footer: two lines, the button, and the quieter link */
+          /* v152.2 §3.2 — the footer: two lines, the button, and the quieter link. v158.1: with more than one action it is
+             two rows (Foot, below) */
           const ft = footer1522({ ...d.foot, state: d.state, status: r.status, first, nowMs });
-          return (
-            <div className={`qc152-rb${ft.late ? " late" : ""}`} data-qc152="reply" data-qc1522="footer" data-act={ft.button?.act ?? "none"} data-icon={ft.icon.k}>
-              <div className="qc152-rf" data-qc152="reply-field">
-                {ft.icon.k === "clock" ? <span className="qc152-fc" data-qc152="foot-icon" aria-hidden="true">{CLOCK}</span>
-                  : ft.icon.k === "ring" ? <span className="qc152-fr" data-qc152="foot-icon" style={{ ["--p" as string]: String(ft.icon.p) }} aria-hidden="true" />
-                  : <span className={`qc152-fg${ft.icon.k === "grey" ? " grey" : ""}`} data-qc152="foot-icon" aria-hidden="true">{StepGlyph({ status: ft.icon.status, kind: null })}</span>}
-                <div className="qc152-rft"><b data-qc152="reply-lead">{ft.lead}</b><span data-qc152="reply-sub">{ft.sub}</span></div>
-              </div>
-              {ft.button ? <button type="button" className={`qc152-rbtn ${ft.button.tone === "navy" ? "nv" : "gh"}`} data-qc152="reply-btn" data-tone={ft.button.tone} data-act={ft.button.act} onClick={() => p.onFoot?.(ft.button!.act)}>{ft.button.label}{ft.button.tone === "navy" ? ARW : null}</button> : null}
-              {ft.link ? <button type="button" className="qc1522-flink" data-qc1522="foot-link" data-act={ft.link.act} onClick={() => p.onFoot?.(ft.link!.act)}>{ft.link.label}</button> : null}
-              {ft.replied ? <button type="button" className="qc1522-flink" data-qc1522="foot-replied" data-act="resp" onClick={() => p.onFoot?.("resp")}>{ft.replied.label}</button> : null}
-            </div>
-          );
+          const primary = ft.button ? { label: ft.button.label, tone: ft.button.tone, act: ft.button.act as string, run: () => p.onFoot?.(ft.button!.act), hook: { "data-qc152": "reply-btn" } } : null;
+          const linkA = ft.link ? { label: ft.link.label, act: ft.link.act as string, run: () => p.onFoot?.(ft.link!.act), hook: { "data-qc1522": "foot-link" } } : null;
+          const repliedA = ft.replied ? { label: ft.replied.label, act: "resp", run: () => p.onFoot?.("resp"), hook: { "data-qc1522": "foot-replied" } } : null;
+          return <Foot late={ft.late} icon={ft.icon} lead={ft.lead} sub={ft.sub} primary={primary} others={[linkA, repliedA]}
+            outer={{ "data-qc1522": "footer", "data-act": ft.button?.act ?? "none" }} />;
         })() : (
-        <div className={`qc152-rb${box.late ? " late" : ""}`} data-qc152="reply" data-act={box.act} data-icon={box.icon.k}>
-          <div className="qc152-rf" data-qc152="reply-field">
-            {box.icon.k === "ring" ? <span className="qc152-fr" data-qc152="foot-icon" style={{ ["--p" as string]: String(box.icon.p) }} aria-hidden="true" />
-              : box.icon.k === "clock" ? <span className="qc152-fc" data-qc152="foot-icon" aria-hidden="true">{CLOCK}</span>
-              : <span className={`qc152-fg${box.icon.k === "grey" ? " grey" : ""}`} data-qc152="foot-icon" aria-hidden="true">{StepGlyph({ status: box.icon.status, kind: null })}</span>}
-            <div className="qc152-rft"><b data-qc152="reply-lead">{box.lead}</b><span data-qc152="reply-sub">{box.sub}</span></div>
-          </div>
-          {box.second ? <button type="button" className="qc152-rbtn gh sm" data-qc152="reply-second" onClick={() => p.onReply(box.second!.act)}>{box.second.label}</button> : null}
-          <button type="button" className={`qc152-rbtn ${box.tone === "navy" ? "nv" : "gh"}`} data-qc152="reply-btn" data-tone={box.tone} onClick={() => p.onReply(box.act)}>{box.button}{ARW}</button>
-        </div>
+          <Foot late={box.late} icon={box.icon} lead={box.lead} sub={box.sub}
+            primary={{ label: box.button, tone: box.tone, act: box.act, arrow: true, run: () => p.onReply(box.act), hook: { "data-qc152": "reply-btn" } }}
+            others={[box.second ? { label: box.second.label, act: box.second.act, run: () => p.onReply(box.second!.act), hook: { "data-qc152": "reply-second" } } : null]}
+            outer={{ "data-act": box.act }} />
         )}
         </>}
         {ed.on && ed.leave ? <LeaveAsk n={ed.keys.length} busy={ed.busy} onLose={ed.lose} onKeep={ed.keep} onSave={() => void ed.save()} /> : null}

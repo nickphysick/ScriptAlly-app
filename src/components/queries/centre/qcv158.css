@@ -88,3 +88,17 @@
 .qc152 .nx-nc textarea::placeholder { font-style: italic; color: #9a948b; }
 .qc152 .nx-nc button { all: unset; box-sizing: border-box; cursor: pointer; height: 44px; padding: 0 16px; border-radius: 22px; background: #2a3a52; color: #fff; font: 600 14.5px var(--sp-serif) !important; white-space: nowrap; }
 .qc152 .nx-nc button:disabled { background: #cfc7bc; cursor: default; }
+
+/* ── v158.1 the footer on two rows when there is more than one action (design-refs/query-card-v158-1/) ──
+   Row 1 the status across the full width, no pill; row 2 the actions on one line, never wrapping at 540 or 504: a third
+   action as the underlined link at the far left, the second as an outlined button, the navy primary at the right. */
+.qc152 .qc152-rb.nf { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px 14px 14px; }
+.qc152 .qc152-rb.nf .nf-st { display: flex; align-items: center; gap: 11px; padding: 0 4px; min-width: 0; }
+.qc152 .qc152-rb.nf .nf-st .qc152-rft { flex: 1 1 auto; min-width: 0; }
+.qc152 .qc152-rb.nf .qc152-rft b { font: 600 15px/1.3 var(--sp-serif) !important; }
+.qc152 .qc152-rb.nf .qc152-rft span { font: italic 400 13.5px/1.35 var(--sp-serif) !important; }
+.qc152 .qc152-rb.nf .nf-ac { display: flex; flex-wrap: nowrap; align-items: center; gap: 8px; min-width: 0; }
+.qc152 .qc152-rb.nf .nf-sp { flex: 1 1 auto; min-width: 0; }
+.qc152 .qc152-rb.nf .nf-ac .qc152-rbtn { height: 46px; border-radius: 23px; }
+.qc152 .qc152-rb.nf .nf-ac .qc152-rbtn.gh2 { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1px #cfc7bc; font-weight: 400; }
+.qc152 .qc152-rb.nf .nf-ac .qc152-rbtn.gh2:hover, .qc152 .qc152-rb.nf .nf-ac .qc152-rbtn.gh2:focus-visible { box-shadow: inset 0 0 0 1.5px #2a3a52; filter: none; outline: none; }
