@@ -9,8 +9,8 @@ Branch `analytics-v26`, cut from what dev served this morning; NOT merged to mai
    `AnalyticsRoute` draws the phone app's own `AnalyticsPhone`. The three `*-390@2x.png` references therefore have
    nothing to sit beside on this route. v17's phone glance strip in `QueryAnalytics` was already unreachable (its
    ≤760 branch sat under a route that switches at 768). The v26 CSS still stacks to one column at 760. L1 reports the
-   390 route (no overflow) rather than asserting this page's parts there. **For Nick:** should v26 replace
-   `AnalyticsPhone`, or stay desktop-only?
+   390 route (no overflow) rather than asserting this page's parts there. **Ruled (Nick, 18 Nov): v26 stays
+   desktop-only;** the phone keeps `AnalyticsPhone`.
 2. **"The app's current status fills."** There are none: status marks v3 (17 Nov) draws status by shape only, one ink
    (`StatusDot`'s header: "colour carries nothing"). Every mark is a `StatusDot` on one neutral disc token; when the
    slate ladder lands, the disc is the one place to take it.

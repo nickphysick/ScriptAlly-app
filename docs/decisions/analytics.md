@@ -51,8 +51,9 @@
 - **Links out:** Queries and the Contact list open unfiltered (neither has a filter a link can set; every workspace
   page stays mounted, so a session-storage preset would be read only on a first visit). Settings opens at Preferences,
   where "A query goes quiet after" is. Follow-ups for Nick in the report.
-- **Below 768px this page is not mounted:** `phone/pages/PageRoutes`'s `AnalyticsRoute` draws the phone app's
-  `AnalyticsPhone`. v26's CSS still stacks to one column at 760 for a narrow desktop window.
+- **v26 is desktop-only (Nick, 18 Nov).** Below 768px `phone/pages/PageRoutes`'s `AnalyticsRoute` keeps drawing the
+  phone app's `AnalyticsPhone`; v26 does not replace it. v26's CSS still stacks to one column at 760 for a narrow
+  desktop window.
 - **`window.__SA_AN26` is dev only, gated at the call site:** `{ v26, bench, anchors, showCompare, manuscriptId }`.
 - **Locks:** `tests/e2e/analyticsV26.measure.ts` AN26-A1, B1, B2, C1, C2, D1, D2, E1, E2, F1, G1, H1, L1 (fixtures from
   `tests/e2e/seedAn26.mjs`, every id `seed-an26-`, restored in the same run); unit `src/lib/analyticsV26.test.ts`.
