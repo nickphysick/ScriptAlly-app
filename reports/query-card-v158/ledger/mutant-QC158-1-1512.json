@@ -1,0 +1,37 @@
+[
+ {
+  "name": "one fixture seed-cal-near-q on the grid",
+  "ok": true,
+  "got": "seed-cal-near-q"
+ },
+ {
+  "name": "one: the footer's top is the same on every tab",
+  "ok": false,
+  "got": "338.92 / 708.56 / 418.28 / 435.38"
+ },
+ {
+  "name": "one: the footer sits inside the card",
+  "ok": false,
+  "got": "432.52≤440.74 802.16≤714.8 511.88≤520.1 528.98≤537.2"
+ },
+ {
+  "name": "many fixture seed-query-10 on the grid",
+  "ok": true,
+  "got": "seed-query-10"
+ },
+ {
+  "name": "many: the footer's top is the same on every tab",
+  "ok": false,
+  "got": "685.16 / 708.56 / 600.99 / 435.38"
+ },
+ {
+  "name": "many: the footer sits inside the card",
+  "ok": false,
+  "got": "778.76≤714.8 802.16≤714.8 694.59≤702.81 528.98≤537.2"
+ },
+ {
+  "name": "the card's height is one value across fixtures and tabs (8)",
+  "ok": false,
+  "got": "440.74–714.8"
+ }
+]

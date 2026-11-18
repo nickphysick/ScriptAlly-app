@@ -1,0 +1,42 @@
+[
+ {
+  "name": "seed-query-10: one row per item the agent asks for (2)",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "seed-query-10: not sent: empty ring, 'not sent'",
+  "ok": true,
+  "got": "false not sent"
+ },
+ {
+  "name": "seed-query-10: not sent: empty ring, 'not sent'",
+  "ok": true,
+  "got": "false not sent"
+ },
+ {
+  "name": "seed-query-10: the summary matches",
+  "ok": true,
+  "got": "You didn’t send query letter, synopsis."
+ },
+ {
+  "name": "seed-cal-near-q: one row per item the agent asks for (2)",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "seed-cal-near-q: not sent: empty ring, 'not sent'",
+  "ok": true,
+  "got": "false not sent"
+ },
+ {
+  "name": "seed-cal-near-q: not sent: empty ring, 'not sent'",
+  "ok": true,
+  "got": "false not sent"
+ },
+ {
+  "name": "seed-cal-near-q: the summary matches",
+  "ok": true,
+  "got": "You didn’t send query letter, synopsis."
+ }
+]

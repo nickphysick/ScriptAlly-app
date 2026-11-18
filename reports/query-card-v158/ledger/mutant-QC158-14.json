@@ -1,0 +1,42 @@
+[
+ {
+  "name": "the desk has tasks (53)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "task 1: the preview draws the shared card (QcCard152)",
+  "ok": true,
+  "got": "{\"h\":515,\"grow\":\"1\",\"pills\":0,\"line\":0,\"waits\":[\"5 days later\",\"57 days later\"]}"
+ },
+ {
+  "name": "task 1: the new Tracking — no day pill, no status line, no 'Same day'",
+  "ok": true,
+  "got": "{\"h\":515,\"grow\":\"1\",\"pills\":0,\"line\":0,\"waits\":[\"5 days later\",\"57 days later\"]}"
+ },
+ {
+  "name": "task 1: the body takes the room (flex-grow 1)",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "task 2: the preview draws the shared card (QcCard152)",
+  "ok": true,
+  "got": "{\"h\":601,\"grow\":\"1\",\"pills\":0,\"line\":0,\"waits\":[\"14 days later\",\"14 days later\",\"14 days later\"]}"
+ },
+ {
+  "name": "task 2: the new Tracking — no day pill, no status line, no 'Same day'",
+  "ok": true,
+  "got": "{\"h\":601,\"grow\":\"1\",\"pills\":0,\"line\":0,\"waits\":[\"14 days later\",\"14 days later\",\"14 days later\"]}"
+ },
+ {
+  "name": "task 2: the body takes the room (flex-grow 1)",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "the fixed height: two tasks' cards are one height",
+  "ok": false,
+  "got": "515 / 601"
+ }
+]

@@ -40,7 +40,7 @@ export const MaterialsTab158: React.FC<MaterialsTab158Props> = (p) => (
                 {chipIcon(c.label)}{sentenceCase(c.label)}
                 {g.pending ? <span className="r">not sent yet</span> : c.detail ? <span className="r">{c.detail}</span> : null}
               </li>
-            )) : <li data-qc158="item" className="none"><em>Nothing recorded</em></li>}
+            )) : <li data-qc158="item" className="none"><em>Nothing recorded</em>{g.pending ? <span className="r">not sent yet</span> : null}</li>}
           </ul>
         </div>
       ))}

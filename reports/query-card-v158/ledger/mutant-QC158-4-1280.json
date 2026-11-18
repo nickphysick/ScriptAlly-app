@@ -1,0 +1,42 @@
+[
+ {
+  "name": "waits drawn (5)",
+  "ok": true,
+  "got": "14 days later | 14 days later | 14 days later | 14 days later | 14 days later"
+ },
+ {
+  "name": "nothing before the first message",
+  "ok": true,
+  "got": "You sent Noah your query10 Jun10 Jun✎ Edit"
+ },
+ {
+  "name": "no 'Same day'",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "\"14 days later\" sits on the side of the message after it (them)",
+  "ok": false,
+  "got": "me"
+ },
+ {
+  "name": "\"14 days later\" sits on the side of the message after it (me)",
+  "ok": false,
+  "got": "them"
+ },
+ {
+  "name": "\"14 days later\" sits on the side of the message after it (them)",
+  "ok": false,
+  "got": "me"
+ },
+ {
+  "name": "\"14 days later\" sits on the side of the message after it (me)",
+  "ok": false,
+  "got": "them"
+ },
+ {
+  "name": "\"14 days later\" sits on the side of the message after it (them)",
+  "ok": false,
+  "got": "me"
+ }
+]

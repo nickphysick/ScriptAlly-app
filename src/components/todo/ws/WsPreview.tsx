@@ -290,7 +290,9 @@ export const ScaledCard: React.FC<{ kind: "query" | "agent"; label: string; onOp
       {/* ⚠️ READ-ONLY (v51.1): the card inside is a picture of the real one. `inert` takes every button and link in it out
           of clicks and focus; the query card's footer action and the stand card's links are hidden as well (todoWs.css),
           so nothing in the preview looks like it can be pressed. A click anywhere is the frame's: it opens the real card. */}
-      <div className="tws-pvz" data-tws="preview-card" inert style={{ zoom: z, width: TRUE_W(kind), maxHeight: h || undefined } as React.CSSProperties}>
+      {/* Query card v158: the query card is always its full height, so here it takes all the space the rail offers (not
+          only up to it); the agent card still hugs its content */}
+      <div className="tws-pvz" data-tws="preview-card" inert style={{ zoom: z, width: TRUE_W(kind), maxHeight: h || undefined, height: kind === "query" && h ? h : undefined } as React.CSSProperties}>
         <aside className={`spanel tws-pvpanel ${kind === "query" ? "qsp" : "qsp apn"}`}>
           <div className="spanel-own">{children}</div>
         </aside>

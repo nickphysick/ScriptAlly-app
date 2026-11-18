@@ -1,0 +1,32 @@
+[
+ {
+  "name": "seed-query-10: the contact row is one line (504px card)",
+  "ok": true,
+  "got": "392,392 h38"
+ },
+ {
+  "name": "seed-query-10: the card is 504px wide for this read",
+  "ok": true,
+  "got": "504"
+ },
+ {
+  "name": "seed-query-10: the address is cut with an ellipsis, not wrapped",
+  "ok": true,
+  "got": "{\"ov\":\"ellipsis\",\"ws\":\"nowrap\",\"cut\":true}"
+ },
+ {
+  "name": "seed-cal-near-q: the contact row is one line (504px card)",
+  "ok": true,
+  "got": "392,392 h38"
+ },
+ {
+  "name": "seed-cal-near-q: the card is 504px wide for this read",
+  "ok": true,
+  "got": "504"
+ },
+ {
+  "name": "seed-cal-near-q: the address is cut with an ellipsis, not wrapped",
+  "ok": true,
+  "got": "{\"ov\":\"ellipsis\",\"ws\":\"nowrap\",\"cut\":true}"
+ }
+]

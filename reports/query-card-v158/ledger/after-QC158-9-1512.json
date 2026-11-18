@@ -1,0 +1,27 @@
+[
+ {
+  "name": "fixture: seed-query-7 has a pending partial with its items recorded",
+  "ok": true,
+  "got": "seed-query-7"
+ },
+ {
+  "name": "a partial asked for and not sent: one pending 'With the partial'",
+  "ok": true,
+  "got": "{\"kind\":\"partial\",\"stage\":\"partial\",\"pending\":true,\"head\":\"With the partial\",\"disc\":\"rgb(228, 235, 242)\",\"box\":\"rgb(42, 58, 82) 0px 0px 0px 1.5px inset\",\"items\":[\"not sent yet\"]}"
+ },
+ {
+  "name": "its box is outlined 1.5px navy",
+  "ok": true,
+  "got": "rgb(42, 58, 82) 0px 0px 0px 1.5px inset"
+ },
+ {
+  "name": "each item says 'not sent yet'",
+  "ok": true,
+  "got": "not sent yet"
+ },
+ {
+  "name": "once sent: one partial group, no outline",
+  "ok": true,
+  "got": "[{\"kind\":\"partial\",\"stage\":\"partial\",\"pending\":false,\"head\":\"With the partial\",\"disc\":\"rgb(228, 235, 242)\",\"box\":\"rgb(239, 233, 223) 0px 0px 0px 1px inset\",\"items\":[]}]"
+ }
+]

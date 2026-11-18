@@ -512,7 +512,8 @@
    slide-in. In the preview the frame sits in the column, upright and still, as tall as the column: the same frame
    (rim, radius, inner border), only placed. The selector out-ranks the frame's own (0-4-0 with :has). */
 .tws-pvz .spanel.qsp.qsp.tws-pvpanel:has(> .spanel-own > [data-qc152]) {
-  position: relative; top: auto; right: auto; bottom: auto; left: auto; width: 100%; height: auto; max-height: none; flex: 0 1 auto; min-height: 0; rotate: none; animation: none; transition: none; z-index: auto;
+  /* Query card v158: the card is always the column's full height, as on the Query Centre — never its content's */
+  position: relative; top: auto; right: auto; bottom: auto; left: auto; width: 100%; height: auto; max-height: none; flex: 1 1 auto; min-height: 0; rotate: none; animation: none; transition: none; z-index: auto;
 }
 
 /* ── v52 Part B — the tray ── */

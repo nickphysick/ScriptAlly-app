@@ -1,0 +1,52 @@
+[
+ {
+  "name": "seed-query-10: three boxes",
+  "ok": true,
+  "got": "reply,method,heard"
+ },
+ {
+  "name": "seed-query-10: equal tops and heights",
+  "ok": true,
+  "got": "275.0/103.0 275.0/103.0 275.0/103.0"
+ },
+ {
+  "name": "seed-query-10: each text block centred within 1px",
+  "ok": false,
+  "got": "10.0:10.0 10.0:32.0 10.0:32.0"
+ },
+ {
+  "name": "seed-query-10: Replies in matches the agent (8)",
+  "ok": true,
+  "got": "About 8 weeks"
+ },
+ {
+  "name": "seed-query-10: no value is a dash",
+  "ok": true,
+  "got": "About 8 weeks | By email | 22 Mar"
+ },
+ {
+  "name": "seed-cal-near-q: three boxes",
+  "ok": true,
+  "got": "reply,method,heard"
+ },
+ {
+  "name": "seed-cal-near-q: equal tops and heights",
+  "ok": true,
+  "got": "275.0/103.0 275.0/103.0 275.0/103.0"
+ },
+ {
+  "name": "seed-cal-near-q: each text block centred within 1px",
+  "ok": false,
+  "got": "10.0:10.0 10.0:32.0 10.0:32.0"
+ },
+ {
+  "name": "seed-cal-near-q: Replies in matches the agent (8)",
+  "ok": true,
+  "got": "About 8 weeks"
+ },
+ {
+  "name": "seed-cal-near-q: no value is a dash",
+  "ok": true,
+  "got": "About 8 weeks | By email | Not yet"
+ }
+]

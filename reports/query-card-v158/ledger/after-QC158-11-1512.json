@@ -1,0 +1,22 @@
+[
+ {
+  "name": "Add note is disabled while the field is empty",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "blur does not save",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "twelve notes: the writing box is visible without scrolling",
+  "ok": true,
+  "got": "{\"bottom\":613.1182098388672,\"visible\":true}"
+ },
+ {
+  "name": "its bottom edge is the same with twelve notes as with none",
+  "ok": true,
+  "got": "613.1 vs 613.1"
+ }
+]
