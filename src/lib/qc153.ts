@@ -6,8 +6,10 @@
  * arrow on the current step (did something come in, go out, or end), the four-step track with skipped steps, and the
  * facts row's words.
  *
- * ⚠️ THE COLOUR IS THE STAGE, NOT THE GROUP. Queried (and anything with no live stage, so every closed status) is
- *    sand; partial requested/sent rose; full requested/sent, R&R and Resubmitted blue; Offer and Signed heather.
+ * ⚠️ THE COLOUR IS THE STAGE, NOT THE GROUP. v157: the slate ladder (lib/stageColours) — Queried sand, partial, full
+ *    (with R&R and Resubmitted) and offer (with Signed) three deepening blues, every closed status its own grey.
+ *    `slipTone` returns those five stage names. The v153 names (sand/rose/blue/heather) survive only as
+ *    `legacyTone153`, for the surfaces that keep their colours this pack: the log-a-query slip preview and Birds-eye.
  * ⚠️ NO RED. Nothing here returns a rust or late colour: a late Next box is a fill (`hot`), its text stays ink.
  */
 import { QueryStatus } from "../types";
@@ -16,12 +18,23 @@ import { CLOSED_STATUSES, isClosedRow, lastHeardMs, liveLevel, shortDate } from 
 import { nextNum, type NextNum } from "./qc1512";
 import { stateOf } from "./queryState";
 import { MONTHS_SHORT } from "./dates";
+import { STAGE_COLOURS, stageOf, type Stage } from "./stageColours";
 
 /* ── the header's colour ─────────────────────────────────────────────────────────────────────────────────────── */
 
-export type SlipTone = "sand" | "rose" | "blue" | "heather";
-export const SLIP_TONE_FILL: Record<SlipTone, string> = { sand: "#efe7da", rose: "#ecd6d2", blue: "#d9e1ea", heather: "#e7d6dc" };
-export function slipTone(status: QueryStatus | string): SlipTone {
+/** v157 — the card's tone is its stage (lib/stageColours), and its fill that stage's band */
+export type SlipTone = Stage;
+export const SLIP_TONE_FILL: Record<SlipTone, string> = {
+  queried: STAGE_COLOURS.queried.band, partial: STAGE_COLOURS.partial.band, full: STAGE_COLOURS.full.band,
+  offer: STAGE_COLOURS.offer.band, closed: STAGE_COLOURS.closed.band,
+};
+export const slipTone = (status: QueryStatus | string): SlipTone => stageOf(status);
+
+/** the v153 tone names and fills, kept for the surfaces not drawn on the Query Centre grid (the log-a-query slip
+ *  preview, Birds-eye's bars); their colours move in the next pack */
+export type LegacyTone153 = "sand" | "rose" | "blue" | "heather";
+export const LEGACY_TONE_FILL_153: Record<LegacyTone153, string> = { sand: "#efe7da", rose: "#ecd6d2", blue: "#d9e1ea", heather: "#e7d6dc" };
+export function legacyTone153(status: QueryStatus | string): LegacyTone153 {
   if (CLOSED_STATUSES.includes(status as QueryStatus)) return "sand";
   switch (liveLevel(status as QueryStatus)) {
     case 1: return "rose";
@@ -194,12 +207,16 @@ export function nextLine(r: QcRow, nowMs: number): string | null {
 export const ACTION_WHY_153: Partial<Record<string, string>> = {
   offer: "Waiting on your answer", materials: "Agents want pages", nudge: "Past their reply date", agent: "With agents, not yet due",
 };
-const ACTION_SWATCH: Partial<Record<string, string>> = { offer: "#e7d6dc", materials: "#ecd6d2", nudge: "#efe7da", agent: "#efe7da", quiet: "#f4efe6", closed: "#f1efec" };
-/** a heading's swatch: Action's own colours; a Status group takes its stage's tone; anything else sand */
+/** v157 — the slate ladder's bands; Gone quiet keeps its own pale stone (#f4efe6), which is no stage's */
+const ACTION_SWATCH: Partial<Record<string, string>> = {
+  offer: STAGE_COLOURS.offer.band, materials: STAGE_COLOURS.partial.band, nudge: STAGE_COLOURS.queried.band, agent: STAGE_COLOURS.queried.band,
+  quiet: "#f4efe6", closed: STAGE_COLOURS.closed.band,
+};
+/** a heading's swatch: Action's own colours; a Status group takes its stage's band; anything else Queried's */
 export function sectionSwatch(group: string, key: string): string {
-  if (group === "attention") return ACTION_SWATCH[key] ?? SLIP_TONE_FILL.sand;
-  if (group === "status") return key === "closed" ? ACTION_SWATCH.closed! : SLIP_TONE_FILL[slipTone(key)];
-  return SLIP_TONE_FILL.sand;
+  if (group === "attention") return ACTION_SWATCH[key] ?? SLIP_TONE_FILL.queried;
+  if (group === "status") return key === "closed" ? SLIP_TONE_FILL.closed : SLIP_TONE_FILL[slipTone(key)];
+  return SLIP_TONE_FILL.queried;
 }
 /** the groups that fold into one row: Gone quiet and Closed */
 export const isFoldKey = (group: string, key: string): boolean => (group === "attention" && (key === "quiet" || key === "closed")) || (group === "status" && key === "closed");

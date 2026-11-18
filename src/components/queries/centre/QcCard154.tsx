@@ -21,7 +21,7 @@ import type { RowAct } from "../../../lib/qc1512";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { queriedFact, slipTone, slipTrack, standWords } from "../../../lib/qc153";
 import { NEXT_WAIT_LABEL, OVERDUE_LINE, OVERDUE_VALUE, nextBox154, nudgeOnLine } from "../../../lib/qc154";
-import { materialGroups } from "../../../lib/qc1533";
+import { materialGroups, tabAccent157 } from "../../../lib/qc1533";
 import { MatTab1533, Track153 } from "./QcSlip153";
 import "./qcv153.css";
 import "./qcv1531.css";
@@ -102,7 +102,7 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
           </div>
         </div>
       </div>
-      {mats ? <span className="qc154-clipw" data-qc154="clip"><MatTab1533 id={r.id} g={mats} status={r.status} onOpen={setPopOpen} /></span> : null}
+      {mats ? <span className="qc154-clipw" data-qc154="clip"><MatTab1533 id={r.id} g={mats} status={r.status} accent={tabAccent157(r.status)} onOpen={setPopOpen} /></span> : null}
     </div>
   );
 };

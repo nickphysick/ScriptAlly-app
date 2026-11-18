@@ -23,7 +23,7 @@ describe("the v154 card", () => {
     expect(h).toMatch(/<span class="qc154-sr"[^>]*>Partial requested<\/span>/);
     /* the label under the current node is the hover's, hidden at rest by the sheet; strip it too */
     expect(visible(h.replace(/<span class="qc154-thl"[^>]*>[^<]*<\/span>/g, ""))).not.toContain("Partial requested");
-    expect(h).toContain('data-tone="rose"');
+    expect(h).toContain('data-tone="partial"');
     expect(h).toContain("105 days ago");
     expect(h.match(/data-qc154="fact"/g)?.length).toBe(2);
   });
@@ -57,10 +57,11 @@ describe("the v154 card", () => {
     expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*\.qc1561-chip[^{]*\{[^}]*transform:\s*none/);
   });
 
-  it("draws no rust, and the rose band's ink is #5f433d", () => {
+  it("draws no rust, and text on the partial band is ink (v157: the slate ladder)", () => {
     expect(card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"))).not.toMatch(/a2452a|8a3a28|b4553f/i);
     const css = readFileSync(new URL("./qcv154.css", import.meta.url), "utf8");
     expect(css).not.toMatch(/a2452a|8a3a28|b4553f/i);
-    expect(css).toMatch(/\[data-tone="rose"\][^{]*\{[^}]*#5f433d/);
+    expect(css).toMatch(/\[data-tone="partial"\][^{]*\{[^}]*--tone:\s*#e4ebf2/);
+    expect(css).toMatch(/\.qc154-nm \{[^}]*color: #1c130f/);
   });
 });

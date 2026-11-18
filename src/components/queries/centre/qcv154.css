@@ -27,11 +27,13 @@
   .qc154-card.is-sel { box-shadow: 0 0 0 2px var(--navy), 0 18px 34px -22px rgba(28, 19, 15, 0.32); }
   /* an open paperclip raises its card over its neighbours, never over the sticky toolbar (z 30) */
   .qc154-card.has-pop, .qc154-card:has(.qc1533-tw:hover) { z-index: 25; }
-  /* the stage's tone and its ink (the ref's, round 55): sand, rose, blue, heather */
-  .qc154-card[data-tone="sand"] { --tone: #efe7da; --tink: #6f5c45; }
-  .qc154-card[data-tone="rose"] { --tone: #ecd6d2; --tink: #5f433d; }
-  .qc154-card[data-tone="blue"] { --tone: #d9e1ea; --tink: #34506e; }
-  .qc154-card[data-tone="heather"] { --tone: #e7d6dc; --tink: #653f56; }
+  /* v157 — the stage's band on the slate ladder (lib/stageColours `STAGE_COLOURS[stage].band`; stageColours.test.ts
+     asserts each hex here equals the table) and the track's ink (until v157 Phase 3, the v153 tone's) */
+  .qc154-card[data-tone="queried"] { --tone: #efe6d6; --tink: #6f5c45; }
+  .qc154-card[data-tone="partial"] { --tone: #e4ebf2; --tink: #5f433d; }
+  .qc154-card[data-tone="full"] { --tone: #b7c9de; --tink: #34506e; }
+  .qc154-card[data-tone="offer"] { --tone: #8ea7c6; --tink: #653f56; }
+  .qc154-card[data-tone="closed"] { --tone: #eceae6; --tink: #6f5c45; }
 
   .qc154-in { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; border: 1px solid #e3d5c9; border-radius: 13px; }
 

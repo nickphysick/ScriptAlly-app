@@ -43,15 +43,15 @@ describe("v154.1 · quiet Queried bands and quiet seals", () => {
     expect(b).toMatch(/background:\s*#fff\b/);
     expect(b).toContain("box-shadow: inset 0 3px 0 #e9dfce, inset 0 -1px 0 #f0eae0");
   });
-  it("a Partial card's band keeps its rose: the quiet rule names Queried only, and nothing else whitens a band", () => {
+  it("a Partial card's band keeps its stage's colour (v157: the partial blue): the quiet rule names Queried only, and nothing else whitens a band", () => {
     for (const m of bare.matchAll(/([^{}]+)\{([^}]*)\}/g)) {
       if (!/\.qc154-hd\b/.test(m[1]) || !/background/.test(m[2])) continue;
       expect(m[1].trim()).toBe('.qc151.qc153 .qc154-card[data-status="Queried"] .qc154-hd');
     }
     const v154 = read("qcv154.css");
-    expect(v154).toContain('.qc154-card[data-tone="rose"] { --tone: #ecd6d2;');
+    expect(v154).toContain('.qc154-card[data-tone="partial"] { --tone: #e4ebf2;');
     const h = card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"));
-    expect(h).toContain('data-tone="rose"');
+    expect(h).toContain('data-tone="partial"');
     expect(h).toContain('data-status="Partial Requested"');
     expect(card154(row154(QueryStatus.QUERIED, "agent"))).toContain('data-status="Queried"');
   });

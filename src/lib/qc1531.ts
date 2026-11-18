@@ -14,7 +14,7 @@
  */
 import { QueryStatus, type Agent } from "../types";
 import type { Qc138Filters } from "./qc138";
-import { SLIP_TONE_FILL } from "./qc153";
+import { LEGACY_TONE_FILL_153 as RING_FILL } from "./qc153";
 
 /* ── the stage ring ───────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -34,12 +34,13 @@ export const RING_HATCH = { stripe: "#d8d1c7", ground: "#f1eee9" } as const;
 /** the empty track */
 export const RING_TRACK = "#f1eee9";
 
-/** ⚠️ IN THIS ORDER, clockwise from 12 o'clock. Every status lands in exactly one (locked in qc1531.test.ts). */
+/** v157: the ring keeps the v153 fills (RING_FILL, a copy of the old tone table) until the next pack moves it.
+ *  ⚠️ IN THIS ORDER, clockwise from 12 o'clock. Every status lands in exactly one (locked in qc1531.test.ts). */
 export const RING_BUCKETS: readonly RingBucket[] = [
-  { key: "wait", label: "Waiting to hear", statuses: [QueryStatus.QUERIED], fill: SLIP_TONE_FILL.sand, ink: "#6f5c45" },
-  { key: "partial", label: "Partial requested", statuses: [QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT], fill: SLIP_TONE_FILL.rose, ink: "#9a4a32" },
-  { key: "full", label: "Full requested", statuses: [QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.RESUBMITTED], fill: SLIP_TONE_FILL.blue, ink: "#34506e" },
-  { key: "offer", label: "Offer", statuses: [QueryStatus.OFFER, QueryStatus.SIGNED], fill: SLIP_TONE_FILL.heather, ink: "#7a4f68" },
+  { key: "wait", label: "Waiting to hear", statuses: [QueryStatus.QUERIED], fill: RING_FILL.sand, ink: "#6f5c45" },
+  { key: "partial", label: "Partial requested", statuses: [QueryStatus.PARTIAL_REQUESTED, QueryStatus.PARTIAL_SENT], fill: RING_FILL.rose, ink: "#9a4a32" },
+  { key: "full", label: "Full requested", statuses: [QueryStatus.FULL_REQUESTED, QueryStatus.FULL_SENT, QueryStatus.REVISE_RESUBMIT, QueryStatus.RESUBMITTED], fill: RING_FILL.blue, ink: "#34506e" },
+  { key: "offer", label: "Offer", statuses: [QueryStatus.OFFER, QueryStatus.SIGNED], fill: RING_FILL.heather, ink: "#7a4f68" },
   { key: "closed", label: "Passed or closed", statuses: [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN], fill: RING_HATCH.ground, ink: "#8a837a" },
 ];
 
