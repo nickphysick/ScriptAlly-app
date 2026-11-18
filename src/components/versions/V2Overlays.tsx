@@ -2,28 +2,27 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Versions v2 — everything that opens over the page: the version drawer (P8), the new / edit form (P9), "Which version
- * went?" (P10), the archive and delete confirms (S04, S05) and the explainer. Each is the ref's own markup.
+ * Versions v2 — the new / edit form (P9; Versions v6 renders it in the page's own card, `bare`), "Which version went?"
+ * (P10), the explainer, and the modal shell (which also hosts v6's version map dialog). Each is the ref's own markup.
+ * Versions v6 DELETED the version drawer (P8), its funnel, the drawer shell and the archive / delete confirm (S04, S05):
+ * the open version is on the page, and archiving is the open card's inline confirm.
  *
  * ⚠️ THEY PORTAL TO <body>, INSIDE A `.vv2` LAYER, because the page's stylesheet is scoped to `.vv2` and the ref's
  *    drawer and modals are children of its <body>. The layer carries the page's state attributes too.
- * ⚠️ ESCAPE IS THE APP'S ONE STACK: a modal over the drawer closes first (ESC_LEVEL.pageModal over pageDrawer).
  * ⚠️ NOTHING HERE WRITES. Every save is the page's, through lib/bookVersions and db.writeVersionChange, so its Undo is
  *    one snapshot.
  */
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { Agent, Manuscript, Query } from "../../types";
-import { QueryStatus } from "../../types";
 import { useEscapeLayer, ESC_LEVEL } from "../../lib/escapeStack";
 import {
   MAX_CHANGES, MAX_CHANGE_LEN, MAX_VERSION_NAME, changesProblem, cleanChanges, descendantsOf, nameProblem, type V2Version,
 } from "../../lib/bookVersions";
 import {
-  MIN_SENT_FOR_RATE, VERSION_NOT_SURE, laterBy, pickerDefault, savedBy, type VersionFacts, type VersionsModel,
+  VERSION_NOT_SURE, laterBy, pickerDefault, savedBy, type VersionFacts, type VersionsModel,
 } from "../../lib/versionsV2";
-import type { AnalyticsRow } from "../../lib/analytics";
-import { DocMark, Chevron, Num, XMark, agentLine, commas, longDay, msDay, sentDay, shortDay, statusWord, versionLabel, Dot } from "./v2Bits";
+import { DocMark, Chevron, Num, XMark, agentLine, commas, sentDay, shortDay, versionLabel } from "./v2Bits";
 
 const SCROLLS = "/images/versions/versions-scrolls-hawk.webp";
 const EXPLAINER = "/images/versions/explainer-hawk.webp";
@@ -49,27 +48,14 @@ function useFocusLoop(open: boolean, root: React.RefObject<HTMLElement | null>, 
   }, [open, key]);
 }
 
-export const DrawerShell: React.FC<{ open: boolean; onClose: () => void; children: React.ReactNode; kind: string; k?: unknown }> = ({ open, onClose, children, kind, k }) => {
-  const ref = useRef<HTMLElement>(null);
-  useEscapeLayer(open, onClose, ESC_LEVEL.pageDrawer);
-  useFocusLoop(open, ref, k);
-  return (
-    <>
-      <div className={`cx-dim${open ? " on" : ""}`} id="cxDim" onClick={onClose} />
-      <aside ref={ref} className={`cx-drw${open ? " on" : ""}`} id="cxDrw" role="dialog" aria-modal="true" aria-labelledby="cxDrwT" data-vv2="drawer" data-kind={kind} aria-hidden={!open}>
-        {open ? children : null}
-      </aside>
-    </>
-  );
-};
-
-export const ModalShell: React.FC<{ open: boolean; kind: "m" | "p"; onClose: () => void; children: React.ReactNode; vv?: string; k?: unknown }> = ({ open, kind, onClose, children, vv, k }) => {
+export const ModalShell: React.FC<{ open: boolean; kind: "m" | "p" | "map"; onClose: () => void; children: React.ReactNode; vv?: string; k?: unknown }> = ({ open, kind, onClose, children, vv, k }) => {
   const ref = useRef<HTMLDivElement>(null);
   useEscapeLayer(open, onClose, ESC_LEVEL.pageModal);
   useFocusLoop(open, ref, k);
   return (
-    <div className={`cx-mdim${open ? " on" : ""}`} id={kind === "m" ? "cxMdim" : "cxPdim"} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div ref={ref} className={kind === "m" ? "cx-modal sm" : "cx-pk"} id={kind === "m" ? "cxModal" : "cxPk"} role="dialog" aria-modal="true" aria-labelledby={kind === "p" ? "cxPkT" : undefined} data-vv2={vv}>
+    <div className={`cx-mdim${open ? " on" : ""}${kind === "map" ? " v6-mapdim" : ""}`} id={kind === "m" ? "cxMdim" : kind === "map" ? "cxMapdim" : "cxPdim"} onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
+      <div ref={ref} className={kind === "m" ? "cx-modal sm" : kind === "map" ? "v6-mapbox" : "cx-pk"} id={kind === "m" ? "cxModal" : kind === "map" ? "cxMap" : "cxPk"} role="dialog" aria-modal="true"
+        aria-labelledby={kind === "p" ? "cxPkT" : kind === "map" ? "msTH" : undefined} data-vv2={vv}>
         {open ? children : null}
       </div>
     </div>
@@ -101,147 +87,17 @@ export const Lineage: React.FC<{ parent: CardSpec; changes: readonly string[]; c
   </div>
 );
 
-/* ══ the funnel (the ref's `hfar`, case "c") ═══════════════════════════════════════════════════════════════ */
-
-const nameList = (qs: Query[], agents: Map<string, Agent>) => qs.map((q) => agentLine(q, agents).name).join(", ");
-
-export const Funnel: React.FC<{ f: VersionFacts; agents: Map<string, Agent> }> = ({ f, agents }) => {
-  const S2 = f.n, R = f.replied.length, M = f.more.length, O = f.offers.length;
-  const steps: [string, number][] = [["Sent", S2], ["Replied", R], ["Asked for more", M], ["Offer", O]];
-  const W = 460, H = 54, g = 3, HT = steps.length * H, cols = ["#d9d0c3", "#2a3a52", "#a2452a", "#6e2a18"];
-  const w = (c: number) => (0.2 + 0.8 * Math.min(1, c / Math.max(1, S2))) * W;
-  const mid = steps.map((s) => w(s[1]));
-  const P = [[mid[0] * 1.03, 0], ...mid.map((m, i) => [m, (i + 0.5) * H]), [Math.max(mid[3] * 0.82, W * 0.14), HT]].map(([wd, y]) => [W / 2 + wd / 2, y]);
-  const cr = (Q: number[][]) => { let o = ""; for (let i = 0; i < Q.length - 1; i++) { const p0 = Q[Math.max(0, i - 1)], p1 = Q[i], p2 = Q[i + 1], p3 = Q[Math.min(Q.length - 1, i + 2)]; o += `C${p1[0] + (p2[0] - p0[0]) / 6} ${p1[1] + (p2[1] - p0[1]) / 6} ${p2[0] - (p3[0] - p1[0]) / 6} ${p2[1] - (p3[1] - p1[1]) / 6} ${p2[0]} ${p2[1]}`; } return o; };
-  const L = P.map(([x, y]) => [W - x, y]).reverse();
-  const sil = `M${P[0][0]} 0` + cr(P) + `L${L[0][0]} ${L[0][1]}` + cr(L) + "Z";
-  const pc = (a: number, b: number) => (b ? Math.round((a / b) * 100) : 0);
-  const rated = S2 >= MIN_SENT_FOR_RATE;
-  const sd = f.qs;
-  const ad = f.avgReply;
-  const TIPS: [string, string, string][] = [
-    [`${S2} ${S2 === 1 ? "query" : "queries"} sent`, S2 ? `First on ${shortDay(msDay(f.firstMs))}, latest ${shortDay(msDay(f.lastMs))}` : "", nameList(sd, agents)],
-    [`${R} of ${S2} replied${rated ? ` · ${pc(R, S2)}%` : ""}`, [ad != null ? `Average reply ${ad} days` : "", S2 - R ? `${S2 - R} still to hear back` : ""].filter(Boolean).join(" · "), nameList(f.replied, agents)],
-    [`${M} of the ${R} who replied asked for more${rated ? ` · ${pc(M, R)}%` : ""}`, [f.partial ? `${f.partial} partial` : "", f.full ? `${f.full} full` : ""].filter(Boolean).join(", "), nameList(f.more, agents)],
-    [O ? `${O} ${O === 1 ? "offer" : "offers"}` : "No offers yet", M - O > 0 ? `${M - O} ${M - O === 1 ? "agent is" : "agents are"} still reading` : "", nameList(f.offers, agents)],
-  ];
-  const wrap = useRef<HTMLDivElement>(null);
-  const tipRef = useRef<HTMLDivElement>(null);
-  const [hov, setHov] = useState<{ i: number; x: number; y: number } | null>(null);
-  const place = (i: number, cx: number, cy: number) => {
-    const wb = wrap.current!.getBoundingClientRect();
-    const tw = tipRef.current?.offsetWidth ?? 240;
-    let x = cx - wb.left + 16; const y = cy - wb.top + 16;
-    if (x + tw > wb.width - 8) x = cx - wb.left - tw - 16;
-    setHov({ i, x, y });
-  };
-  return (
-    <div ref={wrap} className={`hfC-w${hov ? " hv" : ""}`} data-vv2="funnel" onMouseLeave={() => setHov(null)}>
-      <svg className="hfC" viewBox={`0 0 ${W} ${HT}`} role="img" aria-label={steps.map((s) => `${s[1]} ${s[0]}`).join(", ")}>
-        <defs><clipPath id="vv2hfCl"><path d={sil} /></clipPath></defs>
-        <g clipPath="url(#vv2hfCl)">
-          {steps.map(([l, c], i) => (
-            <rect key={l} className={`hfC-b${hov?.i === i ? " on" : ""}`} data-b={i} tabIndex={0} aria-label={TIPS[i][0]}
-              x={0} y={i * H + (i ? g / 2 : 0)} width={W} height={H - (i ? g / 2 : 0) - (i < 3 ? g / 2 : 0)} fill={c ? cols[i] : "#ece6dc"}
-              onMouseMove={(e) => place(i, e.clientX, e.clientY)}
-              onFocus={(e) => { const r = (e.target as SVGRectElement).getBoundingClientRect(); place(i, r.left + r.width / 2, r.top + r.height / 2); }}
-              onBlur={() => setHov(null)} />
-          ))}
-        </g>
-        <g className="hfC-lb">
-          {steps.map(([l, c], i) => (
-            <text key={l} x={W / 2} y={i * H + H / 2 + 6} textAnchor="middle" className={`hfC-t${i && c ? " lt" : ""}`}>{c}<tspan dx={7}>{l.toLowerCase()}</tspan></text>
-          ))}
-        </g>
-      </svg>
-      {TIPS.map((t, i) => (
-        <div key={i} ref={hov?.i === i ? tipRef : undefined} className="hfC-tip" data-tip={i} hidden={hov?.i !== i} role="tooltip"
-          style={hov?.i === i ? { left: `${hov.x}px`, top: `${hov.y}px` } : undefined}>
-          <b>{t[0]}</b>{t[1] ? <span>{t[1]}</span> : null}{t[2] ? <em>{t[2]}</em> : null}
-        </div>
-      ))}
-    </div>
-  );
-};
-
-/* ══ the version drawer (P8; the ref's `results`) ═════════════════════════════════════════════════════════ */
-
-export interface VersionDrawerProps {
-  m: VersionsModel; v: V2Version; rows: Map<string, AnalyticsRow>; agents: Map<string, Agent>;
-  onClose: () => void; onEdit: (id: string) => void; onChange: (q: Query) => void; onPackage: (id: string) => void; locked: boolean;
-}
-
-export const VersionDrawer: React.FC<VersionDrawerProps> = ({ m, v, rows, agents, onClose, onEdit, onChange, onPackage, locked }) => {
-  const f = m.facts.get(v.id)!;
-  const use = v.id === m.inUse;
-  const from = v.parentId ? m.versions.find((x) => x.id === v.parentId) ?? null : null;
-  const fromF = from ? m.facts.get(from.id) ?? null : null;
-  const reps = f.replied.length;
-  const many = m.live.length > 1;
-  return (
-    <>
-      <div className="dh vdh">
-        <img className="vdh-art" src={SCROLLS} alt="" aria-hidden="true" />
-        <div className="tx">
-          <h3 id="cxDrwT">{v.name}</h3>
-          <small>{v.original ? `Your original manuscript, as it went out before ${shortDay(v.createdDate)}` : `${versionLabel(v)} · saved ${longDay(v.createdDate)}`}{use ? " · in use" : ""}</small>
-        </div>
-        <button type="button" className="cx-x" aria-label="Close" onClick={onClose}><XMark /></button>
-      </div>
-      <div className="db vi">
-        {v.original ? <p className="vi-orig"><b>Your original manuscript.</b> Every query sent before {shortDay(v.createdDate)} counts here. If one went out differently, change it below.</p> : null}
-        <div className="vk2" data-vv2="stats">
-          <div className="k0"><span>Sent</span><b>{f.n}</b><i>{f.n ? `since ${shortDay(msDay(f.firstMs))}` : "Not sent yet"}</i></div>
-          <div className="k1"><span>Replied</span><b>{!f.n ? "–" : f.early ? reps : <>{f.repliedPct}<small>%</small></>}</b><i>{f.early && f.n ? `of ${f.n} · too early for a %` : `${reps} of ${f.n}`}</i></div>
-          <div className="k2"><span>Asked for more</span><b>{!f.n ? "–" : f.early ? f.more.length : <>{f.ratePct}<small>%</small></>}</b><i>{f.early && f.n ? `of ${f.n} · too early for a %` : `${f.more.length} of ${f.n}`}</i></div>
-          <div className="k3"><span>Average reply</span><b>{f.avgReply != null ? <>{f.avgReply}<small> days</small></> : "–"}</b><i>{f.replyN ? `from ${f.replyN} ${f.replyN === 1 ? "reply" : "replies"}` : "No replies yet"}</i></div>
-        </div>
-        {f.n ? <><div className="hf-hd"><h5>How far this version gets</h5></div><Funnel f={f} agents={agents} /></> : null}
-        {v.original
-          ? <><h5>Details</h5><p className="vi-m">From your manuscript details · {v.wordCount ? commas(v.wordCount) : "No word count"} words</p></>
-          : from
-            ? <><h5>What changed from {from.original ? "Original" : from.name}</h5>
-                <Lineage parent={{ v: from, name: from.name, sub: outcomeLine(fromF), on: from.id === m.inUse, om: from.original }} changes={v.changes}
-                  child={{ v, name: v.name, sub: outcomeLine(f), on: use }} /></>
-            : <><h5>What changed</h5><Lineage parent={{ v: null, name: "Before this version", sub: "" }} changes={v.changes} child={{ v, name: v.name, sub: outcomeLine(f), on: use }} /></>}
-        <h5>This version’s queries and where they stand</h5>
-        {f.all.length ? (
-          <div className="vi-q" data-vv2="queries">
-            {f.all.map((q) => {
-              const a = agentLine(q, agents);
-              const days = rows.get(q.id)?.replyDays;
-              return (
-                <div className="cx-q" key={q.id}>
-                  <span className="av">{a.initials}</span>
-                  <div><b>{a.name}</b><small>{a.agency ? `${a.agency} · ` : ""}sent {shortDay(sentDay(q))}{typeof days === "number" ? ` · replied in ${days}d` : ""}{q.status === QueryStatus.WITHDRAWN ? " · not counted" : ""}</small></div>
-                  <span className={`stt${f.more.includes(q) ? " hot" : ""}`}><Dot status={q.status} size={15} />{statusWord(q)}</span>
-                  {many && !locked ? <button type="button" className="chg" data-vv2="change" onClick={() => onChange(q)}>Change</button> : null}
-                </div>
-              );
-            })}
-          </div>
-        ) : <div className="cx-empq">Nothing has gone out with this version yet.</div>}
-      </div>
-      <div className="df">
-        <span>{f.n ? null : <button type="button" className="cx-lnk" onClick={() => onPackage(v.id)}>Add to a package</button>}</span>
-        <div className="bt">
-          <button type="button" className="cx-b g" disabled={locked} onClick={() => onEdit(v.id)}>Edit</button>
-          <button type="button" className="cx-b p" data-first onClick={onClose}>Done</button>
-        </div>
-      </div>
-    </>
-  );
-};
-
 /* ══ the form (P9; the ref's `vform`) ════════════════════════════════════════════════════════════════════ */
 
 export interface FormSave { name: string; changes: string[]; wordCount: number | null; parentId: string | null }
 export interface VersionFormProps {
   ms: Manuscript; m: VersionsModel; edit: V2Version | null; earlier: number;
   onClose: () => void; onSave: (s: FormSave) => void; onDetails: () => void;
+  /** Versions v6 — rendered in the page's own card under its navy band: the drawer header is left out, nothing else */
+  bare?: boolean;
 }
 
-export const VersionForm: React.FC<VersionFormProps> = ({ ms, m, edit, earlier, onClose, onSave, onDetails }) => {
+export const VersionForm: React.FC<VersionFormProps> = ({ ms, m, edit, earlier, onClose, onSave, onDetails, bare = false }) => {
   const v = edit;
   const first = !v && !m.versions.length;
   const root = !!v && (v.original || !v.parentId);
@@ -271,11 +127,13 @@ export const VersionForm: React.FC<VersionFormProps> = ({ ms, m, edit, earlier, 
   };
   return (
     <>
-      <div className="dh vdh">
-        <img className="vdh-art" src={SCROLLS} alt="" aria-hidden="true" />
-        <div className="tx"><h3 id="cxDrwT">{v ? `Edit ${v.name}` : "Save a new version"}</h3><small>{ms.title}</small></div>
-        <button type="button" className="cx-x" aria-label="Close" onClick={onClose}><XMark /></button>
-      </div>
+      {bare ? null : (
+        <div className="dh vdh">
+          <img className="vdh-art" src={SCROLLS} alt="" aria-hidden="true" />
+          <div className="tx"><h3 id="cxDrwT">{v ? `Edit ${v.name}` : "Save a new version"}</h3><small>{ms.title}</small></div>
+          <button type="button" className="cx-x" aria-label="Close" onClick={onClose}><XMark /></button>
+        </div>
+      )}
       <div className="db" data-vv2="form">
         {v && root
           ? <div className="fv-note"><span className="ic">i</span><p><b>Original is your manuscript as you first sent it.</b> Its name stays Original, and its word count comes from your <button type="button" className="cx-lnk" onClick={onDetails}>manuscript details</button>.</p></div>
@@ -427,49 +285,6 @@ export const Picker: React.FC<{ mode: PickerMode; m: VersionsModel; agents: Map<
   );
 };
 export { VERSION_NOT_SURE };
-
-/* ══ archive / delete (S04, S05; the ref's `archAsk`) ═════════════════════════════════════════════════════ */
-
-export const ArchiveConfirm: React.FC<{ m: VersionsModel; v: V2Version; packageNames: string[]; onKeep: () => void; onGo: () => void }> = ({ m, v, packageNames, onKeep, onGo }) => {
-  const f = m.facts.get(v.id)!;
-  const q = f.all.length;
-  const kids = m.versions.filter((x) => x.parentId === v.id);
-  const par = v.parentId ? m.versions.find((x) => x.id === v.parentId) ?? null : null;
-  const parName = par ? (par.original ? "Original" : par.name) : "Original";
-  return (
-    <>
-      <div className="cx-ph"><div className="tx"><h3 id="cxPkT">{q ? "Archive" : "Delete"} {v.name}?</h3><small>{q ? `Sent with ${q} ${q === 1 ? "query" : "queries"}` : "Not sent yet"}</small></div><button type="button" className="cx-x" aria-label="Close" onClick={onKeep}><XMark /></button></div>
-      <div className="ar-b" data-vv2="confirm-body">
-        {q ? (
-          <>
-            <p>Archiving takes it off your list and out of the comparisons, so it stops competing with the versions you’re still sending.</p>
-            <ul>
-              <li><b>Its {q} {q === 1 ? "query keeps" : "queries keep"} their version.</b> Nothing about them changes.</li>
-              <li><b>It still counts in your totals.</b></li>
-              <li><b>You can bring it back</b> any time from Archived, at the foot of your list.</li>
-            </ul>
-          </>
-        ) : (
-          <>
-            <p>It hasn’t gone out with any queries, so deleting it loses nothing you’ve tracked.</p>
-            <ul>
-              {kids.length
-                ? <li><b>{kids.length === 1 ? `${kids[0].name} started` : `${kids.length} versions started`} from it.</b> {kids.length === 1 ? "It" : "They"}’ll start from {parName} instead.</li>
-                : <li>It leaves the family tree too.</li>}
-              {packageNames.length ? <li><b>It’s in {packageNames.join(", ")}.</b> {packageNames.length === 1 ? "That package" : "Those packages"} will have no version until you pick one.</li> : null}
-              <li>You’ll have a few seconds to undo.</li>
-            </ul>
-          </>
-        )}
-      </div>
-      <div className="cx-pf">
-        <span className="cx-nt" />
-        <button type="button" className="cx-b g" data-first onClick={onKeep}>Keep it</button>
-        <button type="button" className="cx-b p ar-go" onClick={onGo} data-vv2="confirm-go">{q ? "Archive" : "Delete"}</button>
-      </div>
-    </>
-  );
-};
 
 /* ══ the explainer (the ref's `how`) ═══════════════════════════════════════════════════════════════════════ */
 

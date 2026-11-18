@@ -16,7 +16,9 @@ import type { V2Version } from "../../lib/bookVersions";
 import { generationLabel, treeModel, type VersionsModel } from "../../lib/versionsV2";
 import { BookMark } from "./v2Bits";
 
-export const V2Tree: React.FC<{ ms: Manuscript; m: VersionsModel; onOpen: (id: string, from: HTMLElement | null) => void }> = ({ ms, m, onOpen }) => {
+/** `bare` (Versions v6): inside the version map dialog, whose own navy head carries the title — the section's heading
+ *  block is left out; the tree itself is unchanged. */
+export const V2Tree: React.FC<{ ms: Manuscript; m: VersionsModel; onOpen: (id: string, from: HTMLElement | null) => void; bare?: boolean }> = ({ ms, m, onOpen, bare = false }) => {
   const t = treeModel(m);
   const treeRef = useRef<HTMLDivElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -105,7 +107,7 @@ export const V2Tree: React.FC<{ ms: Manuscript; m: VersionsModel; onOpen: (id: s
 
   return (
     <section className="cx-sec is-full trs" id="secTree" data-skin="e" data-vv2="tree" aria-labelledby="msTH">
-      <div className="trs-hd">
+      {bare ? null : <div className="trs-hd">
         <div className="trs-tx">
           <p className="oh-k">Family tree</p>
           <h2 id="msTH">How your versions connect</h2>
@@ -115,7 +117,7 @@ export const V2Tree: React.FC<{ ms: Manuscript; m: VersionsModel; onOpen: (id: s
           </p>
         </div>
         <div className="trs-art" aria-hidden="true"><span>Illustration<small>A hawk pinning cards to a family tree</small></span></div>
-      </div>
+      </div>}
       <div className={`trw${edge.l ? " more-l" : ""}${edge.r ? " more-r" : ""}`} id="trw" ref={wrapRef}>
         <div className={`tree${t.compact ? " compact" : ""}`} id="tree" ref={treeRef}
           onScroll={(e) => { const el = e.currentTarget; setEdge({ r: el.scrollLeft + el.clientWidth < el.scrollWidth - 4, l: el.scrollLeft > 4 }); }}>
