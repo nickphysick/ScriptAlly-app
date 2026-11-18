@@ -6,9 +6,10 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { QueryStatus } from "../types";
 import { OFFER_SHEEN, OFFER_SHEEN_LAYER, STAGE_COLOURS, STAGE_STATUSES, bandBackground, quietBackground, stageOf } from "./stageColours";
-import { LEGACY_TONE_FILL_153, SLIP_TONE_FILL, legacyTone153, sectionSwatch, slipTone } from "./qc153";
+import { LEGACY_TONE_FILL_153, SLIP_TONE_FILL, sectionSwatch, slipTone } from "./qc153";
+import { STATUS_FILL, STATUS_PALE } from "./qc1512";
 import { RING_BUCKETS } from "./qc1531";
-import { TAB_ACCENT, TAB_ACCENT_157, tabAccent, tabAccent157 } from "./qc1533";
+import { TAB_ACCENT_157, tabAccent157 } from "./qc1533";
 
 const css = (f: string) => readFileSync(`src/components/queries/centre/${f}`, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
@@ -110,16 +111,32 @@ describe("v157 · the page's swatches and the paperclip follow the stage", () =>
   });
 });
 
-describe("v157 · surfaces not on the grid keep today's colours", () => {
-  it("the stage ring keeps the v153 fills (its own copy)", () => {
+describe("Stage colours v1 · Phase 3 · the rest of the Query Centre reads the table", () => {
+  it("the unreachable stage ring keeps its own v153 fills (QcStageRing1531 is rendered by no route; AUDIT.md)", () => {
     expect(RING_BUCKETS.slice(0, 4).map((b) => b.fill)).toEqual(["#efe7da", "#ecd6d2", "#d9e1ea", "#e7d6dc"]);
-  });
-  it("the log-a-query slip and Birds-eye keep the v153 tone names; the slip's paperclip its v153 accent", () => {
     expect(LEGACY_TONE_FILL_153).toEqual({ sand: "#efe7da", rose: "#ecd6d2", blue: "#d9e1ea", heather: "#e7d6dc" });
-    expect(legacyTone153(QueryStatus.REJECTED)).toBe("sand");
-    expect(legacyTone153(QueryStatus.OFFER)).toBe("heather");
-    expect(tabAccent(QueryStatus.PARTIAL_REQUESTED)).toBe(TAB_ACCENT.rose);
-    expect(readFileSync("src/components/queries/centre/QcSlip153.tsx", "utf8")).toContain("data-tone={legacyTone153(r.status)}");
-    expect(readFileSync("src/components/Queries.tsx", "utf8")).toContain("barKind={(r) => legacyTone153(r.row.status)}");
+  });
+  it("STATUS_FILL and STATUS_PALE are the five stages' Band and Tint (Who replied's cap reads them)", () => {
+    expect(STATUS_FILL).toEqual({ sand: "#efe6d6", pink: "#e4ebf2", navy: "#b7c9de", sage: "#efcdc9", grey: "#eceae6" });
+    expect(STATUS_PALE).toEqual({ sand: "#f8f4ed", pink: "#f3f6f9", navy: "#dfe7f0", sage: "#f8e8e5", grey: "#f6f5f3" });
+    expect(readFileSync("src/lib/qc1512.ts", "utf8").match(/export const STATUS_(FILL|PALE)[^;]*;/gs)!.join("")).not.toMatch(/#[0-9a-f]{6}/i);
+  });
+  it("the log-a-query slip and Birds-eye take the stage", () => {
+    expect(readFileSync("src/components/queries/centre/QcSlip153.tsx", "utf8")).toContain("data-tone={slipTone(r.status)}");
+    expect(readFileSync("src/components/Queries.tsx", "utf8")).toContain("barKind={(r) => stageOf(r.row.status)}");
+    const v153 = css("qcv153.css");
+    for (const [stage, c] of Object.entries(STAGE_COLOURS)) {
+      expect([stage, v153.match(new RegExp(`\\.qc153-slip\\[data-tone="${stage}"\\]\\s*\\{\\s*--tone:\\s*(#[0-9a-f]{6})`))?.[1]]).toEqual([stage, c.band]);
+      const bar = v153.match(new RegExp(`\\.qc150-bar--cur\\[data-sk="${stage}"\\]\\s*\\{([^}]*)\\}`))?.[1] ?? "";
+      expect([stage, bar.match(/#[0-9a-f]{6}/)?.[0]]).toEqual([stage, c.band]);
+    }
+  });
+  it("SC1-12 (source) one stage, one colour on Birds-eye: no watch-and-wait shade, no requested/sent tone; only the offer has the sheen", () => {
+    const all = css("qcv150.css") + css("qcv151.css") + css("qcv153.css");
+    expect(all).not.toMatch(/\.qc150-br--w\s+\.qc150-(bar--cur|t-)/);
+    expect(all).not.toMatch(/\.qc150-t-[qrso]\s*\{/);
+    expect(all).not.toMatch(/data-sk="(sand|rose|blue|heather|pink|navy|sage)"/);
+    const sheen = all.match(/\.qc150-bar--cur\[data-sk="[a-z]+"\]\s*\{[^}]*112deg/g) ?? [];
+    expect(sheen.map((r) => r.match(/data-sk="([a-z]+)"/)![1])).toEqual(["offer"]);
   });
 });

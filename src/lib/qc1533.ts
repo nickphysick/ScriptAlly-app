@@ -20,7 +20,6 @@ import { formatQueryMaterial } from "./materials";
 import { partialAsked } from "./qcCardStory";
 import { anyToMs } from "./qcStages";
 import { shortDate } from "./qc151";
-import { legacyTone153, type LegacyTone153 } from "./qc153";
 import { stageOf, type Stage } from "./stageColours";
 
 export interface TabChip { name: string; asked: boolean }
@@ -72,15 +71,8 @@ export function materialGroups(q: MatQuery, status: QueryStatus | string, packag
 /* ── the tab's accent: a deeper shade of the slip header's colour ──────────────────────────────────────────────── */
 
 export interface TabAccent { accent: string; ink: string; rest: string }
-/** `rest` is the ink 82% over white, worked out here rather than with `color-mix()` at run time */
-export const TAB_ACCENT: Record<LegacyTone153, TabAccent> = {
-  sand: { accent: "#e0d2bb", ink: "#5e4c36", rest: "#7b6c5a" },
-  rose: { accent: "#ddb9b1", ink: "#5f433d", rest: "#7c6560" },
-  blue: { accent: "#bccbdc", ink: "#2e4864", rest: "#546980" },
-  heather: { accent: "#d4b7c2", ink: "#653f56", rest: "#816274" },
-};
-/** the v153 accent, by the v153 tone: the log-a-query slip preview's (not drawn on the Query Centre grid) */
-export const tabAccent = (status: QueryStatus | string): TabAccent => TAB_ACCENT[legacyTone153(status)];
+/* `rest` is the ink 82% over white, worked out here rather than with `color-mix()` at run time. Stage colours v1: the
+   slip preview takes the grid card's stage accent too (the v153 tone accents are gone). */
 /** v157 — the grid card's accent follows its stage on the slate ladder. Closed keeps Queried's sand accent (the pack
  *  names four; a closed card's was sand before, and stays so). */
 export const TAB_ACCENT_157: Record<Stage, TabAccent> = {

@@ -11,6 +11,7 @@
  * ⚠️ NAVY MEANS "YOURS TO DO" (the Your move tag, the action button, the headers of groups that are yours).
  */
 import { QueryStatus } from "../types";
+import { STAGE_COLOURS, type Stage } from "./stageColours";
 import { whereItStands, type QcRow, type WhereKey } from "./qcSummary";
 import { QUIET_BAND_HEAD, stateOf, type QueryState } from "./queryState";
 import { nextDoor } from "./queryActions/entry";
@@ -36,9 +37,17 @@ export function statusKind(s: QueryStatus | string): StatusKind {
   }
 }
 /* v152.1 §1 — Queried is the quietest colour: most queries sit there, so it must sit back (was #e6d9c6) */
-export const STATUS_FILL: Record<StatusKind, string> = { sand: "#f2ebe0", pink: "#f3d3c6", navy: "#d3dce7", sage: "#cbd9be", grey: "#f1f0ee" };
+/* Stage colours v1 — the five kinds are the five stages (sand Queried, pink partial, navy full, sage offer, grey closed);
+   their fills are the stage table's, so no stage hex lives here. Band for a fill, Tint for the paler wash. */
+const KIND_STAGE: Record<StatusKind, Stage> = { sand: "queried", pink: "partial", navy: "full", sage: "offer", grey: "closed" };
+export const STATUS_FILL: Record<StatusKind, string> = {
+  sand: STAGE_COLOURS[KIND_STAGE.sand].band, pink: STAGE_COLOURS[KIND_STAGE.pink].band, navy: STAGE_COLOURS[KIND_STAGE.navy].band,
+  sage: STAGE_COLOURS[KIND_STAGE.sage].band, grey: STAGE_COLOURS[KIND_STAGE.grey].band,
+};
 /** Birds-eye's watch-and-wait rows: paler versions (the offer's family has none in the brief, so it keeps its own) */
-export const STATUS_PALE: Record<StatusKind, string> = { sand: "#f7f2ea", pink: "#f7e2da", navy: "#e0e6ee", sage: "#cbd9be", grey: "#f1f0ee" };
+export const STATUS_PALE: Record<StatusKind, string> = {
+  sand: STAGE_COLOURS.queried.tint, pink: STAGE_COLOURS.partial.tint, navy: STAGE_COLOURS.full.tint, sage: STAGE_COLOURS.offer.tint, grey: STAGE_COLOURS.closed.tint,
+};
 export const CLOSED_TEXT = "#8a8076";
 
 /* ── group headers ─────────────────────────────────────────────────────────────────────────────────────────────── */

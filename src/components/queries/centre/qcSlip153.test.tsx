@@ -28,7 +28,7 @@ describe("the slip", () => {
     expect(h).toContain('id="query-row-q1"');
     expect(h).toContain('role="button"');
     expect(h).toContain('aria-label="Tom Ellery, Curtis Vane, Offer"');
-    expect(h).toContain('data-tone="heather"');
+    expect(h).toContain('data-tone="offer"'); // Stage colours v1: the slip's tone is its stage
     expect(h.match(/data-qc153="fact"/g)?.length).toBe(4);
     expect(h).toContain("over a year ago");
     expect(h).toContain("Answer the offer →");
@@ -61,8 +61,8 @@ describe("the slip", () => {
     expect(tab).toContain("<i>2</i>");
     // the tab sits with the name and agency, after them
     expect(h.indexOf('data-qc153="agency"')).toBeLessThan(h.indexOf('data-qc1533="tab"'));
-    // the stage's accent: a partial is dusty rose
-    expect(tab).toContain("--acc:#ddb9b1");
+    // the stage's accent (Stage colours v1: the grid card's, tabAccent157): a partial is the partial blue
+    expect(tab).toContain("--acc:#cbd7e4");
     // the pop-up only when open
     expect(h).not.toContain('data-qc1533="pop"');
   });

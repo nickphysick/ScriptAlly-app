@@ -20,10 +20,12 @@
   .qc153-slip:hover { transform: translateY(-1px); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.1), 0 26px 44px -22px rgba(28, 19, 15, 0.42); }
   .qc153-slip:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--navy), 0 22px 40px -22px rgba(28, 19, 15, 0.32); }
   .qc153-slip.is-sel { box-shadow: 0 0 0 2px var(--navy), 0 22px 40px -22px rgba(28, 19, 15, 0.32); }
-  .qc153-slip[data-tone="sand"] { --tone: #efe7da; }
-  .qc153-slip[data-tone="rose"] { --tone: #ecd6d2; }
-  .qc153-slip[data-tone="blue"] { --tone: #d9e1ea; }
-  .qc153-slip[data-tone="heather"] { --tone: #e7d6dc; }
+  /* Stage colours v1 — the slip's band is its stage's Band (as the grid card's, qcv154.css) */
+  .qc153-slip[data-tone="queried"] { --tone: #efe6d6; }
+  .qc153-slip[data-tone="partial"] { --tone: #e4ebf2; }
+  .qc153-slip[data-tone="full"] { --tone: #b7c9de; }
+  .qc153-slip[data-tone="offer"] { --tone: #efcdc9; }
+  .qc153-slip[data-tone="closed"] { --tone: #eceae6; }
 
   .qc153-top {
     display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 16px;
@@ -269,15 +271,18 @@
 @media (min-width: 768px) {
   .qc151 .qc153-main > .qc151-be.sa-slip { margin: 14px 0 96px; border-radius: 20px; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32); overflow: visible; }
   .qc151 .qc151-be.sa-slip > .sa-slip-in { overflow: clip; }
-  /* the stage palette: sand Queried, dusty rose Partial, blue Full, heather Offer; watch-and-wait rows the pale step */
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="sand"] { background: #efe7da; }
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="rose"] { background: #ecd6d2; }
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="blue"] { background: #d9e1ea; }
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="heather"] { background: #e7d6dc; }
-  .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="sand"] { background: #f6f1ea; }
-  .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="rose"] { background: #f4e6e3; }
-  .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="blue"] { background: #e7ecf2; }
-  .qc151 .qc150-be .qc150-br--w .qc150-bar--cur[data-sk="heather"] { background: #f0e5e9; }
+  /* Stage colours v1 — the current bar is its stage's Band (lib/stageColours, restated here and asserted equal in
+     stageColours.test.ts): one stage, one colour, so requested and sent, and watch-and-wait rows, are not told apart by
+     shade. An offer carries the sheen. Past bars, hatching and the today line are unchanged. */
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="queried"] { background: #efe6d6; }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="partial"] { background: #e4ebf2; }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="full"] { background: #b7c9de; }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="offer"] {
+    background:
+      linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
+      #efcdc9;
+  }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="closed"] { background: #eceae6; }
   /* "30 days over", "in 15 days": sentence case, Source Serif 14, ink, no tracking */
   .qc151 .qc150-be .qc150-tx, .qc151 .qc150-be .qc150-tail--in .qc150-tx {
     font: 400 14px/1 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #1c130f;

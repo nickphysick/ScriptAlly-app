@@ -30,19 +30,11 @@ export const SLIP_TONE_FILL: Record<SlipTone, string> = {
 };
 export const slipTone = (status: QueryStatus | string): SlipTone => stageOf(status);
 
-/** the v153 tone names and fills, kept for the surfaces not drawn on the Query Centre grid (the log-a-query slip
- *  preview, Birds-eye's bars); their colours move in the next pack */
+/** the v153 tone names and fills: since Stage colours v1 read only by the stage ring's RING_FILL (lib/qc1531), whose
+ *  one drawer, QcStageRing1531, no route renders (design-refs/stage-colours-v1/AUDIT.md). Every drawn surface reads
+ *  the stage (slipTone, lib/stageColours). */
 export type LegacyTone153 = "sand" | "rose" | "blue" | "heather";
 export const LEGACY_TONE_FILL_153: Record<LegacyTone153, string> = { sand: "#efe7da", rose: "#ecd6d2", blue: "#d9e1ea", heather: "#e7d6dc" };
-export function legacyTone153(status: QueryStatus | string): LegacyTone153 {
-  if (CLOSED_STATUSES.includes(status as QueryStatus)) return "sand";
-  switch (liveLevel(status as QueryStatus)) {
-    case 1: return "rose";
-    case 2: return "blue";
-    case 3: return "heather";
-    default: return "sand";
-  }
-}
 
 /* ── the arrow ───────────────────────────────────────────────────────────────────────────────────────────────── */
 

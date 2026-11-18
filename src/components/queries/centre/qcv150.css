@@ -256,8 +256,8 @@
   .qc150-bar--past .qc150-lb { color: #6b665e; position: static; }
   .qc150-bar--o { box-sizing: border-box; padding-right: 22px; }
   .qc150-lb { position: sticky; left: 0; padding: 0 14px; font: 400 14px/1 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
-  .qc150-t-q { background: #f4eee4; } .qc150-t-r { background: #f2e4df; } .qc150-t-s { background: #e4e7e1; } .qc150-t-o { background: #dde3ea; }
-  .qc150-br--w .qc150-t-q { background: #f9f4ed; } .qc150-br--w .qc150-t-s { background: #ecefea; } .qc150-br--w .qc150-t-r { background: #f7ece8; } .qc150-br--w .qc150-t-o { background: #e8edf2; }
+  /* Stage colours v1 — the current bar's colour is its stage's Band, from the bar's `data-sk` (qcv153.css). The
+     `qc150-t-*` classes stay on the bar (lib/qc150 stageTint is logic the phone reads) and draw no colour of their own. */
   .qc150-tail { position: absolute; top: 50%; z-index: 2; display: flex; align-items: center; gap: 12px; transform: translateY(-50%); white-space: nowrap; pointer-events: none; }
   .qc150-tail--in { margin-left: 10px; }
   .qc150-dot { flex: none; width: 10px; height: 10px; margin-left: -5px; border-radius: 50%; background: #2a3a52; box-shadow: 0 0 0 4px rgba(42, 58, 82, 0.16); }

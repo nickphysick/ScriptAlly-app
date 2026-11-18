@@ -4,7 +4,8 @@
  */
 import { describe, expect, it } from "vitest";
 import { QueryStatus } from "../types";
-import { materialGroups, TAB_ACCENT, tabAccent } from "./qc1533";
+import { materialGroups, TAB_ACCENT_157, tabAccent157 } from "./qc1533";
+import { readFileSync } from "node:fs";
 
 const NOW = Date.UTC(2026, 10, 8, 12);
 const STAGE = Date.UTC(2026, 9, 20, 12); // 20 Oct
@@ -58,29 +59,28 @@ describe("the materials, grouped by when they went", () => {
   });
 });
 
-describe("the tab's accent follows the slip's stage", () => {
-  it("maps each header colour to its deeper accent and ink", () => {
-    expect(TAB_ACCENT).toEqual({
-      sand: { accent: "#e0d2bb", ink: "#5e4c36", rest: "#7b6c5a" },
-      rose: { accent: "#ddb9b1", ink: "#5f433d", rest: "#7c6560" },
-      blue: { accent: "#bccbdc", ink: "#2e4864", rest: "#546980" },
-      heather: { accent: "#d4b7c2", ink: "#653f56", rest: "#816274" },
-    });
-  });
+describe("the tab's accent follows the stage (Stage colours v1: the slip preview takes the grid card's)", () => {
   it("the resting ink is the ink 82% over white", () => {
     const mix = (h: string) => [1, 3, 5].map((i) => Math.round(parseInt(h.slice(i, i + 2), 16) * 0.82 + 255 * 0.18));
-    for (const a of Object.values(TAB_ACCENT)) expect(mix(a.ink)).toEqual([1, 3, 5].map((i) => parseInt(a.rest.slice(i, i + 2), 16)));
+    for (const a of Object.values(TAB_ACCENT_157)) expect(mix(a.ink)).toEqual([1, 3, 5].map((i) => parseInt(a.rest.slice(i, i + 2), 16)));
   });
-  it("by status: an offer heather, a partial rose, a full blue, waiting sand", () => {
-    expect(tabAccent(QueryStatus.OFFER)).toBe(TAB_ACCENT.heather);
-    expect(tabAccent(QueryStatus.PARTIAL_REQUESTED)).toBe(TAB_ACCENT.rose);
-    expect(tabAccent(QueryStatus.FULL_REQUESTED)).toBe(TAB_ACCENT.blue);
-    expect(tabAccent(QueryStatus.QUERIED)).toBe(TAB_ACCENT.sand);
+  it("by status: an offer rose, a partial and a full their blues, waiting sand", () => {
+    expect(tabAccent157(QueryStatus.OFFER)).toBe(TAB_ACCENT_157.offer);
+    expect(TAB_ACCENT_157.offer).toEqual({ accent: "#dfb1ac", ink: "#7a3f3c", rest: "#92625f" });
+    expect(tabAccent157(QueryStatus.PARTIAL_REQUESTED)).toBe(TAB_ACCENT_157.partial);
+    expect(tabAccent157(QueryStatus.FULL_REQUESTED)).toBe(TAB_ACCENT_157.full);
+    expect(tabAccent157(QueryStatus.QUERIED)).toBe(TAB_ACCENT_157.queried);
   });
-  it("no red or rust ink", () => {
-    for (const a of Object.values(TAB_ACCENT)) {
+  it("no red or rust ink, except the offer's rose, which the writer chose (Stage colours v1)", () => {
+    for (const [k, a] of Object.entries(TAB_ACCENT_157)) {
+      if (k === "offer") continue;
       const [r, g, b] = [1, 3, 5].map((i) => parseInt(a.ink.slice(i, i + 2), 16));
       expect(r - Math.max(g, b), a.ink).toBeLessThan(40);
     }
+  });
+  it("the slip preview reads tabAccent157; the v153 accents are gone", () => {
+    const slip = readFileSync("src/components/queries/centre/QcSlip153.tsx", "utf8");
+    expect(slip).toContain("const a = accent ?? tabAccent157(status);");
+    expect(readFileSync("src/lib/qc1533.ts", "utf8")).not.toMatch(/export const (TAB_ACCENT|tabAccent)\b/);
   });
 });

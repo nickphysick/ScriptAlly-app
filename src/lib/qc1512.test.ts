@@ -25,13 +25,13 @@ const row = (o: { status: QueryStatus; expected?: number | null; stage?: number 
 
 describe("the colour scheme", () => {
   it("one colour per status family; requested and sent share it", () => {
-    expect(STATUS_FILL[statusKind(QueryStatus.QUERIED)]).toBe("#f2ebe0"); // v152.1 §1
+    expect(STATUS_FILL[statusKind(QueryStatus.QUERIED)]).toBe("#efe6d6"); // Stage colours v1: the stage table's Bands
     expect(statusKind(QueryStatus.PARTIAL_REQUESTED)).toBe(statusKind(QueryStatus.PARTIAL_SENT));
-    expect(STATUS_FILL[statusKind(QueryStatus.PARTIAL_SENT)]).toBe("#f3d3c6");
+    expect(STATUS_FILL[statusKind(QueryStatus.PARTIAL_SENT)]).toBe("#e4ebf2");
     expect(statusKind(QueryStatus.FULL_REQUESTED)).toBe(statusKind(QueryStatus.FULL_SENT));
-    expect(STATUS_FILL[statusKind(QueryStatus.FULL_SENT)]).toBe("#d3dce7");
-    expect(STATUS_FILL[statusKind(QueryStatus.OFFER)]).toBe("#cbd9be");
-    for (const s of [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN]) expect(STATUS_FILL[statusKind(s)]).toBe("#f1f0ee");
+    expect(STATUS_FILL[statusKind(QueryStatus.FULL_SENT)]).toBe("#b7c9de");
+    expect(STATUS_FILL[statusKind(QueryStatus.OFFER)]).toBe("#efcdc9");
+    for (const s of [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN]) expect(STATUS_FILL[statusKind(s)]).toBe("#eceae6");
   });
 });
 
@@ -45,7 +45,7 @@ describe("group headers", () => {
   });
   it("status: each header is its status colour; package: stone", () => {
     expect(headFill(headTone("status", QueryStatus.QUERIED))).toBe("#f4eee5"); // v152.1 §1: a step paler than the cap
-    expect(headFill(headTone("status", QueryStatus.REJECTED))).toBe("#f1f0ee");
+    expect(headFill(headTone("status", QueryStatus.REJECTED))).toBe("#eceae6"); // Stage colours v1: the closed Band, through STATUS_FILL
     expect(headFill(headTone("package", "pkg:x"))).toBe("#e3dbcf");
   });
   it("next action: the order and colours", () => {

@@ -136,7 +136,7 @@ import { QcViews156 } from "./queries/centre/QcViews156";
 import { QcLine156 } from "./queries/centre/QcLine156";
 import { weekGoal154, type WeekGoal154 } from "../lib/qc154goal";
 import { clearFacet, railCounts } from "../lib/qc153Rail";
-import { legacyTone153 } from "../lib/qc153";
+import { stageOf } from "../lib/stageColours";
 import { nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
 import { NEEDS_YOU_155, quietBody155, quietNow155 } from "../lib/qc155";
 import { qcStateAid } from "../lib/qcReviewAid155";
@@ -8233,7 +8233,7 @@ export const Queries: React.FC<{
                       selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}
                       lead={(r) => <Track151 row={r.row} />}
                       act={(id) => { const r = qcById.get(id); return r ? rowAct(r, now151) : null; }}
-                      barKind={(r) => legacyTone153(r.row.status)}
+                      barKind={(r) => stageOf(r.row.status)}
                       onOpen={(id) => { cardSetRef.current = qcBeOrder; onOpenQuery?.(id); }}
                       onAct={(id, mode) => {
                         const m = mode as DrawerMode | undefined;

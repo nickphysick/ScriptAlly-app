@@ -18,8 +18,8 @@ describe("the thread (v152 §2.3)", () => {
   it("the disc is the status's cap colour; Query sent and a nudge have none (the record form's options)", () => {
     expect(discFill({ status: QueryStatus.QUERIED, kind: null })).toBe("transparent");
     expect(discFill({ status: null, kind: "nudge" })).toBe("transparent");
-    expect(discFill({ status: QueryStatus.PARTIAL_REQUESTED, kind: null })).toBe("#f3d3c6");
-    expect(discFill({ status: QueryStatus.FULL_SENT, kind: null })).toBe("#d3dce7");
+    expect(discFill({ status: QueryStatus.PARTIAL_REQUESTED, kind: null })).toBe("#e4ebf2");
+    expect(discFill({ status: QueryStatus.FULL_SENT, kind: null })).toBe("#b7c9de");
   });
   it("v152.1 §2.1 only events: no Day 1, no today, no ending; your Query sent first and the latest step last", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 60), st("pr", QueryStatus.PARTIAL_REQUESTED, 16)], { ...ctx, state: "materials", replyMs: null });

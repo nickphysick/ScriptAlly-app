@@ -24,9 +24,9 @@ import React, { useEffect, useRef, useState } from "react";
 import type { QcRow } from "../../../lib/qcSummary";
 import type { RowAct } from "../../../lib/qc1512";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
-import { heardFact, legacyTone153, nextFact, queriedFact, slipTrack, standWords, type SlipTrack } from "../../../lib/qc153";
+import { heardFact, nextFact, queriedFact, slipTone, slipTrack, standWords, type SlipTrack } from "../../../lib/qc153";
 import { policyWords } from "../../../lib/qc1531";
-import { materialGroups, materialsName, tabAccent, type MatGroups, type TabAccent } from "../../../lib/qc1533";
+import { materialGroups, materialsName, tabAccent157, type MatGroups, type TabAccent } from "../../../lib/qc1533";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import type { Agent } from "../../../types";
 import { StatusDot } from "../../StatusDot";
@@ -108,7 +108,7 @@ export const MatTab1533: React.FC<{ id: string; g: MatGroups; status: string; ac
   const hide = () => setOpen(false);
   useEffect(() => { onOpen(open); }, [open, onOpen]);
   useEscapeLayer(open, () => { hide(); btn.current?.focus(); }, ESC_LEVEL.page);
-  const a = accent ?? tabAccent(status);
+  const a = accent ?? tabAccent157(status);
   const popId = `qc1533-pop-${id}`;
   return (
     <span className="qc1533-tw" ref={wrap} onPointerEnter={show} onPointerLeave={() => { if (!wrap.current?.contains(document.activeElement)) hide(); }}
@@ -174,7 +174,7 @@ export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, p
   const open = () => onOpen(r.id);
   return (
     <div className={`sa-slip qc153-slip${selected ? " is-sel" : ""}${popOpen ? " has-pop" : ""}${preview ? " is-preview" : ""}`} id={preview ? undefined : `query-row-${r.id}`}
-      data-qc153="slip" data-qcv={preview ? "preview" : "row"} data-id={r.id} data-tone={legacyTone153(r.status)} data-status={r.status}
+      data-qc153="slip" data-qcv={preview ? "preview" : "row"} data-id={r.id} data-tone={slipTone(r.status)} data-status={r.status}
       {...(preview
         ? { role: "group", "aria-label": `Preview: ${r.agentName}, ${r.agency}, ${word}` }
         : { role: "button", tabIndex: 0, "aria-label": `${r.agentName}, ${r.agency}, ${word}`, "aria-pressed": selected, onClick: open,
