@@ -2,11 +2,10 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Manuscripts v27 (design-refs/manuscripts-v27/manuscripts-v27.html) — the page's two containers:
+ * Manuscripts v27 (design-refs/manuscripts-v27/manuscripts-v27.html) — the navy header (and the Versions page's hero):
  *
- *   THE BOOK      (`.bkx`) a white card: the header-rules header inside it (art, eyebrow, the title, "by {name}", Edit
- *                 details · Full details) with the details card on the right, and the logline strip at its foot
- *   (v28 Part F retired the coming-soon strip that stood second; the page foot is v28/MsFoot)
+ *   Manuscripts v29 retired the book container (the logline strip) and the page foot: the page's desk is v29/Msv29Parts.
+ *   What is left here is the navy header (`MsHeader`) and `V27Hero`, the Versions page's header.
  *
  * ⚠️ THE HEADER IS THE HEADER-RULES GEOMETRY (`--hero-*`, shell/pageHeroFrame.css) WITH TWO IN-CONTAINER OFFSETS: the
  *    right inset is 40px inside the card, the art sits 22px in, and the text starts at the hero's text column + 8.
@@ -14,9 +13,8 @@
  */
 import React from "react";
 import heroArt from "../../../assets/manuscripts/hero-archivist.png";
-import type { CardRow } from "../../../lib/manuscriptV27";
-import { QuotedLine } from "../v28/QuotedLine";
-import { WorkspaceNavyHeader, WsnhFigure, WsnhWords } from "../../shell/WorkspaceNavyHeader";
+import { PenIcon } from "../v29/Msv29Parts";
+import { WorkspaceNavyHeader } from "../../shell/WorkspaceNavyHeader";
 
 /* ══ the header ════════════════════════════════════════════════════════════════════════════════ */
 
@@ -43,16 +41,15 @@ export const V27Hero: React.FC<{
   </header>
 );
 
-/* ══ the navy header (Workspace headers v1, 14 Nov) ═════════════════════════════════════════════════════════════
-   The shared navy header (shell/WorkspaceNavyHeader) in place of the hero above the book card: the book's title (two
-   lines at most, the header growing; never clipped, never smaller), "by {author}", Edit and View summary, and on the
-   right the details card as words — the word count large, then the genre and "{age} · {status} since {day}". Every
-   value is `cardRows`'s, as the card showed it. With no book: "Let's add your book" (or "Add your book again") and
-   the one button that state offers. */
+/* ══ the navy header (Workspace headers v1, 14 Nov; Manuscripts v29, 18 Nov) ══════════════════════════════════════
+   The shared navy header (shell/WorkspaceNavyHeader): the book's title (it wraps, the header growing; never clipped,
+   never smaller), "by {author}", ONE button — "Edit details" — and on the right the book's vitals, which the page
+   supplies (v29/Msv29Parts `MsVitals`). With no book: "Let's add your book" (or "Add your book again") and the one
+   button that state offers. */
 export const MsHeader: React.FC<
   | { kind: "loading" }
   | { kind: "empty"; title: string; onAdd: () => void }
-  | { kind: "book"; title: string; byline: string | null; rows: CardRow[]; words: string | null; onEdit: () => void; onView: (opener: HTMLElement) => void }
+  | { kind: "book"; title: string; byline: string | null; words: string | null; status: string; vitals: React.ReactNode; onEdit: (opener: HTMLElement | null) => void }
 > = (p) => {
   if (p.kind === "loading") {
     return <WorkspaceNavyHeader page="manuscripts" art="manuscripts-header" loading title=" " actions={null} bar={null} />;
@@ -64,48 +61,23 @@ export const MsHeader: React.FC<
         bar={{ title: p.title, button: { label: "+ Add your manuscript", onClick: p.onAdd } }} />
     );
   }
-  const row = (k: CardRow["key"]) => p.rows.find((r) => r.key === k)!;
-  const genre = row("genre"), age = row("age"), status = row("status"), since = row("since");
-  const facts = <>{age.value} · {since.muted ? status.value : <>{status.value.toLowerCase()} since <b data-ms27="hd-since">{since.value}</b></>}</>;
+  /* Manuscripts v29 (18 Nov): ONE button, "Edit details" (white, the pen), and on the right the book's vitals
+     (v29/Msv29Parts `MsVitals`): the count with "words" beneath (or "Add a word count"), a hairline, then the main
+     genre, the age category and the status line. The collapsed bar's button is "Edit details" too. */
   return (
     <WorkspaceNavyHeader page="manuscripts" art="manuscripts-header" wrap
       title={p.title}
       forLine={p.byline ? { lead: "by", text: p.byline } : null}
-      actions={<>
-        <button type="button" className="qc1531-b qc1531-b--n" data-ms27="edit" aria-label="Edit the book's details" onClick={p.onEdit}>Edit</button>
-        <button type="button" className="qc1531-b qc1531-b--g" data-ms27="full" aria-label="View the book's summary" onClick={(e) => p.onView(e.currentTarget)}>View summary</button>
-      </>}
-      right={<>
-        {p.words ? <WsnhFigure small>{p.words}</WsnhFigure> : null}
-        <WsnhWords lead={p.words ? "words" : "No word count yet"} name={<span data-ms27="hd-genre">{genre.value}</span>} sub={facts} />
-      </>}
+      actions={
+        <button type="button" className="qc1531-b qc1531-b--n ms29-hb" data-ms29="edit-details" onClick={(e) => p.onEdit(e.currentTarget)}><PenIcon />Edit details</button>
+      }
+      right={p.vitals}
       bar={{
         title: p.title,
-        aside: <>{p.words ? <b>{p.words} words</b> : null}<em>{status.value}</em></>,
-        button: { label: "Edit", onClick: p.onEdit },
+        aside: <>{p.words ? <b>{p.words} words</b> : null}<em>{p.status}</em></>,
+        button: { label: "Edit details", onClick: () => p.onEdit(null) },
       }} />
   );
 };
 
-/* ══ the book container ═══════════════════════════════════════════════════════════════════════ */
-
-/* Workspace headers v1: the hero and its details card left the container for the navy header above it; the card keeps
-   the logline strip, as before */
-export const BookContainer: React.FC<{
-  logline: string;
-  onAddLogline: () => void;
-}> = ({ logline, onAddLogline }) => (
-  <section className="ms27-bkx" aria-label="The book's logline" data-ms27="book">
-    <div className="ms27-bkl" data-ms27="logline">
-      {logline.trim() ? (
-        /* v28.1: "Read it all" is gone (the details card still opens the book view); the line takes the strip's
-           full width and closes with a rust ” */
-        <p className="ms27-lg"><QuotedLine text={logline} /></p>
-      ) : (
-        <p className="ms27-lg is-empty">No logline yet. <button type="button" className="ms27-lnk" data-ms27="add-logline" onClick={onAddLogline}>Add one</button></p>
-      )}
-    </div>
-  </section>
-);
-
-/* The coming-soon strip (SoonStrip) is retired by Manuscripts v28 Part F: the page foot is v28/MsFoot. */
+/* Manuscripts v29 retired the book container (the logline strip): the pitch frame (v29/Msv29Parts) holds the logline. */
