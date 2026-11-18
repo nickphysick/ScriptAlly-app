@@ -111,8 +111,10 @@ describe("⚠️ ONE component, TEN slots — the briefs are the contract", () =
         expect(html, n).toContain(`ART · ${n.toUpperCase()}`);
       }
     }
-    // exactly TWO slots carry an asset today — the plan card's mark, and (Dashboard feed v1) the Top tip's Mentor
-    expect(NAMES.filter((n) => !!ART_SLOTS[n].src)).toEqual(["seize-the-day", "dash-mentor-pointing"]);
+    // exactly THREE slots carry an asset today — the plan card's mark, (Dashboard feed v1) the Top tip's Mentor, and
+    // (Analytics v26 §A) the Archivist in the Analytics header
+    expect(NAMES.filter((n) => !!ART_SLOTS[n].src)).toEqual(["seize-the-day", "dash-mentor-pointing", "analytics-header"]);
+    expect(ART_SLOTS["analytics-header"].src).toBe("/images/analytics/analytics-archivist.webp?v=1");
     expect(ART_SLOTS["seize-the-day"].src).toBe("/todo-seize-the-day.png");
     // and when one DOES land, an onError flips it back to the caption rather than the glyph
     const src = readFileSync(join(here, "ArtSlot.tsx"), "utf8");

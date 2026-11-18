@@ -142,7 +142,11 @@ export function pathSteps(items: Enriched[], o: Outcomes = outcomes(items), t: R
 /* ══════════════════════════════════ how long do replies take? ══════════════════════════════════ */
 
 export type ReplyKind = "asked" | "passed";
-export interface ReplyPoint { id: string; weeks: number; kind: ReplyKind; mark: Mark }
+export interface ReplyPoint {
+  id: string; weeks: number; kind: ReplyKind; mark: Mark;
+  /** what the first reply was (the log's first incoming rung), so its mark is drawn as that reply */
+  replyStatus: QueryStatus;
+}
 export interface WaitPoint { id: string; weeks: number; mark: Mark }
 export interface ReplyTimes {
   replies: ReplyPoint[];
@@ -158,6 +162,7 @@ export interface ReplyTimes {
 export function replyTimes(items: Enriched[], nowMs: number): ReplyTimes {
   const replies: ReplyPoint[] = items.filter((e) => answered(e) && isDatedReply(e)).map((e) => ({
     id: e.row.id, weeks: weeksOf(e.replyDays as number), kind: asked(e) ? "asked" as const : "passed" as const, mark: markOf(e, nowMs),
+    replyStatus: e.replyStatus ?? (asked(e) ? (e.row.reachedFull ? QueryStatus.FULL_REQUESTED : QueryStatus.PARTIAL_REQUESTED) : QueryStatus.REJECTED),
   }));
   const ws = replies.map((r) => r.weeks);
   const sorted = [...ws].sort((a, b) => a - b);

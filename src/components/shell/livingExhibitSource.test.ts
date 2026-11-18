@@ -50,7 +50,7 @@ describe("LH6 · the exhibition reads nothing but its constant (source)", () => 
       /* Submission packages v4 (14 Oct): the exhibit is retired with its living header; the empty page is PkgEmpty4 (PK4 F1) */
       /* Comparable titles' exhibit retired with comps v27: its empty page is the header and the steps card. */
       /* Analytics' exhibit retired with its living header (analytics v13, 3 Oct): since analytics v21 its empty
-         page is `A21Empty` (a navy panel, one fixed example, the ways in), not a living-header exhibition. */
+         page was `A21Empty`; since analytics v26 it is the shared header and the "How it works" card (A26DayOne). */
     ];
     for (const [file, tag, gate] of mounts) {
       const s = src(file);

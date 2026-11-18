@@ -183,6 +183,8 @@ export const ART_SLOTS: Record<ArtSlotName, SlotBrief> = {
   "analytics-header": {
     caption: "The Analytics header — the Archivist with his ledger, cut out, for the navy panel.",
     w: 190, h: 142,
+    /* Analytics v26 §A: the Archivist enrolled at design-refs/analytics-v21/analytics-archivist.webp (same bytes) */
+    src: "/images/analytics/analytics-archivist.webp?v=1",
     alt: "The Archivist hawk reading his ledger",
   },
   "discover-header": {
