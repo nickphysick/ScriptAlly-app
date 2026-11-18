@@ -1,0 +1,116 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Manuscripts v29 — the page's sheet, ported from design-refs/manuscripts-v29/manuscripts-v29.html (its `.vit`, `.frame`,
+ * `.in`, `.fband`, `.b2`, `.lk`, `.desk`, `.pt`, `.dt`, `.side`, `.sh`, `.bk`, `.nx`, `.soon` and the two breakpoints),
+ * every rule scoped under `.ms29` and renamed `ms29-`. Fonts are the app's tokens (`--sp-type` the typewriter face,
+ * `--sp-serif` the serif), with `!important` because brand.tsx forces headings and bare spans on every route.
+ * Desktop only (768px and up); the phone screens are their own.
+ *
+ * ⚠️ THE NAVY HEADER'S BOX IS NOT TOUCHED HERE. Only its right block's contents (`.ms29-vit`, inside the shared
+ *    header's `right` slot) and the header button's fill are this page's.
+ * ⚠️ THE CLOTH ON THE ACTIVE TILE IS THE RAIL SPINE'S (shell/manuscriptSpine.css: #34425c, its 1px cream edge), with
+ *    the ref's weave and darker spine strip over it.
+ */
+@media (min-width: 768px) {
+  /* ── the header: one white button; the right block is the book's vitals ─────────────────────────────────────── */
+  /* the ref's `.hb.n`: white, the serif at 600 / 18; the built height stays (wsHeaders H1 holds it) */
+  .ms29 .qc151.qc153.wsnh .qc1531-hd .qc1531-b.ms29-hb { display: inline-flex; align-items: center; gap: 10px; background: #fff; color: #1c130f; box-shadow: none; font: 600 18px/1 var(--sp-serif) !important; }
+  .ms29 .qc151.qc153.wsnh .qc1531-hd .qc1531-b.ms29-hb:hover { background: #fffaf2; }
+  .ms29 .qc1531-b.ms29-hb svg { width: 17px; height: 17px; flex: none; }
+  .ms29 .qc151.qc153.wsnh .wsnh-rc { display: block; max-width: none; }
+  .ms29 .ms29-vit { display: flex; align-items: center; gap: 22px; margin-left: 32px; padding: 6px 8px 6px 0; color: #f4eee5; }
+  .ms29 .ms29-vit-n { font: 400 44px/1 var(--sp-type) !important; white-space: nowrap; color: #f4eee5; }
+  .ms29 .ms29-vit-n small { display: block; margin-top: 8px; font: italic 400 15px/1 var(--sp-serif) !important; color: rgba(244, 238, 229, .8); }
+  .ms29 .ms29-vit > i { width: 1px; align-self: stretch; background: rgba(244, 238, 229, .25); }
+  .ms29 .ms29-vit-g b { display: block; font: 400 22px/1.2 var(--sp-type) !important; color: #f4eee5; }
+  .ms29 .ms29-vit-g span { display: block; margin-top: 6px; font: italic 400 15px/1.35 var(--sp-serif) !important; color: rgba(244, 238, 229, .8); white-space: nowrap; }
+  .ms29 .ms29-cdot { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: #f4eee5; vertical-align: 1px; }
+  .ms29 .ms29-vit-add { padding: 0; border: 0; background: none; color: #f4eee5; font: 600 16px/1.3 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 4px; min-height: 32px; cursor: pointer; white-space: nowrap; }
+  .ms29 .wsnh :focus-visible { outline: 2px solid #e8bdb4; outline-offset: 3px; }
+
+  /* ── the frames (as on Versions v6 and the Dashboard) ──────────────────────────────────────────────────────── */
+  .ms29 .ms29-frame { background: #fff; border-radius: 28px; padding: 10px; box-shadow: 0 22px 40px -28px rgba(28, 19, 15, .4), 0 0 0 1px rgba(28, 19, 15, .03); min-width: 0; }
+  .ms29 .ms29-in { border: 1px solid rgba(28, 19, 15, .13); border-radius: 20px; overflow: hidden; background: #fff; }
+  .ms29 .ms29-band { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; min-height: 76px; padding: 18px 26px; }
+  .ms29 .ms29-band h2.ms29-bh { margin: 0; font: 400 26px/1.15 var(--sp-type) !important; color: #1c130f; }
+  .ms29 .ms29-band p.ms29-bs { margin: 4px 0 0; font: italic 400 15px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-band--sand { background: #f3e6da; }
+  .ms29 .ms29-band--stone { background: #ebe7e2; }
+  .ms29 .ms29-b2 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; white-space: nowrap; height: 40px; padding: 0 16px; border-radius: 999px; background: #fff; color: #1c130f; cursor: pointer;
+    font: 600 15px/1 var(--sp-serif) !important; box-shadow: 0 0 0 1px rgba(28, 19, 15, .14), 0 4px 10px -6px rgba(28, 19, 15, .3); }
+  .ms29 .ms29-b2 span { font: inherit !important; }
+  .ms29 .ms29-b2:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, .3), 0 6px 12px -6px rgba(28, 19, 15, .3); }
+  .ms29 .ms29-b2 svg { width: 15px; height: 15px; flex: none; }
+  .ms29 .ms29-b2.is-done { background: #e0e5dd; box-shadow: 0 0 0 1px rgba(28, 19, 15, .14); }
+  .ms29 .ms29-lk { padding: 0; border: 0; background: none; min-height: 32px; cursor: pointer; font: 600 16px/1.3 var(--sp-serif) !important; color: #1c130f; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; white-space: nowrap; }
+  .ms29 .ms29-lk:hover { color: #2a3a52; }
+  .ms29 :is(.ms29-b2, .ms29-lk, .ms29-dt-r):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+
+  /* ── the desk: the pitch · the details ─────────────────────────────────────────────────────────────────────── */
+  /* the ref's 24 under the header (its `.head` margin), where the shared header sheet gives every page 48 */
+  .ms29 .ms29-desk { margin-top: -24px; }
+  .ms29 .ms29-desk { display: grid; grid-template-columns: minmax(0, 1fr) 392px; gap: 24px; align-items: start; }
+  .ms29 .ms29-pt { display: grid; grid-template-columns: 176px minmax(0, 1fr) auto; gap: 8px 28px; align-items: start; padding: 26px 26px 28px; }
+  .ms29 .ms29-pt + .ms29-pt { border-top: 1px dashed rgba(28, 19, 15, .18); }
+  .ms29 .ms29-pt-h h3.ms29-ph { margin: 0; font: 400 20px/1.2 var(--sp-type) !important; color: #1c130f; }
+  .ms29 .ms29-pt-h em { display: block; margin-top: 4px; font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-pt-a { display: flex; align-items: center; gap: 16px; }
+  .ms29 .ms29-pt-x { min-width: 0; max-width: 74ch; }
+  .ms29 .ms29-pt-x p { margin: 0; font: 400 17px/1.6 var(--sp-serif) !important; color: #1c130f; white-space: pre-line; overflow-wrap: anywhere; }
+  .ms29 .ms29-pt-x p.ms29-q { font: italic 400 24px/1.4 var(--sp-serif) !important; }
+  .ms29 .ms29-pt-x p.ms29-q .ms29-qend { font: inherit !important; white-space: nowrap; }
+  .ms29 .ms29-pt-x p.ms29-cl { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden; }
+  .ms29 .ms29-pt-x .ms29-lk { margin-top: 8px; font-size: 15px !important; }
+  .ms29 .ms29-pt-x .ms29-cnt { margin-left: 14px; font: italic 400 14px var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-pt-x > p + .ms29-cnt { display: inline-block; margin: 8px 0 0; }
+  .ms29 .ms29-pt.is-none .ms29-pt-x p { font: italic 400 16px/1.5 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-pt.is-none .ms29-pt-x p b { display: block; margin-bottom: 2px; font: 400 17px/1.4 var(--sp-serif) !important; color: #1c130f; }
+  .ms29 .ms29-pt.is-flash { animation: ms29-fl 1.1s ease-out; }
+  @keyframes ms29-fl { 0% { background: #f3e6da; } 100% { background: #fff; } }
+
+  .ms29 .ms29-dt { padding: 6px 26px 8px; }
+  .ms29 .ms29-dt-r { display: flex; align-items: baseline; gap: 10px; width: 100%; min-height: 52px; padding: 14px 0; border: 0; border-bottom: 1px dashed rgba(28, 19, 15, .18); background: none; text-align: left; color: #1c130f; cursor: pointer; }
+  .ms29 .ms29-dt-r:last-child { border-bottom: 0; }
+  .ms29 .ms29-dt-r .ms29-dt-l { flex: none; font: italic 400 15px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-dt-r > i { flex: 1; min-width: 16px; border-bottom: 1.5px dotted rgba(28, 19, 15, .25); transform: translateY(-4px); }
+  .ms29 .ms29-dt-r .ms29-dt-v { font: 400 18px/1.3 var(--sp-type) !important; text-align: right; max-width: 230px; }
+  .ms29 .ms29-dt-r .ms29-dt-v small { display: block; margin-top: 3px; font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-dt-r .ms29-dt-v.is-mu { font: italic 400 16px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-ndot { display: inline-block; width: 9px; height: 9px; margin-right: 8px; border-radius: 50%; background: #2a3a52; }
+  .ms29 .ms29-dt-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 26px 16px; border-top: 1px solid rgba(28, 19, 15, .08); background: #fbf9f5; }
+  .ms29 .ms29-dt-f > span { font: italic 400 15px var(--sp-serif) !important; color: rgba(28, 19, 15, .72); }
+  .ms29 .ms29-dt-f > span b { margin-right: 6px; font: 400 18px var(--sp-type) !important; font-style: normal; color: #1c130f; }
+
+  /* ── your manuscripts: the active book, and room for the next ──────────────────────────────────────────────── */
+  .ms29 .ms29-side { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+  .ms29 .ms29-sh { display: grid; gap: 12px; padding: 18px 18px 20px; }
+  .ms29 .ms29-bk { position: relative; display: flex; align-items: center; gap: 16px; min-height: 88px; padding: 16px 20px 16px 34px; border-radius: 14px; color: #f4eee5; overflow: hidden;
+    background-color: #34425c; box-shadow: inset 0 0 0 1px rgba(244, 238, 229, .16);
+    background-image: repeating-linear-gradient(0deg, rgba(255, 255, 255, .035) 0 1px, transparent 1px 3px), repeating-linear-gradient(90deg, rgba(255, 255, 255, .03) 0 1px, transparent 1px 3px); }
+  .ms29 .ms29-bk::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 16px; background: rgba(0, 0, 0, .22); box-shadow: inset -1px 0 0 rgba(244, 238, 229, .18); }
+  .ms29 .ms29-bk-t { flex: 1; min-width: 0; }
+  .ms29 .ms29-bk-t b { display: block; font: 400 20px/1.2 var(--sp-type) !important; overflow-wrap: anywhere; }
+  .ms29 .ms29-bk-t span { display: block; margin-top: 4px; font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, .8); }
+  .ms29 .ms29-bk-f { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 13px; border-radius: 999px; background: #fff; color: #1c130f; font: 600 14px/1 var(--sp-serif) !important; }
+  .ms29 .ms29-bk-f i { width: 8px; height: 8px; border-radius: 50%; background: #2a3a52; }
+  .ms29 .ms29-nx { display: flex; align-items: center; gap: 14px; min-height: 88px; padding: 14px 16px; border-radius: 14px; border: 1.5px dashed rgba(28, 19, 15, .28); background: #fbf9f5; cursor: default; }
+  .ms29 .ms29-nx-p { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: #ece7df; color: rgba(28, 19, 15, .55); }
+  .ms29 .ms29-nx-p svg { width: 18px; height: 18px; }
+  .ms29 .ms29-nx-t { flex: 1; min-width: 0; }
+  .ms29 .ms29-nx-t p { margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; }
+  .ms29 .ms29-nx-t b { font: 400 19px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, .72); white-space: nowrap; }
+  .ms29 .ms29-nx-t > span { display: block; margin-top: 4px; font: italic 400 15px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-soon { flex: none; display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: #f5e2da; color: #5a2a22; font: 600 14px/1 var(--sp-serif) !important; font-style: normal !important; white-space: nowrap; }
+}
+
+@media (min-width: 768px) and (max-width: 1180px) {
+  .ms29 .ms29-desk { grid-template-columns: minmax(0, 1fr); }
+}
+@media (min-width: 768px) and (max-width: 860px) {
+  .ms29 .ms29-pt { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ms29 .ms29-pt.is-flash { animation: none !important; }
+}

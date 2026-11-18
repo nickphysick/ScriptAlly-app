@@ -38,7 +38,7 @@ export async function openPage(page: Page) {
   await page.goto("/manuscripts");
   await page.evaluate((id) => { localStorage.setItem("scriptally_active_manuscript_id", id); sessionStorage.setItem("sa.guide.autoOpened", "1"); }, MS_ID);
   await page.goto("/manuscripts");
-  await page.waitForSelector('[data-ms27="book"]');
+  await page.waitForSelector('[data-ms29="desk"]'); /* RE-POINTED (Manuscripts v29): the desk */
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(800);
 }
@@ -55,7 +55,7 @@ async function untilStored(pred: (d: Record<string, unknown>) => boolean): Promi
 }
 const drawerSel = '[data-hdr="ms-edit"]';
 async function openDrawer(page: Page) {
-  await page.locator('[data-ms27="edit"]').click();
+  await page.locator('[data-ms29="edit-details"]').click();
   await expect(page.locator(`${drawerSel}.is-in`)).toBeVisible({ timeout: 10_000 });
   await page.waitForTimeout(450);
 }
@@ -78,6 +78,11 @@ async function bookRow(page: Page, key: string) {
 }
 
 const VPS = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }];
+/* RETIRED (Manuscripts v29, 18 Nov): F1 (the page foot), A1 (every Edit entry — the book view's among them), A2 (the book
+   view's half), B1 and E2 (read back through the book view). The drawer's own locks (G1, B2, C1, D1, D2, E1) stay, opened
+   from the header's "Edit details". Successors: tests/e2e/manuscriptsV29.measure.ts L6, L8, L9; RETIRED-manuscripts-v28.md. */
+const RETIRED_BY_V29 = /^(F1|A1|A2|B1|E2) —/;
+test.beforeEach(({}, info) => { test.skip(RETIRED_BY_V29.test(info.title), "retired by Manuscripts v29 (RETIRED-manuscripts-v28.md)"); });
 
 for (const vp of VPS) {
   test.describe(`MSV28 @ ${vp.width}`, () => {
@@ -138,7 +143,7 @@ for (const vp of VPS) {
         }
       } else readings["guide:present"] = false;
 
-      await page.locator('[data-ms27="edit"]').click();
+      await page.locator('[data-ms29="edit-details"]').click();
       await expect(drawer).toBeVisible();
       await page.waitForTimeout(500);
       const menus = [
@@ -172,7 +177,7 @@ for (const vp of VPS) {
       const ctx = await ctxFor(browser, baseURL!, vp);
       const page = await ctx.newPage();
       const entries: [string, () => Promise<void>][] = [
-        ["header", async () => { await page.locator('[data-ms27="edit"]').click(); }],
+        ["header", async () => { await page.locator('[data-ms29="edit-details"]').click(); }],
         ["book view", async () => { await page.locator('[data-ms27="full"]').click(); await page.waitForSelector('[data-ms27bx="edit"]'); await page.waitForTimeout(900); await page.locator('[data-ms27bx="edit"]').click(); }],
         ["guide step 1", async () => {
           if (!(await page.locator('[data-pck="popover"]').isVisible())) await page.locator('[data-pck="pill"]').click();

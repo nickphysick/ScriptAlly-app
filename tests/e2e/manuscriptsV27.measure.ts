@@ -33,7 +33,13 @@ test.describe.configure({ mode: "serial" });
 
 let asserts = 0;
 const ck = (n = 1) => { asserts += n; };
-const FLOOR = 63; /* v28: A4 retired (its 10 copy and alignment asserts moved to MSV28-F1 and msv28Smoke); Versions v1: E1's interim-page asserts (3 × 2) moved to VER1.
+/* RE-POINTED (Manuscripts v29, 18 Nov): 63 → 45 — A1, A3, B1–B3, C1 and C2 retired (RETIRED-manuscripts-v28.md); what runs
+   is D2 (12 × 2), E1 (5 × 2) and D1 (11). */
+const FLOOR = 45;
+/* RETIRED (Manuscripts v29, 18 Nov): the page's two containers, the header's facts as words, the book view (opening, rows,
+   reduced motion, copy) and opening the drawer from the book view. Successors: tests/e2e/manuscriptsV29.measure.ts. */
+const RETIRED_BY_V29 = /^MSV27-(A1|A3|B1|B2|B3|C1|C2)\b/;
+test.beforeEach(({}, info) => { test.skip(RETIRED_BY_V29.test(info.title), "retired by Manuscripts v29 (RETIRED-manuscripts-v28.md)"); }); /* v28: A4 retired (its 10 copy and alignment asserts moved to MSV28-F1 and msv28Smoke); Versions v1: E1's interim-page asserts (3 × 2) moved to VER1.
    RE-POINTED (Workspace headers v1, 14 Nov): 104 → 63 — A2 retired (16 × 2), B1's details-card opener retired (5 × 2), A3 reads three facts at both widths (+1 at 1280) */
 
 const VPS = [{ width: 1512, height: 900 }, { width: 1280, height: 800 }] as const;
@@ -97,7 +103,7 @@ async function openAt(page: Page, route: string, vp: { width: number; height: nu
   if (!o.motion) await page.addStyleTag({ content: `/*${KILL_MOTION_ID}*/${KILL_MOTION}` });
   if (CSS_MUT[MUTATE]) await page.addStyleTag({ content: CSS_MUT[MUTATE] });
   await expect(page.locator(".ws-work").first()).toBeVisible({ timeout: 30_000 });
-  const sel = route === "/manuscripts/versions" ? '[data-ver1="header"]' : '[data-ms27="book"]'; /* Versions v1 replaced the interim page */
+  const sel = route === "/manuscripts/versions" ? '[data-ver1="header"]' : '[data-ms29="desk"]'; /* RE-POINTED (Manuscripts v29): the desk */ /* Versions v1 replaced the interim page */
   await page.waitForFunction((s) => [...document.querySelectorAll(s)].some((e) => e.getBoundingClientRect().height > 0), sel, { timeout: 30_000 });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(800);

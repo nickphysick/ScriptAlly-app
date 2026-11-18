@@ -17,33 +17,15 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pageSmoke")).toastMock());
 
 import { ManuscriptPage } from "../v12/ManuscriptPage";
-import { FOOT_COPY, MsFoot } from "./MsFoot";
 import { LOGLINE_HINT, LOGLINE_TAG, PITCH_HINT, PITCH_TAG, SERIES_ON, seriesLine, seriesOn, seriesPatch } from "./MsEditDrawer";
 import { deleteField, type FieldValue } from "firebase/firestore";
 
 afterEach(() => setActiveManuscript(null));
 const text = (html: string) => html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").replace(/&#x27;/g, "'");
 
-describe("F1 — the page is the book and the page foot", () => {
-  const html = renderPageSeeded(<ManuscriptPage onNavigate={noNavigate} />, "/manuscripts");
-  it("the book container, then the foot: the bar and two tiles", () => {
-    const sec = /<div class="ms27-bkp" data-ms27="sections">([\s\S]*)$/.exec(html);
-    expect(sec).toBeTruthy();
-    expect([...sec![1].matchAll(/<(section|div) class="(ms27-bkx|ms28-foot)"/g)].map((m) => m[2])).toEqual(["ms27-bkx", "ms28-foot"]);
-    expect(html).not.toContain("ms27-soon");
-  });
-  it("the copy is exact, and the Versions text carries no bold", () => {
-    const f = renderToStaticMarkup(<MsFoot onVersions={() => {}} onPackages={() => {}} />);
-    const t = text(f);
-    for (const s of [FOOT_COPY.chip, FOOT_COPY.title, "We’re working on this. Watch this space.",
-      "Prologue first? Cut the flashback? Faster-paced start? Tweak, save and track different versions of your manuscript to see what lands.",
-      "Bundle query letters, synopses and comparable titles with your manuscript and attach them to queries to see what performs best.",
-      "Open Versions →", "Open Submission packages →"]) expect(t).toContain(s);
-    const v = /data-ms28="tile-versions"[\s\S]*?<\/button>/.exec(f)![0];
-    expect(v).not.toMatch(/<strong|<b>[^<]*Prologue|<b>[^<]*Tweak/);
-    expect(/data-ms28="tile-text">([^<]*)</.exec(v)![1]).toBe(FOOT_COPY.versions.text);
-  });
-});
+/* RETIRED (Manuscripts v29, 18 Nov): F1 — "the book container, then the foot" and the foot's copy. The page foot
+   (v28/MsFoot: the coming-soon bar and the Versions / Submission packages tiles) left the page and its file is deleted;
+   the desk that replaced it is locked in v29/msv29.test.tsx (D1–D3). tests/e2e/RETIRED-manuscripts-v28.md. */
 
 describe("A2/B — the drawer's sections and copy", () => {
   const src = readFileSync(join(__dirname, "MsEditDrawer.tsx"), "utf8").replace(/\/\*[\s\S]*?\*\//g, "");

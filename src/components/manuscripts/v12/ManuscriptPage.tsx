@@ -2,15 +2,15 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * ══ THE MANUSCRIPTS PAGE (v27) — one neat page for the book, a book that opens, and a guide ══
+ * ══ THE MANUSCRIPTS PAGE (v29) — the book on the page ══
  *
- * Design authority: design-refs/manuscripts-v27/manuscripts-v27.html. Locks: tests/e2e/manuscriptsV27.measure.ts (MSV27)
- * and the unit locks beside this file.
+ * Design authority: design-refs/manuscripts-v29/manuscripts-v29.html. Locks: tests/e2e/manuscriptsV29.measure.ts
+ * (MSV29) and v29/msv29.test.tsx.
  *
- * TWO CONTAINERS AND NOTHING ELSE: the book (the header-rules header inside a white card, the details card on its
- * right, the logline at its foot) and the coming-soon strip. No footer. The book's details open in the book view
- * (`v27/BookView`), and every edit is the one Edit details drawer (`v28/MsEditDrawer`, on the shared HalfDrawer),
- * which can open on a field. v28: never a centred modal.
+ * THE NAVY HEADER (one button, "Edit details"; the book's vitals on the right) and THE DESK beneath it: "The pitch" on
+ * the left; "Details" and "Your manuscripts" stacked on the right (v29/Msv29Parts). No footer. Every edit is the one
+ * Edit details drawer (`v28/MsEditDrawer`, on the shared HalfDrawer), opened on a field; a save's toast carries Undo.
+ * v29 retired the book view, "View summary", the logline strip and the coming-soon foot with its two tiles.
  *
  * ⚠️ NO PRO INFORMATION HERE. Versions moved to their own page (`/manuscripts/versions`, `v27/VersionsPage`); packages,
  *    materials, comps and activity are their own pages' business.
@@ -19,11 +19,14 @@
  *    (`location.key`), because the switcher writes the key and re-opens the route.
  * ⚠️ THE EMPTY AND JUST-DELETED STATES ARE v21's, UNCHANGED.
  */
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
 import { queryingSince, scopedManuscript } from "../../../lib/manuscriptSummary";
-import { bookRows, cardRows, coverKicker, msGuideDone, whereItsBeen, wordsOf, wordsText } from "../../../lib/manuscriptV27";
+import { msGuideDone, statusWord, wordsOf, wordsText } from "../../../lib/manuscriptV27";
+import { COPY_FAILED, PITCH, type PitchKey } from "../../../lib/manuscriptV29";
+import { invokeCapture } from "../../shell/railNav";
+import { ActivityType } from "../../../types";
 import type { MsGuideKey } from "../../../lib/manuscriptV27";
 import { MS_CHECKLIST, MS_GUIDE_HIDDEN_PATH, MS_GUIDE_SEEN_PATH, MS_GUIDE_UNHIDE_PATH, msGuideOf } from "../../../lib/pageChecklist";
 import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
@@ -33,9 +36,8 @@ import { useToast } from "../../toast/ToastProvider";
 import { EmptyPreviews, MsBanner } from "./Msv21Parts";
 import { Msv21AddManuscript } from "./Msv21Dialogs";
 import { MsEditDrawer, type EditField } from "../v28/MsEditDrawer";
-import { BookContainer, MsHeader } from "../v27/Msv27Parts";
-import { MsFoot } from "../v28/MsFoot";
-import { BookView, type BookField } from "../v27/BookView";
+import { MsHeader } from "../v27/Msv27Parts";
+import { DetailsFrame, MsVitals, PitchFrame, ShelfFrame, writeClipboard } from "../v29/Msv29Parts";
 import heroArt from "../../../assets/manuscripts/hero-archivist.png";
 import "./msv12.css";
 import "./msv21.css";
@@ -75,8 +77,8 @@ export interface ManuscriptPageProps {
 
 export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, active = true, openId = null }) => {
   const {
-    currentUser, manuscripts, agents, queries, activities, collectionsReady,
-    updateManuscript, addManuscript, updateUserPaths,
+    currentUser, manuscripts, queries, activities, collectionsReady,
+    updateManuscript, updateManuscriptQuiet, deleteActivity, addManuscript, updateUserPaths,
   } = useScriptAllyDb();
   const location = useLocation();
   const { showToast } = useToast();
@@ -91,16 +93,37 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
   const since = useMemo(() => queryingSince(msQueries), [msQueries]);
   const author = (currentUser?.name ?? "").trim() || null;
 
-  /* ══ the book view and the edit form: one open at a time ═══════════════════════════════════ */
+  /* ══ the edit drawer ═══════════════════════════════════════════════════════════════════════ */
 
-  const [bookOpen, setBookOpen] = useState(false);
   /** null closed · otherwise open, on the named section (or none) */
   const [edit, setEdit] = useState<{ field?: EditField } | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [flowKey, setFlowKey] = useState<MsGuideKey | null>(null);
   const [nonce, setNonce] = useState(0);
+  /** v29 Part F: the pitch rows a save changed, flashed once */
+  const [flash, setFlash] = useState<PitchKey[]>([]);
+  useEffect(() => {
+    if (!flash.length) return undefined;
+    const t = window.setTimeout(() => setFlash([]), 1200);
+    return () => window.clearTimeout(t);
+  }, [flash]);
 
-  const openEdit = useCallback((field?: EditField) => { setBookOpen(false); setEdit({ field }); }, []);
+  /* ⚠️ UNDO IS A GENUINE INVERSE (CLAUDE.md "Undo"). `updateManuscript` narrates every save into the feed
+     ("You updated a manuscript's details"), so the undo neither goes back through it (a compensating entry) nor leaves
+     that record: the feed rows for this book that were not there when the drawer opened are the ones the save made,
+     and Undo deletes them. The fields go back through the quiet write; a status move's `statusChangedDate` is put back
+     in a second quiet write, because the quiet write re-stamps it after the fields whenever the status moves. */
+  const live = useRef({ activities, deleteActivity, updateManuscriptQuiet });
+  live.current = { activities, deleteActivity, updateManuscriptQuiet };
+  const feedBefore = useRef<Set<string>>(new Set());
+  const feedOf = (id: string) => live.current.activities
+    .filter((a) => a.activityType === ActivityType.MANUSCRIPT_UPDATED && a.manuscriptId === id).map((a) => a.id);
+
+  const openEdit = useCallback((field?: EditField) => {
+    if (ms) feedBefore.current = new Set(feedOf(ms.id));
+    setEdit({ field });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ms]);
   const closeEdit = useCallback(() => { setEdit(null); setFlowKey(null); }, []);
 
   /* ══ the just-deleted state ═════════════════════════════════════════════════════════════════ */
@@ -120,14 +143,13 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
   const markSeen = useCallback(() => { if (!guide.seen) void updateUserPaths(MS_GUIDE_SEEN_PATH); }, [guide.seen, updateUserPaths]);
   const hideGuide = useCallback(() => { void updateUserPaths(MS_GUIDE_HIDDEN_PATH); }, [updateUserPaths]);
   const unhideGuide = useCallback(() => { void updateUserPaths(MS_GUIDE_UNHIDE_PATH); }, [updateUserPaths]);
-  /* every step opens Edit details on its own field — never the book view (closed first if it is open) */
+  /* every step opens Edit details on its own field */
   const startStep = useCallback((k: MsGuideKey) => {
     const card = MS_STEP_CARDS[k];
-    setBookOpen(false);
-    setEdit({ field: card.field });
+    openEdit(card.field);
     setFlowKey(k);
     return true;
-  }, []);
+  }, [openEdit]);
   const toVersions = useCallback(() => onNavigate("manuscripts", "Versions"), [onNavigate]);
   const toPackages = useCallback(() => onNavigate("manuscripts", "Submission packages"), [onNavigate]);
   const flow: FlowCard | null = useMemo(() => {
@@ -148,7 +170,7 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
 
   const grid = (children: React.ReactNode, state: "filled" | "empty" | "deleted" | "loading") => (
     <WorkspacePageGrid className="msv12-wpg" masthead={null} scrollLabel="Manuscripts">
-      <div className={`msv12-own msv12-root ms21${state === "filled" ? " ms27 ms28-fill" : ""}`} data-msv12="page" data-ms21="page" data-ms27="page" data-state={state}>
+      <div className={`msv12-own msv12-root ms21${state === "filled" ? " ms27 ms29" : ""}`} data-msv12="page" data-ms21="page" data-ms27="page" data-state={state}>
         {children}
         {/* v27: the populated page has no footer; the empty and deleted states keep v21's */}
         {state === "empty" || state === "deleted" ? <AppFooter onNavigate={(t, sub) => onNavigate(t, sub)} /> : null}
@@ -177,15 +199,27 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
 
   const w = wordsOf(ms);
   const words = w > 0 ? wordsText(w) : null;
-  const stats = whereItsBeen(msQueries, activities, agents, Date.now());
+  const msId = ms.id;
+  const undo = async (inverse: Record<string, unknown>) => {
+    const { statusChangedDate, ...fields } = inverse;
+    const made = feedOf(msId).filter((id) => !feedBefore.current.has(id));
+    await live.current.updateManuscriptQuiet(msId, fields as never);
+    if ("statusChangedDate" in inverse) await live.current.updateManuscriptQuiet(msId, { statusChangedDate } as never);
+    for (const id of made) await live.current.deleteActivity(id);
+  };
+  const copy = async (k: PitchKey, text: string) => {
+    const ok = await writeClipboard(text);
+    showToast({ message: ok ? PITCH.find((p) => p.k === k)!.copied : COPY_FAILED });
+    return ok;
+  };
 
   return grid(
     <>
       <PageChecklist page="Manuscripts" items={MS_CHECKLIST} done={done} seen={guide.seen} hidden={guide.hidden}
         active={active} ready={collectionsReady} targetFor={targetFor} onSeen={markSeen} onHide={hideGuide}
         art={heroArt} onStart={startStep} flow={flow} openNonce={nonce}
-        /* never over a task: the book view or the edit form open */
-        quiet={bookOpen || !!edit} onUnhide={unhideGuide} pillClass="pck-pill--ms27" closeOnFocusOut
+        /* never over a task: the edit form open */
+        quiet={!!edit} onUnhide={unhideGuide} pillClass="pck-pill--ms27" closeOnFocusOut
         allDone={{
           ...MS_ALL_DONE,
           after: (
@@ -202,24 +236,22 @@ export const ManuscriptPage: React.FC<ManuscriptPageProps> = ({ onNavigate, acti
             { label: "Build a package", onClick: toPackages, attrs: { "data-ms27": "final-packages" } },
           ],
         }} />
-      <MsHeader kind="book" title={ms.title} byline={author} rows={cardRows(ms, since)} words={words}
-        onEdit={() => openEdit()} onView={() => setBookOpen(true)} />
-      <div className="ms27-bkp" data-ms27="sections">
-        <BookContainer logline={ms.logline ?? ""} onAddLogline={() => openEdit("logline")} />
-        <MsFoot onVersions={toVersions} onPackages={toPackages} />
+      <MsHeader kind="book" title={ms.title} byline={author} words={words} status={statusWord(ms)}
+        vitals={<MsVitals ms={ms} since={since} onAddWords={() => openEdit("wordCount")} />}
+        onEdit={() => openEdit("basics")} />
+      <div className="ms29-desk" data-ms29="desk">
+        <PitchFrame ms={ms} flash={flash} onEdit={(k) => openEdit(k)} onCopy={copy} />
+        <div className="ms29-side" data-ms29="side">
+          <DetailsFrame ms={ms} since={since} queries={msQueries.length} onEdit={() => openEdit("basics")}
+            onSeeQueries={() => onNavigate("queries")} onLogQuery={() => invokeCapture("query", onNavigate)} />
+          <ShelfFrame ms={ms} />
+        </div>
       </div>
 
-      {bookOpen ? (
-        <BookView
-          title={ms.title} author={author} kicker={coverKicker(ms.genre)} words={words}
-          rows={bookRows(ms, since)} stats={stats}
-          logline={ms.logline ?? ""} pitch={ms.elevatorPitch ?? ""} synopsis={ms.synopsis ?? ""}
-          onClosed={() => setBookOpen(false)}
-          onEdit={(f?: BookField) => openEdit(f)}
-          onQueryCentre={() => { setBookOpen(false); onNavigate("queries"); }}
-        />
+      {edit ? (
+        <MsEditDrawer ms={ms} since={since} updateManuscript={updateManuscript} onClose={closeEdit} focus={edit.field}
+          undo={undo} onChanged={setFlash} />
       ) : null}
-      {edit ? <MsEditDrawer ms={ms} since={since} updateManuscript={updateManuscript} onClose={closeEdit} focus={edit.field} /> : null}
     </>,
     "filled",
   );

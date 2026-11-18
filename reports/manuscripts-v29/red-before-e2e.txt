@@ -1,0 +1,44 @@
+# MSV29 red-before, MSV29_MUTATE=all — the lock lines only
+1) [measure] › tests/e2e/manuscriptsV29.measure.ts:92:3 › L1 header box @1280 ────────────────────
+10) [measure] › tests/e2e/manuscriptsV29.measure.ts:225:5 › L6 opens on the field (just-added) ───
+11) [measure] › tests/e2e/manuscriptsV29.measure.ts:248:3 › L7 read it all ───────────────────────
+12) [measure] › tests/e2e/manuscriptsV29.measure.ts:271:3 › L8 copy by state ─────────────────────
+13) [measure] › tests/e2e/manuscriptsV29.measure.ts:313:3 › L9 save and undo ─────────────────────
+14 failed
+14) [measure] › tests/e2e/manuscriptsV29.measure.ts:350:3 › L10 keyboard ─────────────────────────
+2) [measure] › tests/e2e/manuscriptsV29.measure.ts:92:3 › L1 header box @1512 ────────────────────
+3) [measure] › tests/e2e/manuscriptsV29.measure.ts:92:3 › L1 header box @1717 ────────────────────
+4 passed (2.5m)
+4) [measure] › tests/e2e/manuscriptsV29.measure.ts:112:3 › L2 one filled button, above the fold ──
+5) [measure] › tests/e2e/manuscriptsV29.measure.ts:139:5 › L3 desk @1180 ─────────────────────────
+6) [measure] › tests/e2e/manuscriptsV29.measure.ts:163:3 › L3 200% zoom on 1512 (a 756-wide viewport) 
+7) [measure] › tests/e2e/manuscriptsV29.measure.ts:178:3 › L4 targets ────────────────────────────
+8) [measure] › tests/e2e/manuscriptsV29.measure.ts:199:3 › L5 copy ───────────────────────────────
+9) [measure] › tests/e2e/manuscriptsV29.measure.ts:225:5 › L6 opens on the field (everyday) ──────
+Error: L1 fromSheet @1280: 60 vs before 38
+Error: L1 fromSheet @1512: 60 vs before 38
+Error: L1 fromSheet @1717: 60 vs before 38
+Error: L1 top @1280: 166 vs before 144
+Error: L1 top @1512: 166 vs before 144
+Error: L1 top @1717: 166 vs before 144
+Error: L10 the Add a manuscript tile is not in the tab order
+Error: L2 exactly one filled button in the header
+Error: L3 200%: no sideways overflow (144, 0)
+Error: L3 @1180 one column: Details under the pitch (418.375 vs 991.265625)
+Error: L4 a row spans the ledger (191 vs 318)
+Error: L4 nothing clickable under 32px
+Error: L5 the logline as stored, no added quotes
+Error: L5 the pitch as stored
+Error: L5 the synopsis as stored, paragraphs kept
+Error: L6 everyday elevatorPitch: the field has focus
+Error: L6 everyday logline: the field has focus
+Error: L6 everyday synopsis: the field has focus
+Error: L6 just-added elevatorPitch: the field has focus
+Error: L6 just-added logline: the field has focus
+Error: L6 just-added synopsis: the field has focus
+Error: L6 just-added wordCount: the field has focus
+Error: L7 expanded
+Error: L7 focus stays on the link
+Error: L8 all three
+Error: L9 Undo puts back every field exactly (the pitch absent again, the stamp restored)
+Error: L9 the field empty before is absent again

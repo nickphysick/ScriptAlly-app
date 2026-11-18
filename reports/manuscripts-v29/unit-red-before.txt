@@ -1,0 +1,43 @@
+== inverse: no deleteField for an absent field
+× R — the pure rules > R5 the inverse puts back exactly what the save changed — deleteField() for a field that was absent 4ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+FAIL  src/components/manuscripts/v29/msv29.test.tsx > R — the pure rules > R5 the inverse puts back exactly what the save changed — deleteField() for a field that was absent
+Tests  1 failed | 28 passed (29)
+== clamp at 89 words
+× Edges — 90 words exactly, one query, Shelved with an old date, a writer's own quotes > B5 a synopsis of exactly 90 words: no clamp, no link, the count still shows 9ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+FAIL  src/components/manuscripts/v29/msv29.test.tsx > Edges — 90 words exactly, one query, Shelved with an old date, a writer's own quotes > B5 a synopsis of exactly 90 words: no clamp, no link, the count still shows
+Tests  1 failed | 28 passed (29)
+== since without the Querying test
+× R — the pure rules > R3 since only when Querying and a date exists 3ms
+× Edges — 90 words exactly, one query, Shelved with an old date, a writer's own quotes > C5 Shelved with an old querying-since date: no since anywhere 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+FAIL  src/components/manuscripts/v29/msv29.test.tsx > R — the pure rules > R3 since only when Querying and a date exists
+FAIL  src/components/manuscripts/v29/msv29.test.tsx > Edges — 90 words exactly, one query, Shelved with an old date, a writer's own quotes > C5 Shelved with an old querying-since date: no since anywhere
+Tests  2 failed | 27 passed (29)
+== unquoted: writer's quotes kept
+× R — the pure rules > R4 the logline's own quote marks are dropped from the display only; the last word carries the mark 3ms
+× Edges — 90 words exactly, one query, Shelved with an old date, a writer's own quotes > B6 a logline the writer quoted shows one pair of marks 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+FAIL  src/components/manuscripts/v29/msv29.test.tsx > R — the pure rules > R4 the logline's own quote marks are dropped from the display only; the last word carries the mark
+FAIL  src/components/manuscripts/v29/msv29.test.tsx > Edges — 90 words exactly, one query, Shelved with an old date, a writer's own quotes > B6 a logline the writer quoted shows one pair of marks
+Tests  2 failed | 27 passed (29)
+== foot: no singular
+× R — the pure rules > R2 the queries foot: many, one, none 5ms
+× Edges — 90 words exactly, one query, Shelved with an old date, a writer's own quotes > C4 one query: 1 query sent for this book · See them 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+FAIL  src/components/manuscripts/v29/msv29.test.tsx > R — the pure rules > R2 the queries foot: many, one, none
+FAIL  src/components/manuscripts/v29/msv29.test.tsx > Edges — 90 words exactly, one query, Shelved with an old date, a writer's own quotes > C4 one query: 1 query sent for this book · See them
+Tests  2 failed | 27 passed (29)
+== the coming-soon tile in the tab order
+× Everyday — all three written, a long synopsis, further genres, Querying since 10 Mar, 14 queries > D1 your manuscripts: the active book, then the coming-soon tile — no button, no tabindex, labelled 2ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+Tests  1 failed | 28 passed (29)
+== a second header button (View summary beside Edit details)
+× Everyday — all three written, a long synopsis, further genres, Querying since 10 Mar, 14 queries > A1 the header has ONE button, Edit details, with the pen; Edit and View summary are gone 3ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+Tests  1 failed | 28 passed (29)
+== the saved toast without Undo
+× F — the drawer: Undo, the word-count entry, the flash > F1 the saved toast carries Undo with the undone message; a no-op save offers none 12ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+Tests  1 failed | 28 passed (29)

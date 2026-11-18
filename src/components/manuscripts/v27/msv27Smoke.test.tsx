@@ -17,7 +17,6 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 vi.mock("../../toast/ToastProvider", async () => (await import("../../../test/pageSmoke")).toastMock());
 
 import { ManuscriptPage, MS_ALL_DONE, MS_FINAL, MS_STEP_CARDS } from "../v12/ManuscriptPage";
-import { BookView } from "./BookView";
 import { PITCH_HINT, PITCH_PLACEHOLDER, SYNOPSIS_HINT } from "../v28/MsEditDrawer";
 import { MS_CHECKLIST, msGuideOf } from "../../../lib/pageChecklist";
 import { bookRows, cardGenre, cardRows, coverKicker, msGuideDone, sinceDay, allGenres, paragraphs } from "../../../lib/manuscriptV27";
@@ -41,20 +40,8 @@ describe("A1 — the page is two containers and nothing else", () => {
     expect(html).not.toContain('data-probe="app-footer"');
     expect(text(html)).not.toMatch(/What's landing|What’s landing|Comparable|Recent activity|\+ New version|Add manuscript/);
   });
-  /* RE-POINTED (Workspace headers v1, 14 Nov): the hero is the shared navy header — the title, "by {author}" on its
-     ruled line, the two buttons; the eyebrow is gone, and the details card is its right block as words */
-  it("the header: the title, the byline and two buttons — no eyebrow, no How it works", () => {
-    expect(html).not.toContain('data-ms27="eyebrow"');
-    expect(html).not.toContain('data-ms27="header"');
-    expect(html).toMatch(/<h1 class="qc1531-t" data-page-title="true" data-wsnh="title">The Smoke Test<\/h1>/);
-    expect(html).toMatch(/<p class="qc1531-for" data-wsnh="for"><i aria-hidden="true"><\/i><span><em>by<\/em> /);
-    expect(html).toContain('data-ms27="hd-genre"');
-    /* v28.1: the buttons read Edit and View summary */
-    expect(html).toMatch(/aria-label="Edit the book&#x27;s details"[^>]*>Edit<\/button>/);
-    expect(html).toMatch(/aria-label="View the book&#x27;s summary"[^>]*>View summary<\/button>/);
-    expect(text(html)).not.toMatch(/Edit details|Full details|Read it all/);
-    expect(text(html)).not.toMatch(/How it works/i);
-  });
+  /* RETIRED (Manuscripts v29, 18 Nov): "the header: the title, the byline and two buttons" — the header has ONE
+     button now, "Edit details", and its right block is the book's vitals. Replaced by v29/msv29.test.tsx A1–A3. */
 });
 
 describe("A2/A3 — the details card and the logline strip", () => {
@@ -67,14 +54,8 @@ describe("A2/A3 — the details card and the logline strip", () => {
     expect(cardGenre(MS({ subGenres: [] }))).toBe("Thriller");
     expect(sinceDay("2026-03-03")).toBe("3 Mar 2026");
   });
-  it("a written logline sits in the strip alone, closed by a rust quote mark bound to its last word (v28.1)", () => {
-    setActiveManuscript(null);
-    const html = renderPageSeeded(page(), "/manuscripts");
-    const strip = /data-ms27="logline">([\s\S]*?)<\/div>/.exec(html);
-    expect(strip).toBeTruthy();
-    expect(strip![1]).not.toMatch(/<button|<a /);
-    expect(strip![1]).toMatch(/<span class="ms28-qend" data-ms28="qend">\S+<span class="ms28-cq" aria-hidden="true" data-ms28="close-quote">\u201D<\/span><\/span><\/p>/);
-  });
+  /* RETIRED (Manuscripts v29, 18 Nov): "a written logline sits in the strip alone" — the strip is gone; the logline is
+     the pitch frame's first row (v29/msv29.test.tsx B1–B2). */
 });
 
 /* A4 (the coming-soon strip) retired by v28 Part F: the foot's copy is locked in v28/msv28Smoke.test.tsx */
@@ -93,19 +74,8 @@ describe("B — the book view", () => {
     expect(coverKicker("Upmarket")).toBe("An upmarket");
     expect(coverKicker("")).toBeNull();
   });
-  it("renders the three pages' parts, with Not written yet for an absent pitch", () => {
-    const html = renderToStaticMarkup(
-      <BookView title="T" author="N" kicker="A thriller" words="82,400" rows={rows} stats={{ sent: 14, askedForMore: 3, withAgents: 3 }}
-        logline="L" pitch="" synopsis={"One.\n\nTwo."} onClosed={() => {}} onEdit={() => {}} onQueryCentre={() => {}} />,
-    );
-    expect(html).toContain('role="dialog" aria-modal="true" aria-labelledby="ms27-bxT"');
-    expect(html).toContain('data-ms27bx="none-elevatorPitch"');
-    expect(html.match(/class="ms27-bx-sy"/g)?.length).toBe(2);
-    expect(paragraphs("a\n\n\nb")).toEqual(["a", "b"]);
-    for (const h of ["Logline", "Elevator pitch", "Synopsis"]) expect(html).toContain(`<h4>${h}</h4>`);
-    expect(text(html)).not.toMatch(/working (copy|synopsis)/i);
-    expect(text(html)).toContain("See them in the Query Centre");
-  });
+  /* RETIRED (Manuscripts v29, 18 Nov): "renders the three pages' parts" — the book view (v27/BookView) is deleted;
+     its rows and kicker helpers stay in lib/manuscriptV27 and are still locked above. */
 });
 
 describe("C1 — copy: no 'working copy' on the page, the drawer or the book view; the two hints", () => {
@@ -148,8 +118,9 @@ describe("D — the guide", () => {
     });
     const src = readFileSync(join(__dirname, "..", "v12", "ManuscriptPage.tsx"), "utf8");
     const start = src.slice(src.indexOf("const startStep"), src.indexOf("const toVersions"));
-    expect(start).toContain("setBookOpen(false)");
-    expect(start).not.toContain("setBookOpen(true)");
+    /* RE-POINTED (Manuscripts v29): there is no book view to close; the step opens the drawer on its card's field */
+    expect(start).toContain("openEdit(card.field)");
+    expect(src).not.toContain("setBookOpen");
   });
   it("the final note and the all-done header are the prompt's words", () => {
     expect(MS_FINAL).toEqual({ kicker: "Manuscripts · 4 of 4", title: "Your book’s set up.", line: "Everything an agent asks about the book, in one place. Now put it to work with smart querying." });

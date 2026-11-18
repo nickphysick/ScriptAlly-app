@@ -1,0 +1,25 @@
+# MSV29 red-before, MSV29_MUTATE=L3 (the widened break) — the lock lines only
+1 passed (1.1m)
+1) [measure] › tests/e2e/manuscriptsV29.measure.ts:139:5 › L3 desk @1280 ─────────────────────────
+2) [measure] › tests/e2e/manuscriptsV29.measure.ts:139:5 › L3 desk @1512 ─────────────────────────
+3) [measure] › tests/e2e/manuscriptsV29.measure.ts:139:5 › L3 desk @1717 ─────────────────────────
+4 failed
+4) [measure] › tests/e2e/manuscriptsV29.measure.ts:139:5 › L3 desk @1180 ─────────────────────────
+Error: L3 @1180 no sideways overflow (0, 320)
+Error: L3 @1180 one column: Details under the pitch (418.375 vs 1052.046875)
+Error: L3 @1180 the desk on the header's edges
+Error: L3 @1280 24 between
+Error: L3 @1280 no sideways overflow (0, 320)
+Error: L3 @1280 the desk on the header's edges
+Error: L3 @1280 the right column is 392
+Error: L3 @1280 tops aligned (418.375, 1015.265625)
+Error: L3 @1512 24 between
+Error: L3 @1512 no sideways overflow (0, 320)
+Error: L3 @1512 the desk on the header's edges
+Error: L3 @1512 the right column is 392
+Error: L3 @1512 tops aligned (394.75, 991.640625)
+Error: L3 @1717 24 between
+Error: L3 @1717 no sideways overflow (0, 320)
+Error: L3 @1717 the desk on the header's edges
+Error: L3 @1717 the right column is 392
+Error: L3 @1717 tops aligned (394.75, 991.640625)

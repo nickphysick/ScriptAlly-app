@@ -25,12 +25,14 @@ import { sinceDay } from "../../../lib/manuscriptV27";
 import { wordCountHint, pickedFromStored, storedOf, type PickedGenre } from "../../../lib/manuscriptV28";
 import { useScriptAllyDb } from "../../../lib/db";
 import { GenreField } from "./GenreField";
+import { inverseOf, pitchChanged, SAVED, UNDONE, type PitchKey } from "../../../lib/manuscriptV29";
 import { ManuscriptStatus } from "../../../types";
 import type { Manuscript } from "../../../types";
 import "./msv28.css";
 
-/** The sections the drawer can open on (the guide's four steps, and the book view's "Add one"). */
-export type EditField = "basics" | "logline" | "elevatorPitch" | "synopsis";
+/** The sections the drawer can open on (the guide's four steps, the pitch rows' Edit and "Add one"); v29: "wordCount"
+ *  opens on the first section with the word count input focused (the header's "Add a word count"). */
+export type EditField = "basics" | "logline" | "elevatorPitch" | "synopsis" | "wordCount";
 
 export const DRAWER_SUB = "The book’s details. Edit anything; save once.";
 export const PITCH_PLACEHOLDER = "e.g. A ferry skipper races the tide to bring his brother home.";
@@ -76,11 +78,11 @@ const useOpenOn = (bodyRef: React.RefObject<HTMLDivElement | null>, field: EditF
     let raf = requestAnimationFrame(() => {
       raf = requestAnimationFrame(() => {
         const body = bodyRef.current;
-        const sect = body?.querySelector<HTMLElement>(`[data-ms21-sect="${field}"]`);
+        const sect = body?.querySelector<HTMLElement>(`[data-ms21-sect="${field === "wordCount" ? "basics" : field}"]`);
         if (!body || !sect) return;
         const r = sect.getBoundingClientRect(), v = body.getBoundingClientRect();
         body.scrollTop += (r.top + r.height / 2) - (v.top + v.height / 2);
-        const el = sect.querySelector<HTMLInputElement | HTMLTextAreaElement>("textarea, input");
+        const el = sect.querySelector<HTMLInputElement | HTMLTextAreaElement>(field === "wordCount" ? "#ms21-f-words" : "textarea, input");
         if (el) {
           el.focus({ preventScroll: true });
           const n = el.value.length;
@@ -111,7 +113,12 @@ export const MsEditDrawer: React.FC<{
   /** a save landed (the guide ends its spotlight) */
   onSaved?: () => void;
   focus?: EditField;
-}> = ({ ms, since, updateManuscript, onClose, onSaved, focus }) => {
+  /** v29 Part F: the genuine inverse of a save — given the fields the save changed, as they were (`deleteField()` for
+   *  one that was absent). Present, the saved toast carries Undo. */
+  undo?: (inverse: Record<string, unknown>) => Promise<void>;
+  /** v29 Part F: the pitch pieces whose text the save changed (the page flashes those rows once) */
+  onChanged?: (keys: PitchKey[]) => void;
+}> = ({ ms, since, updateManuscript, onClose, onSaved, focus, undo, onChanged }) => {
   const { showToast } = useToast();
   const { addPersonalGenre } = useScriptAllyDb();
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -162,7 +169,11 @@ export const MsEditDrawer: React.FC<{
       setBusy(false);
       return;
     }
-    showToast({ message: "Saved the book’s details." });
+    /* v29 Part F: Undo puts back exactly what this save changed; a save that changed nothing offers none */
+    const inverse = inverseOf(ms, payload);
+    if (undo && Object.keys(inverse).length) showToast({ message: SAVED, undo: () => undo(inverse), undoneMessage: UNDONE });
+    else showToast({ message: SAVED });
+    onChanged?.(pitchChanged(ms, payload));
     onSaved?.();
     onClose();
   };
