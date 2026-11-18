@@ -21,7 +21,7 @@
 - Branch `query-card-v158-1`, cut from `query-card-v158` @ aafbe6163, the branch dev served.
 - Dev: https://scriptally-dev.web.app
 - Bundles:
-  - **this pack:** `index-PENDING.js`;
+  - **this pack:** `index-BcOc9gsY.js`, built from a clean checkout of the pushed tip 6140ec84e;
   - **v158** (missed from its report): `index-AOAzoFjK.js`, built from aafbe6163.
 - Baseline (aafbe6163): the same two `firestoreTarget.test.ts` failures as on 18 Nov, still failing.
 
