@@ -234,8 +234,11 @@ for (const vp of SIZES) {
       /* v56 re-pointed: no legend — the header's ring names each group's count, "to tidy" is housekeeping's */
       const leg = (k: string) => k === "house" ? Number(root.querySelector('[data-tws56="house"]')?.textContent ?? 0)
         : Number(root.querySelector(`[data-tws56="seg"][data-k="${k}"]`)?.getAttribute("aria-label")?.match(/^\d+/)?.[0] ?? 0);
+      /* v57: the workspace's content box, which the tray's 29% resolves against */
+      const wsE = root.querySelector<HTMLElement>('[data-tws="workspace"]')!; const wc = getComputedStyle(wsE);
       return {
         tray: root.querySelector<HTMLElement>('[data-tws="tray"]')!.getBoundingClientRect().width,
+        wsIn: wsE.getBoundingClientRect().width - parseFloat(wc.paddingLeft) - parseFloat(wc.paddingRight) - parseFloat(wc.borderLeftWidth) - parseFloat(wc.borderRightWidth),
         desk: d.width,
         foot: { gap: Math.abs(d.bottom - f.bottom), onScreen: f.bottom <= window.innerHeight + 0.5 && f.top >= 0 },
         strip: Object.fromEntries([...root.querySelectorAll<HTMLElement>("[data-tws55-strip]")].map((e) => [e.getAttribute("data-tws55-strip"), { n: Number(e.textContent), title: e.getAttribute("title") }])),
@@ -246,7 +249,9 @@ for (const vp of SIZES) {
     await page.evaluate(() => { const sc = [...document.querySelectorAll<HTMLElement>(".wpg-scroll")].find((e) => e.getBoundingClientRect().height > 0)!; sc.scrollTop = sc.scrollHeight; });
     await page.waitForTimeout(300);
     const open0 = await read();
-    expect(Math.abs(open0.tray - 340), "L5 · the tray is 340 open").toBeLessThanOrEqual(1);
+    /* ⚠️ RE-POINTED BY v57 (todoWs57.css rule 2): open, the tray is clamp(340px, 29%, 396px) of the workspace */
+    const tray57 = (r: { wsIn: number }) => Math.min(396, Math.max(340, 0.29 * r.wsIn));
+    expect(Math.abs(open0.tray - tray57(open0)), `L5 · the tray is clamp(340, 29% of ${open0.wsIn}, 396) open`).toBeLessThanOrEqual(1);
     expect(open0.foot.gap, "L5 · open: the footer on the desk's foot").toBeLessThanOrEqual(2);
     expect(open0.foot.onScreen, "L5 · open: on screen").toBe(true);
     await page.locator(`${PG} [data-tws="collapse"]`).click();
@@ -263,7 +268,8 @@ for (const vp of SIZES) {
     /* a click anywhere on the strip opens it */
     await page.locator(`${PG} [data-tws55-strip="quiet"]`).click();
     await page.waitForTimeout(450);
-    expect(Math.abs((await read()).tray - 340), "L5 · a click on the strip opens the tray").toBeLessThanOrEqual(1);
+    const reopened = await read();
+    expect(Math.abs(reopened.tray - tray57(reopened)), "L5 · a click on the strip opens the tray").toBeLessThanOrEqual(1);
     await settlePrefs(page, { trayCollapsed: false });
     note(`L5-${vp.width}`, { open0, slim });
   });

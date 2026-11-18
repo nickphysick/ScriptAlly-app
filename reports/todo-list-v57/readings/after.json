@@ -1,0 +1,412 @@
+{
+ "R-1280": {
+  "workspace": 1128,
+  "tray": 340,
+  "desk": 760,
+  "side": 390,
+  "zoom": 0.71627,
+  "sendTitles": [
+   {
+    "t": "Send Marcus your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Ana your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send David your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Rachel your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Clara your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Tobias your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Marcus your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Imogen your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Edda your partial",
+    "h": 37.5
+   },
+   {
+    "t": "Send Theo your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Jonathan your full",
+    "h": 37.5
+   },
+   {
+    "t": "Send Ottoline your full",
+    "h": 18.8
+   }
+  ],
+  "secondRow": {
+   "key": "task-full-seed-query-9",
+   "opacity": "1"
+  },
+  "bandOpacity": "1",
+  "qh": {
+   "text": "What went with it?",
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "20px",
+   "weight": "600"
+  },
+  "scroller": {
+   "found": true,
+   "bg": "linear-gradient(rgba(242, 238, 232, 0.45), rgba(242, 238, 232, 0.45)), url(\"http://127.0.0.1:4321/images/todo/doodle-tile.svg\")",
+   "parent": "wpg tws-wpg"
+  },
+  "tiles": {
+   "cols": 1,
+   "n": 3,
+   "gtc": "274px"
+  },
+  "trayFocus": false,
+  "deskContainer": "inline-size"
+ },
+ "R-1440": {
+  "workspace": 1288,
+  "tray": 373.515625,
+  "desk": 886.484375,
+  "side": 390,
+  "zoom": 0.668519,
+  "sendTitles": [
+   {
+    "t": "Send Marcus your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Ana your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send David your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Rachel your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Clara your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Tobias your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Marcus your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Imogen your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Edda your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Theo your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Jonathan your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Ottoline your full",
+    "h": 18.8
+   }
+  ],
+  "secondRow": {
+   "key": "task-full-seed-query-9",
+   "opacity": "1"
+  },
+  "bandOpacity": "1",
+  "qh": {
+   "text": "What went with it?",
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "20px",
+   "weight": "600"
+  },
+  "scroller": {
+   "found": true,
+   "bg": "linear-gradient(rgba(242, 238, 232, 0.45), rgba(242, 238, 232, 0.45)), url(\"http://127.0.0.1:4321/images/todo/doodle-tile.svg\")",
+   "parent": "wpg tws-wpg"
+  },
+  "tiles": {
+   "cols": 2,
+   "n": 3,
+   "gtc": "195.234px 195.25px"
+  },
+  "trayFocus": false,
+  "deskContainer": "inline-size"
+ },
+ "R-1717": {
+  "workspace": 1565,
+  "tray": 396,
+  "desk": 1141,
+  "side": 479.21875,
+  "zoom": 0.833333,
+  "sendTitles": [
+   {
+    "t": "Send Marcus your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Ana your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send David your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Rachel your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Clara your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Tobias your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Marcus your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Imogen your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Edda your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Theo your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Jonathan your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Ottoline your full",
+    "h": 18.8
+   }
+  ],
+  "secondRow": {
+   "key": "task-full-seed-query-9",
+   "opacity": "1"
+  },
+  "bandOpacity": "1",
+  "qh": {
+   "text": "What went with it?",
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "20px",
+   "weight": "600"
+  },
+  "scroller": {
+   "found": true,
+   "bg": "linear-gradient(rgba(242, 238, 232, 0.45), rgba(242, 238, 232, 0.45)), url(\"http://127.0.0.1:4321/images/todo/doodle-tile.svg\")",
+   "parent": "wpg tws-wpg"
+  },
+  "tiles": {
+   "cols": 2,
+   "n": 3,
+   "gtc": "277.891px 277.891px"
+  },
+  "trayFocus": false,
+  "deskContainer": "inline-size"
+ },
+ "R-1920": {
+  "workspace": 1596,
+  "tray": 396,
+  "desk": 1172,
+  "side": 492.234375,
+  "zoom": 0.857407,
+  "sendTitles": [
+   {
+    "t": "Send Marcus your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Ana your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send David your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Rachel your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Clara your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Tobias your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Marcus your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Imogen your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Edda your partial",
+    "h": 18.8
+   },
+   {
+    "t": "Send Theo your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Jonathan your full",
+    "h": 18.8
+   },
+   {
+    "t": "Send Ottoline your full",
+    "h": 18.8
+   }
+  ],
+  "secondRow": {
+   "key": "task-full-seed-query-9",
+   "opacity": "1"
+  },
+  "bandOpacity": "1",
+  "qh": {
+   "text": "What went with it?",
+   "family": "\"Source Serif 4\", Georgia, serif",
+   "size": "20px",
+   "weight": "600"
+  },
+  "scroller": {
+   "found": true,
+   "bg": "linear-gradient(rgba(242, 238, 232, 0.45), rgba(242, 238, 232, 0.45)), url(\"http://127.0.0.1:4321/images/todo/doodle-tile.svg\")",
+   "parent": "wpg tws-wpg"
+  },
+  "tiles": {
+   "cols": 2,
+   "n": 3,
+   "gtc": "286.875px 286.891px"
+  },
+  "trayFocus": false,
+  "deskContainer": "inline-size"
+ },
+ "M4-zoom": {
+  "z1440": 0.668519,
+  "z1717": 0.833333
+ },
+ "M6-pop": {
+  "span": "\"Source Serif 4\", Georgia, serif",
+  "head": "\"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ "M8": {
+  "off": {
+   "fig": "visible",
+   "acts": [
+    {
+     "vis": "visible",
+     "op": "1",
+     "pvis": "visible",
+     "w": 0,
+     "h": 0
+    },
+    {
+     "vis": "visible",
+     "op": "1",
+     "pvis": "visible",
+     "w": 0,
+     "h": 0
+    }
+   ]
+  },
+  "on": {
+   "fig": "hidden",
+   "acts": [
+    {
+     "vis": "visible",
+     "op": "1",
+     "pvis": "visible",
+     "w": 30,
+     "h": 30
+    },
+    {
+     "vis": "visible",
+     "op": "1",
+     "pvis": "visible",
+     "w": 30,
+     "h": 30
+    }
+   ]
+  }
+ },
+ "M9": {
+  "title": "Send Marcus your full",
+  "steps": [
+   "mats",
+   "ver",
+   "date",
+   "check"
+  ],
+  "n0": 105,
+  "n1": 104,
+  "n2": 105,
+  "snack": "Full sent to Marcus · reply expected by Wed 10 FebUndo",
+  "hasUndo": 1
+ },
+ "M10-qc": {
+  "rest": {
+   "size": true,
+   "n": 0,
+   "frac": 0
+  },
+  "scrolled": {
+   "size": true,
+   "n": 0,
+   "frac": 0
+  }
+ },
+ "M10-cl": {
+  "rest": {
+   "size": true,
+   "n": 0,
+   "frac": 0
+  },
+  "scrolled": {
+   "size": true,
+   "n": 0,
+   "frac": 0
+  }
+ },
+ "M11": {
+  "base": "b9226fc5e",
+  "out": ""
+ }
+}
