@@ -1,0 +1,27 @@
+[
+ {
+  "name": "1 action: all on one line",
+  "ok": false,
+  "got": "[[327,61,147,46]]"
+ },
+ {
+  "name": "2 actions: the status is above every action",
+  "ok": true,
+  "got": "{\"statusBottom\":51,\"parts\":[[14,74,71,20],[312,61,162,46]]}"
+ },
+ {
+  "name": "2 actions: the actions share one line",
+  "ok": true,
+  "got": "84,84"
+ },
+ {
+  "name": "3 actions: the status is above every action",
+  "ok": true,
+  "got": "{\"statusBottom\":51,\"parts\":[[14,74,57,20],[263,61,112,46],[383,61,91,46]]}"
+ },
+ {
+  "name": "3 actions: the actions share one line",
+  "ok": true,
+  "got": "84,84,84"
+ }
+]

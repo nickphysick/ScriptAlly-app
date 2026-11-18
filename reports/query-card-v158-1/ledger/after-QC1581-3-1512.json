@@ -1,0 +1,32 @@
+[
+ {
+  "name": "2 actions: the outlined button then the primary, and no link",
+  "ok": true,
+  "got": "foot-link,reply-btn"
+ },
+ {
+  "name": "2 actions: the primary's right edge is 14px from the footer's",
+  "ok": true,
+  "got": "14"
+ },
+ {
+  "name": "2 actions: the secondary is an outlined button, 46px",
+  "ok": true,
+  "got": "46"
+ },
+ {
+  "name": "3 actions: left to right — the replied link, the outlined link action, the navy primary",
+  "ok": true,
+  "got": "foot-replied,foot-link,reply-btn"
+ },
+ {
+  "name": "3 actions: the primary's right edge is 14px from the footer's",
+  "ok": true,
+  "got": "14"
+ },
+ {
+  "name": "3 actions: the secondary is an outlined button, 46px",
+  "ok": true,
+  "got": "46"
+ }
+]

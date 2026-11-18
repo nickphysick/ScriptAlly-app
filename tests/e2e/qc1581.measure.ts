@@ -221,6 +221,7 @@ test.describe("Query card v158.1", () => {
         const mids = f.parts.map((p) => p.box[1] + p.box[3] / 2);
         L4.check("at 504px the three actions are one line", Math.max(...mids) - Math.min(...mids) <= 2, mids.join(","));
         L4.check("no label is cut", f.parts.every((p) => !p.cut), JSON.stringify(f.parts.filter((p) => p.cut).map((p) => p.label)));
+        L4.check("the row stays inside the footer (nothing pushed past its edge)", f.parts.every((p) => p.box[0] >= 0 && p.box[0] + p.box[2] <= f.outer[2] + 0.5), JSON.stringify(f.parts.map((p) => p.box)));
         await page.evaluate((sel) => { document.querySelector<HTMLElement>(sel)!.closest<HTMLElement>(".spanel")!.style.width = ""; }, CARD);
         await closeCard(page);
       }
@@ -252,7 +253,7 @@ test.describe("Query card v158.1", () => {
           await page.goto("about:blank"); await openQc(page, vp);
         }
       }
-      L4.done(3); L6.done(3); L7.done(3);
+      L4.done(4); L6.done(3); L7.done(3);
     });
 
     test(`QC1581-8 the last note's actions — ${w}`, async ({ page }) => {

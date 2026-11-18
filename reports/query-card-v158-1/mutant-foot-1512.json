@@ -1,0 +1,512 @@
+{
+ "ids": {
+  "1": "qc150l9-q",
+  "2": "seed-query-12",
+  "3": "seed-cal-near-q"
+ },
+ "out": {
+  "1": {
+   "n": 1,
+   "rows": "2",
+   "outer": [
+    0,
+    0,
+    524,
+    121
+   ],
+   "pill": null,
+   "text": [
+    61,
+    13,
+    445,
+    38
+   ],
+   "lead": [
+    61,
+    13,
+    445,
+    20
+   ],
+   "sub": [
+    61,
+    33,
+    445,
+    18
+   ],
+   "subLines": 1,
+   "parts": [
+    {
+     "role": "reply-btn",
+     "act": "resp",
+     "label": "Record a response",
+     "box": [
+      349,
+      61,
+      161,
+      46
+     ],
+     "cut": false
+    }
+   ],
+   "lines": [
+    {
+     "box": [
+      61,
+      13,
+      445,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      61,
+      33,
+      445,
+      18
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      349,
+      61,
+      161,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    }
+   ],
+   "cardH": 700
+  },
+  "2": {
+   "n": 2,
+   "rows": "2",
+   "outer": [
+    0,
+    0,
+    524,
+    121
+   ],
+   "pill": null,
+   "text": [
+    61,
+    13,
+    445,
+    38
+   ],
+   "lead": [
+    61,
+    13,
+    445,
+    20
+   ],
+   "sub": [
+    61,
+    33,
+    445,
+    18
+   ],
+   "subLines": 1,
+   "parts": [
+    {
+     "role": "foot-link",
+     "act": "tell",
+     "label": "Tell them",
+     "box": [
+      14,
+      74,
+      71,
+      20
+     ],
+     "cut": false
+    },
+    {
+     "role": "reply-btn",
+     "act": "offer",
+     "label": "Accept or decline",
+     "box": [
+      335,
+      61,
+      175,
+      46
+     ],
+     "cut": false
+    }
+   ],
+   "lines": [
+    {
+     "box": [
+      61,
+      13,
+      445,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      61,
+      33,
+      445,
+      18
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      14,
+      74,
+      71,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      335,
+      61,
+      175,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    }
+   ],
+   "cardH": 700
+  },
+  "3": {
+   "n": 3,
+   "rows": "2",
+   "outer": [
+    0,
+    0,
+    524,
+    121
+   ],
+   "pill": null,
+   "text": [
+    61,
+    13,
+    445,
+    38
+   ],
+   "lead": [
+    61,
+    13,
+    445,
+    20
+   ],
+   "sub": [
+    61,
+    33,
+    445,
+    18
+   ],
+   "subLines": 1,
+   "parts": [
+    {
+     "role": "foot-link",
+     "act": "close",
+     "label": "Close it",
+     "box": [
+      14,
+      74,
+      57,
+      20
+     ],
+     "cut": false
+    },
+    {
+     "role": "foot-replied",
+     "act": "resp",
+     "label": "Wren replied",
+     "box": [
+      279,
+      61,
+      124,
+      46
+     ],
+     "cut": false
+    },
+    {
+     "role": "reply-btn",
+     "act": "nudge",
+     "label": "Nudge",
+     "box": [
+      411,
+      61,
+      99,
+      46
+     ],
+     "cut": false
+    }
+   ],
+   "lines": [
+    {
+     "box": [
+      61,
+      13,
+      445,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      61,
+      33,
+      445,
+      18
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      14,
+      74,
+      57,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      279,
+      61,
+      124,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      411,
+      61,
+      99,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    }
+   ],
+   "cardH": 700
+  },
+  "long": {
+   "n": 3,
+   "rows": "2",
+   "outer": [
+    0,
+    0,
+    524,
+    121
+   ],
+   "pill": null,
+   "text": [
+    61,
+    13,
+    445,
+    38
+   ],
+   "lead": [
+    61,
+    13,
+    445,
+    20
+   ],
+   "sub": [
+    61,
+    33,
+    445,
+    18
+   ],
+   "subLines": 1,
+   "parts": [
+    {
+     "role": "foot-link",
+     "act": "close",
+     "label": "Close it",
+     "box": [
+      14,
+      74,
+      57,
+      20
+     ],
+     "cut": false
+    },
+    {
+     "role": "foot-replied",
+     "act": "resp",
+     "label": "Wren replied",
+     "box": [
+      279,
+      61,
+      124,
+      46
+     ],
+     "cut": false
+    },
+    {
+     "role": "reply-btn",
+     "act": "nudge",
+     "label": "Nudge",
+     "box": [
+      411,
+      61,
+      99,
+      46
+     ],
+     "cut": false
+    }
+   ],
+   "lines": [
+    {
+     "box": [
+      61,
+      13,
+      445,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      61,
+      33,
+      445,
+      18
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      14,
+      74,
+      57,
+      20
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      279,
+      61,
+      124,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    },
+    {
+     "box": [
+      411,
+      61,
+      99,
+      46
+     ],
+     "in": [
+      0,
+      0,
+      524,
+      121
+     ],
+     "clipped": false
+    }
+   ],
+   "cardH": 700
+  }
+ }
+}

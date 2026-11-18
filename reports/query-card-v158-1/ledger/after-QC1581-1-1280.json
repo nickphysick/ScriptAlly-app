@@ -1,0 +1,37 @@
+[
+ {
+  "name": "1 action: every text line lies inside its box, nothing clipped",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "1 action (long sub): every text line lies inside its box, nothing clipped",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "2 actions: every text line lies inside its box, nothing clipped",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "2 actions (long sub): every text line lies inside its box, nothing clipped",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "3 actions: every text line lies inside its box, nothing clipped",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "3 actions (long sub): every text line lies inside its box, nothing clipped",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "checked one-, two- and three-action footers",
+  "ok": true,
+  "got": "1,2,3"
+ }
+]
