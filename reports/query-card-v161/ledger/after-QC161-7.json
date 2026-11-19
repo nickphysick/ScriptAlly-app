@@ -2,7 +2,7 @@
  {
   "name": "population: the bump ran on undo",
   "ok": true,
-  "got": "{\"frames\":30,\"scales\":29,\"longs\":[],\"span\":483,\"start\":14467.8}"
+  "got": "{\"frames\":30,\"scales\":29,\"longs\":[],\"span\":483,\"start\":14197.5}"
  },
  {
   "name": "at least 24 frames painted while it ran",

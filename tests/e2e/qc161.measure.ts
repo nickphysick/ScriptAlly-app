@@ -10,7 +10,7 @@
  * ⚠️ The harness kills CSS motion (measure.ts KILL_MOTION); every page here lifts it.
  */
 import { test, expect, type Page, type CDPSession } from "@playwright/test";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { liftMotionSuppression, openRoute } from "./measure";
 
@@ -299,6 +299,185 @@ if (PHASE !== "before") {
     L.check("not one of them rendered on the save", moved.length === 0, JSON.stringify(moved.slice(0, 8).map((id) => `${id}: ${r1[id]} → ${r2[id]}`)));
     L.check("the saved query's own card did render (the counter counts)", (r2["q152-agent"] ?? 0) > (r1["q152-agent"] ?? 0), `${r1["q152-agent"]} → ${r2["q152-agent"]}`);
     await page.locator(C("[data-qc1522='undo']")).first().click(); await page.waitForTimeout(2500);
+    L.done(4);
+  });
+}
+
+/* ══ Phase 3: the reply drawer ══════════════════════════════════════════════════════════════════════════════════ */
+const BASELINE = process.env.QC161_BASELINE === "1";
+const BASE_FILE = `${DIR}/baseline-drawer.json`;
+const ANSWERS = ["req", "offer", "rr", "passed", "more"] as const;
+const LINES = (f: string, queryOnly: boolean): Record<string, string> => ({ req: queryOnly ? "You send the pages next" : "You send the manuscript next",
+  offer: `Record it and when ${f} needs an answer`, rr: `${f} wants changes, then another look`, passed: "Closes this query", more: "A question, a call, more pages" });
+const LABELS = (queryOnly: boolean): Record<string, string> => ({ req: queryOnly ? "Asked for the partial" : "Asked for the full", offer: "Made an offer", rr: "Revise & resubmit", passed: "Passed", more: "Something else" });
+const BAND: Record<string, string> = { partial: "rgb(228, 235, 242)", full: "rgb(183, 201, 222)", offer: "rgb(239, 205, 201)", closed: "rgb(236, 234, 230)", queried: "rgb(239, 230, 214)" };
+const dumpKey = (key: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --dump ${key}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!);
+/** a stored query as the save left it, minus what differs run to run: new ids (the app's `act-…` and Firestore's),
+ *  times of day, Timestamps' seconds; the log's and the feed's entries then sorted by what they hold, not their ids */
+const clean = (x: unknown) => JSON.stringify(x)
+  .replace(/"seconds":(\d+)/g, (_, s) => `"day":${Math.floor(Number(s) / 86400)}`).replace(/"nanoseconds":\d+,?/g, "").replace(/,\}/g, "}")
+  .replace(/T\d\d:\d\d:\d\d\.\d{3}Z/g, "").replace(/\bact-[a-z0-9]{6,}\b/g, "NEW")
+  /* Firestore's own ids: 20 characters with a digit and a capital (field names have neither) */
+  .replace(/\b(?=[A-Za-z0-9]*\d)(?=[A-Za-z0-9]*[A-Z])[A-Za-z0-9]{20}\b/g, "NEW");
+const norm = (o: unknown): string => {
+  const d = (typeof o === "string" ? JSON.parse(o) : o) as { q: unknown; log: [string, unknown][]; feed: [string, unknown][] };
+  const rows = (xs: [string, unknown][]) => xs.map((e) => clean(e)).sort();
+  return JSON.stringify({ q: clean(d.q), log: rows(d.log ?? []), feed: rows(d.feed ?? []) });
+};
+/** pick an answer: a tile (v161) or a chip (before it) */
+const pick = (page: Page, v: string) => page.locator(C(`[data-qc1522='reply-types'] [data-v='${v}'], [data-qc161='tiles'] [data-v='${v}']`)).first().click();
+const primaryOf = (page: Page) => page.locator(C("[data-qc1522='composer'] [data-qc1522='save']")).first().evaluate((b) => ({ label: (b.textContent ?? "").trim(), disabled: (b as HTMLButtonElement).disabled }));
+const drawerBox = (page: Page) => page.locator(C("[data-qc1522='composer']")).first().evaluate((e) => {
+  const el = e as HTMLElement, cs = getComputedStyle(el);
+  return { box: [el.offsetLeft, el.offsetTop, el.offsetWidth, el.offsetHeight], bg: cs.backgroundColor, shadow: cs.boxShadow, borderTop: cs.borderTopColor,
+    foot: getComputedStyle(el.querySelector(".qc1522-cf") ?? el).backgroundColor };
+});
+/** the journeys a fixture's footer opens */
+const JOURNEYS: [string, string][] = [["q152-materials", "send"], ["q152-nudge", "nudge"], ["q152-agent", "reply"], ["q152-nudgedquiet", "close"], ["q152-closed", "reopen"], ["q152-offer", "offer"]];
+
+if (PHASE !== "before" && BASELINE) {
+  test("QC161 baseline · the old chip row: each answer's primary and saved plan; each journey's drawer box", async ({ page }) => {
+    const out: Record<string, unknown> = { primaries: {}, plans: {}, drawers: {} };
+    await openQc(page);
+    for (const [id, j] of JOURNEYS) {
+      await openCard(page, id);
+      await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(800);
+      (out.drawers as Record<string, unknown>)[j] = await drawerBox(page).catch(() => null);
+      await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.keyboard.press("Escape"); await page.waitForTimeout(500);
+    }
+    for (const a of ANSWERS) {
+      seed();
+      await page.reload(); await openQc(page); await openCard(page, "q152-agent");
+      await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(700);
+      await pick(page, a); await page.waitForTimeout(400);
+      if (a === "more") await page.locator(C("[data-qc1522='what']")).fill("A synopsis");
+      (out.primaries as Record<string, unknown>)[a] = await primaryOf(page);
+      await page.locator(C("[data-qc1522='save']")).click();
+      await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 15_000 });
+      await page.waitForTimeout(1500);
+      (out.plans as Record<string, unknown>)[a] = norm(dumpKey("agent"));
+    }
+    writeFileSync(BASE_FILE, JSON.stringify(out, null, 1));
+  });
+}
+
+if (PHASE !== "before" && !BASELINE) {
+  if (run("9")) test("QC161-9/10 · tiles in the order given, each disc its stage's Band; picked: one row with Change, the questions, the same primary", async ({ page }) => {
+    const L9 = new Ledger("QC161-9"), L10 = new Ledger("QC161-10");
+    const base = JSON.parse(readFileSync(BASE_FILE, "utf8")) as { primaries: Record<string, { label: string; disabled: boolean }> };
+    await openQc(page);
+    /* q152-long: Full sent, so the full is already asked for and the request is not offered (the grid closes up) */
+    for (const [id, first, queryOnly, want] of [["q152-agent", "Rufus", true, ANSWERS as readonly string[]], ["q152-long", "Jonathan", false, ["offer", "rr", "passed", "more"]]] as const) {
+      await openCard(page, id);
+      await page.locator(C("[data-qc152='reply-btn']")).click({ timeout: 8_000 }); await page.waitForTimeout(900);
+      L9.check(`${id}: population — the reply drawer is open`, await page.locator(C("[data-qc1522='composer'][data-j='reply']")).count() === 1, "");
+      L9.check(`${id}: no chip row`, await page.locator(C(".qc1522-rts")).count() === 0, "");
+      L9.check(`${id}: the line under the title`, (await page.locator(C("[data-qc161='sub']")).innerText().catch(() => "")).trim() === "Pick what happened. You can add the detail next.", "");
+      const tiles = await page.locator(C("[data-qc161='tile']")).evaluateAll((es) => es.map((e) => {
+        const d = e.querySelector<HTMLElement>("[data-qc161='disc']"), cs = d ? getComputedStyle(d) : null;
+        return { v: (e as HTMLElement).dataset.v, label: e.querySelector("b")?.textContent ?? "", line: e.querySelector("i")?.textContent ?? "", bg: cs?.backgroundColor, img: cs?.backgroundImage ?? "", wide: e.classList.contains("wide"), h: (e as HTMLElement).offsetHeight };
+      }));
+      L9.check(`${id}: one tile per answer, in the order given`, JSON.stringify(tiles.map((t) => t.v)) === JSON.stringify(want), JSON.stringify(tiles.map((t) => t.v)));
+      const stageOf = (v: string) => v === "req" ? (queryOnly ? "partial" : "full") : v === "rr" ? "full" : v === "offer" ? "offer" : v === "passed" ? "closed" : id === "q152-agent" ? "queried" : "full";
+      for (const t of tiles) {
+        L9.check(`${id} · ${t.v}: the label and the second line (${first})`, t.label === LABELS(queryOnly)[t.v!] && t.line === LINES(first, queryOnly)[t.v!], `${t.label} / ${t.line}`);
+        L9.check(`${id} · ${t.v}: the disc is its stage's Band (${stageOf(t.v!)})`, t.bg === BAND[stageOf(t.v!)] && (t.v !== "offer" || /gradient/.test(t.img)), `${t.bg} ${t.img.slice(0, 30)}`);
+      }
+      const more = tiles.find((t) => t.v === "more");
+      L9.check(`${id}: Something else spans both columns, 46px high`, !!more?.wide && Math.abs((more?.h ?? 0) - 46) <= 1, JSON.stringify(more));
+      await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.keyboard.press("Escape"); await page.waitForTimeout(500);
+    }
+    /* QC161-10 — picking each answer on q152-agent */
+    await openCard(page, "q152-agent");
+    for (const a of ANSWERS) {
+      await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(800);
+      await pick(page, a); await page.waitForTimeout(500);
+      if (a === "more") await page.locator(C("[data-qc1522='what']")).fill("A synopsis");
+      L10.check(`${a}: the tiles are gone`, await page.locator(C("[data-qc161='tile']")).count() === 0, "");
+      const row = await page.locator(C("[data-qc161='picked']")).innerText().catch(() => "");
+      L10.check(`${a}: one row shows the pick, with Change`, row.includes(LABELS(true)[a]) && /Change/.test(row), row.replace(/\s+/g, " "));
+      L10.check(`${a}: the built questions follow`, await page.locator(C("[data-qc161='picked'] ~ .qc1522-fl")).count() === 1, "");
+      const pr = await primaryOf(page);
+      L10.check(`${a}: the primary's label and state are the old chips' (${base.primaries[a]?.label}, ${base.primaries[a]?.disabled ? "disabled" : "enabled"})`, JSON.stringify(pr) === JSON.stringify(base.primaries[a]), JSON.stringify(pr));
+      if (a === "req") {
+        const focused0 = await page.evaluate(() => { const e = document.activeElement as HTMLElement | null; return e?.closest(".qc1522-fl") ? "question" : e?.tagName ?? ""; });
+        L10.check("picking moves focus to the first question", focused0 === "question", focused0);
+        await page.locator(C("[data-qc161='change']")).click(); await page.waitForTimeout(500);
+        L10.check("Change brings the tiles back", await page.locator(C("[data-qc161='tile']")).count() === 5, "");
+        L10.check("and focuses the tile that was picked", await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.v ?? ""), "") ;
+        const fv = await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.v ?? "");
+        L10.rows[L10.rows.length - 1] = { name: "and focuses the tile that was picked", ok: fv === "req", got: fv };
+      }
+      await page.keyboard.press("Escape"); await page.waitForTimeout(300);
+      if (await page.locator(C("[data-qc1522='discard']")).count()) { await page.locator(C("[data-qc1522='discard']")).click(); await page.waitForTimeout(400); }
+      if (await page.locator(C("[data-qc1522='composer']")).count()) { await page.keyboard.press("Escape"); await page.waitForTimeout(400); }
+    }
+    L9.done(20); L10.done(22);
+  });
+
+  if (run("11")) test("QC161-11 · for each answer the save commits what the old chip row committed with the same inputs", async ({ page }) => {
+    const L = new Ledger("QC161-11");
+    const base = JSON.parse(readFileSync(BASE_FILE, "utf8")) as { plans: Record<string, string> };
+    for (const a of ANSWERS) {
+      seed();
+      await page.goto("about:blank"); await openQc(page); await openCard(page, "q152-agent");
+      await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(700);
+      await pick(page, a); await page.waitForTimeout(400);
+      if (a === "more") await page.locator(C("[data-qc1522='what']")).fill("A synopsis");
+      await page.locator(C("[data-qc1522='save']")).click();
+      await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 15_000 });
+      await page.waitForTimeout(1500);
+      /* the baseline was stored through the first, lossier normaliser (it also renamed 20-letter field names): put the
+         new dump through the same step first, so both sides lose the same */
+      const lossy = (o: unknown) => JSON.stringify(o).replace(/"seconds":(\d+)/g, (_, x) => `"day":${Math.floor(Number(x) / 86400)}`).replace(/,"nanoseconds":\d+/g, "")
+        .replace(/T\d\d:\d\d:\d\d\.\d{3}Z/g, "").replace(/\b(?!q152-)[A-Za-z0-9]{20}\b/g, "NEW");
+      const got = norm(lossy(dumpKey("agent")));
+      L.check(`population: the old chip row's plan for ${a}`, typeof base.plans[a] === "string" && base.plans[a].length > 100, "");
+      const want = norm(base.plans[a]);
+      const at = [...got].findIndex((ch, i) => ch !== want[i]);
+      L.check(`${a}: the stored query, its log and its feed are the old chip row's`, got === want, got === want ? "" : `…${got.slice(Math.max(0, at - 80), at + 120)} ≠ …${want.slice(Math.max(0, at - 80), at + 120)}`);
+    }
+    L.done(10);
+  });
+
+  if (run("12")) test("QC161-12 · every composer journey's drawer is paper with the top shadow; its box is the baseline's", async ({ page }) => {
+    const L = new Ledger("QC161-12");
+    const base = JSON.parse(readFileSync(BASE_FILE, "utf8")) as { drawers: Record<string, { box: number[] } | null> };
+    await openQc(page);
+    for (const [id, j] of JOURNEYS) {
+      await openCard(page, id);
+      await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(800);
+      const d = await drawerBox(page).catch(() => null);
+      L.check(`${j}: population — the drawer opened`, !!d, "");
+      L.check(`${j}: paper rgb(251, 249, 245), and its button row`, d?.bg === "rgb(251, 249, 245)" && d?.foot === "rgb(251, 249, 245)", `${d?.bg} / ${d?.foot}`);
+      L.check(`${j}: the top shadow and the hairline`, /rgba\(28, 19, 15, 0\.28\) 0px -18px 30px -18px/.test(d?.shadow ?? "") && d?.borderTop === "rgb(230, 221, 208)", `${d?.shadow} · ${d?.borderTop}`);
+      const b0 = base.drawers[j]?.box ?? [], b1 = d?.box ?? [];
+      /* ⚠️ the reply journey's contents changed by design (tiles for chips): its drawer sizes to them, under the same
+         66% cap, so its box is not the baseline's. Every other journey's contents are as built, and so is its box. */
+      if (j === "reply") L.check(`${j}: its box grows with the tiles, under the drawer's cap (66% of the card)`, b1[3] >= b0[3] && b1[2] === b0[2], `${JSON.stringify(b0)} → ${JSON.stringify(b1)}`);
+      else L.check(`${j}: its box equals the baseline within 1px`, b0.length === 4 && b1.every((v, i) => Math.abs(v - b0[i]) <= 1), `${JSON.stringify(b0)} → ${JSON.stringify(b1)}`);
+      await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.keyboard.press("Escape"); await page.waitForTimeout(500);
+    }
+    L.done(24);
+  });
+
+  if (run("13")) test("QC161-13 · reduced motion: tiles and questions appear with no animation, and the bump does not run", async ({ page }) => {
+    const L = new Ledger("QC161-13");
+    await openQc(page, { reduced: true });
+    await openCard(page, "q152-agent");
+    await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(800);
+    const anim = (sel: string) => page.locator(C(sel)).evaluateAll((es) => es.flatMap((e) => (e as HTMLElement).getAnimations().map((a) => (a as CSSAnimation).animationName ?? a.id)));
+    L.check("population: the tiles are drawn", await page.locator(C("[data-qc161='tile']")).count() === 5, "");
+    L.check("the tiles run no animation", (await anim("[data-qc161='tile']")).length === 0, JSON.stringify(await anim("[data-qc161='tile']")));
+    await pick(page, "req"); await page.waitForTimeout(100);
+    L.check("the picked row and the questions run no animation", (await anim("[data-qc161='picked'], .qc1522-fl")).length === 0, JSON.stringify(await anim("[data-qc161='picked'], .qc1522-fl")));
+    await startMotionTrace(page);
+    await page.locator(C("[data-qc1522='save']")).click();
+    await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 15_000 });
+    await page.waitForTimeout(1500);
+    const m = await stopMotionTrace(page);
+    L.check("the bump does not run", m.frames.every((f) => !f.bump), String(m.frames.filter((f) => f.bump).length));
+    await page.locator(C("[data-qc1522='undo']")).first().click(); await page.waitForTimeout(2000);
     L.done(4);
   });
 }

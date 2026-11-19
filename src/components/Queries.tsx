@@ -6166,7 +6166,7 @@ export const Queries: React.FC<{
       const pkgList = pro1522 ? packages.filter((k) => k.manuscriptId === q.manuscriptId && !(k as { retiredAt?: string }).retiredAt).map((k) => ({ id: k.id, name: k.packageName })) : null;
       const rec0 = sentRecordOf(q);
       const ctx: ComposerCtx = {
-        first, fullName: ag?.name || ag?.agency || row.agentName, nowMs: now, email: (ag?.email ?? "").trim(), floorMs, env, pro: pro1522,
+        first, fullName: ag?.name || ag?.agency || row.agentName, nowMs: now, email: (ag?.email ?? "").trim(), floorMs, env, pro: pro1522, status: q.status,
         sendKind, sendMats, queriedVia: via === "QueryManager" ? "QueryManager" : via === "Email" ? "Email" : "Other",
         nudgedMs: nudgeMsOf({ ...row, nrmn: !!v152.nrmn }, now), queryOnly: q.status === QueryStatus.QUERIED, remindDays: 14,
         fullAsked: q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT || q.status === QueryStatus.OFFER,

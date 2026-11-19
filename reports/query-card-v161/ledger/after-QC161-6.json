@@ -2,7 +2,7 @@
  {
   "name": "population: the bump ran on save",
   "ok": true,
-  "got": "{\"frames\":29,\"scales\":29,\"longs\":[],\"span\":467,\"start\":9734.6}"
+  "got": "{\"frames\":29,\"scales\":29,\"longs\":[],\"span\":467,\"start\":9231}"
  },
  {
   "name": "at least 24 frames painted while the bump ran",
@@ -22,6 +22,6 @@
  {
   "name": "the draft's settle ran with it (the fill painted on 10+ frames)",
   "ok": true,
-  "got": "58"
+  "got": "53"
  }
 ]

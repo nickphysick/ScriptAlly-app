@@ -4,21 +4,21 @@
   "scales": 29,
   "longs": [],
   "span": 467,
-  "start": 9734.6,
+  "start": 9231,
   "longsAll": [
    {
-    "start": 7063.200000047684,
-    "dur": 63,
+    "start": 6903.5,
+    "dur": 56,
     "name": "unknown"
    },
    {
-    "start": 7731.700000047684,
-    "dur": 1087,
+    "start": 7527.699999928474,
+    "dur": 1064,
     "name": "unknown"
    },
    {
-    "start": 9212.700000047684,
-    "dur": 125,
+    "start": 8760.799999952316,
+    "dur": 88,
     "name": "unknown"
    }
   ]
@@ -28,36 +28,36 @@
   "scales": 29,
   "longs": [],
   "span": 483,
-  "start": 14467.8,
+  "start": 14197.5,
   "longsAll": [
    {
-    "start": 12328.300000071526,
-    "dur": 119,
+    "start": 12088.799999952316,
+    "dur": 116,
     "name": "unknown"
    },
    {
-    "start": 12328.300000071526,
-    "dur": 119,
+    "start": 12088.799999952316,
+    "dur": 116,
     "name": "unknown"
    },
    {
-    "start": 12695.100000023842,
-    "dur": 1131,
+    "start": 12576.699999928474,
+    "dur": 1046,
     "name": "unknown"
    },
    {
-    "start": 12695.100000023842,
-    "dur": 1131,
+    "start": 12576.699999928474,
+    "dur": 1046,
     "name": "unknown"
    },
    {
-    "start": 13984,
-    "dur": 96,
+    "start": 13736.5,
+    "dur": 89,
     "name": "unknown"
    },
    {
-    "start": 13984,
-    "dur": 96,
+    "start": 13736.5,
+    "dur": 89,
     "name": "unknown"
    }
   ]
