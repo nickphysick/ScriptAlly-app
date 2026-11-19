@@ -128,7 +128,7 @@
 .tws-gb em { font: normal 15px var(--tw-type); opacity: 0.75; }
 .tws-gb .tws-cv { margin-left: auto; font-size: 13px; opacity: 0.6; transition: transform 0.15s; }
 .tws-gb[aria-expanded="false"] .tws-cv { transform: rotate(-90deg); }
-.tws-gb[data-band="wait"] { background: var(--tw-rose); color: var(--tw-ink); }
+.tws-gb[data-band="wait"] { background: #fff; color: var(--tw-ink); box-shadow: inset 0 0 0 1px #d4cabd; }
 .tws-gb[data-band="nudge"] { background: var(--tw-sand); color: var(--tw-ink); }
 .tws-gb[data-band="quiet"] { background: var(--tw-stone-fade); color: var(--tw-ink); }
 .tws-gb[data-band="house"] { background: #e4ebf1; color: #2f4357; box-shadow: none; }
@@ -249,7 +249,7 @@
   background: #fff; color: var(--tw-ink); font: 600 15.5px var(--tw-serif); cursor: pointer; box-shadow: inset 0 0 0 1px #d4cabd;
 }
 .tws-sb svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.tws-sb kbd { font: 11px var(--tw-mono); color: var(--tw-mut2); padding: 1px 5px; border-radius: 4px; box-shadow: inset 0 0 0 1px #e3dbcf; }
+.tws-sb kbd { font: 12px var(--tw-mono); color: var(--tw-mut2); padding: 1px 5px; border-radius: 4px; box-shadow: inset 0 0 0 1px #e3dbcf; }
 .tws-sb[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
 /* the hawk (v53 D6): a 34px picture beside a compact blush bubble, above the rail */
 .tws-mnote { display: flex; align-items: flex-start; gap: 12px; margin: 0 0 16px; }

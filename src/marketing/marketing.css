@@ -1352,7 +1352,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-pv4 .mk-fbtag {
   display: inline-block; padding: 5px 12px; border-radius: 999px;
   background: var(--mk-blush); color: var(--mk-rust);
-  font-family: var(--mk-f-mono); font-weight: 600; font-size: .62rem; line-height: 1.2;
+  font-family: var(--mk-f-mono); font-weight: 600; font-size: 12px; line-height: 1.2;
   letter-spacing: .2em; text-transform: uppercase;
 }
 .mk-scope .mk-fbh1 {
@@ -1438,7 +1438,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 .mk-pv4 .mk-fbmore {
   grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; gap: 10px;
   width: 100%; padding: 22px 44px 26px; margin: 0; border: 0; background: none; cursor: pointer;
-  color: var(--mk-nearblack); font-family: var(--mk-f-mono); font-weight: 500; font-size: .66rem;
+  color: var(--mk-nearblack); font-family: var(--mk-f-mono); font-weight: 500; font-size: 12px;
   line-height: 1; letter-spacing: .22em; text-transform: uppercase;
 }
 .mk-pv4 .mk-fbmore::after { content: ""; width: 70px; height: 1px; background: var(--mk-hair); margin-left: 4px; }

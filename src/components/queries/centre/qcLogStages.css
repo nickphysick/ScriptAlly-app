@@ -101,7 +101,7 @@
 .laq .laq-big > button:hover, .laq .laq-big > button.is-hi { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
 .laq .laq-big > button:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
 .laq .laq-big > button.is-on { box-shadow: inset 0 0 0 1.5px var(--laq-navy); background: #f7f5f1; }
-.laq .laq-g { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--laq-paper); font: 500 11px var(--laq-mono) !important; color: #5b4f47; }
+.laq .laq-g { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--laq-paper); font: 500 12px var(--laq-mono) !important; color: #5b4f47; }
 .laq .laq-g.is-pkg { border-radius: 9px; background: var(--laq-harbour); }
 .laq .laq-tx { flex: 1 1 auto; min-width: 0; }
 .laq .laq-tx b { display: block; font: 500 16.5px/1.25 var(--laq-se); }

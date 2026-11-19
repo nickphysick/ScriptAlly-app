@@ -129,7 +129,7 @@
 
 /* the little "i" and its tip (portalled to body) */
 .aap-info { position: relative; display: inline-grid; place-items: center; width: 18px; height: 18px; margin-left: 6px; border-radius: 50%; cursor: help; flex: none;
-  box-shadow: inset 0 0 0 1.3px currentColor; font: italic 600 11.5px/1 var(--sp-serif); color: #8f8a82; vertical-align: middle; }
+  box-shadow: inset 0 0 0 1.3px currentColor; font: italic 600 12px/1 var(--sp-serif); color: #8f8a82; vertical-align: middle; }
 .aap-info.light { color: rgba(244,238,229,.85); }
 .aap-info:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 .aap-tip { position: fixed; z-index: 400; width: 280px; max-width: calc(100vw - 24px); box-sizing: border-box; padding: 10px 12px; border-radius: 10px; background: #1c130f; color: #f4eee5;

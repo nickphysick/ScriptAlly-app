@@ -41,7 +41,7 @@
 }
 .pgd-f em.on { background: var(--qcv-ink, #1c130f); }
 .pgd-f span {
-  font: 400 9px var(--font-mono); letter-spacing: 0.14em;
+  font: 400 12px var(--font-mono); letter-spacing: 0.14em;
   text-transform: uppercase; color: rgba(28, 19, 15, 0.45);
 }
 .pgd-next {

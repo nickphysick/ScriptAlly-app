@@ -505,7 +505,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
               </div>
               <div className="qc151-end-b">
                 <button type="button" className="qc151-btn qc151-btn--g" data-qc151="import" onClick={p.onImport}>Import from a spreadsheet</button>
-                <button type="button" className="qc151-btn qc151-btn--n" data-qc151="signoff-log" onClick={p.onLog}>+ Log a query</button>
+                <button type="button" className="qc151-btn qc151-btn--g" data-qc151="signoff-log" onClick={p.onLog}>+ Log a query</button>
               </div>
             </section>
           ) : null}
