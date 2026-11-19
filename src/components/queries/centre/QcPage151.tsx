@@ -18,10 +18,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { useStableFn } from "../../../lib/useStableFn";
 import { QueryStatus, type Agent } from "../../../types";
 import { StatusDot } from "../../StatusDot";
-import { usePopover } from "../../shell/ListPills";
 import { usePinCover } from "../../shell/stickyStack";
 import { whereItStands, type QcRow, type WhereKey } from "../../../lib/qcSummary";
-import { BE_GROUPS, BE_SORTS, type BeGroup, type BeSort } from "../../../lib/qc150";
+import type { BeGroup, BeSort } from "../../../lib/qc150";
 import type { GroupBy } from "../../../lib/qcCalView";
 import { TAB_LABEL, isClosedRow, lastHeardMs, pressSort, trackOf, type Section, type Sort151, type SortKey151 } from "../../../lib/qc151";
 import { dayLine, pillWords, yearSplit, type PillGroup } from "../../../lib/qc1511";
@@ -29,10 +28,11 @@ import { STATUS_FILL, nextNum, rowAct, statusKind } from "../../../lib/qc1512";
 import { quickOfRow, stateOf } from "../../../lib/queryState";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { RadioMenu151 } from "./QcToolbar140";
-import { GROUP_1522, GROUP_MENU_HEAD, PACKAGE_LOCKED_LINE, head1522 } from "../../../lib/qc1522";
+import { head1522 } from "../../../lib/qc1522";
 import { QcHeader1531 } from "./QcHeader1531";
 import { QcCard154 } from "./QcCard154";
 import { QcBar153 } from "./QcBar153";
+import { AppliedRow, type AppliedChip } from "../../shell/AppliedRow";
 import { ACTION_WHY_153, FOLD_LINE, foldInitials, isFoldKey } from "../../../lib/qc153";
 import { sectionSwatch, standWords } from "../../../lib/qc153";
 import { FirstPanel155, QuietPanel155, Skeleton155 } from "./QcState155";
@@ -49,11 +49,7 @@ import "./qcv156.css";
 const LIST_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01" /></svg>;
 const BIRDS_ICON = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h9M4 12h14M4 17h6" /><circle cx="14" cy="7" r="1.6" /><circle cx="19" cy="12" r="1.6" /><circle cx="11" cy="17" r="1.6" /></svg>;
 const FIND = <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5" /><path d="M16 16l4.5 4.5" /></svg>;
-const FILTER = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 5.5h14M5.5 10h9M8 14.5h4" /></svg>;
-const GROUP = <svg className="gic" viewBox="0 0 20 20" aria-hidden="true"><rect x="2.5" y="2.5" width="15" height="6" rx="1.6" /><path d="M5.5 5.5h4" /><rect x="2.5" y="11.5" width="15" height="6" rx="1.6" /><path d="M5.5 14.5h4" /></svg>;
-const SORT = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 4v12M3.5 13.5 6 16l2.5-2.5M14 16V4m-2.5 2.5L14 4l2.5 2.5" /></svg>;
 const CARET = <svg className="qc151-cv" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>;
-const CROSS = <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 3l6 6M9 3l-6 6" /></svg>;
 const CHEV = <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5l3 3 3-3" /></svg>;
 /* v152.2 §1.2 — the package icon (the ref's): white on the Harbour label, grey on "Nothing recorded" */
 const PKG_ICON = <svg className="qc1522-pk" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6.5 10 3l7 3.5v7L10 17l-7-3.5z" /><path d="M3 6.5 10 10l7-3.5M10 10v7" /></svg>;
@@ -65,7 +61,6 @@ export { standWords } from "../../../lib/qc153";
 
 /** the sort's column words (the headings', the Sort pill's). v151's Agency and Next move columns are folded away; a
  *  sort still set on them from earlier in the visit keeps its own name. */
-const SORT_WORD: Record<SortKey151, string> = { agent: "Agent", agency: "Agency", stage: "Where it stands", queried: "Queried", heard: "Last heard", next: "Next move", due: "Next" };
 /** the arrow, the ref's: ↓ for the column's own direction (soonest / earliest first), ↑ reversed */
 export const arrow = (s: Sort151): string => (s.desc ? "↑" : "↓");
 
@@ -84,7 +79,6 @@ export interface CountLine1512 { ms: string | null; sent: number; active: number
 const BE_GROUP_LINE: Record<BeGroup, string> = { urgency: "Overdue, upcoming, watch and wait", status: "Where each query stands", none: "One timeline" };
 const BE_SORT_LINE: Record<BeSort, string> = { due: "Soonest first", wait: "Oldest query first", agent: "By name" };
 
-type Pop151 = "group" | "begroup" | "besort";
 
 export interface QcPage151Props {
   loading: boolean;
@@ -117,14 +111,16 @@ export interface QcPage151Props {
   filterPanel: (close: () => void) => React.ReactNode;
   /* §5 the pills */
   pills: PillGroup[];
-  onClearAll: () => void;
+  /** List filters v1 — the applied row: one chip per choice (Queries.tsx's qc140Chips), and its Clear all (the
+   *  filters and the search; never the sort or the grouping, which the bar's buttons show) */
+  applied: AppliedChip[];
+  onClearApplied: () => void;
   /* the table */
   group: GroupBy;
   onGroup: (g: GroupBy) => void;
   /** v152.2 §1.1 — grouping by package: Pro or founding (lib/entitlements `versionsUnlocked`) */
   packageOk: boolean;
   sort: Sort151;
-  defaultSort: Sort151;
   onSort: (s: Sort151) => void;
   sections: Section<QcRow>[];
   phraseOf: (r: QcRow) => string;
@@ -192,7 +188,6 @@ const COLLAPSE_KEY = "qh.qc.collapsed1511";
 const readCollapsed = (): Set<string> => { try { return new Set(JSON.parse(sessionStorage.getItem(COLLAPSE_KEY) ?? "[]") as string[]); } catch { return new Set(); } };
 
 export const QcPage151: React.FC<QcPage151Props> = (p) => {
-  const pop = usePopover<Pop151>();
   /* the group headers and Birds-eye's date row pin under the sheet's 12px lip (`--pin-cover`, measured on the sheet) */
   const rootRef = useRef<HTMLDivElement>(null);
   const [sheet, setSheet] = useState<HTMLElement | null>(null);
@@ -296,13 +291,6 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
   /* v155 §3 — loading: the list is busy and draws nothing until the skeleton is due (200ms), then the placeholders */
   const loading155 = p.state155?.kind === "loading";
   const filtersOn = p.filterCount > 0;
-  const groupOpt = p.group === "none" ? { label: "No grouping" } : GROUP_1522.find((o) => o.key === p.group);
-  const beGroupDef = p.beGroup === "urgency";
-  const beSortDef = p.beSort === "due";
-  const sortDef = p.sort.key === p.defaultSort.key && p.sort.desc === p.defaultSort.desc;
-  const groupDef = p.group === "attention";
-  /* §5 — the row is drawn only while something is set */
-  const pillsOn = p.pills.length > 0 || p.find.trim() !== "" || (birds ? (!beGroupDef || !beSortDef) : (!groupDef || !sortDef));
 
   const heading = (k: SortKey151, label: string, cls: string) => {
     const on = p.sort.key === k;
@@ -368,37 +356,6 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     );
   };
 
-  const pill = (key: string, body: React.ReactNode, onBody: (el: HTMLElement) => void, onX: () => void, xLabel: string, opensPanel = false) => (
-    <span key={key} className="qc1511-fp" data-qc1511="pill" data-k={key}>
-      <button type="button" className="qc1511-fpb" data-opens-panel={opensPanel ? "" : undefined} onClick={(e) => onBody(e.currentTarget)}>{body}</button>
-      <button type="button" className="qc1511-fx" data-qc1511="pill-x" aria-label={xLabel} onClick={onX}>{CROSS}</button>
-    </span>
-  );
-  const pillRow = () => {
-    const out: React.ReactNode[] = [];
-    for (const g of p.pills) {
-      const w = pillWords(g);
-      out.push(pill(`f:${g.key}`, w.field
-        ? <><span className="k">{w.field}</span><span className="op">{w.op}</span><span className="v">{w.value}</span></>
-        : <>{FILTER}<span className="v">{w.value}</span></>, () => setPanelOpen(true), g.off, `Remove ${w.field ?? w.value}`, true));
-    }
-    if (p.find.trim()) out.push(pill("find", <><span className="k">Name</span><span className="op">contains</span><span className="v">{p.find.trim()}</span></>,
-      () => (document.querySelector<HTMLInputElement>('[data-qc151="find"] input'))?.focus(), () => p.onFind(""), "Clear the search"));
-    if (birds) {
-      if (!beGroupDef) out.push(pill("group", <>{GROUP}<span className="k">Group</span><span className="v">{BE_GROUPS.find((g) => g.key === p.beGroup)?.label}</span></>,
-        (el) => pop.toggle("begroup", el), () => p.onBeGroup("urgency"), "Back to Urgency"));
-      if (!beSortDef) out.push(pill("sort", <>{SORT}<span className="k">Sort</span><span className="v">{BE_SORTS.find((s) => s.key === p.beSort)?.label}</span></>,
-        (el) => pop.toggle("besort", el), () => p.onBeSort("due"), "Back to Due date"));
-    } else {
-      /* v152.2 §1.1 — the Group pill's × shows the one ungrouped list; on that list it gives Action back */
-      if (!groupDef) out.push(pill("group", <>{GROUP}<span className="k">Group</span><span className="v">{groupOpt?.label}</span></>,
-        (el) => pop.toggle("group", el), () => p.onGroup(p.group === "none" ? "attention" : "none"), p.group === "none" ? "Group by action" : "Show one list"));
-      if (!sortDef) out.push(pill("sort", <>{SORT}<span className="k">Sort</span><span className="v">{SORT_WORD[p.sort.key]} {arrow(p.sort)}</span></>,
-        () => p.onSort({ key: p.sort.key, desc: !p.sort.desc }), () => p.onSort(p.defaultSort), "Back to the default sort"));
-    }
-    return out;
-  };
-
   const empty = p.sections.length === 0;
   /* v153 — a fold opens in place, for the session */
   const [opened, setOpened] = useState<Set<string>>(readOpened);
@@ -440,6 +397,8 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
         <div className="qc153-main" data-qc153="list-column">
           {/* v154 §6 — the slim bar sticks on a strip of the page's own ground that ends in a 22px fade */}
           <div className="qc154-tbw" data-qc154="toolbar" ref={tbRef}>{controlLine}</div>
+          {/* List filters v1 — the applied row: under the bar, only while a filter or a search is set */}
+          {p.applied.length > 0 && !first155 && !loading155 ? <AppliedRow hook="data-qc1511" className="lf-ap--q" chips={p.applied} onClearAll={p.onClearApplied} /> : null}
 
           {birds && !first155 && !loading155 && !error155 ? (
             <div className="qc151-be sa-slip" data-qc151="birds-card"><div className="sa-slip-in">
@@ -448,7 +407,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                   <b>Nothing on the timeline</b>
                   {p.birdsEmpty === "closed"
                     ? <><i>Closed queries don’t appear on Birds-eye. Switch to List to see them.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="back-to-list" onClick={() => p.onView("list")}>Back to List</button></>
-                    : <><i>No live queries match these filters.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="birds-reset" onClick={p.onClearAll}>Reset filters</button></>}
+                    : <><i>No live queries match these filters.</i><button type="button" className="qc151-btn qc151-btn--g" data-qc151="birds-reset" onClick={p.onClearApplied}>Clear all</button></>}
                 </div>
               ) : p.birds}
             </div></div>
@@ -461,7 +420,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
                 <div className="qc151-emp" data-qc151="no-matches">
                   <b>No queries match</b>
                   <i>{[...p.pills.map((g) => pillWords(g).value), ...(p.find.trim() ? [`“${p.find.trim()}”`] : []), ...(p.where ? [TAB_LABEL[p.where]] : [])].join(" · ") || "this view"}</i>
-                  <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onClearAll}>Reset filters</button>
+                  <button type="button" className="qc151-btn qc151-btn--g" data-qc151="empty-reset" onClick={p.onClearApplied}>Clear all</button>
                 </div>
               ) : p.sections.map((s) => {
                 const folds = isFoldKey(p.group, s.key) && !only;

@@ -26,7 +26,9 @@ import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useSta
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
-import { type AgentFacts, type ContactFilters, type SortKey, appliedFilters } from "../../../lib/contactList";
+import { type AgentFacts, type ContactFilters, type SortKey } from "../../../lib/contactList";
+import { appliedChoices } from "../../../lib/contactV27";
+import { AppliedRow } from "../../shell/AppliedRow";
 import { STAGE_NAME } from "../../../lib/qcSummary";
 import { NQ_RING, SetGlyph } from "./ContactSheet24";
 import { GenrePills } from "../../shared/agentRowParts";
@@ -68,7 +70,7 @@ export interface ContactSheet26Props {
   onFill: (id: string) => void;
   /** E — a set the page narrowed to from a link (the dashboard's Agents on file), shown as its own applied chip */
   setChip?: { label: string; onDrop: () => void } | null;
-  /** E — the applied row's "Clear filters" (the filters and any such set; Find is the band's own) */
+  /** the applied row's "Clear all": the filters and any such set (the row clears the search itself) */
   onClearFilters: () => void;
   /** principles v1 — the list's frame draws loading (skeleton rows) or can't-load in place of the rows; default "list" */
   state?: "list" | "loading" | "error";
@@ -161,8 +163,8 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
     return () => { sc.removeEventListener("scroll", on, { capture: true } as EventListenerOptions); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); };
   }, [read]);
 
-  /* E — one count per applied-filters chip (the pick "Ready to query" sets two filters, and shows two chips) */
-  const applied = useMemo(() => appliedFilters(p.filters, (k) => p.genreWord(k) || k), [p.filters, p]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* List filters v1 — one chip per choice the writer made: Ready to query (its two fields) is ONE chip */
+  const applied = useMemo(() => appliedChoices(p.filters, (k) => p.genreWord(k) || k), [p.filters, p]); // eslint-disable-line react-hooks/exhaustive-deps
   const state = p.state ?? "list";
   /* principles v1 — what is applied, in the order the band and applied row draw it (Find, a set, the filters), each with
      the way to take just that one off: the no-matches state names them and offers to remove the last */
@@ -191,17 +193,13 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
       <div className="cl26-pin clq-cap" data-cl26="pin" data-clq="cap" ref={pinRef}>
         <div className="clq-capin"><div className="clq-captop">
           {p.group !== "none" && drawn.length > 0 ? <Index26 secs={secs} current={current ?? drawn[0]?.key ?? null} onJump={jump} /> : null}
-          {applied.length > 0 || p.setChip ? (
-            <div className="cl26-ap" data-cl26="applied" role="status">
-              <span className="cl26-aps">Showing <b>{p.pool.length}</b> of {p.all.length}</span>
-              {p.setChip ? (
-                <button type="button" className="cl26-apc" data-cl26="applied-chip" data-k="set" onClick={p.setChip.onDrop} aria-label={`Remove ${p.setChip.label}`}>{p.setChip.label} ×</button>
-              ) : null}
-              {applied.map((a) => (
-                <button key={a.key} type="button" className="cl26-apc" data-cl26="applied-chip" data-k={a.key} onClick={() => p.onFilters(a.drop(p.filters))} aria-label={`Remove ${a.label}`}>{a.label} ×</button>
-              ))}
-              <button type="button" className="cl26-apx" data-cl26="applied-clear" onClick={p.onClearFilters}>Clear filters</button>
-            </div>
+          {/* List filters v1 — the applied row (shell/AppliedRow): a set, the filters, the search in quotes; Clear all */}
+          {applied.length > 0 || p.setChip || findText ? (
+            <AppliedRow hook="data-cl26" onClearAll={() => { p.onClearFilters(); p.onSearch(""); }} chips={[
+              ...(p.setChip ? [{ key: "set", label: p.setChip.label, onRemove: p.setChip.onDrop }] : []),
+              ...applied.map((a) => ({ key: a.key, label: a.label, onRemove: () => p.onFilters(a.drop(p.filters)) })),
+              ...(findText ? [{ key: "find", label: `\u201c${findText}\u201d`, onRemove: () => p.onSearch("") }] : []),
+            ]} />
           ) : null}
           <div className="cl26-th" role="row" data-cl26="heads">
             <span className="cl26-thm" aria-hidden="true" />
@@ -242,7 +240,7 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
             <h3>{none.title}</h3>
             {none.line ? <p>{none.line}</p> : null}
             <div className="clp-acts">
-              <button type="button" className="clp-btn" data-cl26="reset" onClick={p.onClearAll}>Clear the filters</button>
+              <button type="button" className="clp-btn" data-cl26="reset" onClick={p.onClearAll}>Clear all</button>
               {none.removeLast ? <button type="button" className="clp-btn l" data-clp="remove-last" onClick={named[named.length - 1].drop}>{none.removeLast}</button> : null}
             </div>
           </div>
