@@ -127,10 +127,11 @@ for (const vp of SIZES) {
     await page.waitForTimeout(300); await shot("42-asked-full");
     await tap(page, C("[data-qc1522='save']"), 100); await saved(page); await shot("43-full-saved");
     await card(page, "nudgedwait"); await tap(page, C("[data-qc152='reply-btn']"));
+    /* Query card v161 — a picked answer gives way to one row; "Change" brings the tiles back before the next */
     await tap(page, C("[data-qc1522='reply-types'] [data-v='passed']")); await shot("44-passed");
-    await tap(page, C("[data-qc1522='reply-types'] [data-v='rr']")); await shot("45-rr");
-    await tap(page, C("[data-qc1522='reply-types'] [data-v='offer']")); await shot("46-offer");
-    await tap(page, C("[data-qc1522='reply-types'] [data-v='more']")); await shot("47-something-else");
+    await tap(page, C("[data-qc161='change']")); await tap(page, C("[data-qc1522='reply-types'] [data-v='rr']")); await shot("45-rr");
+    await tap(page, C("[data-qc161='change']")); await tap(page, C("[data-qc1522='reply-types'] [data-v='offer']")); await shot("46-offer");
+    await tap(page, C("[data-qc161='change']")); await tap(page, C("[data-qc1522='reply-types'] [data-v='more']")); await shot("47-something-else");
     await page.keyboard.press("Escape"); await page.waitForTimeout(300); await tap(page, C("[data-qc1522='discard']"));
     /* close it */
     await card(page, "quiet"); await shot("50-gone-quiet-not-nudged");

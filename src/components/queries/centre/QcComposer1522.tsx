@@ -22,6 +22,10 @@ import type { ThreadStepIn } from "../../../lib/qcThread152";
 import { CalendarField, MatChips, PopCtx, type MatEnv } from "./QcEdit152";
 import { StepGlyph } from "./QcBubble152";
 import "./qcv1522card.css";
+/* Query card v161, Phase 3 — the drawer's paper, and the reply's tiles */
+import "./qcv161.css";
+import { StatusDot } from "../../StatusDot";
+import { STAGE_COLOURS, bandBackground, stageOf } from "../../../lib/stageColours";
 
 const DAY = 86_400_000;
 const sod = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
@@ -52,6 +56,8 @@ export interface ComposerCtx {
   nudgedMs: number | null;
   /* reply: only the query has gone (so the request is for the partial) */
   queryOnly: boolean;
+  /** Query card v161 — the query's status now ("Something else" keeps the stage it is at) */
+  status?: QueryStatus | string;
   /** Record a response v1, Phase 4 — the full is already asked for, sent, or past (Full requested, Full sent, Offer):
    *  "Asked for the full" is not offered */
   fullAsked?: boolean;
@@ -104,13 +110,15 @@ const BULB = <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke=
 const CLOCK = <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M8 4.6V8l2.3 1.4" /></svg>;
 const PEN = <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 3.5l2 2L6 12H4v-2z" /></svg>;
 
-/** the reply chips, in order; the first is the partial's request when only the query has gone */
-const REPLIES: { k: ReplyType; label: (queryOnly: boolean) => string; status: QueryStatus }[] = [
-  { k: "req", label: (q) => (q ? "Asked for the partial" : "Asked for the full"), status: QueryStatus.FULL_REQUESTED },
-  { k: "passed", label: () => "Passed", status: QueryStatus.REJECTED },
-  { k: "rr", label: () => "Revise & resubmit", status: QueryStatus.REVISE_RESUBMIT },
-  { k: "offer", label: () => "Made an offer", status: QueryStatus.OFFER },
-  { k: "more", label: () => "Something else", status: QueryStatus.PARTIAL_REQUESTED },
+/** the replies, in order (Query card v161: good news first, Something else last); the request is the partial's when only
+ *  the query has gone. `line` is the tile's second line; `status` the stage the answer leads to (its disc) */
+const REPLIES: { k: ReplyType; label: (queryOnly: boolean) => string; line: (f: string, queryOnly: boolean) => string; status: QueryStatus | null }[] = [
+  { k: "req", label: (q) => (q ? "Asked for the partial" : "Asked for the full"), line: (_f, q) => (q ? "You send the pages next" : "You send the manuscript next"), status: QueryStatus.FULL_REQUESTED },
+  { k: "offer", label: () => "Made an offer", line: (f) => `Record it and when ${f} needs an answer`, status: QueryStatus.OFFER },
+  { k: "rr", label: () => "Revise & resubmit", line: (f) => `${f} wants changes, then another look`, status: QueryStatus.REVISE_RESUBMIT },
+  { k: "passed", label: () => "Passed", line: () => "Closes this query", status: QueryStatus.REJECTED },
+  /* Something else leads nowhere new: its disc is the query's own stage */
+  { k: "more", label: () => "Something else", line: () => "A question, a call, more pages", status: null },
 ];
 
 /** §3.1 the date pills: Today, Yesterday, Another date (the app's calendar; no future day) */
@@ -205,6 +213,18 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
     }
   }, [j, day, mats, via, closeAs, rt, dl, dlMs, rbMs, abMs, formNo, openMore, words, what, c.sendKind, c.queryOnly]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { onDraft(draft); }, [draft]); // eslint-disable-line react-hooks/exhaustive-deps
+  /* v161 — picking a tile moves focus to the first question; Change returns it to the tile that was picked */
+  const cbRef = useRef<HTMLDivElement>(null);
+  const focusNext = useRef<"question" | ReplyType | null>(null);
+  useEffect(() => {
+    const want = focusNext.current, root = cbRef.current;
+    if (!want || !root) return;
+    focusNext.current = null;
+    const el = want === "question"
+      ? root.querySelector<HTMLElement>(".qc1522-fl button, .qc1522-fl input, .qc1522-fl textarea, .qc1522-fl select")
+      : root.querySelector<HTMLElement>(`[data-qc161='tile'][data-v='${want}']`);
+    el?.focus();
+  }, [rt]);
   useEffect(() => () => onDraft(null), []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function labelOf(m: StepMaterial): string {
@@ -303,15 +323,34 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
         if (rt === "more") fields.push(fl("What they asked for", <input type="text" className="qc1522-in" data-qc1522="what" maxLength={80} value={what} placeholder="e.g. A synopsis, the next 50 pages, a call" onChange={(e) => { setWhat(e.target.value); touch(); }} />, "wh"));
         fields.push(fl("Their words", <textarea className="qc1522-ta" data-qc1522="their-words" maxLength={500} value={words} placeholder={`Paste ${f}’s reply, or the line that matters. Optional.`} onChange={(e) => { setWords(e.target.value); touch(); }} />, "q"));
       }
-      body = <>
-        <div className="qc1522-seg qc1522-rts" data-qc1522="reply-types">
-          {REPLIES.filter((r) => r.k !== "req" || c.queryOnly || !c.fullAsked).map((r) => (
-            <button key={r.k} type="button" className={rt === r.k ? "on" : ""} data-v={r.k} onClick={() => { setRt(r.k); touch(); }}>
-              <span className="g" aria-hidden="true">{StepGlyph({ status: r.k === "req" && c.queryOnly ? QueryStatus.PARTIAL_REQUESTED : r.status, kind: null })}</span>{r.label(c.queryOnly)}
+      /* v161 Phase 3 — the answers as tiles (query-card-v161.html): each a disc in the Band of the stage it leads to, with
+         that stage's mark in ink, the label and a second line. Picked, they give way to one row and the questions. */
+      const statusOf = (r: (typeof REPLIES)[number]): QueryStatus | string =>
+        r.k === "req" ? (c.queryOnly ? QueryStatus.PARTIAL_REQUESTED : QueryStatus.FULL_REQUESTED) : r.status ?? c.status ?? QueryStatus.QUERIED;
+      const disc = (r: (typeof REPLIES)[number]) => (
+        <span className="d" data-qc161="disc" aria-hidden="true" style={{ background: bandBackground(stageOf(statusOf(r))) }}>
+          <StatusDot status={statusOf(r)} overrideSize={18} tone="ink" decorative />
+        </span>
+      );
+      const picked = rt ? REPLIES.find((r) => r.k === rt) ?? null : null;
+      body = picked ? <>
+        <div className="qc161-pick" data-qc161="picked" style={{ ["--tint" as string]: STAGE_COLOURS[stageOf(statusOf(picked))].tint }}>
+          {disc(picked)}
+          <span className="t"><b>{picked.label(c.queryOnly)}</b><i>{picked.line(f, c.queryOnly)}</i></span>
+          <button type="button" data-qc161="change" onClick={() => { focusNext.current = picked.k; setRt(null); }}>Change</button>
+        </div>
+        <div className="qc1522-fl">{fields}</div>
+      </> : <>
+        <p className="qc161-sub" data-qc161="sub">Pick what happened. You can add the detail next.</p>
+        <div className="qc161-tiles" data-qc161="tiles" data-qc1522="reply-types">
+          {REPLIES.filter((r) => r.k !== "req" || c.queryOnly || !c.fullAsked).map((r, i) => (
+            <button key={r.k} type="button" className={`qc161-tile${r.k === "more" ? " wide" : ""}`} data-qc161="tile" data-v={r.k}
+              style={{ ["--i" as string]: i }} onClick={() => { focusNext.current = "question"; setRt(r.k); touch(); }}>
+              {disc(r)}
+              <span className="t"><b>{r.label(c.queryOnly)}</b><i>{r.line(f, c.queryOnly)}</i></span>
             </button>
           ))}
         </div>
-        {rt ? <div className="qc1522-fl">{fields}</div> : null}
       </>;
       const label = rt === "passed" ? "Close as passed" : rt === "offer" ? "Add the offer" : `Add ${f}’s reply`;
       const p: ComposerSave | null = rt && !(rt === "more" && !what.trim())
@@ -414,7 +453,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
         <h3 data-qc1522="composer-title">{title}</h3>
         <button type="button" className="qc1522-x" data-qc1522="composer-x" aria-label="Close" onClick={exit}>✕</button>
       </div>
-      <div className="qc1522-cb">{body}</div>
+      <div ref={cbRef} className="qc1522-cb">{body}</div>
       {conf ? (
         <div className="qc1522-conf" data-qc1522="discard-strip">
           <span>Discard what you’ve entered?</span><span className="sp" />

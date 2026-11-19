@@ -117,7 +117,10 @@ export function footer1522(c: FootCtx): Foot1522 {
       const ago = c.replyMs != null ? Math.max(0, calDays(c.nowMs, c.replyMs)) : null;
       const when = ago == null ? "" : ago === 0 ? " · today" : ` · ${pl(ago, "day")} ago`;
       return { ...none, icon: { k: "clock" }, lead: `No reply from ${f} yet`,
-        sub: c.replyMs != null ? `Reply was due ${day(c.replyMs, c.nowMs)}${when}` : "Reply is overdue",
+        /* v161 — nudge due on the writer's reminder with the reply date still ahead: the reply date as the waiting state words
+           it, never "was due" a day still to come */
+        sub: c.replyMs != null && calDays(c.replyMs, c.nowMs) > 0 ? `Reply expected by ${day(c.replyMs, c.nowMs)}`
+          : c.replyMs != null ? `Reply was due ${day(c.replyMs, c.nowMs)}${when}` : "Reply is overdue",
         button: { label: "Nudge", tone: "navy", act: "nudge" }, link: { label: "Close it", act: "close" }, replied: { label: `${f} replied`, act: "resp" } };
     }
     case "agent": {

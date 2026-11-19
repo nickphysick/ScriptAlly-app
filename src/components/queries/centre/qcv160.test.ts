@@ -28,7 +28,8 @@ describe("Query card v160 · Phase 1 — the bump", () => {
   });
   it("the card bumps only on a landing's first change, on its own frame", () => {
     expect(CARD).toMatch(/useLanding160\(p\.motion, sig160, r\.id/);
-    expect(code(CARD)).toMatch(/if \(first\) bump\(root\.closest<HTMLElement>\("\.spanel"\)\)/);
+    /* v161: the card passes itself as the bump's owner, so the bump is held with the rest of the landing's motion */
+    expect(code(CARD)).toMatch(/if \(first\) bump\(root\.closest<HTMLElement>\("\.spanel"\), root\)/);
     expect(LANDING).toMatch(/p\.rId !== rId/);
   });
   it("no var() and no color-mix() in the motion", () => {
@@ -126,6 +127,24 @@ describe("Query card v160 · QC160-4 — bumps never stack (a stub frame: two la
     bump(frame);
     bump(frame);
     expect(log).toEqual(["start 1", "cancel 1", "start 2"]);
+  });
+});
+
+describe("Query card v161 · Phase 2 — the motion waits for the page", () => {
+  it("the landing holds its motion (the bump with it) and nothing is finished out from under the hold", () => {
+    const land = code(CARD).slice(code(CARD).indexOf("land: (kind, first) => {"), code(CARD).indexOf("/* the draft is held while"));
+    expect(land.indexOf("if (!reduced() && !isHeld(root)) finishAll(root);")).toBeGreaterThan(-1);
+    expect(land.indexOf("if (!reduced() && !isHeld(root)) finishAll(root);")).toBeLessThan(land.indexOf("hold(root)"));
+    expect(land.indexOf("hold(root)")).toBeLessThan(land.indexOf('bump(root.closest<HTMLElement>(".spanel"), root)'));
+  });
+  it("the release waits for the page's done and three quick frames, and plays regardless after 4s", () => {
+    expect(CARD).toMatch(/if \(quiet >= 3\) release\(root\)/);
+    expect(CARD).toMatch(/window\.setTimeout\(\(\) => release\(root\), 4000\)/);
+    expect(HOST).toMatch(/if \(bump\) setQcMotion160\(\(m\) => \(m && m\.kind === "save" \? \{ \.\.\.m, done: true \} : m\)\);/);
+  });
+  it("a held animation is paused when made and played on release", () => {
+    expect(code(MOTION)).toMatch(/if \(h\) \{ a\.pause\(\); h\.push\(a\); \}/);
+    expect(code(MOTION).match(/export function release[\s\S]*?\n}/)?.[0]).toMatch(/a\.play\(\)/);
   });
 });
 

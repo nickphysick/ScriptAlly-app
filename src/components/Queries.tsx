@@ -1852,7 +1852,7 @@ export const Queries: React.FC<{
   const [qc1522Edit, setQc1522Edit] = useState<string | null>(null);
   const [qc1522Toast, setQc1522Toast] = useState<{ msg: string; undo: (() => Promise<void>) | null; bump?: boolean } | null>(null);
   /* Query card v160 — a save has started or Undo was pressed: the card moves when the change lands (QcCard152 `motion`) */
-  const [qcMotion160, setQcMotion160] = useState<{ kind: "save" | "undo"; n: number } | null>(null);
+  const [qcMotion160, setQcMotion160] = useState<{ kind: "save" | "undo"; n: number; done?: boolean } | null>(null);
   const [qc1522Burst, setQc1522Burst] = useState<number | null>(null);
   /* the toast lasts 5.2s; opening another composer dismisses it */
   useEffect(() => { if (!qc1522Toast) return undefined; const t = window.setTimeout(() => setQc1522Toast(null), 5200); return () => window.clearTimeout(t); }, [qc1522Toast]);
@@ -6166,7 +6166,7 @@ export const Queries: React.FC<{
       const pkgList = pro1522 ? packages.filter((k) => k.manuscriptId === q.manuscriptId && !(k as { retiredAt?: string }).retiredAt).map((k) => ({ id: k.id, name: k.packageName })) : null;
       const rec0 = sentRecordOf(q);
       const ctx: ComposerCtx = {
-        first, fullName: ag?.name || ag?.agency || row.agentName, nowMs: now, email: (ag?.email ?? "").trim(), floorMs, env, pro: pro1522,
+        first, fullName: ag?.name || ag?.agency || row.agentName, nowMs: now, email: (ag?.email ?? "").trim(), floorMs, env, pro: pro1522, status: q.status,
         sendKind, sendMats, queriedVia: via === "QueryManager" ? "QueryManager" : via === "Email" ? "Email" : "Other",
         nudgedMs: nudgeMsOf({ ...row, nrmn: !!v152.nrmn }, now), queryOnly: q.status === QueryStatus.QUERIED, remindDays: 14,
         fullAsked: q.status === QueryStatus.FULL_REQUESTED || q.status === QueryStatus.FULL_SENT || q.status === QueryStatus.OFFER,
@@ -6192,7 +6192,12 @@ export const Queries: React.FC<{
         /* the composer (or the bubble's form) gives way as the save starts: its draft would otherwise sit beside the new
            step the local write has already drawn, until the server answers */
         setQc1522J(null); setQc1522Draft(null); setQc1522Edit(null);
-        try { await fn(); return true; } catch (e) {
+        try {
+          await fn();
+          /* Query card v161 — the save is done: the card releases its held motion after the page has drawn it */
+          if (bump) setQcMotion160((m) => (m && m.kind === "save" ? { ...m, done: true } : m));
+          return true;
+        } catch (e) {
           console.error("v152.2: the save failed", e);
           if (bump) setQcMotion160(null);
           showToast({ message: "Couldn't save that. Nothing was changed." });
@@ -6389,7 +6394,7 @@ export const Queries: React.FC<{
         const t = qc1522Toast; setQc1522Toast(null);
         if (t.bump) setQcMotion160({ kind: "undo", n: Date.now() });
         /* a restore the rules refuse writes nothing (one batch): say so, never leave the writer believing it was undone */
-        void t.undo?.().catch((e) => { console.error("v152.2 undo refused", (e as { code?: string })?.code ?? e); setQc1522Toast({ msg: "Couldn’t undo that. Nothing was changed.", undo: null }); });
+        void t.undo?.().then(() => { if (t.bump) setQcMotion160((m) => (m && m.kind === "undo" ? { ...m, done: true } : m)); }).catch((e) => { console.error("v152.2 undo refused", (e as { code?: string })?.code ?? e); setQc1522Toast({ msg: "Couldn’t undo that. Nothing was changed.", undo: null }); });
       } : null } : null;
       card1522.burst = qc1522Burst;
       card1522.motion = qcMotion160;

@@ -1,0 +1,22 @@
+[
+ {
+  "name": "population: the render counter is live and counted the grid",
+  "ok": true,
+  "got": "110"
+ },
+ {
+  "name": "population: 116 other grid cards",
+  "ok": true,
+  "got": "116"
+ },
+ {
+  "name": "not one of them rendered on the save",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "the saved query's own card did render (the counter counts)",
+  "ok": true,
+  "got": "2 → 3"
+ }
+]

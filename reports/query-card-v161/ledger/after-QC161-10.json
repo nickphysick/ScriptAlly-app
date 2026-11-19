@@ -1,0 +1,117 @@
+[
+ {
+  "name": "req: the tiles are gone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "req: one row shows the pick, with Change",
+  "ok": true,
+  "got": "Asked for the partial You send the pages next Change"
+ },
+ {
+  "name": "req: the built questions follow",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "req: the primary's label and state are the old chips' (Add Rufus’s reply, enabled)",
+  "ok": true,
+  "got": "{\"label\":\"Add Rufus’s reply\",\"disabled\":false}"
+ },
+ {
+  "name": "picking moves focus to the first question",
+  "ok": true,
+  "got": "question"
+ },
+ {
+  "name": "Change brings the tiles back",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "and focuses the tile that was picked",
+  "ok": true,
+  "got": "req"
+ },
+ {
+  "name": "offer: the tiles are gone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "offer: one row shows the pick, with Change",
+  "ok": true,
+  "got": "Made an offer Record it and when Rufus needs an answer Change"
+ },
+ {
+  "name": "offer: the built questions follow",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "offer: the primary's label and state are the old chips' (Add the offer, enabled)",
+  "ok": true,
+  "got": "{\"label\":\"Add the offer\",\"disabled\":false}"
+ },
+ {
+  "name": "rr: the tiles are gone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "rr: one row shows the pick, with Change",
+  "ok": true,
+  "got": "Revise & resubmit Rufus wants changes, then another look Change"
+ },
+ {
+  "name": "rr: the built questions follow",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "rr: the primary's label and state are the old chips' (Add Rufus’s reply, enabled)",
+  "ok": true,
+  "got": "{\"label\":\"Add Rufus’s reply\",\"disabled\":false}"
+ },
+ {
+  "name": "passed: the tiles are gone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "passed: one row shows the pick, with Change",
+  "ok": true,
+  "got": "Passed Closes this query Change"
+ },
+ {
+  "name": "passed: the built questions follow",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "passed: the primary's label and state are the old chips' (Close as passed, enabled)",
+  "ok": true,
+  "got": "{\"label\":\"Close as passed\",\"disabled\":false}"
+ },
+ {
+  "name": "more: the tiles are gone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "more: one row shows the pick, with Change",
+  "ok": true,
+  "got": "Something else A question, a call, more pages Change"
+ },
+ {
+  "name": "more: the built questions follow",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "more: the primary's label and state are the old chips' (Add Rufus’s reply, enabled)",
+  "ok": true,
+  "got": "{\"label\":\"Add Rufus’s reply\",\"disabled\":false}"
+ }
+]

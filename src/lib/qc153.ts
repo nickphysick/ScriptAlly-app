@@ -154,7 +154,8 @@ const dayMs = (v: unknown): number | null => {
   const t = new Date(v.length === 10 ? `${v}T12:00:00` : v).getTime();
   return Number.isNaN(t) ? null : t;
 };
-/** the writer's own nudge reminder, when its day is still to come (a passed one is the nudge, `nudgeMsOf`) */
+/** the writer's own nudge reminder, when its day is still to come (a passed one is NOT a nudge: it makes the query nudge
+ *  due, lib/queryState `remindedMs`; only a logged nudge counts, `nudgeMsOf` — Query card v161) */
 export function scheduledNudgeMs(r: Pick<QcRow, "query">, nowMs: number): number | null {
   const t = dayMs((r.query as { nudgeDate?: string } | null)?.nudgeDate);
   return t != null && sod(t) >= sod(nowMs) ? t : null;

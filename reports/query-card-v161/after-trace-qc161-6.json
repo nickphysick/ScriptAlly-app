@@ -1,0 +1,65 @@
+{
+ "save": {
+  "frames": 30,
+  "scales": 29,
+  "longs": [],
+  "span": 483,
+  "start": 9494.3,
+  "longsAll": [
+   {
+    "start": 6991.699999928474,
+    "dur": 59,
+    "name": "unknown"
+   },
+   {
+    "start": 7638,
+    "dur": 1101,
+    "name": "unknown"
+   },
+   {
+    "start": 9033.899999976158,
+    "dur": 83,
+    "name": "unknown"
+   }
+  ]
+ },
+ "undo": {
+  "frames": 29,
+  "scales": 29,
+  "longs": [],
+  "span": 467,
+  "start": 14327.4,
+  "longsAll": [
+   {
+    "start": 12222.100000023842,
+    "dur": 127,
+    "name": "unknown"
+   },
+   {
+    "start": 12222.100000023842,
+    "dur": 127,
+    "name": "unknown"
+   },
+   {
+    "start": 12587.799999952316,
+    "dur": 1076,
+    "name": "unknown"
+   },
+   {
+    "start": 12587.799999952316,
+    "dur": 1076,
+    "name": "unknown"
+   },
+   {
+    "start": 13856.199999928474,
+    "dur": 125,
+    "name": "unknown"
+   },
+   {
+    "start": 13856.199999928474,
+    "dur": 125,
+    "name": "unknown"
+   }
+  ]
+ }
+}

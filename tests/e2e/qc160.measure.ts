@@ -332,7 +332,11 @@ if (PHASE !== "before") {
     /* the landing: the first frame the band's word changed */
     const li = tr.findIndex((f, i) => i > 0 && f.bandWord !== tr[i - 1].bandWord);
     L5.check("population: the landing frame was found", li > 0, String(li));
-    const t0 = tr[li]?.t ?? 0;
+    /* Query card v161 — the motion is held until the page has drawn the save, then released together: its clock starts at
+       the release (the first frame the card's frame has scaled), no longer at the landing */
+    const ri = tr.findIndex((f, i) => i >= li && parseFloat(String(f.frameScale)) > 1.0001);
+    L5.check("population: the held motion was released", ri >= li, String(ri));
+    const t0 = tr[ri]?.t ?? 0;
     const after = tr.slice(li);
     L5.check("the same bubble element stays in the DOM through the save", tr.every((f) => (f.tagged as { in: boolean } | null)?.in === true), JSON.stringify(tr.filter((f) => !(f.tagged as { in: boolean } | null)?.in).slice(0, 1)));
     L5.check("it is the thread's newest step after the landing, no longer a draft", after.every((f) => (f.tagged as { isLast: boolean; draft: boolean }).isLast && !(f.tagged as { draft: boolean }).draft), JSON.stringify((after[0]?.tagged)));
@@ -351,7 +355,7 @@ if (PHASE !== "before") {
     const from = nums(tr[li - 1]?.bandBg), to = nums(tr[tr.length - 1]?.bandBg);
     L6.check("population: the save changes the stage (the strip's colour)", from.join() !== to.join(), `${tr[li - 1]?.bandBg} → ${tr[tr.length - 1]?.bandBg}`);
     L6.check("population: both ends are single colours", !/gradient/.test(String(tr[li - 1]?.bandImg)) && !/gradient/.test(String(tr[tr.length - 1]?.bandImg)), `${tr[li - 1]?.bandImg} / ${tr[tr.length - 1]?.bandImg}`);
-    const at200 = after.find((f) => f.t - t0 >= 190)!;
+    const at200 = tr.slice(ri).find((f) => f.t - t0 >= 190)!;
     const mid = nums(at200?.bandBg);
     const between = mid.length === 3 && mid.every((v, k) => (v - from[k]) * (v - to[k]) <= 0) && mid.join() !== from.join() && mid.join() !== to.join();
     L6.check("at 200ms the strip's background-color is strictly between the old and new", between, `${tr[li - 1]?.bandBg} | ${at200?.bandBg} @${(at200?.t ?? 0) - t0}ms | ${tr[tr.length - 1]?.bandBg}`);
@@ -461,7 +465,9 @@ if (PHASE !== "before") {
     writeFileSync(`${DIR}/frames/${PHASE}-undo-materials.json`, JSON.stringify(us));
     const li = us.findIndex((f) => f.leaving);
     L7.check("population: the undone bubble began to leave", li >= 0, String(li));
-    const t0 = us[li]?.t ?? 0;
+    /* Query card v161 — the fold is held with the rest until the page has drawn the undo: its clock starts when it moves */
+    const fi = us.findIndex((f, i) => i >= li && f.in && (f.op ?? 1) < 0.999);
+    const t0 = (us[Math.max(li, fi - 1)]?.t) ?? 0;
     const at = (ms: number) => us.find((f) => f.t - t0 >= ms);
     L7.check("at 150ms it is still in the DOM, opacity below 1", !!at(150)?.in && (at(150)?.op ?? 1) < 1, JSON.stringify(at(150)));
     L7.check("at 350ms its height is under half its original", !!at(350) && (!at(350)!.in || (at(350)!.h ?? 99) < tag.h / 2), `${at(350)?.h} of ${tag.h}`);

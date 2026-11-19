@@ -1,0 +1,17 @@
+[
+ {
+  "name": "population: queries waiting on the agent checked",
+  "ok": true,
+  "got": "64"
+ },
+ {
+  "name": "population: at least one nudged query and one not",
+  "ok": true,
+  "got": "3 nudged · 61 not"
+ },
+ {
+  "name": "the footer and the thread agree on every one",
+  "ok": false,
+  "got": "[\"q152-nudgedquiet: footer \\\"15 Oct\\\" · thread [] · No reply from Nell Nudged 15 Oct · quiet since 12 Nov Nell replied Nudge again Close it\",\"q152-nudgedwait: footer \\\"30 Oct\\\" · thread [] · Waiting on Wren Nudged 30 Oct · goes quiet on 27 Nov Record a response\"]"
+ }
+]

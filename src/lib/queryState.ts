@@ -7,7 +7,8 @@
  *
  *   offer      an open offer                                        (the agent waits on you)
  *   materials  a partial, full or revision asked for and not sent    (the agent waits on you)
- *   nudge      past the reply date, not nudged, and the agent does not treat no reply as a no (yours to nudge)
+ *   nudge      past the reply date, not nudged, and the agent does not treat no reply as a no; or the writer's own
+ *              reminder (`nudgeDate`) has come and no nudge is logged (yours to nudge)
  *   agent      inside the reply time, or inside the quiet window after a nudge (you wait on the agent)
  *   quiet      the quiet window has passed with no reply             (going cold)
  *   closed     passed, no response, withdrawn, signed
@@ -16,9 +17,10 @@
  *    four-set rule (`whereItStands`, lib/qcSummary) and `buildQcRows`' `court` are left exactly as they were for every
  *    other reader, which the v152 report lists so they can be moved later.
  *
- * ⚠️ THE NUDGE (Nick's ruling): `lastNudgeSentDate`, falling back to `nudgeDate`. `nudgeDate` is the PLANNED nudge
- *    (`logDefaults` writes one at log time), so two guards stop a plan reading as a nudge already sent: a date still in
- *    the future is no nudge yet, and a nudge from before the latest send belongs to an earlier stage.
+ * ⚠️ THE NUDGE (Query card v161, Nick's ruling): only a LOGGED nudge is a nudge — `lastNudgeSentDate`. `nudgeDate` is
+ *    the writer's reminder (`logDefaults` writes one at log time) and never counts as a nudge, whatever its date: a
+ *    reminder that has come means "nudge due" (`remindedMs`). Two guards stay on both: a date still in the future does
+ *    not count yet, and one from before the latest send belongs to an earlier stage.
  *
  * ⚠️ THE EDGES are `nudgePhase`'s: the reply date itself is still inside the reply time (`<`), and the last day of the
  *    window is still inside it (`>`). An undated stage keeps the 84-day rule (CLOSE_UNDATED_DAYS).
@@ -68,14 +70,25 @@ export interface StateInput {
 }
 export interface Ctx { quietWeeks: number; nowMs: number }
 
-/** the latest nudge this stage, or null (see the header's two guards) */
-export function nudgeMsOf(r: StateInput, nowMs: number): number | null {
-  const ms = anyToMs(r.query.lastNudgeSentDate) ?? anyToMs(r.query.nudgeDate);
-  if (ms == null || ms > nowMs) return null;
+/** a date that counts this stage: not on a day still to come, not before the latest send (the header's two guards).
+ *  ⚠️ BY DAY, NOT BY INSTANT (v161): a step is stored at noon of its day (lib/qc152Write stepTime), so a nudge logged
+ *  "today" before noon was an instant in the future and did not count until midday. */
+function thisStage(r: StateInput, ms: number | null, nowMs: number): number | null {
+  const sod = (t: number) => new Date(t).setHours(0, 0, 0, 0);
+  if (ms == null || sod(ms) > sod(nowMs)) return null;
   const sends = [r.sentMs, anyToMs(r.query.dateSent), anyToMs(r.query.partialSentDate), anyToMs(r.query.fullSentDate)]
     .filter((t): t is number => t != null);
   const lastSend = sends.length ? Math.max(...sends) : null;
   return lastSend != null && ms < lastSend ? null : ms;
+}
+/** the latest LOGGED nudge this stage, or null. A reminder (`nudgeDate`) is never a nudge (v161). */
+export function nudgeMsOf(r: StateInput, nowMs: number): number | null {
+  return thisStage(r, anyToMs(r.query.lastNudgeSentDate), nowMs);
+}
+/** the writer's own reminder, when its day has come this stage and no nudge is logged: the query is nudge due (v161) */
+export function remindedMs(r: StateInput, nowMs: number): number | null {
+  if (nudgeMsOf(r, nowMs) != null) return null;
+  return thisStage(r, anyToMs(r.query.nudgeDate), nowMs);
 }
 
 export function queryState(r: StateInput, c: Ctx): QueryState {
@@ -86,11 +99,13 @@ export function queryState(r: StateInput, c: Ctx): QueryState {
   const win = c.quietWeeks * 7 * DAY;
   const nudge = nudgeMsOf(r, c.nowMs);
   if (nudge != null) return c.nowMs - nudge > win ? "quiet" : "agent";
+  /* v161 — the writer's reminder has come and nothing is logged: nudge due while the reply date is still ahead */
+  const reminded = remindedMs(r, c.nowMs) != null;
   if (r.expectedMs == null) {
     const inStage = r.stageStartMs != null ? (c.nowMs - r.stageStartMs) / DAY : 0;
-    return inStage > CLOSE_UNDATED_DAYS ? "quiet" : "agent";
+    return inStage > CLOSE_UNDATED_DAYS ? "quiet" : reminded ? "nudge" : "agent";
   }
-  if (!(r.expectedMs < c.nowMs)) return "agent";
+  if (!(r.expectedMs < c.nowMs)) return reminded ? "nudge" : "agent";
   /* v152.2 (Nick, 6 Nov) — "no reply means no" counts at the Queried stage only: a partial or full the agent asked for
      is still waiting on them, whatever their silence policy for queries */
   if (r.nrmn && r.status === QueryStatus.QUERIED) return "quiet";

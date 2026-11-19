@@ -1,0 +1,52 @@
+[
+ {
+  "name": "population: the old chip row's plan for req",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "req: the stored query, its log and its feed are the old chip row's",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the old chip row's plan for offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "offer: the stored query, its log and its feed are the old chip row's",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the old chip row's plan for rr",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "rr: the stored query, its log and its feed are the old chip row's",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the old chip row's plan for passed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "passed: the stored query, its log and its feed are the old chip row's",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the old chip row's plan for more",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "more: the stored query, its log and its feed are the old chip row's",
+  "ok": false,
+  "got": "…\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\",\\\"materialsWanted\\\":[\\\"Query letter\\\"],\\\"packageId\\\":\\\"\\\",\\\"NEW\\\":\\\"QC152 fixture: agent\\\",\\\"rejectedDate\\\":\\\"2026-11-19\\\",\\\"reject ≠ …\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\",\\\"materialsRequestedQuantity\\\":\\\"A synopsis\\\",\\\"materialsRequestedType\\\":\\\"other\\\",\\\"materialsWanted\\\":[\\\"Query letter\\\"],\\\"package"
+ }
+]

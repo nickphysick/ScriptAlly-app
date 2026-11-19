@@ -29,9 +29,32 @@ export const FOOT = { ms: 320, at: 120, rise: 6 } as const;
 export const TOAST_OUT = { ms: 220, drop: 8 } as const;
 export const ENTER_FADE = 200;
 
+/* ══ Query card v161, Phase 2 — THE MOTION WAITS FOR THE PAGE ═════════════════════════════════════════════════════
+   A save's or an undo's change reaches the card first; the whole page re-renders after it (every workspace page stays
+   mounted), a long task that ran underneath v160's motion so nothing visibly moved (Step 0.4: 1268ms at CPU 4×). While a
+   landing is HELD, every animation made for it — the bump too — is created paused on its first frame, so the card holds
+   still; `release` plays them together on the first quiet frame after the page has finished (QcCard152). */
+const held = new WeakMap<Element, Animation[]>();
+/** hold this card's motion: what is made for it from now waits for `release` */
+export function hold(owner: Element): void { held.set(owner, held.get(owner) ?? []); }
+export const isHeld = (owner: Element | null): boolean => !!owner && held.has(owner);
+const park = (owner: Element | null, a: Animation): Animation => {
+  const h = owner ? held.get(owner) : undefined;
+  if (h) { a.pause(); h.push(a); }
+  return a;
+};
+/** play everything held for this card, together */
+export function release(owner: Element | null): void {
+  if (!owner) return;
+  const h = held.get(owner);
+  held.delete(owner);
+  for (const a of h ?? []) { try { a.play(); } catch { /* removed with its element */ } }
+}
+
 /** the animations each frame is running for v160, so a new one can end the old ones at once */
 const running = new WeakMap<Element, Animation[]>();
 const track = (owner: Element, a: Animation): Animation => {
+  park(owner, a);
   const list = running.get(owner) ?? [];
   list.push(a);
   running.set(owner, list);
@@ -42,13 +65,14 @@ const track = (owner: Element, a: Animation): Animation => {
 /** end every v160 motion on this card at once (a second save, or Undo pressed while the confirm runs) */
 export function finishAll(owner: Element | null): void {
   if (!owner) return;
-  for (const a of running.get(owner) ?? []) { try { a.finish(); } catch { a.cancel(); } }
+  for (const a of [...(held.get(owner) ?? []), ...(running.get(owner) ?? [])]) { try { a.finish(); } catch { a.cancel(); } }
+  held.delete(owner);
   running.set(owner, []);
 }
 
 const bumps = new WeakMap<Element, Animation>();
 /** Phase 1 — the bump, on the card's frame (the panel), never stacking */
-export function bump(frame: HTMLElement | null): void {
+export function bump(frame: HTMLElement | null, owner: Element | null = null): void {
   if (!frame || reduced()) return;
   bumps.get(frame)?.cancel();
   const a = frame.animate([
@@ -57,6 +81,7 @@ export function bump(frame: HTMLElement | null): void {
     { scale: "1" },
   ], { duration: BUMP.ms });
   a.id = "qc160-bump";
+  park(owner, a);
   bumps.set(frame, a);
   const clear = () => { if (bumps.get(frame) === a) bumps.delete(frame); };
   a.finished.then(clear, clear);
