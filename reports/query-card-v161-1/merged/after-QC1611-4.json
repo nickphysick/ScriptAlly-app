@@ -1,0 +1,127 @@
+[
+ {
+  "name": "mark the partial sent: pressed in within 100ms",
+  "ok": true,
+  "got": "51ms"
+ },
+ {
+  "name": "mark the partial sent: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": true,
+  "got": "1.03499 · 32 frames · ends 1"
+ },
+ {
+  "name": "mark the partial sent · its undo: pressed in within 100ms",
+  "ok": true,
+  "got": "43ms"
+ },
+ {
+  "name": "mark the partial sent · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": false,
+  "got": "1.03499 · 22 frames · ends 1"
+ },
+ {
+  "name": "log a nudge: pressed in within 100ms",
+  "ok": true,
+  "got": "37ms"
+ },
+ {
+  "name": "log a nudge: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": true,
+  "got": "1.03492 · 25 frames · ends 1"
+ },
+ {
+  "name": "log a nudge · its undo: pressed in within 100ms",
+  "ok": true,
+  "got": "48ms"
+ },
+ {
+  "name": "log a nudge · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": false,
+  "got": "1.03499 · 19 frames · ends 1"
+ },
+ {
+  "name": "record a response: pressed in within 100ms",
+  "ok": true,
+  "got": "43ms"
+ },
+ {
+  "name": "record a response: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": true,
+  "got": "1.03499 · 30 frames · ends 1"
+ },
+ {
+  "name": "record a response · its undo: pressed in within 100ms",
+  "ok": true,
+  "got": "41ms"
+ },
+ {
+  "name": "record a response · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": true,
+  "got": "1.03499 · 25 frames · ends 1"
+ },
+ {
+  "name": "close the query: pressed in within 100ms",
+  "ok": true,
+  "got": "41ms"
+ },
+ {
+  "name": "close the query: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": true,
+  "got": "1.03499 · 26 frames · ends 1"
+ },
+ {
+  "name": "close the query · its undo: pressed in within 100ms",
+  "ok": true,
+  "got": "40ms"
+ },
+ {
+  "name": "close the query · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": false,
+  "got": "1.03499 · 23 frames · ends 1"
+ },
+ {
+  "name": "decline the offer: pressed in within 100ms",
+  "ok": true,
+  "got": "32ms"
+ },
+ {
+  "name": "decline the offer: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": true,
+  "got": "1.03499 · 25 frames · ends 1"
+ },
+ {
+  "name": "decline the offer · its undo: pressed in within 100ms",
+  "ok": true,
+  "got": "36ms"
+ },
+ {
+  "name": "decline the offer · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": false,
+  "got": "1.03499 · 21 frames · ends 1"
+ },
+ {
+  "name": "delete a step: pressed in within 100ms",
+  "ok": true,
+  "got": "37ms"
+ },
+ {
+  "name": "delete a step: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": true,
+  "got": "1.03499 · 27 frames · ends 1"
+ },
+ {
+  "name": "delete a step · its undo: pressed in within 100ms",
+  "ok": true,
+  "got": "42ms"
+ },
+ {
+  "name": "delete a step · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames",
+  "ok": true,
+  "got": "1.03499 · 31 frames · ends 1"
+ },
+ {
+  "name": "it ran at least five different actions",
+  "ok": true,
+  "got": "[\"mark the partial sent\",\"log a nudge\",\"record a response\",\"close the query\",\"decline the offer\",\"delete a step\"]"
+ }
+]
