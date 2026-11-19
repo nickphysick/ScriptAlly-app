@@ -1,0 +1,37 @@
+[
+ {
+  "name": "population: the save changes the stage (the strip's colour)",
+  "ok": true,
+  "got": "rgb(239, 230, 214) → rgb(228, 235, 242)"
+ },
+ {
+  "name": "population: both ends are single colours",
+  "ok": true,
+  "got": "none / none"
+ },
+ {
+  "name": "at 200ms the strip's background-color is strictly between the old and new",
+  "ok": false,
+  "got": "rgb(239, 230, 214) | rgb(228, 235, 242) @205ms | rgb(228, 235, 242)"
+ },
+ {
+  "name": "by 500ms it equals the new colour",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ },
+ {
+  "name": "the label's colour eases too (between at 200ms, where it changes)",
+  "ok": true,
+  "got": "rgb(248, 244, 237) | rgb(244, 245, 246) | rgb(243, 246, 249)"
+ },
+ {
+  "name": "the footer's new contents fade in (opacity strictly between 0 and 1 during the run)",
+  "ok": true,
+  "got": "[0,0,0,0,0.0254028,0.085292,0.177025,0.29079,0.408338,0.516845]"
+ },
+ {
+  "name": "the footer is fully drawn by 500ms",
+  "ok": true,
+  "got": "1"
+ }
+]

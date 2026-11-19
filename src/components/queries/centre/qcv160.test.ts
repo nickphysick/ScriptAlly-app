@@ -4,7 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { gridEase } from "./qcMotion160";
+import { bump, gridEase } from "./qcMotion160";
 
 const read = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
 const MOTION = read("./qcMotion160.ts");
@@ -109,6 +109,23 @@ describe("Query card v160 · Phase 4 — the grid card behind", () => {
     expect(fn).toMatch(/reduced\(\)/);
     expect(fn).toMatch(/backgroundColor: e\.from \}, \{ backgroundColor: e\.to/);
     expect(MOTION).toMatch(/GRID = \{ ms: 500 \}/);
+  });
+});
+
+describe("Query card v160 · QC160-4 — bumps never stack (a stub frame: two landings inside 500ms cannot be made through the UI)", () => {
+  it("a second bump ends the running one at once, before it starts", () => {
+    const log: string[] = [];
+    let n = 0;
+    const frame = {
+      animate: () => {
+        const k = ++n;
+        log.push(`start ${k}`);
+        return { id: "", cancel: () => log.push(`cancel ${k}`), finished: new Promise(() => {}) };
+      },
+    } as unknown as HTMLElement;
+    bump(frame);
+    bump(frame);
+    expect(log).toEqual(["start 1", "cancel 1", "start 2"]);
   });
 });
 

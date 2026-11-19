@@ -1,0 +1,67 @@
+[
+ {
+  "name": "mark the partial sent: the save bumps (one scale animation, 500ms, peak 1.022)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "mark the partial sent: its undo bumps",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "log a nudge: the save bumps (one scale animation, 500ms, peak 1.022)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "log a nudge: its undo bumps",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "record a response (a request): the save bumps (one scale animation, 500ms, peak 1.022)",
+  "ok": true,
+  "got": "[{\"uid\":2,\"props\":[\"scale\"],\"dur\":500,\"peak\":1.022,\"play\":\"running\"}]"
+ },
+ {
+  "name": "record a response (a request): its undo bumps",
+  "ok": true,
+  "got": "[{\"uid\":3,\"props\":[\"scale\"],\"dur\":500,\"peak\":1.022,\"play\":\"running\"}]"
+ },
+ {
+  "name": "record a response (a pass, which closes it): the save bumps (one scale animation, 500ms, peak 1.022)",
+  "ok": true,
+  "got": "[{\"uid\":2,\"props\":[\"scale\"],\"dur\":500,\"peak\":1.022,\"play\":\"running\"}]"
+ },
+ {
+  "name": "record a response (a pass, which closes it): its undo bumps",
+  "ok": true,
+  "got": "[{\"uid\":3,\"props\":[\"scale\"],\"dur\":500,\"peak\":1.022,\"play\":\"running\"}]"
+ },
+ {
+  "name": "close the query: the save bumps (one scale animation, 500ms, peak 1.022)",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "close the query: its undo bumps",
+  "ok": false,
+  "got": "[]"
+ },
+ {
+  "name": "reopen a closed query: its composer saves in one press (not run: no save)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "answer an offer: its composer saves in one press (not run: no save)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "it ran at least four different actions",
+  "ok": true,
+  "got": "[\"mark the partial sent\",\"log a nudge\",\"record a response (a request)\",\"record a response (a pass, which closes it)\",\"close the query\"]"
+ }
+]

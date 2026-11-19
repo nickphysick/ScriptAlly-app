@@ -2,7 +2,7 @@
  {
   "name": "population: opening the card was sampled",
   "ok": true,
-  "got": "91"
+  "got": "93"
  },
  {
   "name": "opening the card: no scale animation on the frame",
@@ -12,7 +12,7 @@
  {
   "name": "population: changing tab was sampled",
   "ok": true,
-  "got": "105"
+  "got": "212"
  },
  {
   "name": "changing tab: no scale animation on the frame",
@@ -22,7 +22,7 @@
  {
   "name": "population: adding a note was sampled",
   "ok": true,
-  "got": "186"
+  "got": "187"
  },
  {
   "name": "adding a note: no scale animation on the frame",
@@ -32,7 +32,7 @@
  {
   "name": "population: stepping to the next query was sampled",
   "ok": true,
-  "got": "107"
+  "got": "103"
  },
  {
   "name": "stepping to the next query: no scale animation on the frame",
@@ -42,7 +42,7 @@
  {
   "name": "population: opening the composer was sampled",
   "ok": true,
-  "got": "118"
+  "got": "113"
  },
  {
   "name": "opening the composer: no scale animation on the frame",

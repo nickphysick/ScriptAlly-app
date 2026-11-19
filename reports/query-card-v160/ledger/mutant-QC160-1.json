@@ -1,0 +1,47 @@
+[
+ {
+  "name": "population: the save landed (toast)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "save: exactly one scale animation on the frame",
+  "ok": true,
+  "got": "[{\"uid\":3,\"props\":[\"scale\"],\"dur\":500,\"peak\":1.022,\"play\":\"running\"}]"
+ },
+ {
+  "name": "save: it animates scale only, never transform",
+  "ok": true,
+  "got": "[\"scale\"]"
+ },
+ {
+  "name": "save: 500ms",
+  "ok": true,
+  "got": "500"
+ },
+ {
+  "name": "save: peaks between 1.02 and 1.025",
+  "ok": true,
+  "got": "1.022"
+ },
+ {
+  "name": "save: population — frames with the bump running",
+  "ok": true,
+  "got": "32"
+ },
+ {
+  "name": "save: the frame's rotate is unchanged during it (frames where the lean's own return is not running)",
+  "ok": true,
+  "got": "31 frames: [\"1.6deg\"]"
+ },
+ {
+  "name": "save: the frame's translate is unchanged during it",
+  "ok": true,
+  "got": "[\"none\"]"
+ },
+ {
+  "name": "save: transform is never set on the frame",
+  "ok": true,
+  "got": "[\"none\"]"
+ }
+]

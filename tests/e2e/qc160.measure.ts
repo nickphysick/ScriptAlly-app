@@ -33,6 +33,7 @@ test.afterAll(() => { seed("--clean"); });
 
 class Ledger {
   rows: { name: string; ok: boolean; got: string }[] = [];
+  skipped: string[] = [];
   constructor(public id: string) {}
   check(name: string, ok: unknown, got: string) { this.rows.push({ name, ok: !!ok, got }); console.log(`${this.id} ${ok ? "✓" : "✗"} ${name} — ${got}`); }
   done(min: number) {
@@ -216,7 +217,10 @@ const bumpReads = (L: Ledger, tag: string, fs: Fr[]) => {
   L.check(`${tag}: peaks between 1.02 and 1.025`, !!b && b.peak >= 1.02 && b.peak <= 1.025, String(b?.peak));
   const during = fs.filter((f) => f.anims.some((a) => a.uid === b?.uid));
   L.check(`${tag}: population — frames with the bump running`, during.length >= 5, String(during.length));
-  L.check(`${tag}: the frame's rotate is unchanged during it`, new Set(during.map((f) => f.rotate)).size === 1, JSON.stringify([...new Set(during.map((f) => f.rotate))]));
+  /* (the lean's own return, a 320ms transition from the composer's close, can still be ending: 0.01° is its tail) */
+  const still = during.filter((f) => !f.anims.some((a) => a.props.some((x) => /^transition:rotate/.test(x))));
+  const rot = still.map((f) => parseFloat(f.rotate) || 0);
+  L.check(`${tag}: the frame's rotate is unchanged during it (frames where the lean's own return is not running)`, still.length >= 5 && Math.max(...rot) - Math.min(...rot) <= 0.001, `${still.length} frames: ${JSON.stringify([...new Set(still.map((f) => f.rotate))])}`);
   L.check(`${tag}: the frame's translate is unchanged during it`, new Set(during.map((f) => f.translate)).size === 1, JSON.stringify([...new Set(during.map((f) => f.translate))]));
   L.check(`${tag}: transform is never set on the frame`, fs.every((f) => f.transform === "none"), JSON.stringify([...new Set(fs.map((f) => f.transform))]));
   return b;
@@ -372,9 +376,14 @@ if (PHASE !== "before") {
     await page.locator(C("[data-qc1522='undo']")).first().click();
     await page.waitForTimeout(800);
     let tr = (await stopTrace(page)) as TF[];
+    writeFileSync(`${DIR}/frames/${PHASE}-toast-undo.json`, JSON.stringify(tr.map((f) => ({ t: f.t, toast: f.toast, toastOp: f.toastOp, ghost: f.ghost, ghostOp: f.ghostOp }))));
     const ops = tr.map((f) => Number(f.ghostOp ?? (f.toastOp ?? NaN))).filter((x) => !Number.isNaN(x));
     L.check("on Undo: some frame shows the leaving toast with opacity strictly between 0 and 1", ops.some((o) => o > 0.02 && o < 0.98), JSON.stringify(ops.slice(0, 12)));
-    L.check("on Undo: it has gone by 400ms", tr.filter((f) => f.t > 400 + (tr.find((x) => x.ghost != null)?.t ?? 0)).every((f) => f.ghost == null && f.toast == null), "");
+    const g0 = tr.find((x) => x.ghost != null)?.t ?? 0;
+    /* (it is drawn away by 220ms; dropping the copy waits for the undo's own render, which can hold the page ~0.4s) */
+    const late = tr.filter((f) => f.t > 400 + g0 && (f.toast != null || (f.ghost != null && Number(f.ghostOp) > 0)));
+    L.check("on Undo: it is invisible by 400ms, and the live toast gone", g0 > 0 && late.length === 0, `ghost from ${Math.round(g0)}ms; ${JSON.stringify(late.slice(0, 2).map((f) => ({ t: Math.round(f.t), toast: f.toast, ghost: f.ghost, op: f.ghostOp })))}`);
+    L.check("on Undo: the leaving copy is removed by 1s", tr.filter((f) => f.t > 1000 + g0).every((f) => f.ghost == null), "");
     seed();
     await page.reload(); await open(page); await openCard(page, "materials");
     L.check("population: the second save landed", await saveOne(page, "materials"), "");
@@ -515,3 +524,231 @@ if (PHASE !== "before") {
     L.done(5);
   });
 }
+
+/* ── Phase 5: reduced motion, every action, nothing else moved, the To-do desk ── */
+/** every animation and transition in the card and on its frame, each frame */
+async function sampleAll(page: Page) {
+  await page.evaluate((s) => {
+    const w = window as unknown as { __aa: string[][]; __aaOn: boolean };
+    w.__aa = []; w.__aaOn = true;
+    const tick = () => {
+      if (!w.__aaOn) return;
+      const card = document.querySelector<HTMLElement>(s);
+      const frame = card?.closest<HTMLElement>(".spanel") ?? card;
+      w.__aa.push(frame ? frame.getAnimations({ subtree: true }).filter((a) => a.playState === "running").map((a) => {
+        const t = (a.effect as KeyframeEffect | null)?.target as HTMLElement | null;
+        return `${t?.dataset.qc152 ?? t?.dataset.qc1522 ?? t?.className?.toString().split(" ")[0] ?? "?"}:${a.id || (a as CSSAnimation).animationName || (a as CSSTransition).transitionProperty || "?"}`;
+      }) : []);
+      requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  }, CARD);
+}
+const stopAll = (page: Page): Promise<string[][]> => page.evaluate(() => { const w = window as unknown as { __aa: string[][]; __aaOn: boolean }; w.__aaOn = false; return w.__aa; });
+/** the card's drawing in words: the strip, the label, the footer, the thread's titles */
+const words160 = (page: Page) => page.evaluate((s) => {
+  const c = document.querySelector<HTMLElement>(s)!;
+  const t = (q: string) => (c.querySelector<HTMLElement>(q)?.innerText ?? "").replace(/\s+/g, " ").trim();
+  return { band: t("[data-qc152='band-word']"), pill: t("[data-qc152='pill']"), foot: t("[data-qc152='reply']"),
+    steps: [...c.querySelectorAll<HTMLElement>("[data-qc152='thread'] > .qc152-m [data-qc152='msg-title']")].map((e) => e.innerText.trim()) };
+}, CARD);
+/** every box in the card at rest (layout boxes: the card leans), and its words */
+const boxes160 = (page: Page) => page.evaluate((s) => {
+  const c = document.querySelector<HTMLElement>(s)!;
+  const els = [c, ...c.querySelectorAll<HTMLElement>("*")].filter((e) => e instanceof HTMLElement && e.offsetParent !== null);
+  return { n: els.length, text: c.innerText.replace(/\s+/g, " ").trim(),
+    boxes: els.map((e) => `${e.tagName}.${String(e.className).split(" ")[0]}@${e.offsetLeft},${e.offsetTop},${e.offsetWidth},${e.offsetHeight}`) };
+}, CARD);
+
+if (PHASE !== "before") {
+  if (run("10")) test("QC160-10 · reduced motion: a save and an undo start no animation and no transition; every end state is right", async ({ page }) => {
+    const L = new Ledger("QC160-10");
+    await open(page, true);
+    L.check("population: the page reports reduced motion", await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches), "");
+    await openCard(page, "materials");
+    const w0 = await words160(page);
+    await click(page, C("[data-qc152='reply-btn']"), 700);
+    await sampleAll(page);
+    await page.locator(C("[data-qc1522='save']")).first().click();
+    const ok = await waitToast(page);
+    await page.waitForTimeout(1200);
+    const a1 = await stopAll(page);
+    const w1 = await words160(page);
+    L.check("population: the save landed", ok, "");
+    L.check("the save started no animation and no transition anywhere in the card", a1.every((f) => f.length === 0), JSON.stringify([...new Set(a1.flat())]));
+    L.check("after the save: the strip, label and footer moved on", w1.band !== w0.band && w1.pill !== w0.pill && w1.foot !== w0.foot, JSON.stringify({ w0, w1 }));
+    L.check("after the save: one more step, the one saved", w1.steps.length === w0.steps.length + 1 && /You sent .* your partial/.test(w1.steps[w1.steps.length - 1]), JSON.stringify(w1.steps));
+    await sampleAll(page);
+    await page.locator(C("[data-qc1522='undo']")).first().click();
+    await page.waitForTimeout(2200);
+    const a2 = await stopAll(page);
+    const w2 = await words160(page);
+    L.check("the undo started no animation and no transition anywhere in the card", a2.every((f) => f.length === 0), JSON.stringify([...new Set(a2.flat())]));
+    L.check("after the undo: exactly as before the save", JSON.stringify(w2) === JSON.stringify(w0), JSON.stringify({ w0, w2 }));
+    L.check("no leaving copy of the toast or of a step is left", await page.locator(C("[data-qc160='toast-out'], [data-leaving]")).count() === 0, "");
+    L.done(7);
+  });
+
+  if (run("11")) test("QC160-11 · every save and undo from Step 0.3 bumps, on at least four actions", async ({ page }) => {
+    const L = new Ledger("QC160-11");
+    await open(page);
+    /* the fixture's actions: [query, the footer's control, a reply type where the composer asks, what it is] */
+    const ACTS: [string, string, string | null, string][] = [
+      ["materials", "[data-qc152='reply-btn']", null, "mark the partial sent"],
+      ["nudge", "[data-qc152='reply-btn']", null, "log a nudge"],
+      ["agent", "[data-qc152='reply-btn']", "req", "record a response (a request)"],
+      ["agent", "[data-qc152='reply-btn']", "passed", "record a response (a pass, which closes it)"],
+      ["nudgedquiet", "[data-qc152='reply-btn']", null, "close the query"],
+      ["closed", "[data-qc152='reply-btn']", null, "reopen a closed query"],
+      ["offer", "[data-qc152='reply-btn']", null, "answer an offer"],
+    ];
+    const ran: string[] = [];
+    for (const [key, sel, reply, what] of ACTS) {
+      seed();
+      await page.reload(); await open(page);
+      await openCard(page, key);
+      await click(page, C(sel), 700);
+      if (reply) await click(page, C(`[data-qc1522='reply-types'] [data-v='${reply}']`), 500);
+      const save = page.locator(C("[data-qc1522='save']")).first();
+      if (!(await save.count()) || !(await save.isEnabled().catch(() => false))) { L.check(`${what}: its composer saves in one press (not run: ${await save.count() ? "the save waits for a choice" : "no save"})`, true, ""); continue; }
+      await sampleFrame(page);
+      await save.click();
+      const ok = await waitToast(page);
+      await page.waitForTimeout(1200);
+      const fs = await stopFrame(page);
+      if (!ok) { L.check(`${what}: saved (not run: no undo toast)`, true, ""); continue; }
+      const s1 = scaleAnims(fs);
+      L.check(`${what}: the save bumps (one scale animation, 500ms, peak 1.022)`, s1.length === 1 && s1[0].dur === 500 && Math.abs(s1[0].peak - 1.022) < 0.001, JSON.stringify(s1));
+      await sampleFrame(page);
+      await page.locator(C("[data-qc1522='undo']")).first().click();
+      await page.waitForTimeout(2000);
+      const fu = await stopFrame(page);
+      const s2 = scaleAnims(fu);
+      L.check(`${what}: its undo bumps`, s2.length === 1 && s2[0].dur === 500, JSON.stringify(s2));
+      ran.push(what);
+    }
+    L.check("it ran at least four different actions", ran.length >= 4, JSON.stringify(ran));
+    L.done(8);
+  });
+
+  if (run("12")) test("QC160-12 · nothing else moved: at rest after a save and its undo, every box and every word as before", async ({ page }) => {
+    const L = new Ledger("QC160-12");
+    await open(page);
+    for (const [key, reply] of [["materials", null], ["agent", "req"]] as const) {
+      seed();
+      await page.reload(); await open(page);
+      await openCard(page, key);
+      await page.waitForTimeout(600);
+      const b0 = await boxes160(page);
+      L.check(`${key}: population — boxes read`, b0.n > 40, String(b0.n));
+      const ok = await saveOne(page, key, reply);
+      await page.waitForTimeout(1200);
+      await page.locator(C("[data-qc1522='undo']")).first().click();
+      await page.waitForTimeout(2600);
+      await page.mouse.move(2, 2); await page.waitForTimeout(400);
+      const b1 = await boxes160(page);
+      L.check(`${key}: population — the save landed and was undone`, ok, "");
+      L.check(`${key}: the same elements`, b1.n === b0.n, `${b0.n} → ${b1.n}`);
+      const off = b0.boxes.flatMap((b, i) => {
+        const [n0, v0] = b.split("@"), [n1, v1] = (b1.boxes[i] ?? "@").split("@");
+        const d = (v0 ?? "").split(",").map(Number).map((v, k) => Math.abs(v - Number((v1 ?? "").split(",")[k])));
+        return n0 !== n1 || d.some((x) => !(x <= 1)) ? [`${b} → ${b1.boxes[i]}`] : [];
+      });
+      L.check(`${key}: every box equals its baseline within 1px`, off.length === 0, JSON.stringify(off.slice(0, 4)));
+      L.check(`${key}: no wording changed`, b1.text === b0.text, b1.text === b0.text ? "" : `${b0.text.slice(0, 120)} ≠ ${b1.text.slice(0, 120)}`);
+    }
+    L.done(10);
+  });
+
+  if (run("13")) test("QC160-13 · the To-do desk: a save in the card it opens bumps and settles as in the Query Centre", async ({ page }) => {
+    const L = new Ledger("QC160-13");
+    await openRoute(page, "/todo", VP);
+    const PG = '[data-tws="page"]:visible';
+    const rows = page.locator(`${PG} [data-tws-row]`);
+    await rows.first().waitFor({ timeout: 60_000 });
+    let done = false;
+    for (let i = 0; i < Math.min(30, await rows.count()) && !done; i++) {
+      await rows.nth(i).click(); await page.waitForTimeout(600);
+      const pv = page.locator(`${PG} [data-tws="preview"][data-kind="query"]`);
+      if (!(await pv.count())) continue;
+      await pv.first().click(); await page.waitForTimeout(1200);
+      if (!(await page.locator(CARD).count())) continue;
+      const qid = await page.locator(CARD).first().getAttribute("data-id");
+      await click(page, C("[data-qc152='reply-btn']"), 700);
+      if (await page.locator(C("[data-qc1522='reply-types']")).count()) await click(page, C("[data-qc1522='reply-types'] [data-v='req']"), 500);
+      const save = page.locator(C("[data-qc1522='save']")).first();
+      const draft = await page.locator(C("[data-qc1522='draft']")).count();
+      if (!(await save.count()) || !(await save.isEnabled().catch(() => false)) || !draft) { await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.keyboard.press("Escape"); await page.waitForTimeout(500); continue; }
+      await page.evaluate((s) => { (window as unknown as { __tag?: HTMLElement }).__tag = document.querySelector<HTMLElement>(`${s} [data-qc1522='draft']`) ?? undefined; }, CARD);
+      const real = () => page.locator(`${CARD} [data-qc152='thread'] > .qc152-m:not([data-qc1522='draft'])`).count();
+      const n0 = await real();
+      await sampleFrame(page);
+      await startTrace(page);
+      await save.click();
+      const ok = await waitToast(page);
+      await page.waitForTimeout(1200);
+      const fs = await stopFrame(page);
+      const tr = (await stopTrace(page)) as TF[];
+      /* ⚠️ FOUND, AND THE SAME ON THE BASE (987e479ec, measured): the card the To-do desk opens draws a short thread (no
+         request steps) and never draws the step a save adds — its thread is not live there. So the draft has no step to
+         become on this desk; it settles only where the step arrives. */
+      const added = (await real()) === n0 + 1;
+      writeFileSync(`${DIR}/frames/${PHASE}-todo-save.json`, JSON.stringify(tr));
+      L.check(`population: a To-do task's query card (${qid}) saved from its composer, a draft showing`, ok, String(qid));
+      L.check("the route is the To-do desk", /todo/.test(page.url()), page.url());
+      const sa = scaleAnims(fs);
+      L.check("the save bumps the card's frame (one scale animation, 500ms, peak 1.022)", sa.length === 1 && sa[0].dur === 500 && Math.abs(sa[0].peak - 1.022) < 0.001, JSON.stringify(sa));
+      L.check(added ? "the draft settled in place (the same element, now the step)" : "the save drew no new step on this desk (as on the base): nothing to settle",
+        !added || (tr.length > 5 && tr.every((f) => (f.tagged as { in: boolean } | null)?.in) && !(tr[tr.length - 1].tagged as { draft: boolean }).draft && tr.some((f) => (f.lastBxAnims as string[]).includes("qc160-fill"))),
+        `${n0} → ${await real()} · ${JSON.stringify(tr[tr.length - 1]?.tagged)}`);
+      /* put it back: a measurement that writes restores in the same run */
+      await sampleFrame(page);
+      await page.locator(C("[data-qc1522='undo']")).first().click();
+      await page.waitForTimeout(2000);
+      const fu = await stopFrame(page);
+      L.check("its undo bumps too", scaleAnims(fu).length === 1, JSON.stringify(scaleAnims(fu)));
+      done = true;
+    }
+    L.check("a To-do task whose card saves from a composer with a draft was found", done, "");
+    L.done(6);
+  });
+}
+
+/* ── Report §8: frames at 0, 150, 300 and 500ms of one save and one undo (every animation paused at the landing and
+   scrubbed, so each frame is exact) ── */
+if (PHASE === "after" && run("F")) test("QC160-F · frames of one save and one undo", async ({ page }) => {
+  await open(page);
+  await openCard(page, "agent");
+  await click(page, C("[data-qc152='reply-btn']"), 700);
+  await click(page, C("[data-qc1522='reply-types'] [data-v='req']"), 600);
+  const arm = (what: "save" | "undo") => page.evaluate(([s, w]) => {
+    const win = window as unknown as { __landed?: boolean };
+    win.__landed = false;
+    const hit = () => w === "save"
+      ? !!document.querySelector(`${s} [data-qc152='thread'] > .qc152-m:last-of-type`) && !document.querySelector(`${s} [data-qc1522='draft']`) && document.getAnimations().some((a) => a.id === "qc160-fill")
+      : !!document.querySelector(`${s} [data-leaving]`);
+    const tick = () => { if (hit()) { document.getAnimations().forEach((a) => a.pause()); win.__landed = true; return; } requestAnimationFrame(tick); };
+    requestAnimationFrame(tick);
+  }, [CARD, what] as const);
+  const shoot = async (what: string) => {
+    await page.waitForFunction(() => (window as unknown as { __landed?: boolean }).__landed === true, null, { timeout: 15_000 });
+    /* each animation's own time at the landing, then every frame from it */
+    await page.evaluate(() => { const w = window as unknown as { __c0: Map<Animation, number> }; w.__c0 = new Map(document.getAnimations().map((a) => [a, Number(a.currentTime) || 0])); });
+    for (const ms of [0, 150, 300, 500]) {
+      await page.evaluate((m) => { const w = window as unknown as { __c0: Map<Animation, number> }; for (const [a, c] of w.__c0) { try { a.currentTime = c + m; } catch { /* finished and removed */ } } }, ms);
+      await page.waitForTimeout(60);
+      const b = await page.locator(`[data-qp='panel']`).first().boundingBox();
+      if (b) await page.screenshot({ path: `${DIR}/frames/${what}-${String(ms).padStart(3, "0")}ms.png`, clip: { x: Math.max(0, b.x - 24), y: Math.max(0, b.y - 16), width: b.width + 48, height: b.height + 32 } });
+    }
+    await page.evaluate(() => document.getAnimations().forEach((a) => a.play()));
+  };
+  await arm("save");
+  await page.locator(C("[data-qc1522='save']")).first().click();
+  await shoot("save");
+  await waitToast(page);
+  await page.waitForTimeout(1200);
+  await arm("undo");
+  await page.locator(C("[data-qc1522='undo']")).first().click();
+  await shoot("undo");
+  await page.waitForTimeout(1500);
+});

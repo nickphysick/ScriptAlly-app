@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: the grid has solid, offer and gone-quiet cards",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the grid card's band changed colour",
+  "ok": true,
+  "got": "rgb(239, 230, 214) → rgb(228, 235, 242)"
+ },
+ {
+  "name": "the band is part-way between the old and new colour 150–300ms in (the card stayed mounted)",
+  "ok": false,
+  "got": "rgb(239, 230, 214) | rgb(228, 235, 242) | rgb(228, 235, 242) · mounted once: true"
+ },
+ {
+  "name": "the band's ease ran on the grid card (Web Animations, 500ms)",
+  "ok": false,
+  "got": ""
+ },
+ {
+  "name": "it has the new colour by 560ms",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ }
+]

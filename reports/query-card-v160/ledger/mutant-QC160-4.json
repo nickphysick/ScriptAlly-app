@@ -1,0 +1,22 @@
+[
+ {
+  "name": "population: the save landed and Undo was pressed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "at most one running scale animation on the frame in any frame",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "population: two bumps ran (the save's and the undo's)",
+  "ok": false,
+  "got": "0"
+ },
+ {
+  "name": "the frame's box at rest equals its box before the save",
+  "ok": true,
+  "got": "932,100,540,700,none,1.6deg → 932,100,540,700,none,1.6deg"
+ }
+]

@@ -11,8 +11,8 @@
  },
  {
   "name": "on Undo: it has gone by 400ms",
-  "ok": true,
-  "got": ""
+  "ok": false,
+  "got": "ghost from 186ms; [{\"t\":597,\"ghost\":\"Partial sentUndo\",\"op\":\"0\"}]"
  },
  {
   "name": "population: the second save landed",
@@ -22,7 +22,7 @@
  {
   "name": "timed out: some frame shows it leaving, opacity strictly between 0 and 1",
   "ok": true,
-  "got": "[1,1,0.990015,0.9627,0.921499,0.8678,0.804929,0.731848,0.651593,0.563511,0.469189,0.367232]"
+  "got": "[1,1,1,0.962681,0.921474,0.868121,0.804483,0.732267,0.651548,0.563462,0.468548,0.367802]"
  },
  {
   "name": "timed out: the live toast is gone",

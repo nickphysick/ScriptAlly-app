@@ -7,7 +7,7 @@
  {
   "name": "population: the landing frame was found",
   "ok": true,
-  "got": "21"
+  "got": "27"
  },
  {
   "name": "the same bubble element stays in the DOM through the save",
@@ -22,7 +22,7 @@
  {
   "name": "its background-size animates (the fill runs on the bubble)",
   "ok": true,
-  "got": "27"
+  "got": "26"
  },
  {
   "name": "the fill starts near 0% and reaches 100%",
@@ -47,7 +47,7 @@
  {
   "name": "it eased in from scale 1.015",
   "ok": true,
-  "got": "[\"1.015\",\"1.015\",\"1.01356\",\"1.01202\"]"
+  "got": "[\"1.015\",\"1.015\",\"1.01203\",\"1.0104\"]"
  },
  {
   "name": "no new element popped in (no .new on it)",

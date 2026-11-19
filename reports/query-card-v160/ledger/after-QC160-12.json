@@ -1,0 +1,52 @@
+[
+ {
+  "name": "materials: population — boxes read",
+  "ok": true,
+  "got": "73"
+ },
+ {
+  "name": "materials: population — the save landed and was undone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "materials: the same elements",
+  "ok": true,
+  "got": "73 → 73"
+ },
+ {
+  "name": "materials: every box equals its baseline within 1px",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "materials: no wording changed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "agent: population — boxes read",
+  "ok": true,
+  "got": "58"
+ },
+ {
+  "name": "agent: population — the save landed and was undone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "agent: the same elements",
+  "ok": true,
+  "got": "58 → 58"
+ },
+ {
+  "name": "agent: every box equals its baseline within 1px",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "agent: no wording changed",
+  "ok": true,
+  "got": ""
+ }
+]

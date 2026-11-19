@@ -17,27 +17,27 @@
  {
   "name": "at 150ms it is still in the DOM, opacity below 1",
   "ok": true,
-  "got": "{\"t\":781.8999999761581,\"in\":true,\"leaving\":true,\"op\":0.210347,\"h\":61,\"above\":380,\"pe\":\"none\",\"waits\":2}"
+  "got": "{\"t\":828.8000000715256,\"in\":true,\"leaving\":true,\"op\":0.210232,\"h\":61,\"above\":380,\"pe\":\"none\",\"waits\":2}"
  },
  {
   "name": "at 350ms its height is under half its original",
   "ok": true,
-  "got": "2 of 61"
+  "got": "4 of 61"
  },
  {
   "name": "by 500ms it is gone",
   "ok": true,
-  "got": "{\"t\":1139,\"in\":false,\"leaving\":true,\"op\":null,\"h\":null,\"above\":380,\"pe\":null,\"waits\":0}"
+  "got": "{\"t\":1177.4000000953674,\"in\":false,\"leaving\":true,\"op\":null,\"h\":null,\"above\":380,\"pe\":null,\"waits\":0}"
  },
  {
   "name": "it takes no clicks while leaving",
   "ok": true,
-  "got": "26"
+  "got": "27"
  },
  {
   "name": "the bubble above never moves more than 2px between two frames",
   "ok": true,
-  "got": "max step 0px over 103 frames"
+  "got": "max step 0px over 102 frames"
  },
  {
   "name": "its wait line folds with it (the bubble and its line leaving, then gone)",

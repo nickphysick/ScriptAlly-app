@@ -1,0 +1,52 @@
+[
+ {
+  "name": "materials: population — boxes read",
+  "ok": true,
+  "got": "73"
+ },
+ {
+  "name": "materials: population — the save landed and was undone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "materials: the same elements",
+  "ok": false,
+  "got": "73 → 88"
+ },
+ {
+  "name": "materials: every box equals its baseline within 1px",
+  "ok": false,
+  "got": "[\"DIV.qc152-th@0,257,524,196 → DIV.qc152-th@0,257,524,208\",\"DIV.qc152-rb@0,605,524,79 → DIV.qc1522-lt@434,445,66,0\",\"DIV.qc152-rf@14,618,309,52 → DIV.qc152-m@136,451,370,0\",\"SPAN.qc152-fg@24,628,32,32 → DIV.qc152-bx@0,0,370,61\"]"
+ },
+ {
+  "name": "materials: no wording changed",
+  "ok": false,
+  "got": "MATERIALS REQUESTED Day 30 ✕ MV Mira Vale STATE & WINDOW Partial requested QUERYING The Smoke Test ADULT LITERARY FICTIO ≠ MATERIALS REQUESTED Day 30 ✕ MV Mira Vale STATE & WINDOW Partial requested QUERYING The Smoke Test ADULT LITERARY FICTIO"
+ },
+ {
+  "name": "agent: population — boxes read",
+  "ok": true,
+  "got": "58"
+ },
+ {
+  "name": "agent: population — the save landed and was undone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "agent: the same elements",
+  "ok": false,
+  "got": "58 → 71"
+ },
+ {
+  "name": "agent: every box equals its baseline within 1px",
+  "ok": false,
+  "got": "[\"DIV.qc152-th@0,257,524,91 → DIV.qc152-th@0,257,524,103\",\"DIV.qc152-rb@0,605,524,79 → DIV.qc1522-lt@58,340,66,0\",\"DIV.qc152-rf@14,618,323,52 → DIV.qc152-m@18,346,312,0\",\"SPAN.qc152-fc@24,628,32,32 → SPAN.qc152-av@0,6,24,24\"]"
+ },
+ {
+  "name": "agent: no wording changed",
+  "ok": false,
+  "got": "WITH THE AGENT Day 7 ✕ RV Rufus Vale STATE & WINDOW Queried QUERYING The Smoke Test ADULT LITERARY FICTION 92,000 WORDS  ≠ WITH THE AGENT Day 7 ✕ RV Rufus Vale STATE & WINDOW Queried QUERYING The Smoke Test ADULT LITERARY FICTION 92,000 WORDS "
+ }
+]
