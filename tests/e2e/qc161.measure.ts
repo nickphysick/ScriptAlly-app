@@ -229,3 +229,76 @@ if (PHASE !== "before") {
     L.done(5);
   });
 }
+
+/* ══ Phase 2: the bump that shows ════════════════════════════════════════════════════════════════════════════════ */
+/** the running bump's window: frames painted while it ran, its distinct scales above 1, long tasks over 50ms overlapping */
+function runningBump(m: MT) {
+  const fr = m.frames.filter((f) => f.bumpPlay === "running");
+  if (!fr.length) return { frames: 0, scales: 0, longs: [] as { start: number; dur: number }[], span: 0, start: null as number | null };
+  const a = fr[0].t, b = fr[fr.length - 1].t;
+  const painted = m.frames.filter((f) => f.t >= a && f.t <= b).length;
+  const longs = m.longs.filter((l) => l.dur > 50 && l.start < b && l.start + l.dur > a).map((l) => ({ start: Math.round(l.start - a), dur: Math.round(l.dur) }));
+  const scales = new Set(fr.map((f) => f.scale).filter((s) => s && s !== "none" && parseFloat(s) > 1)).size;
+  return { frames: painted, scales, longs, span: Math.round(b - a), start: a };
+}
+if (PHASE !== "before") {
+  if (run("6")) test("QC161-6/7 · CPU 4×: the bump on save and on undo is seen — 24+ frames, 10+ scales, no long task under it; the fold too", async ({ page }) => {
+    const L6 = new Ledger("QC161-6"), L7 = new Ledger("QC161-7");
+    await openQc(page);
+    await openCard(page, "q152-agent");
+    await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(700);
+    await page.locator(C("[data-qc1522='reply-types'] [data-v='req']")).click(); await page.waitForTimeout(500);
+    const cdp = await throttle(page, 4);
+    await startMotionTrace(page);
+    await page.waitForTimeout(300);
+    await page.locator(C("[data-qc1522='save']")).click();
+    await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 30_000 });
+    /* (the toast, and its Undo, lasts 5.2s: the save's motion is over well inside it) */
+    await page.waitForTimeout(2200);
+    const s = await stopMotionTrace(page);
+    const rs = runningBump(s);
+    L6.check("population: the bump ran on save", rs.frames > 0, JSON.stringify(rs));
+    L6.check("at least 24 frames painted while the bump ran", rs.frames >= 24, `${rs.frames} frames over ${rs.span}ms`);
+    L6.check("the frame's scale took at least 10 distinct values above 1", rs.scales >= 10, String(rs.scales));
+    L6.check("no long task over 50ms overlaps it", rs.longs.length === 0, JSON.stringify(rs.longs));
+    const fill = s.frames.filter((f) => f.fill);
+    L6.check("the draft's settle ran with it (the fill painted on 10+ frames)", fill.length >= 10, String(fill.length));
+    await startMotionTrace(page);
+    await page.waitForTimeout(150);
+    await page.locator(C("[data-qc1522='undo']")).first().click({ timeout: 8_000 });
+    await page.waitForTimeout(5000);
+    const u = await stopMotionTrace(page);
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+    const ru = runningBump(u);
+    L7.check("population: the bump ran on undo", ru.frames > 0, JSON.stringify(ru));
+    L7.check("at least 24 frames painted while it ran", ru.frames >= 24, `${ru.frames} frames over ${ru.span}ms`);
+    L7.check("the frame's scale took at least 10 distinct values above 1", ru.scales >= 10, String(ru.scales));
+    L7.check("no long task over 50ms overlaps it", ru.longs.length === 0, JSON.stringify(ru.longs));
+    const folds = new Set(u.frames.map((f) => f.fold).filter((h) => h != null));
+    L7.check("the undone step's height took at least 6 distinct values while folding", folds.size >= 6, JSON.stringify([...folds].slice(0, 12)));
+    writeFileSync(`${DIR}/${PHASE}-trace-qc161-6.json`, JSON.stringify({ save: { ...rs, longsAll: s.longs }, undo: { ...ru, longsAll: u.longs } }, null, 1));
+    L6.done(5); L7.done(5);
+  });
+
+  if (run("8")) test("QC161-8 · on a save, a grid card for a different query renders 0 times", async ({ page }) => {
+    const L = new Ledger("QC161-8");
+    await openQc(page);
+    await openCard(page, "q152-agent");
+    const others = await page.locator(`${PAGE} [data-qc154='card']`).evaluateAll((es) => es.map((e) => (e as HTMLElement).dataset.id!).filter((id) => id && id !== "q152-agent"));
+    const r0 = await page.evaluate(() => ({ ...((window as unknown as { __qc154r?: Record<string, number> }).__qc154r ?? {}) }));
+    L.check("population: the render counter is live and counted the grid", Object.keys(r0).length >= 20, String(Object.keys(r0).length));
+    await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(700);
+    await page.locator(C("[data-qc1522='reply-types'] [data-v='req']")).click(); await page.waitForTimeout(400);
+    const r1 = await page.evaluate(() => ({ ...((window as unknown as { __qc154r?: Record<string, number> }).__qc154r ?? {}) }));
+    await page.locator(C("[data-qc1522='save']")).click();
+    await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 30_000 });
+    await page.waitForTimeout(2500);
+    const r2 = await page.evaluate(() => ({ ...((window as unknown as { __qc154r?: Record<string, number> }).__qc154r ?? {}) }));
+    const moved = others.filter((id) => (r2[id] ?? 0) !== (r1[id] ?? 0));
+    L.check(`population: ${others.length} other grid cards`, others.length >= 20, String(others.length));
+    L.check("not one of them rendered on the save", moved.length === 0, JSON.stringify(moved.slice(0, 8).map((id) => `${id}: ${r1[id]} → ${r2[id]}`)));
+    L.check("the saved query's own card did render (the counter counts)", (r2["q152-agent"] ?? 0) > (r1["q152-agent"] ?? 0), `${r1["q152-agent"]} → ${r2["q152-agent"]}`);
+    await page.locator(C("[data-qc1522='undo']")).first().click(); await page.waitForTimeout(2500);
+    L.done(4);
+  });
+}

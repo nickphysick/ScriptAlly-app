@@ -44,7 +44,12 @@ export interface QcCard154Props {
   onAct: (id: string, mode?: DrawerMode) => void;
 }
 
-export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, packageName, act, onOpen, onAct }) => {
+const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, packageName, act, onOpen, onAct }) => {
+  /* v161 Phase 2 — a render count per query, for the e2e lock only (no production build carries it) */
+  if (import.meta.env.MODE !== "production" && typeof window !== "undefined") {
+    const w = window as unknown as { __qc154r?: Record<string, number> };
+    (w.__qc154r ??= {})[r.id] = (w.__qc154r[r.id] ?? 0) + 1;
+  }
   const t = slipTrack(r);
   const word = standWords(r);
   const sent = queriedFact(r, nowMs);
@@ -131,3 +136,20 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
     </div>
   );
 };
+
+/* ══ Query card v161, Phase 2 — A CARD WHOSE QUERY DID NOT CHANGE DOES NOT RE-RENDER ══════════════════════════════
+   A save re-derived every row, so every grid card re-rendered inside the save's long task. The card is drawn from its
+   row, the hour, whether it is selected, its package's name and its action: when none of those changed it is skipped.
+   ⚠️ Its callbacks are compared by NOTHING: the callers pass stable ones (lib/useStableFn) that call the latest. */
+const rowSigs = new WeakMap<object, string>();
+const sigOf = (o: unknown): string => {
+  if (o == null || typeof o !== "object") return JSON.stringify(o ?? null);
+  let s = rowSigs.get(o);
+  if (s == null) { s = JSON.stringify(o); rowSigs.set(o, s); }
+  return s;
+};
+export const sameCard154 = (a: QcCard154Props, b: QcCard154Props): boolean =>
+  a.selected === b.selected && a.packageName === b.packageName && Math.floor(a.nowMs / 3_600_000) === Math.floor(b.nowMs / 3_600_000)
+  && (a.row === b.row || sigOf(a.row) === sigOf(b.row)) && sigOf(a.act) === sigOf(b.act);
+export const QcCard154 = React.memo(QcCard154Inner, sameCard154);
+

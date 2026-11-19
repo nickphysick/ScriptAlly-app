@@ -14,7 +14,8 @@
  */
 import { useLayoutEffect, useRef } from "react";
 
-export interface Motion160 { kind: "save" | "undo"; n: number }
+/** `done`: the save or the undo has finished (its write acknowledged) — the card releases its held motion after it (v161) */
+export interface Motion160 { kind: "save" | "undo"; n: number; done?: boolean }
 const WINDOW_MS = 1200, GIVE_UP_MS = 8000;
 
 export function useLanding160(

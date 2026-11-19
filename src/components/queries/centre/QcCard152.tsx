@@ -46,7 +46,7 @@ import { AgentTab158 } from "./QcAgent158";
 import { MaterialsTab158 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
 /* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
-import { bump, easeBg, fadeIn, finishAll, fold, foot as footIn, markPop, reduced, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
+import { bump, easeBg, fadeIn, finishAll, fold, foot as footIn, hold, isHeld, markPop, reduced, release, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
 import "./qcv160.css";
 import { useLanding160, type Motion160 } from "./useLanding160";
 
@@ -268,6 +268,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const keysAtStart = useRef<Set<string> | null>(null);
   const snap160 = useRef<Snap160 | null>(null);
   const [enter, setEnter] = useState<string[]>([]);
+  /* v161 Phase 2 — a held landing (its count), released on the first quiet frame after the page says the save is done */
+  const [heldN, setHeldN] = useState(0);
   /* Phase 3 — the steps an undo (or a delete) took away, still drawn while they fold: each with the keys that stood
      before it, so it is drawn where it was */
   type Leaving = { item: ThreadItem; before: string[] };
@@ -285,13 +287,16 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     land: (kind, first) => {
       const root = rootRef.current;
       if (!root) return;
-      if (first) bump(root.closest<HTMLElement>(".spanel"));
+      /* a motion still running ends at once — before anything new is made, and never what is held for this landing */
+      if (!reduced() && !isHeld(root)) finishAll(root);
+      /* v161 — the motion of this landing is held until the page has finished drawing it (the release below) */
+      if (first && !reduced()) { hold(root); setHeldN((n) => n + 1); }
+      if (first) bump(root.closest<HTMLElement>(".spanel"), root);
       const start = keysAtStart.current ?? new Set<string>();
       keysAtStart.current = new Set(thread.map((x) => x.key));
       if (settledNow) { draftSeq.current += 1; lastDraft.current = null; }
       if (reduced()) { snap160.current = readSnap160(root); return; }
       /* (the fold's elements are drawn by this render: goneNow, below) */
-      finishAll(root);
       const was = snap160.current, now = readSnap160(root);
       snap160.current = now;
       const el = (k: string) => root.querySelector<HTMLElement>(`[data-qc152='thread'] > [data-rk="${CSS.escape(alias.current.map.get(k) ?? k)}"]`);
@@ -359,6 +364,25 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const rk = (k: string) => alias.current.map.get(k) ?? k;
   useLayoutEffect(() => { if (p.draft) lastDraft.current = p.draft; lastThread.current = { id: r.id, items: thread }; });
   useLayoutEffect(() => { setLeaving([]); }, [r.id]);
+  /* v161 Phase 2 — RELEASE: once the page says the save or the undo is done (its write acknowledged, so the page's own
+     re-render of it has run), wait for three quick frames in a row (≤ 40ms apart: nothing long is running) and play the
+     held motion. 4s after the landing it plays regardless. */
+  const motionDone = !!p.motion?.done;
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || !isHeld(root)) return undefined;
+    const cap = window.setTimeout(() => release(root), 4000);
+    if (!motionDone) return () => window.clearTimeout(cap);
+    let raf = 0, last = performance.now(), quiet = 0;
+    const tick = (t: number) => {
+      quiet = t - last <= 40 ? quiet + 1 : 0;
+      last = t;
+      if (quiet >= 3) release(root); else raf = window.requestAnimationFrame(tick);
+    };
+    raf = window.requestAnimationFrame(tick);
+    return () => { window.cancelAnimationFrame(raf); window.clearTimeout(cap); };
+  }, [heldN, motionDone]);
+  useEffect(() => () => release(rootRef.current), [r.id]);
 
   const chips = (cs: ThreadChip[], key: string) => cs.length ? (
     <span className="qc152-chs" data-qc152="chips">

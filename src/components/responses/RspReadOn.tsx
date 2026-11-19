@@ -17,6 +17,7 @@ import type { QcRow } from "../../lib/qcSummary";
 import { rowAct } from "../../lib/qc1512";
 import type { DrawerMode } from "../../lib/queryActions/drawerStore";
 import { QcCard154 } from "../queries/centre/QcCard154";
+import { useStableFn } from "../../lib/useStableFn";
 
 type Item = RespItem<QcRow>;
 const reduced = () => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -81,6 +82,10 @@ export const RspReadOn: React.FC<{
     window.addEventListener("resize", on);
     return () => { t.removeEventListener("scroll", on); window.removeEventListener("resize", on); cancelAnimationFrame(raf); };
   }, [sync, items.length]);
+  /* Query card v161 — stable callbacks: QcCard154 is memoised and skips a re-render for a new closure alone. Above the
+     early return (hooks keep their order); they find the item when called, from the latest render */
+  const open154 = useStableFn((id: string) => { const x = items.find((i) => i.id === id); if (x) onOpen(x); });
+  const act154 = useStableFn((id: string, mode?: DrawerMode) => { const x = items.find((i) => i.id === id); if (x) onAct(x, mode ?? "resp"); });
   if (!items.length) return null;
   const go = (left: number) => track.current?.scrollTo({ left, behavior: reduced() ? "auto" : "smooth" });
   const atStart = view.x <= 4, atEnd = view.x >= view.max - 4;
@@ -108,8 +113,7 @@ export const RspReadOn: React.FC<{
           {items.map((i) => (
             <QcCard154 key={i.id} row={i.row} nowMs={nowMs} selected={selectedId === i.id} packageName={packageNameOf(i.row)}
               act={rowAct(i.row, nowMs)}
-              onOpen={(id) => { const x = by(id); if (x) onOpen(x); }}
-              onAct={(id, mode) => { const x = by(id); if (x) onAct(x, mode ?? "resp"); }} />
+              onOpen={open154} onAct={act154} />
           ))}
         </div>
         {nav ? (

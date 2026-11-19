@@ -15,6 +15,7 @@
  *    group passes, and the next group's header (later in the table) paints over it when it arrives.
  */
 import React, { useEffect, useRef, useState } from "react";
+import { useStableFn } from "../../../lib/useStableFn";
 import { QueryStatus, type Agent } from "../../../types";
 import { StatusDot } from "../../StatusDot";
 import { usePopover } from "../../shell/ListPills";
@@ -405,9 +406,11 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     return n;
   });
   /* v154 — each group's queries are a 3-across grid of small cards (the slip's successor: same row, facts and act) */
+  /* v161 — stable callbacks, so a card whose query did not change is not re-rendered for a new closure (QcCard154) */
+  const onOpen154 = useStableFn(p.onOpen), onAct154 = useStableFn(p.onAct);
   const card = (r: QcRow) => (
     <QcCard154 key={r.id} row={r} nowMs={p.nowMs} selected={p.selectedId === r.id} packageName={p.packageNameOf(r)}
-      act={rowAct(r, p.nowMs)} onOpen={p.onOpen} onAct={p.onAct} />
+      act={rowAct(r, p.nowMs)} onOpen={onOpen154} onAct={onAct154} />
   );
   const only = p.sections.length === 1;
   /* v153 — the slim bar at the top of the list column: the switch, the count, search, Sort and Group */
