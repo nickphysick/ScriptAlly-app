@@ -152,3 +152,15 @@
   :is(.qc151.qc153, .cl27) .qc153-railcol[data-qc155-busy] .fp :is(.fp-n, .fp-pn, .fp-swn, .fp-on),
   :is(.qc151.qc153, .cl27) .fp[aria-busy="true"] :is(.fp-n, .fp-pn, .fp-swn, .fp-on) { visibility: hidden; }
 }
+
+/* ── List filters v1 Phase 6 · motion: it confirms a press and never loops ── */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  :is(.qc151.qc153, .cl27) .fp .fp-tile { transition: background 0.15s, box-shadow 0.15s, transform 0.15s; }
+  :is(.qc151.qc153, .cl27) .fp .fp-tile:hover:not(:disabled):not(.is-on) { transform: translateY(-1px); }
+  :is(.qc151.qc153, .cl27) .fp .fp-tile:active:not(:disabled) { transform: translateY(0) scale(0.98); }
+  :is(.qc151.qc153, .cl27) .fp .fp-pill { transition: background 0.15s, box-shadow 0.15s, transform 0.15s; }
+  :is(.qc151.qc153, .cl27) .fp .fp-pill:hover:not(:disabled):not(.is-on) { transform: translateY(-1px); box-shadow: inset 0 0 0 1px #c9bba9, 0 8px 14px -10px rgba(28, 19, 15, 0.35); }
+  :is(.qc151.qc153, .cl27) .fp .fp-sg { transition: flex-grow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.15s; }
+  :is(.qc151.qc153, .cl27) .fp .fp-tog, :is(.qc151.qc153, .cl27) .fp .fp-tog::after { transition: background 0.15s, transform 0.15s; }
+  :is(.qc151.qc153, .cl27) .fp .fp-fold i { transition: transform 0.18s ease-out; }
+}

@@ -109,3 +109,26 @@ describe("the sheet", () => {
     }
   });
 });
+
+describe("motion (Phase 6)", () => {
+  const sheets = ["filterPanel.css", "stageFilter.css", "appliedRow.css"].map((f) => [f, readFileSync(resolve(__dirname, f), "utf8")] as const);
+  it("every transition and animation runs only without reduced motion; nothing loops; keyframes hold no var()", () => {
+    for (const [f, s] of sheets) {
+      const bare = s.replace(/\/\*[\s\S]*?\*\//g, "");
+      const moving = bare.split(/@media[^{]*prefers-reduced-motion: no-preference\)\s*\{/);
+      /* before the first motion block, no rule moves */
+      expect(moving[0], f).not.toMatch(/\b(transition|animation)\s*:/);
+      expect(bare, f).not.toMatch(/infinite/);
+      for (const k of bare.match(/@keyframes[^{]*\{[\s\S]*?\}\s*\}/g) ?? []) expect(k, f).not.toContain("var(");
+    }
+  });
+  it("the counts run over 260ms; bars and splits ease their widths over 350ms on the reference's curve", async () => {
+    const { COUNT_MS } = await import("./FilterPanel");
+    expect(COUNT_MS).toBe(260);
+    const all = sheets.map(([, s]) => s).join("\n");
+    expect(all).toContain(".fp .fp-sg { transition: flex-grow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)");
+    expect(all).toContain(".fp .sf-seg { transition: flex-grow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1)");
+    expect(all).toContain(".fp .fp-fold i { transition: transform 0.18s ease-out; }");
+    expect(all).toContain("animation: lf-pop 0.2s ease-out");
+  });
+});

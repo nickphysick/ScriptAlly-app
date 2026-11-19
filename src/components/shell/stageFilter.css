@@ -25,3 +25,10 @@
   :is(.qc151.qc153, .cl27) .fp .sf-lab.is-on:focus-visible { outline-offset: 5px; }
   :is(.qc151.qc153, .cl27) .fp .sf-lab svg { flex: none; }
 }
+
+/* List filters v1 Phase 6 · motion: segments grow from where they were; a label lifts on hover. None under reduced motion. */
+@media (min-width: 768px) and (prefers-reduced-motion: no-preference) {
+  :is(.qc151.qc153, .cl27) .fp .sf-seg { transition: flex-grow 0.35s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.2s; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab { transition: box-shadow 0.15s, transform 0.15s; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab:hover:not(:disabled) { transform: translateY(-1px); }
+}

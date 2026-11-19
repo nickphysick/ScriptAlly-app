@@ -21,7 +21,7 @@
  *    stays mounted, so a probe that counts one page's hooks across the document must never count the other's.
  * ⚠️ NO COLOUR HERE MEANS A STAGE. Stage colours live in lib/stageColours and are drawn only by shell/StageFilter.
  */
-import React, { createContext, useContext, useEffect, useId, useState } from "react";
+import React, { createContext, useContext, useEffect, useId, useRef, useState } from "react";
 import "./filterPanel.css";
 
 type Hook = `data-${string}`;
@@ -47,8 +47,33 @@ export const FILTER_ICONS: Record<FilterIcon, React.ReactNode> = {
 export const FILTER_TICK = <svg className="fp-tk" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.6l4.6-5" /></svg>;
 const CARET = <svg viewBox="0 0 12 12" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M2 4h8L6 9z" /></svg>;
 
-/** a count: the number, and its probe value (`data-n`) on the element that shows it */
-export const Num: React.FC<{ n: number; className?: string }> = ({ n, className }) => <b className={className} data-n={n}>{n}</b>;
+/** List filters v1 Phase 6 — a count that changes runs to its new value over this long; never on first paint */
+export const COUNT_MS = 260;
+const reducedMotion = (): boolean => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+/**
+ * A count: the number, and its probe value (`data-n`, always the TARGET) on the element that shows it. When the number
+ * changes it runs to the new value over COUNT_MS; on first paint, and under reduced motion, it lands at once.
+ */
+export const Num: React.FC<{ n: number; className?: string }> = ({ n, className }) => {
+  const [shown, setShown] = useState(n);
+  const from = useRef(n);
+  useEffect(() => {
+    const start = from.current;
+    from.current = n;
+    if (start === n) return undefined;
+    if (reducedMotion()) { setShown(n); return undefined; }
+    let raf = 0;
+    const t0 = performance.now();
+    const step = (t: number) => {
+      const k = Math.min(1, (t - t0) / COUNT_MS);
+      setShown(Math.round(start + (n - start) * k));
+      if (k < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => { cancelAnimationFrame(raf); setShown(n); };
+  }, [n]);
+  return <b className={className} data-n={n}>{shown}</b>;
+};
 
 /* ── the card ──────────────────────────────────────────────────────────────────────────────────────────────────── */
 export interface FilterPanelProps {
