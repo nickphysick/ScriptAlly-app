@@ -19,7 +19,7 @@ import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
-import { buildCorpus, rankItems } from "../../lib/searchPalette";
+import { buildCorpus, searchPalette } from "../../lib/searchPalette";
 import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import { SearchPalette } from "./SearchPalette";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
@@ -64,12 +64,15 @@ export function usePalette({ onNavigate, onNavigatePath, setSearchQuery, pageIco
      keystroke; the ranking is the cheap part. */
   const corpus = useMemo(
     () => buildCorpus({
-      agents, queries, manuscripts, now: Date.now(),
+      agents, queries,
       agentLabel: (a) => ({ primary: agentPrimary(a), secondary: agentSecondary(a) }),
     }),
-    [agents, queries, manuscripts],
+    [agents, queries],
   );
-  const items = useMemo(() => rankItems(corpus, term), [corpus, term]);
+  const items = useMemo(
+    () => searchPalette(corpus, term, "all").rows.flatMap((r) => (r.type === "item" ? [r.item] : [])),
+    [corpus, term],
+  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {

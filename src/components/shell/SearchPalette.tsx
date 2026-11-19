@@ -19,7 +19,7 @@ import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 import { invokeCapture } from "./railNav";
 import {
-  GROUP_LABEL, GROUP_ORDER, PaletteItem, PaletteKind, PaletteRun, emptyStateItems, highlightParts,
+  GROUP_LABEL, GROUP_ORDER, PaletteItem, PaletteKind, PaletteRun, highlightParts, tokens,
 } from "../../lib/searchPalette";
 import { PaletteBox, palettePosition, visibleAnchorRect } from "../../lib/palettePosition";
 import searchMark from "../../assets/shell/search-icon.png";
@@ -48,11 +48,14 @@ const queryWho = (title: string): string => title.split(" — ")[0] ?? title;
 /** Row glyphs by kind — lucide, as everywhere else in the shell (TypeGlyph stays locked to
  *  material types and is not involved). */
 const KIND_ICON: Record<PaletteKind, React.ReactNode> = {
-  act: <Plus aria-hidden="true" />,
+  action: <Plus aria-hidden="true" />,
   agent: <UserPlus aria-hidden="true" />,
   query: <Send aria-hidden="true" />,
-  ms: <Book aria-hidden="true" />,
+  task: <Book aria-hidden="true" />,
+  note: <Book aria-hidden="true" />,
+  material: <Book aria-hidden="true" />,
   page: <LayoutGrid aria-hidden="true" />,
+  help: <HelpCircle aria-hidden="true" />,
 };
 
 /** A few actions/pages read better with their own glyph than their kind's default. */
@@ -104,10 +107,7 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
   const [sel, setSel] = useState(0);
   const [box, setBox] = useState<PaletteBox | null>(null);
 
-  const rows = useMemo(
-    () => (term.trim() ? items : emptyStateItems()),
-    [term, items]
-  );
+  const rows = items;
 
   /* a SOON row is shown and never chosen: the selection starts on, and moves through, the others */
   /* −1 when every row is SOON: nothing is selected and Enter does nothing (MS4 found the SOON row
@@ -159,15 +159,11 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
         // the existing deep-selection contract: onNavigate("queries", <query id>)
         onNavigate("queries", run.queryId);
         break;
-      case "agent":
-        // the existing behaviour: the Agents page, seeded with the name as its list filter
-        setSearchQuery(run.name);
-        onNavigatePath("/agents");
-        break;
       case "logQueryTo":
-        // JUMP TO — the existing preselect seam (LogQueryFocusForm's initialAgentId), never a
-        // new form and never a new handler.
         onNavigate("queries", "Log a query", { agentId: run.agentId });
+        break;
+      default:
+        /* Part D wires the rest */
         break;
     }
   }, [onNavigate, onNavigatePath, setSearchQuery]);
@@ -382,7 +378,7 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
                         </span>
                         <span className="sp-tx sp-tx--line">
                           <span className="sp-t1">
-                            {highlightParts(item.status ? queryWho(item.title) : item.title, term).map((p, j) =>
+                            {highlightParts(item.status ? queryWho(item.title) : item.title, tokens(term)).map((p, j) =>
                               p.match ? <mark key={j}>{p.text}</mark> : <React.Fragment key={j}>{p.text}</React.Fragment>
                             )}
                           </span>
@@ -393,7 +389,6 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
                         </span>
                         <span className="sp-k">
                           {item.status && <span className="sp-st">{item.status}</span>}
-                          {item.meta && <span className="sp-meta">{item.meta}</span>}
                           {item.soon && <span className="sa-soon" aria-label="coming soon">SOON</span>}
                           {i === sel && !item.soon && <span className="sp-kc" aria-hidden="true">↵</span>}
                         </span>
@@ -409,14 +404,12 @@ export const SearchPalette: React.FC<SearchPaletteProps> = ({
                       </span>
                       <span className="sp-tx">
                         <span className="sp-t1">
-                          {highlightParts(item.title, term).map((p, j) =>
+                          {highlightParts(item.title, tokens(term)).map((p, j) =>
                             p.match ? <mark key={j}>{p.text}</mark> : <React.Fragment key={j}>{p.text}</React.Fragment>
                           )}
                         </span>
                         {item.subtitle && <span className="sp-t2">{item.subtitle}</span>}
                       </span>
-                      {item.meta && <span className="sp-meta">{item.meta}</span>}
-                      {item.shortcut && <span className="sp-kb">{item.shortcut}</span>}
                       </>
                     )}
                   </div>
