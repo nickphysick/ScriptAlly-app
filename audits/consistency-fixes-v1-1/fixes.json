@@ -229,6 +229,34 @@
     "account-profile",
     "account-preferences"
    ]
+  },
+  "L-go-red": {
+   "mode": "same",
+   "sel": ".tws-go[data-red]",
+   "pages": [
+    "todo"
+   ]
+  },
+  "L-po-warn": {
+   "mode": "same",
+   "sel": ".tws-po[data-warn] span",
+   "pages": [
+    "todo"
+   ]
+  },
+  "L-bdl": {
+   "mode": "same",
+   "sel": ".tws-bd .tws-bdl",
+   "pages": [
+    "todo"
+   ]
+  },
+  "L-pip55": {
+   "mode": "same",
+   "sel": ".tws .tws55-pip",
+   "pages": [
+    "todo"
+   ]
   }
  }
 }

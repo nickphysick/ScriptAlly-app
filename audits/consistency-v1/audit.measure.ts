@@ -60,6 +60,41 @@ async function ruleProbe(page: Page, key: string, vw: number) {
    into CA_RULE_SHOTS/<CA_LABEL>/<page>/<fix>.png (git-ignored) */
 const CHECK = process.env.CA_CHECK === "1" ? readFileSync(resolve(process.cwd(), "audits/consistency-fixes-v1/check-probe.js"), "utf8") : null;
 const FIXES = CHECK ? (JSON.parse(readFileSync(resolve(process.cwd(), process.env.CA_FIXES || "audits/consistency-fixes-v1/fixes.json"), "utf8")).fixes as Record<string, { sel: string; pages: string[] }>) : {};
+/* v1.1: CA_LATE_CROPS=1 crops the To-do's other uses of --tw-late, which only show after an action that writes
+   nothing: the dismiss pop with its red option picked (.tws-po[data-warn] + .tws-go[data-red]), and the filter pip
+   (.tws55-pip) with one type chip on. Everything is closed and the filter cleared after. */
+async function lateCrops(page: Page, key: string, vw: number) {
+  if (process.env.CA_LATE_CROPS !== "1" || key !== "todo" || vw !== 1512) return;
+  const dir = resolve(RULE_SHOTS, process.env.CA_LABEL || "run", key);
+  mkdirSync(dir, { recursive: true });
+  const crop = async (sel: string, name: string) => {
+    const loc = page.locator(sel).locator("visible=true").first();
+    if (!(await loc.count())) { console.log(`[late] ${name}: not on screen`); return; }
+    const b = (await loc.boundingBox())!; const pad = 24; const vp = page.viewportSize()!;
+    const x = Math.max(0, b.x - pad), y = Math.max(0, b.y - pad);
+    await page.screenshot({ path: resolve(dir, `${name}.png`), clip: { x, y, width: Math.min(b.width + pad * 2, vp.width - x), height: Math.min(b.height + pad * 2, vp.height - y) }, animations: "disabled", scale: "css" });
+    console.log(`[late] ${name}: cropped`);
+  };
+  try {
+    const row = page.locator(".tws-ti:has(.tws-qact [aria-label='Dismiss'])").locator("visible=true").first();
+    if (await row.count()) {
+      await row.hover();
+      await row.locator(".tws-qact [aria-label='Dismiss']").click();
+      const warn = page.locator(".tws-pop .tws-po[data-warn]").first();
+      if (await warn.count()) { await warn.click(); await crop(".tws-pop", "late-dismiss-pop"); } else console.log("[late] no warn option on this row");
+      await page.keyboard.press("Escape");
+    } else console.log("[late] no dismissable row");
+  } catch (e) { console.log(`[late] dismiss: ${String((e as Error).message).slice(0, 120)}`); }
+  try {
+    await page.locator("[data-tws55='menu-btn']").first().click();
+    await page.locator(".tws55-chip[data-tws55-type]").first().click();
+    await page.keyboard.press("Escape");
+    await crop("[data-tws55='menu-btn']", "late-filter-pip");
+    await page.locator("[data-tws55='menu-btn']").first().click();
+    await page.locator("[data-tws55='clear']").first().click();
+    await page.keyboard.press("Escape");
+  } catch (e) { console.log(`[late] pip: ${String((e as Error).message).slice(0, 120)}`); }
+}
 async function checkProbe(page: Page, key: string, vw: number) {
   if (!CHECK) return;
   const sels = Object.fromEntries(Object.entries(FIXES).filter(([, f]) => f.pages.includes(key)).map(([id, f]) => [id, f.sel]));
@@ -243,6 +278,7 @@ test("consistency audit v1 — every route, both viewports", async ({ browser })
           writeFileSync(resolve(OUT, `${key}@${vp.w}.json`), JSON.stringify({ ...entry, ...data, errors }, null, 1));
           await ruleProbe(page, key, vp.w);
           await checkProbe(page, key, vp.w);
+          await lateCrops(page, key, vp.w);
           entry.records = data.records.length;
           entry.header = (data.meta as { header?: unknown }).header ?? null;
         }
