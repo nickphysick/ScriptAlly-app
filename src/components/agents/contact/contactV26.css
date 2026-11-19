@@ -138,7 +138,7 @@
 .cl26-dsc--closed { background: #e4e1db; color: rgba(28, 19, 15, .55); }
 .cl26-bang {
   position: absolute; top: -4px; right: -4px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center;
-  background: #c9765d; color: #fff; box-shadow: 0 0 0 2px #fff; font: 700 11px/1 var(--sp-serif) !important; font-style: normal !important;
+  background: #c9765d; color: #fff; box-shadow: 0 0 0 2px #fff; font: 700 12px/1 var(--sp-serif) !important; font-style: normal !important;
 }
 .cl26-want { min-width: 0; padding-right: 16px; }
 .cl26-want .cl252-pills { display: flex; flex-wrap: nowrap; gap: 6px; overflow: hidden; }
