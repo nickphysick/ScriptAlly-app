@@ -40,6 +40,7 @@ import { db as firestoreDb } from "../../../lib/firebase";
 import { commitAgentEdits } from "../../../lib/saveAgentEdits";
 import { agentBack, openQueryPanelFromAgent } from "../../../lib/queryPanelStore";
 import { useToast } from "../../toast/ToastProvider";
+import { committedNotes, computeNotePreview, effectiveNotes, emptyNotesDraft, FLAT_NOTE_ID } from "../../../lib/agentNotes";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
 import { CARD_EDITING_EVENT, requestCardClose } from "./AgentCardPanel262";
@@ -667,10 +668,18 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   }, [uid]);
   const { storedNotes, onAddNote } = useAgentNotes(p.preview ? null : a, uid, writeAgent);
   const flat = (a.notes ?? "").trim();
+  const pinnedId = a.pinnedNoteId ?? null;
   const noteList: NoteIn[] = [
-    ...(flat ? [{ id: "__flat__", text: flat, ms: null, pinned: false, top: true }] : []),
-    ...storedNotes.map((n) => { const t = Date.parse(n.createdAt); return { id: n.id, text: n.text, ms: Number.isFinite(t) ? t : null, pinned: false }; }),
+    ...(flat ? [{ id: FLAT_NOTE_ID, text: flat, ms: null, pinned: pinnedId === FLAT_NOTE_ID, top: true }] : []),
+    ...storedNotes.map((n) => { const t = Date.parse(n.createdAt); return { id: n.id, text: n.text, ms: Number.isFinite(t) ? t : null, pinned: pinnedId === n.id }; }),
   ];
+  /* Agent card v2 ruling 1 — Pin as the query card's notes pin: one pinned note, first in the list; pinning another moves the
+     pin. Stored as the agent's `pinnedNoteId`, with the card cache (`notePreview`) recomputed in the same write. */
+  const pinNote = (id: string | null) => {
+    const list = committedNotes(effectiveNotes(storedNotes, emptyNotesDraft(), { flatNote: a.notes, dateAdded: a.dateAdded }));
+    void writeAgent(a.id, { pinnedNoteId: id, notePreview: computeNotePreview(list, id ?? undefined) })
+      .then((r) => { if (!r.ok) showToast({ message: "Couldn’t pin that note. Try again." }); });
+  };
   const quotes = threads.flatMap((t) => quotesOf(t.steps));
   const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
   const notes = (
@@ -678,7 +687,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
       <NotesTab158 first={m.first} nowMs={p.nowMs} notes={noteList} quotes={quotes} resetKey={a.id}
         placeholder={`Add a note about ${m.first}`} emptySub={`This is the place for where you met ${m.first}, and anything worth remembering before you query.`}
         onAdd={(text) => { void onAddNote(text).then((ok) => { if (ok) { land([]); showToast({ message: `Noted on ${m.first}’s card` }); } else showToast({ message: "Couldn’t save that note. Try again." }); }); }}
-        onPin={null}
+        onPin={p.preview ? null : (id, on) => pinNote(on ? id : null)}
         onTask={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id, dueDate: todayIso() }).then(() => showToast({ message: "On your to-do list for today" })); }}
         onCork={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id }).then(() => showToast({ message: "Pinned to your Corkboard" })); }} />
     </div>

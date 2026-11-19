@@ -493,6 +493,27 @@ async function noteAct(page: Page, id: string, act: string) {
 }
 const agentOf = (id: string) => (JSON.parse(dump(id)) as { agent: Record<string, unknown> }).agent;
 
+test("AC2-7 · Pin on notes", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("AC2-7");
+  await openAc(page, SIZES[0], { id: "acv2fx-notes" });
+  await tab(page, "notes");
+  if (MUTS.has("pin")) await page.evaluate(() => document.addEventListener("click", (e) => { if ((e.target as HTMLElement).closest("[data-act='pin']")) e.stopImmediatePropagation(); }, true));
+  const pinOf = async (id: string) => { await noteAct(page, id, "pin"); await page.waitForTimeout(1500); };
+  const first = () => page.locator(`${AC} [data-qc158='note']`).first();
+  await pinOf("acv2fx-n05");
+  L.check("pinned · first in the list", (await first().getAttribute("data-id")) === "acv2fx-n05", (await first().getAttribute("data-id")) ?? "");
+  L.check("pinned · says so", (await first().locator("[data-qc158='pinned']").count()) === 1, "");
+  L.check("pinned · stored", agentOf("acv2fx-notes").pinnedNoteId === "acv2fx-n05", String(agentOf("acv2fx-notes").pinnedNoteId));
+  await pinOf("acv2fx-n09");
+  L.check("another · the pin moves", (await first().getAttribute("data-id")) === "acv2fx-n09" && (await page.locator(`${AC} [data-qc158='pinned']`).count()) === 1, "");
+  L.check("another · stored", agentOf("acv2fx-notes").pinnedNoteId === "acv2fx-n09", String(agentOf("acv2fx-notes").pinnedNoteId));
+  await noteAct(page, "acv2fx-n09", "pin");
+  await page.waitForTimeout(1500);
+  L.check("unpin · nothing pinned", (await page.locator(`${AC} [data-qc158='pinned']`).count()) === 0 && !("pinnedNoteId" in agentOf("acv2fx-notes")), "");
+  L.done(6);
+});
+
 test("AC2-8 · the add doors focus their own field", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("AC2-8");
