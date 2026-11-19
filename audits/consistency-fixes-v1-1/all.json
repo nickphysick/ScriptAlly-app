@@ -308,6 +308,46 @@
    "pages": [
     "todo"
    ]
+  },
+  "S-wsr": {
+   "mode": "same",
+   "sel": ".wsr",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile",
+    "account-preferences"
+   ]
+  },
+  "S-fb-ctl": {
+   "mode": "same",
+   "sel": ".wsr-fb",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile",
+    "account-preferences"
+   ]
+  },
+  "S-foot": {
+   "mode": "same",
+   "sel": ".wsr-foot",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile",
+    "account-preferences"
+   ]
+  },
+  "S-nav": {
+   "mode": "same",
+   "sel": ".wsr-nav, .wsr-setnav",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile",
+    "account-preferences"
+   ]
   }
  }
 }
