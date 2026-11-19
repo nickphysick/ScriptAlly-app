@@ -135,7 +135,7 @@ import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { QcViews156 } from "./queries/centre/QcViews156";
 import { QcLine156 } from "./queries/centre/QcLine156";
 import { weekGoal154, type WeekGoal154 } from "../lib/qc154goal";
-import { clearFacet, railCounts } from "../lib/qc153Rail";
+import { railCounts } from "../lib/qc153Rail";
 import { stageOf } from "../lib/stageColours";
 import { nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
 import { NEEDS_YOU_155, quietBody155, quietNow155 } from "../lib/qc155";
@@ -8189,7 +8189,8 @@ export const Queries: React.FC<{
               const order151 = sections151.flatMap((x) => x.rows.map((r) => r.id));
               /* v153 — the rail's faceted counts, over what the rail does not own (scope, search, the older narrowings) */
               const railBase = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn));
-              const viewAllN = railBase.filter((r) => matches138(r, clearFacet(qcF138, "quick"), now151)).length;
+              /* List filters v1 — the foot's "{y} need you": Your move with nothing filtered, over the list in scope */
+              const needYou = qcScoped.filter((r) => matches138(r, { ...emptyQc138Filters(), you: true }, now151)).length;
               const railN = railCounts(railBase, qcF138, qc138Counts.sent.map((o) => o.key), (r, g) => matches138(r, g, now151));
               /* v156 §2 — the header's line and the collapsed bar's "n of goal" (goal156Of) */
               const goal156 = showGridSkeleton || qcLoadFail ? null : goal156Of(queries.map((q) => anyToMs(q.dateSent)), currentUser?.queryingGoals, now151);
@@ -8246,8 +8247,8 @@ export const Queries: React.FC<{
                   onImport={() => onNavigate?.("import")}
                   packageNameOf={(r) => { const k = pkgKeyOf(r); return k ? qcPackageName(k) : null; }}
                   agentOf={(r) => qcLivingAgents.get(r.query.agentId) ?? null}
-                  rail={<QcViews156 filters={qcF138} onFilters={setQcF138} counts={railN} allN={viewAllN} sent={qc138Counts.sent} onReset={clear151}
-                    showing={qcVisible.length} onExport={exportQcList} loading={showGridSkeleton} />}
+                  rail={<QcViews156 filters={qcF138} onFilters={setQcF138} counts={railN} sent={qc138Counts.sent} onReset={clear151}
+                    showing={qcVisible.length} total={qcScoped.length} needYou={needYou} loading={showGridSkeleton} />}
                   birds={qcView150 === "birds" && !showGridSkeleton ? (
                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
                       selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}

@@ -1,10 +1,8 @@
 /**
- * Query Centre v156 — the "this week" line's geometry (Phase 2) and the Views panel's model (Phase 4).
+ * Query Centre v156 — the "this week" line's geometry (Phase 2); the Views panel's model retired (List filters v1).
  */
 import { describe, expect, it } from "vitest";
-import { QueryStatus } from "../types";
-import { emptyQc138Filters, type Qc138Filters } from "./qc138";
-import { LINE_H, LINE_W, lineAlt, lineGeometry, lineMonths, moreActive156, selectView156, statusRows156, viewOf156, VIEWS_156 } from "./qc156";
+import { LINE_H, LINE_W, lineAlt, lineGeometry, lineMonths } from "./qc156";
 
 /* the ref's own series (design-refs/query-centre-v156.html, the rendered path at 1920): goal 3, this week 2 */
 const REF_SERIES = [1, 0, 2, 3, 1, 0, 2, 4, 1, 0, 1, 3, 1, 3, 4, 3, 3, 3, 4, 2];
@@ -47,45 +45,5 @@ describe("the this-week line (v156 §2)", () => {
   });
 });
 
-const F = (o: Partial<Qc138Filters> = {}): Qc138Filters => ({ ...emptyQc138Filters(), ...o });
-
-describe("the Views panel (v156 §6)", () => {
-  it("lists the five views with today's labels, All queries first", () => {
-    expect(VIEWS_156.map((v) => v.label)).toEqual(["All queries", "Your move", "Overdue", "Waiting to hear back", "Offers"]);
-  });
-  it("selecting a view replaces the previous one", () => {
-    const a = selectView156(F(), "you");
-    expect(viewOf156(a)).toBe("you");
-    const b = selectView156(a, "offers");
-    expect(viewOf156(b)).toBe("offers");
-    expect(b.you).toBe(false);
-    expect(b.offers).toBe(true);
-    /* selecting the selected view keeps it (a view is picked, never toggled off) */
-    expect(viewOf156(selectView156(b, "offers"))).toBe("offers");
-  });
-  it("All queries clears the view, and leaves the status ticks alone", () => {
-    const f = selectView156(F({ stages: [QueryStatus.QUERIED] }), "wait");
-    const g = selectView156(f, "all");
-    expect(viewOf156(g)).toBe("all");
-    expect(g.you || g.waiting || g.offers || g.past).toBe(false);
-    expect(g.stages).toEqual([QueryStatus.QUERIED]);
-  });
-  it("Overdue is the past field, as the quick filter wrote it", () => {
-    expect(viewOf156(F({ past: true }))).toBe("over");
-    expect(selectView156(F(), "over").past).toBe(true);
-  });
-  it("leaves out statuses at 0, unless ticked", () => {
-    const rows = statusRows156({ q: 7, pr: 1, ps: 0, fr: 1, fs: 0, of: 1, rj: 2, nr: 0 }, F({ stages: [QueryStatus.NO_RESPONSE] }));
-    expect(rows.map((r) => r.row.key)).toEqual(["q", "pr", "fr", "of", "rj", "nr"]);
-    expect(rows.find((r) => r.row.key === "nr")?.on).toBe(true);
-  });
-  it("More filters is active for a round, a date filter, or Past their reply date under another view — not for the Overdue view itself", () => {
-    expect(moreActive156(F())).toBe(false);
-    expect(moreActive156(F({ sent: ["pkg1"] }))).toBe(true);
-    expect(moreActive156(F({ dueWeek: true }))).toBe(true);
-    expect(moreActive156(F({ missing: true }))).toBe(true);
-    expect(moreActive156(F({ overYear: true }))).toBe(true);
-    expect(moreActive156(F({ past: true }))).toBe(false);
-    expect(moreActive156(F({ past: true, you: true }))).toBe(true);
-  });
-});
+/* the Views panel's model (§6) retired with the panel in List filters v1 Phase 2: the Filter panel writes the quick
+   fields through lib/qc153Rail `pickQuick` and the stages through lib/qc140 `toggleStage` (their own tests). */

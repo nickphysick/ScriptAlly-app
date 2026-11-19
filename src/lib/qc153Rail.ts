@@ -14,7 +14,8 @@
  * ⚠️ MOST USED IS A RADIO: one pick at a time; pressing the active one turns it off.
  */
 import { emptyQc138Filters, type Qc138Filters } from "./qc138";
-import { QUICK_PICKS, STAND_ROWS, appliedChips, toggleStand, type QuickKey } from "./qc140";
+import { QUICK_PICKS, STAGES, STAND_ROWS, appliedChips, toggleStand, type QuickKey } from "./qc140";
+import { STAGE_STATUSES, type Stage } from "./stageColours";
 import { WHERE_KEYS, type WhereKey } from "./qcSummary";
 
 export type Facet = "quick" | "where" | "stages" | "sent" | "more";
@@ -55,6 +56,8 @@ export interface RailCounts {
   quick: Record<QuickKey, number>;
   where: Record<WhereKey, number>;
   stand: Record<string, number>;
+  /** List filters v1 — each stage, every one of its statuses (lib/stageColours STAGE_STATUSES), faceted as Stage is */
+  stage: Record<Stage, number>;
   sent: Record<string, number>;
   more: Record<MoreField, number>;
 }
@@ -74,9 +77,11 @@ export function railCounts<R>(rows: readonly R[], f: Qc138Filters, sentKeys: rea
   for (const k of WHERE_KEYS) where[k] = count(w, { ...E, where: k });
   const stand: Record<string, number> = {};
   for (const row of STAND_ROWS) stand[row.key] = count(s, toggleStand(E, row));
+  const stage = {} as Record<Stage, number>;
+  for (const st of STAGES) stage[st] = count(s, { ...E, stages: [...STAGE_STATUSES[st]] });
   const sent: Record<string, number> = {};
   for (const k of sentKeys) sent[k] = count(p, { ...E, sent: [k] });
   const more = {} as Record<MoreField, number>;
   for (const r of MORE_ROWS_153) more[r.key] = count(m, { ...E, [r.key]: true });
-  return { quick, where, stand, sent, more };
+  return { quick, where, stand, stage, sent, more };
 }
