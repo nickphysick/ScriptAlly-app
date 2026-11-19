@@ -10,7 +10,7 @@ import { findDuplicateAgent } from "./contactList";
 import { agentGaps, GAP_LABEL } from "./contactHousekeeping";
 import { appliesTo } from "./listHealth";
 import { sanitizeAgentPatch } from "./saveAgentEdits";
-import { howTiles } from "./contactCard262";
+import { factBoxes } from "./agentCardV2";
 import { queryViaOf } from "./queryVia";
 
 const agent = (o: Partial<Agent>): Agent => ({
@@ -64,10 +64,11 @@ describe("the Other method", () => {
     const back = cardPatch(stored, draftOf(stored), { ...draftOf(stored), method: SubmissionMethod.EMAIL }, "now");
     expect(back.submissionMethodOther).toBeNull();
   });
-  it("reads 'via {text}' on the card's How tile, or 'via Other' with none", () => {
-    const t = howTiles(agent({ submissionMethod: SubmissionMethod.OTHER, submissionMethodOther: "Agency portal" }), "open");
-    expect(t.find((x) => x.k === "method")?.bold).toBe("via Agency portal");
-    expect(howTiles(agent({ submissionMethod: SubmissionMethod.OTHER }), "open").find((x) => x.k === "method")?.bold).toBe("via Other");
+  /* Agent card v2 — the How tiles are the card's fact boxes: Takes queries · Via {text} */
+  it("reads 'Via {text}' in the card's Takes queries box, or 'Via Other' with none", () => {
+    const t = factBoxes(agent({ submissionMethod: SubmissionMethod.OTHER, submissionMethodOther: "Agency portal" }), "open");
+    expect(t.find((x) => x.k === "method")?.value).toBe("Via Agency portal");
+    expect(factBoxes(agent({ submissionMethod: SubmissionMethod.OTHER }), "open").find((x) => x.k === "method")?.value).toBe("Via Other");
   });
   it("never seeds a query's send method (the query rules' enum)", () => {
     expect(queryViaOf("Other")).toBeNull();

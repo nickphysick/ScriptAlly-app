@@ -124,7 +124,7 @@ export interface FactBoxIn { k: "reply" | "method" | "door"; label: string; valu
 export function factBoxes(a: Agent, door: AgentFacts["door"]): FactBoxIn[] {
   const w = typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? a.responseTimeWeeks : null;
   const policy = a.noResponseMeansNo === true ? "no reply means no" : a.noResponseMeansNo === false ? "always replies" : null;
-  const m = a.submissionMethod === SubmissionMethod.OTHER ? `Via ${(a.submissionMethodOther ?? "").trim() || "other means"}` : METHOD[String(a.submissionMethod ?? "")] ?? null;
+  const m = a.submissionMethod === SubmissionMethod.OTHER ? `Via ${(a.submissionMethodOther ?? "").trim() || "Other"}` : METHOD[String(a.submissionMethod ?? "")] ?? null;
   const checked = monthOf(a.lastCheckedDate), reopens = monthOf(a.reopensOn);
   return [
     { k: "reply", label: "Replies in", value: w ? `About ${w} ${w === 1 ? "week" : "weeks"}` : null, sub: policy },
