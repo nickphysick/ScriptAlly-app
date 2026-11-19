@@ -114,6 +114,10 @@ test.describe("ink shell", () => {
         expect(s, "the field is drawn").not.toBeNull();
         expect(near(s.w, 280) || near(s.w, 168), `${route}: width ${s.w}`).toBe(true);
         expect(near(cap.x - s.r, 12), `${route}: gap ${cap.x - s.r}`).toBe(true);
+        /* a page slot that holds a control (the Contact list's guide pill) stands between the field and Help, so the
+           field's right edge is that much further left there: the one-x claim is for routes whose slot is empty */
+        const slotW = await page.evaluate(() => [...document.querySelectorAll<HTMLElement>('.ws-pagebar [data-shell="page-slot"]')].find((e) => e.offsetParent !== null)?.getBoundingClientRect().width ?? 0);
+        if (slotW > 0.5) { console.log(`[INK7 ${w}] ${route}: page slot ${slotW.toFixed(1)}px, field right ${s.r.toFixed(1)} — left out of the one-x claim`); continue; }
         xs.push(s.r);
       }
       expect(Math.max(...xs) - Math.min(...xs), `right edge across routes at ${w}: ${xs.join(",")}`).toBeLessThanOrEqual(1);
