@@ -194,8 +194,8 @@ if (PHASE === "step0") {
 }
 
 /* ═════════════════════════════ the locks ═════════════════════════════ */
-const T1_ROLES = ["view label", "view label (on)", "view count", "sub-heading (Refine)", "sub-heading note", "sub-label", "tick-box label", "tick-box count",
-  "More filters", "foot showing", "foot export", "bar count", "Find placeholder", "Find input", "chip label (Sort)", "chip label (Group)",
+/* List filters v1 — the Views panel's roles retired with it; the Filter panel's (one component on both pages) in their place */
+const T1_ROLES = ["panel heading", "Clear all", "section title", "tile label", "tile count", "pill label", "foot", "bar count", "Find placeholder", "Find input", "chip label (Sort)", "chip label (Group)",
   "slim title", "slim subline", "slim button"] as const;
 const same = (a: Record<string, string> | null, b: Record<string, string> | null) => !!a && !!b && a.family === b.family && a.size === b.size && a.weight === b.weight;
 const fmt = (a: Record<string, string> | null) => (a ? `${a.family.split(",")[0]} ${a.size} ${a.weight}${a.style === "italic" ? " italic" : ""}` : "absent");
@@ -287,7 +287,8 @@ if (PHASE === "after") {
       const own = await page.evaluate((cl) => {
         const r = [...document.querySelectorAll<HTMLElement>(cl)].find((e) => e.getBoundingClientRect().width > 0)!;
         const f = (s: string) => { const e = r.querySelector(s); return e ? getComputedStyle(e).fontFamily.split(",")[0] : null; };
-        return { yourBook: f("[data-clq='your-book']"), healthTitle: f(".clq-rc .cl26-ht"), healthMissing: f(".clq-rc .cl26-hm"), ruled: f(".qc1531-for > span"), slimHealth: f("[data-clh2='slim-health'] b"), slimHealthWords: f("[data-clh2='slim-health'] em") };
+        /* List filters v1 — the powder "your book" tag is retired; its successor is the key under the genres */
+        return { yourBook: f("[data-clq='book-key']"), healthTitle: f(".clq-rc .cl26-ht"), healthMissing: f(".clq-rc .cl26-hm"), ruled: f(".qc1531-for > span"), slimHealth: f("[data-clh2='slim-health'] b"), slimHealthWords: f("[data-clh2='slim-health'] em") };
       }, CL);
       T1.check("the Contact list's own nodes: your book serif, List health typewriter + serif, the ruled line serif, the slim ring's words the streak type",
         /Serif/.test(own.yourBook ?? "") && /Special Elite/.test(own.healthTitle ?? "") && /Serif/.test(own.healthMissing ?? "") && /Serif/.test(own.ruled ?? "") && /Special Elite/.test(own.slimHealth ?? "") && /Serif/.test(own.slimHealthWords ?? ""),

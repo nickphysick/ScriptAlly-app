@@ -1,0 +1,17 @@
+[
+ {
+  "name": "Queries has the Stage section",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Queries has no splits",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "the four quick tiles",
+  "ok": true,
+  "got": "[\"Your move\",\"Past their reply date\",\"Waiting to hear back\",\"Offers\"]"
+ }
+]

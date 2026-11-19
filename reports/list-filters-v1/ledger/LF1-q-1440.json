@@ -1,0 +1,22 @@
+[
+ {
+  "name": "one Filter panel on the page",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "no Views panel anywhere in the document",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "the head is navy rgb(42, 58, 82)",
+  "ok": true,
+  "got": "rgb(42, 58, 82)"
+ },
+ {
+  "name": "the head reads Filter",
+  "ok": true,
+  "got": "Filter"
+ }
+]

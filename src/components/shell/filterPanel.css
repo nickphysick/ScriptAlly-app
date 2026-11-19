@@ -99,13 +99,17 @@
   :is(.qc151.qc153, .cl27) .fp .fp-pill--more:hover:not(:disabled) { background: #faf7f2; box-shadow: none; }
 
   /* ── a split ── */
-  :is(.qc151.qc153, .cl27) .fp .fp-split { display: flex; gap: 3px; height: 56px; border-radius: 12px; overflow: hidden; }
+  /* 56px, as the reference; it grows only when a side's words wrap (the app's serif is wider than the ref's fallback) */
+  :is(.qc151.qc153, .cl27) .fp .fp-split { display: flex; gap: 3px; min-height: 56px; border-radius: 12px; overflow: hidden; }
   :is(.qc151.qc153, .cl27) .fp .fp-sg {
-    all: unset; cursor: pointer; box-sizing: border-box; flex: 0 1 0; min-width: 92px; display: flex; flex-direction: column; justify-content: center; gap: 4px; padding: 0 12px;
+    all: unset; cursor: pointer; box-sizing: border-box; flex: 0 1 auto; min-width: 92px; display: flex; flex-direction: column; justify-content: center; gap: 3px; padding: 8px 11px;
     color: #1c130f;
   }
-  :is(.qc151.qc153, .cl27) .fp .fp-sg .fp-n { font: 400 22px/1 var(--sp-type) !important; }
-  :is(.qc151.qc153, .cl27) .fp .fp-sg > span { font: 400 13.5px/1 var(--sp-serif) !important; color: #5b4f47; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  :is(.qc151.qc153, .cl27) .fp .fp-sg .fp-n { font: 400 22px/1 var(--sp-type) !important; line-height: 22px !important; }
+  /* each side is first as wide as its words (flex-basis auto), then shares the rest by its count (flex-grow, inline) */
+  /* the words wrap to a second line rather than clip: with the app's own serif, "open to queries" and "closed for now"
+     need ~243px together and the panel gives 240 (the reference's fallback face was narrower) */
+  :is(.qc151.qc153, .cl27) .fp .fp-sg > span { font: 400 13.5px/1.1 var(--sp-serif) !important; color: #5b4f47; overflow-wrap: anywhere; }
   :is(.qc151.qc153, .cl27) .fp .fp-sg--a { background: #e9e3da; }
   :is(.qc151.qc153, .cl27) .fp .fp-sg--b { background: #f6f3ee; }
   :is(.qc151.qc153, .cl27) .fp .fp-sg:hover:not(:disabled):not(.is-on) { background: #ded6ca; }

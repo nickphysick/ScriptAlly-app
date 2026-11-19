@@ -1,0 +1,17 @@
+[
+ {
+  "name": "no group heading, one section, the button reads None",
+  "ok": true,
+  "got": "{\"heads\":0,\"groups\":[\"all\"],\"btn\":\"None\"}"
+ },
+ {
+  "name": "a reload keeps it",
+  "ok": true,
+  "got": "{\"heads\":0,\"groups\":[\"all\"],\"btn\":\"None\"}"
+ },
+ {
+  "name": "Action again: headings back",
+  "ok": true,
+  "got": ""
+ }
+]

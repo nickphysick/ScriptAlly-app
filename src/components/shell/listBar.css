@@ -11,6 +11,8 @@
   :is(.qc151.qc153, .cl27) .qc153-bar .lf-lab { font: 400 14.5px/1 var(--sp-serif) !important; font-style: normal; color: #5b4f47; white-space: nowrap; }
   :is(.qc151.qc153, .cl27) .qc153-bar .lf-ic { flex: none; color: #2a3a52; }
   :is(.qc151.qc153, .cl27) .qc153-bar .qc153-dd .sc-ic { color: #2a3a52; }
+  /* the Sort chip's field in the bar chip's own type on both pages (shell/sortChip.css's 15px is the cards view's) */
+  :is(.qc151.qc153, .cl27) .qc153-bar .qc153-dd .sc-f { font: 600 14.5px/1 var(--sp-serif) !important; }
   :is(.qc151.qc153, .cl27) .qc153-bar .qc153-dd .sc-dir { font: 600 15px/1 var(--sp-serif) !important; font-style: normal; color: #2a3a52; }
   :is(.qc151.qc153, .cl27) .qc153-bar .qc153-dd .lf-cv,
   :is(.qc151.qc153, .cl27) .qc153-bar .qc153-dd .sc-cv { flex: none; width: 10px; height: 10px; color: #5b4f47; }
@@ -31,3 +33,8 @@
 /* List filters v1 — a column heading that is not the sort shows ↕ on keyboard focus as well as hover (contactV26.css
    already shows it on hover and on the sorted column) */
 .cl27 .cl26-th button:focus-visible i { opacity: 1; }
+
+/* the bars' Sort menu (shell/SortChipMenu, portalled): its heading in sentence case, the typewriter, muted (the ref's .pop h4) */
+.lpop.sc-pop:is([data-qc153="sort-menu"], [data-clq="sort-menu"]) .sc-mh {
+  font: 400 15px/1.2 var(--sp-type) !important; letter-spacing: 0; text-transform: none; color: #5b4f47;
+}
