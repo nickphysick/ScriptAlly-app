@@ -79,7 +79,8 @@ test.describe("search v1", () => {
     await page.keyboard.press("Escape");
     await page.waitForTimeout(300);
     await page.goto("/agents");
-    const find = page.locator('input[aria-label^="Find an agent"]').first();
+    /* every workspace page stays mounted: read the Contact list's Find that is on screen */
+    const find = page.locator('input[aria-label^="Find an agent"]:visible').first();
     await expect(find).toBeVisible();
     await expect(find).toHaveValue("");
   });
@@ -110,8 +111,10 @@ test.describe("search v1", () => {
     await expect(page.locator(INPUT)).toBeFocused();
   });
 
+  /* ⚠️ at 1280 × 800 the sheet is 1192 wide — still over 1180 — so 1100 is added to see the list-only box at all */
   test("SV1-R5 · the peek is drawn on a sheet 1180px or wider and not below; the box is 920 and 660 wide", async ({ page }) => {
-    for (const vp of SIZES) {
+    const seenNarrow: boolean[] = [];
+    for (const vp of [...SIZES, { width: 1100, height: 800 }]) {
       await inkOpen(page, "/queries", vp.width, { height: vp.height });
       const sheet = (await boxOf(page, ".ws-window"))!;
       await openSearch(page);
@@ -120,8 +123,10 @@ test.describe("search v1", () => {
       console.log(`[SV1-R5] ${vp.width}: sheet ${sheet.w}, box ${box.w}, peek ${await page.locator(".sv1-peek").count()}`);
       expect(Math.abs(box.w - (wide ? 920 : 660)), `${vp.width}: box ${box.w} on a ${sheet.w} sheet`).toBeLessThan(1);
       await expect(page.locator(`${PAL} .sv1-peek`)).toHaveCount(wide ? 1 : 0);
+      seenNarrow.push(!wide);
       await page.keyboard.press("Escape");
     }
+    expect(seenNarrow, "both sides of 1180 were measured").toEqual(expect.arrayContaining([true, false]));
   });
 
   test("SV1-R6 · the body is one height with no term, one result and no match", async ({ page }) => {
@@ -140,7 +145,7 @@ test.describe("search v1", () => {
   test("SV1-R7 · crossing three rows in under 110ms leaves the peek alone; resting on one moves it", async ({ page }) => {
     await inkOpen(page, "/queries", 1512, { height: 900 });
     await openSearch(page);
-    await typeTerm(page, "marsh");
+    /* before you type: Start something and Go to, seven rows */
     const rows = page.locator(`${PAL} .sv1-row`);
     expect(await rows.count()).toBeGreaterThan(4);
     const peekText = () => page.locator(`${PAL} .sv1-peek`).innerText();
@@ -161,17 +166,23 @@ test.describe("search v1", () => {
   });
 
   test("SV1-R8 · at 390 wide the phone's palette is as it was before this branch", async ({ page }) => {
-    await openRoute(page, "/queries", { width: 390, height: 844 });
+    /* openRoute waits on the desktop shell, so the route opens wide and then narrows, as SR1.3 does */
+    await openRoute(page, "/queries", { width: 1280, height: 800 });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.waitForTimeout(500);
     await page.evaluate(() => document.fonts.ready);
     await page.keyboard.press(`${mod}+k`);
+    /* ⚠️ ON THE BASE THE PHONE PALETTE MOUNTS AND NEVER SHOWS: at 390 no opener has a rect, so it is never placed and
+       stays visibility:hidden. The compare reads it as it is, visible or not — "as it was" includes that. */
     const pal = page.locator(".sp-pal");
-    await expect(pal).toBeVisible();
+    await expect(pal).toBeAttached();
     await page.waitForTimeout(300);
     const read = () => page.evaluate(() => {
       const root = document.querySelector<HTMLElement>(".sp-pal")!;
       const b = root.getBoundingClientRect();
       const cs = getComputedStyle(root);
       return {
+        visibility: cs.visibility,
         box: [Math.round(b.left), Math.round(b.top), Math.round(b.width)],
         ink: root.classList.contains("sp-pal--ink"),
         frame: [cs.backgroundColor, cs.borderRadius],
