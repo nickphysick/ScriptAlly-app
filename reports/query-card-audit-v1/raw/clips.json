@@ -1,0 +1,564 @@
+{
+ "clips": {
+  "cor-closed": null,
+  "cor-move-a": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "asked",
+     "text": "Asked 7 Sep Partial · asked"
+    }
+   ]
+  },
+  "cor-move-b": null,
+  "cor-move-c": null,
+  "cor-pair": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "sent",
+     "text": "Sent 2 Sep Partial"
+    }
+   ]
+  },
+  "cor-undo": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "sent",
+     "text": "Sent 9 Sep Full manuscript"
+    }
+   ]
+  },
+  "cv25-q-01": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Original"
+    }
+   ]
+  },
+  "cv25-q-02": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Original"
+    }
+   ]
+  },
+  "cv25-q-03": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Original"
+    }
+   ]
+  },
+  "cv25-q-04": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Original"
+    }
+   ]
+  },
+  "cv25-q-05": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Original"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 3 Jun Partial"
+    }
+   ]
+  },
+  "cv25-q-06": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Light"
+    },
+    {
+     "kind": "asked",
+     "text": "Asked 2 Sep Partial · asked"
+    }
+   ]
+  },
+  "cv25-q-07": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "asked",
+     "text": "Asked 10 Sep Partial · asked"
+    }
+   ]
+  },
+  "cv25-q-08": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Light"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent later Full manuscript"
+    }
+   ]
+  },
+  "cv25-q-09": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Light"
+    },
+    {
+     "kind": "asked",
+     "text": "Asked 24 Sep Full manuscript · asked"
+    }
+   ]
+  },
+  "cv25-q-10": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Light"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 3 Jun Full manuscript"
+    }
+   ]
+  },
+  "cv25-q-11": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Light"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 12 Jul Partial"
+    }
+   ]
+  },
+  "cv25-q-12": null,
+  "cv25-q-13": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Standard"
+    }
+   ]
+  },
+  "cv25-q-14": null,
+  "msv12-q-1": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Autumn round"
+    }
+   ]
+  },
+  "msv12-q-2": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Autumn round"
+    }
+   ]
+  },
+  "msv12-q-3": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Autumn round"
+    },
+    {
+     "kind": "asked",
+     "text": "Asked 12 Sep First 50 pages · asked"
+    }
+   ]
+  },
+  "msv12-q-4": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Autumn round"
+    },
+    {
+     "kind": "asked",
+     "text": "Asked 19 Sep Full manuscript · asked"
+    }
+   ]
+  },
+  "msv12-q-5": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Agents with MSWL"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 24 Jul Full manuscript"
+    }
+   ]
+  },
+  "msv12-q-6": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Agents with MSWL"
+    }
+   ]
+  },
+  "msv12-q-7": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query First round"
+    }
+   ]
+  },
+  "msv12-q-8": null,
+  "probe-dangling-pkg": null,
+  "probe-goalstress-today": null,
+  "probe-un-both": null,
+  "probe-un-noagent": null,
+  "probe-un-noms": null,
+  "qc150l9-q": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "sent",
+     "text": "Sent 15 Oct Full manuscript"
+    }
+   ]
+  },
+  "rej-query-1": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Covering letter"
+    }
+   ]
+  },
+  "rj-dupe": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "asked",
+     "text": "Asked 9 Sep Full manuscript · asked"
+    }
+   ]
+  },
+  "rj-nudge": null,
+  "rj-send": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "asked",
+     "text": "Asked 12 Sep Full manuscript · asked"
+    }
+   ]
+  },
+  "seed-cal-bang-q": null,
+  "seed-cal-near-q": null,
+  "seed-cal-passed20-q": null,
+  "seed-cal-passed865-q": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "asked",
+     "text": "Asked Full manuscript · asked"
+    }
+   ]
+  },
+  "seed-cal-soon-q": null,
+  "seed-pkgq-1": {
+   "label": "2 materials",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Covering letter Synopsis The Complete Autumn Submission Bundle for Literary Agents"
+    }
+   ]
+  },
+  "seed-pkgq-10": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Prologue-led"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 24 Jul Partial"
+    }
+   ]
+  },
+  "seed-pkgq-2": null,
+  "seed-pkgq-3": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query The Complete Autumn Submission Bundle for Literary Agents"
+    },
+    {
+     "kind": "asked",
+     "text": "Asked 20 Jun Full manuscript · asked"
+    }
+   ]
+  },
+  "seed-pkgq-4": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Unattributed set"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 23 Aug Partial"
+    }
+   ]
+  },
+  "seed-pkgq-5": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query The Complete Autumn Submission Bundle for Literary Agents"
+    }
+   ]
+  },
+  "seed-pkgq-6": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query The Complete Autumn Submission Bundle for Literary Agents"
+    }
+   ]
+  },
+  "seed-pkgq-7": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Comps-led variant"
+    }
+   ]
+  },
+  "seed-pkgq-8": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Comps-led variant"
+    }
+   ]
+  },
+  "seed-pkgq-9": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Prologue-led"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 19 Jul Full manuscript"
+    }
+   ]
+  },
+  "seed-query-1": null,
+  "seed-query-10": {
+   "label": "2 materials",
+   "groups": [
+    {
+     "kind": "sent",
+     "text": "Sent 8 Mar Partial"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 5 Apr Full manuscript"
+    }
+   ]
+  },
+  "seed-query-11": {
+   "label": "2 materials",
+   "groups": [
+    {
+     "kind": "asked",
+     "text": "Asked 8 Jul Revised manuscript · asked"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent later Full manuscript"
+    }
+   ]
+  },
+  "seed-query-12": {
+   "label": "2 materials",
+   "groups": [
+    {
+     "kind": "sent",
+     "text": "Sent 8 Jul Partial"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 5 Aug Full manuscript"
+    }
+   ]
+  },
+  "seed-query-13": null,
+  "seed-query-14": null,
+  "seed-query-15": null,
+  "seed-query-16": null,
+  "seed-query-17": null,
+  "seed-query-18": null,
+  "seed-query-19": null,
+  "seed-query-2": null,
+  "seed-query-20": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "asked",
+     "text": "Asked 19 Aug Partial · asked"
+    }
+   ]
+  },
+  "seed-query-21": {
+   "label": "2 materials",
+   "groups": [
+    {
+     "kind": "sent",
+     "text": "Sent 24 Jun Partial"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 22 Jul Full manuscript"
+    }
+   ]
+  },
+  "seed-query-22": null,
+  "seed-query-23": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "sent",
+     "text": "Sent 19 Aug Partial"
+    }
+   ]
+  },
+  "seed-query-3": null,
+  "seed-query-4": null,
+  "seed-query-5": null,
+  "seed-query-6": null,
+  "seed-query-7": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "asked",
+     "text": "Asked 19 Aug Partial · asked"
+    }
+   ]
+  },
+  "seed-query-8": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "sent",
+     "text": "Sent 22 Aug Partial"
+    }
+   ]
+  },
+  "seed-query-9": {
+   "label": "2 materials",
+   "groups": [
+    {
+     "kind": "asked",
+     "text": "Asked 19 Aug Full manuscript · asked"
+    },
+    {
+     "kind": "sent",
+     "text": "Sent 5 Aug Partial"
+    }
+   ]
+  },
+  "seed-query-ms2-a": null,
+  "seed-query-ms2-b": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "sent",
+     "text": "Sent later Full manuscript"
+    }
+   ]
+  },
+  "thin-q-chase": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Covering letter"
+    }
+   ]
+  },
+  "thin-q-close": {
+   "label": "2 materials",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Covering letter Synopsis"
+    }
+   ]
+  },
+  "thin-q-cohort-1": null,
+  "thin-q-cohort-2": null,
+  "thin-q-cohort-3": null,
+  "thin-q-cohort-4": null,
+  "thin-q-cohort-5": null,
+  "thin-q-cohort-6": null,
+  "thin-q-gap-solo": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "sent",
+     "text": "Sent 29 Aug Partial"
+    }
+   ]
+  },
+  "thin-q-remind": {
+   "label": "1 material",
+   "groups": [
+    {
+     "kind": "query",
+     "text": "With the query Covering letter"
+    }
+   ]
+  }
+ }
+}

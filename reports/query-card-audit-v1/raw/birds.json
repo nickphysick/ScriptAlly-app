@@ -1,0 +1,1831 @@
+{
+ "rows": [
+  {
+   "id": "thin-q-close",
+   "when": "overdue",
+   "text": "Rosalind Vale Vale & Marchetti Queried · overdue since 27 Sep 418 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1755361549259",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 27 Sep"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-query-22",
+   "when": "overdue",
+   "text": "Bea Halloran Halloran & Fitch Queried · overdue since 1 Jan 322 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1787097600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 1 Jan"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "msv12-q-1",
+   "when": "overdue",
+   "text": "Mira Kovic Old Harbour Literary Queried · overdue since 1 Jan 322 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1788598800000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 1 Jan"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "msv12-q-7",
+   "when": "overdue",
+   "text": "Mira Kovic Old Harbour Literary Queried · overdue since 1 Jan 322 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1773133200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 1 Jan"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-query-4",
+   "when": "overdue",
+   "text": "Priya Nair Northbank Literary Queried · overdue since 1 Jan 322 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1785974400000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 1 Jan"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-query-19",
+   "when": "overdue",
+   "text": "Rachel Lin Lin Literary Queried · overdue since 2 Mar 262 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1767571200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 2 Mar"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "thin-q-cohort-2",
+   "when": "overdue",
+   "text": "Tobias Quint Quint Literary Queried · overdue since 10 Apr 223 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1773419149259",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 10 Apr"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "thin-q-cohort-1",
+   "when": "overdue",
+   "text": "Rosalind Vale Vale & Marchetti Queried · overdue since 15 Apr 218 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1772641549259",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 15 Apr"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "thin-q-cohort-6",
+   "when": "overdue",
+   "text": "Tobias Quint Quint Literary Queried · overdue since 16 May 187 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1776529549259",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 16 May"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "thin-q-cohort-3",
+   "when": "overdue",
+   "text": "Imogen Farr Farr & Boyd Queried · overdue since 17 May 186 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1774196749259",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 17 May"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "thin-q-cohort-5",
+   "when": "overdue",
+   "text": "Rosalind Vale Vale & Marchetti Queried · overdue since 21 May 182 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1775751949259",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 21 May"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "thin-q-cohort-4",
+   "when": "overdue",
+   "text": "Devendra Rao Rao Agency Queried · overdue since 9 Jun 163 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1774974349259",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 9 Jun"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-query-10",
+   "when": "overdue",
+   "text": "Peter Vance Vance Associates Full sent · overdue since 28 Jun 144 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1770508800000",
+     "to": "1771718400000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1771718400000",
+     "to": "1772928000000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1772928000000",
+     "to": "1774137600000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1774137600000",
+     "to": "1775347200000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1775347200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full sent · overdue since 28 Jun"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-query-ms2-a",
+   "when": "overdue",
+   "text": "Elinor Hale Cavendish & Roe Queried · overdue since 27 Jul 115 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1780272000000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 27 Jul"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "rj-nudge",
+   "when": "overdue",
+   "text": "Tamsin Probewell Probe & Nightingale Queried · overdue since 10 Aug 101 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1782737508927",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 10 Aug"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "thin-q-chase",
+   "when": "overdue",
+   "text": "Tobias Quint Quint Literary Queried · overdue since 19 Aug 92 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1784737549259",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 19 Aug"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-query-ms2-b",
+   "when": "overdue",
+   "text": "Tom Ellery Curtis Vane Full sent · overdue since 24 Aug 87 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1780272000000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full sent · overdue since 24 Aug"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "cv25-q-10",
+   "when": "overdue",
+   "text": "Aisha Kapoor The Lantern Agency Full sent · overdue since 26 Aug 85 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1780488000000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full sent · overdue since 26 Aug"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "cv25-q-05",
+   "when": "overdue",
+   "text": "Sophie Dunn Ashgrove Literary Partial sent · overdue since 26 Aug 85 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1780488000000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial sent · overdue since 26 Aug"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-cal-passed20-q",
+   "when": "overdue",
+   "text": "Cormac Bligh Bligh & Sons Queried · overdue since 8 Sep 72 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1786406400000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 8 Sep"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-query-6",
+   "when": "overdue",
+   "text": "Sam Okoro Okoro Bell Queried · overdue since 12 Sep 68 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1784332800000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 12 Sep"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-pkgq-1",
+   "when": "overdue",
+   "text": "Elinor Hale Cavendish & Roe Queried · overdue since 19 Sep 61 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1784937600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 19 Sep"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-pkgq-2",
+   "when": "overdue",
+   "text": "Tom Ellery Curtis Vane Queried · overdue since 21 Sep 59 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1785110400000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 21 Sep"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "seed-query-5",
+   "when": "overdue",
+   "text": "Joan Whitfield Whitfield Agency Queried · overdue since 23 Sep 57 days over Close it →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1785283200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 23 Sep"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "cor-undo",
+   "when": "overdue",
+   "text": "Sam Okoro Okoro Bell Full sent · overdue since 26 Sep 54 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1783123200000",
+     "to": "1785974400000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1785974400000",
+     "to": "1788912000000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1788912000000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full sent · overdue since 26 Sep"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "cor-move-b",
+   "when": "overdue",
+   "text": "Priya Nair Northbank Literary Queried · overdue since 28 Sep 52 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1785715200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 28 Sep"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-pkgq-7",
+   "when": "overdue",
+   "text": "Rachel Lin Lin Literary Queried · overdue since 29 Sep 51 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1785801600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 29 Sep"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-query-3",
+   "when": "overdue",
+   "text": "Marcus Reed Reed & Partners Queried · overdue since 4 Oct 46 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1786233600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 4 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-query-7",
+   "when": "overdue",
+   "text": "Rachel Lin Lin Literary Partial requested · overdue since 4 Oct 46 days over Send your partial →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1785888000000",
+     "to": "1787137200000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1787137200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial requested · overdue since 4 Oct"
+    }
+   ],
+   "act": "Send your partial →"
+  },
+  {
+   "id": "seed-cal-near-q",
+   "when": "overdue",
+   "text": "Wren Ashcombe Ashcombe Literary Queried · overdue since 4 Oct 46 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1786233600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 4 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "cv25-q-11",
+   "when": "overdue",
+   "text": "Hester Quinn Quinn Literary Partial sent · overdue since 4 Oct 46 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1783857600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial sent · overdue since 4 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-pkgq-9",
+   "when": "overdue",
+   "text": "Ana Duarte Duarte Words Full sent · overdue since 11 Oct 39 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1784419200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full sent · overdue since 11 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-query-21",
+   "when": "overdue",
+   "text": "Ana Duarte Duarte Words Full sent · overdue since 14 Oct 36 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1779840000000",
+     "to": "1781049600000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1781049600000",
+     "to": "1782259200000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1782259200000",
+     "to": "1783468800000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1783468800000",
+     "to": "1784678400000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1784678400000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full sent · overdue since 14 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-pkgq-10",
+   "when": "overdue",
+   "text": "Peter Vance Vance Associates Partial sent · overdue since 16 Oct 34 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1784851200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial sent · overdue since 16 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "msv12-q-5",
+   "when": "overdue",
+   "text": "Sun-hee Park Meridian Line Full sent · overdue since 16 Oct 34 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1782896400000",
+     "to": "1784538000000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1784538000000",
+     "to": "1784883600000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1784883600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full sent · overdue since 16 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "thin-q-remind",
+   "when": "overdue",
+   "text": "Imogen Farr Farr & Boyd Queried · overdue since 16 Oct 34 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1787329549259",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 16 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-query-11",
+   "when": "overdue",
+   "text": "Iris Kwan Kwan & Hall Revise & resubmit · overdue since 19 Oct 31 days over Send your revision →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1783468800000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Revise & resubmit · overdue since 19 Oct"
+    }
+   ],
+   "act": "Send your revision →"
+  },
+  {
+   "id": "msv12-q-2",
+   "when": "overdue",
+   "text": "Douglas Renner Renner & Frost Queried · overdue since 20 Oct 30 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1788858000000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 20 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-query-2",
+   "when": "overdue",
+   "text": "Tom Ellery Curtis Vane Queried · overdue since 27 Oct 23 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1788220800000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 27 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "thin-q-gap-solo",
+   "when": "overdue",
+   "text": "Devendra Rao Rao Agency Partial sent · overdue since 29 Oct 21 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1786033549259",
+     "to": "1788020749310"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1788020749310",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial sent · overdue since 29 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "cor-pair",
+   "when": "overdue",
+   "text": "Elinor Hale Cavendish & Roe Partial sent · overdue since 31 Oct 19 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1786147200000",
+     "to": "1787327299857"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1787327299857",
+     "to": "1787875200000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1787875200000",
+     "to": "1788307200000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1788307200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial sent · overdue since 31 Oct"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-query-23",
+   "when": "overdue",
+   "text": "Rufus Oyelaran Oyelaran Books Partial sent · overdue since 11 Nov 8 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1784678400000",
+     "to": "1785888000000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1785888000000",
+     "to": "1787097600000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1787097600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial sent · overdue since 11 Nov"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-query-8",
+   "when": "overdue",
+   "text": "David Marsh Marsh & Co Partial sent · overdue since 14 Nov 5 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1784937600000",
+     "to": "1786147200000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1786147200000",
+     "to": "1786698000000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1786698000000",
+     "to": "1787356800000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1787356800000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial sent · overdue since 14 Nov"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "probe-dangling-pkg",
+   "when": "overdue",
+   "text": "Elinor Hale Cavendish & Roe Queried · overdue since 15 Nov 4 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1789927488037",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 15 Nov"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "probe-un-noms",
+   "when": "overdue",
+   "text": "Elinor Hale Cavendish & Roe Queried · overdue since 15 Nov 4 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1789929905192",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 15 Nov"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-pkgq-4",
+   "when": "overdue",
+   "text": "Priya Nair Northbank Literary Partial sent · overdue since 15 Nov 4 days over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1782777600000",
+     "to": "1787512719746"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1787512719746",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial sent · overdue since 15 Nov"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "probe-goalstress-today",
+   "when": "overdue",
+   "text": "Elinor Hale Cavendish & Roe Queried · overdue since 18 Nov 1 day over Nudge →",
+   "group": "overdue",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1790121600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · overdue since 18 Nov"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-cal-soon-q",
+   "when": "upcoming",
+   "text": "Hester Blaine Blaine & Vole Queried · reply by 1 Dec in 12 days Nudge →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1788825600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · reply by 1 Dec"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "seed-query-9",
+   "when": "upcoming",
+   "text": "Ana Duarte Duarte Words Full requested Send your full →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1783468800000",
+     "to": "1784678400000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1784678400000",
+     "to": "1785888000000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1785888000000",
+     "to": "1787097600000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1787097600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full requested"
+    }
+   ],
+   "act": "Send your full →"
+  },
+  {
+   "id": "cv25-q-06",
+   "when": "upcoming",
+   "text": "Clara Beaumont Harbour Lane Partial requested Send your partial →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1788350400000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial requested"
+    }
+   ],
+   "act": "Send your partial →"
+  },
+  {
+   "id": "seed-query-20",
+   "when": "upcoming",
+   "text": "David Marsh Marsh & Co Partial requested Send your partial →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1785888000000",
+     "to": "1787097600000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1787097600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial requested"
+    }
+   ],
+   "act": "Send your partial →"
+  },
+  {
+   "id": "msv12-q-3",
+   "when": "upcoming",
+   "text": "Edda Voss Voss Literary Partial requested Send your partial →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1788685200000",
+     "to": "1789203600000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1789203600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial requested"
+    }
+   ],
+   "act": "Send your partial →"
+  },
+  {
+   "id": "rj-send",
+   "when": "upcoming",
+   "text": "Imogen Vale Vale & Wick Full requested Send your full →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1784811108672",
+     "to": "1789217508672"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1789217508672",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full requested"
+    }
+   ],
+   "act": "Send your full →"
+  },
+  {
+   "id": "cv25-q-09",
+   "when": "upcoming",
+   "text": "Jonathan Marsh The Marsh Agency Full requested Send your full →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1790251200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full requested"
+    }
+   ],
+   "act": "Send your full →"
+  },
+  {
+   "id": "cor-move-a",
+   "when": "upcoming",
+   "text": "Marcus Reed Reed & Partners Partial requested Send your partial →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1785283200000",
+     "to": "1787326955296"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1787326955296",
+     "to": "1788739200000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1788739200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial requested"
+    }
+   ],
+   "act": "Send your partial →"
+  },
+  {
+   "id": "cv25-q-07",
+   "when": "upcoming",
+   "text": "Marcus Reed Bloomsbury Quill Partial requested Send your partial →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "partial",
+     "tone": null,
+     "from": "1789041600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Partial requested"
+    }
+   ],
+   "act": "Send your partial →"
+  },
+  {
+   "id": "seed-pkgq-3",
+   "when": "upcoming",
+   "text": "Marcus Reed Reed & Partners Full requested Send your full →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1782345600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full requested"
+    }
+   ],
+   "act": "Send your full →"
+  },
+  {
+   "id": "seed-query-12",
+   "when": "upcoming",
+   "text": "Noah Bright Bright Literary Offer Answer the offer →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1781049600000",
+     "to": "1782259200000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1782259200000",
+     "to": "1783468800000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1783468800000",
+     "to": "1784678400000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1784678400000",
+     "to": "1785888000000"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1785888000000",
+     "to": "1787097600000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "offer",
+     "tone": null,
+     "from": "1787097600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Offer"
+    }
+   ],
+   "act": "Answer the offer →"
+  },
+  {
+   "id": "seed-cal-passed865-q",
+   "when": "upcoming",
+   "text": "Ottoline Frayn Frayn Agency Full requested Send your full →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1713398400000",
+     "to": "1789921432116"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1789921432116",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full requested"
+    }
+   ],
+   "act": "Send your full →"
+  },
+  {
+   "id": "msv12-q-4",
+   "when": "upcoming",
+   "text": "Theo Abara Abara Grant Agency Full requested Send your full →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1788771600000",
+     "to": "1789808400000"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1789808400000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full requested"
+    }
+   ],
+   "act": "Send your full →"
+  },
+  {
+   "id": "rj-dupe",
+   "when": "upcoming",
+   "text": "Tobias Hark Hark Literary Full requested Send your full →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1783947108729",
+     "to": "1788958308729"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1788958308729",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full requested"
+    }
+   ],
+   "act": "Send your full →"
+  },
+  {
+   "id": "cv25-q-08",
+   "when": "upcoming",
+   "text": "Tom Ellery Ellery & Finch Offer Answer the offer →",
+   "group": "upcoming",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "offer",
+     "tone": null,
+     "from": "1787400000000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Offer"
+    }
+   ],
+   "act": "Answer the offer →"
+  },
+  {
+   "id": "seed-cal-bang-q",
+   "when": "watch",
+   "text": "Alasdair Crewe Crewe Literary Queried · reply by 9 Dec in 20 days Nudge →",
+   "group": "watch",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1787097600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried · reply by 9 Dec"
+    }
+   ],
+   "act": "Nudge →"
+  },
+  {
+   "id": "qc150l9-q",
+   "when": "watch",
+   "text": "Wren Calloway Calloway & Hart Full sent · reply by 7 Jan Record a response",
+   "group": "watch",
+   "bars": [
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1789430400000",
+     "to": "1790808948964"
+    },
+    {
+     "kind": "be-past",
+     "sk": null,
+     "tone": null,
+     "from": "1790808948964",
+     "to": "1792104948964"
+    },
+    {
+     "kind": "be-bar",
+     "sk": "full",
+     "tone": null,
+     "from": "1792104948964",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Full sent · reply by 7 Jan"
+    }
+   ],
+   "act": "Record a response"
+  },
+  {
+   "id": "probe-un-both",
+   "when": "nodate",
+   "text": "Agent not recorded Queried Record a response",
+   "group": "nodate",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1789929905391",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried"
+    }
+   ],
+   "act": "Record a response"
+  },
+  {
+   "id": "probe-un-noagent",
+   "when": "nodate",
+   "text": "Agent not recorded Queried Record a response",
+   "group": "nodate",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1789929905292",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried"
+    }
+   ],
+   "act": "Record a response"
+  },
+  {
+   "id": "cv25-q-04",
+   "when": "nodate",
+   "text": "Daniel O’Rourke Inkwell & Stone Queried Close it →",
+   "group": "nodate",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1781956800000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried"
+    }
+   ],
+   "act": "Close it →"
+  },
+  {
+   "id": "cv25-q-14",
+   "when": "nodate",
+   "text": "Fenella Strand Brightwater Books Queried Record a response",
+   "group": "nodate",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1790596800000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried"
+    }
+   ],
+   "act": "Record a response"
+  },
+  {
+   "id": "cv25-q-13",
+   "when": "nodate",
+   "text": "Nadia Hussain Northgate Literary Queried Record a response",
+   "group": "nodate",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1790769600000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried"
+    }
+   ],
+   "act": "Record a response"
+  },
+  {
+   "id": "cv25-q-03",
+   "when": "nodate",
+   "text": "Priya Raman Raman & Rowe Queried Close it →",
+   "group": "nodate",
+   "bars": [
+    {
+     "kind": "be-bar",
+     "sk": "queried",
+     "tone": null,
+     "from": "1782907200000",
+     "to": null
+    }
+   ],
+   "labels": [
+    {
+     "lb": "cur",
+     "text": "Queried"
+    }
+   ],
+   "act": "Close it →"
+  }
+ ]
+}

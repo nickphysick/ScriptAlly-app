@@ -1,0 +1,443 @@
+{
+ "cards": {
+  "seed-pkgq-3": [
+   {
+    "rowText": "Send Marcus your full Reed & Partners 152 days waiting",
+    "thread": [
+     "Marcus asked for your full manuscript · 20 Jun",
+     "You sent Marcus your query · 25 Jun",
+     "You sent Marcus your full manuscript · 21 Aug"
+    ],
+    "foot": "Send the full No date set Mark full sent"
+   }
+  ],
+  "seed-query-9": [
+   {
+    "rowText": "Send Ana your full Duarte Words 92 days waiting",
+    "thread": [
+     "You sent Ana your query · 8 Jul",
+     "Ana asked for a partial · 22 Jul",
+     "You sent Ana your partial · 5 Aug",
+     "Ana asked for your full manuscript · 19 Aug"
+    ],
+    "foot": "Send the full No date set Mark full sent"
+   }
+  ],
+  "seed-query-20": [
+   {
+    "rowText": "Send David your partial Marsh & Co 92 days waiting",
+    "thread": [
+     "You sent David your query · 5 Aug",
+     "David asked for a partial · 19 Aug"
+    ],
+    "foot": "Send the partial No date set Mark partial sent"
+   }
+  ],
+  "seed-query-7": [
+   {
+    "rowText": "Send Rachel your partial Lin Literary 92 days waiting",
+    "thread": [
+     "You sent Rachel your query · 5 Aug",
+     "Rachel asked for a partial · 19 Aug"
+    ],
+    "foot": "Send the partial 46 days late · was due 4 Oct Mark partial sent"
+   }
+  ],
+  "cv25-q-08": [
+   {
+    "rowText": "Answer Tom’s offer Ellery & Finch 89 days late",
+    "thread": [
+     "You sent Tom your query · 22 Aug"
+    ],
+    "foot": "Tom made an offer Tom hasn’t given an answer-by date Answer the offer"
+   }
+  ],
+  "cv25-q-06": [
+   {
+    "rowText": "Send Clara your partial Harbour Lane 78 days waiting",
+    "thread": [
+     "You sent Clara your query · 2 Sep"
+    ],
+    "foot": "Send the partial No date set Mark partial sent"
+   }
+  ],
+  "rj-dupe": [
+   {
+    "rowText": "Send Tobias your full Hark Literary 71 days waiting",
+    "thread": [
+     "You sent Tobias your query · 13 Jul",
+     "Tobias asked for your full manuscript · 8 Sep",
+     "You sent Tobias your full manuscript · 21 Sep",
+     "You nudged Tobias · 21 Sep"
+    ],
+    "foot": "Send the full No date set Mark full sent"
+   }
+  ],
+  "cv25-q-07": [
+   {
+    "rowText": "Send Marcus your partial Bloomsbury Quill 70 days waiting",
+    "thread": [
+     "You sent Marcus your query · 10 Sep"
+    ],
+    "foot": "Send the partial No date set Mark partial sent"
+   }
+  ],
+  "rj-send": [
+   {
+    "rowText": "Send Imogen your full Vale & Wick 68 days waiting",
+    "thread": [
+     "You sent Imogen your query · 23 Jul",
+     "Imogen asked for your full manuscript · 11 Sep"
+    ],
+    "foot": "Send the full No date set Mark full sent"
+   }
+  ],
+  "msv12-q-3": [
+   {
+    "rowText": "Send Edda your partial Voss Literary 68 days waiting",
+    "thread": [
+     "You sent Edda your query · 6 Sep",
+     "Edda asked for a partial · 6 Sep"
+    ],
+    "foot": "Send the partial No date set Mark partial sent"
+   }
+  ],
+  "msv12-q-4": [
+   {
+    "rowText": "Send Theo your full Abara Grant Agency 61 days waiting",
+    "thread": [
+     "You sent Theo your query · 7 Sep",
+     "Theo asked for your full manuscript · 7 Sep"
+    ],
+    "foot": "Send the full No date set Mark full sent"
+   }
+  ],
+  "cv25-q-09": [
+   {
+    "rowText": "Send Jonathan your full The Marsh Agency 56 days waiting",
+    "thread": [
+     "You sent Jonathan your query · 24 Sep"
+    ],
+    "foot": "Send the full No date set Mark full sent"
+   }
+  ],
+  "seed-query-12": [
+   {
+    "rowText": "Answer Noah’s offer Bright Literary",
+    "thread": [
+     "Noah asked for your full manuscript · 22 Jul",
+     "You sent Noah your full manuscript · 5 Aug",
+     "Noah offered · 19 Aug"
+    ],
+    "foot": "Noah made an offer Noah hasn’t given an answer-by date Answer the offer"
+   }
+  ],
+  "seed-cal-passed865-q": [
+   {
+    "rowText": "Send Ottoline your full Frayn Agency",
+    "thread": [
+     "You sent Ottoline your query · 18 Apr 2024",
+     "Ottoline asked for your full manuscript · 18 Apr 2024"
+    ],
+    "foot": "Send the full No date set Mark full sent"
+   }
+  ],
+  "cor-move-a": [
+   {
+    "rowText": "Send Marcus your partial Reed & Partners",
+    "thread": [
+     "You sent Marcus your query · 29 Jul",
+     "Marcus asked for a partial · 7 Sep"
+    ],
+    "foot": "Send the partial No date set Mark partial sent"
+   }
+  ],
+  "seed-query-11": [
+   {
+    "rowText": "Send Iris your revision Kwan & Hall",
+    "thread": [
+     "You sent Iris your query · 8 Jul",
+     "Iris asked for a partial · 22 Jul",
+     "You sent Iris your partial · 5 Aug",
+     "Iris asked you to revise and resubmit · 19 Aug"
+    ],
+    "foot": "Revise and resubmit by 19 Oct Mark resubmitted"
+   }
+  ],
+  "seed-query-3": [
+   {
+    "rowText": "Nudge Marcus Reed & Partners 76 days late",
+    "thread": [
+     "You sent Marcus your query · 9 Aug"
+    ],
+    "foot": "No reply from Marcus Reply was due 4 Oct · not nudged yet Marcus replied Close it Nudge"
+   }
+  ],
+  "seed-query-2": [
+   {
+    "rowText": "Nudge Tom Curtis Vane 76 days late",
+    "thread": [
+     "You sent Tom your query · 1 Sep"
+    ],
+    "foot": "No reply from Tom yet Reply was due 27 Oct · 23 days ago Tom replied Close it Nudge"
+   }
+  ],
+  "thin-q-remind": [
+   {
+    "rowText": "Nudge Imogen Farr & Boyd 62 days late",
+    "thread": [
+     "You sent Imogen your query · 21 Aug"
+    ],
+    "foot": "No reply from Imogen Reply was due 16 Oct · not nudged yet Imogen replied Close it Nudge"
+   }
+  ],
+  "seed-cal-bang-q": [
+   {
+    "rowText": "Nudge Alasdair Crewe Literary 46 days late",
+    "thread": [
+     "You sent Alasdair your query · 19 Aug"
+    ],
+    "foot": "No reply from Alasdair yet Reply expected by 9 Dec Alasdair replied Close it Nudge"
+   }
+  ],
+  "seed-cal-near-q": [
+   {
+    "rowText": "Nudge Wren Ashcombe Literary 46 days late",
+    "thread": [
+     "You sent Wren your query · 9 Aug"
+    ],
+    "foot": "No reply from Wren Reply was due 4 Oct · not nudged yet Wren replied Close it Nudge"
+   }
+  ],
+  "seed-cal-soon-q": [
+   {
+    "rowText": "Nudge Hester Blaine & Vole 38 days late",
+    "thread": [
+     "You sent Hester your query · 8 Sep"
+    ],
+    "foot": "No reply from Hester yet Reply expected by 1 Dec Hester replied Close it Nudge"
+   }
+  ],
+  "thin-q-gap-solo": [
+   {
+    "rowText": "Nudge Devendra Rao Agency 35 days late",
+    "thread": [
+     "You sent Devendra your query · 6 Aug",
+     "You sent Devendra your partial · 29 Aug"
+    ],
+    "foot": "No reply from Devendra yet Reply was due 29 Oct · 21 days ago Devendra replied Close it Nudge"
+   }
+  ],
+  "msv12-q-2": [
+   {
+    "rowText": "Nudge Douglas Renner & Frost 30 days late",
+    "thread": [
+     "You sent Douglas your query · 8 Sep"
+    ],
+    "foot": "No reply from Douglas Reply was due 20 Oct · not nudged yet Douglas replied Close it Nudge"
+   }
+  ],
+  "msv12-q-1": [
+   {
+    "rowText": "Nudge Mira Old Harbour Literary 19 days late",
+    "thread": [
+     "You sent Mira your query · 5 Sep"
+    ],
+    "foot": "No reply from Mira Reply was due 1 Jan · quiet for 46 weeks Mira replied Nudge Close it"
+   }
+  ],
+  "thin-q-close": [
+   {
+    "rowText": "Rosalind’s gone quiet Vale & Marchetti 459 days quiet",
+    "thread": [
+     "You sent Rosalind your query · 16 Aug 2025"
+    ],
+    "foot": "No reply from Rosalind Reply was due 27 Sep 2025 · quiet for 59 weeks Rosalind replied Nudge Close it"
+   }
+  ],
+  "msv12-q-7": [
+   {
+    "rowText": "Mira’s gone quiet Old Harbour Literary 254 days quiet",
+    "thread": [
+     "You sent Mira your query · 10 Mar"
+    ],
+    "foot": "No reply from Mira Reply was due 1 Jan · quiet for 46 weeks Mira replied Nudge Close it"
+   }
+  ],
+  "thin-q-cohort-3": [
+   {
+    "rowText": "Imogen’s gone quiet Farr & Boyd 241 days quiet",
+    "thread": [
+     "You sent Imogen your query · 22 Mar"
+    ],
+    "foot": "No reply from Imogen Reply was due 17 May · quiet for 26 weeks Imogen replied Nudge Close it"
+   }
+  ],
+  "thin-q-cohort-4": [
+   {
+    "rowText": "Devendra’s gone quiet Rao Agency 232 days quiet",
+    "thread": [
+     "You sent Devendra your query · 31 Mar"
+    ],
+    "foot": "No reply from Devendra Reply was due 9 Jun · quiet for 23 weeks Devendra replied Nudge Close it"
+   }
+  ],
+  "seed-query-ms2-a": [
+   {
+    "rowText": "Elinor’s gone quiet Cavendish & Roe 171 days quiet",
+    "thread": [
+     "You sent Elinor your query · 1 Jun"
+    ],
+    "foot": "No reply from Elinor Reply was due 27 Jul · quiet for 16 weeks Elinor replied Nudge Close it"
+   }
+  ],
+  "seed-query-ms2-b": [
+   {
+    "rowText": "Tom’s gone quiet Curtis Vane 171 days quiet",
+    "thread": [
+     "You sent Tom your query · 1 Jun",
+     "You sent Tom your full manuscript · 1 Jun"
+    ],
+    "foot": "No reply from Tom Reply was due 24 Aug · quiet for 12 weeks Tom replied Nudge Close it"
+   }
+  ],
+  "cor-undo": [
+   {
+    "rowText": "Sam’s gone quiet Okoro Bell 138 days quiet",
+    "thread": [
+     "You sent Sam your query · 4 Jul",
+     "You sent Sam your partial · 6 Aug",
+     "You sent Sam your full manuscript · 9 Sep"
+    ],
+    "foot": "No reply from Sam Reply was due 26 Sep · not nudged yet Sam replied Close it Nudge"
+   }
+  ],
+  "seed-pkgq-9": [
+   {
+    "rowText": "Ana’s gone quiet Duarte Words 123 days quiet",
+    "thread": [
+     "You sent Ana your query · 19 Jul",
+     "You sent Ana your full manuscript · 19 Jul"
+    ],
+    "foot": "No reply from Ana Reply was due 11 Oct · not nudged yet Ana replied Close it Nudge"
+   }
+  ],
+  "thin-q-chase": [
+   {
+    "rowText": "Tobias’ gone quiet Quint Literary 119 days quiet",
+    "thread": [
+     "You sent Tobias your query · 22 Jul"
+    ],
+    "foot": "No reply from Tobias Reply was due 19 Aug · quiet for 13 weeks Tobias replied Nudge Close it"
+   }
+  ],
+  "seed-pkgq-10": [
+   {
+    "rowText": "Peter’s gone quiet Vance Associates 118 days quiet",
+    "thread": [
+     "You sent Peter your query · 24 Jul",
+     "You sent Peter your partial · 24 Jul"
+    ],
+    "foot": "No reply from Peter Reply was due 16 Oct · not nudged yet Peter replied Close it Nudge"
+   }
+  ],
+  "seed-pkgq-2": [
+   {
+    "rowText": "Tom’s gone quiet Curtis Vane 115 days quiet",
+    "thread": [
+     "You sent Tom your query · 27 Jul"
+    ],
+    "foot": "No reply from Tom Reply was due 21 Sep · quiet for 8 weeks Tom replied Nudge Close it"
+   }
+  ],
+  "seed-query-5": [
+   {
+    "rowText": "Joan’s gone quiet Whitfield Agency 113 days quiet",
+    "thread": [
+     "You sent Joan your query · 29 Jul"
+    ],
+    "foot": "No reply from Joan Reply was due 23 Sep · quiet for 8 weeks Joan replied Nudge Close it"
+   }
+  ],
+  "cor-move-b": [
+   {
+    "rowText": "Priya’s gone quiet Northbank Literary 108 days quiet",
+    "thread": [
+     "You sent Priya your query · 3 Aug"
+    ],
+    "foot": "No reply from Priya Reply was due 28 Sep · not nudged yet Priya replied Close it Nudge"
+   }
+  ],
+  "seed-pkgq-7": [
+   {
+    "rowText": "Rachel’s gone quiet Lin Literary 107 days quiet",
+    "thread": [
+     "You sent Rachel your query · 4 Aug"
+    ],
+    "foot": "No reply from Rachel Reply was due 29 Sep · not nudged yet Rachel replied Close it Nudge"
+   }
+  ],
+  "cor-pair": [
+   {
+    "rowText": "Elinor’s gone quiet Cavendish & Roe 103 days quiet",
+    "thread": [
+     "You sent Elinor your query · 8 Aug",
+     "Elinor asked for a partial · 28 Aug",
+     "You sent Elinor your partial · 2 Sep"
+    ],
+    "foot": "No reply from Elinor yet Reply was due 31 Oct · 19 days ago Elinor replied Close it Nudge"
+   }
+  ],
+  "seed-cal-passed20-q": [
+   {
+    "rowText": "Cormac’s gone quiet Bligh & Sons 100 days quiet",
+    "thread": [
+     "You sent Cormac your query · 11 Aug"
+    ],
+    "foot": "No reply from Cormac Reply was due 8 Sep · quiet for 10 weeks Cormac replied Nudge Close it"
+   }
+  ],
+  "seed-query-22": [
+   {
+    "rowText": "Bea’s gone quiet Halloran & Fitch 92 days quiet",
+    "thread": [
+     "You sent Bea your query · 19 Aug"
+    ],
+    "foot": "No reply from Bea Reply was due 1 Jan · quiet for 46 weeks Bea replied Nudge Close it"
+   }
+  ],
+  "seed-query-23": [
+   {
+    "rowText": "Rufus’ gone quiet Oyelaran Books 92 days quiet",
+    "thread": [
+     "You sent Rufus your query · 22 Jul",
+     "Rufus asked for a partial · 5 Aug",
+     "You sent Rufus your partial · 19 Aug"
+    ],
+    "foot": "No reply from Rufus yet Reply was due 11 Nov · 8 days ago Rufus replied Close it Nudge"
+   }
+  ],
+  "seed-query-8": [
+   {
+    "rowText": "David’s gone quiet Marsh & Co 89 days quiet",
+    "thread": [
+     "You sent David your query · 25 Jul",
+     "David asked for a partial · 8 Aug",
+     "You sent David your partial · 22 Aug"
+    ],
+    "foot": "No reply from David yet Reply was due 14 Nov · 5 days ago David replied Close it Nudge"
+   }
+  ],
+  "rj-nudge": [
+   {
+    "rowText": "Tamsin’s gone quiet Probe & Nightingale 59 days quiet",
+    "thread": [
+     "You nudged Tamsin · 21 Sep",
+     "You nudged Tamsin · 21 Sep",
+     "You nudged Tamsin · 21 Sep"
+    ],
+    "foot": "No reply from Tamsin Nudged 21 Sep · quiet since 19 Oct Tamsin replied Nudge again Close it"
+   }
+  ]
+ }
+}

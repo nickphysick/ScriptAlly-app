@@ -1,0 +1,249 @@
+{
+ "byStatus": {
+  "Rejected": "cor-closed",
+  "Partial Requested": "cor-move-a",
+  "Queried": "cor-move-b",
+  "Partial Sent": "cor-pair",
+  "Full Sent": "cor-undo",
+  "Offer": "cv25-q-08",
+  "Full Requested": "cv25-q-09",
+  "No Response": "msv12-q-8",
+  "Revise & Resubmit": "seed-query-11",
+  "Withdrawn": "seed-query-17"
+ },
+ "queries": {
+  "cor-closed": {
+   "status": "Rejected",
+   "tabs": {
+    "tracking": "You sent Tom your query 19 Jul 25 days later TE Tom asked for your full manuscript 13 Aug 35 days later TE Tom passed 17 Sep",
+    "agent": "Replies in About 8 weeks always replies Takes queries By email you queried by email Last heard 17 Sep 63 days ago Copy email tom@example.com + Add a website What Tom asks for Query letter not sent Synopsis not sent You didn’t send query letter, synopsis. Wishlist in Tom’s words Nothing saved yet. Add Tom’s wishlist Open Tom’s full card Edit these details",
+    "materials": "With the query 19 Jul, by email Nothing recorded With the full asked 13 Aug Nothing recorded not sent yet + Add something you sent Edit what went",
+    "notes": "Nothing noted yet This is the place for why you picked Tom, and what you’d change if this one’s a no. Add note"
+   },
+   "actions": [
+    {
+     "label": "Reopen",
+     "title": "Reopen Tom’s query",
+     "opened": "Reopen Tom’s query ✕ What happened? The pass was recorded by mistake Takes it off. Nothing new goes on the thread. → Tom got back in touch Record what Tom said, dated today. → Cancel",
+     "returned": true,
+     "stillOpen": false
+    }
+   ],
+   "errors": []
+  },
+  "cor-move-a": {
+   "status": "Partial Requested",
+   "tabs": {
+    "tracking": "You sent Marcus your query 29 Jul 40 days later MR Marcus asked for a partial 7 Sep",
+    "agent": "Replies in About 8 weeks always replies Takes queries By email you queried by email Last heard 7 Sep 73 days ago Copy email marcus@example.com + Add a website What Marcus asks for Query letter not sent Synopsis not sent You didn’t send query letter, synopsis. Wishlist in Marcus’s words Nothing saved yet. Add Marcus’s wishlist Open Marcus’s full card Edit these details",
+    "materials": "With the query 29 Jul, by email Nothing recorded With the partial asked 7 Sep Nothing recorded not sent yet + Add something you sent Edit what went",
+    "notes": "Nothing noted yet This is the place for why you picked Marcus, and what you’d change if this one’s a no. Add note"
+   },
+   "actions": [
+    {
+     "label": "Mark partial sent",
+     "title": "Mark the partial sent",
+     "opened": "Mark the partial sent ✕ When Today Yesterday Another date What went FIRST 3 CHAPTERS · POST-R&R (T. MARSH) ✕ + ADD From post-r&r (t. marsh) · change Cancel Mark sent",
+     "returned": true,
+     "stillOpen": false
+    }
+   ],
+   "errors": []
+  },
+  "cor-move-b": {
+   "status": "Queried",
+   "tabs": {
+    "tracking": "You sent Priya your query 3 Aug",
+    "agent": "Replies in About 8 weeks no reply means no Takes queries By email you queried by email Last heard Not yet since 3 Aug Copy email priya@example.com + Add a website What Priya asks for Query letter not sent Synopsis not sent You didn’t send query letter, synopsis. Wishlist in Priya’s words Nothing saved yet. Add Priya’s wishlist Open Priya’s full card Edit these details",
+    "materials": "With the query 3 Aug, by email Nothing recorded + Add something you sent Edit what went",
+    "notes": "Nothing noted yet This is the place for why you picked Priya, and what you’d change if this one’s a no. Add note"
+   },
+   "actions": [
+    {
+     "label": "Priya replied",
+     "title": "What did Priya say?",
+     "opened": "What did Priya say? ✕ Pick what happened. You can add the detail next. Asked for the partial You send the pages next Made an offer Record it and when Priya needs an answer Revise & resubmit Priya wants changes, then another look Passed Closes this query Something else A question, a call, more pages ",
+     "returned": true,
+     "stillOpen": false
+    },
+    {
+     "label": "Close it",
+     "title": "Close Priya’s query",
+     "opened": "Close Priya’s query ✕ You haven’t nudged Priya. One polite follow-up often gets a reply. Nudge instead Close it as No response I withdrew it When Today Yesterday Another date Cancel Close it",
+     "returned": true,
+     "stillOpen": false
+    },
+    {
+     "label": "Nudge",
+     "title": "Nudge Priya",
+     "opened": "Nudge Priya ✕ Send Priya a nudge, then log it here. It goes to priya@example.com. Copy address Open in mail Sent by Email QueryManager Other When Today Yesterday Another date Cancel Log the nudge",
+     "returned": true,
+     "stillOpen": false
+    }
+   ],
+   "errors": []
+  },
+  "cor-pair": {
+   "status": "Partial Sent",
+   "tabs": {
+    "tracking": "You sent Elinor your query 8 Aug 20 days later EH Elinor asked for a partial 28 Aug 5 days later You sent Elinor your partial 2 Sep",
+    "agent": "Replies in About 8 weeks no reply means no Takes queries By email you queried by email Last heard 28 Aug 83 days ago Copy email elinor@example.com + Add a website What Elinor asks for Query letter not sent Synopsis not sent You didn’t send query letter, synopsis. Wishlist in Elinor’s words Nothing saved yet. Add Elinor’s wishlist Open Elinor’s full card Edit these details",
+    "materials": "With the query 8 Aug, by email Nothing recorded With the partial 2 Sep, asked 28 Aug Nothing recorded + Add something you sent Edit what went",
+    "notes": "Nothing noted yet This is the place for why you picked Elinor, and what you’d change if this one’s a no. Add note"
+   },
+   "actions": [
+    {
+     "label": "Elinor replied",
+     "title": "What did Elinor say?",
+     "opened": "What did Elinor say? ✕ Pick what happened. You can add the detail next. Asked for the full You send the manuscript next Made an offer Record it and when Elinor needs an answer Revise & resubmit Elinor wants changes, then another look Passed Closes this query Something else A question, a call, more p",
+     "returned": true,
+     "stillOpen": false
+    },
+    {
+     "label": "Close it",
+     "title": "Close Elinor’s query",
+     "opened": "Close Elinor’s query ✕ Close it as No response I withdrew it When Today Yesterday Another date Cancel Close it",
+     "returned": true,
+     "stillOpen": false
+    },
+    {
+     "label": "Nudge",
+     "title": "Nudge Elinor",
+     "opened": "Nudge Elinor ✕ Send Elinor a nudge, then log it here. It goes to elinor@example.com. Copy address Open in mail Sent by Email QueryManager Other When Today Yesterday Another date Cancel Log the nudge",
+     "returned": true,
+     "stillOpen": false
+    }
+   ],
+   "errors": []
+  },
+  "cor-undo": {
+   "status": "Full Sent",
+   "tabs": {
+    "tracking": "You sent Sam your query 4 Jul 33 days later You sent Sam your partial 6 Aug 34 days later You sent Sam your full manuscript 9 Sep",
+    "agent": "Replies in About 8 weeks always replies Takes queries By email you queried by email Last heard Not yet since 4 Jul Copy email sam@example.com + Add a website What Sam asks for Query letter not sent Synopsis not sent You didn’t send query letter, synopsis. Wishlist in Sam’s words Nothing saved yet. Add Sam’s wishlist Open Sam’s full card Edit these details",
+    "materials": "With the query 4 Jul, by email Nothing recorded With the partial 6 Aug Nothing recorded With the full 9 Sep Nothing recorded + Add something you sent Edit what went",
+    "notes": "Nothing noted yet This is the place for why you picked Sam, and what you’d change if this one’s a no. Add note"
+   },
+   "actions": [
+    {
+     "label": "Sam replied",
+     "title": "What did Sam say?",
+     "opened": "What did Sam say? ✕ Pick what happened. You can add the detail next. Made an offer Record it and when Sam needs an answer Revise & resubmit Sam wants changes, then another look Passed Closes this query Something else A question, a call, more pages Cancel Add Sam’s reply",
+     "returned": true,
+     "stillOpen": false
+    },
+    {
+     "label": "Close it",
+     "title": "Close Sam’s query",
+     "opened": "Close Sam’s query ✕ Close it as No response I withdrew it When Today Yesterday Another date Cancel Close it",
+     "returned": true,
+     "stillOpen": false
+    },
+    {
+     "label": "Nudge",
+     "title": "Nudge Sam",
+     "opened": "Nudge Sam ✕ Send Sam a nudge, then log it here. It goes to sam@example.com. Copy address Open in mail Sent by Email QueryManager Other When Today Yesterday Another date Cancel Log the nudge",
+     "returned": true,
+     "stillOpen": false
+    }
+   ],
+   "errors": []
+  },
+  "cv25-q-08": {
+   "status": "Offer",
+   "tabs": {
+    "tracking": "You sent Tom your query 22 Aug",
+    "agent": "Replies in Add reply time Takes queries By email you queried by email Last heard Not yet since 22 Aug + Add an email + Add a website What Tom asks for Query letter not sent Synopsis not sent You didn’t send query letter, synopsis. Wishlist in Tom’s words Nothing saved yet. Add Tom’s wishlist Open Tom’s full card Edit these details",
+    "materials": "With the query Light 22 Aug, by email Nothing recorded",
+    "notes": "Nothing noted yet This is the place for why you picked Tom, and what you’d change if this one’s a no. Add note"
+   },
+   "actions": [
+    {
+     "label": "Answer the offer",
+     "title": "Tom’s offer",
+     "opened": "Tom’s offer ✕ Offer from Tom Ellery Edit What are you doing? Taking time to decide Tell the other agents you have an offer. → Accepting Close everything else as withdrawn. → Declining Close this one. Everything else carries on. → Cancel",
+     "returned": true,
+     "stillOpen": false
+    }
+   ],
+   "errors": []
+  },
+  "cv25-q-09": {
+   "status": "Full Requested",
+   "tabs": {
+    "tracking": "You sent Jonathan your query 24 Sep",
+    "agent": "Replies in Add reply time Takes queries By email you queried by email Last heard Not yet since 24 Sep + Add an email + Add a website What Jonathan asks for Query letter not sent Synopsis not sent You didn’t send query letter, synopsis. Wishlist in Jonathan’s words Nothing saved yet. Add Jonathan’s wishlist Open Jonathan’s full card Edit these details",
+    "materials": "With the query Light 24 Sep, by email Nothing recorded",
+    "notes": "Nothing noted yet This is the place for why you picked Jonathan, and what you’d change if this one’s a no. Add note"
+   },
+   "actions": [
+    {
+     "label": "Mark full sent",
+     "title": "Mark the full sent",
+     "opened": "Mark the full sent ✕ When Today Yesterday Another date What went FULL MANUSCRIPT ✕ + ADD Cancel Mark sent",
+     "returned": true,
+     "stillOpen": false
+    }
+   ],
+   "errors": []
+  },
+  "msv12-q-8": {
+   "status": "No Response",
+   "tabs": {
+    "tracking": "You sent Douglas your query 5 Mar You closed it: no reply 5 Mar",
+    "agent": "Replies in About 6 weeks Takes queries By email you queried by email Last heard Not yet since 5 Mar + Add an email + Add a website What Douglas asks for Query letter not sent Synopsis not sent You didn’t send query letter, synopsis. Wishlist in Douglas’s words Nothing saved yet. Add Douglas’s wishlist Open Douglas’s full card Edit these details",
+    "materials": "With the query 5 Mar, by email Nothing recorded",
+    "notes": "Nothing noted yet This is the place for why you picked Douglas, and what you’d change if this one’s a no. Add note"
+   },
+   "actions": [
+    {
+     "label": "Reopen",
+     "title": "Reopen Douglas’s query",
+     "opened": "Reopen Douglas’s query ✕ What happened? The pass was recorded by mistake Takes it off. Nothing new goes on the thread. → Douglas got back in touch Record what Douglas said, dated today. → Cancel",
+     "returned": true,
+     "stillOpen": false
+    }
+   ],
+   "errors": []
+  },
+  "seed-query-11": {
+   "status": "Revise & Resubmit",
+   "tabs": {
+    "tracking": "You sent Iris your query 8 Jul 14 days later IK Iris asked for a partial 22 Jul 14 days later You sent Iris your partial 5 Aug 14 days later IK Iris asked you to revise and resubmit Resubmit by 19 Oct 19 Aug",
+    "agent": "Replies in About 8 weeks always replies Takes queries By email you queried by email Last heard 19 Aug 92 days ago Copy email iris@example.com + Add a website What Iris asks for Query letter not sent Synopsis not sent You didn’t send query letter, synopsis. Wishlist in Iris’s words Nothing saved yet. Add Iris’s wishlist Open Iris’s full card Edit these details",
+    "materials": "With the query 8 Jul, by email Nothing recorded With the partial 5 Aug, asked 22 Jul Nothing recorded With the resubmission asked 19 Aug Nothing recorded not sent yet + Add something you sent Edit what went",
+    "notes": "Nothing noted yet This is the place for why you picked Iris, and what you’d change if this one’s a no. Add note"
+   },
+   "actions": [
+    {
+     "label": "Mark resubmitted",
+     "title": "Mark the revision sent",
+     "opened": "Mark the revision sent ✕ When Today Yesterday Another date What went FULL MANUSCRIPT · POST-R&R (T. MARSH) ✕ + ADD From post-r&r (t. marsh) · change Cancel Mark sent",
+     "returned": true,
+     "stillOpen": false
+    }
+   ],
+   "errors": []
+  },
+  "seed-query-17": {
+   "status": "Withdrawn",
+   "tabs": {
+    "tracking": "You sent Joan your query 5 Aug 14 days later You withdrew your query 19 Aug",
+    "agent": "Replies in About 8 weeks always replies Takes queries By email you queried by email Last heard Not yet since 5 Aug Copy email joan@example.com + Add a website What Joan asks for Query letter not sent Synopsis not sent You didn’t send query letter, synopsis. Wishlist in Joan’s words Nothing saved yet. Add Joan’s wishlist Open Joan’s full card Edit these details",
+    "materials": "With the query 5 Aug, by email Nothing recorded + Add something you sent Edit what went",
+    "notes": "Nothing noted yet This is the place for why you picked Joan, and what you’d change if this one’s a no. Add note"
+   },
+   "actions": [
+    {
+     "label": "Reopen",
+     "title": "Reopen Joan’s query",
+     "opened": "Reopen Joan’s query ✕ What happened? The pass was recorded by mistake Takes it off. Nothing new goes on the thread. → Joan got back in touch Record what Joan said, dated today. → Cancel",
+     "returned": true,
+     "stillOpen": false
+    }
+   ],
+   "errors": []
+  }
+ },
+ "errors": []
+}
