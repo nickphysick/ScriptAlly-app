@@ -64,3 +64,6 @@ dist-emu/
 # and Nick's own photos with their truth (never committed).
 functions/eval/fixtures/photos/
 functions/eval/fixtures/photos-real/
+
+# Consistency fixes v1 — local screenshots and the review page show a copy of live data; never committed
+audits/consistency-fixes-v1/local/
