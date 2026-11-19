@@ -27,6 +27,35 @@ const CFG = JSON.parse(readFileSync(resolve(DIR, "routes.json"), "utf8")) as {
   routes: { path: string; family: string; name?: string; signedOut?: boolean; key?: string; note?: string }[];
   overlays: { from: string; name: string; open: { button?: string; firstOf?: string; key?: string } }[];
 };
+/* Consistency fixes v1: CA_RULES=1 also runs the rule probe and crops each instance into CA_RULE_SHOTS (git-ignored) */
+const RULES = process.env.CA_RULES === "1" ? readFileSync(resolve(process.cwd(), "audits/consistency-fixes-v1/rules-probe.js"), "utf8") : null;
+const RULE_SHOTS = resolve(process.cwd(), process.env.CA_RULE_SHOTS || "audits/consistency-fixes-v1/local/shots");
+async function ruleProbe(page: Page, key: string, vw: number) {
+  if (!RULES) return;
+  const data = (await page.evaluate(RULES)) as { out: Record<string, { id: string }[]> };
+  writeFileSync(resolve(OUT, `${key}@${vw}.rules.json`), JSON.stringify(data, null, 1));
+  if (vw !== 1512) return;
+  const dir = resolve(RULE_SHOTS, key);
+  mkdirSync(dir, { recursive: true });
+  let taken = 0;
+  for (const [rule, list] of Object.entries(data.out)) {
+    for (const inst of list) {
+      if (taken >= 90) break;
+      try {
+        const loc = page.locator(`[data-cf-id="${inst.id}"]`).first();
+        await loc.scrollIntoViewIfNeeded({ timeout: 1500 });
+        const box = await loc.boundingBox();
+        if (!box) continue;
+        const vp = page.viewportSize()!;
+        const pad = 40;
+        const x = Math.max(0, box.x - pad), y = Math.max(0, box.y - pad);
+        await page.screenshot({ path: resolve(dir, `${rule}-${inst.id}.png`), clip: { x, y, width: Math.min(box.width + pad * 2, 700, vp.width - x), height: Math.min(box.height + pad * 2, 300, vp.height - y) }, animations: "disabled", scale: "css" });
+        taken++;
+      } catch { /* moved or gone: its reading stands */ }
+    }
+  }
+  await page.evaluate(() => { const s = document.querySelector("#app-stage-scroll"); if (s) s.scrollTop = 0; window.scrollTo(0, 0); });
+}
 const ONLY = (process.env.CA_ONLY || "").split(",").map((s) => s.trim()).filter(Boolean);
 const SHOTS = process.env.CA_SHOTS !== "0";
 const VIEWPORTS = [
@@ -182,6 +211,7 @@ test("consistency audit v1 — every route, both viewports", async ({ browser })
           }
           const data = await collectAndCrop(page, key, vp.w, String(vp.w));
           writeFileSync(resolve(OUT, `${key}@${vp.w}.json`), JSON.stringify({ ...entry, ...data, errors }, null, 1));
+          await ruleProbe(page, key, vp.w);
           entry.records = data.records.length;
           entry.header = (data.meta as { header?: unknown }).header ?? null;
         }
@@ -227,6 +257,7 @@ test("consistency audit v1 — every route, both viewports", async ({ browser })
           else {
             writeFileSync(resolve(OUT, `${key}@${vp.w}.json`), JSON.stringify({ ...entry, ...data }, null, 1));
             entry.records = data.records.length;
+            await ruleProbe(page, key, vp.w);
           }
         }
         await page.keyboard.press("Escape").catch(() => {});
