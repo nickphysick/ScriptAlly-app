@@ -75,20 +75,15 @@ async function typeRoles(page: Page, root: string) {
     const ph = (e: Element | null) => { if (!e) return null; const c = getComputedStyle(e, "::placeholder"); return { family: c.fontFamily, size: c.fontSize, weight: c.fontWeight, style: c.fontStyle }; };
     const slim = q(":scope > .qc156-slim");
     return {
-      "views heading": t(q(".qc156-vh b")),
-      "Reset": t(q(".qc156-vh .qc153-rst")),
-      "view label (on)": t(q(".qc156-vr.is-on span")),
-      "view label": t(q(".qc156-vr:not(.is-on) span")),
-      "view count": t(q(".qc156-vr:not(.is-on) em")),
-      "sub-heading (Refine)": t(q(".qc156-vsh")),
-      "sub-heading note": t(q(".qc156-vsh small")),
-      "sub-label": t(q(".qc156-vsl")),
-      "tick-box label": t(q(".qc156-vc .qc156-vct")),
-      "tick-box count": t(q(".qc156-vc em")),
-      "More filters": t(q(".qc156-mf b")),
-      "More filters summary": t(q(".qc156-mf small")),
-      "foot showing": t(q(".qc156-vf > span")),
-      "foot export": t(q(".qc156-exp")),
+      /* List filters v1 — the Filter panel's roles (shell/FilterPanel, one component on both pages); the Views panel's
+         rows (views, Refine, tick boxes, More filters, the foot's export) retired with it */
+      "panel heading": t(q(".fp-t")),
+      "Clear all": t(q(".fp-clr")),
+      "section title": t(q(".fp-st > b")),
+      "tile label": t(q(".fp-tile:not(.fp-tile--wide) .fp-tx")),
+      "tile count": t(q(".fp-tile:not(.fp-tile--wide) .fp-n")),
+      "pill label": t(q(".fp-pill:not(.fp-pill--more)")),
+      "foot": t(q(".fp-ft")),
       "bar count": t(q(".qc153-cnt")),
       "bar count figure": t(q(".qc153-cnt b")),
       "Find input": t(q(".qc153-find input")),

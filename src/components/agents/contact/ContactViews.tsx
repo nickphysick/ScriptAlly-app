@@ -2,109 +2,137 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list — Query Centre layout v1 (design-refs/contact-list-qc-layout-v7/contact-list-qc-layout-v7.html) — THE
- * VIEWS PANEL, replacing the v27 filter rail (ContactRail27, deleted with it). The card is the Query Centre's own
- * (`shell/ViewsPanel`, which `QcViews156` renders through); this file says only what the Contact list's views, rows and
- * counts are:
+ * List filters v1 Phase 3 (design-refs/list-filters-v1/) — THE AGENTS LIST'S FILTER PANEL, in the filter column. The card
+ * is the shared shell/FilterPanel; this file says what the Agents list's sections, counts and writes are. Agent filters
+ * only:
  *
- *   Views          All agents, then the four picks (`PICKS26`, in order), one at a time, each with its count; a pick at
- *                  0 fades and cannot be pressed (as v27's pills); All agents clears the pick
- *   Refine         Genres — every genre on file, multi-select, each with its count; a genre the book in scope carries
- *                  shows a small powder "your book" tag after its name (the rows' genre chips keep their ✓)
- *   More filters   Where they stand (the four groups) and Submissions (open to queries only), behind the full-width
- *                  row, open while one of them is set
- *   foot           "{n} showing" / "{n} of {total} showing" and the export, unchanged
+ *   Who to query next       a wide tile, Ready to query (`queried: "no"` + `open: "open"`, lib/contactV27 toggleReady),
+ *                           then Always reply (`always`) and Missing details (`missing`), each its own on/off
+ *   Have you queried them?  a split: not yet queried | queried (`queried`)
+ *   Are they open?          a split: open to queries | closed for now (`open`); under it, "{n} not known" while any
+ *                           agent's door is not known (`open: "unknown"`)
+ *   What they want          genres as pills: the book's first (a tick), then by count, then A to Z; six, plus any on,
+ *                           then "+{n} more", which shows every genre with a "Find a genre" field and "Show fewer"
+ *   foot                    "All {N} agents. {x} not yet queried." / "Showing {n} of {N} agents."
  *
- * ⚠️ A PRESENTATION OF THE PAGE'S ONE FILTER STATE: every control writes through `onFilters` / `onSets` with
- *    lib/contactV27's own writers, and every count is lib/contactV27 `railCounts` (the list's own predicate, faceted).
- *    The one count it adds is All agents': the list under everything but the pick, by the same predicate.
- * ⚠️ ITS HOOKS ARE `data-clq`, NEVER `data-qc156`: every workspace page stays mounted, so a Query Centre probe that
- *    counts `[data-qc156=…]` across the document would otherwise count this panel too.
+ * ⚠️ A PRESENTATION OF THE PAGE'S ONE FILTER STATE: every control writes `ContactFilters` through `onFilters` with
+ *    lib/contactV27's writers, and every count is lib/contactV27 `railCounts` (the list's own predicate, faceted).
+ * ⚠️ READY TO QUERY IS THE SAME STATE AS THE TWO SPLITS' LEFT SIDES: when it is on, "not yet queried" and "open to
+ *    queries" read on too. One filter state, shown twice on purpose.
+ * ⚠️ NOT DRAWN, STILL HONOURED: `status`, `action`, `mats` and the set ("Where they stand"). Set from the dashboard or a
+ *    link they filter, show as applied chips, and Clear all clears them. Your move and Waiting to hear back are about
+ *    chasing queries: they belong to the Queries page and are not here.
+ * ⚠️ NO STAGE COLOUR anywhere in this panel: none of its filters is a stage.
+ * ⚠️ ITS HOOKS ARE `data-clq`, NEVER `data-qc156`: every workspace page stays mounted.
  */
-import React from "react";
+import React, { useState } from "react";
 import type { AgentFacts, ContactFilters } from "../../../lib/contactList";
-import { matchesContactFilters } from "../../../lib/contactList";
-import { inSet, SET_LABEL, SET_ORDER, type SetKey } from "../../../lib/contactV24";
-import { PICKS26, type Pick26Key } from "../../../lib/contactV26";
-import { applyPick, pickOn, railCounts, railExport, railOn, railShowing, toggleGenre, toggleOpen, toggleSet, type Sets } from "../../../lib/contactV27";
-import { ViewsPanel, type ViewIcon } from "../../shell/ViewsPanel";
+import { emptyContactFilters, matchesContactFilters } from "../../../lib/contactList";
+import { railCounts, railOn, readyOn, toggleGenre, toggleReady, READY_LABEL, type RailGenre, type Sets } from "../../../lib/contactV27";
+import { FILTER_TICK, FilterPanel, FilterPills, FilterSection, FilterSplit, FilterTile, FilterTiles } from "../../shell/FilterPanel";
 import "../../queries/centre/qcv153.css";
 import "../../queries/centre/qcv1531.css";
 import "../../queries/centre/qcv154.css";
 import "../../queries/centre/qcv156.css";
 import "./contactQcLayout.css";
 
-/** each pick's icon, from the Query Centre's five: Your move and Waiting are the Query Centre's own; Ready to query takes
- *  the paper plane and Missing details the document (no Query Centre view matches them) */
-export const PICK_ICON: Record<Pick26Key, ViewIcon> = { you: "you", ready: "plane", wait: "clock", missing: "doc" };
-/** the groups' descriptions, read as their titles (v27's tiles') */
-const SET_TITLE: Record<SetKey, string> = {
-  you: "Agents waiting on you", agent: "Queried, and waiting on the agent", none: "Agents you haven't queried yet", closed: "Passed, or closed with no reply",
-};
-/** All agents: the pick taken off (applyPick on the pick that is on clears it), nothing else touched */
-export const clearPick = (f: ContactFilters): ContactFilters => { const k = pickOn(f); return k ? applyPick(f, k) : f; };
+/** genres shown before "+{n} more" */
+export const GENRES_SHOWN = 6;
+const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
+/** the foot's sentence */
+export function agentsFoot(on: boolean, showing: number, total: number, notQueried: number): string {
+  if (on || showing !== total) return `Showing ${showing} of ${total} ${plural(total, "agent", "agents")}.`;
+  const all = `All ${total} ${plural(total, "agent", "agents")}.`;
+  return notQueried > 0 ? `${all} ${notQueried} not yet queried.` : all;
+}
+/** the genres' order: the book's first, then railCounts' own order (how many agents carry it, highest first, then A to
+ *  Z). A stable sort on the book alone, so the order never jumps as other filters change the faceted counts. */
+export const orderGenres = (g: readonly RailGenre[], hit: (k: string) => boolean): RailGenre[] =>
+  [...g].sort((a, b) => Number(hit(b.key)) - Number(hit(a.key)));
+
+const FIND_I = <svg viewBox="0 0 20 20" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" /><path d="m13 13 4 4" /></svg>;
 
 export interface ContactViewsProps {
   all: readonly AgentFacts[];
   filters: ContactFilters;
   onFilters: (f: ContactFilters) => void;
   sets: Sets;
-  onSets: (s: Sets) => void;
   /** Find (and any page-level pool) — every count is taken inside it */
   pool: (x: AgentFacts) => boolean;
   genreLabel: (key: string, raw: string) => string;
   /** a genre the manuscript in scope carries */
   genreHit?: (key: string) => boolean;
   showing: number;
-  /** clears everything the applied row's "Clear filters" clears */
+  /** Clear all: every filter, drawn here or not, and the set */
   onReset: () => void;
-  onExport: () => void;
   loading?: boolean;
 }
 
 export const ContactViews: React.FC<ContactViewsProps> = (p) => {
   const f = p.filters;
+  const [allGenres, setAllGenres] = useState(false);
+  const [gfind, setGfind] = useState("");
   const on = railOn(f, p.sets);
-  const counts = railCounts(p.all, f, p.sets, p.pool, p.genreLabel);
-  const pick = pickOn(f);
-  const bare = clearPick(f);
-  const allN = p.all.reduce((n, x) => n + (p.pool(x) && inSet(x, p.sets) && matchesContactFilters(x, bare) ? 1 : 0), 0);
+  const c = railCounts(p.all, f, p.sets, p.pool, p.genreLabel);
+  const hit = (k: string) => !!p.genreHit?.(k);
+  const ready = readyOn(f);
+  const notQueried = p.all.reduce((n, x) => n + (matchesContactFilters(x, { ...emptyContactFilters(), queried: "no" }) ? 1 : 0), 0);
+
+  const ordered = orderGenres(c.genres, hit);
+  const q = gfind.trim().toLowerCase();
+  const shownGenres = allGenres
+    ? ordered.filter((g) => !q || g.label.toLowerCase().includes(q))
+    : ordered.filter((g, i) => i < GENRES_SHOWN || g.on);
+  const carries = c.genres.some((g) => hit(g.key));
+  const side = (k: "queried" | "open", v: string) => () => p.onFilters({ ...f, [k]: f[k] === v ? "either" : v } as ContactFilters);
+
   return (
-    <ViewsPanel hook="data-clq" label="Views" loading={!!p.loading}
-      resetDisabled={on === 0} onReset={p.onReset}
-      views={[
-        { key: "all", label: "All agents", icon: "list", n: allN, on: pick === null, disabled: false, onPick: () => p.onFilters(bare) },
-        ...PICKS26.map((k) => {
-          const isOn = pick === k.key;
-          const n = counts.picks[k.key];
-          /* a second press on the pick that is on clears it, as v27's radio did (applyPick) */
-          return { key: k.key, label: k.title, icon: PICK_ICON[k.key], n, on: isOn, title: k.line, disabled: !isOn && n === 0, onPick: () => p.onFilters(applyPick(f, k.key)) };
-        }),
-      ]}
-      refine={[{
-        id: "gn", label: "Genres",
-        empty: <span className="clq-none" data-clq="genres-none">No genres on file yet</span>,
-        ticks: counts.genres.map((g) => {
-          const hit = !!p.genreHit?.(g.key);
-          return {
-            key: g.key, data: "genre", n: g.n, on: g.on, onToggle: () => p.onFilters(toggleGenre(f, g.key)),
-            label: <>{g.label}{hit ? <span className="clq-yb" data-clq="your-book">your book</span> : null}</>,
-          };
-        }),
-      }]}
-      more={{
-        summary: "Where they stand, submissions", active: !!p.sets?.length || f.open === "open",
-        groups: [
-          { id: "ws", label: "Where they stand", ticks: SET_ORDER.map((k) => ({
-            key: k, data: "stand", label: SET_LABEL[k], n: counts.where[k], on: !!p.sets?.includes(k), title: SET_TITLE[k], onToggle: () => p.onSets(toggleSet(p.sets, k)),
-          })) },
-          { id: "sb", label: "Submissions", ticks: [{
-            key: "open", data: "open-only", label: "Open to queries only", n: counts.open, on: f.open === "open", onToggle: () => p.onFilters(toggleOpen(f)),
-          }] },
-        ],
-      }}
-      showing={railShowing(p.showing, p.all.length, on > 0)}
-      exportLabel={railExport(p.showing)} exportDisabled={p.showing === 0} onExport={p.onExport}
-    />
+    <FilterPanel hook="data-clq" label="Filter your agents" on={on} onClear={p.onReset} loading={!!p.loading}
+      foot={agentsFoot(on > 0, p.showing, p.all.length, notQueried)}>
+      <FilterSection probe="next" title="Who to query next">
+        <FilterTiles label="Who to query next" role="group">
+          <FilterTile k="ready" n={c.ready} label={READY_LABEL} line="Open, and not yet queried" icon="plane" wide role="checkbox"
+            on={ready} onPress={() => p.onFilters(toggleReady(f))} />
+          <FilterTile k="always" n={c.always} label="Always reply" title={"Even when it’s a no"} icon="reply" role="checkbox"
+            on={f.always} onPress={() => p.onFilters({ ...f, always: !f.always })} />
+          <FilterTile k="missing" n={c.missing} label="Missing details" title="Gaps in their profile" icon="doc" role="checkbox"
+            on={!!f.missing} onPress={() => p.onFilters({ ...f, missing: !f.missing })} />
+        </FilterTiles>
+      </FilterSection>
+
+      <FilterSection probe="splits" title="Have you queried them?">
+        <FilterSplit probe="queried" label="Have you queried them?" sides={[
+          { k: "no", n: c.queried.no, words: "not yet queried", on: f.queried === "no", onPress: side("queried", "no") },
+          { k: "yes", n: c.queried.yes, words: "queried", on: f.queried === "yes", onPress: side("queried", "yes") },
+        ]} />
+        <div className="fp-st"><b>Are they open?</b></div>
+        <FilterSplit probe="open" label="Are they open?" sides={[
+          { k: "open", n: c.door.open, words: "open to queries", on: f.open === "open", onPress: side("open", "open") },
+          { k: "closed", n: c.door.closed, words: "closed for now", on: f.open === "closed", onPress: side("open", "closed") },
+        ]} />
+        {c.door.unknown > 0 || f.open === "unknown" ? (
+          <div className="fp-note">
+            <button type="button" className="fp-lnk" data-clq="not-known" aria-pressed={f.open === "unknown"} disabled={!!p.loading}
+              onClick={side("open", "unknown")}>{c.door.unknown} not known</button>
+          </div>
+        ) : null}
+      </FilterSection>
+
+      <FilterSection probe="genres" title="What they want"
+        aside={allGenres ? <button type="button" className="fp-lnk" data-clq="genres-fewer" onClick={() => { setAllGenres(false); setGfind(""); }}>Show fewer</button> : null}>
+        {allGenres ? (
+          <label className="fp-find" data-clq="genre-find">
+            {FIND_I}
+            <input value={gfind} onChange={(e) => setGfind(e.target.value)} placeholder="Find a genre" aria-label="Find a genre" autoComplete="off" />
+          </label>
+        ) : null}
+        {c.genres.length === 0 ? <span className="fp-none" data-clq="genres-none">No genres on file yet</span> : (
+          <FilterPills probe="genre" label="What they want"
+            items={shownGenres.map((g) => ({ k: g.key, label: g.label, n: g.n, on: g.on, tick: hit(g.key), onToggle: () => p.onFilters(toggleGenre(f, g.key)) }))}
+            more={allGenres ? null : { n: ordered.length - shownGenres.length, onPress: () => setAllGenres(true) }} />
+        )}
+        {carries ? <p className="fp-note" data-clq="book-key">{FILTER_TICK}Genres your book carries</p> : null}
+      </FilterSection>
+    </FilterPanel>
   );
 };

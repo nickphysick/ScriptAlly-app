@@ -302,6 +302,9 @@ test.describe("Query Centre v156", () => {
      last and All queries clears it (the toolbar's count follows each); two statuses show the union; More filters opens
      and shows its groups; Tab reaches every view and tick box. Screens: at rest, each view, More open; Birds-eye. */
   test("V5 — the Views panel", async ({ page }) => {
+    /* RETIRED in List filters v1: the Views panel (views, Refine's Status ticks, More filters, the foot's export) is
+       replaced by shell/FilterPanel. Its successor locks are tests/e2e/lf1.measure.ts LF1–LF10. */
+    test.skip(true, "retired by List filters v1 (lf1.measure.ts)");
     test.skip(PHASE === "before", "after only");
     const L = new Ledger("V5");
     const V = `${PAGE} [data-qc156='views']`;
@@ -393,24 +396,25 @@ test.describe("Query Centre v156", () => {
     const L = new Ledger("V6");
     const boxes = () => page.evaluate((sel) => {
       const b = (q: string) => { const e = document.querySelector<HTMLElement>(`${sel} ${q}`); if (!e) return null; const r = e.getBoundingClientRect(); return [+r.x.toFixed(1), +r.y.toFixed(1), +r.width.toFixed(1), +r.height.toFixed(1)].join(","); };
-      return { header: b("[data-qc1531='header']"), week: b("[data-qc156='week']"), views: b("[data-qc156='views']"), toolbar: b("[data-qc154='toolbar']") };
+      return { header: b("[data-qc1531='header']"), week: b("[data-qc156='week']"), views: b("[data-qc156='panel']"), toolbar: b("[data-qc154='toolbar']") };
     }, PAGE);
     for (const vp of SIZES) {
       const w = vp.width;
       /* day one */
       await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_QC_STATE = "first"; });
       await openRoute(page, "/queries", vp);
-      await page.waitForSelector(`${PAGE} [data-qc156='views']`, { timeout: 60_000 });
+      await page.waitForSelector(`${PAGE} [data-qc156='panel']`, { timeout: 60_000 });
       await page.waitForTimeout(800);
       const d = await page.evaluate((sel) => {
         const col = document.querySelector<HTMLElement>(`${sel} [data-qc153='rail-column']`)!;
         return {
           title: document.querySelector(`${sel} [data-qc151='title']`)?.textContent, op: getComputedStyle(col).opacity, inert: col.inert,
-          counts: [...col.querySelectorAll("[data-qc156='view']")].map((e) => e.getAttribute("data-n")),
+          /* List filters v1 — the panel's quick tiles (the Views rows before) */
+          counts: [...col.querySelectorAll("[data-qc156='tile']")].map((e) => e.getAttribute("data-n")),
         };
       }, PAGE);
       L.check(`${w} day one: "No queries yet" on the navy panel`, d.title === "No queries yet", `${d.title}`);
-      L.check(`${w} day one: the Views card dimmed, inert, every view at 0`, d.op === "0.4" && d.inert && d.counts.every((n) => n === "0"), JSON.stringify(d));
+      L.check(`${w} day one: the Filter card dimmed, inert, every tile at 0`, d.op === "0.4" && d.inert && d.counts.every((n) => n === "0"), JSON.stringify(d));
       await page.screenshot({ path: `${SHOTS}/v6-dayone-${w}.png` });
       /* quiet */
       await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_QC_STATE = "quiet"; });
@@ -424,7 +428,7 @@ test.describe("Query Centre v156", () => {
       await page.addInitScript(() => { (window as unknown as Record<string, unknown>).__SA_QC_HOLD_MS = 2500; });
       await page.setViewportSize(vp);
       await page.goto("/queries");
-      await page.waitForSelector(`${PAGE} [data-qc156='views']`, { timeout: 60_000 });
+      await page.waitForSelector(`${PAGE} [data-qc156='panel']`, { timeout: 60_000 });
       await page.waitForTimeout(300);
       const busy = await boxes();
       const shownBusy = await page.evaluate((sel) => !!document.querySelector(`${sel} [data-qc155='goal-hold']`), PAGE);

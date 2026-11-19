@@ -50,6 +50,14 @@
   :is(.qc151.qc153, .cl27) .fp .fp-lnk[aria-pressed="true"] { font-weight: 600 !important; }
   :is(.qc151.qc153, .cl27) .fp .fp-note { margin: 10px 4px 0; display: flex; align-items: center; gap: 6px; font: 400 13.5px/1.3 var(--sp-serif) !important; color: #5b4f47; }
   :is(.qc151.qc153, .cl27) .fp .fp-none { display: block; margin: 0 4px; font: italic 400 14px/1.4 var(--sp-serif) !important; color: #8a8076; }
+  :is(.qc151.qc153, .cl27) .fp .fp-find {
+    display: flex; align-items: center; gap: 8px; height: 34px; margin: 0 0 10px; padding: 0 10px; border-radius: 8px; background: #fff;
+    box-shadow: inset 0 0 0 1px #e3d5c9; color: #5b4f47;
+  }
+  :is(.qc151.qc153, .cl27) .fp .fp-find:focus-within { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+  :is(.qc151.qc153, .cl27) .fp .fp-find input {
+    flex: 1; min-width: 0; border: 0; outline: 0; background: none; font: 400 15px/1 var(--sp-serif) !important; color: #1c130f;
+  }
   :is(.qc151.qc153, .cl27) .fp .fp-tk { flex: none; width: 13px; height: 13px; color: #2a3a52; }
 
   /* ── tiles ── */
