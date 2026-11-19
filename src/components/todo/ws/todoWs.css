@@ -129,6 +129,7 @@
 .tws-gb .tws-cv { margin-left: auto; font-size: 13px; opacity: 0.6; transition: transform 0.15s; }
 .tws-gb[aria-expanded="false"] .tws-cv { transform: rotate(-90deg); }
 .tws-gb[data-band="wait"] { background: #fff; color: var(--tw-ink); box-shadow: inset 0 0 0 1px #d4cabd; }
+.tws-gb[data-band="wait"] em { box-shadow: inset 0 0 0 1px #d4cabd; }
 .tws-gb[data-band="nudge"] { background: var(--tw-sand); color: var(--tw-ink); }
 .tws-gb[data-band="quiet"] { background: var(--tw-stone-fade); color: var(--tw-ink); }
 .tws-gb[data-band="house"] { background: #e4ebf1; color: #2f4357; box-shadow: none; }
