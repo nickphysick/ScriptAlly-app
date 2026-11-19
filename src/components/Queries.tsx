@@ -2143,29 +2143,7 @@ export const Queries: React.FC<{
     };
   }, [currentUser?.id, selectedQueryId]);
 
-  // Setup real-time listener for the query's activity subcollection (Fix 3)
-  useEffect(() => {
-    if (!currentUser || !selectedQueryId) {
-      setTrackingEvents([]);
-      return;
-    }
-
-    const unsubscribe = onSnapshot(
-      query(
-        collection(db, 'users', currentUser.id, 'queries', selectedQueryId, 'activity'),
-        orderBy('createdAt', 'asc')
-      ),
-      (snapshot) => {
-        const events = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        setTrackingEvents(events);
-      },
-      (error) => {
-        handleFirestoreError(error, OperationType.GET, `users/${currentUser.id}/queries/${selectedQueryId}/activity`);
-      }
-    );
-
-    return () => unsubscribe();
-  }, [selectedQueryId, currentUser?.id]);
+  /* the activity listener follows the query the open card describes (`cardQueryId`, below), not only the selected row */
 
   const triggerToast = (config: {
     queryId: string;
@@ -3047,6 +3025,21 @@ export const Queries: React.FC<{
    */
   /* the store's wins while it is set: it is what the reader last pressed */
   const cardQueryId = extPanel?.id ?? beCard ?? selectedQueryId;
+  /* To-do card thread v1 — THE ACTIVITY LISTENER FOLLOWS THE CARD'S QUERY. Every reader of `trackingEvents` pairs it with
+     `activeQuery` (this id). It used to follow `selectedQueryId` only, so a card opened from another page (the To-do desk,
+     through the shared panel) or from Birds-eye was drawn from another query's activity, or none: a short thread, and a
+     save's new step never drawn. A change of query empties the events at once, so no frame draws one query's log on
+     another's card. ⚠️ Declared after `cardQueryId` on purpose (a render-time read of it above would be a TDZ crash). */
+  useEffect(() => {
+    setTrackingEvents([]);
+    if (!currentUser || !cardQueryId) return undefined;
+    const unsubscribe = onSnapshot(
+      query(collection(db, 'users', currentUser.id, 'queries', cardQueryId, 'activity'), orderBy('createdAt', 'asc')),
+      (snapshot) => { const events = snapshot.docs.map((d) => ({ id: d.id, ...d.data() })); setTrackingEvents(events); },
+      (error) => { handleFirestoreError(error, OperationType.GET, `users/${currentUser.id}/queries/${cardQueryId}/activity`); },
+    );
+    return () => unsubscribe();
+  }, [cardQueryId, currentUser?.id]);
   /* v149 C — another query in the panel opens in view mode, unless a flow asked for respond on that very query */
   useEffect(() => {
     const p = qcCardPendingMode.current;
