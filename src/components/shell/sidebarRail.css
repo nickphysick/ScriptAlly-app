@@ -89,7 +89,7 @@
   }
   .wsr-ic svg { width: 20px; height: 20px; transition: stroke-width 0.18s ease; }
   .wsr-lbl {
-    font: 400 11.5px/1.15 var(--sp-serif); font-optical-sizing: auto; letter-spacing: -0.005em; white-space: nowrap;
+    font: 400 12px/1.15 var(--sp-serif); font-optical-sizing: auto; letter-spacing: -0.005em; white-space: nowrap;
     color: rgba(var(--ink-cream-rgb), 0.74);
   }
 
@@ -127,7 +127,7 @@
   .wsr-fb:hover .wsr-fbi { background: rgba(var(--ink-terra-rgb), 0.1); }
   .wsr-fbi svg { width: 17px; height: 17px; }
   .wsr-fbi i { position: absolute; right: -3px; top: -3px; width: 9px; height: 9px; border-radius: 50%; background: var(--ink-terra); box-shadow: 0 0 0 2px var(--ink-shell); }
-  .wsr-t { font: 600 11px/normal var(--sp-serif); color: var(--ink-terra); }
+  .wsr-t { font: 600 12px/normal var(--sp-serif); color: var(--ink-terra); }
   .wsr-foot { flex: none; padding-top: 12px; display: flex; justify-content: center; }
   .wsr .wsr-av {
     width: 32px; height: 32px; padding: 0; border-radius: 50%; border: 0; display: grid; place-items: center;
