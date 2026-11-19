@@ -56,7 +56,8 @@ The 2 failures are the existing `firestoreTarget` ones.
 
 ## Dev
 
-DEV
+https://scriptally-dev.web.app serves `index-DH0PUdVK.js`, built from d9058017c on a clean checkout of the pushed tip.
+Before this deploy dev served `index-BBv9y05U.js` (Query card v160).
 
 ## Not done
 
