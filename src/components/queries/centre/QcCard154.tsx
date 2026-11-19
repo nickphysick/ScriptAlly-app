@@ -15,7 +15,7 @@
  * ⚠️ THE STATUS WORD IS NEVER DRAWN AT REST, and never dropped: it names the card, it names the track (and its
  *    `title`), and it sits in a visually hidden span beside the track.
  */
-import React, { useState } from "react";
+import React, { useLayoutEffect, useRef, useState } from "react";
 import type { QcRow } from "../../../lib/qcSummary";
 import type { RowAct } from "../../../lib/qc1512";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
@@ -28,6 +28,9 @@ import "./qcv1531.css";
 import "./qcv154.css";
 import "./qcv1561.css";
 import "./qcv157.css";
+/* Query card v160, Phase 4 — the band eases to a new stage */
+import { STAGE_COLOURS } from "../../../lib/stageColours";
+import { gridBand, gridEase } from "./qcMotion160";
 
 const BELL = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M8 2.5a4 4 0 0 0-4 4v2.5L2.8 11h10.4L12 9V6.5a4 4 0 0 0-4-4zM6.5 13a1.5 1.5 0 0 0 3 0" /></svg>;
 
@@ -52,6 +55,18 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
   const hot = (nx.kind === "other" && nx.hot) || quiet;
   const mats = materialGroups(r.query, r.status, packageName, r.stageStartMs, nowMs);
   const [popOpen, setPopOpen] = useState(false);
+  /* v160 Phase 4 — the band's colour eases over 500ms when the stage changes; a gradient band (the offer's sheen, gone
+     quiet's fade) at either end changes at once. Web Animations from the committed change, so it runs in the frame the
+     new colour is drawn in (a CSS transition, measured, did not start behind the open card). */
+  const tone = slipTone(r.status);
+  const bandNow = { band: STAGE_COLOURS[tone].band, grad: quiet || tone === "offer" };
+  const bandWas = useRef(bandNow);
+  const hdRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const e = gridEase(bandWas.current, bandNow);
+    bandWas.current = bandNow;
+    if (e) gridBand(hdRef.current, e);
+  }, [bandNow.band, bandNow.grad]); // eslint-disable-line react-hooks/exhaustive-deps
   /* the slip's rule: a navy or nudge act is the button's words; anything else opens the card */
   const cta = act && act.tone !== "plain" ? act : null;
   const open = () => onOpen(r.id);
@@ -64,7 +79,7 @@ export const QcCard154: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, p
       onClick={open}
       onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); open(); } }}>
       <div className="qc154-in">
-        <div className="qc154-hd" data-qc154="band">
+        <div ref={hdRef} className="qc154-hd" data-qc154="band">
           <span className="qc153-seal qc154-seal" aria-hidden="true">{r.initials}</span>
           <span className="qc154-who">
             <b className="qc154-nm" data-qc154="name">{r.agentName}</b>

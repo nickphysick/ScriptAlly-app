@@ -4,6 +4,7 @@
  */
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { gridEase } from "./qcMotion160";
 
 const read = (p: string) => readFileSync(new URL(p, import.meta.url), "utf8");
 const MOTION = read("./qcMotion160.ts");
@@ -86,6 +87,28 @@ describe("Query card v160 · Phase 3 — undo", () => {
     const u = HOST.slice(HOST.indexOf("card1522.toast = qc1522Toast ?"), HOST.indexOf("card1522.burst ="));
     expect(u).toMatch(/setQc1522Toast\(null\);\n\s+if \(t\.bump\) setQcMotion160\(\{ kind: "undo", n: Date\.now\(\) \}\);\n[\s\S]*void t\.undo\?\.\(\)/);
     expect(u).not.toMatch(/setTimeout/);
+  });
+});
+
+describe("Query card v160 · Phase 4 — the grid card behind", () => {
+  const solid = (band: string) => ({ band, grad: false }), grad = (band: string) => ({ band, grad: true });
+  it("eases between two single colours", () => {
+    expect(gridEase(solid("#efe6d6"), solid("#e4ebf2"))).toEqual({ from: "#efe6d6", to: "#e4ebf2" });
+  });
+  it("changes at once where either end is a gradient (the offer's sheen, gone quiet's fade), or nothing changed", () => {
+    expect(gridEase(grad("#efcdc9"), solid("#eceae6"))).toBeNull();
+    expect(gridEase(solid("#b7c9de"), grad("#efcdc9"))).toBeNull();
+    expect(gridEase(solid("#efe6d6"), grad("#efe6d6"))).toBeNull();
+    expect(gridEase(solid("#efe6d6"), solid("#efe6d6"))).toBeNull();
+    expect(gridEase(null, solid("#efe6d6"))).toBeNull();
+  });
+  it("the grid card animates its band only, 500ms, never under reduced motion", () => {
+    const G = read("./QcCard154.tsx");
+    expect(G).toMatch(/gridBand\(hdRef\.current, e\)/);
+    const fn = code(MOTION).match(/export function gridBand[\s\S]*?\n}/)?.[0] ?? "";
+    expect(fn).toMatch(/reduced\(\)/);
+    expect(fn).toMatch(/backgroundColor: e\.from \}, \{ backgroundColor: e\.to/);
+    expect(MOTION).toMatch(/GRID = \{ ms: 500 \}/);
   });
 });
 

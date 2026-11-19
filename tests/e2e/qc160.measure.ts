@@ -12,7 +12,7 @@
 import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
-import { openRoute } from "./measure";
+import { liftMotionSuppression, openRoute } from "./measure";
 
 const PHASE = process.env.SA_PHASE === "before" ? "before" : process.env.SA_PHASE === "mutant" ? "mutant" : "after";
 const ONLY = process.env.QC160_ONLY ?? "";
@@ -42,16 +42,19 @@ class Ledger {
   }
 }
 
-async function open(page: Page, reduced = false) {
+/** ⚠️ THE HARNESS KILLS CSS MOTION (measure.ts KILL_MOTION: every transition and animation `none !important`). v160 is
+ *  motion, and its reduced-motion lock is only true with the app's own CSS live, so every page here lifts it. */
+async function open(page: Page, reduced = false, group = "attention") {
   if (reduced) await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.addInitScript(() => {
+  await page.addInitScript((g) => {
     try {
       sessionStorage.removeItem("qh.qc.filters"); sessionStorage.removeItem("qh.qc.collapsed1511"); sessionStorage.setItem("qh.qc.view150", "list");
-      localStorage.setItem("qh.qc.view", JSON.stringify({ v: 1, group: "attention", sort: { key: "due", reversed: false }, density: "comfortable" }));
+      localStorage.setItem("qh.qc.view", JSON.stringify({ v: 1, group: g, sort: { key: "due", reversed: false }, density: "comfortable" }));
       localStorage.setItem("sa.guide.queries", "1"); localStorage.setItem("sa.guide.queries-explainer", "1"); localStorage.removeItem("sa.pinList.queries");
     } catch { /* private mode */ }
-  });
+  }, group);
   await openRoute(page, "/queries", VP);
+  await liftMotionSuppression(page);
   await page.waitForSelector(`${PAGE} [data-qc153="bar"]`, { timeout: 60_000 });
   const lb = page.locator(`${PAGE} [data-qc153="bar"] button[data-v="list"]`);
   if ((await lb.getAttribute("aria-pressed")) !== "true" && await lb.isEnabled()) await lb.click();
@@ -382,7 +385,7 @@ if (PHASE !== "before") {
     const gs = tr.map((f) => Number(f.ghostOp ?? NaN)).filter((x) => !Number.isNaN(x));
     L.check("timed out: some frame shows it leaving, opacity strictly between 0 and 1", gs.some((o) => o > 0.02 && o < 0.98), JSON.stringify(gs.slice(0, 12)));
     L.check("timed out: the live toast is gone", tr[tr.length - 1]?.toast == null, String(tr[tr.length - 1]?.toast));
-    L.done(6);
+    L.done(5);
   });
 }
 
@@ -471,5 +474,44 @@ if (PHASE !== "before") {
     L8.check("the restore starts at the press (its read goes out within 100ms)", !!read && read.t >= 0 && read.t <= 100, JSON.stringify(read));
     L8.check("the undo's commit is not held for a motion: it goes out before the fold has run (420ms)", !!commit && commit.t - (t0 - 100 + (clickAt - press)) < 420, JSON.stringify({ commit, foldFromPress: Math.round(t0 - 100 + (clickAt - press)) }));
     L7.done(9); L8.done(5);
+  });
+}
+
+/* ── Phase 4: the grid card behind ── */
+if (PHASE !== "before") {
+  if (run("14")) test("QC160-14 · the grid card's band eases to a new stage", async ({ page }) => {
+    const L = new Ledger("QC160-14");
+    /* grouped by nothing, so a stage change does not move the card to another group (which re-mounts it) */
+    await open(page, false, "none");
+    const G = (id: string) => `${PAGE} [data-qc154='card'][data-id='${id}'] [data-qc154='band']`;
+    L.check("population: the grid has solid, offer and gone-quiet cards", await page.evaluate((pg) => {
+      const cs = [...document.querySelectorAll<HTMLElement>(`${pg} [data-qc154='card']`)].filter((c) => c.getBoundingClientRect().width > 0);
+      return cs.some((c) => c.dataset.tone === "offer") && cs.some((c) => c.dataset.quiet != null) && cs.length > 20;
+    }, PAGE), "");
+    /* a stage change, read on the grid card while the slide-in card is open over it */
+    await page.evaluate((sel) => {
+      const w = window as unknown as { __gb: { t: number; bg: string | null; el: number }[]; __gbOn: boolean };
+      w.__gb = []; w.__gbOn = true; const t0 = performance.now(); const ids = new WeakMap<object, number>(); let n = 0;
+      /* the visible copy: every workspace page stays mounted, and a hidden one never runs a transition */
+      const tick = () => { if (!w.__gbOn) return; const e = [...document.querySelectorAll<HTMLElement>(sel)].find((x) => x.getBoundingClientRect().width > 0) ?? null; if (e && !ids.has(e)) ids.set(e, ++n);
+        const cs = e ? getComputedStyle(e) : null;
+        w.__gb.push({ t: performance.now() - t0, bg: cs?.backgroundColor ?? null, el: e ? ids.get(e)! : 0, tr: `${cs?.transitionProperty} ${cs?.transitionDuration}`, tone: e?.closest<HTMLElement>("[data-qc154='card']")?.dataset.tone, snap: e?.closest<HTMLElement>("[data-qc154='card']")?.dataset.snap != null, an: e ? e.getAnimations().map((a) => a.id).join() : "", vis: e ? getComputedStyle(e.closest<HTMLElement>("[data-qc154='card']")!).visibility + "/" + getComputedStyle(e.closest<HTMLElement>(".qc151")!).display : "" } as never); requestAnimationFrame(tick); };
+      requestAnimationFrame(tick);
+    }, G("q152-agent"));
+    await openCard(page, "agent");
+    await saveOne(page, "agent", "req");
+    await page.waitForTimeout(1500);
+    const gb = await page.evaluate(() => { const w = window as unknown as { __gb: { t: number; bg: string | null; el: number }[]; __gbOn: boolean }; w.__gbOn = false; return w.__gb; });
+    const ci = gb.findIndex((f, i) => i > 0 && f.bg !== gb[i - 1].bg);
+    L.check("population: the grid card's band changed colour", ci > 0, `${gb[0]?.bg} → ${gb[gb.length - 1]?.bg}`);
+    const kept = new Set(gb.filter((f) => f.el).map((f) => f.el)).size === 1;
+    const from = nums(gb[ci - 1]?.bg), to = nums(gb[gb.length - 1]?.bg), t0 = gb[ci]?.t ?? 0;
+    const mid = gb.find((f) => f.t - t0 >= 150 && f.t - t0 <= 300);
+    const between = !!mid && nums(mid.bg).every((v, k) => (v - from[k]) * (v - to[k]) <= 0) && nums(mid.bg).join() !== to.join();
+    L.check(kept ? "the band is part-way between the old and new colour 150–300ms in (the card stayed mounted)" : "the card moved group (re-mounted): as built, it changes at once", kept ? between : true, `${gb[ci - 1]?.bg} | ${mid?.bg} | ${gb[gb.length - 1]?.bg} · mounted once: ${kept}`);
+    L.check("the band's ease ran on the grid card (Web Animations, 500ms)", gb.some((f) => /qc160-grid/.test(String((f as unknown as { an: string }).an))), "");
+    const end = gb.find((f) => f.t - t0 >= 560);
+    L.check("it has the new colour by 560ms", nums(end?.bg).join() === to.join(), String(end?.bg));
+    L.done(5);
   });
 }

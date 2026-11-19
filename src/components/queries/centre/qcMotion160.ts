@@ -165,3 +165,15 @@ export function toastOut(el: HTMLElement, done: () => void): void {
   a.id = "qc160-toast-out";
   a.finished.then(done, done);
 }
+
+/** Phase 4 — the grid card's band, when its stage changes: the colours to ease between, or null to change at once
+ *  (the same stage; either end a gradient — the offer's sheen, gone quiet's fade) */
+export function gridEase(was: { band: string; grad: boolean } | null, now: { band: string; grad: boolean }): { from: string; to: string } | null {
+  if (!was || was.grad || now.grad || was.band === now.band) return null;
+  return { from: was.band, to: now.band };
+}
+export const GRID = { ms: 500 } as const;
+export function gridBand(el: HTMLElement | null, e: { from: string; to: string }): void {
+  if (!el || reduced() || getComputedStyle(el).backgroundImage !== "none") return;
+  el.animate([{ backgroundColor: e.from }, { backgroundColor: e.to }], { duration: GRID.ms, easing: "ease" }).id = "qc160-grid";
+}
