@@ -229,8 +229,10 @@
   /* ── the right: search · Log a query · (rule) · Help ── */
   .ws-pagebar .ws-bright { --ws-bright-gap: 12px; }
 
-  /* ⚠️ A FIXED 168px FIELD (fit rule 5): it never grows, shrinks or moves, so the tabs can be fitted up
-     to 24px short of it and nothing else in the bar ever moves. */
+  /* ⚠️ FIT RULE 5, AS AMENDED BY SEARCH FIELD V1 (19 Nov): the field's RIGHT EDGE never moves. It is 280px when every
+     tab keeps its name beside it with the 24px gap (`[data-wide]`), 168px when they only fit beside that, then its 38px
+     icon (`[data-fold]`). The fit (`planWithFolds`) decides; the width changes only when the page or the window does,
+     so it is not animated, and nothing else in the bar moves. */
   .ws-sfield {
     box-sizing: border-box;
     flex: none;
@@ -253,6 +255,7 @@
   .ws-sfield:hover { background: rgba(var(--ink-cream-rgb), 0.11); color: var(--ink-cream-66); }
   /* SHELL TABS v2 · when space runs short, search folds first (TabStrip's fit, `planWithFold`): a 38px icon button, the
      same height, ring and fill; its right edge stays where it was, so nothing else in the bar moves (ST2-C2) */
+  .ws-pagebar .ws-sfield[data-wide] { width: 280px; }
   .ws-pagebar .ws-sfield[data-fold] { width: 38px; padding: 0; gap: 0; justify-content: center; }
   .ws-pagebar .ws-sfield[data-fold] .ws-sfield-l,
   .ws-pagebar .ws-sfield[data-fold] .ws-sfield-k { display: none; }

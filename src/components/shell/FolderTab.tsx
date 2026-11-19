@@ -264,8 +264,9 @@ export type StripMode = "cur" | "full" | "ic" | "hid";
 
 /** Between tabs (the ref's `.tabs` gap). */
 const STRIP_GAP = 2;
-/** The bar's search field, open and folded to its icon (inkShell.css `.ws-sfield`, `.ws-sfield[data-fold]`;
- *  `searchFold.test.ts` holds the two equal to the CSS). */
+/** The bar's search field: wide when the bar has the room, open, and folded to its icon (inkShell.css
+ *  `.ws-sfield[data-wide]`, `.ws-sfield`, `.ws-sfield[data-fold]`; `searchFold.test.ts` holds the three equal to the CSS). */
+export const SEARCH_WIDE_W = 280;
 export const SEARCH_W = 168;
 export const SEARCH_FOLD_W = 38;
 
@@ -274,8 +275,8 @@ export const SEARCH_FOLD_W = 38;
 export const PILL_FOLD_W = 38;
 
 /**
- * Shell tabs v2 Phase 3, v2.1 Phase 1 — WHEN SPACE RUNS SHORT THE BAR GIVES UP ROOM IN ORDER: search folds to its icon,
- * then the guide pill folds to its icon, and only then may a tab lose its name. `rooms[k]` is the room the strip would
+ * Shell tabs v2 Phase 3, v2.1 Phase 1, search field v1 — WHEN SPACE RUNS SHORT THE BAR GIVES UP ROOM IN ORDER: search
+ * goes from 280px to 168px, then folds to its icon, then the guide pill folds to its icon, and only then may a tab lose its name. `rooms[k]` is the room the strip would
  * have with the first k controls folded (rooms[0]: nothing folded). The level is the first k at which every tab keeps
  * its name; if none does, the last level, planned with the old order of retreat (icons, then "+N"). Pure, so it is
  * unit-tested; `TabStrip` feeds it measured widths. Unfolding is the same reading as the window widens, so the pill's
@@ -382,7 +383,8 @@ export const TabStrip: React.FC<TabStripProps> = ({ tabs, current, onGo, limitRe
       const foldedW = slotFolded ? slotW : slotW - pillW + PILL_FOLD_W;
       const rightOpen = right + (slotW - openW);
       const rightFolded = right + (slotW - foldedW);
-      const rooms = [rightOpen - SEARCH_W - LIMIT_GAP - left, rightOpen - SEARCH_FOLD_W - LIMIT_GAP - left];
+      /* search field v1: the wide field is the first room, so the field gives up its extra width before anything folds */
+      const rooms = [rightOpen - SEARCH_WIDE_W - LIMIT_GAP - left, rightOpen - SEARCH_W - LIMIT_GAP - left, rightOpen - SEARCH_FOLD_W - LIMIT_GAP - left];
       if (pill && slotW > 0) rooms.push(rightFolded - SEARCH_FOLD_W - LIMIT_GAP - left);
       const plan = planWithFolds(rest, icon, curIdx, cur, more, rooms);
       next = plan.modes;

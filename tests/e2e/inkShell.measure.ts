@@ -103,7 +103,8 @@ test.describe("ink shell", () => {
   /* ── INK6 · tab fit — RETIRED by shell nav v3 (13 Nov): the sibling row is replaced by the tab strip, whose fit
      (current never icon or "+N", resting tabs give way from the right) is SNV3-F1/F2 in shellNavV3.measure.ts. ── */
 
-  test("INK7 · search is 168px, 12px before Log a query, at one x on every route; a click opens the palette", async ({ page }) => {
+  /* search field v1 (19 Nov): the field is 280 or 168 by the fit, so the one x across routes is its RIGHT edge */
+  test("INK7 · search is 280 or 168px, 12px before Log a query, its right edge at one x on every route; a click opens the palette", async ({ page }) => {
     for (const w of WIDTHS) {
       const xs: number[] = [];
       for (const route of ROUTES) {
@@ -111,11 +112,11 @@ test.describe("ink shell", () => {
         const s = (await rect(page, ".ws-sfield"))!;
         const cap = (await rect(page, ".ws-cap--bar"))!;
         expect(s, "the field is drawn").not.toBeNull();
-        expect(near(s.w, 168), `${route}: width ${s.w}`).toBe(true);
+        expect(near(s.w, 280) || near(s.w, 168), `${route}: width ${s.w}`).toBe(true);
         expect(near(cap.x - s.r, 12), `${route}: gap ${cap.x - s.r}`).toBe(true);
-        xs.push(s.x);
+        xs.push(s.r);
       }
-      expect(Math.max(...xs) - Math.min(...xs), `x across routes at ${w}: ${xs.join(",")}`).toBeLessThanOrEqual(1);
+      expect(Math.max(...xs) - Math.min(...xs), `right edge across routes at ${w}: ${xs.join(",")}`).toBeLessThanOrEqual(1);
     }
     await page.locator(".ws-sfield").click();
     await expect(page.locator(".sp-pal")).toBeVisible();

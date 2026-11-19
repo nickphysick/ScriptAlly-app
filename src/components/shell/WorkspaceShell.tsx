@@ -786,8 +786,10 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
   /* shell tabs v2 / v2.1: the strip's fit says how far the bar must fold (TabStrip `onFold`): 1 folds search to its
      icon, 2 also folds the guide pill in the page slot. The level is published for the pill's tooltip. */
   const [foldLevel, setFoldLevel] = useState(0);
-  const searchFolded = foldLevel >= 1;
-  const slotFolded = foldLevel >= 2;
+  /* search field v1: level 0 is the wide field (280), 1 the 168 field, 2 the icon, 3 the pill folded too */
+  const searchWide = foldLevel === 0;
+  const searchFolded = foldLevel >= 2;
+  const slotFolded = foldLevel >= 3;
   useEffect(() => { setBarSlotFolded(slotFolded); }, [slotFolded]);
   const setSearchRefs = useCallback((el: HTMLButtonElement | null) => {
     searchFieldRef.current = el;
@@ -1299,7 +1301,8 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
               {/* the right: the workspace group (search · Log a query), then Help, set apart. Spacing is
                   per-child `margin-left`, so a control that leaves in settings mode takes its space. */}
               <div className="ws-bright">
-                {/* ⚠️ A 168px FIELD WHOSE RIGHT EDGE NEVER MOVES (fit rule 5). It opens the existing palette, the
+                {/* ⚠️ A FIELD WHOSE RIGHT EDGE NEVER MOVES (fit rule 5, as amended by search field v1): 280px when every tab keeps
+                    its name beside it (`data-wide`), 168px when they only fit beside that, then its icon. It opens the existing palette, the
                     same as ⌘K (bound in `usePalette`); the ref is still the palette's anchor.
                     ⚠️ SHELL TABS v2: WHEN THE TABS WOULD NOT KEEP THEIR NAMES, SEARCH FOLDS FIRST to a 38px icon button
                     (`data-fold`, set by the strip's own fit — `planWithFolds`); the tabs and "Log a query" keep their
@@ -1309,6 +1312,7 @@ export const WorkspaceShell: React.FC<WorkspaceShellProps> = ({
                     ref={setSearchRefs}
                     type="button"
                     className="ws-search ws-sfield"
+                    data-wide={searchWide ? "" : undefined}
                     data-fold={searchFolded ? "" : undefined}
                     data-probe="search"
                     onClick={onOpenSearch}
