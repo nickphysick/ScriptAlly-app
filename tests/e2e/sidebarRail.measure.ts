@@ -59,7 +59,7 @@ test.describe("sidebar rail v1 — Phase 1, the nav model", () => {
     await expect(input).toBeVisible();
     for (const [term, title] of [["respon", "Responses"], ["analy", "Analytics"], ["submission", "Submission packages"], ["versions", "Versions"], ["comparable", "Comparable titles"], ["letters", "Query letters"]] as const) {
       await input.fill(term);
-      const titles = await page.locator(".sp-res .sp-t1").allTextContents();
+      const titles = await page.locator(".sp-res .sp-t1, .sv1-row .sv1-t1").allTextContents();
       console.log(`[SR1.2] "${term}"`, JSON.stringify(titles.slice(0, 6)));
       expect(titles.map((t) => t.trim()), term).toContain(title);
     }
