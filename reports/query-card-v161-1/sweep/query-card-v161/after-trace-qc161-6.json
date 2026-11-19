@@ -1,0 +1,135 @@
+{
+ "save": {
+  "frames": 32,
+  "scales": 30,
+  "longs": [],
+  "span": 517,
+  "start": 11269.4,
+  "longsAll": [
+   {
+    "start": 7156.399999976158,
+    "dur": 167,
+    "name": "unknown"
+   },
+   {
+    "start": 7969.200000047684,
+    "dur": 1537,
+    "name": "unknown"
+   },
+   {
+    "start": 9506.200000047684,
+    "dur": 53,
+    "name": "unknown"
+   },
+   {
+    "start": 10432.299999952316,
+    "dur": 54,
+    "name": "unknown"
+   },
+   {
+    "start": 10488,
+    "dur": 79,
+    "name": "unknown"
+   },
+   {
+    "start": 10729.100000023842,
+    "dur": 53,
+    "name": "unknown"
+   },
+   {
+    "start": 11091.799999952316,
+    "dur": 58,
+    "name": "unknown"
+   },
+   {
+    "start": 11150.799999952316,
+    "dur": 67,
+    "name": "unknown"
+   },
+   {
+    "start": 12694.899999976158,
+    "dur": 122,
+    "name": "unknown"
+   }
+  ]
+ },
+ "undo": {
+  "frames": 28,
+  "scales": 26,
+  "longs": [],
+  "span": 517,
+  "start": 18619.2,
+  "longsAll": [
+   {
+    "start": 14036.5,
+    "dur": 435,
+    "name": "unknown"
+   },
+   {
+    "start": 14473.799999952316,
+    "dur": 55,
+    "name": "unknown"
+   },
+   {
+    "start": 14036.5,
+    "dur": 435,
+    "name": "unknown"
+   },
+   {
+    "start": 14473.799999952316,
+    "dur": 55,
+    "name": "unknown"
+   },
+   {
+    "start": 14959.799999952316,
+    "dur": 2046,
+    "name": "unknown"
+   },
+   {
+    "start": 17006.799999952316,
+    "dur": 73,
+    "name": "unknown"
+   },
+   {
+    "start": 14959.799999952316,
+    "dur": 2046,
+    "name": "unknown"
+   },
+   {
+    "start": 17006.799999952316,
+    "dur": 73,
+    "name": "unknown"
+   },
+   {
+    "start": 17663.200000047684,
+    "dur": 64,
+    "name": "unknown"
+   },
+   {
+    "start": 17729.100000023842,
+    "dur": 116,
+    "name": "unknown"
+   },
+   {
+    "start": 17663.200000047684,
+    "dur": 64,
+    "name": "unknown"
+   },
+   {
+    "start": 17729.100000023842,
+    "dur": 116,
+    "name": "unknown"
+   },
+   {
+    "start": 18095.700000047684,
+    "dur": 69,
+    "name": "unknown"
+   },
+   {
+    "start": 18095.700000047684,
+    "dur": 69,
+    "name": "unknown"
+   }
+  ]
+ }
+}

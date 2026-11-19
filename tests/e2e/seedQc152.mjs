@@ -42,7 +42,9 @@ async function wipe() {
     for (const a of (await getDocs(collection(db, "users", uid, "queries", d.id, "activity"))).docs) { await deleteDoc(a.ref); gone++; }
   }
   for (const coll of ["queries", "agents", "taskFlags", "activities", "tasks"]) {
-    for (const d of (await getDocs(collection(db, "users", uid, coll))).docs) if (d.id.startsWith(PREFIX)) { await deleteDoc(d.ref); gone++; }
+    /* (a feed row the app wrote has its own id, not ours: it is ours when it names a seed query — v161.1, QC161-11 saw one
+       a v160 spec left behind) */
+    for (const d of (await getDocs(collection(db, "users", uid, coll))).docs) if (d.id.startsWith(PREFIX) || (coll === "activities" && String(d.data().queryId ?? "").startsWith(PREFIX))) { await deleteDoc(d.ref); gone++; }
   }
   await updateDoc(doc(db, "users", uid), { "todoPrefs.queries.quietWeeks": deleteField() }).catch(() => {});
   return gone;

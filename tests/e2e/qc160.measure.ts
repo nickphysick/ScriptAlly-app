@@ -163,7 +163,7 @@ if (PHASE === "before") {
 }
 
 /* ══ the locks ════════════════════════════════════════════════════════════════════════════════════════════════════ */
-interface Fr { t: number; scale: string; rotate: string; translate: string; transform: string; anims: { uid: number; props: string[]; dur: number; peak: number; play: string }[] }
+interface Fr { t: number; scale: string; rotate: string; translate: string; transform: string; anims: { uid: number; id: string; props: string[]; dur: number; peak: number; play: string }[] }
 /** every frame: the frame's own scale/rotate/translate/transform, and every animation running on the frame itself */
 async function sampleFrame(page: Page) {
   await page.evaluate((cardSel) => {
@@ -182,7 +182,7 @@ async function sampleFrame(page: Page) {
           if (a instanceof CSSTransition) props.push(`transition:${a.transitionProperty}`);
           if (a instanceof CSSAnimation) props.push(`css:${a.animationName}`);
           const peak = Math.max(...ks.map((k) => parseFloat(String((k as Record<string, unknown>).scale ?? "1")) || 1));
-          return { uid: uid(a), props, dur: Number(a.effect?.getTiming().duration) || 0, peak, play: a.playState };
+          return { uid: uid(a), id: a.id, props, dur: Number(a.effect?.getTiming().duration) || 0, peak, play: a.playState };
         });
         w.__fs.push({ t: Math.round(performance.now() - t0), scale: cs.scale, rotate: cs.rotate, translate: cs.translate, transform: cs.transform, anims });
       }
@@ -208,13 +208,20 @@ async function saveOne(page: Page, key: string, reply: string | null = null): Pr
   await click(page, C("[data-qc1522='save']"), 50);
   return waitToast(page);
 }
+/** v161.1: one press (at most) then exactly one pop — 520ms, peaking at 1.035 — and no other scale animation */
+const pressAndPop = (sa: Fr["anims"]) => {
+  const pops = sa.filter((a) => a.id === "qc160-bump"), presses = sa.filter((a) => a.id === "qc1611-press");
+  return pops.length === 1 && presses.length <= 1 && sa.length === pops.length + presses.length && Math.abs(pops[0].dur - 520) < 1 && Math.abs(pops[0].peak - 1.035) < 0.0005;
+};
 const bumpReads = (L: Ledger, tag: string, fs: Fr[]) => {
   const sa = scaleAnims(fs);
-  L.check(`${tag}: exactly one scale animation on the frame`, sa.length === 1, JSON.stringify(sa));
-  const b = sa[0];
-  L.check(`${tag}: it animates scale only, never transform`, !!b && b.props.join() === "scale", JSON.stringify(b?.props));
-  L.check(`${tag}: 500ms`, !!b && Math.abs(b.dur - 500) < 1, String(b?.dur));
-  L.check(`${tag}: peaks between 1.02 and 1.025`, !!b && b.peak >= 1.02 && b.peak <= 1.025, String(b?.peak));
+  /* (v161.1: the bump is a press and a pop — the press, at most one, then exactly one pop; nothing else scales the frame) */
+  const pops = sa.filter((a) => a.id === "qc160-bump"), presses = sa.filter((a) => a.id === "qc1611-press");
+  L.check(`${tag}: exactly one pop, at most one press, and no other scale animation on the frame`, pops.length === 1 && presses.length <= 1 && sa.length === pops.length + presses.length, JSON.stringify(sa));
+  const b = pops[0];
+  L.check(`${tag}: they animate scale only, never transform`, sa.every((a) => a.props.join() === "scale"), JSON.stringify(sa.map((a) => a.props)));
+  L.check(`${tag}: the pop is 520ms`, !!b && Math.abs(b.dur - 520) < 1, String(b?.dur));
+  L.check(`${tag}: the pop peaks at 1.035`, !!b && Math.abs(b.peak - 1.035) < 0.0005, String(b?.peak));
   const during = fs.filter((f) => f.anims.some((a) => a.uid === b?.uid));
   L.check(`${tag}: population — frames with the bump running`, during.length >= 5, String(during.length));
   /* (the lean's own return, a 320ms transition from the composer's close, can still be ending: 0.01° is its tail) */
@@ -297,7 +304,7 @@ if (PHASE !== "before") {
     L.check("population: the save landed and Undo was pressed", ok, "");
     const most = Math.max(0, ...fs.map((f) => f.anims.filter((a) => a.props.includes("scale")).length));
     L.check("at most one running scale animation on the frame in any frame", most <= 1, String(most));
-    L.check("population: two bumps ran (the save's and the undo's)", scaleAnims(fs).length === 2, String(scaleAnims(fs).length));
+    L.check("population: two pops ran (the save's and the undo's)", scaleAnims(fs).filter((a) => a.id === "qc160-bump").length === 2, JSON.stringify(scaleAnims(fs).map((a) => a.id)));
     const box1 = await frameBox(page);
     L.check("the frame's box at rest equals its box before the save", box0 === box1, `${box0} → ${box1}`);
     L.done(4);
@@ -624,13 +631,13 @@ if (PHASE !== "before") {
       const fs = await stopFrame(page);
       if (!ok) { L.check(`${what}: saved (not run: no undo toast)`, true, ""); continue; }
       const s1 = scaleAnims(fs);
-      L.check(`${what}: the save bumps (one scale animation, 500ms, peak 1.022)`, s1.length === 1 && s1[0].dur === 500 && Math.abs(s1[0].peak - 1.022) < 0.001, JSON.stringify(s1));
+      L.check(`${what}: the save presses in and pops (at most one press; one pop, 520ms, peak 1.035)`, pressAndPop(s1), JSON.stringify(s1));
       await sampleFrame(page);
       await page.locator(C("[data-qc1522='undo']")).first().click();
       await page.waitForTimeout(2000);
       const fu = await stopFrame(page);
       const s2 = scaleAnims(fu);
-      L.check(`${what}: its undo bumps`, s2.length === 1 && s2[0].dur === 500, JSON.stringify(s2));
+      L.check(`${what}: its undo presses in and pops`, pressAndPop(s2), JSON.stringify(s2));
       ran.push(what);
     }
     L.check("it ran at least four different actions", ran.length >= 4, JSON.stringify(ran));
@@ -703,7 +710,7 @@ if (PHASE !== "before") {
       L.check(`population: a To-do task's query card (${qid}) saved from its composer, a draft showing`, ok, String(qid));
       L.check("the route is the To-do desk", /todo/.test(page.url()), page.url());
       const sa = scaleAnims(fs);
-      L.check("the save bumps the card's frame (one scale animation, 500ms, peak 1.022)", sa.length === 1 && sa[0].dur === 500 && Math.abs(sa[0].peak - 1.022) < 0.001, JSON.stringify(sa));
+      L.check("the save presses the card's frame in and pops it (at most one press; one pop, 520ms, peak 1.035)", pressAndPop(sa), JSON.stringify(sa));
       L.check(added ? "the draft settled in place (the same element, now the step)" : "the save drew no new step on this desk (as on the base): nothing to settle",
         !added || (tr.length > 5 && tr.every((f) => (f.tagged as { in: boolean } | null)?.in) && !(tr[tr.length - 1].tagged as { draft: boolean }).draft && tr.some((f) => (f.lastBxAnims as string[]).includes("qc160-fill"))),
         `${n0} → ${await real()} · ${JSON.stringify(tr[tr.length - 1]?.tagged)}`);
@@ -712,7 +719,7 @@ if (PHASE !== "before") {
       await page.locator(C("[data-qc1522='undo']")).first().click();
       await page.waitForTimeout(2000);
       const fu = await stopFrame(page);
-      L.check("its undo bumps too", scaleAnims(fu).length === 1, JSON.stringify(scaleAnims(fu)));
+      L.check("its undo presses in and pops too", pressAndPop(scaleAnims(fu)), JSON.stringify(scaleAnims(fu)));
       done = true;
     }
     L.check("a To-do task whose card saves from a composer with a draft was found", done, "");

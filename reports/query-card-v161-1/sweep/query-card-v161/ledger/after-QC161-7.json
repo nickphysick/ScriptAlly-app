@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: the bump ran on undo",
+  "ok": true,
+  "got": "{\"frames\":28,\"scales\":26,\"longs\":[],\"span\":517,\"start\":18619.2}"
+ },
+ {
+  "name": "at least 24 frames painted while it ran",
+  "ok": true,
+  "got": "28 frames over 517ms"
+ },
+ {
+  "name": "the frame's scale took at least 10 distinct values above 1",
+  "ok": true,
+  "got": "26"
+ },
+ {
+  "name": "no long task over 50ms overlaps it",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "the undone step's height took at least 6 distinct values while folding",
+  "ok": true,
+  "got": "[40,39,30,22,15,10,7,4,3,1,0]"
+ }
+]

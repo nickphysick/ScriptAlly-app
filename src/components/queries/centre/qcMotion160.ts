@@ -6,7 +6,8 @@
  * wording, layout, colour or behaviour changes. Every value is a literal or read off the page at the moment it runs, so
  * everything here is the Web Animations API (CLAUDE.md: no var() inside @keyframes, no color-mix()).
  *
- *   bump        the slide-in card's frame: `scale` 1 → 1.022 (35%) → 1 over 500ms, once. `scale` composes with the
+ *   bump        the slide-in card's frame (v161.1): pressed in to `scale` 0.985 at the press, then popped from there →
+ *               1.035 (40%) → 1 over 520ms when the save lands. `scale` composes with the
  *               frame's `rotate` (its lean) and `translate` (its slide-in); `transform` is never set on the frame.
  *               A second bump ends the running one at once: they never stack.
  *   settle      a draft bubble becoming its step: the final colour fills from the left (background-size), the dashed

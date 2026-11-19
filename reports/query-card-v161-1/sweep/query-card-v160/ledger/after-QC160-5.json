@@ -1,0 +1,62 @@
+[
+ {
+  "name": "population: a draft was showing, and the save landed",
+  "ok": true,
+  "got": "{\"ok\":true,\"tagged\":true}"
+ },
+ {
+  "name": "population: the landing frame was found",
+  "ok": true,
+  "got": "19"
+ },
+ {
+  "name": "population: the held motion was released",
+  "ok": true,
+  "got": "36"
+ },
+ {
+  "name": "the same bubble element stays in the DOM through the save",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "it is the thread's newest step after the landing, no longer a draft",
+  "ok": true,
+  "got": "{\"in\":true,\"draft\":false,\"isLast\":true,\"cls\":\"qc152-m them\"}"
+ },
+ {
+  "name": "its background-size animates (the fill runs on the bubble)",
+  "ok": true,
+  "got": "42"
+ },
+ {
+  "name": "the fill starts near 0% and reaches 100%",
+  "ok": true,
+  "got": "[\"0% 100%\",\"99.999% 100%\"]"
+ },
+ {
+  "name": "the fill's run is 420ms (none after 500ms)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "after 500ms its background is the stage's Band",
+  "ok": true,
+  "got": "rgb(228, 235, 242) vs rgb(228, 235, 242) (#e4ebf2)"
+ },
+ {
+  "name": "after 500ms it has no dashed outline",
+  "ok": true,
+  "got": "none rgb(28, 19, 15) / solid"
+ },
+ {
+  "name": "it eased in from scale 1.015",
+  "ok": true,
+  "got": "[\"1.015\",\"1.015\",\"1.015\",\"1.015\"]"
+ },
+ {
+  "name": "no new element popped in (no .new on it)",
+  "ok": true,
+  "got": ""
+ }
+]
