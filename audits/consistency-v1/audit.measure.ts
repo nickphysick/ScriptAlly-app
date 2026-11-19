@@ -56,6 +56,34 @@ async function ruleProbe(page: Page, key: string, vw: number) {
   }
   await page.evaluate(() => { const s = document.querySelector("#app-stage-scroll"); if (s) s.scrollTop = 0; window.scrollTo(0, 0); });
 }
+/* Consistency fixes v1: CA_CHECK=1 measures every fix's elements (check-probe.js) and crops the first of each at 1512
+   into CA_RULE_SHOTS/<CA_LABEL>/<page>/<fix>.png (git-ignored) */
+const CHECK = process.env.CA_CHECK === "1" ? readFileSync(resolve(process.cwd(), "audits/consistency-fixes-v1/check-probe.js"), "utf8") : null;
+const FIXES = CHECK ? (JSON.parse(readFileSync(resolve(process.cwd(), "audits/consistency-fixes-v1/fixes.json"), "utf8")).fixes as Record<string, { sel: string; pages: string[] }>) : {};
+async function checkProbe(page: Page, key: string, vw: number) {
+  if (!CHECK) return;
+  const sels = Object.fromEntries(Object.entries(FIXES).filter(([, f]) => f.pages.includes(key)).map(([id, f]) => [id, f.sel]));
+  if (!Object.keys(sels).length) return;
+  await page.evaluate((s) => { (window as unknown as { __cfSelectors: unknown }).__cfSelectors = s; }, sels);
+  const data = await page.evaluate(CHECK);
+  writeFileSync(resolve(OUT, `${key}@${vw}.check.json`), JSON.stringify(data, null, 1));
+  if (vw !== 1512) return;
+  const dir = resolve(RULE_SHOTS, process.env.CA_LABEL || "run", key);
+  mkdirSync(dir, { recursive: true });
+  for (const [id, sel] of Object.entries(sels)) {
+    try {
+      const loc = page.locator(sel).locator("visible=true").first();
+      if (!(await loc.count())) continue;
+      await loc.scrollIntoViewIfNeeded({ timeout: 1500 });
+      const b = await loc.boundingBox();
+      if (!b) continue;
+      const vp = page.viewportSize()!;
+      const pad = 48, x = Math.max(0, b.x - pad), y = Math.max(0, b.y - pad);
+      await page.screenshot({ path: resolve(dir, `${id}.png`), clip: { x, y, width: Math.min(b.width + pad * 2, 760, vp.width - x), height: Math.min(b.height + pad * 2, 320, vp.height - y) }, animations: "disabled", scale: "css" });
+    } catch { /* not cropped; its reading stands */ }
+  }
+  await page.evaluate(() => { const s = document.querySelector("#app-stage-scroll"); if (s) s.scrollTop = 0; window.scrollTo(0, 0); });
+}
 const ONLY = (process.env.CA_ONLY || "").split(",").map((s) => s.trim()).filter(Boolean);
 const SHOTS = process.env.CA_SHOTS !== "0";
 const VIEWPORTS = [
@@ -212,6 +240,7 @@ test("consistency audit v1 — every route, both viewports", async ({ browser })
           const data = await collectAndCrop(page, key, vp.w, String(vp.w));
           writeFileSync(resolve(OUT, `${key}@${vp.w}.json`), JSON.stringify({ ...entry, ...data, errors }, null, 1));
           await ruleProbe(page, key, vp.w);
+          await checkProbe(page, key, vp.w);
           entry.records = data.records.length;
           entry.header = (data.meta as { header?: unknown }).header ?? null;
         }
@@ -258,6 +287,7 @@ test("consistency audit v1 — every route, both viewports", async ({ browser })
             writeFileSync(resolve(OUT, `${key}@${vp.w}.json`), JSON.stringify({ ...entry, ...data }, null, 1));
             entry.records = data.records.length;
             await ruleProbe(page, key, vp.w);
+            await checkProbe(page, key, vp.w);
           }
         }
         await page.keyboard.press("Escape").catch(() => {});

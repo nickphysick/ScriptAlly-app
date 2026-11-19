@@ -1,0 +1,30 @@
+{
+  "_note": "Every fix this run tries: id → the selector the check probe measures, the pages it renders on, and the rule. Pages are routes.json keys; overlay keys are the overlay runs.",
+  "fixes": {
+    "R1-aap-info": { "sel": ".aap-info", "pages": ["overlay-Add-an-agent-journey"] },
+    "R1-cl26-bang": { "sel": ".cl26-bang", "pages": ["agents"] },
+    "R1-dv1-step": { "sel": ".dv1-steps li > i", "pages": ["agents-discover"] },
+    "R1-dv1-pro": { "sel": ".dv1-pro", "pages": ["agents-discover"] },
+    "R1-d22-road": { "sel": ".d22-road small", "pages": ["dashboard", "your-notes"] },
+    "R1-d60-hin": { "sel": ".d60-hin small", "pages": ["dashboard"] },
+    "R1-impg-fact": { "sel": ".impg-fact", "pages": ["import"] },
+    "R1-laq-g": { "sel": ".laq .laq-g", "pages": ["overlay-Log-a-query-journey"] },
+    "R1-laq-faces": { "sel": ".laq .laq-faces i", "pages": ["overlay-Log-a-query-journey"] },
+    "R1-qc152-band": { "sel": ".qc152 .qc152-band > span", "pages": ["overlay-Query-card-slide-out", "todo", "queries", "queries-responses"] },
+    "R1-qc152-ag": { "sel": ".qc152 .qc152-ag", "pages": ["overlay-Query-card-slide-out", "todo", "queries", "queries-responses"] },
+    "R1-qc152-ms": { "sel": ".qc152 .qc152-ms small", "pages": ["overlay-Query-card-slide-out", "todo", "queries", "queries-responses"] },
+    "R1-qc152-bkc": { "sel": ".qc152 .qc152-bkc span", "pages": ["overlay-Query-card-slide-out", "todo", "queries", "queries-responses"] },
+    "R1-qc152-av": { "sel": ".qc152 .qc152-av", "pages": ["overlay-Query-card-slide-out", "todo", "queries", "queries-responses"] },
+    "R1-qc153-more": { "sel": ".qc153-sm--more", "pages": ["queries"] },
+    "R1-rsp15-stamp": { "sel": ".rsp15-stamp", "pages": ["queries-responses"] },
+    "R1-tws-kbd": { "sel": ".tws-sb kbd", "pages": ["todo"] },
+    "R1-mk-fbtag": { "sel": ".mk-fbtag", "pages": ["pricing"] },
+    "R1-mk-fbmorelbl": { "sel": ".mk-fbmorelbl", "pages": ["pricing"] },
+    "R1-mk-rungline": { "sel": ".mk-rungline", "pages": ["pricing"] },
+    "R1-pgd": { "sel": ".pgd-f span", "pages": ["queries-analytics"] },
+    "R2-contact-send": { "sel": ".mk-cbtn", "pages": ["contact"] },
+    "R2-queries-signoff": { "sel": "[data-qc151='signoff-log']", "pages": ["queries"] },
+    "R2-responses-share": { "sel": ".rsp15-rbn", "pages": ["queries-responses"] },
+    "R3-todo-wait": { "sel": ".tws-gb[data-band='wait']", "pages": ["todo"] }
+  }
+}
