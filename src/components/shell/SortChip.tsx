@@ -27,6 +27,8 @@ export interface SortField<K extends string> {
   order: [{ label: string; reversed: boolean }, { label: string; reversed: boolean }];
   /** the chip's own words, by direction, where they differ from `label` (Contact list v25: "Name A–Z" / "Name Z–A") */
   chip?: (reversed: boolean) => string;
+  /** List filters v1 — the direction choosing this field in the menu sets (its natural order); false when absent */
+  natural?: boolean;
 }
 export interface SortValue<K extends string> { key: K; reversed: boolean }
 
@@ -38,7 +40,9 @@ export const SORT_ICON = (
 const TICK = <svg viewBox="0 0 12 12" width="12" height="12" aria-hidden="true"><path d="M2.5 6.2 5 8.6l4.6-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 
 /** the chip's contents: icon, "Sorted by", the field, the arrow. `toolbar` is the element whose width decides the fold. */
-export function SortChipButton<K extends string>({ fields, value, open, onToggle, className, ns, disabled = false, toolbar }: {
+const CARET = <svg className="sc-cv" viewBox="0 0 12 12" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M2 4h8L6 9z" /></svg>;
+
+export function SortChipButton<K extends string>({ fields, value, open, onToggle, className, ns, disabled = false, toolbar, labelled = false }: {
   fields: readonly SortField<K>[];
   value: SortValue<K>;
   open: boolean;
@@ -47,6 +51,9 @@ export function SortChipButton<K extends string>({ fields, value, open, onToggle
   ns: string;
   disabled?: boolean;
   toolbar?: () => HTMLElement | null;
+  /** List filters v1 — the bars' labelled chip: "Sort:" (muted), the field (600), the arrow (navy, ↑ ascending, ↓
+   *  descending, its title the order's words) and a caret. The bar folds "Sort:" away when it runs short. */
+  labelled?: boolean;
 }) {
   const ref = useRef<HTMLButtonElement>(null);
   const [narrow, setNarrow] = useState(false);
@@ -73,9 +80,12 @@ export function SortChipButton<K extends string>({ fields, value, open, onToggle
       aria-label={f ? `Sorted by ${f.label}, ${dirWords.toLowerCase()}. Change the order` : "Sort the cards"}
       onClick={(e) => onToggle(e.currentTarget)}>
       {SORT_ICON}
-      <em className="sc-sby">Sorted by</em>
+      {labelled ? <em className="sc-sby sc-lab lf-lab">Sort:</em> : <em className="sc-sby">Sorted by</em>}
       <b className="sc-f" data-sc="field">{f ? (f.chip ? f.chip(value.reversed) : f.label) : "Order"}</b>
-      <i className="sc-dir" data-sc="dir" data-reversed={value.reversed ? "true" : "false"} aria-hidden="true">{value.reversed ? "↑" : "↓"}</i>
+      {labelled
+        ? <i className="sc-dir" data-sc="dir" data-reversed={value.reversed ? "true" : "false"} title={dirWords || undefined}>{value.reversed ? "↓" : "↑"}</i>
+        : <i className="sc-dir" data-sc="dir" data-reversed={value.reversed ? "true" : "false"} aria-hidden="true">{value.reversed ? "↑" : "↓"}</i>}
+      {labelled ? CARET : null}
     </button>
   );
 }
@@ -117,7 +127,7 @@ export function SortChipMenu<K extends string>({ anchor, fields, value, onChange
         const on = x.key === value.key;
         return (
           <button key={x.key} type="button" role="menuitemradio" aria-checked={on} className="sc-opt" data-sc="opt" data-k={x.key}
-            onClick={() => { if (!on) onChange({ key: x.key, reversed: false }); }}>
+            onClick={() => { if (!on) onChange({ key: x.key, reversed: x.natural ?? false }); }}>
             <span className="sc-tick" aria-hidden="true">{on ? TICK : null}</span><b>{x.label}</b>
           </button>
         );

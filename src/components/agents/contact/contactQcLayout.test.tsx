@@ -149,7 +149,7 @@ describe("List filters v1 Phase 3 · the Agents panel", () => {
 });
 
 const bar = (shown: number, group: "letter" | "status" | "none" = "none") => renderToStaticMarkup(
-  <ContactBar shown={shown} loading={false} search="" onSearch={noop} sortKey="surname" reversed={false} onSort={noop} group={group} onGroup={noop} />);
+  <ContactBar shown={shown} loading={false} search="" onSearch={noop} sortKey="surname" reversed={false} onSort={noop} group={group} onGroup={noop} onExport={noop} />);
 
 describe("Phase 3 · the light bar above the list", () => {
   it("is the Query Centre's bar (shell/ListBar) on its sticky strip", () => {
@@ -165,7 +165,10 @@ describe("Phase 3 · the light bar above the list", () => {
     expect(h).toContain('placeholder="Find an agent or agency"');
     expect(h).toContain('<kbd aria-hidden="true">/</kbd>');
     expect(h).toMatch(/data-clq="sort"[\s\S]*?<b class="sc-f" data-sc="field">Surname<\/b>/);
-    expect(h).toMatch(/data-clq="group"[^>]*><span aria-hidden="true">▤<\/span><b>No grouping<\/b>/);
+    /* List filters v1 — labelled: "Group:", the value ("None" ungrouped), a caret; Sort: "Sort:", the field, ↑ */
+    expect(h).toMatch(/data-clq="group"[^>]*><span class="lf-ic" aria-hidden="true">▤<\/span><em class="lf-lab">Group:<\/em><b>None<\/b><svg class="lf-cv"/);
+    expect(h).toMatch(/<em class="sc-sby sc-lab lf-lab">Sort:<\/em><b class="sc-f" data-sc="field">Surname<\/b><i class="sc-dir" data-sc="dir" data-reversed="false" title="A to Z">↑<\/i>/);
+    expect(h).toMatch(/data-clq="export" aria-label="Export 17 agents" title="Export 17 agents"/);
     /* the "/" key finds the field by the hook v26's band carried */
     expect(h).toMatch(/<label class="qc153-find" data-cl26="find" data-cl24="find" data-nb1="find">/);
   });

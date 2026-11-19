@@ -30,8 +30,9 @@ export function listGroupOf(g: GroupBy, packageOk: boolean): GroupBy {
   if (g === "package" && !packageOk) return "attention";
   return g;
 }
-/** the grouping a device remembers: never the ungrouped one, which the Group pill's × gives for the visit only */
-export const savedGroupOf = (g: GroupBy): GroupBy => (g === "none" || g === "action" ? "attention" : g);
+/** the grouping a device remembers: the retired "action" reads as Action. List filters v1 — "No grouping" is a choice in
+ *  the Group menu now, so it is remembered like the others (it was the Group pill's × for the visit only). */
+export const savedGroupOf = (g: GroupBy): GroupBy => (g === "action" ? "attention" : g);
 
 /* ── §1.2 group headers ──────────────────────────────────────────────────────────────────────────────────────── */
 

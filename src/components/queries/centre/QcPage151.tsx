@@ -112,6 +112,8 @@ export interface QcPage151Props {
   findRef?: React.Ref<HTMLInputElement>;
   filterCount: number;
   onClearFilters: () => void;
+  /** List filters v1 — Export, in the bar: the rows the list shows */
+  onExport: () => void;
   filterPanel: (close: () => void) => React.ReactNode;
   /* §5 the pills */
   pills: PillGroup[];
@@ -419,7 +421,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
       find={p.find} onFind={p.onFind} findRef={p.findRef} sort={p.sort} onSort={p.onSort}
       group={p.group} onGroup={p.onGroup} packageOk={p.packageOk}
       beGroup={p.beGroup} onBeGroup={p.onBeGroup} beSort={p.beSort} onBeSort={p.onBeSort}
-      stuckGroup={birds ? null : tbGrp} stuckOn={!birds && tbOn} />
+      stuckGroup={birds ? null : tbGrp} stuckOn={!birds && tbOn} onExport={p.onExport} />
   );
   /* v156 §3 — not while loading (its figures arrive with the data) */
   const slim156 = p.counts && !p.loading

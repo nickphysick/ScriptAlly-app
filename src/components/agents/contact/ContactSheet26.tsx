@@ -175,6 +175,11 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
   ];
   const none = noMatchCopy(named.map((n) => n.label));
   const sortBy = (k: SortKey) => p.onSort({ key: k, reversed: p.sortKey === k ? !p.reversed : false });
+  /* List filters v1 — the arrow on the sorted column only (↑ ascending, ↓ descending, as the bar's Sort chip draws it);
+     the others show ↕ on hover and on keyboard focus */
+  const headArrow = (k: SortKey) => (p.sortKey === k
+    ? <i aria-hidden="true" data-cl26="head-arrow">{p.reversed ? "↓" : "↑"}</i>
+    : <i aria-hidden="true" className="lf-hv" data-cl26="head-arrow">↕</i>);
 
   return (
     <section className="cl26-card" data-cl26="card" ref={cardRef} data-kind={drawn[0]?.kind ?? "all"}>
@@ -202,13 +207,13 @@ export const ContactSheet26: React.FC<ContactSheet26Props> = (p) => {
             <span className="cl26-thm" aria-hidden="true" />
             <span role="columnheader" aria-sort={p.sortKey === "surname" ? (p.reversed ? "descending" : "ascending") : "none"}>
               <button type="button" className={p.sortKey === "surname" ? "on" : undefined} data-cl26="head" data-key="surname" onClick={() => sortBy("surname")}>
-                Agent<i aria-hidden="true">{p.sortKey === "surname" && p.reversed ? "↑" : "↓"}</i>
+                Agent{headArrow("surname")}
               </button>
             </span>
             <span role="columnheader" className="cl26-thx" data-cl26="head-want">What they want</span>
             <span role="columnheader" aria-sort={p.sortKey === "status" ? (p.reversed ? "descending" : "ascending") : "none"}>
               <button type="button" className={p.sortKey === "status" ? "on" : undefined} data-cl26="head" data-key="status" onClick={() => sortBy("status")}>
-                Your query<i aria-hidden="true">{p.sortKey === "status" && p.reversed ? "↑" : "↓"}</i>
+                Your query{headArrow("status")}
               </button>
             </span>
             <span aria-hidden="true" />

@@ -1132,7 +1132,8 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* QC layout v1 — the Query Centre's light bar above the card (count, Find, Sort, Group), on its sticky strip */}
         <ContactBar shown={frameState ? 0 : listPool.length} loading={frameState !== null} search={search} onSearch={setSearch}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
-          group={group26} onGroup={setGroup26} />
+          group={group26} onGroup={setGroup26}
+          onExport={() => downloadAgentsCsv(visibleFacts, (raw) => genreLabel(raw, personalGenres))} />
         <ContactSheet26 pool={frameState ? NO_FACTS : listPool} all={frameState ? NO_FACTS : listAll} group={group26}
           state={frameState ?? "list"} onRetry={retryAgents} dayOne={dayOneHere ? { onAdd: openAdd } : null}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}

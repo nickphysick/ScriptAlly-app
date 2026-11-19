@@ -8212,7 +8212,7 @@ export const Queries: React.FC<{
                   showing={qcVisible.length}
                   find={qcFind} onFind={setQcFind} findRef={qcSheetFindRef}
                   filterCount={strip151.filter((c) => c.key !== "find").length}
-                  onClearFilters={clear151}
+                  onClearFilters={clear151} onExport={exportQcList}
                   filterPanel={(close) => (
                     <QcFilterPanel151 close={close} onResetAll={strip151.some((c) => c.key !== "find") ? clear151 : null} model={{
                       filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,

@@ -239,8 +239,10 @@ export const ContactSheet24: React.FC<ContactSheet24Props> = (p) => {
 /* Contact list v26 E — EXTENDED IN PLACE: the menu takes its options (a bold name and a line each) and the chosen key, so
    v24's two (Status, No grouping) and v26's three (Letter, Status, No grouping) are one component. */
 export interface GroupMenuOption<K extends string> { key: K; label: string; line: string }
-export function GroupMenu<K extends string>({ anchor, options, value, onPick, className }: {
+export function GroupMenu<K extends string>({ anchor, options, value, onPick, className, divideBefore }: {
   anchor: HTMLElement; options: readonly GroupMenuOption<K>[]; value: K; onPick: (k: K) => void; className?: string;
+  /** List filters v1 — a hairline before this option ("No grouping") */
+  divideBefore?: K;
 }) {
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
   useLayoutEffect(() => {
@@ -251,9 +253,12 @@ export function GroupMenu<K extends string>({ anchor, options, value, onPick, cl
     <div className={`lpop cl24-gpop${className ? ` ${className}` : ""}`} data-lpop="group" data-cl24="group-menu" role="menu" aria-label="Group by" style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999 }}>
       <h6>Group by</h6>
       {options.map((o) => (
-        <button key={o.key} type="button" role="menuitemradio" aria-checked={value === o.key} className="cl24-gopt" data-cl24="group-opt" data-v={o.key} onClick={() => onPick(o.key)}>
-          <i aria-hidden="true">{value === o.key ? "●" : ""}</i><span><b>{o.label}</b><small>{o.line}</small></span>
-        </button>
+        <React.Fragment key={o.key}>
+          {divideBefore === o.key ? <hr className="cl24-ghr" role="separator" /> : null}
+          <button type="button" role="menuitemradio" aria-checked={value === o.key} className="cl24-gopt" data-cl24="group-opt" data-v={o.key} onClick={() => onPick(o.key)}>
+            <i aria-hidden="true">{value === o.key ? "●" : ""}</i><span><b>{o.label}</b><small>{o.line}</small></span>
+          </button>
+        </React.Fragment>
       ))}
     </div>
   );

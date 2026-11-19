@@ -31,6 +31,7 @@ import { SortChipButton, SortChipMenu } from "../../shell/SortChip";
 import { usePopover } from "../../shell/ListPills";
 import { ListBar } from "../../shell/ListBar";
 import { GroupMenu } from "./ContactSheet24";
+import { railExport } from "../../../lib/contactV27";
 import "../../queries/centre/qcv153.css";
 import "../../queries/centre/qcv154.css";
 import "../../queries/centre/qcv1541.css";
@@ -38,6 +39,9 @@ import "../../queries/centre/qcv156.css";
 import "./contactQcLayout.css";
 
 export const GROUP26_LABEL: Record<Group26Key, string> = { letter: "Letter", status: "Status", none: "No grouping" };
+/** List filters v1 — the Group button's value: "None" when ungrouped (the menu's row keeps "No grouping") */
+export const GROUP_VALUE: Record<Group26Key, string> = { ...GROUP26_LABEL, none: "None" };
+const CARET = <svg className="lf-cv" viewBox="0 0 12 12" width="10" height="10" fill="currentColor" aria-hidden="true"><path d="M2 4h8L6 9z" /></svg>;
 export const FIND_AGENT = "Find an agent or agency";
 
 /** is the strip stuck: the scroller has moved and the strip sits at its sticky top */
@@ -59,6 +63,8 @@ export const ContactBar: React.FC<{
   onSort: (v: { key: SortKey; reversed: boolean }) => void;
   group: Group26Key;
   onGroup: (g: Group26Key) => void;
+  /** List filters v1 — Export, in the bar: the rows the list shows */
+  onExport: () => void;
 }> = (p) => {
   const pop = usePopover<"group" | "sort">();
   const tbRef = useRef<HTMLDivElement>(null);
@@ -115,19 +121,20 @@ export const ContactBar: React.FC<{
         count={<span className="qc153-cnt" data-clq="count" data-n={p.shown}>{p.loading ? " " : <><b>{p.shown}</b> {p.shown === 1 ? "agent" : "agents"}</>}</span>}
         find={{ value: p.search, onChange: p.onSearch, placeholder: FIND_AGENT,
           /* the hooks v26's band field carried: the page guide (`data-cl26`) and the "/" key (`data-nb1`) find it */
-          attrs: { "data-cl26": "find", "data-cl24": "find", "data-nb1": "find" }, clearAttrs: { "data-clq": "find-clear" } }}>
-        <SortChipButton fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} open={pop.open === "sort"} className="qc153-dd clq-sort" ns="clq"
+          attrs: { "data-cl26": "find", "data-cl24": "find", "data-nb1": "find" }, clearAttrs: { "data-clq": "find-clear" } }}
+        exportBtn={{ label: railExport(p.shown), disabled: p.loading || p.shown === 0, onExport: p.onExport, attrs: { "data-clq": "export" } }}>
+        <SortChipButton labelled fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} open={pop.open === "sort"} className="qc153-dd clq-sort" ns="clq"
           disabled={p.loading} onToggle={(a) => pop.toggle("sort", a)} />
         <button type="button" className="qc153-dd clq-group" data-clq="group" aria-haspopup="menu" aria-expanded={pop.open === "group"} disabled={p.loading}
-          aria-label={`Grouped by ${GROUP26_LABEL[p.group]}. Change the grouping`} onClick={(e) => pop.toggle("group", e.currentTarget)}>
-          <span aria-hidden="true">▤</span><b>{GROUP26_LABEL[p.group]}</b>
+          aria-label={`Group: ${GROUP_VALUE[p.group]}. Change the grouping`} onClick={(e) => pop.toggle("group", e.currentTarget)}>
+          <span className="lf-ic" aria-hidden="true">▤</span><em className="lf-lab">Group:</em><b>{GROUP_VALUE[p.group]}</b>{CARET}
         </button>
         {pop.open === "sort" && pop.anchor ? (
           <SortChipMenu anchor={pop.anchor} fields={CL_SORT_FIELDS} value={{ key: p.sortKey, reversed: p.reversed }} ns="clq" heading="Sort by" note={null}
             onChange={(v) => p.onSort(v as { key: SortKey; reversed: boolean })} />
         ) : null}
         {pop.open === "group" && pop.anchor ? (
-          <GroupMenu anchor={pop.anchor} options={GROUP26_OPTIONS} value={p.group} className="cl26-gpop" onPick={(g) => { p.onGroup(g); pop.close(); }} />
+          <GroupMenu anchor={pop.anchor} options={GROUP26_OPTIONS} value={p.group} className="cl26-gpop" divideBefore="none" onPick={(g) => { p.onGroup(g); pop.close(); }} />
         ) : null}
       </ListBar>
     </div>

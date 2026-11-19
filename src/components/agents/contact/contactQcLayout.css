@@ -75,12 +75,13 @@
 /* ── Phase 3 · the light bar above the list (the Query Centre's `.qc154-tbw` strip and `.qc153-bar`; their rules name
    `.cl27`). The Sort chip shows the field's name: `SortChipButton`'s "Sorted by" is not drawn. ────────────────────── */
 @media (min-width: 768px) {
-  .cl27 .qc153-bar .clq-sort .sc-sby { display: none; }
+  /* List filters v1 — the labelled chip's "Sort:" shows; only the old "Sorted by" stays hidden */
+  .cl27 .qc153-bar .clq-sort .sc-sby:not(.sc-lab) { display: none; }
   /* v1.1 — the field's name in the Query Centre chip's own type (`.qc153-dd`: 14.5px serif, its `b` 600), not the shared
      sort chip's 15px (shell/sortChip.css `.sc-chip .sc-f`) */
   .cl27 .qc153-bar .qc153-dd.clq-sort .sc-f { font: 600 14.5px/1 var(--sp-serif) !important; }
   .cl27 .qc153-bar .clq-sort :is(svg) { flex: none; width: 15px; height: 15px; }
-  .cl27 .qc153-bar .clq-sort .sc-dir { font-style: normal; color: var(--mut, #5b4f47); }
+  .cl27 .qc153-bar .clq-sort .sc-dir { font-style: normal; color: #2a3a52; }
   /* the card 22px under the bar (the ref's `.tb { margin-bottom: 22px }`): the bar's own 4px, then 18 */
   .cl27 .qc153-main > .qc154-tbw + .cl26-card { margin-top: 18px; }
 }

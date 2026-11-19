@@ -226,16 +226,5 @@ export function foldInitials(rows: readonly Pick<QcRow, "id" | "initials">[], ma
 
 /** the search's words: it matches the agent's name and agency (lib/qcSummary `matchesFind`), nothing else */
 export const FIND_PLACEHOLDER = "Find an agent or agency";
-/** the bar's Sort menu: four choices over the list's own sort (lib/qc151 `Sort151`) */
-export const BAR_SORTS: readonly { label: string; line: string; sort: { key: "due" | "queried" | "heard" | "agent"; desc: boolean } }[] = [
-  { label: "Next due", line: "Soonest first", sort: { key: "due", desc: false } },
-  { label: "Queried", line: "Newest first", sort: { key: "queried", desc: true } },
-  { label: "Last heard", line: "Most recent first", sort: { key: "heard", desc: true } },
-  { label: "Agent", line: "A to Z", sort: { key: "agent", desc: false } },
-];
-const SORT_NAME: Record<string, string> = { agency: "Agency", stage: "Where it stands", next: "Next move" };
-/** the Sort button's value: the matching choice's name, or the column's own for a sort set elsewhere */
-export function barSortOf(s: { key: string; desc: boolean }): string {
-  const hit = BAR_SORTS.find((o) => o.sort.key === s.key);
-  return hit?.label ?? SORT_NAME[s.key] ?? "Next due";
-}
+/* the bar's four fixed sorts (BAR_SORTS, barSortOf) retired in List filters v1: Sort is the shared SortChip over
+   lib/cardsSort QC_LIST_SORT_FIELDS, on the same Sort151 */
