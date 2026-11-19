@@ -11,6 +11,15 @@ import { SIZES, openCard, shotDir, Ledger, MUT, CARD, cssBreak, frameScroll } fr
 
 test.describe.configure({ mode: "default" });
 
+/* Agent card v2 retires these CL262 cases (design-refs/agent-card-v2/; its locks are acv2.measure.ts):
+     J1  the panel 14 from the sheet's top and bottom, its height the sheet's → the query card's height (AC2-1)
+     J3  the next-step box as the card's one colour → the query box and the footer (AC2-2)
+     J4  ghost lines and "+ Add …" per empty section → a section with nothing in it is not drawn (AC2-3)
+     the three shot sets → acv2Shots.measure.ts
+   J2 (the lean) and J5–J11 (editing on the card) stand: the lean and the editing are kept as built. */
+const RETIRED_BY_ACV2 = [/^CL262 shots/, /^J1 /, /^J3 /, /^J4 /];
+test.beforeEach(({}, info) => { test.skip(RETIRED_BY_ACV2.some((r) => r.test(info.title)), "retired by Agent card v2 (see the note above)"); });
+
 test("CL262 shots — the card", async ({ page }) => {
   test.setTimeout(240_000);
   for (const [name, stand] of [["01-card-you", "you"], ["02-card-none", "none"], ["xx-card-agent", "agent"], ["xx-card-closed", "closed"]] as const) {

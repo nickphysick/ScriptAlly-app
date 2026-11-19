@@ -447,7 +447,10 @@ test("CO19 · the Query Centre's query panel has no scrim while browsing", async
 });
 
 /* ═════════ CO20 ═════════ */
-test("CO20 · + Website and + Email open Contact details with the cursor in that field", async ({ page }) => {
+/* Agent card v2 retires CO20: the head's "+ Website" / "+ Email" are gone (a section with nothing in it is not drawn, and the
+   Finish block lists Housekeeping's items, which name neither). Contact details open from the band's pencil and "Edit these
+   details", which AC2's editing reaches. */
+test.skip("CO20 · + Website and + Email open Contact details with the cursor in that field", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("CO20");
   for (const [k, sel] of [["website", "add-website"], ["email", "add-email"]] as const) {
