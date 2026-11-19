@@ -2544,12 +2544,12 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   display: block; width: 100%; margin: 26px 0 0; cursor: pointer;
   font-family: inherit; font-size: 17px; font-weight: 500; line-height: 1.2;
   padding: 16px 22px; border: 0; border-radius: 30px;
-  background: var(--mk-navy); color: #fff;
+  background: var(--mk-nearblack); color: var(--mk-cta-ink);
   transition: background .18s ease;
 }
-.mk-cbtn:hover { background: var(--mk-navy-hov); }
+.mk-cbtn:hover { background: var(--mk-ink-hov); }
 .mk-cbtn:disabled { opacity: .55; cursor: default; }
-.mk-cbtn:disabled:hover { background: var(--mk-navy); }
+.mk-cbtn:disabled:hover { background: var(--mk-nearblack); }
 .mk-cstate { margin: 14px 0 0; font-size: 15px; line-height: 1.55; color: var(--mk-muted); }
 .mk-cstate--bad { color: var(--mk-rust); }
 /* A failed send's offer of the mail app (13 Nov): a link under the notice, never a second filled button. */
