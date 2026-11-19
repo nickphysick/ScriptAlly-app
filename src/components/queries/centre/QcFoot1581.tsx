@@ -17,10 +17,12 @@ export const CLOCK = <svg viewBox="0 0 16 16" width="15" height="15" fill="none"
  * test hooks are the paths' own; DOM order is reading order.
  */
 export type FootAction = { label: string; act: string; run: () => void; hook: Record<string, string> };
-type FootIconIn = { k: "stage"; status: QueryStatus } | { k: "ring"; p: number } | { k: "clock" } | { k: "grey"; status: QueryStatus };
+/** Agent card v2 — `node`: a mark the caller draws (the agent card's dotted "not queried" ring) in the clock's disc */
+export type FootIconIn = { k: "stage"; status: QueryStatus } | { k: "ring"; p: number } | { k: "clock" } | { k: "grey"; status: QueryStatus } | { k: "node"; node: React.ReactNode };
 export const Foot: React.FC<{ late: boolean; icon: FootIconIn; lead: string; sub: string; outer: Record<string, string>;
   primary: (FootAction & { tone: "navy" | "outline"; arrow?: boolean }) | null; others: (FootAction | null)[] }> = ({ late, icon, lead, sub, outer, primary, others }) => {
   const disc = icon.k === "clock" ? <span className="qc152-fc" data-qc152="foot-icon" aria-hidden="true">{CLOCK}</span>
+    : icon.k === "node" ? <span className="qc152-fc" data-qc152="foot-icon" aria-hidden="true">{icon.node}</span>
     : icon.k === "ring" ? <span className="qc152-fr" data-qc152="foot-icon" style={{ ["--p" as string]: String(icon.p) }} aria-hidden="true" />
     : <span className={`qc152-fg${icon.k === "grey" ? " grey" : ""}`} data-qc152="foot-icon" aria-hidden="true">{StepGlyph({ status: icon.status, kind: null })}</span>;
   const words = <div className="qc152-rft"><b data-qc152="reply-lead">{lead}</b><span data-qc152="reply-sub">{sub}</span></div>;

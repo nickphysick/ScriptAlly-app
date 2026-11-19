@@ -9,8 +9,10 @@
    THE LEAN: 1.6° while reading, by the `rotate` property, so the slide-in's `translate` composes with it; an editing or
    recording view (anything but the reading card, or a journey in the panel's slot) sets it to `none` over 320ms, which
    also stops the panel being the containing block of anything fixed inside it. Reduced motion: no slide, no change. */
+/* Agent card v2 — the slide-out card's height, lifted to :root so the agent card holds the same one (one formula) */
+:root { --qc-card-h: min(700px, calc(100vh - 56px)); }
 .spanel.qsp.qsp:has(> .spanel-own > [data-qc152]) {
-  --qc152-h: min(700px, calc(100vh - 56px));
+  --qc152-h: var(--qc-card-h);
   top: calc(50vh - var(--qc152-h) / 2); bottom: auto; right: 40px; left: auto;
   width: 540px; height: var(--qc152-h); box-sizing: border-box;
   padding: 7px; border-radius: 20px; background: #fff; overflow: visible;
