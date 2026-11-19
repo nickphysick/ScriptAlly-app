@@ -138,6 +138,8 @@ const PART_OF: Partial<Record<keyof CardDraft, string>> = {
   name: "head", agency: "head", agencyUnknown: "head", country: "head", city: "head", email: "contact", website: "contact",
   genres: "genres", wishlist: "wishlist", mats: "asks", weeks: "facts", nrn: "facts", method: "facts", methodOther: "facts", door: "facts", reopens: "facts", rating: "band",
 };
+/** a fact box's "Add": the field of "How {first} works" it lands in (AaField `data-f`) */
+const BOX_FIELD: Record<"reply" | "method" | "door", string> = { reply: "weeks", method: "method", door: "door" };
 /** the dotted "not queried" ring, at the size the query card's footer disc holds */
 const NQ16 = <svg viewBox="0 0 14 14" width="16" height="16" aria-hidden="true"><circle cx="7" cy="7" r="5.6" fill="none" stroke="#2a3a52" strokeWidth="1.5" strokeDasharray="1.6 2" /></svg>;
 const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
@@ -268,9 +270,9 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     setOpen([]); resetRef.current(a);
   }, [a.id]); // eslint-disable-line react-hooks/exhaustive-deps
   /** open one section (adding it to any already open); the first opening starts a fresh draft */
-  const openSec = (k: Sec262) => {
+  const openSec = (k: Sec262, field?: string) => {
     if (!kit) { p.onEdit(undefined, SEC_FOCUS[k]); return; }
-    opened.current = { k, all: false };
+    opened.current = { k, all: false, field };
     setTab("profile");
     setOpen((cur) => {
       if (cur.includes(k)) return cur;
@@ -370,7 +372,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
 
   /* revealing and focus: a section opened on its own scrolls into view only by what it needs (plus 90px of air), or its
      heading comes to 70px below the band when it was hidden; its first text field takes focus without scrolling */
-  const opened = useRef<{ k: Sec262; all: boolean; focus?: "website" | "email" } | null>(null);
+  const opened = useRef<{ k: Sec262; all: boolean; focus?: "website" | "email"; field?: string } | null>(null);
   /* a reveal asked for while every section is already open changes no state: this makes it a new ask */
   const [revealSeq, setRevealSeq] = useState(0);
   useEffect(() => {
@@ -380,7 +382,9 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     opened.current = null;
     const el = secEl(sc, o.all ? "contact" : o.k);
     if (!el) return;
+    /* Agent card v2 — a fact box's "Add" lands in that field of "How {first} works" */
     const field = o.focus ? el.querySelector<HTMLInputElement>(`input[data-ae='${o.focus}']`)
+      : o.field ? el.querySelector<HTMLInputElement>(`[data-f='${o.field}'] input, [data-f='${o.field}'] button`)
       : el.querySelector<HTMLInputElement | HTMLTextAreaElement>("textarea, input[data-ae='name']");
     if (field) { field.focus({ preventScroll: true }); const n = field.value.length; try { field.setSelectionRange(n, n); } catch { /* not a text field */ } }
     /* Card offers v1 — + Website / + Email: the field itself, brought into view in the card's scroller */
@@ -586,15 +590,21 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         <section className="acv2-sec" data-cl262="sec" data-k="how" data-acv2="facts-sec">
           {penFor("how")}
           <div className="nx-boxes" data-qc158="boxes" data-acv2="facts" data-acv2-part="facts">
-            {boxes.map((b) => <NxBox key={b.k} k={b.k} label={b.label} value={b.value ?? "Not known yet"} sub={b.value ? b.sub : null}
+            {boxes.map((b) => <NxBox key={b.k} k={b.k} label={b.label} value={b.value ?? "Not known yet"}
+              /* Agent card v2 ruling 3 — an unknown box carries a small "Add" to that field of "How {first} works" */
+              sub={b.value ? b.sub : p.preview ? null : <button type="button" className="nx-lk acv2-boxadd" data-acv2="box-add" data-k={b.k}
+                onClick={() => (kit ? openSec("how", BOX_FIELD[b.k]) : p.onEdit("work", b.k === "method" ? "method" : b.k === "door" ? "door" : "reply"))}>Add</button>}
               extra={b.value ? undefined : { "data-unknown": "" }} />)}
           </div>
         </section>
       ) : null, kit ? <EditHow form={form} agent={a} kit={kit} first={m.first} offers={offerKit} /> : undefined)}
-      {email || site ? (
+      {email || site || !p.preview ? (
         <div className="nx-reach" data-qc158="contact" data-acv2="contact" data-acv2-part="contact">
-          {email ? <NxCopyEmail email={email} onCopy={() => { void navigator.clipboard?.writeText(email).then(() => showToast({ message: `Copied ${m.first}’s email` }), () => {}); }} /> : null}
-          {site ? <NxSite label="Website" href={hrefFor(site) ?? null} /> : null}
+          {email ? <NxCopyEmail email={email} onCopy={() => { void navigator.clipboard?.writeText(email).then(() => showToast({ message: `Copied ${m.first}’s email` }), () => {}); }} />
+            /* Agent card v2 ruling 3 — the query card's quiet button; Contact details with the cursor in the field */
+            : p.preview ? null : <button type="button" className="nx-btn gh" data-qc158="add" data-acv2="add-email" data-k="email" onClick={() => openAll("email")}>+ Add email</button>}
+          {site ? <NxSite label="Website" href={hrefFor(site) ?? null} />
+            : p.preview ? null : <button type="button" className="nx-btn gh" data-qc158="add" data-acv2="add-website" data-k="website" onClick={() => openAll("website")}>+ Add a website</button>}
         </div>
       ) : null}
       {show("materials", "What they ask for", asks.length ? (

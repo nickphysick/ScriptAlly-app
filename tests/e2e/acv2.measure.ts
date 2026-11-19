@@ -92,7 +92,8 @@ async function queryCardHeight(page: Page): Promise<number | null> {
   return h;
 }
 
-test.describe.configure({ mode: "serial" });
+/* each lock runs whatever the one before it did (a mutation run turns every lock red, and each must be seen to) */
+test.describe.configure({ mode: "default" });
 test.beforeAll(() => { seed(); });
 test.afterAll(() => { clean(); });
 
@@ -473,3 +474,60 @@ test("AC2-6 · save bumps once; cancel, discard, undo never; the saved tint; Und
   L.check("documents back after the run", dump(id) === docBefore, "");
   L.done(13);
 });
+
+/* ══ Rulings (19 Nov) ═══════════════════════════════════════════════════════════════════════════════════════════
+   AC2-7  Pin: one pinned note, first, "Pinned", stored as pinnedNoteId; pinning another moves it; Unpin removes it
+          mutation: pin (the Pin press reaches nothing)
+   AC2-8  the doors for what Housekeeping doesn't track: on a name-only agent "+ Add email" and "+ Add a website" each focus
+          their own field; an unknown fact box's "Add" lands in that field of "How {first} works"
+          mutation: bothname (both doors end in Name)
+   AC2-9  the old notes string: Edit changes only that string; Delete clears it, and Undo puts it back byte for byte
+          mutation: undodrop (the Undo press reaches nothing) */
+/** a note's actions show on hover or focus, as on the query card: hover the note, then press */
+async function noteAct(page: Page, id: string, act: string) {
+  const n = page.locator(`${AC} [data-qc158='note'][data-id='${id}']`);
+  await n.scrollIntoViewIfNeeded();
+  await n.hover();
+  await page.waitForTimeout(250);
+  await n.locator(`[data-act='${act}']`).click();
+}
+const agentOf = (id: string) => (JSON.parse(dump(id)) as { agent: Record<string, unknown> }).agent;
+
+test("AC2-8 · the add doors focus their own field", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("AC2-8");
+  const vp = SIZES[0];
+  const bothName = async () => { if (MUTS.has("bothname")) await page.evaluate(() => document.addEventListener("click", (e) => {
+    if ((e.target as HTMLElement).closest("[data-acv2='add-email'], [data-acv2='add-website'], [data-acv2='box-add']")) window.setTimeout(() => document.querySelector<HTMLInputElement>("[data-cl262='panel'] input[data-ae='name']")?.focus(), 400);
+  }, true)); };
+  for (const [k, sel] of [["email", "add-email"], ["website", "add-website"]] as const) {
+    await openAc(page, vp, { id: "acv2fx-nameonly" });
+    await bothName();
+    const btn = page.locator(`${AC} [data-acv2='${sel}']`);
+    L.check(`${k} · the door is there`, (await btn.count()) === 1 && /^\+ Add (email|a website)$/.test((await btn.textContent()) ?? ""), (await btn.textContent()) ?? "none");
+    await btn.click();
+    await page.waitForTimeout(900);
+    const ae = await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.ae ?? document.activeElement?.tagName ?? "");
+    L.check(`${k} · the cursor is in its own field`, ae === k, ae);
+    L.check(`${k} · Contact details is open`, (await page.locator(`${AC} .cl262-sec[data-k='contact'].is-edit`).count()) === 1, "");
+  }
+  /* an unknown fact box's Add: an agent with a box that reads "Not known yet" */
+  let done = false;
+  await walk(page, vp, async (r) => {
+    const add = page.locator(`${AC} [data-acv2='box-add']`).first();
+    if (!(await add.count())) return false;
+    await bothName();
+    const k = (await add.getAttribute("data-k")) ?? "";
+    await add.click();
+    await page.waitForTimeout(900);
+    const f = await page.evaluate(() => document.activeElement?.closest<HTMLElement>("[data-f]")?.dataset.f ?? "");
+    const want = { reply: "weeks", method: "method", door: "door" }[k];
+    L.check(`box Add · ${r.name} · ${k} lands in ${want}`, f === want, f || "nowhere");
+    L.check(`box Add · How ${r.name.split(" ")[0]} works is open`, (await page.locator(`${AC} .cl262-sec[data-k='how'].is-edit`).count()) === 1, "");
+    done = true;
+    return true;
+  });
+  L.check("an unknown box was found", done, "");
+  L.done(9);
+});
+

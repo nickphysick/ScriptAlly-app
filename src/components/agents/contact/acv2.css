@@ -87,3 +87,6 @@
 @media (prefers-reduced-motion: reduce) {
   .acv2, .acv2 * { transition: none !important; animation: none !important; }
 }
+
+/* ruling 3 — an unknown fact box's small "Add" */
+.acv2 .nx-box .acv2-boxadd { font-style: normal !important; font-size: 13.5px !important; }
