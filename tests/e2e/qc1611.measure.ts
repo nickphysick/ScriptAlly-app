@@ -339,3 +339,50 @@ if (PHASE !== "before") {
 }
 
 
+
+/* ══ the frames ══════════════════════════════════════════════════════════════════════════════════════════════════════
+   CDP's screencast takes the compositor's own frames, so it also has frames painted while the page's main thread is busy
+   (where rAF, and so every trace above, has none). For each CPU rate: the frame nearest the press + 70ms, the middle of
+   the longest long task between the press and the pop (at 1× with no long task: midway from the press-in to the pop),
+   the pop's peak (its start + 40% of 520ms) and at rest (its end + 400ms). */
+if (PHASE === "after" && run("F")) test("QC1611-F · frames of one save at CPU 1× and 4×: the press, mid-freeze, the pop's peak, at rest", async ({ page }) => {
+  const index: Record<string, unknown> = {};
+  for (const rate of [1, 4]) {
+    seed();
+    await page.goto("about:blank"); await openQc(page); await openCard(page, "q152-agent");
+    await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(700);
+    await page.locator(C("[data-qc1522='reply-types'] [data-v='req']")).click(); await page.waitForTimeout(500);
+    const cdp = await throttle(page, rate);
+    const origin = await page.evaluate(() => performance.timeOrigin);
+    const shots: { t: number; data: string }[] = [];
+    cdp.on("Page.screencastFrame", (f: { data: string; sessionId: number; metadata: { timestamp?: number } }) => {
+      shots.push({ t: (f.metadata.timestamp ?? 0) * 1000 - origin, data: f.data });
+      void cdp.send("Page.screencastFrameAck", { sessionId: f.sessionId }).catch(() => {});
+    });
+    await cdp.send("Page.startScreencast", { format: "png", everyNthFrame: 1 });
+    await startTrace(page);
+    await page.waitForTimeout(400);
+    await press(page, SAVE);
+    await waitUndo(page);
+    await page.waitForTimeout(1500);
+    const tr = await stopTrace(page);
+    await cdp.send("Page.stopScreencast");
+    await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
+    const s = shape(tr), p = tr.press ?? 0, popStart = s.popStart ?? p, popEnd = popStart + s.popSpan;
+    const long = tr.longs.filter((l) => l.start + l.dur > p && l.start < popStart).sort((a, b) => b.dur - a.dur)[0];
+    const marks: Record<string, number> = { press: p + 70, freeze: long ? long.start + long.dur / 2 : ((s.heldAt ?? p) + popStart) / 2, peak: popStart + 0.4 * 520, rest: popEnd + 400 };
+    const got: Record<string, unknown> = {};
+    for (const [k, at] of Object.entries(marks)) {
+      const near = shots.reduce<{ t: number; data: string } | null>((b, x) => (!b || Math.abs(x.t - at) < Math.abs(b.t - at) ? x : b), null);
+      if (!near) continue;
+      writeFileSync(`${DIR}/frames/${rate}x-${k}.png`, Buffer.from(near.data, "base64"));
+      const fr = tr.frames.reduce<Fr | null>((b, f) => (!b || Math.abs(f.t - near.t) < Math.abs(b.t - near.t) ? f : b), null);
+      got[k] = { wantMs: Math.round(at - p), shotMs: Math.round(near.t - p), nearestRafScale: fr?.scale ?? null, nearestRafMs: fr ? Math.round(fr.t - p) : null };
+    }
+    index[`${rate}x`] = { shots: shots.length, shotsDuringLong: long ? shots.filter((x) => x.t > long.start && x.t < long.start + long.dur).length : 0,
+      long: long ? { at: Math.round(long.start - p), dur: Math.round(long.dur) } : null, firstInMs: s.firstInMs, popAt: Math.round(popStart - p), peak: s.peak, frames: got };
+    console.log("QC1611-F", rate, JSON.stringify(index[`${rate}x`]));
+  }
+  writeFileSync(`${DIR}/frames/index.json`, JSON.stringify(index, null, 1));
+  expect(Object.keys(index).length).toBe(2);
+});
