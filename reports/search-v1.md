@@ -11,7 +11,15 @@ Commits:
 | A | `f63a1407c` | matching (`lib/searchPalette.ts`), SV1-U1…U9, the refs |
 | B | `d2e104b28` | what there is to find (`lib/searchSources.ts`), SV1-B1…B6 |
 | C + D | `212f781ce` | the desktop palette (`SearchDesk.tsx`, `searchV1.css`) and every opener — **one commit, not two** (below) |
-| E | _see git log_ | the rendered locks' greens, the repointed e2e locks, this report |
+| E | `8e89d1305` | the rendered locks' greens, the repointed e2e locks, this report |
+
+## On dev
+
+**Dev serves `index-D50rRItV.js`** (19 Nov), built from `dev/tct1-sv1` @ `0ebacd6aa`. That branch is
+`todo-card-thread-v1` @ `ab699e789`, the branch dev served by then (`index-DH0PUdVK.js`, two commits past this
+branch's base, no files in common), with `search-v1` merged in. It was built from a `git archive` of the pushed tip
+and hosting only was deployed. On the integration branch: tsc 0, build clean, Vitest 12912 passed with only the 2
+baseline `firestoreTarget` failures, and SV1-R1…R8 9/9. **Not merged to main. Prod untouched.**
 
 ## False premises (things the prompt said that are not true of the code)
 
