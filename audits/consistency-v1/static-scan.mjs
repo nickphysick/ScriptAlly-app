@@ -18,6 +18,7 @@
  */
 import { readFileSync, readdirSync, statSync, writeFileSync, mkdirSync } from "node:fs";
 import { resolve, relative, dirname } from "node:path";
+import { readTokens } from "./tokens.mjs";
 
 const ROOT = resolve(new URL("../..", import.meta.url).pathname);
 const OUT = resolve(ROOT, process.argv[2] || "audits/consistency-v1/.run/scan.json");
@@ -98,28 +99,15 @@ const isRed = (c) => { const x = hsl(c); return (x.h <= 10 || x.h >= 345) && x.s
 const COLOUR_RE = /#[0-9a-fA-F]{3,8}\b|rgba?\([^)]*\)|hsla?\([^)]*\)/g;
 const SCALE = [28, 24, 20, 16, 14];
 
-/* ── the shared tokens ───────────────────────────────────────────────────────────────────────── */
-const sharedTokens = [];
-for (const f of SHARED_CSS) {
-  const src = stripComments(readFileSync(resolve(ROOT, f), "utf8"), true);
-  src.split("\n").forEach((line, i) => {
-    for (const m of line.matchAll(/(--[\w-]+)\s*:\s*([^;]+);?/g)) {
-      const val = m[2].trim();
-      sharedTokens.push({ name: m[1], value: val, file: f, line: i + 1, rgb: toRgb(val) });
-    }
-  });
-}
-for (const f of SHARED_TS) {
-  const src = stripComments(readFileSync(resolve(ROOT, f), "utf8"), false);
-  src.split("\n").forEach((line, i) => {
-    const m = /export const (\w+)\s*=\s*["'`]([^"'`]+)["'`]/.exec(line);
-    if (m) sharedTokens.push({ name: m[1], value: m[2], file: f, line: i + 1, rgb: toRgb(m[2]) });
-  });
-}
+/* ── the shared tokens (tokens.mjs: :root/@theme in any stylesheet + designTokens.ts) ─────────────── */
+const TOK = readTokens(ROOT);
+const sharedTokens = TOK.shared.map((t) => ({ ...t, rgb: toRgb(t.value) }));
 const colourTokens = sharedTokens.filter((t) => t.rgb && t.rgb.a === 1);
+const SHARED_FILES = new Set(sharedTokens.map((t) => t.file));
+const sharedLine = new Set(sharedTokens.map((t) => `${t.file}:${t.line}`));
 const nearestToken = (c) => {
   let best = null;
-  for (const t of colourTokens) { const d = dE(c, t.rgb); if (!best || d < best.d) best = { t, d }; }
+  for (const t of colourTokens) { const d = dE(c, t.rgb); if (!best || d < best.d - 1e-9) best = { t, d }; } // ties keep the app-wide token (sorted first)
   return best;
 };
 
@@ -130,7 +118,6 @@ const allColours = new Map(); // hex → { n, at }
 
 for (const f of files) {
   const isCss = f.endsWith(".css");
-  const isShared = SHARED_CSS.includes(f) || SHARED_TS.includes(f);
   const raw = readFileSync(resolve(ROOT, f), "utf8");
   const src = stripComments(raw, isCss);
   const lines = src.split("\n");
@@ -152,21 +139,21 @@ for (const f of files) {
       allColours.get(h).n++;
       if (isBurg(c) && c.a > 0) {
         const mountFrame = f === "src/lib/designTokens.ts" && /insetBorder/.test(line);
-        const tokenDef = isShared && isTokenDef;
+        const tokenDef = sharedLine.has(`${f}:${ln}`);
         if (!mountFrame && !tokenDef) push("burgundy", f, ln, m[0], { context: line.trim().slice(0, 140) });
       }
       if (c.a > 0.15 && isGreen(c)) push("green", f, ln, m[0], { hex: h, context: line.trim().slice(0, 140) });
       if (c.a > 0.15 && isRed(c)) push("red", f, ln, m[0], { hex: h, context: line.trim().slice(0, 140) });
-      if (isShared && (isTokenDef || SHARED_TS.includes(f))) continue;
+      if (sharedLine.has(`${f}:${ln}`) || SHARED_TS.includes(f)) continue;
       const near = c.a === 1 ? nearestToken(c) : null;
-      const base = { hex: h, nearest: near ? { token: near.t.name, value: near.t.value, dE: Math.round(near.d * 100) / 100, at: `${near.t.file}:${near.t.line}` } : null };
+      const base = { hex: h, nearest: near ? { token: near.t.name, value: near.t.value, dE: Math.round(near.d * 100) / 100, at: `${near.t.file}:${near.t.line}`, appWide: near.t.appWide } : null };
       if (isTokenDef) push("local-token-colour", f, ln, m[0], base);
       else push("colour-literal", f, ln, m[0], { ...base, context: line.trim().slice(0, 140) });
     }
 
     /* font-family */
     const ff = isCss ? /font-family\s*:\s*([^;]+)/.exec(line) : /fontFamily\s*:\s*([^,}]+)/.exec(line);
-    if (ff && !/var\(--font|var\(--f12|inherit|var\(--[\w-]*(font|serif|sans|mono)/.test(ff[1]) && !(isShared && isTokenDef)) push("font-family", f, ln, ff[1].trim());
+    if (ff && !/var\(--font|var\(--f12|inherit|var\(--[\w-]*(font|serif|sans|mono)/.test(ff[1]) && !sharedLine.has(`${f}:${ln}`)) push("font-family", f, ln, ff[1].trim());
 
     /* font-size */
     const fsRe = isCss ? /font-size\s*:\s*([\d.]+)(px|rem)\b/g : /fontSize\s*:\s*["']?([\d.]+)(px|rem)?["']?/g;
@@ -183,13 +170,13 @@ for (const f of files) {
 
     /* radius */
     const rr = isCss ? /border(?:-[a-z]+)*-radius\s*:\s*([^;]+)/.exec(line) : /borderRadius\s*:\s*["']?([^,}"']+)/.exec(line);
-    if (rr && !/var\(--/.test(rr[1]) && !/^(0|50%|999+px|9999px|100%|inherit)$/.test(rr[1].trim()) && !(isShared && isTokenDef)) push("radius-literal", f, ln, rr[1].trim());
+    if (rr && !/var\(--/.test(rr[1]) && !/^(0|50%|999+px|9999px|100%|inherit)$/.test(rr[1].trim()) && !sharedLine.has(`${f}:${ln}`)) push("radius-literal", f, ln, rr[1].trim());
     /* shadow */
     const sh = isCss ? /box-shadow\s*:\s*([^;]+)/.exec(line) : /boxShadow\s*:\s*["'`]([^"'`]+)/.exec(line);
-    if (sh && !/^(none|inherit|var\([^)]*\))\s*(!important)?$/.test(sh[1].trim()) && !(isShared && isTokenDef)) push("shadow-literal", f, ln, sh[1].trim());
+    if (sh && !/^(none|inherit|var\([^)]*\))\s*(!important)?$/.test(sh[1].trim()) && !sharedLine.has(`${f}:${ln}`)) push("shadow-literal", f, ln, sh[1].trim());
     /* border with a literal colour */
     const bd = isCss ? /\bborder(?:-(?:top|right|bottom|left))?\s*:\s*([^;]+)/.exec(line) : /\bborder(?:Top|Right|Bottom|Left)?\s*:\s*["'`]([^"'`]+)/.exec(line);
-    if (bd && COLOUR_RE.test(bd[1]) && !(isShared && isTokenDef)) push("border-literal", f, ln, bd[1].trim());
+    if (bd && COLOUR_RE.test(bd[1]) && !sharedLine.has(`${f}:${ln}`)) push("border-literal", f, ln, bd[1].trim());
     COLOUR_RE.lastIndex = 0;
   });
 
@@ -212,6 +199,10 @@ for (let i = 0; i < palette.length; i++) for (let j = i + 1; j < palette.length;
 }
 nearDup.sort((x, y) => x.dE - y.dE);
 
+/* a literal that IS a :root token's value (ΔE 0): the mechanical sweep candidates, reported, never applied here */
+const exactTokenDupes = items.filter((i) => i.kind === "colour-literal" && i.nearest && i.nearest.dE === 0 && i.nearest.appWide);
+const dupeByToken = {};
+for (const i of exactTokenDupes) { const k = `${i.nearest.token} ${i.nearest.value}`; dupeByToken[k] = (dupeByToken[k] || 0) + 1; }
 const counts = {};
 for (const it of items) counts[it.kind] = (counts[it.kind] || 0) + 1;
 const byFile = {};
@@ -220,9 +211,10 @@ for (const it of items) { const k = `${it.kind}|${it.file}`; byFile[k] = (byFile
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, JSON.stringify({
   scanned: files.length,
-  sharedTokens: { count: sharedTokens.length, colours: colourTokens.length, files: [...SHARED_CSS, ...SHARED_TS] },
+  sharedTokens: { count: sharedTokens.length, colours: colourTokens.length, files: [...SHARED_FILES].sort(), themeScopedInIndexCss: TOK.themeScoped.length },
   counts, nearDuplicateColours: { count: nearDup.length, pairs: nearDup.slice(0, 400) },
   distinctColours: palette.length,
+  literalsEqualToRootToken: { count: exactTokenDupes.length, files: new Set(exactTokenDupes.map((i) => i.file)).size, byToken: Object.entries(dupeByToken).sort((a, b) => b[1] - a[1]).slice(0, 40) },
   byFile: Object.entries(byFile).sort((a, b) => b[1] - a[1]).slice(0, 300).map(([k, n]) => ({ kind: k.split("|")[0], file: k.split("|")[1], n })),
   items,
 }, null, 1));

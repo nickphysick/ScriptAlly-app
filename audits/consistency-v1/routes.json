@@ -272,13 +272,7 @@
       "open": {
         "firstOf": "[aria-label*='ccount' i][aria-haspopup], button[aria-label*='ccount' i]"
       }
-    },
-    {
-      "from": "/queries",
-      "name": "Help menu",
-      "open": {
-        "firstOf": "button[aria-label*='elp' i], .ws-bright button:last-child"
-      }
     }
-  ]
+  ],
+  "_note_overlays": "Pop-up menus (role=menu: the account menu, the help menu) are not dialogs and the collector does not measure them; they are listed as not reached."
 }

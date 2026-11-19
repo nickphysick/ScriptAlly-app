@@ -205,7 +205,8 @@
     const cs = getComputedStyle(header);
     const title = header.querySelector("h1") || [...header.querySelectorAll("*")].filter(vis).filter((e) => ownText(e)).sort((a, b) => parseFloat(getComputedStyle(b).fontSize) - parseFloat(getComputedStyle(a).fontSize))[0];
     const tr = title ? title.getBoundingClientRect() : null;
-    const textEls = [...header.querySelectorAll("*")].filter(vis).filter((e) => ownText(e) && e !== title && !(title && title.contains(e)));
+    /* the subheader is words, never a control's label */
+    const textEls = [...header.querySelectorAll("*")].filter(vis).filter((e) => ownText(e) && e !== title && !(title && title.contains(e)) && !e.closest("button, a, [role='button'], [role='tab'], label"));
     const sub = tr ? textEls.find((e) => e.getBoundingClientRect().top >= tr.bottom - 2 && e.getBoundingClientRect().left < tr.left + 40) : null;
     const illus = [...header.querySelectorAll("img, svg, picture, canvas")].filter(vis).filter((e) => e.getBoundingClientRect().height >= 56).sort((a, b) => b.getBoundingClientRect().height - a.getBoundingClientRect().height)[0];
     const kids = [...header.querySelectorAll("button, a, [role='button'], input, select")].filter(vis);

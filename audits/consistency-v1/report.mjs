@@ -120,6 +120,7 @@ function findingHtml(f) {
   return `<section class="f t${f.tier}" id="${f.id}">
     <h3><span class="id">${f.id}</span> ${esc(sentence(f))}</h3>
     <p class="meta">${esc(FAMILY_LABEL[f.family] || f.family)} · ${f.vws ? f.vws.join(" and ") : f.vw}px wide${f.otherWidth ? ` (values shown at ${f.vw}; at ${f.otherWidth.vw} there ${f.otherWidth.variants === 1 ? "is one variant" : `are ${f.otherWidth.variants} variants`}${f.otherWidth.samePagesSplit ? ", split across the same pages" : ", split differently — findings.json has them"})` : ""} · part <code>${esc(f.part)}/${esc(f.role)}</code> · ${esc(f.reason)}${f.oracle ? ` The oracle points to variant ${f.oracle.variant + 1}: ${esc(f.oracle.why)}.` : f.tier === "B" ? " No shared token or primitive settles it." : ""}</p>
+    ${f.refNote ? `<p class="meta"><b>Design refs:</b> ${esc(f.refNote)}</p>` : ""}
     ${after ? `<p class="after ${after.state}">After the Tier A fixes: <b>${esc(after.text)}</b></p>` : ""}
     ${fix ? `<p class="after gone">Fixed in <code>${esc(fix.commit)}</code>: ${esc(fix.what)}</p>` : ""}
     <div class="vars">${variants}</div>${more}
@@ -138,6 +139,9 @@ const scanHtml = SCAN ? `<section class="scan"><h2>The source scan</h2>
 <table class="counts"><tr><th>What</th><th>Count</th></tr>${Object.entries(SCAN.counts).sort((a, b) => b[1] - a[1]).map(([k, v]) => `<tr><td>${esc(k)}</td><td>${v}</td></tr>`).join("")}
 <tr><td>distinct colour values in source</td><td>${SCAN.distinctColours}</td></tr><tr><td>near-duplicate colour pairs (ΔE &lt; 2.3)</td><td>${SCAN.nearDuplicateColours.count}</td></tr></table>
 ${["primitive-copy", "green", "red", "var-in-keyframes", "color-mix"].map((k) => { const it = SCAN.items.filter((i) => i.kind === k); return it.length ? `<h3>${esc(k)} (${it.length})</h3><ul class="mono">${it.slice(0, 60).map((i) => `<li><code>${esc(i.file)}${i.line ? ":" + i.line : ""}</code> ${swatch(i.hex)}${esc(i.value)} <span class="muted">${esc((i.context || "").slice(0, 100))}</span></li>`).join("")}</ul>${it.length > 60 ? `<p class="muted">…${it.length - 60} more in scan.json</p>` : ""}` : ""; }).join("")}
+<h3>Hard-coded colours that equal an app-wide token (${SCAN.literalsEqualToRootToken?.count ?? 0} literals in ${SCAN.literalsEqualToRootToken?.files ?? 0} files)</h3>
+<p>Each of these literals is exactly the value of an app-wide token (index.css, the shell's stylesheets or designTokens.ts). They render identically today, so none shows as a difference on screen. They are listed as candidates for a sweep, not fixed here: a value that equals a token is not always that token (most <code>#ffffff</code> is not "the shell's active fill"), so each swap needs a reading of what the colour is for.</p>
+<ul class="mono">${(SCAN.literalsEqualToRootToken?.byToken || []).slice(0, 20).map(([k, n]) => `<li>${swatch(k.split(" ")[1])}<code>${esc(k)}</code> ${n}</li>`).join("")}</ul>
 <h3>Burgundy outside the MountCard frame (${SCAN.counts.burgundy || 0} uses in ${new Set(SCAN.items.filter((i) => i.kind === "burgundy").map((i) => i.file)).size} files)</h3>
 <ul class="mono">${Object.entries(SCAN.items.filter((i) => i.kind === "burgundy").reduce((m, i) => ((m[i.file] = (m[i.file] || 0) + 1), m), {})).sort((a, b) => b[1] - a[1]).slice(0, 40).map(([f, n]) => `<li><code>${esc(f)}</code> ${n}</li>`).join("")}</ul>
 <h3>Closest near-duplicate colour pairs</h3><ul class="mono">${SCAN.nearDuplicateColours.pairs.slice(0, 40).map((p) => `<li>${swatch(p.a)}${p.a} ${swatch(p.b)}${p.b} ΔE ${p.dE} <span class="muted">${esc(p.aAt)} · ${esc(p.bAt)}</span></li>`).join("")}</ul>
@@ -178,6 +182,11 @@ nav a{margin-right:12px}
 <p>${INV.pages.length} routes measured; ${INV.measured.length} page-views.</p>
 <h3>Failed to load</h3>${failedHtml}
 <h3>Redirected (measured where they landed)</h3>${redirHtml}
+<h3>Not reached</h3>
+<ul><li>Empty states: the harness account is populated, so no route showed its empty state; empty-state headers were not measured (baked decision 5 would hold them apart in any case).</li>
+<li>Pop-up menus (the account menu, the help menu) are role="menu", not dialogs; the collector measures dialogs only.</li>
+<li>Set-up (onboarding after sign-up) is reached only by creating an account; the run creates none.</li>
+<li>Mobile layouts: out of scope (desktop only).</li></ul>
 <p class="muted">${INV.singlePageGroups} groups had only one page in them and so could not be compared (listed in inventory.json, never counted as a pass).</p>
 <div id="scan">${scanHtml}</div>
 </main></body></html>`;

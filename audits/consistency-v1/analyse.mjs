@@ -24,6 +24,7 @@
 import { readFileSync, readdirSync, writeFileSync, existsSync } from "node:fs";
 import { resolve, relative } from "node:path";
 import { createHash } from "node:crypto";
+import { readTokens } from "./tokens.mjs";
 
 const ROOT = resolve(new URL("../..", import.meta.url).pathname);
 const args = process.argv.slice(2);
@@ -53,23 +54,31 @@ const lab = ({ r, g, b }) => {
 };
 const dE = (a, b) => { const A = lab(a), B = lab(b); return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]) + Math.abs((a.a ?? 1) - (b.a ?? 1)) * 100; };
 
-/* shared colour tokens (index.css + designTokens.ts), for "the oracle points to" */
-const tokenColours = [];
-{
-  const add = (name, v, at) => {
-    const m = /^#([0-9a-f]{6})$/i.exec(v.trim());
-    if (m) tokenColours.push({ name, hex: `#${m[1].toLowerCase()}`, at });
-  };
-  readFileSync(resolve(ROOT, "src/index.css"), "utf8").split("\n").forEach((l, i) => { for (const m of l.matchAll(/(--[\w-]+)\s*:\s*(#[0-9a-fA-F]{6})\b/g)) add(m[1], m[2], `src/index.css:${i + 1}`); });
-  readFileSync(resolve(ROOT, "src/lib/designTokens.ts"), "utf8").split("\n").forEach((l, i) => { const m = /export const (\w+)\s*=\s*["'](#[0-9a-fA-F]{6})["']/.exec(l); if (m) add(m[1], m[2], `src/lib/designTokens.ts:${i + 1}`); });
-}
+/* shared colour tokens (tokens.mjs: :root/@theme anywhere + designTokens.ts), for "the oracle points to" */
+const SHARED_TOK = readTokens(ROOT).shared;
+/* resolve the rgb(var(--x-rgb)) form (--ws-page is written that way) as well as plain hex */
+const tokVal = (t) => {
+  const v = t.value.trim();
+  if (/^#[0-9a-fA-F]{6}$/.test(v)) return v.toLowerCase();
+  const m = /^rgba?\(\s*var\((--[\w-]+)\)\s*\)$/.exec(v);
+  const ref = m && SHARED_TOK.find((x) => x.name === m[1]);
+  const ch = ref && /^(\d+)\s*,\s*(\d+)\s*,\s*(\d+)$/.exec(ref.value.trim());
+  return ch ? "#" + ch.slice(1, 4).map((n) => (+n).toString(16).padStart(2, "0")).join("") : null;
+};
+const tokenColours = SHARED_TOK.map((t) => ({ name: t.name, hex: tokVal(t), at: `${t.file}:${t.line}`, appWide: t.appWide })).filter((t) => t.hex);
 const tokenFor = (hex) => tokenColours.filter((t) => t.hex === hex);
 
 /* ── which fields each part compares ─────────────────────────────────────────────────────────── */
 const DROP = new Set(["bgFrom", "label"]);
+/* ⚠️ BOX GEOMETRY IS COMPARED TO THE WHOLE PIXEL. Text-driven boxes land on fractions (227 / 227.1 / 227.2)
+   that nobody can see; left unrounded they split one value into three "variants". Type values keep their
+   decimals: a 54.4px title against a 54px one is a real difference in the CSS. */
+const GEOM = new Set(["height", "width", "topFromSheet", "leftFromSheet", "titleLeft", "titleTop", "subGap", "illusRight", "rightItemInset", "gapBelow"]);
+const roundGeom = (k, v) => (GEOM.has(k) && typeof v === "number" ? Math.round(v) : k === "illusBox" && typeof v === "string" ? v.replace(/[\d.]+/g, (n) => String(Math.round(+n))) : v);
 const sigOf = (part, role, sig) => {
   const o = {};
-  for (const [k, v] of Object.entries(sig || {})) {
+  for (const [k0, v0] of Object.entries(sig || {})) {
+    const k = k0, v = roundGeom(k0, v0);
     if (DROP.has(k) || v === undefined || v === null) continue;
     if (k === "width" && !(part === "buttons" && role.startsWith("icon-only")) && !["form-controls", "tags-status", "overlays", "surfaces"].includes(part)) continue;
     if (k === "height" && part === "type") continue;
@@ -83,6 +92,7 @@ const ROLE_WEIGHT = { "navy · topFromSheet": 4, "navy · height": 3, "navy · b
 /* ── the baked decisions, as code ────────────────────────────────────────────────────────────── */
 const STATE_FILLS = ["#f7efe3", "#e0e5dd", "#f5e6df", "#d7e0e8", "#e4e1db"];
 function bakedReason(f) {
+  if (f.family === "workspace:discover-not-ready") return "Baked 5 and design-refs/discover-v1 (ref-empty-1512): Discover's not-ready state has its own hero; the shared header (design-refs/workspace-headers-v1) is for its populated state, which the harness account does not reach.";
   if (f.family === "workspace:todo-slim-header") return "Baked 2: the To-do list has a slim title row instead of the full workspace header; held apart from the workspace header comparison.";
   if (f.family === "dashboard" && (f.part === "page-header" || f.part === "surfaces")) return "Baked 1: the Dashboard's header and layout differ from the workspace pages on purpose.";
   if (f.part === "page-header" && f.pages.length && f.variants.every((v) => v.pages.every((p) => p === "todo") || v.pages.length === 0)) return "Baked 2: the To-do list has a slim title row.";
@@ -109,6 +119,10 @@ for (const run of runs) {
     let family = run.family;
     /* Baked 2: the To-do list's slim title row is held apart from the workspace header comparison */
     if (run.family === "workspace" && run.key === "todo" && (r.part === "page-header" || (r.part === "type" && /^page-/.test(r.role)))) family = "workspace:todo-slim-header";
+    /* Baked 5 + design-refs/discover-v1 (ref-empty): the harness account reaches Discover's not-ready state, whose
+       hero is that ref's. workspace-headers-v1 gives Discover the shared header only when populated, which the
+       harness does not reach — so Discover's header is held apart rather than compared with populated headers. */
+    if (run.family === "workspace" && run.key === "agents-discover" && (r.part === "page-header" || (r.part === "type" && /^page-/.test(r.role)))) family = "workspace:discover-not-ready";
     if (r.scope === "overlay") family = "overlays";
     if (family === "dashboard" && SHARED_FAMILY_PARTS.has(r.part) && !(r.part === "type" && /page-/.test(r.role))) family = "workspace";
     /* overlays are compared with each other wherever they open from, and whatever height they happen to be:
@@ -116,7 +130,7 @@ for (const run of runs) {
     const role0 = family === "overlays" ? r.role.replace(/^(drawer|modal|full-screen)[/-]/, "") : r.role;
     /* the page header is a set of independent measurements: each is its own comparison, so a finding reads
        "the header sits at three distances from the sheet" rather than "eleven headers are all different" */
-    const units = r.part === "page-header" && family !== "workspace:todo-slim-header"
+    const units = r.part === "page-header" && !family.startsWith("workspace:")
       ? Object.entries(sigOf(r.part, r.role, r.sig)).filter(([k]) => k !== "kind").map(([k, v]) => ({ role: `${role0} · ${k}`, sig: { [k]: v } }))
       : [{ role: role0, sig: sigOf(r.part, r.role, r.sig) }];
     for (const u of units) {
@@ -215,7 +229,7 @@ const singles = [];
 for (const g of groups.values()) {
   const variants = [...g.variants.values()].map((v) => ({ ...v, pages: [...v.pages].sort() })).sort((a, b) => b.pages.length - a.pages.length || b.n - a.n);
   const pages = [...g.pages].sort();
-  if (g.family === "workspace:todo-slim-header") {
+  if (g.family === "workspace:todo-slim-header" || g.family === "workspace:discover-not-ready") {
     findings.push({ id: "", family: g.family, vw: g.vw, part: g.part, role: g.role, pages, fields: Object.keys(variants[0].sig), variants: variants.map((v) => ({ sig: v.sig, pages: v.pages, n: v.n, examples: v.examples.map((e) => ({ ...e, sources: sourcesFor(e.cls) })) })), tier: "C", reason: bakedReason({ family: g.family }), oracle: null, visibility: 0 });
     continue;
   }
@@ -228,6 +242,9 @@ for (const g of groups.values()) {
   f.fields = [...fields];
   /* the oracle: a variant whose colours are all shared tokens */
   f.oracle = null;
+  const REF = (() => { try { return JSON.parse(readFileSync(resolve(ROOT, "audits/consistency-v1/ref-checks.json"), "utf8")).checks; } catch { return []; } })();
+  const rc = REF.find((c) => c.key === `${g.family}|${g.part}|${g.role}`);
+  if (rc) { f.refNote = rc.note; if (rc.tier) f.forceTier = rc.tier; }
   for (const v of variants) {
     const cols = Object.entries(v.sig).filter(([, x]) => /^#[0-9a-f]{6}$/.test(String(x)));
     const hit = cols.length && cols.every(([, x]) => tokenFor(x).length);
@@ -237,6 +254,7 @@ for (const g of groups.values()) {
   }
   const baked = bakedReason(f);
   if (baked) { f.tier = "C"; f.reason = baked; }
+  else if (f.forceTier) { f.tier = f.forceTier; f.reason = f.refNote; }
   else {
     /* Tier A test 1: exactly two variants; the minority is ONE page; every other page in the group uses the
        majority and nothing else; the difference is ≤ 2px (or an invisible colour) on every differing field. */
