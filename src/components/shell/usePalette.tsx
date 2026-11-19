@@ -23,6 +23,13 @@ import { buildCorpus, searchPalette } from "../../lib/searchPalette";
 import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import { SearchPalette } from "./SearchPalette";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
+import { corpusSources } from "../../lib/searchSources";
+import { quietWeeksOf } from "../../lib/queryState";
+import { HELP_ARTICLE_LIST } from "../../content/help/articles";
+import { articleText } from "../../content/help/model";
+
+/** The written help articles as search reads them — title, lede and plain text, no Help Centre page code. */
+const HELP_SOURCE = HELP_ARTICLE_LIST.map((a) => ({ slug: a.slug, title: a.title, lede: a.lede, body: articleText(a) }));
 
 /** The workspace's active manuscript id — the same key the shell's selector writes. */
 const readActiveMs = (): string | null => {
@@ -51,7 +58,8 @@ export interface PaletteHandle {
 
 export function usePalette({ onNavigate, onNavigatePath, setSearchQuery, pageIcon }: UsePaletteInput): PaletteHandle {
   const { pathname } = useLocation();
-  const { agents, queries, manuscripts } = useScriptAllyDb();
+  const db = useScriptAllyDb();
+  const { agents, queries, manuscripts } = db;
 
   const [open, setOpen] = useState(false);
   const [term, setTerm] = useState("");
@@ -62,13 +70,22 @@ export function usePalette({ onNavigate, onNavigatePath, setSearchQuery, pageIco
   /* THE CORPUS — built from already-loaded state (DbProvider subscribes on every route), so the
      palette never fetches and has no loading state. Rebuilt when the data changes, not per
      keystroke; the ranking is the cheap part. */
-  const corpus = useMemo(
-    () => buildCorpus({
+  /* ⚠️ BUILT ONLY WHILE OPEN: the task chain is the To-do board's whole assembly, so it is not run on every write while
+     the palette is shut. Opening rebuilds it from the state as it is. */
+  const corpus = useMemo(() => {
+    if (!open) return [];
+    const now = Date.now();
+    const activeMs = resolveScopedManuscript(manuscripts, readActiveMs()) ?? null;
+    return buildCorpus({
       agents, queries,
       agentLabel: (a) => ({ primary: agentPrimary(a), secondary: agentSecondary(a) }),
-    }),
-    [agents, queries],
-  );
+      activeManuscriptTitle: activeMs?.title,
+      ...corpusSources({
+        tasks: db.tasks, userTasks: db.userTasks, queries, agents, manuscripts, taskFlags: db.taskFlags,
+        activities: db.activities, packages: db.packages, versions: db.versions, mutedTaskRules: db.currentUser?.mutedTaskRules,
+      }, { now, quietWeeks: quietWeeksOf(db.currentUser), activeMs, help: HELP_SOURCE }),
+    });
+  }, [open, agents, queries, manuscripts, db.tasks, db.userTasks, db.taskFlags, db.activities, db.packages, db.versions, db.currentUser]);
   const items = useMemo(
     () => searchPalette(corpus, term, "all").rows.flatMap((r) => (r.type === "item" ? [r.item] : [])),
     [corpus, term],

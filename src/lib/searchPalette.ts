@@ -18,6 +18,7 @@
 import { RailCaptureKey } from "../components/shell/railNav";
 import { TODO_ROUTES } from "./todoRoutes";
 import { workspaceSections } from "./workspaceNav";
+import { stageOf } from "./stageColours";
 
 /** What opening a row does. Data only — the palette component performs it. */
 export type PaletteRun =
@@ -125,6 +126,12 @@ export interface PaletteItem {
   run: PaletteRun;
   /** ⌘↵ — the likely next thing, when the row has one. */
   second?: { label: string; run: PaletteRun };
+  /** What the peek shows when the row is selected. */
+  peek?: PalettePeek;
+  /** A note's paper colour (its tile and its peek). */
+  colour?: string;
+  /** A material row's kind. */
+  materialKind?: "letter" | "package";
 }
 
 /* ─────────────────────────────────── matching (the mock's script, ported) ─────────────────────────────────── */
@@ -551,17 +558,93 @@ export const PALETTE_PAGES: PaletteItem[] = [
   { id: "page:help", group: "Pages", kind: "page", title: "Help centre", subtitle: "Guides and answers", keywords: "help support guide", run: { kind: "path", path: "/help" } },
 ];
 
+/** One labelled fact in the peek: a 13px label over a 15px value, with an optional quieter line. */
+export interface PeekFact { label: string; value: string; line?: string | null; wide?: boolean }
+
+/** What the peek shows for a row — data only, worded from the app's own helpers when the corpus is built. */
+export type PalettePeek =
+  | { kind: "agent"; sub: string; status?: string; queriedLine?: string; manuscript: string; facts: PeekFact[] }
+  | { kind: "query"; status: string; who: string; facts: PeekFact[] }
+  | { kind: "task"; text: string; facts: PeekFact[] }
+  | { kind: "note"; text: string; colour: string }
+  | { kind: "material"; sub: string; facts: PeekFact[] }
+  | { kind: "text"; text: string };
+
+/** "Not stated", as elsewhere, for an absent value. */
+export const NOT_STATED = "Not stated";
+
+/** The pieces of a query row the corpus reads — the Query Centre's own stamped row, built by the host. */
+export interface QueryRowFacts {
+  /** "14 Sep" — the card's Sent value (lib/qc153 queriedFact). */
+  sent: string | null;
+  /** "9 days ago" — the card's Sent line. */
+  sentLine: string | null;
+  sentMs: number | null;
+  /** The card's Next box, as worded there (lib/qc154 nextBox154). */
+  next: { label: string; value: string; line: string | null };
+  /** The card's Last heard box (lib/qc153 heardFact). */
+  heard: { value: string; line: string | null };
+  /** Gone quiet, by the Query Centre's own test (lib/qc154 isQuietCard). */
+  quiet: boolean;
+  /** Whose move: the row's court (lib/qcSummary courtOf). */
+  court: "you" | "agent" | "offer" | "closed";
+}
+
+export interface CorpusAgent {
+  id: string; name?: string; agency?: string; city?: string; genres?: string[] | string; mswlNotes?: string;
+  submissionStatus?: string; responseTimeWeeks?: number; materialsWanted?: string[];
+}
+export interface CorpusQuery { id: string; agentId: string; manuscriptId: string; status: string; packageId?: string }
+
 export interface CorpusInput {
-  agents: { id: string; name?: string; agency?: string; city?: string; genres?: string[] | string; mswlNotes?: string }[];
-  queries: { id: string; agentId: string; manuscriptId: string; status: string; dateSent?: string }[];
+  agents: CorpusAgent[];
+  queries: CorpusQuery[];
   /** How an agent's name and agency read — the app's ONE display rule, passed in. */
   agentLabel: (a: { id: string; name?: string; agency?: string }) => { primary: string; secondary: string };
+  /** The Query Centre's stamped row facts, by query id. Absent: no state words, no dates. */
+  rows?: ReadonlyMap<string, QueryRowFacts>;
+  /** Their policy as worded on the card, by agent id. */
+  policy?: (agentId: string) => { value: string; line: string | null } | null;
+  /** The active manuscript — an agent row's chip and peek are its query on this one. */
+  activeManuscriptId?: string | null;
+  activeManuscriptTitle?: string;
+  /** Package names by id (every package — a query's line names the one it went with). */
+  packageNames?: ReadonlyMap<string, string>;
+  /** The tasks the To-do list shows today (its own selector), already worded. */
+  tasks?: { key: string; title: string; due: string | null; about: string | null }[];
+  /** The Corkboard's notes, with their paper colour resolved. */
+  notes?: { id: string; text: string; colour: string }[];
+  /** Live letters and live packages for the active manuscript, with the lines their pages show. */
+  letters?: { id: string; name: string; line: string; facts: PeekFact[] }[];
+  packages?: { id: string; name: string; line: string; facts: PeekFact[] }[];
+  /** Help articles: title, slug, and the body as plain text. */
+  help?: { slug: string; title: string; body: string; lede?: string }[];
 }
+
+const MONTHS = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+
+/**
+ * THE STATE WORDS a query is found by — read off the Query Centre's own row (its court and its quiet test), never a
+ * second calculation.
+ */
+export function stateWords(r: Pick<QueryRowFacts, "court" | "quiet"> | undefined): string {
+  if (!r) return "";
+  if (r.quiet) return "gone quiet nudge";
+  if (r.court === "closed") return "closed";
+  if (r.court === "agent") return "with the agent waiting";
+  return "your move with you needs you";
+}
+
+const firstName = (n: string) => n.trim().split(/\s+/)[0] ?? n;
 
 /** BUILD THE CORPUS from already-loaded state. Order matters: it is the tie-break (score, then corpus position). */
 export function buildCorpus(input: CorpusInput): PaletteItem[] {
-  const { agents, queries, agentLabel } = input;
+  const { agents, queries, agentLabel, rows, policy, activeManuscriptId, packageNames } = input;
+  const ms = input.activeManuscriptTitle ?? "this manuscript";
   const agentById = new Map(agents.map((a) => [a.id, a]));
+  const activeQueryOf = new Map<string, CorpusQuery>();
+  for (const q of queries) if (activeManuscriptId && q.manuscriptId === activeManuscriptId && !activeQueryOf.has(q.agentId)) activeQueryOf.set(q.agentId, q);
+
   const agentItems: PaletteItem[] = agents.map((a) => {
     const { primary, secondary } = agentLabel(a);
     const sub = [secondary, a.city].filter(Boolean).join(" · ");
@@ -569,20 +652,93 @@ export function buildCorpus(input: CorpusInput): PaletteItem[] {
     const extra: PaletteExtra[] = [];
     if (a.mswlNotes) extra.push({ label: "Wishlist", text: a.mswlNotes });
     if (genres) extra.push({ label: "Genres", text: genres });
+    const q = activeQueryOf.get(a.id);
+    const r = q ? rows?.get(q.id) : undefined;
+    const weeks = typeof a.responseTimeWeeks === "number" && a.responseTimeWeeks > 0 ? Math.round(a.responseTimeWeeks) : null;
+    const facts: PeekFact[] = [
+      { label: "Submissions", value: a.submissionStatus === "Open" || a.submissionStatus === "Closed" ? a.submissionStatus : NOT_STATED },
+      { label: "Usually replies in", value: weeks ? `About ${weeks} week${weeks === 1 ? "" : "s"}` : NOT_STATED },
+      { label: "Asks for", value: a.materialsWanted?.length ? a.materialsWanted.join(", ") : NOT_STATED, wide: true },
+    ];
     return {
       id: `agent:${a.id}`, group: "Agents", kind: "agent", agentId: a.id,
-      title: primary, subtitle: sub || undefined, extra,
+      title: primary, subtitle: sub || undefined, extra, status: q?.status,
       run: { kind: "agentCard", agentId: a.id },
+      second: q
+        ? { label: "Open the query", run: { kind: "query", queryId: q.id } }
+        : { label: `Log a query to ${firstName(primary)}`, run: { kind: "logQueryTo", agentId: a.id } },
+      peek: {
+        kind: "agent", sub: [secondary, a.city].filter(Boolean).join(", "), status: q?.status, manuscript: ms,
+        queriedLine: q ? (r?.sent ? `Queried ${r.sent} for ${ms}` : `Queried for ${ms}`) : undefined, facts,
+      },
     };
   });
+
   const queryItems: PaletteItem[] = queries.map((q) => {
     const agent = agentById.get(q.agentId);
     const who = agent ? agentLabel(agent).primary : "Unknown agent";
+    const r = rows?.get(q.id);
+    const pkg = q.packageId ? packageNames?.get(q.packageId) : undefined;
+    const sentBit = r?.sent ? `queried ${r.sent}` : "queried";
+    const lead = r?.quiet ? `Gone quiet · ${sentBit}` : sentBit.charAt(0).toUpperCase() + sentBit.slice(1);
+    const subtitle = [lead, pkg].filter(Boolean).join(" · ");
+    const month = r?.sentMs != null ? MONTHS[new Date(r.sentMs).getMonth()] : "";
+    const pol = policy?.(q.agentId);
+    const closed = r ? r.court === "closed" : false;
     return {
       id: `query:${q.id}`, group: "Queries", kind: "query", agentId: q.agentId,
-      title: who, keywords: q.status, agency: agent?.agency, status: q.status,
+      title: who, subtitle,
+      keywords: [q.status, stageWord(q.status), stateWords(r), month, pkg].filter(Boolean).join(" "),
+      agency: agent?.agency,
+      agencyLine: agent?.agency ? [agent.agency, r?.sent ? `queried ${r.sent}` : null].filter(Boolean).join(" · ") : undefined,
+      status: q.status,
       run: { kind: "query", queryId: q.id },
+      second: closed ? undefined : { label: "Record a response", run: { kind: "recordFor", queryId: q.id } },
+      peek: {
+        kind: "query", status: q.status, who: [who, agent?.agency].filter(Boolean).join(", "),
+        facts: [
+          { label: "Sent", value: [r?.sent ?? NOT_STATED, pkg].filter(Boolean).join(" · "), line: r?.sentLine ?? null },
+          { label: r?.next.label ?? "Next", value: r?.next.value ?? NOT_STATED, line: r?.next.line ?? null },
+          { label: "Last heard", value: r?.heard.value ?? NOT_STATED, line: r?.heard.line ?? null, wide: true },
+          { label: "Their policy", value: pol && pol.value !== "—" ? pol.value : NOT_STATED, line: pol?.line ?? null, wide: true },
+        ],
+      },
     };
   });
-  return [...agentItems, ...queryItems, ...PALETTE_ACTIONS, ...PALETTE_PAGES];
+
+  const taskItems: PaletteItem[] = (input.tasks ?? []).map((t) => ({
+    id: `task:${t.key}`, group: "Tasks", kind: "task",
+    title: t.title, subtitle: t.due ? `Due ${t.due}` : "No date", keywords: "task to-do todo",
+    run: { kind: "task", taskId: t.key },
+    peek: { kind: "task", text: t.title, facts: [{ label: "Due", value: t.due ?? "No date" }, { label: "About", value: t.about ?? "Nothing linked" }] },
+  }));
+  const noteItems: PaletteItem[] = (input.notes ?? []).map((n) => ({
+    id: `note:${n.id}`, group: "Notes", kind: "note",
+    title: n.text, subtitle: "On your Corkboard", keywords: "note", colour: n.colour,
+    run: { kind: "note", noteId: n.id },
+    peek: { kind: "note", text: n.text, colour: n.colour },
+  }));
+  const materialItems: PaletteItem[] = [
+    ...(input.letters ?? []).map((l): PaletteItem => ({
+      id: `letter:${l.id}`, group: "Materials", kind: "material", materialKind: "letter",
+      title: l.name, subtitle: `Query letter · ${l.line}`, keywords: "query letter materials",
+      run: { kind: "letter", letterId: l.id }, peek: { kind: "material", sub: "Query letter", facts: l.facts },
+    })),
+    ...(input.packages ?? []).map((p): PaletteItem => ({
+      id: `package:${p.id}`, group: "Materials", kind: "material", materialKind: "package",
+      title: p.name, subtitle: `Package · ${p.line}`, keywords: "package materials",
+      run: { kind: "package", packageId: p.id }, peek: { kind: "material", sub: "Package", facts: p.facts },
+    })),
+  ];
+  const helpItems: PaletteItem[] = (input.help ?? []).map((h) => ({
+    id: `help:${h.slug}`, group: "Help", kind: "help",
+    title: h.title, subtitle: "Help centre", keywords: "help guide", extra: h.body ? [{ label: "", text: h.body }] : [],
+    run: { kind: "help", slug: h.slug },
+    peek: { kind: "text", text: h.lede || h.body.slice(0, 280) },
+  }));
+
+  return [...agentItems, ...queryItems, ...taskItems, ...noteItems, ...materialItems, ...PALETTE_ACTIONS, ...PALETTE_PAGES, ...helpItems];
 }
+
+/** The stage a status is in, as a word to be found by ("full", "partial", "offer"…). */
+const stageWord = (status: string): string => stageOf(status);
