@@ -271,7 +271,7 @@
   .ws-sfield-l { font-family: inherit; flex: 1; text-align: left; }
   .ws-sfield-k {
     font-family: "JetBrains Mono", monospace;
-    font-size: 10px;
+    font-size: 12px;
     padding: 2px 6px;
     border-radius: 5px;
     background: rgba(var(--ink-cream-rgb), 0.09);
@@ -377,7 +377,7 @@
     background: rgba(var(--ink-cream-rgb), 0.1);
     font-family: "JetBrains Mono", monospace;
     font-weight: 600;
-    font-size: 8.5px;
+    font-size: 12px;
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--ink-cream-66);
