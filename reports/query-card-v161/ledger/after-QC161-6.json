@@ -2,12 +2,12 @@
  {
   "name": "population: the bump ran on save",
   "ok": true,
-  "got": "{\"frames\":29,\"scales\":29,\"longs\":[],\"span\":467,\"start\":9231}"
+  "got": "{\"frames\":30,\"scales\":29,\"longs\":[],\"span\":483,\"start\":9494.3}"
  },
  {
   "name": "at least 24 frames painted while the bump ran",
   "ok": true,
-  "got": "29 frames over 467ms"
+  "got": "30 frames over 483ms"
  },
  {
   "name": "the frame's scale took at least 10 distinct values above 1",
@@ -22,6 +22,6 @@
  {
   "name": "the draft's settle ran with it (the fill painted on 10+ frames)",
   "ok": true,
-  "got": "53"
+  "got": "56"
  }
 ]

@@ -1,0 +1,27 @@
+[
+ {
+  "name": "seed-cal-bang-q: it is nudge due or gone quiet, never waiting (state \"nudge\")",
+  "ok": true,
+  "got": "nudge · No reply from Alasdair yet Reply expected by 9 Dec Alasdair replied Close it Nudge"
+ },
+ {
+  "name": "seed-cal-bang-q: nudge due leads with Nudge",
+  "ok": true,
+  "got": "No reply from Alasdair yet Reply expected by 9 Dec Alasdair replied Close it Nudge"
+ },
+ {
+  "name": "seed-cal-soon-q: it is nudge due or gone quiet, never waiting (state \"nudge\")",
+  "ok": true,
+  "got": "nudge · No reply from Hester yet Reply expected by 1 Dec Hester replied Close it Nudge"
+ },
+ {
+  "name": "seed-cal-soon-q: nudge due leads with Nudge",
+  "ok": true,
+  "got": "No reply from Hester yet Reply expected by 1 Dec Hester replied Close it Nudge"
+ },
+ {
+  "name": "thin-q-remind: it is nudge due or gone quiet, never waiting (state \"quiet\")",
+  "ok": true,
+  "got": "quiet · No reply from Imogen Reply was due 16 Oct · quiet for 4 weeks Imogen replied Nudge Close it"
+ }
+]

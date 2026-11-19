@@ -1,63 +1,63 @@
 {
  "save": {
-  "frames": 29,
+  "frames": 30,
   "scales": 29,
   "longs": [],
-  "span": 467,
-  "start": 9231,
+  "span": 483,
+  "start": 9494.3,
   "longsAll": [
    {
-    "start": 6903.5,
-    "dur": 56,
+    "start": 6991.699999928474,
+    "dur": 59,
     "name": "unknown"
    },
    {
-    "start": 7527.699999928474,
-    "dur": 1064,
+    "start": 7638,
+    "dur": 1101,
     "name": "unknown"
    },
    {
-    "start": 8760.799999952316,
-    "dur": 88,
+    "start": 9033.899999976158,
+    "dur": 83,
     "name": "unknown"
    }
   ]
  },
  "undo": {
-  "frames": 30,
+  "frames": 29,
   "scales": 29,
   "longs": [],
-  "span": 483,
-  "start": 14197.5,
+  "span": 467,
+  "start": 14327.4,
   "longsAll": [
    {
-    "start": 12088.799999952316,
-    "dur": 116,
+    "start": 12222.100000023842,
+    "dur": 127,
     "name": "unknown"
    },
    {
-    "start": 12088.799999952316,
-    "dur": 116,
+    "start": 12222.100000023842,
+    "dur": 127,
     "name": "unknown"
    },
    {
-    "start": 12576.699999928474,
-    "dur": 1046,
+    "start": 12587.799999952316,
+    "dur": 1076,
     "name": "unknown"
    },
    {
-    "start": 12576.699999928474,
-    "dur": 1046,
+    "start": 12587.799999952316,
+    "dur": 1076,
     "name": "unknown"
    },
    {
-    "start": 13736.5,
-    "dur": 89,
+    "start": 13856.199999928474,
+    "dur": 125,
     "name": "unknown"
    },
    {
-    "start": 13736.5,
-    "dur": 89,
+    "start": 13856.199999928474,
+    "dur": 125,
     "name": "unknown"
    }
   ]

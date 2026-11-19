@@ -7,11 +7,11 @@
  {
   "name": "population: at least one nudged query and one not",
   "ok": true,
-  "got": "6 nudged · 58 not"
+  "got": "3 nudged · 61 not"
  },
  {
   "name": "the footer and the thread agree on every one",
   "ok": false,
-  "got": "[\"q152-nudgedquiet: footer \\\"15 Oct\\\" · thread [] · No reply from Nell Nudged 15 Oct · quiet since 12 Nov Nell replied Nudge again Close it\",\"q152-nudgedwait: footer \\\"30 Oct\\\" · thread [] · Waiting on Wren Nudged 30 Oct · goes quiet on 27 Nov Record a response\",\"thin-q-remind: footer \\\"18 Sep\\\" · thread [] · No reply from Imogen Nudged 18 Sep · quiet since 16 Oct Imogen replied Nudge again Close it\",\"seed-cal-soon-q: footer \\\"12 Oct\\\" · thread [] · No reply from Hester Nudged 12 Oct · quiet since 9 Nov Hester replied Nudge again Close it\",\"seed-cal-bang-q: footer \\\"25 Sep\\\" · thread [] · No reply from Alasdair Nudged 25 Sep · quiet since 23 Oct Alasdair replied Nudge again Close it\"]"
+  "got": "[\"q152-nudgedquiet: footer \\\"15 Oct\\\" · thread [] · No reply from Nell Nudged 15 Oct · quiet since 12 Nov Nell replied Nudge again Close it\",\"q152-nudgedwait: footer \\\"30 Oct\\\" · thread [] · Waiting on Wren Nudged 30 Oct · goes quiet on 27 Nov Record a response\"]"
  }
 ]

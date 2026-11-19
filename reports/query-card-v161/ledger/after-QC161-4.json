@@ -2,12 +2,12 @@
  {
   "name": "population: queries waiting on the agent checked",
   "ok": true,
-  "got": "64"
+  "got": "70"
  },
  {
   "name": "population: at least one nudged query and one not",
   "ok": true,
-  "got": "3 nudged · 61 not"
+  "got": "3 nudged · 67 not"
  },
  {
   "name": "the footer and the thread agree on every one",

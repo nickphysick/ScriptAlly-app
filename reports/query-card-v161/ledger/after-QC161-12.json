@@ -57,7 +57,7 @@
  {
   "name": "reply: its box grows with the tiles, under the drawer's cap (66% of the card)",
   "ok": true,
-  "got": "[0,474,524,210] → [0,319,524,365]"
+  "got": "[0,474,524,210] → [0,442,524,242]"
  },
  {
   "name": "close: population — the drawer opened",

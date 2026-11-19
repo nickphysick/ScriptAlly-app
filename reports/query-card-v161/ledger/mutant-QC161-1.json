@@ -2,17 +2,17 @@
  {
   "name": "seed-cal-bang-q: population — its grid card",
   "ok": true,
-  "got": "AC Alasdair Crewe Crewe Literary Queried Queried Sent 19 Aug 92 days ago Gone qu"
+  "got": "AC Alasdair Crewe Crewe Literary Queried Queried Sent 19 Aug 92 days ago Next Re"
  },
  {
   "name": "seed-cal-bang-q: the grid card says no \"Nudged\"/\"nudged\"",
-  "ok": false,
-  "got": "AC Alasdair Crewe Crewe Literary Queried Queried Sent 19 Aug 92 days ago Gone quiet Nudge or close nudged 25 Sep → Nudge or close z z z"
+  "ok": true,
+  "got": "AC Alasdair Crewe Crewe Literary Queried Queried Sent 19 Aug 92 days ago Next Response overdue Send nudge now → Nudge"
  },
  {
   "name": "seed-cal-bang-q: the footer says no \"Nudged\" and no \"You nudged Alasdair\"",
-  "ok": false,
-  "got": "No reply from Alasdair Nudged 25 Sep · quiet since 23 Oct Alasdair replied Nudge again Close it"
+  "ok": true,
+  "got": "No reply from Alasdair yet Reply expected by 9 Dec Alasdair replied Close it Nudge"
  },
  {
   "name": "seed-cal-bang-q: the thread has no nudge step",
@@ -22,17 +22,17 @@
  {
   "name": "seed-cal-soon-q: population — its grid card",
   "ok": true,
-  "got": "HB Hester Blaine Blaine & Vole Queried Queried Sent 8 Sep 72 days ago Gone quiet"
+  "got": "HB Hester Blaine Blaine & Vole Queried Queried Sent 8 Sep 72 days ago Next Respo"
  },
  {
   "name": "seed-cal-soon-q: the grid card says no \"Nudged\"/\"nudged\"",
-  "ok": false,
-  "got": "HB Hester Blaine Blaine & Vole Queried Queried Sent 8 Sep 72 days ago Gone quiet Nudge or close nudged 12 Oct → Nudge or close z z z"
+  "ok": true,
+  "got": "HB Hester Blaine Blaine & Vole Queried Queried Sent 8 Sep 72 days ago Next Response overdue Send nudge now → Nudge"
  },
  {
   "name": "seed-cal-soon-q: the footer says no \"Nudged\" and no \"You nudged Hester\"",
-  "ok": false,
-  "got": "No reply from Hester Nudged 12 Oct · quiet since 9 Nov Hester replied Nudge again Close it"
+  "ok": true,
+  "got": "No reply from Hester yet Reply expected by 1 Dec Hester replied Close it Nudge"
  },
  {
   "name": "seed-cal-soon-q: the thread has no nudge step",
@@ -46,13 +46,13 @@
  },
  {
   "name": "thin-q-remind: the grid card says no \"Nudged\"/\"nudged\"",
-  "ok": false,
-  "got": "IF Imogen Farr Farr & Boyd Queried Queried Sent 21 Aug 90 days ago Gone quiet Nudge or close nudged 18 Sep → Nudge or close z z z 1"
+  "ok": true,
+  "got": "IF Imogen Farr Farr & Boyd Queried Queried Sent 21 Aug 90 days ago Gone quiet Nudge or close since 16 Oct → Nudge or close z z z 1"
  },
  {
   "name": "thin-q-remind: the footer says no \"Nudged\" and no \"You nudged Imogen\"",
-  "ok": false,
-  "got": "No reply from Imogen Nudged 18 Sep · quiet since 16 Oct Imogen replied Nudge again Close it"
+  "ok": true,
+  "got": "No reply from Imogen Reply was due 16 Oct · quiet for 4 weeks Imogen replied Nudge Close it"
  },
  {
   "name": "thin-q-remind: the thread has no nudge step",

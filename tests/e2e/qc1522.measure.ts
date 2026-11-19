@@ -443,17 +443,21 @@ for (const vp of SIZES) {
       await open(page, vp);
       await openCard(page, "agent");
       await click(page, C("[data-qc152='reply-btn']"));
-      const chips = await page.locator(C("[data-qc1522='reply-types'] button")).allInnerTexts();
-      L.check("exactly the five replies", JSON.stringify(chips.map((c) => c.trim())) === JSON.stringify(["Asked for the partial", "Passed", "Revise & resubmit", "Made an offer", "Something else"]), JSON.stringify(chips));
+      /* Query card v161 — the answers are tiles (good news first); a tile's label is its <b> */
+      const chips = await page.locator(C("[data-qc1522='reply-types'] [data-qc161='tile'] b")).allInnerTexts();
+      L.check("exactly the five replies", JSON.stringify(chips.map((c) => c.trim())) === JSON.stringify(["Asked for the partial", "Made an offer", "Revise & resubmit", "Passed", "Something else"]), JSON.stringify(chips));
       L.check("no step of yours offered", !chips.some((c) => /nudg|sent|closed|told/i.test(c)), JSON.stringify(chips));
       L.check("the button waits for a choice", await page.locator(C("[data-qc1522='save']")).isDisabled(), "");
       const FIELDS: Record<string, string[]> = { req: ["When", "Their deadline", "Their words"], passed: ["When", "What kind of no", "Their words"], rr: ["When", "Resubmit by", "Their words"], offer: ["When", "Answer by", "Their words"], more: ["When", "What they asked for", "Their words"] };
       for (const [k, want] of Object.entries(FIELDS)) {
+        /* v161 — a picked answer gives way to one row; "Change" brings the tiles back */
+        if (await page.locator(C("[data-qc161='change']")).count()) await click(page, C("[data-qc161='change']"));
         await click(page, C(`[data-qc1522='reply-types'] [data-v='${k}']`));
         const labels = (await page.locator(C("[data-qc1522='composer'] .qc1522-fl > label")).allInnerTexts()).map((x) => x.trim()).filter(Boolean);
         L.check(`${k}: ${want.join(", ")}`, JSON.stringify(labels) === JSON.stringify(want), JSON.stringify(labels));
       }
       /* a pass: personal, open to more work, kept off the Wall */
+      if (await page.locator(C("[data-qc161='change']")).count()) await click(page, C("[data-qc161='change']"));
       await click(page, C("[data-qc1522='reply-types'] [data-v='passed']"));
       await click(page, C("[data-qc1522='pass-kind'] [data-v='personal']"));
       await page.locator(C("[data-qc1522='open-to-more']")).check();
@@ -548,8 +552,9 @@ for (const vp of SIZES) {
       await openCard(page, "passed");
       await click(page, C("[data-qc152='reply-btn']"));
       await click(page, C("[data-qc1522='reopen-why'] [data-v='back']"));
-      const pre = await page.locator(C("[data-qc1522='reply-types'] [data-v='rr']")).getAttribute("class");
-      L.check("Revise & resubmit is chosen", /\bon\b/.test(pre ?? ""), String(pre));
+      /* v161 — the chosen answer is the picked row (the tiles have given way to it) */
+      const pre = await page.locator(C("[data-qc161='picked']")).innerText().catch(() => "");
+      L.check("Revise & resubmit is chosen", /Revise & resubmit/.test(pre), pre);
       await click(page, C("[data-qc1522='save']"), 100);
       L.check("the toast shows (2)", await toast(page), "");
       /* createdAt is a Timestamp ({ seconds }) on new steps and an ISO string on seeded ones: compare as times */

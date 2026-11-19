@@ -63,7 +63,8 @@ export async function openQc(page: Page, opts: { reduced?: boolean; group?: stri
   await page.mouse.move(2, 2);
 }
 export async function openCard(page: Page, id: string) {
-  const c = page.locator(`${PAGE} [data-qc154='card'][data-id='${id}']`);
+  /* (a query can be drawn twice on the grid — the first is the one to open) */
+  const c = page.locator(`${PAGE} [data-qc154='card'][data-id='${id}']`).first();
   await c.scrollIntoViewIfNeeded();
   await c.locator("[data-qc154='name']").first().click();
   await page.locator(`${CARD}[data-id='${id}']`).waitFor({ timeout: 15_000 });
@@ -120,7 +121,7 @@ if (PHASE === "before") {
     await cdp.send("Profiler.enable"); await cdp.send("Profiler.setSamplingInterval", { interval: 200 }); await cdp.send("Profiler.start");
     await startMotionTrace(page);
     await page.waitForTimeout(300);
-    await page.locator(C("[data-qc1522='save']")).click();
+    await page.locator(C("[data-qc1522='save']")).click({ timeout: 10_000 });
     await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 30_000 });
     await page.waitForTimeout(2500);
     const save = await stopMotionTrace(page);
@@ -216,7 +217,7 @@ if (PHASE !== "before") {
     L.check("population: q152-nudge is nudge due", (await page.locator(CARD).getAttribute("data-state")) === "nudge", before);
     const n0 = (await threadOf(page)).filter((m) => m.kind === "nudge").length;
     await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(700);
-    await page.locator(C("[data-qc1522='save']")).click();
+    await page.locator(C("[data-qc1522='save']")).click({ timeout: 10_000 });
     const ok = await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 15_000 }).then(() => true, () => false);
     await page.waitForTimeout(2000);
     const f = await footText(page), th = await threadOf(page);
@@ -251,7 +252,7 @@ if (PHASE !== "before") {
     const cdp = await throttle(page, 4);
     await startMotionTrace(page);
     await page.waitForTimeout(300);
-    await page.locator(C("[data-qc1522='save']")).click();
+    await page.locator(C("[data-qc1522='save']")).click({ timeout: 10_000 });
     await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 30_000 });
     /* (the toast, and its Undo, lasts 5.2s: the save's motion is over well inside it) */
     await page.waitForTimeout(2200);
@@ -290,7 +291,7 @@ if (PHASE !== "before") {
     await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(700);
     await page.locator(C("[data-qc1522='reply-types'] [data-v='req']")).click(); await page.waitForTimeout(400);
     const r1 = await page.evaluate(() => ({ ...((window as unknown as { __qc154r?: Record<string, number> }).__qc154r ?? {}) }));
-    await page.locator(C("[data-qc1522='save']")).click();
+    await page.locator(C("[data-qc1522='save']")).click({ timeout: 10_000 });
     await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 30_000 });
     await page.waitForTimeout(2500);
     const r2 = await page.evaluate(() => ({ ...((window as unknown as { __qc154r?: Record<string, number> }).__qc154r ?? {}) }));
@@ -352,7 +353,7 @@ if (PHASE !== "before" && BASELINE) {
       await pick(page, a); await page.waitForTimeout(400);
       if (a === "more") await page.locator(C("[data-qc1522='what']")).fill("A synopsis");
       (out.primaries as Record<string, unknown>)[a] = await primaryOf(page);
-      await page.locator(C("[data-qc1522='save']")).click();
+      await page.locator(C("[data-qc1522='save']")).click({ timeout: 10_000 });
       await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 15_000 });
       await page.waitForTimeout(1500);
       (out.plans as Record<string, unknown>)[a] = norm(dumpKey("agent"));
@@ -424,7 +425,7 @@ if (PHASE !== "before" && !BASELINE) {
       await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(700);
       await pick(page, a); await page.waitForTimeout(400);
       if (a === "more") await page.locator(C("[data-qc1522='what']")).fill("A synopsis");
-      await page.locator(C("[data-qc1522='save']")).click();
+      await page.locator(C("[data-qc1522='save']")).click({ timeout: 10_000 });
       await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 15_000 });
       await page.waitForTimeout(1500);
       /* the baseline was stored through the first, lossier normaliser (it also renamed 20-letter field names): put the
@@ -463,21 +464,42 @@ if (PHASE !== "before" && !BASELINE) {
 
   if (run("13")) test("QC161-13 · reduced motion: tiles and questions appear with no animation, and the bump does not run", async ({ page }) => {
     const L = new Ledger("QC161-13");
+    seed(); /* QC161-11 leaves q152-agent saved: start from the seed */
     await openQc(page, { reduced: true });
     await openCard(page, "q152-agent");
-    await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(800);
+    await page.locator(C("[data-qc152='reply-btn']")).click({ timeout: 10_000 }); await page.waitForTimeout(800);
     const anim = (sel: string) => page.locator(C(sel)).evaluateAll((es) => es.flatMap((e) => (e as HTMLElement).getAnimations().map((a) => (a as CSSAnimation).animationName ?? a.id)));
     L.check("population: the tiles are drawn", await page.locator(C("[data-qc161='tile']")).count() === 5, "");
     L.check("the tiles run no animation", (await anim("[data-qc161='tile']")).length === 0, JSON.stringify(await anim("[data-qc161='tile']")));
     await pick(page, "req"); await page.waitForTimeout(100);
     L.check("the picked row and the questions run no animation", (await anim("[data-qc161='picked'], .qc1522-fl")).length === 0, JSON.stringify(await anim("[data-qc161='picked'], .qc1522-fl")));
     await startMotionTrace(page);
-    await page.locator(C("[data-qc1522='save']")).click();
+    await page.locator(C("[data-qc1522='save']")).click({ timeout: 10_000 });
     await page.locator(C("[data-qc1522='undo']")).waitFor({ timeout: 15_000 });
     await page.waitForTimeout(1500);
     const m = await stopMotionTrace(page);
     L.check("the bump does not run", m.frames.every((f) => !f.bump), String(m.frames.filter((f) => f.bump).length));
-    await page.locator(C("[data-qc1522='undo']")).first().click(); await page.waitForTimeout(2000);
+    await page.locator(C("[data-qc1522='undo']")).first().click({ timeout: 10_000 }); await page.waitForTimeout(2000);
     L.done(4);
   });
 }
+
+/* ══ Report §8: screenshots (QC161_SHOTS=<prefix>; "before" is taken on the base code) ═══════════════════════════ */
+if (process.env.QC161_SHOTS) test("QC161 shots · Jonathan Marsh's and Daniel O'Rourke's cards; the drawer with tiles and with an answer picked", async ({ page }) => {
+  const pre = process.env.QC161_SHOTS!;
+  const panel = async (name: string) => {
+    const b = await page.locator("[data-qp='panel']").first().boundingBox();
+    if (b) await page.screenshot({ path: `${DIR}/shots/${pre}-${name}.png`, clip: { x: Math.max(0, b.x - 24), y: Math.max(0, b.y - 12), width: b.width + 48, height: b.height + 24 } });
+  };
+  await openQc(page, { group: "none" });
+  for (const [id, name] of [["cv25-q-09", "jonathan-marsh"], ["cv25-q-04", "daniel-orourke"], ["seed-cal-bang-q", "alasdair-crewe-reminder"]] as const) {
+    await openCard(page, id); await page.waitForTimeout(600);
+    await panel(name);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(500);
+  }
+  await openCard(page, "q152-agent");
+  await page.locator(C("[data-qc152='reply-btn']")).click(); await page.waitForTimeout(1000);
+  await panel("drawer");
+  await pick(page, "req"); await page.waitForTimeout(800);
+  await panel("drawer-picked");
+});

@@ -1,0 +1,22 @@
+[
+ {
+  "name": "population: the tiles are drawn",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the tiles run no animation",
+  "ok": false,
+  "got": "[\"qc161In\",\"qc161In\",\"qc161In\",\"qc161In\",\"qc161In\"]"
+ },
+ {
+  "name": "the picked row and the questions run no animation",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "the bump does not run",
+  "ok": true,
+  "got": "0"
+ }
+]
