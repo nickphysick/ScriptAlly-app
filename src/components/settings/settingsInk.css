@@ -159,7 +159,7 @@
     font-family: "JetBrains Mono", monospace;
     font-weight: 600;
     font-size: 15px;
-    color: var(--ink-terra-deep);
+    color: var(--sp-rust);
   }
   .acct-page .sc-id-n { font-family: var(--sp-serif); font-weight: 600; font-size: 17px; color: var(--ink-on-light); }
   .acct-page .sc-id-m { margin-top: 2px; font-family: var(--sp-serif); font-size: 14px; color: rgba(28, 19, 15, 0.58); }

@@ -23,11 +23,11 @@
 .d58.d2 .d22-prize { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; font-size: 13px; line-height: 1.3; color: #6b4237; white-space: nowrap; min-width: 0; }
 .d58.d2 .d22-prize > svg { width: 15px; height: 15px; flex: none; color: #a0675a; }
 .d58.d2 .d22-prize > span { white-space: pre; }
-.d58.d2 .d22-how { border: 0; background: none; padding: 0; cursor: pointer; font: inherit; font-weight: 700; color: #7a3f31; text-decoration: underline; text-underline-offset: 3px; }
+.d58.d2 .d22-how { border: 0; background: none; padding: 0; cursor: pointer; font: inherit; font-weight: 700; color: var(--sp-rust); text-decoration: underline; text-underline-offset: 3px; }
 /* the fold button (Part E) */
 .d58.d2 .d22-fold {
   width: 28px; height: 28px; margin-left: 6px; flex: none; border: 0; padding: 0; border-radius: 50%; cursor: pointer;
-  display: grid; place-items: center; background: rgba(255, 255, 255, 0.75); box-shadow: inset 0 0 0 1px #e2c8bc; color: #7a3f31;
+  display: grid; place-items: center; background: rgba(255, 255, 255, 0.75); box-shadow: inset 0 0 0 1px #e2c8bc; color: var(--sp-rust);
 }
 .d58.d2 .d22-fold:hover { background: #fff; }
 .d58.d2 .d22-fold svg { width: 14px; height: 14px; }
@@ -80,12 +80,12 @@
 .d58.d2 .d22-tip::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 12px; height: 12px; background: #fff; transform: translateX(-50%) rotate(45deg); box-shadow: 1px 1px 0 #ecdcd4; }
 .d58.d2 .d22-road li:hover .d22-tip, .d58.d2 .d22-road li:focus-visible .d22-tip, .d58.d2 .d22-road li:focus .d22-tip { opacity: 1; transform: translate(-50%, 0); }
 .d58.d2 .d22-tn { display: block; font-family: var(--d58-type) !important; font-size: 18px; line-height: 1.3; color: var(--d2-ink); }
-.d58.d2 .d22-tc { display: block; margin-top: 2px; font-weight: 600; font-size: 12.5px; line-height: 1.3; color: #7a3f31; }
+.d58.d2 .d22-tc { display: block; margin-top: 2px; font-weight: 600; font-size: 12.5px; line-height: 1.3; color: var(--sp-rust); }
 
 /* 3 · the ask */
 .d58.d2 .d22-ask { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; padding: 10px 14px; border-radius: 16px; background: #fbf0ea; border: 1px solid #f0dbd1; }
 .d58.d2 .d22-ask p { margin: 0; font-size: 15px; line-height: 1.35; color: var(--d2-ink); text-align: right; }
-.d58.d2 .d22-ask p b { font-weight: 700; color: #7a3f31; }
+.d58.d2 .d22-ask p b { font-weight: 700; color: var(--sp-rust); }
 .d58.d2 .d22-tell { display: flex; gap: 8px; }
 .d58.d2 .d22-tell button {
   height: 34px; padding: 0 13px 0 5px; display: inline-flex; align-items: center; gap: 6px; border: 0; border-radius: 999px; cursor: pointer;
@@ -100,7 +100,7 @@
 
 /* 4 · your last note */
 .d58.d2 .d22-last { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; min-width: 0; padding: 7px 12px; border-radius: 11px; background: #f8f4ef; font-size: 13.5px; line-height: 1.35; color: #3b322c; }
-.d58.d2 .d22-lt { font-weight: 700; color: #7a3f31; white-space: nowrap; }
+.d58.d2 .d22-lt { font-weight: 700; color: var(--sp-rust); white-space: nowrap; }
 .d58.d2 .d22-last em { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .d58.d2 .d22-last i { flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px; border-radius: 999px; font-style: normal; font-weight: 600; font-size: 12px; line-height: 1.3; white-space: nowrap; background: #efe7df; color: #6b5a4e; }
 .d58.d2 .d22-last i.is-done { background: #e1ebe1; color: #355a3a; }
@@ -118,7 +118,7 @@
 .d58.d2 .d22-fbadge .d22-egg { width: 28px; height: 22px; }
 .d58.d2 .d22-fstat { padding-left: 14px; border-left: 1px solid rgba(122, 63, 49, 0.25); font-size: 14px; line-height: 1.3; color: #3b322c; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .d58.d2 .d22-frank { font-family: var(--d58-type) !important; font-weight: 400; font-size: 18px; color: var(--d2-ink); margin-right: 4px; }
-.d58.d2 .d22-fstat em { font-style: normal; font-weight: 700; color: #7a3f31; }
+.d58.d2 .d22-fstat em { font-style: normal; font-weight: 700; color: var(--sp-rust); }
 .d58.d2 .d22-strip .d22-tell { margin-left: auto; }
 .d58.d2 .d22-strip .d22-fold { margin-left: 0; }
 

@@ -96,7 +96,7 @@
 .cp32 .cp32-rown { display: block; font: 600 17px/1.3 var(--c32-serif); overflow-wrap: anywhere; }
 .cp32 .cp32-rows-l { display: block; font: 400 14.5px/1.45 var(--c32-serif); color: var(--c32-muted); }
 .cp32 .cp32-rows-l b { font-weight: 600; color: var(--c32-ink); }
-.cp32 .cp32-rowu { display: inline-flex; align-items: center; min-height: 22px; margin-top: 6px; padding: 0 10px; border-radius: 999px; background: #f5e3db; color: #7a3f33; font: 600 12.5px/1.2 var(--c32-serif); }
+.cp32 .cp32-rowu { display: inline-flex; align-items: center; min-height: 22px; margin-top: 6px; padding: 0 10px; border-radius: 999px; background: #f5e3db; color: var(--sp-rust); font: 600 12.5px/1.2 var(--c32-serif); }
 .cp32 .cp32-shelf-f { margin: 20px 0 0; padding: 0 4px; }
 .cp32 .cp32-none { margin: 0; padding: 14px 4px; color: var(--c32-muted); }
 

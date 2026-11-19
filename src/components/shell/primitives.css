@@ -126,6 +126,7 @@
   --sp-anthracite-hov: #34465f;
   --sp-cream: #f5f1eb;
   --sp-frame: #7c3a2a;
+  --sp-rust: #7a3f31; /* consistency fixes v1.1, ruling 6: the one rust for small warm accents (text and icons) */
   --sp-lift: 0 2px 8px rgba(28, 19, 15, 0.06);
 }
 
