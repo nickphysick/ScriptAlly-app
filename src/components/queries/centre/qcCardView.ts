@@ -21,6 +21,8 @@ import { nextLine } from "../../../lib/qcRowLines";
 import { nextDoor } from "../../../lib/queryActions/entry";
 import { buildTimelineRows } from "../../reading-pane/QueryTimeline";
 import { nudgeMsOf, stampRows, stateOf, queryState as qsOf } from "../../../lib/queryState";
+/** v161 — the key of a nudge drawn from `lastNudgeSentDate` (no activity behind it, so it has no ✎ Edit) */
+export const FIELD_NUDGE_KEY = "field-nudge";
 import { dayLabel as dayLabel152, sideOf as side152, type ThreadStepIn } from "../../../lib/qcThread152";
 import { getActivityTime } from "../../../lib/queryDerivation";
 import { anyToMs } from "../../../lib/qcStages";
@@ -162,6 +164,15 @@ export function buildCardView(i: CardViewIn) {
       const dl = typeof e.toldDeadline === "string" ? new Date(e.toldDeadline).getTime() : NaN;
       tSteps.push({ key: `t-${e.id}`, activityId: e.id, status: null, kind: "told", ms: Number.isFinite(ms0) && ms0 > 0 ? ms0 : null, chips: [],
         toldCount: typeof e.toldCount === "number" ? e.toldCount : null, via: Number.isFinite(dl) ? `offer deadline ${dayLabel152(dl, now)}` : null });
+    }
+    /* Query card v161 — the thread agrees with the footer: a logged nudge (`lastNudgeSentDate`, lib/queryState nudgeMsOf)
+       with no nudge step on its day is drawn from the field, read-only, in the nudge bubble's own form. Nothing is written. */
+    {
+      const nf = nudgeMsOf({ ...row, nrmn: false }, now);
+      const dayOf = (ms: number) => new Date(ms).toDateString();
+      if (nf != null && !tSteps.some((x) => x.kind === "nudge" && x.ms != null && dayOf(x.ms) === dayOf(nf))) {
+        tSteps.push({ key: FIELD_NUDGE_KEY, status: null, kind: "nudge", ms: nf, chips: [], via: methodQualifier(q.sendMethod) });
+      }
     }
     const nrmnRaw = typeof (q as { nrmnOverride?: unknown }).nrmnOverride === "boolean" ? (q as { nrmnOverride?: boolean }).nrmnOverride! : ag?.noResponseMeansNo;
     const state = stateOf(row) ?? qsOf({ ...row, nrmn: !!nrmnRaw }, { quietWeeks, nowMs: now });

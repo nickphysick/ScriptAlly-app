@@ -443,9 +443,10 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               tint={it.tint} grey={it.grey} initials={r.initials} chips={clip ? clipChip(clip) : chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
               className={[(p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) && !alias.current.map.has(it.key)) || enter.includes(it.key) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : "", out ? "qc160-out" : ""].filter(Boolean).join(" ") || undefined}
               mark={checking ? <span className="qc153-chkw" data-qc153="checking">Checking</span> : stamped ? <span className="qc153-stamp" data-qc153="logged">Logged</span> : null}
-              outer={{ "data-qc152": "msg", "data-rk": rk(it.key), "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId,
+              outer={{ "data-qc152": "msg", "data-rk": rk(it.key), "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId, "data-field": it.key === "field-nudge" ? "" : undefined,
                 ...(out ? { "data-leaving": "", "aria-hidden": true, inert: true } : {}), style: { animationDelay: `${i * 45}ms` } }}
-              after={<button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
+              /* v161 — a nudge drawn from the query's field has no activity to edit */
+              after={it.key === "field-nudge" ? null : <button type="button" className="qc152-fx" data-qc152="edit-step" aria-label={`Edit ${it.title}`}
                 onClick={() => p.onEditStep(it.activityId ?? null)}>✎ Edit</button>} />
           </React.Fragment>
         );

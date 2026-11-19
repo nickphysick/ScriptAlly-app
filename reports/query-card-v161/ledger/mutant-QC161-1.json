@@ -1,0 +1,62 @@
+[
+ {
+  "name": "seed-cal-bang-q: population — its grid card",
+  "ok": true,
+  "got": "AC Alasdair Crewe Crewe Literary Queried Queried Sent 19 Aug 92 days ago Gone qu"
+ },
+ {
+  "name": "seed-cal-bang-q: the grid card says no \"Nudged\"/\"nudged\"",
+  "ok": false,
+  "got": "AC Alasdair Crewe Crewe Literary Queried Queried Sent 19 Aug 92 days ago Gone quiet Nudge or close nudged 25 Sep → Nudge or close z z z"
+ },
+ {
+  "name": "seed-cal-bang-q: the footer says no \"Nudged\" and no \"You nudged Alasdair\"",
+  "ok": false,
+  "got": "No reply from Alasdair Nudged 25 Sep · quiet since 23 Oct Alasdair replied Nudge again Close it"
+ },
+ {
+  "name": "seed-cal-bang-q: the thread has no nudge step",
+  "ok": true,
+  "got": "[\"You sent Alasdair your query\"]"
+ },
+ {
+  "name": "seed-cal-soon-q: population — its grid card",
+  "ok": true,
+  "got": "HB Hester Blaine Blaine & Vole Queried Queried Sent 8 Sep 72 days ago Gone quiet"
+ },
+ {
+  "name": "seed-cal-soon-q: the grid card says no \"Nudged\"/\"nudged\"",
+  "ok": false,
+  "got": "HB Hester Blaine Blaine & Vole Queried Queried Sent 8 Sep 72 days ago Gone quiet Nudge or close nudged 12 Oct → Nudge or close z z z"
+ },
+ {
+  "name": "seed-cal-soon-q: the footer says no \"Nudged\" and no \"You nudged Hester\"",
+  "ok": false,
+  "got": "No reply from Hester Nudged 12 Oct · quiet since 9 Nov Hester replied Nudge again Close it"
+ },
+ {
+  "name": "seed-cal-soon-q: the thread has no nudge step",
+  "ok": true,
+  "got": "[\"You sent Hester your query\"]"
+ },
+ {
+  "name": "thin-q-remind: population — its grid card",
+  "ok": true,
+  "got": "IF Imogen Farr Farr & Boyd Queried Queried Sent 21 Aug 90 days ago Gone quiet Nu"
+ },
+ {
+  "name": "thin-q-remind: the grid card says no \"Nudged\"/\"nudged\"",
+  "ok": false,
+  "got": "IF Imogen Farr Farr & Boyd Queried Queried Sent 21 Aug 90 days ago Gone quiet Nudge or close nudged 18 Sep → Nudge or close z z z 1"
+ },
+ {
+  "name": "thin-q-remind: the footer says no \"Nudged\" and no \"You nudged Imogen\"",
+  "ok": false,
+  "got": "No reply from Imogen Nudged 18 Sep · quiet since 16 Oct Imogen replied Nudge again Close it"
+ },
+ {
+  "name": "thin-q-remind: the thread has no nudge step",
+  "ok": true,
+  "got": "[\"You sent Imogen your query\"]"
+ }
+]

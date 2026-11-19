@@ -115,7 +115,7 @@ function lineAndStep(r: QcRow & Stamped, state: QueryState, nowMs: number, email
       };
     }
     case "quiet": {
-      const nudgedMs = r.nudged ? anyToMs(r.query.lastNudgeSentDate) ?? anyToMs(r.query.nudgeDate) ?? NaN : NaN;
+      const nudgedMs = r.nudged ? anyToMs(r.query.lastNudgeSentDate) ?? NaN : NaN; /* v161: a reminder is not a nudge */
       const weeks = since != null ? Math.max(1, Math.round((nowMs - since) / (7 * DAY))) : null;
       return {
         short: Number.isFinite(nudgedMs) ? `quiet since ${dm(nudgedMs)}` : since != null ? ago(since, nowMs) : "",

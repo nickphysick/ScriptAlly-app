@@ -53,10 +53,13 @@ describe("queryState — the six states (v152 §1.1–1.2)", () => {
     expect(queryState({ ...within, query: { dateSent: within.query.dateSent } }, c4)).toBe("quiet");
     expect(queryState(within, c4)).toBe("agent");
   });
-  it("the nudge falls back to nudgeDate, but a future plan or a nudge before the latest send is no nudge", () => {
-    expect(queryState(agentRow({ replyAgo: 40, planAgo: 10 }), c4)).toBe("agent");
+  it("only a logged nudge is a nudge (v161): a passed reminder is not, a future one counts for nothing, a nudge before the latest send is no nudge", () => {
+    /* rewritten for Query card v161 — it asserted the old fallback to `nudgeDate`: a passed reminder 10 days ago read as a
+       nudge and kept the query waiting. Now the reminder counts for nothing past the reply date: 40 days past it is quiet */
+    expect(queryState(agentRow({ replyAgo: 40, planAgo: 10 }), c4)).toBe("quiet");
     expect(queryState(agentRow({ replyAgo: 40, planAgo: -3 }), c4)).toBe("quiet");
     expect(queryState(agentRow({ replyAgo: 40, sentAgo: 30, nudgeAgo: 45 }), c4)).toBe("quiet");
+    expect(queryState(agentRow({ replyAgo: 40, nudgeAgo: 10 }), c4)).toBe("agent");
   });
   it("an undated stage keeps the 84-day rule", () => {
     expect(queryState(agentRow({ replyAgo: null, sentAgo: 80 }), c4)).toBe("agent");
