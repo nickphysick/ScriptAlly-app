@@ -1,0 +1,7235 @@
+{
+ "generated": "2026-11-19T00:39:12.982Z",
+ "base": {
+  "commit": "987e479ec",
+  "branch": "dev/qc1581-pk62",
+  "how": "https://scriptally-dev.web.app served index-D36ukT_K.js on 18 Nov 23:0x; the memory note submission-packages-v62-state records that bundle as built from dev/qc1581-pk62 @ 987e479ec (v62 merged onto query-card-v158-1). The branch consistency-audit-v1 is cut from that commit."
+ },
+ "auditOnly": {
+  "rule": "Files changed by a branch with a commit in the last 48 hours whose tip is NOT already inside the base (merge-base diff), plus src/ files left uncommitted in another worktree. Branches whose tips are inside the base are listed too: their work is in this tree already.",
+  "branchesOutsideBase": {
+   "analytics-v26 (301e51a7e)": [
+    "docs/decisions/*",
+    "reports/analytics-v26/*"
+   ],
+   "comps-v32 (44971de22)": [
+    "reports/comps-v32/*"
+   ],
+   "corkboard-v15 (8cbe3ae61)": [
+    "reports/corkboard-v15/*"
+   ],
+   "manuscripts-v29 (34ad553b7)": [
+    "docs/decisions/*",
+    "reports/manuscripts-v29/*"
+   ],
+   "query-centre-v157 (253c0d5f2)": [
+    "reports/query-centre-v157/*"
+   ],
+   "record-a-response-v1-1 (178117b02)": [
+    "reports/record-a-response-v1*/*",
+    "one tests/e2e spec"
+   ],
+   "submission-packages-v62 (0e466851a)": [
+    "reports/submission-packages-v62/REPORT.md"
+   ],
+   "todo-list-v57 (6fa78b66a)": [
+    "reports/todo-list-v57/*"
+   ],
+   "versions-v6 (5423f2b5c)": [
+    "reports/versions-v6/* (75 files)"
+   ]
+  },
+  "dirtyInOtherWorktrees": {
+   "ScriptAlly-rsp6 (responses-v6, uncommitted)": [
+    "src/components/responses/ResponsesPage.tsx",
+    "src/components/responses/Rsp5Insights.tsx",
+    "src/components/responses/Rsp5Timing.tsx",
+    "src/components/responses/Rsp5Words.tsx",
+    "src/components/responses/Rsp6Empty.tsx",
+    "src/components/responses/Rsp6Head.tsx",
+    "src/components/responses/Rsp6Requests.tsx",
+    "src/components/responses/Rsp6Sections.tsx",
+    "src/components/responses/RspPanel.tsx",
+    "src/components/responses/responses6.css",
+    "src/components/shared/StandardQueryCard.tsx",
+    "src/components/shared/standardQueryCard.css",
+    "src/lib/responses.ts"
+   ]
+  },
+  "liveClaimNoDirtyFiles": "ScriptAlly-qc160 (query-card-v160, at the base commit) is claimed by a live session; it has no uncommitted src changes, so no file is audit-only from it, but Query Centre card files may change there next.",
+  "branchesInsideBase": [
+   "dev/qc1581-pk62",
+   "dev/smv31-vv6 … -ms29 (the stacked dev line)",
+   "laq-materials-fork-v1",
+   "query-card-v158",
+   "query-card-v158-1",
+   "query-card-v160",
+   "responses-v15",
+   "shell-tabs-v2-1",
+   "stage-colours-v1",
+   "status-marks-v3"
+  ],
+  "alsoDoNotTouch": [
+   "Manuscripts page files (src/components/manuscripts/v27, v29 and the /manuscripts route's parts)",
+   "token definitions (src/index.css custom properties, src/lib/designTokens.ts)",
+   "shared primitives",
+   "design-refs/",
+   "test goldens and snapshots"
+  ]
+ },
+ "baselines": {
+  "recorded": "consistency-audit-v1 worktree at 987e479ec, before any edit",
+  "tsc": "0 errors (NODE_OPTIONS=--max-old-space-size=4096; the default heap ran out of memory). A first run before functions/node_modules was linked showed 7 TS2307 errors in functions/ (missing modules only).",
+  "build": "vite build exit 0; only the chunk-size note",
+  "vitest": "1 file / 2 tests failed of 12886 (src/test/firestoreTarget.test.ts — the live-guard census; recorded as red on this line before this run). A first run before functions/node_modules was linked showed 12 files / 4 tests red: eight functions/ suites and two src/lib suites that failed to load, plus assertion failures in smartImportCore (SDK ceiling), statusMarksV3Sources SM3-8 and this one. Only firestoreTarget recurred once the modules were linked."
+ },
+ "pages": [
+  {
+   "path": "/dashboard",
+   "name": "/dashboard",
+   "family": "dashboard",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.d2-band"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/queries",
+   "name": "Queries",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/queries/analytics",
+   "name": "Analytics",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd.wsnh-hd"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/queries/responses",
+   "name": "Responses",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd.wsnh-hd"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/queries/packages",
+   "name": "Packages",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd.pk43-hd"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/todo",
+   "name": "Tasks (To-do)",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd.tws56-hd"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/todo/corkboard",
+   "name": "Corkboard",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd.wsnh-hd"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/agents",
+   "name": "Contact list",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd.clq-hd"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/agents/discover",
+   "name": "Discover",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "div.dv1-aep"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/manuscripts",
+   "name": "Manuscripts",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd.wsnh-hd.wsnh-hd--wrap"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/manuscripts/comps",
+   "name": "Comps",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd.wsnh-hd"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/manuscripts/versions",
+   "name": "Versions",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd.wsnh-hd.wsnh-hd--two"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/materials/letters",
+   "name": "Letters",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.qc1531-hd.qlp-hd"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/materials",
+   "name": "Materials",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [],
+   "failed": [],
+   "redirectedTo": "/dashboard",
+   "header": null,
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/goals",
+   "name": "Streaks & goals",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [],
+   "failed": [],
+   "redirectedTo": "/dashboard",
+   "header": null,
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/you",
+   "name": "You",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [],
+   "failed": [],
+   "redirectedTo": "/dashboard",
+   "header": null,
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/queries/all",
+   "name": "All queries",
+   "family": "workspace",
+   "signedOut": false,
+   "measuredAt": [],
+   "failed": [],
+   "redirectedTo": "/queries",
+   "header": null,
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/account/profile",
+   "name": "Settings — You",
+   "family": "non-workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "header.sc-ttl.sc-ttl--live"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/account/preferences",
+   "name": "Settings — Preferences",
+   "family": "non-workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "header.sc-ttl.sc-ttl--live"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/account/emails",
+   "name": "Settings — Emails",
+   "family": "non-workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "header.sc-ttl.sc-ttl--live"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/account/plan",
+   "name": "Settings — Plan",
+   "family": "non-workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "header.sc-ttl.sc-ttl--live"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/account/data",
+   "name": "Settings — Your data",
+   "family": "non-workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "header.sc-ttl.sc-ttl--live"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/plans",
+   "name": "Plans",
+   "family": "non-workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "header.sc-ttl.sc-ttl--live"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/help",
+   "name": "Help Centre",
+   "family": "non-workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "header.hc-top"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/your-notes",
+   "name": "Your notes",
+   "family": "non-workspace",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "div.qc151.yn-hdw"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/import",
+   "name": "Import",
+   "family": "onboarding",
+   "signedOut": false,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.ph.ph--compact.ph--panel.hpanel"
+   },
+   "seededData": true,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/#/signin",
+   "name": "Sign in",
+   "family": "onboarding",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "h1.sf-offerh"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/#/signup",
+   "name": "Sign up",
+   "family": "onboarding",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "h1.sf-offerh"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/",
+   "name": "Landing",
+   "family": "public",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "h1#mk-dh-h.mk-dh-q"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/pricing",
+   "name": "Pricing",
+   "family": "public",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "h1#mk-pv4-h1.mk-fbh1"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/about",
+   "name": "About",
+   "family": "public",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "div.mk-aherocol"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/contact",
+   "name": "Contact",
+   "family": "public",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "h1.mk-ch1"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/founders",
+   "name": "Founders",
+   "family": "public",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "h1.mk-fwh1"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/welcome",
+   "name": "Welcome",
+   "family": "public",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.mk-wel-hero"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/terms",
+   "name": "Terms",
+   "family": "public",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.mk-pv-hero"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/privacy",
+   "name": "Privacy",
+   "family": "public",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "navy",
+    "el": "header.mk-pv-hero"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  },
+  {
+   "path": "/help",
+   "name": "Help Centre (signed out)",
+   "family": "public",
+   "signedOut": true,
+   "measuredAt": [
+    1512,
+    1920
+   ],
+   "failed": [],
+   "redirectedTo": null,
+   "header": {
+    "kind": "plain",
+    "el": "header.hc-top"
+   },
+   "seededData": false,
+   "emptyState": "not reached — the harness account is populated; no route shows its empty state with it"
+  }
+ ],
+ "overlays": [
+  {
+   "from": "/queries",
+   "name": "Log a query journey",
+   "open": {
+    "button": "^Log a query$"
+   },
+   "measured": true,
+   "failed": []
+  },
+  {
+   "from": "/queries",
+   "name": "Query card slide-out",
+   "open": {
+    "firstOf": "[data-qid], [data-query-id], .qc-card, [class*='qcCard'], [class*='qc15'][role='button']"
+   },
+   "measured": true,
+   "failed": []
+  },
+  {
+   "from": "/queries",
+   "name": "Search palette",
+   "open": {
+    "key": "Meta+k"
+   },
+   "measured": true,
+   "failed": []
+  },
+  {
+   "from": "/queries",
+   "name": "Keyboard shortcuts",
+   "open": {
+    "key": "?"
+   },
+   "measured": false,
+   "failed": [
+    "1512: opened, but the collector found no visible dialog surface",
+    "1920: opened, but the collector found no visible dialog surface"
+   ]
+  },
+  {
+   "from": "/agents",
+   "name": "Add an agent journey",
+   "open": {
+    "button": "Add an agent"
+   },
+   "measured": true,
+   "failed": []
+  },
+  {
+   "from": "/agents",
+   "name": "Agent card",
+   "open": {
+    "firstOf": ".cl24-card, .cl26-card, .cl17-card, [class*='agent-card']"
+   },
+   "measured": true,
+   "failed": []
+  },
+  {
+   "from": "/queries",
+   "name": "Record a response journey",
+   "open": {
+    "button": "^Record a response"
+   },
+   "measured": true,
+   "failed": []
+  },
+  {
+   "from": "/manuscripts/comps",
+   "name": "Add a comp",
+   "open": {
+    "button": "Add a comp"
+   },
+   "measured": true,
+   "failed": []
+  },
+  {
+   "from": "/queries/packages",
+   "name": "New package",
+   "open": {
+    "button": "New package"
+   },
+   "measured": true,
+   "failed": []
+  },
+  {
+   "from": "/dashboard",
+   "name": "Account menu",
+   "open": {
+    "firstOf": "[aria-label*='ccount' i][aria-haspopup], button[aria-label*='ccount' i]"
+   },
+   "measured": false,
+   "failed": [
+    "1512: opened, but the collector found no visible dialog surface",
+    "1920: opened, but the collector found no visible dialog surface"
+   ]
+  }
+ ],
+ "shared": {
+  "tokenFiles": [
+   "src/components/agents/card/agentCard.css",
+   "src/components/agents/contact/contactV11.css",
+   "src/components/agents/contact/housekeepingV18.css",
+   "src/components/agents/discover1/discover1.css",
+   "src/components/containers/containers.css",
+   "src/components/containers/framedCard.css",
+   "src/components/packages/packagesBroadsheet.css",
+   "src/components/queries/centre/qcvPage.css",
+   "src/components/reading-pane/packageGroup.css",
+   "src/components/shell/contentColumn.css",
+   "src/components/shell/f12.css",
+   "src/components/shell/headerPanel.css",
+   "src/components/shell/headerSheet.css",
+   "src/components/shell/illustratedMasthead.css",
+   "src/components/shell/pageHeader.css",
+   "src/components/shell/pageHeroFrame.css",
+   "src/components/shell/primitives.css",
+   "src/components/shell/shortcutsSheet.css",
+   "src/components/shell/workspacePageGrid.css",
+   "src/components/shell/workspaceShell.css",
+   "src/components/todo/taskTicket.css",
+   "src/components/todo/todoCalendar.css",
+   "src/index.css",
+   "src/lib/designTokens.ts",
+   "src/marketing/public.css"
+  ],
+  "themeScopedInIndexCss": {
+   "count": 503,
+   "scopes": [
+    ".t-capp",
+    ".t-bold",
+    ".t-edn",
+    ".t-f12"
+   ]
+  },
+  "counts": {
+   "colour": 329,
+   "type": 14,
+   "spacing": 19,
+   "radius": 4,
+   "shadow": 9,
+   "otherDefinitions": 110
+  },
+  "notes": [
+   "The navy of the headers and primary buttons (#2a3a52) is a token twice over: --sp-anthracite (src/components/shell/primitives.css:125, :root) and shellActiveBg (src/lib/designTokens.ts:143). It is also a literal in 193 source files (grep -rli 2a3a52 src, 19 Nov). The shell's own navy is --ink-shell #1b2433 (src/index.css:212).",
+   "Shared tokens are spread across many stylesheets: any custom property declared at :root is global. Page stylesheets declare their own at :root too (--fc-*, --clv-*, --dv1-*); the report prefers an app-wide token (index.css, shell/, designTokens.ts) when two share a value.",
+   "There is no type-size token scale (no --fs-*/--text-* in src/index.css); font sizes are literals in each page stylesheet.",
+   "Radius tokens exist (--r-sm 6, --r-md 9, --r-lg 12, --r-xl 16, src/index.css:1242) but are declared inside the .t-f12 theme scope (opened at line 1157), so they resolve only under it.",
+   "Spacing has no 8-point token set; gaps are literals."
+  ],
+  "tokens": {
+   "colour": [
+    {
+     "name": "--o-ms",
+     "value": "#8a4a3c",
+     "at": "src/index.css:72",
+     "appWide": true
+    },
+    {
+     "name": "--o-pkg",
+     "value": "#9a7233",
+     "at": "src/index.css:56",
+     "appWide": true
+    },
+    {
+     "name": "--o-scout",
+     "value": "#467a76",
+     "at": "src/index.css:61",
+     "appWide": true
+    },
+    {
+     "name": "--mat-parch-2",
+     "value": "#f7f3ee",
+     "at": "src/index.css:74",
+     "appWide": true
+    },
+    {
+     "name": "--mat-parch-3",
+     "value": "#f3eee7",
+     "at": "src/index.css:68",
+     "appWide": true
+    },
+    {
+     "name": "--mat-tray",
+     "value": "#e9c9b8",
+     "at": "src/index.css:69",
+     "appWide": true
+    },
+    {
+     "name": "--mat-soft",
+     "value": "0 1px 2px rgba(28, 19, 15, 0.05), 0 6px 18px rgba(28, 19, 15, 0.06)",
+     "at": "src/index.css:70",
+     "appWide": true
+    },
+    {
+     "name": "--sa-sk-base",
+     "value": "#ece6de",
+     "at": "src/index.css:71",
+     "appWide": true
+    },
+    {
+     "name": "--burg",
+     "value": "#7c3a2a",
+     "at": "src/index.css:73",
+     "appWide": true
+    },
+    {
+     "name": "--ink",
+     "value": "#241c15",
+     "at": "src/index.css:78",
+     "appWide": true
+    },
+    {
+     "name": "--muted",
+     "value": "#9a8c80",
+     "at": "src/index.css:77",
+     "appWide": true
+    },
+    {
+     "name": "--pink",
+     "value": "#f5e2da",
+     "at": "src/index.css:78",
+     "appWide": true
+    },
+    {
+     "name": "--hair",
+     "value": "#e7ddd2",
+     "at": "src/index.css:87",
+     "appWide": true
+    },
+    {
+     "name": "--hair-soft",
+     "value": "#efe8de",
+     "at": "src/index.css:84",
+     "appWide": true
+    },
+    {
+     "name": "--pink-b",
+     "value": "#e8c8bc",
+     "at": "src/index.css:85",
+     "appWide": true
+    },
+    {
+     "name": "--pink-h",
+     "value": "#efd5ca",
+     "at": "src/index.css:86",
+     "appWide": true
+    },
+    {
+     "name": "--gold-t",
+     "value": "#f6efdd",
+     "at": "src/index.css:121",
+     "appWide": true
+    },
+    {
+     "name": "--gold-b",
+     "value": "#e7d9b8",
+     "at": "src/index.css:103",
+     "appWide": true
+    },
+    {
+     "name": "--gold-i",
+     "value": "#7d621d",
+     "at": "src/index.css:103",
+     "appWide": true
+    },
+    {
+     "name": "--sage-band",
+     "value": "#dce0d9",
+     "at": "src/index.css:105",
+     "appWide": true
+    },
+    {
+     "name": "--sage-band-2",
+     "value": "#d0d6cc",
+     "at": "src/index.css:104",
+     "appWide": true
+    },
+    {
+     "name": "--sage-edge",
+     "value": "#c8d0c5",
+     "at": "src/index.css:104",
+     "appWide": true
+    },
+    {
+     "name": "--btn-ink",
+     "value": "#1c130f",
+     "at": "src/index.css:132",
+     "appWide": true
+    },
+    {
+     "name": "--mast-muted",
+     "value": "#807168",
+     "at": "src/index.css:154",
+     "appWide": true
+    },
+    {
+     "name": "--tl",
+     "value": "#f6ddd3",
+     "at": "src/index.css:138",
+     "appWide": true
+    },
+    {
+     "name": "--ts",
+     "value": "#e7ece4",
+     "at": "src/index.css:139",
+     "appWide": true
+    },
+    {
+     "name": "--tp",
+     "value": "#f3e6cf",
+     "at": "src/index.css:140",
+     "appWide": true
+    },
+    {
+     "name": "--slate",
+     "value": "#6A89A7",
+     "at": "src/index.css:141",
+     "appWide": true
+    },
+    {
+     "name": "--slate-deep",
+     "value": "#4f6b86",
+     "at": "src/index.css:148",
+     "appWide": true
+    },
+    {
+     "name": "--slate-tint",
+     "value": "#eef2f7",
+     "at": "src/index.css:146",
+     "appWide": true
+    },
+    {
+     "name": "--slate-line",
+     "value": "#c7d6e3",
+     "at": "src/index.css:147",
+     "appWide": true
+    },
+    {
+     "name": "--sage",
+     "value": "#8a9e88",
+     "at": "src/index.css:148",
+     "appWide": true
+    },
+    {
+     "name": "--sage-d",
+     "value": "#5a6e58",
+     "at": "src/index.css:149",
+     "appWide": true
+    },
+    {
+     "name": "--gold",
+     "value": "#a8842c",
+     "at": "src/index.css:150",
+     "appWide": true
+    },
+    {
+     "name": "--shell-desk",
+     "value": "#aebdb0",
+     "at": "src/index.css:186",
+     "appWide": true
+    },
+    {
+     "name": "--shell-active-fill",
+     "value": "#ffffff",
+     "at": "src/index.css:176",
+     "appWide": true
+    },
+    {
+     "name": "--shell-ground",
+     "value": "#e7e0d5",
+     "at": "src/index.css:177",
+     "appWide": true
+    },
+    {
+     "name": "--ws-ground",
+     "value": "#f7f4ee",
+     "at": "src/index.css:190",
+     "appWide": true
+    },
+    {
+     "name": "--ws-page",
+     "value": "rgb(var(--ws-page-rgb))",
+     "at": "src/index.css:198",
+     "appWide": true
+    },
+    {
+     "name": "--ws-sheet",
+     "value": "#fbf9f5",
+     "at": "src/index.css:199",
+     "appWide": true
+    },
+    {
+     "name": "--ws-band",
+     "value": "#fbf9f5",
+     "at": "src/index.css:200",
+     "appWide": true
+    },
+    {
+     "name": "--ws-ground-cool",
+     "value": "#f5f5f3",
+     "at": "src/index.css:205",
+     "appWide": true
+    },
+    {
+     "name": "--ink-shell",
+     "value": "#1b2433",
+     "at": "src/index.css:222",
+     "appWide": true
+    },
+    {
+     "name": "--ink-cream",
+     "value": "#f4eee5",
+     "at": "src/index.css:215",
+     "appWide": true
+    },
+    {
+     "name": "--ink-cream-92",
+     "value": "rgba(244, 238, 229, 0.92)",
+     "at": "src/index.css:217",
+     "appWide": true
+    },
+    {
+     "name": "--ink-cream-66",
+     "value": "rgba(244, 238, 229, 0.66)",
+     "at": "src/index.css:218",
+     "appWide": true
+    },
+    {
+     "name": "--ink-cream-42",
+     "value": "rgba(244, 238, 229, 0.42)",
+     "at": "src/index.css:219",
+     "appWide": true
+    },
+    {
+     "name": "--ink-cream-12",
+     "value": "rgba(244, 238, 229, 0.12)",
+     "at": "src/index.css:220",
+     "appWide": true
+    },
+    {
+     "name": "--ink-terra",
+     "value": "#d9967a",
+     "at": "src/index.css:223",
+     "appWide": true
+    },
+    {
+     "name": "--ink-rose",
+     "value": "#e0a38f",
+     "at": "src/index.css:227",
+     "appWide": true
+    },
+    {
+     "name": "--ink-bright",
+     "value": "#fffaf3",
+     "at": "src/index.css:229",
+     "appWide": true
+    },
+    {
+     "name": "--ink-on-light",
+     "value": "#1c130f",
+     "at": "src/index.css:231",
+     "appWide": true
+    },
+    {
+     "name": "--ink-tp-paper",
+     "value": "#f6f1e7",
+     "at": "src/index.css:235",
+     "appWide": true
+    },
+    {
+     "name": "--ink-tp-clip",
+     "value": "#c0705a",
+     "at": "src/index.css:235",
+     "appWide": true
+    },
+    {
+     "name": "--ink-paper",
+     "value": "#fffdf9",
+     "at": "src/index.css:242",
+     "appWide": true
+    },
+    {
+     "name": "--ink-paper-2",
+     "value": "#f7f4ef",
+     "at": "src/index.css:240",
+     "appWide": true
+    },
+    {
+     "name": "--ink-terra-deep",
+     "value": "#9a5638",
+     "at": "src/index.css:241",
+     "appWide": true
+    },
+    {
+     "name": "--ink-band",
+     "value": "#2d3a50",
+     "at": "src/index.css:242",
+     "appWide": true
+    },
+    {
+     "name": "--ws-edge",
+     "value": "#e9e2d7",
+     "at": "src/index.css:248",
+     "appWide": true
+    },
+    {
+     "name": "--ws-window",
+     "value": "rgb(var(--ws-window-rgb))",
+     "at": "src/index.css:265",
+     "appWide": true
+    },
+    {
+     "name": "--n0",
+     "value": "#ffffff",
+     "at": "src/index.css:346",
+     "appWide": true
+    },
+    {
+     "name": "--n1",
+     "value": "#fef8f0",
+     "at": "src/index.css:347",
+     "appWide": true
+    },
+    {
+     "name": "--n2",
+     "value": "#f5f0e8",
+     "at": "src/index.css:348",
+     "appWide": true
+    },
+    {
+     "name": "--n3",
+     "value": "#e9e4dd",
+     "at": "src/index.css:349",
+     "appWide": true
+    },
+    {
+     "name": "--n4",
+     "value": "#e1dcd6",
+     "at": "src/index.css:350",
+     "appWide": true
+    },
+    {
+     "name": "--n5",
+     "value": "#d6d2cc",
+     "at": "src/index.css:351",
+     "appWide": true
+    },
+    {
+     "name": "--n6",
+     "value": "#a19e9a",
+     "at": "src/index.css:352",
+     "appWide": true
+    },
+    {
+     "name": "--n7",
+     "value": "#5c5a58",
+     "at": "src/index.css:353",
+     "appWide": true
+    },
+    {
+     "name": "--n8",
+     "value": "#141412",
+     "at": "src/index.css:354",
+     "appWide": true
+    },
+    {
+     "name": "--shell-rail",
+     "value": "#efe7db",
+     "at": "src/index.css:443",
+     "appWide": true
+    },
+    {
+     "name": "--shell-side",
+     "value": "#e6e4e0",
+     "at": "src/index.css:414",
+     "appWide": true
+    },
+    {
+     "name": "--shell-rule",
+     "value": "rgba(28, 19, 15, 0.10)",
+     "at": "src/index.css:408",
+     "appWide": true
+    },
+    {
+     "name": "--shell-active-fg",
+     "value": "#fdf9f5",
+     "at": "src/index.css:416",
+     "appWide": true
+    },
+    {
+     "name": "--shell-hover-bg",
+     "value": "rgba(255, 255, 255, 0.45)",
+     "at": "src/index.css:417",
+     "appWide": true
+    },
+    {
+     "name": "--shell-hairline",
+     "value": "rgba(28, 19, 15, 0.12)",
+     "at": "src/index.css:418",
+     "appWide": true
+    },
+    {
+     "name": "--shell-mute",
+     "value": "rgba(28, 19, 15, 0.58)",
+     "at": "src/index.css:419",
+     "appWide": true
+    },
+    {
+     "name": "--shell-label",
+     "value": "rgba(28, 19, 15, 0.45)",
+     "at": "src/index.css:420",
+     "appWide": true
+    },
+    {
+     "name": "--shell-ring",
+     "value": "rgba(28, 19, 15, 0.28)",
+     "at": "src/index.css:421",
+     "appWide": true
+    },
+    {
+     "name": "--shell-btn-hover",
+     "value": "rgba(255, 255, 255, 0.6)",
+     "at": "src/index.css:422",
+     "appWide": true
+    },
+    {
+     "name": "--shell-switch-bg",
+     "value": "rgba(255, 255, 255, 0.7)",
+     "at": "src/index.css:423",
+     "appWide": true
+    },
+    {
+     "name": "--shell-switch-hover",
+     "value": "rgba(255, 255, 255, 0.92)",
+     "at": "src/index.css:424",
+     "appWide": true
+    },
+    {
+     "name": "--shell-control-bg",
+     "value": "#ffffff",
+     "at": "src/index.css:425",
+     "appWide": true
+    },
+    {
+     "name": "--shell-ink-70",
+     "value": "rgba(28, 19, 15, 0.7)",
+     "at": "src/index.css:430",
+     "appWide": true
+    },
+    {
+     "name": "--shell-ink-45",
+     "value": "rgba(28, 19, 15, 0.45)",
+     "at": "src/index.css:429",
+     "appWide": true
+    },
+    {
+     "name": "--shell-ghost-hover",
+     "value": "rgba(28, 19, 15, 0.08)",
+     "at": "src/index.css:430",
+     "appWide": true
+    },
+    {
+     "name": "--shell-bar-vr",
+     "value": "rgba(28, 19, 15, 0.14)",
+     "at": "src/index.css:431",
+     "appWide": true
+    },
+    {
+     "name": "--shell-menu-on",
+     "value": "#f7f3ee",
+     "at": "src/index.css:432",
+     "appWide": true
+    },
+    {
+     "name": "--shell-cover-a-bg",
+     "value": "#f1e2d8",
+     "at": "src/index.css:433",
+     "appWide": true
+    },
+    {
+     "name": "--shell-cover-a-ink",
+     "value": "#8a4a3c",
+     "at": "src/index.css:432",
+     "appWide": true
+    },
+    {
+     "name": "--shell-cover-b-bg",
+     "value": "#e3e9ee",
+     "at": "src/index.css:434",
+     "appWide": true
+    },
+    {
+     "name": "--shell-cover-b-ink",
+     "value": "#5f7b93",
+     "at": "src/index.css:433",
+     "appWide": true
+    },
+    {
+     "name": "--shell-cover-c-bg",
+     "value": "#e0e5dd",
+     "at": "src/index.css:435",
+     "appWide": true
+    },
+    {
+     "name": "--shell-cover-c-ink",
+     "value": "#5d7059",
+     "at": "src/index.css:434",
+     "appWide": true
+    },
+    {
+     "name": "--shell-canvas",
+     "value": "#f7f2e9",
+     "at": "src/index.css:436",
+     "appWide": true
+    },
+    {
+     "name": "--shell-card",
+     "value": "#fdfaf5",
+     "at": "src/index.css:437",
+     "appWide": true
+    },
+    {
+     "name": "--shell-panel",
+     "value": "#f2ede7",
+     "at": "src/index.css:446",
+     "appWide": true
+    },
+    {
+     "name": "--shell-inset",
+     "value": "#efe8df",
+     "at": "src/index.css:443",
+     "appWide": true
+    },
+    {
+     "name": "--shell-line",
+     "value": "#e3d9cf",
+     "at": "src/index.css:444",
+     "appWide": true
+    },
+    {
+     "name": "--shell-line-soft",
+     "value": "#ece3da",
+     "at": "src/index.css:445",
+     "appWide": true
+    },
+    {
+     "name": "--shell-quiet",
+     "value": "#b3a598",
+     "at": "src/index.css:488",
+     "appWide": true
+    },
+    {
+     "name": "--shell-ink",
+     "value": "#2e2723",
+     "at": "src/index.css:518",
+     "appWide": true
+    },
+    {
+     "name": "--shell-ink-soft",
+     "value": "#6a615a",
+     "at": "src/index.css:504",
+     "appWide": true
+    },
+    {
+     "name": "--shell-muted",
+     "value": "#9c8878",
+     "at": "src/index.css:505",
+     "appWide": true
+    },
+    {
+     "name": "--shell-burgundy",
+     "value": "#7c3a2a",
+     "at": "src/index.css:506",
+     "appWide": true
+    },
+    {
+     "name": "--shell-parch",
+     "value": "#f2ede7",
+     "at": "src/index.css:507",
+     "appWide": true
+    },
+    {
+     "name": "--shell-chrome",
+     "value": "#fbf9f5",
+     "at": "src/index.css:508",
+     "appWide": true
+    },
+    {
+     "name": "--shell-hair",
+     "value": "#ece7de",
+     "at": "src/index.css:509",
+     "appWide": true
+    },
+    {
+     "name": "--shell-edge",
+     "value": "#e6e0d5",
+     "at": "src/index.css:510",
+     "appWide": true
+    },
+    {
+     "name": "--shell-seam",
+     "value": "#ddd2c2",
+     "at": "src/index.css:511",
+     "appWide": true
+    },
+    {
+     "name": "--shell-rail-tx",
+     "value": "#a89a8a",
+     "at": "src/index.css:512",
+     "appWide": true
+    },
+    {
+     "name": "--shell-rail-hi",
+     "value": "#f4efe7",
+     "at": "src/index.css:513",
+     "appWide": true
+    },
+    {
+     "name": "--shell-avatar-bg",
+     "value": "#f5e3da",
+     "at": "src/index.css:514",
+     "appWide": true
+    },
+    {
+     "name": "--shell-avatar-bd",
+     "value": "rgba(124, 58, 42, 0.25)",
+     "at": "src/index.css:515",
+     "appWide": true
+    },
+    {
+     "name": "--shell-menu-edge",
+     "value": "rgba(124, 58, 42, 0.15)",
+     "at": "src/index.css:524",
+     "appWide": true
+    },
+    {
+     "name": "--shell-page",
+     "value": "#f7eee7",
+     "at": "src/index.css:521",
+     "appWide": true
+    },
+    {
+     "name": "--shell-focus",
+     "value": "rgba(124, 58, 42, 0.45)",
+     "at": "src/index.css:523",
+     "appWide": true
+    },
+    {
+     "name": "--shell-cap-rim",
+     "value": "inset 0 1px 0 rgba(255,255,255,.55)",
+     "at": "src/index.css:595",
+     "appWide": true
+    },
+    {
+     "name": "--shell-rail-icon",
+     "value": "#a89a8a",
+     "at": "src/index.css:599",
+     "appWide": true
+    },
+    {
+     "name": "--shell-divider",
+     "value": "linear-gradient(90deg, transparent, rgba(46,39,35,.16) 22%, rgba(46,39,35,.16) 78%, transparent)",
+     "at": "src/index.css:604",
+     "appWide": true
+    },
+    {
+     "name": "--shell-bar-bg",
+     "value": "#f1ebe3",
+     "at": "src/index.css:607",
+     "appWide": true
+    },
+    {
+     "name": "--shell-bar-tint",
+     "value": "rgba(232, 227, 221, 0.93)",
+     "at": "src/index.css:618",
+     "appWide": true
+    },
+    {
+     "name": "--shell-bar-tint-solid",
+     "value": "#e8e3dd",
+     "at": "src/index.css:613",
+     "appWide": true
+    },
+    {
+     "name": "--shell-ink",
+     "value": "#2e2723",
+     "at": "src/index.css:621",
+     "appWide": true
+    },
+    {
+     "name": "--shell-ink-soft",
+     "value": "#6a615a",
+     "at": "src/index.css:621",
+     "appWide": true
+    },
+    {
+     "name": "--shell-muted",
+     "value": "#9c8878",
+     "at": "src/index.css:622",
+     "appWide": true
+    },
+    {
+     "name": "--state-queried",
+     "value": "#f7efe3",
+     "at": "src/components/shell/f12.css:1047",
+     "appWide": true
+    },
+    {
+     "name": "--state-agent",
+     "value": "#e0e5dd",
+     "at": "src/components/shell/f12.css:1024",
+     "appWide": true
+    },
+    {
+     "name": "--state-you",
+     "value": "#f5e6df",
+     "at": "src/components/shell/f12.css:1025",
+     "appWide": true
+    },
+    {
+     "name": "--state-offer",
+     "value": "#d7e0e8",
+     "at": "src/components/shell/f12.css:1026",
+     "appWide": true
+    },
+    {
+     "name": "--state-closed",
+     "value": "#e4e1db",
+     "at": "src/components/shell/f12.css:1027",
+     "appWide": true
+    },
+    {
+     "name": "--state-queried-deep",
+     "value": "#e7d9bd",
+     "at": "src/components/shell/f12.css:1038",
+     "appWide": true
+    },
+    {
+     "name": "--state-agent-deep",
+     "value": "#c7d0c2",
+     "at": "src/components/shell/f12.css:1034",
+     "appWide": true
+    },
+    {
+     "name": "--state-you-deep",
+     "value": "#e8c9bb",
+     "at": "src/components/shell/f12.css:1035",
+     "appWide": true
+    },
+    {
+     "name": "--state-offer-deep",
+     "value": "#c9d6e1",
+     "at": "src/components/shell/f12.css:1036",
+     "appWide": true
+    },
+    {
+     "name": "--state-closed-deep",
+     "value": "#cfc9c1",
+     "at": "src/components/shell/f12.css:1037",
+     "appWide": true
+    },
+    {
+     "name": "--hpanel-fg",
+     "value": "#f4eee5",
+     "at": "src/components/shell/headerPanel.css:25",
+     "appWide": true
+    },
+    {
+     "name": "--hpanel-muted",
+     "value": "rgba(244, 238, 229, 0.86)",
+     "at": "src/components/shell/headerPanel.css:26",
+     "appWide": true
+    },
+    {
+     "name": "--hpanel-line",
+     "value": "rgba(244, 238, 229, 0.14)",
+     "at": "src/components/shell/headerPanel.css:27",
+     "appWide": true
+    },
+    {
+     "name": "--hpanel-stamp",
+     "value": "#e0a188",
+     "at": "src/components/shell/headerPanel.css:28",
+     "appWide": true
+    },
+    {
+     "name": "--hpanel-primary-bg",
+     "value": "#f3eee6",
+     "at": "src/components/shell/headerPanel.css:29",
+     "appWide": true
+    },
+    {
+     "name": "--hpanel-primary-fg",
+     "value": "#1b2433",
+     "at": "src/components/shell/headerPanel.css:30",
+     "appWide": true
+    },
+    {
+     "name": "--hpanel-ring",
+     "value": "rgba(244, 238, 229, 0.7)",
+     "at": "src/components/shell/headerPanel.css:31",
+     "appWide": true
+    },
+    {
+     "name": "--illo-solid",
+     "value": "#000000",
+     "at": "src/components/shell/illustratedMasthead.css:13",
+     "appWide": true
+    },
+    {
+     "name": "--sp-ink",
+     "value": "#1c130f",
+     "at": "src/components/shell/primitives.css:125",
+     "appWide": true
+    },
+    {
+     "name": "--sp-anthracite",
+     "value": "#2a3a52",
+     "at": "src/components/shell/primitives.css:126",
+     "appWide": true
+    },
+    {
+     "name": "--sp-anthracite-hov",
+     "value": "#34465f",
+     "at": "src/components/shell/primitives.css:127",
+     "appWide": true
+    },
+    {
+     "name": "--sp-cream",
+     "value": "#f5f1eb",
+     "at": "src/components/shell/primitives.css:128",
+     "appWide": true
+    },
+    {
+     "name": "--sp-frame",
+     "value": "#7c3a2a",
+     "at": "src/components/shell/primitives.css:129",
+     "appWide": true
+    },
+    {
+     "name": "--sp-lift",
+     "value": "0 2px 8px rgba(28, 19, 15, 0.06)",
+     "at": "src/components/shell/primitives.css:130",
+     "appWide": true
+    },
+    {
+     "name": "--sks-scrim",
+     "value": "rgba(28, 19, 15, 0.28)",
+     "at": "src/components/shell/shortcutsSheet.css:11",
+     "appWide": true
+    },
+    {
+     "name": "--sks-card",
+     "value": "#ffffff",
+     "at": "src/components/shell/shortcutsSheet.css:12",
+     "appWide": true
+    },
+    {
+     "name": "--sks-rule",
+     "value": "rgba(28, 19, 15, 0.1)",
+     "at": "src/components/shell/shortcutsSheet.css:13",
+     "appWide": true
+    },
+    {
+     "name": "--sks-muted",
+     "value": "rgba(28, 19, 15, 0.55)",
+     "at": "src/components/shell/shortcutsSheet.css:14",
+     "appWide": true
+    },
+    {
+     "name": "--sks-cap-bg",
+     "value": "#f5f1eb",
+     "at": "src/components/shell/shortcutsSheet.css:15",
+     "appWide": true
+    },
+    {
+     "name": "parchment",
+     "value": "#fdfaf5",
+     "at": "src/lib/designTokens.ts:14",
+     "appWide": true
+    },
+    {
+     "name": "kraft",
+     "value": "#F5F0EA",
+     "at": "src/lib/designTokens.ts:15",
+     "appWide": true
+    },
+    {
+     "name": "kraftGlow",
+     "value": "radial-gradient(ellipse at 50% 0%, rgba(253,250,245,0.6) 0%, transparent 55%)",
+     "at": "src/lib/designTokens.ts:17",
+     "appWide": true
+    },
+    {
+     "name": "insetBorder",
+     "value": "1px solid rgba(124,58,42,0.28)",
+     "at": "src/lib/designTokens.ts:20",
+     "appWide": true
+    },
+    {
+     "name": "qdbPagePink",
+     "value": "#f8eae3",
+     "at": "src/lib/designTokens.ts:26",
+     "appWide": true
+    },
+    {
+     "name": "qdbDeskSurface",
+     "value": "#faf7f1",
+     "at": "src/lib/designTokens.ts:27",
+     "appWide": true
+    },
+    {
+     "name": "qdbDeskFrame",
+     "value": "#b8b1a4",
+     "at": "src/lib/designTokens.ts:28",
+     "appWide": true
+    },
+    {
+     "name": "qdbMasthead",
+     "value": "#ffffff",
+     "at": "src/lib/designTokens.ts:29",
+     "appWide": true
+    },
+    {
+     "name": "qdbCardLine",
+     "value": "#ddd4c6",
+     "at": "src/lib/designTokens.ts:30",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldDesk",
+     "value": "#c3cfdb",
+     "at": "src/lib/designTokens.ts:36",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldSlate",
+     "value": "#6A89A7",
+     "at": "src/lib/designTokens.ts:37",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldInk",
+     "value": "#1d1712",
+     "at": "src/lib/designTokens.ts:38",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldInk2",
+     "value": "#2c2017",
+     "at": "src/lib/designTokens.ts:39",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldParchment",
+     "value": "#fdfaf5",
+     "at": "src/lib/designTokens.ts:40",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldPinkBand",
+     "value": "#f5c7c2",
+     "at": "src/lib/designTokens.ts:41",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldBurgundy",
+     "value": "#7c3a2a",
+     "at": "src/lib/designTokens.ts:42",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldSage",
+     "value": "#8a9e88",
+     "at": "src/lib/designTokens.ts:43",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldDarkSage",
+     "value": "#5a6e58",
+     "at": "src/lib/designTokens.ts:44",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldSageTint",
+     "value": "#e9ede6",
+     "at": "src/lib/designTokens.ts:45",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldMuted",
+     "value": "#7d7268",
+     "at": "src/lib/designTokens.ts:46",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldBtnPink",
+     "value": "#f5e2da",
+     "at": "src/lib/designTokens.ts:47",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldBtnPinkBd",
+     "value": "#e8c8bc",
+     "at": "src/lib/designTokens.ts:48",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldSel",
+     "value": "#f9ddd8",
+     "at": "src/lib/designTokens.ts:49",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldSelBd",
+     "value": "#f1d2cc",
+     "at": "src/lib/designTokens.ts:50",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldDirOut",
+     "value": "#7c3a2a",
+     "at": "src/lib/designTokens.ts:53",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldDirIn",
+     "value": "#8a9e88",
+     "at": "src/lib/designTokens.ts:54",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldDirClosed",
+     "value": "#9b8c7a",
+     "at": "src/lib/designTokens.ts:55",
+     "appWide": true
+    },
+    {
+     "name": "burgundy",
+     "value": "#7c3a2a",
+     "at": "src/lib/designTokens.ts:61",
+     "appWide": true
+    },
+    {
+     "name": "deepBurgundy",
+     "value": "#6b3023",
+     "at": "src/lib/designTokens.ts:62",
+     "appWide": true
+    },
+    {
+     "name": "bodyInk",
+     "value": "#3a1c14",
+     "at": "src/lib/designTokens.ts:63",
+     "appWide": true
+    },
+    {
+     "name": "headingInk",
+     "value": "#2e3a2c",
+     "at": "src/lib/designTokens.ts:64",
+     "appWide": true
+    },
+    {
+     "name": "mutedInk",
+     "value": "#8a7a6c",
+     "at": "src/lib/designTokens.ts:65",
+     "appWide": true
+    },
+    {
+     "name": "labelColor",
+     "value": "#9c8878",
+     "at": "src/lib/designTokens.ts:66",
+     "appWide": true
+    },
+    {
+     "name": "sageBandRule",
+     "value": "rgba(90,110,88,0.2)",
+     "at": "src/lib/designTokens.ts:71",
+     "appWide": true
+    },
+    {
+     "name": "sageAccent",
+     "value": "#8a9e88",
+     "at": "src/lib/designTokens.ts:72",
+     "appWide": true
+    },
+    {
+     "name": "sageText",
+     "value": "#5a6e58",
+     "at": "src/lib/designTokens.ts:73",
+     "appWide": true
+    },
+    {
+     "name": "pinkBandRule",
+     "value": "rgba(124,58,42,0.15)",
+     "at": "src/lib/designTokens.ts:75",
+     "appWide": true
+    },
+    {
+     "name": "amberBandRule",
+     "value": "rgba(185,138,78,0.25)",
+     "at": "src/lib/designTokens.ts:77",
+     "appWide": true
+    },
+    {
+     "name": "buttonPinkBg",
+     "value": "#f5e2da",
+     "at": "src/lib/designTokens.ts:80",
+     "appWide": true
+    },
+    {
+     "name": "buttonPinkBorder",
+     "value": "#e8c8bc",
+     "at": "src/lib/designTokens.ts:81",
+     "appWide": true
+    },
+    {
+     "name": "buttonPinkHoverBg",
+     "value": "#efd5ca",
+     "at": "src/lib/designTokens.ts:82",
+     "appWide": true
+    },
+    {
+     "name": "buttonPinkHoverBorder",
+     "value": "#d8a89a",
+     "at": "src/lib/designTokens.ts:83",
+     "appWide": true
+    },
+    {
+     "name": "ghostButtonBg",
+     "value": "#ffffff",
+     "at": "src/lib/designTokens.ts:84",
+     "appWide": true
+    },
+    {
+     "name": "ghostButtonBorder",
+     "value": "#e0d5c8",
+     "at": "src/lib/designTokens.ts:85",
+     "appWide": true
+    },
+    {
+     "name": "ghostButtonText",
+     "value": "#6a5a50",
+     "at": "src/lib/designTokens.ts:86",
+     "appWide": true
+    },
+    {
+     "name": "statusBurgundy",
+     "value": "#7c3a2a",
+     "at": "src/lib/designTokens.ts:115",
+     "appWide": true
+    },
+    {
+     "name": "statusPinkFill",
+     "value": "#f8e7dc",
+     "at": "src/lib/designTokens.ts:116",
+     "appWide": true
+    },
+    {
+     "name": "statusSageRing",
+     "value": "#8a9e88",
+     "at": "src/lib/designTokens.ts:117",
+     "appWide": true
+    },
+    {
+     "name": "statusSageFill",
+     "value": "#e9ede6",
+     "at": "src/lib/designTokens.ts:118",
+     "appWide": true
+    },
+    {
+     "name": "statusSageMark",
+     "value": "#5a6e58",
+     "at": "src/lib/designTokens.ts:119",
+     "appWide": true
+    },
+    {
+     "name": "statusTrack",
+     "value": "#eee2d2",
+     "at": "src/lib/designTokens.ts:120",
+     "appWide": true
+    },
+    {
+     "name": "statusClosedRing",
+     "value": "#cfc6bb",
+     "at": "src/lib/designTokens.ts:121",
+     "appWide": true
+    },
+    {
+     "name": "statusClosedTrack",
+     "value": "#e4ddd2",
+     "at": "src/lib/designTokens.ts:122",
+     "appWide": true
+    },
+    {
+     "name": "statusClosedFill",
+     "value": "#efeae2",
+     "at": "src/lib/designTokens.ts:123",
+     "appWide": true
+    },
+    {
+     "name": "statusClosedMark",
+     "value": "#b3a896",
+     "at": "src/lib/designTokens.ts:124",
+     "appWide": true
+    },
+    {
+     "name": "statusParchment",
+     "value": "#fdfaf5",
+     "at": "src/lib/designTokens.ts:125",
+     "appWide": true
+    },
+    {
+     "name": "shellGround",
+     "value": "#e7e0d5",
+     "at": "src/lib/designTokens.ts:133",
+     "appWide": true
+    },
+    {
+     "name": "shellRail",
+     "value": "#efe7db",
+     "at": "src/lib/designTokens.ts:134",
+     "appWide": true
+    },
+    {
+     "name": "shellSide",
+     "value": "#e6e4e0",
+     "at": "src/lib/designTokens.ts:135",
+     "appWide": true
+    },
+    {
+     "name": "shellRule",
+     "value": "rgba(28, 19, 15, 0.10)",
+     "at": "src/lib/designTokens.ts:139",
+     "appWide": true
+    },
+    {
+     "name": "shellActiveBg",
+     "value": "#2a3a52",
+     "at": "src/lib/designTokens.ts:143",
+     "appWide": true
+    },
+    {
+     "name": "shellActiveFg",
+     "value": "#fdf9f5",
+     "at": "src/lib/designTokens.ts:144",
+     "appWide": true
+    },
+    {
+     "name": "shellHoverBg",
+     "value": "rgba(255, 255, 255, 0.45)",
+     "at": "src/lib/designTokens.ts:145",
+     "appWide": true
+    },
+    {
+     "name": "shellHairline",
+     "value": "rgba(28, 19, 15, 0.12)",
+     "at": "src/lib/designTokens.ts:146",
+     "appWide": true
+    },
+    {
+     "name": "shellMute",
+     "value": "rgba(28, 19, 15, 0.58)",
+     "at": "src/lib/designTokens.ts:147",
+     "appWide": true
+    },
+    {
+     "name": "shellRing",
+     "value": "rgba(28, 19, 15, 0.28)",
+     "at": "src/lib/designTokens.ts:148",
+     "appWide": true
+    },
+    {
+     "name": "shellBtnHover",
+     "value": "rgba(255, 255, 255, 0.6)",
+     "at": "src/lib/designTokens.ts:149",
+     "appWide": true
+    },
+    {
+     "name": "shellSwitchBg",
+     "value": "rgba(255, 255, 255, 0.7)",
+     "at": "src/lib/designTokens.ts:150",
+     "appWide": true
+    },
+    {
+     "name": "shellSwitchHover",
+     "value": "rgba(255, 255, 255, 0.92)",
+     "at": "src/lib/designTokens.ts:151",
+     "appWide": true
+    },
+    {
+     "name": "shellControlBg",
+     "value": "#ffffff",
+     "at": "src/lib/designTokens.ts:152",
+     "appWide": true
+    },
+    {
+     "name": "shellCanvas",
+     "value": "#f7f2e9",
+     "at": "src/lib/designTokens.ts:153",
+     "appWide": true
+    },
+    {
+     "name": "shellCard",
+     "value": "#fdfaf5",
+     "at": "src/lib/designTokens.ts:154",
+     "appWide": true
+    },
+    {
+     "name": "shellPanel",
+     "value": "#f2ede7",
+     "at": "src/lib/designTokens.ts:155",
+     "appWide": true
+    },
+    {
+     "name": "shellInset",
+     "value": "#efe8df",
+     "at": "src/lib/designTokens.ts:156",
+     "appWide": true
+    },
+    {
+     "name": "shellLine",
+     "value": "#e3d9cf",
+     "at": "src/lib/designTokens.ts:157",
+     "appWide": true
+    },
+    {
+     "name": "shellLineSoft",
+     "value": "#ece3da",
+     "at": "src/lib/designTokens.ts:158",
+     "appWide": true
+    },
+    {
+     "name": "shellDesk",
+     "value": "#aebdb0",
+     "at": "src/lib/designTokens.ts:167",
+     "appWide": true
+    },
+    {
+     "name": "shellActiveFill",
+     "value": "#ffffff",
+     "at": "src/lib/designTokens.ts:169",
+     "appWide": true
+    },
+    {
+     "name": "shellBarBg",
+     "value": "#f1ebe3",
+     "at": "src/lib/designTokens.ts:171",
+     "appWide": true
+    },
+    {
+     "name": "shellInk",
+     "value": "#2e2723",
+     "at": "src/lib/designTokens.ts:176",
+     "appWide": true
+    },
+    {
+     "name": "shellInkSoft",
+     "value": "#6a615a",
+     "at": "src/lib/designTokens.ts:177",
+     "appWide": true
+    },
+    {
+     "name": "shellMuted",
+     "value": "#9c8878",
+     "at": "src/lib/designTokens.ts:178",
+     "appWide": true
+    },
+    {
+     "name": "oMs",
+     "value": "#8a4a3c",
+     "at": "src/lib/designTokens.ts:190",
+     "appWide": true
+    },
+    {
+     "name": "oPkg",
+     "value": "#9a7233",
+     "at": "src/lib/designTokens.ts:191",
+     "appWide": true
+    },
+    {
+     "name": "oScout",
+     "value": "#467a76",
+     "at": "src/lib/designTokens.ts:193",
+     "appWide": true
+    },
+    {
+     "name": "matParch2",
+     "value": "#f7f3ee",
+     "at": "src/lib/designTokens.ts:195",
+     "appWide": true
+    },
+    {
+     "name": "matParch3",
+     "value": "#f3eee7",
+     "at": "src/lib/designTokens.ts:196",
+     "appWide": true
+    },
+    {
+     "name": "matTray",
+     "value": "#e9c9b8",
+     "at": "src/lib/designTokens.ts:197",
+     "appWide": true
+    },
+    {
+     "name": "matSoft",
+     "value": "0 1px 2px rgba(28, 19, 15, 0.05), 0 6px 18px rgba(28, 19, 15, 0.06)",
+     "at": "src/lib/designTokens.ts:198",
+     "appWide": true
+    },
+    {
+     "name": "--ac-tone-you",
+     "value": "#f5e6df",
+     "at": "src/components/agents/card/agentCard.css:24",
+     "appWide": false
+    },
+    {
+     "name": "--ac-tone-agent",
+     "value": "#f7efe3",
+     "at": "src/components/agents/card/agentCard.css:24",
+     "appWide": false
+    },
+    {
+     "name": "--ac-tone-offer",
+     "value": "#d7e0e8",
+     "at": "src/components/agents/card/agentCard.css:25",
+     "appWide": false
+    },
+    {
+     "name": "--ac-tone-closed",
+     "value": "#e4e1db",
+     "at": "src/components/agents/card/agentCard.css:26",
+     "appWide": false
+    },
+    {
+     "name": "--ac-ini",
+     "value": "#dbe3ea",
+     "at": "src/components/agents/card/agentCard.css:27",
+     "appWide": false
+    },
+    {
+     "name": "--ac-hover",
+     "value": "#f5f1eb",
+     "at": "src/components/agents/card/agentCard.css:28",
+     "appWide": false
+    },
+    {
+     "name": "--ac-warn",
+     "value": "#fbf3ef",
+     "at": "src/components/agents/card/agentCard.css:29",
+     "appWide": false
+    },
+    {
+     "name": "--ac-seg",
+     "value": "#efe9e1",
+     "at": "src/components/agents/card/agentCard.css:33",
+     "appWide": false
+    },
+    {
+     "name": "--ac-hint",
+     "value": "#eef2f5",
+     "at": "src/components/agents/card/agentCard.css:33",
+     "appWide": false
+    },
+    {
+     "name": "--ac-line",
+     "value": "rgba(28, 19, 15, 0.22)",
+     "at": "src/components/agents/card/agentCard.css:34",
+     "appWide": false
+    },
+    {
+     "name": "--clv-slate",
+     "value": "#5f7b93",
+     "at": "src/components/agents/contact/contactV11.css:35",
+     "appWide": false
+    },
+    {
+     "name": "--clv-slate-pale",
+     "value": "#cfd9e2",
+     "at": "src/components/agents/contact/contactV11.css:27",
+     "appWide": false
+    },
+    {
+     "name": "--clv-slate-tray",
+     "value": "#d6dfe6",
+     "at": "src/components/agents/contact/contactV11.css:28",
+     "appWide": false
+    },
+    {
+     "name": "--clv-slate-ink",
+     "value": "#3f566b",
+     "at": "src/components/agents/contact/contactV11.css:29",
+     "appWide": false
+    },
+    {
+     "name": "--clv-ink",
+     "value": "#1c130f",
+     "at": "src/components/agents/contact/contactV11.css:32",
+     "appWide": false
+    },
+    {
+     "name": "--clv-ink-70",
+     "value": "rgba(28, 19, 15, 0.7)",
+     "at": "src/components/agents/contact/contactV11.css:33",
+     "appWide": false
+    },
+    {
+     "name": "--clv-ink-45",
+     "value": "rgba(28, 19, 15, 0.45)",
+     "at": "src/components/agents/contact/contactV11.css:34",
+     "appWide": false
+    },
+    {
+     "name": "--clv-hair",
+     "value": "rgba(28, 19, 15, 0.11)",
+     "at": "src/components/agents/contact/contactV11.css:35",
+     "appWide": false
+    },
+    {
+     "name": "--clv-parchment",
+     "value": "#fdf9f5",
+     "at": "src/components/agents/contact/contactV11.css:36",
+     "appWide": false
+    },
+    {
+     "name": "--clv-p2",
+     "value": "#f7f3ee",
+     "at": "src/components/agents/contact/contactV11.css:37",
+     "appWide": false
+    },
+    {
+     "name": "--clv-p3",
+     "value": "#f3eee7",
+     "at": "src/components/agents/contact/contactV11.css:38",
+     "appWide": false
+    },
+    {
+     "name": "--clv-frame",
+     "value": "#7c3a2a",
+     "at": "src/components/agents/contact/contactV11.css:40",
+     "appWide": false
+    },
+    {
+     "name": "--clv-rust",
+     "value": "#8a4a3c",
+     "at": "src/components/agents/contact/contactV11.css:41",
+     "appWide": false
+    },
+    {
+     "name": "--clv-wash",
+     "value": "#f8ebe3",
+     "at": "src/components/agents/contact/contactV11.css:42",
+     "appWide": false
+    },
+    {
+     "name": "--clv-sage",
+     "value": "#e0e5dd",
+     "at": "src/components/agents/contact/contactV11.css:43",
+     "appWide": false
+    },
+    {
+     "name": "--clv-soft",
+     "value": "0 1px 2px rgba(28, 19, 15, 0.05), 0 10px 24px -18px rgba(28, 19, 15, 0.22)",
+     "at": "src/components/agents/contact/contactV11.css:44",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-i72",
+     "value": "rgba(28, 19, 15, 0.72)",
+     "at": "src/components/agents/discover1/discover1.css:25",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-i58",
+     "value": "rgba(28, 19, 15, 0.58)",
+     "at": "src/components/agents/discover1/discover1.css:26",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-i45",
+     "value": "rgba(28, 19, 15, 0.45)",
+     "at": "src/components/agents/discover1/discover1.css:27",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-i30",
+     "value": "rgba(28, 19, 15, 0.3)",
+     "at": "src/components/agents/discover1/discover1.css:28",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-i14",
+     "value": "rgba(28, 19, 15, 0.14)",
+     "at": "src/components/agents/discover1/discover1.css:29",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-i08",
+     "value": "rgba(28, 19, 15, 0.08)",
+     "at": "src/components/agents/discover1/discover1.css:30",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-navy2",
+     "value": "#2c3a53",
+     "at": "src/components/agents/discover1/discover1.css:32",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-rust",
+     "value": "#a0452e",
+     "at": "src/components/agents/discover1/discover1.css:33",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-blush",
+     "value": "#f6e2d8",
+     "at": "src/components/agents/discover1/discover1.css:34",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-paper",
+     "value": "#fbf9f5",
+     "at": "src/components/agents/discover1/discover1.css:35",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-slate",
+     "value": "#5f7b93",
+     "at": "src/components/agents/discover1/discover1.css:36",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-slate2",
+     "value": "#4e6a82",
+     "at": "src/components/agents/discover1/discover1.css:37",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-sage",
+     "value": "#4e7d60",
+     "at": "src/components/agents/discover1/discover1.css:38",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-sand",
+     "value": "#f7efe3",
+     "at": "src/components/agents/discover1/discover1.css:39",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-cream",
+     "value": "#f4eee5",
+     "at": "src/components/agents/discover1/discover1.css:40",
+     "appWide": false
+    },
+    {
+     "name": "--cap-pro-a",
+     "value": "#cfdcea",
+     "at": "src/components/containers/containers.css:74",
+     "appWide": false
+    },
+    {
+     "name": "--cap-pro-b",
+     "value": "#bccfe2",
+     "at": "src/components/containers/containers.css:52",
+     "appWide": false
+    },
+    {
+     "name": "--cap-pro-edge",
+     "value": "#9db6cf",
+     "at": "src/components/containers/containers.css:52",
+     "appWide": false
+    },
+    {
+     "name": "--cap-pro-ink",
+     "value": "#2d4a6b",
+     "at": "src/components/containers/containers.css:52",
+     "appWide": false
+    },
+    {
+     "name": "--cap-outgoing-a",
+     "value": "#f7e3da",
+     "at": "src/components/containers/containers.css:54",
+     "appWide": false
+    },
+    {
+     "name": "--cap-outgoing-b",
+     "value": "#f0d5c9",
+     "at": "src/components/containers/containers.css:53",
+     "appWide": false
+    },
+    {
+     "name": "--cap-outgoing-edge",
+     "value": "#e5c3b4",
+     "at": "src/components/containers/containers.css:53",
+     "appWide": false
+    },
+    {
+     "name": "--cap-outgoing-ink",
+     "value": "#8a4433",
+     "at": "src/components/containers/containers.css:53",
+     "appWide": false
+    },
+    {
+     "name": "--cap-incoming-a",
+     "value": "#dfe6dc",
+     "at": "src/components/containers/containers.css:55",
+     "appWide": false
+    },
+    {
+     "name": "--cap-incoming-b",
+     "value": "#d2dccf",
+     "at": "src/components/containers/containers.css:54",
+     "appWide": false
+    },
+    {
+     "name": "--cap-incoming-edge",
+     "value": "#bccab8",
+     "at": "src/components/containers/containers.css:54",
+     "appWide": false
+    },
+    {
+     "name": "--cap-incoming-ink",
+     "value": "#4f6647",
+     "at": "src/components/containers/containers.css:54",
+     "appWide": false
+    },
+    {
+     "name": "--cap-reference-a",
+     "value": "#f6eed5",
+     "at": "src/components/containers/containers.css:56",
+     "appWide": false
+    },
+    {
+     "name": "--cap-reference-b",
+     "value": "#efe4c2",
+     "at": "src/components/containers/containers.css:55",
+     "appWide": false
+    },
+    {
+     "name": "--cap-reference-edge",
+     "value": "#e0d3aa",
+     "at": "src/components/containers/containers.css:55",
+     "appWide": false
+    },
+    {
+     "name": "--cap-reference-ink",
+     "value": "#7a6326",
+     "at": "src/components/containers/containers.css:55",
+     "appWide": false
+    },
+    {
+     "name": "--sa-sec-rule",
+     "value": "rgba(124, 58, 42, 0.16)",
+     "at": "src/components/containers/containers.css:61",
+     "appWide": false
+    },
+    {
+     "name": "--fc-card",
+     "value": "#ffffff",
+     "at": "src/components/containers/framedCard.css:14",
+     "appWide": false
+    },
+    {
+     "name": "--fc-frame",
+     "value": "#7c3a2a",
+     "at": "src/components/containers/framedCard.css:17",
+     "appWide": false
+    },
+    {
+     "name": "--fc-ink",
+     "value": "#1c130f",
+     "at": "src/components/containers/framedCard.css:20",
+     "appWide": false
+    },
+    {
+     "name": "--fc-page",
+     "value": "#f5f1eb",
+     "at": "src/components/containers/framedCard.css:21",
+     "appWide": false
+    },
+    {
+     "name": "--fc-navy",
+     "value": "#2a3a52",
+     "at": "src/components/containers/framedCard.css:22",
+     "appWide": false
+    },
+    {
+     "name": "--fc-stone",
+     "value": "#e4e1db",
+     "at": "src/components/containers/framedCard.css:23",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-ink",
+     "value": "#1c130f",
+     "at": "src/components/queries/centre/qcvPage.css:48",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-ink-70",
+     "value": "rgba(28, 19, 15, 0.7)",
+     "at": "src/components/queries/centre/qcvPage.css:49",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-ink-45",
+     "value": "rgba(28, 19, 15, 0.45)",
+     "at": "src/components/queries/centre/qcvPage.css:50",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-hair",
+     "value": "rgba(28, 19, 15, 0.11)",
+     "at": "src/components/queries/centre/qcvPage.css:51",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-parchment",
+     "value": "#fdf9f5",
+     "at": "src/components/queries/centre/qcvPage.css:52",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-quiet",
+     "value": "#f6f1ea",
+     "at": "src/components/queries/centre/qcvPage.css:53",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-track",
+     "value": "#f1ece5",
+     "at": "src/components/queries/centre/qcvPage.css:54",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-rust",
+     "value": "#8a4a3c",
+     "at": "src/components/queries/centre/qcvPage.css:55",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-navy",
+     "value": "#2a3a52",
+     "at": "src/components/queries/centre/qcvPage.css:56",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-navy-hov",
+     "value": "#34465f",
+     "at": "src/components/queries/centre/qcvPage.css:57",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-frame",
+     "value": "#7c3a2a",
+     "at": "src/components/queries/centre/qcvPage.css:87",
+     "appWide": false
+    },
+    {
+     "name": "--be-accent",
+     "value": "#e9c9b8",
+     "at": "src/components/queries/centre/qcvPage.css:97",
+     "appWide": false
+    },
+    {
+     "name": "--be-ink",
+     "value": "#1c130f",
+     "at": "src/components/queries/centre/qcvPage.css:88",
+     "appWide": false
+    },
+    {
+     "name": "--be-mute",
+     "value": "rgba(28, 19, 15, 0.62)",
+     "at": "src/components/queries/centre/qcvPage.css:89",
+     "appWide": false
+    },
+    {
+     "name": "--be-soft",
+     "value": "rgba(28, 19, 15, 0.07)",
+     "at": "src/components/queries/centre/qcvPage.css:90",
+     "appWide": false
+    },
+    {
+     "name": "--pro-mid",
+     "value": "#6A89A7",
+     "at": "src/components/reading-pane/packageGroup.css:51",
+     "appWide": false
+    },
+    {
+     "name": "--pro-ink",
+     "value": "#39587a",
+     "at": "src/components/reading-pane/packageGroup.css:38",
+     "appWide": false
+    },
+    {
+     "name": "--pro-fill",
+     "value": "#e3ebf3",
+     "at": "src/components/reading-pane/packageGroup.css:39",
+     "appWide": false
+    },
+    {
+     "name": "--pro-fill-deep",
+     "value": "#d5e1ec",
+     "at": "src/components/reading-pane/packageGroup.css:40",
+     "appWide": false
+    },
+    {
+     "name": "--pro-edge",
+     "value": "#b9cdde",
+     "at": "src/components/reading-pane/packageGroup.css:41",
+     "appWide": false
+    },
+    {
+     "name": "--pro-fill-hov",
+     "value": "#d5e1ec",
+     "at": "src/components/reading-pane/packageGroup.css:44",
+     "appWide": false
+    },
+    {
+     "name": "--tl-nearblack",
+     "value": "#1c130f",
+     "at": "src/components/todo/todoCalendar.css:43",
+     "appWide": false
+    }
+   ],
+   "type": [
+    {
+     "name": "--font-sans",
+     "value": "\"Source Sans 3\", \"Source Sans Pro\", system-ui, -apple-system, sans-serif",
+     "at": "src/index.css:30",
+     "appWide": true
+    },
+    {
+     "name": "--font-serif",
+     "value": "\"Playfair Display\", Georgia, serif",
+     "at": "src/index.css:20",
+     "appWide": true
+    },
+    {
+     "name": "--font-mono",
+     "value": "\"JetBrains Mono\", monospace",
+     "at": "src/index.css:21",
+     "appWide": true
+    },
+    {
+     "name": "--sp-mono",
+     "value": "\"JetBrains Mono\", monospace",
+     "at": "src/components/shell/primitives.css:122",
+     "appWide": true
+    },
+    {
+     "name": "--sp-serif",
+     "value": "\"Source Serif 4\", Georgia, serif",
+     "at": "src/components/shell/primitives.css:126",
+     "appWide": true
+    },
+    {
+     "name": "--ac-mono",
+     "value": "var(--font-mono, \"JetBrains Mono\", monospace)",
+     "at": "src/components/agents/card/agentCard.css:30",
+     "appWide": false
+    },
+    {
+     "name": "--clv-serif",
+     "value": "\"Source Serif 4\", Georgia, serif",
+     "at": "src/components/agents/contact/contactV11.css:30",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-serif",
+     "value": "var(--sp-serif)",
+     "at": "src/components/agents/discover1/discover1.css:42",
+     "appWide": false
+    },
+    {
+     "name": "--dv1-mono",
+     "value": "var(--font-mono)",
+     "at": "src/components/agents/discover1/discover1.css:43",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-serif",
+     "value": "var(--font-serif)",
+     "at": "src/components/queries/centre/qcvPage.css:62",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-mono",
+     "value": "var(--font-mono)",
+     "at": "src/components/queries/centre/qcvPage.css:63",
+     "appWide": false
+    },
+    {
+     "name": "--font-sans",
+     "value": "\"Source Sans 3\", \"Source Sans Pro\", system-ui, -apple-system, sans-serif",
+     "at": "src/marketing/public.css:22",
+     "appWide": false
+    },
+    {
+     "name": "--font-serif",
+     "value": "\"Playfair Display\", Georgia, serif",
+     "at": "src/marketing/public.css:23",
+     "appWide": false
+    },
+    {
+     "name": "--font-mono",
+     "value": "\"JetBrains Mono\", monospace",
+     "at": "src/marketing/public.css:24",
+     "appWide": false
+    }
+   ],
+   "spacing": [
+    {
+     "name": "--page-section-gap",
+     "value": "40px",
+     "at": "src/index.css:250",
+     "appWide": true
+    },
+    {
+     "name": "--work-gutter",
+     "value": "32px",
+     "at": "src/index.css:321",
+     "appWide": true
+    },
+    {
+     "name": "--tl-gap",
+     "value": "22px",
+     "at": "src/index.css:332",
+     "appWide": true
+    },
+    {
+     "name": "--tl-body-gap",
+     "value": "9px",
+     "at": "src/index.css:345",
+     "appWide": true
+    },
+    {
+     "name": "--gutter",
+     "value": "20px",
+     "at": "src/index.css:472",
+     "appWide": true
+    },
+    {
+     "name": "--pad-r",
+     "value": "18px",
+     "at": "src/index.css:476",
+     "appWide": true
+    },
+    {
+     "name": "--shell-cap-gap",
+     "value": "14px",
+     "at": "src/index.css:487",
+     "appWide": true
+    },
+    {
+     "name": "--shell-gutter",
+     "value": "16px",
+     "at": "src/index.css:616",
+     "appWide": true
+    },
+    {
+     "name": "--shell-card-pad",
+     "value": "12px",
+     "at": "src/index.css:618",
+     "appWide": true
+    },
+    {
+     "name": "--content-gutter",
+     "value": "80px",
+     "at": "src/components/shell/pageHeader.css:44",
+     "appWide": true
+    },
+    {
+     "name": "--content-gutter-tight",
+     "value": "35px",
+     "at": "src/components/shell/pageHeader.css:55",
+     "appWide": true
+    },
+    {
+     "name": "--content-gutter",
+     "value": "16px",
+     "at": "src/components/shell/pageHeader.css:157",
+     "appWide": true
+    },
+    {
+     "name": "--hero-gap-below",
+     "value": "44px",
+     "at": "src/components/shell/pageHeroFrame.css:33",
+     "appWide": true
+    },
+    {
+     "name": "--hero-ey-gap",
+     "value": "15px",
+     "at": "src/components/shell/pageHeroFrame.css:36",
+     "appWide": true
+    },
+    {
+     "name": "--hero-by-gap",
+     "value": "12px",
+     "at": "src/components/shell/pageHeroFrame.css:38",
+     "appWide": true
+    },
+    {
+     "name": "--hero-act-gap",
+     "value": "24px",
+     "at": "src/components/shell/pageHeroFrame.css:40",
+     "appWide": true
+    },
+    {
+     "name": "--hero-art-gap",
+     "value": "28px",
+     "at": "src/components/shell/pageHeroFrame.css:45",
+     "appWide": true
+    },
+    {
+     "name": "--read-gutter",
+     "value": "40px",
+     "at": "src/components/shell/workspacePageGrid.css:488",
+     "appWide": true
+    },
+    {
+     "name": "--qcv-rail-gap",
+     "value": "36px",
+     "at": "src/components/queries/centre/qcvPage.css:47",
+     "appWide": false
+    }
+   ],
+   "radius": [
+    {
+     "name": "--shell-cap-radius",
+     "value": "18px",
+     "at": "src/index.css:486",
+     "appWide": true
+    },
+    {
+     "name": "--shell-card-radius",
+     "value": "16px",
+     "at": "src/index.css:572",
+     "appWide": true
+    },
+    {
+     "name": "--fc-radius",
+     "value": "16px",
+     "at": "src/components/containers/framedCard.css:15",
+     "appWide": false
+    },
+    {
+     "name": "--fc-frame-radius",
+     "value": "11px",
+     "at": "src/components/containers/framedCard.css:18",
+     "appWide": false
+    }
+   ],
+   "shadow": [
+    {
+     "name": "--shell-cap-shadow",
+     "value": "0 1px 2px rgba(56,66,58,.08),\n    0 4px 10px rgba(56,66,58,.09),\n    0 14px 30px rgba(56,66,58,.11),\n    0 34px 66px rgba(56,66,58,.13)",
+     "at": "src/index.css:592",
+     "appWide": true
+    },
+    {
+     "name": "--hub-mast-pad",
+     "value": "22px 30px 20px",
+     "at": "src/index.css:1258",
+     "appWide": true
+    },
+    {
+     "name": "--hub-mast-pad",
+     "value": "16px 30px 15px",
+     "at": "src/index.css:1259",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldShadowCard",
+     "value": "0 8px 20px rgba(29,23,18,.18)",
+     "at": "src/lib/designTokens.ts:57",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldShadowBtn",
+     "value": "0 4px 11px rgba(29,23,18,.20)",
+     "at": "src/lib/designTokens.ts:58",
+     "appWide": true
+    },
+    {
+     "name": "qdbBoldShadowRow",
+     "value": "0 2px 8px rgba(29,23,18,.10)",
+     "at": "src/lib/designTokens.ts:59",
+     "appWide": true
+    },
+    {
+     "name": "mountShadow",
+     "value": "0 1px 3px rgba(58,28,20,0.08), 0 8px 26px rgba(58,28,20,0.13)",
+     "at": "src/lib/designTokens.ts:112",
+     "appWide": true
+    },
+    {
+     "name": "--fc-shadow",
+     "value": "0 2px 8px rgba(28, 19, 15, 0.06)",
+     "at": "src/components/containers/framedCard.css:19",
+     "appWide": false
+    },
+    {
+     "name": "--qcv-shadow",
+     "value": "0 2px 8px rgba(28, 19, 15, 0.06)",
+     "at": "src/components/queries/centre/qcvPage.css:64",
+     "appWide": false
+    }
+   ],
+   "other": 110
+  },
+  "primitives": [
+   {
+    "name": "MountCard",
+    "file": "src/components/MountCard.tsx",
+    "exists": true,
+    "note": "parchment card + inset frame (insetBorder, src/lib/designTokens.ts); identified at runtime by its aria-hidden absolute inset-6 radius-10 frame"
+   },
+   {
+    "name": "StatusDot",
+    "file": "src/components/StatusDot.tsx",
+    "exists": true,
+    "note": "the only drawing of a query's status (CLAUDE.md)"
+   },
+   {
+    "name": "WorkspaceNavyHeader",
+    "file": "src/components/shell/WorkspaceNavyHeader.tsx",
+    "exists": true,
+    "note": "shared navy header; styles src/components/shell/wsnh.css; probes data-wsnh"
+   },
+   {
+    "name": "PageHeader",
+    "file": "src/components/shell/PageHeader.tsx",
+    "exists": true,
+    "note": ""
+   },
+   {
+    "name": "PanelHeader",
+    "file": "src/components/shell/PanelHeader.tsx",
+    "exists": true,
+    "note": ""
+   },
+   {
+    "name": "SlimBar",
+    "file": "src/components/shell/SlimBar.tsx",
+    "exists": true,
+    "note": ""
+   },
+   {
+    "name": "SidePanel (drawer shell)",
+    "file": "src/components/shell/SidePanel.tsx",
+    "exists": true,
+    "note": "aside.spanel — Log a query and the query card open in it"
+   },
+   {
+    "name": "SlideOver",
+    "file": "src/components/shared/SlideOver.tsx",
+    "exists": true,
+    "note": ""
+   },
+   {
+    "name": "HalfDrawer",
+    "file": "src/components/shell/HalfDrawer.tsx",
+    "exists": true,
+    "note": ""
+   },
+   {
+    "name": "MobileSheet",
+    "file": "src/components/shell/MobileSheet.tsx",
+    "exists": true,
+    "note": "phone only — out of scope"
+   },
+   {
+    "name": "EmptyPanel",
+    "file": "src/components/shell/EmptyPanel.tsx",
+    "exists": true,
+    "note": ""
+   },
+   {
+    "name": "ToolbarButton",
+    "file": "src/components/shared/ToolbarButton.tsx",
+    "exists": true,
+    "note": "the one shared button component found; most buttons are page-local classes"
+   },
+   {
+    "name": "SegmentedToggle",
+    "file": "src/components/forms/SegmentedToggle.tsx",
+    "exists": true,
+    "note": ""
+   },
+   {
+    "name": "BrandInput / BrandDropdown / BrandDatePicker",
+    "file": "src/components/forms/BrandInput.tsx",
+    "exists": true,
+    "note": "src/components/forms/"
+   },
+   {
+    "name": "ToastProvider",
+    "file": "src/components/toast/ToastProvider.tsx",
+    "exists": true,
+    "note": ""
+   },
+   {
+    "name": "SearchPalette",
+    "file": "src/components/shell/SearchPalette.tsx",
+    "exists": true,
+    "note": ""
+   },
+   {
+    "name": "AppFooter",
+    "file": "src/components/shell/AppFooter.tsx",
+    "exists": true,
+    "note": ""
+   }
+  ]
+ },
+ "staticScan": {
+  "scanned": 1663,
+  "counts": {
+   "colour-literal": 16999,
+   "radius-literal": 3670,
+   "burgundy": 567,
+   "font-family": 1770,
+   "font-size-off-scale": 6635,
+   "border-literal": 1082,
+   "shadow-literal": 2429,
+   "red": 40,
+   "green": 37,
+   "primitive-copy": 8,
+   "local-token-colour": 2097,
+   "var-in-keyframes": 10,
+   "color-mix": 1
+  },
+  "distinctColours": 2102,
+  "nearDuplicatePairs": 27514
+ },
+ "runtime": {
+  "run": "../../../private/tmp/claude-501/-Users-nickphysick-ScriptAlly-app/25cab010-0c64-48aa-975a-ada7bdda7356/scratchpad/run2",
+  "groups": 495,
+  "singlePageGroups": 131,
+  "populations": [
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "segment/rest",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "segment/rest",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "segment/selected",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "segment/selected",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "tab/rest",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "tab/rest",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "tab/selected",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "tab/selected",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "tablist",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "tablist",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "lists",
+    "role": "list-item",
+    "pages": 1,
+    "variants": 3
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "lists",
+    "role": "list-item",
+    "pages": 1,
+    "variants": 3
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · bg",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · bg",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · gapBelow",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · gapBelow",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · height",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · height",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · leftFromSheet",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · leftFromSheet",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · padding",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · padding",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · radius",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · radius",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · rightItemInset",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · rightItemInset",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · subGap",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · subGap",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · titleLeft",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · titleLeft",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · titleTop",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · titleTop",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · topFromSheet",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · topFromSheet",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "page-background",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "page-background",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "section-band",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "section-band",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "sheet",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "sheet",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "sidebar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "sidebar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "stage",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "stage",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "top-bar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "top-bar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-subheader",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-subheader",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-title",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "dashboard",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-title",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "filled-light/rest",
+    "pages": 5,
+    "variants": 6
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "filled-light/rest",
+    "pages": 5,
+    "variants": 6
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "ghost/disabled",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "ghost/disabled",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "ghost/rest",
+    "pages": 5,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "ghost/rest",
+    "pages": 5,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "icon-only/rest",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "icon-only/rest",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "primary/rest",
+    "pages": 6,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "primary/rest",
+    "pages": 6,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "secondary/rest",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "secondary/rest",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "cards",
+    "role": "card",
+    "pages": 8,
+    "variants": 13
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "cards",
+    "role": "card",
+    "pages": 8,
+    "variants": 13
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "input",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "input",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "radio",
+    "pages": 2,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "radio",
+    "pages": 2,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "select",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "select",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "toggle",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "toggle",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "segment/rest",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "segment/rest",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "segment/selected",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "segment/selected",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "lists",
+    "role": "column-header",
+    "pages": 1,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "lists",
+    "role": "column-header",
+    "pages": 1,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "lists",
+    "role": "list-item",
+    "pages": 3,
+    "variants": 13
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "lists",
+    "role": "list-item",
+    "pages": 3,
+    "variants": 13
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "lists",
+    "role": "row",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "lists",
+    "role": "row",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "lists",
+    "role": "table-head",
+    "pages": 1,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "lists",
+    "role": "table-head",
+    "pages": 1,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · bg",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · bg",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · gapBelow",
+    "pages": 8,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · gapBelow",
+    "pages": 8,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · height",
+    "pages": 8,
+    "variants": 5
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · height",
+    "pages": 8,
+    "variants": 5
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · illusBox",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · illusBox",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · illusRight",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · illusRight",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · leftFromSheet",
+    "pages": 8,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · leftFromSheet",
+    "pages": 8,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · padding",
+    "pages": 8,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · padding",
+    "pages": 8,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · radius",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · radius",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · rightItemInset",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · rightItemInset",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · subGap",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · subGap",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · titleLeft",
+    "pages": 8,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · titleLeft",
+    "pages": 8,
+    "variants": 2
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · titleTop",
+    "pages": 8,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · titleTop",
+    "pages": 8,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · topFromSheet",
+    "pages": 8,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · topFromSheet",
+    "pages": 8,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "small-parts",
+    "role": "empty-state",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "small-parts",
+    "role": "empty-state",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "page-background",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "page-background",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "section-band",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "section-band",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "sheet",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "sheet",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "sidebar",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "sidebar",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "stage",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "stage",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "top-bar",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "top-bar",
+    "pages": 8,
+    "variants": 1
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "tags-status",
+    "role": "pill",
+    "pages": 6,
+    "variants": 9
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "tags-status",
+    "role": "pill",
+    "pages": 6,
+    "variants": 9
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "body",
+    "pages": 8,
+    "variants": 37
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "body",
+    "pages": 8,
+    "variants": 37
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "card-heading",
+    "pages": 3,
+    "variants": 5
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "card-heading",
+    "pages": 3,
+    "variants": 5
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "numerals",
+    "pages": 3,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "numerals",
+    "pages": 3,
+    "variants": 4
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-subheader",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-subheader",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-title",
+    "pages": 8,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-title",
+    "pages": 8,
+    "variants": 3
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "secondary",
+    "pages": 6,
+    "variants": 21
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "secondary",
+    "pages": 6,
+    "variants": 21
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "section-heading",
+    "pages": 7,
+    "variants": 5
+   },
+   {
+    "family": "non-workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "section-heading",
+    "pages": 7,
+    "variants": 5
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "filled-light/rest",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "filled-light/rest",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "ghost/rest",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "ghost/rest",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "icon-only/rest",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "icon-only/rest",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "primary/rest",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "primary/rest",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "cards",
+    "role": "card",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "cards",
+    "role": "card",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "input",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "input",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · bg",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · bg",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · gapBelow",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · gapBelow",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · height",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · height",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · leftFromSheet",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · leftFromSheet",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · padding",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · padding",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · radius",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · radius",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · subGap",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · subGap",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · titleLeft",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · titleLeft",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · titleTop",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · titleTop",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · topFromSheet",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · topFromSheet",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · bg",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · bg",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · gapBelow",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · gapBelow",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · height",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · height",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · leftFromSheet",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · leftFromSheet",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · padding",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · padding",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · radius",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · radius",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · topFromSheet",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · topFromSheet",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "page-background",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "page-background",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "section-band",
+    "pages": 1,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "section-band",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "sheet",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "sheet",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "sidebar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "sidebar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "stage",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "stage",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "top-bar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "top-bar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "type",
+    "role": "body",
+    "pages": 3,
+    "variants": 7
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "type",
+    "role": "body",
+    "pages": 3,
+    "variants": 7
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "type",
+    "role": "h1",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "type",
+    "role": "h1",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "type",
+    "role": "labels",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "type",
+    "role": "labels",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-subheader",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-subheader",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-title",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-title",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "onboarding",
+    "vw": 1512,
+    "part": "type",
+    "role": "section-heading",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "onboarding",
+    "vw": 1920,
+    "part": "type",
+    "role": "section-heading",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "filled-light/disabled",
+    "pages": 2,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "filled-light/disabled",
+    "pages": 2,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "filled-light/rest",
+    "pages": 7,
+    "variants": 12
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "filled-light/rest",
+    "pages": 7,
+    "variants": 12
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "ghost/rest",
+    "pages": 5,
+    "variants": 5
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "ghost/rest",
+    "pages": 5,
+    "variants": 5
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "icon-only/disabled",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "icon-only/disabled",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "icon-only/rest",
+    "pages": 4,
+    "variants": 6
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "icon-only/rest",
+    "pages": 4,
+    "variants": 6
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "primary/disabled",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "primary/disabled",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "primary/rest",
+    "pages": 4,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "primary/rest",
+    "pages": 4,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "secondary/rest",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "secondary/rest",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "cards",
+    "role": "card",
+    "pages": 9,
+    "variants": 13
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "cards",
+    "role": "card",
+    "pages": 9,
+    "variants": 13
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "footers",
+    "role": "action-footer",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "footers",
+    "role": "action-footer",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "input",
+    "pages": 6,
+    "variants": 11
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "input",
+    "pages": 6,
+    "variants": 11
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "radio",
+    "pages": 4,
+    "variants": 10
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "radio",
+    "pages": 4,
+    "variants": 10
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "textarea",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "textarea",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "segment/rest",
+    "pages": 4,
+    "variants": 5
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "segment/rest",
+    "pages": 4,
+    "variants": 5
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "segment/selected",
+    "pages": 4,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "segment/selected",
+    "pages": 4,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "tab/rest",
+    "pages": 2,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "tab/rest",
+    "pages": 2,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "tab/selected",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "tab/selected",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "tablist",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "tablist",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "lists",
+    "role": "list-item",
+    "pages": 1,
+    "variants": 2
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "lists",
+    "role": "list-item",
+    "pages": 1,
+    "variants": 2
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "overlays",
+    "role": "body",
+    "pages": 4,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "overlays",
+    "role": "body",
+    "pages": 4,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "overlays",
+    "role": "close",
+    "pages": 8,
+    "variants": 8
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "overlays",
+    "role": "close",
+    "pages": 8,
+    "variants": 8
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "overlays",
+    "role": "header",
+    "pages": 9,
+    "variants": 9
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "overlays",
+    "role": "header",
+    "pages": 9,
+    "variants": 9
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "overlays",
+    "role": "shell",
+    "pages": 9,
+    "variants": 8
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "overlays",
+    "role": "shell",
+    "pages": 9,
+    "variants": 8
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "small-parts",
+    "role": "snackbar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "small-parts",
+    "role": "snackbar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "tags-status",
+    "role": "pill",
+    "pages": 5,
+    "variants": 5
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "tags-status",
+    "role": "pill",
+    "pages": 5,
+    "variants": 5
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "tags-status",
+    "role": "tag",
+    "pages": 4,
+    "variants": 6
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "tags-status",
+    "role": "tag",
+    "pages": 4,
+    "variants": 6
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "type",
+    "role": "body",
+    "pages": 7,
+    "variants": 21
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "type",
+    "role": "body",
+    "pages": 7,
+    "variants": 21
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "type",
+    "role": "card-heading",
+    "pages": 5,
+    "variants": 5
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "type",
+    "role": "card-heading",
+    "pages": 5,
+    "variants": 5
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "type",
+    "role": "labels",
+    "pages": 5,
+    "variants": 13
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "type",
+    "role": "labels",
+    "pages": 5,
+    "variants": 13
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "type",
+    "role": "numerals",
+    "pages": 2,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "type",
+    "role": "numerals",
+    "pages": 2,
+    "variants": 4
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "type",
+    "role": "secondary",
+    "pages": 3,
+    "variants": 11
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "type",
+    "role": "secondary",
+    "pages": 3,
+    "variants": 11
+   },
+   {
+    "family": "overlays",
+    "vw": 1512,
+    "part": "type",
+    "role": "section-heading",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "overlays",
+    "vw": 1920,
+    "part": "type",
+    "role": "section-heading",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "filled-light/rest",
+    "pages": 8,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "filled-light/rest",
+    "pages": 8,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "ghost/rest",
+    "pages": 7,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "ghost/rest",
+    "pages": 7,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "primary/rest",
+    "pages": 4,
+    "variants": 5
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "primary/rest",
+    "pages": 4,
+    "variants": 5
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "secondary/rest",
+    "pages": 1,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "secondary/rest",
+    "pages": 1,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "cards",
+    "role": "card",
+    "pages": 7,
+    "variants": 14
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "cards",
+    "role": "card",
+    "pages": 7,
+    "variants": 14
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "footers",
+    "role": "page-footer",
+    "pages": 9,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "footers",
+    "role": "page-footer",
+    "pages": 9,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "input",
+    "pages": 6,
+    "variants": 8
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "input",
+    "pages": 6,
+    "variants": 8
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "radio",
+    "pages": 2,
+    "variants": 7
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "radio",
+    "pages": 2,
+    "variants": 7
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "textarea",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "textarea",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "segment/rest",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "segment/rest",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "segment/selected",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "segment/selected",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "lists",
+    "role": "list-item",
+    "pages": 5,
+    "variants": 10
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "lists",
+    "role": "list-item",
+    "pages": 5,
+    "variants": 10
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · bg",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · bg",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · gapBelow",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · gapBelow",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · height",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · height",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · illusBox",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · illusBox",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · illusRight",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · illusRight",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · leftFromSheet",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · leftFromSheet",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · padding",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · padding",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · radius",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · radius",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · rightItemInset",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · rightItemInset",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · subGap",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · subGap",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · titleLeft",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · titleLeft",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · titleTop",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · titleTop",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · topFromSheet",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · topFromSheet",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · bg",
+    "pages": 6,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · bg",
+    "pages": 6,
+    "variants": 2
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · gapBelow",
+    "pages": 6,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · gapBelow",
+    "pages": 6,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · height",
+    "pages": 6,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · height",
+    "pages": 6,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · illusBox",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · illusBox",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · illusRight",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · illusRight",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · leftFromSheet",
+    "pages": 6,
+    "variants": 4
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · leftFromSheet",
+    "pages": 6,
+    "variants": 4
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · padding",
+    "pages": 6,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · padding",
+    "pages": 6,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · radius",
+    "pages": 6,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · radius",
+    "pages": 6,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · rightItemInset",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · rightItemInset",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · subGap",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · subGap",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · titleLeft",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · titleLeft",
+    "pages": 3,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · titleTop",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · titleTop",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "plain · topFromSheet",
+    "pages": 6,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "plain · topFromSheet",
+    "pages": 6,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "small-parts",
+    "role": "snackbar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "small-parts",
+    "role": "snackbar",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "page-background",
+    "pages": 9,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "page-background",
+    "pages": 9,
+    "variants": 1
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "section-band",
+    "pages": 2,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "sheet",
+    "pages": 9,
+    "variants": 4
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "sheet",
+    "pages": 9,
+    "variants": 4
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "top-bar",
+    "pages": 9,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "top-bar",
+    "pages": 9,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "tags-status",
+    "role": "pill",
+    "pages": 2,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "tags-status",
+    "role": "pill",
+    "pages": 2,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "tags-status",
+    "role": "tag",
+    "pages": 1,
+    "variants": 10
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "tags-status",
+    "role": "tag",
+    "pages": 1,
+    "variants": 10
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "type",
+    "role": "body",
+    "pages": 9,
+    "variants": 60
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "type",
+    "role": "body",
+    "pages": 9,
+    "variants": 60
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "type",
+    "role": "card-heading",
+    "pages": 2,
+    "variants": 4
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "type",
+    "role": "card-heading",
+    "pages": 2,
+    "variants": 4
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "type",
+    "role": "h1",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "type",
+    "role": "h1",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "type",
+    "role": "labels",
+    "pages": 6,
+    "variants": 22
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "type",
+    "role": "labels",
+    "pages": 6,
+    "variants": 22
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "type",
+    "role": "numerals",
+    "pages": 5,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "type",
+    "role": "numerals",
+    "pages": 5,
+    "variants": 6
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-subheader",
+    "pages": 4,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-subheader",
+    "pages": 4,
+    "variants": 3
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-title",
+    "pages": 6,
+    "variants": 5
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-title",
+    "pages": 6,
+    "variants": 5
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "type",
+    "role": "secondary",
+    "pages": 3,
+    "variants": 19
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "type",
+    "role": "secondary",
+    "pages": 3,
+    "variants": 19
+   },
+   {
+    "family": "public",
+    "vw": 1512,
+    "part": "type",
+    "role": "section-heading",
+    "pages": 8,
+    "variants": 17
+   },
+   {
+    "family": "public",
+    "vw": 1920,
+    "part": "type",
+    "role": "section-heading",
+    "pages": 8,
+    "variants": 17
+   },
+   {
+    "family": "workspace:discover-not-ready",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace:discover-not-ready",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace:discover-not-ready",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-subheader",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace:discover-not-ready",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-subheader",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace:discover-not-ready",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-title",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace:discover-not-ready",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-title",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace:todo-slim-header",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace:todo-slim-header",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace:todo-slim-header",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-title",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace:todo-slim-header",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-title",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "filled-light/rest",
+    "pages": 12,
+    "variants": 30
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "filled-light/rest",
+    "pages": 12,
+    "variants": 30
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "ghost/rest",
+    "pages": 11,
+    "variants": 23
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "ghost/rest",
+    "pages": 11,
+    "variants": 23
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "icon-only/disabled",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "icon-only/disabled",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "icon-only/rest",
+    "pages": 4,
+    "variants": 6
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "icon-only/rest",
+    "pages": 4,
+    "variants": 6
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "primary/disabled",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "primary/disabled",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "primary/rest",
+    "pages": 7,
+    "variants": 10
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "primary/rest",
+    "pages": 7,
+    "variants": 10
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "buttons",
+    "role": "secondary/rest",
+    "pages": 7,
+    "variants": 7
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "buttons",
+    "role": "secondary/rest",
+    "pages": 7,
+    "variants": 7
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "cards",
+    "role": "card",
+    "pages": 13,
+    "variants": 30
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "cards",
+    "role": "card",
+    "pages": 13,
+    "variants": 31
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "footers",
+    "role": "page-footer",
+    "pages": 4,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "footers",
+    "role": "page-footer",
+    "pages": 4,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "checkbox",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "checkbox",
+    "pages": 2,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "input",
+    "pages": 5,
+    "variants": 4
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "input",
+    "pages": 5,
+    "variants": 4
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "radio",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "radio",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "select",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "select",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "form-controls",
+    "role": "textarea",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "form-controls",
+    "role": "textarea",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "segment/rest",
+    "pages": 4,
+    "variants": 6
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "segment/rest",
+    "pages": 4,
+    "variants": 6
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "segment/selected",
+    "pages": 4,
+    "variants": 4
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "segment/selected",
+    "pages": 4,
+    "variants": 4
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "tab/rest",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "tab/rest",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "tab/selected",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "tab/selected",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "in-page-nav",
+    "role": "tablist",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "in-page-nav",
+    "role": "tablist",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "lists",
+    "role": "column-header",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "lists",
+    "role": "column-header",
+    "pages": 3,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "lists",
+    "role": "group-header",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "lists",
+    "role": "group-header",
+    "pages": 1,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "lists",
+    "role": "list-item",
+    "pages": 7,
+    "variants": 12
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "lists",
+    "role": "list-item",
+    "pages": 7,
+    "variants": 12
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "lists",
+    "role": "row",
+    "pages": 3,
+    "variants": 4
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "lists",
+    "role": "row",
+    "pages": 3,
+    "variants": 4
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "lists",
+    "role": "table-head",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "lists",
+    "role": "table-head",
+    "pages": 3,
+    "variants": 3
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · bg",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · bg",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · gapBelow",
+    "pages": 10,
+    "variants": 7
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · gapBelow",
+    "pages": 10,
+    "variants": 7
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · height",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · height",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · illusBox",
+    "pages": 6,
+    "variants": 6
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · illusBox",
+    "pages": 6,
+    "variants": 6
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · illusRight",
+    "pages": 6,
+    "variants": 3
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · illusRight",
+    "pages": 6,
+    "variants": 3
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · leftFromSheet",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · leftFromSheet",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · padding",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · padding",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · radius",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · radius",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · rightItemInset",
+    "pages": 9,
+    "variants": 9
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · rightItemInset",
+    "pages": 9,
+    "variants": 9
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · titleLeft",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · titleLeft",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · titleTop",
+    "pages": 10,
+    "variants": 6
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · titleTop",
+    "pages": 10,
+    "variants": 6
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "page-header",
+    "role": "navy · topFromSheet",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "page-header",
+    "role": "navy · topFromSheet",
+    "pages": 10,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "small-parts",
+    "role": "empty-state",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "small-parts",
+    "role": "empty-state",
+    "pages": 2,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "page-background",
+    "pages": 12,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "page-background",
+    "pages": 12,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "section-band",
+    "pages": 7,
+    "variants": 16
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "section-band",
+    "pages": 7,
+    "variants": 15
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "sheet",
+    "pages": 12,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "sheet",
+    "pages": 12,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "sidebar",
+    "pages": 12,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "sidebar",
+    "pages": 12,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "stage",
+    "pages": 12,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "stage",
+    "pages": 12,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "surfaces",
+    "role": "top-bar",
+    "pages": 12,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "surfaces",
+    "role": "top-bar",
+    "pages": 12,
+    "variants": 1
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "tags-status",
+    "role": "pill",
+    "pages": 6,
+    "variants": 17
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "tags-status",
+    "role": "pill",
+    "pages": 6,
+    "variants": 16
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "tags-status",
+    "role": "tag",
+    "pages": 5,
+    "variants": 10
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "tags-status",
+    "role": "tag",
+    "pages": 5,
+    "variants": 10
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "body",
+    "pages": 13,
+    "variants": 123
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "body",
+    "pages": 13,
+    "variants": 123
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "card-heading",
+    "pages": 10,
+    "variants": 16
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "card-heading",
+    "pages": 10,
+    "variants": 16
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "labels",
+    "pages": 3,
+    "variants": 11
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "labels",
+    "pages": 3,
+    "variants": 11
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "numerals",
+    "pages": 9,
+    "variants": 22
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "numerals",
+    "pages": 9,
+    "variants": 22
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "page-title",
+    "pages": 10,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "page-title",
+    "pages": 10,
+    "variants": 2
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "secondary",
+    "pages": 7,
+    "variants": 20
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "secondary",
+    "pages": 7,
+    "variants": 20
+   },
+   {
+    "family": "workspace",
+    "vw": 1512,
+    "part": "type",
+    "role": "section-heading",
+    "pages": 11,
+    "variants": 14
+   },
+   {
+    "family": "workspace",
+    "vw": 1920,
+    "part": "type",
+    "role": "section-heading",
+    "pages": 11,
+    "variants": 14
+   }
+  ]
+ }
+}

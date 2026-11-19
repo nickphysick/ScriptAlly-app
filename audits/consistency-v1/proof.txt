@@ -1,0 +1,11 @@
+Harness proof — consistency audit v1, Phase 1 (19 Nov 2026)
+Planted in the worktree only, on /queries at 1512 (src/components/queries/centre/qcv156.css, appended, then restored from a copy; git diff --name-only HEAD empty afterwards):
+  1. #app-stage-scroll:has(.qc156-views) h1.qc1531-t { font-size: 56px }   (54 → 56: the title 2px larger)
+  2. aside.qc153-rail.qc156-views ring rgb(227,219,207) → rgb(226,218,206)   (the Views card's edge one shade off; this card draws its edge as a 1px ring)
+  3. .qc151-btn--n { height: 38px }   (42 → 38: the + Log a query primary 4px shorter)
+First attempt: the title rule was scoped to an ancestor that does not hold the title, so the title rendered unchanged and the proof reported MISSED with 0 new readings. The plant was fixed, not the harness; second attempt:
+[analyse] 82 measured page-views · 495 groups · 157 findings ({"B":152,"A":1,"C":4}) · 6 failed loads · 131 single-page groups
+[proof] CAUGHT — page title 2px larger: 1 new reading(s) on queries (fontSize 56); finding B008 (4 variants)
+[proof] CAUGHT — card edge one shade off: 1 new reading(s) on queries (border "none", shadow "rgb(226, 218, 206) 0px 0px 0px 1px, rgba(28, 19, 15, 0.35) 0px 18px 30px -24px"); finding B014 (31 variants)
+[proof] CAUGHT — primary button 4px shorter: 1 new reading(s) on queries (height 38); finding B019 (10 variants)
+[proof] all 3 faults caught
