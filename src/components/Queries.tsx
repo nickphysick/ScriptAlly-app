@@ -6394,7 +6394,7 @@ export const Queries: React.FC<{
         const t = qc1522Toast; setQc1522Toast(null);
         if (t.bump) setQcMotion160({ kind: "undo", n: Date.now() });
         /* a restore the rules refuse writes nothing (one batch): say so, never leave the writer believing it was undone */
-        void t.undo?.().then(() => { if (t.bump) setQcMotion160((m) => (m && m.kind === "undo" ? { ...m, done: true } : m)); }).catch((e) => { console.error("v152.2 undo refused", (e as { code?: string })?.code ?? e); setQc1522Toast({ msg: "Couldn’t undo that. Nothing was changed.", undo: null }); });
+        void t.undo?.().then(() => { if (t.bump) setQcMotion160((m) => (m && m.kind === "undo" ? { ...m, done: true } : m)); }).catch((e) => { console.error("v152.2 undo refused", (e as { code?: string })?.code ?? e); setQcMotion160(null); setQc1522Toast({ msg: "Couldn’t undo that. Nothing was changed.", undo: null }); });
       } : null } : null;
       card1522.burst = qc1522Burst;
       card1522.motion = qcMotion160;

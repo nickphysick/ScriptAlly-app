@@ -434,8 +434,15 @@ if (PHASE !== "before" && !BASELINE) {
         .replace(/T\d\d:\d\d:\d\d\.\d{3}Z/g, "").replace(/\b(?!q152-)[A-Za-z0-9]{20}\b/g, "NEW");
       const got = norm(lossy(dumpKey("agent")));
       L.check(`population: the old chip row's plan for ${a}`, typeof base.plans[a] === "string" && base.plans[a].length > 100, "");
-      const want = norm(base.plans[a]);
+      /* (v161.1: the baseline was recorded while the seed's wipe left the app's own feed rows behind, so each answer's
+         stored feed also carries the rows of the answers before it. The wipe now removes them; take the previous
+         answer's new rows off the baseline once each, so both sides hold this answer's write and the seed's rows only) */
+      const wantObj = JSON.parse(norm(base.plans[a])) as { feed: string[] };
+      const prev = ANSWERS.indexOf(a) > 0 ? (JSON.parse(norm(base.plans[ANSWERS[ANSWERS.indexOf(a) - 1]])) as { feed: string[] }).feed : [];
+      for (const r of prev) { if (!r.startsWith('["NEW"')) continue; const i = wantObj.feed.indexOf(r); if (i >= 0) wantObj.feed.splice(i, 1); }
+      const want = JSON.stringify(wantObj);
       const at = [...got].findIndex((ch, i) => ch !== want[i]);
+      if (got !== want) writeFileSync(`${DIR}/${PHASE}-qc161-11-${a}.json`, JSON.stringify({ got: JSON.parse(got), want: JSON.parse(want) }, null, 1));
       L.check(`${a}: the stored query, its log and its feed are the old chip row's`, got === want, got === want ? "" : `…${got.slice(Math.max(0, at - 80), at + 120)} ≠ …${want.slice(Math.max(0, at - 80), at + 120)}`);
     }
     L.done(10);

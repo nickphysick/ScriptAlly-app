@@ -1,0 +1,32 @@
+[
+ {
+  "name": "fails (every Firestore request refused): population — it pressed in",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "fails (every Firestore request refused): back at scale 1 within 4.2s",
+  "ok": false,
+  "got": "0.985 at 4186ms"
+ },
+ {
+  "name": "fails (every Firestore request refused): no pop",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "never lands (every Firestore request left unanswered): population — it pressed in",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "never lands (every Firestore request left unanswered): back at scale 1 within 4.2s",
+  "ok": false,
+  "got": "0.985 at 4199ms"
+ },
+ {
+  "name": "never lands (every Firestore request left unanswered): no pop",
+  "ok": true,
+  "got": "1"
+ }
+]

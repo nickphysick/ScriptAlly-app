@@ -1,0 +1,22 @@
+[
+ {
+  "name": "population: the save landed and Undo was pressed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "at most one running scale animation on the frame in any frame",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "population: two pops ran (the save's and the undo's)",
+  "ok": true,
+  "got": "[\"qc1611-press\",\"qc160-bump\",\"qc1611-press\",\"qc160-bump\"]"
+ },
+ {
+  "name": "the frame's box at rest equals its box before the save",
+  "ok": true,
+  "got": "932,100,540,700,none,1.6deg → 932,100,540,700,none,1.6deg"
+ }
+]

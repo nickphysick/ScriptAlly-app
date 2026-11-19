@@ -1,0 +1,17 @@
+[
+ {
+  "name": "save: the pop rises above 1.03 and stays below 1.04",
+  "ok": true,
+  "got": "1.03499"
+ },
+ {
+  "name": "save: at least 24 frames painted in the pop's 520ms",
+  "ok": true,
+  "got": "31 frames over 500ms"
+ },
+ {
+  "name": "save: it ends at exactly 1",
+  "ok": true,
+  "got": "1"
+ }
+]

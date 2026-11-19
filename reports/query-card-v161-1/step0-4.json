@@ -1,0 +1,22 @@
+{
+ "longs": [
+  {
+   "at": -16,
+   "dur": 59
+  },
+  {
+   "at": 683,
+   "dur": 1201
+  },
+  {
+   "at": 2054,
+   "dur": 51
+  },
+  {
+   "at": 2116,
+   "dur": 98
+  }
+ ],
+ "framesBeforeTheFreeze": 35,
+ "firstFrameAfterPress": 57
+}

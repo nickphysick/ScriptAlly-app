@@ -1,0 +1,17 @@
+[
+ {
+  "name": "population: the primary is \"Add Rufus’s reply\"",
+  "ok": true,
+  "got": "Add Rufus’s reply"
+ },
+ {
+  "name": "population: the save landed (the toast)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "save: a painted frame shows the frame's scale below 1 within 100ms of the press",
+  "ok": true,
+  "got": "35ms"
+ }
+]

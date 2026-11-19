@@ -13,6 +13,8 @@ import type { StepMaterial } from "../../../lib/qc152Write";
 import type { QueryStatus } from "../../../types";
 import { CalendarField, MatChips, PopCtx, type MatEnv } from "./QcEdit152";
 import { StepGlyph } from "./QcBubble152";
+/* Query card v161.1 — a step's delete presses the card in, as every save that bumps does */
+import { pressAtPointer, pressThen } from "./qcMotion160";
 
 const sod = (ms: number) => { const d = new Date(ms); d.setHours(0, 0, 0, 0); return d.getTime(); };
 
@@ -102,7 +104,7 @@ export const QcStepEdit1522: React.FC<StepEditProps> = (p) => {
           <div className="qc1522-conf in" data-qc1522="delete-confirm">
             <span>{p.deleteText}</span><span className="sp" />
             <button type="button" className="qc1522-lk" data-qc1522="keep-step" onClick={() => setDel(false)}>Keep it</button>
-            <button type="button" className="qc1522-btn nv sm" data-qc1522="delete-ok" disabled={p.busy} onClick={() => void p.onDelete()}>Delete</button>
+            <button type="button" className="qc1522-btn nv sm" data-qc1522="delete-ok" disabled={p.busy} onPointerDown={(e) => pressAtPointer(e.currentTarget.closest<HTMLElement>(".spanel"))} onClick={(e) => { const fr = e.currentTarget.closest<HTMLElement>(".spanel"); pressThen(fr, () => void p.onDelete()); }}>Delete</button>
           </div>
         ) : conf ? (
           <div className="qc1522-conf in" data-qc1522="discard-strip">

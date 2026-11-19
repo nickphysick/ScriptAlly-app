@@ -46,7 +46,7 @@ import { AgentTab158 } from "./QcAgent158";
 import { MaterialsTab158 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
 /* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
-import { bump, easeBg, fadeIn, finishAll, fold, foot as footIn, hold, isHeld, markPop, reduced, release, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
+import { bump, easeBg, fadeIn, finishAll, fold, foot as footIn, hold, isHeld, isPressed, markPop, pressAtPointer, pressBack, pressThen, reduced, release, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
 import "./qcv160.css";
 import { useLanding160, type Motion160 } from "./useLanding160";
 
@@ -383,6 +383,16 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     return () => { window.cancelAnimationFrame(raf); window.clearTimeout(cap); };
   }, [heldN, motionDone]);
   useEffect(() => () => release(rootRef.current), [r.id]);
+  /* v161.1 — nothing landed: the page withdrew the motion (the save failed or was refused), or the save finished and drew
+     nothing within 1.5s. The frame eases back to 1 with no pop. (The press's own 4s net is the last resort.) */
+  const motionN = p.motion?.n ?? null;
+  useEffect(() => {
+    const frame = rootRef.current?.closest<HTMLElement>(".spanel") ?? null;
+    if (!p.motion) { pressBack(frame); return undefined; }
+    if (!motionDone) return undefined;
+    const t = window.setTimeout(() => { const root = rootRef.current; if (isPressed(frame) && !isHeld(root)) pressBack(frame); }, 1500);
+    return () => window.clearTimeout(t);
+  }, [motionN, motionDone, !p.motion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const chips = (cs: ThreadChip[], key: string) => cs.length ? (
     <span className="qc152-chs" data-qc152="chips">
@@ -619,7 +629,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             <span>{toastGone.msg}</span>{toastGone.undo ? <button type="button" tabIndex={-1}>Undo</button> : null}
           </div>
         ) : null}
-        {p.toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{p.toast.msg}</span>{p.toast.onUndo ? <button type="button" data-qc1522="undo" onClick={p.toast.onUndo}>Undo</button> : null}</div> : null}
+        {p.toast ? <div className="qc1522-toast" role="status" data-qc1522="toast"><span>{p.toast.msg}</span>{p.toast.onUndo ? <button type="button" data-qc1522="undo" onPointerDown={(e) => pressAtPointer(e.currentTarget.closest<HTMLElement>(".spanel"))} onClick={(e) => { const u = p.toast?.onUndo; if (u) pressThen(e.currentTarget.closest<HTMLElement>(".spanel"), u, true); }}>Undo</button> : null}</div> : null}
         {p.burst ? <div key={p.burst} className="qc1522-burst" aria-hidden="true" data-qc1522="burst">{Array.from({ length: 46 }, (_, k) => <i key={k} style={{ left: `${(k * 37) % 100}%`, background: ["#f2ebe0", "#f3d3c6", "#d3dce7", "#cbd9be"][k % 4], animationDelay: `${(k % 7) * 0.08}s` }} />)}</div> : null}
       </div>
       {tip.node}
