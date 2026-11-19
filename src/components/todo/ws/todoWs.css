@@ -163,7 +163,6 @@
 .tws-du { text-align: right; min-width: 40px; line-height: 1.15; }
 .tws-du b { display: block; font: 400 16px var(--tw-type); color: var(--tw-ink2); }
 .tws-du small { display: block; font: 14px var(--tw-serif); color: var(--tw-mut2); white-space: nowrap; }
-.tws-du[data-late] small, .tws-du[data-late] b { color: var(--tw-late); }
 .tws-qact { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: none; gap: 4px; background: #fff; padding-left: 6px; }
 .tws-ti:hover .tws-qact, .tws-ti:focus-within .tws-qact { display: flex; }
 .tws-qact span[role="button"] {

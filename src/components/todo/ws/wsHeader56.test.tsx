@@ -45,9 +45,9 @@ describe("the navy header (WsHeader56)", () => {
     expect(h).not.toMatch(/legend|qc1531-lg|tws54-lg/);
   });
   it("What needs doing and one italic line; a part at 0 is left out, both at 0 leaves no line", () => {
-    expect(html(BD)).toContain('<b>What needs doing</b><small data-tws56="line"><em data-tws56="late">3</em> late · <em data-tws56="house">31</em> to tidy</small>');
+    expect(html(BD)).toContain('<b>What needs doing</b><small data-tws56="line"><em data-tws56="late">3</em> past expected · <em data-tws56="house">31</em> to tidy</small>');
     expect(html({ ...BD, late: 0 })).toContain('<small data-tws56="line"><em data-tws56="house">31</em> to tidy</small>');
-    expect(html({ ...BD, house: 0 })).toContain('<small data-tws56="line"><em data-tws56="late">3</em> late</small>');
+    expect(html({ ...BD, house: 0 })).toContain('<small data-tws56="line"><em data-tws56="late">3</em> past expected</small>');
     expect(html({ ...BD, late: 0, house: 0 })).not.toContain('data-tws56="line"');
     expect(wordsLine56({ ...BD, late: 0, house: 0 })).toEqual([]);
   });
