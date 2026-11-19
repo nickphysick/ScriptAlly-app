@@ -59,7 +59,7 @@ async function ruleProbe(page: Page, key: string, vw: number) {
 /* Consistency fixes v1: CA_CHECK=1 measures every fix's elements (check-probe.js) and crops the first of each at 1512
    into CA_RULE_SHOTS/<CA_LABEL>/<page>/<fix>.png (git-ignored) */
 const CHECK = process.env.CA_CHECK === "1" ? readFileSync(resolve(process.cwd(), "audits/consistency-fixes-v1/check-probe.js"), "utf8") : null;
-const FIXES = CHECK ? (JSON.parse(readFileSync(resolve(process.cwd(), "audits/consistency-fixes-v1/fixes.json"), "utf8")).fixes as Record<string, { sel: string; pages: string[] }>) : {};
+const FIXES = CHECK ? (JSON.parse(readFileSync(resolve(process.cwd(), process.env.CA_FIXES || "audits/consistency-fixes-v1/fixes.json"), "utf8")).fixes as Record<string, { sel: string; pages: string[] }>) : {};
 async function checkProbe(page: Page, key: string, vw: number) {
   if (!CHECK) return;
   const sels = Object.fromEntries(Object.entries(FIXES).filter(([, f]) => f.pages.includes(key)).map(([id, f]) => [id, f.sel]));

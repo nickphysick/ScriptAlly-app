@@ -1,0 +1,315 @@
+{
+ "_note": "v1 kept fixes (prefixed v1:) + v1.1; the one file a run measures",
+ "fixes": {
+  "v1:R1-aap-info": {
+   "sel": ".aap-info",
+   "pages": [
+    "overlay-Add-an-agent-journey"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-cl26-bang": {
+   "sel": ".cl26-bang",
+   "pages": [
+    "agents"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-dv1-step": {
+   "sel": ".dv1-steps li > i",
+   "pages": [
+    "agents-discover"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-d22-road": {
+   "sel": ".d22-road small",
+   "pages": [
+    "dashboard",
+    "your-notes"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-laq-g": {
+   "sel": ".laq .laq-g",
+   "pages": [
+    "overlay-Log-a-query-journey"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-qc152-band": {
+   "sel": ".qc152 .qc152-band > span",
+   "pages": [
+    "overlay-Query-card-slide-out",
+    "todo",
+    "queries",
+    "queries-responses"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-qc152-av": {
+   "sel": ".qc152 .qc152-av",
+   "pages": [
+    "overlay-Query-card-slide-out",
+    "todo",
+    "queries",
+    "queries-responses"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-qc153-more": {
+   "sel": ".qc153-sm--more",
+   "pages": [
+    "queries"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-rsp15-stamp": {
+   "sel": ".rsp15-stamp",
+   "pages": [
+    "queries-responses"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-tws-kbd": {
+   "sel": ".tws-sb kbd",
+   "pages": [
+    "todo"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-mk-fbtag": {
+   "sel": ".mk-fbtag",
+   "pages": [
+    "pricing"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-mk-fbmorelbl": {
+   "sel": ".mk-fbmorelbl",
+   "pages": [
+    "pricing"
+   ],
+   "mode": "font"
+  },
+  "v1:R1-pgd": {
+   "sel": ".pgd-f span",
+   "pages": [
+    "queries-analytics"
+   ],
+   "mode": "font"
+  },
+  "v1:R2-queries-signoff": {
+   "sel": "[data-qc151='signoff-log']",
+   "pages": [
+    "queries"
+   ],
+   "mode": "fill"
+  },
+  "v1:R2-responses-share": {
+   "sel": ".rsp15-rbn",
+   "pages": [
+    "queries-responses"
+   ],
+   "mode": "fill"
+  },
+  "v1:R3-todo-wait": {
+   "sel": ".tws-gb[data-band='wait']",
+   "pages": [
+    "todo"
+   ],
+   "mode": "fill"
+  },
+  "P1-wait-pill": {
+   "mode": "fill",
+   "sel": ".tws-gb[data-band=\"wait\"] em",
+   "pages": [
+    "todo"
+   ]
+  },
+  "S-rail-lbl": {
+   "mode": "font",
+   "sel": ".wsr-ni .wsr-lbl",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile",
+    "account-preferences"
+   ]
+  },
+  "S-rail-ni": {
+   "mode": "same",
+   "sel": ".wsr-ni",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile",
+    "account-preferences"
+   ]
+  },
+  "S-rail-ct": {
+   "mode": "font",
+   "sel": ".wsr-ct",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile",
+    "account-preferences"
+   ]
+  },
+  "S-rail-fb": {
+   "mode": "font",
+   "sel": ".wsr-t",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile",
+    "account-preferences"
+   ]
+  },
+  "S-sfield-k": {
+   "mode": "font",
+   "sel": ".ws-pagebar .ws-sfield-k",
+   "pages": [
+    "dashboard",
+    "todo"
+   ]
+  },
+  "S-sfield": {
+   "mode": "same",
+   "sel": ".ws-pagebar .ws-sfield",
+   "pages": [
+    "dashboard",
+    "todo"
+   ]
+  },
+  "S-sfield-l": {
+   "mode": "same",
+   "sel": ".ws-pagebar .ws-sfield-l",
+   "pages": [
+    "dashboard",
+    "todo"
+   ]
+  },
+  "S-esc": {
+   "mode": "font",
+   "sel": ".ws-pagebar .ws-esc",
+   "pages": [
+    "account-profile",
+    "account-preferences"
+   ]
+  },
+  "S-backapp": {
+   "mode": "same",
+   "sel": ".ws-pagebar .ws-backapp",
+   "pages": [
+    "account-profile",
+    "account-preferences"
+   ]
+  },
+  "S-betapill": {
+   "mode": "font",
+   "sel": ".sa-betapill",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile"
+   ]
+  },
+  "S-betastrip": {
+   "mode": "same",
+   "sel": ".sa-betastrip",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile"
+   ]
+  },
+  "D-finclose": {
+   "mode": "fill",
+   "sel": ".fv2-finclose",
+   "pages": [
+    "dashboard"
+   ]
+  },
+  "B-betalink": {
+   "mode": "color",
+   "sel": ".sa-betastrip p button",
+   "pages": [
+    "dashboard",
+    "todo",
+    "account-profile"
+   ]
+  },
+  "R-footer-h4": {
+   "mode": "color",
+   "sel": ".af .af-col h4",
+   "pages": [
+    "account-profile",
+    "help",
+    "your-notes",
+    "plans"
+   ]
+  },
+  "R-footer-made": {
+   "mode": "color",
+   "sel": ".af-made svg",
+   "pages": [
+    "account-profile",
+    "help",
+    "your-notes",
+    "plans"
+   ]
+  },
+  "R-acct-av": {
+   "mode": "color",
+   "sel": ".acct-page .sc-id-av",
+   "pages": [
+    "account-profile"
+   ]
+  },
+  "R-ms-soon": {
+   "mode": "color",
+   "sel": ".ms29 .ms29-soon",
+   "pages": [
+    "manuscripts"
+   ]
+  },
+  "R-cp-rowu": {
+   "mode": "color",
+   "sel": ".cp32 .cp32-rowu",
+   "pages": [
+    "manuscripts-comps"
+   ]
+  },
+  "R-d22-keep": {
+   "mode": "same",
+   "sel": ".d22-how, .d22-tc, .d22-ask p b, .d22-lt, .d22-fstat em",
+   "pages": [
+    "dashboard",
+    "your-notes"
+   ]
+  },
+  "R-yn-keep": {
+   "mode": "same",
+   "sel": ".yn .yn-nrep b, .yn .yn-ns small b, .yn-oc.ok, .yn-oc.pl",
+   "pages": [
+    "your-notes"
+   ]
+  },
+  "T-du-late": {
+   "mode": "color",
+   "sel": ".tws-du[data-late] b, .tws-du[data-late] small",
+   "pages": [
+    "todo"
+   ]
+  },
+  "T-hdr-line": {
+   "mode": "same",
+   "sel": "[data-tws56=\"line\"]",
+   "pages": [
+    "todo"
+   ]
+  }
+ }
+}

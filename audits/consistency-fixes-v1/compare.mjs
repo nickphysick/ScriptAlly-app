@@ -18,7 +18,9 @@ import { resolve } from "node:path";
 const [B, A] = process.argv.slice(2, 4).map((p) => resolve(p));
 const OUT = process.argv.includes("--out") ? resolve(process.argv[process.argv.indexOf("--out") + 1]) : resolve(A, "verdicts.json");
 const ROOT = resolve(new URL("../..", import.meta.url).pathname);
-const FIXES = JSON.parse(readFileSync(resolve(ROOT, "audits/consistency-fixes-v1/fixes.json"), "utf8")).fixes;
+const FIXES = JSON.parse(readFileSync(resolve(ROOT, process.env.CA_FIXES || "audits/consistency-fixes-v1/fixes.json"), "utf8")).fixes;
+/* v1.1: a fix may name its mode; without one, the v1 prefix rule (R1 = font, else fill) */
+const modeOf = (id, fx) => fx.mode || (id.startsWith("R1") ? "font" : "fill");
 const load = (d, f) => (existsSync(resolve(d, f)) ? JSON.parse(readFileSync(resolve(d, f), "utf8")) : null);
 
 const verdicts = {};
@@ -35,7 +37,14 @@ for (const [id, fx] of Object.entries(FIXES)) {
         if (!x || !y) { rows.push({ i, problem: `element count ${b.length} → ${a.length}` }); continue; }
         v.measured++;
         const r = { i, text: y.text, fontSize: `${x.fontSize}→${y.fontSize}`, lines: `${x.lines}→${y.lines}`, box: `${x.box.w}x${x.box.h}→${y.box.w}x${y.box.h}`, parent: x.parent && y.parent ? `${x.parent.w}x${x.parent.h}→${y.parent.w}x${y.parent.h}` : null, problems: [] };
-        if (id.startsWith("R1")) {
+        const mode = modeOf(id, fx);
+        const moved = Math.abs(y.box.w - x.box.w) > 1 || Math.abs(y.box.h - x.box.h) > 1 || Math.abs(y.box.x - x.box.x) > 1 || Math.abs(y.box.y - x.box.y) > 1;
+        if (mode === "color" || mode === "same") {
+          r.color = `${x.color} → ${y.color}`;
+          if (mode === "color" && x.color === y.color) r.problems.push("colour unchanged");
+          if (mode === "same" && (x.color !== y.color || x.bg !== y.bg || x.text !== y.text && !process.env.CA_TEXT_OK)) r.problems.push(`changed: ${x.color}/${x.bg}/${x.text} → ${y.color}/${y.bg}/${y.text}`);
+          if (moved) r.problems.push(`box moved/resized ${JSON.stringify(x.box)} → ${JSON.stringify(y.box)}`);
+        } else if (mode === "font") {
           if (y.fontSize < 12) r.problems.push(`still ${y.fontSize}px (another rule wins)`);
           if (y.lines > x.lines) r.problems.push(`wraps: ${x.lines} → ${y.lines} lines`);
           if (y.clipped && !x.clipped) r.problems.push(`clipped: ${y.clipped}`);
