@@ -666,11 +666,12 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     if (!uid) return { ok: false as const, error: "Not signed in" };
     return commitAgentEdits(firestoreDb, uid, id, patch);
   }, [uid]);
-  const { storedNotes, onAddNote } = useAgentNotes(p.preview ? null : a, uid, writeAgent);
-  const flat = (a.notes ?? "").trim();
+  const { storedNotes, onAddNote, onEditNote, onDeleteNote, onRestoreNote } = useAgentNotes(p.preview ? null : a, uid, writeAgent);
+  /* the old string is shown as written (never trimmed into a new value): it is edited and deleted as the one field it is */
+  const flat = a.notes ?? "";
   const pinnedId = a.pinnedNoteId ?? null;
   const noteList: NoteIn[] = [
-    ...(flat ? [{ id: FLAT_NOTE_ID, text: flat, ms: null, pinned: pinnedId === FLAT_NOTE_ID, top: true }] : []),
+    ...(flat.trim() ? [{ id: FLAT_NOTE_ID, text: flat, ms: null, pinned: pinnedId === FLAT_NOTE_ID, top: true }] : []),
     ...storedNotes.map((n) => { const t = Date.parse(n.createdAt); return { id: n.id, text: n.text, ms: Number.isFinite(t) ? t : null, pinned: pinnedId === n.id }; }),
   ];
   /* Agent card v2 ruling 1 — Pin as the query card's notes pin: one pinned note, first in the list; pinning another moves the
@@ -680,6 +681,25 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     void writeAgent(a.id, { pinnedNoteId: id, notePreview: computeNotePreview(list, id ?? undefined) })
       .then((r) => { if (!r.ok) showToast({ message: "Couldn’t pin that note. Try again." }); });
   };
+  /* Agent card v2 ruling 4 — Edit and Delete on every note of the writer's. The old string writes back to its own field
+     through the card's notes save (`onNotes`); Delete clears it, and Undo writes the same bytes back. */
+  const editNote = async (id: string, text: string): Promise<boolean> => (id === FLAT_NOTE_ID ? p.onNotes(text) : onEditNote(id, text));
+  const deleteNote = (id: string) => {
+    if (id === FLAT_NOTE_ID) {
+      const was = a.notes ?? "";
+      void p.onNotes("").then((ok) => {
+        if (!ok) { showToast({ message: "Couldn’t delete that note. Try again." }); return; }
+        showToast({ message: "Note deleted", undo: async () => { if (await p.onNotes(was)) showToast({ message: "Note restored" }); } });
+      });
+      return;
+    }
+    const n = storedNotes.find((x) => x.id === id);
+    if (!n) return;
+    void onDeleteNote(n).then((ok) => {
+      if (!ok) { showToast({ message: "Couldn’t delete that note. Try again." }); return; }
+      showToast({ message: "Note deleted", undo: async () => { if (await onRestoreNote(n)) showToast({ message: "Note restored" }); } });
+    });
+  };
   const quotes = threads.flatMap((t) => quotesOf(t.steps));
   const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
   const notes = (
@@ -688,6 +708,8 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         placeholder={`Add a note about ${m.first}`} emptySub={`This is the place for where you met ${m.first}, and anything worth remembering before you query.`}
         onAdd={(text) => { void onAddNote(text).then((ok) => { if (ok) { land([]); showToast({ message: `Noted on ${m.first}’s card` }); } else showToast({ message: "Couldn’t save that note. Try again." }); }); }}
         onPin={p.preview ? null : (id, on) => pinNote(on ? id : null)}
+        onEdit={p.preview ? null : editNote}
+        onDelete={p.preview ? null : deleteNote}
         onTask={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id, dueDate: todayIso() }).then(() => showToast({ message: "On your to-do list for today" })); }}
         onCork={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id }).then(() => showToast({ message: "Pinned to your Corkboard" })); }} />
     </div>

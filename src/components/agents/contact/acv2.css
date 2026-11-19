@@ -88,5 +88,8 @@
   .acv2, .acv2 * { transition: none !important; animation: none !important; }
 }
 
+/* ruling 4 — a writer's note edited in place (the query card has no edit, so this is the agent card's) */
+.acv2 .nx-edit textarea { width: 100%; box-sizing: border-box; min-height: 72px; resize: vertical; border: 0; outline: 0; padding: 10px 12px; border-radius: 8px; background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; font: 400 15px/1.45 var(--sp-serif) !important; color: #1c130f; }
+.acv2 .nx-edit .nx-acts { justify-content: flex-end; }
 /* ruling 3 — an unknown fact box's small "Add" */
 .acv2 .nx-box .acv2-boxadd { font-style: normal !important; font-size: 13.5px !important; }

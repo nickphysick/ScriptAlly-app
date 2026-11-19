@@ -72,14 +72,26 @@ export interface NotesTab158Props {
   placeholder?: string;
   /** Agent card v2 — the empty list's second line; absent: the query card's */
   emptySub?: string;
+  /** Agent card v2 — a writer's note edited in place (true when it landed); absent: no Edit */
+  onEdit?: ((id: string, text: string) => Promise<boolean>) | null;
+  /** Agent card v2 — a writer's note deleted (the caller offers Undo); absent: no Delete */
+  onDelete?: ((id: string) => void) | null;
 }
 
 export const NotesTab158: React.FC<NotesTab158Props> = (p) => {
   const [draft, setDraft] = useState("");
+  /* Agent card v2 — one note edited in place at a time: its id and the words so far */
+  const [editing, setEditing] = useState<{ id: string; text: string } | null>(null);
+  const saveEdit = async () => {
+    if (!editing || !p.onEdit) return;
+    const t = editing.text.trim();
+    if (!t) return;
+    if (await p.onEdit(editing.id, t)) setEditing(null);
+  };
   const ta = useRef<HTMLTextAreaElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const [scrollTo, setScrollTo] = useState<number | null>(null);
-  useEffect(() => { setDraft(""); }, [p.resetKey]);
+  useEffect(() => { setDraft(""); setEditing(null); }, [p.resetKey]);
   /* the field grows with what is typed, to 120px */
   useLayoutEffect(() => {
     const el = ta.current; if (!el) return;
@@ -114,11 +126,23 @@ export const NotesTab158: React.FC<NotesTab158Props> = (p) => {
           <article key={e.n.id} className="nx-n" data-qc158="note" data-id={e.n.id} data-pinned={e.n.pinned ? "" : undefined}
             data-new={scrollTo != null && newest?.id === e.n.id ? "" : undefined} tabIndex={0}>
             <header><b>You</b>{e.n.ms != null ? <span>· {dayLabel(e.n.ms, p.nowMs)}</span> : null}{e.n.pinned ? <span className="pin" data-qc158="pinned">Pinned</span> : null}</header>
-            <p>{e.n.text}</p>
-            <div className="nx-acts" data-qc158="acts">
+            {editing && editing.id === e.n.id ? (
+              <div className="nx-edit" data-qc158="edit">
+                <textarea value={editing.text} rows={3} aria-label="Edit this note" data-qc158="edit-field" autoFocus
+                  onChange={(ev) => setEditing({ id: e.n.id, text: ev.target.value })}
+                  onKeyDown={(ev) => { if (ev.key === "Enter" && (ev.metaKey || ev.ctrlKey)) { ev.preventDefault(); void saveEdit(); } if (ev.key === "Escape") { ev.stopPropagation(); setEditing(null); } }} />
+                <div className="nx-acts" data-qc158="edit-acts">
+                  <button type="button" className="nx-lk" data-qc158="edit-cancel" onClick={() => setEditing(null)}>Cancel</button>
+                  <button type="button" className="nx-lk" data-qc158="edit-save" disabled={!editing.text.trim()} onClick={() => void saveEdit()}>Save</button>
+                </div>
+              </div>
+            ) : <p>{e.n.text}</p>}
+            <div className="nx-acts" data-qc158="acts" hidden={!!editing && editing.id === e.n.id}>
               {p.onPin ? <button type="button" className="nx-lk" data-qc158="act" data-act="pin" onClick={() => p.onPin!(e.n.id, !e.n.pinned)}>{e.n.pinned ? "Unpin" : "Pin to the top"}</button> : null}
               {p.onTask ? <button type="button" className="nx-lk" data-qc158="act" data-act="task" onClick={() => p.onTask!(e.n.text)}>Make it a task</button> : null}
               {p.onCork ? <button type="button" className="nx-lk" data-qc158="act" data-act="cork" onClick={() => p.onCork!(e.n.text)}>Send to Corkboard</button> : null}
+              {p.onEdit ? <button type="button" className="nx-lk" data-qc158="act" data-act="edit" onClick={() => setEditing({ id: e.n.id, text: e.n.text })}>Edit</button> : null}
+              {p.onDelete ? <button type="button" className="nx-lk" data-qc158="act" data-act="delete" onClick={() => p.onDelete!(e.n.id)}>Delete</button> : null}
             </div>
           </article>
         ) : (

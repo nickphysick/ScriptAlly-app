@@ -124,7 +124,11 @@ test("AC2-1 · the shell: height, band, frame, pill", async ({ page }) => {
   /* the band on one agent per stand, the frame, and the pill's tint for five stages */
   const vp = SIZES[0];
   const stands = new Set<string>(), stages = new Set<string>();
-  await walk(page, vp, async (r) => {
+  let mutated = false;
+  await walk(page, vp, async (r0) => {
+    /* the walk opens the page afresh, so a CSS mutation is put back once it has, and the card read again */
+    let r = r0;
+    if (!mutated && MUTS.size) { mutated = true; await mutate(); r = (await readCard(page)) ?? r0; }
     if (!stands.has(r.stand)) {
       stands.add(r.stand);
       L.check(`band · ${r.stand} (${r.name})`, r.band === "rgb(94, 113, 137)", r.band);
@@ -137,7 +141,6 @@ test("AC2-1 · the shell: height, band, frame, pill", async ({ page }) => {
     }
     return stands.size >= 4 && stages.size >= 5;
   });
-  if (MUTS.size) await mutate();
   L.check("pill · five stages seen", stages.size >= 5, [...stages].join(", "));
   L.done(14);
 });
@@ -552,3 +555,35 @@ test("AC2-8 · the add doors focus their own field", async ({ page }) => {
   L.done(9);
 });
 
+test("AC2-9 · the old notes string: Edit, Delete and Undo", async ({ page }) => {
+  test.setTimeout(240_000);
+  const L = new Ledger("AC2-9");
+  const before = agentOf("acv2fx-notes");
+  const old = String(before.notes);
+  await openAc(page, SIZES[0], { id: "acv2fx-notes" });
+  await tab(page, "notes");
+  const flatNote = page.locator(`${AC} [data-qc158='note'][data-id='__flat__']`);
+  L.check("the old string is a note with Edit and Delete", (await flatNote.locator("[data-act='edit']").count()) === 1 && (await flatNote.locator("[data-act='delete']").count()) === 1, "");
+  /* Edit: only the string changes */
+  const edited = `${old}\nAnd she answers within a week. (edited)`;
+  await noteAct(page, "__flat__", "edit");
+  await page.locator(`${AC} [data-qc158='edit-field']`).fill(edited);
+  await page.locator(`${AC} [data-qc158='edit-save']`).click();
+  await page.waitForTimeout(1500);
+  const after = agentOf("acv2fx-notes");
+  const strip = (a: Record<string, unknown>) => JSON.stringify(Object.fromEntries(Object.entries(a).filter(([k]) => k !== "notes").sort(([x], [y]) => x.localeCompare(y))));
+  L.check("edit · the string is the new words", after.notes === edited, JSON.stringify(after.notes));
+  L.check("edit · nothing else on the agent changed", strip(after) === strip(before), strip(after) === strip(before) ? "" : `${strip(before).slice(0, 160)} vs ${strip(after).slice(0, 160)}`);
+  /* Delete, then Undo: the same bytes back */
+  if (MUTS.has("undodrop")) await page.evaluate(() => document.addEventListener("click", (e) => { if ((e.target as HTMLElement).closest(".sa-toast-undo")) e.stopImmediatePropagation(); }, true));
+  await noteAct(page, "__flat__", "delete");
+  await page.waitForTimeout(1500);
+  L.check("delete · the string is cleared", agentOf("acv2fx-notes").notes === "", JSON.stringify(agentOf("acv2fx-notes").notes));
+  L.check("delete · the note is gone from the card", (await page.locator(`${AC} [data-qc158='note'][data-id='__flat__']`).count()) === 0, "");
+  await page.locator(".sa-toast-undo:visible").last().click();
+  await page.waitForTimeout(1500);
+  const back = agentOf("acv2fx-notes").notes;
+  L.check("undo · byte for byte", back === edited, JSON.stringify(back));
+  L.check("undo · shown again, first", (await page.locator(`${AC} [data-qc158='note']`).first().getAttribute("data-id")) === "__flat__", "");
+  L.done(7);
+});
