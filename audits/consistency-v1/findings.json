@@ -1,9 +1,8 @@
 {
- "generated": "2026-11-19T00:39:02.613Z",
+ "generated": "2026-11-19T01:01:51.712Z",
  "counts": {
   "tier": {
-   "B": 145,
-   "A": 1,
+   "B": 146,
    "C": 6
   },
   "part": {
@@ -58,8 +57,8 @@
     "C": 0
    },
    "footers": {
-    "A": 1,
-    "B": 2,
+    "A": 0,
+    "B": 3,
     "C": 0
    },
    "in-page-nav": {
@@ -67653,6 +67652,224 @@
   },
   {
    "id": "B113",
+   "family": "workspace",
+   "vw": 1512,
+   "part": "footers",
+   "role": "page-footer",
+   "pages": [
+    "agents-discover",
+    "manuscripts-comps",
+    "queries-analytics",
+    "queries-responses"
+   ],
+   "variants": [
+    {
+     "sig": {
+      "fontFamily": "Source Serif 4",
+      "fontSize": 16,
+      "fontWeight": "400",
+      "lineHeight": 24,
+      "letterSpacing": "normal",
+      "textTransform": "",
+      "color": "#3a1c14",
+      "bg": "#f2eee8",
+      "border": "none",
+      "radius": "0",
+      "shadow": "none",
+      "padding": "0 0 26 0",
+      "height": 345
+     },
+     "pages": [
+      "agents-discover",
+      "queries-analytics",
+      "queries-responses"
+     ],
+     "n": 3,
+     "examples": [
+      {
+       "page": "agents-discover",
+       "cls": [
+        "footer.af",
+        "div.dv1-page",
+        "div.wpg-scroll",
+        "div.wpg.dv1-wpg"
+       ],
+       "text": "QueryHawk A bird's-eye view of your querying campaign. Built",
+       "rect": {
+        "x": 32,
+        "y": 1523.8,
+        "w": 1360,
+        "h": 345.4
+       },
+       "shot": "shots/agents-discover/footers-page-footer-78580062e2.png",
+       "sources": [
+        "src/components/agents/contact/contactV11.css:82",
+        "src/components/agents/contact/contactV16.css:166",
+        "src/components/manuscripts/comps25/compsV25.css:63",
+        "src/components/manuscripts/comps32/comps32.css:222"
+       ]
+      },
+      {
+       "page": "queries-analytics",
+       "cls": [
+        "footer.af",
+        "div.a26-page",
+        "div.wpg-scroll",
+        "div.wpg.qa-wpg"
+       ],
+       "text": "QueryHawk A bird's-eye view of your querying campaign. Built",
+       "rect": {
+        "x": 32,
+        "y": 3467.2,
+        "w": 1360,
+        "h": 345.4
+       },
+       "shot": "shots/queries-analytics/footers-page-footer-78580062e2.png",
+       "sources": [
+        "src/components/agents/contact/contactV11.css:82",
+        "src/components/agents/contact/contactV16.css:166",
+        "src/components/manuscripts/comps25/compsV25.css:63",
+        "src/components/manuscripts/comps32/comps32.css:222"
+       ]
+      },
+      {
+       "page": "queries-responses",
+       "cls": [
+        "footer.af",
+        "div.rsp-foot",
+        "div.rsp.rsp5.rsp15",
+        "div.rsp-page"
+       ],
+       "text": "QueryHawk A bird's-eye view of your querying campaign. Built",
+       "rect": {
+        "x": 32,
+        "y": 1651.8,
+        "w": 1360,
+        "h": 345.4
+       },
+       "shot": "shots/queries-responses/footers-page-footer-78580062e2.png",
+       "sources": [
+        "src/components/agents/contact/contactV11.css:82",
+        "src/components/agents/contact/contactV16.css:166",
+        "src/components/manuscripts/comps25/compsV25.css:63",
+        "src/components/manuscripts/comps32/comps32.css:222"
+       ]
+      }
+     ]
+    },
+    {
+     "sig": {
+      "fontFamily": "Source Serif 4",
+      "fontSize": 16,
+      "fontWeight": "400",
+      "lineHeight": 23.2,
+      "letterSpacing": "normal",
+      "textTransform": "",
+      "color": "#3a1c14",
+      "bg": "#f2eee8",
+      "border": "none",
+      "radius": "0",
+      "shadow": "none",
+      "padding": "0 0 26 0",
+      "height": 345
+     },
+     "pages": [
+      "manuscripts-comps"
+     ],
+     "n": 1,
+     "examples": [
+      {
+       "page": "manuscripts-comps",
+       "cls": [
+        "footer.af",
+        "div.cpv-page.cp30.cp32",
+        "div.wpg-scroll",
+        "div.wpg"
+       ],
+       "text": "QueryHawk A bird's-eye view of your querying campaign. Built",
+       "rect": {
+        "x": 32,
+        "y": 3116.2,
+        "w": 1360,
+        "h": 345.4
+       },
+       "shot": "shots/manuscripts-comps/footers-page-footer-37614c993f.png",
+       "sources": [
+        "src/components/agents/contact/contactV11.css:82",
+        "src/components/agents/contact/contactV16.css:166",
+        "src/components/manuscripts/comps25/compsV25.css:63",
+        "src/components/manuscripts/comps32/comps32.css:222"
+       ]
+      }
+     ]
+    }
+   ],
+   "fields": [
+    "lineHeight"
+   ],
+   "oracle": null,
+   "refNote": "Phase 3: moved from Tier A. The footer (shared AppFooter, .af) sets no line-height of its own; on Comps it inherits 1.45 from the page root (.cp30 { font: 400 16px/1.45 } — src/components/manuscripts/comps30/comps30.css:23), elsewhere 1.5. The footer renders identically (345.4px high on both) because its children set their own. The only fix is the Comps root line-height, which every unstyled text block on Comps inherits, so it would move other measurements by more than 1px (step 3); AppFooter is a shared primitive (not to be touched). Left for Nick.",
+   "forceTier": "B",
+   "tier": "B",
+   "reason": "Phase 3: moved from Tier A. The footer (shared AppFooter, .af) sets no line-height of its own; on Comps it inherits 1.45 from the page root (.cp30 { font: 400 16px/1.45 } — src/components/manuscripts/comps30/comps30.css:23), elsewhere 1.5. The footer renders identically (345.4px high on both) because its children set their own. The only fix is the Comps root line-height, which every unstyled text block on Comps inherits, so it would move other measurements by more than 1px (step 3); AppFooter is a shared primitive (not to be touched). Left for Nick.",
+   "visibility": 79,
+   "vws": [
+    1512,
+    1920
+   ],
+   "otherWidth": {
+    "vw": 1920,
+    "variants": 2,
+    "samePagesSplit": true,
+    "tier": "B",
+    "variantsData": [
+     {
+      "sig": {
+       "fontFamily": "Source Serif 4",
+       "fontSize": 16,
+       "fontWeight": "400",
+       "lineHeight": 24,
+       "letterSpacing": "normal",
+       "textTransform": "",
+       "color": "#3a1c14",
+       "bg": "#f2eee8",
+       "border": "none",
+       "radius": "0",
+       "shadow": "none",
+       "padding": "0 0 26 0",
+       "height": 345
+      },
+      "pages": [
+       "agents-discover",
+       "queries-analytics",
+       "queries-responses"
+      ]
+     },
+     {
+      "sig": {
+       "fontFamily": "Source Serif 4",
+       "fontSize": 16,
+       "fontWeight": "400",
+       "lineHeight": 23.2,
+       "letterSpacing": "normal",
+       "textTransform": "",
+       "color": "#3a1c14",
+       "bg": "#f2eee8",
+       "border": "none",
+       "radius": "0",
+       "shadow": "none",
+       "padding": "0 0 26 0",
+       "height": 345
+      },
+      "pages": [
+       "manuscripts-comps"
+      ]
+     }
+    ]
+   }
+  },
+  {
+   "id": "B114",
    "family": "non-workspace",
    "vw": 1512,
    "part": "form-controls",
@@ -67962,7 +68179,7 @@
    }
   },
   {
-   "id": "B114",
+   "id": "B115",
    "family": "workspace",
    "vw": 1512,
    "part": "lists",
@@ -68149,7 +68366,7 @@
    }
   },
   {
-   "id": "B115",
+   "id": "B116",
    "family": "public",
    "vw": 1512,
    "part": "type",
@@ -69274,7 +69491,7 @@
    }
   },
   {
-   "id": "B116",
+   "id": "B117",
    "family": "onboarding",
    "vw": 1512,
    "part": "type",
@@ -69720,7 +69937,7 @@
    }
   },
   {
-   "id": "B117",
+   "id": "B118",
    "family": "non-workspace",
    "vw": 1512,
    "part": "form-controls",
@@ -69888,7 +70105,7 @@
    }
   },
   {
-   "id": "B118",
+   "id": "B119",
    "family": "workspace",
    "vw": 1512,
    "part": "type",
@@ -70502,7 +70719,7 @@
    }
   },
   {
-   "id": "B119",
+   "id": "B120",
    "family": "public",
    "vw": 1512,
    "part": "in-page-nav",
@@ -70675,7 +70892,7 @@
    }
   },
   {
-   "id": "B120",
+   "id": "B121",
    "family": "public",
    "vw": 1512,
    "part": "in-page-nav",
@@ -70848,7 +71065,7 @@
    }
   },
   {
-   "id": "B121",
+   "id": "B122",
    "family": "overlays",
    "vw": 1512,
    "part": "in-page-nav",
@@ -71011,7 +71228,7 @@
    }
   },
   {
-   "id": "B122",
+   "id": "B123",
    "family": "overlays",
    "vw": 1512,
    "part": "type",
@@ -71629,7 +71846,7 @@
    }
   },
   {
-   "id": "B123",
+   "id": "B124",
    "family": "overlays",
    "vw": 1512,
    "part": "in-page-nav",
@@ -71925,7 +72142,7 @@
    }
   },
   {
-   "id": "B124",
+   "id": "B125",
    "family": "workspace",
    "vw": 1512,
    "part": "in-page-nav",
@@ -72098,7 +72315,7 @@
    }
   },
   {
-   "id": "B125",
+   "id": "B126",
    "family": "non-workspace",
    "vw": 1512,
    "part": "in-page-nav",
@@ -72269,7 +72486,7 @@
    }
   },
   {
-   "id": "B126",
+   "id": "B127",
    "family": "non-workspace",
    "vw": 1512,
    "part": "in-page-nav",
@@ -72441,7 +72658,7 @@
    }
   },
   {
-   "id": "B127",
+   "id": "B128",
    "family": "workspace",
    "vw": 1512,
    "part": "form-controls",
@@ -72664,7 +72881,7 @@
    }
   },
   {
-   "id": "B128",
+   "id": "B129",
    "family": "public",
    "vw": 1512,
    "part": "buttons",
@@ -72836,7 +73053,7 @@
    }
   },
   {
-   "id": "B129",
+   "id": "B130",
    "family": "public",
    "vw": 1512,
    "part": "tags-status",
@@ -73069,7 +73286,7 @@
    }
   },
   {
-   "id": "B130",
+   "id": "B131",
    "family": "all",
    "vw": 1512,
    "part": "rules",
@@ -73240,7 +73457,7 @@
    ]
   },
   {
-   "id": "B131",
+   "id": "B132",
    "family": "non-workspace",
    "vw": 1512,
    "part": "type",
@@ -73483,7 +73700,7 @@
    }
   },
   {
-   "id": "B132",
+   "id": "B133",
    "family": "workspace",
    "vw": 1512,
    "part": "in-page-nav",
@@ -73655,7 +73872,7 @@
    }
   },
   {
-   "id": "B133",
+   "id": "B134",
    "family": "workspace",
    "vw": 1512,
    "part": "in-page-nav",
@@ -73825,7 +74042,7 @@
    }
   },
   {
-   "id": "B134",
+   "id": "B135",
    "family": "overlays",
    "vw": 1512,
    "part": "in-page-nav",
@@ -73991,7 +74208,7 @@
    }
   },
   {
-   "id": "B135",
+   "id": "B136",
    "family": "onboarding",
    "vw": 1512,
    "part": "type",
@@ -74160,7 +74377,7 @@
    }
   },
   {
-   "id": "B136",
+   "id": "B137",
    "family": "non-workspace",
    "vw": 1512,
    "part": "form-controls",
@@ -74353,7 +74570,7 @@
    }
   },
   {
-   "id": "B137",
+   "id": "B138",
    "family": "onboarding",
    "vw": 1512,
    "part": "form-controls",
@@ -74567,7 +74784,7 @@
    }
   },
   {
-   "id": "B138",
+   "id": "B139",
    "family": "public",
    "vw": 1512,
    "part": "tags-status",
@@ -75268,7 +75485,7 @@
    }
   },
   {
-   "id": "B139",
+   "id": "B140",
    "family": "non-workspace",
    "vw": 1512,
    "part": "lists",
@@ -75570,7 +75787,7 @@
    }
   },
   {
-   "id": "B140",
+   "id": "B141",
    "family": "overlays",
    "vw": 1512,
    "part": "type",
@@ -75817,7 +76034,7 @@
    }
   },
   {
-   "id": "B141",
+   "id": "B142",
    "family": "non-workspace",
    "vw": 1512,
    "part": "lists",
@@ -76044,7 +76261,7 @@
    }
   },
   {
-   "id": "B142",
+   "id": "B143",
    "family": "dashboard",
    "vw": 1512,
    "part": "lists",
@@ -76271,7 +76488,7 @@
    }
   },
   {
-   "id": "B143",
+   "id": "B144",
    "family": "overlays",
    "vw": 1512,
    "part": "lists",
@@ -76434,7 +76651,7 @@
    }
   },
   {
-   "id": "B144",
+   "id": "B145",
    "family": "all",
    "vw": 1512,
    "part": "rules",
@@ -76482,7 +76699,7 @@
    ]
   },
   {
-   "id": "B145",
+   "id": "B146",
    "family": "all",
    "vw": 1512,
    "part": "rules",
@@ -76527,229 +76744,6 @@
    "vws": [
     1512
    ]
-  },
-  {
-   "id": "A146",
-   "family": "workspace",
-   "vw": 1512,
-   "part": "footers",
-   "role": "page-footer",
-   "pages": [
-    "agents-discover",
-    "manuscripts-comps",
-    "queries-analytics",
-    "queries-responses"
-   ],
-   "variants": [
-    {
-     "sig": {
-      "fontFamily": "Source Serif 4",
-      "fontSize": 16,
-      "fontWeight": "400",
-      "lineHeight": 24,
-      "letterSpacing": "normal",
-      "textTransform": "",
-      "color": "#3a1c14",
-      "bg": "#f2eee8",
-      "border": "none",
-      "radius": "0",
-      "shadow": "none",
-      "padding": "0 0 26 0",
-      "height": 345
-     },
-     "pages": [
-      "agents-discover",
-      "queries-analytics",
-      "queries-responses"
-     ],
-     "n": 3,
-     "examples": [
-      {
-       "page": "agents-discover",
-       "cls": [
-        "footer.af",
-        "div.dv1-page",
-        "div.wpg-scroll",
-        "div.wpg.dv1-wpg"
-       ],
-       "text": "QueryHawk A bird's-eye view of your querying campaign. Built",
-       "rect": {
-        "x": 32,
-        "y": 1523.8,
-        "w": 1360,
-        "h": 345.4
-       },
-       "shot": "shots/agents-discover/footers-page-footer-78580062e2.png",
-       "sources": [
-        "src/components/agents/contact/contactV11.css:82",
-        "src/components/agents/contact/contactV16.css:166",
-        "src/components/manuscripts/comps25/compsV25.css:63",
-        "src/components/manuscripts/comps32/comps32.css:222"
-       ]
-      },
-      {
-       "page": "queries-analytics",
-       "cls": [
-        "footer.af",
-        "div.a26-page",
-        "div.wpg-scroll",
-        "div.wpg.qa-wpg"
-       ],
-       "text": "QueryHawk A bird's-eye view of your querying campaign. Built",
-       "rect": {
-        "x": 32,
-        "y": 3467.2,
-        "w": 1360,
-        "h": 345.4
-       },
-       "shot": "shots/queries-analytics/footers-page-footer-78580062e2.png",
-       "sources": [
-        "src/components/agents/contact/contactV11.css:82",
-        "src/components/agents/contact/contactV16.css:166",
-        "src/components/manuscripts/comps25/compsV25.css:63",
-        "src/components/manuscripts/comps32/comps32.css:222"
-       ]
-      },
-      {
-       "page": "queries-responses",
-       "cls": [
-        "footer.af",
-        "div.rsp-foot",
-        "div.rsp.rsp5.rsp15",
-        "div.rsp-page"
-       ],
-       "text": "QueryHawk A bird's-eye view of your querying campaign. Built",
-       "rect": {
-        "x": 32,
-        "y": 1651.8,
-        "w": 1360,
-        "h": 345.4
-       },
-       "shot": "shots/queries-responses/footers-page-footer-78580062e2.png",
-       "sources": [
-        "src/components/agents/contact/contactV11.css:82",
-        "src/components/agents/contact/contactV16.css:166",
-        "src/components/manuscripts/comps25/compsV25.css:63",
-        "src/components/manuscripts/comps32/comps32.css:222"
-       ]
-      }
-     ]
-    },
-    {
-     "sig": {
-      "fontFamily": "Source Serif 4",
-      "fontSize": 16,
-      "fontWeight": "400",
-      "lineHeight": 23.2,
-      "letterSpacing": "normal",
-      "textTransform": "",
-      "color": "#3a1c14",
-      "bg": "#f2eee8",
-      "border": "none",
-      "radius": "0",
-      "shadow": "none",
-      "padding": "0 0 26 0",
-      "height": 345
-     },
-     "pages": [
-      "manuscripts-comps"
-     ],
-     "n": 1,
-     "examples": [
-      {
-       "page": "manuscripts-comps",
-       "cls": [
-        "footer.af",
-        "div.cpv-page.cp30.cp32",
-        "div.wpg-scroll",
-        "div.wpg"
-       ],
-       "text": "QueryHawk A bird's-eye view of your querying campaign. Built",
-       "rect": {
-        "x": 32,
-        "y": 3116.2,
-        "w": 1360,
-        "h": 345.4
-       },
-       "shot": "shots/manuscripts-comps/footers-page-footer-37614c993f.png",
-       "sources": [
-        "src/components/agents/contact/contactV11.css:82",
-        "src/components/agents/contact/contactV16.css:166",
-        "src/components/manuscripts/comps25/compsV25.css:63",
-        "src/components/manuscripts/comps32/comps32.css:222"
-       ]
-      }
-     ]
-    }
-   ],
-   "fields": [
-    "lineHeight"
-   ],
-   "oracle": null,
-   "tier": "A",
-   "reason": "One page (manuscripts-comps) is 0.8000000000000007px off the value the other 3 pages use.",
-   "aTest": "one-page-within-2px",
-   "target": {
-    "variant": 0
-   },
-   "stray": {
-    "variant": 1
-   },
-   "visibility": 79,
-   "vws": [
-    1512,
-    1920
-   ],
-   "otherWidth": {
-    "vw": 1920,
-    "variants": 2,
-    "samePagesSplit": true,
-    "tier": "A",
-    "variantsData": [
-     {
-      "sig": {
-       "fontFamily": "Source Serif 4",
-       "fontSize": 16,
-       "fontWeight": "400",
-       "lineHeight": 24,
-       "letterSpacing": "normal",
-       "textTransform": "",
-       "color": "#3a1c14",
-       "bg": "#f2eee8",
-       "border": "none",
-       "radius": "0",
-       "shadow": "none",
-       "padding": "0 0 26 0",
-       "height": 345
-      },
-      "pages": [
-       "agents-discover",
-       "queries-analytics",
-       "queries-responses"
-      ]
-     },
-     {
-      "sig": {
-       "fontFamily": "Source Serif 4",
-       "fontSize": 16,
-       "fontWeight": "400",
-       "lineHeight": 23.2,
-       "letterSpacing": "normal",
-       "textTransform": "",
-       "color": "#3a1c14",
-       "bg": "#f2eee8",
-       "border": "none",
-       "radius": "0",
-       "shadow": "none",
-       "padding": "0 0 26 0",
-       "height": 345
-      },
-      "pages": [
-       "manuscripts-comps"
-      ]
-     }
-    ]
-   }
   },
   {
    "id": "C147",
@@ -77402,6 +77396,81 @@
    }
   }
  ],
- "after": null,
+ "after": {
+  "run": "../../../private/tmp/claude-501/-Users-nickphysick-ScriptAlly-app/25cab010-0c64-48aa-975a-ada7bdda7356/scratchpad/run3",
+  "counts": {
+   "tier": {
+    "B": 146,
+    "C": 6
+   },
+   "part": {
+    "surfaces": {
+     "A": 0,
+     "B": 8,
+     "C": 0
+    },
+    "page-header": {
+     "A": 0,
+     "B": 27,
+     "C": 2
+    },
+    "type": {
+     "A": 0,
+     "B": 32,
+     "C": 3
+    },
+    "cards": {
+     "A": 0,
+     "B": 5,
+     "C": 0
+    },
+    "buttons": {
+     "A": 0,
+     "B": 20,
+     "C": 0
+    },
+    "rules": {
+     "A": 0,
+     "B": 6,
+     "C": 0
+    },
+    "overlays": {
+     "A": 0,
+     "B": 4,
+     "C": 0
+    },
+    "form-controls": {
+     "A": 0,
+     "B": 10,
+     "C": 0
+    },
+    "lists": {
+     "A": 0,
+     "B": 10,
+     "C": 0
+    },
+    "tags-status": {
+     "A": 0,
+     "B": 7,
+     "C": 0
+    },
+    "footers": {
+     "A": 0,
+     "B": 3,
+     "C": 0
+    },
+    "in-page-nav": {
+     "A": 0,
+     "B": 14,
+     "C": 0
+    },
+    "small-parts": {
+     "A": 0,
+     "B": 0,
+     "C": 1
+    }
+   }
+  }
+ },
  "fixes": []
 }

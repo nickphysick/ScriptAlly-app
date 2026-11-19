@@ -1,8 +1,23 @@
 {
   "_note": "Design-ref checks made by hand for the most visible findings (19 Nov). Each note is attached to the finding with the same family|part|role. A note never changes a tier unless 'tier' is given; refs that disagree with each other leave a finding in Tier B.",
   "checks": [
-    { "key": "public|surfaces|sheet", "note": "Each variant's colour appears in that page's own ref: privacy-v1.html has #fbf6ef, welcome-page-v1.html has #f4ede3, pricing-page-v1.html and contact-terms-unsubscribe-v1.html have #f2eee8. The refs disagree with each other, so no ref settles it." },
-    { "key": "workspace|surfaces|stage", "note": "Shared token --ws-page = rgb(var(--ws-page-rgb)) = #f2eee8 (src/index.css:196-197, the app-wide ground). The Query Centre's own refs (query-centre-v156-1.html, query-centre-v157.html) set its sheet to #f6f3ee. The token outranks a page ref in this audit's oracle, so it points to #f2eee8; the Query Centre's ref is why it differs." },
-    { "key": "workspace|surfaces|sheet", "note": "Same as the stage: --ws-page #f2eee8 is the app-wide ground (src/index.css:197); the Query Centre's refs (v156-1, v157) set #f6f3ee." }
+    {
+      "key": "public|surfaces|sheet",
+      "note": "Each variant's colour appears in that page's own ref: privacy-v1.html has #fbf6ef, welcome-page-v1.html has #f4ede3, pricing-page-v1.html and contact-terms-unsubscribe-v1.html have #f2eee8. The refs disagree with each other, so no ref settles it."
+    },
+    {
+      "key": "workspace|surfaces|stage",
+      "note": "Shared token --ws-page = rgb(var(--ws-page-rgb)) = #f2eee8 (src/index.css:196-197, the app-wide ground). The Query Centre's own refs (query-centre-v156-1.html, query-centre-v157.html) set its sheet to #f6f3ee. The token outranks a page ref in this audit's oracle, so it points to #f2eee8; the Query Centre's ref is why it differs."
+    },
+    {
+      "key": "workspace|surfaces|sheet",
+      "note": "Same as the stage: --ws-page #f2eee8 is the app-wide ground (src/index.css:197); the Query Centre's refs (v156-1, v157) set #f6f3ee."
+    },
+    {
+      "key": "workspace|footers|page-footer",
+      "tier": "B",
+      "phase3": true,
+      "note": "Phase 3: moved from Tier A. The footer (shared AppFooter, .af) sets no line-height of its own; on Comps it inherits 1.45 from the page root (.cp30 { font: 400 16px/1.45 } — src/components/manuscripts/comps30/comps30.css:23), elsewhere 1.5. The footer renders identically (345.4px high on both) because its children set their own. The only fix is the Comps root line-height, which every unstyled text block on Comps inherits, so it would move other measurements by more than 1px (step 3); AppFooter is a shared primitive (not to be touched). Left for Nick."
+    }
   ]
 }

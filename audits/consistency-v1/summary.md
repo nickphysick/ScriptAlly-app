@@ -1,13 +1,13 @@
 # Consistency audit v1 — summary
 
-Generated 2026-11-19T00:39:02.613Z. Run: `../../../private/tmp/claude-501/-Users-nickphysick-ScriptAlly-app/25cab010-0c64-48aa-975a-ada7bdda7356/scratchpad/run2`. Full report: `audits/consistency-v1/report.html`; data: `findings.json`.
+Generated 2026-11-19T01:01:51.712Z. Run: `../../../private/tmp/claude-501/-Users-nickphysick-ScriptAlly-app/25cab010-0c64-48aa-975a-ada7bdda7356/scratchpad/run2`. Full report: `audits/consistency-v1/report.html`; data: `findings.json`.
 
 ## Counts by tier
 
 | Tier | Findings |
 |---|---|
-| B — needs Nick | 145 |
-| A — mechanical | 1 |
+| B — needs Nick | 146 |
+| A — mechanical | 0 |
 | C — deliberate | 6 |
 
 ## Counts by part
@@ -25,7 +25,7 @@ Generated 2026-11-19T00:39:02.613Z. Run: `../../../private/tmp/claude-501/-Users
 | rules | 6 | 0 | 0 |
 | card | 5 | 0 | 0 |
 | overlay | 4 | 0 | 0 |
-| footer | 2 | 1 | 0 |
+| footer | 3 | 0 | 0 |
 | small part | 0 | 0 | 1 |
 
 ## The ten most visible Tier B findings
@@ -46,3 +46,7 @@ Generated 2026-11-19T00:39:02.613Z. Run: `../../../private/tmp/claude-501/-Users
 - Measured: 41 routes, 82 page-views.
 - Failed to load: `/queries` @1512 (opened, but the collector found no visible dialog surface); `/dashboard` @1512 (opened, but the collector found no visible dialog surface); `/queries` @1920 (opened, but the collector found no visible dialog surface); `/dashboard` @1920 (opened, but the collector found no visible dialog surface).
 - Redirected: `/goals` → `/dashboard`; `/materials` → `/dashboard`; `/queries/all` → `/queries`; `/you` → `/dashboard`.
+
+## After the Tier A fixes
+
+After run `../../../private/tmp/claude-501/-Users-nickphysick-ScriptAlly-app/25cab010-0c64-48aa-975a-ada7bdda7356/scratchpad/run3`: {"B":146,"C":6} (before: {"B":146,"C":6}).

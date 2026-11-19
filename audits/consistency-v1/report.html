@@ -18,16 +18,16 @@ table{border-collapse:collapse;font-size:12px;width:100%}th,td{text-align:left;p
 nav a{margin-right:12px}
 </style></head><body><main>
 <h1>Consistency audit v1</h1>
-<p class="muted">Generated 2026-11-19T00:39:02.613Z from run <code>../../../private/tmp/claude-501/-Users-nickphysick-ScriptAlly-app/25cab010-0c64-48aa-975a-ada7bdda7356/scratchpad/run2</code>. Built from the rendered pages (computed values, measured boxes) at 1512×982 and 1920×1080, signed in as the emulator harness account. Desktop only.</p>
-<nav><a href="#tierB">Tier B — needs Nick (145)</a><a href="#tierA">Tier A — mechanical (1)</a><a href="#tierC">Tier C — deliberate (6)</a><a href="#pages">Pages</a><a href="#scan">Source scan</a></nav>
+<p class="muted">Generated 2026-11-19T01:01:51.712Z from run <code>../../../private/tmp/claude-501/-Users-nickphysick-ScriptAlly-app/25cab010-0c64-48aa-975a-ada7bdda7356/scratchpad/run2</code>. Built from the rendered pages (computed values, measured boxes) at 1512×982 and 1920×1080, signed in as the emulator harness account. Desktop only.</p>
+<nav><a href="#tierB">Tier B — needs Nick (146)</a><a href="#tierA">Tier A — mechanical (0)</a><a href="#tierC">Tier C — deliberate (6)</a><a href="#pages">Pages</a><a href="#scan">Source scan</a></nav>
 <h2>How to read this</h2>
 <p>Each finding is one part of the app (for example the page title on workspace pages at 1512px wide) that is drawn more than one way within a family of pages. Pages are compared only within their family (workspace, non-workspace, onboarding, public, overlays); the Dashboard joins the workspace pages for buttons, cards, text and form controls only. Variant 1 is the most common, which is evidence, not the answer: a variant is marked "oracle" only where a shared token settles it.</p>
-<table class="counts"><tr><th>Part</th><th>Tier B</th><th>Tier A</th><th>Tier C</th></tr><tr><td>text</td><td>32</td><td>0</td><td>3</td></tr><tr><td>page header</td><td>27</td><td>0</td><td>2</td></tr><tr><td>button</td><td>20</td><td>0</td><td>0</td></tr><tr><td>in-page navigation</td><td>14</td><td>0</td><td>0</td></tr><tr><td>form control</td><td>10</td><td>0</td><td>0</td></tr><tr><td>list part</td><td>10</td><td>0</td><td>0</td></tr><tr><td>surface</td><td>8</td><td>0</td><td>0</td></tr><tr><td>tag / status mark</td><td>7</td><td>0</td><td>0</td></tr><tr><td>rules</td><td>6</td><td>0</td><td>0</td></tr><tr><td>card</td><td>5</td><td>0</td><td>0</td></tr><tr><td>overlay</td><td>4</td><td>0</td><td>0</td></tr><tr><td>footer</td><td>2</td><td>1</td><td>0</td></tr><tr><td>small part</td><td>0</td><td>0</td><td>1</td></tr><tr><th>Total</th><th>145</th><th>1</th><th>6</th></tr></table>
-<h2 id="tierB">Tier B — needs Nick (145), most visible first</h2><section class="f tB" id="B001">
+<table class="counts"><tr><th>Part</th><th>Tier B</th><th>Tier A</th><th>Tier C</th></tr><tr><td>text</td><td>32</td><td>0</td><td>3</td></tr><tr><td>page header</td><td>27</td><td>0</td><td>2</td></tr><tr><td>button</td><td>20</td><td>0</td><td>0</td></tr><tr><td>in-page navigation</td><td>14</td><td>0</td><td>0</td></tr><tr><td>form control</td><td>10</td><td>0</td><td>0</td></tr><tr><td>list part</td><td>10</td><td>0</td><td>0</td></tr><tr><td>surface</td><td>8</td><td>0</td><td>0</td></tr><tr><td>tag / status mark</td><td>7</td><td>0</td><td>0</td></tr><tr><td>rules</td><td>6</td><td>0</td><td>0</td></tr><tr><td>card</td><td>5</td><td>0</td><td>0</td></tr><tr><td>overlay</td><td>4</td><td>0</td><td>0</td></tr><tr><td>footer</td><td>3</td><td>0</td><td>0</td></tr><tr><td>small part</td><td>0</td><td>0</td><td>1</td></tr><tr><th>Total</th><th>146</th><th>0</th><th>6</th></tr></table>
+<h2 id="tierB">Tier B — needs Nick (146), most visible first</h2><section class="f tB" id="B001">
     <h3><span class="id">B001</span> The sheet (surface) is drawn four different ways across nine pages, differing in background, corner radius.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>surfaces/sheet</code> · 4 variants in use. No shared token or primitive settles it.</p>
     <p class="meta"><b>Design refs:</b> Each variant's colour appears in that page's own ref: privacy-v1.html has #fbf6ef, welcome-page-v1.html has #f4ede3, pricing-page-v1.html and contact-terms-unsubscribe-v1.html have #f2eee8. The refs disagree with each other, so no ref settles it.</p>
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · five pages · 5 elements</div>
@@ -59,7 +59,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B002</span> The stage (surface) has two different backgrounds across twelve pages.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>surfaces/stage</code> · Two real variants in use. The oracle points to variant 1: its colours are shared tokens (bg #f2eee8 = --ws-page).</p>
     <p class="meta"><b>Design refs:</b> Shared token --ws-page = rgb(var(--ws-page-rgb)) = #f2eee8 (src/index.css:196-197, the app-wide ground). The Query Centre's own refs (query-centre-v156-1.html, query-centre-v157.html) set its sheet to #f6f3ee. The token outranks a page ref in this audit's oracle, so it points to #f2eee8; the Query Centre's ref is why it differs.</p>
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var oracle">
       <div class="vh"><b>Variant 1</b> · eleven pages · 11 elements · <span class="tag">oracle: shared token</span></div>
@@ -79,7 +79,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B003</span> The sheet (surface) has two different backgrounds across twelve pages.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>surfaces/sheet</code> · Two real variants in use. The oracle points to variant 1: its colours are shared tokens (bg #f2eee8 = --ws-page).</p>
     <p class="meta"><b>Design refs:</b> Same as the stage: --ws-page #f2eee8 is the app-wide ground (src/index.css:197); the Query Centre's refs (v156-1, v157) set #f6f3ee.</p>
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var oracle">
       <div class="vh"><b>Variant 1</b> · eleven pages · 11 elements · <span class="tag">oracle: shared token</span></div>
@@ -99,7 +99,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B004</span> The navy workspace header's gap to the content below has seven different values across ten pages.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 7 variants, split across the same pages) · part <code>page-header/navy · gapBelow</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (7 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -149,7 +149,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B005</span> The page header's distance from the top of the sheet has four different values across eight pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>page-header/plain · topFromSheet</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · five pages · 5 elements</div>
@@ -181,7 +181,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B006</span> The page header's distance from the top of the sheet has six different values across six pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>page-header/plain · topFromSheet</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -225,7 +225,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B007</span> The page title is drawn five different ways across six pages, differing in font size, line height, letter spacing, text colour.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 5 variants, split across the same pages) · part <code>type/page-title</code> · 5 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (5 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -263,7 +263,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B008</span> The page title is drawn three different ways across eight pages, differing in font, font size, font weight, line height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>type/page-title</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · six pages · 6 elements</div>
@@ -289,7 +289,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B009</span> The card is drawn 30 different ways across 13 pages, differing in background, border, corner radius, shadow, padding.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 31 variants, split differently — findings.json has them) · part <code>cards/card</code> · 30 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (30 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · five pages · 5 elements</div>
@@ -357,7 +357,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B010</span> The section heading (text) is drawn 14 different ways across eleven pages, differing in font size, line height, letter spacing, text colour.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 14 variants, split across the same pages) · part <code>type/section-heading</code> · 14 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (14 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 6 elements</div>
@@ -425,7 +425,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B011</span> The filled-light · rest (button) is drawn 30 different ways across twelve pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, shadow, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 30 variants, split across the same pages) · part <code>buttons/filled-light/rest</code> · 30 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (30 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · nine pages · 9 elements</div>
@@ -493,7 +493,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B012</span> The page title is drawn two different ways across ten pages, differing in font size, line height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>type/page-title</code> · Two real variants in use. (at 1920) No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · nine pages · 9 elements</div>
@@ -513,7 +513,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B013</span> The primary · rest (button) is drawn ten different ways across seven pages, differing in font, font size, font weight, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 10 variants, split across the same pages) · part <code>buttons/primary/rest</code> · 10 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (10 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -581,7 +581,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B014</span> Text sizes off the 28 / 24 / 20 / 16 / 14 scale: 45 distinct values on 40 pages.</h3>
     <p class="meta">all · 1512px wide · part <code>rules/type-off-scale</code> · Baked 11: the type scale is 28, 24, 20, 16, 14 (one larger display size for a hero). Off-scale is Tier B unless it meets the Tier A test. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (45 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · 30 pages · 199 elements</div>
@@ -649,7 +649,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B015</span> The ghost · rest (button) is drawn 23 different ways across eleven pages, differing in font, font size, font weight, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 23 variants, split across the same pages) · part <code>buttons/ghost/rest</code> · 23 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (23 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · nine pages · 9 elements</div>
@@ -717,7 +717,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B016</span> The section heading (text) is drawn 17 different ways across eight pages, differing in font size, line height, letter spacing, text colour.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 17 variants, split across the same pages) · part <code>type/section-heading</code> · 17 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (17 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · three pages · 21 elements</div>
@@ -785,7 +785,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B017</span> The section-band (surface) is drawn 16 different ways across seven pages, differing in background, border, corner radius, shadow.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 15 variants, split differently — findings.json has them) · part <code>surfaces/section-band</code> · 16 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (16 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · four pages · 4 elements</div>
@@ -853,7 +853,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B018</span> The navy workspace header's title top has six different values across ten pages.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>page-header/navy · titleTop</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · five pages · 5 elements</div>
@@ -897,7 +897,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B019</span> The card heading (text) is drawn 16 different ways across ten pages, differing in font, font size, font weight, line height, text colour.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 16 variants, split across the same pages) · part <code>type/card-heading</code> · 16 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (16 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · four pages · 12 elements</div>
@@ -965,7 +965,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B020</span> The card is drawn 13 different ways across nine overlays, differing in background, border, corner radius, shadow, padding.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 13 variants, split across the same pages) · part <code>cards/card</code> · 13 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (13 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -1033,7 +1033,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B021</span> The navy workspace header's right-hand item inset has nine different values across nine pages.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 9 variants, split across the same pages) · part <code>page-header/navy · rightItemInset</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (9 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -1095,7 +1095,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B022</span> The primary · rest (button) is drawn four different ways across six pages, differing in font, font size, font weight, line height, text colour, background, corner radius, padding, height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>buttons/primary/rest</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 7 elements</div>
@@ -1127,7 +1127,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B023</span> The card is drawn 13 different ways across eight pages, differing in background, border, corner radius, shadow, padding.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 13 variants, split across the same pages) · part <code>cards/card</code> · 13 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (13 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · five pages · 12 elements</div>
@@ -1195,7 +1195,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B024</span> The page header's height has five different values across eight pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 5 variants, split across the same pages) · part <code>page-header/plain · height</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (5 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · four pages · 4 elements</div>
@@ -1233,7 +1233,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B025</span> The navy workspace header's height has three different values across three pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>page-header/navy · height</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -1259,7 +1259,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B026</span> The section heading (text) is drawn five different ways across seven pages, differing in font, font size, line height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 5 variants, split across the same pages) · part <code>type/section-heading</code> · 5 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (5 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · five pages · 13 elements</div>
@@ -1297,7 +1297,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B027</span> The shell (overlay) is drawn eight different ways across nine overlays, differing in background, corner radius, shadow, padding.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 8 variants, split across the same pages) · part <code>overlays/shell</code> · 8 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (8 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -1353,7 +1353,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B028</span> The header (overlay) is drawn nine different ways across nine overlays, differing in background, border, corner radius, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 9 variants, split across the same pages) · part <code>overlays/header</code> · 9 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (9 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -1415,7 +1415,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B029</span> The page header's gap to the content below has four different values across eight pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>page-header/plain · gapBelow</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · five pages · 5 elements</div>
@@ -1447,7 +1447,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B030</span> The filled-light · rest (button) is drawn six different ways across eight pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, shadow, padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>buttons/filled-light/rest</code> · 6 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · six pages · 6 elements</div>
@@ -1491,7 +1491,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B031</span> The secondary · rest (button) is drawn seven different ways across seven pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 7 variants, split across the same pages) · part <code>buttons/secondary/rest</code> · 7 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (7 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -1541,7 +1541,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B032</span> The primary · rest (button) is drawn five different ways across four pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 5 variants, split across the same pages) · part <code>buttons/primary/rest</code> · 5 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (5 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -1579,7 +1579,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B033</span> The card is drawn 14 different ways across seven pages, differing in background, border, corner radius, shadow, padding.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 14 variants, split across the same pages) · part <code>cards/card</code> · 14 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (14 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -1647,7 +1647,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B034</span> The ghost · rest (button) is drawn six different ways across seven pages, differing in font, font size, font weight, line height, letter spacing, text case, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>buttons/ghost/rest</code> · 6 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · six pages · 21 elements</div>
@@ -1691,7 +1691,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B035</span> The page header's left edge has three different values across eight pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>page-header/plain · leftFromSheet</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · six pages · 6 elements</div>
@@ -1717,7 +1717,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B036</span> The page header's padding has three different values across eight pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>page-header/plain · padding</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · six pages · 6 elements</div>
@@ -1743,7 +1743,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B037</span> The page header's title top has three different values across eight pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>page-header/plain · titleTop</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · six pages · 6 elements</div>
@@ -1769,7 +1769,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B038</span> The page header's background has two different values across six pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>page-header/plain · bg</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · four pages · 4 elements</div>
@@ -1789,7 +1789,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B039</span> The filled-light · rest (button) is drawn twelve different ways across seven overlays, differing in font, font size, font weight, line height, letter spacing, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 12 variants, split across the same pages) · part <code>buttons/filled-light/rest</code> · 12 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (12 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 41 elements</div>
@@ -1857,7 +1857,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B040</span> The top bar (surface) has three different heights across nine pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>surfaces/top-bar</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · six pages · 6 elements</div>
@@ -1883,7 +1883,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B041</span> The navy workspace header's illustration box has six different values across six pages.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>page-header/navy · illusBox</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -1927,7 +1927,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B042</span> The page header's title inset has two different values across eight pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>page-header/plain · titleLeft</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · seven pages · 7 elements</div>
@@ -1947,7 +1947,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B043</span> The primary · rest (button) is drawn four different ways across four overlays, differing in font, font size, font weight, line height, text colour, background, corner radius, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>buttons/primary/rest</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -1979,7 +1979,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B044</span> The page header's height has six different values across six pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>page-header/plain · height</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -2023,7 +2023,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B045</span> The page header's gap to the content below has six different values across six pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>page-header/plain · gapBelow</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -2067,7 +2067,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B046</span> The page subheader is drawn three different ways across four pages, differing in font, font size, line height, text colour.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>type/page-subheader</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -2093,7 +2093,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B047</span> The page header's left edge has four different values across six pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>page-header/plain · leftFromSheet</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · three pages · 3 elements</div>
@@ -2125,7 +2125,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B048</span> The navy workspace header's illustration inset has three different values across six pages.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>page-header/navy · illusRight</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · four pages · 4 elements</div>
@@ -2151,7 +2151,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B049</span> The ghost · rest (button) is drawn five different ways across five overlays, differing in font, font size, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 5 variants, split across the same pages) · part <code>buttons/ghost/rest</code> · 5 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (5 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -2189,7 +2189,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B050</span> Burgundy drawn somewhere other than a MountCard frame: one distinct value on 31 pages.</h3>
     <p class="meta">all · 1512px wide · part <code>rules/burgundy</code> · Baked 9: burgundy is only the MountCard frame border. (The MountCard frame itself is drawn at 28% opacity, so it is not this colour.) No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (1 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · 31 pages · 67 elements</div>
@@ -2203,7 +2203,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B051</span> The sheet (surface) has two different corner radiuses across three pages.</h3>
     <p class="meta">onboarding pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>surfaces/sheet</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -2223,7 +2223,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B052</span> The card heading (text) is drawn five different ways across five overlays, differing in font size, line height, text colour.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 5 variants, split across the same pages) · part <code>type/card-heading</code> · 5 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (5 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -2261,7 +2261,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B053</span> The filled-light · rest (button) is drawn six different ways across five pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, shadow, padding, height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>buttons/filled-light/rest</code> · 6 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 6 elements</div>
@@ -2305,7 +2305,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B054</span> The body (text) is drawn 123 different ways across 13 pages, differing in font, font size, font weight, line height, letter spacing, text colour.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 123 variants, split across the same pages) · part <code>type/body</code> · 123 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (123 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · eight pages · 8 elements</div>
@@ -2373,7 +2373,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B055</span> The page subheader is drawn three different ways across three pages, differing in font, font size, line height, text colour.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>type/page-subheader</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -2399,7 +2399,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B056</span> The close (overlay) is drawn eight different ways across eight overlays, differing in font, font size, line height, letter spacing, text colour, background, corner radius, padding, height, width.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 8 variants, split across the same pages) · part <code>overlays/close</code> · 8 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (8 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -2455,7 +2455,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B057</span> The ghost · rest (button) is drawn four different ways across five pages, differing in font, font size, font weight, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>buttons/ghost/rest</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · four pages · 7 elements</div>
@@ -2487,7 +2487,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B058</span> The input (form control) is drawn eight different ways across six pages, differing in font, font size, line height, text colour, background, border, corner radius, padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 8 variants, split across the same pages) · part <code>form-controls/input</code> · 8 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (8 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 4 elements</div>
@@ -2543,7 +2543,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B059</span> Text smaller than 12px: ten distinct values on 16 pages.</h3>
     <p class="meta">all · 1512px wide · part <code>rules/type-under-12</code> · Baked 11: nothing under 12. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (10 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · seven pages · 39 elements</div>
@@ -2611,7 +2611,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B060</span> The list-item (list part) is drawn twelve different ways across seven pages, differing in font size, line height, text colour, background, border, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 12 variants, split across the same pages) · part <code>lists/list-item</code> · 12 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (12 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 3 elements</div>
@@ -2679,7 +2679,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B061</span> The input (form control) is drawn eleven different ways across six overlays, differing in font size, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 11 variants, split across the same pages) · part <code>form-controls/input</code> · 11 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (11 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 3 elements</div>
@@ -2747,7 +2747,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B062</span> The icon-only · rest (button) is drawn six different ways across four overlays, differing in font, font size, line height, letter spacing, text colour, background, corner radius, shadow, height, width.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>buttons/icon-only/rest</code> · 6 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 11 elements</div>
@@ -2791,7 +2791,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B063</span> The body (text) is drawn 60 different ways across nine pages, differing in font, font size, font weight, line height, letter spacing, text colour.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 60 variants, split across the same pages) · part <code>type/body</code> · 60 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (60 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 27 elements</div>
@@ -2859,7 +2859,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B064</span> The icon-only · rest (button) is drawn six different ways across four pages, differing in text colour, background, corner radius, shadow, height, width.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>buttons/icon-only/rest</code> · 6 variants in use. The oracle points to variant 6: its colours are shared tokens (color #1c130f = --btn-ink/--ink-on-light/--sp-ink/--clv-ink/--fc-ink/--qcv-ink/--be-ink/--tl-nearblack; bg #ffffff = --shell-active-fill/--n0/--shell-control-bg/--sks-card/qdbMasthead/ghostButtonBg/shellControlBg/shellActiveFill/--fc-card).</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 14 elements</div>
@@ -2903,7 +2903,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B065</span> The card heading (text) is drawn five different ways across three pages, differing in font size, line height, text colour.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 5 variants, split across the same pages) · part <code>type/card-heading</code> · 5 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (5 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 3 elements</div>
@@ -2941,7 +2941,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B066</span> The pill (tag / status mark) is drawn nine different ways across six pages, differing in font size, font weight, line height, text colour, background, border, shadow, padding, height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 9 variants, split across the same pages) · part <code>tags-status/pill</code> · 9 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (9 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · three pages · 3 elements</div>
@@ -3003,7 +3003,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B067</span> The page header's title-to-subheader gap has three different values across three pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>page-header/plain · subGap</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -3029,7 +3029,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B068</span> The pill (tag / status mark) is drawn 17 different ways across six pages, differing in font, font size, font weight, line height, letter spacing, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 16 variants, split differently — findings.json has them) · part <code>tags-status/pill</code> · 17 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (17 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 8 elements</div>
@@ -3097,7 +3097,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B069</span> The numerals (text) is drawn 22 different ways across nine pages, differing in font, font size, font weight, line height, text colour.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 22 variants, split across the same pages) · part <code>type/numerals</code> · 22 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (22 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · three pages · 20 elements</div>
@@ -3165,7 +3165,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B070</span> The primary · rest (button) is drawn two different ways across three pages, differing in corner radius, padding, height.</h3>
     <p class="meta">onboarding pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>buttons/primary/rest</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -3185,7 +3185,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B071</span> The section-band (surface) is drawn three different ways across two pages, differing in background, border, corner radius, shadow.</h3>
     <p class="meta">public pages · 1512px wide · part <code>surfaces/section-band</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -3211,7 +3211,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B072</span> The card is drawn three different ways across three pages, differing in background, shadow, padding.</h3>
     <p class="meta">onboarding pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>cards/card</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -3237,7 +3237,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B073</span> The navy workspace header's padding has two different values across three pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>page-header/navy · padding</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -3257,7 +3257,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B074</span> The navy workspace header's title top has two different values across three pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>page-header/navy · titleTop</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -3277,7 +3277,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B075</span> The navy workspace header's title-to-subheader gap has two different values across three pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>page-header/navy · subGap</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -3297,7 +3297,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B076</span> The page header's title top has three different values across three pages.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>page-header/plain · titleTop</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -3323,7 +3323,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B077</span> The page-footer (footer) is drawn three different ways across nine pages, differing in padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>footers/page-footer</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · six pages · 6 elements</div>
@@ -3349,7 +3349,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B078</span> The body (text) is drawn 37 different ways across eight pages, differing in font, font size, font weight, line height, text colour.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 37 variants, split across the same pages) · part <code>type/body</code> · 37 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (37 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · five pages · 27 elements</div>
@@ -3417,7 +3417,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B079</span> The tag (tag / status mark) is drawn ten different ways across five pages, differing in font, font size, font weight, line height, letter spacing, text case, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 10 variants, split across the same pages) · part <code>tags-status/tag</code> · 10 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (10 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -3485,7 +3485,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B080</span> The pill (tag / status mark) is drawn five different ways across five overlays, differing in font, font size, font weight, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 5 variants, split across the same pages) · part <code>tags-status/pill</code> · 5 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (5 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 70 elements</div>
@@ -3523,7 +3523,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B081</span> The list-item (list part) is drawn ten different ways across five pages, differing in font, font size, line height, text colour, background, border, padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 10 variants, split across the same pages) · part <code>lists/list-item</code> · 10 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (10 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 18 elements</div>
@@ -3591,7 +3591,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B082</span> The segment · rest (in-page navigation) is drawn six different ways across four pages, differing in font size, font weight, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>in-page-nav/segment/rest</code> · 6 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 8 elements</div>
@@ -3635,7 +3635,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B083</span> The secondary (text) is drawn 20 different ways across seven pages, differing in font, font size, font weight, line height, letter spacing, text colour.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 20 variants, split across the same pages) · part <code>type/secondary</code> · 20 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (20 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -3703,7 +3703,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B084</span> The body (text) is drawn 21 different ways across seven overlays, differing in font, font size, font weight, line height, text colour.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 21 variants, split across the same pages) · part <code>type/body</code> · 21 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (21 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 7 elements</div>
@@ -3771,7 +3771,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B085</span> The radio (form control) is drawn ten different ways across four overlays, differing in font, font size, line height, text colour, background, corner radius, shadow, padding, height, width.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 10 variants, split across the same pages) · part <code>form-controls/radio</code> · 10 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (10 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 11 elements</div>
@@ -3839,7 +3839,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B086</span> The segment · rest (in-page navigation) is drawn five different ways across four overlays, differing in font, font size, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 5 variants, split across the same pages) · part <code>in-page-nav/segment/rest</code> · 5 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (5 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 11 elements</div>
@@ -3877,7 +3877,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B087</span> The segment · selected (in-page navigation) is drawn four different ways across four pages, differing in font size, font weight, line height, text colour, background, border, corner radius, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>in-page-nav/segment/selected</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -3909,7 +3909,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B088</span> The ghost · rest (button) is drawn two different ways across three pages, differing in font size, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">onboarding pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>buttons/ghost/rest</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -3929,7 +3929,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B089</span> The tag (tag / status mark) is drawn six different ways across four overlays, differing in font, font size, font weight, line height, letter spacing, text case, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>tags-status/tag</code> · 6 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 6 elements</div>
@@ -3973,7 +3973,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B090</span> The filled-light · disabled (button) is drawn four different ways across two overlays, differing in font, font size, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>buttons/filled-light/disabled</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 3 elements</div>
@@ -4005,7 +4005,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B091</span> The segment · selected (in-page navigation) is drawn four different ways across four overlays, differing in font, font size, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>in-page-nav/segment/selected</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4037,7 +4037,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B092</span> The section heading (text) is drawn two different ways across two overlays, differing in font, font size, font weight, line height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>type/section-heading</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4057,7 +4057,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B093</span> The secondary (text) is drawn 21 different ways across six pages, differing in font, font size, font weight, line height, text colour.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 21 variants, split across the same pages) · part <code>type/secondary</code> · 21 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (21 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · three pages · 3 elements</div>
@@ -4125,7 +4125,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B094</span> The section heading (text) is drawn two different ways across three pages, differing in font size, line height.</h3>
     <p class="meta">onboarding pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>type/section-heading</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -4145,7 +4145,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B095</span> The input (form control) is drawn four different ways across five pages, differing in font size, line height, corner radius, shadow, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>form-controls/input</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -4177,7 +4177,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B096</span> The page header's illustration box has two different values across two pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>page-header/plain · illusBox</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4197,7 +4197,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B097</span> The page header's illustration inset has two different values across two pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>page-header/plain · illusRight</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4217,7 +4217,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B098</span> The page header's right-hand item inset has two different values across two pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>page-header/plain · rightItemInset</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4237,7 +4237,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B099</span> The labels (text) is drawn 22 different ways across six pages, differing in font, font size, font weight, line height, letter spacing, text case, text colour.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 22 variants, split across the same pages) · part <code>type/labels</code> · 22 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (22 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 4 elements</div>
@@ -4305,7 +4305,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B100</span> The labels (text) is drawn 13 different ways across five overlays, differing in font, font size, font weight, line height, letter spacing, text case, text colour.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 13 variants, split across the same pages) · part <code>type/labels</code> · 13 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (13 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 6 elements</div>
@@ -4373,7 +4373,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B101</span> The filled-light · rest (button) is drawn two different ways across two pages, differing in font size, line height, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">onboarding pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>buttons/filled-light/rest</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -4393,7 +4393,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B102</span> The h1 (text) is drawn three different ways across three pages, differing in font size, line height, letter spacing.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>type/h1</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4419,7 +4419,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B103</span> The numerals (text) is drawn six different ways across five pages, differing in font, font size, font weight, line height, letter spacing, text colour.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 6 variants, split across the same pages) · part <code>type/numerals</code> · 6 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (6 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 20 elements</div>
@@ -4463,7 +4463,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B104</span> The row (list part) is drawn four different ways across three pages, differing in font, line height, text colour, border, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>lists/row</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 34 elements</div>
@@ -4495,7 +4495,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B105</span> The card heading (text) is drawn four different ways across two pages, differing in font size, line height, letter spacing.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>type/card-heading</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 6 elements</div>
@@ -4527,7 +4527,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B106</span> The list-item (list part) is drawn 13 different ways across three pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, padding, height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 13 variants, split across the same pages) · part <code>lists/list-item</code> · 13 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (13 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 5 elements</div>
@@ -4595,7 +4595,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B107</span> The page header's gap to the content below has two different values across two pages.</h3>
     <p class="meta">onboarding pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>page-header/plain · gapBelow</code> · Baked 6 / the prompt: a difference in the page header's position or shape is always Tier B. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4615,7 +4615,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B108</span> The radio (form control) is drawn seven different ways across two pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, padding, height, width.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 7 variants, split across the same pages) · part <code>form-controls/radio</code> · 7 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (7 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 3 elements</div>
@@ -4665,7 +4665,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B109</span> The body (overlay) is drawn four different ways across four overlays, differing in padding, background.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>overlays/body</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4697,7 +4697,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B110</span> The table-head (list part) is drawn three different ways across three pages, differing in font, line height, text colour, background, border, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>lists/table-head</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4723,7 +4723,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B111</span> The section-band (surface) is drawn two different ways across one pages, differing in background, corner radius, shadow.</h3>
     <p class="meta">onboarding pages · 1512px wide · part <code>surfaces/section-band</code> · Two real variants in use. The oracle points to variant 1: its colours are shared tokens (bg #f2eee8 = --ws-page).</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var oracle">
       <div class="vh"><b>Variant 1</b> · one page · 1 element · <span class="tag">oracle: shared token</span></div>
@@ -4743,7 +4743,7 @@ nav a{margin-right:12px}
     <h3><span class="id">B112</span> The action-footer (footer) is drawn three different ways across three overlays, differing in background, border, padding, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>footers/action-footer</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4766,10 +4766,30 @@ nav a{margin-right:12px}
     </div></div>
     <p class="muted small">The same in every variant: corner radius 0 · shadow none</p>
   </section><section class="f tB" id="B113">
-    <h3><span class="id">B113</span> The radio (form control) is drawn four different ways across two pages, differing in font size, font weight, line height, text colour, background, border, corner radius, shadow, padding, height, width.</h3>
+    <h3><span class="id">B113</span> The page-footer (footer) has two different line heights across four pages.</h3>
+    <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>footers/page-footer</code> · Phase 3: moved from Tier A. The footer (shared AppFooter, .af) sets no line-height of its own; on Comps it inherits 1.45 from the page root (.cp30 { font: 400 16px/1.45 } — src/components/manuscripts/comps30/comps30.css:23), elsewhere 1.5. The footer renders identically (345.4px high on both) because its children set their own. The only fix is the Comps root line-height, which every unstyled text block on Comps inherits, so it would move other measurements by more than 1px (step 3); AppFooter is a shared primitive (not to be touched). Left for Nick. No shared token or primitive settles it.</p>
+    <p class="meta"><b>Design refs:</b> Phase 3: moved from Tier A. The footer (shared AppFooter, .af) sets no line-height of its own; on Comps it inherits 1.45 from the page root (.cp30 { font: 400 16px/1.45 } — src/components/manuscripts/comps30/comps30.css:23), elsewhere 1.5. The footer renders identically (345.4px high on both) because its children set their own. The only fix is the Comps root line-height, which every unstyled text block on Comps inherits, so it would move other measurements by more than 1px (step 3); AppFooter is a shared primitive (not to be touched). Left for Nick.</p>
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
+    
+    <div class="vars"><div class="var">
+      <div class="vh"><b>Variant 1</b> · three pages · 3 elements</div>
+      <div class="noshot">Discover — “QueryHawk A bird's-eye view of your quer”</div>
+      <table><tr><th>line height</th><td>24</td></tr></table>
+      <div class="pages">Discover · Analytics · Responses</div>
+      <div class="src"><code>src/components/agents/contact/contactV11.css:82</code> <code>src/components/agents/contact/contactV16.css:166</code> <code>src/components/manuscripts/comps25/compsV25.css:63</code> <code>src/components/manuscripts/comps32/comps32.css:222</code></div>
+    </div><div class="var">
+      <div class="vh"><b>Variant 2</b> · one page · 1 element</div>
+      <div class="noshot">Comps — “QueryHawk A bird's-eye view of your quer”</div>
+      <table><tr><th>line height</th><td>23.2</td></tr></table>
+      <div class="pages">Comps</div>
+      <div class="src"><code>src/components/agents/contact/contactV11.css:82</code> <code>src/components/agents/contact/contactV16.css:166</code> <code>src/components/manuscripts/comps25/compsV25.css:63</code> <code>src/components/manuscripts/comps32/comps32.css:222</code></div>
+    </div></div>
+    <p class="muted small">The same in every variant: font Source Serif 4 · font size 16 · font weight 400 · letter spacing normal · text case  · text colour #3a1c14 · background #f2eee8 · border none · corner radius 0 · shadow none · padding 0 0 26 0 · height 345</p>
+  </section><section class="f tB" id="B114">
+    <h3><span class="id">B114</span> The radio (form control) is drawn four different ways across two pages, differing in font size, font weight, line height, text colour, background, border, corner radius, shadow, padding, height, width.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>form-controls/radio</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 3 elements</div>
@@ -4797,11 +4817,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/plans/plansPage.css:39</code> <code>src/components/plans/plansPage.css:71</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · letter spacing normal · text case </p>
-  </section><section class="f tB" id="B114">
-    <h3><span class="id">B114</span> The column-header (list part) is drawn two different ways across three pages, differing in font, font size, line height, text colour, background, border, padding, height.</h3>
+  </section><section class="f tB" id="B115">
+    <h3><span class="id">B115</span> The column-header (list part) is drawn two different ways across three pages, differing in font, font size, line height, text colour, background, border, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>lists/column-header</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 10 elements</div>
@@ -4817,11 +4837,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/agents/contact/contactPrinciples.css:36</code> <code>src/components/agents/contact/contactV26.css:96</code> <code>src/components/agents/contact/contactV26.css:100</code> <code>src/components/agents/contact/contactV26.css:101</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font weight 400 · letter spacing normal · text case  · corner radius 0 · shadow none</p>
-  </section><section class="f tB" id="B115">
-    <h3><span class="id">B115</span> The secondary (text) is drawn 19 different ways across three pages, differing in font, font size, font weight, line height, text colour.</h3>
+  </section><section class="f tB" id="B116">
+    <h3><span class="id">B116</span> The secondary (text) is drawn 19 different ways across three pages, differing in font, font size, font weight, line height, text colour.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 19 variants, split across the same pages) · part <code>type/secondary</code> · 19 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (19 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 8 elements</div>
@@ -4885,11 +4905,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/marketing/marketing.css:1011</code> <code>src/marketing/marketing.css:1037</code></div>
     </div></div><p class="muted">…and 9 more variants (findings.json has them all).</p>
     <p class="muted small">The same in every variant: letter spacing normal · text case </p>
-  </section><section class="f tB" id="B116">
-    <h3><span class="id">B116</span> The body (text) is drawn seven different ways across three pages, differing in font, font size, line height, text colour.</h3>
+  </section><section class="f tB" id="B117">
+    <h3><span class="id">B117</span> The body (text) is drawn seven different ways across three pages, differing in font, font size, line height, text colour.</h3>
     <p class="meta">onboarding pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 7 variants, split across the same pages) · part <code>type/body</code> · 7 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (7 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 2 elements</div>
@@ -4935,11 +4955,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/onboarding/onboarding.css:341</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font weight 400 · letter spacing normal · text case </p>
-  </section><section class="f tB" id="B117">
-    <h3><span class="id">B117</span> The input (form control) is drawn two different ways across two pages, differing in font, font size, line height, corner radius, shadow, padding, height.</h3>
+  </section><section class="f tB" id="B118">
+    <h3><span class="id">B118</span> The input (form control) is drawn two different ways across two pages, differing in font, font size, line height, corner radius, shadow, padding, height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>form-controls/input</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -4955,11 +4975,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/helpCentre.css:41</code> <code>src/components/helpCentre.css:46</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font weight 400 · letter spacing normal · text case  · text colour #1c130f · background #ffffff · border none</p>
-  </section><section class="f tB" id="B118">
-    <h3><span class="id">B118</span> The labels (text) is drawn eleven different ways across three pages, differing in font, font size, font weight, line height, letter spacing, text case, text colour.</h3>
+  </section><section class="f tB" id="B119">
+    <h3><span class="id">B119</span> The labels (text) is drawn eleven different ways across three pages, differing in font, font size, font weight, line height, letter spacing, text case, text colour.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 11 variants, split across the same pages) · part <code>type/labels</code> · 11 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (11 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 74 elements</div>
@@ -5023,11 +5043,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/dashboard/v2/dash2.css:37</code></div>
     </div></div><p class="muted">…and 1 more variants (findings.json has them all).</p>
     
-  </section><section class="f tB" id="B119">
-    <h3><span class="id">B119</span> The segment · selected (in-page navigation) is drawn two different ways across two pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, padding, height.</h3>
+  </section><section class="f tB" id="B120">
+    <h3><span class="id">B120</span> The segment · selected (in-page navigation) is drawn two different ways across two pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>in-page-nav/segment/selected</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5043,11 +5063,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/marketing/marketing.css:1709</code> <code>src/marketing/marketing.css:1749</code> <code>src/marketing/marketing.css:1755</code> <code>src/marketing/marketing.css:1758</code></div>
     </div></div>
     <p class="muted small">The same in every variant: letter spacing normal · text case  · shadow none</p>
-  </section><section class="f tB" id="B120">
-    <h3><span class="id">B120</span> The segment · rest (in-page navigation) is drawn two different ways across two pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, padding, height.</h3>
+  </section><section class="f tB" id="B121">
+    <h3><span class="id">B121</span> The segment · rest (in-page navigation) is drawn two different ways across two pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>in-page-nav/segment/rest</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 4 elements</div>
@@ -5063,11 +5083,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/marketing/marketing.css:1709</code> <code>src/marketing/marketing.css:1749</code> <code>src/marketing/marketing.css:1755</code> <code>src/marketing/marketing.css:1758</code></div>
     </div></div>
     <p class="muted small">The same in every variant: letter spacing normal · text case  · shadow none</p>
-  </section><section class="f tB" id="B121">
-    <h3><span class="id">B121</span> The tablist (in-page navigation) is drawn two different ways across two overlays, differing in font, border, height.</h3>
+  </section><section class="f tB" id="B122">
+    <h3><span class="id">B122</span> The tablist (in-page navigation) is drawn two different ways across two overlays, differing in font, border, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>in-page-nav/tablist</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5083,11 +5103,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/queries/centre/qcv1522card.css:36</code> <code>src/components/queries/centre/qcv1522card.css:38</code> <code>src/components/queries/centre/qcv1522card.css:162</code> <code>src/components/queries/centre/qcv152card.css:78</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font size 16 · font weight 400 · line height 24 · letter spacing normal · text case  · text colour #1c130f · background #ffffff · corner radius 0 · shadow none · padding 0 0 0 0</p>
-  </section><section class="f tB" id="B122">
-    <h3><span class="id">B122</span> The secondary (text) is drawn eleven different ways across three overlays, differing in font, font size, line height, text colour.</h3>
+  </section><section class="f tB" id="B123">
+    <h3><span class="id">B123</span> The secondary (text) is drawn eleven different ways across three overlays, differing in font, font size, line height, text colour.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 11 variants, split across the same pages) · part <code>type/secondary</code> · 11 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (11 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 5 elements</div>
@@ -5151,11 +5171,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/queries/centre/qcv152card.css:165</code> <code>src/components/queries/centre/qcv152card.css:167</code> <code>src/components/queries/centre/qcv152card.css:168</code> <code>src/components/queries/centre/qcv158.css:97</code></div>
     </div></div><p class="muted">…and 1 more variants (findings.json has them all).</p>
     <p class="muted small">The same in every variant: font weight 400 · letter spacing normal · text case </p>
-  </section><section class="f tB" id="B123">
-    <h3><span class="id">B123</span> The tab · rest (in-page navigation) is drawn four different ways across two overlays, differing in font, font size, line height, text colour, height.</h3>
+  </section><section class="f tB" id="B124">
+    <h3><span class="id">B124</span> The tab · rest (in-page navigation) is drawn four different ways across two overlays, differing in font, font size, line height, text colour, height.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>in-page-nav/tab/rest</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 2 elements</div>
@@ -5183,11 +5203,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/queries/centre/qcv1522card.css:36</code> <code>src/components/queries/centre/qcv1522card.css:38</code> <code>src/components/queries/centre/qcv1522card.css:162</code> <code>src/components/queries/centre/qcv152card.css:78</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font weight 400 · letter spacing normal · text case  · background #ffffff · border none · corner radius 0 · shadow none · padding 0 0 9 0</p>
-  </section><section class="f tB" id="B124">
-    <h3><span class="id">B124</span> The tablist (in-page navigation) is drawn two different ways across two pages, differing in font, line height, background, border, corner radius, padding, height.</h3>
+  </section><section class="f tB" id="B125">
+    <h3><span class="id">B125</span> The tablist (in-page navigation) is drawn two different ways across two pages, differing in font, line height, background, border, corner radius, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>in-page-nav/tablist</code> · Two real variants in use. The oracle points to variant 2: its colours are shared tokens (color #1c130f = --btn-ink/--ink-on-light/--sp-ink/--clv-ink/--fc-ink/--qcv-ink/--be-ink/--tl-nearblack; bg #ffffff = --shell-active-fill/--n0/--shell-control-bg/--sks-card/qdbMasthead/ghostButtonBg/shellControlBg/shellActiveFill/--fc-card).</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5203,11 +5223,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/queries/centre/qcv1522card.css:36</code> <code>src/components/queries/centre/qcv1522card.css:38</code> <code>src/components/queries/centre/qcv1522card.css:162</code> <code>src/components/queries/centre/qcv152card.css:78</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font size 16 · font weight 400 · letter spacing normal · text case  · text colour #1c130f · shadow none</p>
-  </section><section class="f tB" id="B125">
-    <h3><span class="id">B125</span> The segment · selected (in-page navigation) is drawn two different ways across two pages, differing in font size, font weight, line height, text colour, background, border, corner radius, shadow, padding, height.</h3>
+  </section><section class="f tB" id="B126">
+    <h3><span class="id">B126</span> The segment · selected (in-page navigation) is drawn two different ways across two pages, differing in font size, font weight, line height, text colour, background, border, corner radius, shadow, padding, height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>in-page-nav/segment/selected</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5223,11 +5243,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/plans/plansPage.css:39</code> <code>src/components/plans/plansPage.css:71</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · letter spacing normal · text case </p>
-  </section><section class="f tB" id="B126">
-    <h3><span class="id">B126</span> The segment · rest (in-page navigation) is drawn two different ways across two pages, differing in font size, line height, text colour, background, border, corner radius, padding, height.</h3>
+  </section><section class="f tB" id="B127">
+    <h3><span class="id">B127</span> The segment · rest (in-page navigation) is drawn two different ways across two pages, differing in font size, line height, text colour, background, border, corner radius, padding, height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>in-page-nav/segment/rest</code> · Two real variants in use. The oracle points to variant 1: its colours are shared tokens (color #f4eee5 = --ink-cream/--hpanel-fg/--dv1-cream; bg #2d3a50 = --ink-band).</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var oracle">
       <div class="vh"><b>Variant 1</b> · one page · 3 elements · <span class="tag">oracle: shared token</span></div>
@@ -5243,11 +5263,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/plans/planTable.css:7</code> <code>src/components/plans/planTable.css:8</code> <code>src/components/plans/planTable.css:9</code> <code>src/components/plans/planTable.css:10</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · font weight 400 · letter spacing normal · text case  · shadow none</p>
-  </section><section class="f tB" id="B127">
-    <h3><span class="id">B127</span> The radio (form control) is drawn two different ways across two pages, differing in font weight, text colour, background.</h3>
+  </section><section class="f tB" id="B128">
+    <h3><span class="id">B128</span> The radio (form control) is drawn two different ways across two pages, differing in font weight, text colour, background.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>form-controls/radio</code> · Two real variants in use. The oracle points to variant 1: its colours are shared tokens (color #1c130f = --btn-ink/--ink-on-light/--sp-ink/--clv-ink/--fc-ink/--qcv-ink/--be-ink/--tl-nearblack; bg #ffffff = --shell-active-fill/--n0/--shell-control-bg/--sks-card/qdbMasthead/ghostButtonBg/shellControlBg/shellActiveFill/--fc-card).</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var oracle">
       <div class="vh"><b>Variant 1</b> · two pages · 8 elements · <span class="tag">oracle: shared token</span></div>
@@ -5263,11 +5283,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/queries/centre/qcv156.css:150</code> <code>src/components/queries/centre/qcv156.css:154</code> <code>src/components/queries/centre/qcv156.css:155</code> <code>src/components/queries/centre/qcv156.css:156</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · font size 15.5 · line height 18.6 · letter spacing normal · text case  · border none · corner radius 9 · shadow none · padding 0 10 0 10 · height 38 · width 252</p>
-  </section><section class="f tB" id="B128">
-    <h3><span class="id">B128</span> The secondary · rest (button) is drawn two different ways across one pages, differing in font size, font weight, text colour, border, corner radius, padding, height.</h3>
+  </section><section class="f tB" id="B129">
+    <h3><span class="id">B129</span> The secondary · rest (button) is drawn two different ways across one pages, differing in font size, font weight, text colour, border, corner radius, padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>buttons/secondary/rest</code> · Two real variants in use. The oracle points to variant 1: its colours are shared tokens (color #f4eee5 = --ink-cream/--hpanel-fg/--dv1-cream; bg #2a3a52 = --sp-anthracite/shellActiveBg/--fc-navy/--qcv-navy).</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var oracle">
       <div class="vh"><b>Variant 1</b> · one page · 3 elements · <span class="tag">oracle: shared token</span></div>
@@ -5283,11 +5303,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/marketing/marketing.css:1780</code> <code>src/marketing/marketing.css:1784</code> <code>src/marketing/marketing.css:1787</code> <code>src/marketing/marketing.css:2742</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · line height normal · letter spacing normal · text case  · background #2a3a52 · shadow none</p>
-  </section><section class="f tB" id="B129">
-    <h3><span class="id">B129</span> The pill (tag / status mark) is drawn three different ways across two pages, differing in font, font size, font weight, line height, letter spacing, text case, text colour, background, padding, height.</h3>
+  </section><section class="f tB" id="B130">
+    <h3><span class="id">B130</span> The pill (tag / status mark) is drawn three different ways across two pages, differing in font, font size, font weight, line height, letter spacing, text case, text colour, background, padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>tags-status/pill</code> · 3 variants in use. The oracle points to variant 3: its colours are shared tokens (color #1c130f = --btn-ink/--ink-on-light/--sp-ink/--clv-ink/--fc-ink/--qcv-ink/--be-ink/--tl-nearblack; bg #d7e0e8 = --state-offer/--ac-tone-offer).</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5309,11 +5329,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/marketing/heroCard.css:47</code></div>
     </div></div>
     <p class="muted small">The same in every variant: border none · corner radius 999 · shadow none</p>
-  </section><section class="f tB" id="B130">
-    <h3><span class="id">B130</span> More than one filled primary button in a view, or a primary that is not navy: four distinct values on six pages.</h3>
+  </section><section class="f tB" id="B131">
+    <h3><span class="id">B131</span> More than one filled primary button in a view, or a primary that is not navy: four distinct values on six pages.</h3>
     <p class="meta">all · 1512px wide · part <code>rules/one-navy-primary</code> · Baked 10: one filled primary button per view, in navy. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · three pages · 3 elements</div>
@@ -5341,11 +5361,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/marketing/marketing.css:2543</code> <code>src/marketing/marketing.css:2550</code> <code>src/marketing/marketing.css:2551</code> <code>src/marketing/marketing.css:2552</code></div>
     </div></div>
     
-  </section><section class="f tB" id="B131">
-    <h3><span class="id">B131</span> The numerals (text) is drawn four different ways across three pages, differing in font, font size, line height, text colour.</h3>
+  </section><section class="f tB" id="B132">
+    <h3><span class="id">B132</span> The numerals (text) is drawn four different ways across three pages, differing in font, font size, line height, text colour.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>type/numerals</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 2 elements</div>
@@ -5373,11 +5393,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/notes/yourNotes.css:202</code> <code>src/components/notes/yourNotes.css:203</code> <code>src/components/queries/centre/qcv1531.css:56</code> <code>src/components/queries/centre/qcv1531.css:57</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font weight 600 · letter spacing normal · text case </p>
-  </section><section class="f tB" id="B132">
-    <h3><span class="id">B132</span> The tab · selected (in-page navigation) is drawn two different ways across two pages, differing in font size, font weight, line height, text colour, background, corner radius, shadow, padding, height.</h3>
+  </section><section class="f tB" id="B133">
+    <h3><span class="id">B133</span> The tab · selected (in-page navigation) is drawn two different ways across two pages, differing in font size, font weight, line height, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>in-page-nav/tab/selected</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5393,11 +5413,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/queries/centre/qcv1522card.css:36</code> <code>src/components/queries/centre/qcv1522card.css:38</code> <code>src/components/queries/centre/qcv1522card.css:162</code> <code>src/components/queries/centre/qcv152card.css:78</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · letter spacing normal · text case  · border none</p>
-  </section><section class="f tB" id="B133">
-    <h3><span class="id">B133</span> The tab · rest (in-page navigation) is drawn two different ways across two pages, differing in font size, line height, text colour, background, corner radius, padding, height.</h3>
+  </section><section class="f tB" id="B134">
+    <h3><span class="id">B134</span> The tab · rest (in-page navigation) is drawn two different ways across two pages, differing in font size, line height, text colour, background, corner radius, padding, height.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>in-page-nav/tab/rest</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 3 elements</div>
@@ -5413,11 +5433,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/todo/corkboard/corkboard15.css:63</code> <code>src/components/todo/corkboard/corkboard15.css:64</code> <code>src/components/todo/corkboard/corkboard15.css:65</code> <code>src/components/todo/corkboard/corkboard15.css:66</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · font weight 400 · letter spacing normal · text case  · border none · shadow none</p>
-  </section><section class="f tB" id="B134">
-    <h3><span class="id">B134</span> The tab · selected (in-page navigation) is drawn two different ways across two overlays, differing in font, font size, line height, border, shadow.</h3>
+  </section><section class="f tB" id="B135">
+    <h3><span class="id">B135</span> The tab · selected (in-page navigation) is drawn two different ways across two overlays, differing in font, font size, line height, border, shadow.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>in-page-nav/tab/selected</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5433,11 +5453,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/queries/centre/qcv1522card.css:36</code> <code>src/components/queries/centre/qcv1522card.css:38</code> <code>src/components/queries/centre/qcv1522card.css:162</code> <code>src/components/queries/centre/qcv152card.css:78</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font weight 400 · letter spacing normal · text case  · text colour #1c130f · background #ffffff · corner radius 0 · padding 0 0 9 0 · height 33</p>
-  </section><section class="f tB" id="B135">
-    <h3><span class="id">B135</span> The labels (text) is drawn two different ways across three pages, differing in font, font size, font weight, line height, letter spacing, text case, text colour.</h3>
+  </section><section class="f tB" id="B136">
+    <h3><span class="id">B136</span> The labels (text) is drawn two different ways across three pages, differing in font, font size, font weight, line height, letter spacing, text case, text colour.</h3>
     <p class="meta">onboarding pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>type/labels</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 5 elements</div>
@@ -5453,11 +5473,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/import/importPage.css:40</code></div>
     </div></div>
     
-  </section><section class="f tB" id="B136">
-    <h3><span class="id">B136</span> The toggle (form control) has two different backgrounds across two pages.</h3>
+  </section><section class="f tB" id="B137">
+    <h3><span class="id">B137</span> The toggle (form control) has two different backgrounds across two pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>form-controls/toggle</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 7 elements</div>
@@ -5473,11 +5493,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/phone/pages/settingsPhone.css:38</code> <code>src/components/phone/pages/settingsPhone.css:39</code> <code>src/components/phone/pages/settingsPhone.css:40</code> <code>src/components/phone/pages/settingsPhone.css:41</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · font size 16 · font weight 400 · line height 24 · letter spacing normal · text case  · text colour #3a1c14 · border none · corner radius 999 · shadow none · padding 0 0 0 0 · height 22 · width 38</p>
-  </section><section class="f tB" id="B137">
-    <h3><span class="id">B137</span> The input (form control) has two different padding values across two pages.</h3>
+  </section><section class="f tB" id="B138">
+    <h3><span class="id">B138</span> The input (form control) has two different padding values across two pages.</h3>
     <p class="meta">onboarding pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>form-controls/input</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · two pages · 3 elements</div>
@@ -5493,11 +5513,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/auth.css:8</code> <code>src/components/auth.css:13</code> <code>src/components/auth.css:14</code> <code>src/components/auth.css:15</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Sans 3 · font size 16 · font weight 400 · line height 20.8 · letter spacing normal · text case  · text colour #1c130f · background #ffffff · border 1px solid #1c130f/34 · corner radius 8 · shadow none · height 45</p>
-  </section><section class="f tB" id="B138">
-    <h3><span class="id">B138</span> The tag (tag / status mark) is drawn ten different ways across one pages, differing in font size, font weight, line height, letter spacing, text case, text colour, background, corner radius, shadow, padding, height.</h3>
+  </section><section class="f tB" id="B139">
+    <h3><span class="id">B139</span> The tag (tag / status mark) is drawn ten different ways across one pages, differing in font size, font weight, line height, letter spacing, text case, text colour, background, corner radius, shadow, padding, height.</h3>
     <p class="meta">public pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 10 variants, split across the same pages) · part <code>tags-status/tag</code> · 10 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (10 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 2 elements</div>
@@ -5561,11 +5581,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/marketing/heroCard.css:54</code> <code>src/marketing/heroCard.css:55</code> <code>src/marketing/heroCard.css:182</code> <code>src/marketing/heroCard.css:183</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font JetBrains Mono · border none</p>
-  </section><section class="f tB" id="B139">
-    <h3><span class="id">B139</span> The column-header (list part) is drawn four different ways across one pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, padding, height.</h3>
+  </section><section class="f tB" id="B140">
+    <h3><span class="id">B140</span> The column-header (list part) is drawn four different ways across one pages, differing in font, font size, font weight, line height, text colour, background, border, corner radius, padding, height.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>lists/column-header</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 7 elements</div>
@@ -5593,11 +5613,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/plans/planTable.css:21</code> <code>src/components/plans/planTable.css:22</code> <code>src/components/plans/planTable.css:23</code> <code>src/components/plans/planTable.css:24</code></div>
     </div></div>
     <p class="muted small">The same in every variant: letter spacing normal · text case  · shadow none</p>
-  </section><section class="f tB" id="B140">
-    <h3><span class="id">B140</span> The numerals (text) is drawn four different ways across two overlays, differing in font, font size, font weight, line height, text colour.</h3>
+  </section><section class="f tB" id="B141">
+    <h3><span class="id">B141</span> The numerals (text) is drawn four different ways across two overlays, differing in font, font size, font weight, line height, text colour.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 4 variants, split across the same pages) · part <code>type/numerals</code> · 4 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (4 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 5 elements</div>
@@ -5625,11 +5645,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/queries/centre/qcLogStages.css:56</code> <code>src/components/queries/centre/qcLogStages.css:58</code> <code>src/components/queries/centre/qcLogStages.css:59</code> <code>src/components/queries/centre/qcLogStages.css:60</code></div>
     </div></div>
     <p class="muted small">The same in every variant: letter spacing normal · text case </p>
-  </section><section class="f tB" id="B141">
-    <h3><span class="id">B141</span> The table-head (list part) has three different heights across one pages.</h3>
+  </section><section class="f tB" id="B142">
+    <h3><span class="id">B142</span> The table-head (list part) has three different heights across one pages.</h3>
     <p class="meta">non-workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>lists/table-head</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 7 elements</div>
@@ -5651,11 +5671,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/plans/planTable.css:12</code> <code>src/components/plans/planTable.css:13</code> <code>src/components/plans/planTable.css:14</code> <code>src/components/plans/planTable.css:15</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · font size 16 · font weight 400 · line height 24 · letter spacing normal · text case  · text colour #1c130f · background #ffffff · border none · corner radius 0 · shadow none · padding 0 0 0 0</p>
-  </section><section class="f tB" id="B142">
-    <h3><span class="id">B142</span> The list-item (list part) is drawn three different ways across one pages, differing in border, corner radius, height.</h3>
+  </section><section class="f tB" id="B143">
+    <h3><span class="id">B143</span> The list-item (list part) is drawn three different ways across one pages, differing in border, corner radius, height.</h3>
     <p class="meta">the Dashboard · 1512 and 1920px wide (values shown at 1512; at 1920 there are 3 variants, split across the same pages) · part <code>lists/list-item</code> · 3 variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (3 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 5 elements</div>
@@ -5677,11 +5697,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/dashboard/v2/dash2Frame.css:42</code> <code>src/components/dashboard/v2/dash2Frame.css:43</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · font size 16 · font weight 400 · line height 24 · letter spacing normal · text case  · text colour #1c130f · background #ffffff · shadow none · padding 0 0 0 0</p>
-  </section><section class="f tB" id="B143">
-    <h3><span class="id">B143</span> The list-item (list part) has two different heights across one overlays.</h3>
+  </section><section class="f tB" id="B144">
+    <h3><span class="id">B144</span> The list-item (list part) has two different heights across one overlays.</h3>
     <p class="meta">overlays · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>lists/list-item</code> · Two real variants in use. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 5 elements</div>
@@ -5697,11 +5717,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/queries/centre/qcLogStages.css:52</code> <code>src/components/queries/centre/qcLogStages.css:53</code> <code>src/components/queries/centre/qcLogStages.css:54</code> <code>src/components/queries/centre/qcLogStages.css:66</code></div>
     </div></div>
     <p class="muted small">The same in every variant: font Source Serif 4 · font size 16 · font weight 400 · line height 24 · letter spacing normal · text case  · text colour #1c130f · background #2a3a52 · border none · corner radius 0 · shadow none · padding 0 0 0 0</p>
-  </section><section class="f tB" id="B144">
-    <h3><span class="id">B144</span> A button filled with blush: one distinct value on one page.</h3>
+  </section><section class="f tB" id="B145">
+    <h3><span class="id">B145</span> A button filled with blush: one distinct value on one page.</h3>
     <p class="meta">all · 1512px wide · part <code>rules/blush-button</code> · Baked 10: blush is an accent, never a button. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (1 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5711,11 +5731,11 @@ nav a{margin-right:12px}
       <div class="src"><code>src/components/todo/ws/todoWs.css:121</code> <code>src/components/todo/ws/todoWs.css:127</code> <code>src/components/todo/ws/todoWs.css:128</code> <code>src/components/todo/ws/todoWs.css:129</code></div>
     </div></div>
     
-  </section><section class="f tB" id="B145">
-    <h3><span class="id">B145</span> Red drawn on the page: one distinct value on one page.</h3>
+  </section><section class="f tB" id="B146">
+    <h3><span class="id">B146</span> Red drawn on the page: one distinct value on one page.</h3>
     <p class="meta">all · 1512px wide · part <code>rules/red</code> · Baked 9: no red states. No shared token or primitive settles it.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (1 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 4 elements</div>
@@ -5726,32 +5746,12 @@ nav a{margin-right:12px}
     </div></div>
     
   </section>
-<h2 id="tierA">Tier A — mechanical (1)</h2><section class="f tA" id="A146">
-    <h3><span class="id">A146</span> The page-footer (footer) has two different line heights across four pages.</h3>
-    <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>footers/page-footer</code> · One page (manuscripts-comps) is 0.8000000000000007px off the value the other 3 pages use.</p>
-    
-    
-    
-    <div class="vars"><div class="var">
-      <div class="vh"><b>Variant 1</b> · three pages · 3 elements</div>
-      <figure><img loading="lazy" src="shots/agents-discover/footers-page-footer-78580062e2.png" alt=""><figcaption>Discover — “QueryHawk A bird's-eye view of your quer”</figcaption></figure>
-      <table><tr><th>line height</th><td>24</td></tr></table>
-      <div class="pages">Discover · Analytics · Responses</div>
-      <div class="src"><code>src/components/agents/contact/contactV11.css:82</code> <code>src/components/agents/contact/contactV16.css:166</code> <code>src/components/manuscripts/comps25/compsV25.css:63</code> <code>src/components/manuscripts/comps32/comps32.css:222</code></div>
-    </div><div class="var">
-      <div class="vh"><b>Variant 2</b> · one page · 1 element</div>
-      <figure><img loading="lazy" src="shots/manuscripts-comps/footers-page-footer-37614c993f.png" alt=""><figcaption>Comps — “QueryHawk A bird's-eye view of your quer”</figcaption></figure>
-      <table><tr><th>line height</th><td>23.2</td></tr></table>
-      <div class="pages">Comps</div>
-      <div class="src"><code>src/components/agents/contact/contactV11.css:82</code> <code>src/components/agents/contact/contactV16.css:166</code> <code>src/components/manuscripts/comps25/compsV25.css:63</code> <code>src/components/manuscripts/comps32/comps32.css:222</code></div>
-    </div></div>
-    <p class="muted small">The same in every variant: font Source Serif 4 · font size 16 · font weight 400 · letter spacing normal · text case  · text colour #3a1c14 · background #f2eee8 · border none · corner radius 0 · shadow none · padding 0 0 26 0 · height 345</p>
-  </section>
+<h2 id="tierA">Tier A — mechanical (0)</h2><p>None.</p>
 <h2 id="tierC">Tier C — deliberate (6)</h2><section class="f tC" id="C147">
     <h3><span class="id">C147</span> The empty-state (small part) is drawn two different ways across two pages, differing in background, padding.</h3>
     <p class="meta">workspace pages · 1512 and 1920px wide (values shown at 1512; at 1920 there are 2 variants, split across the same pages) · part <code>small-parts/empty-state</code> · Baked 5: empty states keep a light, open header (not held to populated values).</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (2 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5771,7 +5771,7 @@ nav a{margin-right:12px}
     <h3><span class="id">C148</span> The navy workspace header on Discover is held apart from the comparison.</h3>
     <p class="meta">workspace:discover-not-ready · 1512 and 1920px wide (values shown at 1512; at 1920 there is one variant, split across the same pages) · part <code>page-header/navy</code> · Baked 5 and design-refs/discover-v1 (ref-empty-1512): Discover's not-ready state has its own hero; the shared header (design-refs/workspace-headers-v1) is for its populated state, which the harness account does not reach.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (1 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5785,7 +5785,7 @@ nav a{margin-right:12px}
     <h3><span class="id">C149</span> The page title on Discover is held apart from the comparison.</h3>
     <p class="meta">workspace:discover-not-ready · 1512 and 1920px wide (values shown at 1512; at 1920 there is one variant, split across the same pages) · part <code>type/page-title</code> · Baked 5 and design-refs/discover-v1 (ref-empty-1512): Discover's not-ready state has its own hero; the shared header (design-refs/workspace-headers-v1) is for its populated state, which the harness account does not reach.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (1 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5799,7 +5799,7 @@ nav a{margin-right:12px}
     <h3><span class="id">C150</span> The page subheader on Discover is held apart from the comparison.</h3>
     <p class="meta">workspace:discover-not-ready · 1512 and 1920px wide (values shown at 1512; at 1920 there is one variant, split across the same pages) · part <code>type/page-subheader</code> · Baked 5 and design-refs/discover-v1 (ref-empty-1512): Discover's not-ready state has its own hero; the shared header (design-refs/workspace-headers-v1) is for its populated state, which the harness account does not reach.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (1 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5813,7 +5813,7 @@ nav a{margin-right:12px}
     <h3><span class="id">C151</span> The navy workspace header on Tasks (To-do) is held apart from the comparison.</h3>
     <p class="meta">workspace:todo-slim-header · 1512 and 1920px wide (values shown at 1512; at 1920 there is one variant, split across the same pages) · part <code>page-header/navy</code> · Baked 2: the To-do list has a slim title row instead of the full workspace header; held apart from the workspace header comparison.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (1 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
@@ -5827,7 +5827,7 @@ nav a{margin-right:12px}
     <h3><span class="id">C152</span> The page title on Tasks (To-do) is held apart from the comparison.</h3>
     <p class="meta">workspace:todo-slim-header · 1512 and 1920px wide (values shown at 1512; at 1920 there is one variant, split across the same pages) · part <code>type/page-title</code> · Baked 2: the To-do list has a slim title row instead of the full workspace header; held apart from the workspace header comparison.</p>
     
-    
+    <p class="after same">After the Tier A fixes: <b>Unchanged (1 variants)</b></p>
     
     <div class="vars"><div class="var">
       <div class="vh"><b>Variant 1</b> · one page · 1 element</div>
