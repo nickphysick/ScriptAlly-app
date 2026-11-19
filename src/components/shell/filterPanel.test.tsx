@@ -132,3 +132,20 @@ describe("motion (Phase 6)", () => {
     expect(all).toContain("animation: lf-pop 0.2s ease-out");
   });
 });
+
+describe("always pinned (List filters v1.1)", () => {
+  it("the sections sit in one scrolling body between the head and the foot", () => {
+    const h = panel(0, <FilterSection probe="s" title="Stage"><i>x</i></FilterSection>);
+    expect(h).toMatch(/<div class="fp-hd"[\s\S]*?<\/div><div class="fp-body" data-tst="body"><section class="fp-sec"[\s\S]*<\/section><\/div><p class="fp-ft"/);
+  });
+  it("the card is a column capped at the room under the bar; head and foot never scroll; the body does", () => {
+    expect(css).toContain("display: flex; flex-direction: column;\n    max-height: calc(var(--wpg-port-h, 100vh) - var(--pin-cover, 12px) - 28px);");
+    expect(css).toContain(".fp > .fp-hd, :is(.qc151.qc153, .cl27) .fp > .fp-ft { flex: none; }");
+    expect(css).toMatch(/\.fp > \.fp-body \{\s*flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;\s*scrollbar-width: thin; scrollbar-color: #d6cabb transparent;/);
+    expect(css).toContain(".fp[data-fp-more] > .fp-ft { box-shadow: 0 -10px 14px -12px rgba(28, 19, 15, 0.28);");
+  });
+  it("the tall rule and its hook are gone", () => {
+    expect(() => readFileSync(resolve(__dirname, "useTallRail.ts"), "utf8")).toThrow();
+    expect(readFileSync(resolve(__dirname, "../queries/centre/qcv154.css"), "utf8")).not.toMatch(/\[data-qc154-tall\]\s*\{/);
+  });
+});

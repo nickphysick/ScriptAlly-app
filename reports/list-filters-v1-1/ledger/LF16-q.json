@@ -1,0 +1,22 @@
+[
+ {
+  "name": "at rest: the body does not scroll",
+  "ok": true,
+  "got": "{\"sh\":851,\"ch\":851,\"top\":0}"
+ },
+ {
+  "name": "at rest: no foot shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "scrolled: pinned at --pin-cover + 14 (±1)",
+  "ok": true,
+  "got": "top 98, cover 84"
+ },
+ {
+  "name": "scrolled: the body does not scroll, no shadow",
+  "ok": true,
+  "got": "{\"sh\":851,\"ch\":851,\"top\":0} none"
+ }
+]

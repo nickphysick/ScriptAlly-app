@@ -1,0 +1,37 @@
+[
+ {
+  "name": "the panel's top is --pin-cover + 14 (±1)",
+  "ok": true,
+  "got": "top 98, cover 84"
+ },
+ {
+  "name": "its bottom is at least 12px above the scrollport's",
+  "ok": true,
+  "got": "14px"
+ },
+ {
+  "name": "the body scrolls (content taller than the room)",
+  "ok": true,
+  "got": "{\"sh\":851,\"ch\":354,\"top\":0}"
+ },
+ {
+  "name": "the head and the foot are fully visible",
+  "ok": true,
+  "got": "head true foot true"
+ },
+ {
+  "name": "the foot carries the more-below shadow",
+  "ok": true,
+  "got": "rgba(28, 19, 15, 0.28) 0px -10px 14px -12px"
+ },
+ {
+  "name": "scrolled to its end, the foot has no shadow",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "focus on a control out of sight scrolls the body to it, not the page",
+  "ok": true,
+  "got": "{\"inBody\":true,\"visible\":true,\"bodyTop\":497} page 1500→1500"
+ }
+]

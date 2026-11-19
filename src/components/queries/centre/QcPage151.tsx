@@ -38,7 +38,6 @@ import { sectionSwatch, standWords } from "../../../lib/qc153";
 import { FirstPanel155, QuietPanel155, Skeleton155 } from "./QcState155";
 import { LoadFailed } from "../../notes/LoadFailed";
 import { QcSlim156 } from "./QcSlim156";
-import { useTallRail } from "../../shell/useTallRail";
 import type { WeekGoal154 } from "../../../lib/qc154goal";
 import "./qcv151.css";
 import "./qcv1522.css";
@@ -272,9 +271,7 @@ export const QcPage151: React.FC<QcPage151Props> = (p) => {
     on();
     return () => { document.removeEventListener("scroll", on, true); window.removeEventListener("resize", on); if (raf) cancelAnimationFrame(raf); window.clearTimeout(clear); };
   }, []);
-  /* v154 §6 — the rail sticks 14px under the toolbar's top; taller than the scrollport, it scrolls with the page
-     (shell/useTallRail, extracted from here unchanged; the Contact list's Views panel uses it too) */
-  useTallRail(rootRef, p.rail);
+  /* List filters v1.1 — the filter card always pins (shell/FilterPanel scrolls its own body); useTallRail is retired */
 
   /* §6 — a group's rows fold away under its header, for the session */
   const [collapsed, setCollapsed] = useState<Set<string>>(readCollapsed);

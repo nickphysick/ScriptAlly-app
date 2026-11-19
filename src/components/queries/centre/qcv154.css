@@ -212,6 +212,7 @@
 
   :is(.qc151.qc153, .cl27) .qc153-rail { top: calc(var(--pin-cover, 12px) + 14px); }
   :is(.qc151.qc153, .cl27) .qc153-rail .qc153-rin { max-height: none; overflow: visible; overscroll-behavior: auto; }
-  :is(.qc151.qc153, .cl27) .qc153-rail[data-qc154-tall] { position: relative; top: auto; }
+  /* List filters v1.1 — the tall rail's "scroll with the page" rule is retired: the filter card always pins and scrolls
+     its own body (shell/filterPanel.css) */
 }
 @media (prefers-reduced-motion: reduce) { .qc154-tc > .qc154-tn, .qc154-tc > .qc154-tg { transition: none; } }

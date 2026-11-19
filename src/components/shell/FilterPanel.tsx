@@ -15,8 +15,13 @@
  *
  * ⚠️ PRESENTATION ONLY: every count, every "on" and every write is handed in by the page. The panel holds two pieces of
  *    state, a fold's open and how a count is shown on its way to a new value; neither is a filter.
- * ⚠️ THE CARD KEEPS THE RAIL'S BONES (`qc153-rail`): its column, its width, its stickiness and useTallRail's "too tall to
- *    pin" all read that class. Its look is shell/filterPanel.css, scoped to `.fp`.
+ * ⚠️ THE CARD KEEPS THE RAIL'S BONES (`qc153-rail`): its column, its width and its stickiness read that class. Its look is
+ *    shell/filterPanel.css, scoped to `.fp`.
+ * ⚠️ IT ALWAYS PINS (List filters v1.1). The card is a column no taller than the room under the bar (a `max-height` on
+ *    `--wpg-port-h` and `--pin-cover`, so it follows the collapsed bar with no script); the head and the foot never
+ *    scroll, and the sections scroll inside `.fp-body` when they need more room. `data-fp-more` on the card says there is
+ *    more below (the foot's shadow); `--fp-sb` is the body's scrollbar width, taken out of the sections' right padding so
+ *    the content never shifts sideways. useTallRail ("too tall: scroll with the page") is retired.
  * ⚠️ THE `data-*` PROBES ARE THE CALLER'S (`hook`: `data-qc156` on Queries, `data-clq` on Agents): every workspace page
  *    stays mounted, so a probe that counts one page's hooks across the document must never count the other's.
  * ⚠️ NO COLOUR HERE MEANS A STAGE. Stage colours live in lib/stageColours and are drawn only by shell/StageFilter.
@@ -88,17 +93,50 @@ export interface FilterPanelProps {
   loading?: boolean;
   children: React.ReactNode;
 }
+/**
+ * The body's two readings, on every scroll and resize: whether there is more below (`data-fp-more` on the card) and the
+ * scrollbar's width (`--fp-sb`). Written to the DOM, not React state: a scroll must not re-render the panel.
+ */
+function useBodyReadings(railRef: React.RefObject<HTMLElement | null>, bodyRef: React.RefObject<HTMLDivElement | null>) {
+  useEffect(() => {
+    const rail = railRef.current, body = bodyRef.current;
+    if (!rail || !body) return undefined;
+    let raf = 0;
+    const read = () => {
+      raf = 0;
+      const more = body.scrollHeight - body.clientHeight - body.scrollTop > 1;
+      if (rail.hasAttribute("data-fp-more") !== more) rail.toggleAttribute("data-fp-more", more);
+      const sb = `${Math.max(0, body.offsetWidth - body.clientWidth)}px`;
+      if (rail.style.getPropertyValue("--fp-sb") !== sb) rail.style.setProperty("--fp-sb", sb);
+    };
+    const on = () => { if (!raf) raf = requestAnimationFrame(read); };
+    read();
+    body.addEventListener("scroll", on, { passive: true });
+    window.addEventListener("resize", on);
+    const ro = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(on);
+    ro?.observe(body);
+    for (const c of body.children) ro?.observe(c);
+    /* a section added or removed (What you sent, the genres' "+n more") changes the content's height */
+    const mo = typeof MutationObserver === "undefined" ? null : new MutationObserver(() => { for (const c of body.children) ro?.observe(c); on(); });
+    mo?.observe(body, { childList: true, subtree: true });
+    return () => { body.removeEventListener("scroll", on); window.removeEventListener("resize", on); ro?.disconnect(); mo?.disconnect(); if (raf) cancelAnimationFrame(raf); };
+  }, [railRef, bodyRef]);
+}
+
 export const FilterPanel: React.FC<FilterPanelProps> = ({ hook, label, on, onClear, foot, loading = false, children }) => {
   const h = (v: string) => ({ [hook]: v });
+  const railRef = useRef<HTMLElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  useBodyReadings(railRef, bodyRef);
   return (
     <Ctx.Provider value={{ hook, loading }}>
-      <aside className="qc153-rail fp" aria-label={label} {...h("panel")} aria-busy={loading || undefined}>
+      <aside className="qc153-rail fp" aria-label={label} {...h("panel")} aria-busy={loading || undefined} ref={railRef}>
         <div className="fp-hd" {...h("head")}>
           <b className="fp-t" {...h("title")}>Filter</b>
           {on > 0 ? <span className="fp-on" {...h("on")}>{on} on</span> : null}
           <button type="button" className="fp-clr" {...h("clear")} disabled={on === 0 || loading} onClick={onClear}>Clear all</button>
         </div>
-        {children}
+        <div className="fp-body" {...h("body")} ref={bodyRef}>{children}</div>
         <p className="fp-ft" aria-live="polite" {...h("foot")}>{loading ? " " : foot}</p>
       </aside>
     </Ctx.Provider>

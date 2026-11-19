@@ -1,0 +1,27 @@
+[
+ {
+  "name": "the panel's content is taller than the room (proved first)",
+  "ok": true,
+  "got": "content 991 vs room 676"
+ },
+ {
+  "name": "pinned after scrolling 1500px: top = --pin-cover + 14 (±1)",
+  "ok": true,
+  "got": "top 98, cover 84, sticky"
+ },
+ {
+  "name": "the head and foot are in view",
+  "ok": true,
+  "got": "head true foot true"
+ },
+ {
+  "name": "its body is taller inside than its box",
+  "ok": true,
+  "got": "{\"sh\":850,\"ch\":533,\"top\":0}"
+ },
+ {
+  "name": "scrolled to its end, the body moved and its last control is in view",
+  "ok": true,
+  "got": "{\"top\":317,\"inside\":true}"
+ }
+]

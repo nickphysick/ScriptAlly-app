@@ -279,7 +279,9 @@ for (const vp of SIZES) {
     const back = await page.evaluate((sel) => { const b = document.querySelector<HTMLElement>(`${sel} [data-qc153="bar"]`)!.getBoundingClientRect(); const f = document.querySelector<HTMLElement>(`${sel} [data-qc153="list-column"] section, ${sel} [data-qc153="fold"]`)!.getBoundingClientRect(); return { barY: b.y, barH: b.height, firstY: f.y, stuck: document.querySelector(`${sel} [data-qc153="count"]`)!.hasAttribute("data-stuck"), g: document.querySelector(`${sel} [data-qc154='toolbar-group']`)!.textContent }; }, PAGE);
     L.check("back at the top: the count again, and nothing has moved", !back.stuck && back.g === "" && near(back.barY, rest.barY, 0.5) && near(back.firstY, rest.firstY, 0.5), JSON.stringify({ rest, back }));
     const rail = await page.evaluate((sel) => { const r = document.querySelector<HTMLElement>(`${sel} .qc153-rail`)!; const s = getComputedStyle(r); return { pos: s.position, top: s.top, tall: r.hasAttribute("data-qc154-tall"), h: r.offsetHeight, port: document.querySelector<HTMLElement>(".ws-window .qc-wpg.qc-wpg--v11 > .wpg-scroll")!.clientHeight }; }, PAGE);
-    L.check("rail: sticky 14px under the lip, or scrolling when taller than the port", rail.tall ? rail.pos === "relative" : rail.pos === "sticky", JSON.stringify(rail));
+    /* List filters v1.1 — RETIRED: "or scrolling with the page when taller than the port" (data-qc154-tall). The filter
+       card always pins and scrolls its own body; lf11.measure.ts LF15–LF19 hold it. */
+    L.check("rail: sticky 14px under the lip (List filters v1.1: always)", rail.pos === "sticky" && !rail.tall, JSON.stringify(rail));
     L.done(6);
   });
 }

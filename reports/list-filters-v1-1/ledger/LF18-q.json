@@ -1,0 +1,17 @@
+[
+ {
+  "name": "the page content is under 1000px wide",
+  "ok": true,
+  "got": "888px"
+ },
+ {
+  "name": "Queries keeps two columns and the panel pins",
+  "ok": true,
+  "got": "sticky top 98 cover 84"
+ },
+ {
+  "name": "nothing clipped: head and foot in view, 12px clear beneath",
+  "ok": true,
+  "got": "gap 14"
+ }
+]

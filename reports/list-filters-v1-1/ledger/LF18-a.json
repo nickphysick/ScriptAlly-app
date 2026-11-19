@@ -1,0 +1,22 @@
+[
+ {
+  "name": "the page content is under 1000px wide",
+  "ok": true,
+  "got": "888px"
+ },
+ {
+  "name": "the panel is above the list",
+  "ok": true,
+  "got": "{\"content\":888,\"above\":true,\"position\":\"static\",\"maxH\":\"none\",\"sh\":656,\"ch\":656}"
+ },
+ {
+  "name": "not pinned",
+  "ok": true,
+  "got": "static"
+ },
+ {
+  "name": "full height, nothing clipped (no max-height, the body does not scroll)",
+  "ok": true,
+  "got": "none 656/656"
+ }
+]

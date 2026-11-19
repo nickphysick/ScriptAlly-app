@@ -9,8 +9,8 @@
  * ⚠️ NEUTRALS ONLY: navy #2a3a52, cream #f4eee5, white, and the papers #faf7f2 / #f6f3ee / #e9e3da. A stage colour is
  *    never written here; the stage bar and labels are shell/stageFilter.css, which reads lib/stageColours.
  * ⚠️ FONTS CARRY !important: the brand stylesheet names headings and bare spans on every route (see the type guard below).
- * ⚠️ The card's column, width, stickiness and pin are the rail's (`qc153-rail`, qcv153.css, useTallRail); this sheet
- *    sets only its look, and turns off the rail's inner scroller (the card never scrolls inside itself).
+ * ⚠️ The card's column, width, stickiness and pin are the rail's (`qc153-rail`, qcv153.css). List filters v1.1: the card
+ *    ALWAYS PINS — a column no taller than the room under the bar, whose sections scroll in `.fp-body`.
  */
 @media (min-width: 768px) {
   /* the type guard: every text node inherits the card's face unless a rule names one */
@@ -21,7 +21,22 @@
     box-sizing: border-box; width: 268px; padding: 0; border-radius: 16px; background: #fff; overflow: hidden; color: #1c130f;
     box-shadow: 0 0 0 1px #e3dbcf, 0 18px 30px -24px rgba(28, 19, 15, 0.35);
     font: 400 16px/1.4 var(--sp-serif);
+    /* List filters v1.1 — always pinned: no taller than the room under the bar (top --pin-cover + 14, 14 clear beneath) */
+    display: flex; flex-direction: column;
+    max-height: calc(var(--wpg-port-h, 100vh) - var(--pin-cover, 12px) - 28px);
   }
+  :is(.qc151.qc153, .cl27) .fp > .fp-hd, :is(.qc151.qc153, .cl27) .fp > .fp-ft { flex: none; }
+  /* the sections: the one part that scrolls; a thin, quiet scrollbar whose width comes out of the sections' right
+     padding (--fp-sb, measured), so nothing shifts sideways when it appears */
+  :is(.qc151.qc153, .cl27) .fp > .fp-body {
+    flex: 1 1 auto; min-height: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain;
+    scrollbar-width: thin; scrollbar-color: #d6cabb transparent;
+  }
+  :is(.qc151.qc153, .cl27) .fp > .fp-body > .fp-sec { padding-right: calc(14px - var(--fp-sb, 0px)); }
+  :is(.qc151.qc153, .cl27) .fp > .fp-body > .fp-fold { padding-right: calc(18px - var(--fp-sb, 0px)); }
+  :is(.qc151.qc153, .cl27) .fp > .fp-body > .fp-sec:first-child { border-top: 0; }
+  /* more below: the foot lifts with a soft top shadow */
+  :is(.qc151.qc153, .cl27) .fp[data-fp-more] > .fp-ft { box-shadow: 0 -10px 14px -12px rgba(28, 19, 15, 0.28); position: relative; z-index: 1; }
   :is(.qc151.qc153, .cl27) .fp :focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 
   /* ── the head: navy, "Filter", "{n} on", Clear all ── */
@@ -38,7 +53,6 @@
 
   /* ── a section ── */
   :is(.qc151.qc153, .cl27) .fp .fp-sec { padding: 14px 14px 16px; border-top: 1px solid #f1ebe2; }
-  :is(.qc151.qc153, .cl27) .fp .fp-hd + .fp-sec { border-top: 0; }
   :is(.qc151.qc153, .cl27) .fp .fp-sec[hidden] { display: none; }
   :is(.qc151.qc153, .cl27) .fp .fp-st { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin: 0 4px 10px; }
   :is(.qc151.qc153, .cl27) .fp .fp-st > b { font: 400 17px/1 var(--sp-type) !important; color: #1c130f; }

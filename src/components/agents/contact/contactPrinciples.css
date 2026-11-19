@@ -128,6 +128,9 @@
   .cl27 .qc153-cl { grid-template-columns: minmax(0, 1fr) !important; row-gap: 18px; }
   .cl27 .qc153-railcol, .cl27 .qc153-rail { position: static !important; top: auto !important; }
   .cl27 .qc153-rail .qc153-rin { max-height: none !important; }
+  /* List filters v1.1 — folded, the filter card is above the list at its full height: no cap, the body does not scroll */
+  .cl27 .qc153-rail.fp { max-height: none !important; }
+  .cl27 .qc153-rail.fp > .fp-body { overflow: visible !important; }
   /* QC layout v1 — the navy header stacks the same way: the drawing small, List health on its own row */
   .cl27 > .qc1531-hd.clq-hd { grid-template-columns: 72px minmax(0, 1fr) !important; row-gap: 18px; column-gap: 20px; padding-left: 20px !important; }
   .cl27 > .qc1531-hd.clq-hd .clq-art img { width: 72px; }

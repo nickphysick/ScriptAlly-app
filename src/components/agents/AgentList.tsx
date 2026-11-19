@@ -49,7 +49,6 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { ContactHeaderQc } from "./contact/ContactHeaderQc";
 import { ContactSlimBar } from "./contact/ContactSlimBar";
 import { ContactViews } from "./contact/ContactViews";
-import { useTallRail } from "../shell/useTallRail";
 import { headerFigures } from "../../lib/contactV26";
 import { SET_LABEL } from "../../lib/contactV24";
 /** v26 E — a set the page narrowed to from a link, in the applied row's words ("Querying" for Your move + With the agent) */
@@ -397,8 +396,7 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
   const showEmpty = !frameState && (pageState === "blank" || (pageState === "list" && lhOverride === 0));
   const showList = pageState === "list" && !showEmpty && !frameState;
   const showFrame = showList || frameState !== null;
-  /* QC layout v1 — the Views panel pins as the Query Centre's does, and scrolls with the page when taller than the port */
-  useTallRail(mainColRef, `${showFrame}-${frameState}`);
+  /* List filters v1.1 — the filter card always pins (shell/FilterPanel scrolls its own body); useTallRail is retired */
   /* v16 §E — full screen is on only over a list, on this page's own route */
   const fullOn = full && showList;
   const fullRef = useRef(fullOn);

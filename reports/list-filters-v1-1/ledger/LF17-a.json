@@ -1,0 +1,57 @@
+[
+ {
+  "name": "@400: pinned at --pin-cover + 14 (±1)",
+  "ok": true,
+  "got": "top 98, cover 84"
+ },
+ {
+  "name": "@400: never over the collapsed bar",
+  "ok": true,
+  "got": "top 98, bar bottom 72"
+ },
+ {
+  "name": "@900: pinned at --pin-cover + 14 (±1)",
+  "ok": true,
+  "got": "top 98, cover 84"
+ },
+ {
+  "name": "@900: never over the collapsed bar",
+  "ok": true,
+  "got": "top 98, bar bottom 72"
+ },
+ {
+  "name": "@1500: pinned at --pin-cover + 14 (±1)",
+  "ok": true,
+  "got": "top 98, cover 84"
+ },
+ {
+  "name": "@1500: never over the collapsed bar",
+  "ok": true,
+  "got": "top 98, bar bottom 72"
+ },
+ {
+  "name": "@900: pinned at --pin-cover + 14 (±1)",
+  "ok": true,
+  "got": "top 98, cover 84"
+ },
+ {
+  "name": "@900: never over the collapsed bar",
+  "ok": true,
+  "got": "top 98, bar bottom 72"
+ },
+ {
+  "name": "@400: pinned at --pin-cover + 14 (±1)",
+  "ok": true,
+  "got": "top 98, cover 84"
+ },
+ {
+  "name": "@400: never over the collapsed bar",
+  "ok": true,
+  "got": "top 98, bar bottom 72"
+ },
+ {
+  "name": "the collapsed bar changed --pin-cover during the run (else the lock is vacuous)",
+  "ok": true,
+  "got": "400:84 900:84 1500:84 900:84 400:84 0:12"
+ }
+]
