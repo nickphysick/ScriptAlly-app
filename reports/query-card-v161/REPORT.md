@@ -39,7 +39,10 @@ Branch `query-card-v161`, worktree `ScriptAlly-qc161` (removed after the push). 
 
 - Branch `query-card-v161`, cut from `todo-card-thread-v1` @ ab699e789, which dev served (To-do card thread v1, on
   Query card v160).
-- Dev: https://scriptally-dev.web.app, bundle `BUNDLE`.
+- Dev: https://scriptally-dev.web.app, bundle `index-uSsspMoT.js`. Dev had moved to `dev/tct1-sv1`
+  (`index-D50rRItV.js`, another session's Search v1 on To-do card thread v1) by the end. So v161 was merged onto it
+  as `dev/tct1-sv1-qc161` @ 003562e45 (a clean merge), gated there (tsc 0; Vitest 12925 passed with the 2 known
+  failures; QC161-1, -6, -7, -9 and -10 green), and that branch's pushed tip was deployed.
 
 ## 3. Step 0.3: the nudge's readers, and the seed
 
