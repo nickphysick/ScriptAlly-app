@@ -1,0 +1,47 @@
+[
+ {
+  "name": "at rest: no Reset, Reset filters or Clear filters",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "at rest: \"Clear all\" in the head",
+  "ok": true,
+  "got": "Clear all"
+ },
+ {
+  "name": "filtered: no Reset, Reset filters or Clear filters",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "filtered: \"Clear all\" in the head",
+  "ok": true,
+  "got": "Clear all"
+ },
+ {
+  "name": "filtered: \"Clear all\" in the applied row",
+  "ok": true,
+  "got": "Clear all"
+ },
+ {
+  "name": "nothing matches: no Reset, Reset filters or Clear filters",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "nothing matches: \"Clear all\" in the head",
+  "ok": true,
+  "got": "Clear all"
+ },
+ {
+  "name": "nothing matches: \"Clear all\" in the applied row",
+  "ok": true,
+  "got": "Clear all"
+ },
+ {
+  "name": "nothing matches: its button says Clear all",
+  "ok": true,
+  "got": ""
+ }
+]

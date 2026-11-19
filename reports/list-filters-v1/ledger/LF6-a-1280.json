@@ -1,0 +1,67 @@
+[
+ {
+  "name": "a population: tiles, split sides and genres to press",
+  "ok": true,
+  "got": "tile:ready:35 tile:always:23 tile:missing:52 side:no:39 side:yes:14 side:open:49 side:closed:4 genre:thriller:22 genre:literary-fiction:29 genre:crime:1 genre:suspense:1"
+ },
+ {
+  "name": "tile ready: the list shows its count",
+  "ok": true,
+  "got": "35 vs 35"
+ },
+ {
+  "name": "tile always: the list shows its count",
+  "ok": true,
+  "got": "23 vs 23"
+ },
+ {
+  "name": "tile missing: the list shows its count",
+  "ok": true,
+  "got": "52 vs 52"
+ },
+ {
+  "name": "side no: the list shows its count",
+  "ok": true,
+  "got": "39 vs 39"
+ },
+ {
+  "name": "side yes: the list shows its count",
+  "ok": true,
+  "got": "14 vs 14"
+ },
+ {
+  "name": "side open: the list shows its count",
+  "ok": true,
+  "got": "49 vs 49"
+ },
+ {
+  "name": "side closed: the list shows its count",
+  "ok": true,
+  "got": "4 vs 4"
+ },
+ {
+  "name": "genre thriller: the list shows its count",
+  "ok": true,
+  "got": "22 vs 22"
+ },
+ {
+  "name": "genre literary-fiction: the list shows its count",
+  "ok": true,
+  "got": "29 vs 29"
+ },
+ {
+  "name": "genre crime: the list shows its count",
+  "ok": true,
+  "got": "1 vs 1"
+ },
+ {
+  "name": "genre suspense: the list shows its count",
+  "ok": true,
+  "got": "1 vs 1"
+ },
+ {
+  "name": "after each, the whole list is back",
+  "ok": true,
+  "got": "53 of 53"
+ }
+]

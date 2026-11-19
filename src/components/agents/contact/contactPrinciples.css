@@ -46,8 +46,8 @@
 .cl27 .clp2-fit i.on { color: #2a3a52; }
 .cl27 .cl26-ix .cl26-ixe:disabled { opacity: .45; }
 @media (min-width: 768px) {
-  /* QC layout v1 — v27's rail pills, Reset and "More filters" row are deleted with the rail (ContactViews is the Query
-     Centre's Views panel, shell/ViewsPanel) */
+  /* QC layout v1 — v27's rail pills, Reset and "More filters" row are deleted with the rail (ContactViews is now the
+     Filter panel, shell/FilterPanel — List filters v1) */
 }
 
 /* ── 3 · feedback: the new row's tint and the postmark ──────────────────────────────────────────────────────────── */

@@ -10,15 +10,10 @@
  *      top 6px down, and the scale 10% above the larger of the goal and the busiest week, so neither ever touches the
  *      top. An all-zero series lies flat along the baseline; the goal line still shows.
  *
- *   §6 THE VIEWS PANEL'S MODEL: the five views are the existing quick filters ("Most used"), now picked one at a time,
- *      with "All queries" as no quick filter at all. ⚠️ A VIEW IS THE SAME FIELD THE QUICK FILTER WROTE (`you`, `past`,
- *      `waiting`, `offers` on `Qc138Filters`), never a second state: Overdue is `past`, which is also the Dates group's
- *      "Past their reply date" box — one field, two doors, exactly as the rail's Overdue pick and More switch were.
+ *   §6 THE VIEWS PANEL'S MODEL: retired in List filters v1 (see the foot of this file).
  */
 import { MONTHS_SHORT } from "./dates";
-import type { Qc138Filters } from "./qc138";
 import type { GoalWeek154 } from "./qc154goal";
-import { QUICK_PICKS, STAND_ROWS, standOn, type QuickKey, type StandRow } from "./qc140";
 
 /* ── §2 the line ─────────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -59,38 +54,5 @@ export const lineMonths = (w: readonly { start: string }[]): { first: string; la
   return { first: m(w[0]?.start), last: m(w[w.length - 1]?.start) };
 };
 
-/* ── §6 the Views panel ──────────────────────────────────────────────────────────────────────────────────────── */
-
-export type ViewKey156 = "all" | QuickKey;
-export type ViewIcon156 = "list" | "you" | "clock" | "plane" | "doc";
-const ICON: Record<QuickKey, ViewIcon156> = { you: "you", over: "clock", wait: "plane", offers: "doc" };
-/** All queries, then the quick filters in their order and with their labels (never renamed) */
-export const VIEWS_156: readonly { key: ViewKey156; label: string; icon: ViewIcon156; line?: string }[] = [
-  { key: "all", label: "All queries", icon: "list" },
-  ...QUICK_PICKS.map((p) => ({ key: p.key, label: p.title, icon: ICON[p.key], line: p.line })),
-];
-const QUICK_FIELDS = ["you", "past", "waiting", "offers"] as const;
-
-/** the view the filters hold: the first quick field on, in the quick filters' order; none is All queries */
-export function viewOf156(f: Qc138Filters): ViewKey156 {
-  for (const p of QUICK_PICKS) if (f[p.field]) return p.key;
-  return "all";
-}
-/** a view replaces any other; All queries clears every quick field. Nothing else in the filters changes. */
-export function selectView156(f: Qc138Filters, k: ViewKey156): Qc138Filters {
-  const cleared: Qc138Filters = { ...f };
-  for (const x of QUICK_FIELDS) cleared[x] = false;
-  if (k === "all") return cleared;
-  const p = QUICK_PICKS.find((x) => x.key === k);
-  if (!p) return cleared;
-  return { ...cleared, [p.field]: true };
-}
-
-/** Refine's Status rows: the stage rows with a count in this view, or ticked */
-export function statusRows156(stand: Record<string, number>, f: Qc138Filters): { row: StandRow; n: number; on: boolean }[] {
-  return STAND_ROWS.map((row) => ({ row, n: stand[row.key] ?? 0, on: standOn(f, row) })).filter((x) => x.n > 0 || x.on);
-}
-
-/** a filter behind "More filters" is set: a round, a date filter, or Past their reply date under a view other than Overdue */
-export const moreActive156 = (f: Qc138Filters): boolean =>
-  f.sent.length > 0 || f.dueWeek || f.missing || f.overYear || (f.past && viewOf156(f) !== "over");
+/* §6 THE VIEWS PANEL'S MODEL retired with the panel (List filters v1 Phase 2): the Queries list's Filter panel is
+   queries/centre/QcViews156 over shell/FilterPanel, its quick tiles write lib/qc153Rail `pickQuick`. */

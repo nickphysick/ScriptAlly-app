@@ -1124,16 +1124,16 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
         {/* v27 — TWO COLUMNS, the Query Centre's (`qc153-cl`): the Views panel (sticky; QC layout v1), then the list */}
         <div className="qc153-cl" data-cl27="columns">
         <div className="qc153-railcol" data-cl27="rail-column">
-          <ContactViews all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} onSets={setSets} pool={inPool}
+          <ContactViews all={frameState ? NO_FACTS : listAll} loading={frameState !== null} filters={filters} onFilters={setFilters} sets={sets} pool={inPool}
             genreLabel={(k, raw) => genreLabel(raw, personalGenres) || k} genreHit={bookHit} showing={frameState ? 0 : listPool.length}
-            onReset={clearRailFilters}
-            onExport={() => downloadAgentsCsv(visibleFacts, (raw) => genreLabel(raw, personalGenres))} />
+            onReset={clearRailFilters} />
         </div>
         <div className="qc153-main" data-cl27="list-column">
         {/* QC layout v1 — the Query Centre's light bar above the card (count, Find, Sort, Group), on its sticky strip */}
         <ContactBar shown={frameState ? 0 : listPool.length} loading={frameState !== null} search={search} onSearch={setSearch}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}
-          group={group26} onGroup={setGroup26} />
+          group={group26} onGroup={setGroup26}
+          onExport={() => downloadAgentsCsv(visibleFacts, (raw) => genreLabel(raw, personalGenres))} />
         <ContactSheet26 pool={frameState ? NO_FACTS : listPool} all={frameState ? NO_FACTS : listAll} group={group26}
           state={frameState ?? "list"} onRetry={retryAgents} dayOne={dayOneHere ? { onAdd: openAdd } : null}
           sortKey={sortKey} reversed={reversed} onSort={(v) => { setSortKeyRaw(v.key); setReversed(v.reversed); }}

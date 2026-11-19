@@ -1,0 +1,17 @@
+[
+ {
+  "name": "the population: panel, bar (and applied row on Agents) at least 20 elements",
+  "ok": true,
+  "got": "102 elements, applied row true"
+ },
+ {
+  "name": "no stage band or tint on Agents' panel, bar or applied row",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "no powder blue",
+  "ok": true,
+  "got": "[]"
+ }
+]

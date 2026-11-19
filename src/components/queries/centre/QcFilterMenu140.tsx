@@ -17,6 +17,7 @@
  *    the scroll position and the focused control survive a change.
  * ⚠️ PIP IS NEVER COUNTED: "{v} of {N}" are the page's own visible and scoped rows, and the practice row is neither.
  */
+import type { Stage } from "../../../lib/stageColours";
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { quietScroll, type PopoverState } from "../../shell/ListPills";
@@ -218,7 +219,7 @@ export const QcFilterPanel151: React.FC<{ model: Qc140FilterModel; close: () => 
 
 /* ── the applied-filters row ─────────────────────────────────────────────────────────────────────────────────── */
 
-export interface Qc140Chip { key: string; label: string; status?: string; off: () => void }
+export interface Qc140Chip { key: string; label: string; status?: string; /** List filters v1 — a whole stage */ stage?: Stage; off: () => void }
 
 /**
  * Under the toolbar while anything narrows the list: powder, a 1px rule at the top. "{v} of {N} queries", a removable

@@ -14,7 +14,7 @@ const page = readFileSync(new URL("./QcPage151.tsx", import.meta.url), "utf8");
 const bar = (extra: Partial<QcBar153Props>) => renderToStaticMarkup(
   <QcBar153 view="list" onView={() => {}} loading={false} showing={26} total={26} find="" onFind={() => {}}
     sort={{ key: "due", desc: false }} onSort={() => {}} group="attention" onGroup={() => {}} packageOk
-    beGroup="urgency" onBeGroup={() => {}} beSort="due" onBeSort={() => {}} {...extra} />,
+    beGroup="urgency" onBeGroup={() => {}} beSort="due" onBeSort={() => {}} onExport={() => {}} {...extra} />,
 );
 
 describe("the sticky toolbar", () => {

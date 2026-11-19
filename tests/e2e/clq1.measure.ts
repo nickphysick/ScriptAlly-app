@@ -23,6 +23,8 @@ import { test, expect, type Page } from "@playwright/test";
 import { createRequire } from "node:module";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
+/** List filters v1 replaced the Views panel this suite's L4 and L5 read; they are kept for the record and not run */
+const LIST_FILTERS_V1 = true;
 
 const { PNG } = createRequire(import.meta.url)("playwright-core/lib/utilsBundle") as { PNG: { sync: { read(b: Buffer): { width: number; height: number; data: Buffer } } } };
 
@@ -225,7 +227,10 @@ if (PHASE === "qcbase") {
       } else L3.check("at 0 gaps there is no Fill the gaps", (await fill.count()) === 0, `${await fill.count()} buttons`);
       L3.done(6);
 
-      /* ── L4 · views ── */
+      /* ── L4 · views and L5 · refine: RETIRED in List filters v1. The Views panel they read (its views, Refine's genre
+         tick boxes, the powder "your book" tag, More filters) is replaced by shell/FilterPanel; the successor locks are
+         tests/e2e/lf1.measure.ts LF1–LF7 (one panel, the pages differ, counts, Ready to query). Kept, not run. ── */
+      if (!LIST_FILTERS_V1) {
       const L4 = new Ledger(`L4-${W}`);
       const shown = async () => Number(await page.locator(vis(CL, "[data-clq='count']")).getAttribute("data-n"));
       const rows = async () => page.locator(`${CL} [data-cl26='row'] >> visible=true`).count();
@@ -306,6 +311,7 @@ if (PHASE === "qcbase") {
       await page.screenshot({ path: `${SHOTS}/cl-more-${W}.png` });
       await more.click(); await page.waitForTimeout(400);
       console.log(`More filters after closing: aria-expanded=${await more.getAttribute("aria-expanded")}`);
+      }
 
       /* ── L6 · the card's line ── */
       const L6 = new Ledger(`L6-${W}`);

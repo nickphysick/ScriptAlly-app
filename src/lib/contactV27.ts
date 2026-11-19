@@ -8,8 +8,8 @@
  * (`matchesContactFilters`, `inSet`), FACETED as the Query Centre's rail is: each control is counted under every OTHER
  * active control and Find, so a count is what the list would show if that control were added.
  */
-import type { AgentFacts, ContactFilters } from "./contactList";
-import { contactFilterCount, isOpenNow, matchesContactFilters } from "./contactList";
+import type { AgentFacts, AppliedFilter, ContactFilters, OpenChoice, QueriedChoice } from "./contactList";
+import { appliedFilters, isOpenNow, matchesContactFilters } from "./contactList";
 import { genreKey } from "./genreMatch";
 import { inSet, SET_ORDER, type SetKey } from "./contactV24";
 import { applyPick, PICKS26, pickOn, type Pick26Key } from "./contactV26";
@@ -24,8 +24,31 @@ export function toggleSet(sets: Sets, k: SetKey): Sets {
   return rest.length ? rest : null;
 }
 
-/** "n on": one per applied-filters chip, as the applied row counts them (the set is one chip) */
-export const railOn = (f: ContactFilters, sets: Sets): number => contactFilterCount(f) + (sets ? 1 : 0);
+/* ── List filters v1 — Ready to query is ONE choice ─────────────────────────────────────────────────────────────── */
+
+/** Ready to query: exactly the shared pick's definition (lib/contactList QUICK_PICKS "ready") */
+export const readyOn = (f: ContactFilters): boolean => f.queried === "no" && f.open === "open";
+/** the wide tile pressed: off → both fields set; on → both cleared. Nothing else is touched. */
+export const toggleReady = (f: ContactFilters): ContactFilters =>
+  (readyOn(f) ? { ...f, queried: "either", open: "either" } : { ...f, queried: "no", open: "open" });
+export const READY_LABEL = "Ready to query";
+/**
+ * The applied chips, one per choice the writer made: lib/contactList `appliedFilters`, except that Ready to query (both
+ * of its fields) is ONE chip, and removing it clears both.
+ */
+export function appliedChoices(f: ContactFilters, genreLabel: (k: string) => string): AppliedFilter[] {
+  const all = appliedFilters(f, genreLabel);
+  if (!readyOn(f)) return all;
+  const out: AppliedFilter[] = [];
+  for (const a of all) {
+    if (a.key === "queried") continue;
+    out.push(a.key === "open" ? { key: "ready", label: READY_LABEL, drop: (g) => ({ ...g, queried: "either", open: "either" }) } : a);
+  }
+  return out;
+}
+
+/** "n on": one per applied chip, as the applied row draws them (Ready to query is one; the set is one) */
+export const railOn = (f: ContactFilters, sets: Sets): number => appliedChoices(f, (k) => k).length + (sets ? 1 : 0);
 
 export interface RailGenre { key: string; label: string; n: number; on: boolean }
 export interface RailCounts27 {
@@ -33,6 +56,12 @@ export interface RailCounts27 {
   where: Record<SetKey, number>;
   genres: RailGenre[];
   open: number;
+  /** List filters v1 — what the list would show with each control pressed (every other control and Find kept) */
+  ready: number;
+  always: number;
+  missing: number;
+  queried: Record<Exclude<QueriedChoice, "either">, number>;
+  door: Record<Exclude<OpenChoice, "either">, number>;
 }
 
 /**
@@ -78,7 +107,16 @@ export function railCounts(
     .map(([key, t]) => ({ key, label: t.label, n: t.n, on: f.genres.includes(key) }));
 
   const open = all.reduce((n, x) => n + (pool(x) && inSet(x, sets) && matchesContactFilters(x, f, "open") && isOpenNow(x) ? 1 : 0), 0);
-  return { picks, where, genres, open };
+  /* List filters v1 — each new control's count, by the list's own predicate with that control pressed */
+  const under = (g: ContactFilters) => all.reduce((n, x) => n + (inView(x, g) ? 1 : 0), 0);
+  return {
+    picks, where, genres, open,
+    ready: under({ ...f, queried: "no", open: "open" }),
+    always: under({ ...f, always: true }),
+    missing: under({ ...f, missing: true }),
+    queried: { no: under({ ...f, queried: "no" }), yes: under({ ...f, queried: "yes" }) },
+    door: { open: under({ ...f, open: "open" }), closed: under({ ...f, open: "closed" }), unknown: under({ ...f, open: "unknown" }) },
+  };
 }
 
 /** a genre pressed in the rail: added or taken out, "any" of them, exactly as the v26 Filters menu writes it */

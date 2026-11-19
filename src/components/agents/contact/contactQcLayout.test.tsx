@@ -8,10 +8,11 @@ import React from "react";
 import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ContactHeaderQc, CLQ_ARCH, CLQ_RING, QC_ART_W } from "./ContactHeaderQc";
-import { ContactViews, clearPick, PICK_ICON } from "./ContactViews";
+import { ContactViews, agentsFoot, GENRES_SHOWN } from "./ContactViews";
 import { ContactBar } from "./ContactBar";
 import { emptyContactFilters, type AgentFacts, type ContactFilters } from "../../../lib/contactList";
-import { applyPick, pickOn } from "../../../lib/contactV27";
+import { appliedChoices, railOn, toggleReady } from "../../../lib/contactV27";
+import { STAGE_COLOURS } from "../../../lib/stageColours";
 
 const noop = () => {};
 const read = (f: string) => readFileSync(new URL(f, import.meta.url), "utf8");
@@ -59,62 +60,96 @@ describe("Phase 1 · the navy header", () => {
   });
 });
 
-const fx = (id: string, o: Partial<AgentFacts> = {}): AgentFacts => ({
-  agent: { id, name: `Agent ${id}`, agency: "" } as AgentFacts["agent"], stand: "none", genres: [], gaps: [], door: "open", ...o,
+const fx = (id: string, o: Partial<AgentFacts> = {}, agent: Record<string, unknown> = {}): AgentFacts => ({
+  agent: { id, name: `Agent ${id}`, agency: "", ...agent } as AgentFacts["agent"], stand: "none", standing: { kind: "none" }, status14: "none",
+  genres: [], gaps: 0, door: "open", openKey: "open", ...o,
 } as unknown as AgentFacts);
-const views = (f: ContactFilters = emptyContactFilters(), all: AgentFacts[] = [fx("a", { genres: ["Thriller"] }), fx("b", { genres: ["Romance"] })]) => renderToStaticMarkup(
-  <ContactViews all={all} filters={f} onFilters={noop} sets={null} onSets={noop} pool={() => true} genreLabel={(_k, raw) => raw}
-    genreHit={(k) => k === "thriller"} showing={all.length} onReset={noop} onExport={noop} />);
+/* five agents: a and b open and not queried (a always replies, a's genre is the book's), c queried and closed, d open,
+   queried and with gaps in its profile, e with its door not known */
+const FX = [
+  fx("a", { genres: ["Thriller"] }, { noResponseMeansNo: false }),
+  fx("b", { genres: ["Romance"] }),
+  fx("c", { openKey: "closed", standing: { kind: "agent" } as unknown as AgentFacts["standing"], genres: ["Crime"] }),
+  fx("d", { gaps: 2, standing: { kind: "agent" } as unknown as AgentFacts["standing"] }),
+  fx("e", { openKey: "unstated" }),
+];
+const views = (f: ContactFilters = emptyContactFilters(), all: AgentFacts[] = FX) => renderToStaticMarkup(
+  <ContactViews all={all} filters={f} onFilters={noop} sets={null} pool={() => true} genreLabel={(_k, raw) => raw}
+    genreHit={(k) => k === "thriller"} showing={all.length} onReset={noop} />);
+const btn = (h: string, probe: string) => [...h.matchAll(new RegExp(`<button[^>]*data-clq="${probe}"[^>]*>[\\s\\S]*?</button>`, "g"))].map((m) => m[0]);
+const E = emptyContactFilters;
 
-describe("Phase 2 · the Views panel", () => {
-  it("is the Query Centre's own panel (shell/ViewsPanel), with its own hooks", () => {
+describe("List filters v1 Phase 3 · the Agents panel", () => {
+  it("is the shared Filter panel (shell/FilterPanel) with the Agents list's own hooks; ViewsPanel is gone", () => {
     const h = views();
-    expect(h).toMatch(/^<aside class="qc153-rail qc156-views" aria-label="Views" data-clq="views">/);
+    expect(h).toMatch(/^<aside class="qc153-rail fp" aria-label="Filter your agents" data-clq="panel">/);
     expect(h).not.toContain("data-qc156");
-    expect(read("./ContactViews.tsx")).toContain('from "../../shell/ViewsPanel"');
-    expect(read("../../queries/centre/QcViews156.tsx")).toContain('from "../../shell/ViewsPanel"');
+    expect(read("./ContactViews.tsx")).toContain('from "../../shell/FilterPanel"');
+    expect(read("../../queries/centre/QcViews156.tsx")).toContain('from "../../shell/FilterPanel"');
+    expect(() => read("../../shell/ViewsPanel.tsx")).toThrow();
   });
-  it("Views over Reset; All agents then the four picks in order, each with its count; All agents selected by default", () => {
+  it("Who to query next: Ready to query wide, then Always reply and Missing details; no Your move, no Waiting to hear back", () => {
     const h = views();
-    expect(h).toMatch(/<b>Views<\/b><button type="button" class="qc153-rst" data-clq="reset" disabled="">Reset<\/button>/);
-    const labels = [...h.matchAll(/data-clq="view" data-k="(\w+)" data-n="(\d+)"[\s\S]*?<span>([^<]+)<\/span>/g)].map((m) => `${m[1]}:${m[3]}`);
-    expect(labels).toEqual(["all:All agents", "you:Your move", "ready:Ready to query", "wait:Waiting to hear back", "missing:Missing details"]);
-    expect(h).toMatch(/aria-checked="true" class="qc156-vr is-on" data-clq="view" data-k="all"/);
+    const t = btn(h, "tile");
+    expect(t.map((x) => x.match(/data-k="(\w+)" data-n="(\d+)"/)?.slice(1).join(":"))).toEqual(["ready:2", "always:1", "missing:1"]);
+    expect(t[0]).toMatch(/class="fp-tile fp-tile--wide"[\s\S]*Ready to query<small>Open, and not yet queried<\/small>/);
+    expect(t[1]).toMatch(/title="Even when it’s a no"/);
+    expect(t[2]).toMatch(/title="Gaps in their profile"/);
+    for (const gone of ["Your move", "Waiting to hear back", "All agents", "Views", "Refine", "More filters", "Where they stand", "Export"]) expect(h).not.toContain(gone);
   });
-  it("icons: the Query Centre's where they match; Ready to query the paper plane, Missing details the document", () => {
-    expect(PICK_ICON).toEqual({ you: "you", ready: "plane", wait: "clock", missing: "doc" });
+  it("Ready to query sets both fields and clears both; both split sides read on with it, and it is one applied chip", () => {
+    const on = toggleReady(E());
+    expect([on.queried, on.open]).toEqual(["no", "open"]);
+    expect(toggleReady(on)).toEqual(E());
+    const h = views(on);
+    expect(btn(h, "tile")[0]).toMatch(/aria-checked="true"/);
+    expect(btn(h, "side").filter((x) => x.includes('aria-checked="true"')).map((x) => x.match(/data-k="(\w+)"/)?.[1])).toEqual(["no", "open"]);
+    expect(appliedChoices(on, (k) => k).map((c) => c.label)).toEqual(["Ready to query"]);
+    expect(appliedChoices(on, (k) => k)[0].drop(on)).toEqual(E());
+    expect(railOn(on, null)).toBe(1);
+    /* one of the two alone is not Ready to query: its own chip, as before */
+    expect(appliedChoices({ ...E(), queried: "no" }, (k) => k).map((c) => c.label)).toEqual(["Not queried yet"]);
   });
-  it("a view at 0 fades and cannot be pressed", () => {
-    expect(views()).toMatch(/data-clq="view" data-k="wait" data-n="0"[^>]*disabled=""/);
+  it("Always reply and Missing details are independent, and either can be on with Ready to query", () => {
+    const h = views({ ...toggleReady(E()), always: true, missing: true });
+    expect(btn(h, "tile").every((x) => x.includes('aria-checked="true"'))).toBe(true);
+    expect(btn(h, "tile").every((x) => x.includes('role="checkbox"'))).toBe(true);
   });
-  it("All agents clears the pick and touches nothing else; views are one at a time", () => {
-    const f = { ...applyPick(emptyContactFilters(), "ready"), genres: ["thriller"] };
-    expect(pickOn(f)).toBe("ready");
-    expect(pickOn(clearPick(f))).toBe(null);
-    expect(clearPick(f).genres).toEqual(["thriller"]);
-    expect(pickOn(applyPick(applyPick(emptyContactFilters(), "you"), "missing"))).toBe("missing");
-  });
-  it("Refine within this view: Genres, a tick box per genre with its count; \"your book\" on the book's genres, no ✓ prefix", () => {
+  it("the splits: counts, words, and the \"not known\" link while any door is not known", () => {
     const h = views();
-    expect(h).toContain("Refine<small>within this view</small>");
-    expect(h).toMatch(/<p class="qc156-vsl" id="[^"]+-gn">Genres<\/p>/);
-    expect(h).toMatch(/role="checkbox"[^>]*data-clq="genre" data-k="thriller" data-n="1"[\s\S]*?<span class="qc156-vct">Thriller<span class="clq-yb" data-clq="your-book">your book<\/span><\/span>/);
-    expect(h).toMatch(/data-clq="genre" data-k="romance"[\s\S]*?<span class="qc156-vct">Romance<\/span>/);
-    expect(h).not.toContain("✓");
+    expect(btn(h, "side").map((x) => `${x.match(/data-k="(\w+)" data-n="(\d+)"/)?.slice(1).join(":")}:${x.match(/<span>([^<]+)</)?.[1]}`))
+      .toEqual(["no:3:not yet queried", "yes:2:queried", "open:3:open to queries", "closed:1:closed for now"]);
+    expect(h).toMatch(/<button type="button" class="fp-lnk" data-clq="not-known" aria-pressed="false">1 not known<\/button>/);
+    expect(views(E(), FX.slice(0, 4))).not.toContain("not known");
   });
-  it("More filters: Where they stand and Submissions behind the row, closed until one of them is on", () => {
+  it("What they want: the book's genre first with a tick, the key under the pills; no powder \"your book\" tag", () => {
     const h = views();
-    expect(h).toMatch(/<div id="[^"]+" class="qc156-mb" data-clq="more-body" hidden="">/);
-    expect(h).toContain("<b>More filters</b><small>Where they stand, submissions</small>");
-    expect(views({ ...emptyContactFilters(), open: "open" })).toMatch(/class="qc156-mb" data-clq="more-body">/);
+    const g = btn(h, "genre");
+    expect(g[0]).toMatch(/data-k="thriller"[^>]*><svg class="fp-tk"/);
+    expect(g.slice(1).some((x) => x.includes("fp-tk"))).toBe(false);
+    expect(h).toMatch(/data-clq="book-key"><svg class="fp-tk"[\s\S]*?<\/svg>Genres your book carries<\/p>/);
+    expect(h).not.toMatch(/your book<|clq-yb|#e3e8ef/);
   });
-  it("the foot: \"{n} showing\" and the export, unchanged", () => {
-    expect(views()).toMatch(/<span data-clq="showing">2 showing<\/span><button type="button" class="qc156-exp" data-clq="export">Export 2 agents<\/button>/);
+  it("six genres, then \"+{n} more\"; none on file says so", () => {
+    const many = Array.from({ length: 9 }, (_, i) => fx(`g${i}`, { genres: [`Genre ${String.fromCharCode(65 + i)}`] }));
+    const h = views(E(), many);
+    expect(btn(h, "genre")).toHaveLength(GENRES_SHOWN);
+    expect(h).toMatch(/data-clq="genre-more">\+3 more<\/button>/);
+    expect(views(E(), [fx("z")])).toContain('<span class="fp-none" data-clq="genres-none">No genres on file yet</span>');
+  });
+  it("no stage colour anywhere in the panel", () => {
+    const h = views(toggleReady(E())).toLowerCase();
+    for (const c of Object.values(STAGE_COLOURS)) for (const hex of Object.values(c)) expect(h).not.toContain(hex);
+  });
+  it("the foot", () => {
+    expect(agentsFoot(false, 5, 5, 3)).toBe("All 5 agents. 3 not yet queried.");
+    expect(agentsFoot(false, 5, 5, 0)).toBe("All 5 agents.");
+    expect(agentsFoot(true, 2, 5, 3)).toBe("Showing 2 of 5 agents.");
   });
 });
 
 const bar = (shown: number, group: "letter" | "status" | "none" = "none") => renderToStaticMarkup(
-  <ContactBar shown={shown} loading={false} search="" onSearch={noop} sortKey="surname" reversed={false} onSort={noop} group={group} onGroup={noop} />);
+  <ContactBar shown={shown} loading={false} search="" onSearch={noop} sortKey="surname" reversed={false} onSort={noop} group={group} onGroup={noop} onExport={noop} />);
 
 describe("Phase 3 · the light bar above the list", () => {
   it("is the Query Centre's bar (shell/ListBar) on its sticky strip", () => {
@@ -130,7 +165,10 @@ describe("Phase 3 · the light bar above the list", () => {
     expect(h).toContain('placeholder="Find an agent or agency"');
     expect(h).toContain('<kbd aria-hidden="true">/</kbd>');
     expect(h).toMatch(/data-clq="sort"[\s\S]*?<b class="sc-f" data-sc="field">Surname<\/b>/);
-    expect(h).toMatch(/data-clq="group"[^>]*><span aria-hidden="true">▤<\/span><b>No grouping<\/b>/);
+    /* List filters v1 — labelled: "Group:", the value ("None" ungrouped), a caret; Sort: "Sort:", the field, ↑ */
+    expect(h).toMatch(/data-clq="group"[^>]*><span class="lf-ic" aria-hidden="true">▤<\/span><em class="lf-lab">Group:<\/em><b>None<\/b><svg class="lf-cv"/);
+    expect(h).toMatch(/<em class="sc-sby sc-lab lf-lab">Sort:<\/em><b class="sc-f" data-sc="field">Surname<\/b><i class="sc-dir" data-sc="dir" data-reversed="false" title="A to Z">↑<\/i>/);
+    expect(h).toMatch(/data-clq="export" aria-label="Export 17 agents" title="Export 17 agents"/);
     /* the "/" key finds the field by the hook v26's band carried */
     expect(h).toMatch(/<label class="qc153-find" data-cl26="find" data-cl24="find" data-nb1="find">/);
   });
@@ -170,7 +208,8 @@ describe("the Query Centre's rules name the Contact list at the same specificity
     /* To-do v56 re-pointed: the header rules name the To-do list's header (`.tws56-hdw`) too, at the same specificity */
     /* Workspace headers v1 re-pointed: and the shared navy header (`.wsnh`) */
     expect(css("qcv156.css")).toContain(":is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd {");
-    expect(css("qcv156.css")).toContain(":is(.qc151.qc153, .cl27) .qc153-rail.qc156-views {");
+    /* List filters v1 — the filter card is shell/FilterPanel's, its rule naming both pages at the same specificity */
+    expect(read("../../shell/filterPanel.css")).toContain(":is(.qc151.qc153, .cl27) .qc153-rail.fp {");
     expect(css("qcv156.css")).toContain(":is(.qc151.qc153, .cl27) .qc154-tbw.qc154-tbw.qc154-tbw[data-qc156-stuck] {");
     expect(css("qcv1534.css")).toContain(":is(.qc151.qc153, .cl27, .tws56-hdw) .qc1531-hd { grid-template-columns: 268px");
     expect(css("qcv154.css")).toContain(":is(.qc151.qc153, .cl27) .qc154-tbw {");
@@ -187,8 +226,8 @@ import { ContactSheet26 } from "./ContactSheet26";
 describe("v1.1 Phase 1 · the type guard", () => {
   it("the Query Centre's guard, scoped to the four shared pieces, in contactQcLayout.css (never a Query Centre sheet)", () => {
     const css = read("./contactQcLayout.css");
-    expect(css).toContain(".cl27 :is(.qc1531-hd, .qc156-views, .qc154-tbw, .qc156-slim) :where(span, p, div, label, td, th, b, i, em, small, button, input) { font-family: inherit; }");
-    expect(css).toContain(".cl27 :is(.qc1531-hd, .qc156-views, .qc154-tbw, .qc156-slim) { font: 400 16px/1.45 var(--sp-serif); }");
+    expect(css).toContain(".cl27 :is(.qc1531-hd, .fp, .qc154-tbw, .qc156-slim) :where(span, p, div, label, td, th, b, i, em, small, button, input) { font-family: inherit; }");
+    expect(css).toContain(".cl27 :is(.qc1531-hd, .fp, .qc154-tbw, .qc156-slim) { font: 400 16px/1.45 var(--sp-serif); }");
     expect(read("../../queries/centre/qcv151.css")).not.toMatch(/\.cl27/);
   });
 });

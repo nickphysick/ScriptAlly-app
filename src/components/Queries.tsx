@@ -135,7 +135,7 @@ import { QcFilterPanel151 } from "./queries/centre/QcFilterMenu140";
 import { QcViews156 } from "./queries/centre/QcViews156";
 import { QcLine156 } from "./queries/centre/QcLine156";
 import { weekGoal154, type WeekGoal154 } from "../lib/qc154goal";
-import { clearFacet, railCounts } from "../lib/qc153Rail";
+import { railCounts } from "../lib/qc153Rail";
 import { stageOf } from "../lib/stageColours";
 import { nudgeMsOf, quickOfRow, quietWeeksOf, stampRows, stateOf, queryState as qsOf } from "../lib/queryState";
 import { NEEDS_YOU_155, quietBody155, quietNow155 } from "../lib/qc155";
@@ -4017,7 +4017,7 @@ export const Queries: React.FC<{
   /* v140 §D — the applied row's chips: one per active filter (lib/qc140), the older sentence filter and the strip's court
      when either is set (both still narrow the list), and the search, shown as "…" and never counted on the Filters chip */
   const qc140Chips: Qc140Chip[] = [
-    ...appliedChips(qcF138, (k) => qcPackageOf(k)?.packageName ?? "Package no longer on file").map((c) => ({ key: c.key, label: c.label, status: c.status, off: () => setQcF138((f) => c.off(f)) })),
+    ...appliedChips(qcF138, (k) => qcPackageOf(k)?.packageName ?? "Package no longer on file").map((c) => ({ key: c.key, label: c.label, status: c.status, stage: c.stage, off: () => setQcF138((f) => c.off(f)) })),
     ...(qcFilter !== "all" ? [{ key: "sentence", label: qcFilter === "you" ? "With you" : qcFilter === "agent" ? "With the agent" : qcFilter === "offers" ? "Offers" : qcFilter === "past" ? "Past expected" : qcFilter === "closed" ? "Closed" : qcFilter.startsWith("stage:") ? STAGE_NAME[qcFilter.slice(6) as QueryStatus] ?? "Stage" : qcFilter === "court:agent" ? "With agents" : qcFilter === "court:closed" ? "Closed" : "With you", off: () => setQcFilter("all") }] : []),
     ...(qcCourtOn ? [{ key: `court:${qcCourtOn}`, label: qcCourtOn === "you" ? "Your move" : qcCourtOn === "agent" ? "With agents" : "Closed", off: () => setQcCzCourt(null) }] : []),
     ...(qcFind.trim() ? [{ key: "find", label: `“${qcFind.trim()}”`, off: () => setQcFind("") }] : []),
@@ -8184,12 +8184,11 @@ export const Queries: React.FC<{
               /* v153 — "Where it stands" is in the rail now, so Reset clears it with the rest */
               const keepWhere = () => setQcF138(emptyQc138Filters());
               const clear151 = () => { keepWhere(); setQcFilter("all"); setQcCzCourt(null); setQcIds(null); };
-              /* v151.1 §5 — Clear all: filters, search, grouping and sort (and Birds-eye's), never the quick filter */
-              const clearAll1511 = () => { clear151(); setQcFind(""); setQcGroup("attention"); setQcSort151(DEFAULT_SORT_151); setQcBeGroup("urgency"); setQcBeSort("due"); };
               const order151 = sections151.flatMap((x) => x.rows.map((r) => r.id));
               /* v153 — the rail's faceted counts, over what the rail does not own (scope, search, the older narrowings) */
               const railBase = qcScoped.filter((r) => (!qcIds || qcIds.has(r.id)) && matchesFilter(r, qcFilter) && matchesFind(r, qcFind) && (!qcCourtOn || tileCourt(r.status) === qcCourtOn));
-              const viewAllN = railBase.filter((r) => matches138(r, clearFacet(qcF138, "quick"), now151)).length;
+              /* List filters v1 — the foot's "{y} need you": Your move with nothing filtered, over the list in scope */
+              const needYou = qcScoped.filter((r) => matches138(r, { ...emptyQc138Filters(), you: true }, now151)).length;
               const railN = railCounts(railBase, qcF138, qc138Counts.sent.map((o) => o.key), (r, g) => matches138(r, g, now151));
               /* v156 §2 — the header's line and the collapsed bar's "n of goal" (goal156Of) */
               const goal156 = showGridSkeleton || qcLoadFail ? null : goal156Of(queries.map((q) => anyToMs(q.dateSent)), currentUser?.queryingGoals, now151);
@@ -8211,7 +8210,7 @@ export const Queries: React.FC<{
                   showing={qcVisible.length}
                   find={qcFind} onFind={setQcFind} findRef={qcSheetFindRef}
                   filterCount={strip151.filter((c) => c.key !== "find").length}
-                  onClearFilters={clear151}
+                  onClearFilters={clear151} onExport={exportQcList}
                   filterPanel={(close) => (
                     <QcFilterPanel151 close={close} onResetAll={strip151.some((c) => c.key !== "find") ? clear151 : null} model={{
                       filters: qcF138, onFilters: setQcF138, showing: qcVisible.length, total: qcScoped.length,
@@ -8220,9 +8219,13 @@ export const Queries: React.FC<{
                       filtered: qc140Chips.length > 0, onExport: exportQcList,
                     }} />
                   )}
-                  pills={pillGroups(strip151)} onClearAll={clearAll1511}
+                  pills={pillGroups(strip151)}
+                  /* List filters v1 — the applied row: every chip (the search in quotes, a whole stage on its band), and
+                     Clear all = the filters and the search; the sort and grouping stay (the bar's buttons show them) */
+                  applied={qc140Chips.map((c) => ({ key: c.key, label: c.label, stage: c.stage, mark: c.stage ? c.status : undefined, onRemove: c.off }))}
+                  onClearApplied={() => { clear151(); setQcFind(""); }}
                   group={group1522} onGroup={setQcGroup1522} packageOk={pkgOk1522}
-                  sort={qcSort151} defaultSort={DEFAULT_SORT_151} onSort={setQcSort151}
+                  sort={qcSort151} onSort={setQcSort151}
                   sections={showGridSkeleton ? [] : sections151}
                   phraseOf={phrase151}
                   nowMs={now151}
@@ -8246,8 +8249,8 @@ export const Queries: React.FC<{
                   onImport={() => onNavigate?.("import")}
                   packageNameOf={(r) => { const k = pkgKeyOf(r); return k ? qcPackageName(k) : null; }}
                   agentOf={(r) => qcLivingAgents.get(r.query.agentId) ?? null}
-                  rail={<QcViews156 filters={qcF138} onFilters={setQcF138} counts={railN} allN={viewAllN} sent={qc138Counts.sent} onReset={clear151}
-                    showing={qcVisible.length} onExport={exportQcList} loading={showGridSkeleton} />}
+                  rail={<QcViews156 filters={qcF138} onFilters={setQcF138} counts={railN} sent={qc138Counts.sent} onReset={clear151}
+                    showing={qcVisible.length} total={qcScoped.length} needYou={needYou} loading={showGridSkeleton} />}
                   birds={qcView150 === "birds" && !showGridSkeleton ? (
                     <QcBirds150 groups={qcBeGroups} banded={qcBeGroup !== "none"} nowMs={qcNow138} moves={qcMoves}
                       selectedId={selectedQueryId} closedN={beClosedCount(qcVisible, qcNow138)}

@@ -1,0 +1,22 @@
+[
+ {
+  "name": "Ready to query reads on",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "both split sides read on: not yet queried, open to queries",
+  "ok": true,
+  "got": "[\"no\",\"open\"]"
+ },
+ {
+  "name": "the applied row has one chip, Ready to query",
+  "ok": true,
+  "got": "[{\"k\":\"ready\",\"t\":\"Ready to query\",\"stage\":null}]"
+ },
+ {
+  "name": "removing the chip clears both",
+  "ok": true,
+  "got": "0 sides on, 53 of 53"
+ }
+]

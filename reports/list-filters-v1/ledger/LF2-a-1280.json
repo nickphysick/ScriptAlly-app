@@ -1,0 +1,17 @@
+[
+ {
+  "name": "Agents has the two splits",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "Agents has no Stage section",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "no control named Your move or Waiting to hear back",
+  "ok": true,
+  "got": "0"
+ }
+]

@@ -1,0 +1,12 @@
+[
+ {
+  "name": "the population: panel, bar (and applied row on Agents) at least 20 elements",
+  "ok": true,
+  "got": "164 elements, applied row false"
+ },
+ {
+  "name": "no powder blue",
+  "ok": true,
+  "got": "[]"
+ }
+]

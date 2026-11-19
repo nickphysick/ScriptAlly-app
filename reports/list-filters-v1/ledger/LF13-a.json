@@ -1,0 +1,12 @@
+[
+ {
+  "name": "every count is its value one frame after the press",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "every bar segment and split side is at its width one frame after the press",
+  "ok": true,
+  "got": "145,92,120.9,116.1 → 145,92,120.9,116.1"
+ }
+]

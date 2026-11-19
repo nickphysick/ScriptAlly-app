@@ -88,7 +88,8 @@ describe("v27 — the controls write the menu's own fields", () => {
   });
   it("n on is the applied row's chips (the set is one); the foot names what the list shows", () => {
     expect(railOn(emptyContactFilters(), null)).toBe(0);
-    expect(railOn(applyPick(emptyContactFilters(), "ready"), ["you"])).toBe(3);
+    /* List filters v1 — Ready to query is ONE chip (its two fields), the set another */
+    expect(railOn(applyPick(emptyContactFilters(), "ready"), ["you"])).toBe(2);
     expect(railShowing(41, 41, false)).toBe("41 showing");
     expect(railShowing(12, 41, true)).toBe("12 of 41 showing");
     expect([railExport(1), railExport(41)]).toEqual(["Export 1 agent", "Export 41 agents"]);

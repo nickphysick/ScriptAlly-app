@@ -9,6 +9,7 @@
 import type { SortField } from "../components/shell/SortChip";
 import type { Qc138SortKey } from "./qc138";
 import type { SortKey } from "./contactList";
+import type { Sort151, SortKey151 } from "./qc151";
 
 const AZ = [{ label: "A to Z", reversed: false }, { label: "Z to A", reversed: true }] as SortField<string>["order"];
 
@@ -22,6 +23,29 @@ export const QC_SORT_FIELDS: readonly SortField<Qc138SortKey>[] = [
   { key: "next", label: "Next move", order: AZ },
   { key: "changed", label: "Last changed", order: [{ label: "Newest first", reversed: true }, { label: "Oldest first", reversed: false }] },
 ];
+
+/**
+ * List filters v1 Phase 4 — THE QUERIES LIST'S SORT, over the list's one sort state (`Sort151`, the state the List view
+ * reads; `reversed` is `desc`). The menu's five, each with its natural order first (choosing a field sets it), then
+ * Agency and Next move, which no menu offers but a sort set elsewhere may hold: the button still names them.
+ * ⚠️ NOT QC_SORT_FIELDS: that list is keyed by Qc138SortKey, the full-screen toolbar's sort (QcToolbar140), which the
+ *    desktop page does not mount.
+ */
+export const QC_LIST_SORT_FIELDS: readonly SortField<SortKey151>[] = [
+  { key: "due", label: "Next due", natural: false, order: [{ label: "Soonest first", reversed: false }, { label: "Latest first", reversed: true }] },
+  { key: "queried", label: "Queried", natural: true, order: [{ label: "Newest first", reversed: true }, { label: "Oldest first", reversed: false }] },
+  { key: "heard", label: "Last heard", natural: true, order: [{ label: "Most recent first", reversed: true }, { label: "Oldest first", reversed: false }] },
+  { key: "agent", label: "Agent", natural: false, order: AZ as SortField<SortKey151>["order"] },
+  { key: "stage", label: "Where it stands", natural: false, order: [{ label: "Earliest stage first", reversed: false }, { label: "Furthest on first", reversed: true }] },
+];
+/** the button's names for a sort the menu does not offer (set by a heading elsewhere) */
+export const QC_LIST_SORT_NAMED: readonly SortField<SortKey151>[] = [
+  ...QC_LIST_SORT_FIELDS,
+  { key: "agency", label: "Agency", order: AZ as SortField<SortKey151>["order"] },
+  { key: "next", label: "Next move", order: AZ as SortField<SortKey151>["order"] },
+];
+export const sortValue151 = (s: Sort151): { key: SortKey151; reversed: boolean } => ({ key: s.key, reversed: s.desc });
+export const sort151Of = (v: { key: SortKey151; reversed: boolean }): Sort151 => ({ key: v.key, desc: v.reversed });
 
 /** Contact list v25.1 E4/E5 — its five headings, in their order, each a sort; the pill says the choice in words (no
  *  arrow): "Name A–Z", "Best genre fit", "Quickest reply", "Most urgent", "Highest rated", and their reverses */

@@ -87,7 +87,9 @@ describe("v152.2 §1 the list", () => {
     expect(listGroupOf("action", true)).toBe("attention");
     expect(listGroupOf("package", false)).toBe("attention");
     expect(listGroupOf("none", true)).toBe("none");
-    expect(savedGroupOf("none")).toBe("attention");
+    /* List filters v1 — "No grouping" is a menu choice and is remembered */
+    expect(savedGroupOf("none")).toBe("none");
+    expect(savedGroupOf("action")).toBe("attention");
     expect(ACTION_LABEL.agent).toBe("Watch and wait");
   });
   it("§1.2 header kinds", () => {
