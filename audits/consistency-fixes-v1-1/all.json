@@ -245,20 +245,18 @@
    "mode": "color",
    "sel": ".af .af-col h4",
    "pages": [
-    "account-profile",
-    "help",
-    "your-notes",
-    "plans"
+    "queries-analytics",
+    "agents-discover",
+    "queries-responses"
    ]
   },
   "R-footer-made": {
    "mode": "color",
    "sel": ".af-made svg",
    "pages": [
-    "account-profile",
-    "help",
-    "your-notes",
-    "plans"
+    "queries-analytics",
+    "agents-discover",
+    "queries-responses"
    ]
   },
   "R-acct-av": {
