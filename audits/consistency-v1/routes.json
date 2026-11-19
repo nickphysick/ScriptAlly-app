@@ -1,0 +1,284 @@
+{
+  "_note": "Built from the router (src/marketing/routeTiers.ts MARKETING_PATHS + WORKSPACE_PATHS, src/lib/accountRoutes.ts, App.tsx auth hashes). family per the audit prompt. signedOut routes open in a fresh context with no session.",
+  "routes": [
+    {
+      "path": "/dashboard",
+      "family": "dashboard"
+    },
+    {
+      "path": "/queries",
+      "family": "workspace",
+      "name": "Queries"
+    },
+    {
+      "path": "/queries/analytics",
+      "family": "workspace",
+      "name": "Analytics"
+    },
+    {
+      "path": "/queries/responses",
+      "family": "workspace",
+      "name": "Responses"
+    },
+    {
+      "path": "/queries/packages",
+      "family": "workspace",
+      "name": "Packages"
+    },
+    {
+      "path": "/todo",
+      "family": "workspace",
+      "name": "Tasks (To-do)"
+    },
+    {
+      "path": "/todo/corkboard",
+      "family": "workspace",
+      "name": "Corkboard"
+    },
+    {
+      "path": "/agents",
+      "family": "workspace",
+      "name": "Contact list"
+    },
+    {
+      "path": "/agents/discover",
+      "family": "workspace",
+      "name": "Discover"
+    },
+    {
+      "path": "/manuscripts",
+      "family": "workspace",
+      "name": "Manuscripts"
+    },
+    {
+      "path": "/manuscripts/comps",
+      "family": "workspace",
+      "name": "Comps"
+    },
+    {
+      "path": "/manuscripts/versions",
+      "family": "workspace",
+      "name": "Versions"
+    },
+    {
+      "path": "/materials/letters",
+      "family": "workspace",
+      "name": "Letters"
+    },
+    {
+      "path": "/materials",
+      "family": "workspace",
+      "name": "Materials",
+      "note": "phone tab; a computer is redirected"
+    },
+    {
+      "path": "/goals",
+      "family": "workspace",
+      "name": "Streaks & goals",
+      "note": "phone page; a computer is redirected"
+    },
+    {
+      "path": "/you",
+      "family": "workspace",
+      "name": "You",
+      "note": "phone tab; a computer is redirected"
+    },
+    {
+      "path": "/queries/all",
+      "family": "workspace",
+      "name": "All queries",
+      "note": "phone page; a computer is redirected"
+    },
+    {
+      "path": "/account/profile",
+      "family": "non-workspace",
+      "name": "Settings — You"
+    },
+    {
+      "path": "/account/preferences",
+      "family": "non-workspace",
+      "name": "Settings — Preferences"
+    },
+    {
+      "path": "/account/emails",
+      "family": "non-workspace",
+      "name": "Settings — Emails"
+    },
+    {
+      "path": "/account/plan",
+      "family": "non-workspace",
+      "name": "Settings — Plan"
+    },
+    {
+      "path": "/account/data",
+      "family": "non-workspace",
+      "name": "Settings — Your data"
+    },
+    {
+      "path": "/plans",
+      "family": "non-workspace",
+      "name": "Plans"
+    },
+    {
+      "path": "/help",
+      "family": "non-workspace",
+      "name": "Help Centre"
+    },
+    {
+      "path": "/your-notes",
+      "family": "non-workspace",
+      "name": "Your notes"
+    },
+    {
+      "path": "/import",
+      "family": "onboarding",
+      "name": "Import"
+    },
+    {
+      "path": "/#/signin",
+      "family": "onboarding",
+      "name": "Sign in",
+      "signedOut": true
+    },
+    {
+      "path": "/#/signup",
+      "family": "onboarding",
+      "name": "Sign up",
+      "signedOut": true
+    },
+    {
+      "path": "/",
+      "family": "public",
+      "name": "Landing",
+      "signedOut": true
+    },
+    {
+      "path": "/pricing",
+      "family": "public",
+      "name": "Pricing",
+      "signedOut": true
+    },
+    {
+      "path": "/about",
+      "family": "public",
+      "name": "About",
+      "signedOut": true
+    },
+    {
+      "path": "/contact",
+      "family": "public",
+      "name": "Contact",
+      "signedOut": true
+    },
+    {
+      "path": "/founders",
+      "family": "public",
+      "name": "Founders",
+      "signedOut": true
+    },
+    {
+      "path": "/welcome",
+      "family": "public",
+      "name": "Welcome",
+      "signedOut": true
+    },
+    {
+      "path": "/terms",
+      "family": "public",
+      "name": "Terms",
+      "signedOut": true
+    },
+    {
+      "path": "/privacy",
+      "family": "public",
+      "name": "Privacy",
+      "signedOut": true
+    },
+    {
+      "path": "/help",
+      "family": "public",
+      "name": "Help Centre (signed out)",
+      "signedOut": true,
+      "key": "help-public"
+    }
+  ],
+  "overlays": [
+    {
+      "from": "/queries",
+      "name": "Log a query journey",
+      "open": {
+        "button": "^Log a query$"
+      }
+    },
+    {
+      "from": "/queries",
+      "name": "Query card slide-out",
+      "open": {
+        "firstOf": "[data-qid], [data-query-id], .qc-card, [class*='qcCard'], [class*='qc15'][role='button']"
+      }
+    },
+    {
+      "from": "/queries",
+      "name": "Search palette",
+      "open": {
+        "key": "Meta+k"
+      }
+    },
+    {
+      "from": "/queries",
+      "name": "Keyboard shortcuts",
+      "open": {
+        "key": "?"
+      }
+    },
+    {
+      "from": "/agents",
+      "name": "Add an agent journey",
+      "open": {
+        "button": "Add an agent"
+      }
+    },
+    {
+      "from": "/agents",
+      "name": "Agent card",
+      "open": {
+        "firstOf": ".cl24-card, .cl26-card, .cl17-card, [class*='agent-card']"
+      }
+    },
+    {
+      "from": "/queries",
+      "name": "Record a response journey",
+      "open": {
+        "button": "^Record a response"
+      }
+    },
+    {
+      "from": "/manuscripts/comps",
+      "name": "Add a comp",
+      "open": {
+        "button": "Add a comp"
+      }
+    },
+    {
+      "from": "/queries/packages",
+      "name": "New package",
+      "open": {
+        "button": "New package"
+      }
+    },
+    {
+      "from": "/dashboard",
+      "name": "Account menu",
+      "open": {
+        "firstOf": "[aria-label*='ccount' i][aria-haspopup], button[aria-label*='ccount' i]"
+      }
+    },
+    {
+      "from": "/queries",
+      "name": "Help menu",
+      "open": {
+        "firstOf": "button[aria-label*='elp' i], .ws-bright button:last-child"
+      }
+    }
+  ]
+}
