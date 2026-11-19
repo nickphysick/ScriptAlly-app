@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>List filters v1 — design reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sp-type:"Special Elite","Courier New",Courier,monospace;
+  --sp-serif:"Source Serif 4",Georgia,serif;
+  --ink:#1c130f; --mut:#5b4f47; --faint:#8a8076; --navy:#2a3a52; --page:#f2eee8; --cream:#f4eee5; --line:#e3d5c9;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--page);font-family:var(--sp-serif);color:var(--ink)}
+button{font:inherit;color:inherit}
+
+/* ── mock chrome (not app) ── */
+.sw{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line);padding:12px 24px;display:flex;flex-direction:column;gap:10px}
+.sw-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw-row b{font:400 17px/1 var(--sp-type);margin-right:6px}
+.sw-row span.gap{width:22px}
+.sw button{all:unset;cursor:pointer;padding:8px 14px;border-radius:999px;background:#faf7f2;box-shadow:inset 0 0 0 1px #e9e0d4;font:400 14.5px/1 var(--sp-serif)}
+.sw button:hover{background:#fff;box-shadow:inset 0 0 0 1px #d6cabb}
+.sw button.on{background:var(--navy);color:var(--cream);box-shadow:none}
+.sw button:focus-visible,.ws button:focus-visible{outline:2px solid var(--navy);outline-offset:2px}
+.sw-note{margin:0;padding:0 0 0 18px;font:400 14.5px/1.5 var(--sp-serif);color:var(--mut);max-width:1180px;columns:2;column-gap:40px}
+.sw-note li{break-inside:avoid}
+.sw-note b{color:var(--ink);font-weight:600}
+@media(max-width:1000px){.sw-note{columns:1}}
+
+/* ── the working area ── */
+.ws{padding:26px 40px 60px;max-width:1500px;margin:0 auto}
+.pt{margin:0 0 22px;font:400 30px/1.2 var(--sp-type)}
+.pt small{margin-left:14px;font:italic 400 17px/1 var(--sp-serif);color:var(--mut)}
+.body{display:grid;grid-template-columns:270px minmax(0,1fr);gap:30px;align-items:start}
+
+/* the panel (shell/ViewsPanel as built) */
+.rail{position:sticky;top:150px;border-radius:16px;background:#fff;box-shadow:0 0 0 1px var(--line),0 1px 2px rgba(28,19,15,.06),0 18px 36px -24px rgba(28,19,15,.3);overflow:hidden}
+.vh{display:flex;align-items:baseline;gap:10px;padding:18px 18px 12px;border-bottom:2.5px solid var(--navy)}
+.vh b{font:400 25px/1 var(--sp-type)}
+.vh .ron{font:400 14.5px/1 var(--sp-serif);color:var(--mut)}
+.vh button{all:unset;cursor:pointer;margin-left:auto;font:400 15.5px/1 var(--sp-serif);color:var(--mut)}
+.vh button:not(:disabled){color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+.vh button:disabled{opacity:.6;cursor:default}
+.views{list-style:none;margin:0;padding:10px 8px}
+.views button{all:unset;cursor:pointer;display:flex;align-items:center;gap:11px;width:100%;box-sizing:border-box;padding:9px 12px;border-radius:9px;font:400 17px/1.2 var(--sp-serif)}
+.views button:hover{background:#faf7f2}
+.views svg{flex:none;width:17px;height:17px;color:var(--mut)}
+.views .tx{flex:1}
+.views .n{font:400 14.5px/1 var(--sp-type);color:var(--faint)}
+.views .on{background:var(--navy);color:var(--cream)}
+.views .on .tx{font-weight:600}
+.views .on svg,.views .on .n{color:rgba(244,238,229,.8)}
+.views .on:hover{background:var(--navy)}
+.views .zero{opacity:.45;pointer-events:none}
+.rf{display:flex;justify-content:space-between;align-items:baseline;padding:16px 18px 4px;border-top:1px solid #f1ebe2}
+.rf b{font:400 19px/1 var(--sp-type)}
+.rf small{font:600 14.5px/1 var(--sp-serif);color:var(--mut)}
+.rf-l{padding:8px 18px 2px;font:400 15px/1 var(--sp-serif);color:var(--mut)}
+.ck{list-style:none;margin:0;padding:0 8px 10px}
+.ck button{all:unset;cursor:pointer;display:flex;align-items:center;gap:11px;width:100%;box-sizing:border-box;min-height:34px;padding:7px 10px;border-radius:8px;font:400 16px/1.3 var(--sp-serif)}
+.ck button:hover{background:#faf7f2}
+.ck .tx{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
+.ck .n{font:400 13px/1 var(--sp-type);color:var(--faint)}
+.ck .zero{opacity:.45;pointer-events:none}
+.box{flex:none;width:17px;height:17px;border-radius:4px;box-shadow:inset 0 0 0 1.5px #b9afa3;display:grid;place-items:center;color:#fff}
+.on>.box{background:var(--navy);box-shadow:none}
+.on>.tx{font-weight:600}
+.mine{font:400 12.5px/1 var(--sp-serif);color:var(--navy);background:#e3e8ef;border-radius:999px;padding:3px 7px}
+.mf{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;min-height:44px;padding:10px 18px;border-top:1px solid #efe8de;font:600 15px/1.3 var(--sp-serif)}
+.mf small{margin-left:6px;font:400 14px/1.3 var(--sp-serif);color:#6b6058}
+.mf:hover{background:#faf7f2}
+.mf i{font-style:normal;font-size:11px;color:var(--faint)}
+.rft{display:flex;justify-content:space-between;align-items:center;padding:12px 18px 14px;border-top:1px solid #efe8de;font:400 15px/1.3 var(--sp-serif);color:var(--mut)}
+.rft button{all:unset;cursor:pointer;text-decoration:underline;text-underline-offset:3px;color:var(--ink)}
+
+/* proposed: one folding section per filter */
+.sh{all:unset;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;box-sizing:border-box;min-height:46px;padding:14px 18px 8px;border-top:1px solid #f1ebe2}
+.sh b{font:400 19px/1 var(--sp-type)}
+.sh .sn{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--navy);color:var(--cream);font:400 12.5px/1 var(--sp-type)}
+.sh i{margin-left:auto;font-style:normal;font-size:11px;color:var(--faint);transition:transform .18s ease-out}
+.sh[aria-expanded=false]{padding-bottom:14px}
+.sh[aria-expanded=false] i{transform:rotate(-90deg)}
+.sh:hover b{text-decoration:underline;text-underline-offset:4px}
+.gfind{display:flex;align-items:center;gap:8px;height:34px;margin:2px 18px 8px;padding:0 10px;border-radius:8px;box-shadow:inset 0 0 0 1px var(--line);color:var(--mut)}
+.gfind input{flex:1;min-width:0;border:0;outline:0;background:none;font:400 15px/1 var(--sp-serif);color:var(--ink)}
+.more-l{all:unset;cursor:pointer;display:inline-block;margin:0 18px 14px;min-height:24px;font:400 15px/1.6 var(--sp-serif);text-decoration:underline;text-underline-offset:3px;color:var(--ink)}
+
+/* the bar above the list (shell/ListBar as built) */
+.tb{display:flex;align-items:center;gap:12px;margin-bottom:18px;position:relative}
+.vsw{display:flex;padding:3px;border-radius:10px;background:#e9e3da}
+.vsw button{all:unset;cursor:pointer;height:33px;padding:0 12px;border-radius:8px;font:600 15px/33px var(--sp-serif);color:var(--mut)}
+.vsw button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(28,19,15,.12)}
+.tb .cnt{flex:none;font:400 19px/1 var(--sp-serif);margin:0 4px;white-space:nowrap}
+.tb .fd{flex:1;min-width:160px;display:flex;align-items:center;gap:12px;height:39px;padding:0 10px 0 14px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);color:var(--mut)}
+.tb .fd input{flex:1;min-width:0;border:0;outline:0;background:none;font:400 17px/1 var(--sp-serif);color:var(--ink)}
+.tb .fd input::placeholder{color:#8a8076}
+.tb kbd{display:grid;place-items:center;width:20px;height:22px;border-radius:5px;box-shadow:inset 0 0 0 1px #d6cabb;font:400 12px/1 var(--sp-serif);color:var(--mut)}
+.cb{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;height:39px;padding:0 13px;border-radius:10px;background:#fff;box-shadow:inset 0 0 0 1px var(--line);font:600 16px/1 var(--sp-serif);white-space:nowrap}
+.cb:hover{box-shadow:inset 0 0 0 1px #c9bba9}
+.cb[aria-expanded=true]{box-shadow:inset 0 0 0 1.5px var(--navy)}
+.cb .gl{font-weight:400;color:var(--mut)}
+.cb .lb{font:400 14.5px/1 var(--sp-type);color:rgba(28,19,15,.6)}
+.cb .dir{color:var(--navy)}
+.cb .cv{font-size:10px;color:var(--mut)}
+.pop{position:absolute;top:47px;right:0;z-index:20;width:320px;padding:14px 12px 12px;border-radius:14px;background:#fff;box-shadow:0 0 0 1px rgba(28,19,15,.1),0 22px 48px -18px rgba(28,19,15,.45)}
+.pop h4{margin:0 8px 8px;font:400 15px/1.2 var(--sp-type);color:var(--mut)}
+.pop .opt{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;min-height:36px;padding:6px 8px;border-radius:8px}
+.pop .opt:hover{background:#f6f3ee}
+.pop .opt b{font:400 15px/22px var(--sp-type);white-space:nowrap}
+.pop .opt small{margin-left:auto;font:italic 400 13.5px/1.2 var(--sp-serif);color:var(--mut);text-align:right}
+.pop .tk{flex:none;width:14px;color:var(--navy);font-size:13px}
+.pop hr{border:0;border-top:1px solid #f1ebe2;margin:6px 8px}
+.seg{display:flex;gap:2px;margin:10px 0 0;padding:3px;border-radius:10px;background:#f4f0e9}
+.seg button{all:unset;cursor:pointer;flex:1 1 0;text-align:center;height:34px;border-radius:7px;font:400 14.5px/34px var(--sp-type);color:rgba(28,19,15,.7);white-space:nowrap}
+.seg button.on{background:var(--navy);color:var(--cream)}
+
+/* the list card */
+.card{border-radius:22px;background:#fff;box-shadow:0 0 0 1px #1c130f14,0 18px 34px -22px #1c130f73;padding:10px}
+.frame{border:1px solid var(--line);border-radius:13px;overflow:clip}
+.ap{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:10px 18px;background:#faf7f2;border-bottom:1px solid rgba(28,19,15,.08);font:400 15px/1.3 var(--sp-serif);color:var(--mut)}
+.apc{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:7px;min-height:28px;padding:3px 10px 3px 12px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1px #d6cabb;color:var(--ink);font:400 14.5px/1.2 var(--sp-serif)}
+.apc:hover{box-shadow:inset 0 0 0 1px var(--navy)}
+.apc i{font-style:normal;color:var(--mut)}
+.apx{all:unset;cursor:pointer;margin-left:auto;text-decoration:underline;text-underline-offset:3px;color:var(--ink)}
+.th,.row{display:grid;align-items:center;column-gap:20px;padding:0 20px}
+.q .th,.q .row{grid-template-columns:minmax(0,1.35fr) minmax(0,1.1fr) 110px 110px minmax(0,1fr)}
+.a .th,.a .row{grid-template-columns:minmax(0,1.25fr) minmax(0,1fr) minmax(0,.8fr)}
+.th{height:44px;background:#fbf9f6;border-bottom:1px solid rgba(28,19,15,.1);font:400 14px/1 var(--sp-type);color:var(--mut)}
+.th button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:0 6px;margin-left:-6px;border-radius:6px}
+.th button:hover{background:#f1ebe2;color:var(--ink)}
+.th .on{color:var(--ink)}
+.th .ar{font-size:12px;color:var(--faint)}
+.th .on .ar{color:var(--navy)}
+.th .hv .ar{visibility:hidden}
+.th .hv:hover .ar,.th .hv:focus-visible .ar{visibility:visible}
+.gh{display:flex;align-items:baseline;gap:10px;padding:12px 20px 10px;background:#e9eef5;border-top:1px solid rgba(28,19,15,.08);font:400 17px/1 var(--sp-type)}
+.gh small{font:400 13.5px/1 var(--sp-type);color:var(--mut)}
+.row{min-height:70px;padding-top:10px;padding-bottom:10px;border-top:1px solid rgba(28,19,15,.08)}
+.rows>.row:first-child,.th+.row{border-top:0}
+.row:hover{background:#fbf9f6}
+.who{display:flex;align-items:center;gap:14px;min-width:0}
+.av{flex:none;width:42px;height:42px;border-radius:50%;background:var(--navy);color:var(--cream);display:grid;place-items:center;font:400 14px/1 var(--sp-type)}
+.av.c{background:#b5aca4}
+.av.n{background:none;color:var(--navy);box-shadow:inset 0 0 0 1.5px var(--navy)}
+.who b{display:block;font:400 18px/1.2 var(--sp-type);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who .st{font-size:13px;letter-spacing:1px;color:var(--navy);margin-left:8px}
+.who .st s{text-decoration:none;color:#d6cabb}
+.who small{display:block;margin-top:4px;font:400 15px/1.2 var(--sp-serif);color:var(--mut)}
+.stt{display:flex;align-items:center;gap:10px;font:400 16px/1.2 var(--sp-type)}
+.o{flex:none;width:15px;height:15px;border-radius:50%;box-shadow:inset 0 0 0 1.6px var(--ink)}
+.o.h{background:linear-gradient(90deg,var(--ink) 50%,transparent 50%)}
+.o.f{background:var(--ink)}
+.o.d{box-shadow:none;border:1.6px dashed var(--ink)}
+.o.x{box-shadow:inset 0 0 0 1.6px var(--faint)}
+.dt{font:400 15px/1.2 var(--sp-serif);color:var(--mut)}
+.nx{font:400 15.5px/1.25 var(--sp-type)}
+.nx.you{color:#7c3a2a}
+.want{display:flex;flex-wrap:wrap;gap:6px}
+.gp{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:6px;background:#f3efe9;font:400 14px/1.2 var(--sp-type)}
+.gp .bk{width:12px;height:12px;color:var(--navy)}
+.empty{padding:46px 20px;text-align:center}
+.empty h3{margin:0 0 8px;font:400 20px/1.2 var(--sp-type)}
+.empty p{margin:0 0 14px;color:var(--mut)}
+.empty button{all:unset;cursor:pointer;height:38px;padding:0 16px;border-radius:9px;box-shadow:inset 0 0 0 1.5px var(--navy);font:400 15px/38px var(--sp-type)}
+
+/* ── v3 · the panel: navy head, summaries, the app's stage colours only on stages ── */
+.rail{overflow:hidden}
+.vh{background:var(--navy);color:var(--cream);border-bottom:0;padding:19px 18px 17px;align-items:center}
+.vh .ron{color:rgba(244,238,229,.75)}
+.vh button,.vh button:not(:disabled){color:var(--cream)}
+.sec{padding:14px 14px 16px;border-top:1px solid #f1ebe2}
+.sec:first-of-type{border-top:0}
+.sct{display:flex;align-items:baseline;justify-content:space-between;margin:0 4px 10px}
+.sct b{font:400 17px/1 var(--sp-type)}
+.sct small{font:400 13.5px/1 var(--sp-serif);color:var(--mut)}
+.sct button{all:unset;cursor:pointer;font:400 13.5px/1.6 var(--sp-serif);color:var(--ink);text-decoration:underline;text-underline-offset:3px}
+/* quick picks: number tiles, neutral paper, navy when on */
+.qt{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tile{all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;gap:10px;min-height:80px;padding:11px 12px 10px;border-radius:12px;background:#faf7f2;box-shadow:inset 0 0 0 1px #e9e0d4;transition:background .15s,box-shadow .15s,transform .15s}
+.tile:hover{background:#fff;box-shadow:inset 0 0 0 1px #c9bba9,0 8px 14px -10px rgba(28,19,15,.35);transform:translateY(-1px)}
+.tile:active{transform:translateY(0) scale(.98)}
+.tile .top{display:flex;justify-content:space-between;align-items:flex-start}
+.tile b{font:400 28px/1 var(--sp-type)}
+.tile svg{width:17px;height:17px;color:var(--faint)}
+.tile .tx{font:400 14.5px/1.2 var(--sp-serif);color:var(--mut)}
+.tile.on,.tile.on:hover{background:var(--navy);color:var(--cream);box-shadow:none}
+.tile.on .tx,.tile.on svg{color:rgba(244,238,229,.82)}
+.tile.zero{opacity:.45;pointer-events:none}
+.tile.wide{grid-column:1/-1;flex-direction:row;align-items:center;gap:14px;min-height:66px}
+.tile.wide b{font-size:32px}
+.tile.wide .tx{flex:1;color:var(--ink);font-size:16px}
+.tile.wide .tx small{display:block;margin-top:3px;font:400 13.5px/1.2 var(--sp-serif);color:var(--mut)}
+.tile.wide.on .tx,.tile.wide.on .tx small{color:var(--cream)}
+/* the stage bar and stage labels: the one place the stage colours appear in the panel */
+.sbar{display:flex;gap:2px;height:18px;margin:0 4px 12px;border-radius:999px;overflow:hidden;background:#f1ebe2}
+.sbar button{border:0;padding:0;margin:0;cursor:pointer;min-width:0;height:100%;transition:flex-grow .35s cubic-bezier(.2,.8,.2,1),opacity .2s}
+.sbar.some button:not(.on){opacity:.45}
+.sbar button:hover{filter:brightness(.96)}
+.stg{display:flex;flex-wrap:wrap;gap:6px}
+.sp{all:unset;cursor:pointer;box-sizing:border-box;display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:5px 11px 5px 9px;border-radius:999px;font:400 14.5px/1.2 var(--sp-serif);color:var(--ink);transition:box-shadow .15s,transform .15s}
+.sp:hover{transform:translateY(-1px)}
+.sp .n{font:400 12.5px/1 var(--sp-type);color:var(--mut)}
+.sp.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--navy)!important;font-weight:600}
+.sp.zero{opacity:.45;pointer-events:none}
+.gly{flex:none;width:15px;height:15px;color:var(--ink)}
+:is(.sp,.apc,.sbar button)[data-stage=queried]{background:#efe6d6;box-shadow:inset 0 0 0 1px #e0d2bb}
+:is(.sp,.apc,.sbar button)[data-stage=partial]{background:#e4ebf2;box-shadow:inset 0 0 0 1px #cbd7e4}
+:is(.sp,.apc,.sbar button)[data-stage=full]{background:#b7c9de;box-shadow:inset 0 0 0 1px #9db4cf}
+:is(.sp,.apc,.sbar button)[data-stage=offer]{background:linear-gradient(112deg,rgba(255,255,255,0) 22%,rgba(255,255,255,.55) 40%,rgba(255,255,255,.12) 52%,rgba(255,255,255,0) 66%) 30% 0/260% 100% no-repeat,#efcdc9;box-shadow:inset 0 0 0 1px #dfb1ac}
+:is(.sp,.apc,.sbar button)[data-stage=closed]{background:#eceae6;box-shadow:inset 0 0 0 1px #dedbd5}
+.sbar button[data-stage]{box-shadow:none}
+/* neutral pills */
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:5px 11px 5px 12px;border-radius:999px;background:#faf7f2;box-shadow:inset 0 0 0 1px #e9e0d4;font:400 14.5px/1.25 var(--sp-serif);transition:background .15s,transform .15s}
+.pill .n{font:400 12.5px/1 var(--sp-type);color:var(--mut)}
+.pill:hover:not(.on){background:#fff;box-shadow:inset 0 0 0 1px #c9bba9;transform:translateY(-1px)}
+.pill.on{background:var(--navy);color:var(--cream);box-shadow:none}
+.pill.on .n{color:rgba(244,238,229,.75)}
+.pill.zero{opacity:.45;pointer-events:none}
+.pill .bk{width:13px;height:13px;color:var(--navy)}
+.pill.on .bk{color:var(--cream)}
+.pill.more{background:none;box-shadow:none;border:1px dashed #c9bba9;color:var(--mut)}
+.pk{margin:10px 4px 0;font:400 13.5px/1.3 var(--sp-serif);color:var(--mut);display:flex;align-items:center;gap:6px}
+.pk svg{width:13px;height:13px;color:var(--navy)}
+.gfind{margin:0 0 10px}
+/* agents: a two-way split you can press */
+.split{display:flex;gap:3px;height:56px;border-radius:12px;overflow:hidden}
+.split+.sct{margin-top:16px}
+.sg{all:unset;cursor:pointer;box-sizing:border-box;min-width:92px;display:flex;flex-direction:column;justify-content:center;gap:4px;padding:0 12px;transition:flex-grow .35s cubic-bezier(.2,.8,.2,1),background .15s}
+.sg b{font:400 22px/1 var(--sp-type)}
+.sg span{font:400 13.5px/1 var(--sp-serif);color:var(--mut);white-space:nowrap}
+.sg.a{background:#e9e3da}.sg.b{background:#f6f3ee}
+.sg:hover{background:#ded6ca}
+.sg.on,.sg.on:hover{background:var(--navy);color:var(--cream)}
+.sg.on span{color:rgba(244,238,229,.82)}
+.sg.zero{opacity:.45;pointer-events:none}
+/* switches */
+.swr{all:unset;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;min-height:36px;padding:6px 4px;border-radius:8px;font:400 16px/1.3 var(--sp-serif)}
+.swr:hover{background:#faf7f2}
+.swr .tx{flex:1}.swr .n{font:400 13px/1 var(--sp-type);color:var(--faint)}
+.swr.zero{opacity:.45;pointer-events:none}
+.tog{width:34px;height:20px;border-radius:999px;background:#d9d0c5;position:relative;flex:none;transition:background .15s}
+.tog::after{content:"";position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s}
+.on>.tog{background:var(--navy)}.on>.tog::after{transform:translateX(14px)}
+.fold{all:unset;cursor:pointer;display:flex;align-items:center;justify-content:space-between;width:100%;box-sizing:border-box;min-height:46px;padding:0 18px;border-top:1px solid #f1ebe2}
+.fold b{font:400 17px/1 var(--sp-type)}
+.fold small{margin-left:8px;font:400 13.5px/1 var(--sp-serif);color:var(--mut)}
+.fold i{font-style:normal;font-size:11px;color:var(--faint);transition:transform .18s ease-out}
+.fold[aria-expanded=false] i{transform:rotate(-90deg)}
+.fold:hover{background:#faf7f2}
+.fold+.sec{border-top:0;padding-top:0}
+.rft{font:400 15px/1.4 var(--sp-type);color:var(--ink);background:#faf7f2}
+/* bar, applied row, list */
+.cb .ic{color:var(--navy);font-weight:400}
+.ap{background:#faf7f2}
+.ap .lead{margin-right:4px;color:var(--ink)}
+.apc{background:var(--navy);color:var(--cream);box-shadow:none;animation:pop .2s ease-out}
+.apc i{color:rgba(244,238,229,.75)}
+.apc:hover{background:#334763;box-shadow:none}
+.apc[data-stage]{color:var(--ink)}
+.apc[data-stage] i{color:var(--mut)}
+.apc[data-stage]:hover{filter:brightness(.96)}
+.gh{background:#f6f3ee}
+.lab{display:inline-flex;align-items:center;gap:8px;min-height:30px;padding:4px 12px 4px 9px;border-radius:999px;font:400 15px/1.2 var(--sp-type);box-shadow:none!important}
+.lab[data-stage=queried]{background:#f8f4ed}.lab[data-stage=partial]{background:#f3f6f9}.lab[data-stage=full]{background:#dfe7f0}.lab[data-stage=offer]{background:#f8e8e5}.lab[data-stage=closed]{background:#f6f5f3}
+.lab.nq{background:none;padding-left:0}
+@keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.tile,.pill,.sp,.sg,.sbar button,.tog,.tog::after,.fold i{transition:none}.apc{animation:none}}
+@keyframes rise{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.rows.go>*{animation:rise .22s ease-out both}
+@media(prefers-reduced-motion:reduce){.rows.go>*{animation:none}.sh i{transition:none}}
+@media(max-width:1100px){.body{grid-template-columns:1fr}.rail{position:static}.ws{padding:20px 16px 40px}}
+</style>
+</head>
+<body>
+<div class="sw">
+  <div class="sw-row" id="swr"></div>
+  <ul class="sw-note" id="note"></ul>
+</div>
+<div class="ws" id="ws"></div>
+<script>
+/* ── sample data (invented) ── */
+const TODAY=new Date("2026-11-19");
+const d=n=>{const x=new Date(TODAY);x.setDate(x.getDate()+n);return x};
+const fmt=x=>x?x.toLocaleDateString("en-GB",{day:"numeric",month:"short"})+(x.getFullYear()!==2026?" "+x.getFullYear():""):"—";
+const ST={q:["Queried","queried"],pr:["Partial requested","partial"],ps:["Partial sent","partial"],fr:["Full requested","full"],fs:["Full sent","full"],of:["Offer","offer"],rj:["Passed","closed"],nr:["No reply","closed"]};
+const ST_ORDER=["q","pr","ps","fr","fs","of","rj","nr"];
+const STAGES=[["queried","Queried"],["partial","Partial"],["full","Full"],["offer","Offer"],["closed","Closed"]];
+const STAGE_BAND={queried:"#efe6d6",partial:"#e4ebf2",full:"#b7c9de",offer:"#efcdc9",closed:"#eceae6"};
+const Q=[
+ ["Imogen Hartley","Calder & Finch","pr",-41,-3,5,"Round one"],["Tobias Wren","Larkspur Literary","q",-64,null,-8,"Round one"],
+ ["Priya Nandakumar","Quill & Harbour","fs",-120,-30,12,"Round one"],["Felix Okafor","The Beacon Agency","of",-150,-2,6,"Round one"],
+ ["Marianne Leclerc","Saltmarsh Associates","q",-12,null,44,"Round two"],["Douglas Pym","Pym Literary","rj",-90,-55,null,"Round one"],
+ ["Hattie Voss","Greenfinch Agency","fr",-70,-6,3,"Round two"],["Rupert Ainsley","Ainsley Marsh","q",-20,null,36,"Round two"],
+ ["Cora Bellweather","Thistle & Ink","ps",-58,-25,-4,"Round one"],["Nathaniel Frost","Northlight Books","nr",-400,null,null,""],
+ ["Sunita Rao","Ember Literary","q",-5,null,51,"Round two"],["Edmund Castellan","Castellan & Co","q",-33,null,23,""],
+ ["Beatrix Lowe","Lowe & Daughters","q",-9,null,47,"Round two"],["Annika Sorensen","Fjord Literary","q",-2,null,54,"Round two"],
+].map(([name,agency,st,qd,hd,due,sent],i)=>({id:"q"+i,name,agency,st,stage:ST[st][1],queried:d(qd),heard:hd==null?null:d(hd),due,sent}));
+Q.forEach(r=>{
+  r.closed=r.stage==="closed";
+  r.over=!r.closed&&["q","ps","fs"].includes(r.st)&&r.due<0;
+  r.you=["pr","fr","of"].includes(r.st)||r.over;
+  r.wait=["q","ps","fs"].includes(r.st)&&r.due>=0;
+  r.action=r.closed?"Closed":r.st==="of"?"Answer the offer":["pr","fr"].includes(r.st)?"Materials requested":r.over?"Nudge due":"Watch and wait";
+  r.next=r.closed?"Nothing to do":r.st==="of"?`Answer the offer in ${r.due} days`:r.st==="pr"?`Send the partial in ${r.due} days`:r.st==="fr"?`Send the full in ${r.due} days`:r.over?`Send a nudge, ${-r.due} days past the date`:`Reply expected in ${r.due} days`;
+});
+const QST={"Imogen Hartley":"pr","Tobias Wren":"q","Priya Nandakumar":"fs","Felix Okafor":"of","Marianne Leclerc":"q","Douglas Pym":"rj","Hattie Voss":"fr","Annika Sorensen":"q","Beatrix Lowe":"q","Nathaniel Frost":"nr"};
+const A=[
+ ["Imogen Hartley","Calder & Finch",["Crime","Thriller"],true,5,-200,6,true],["Tobias Wren","Larkspur Literary",["Literary","Historical"],true,4,-190,8,false],
+ ["Priya Nandakumar","Quill & Harbour",["Crime","Upmarket"],true,4,-180,10,true],["Felix Okafor","The Beacon Agency",["Thriller","Speculative"],true,5,-175,4,true],
+ ["Marianne Leclerc","Saltmarsh Associates",["Literary","Book club"],false,3,-90,12,false],["Douglas Pym","Pym Literary",["Crime"],true,2,-160,6,true],
+ ["Hattie Voss","Greenfinch Agency",["Thriller","Crime","Psychological"],true,4,-80,5,false],["Annika Sorensen","Fjord Literary",["Crime","Noir"],true,5,-14,6,true],
+ ["Giles Merriweather","Merriweather Lane",["Historical","Saga"],false,2,-40,14,false],["Beatrix Lowe","Lowe & Daughters",["Thriller","Upmarket"],true,4,-9,8,false],
+ ["Callum Reyes","Harbourside",[],true,0,-3,0,false],["Nathaniel Frost","Northlight Books",["Science fiction","Fantasy"],false,1,-420,16,false],
+ ["Odette Marchand","Marchand Lit",["Romance","Book club"],true,2,-30,9,true],["Winifred Ashby","Ashby Row",["Psychological","Domestic noir","Thriller"],true,5,-21,7,false],
+ ["Lionel Trask","Trask & Byrne",["Horror","Gothic"],true,3,-18,0,false],["Seren Kavanagh","Tidewater Agency",["Young adult","Fantasy"],false,1,-60,11,true],
+ ["Jasper Lindqvist","Lindqvist & Hale",["Crime","Historical"],true,4,-12,5,true],["Mabel Okonjo","Third Lantern",["Thriller","Noir"],true,3,-6,9,false],
+].map(([name,agency,genres,open,fit,ad,reply,always],i)=>({id:"a"+i,name,agency,genres,open,fit,added:d(ad),reply,always,st:QST[name]||null,queried:!!QST[name],missing:genres.length===0||reply===0}));
+const BOOK=new Set(["Crime","Thriller"]);
+const sur=n=>n.split(" ").pop(), ini=n=>n.split(" ").map(w=>w[0]).join("");
+
+/* ── the two pages: each with its own filters ── */
+const IC={list:'<path d="M3 5h12M3 9h12M3 13h12"/>',you:'<circle cx="9" cy="9" r="6.5"/><path d="M9 5.6v4.1M9 12.2v.1"/>',clock:'<circle cx="9" cy="9" r="6.5"/><path d="M9 5.4V9l2.5 1.6"/>',plane:'<path d="M15.5 2.5 2.5 8l5 1.8L9.3 15z"/><path d="M15.5 2.5 7.5 9.8"/>',doc:'<path d="M4.5 2.5h6l3 3v10h-9z"/><path d="M7 9h4.5M7 12h4.5"/>',reply:'<path d="M3 4.5h12v8H8l-3.2 2.6V12.5H3z"/>',seal:'<circle cx="9" cy="9" r="6.5"/><path d="m9 5.6 1 2.2 2.4.3-1.8 1.6.5 2.4L9 10.9l-2.1 1.2.5-2.4-1.8-1.6 2.4-.3z"/>'};
+const P={
+ q:{title:"Your queries",noun:["query","queries"],rows:Q,find:"Find an agent or agency",
+   views:[["you","Your move","you",r=>r.you,"Requests, offers and nudges"],["over","Past their reply date","clock",r=>r.over,"Time for a nudge"],["wait","Waiting to hear back","plane",r=>r.wait,"With agents, not yet due"],["offers","Offers","seal",r=>r.st==="of","Waiting on your answer"]],
+   secs:[{k:"stage",test:(r,k)=>r.stage===k,label:k=>STAGES.find(x=>x[0]===k)[1]},{k:"sent",test:(r,k)=>r.sent===k,label:k=>k||"Nothing recorded"},
+     {k:"dates",and:true,test:(r,k)=>k==="week"?(r.due!=null&&r.due>=0&&r.due<=7):k==="missing"?r.sent==="":(TODAY-r.queried)/864e5>365,label:k=>({week:"Due this week",missing:"Missing materials",year:"Over a year"})[k]}],
+   sorts:{due:["Next due",["Soonest first","Latest first"],r=>r.due==null?9999:r.due],queried:["Queried",["Oldest first","Newest first"],r=>+r.queried],heard:["Last heard",["Oldest first","Most recent first"],r=>r.heard?+r.heard:0],agent:["Agent",["A to Z","Z to A"],r=>sur(r.name)],stage:["Where it stands",["Earliest stage first","Furthest on first"],r=>ST_ORDER.indexOf(r.st)]},
+   defSort:{k:"due",desc:false},
+   groups:{status:["Status","Queried, partial requested, partial sent and so on",r=>ST[r.st][0],ST_ORDER.map(k=>ST[k][0])],action:["Action","What it needs from you: send, nudge, wait or close",r=>r.action,["Answer the offer","Materials requested","Nudge due","Watch and wait","Closed"]],none:["No grouping","One list, in the order you sort by"]},
+   defGroup:"action",heads:[["agent","Agent"],["stage","Where it stands"],["queried","Queried"],["heard","Last heard"],["due","Next"]]},
+ a:{title:"Your agents",noun:["agent","agents"],rows:A,find:"Find an agent or agency",
+   views:[["ready","Ready to query","plane",r=>!r.queried&&r.open,"Open, and not yet queried"],["always","Always reply","reply",r=>r.always,"Even when it's a no"],["missing","Missing details","doc",r=>r.missing,"Gaps in their profile"]],
+   secs:[{k:"queried",one:true,test:(r,k)=>r.queried===(k==="yes"),label:k=>k==="yes"?"Queried":"Not yet queried"},{k:"subs",one:true,test:(r,k)=>r.open===(k==="open"),label:k=>k==="open"?"Open to queries":"Closed to queries"},{k:"genres",test:(r,k)=>r.genres.includes(k),label:k=>k}],
+   sorts:{surname:["Surname",["A to Z","Z to A"],r=>sur(r.name)],added:["Date added",["Oldest first","Newest first"],r=>+r.added],reply:["Reply time",["Fastest first","Slowest first"],r=>r.reply||99],status:["Query status",["Earliest first","Furthest on"],r=>r.st?ST_ORDER.indexOf(r.st):-1],rating:["Agent fit",["Lowest first","Best fit first"],r=>r.fit]},
+   defSort:{k:"surname",desc:false},
+   groups:{letter:["Letter","A to Z by surname",r=>sur(r.name)[0],null],status:["Status","Where your query to them stands",r=>r.st?ST[r.st][0]:"Not queried",["Not queried",...ST_ORDER.map(k=>ST[k][0])]],none:["No grouping","One list, in the order you sort by"]},
+   defGroup:"none",heads:[["surname","Agent"],[null,"What they want"],["status","Your query"]]},
+};
+const fresh=p=>({view:"all",f:Object.fromEntries(P[p].secs.map(s=>[s.k,new Set()])),find:"",sort:{...P[p].defSort},group:P[p].defGroup,more:false,allGen:false,gfind:"",pop:null});
+const S={page:"q",q:fresh("q"),a:fresh("a")};
+const cur=()=>S[S.page], def=()=>P[S.page];
+
+/* ── one filter state, faceted counts ── */
+function match(r,s,force){
+  const D=def(),vk=force&&force.view!==undefined?force.view:s.view;
+  if(vk!=="all"&&!D.views.find(v=>v[0]===vk)[3](r))return false;
+  for(const sec of D.secs){
+    let set=s.f[sec.k];
+    if(force&&force.sec===sec.k)set=sec.and?new Set([...set,force.opt]):new Set([force.opt]);
+    if(!set.size)continue;const ks=[...set];
+    if(sec.and?!ks.every(k=>sec.test(r,k)):!ks.some(k=>sec.test(r,k)))return false;
+  }
+  const t=s.find.trim().toLowerCase();
+  return !t||r.name.toLowerCase().includes(t)||r.agency.toLowerCase().includes(t);
+}
+const nView=k=>def().rows.filter(r=>match(r,cur(),{view:k})).length;
+const nOpt=(sec,k)=>def().rows.filter(r=>match(r,cur(),{sec,opt:k})).length;
+const onCount=()=>{const s=cur();return (s.view!=="all"?1:0)+Object.values(s.f).reduce((n,x)=>n+x.size,0)};
+function shown(){
+  const s=cur(),sd=def().sorts[s.sort.k];
+  return def().rows.filter(r=>match(r,s)).sort((x,y)=>{const a=sd[2](x),b=sd[2](y);const c=typeof a==="string"?a.localeCompare(b):a-b;return (s.sort.desc?-c:c)||sur(x.name).localeCompare(sur(y.name))});
+}
+
+/* ── drawing ── */
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const svg=k=>`<svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${IC[k]}</svg>`;
+const TICK='<svg class="bk" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 6.2 5 8.6l4.6-5"/></svg>';
+/* the status marks: ink, never a stage colour (StatusDot's set) */
+function gly(st){
+  const g=c=>`<svg class="gly" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">${c}</svg>`;
+  const ring=dash=>`<circle cx="8" cy="8" r="6.2"${dash?' stroke-dasharray="2.4 2"':""}/>`;
+  const half='<path d="M8 1.8a6.2 6.2 0 0 0 0 12.4z" fill="currentColor" stroke="none"/>', full='<circle cx="8" cy="8" r="3.9" fill="currentColor" stroke="none"/>';
+  return g({q:ring(),queried:ring(),pr:ring(1)+half,ps:ring()+half,partial:ring()+half,fr:ring(1)+full,fs:ring()+full,full:ring()+full,
+    of:ring()+'<path d="m8 4.6 1 2.1 2.3.3-1.7 1.6.4 2.3L8 9.8l-2 1.1.4-2.3L4.7 7l2.3-.3z" fill="currentColor" stroke="none"/>',
+    rj:ring()+'<path d="M4.8 8h6.4"/>',nr:ring()+'<path d="M4.8 8h6.4"/>',closed:ring()+'<path d="M4.8 8h6.4"/>',none:ring(1)}[st]);
+}
+const G=k=>gly(k==="offer"?"of":k);
+const cu=(id,n)=>`<b data-cu="${id}" data-n="${n}">${n}</b>`;
+const st=(sec,k)=>{const s=cur(),on=s.f[sec].has(k),n=nOpt(sec,k);return {on,n,cls:(on?" on":"")+(!on&&n===0?" zero":""),at:`aria-checked="${on}" data-tick="${sec}" data-k="${esc(k)}"`}};
+const tile=([k,l,ic,,line],wide)=>{const n=nView(k),on=cur().view===k;
+  return wide?`<button role="radio" aria-checked="${on}" class="tile wide${on?" on":""}${!on&&n===0?" zero":""}" data-view="${k}">${cu("v"+k,n)}<span class="tx">${l}<small>${line}</small></span>${svg(ic)}</button>`
+   :`<button role="radio" aria-checked="${on}" class="tile${on?" on":""}${!on&&n===0?" zero":""}" data-view="${k}" title="${line}"><span class="top">${cu("v"+k,n)}${svg(ic)}</span><span class="tx">${l}</span></button>`};
+const pill=(sec,k,l,extra="")=>{const o=st(sec,k);return `<button role="checkbox" class="pill${o.cls}" ${o.at}>${extra}${l}<span class="n">${o.n}</span></button>`};
+const sw=(sec,k,l)=>{const o=st(sec,k);return `<button role="switch" class="swr${o.cls}" ${o.at}><span class="tx">${l}</span><span class="n">${o.n}</span><i class="tog"></i></button>`};
+const split=(sec,[ka,la],[kb,lb])=>{const a=st(sec,ka),b=st(sec,kb);
+  return `<div class="split" role="radiogroup">${[[ka,la,a,"a"],[kb,lb,b,"b"]].map(([k,l,o,c])=>`<button role="radio" class="sg ${c}${o.cls}" ${o.at} data-fg="${sec+k}" style="flex-grow:${Math.max(o.n,.001)}">${cu(sec+k,o.n)}<span>${l}</span></button>`).join("")}</div>`};
+
+function railQ(){
+  const s=cur(),D=def(),some=s.f.stage.size>0,datesOn=s.f.dates.size,open=s.more||datesOn>0;
+  const stages=STAGES.map(([k,l])=>({k,l,...st("stage",k)}));
+  const sent=[...new Set(Q.map(r=>r.sent))].sort((x,y)=>(x==="")-(y==="")||x.localeCompare(y));
+  return `<div class="sec"><div class="sct"><b>What needs you</b></div><div class="qt" role="radiogroup" aria-label="Quick picks">${D.views.map(v=>tile(v)).join("")}</div></div>
+   <div class="sec"><div class="sct"><b>Stage</b><small>${some?[...s.f.stage].length+" picked":"how far they've got"}</small></div>
+     <div class="sbar${some?" some":""}" aria-hidden="true">${stages.filter(x=>x.n||x.on).map(x=>`<button tabindex="-1" class="${x.on?"on":""}" data-stage="${x.k}" data-tick="stage" data-k="${x.k}" data-fg="bar${x.k}" style="flex-grow:${Math.max(x.n,.001)}" title="${x.l}: ${x.n}"></button>`).join("")}</div>
+     <div class="stg">${stages.map(x=>`<button role="checkbox" class="sp${x.cls}" data-stage="${x.k}" ${x.at}>${G(x.k)}${x.l}<span class="n">${x.n}</span></button>`).join("")}</div></div>
+   <div class="sec"><div class="sct"><b>What you sent</b></div><div class="pills">${sent.map(k=>pill("sent",k,k||"Nothing recorded")).join("")}</div></div>
+   <button class="fold" data-act="more" aria-expanded="${open}"><span><b>Dates</b>${datesOn?`<small>${datesOn} on</small>`:""}</span><i>▾</i></button>
+   ${open?`<div class="sec">${sw("dates","week","Due this week")}${sw("dates","missing","Missing materials")}${sw("dates","year","Over a year")}</div>`:""}`;
+}
+function railA(){
+  const s=cur(),D=def(),m={};A.forEach(r=>r.genres.forEach(g=>m[g]=(m[g]||0)+1));
+  let gs=Object.keys(m).sort((x,y)=>BOOK.has(y)-BOOK.has(x)||m[y]-m[x]||x.localeCompare(y));const total=gs.length,t=s.gfind.trim().toLowerCase();
+  if(s.allGen){if(t)gs=gs.filter(g=>g.toLowerCase().includes(t))}else gs=gs.filter((g,i)=>i<6||s.f.genres.has(g));
+  return `<div class="sec"><div class="sct"><b>Who to query next</b></div><div class="qt" role="radiogroup" aria-label="Quick picks">${tile(D.views[0],true)}${D.views.slice(1).map(v=>tile(v)).join("")}</div></div>
+   <div class="sec"><div class="sct"><b>Have you queried them?</b></div>${split("queried",["no","not yet queried"],["yes","queried"])}
+     <div class="sct"><b>Are they open?</b></div>${split("subs",["open","open to queries"],["closed","closed for now"])}</div>
+   <div class="sec"><div class="sct"><b>What they want</b>${s.allGen?`<button data-act="allgen">Show fewer</button>`:""}</div>
+     ${s.allGen?`<label class="gfind"><span aria-hidden="true">⌕</span><input data-gfind placeholder="Find a genre" value="${esc(s.gfind)}" aria-label="Find a genre"></label>`:""}
+     <div class="pills">${gs.map(g=>pill("genres",g,g,BOOK.has(g)?TICK:"")).join("")||`<span class="pk" style="margin:0">No genre matches</span>`}${!s.allGen&&total>gs.length?`<button class="pill more" data-act="allgen">+${total-gs.length} more</button>`:""}</div>
+     <p class="pk">${TICK}Genres your book carries</p></div>`;
+}
+function rail(){
+  const on=onCount(),n=shown().length,D=def(),tot=D.rows.length;
+  const line=S.page==="q"?(on?`Showing ${n} of ${tot} queries.`:`All ${tot} queries. ${Q.filter(r=>r.you).length} need you.`):(on?`Showing ${n} of ${tot} agents.`:`All ${tot} agents. ${A.filter(r=>!r.queried).length} not yet queried.`);
+  return `<aside class="rail" aria-label="Filter"><div class="vh"><b>Filter</b>${on?`<span class="ron">${on} on</span>`:""}<button data-act="clear" ${on?"":"disabled"}>Clear all</button></div>
+    ${S.page==="q"?railQ():railA()}<div class="rft"><span aria-live="polite">${line}</span></div></aside>`;
+}
+function bar(){
+  const s=cur(),D=def(),n=shown().length,tot=D.rows.length,sd=D.sorts[s.sort.k];
+  let pop="";
+  if(s.pop==="sort")pop=`<div class="pop" role="menu"><h4>Sort by</h4>${Object.entries(D.sorts).map(([k,v])=>`<button class="opt" role="menuitemradio" aria-checked="${s.sort.k===k}" data-sort="${k}"><span class="tk">${s.sort.k===k?"✓":""}</span><b>${v[0]}</b></button>`).join("")}
+    <div class="seg" role="radiogroup" aria-label="Order"><button role="radio" aria-checked="${!s.sort.desc}" class="${s.sort.desc?"":"on"}" data-dir="0">${sd[1][0]}</button><button role="radio" aria-checked="${s.sort.desc}" class="${s.sort.desc?"on":""}" data-dir="1">${sd[1][1]}</button></div></div>`;
+  if(s.pop==="group")pop=`<div class="pop" role="menu"><h4>Group the list by</h4>${Object.keys(D.groups).map(k=>`${k==="none"?"<hr>":""}<button class="opt" role="menuitemradio" aria-checked="${s.group===k}" data-group="${k}"><span class="tk">${s.group===k?"✓":""}</span><b>${D.groups[k][0]}</b><small>${D.groups[k][1]}</small></button>`).join("")}</div>`;
+  return `<div class="tb">${S.page==="q"?`<div class="vsw" role="group" aria-label="View"><button class="on">List</button><button>Birds-eye</button></div>`:""}
+    <span class="cnt" aria-live="polite">${n!==tot?`<b>${n}</b> of <b>${tot}</b>`:`<b>${tot}</b> ${D.noun[1]}`}</span>
+    <label class="fd"><span aria-hidden="true">⌕</span><input data-find placeholder="${D.find}" value="${esc(s.find)}" aria-label="${D.find}"><kbd>/</kbd></label>
+    <button class="cb" data-pop="sort" aria-haspopup="menu" aria-expanded="${s.pop==="sort"}"><span class="ic" aria-hidden="true">⇅</span><span class="gl">Sort:</span> ${sd[0]} <span class="dir" title="${sd[1][+s.sort.desc]}">${s.sort.desc?"↓":"↑"}</span><span class="cv">▾</span></button>
+    <button class="cb" data-pop="group" aria-haspopup="menu" aria-expanded="${s.pop==="group"}"><span class="ic" aria-hidden="true">▤</span><span class="gl">Group:</span> ${s.group==="none"?"None":D.groups[s.group][0]}<span class="cv">▾</span></button>
+    <button class="cb" title="Export what the list is showing"><span aria-hidden="true">↓</span> Export</button>${pop}</div>`;
+}
+function applied(){
+  const s=cur(),D=def(),chips=[];
+  if(s.view!=="all")chips.push(["view","",D.views.find(v=>v[0]===s.view)[1],null]);
+  D.secs.forEach(sec=>[...s.f[sec.k]].forEach(k=>chips.push([sec.k,k,sec.label(k),sec.k==="stage"?k:null])));
+  if(s.find.trim())chips.push(["find","",`“${s.find.trim()}”`,null]);
+  if(!chips.length)return "";
+  return `<div class="ap" role="status"><span class="lead">Filtered by</span>${chips.map(([a,k,l,g])=>`<button class="apc" ${g?`data-stage="${g}"`:""} data-drop="${a}" data-k="${esc(k)}" aria-label="Remove ${esc(l)}">${g?G(g):""}${esc(l)}<i>×</i></button>`).join("")}<button class="apx" data-act="clear">Clear all</button></div>`;
+}
+const lab=stk=>stk?`<span class="lab" data-stage="${ST[stk][1]}">${gly(stk)}${ST[stk][0]}</span>`:`<span class="lab nq">${gly("none")}Not queried</span>`;
+function rowHtml(r){
+  if(S.page==="q")return `<div class="row"><div class="who"><span class="av${r.closed?" c":""}">${ini(r.name)}</span><span><b>${r.name}</b><small>${r.agency}</small></span></div>
+    <div>${lab(r.st)}</div><div class="dt">${fmt(r.queried)}</div><div class="dt">${fmt(r.heard)}</div><div class="nx">${r.next}</div></div>`;
+  return `<div class="row"><div class="who"><span class="av ${r.queried?"":"n"}">${ini(r.name)}</span><span><b>${r.name}${r.fit?`<span class="st">${"★".repeat(r.fit)}<s>${"★".repeat(5-r.fit)}</s></span>`:""}</b><small>${r.agency}${r.open?"":" · closed for now"}</small></span></div>
+    <div class="want">${r.genres.map(g=>`<span class="gp">${BOOK.has(g)?TICK:""}${g}</span>`).join("")||`<span class="dt"><i>No genres on file</i></span>`}</div><div>${lab(r.st)}</div></div>`;
+}
+function list(){
+  const s=cur(),D=def(),rows=shown();
+  const heads=D.heads.map(([k,l])=>{if(!k)return `<span>${l}</span>`;const on=s.sort.k===k;
+    return `<span role="columnheader" aria-sort="${on?(s.sort.desc?"descending":"ascending"):"none"}"><button data-head="${k}" class="${on?"on":"hv"}" title="Sort by ${l.toLowerCase()}">${l}<span class="ar">${on?(s.sort.desc?"↓":"↑"):"↕"}</span></button></span>`}).join("");
+  let body;
+  if(!rows.length)body=`<div class="empty"><h3>No ${D.noun[1]} match these filters.</h3><p>Take one off, or start again.</p><button data-act="clear">Clear all</button></div>`;
+  else if(s.group==="none")body=rows.map(rowHtml).join("");
+  else{const g=D.groups[s.group],m=new Map();rows.forEach(r=>{const k=g[2](r);(m.get(k)||m.set(k,[]).get(k)).push(r)});
+    const keys=[...m.keys()].sort((x,y)=>g[3]?g[3].indexOf(x)-g[3].indexOf(y):x.localeCompare(y));
+    body=keys.map(k=>`<div class="gh">${k}<small>${m.get(k).length}</small></div>${m.get(k).map(rowHtml).join("")}`).join("")}
+  return `<div class="card ${S.page}"><div class="frame">${applied()}<div class="th" role="row">${heads}</div><div class="rows go">${body}</div></div></div>`;
+}
+const NOTES={
+ q:["<b>Query filters only</b>: what needs you, how far each has got, what you sent, and dates.","<b>Stage is one bar and five labels</b>, not eight tick rows. It is the only place the stage colours appear: sand, the two blues, rose with its sheen, and grey, each meaning its stage.","Quick picks are number tiles in neutral paper, navy when picked. Nothing else is coloured.","Numbers count to their new value and the bar re-balances as you filter."],
+ a:["<b>Agent filters only</b>: who to query next, whether you've queried them, whether they're open, and what they want. The query-chasing picks (“Your move”, “Waiting to hear back”) stay on the Queries page.","Queried and open are <b>two-way splits</b> sized by their numbers: press a side to filter.","Genres are the top six as pills, your book's first with a tick, then “+N more” with a search.","No stage colours in the panel here, because none of these filters is a stage. They appear only on the “Your query” labels in the list."],
+};
+const PREV={};
+function render(keep){
+  const sc=window.scrollY;
+  document.getElementById("swr").innerHTML=`<b>Page</b><button data-page="q" class="${S.page==="q"?"on":""}">Queries list</button><button data-page="a" class="${S.page==="a"?"on":""}">Agents list</button>`;
+  document.getElementById("note").innerHTML=NOTES[S.page].map(t=>`<li>${t}</li>`).join("");
+  document.getElementById("ws").innerHTML=`<h1 class="pt">${def().title}<small>design reference, list filters v1</small></h1><div class="body">${rail()}<div>${bar()}${list()}</div></div>`;
+  if(keep){const el=document.querySelector(`[${keep.attr}]`);if(el){el.focus();if(keep.pos!=null)el.setSelectionRange(keep.pos,keep.pos)}}
+  window.scrollTo(0,sc);animate();
+}
+/* numbers count to their new value; bars and splits grow from where they were */
+function animate(){
+  const still=matchMedia("(prefers-reduced-motion: reduce)").matches,pg=S.page;
+  document.querySelectorAll("[data-cu]").forEach(el=>{const id=pg+el.dataset.cu,to=+el.dataset.n,from=PREV[id];PREV[id]=to;
+    if(still||from===undefined||from===to)return;const t0=performance.now();
+    (function step(t){const p=Math.min(1,(t-t0)/260);el.textContent=Math.round(from+(to-from)*p);if(p<1)requestAnimationFrame(step)})(t0)});
+  document.querySelectorAll("[data-fg]").forEach(el=>{const id=pg+"fg"+el.dataset.fg,to=el.style.flexGrow,from=PREV[id];PREV[id]=to;
+    if(still||from===undefined||from===to)return;el.style.transition="none";el.style.flexGrow=from;el.offsetWidth;el.style.transition="";el.style.flexGrow=to});
+}
+function clearAll(){const s=cur(),k=fresh(S.page);s.view="all";s.f=k.f;s.find="";s.gfind=""}
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button"),s=cur();
+  if(!b){if(s.pop&&!e.target.closest(".pop")){s.pop=null;render()}return}
+  const ds=b.dataset;
+  if(ds.page)S.page=ds.page;
+  else if(ds.view)s.view=s.view===ds.view?"all":ds.view;
+  else if(ds.tick){const sec=def().secs.find(x=>x.k===ds.tick),set=s.f[ds.tick],had=set.has(ds.k);if(sec.one)set.clear();had?set.delete(ds.k):set.add(ds.k)}
+  else if(ds.act==="clear")clearAll();
+  else if(ds.act==="more")s.more=!s.more;
+  else if(ds.act==="allgen"){s.allGen=!s.allGen;s.gfind=""}
+  else if(ds.pop)s.pop=s.pop===ds.pop?null:ds.pop;
+  else if(ds.sort)s.sort={k:ds.sort,desc:["queried","heard","added","rating"].includes(ds.sort)};
+  else if(ds.dir)s.sort.desc=ds.dir==="1";
+  else if(ds.group){s.group=ds.group;s.pop=null}
+  else if(ds.head)s.sort=s.sort.k===ds.head?{k:ds.head,desc:!s.sort.desc}:{k:ds.head,desc:false};
+  else if(ds.drop){if(ds.drop==="view")s.view="all";else if(ds.drop==="find")s.find="";else s.f[ds.drop].delete(ds.k)}
+  else return;
+  render();
+});
+document.addEventListener("input",e=>{const t=e.target,s=cur();
+  if(t.matches("[data-find]")){s.find=t.value;render({attr:"data-find",pos:t.selectionStart})}
+  else if(t.matches("[data-gfind]")){s.gfind=t.value;render({attr:"data-gfind",pos:t.selectionStart})}});
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&cur().pop){cur().pop=null;render()}
+  if(e.key==="/"&&!e.target.matches("input")){e.preventDefault();document.querySelector("[data-find]").focus()}});
+render();
+</script>
+</body>
+</html>
