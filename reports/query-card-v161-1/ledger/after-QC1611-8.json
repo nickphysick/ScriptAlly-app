@@ -1,0 +1,17 @@
+[
+ {
+  "name": "population: the save landed and was undone",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no scale animation on the frame, on the save or the undo",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "its scale never leaves 1",
+  "ok": true,
+  "got": ""
+ }
+]

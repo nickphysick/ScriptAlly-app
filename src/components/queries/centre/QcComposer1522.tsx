@@ -25,6 +25,7 @@ import "./qcv1522card.css";
 /* Query card v161, Phase 3 — the drawer's paper, and the reply's tiles */
 import "./qcv161.css";
 import { StatusDot } from "../../StatusDot";
+import { pressAtPointer, pressThen } from "./qcMotion160";
 import { STAGE_COLOURS, bandBackground, stageOf } from "../../../lib/stageColours";
 
 const DAY = 86_400_000;
@@ -234,7 +235,8 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
     return matLabelOf(m, o);
   }
 
-  const save = async (p: ComposerSave) => { if (busy) return; await onSave(p); };
+  /* Query card v161.1 — the card's frame presses in at the press, before anything else; the save follows at once */
+  const save = (p: ComposerSave) => { if (busy) return; pressThen(cbRef.current?.closest<HTMLElement>(".spanel") ?? null, () => void onSave(p)); };
   const copy = (email: string, key: string) => {
     void navigator.clipboard?.writeText(email).then(() => { setCopied(key); window.setTimeout(() => setCopied(null), 1400); }, () => {});
   };
@@ -242,7 +244,8 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
   let title = "", tall = false, body: React.ReactNode = null, foot: React.ReactNode = null;
   const cancel = <button type="button" className="qc1522-btn gh" data-qc1522="cancel" onClick={exit}>{cancelLabel ?? "Cancel"}</button>;
   const primary = (label: string, p: ComposerSave | null, data = "save", disabled = false) => (
-    <button type="button" className="qc1522-btn nv" data-qc1522={data} disabled={disabled || busy || !p} onClick={() => p && void save(p)}>{label}{ARW}</button>
+    <button type="button" className="qc1522-btn nv" data-qc1522={data} disabled={disabled || busy || !p}
+      onPointerDown={(e) => { if (p && !busy) pressAtPointer(e.currentTarget.closest<HTMLElement>(".spanel")); }} onClick={() => p && void save(p)}>{label}{ARW}</button>
   );
   const fl = (label: string, field: React.ReactNode, key: string) => <React.Fragment key={key}><label>{label}</label><div>{field}</div></React.Fragment>;
 
@@ -423,7 +426,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
       const newly = c.others.filter((o) => told[o.id] && !o.told).length;
       foot = <>
         <span className="qc1522-hint" data-qc1522="told-count">{nt} of {c.others.length} told</span><span className="sp" />
-        <button type="button" className="qc1522-btn gh" data-qc1522="later" disabled={busy} onClick={() => void save({ j: "tell", told, later: true })}>{newly || nt ? "Do the rest later" : "Do it later"}</button>
+        <button type="button" className="qc1522-btn gh" data-qc1522="later" disabled={busy} onPointerDown={(e) => { if (!busy) pressAtPointer(e.currentTarget.closest<HTMLElement>(".spanel")); }} onClick={() => void save({ j: "tell", told, later: true })}>{newly || nt ? "Do the rest later" : "Do it later"}</button>
         {primary("Done", { j: "tell", told, later: false }, "done", nt < c.others.length)}
       </>;
       break;

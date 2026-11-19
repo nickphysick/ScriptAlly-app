@@ -1,0 +1,27 @@
+[
+ {
+  "name": "save: population — frames held between the press-in and the landing",
+  "ok": true,
+  "got": "69"
+ },
+ {
+  "name": "save: every one at scale 0.985",
+  "ok": true,
+  "got": "[0.985]"
+ },
+ {
+  "name": "population: a long task (over 50ms) ran while the frame was held",
+  "ok": true,
+  "got": "[1288,137]"
+ },
+ {
+  "name": "the frames either side of the long task are at 0.985",
+  "ok": true,
+  "got": "[0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985]"
+ },
+ {
+  "name": "the press is a finished animation filled forwards (the compositor holds it)",
+  "ok": true,
+  "got": "[\"qc160-bump:paused\"]"
+ }
+]

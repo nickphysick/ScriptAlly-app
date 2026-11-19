@@ -21,7 +21,56 @@
  */
 export const reduced = (): boolean => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-export const BUMP = { ms: 500, peak: 1.022, at: 0.35, ease: "cubic-bezier(0.2, 0.8, 0.2, 1)" } as const;
+/* Query card v161.1 — the bump is a press and a pop: the frame presses in at the press, holds through the save, and pops
+   when the save lands (it replaces v160's 1 → 1.022 → 1). */
+export const PRESS = { to: 0.985, ms: 120, backMs: 150, net: 4000, yieldMs: 50 } as const;
+export const BUMP = { ms: 520, peak: 1.035, at: 0.4, ease: "cubic-bezier(0.2, 0.8, 0.2, 1)" } as const;
+const pressed = new WeakMap<Element, { a: Animation; t: number }>();
+export const isPressed = (frame: Element | null): boolean => !!frame && pressed.has(frame);
+/** at the press: the frame eases to 0.985 over 120ms and holds there (on the compositor, whatever the page then does).
+ *  A second press while one is held does nothing. Never longer than 4s: the safety net eases it back. */
+export function pressIn(frame: HTMLElement | null): void {
+  if (!frame || reduced() || pressed.has(frame)) return;
+  bumps.get(frame)?.cancel();
+  const a = frame.animate([{ scale: "1" }, { scale: String(PRESS.to) }], { duration: PRESS.ms, easing: "ease-out", fill: "forwards" });
+  a.id = "qc1611-press";
+  pressed.set(frame, { a, t: window.setTimeout(() => pressBack(frame), PRESS.net) });
+}
+/** nothing landed (the save failed, was refused, or never drew): the frame eases back to 1 over 150ms, with no pop */
+export function pressBack(frame: HTMLElement | null): void {
+  const p = frame ? pressed.get(frame) : undefined;
+  if (!frame || !p) return;
+  pressed.delete(frame);
+  window.clearTimeout(p.t);
+  const at = parseFloat(getComputedStyle(frame).scale) || PRESS.to;
+  p.a.cancel();
+  if (reduced() || at === 1) return;
+  frame.animate([{ scale: String(at) }, { scale: "1" }], { duration: PRESS.backMs, easing: "ease-out" }).id = "qc1611-back";
+}
+/** At the pointer's press (pointerdown, the press's first handler): press in before the click's own work begins — a
+ *  click runs the page's listeners and their render in one task (137ms on Undo at CPU 4×, measured), and an animation
+ *  made inside that task cannot reach the compositor until it ends. If no click follows within 700ms (the pointer was
+ *  dragged off), the frame eases back. */
+const armed = new WeakMap<Element, number>();
+export function pressAtPointer(frame: HTMLElement | null): void {
+  if (!frame || reduced() || pressed.has(frame)) return;
+  pressIn(frame);
+  armed.set(frame, window.setTimeout(() => { armed.delete(frame); pressBack(frame); }, 700));
+}
+/** at the click (or Enter/Space): press in if the pointer has not already, then save. A save starts at once (Step 0.4:
+ *  its long task is ~680ms after the press, 35 frames painted between). Undo waits (`yieldFrames`) for two painted
+ *  frames when the press began here, at the click — its own work re-renders the page straight away — and never more
+ *  than 50ms. */
+export function pressThen<T>(frame: HTMLElement | null, run: () => T, yieldFrames = false): void {
+  const a = frame ? armed.get(frame) : undefined;
+  if (frame && a != null) { window.clearTimeout(a); armed.delete(frame); run(); return; }
+  if (!frame || reduced() || pressed.has(frame) || !yieldFrames) { pressIn(frame); run(); return; }
+  pressIn(frame);
+  let done = false;
+  const go = () => { if (!done) { done = true; run(); } };
+  requestAnimationFrame(() => requestAnimationFrame(() => window.setTimeout(go, 0)));
+  window.setTimeout(go, PRESS.yieldMs);
+}
 export const SETTLE = { ms: 420, ease: "cubic-bezier(0.3, 0.7, 0.2, 1)", lineFrom: 120, lineMs: 300, from: 1.015 } as const;
 export const FOLD = { fadeMs: 190, closeMs: 230, ease: "cubic-bezier(0.4, 0, 0.2, 1)" } as const;
 export const STRIP = { ms: 450, wordMs: 300, wordAt: 100, wordRise: 5, markMs: 400, markAt: 120, markEase: "cubic-bezier(0.2, 0.9, 0.3, 1.2)" } as const;
@@ -75,11 +124,16 @@ const bumps = new WeakMap<Element, Animation>();
 export function bump(frame: HTMLElement | null, owner: Element | null = null): void {
   if (!frame || reduced()) return;
   bumps.get(frame)?.cancel();
+  /* v161.1 — the pop starts where the press left it (0.985), and the press gives way to it */
+  const p = pressed.get(frame);
+  const from = p ? PRESS.to : 1;
+  if (p) { pressed.delete(frame); window.clearTimeout(p.t); }
   const a = frame.animate([
-    { scale: "1", easing: BUMP.ease },
+    { scale: String(from), easing: BUMP.ease },
     { scale: String(BUMP.peak), offset: BUMP.at, easing: BUMP.ease },
     { scale: "1" },
   ], { duration: BUMP.ms });
+  p?.a.cancel();
   a.id = "qc160-bump";
   park(owner, a);
   bumps.set(frame, a);

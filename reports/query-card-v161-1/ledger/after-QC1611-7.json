@@ -1,0 +1,52 @@
+[
+ {
+  "name": "a tab change: population — sampled",
+  "ok": true,
+  "got": "69"
+ },
+ {
+  "name": "a tab change: no scale animation on the frame",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "adding a note: population — sampled",
+  "ok": true,
+  "got": "133"
+ },
+ {
+  "name": "adding a note: no scale animation on the frame",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "opening the drawer: population — sampled",
+  "ok": true,
+  "got": "95"
+ },
+ {
+  "name": "opening the drawer: no scale animation on the frame",
+  "ok": true,
+  "got": "[\"rotate:running\"]"
+ },
+ {
+  "name": "from the press-in to the pop's end, outside the lean's own return, the frame's rotate never changes",
+  "ok": true,
+  "got": "[\"1.6deg\"]"
+ },
+ {
+  "name": "its translate never changes",
+  "ok": true,
+  "got": "[\"none\"]"
+ },
+ {
+  "name": "transform is never set on it",
+  "ok": true,
+  "got": "[\"none\"]"
+ },
+ {
+  "name": "its box at rest is the baseline's",
+  "ok": true,
+  "got": "932,100,540,700 → 932,100,540,700"
+ }
+]
