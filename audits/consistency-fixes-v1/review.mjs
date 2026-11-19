@@ -25,7 +25,6 @@ const FIXED = {
   "R1-dv1-step": "The 1-2-3 step numerals in How it works: 11px → 12px.",
   "R1-d22-road": "The founding road's note counts (“1 note”, “3 notes”…): 11.5px → 12px.",
   "R1-laq-g": "The agent initials in the journey's big rows: 11px → 12px.",
-  "R1-laq-faces": "The stacked initials (“AK”, “CB”): 8px → 12px.",
   "R1-qc152-band": "The query card's stage band label (“OFFER”, “MATERIALS REQUESTED”): 11px → 12px.",
   "R1-qc152-av": "The query card's avatar initials: 8.5px → 12px.",
   "R1-qc153-more": "The “+39” overflow chip: 11px → 12px.",
@@ -46,6 +45,7 @@ const UNDONE = {
   "R1-qc152-bkc": "The query card's book chips (9.5px): the chip row grew 60px wider and 4.7px taller.",
   "R1-mk-rungline": "Pricing's ladder rate lines (.56rem = 9px): each rung grew 4px taller.",
   "R2-contact-send": "Contact's “Send message” in navy (the colour its phone rule already uses): it measured clean, but left --mk-ink-hov declared and unread, so src/marketing/marketingTokens.test.ts went red. Passing it would mean deleting a token or editing the test; reverted in 6214aad77.",
+  "R1-laq-faces": "Log a query's stacked initials (8px): the measurements passed, but at 12px the letters run under the next overlapping circle (\u201cAK\u201d reads \u201cAI\u201d). Seen in the screenshot; reverted.",
   "R1-d60-hin": "The Dashboard ring's “OF 53” (8.5px): it passed its own check, but moved the “14” above it by 2.3px.",
 };
 const crop = (label, id) => { for (const [k, f] of Object.entries(V[id]?.pages || {})) { const page = k.split("@")[0]; const p = resolve(LOCAL, label, page, `${id}.png`); if (existsSync(p)) return { page, p }; } return { page: null, p: null }; };
