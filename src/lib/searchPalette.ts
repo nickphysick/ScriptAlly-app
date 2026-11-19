@@ -36,7 +36,7 @@ export type PaletteRun =
   | { kind: "logQueryTo"; agentId: string }
   /** Record a response for this query. */
   | { kind: "recordFor"; queryId: string }
-  /** A task, a note, a letter or a package — Part D says how far each can be opened. */
+  /** A task, a note, a letter or a package — SearchPalette's perform says how far each can be opened. */
   | { kind: "task"; taskId: string }
   | { kind: "note"; noteId: string }
   | { kind: "letter"; letterId: string }
@@ -45,12 +45,8 @@ export type PaletteRun =
   | { kind: "help"; slug: string }
   /** Look for the term in the Help centre. */
   | { kind: "helpSearch"; term: string }
-  /** The Queries page's own "Download all as CSV". */
-  | { kind: "export" }
   /** lib/feedbackStore's openFeedback(). */
   | { kind: "feedback" }
-  /** Tasks, then TODO_OPEN_TASK_SETTINGS — the account menu's contract. */
-  | { kind: "taskSettings" }
   /** The new-agent card with the name filled in. */
   | { kind: "newAgent"; name: string };
 
@@ -334,8 +330,6 @@ export type PaletteRow =
   | { type: "item"; item: PaletteItem; match?: MatchInfo }
   /** "Show all {n} {noun}" — chooses that group's scope. `scope: "all"` is "Show all {n} in Everything". */
   | { type: "more"; scope: PaletteScope; label: string; n: number }
-  /** "See these {n} on the {Agents|Queries} page", at the end of a scoped list. */
-  | { type: "handoff"; scope: "Agents" | "Queries"; label: string; n: number }
   /** The no-match message. `inScope` when a scope has nothing and Everything has `elsewhere`. */
   | { type: "none"; term: string; words: number; inScope?: PaletteScope; elsewhere?: number };
 
@@ -349,7 +343,7 @@ export interface PaletteResult {
 }
 
 export const isSelectable = (r: PaletteRow | undefined): boolean =>
-  !!r && ((r.type === "item" && !r.item.soon) || r.type === "more" || r.type === "handoff");
+  !!r && ((r.type === "item" && !r.item.soon) || r.type === "more");
 
 /** Title case for the "Add “{Term}” as an agent" row. */
 const titleCase = (s: string) => s.replace(/(^|\s)(\S)/g, (_m, a: string, c: string) => a + c.toUpperCase());
@@ -386,7 +380,7 @@ export const RECENT_SHOWN = 4;
  * SEARCH — the rows to draw for a term and a scope (the mock's `search()`).
  *
  * With Everything: a single Best match, then the rest by group in GROUP_ORDER, capped, each capped group ending with a
- * "Show all" row. With a scope: that group only, uncapped, no Best match; Agents and Queries end with a hand-off row.
+ * "Show all" row. With a scope: that group only, uncapped, no Best match.
  * A slipped letter is tried only when nothing matches as typed. One row per agent: a query is listed apart only when
  * the words say something about the query.
  */
@@ -465,9 +459,9 @@ export function searchPalette(corpus: PaletteItem[], term: string, scope: Palett
     for (const h of gh.slice(0, cap)) rows.push({ type: "item", item: h.item, match: h.m });
     if (capped) rows.push({ type: "more", scope: g, label: `Show all ${n} ${GROUP_NOUN[g]}`, n });
   }
-  if (scope === "Agents" || scope === "Queries") {
-    rows.push({ type: "handoff", scope, label: `See these ${inScope.length} on the ${scope} page`, n: inScope.length });
-  }
+  /* ⚠️ NO HAND-OFF ROWS ("See these {n} on the Agents/Queries page"). Neither page's Find can be seeded from the shell
+     today: the Contact list reads `searchQuery` once, when it first mounts, and stays mounted; the Query Centre's Find
+     reads only its own visit memory at mount. A row that says it shows "these" and shows everything is left out. */
   return { rows, counts, total, toks };
 }
 
@@ -497,11 +491,9 @@ export const PALETTE_ACTIONS: PaletteItem[] = [
     title: "Import from a spreadsheet", subtitle: "Bring your tracker in", keywords: "csv excel smart import tracker upload",
     run: { kind: "path", path: "/import" },
   },
-  {
-    id: "act:export", group: "Actions", kind: "action",
-    title: "Export your queries", subtitle: "Download them as a CSV file", keywords: "csv download backup spreadsheet",
-    run: { kind: "export" },
-  },
+  /* ⚠️ NO "Export your queries". The Queries page's export (`exportQueriesToCSV`) is a closure over that page's state
+     (agents, manuscripts, activities, journal entries), so it cannot be called from the shell without a second copy;
+     the row is left out rather than given an export of its own (search v1, Part D). */
   {
     id: "act:feedback", group: "Actions", kind: "action",
     title: "Give feedback", subtitle: "Tell us what’s broken or missing", keywords: "bug idea report problem suggestion",
@@ -553,8 +545,8 @@ export const PALETTE_PAGES: PaletteItem[] = [
   { id: "page:import", group: "Pages", kind: "page", title: "Import", subtitle: "Bring in queries from a spreadsheet", keywords: "smart import template csv excel", run: { kind: "path", path: "/import" } },
   { id: "page:account", group: "Pages", kind: "page", title: "Account", subtitle: "Your details and preferences", keywords: "settings password email profile", run: { kind: "path", path: "/account" } },
   { id: "page:plans", group: "Pages", kind: "page", title: "Plans", subtitle: "What Pro adds", keywords: "pro pricing upgrade", run: { kind: "path", path: "/plans" } },
-  /* Task settings is a SHEET inside /todo, not a route: go there, then dispatch the event the account menu uses */
-  { id: "page:task-settings", group: "Pages", kind: "page", title: "Task settings", subtitle: "Choose what appears on your to-do list", keywords: "settings", run: { kind: "taskSettings" } },
+  /* Task settings is a ROUTE, as the account menu's row is (the sheet and its `sa:open-task-settings` event are retired) */
+  { id: "page:task-settings", group: "Pages", kind: "page", title: "Task settings", subtitle: "Choose what appears on your to-do list", keywords: "settings", run: { kind: "path", path: "/account/preferences" } },
   { id: "page:help", group: "Pages", kind: "page", title: "Help centre", subtitle: "Guides and answers", keywords: "help support guide", run: { kind: "path", path: "/help" } },
 ];
 

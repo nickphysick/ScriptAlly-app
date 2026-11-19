@@ -130,11 +130,11 @@ describe("grouping — Best match, then the fixed order, capped", () => {
     expect(h.find((x) => x.label === "Agents")?.count).toBeUndefined();
     expect(h.find((x) => x.label === "Tasks")?.count).toBe(5);
   });
-  it("with a scope: that group only, uncapped, no Best match; Agents ends with the hand-off", () => {
+  it("with a scope: that group only, uncapped, no Best match, and no hand-off row (neither page's Find can be seeded)", () => {
     const { rows } = searchPalette(corpus, "sam", "Agents");
     expect(heads(rows)).toEqual(["Agents"]);
     expect(ids(rows)).toHaveLength(6);
-    expect(rows.at(-1)).toMatchObject({ type: "handoff", label: "See these 6 on the Agents page" });
+    expect(rows.map((r) => r.type)).toEqual(["head", "item", "item", "item", "item", "item", "item"]);
   });
   it("a scope with nothing points at Everything", () => {
     const { rows } = searchPalette(agents, "sam", "Notes");
@@ -174,16 +174,14 @@ describe("before you type", () => {
 });
 
 describe("the actions and pages", () => {
-  it("lists the seven actions in order, each on a handler kind the palette performs", () => {
+  it("lists the actions in order — no Export, whose only implementation is a closure inside the Queries page", () => {
     expect(PALETTE_ACTIONS.map((a) => a.title)).toEqual([
-      "Log a query", "Record a response", "Add an agent", "Import from a spreadsheet", "Export your queries",
-      "Give feedback", "Add a manuscript",
+      "Log a query", "Record a response", "Add an agent", "Import from a spreadsheet", "Give feedback", "Add a manuscript",
     ]);
-    expect(PALETTE_ACTIONS.find((a) => a.id === "act:export")!.run).toEqual({ kind: "export" });
     expect(PALETTE_ACTIONS.find((a) => a.id === "act:feedback")!.run).toEqual({ kind: "feedback" });
   });
-  it("Task settings dispatches the sheet's contract rather than only opening Tasks", () => {
-    expect(PALETTE_PAGES.find((p) => p.id === "page:task-settings")!.run).toEqual({ kind: "taskSettings" });
+  it("Task settings goes where the account menu's Task settings goes, not to Tasks", () => {
+    expect(PALETTE_PAGES.find((p) => p.id === "page:task-settings")!.run).toEqual({ kind: "path", path: "/account/preferences" });
   });
   it("every day-one page id exists", () => {
     for (const id of DAY_ONE_PAGE_IDS) expect(PALETTE_PAGES.some((p) => p.id === id), id).toBe(true);

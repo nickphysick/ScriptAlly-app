@@ -19,7 +19,7 @@ import { SHORTCUTS, matchesShortcut } from "../../lib/shortcuts";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useScriptAllyDb } from "../../lib/db";
-import { buildCorpus, searchPalette } from "../../lib/searchPalette";
+import { buildCorpus } from "../../lib/searchPalette";
 import { agentPrimary, agentSecondary } from "../../lib/agentDisplay";
 import { SearchPalette } from "./SearchPalette";
 import { resolveScopedManuscript } from "../../lib/shellSidebar";
@@ -27,6 +27,20 @@ import { corpusSources } from "../../lib/searchSources";
 import { quietWeeksOf } from "../../lib/queryState";
 import { HELP_ARTICLE_LIST } from "../../content/help/articles";
 import { articleText } from "../../content/help/model";
+
+/** Recently opened, on THIS DEVICE ONLY (search v1): five ids, newest first, no repeats. Nothing goes to Firestore. */
+export const RECENTS_KEY = (uid: string) => `qh.search.recents.${uid}`;
+export const RECENTS_KEPT = 5;
+export function readRecents(uid: string | undefined): string[] {
+  if (!uid) return [];
+  try {
+    const v = JSON.parse(localStorage.getItem(RECENTS_KEY(uid)) ?? "[]");
+    return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string").slice(0, RECENTS_KEPT) : [];
+  } catch { return []; }
+}
+export function pushRecent(list: readonly string[], id: string): string[] {
+  return [id, ...list.filter((x) => x !== id)].slice(0, RECENTS_KEPT);
+}
 
 /** The written help articles as search reads them — title, lede and plain text, no Help Centre page code. */
 const HELP_SOURCE = HELP_ARTICLE_LIST.map((a) => ({ slug: a.slug, title: a.title, lede: a.lede, body: articleText(a) }));
@@ -37,14 +51,16 @@ const readActiveMs = (): string | null => {
 };
 
 export interface UsePaletteInput {
-  onNavigate: (tab: string, subPageName?: string) => void;
+  onNavigate: (tab: string, subPageName?: string, opts?: { agentId?: string; manuscriptId?: string }) => void;
   onNavigatePath: (path: string) => void;
   /**
    * The sidebar's own icon for a page path (follow-up 2, §3): a Go-to row shows the SAME mark its
    * sidebar row does, never a generic grid. The host owns the icon map; null means "not a sidebar page".
    */
   pageIcon?: (path: string) => React.ReactNode | null;
-  setSearchQuery: (v: string) => void;
+  /** ⚠️ UNREAD since search v1: an agent row opens the agent's card, and the Agents hand-off was left out (the
+   *  Contact list reads its filter only when it first mounts). Kept on the input so the hosts need not change. */
+  setSearchQuery?: (v: string) => void;
 }
 
 export interface PaletteHandle {
@@ -56,7 +72,7 @@ export interface PaletteHandle {
   palette: React.ReactElement;
 }
 
-export function usePalette({ onNavigate, onNavigatePath, setSearchQuery, pageIcon }: UsePaletteInput): PaletteHandle {
+export function usePalette({ onNavigate, onNavigatePath, pageIcon }: UsePaletteInput): PaletteHandle {
   const { pathname } = useLocation();
   const db = useScriptAllyDb();
   const { agents, queries, manuscripts } = db;
@@ -66,6 +82,16 @@ export function usePalette({ onNavigate, onNavigatePath, setSearchQuery, pageIco
   const searchOpenerRef = useRef<HTMLButtonElement>(null);
   const desktopSearchRef = useRef<HTMLButtonElement>(null);
   const openPalette = useCallback(() => { setTerm(""); setOpen(true); }, []);
+  const uid = db.currentUser?.id;
+  const [recents, setRecents] = useState<string[]>([]);
+  /* read on opening, so another tab's opens are seen; a record that no longer exists is skipped by the search core */
+  useEffect(() => { if (open) setRecents(readRecents(uid)); }, [open, uid]);
+  const onOpened = useCallback((id: string) => {
+    if (!uid) return;
+    const next = pushRecent(readRecents(uid), id);
+    setRecents(next);
+    try { localStorage.setItem(RECENTS_KEY(uid), JSON.stringify(next)); } catch { /* private mode: this device keeps none */ }
+  }, [uid]);
 
   /* THE CORPUS — built from already-loaded state (DbProvider subscribes on every route), so the
      palette never fetches and has no loading state. Rebuilt when the data changes, not per
@@ -86,10 +112,6 @@ export function usePalette({ onNavigate, onNavigatePath, setSearchQuery, pageIco
       }, { now, quietWeeks: quietWeeksOf(db.currentUser), activeMs, help: HELP_SOURCE }),
     });
   }, [open, agents, queries, manuscripts, db.tasks, db.userTasks, db.taskFlags, db.activities, db.packages, db.versions, db.currentUser]);
-  const items = useMemo(
-    () => searchPalette(corpus, term, "all").rows.flatMap((r) => (r.type === "item" ? [r.item] : [])),
-    [corpus, term],
-  );
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -119,8 +141,9 @@ export function usePalette({ onNavigate, onNavigatePath, setSearchQuery, pageIco
       onClose={() => setOpen(false)}
       onNavigate={onNavigate}
       onNavigatePath={onNavigatePath}
-      items={items}
-      setSearchQuery={setSearchQuery}
+      corpus={corpus}
+      recents={recents}
+      onOpened={onOpened}
       openerRef={searchOpenerRef}
       desktopOpenerRef={desktopSearchRef}
       term={term}

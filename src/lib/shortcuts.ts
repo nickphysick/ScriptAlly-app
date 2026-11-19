@@ -16,8 +16,8 @@
  * so an entry with no binding fails, which is the sheet's promise.
  */
 
-export type ShortcutScope = "Everywhere" | "To-do list" | "A task's choices" | "Corkboard" | "Comparable titles" | "Contact list" | "Discover" | "Query Centre" | "Responses" | "The agent card";
-export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "To-do list", "A task's choices", "Corkboard", "Comparable titles", "Contact list", "Discover", "Query Centre", "Responses", "The agent card"];
+export type ShortcutScope = "Everywhere" | "Search" | "To-do list" | "A task's choices" | "Corkboard" | "Comparable titles" | "Contact list" | "Discover" | "Query Centre" | "Responses" | "The agent card";
+export const SCOPE_ORDER: readonly ShortcutScope[] = ["Everywhere", "Search", "To-do list", "A task's choices", "Corkboard", "Comparable titles", "Contact list", "Discover", "Query Centre", "Responses", "The agent card"];
 
 /** One way to press it. `mod` is ⌘ on a Mac and Ctrl elsewhere; letters match either case. */
 export interface KeyChord { key: string; mod?: boolean }
@@ -38,6 +38,9 @@ const k = (key: string, mod = false): KeyChord => ({ key, mod });
 
 export const SHORTCUTS = {
   search:           { chords: [k("k", true)], label: "Search", scope: "Everywhere", bound: "src/components/shell/usePalette.tsx", inFields: "works" },
+  /* search v1: inside ⌘K search, with focus in its field (the field is where the keys are read) */
+  searchSecond:     { chords: [k("Enter", true)], label: "Run the selected result's second action", scope: "Search", bound: "src/components/shell/SearchDesk.tsx", inFields: "works" },
+  searchScope:      { chords: [k("Tab")], label: "Narrow to the next kind of result (Shift Tab goes back)", scope: "Search", bound: "src/components/shell/SearchDesk.tsx", inFields: "works" },
   sidebar:          { chords: [k("\\", true), k("[")], label: "Open or close the sidebar", scope: "Everywhere", bound: "src/components/shell/useSidebarState.ts", inFields: "stands down" },
   switchManuscript: { chords: [k("m")], label: "Switch manuscript", scope: "Everywhere", bound: "src/components/shell/BarSwitcher.tsx", inFields: "stands down" },
   shortcuts:        { chords: [k("?")], label: "Show keyboard shortcuts", scope: "Everywhere", bound: "src/components/shell/ShortcutsSheet.tsx", inFields: "stands down" },
