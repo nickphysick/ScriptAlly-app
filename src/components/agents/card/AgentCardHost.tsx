@@ -110,9 +110,13 @@ export const AgentCardHost: React.FC<{ sandbox?: AgentCardSandbox }> = ({ sandbo
   /* Add agent v1 Phase 5 — EVERY "EDIT AGENT" OPENS THE AGENT'S CARD: an existing agent's editor is the Contact list's
      card (`AgentCard262` in `AgentCardPanel262`) in edit mode at the door's section; `AgentEditMode`'s long form is
      deleted. On the Contact list the page's own card answers first (the edit interceptor). */
-  if (panel && req.agentId !== null) {
+  /* Agent card v2 — EVERY DOOR TO AN EXISTING AGENT IS THE ONE CARD: a door that only reads (search, the To-do list, the
+     query card's "← Back to {first}") opened Agent card v1's quick view (`AgentCardSession`) until now; it opens the same
+     card, unopened for editing. The quick view stays for a new agent's session, and for the dev lab's cast (`sandbox`:
+     its agents are in memory, which the one card does not read). */
+  if (req.agentId !== null && (panel || !sandbox)) {
     return <HostAgentCard key={req.agentId} agentId={req.agentId}
-      openAt={{ seq: req.seq, tab: req.tab, focus: req.focus, prefill: req.prefill }} sequence={req.sequence ? [...req.sequence] : undefined} />;
+      openAt={panel ? { seq: req.seq, tab: req.tab, focus: req.focus, prefill: req.prefill } : undefined} sequence={req.sequence ? [...req.sequence] : undefined} />;
   }
   return (
     <>

@@ -111,7 +111,7 @@ export const AgentCardPanel262: React.FC<{
     <SideScrim level={modal ? "action" : "off"} className="cl262-scrim" />
     <div ref={panelRef} className="cl262-panel" data-cl262="panel" data-cl24="panel" data-agent-id={agentId} role="dialog" aria-modal={modal ? "true" : "false"} aria-label="Agent"
       data-arrive={arriving ? "" : undefined} data-leave={leaving ? "" : undefined} data-reduce={reduce ? "" : undefined}
-      style={box ? { top: box.top, bottom: box.bottom, right: box.right } : undefined}>
+      style={box ? { right: box.right } : undefined}>
       <div className="cl262-lean" data-cl262="lean" data-cl24="agent-card" data-editing={editing ? "" : undefined}>
         {children}
       </div>

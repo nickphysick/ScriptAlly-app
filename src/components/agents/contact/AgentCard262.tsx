@@ -2,19 +2,23 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Contact list v26.2 (design-refs/contact-list-v26-2/, screens 01–03, 09) — THE AGENT CARD AS THE LANDING PAGE'S CARD:
- * `AgentPaperCard`'s panel variant, filled with the Contact list's agent.
+ * Agent card v2 (design-refs/agent-card-v2/) — THE AGENT CARD, BROUGHT UP TO THE QUERY CARD BY REUSING ITS BUILT PARTS,
+ * inside the agent card's own frame (the #a5837b line, the 10px white mat, 580 wide, the −1.2° lean).
  *
- *   band       the status chip ("Your move · Offer"), the stars (click to set), edit and ✕ — #5e7189 for every agent
- *   head       the 60px disc by who it's with, the name, the agency, "{City} · replies in about {n} weeks", Website and
- *              Email (a missing one is a small outlined "+ Website" / "+ Email")
- *   next step  the one coloured thing on the card: the existing call box's words and verbs, toned by who it's with
- *   tabs       Profile (the landing sections and the four "How {first} works" tiles) · History (as built) · Notes
- *   gaps       ghost lines and one outlined "+ Add …" per empty section; never the dashed `apc-add`
- *   foot       "Added {d Mon yyyy}" and ‹ i / n ›
+ *   height     always the slide-out query card's (`--qc-card-h`, qcv152card.css): the band, head, query box, tabs and footer
+ *              hold still, and the body scrolls
+ *   band       slate #5e7189 on every agent, in the query card's band layout: Agent fit and its stars at the left; "{i} / {n}",
+ *              ‹ ›, the pencil and ✕ as the query card's 26px round buttons at the right
+ *   head       the query card's: a 40px disc (its outer ring the live query's stage Edge), the name, the agency in the caps
+ *              line, the location, and the status pill (StatusDot and word, the stage's Tint)
+ *   query box  the live query for the active manuscript: one button to the query card ("← Back to {first}")
+ *   tabs       Profile (QcAgent158's parts) · History (the query card's thread, read-only) · Notes (QcNotes158)
+ *   footer     QcFoot1581, from lib/agentCardV2 `acFoot` (the pack's table); while editing, the save bar takes its place
  *
- * ⚠️ IT DRAWS FROM THE PAGE'S OWN MODEL (`AgentCard24Props`, `useCardModel`): the call box, the gaps, the story and the
- *    edit kit are the ones the v25 card read, so nothing is derived twice.
+ * ⚠️ THE QUERY CARD'S PARTS DRAW INSIDE A `.qc152` ROOT, so the query card's own stylesheets place them; the agent card's
+ *    stylesheet (acv2.css) holds only what is the agent card's. Nothing of the query card's CSS is copied.
+ * ⚠️ EDITING IS AS BUILT (Contact list v26.2 C, Card offers v1, Add agent v1): the sections, the pencils, "also changes",
+ *    the offers and the discard guard. The face round them is new.
  */
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -22,11 +26,20 @@ import { StatusDot } from "../../StatusDot";
 import { agentInitials, agentPrimary } from "../../../lib/agentDisplay";
 import { addedLabel } from "../../../lib/contactList";
 import { hrefFor } from "../../../lib/quickAdd";
-import { AgentPaperCard, PaperIcon, type PaperCardData } from "../../shared/AgentPaperCard";
-import { bandWords, howTiles, materialChips, metaLine, nextStep, type NextStep } from "../../../lib/contactCard262";
-import { NQ_RING } from "./ContactSheet24";
-import { Notes, type AgentCard24Props, useCardModel } from "./AgentCard24";
-import { YouAndStory } from "./AgentCardParts255";
+import { type AgentCard24Props, useCardModel } from "./AgentCard24";
+import { acColours, acFoot, acPill, acTone, askList, factBoxes, factBoxesShown, finishItems, finishShare, queryBoxLine, type AcAct } from "../../../lib/agentCardV2";
+import { NxBox, NxCopyEmail, NxSite, TICK } from "../../queries/centre/QcAgent158";
+import { Foot, ARW } from "../../queries/centre/QcFoot1581";
+import { NotesTab158, quotesOf, type NoteIn } from "../../queries/centre/QcNotes158";
+import { ThreadRead } from "../../queries/centre/QcThreadRead";
+import { bump, reduced } from "../../queries/centre/qcMotion160";
+import { useAgentThreads } from "../card/useAgentThreads";
+import { useAgentNotes } from "../card/useAgentNotes";
+import { useScriptAllyDb } from "../../../lib/db";
+import { db as firestoreDb } from "../../../lib/firebase";
+import { commitAgentEdits } from "../../../lib/saveAgentEdits";
+import { agentBack, openQueryPanelFromAgent } from "../../../lib/queryPanelStore";
+import { useToast } from "../../toast/ToastProvider";
 import type { AgentCardField, AgentCardTab } from "../../../lib/agentCardStore";
 import { FIT_TIP, FitStars, InfoTip } from "../card/agentPills";
 import { CARD_EDITING_EVENT, requestCardClose } from "./AgentCardPanel262";
@@ -42,6 +55,13 @@ const changeCount = (changed: readonly (keyof CardDraft)[]) => changeNames(chang
 const INLINE_FOCUS: Record<InlineField, AgentCardField> = { wishlist: "wishlist", genres: "genres", replies: "reply", email: "email", website: "website", form: "website", social: "mswl" };
 import "./contactV262.css";
 import "./contactPrinciples.css";
+/* Agent card v2 — the query card's own stylesheets, for the parts it lends (imported, never copied), then the agent card's */
+import "../../queries/centre/qcv152card.css";
+import "../../queries/centre/qcv1522card.css";
+import "../../queries/centre/qcv153thread.css";
+import "../../queries/centre/sc1card.css";
+import "../../queries/centre/qcv158.css";
+import "./acv2.css";
 
 /** the band's slate, for every agent (v26.2 ruling) */
 export const CARD262_BAND = "#5e7189";
@@ -102,31 +122,6 @@ export interface AgentCard262Props extends AgentCard24Props {
   openAt?: OpenAt;
 }
 
-/** the 60px disc, coloured by who it's with */
-export const Disc262: React.FC<{ stand: string; initials: string }> = ({ stand, initials }) => (
-  <span className={`cl262-dsc cl262-dsc--${stand}`} data-cl262="disc" data-k={stand} aria-hidden="true">
-    {initials}{stand === "you" ? <i className="cl262-bang">!</i> : null}
-  </span>
-);
-
-/** the next-step box: the card's one coloured thing */
-export const NextBox: React.FC<{ s: NextStep; p: AgentCard24Props }> = ({ s, p }) => {
-  const run = () => {
-    const a = s.button?.act;
-    if (!a) return;
-    if (a.kind === "journey") p.onJourney(a.mode, a.queryId);
-    else if (a.kind === "log") p.onLog();
-    else p.onOpenQuery(a.queryId);
-  };
-  return (
-    <div className="cl262-next" data-cl262="next" data-tone={s.tone} data-cl24="call" data-kind={s.tone}>
-      <span className="cl262-ndisc" aria-hidden="true">{s.status ? <StatusDot status={s.status} overrideSize={18} /> : NQ_RING}</span>
-      <p><b data-cl262="next-bold">{s.bold}</b><i data-cl262="next-sub">{s.sub}</i></p>
-      {s.button ? <button type="button" data-cl262="next-btn" data-cl24="call-btn" onClick={run}>{s.button.label}</button> : null}
-    </div>
-  );
-};
-
 /** a section: heading (with its pencil on hover), then its content or its ghost lines and one "+ Add …" */
 const Section: React.FC<{ k: Sec262; title: string; onEdit?: () => void; onDone?: () => void; editing?: React.ReactNode; children?: React.ReactNode }> = ({ k, title, onEdit, onDone, editing, children }) => (
   <section className={`apc-sec cl262-sec${editing ? " is-edit" : ""}`} data-cl262="sec" data-k={k} data-fam={SEC_FAM[k]} data-editing={editing ? "" : undefined}>
@@ -136,26 +131,81 @@ const Section: React.FC<{ k: Sec262; title: string; onEdit?: () => void; onDone?
     {editing ? <div className="ac cl262-fx">{editing}</div> : children}
   </section>
 );
-const Ghost: React.FC<{ kind: "chips" | "lines"; add: string; k: Sec262; onAdd?: () => void }> = ({ kind, add, k, onAdd }) => (
-  <div className="cl262-ghost" data-cl262="ghost" data-k={k}>
-    <span className={`cl262-gb ${kind}`} aria-hidden="true">
-      {kind === "chips" ? <><i style={{ width: 88 }} /><i style={{ width: 72 }} /><i style={{ width: 96 }} /></> : <><i style={{ width: "92%" }} /><i style={{ width: "70%" }} /></>}
-    </span>
-    {onAdd ? <button type="button" className="cl262-addb" data-cl262="add" data-k={k} onClick={onAdd}>{add}</button> : null}
-  </div>
-);
+/** Agent card v2 — the query box's door back: the tab the writer left, for this agent, read once when the card returns */
+let returnTo: { agentId: string; tab: Tab } | null = null;
+/** the parts a changed field lives in (the saved tint) */
+const PART_OF: Partial<Record<keyof CardDraft, string>> = {
+  name: "head", agency: "head", agencyUnknown: "head", country: "head", city: "head", email: "contact", website: "contact",
+  genres: "genres", wishlist: "wishlist", mats: "asks", weeks: "facts", nrn: "facts", method: "facts", methodOther: "facts", door: "facts", reopens: "facts", rating: "band",
+};
+/** the dotted "not queried" ring, at the size the query card's footer disc holds */
+const NQ16 = <svg viewBox="0 0 14 14" width="16" height="16" aria-hidden="true"><circle cx="7" cy="7" r="5.6" fill="none" stroke="#2a3a52" strokeWidth="1.5" strokeDasharray="1.6 2" /></svg>;
+const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
+const LETTER = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
+const PAGE = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M4 2h6l2.5 2.5V14H4z" /><path d="M6 7h4M6 9.5h4" /></svg>;
+const PAGES = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M5 2.5h7v10H5z" /><path d="M3.5 4.5v10h7" /></svg>;
+/** the completion ring: navy over blush, the share of Housekeeping's details that are in */
+const Ring: React.FC<{ share: number }> = ({ share }) => {
+  const r = 16, c = 2 * Math.PI * r;
+  return (
+    <svg className="ring" viewBox="0 0 40 40" width="40" height="40" aria-hidden="true">
+      <circle cx="20" cy="20" r={r} fill="none" stroke="#f0d9d2" strokeWidth="5" />
+      <circle cx="20" cy="20" r={r} fill="none" stroke="#2a3a52" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${(c * share).toFixed(1)} ${c.toFixed(1)}`} transform="rotate(-90 20 20)" />
+    </svg>
+  );
+};
+/** run once the page has gone quiet (three short frames in a row), or after 1.5s: v161's rule for when the bump starts */
+function afterQuiet(run: () => void): void {
+  let last = performance.now(), calm = 0, done = false;
+  const cap = window.setTimeout(() => { if (!done) { done = true; run(); } }, 1500);
+  const tick = (t: number) => {
+    if (done) return;
+    calm = t - last < 34 ? calm + 1 : 0;
+    last = t;
+    if (calm >= 3) { done = true; window.clearTimeout(cap); run(); return; }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+/** the saved tint: the part holds #dfe7f0 with a #9db4cf edge, then fades to its own colour over 1.8s */
+export const SAVED_TINT = { fill: "#dfe7f0", edge: "#9db4cf", ms: 1800, hold: 0.3 } as const;
+function tintParts(root: HTMLElement, parts: readonly string[]): void {
+  for (const k of new Set(parts)) {
+    for (const el of root.querySelectorAll<HTMLElement>(`[data-acv2-part='${k}']`)) {
+      const cs = getComputedStyle(el);
+      const own = { backgroundColor: cs.backgroundColor, boxShadow: cs.boxShadow === "none" ? "inset 0 0 0 0 rgba(0, 0, 0, 0)" : cs.boxShadow };
+      const on = { backgroundColor: SAVED_TINT.fill, boxShadow: `inset 0 0 0 1.5px ${SAVED_TINT.edge}` };
+      el.animate([{ ...on }, { ...on, offset: SAVED_TINT.hold }, own], { duration: SAVED_TINT.ms, easing: "ease-out" }).id = "acv2-saved";
+    }
+  }
+}
 
 export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
   const m = useCardModel(p);
   const { x } = p;
   const a = m.a;
-  const [tab, setTab] = useState<Tab>("profile");
-  useEffect(() => { setTab("profile"); }, [a.id]);
+  const [tab, setTab] = useState<Tab>(() => {
+    /* the query box's way back: the tab the writer left */
+    const r = returnTo && returnTo.agentId === a.id ? returnTo.tab : "profile";
+    returnTo = null;
+    return r;
+  });
+  const firstId = useRef(a.id);
+  useEffect(() => { if (firstId.current === a.id) return; firstId.current = a.id; setTab("profile"); }, [a.id]);
   const scrollRef = useRef<HTMLDivElement>(null);
   /* ── Part C · editing on the card: one draft (the editor's own form), any number of open sections ── */
   const kit = p.edit?.form ?? null;
   const [open, setOpen] = useState<Sec262[]>([]);
-  const [flash, setFlash] = useState(false);
+  /* Agent card v2 — the frame the bump moves (the white mat), and what a save lands on */
+  const cardRef = useRef<HTMLDivElement>(null);
+  const changedRef = useRef<readonly (keyof CardDraft)[]>([]);
+  const land = useCallback((parts: readonly string[]) => {
+    const frame = cardRef.current;
+    if (!frame || reduced()) return;
+    /* the tint as soon as the closed sections have drawn their parts; the bump on the first quiet frame after */
+    requestAnimationFrame(() => requestAnimationFrame(() => { if (cardRef.current) tintParts(cardRef.current, parts); }));
+    afterQuiet(() => bump(cardRef.current));
+  }, []);
   const editing = open.length > 0;
   /* Card offers v1 — the panel deepens its scrim while anything is being edited (and lets it go when the card goes) */
   useEffect(() => {
@@ -172,18 +222,20 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     alsoFor: kit?.alsoFor ?? (() => []),
     onSave: async (d, base) => {
       if (!kit) return { ok: false, error: "Nothing to save to." };
-      const r = await kit.onSave(d, base, planRef.current);
+      const changed = changedRef.current;
+      const r = await kit.onSave(d, base, planRef.current, { n: changeCount(changed) });
       if ("error" in r) return r;
-      /* the sections close in place, the card leans back, and the frame flashes navy (never sage: no green) */
+      /* Agent card v2 — the sections close in place, the card leans back and bumps once (the query card's bump), and the
+         parts that changed hold the saved tint (the `is-saved` outline flash is retired) */
       closeAll();
-      setFlash(true);
-      window.setTimeout(() => setFlash(false), 1200);
+      land(changed.map((k) => PART_OF[k]).filter((x): x is string => !!x));
       return r;
     },
     onLeave: closeAll,
   });
   const resetRef = useRef(form.reset);
   resetRef.current = form.reset;
+  changedRef.current = form.changed;
   /* ── Card offers v1 · what this edit does to the queries already out, asked as a choice ──────────────────────────
      The two choices live for one edit session: they start on Update and on the close offer's suggestion, and reset
      whenever the sections close (a save, Cancel, a discard). While the slider is dragged the offer holds still and
@@ -410,129 +462,247 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
     closeAll();
   }, ESC_LEVEL.card);
 
+  /* ══ Agent card v2 · the face ══════════════════════════════════════════════════════════════════════════════════ */
+  const tone = acTone(x);
+  const col = acColours(tone);
+  const pill = acPill(x);
+  const ft = acFoot(x, m.first, m.call, p.nowMs);
+  const boxes = factBoxes(a, x.door);
+  const asks = askList(a);
   const genres = a.genres ?? [];
   const wish = (a.mswlNotes ?? "").trim();
-  const mats = materialChips(a);
-  const tiles = howTiles(a, x.door);
-  const meta = metaLine(a, x.loc);
-  const step = nextStep(x, m.first, m.call, p.nowMs);
   const site = (a.website ?? "").trim();
   const email = (a.email ?? "").trim();
   const added = addedLabel(a);
+  const name = agentPrimary(a);
+  const agency = (a.name ?? "").trim() ? ((a.agency ?? "").trim() || (a.agencyUnknown ? "Agency unknown" : "")) : "";
+  const initials = agentInitials(a).slice(0, 2);
+  const { showToast } = useToast();
+  const db = useScriptAllyDb();
 
-  const data: PaperCardData = {
-    status: x.stand === "agent" ? "querying" : x.stand, statusLabel: bandWords(x), stars: a.starRating ?? 0,
-    initials: agentInitials(a).slice(0, 2), name: agentPrimary(a),
-    /* Add agent v1 — "Agency unknown" stands where the agency would be */
-    agency: (a.name ?? "").trim() ? ((a.agency ?? "").trim() || (a.agencyUnknown ? "Agency unknown" : "")) : "",
-    genres: [], materials: [],
+  /* the query card for this agent's live query, with "← Back to {first}"; the card comes back at the tab it left */
+  const openQuery = (queryId: string) => {
+    if (!ask(() => openQuery(queryId))) return;
+    returnTo = { agentId: a.id, tab };
+    openQueryPanelFromAgent(queryId, agentBack(a));
   };
-  /* Add agent v1 — Agent fit: a star saves at once ("Agent fit: great fit"); the chosen one pressed again clears it */
-  const rate = (n: number | null) => { if (p.edit) void p.edit.save({ rating: n }); };
+  const runAct = (act: AcAct) => {
+    if (act.kind === "journey") p.onJourney(act.mode, act.queryId);
+    else if (act.kind === "log") p.onLog();
+    else if (act.kind === "open") openQuery(act.queryId);
+    else {
+      /* Make it a task: the offer's answer, on today's to-do list */
+      const q = p.queries.find((y) => y.id === act.queryId);
+      const d = new Date();
+      const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      void db.addUserTask({ text: `Answer ${m.first}’s offer`, queryId: act.queryId, agentId: a.id, manuscriptId: q?.manuscriptId, dueDate: today })
+        .then(() => showToast({ message: "On your to-do list for today" }));
+    }
+  };
 
-  const bandRight = (
-    <span className="apc-bandr cl262-bandr">
+  /* Agent fit: a star saves at once; the chosen one pressed again clears it. The bump and the app's snackbar confirm it. */
+  const rate = (n: number | null) => {
+    if (!p.edit) return;
+    void p.edit.save({ rating: n }).then((ok) => { if (ok) land(["band"]); });
+  };
+
+  const band = (
+    <div className="qc152-band dk agb" data-qc152="band" data-acv2="band" data-acv2-part="band">
       {p.preview ? (
-        <span className="cl262-stars cl262-fitro" data-cl262="stars" aria-label={`Agent fit: ${a.starRating ? `${a.starRating} of 5` : "not rated"}`}>
+        <span className="cl262-stars cl262-fitro ag-fit" data-cl262="stars" aria-label={`Agent fit: ${a.starRating ? `${a.starRating} of 5` : "not rated"}`}>
           <small className="aap-fitw">Agent fit</small>{[1, 2, 3, 4, 5].map((i) => <i key={i} data-on={i <= (a.starRating ?? 0) ? "" : undefined}>★</i>)}
         </span>
       ) : (
-        <span className="cl262-fitwrap" data-cl262="fit">
+        <span className="cl262-fitwrap ag-fit" data-cl262="fit">
           <span data-cl262="stars"><FitStars variant="band" value={a.starRating ?? null} onPick={rate} /></span>
           <InfoTip tone="light">{FIT_TIP}</InfoTip>
         </span>
       )}
-      {p.preview ? null : all ? <span className="cl262-editing" data-cl262="editing-chip">Editing</span>
-        : <button type="button" className="cl262-rb" data-cl262="edit-all" aria-label={`Edit everything about ${m.first}`} onClick={() => openAll()}>{IC.pen}</button>}
-      {p.preview ? null : <button type="button" className="cl262-rb" data-cl262="close" data-cl24="close" aria-label="Close the agent" onClick={() => requestCardClose()}><span aria-hidden="true">×</span></button>}
-    </span>
+      {p.preview ? null : <>
+        <span className="ag-pos" data-cl24="pos" data-acv2="pos">{p.index + 1} / {p.total}</span>
+        <button type="button" className="qc152-x" data-cl262="prev" data-cl24="prev" aria-label="Previous agent" title="Previous agent" disabled={p.index <= 0} onClick={() => goStep(-1)}>{IC.l}</button>
+        <button type="button" className="qc152-x" data-cl262="next-agent" data-cl24="next" aria-label="Next agent" title="Next agent" disabled={p.index >= p.total - 1} onClick={() => goStep(1)}>{IC.r}</button>
+        {all ? <span className="cl262-editing" data-cl262="editing-chip">Editing</span>
+          : <button type="button" className="qc152-x" data-cl262="edit-all" aria-label={`Edit everything about ${m.first}`} title={`Edit everything about ${m.first}`} onClick={() => openAll()}>{IC.pen}</button>}
+        <button type="button" className="qc152-x" data-cl262="close" data-cl24="close" aria-label="Close the agent" title="Close" onClick={() => (p.onClose ?? requestCardClose)()}>✕</button>
+      </>}
+    </div>
   );
-  const links = (
-    <span className="cl262-links" data-cl262="links">
-      {site ? <a href={hrefFor(site) ?? "#"} target="_blank" rel="noopener noreferrer" data-cl262="website"><PaperIcon kind="web" />Website</a>
-        : <button type="button" className="cl262-lk" data-cl262="add-website" onClick={() => openAll("website")}>+ Website</button>}
-      {email ? <a href={`mailto:${email}`} data-cl262="email"><PaperIcon kind="mail" />Email</a>
-        : <button type="button" className="cl262-lk" data-cl262="add-email" onClick={() => openAll("email")}>+ Email</button>}
-    </span>
+  const head = (
+    <div className="qc152-agent" data-acv2="head" data-acv2-part="head">
+      <span className={`qc152-disc acv2-disc${tone === "nq" ? " nq" : tone === "closed" ? " cl" : ""}`} data-acv2="disc" data-tone={tone} aria-hidden="true"
+        style={tone === "nq" ? undefined : { boxShadow: `0 0 0 2.5px #fff, 0 0 0 4.5px ${col.edge}` }}>{initials}</span>
+      <div className="qc152-who">
+        <h2 className="qc152-nm qcv-open-nm" data-apc="name" data-acv2="name">{name}</h2>
+        {agency ? <div className="qc152-ag" data-acv2="agency">{agency.toUpperCase()}</div> : null}
+        {x.loc ? <div className="ag-loc" data-acv2="loc">{x.loc}</div> : null}
+      </div>
+      <span className={`qc152-pill${tone === "nq" ? " nq" : ""}`} data-qc152="pill" data-acv2="pill" data-stage={tone === "nq" ? undefined : tone} data-tone={tone}>
+        <span className="qc152-cap">{pill.status ? <StatusDot status={pill.status} overrideSize={17} tone="ink" decorative /> : NQ16}</span><span>{pill.word}</span>
+      </span>
+    </div>
   );
-  const gaps = p.gaps && p.gaps.n > 0 ? p.gaps : null;
-  /* the first gap is Housekeeping's (its order); its section, or every section for a contact field */
-  const fillGaps = () => {
-    if (!gaps) return;
-    if (!kit) { p.onEdit(gaps.tab, gaps.focus); return; }
-    applyAsk(gaps.tab, gaps.focus);
-  };
+  const q = x.q;
+  const qbox = q ? (
+    <button type="button" className={`ag-q${tone === "offer" ? " foil" : ""}`} data-acv2="qbox" data-tone={tone} data-query={q.id}
+      aria-label={`Open your query to ${m.first}`} onClick={() => openQuery(q.id)}>
+      <span className="bk" aria-hidden="true">{BOOK}</span>
+      <span className="t"><b data-acv2="qbox-title">{p.titleOf(q.manuscriptId)}</b><i data-acv2="qbox-line">{queryBoxLine(q, p.nowMs)}</i></span>
+      <span className="go">Open the query{ARW}</span>
+    </button>
+  ) : null;
   const tabs = (
-    <div className="cl262-tabs" role="tablist" aria-label="The agent">
+    <div className="qc152-tabs" role="tablist" aria-label="The agent" data-acv2="tabs">
       {(["profile", "history", "notes"] as const).map((t) => (
-        <button key={t} type="button" role="tab" className="cl262-tab" data-cl262="tab" data-cl24="tab" data-tab={t} aria-selected={tab === t} onClick={() => setTab(t)}>
+        <button key={t} type="button" role="tab" data-cl262="tab" data-cl24="tab" data-tab={t} aria-selected={tab === t} onClick={() => setTab(t)}>
           {t === "profile" ? "Profile" : t === "history" ? "History" : "Notes"}
         </button>
       ))}
-      {tab === "profile" && gaps ? (
-        <span className="cl262-gapl" data-cl262="gap-line" data-n={gaps.n}>
-          {gaps.n} {gaps.n === 1 ? "detail" : "details"} missing · <button type="button" data-cl262="gap-fill" onClick={fillGaps}>Fill them in →</button>
-        </span>
-      ) : null}
     </div>
   );
+
+  /* ── Profile: QcAgent158's parts, in the pack's order; a section with nothing in it is not drawn ── */
+  const gaps = p.gaps && p.gaps.n > 0 ? p.gaps : null;
+  const fin = gaps ? finishItems(gaps.keys ?? []) : [];
+  const penFor = (k: Sec262) => (p.preview ? null : <button type="button" className="cl262-pen" data-cl262="pen" data-k={k} aria-label={`Edit ${k === "how" ? `how ${m.first} works` : k}`} onClick={() => edit(k)}>{IC.pen}</button>);
+  const show = (k: Sec262, title: string, view: React.ReactNode, editor: React.ReactNode | undefined) => (isOpen(k) && editor
+    ? <Section key={k} k={k} title={title} onDone={() => closeSec(k)} editing={editor} />
+    : view);
+  const factsShown = factBoxesShown(boxes);
   const profile = (
-    <div className="cl262-body" data-cl262="profile" data-cl24="pane">
+    <div className="nx acv2-pro" data-cl262="profile" data-cl24="pane" data-acv2="profile">
       {all && kit ? <Section k="contact" title="Contact details" onDone={() => closeSec("contact")} editing={<EditContact form={form} agent={a} kit={kit} />} /> : null}
-      <Section k="genres" title="Genres sought" onEdit={p.preview ? undefined : () => edit("genres")} onDone={() => closeSec("genres")} editing={isOpen("genres") && kit ? <EditGenres form={form} kit={kit} isHit={p.genreHit} /> : undefined}>
-        {genres.length ? (
-          <span className="apc-chips" data-cl262="genres">
-            {[...genres.filter((g) => p.genreHit(g)), ...genres.filter((g) => !p.genreHit(g))].map((g) => (
-              <span key={g} className={`apc-chip${p.genreHit(g) ? " is-hit" : ""}`} data-cl262="genre">{p.genreWord(g)}</span>
-            ))}
-          </span>
-        ) : <Ghost kind="chips" add="+ Add genres" k="genres" onAdd={() => edit("genres")} />}
-      </Section>
-      <Section k="wishlist" title="Manuscript wishlist" onEdit={p.preview ? undefined : () => edit("wishlist")} onDone={() => closeSec("wishlist")} editing={isOpen("wishlist") ? <EditWishlist form={form} /> : undefined}>
-        {wish ? <p className="apc-wish" data-cl262="wishlist">{wish}</p> : <Ghost kind="lines" add="+ Add their wishlist" k="wishlist" onAdd={() => edit("wishlist")} />}
-      </Section>
-      <Section k="materials" title="Materials requested" onEdit={p.preview ? undefined : () => edit("materials")} onDone={() => closeSec("materials")} editing={isOpen("materials") ? <EditMaterials form={form} /> : undefined}>
-        {mats.length ? (
-          <span className="apc-chips" data-cl262="materials">{mats.map((c) => <span key={c.label} className="apc-mat"><PaperIcon kind={c.kind} />{c.label}</span>)}</span>
-        ) : <Ghost kind="chips" add="+ Add materials" k="materials" onAdd={() => edit("materials")} />}
-      </Section>
-      <Section k="how" title={`How ${m.first} works`} onEdit={p.preview ? undefined : () => edit("how")} onDone={() => closeSec("how")} editing={isOpen("how") && kit ? <EditHow form={form} agent={a} kit={kit} first={m.first} offers={offerKit} /> : undefined}>
-        <div className="cl262-tiles" data-cl262="tiles">
-          {tiles.map((t) => (
-            <span key={t.k} className={`cl262-tile${t.known ? "" : " gap"}`} data-cl262="tile" data-k={t.k} data-known={t.known ? "" : undefined}>
-              {IC.tile[t.k]}
-              <span>{t.known ? <>{t.pre}<b>{t.bold}</b>{t.post.split(" · ")[0]}{t.post.includes(" · ") ? <small className="cl262-tpost"> · {t.post.split(" · ").slice(1).join(" · ")}</small> : null}</> : <><i>{t.pre}</i>{t.k === "reply" ? <button type="button" className="cl262-tadd" data-cl262="tile-add" onClick={() => edit("how")}>Add</button> : null}</>}</span>
-            </span>
-          ))}
+      {gaps && !editing ? (
+        <div className="ag-fin" data-acv2="finish" data-n={gaps.n}>
+          <div className="top"><Ring share={finishShare(gaps.n)} /><div><b>Finish {m.first}’s profile</b>
+            <span data-acv2="finish-count">{gaps.n} {gaps.n === 1 ? "detail" : "details"} to add. The more you add, the better your reminders and suggestions.</span></div></div>
+          <div className="adds">{fin.map((g) => (
+            <button key={g.key} type="button" className="nx-btn gh" data-acv2="finish-add" data-k={g.key}
+              onClick={() => (kit ? applyAsk(g.tab, g.focus as AgentCardField) : p.onEdit(g.tab, g.focus as AgentCardField))}>{g.label}</button>
+          ))}</div>
         </div>
-      </Section>
+      ) : null}
+      {show("how", `How ${m.first} works`, factsShown ? (
+        <section className="acv2-sec" data-cl262="sec" data-k="how" data-acv2="facts-sec">
+          {penFor("how")}
+          <div className="nx-boxes" data-qc158="boxes" data-acv2="facts" data-acv2-part="facts">
+            {boxes.map((b) => <NxBox key={b.k} k={b.k} label={b.label} value={b.value ?? "Not known yet"} sub={b.value ? b.sub : null}
+              extra={b.value ? undefined : { "data-unknown": "" }} />)}
+          </div>
+        </section>
+      ) : null, kit ? <EditHow form={form} agent={a} kit={kit} first={m.first} offers={offerKit} /> : undefined)}
+      {email || site ? (
+        <div className="nx-reach" data-qc158="contact" data-acv2="contact" data-acv2-part="contact">
+          {email ? <NxCopyEmail email={email} onCopy={() => { void navigator.clipboard?.writeText(email).then(() => showToast({ message: `Copied ${m.first}’s email` }), () => {}); }} /> : null}
+          {site ? <NxSite label="Website" href={hrefFor(site) ?? null} /> : null}
+        </div>
+      ) : null}
+      {show("materials", "What they ask for", asks.length ? (
+        <section className="acv2-sec" data-cl262="sec" data-k="materials" data-qc158="asks" data-acv2="asks" data-acv2-part="asks">
+          <h4>What {m.first} asks for{penFor("materials")}</h4>
+          <ul className="nx-list">{asks.map((c) => (
+            <li key={c.label} data-acv2="ask">{c.kind === "letter" ? LETTER : c.kind === "pages" ? PAGES : PAGE}{c.label}{c.qty ? <span className="r">{c.qty}</span> : null}</li>
+          ))}</ul>
+        </section>
+      ) : null, <EditMaterials form={form} />)}
+      {show("wishlist", "Manuscript wishlist", wish ? (
+        <section className="acv2-sec" data-cl262="sec" data-k="wishlist" data-qc158="wishlist" data-acv2="wishlist" data-acv2-part="wishlist">
+          <h4>Wishlist <em>in {m.first}’s words</em>{penFor("wishlist")}</h4>
+          <p className="nx-quote" data-cl262="wishlist">{wish}</p>
+        </section>
+      ) : null, <EditWishlist form={form} />)}
+      {show("genres", "Genres sought", genres.length ? (
+        <section className="acv2-sec" data-cl262="sec" data-k="genres" data-acv2="genres" data-acv2-part="genres">
+          <h4>Genres {m.first} takes{genres.some((g) => p.genreHit(g)) ? <span className="r" data-acv2="yours">includes yours</span> : null}{penFor("genres")}</h4>
+          <div className="nx-chips" data-cl262="genres">
+            {[...genres.filter((g) => p.genreHit(g)), ...genres.filter((g) => !p.genreHit(g))].map((g) => (
+              p.genreHit(g)
+                ? <span key={g} className="nx-chip" data-cl262="genre" data-hit=""><span className="nx-tick" aria-hidden="true">{TICK}</span>{p.genreWord(g)}</span>
+                : <span key={g} className="nx-chip no" data-cl262="genre">{p.genreWord(g)}</span>
+            ))}
+          </div>
+        </section>
+      ) : null, kit ? <EditGenres form={form} kit={kit} isHit={p.genreHit} /> : undefined)}
+      <div className="nx-foot" data-acv2="profile-foot">
+        <span className="ag-added" data-cl262="added">{added ? `Added ${added}` : "Added"}</span>
+        {p.preview ? null : <button type="button" className="nx-lk" data-acv2="edit-details" onClick={() => openAll()}>Edit these details</button>}
+      </div>
     </div>
   );
-  const body = tab === "profile" ? profile
-    : tab === "history" ? <div className="cl262-body cl262-hist" data-cl262="history" data-cl24="pane"><YouAndStory blocks={p.story?.blocks ?? []} heard={p.story?.heard ?? null} first={m.first} onOpenQuery={p.onOpenQuery} /></div>
-    : <div className="cl262-body cl262-notes" data-cl262="notes" data-cl24="pane"><Notes p={p} first={m.first} /></div>;
-  const foot = (
-    <div className="cl262-foot" data-cl262="foot">
-      <span className="cl262-added apc-meta" data-cl262="added">{IC.clock}{added ? `Added ${added}` : "Added"}</span>
-      {p.preview ? null : <span className="cl262-pager" data-cl24="nav">
-        <button type="button" data-cl262="prev" data-cl24="prev" aria-label="Previous agent" disabled={p.index <= 0} onClick={() => goStep(-1)}>{IC.l}</button>
-        <span data-cl24="pos">{p.index + 1} / {p.total}</span>
-        <button type="button" data-cl262="next-agent" data-cl24="next" aria-label="Next agent" disabled={p.index >= p.total - 1} onClick={() => goStep(1)}>{IC.r}</button>
-      </span>}
+
+  /* ── History: the query card's thread for each query to the agent; a heading per query only when there is more than one ── */
+  const threads = useAgentThreads(a.id, p.queries, p.titleOf, p.nowMs);
+  const history = (
+    <div className="ag-hist" data-cl262="history" data-cl24="pane" data-acv2="history" data-n={threads.length}>
+      {threads.length === 0 ? (
+        <div className="nx-nempty" data-acv2="history-empty"><b>No history yet</b><span>When you query {m.first}, every step lands here.</span></div>
+      ) : threads.map((t) => (
+        <React.Fragment key={t.queryId}>
+          {threads.length > 1 ? (
+            <div className="ag-hq" data-acv2="history-head" data-query={t.queryId}><b>{t.title}</b>
+              <button type="button" className="nx-lk" onClick={() => openQuery(t.queryId)}>Open the query</button></div>
+          ) : null}
+          <ThreadRead {...t} first={m.first} initials={initials} />
+        </React.Fragment>
+      ))}
     </div>
+  );
+
+  /* ── Notes: QcNotes158 — the agent's own words from this agent's queries, and the writer's notes (the agent's notes
+     subcollection, dated). The old `agent.notes` string is shown as one undated note at the top and never rewritten. ── */
+  const uid = db.currentUser?.id ?? null;
+  const writeAgent = useCallback(async (id: string, patch: Parameters<typeof commitAgentEdits>[3]) => {
+    if (!uid) return { ok: false as const, error: "Not signed in" };
+    return commitAgentEdits(firestoreDb, uid, id, patch);
+  }, [uid]);
+  const { storedNotes, onAddNote } = useAgentNotes(p.preview ? null : a, uid, writeAgent);
+  const flat = (a.notes ?? "").trim();
+  const noteList: NoteIn[] = [
+    ...(flat ? [{ id: "__flat__", text: flat, ms: null, pinned: false, top: true }] : []),
+    ...storedNotes.map((n) => { const t = Date.parse(n.createdAt); return { id: n.id, text: n.text, ms: Number.isFinite(t) ? t : null, pinned: false }; }),
+  ];
+  const quotes = threads.flatMap((t) => quotesOf(t.steps));
+  const todayIso = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+  const notes = (
+    <div className="qc152-notes acv2-notes" data-cl262="notes" data-cl24="pane" data-acv2="notes">
+      <NotesTab158 first={m.first} nowMs={p.nowMs} notes={noteList} quotes={quotes} resetKey={a.id}
+        placeholder={`Add a note about ${m.first}`} emptySub={`This is the place for where you met ${m.first}, and anything worth remembering before you query.`}
+        onAdd={(text) => { void onAddNote(text).then((ok) => { if (ok) { land([]); showToast({ message: `Noted on ${m.first}’s card` }); } else showToast({ message: "Couldn’t save that note. Try again." }); }); }}
+        onPin={null}
+        onTask={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id, dueDate: todayIso() }).then(() => showToast({ message: "On your to-do list for today" })); }}
+        onCork={p.preview ? null : (text) => { void db.addUserTask({ text, agentId: a.id }).then(() => showToast({ message: "Pinned to your Corkboard" })); }} />
+    </div>
+  );
+
+  const body = tab === "profile" ? profile : tab === "history" ? history : notes;
+  const icon = ft.icon.k === "nq" ? { k: "node" as const, node: NQ16 } : ft.icon;
+  const footer = (
+    <Foot late={false} icon={icon} lead={ft.lead} sub={ft.sub}
+      primary={ft.button ? { label: ft.button.label, tone: ft.button.tone, act: ft.button.act.kind, run: () => runAct(ft.button!.act), hook: { "data-acv2": "foot-btn", "data-cl24": "call-btn" } } : null}
+      others={[ft.link ? { label: ft.link.label, act: ft.link.act.kind, run: () => runAct(ft.link!.act), hook: { "data-acv2": "foot-link" } } : null]}
+      outer={{ "data-acv2": "foot", "data-row": ft.row }} />
   );
   return (
-    <AgentPaperCard variant="panel" className={`cl262-card${editing ? " is-editing" : ""}${flash ? " is-saved" : ""}${p.preview ? " is-preview" : ""}`} data={data}
-      panel={{
-        onClose: () => (p.onClose ?? requestCardClose)(), closeLabel: "Close the agent", links, tabs, body,
-        /* while editing the save bar sits above the foot, which stays: ‹ › must still be pressable, and they ask the guard */
-        foot,
-        afterScroll: editing ? <SaveBar form={form} first={m.first} guard={guard} onCancel={cancel} onSave={() => void form.save()} onKeep={() => setGuard(null)}
-          onDiscard={() => { const g = guard; discardThen(g ? g.run : () => {}); }} extras={plan ? saveExtras(plan) : []} /> : null,
-        band: CARD262_BAND, bandRight, disc: <Disc262 stand={x.stand} initials={data.initials} />,
-        meta: meta ? <span className="apc-meta" data-cl262="meta">{meta}</span> : null,
-        afterHead: <NextBox s={step} p={p} />, scrollRef,
-        scrollAttrs: { "data-cl262": "scroll", "data-tab": tab },
-      }} />
+    <div ref={cardRef} className={`cl262-card apc acv2${editing ? " is-editing" : ""}${p.preview ? " is-preview" : ""}`} data-cl262="card" data-apc="card" data-acv2="card"
+      data-tone={tone} data-stand={x.stand} data-agent-id={a.id}>
+      <div className="apc-frame acv2-frame" data-apc="frame" data-acv2="frame">
+        <div className="qc149c qcv-legacy qc152 acv2-qc" data-acv2="qc"
+          style={{ ["--band" as string]: col.band, ["--tint" as string]: col.tint, ["--edge" as string]: col.edge, ["--mark" as string]: col.mark, ["--fdisc" as string]: tone === "nq" ? "#f3f6f9" : col.band } as React.CSSProperties}>
+          <div className="qc152-in">
+            {band}
+            {head}
+            {qbox}
+            {tabs}
+            <div ref={scrollRef} className="qc152-body" role="tabpanel" data-qc152="body" data-apc="scroll" data-cl262="scroll" data-acv2="body" data-tab={tab}>{body}</div>
+            {editing ? (
+              <div className="ag-savewrap" data-acv2="save">
+                <SaveBar form={form} first={m.first} guard={guard} onCancel={cancel} onSave={() => void form.save()} onKeep={() => setGuard(null)}
+                  onDiscard={() => { const g = guard; discardThen(g ? g.run : () => {}); }} extras={plan ? saveExtras(plan) : []} />
+              </div>
+            ) : footer}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };

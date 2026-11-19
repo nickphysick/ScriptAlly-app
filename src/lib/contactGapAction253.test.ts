@@ -34,7 +34,10 @@ describe("agentGapAction", () => {
     const bare = { ...CONTACT_FIXTURE_AGENTS[0], id: "bare", genres: [], mswlNotes: "", materialsWanted: ["Query letter"], submissionStatus: "Open" } as Agent;
     delete (bare as { responseTimeWeeks?: number }).responseTimeWeeks;
     const act = agentGapAction(hkModel([bare], ctx, contactPrefsOf(null, new Date("2026-10-26T12:00:00Z"))), "bare");
-    expect(act).toEqual({ n: 3, first: "reply" });
+    expect(act).toEqual({ n: 3, first: "reply", keys: ["reply", "genres", "wishlist"] });
+    /* Agent card v2 — the card's "Finish {first}'s profile" block lists every item, in Housekeeping's order */
+    expect(act!.keys[0]).toBe(act!.first);
+    expect(act!.keys.length).toBe(act!.n);
     expect(GAP_FOCUS[act!.first]).toEqual({ tab: "work", focus: "reply" });
   });
   it("says one gap and many gaps", () => {
