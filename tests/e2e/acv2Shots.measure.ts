@@ -6,6 +6,7 @@
  * 1512 × 900 and 1280 × 800. Shots only; the locks are acv2.measure.ts.
  */
 import { test } from "@playwright/test";
+import { execFileSync } from "node:child_process";
 import { AC, cardClip, openAc, shotDir, SIZES, tab } from "./acv2Lib";
 import { openApp } from "./pageHeaderV2Lib";
 
@@ -32,17 +33,23 @@ test("AC2 shots · doors", async ({ page }) => {
   test.setTimeout(180_000);
   const dir = shotDir();
   const vp = SIZES[0];
+  /* the To-do list's door: the seeded task linked to Nora, its preview pressed */
+  execFileSync("node", ["tests/e2e/seedAcv2.mjs"], { stdio: "inherit" });
   await openApp(page, "/todo", vp);
-  const items = page.locator("[data-tws='tray'] button:visible");
-  const n = Math.min(await items.count(), 30);
-  for (let i = 0; i < n; i++) {
-    if (await page.locator(".tws-agcard:visible").count()) break;
-    await items.nth(i).click({ timeout: 3000 }).catch(() => {});
-    await page.waitForTimeout(600);
-  }
-  const prev = page.locator(".tws-agcard:visible").first();
-  if (await prev.count()) await prev.screenshot({ path: `${dir}/1512-todo-preview.png` });
-  else console.log("  AC2 shots · no To-do task showed an agent card preview");
+  const task = page.getByText("Ask Nora about the York anthology").first();
+  await task.click({ timeout: 10_000 }).catch(() => console.log("  AC2 shots · the seeded task is not on the To-do list"));
+  await page.waitForTimeout(900);
+  const prev = page.locator("[data-tws='preview'][data-kind='agent']:visible").first();
+  if (await prev.count()) {
+    await page.screenshot({ path: `${dir}/1512-todo-preview.png` });
+    await prev.click();
+    const real = page.locator("[data-cl262='panel'] [data-acv2='card']");
+    await real.first().waitFor({ timeout: 8000 }).catch(() => {});
+    await page.waitForTimeout(900);
+    if (await real.count()) await page.screenshot({ path: `${dir}/1512-todo-door.png` });
+    else console.log("  AC2 shots · pressing the To-do preview opened no agent card");
+  } else { console.log("  AC2 shots · no agent preview on the To-do list"); await page.screenshot({ path: `${dir}/1512-todo-miss.png` }); }
+  execFileSync("node", ["tests/e2e/seedAcv2.mjs", "--clean"], { stdio: "inherit" });
   await openApp(page, "/dashboard", vp);
   await page.keyboard.press("ControlOrMeta+k");
   await page.waitForTimeout(500);

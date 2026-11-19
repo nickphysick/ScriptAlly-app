@@ -5,6 +5,7 @@
  * Agent card v2's fixtures, beside the harness's own agents:
  *   acv2fx-nameonly  a name and nothing else (no agency, no contact, no facts): AC2-1's short card, AC2-3's empty profile
  *   acv2fx-notes     an agent whose old `notes` string stands, with twelve dated notes under it (AC2-5)
+ *   acv2fx-task      a To-do task for today linked to Nora Notekeeper (the report's To-do door: its preview opens the card)
  *   acv2fx-s1…s3     three more steps on Clara Beaumont's query's own log (the harness's logs hold one step each), so
  *                    AC2-4 compares a four-step thread: partial requested, partial sent, full requested
  *
@@ -53,6 +54,7 @@ async function claraQuery() {
 }
 async function wipe() {
   let gone = 0;
+  for (const t of (await getDocs(collection(db, "users", uid, "tasks"))).docs) if (t.id.startsWith(PREFIX)) { await deleteDoc(t.ref); gone++; }
   const cq = await claraQuery();
   if (cq) for (const a of (await getDocs(collection(db, "users", uid, "queries", cq, "activity"))).docs) if (a.id.startsWith(PREFIX)) { await deleteDoc(a.ref); gone++; }
   for (const d of (await getDocs(collection(db, "users", uid, "agents"))).docs) {
@@ -76,6 +78,11 @@ await setDoc(doc(db, "users", uid, "agents", `${PREFIX}notes`), { ...base(`${PRE
 for (let i = 1; i <= 12; i++) {
   await setDoc(doc(db, "users", uid, "agents", `${PREFIX}notes`, "notes", `${PREFIX}n${String(i).padStart(2, "0")}`),
     { text: `Note ${i}: something worth remembering about Nora before the next query, written on day ${i}.`, createdAt: iso(20 - i) });
+}
+{
+  const d = new Date(), today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const now = new Date().toISOString();
+  await setDoc(doc(db, "users", uid, "tasks", `${PREFIX}task`), { id: `${PREFIX}task`, userId: uid, text: "Ask Nora about the York anthology", done: false, createdAt: now, updatedAt: now, agentId: `${PREFIX}notes`, dueDate: today });
 }
 /* three more steps on Clara's query, after its first (the same shape as the step already there) */
 const cq = await claraQuery();
