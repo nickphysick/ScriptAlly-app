@@ -1,0 +1,14 @@
+{
+ "_note": "v1-5 Phases 7–12: one crop per selector at 1512, and each element's box and type",
+ "fixes": {
+  "h-section": { "sel": ".a26-sec-h h2, .a26-rb h2, .rsp15-h2t, .rsp15-rht, .k62-band-t h2, .ms29-bh, .cp32-rbt, .cp32-cpdh, .cb15-h2 h2, .dv1-dh h3", "pages": ["*"] },
+  "h-card": { "sel": ".fv2-fint, .os-card .os-cardttl, .k62-h3, .ms29-ph, .cp32-h3, .cp32-scth, .v6-bt, .dv1-steps h3, .a26-h3", "pages": ["*"] },
+  "h-small": { "sel": ".k62-cg, .a26-cm h3, .a26-rd h3", "pages": ["*"] },
+  "card": { "sel": ".cp32-rc, .a26-rc, .k62-rc, .os-card.d2-card, .os-card.d60-card, .v6-card, .ms29-frame", "pages": ["*"] },
+  "btn": { "sel": ".d2-open, .fv2-finclose, .v6-pill--navy, .qlp-b1, .rsp15-rbn, .cp32-btn, .cp32-pill, .ms29-b2, .k62-pb, .tws-go, .tws-sb, .ph-primary, .qc151-btn", "pages": ["*"] },
+  "switch": { "sel": ".cp32-tog, .cp32-tog button, .qc151-sw, .cb15-vsw", "pages": ["*"] },
+  "field": { "sel": ".cf-big, .hdr input, .hdr textarea, .aap-inp, .k62-fld input, .qlp-fld input, .qlp-first-p textarea", "pages": ["*"] },
+  "close": { "sel": ".cp30-x, .flh-x, .k62-hdr-x, .cl262-rb, .qc152-x", "pages": ["*"] },
+  "foot": { "sel": ".cf-foot, .k62-hdr-foot, .cl262-foot", "pages": ["*"] }
+ }
+}

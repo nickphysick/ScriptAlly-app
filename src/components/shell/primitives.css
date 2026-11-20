@@ -128,6 +128,15 @@
   --sp-frame: #7c3a2a;
   --sp-rust: #7a3f31; /* consistency fixes v1.1, ruling 6: the one rust for small warm accents (text and icons) */
   --sp-lift: 0 2px 8px rgba(28, 19, 15, 0.06);
+  /* Consistency roll-out v1, Phase 7 (ruling 6): three heading sizes for the page body of workspace pages and the
+     Dashboard. Each is a whole `font` shorthand, read as `font: var(--sp-h-…) !important` (brand.tsx forces h1–h3
+     into its serif with !important). Colour stays each page's own.
+       section — heads a section of the page, or a framed card's band (the ref's "Your shelf", "The pitch")
+       card    — heads one card, or a part inside a card ("Next up", "Where they are now")
+       small   — a small heading inside a card, under its heading ("First 5") */
+  --sp-h-section: 400 24px/1.2 var(--sp-type);
+  --sp-h-card: 400 20px/1.25 var(--sp-type);
+  --sp-h-small: 600 16px/1.3 var(--sp-serif);
 }
 
 /* ══ SEARCH — one component, two widths ══ */

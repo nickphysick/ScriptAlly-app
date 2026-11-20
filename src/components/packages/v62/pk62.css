@@ -89,7 +89,7 @@
 .pk62 .k62-btn .k62-svg { width: 16px; height: 16px; }
 .k62-layer .k62-btn.k62-pri { background: var(--k62-btn); color: #fff; box-shadow: none; }
 .k62-layer .k62-btn.k62-pri:hover { background: #24324a; }
-.pk62 .k62-h3 { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; font: 400 21px/1.25 var(--k62-type); }
+/* Consistency roll-out v1, Phase 7: the card heading */ .pk62 .k62-h3 { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; font: var(--sp-h-card); }
 .pk62 .k62-h3 small { font: 400 14.5px/1.2 var(--k62-serif); color: var(--k62-muted); }
 .pk62 .k62-lst { list-style: none; margin: 0; padding: 0; }
 .pk62 .k62-lst-x { flex: 1; min-width: 0; }
@@ -124,7 +124,7 @@
 .pk62 .k62-band .k62-disc { width: 48px; height: 48px; background: #f4eee5; color: var(--k62-navy); }
 .pk62 .k62-band .k62-pic { width: 22px; height: 22px; }
 .pk62 .k62-band-t { flex: 1 1 260px; min-width: 0; }
-.pk62 .k62-band-t h2 { font: 400 26px/1.15 var(--k62-type); overflow-wrap: anywhere; }
+/* Consistency roll-out v1, Phase 7: the section heading */ .pk62 .k62-band-t h2 { font: var(--sp-h-section); overflow-wrap: anywhere; }
 .pk62 .k62-band-t p { margin-top: 5px; font: italic 400 15.5px/1.3 var(--k62-serif); color: rgba(244, 238, 229, .8); }
 .pk62 .k62-acts { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .pk62 .k62-pb { display: inline-flex; align-items: center; height: 42px; padding: 0 20px; border: 0; border-radius: 999px; font: 600 16px/1 var(--k62-serif); white-space: nowrap; }
@@ -144,7 +144,7 @@
 .pk62 .k62-split > section + section { border-left: 1px solid var(--k62-hair); }
 
 /* What's in it */
-.pk62 .k62-cg { margin: 22px 0 4px; font: 400 15px/1.2 var(--k62-type); color: var(--k62-muted); }
+/* Consistency roll-out v1, Phase 7: the small heading */ .pk62 .k62-cg { margin: 22px 0 4px; font: var(--sp-h-small); color: var(--k62-muted); }
 .pk62 .k62-h3 + .k62-cg { margin-top: 0; }
 .pk62 .k62-cr-h { display: flex; align-items: center; gap: 14px; min-height: 54px; padding: 8px 14px; border-radius: 12px; background: #f7f4ef; margin-top: 6px; }
 .pk62 .k62-tk { display: grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--k62-navy); color: #fff; }

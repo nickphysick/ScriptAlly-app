@@ -141,7 +141,7 @@
 }
 /* the section heading row (ref `.h2`) */
 .rsp15 .rsp15-h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 16px; }
-.rsp15 .rsp15-h2 .rsp15-h2t { margin: 0; font: 400 30px/1.1 var(--r15-type) !important; color: var(--r15-ink); }
+/* Consistency roll-out v1, Phase 7: the section heading */ .rsp15 .rsp15-h2 .rsp15-h2t { margin: 0; font: var(--sp-h-section) !important; color: var(--r15-ink); }
 .rsp15 .rsp15-h2 p { margin: 0; font: italic 400 16.5px/1.4 var(--r15-serif) !important; color: var(--r15-mut); }
 .rsp15 .rsp15-sp { flex: 1; }
 .rsp15 .rsp15-nav { display: flex; gap: 8px; align-self: center; }
@@ -240,7 +240,7 @@
 
 /* ═════ the Rejection collection (ref v12 `.rc`, `.rh`, `.rc2`, `.rcs`, `.rch`, `.rcm`, `.rcr`, `.rcf`) ═════ */
 .rsp15 .rsp15-rh { display: flex; flex-wrap: wrap; gap: 14px 36px; align-items: center; padding: 0 2px; }
-.rsp15 .rsp15-rh .rsp15-rht { margin: 0; font: 400 34px/1.05 var(--r15-type) !important; color: var(--r15-ink); }
+/* Consistency roll-out v1, Phase 7: the section heading */ .rsp15 .rsp15-rh .rsp15-rht { margin: 0; font: var(--sp-h-section) !important; color: var(--r15-ink); }
 .rsp15 .rsp15-rh > p { flex-basis: 100%; margin: 0; font: 400 16px/1.5 var(--r15-serif) !important; color: var(--r15-mut); }
 .rsp15 .rsp15-ct { display: flex; align-items: center; gap: 14px; padding-left: 36px; border-left: 1px solid #ddd3c6; }
 .rsp15 .rsp15-ct > b { font: 400 44px/1 var(--r15-type) !important; }

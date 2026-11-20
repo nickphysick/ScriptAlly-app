@@ -49,7 +49,7 @@
 .cp32 .cp32-rc { padding: 8px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .07); min-width: 0; }
 .cp32 .cp32-rc-in { border: 1px solid var(--c32-frame); border-radius: 13px; overflow: hidden; background: #fff; height: 100%; }
 .cp32 .cp32-rb { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 66px; padding: 14px 28px; }
-.cp32 .cp32-rb h2.cp32-rbt { min-width: 0; margin: 0; overflow-wrap: anywhere; font: 400 23px/1.2 var(--c32-type) !important; color: inherit !important; }
+.cp32 .cp32-rb h2.cp32-rbt { min-width: 0; margin: 0; /* Consistency roll-out v1, Phase 7: the section heading */ overflow-wrap: anywhere; font: var(--sp-h-section) !important; color: inherit !important; }
 .cp32 .cp32-rb small { text-align: right; font: 400 15px/1.2 var(--c32-serif); color: var(--c32-muted); }
 .cp32 .cp32-rb.is-navy { background: var(--c32-navy); color: #fffaf3; }
 .cp32 .cp32-rb.is-sand { background: #f2e6d8; color: var(--c32-ink); }
@@ -118,7 +118,7 @@
 .cp32 .cp32-wait p { margin: 0; }
 .cp32 .cp32-wait .cp32-btn { margin-top: 12px; }
 .cp32 .cp32-two2 { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr); gap: 56px; margin-top: 32px; align-items: start; }
-.cp32 h3.cp32-h3 { margin: 0 0 16px; font: 400 19px/1.25 var(--c32-type) !important; color: var(--c32-ink); }
+/* Consistency roll-out v1, Phase 7: the card heading */ .cp32 h3.cp32-h3 { margin: 0 0 16px; font: var(--sp-h-card) !important; color: var(--c32-ink); }
 .cp32 .cp32-why p { margin: 0; font: 400 17px/1.5 var(--c32-serif); }
 .cp32 .cp32-why .cp32-gap { color: var(--c32-muted); }
 .cp32 .cp32-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
@@ -191,7 +191,7 @@
 .cp32 .cp32-cpd { position: relative; display: flex; align-items: center; gap: 20px; padding: 26px 210px 26px 28px; background: #eae7e2; }
 .cp32 .cp32-cpd-ic { flex: none; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; background: var(--c32-navy); color: #fffaf3; box-shadow: 0 0 0 5px rgba(255, 255, 255, .7); }
 .cp32 .cp32-cpd-ic svg { width: 28px; height: 28px; }
-.cp32 .cp32-cpd h2.cp32-cpdh { margin: 0; font: 400 34px/1.15 var(--c32-type) !important; color: var(--c32-ink) !important; }
+/* Consistency roll-out v1, Phase 7: the section heading */ .cp32 .cp32-cpd h2.cp32-cpdh { margin: 0; font: var(--sp-h-section) !important; color: var(--c32-ink) !important; }
 .cp32 .cp32-cpd p { margin: 6px 0 0; font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
 .cp32 .cp32-ribbon { position: absolute; top: 0; right: 150px; width: 28px; height: calc(100% + 14px); background: linear-gradient(90deg, #7d3f4e, #96505f 45%, #874655); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 11px), 0 100%); z-index: 1; }
 .cp32 .cp32-tbl table { width: 100%; border-collapse: collapse; }
@@ -216,7 +216,7 @@
 .cp32 .cp32-scout { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; padding: 22px 32px 22px 28px; border-top: 1px solid var(--c32-frame); background: radial-gradient(120% 160% at 0 0, #fbefe9 0%, #f4e0d7 100%); }
 .cp32 .cp32-perch { flex: none; width: 118px; height: auto; margin: -6px 0 -10px; filter: drop-shadow(0 6px 8px rgba(28, 19, 15, .18)); }
 .cp32 .cp32-scout > div { flex: 1; min-width: 260px; }
-.cp32 .cp32-scout h3.cp32-scth { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0; font: 400 23px/1.2 var(--c32-type) !important; color: var(--c32-ink) !important; }
+.cp32 .cp32-scout h3.cp32-scth { display: flex; align-items: center; gap: 12px; /* Consistency roll-out v1, Phase 7: the card heading */ flex-wrap: wrap; margin: 0; font: var(--sp-h-card) !important; color: var(--c32-ink) !important; }
 .cp32 .cp32-scout h3 span { display: inline-flex; align-items: center; height: 26px; padding: 0 12px; border-radius: 13px; background: #fff; color: var(--c32-rose); font: 600 13px/1 var(--c32-serif); }
 .cp32 .cp32-scout p { margin: 6px 0 0; max-width: 680px; font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
 
