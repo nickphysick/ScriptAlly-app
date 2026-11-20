@@ -4,7 +4,7 @@
  *
  * DASHBOARD v3 · Expected back (Phase 4b; ref design-refs/dashboard-v3.html).
  *
- * The heading sentence ("{n} replies expected this week." / "Nothing due back this week."), up to three rows due
+ * The heading sentence ("{n} replies expected in the next 7 days." / "Nothing due back in the next 7 days."), up to three rows due
  * soonest — agent, agency, a bar from the last step to the date, "by {day date}" — then "{n} are past their date" with
  * up to two rows, oldest first, "since {date}" and no bar; then "{n} more are within their reply window." and the Query
  * Centre. A row opens that query's slide-out card.
@@ -48,7 +48,7 @@ export const Dash3Expected: React.FC<{
 }> = ({ loading, model, onOpen, onAll }) => (
   /* Phase 3: Expected back is about queries out with agents — the Queried band */
   <Frame tone="paper" bandStyle={{ background: bandBackground("queried") }} title={EXPECTED_TITLE} label={EXPECTED_TITLE} probe="expected" loading={loading} className="d3-expected">
-    <div className="d2-body d3-exbody" data-d3="expected" data-week={model?.thisWeek} data-past={model?.pastCount} data-more={model?.more}>
+    <div className="d2-body d3-exbody" data-d3="expected" data-next={model?.nextDays} data-past={model?.pastCount} data-more={model?.more}>
       {!model ? (
         <>
           <p className="d3-exsay">{EXAMPLE_HEAD}</p>

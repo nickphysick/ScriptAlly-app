@@ -108,8 +108,8 @@ export interface ExpectedRow {
 }
 
 export interface ExpectedBack {
-  /** due by the end of this Monday–Sunday week (and not yet past) */
-  thisWeek: number;
+  /** due within the next 7 days (and not yet past) */
+  nextDays: number;
   /** the soonest due, up to three */
   soon: ExpectedRow[];
   /** past their date, oldest first */
@@ -121,12 +121,9 @@ export interface ExpectedBack {
   waiting: number;
 }
 
-/** midnight at the start of next Monday, local time */
-export function weekEndMs(nowMs: number): number {
-  const d = new Date(nowMs);
-  const sinceMon = (d.getDay() + 6) % 7;
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate() - sinceMon + 7).getTime();
-}
+/** Dashboard v3 quick lane: the heading counts the next 7 days from now (was: to Sunday night) */
+export const NEXT_DAYS = 7;
+export const windowEndMs = (nowMs: number): number => nowMs + NEXT_DAYS * 86_400_000;
 
 /**
  * ⚠️ ONLY THE QUERY CENTRE'S CLOCK: a row counts when its court is the agent's and `expectedFor` gave it a date. A
@@ -136,7 +133,7 @@ export function expectedBack(qcRows: readonly QcRow[], nowMs: number): ExpectedB
   const waiting = qcRows.filter((r) => r.court === "agent" && r.expectedMs != null);
   const due = waiting.filter((r) => (r.expectedMs as number) > nowMs).sort((a, b) => (a.expectedMs as number) - (b.expectedMs as number));
   const pastAll = waiting.filter((r) => (r.expectedMs as number) <= nowMs).sort((a, b) => (a.expectedMs as number) - (b.expectedMs as number));
-  const end = weekEndMs(nowMs);
+  const end = windowEndMs(nowMs);
   const soon = due.slice(0, EXPECTED_SHOWN).map((r): ExpectedRow => {
     const ms = r.expectedMs as number;
     const from = r.stageStartMs ?? r.sentMs;
@@ -148,7 +145,7 @@ export function expectedBack(qcRows: readonly QcRow[], nowMs: number): ExpectedB
     return { id: r.id, agent: r.agentName, agency: r.agency, ms, progress: null, when: `since ${shortDay(ms)}` };
   });
   return {
-    thisWeek: due.filter((r) => (r.expectedMs as number) < end).length,
+    nextDays: due.filter((r) => (r.expectedMs as number) <= end).length,
     soon, pastCount: pastAll.length, past,
     more: Math.max(0, due.length - soon.length),
     waiting: waiting.length,
@@ -156,7 +153,7 @@ export function expectedBack(qcRows: readonly QcRow[], nowMs: number): ExpectedB
 }
 
 export const expectedHeading = (e: ExpectedBack): string =>
-  e.thisWeek > 0 ? `${e.thisWeek.toLocaleString("en-GB")} ${plural(e.thisWeek, "reply", "replies")} expected this week.` : "Nothing due back this week.";
+  e.nextDays > 0 ? `${e.nextDays.toLocaleString("en-GB")} ${plural(e.nextDays, "reply", "replies")} expected in the next 7 days.` : "Nothing due back in the next 7 days.";
 export const pastHeading = (n: number): string => `${n.toLocaleString("en-GB")} ${plural(n, "is", "are")} past ${plural(n, "its", "their")} date`;
 export const moreLine = (n: number): string => `${n.toLocaleString("en-GB")} more ${plural(n, "is", "are")} within ${plural(n, "its", "their")} reply window.`;
 
