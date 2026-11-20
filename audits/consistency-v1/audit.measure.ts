@@ -231,7 +231,9 @@ test("consistency audit v1 — every route, both viewports", async ({ browser })
     const signedIn = await browser.newContext({ storageState: STORAGE_STATE, viewport: { width: vp.w, height: vp.h } });
     const signedOut = await browser.newContext({ storageState: { cookies: [], origins: [] }, viewport: { width: vp.w, height: vp.h } });
     /* v1.1: CA_RAIL99=1 stands the rail's count in at 128 (lib/railReviewAid, dev-only), so the "99+" badge is measured */
-    if (process.env.CA_RAIL99 === "1") await signedIn.addInitScript(() => { (globalThis as unknown as { __SA_RAIL_COUNT: number }).__SA_RAIL_COUNT = 128; });
+    /* roll-out v1: CA_RAIL_COUNT=<n> stands any count in (9, 16, 128 for "99+") */
+    const railN = process.env.CA_RAIL_COUNT ? Number(process.env.CA_RAIL_COUNT) : process.env.CA_RAIL99 === "1" ? 128 : null;
+    if (railN != null) await signedIn.addInitScript((n) => { (globalThis as unknown as { __SA_RAIL_COUNT: number }).__SA_RAIL_COUNT = n; }, railN);
     /* ⚠️ SIGN IN ONCE PER CONTEXT. Firebase keeps its session in IndexedDB, which storageState cannot carry, so
        a fresh context is signed OUT — the first trial measured the sign-up screen on every workspace route.
        ensureSignedIn is the harness's own (password from env / .env.local, never printed). */

@@ -1,0 +1,8 @@
+{ "_note": "Phase 1 — the rail count at 12px, right-anchored; measured with CA_RAIL_COUNT 9, 16 and 128 (\"99+\").",
+  "fixes": {
+  "P1-ct": { "sel": ".wsr-ct", "pages": ["dashboard", "todo", "queries", "account-profile", "plans"] },
+  "P1-svg": { "sel": ".wsr-ni .wsr-ic svg", "pages": ["dashboard", "todo", "queries", "account-profile", "plans"] },
+  "P1-ic": { "sel": ".wsr-ni .wsr-ic", "pages": ["dashboard", "todo", "queries", "account-profile", "plans"] },
+  "P1-ni": { "sel": ".wsr-ni", "pages": ["dashboard", "todo", "queries", "account-profile", "plans"] },
+  "P1-rail": { "sel": ".wsr", "pages": ["dashboard", "todo", "queries", "account-profile", "plans"] }
+ } }
