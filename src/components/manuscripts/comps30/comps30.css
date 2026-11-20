@@ -56,7 +56,7 @@
 :is(.cp30, .cp30-layer) .cp30-x { flex: none; margin-left: auto; align-self: flex-start; width: 40px; height: 40px; padding: 0; border-radius: 50%; border: 0; background: rgba(244, 238, 229, .14); color: var(--c30-cream); display: grid; place-items: center; line-height: 0; }
 :is(.cp30, .cp30-layer) .cp30-x svg { width: 16px; height: 16px; display: block; }
 /* Consistency roll-out v1, Phase 12: the Add a comp panel's close is 36 (it was 40); the page's own pop keeps 40 */
-:is(.cp30, .cp30-layer) .hdr-head .cp30-x { width: var(--sp-px-size); height: var(--sp-px-size); }
+.hdr-head .cp30-x.cp30-x { width: var(--sp-px-size); height: var(--sp-px-size); }
 
 /* ── the how-it-works pop-up ── */
 .cp30-layer.cp30-popdim { position: fixed; inset: 0; z-index: 75; display: grid; place-items: center; background: rgba(28, 19, 15, .35); }
