@@ -54,9 +54,9 @@ describe("DF1-C · Active and Closed, one card", () => {
     expect(at('data-d2-card="active"')).toBeLessThan(at('data-d2="right"'));
     expect(html).not.toContain('data-probe="chart-card"');
   });
-  it("draws no Agents on file card before the first agent (first visit v2, Part A)", () => {
-    /* RE-POINTED (Dashboard v2): the hoop's own probe — the old slot attribute is gone, so asserting its absence was vacuous */
-    expect(page([])).not.toContain('data-d60="agents-hoop"');
+  /* RE-POINTED (Dashboard v3, Phase 5): Agents on file is drawn in every state (the ref's Day one shows it at 0) */
+  it("draws Agents on file before the first agent too", () => {
+    expect(page([])).toContain('data-d60="agents-hoop"');
     expect(page()).toContain('data-d60="agents-hoop"');
   });
   it("words the founding card's footer for this page", () => {

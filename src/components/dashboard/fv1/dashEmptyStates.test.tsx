@@ -20,7 +20,7 @@ import { comingItems } from "../../../lib/dashList";
 import { buildQcRows } from "../../../lib/qcSummary";
 import { feedEntries } from "../../../lib/dashFeed";
 import { SUMMARY_NONE } from "../../../lib/dashFeedDrawer";
-import { AgentsHoop, ClosedHoop, CLOSED_NONE, MORE_IN_DISCOVER } from "../v60/Dash60Left";
+import { AgentsHoop, ClosedHoop, CLOSED_NONE, MORE_IN_DISCOVER, AGENTS_NONE_V3, NO_ONE_LEFT, stillToQuery } from "../v60/Dash60Left";
 import { QueryMini } from "../v116/MiniCards";
 
 const NOW = new Date(2026, 9, 29, 12);
@@ -90,12 +90,23 @@ describe("DFV-D · Agents on file", () => {
     expect(html).not.toMatch(/>0<\/span>\s*(Querying|Not yet queried)/);
     expect(html).not.toContain("0 ready to query");
     expect(html).toContain(`${MORE_IN_DISCOVER} →`);
-    expect(html).toContain('data-d60="hoop-total">OF 1</small>');
+    /* RE-POINTED (Dashboard v3, Phase 5): the centre is the total and the word; at none, "No one left to query." */
+    expect(html).toContain('data-d60="hoop-total">agent</small>');
+    expect(html).toContain(NO_ONE_LEFT);
   });
-  it("with no agents at all, words and the way to bring a list in", () => {
+  it("some not yet queried: \"{n} still to query. See them →\"", () => {
+    const html = agents([TESSA, { ...TESSA, id: "a2", name: "Felix Hart" }], [q("q1", "a1", QueryStatus.QUERIED, "2026-10-29T10:00:00.000Z")]);
+    expect(html).toContain('data-d60="hoop-total">agents</small>');
+    expect(html).toContain(stillToQuery(1));
+    expect(html).toContain('data-d3="see-them"');
+    expect(html).not.toContain(NO_ONE_LEFT);
+  });
+  /* RE-POINTED (Dashboard v3, Phase 5): the ref's sentence, Add an agent and Discover */
+  it("with no agents at all, the sentence and the two ways in", () => {
     const html = agents([], [q("q1", "a1", QueryStatus.QUERIED, "2026-10-29T10:00:00.000Z")]);
-    expect(html).toContain("No agents yet.");
-    expect(html).toContain("Import a list →");
+    expect(html).toContain(AGENTS_NONE_V3.line.replaceAll("'", "&#x27;"));
+    expect(html).toContain(`${AGENTS_NONE_V3.add} →`);
+    expect(html).toContain(`${AGENTS_NONE_V3.discover} →`);
   });
 });
 

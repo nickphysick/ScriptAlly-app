@@ -39,7 +39,7 @@ import { F1Feed } from "../f1/F1Feed";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { foundingFoldWrite, gsCloseWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { foundingFoldWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
@@ -50,7 +50,6 @@ import { ResumeCard } from "../fv2/ResumeCard";
 import { LoadFailed } from "../../notes/LoadFailed";
 import type { PageLoadFailure } from "../../notes/useLoadFailure";
 import { ReminderDone } from "../fv2/ReminderAsk";
-import { FinishLine } from "../fv2/FinishLine";
 import { logEvent } from "../../../lib/events";
 import type { DraftMeta } from "../../../lib/importDraft";
 /* ⚠️ LOADED WHEN FIRST NEEDED: `lib/importDraft` brings Firebase, and this page is also the onboarding ghost, mounted by
@@ -62,6 +61,7 @@ import { Dash2Band } from "../v2/Dash2Band";
 import { wholeWeeksQuerying } from "../../../lib/dash2";
 import { expectedBack, howItsGoing, stageMarks, withoutContradictions } from "../../../lib/dash3";
 import { Dash3Expected } from "../v3/Dash3Expected";
+import { Dash3GsRow } from "../v3/Dash3GsRow";
 import { Dash3Reminder } from "../v3/Dash3Reminder";
 import { Dash2Next } from "../v2/Dash2Next";
 import { Dash2Active } from "../v2/Dash2Active";
@@ -288,10 +288,6 @@ export const Dash58: React.FC<Dash58Props> = ({
   const gsAllDone = gsRows.length > 0 && gsRows.every((r) => r.done);
   const gsWhat = gsSlot({ pre: empty, hidden: gsHidden, closed: gsClosed, allDone: gsAllDone });
   const gsSheetOpen = gsWhat !== "goal";
-  const closeGs = scopeId && onPrefs && !example ? () => {
-    setGsClosedNow(true); void onPrefs(gsCloseWrite(scopeId));
-    logEvent(currentUser?.id, "getting_started_done", path ?? "ready");
-  } : undefined;
   /* Part I: a Getting started row ticking while this page is mounted. The rows already done when it first loads are not
      ticks; nor is anything in the ghost or the example. */
   const gsSeen = useRef<Set<string> | null>(null);
@@ -511,6 +507,10 @@ export const Dash58: React.FC<Dash58Props> = ({
      While loading, the page draws whichever state the shape memory last saw, so the swap never
      flashes; once loaded it is the one predicate's answer. */
   const pre = loading ? shape.pre : empty;
+  /* Dashboard v3, Phase 5: where Getting started sits — read off `pre`, so it follows the loading page's shape memory too.
+     All done is gone: v2's finish line is not drawn on this page. */
+  const gsLeft = gsRows.filter((r) => !r.done).length;
+  const gsPlace: "lead" | "under-next" | "row" | "none" = pre ? "lead" : !gsSheetOpen || gsLeft === 0 ? "none" : gsLeft === 1 ? "row" : "under-next";
   const hasAgents = loading ? shape.agents : agents.length > 0;
   /* first visit v2 (Part A): which first-visit state the page is in; while loading, the shape memory's */
   /* ── first visit v2 (Part F): a Smart Import review left halfway, for this book (or for a book set-up has not made yet) ── */
@@ -634,7 +634,7 @@ export const Dash58: React.FC<Dash58Props> = ({
       /* v118 Part B — a slice or row opens the Contact list filtered to that status */
       onOpen={(k) => navigate(contactListForStatus(k))}
       agents={agents} queries={queries} msId={scopeId}
-      onDiscover={() => onNavigate("agents", "Discover")} onImport={() => onNavigate("import")} />
+      onDiscover={() => onNavigate("agents", "Discover")} onImport={() => onNavigate("import")} onAddAgent={addAgent} />
   );
 
   return (
@@ -665,15 +665,18 @@ export const Dash58: React.FC<Dash58Props> = ({
           <div className="d2-grid" data-d2="grid">
             {/* ⚠️ DASHBOARD v3 (ref design-refs/dashboard-v3.html), Phase 2: left — Next up, Agents on file, Getting started;
                 middle — the chart, then Expected back; right — the feed */}
-            <div className="d2-col d2-left" data-d2="left">
+            <div className="d2-col d2-left" data-d2="left" data-gs={gsPlace}>
+              {/* Dashboard v3, Phase 5: Getting started by stage — before the first query the full card leads and Next up is
+                  not drawn; two or more steps left, the full card under Next up; one step left, one row under Agents on file;
+                  all done or hidden, gone */}
               {!pre && <Dash2Next loading={loading} plan={nextPlan} ctx={taskCtx} onView={viewTask} onSeeAll={() => onNavigate(plan.all.tab, plan.all.sub)} />}
-              {!pre && hasAgents && agentsCard}
-              {gsSheetOpen && (
+              {(gsPlace === "lead" || gsPlace === "under-next") && (
                 <div className="d2-gs" data-d2="gs-slot">
-                  <GsSheet loading={loading} rows={gsRows} path={path} onGo={goGs} onHide={gsHide}
-                    finish={gsWhat === "finish" ? <FinishLine path={path} onClose={closeGs} /> : undefined} />
+                  <GsSheet loading={loading} rows={gsRows} path={path} onGo={goGs} onHide={gsHide} />
                 </div>
               )}
+              {agentsCard}
+              {gsPlace === "row" && <Dash3GsRow rows={gsRows} path={path} onGo={goGs} onHide={gsHide} />}
             </div>
             <div className="d2-col d2-mid" data-d2="mid">
               {pre ? (

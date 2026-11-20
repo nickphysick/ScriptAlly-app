@@ -74,9 +74,9 @@ describe("FV2-A · Getting started is the sheet, the goal sheet takes the slot b
     expect(html).not.toContain('data-df1="goal"');
     expect(html).not.toContain('data-d2="gs-slot"');
   });
-  it("Agents on file only once there is one agent", () => {
-    /* RE-POINTED (Dashboard v2): the hoop's own probe */
-    expect(render([q("a", QueryStatus.QUERIED)])).not.toContain('data-d60="agents-hoop"');
+  /* RE-POINTED (Dashboard v3, Phase 5): Agents on file is drawn with none on file too — the ref's sentence and two ways in */
+  it("Agents on file with and without agents", () => {
+    expect(render([q("a", QueryStatus.QUERIED)])).toContain('data-d3="agents-none-line"');
     expect(render([q("a", QueryStatus.QUERIED)], ms(), [A1])).toContain('data-d60="agents-hoop"');
   });
   it("the task card's last Then: names Getting started while the sheet is open", () => {

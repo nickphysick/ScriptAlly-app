@@ -77,3 +77,18 @@
 .d58.d2 .d3-exh { margin: 14px 0 2px; font-weight: 600; font-size: 15px; }
 .d58.d2 .d3-exf { margin: 12px 0 0; font-size: 14px; color: var(--d2-muted); }
 .d58.d2 .d3-egtag { display: inline-block; margin-bottom: 8px; padding: 1px 8px; border-radius: 9px; background: #efe6d6; font-size: 12px; color: var(--d2-muted); }
+
+/* ── Phase 5 · Agents on file and Getting started by stage ── */
+.d58.d2 .d3-aglink { margin-left: auto; font-size: 14px; white-space: nowrap; }
+.d58.d2 .d60-agents .d60-hn + small { text-transform: none; letter-spacing: 0; font-family: var(--d58-serif); font-size: 12px; color: var(--d2-muted); }
+.d58.d2 .d3-agnote { margin-top: 8px; font-size: 14px; color: var(--d2-muted); list-style: none; }
+.d58.d2 .d3-agnote .d60-ready { display: inline; padding: 0; font-weight: 600; color: var(--d2-ink); }
+.d58.d2 .d3-agnone { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 8px 0 0; }
+/* the one-row fold (the ref's `.gs`) */
+.d58.d2 .d3-gsrow { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 14px; background: #ffffff; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32); font-size: 15px; color: var(--d2-ink); }
+.d58.d2 .d3-gssegs { display: flex; gap: 3px; flex: none; }
+.d58.d2 .d3-gssegs i { width: 16px; height: 4px; border-radius: 2px; background: #ebe4da; }
+.d58.d2 .d3-gssegs i.is-on { background: #2d3a50; }
+.d58.d2 .d3-gstx { flex: 1 1 auto; min-width: 0; }
+.d58.d2 .d3-gsrow .d2-link { white-space: nowrap; }
+.d58.d2 .d3-gshide { flex: none; border: 0; background: transparent; padding: 6px; font-size: 14px; color: var(--d2-muted); text-decoration: underline; cursor: pointer; }
