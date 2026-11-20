@@ -75,7 +75,7 @@ describe("DB3-4b · Expected back on the card", () => {
     const opened: string[] = [];
     const h = renderToStaticMarkup(<Dash3Expected loading={false} model={expectedBack([r("a", 2), r("b", -3), r("c", 20), r("d", 30), r("e", 40), r("f", 50)], NOW)} onOpen={(id) => opened.push(id)} onAll={() => {}} />);
     expect(h).toContain(`style="background:${STAGE_COLOURS.queried.band}"`);
-    expect(h).toContain("1 reply expected this week.");
+    expect(h).toContain("1 reply expected in the next 7 days.");
     expect(h.match(/data-d3="ex-row"/g)?.length).toBe(3);
     expect(h.match(/data-d3="ex-past"/g)?.length).toBe(1);
     expect(h).toContain("1 is past its date");

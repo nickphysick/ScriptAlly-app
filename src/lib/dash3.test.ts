@@ -8,7 +8,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { QueryStatus, type Query } from "../types";
 import { STAGE_COLOURS } from "./stageColours";
-import { expectedBack, expectedHeading, goingHeading, goingSub, howItsGoing, moreLine, pastHeading, stageMarks, weekEndMs, withoutContradictions } from "./dash3";
+import { expectedBack, expectedHeading, goingHeading, goingSub, howItsGoing, moreLine, pastHeading, stageMarks, windowEndMs, withoutContradictions } from "./dash3";
 import type { QcRow } from "./qcSummary";
 import type { ListItem, ListPlan } from "./dashList";
 
@@ -43,11 +43,12 @@ const row = (id: string, expDays: number | null, court: QcRow["court"] = "agent"
   ({ id, court, expectedMs: expDays == null ? null : NOW + expDays * DAY, stageStartMs: NOW + startDays * DAY, sentMs: NOW + startDays * DAY, agentName: `Agent ${id}`, agency: `Agency ${id}` } as unknown as QcRow);
 
 describe("DB3-4b · Expected back reads only the Query Centre's clock", () => {
-  it("this week runs to Sunday night; three soonest, two past oldest first, the rest counted", () => {
-    expect(new Date(weekEndMs(NOW)).getDay()).toBe(1);
+  /* RE-POINTED (quick lane): the heading counts the next 7 days, not to Sunday night */
+  it("the next 7 days; three soonest, two past oldest first, the rest counted", () => {
+    expect(windowEndMs(NOW) - NOW).toBe(7 * DAY);
     const rows = [row("a", 1), row("b", 3), row("c", 2), row("d", 9), row("e", 30), row("p1", -5), row("p2", -40), row("p3", -1), row("x", null), row("y", 2, "you"), row("z", -9, "closed")];
     const e = expectedBack(rows, NOW);
-    expect(e.thisWeek).toBe(3); // a (Thu), c (Fri), b (Sat)
+    expect(e.nextDays).toBe(3); // a (+1), c (+2), b (+3); d (+9) is beyond
     expect(e.soon.map((r) => r.id)).toEqual(["a", "c", "b"]);
     expect(e.soon[0].when).toBe("by Thu 19 Nov");
     expect(e.soon.every((r) => r.progress! > 0.9 && r.progress! <= 1)).toBe(true);
@@ -56,11 +57,19 @@ describe("DB3-4b · Expected back reads only the Query Centre's clock", () => {
     expect(e.past[0].when).toBe("since 9 Oct");
     expect(e.past.every((r) => r.progress === null)).toBe(true);
     expect(e.more).toBe(2);
-    expect([expectedHeading(e), pastHeading(3), moreLine(2)]).toEqual(["3 replies expected this week.", "3 are past their date", "2 more are within their reply window."]);
+    expect([expectedHeading(e), pastHeading(3), moreLine(2)]).toEqual(["3 replies expected in the next 7 days.", "3 are past their date", "2 more are within their reply window."]);
   });
-  it("nothing due this week says so; one past reads in the singular", () => {
+  it("on a Sunday, a reply due on the Monday counts; one due in 8 days does not", () => {
+    const SUN = new Date(2026, 10, 22, 12).getTime();
+    expect(new Date(SUN).getDay()).toBe(0);
+    const at = (id: string, d: number) => ({ ...row(id, 0), expectedMs: SUN + d * DAY } as QcRow);
+    const e = expectedBack([at("mon", 1), at("tue", 2), at("late", 8)], SUN);
+    expect(e.nextDays).toBe(2);
+    expect(expectedHeading(e)).toBe("2 replies expected in the next 7 days.");
+  });
+  it("nothing due in the next 7 days says so; one past reads in the singular", () => {
     const e = expectedBack([row("a", 20)], NOW);
-    expect(expectedHeading(e)).toBe("Nothing due back this week.");
+    expect(expectedHeading(e)).toBe("Nothing due back in the next 7 days.");
     expect([pastHeading(1), moreLine(1)]).toEqual(["1 is past its date", "1 more is within its reply window."]);
   });
   it("never says overdue, late or watching", () => {
