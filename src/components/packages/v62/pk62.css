@@ -324,7 +324,11 @@
 .k62-icons button[aria-checked="true"] { background: var(--k62-btn); color: var(--k62-cream); box-shadow: none; }
 .k62-hdr-body > p { margin-bottom: 16px; color: var(--k62-t72); }
 .k62-hdr-body > p.k62-retire { margin-top: 12px; }
-.k62-hdr-foot { display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 14px 24px; background: #fff; border-top: 1px solid rgba(28, 19, 15, .1); }
+/* Consistency roll-out v1, Phase 12: the panel's action footer is 72 high (it was 71); its buttons take Phase 9's */
+.k62-hdr-foot { box-sizing: border-box; min-height: var(--sp-pfoot-h); display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: var(--sp-pfoot-pad); background: #fff; border-top: var(--sp-pfoot-rule); }
+:is(.pk62, .k62-layer) .k62-hdr-foot .k62-btn { height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); }
+:is(.pk62, .k62-layer) .k62-hdr-foot .k62-btn:hover { background: var(--sp-btn-line-hov); box-shadow: var(--sp-btn-ring); }
+:is(.pk62, .k62-layer) .k62-hdr-foot .k62-btn.k62-pri { background: var(--sp-anthracite); color: #fff; box-shadow: none; }
 .k62-hdr-foot .k62-btn[disabled] { opacity: .6; cursor: default; }
 
 /* ══ §7 · narrower screens ══ */

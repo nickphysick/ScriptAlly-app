@@ -172,6 +172,10 @@
 }
 .sp-fld { box-sizing: border-box; width: 100%; height: var(--sp-fld-h); padding: var(--sp-fld-pad); border: 0; border-radius: var(--sp-fld-r); background: #fff; box-shadow: var(--sp-fld-edge); font: var(--sp-fld-font); color: var(--sp-ink); outline: none; }
 .sp-fld:focus { box-shadow: var(--sp-fld-focus); }
+/* Consistency roll-out v1, Phase 12 (ruling 9): a slide-out panel's close button is a 36 × 36 circle; its fixed action
+   footer is 72 high with 14 24 of padding and a 1px hairline above. Builds, shells, headers and positions are the
+   panels' own. */
+:root { --sp-px-size: 36px; --sp-pfoot-h: 72px; --sp-pfoot-pad: 14px 24px; --sp-pfoot-rule: 1px solid rgba(28, 19, 15, .1); }
 .sp-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
 .sp-btn--fill { background: var(--sp-anthracite); color: #fff; }
 .sp-btn--fill:hover:not(:disabled) { background: var(--sp-anthracite-hov); }

@@ -205,10 +205,14 @@
 .cf-sugg button:disabled { opacity: 0.35; cursor: default; }
 
 /* the foot: pinned (it is the drawer's own foot, never inside the scrolling body) */
-.cf-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 28px; border-top: 1px solid rgba(28, 19, 15, 0.08); background: #fff; color: #1c130f; }
+/* Consistency roll-out v1, Phase 12: the panel's action footer (72 high, 14 24, the .1 hairline; it was 73, 16 28, .08) */
+.cf-foot { box-sizing: border-box; min-height: var(--sp-pfoot-h); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: var(--sp-pfoot-pad); border-top: var(--sp-pfoot-rule); background: #fff; color: #1c130f; }
 .cf-foot > span:first-child { flex: 1 1 auto; min-width: 0; font: 400 14px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
 .cf-foot .cf-bt { flex: none; display: flex; align-items: center; gap: 8px; }
-.cv-layer.cf-foot .cv-pillbtn, .cv-layer.cf-foot .cv-ghost { height: 40px; padding: 0 18px; border-radius: 20px; font-size: 14.5px; }
+/* Phase 12: its buttons take Phase 9's filled and outline action buttons (they were 40-high pills at 14.5) */
+.cv-layer.cf-foot .cv-pillbtn, .cv-layer.cf-foot .cv-ghost { height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
+.cv-layer.cf-foot .cv-pillbtn { background: var(--sp-anthracite); color: #fff; }
+.cv-layer.cf-foot .cv-ghost { background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); }
 .cv-layer.cf-foot .cv-pillbtn:disabled { opacity: 1; background: #b9b3ad; }
 .cv-layer.cf-foot .cv-ghost:disabled { opacity: 0.45; cursor: default; }
 .cf-remove { height: 40px; padding: 0 12px; border: 0; background: none; cursor: pointer; font: 400 14.5px/1 var(--sp-type); color: #a2452a; }
