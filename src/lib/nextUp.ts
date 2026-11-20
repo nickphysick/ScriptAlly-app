@@ -283,3 +283,29 @@ export function nextLead(item: ListItem, ctx: TaskCtx): NextLead {
     }
   }
 }
+
+/* ── the rows beneath (Phase 2) ───────────────────────────────────────────────────────────────── */
+
+export interface NextRow {
+  initials: string;
+  /** the task in one line, the agent's whole name in it */
+  text: string;
+  /** its wait ("23 days", "5 months", "today"), where its kind has one; never "ago" */
+  wait: string | null;
+}
+
+/** A task below the lead: a small seal, the task in one line, and its wait. */
+export function nextRow(item: ListItem, ctx: TaskCtx): NextRow {
+  const l = nextLead(item, ctx);
+  const name = l.agent?.name ?? item.who;
+  const initials = l.agent?.initials ?? item.initials;
+  const text = l.kind === "partial" || l.kind === "full" || l.kind === "revision" ? `Send your ${l.kind} to ${name}`
+    : l.kind === "nudge" ? `Send ${name} a nudge`
+      : l.kind === "quiet" ? `Close your query to ${name}, or nudge again`
+        : l.kind === "offer" ? `Answer ${possessive(name)} offer`
+          : l.kind === "tell" ? `Tell the others about ${possessive(item.who)} offer`
+            : `${item.pre}${item.who}${item.post}`.trim();
+  /* a count of queries is not a wait: the tell row shows none */
+  const wait = l.kind !== "tell" && l.figure?.wait ? l.figure.wait : null;
+  return { initials, text, wait };
+}

@@ -52,3 +52,21 @@
 /* 5 · the buttons */
 .d58.d2 .nu-acts { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
 .d58.d2 .nu-acts .d2-open { margin-top: 0; }
+
+/* ── Phase 2 · the rows beneath: small navy seal, the task in one line, its wait; hover or focus swaps the wait for the
+   navy arrow chip, and the whole row is the click target ── */
+.d58.d2 .nu-rows { margin: 8px 0 0; }
+.d58.d2 .nu-row { position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 8px 6px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; text-align: left; font: 400 16px/1.3 var(--d58-serif); color: var(--d2-ink); }
+.d58.d2 .nu-row:hover { background: color-mix(in srgb, var(--d2-hair) 45%, transparent); }
+.d58.d2 .nu-row:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.d58.d2 .nu-rseal { flex: none; }
+.d58.d2 .nu-rtx { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .nu-wait { flex: none; margin-left: auto; font-size: 14px; color: var(--d2-muted); white-space: nowrap; transition: opacity 150ms ease; }
+.d58.d2 .nu-go { position: absolute; right: 6px; top: 50%; width: 28px; height: 28px; margin-top: -14px; border-radius: 8px; background: var(--sp-anthracite); color: #fffaf3; display: grid; place-items: center; opacity: 0; transition: opacity 150ms ease; }
+.d58.d2 .nu-go svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.6; }
+.d58.d2 .nu-row:hover .nu-go, .d58.d2 .nu-row:focus-visible .nu-go { opacity: 1; }
+.d58.d2 .nu-row:hover .nu-wait, .d58.d2 .nu-row:focus-visible .nu-wait { opacity: 0; }
+/* the text never runs under the chip */
+.d58.d2 .nu-row:not(:has(.nu-wait)) .nu-rtx { margin-right: 34px; }
+.d58.d2 .nu-wait { min-width: 28px; text-align: right; }
+@media (prefers-reduced-motion: reduce) { .d58.d2 .nu-wait, .d58.d2 .nu-go { transition: none; } }

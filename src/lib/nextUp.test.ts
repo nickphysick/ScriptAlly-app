@@ -168,3 +168,22 @@ describe("NU1-c · sentence, number, caption and label by kind", () => {
     }
   });
 });
+
+import { nextRow } from "./nextUp";
+
+describe("NU1-d · the rows beneath", () => {
+  it("the task in one line with the agent's whole name, and its wait; never \"ago\"", () => {
+    const send = nextRow(item({ taskType: "partial_requested" }), ctx(query({ status: QueryStatus.PARTIAL_REQUESTED }), row({ status: QueryStatus.PARTIAL_REQUESTED, stageStartMs: ago(23) }), agent({ name: "Daniel O'Rourke" })));
+    expect(send).toEqual({ initials: "DO", text: "Send your partial to Daniel O'Rourke", wait: "23 days" });
+    const nudge = nextRow(item({ group: "nudge", action: { kind: "drawer", request: { mode: "nudge", queryId: "q1" } } }), ctx(query(), row({ expectedMs: ago(39) }), agent({ name: "Tom Okafor" })));
+    expect(nudge).toMatchObject({ text: "Send Tom Okafor a nudge", wait: "39 days" });
+    const offer = nextRow(item({ taskType: "offer_received" }), ctx(query({ status: QueryStatus.OFFER, offerDate: new Date(ago(2)).toISOString() }), row({ status: QueryStatus.OFFER })));
+    expect(offer.wait).toBe("2 days");
+    for (const r of [send, nudge, offer]) expect(`${r.text} ${r.wait}`).not.toMatch(/\bago\b/);
+  });
+  it("a task with no wait shows none", () => {
+    const hk = nextRow(item({ group: "house", pre: "Add genres for ", who: "4 agents", initials: "GE", action: { kind: "agent", agentId: "a1", tab: "overview", focus: "genres", sequence: ["a1", "a2", "a3", "a4"] } as unknown as ListItem["action"] }),
+      { queries: [], agents: [agent()], qcRows: [], nowMs: NOW });
+    expect(hk).toEqual({ initials: "GE", text: "Add genres for 4 agents", wait: null });
+  });
+});

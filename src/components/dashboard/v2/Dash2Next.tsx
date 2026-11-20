@@ -6,7 +6,7 @@
  *
  * The lead task has five rows, in the same places on every card: the agent row (the navy seal, name, agency in italic,
  * a number and its caption on the right), the sentence in the typewriter face, the fixed four-stop track, one label
- * line, the buttons. Then the next two tasks as rows.
+ * line, the buttons. Then up to two more tasks as rows: a small seal, the task in one line, its wait on the right.
  *
  * ⚠️ THE PLAN IS THE APP'S: the items and their order are `dashList`'s (via Dashboard v3's `withoutContradictions`);
  *    the words and numbers are `lib/nextUp`'s, read from the Query Centre's own rows. ⚠️ THE DASHBOARD NEVER COMPLETES
@@ -14,14 +14,14 @@
  * ⚠️ STATUS IS DRAWN BY THE REAL StatusDot, the seal is the real AgentDisc; nothing here redraws a mark.
  */
 import React, { useMemo } from "react";
-import type { ListAction, ListItem, ListPlan } from "../../../lib/dashList";
+import type { ListAction, ListPlan } from "../../../lib/dashList";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { CAUGHT_UP } from "../v71/Dash71Task";
 import { StatusDot } from "../../StatusDot";
 import { AgentDisc } from "../../shared/AgentDisc";
 import { Frame } from "./Frame";
 import { STAGE_COLOURS, bandBackground, quietBackground } from "../../../lib/stageColours";
-import { nextLead, type NextLead, type Track } from "../../../lib/nextUp";
+import { nextLead, nextRow, type NextLead, type Track } from "../../../lib/nextUp";
 import "./nextUp.css";
 
 export const OPEN_TASK = "Open task";
@@ -30,10 +30,6 @@ export const SEE_ALL = "See all";
 export const NEXT_SHOWN = 3;
 /** the seal's diameter on the lead card; the track's first stop is centred under it */
 export const LEAD_SEAL = 40;
-
-const Mark: React.FC<{ item: ListItem; size: number }> = ({ item, size }) => (item.status
-  ? <StatusDot status={item.status} overrideSize={size} decorative />
-  : <svg viewBox="0 0 24 24" width={size} height={size} aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" strokeWidth="2" /></svg>);
 
 /** The fixed four stops, edge to edge: the line fills to the ringed stop. Unreached stops are faint; Offer is the outline seal. */
 export const NextTrack: React.FC<{ track: Track }> = ({ track }) => (
@@ -118,16 +114,23 @@ export const Dash2Next: React.FC<{
               </Lead>
             </div>
             {rest.length > 0 && (
-              <ul className="d2-later" data-d2="next-rest">
-                {rest.map((it) => (
-                  <li key={it.key}>
-                    <button type="button" className="d2-lrow" data-d2="next-row" onClick={() => onView(it.action)}>
-                      <span className="d2-lmark"><Mark item={it} size={18} /></span>
-                      <span className="d2-ltx">{it.pre}{it.who}{it.post}</span>
-                      {it.when && <time>{it.when}</time>}
-                    </button>
-                  </li>
-                ))}
+              <ul className="d2-later nu-rows" data-d2="next-rest">
+                {rest.map((it) => {
+                  const r = nextRow(it, ctx);
+                  return (
+                    <li key={it.key}>
+                      {/* the whole row is the click target; hover or focus swaps the wait for the arrow chip */}
+                      <button type="button" className="nu-row" data-d2="next-row" data-key={it.key} onClick={() => onView(it.action)}>
+                        <AgentDisc initials={r.initials} standing="querying" size={30} className="nu-rseal" />
+                        <span className="nu-rtx" data-nu="row-text">{r.text}</span>
+                        {r.wait && <span className="nu-wait" data-nu="row-wait">{r.wait}</span>}
+                        <span className="nu-go" aria-hidden="true">
+                          <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+                        </span>
+                      </button>
+                    </li>
+                  );
+                })}
               </ul>
             )}
           </>
