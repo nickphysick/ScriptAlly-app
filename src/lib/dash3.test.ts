@@ -63,7 +63,7 @@ describe("DB3-4b · Expected back reads only the Query Centre's clock", () => {
     expect([pastHeading(1), moreLine(1)]).toEqual(["1 is past its date", "1 more is within its reply window."]);
   });
   it("never says overdue, late or watching", () => {
-    const src = readFileSync(new URL("./dash3.ts", import.meta.url), "utf8");
+    const src = readFileSync(new URL("./dash3.ts", import.meta.url), "utf8") + readFileSync(new URL("../components/dashboard/v3/Dash3Expected.tsx", import.meta.url), "utf8");
     /* the copy: every string and template literal (comments are not copy) */
     const copy = (src.match(/"[^"\n]*"|`[^`]*`/g) ?? []).join(" ");
     expect(copy).toContain("reply window");

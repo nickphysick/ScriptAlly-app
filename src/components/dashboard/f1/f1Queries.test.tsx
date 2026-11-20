@@ -45,6 +45,9 @@ describe("DF1-C · Active and Closed, one card", () => {
     /* RE-POINTED (Dashboard v3, Phase 2): Closed queries is off the Dashboard — the middle is the chart, then Expected back */
     for (const s of ['data-d2-card="founding"', 'data-d2="grid"', 'data-d2="left"', 'data-d2-card="next"', 'data-d60="agents-hoop"', 'data-d2="mid"', 'data-d2-card="active"', 'data-d2="right"', 'data-d2="feed"']) expect(at(s), s).toBeGreaterThan(-1);
     expect(at('data-d60="closed-hoop"')).toBe(-1);
+    /* Dashboard v3, Phase 4b: Expected back follows the chart in the middle column */
+    expect(at('data-d2-card="active"')).toBeLessThan(at('data-d2-card="expected"'));
+    expect(at('data-d2-card="expected"')).toBeLessThan(at('data-d2="right"'));
     expect(at('data-d2-card="founding"')).toBeLessThan(at('data-d2="grid"'));
     expect(at('data-d2-card="next"')).toBeLessThan(at('data-d60="agents-hoop"'));
     expect(at('data-d60="agents-hoop"')).toBeLessThan(at('data-d2="mid"'));

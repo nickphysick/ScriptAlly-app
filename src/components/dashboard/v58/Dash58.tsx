@@ -60,7 +60,8 @@ import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import { Dash2Band } from "../v2/Dash2Band";
 import { wholeWeeksQuerying } from "../../../lib/dash2";
-import { howItsGoing, stageMarks, withoutContradictions } from "../../../lib/dash3";
+import { expectedBack, howItsGoing, stageMarks, withoutContradictions } from "../../../lib/dash3";
+import { Dash3Expected } from "../v3/Dash3Expected";
 import { Dash3Reminder } from "../v3/Dash3Reminder";
 import { Dash2Next } from "../v2/Dash2Next";
 import { Dash2Active } from "../v2/Dash2Active";
@@ -339,6 +340,9 @@ export const Dash58: React.FC<Dash58Props> = ({
     () => ({ queries, agents, qcRows: buildQcRows(scopedQueries, agents, scopedActivities, now.getTime()), nowMs: now.getTime() }),
     [queries, agents, scopedQueries, scopedActivities, now],
   );
+
+  /* Dashboard v3, Phase 4b: Expected back — the Query Centre's own clock, read off the same rows */
+  const expected = useMemo(() => expectedBack(taskCtx.qcRows, now.getTime()), [taskCtx, now]);
 
   const run = (a: ListAction) => {
     /* Record a response v1 — a response is the query's card and its composer, over the dashboard */
@@ -689,6 +693,9 @@ export const Dash58: React.FC<Dash58Props> = ({
                 <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities} agents={agents}
                   activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} going={going} />
               )}
+              {/* before the first query, a labelled example; afterwards, the clock's own rows. A row opens its query's card. */}
+              <Dash3Expected loading={loading} model={pre ? null : expected}
+                onOpen={(id) => openQueryPanel(id, "dashboard")} onAll={() => onNavigate("queries")} />
             </div>
             <div className="d2-right" data-d2="right">
               <div className="d2-feed" data-d2="feed">

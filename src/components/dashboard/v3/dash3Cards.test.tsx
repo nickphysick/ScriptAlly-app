@@ -63,3 +63,30 @@ describe("DB3-4a · the chart's third view", () => {
     expect(one).toContain(bandBackground("offer").slice(0, 30));
   });
 });
+
+import { Dash3Expected, EXAMPLE_TAG } from "./Dash3Expected";
+import { expectedBack } from "../../../lib/dash3";
+import type { QcRow } from "../../../lib/qcSummary";
+
+describe("DB3-4b · Expected back on the card", () => {
+  const NOW = new Date(2026, 10, 18, 12).getTime();
+  const r = (id: string, d: number) => ({ id, court: "agent", expectedMs: NOW + d * 86_400_000, stageStartMs: NOW - 40 * 86_400_000, sentMs: null, agentName: `A ${id}`, agency: `Ag ${id}` } as unknown as QcRow);
+  it("the Queried head; rows open their query; past rows have no bar; the footer links the Query Centre", () => {
+    const opened: string[] = [];
+    const h = renderToStaticMarkup(<Dash3Expected loading={false} model={expectedBack([r("a", 2), r("b", -3), r("c", 20), r("d", 30), r("e", 40), r("f", 50)], NOW)} onOpen={(id) => opened.push(id)} onAll={() => {}} />);
+    expect(h).toContain(`style="background:${STAGE_COLOURS.queried.band}"`);
+    expect(h).toContain("1 reply expected this week.");
+    expect(h.match(/data-d3="ex-row"/g)?.length).toBe(3);
+    expect(h.match(/data-d3="ex-past"/g)?.length).toBe(1);
+    expect(h).toContain("1 is past its date");
+    expect(h).toContain("2 more are within their reply window.");
+    expect(h).toContain('data-d3="ex-qc"');
+    const pastRow = h.slice(h.indexOf('data-d3="ex-past"'));
+    expect(pastRow.slice(0, pastRow.indexOf("</button>"))).not.toContain("d3-pb");
+  });
+  it("day one: a labelled example", () => {
+    const h = renderToStaticMarkup(<Dash3Expected loading={false} model={null} onOpen={() => {}} onAll={() => {}} />);
+    expect(h).toContain(`>${EXAMPLE_TAG}<`);
+    expect(h).not.toContain('data-d3="ex-row"');
+  });
+});
