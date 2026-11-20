@@ -11,10 +11,10 @@
 .mk-pv {
   --pv-navy: #1b2433; --pv-navy2: #2a3a52; --pv-blush: #e8b4a3; --pv-rust: #a2452a;
   --pv-ink: #1c130f; --pv-body: rgba(28, 19, 15, .85); --pv-cream: #fbf6ef;
-  background: var(--pv-cream); color: var(--pv-ink); font: 400 16px/1.55 var(--mk-f-serif);
+  color: var(--pv-ink); font: 400 16px/1.55 var(--mk-f-serif);
 }
 /* The drawer runs on from the navy bar, and the page's ground is the body's cream to the footer. */
-.mk-sheet:has(.mk-pv) { border-top-left-radius: 0; border-top-right-radius: 0; background-color: #fbf6ef; }
+.mk-sheet:has(.mk-pv) { border-top-left-radius: 0; border-top-right-radius: 0; }
 
 .mk-pv-in { max-width: 1120px; margin: 0 auto; padding: 0 64px; box-sizing: border-box; }
 

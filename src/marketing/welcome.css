@@ -18,10 +18,10 @@
   --wel-navy: #1b2433; --wel-navy2: #2a3a52; --wel-blush: #e8b4a3; --wel-rust: #a2452a; --wel-stub: #7a3420;
   --wel-ink: #1c130f; --wel-body: rgba(28, 19, 15, .74); --wel-muted: rgba(28, 19, 15, .55);
   --wel-b1: #f4ede3; --wel-b2: #fbf6ef; --wel-card: #fffefb;
-  background: var(--wel-b1); color: var(--wel-ink); font: 400 16px/1.55 var(--mk-f-serif);
+  color: var(--wel-ink); font: 400 16px/1.55 var(--mk-f-serif);
 }
 /* The drawer runs on from the navy bar, so the sheet's top corners would show ink between them. */
-.mk-sheet:has(.mk-wel) { border-top-left-radius: 0; border-top-right-radius: 0; background-color: #f4ede3; }
+.mk-sheet:has(.mk-wel) { border-top-left-radius: 0; border-top-right-radius: 0; }
 
 .mk-wel-in { max-width: 1120px; margin: 0 auto; padding: 0 64px; box-sizing: border-box; }
 .mk-wel-in--narrow { max-width: 820px; }
