@@ -16,15 +16,12 @@ vi.mock("../../../lib/firebase", async () => (await import("../../../test/pageSm
 
 import { Dash58 } from "../v58/Dash58";
 import { Dash2Band } from "./Dash2Band";
-import { nextReason } from "./Dash2Next";
 import { RANK_MIN } from "../../../lib/foundingBand";
 import { EDGE, HEADROOM, PLOT_H } from "./Dash2Active";
 import { TIERS } from "../../../lib/foundingStats";
 import { breakdownFor, changeText, dash2Weeks, dateLabels, indexActivities, visibleWeeks, weekAria, wholeWeeksQuerying, weeksTag } from "../../../lib/dash2";
 import { aggregateLedger, dailyLedger } from "../../../lib/oneScreen";
 import { latestNote, noteFrom, noNotesLine } from "../../../lib/foundingNotes";
-import type { ListItem } from "../../../lib/dashList";
-import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { QueryStatus, type Agent, type Manuscript, type Query, type User } from "../../../types";
 
 const NOW = new Date(2026, 9, 29, 12);
@@ -151,14 +148,9 @@ describe("DB2-D · the founding card", () => {
   });
 });
 
+/* RETIRED (Next up v1): DB2-B held the lead's reason line ("no reply in N weeks", "window ended N weeks ago"). The
+   lead card has one label line now, lib/nextUp's, held kind by kind in src/lib/nextUp.test.ts (NU1). */
+
 /* RETIRED (v2.2 Part C): DB21-C held v2.1's hero line and progress ring. The band has no ring, and its words are
    lib/foundingBand's, held over every rank in foundingBand.test.ts (and on the page by DB22 C1). */
 
-describe("DB2-B · Next up's reason", () => {
-  it("says how long there has been no reply, and in rose how long since the window ended", () => {
-    const now = NOW.getTime();
-    const item = { group: "quiet", action: { kind: "drawer", request: { mode: "close", queryId: "q1" } } } as unknown as ListItem;
-    const ctx = { qcRows: [{ id: "q1", sentMs: now - 33 * 7 * 86_400_000, stageStartMs: null, expectedMs: now - 9 * 7 * 86_400_000 }], nowMs: now } as unknown as TaskCtx;
-    expect(nextReason(item, ctx, null)).toEqual({ said: "no reply in 33 weeks", past: "window ended 9 weeks ago" });
-  });
-});

@@ -1,0 +1,170 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * NU1 — Next up v1: the lead card's sentence, number, caption and label for each kind of task, the fixed four-stop
+ * track, and the day counts (0 reads "today", days up to 60, then whole months).
+ */
+import { describe, it, expect } from "vitest";
+import { QueryStatus, type Agent, type Query } from "../types";
+import type { ListItem } from "./dashList";
+import type { TaskCtx } from "./dashTaskCard";
+import type { QcRow } from "./qcSummary";
+import { dayFigure, daysSince, nextKind, nextLead, quietFigure, trackOf } from "./nextUp";
+
+const NOW = new Date(2026, 10, 20, 12).getTime();
+const DAY = 86_400_000;
+const ago = (d: number) => NOW - d * DAY;
+
+const agent = (o: Partial<Agent> = {}): Agent => ({ id: "a1", name: "Jonathan Marsh", agency: "The Marsh Agency", ...o } as Agent);
+const query = (o: Partial<Query> = {}): Query => ({ id: "q1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED, ...o } as Query);
+const row = (o: Partial<QcRow> = {}): QcRow => ({
+  id: "q1", manuscriptId: "m1", court: "agent", status: QueryStatus.QUERIED, initials: "JM", agentName: "Jonathan Marsh",
+  sentMs: null, lastMs: 0, stageStartMs: null, expectedMs: null, expectedKind: null, history: { spans: [], currentStartMs: null, dated: false },
+  ...o,
+} as unknown as QcRow);
+const item = (o: Partial<ListItem>): ListItem => ({
+  key: "k", group: "req", tone: "house", pre: "", who: "Jonathan Marsh", post: "", initials: "JM", fact: "", agency: "", status: null,
+  when: "", foot: "", actLabel: "", action: { kind: "drawer", request: { mode: "sent", queryId: "q1" } }, stages: null, note: null, date: null,
+  ...o,
+} as ListItem);
+const ctx = (q: Query, r: QcRow, a: Agent = agent(), more: QcRow[] = []): TaskCtx => ({ queries: [q], agents: [a], qcRows: [r, ...more], nowMs: NOW });
+const spans = (...ss: [QueryStatus, number][]) => ({ spans: ss.map(([status, d]) => ({ status, startMs: ago(d), endMs: null, current: false })), currentStartMs: null, dated: true });
+
+describe("NU1-a · day counts", () => {
+  it("0 reads today with no caption; days up to 60; then whole months", () => {
+    expect(dayFigure(0, "waiting")).toEqual({ value: "today", caption: null, wait: "today" });
+    expect(dayFigure(1, "waiting")).toEqual({ value: "1", caption: "day waiting", wait: "1 day" });
+    expect(dayFigure(60, "waiting")).toEqual({ value: "60", caption: "days waiting", wait: "60 days" });
+    expect(dayFigure(61, "waiting")).toEqual({ value: "2", caption: "months waiting", wait: "2 months" });
+    expect(dayFigure(400, "ago").caption).toBe("months ago");
+  });
+  it("gone quiet: weeks under two months, then months", () => {
+    expect(quietFigure(20)).toMatchObject({ value: "3", caption: "weeks quiet" });
+    expect(quietFigure(160)).toMatchObject({ value: "5", caption: "months quiet" });
+    expect(quietFigure(0).caption).toBe(null);
+  });
+  it("whole calendar days", () => {
+    expect(daysSince(ago(17), NOW)).toBe(17);
+    expect(daysSince(NOW + 5 * DAY, NOW)).toBe(0);
+  });
+});
+
+describe("NU1-b · the track is always four stops", () => {
+  it("a full asked for straight from the query: the partial stop stays faint, Offer the outline", () => {
+    const t = trackOf(QueryStatus.FULL_REQUESTED, spans([QueryStatus.QUERIED, 30], [QueryStatus.FULL_REQUESTED, 17]).spans);
+    expect(t.cur).toBe(2);
+    expect(t.stops.map((s) => [s.status, s.reached])).toEqual([
+      [QueryStatus.QUERIED, true], [QueryStatus.PARTIAL_SENT, false], [QueryStatus.FULL_REQUESTED, true], [QueryStatus.OFFER, false],
+    ]);
+  });
+  it("a long history is still four stops; a revision is the arrows mark on the Full stop", () => {
+    const t = trackOf(QueryStatus.REVISE_RESUBMIT, spans([QueryStatus.QUERIED, 90], [QueryStatus.PARTIAL_REQUESTED, 80], [QueryStatus.PARTIAL_SENT, 70],
+      [QueryStatus.FULL_REQUESTED, 50], [QueryStatus.FULL_SENT, 40], [QueryStatus.REVISE_RESUBMIT, 9]).spans);
+    expect(t.stops).toHaveLength(4);
+    expect(t.stops[1]).toEqual({ status: QueryStatus.PARTIAL_SENT, reached: true });
+    expect(t.stops[2]).toEqual({ status: QueryStatus.REVISE_RESUBMIT, reached: true });
+    expect(t.cur).toBe(2);
+  });
+  it("an offer completes it", () => {
+    expect(trackOf(QueryStatus.OFFER, []).cur).toBe(3);
+    expect(trackOf(QueryStatus.OFFER, []).stops[3]).toEqual({ status: QueryStatus.OFFER, reached: true });
+  });
+});
+
+describe("NU1-c · sentence, number, caption and label by kind", () => {
+  it("send the partial / full / revision", () => {
+    for (const [taskType, status, word, sentence] of [
+      ["partial_requested", QueryStatus.PARTIAL_REQUESTED, "Partial asked for", "Send your partial."],
+      ["full_requested", QueryStatus.FULL_REQUESTED, "Full asked for", "Send your full."],
+      ["revise_resubmit", QueryStatus.REVISE_RESUBMIT, "Revision asked for", "Send your revision."],
+    ] as const) {
+      const l = nextLead(item({ taskType, status }), ctx(query({ status }), row({ status, stageStartMs: new Date(2026, 10, 3).getTime() })));
+      expect(l.sentence).toBe(sentence);
+      expect(l.figure).toMatchObject({ value: "17", caption: "days waiting" });
+      expect(l.label).toEqual({ lead: word, rest: " · 3 Nov" });
+      expect(l.agent).toEqual({ initials: "JM", name: "Jonathan Marsh", agency: "The Marsh Agency" });
+    }
+  });
+  it("an offer's send the full is the full's card", () => {
+    expect(nextKind({ group: "req", taskType: "offer_send_full" })).toBe("full");
+  });
+  it("nudge due: days past the expected date, the send and the expected date", () => {
+    const l = nextLead(item({ group: "nudge", taskType: "nudge_overdue", status: QueryStatus.QUERIED, action: { kind: "drawer", request: { mode: "nudge", queryId: "q1" } } }),
+      ctx(query(), row({ stageStartMs: new Date(2026, 7, 12).getTime(), expectedMs: new Date(2026, 9, 12).getTime() }), agent({ name: "Tom Okafor" })));
+    expect(l.sentence).toBe("Send Tom a nudge.");
+    expect(l.figure).toMatchObject({ value: "39", caption: "days past date" });
+    expect(l.label).toEqual({ lead: "Queried", rest: " 12 Aug · reply expected by 12 Oct" });
+    expect(l.track?.cur).toBe(0);
+  });
+  it("nudge due after a send: the label names the send, not the query", () => {
+    const l = nextLead(item({ group: "nudge", status: QueryStatus.PARTIAL_SENT, action: { kind: "drawer", request: { mode: "nudge", queryId: "q1" } } }),
+      ctx(query({ status: QueryStatus.PARTIAL_SENT }), row({ status: QueryStatus.PARTIAL_SENT, stageStartMs: new Date(2026, 6, 1).getTime(), expectedMs: ago(5) })));
+    expect(l.label?.lead).toBe("Partial sent");
+  });
+  it("no first name saved: the agent, never he or she", () => {
+    const l = nextLead(item({ group: "nudge", action: { kind: "drawer", request: { mode: "nudge", queryId: "q1" } } }), ctx(query(), row(), agent({ name: "" })));
+    expect(l.sentence).toBe("Send the agent a nudge.");
+    const o = nextLead(item({ taskType: "offer_received", status: QueryStatus.OFFER }), ctx(query({ status: QueryStatus.OFFER }), row({ status: QueryStatus.OFFER }), agent({ name: "  " })));
+    expect(o.sentence).toBe("Answer the agent’s offer.");
+    for (const s of [l.sentence, o.sentence]) expect(s).not.toMatch(/\b(he|she|his|her)\b/i);
+  });
+  it("gone quiet: time since the last event; the query and the nudge dated; a dotted track", () => {
+    const l = nextLead(item({ group: "quiet", taskType: "nudge_overdue", action: { kind: "drawer", request: { mode: "nudge", queryId: "q1" } } }),
+      ctx(query({ lastNudgeSentDate: new Date(2026, 8, 2).toISOString() }), row({ sentMs: new Date(2026, 5, 21).getTime(), lastMs: new Date(2026, 5, 1).getTime() })));
+    expect(l.sentence).toBe("Close it, or nudge again?");
+    expect(l.figure).toMatchObject({ value: "5", caption: "months quiet" });
+    expect(l.label).toEqual({ lead: "Gone quiet", rest: " · queried 21 Jun · nudged 2 Sep" });
+    expect(l.track?.quiet).toBe(true);
+  });
+  it("gone quiet without a nudge says nothing about one", () => {
+    const l = nextLead(item({ group: "quiet", taskType: "no_response_close" }), ctx(query(), row({ sentMs: ago(100), lastMs: ago(40) })));
+    expect(l.label?.rest).not.toMatch(/nudged/);
+    expect(l.figure).toMatchObject({ value: "6", caption: "weeks quiet" });
+  });
+  it("answer the offer", () => {
+    const l = nextLead(item({ taskType: "offer_received", status: QueryStatus.OFFER }),
+      ctx(query({ status: QueryStatus.OFFER, offerDate: new Date(2026, 10, 18).toISOString() }), row({ status: QueryStatus.OFFER }), agent({ name: "Rosalind Achebe" })));
+    expect(l.sentence).toBe("Answer Rosalind’s offer.");
+    expect(l.figure).toMatchObject({ value: "2", caption: "days ago" });
+    expect(l.label).toEqual({ lead: "Offer made", rest: " · 18 Nov" });
+    expect(l.track?.cur).toBe(3);
+  });
+  it("an offer made today: today, no caption", () => {
+    const l = nextLead(item({ taskType: "offer_received" }), ctx(query({ status: QueryStatus.OFFER, offerDate: new Date(NOW).toISOString() }), row({ status: QueryStatus.OFFER })));
+    expect(l.figure).toEqual({ value: "today", caption: null, wait: "today" });
+  });
+  it("a request over 60 days old counts in months", () => {
+    const l = nextLead(item({ taskType: "full_requested" }), ctx(query({ status: QueryStatus.FULL_REQUESTED }), row({ status: QueryStatus.FULL_REQUESTED, stageStartMs: ago(95) })));
+    expect(l.figure).toMatchObject({ value: "3", caption: "months waiting" });
+  });
+  it("tell the other agents: the open queries' seals and count, and who made the offer", () => {
+    const others = Array.from({ length: 14 }, (_, i) => row({ id: `o${i}`, initials: `A${i}`, status: QueryStatus.QUERIED }));
+    const closed = row({ id: "gone", court: "closed" });
+    const l = nextLead(item({ taskType: "offer_tell_all", status: QueryStatus.OFFER, action: { kind: "drawer", request: { mode: "offer", queryId: "q1" } } }),
+      ctx(query({ status: QueryStatus.OFFER, offerDate: new Date(2026, 10, 18).toISOString() }), row({ status: QueryStatus.OFFER }), agent({ name: "Rosalind Achebe" }), [...others, closed]));
+    expect(l.sentence).toBe("Tell the others you have an offer.");
+    expect(l.figure).toMatchObject({ value: "14", caption: "still reading" });
+    expect(l.seals).toEqual({ initials: ["A0", "A1", "A2", "A3"], more: 10 });
+    expect(l.track).toBe(null);
+    expect(l.sub).toBe("Rosalind Achebe made an offer on 18 Nov.");
+  });
+  it("not about a query: the task's own title and note, no number, no track, a plain head", () => {
+    const l = nextLead(item({ group: "house", pre: "Add a typical reply time for ", who: "Priya Nair", note: "It sets the date you can expect to hear back.",
+      action: { kind: "agent", agentId: "a1", tab: "overview", focus: "reply", sequence: ["a1"] } as unknown as ListItem["action"] }),
+      { queries: [], agents: [agent({ name: "Priya Nair", agency: "Nair Literary" })], qcRows: [], nowMs: NOW });
+    expect(l.sentence).toBe("Add a typical reply time for Priya Nair.");
+    expect(l.sub).toBe("It sets the date you can expect to hear back.");
+    expect(l.figure).toBe(null);
+    expect(l.track).toBe(null);
+    expect(l.stage).toBe(null);
+    expect(l.agent).toMatchObject({ name: "Priya Nair", agency: "Nair Literary" });
+  });
+  it("every caption is two words at most, and none says a verdict", () => {
+    const caps = [dayFigure(5, "waiting"), dayFigure(5, "past date"), dayFigure(5, "ago"), dayFigure(90, "past date"), quietFigure(30), quietFigure(90)].map((f) => f.caption ?? "");
+    for (const c of caps) {
+      expect(c.replace(/^(days?|months?|weeks?) /, "").split(" ").length, c).toBeLessThanOrEqual(2);
+      expect(c).not.toMatch(/overdue|late/i);
+    }
+  });
+});
