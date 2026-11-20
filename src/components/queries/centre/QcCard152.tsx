@@ -533,7 +533,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
 
   return (
     <PopCtx.Provider value={pop}>
-    <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view}
+    <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view} data-qc163-stage={stage}
       data-lean={view === "read" && !jOpen && !ed.on ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
       data-stage={stage} data-quiet={quiet ? "" : undefined} style={stageVars}>
       <div ref={inRef} className="qc152-in">

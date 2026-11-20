@@ -18,12 +18,15 @@
  *   foot        the footer's new contents fade and rise; its height eases when it changes.
  *   toastOut    the toast leaves: opacity to 0 and 8px down over 220ms.
  *   breathe     (v161.2) while the composer drawer is open, the card's rim breathes — the frame's ::before, which
- *               draws its white rim and shadow: `scale` 1 → 1.01 → 1 over 1.9s, eased, repeating. Nothing inside the frame
- *               moves (the drawer and every button stay still). It rests while the writer types and stops when the drawer
- *               closes; at a save's press the rim eases back as the press-in begins.
+ *               draws its white rim and shadow: `scale` 1 → 1.01 → 1 over 3.2s (v163), eased, repeating. Nothing inside
+ *               the frame moves (the drawer and every button stay still). It rests while the writer types and stops when
+ *               the drawer closes; at a save's press the rim eases back as the press-in begins. v163: the rim layer's tint
+ *               breathes with it, opacity 0 → 0.72 → 0, in the `rim` colour of the card's current stage.
  *
  * ⚠️ REDUCED MOTION: none of this runs (`reduced()`); every state changes at once, as before v160.
  */
+import { STAGE_COLOURS, type Stage } from "../../../lib/stageColours";
+
 export const reduced = (): boolean => typeof window !== "undefined" && !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
 /* Query card v161.1 — the bump is a press and a pop: the frame presses in at the press, holds through the save, and pops
@@ -57,44 +60,109 @@ export function pressBack(frame: HTMLElement | null): void {
   frame.animate([{ scale: String(at) }, { scale: "1" }], { duration: PRESS.backMs, easing: "ease-out" }).id = "qc1611-back";
 }
 
-/* ══ Query card v161.2 — THE CARD BREATHES WHILE THE WRITER IS RECORDING ═════════════════════════════════════════════
+/* ══ Query card v161.2 — THE CARD BREATHES WHILE THE WRITER IS RECORDING; v163 — IN THE STAGE'S COLOUR ══════════════
    The composer drawer owns it (QcComposer1522): `breatheOpen` at its mount, `breatheType` on a keystroke in one of its
    fields, `breatheClose` at its unmount — so every way in and out of the drawer is covered by the drawer itself. One
    breath per frame at most; the press (`pressIn`) ends it from wherever it is.
-   ⚠️ IT ANIMATES THE RIM, NEVER THE FRAME: the frame's ::before (qcv152card.css) draws the rim and the shadow, and only
-   it scales — scaling the frame moved every button in the drawer each frame (Playwright's click never found it still,
-   QC1612's ordinary-click check). */
-export const BREATHE = { peak: 1.01, ms: 1900, ease: "ease-in-out", enterMs: 320, after: 300, restMs: 180, closeMs: 120, idleMs: 2000 } as const;
-type Breath = { a: Animation | null; rest: Animation | null; t: number | null };
+   ⚠️ IT ANIMATES THE RIM, NEVER THE FRAME: the frame's ::before (qcv152card.css) draws the white paper and the shadow, and
+   only it scales — scaling the frame moved every button in the drawer each frame (Playwright's click never found it
+   still, QC1612's ordinary-click check).
+   v163 — THE RIM LAYER (`rimOf`): a decorative span over the frame's 7px border, masked to that ring, holding the TINT (the
+   ring in one flat colour) and the LIGHT (a 920px conic square that runs round on a landing). The tint breathes with the
+   paper, in the `rim` of the card's current stage. ⚠️ PAPER AND TINT MOVE AS ONE: the ring layer takes the paper's own scale
+   keyframes, and all three animations (paper, ring, tint) are given one `startTime`, so they share a clock to the
+   millisecond rather than merely starting in the same task. */
+export const BREATHE = { peak: 1.01, ms: 3200, ease: "cubic-bezier(0.37, 0, 0.63, 1)", enterMs: 320, after: 300, restMs: 180, closeMs: 120, idleMs: 2000 } as const;
+/** v163 — the tint's peak opacity (the breath's and the press's), its rise at the press, its fade at the landing, its
+ *  fade when nothing lands */
+export const RIM163 = { peak: 0.72, holdMs: 280, fadeMs: 700, backMs: 150 } as const;
+type Breath = { a: Animation[] | null; rest: Animation[]; t: number | null };
 const breaths = new WeakMap<Element, Breath>();
 const RIM = "::before";
-const scaleNow = (el: Element): number => { const v = getComputedStyle(el, RIM).scale; return v === "none" ? 1 : parseFloat(v) || 1; };
-/** stop the breath (and any easing to rest) where it is; returns the scale it was at */
-function still(frame: HTMLElement, b: Breath): number {
-  if (b.t != null) { window.clearTimeout(b.t); b.t = null; }
-  if (!b.a && !b.rest) return 1;
-  const at = scaleNow(frame);
-  b.a?.cancel(); b.rest?.cancel(); b.a = null; b.rest = null;
-  return Math.abs(at - 1) < 0.0001 ? 1 : at;
+type Rim = { ring: HTMLElement; tint: HTMLElement; light: HTMLElement };
+/** the rim layer, made on first use and kept with the frame (removed with it). aria-hidden, no pointer events, no layout:
+ *  appended after the frame's own children, which React owns and never reorders around it. */
+export function rimOf(frame: HTMLElement): Rim {
+  let ring = frame.querySelector<HTMLElement>(":scope > .qc163-rim");
+  if (!ring) {
+    ring = document.createElement("span");
+    ring.className = "qc163-rim";
+    ring.setAttribute("aria-hidden", "true");
+    ring.setAttribute("data-qc163", "rim");
+    const light = document.createElement("i"), tint = document.createElement("b");
+    light.setAttribute("data-qc163", "light");
+    tint.setAttribute("data-qc163", "tint");
+    ring.append(light, tint);
+    frame.append(ring);
+  }
+  return { ring, light: ring.querySelector<HTMLElement>(":scope > i")!, tint: ring.querySelector<HTMLElement>(":scope > b")! };
 }
-function toRest(frame: HTMLElement, b: Breath, from: number, ms: number): void {
-  if (from === 1) return;
-  const r = frame.animate([{ scale: String(from) }, { scale: "1" }], { duration: ms, easing: "ease-out", pseudoElement: RIM });
-  r.id = "qc1612-rest";
-  b.rest = r;
-  const clear = () => { if (b.rest === r) b.rest = null; };
-  r.finished.then(clear, clear);
+/** the stage the card in this frame shows now (QcCard152's `data-qc163-stage`) */
+export function stageAt(frame: HTMLElement): Stage {
+  const s = frame.querySelector<HTMLElement>("[data-qc152='card']")?.getAttribute("data-qc163-stage");
+  return s && s in STAGE_COLOURS ? (s as Stage) : "queried";
+}
+const scaleNow = (el: Element, pseudo?: string): number => { const v = getComputedStyle(el, pseudo).scale; return v === "none" ? 1 : parseFloat(v) || 1; };
+const opacityNow = (el: Element): number => parseFloat(getComputedStyle(el).opacity) || 0;
+/** stop the breath (and any easing to rest) where it is; returns the scale it was at, and the tint's opacity if the breath
+ *  owned it (never the press's hold) */
+function still(frame: HTMLElement, b: Breath): { s: number; o: number } {
+  if (b.t != null) { window.clearTimeout(b.t); b.t = null; }
+  if (!b.a && !b.rest.length) return { s: 1, o: 0 };
+  const at = scaleNow(frame, RIM);
+  const o = rimTinted(b) ? opacityNow(rimOf(frame).tint) : 0;
+  for (const x of [...(b.a ?? []), ...b.rest]) x.cancel();
+  b.a = null; b.rest = [];
+  return { s: Math.abs(at - 1) < 0.0001 ? 1 : at, o: o < 0.001 ? 0 : o };
+}
+const rimTinted = (b: Breath): boolean => [...(b.a ?? []), ...b.rest].some((x) => x.id === "qc163-tint" || x.id === "qc163-tint-rest");
+/** ease the paper and the ring from `s` to 1, and the tint from `o` to 0, over `ms` */
+function toRest(frame: HTMLElement, b: Breath, from: { s: number; o: number }, ms: number): void {
+  const { ring, tint } = rimOf(frame);
+  const made: Animation[] = [];
+  const t = { duration: ms, easing: "ease-out" };
+  if (from.s !== 1) {
+    const r = frame.animate([{ scale: String(from.s) }, { scale: "1" }], { ...t, pseudoElement: RIM });
+    r.id = "qc1612-rest";
+    const g = ring.animate([{ scale: String(from.s) }, { scale: "1" }], t);
+    g.id = "qc163-rim-rest";
+    made.push(r, g);
+  }
+  if (from.o !== 0) {
+    const o = tint.animate([{ opacity: from.o }, { opacity: 0 }], t);
+    o.id = "qc163-tint-rest";
+    made.push(o);
+  }
+  if (!made.length) return;
+  b.rest.push(...made);
+  for (const a of made) { const clear = () => { b.rest = b.rest.filter((x) => x !== a); }; a.finished.then(clear, clear); }
+  sync(made);
+}
+/** one clock for animations made together */
+function sync(list: Animation[]): void {
+  const t0 = document.timeline?.currentTime;
+  if (t0 == null) return;
+  for (const a of list) a.startTime = t0;
 }
 function breathStart(frame: HTMLElement): void {
   const b = breaths.get(frame);
   if (!b || pressed.has(frame) || bumps.has(frame)) return;
   if (b.t != null) { window.clearTimeout(b.t); b.t = null; }
   if (b.a) return;
-  b.rest?.cancel(); b.rest = null;
-  const k = (scale: number | string, offset?: number) => ({ scale: String(scale), easing: BREATHE.ease, ...(offset != null ? { offset } : {}) });
-  const a = frame.animate([k(1), k(BREATHE.peak, 0.5), k(1)], { duration: BREATHE.ms, iterations: Infinity, pseudoElement: RIM });
-  a.id = "qc1612-breath";
-  b.a = a;
+  for (const x of b.rest) x.cancel();
+  b.rest = [];
+  const { ring, tint } = rimOf(frame);
+  tint.style.background = STAGE_COLOURS[stageAt(frame)].rim;
+  const t = { duration: BREATHE.ms, iterations: Infinity, easing: BREATHE.ease };
+  const sk = [{ scale: "1" }, { scale: String(BREATHE.peak) }, { scale: "1" }];
+  const paper = frame.animate(sk, { ...t, pseudoElement: RIM });
+  paper.id = "qc1612-breath";
+  const rim = ring.animate(sk, t);
+  rim.id = "qc163-rim-breath";
+  const glow = tint.animate([{ opacity: 0 }, { opacity: RIM163.peak }, { opacity: 0 }], t);
+  glow.id = "qc163-tint";
+  b.a = [paper, rim, glow];
+  sync(b.a);
 }
 const arm = (frame: HTMLElement, b: Breath, ms: number) => {
   if (b.t != null) window.clearTimeout(b.t);
@@ -105,7 +173,7 @@ const arm = (frame: HTMLElement, b: Breath, ms: number) => {
 export function breatheOpen(frame: HTMLElement | null): void {
   if (!frame || reduced()) return;
   const old = breaths.get(frame);
-  const b: Breath = { a: null, rest: null, t: null };
+  const b: Breath = { a: null, rest: [], t: null };
   if (old) toRest(frame, b, still(frame, old), BREATHE.closeMs);
   breaths.set(frame, b);
   arm(frame, b, BREATHE.enterMs + BREATHE.after);
@@ -122,16 +190,15 @@ export function breatheType(frame: HTMLElement | null): void {
   if (b.a) toRest(frame, b, still(frame, b), BREATHE.restMs);
   arm(frame, b, BREATHE.idleMs);
 }
-/** the drawer closed, by any route: to 1 within 150ms */
+/** the drawer closed, by any route: to 1 (and the tint to 0) within 150ms */
 export function breatheClose(frame: HTMLElement | null): void {
   const b = frame ? breaths.get(frame) : undefined;
   if (!frame || !b) return;
   breaths.delete(frame);
-  const from = still(frame, b);
-  toRest(frame, b, from, BREATHE.closeMs);
+  toRest(frame, b, still(frame, b), BREATHE.closeMs);
 }
-/** the press: the breath ends, the rim easing back to 1 over the press-in's 120ms; it does not come back unless the
- *  press is given back (`pressBack`) with the drawer still open */
+/** the press: the breath ends, the paper, the ring and the tint easing back over the press-in's 120ms. It does not come
+ *  back unless the press is given back (`pressBack`) with the drawer still open. */
 function breathEnd(frame: HTMLElement): void {
   const b = breaths.get(frame);
   if (b) toRest(frame, b, still(frame, b), PRESS.ms);

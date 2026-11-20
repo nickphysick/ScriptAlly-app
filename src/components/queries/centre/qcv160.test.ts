@@ -176,10 +176,12 @@ describe("Query card v161.1 — press in, hold, pop", () => {
 
 describe("Query card v161.2 — the card breathes while the drawer is open", () => {
   const fnOf = (name: string) => code(MOTION).match(new RegExp(`(?:export )?function ${name}\\([\\s\\S]*?\\n}`))?.[0] ?? "";
-  it("1 → 1.01 → 1 over 1.9s, eased, repeating; scale only, never transform; no var()", () => {
-    expect(MOTION).toMatch(/BREATHE = \{ peak: 1\.01, ms: 1900, ease: "ease-in-out", enterMs: 320, after: 300, restMs: 180, closeMs: 120, idleMs: 2000 \}/);
+  it("1 → 1.01 → 1 over 3.2s (v163), eased, repeating; scale only, never transform; no var()", () => {
+    expect(MOTION).toMatch(/BREATHE = \{ peak: 1\.01, ms: 3200, ease: "cubic-bezier\(0\.37, 0, 0\.63, 1\)", enterMs: 320, after: 300, restMs: 180, closeMs: 120, idleMs: 2000 \}/);
     const f = fnOf("breathStart");
-    expect(f).toMatch(/frame\.animate\(\[k\(1\), k\(BREATHE\.peak, 0\.5\), k\(1\)\], \{ duration: BREATHE\.ms, iterations: Infinity, pseudoElement: RIM \}\)/);
+    expect(f).toMatch(/const t = \{ duration: BREATHE\.ms, iterations: Infinity, easing: BREATHE\.ease \};/);
+    expect(f).toMatch(/const sk = \[\{ scale: "1" \}, \{ scale: String\(BREATHE\.peak\) \}, \{ scale: "1" \}\];/);
+    expect(f).toMatch(/frame\.animate\(sk, \{ \.\.\.t, pseudoElement: RIM \}\)/);
     expect(f).toMatch(/if \(b\.a\) return;/);
     expect(f).not.toMatch(/transform|var\(/);
   });
@@ -213,5 +215,44 @@ describe("Query card v161.2 — the card breathes while the drawer is open", () 
     expect(COMPOSER).toMatch(/data-qc1522="discard" onClick=\{\(\) => \{ setConf\(false\); setDirty\(false\); close\(\); \}\}/);
     expect(COMPOSER.indexOf("const frameOf = ")).toBeLessThan(COMPOSER.indexOf("const close = "));
     expect(CARD.match(/breatheClose\(e\.currentTarget\.closest<HTMLElement>\("\.spanel"\)\); p\.stepCard!\.go\((-1|1)\);/g)?.length).toBe(2);
+  });
+});
+
+/* Query card v163, Phase 2 — the rim layer and the breath in the stage's colour (source half; the computed half is
+   tests/e2e/qc163.measure.ts) */
+describe("Query card v163 — the rim layer breathes in the stage's colour", () => {
+  const fnOf = (name: string) => code(MOTION).match(new RegExp(`(?:export )?function ${name}\\([\\s\\S]*?\\n}`))?.[0] ?? "";
+  const css = read("./qcv152card.css");
+  const rule = (sel: string) => css.match(new RegExp(`${sel.replace(/[.*+?^${}()|[\]\\>]/g, "\\$&")} \\{[^}]*\\}`))?.[0] ?? "";
+  it("the ring: over the 7px border, masked to it in both forms, no pointer events, no layout", () => {
+    const r = rule(".spanel > .qc163-rim");
+    expect(r).toMatch(/position: absolute; inset: 0;/);
+    expect(r).toMatch(/padding: 7px; border-radius: 20px;/);
+    expect(r).toMatch(/pointer-events: none; overflow: hidden;/);
+    expect(r).toMatch(/-webkit-mask: linear-gradient\(#000 0 0\) content-box, linear-gradient\(#000 0 0\);/);
+    expect(r).toMatch(/-webkit-mask-composite: xor;/);
+    expect(r).toMatch(/mask: linear-gradient\(#000 0 0\) content-box exclude, linear-gradient\(#000 0 0\);/);
+    expect(rule(".spanel > .qc163-rim > i")).toMatch(/width: 920px; height: 920px; translate: -50% -50%; opacity: 0;/);
+    expect(rule(".spanel > .qc163-rim > b")).toMatch(/inset: 0; opacity: 0;/);
+    const f = fnOf("rimOf");
+    expect(f).toMatch(/ring\.setAttribute\("aria-hidden", "true"\);/);
+    expect(f).toMatch(/frame\.append\(ring\);/);
+  });
+  it("the tint breathes with the paper: same keyframe clock (one startTime), 0 → 0.72 → 0, the current stage's rim", () => {
+    expect(MOTION).toMatch(/export const RIM163 = \{ peak: 0\.72, holdMs: 280, fadeMs: 700, backMs: 150 \} as const;/);
+    const f = fnOf("breathStart");
+    expect(f).toMatch(/tint\.style\.background = STAGE_COLOURS\[stageAt\(frame\)\]\.rim;/);
+    expect(f).toMatch(/const rim = ring\.animate\(sk, t\);/);
+    expect(f).toMatch(/tint\.animate\(\[\{ opacity: 0 \}, \{ opacity: RIM163\.peak \}, \{ opacity: 0 \}\], t\)/);
+    expect(f).toMatch(/glow\.id = "qc163-tint";/);
+    expect(f).toMatch(/b\.a = \[paper, rim, glow\];\s*sync\(b\.a\);/);
+    expect(fnOf("sync")).toMatch(/for \(const a of list\) a\.startTime = t0;/);
+    expect(read("./QcCard152.tsx")).toMatch(/data-qc152="card"[^>]*data-qc163-stage=\{stage\}/);
+  });
+  it("nothing in the breath animates anything but scale and opacity, and no var() or color-mix() in it", () => {
+    for (const n of ["breathStart", "toRest", "still", "rimOf"]) {
+      const f = fnOf(n);
+      expect([n, /transform|box-?[sS]hadow|var\(|color-mix/.test(f)]).toEqual([n, false]);
+    }
   });
 });
