@@ -222,15 +222,17 @@ textarea.qlp-paper--edit { resize: vertical; min-height: 520px; box-shadow: 0 0 
 .qlp-quill { display: block; width: 74px; margin-bottom: 16px; }
 .qlp-first-p { background: #fff; border-radius: 6px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 18px 34px -22px rgba(28, 19, 15, .45); padding: 24px 24px 20px; }
 .qlp .qlp-first-p textarea { display: block; width: 100%; min-height: 360px; border: 0; outline: none; resize: vertical; padding: 24px 32px;
-  font: 400 16px/1.65 var(--sp-serif) !important; color: var(--ql-ink); background: #fbf9f5; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .12); }
-.qlp .qlp-first-p textarea:focus { box-shadow: inset 0 0 0 2px var(--ql-navy); }
+  font: 400 16px/1.65 var(--sp-serif) !important; color: var(--ql-ink); background: #fbf9f5; border-radius: var(--sp-fld-r); box-shadow: var(--sp-fld-edge); }
+/* Phase 11: the letter's textarea takes the field's radius, edge and focus (6, .12 and 2px before); its height, its
+   paper ground and its writing line stay */
+.qlp .qlp-first-p textarea:focus { box-shadow: var(--sp-fld-focus); }
 .qlp-first-f { display: flex; align-items: center; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
 .qlp-sp { flex: 1; }
 .qlp-fld { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .qlp .qlp-fld > span:first-child { font: 400 16px/1 var(--sp-type); }
 .qlp .qlp-fld input { height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .18);
   font: 400 16px/1 var(--sp-serif); color: var(--ql-ink); outline: none; }
-.qlp .qlp-fld input:focus { box-shadow: inset 0 0 0 2px var(--ql-navy); }
+/* Phase 11: the field's focus edge (primitives.css `.sp-fld`) */ .qlp .qlp-fld input:focus { box-shadow: var(--sp-fld-focus); }
 
 /* ── loading: blocks at the columns' final sizes ─────────────────────────────────────────────────────────────── */
 .qlp-sk { display: block; border-radius: 12px; background: #ebe5db; }

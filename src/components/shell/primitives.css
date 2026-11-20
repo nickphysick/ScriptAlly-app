@@ -158,7 +158,20 @@
   --sp-btn-font: 600 15px/1 var(--sp-serif);
   --sp-btn-ring: inset 0 0 0 1.5px var(--sp-anthracite);
   --sp-btn-line-hov: rgba(42, 58, 82, .06);
+  /* Consistency roll-out v1, Phase 11 (ruling 8): the boxed text field on workspace pages and in slide-out panels.
+     44 high, radius 10, 0 14 of padding, white, Source Serif 4 16, a 1px edge inside; at focus a 1.5px navy edge.
+     A textarea takes the radius, edge, face and focus and keeps its own height; a headline field keeps its height and
+     size. `.sp-fld` draws it; each page's own field rule reads these values. Not: bare inputs inside a search bar or a
+     tag row, and Settings, onboarding and public fields. */
+  --sp-fld-h: 44px;
+  --sp-fld-r: 10px;
+  --sp-fld-pad: 0 14px;
+  --sp-fld-font: 400 16px var(--sp-serif);
+  --sp-fld-edge: inset 0 0 0 1px rgba(28, 19, 15, .18);
+  --sp-fld-focus: inset 0 0 0 1.5px var(--sp-anthracite);
 }
+.sp-fld { box-sizing: border-box; width: 100%; height: var(--sp-fld-h); padding: var(--sp-fld-pad); border: 0; border-radius: var(--sp-fld-r); background: #fff; box-shadow: var(--sp-fld-edge); font: var(--sp-fld-font); color: var(--sp-ink); outline: none; }
+.sp-fld:focus { box-shadow: var(--sp-fld-focus); }
 .sp-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
 .sp-btn--fill { background: var(--sp-anthracite); color: #fff; }
 .sp-btn--fill:hover:not(:disabled) { background: var(--sp-anthracite-hov); }

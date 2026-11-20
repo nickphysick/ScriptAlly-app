@@ -317,7 +317,7 @@
 .k62-fld small { font-size: 14px; color: var(--k62-t62); }
 .k62-fld .k62-err-t { color: #8a3324; }
 .k62-fld input { height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .18); font: 400 16px/1.4 var(--k62-serif); color: var(--k62-ink); outline: none; }
-.k62-fld input:focus { box-shadow: inset 0 0 0 2px var(--k62-navy); }
+/* Phase 11: the field's focus edge (primitives.css `.sp-fld`) */ .k62-fld input:focus { box-shadow: var(--sp-fld-focus); }
 .k62-fld input.k62-err { box-shadow: inset 0 0 0 2px #8a3324; }
 .k62-icons { display: flex; gap: 8px; flex-wrap: wrap; }
 .k62-icons button { width: 46px; height: 46px; border: 0; border-radius: 50%; display: grid; place-items: center; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .18); }

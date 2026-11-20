@@ -168,14 +168,15 @@
 .cf-fld .cf-req { font-weight: 600; color: #a2452a; }
 /* comps v32: the line under "In your own words" */
 .cf-fld > .cf-hint { display: block; margin-top: 6px; font: italic 400 14px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.62); }
+/* Consistency roll-out v1, Phase 11: the text field (primitives.css `.sp-fld`) */
 .cf-fld input, .cf-fld textarea, .cf-tagbox {
-  box-sizing: border-box; width: 100%; height: 46px; padding: 0 14px; border: 0; border-radius: 10px; background: #fff;
-  box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.16); font: 400 16px/normal var(--sp-serif); color: #1c130f; outline: none; transition: box-shadow 0.15s;
+  box-sizing: border-box; width: 100%; height: var(--sp-fld-h); padding: var(--sp-fld-pad); border: 0; border-radius: var(--sp-fld-r); background: #fff;
+  box-shadow: var(--sp-fld-edge); font: 400 16px/normal var(--sp-serif); color: #1c130f; outline: none; transition: box-shadow 0.15s;
 }
 .cf-fld input.cf-big { height: 52px; font-size: 19px; }
 .cf-fld textarea { display: block; height: auto; min-height: 92px; padding: 12px 14px; line-height: 1.5; resize: vertical; }
 .cf-fld input::placeholder, .cf-fld textarea::placeholder, .cf-tagbox input::placeholder { color: rgba(28, 19, 15, 0.36); }
-.cf-fld input:focus, .cf-fld textarea:focus, .cf-tagbox:focus-within { box-shadow: inset 0 0 0 2px var(--sp-anthracite); }
+.cf-fld input:focus, .cf-fld textarea:focus, .cf-tagbox:focus-within { box-shadow: var(--sp-fld-focus); }
 .cf-fld.is-err input { box-shadow: inset 0 0 0 2px #a2452a; }
 .cf-pair { display: grid; grid-template-columns: minmax(0, 1fr) 124px; gap: 12px; }
 .cf-err { margin: -6px 0 12px; font: 400 14px/1.4 var(--sp-serif); color: #a2452a; }
