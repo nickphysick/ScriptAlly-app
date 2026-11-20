@@ -35,6 +35,9 @@
 
 /* ── the header ── */
 .hc .hc-top { display: grid; grid-template-columns: 1fr 200px; gap: 30px; align-items: center; }
+/* Consistency roll-out v1, Phase 6 (ruling 10): inside the app the header starts 44 below the sheet's top, as Settings'
+   does (it was the page's 34). The public Help centre (no `.ws-window`) and the phone keep theirs. */
+@media (min-width: 768px) { .ws-window .hc { padding-top: 44px; } }
 .hc .hc-h1.hc-h1 { font: 400 46px/1.05 var(--sp-type) !important; letter-spacing: 0; }
 .hc .hc-sub { color: var(--hc-60); margin: 10px 0 0; max-width: 52ch; }
 .hc .hc-artimg { width: 200px; height: auto; display: block; justify-self: end; }
