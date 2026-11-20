@@ -69,7 +69,8 @@ staging to split them afterwards. I'd rather say that than fake a sequence.
 - `340321496` — Phases 1–4 (source and unit tests)
 - `7a93647f2` — the AC21 locks; earlier locks re-pointed or retired
 - (this commit) — the report, its ledgers, shots, stills and recordings; the decisions file; the pictures spec
-- `f633b10af` — the integration merge (clean)
+- `68a1922c8` — AC21-4b brings the tick into the card's view before pressing it (harness only)
+- `f633b10af`, `1980f9273`, `cb03d82cb` — the integration merges (clean)
 
 What qcMotion160 gained, parameters only: `rimColours(frame)` reads the frame's own `data-qc163-rim` /
 `data-qc163-rim-hi`, else the stage as before. `pressIn` / `pressAtPointer` / `pressThen` take `{ tint: false }` (a star or
@@ -139,7 +140,10 @@ brief, and the light is seen after each tick, after Save all, and running back o
 
 ## 8. Dev bundle
 
-(filled after the deploy)
+Dev served `index-CxA-G9nt.js` (`dev/cr1-qc163-db3-acv2-cr5-qcc` @ `a03e20053`) up to the deploy, checked again just before
+it. Deployed from a clean checkout of the pushed integration tip `dev/cr1-qc163-db3-acv2-cr5-qcc-acv21` @ `cb03d82cb`:
+dev now serves **`index-D8HLzDId.js`**, the same hash the build gave. All 12 AC21 tests were green on that tip first, in a
+whole-file run, and its tsc, functions tsc, build and Vitest match the baseline.
 
 ## 9. For Nick
 
