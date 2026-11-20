@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk consistency rulings v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+
+  :root {
+    --sp-type: "Special Elite", "Courier New", Courier, monospace;
+    --sp-serif: "Source Serif 4", Georgia, serif;
+    --mono: "JetBrains Mono", monospace;
+    --ink-shell: #1b2433; --ink-cream: #f4eee5; --ink-cream-rgb: 244, 238, 229;
+    --ink-terra: #d9967a; --ink-terra-rgb: 217, 150, 122; --ink-bright: #fffaf3;
+    --ink-band: #2d3a50; --ink: #1c130f; --page: #f2eee8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #faf8f4; color: var(--ink); font: 400 16px/1.5 var(--sp-serif); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 28px 120px; }
+  h1 { font: 400 34px/1.2 var(--sp-type); margin: 0 0 8px; }
+  .lede { margin: 0 0 8px; max-width: 70ch; color: #4d443d; }
+  .how { margin: 0 0 36px; color: #6b5f56; font-size: 15px; }
+  section { margin: 0 0 28px; background: #fff; border-radius: 16px; box-shadow: inset 0 0 0 1px #e6dfd4; padding: 26px 28px 22px; }
+  h2 { font: 400 23px/1.25 var(--sp-type); margin: 0 0 6px; }
+  h2 span { color: #8a8076; margin-right: 10px; }
+  .q { margin: 0 0 18px; color: #4d443d; max-width: 78ch; }
+  .cmp { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cmp.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 820px) { .cmp, .cmp.three { grid-template-columns: 1fr; } }
+  .pane { border-radius: 12px; box-shadow: inset 0 0 0 1px #e6dfd4; overflow: hidden; display: flex; flex-direction: column; }
+  .pane > b { display: block; padding: 9px 14px; font: 600 14px/1.3 var(--sp-serif); background: #f4f0ea; border-bottom: 1px solid #e6dfd4; }
+  .pane > b small { font-weight: 400; color: #6b5f56; font-size: 14px; }
+  .stage { flex: 1; padding: 22px 18px; display: flex; flex-wrap: wrap; gap: 22px; align-items: center; justify-content: center; }
+  .stage.shell { background: var(--ink-shell); }
+  .stage.page { background: var(--page); }
+  .stage.white { background: #fff; }
+  .stage.col { flex-direction: column; align-items: stretch; }
+  .rec { margin: 16px 0 0; font-size: 15px; color: #3a332d; }
+  .rec b { font-weight: 700; }
+  .pick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pick label { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border-radius: 999px; box-shadow: inset 0 0 0 1px #cfc6b8; cursor: pointer; font-size: 15px; background: #fff; }
+  .pick input { accent-color: #2a3a52; margin: 0; }
+  .pick label:has(input:checked) { box-shadow: inset 0 0 0 2px #2a3a52; background: #eef1f5; }
+  .pick label:focus-within { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .cap { font-size: 14px; color: #6b5f56; text-align: center; width: 100%; margin: 0; }
+  .stage.shell .cap { color: rgba(244, 238, 229, .66); }
+
+  /* ── rail (sidebarRail.css) ── */
+  .wsr { width: 80px; padding: 10px 6px 12px; display: flex; flex-direction: column; background: var(--ink-shell); }
+  .wsr-ni { position: relative; width: 100%; height: 58px; margin-bottom: 4px; padding: 0 2px; border-radius: 9px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: rgba(244, 238, 229, .66); }
+  .wsr-ic { display: grid; place-items: center; width: 48px; height: 30px; border-radius: 15px; opacity: .5; }
+  .wsr-ic svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .wsr-lbl { font: 400 11.5px/1.15 var(--sp-serif); letter-spacing: -0.005em; white-space: nowrap; color: rgba(244, 238, 229, .58); }
+  .wsr-on { color: var(--ink-bright); }
+  .wsr-on .wsr-ic { opacity: 1; color: var(--ink-terra); background: rgba(217, 150, 122, .2); }
+  .wsr-on .wsr-ic svg { stroke-width: 2.6; }
+  .wsr-on .wsr-lbl { color: var(--ink-bright); font-weight: 600; }
+  .wsr-ct { position: absolute; left: calc(50% + 9px); top: 3px; min-width: 16px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--ink-terra); color: var(--ink-shell); font: 600 9px/15px var(--mono); text-align: center; box-shadow: 0 0 0 2px var(--ink-shell); }
+  .wsr-fb { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .wsr-fbi { position: relative; width: 42px; height: 34px; border-radius: 10px; box-shadow: inset 0 0 0 1.5px var(--ink-terra); color: var(--ink-terra); display: grid; place-items: center; }
+  .wsr-fbi svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .wsr-t { font: 600 11px/normal var(--sp-serif); color: var(--ink-terra); }
+  .p12 .wsr-lbl { font-size: 12px; }
+  .p12 .wsr-t { font-size: 12px; }
+  .p12 .wsr-ct { font: 600 12px/18px var(--mono); min-width: 20px; height: 18px; border-radius: 9px; padding: 0 5px; top: 1px; }
+
+  
+  .send { position: sticky; bottom: 0; margin-top: 36px; background: #1b2433; color: #f4eee5; border-radius: 16px; padding: 18px 22px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+  .send p { margin: 0; font-size: 15px; }
+  .send button { height: 40px; padding: 0 20px; border: 0; border-radius: 999px; background: #f4eee5; color: #1b2433; font: 600 15px var(--sp-serif); cursor: pointer; }
+  .send button:focus-visible { outline: 2px solid #d9967a; outline-offset: 2px; }
+  textarea { width: 100%; min-height: 220px; margin-top: 12px; border-radius: 10px; border: 1px solid #cfc6b8; padding: 12px; font: 14px/1.5 var(--mono); display: none; }
+  .note { margin: 14px 0 0; padding: 10px 14px; border-radius: 10px; background: #f4f0ea; font-size: 15px; color: #3a332d; }
+  .lbl { font-size: 14px; color: #6b5f56; margin: 0; text-align: center; }
+  .stage.shell .lbl, .stage.navy .lbl { color: rgba(244,238,229,.7); }
+  .stage.navy { background: #2a3a52; }
+  .stage.top { align-items: flex-start; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .item.l { align-items: flex-start; }
+  .cmp.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 980px) { .cmp.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .cmp.four { grid-template-columns: 1fr; } }
+  .sub { font: 600 15px/1.3 var(--sp-serif); margin: 22px 0 10px; }
+
+  /* 1 page colour */
+  .ground { width: 100%; padding: 22px; display: flex; justify-content: center; }
+  .ground .c { width: 100%; max-width: 300px; background: #fff; border-radius: 13px; border: 1px solid #e9e3d9; padding: 14px 16px; }
+  .ground .c h3 { margin: 0 0 6px; font: 400 20px/1.25 var(--sp-type); }
+  .bar { height: 10px; border-radius: 5px; background: #ece7df; margin: 8px 0; }
+  .bar.s { width: 60%; }
+
+  /* 2 gap under header */
+  .gaps { display: flex; gap: 10px; width: 100%; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+  .gap { width: 104px; }
+  .gap .hd { height: 34px; background: #2a3a52; border-radius: 0 0 10px 10px; }
+  .gap .ct { height: 46px; background: #fff; border-radius: 10px 10px 0 0; border: 1px solid #e9e3d9; border-bottom: 0; }
+  .gap p { margin: 6px 0 0; font-size: 14px; line-height: 1.3; text-align: center; color: #4d443d; }
+  .gap p b { display: block; color: #1c130f; }
+
+  /* 3,4 buttons */
+  .btn { display: inline-flex; align-items: center; white-space: nowrap; color: #fff; }
+  .sw { width: 86px; height: 56px; border-radius: 10px; }
+
+  /* 5 cards */
+  .cardA { background: #fff; border-radius: 20px; padding: 8px; box-shadow: 0 1px 2px rgba(28,19,15,.04), 0 6px 18px rgba(28,19,15,.07); }
+  .cardA > div { border-radius: 13px; border: 1px solid #e9e3d9; padding: 16px 18px; }
+  .cardB { background: #fff; border-radius: 20px; padding: 7px; box-shadow: 0 1px 2px rgba(28,19,15,.08), 0 22px 40px -22px rgba(28,19,15,.32); }
+  .cardB > div { border-radius: 14px; border: 1px solid #e3d5c9; padding: 16px 18px; }
+  .cardC { background: #fff; border-radius: 28px; padding: 10px; box-shadow: 0 22px 40px -28px rgba(28,19,15,.4), 0 0 0 1px rgba(28,19,15,.03); }
+  .cardC > div { border-radius: 20px; border: 1px solid rgba(28,19,15,.13); padding: 16px 18px; }
+  .cardD { background: #fff; border-radius: 18px; box-shadow: 0 0 0 1px #e3dbcf, 0 18px 30px -24px rgba(28,19,15,.35); padding: 16px 18px; }
+  .card { width: 100%; }
+  .card h3 { margin: 0 0 6px; font: 400 20px/1.25 var(--sp-type); }
+
+  /* 6 headings */
+  .hs { width: 100%; display: grid; gap: 12px; }
+  .hs div { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+  .hs div span:last-child { font-size: 14px; color: #6b5f56; white-space: nowrap; }
+  .se { font-family: var(--sp-type); font-weight: 400; color: #1c130f; }
+
+  /* 7 view switch */
+  .seg { display: inline-flex; gap: 4px; }
+  .seg span { display: inline-flex; align-items: center; height: 34px; padding: 0 12px; border-radius: 9px; font: 400 14.5px var(--sp-serif); background: #efe9df; color: #5b4f47; }
+  .seg span.on { background: #2a3a52; color: #fff; font-weight: 600; }
+  .segp span { height: 34px; padding: 0 18px; border-radius: 999px; font: 600 15px var(--sp-serif); background: rgba(255,255,255,.12); color: rgba(255,250,243,.78); }
+  .segp span.on { background: #fffaf3; color: #1c130f; }
+  .segp.r9 span { border-radius: 9px; }
+  .tabs { display: inline-flex; gap: 22px; background: #fbf9f5; padding: 0 14px; border-radius: 8px; }
+  .tabs span { display: inline-flex; align-items: center; height: 42px; font: 400 15.5px var(--sp-serif); color: #5b4f47; border-bottom: 2px solid transparent; }
+  .tabs span.on { color: #1c130f; font-weight: 600; border-bottom-color: #2a3a52; }
+
+  /* 8 inputs */
+  .inp { display: flex; align-items: center; width: 240px; background: #fff; color: #1c130f; font-family: var(--sp-serif); }
+
+  /* 9 slide-outs */
+  .crop { width: 300px; height: 150px; overflow: hidden; position: relative; background: rgba(28,19,15,.28); }
+  .shA { position: absolute; left: 24px; top: 16px; width: 420px; height: 400px; background: #fff; border-radius: 20px; padding: 7px; box-shadow: 0 1px 2px rgba(28,19,15,.08), 0 26px 48px -20px rgba(28,19,15,.38); }
+  .shA .in { border-radius: 14px; height: 100%; padding: 18px 18px; }
+  .shA .x, .shB .x { position: absolute; display: grid; place-items: center; border-radius: 50%; font: 400 22px/1 var(--sp-serif); }
+  .shA h4, .shB h4 { margin: 0; font: 400 22px/1.2 var(--sp-type); }
+  .shB { position: absolute; left: 24px; top: 0; width: 420px; height: 400px; background: #fff; border-radius: 12px 0 0 12px; box-shadow: -24px 0 48px -24px rgba(28,19,15,.45), 0 0 0 1px rgba(28,19,15,.08); overflow: hidden; }
+  .shB .hd { background: #2a3a52; color: #f4eee5; padding: 22px 24px; height: 97px; }
+  .xs { display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .xb { display: grid; place-items: center; border-radius: 50%; font: 400 22px/1 var(--sp-serif); color: #f4eee5; }
+
+  /* 12 rail badge variants */
+  .bB .wsr-ct { left: auto; right: 2px; font: 600 12px/18px var(--mono); min-width: 20px; height: 18px; border-radius: 9px; padding: 0 5px; top: 1px; }
+  .bC .wsr-ct { font: 600 11px/17px var(--mono); min-width: 18px; height: 17px; border-radius: 9px; padding: 0 4px; top: 2px; }
+  .rails { display: flex; gap: 14px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Consistency rulings v2</h1>
+  <p class="lede">Twelve decisions that settle most of the 146 audit findings. Each shows what the app does today, drawn from the audit's measurements at real size, beside the choices.</p>
+  <p class="how">Pick an answer under each one, then press "Copy my rulings" at the bottom and paste it into the chat. My recommendation is pre-selected.</p>
+  
+  <section data-q="1 Workspace page colour">
+    <h2><span>1</span>The workspace page colour</h2>
+    <p class="q">Eleven workspace pages sit on oat (#f2eee8), your app-wide page colour. Queries alone sits on a lighter shade (#f6f3ee).</p>
+    <div class="cmp">
+      <div class="pane"><b>Oat <small>11 pages</small></b><div class="ground" style="background:#f2eee8"><div class="c"><h3>Your shelf</h3><div class="bar"></div><div class="bar s"></div></div></div></div>
+      <div class="pane"><b>Lighter <small>Queries only</small></b><div class="ground" style="background:#f6f3ee"><div class="c"><h3>Your shelf</h3><div class="bar"></div><div class="bar s"></div></div></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> oat everywhere. The difference is slight, but it shows when you move between Queries and Agents.</p>
+    <div class="pick">
+      <label><input type="radio" name="q1" value="Oat (#f2eee8) on every workspace page, including Queries" checked>Oat everywhere</label>
+      <label><input type="radio" name="q1" value="The lighter #f6f3ee on every workspace page">Lighter everywhere</label>
+      <label><input type="radio" name="q1" value="Leave Queries lighter than the rest">Leave as it is</label>
+    </div>
+  </section>
+
+  <section data-q="2 Gap under the navy header">
+    <h2><span>2</span>The gap under the navy header</h2>
+    <p class="q">The space between the navy header and the first thing below it has seven different values across ten pages, from none at all to 64px.</p>
+    <div class="pane"><b>Now</b><div class="stage page top"><div class="gaps" id="gapsNow"></div></div></div>
+    <div class="sub">The choices</div>
+    <div class="pane"><b>One gap on every page</b><div class="stage page top"><div class="gaps" id="gapsNew"></div></div></div>
+    <p class="rec"><b>Recommendation:</b> 40px. It gives the header room without pushing content down, and it is on your 8-point spacing grid.</p>
+    <p class="note">Already ruled, so no pick needed: the title sits the same distance from the top of every navy header. It measures 38 to 40px on seven pages but 49 on Packages, 53 on Queries and 62 on Letters. The roll-out sets all of them to 40.</p>
+    <div class="pick">
+      <label><input type="radio" name="q2" value="24px under every navy header">24px</label>
+      <label><input type="radio" name="q2" value="40px under every navy header" checked>40px</label>
+      <label><input type="radio" name="q2" value="48px under every navy header">48px</label>
+    </div>
+  </section>
+
+  <section data-q="3 One navy">
+    <h2><span>3</span>Two navies</h2>
+    <p class="q">The app has two navy tokens that are almost the same: #2a3a52 and #2d3a50. Buttons, headers and selected states use one or the other with no pattern.</p>
+    <div class="cmp">
+      <div class="pane"><b>#2a3a52 <small>Queries, Agents, Corkboard, Responses</small></b><div class="stage white"><span class="sw" style="background:#2a3a52"></span><span class="btn" style="background:#2a3a52;height:40px;padding:0 20px;border-radius:10px;font:600 15px var(--sp-serif)">Open task</span></div></div>
+      <div class="pane"><b>#2d3a50 <small>Dashboard, Versions, Letters, Settings</small></b><div class="stage white"><span class="sw" style="background:#2d3a50"></span><span class="btn" style="background:#2d3a50;height:40px;padding:0 20px;border-radius:10px;font:600 15px var(--sp-serif)">Open task</span></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> one navy, #2a3a52. Nobody can tell them apart side by side, and one value means one place to change it.</p>
+    <div class="pick">
+      <label><input type="radio" name="q3" value="One navy everywhere: #2a3a52" checked>One navy, #2a3a52</label>
+      <label><input type="radio" name="q3" value="One navy everywhere: #2d3a50">One navy, #2d3a50</label>
+      <label><input type="radio" name="q3" value="Keep both navies">Keep both</label>
+    </div>
+  </section>
+
+  <section data-q="4 Main action button">
+    <h2><span>4</span>The main action button on a page</h2>
+    <p class="q">The filled navy button comes in different shapes, heights and typefaces depending on the page.</p>
+    <div class="pane"><b>Now</b><div class="stage white" id="btnNow"></div></div>
+    <div class="sub">The choices</div>
+    <div class="cmp three">
+      <div class="pane"><b>A. Rounded <small>40 high</small></b><div class="stage white"><span class="btn" style="background:#2a3a52;height:40px;padding:0 20px;border-radius:10px;font:600 15px var(--sp-serif)">Save letter</span></div></div>
+      <div class="pane"><b>B. Pill <small>40 high</small></b><div class="stage white"><span class="btn" style="background:#2a3a52;height:40px;padding:0 20px;border-radius:999px;font:600 15px var(--sp-serif)">Save letter</span></div></div>
+      <div class="pane"><b>C. Typewriter <small>46 high</small></b><div class="stage white"><span class="btn" style="background:#2a3a52;color:#f4eee5;height:46px;padding:0 22px;border-radius:12px;font:400 17px var(--sp-type)">Save letter</span></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> A. It is closest to "+ Log a query", your most-used button, and it sits well beside inputs and cards. Outline buttons take the same shape and height.</p>
+    <p class="note">Not part of this pick: the buttons inside the navy header (46 high, typewriter face) already match on nine pages and stay as they are.</p>
+    <div class="pick">
+      <label><input type="radio" name="q4" value="A: rounded, 40 high, radius 10, Source Serif 600 15px" checked>A. Rounded</label>
+      <label><input type="radio" name="q4" value="B: pill, 40 high, Source Serif 600 15px">B. Pill</label>
+      <label><input type="radio" name="q4" value="C: typewriter face, 46 high, radius 12">C. Typewriter</label>
+    </div>
+  </section>
+
+  <section data-q="5 Card frame">
+    <h2><span>5</span>The framed card</h2>
+    <p class="q">The audit counted 30 card treatments. Most are one of these four: a white rim with a ruled frame inside it, in three different strengths, plus a single-edge card used for side panels.</p>
+    <div class="cmp four">
+      <div class="pane"><b>A <small>Comps, Analytics, Packages</small></b><div class="stage page"><div class="card cardA"><div><h3>Your shelf</h3><div class="bar"></div><div class="bar s"></div></div></div></div></div>
+      <div class="pane"><b>B <small>Dashboard, Versions, To-do</small></b><div class="stage page"><div class="card cardB"><div><h3>Next up</h3><div class="bar"></div><div class="bar s"></div></div></div></div></div>
+      <div class="pane"><b>C <small>Manuscripts</small></b><div class="stage page"><div class="card cardC"><div><h3>The pitch</h3><div class="bar"></div><div class="bar s"></div></div></div></div></div>
+      <div class="pane"><b>Side panel <small>Queries, Agents</small></b><div class="stage page"><div class="card cardD"><h3>Views</h3><div class="bar"></div><div class="bar s"></div></div></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> A for every framed card, and keep the single-edge card for side panels only. A is already the most used, and its soft shadow keeps a page of several cards calm.</p>
+    <div class="pick">
+      <label><input type="radio" name="q5" value="A for every framed card (rim radius 20, soft shadow, inner frame radius 13); side panels keep the single-edge card" checked>A everywhere</label>
+      <label><input type="radio" name="q5" value="B for every framed card (deeper shadow, inner frame radius 14); side panels keep the single-edge card">B everywhere</label>
+      <label><input type="radio" name="q5" value="C for every framed card (rim radius 28, inner frame radius 20); side panels keep the single-edge card">C everywhere</label>
+      <label><input type="radio" name="q5" value="Leave the card frames as they are">Leave as they are</label>
+    </div>
+  </section>
+
+  <section data-q="6 Heading sizes">
+    <h2><span>6</span>Heading sizes</h2>
+    <p class="q">Section headings on workspace pages come in six sizes, and headings inside cards in five more. Your type scale is 28, 24, 20, 16 and 14.</p>
+    <div class="cmp">
+      <div class="pane"><b>Now</b><div class="stage white"><div class="hs">
+        <div><span class="se" style="font-size:38px">How it works.</span><span>38 · Discover</span></div>
+        <div><span class="se" style="font-size:30px">Agents who want to read on</span><span>30 · Responses, Corkboard</span></div>
+        <div><span class="se" style="font-size:26px">The pitch</span><span>26 · Manuscripts</span></div>
+        <div><span class="se" style="font-size:23px">Your shelf</span><span>23 · Comps, Analytics</span></div>
+        <div><span class="se" style="font-size:22px">That's you set up</span><span>22 · Dashboard</span></div>
+        <div><span class="se" style="font-size:20px">Next up</span><span>20 · Dashboard, Versions</span></div>
+        <div><span class="se" style="font-size:20px">Where they are now</span><span>card · 20 · Analytics</span></div>
+        <div><span style="font:600 17px var(--sp-serif)">First 5</span><span>card · 17 serif · Analytics</span></div>
+        <div><span class="se" style="font-size:16px">Refine within this view</span><span>card · 16 · Queries, Agents</span></div>
+      </div></div></div>
+      <div class="pane"><b>Three sizes</b><div class="stage white"><div class="hs">
+        <div><span class="se" style="font-size:24px">Agents who want to read on</span><span>24 · section heading</span></div>
+        <div><span class="se" style="font-size:24px">Your shelf</span><span>24 · section heading</span></div>
+        <div><span class="se" style="font-size:20px">Where they are now</span><span>20 · card heading</span></div>
+        <div><span class="se" style="font-size:20px">Next up</span><span>20 · card heading</span></div>
+        <div><span style="font:600 16px var(--sp-serif)">First 5</span><span>16 serif · small heading</span></div>
+        <div><span style="font:600 16px var(--sp-serif)">Refine within this view</span><span>16 serif · small heading</span></div>
+      </div></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> three sizes. Section headings at 24 and card headings at 20, both in the typewriter face, and a 16 serif for small headings inside a card. A hero line like Discover's "How it works." may stay larger.</p>
+    <div class="pick">
+      <label><input type="radio" name="q6" value="Three heading sizes: section 24 Special Elite, card 20 Special Elite, small 16 Source Serif 600; heroes may be larger" checked>Three sizes</label>
+      <label><input type="radio" name="q6" value="Three heading sizes but section headings at 28: section 28, card 20, small 16">Three sizes, sections at 28</label>
+      <label><input type="radio" name="q6" value="Leave heading sizes as they are">Leave as they are</label>
+    </div>
+  </section>
+
+  <section data-q="7 View switches and tabs">
+    <h2><span>7</span>View switches and tabs</h2>
+    <p class="q">Three pages switch between views in three different ways.</p>
+    <div class="cmp three">
+      <div class="pane"><b>Queries <small>boxed</small></b><div class="stage white"><div class="seg"><span class="on">List</span><span>Birds-eye</span></div></div></div>
+      <div class="pane"><b>Comps <small>pills, in the navy header</small></b><div class="stage navy"><div class="seg segp"><span class="on">Letters</span><span>Queries</span></div></div></div>
+      <div class="pane"><b>To-do <small>underlined tabs</small></b><div class="stage white"><div class="tabs"><span class="on">To do</span><span>Snoozed</span></div></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> keep two patterns with one job each. Boxed segments switch how the same things are shown (Queries, Comps), and underlined tabs move between different lists (To-do). Comps changes from pills to the boxed shape.</p>
+    <div class="pick">
+      <label><input type="radio" name="q7" value="Two patterns: boxed segments (radius 9, 34 high) for view switches, underlined tabs for different lists; Comps moves to the boxed shape" checked>Two patterns, Comps boxed</label>
+      <label><input type="radio" name="q7" value="Boxed segments everywhere, including To-do">Boxed everywhere</label>
+      <label><input type="radio" name="q7" value="Leave view switches and tabs as they are">Leave as they are</label>
+    </div>
+  </section>
+
+  <section data-q="8 Text fields">
+    <h2><span>8</span>Text fields</h2>
+    <p class="q">Forms draw their text fields three ways, differing in height, corner, edge and text size.</p>
+    <div class="cmp three">
+      <div class="pane"><b>Letters <small>44 high</small></b><div class="stage white"><span class="inp" style="height:44px;padding:0 14px;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(28,19,15,.18);font-size:16px">Agency name</span></div></div>
+      <div class="pane"><b>Add a comp <small>46 high</small></b><div class="stage white"><span class="inp" style="height:46px;padding:0 14px;border-radius:10px;box-shadow:inset 0 0 0 1px rgba(28,19,15,.16);font-size:16px">Agency name</span></div></div>
+      <div class="pane"><b>Add an agent <small>46 high, navy edge, 18px text</small></b><div class="stage white"><span class="inp" style="height:46px;padding:0 12px;border-radius:8px;box-shadow:inset 0 0 0 1.5px #2a3a52;font-size:18px">Agency name</span></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> the Letters field everywhere: 44 high, 10px corners, a hairline edge and 16px text. The navy edge is kept for the field you are typing in.</p>
+    <div class="pick">
+      <label><input type="radio" name="q8" value="One text field: 44 high, radius 10, 1px ink edge, 16px text; navy edge on focus only" checked>Letters field everywhere</label>
+      <label><input type="radio" name="q8" value="One text field: the Add an agent style (46 high, radius 8, navy edge, 18px text)">Add an agent style everywhere</label>
+      <label><input type="radio" name="q8" value="Leave text fields as they are">Leave as they are</label>
+    </div>
+  </section>
+
+  <section data-q="9 Slide-out panels">
+    <h2><span>9</span>Slide-out panels</h2>
+    <p class="q">Panels that slide in from the right come in two builds, and their close buttons in four sizes. These crops show the top-left corner of each build.</p>
+    <div class="cmp">
+      <div class="pane"><b>Rimmed card <small>Query card, Log a query, Record a response</small></b><div class="stage white"><div class="crop"><div class="shA"><div class="in"><h4>Logging new query</h4></div></div></div></div></div>
+      <div class="pane"><b>Flush panel with a navy head <small>New package; Add a comp and Add an agent are similar</small></b><div class="stage white"><div class="crop"><div class="shB"><div class="hd"><h4>New package</h4></div></div></div></div></div>
+    </div>
+    <div class="sub">Close buttons today</div>
+    <div class="pane"><b>Now</b><div class="stage navy"><div class="xs">
+      <div class="item"><span style="background:#fff;padding:8px;border-radius:10px;display:grid"><span class="xb" style="width:30px;height:30px;background:#2a3a52">×</span></span><p class="lbl">30 · Log a query, Add an agent</p></div>
+      <div class="item"><span class="xb" style="width:35px;height:35px;background:rgba(244,238,229,.18)">×</span><p class="lbl">35 · Agent card</p></div>
+      <div class="item"><span class="xb" style="width:36px;height:36px;background:rgba(244,238,229,.1);font-size:16px">✕</span><p class="lbl">36 · New package</p></div>
+      <div class="item"><span class="xb" style="width:40px;height:40px;background:rgba(244,238,229,.14)">×</span><p class="lbl">40 · Add a comp</p></div>
+    </div></div></div>
+    <p class="rec"><b>Recommendation:</b> make the close button one size (36) and the action footer one height now, and leave the two builds alone until Log a query and Add an agent are redesigned. Rebuilding three panels just to match would be the riskiest change on this board.</p>
+    <div class="pick">
+      <label><input type="radio" name="q9" value="Unify the close button (36px) and the action footer now; decide the panel build when Log a query and Add an agent are redesigned" checked>Close button and footer now, builds later</label>
+      <label><input type="radio" name="q9" value="Rimmed card for every slide-out panel">Rimmed card everywhere</label>
+      <label><input type="radio" name="q9" value="Flush panel with a navy head for every slide-out panel">Flush panel everywhere</label>
+      <label><input type="radio" name="q9" value="Leave slide-out panels as they are">Leave as they are</label>
+    </div>
+  </section>
+
+  <section data-q="10 Settings, Help and Your notes titles">
+    <h2><span>10</span>Titles on Settings, Help and Your notes</h2>
+    <p class="q">These pages draw their title three ways. Your notes is the only page in the app with a Playfair title.</p>
+    <div class="pane"><b>Now</b><div class="stage white col">
+      <div class="hs">
+        <div><span class="se" style="font-size:36px;line-height:1">You have 47 queries logged</span><span>36 · Settings, Plans</span></div>
+        <div><span class="se" style="font-size:46px;line-height:1.05">How can we help?</span><span>46 · Help Centre</span></div>
+        <div><span style="font:600 54px/1.05 'Playfair Display',Georgia,serif">Your notes</span><span>54 Playfair · Your notes</span></div>
+      </div>
+    </div></div>
+    <p class="rec"><b>Recommendation:</b> the typewriter face on all of them, at two sizes: 36 on Settings and Plans, and 46 on Help and Your notes, which open with a bigger welcome. Their headers also start at four different heights (28, 34, 44 and 86px from the top); the roll-out sets them all to 44.</p>
+    <div class="pick">
+      <label><input type="radio" name="q10" value="Special Elite on all: 36 on Settings and Plans, 46 on Help and Your notes; every header starts 44px from the top" checked>Typewriter, two sizes</label>
+      <label><input type="radio" name="q10" value="Special Elite 36 on all of Settings, Plans, Help and Your notes; every header starts 44px from the top">Typewriter, 36 everywhere</label>
+      <label><input type="radio" name="q10" value="Leave these titles as they are">Leave as they are</label>
+    </div>
+  </section>
+
+  <section data-q="11 Public page colour">
+    <h2><span>11</span>The public pages' background</h2>
+    <p class="q">Six public pages use oat. Privacy and Terms use a creamier shade, and the invite page a third.</p>
+    <div class="cmp three">
+      <div class="pane"><b>Oat #f2eee8 <small>Home, About, Pricing, Contact, Founders, Help</small></b><div class="ground" style="background:#f2eee8"><div class="c"><h3>Get in touch.</h3><div class="bar"></div><div class="bar s"></div></div></div></div>
+      <div class="pane"><b>Cream #fbf6ef <small>Privacy, Terms</small></b><div class="ground" style="background:#fbf6ef"><div class="c"><h3>Privacy</h3><div class="bar"></div><div class="bar s"></div></div></div></div>
+      <div class="pane"><b>Sand #f4ede3 <small>Invite page</small></b><div class="ground" style="background:#f4ede3"><div class="c"><h3>Welcome</h3><div class="bar"></div><div class="bar s"></div></div></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> oat on all nine, so the public site and the app share one page colour. The public pages' hero titles differ on purpose and are not part of this.</p>
+    <div class="pick">
+      <label><input type="radio" name="q11" value="Oat (#f2eee8) on every public page" checked>Oat everywhere</label>
+      <label><input type="radio" name="q11" value="Leave the public page backgrounds as they are">Leave as they are</label>
+    </div>
+  </section>
+
+  <section data-q="12 Rail count badge">
+    <h2><span>12</span>The count on the rail</h2>
+    <p class="q">The 12px badge from the last board ran past the rail's edge at "99+", so it is still 9px. These are two ways to make it fit, each shown with "16" and "99+".</p>
+    <div class="cmp three">
+      <div class="pane"><b>Now <small>9px</small></b><div class="stage shell"><div class="rails"><div class="wsr" data-rail="16"></div><div class="wsr" data-rail="99+"></div></div></div></div>
+      <div class="pane bB"><b>A. 12px, growing inwards</b><div class="stage shell"><div class="rails"><div class="wsr" data-rail="16"></div><div class="wsr" data-rail="99+"></div></div></div></div>
+      <div class="pane bC"><b>B. 11px, same place</b><div class="stage shell"><div class="rails"><div class="wsr" data-rail="16"></div><div class="wsr" data-rail="99+"></div></div></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> A. It meets your 12px rule. The badge is pinned near the rail's right edge and widens towards the icon, so a long count overlaps the icon's corner slightly.</p>
+    <div class="pick">
+      <label><input type="radio" name="q12" value="A: rail count at 12px, pinned to the right and growing inwards" checked>A. 12px, growing inwards</label>
+      <label><input type="radio" name="q12" value="B: rail count at 11px in its current place, as an agreed exception to the 12px rule">B. 11px</label>
+      <label><input type="radio" name="q12" value="Leave the rail count at 9px">Leave at 9px</label>
+    </div>
+  </section>
+
+  <div class="send">
+    <p>When you've picked all twelve, copy them and paste into the chat.</p>
+    <button type="button" id="copy">Copy my rulings</button>
+  </div>
+  <textarea id="out" aria-label="Your rulings" readonly></textarea>
+</div>
+<script>
+var I = {
+    dash: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/>',
+    send: '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
+    people: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+    letter: '<path d="m18 5-2.414-2.414A2 2 0 0 0 14.172 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2"/><path d="M21.378 12.626a1 1 0 0 0-3.004-3.004l-4.01 4.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/><path d="M8 18h1"/>',
+    check: '<path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/>'
+  };
+  
+  function rail(el) {
+    var n = el.getAttribute("data-rail");
+    var rows = [["send", "Queries", true], ["check", "Tasks", false, n]];
+    el.innerHTML = rows.map(function (r) {
+      return '<div class="wsr-ni' + (r[2] ? " wsr-on" : "") + '"><span class="wsr-ic"><svg viewBox="0 0 24 24">' + I[r[0]] + '</svg></span><span class="wsr-lbl" style="font-size:12px">' + r[1] + '</span>' + (r[3] ? '<span class="wsr-ct">' + r[3] + '</span>' : "") + '</div>';
+    }).join("");
+  }
+  document.querySelectorAll("[data-rail]").forEach(rail);
+
+  function gaps(id, list) {
+    document.getElementById(id).innerHTML = list.map(function (g) {
+      return '<div class="gap"><div class="hd"></div><div style="height:' + g[0] + 'px"></div><div class="ct"></div><p><b>' + g[0] + 'px</b>' + g[1] + '</p></div>';
+    }).join("");
+  }
+  gaps("gapsNow", [[0, "Responses"], [18, "Queries, Agents"], [24, "Manuscripts"], [36, "Corkboard"], [40, "Versions, Packages"], [48, "Comps, Letters"], [64, "Analytics"]]);
+  gaps("gapsNew", [[24, ""], [40, "recommended"], [48, ""]]);
+
+  var B = [
+    ["+ Log a query", "background:#2a3a52;height:42px;padding:0 20px;border-radius:10px;font:600 15.5px var(--sp-serif)", "Queries · 42 high"],
+    ["Open task", "background:#2d3a50;height:40px;padding:0 20px;border-radius:999px;font:600 15px var(--sp-serif)", "Dashboard · 40, pill"],
+    ["Save your first version", "background:#2d3a50;height:40px;padding:0 18px;border-radius:999px;font:600 15px var(--sp-serif)", "Versions · 40, pill"],
+    ["Save letter", "background:#2d3a50;color:#f4eee5;height:46px;padding:0 22px;border-radius:12px;font:400 17px var(--sp-type)", "Letters · 46, typewriter"]
+  ];
+  document.getElementById("btnNow").innerHTML = B.map(function (b) {
+    return '<div class="item"><span class="btn" style="' + b[1] + '">' + b[0] + '</span><p class="lbl">' + b[2] + '</p></div>';
+  }).join("");
+
+  document.getElementById("copy").addEventListener("click", function () {
+    var lines = ["Consistency rulings v2"];
+    document.querySelectorAll("section").forEach(function (s) {
+      var c = s.querySelector("input:checked");
+      lines.push(s.getAttribute("data-q") + ": " + (c ? c.value : "not picked"));
+    });
+    var text = lines.join("\n"), out = document.getElementById("out"), btn = this;
+    out.value = text; out.style.display = "block";
+    function done(ok) { btn.textContent = ok ? "Copied" : "Copy the text below"; if (!ok) { out.focus(); out.select(); } }
+    try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  });
+
+</script>
+</body>
+</html>
