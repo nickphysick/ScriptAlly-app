@@ -47,9 +47,25 @@ const pl = (n: number, one: string) => `${n} ${n === 1 ? one : `${one}s`}`;
 /** "Query letter" → "Query letter"; "FIRST 5 CHAPTERS" → "First 5 chapters" */
 export const sentenceCase = (s: string): string => { const t = s.trim(); return t ? t.charAt(0).toUpperCase() + t.slice(1).toLowerCase() : t; };
 
-const MAIL = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
-const WEB = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>;
-const TICK = <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m3 6.2 2 2 4-4.4" /></svg>;
+export const MAIL = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
+export const WEB = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>;
+export const TICK = <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m3 6.2 2 2 4-4.4" /></svg>;
+
+/* Agent card v2 — the presentational parts the agent card shares (lifted, not copied): a fact box, Copy email, the
+   website button. Their DOM is the query card's own; the agent card draws them inside its own `.qc152` root. */
+export const NxBox: React.FC<{ k: string; label: string; value: React.ReactNode; sub?: React.ReactNode; extra?: Record<string, unknown> }> = ({ k, label, value, sub, extra }) => (
+  <div className="nx-box" data-qc158="box" data-k={k} {...extra}>
+    <small>{label}</small>
+    <b data-qc158="value">{value}</b>
+    {sub ? <i>{sub}</i> : null}
+  </div>
+);
+export const NxCopyEmail: React.FC<{ email: string; onCopy: () => void; extra?: Record<string, unknown> }> = ({ email, onCopy, extra }) => (
+  <button type="button" className="nx-btn" data-qc158="copy-email" onClick={onCopy} {...extra}>{MAIL}Copy email<small data-qc158="address">{email}</small></button>
+);
+export const NxSite: React.FC<{ label: string; href: string | null; extra?: Record<string, unknown> }> = ({ label, href, extra }) => (href
+  ? <a className="nx-btn gh" data-qc158="website" href={href} target="_blank" rel="noreferrer" {...extra}>{WEB}{label}</a>
+  : <span className="nx-btn gh" data-qc158="website" {...extra}>{WEB}{label}</span>);
 
 export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
   const add = (label: string, f: Field, k: string) => (
@@ -60,32 +76,24 @@ export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
   return (
     <div className="nx" data-qc152="agent-pane" data-qc158="agent">
       <div className="nx-boxes" data-qc158="boxes">
-        <div className="nx-box" data-qc158="box" data-k="reply" {...p.dbl("weeks")}>
-          <small>Replies in</small>
-          {p.weeks != null ? <b data-qc158="value">About {pl(p.weeks, "week")}</b> : <b data-qc158="value">{add("Add reply time", "reply", "reply")}</b>}
-          {p.nrmn === true ? <i>no reply means no</i> : p.nrmn === false ? <i>always replies</i> : null}
-        </div>
-        <div className="nx-box" data-qc158="box" data-k="method" {...p.dbl("method")}>
-          <small>Takes queries</small>
-          {how ? <b data-qc158="value">{how}</b> : <b data-qc158="value">{add(`Add how ${p.first} takes queries`, "method", "method")}</b>}
-          {p.queriedVia ? <i>you queried {p.queriedVia}</i> : null}
-        </div>
-        <div className="nx-box" data-qc158="box" data-k="heard">
-          <small>Last heard</small>
-          <b data-qc158="value">{p.lastHeardMs != null ? dayLabel(p.lastHeardMs, p.nowMs) : "Not yet"}</b>
-          {p.lastHeardMs != null ? <i>{days(p.nowMs, p.lastHeardMs) === 0 ? "today" : `${pl(days(p.nowMs, p.lastHeardMs), "day")} ago`}</i>
-            : p.sentMs != null ? <i>since {dayLabel(p.sentMs, p.nowMs)}</i> : null}
-        </div>
+        <NxBox k="reply" label="Replies in" extra={p.dbl("weeks")}
+          value={p.weeks != null ? <>About {pl(p.weeks, "week")}</> : add("Add reply time", "reply", "reply")}
+          sub={p.nrmn === true ? "no reply means no" : p.nrmn === false ? "always replies" : null} />
+        <NxBox k="method" label="Takes queries" extra={p.dbl("method")}
+          value={how ? how : add(`Add how ${p.first} takes queries`, "method", "method")}
+          sub={p.queriedVia ? <>you queried {p.queriedVia}</> : null} />
+        <NxBox k="heard" label="Last heard"
+          value={p.lastHeardMs != null ? dayLabel(p.lastHeardMs, p.nowMs) : "Not yet"}
+          sub={p.lastHeardMs != null ? (days(p.nowMs, p.lastHeardMs) === 0 ? "today" : `${pl(days(p.nowMs, p.lastHeardMs), "day")} ago`)
+            : p.sentMs != null ? <>since {dayLabel(p.sentMs, p.nowMs)}</> : null} />
       </div>
 
       <div className="nx-reach" data-qc158="contact">
         {p.email
-          ? <button type="button" className="nx-btn" data-qc158="copy-email" onClick={p.onCopyEmail} {...p.dbl("email")}>{MAIL}Copy email<small data-qc158="address">{p.email}</small></button>
+          ? <NxCopyEmail email={p.email} onCopy={p.onCopyEmail} extra={p.dbl("email")} />
           : <button type="button" className="nx-btn gh" data-qc158="add" data-k="email" onClick={() => p.onField("email")}>+ Add an email</button>}
         {site
-          ? (p.websiteHref
-            ? <a className="nx-btn gh" data-qc158="website" href={p.websiteHref} target="_blank" rel="noreferrer" {...p.dbl("website")}>{WEB}{site}</a>
-            : <span className="nx-btn gh" data-qc158="website" {...p.dbl("website")}>{WEB}{site}</span>)
+          ? <NxSite label={site} href={p.websiteHref} extra={p.dbl("website")} />
           : <button type="button" className="nx-btn gh" data-qc158="add" data-k="website" onClick={() => p.onField("website")}>+ Add a website</button>}
       </div>
 

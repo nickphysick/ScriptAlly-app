@@ -211,8 +211,9 @@ test("AA5 · the submission link follows the method; Other's words reach the car
   await page.locator("[data-aaj='add']").click();
   await page.locator("[data-aaj='fit']").waitFor({ timeout: 20_000 });
   await page.waitForTimeout(1200);
-  const tile = ((await page.locator("[data-aaj='fit'] [data-cl262='tile'][data-k='method']").textContent()) ?? "").trim();
-  L.check("the card's tile reads via {text}", tile.includes("Takes queries via Agency portal"), tile);
+  /* Agent card v2 — the "How {first} works" tiles are the query card's fact boxes: Takes queries · Via {text} */
+  const tile = ((await page.locator("[data-aaj='fit'] [data-acv2='facts'] [data-k='method']").textContent()) ?? "").trim();
+  L.check("the card's fact box reads via {text}", tile.includes("Takes queries") && tile.includes("Via Agency portal"), tile);
   const stored = (JSON.parse(emu("agents")) as { name: string; submissionMethod: string; submissionMethodOther: string }[]).find((a) => a.name === `Petra ${RUN}`);
   L.check("stored: Other and its words", stored?.submissionMethod === "Other" && stored?.submissionMethodOther === "Agency portal", JSON.stringify(stored));
   await page.locator("[data-aaj='done']").click();
@@ -332,16 +333,18 @@ test("AA9 · the finish screen: the real card face, whole inside the body; Fill 
     return {
       inside: c.top >= body.top - 0.5 && c.bottom <= body.bottom + 0.5 && c.left >= body.left - 0.5 && c.right <= body.right + 0.5,
       box: [c.top, c.bottom, body.top, body.bottom].map((x) => Math.round(x)),
-      face: ["[data-cl262='next']", "[data-cl262='tab']", "[data-cl262='sec']", "[data-cl262='foot']", ".apc-band"].map(has),
+      /* Agent card v2 — the face: the band, the tabs, the profile, the footer (the next-step box is retired) */
+      face: ["[data-acv2='band']", "[data-cl262='tab']", "[data-acv2='profile']", "[data-acv2='foot']"].map(has),
       ttl: document.querySelector("[data-aaj='done-title']")?.textContent ?? "",
     };
   });
   L.check("the title", r.ttl === "Saffron’s on your list.", r.ttl);
-  L.check("the real face (next step, tabs, sections, foot, band)", r.face.every(Boolean), JSON.stringify(r.face));
+  L.check("the real face (band, tabs, profile, footer)", r.face.every(Boolean), JSON.stringify(r.face));
   L.check("whole inside the body at 900 tall", r.inside, JSON.stringify(r.box));
   const sub = (await page.locator(".aaj-fitnote").textContent())?.trim();
   L.check("the note under it", sub === "A preview of their card. You’ll find it on your Contact list.", sub ?? "");
-  await page.locator("[data-aaj='fit'] [data-cl262='gap-fill']").click();
+  /* Agent card v2 — the gap line's "Fill them in →" is the Finish block's first "+ {detail}" */
+  await page.locator("[data-aaj='fit'] [data-acv2='finish-add']").first().click();
   const panel = page.locator("[data-cl262='panel']");
   await panel.waitFor({ timeout: 20_000 });
   await page.waitForTimeout(800);
@@ -441,7 +444,7 @@ test("AA12 · the edit routes open the card in edit mode; nothing renders the lo
   if (MUT === "AA12") await page.evaluate(() => document.body.insertAdjacentHTML("beforeend", "<div class='cl252-em' style='position:fixed;top:0;left:0;width:20px;height:20px'></div>"));
   await panel.locator("[data-cl262='edit-all']").click();
   await card("Contact list · band pencil");
-  /* the Query Centre: a query's Agent tab, then its "+ Website" / "+ Add {first}'s wishlist" door (openAgentCard at a
+  /* the Query Centre: a query's Agent tab, then its "+ Add a website" / "+ Add an email" door (v158's words; earlier "+ Website") (openAgentCard at a
      field, from another page — the app-level host, not the Contact list's own card) */
   await openApp(page, "/queries", VP);
   const qrow = page.locator("[data-qc151='row']:visible, [data-qcv='row']:visible, tr[data-id]:visible").first();
@@ -450,7 +453,7 @@ test("AA12 · the edit routes open the card in edit mode; nothing renders the lo
   await page.waitForTimeout(1200);
   await page.locator("[role='tab']:visible", { hasText: /agent/i }).first().click();
   await page.waitForTimeout(800);
-  const door = page.locator("button:visible", { hasText: /^\s*\+\s*(Website|Add .*wishlist)/ }).first();
+  const door = page.locator("button:visible", { hasText: /^\s*\+\s*(Website|Add a website|Add an email|Add .*wishlist)/ }).first();
   L.check("population: a door on the agent tab", (await door.count()) > 0, "door");
   await door.click();
   await card("Query Centre · agent tab door");

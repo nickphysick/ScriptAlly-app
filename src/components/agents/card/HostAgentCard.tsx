@@ -27,7 +27,7 @@ import { colleaguesOf, genreFit } from "../../../lib/contactV24";
 import { genreLabel } from "../../../lib/genres";
 import { bookGenreHit, bookGenres } from "../../../lib/genreMatch";
 import { alsoChanges, type EditCtx } from "../../../lib/contactEdit";
-import { offerToast } from "../../../lib/cardOffers";
+import { savedWords, UNDONE_WORDS } from "../../../lib/agentCardV2";
 import { commitAgentEdits } from "../../../lib/saveAgentEdits";
 import { draftOf, toContactDraft } from "../../../lib/cardDraft";
 import { GAP_FOCUS, agentGaps } from "../../../lib/contactHousekeeping";
@@ -114,16 +114,16 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
         personal: editOpts.personal, agents, msGenre: scoped?.genre ?? null, genrePool: editOpts.genrePool, personalGenres: editOpts.personalLabels,
         allGenres: editOpts.allGenres, nowMs, onNewGenre: editOpts.onNewGenre,
         alsoFor: (d, base) => alsoChanges(agent, toContactDraft(agent, base, d), editCtx),
-        onSave: async (d, base, offers) => {
+        onSave: async (d, base, offers, meta) => {
           const r = await saveDraft(agent, base, d, { emit: false, offers });
           if (!r.ok) return { ok: false, error: (r as { error: string }).error };
           const undo = r.undo;
-          /* Card offers v1 — the toast says what the save did to the query (the mock's words); a query that did not
-             update is named, and the agent's save stands */
+          /* Card offers v1 — a query that did not update is named, and the agent's save stands. Agent card v2 — otherwise
+             "Saved {n} changes to {first}", plus what it did to the query; Undo puts the snapshot back ("Changes undone") */
           const failed = (r as { failed?: string[] }).failed ?? [];
           const message = failed.length ? `Saved ${first}’s card, but ${failed.join(" and ")} didn’t update. Try it from the query.`
-            : (offers ? offerToast(offers) : null) ?? `Saved ${first}’s card`;
-          showToast({ message, ...(undo ? { undo: async () => { await undo(); } } : {}) });
+            : savedWords(meta?.n ?? 1, first, offers);
+          showToast({ message, ...(undo ? { undo: async () => { await undo(); showToast({ message: UNDONE_WORDS }); } } : {}) });
           return { ok: true };
         },
         leaveRef: leave, closeGuardRef: guard, resumePick: noop,
@@ -147,7 +147,7 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
       deleteQueries: destroyManifest("agent", agent.id, { queries, activities, taskFlags }).queries,
       onDelete: () => { closeAgentCard(); void deleteAgent(agent.id); },
       edit,
-      gaps: gaps.length ? { n: gaps.length, focus: GAP_FOCUS[gaps[0]].focus as AgentCardField, tab: GAP_FOCUS[gaps[0]].tab } : null,
+      gaps: gaps.length ? { n: gaps.length, focus: GAP_FOCUS[gaps[0]].focus as AgentCardField, tab: GAP_FOCUS[gaps[0]].tab, keys: gaps } : null,
       story: { blocks: storyBlocks(rows, toAgent, activities, (id) => titleOf(id) || null, replyWeeksOf(agent), nowMs), heard: heardWords(rows) },
     };
     return { ...base, preview: o.preview };
@@ -158,7 +158,7 @@ export function useHostCardProps(agentId: string, o: { preview?: boolean; sequen
 
 
 /** the card in its panel, in edit mode at the door's section */
-export const HostAgentCard: React.FC<{ agentId: string; openAt: OpenAt; sequence?: string[] }> = ({ agentId, openAt, sequence }) => {
+export const HostAgentCard: React.FC<{ agentId: string; openAt?: OpenAt; sequence?: string[] }> = ({ agentId, openAt, sequence }) => {
   const { props, guard } = useHostCardProps(agentId, { sequence });
   if (!props) return null;
   return (

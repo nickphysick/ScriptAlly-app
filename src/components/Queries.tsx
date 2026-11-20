@@ -6429,7 +6429,8 @@ export const Queries: React.FC<{
         onFocused={() => setQcEditUndated(false)}
         onAgentField={(f) => {
           if (!ag) return;
-          if (f === null) openAgentCard(ag.id, { tab: "who", from: "qc" });
+          /* Agent card v2 — "Open {first}'s full card" reads the card; the tab "who" opened every section for editing */
+          if (f === null) openAgentCard(ag.id, { from: "qc" });
           else if (f === "wishlist") openAgentCard(ag.id, { tab: "want", focus: "wishlist", from: "qc" });
           else if (f === "method") openAgentCard(ag.id, { tab: "work", focus: "method", from: "qc" });
           else if (f === "reply") openAgentCard(ag.id, { tab: "work", focus: "reply", from: "qc" });

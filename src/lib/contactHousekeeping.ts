@@ -299,10 +299,10 @@ export function agentGapLine(model: Pick<HkModel, "byAgent">, agentId: string): 
  * the same count the agent panel's gap line and the drawer show — and the first of them in Housekeeping's own order
  * (points, then queried, then name), which is the field the card's edit mode opens at. Null when the agent has none.
  */
-export function agentGapAction(model: Pick<HkModel, "byAgent">, agentId: string): { n: number; first: GapKey } | null {
+export function agentGapAction(model: Pick<HkModel, "byAgent">, agentId: string): { n: number; first: GapKey; keys: GapKey[] } | null {
   const row = model.byAgent.find((r) => r.agent.id === agentId);
   if (!row || row.items.length === 0) return null;
-  return { n: row.items.length, first: row.items[0].gap };
+  return { n: row.items.length, first: row.items[0].gap, keys: row.items.map((i) => i.gap) };
 }
 /** where each gap opens in the card's edit mode */
 export const GAP_FOCUS: Record<GapKey, { tab: "who" | "want" | "work"; focus: "reply" | "materials" | "genres" | "wishlist" | "reopen" | "agency" }> = {

@@ -12,6 +12,7 @@
  *
  * Module scope, like `drawerStore`: nothing to mount means nothing to forget.
  */
+import { spyJourney } from "./journeySpy";
 import { openQueryDrawer } from "./queryActions/drawerStore";
 /* "agent" (Contact list v16 §F): opened from an agent's panel, on its Queries tab — the query view carries a way back */
 export type PanelOrigin = "dashboard" | "feed" | "other" | "agent";
@@ -37,6 +38,7 @@ export interface PanelBack { agentId: string; first: string }
 let back: PanelBack | null = null;
 export const queryPanelBack = (): PanelBack | null => back;
 export function openQueryPanelFromAgent(id: string, from: PanelBack): void {
+  spyJourney({ via: "query-card", mode: "open", queryId: id, back: from.first });
   back = from;
   current = { id, from: "agent" };
   tell();
@@ -87,6 +89,7 @@ export function subscribeResponse(f: (r: ResponseRequest) => void): () => void {
 export const responseHosted = (): boolean => respSubs.size > 0;
 let savedWaiter: { id: string | null; f: (id: string) => void } | null = null;
 export function openResponse(opts: ResponseRequest = {}): boolean {
+  spyJourney({ via: "response", mode: "resp", queryId: opts.queryId ?? null });
   /* the phone (nothing listens): its own flow, unchanged — the drawer's response journey */
   if (!respSubs.size) { openQueryDrawer({ mode: "resp", ...(opts.queryId ? { queryId: opts.queryId } : {}) }); return false; }
   savedWaiter = opts.onSaved ? { id: opts.queryId ?? null, f: opts.onSaved } : null;

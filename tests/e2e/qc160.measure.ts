@@ -26,8 +26,11 @@ test.setTimeout(600_000);
 mkdirSync(`${DIR}/ledger`, { recursive: true });
 mkdirSync(`${DIR}/frames`, { recursive: true });
 
-const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe" });
-const dump = (key: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --dump ${key}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!);
+/* ⚠️ A TIMEOUT, NOT A RETRY: execSync blocks the worker's event loop, so Playwright's own test timeout cannot fire while
+   the seed runs; an emulator that answers its writes with UNKNOWN made the SDK retry forever and held the test slot
+   (20 Nov, twice). 60s fails the test instead. */
+const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe", timeout: 60_000, killSignal: "SIGKILL" });
+const dump = (key: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --dump ${key}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 60_000, killSignal: "SIGKILL" }).trim().split("\n").pop()!);
 test.beforeAll(() => { seed(); });
 test.afterAll(() => { seed("--clean"); });
 

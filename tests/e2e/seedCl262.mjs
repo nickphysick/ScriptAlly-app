@@ -48,5 +48,14 @@ await setDoc(doc(db, "users", uid, "agents", id), {
   city: "Bath", country: "GB", submissionStatus: "Open", submissionMethod: "Email",
   setAside: false, importedNeedsReview: false, materialsWanted: [], dateAdded: iso, lastCheckedDate: iso,
 });
+/* Agent card v2 draws no empty section (design-refs/agent-card-v2/): the editing locks that press a section's own pen
+   need an agent with every section filled — Fenella Filled, never queried, nobody else reads her */
+await setDoc(doc(db, "users", uid, "agents", `${PREFIX}full`), {
+  id: `${PREFIX}full`, userId: uid, name: "Fenella Filled", agency: "Full House Literary", email: "fenella@fullhouse.test",
+  website: "https://fullhouse.test", genres: ["Literary fiction", "Historical fiction"], notes: "", agentNotes: "",
+  mswlNotes: "Quiet books about loud families.", twitter: "", bluesky: "", instagram: "", socials: [],
+  city: "York", country: "GB", submissionStatus: "Open", submissionMethod: "Email", responseTimeWeeks: 8, noResponseMeansNo: false,
+  setAside: false, importedNeedsReview: false, materialsWanted: ["Query letter", "Synopsis"], dateAdded: iso, lastCheckedDate: iso,
+});
 console.log("cl262fx: seeded");
 process.exit(0);

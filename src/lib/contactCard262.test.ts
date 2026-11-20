@@ -1,39 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { QueryStatus, SubmissionMethod } from "../types";
-import { bandWords, howTiles, metaLine, nextStep } from "./contactCard262";
+import { nextStep } from "./contactCard262";
 
 const q = (status: QueryStatus, extra: Record<string, unknown> = {}) => ({ id: "q1", status, court: "agent", sentMs: Date.UTC(2026, 8, 1), lastMs: Date.UTC(2026, 9, 2), expectedMs: null, ...extra });
 const x = (stand: string, extra: Record<string, unknown> = {}) => ({ stand, q: null, door: "open", agent: { id: "a", name: "Tom Ellery", agency: "E & F" }, ...extra }) as never;
 
-describe("v26.2 B — the band's chip", () => {
-  it("says who it's with and the stage", () => {
-    expect(bandWords(x("you", { q: q(QueryStatus.OFFER) }))).toBe("Your move · Offer");
-    expect(bandWords(x("agent", { q: q(QueryStatus.FULL_SENT) }))).toBe("With the agent · Full sent");
-    expect(bandWords(x("closed", { q: q(QueryStatus.REJECTED) }))).toBe("Closed · Passed");
-    expect(bandWords(x("none"))).toBe("Not yet queried");
-    expect(bandWords(x("none", { door: "closed" }))).toBe("Closed to queries");
-  });
-});
-
-describe("v26.2 B — the head's meta line", () => {
-  it("omits whichever half is unknown, with no stray separator", () => {
-    expect(metaLine({ city: "Bath", responseTimeWeeks: 6 }, null)).toBe("Bath · replies in about 6 weeks");
-    expect(metaLine({ city: "", responseTimeWeeks: 6 }, null)).toBe("replies in about 6 weeks");
-    expect(metaLine({ city: "Bath", responseTimeWeeks: 0 }, null)).toBe("Bath");
-    expect(metaLine({ city: "", responseTimeWeeks: undefined }, null)).toBe(null);
-  });
-});
-
-describe("v26.2 B — the four tiles", () => {
-  it("are reply, door, method, policy, with the gaps in italics", () => {
-    const t = howTiles({ responseTimeWeeks: 8, submissionMethod: SubmissionMethod.QUERY_MANAGER, noResponseMeansNo: false } as never, "open");
-    expect(t.map((x) => `${x.pre}${x.bold}${x.post}`)).toEqual(["Replies in about 8 weeks", "Open to queries", "Takes queries via QueryManager", "Always replies"]);
-    const g = howTiles({} as never, "unknown");
-    expect(g.map((x) => x.known)).toEqual([false, false, false, false]);
-    expect(g.map((x) => x.pre)).toEqual(["Reply time not known", "Not known if open", "How they take queries not known", "Response policy not stated"]);
-  });
-});
-
+/* Agent card v2 retired the band's chip, the head's meta line and the four tiles (lib/agentCardV2 has their successors) */
 describe("v26.2 B — the next-step box", () => {
   it("is the call box for your move, and toned for the rest", () => {
     const call = { kind: "you", bold: "Tom made an offer.", sub: "Reply by 31 Jul.", button: "Record your answer", door: { mode: "offer", label: "Record your answer" }, queryId: "q1" } as never;

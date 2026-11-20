@@ -100,7 +100,7 @@ export interface AgentCard24Props {
   edit?: CardEditKit;
   /** Contact list v25.4 D — Housekeeping's gaps for the agent: the count, and the field the edit mode opens at (null:
    *  none, and the Profile tab says nothing about gaps) */
-  gaps?: { n: number; focus: AgentCardField; tab: AgentCardTab } | null;
+  gaps?: { n: number; focus: AgentCardField; tab: AgentCardTab; /** Agent card v2 — every item, in Housekeeping's order */ keys?: import("../../../lib/contactHousekeeping").GapKey[] } | null;
   /** Contact list v25.5 B — the History tab's query story: every query to the agent, newest first, and the heading's
    *  "waiting to hear back" / "heard back" (lib/contactStory255) */
   story?: { blocks: StoryBlock[]; heard: string | null };
@@ -130,7 +130,8 @@ export interface CardFormKit {
   nowMs: number;
   alsoFor: (d: CardDraft, base: CardDraft) => import("../../../lib/contactEdit").AlsoNote[];
   /** the one write (the editor's existing save); its toast is the page's */
-  onSave: (d: CardDraft, base: CardDraft, offers?: import("../../../lib/cardOffers").OfferPlan | null) => Promise<{ ok: true } | { ok: false; error: string }>;
+  /** Agent card v2 — `meta.n`: the changes the save bar counted, for the snackbar ("Saved {n} changes to {first}") */
+  onSave: (d: CardDraft, base: CardDraft, offers?: import("../../../lib/cardOffers").OfferPlan | null, meta?: { n: number }) => Promise<{ ok: true } | { ok: false; error: string }>;
   onNewGenre: (typed: string) => Promise<{ ok: true; label: string } | { ok: false; reason: string }>;
   /** the page's "another row was picked" / "leave" hook: the card sets it while it has unsaved changes */
   leaveRef: React.MutableRefObject<(() => void) | null>;

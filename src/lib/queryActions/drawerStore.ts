@@ -10,6 +10,7 @@
  * mounted by every page that opens the drawer, and forgetting it is a silent no-op on a button that
  * looks live. Nothing to wire means nothing to forget. The host subscribes; callers only call.
  */
+import { spyJourney } from "../journeySpy";
 import { PARKED_KEY, bareRequest, fromStored, sameJourney, toStored, type ParkedJourney } from "./parking";
 
 export type { ParkedJourney } from "./parking";
@@ -121,6 +122,7 @@ const notify = () => listeners.forEach((l) => l(current));
  * and start", never a silent replace — and a door asking for the SAME one resumes it.
  */
 export function openQueryDrawer(req: OpenRequest): void {
+  spyJourney({ via: "drawer", mode: req.mode, queryId: req.queryId ?? null, agentId: (req as { agentId?: string }).agentId ?? null });
   if (parked) {
     if (sameJourney(parked.req, req)) { resumeQueryDrawer(req); return; }
     clash = req;

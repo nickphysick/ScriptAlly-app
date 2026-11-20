@@ -11,6 +11,15 @@ import { SIZES, openCard, shotDir, Ledger, MUT, CARD, cssBreak, frameScroll } fr
 
 test.describe.configure({ mode: "default" });
 
+/* Agent card v2 retires these CL262 cases (design-refs/agent-card-v2/; its locks are acv2.measure.ts):
+     J1  the panel 14 from the sheet's top and bottom, its height the sheet's → the query card's height (AC2-1)
+     J3  the next-step box as the card's one colour → the query box and the footer (AC2-2)
+     J4  ghost lines and "+ Add …" per empty section → a section with nothing in it is not drawn (AC2-3)
+     the three shot sets → acv2Shots.measure.ts
+   J2 (the lean) and J5–J11 (editing on the card) stand: the lean and the editing are kept as built. */
+const RETIRED_BY_ACV2 = [/^CL262 shots/, /^J1 /, /^J3 /, /^J4 /];
+test.beforeEach(({}, info) => { test.skip(RETIRED_BY_ACV2.some((r) => r.test(info.title)), "retired by Agent card v2 (see the note above)"); });
+
 test("CL262 shots — the card", async ({ page }) => {
   test.setTimeout(240_000);
   for (const [name, stand] of [["01-card-you", "you"], ["02-card-none", "none"], ["xx-card-agent", "agent"], ["xx-card-closed", "closed"]] as const) {
@@ -54,6 +63,8 @@ test("CL262 shots — editing", async ({ page }) => {
 /* ══ the locks ═════════════════════════════════════════════════════════════════════════════════════════════════════ */
 
 const GAPPY = "cl262fx-gappy";
+/** Agent card v2 — every section filled, so each has its own pen (an empty section is not drawn) */
+const FULL = "cl262fx-full";
 /** the gappy agent as seeded: a saving lock (J11) fills its wishlist, so every reader starts from the seed */
 const fresh = () => execFileSync("node", ["tests/e2e/seedCl262.mjs"], { stdio: "inherit" });
 const pen = (page: Page, k: string) => page.locator(`${CARD} [data-cl262='pen'][data-k='${k}']`).first();
@@ -79,6 +90,12 @@ const secTop = (page: Page, k: string) => page.evaluate((key) => {
 }, k);
 /** reveal a pen (it fades in on hover) and press it with the pointer */
 async function pressPen(page: Page, k: string) {
+  /* Agent card v2 — an empty section is not drawn; its door is the Finish block's "+ {detail}" (Housekeeping's list) */
+  if (!(await sec(page, k).count())) {
+    await page.locator(`${CARD} [data-acv2='finish-add'][data-k='${k === "how" ? "reply" : k}']`).first().click({ timeout: 5000 }).catch(() => {});
+    await page.waitForTimeout(450);
+    return;
+  }
   await sec(page, k).hover();
   await pen(page, k).click({ timeout: 5000 }).catch(() => {});
   await page.waitForTimeout(450);
@@ -125,7 +142,7 @@ test.describe("CL262 locks", () => {
     test(`J2 the lean · ${at}`, async ({ page }) => {
       test.setTimeout(180_000);
       const L = new Ledger(`J2-${at}`);
-      await openCard(page, vp, { stand: "you" });
+      await openCard(page, vp, { id: FULL });
       if (MUT === "J2") await cssBreak(page, ".cl262-lean{transform:none!important}");
       L.check("rest −1.2°", Math.abs((await lean(page)) + 1.2) < 0.05, String(await lean(page)));
       await pressPen(page, "wishlist");
@@ -209,7 +226,7 @@ test.describe("CL262 locks", () => {
     test(`J5 one section at a time · ${at}`, async ({ page }) => {
       test.setTimeout(180_000);
       const L = new Ledger(`J5-${at}`);
-      await openCard(page, vp, { stand: "you" });
+      await openCard(page, vp, { id: FULL });
       if (MUT === "J5") await cssBreak(page, "[data-cl262='pen']{pointer-events:none!important}");
       await pressPen(page, "genres").catch(() => {});
       L.check("genres pen → genres only", JSON.stringify(await editingKeys(page)) === '["genres"]', (await editingKeys(page)).join(","));
@@ -229,7 +246,7 @@ test.describe("CL262 locks", () => {
       test.setTimeout(240_000);
       const L = new Ledger(`J6-${at}`);
       fresh();
-      await openCard(page, vp, { id: GAPPY });
+      await openCard(page, vp, { id: FULL });
       if (MUT === "J6") await cssBreak(page, "[data-aap='door-closed']{display:none!important}");
       await pressPen(page, "genres");
       const g = await page.evaluate(() => {
@@ -350,7 +367,7 @@ test.describe("CL262 locks", () => {
     test(`J10 the discard guard · ${at}`, async ({ page }) => {
       test.setTimeout(240_000);
       const L = new Ledger(`J10-${at}`);
-      const id0 = await openCard(page, vp, { stand: "you" });
+      const id0 = await openCard(page, vp, { id: FULL });
       if (MUT === "J10") await cssBreak(page, "[data-cl262='save-bar'][data-guard]{display:none!important}");
       const dirty = async () => { await pressPen(page, "wishlist"); await page.keyboard.type(" x"); await page.waitForTimeout(150); };
       const guardUp = () => page.locator(`${CARD} [data-cl262='save-bar'][data-guard]`).isVisible();
