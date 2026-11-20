@@ -50,7 +50,8 @@
 
   /* ── the desk: the pitch · the details ─────────────────────────────────────────────────────────────────────── */
   /* the ref's 24 under the header (its `.head` margin), where the shared header sheet gives every page 48 */
-  .ms29 .ms29-desk { margin-top: -24px; }
+  /* Consistency roll-out v1, Phase 5 (ruling 2): the desk sits 40 under the header (48 − 8); it was 48 − 24 = 24 */
+  .ms29 .ms29-desk { margin-top: -8px; }
   .ms29 .ms29-desk { display: grid; grid-template-columns: minmax(0, 1fr) 392px; gap: 24px; align-items: start; }
   .ms29 .ms29-pt { display: grid; grid-template-columns: 176px minmax(0, 1fr) auto; gap: 8px 28px; align-items: start; padding: 26px 26px 28px; }
   .ms29 .ms29-pt + .ms29-pt { border-top: 1px dashed rgba(28, 19, 15, .18); }

@@ -25,6 +25,9 @@
 
 /* ═════════ the header's right-hand block (`.brk`, `.pick`) — inside the shared navy header ═════════ */
 .cb15 .qc151.qc153.wsnh .wsnh-rc { max-width: 560px; grid-template-columns: minmax(0, 1fr); }
+/* Consistency roll-out v1, Phase 5 (ruling 2): the tools' first button sits 40 under the header. The tools' box starts
+   12 above its buttons (padding 12, margin −12), so the header's margin is 40 where wsnh.css gives 48. */
+@media (min-width: 768px) { .cb15 .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { margin-bottom: 40px; } }
 .cb15 .cb15-brk { display: flex; justify-content: flex-end; }
 .cb15 .cb15-brk button { display: block; min-width: 150px; min-height: 32px; padding: 6px 30px 8px; border-left: 1px solid rgba(244, 238, 229, .28); border-radius: 0; color: rgba(244, 238, 229, .86); transition: background .15s; }
 .cb15 .cb15-brk button:first-child { border-left: 0; }

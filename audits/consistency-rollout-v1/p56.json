@@ -1,0 +1,7 @@
+{
+ "_note": "v1-5 Phases 5–6: the page header (navy workspace header, or a plain page header) and its title",
+ "fixes": {
+  "hdr": { "sel": ".qc151.qc153 > .qc1531-hd, .cl27 > .qc1531-hd, header.sc-ttl, header.hc-top, .yn-hdw", "pages": ["*"] },
+  "hdr-title": { "sel": ".qc1531-hd h1.qc1531-t, header.sc-ttl h1, header.hc-top h1, .yn-hdw h1", "pages": ["*"] }
+ }
+}

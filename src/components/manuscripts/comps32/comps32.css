@@ -25,6 +25,8 @@
 @media (min-width: 768px) {
   /* the headline scales so it stays on one line beside the block (seven classes: above wsnh.css §2's five) */
   .cp32 .qc151.qc153.wsnh.cp32-hdr > .qc1531-hd.wsnh-hd.wsnh-hd h1.qc1531-t { font-size: clamp(44px, 3.6vw, 66px) !important; }
+  /* Consistency roll-out v1, Phase 5 (ruling 2): the band sits 40 under the header, not wsnh.css's 48 */
+  .cp32 .qc151.qc153.wsnh.cp32-hdr > .qc1531-hd.wsnh-hd.wsnh-hd { margin-bottom: 40px; }
   /* the ruled by-line wraps rather than cutting the book's name short (nothing on this page ends in an ellipsis) */
   .cp32 .qc151.qc153.wsnh.cp32-hdr > .qc1531-hd .qc1531-for span { text-overflow: clip; overflow: visible; white-space: normal; max-width: none; flex: 0 1 auto; }
   /* the collapsed bar's title and aside are short here; they clip rather than end in an ellipsis */

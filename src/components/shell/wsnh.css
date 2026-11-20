@@ -23,6 +23,18 @@
      break (tests/e2e/wsHeaders.measure.ts). */
   .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { margin-top: calc(30px + 8px); --wsh11: 1; }
 
+  /* ── §1b · Consistency roll-out v1, Phase 5 (ruling 2): one title place, and the Query Centre's gap ─────────────────
+     The header's title top sits 40 below the panel's top on every workspace page with this header (the Query Centre,
+     Packages and Letters reach it through `.qc151.qc153` without `.wsnh`; every page here is one bundle's sheet). The
+     grid centred the title block, so the title's place followed the block's height (38.3 to 61.6); here the block
+     starts at the top, 22 (the panel's padding) + 18 = 40. Every such header is 227 tall and its tallest title block
+     is 163, so 18 + 163 fits the 183 inside and no header changes height. Not the Contact list (`.cl27`, whose header
+     rules are its own sheet's) nor the To-do's slim header (`.tws56-hdw`): neither wrapper is `.qc151.qc153`. */
+  .qc151.qc153 > .qc1531-hd.qc1531-hd > .qc1531-main { align-self: start; margin-top: 18px; }
+  /* the Query Centre's columns sit 40 under the panel (qcv156 §1's 30 before): the rail, the toolbar and the list move
+     down 10. Only that page has the columns beside its header. */
+  .qc151.qc153 > .qc1531-hd.qc1531-hd:has(~ .qc153-cl) { margin-bottom: 40px; }
+
   /* ── §2 · Query letters v2.4's additions, as built there ──────────────────────────────────────────────────── */
   .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { min-height: 227px; margin-bottom: 48px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }
   /* the right block takes its own width (the ref's `auto` column, at most 440), not the Query Centre's 400–560 track

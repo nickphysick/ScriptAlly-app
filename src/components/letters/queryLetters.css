@@ -54,7 +54,8 @@
   /* v2.4 · the step from header to content (the ref's `.sp48 .head`): 48 under the header, larger than any gap inside
      the content (30), and the header casts the ref's soft card shadow. This page only: the Query Centre's and the
      Contact list's headers keep their 30 and their shadow. */
-  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd.qlp-hd { margin-bottom: 48px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }
+  /* Consistency roll-out v1, Phase 5 (ruling 2): 40 under the header, as on every workspace page (it was 48) */
+  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd.qlp-hd { margin-bottom: 40px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }
 }
 
 .qlp-lnk { padding: 0; border: 0; background: none; color: var(--ql-navy) !important; font-size: 16px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, .4); min-height: 32px; }

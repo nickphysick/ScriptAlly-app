@@ -113,7 +113,8 @@
 /* ═════ the page's sections, and one even gap between them (ref v15: `--sg: 72px`; the band 30px under the header) ═════ */
 .rsp15 .rsp15-body { display: flow-root; }
 .rsp15 .rsp15-body > * { margin-top: var(--r15-sg); }
-.rsp15 .rsp15-body > :first-child { margin-top: 30px; }
+/* Consistency roll-out v1, Phase 5 (ruling 2): 40 under the header on every workspace page (the ref said 30) */
+.rsp15 .rsp15-body > :first-child { margin-top: 40px; }
 .rsp15 [data-rsp5-sec] { scroll-margin-top: 20px; }
 .rsp15 .rsp15-mono {
   display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 50%; background: var(--r15-navy); color: var(--r15-cream);

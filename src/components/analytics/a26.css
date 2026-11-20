@@ -61,6 +61,12 @@
 
 /* ── sections ── */
 .a26-page .a26-sec { margin-top: 64px; }
+/* Consistency roll-out v1, Phase 5 (ruling 2): the first section sits 40 under the header. The header's margin (48)
+   and the first section's (64) collapse into the larger, so both are 40 here. */
+@media (min-width: 768px) {
+  .a26-page .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { margin-bottom: 40px; }
+  .a26-page .a26-flow > :first-child { margin-top: 40px; }
+}
 .a26-page .a26-sec-h { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
 .a26-page .a26-sec-h h2 { font: 400 30px/1.15 var(--a26-type) !important; }
 .a26-page .a26-sec-h p { font-size: 16px; color: var(--a26-muted); }
