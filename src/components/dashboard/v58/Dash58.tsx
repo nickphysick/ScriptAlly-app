@@ -62,6 +62,7 @@ import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import { Dash2Band } from "../v2/Dash2Band";
 import { wholeWeeksQuerying } from "../../../lib/dash2";
+import { stageMarks } from "../../../lib/dash3";
 import { Dash2Next } from "../v2/Dash2Next";
 import { Dash2Active } from "../v2/Dash2Active";
 import { Dash2Founding } from "../v2/Dash2Founding";
@@ -84,6 +85,8 @@ import "../f1/df1.css";
 import "../fv2/fv2.css";
 import "../v2/dash2.css";
 import "../v2/dash2Feed.css";
+/* ⚠️ AND DASHBOARD v3 LAST OF ALL: its rules win every tie */
+import "../v3/dash3.css";
 
 export interface Dash58Props {
   loading: boolean;
@@ -595,6 +598,8 @@ export const Dash58: React.FC<Dash58Props> = ({
     return () => window.clearTimeout(t);
   }, [loading]);
 
+  /* Dashboard v3, Phase 1: the header's stage marks — current-stage counts for this manuscript */
+  const marks = useMemo(() => stageMarks(scopedQueries), [scopedQueries]);
   const author = (currentUser?.name ?? "").trim();
   const title = (activeManuscript?.title ?? "").trim();
 
@@ -640,9 +645,11 @@ export const Dash58: React.FC<Dash58Props> = ({
               queries chart, then Closed queries · right: the feed, as tall as the grid row (so its scroll area ends level
               with the taller of the other two columns). Before the first query the middle holds the set-up card and the
               right the empty feed. */}
-          <Dash2Band loading={loading} title={title} author={author} buttons={!pre}
+          {/* Dashboard v3, Phase 1: the stage marks in the band; Log a query is the top bar's alone */}
+          <Dash2Band loading={loading} title={title} author={author}
             weeks={loading || loadFail ? null : wholeWeeksQuerying(scopedQueries, now)}
-            onLog={logQuery} onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")} />
+            marks={loading || loadFail ? [] : marks}
+            onRecord={() => onNavigate("queries", "Record a response")} onAddAgent={() => onNavigate("agents", "Add an agent")} />
           {/* ⚠️ DASHBOARD v2.2 (Part A; ref design-refs/dashboard-v2-2): the founding writer is a full-width band under the
               navy header, never a card inside a column. */}
           {/* Part D: the rank last celebrated is `users.foundingSeenTier` (v105's field); never written from the ghost or the example */}

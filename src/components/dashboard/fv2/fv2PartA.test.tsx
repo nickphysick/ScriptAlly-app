@@ -63,7 +63,9 @@ describe("FV2-A · Getting started is the sheet, the goal sheet takes the slot b
     expect(html).toContain('data-fv2="gs"');
     expect(html).toContain('data-fv2="gs-hide"');
     expect(html).not.toContain('data-df1="goal"');
-    expect(html).toContain('data-d2="log"');
+    /* RE-POINTED (Dashboard v3, Phase 1): the band's actions are Record a response and Add an agent; Log a query is the top bar's */
+    expect(html).toContain('data-d2="record"');
+    expect(html).not.toContain('data-d2="log"');
   });
   /* RE-POINTED (Dashboard v2): the goal sheet is retired, so a hidden Getting started leaves the slot empty */
   it("hidden: Getting started goes and nothing takes its place", () => {

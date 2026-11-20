@@ -1,0 +1,21 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * DASHBOARD v3 (ref design-refs/dashboard-v3.html). Imported after every earlier dashboard sheet, so its rules win
+ * ties; every rule is scoped to `.d58.d2` or names a `d3-` class only this page renders. Values are the page's own
+ * tokens (`--d2-*`, `--d58-*`) and `lib/stageColours` (restated hexes are asserted against it in dash3.test.ts).
+ */
+
+/* ── Phase 1 · the navy band: title, stage marks, two outline buttons; never wraps, never grows ── */
+.d58.d2 .d2-band { flex-wrap: nowrap; gap: 24px; }
+.d58.d2 .d2-bandtx { flex: 0 1 auto; }
+.d58.d2 h1.d2-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .d3-marks { margin: 0 0 0 auto; padding: 0; list-style: none; display: flex; align-items: center; gap: 22px; flex: none; color: #fffaf3; }
+.d58.d2 .d3-marks li { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; color: #fffaf3; }
+.d58.d2 .d3-marks b { font-family: var(--d58-type) !important; font-weight: 400; font-size: 22px; line-height: 1; color: #fffaf3; }
+.d58.d2 .d3-marks small { font-family: var(--d58-serif); font-size: 14px; color: rgba(244, 238, 229, 0.7); }
+.d58.d2 .d3-marks li.is-closed, .d58.d2 .d3-marks li.is-closed b, .d58.d2 .d3-marks li.is-closed small { color: rgba(244, 238, 229, 0.45); }
+.d58.d2 .d3-marks + .d2-acts { margin-left: 0; }
+.d58.d2 .d2-acts { flex: none; }
+@media (max-width: 1180px) { .d58.d2 .d3-marks { display: none; } .d58.d2 .d3-marks + .d2-acts { margin-left: auto; } }
