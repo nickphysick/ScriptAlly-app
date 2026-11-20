@@ -120,6 +120,9 @@ export interface CardEditKit {
    *  Also-changes dry run and its one save (absent: the card hands every edit to `renderEdit`) */
   form?: CardFormKit;
 }
+/** Agent card v2.1 — what the card says about one save */
+export interface CardSaveMeta { n: number; section?: string; silent?: boolean; onUndo?: () => void }
+
 export interface CardFormKit {
   personal: import("../../../lib/genres").PersonalGenre[];
   agents: readonly import("../../../types").Agent[];
@@ -131,7 +134,10 @@ export interface CardFormKit {
   alsoFor: (d: CardDraft, base: CardDraft) => import("../../../lib/contactEdit").AlsoNote[];
   /** the one write (the editor's existing save); its toast is the page's */
   /** Agent card v2 — `meta.n`: the changes the save bar counted, for the snackbar ("Saved {n} changes to {first}") */
-  onSave: (d: CardDraft, base: CardDraft, offers?: import("../../../lib/cardOffers").OfferPlan | null, meta?: { n: number }) => Promise<{ ok: true } | { ok: false; error: string }>;
+  /** Agent card v2.1 — `meta.section`: a section saved on its own ("Saved {section} for {first}"); `meta.silent`: no snackbar
+   *  (Save all makes one for every section it saved); `meta.onUndo`: run after the snackbar's Undo has put the snapshot back.
+   *  The result carries the save's Undo (absent when no snapshot could be taken). */
+  onSave: (d: CardDraft, base: CardDraft, offers?: import("../../../lib/cardOffers").OfferPlan | null, meta?: CardSaveMeta) => Promise<{ ok: true; undo?: () => Promise<boolean> } | { ok: false; error: string }>;
   onNewGenre: (typed: string) => Promise<{ ok: true; label: string } | { ok: false; reason: string }>;
   /** the page's "another row was picked" / "leave" hook: the card sets it while it has unsaved changes */
   leaveRef: React.MutableRefObject<(() => void) | null>;

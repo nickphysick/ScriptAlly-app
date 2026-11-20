@@ -28,6 +28,10 @@ export const STAGE_COLOURS: Record<Stage, StageColour> = {
   closed: { band: "#eceae6", tint: "#f6f5f3", edge: "#dedbd5", mark: "#a8a199", rim: "#9a9389", rimHi: "#e6e3de" },
 };
 
+/** Agent card v2.1 — the agent card's border with no query to follow: slate (the card's band), and its light's bright end.
+ *  One entry beside the table; the table itself is unchanged. */
+export const NO_QUERY_RIM: Pick<StageColour, "rim" | "rimHi"> = { rim: "#5e7189", rimHi: "#c3cedb" };
+
 /** the white sheen over the offer's band, as one layer (position 30% 0, size 260% 100%) */
 export const OFFER_SHEEN_LAYER =
   "linear-gradient(112deg, rgba(255,255,255,0) 22%, rgba(255,255,255,.55) 40%, rgba(255,255,255,.12) 52%, rgba(255,255,255,0) 66%) 30% 0 / 260% 100% no-repeat";

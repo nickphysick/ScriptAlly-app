@@ -36,7 +36,7 @@ import { fitToast } from "./card/agentPills";
 import { health as healthOf } from "../../lib/listHealth";
 import { draftOf, toContactDraft, type CardDraft } from "../../lib/cardDraft";
 import { alsoChanges } from "../../lib/contactEdit";
-import { savedWords, UNDONE_WORDS } from "../../lib/agentCardV2";
+import { savedWords, sectionSavedWords, UNDONE_WORDS } from "../../lib/agentCardV2";
 import type { AgentEditPatch, SaveAgentResult } from "../../lib/saveAgentEdits";
 import { commitAgentEdits } from "../../lib/saveAgentEdits";
 import { db as firestoreDb } from "../../lib/firebase";
@@ -955,9 +955,11 @@ export const AgentList: React.FC<AgentListProps> = ({ searchQuery, onNavigate, a
              "Saved {n} changes to {first}", plus what it did to the query; Undo puts the snapshot back ("Changes undone") */
           const failed = (r as { failed?: string[] }).failed ?? [];
           const message = failed.length ? `Saved ${first}’s card, but ${failed.join(" and ")} didn’t update. Try it from the query.`
-            : savedWords(meta?.n ?? 1, first, offers);
-          showToast({ message, ...(undo ? { undo: async () => { await undo(); showToast({ message: UNDONE_WORDS }); } } : {}) });
-          return { ok: true };
+            : meta?.section ? sectionSavedWords(meta.section, first, offers) : savedWords(meta?.n ?? 1, first, offers);
+          /* Agent card v2.1 — a section's save names the section; Save all makes its own snackbar (`silent`), and the card
+             plays its Undo motion once the snapshot is back (`onUndo`) */
+          if (!meta?.silent) showToast({ message, ...(undo ? { undo: async () => { const ok = await undo(); if (ok) meta?.onUndo?.(); showToast({ message: UNDONE_WORDS }); } } : {}) });
+          return { ok: true, undo };
         },
         leaveRef: editLeave,
         closeGuardRef: cardGuard,
