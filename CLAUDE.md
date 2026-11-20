@@ -9,7 +9,7 @@ The full reasoning, dates and incidents behind every rule below are in `docs/dec
 ## Working discipline
 
 ### Repo and branches
-- **Direct-to-`main` only.** No feature branches, no PRs, no auto-merge (solo dev, no live users). If you find yourself creating a branch or opening a PR, stop.
+- **Every Claude Code session works in its own git worktree on its own short-lived branch; never two sessions in one checkout.** Commit with `git commit --only -- <explicit paths>`. Deploying to dev is always allowed; `main` and prod are Nick's.
 - **CI-on-push stays** (`.github/workflows/ci.yml`: typecheck + tests + build on every push to `main`). It is the safety net, not PR gating. Its per-ref `concurrency` group with `cancel-in-progress`, and `ci-retry.yml` (re-runs a failed run ONCE, only when every job executed zero steps), must not be removed casually.
 - **A red CI email is not necessarily a red build.** A job that never got a runner ends run-`failure`/job-`cancelled`. The tell is `runner_name` in `gh api repos/<o>/<r>/actions/runs/<id>/jobs`: a real failure names a machine and has steps. Before blaming the repo for any CI oddity, check `githubstatus.com`. `gh workflow run CI --ref main` re-verifies the tip when a run went missing. Detail: docs/decisions/testing-measurement.md.
 - **One active session per working tree.** For parallel work, each session gets its own worktree: `git worktree add ../ScriptAlly-<task> main`. End state is normally just `/Users/nickphysick/ScriptAlly-app`.
@@ -125,6 +125,22 @@ The full reasoning, dates and incidents behind every rule below are in `docs/dec
 - **A measurement names its target** (`SA_E2E_BASE_URL` is required; prod is refused) and refuses a bundle older than its sources (`bundleGuard`). Bind `vite preview` with `--host 127.0.0.1`.
 - **A measurement that writes restores in the same run**, and nothing navigates between a commit and its Undo.
 - **A mutation is run and undone in the measurement worktree**, never with `git checkout` in the primary checkout; backup names come from the full path (macOS is case-insensitive).
+
+## Design rules (settled)
+Nick's consistency rulings (design-refs/consistency-rollout-v1/consistency-rulings-v2.html), as built by Consistency roll-out v1. Tokens and classes live in `src/components/shell/primitives.css` (`:root`) unless named otherwise.
+- **Page colour is oat `--ws-page` (#f2eee8, index.css)** on workspace and public pages; public pages, which never load the shell, write #f2eee8.
+- **One navy: `--sp-anthracite` (#2a3a52)**, hover `--sp-anthracite-hov`; `--ink-band` (index.css) is the same navy. **One rust for small accents: `--sp-rust` (#7a3f31).** Burgundy only as the MountCard frame border. No green. Red only on destructive actions.
+- **Nothing under 12px**, except artwork and scaled-down previews.
+- **Headings:** section `font: var(--sp-h-section)` (Special Elite 24), card `--sp-h-card` (Special Elite 20), small `--sp-h-small` (Source Serif 600 16), each read with `!important` (brand.tsx forces h1–h3). Heroes may be larger.
+- **Navy header:** title 40px from the header's top; 40px gap to the content below (`src/components/shell/wsnh.css` §1b).
+- **Action buttons in a page body:** `.sp-btn` + `.sp-btn--fill` / `.sp-btn--line` (`--sp-btn-h` 40, `--sp-btn-r` 10, `--sp-btn-font` Source Serif 600 15). One filled navy per view; others outline. Not header, toggle, tab, pill, row, icon-only, destructive, Settings or public buttons.
+- **Framed card:** `.sp-rc` › `.sp-rc-in` (`--sp-rc-r` 20, `--sp-rc-pad` 8, `--sp-rc-sh`; inner `--sp-rc-in-r` 13, `--sp-rc-edge` 1px #e9e3d9). Side panels (the Views rails) use the single-edge card, not this.
+- **Text field:** `.sp-fld` (`--sp-fld-h` 44, `--sp-fld-r` 10, `--sp-fld-edge` 1px ink edge, `--sp-fld-font` 16px; `--sp-fld-focus` navy edge on focus). A headline field keeps its height and size.
+- **View switches are boxed** (box radius 12, buttons 34 high, radius 9: the Query Centre's List / Birds-eye switch, `.cp32-tog` on Comps). Underlined tabs are for different lists.
+- **Slide-out panels:** close button `--sp-px-size` (36 × 36); action footer `--sp-pfoot-h` (72) with `--sp-pfoot-pad` (14px 24px) and `--sp-pfoot-rule`.
+- **Copy:** "past expected", never "late" or "overdue". Colour never marks time pressure. No verdict words.
+- **New work uses these shared classes and tokens.** Do not write a new size, colour or radius on a page when one of these fits; point the page's own rule at the token.
+- **The consistency audit:** `npm run e2e:emu -- --config audits/consistency-v1/playwright.audit.config.ts` (through the test slot; `CA_ONLY=<pages>`, `CA_VIEWPORTS=1512,1920`, `CA_OUT=<dir>`), then `node audits/consistency-v1/analyse.mjs <dir>` writes findings.json.
 
 ## Dev-only routes and locked surfaces
 - Dev-only lab routes (`#/contact-lab`, `#/onb-lab`, `#/shell-lab`, `#/status-dots`) are gated on `MODE`/`import.meta.env.DEV`; a review aid's call site carries its own mode gate so production ships none of it. Grep the production bundle for a lab's names before a prod release; remove any dev route that has outlived its purpose before it reaches prod.
