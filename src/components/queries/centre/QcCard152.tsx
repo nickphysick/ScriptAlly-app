@@ -291,7 +291,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
       if (!reduced() && !isHeld(root)) finishAll(root);
       /* v161 — the motion of this landing is held until the page has finished drawing it (the release below) */
       if (first && !reduced()) { hold(root); setHeldN((n) => n + 1); }
-      if (first) bump(root.closest<HTMLElement>(".spanel"), root);
+      if (first) bump(root.closest<HTMLElement>(".spanel"), root, kind);
       const start = keysAtStart.current ?? new Set<string>();
       keysAtStart.current = new Set(thread.map((x) => x.key));
       if (settledNow) { draftSeq.current += 1; lastDraft.current = null; }
@@ -533,7 +533,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
 
   return (
     <PopCtx.Provider value={pop}>
-    <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view}
+    <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view} data-qc163-stage={stage}
       data-lean={view === "read" && !jOpen && !ed.on ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
       data-stage={stage} data-quiet={quiet ? "" : undefined} style={stageVars}>
       <div ref={inRef} className="qc152-in">

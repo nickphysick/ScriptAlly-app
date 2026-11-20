@@ -34,6 +34,22 @@
 @keyframes qc152In { from { translate: calc(100% + 120px) 0; } to { translate: 0 0; } }
 .spanel.qsp.qsp:has(> .spanel-own > [data-qc152="flat"]), .spanel.qsp.qsp:has(> .spanel-own > [data-lean="flat"]),
 .spanel.qsp.qsp[data-step]:has(> .spanel-own > [data-qc152]) { rotate: none; }
+/* Query card v163 — THE RIM LAYER (qcMotion160 `rimOf` makes it, on first use): purely decorative, over the frame's 7px
+   white border and masked to that ring (the middle cut out), so nothing inside the frame is covered or moved. It holds the
+   TINT (`b`: the ring in one flat colour, the stage's `rim`) and the LIGHT (`i`: a 920px conic square centred on the frame,
+   coloured and turned at a landing). Both at opacity 0 at rest; every value that moves is a Web Animation. */
+.spanel > .qc163-rim {
+  position: absolute; inset: 0; z-index: 1; box-sizing: border-box; padding: 7px; border-radius: 20px;
+  pointer-events: none; overflow: hidden;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
+}
+.spanel > .qc163-rim > i {
+  position: absolute; left: 50%; top: 50%; width: 920px; height: 920px; translate: -50% -50%; opacity: 0;
+  will-change: rotate, opacity;
+}
+.spanel > .qc163-rim > b { position: absolute; inset: 0; opacity: 0; will-change: opacity; }
 @media (max-width: 1400px) { .spanel.qsp.qsp:has(> .spanel-own > [data-qc152]) { width: 504px; right: 28px; } }
 @media (prefers-reduced-motion: reduce) {
   .spanel.qsp.qsp:has(> .spanel-own > [data-qc152]) { animation: none; transition: none; }
