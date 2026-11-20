@@ -6,12 +6,17 @@
  * brand-font and portal rules every v2 sheet follows.
  */
 /* ── Part B · the framed card (built hoops included) ── */
+/* Consistency roll-out v1, Phase 8: the framed card (primitives.css `.sp-rc` › `.sp-rc-in`) — rim 7 → 8, the deeper shadow, inner 14 → 13, #e3d5c9 → #e9e3d9.
+   The two `:not()` rules after these two draw it on the Dashboard. Your notes (`.yn`, the same classes on a
+   non-workspace page) and its note panel (`.yn-layer`, a slide-out) keep these two. */
 .d58.d2 .os-card {
   padding: 7px; border-radius: 20px; background: #fff;
   box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32);
   display: flex; flex-direction: column; height: auto;
 }
 .d58.d2 .os-card .os-frame { border: 1px solid #e3d5c9; border-radius: 14px; overflow: hidden; background: #fff; padding: 0; flex: 1 1 auto; }
+.d58.d2:not(.yn, .yn-layer) .os-card { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); }
+.d58.d2:not(.yn, .yn-layer) .os-card .os-frame { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); }
 .d58.d2 .os-card .os-band { margin: 0; padding: 12px 18px; }
 .d58.d2 .os-card .os-bandrow { gap: 10px; }
 /* Consistency roll-out v1, Phase 7: the card heading (20/1.25; it was 20/1.3) */ .d58.d2 .os-card h2.os-cardttl, .d58.d2 .os-card h3.os-cardttl { font: var(--sp-h-card) !important; white-space: nowrap; }

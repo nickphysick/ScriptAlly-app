@@ -72,8 +72,8 @@
 .a26-page .a26-sec-h p { font-size: 16px; color: var(--a26-muted); }
 
 /* ── the card: white rim + hairline frame, a band across the top ── */
-.a26-page .a26-rc { padding: 8px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.04), 0 6px 18px rgba(28, 19, 15, 0.07); min-width: 0; }
-.a26-page .a26-rc-in { border: 1px solid var(--a26-hair); border-radius: 13px; overflow: hidden; background: #fff; height: 100%; }
+/* Consistency roll-out v1, Phase 8: the framed card (primitives.css `.sp-rc` › `.sp-rc-in`) */ .a26-page .a26-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
+.a26-page .a26-rc-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; height: 100%; }
 .a26-page .a26-rb { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 66px; padding: 14px 28px; }
 .a26-page .a26-rb h2 { min-width: 0; overflow-wrap: anywhere; /* Consistency roll-out v1, Phase 7: the section heading */ font: var(--sp-h-section) !important; color: var(--a26-ink); }
 .a26-page .a26-rb small { text-align: right; font: 400 15px/1.2 var(--a26-serif); color: var(--a26-muted); }

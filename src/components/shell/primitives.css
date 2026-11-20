@@ -137,7 +137,19 @@
   --sp-h-section: 400 24px/1.2 var(--sp-type);
   --sp-h-card: 400 20px/1.25 var(--sp-type);
   --sp-h-small: 600 16px/1.3 var(--sp-serif);
+  /* Consistency roll-out v1, Phase 8 (ruling 5): the framed card — Comps' `cp32-rc` › `cp32-rc-in`, as built. A white
+     rim (radius 20, 8 of padding, one soft shadow) holding a hairline frame (radius 13). `.sp-rc` › `.sp-rc-in` below
+     draw it; each page's own framed-card rule reads these values, so the card keeps its page's breakpoints and the
+     modifiers written against it. Not a framed card: single-edge side panels (the Views rails), the query card and
+     its Next box, stat tiles, art placeholders, the founding band, anything in a slide-out panel. */
+  --sp-rc-pad: 8px;
+  --sp-rc-r: 20px;
+  --sp-rc-sh: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .07);
+  --sp-rc-in-r: 13px;
+  --sp-rc-edge: 1px solid #e9e3d9;
 }
+.sp-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
+.sp-rc-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; }
 
 /* ══ SEARCH — one component, two widths ══ */
 .sp-search {

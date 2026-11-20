@@ -46,8 +46,8 @@
 }
 
 /* ══ the Dashboard's card: white rim 8, hairline frame, radius 20 / 13, a band across the top ═════════════════════ */
-.cp32 .cp32-rc { padding: 8px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .07); min-width: 0; }
-.cp32 .cp32-rc-in { border: 1px solid var(--c32-frame); border-radius: 13px; overflow: hidden; background: #fff; height: 100%; }
+/* Consistency roll-out v1, Phase 8: the framed card (primitives.css `.sp-rc` › `.sp-rc-in`) */ .cp32 .cp32-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
+.cp32 .cp32-rc-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; height: 100%; }
 .cp32 .cp32-rb { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 66px; padding: 14px 28px; }
 .cp32 .cp32-rb h2.cp32-rbt { min-width: 0; margin: 0; /* Consistency roll-out v1, Phase 7: the section heading */ overflow-wrap: anywhere; font: var(--sp-h-section) !important; color: inherit !important; }
 .cp32 .cp32-rb small { text-align: right; font: 400 15px/1.2 var(--c32-serif); color: var(--c32-muted); }

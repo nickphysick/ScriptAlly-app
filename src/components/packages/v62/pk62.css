@@ -73,8 +73,8 @@
 .pk62 .k62-note .k62-btn { height: 38px; }
 
 /* ══ §3 · shared parts: the framed card, its band, discs, links, buttons ══ */
-.pk62 .k62-rc { padding: 8px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .07); min-width: 0; }
-.pk62 .k62-rc-in { border: 1px solid #e9e3d9; border-radius: 13px; overflow: hidden; background: #fff; height: 100%; }
+/* Consistency roll-out v1, Phase 8: the framed card (primitives.css `.sp-rc` › `.sp-rc-in`) */ .pk62 .k62-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
+.pk62 .k62-rc-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; height: 100%; }
 .pk62 .k62-rb { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 66px; padding: 14px 28px; font: 400 23px/1.2 var(--k62-type); }
 .pk62 .k62-rb > span:first-child { min-width: 0; overflow-wrap: anywhere; }
 .pk62 .k62-rb small { text-align: right; font: 400 15px/1.2 var(--k62-serif); color: var(--k62-muted); }
