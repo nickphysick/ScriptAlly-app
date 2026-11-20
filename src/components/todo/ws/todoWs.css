@@ -537,7 +537,6 @@
 .tws-bar button:hover { filter: brightness(0.94); }
 .tws-bd p { margin: 8px 0 0; font: 15px/1.4 var(--tw-serif); color: var(--tw-ink2); }
 .tws-bd p b { font: 400 16px var(--tw-type); color: var(--tw-ink); }
-.tws-bd .tws-bdl { color: var(--tw-late); }
 .tws-bd .tws-bdt { padding: 0; border: 0; background: none; font: inherit; color: var(--tw-mut2); text-decoration: underline; text-decoration-color: #d9cfc1; text-underline-offset: 3px; cursor: pointer; }
 .tws-bd .tws-bdt:hover { color: var(--tw-navy); }
 
