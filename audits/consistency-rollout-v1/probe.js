@@ -57,5 +57,31 @@
     navy[k] = (navy[k] || 0) + 1;
   }
   out.__navy = navy;
+  /* rollout v1 (Phase 5/6): the header on screen — the navy workspace header, else a plain page header — with its
+     title and the first visible element below it, and the margins that set the gap */
+  const cn = (e) => `${e.tagName.toLowerCase()}.${String(e.className.baseVal ?? e.className).split(" ").filter(Boolean).join(".")}`.slice(0, 90);
+  const hd = [...document.querySelectorAll(".qc1531-hd, header.sc-ttl, header.hc-top, .yn-hdw")].filter(vis)[0];
+  if (hd) {
+    const r = hd.getBoundingClientRect(), cs = getComputedStyle(hd);
+    const t = hd.querySelector("h1") || null, tr = t && t.getBoundingClientRect();
+    const sheet = hd.closest(".ws-window") || document.querySelector(".ws-window");
+    const els = [...(hd.closest(".wpg-scroll, .ws-wbody, main") || document.body).querySelectorAll("*")].filter((e) => !hd.contains(e) && !e.contains(hd) && vis(e));
+    const below = els.filter((e) => e.getBoundingClientRect().top >= r.bottom - 1 && e.getBoundingClientRect().height > 8).sort((x, y) => x.getBoundingClientRect().top - y.getBoundingClientRect().top)[0];
+    const bcs = below && getComputedStyle(below);
+    out.__hdr = { hd: cn(hd), parent: cn(hd.parentElement), top: Math.round((r.top - (sheet ? sheet.getBoundingClientRect().top : 0)) * 10) / 10, bottom: Math.round(r.bottom * 10) / 10, pt: cs.paddingTop, mb: cs.marginBottom, mt: cs.marginTop, display: getComputedStyle(hd.parentElement).display,
+      title: t ? { cls: cn(t), top: Math.round((tr.top - r.top) * 10) / 10, font: getComputedStyle(t).font.slice(0, 80), mt: getComputedStyle(t).marginTop, prev: t.previousElementSibling ? cn(t.previousElementSibling) : null, parent: cn(t.parentElement) } : null,
+      below: below ? { cls: cn(below), parent: cn(below.parentElement), gap: Math.round((below.getBoundingClientRect().top - r.bottom) * 10) / 10, mt: bcs.marginTop, pt: getComputedStyle(below.parentElement).paddingTop } : null };
+  }
+  /* rollout v1 (Phases 7–12): inventories. Each lists visible elements with what the phase reads. */
+  const st = (e) => { const c = getComputedStyle(e), r = e.getBoundingClientRect(); return { cls: cn(e), text: (e.innerText || e.getAttribute("aria-label") || "").replace(/\s+/g, " ").trim().slice(0, 40), w: Math.round(r.width * 10) / 10, h: Math.round(r.height * 10) / 10, x: Math.round(r.left), y: Math.round(r.top), fam: c.fontFamily.split(",")[0].replace(/["']/g, ""), fs: c.fontSize, fw: c.fontWeight, lh: c.lineHeight, rad: c.borderTopLeftRadius, pad: c.padding, bg: c.backgroundColor, sh: c.boxShadow.slice(0, 120), bd: `${c.borderTopWidth} ${c.borderTopStyle} ${c.borderTopColor}`, col: c.color,
+    ctx: e.closest("[role=dialog], aside, .qc152, footer, header, .qc1531-hd") ? cn(e.closest("[role=dialog], aside, .qc152, footer, header, .qc1531-hd")).slice(0, 50) : "" }; };
+  const V = (q) => [...document.querySelectorAll(q)].filter(vis);
+  out.__heads = V("h2, h3, h4, h5, [role=heading]").slice(0, 80).map(st);
+  out.__btns = V("button, a[role=button], a.btn, a[class*=btn]").filter((e) => { const c = getComputedStyle(e), r = e.getBoundingClientRect(); return r.height >= 28 && r.width >= 60 && (e.innerText || "").trim() && (c.backgroundColor !== "rgba(0, 0, 0, 0)" || c.boxShadow !== "none" || parseFloat(c.borderTopWidth) > 0); }).slice(0, 80).map(st);
+  out.__fields = V("input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=hidden]), select, textarea, [contenteditable=true]").slice(0, 60).map(st);
+  out.__close = V("[role=dialog] button, aside button, .qad button, [class*=drawer] button, [class*=panel] button").filter((e) => /close|×|✕/i.test(`${e.getAttribute("aria-label") || ""} ${e.innerText || ""}`) && e.getBoundingClientRect().width <= 48).slice(0, 20).map(st);
+  out.__foot = V("[role=dialog] footer, aside footer, [class*=foot]").filter((e) => e.closest("[role=dialog], aside, [class*=drawer]")).slice(0, 12).map(st);
+  out.__cards = V("body *").filter((e) => { const c = getComputedStyle(e); const r = e.getBoundingClientRect(); return r.width >= 160 && r.height >= 80 && /255, 255, 255/.test(c.backgroundColor) && parseFloat(c.borderTopLeftRadius) >= 14 && c.boxShadow !== "none" && e.firstElementChild && parseFloat(getComputedStyle(e.firstElementChild).borderTopLeftRadius) >= 8 && (getComputedStyle(e.firstElementChild).boxShadow !== "none" || parseFloat(getComputedStyle(e.firstElementChild).borderTopWidth) > 0); }).slice(0, 40).map((e) => ({ ...st(e), inner: st(e.firstElementChild) }));
+  out.__switch = V("[role=tablist], [class*=seg], [class*=switch], [class*=toggle]").filter((e) => e.children.length >= 2 && e.children.length <= 5).slice(0, 12).map((e) => ({ ...st(e), kids: [...e.children].slice(0, 4).map(st) }));
   return out;
 })();

@@ -1,8 +1,92 @@
-{ "_note": "Phase 1 — the rail count at 12px, right-anchored; measured with CA_RAIL_COUNT 9, 16 and 128 (\"99+\").",
-  "fixes": {
-  "P1-ct": { "sel": ".wsr-ct", "pages": ["dashboard", "todo", "queries", "account-profile", "plans"] },
-  "P1-svg": { "sel": ".wsr-ni .wsr-ic svg", "pages": ["dashboard", "todo", "queries", "account-profile", "plans"] },
-  "P1-ic": { "sel": ".wsr-ni .wsr-ic", "pages": ["dashboard", "todo", "queries", "account-profile", "plans"] },
-  "P1-ni": { "sel": ".wsr-ni", "pages": ["dashboard", "todo", "queries", "account-profile", "plans"] },
-  "P1-rail": { "sel": ".wsr", "pages": ["dashboard", "todo", "queries", "account-profile", "plans"] }
- } }
+{
+ "_note": "Phase 1 — the rail count at 12px, right-anchored; measured with CA_RAIL_COUNT 9, 16 and 128 (\"99+\"). Plus the Phase 2/4 reported patches.",
+ "fixes": {
+  "P1-ct": {
+   "sel": ".wsr-ct",
+   "pages": [
+    "dashboard",
+    "todo",
+    "queries",
+    "account-profile",
+    "plans"
+   ]
+  },
+  "P1-svg": {
+   "sel": ".wsr-ni .wsr-ic svg",
+   "pages": [
+    "dashboard",
+    "todo",
+    "queries",
+    "account-profile",
+    "plans"
+   ]
+  },
+  "P1-ic": {
+   "sel": ".wsr-ni .wsr-ic",
+   "pages": [
+    "dashboard",
+    "todo",
+    "queries",
+    "account-profile",
+    "plans"
+   ]
+  },
+  "P1-ni": {
+   "sel": ".wsr-ni",
+   "pages": [
+    "dashboard",
+    "todo",
+    "queries",
+    "account-profile",
+    "plans"
+   ]
+  },
+  "P1-rail": {
+   "sel": ".wsr",
+   "pages": [
+    "dashboard",
+    "todo",
+    "queries",
+    "account-profile",
+    "plans"
+   ]
+  },
+  "R2-qc-band": {
+   "sel": ".qcv-group[data-v138] .qc138-sheet .qc138-band.qc144-rh",
+   "pages": [
+    "queries"
+   ]
+  },
+  "R2-qc-halo": {
+   "sel": ".qc154-wkg",
+   "pages": [
+    "queries"
+   ]
+  },
+  "R2-qc-tbw": {
+   "sel": ".qc154-tbw",
+   "pages": [
+    "queries"
+   ]
+  },
+  "R4-wel-band": {
+   "sel": ".mk-wel-band--1, .mk-wel-band--2",
+   "pages": [
+    "welcome"
+   ]
+  },
+  "R4-pv": {
+   "sel": ".mk-pv",
+   "pages": [
+    "privacy",
+    "terms"
+   ]
+  },
+  "R4-wel": {
+   "sel": ".mk-wel",
+   "pages": [
+    "welcome"
+   ]
+  }
+ }
+}
