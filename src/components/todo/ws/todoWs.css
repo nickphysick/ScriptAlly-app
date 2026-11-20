@@ -245,8 +245,9 @@
 }
 @container twscol (max-width: 399.98px) { .tws-wf em.tws-prog { display: none; } }
 .tws-sb {
-  position: relative; height: 40px; display: inline-flex; align-items: center; gap: 8px; padding: 0 14px; border: 0; border-radius: 22px;
-  background: #fff; color: var(--tw-ink); font: 600 15.5px var(--tw-serif); cursor: pointer; box-shadow: inset 0 0 0 1px #d4cabd;
+  /* Consistency roll-out v1, Phase 9: the outline action button (primitives.css `.sp-btn`) */
+  position: relative; display: inline-flex; align-items: center; gap: 8px; border: 0; cursor: pointer;
+  height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring);
 }
 .tws-sb svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .tws-sb kbd { font: 12px var(--tw-mono); color: var(--tw-mut2); padding: 1px 5px; border-radius: 4px; box-shadow: inset 0 0 0 1px #e3dbcf; }
@@ -294,9 +295,10 @@
 }
 .tws-tile[aria-pressed="true"] .tws-sugg, .tws-tile[aria-checked="true"] .tws-sugg { background: rgba(255, 255, 255, 0.85); color: var(--tw-blush-ink); }
 
+/* Consistency roll-out v1, Phase 9: the filled action button (primitives.css `.sp-btn`); it was a 46-high pill at 17 */
 .tws-go {
-  height: 46px; display: inline-flex; align-items: center; gap: 8px; padding: 0 24px; border: 0; border-radius: 999px; background: var(--tw-navy);
-  color: #fff; font: 600 17px var(--tw-serif); cursor: pointer; white-space: nowrap; min-width: 120px; justify-content: center;
+  display: inline-flex; align-items: center; gap: 8px; border: 0; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: var(--sp-anthracite); color: #fff; box-shadow: none;
+  cursor: pointer; white-space: nowrap; min-width: 120px; justify-content: center;
 }
 .tws-go svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
 .tws-go:disabled { opacity: 0.4; cursor: default; }

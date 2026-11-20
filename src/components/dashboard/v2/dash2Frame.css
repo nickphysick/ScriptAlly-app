@@ -36,7 +36,7 @@
 .d58.d2 .d2-ntitle { display: block; font-weight: 600; font-size: 17px; line-height: 1.3; }
 .d58.d2 .d2-nwhy { display: block; margin-top: 4px; font-size: 14.5px; line-height: 1.45; color: var(--d2-muted); }
 .d58.d2 .d2-nwhy em { font-style: normal; font-weight: 600; color: #a0675a; }
-.d58.d2 .d2-open { margin-top: 12px; height: 40px; padding: 0 20px; border: 0; border-radius: 999px; background: var(--sp-anthracite); color: #fff; font-weight: 600; font-size: 15px; cursor: pointer; }
+/* Consistency roll-out v1, Phase 9: the filled action button (primitives.css `.sp-btn`) */ .d58.d2 .d2-open { margin-top: 12px; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: var(--sp-anthracite); color: #fff; box-shadow: none; border: 0; cursor: pointer; }
 .d58.d2 .d2-open:hover { background: #24304a; }
 .d2-open:focus-visible, .d2-lrow:focus-visible, .d2-link:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d58.d2 .d2-later { list-style: none; margin: 8px 0 0; padding: 0; }

@@ -60,7 +60,7 @@
 .vv6 .v6-pb.g { background: transparent; color: #fffaf3; box-shadow: inset 0 0 0 1px rgba(255, 250, 243, .25); }
 .vv6 .v6-pb.g:hover { box-shadow: inset 0 0 0 1px rgba(255, 250, 243, .55); }
 .vv6 .v6-tone--navy :is(.v6-pb):focus-visible { outline-color: #fffaf3; }
-.vv6 .v6-pill--navy { background: var(--v6-navy); color: #fff; }
+/* Consistency roll-out v1, Phase 9: the filled action button (primitives.css `.sp-btn`) */ .vv6 .v6-pill--navy { height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: var(--sp-anthracite); color: #fff; box-shadow: none; }
 .vv6 .v6-pill--navy:hover { background: #24304a; }
 .vv6 :is(.v6-pb, .v6-pill)[disabled] { opacity: .5; cursor: default; }
 .vv6 .v6-inuse { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 999px; background: #fffaf3; color: var(--v6-ink); font: 600 15px/1 var(--sp-serif); white-space: nowrap; }

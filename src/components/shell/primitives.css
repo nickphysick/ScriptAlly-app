@@ -147,7 +147,23 @@
   --sp-rc-sh: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .07);
   --sp-rc-in-r: 13px;
   --sp-rc-edge: 1px solid #e9e3d9;
+  /* Consistency roll-out v1, Phase 9 (ruling 4): the main action button in the page body of workspace pages and the
+     Dashboard. 40 high, radius 10, 0 20 of padding, Source Serif 4 600 15. Filled: the navy ground, white words, one per
+     view. Outline: no ground, navy words, a 1.5px navy ring inside, the same box. `.sp-btn` + `--fill` / `--line` draw
+     it; each page's own button rule reads these values. Not: buttons in the navy header, selected toggles, tabs,
+     filter pills, list rows, icon-only buttons, destructive red buttons, Settings and public buttons. */
+  --sp-btn-h: 40px;
+  --sp-btn-r: 10px;
+  --sp-btn-pad: 0 20px;
+  --sp-btn-font: 600 15px/1 var(--sp-serif);
+  --sp-btn-ring: inset 0 0 0 1.5px var(--sp-anthracite);
+  --sp-btn-line-hov: rgba(42, 58, 82, .06);
 }
+.sp-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
+.sp-btn--fill { background: var(--sp-anthracite); color: #fff; }
+.sp-btn--fill:hover:not(:disabled) { background: var(--sp-anthracite-hov); }
+.sp-btn--line { background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); }
+.sp-btn--line:hover:not(:disabled) { background: var(--sp-btn-line-hov); }
 .sp-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
 .sp-rc-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; }
 

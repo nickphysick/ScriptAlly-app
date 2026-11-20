@@ -55,10 +55,10 @@
 .cp32 .cp32-rb.is-sand { background: #f2e6d8; color: var(--c32-ink); }
 .cp32 .cp32-go { padding: 0; border: 0; background: none; font: 600 15px/1.3 var(--c32-serif); color: var(--c32-ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; min-height: 28px; text-align: left; cursor: pointer; }
 .cp32 .cp32-go:hover { color: var(--c32-btn); }
-.cp32 .cp32-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 18px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #d9d1c5; font: 600 16px/1 var(--c32-serif); color: var(--c32-ink); white-space: nowrap; cursor: pointer; }
-.cp32 .cp32-btn:hover { box-shadow: inset 0 0 0 1px #a99f93; }
+.cp32 .cp32-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; /* Phase 9: the outline action button */ height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); border: 0; white-space: nowrap; cursor: pointer; }
+.cp32 .cp32-btn:hover { background: var(--sp-btn-line-hov); }
 .cp32 .cp32-btn svg { width: 16px; height: 16px; }
-.cp32 .cp32-btn.is-pri { background: var(--c32-btn); color: #fff; box-shadow: none; }
+/* Phase 9: the filled action button */ .cp32 .cp32-btn.is-pri { background: var(--sp-anthracite); color: #fff; box-shadow: none; }
 .cp32 .cp32-btn.is-pri:hover { background: #24324a; }
 .cp32 :focus-visible { outline: 2px solid var(--c32-navy); outline-offset: 2px; }
 

@@ -39,10 +39,11 @@
   .ms29 .ms29-band p.ms29-bs { margin: 4px 0 0; font: italic 400 15px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
   .ms29 .ms29-band--sand { background: #f3e6da; }
   .ms29 .ms29-band--stone { background: #ebe7e2; }
-  .ms29 .ms29-b2 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; white-space: nowrap; height: 40px; padding: 0 16px; border-radius: 999px; background: #fff; color: #1c130f; cursor: pointer;
-    font: 600 15px/1 var(--sp-serif) !important; box-shadow: 0 0 0 1px rgba(28, 19, 15, .14), 0 4px 10px -6px rgba(28, 19, 15, .3); }
+  /* Consistency roll-out v1, Phase 9: the outline action button (primitives.css `.sp-btn`); it was a white pill */
+  .ms29 .ms29-b2 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; white-space: nowrap; cursor: pointer;
+    height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); }
   .ms29 .ms29-b2 span { font: inherit !important; }
-  .ms29 .ms29-b2:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, .3), 0 6px 12px -6px rgba(28, 19, 15, .3); }
+  .ms29 .ms29-b2:hover { background: var(--sp-btn-line-hov); }
   .ms29 .ms29-b2 svg { width: 15px; height: 15px; flex: none; }
   .ms29 .ms29-b2.is-done { background: #e0e5dd; box-shadow: 0 0 0 1px rgba(28, 19, 15, .14); }
   .ms29 .ms29-lk { padding: 0; border: 0; background: none; min-height: 32px; cursor: pointer; font: 600 16px/1.3 var(--sp-serif) !important; color: #1c130f; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; white-space: nowrap; }
