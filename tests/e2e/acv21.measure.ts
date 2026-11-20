@@ -67,6 +67,8 @@ async function pen(page: Page, k: string) {
 }
 /** a control's box once the card has stopped scrolling (an opening's reveal is a smooth scroll) */
 async function stableBox(page: Page, sel: string) {
+  /* in view in the card's own scroller first: a section opened below can scroll this one's heading under the tabs */
+  await page.locator(sel).evaluate((e) => { const sc = e.closest<HTMLElement>("[data-apc='scroll']"); if (!sc) return; const r = e.getBoundingClientRect(), b = sc.getBoundingClientRect(); if (r.top < b.top + 8 || r.bottom > b.bottom - 8) sc.scrollTop += r.top - b.top - 60; });
   let last = await page.locator(sel).boundingBox();
   for (let i = 0; i < 30; i++) {
     await page.waitForTimeout(100);
