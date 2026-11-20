@@ -59,7 +59,9 @@ const read = (page: Page) => page.evaluate(() => {
   }
   const cards = qa(".os-card, .d3-gsrow, [data-d2='feed']").filter((e) => e.getBoundingClientRect().height > 0).map((e) => ({ name: e.getAttribute("data-d2-card") ?? e.getAttribute("data-d60") ?? e.className.slice(0, 30), ...r(e)! }));
   /* the chart's week circles are plot marks, not actions */
-  const navyFilled = [...root.querySelectorAll<HTMLElement>("button:not([data-d2='week'])")].filter((b) => b.getBoundingClientRect().height > 0 && getComputedStyle(b).backgroundColor === "rgb(45, 58, 80)").map((b) => b.textContent?.trim() ?? "");
+  /* "navy" is whatever the page's one navy is: the band's own fill (Consistency roll-out v1 repoints the token) */
+  const navy = band ? getComputedStyle(band).backgroundColor : "rgb(45, 58, 80)";
+  const navyFilled = [...root.querySelectorAll<HTMLElement>("button:not([data-d2='week'])")].filter((b) => b.getBoundingClientRect().height > 0 && getComputedStyle(b).backgroundColor === navy).map((b) => b.textContent?.trim() ?? "");
   const hawk = document.querySelector('[data-d2="hawk"]');
   const hawkCs = hawk ? getComputedStyle(hawk) : null;
   return {
@@ -77,6 +79,7 @@ const read = (page: Page) => page.evaluate(() => {
     left: r(q('[data-d2="left"]')), mid: r(q('[data-d2="mid"]')), right: r(q('[data-d2="right"]')),
     order: { left: order("left"), mid: order("mid") },
     closedHoop: !!q('[data-d60="closed-hoop"]'),
+    navy,
     heads: {
       next: bg(q('[data-d2-card="next"] .os-band')), nextStage: q('[data-d2-card="next"]')?.getAttribute("data-stage") ?? null,
       expected: bg(q('[data-d2-card="expected"] .os-band')), chart: bg(q('[data-d2-card="active"] .os-band')),
@@ -126,7 +129,9 @@ for (const s of STATES) for (const vp of SIZES) {
 
     /* C · heads */
     if (s.key !== "day-one") check("C1", where, m.heads.expected === "rgb(239, 230, 214)", `expected head ${m.heads.expected}`);
-    check("C2", where, m.heads.chart === "" || m.heads.chart === "rgb(45, 58, 80)", `chart head ${m.heads.chart}`);
+    check("C2", where, m.heads.chart === "" || m.heads.chart === m.navy, `chart head ${m.heads.chart}, the band's navy ${m.navy}`);
+    /* the lock is not vacuous: past day one the one filled button is there, and is the page's navy */
+    if (s.key !== "day-one") check("L7", where, m.navyFilled.length === 1, JSON.stringify(m.navyFilled));
     check("C3", where, m.heads.agents === "rgb(255, 255, 255)", `agents head ${m.heads.agents}`);
     if (s.key !== "day-one") check("C4", where, m.heads.nextStage === "none" ? m.heads.next === "rgb(255, 255, 255)" : m.heads.next !== "" && m.heads.next !== "rgb(244, 230, 214)", `next ${m.heads.nextStage} ${m.heads.next}`);
 

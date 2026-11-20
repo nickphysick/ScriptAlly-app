@@ -36,7 +36,7 @@
 .d58.d2 .d3-mail span { flex: 1 1 auto; min-width: 0; }
 .d58.d2 .d3-mail button { height: 32px; padding: 0 12px; border: 0; border-radius: 16px; background: transparent; box-shadow: inset 0 0 0 1px #e3d5c9; font-weight: 600; font-size: 14px; white-space: nowrap; cursor: pointer; color: var(--d2-ink); }
 .d58.d2 .d3-mail button.is-x { box-shadow: none; color: var(--d2-muted); padding: 0 6px; }
-.d58.d2 .d3-mail button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.d58.d2 .d3-mail button:focus-visible { outline: 2px solid var(--d2-navy); outline-offset: 2px; }
 
 /* ── Phase 3 · card heads: a head takes the colour of the stage it is about (lib/stageColours, set inline by the card);
    anything not about a stage is plain paper with a hairline beneath. The chart stays navy. No blush, no grey. ── */
@@ -66,12 +66,12 @@
 .d58.d2 .d3-ex { box-sizing: border-box; width: 100%; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(70px, 1fr) auto; align-items: center; gap: 12px; min-height: 44px; padding: 6px 4px; border: 0; border-radius: 8px; background: none; text-align: left; font-size: 15px; color: var(--d2-ink); }
 .d58.d2 button.d3-ex { cursor: pointer; }
 .d58.d2 button.d3-ex:hover { background: #f8f4ed; }
-.d58.d2 button.d3-ex:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.d58.d2 button.d3-ex:focus-visible { outline: 2px solid var(--d2-navy); outline-offset: 2px; }
 .d58.d2 .d3-exw { min-width: 0; }
 .d58.d2 .d3-exw b { display: block; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .d58.d2 .d3-exw i { display: block; font-style: normal; font-size: 14px; color: var(--d2-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .d58.d2 .d3-pb { display: block; height: 6px; border-radius: 3px; background: #efe6d6; overflow: hidden; }
-.d58.d2 .d3-pb u { display: block; height: 100%; border-radius: 3px; background: #2d3a50; }
+.d58.d2 .d3-pb u { display: block; height: 100%; border-radius: 3px; background: var(--d2-navy); }
 .d58.d2 .d3-when { font-size: 14px; color: var(--d2-muted); white-space: nowrap; text-align: right; }
 .d58.d2 .d3-when.is-past { color: #a0675a; font-weight: 600; }
 .d58.d2 .d3-exh { margin: 14px 0 2px; font-weight: 600; font-size: 15px; }
@@ -88,7 +88,7 @@
 .d58.d2 .d3-gsrow { display: flex; align-items: center; gap: 12px; padding: 10px 16px; border-radius: 14px; background: #ffffff; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32); font-size: 15px; color: var(--d2-ink); }
 .d58.d2 .d3-gssegs { display: flex; gap: 3px; flex: none; }
 .d58.d2 .d3-gssegs i { width: 16px; height: 4px; border-radius: 2px; background: #ebe4da; }
-.d58.d2 .d3-gssegs i.is-on { background: #2d3a50; }
+.d58.d2 .d3-gssegs i.is-on { background: var(--d2-navy); }
 .d58.d2 .d3-gstx { flex: 1 1 auto; min-width: 0; }
 .d58.d2 .d3-gsrow .d2-link { white-space: nowrap; }
 .d58.d2 .d3-gshide { flex: none; border: 0; background: transparent; padding: 6px; font-size: 14px; color: var(--d2-muted); text-decoration: underline; cursor: pointer; }
