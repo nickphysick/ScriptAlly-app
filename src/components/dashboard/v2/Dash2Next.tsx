@@ -15,14 +15,14 @@
  * ⚠️ STATUS IS DRAWN BY THE REAL StatusDot, the seal is the real AgentDisc; nothing here redraws a mark.
  */
 import React, { useMemo } from "react";
-import type { ListAction, ListPlan } from "../../../lib/dashList";
+import type { ListAction, ListItem, ListPlan } from "../../../lib/dashList";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { CAUGHT_UP } from "../v71/Dash71Task";
 import { StatusDot } from "../../StatusDot";
 import { AgentDisc } from "../../shared/AgentDisc";
 import { Frame } from "./Frame";
 import { STAGE_COLOURS, bandBackground, quietBackground } from "../../../lib/stageColours";
-import { nextButtons, nextLead, nextRow, type NextLead, type Track } from "../../../lib/nextUp";
+import { nextButtons, nextKind, nextLead, nextRow, type NextLead, type Track } from "../../../lib/nextUp";
 import "./nextUp.css";
 
 export const SEE_ALL = "See all";
@@ -79,6 +79,16 @@ const Lead: React.FC<{ lead: NextLead; children: React.ReactNode }> = ({ lead, c
   </>
 );
 
+/** dev only: see the review aid in Dash2Next. A kind with no task leaves the plan as it is. */
+function leadFirst(items: readonly ListItem[], ctx: TaskCtx): readonly ListItem[] {
+  const want = typeof window !== "undefined" ? (window as unknown as { __SA_NEXT_LEAD?: string }).__SA_NEXT_LEAD : undefined;
+  if (!want) return items;
+  /* "coming": the one "other" item about a query (Coming up), told apart by its track */
+  const key = (it: ListItem) => { const k = nextKind(it); return k === "other" && nextLead(it, ctx).track ? "coming" : k; };
+  const at = items.findIndex((it) => key(it) === want);
+  return at > 0 ? [items[at], ...items.slice(0, at), ...items.slice(at + 1)] : items;
+}
+
 export const Dash2Next: React.FC<{
   loading: boolean;
   plan: ListPlan;
@@ -89,7 +99,10 @@ export const Dash2Next: React.FC<{
   onStep?: (a: ListAction) => void;
   onSeeAll: () => void;
 }> = ({ loading, plan, ctx, onView, onStep = onView, onSeeAll }) => {
-  const items = plan.items;
+  /* the measurement's review aid (development builds only; the MODE literal is replaced at build time, so production
+     ships none of it): `window.__SA_NEXT_LEAD = "<kind>"` puts that kind's first task in the lead, the rest in order,
+     so every kind can be measured leading on one seeded account. The plan and its order are untouched. */
+  const items = import.meta.env.MODE !== "production" ? leadFirst(plan.items, ctx) : plan.items;
   const n = items.length;
   const top = items[0] ?? null;
   const lead = useMemo(() => (top ? nextLead(top, ctx) : null), [top, ctx]);

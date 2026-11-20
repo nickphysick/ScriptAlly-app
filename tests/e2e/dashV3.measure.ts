@@ -19,6 +19,9 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { openRoute } from "./measure";
 
 const DIR = "reports/dashboard-v3";
+/* Next up v1, Phase 3: the one filled button says what it does (lib/nextUp `nextButtons`), where it said "Open task".
+   The other kinds' filled button is the task's own action ("Fill in", "Log a query", "Record a response", "Open"). */
+const NEXT_UP_BUTTONS = /^(Log it as sent|Log the nudge|Close it|Record your answer|See who to tell|Fill in|Log a query|Record a response|Open)$/;
 const SIZES = [{ width: 1512, height: 982 }, { width: 1280, height: 720 }] as const;
 const STATES = [
   { key: "day-one", ms: "db60-pre" },
@@ -125,7 +128,7 @@ for (const s of STATES) for (const vp of SIZES) {
     if (s.key === "day-one") check("L4", where, m.gsPlace === "lead" && m.order.left[0] === "gs-slot" && !lo.includes("next"), lo);
     else check("L4", where, m.order.left[0] === "next", lo);
     check("L5", where, m.order.mid.indexOf("expected") > 0, m.order.mid.join(" > "));
-    check("L6", where, m.navyFilled.length <= 1 && (s.key === "day-one" || m.navyFilled.every((t) => t === "Open task")), JSON.stringify(m.navyFilled));
+    check("L6", where, m.navyFilled.length <= 1 && (s.key === "day-one" || m.navyFilled.every((t) => NEXT_UP_BUTTONS.test(t))), JSON.stringify(m.navyFilled));
 
     /* C · heads */
     if (s.key !== "day-one") check("C1", where, m.heads.expected === "rgb(239, 230, 214)", `expected head ${m.heads.expected}`);

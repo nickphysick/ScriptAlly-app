@@ -17,7 +17,9 @@
 .d58.d2 .nu-lead > * { margin: 0; }
 
 /* 1 · the agent row */
-.d58.d2 .nu-who { display: flex; align-items: center; gap: 12px; min-height: 40px; background: inherit; }
+/* ⚠️ ONE HEIGHT FOR EVERY CARD: name over agency is 44.6px measured; a card with no agency line, or the several-queries
+   seals, would otherwise sit 4–8px shorter and move the four rows beneath (NU1 R3, measured) */
+.d58.d2 .nu-who { display: flex; align-items: center; gap: 12px; min-height: 46px; background: inherit; }
 .d58.d2 .nu-seal { flex: none; }
 .d58.d2 .nu-id { flex: 1 1 auto; min-width: 0; display: block; font-family: var(--d58-serif); }
 .d58.d2 .nu-name { display: block; font: 600 17px/1.2 var(--d58-serif); color: var(--d2-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
