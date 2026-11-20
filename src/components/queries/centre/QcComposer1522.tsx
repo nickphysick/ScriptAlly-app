@@ -25,7 +25,7 @@ import "./qcv1522card.css";
 /* Query card v161, Phase 3 — the drawer's paper, and the reply's tiles */
 import "./qcv161.css";
 import { StatusDot } from "../../StatusDot";
-import { pressAtPointer, pressThen } from "./qcMotion160";
+import { breatheClose, breatheIn, breatheOpen, breatheType, pressAtPointer, pressThen } from "./qcMotion160";
 import { STAGE_COLOURS, bandBackground, stageOf } from "../../../lib/stageColours";
 
 const DAY = 86_400_000;
@@ -185,7 +185,12 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
   const go = (n: Journey) => { setJ(n); setDirty(false); setConf(false); pop.setOpen(null); };
   const back: Journey | null = j === "unpass" ? "reopen" : j === "tell" || j === "accept" || j === "decline" ? "offer" : j === "reply" && j0 === "reopen" ? "reopen" : j === "nudge" && j0 === "close" ? "close" : null;
   const up = (to: () => void) => { if (dirty) { setConf(true); return; } to(); };
-  const exit = () => up(onClose);
+  /* v161.2 — the frame (for the breath); a close made here stops the breath at the press, before any swap animation
+     the host runs on the way out (stepping, "← Someone else": lib/cardMotion swapCard, 130ms before the unmount) */
+  const cpRef = useRef<HTMLDivElement>(null);
+  const frameOf = () => cpRef.current?.closest<HTMLElement>(".spanel") ?? null;
+  const close = () => { breatheClose(frameOf()); onClose(); };
+  const exit = () => up(close);
   useEscapeLayer(true, () => {
     if (pop.open) { pop.setOpen(null); return; }
     if (conf) { setConf(false); return; }
@@ -227,6 +232,18 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
     el?.focus();
   }, [rt]);
   useEffect(() => () => onDraft(null), []); // eslint-disable-line react-hooks/exhaustive-deps
+  /* Query card v161.2 — the card's frame breathes for as long as this drawer is open (any journey; its mount and unmount
+     are every way in and out), rests while the writer types, and gives way to the save's press (qcMotion160 breathe*).
+     A host with no frame: nothing runs. */
+  useEffect(() => {
+    const frame = frameOf();
+    breatheOpen(frame);
+    return () => breatheClose(frame);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const typed = (e: React.SyntheticEvent) => {
+    const t = e.target as HTMLElement;
+    if (t.matches?.("input, textarea, [contenteditable='true']")) breatheType(frameOf());
+  };
 
   function labelOf(m: StepMaterial): string {
     const vName = (id: string) => c.env.versions.find((v) => v.id === id)?.name ?? null;
@@ -450,7 +467,10 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
   }
 
   return (
-    <div className={`qc1522-cp${tall ? " tall" : ""}`} data-qc1522="composer" data-j={j} data-dirty={dirty ? "" : undefined} role="group" aria-label={title}>
+    <div ref={cpRef} className={`qc1522-cp${tall ? " tall" : ""}`} data-qc1522="composer" data-j={j} data-dirty={dirty ? "" : undefined} role="group" aria-label={title}
+      onAnimationEnd={(e) => { if (e.target === e.currentTarget) breatheIn(frameOf()); }}
+      onKeyDownCapture={(e) => { if (e.key.length === 1 || e.key === "Backspace" || e.key === "Delete" || e.key === "Enter") typed(e); }}
+      onInputCapture={typed}>
       <div className="qc1522-ch">
         {back ? <button type="button" className="qc1522-bk" data-qc1522="back" onClick={() => up(() => go(back))}>← Back</button> : null}
         <h3 data-qc1522="composer-title">{title}</h3>
@@ -461,7 +481,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
         <div className="qc1522-conf" data-qc1522="discard-strip">
           <span>Discard what you’ve entered?</span><span className="sp" />
           <button type="button" className="qc1522-lk" data-qc1522="keep" onClick={() => setConf(false)}>Keep editing</button>
-          <button type="button" className="qc1522-btn nv sm" data-qc1522="discard" onClick={() => { setConf(false); setDirty(false); onClose(); }}>Discard</button>
+          <button type="button" className="qc1522-btn nv sm" data-qc1522="discard" onClick={() => { setConf(false); setDirty(false); close(); }}>Discard</button>
         </div>
       ) : <div className="qc1522-cf">{foot}</div>}
     </div>

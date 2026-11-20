@@ -158,6 +158,8 @@ describe("Query card v161.1 — press in, hold, pop", () => {
     const f = fnOf("pressIn");
     expect(f).toMatch(/if \(!frame \|\| reduced\(\) \|\| pressed\.has\(frame\)\) return;/);
     expect(f).toMatch(/\[\{ scale: "1" \}, \{ scale: String\(PRESS\.to\) \}\], \{ duration: PRESS\.ms, easing: "ease-out", fill: "forwards" \}/);
+    /* v161.2: the press ends the breath (the rim eases back on its own layer) */
+    expect(f).toMatch(/breathEnd\(frame\);/);
     expect(f).toMatch(/window\.setTimeout\(\(\) => pressBack\(frame\), PRESS\.net\)/);
   });
   it("starts at the pointer's press; the click confirms it and saves; Undo yields two painted frames, never over 50ms", () => {
@@ -169,5 +171,47 @@ describe("Query card v161.1 — press in, hold, pop", () => {
   it("nothing landed: eased back with no pop — on a withdrawn motion, a finished save that drew nothing, or the 4s net", () => {
     expect(CARD).toMatch(/if \(!p\.motion\) \{ pressBack\(frame\); return undefined; \}/);
     expect(fnOf("pressBack")).toMatch(/duration: PRESS\.backMs/);
+  });
+});
+
+describe("Query card v161.2 — the card breathes while the drawer is open", () => {
+  const fnOf = (name: string) => code(MOTION).match(new RegExp(`(?:export )?function ${name}\\([\\s\\S]*?\\n}`))?.[0] ?? "";
+  it("1 → 1.01 → 1 over 1.9s, eased, repeating; scale only, never transform; no var()", () => {
+    expect(MOTION).toMatch(/BREATHE = \{ peak: 1\.01, ms: 1900, ease: "ease-in-out", enterMs: 320, after: 300, restMs: 180, closeMs: 120, idleMs: 2000 \}/);
+    const f = fnOf("breathStart");
+    expect(f).toMatch(/frame\.animate\(\[k\(1\), k\(BREATHE\.peak, 0\.5\), k\(1\)\], \{ duration: BREATHE\.ms, iterations: Infinity, pseudoElement: RIM \}\)/);
+    expect(f).toMatch(/if \(b\.a\) return;/);
+    expect(f).not.toMatch(/transform|var\(/);
+  });
+  it("it is the rim that breathes, never the frame: the frame's ::before draws the rim and shadow, and the frame none", () => {
+    expect(MOTION).toMatch(/const RIM = "::before";/);
+    expect(fnOf("toRest")).toMatch(/pseudoElement: RIM/);
+    expect(fnOf("breathEnd")).toMatch(/toRest\(frame, b, still\(frame, b\), PRESS\.ms\)/);
+    const css = read("./qcv152card.css");
+    const frame = css.match(/\.spanel\.qsp\.qsp:has\(> \.spanel-own > \[data-qc152\]\) \{[\s\S]*?\n\}/)?.[0] ?? "";
+    expect(frame).toMatch(/background: transparent; box-shadow: none;/);
+    const rim = css.match(/\.spanel\.qsp\.qsp:has\(> \.spanel-own > \[data-qc152\]\)::before \{[\s\S]*?\n\}/)?.[0] ?? "";
+    expect(rim).toMatch(/position: absolute; inset: 0; z-index: -1; pointer-events: none;/);
+    expect(rim).toMatch(/border-radius: 20px; background: #fff;/);
+    expect(rim).toMatch(/box-shadow: 0 1px 2px rgba\(28, 19, 15, 0\.08\), 0 26px 48px -20px rgba\(28, 19, 15, 0\.38\), 0 70px 90px -50px rgba\(28, 19, 15, 0\.3\);/);
+  });
+  it("never under reduced motion; the press ends it; a press given back lets it return", () => {
+    expect(fnOf("breatheOpen")).toMatch(/if \(!frame \|\| reduced\(\)\) return;/);
+    expect(fnOf("pressBack")).toMatch(/breathResume\(frame\);/);
+  });
+  it("the drawer owns it: open at its mount, closed at its unmount, rested on a keystroke in a field", () => {
+    expect(COMPOSER).toMatch(/breatheOpen\(frame\);\n\s*return \(\) => breatheClose\(frame\);/);
+    expect(COMPOSER).toMatch(/onKeyDownCapture=/);
+    expect(COMPOSER).toMatch(/if \(t\.matches\?\.\("input, textarea, \[contenteditable='true'\]"\)\) breatheType\(frameOf\(\)\);/);
+    /* order (CLAUDE.md, TDZ): frameOf is declared above the effect and the handler that read it */
+    expect(COMPOSER.indexOf("const frameOf = ")).toBeGreaterThan(0);
+    expect(COMPOSER.indexOf("const frameOf = ")).toBeLessThan(COMPOSER.indexOf("breatheOpen(frame);"));
+  });
+  it("a close made in the drawer, or a step to another query, stops it at the press (before the host's swap)", () => {
+    expect(COMPOSER).toMatch(/const close = \(\) => \{ breatheClose\(frameOf\(\)\); onClose\(\); \};/);
+    expect(COMPOSER).toMatch(/const exit = \(\) => up\(close\);/);
+    expect(COMPOSER).toMatch(/data-qc1522="discard" onClick=\{\(\) => \{ setConf\(false\); setDirty\(false\); close\(\); \}\}/);
+    expect(COMPOSER.indexOf("const frameOf = ")).toBeLessThan(COMPOSER.indexOf("const close = "));
+    expect(CARD.match(/breatheClose\(e\.currentTarget\.closest<HTMLElement>\("\.spanel"\)\); p\.stepCard!\.go\((-1|1)\);/g)?.length).toBe(2);
   });
 });

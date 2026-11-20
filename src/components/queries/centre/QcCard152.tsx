@@ -46,7 +46,7 @@ import { AgentTab158 } from "./QcAgent158";
 import { MaterialsTab158 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
 /* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
-import { bump, easeBg, fadeIn, finishAll, fold, foot as footIn, hold, isHeld, isPressed, markPop, pressAtPointer, pressBack, pressThen, reduced, release, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
+import { breatheClose, bump, easeBg, fadeIn, finishAll, fold, foot as footIn, hold, isHeld, isPressed, markPop, pressAtPointer, pressBack, pressThen, reduced, release, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
 import "./qcv160.css";
 import { useLanding160, type Motion160 } from "./useLanding160";
 
@@ -547,8 +547,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           <span data-qc152="band-word">{d.foot ? bnd.word : r.status === QueryStatus.OFFER ? "OFFER" : STATE_BAND[d.state]}</span>
           {d.state !== "closed" && r.dayN != null ? <span className="qc152-day" data-qc152="day">Day {r.dayN}</span> : <span className="qc152-day" />}
           {p.stepCard && p.stepCard.of > 1 ? <>
-            <button type="button" className="qc152-x" data-qc152="prev" aria-label="Previous query" title="Previous query" disabled={p.stepCard.at <= 0} onClick={() => p.stepCard!.go(-1)}>{PREV}</button>
-            <button type="button" className="qc152-x" data-qc152="next" aria-label="Next query" title="Next query" disabled={p.stepCard.at >= p.stepCard.of - 1} onClick={() => p.stepCard!.go(1)}>{NEXT}</button>
+            <button type="button" className="qc152-x" data-qc152="prev" aria-label="Previous query" title="Previous query" disabled={p.stepCard.at <= 0} onClick={(e) => { breatheClose(e.currentTarget.closest<HTMLElement>(".spanel")); p.stepCard!.go(-1); }}>{PREV}</button>
+            <button type="button" className="qc152-x" data-qc152="next" aria-label="Next query" title="Next query" disabled={p.stepCard.at >= p.stepCard.of - 1} onClick={(e) => { breatheClose(e.currentTarget.closest<HTMLElement>(".spanel")); p.stepCard!.go(1); }}>{NEXT}</button>
           </> : null}
           <button type="button" className="qc152-x" data-qc152="pencil" aria-label="Edit this query" title="Edit this query"
             onClick={() => (p.editData ? ed.start() : p.onPencil())}>{PEN}</button>

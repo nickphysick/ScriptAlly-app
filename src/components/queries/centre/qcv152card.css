@@ -13,8 +13,9 @@
   --qc152-h: min(700px, calc(100vh - 56px));
   top: calc(50vh - var(--qc152-h) / 2); bottom: auto; right: 40px; left: auto;
   width: 540px; height: var(--qc152-h); box-sizing: border-box;
-  padding: 7px; border-radius: 20px; background: #fff; overflow: visible;
-  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 26px 48px -20px rgba(28, 19, 15, 0.38), 0 70px 90px -50px rgba(28, 19, 15, 0.3);
+  /* Query card v161.2 — the rim and its shadow are drawn by the frame's ::before (below), so the breath can swell the
+     paper while nothing inside the frame moves */
+  padding: 7px; border-radius: 20px; background: transparent; box-shadow: none; overflow: visible;
   rotate: 1.6deg;
   transition: rotate 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
   /* ⚠️ OVER THE SHELL'S BAR. Centred, the card's band reaches up into the bar's row, and the bar sits at 67 while a
@@ -24,6 +25,11 @@
   /* Record a response v1, Phase 6 — the motion table's open: in from the right over 280ms, cubic-bezier(.2,.8,.2,1);
      the lean is the card's resting state, not part of the slide */
   animation: qc152In 280ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards;
+}
+.spanel.qsp.qsp:has(> .spanel-own > [data-qc152])::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  border-radius: 20px; background: #fff;
+  box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 26px 48px -20px rgba(28, 19, 15, 0.38), 0 70px 90px -50px rgba(28, 19, 15, 0.3);
 }
 @keyframes qc152In { from { translate: calc(100% + 120px) 0; } to { translate: 0 0; } }
 .spanel.qsp.qsp:has(> .spanel-own > [data-qc152="flat"]), .spanel.qsp.qsp:has(> .spanel-own > [data-lean="flat"]),

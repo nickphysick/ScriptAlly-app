@@ -17,6 +17,10 @@
  *               pill's mark pops.
  *   foot        the footer's new contents fade and rise; its height eases when it changes.
  *   toastOut    the toast leaves: opacity to 0 and 8px down over 220ms.
+ *   breathe     (v161.2) while the composer drawer is open, the card's rim breathes — the frame's ::before, which
+ *               draws its white rim and shadow: `scale` 1 → 1.01 → 1 over 1.9s, eased, repeating. Nothing inside the frame
+ *               moves (the drawer and every button stay still). It rests while the writer types and stops when the drawer
+ *               closes; at a save's press the rim eases back as the press-in begins.
  *
  * ⚠️ REDUCED MOTION: none of this runs (`reduced()`); every state changes at once, as before v160.
  */
@@ -33,6 +37,8 @@ export const isPressed = (frame: Element | null): boolean => !!frame && pressed.
 export function pressIn(frame: HTMLElement | null): void {
   if (!frame || reduced() || pressed.has(frame)) return;
   bumps.get(frame)?.cancel();
+  /* v161.2 — the breath gives way: the rim eases back to 1 over the press-in's own 120ms */
+  breathEnd(frame);
   const a = frame.animate([{ scale: "1" }, { scale: String(PRESS.to) }], { duration: PRESS.ms, easing: "ease-out", fill: "forwards" });
   a.id = "qc1611-press";
   pressed.set(frame, { a, t: window.setTimeout(() => pressBack(frame), PRESS.net) });
@@ -45,8 +51,94 @@ export function pressBack(frame: HTMLElement | null): void {
   window.clearTimeout(p.t);
   const at = parseFloat(getComputedStyle(frame).scale) || PRESS.to;
   p.a.cancel();
+  /* v161.2 — the drawer is still open: the breath comes back after a pause */
+  breathResume(frame);
   if (reduced() || at === 1) return;
   frame.animate([{ scale: String(at) }, { scale: "1" }], { duration: PRESS.backMs, easing: "ease-out" }).id = "qc1611-back";
+}
+
+/* ══ Query card v161.2 — THE CARD BREATHES WHILE THE WRITER IS RECORDING ═════════════════════════════════════════════
+   The composer drawer owns it (QcComposer1522): `breatheOpen` at its mount, `breatheType` on a keystroke in one of its
+   fields, `breatheClose` at its unmount — so every way in and out of the drawer is covered by the drawer itself. One
+   breath per frame at most; the press (`pressIn`) ends it from wherever it is.
+   ⚠️ IT ANIMATES THE RIM, NEVER THE FRAME: the frame's ::before (qcv152card.css) draws the rim and the shadow, and only
+   it scales — scaling the frame moved every button in the drawer each frame (Playwright's click never found it still,
+   QC1612's ordinary-click check). */
+export const BREATHE = { peak: 1.01, ms: 1900, ease: "ease-in-out", enterMs: 320, after: 300, restMs: 180, closeMs: 120, idleMs: 2000 } as const;
+type Breath = { a: Animation | null; rest: Animation | null; t: number | null };
+const breaths = new WeakMap<Element, Breath>();
+const RIM = "::before";
+const scaleNow = (el: Element): number => { const v = getComputedStyle(el, RIM).scale; return v === "none" ? 1 : parseFloat(v) || 1; };
+/** stop the breath (and any easing to rest) where it is; returns the scale it was at */
+function still(frame: HTMLElement, b: Breath): number {
+  if (b.t != null) { window.clearTimeout(b.t); b.t = null; }
+  if (!b.a && !b.rest) return 1;
+  const at = scaleNow(frame);
+  b.a?.cancel(); b.rest?.cancel(); b.a = null; b.rest = null;
+  return Math.abs(at - 1) < 0.0001 ? 1 : at;
+}
+function toRest(frame: HTMLElement, b: Breath, from: number, ms: number): void {
+  if (from === 1) return;
+  const r = frame.animate([{ scale: String(from) }, { scale: "1" }], { duration: ms, easing: "ease-out", pseudoElement: RIM });
+  r.id = "qc1612-rest";
+  b.rest = r;
+  const clear = () => { if (b.rest === r) b.rest = null; };
+  r.finished.then(clear, clear);
+}
+function breathStart(frame: HTMLElement): void {
+  const b = breaths.get(frame);
+  if (!b || pressed.has(frame) || bumps.has(frame)) return;
+  if (b.t != null) { window.clearTimeout(b.t); b.t = null; }
+  if (b.a) return;
+  b.rest?.cancel(); b.rest = null;
+  const k = (scale: number | string, offset?: number) => ({ scale: String(scale), easing: BREATHE.ease, ...(offset != null ? { offset } : {}) });
+  const a = frame.animate([k(1), k(BREATHE.peak, 0.5), k(1)], { duration: BREATHE.ms, iterations: Infinity, pseudoElement: RIM });
+  a.id = "qc1612-breath";
+  b.a = a;
+}
+const arm = (frame: HTMLElement, b: Breath, ms: number) => {
+  if (b.t != null) window.clearTimeout(b.t);
+  b.t = window.setTimeout(() => { b.t = null; breathStart(frame); }, ms);
+};
+/** the drawer opened: the breath starts once the drawer is in and the card has straightened (`breatheIn` brings it
+ *  forward to 300ms after the drawer's own entrance ends) */
+export function breatheOpen(frame: HTMLElement | null): void {
+  if (!frame || reduced()) return;
+  const old = breaths.get(frame);
+  const b: Breath = { a: null, rest: null, t: null };
+  if (old) toRest(frame, b, still(frame, old), BREATHE.closeMs);
+  breaths.set(frame, b);
+  arm(frame, b, BREATHE.enterMs + BREATHE.after);
+}
+/** the drawer's entrance has ended */
+export function breatheIn(frame: HTMLElement | null): void {
+  const b = frame ? breaths.get(frame) : undefined;
+  if (frame && b && !b.a && b.t != null) arm(frame, b, BREATHE.after);
+}
+/** a keystroke in one of the drawer's fields: to rest within 200ms, and again 2s after the last key */
+export function breatheType(frame: HTMLElement | null): void {
+  const b = frame ? breaths.get(frame) : undefined;
+  if (!frame || !b || pressed.has(frame)) return;
+  if (b.a) toRest(frame, b, still(frame, b), BREATHE.restMs);
+  arm(frame, b, BREATHE.idleMs);
+}
+/** the drawer closed, by any route: to 1 within 150ms */
+export function breatheClose(frame: HTMLElement | null): void {
+  const b = frame ? breaths.get(frame) : undefined;
+  if (!frame || !b) return;
+  breaths.delete(frame);
+  const from = still(frame, b);
+  toRest(frame, b, from, BREATHE.closeMs);
+}
+/** the press: the breath ends, the rim easing back to 1 over the press-in's 120ms; it does not come back unless the
+ *  press is given back (`pressBack`) with the drawer still open */
+function breathEnd(frame: HTMLElement): void {
+  const b = breaths.get(frame);
+  if (b) toRest(frame, b, still(frame, b), PRESS.ms);
+}
+function breathResume(frame: HTMLElement): void {
+  const b = breaths.get(frame);
+  if (b && !b.a) arm(frame, b, BREATHE.idleMs);
 }
 /** At the pointer's press (pointerdown, the press's first handler): press in before the click's own work begins — a
  *  click runs the page's listeners and their render in one task (137ms on Undo at CPU 4×, measured), and an animation
