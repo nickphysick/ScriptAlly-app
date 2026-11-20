@@ -392,7 +392,7 @@ export function courtFoot(rows: readonly QcRow[], key: TileCourt, nowMs: number)
      */
     const earliest = ordered.find((r) => r.expectedMs != null)?.expectedMs ?? null;
     if (earliest != null && earliest < startOfDayMs(nowMs)) {
-      label = "overdue since";
+      label = "past expected since";
       date = shortWeekDay(earliest);
     } else if (earliest != null) {
       date = key === "you" ? shortWeekDay(earliest) : shortDay(earliest);

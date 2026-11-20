@@ -85,7 +85,7 @@ export interface DueCell { text: string; late: boolean }
 export function dueCell(dueMs: number | null, nowMs: number): DueCell | null {
   if (dueMs == null) return null;
   const d = daysFrom(dueMs, nowMs);
-  if (d < 0) return { text: `${-d} ${d === -1 ? "day" : "days"} late`, late: true };
+  if (d < 0) return { text: `${-d} ${d === -1 ? "day" : "days"} past expected`, late: true };
   if (d === 0) return { text: "Today", late: true };
   if (d === 1) return { text: "Tomorrow", late: true };
   const dt = new Date(dueMs);

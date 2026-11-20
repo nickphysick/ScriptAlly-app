@@ -247,7 +247,7 @@ export type WsGrouping = "category" | "urgency" | "when" | "agent" | "none";
 export const WS_GROUPINGS: readonly { id: WsGrouping; label: string; hint: string }[] = [
   { id: "category", label: "Category", hint: "Agents are waiting · Nudges · Gone quiet · Housekeeping · Yours" },
   { id: "urgency", label: "Urgency", hint: "Needs you now · Housekeeping · Yours" },
-  { id: "when", label: "When", hint: "Overdue · Due this week · Coming up · Not dated" },
+  { id: "when", label: "When", hint: "Past expected · Due this week · Coming up · Not dated" },
   { id: "agent", label: "Agent", hint: "What you owe each person" },
   { id: "none", label: "None", hint: "One flat list" },
 ];
@@ -327,7 +327,7 @@ export function dayBit(t: WsTask): DayBit {
   if (t.kind === "quiet") return { big: t.quietDays != null ? String(t.quietDays) : null, small: t.quietDays != null ? "days in" : "No date", late: false };
   if (t.dueDays == null) return { big: null, small: "No date", late: false };
   if (t.dueDays === 0) return { big: "Today", small: "", late: true };
-  if (t.dueDays < 0) return { big: String(-t.dueDays), small: -t.dueDays === 1 ? "day late" : "days late", late: true };
+  if (t.dueDays < 0) return { big: String(-t.dueDays), small: -t.dueDays === 1 ? "day past expected" : "days past expected", late: true };
   return { big: String(t.dueDays), small: t.dueDays === 1 ? "day left" : "days left", late: false };
 }
 
@@ -349,7 +349,7 @@ export function daysWaiting(t: WsTask, nowMs: number): number | null {
   return t.kind === "own" ? null : daysSinceAnchor(t.item, nowMs);
 }
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
-const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day late", "days late"), late: true }
+const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day past expected", "days past expected"), late: true }
   : d === 0 ? { n: "Today", words: "", late: true } : { n: String(d), words: plural(d, "day left", "days left"), late: false };
 /**
  * The figure at a row's right: a request "{n} days waiting" (since the agent asked), a nudge "{n} days late", Gone quiet
@@ -394,7 +394,7 @@ export function dueChip(t: WsTask): { b: string; s: string; late: boolean } | nu
   if (t.kind === "quiet") return t.quietDays != null ? { b: String(t.quietDays), s: "days", late: false } : null;
   if (t.dueDays == null) return null;
   if (t.dueDays === 0) return { b: "Today", s: "", late: true };
-  if (t.dueDays < 0) return { b: String(-t.dueDays), s: -t.dueDays === 1 ? "day late" : "days late", late: true };
+  if (t.dueDays < 0) return { b: String(-t.dueDays), s: -t.dueDays === 1 ? "day past expected" : "days past expected", late: true };
   return { b: String(t.dueDays), s: t.dueDays === 1 ? "day left" : "days left", late: false };
 }
 
@@ -468,7 +468,7 @@ export const andList = (a: readonly string[]): string => (a.length < 2 ? (a[0] ?
 export function startReason(p: { task: WsTask | null; urgent: boolean }): string {
   const d = p.task?.dueDays;
   if (!p.task || !p.urgent || d == null) return "Nothing urgent";
-  if (d < 0) return `${-d} ${d === -1 ? "day" : "days"} late`;
+  if (d < 0) return `${-d} ${d === -1 ? "day" : "days"} past expected`;
   if (d === 0) return "Due today";
   if (d === 1) return "Due tomorrow";
   return `Due in ${d} days`;

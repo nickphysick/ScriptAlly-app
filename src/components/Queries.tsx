@@ -4491,7 +4491,7 @@ export const Queries: React.FC<{
     ),
     ...(selectedManuscriptFilter !== "All" ? [{ key: "ms", label: (manuscriptsWithQueries.find(m => m.id === selectedManuscriptFilter)?.title || "MANUSCRIPT").toUpperCase(), remove: () => setSelectedManuscriptFilter("All") }] : []),
     ...(statusFilterActive ? statusSel.map(s => ({ key: `st:${s}`, label: (s === QueryStatus.REVISE_RESUBMIT ? "R&R" : s).toUpperCase(), remove: () => setStatusSel(prev => prev.filter(x => x !== s)) })) : []),
-    ...(needsOverdue ? [{ key: "overdue", label: "OVERDUE FOR A REPLY", remove: () => setNeedsOverdue(false) }] : []),
+    ...(needsOverdue ? [{ key: "overdue", label: "PAST EXPECTED", remove: () => setNeedsOverdue(false) }] : []),
   ];
   const activeFilterCount = activeFilterChips.length;
   /* Is the list narrowed? Both doors count — the filter popovers AND either search (the list's
@@ -4588,7 +4588,7 @@ export const Queries: React.FC<{
       { key: "date_newest", label: "Date sent · newest", sub: "Your latest queries first" },
       { key: "date_oldest", label: "Date sent · oldest" },
       { key: "waiting_longest", label: "Waiting longest", sub: "Silence, longest first" },
-      { key: "due_soonest", label: "Reply due soonest", sub: "Floats overdue queries to the top" },
+      { key: "due_soonest", label: "Reply due soonest", sub: "Floats queries past expected to the top" },
     ]},
     { group: "Pipeline", items: [
       { key: "journey_depth", label: "Journey depth", sub: "Offers and fulls above fresh queries" },
@@ -6664,8 +6664,8 @@ export const Queries: React.FC<{
       }
       /* v150 D — on the desktop the step points at the switch's Birds-eye button (the floating pill is retired there) */
       case "birds": return vis("[data-qc150='switch'] [data-v='birds']")
-        ? { el: vis("[data-qc150='switch'] [data-v='birds']"), text: "Every live query on one timeline, so you can see what's due and what's late at a glance. Switch the list to Birds-eye here." }
-        : { el: vis(".bvd-tab"), keyCap: "B", text: "Every live query on one timeline, so you can see what's due and what's late at a glance. Click here, or press B from anywhere on the page." };
+        ? { el: vis("[data-qc150='switch'] [data-v='birds']"), text: "Every live query on one timeline, so you can see what's due and what's past expected at a glance. Switch the list to Birds-eye here." }
+        : { el: vis(".bvd-tab"), keyCap: "B", text: "Every live query on one timeline, so you can see what's due and what's past expected at a glance. Click here, or press B from anywhere on the page." };
       default: return { el: null, text: "" };
     }
   }, [queries, agents, qcPin]);

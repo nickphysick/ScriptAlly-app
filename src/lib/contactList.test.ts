@@ -135,7 +135,7 @@ describe("the row's standing query and its date line", () => {
     const lines = new Map([...by.entries()].map(([id, r]) => [id, rowDateLine(r, NOW)]));
     /* agent's court, past the date → the fact, in ink. RE-POINTED (v19.2 §D): this fixture is more than 30 days past,
        so it reads "Overdue since …"; the counted form ("Expected … · Nd over") is held in contactV192.test.ts */
-    expect(lines.get("fq-2")).toEqual({ text: expect.stringMatching(/^(Expected \d+ \w+ · \d+d over|Overdue since \d+ \w+( \d{4})?)$/), over: true });
+    expect(lines.get("fq-2")).toEqual({ text: expect.stringMatching(/^(Expected \d+ \w+ · \d+d over|Past expected since \d+ \w+( \d{4})?)$/), over: true });
     /* agent's court, inside the window → a reply coming */
     expect(lines.get("fq-1")).toEqual({ text: expect.stringMatching(/^Reply by \d+ \w+ · in \d+d$/), over: false });
     /* the writer's own send-by (partial requested carries the writer clock when one exists) —

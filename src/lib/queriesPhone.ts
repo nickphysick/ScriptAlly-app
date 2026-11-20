@@ -87,7 +87,7 @@ export function stampFor(r: QcRow, nowMs: number): Stamp | null {
   if (w === "closed") return { text: dayWords(r.lastMs, nowMs), late: false };
   if (r.expectedMs == null) return null;
   const n = dayDiff(r.expectedMs, nowMs);
-  if (n < 0) return { text: `${-n} ${-n === 1 ? "day" : "days"} late`, late: true };
+  if (n < 0) return { text: `${-n} ${-n === 1 ? "day" : "days"} past expected`, late: true };
   if (n === 0) return { text: "Today", late: false };
   if (n === 1) return { text: "Tomorrow", late: false };
   if (n < 7) return { text: WEEKDAY[new Date(r.expectedMs).getDay()], late: false };
@@ -109,7 +109,7 @@ export interface Hero { row: QcRow; pill: string; strip: Strip; sub: string; but
 export function duePill(dueMs: number | null, nowMs: number): string {
   if (dueMs == null) return "Your move";
   const n = dayDiff(dueMs, nowMs);
-  if (n < 0) return `${-n} ${-n === 1 ? "day" : "days"} late`;
+  if (n < 0) return `${-n} ${-n === 1 ? "day" : "days"} past expected`;
   if (n === 0) return "Due today";
   if (n === 1) return "Due tomorrow";
   return `Due in ${n} days`;
@@ -133,7 +133,7 @@ export function yourMoveGroups(rows: readonly QcRow[], nowMs: number): { hero: Q
     else { const n = dayDiff(r.expectedMs, nowMs); (n < 0 ? over : n < 7 ? week : later).push(r); }
   }
   const groups: RowGroup[] = [
-    { key: "overdue", label: "Overdue", rows: over, hot: true },
+    { key: "overdue", label: "Past expected", rows: over, hot: true },
     { key: "week", label: "This week", rows: week },
     { key: "later", label: "Later", rows: later },
   ].filter((g) => g.rows.length > 0);

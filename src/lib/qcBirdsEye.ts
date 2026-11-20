@@ -22,7 +22,7 @@ const DAY = 86_400_000;
 export type Attention = "overdue" | "upcoming" | "watch";
 export const ATTENTION_ORDER: readonly Attention[] = ["overdue", "upcoming", "watch"];
 export const ATTENTION_LABEL: Record<Attention, string> = {
-  overdue: "Overdue", upcoming: "Upcoming", watch: "Watch and wait",
+  overdue: "Past expected", upcoming: "Upcoming", watch: "Watch and wait",
 };
 /** The mono hint under each group's count in the expanded header (§8.2). */
 export const ATTENTION_HINT: Record<Attention, string> = {

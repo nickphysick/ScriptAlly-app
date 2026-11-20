@@ -43,7 +43,7 @@ const relDays = (target: Date, ref: Date) => {
   const n = dayDiff(target, ref);
   if (n === 0) return "today";
   if (n > 0) return `in ${n} day${n === 1 ? "" : "s"}`;
-  return `overdue ${-n} day${-n === 1 ? "" : "s"}`;
+  return `${-n} day${-n === 1 ? "" : "s"} past expected`;
 };
 
 /** Firestore Timestamp | ISO string | Date → Date | null. */

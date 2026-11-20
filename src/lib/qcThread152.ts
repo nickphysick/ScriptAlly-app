@@ -320,7 +320,7 @@ export interface ReplyCtx {
 function leftWords(dueMs: number | null, nowMs: number): { sub: string; late: boolean } {
   if (dueMs == null) return { sub: "No date set", late: false };
   const n = days(dueMs, nowMs);
-  if (n < 0) return { sub: `${pl(-n, "day")} late`, late: true };
+  if (n < 0) return { sub: `${pl(-n, "day")} past expected`, late: true };
   if (n === 0) return { sub: `Due today · ${dayLabel(dueMs, nowMs)}`, late: false };
   return { sub: `${pl(n, "day")} left · by ${dayLabel(dueMs, nowMs)}`, late: false };
 }
@@ -358,7 +358,7 @@ export function replyBox(c: ReplyCtx): ReplyBox {
     case "nudge": {
       const ago = c.replyMs != null ? Math.max(0, days(c.nowMs, c.replyMs)) : null;
       return { ...base, icon: { k: "clock" }, lead: `No reply from ${f} yet`,
-        sub: c.replyMs != null ? `Reply was due ${dayLabel(c.replyMs, c.nowMs)} · ${pl(ago!, "day")} ago` : "Reply is overdue", late: true, button: "Nudge", tone: "outline", act: "nudge" };
+        sub: c.replyMs != null ? `Reply was due ${dayLabel(c.replyMs, c.nowMs)} · ${pl(ago!, "day")} ago` : "Reply is past expected", late: true, button: "Nudge", tone: "outline", act: "nudge" };
     }
     case "agent": {
       const nudged = c.nudged ?? S.some((x) => x.kind === "nudge" && x.ms != null && x.ms >= (Math.max(...S.filter((y) => !y.kind && y.ms != null).map((y) => y.ms!), 0)));

@@ -59,7 +59,7 @@ export const NudgeModal: React.FC<NudgeModalProps> = ({
   }
   if (responseDeadline) {
     const overdueDays = Math.max(0, Math.floor((now - new Date(responseDeadline).getTime()) / DAY_MS));
-    sentenceParts.push(`Their response is ${plural(overdueDays, "day")} overdue.`);
+    sentenceParts.push(`Their response is ${plural(overdueDays, "day")} past expected.`);
   }
   const sentence = sentenceParts.join(" ");
 
@@ -78,7 +78,7 @@ export const NudgeModal: React.FC<NudgeModalProps> = ({
 
   return (
     <FormShell
-      preLabel="Response overdue"
+      preLabel="Past expected"
       name="Send a nudge"
       subLine={subLine || undefined}
       avatarIcon={<ConciergeBell className="w-[18px] h-[18px]" />}

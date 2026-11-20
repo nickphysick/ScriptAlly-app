@@ -43,7 +43,7 @@ export const WRITTEN_ARTICLES: readonly HelpArticle[] = [
     lede: "Search and filter the Query Centre's list until it shows the queries you want.",
     guide: { page: QC, key: "find" },
     body: "Type into `Find an agent or agency` above the list, or press `/` to jump there. It matches the agent's name and the agency recorded on the query.\n\n"
-      + "Press `Filters` for more. `Your move`, `Overdue`, `Waiting to hear back` and `Offers` sit at the top, then every stage under Where it stands, what you sent, and a few more such as due this week. Filters add up, and the button shows how many are on.\n\n"
+      + "Press `Filters` for more. `Your move`, `Past expected`, `Waiting to hear back` and `Offers` sit at the top, then every stage under Where it stands, what you sent, and a few more such as due this week. Filters add up, and the button shows how many are on.\n\n"
       + "The export button downloads the queries the list is showing.",
     related: ["open-a-query", "status-key", "pin-the-list", "birds-eye-view"],
   },
@@ -73,8 +73,8 @@ export const WRITTEN_ARTICLES: readonly HelpArticle[] = [
     slug: "birds-eye-view", area: "queries", title: "Birds-eye view", draft: true, updated: D,
     lede: "Every live query on one timeline, so you can see what is due and what has gone quiet.",
     guide: { page: QC, key: "birds" },
-    body: "Press the floating `Birds-eye view` tab on the Query Centre, or press `B`. The tab shows how many queries are overdue and how many are coming up.\n\n"
-      + "Queries are grouped by urgency to begin with: overdue, upcoming, watch and wait, and no date. You can group and sort another way, and narrow the view by name, by when, or by stage. Closed queries aren't shown.",
+    body: "Press the floating `Birds-eye view` tab on the Query Centre, or press `B`. The tab shows how many queries are past expected and how many are coming up.\n\n"
+      + "Queries are grouped by urgency to begin with: past expected, upcoming, watch and wait, and no date. You can group and sort another way, and narrow the view by name, by when, or by stage. Closed queries aren't shown.",
     related: ["expected-dates", "find-a-query", "status-key", "open-a-query"],
   },
   {

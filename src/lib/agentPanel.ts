@@ -154,7 +154,7 @@ export function panelStand({ agent, facts, q, title, fitGenre, nowMs }: StandInp
   }
   /* with the agent */
   if (gone) {
-    return { ...base, state: "late", tone: "agent", heading: `${first} is late`, figure: `${plural(left!)} over`, past: true,
+    return { ...base, state: "late", tone: "agent", heading: "Past expected", figure: `${plural(left!)} over`, past: true,
       paragraph: [t(`You expected a reply by ${day(q.expectedMs!, nowMs)}.`)] };
   }
   return { ...base, state: "waiting", tone: "agent", heading: `Waiting on ${first}`, figure: left != null ? `${plural(left)} to go` : null, past: false,

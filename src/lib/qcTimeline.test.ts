@@ -141,8 +141,8 @@ describe("§8.7 · the bars and their words", () => {
     expect(currentWords(soon, NOW)).toMatch(/^Queried · reply by \d+ \w{3}$/);
     const gone = one({ dateSent: ago(400) });
     /* v126.2 — past its date, every stage reads "<Stage> · overdue since <date>" */
-    expect(currentWords(gone, NOW)).toMatch(/^Queried · overdue since \d+ \w{3}$/);
-    expect(currentWords(one({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(30), expectedSendDate: ago(5) }), NOW)).toMatch(/· overdue since /);
+    expect(currentWords(gone, NOW)).toMatch(/^Queried · past expected since \d+ \w{3}$/);
+    expect(currentWords(one({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(30), expectedSendDate: ago(5) }), NOW)).toMatch(/· past expected since /);
   });
   it("the three courts each say their own thing, and a missing date says which is missing", () => {
     expect(currentWords(one({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(2), expectedSendDate: new Date(NOW + 6 * DAY).toISOString() }), NOW)).toMatch(/send by/);
@@ -166,7 +166,7 @@ describe("§8.7 · the bars and their words", () => {
     expect(cur.aheadFromMs, "nothing is ahead of today on a bar that ends at today").toBeNull();
   });
   it("⚠️ the nudge chip is AGENT-SIDE ONLY — a nudge is sent to someone who owes you a reply", () => {
-    expect(tlRow(one({ dateSent: ago(400) }), NOW).nudge?.text).toMatch(/overdue · (nudge|nudge or close)$/);
+    expect(tlRow(one({ dateSent: ago(400) }), NOW).nudge?.text).toMatch(/past expected · (nudge|nudge or close)$/);
     /* a with-you query past its own send-by date owes YOU, so there is nobody to nudge */
     const mine = one({ status: QueryStatus.FULL_REQUESTED, fullRequestedDate: ago(40), expectedSendDate: ago(10) });
     expect(mine.expectedMs).toBeLessThan(NOW);
@@ -329,7 +329,7 @@ describe("§C3 · your move", () => {
       const n2 = at(d).nudge;
       if (!n2) continue;
       const close = / · nudge or close$/.test(n2.text);
-      expect(n2.text, `${n2.days} days over`).toMatch(close ? /overdue · nudge or close$/ : /overdue · nudge$/);
+      expect(n2.text, `${n2.days} days over`).toMatch(close ? /past expected · nudge or close$/ : /past expected · nudge$/);
       expect(close, `${n2.days} days over said "${n2.text}"`).toBe(n2.days > CLOSE_OVER_DAYS);
       (seen.get(close) ?? seen.set(close, []).get(close)!).push(n2.days);
     }

@@ -21,7 +21,7 @@ describe("the v154 Next box", () => {
     expect(box).toContain('data-state="over"');
     const rest = atRest(box);
     expect(rest).toContain(">Next<");
-    expect(rest).toContain(">Response overdue<");
+    expect(rest).toContain(">Past expected<");
     expect(rest).toContain(">Send nudge now<");
     expect(rest).not.toContain("qc154-bar");
     expect(rest).not.toContain("<button");

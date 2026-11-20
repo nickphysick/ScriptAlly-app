@@ -62,14 +62,14 @@ export function nextText(r: QcRow, nowMs: number): NextText {
         : { text: "No reply date", tone: "faint" };
     }
     const d = daysFrom(due, nowMs);
-    if (d < 0) return { text: `Reply ${days(-d)} overdue`, tone: "late" };
+    if (d < 0) return { text: `Reply ${days(-d)} past expected`, tone: "late" };
     if (d === 0) return { text: "Reply due today", tone: "faint" };
     const set = writerExpectedMs(r.query) != null;
     return set ? { text: `Reply due ${wdDate(due, nowMs)}`, tone: "faint" } : { text: `Reply by ${yearDm(due, nowMs)}`, tone: "faint" };
   }
   if (due == null) return { text: "No date yet", tone: "faint" };
   const d = daysFrom(due, nowMs);
-  if (d < 0) return { text: `${days(-d)} late`, tone: "late" };
+  if (d < 0) return { text: `${days(-d)} past expected`, tone: "late" };
   if (d === 0) return { text: "Due today", tone: "late" };
   if (d === 1) return { text: "Due tomorrow", tone: "late" };
   return { text: `Due ${wdDate(due, nowMs)}`, tone: "ink" };
@@ -124,14 +124,14 @@ const lateClause = (rows: QcRow[], nowMs: number): string => {
     const r = rows[0];
     const k = kindOf(r);
     const by = days(-daysFrom(r.expectedMs!, nowMs));
-    return k === "nudge" ? `${r.agentName}’s reply is ${by} overdue` : `${r.agentName}’s ${NOUN[k][0]} is ${by} late`;
+    return k === "nudge" ? `${r.agentName}’s reply is ${by} past expected` : `${r.agentName}’s ${NOUN[k][0]} is ${by} past expected`;
   }
   const kinds = new Set(rows.map(kindOf));
   if (kinds.size === 1) {
     const k = [...kinds][0];
-    return k === "nudge" ? `${spell(rows.length)} replies are overdue` : `${spell(rows.length)} ${NOUN[k][1]} are late`;
+    return k === "nudge" ? `${spell(rows.length)} replies are past expected` : `${spell(rows.length)} ${NOUN[k][1]} are past expected`;
   }
-  return `${spell(rows.length)} are late`;
+  return `${spell(rows.length)} are past expected`;
 };
 
 /**
@@ -205,7 +205,7 @@ export function todoRows(mine: readonly QcRow[], nowMs: number, max = 4): TodoRo
     const k = kindOf(r);
     const due = dueOf(r);
     const d = due != null ? daysFrom(due, nowMs) : null;
-    const when = d == null ? "No date yet" : d < 0 ? `${days(-d)} late` : d === 0 ? "Due today" : `${days(d)} left`;
+    const when = d == null ? "No date yet" : d < 0 ? `${days(-d)} past expected` : d === 0 ? "Due today" : `${days(d)} left`;
     return { id: r.id, status: KIND_GLYPH[k] === QueryStatus.QUERIED ? (r.status as QueryStatus) : KIND_GLYPH[k], job: JOB[k](r.agentName), when, late: d != null && d < 0 };
   });
 }

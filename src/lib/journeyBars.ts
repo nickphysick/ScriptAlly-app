@@ -1654,8 +1654,8 @@ export function latenessLine(i: {
        start of a debt and then states its length, which is the same span twice; "owed" is the
        writer's obligation stated as a noun, which is a shade closer to a verdict than a fact. */
     return i.dueYmd
-      ? `${i.prefix} · due ${on(i.dueYmd)} · ${overdueSpan(daysBetween(i.dueYmd, i.todayYmd))} overdue`
-      : `${i.prefix} · no date promised · ${overdueSpan(i.days)} overdue`;
+      ? `${i.prefix} · due ${on(i.dueYmd)} · ${overdueSpan(daysBetween(i.dueYmd, i.todayYmd))} past expected`
+      : `${i.prefix} · no date promised · ${overdueSpan(i.days)} past expected`;
   }
   /**
    * An agency's window that has passed.
@@ -1673,8 +1673,8 @@ export function latenessLine(i: {
    * vocabulary, `{what the date was} · {how late}`, in all three cases.
    */
   return i.expectedYmd
-    ? `${i.prefix} · expected ${on(i.expectedYmd)} · ${overdueSpan(daysBetween(i.expectedYmd, i.todayYmd))} overdue`
-    : `${i.prefix} · no date promised · overdue`;
+    ? `${i.prefix} · expected ${on(i.expectedYmd)} · ${overdueSpan(daysBetween(i.expectedYmd, i.todayYmd))} past expected`
+    : `${i.prefix} · no date promised · past expected`;
 }
 
 /**
@@ -1713,14 +1713,14 @@ export function barFactLine(i: {
   const mine = i.source === "sendBy" || i.source === "reminder";
   if (mine) {
     return d > 0
-      ? { fact: `Due ${on}`, tail: `${overdueSpan(d)} overdue` }
+      ? { fact: `Due ${on}`, tail: `${overdueSpan(d)} past expected` }
       /* ⚠️ THE ONE SHAPE THE PACK DID NOT NAME: the writer's own date, still ahead. `left` is a
          fact about a commitment they made themselves, which is not the same as forecasting an
          agency's behaviour — the thing this board refuses to do. */
       : { fact: `Due ${on}`, tail: `${overdueSpan(Math.max(0, -d))} left` };
   }
   return d > 0
-    ? { fact: `Expected ${on}`, tail: `${overdueSpan(d)} overdue` }
+    ? { fact: `Expected ${on}`, tail: `${overdueSpan(d)} past expected` }
     /* ⚠️ `waiting`, NOT `left`. "14 days waiting" is how long it has been, which is a fact; "14
        days left" about an agency's window is a forecast the agency never promised to keep. */
     : { fact: `Reply expected ${on}`, tail: `${overdueSpan(Math.max(0, -d))} waiting` };
@@ -1817,7 +1817,7 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
         return {
           long: latenessLine({ prefix: "Offer received", owed: true, dueYmd: i.expectedYmd, todayYmd: i.today,
             days: i.yoursDays, expectedYmd: i.expectedYmd }),
-          short: "Offer · overdue",
+          short: "Offer · past expected",
         };
       }
       return i.expectedYmd
@@ -1843,7 +1843,7 @@ export function labelFor(state: BarState, i: LabelInput): BarLabel {
         return {
           long: latenessLine({ prefix: asked.long, owed: true, dueYmd: i.expectedYmd, todayYmd: i.today,
             days: i.yoursDays, expectedYmd: i.expectedYmd }),
-          short: `${asked.short} · overdue`,
+          short: `${asked.short} · past expected`,
         };
       }
       if (!i.expectedYmd && i.yoursDays > 0) {

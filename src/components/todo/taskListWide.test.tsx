@@ -133,7 +133,7 @@ describe("2 · the wiring — RENDERED, so the claims are about the markup and n
     const html = render(card(), { sort: "over" });
     const hd = sliceBetween(html, 'class="lhd"', 'class="l-body"');
     const labels = [...hd.matchAll(/aria-label="Sort by ([^"]+)"/g)].map((m) => m[1]);
-    expect(labels).toEqual(["Task", "Agent", "Due", "Overdue by"]);
+    expect(labels).toEqual(["Task", "Agent", "Due", "Past expected by"]);
     expect(hd).toContain('class="h-over on" aria-pressed="true"');
     expect(hd.match(/aria-pressed="true"/g) ?? []).toHaveLength(1);
     expect(hd, "longest overdue first reads ▼").toContain(">▼</span>");

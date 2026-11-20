@@ -86,7 +86,7 @@ export const overdueDays = (dueDate: string | null | undefined, today: string = 
 export const dueChipLabel = (dueDate: string | null | undefined, today: string = todayLocalISO()): string => {
   if (dueStage(dueDate, today) === "over") {
     const n = overdueDays(dueDate, today);
-    return `Overdue · ${n} day${n === 1 ? "" : "s"}`;
+    return `${n} day${n === 1 ? "" : "s"} past expected`;
   }
   return formatDueLabel(dueDate, today);
 };

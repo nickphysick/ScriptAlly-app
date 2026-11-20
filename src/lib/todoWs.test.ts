@@ -95,7 +95,7 @@ describe("the priority line", () => {
 
 describe("the day counts and the chip", () => {
   it("late counts read late; Gone quiet reads days in; housekeeping has no date", () => {
-    expect(dayBit(byKey("send"))).toEqual({ big: "8", small: "days late", late: true });
+    expect(dayBit(byKey("send"))).toEqual({ big: "8", small: "days past expected", late: true });
     expect(dayBit(byKey("quiet"))).toEqual({ big: "110", small: "days in", late: false });
     expect(dayBit(byKey("sweep|a5"))).toEqual({ big: null, small: "No date", late: false });
     expect(dueChip(byKey("offer"))).toEqual({ b: "1", s: "day left", late: false });
@@ -192,8 +192,8 @@ describe("v51.1 — the priority phrase and the row titles", () => {
   it("v52 · Start here's reason", () => {
     expect(startReason({ task: { ...by("offer"), dueDays: 1 }, urgent: true })).toBe("Due tomorrow");
     expect(startReason({ task: { ...by("offer"), dueDays: 0 }, urgent: true })).toBe("Due today");
-    expect(startReason({ task: { ...by("send"), dueDays: -8 }, urgent: true })).toBe("8 days late");
-    expect(startReason({ task: { ...by("send"), dueDays: -1 }, urgent: true })).toBe("1 day late");
+    expect(startReason({ task: { ...by("send"), dueDays: -8 }, urgent: true })).toBe("8 days past expected");
+    expect(startReason({ task: { ...by("send"), dueDays: -1 }, urgent: true })).toBe("1 day past expected");
     expect(startReason({ task: by("quiet"), urgent: false })).toBe("Nothing urgent");
     expect(startReason({ task: null, urgent: false })).toBe("Nothing urgent");
   });

@@ -210,13 +210,13 @@ export const QcBirdsDrawer: React.FC<{
       data-qcv="bvd-tab"
       style={{ right: place.right, bottom: place.bottom }}
       onClick={onOpenDrawer}
-      aria-label={`Birds-eye view: ${counts.when.overdue} overdue, ${counts.when.upcoming} upcoming. Press B to open.`}
+      aria-label={`Birds-eye view: ${counts.when.overdue} past expected, ${counts.when.upcoming} upcoming. Press B to open.`}
       disabled={loading}
     >
       <span className="bvd-tab-img"><img src={`${BE_HAWK_HEAD.src}?v=${BE_HAWK_HEAD.version}`} width={BE_HAWK_HEAD.width} height={BE_HAWK_HEAD.height} alt="" /></span>
       <span className="bvd-tab-t">
         <b>Birds-eye view</b>
-        <small><em>{counts.when.overdue}</em> OVERDUE · <em>{counts.when.upcoming}</em> UPCOMING</small>
+        <small><em>{counts.when.overdue}</em> PAST EXPECTED · <em>{counts.when.upcoming}</em> UPCOMING</small>
       </span>
       <span className="bvd-tab-go" aria-hidden="true">⤢</span>
     </button>

@@ -87,7 +87,7 @@ export function footer1522(c: FootCtx): Foot1522 {
       else {
         const n = calDays(c.dueMs, c.nowMs);
         const by = `${f} wants an answer by ${day(c.dueMs, c.nowMs)}`;
-        sub = n < 0 ? `${pl(-n, "day")} late · ${by}` : n === 0 ? `Due today · ${by}` : `${pl(n, "day")} left · ${by}`;
+        sub = n < 0 ? `${pl(-n, "day")} past expected · ${by}` : n === 0 ? `Due today · ${by}` : `${pl(n, "day")} left · ${by}`;
         late = n < 0;
       }
       return { ...none, late, icon: { k: "stage", status: QueryStatus.OFFER }, lead: `${f} made an offer`, sub,
@@ -108,7 +108,7 @@ export function footer1522(c: FootCtx): Foot1522 {
       let sub = "No date set", late = false;
       if (c.dueMs != null) {
         const n = calDays(c.dueMs, c.nowMs);
-        sub = n < 0 ? `${pl(-n, "day")} late · was due ${day(c.dueMs, c.nowMs)}` : n === 0 ? `Due today · ${day(c.dueMs, c.nowMs)}` : `by ${day(c.dueMs, c.nowMs)}`;
+        sub = n < 0 ? `${pl(-n, "day")} past expected · was due ${day(c.dueMs, c.nowMs)}` : n === 0 ? `Due today · ${day(c.dueMs, c.nowMs)}` : `by ${day(c.dueMs, c.nowMs)}`;
         late = n < 0;
       }
       return { ...none, late, icon, lead, sub, button: { label, tone: "navy", act: "sent" } };
@@ -120,7 +120,7 @@ export function footer1522(c: FootCtx): Foot1522 {
         /* v161 — nudge due on the writer's reminder with the reply date still ahead: the reply date as the waiting state words
            it, never "was due" a day still to come */
         sub: c.replyMs != null && calDays(c.replyMs, c.nowMs) > 0 ? `Reply expected by ${day(c.replyMs, c.nowMs)}`
-          : c.replyMs != null ? `Reply was due ${day(c.replyMs, c.nowMs)}${when}` : "Reply is overdue",
+          : c.replyMs != null ? `Reply was due ${day(c.replyMs, c.nowMs)}${when}` : "Reply is past expected",
         button: { label: "Nudge", tone: "navy", act: "nudge" }, link: { label: "Close it", act: "close" }, replied: { label: `${f} replied`, act: "resp" } };
     }
     case "agent": {
