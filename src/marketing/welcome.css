@@ -17,7 +17,8 @@
 .mk-wel {
   --wel-navy: #1b2433; --wel-navy2: #2a3a52; --wel-blush: #e8b4a3; --wel-rust: #a2452a; --wel-stub: #7a3420;
   --wel-ink: #1c130f; --wel-body: rgba(28, 19, 15, .74); --wel-muted: rgba(28, 19, 15, .55);
-  --wel-b1: #f4ede3; --wel-b2: #fbf6ef; --wel-card: #fffefb;
+  /* Consistency roll-out v1.1, Phase 3: the band that matched the old sheet (#f4ede3) is the oat page (marketing's --mk-lower); the contrasting band stays */
+  --wel-b1: var(--mk-lower); --wel-b2: #fbf6ef; --wel-card: #fffefb;
   color: var(--wel-ink); font: 400 16px/1.55 var(--mk-f-serif);
 }
 /* The drawer runs on from the navy bar, so the sheet's top corners would show ink between them. */

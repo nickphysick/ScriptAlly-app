@@ -1638,7 +1638,7 @@ export const Dashboard: React.FC<{
                           <div className="space-y-3">
                             <div className="flex items-center gap-1.5 text-[#a86a52] font-bold text-[10px] uppercase tracking-wider mb-2 select-none">
                               <Clock className="w-4 h-4 text-[#a86a52]" />
-                              <span>Overdue</span>
+                              <span>Past expected</span>
                             </div>
                             <div className="flex flex-col gap-3">
                               {overdueList.map(t => (

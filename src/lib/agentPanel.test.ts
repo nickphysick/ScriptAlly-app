@@ -100,7 +100,7 @@ describe("where you stand: the eight states", () => {
   });
   it("with the agent, past the reply date", () => {
     const v = see(view(mk("a"), [qy("a", QueryStatus.QUERIED, 60)]));
-    expect(v.stand).toMatchObject({ state: "late", tone: "agent", heading: "Clara is late", figure: "18 days over", past: true });
+    expect(v.stand).toMatchObject({ state: "late", tone: "agent", heading: "Past expected", figure: "18 days over", past: true });
     expect(v.text).toBe("You expected a reply by 24 Sep.");
     expect(v.foot.hot).toBe(true);
   });

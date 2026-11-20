@@ -32,7 +32,7 @@ export const WsSlim56: React.FC<{ todo: number; bd: Breakdown; book: string | nu
     right={(
       <span className="qc156-sw" data-tws56="slim-need">
         <b>{needYou(bd)} need you</b>
-        {bd.late > 0 ? <em data-tws56="slim-late">{bd.late} late</em> : null}
+        {bd.late > 0 ? <em data-tws56="slim-late">{bd.late} past expected</em> : null}
       </span>
     )}
     button={{ label: "+ Add a task", onClick: onAdd, probe: "slim-add" }} />

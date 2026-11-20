@@ -96,10 +96,10 @@ export function countersFor(f: CardCFacts): [CounterModel, CounterModel, Counter
     case "waiting":
       return [dash(f.eyebrowDays, "days waiting"), dash(f.nudges, "nudges"), total];
     case "passed":
-      return [dash(f.eyebrowDays, "days overdue", true), dash(f.nudges, "nudges"), total];
+      return [dash(f.eyebrowDays, "days past expected", true), dash(f.nudges, "nudges"), total];
     case "moveDated":
       return [
-        dash(f.eyebrowDays, f.today > (f.end ?? Infinity) ? "days overdue" : "days left", f.today > (f.end ?? Infinity)),
+        dash(f.eyebrowDays, f.today > (f.end ?? Infinity) ? "days past expected" : "days left", f.today > (f.end ?? Infinity)),
         dash(f.windowDays, "days you had"), total];
     case "moveUndated":
       return [dash(f.eyebrowDays, "days since request", true), { v: "—", label: "date promised" }, total];
@@ -113,7 +113,7 @@ export function countersFor(f: CardCFacts): [CounterModel, CounterModel, Counter
         { v: String(f.stageIdx ?? 1), label: `of ${f.stageCount ?? 1} stages` }];
     case "task":
       return [
-        dash(f.eyebrowDays, f.today > (f.end ?? Infinity) ? "days overdue" : "days left", f.today > (f.end ?? Infinity)),
+        dash(f.eyebrowDays, f.today > (f.end ?? Infinity) ? "days past expected" : "days left", f.today > (f.end ?? Infinity)),
         dash(f.rolled, "rolled"), dash(f.daysOpen, "days open")];
     case "closed":
       return [total, dash(f.nudges, "nudges"), { v: f.outcome ?? "—", label: "outcome" }];

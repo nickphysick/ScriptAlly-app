@@ -125,9 +125,9 @@ export function nextLine(r: QcRow, c: ComingUp | null, nowMs: number): NextLine 
       const yrs = r.sentMs != null ? (whole(r.sentMs, nowMs) / 365).toFixed(1).replace(/\.0$/, "") : null;
       return { phrase, line: yrs ? `NO REPLY · ${yrs} ${yrs === "1" ? "YEAR" : "YEARS"}` : "NO REPLY", hot: false };
     }
-    return { phrase, line: exp != null ? `OVERDUE SINCE ${upDate(exp, nowMs)}` : "NO REPLY DATE", hot: false };
+    return { phrase, line: exp != null ? `PAST EXPECTED SINCE ${upDate(exp, nowMs)}` : "NO REPLY DATE", hot: false };
   }
-  if (move?.mode === "nudge") return { phrase, line: `OVERDUE SINCE ${upDate(exp!, nowMs)}`, hot: false };
+  if (move?.mode === "nudge") return { phrase, line: `PAST EXPECTED SINCE ${upDate(exp!, nowMs)}`, hot: false };
   /* Record a response leads: nothing to do but wait. Inside the last week the wait is named "Reply due". */
   if (left != null && left >= 0 && left <= 6) return { phrase: "Reply due", line: `BY ${upWeekDate(exp!)}`, hot: false };
   return { phrase, line: exp != null ? `REPLY BY ${upDate(exp, nowMs)}` : "NO REPLY DATE", hot: false };

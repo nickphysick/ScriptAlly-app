@@ -35,7 +35,7 @@ export type SortBy = "queried" | "changed" | "due";
  */
 export type DueKey = "any" | "overdue" | "week" | "fortnight" | "month" | "nodate";
 export const DUE_OPTIONS: readonly { key: DueKey; label: string }[] = [
-  { key: "any", label: "Any time" }, { key: "overdue", label: "Overdue" }, { key: "week", label: "This week" },
+  { key: "any", label: "Any time" }, { key: "overdue", label: "Past expected" }, { key: "week", label: "This week" },
   { key: "fortnight", label: "Next two weeks" }, { key: "month", label: "Within a month" }, { key: "nodate", label: "No date set" },
 ];
 

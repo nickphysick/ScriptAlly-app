@@ -22,7 +22,7 @@ export const DASH_TIPS: readonly DashTip[] = [
   },
   {
     lead: "Fill in your agents' details.",
-    rest: "Add each agent's usual reply time and what they ask for. The reply time is how QueryHawk knows when a query is overdue, and the list means you send exactly what each agent wants.",
+    rest: "Add each agent's usual reply time and what they ask for. The reply time is how QueryHawk knows when a query is past expected, and the list means you send exactly what each agent wants.",
   },
   {
     lead: "Mix established and newer agents.",

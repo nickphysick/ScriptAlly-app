@@ -15,13 +15,13 @@ import { wsSections, type WsFilters, type WsGrouping, type WsTask, type WsWhen }
 export const TRAY_GROUP_HINT: Record<WsGrouping, string> = {
   category: "Agents waiting · Nudges · Gone quiet · Housekeeping",
   urgency: "Needs you now · Housekeeping",
-  when: "Overdue · This week · Coming up · No date",
+  when: "Past expected · This week · Coming up · No date",
   agent: "What you owe each person",
   none: "One flat list",
 };
 
 /** a when chip's word, verbatim from the mock (the brief names "No date") */
-export const TRAY_WHEN_WORD: Record<WsWhen, string> = { Overdue: "Overdue", "Due this week": "Due this week", "Coming up": "Coming up", "No date": "No date" };
+export const TRAY_WHEN_WORD: Record<WsWhen, string> = { Overdue: "Past expected", "Due this week": "Due this week", "Coming up": "Coming up", "No date": "No date" };
 
 /** the filters on, in the menu's order, as the line names them; empty when none is on (grouping is never a filter) */
 export function filterWords(f: WsFilters): string[] {

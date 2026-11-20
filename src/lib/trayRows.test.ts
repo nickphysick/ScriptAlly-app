@@ -33,17 +33,17 @@ describe("TD52 F2 — the overdue tag", () => {
     expect(lateTag(0)).toBeNull();
   });
   it("spoken: Overdue since {date}", () => {
-    expect(overdueLabel("2026-06-20", "2026-10-17")).toBe("Overdue since 20 June");
-    expect(overdueLabel("2025-12-01", "2026-10-17")).toBe("Overdue since 1 December 2025");
+    expect(overdueLabel("2026-06-20", "2026-10-17")).toBe("Past expected since 20 June");
+    expect(overdueLabel("2025-12-01", "2026-10-17")).toBe("Past expected since 1 December 2025");
   });
 });
 
 describe("v7 S5 — lateWords: the tag's figure, said in words", () => {
   it("days, weeks and months, with the tag's thresholds", () => {
-    expect(lateWords(1)).toBe("1 day overdue");
-    expect(lateWords(5)).toBe("5 days overdue");
-    expect(lateWords(20)).toBe("3 wk overdue");
-    expect(lateWords(95)).toBe("3 mo overdue");
+    expect(lateWords(1)).toBe("1 day past expected");
+    expect(lateWords(5)).toBe("5 days past expected");
+    expect(lateWords(20)).toBe("3 wk past expected");
+    expect(lateWords(95)).toBe("3 mo past expected");
     expect(lateWords(0)).toBeNull();
     for (const d of [1, 5, 13, 14, 30, 59, 60, 200]) expect(lateWords(d)!.split(" ")[0], String(d)).toBe(lateTag(d)!.slice(1).split(" ")[0]);
   });

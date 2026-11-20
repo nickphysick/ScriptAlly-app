@@ -248,7 +248,7 @@ describe("v126.2 · the desk foot says when the earliest date has passed", () =>
     /* sent 40 days ago against a 4-week window: its reply date has passed */
     const past = rowsOf([mkQ({ dateSent: ago(40) })], [a]);
     const f1 = courtFoot(past, "agent", NOW);
-    expect(f1.when.label).toBe("overdue since");
+    expect(f1.when.label).toBe("past expected since");
     expect(f1.when.date).toMatch(/^[A-Z][a-z]{2} \d{1,2} [A-Z][a-z]{2}$/);
     /* sent 5 days ago: still to come */
     const f2 = courtFoot(rowsOf([mkQ({ dateSent: ago(5) })], [a]), "agent", NOW);

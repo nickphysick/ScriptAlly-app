@@ -35,7 +35,7 @@ describe("v152.2 §3.2 the footer", () => {
   });
   it("materials: late in rust with the due day; the button names the material", () => {
     const x = f({ state: "materials", status: QueryStatus.PARTIAL_REQUESTED, dueMs: NOW - 8 * DAY });
-    expect([x.lead, x.sub, x.late, x.button?.label]).toEqual(["Send the partial", "8 days late · was due 30 Sep", true, "Mark partial sent"]);
+    expect([x.lead, x.sub, x.late, x.button?.label]).toEqual(["Send the partial", "8 days past expected · was due 30 Sep", true, "Mark partial sent"]);
     expect(f({ state: "materials", status: QueryStatus.FULL_REQUESTED, dueMs: NOW + 5 * DAY }).button?.label).toBe("Mark full sent");
     expect(f({ state: "materials", status: QueryStatus.PARTIAL_REQUESTED, askedFor: "A synopsis" }).lead).toBe("Send a synopsis");
     expect(f({ state: "materials", status: QueryStatus.REVISE_RESUBMIT, dueMs: NOW + 30 * DAY }).button?.label).toBe("Mark resubmitted");

@@ -18,7 +18,7 @@ describe("the To-do list's slim bar (WsSlim56)", () => {
     const h = renderToStaticMarkup(<WsSlim56 todo={38} bd={BD} book="Murphy’s Day Out" onAdd={() => {}} />);
     expect(h).toMatch(/^<div class="qc156-slim" data-tws56="slim" inert="" aria-hidden="true">/);
     expect(h).toContain('<b data-tws56="slim-title">38 things to do</b><i data-tws56="slim-for">for Murphy’s Day Out</i>');
-    expect(h).toContain('<span class="qc156-sw" data-tws56="slim-need"><b>5 need you</b><em data-tws56="slim-late">3 late</em></span>');
+    expect(h).toContain('<span class="qc156-sw" data-tws56="slim-need"><b>5 need you</b><em data-tws56="slim-late">3 past expected</em></span>');
     expect(h).toMatch(/<button type="button" class="qc156-sb" data-tws56="slim-add"[^>]*>\+ Add a task<\/button>/);
   });
   it("no late, no book: neither is drawn", () => {

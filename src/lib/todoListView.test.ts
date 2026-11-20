@@ -123,11 +123,11 @@ describe("the flags, the badge, the label, the parse", () => {
   });
 
   it("the trigger's label is the contract's two-part sentence", () => {
-    expect(viewButtonLabel(VIEW_DEFAULT)).toBe("By when · Overdue by");
+    expect(viewButtonLabel(VIEW_DEFAULT)).toBe("By when · Past expected by");
     expect(viewButtonLabel({ ...VIEW_DEFAULT, grouping: "grouped", sort: "needs-you" })).toBe("By urgency · Priority");
     expect(viewButtonLabel({ ...VIEW_DEFAULT, grouping: "agent", sort: "longest" }))
       .toBe("By agent · Longest waiting");
-    expect(viewButtonLabel({ ...VIEW_DEFAULT, grouping: "flat" })).toBe("Flat · Overdue by");
+    expect(viewButtonLabel({ ...VIEW_DEFAULT, grouping: "flat" })).toBe("Flat · Past expected by");
   });
 
   it("parseView round-trips the new fields and retires the old sort by falling back", () => {
@@ -211,7 +211,7 @@ describe("the landing state — grouped by When (list round, Phase 3)", () => {
 
   it("the default IS the landing state — When, Overdue by, longest first", () => {
     expect([VIEW_DEFAULT.grouping, VIEW_DEFAULT.sort, VIEW_DEFAULT.direction]).toEqual(["time", "over", "asc"]);
-    expect(viewButtonLabel(VIEW_DEFAULT)).toBe("By when · Overdue by");
+    expect(viewButtonLabel(VIEW_DEFAULT)).toBe("By when · Past expected by");
     /* and it is not "filtered" or "sorted" — the funnel and the order marker rest at the landing */
     expect(isFiltered(VIEW_DEFAULT)).toBe(false);
     expect(isSorted(VIEW_DEFAULT)).toBe(false);
@@ -219,11 +219,11 @@ describe("the landing state — grouped by When (list round, Phase 3)", () => {
 
   it("four heads in the contract's order, and an empty bucket draws none", () => {
     const out = applyView(gs(), VIEW_DEFAULT, F());
-    expect(out.map((g) => g.label)).toEqual(["Overdue", "Due this week", "Coming up", "No date"]);
+    expect(out.map((g) => g.label)).toEqual(["Past expected", "Due this week", "Coming up", "No date"]);
     expect(out.map((g) => g.id)).toEqual(["when-over", "when-week", "when-later", "when-none"]);
     const fewer = applyView([grp("urgent", "Needs you now", [card("old"), card("non")])],
       VIEW_DEFAULT, facts({}, {}, { old: "2024-05-21", non: null }, {}, TODAY));
-    expect(fewer.map((g) => g.label), "an empty bucket states nothing").toEqual(["Overdue", "No date"]);
+    expect(fewer.map((g) => g.label), "an empty bucket states nothing").toEqual(["Past expected", "No date"]);
   });
 
   it("Overdue holds only past days; Coming up only days past the week; and the order runs longest first", () => {

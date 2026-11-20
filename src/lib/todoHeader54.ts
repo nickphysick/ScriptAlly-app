@@ -34,7 +34,7 @@ export function needRows(sections: readonly WsSection[], bd: Breakdown, nowMs: n
   const latest = lateBy.length ? Math.max(...lateBy) : 0;
   return [
     { key: "wait", label: NEED_LABEL.wait, n: bd.wait, note: bd.wait && longest ? plural(longest, "day", "days") : "", late: false },
-    { key: "nudge", label: NEED_LABEL.nudge, n: bd.nudge, note: latest ? `${latest} late` : "", late: latest > 0 },
+    { key: "nudge", label: NEED_LABEL.nudge, n: bd.nudge, note: latest ? `${plural(latest, "day", "days")} past expected` : "", late: latest > 0 },
     { key: "quiet", label: NEED_LABEL.quiet, n: bd.quiet, note: bd.quiet ? "close or nudge" : "", late: false },
     { key: "house", label: NEED_LABEL.house, n: bd.house, note: bd.house ? "when you have a moment" : "", late: false },
   ];

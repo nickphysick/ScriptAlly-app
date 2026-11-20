@@ -30,7 +30,7 @@ export type NextBox154 =
   | { kind: "other"; value: string; line: string | null; hot: boolean };
 
 export const NEXT_WAIT_LABEL = "Reply expected by";
-export const OVERDUE_VALUE = "Response overdue";
+export const OVERDUE_VALUE = "Past expected";
 export const OVERDUE_LINE = "Send nudge now";
 export const nudgeOnLine = (date: string): string => `Nudge on ${date}`;
 

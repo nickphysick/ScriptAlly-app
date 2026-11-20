@@ -58,7 +58,7 @@ export type GroupingId = "time" | "category" | "flat" | "grouped" | "agent" | "t
 export type DirectionId = "asc" | "desc";
 
 export const SORT_LABEL: Record<SortId, string> = {
-  over: "Overdue by",
+  over: "Past expected by",
   due: "Due date",
   task: "Task A–Z",
   agent: "Agent A–Z",
@@ -70,7 +70,7 @@ export const SORT_LABEL: Record<SortId, string> = {
 };
 /** the panel's sub-lines — the contract's own words, empty where it draws none */
 export const SORT_DESC: Record<SortId, string> = {
-  over: "Longest overdue first, then what falls due soonest",
+  over: "Longest past expected first, then what falls due soonest",
   due: "Soonest first",
   task: "",
   "needs-you": "Urgency groups, then longest waiting",
@@ -83,7 +83,7 @@ export const SORT_DESC: Record<SortId, string> = {
 /** the four sortable column heads, in the contract's left-to-right order */
 export type HeadKey = "task" | "agent" | "due" | "over";
 export const HEAD_KEYS: HeadKey[] = ["task", "agent", "due", "over"];
-export const HEAD_LABEL: Record<HeadKey, string> = { task: "Task", agent: "Agent", due: "Due", over: "Overdue by" };
+export const HEAD_LABEL: Record<HeadKey, string> = { task: "Task", agent: "Agent", due: "Due", over: "Past expected by" };
 
 /**
  * A head click — the contract's `sortBy(k)`: the same head flips, a new head starts in its natural
@@ -110,7 +110,7 @@ export const GROUPING_LABEL: Record<GroupingId, string> = {
   grouped: "Urgency", agent: "Agent", type: "Task type", manuscript: "Manuscript",
 };
 export const GROUPING_DESC: Record<GroupingId, string> = {
-  time: "Overdue · Due this week · Coming up · No date",
+  time: "Past expected · Due this week · Coming up · No date",
   grouped: "Needs you now · Housekeeping · Yours",
   agent: "What you owe each person",
   type: "",

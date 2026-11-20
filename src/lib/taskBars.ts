@@ -105,7 +105,7 @@ export function taskBar(
 }
 
 /** the band's two words — the holder, in the same vocabulary every other band uses */
-export const taskHolder = (overdue: boolean): string => (overdue ? "Overdue" : "With you");
+export const taskHolder = (overdue: boolean): string => (overdue ? "Past expected" : "With you");
 
 /**
  * ⚠️ THE TAIL MEASURES, IT DOES NOT REPEAT THE BAND. The first build set it to the holder word, so a
@@ -121,7 +121,7 @@ export function taskTail(
 ): string {
   const at = (s: string) => new Date(`${s}T12:00:00`).getTime();
   const d = Math.round((at(todayYmd) - at(dueYmd)) / 86400000);
-  if (d > 0) return `${span(d)} overdue`;
+  if (d > 0) return `${span(d)} past expected`;
   if (d === 0) return "due today";
   return `in ${span(-d)}`;
 }

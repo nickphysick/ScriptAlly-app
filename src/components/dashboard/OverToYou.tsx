@@ -199,8 +199,8 @@ export const buildOverToYouRows = (tasks: Task[], queries: Query[], agents: Agen
           break;
         case "nudge_overdue":
           description = deadline
-            ? `Agent response overdue · ${fmtGap(deadline, now)} past window`
-            : "Agent response overdue";
+            ? `Agent response · ${fmtGap(deadline, now)} past expected`
+            : "Agent response past expected";
           break;
       }
 

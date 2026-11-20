@@ -27,8 +27,8 @@ const row = (o: { status: QueryStatus; expected?: number | null; stage?: number 
 
 describe("the Next column (v151.1 §7)", () => {
   it("the writer's turn: late, due today, due tomorrow, otherwise the weekday date", () => {
-    expect(nextText(row({ status: QueryStatus.PARTIAL_REQUESTED, expected: at(-8) }), NOW)).toEqual({ text: "8 days late", tone: "late" });
-    expect(nextText(row({ status: QueryStatus.PARTIAL_REQUESTED, expected: at(-1) }), NOW)).toEqual({ text: "1 day late", tone: "late" });
+    expect(nextText(row({ status: QueryStatus.PARTIAL_REQUESTED, expected: at(-8) }), NOW)).toEqual({ text: "8 days past expected", tone: "late" });
+    expect(nextText(row({ status: QueryStatus.PARTIAL_REQUESTED, expected: at(-1) }), NOW)).toEqual({ text: "1 day past expected", tone: "late" });
     expect(nextText(row({ status: QueryStatus.OFFER, expected: at(0) }), NOW)).toEqual({ text: "Due today", tone: "late" });
     expect(nextText(row({ status: QueryStatus.OFFER, expected: at(1) }), NOW)).toEqual({ text: "Due tomorrow", tone: "late" });
     expect(nextText(row({ status: QueryStatus.FULL_REQUESTED, expected: at(7) }), NOW)).toEqual({ text: "Due Thu 15 Oct", tone: "ink" });
@@ -38,8 +38,8 @@ describe("the Next column (v151.1 §7)", () => {
     expect(nextText(row({ status: QueryStatus.QUERIED, expected: at(14) }), NOW)).toEqual({ text: "Reply by 22 Oct", tone: "faint" });
   });
   it("gone quiet (and a nudge-window row): the reply's lateness; undated, the days without one", () => {
-    expect(nextText(row({ status: QueryStatus.QUERIED, expected: at(-37) }), NOW)).toEqual({ text: "Reply 37 days overdue", tone: "late" });
-    expect(nextText(row({ status: QueryStatus.QUERIED, expected: at(-5) }), NOW)).toEqual({ text: "Reply 5 days overdue", tone: "late" });
+    expect(nextText(row({ status: QueryStatus.QUERIED, expected: at(-37) }), NOW)).toEqual({ text: "Reply 37 days past expected", tone: "late" });
+    expect(nextText(row({ status: QueryStatus.QUERIED, expected: at(-5) }), NOW)).toEqual({ text: "Reply 5 days past expected", tone: "late" });
     expect(nextText(row({ status: QueryStatus.QUERIED, expected: null, stage: at(-120) }), NOW)).toEqual({ text: "No reply in 120 days", tone: "late" });
   });
   it("closed: a dash", () => {
@@ -72,8 +72,8 @@ describe("the summary card (v151.1 §2)", () => {
     const s = weekSummary(rows, NOW);
     expect(s.n).toBe(4);
     expect(s.heading).toBe("4 queries need you this week");
-    expect(s.detail).toBe("Tom Ellery made an offer on 2 Oct, and two partials are late.");
-    expect(s.pills.map((p) => [p.text, p.late])).toEqual([["1 offer to answer", false], ["2 partials late", true], ["1 full to send", false]]);
+    expect(s.detail).toBe("Tom Ellery made an offer on 2 Oct, and two partials are past expected.");
+    expect(s.pills.map((p) => [p.text, p.late])).toEqual([["1 offer to answer", false], ["2 partials past expected", true], ["1 full to send", false]]);
     expect(s.pills.map((p) => p.status)).toEqual([QueryStatus.OFFER, QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED]);
   });
   it("one query: singular", () => {

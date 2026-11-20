@@ -1,0 +1,15 @@
+{
+ "_note": "Consistency roll-out v1.1 — one crop per selector at 1512 (CA_CHECK=1 CA_CHECK_PROBE=audits/consistency-rollout-v1-1/probe.js CA_FIXES=<this>), and each element's box and type",
+ "fixes": {
+  "p3-qc-ground": { "sel": ".ws-window .qc-wpg.qc-wpg--v11 > .wpg-scroll", "pages": ["queries"] },
+  "p3-qc-toolbar": { "sel": ".qc151.qc153 .qc154-tbw", "pages": ["queries"] },
+  "p3-qc-halo": { "sel": ".qc151.qc153 .qc154-wkg", "pages": ["queries"] },
+  "p3-qc-band": { "sel": ".qcv-group[data-v138] .qc138-sheet .qc138-band.qc144-rh", "pages": ["*"] },
+  "p3-invite-b1": { "sel": ".mk-wel-band--1", "pages": ["welcome", "welcome-verified"] },
+  "p3-invite-b2": { "sel": ".mk-wel-band--2", "pages": ["welcome", "welcome-verified"] },
+  "p5-card": { "sel": ".d58.d2 .os-card", "pages": ["dashboard", "dashboard-fv", "your-notes"] },
+  "p5-frame": { "sel": ".d58.d2 .os-card > .os-frame", "pages": ["dashboard", "dashboard-fv", "your-notes"] },
+  "p5-hoop": { "sel": ".d58.d2 .d60-hoopcard", "pages": ["dashboard", "dashboard-fv"] },
+  "p5-fv-panel": { "sel": ".d58 .df1-q", "pages": ["dashboard-fv"] }
+ }
+}

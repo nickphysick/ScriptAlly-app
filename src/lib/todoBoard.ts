@@ -403,7 +403,7 @@ export function taskSurfaced(dueYmd: string, offset: SurfaceOffset | undefined, 
  *  (the DUE-TODAY promotion is carried by the band tag, not this chip). */
 function taskDueChip(dueYmd: string, state: "future" | "today" | "overdue"): string {
   const d = shortDate(dueYmd).toUpperCase();
-  return state === "overdue" ? `OVERDUE · ${d}` : d;
+  return state === "overdue" ? `PAST EXPECTED · ${d}` : d;
 }
 
 // notes-and-tasks P3 — THE TWO NATURES, DERIVED FROM dueDate: absent = a NOTE (butter, pinned,

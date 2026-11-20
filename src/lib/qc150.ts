@@ -118,7 +118,7 @@ export const BE_GROUPS: readonly { key: BeGroup; label: string }[] = [
 export const BE_SORTS: readonly { key: BeSort; label: string }[] = [
   { key: "due", label: "Due date" }, { key: "wait", label: "Waiting longest" }, { key: "agent", label: "Agent A–Z" },
 ];
-const WHEN_LABEL: Record<BvdWhen, string> = { overdue: "Overdue", upcoming: "Upcoming", watch: "Watch and wait", nodate: "No date" };
+const WHEN_LABEL: Record<BvdWhen, string> = { overdue: "Past expected", upcoming: "Upcoming", watch: "Watch and wait", nodate: "No date" };
 const WHEN_ORDER: readonly BvdWhen[] = ["overdue", "upcoming", "watch", "nodate"];
 
 export interface BeGroupOut { key: string; label: string; rows: EyeRow[] }
@@ -196,7 +196,7 @@ export function beLine(r: EyeRow, nowMs: number): BeLine {
   let cur: BeLine["cur"] = null;
   if (curStart != null) {
     const to = overdue ? today : due ?? today;
-    const lab = due == null ? stage : overdue ? `${stage} · overdue since ${shortDay(due)}` : `${stage} · ${r.court === "you" ? "due" : "reply by"} ${shortDay(due)}`;
+    const lab = due == null ? stage : overdue ? `${stage} · past expected since ${shortDay(due)}` : `${stage} · ${r.court === "you" ? "due" : "reply by"} ${shortDay(due)}`;
     cur = { key: `${row.id}:cur`, fromMs: curStart, toMs: Math.max(to, curStart + DAY), label: lab, title: `${stage} · ${shortDay(curStart)} → ${shortDay(to)}`, stage, tint: stageTint(row.status), overdue };
   }
   return { id: row.id, row, when: whenOf(row, nowMs), past, cur, dueMs: due, daysOver, inDays };

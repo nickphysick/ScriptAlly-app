@@ -210,7 +210,7 @@ export function rowDateLine(q: QcRow, nowMs: number): RowDateLine | null {
      "Overdue since 15 May" (the year added when it is not this year's) — Nick's wording, the same ink. */
   if (past && days > LONG_OVER) {
     const y = new Date(q.expectedMs).getFullYear() === new Date(nowMs).getFullYear();
-    return { text: `Overdue since ${y ? dmy(q.expectedMs) : dmyY(q.expectedMs)}`, over: true };
+    return { text: `Past expected since ${y ? dmy(q.expectedMs) : dmyY(q.expectedMs)}`, over: true };
   }
   return past
     ? { text: `Expected ${dmy(q.expectedMs)} · ${days}d over`, over: true }

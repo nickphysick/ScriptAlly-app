@@ -66,7 +66,7 @@ describe("Your move", () => {
   });
   it("a late row says how late; a near one names the day; an undated one has no stamp", () => {
     const late = ROWS.find((r) => r.id === "q1")!;
-    expect(stampFor(late, NOW)).toEqual({ text: "8 days late", late: true });
+    expect(stampFor(late, NOW)).toEqual({ text: "8 days past expected", late: true });
     const offer = ROWS.find((r) => r.id === "q5")!;
     expect(stampFor(offer, NOW)).toEqual({ text: "Tomorrow", late: false });
   });

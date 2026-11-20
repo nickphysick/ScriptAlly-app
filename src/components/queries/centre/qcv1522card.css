@@ -83,12 +83,16 @@
 .qc152 .qc1522-lk { all: unset; cursor: pointer; font: 400 14px var(--sp-serif) !important; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 .qc152 .qc1522-lk:hover { color: #1c130f; }
 .qc152 .qc1522-lk.rust { color: #a2452a; text-decoration: none; }
+/* Consistency roll-out v1.1, Phase 6: Record a response's fields take the text field (primitives.css `.sp-fld`): radius
+   9 → 10, the 1px edge inside (it was a 1px #d9cfc2 border), 14.5 → 16, the 1.5px navy edge at focus. The input is the
+   field, 44 high with 0 14 of padding; the textarea keeps its own height (62) and padding (+1 for the border it lost). */
 .qc152 .qc1522-in, .qc152 .qc1522-ta {
-  box-sizing: border-box; width: 100%; padding: 7px 10px; border: 1px solid #d9cfc2; border-radius: 9px; background: #fff; outline: none;
-  font: 400 14.5px/1.45 var(--sp-serif) !important; color: #1c130f;
+  box-sizing: border-box; width: 100%; padding: 8px 11px; border: 0; border-radius: var(--sp-fld-r); background: #fff; outline: none;
+  box-shadow: var(--sp-fld-edge); font: 400 16px/1.45 var(--sp-serif) !important; color: #1c130f;
 }
-.qc152 .qc1522-ta { min-height: 62px; resize: vertical; }
-.qc152 .qc1522-in:focus, .qc152 .qc1522-ta:focus { border-color: #2a3a52; box-shadow: 0 0 0 3px rgba(42, 58, 82, 0.12); }
+.qc152 .qc1522-in { height: var(--sp-fld-h); padding: var(--sp-fld-pad); font: var(--sp-fld-font) !important; }
+.qc152 .qc1522-ta { min-height: 62px; height: 62px; resize: vertical; } /* stated: two rows of 16 would make it 62.4 */
+.qc152 .qc1522-in:focus, .qc152 .qc1522-ta:focus { box-shadow: var(--sp-fld-focus); }
 .qc152 .qc1522-chks { display: grid; gap: 6px; }
 .qc152 .qc1522-chk { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; cursor: pointer; font: 400 14.5px var(--sp-serif) !important; color: #1c130f; }
 .qc152 .qc1522-chks .qc1522-chk { margin: 0; }

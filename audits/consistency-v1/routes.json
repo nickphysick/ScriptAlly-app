@@ -6,6 +6,14 @@
       "family": "dashboard"
     },
     {
+      "path": "/dashboard",
+      "family": "dashboard",
+      "key": "dashboard-fv",
+      "name": "Dashboard (first visit)",
+      "note": "roll-out v1.1: the active book is the harness's book with no queries (db60-pre), set in localStorage only and put back after",
+      "storage": { "scriptally_active_manuscript_id": "db60-pre" }
+    },
+    {
       "path": "/queries",
       "family": "workspace",
       "name": "Queries"
@@ -181,6 +189,14 @@
       "family": "public",
       "name": "Welcome",
       "signedOut": true
+    },
+    {
+      "path": "/welcome?v=verified",
+      "family": "public",
+      "key": "welcome-verified",
+      "name": "Welcome (verified, no reference)",
+      "signedOut": true,
+      "note": "roll-out v1.1: the invite page's verified state, which draws the alternating bands; no reference, so nothing is fetched or written"
     },
     {
       "path": "/terms",
