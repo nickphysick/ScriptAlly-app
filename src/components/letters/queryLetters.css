@@ -75,7 +75,7 @@
 
 /* buttons */
 .qlp-b1, .qlp-b2 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; white-space: nowrap; font-family: var(--sp-type) !important; font-weight: 400; }
-/* Consistency roll-out v1, Phase 9: the filled action button (primitives.css `.sp-btn`) */ (it was 46 high, radius 12, the typewriter at 17)
+/* Consistency roll-out v1, Phase 9: the filled action button (primitives.css `.sp-btn`); it was 46 high, radius 12, the typewriter at 17 */
 .qlp-b1.qlp-b1 { height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: var(--ql-btn); color: #fff !important; }
 .qlp-b1:hover { background: #24324a; }
 .qlp-b1:disabled { opacity: .55; cursor: default; }
