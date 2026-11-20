@@ -291,7 +291,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
       if (!reduced() && !isHeld(root)) finishAll(root);
       /* v161 — the motion of this landing is held until the page has finished drawing it (the release below) */
       if (first && !reduced()) { hold(root); setHeldN((n) => n + 1); }
-      if (first) bump(root.closest<HTMLElement>(".spanel"), root);
+      if (first) bump(root.closest<HTMLElement>(".spanel"), root, kind);
       const start = keysAtStart.current ?? new Set<string>();
       keysAtStart.current = new Set(thread.map((x) => x.key));
       if (settledNow) { draftSeq.current += 1; lastDraft.current = null; }

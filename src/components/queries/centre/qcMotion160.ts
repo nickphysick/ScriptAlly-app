@@ -7,7 +7,8 @@
  * everything here is the Web Animations API (CLAUDE.md: no var() inside @keyframes, no color-mix()).
  *
  *   bump        the slide-in card's frame (v161.1): pressed in to `scale` 0.985 at the press, then popped from there →
- *               1.035 (40%) → 1 over 520ms when the save lands. `scale` composes with the
+ *               1.03 (42%) → 1 over 620ms when a save lands, or sunk → 0.975 (30%) → 1 when an undo does (v163). With it
+ *               (v163) the rim's tint fades and a light runs once round the border. `scale` composes with the
  *               frame's `rotate` (its lean) and `translate` (its slide-in); `transform` is never set on the frame.
  *               A second bump ends the running one at once: they never stack.
  *   settle      a draft bubble becoming its step: the final colour fills from the left (background-size), the dashed
@@ -32,7 +33,12 @@ export const reduced = (): boolean => typeof window !== "undefined" && !!window.
 /* Query card v161.1 — the bump is a press and a pop: the frame presses in at the press, holds through the save, and pops
    when the save lands (it replaces v160's 1 → 1.022 → 1). */
 export const PRESS = { to: 0.985, ms: 120, backMs: 150, net: 4000, yieldMs: 50 } as const;
-export const BUMP = { ms: 520, peak: 1.035, at: 0.4, ease: "cubic-bezier(0.2, 0.8, 0.2, 1)" } as const;
+/* v163 — the pop (a save) peaks at 1.03 at 42% over 620ms; the sink (an undo) dips to 0.975 at 30% over the same, never
+   above 1. One easing over the whole run, as the ref (design-refs/query-card-v163/) animates it. */
+export const BUMP = { ms: 620, peak: 1.03, at: 0.42, ease: "cubic-bezier(0.25, 0.8, 0.25, 1)" } as const;
+export const SINK = { low: 0.975, at: 0.3 } as const;
+/* v163 — the landing light: one lap of the conic, clockwise on a save, mirrored and anticlockwise on an undo */
+export const LIGHT = { ms: 1300, ease: "cubic-bezier(0.4, 0.05, 0.25, 1)", from: -40, to: 320, inAt: 0.14, outAt: 0.76 } as const;
 const pressed = new WeakMap<Element, { a: Animation; t: number }>();
 export const isPressed = (frame: Element | null): boolean => !!frame && pressed.has(frame);
 /** at the press: the frame eases to 0.985 over 120ms and holds there (on the compositor, whatever the page then does).
@@ -40,8 +46,10 @@ export const isPressed = (frame: Element | null): boolean => !!frame && pressed.
 export function pressIn(frame: HTMLElement | null): void {
   if (!frame || reduced() || pressed.has(frame)) return;
   bumps.get(frame)?.cancel();
-  /* v161.2 — the breath gives way: the rim eases back to 1 over the press-in's own 120ms */
-  breathEnd(frame);
+  /* v161.2 — the breath gives way: the rim eases back to 1 over the press-in's own 120ms; v163 — the tint does not stop:
+     it rises to 0.72 from wherever it is and holds through the save */
+  const o = breaths.has(frame) ? breathEnd(frame) : opacityNow(rimOf(frame).tint);
+  tintHold(frame, o);
   const a = frame.animate([{ scale: "1" }, { scale: String(PRESS.to) }], { duration: PRESS.ms, easing: "ease-out", fill: "forwards" });
   a.id = "qc1611-press";
   pressed.set(frame, { a, t: window.setTimeout(() => pressBack(frame), PRESS.net) });
@@ -52,6 +60,8 @@ export function pressBack(frame: HTMLElement | null): void {
   if (!frame || !p) return;
   pressed.delete(frame);
   window.clearTimeout(p.t);
+  /* v163 — nothing landed: the tint eases to 0 over 150ms, and no light */
+  tintBack(frame);
   const at = parseFloat(getComputedStyle(frame).scale) || PRESS.to;
   p.a.cancel();
   /* v161.2 — the drawer is still open: the breath comes back after a pause */
@@ -197,11 +207,68 @@ export function breatheClose(frame: HTMLElement | null): void {
   breaths.delete(frame);
   toRest(frame, b, still(frame, b), BREATHE.closeMs);
 }
-/** the press: the breath ends, the paper, the ring and the tint easing back over the press-in's 120ms. It does not come
- *  back unless the press is given back (`pressBack`) with the drawer still open. */
-function breathEnd(frame: HTMLElement): void {
+/** the press: the breath ends, the paper and the ring easing back to 1 over the press-in's 120ms; the tint is left for
+ *  the press's hold to take up from where it was (returned). It does not come back unless the press is given back
+ *  (`pressBack`) with the drawer still open. */
+function breathEnd(frame: HTMLElement): number {
   const b = breaths.get(frame);
-  if (b) toRest(frame, b, still(frame, b), PRESS.ms);
+  if (!b) return 0;
+  const at = still(frame, b);
+  toRest(frame, b, { s: at.s, o: 0 }, PRESS.ms);
+  return at.o;
+}
+/* ══ v163 — THE TINT AT THE PRESS, AND THE LANDING ═════════════════════════════════════════════════════════════════
+   At the press the tint rises to 0.72 (280ms, ease-out) and holds, in the `rim` of the stage the card is in then — an
+   opacity animation, so the compositor keeps it moving through the app's freeze. At the landing (made through v161's
+   hold/release with the rest of it) it fades 0.72 → 0 over 700ms while the light runs once round in the colours of the
+   stage the card is in now: the stage moved to on a save, returned to on an undo. */
+const holds = new WeakMap<Element, Animation>();
+const landings = new WeakMap<Element, Animation[]>();
+function tintHold(frame: HTMLElement, from: number): void {
+  const { tint } = rimOf(frame);
+  holds.get(frame)?.cancel();
+  tint.style.background = STAGE_COLOURS[stageAt(frame)].rim;
+  const h = tint.animate([{ opacity: from }, { opacity: RIM163.peak }], { duration: RIM163.holdMs, easing: "ease-out", fill: "forwards" });
+  h.id = "qc163-tint-hold";
+  holds.set(frame, h);
+}
+function tintBack(frame: HTMLElement): void {
+  const h = holds.get(frame);
+  if (!h) return;
+  holds.delete(frame);
+  const { tint } = rimOf(frame);
+  const o = opacityNow(tint);
+  h.cancel();
+  if (o < 0.001) return;
+  tint.animate([{ opacity: o }, { opacity: 0 }], { duration: RIM163.backMs, easing: "ease-out" }).id = "qc163-tint-back";
+}
+/** the landing's tint and light (`bump` calls it); `owner` holds them with the rest of the landing */
+function landRim(frame: HTMLElement, owner: Element | null, kind: "save" | "undo"): Animation[] {
+  const { tint, light } = rimOf(frame);
+  const made: Animation[] = [];
+  const h = holds.get(frame);
+  holds.delete(frame);
+  if (h) {
+    const f = tint.animate([{ opacity: RIM163.peak }, { opacity: 0 }], { duration: RIM163.fadeMs, easing: "ease-out", fill: "forwards" });
+    f.id = "qc163-tint-fade";
+    const end = () => { h.cancel(); f.cancel(); };
+    f.finished.then(end, () => h.cancel());
+    made.push(park(owner, f));
+  }
+  const c = STAGE_COLOURS[stageAt(frame)];
+  const back = kind === "undo";
+  light.style.background = `conic-gradient(from 0deg, transparent 0 58%, ${c.rim} 84%, ${c.rimHi} 93%, transparent 100%)`;
+  light.style.scale = back ? "-1 1" : "1 1";
+  const turn = (d: number) => `${back ? -d : d}deg`;
+  const l = light.animate([
+    { rotate: turn(LIGHT.from), opacity: 0 },
+    { opacity: 1, offset: LIGHT.inAt },
+    { opacity: 1, offset: LIGHT.outAt },
+    { rotate: turn(LIGHT.to), opacity: 0 },
+  ], { duration: LIGHT.ms, easing: LIGHT.ease });
+  l.id = "qc163-light";
+  made.push(park(owner, l));
+  return made;
 }
 function breathResume(frame: HTMLElement): void {
   const b = breaths.get(frame);
@@ -281,22 +348,23 @@ export function finishAll(owner: Element | null): void {
 
 const bumps = new WeakMap<Element, Animation>();
 /** Phase 1 — the bump, on the card's frame (the panel), never stacking */
-export function bump(frame: HTMLElement | null, owner: Element | null = null): void {
+export function bump(frame: HTMLElement | null, owner: Element | null = null, kind: "save" | "undo" = "save"): void {
   if (!frame || reduced()) return;
   bumps.get(frame)?.cancel();
+  /* v163 — a second landing ends the running light and tint at once: they never stack */
+  for (const x of landings.get(frame) ?? []) x.cancel();
   /* v161.1 — the pop starts where the press left it (0.985), and the press gives way to it */
   const p = pressed.get(frame);
   const from = p ? PRESS.to : 1;
   if (p) { pressed.delete(frame); window.clearTimeout(p.t); }
-  const a = frame.animate([
-    { scale: String(from), easing: BUMP.ease },
-    { scale: String(BUMP.peak), offset: BUMP.at, easing: BUMP.ease },
-    { scale: "1" },
-  ], { duration: BUMP.ms });
+  /* v163 — a save pops (1.03 at 42%); an undo sinks (0.975 at 30%) and never rises above 1 */
+  const mid = kind === "undo" ? { scale: String(SINK.low), offset: SINK.at } : { scale: String(BUMP.peak), offset: BUMP.at };
+  const a = frame.animate([{ scale: String(from) }, mid, { scale: "1" }], { duration: BUMP.ms, easing: BUMP.ease });
   p?.a.cancel();
   a.id = "qc160-bump";
   park(owner, a);
   bumps.set(frame, a);
+  landings.set(frame, landRim(frame, owner, kind));
   const clear = () => { if (bumps.get(frame) === a) bumps.delete(frame); };
   a.finished.then(clear, clear);
 }

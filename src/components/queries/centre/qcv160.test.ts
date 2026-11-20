@@ -15,12 +15,15 @@ const code = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/
 
 describe("Query card v160 · Phase 1 — the bump", () => {
   /* rewritten for Query card v161.1: the bump is now the pop after a press — 0.985 → 1.035 at 40% → 1, 520ms */
-  it("animates the frame's `scale` (the pop: from the press's 0.985 → 1.035 at 40% → 1, 520ms), never `transform`", () => {
+  it("animates the frame's `scale` (v163: the pop from the press's 0.985 → 1.03 at 42% → 1, 620ms; the sink → 0.975 at 30%), never `transform`", () => {
     const fn = code(MOTION).match(/export function bump[\s\S]*?\n}/)?.[0] ?? "";
     expect(fn).toMatch(/frame\.animate\(/);
     expect(fn).toMatch(/scale:/);
     expect(fn).not.toMatch(/transform/);
-    expect(MOTION).toMatch(/BUMP = \{ ms: 520, peak: 1\.035, at: 0\.4, ease: "cubic-bezier\(0\.2, 0\.8, 0\.2, 1\)"/);
+    expect(MOTION).toMatch(/BUMP = \{ ms: 620, peak: 1\.03, at: 0\.42, ease: "cubic-bezier\(0\.25, 0\.8, 0\.25, 1\)" \}/);
+    expect(MOTION).toMatch(/SINK = \{ low: 0\.975, at: 0\.3 \}/);
+    expect(fn).toMatch(/const mid = kind === "undo" \? \{ scale: String\(SINK\.low\), offset: SINK\.at \} : \{ scale: String\(BUMP\.peak\), offset: BUMP\.at \};/);
+    expect(fn).toMatch(/frame\.animate\(\[\{ scale: String\(from\) \}, mid, \{ scale: "1" \}\], \{ duration: BUMP\.ms, easing: BUMP\.ease \}\)/);
     expect(fn).toMatch(/const from = p \? PRESS\.to : 1;/);
   });
   it("a new bump ends the running one at once (they never stack), and nothing moves under reduced motion", () => {
@@ -32,7 +35,7 @@ describe("Query card v160 · Phase 1 — the bump", () => {
   it("the card bumps only on a landing's first change, on its own frame", () => {
     expect(CARD).toMatch(/useLanding160\(p\.motion, sig160, r\.id/);
     /* v161: the card passes itself as the bump's owner, so the bump is held with the rest of the landing's motion */
-    expect(code(CARD)).toMatch(/if \(first\) bump\(root\.closest<HTMLElement>\("\.spanel"\), root\)/);
+    expect(code(CARD)).toMatch(/if \(first\) bump\(root\.closest<HTMLElement>\("\.spanel"\), root, kind\)/);
     expect(LANDING).toMatch(/p\.rId !== rId/);
   });
   it("no var() and no color-mix() in the motion", () => {
@@ -120,16 +123,21 @@ describe("Query card v160 · QC160-4 — bumps never stack (a stub frame: two la
   it("a second bump ends the running one at once, before it starts", () => {
     const log: string[] = [];
     let n = 0;
-    const frame = {
+    const el = (tag: string) => ({
+      style: {} as Record<string, string>,
       animate: () => {
         const k = ++n;
-        log.push(`start ${k}`);
-        return { id: "", cancel: () => log.push(`cancel ${k}`), finished: new Promise(() => {}) };
+        log.push(`start ${tag} ${k}`);
+        return { id: "", cancel: () => log.push(`cancel ${tag} ${k}`), finished: new Promise(() => {}) };
       },
-    } as unknown as HTMLElement;
+    });
+    /* v163: the frame carries its rim layer (light and tint), and the landing's light never stacks either */
+    const light = el("light"), tint = el("tint");
+    const ring = { querySelector: (q: string) => (q.includes("> i") ? light : tint) };
+    const frame = { ...el("frame"), querySelector: (q: string) => (q.includes("qc163-rim") ? ring : null) } as unknown as HTMLElement;
     bump(frame);
     bump(frame);
-    expect(log).toEqual(["start 1", "cancel 1", "start 2"]);
+    expect(log).toEqual(["start frame 1", "start light 2", "cancel frame 1", "cancel light 2", "start frame 3", "start light 4"]);
   });
 });
 
@@ -138,7 +146,8 @@ describe("Query card v161 · Phase 2 — the motion waits for the page", () => {
     const land = code(CARD).slice(code(CARD).indexOf("land: (kind, first) => {"), code(CARD).indexOf("/* the draft is held while"));
     expect(land.indexOf("if (!reduced() && !isHeld(root)) finishAll(root);")).toBeGreaterThan(-1);
     expect(land.indexOf("if (!reduced() && !isHeld(root)) finishAll(root);")).toBeLessThan(land.indexOf("hold(root)"));
-    expect(land.indexOf("hold(root)")).toBeLessThan(land.indexOf('bump(root.closest<HTMLElement>(".spanel"), root)'));
+    expect(land.indexOf('bump(root.closest<HTMLElement>(".spanel"), root, kind)')).toBeGreaterThan(-1);
+    expect(land.indexOf("hold(root)")).toBeLessThan(land.indexOf('bump(root.closest<HTMLElement>(".spanel"), root, kind)'));
   });
   it("the release waits for the page's done and three quick frames, and plays regardless after 4s", () => {
     expect(CARD).toMatch(/if \(quiet >= 3\) release\(root\)/);
@@ -158,8 +167,8 @@ describe("Query card v161.1 — press in, hold, pop", () => {
     const f = fnOf("pressIn");
     expect(f).toMatch(/if \(!frame \|\| reduced\(\) \|\| pressed\.has\(frame\)\) return;/);
     expect(f).toMatch(/\[\{ scale: "1" \}, \{ scale: String\(PRESS\.to\) \}\], \{ duration: PRESS\.ms, easing: "ease-out", fill: "forwards" \}/);
-    /* v161.2: the press ends the breath (the rim eases back on its own layer) */
-    expect(f).toMatch(/breathEnd\(frame\);/);
+    /* v161.2: the press ends the breath (the rim eases back on its own layer); v163: the tint is held from where it was */
+    expect(f).toMatch(/const o = breaths\.has\(frame\) \? breathEnd\(frame\) : opacityNow\(rimOf\(frame\)\.tint\);\s*tintHold\(frame, o\);/);
     expect(f).toMatch(/window\.setTimeout\(\(\) => pressBack\(frame\), PRESS\.net\)/);
   });
   it("starts at the pointer's press; the click confirms it and saves; Undo yields two painted frames, never over 50ms", () => {
@@ -188,7 +197,7 @@ describe("Query card v161.2 — the card breathes while the drawer is open", () 
   it("it is the rim that breathes, never the frame: the frame's ::before draws the rim and shadow, and the frame none", () => {
     expect(MOTION).toMatch(/const RIM = "::before";/);
     expect(fnOf("toRest")).toMatch(/pseudoElement: RIM/);
-    expect(fnOf("breathEnd")).toMatch(/toRest\(frame, b, still\(frame, b\), PRESS\.ms\)/);
+    expect(fnOf("breathEnd")).toMatch(/const at = still\(frame, b\);\s*toRest\(frame, b, \{ s: at\.s, o: 0 \}, PRESS\.ms\);/);
     const css = read("./qcv152card.css");
     const frame = css.match(/\.spanel\.qsp\.qsp:has\(> \.spanel-own > \[data-qc152\]\) \{[\s\S]*?\n\}/)?.[0] ?? "";
     expect(frame).toMatch(/background: transparent; box-shadow: none;/);
@@ -252,6 +261,51 @@ describe("Query card v163 — the rim layer breathes in the stage's colour", () 
   it("nothing in the breath animates anything but scale and opacity, and no var() or color-mix() in it", () => {
     for (const n of ["breathStart", "toRest", "still", "rimOf"]) {
       const f = fnOf(n);
+      expect([n, /transform|box-?[sS]hadow|var\(|color-mix/.test(f)]).toEqual([n, false]);
+    }
+  });
+});
+
+/* Query card v163, Phase 3 — the press holds the tint; the landing fades it and runs the light once round (source half;
+   the computed half is tests/e2e/qc163.measure.ts) */
+describe("Query card v163 — the press, the landing light, the pop and the sink", () => {
+  const fnOf = (name: string) => code(MOTION).match(new RegExp(`(?:export )?function ${name}\\([\\s\\S]*?\\n}`))?.[0] ?? "";
+  it("at the press the tint rises to 0.72 over 280ms, ease-out, and holds (fill forwards), in the stage of the press", () => {
+    const f = fnOf("tintHold");
+    expect(f).toMatch(/tint\.style\.background = STAGE_COLOURS\[stageAt\(frame\)\]\.rim;/);
+    expect(f).toMatch(/tint\.animate\(\[\{ opacity: from \}, \{ opacity: RIM163\.peak \}\], \{ duration: RIM163\.holdMs, easing: "ease-out", fill: "forwards" \}\)/);
+    expect(f).toMatch(/h\.id = "qc163-tint-hold";/);
+  });
+  it("nothing landed: the tint eases to 0 over 150ms and no light is made", () => {
+    expect(fnOf("pressBack")).toMatch(/tintBack\(frame\);/);
+    const f = fnOf("tintBack");
+    expect(f).toMatch(/tint\.animate\(\[\{ opacity: o \}, \{ opacity: 0 \}\], \{ duration: RIM163\.backMs, easing: "ease-out" \}\)/);
+    expect(f).not.toMatch(/light/);
+  });
+  it("the landing: the tint fades 0.72 → 0 over 700ms; the light runs one lap in the stage the card is in now, mirrored and backwards on an undo; all held with the landing", () => {
+    expect(MOTION).toMatch(/LIGHT = \{ ms: 1300, ease: "cubic-bezier\(0\.4, 0\.05, 0\.25, 1\)", from: -40, to: 320, inAt: 0\.14, outAt: 0\.76 \}/);
+    const f = fnOf("landRim");
+    expect(f).toMatch(/tint\.animate\(\[\{ opacity: RIM163\.peak \}, \{ opacity: 0 \}\], \{ duration: RIM163\.fadeMs, easing: "ease-out", fill: "forwards" \}\)/);
+    expect(f).toMatch(/const c = STAGE_COLOURS\[stageAt\(frame\)\];/);
+    expect(f).toMatch(/conic-gradient\(from 0deg, transparent 0 58%, \$\{c\.rim\} 84%, \$\{c\.rimHi\} 93%, transparent 100%\)/);
+    expect(f).toMatch(/const back = kind === "undo";/);
+    expect(f).toMatch(/light\.style\.scale = back \? "-1 1" : "1 1";/);
+    expect(f).toMatch(/const turn = \(d: number\) => `\$\{back \? -d : d\}deg`;/);
+    expect(f).toMatch(/\{ rotate: turn\(LIGHT\.from\), opacity: 0 \}/);
+    expect(f).toMatch(/\{ rotate: turn\(LIGHT\.to\), opacity: 0 \}/);
+    expect(f.match(/made\.push\(park\(owner, /g)?.length).toBe(2);
+  });
+  it("a second landing ends the light and the tint at once, before anything new is made", () => {
+    const f = code(MOTION).match(/export function bump[\s\S]*?\n}/)?.[0] ?? "";
+    expect(f.indexOf("for (const x of landings.get(frame) ?? []) x.cancel();")).toBeGreaterThan(-1);
+    expect(f.indexOf("for (const x of landings.get(frame) ?? []) x.cancel();")).toBeLessThan(f.indexOf("frame.animate("));
+    expect(f).toMatch(/landings\.set\(frame, landRim\(frame, owner, kind\)\);/);
+  });
+  it("the new motion changes only opacity, rotate and scale; no var(), no color-mix(), no transform", () => {
+    for (const n of ["tintHold", "tintBack", "landRim"]) {
+      const f = fnOf(n);
+      const props = [...f.matchAll(/\{ ([a-zA-Z]+): /g)].map((m) => m[1]).filter((k) => !["duration"].includes(k));
+      expect([n, props.filter((k) => !["opacity", "rotate", "scale", "offset"].includes(k))]).toEqual([n, []]);
       expect([n, /transform|box-?[sS]hadow|var\(|color-mix/.test(f)]).toEqual([n, false]);
     }
   });
