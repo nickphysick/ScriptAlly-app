@@ -25,6 +25,9 @@
 
 /* ═════════ the header's right-hand block (`.brk`, `.pick`) — inside the shared navy header ═════════ */
 .cb15 .qc151.qc153.wsnh .wsnh-rc { max-width: 560px; grid-template-columns: minmax(0, 1fr); }
+/* Consistency roll-out v1, Phase 5 (ruling 2): the tools' first button sits 40 under the header. The tools' box starts
+   12 above its buttons (padding 12, margin −12), so the header's margin is 40 where wsnh.css gives 48. */
+@media (min-width: 768px) { .cb15 .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { margin-bottom: 40px; } }
 .cb15 .cb15-brk { display: flex; justify-content: flex-end; }
 .cb15 .cb15-brk button { display: block; min-width: 150px; min-height: 32px; padding: 6px 30px 8px; border-left: 1px solid rgba(244, 238, 229, .28); border-radius: 0; color: rgba(244, 238, 229, .86); transition: background .15s; }
 .cb15 .cb15-brk button:first-child { border-left: 0; }
@@ -98,7 +101,7 @@
 .cb15 .cb15-h2 { display: flex; align-items: baseline; gap: 18px; margin: 72px 0 16px; }
 .cb15 .cb15-h2.cb15-first { margin-top: 34px; }
 .cb15 .cb15-h2.cb15-next { margin-top: 52px; }
-.cb15 .cb15-h2 h2 { margin: 0; font: 400 30px/1.1 var(--c15-type) !important; color: var(--c15-ink); }
+/* Consistency roll-out v1, Phase 7: the section heading */ .cb15 .cb15-h2 h2 { margin: 0; font: var(--sp-h-section) !important; color: var(--c15-ink); }
 .cb15 .cb15-h2 p { margin: 0; font: italic 400 16.5px/1.4 var(--c15-serif) !important; color: var(--c15-mut); }
 .cb15 .cb15-h2 .cb15-back { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px 0 10px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #d4cabd; font: 600 14.5px/1 var(--c15-serif) !important; align-self: center; white-space: nowrap; flex: none; }
 .cb15 .cb15-h2 .cb15-back svg { width: 16px; height: 16px; }

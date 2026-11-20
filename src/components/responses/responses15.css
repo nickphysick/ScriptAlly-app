@@ -113,7 +113,8 @@
 /* ═════ the page's sections, and one even gap between them (ref v15: `--sg: 72px`; the band 30px under the header) ═════ */
 .rsp15 .rsp15-body { display: flow-root; }
 .rsp15 .rsp15-body > * { margin-top: var(--r15-sg); }
-.rsp15 .rsp15-body > :first-child { margin-top: 30px; }
+/* Consistency roll-out v1, Phase 5 (ruling 2): 40 under the header on every workspace page (the ref said 30) */
+.rsp15 .rsp15-body > :first-child { margin-top: 40px; }
 .rsp15 [data-rsp5-sec] { scroll-margin-top: 20px; }
 .rsp15 .rsp15-mono {
   display: grid; place-items: center; flex: none; width: 38px; height: 38px; border-radius: 50%; background: var(--r15-navy); color: var(--r15-cream);
@@ -140,7 +141,7 @@
 }
 /* the section heading row (ref `.h2`) */
 .rsp15 .rsp15-h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 16px; }
-.rsp15 .rsp15-h2 .rsp15-h2t { margin: 0; font: 400 30px/1.1 var(--r15-type) !important; color: var(--r15-ink); }
+/* Consistency roll-out v1, Phase 7: the section heading */ .rsp15 .rsp15-h2 .rsp15-h2t { margin: 0; font: var(--sp-h-section) !important; color: var(--r15-ink); }
 .rsp15 .rsp15-h2 p { margin: 0; font: italic 400 16.5px/1.4 var(--r15-serif) !important; color: var(--r15-mut); }
 .rsp15 .rsp15-sp { flex: 1; }
 .rsp15 .rsp15-nav { display: flex; gap: 8px; align-self: center; }
@@ -239,7 +240,7 @@
 
 /* ═════ the Rejection collection (ref v12 `.rc`, `.rh`, `.rc2`, `.rcs`, `.rch`, `.rcm`, `.rcr`, `.rcf`) ═════ */
 .rsp15 .rsp15-rh { display: flex; flex-wrap: wrap; gap: 14px 36px; align-items: center; padding: 0 2px; }
-.rsp15 .rsp15-rh .rsp15-rht { margin: 0; font: 400 34px/1.05 var(--r15-type) !important; color: var(--r15-ink); }
+/* Consistency roll-out v1, Phase 7: the section heading */ .rsp15 .rsp15-rh .rsp15-rht { margin: 0; font: var(--sp-h-section) !important; color: var(--r15-ink); }
 .rsp15 .rsp15-rh > p { flex-basis: 100%; margin: 0; font: 400 16px/1.5 var(--r15-serif) !important; color: var(--r15-mut); }
 .rsp15 .rsp15-ct { display: flex; align-items: center; gap: 14px; padding-left: 36px; border-left: 1px solid #ddd3c6; }
 .rsp15 .rsp15-ct > b { font: 400 44px/1 var(--r15-type) !important; }
@@ -249,8 +250,9 @@
 .rsp15 .rsp15-ct small { display: block; font: 400 13.5px/1.3 var(--r15-serif) !important; opacity: 0.75; white-space: nowrap; }
 .rsp15 .rsp15-side { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 .rsp15 .rsp15-rbn {
-  all: unset; box-sizing: border-box; cursor: pointer; height: 40px; padding: 0 18px; border-radius: 12px; display: inline-flex; align-items: center;
-  font: 600 15px/1 var(--r15-serif) !important; white-space: nowrap; color: var(--r15-ink); box-shadow: inset 0 0 0 1px #d4cabd;
+  /* Consistency roll-out v1, Phase 9: the outline action button (primitives.css `.sp-btn`) */
+  all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; white-space: nowrap;
+  height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring);
 }
 .rsp15 .rsp15-rc2 { display: flex; align-items: center; gap: 12px; margin-top: 14px; padding: 0 2px; }
 .rsp15 .rsp15-rc2 > p { flex: 1; margin: 0; font: 400 16px/1.45 var(--r15-serif) !important; color: var(--r15-mut); }

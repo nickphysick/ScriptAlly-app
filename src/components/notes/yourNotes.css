@@ -33,6 +33,14 @@
 .yn .yn-hdw .qc1531-hd { padding-bottom: 18px; }
 /* Non-workspace v1, Phase 1: the title in the typewriter face, like the Query Centre's since 9 Nov (it was the book face). */
 .yn .yn-hdw h1.qc1531-t { font-family: var(--sp-type) !important; font-weight: 400 !important; }
+/* Consistency roll-out v1, Phase 6 (ruling 10): the title is Help's, Special Elite 400 46/1.05, and the header starts
+   44 below the sheet's top (28 before). The rule above lost to qcv1531's Playfair 600 54 on source order (both 0-3-1
+   and !important), so this one names two classes more. The art placeholder (230) sets the header's height, so the
+   smaller title changes no height; the title block, centred, sits 4.2 lower. */
+@media (min-width: 768px) {
+  .yn .yn-hdw.qc151 .qc1531-hd h1.qc1531-t { font: 400 46px/1.05 var(--sp-type) !important; letter-spacing: 0; }
+  .yn.d58 { padding-top: 44px; }
+}
 .yn .yn-art { display: grid; place-items: center; }
 .yn .yn-ph {
   width: 190px; height: 230px; border-radius: 22px; border: 2px dashed #cdbfb0; background: rgba(255, 255, 255, 0.45);

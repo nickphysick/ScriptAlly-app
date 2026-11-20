@@ -61,15 +61,21 @@
 
 /* ── sections ── */
 .a26-page .a26-sec { margin-top: 64px; }
+/* Consistency roll-out v1, Phase 5 (ruling 2): the first section sits 40 under the header. The header's margin (48)
+   and the first section's (64) collapse into the larger, so both are 40 here. */
+@media (min-width: 768px) {
+  .a26-page .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { margin-bottom: 40px; }
+  .a26-page .a26-flow > :first-child { margin-top: 40px; }
+}
 .a26-page .a26-sec-h { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 18px; }
-.a26-page .a26-sec-h h2 { font: 400 30px/1.15 var(--a26-type) !important; }
+/* Consistency roll-out v1, Phase 7: the section heading */ .a26-page .a26-sec-h h2 { font: var(--sp-h-section) !important; }
 .a26-page .a26-sec-h p { font-size: 16px; color: var(--a26-muted); }
 
 /* ── the card: white rim + hairline frame, a band across the top ── */
-.a26-page .a26-rc { padding: 8px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.04), 0 6px 18px rgba(28, 19, 15, 0.07); min-width: 0; }
-.a26-page .a26-rc-in { border: 1px solid var(--a26-hair); border-radius: 13px; overflow: hidden; background: #fff; height: 100%; }
+/* Consistency roll-out v1, Phase 8: the framed card (primitives.css `.sp-rc` › `.sp-rc-in`) */ .a26-page .a26-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
+.a26-page .a26-rc-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; height: 100%; }
 .a26-page .a26-rb { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 66px; padding: 14px 28px; }
-.a26-page .a26-rb h2 { min-width: 0; overflow-wrap: anywhere; font: 400 23px/1.2 var(--a26-type) !important; color: var(--a26-ink); }
+.a26-page .a26-rb h2 { min-width: 0; overflow-wrap: anywhere; /* Consistency roll-out v1, Phase 7: the section heading */ font: var(--sp-h-section) !important; color: var(--a26-ink); }
 .a26-page .a26-rb small { text-align: right; font: 400 15px/1.2 var(--a26-serif); color: var(--a26-muted); }
 .a26-page .a26-rb--sd { background: var(--a26-sand); }
 .a26-page .a26-rb--st { background: var(--a26-stone); }
@@ -163,11 +169,11 @@
 /* the three-up tiles (rounds, comparison) */
 .a26-page .a26-cmp { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
 .a26-page .a26-cm { display: flex; flex-direction: column; padding: 18px 14px 16px; border-radius: 14px; background: var(--a26-well); text-align: center; min-width: 0; }
-.a26-page .a26-cm h3 { font: 600 16px/1.3 var(--a26-serif) !important; min-height: 42px; }
+/* Consistency roll-out v1, Phase 7: the small heading */ .a26-page .a26-cm h3 { font: var(--sp-h-small) !important; min-height: 42px; }
 .a26-page .a26-cm-v { margin-top: 14px; font: 400 18px/1.2 var(--a26-type); }
 .a26-page .a26-cm-n { margin-top: 4px; font-size: 14px; color: var(--a26-muted); }
 .a26-page .a26-rd { text-align: left; padding: 18px; }
-.a26-page .a26-rd h3 { min-height: 0; font: 600 17px/1.3 var(--a26-serif) !important; }
+/* Consistency roll-out v1, Phase 7: the small heading */ .a26-page .a26-rd h3 { min-height: 0; font: var(--sp-h-small) !important; }
 .a26-page .a26-rd h3 span { display: block; font: 400 14px/1.3 var(--a26-serif); color: var(--a26-muted); }
 .a26-page .a26-rd-n { margin-top: 14px; font: 400 20px/1 var(--a26-type); }
 .a26-page .a26-rd-n b { font: 400 40px/1 var(--a26-type); }

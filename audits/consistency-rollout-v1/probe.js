@@ -62,13 +62,21 @@
   const cn = (e) => `${e.tagName.toLowerCase()}.${String(e.className.baseVal ?? e.className).split(" ").filter(Boolean).join(".")}`.slice(0, 90);
   const hd = [...document.querySelectorAll(".qc1531-hd, header.sc-ttl, header.hc-top, .yn-hdw")].filter(vis)[0];
   if (hd) {
+    /* v1-5: every scroller above the header back to its top first, so `top` is the header's distance from the sheet's
+       top and not wherever the crops left the page */
+    for (let e = hd.parentElement; e; e = e.parentElement) if (e.scrollTop) e.scrollTop = 0;
     const r = hd.getBoundingClientRect(), cs = getComputedStyle(hd);
     const t = hd.querySelector("h1") || null, tr = t && t.getBoundingClientRect();
     const sheet = hd.closest(".ws-window") || document.querySelector(".ws-window");
     const els = [...(hd.closest(".wpg-scroll, .ws-wbody, main") || document.body).querySelectorAll("*")].filter((e) => !hd.contains(e) && !e.contains(hd) && vis(e));
     const below = els.filter((e) => e.getBoundingClientRect().top >= r.bottom - 1 && e.getBoundingClientRect().height > 8).sort((x, y) => x.getBoundingClientRect().top - y.getBoundingClientRect().top)[0];
     const bcs = below && getComputedStyle(below);
-    out.__hdr = { hd: cn(hd), parent: cn(hd.parentElement), top: Math.round((r.top - (sheet ? sheet.getBoundingClientRect().top : 0)) * 10) / 10, bottom: Math.round(r.bottom * 10) / 10, pt: cs.paddingTop, mb: cs.marginBottom, mt: cs.marginTop, display: getComputedStyle(hd.parentElement).display,
+    /* rollout v1-5 (Phase 5): the first PAINTED element below the header — text, a fill, an edge, a shadow or an image —
+       not an empty wrapper, so the gap is the one the eye reads */
+    const paints = (e) => { const c = getComputedStyle(e); return (c.backgroundColor !== "rgba(0, 0, 0, 0)" && c.backgroundColor !== "transparent") || c.boxShadow !== "none" || parseFloat(c.borderTopWidth) > 0 || /^(IMG|SVG|CANVAS|svg)$/.test(e.tagName) || [...e.childNodes].some((n) => n.nodeType === 3 && n.nodeValue.trim()); };
+    const content = els.filter((e) => e.getBoundingClientRect().top >= r.bottom - 1 && paints(e)).sort((x, y) => x.getBoundingClientRect().top - y.getBoundingClientRect().top)[0];
+    out.__hdr = { hd: cn(hd), parent: cn(hd.parentElement), h: Math.round(r.height * 10) / 10,
+      content: content ? { cls: cn(content), text: (content.innerText || "").replace(/\s+/g, " ").trim().slice(0, 40), gap: Math.round((content.getBoundingClientRect().top - r.bottom) * 10) / 10, w: Math.round(content.getBoundingClientRect().width) } : null, top: Math.round((r.top - (sheet ? sheet.getBoundingClientRect().top : 0)) * 10) / 10, bottom: Math.round(r.bottom * 10) / 10, pt: cs.paddingTop, mb: cs.marginBottom, mt: cs.marginTop, display: getComputedStyle(hd.parentElement).display,
       title: t ? { cls: cn(t), top: Math.round((tr.top - r.top) * 10) / 10, font: getComputedStyle(t).font.slice(0, 80), mt: getComputedStyle(t).marginTop, prev: t.previousElementSibling ? cn(t.previousElementSibling) : null, parent: cn(t.parentElement) } : null,
       below: below ? { cls: cn(below), parent: cn(below.parentElement), gap: Math.round((below.getBoundingClientRect().top - r.bottom) * 10) / 10, mt: bcs.marginTop, pt: getComputedStyle(below.parentElement).paddingTop } : null };
   }

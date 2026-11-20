@@ -128,7 +128,61 @@
   --sp-frame: #7c3a2a;
   --sp-rust: #7a3f31; /* consistency fixes v1.1, ruling 6: the one rust for small warm accents (text and icons) */
   --sp-lift: 0 2px 8px rgba(28, 19, 15, 0.06);
+  /* Consistency roll-out v1, Phase 7 (ruling 6): three heading sizes for the page body of workspace pages and the
+     Dashboard. Each is a whole `font` shorthand, read as `font: var(--sp-h-…) !important` (brand.tsx forces h1–h3
+     into its serif with !important). Colour stays each page's own.
+       section — heads a section of the page, or a framed card's band (the ref's "Your shelf", "The pitch")
+       card    — heads one card, or a part inside a card ("Next up", "Where they are now")
+       small   — a small heading inside a card, under its heading ("First 5") */
+  --sp-h-section: 400 24px/1.2 var(--sp-type);
+  --sp-h-card: 400 20px/1.25 var(--sp-type);
+  --sp-h-small: 600 16px/1.3 var(--sp-serif);
+  /* Consistency roll-out v1, Phase 8 (ruling 5): the framed card — Comps' `cp32-rc` › `cp32-rc-in`, as built. A white
+     rim (radius 20, 8 of padding, one soft shadow) holding a hairline frame (radius 13). `.sp-rc` › `.sp-rc-in` below
+     draw it; each page's own framed-card rule reads these values, so the card keeps its page's breakpoints and the
+     modifiers written against it. Not a framed card: single-edge side panels (the Views rails), the query card and
+     its Next box, stat tiles, art placeholders, the founding band, anything in a slide-out panel. */
+  --sp-rc-pad: 8px;
+  --sp-rc-r: 20px;
+  --sp-rc-sh: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .07);
+  --sp-rc-in-r: 13px;
+  --sp-rc-edge: 1px solid #e9e3d9;
+  /* Consistency roll-out v1, Phase 9 (ruling 4): the main action button in the page body of workspace pages and the
+     Dashboard. 40 high, radius 10, 0 20 of padding, Source Serif 4 600 15. Filled: the navy ground, white words, one per
+     view. Outline: no ground, navy words, a 1.5px navy ring inside, the same box. `.sp-btn` + `--fill` / `--line` draw
+     it; each page's own button rule reads these values. Not: buttons in the navy header, selected toggles, tabs,
+     filter pills, list rows, icon-only buttons, destructive red buttons, Settings and public buttons. */
+  --sp-btn-h: 40px;
+  --sp-btn-r: 10px;
+  --sp-btn-pad: 0 20px;
+  --sp-btn-font: 600 15px/1 var(--sp-serif);
+  --sp-btn-ring: inset 0 0 0 1.5px var(--sp-anthracite);
+  --sp-btn-line-hov: rgba(42, 58, 82, .06);
+  /* Consistency roll-out v1, Phase 11 (ruling 8): the boxed text field on workspace pages and in slide-out panels.
+     44 high, radius 10, 0 14 of padding, white, Source Serif 4 16, a 1px edge inside; at focus a 1.5px navy edge.
+     A textarea takes the radius, edge, face and focus and keeps its own height; a headline field keeps its height and
+     size. `.sp-fld` draws it; each page's own field rule reads these values. Not: bare inputs inside a search bar or a
+     tag row, and Settings, onboarding and public fields. */
+  --sp-fld-h: 44px;
+  --sp-fld-r: 10px;
+  --sp-fld-pad: 0 14px;
+  --sp-fld-font: 400 16px var(--sp-serif);
+  --sp-fld-edge: inset 0 0 0 1px rgba(28, 19, 15, .18);
+  --sp-fld-focus: inset 0 0 0 1.5px var(--sp-anthracite);
 }
+.sp-fld { box-sizing: border-box; width: 100%; height: var(--sp-fld-h); padding: var(--sp-fld-pad); border: 0; border-radius: var(--sp-fld-r); background: #fff; box-shadow: var(--sp-fld-edge); font: var(--sp-fld-font); color: var(--sp-ink); outline: none; }
+.sp-fld:focus { box-shadow: var(--sp-fld-focus); }
+/* Consistency roll-out v1, Phase 12 (ruling 9): a slide-out panel's close button is a 36 × 36 circle; its fixed action
+   footer is 72 high with 14 24 of padding and a 1px hairline above. Builds, shells, headers and positions are the
+   panels' own. */
+:root { --sp-px-size: 36px; --sp-pfoot-h: 72px; --sp-pfoot-pad: 14px 24px; --sp-pfoot-rule: 1px solid rgba(28, 19, 15, .1); }
+.sp-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
+.sp-btn--fill { background: var(--sp-anthracite); color: #fff; }
+.sp-btn--fill:hover:not(:disabled) { background: var(--sp-anthracite-hov); }
+.sp-btn--line { background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); }
+.sp-btn--line:hover:not(:disabled) { background: var(--sp-btn-line-hov); }
+.sp-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
+.sp-rc-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; }
 
 /* ══ SEARCH — one component, two widths ══ */
 .sp-search {

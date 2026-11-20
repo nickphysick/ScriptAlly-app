@@ -13,5 +13,8 @@
   font: 400 22px/1 var(--sp-serif); color: #1c130f;
 }
 .flh .flh-x:hover { background: rgba(28, 19, 15, 0.06); }
+/* Consistency roll-out v1, Phase 12: on the Log a query and Add an agent panels the close is 36 (it was 30); the "×"
+   stays 22. The legacy query card (QcQueryCard149) keeps 30. */
+:is(.laq, .aaj) .flh .flh-x { width: var(--sp-px-size); height: var(--sp-px-size); }
 .flh .flh-x:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .flh p.flh-l { animation: none; } }

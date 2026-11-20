@@ -77,12 +77,14 @@
 .aap-hint { font: italic 400 13.5px/1.35 var(--sp-serif); color: #6c675f; }
 
 /* text fields */
+/* Consistency roll-out v1, Phase 11: the text field (primitives.css `.sp-fld`) */
 .aap-inp {
-  all: unset; box-sizing: border-box; width: 100%; height: 40px; padding: 0 12px; border-radius: 8px; background: #fff;
-  box-shadow: inset 0 0 0 1px #e6dfd5; font: 400 16px var(--sp-serif); color: #1c130f;
+  all: unset; box-sizing: border-box; width: 100%; height: var(--sp-fld-h); padding: var(--sp-fld-pad); border-radius: var(--sp-fld-r); background: #fff;
+  box-shadow: var(--sp-fld-edge); font: var(--sp-fld-font); color: #1c130f;
 }
-.aap-inp.big { height: 46px; font-size: 18px; background: #f5f1ea; box-shadow: inset 0 1px 2px rgba(28,19,15,.08); }
-.aap-inp:focus, .aap-inp.big:focus { background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }
+/* Phase 11: the big field was 46 high at 18 on a sand ground; it is the standard field now */
+.aap-inp.big { height: var(--sp-fld-h); }
+.aap-inp:focus, .aap-inp.big:focus { background: #fff; box-shadow: var(--sp-fld-focus); }
 .aap-inp[aria-invalid="true"] { box-shadow: inset 0 0 0 1.5px #a2452a; }
 .aap-inp::placeholder { font-style: italic; color: #9a948b; }
 .aap-ta { height: auto; min-height: 96px; padding: 10px 12px; resize: vertical; font: italic 400 16.5px/1.45 var(--sp-serif); white-space: pre-wrap; }

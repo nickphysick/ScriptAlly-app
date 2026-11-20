@@ -54,7 +54,8 @@
   /* v2.4 · the step from header to content (the ref's `.sp48 .head`): 48 under the header, larger than any gap inside
      the content (30), and the header casts the ref's soft card shadow. This page only: the Query Centre's and the
      Contact list's headers keep their 30 and their shadow. */
-  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd.qlp-hd { margin-bottom: 48px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }
+  /* Consistency roll-out v1, Phase 5 (ruling 2): 40 under the header, as on every workspace page (it was 48) */
+  .qlp .qc151.qc153 > .qc1531-hd.qlp-hd.qlp-hd { margin-bottom: 40px; box-shadow: 0 22px 36px -26px rgba(28, 19, 15, .55); }
 }
 
 .qlp-lnk { padding: 0; border: 0; background: none; color: var(--ql-navy) !important; font-size: 16px; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, .4); min-height: 32px; }
@@ -74,10 +75,14 @@
 
 /* buttons */
 .qlp-b1, .qlp-b2 { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; white-space: nowrap; font-family: var(--sp-type) !important; font-weight: 400; }
-.qlp-b1 { height: 46px; padding: 0 22px; border-radius: 12px; background: var(--ql-btn); color: var(--ql-cream) !important; font-size: 17px; }
+/* Consistency roll-out v1, Phase 9: the filled action button (primitives.css `.sp-btn`); it was 46 high, radius 12, the typewriter at 17 */
+.qlp-b1.qlp-b1 { height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: var(--ql-btn); color: #fff !important; }
 .qlp-b1:hover { background: #24324a; }
 .qlp-b1:disabled { opacity: .55; cursor: default; }
-.qlp-b1--sm { height: 40px; font-size: 15px; padding: 0 18px; }
+.qlp-b1--sm { height: 40px; font-size: 15px; padding: 0 18px; } /* Phase 9: `.qlp-b1.qlp-b1` above outranks this; the one size is the standard */
+/* Consistency roll-out v1, Phase 9: the outline action button (primitives.css `.sp-btn`) */ 
+.qlp-b2.qlp-b2 { height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); }
+.qlp-b2.qlp-b2:hover { background: var(--sp-btn-line-hov); box-shadow: var(--sp-btn-ring); }
 .qlp-b2 { height: 40px; padding: 0 16px; border-radius: 12px; background: #fff; color: var(--ql-ink); font-size: 15px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .14), 0 4px 10px -6px rgba(28, 19, 15, .3); }
 .qlp-b2:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, .3), 0 6px 12px -6px rgba(28, 19, 15, .3); }
 .qlp-b2 svg, .qlp-b1 svg { width: 16px; height: 16px; flex: none; }
@@ -217,15 +222,17 @@ textarea.qlp-paper--edit { resize: vertical; min-height: 520px; box-shadow: 0 0 
 .qlp-quill { display: block; width: 74px; margin-bottom: 16px; }
 .qlp-first-p { background: #fff; border-radius: 6px; box-shadow: 0 0 0 1px rgba(28, 19, 15, .1), 0 18px 34px -22px rgba(28, 19, 15, .45); padding: 24px 24px 20px; }
 .qlp .qlp-first-p textarea { display: block; width: 100%; min-height: 360px; border: 0; outline: none; resize: vertical; padding: 24px 32px;
-  font: 400 16px/1.65 var(--sp-serif) !important; color: var(--ql-ink); background: #fbf9f5; border-radius: 6px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .12); }
-.qlp .qlp-first-p textarea:focus { box-shadow: inset 0 0 0 2px var(--ql-navy); }
+  font: 400 16px/1.65 var(--sp-serif) !important; color: var(--ql-ink); background: #fbf9f5; border-radius: var(--sp-fld-r); box-shadow: var(--sp-fld-edge); }
+/* Phase 11: the letter's textarea takes the field's radius, edge and focus (6, .12 and 2px before); its height, its
+   paper ground and its writing line stay */
+.qlp .qlp-first-p textarea:focus { box-shadow: var(--sp-fld-focus); }
 .qlp-first-f { display: flex; align-items: center; gap: 16px; margin-top: 16px; flex-wrap: wrap; }
 .qlp-sp { flex: 1; }
 .qlp-fld { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
 .qlp .qlp-fld > span:first-child { font: 400 16px/1 var(--sp-type); }
 .qlp .qlp-fld input { height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .18);
   font: 400 16px/1 var(--sp-serif); color: var(--ql-ink); outline: none; }
-.qlp .qlp-fld input:focus { box-shadow: inset 0 0 0 2px var(--ql-navy); }
+/* Phase 11: the field's focus edge (primitives.css `.sp-fld`) */ .qlp .qlp-fld input:focus { box-shadow: var(--sp-fld-focus); }
 
 /* ── loading: blocks at the columns' final sizes ─────────────────────────────────────────────────────────────── */
 .qlp-sk { display: block; border-radius: 12px; background: #ebe5db; }

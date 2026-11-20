@@ -25,6 +25,8 @@
 @media (min-width: 768px) {
   /* the headline scales so it stays on one line beside the block (seven classes: above wsnh.css §2's five) */
   .cp32 .qc151.qc153.wsnh.cp32-hdr > .qc1531-hd.wsnh-hd.wsnh-hd h1.qc1531-t { font-size: clamp(44px, 3.6vw, 66px) !important; }
+  /* Consistency roll-out v1, Phase 5 (ruling 2): the band sits 40 under the header, not wsnh.css's 48 */
+  .cp32 .qc151.qc153.wsnh.cp32-hdr > .qc1531-hd.wsnh-hd.wsnh-hd { margin-bottom: 40px; }
   /* the ruled by-line wraps rather than cutting the book's name short (nothing on this page ends in an ellipsis) */
   .cp32 .qc151.qc153.wsnh.cp32-hdr > .qc1531-hd .qc1531-for span { text-overflow: clip; overflow: visible; white-space: normal; max-width: none; flex: 0 1 auto; }
   /* the collapsed bar's title and aside are short here; they clip rather than end in an ellipsis */
@@ -44,19 +46,19 @@
 }
 
 /* ══ the Dashboard's card: white rim 8, hairline frame, radius 20 / 13, a band across the top ═════════════════════ */
-.cp32 .cp32-rc { padding: 8px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .07); min-width: 0; }
-.cp32 .cp32-rc-in { border: 1px solid var(--c32-frame); border-radius: 13px; overflow: hidden; background: #fff; height: 100%; }
+/* Consistency roll-out v1, Phase 8: the framed card (primitives.css `.sp-rc` › `.sp-rc-in`) */ .cp32 .cp32-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
+.cp32 .cp32-rc-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; height: 100%; }
 .cp32 .cp32-rb { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 66px; padding: 14px 28px; }
-.cp32 .cp32-rb h2.cp32-rbt { min-width: 0; margin: 0; overflow-wrap: anywhere; font: 400 23px/1.2 var(--c32-type) !important; color: inherit !important; }
+.cp32 .cp32-rb h2.cp32-rbt { min-width: 0; margin: 0; /* Consistency roll-out v1, Phase 7: the section heading */ overflow-wrap: anywhere; font: var(--sp-h-section) !important; color: inherit !important; }
 .cp32 .cp32-rb small { text-align: right; font: 400 15px/1.2 var(--c32-serif); color: var(--c32-muted); }
 .cp32 .cp32-rb.is-navy { background: var(--c32-navy); color: #fffaf3; }
 .cp32 .cp32-rb.is-sand { background: #f2e6d8; color: var(--c32-ink); }
 .cp32 .cp32-go { padding: 0; border: 0; background: none; font: 600 15px/1.3 var(--c32-serif); color: var(--c32-ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; min-height: 28px; text-align: left; cursor: pointer; }
 .cp32 .cp32-go:hover { color: var(--c32-btn); }
-.cp32 .cp32-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 18px; border: 0; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #d9d1c5; font: 600 16px/1 var(--c32-serif); color: var(--c32-ink); white-space: nowrap; cursor: pointer; }
-.cp32 .cp32-btn:hover { box-shadow: inset 0 0 0 1px #a99f93; }
+.cp32 .cp32-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; /* Phase 9: the outline action button */ height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); border: 0; white-space: nowrap; cursor: pointer; }
+.cp32 .cp32-btn:hover { background: var(--sp-btn-line-hov); }
 .cp32 .cp32-btn svg { width: 16px; height: 16px; }
-.cp32 .cp32-btn.is-pri { background: var(--c32-btn); color: #fff; box-shadow: none; }
+/* Phase 9: the filled action button */ .cp32 .cp32-btn.is-pri { background: var(--sp-anthracite); color: #fff; box-shadow: none; }
 .cp32 .cp32-btn.is-pri:hover { background: #24324a; }
 .cp32 :focus-visible { outline: 2px solid var(--c32-navy); outline-offset: 2px; }
 
@@ -68,8 +70,8 @@
 .cp32 .cp32-band b { font: 400 20px/1.2 var(--c32-type); }
 .cp32 .cp32-band i { width: 1px; height: 26px; background: rgba(28, 19, 15, .22); }
 .cp32 .cp32-band p { flex: 1; min-width: 240px; margin: 0; font: 400 16px/1.5 var(--c32-serif); color: #4a2f29; }
-.cp32 .cp32-pill { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 18px; border: 0; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .1); font: 600 15.5px/1 var(--c32-serif); color: var(--c32-ink); white-space: nowrap; cursor: pointer; }
-.cp32 .cp32-pill:hover { box-shadow: 0 2px 6px rgba(28, 19, 15, .18); }
+/* Phase 9: the outline action button (it was a white 38-high pill) */ .cp32 .cp32-pill { display: inline-flex; align-items: center; gap: 8px; border: 0; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); white-space: nowrap; cursor: pointer; }
+.cp32 .cp32-pill:hover { background: var(--sp-btn-line-hov); }
 
 /* ══ C · your shelf and the open comp ═════════════════════════════════════════════════════════════════════════════ */
 /* 48 under the header (its own margin); 40 under the band */
@@ -102,9 +104,12 @@
 
 /* the open comp: sticky under the collapsed bar (60) while the shelf scrolls */
 .cp32 .cp32-work { position: sticky; top: 76px; }
-.cp32 .cp32-tog { display: flex; flex: none; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, .12); }
-.cp32 .cp32-tog button { height: 34px; padding: 0 18px; border: 0; border-radius: 999px; background: none; font: 600 15px/1 var(--c32-serif); color: rgba(255, 250, 243, .78); cursor: pointer; }
-.cp32 .cp32-tog button[aria-pressed="true"] { background: #fffaf3; color: var(--c32-ink); }
+/* Consistency roll-out v1, Phase 10 (ruling 7): the boxed view switch (the Query Centre's List / Birds-eye shape: a box
+   radius 12, buttons 34 high, radius 9, 0 12, Source Serif 14.5, 400 at rest and 600 picked). It was pills. Its
+   colours stay the ones drawn for the navy band. */
+.cp32 .cp32-tog { display: flex; flex: none; padding: 3px; border-radius: 12px; background: rgba(255, 255, 255, .12); }
+.cp32 .cp32-tog button { height: 34px; padding: 0 12px; border: 0; border-radius: 9px; background: none; font: 400 14.5px/1 var(--c32-serif); color: rgba(255, 250, 243, .78); cursor: pointer; }
+.cp32 .cp32-tog button[aria-pressed="true"] { background: #fffaf3; color: var(--c32-ink); font-weight: 600; }
 .cp32 .cp32-tog button:focus-visible { outline-color: #e8bdb4; }
 .cp32 .cp32-wk { padding: 28px 32px 36px; }
 .cp32 .cp32-wktop { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
@@ -116,7 +121,7 @@
 .cp32 .cp32-wait p { margin: 0; }
 .cp32 .cp32-wait .cp32-btn { margin-top: 12px; }
 .cp32 .cp32-two2 { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr); gap: 56px; margin-top: 32px; align-items: start; }
-.cp32 h3.cp32-h3 { margin: 0 0 16px; font: 400 19px/1.25 var(--c32-type) !important; color: var(--c32-ink); }
+/* Consistency roll-out v1, Phase 7: the card heading */ .cp32 h3.cp32-h3 { margin: 0 0 16px; font: var(--sp-h-card) !important; color: var(--c32-ink); }
 .cp32 .cp32-why p { margin: 0; font: 400 17px/1.5 var(--c32-serif); }
 .cp32 .cp32-why .cp32-gap { color: var(--c32-muted); }
 .cp32 .cp32-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
@@ -189,7 +194,7 @@
 .cp32 .cp32-cpd { position: relative; display: flex; align-items: center; gap: 20px; padding: 26px 210px 26px 28px; background: #eae7e2; }
 .cp32 .cp32-cpd-ic { flex: none; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; background: var(--c32-navy); color: #fffaf3; box-shadow: 0 0 0 5px rgba(255, 255, 255, .7); }
 .cp32 .cp32-cpd-ic svg { width: 28px; height: 28px; }
-.cp32 .cp32-cpd h2.cp32-cpdh { margin: 0; font: 400 34px/1.15 var(--c32-type) !important; color: var(--c32-ink) !important; }
+/* Consistency roll-out v1, Phase 7: the section heading */ .cp32 .cp32-cpd h2.cp32-cpdh { margin: 0; font: var(--sp-h-section) !important; color: var(--c32-ink) !important; }
 .cp32 .cp32-cpd p { margin: 6px 0 0; font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
 .cp32 .cp32-ribbon { position: absolute; top: 0; right: 150px; width: 28px; height: calc(100% + 14px); background: linear-gradient(90deg, #7d3f4e, #96505f 45%, #874655); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 11px), 0 100%); z-index: 1; }
 .cp32 .cp32-tbl table { width: 100%; border-collapse: collapse; }
@@ -214,7 +219,7 @@
 .cp32 .cp32-scout { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; padding: 22px 32px 22px 28px; border-top: 1px solid var(--c32-frame); background: radial-gradient(120% 160% at 0 0, #fbefe9 0%, #f4e0d7 100%); }
 .cp32 .cp32-perch { flex: none; width: 118px; height: auto; margin: -6px 0 -10px; filter: drop-shadow(0 6px 8px rgba(28, 19, 15, .18)); }
 .cp32 .cp32-scout > div { flex: 1; min-width: 260px; }
-.cp32 .cp32-scout h3.cp32-scth { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0; font: 400 23px/1.2 var(--c32-type) !important; color: var(--c32-ink) !important; }
+.cp32 .cp32-scout h3.cp32-scth { display: flex; align-items: center; gap: 12px; /* Consistency roll-out v1, Phase 7: the card heading */ flex-wrap: wrap; margin: 0; font: var(--sp-h-card) !important; color: var(--c32-ink) !important; }
 .cp32 .cp32-scout h3 span { display: inline-flex; align-items: center; height: 26px; padding: 0 12px; border-radius: 13px; background: #fff; color: var(--c32-rose); font: 600 13px/1 var(--c32-serif); }
 .cp32 .cp32-scout p { margin: 6px 0 0; max-width: 680px; font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
 
