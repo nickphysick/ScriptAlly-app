@@ -39,7 +39,7 @@ import { F1Feed } from "../f1/F1Feed";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { foundingFoldWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { foundingFoldWrite, gsCloseWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
@@ -62,6 +62,7 @@ import { wholeWeeksQuerying } from "../../../lib/dash2";
 import { expectedBack, howItsGoing, stageMarks, withoutContradictions } from "../../../lib/dash3";
 import { Dash3Expected } from "../v3/Dash3Expected";
 import { Dash3GsRow } from "../v3/Dash3GsRow";
+import { FinishLine } from "../fv2/FinishLine";
 import { Dash3Reminder } from "../v3/Dash3Reminder";
 import { Dash2Next } from "../v2/Dash2Next";
 import { Dash2Active } from "../v2/Dash2Active";
@@ -511,6 +512,23 @@ export const Dash58: React.FC<Dash58Props> = ({
      All done is gone: v2's finish line is not drawn on this page. */
   const gsLeft = gsRows.filter((r) => !r.done).length;
   const gsPlace: "lead" | "under-next" | "row" | "none" = pre ? "lead" : !gsSheetOpen || gsLeft === 0 ? "none" : gsLeft === 1 ? "row" : "under-next";
+  /* Dashboard v3 quick lane — THE FINISH LINE, ONCE. When the last step is done, v2's "That's you set up" shows in the slot
+     Getting started last held, until it is dismissed or the next visit. Seeing it stores the close (`gsCloseWrite`), so the
+     next load never draws it; this mount holds it (`finishFor`) until the writer closes it. */
+  const gsSlotRef = useRef<"under-next" | "row">("row");
+  if (gsPlace === "under-next" || gsPlace === "row") gsSlotRef.current = gsPlace;
+  const [finishFor, setFinishFor] = useState<string | null>(null);
+  const [finishGone, setFinishGone] = useState<string | null>(null);
+  const finishNow = !pre && !!scopeId && finishGone !== scopeId && (finishFor === scopeId || (!loading && gsWhat === "finish"));
+  useEffect(() => {
+    if (loading || pre || !scopeId || gsWhat !== "finish" || finishFor === scopeId) return;
+    setFinishFor(scopeId);
+    if (example || !onPrefs || rootRef.current?.closest(".im-ghost")) return;
+    void onPrefs(gsCloseWrite(scopeId));
+    logEvent(currentUser?.id, "getting_started_done", path ?? "ready");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loading, pre, scopeId, gsWhat]);
+  const finishNode = finishNow ? <FinishLine path={path} onClose={() => setFinishGone(scopeId)} /> : null;
   const hasAgents = loading ? shape.agents : agents.length > 0;
   /* first visit v2 (Part A): which first-visit state the page is in; while loading, the shape memory's */
   /* ── first visit v2 (Part F): a Smart Import review left halfway, for this book (or for a book set-up has not made yet) ── */
@@ -670,6 +688,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                   not drawn; two or more steps left, the full card under Next up; one step left, one row under Agents on file;
                   all done or hidden, gone */}
               {!pre && <Dash2Next loading={loading} plan={nextPlan} ctx={taskCtx} onView={viewTask} onSeeAll={() => onNavigate(plan.all.tab, plan.all.sub)} />}
+              {finishNode && gsSlotRef.current === "under-next" && <div className="d2-gs" data-d2="gs-slot">{finishNode}</div>}
               {(gsPlace === "lead" || gsPlace === "under-next") && (
                 <div className="d2-gs" data-d2="gs-slot">
                   <GsSheet loading={loading} rows={gsRows} path={path} onGo={goGs} onHide={gsHide} />
@@ -677,6 +696,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               )}
               {agentsCard}
               {gsPlace === "row" && <Dash3GsRow rows={gsRows} path={path} onGo={goGs} onHide={gsHide} />}
+              {finishNode && gsSlotRef.current === "row" && <div className="d2-gs" data-d2="gs-slot">{finishNode}</div>}
             </div>
             <div className="d2-col d2-mid" data-d2="mid">
               {pre ? (

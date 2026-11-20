@@ -49,13 +49,17 @@ describe("FV2-H · on the page", () => {
         currentUser={{ id: "u1", name: "Audit S1", todoPrefs, notifyPrefs: { nudges: true } } as unknown as User} activeManuscript={ms} onNavigate={() => {}} onPrefs={() => {}} now={new Date(2026, 9, 29, 12)} />
     </MemoryRouter>,
   );
-  /* RE-POINTED (Dashboard v3, Phase 5): all done, Getting started is gone from the Dashboard — no finish line */
-  it("all five done: Getting started is gone, and no Then: naming Getting started", () => {
+  /* RE-POINTED (Dashboard v3 quick lane): all done, v2's finish line shows once in Getting started's slot — the list is gone */
+  it("all five done: the finish line in Getting started's slot, and no Then: naming Getting started", () => {
     const html = page();
-    expect(html).not.toContain('data-fv2="finish"');
+    expect(html).toContain('data-fv2="finish"');
+    expect(html).toContain(">That&#x27;s you set up<");
     expect(html).not.toContain('data-fv2="gs"');
-    expect(html).toContain('data-gs="none"');
+    expect(html.indexOf('data-d60="agents-hoop"')).toBeLessThan(html.indexOf('data-fv2="finish"'));
     expect(html).not.toContain("Then: finish getting started");
+  });
+  it("the next visit (the close stored when it was seen): no finish line", () => {
+    expect(page({ dash: { gsClosed: { "ms-1": true } } })).not.toContain('data-fv2="finish"');
   });
   /* RE-POINTED (Dashboard v3, Phase 5): one step left folds to the single row, under Agents on file */
   it("one undone: the one-row fold, under Agents on file", () => {
