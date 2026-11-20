@@ -14,8 +14,10 @@ import { TAB_ACCENT_157, tabAccent157 } from "./qc1533";
 const css = (f: string) => readFileSync(`src/components/queries/centre/${f}`, "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
 
 describe("v157 · the stage table (Stage colours v1: offer rose, and an edge)", () => {
+  /* v163 added rim and rimHi (locked in their own block below): these locks read the four uses they were written for */
+  const four = ({ band, tint, edge, mark }: { band: string; tint: string; edge: string; mark: string }) => ({ band, tint, edge, mark });
   it("is the pack's table, hex for hex", () => {
-    expect(STAGE_COLOURS).toEqual({
+    expect(Object.fromEntries(Object.entries(STAGE_COLOURS).map(([k, c]) => [k, four(c)]))).toEqual({
       queried: { band: "#efe6d6", tint: "#f8f4ed", edge: "#e0d2bb", mark: "#dccdb3" },
       partial: { band: "#e4ebf2", tint: "#f3f6f9", edge: "#cbd7e4", mark: "#a9bdd2" },
       full: { band: "#b7c9de", tint: "#dfe7f0", edge: "#9db4cf", mark: "#7391b3" },
@@ -24,7 +26,7 @@ describe("v157 · the stage table (Stage colours v1: offer rose, and an edge)", 
     });
   });
   it("SC1-2 (source) the offer is rose under the one sheen; no other stage has it; quiet fades a band to white", () => {
-    expect(STAGE_COLOURS.offer).toEqual({ band: "#efcdc9", tint: "#f8e8e5", edge: "#dfb1ac", mark: "#cf9a96" });
+    expect(four(STAGE_COLOURS.offer)).toEqual({ band: "#efcdc9", tint: "#f8e8e5", edge: "#dfb1ac", mark: "#cf9a96" });
     expect(OFFER_SHEEN).toBe(`${OFFER_SHEEN_LAYER}, #efcdc9`);
     expect(OFFER_SHEEN_LAYER).toBe("linear-gradient(112deg, rgba(255,255,255,0) 22%, rgba(255,255,255,.55) 40%, rgba(255,255,255,.12) 52%, rgba(255,255,255,0) 66%) 30% 0 / 260% 100% no-repeat");
     expect(bandBackground("offer")).toBe(OFFER_SHEEN);
@@ -191,5 +193,31 @@ describe("Stage colours v1 · Phase 3 · the rest of the Query Centre reads the 
     expect(all).not.toMatch(/data-sk="(sand|rose|blue|heather|pink|navy|sage)"/);
     const sheen = all.match(/\.qc150-bar--cur\[data-sk="[a-z]+"\]\s*\{[^}]*112deg/g) ?? [];
     expect(sheen.map((r) => r.match(/data-sk="([a-z]+)"/)![1])).toEqual(["offer"]);
+  });
+});
+
+/* Query card v163 — the rim's colours: the slide-in card's border breathes in `rim` and its landing light runs in
+   `rim` → `rimHi` (qcMotion160). Deeper than `band`, so they read on the white rim. Used by that rim only. */
+describe("Query card v163 — rim and rimHi, one pair per stage", () => {
+  const RIM: Record<string, { rim: string; rimHi: string }> = {
+    queried: { rim: "#bfa87e", rimHi: "#f3ead9" },
+    partial: { rim: "#6f8fb3", rimHi: "#d6e1ee" },
+    full: { rim: "#557aa3", rimHi: "#c5d4e6" },
+    offer: { rim: "#c98f8a", rimHi: "#f6dedb" },
+    closed: { rim: "#9a9389", rimHi: "#e6e3de" },
+  };
+  it("all five stages carry both keys, as literal lower-case hex, equal to the pack's table", () => {
+    expect(Object.keys(STAGE_COLOURS).sort()).toEqual(Object.keys(RIM).sort());
+    for (const [stage, c] of Object.entries(STAGE_COLOURS)) {
+      expect([stage, c.rim, c.rimHi]).toEqual([stage, RIM[stage].rim, RIM[stage].rimHi]);
+      expect(c.rim).toMatch(/^#[0-9a-f]{6}$/);
+      expect(c.rimHi).toMatch(/^#[0-9a-f]{6}$/);
+    }
+  });
+  it("the source writes them as literals in the table, not computed", () => {
+    const src = readFileSync("src/lib/stageColours.ts", "utf8");
+    for (const [stage, c] of Object.entries(RIM)) {
+      expect(src).toMatch(new RegExp(`\\b${stage}: \\{[^}]*rim: "${c.rim}", rimHi: "${c.rimHi}" \\}`));
+    }
   });
 });
