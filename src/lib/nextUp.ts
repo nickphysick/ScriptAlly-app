@@ -17,7 +17,8 @@
  * ⚠️ NO VERDICT WORDS (overdue, late) and no green: a number and what it counts, nothing more.
  */
 import { QueryStatus, type Agent, type Query } from "../types";
-import type { ListItem } from "./dashList";
+import type { ListAction, ListItem } from "./dashList";
+import type { DrawerMode, DrawerPreset } from "./queryActions/drawerStore";
 import type { TaskCtx } from "./dashTaskCard";
 import type { QcRow } from "./qcSummary";
 import { anyToMs } from "./qcStages";
@@ -308,4 +309,47 @@ export function nextRow(item: ListItem, ctx: TaskCtx): NextRow {
   /* a count of queries is not a wait: the tell row shows none */
   const wait = l.kind !== "tell" && l.figure?.wait ? l.figure.wait : null;
   return { initials, text, wait };
+}
+
+/* ── the buttons (Phase 3) ────────────────────────────────────────────────────────────────────── */
+
+export interface NextButton {
+  label: string;
+  /** what it opens: a query's step (the slide-out at that step, filled in and waiting), or what the task opens today */
+  action: ListAction;
+  /** one filled button on the card; gone quiet's second is the outline */
+  filled: boolean;
+}
+
+/** The offer journey's steps, in its own order (OfferJourney.tsx: The offer, The others, The call, Your decision). */
+export const OFFER_STEP = { others: 1, decision: 3 } as const;
+
+/**
+ * The sentence is what the writer does in the real world; the button is what they then do in QueryHawk. Each opens a
+ * step of the task's own journey and nothing else: the request is the task's own door (`drawerDoorForTask`, carried as
+ * `item.action`), with at most the step to open at named. Nothing is saved from the Dashboard.
+ */
+export function nextButtons(item: ListItem, kind: NextKind): NextButton[] {
+  const a = item.action;
+  const door = a.kind === "drawer" ? a.request : null;
+  const qid = door?.queryId ?? null;
+  const at = (mode: DrawerMode, preset?: DrawerPreset): ListAction =>
+    ({ kind: "drawer", request: { mode, ...(qid ? { queryId: qid } : {}), ...(preset ? { preset } : {}) } });
+  switch (kind) {
+    case "partial":
+    case "full":
+    case "revision": return [{ label: "Log it as sent", action: a, filled: true }];
+    case "nudge": return [{ label: "Log the nudge", action: a, filled: true }];
+    case "quiet": return qid
+      ? [{ label: "Close it", action: at("close", { closeWhy: "noreply" }), filled: true }, { label: "Log a nudge", action: at("nudge", { nudgeTab: "sent" }), filled: false }]
+      : [{ label: "Open", action: a, filled: true }];
+    case "offer": return [{ label: "Record your answer", action: qid ? at("offer", { step: OFFER_STEP.decision }) : a, filled: true }];
+    /* the task's own door: the offering query's journey at "The others" — who is still reading, to tick off as told */
+    case "tell": return [{ label: "See who to tell", action: a, filled: true }];
+    case "other": return [{ label: item.actLabel || "Open", action: a, filled: true }];
+    default: {
+      const unhandled: never = kind;
+      return unhandled;
+    }
+  }
 }

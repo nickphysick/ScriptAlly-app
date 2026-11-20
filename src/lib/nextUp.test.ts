@@ -187,3 +187,57 @@ describe("NU1-d · the rows beneath", () => {
     expect(hk).toEqual({ initials: "GE", text: "Add genres for 4 agents", wait: null });
   });
 });
+
+import { nextButtons, OFFER_STEP } from "./nextUp";
+
+describe("NU1-e · the buttons open the task's own step", () => {
+  const door = (mode: string, extra: object = {}) => ({ kind: "drawer", request: { mode, queryId: "q1", ...extra } }) as ListItem["action"];
+  it("send partial, full or revision: Log it as sent, the task's sent door", () => {
+    for (const k of ["partial", "full", "revision"] as const) {
+      const a = door("sent");
+      expect(nextButtons(item({ action: a }), k)).toEqual([{ label: "Log it as sent", action: a, filled: true }]);
+    }
+  });
+  it("nudge due: Log the nudge, the task's nudge door", () => {
+    const a = door("nudge", { preset: { nudgeTab: "sent" } });
+    expect(nextButtons(item({ action: a }), "nudge")).toEqual([{ label: "Log the nudge", action: a, filled: true }]);
+  });
+  it("gone quiet: Close it filled, Log a nudge the outline", () => {
+    const b = nextButtons(item({ action: door("close", { preset: { closeWhy: "noreply" } }) }), "quiet");
+    expect(b.map((x) => [x.label, x.filled])).toEqual([["Close it", true], ["Log a nudge", false]]);
+    expect(b[0].action).toEqual({ kind: "drawer", request: { mode: "close", queryId: "q1", preset: { closeWhy: "noreply" } } });
+    expect(b[1].action).toEqual({ kind: "drawer", request: { mode: "nudge", queryId: "q1", preset: { nudgeTab: "sent" } } });
+  });
+  it("answer the offer: Record your answer, the offer journey at Your decision", () => {
+    const b = nextButtons(item({ action: door("offer", { preset: { step: 1 } }) }), "offer");
+    expect(b).toEqual([{ label: "Record your answer", action: { kind: "drawer", request: { mode: "offer", queryId: "q1", preset: { step: OFFER_STEP.decision } } }, filled: true }]);
+  });
+  it("tell the other agents: See who to tell, the task's own door (the offer journey at The others)", () => {
+    const a = door("offer", { preset: { step: OFFER_STEP.others } });
+    expect(nextButtons(item({ action: a }), "tell")).toEqual([{ label: "See who to tell", action: a, filled: true }]);
+  });
+  it("not about a query: the task's own action, else Open", () => {
+    const a = { kind: "agent", agentId: "a1", tab: "overview", focus: "reply", sequence: ["a1"] } as unknown as ListItem["action"];
+    expect(nextButtons(item({ action: a, actLabel: "Fill in" }), "other")).toEqual([{ label: "Fill in", action: a, filled: true }]);
+    expect(nextButtons(item({ action: a, actLabel: "" }), "other")[0].label).toBe("Open");
+  });
+  it("one filled button on every card", () => {
+    for (const k of ["partial", "full", "revision", "nudge", "quiet", "offer", "tell", "other"] as const) {
+      expect(nextButtons(item({ action: door("sent") }), k).filter((b) => b.filled)).toHaveLength(1);
+    }
+  });
+});
+
+import { readFileSync } from "node:fs";
+describe("NU1-f · the opener takes one optional step, and the journey is untouched", () => {
+  const store = readFileSync(new URL("./queryPanelStore.ts", import.meta.url), "utf8");
+  const dash = readFileSync(new URL("../components/dashboard/v58/Dash58.tsx", import.meta.url), "utf8");
+  it("openQueryPanel(id, from, step?) steps the task's own request into the panel's slot", () => {
+    expect(store).toMatch(/export function openQueryPanel\(id: string, from: PanelOrigin = "other", step\?: OpenRequest\): void/);
+    expect(store).toMatch(/openQueryDrawer\(\{ \.\.\.req, queryId: id \}\)/);
+  });
+  it("the Dashboard's lead buttons go through it with the panel named; the rows keep viewTask", () => {
+    expect(dash).toMatch(/onView=\{viewTask\} onStep=\{stepTask\}/);
+    expect(dash).toMatch(/openQueryPanel\(qid, "dashboard", \{ \.\.\.a\.request, panel: \{/);
+  });
+});

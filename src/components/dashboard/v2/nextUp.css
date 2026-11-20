@@ -70,3 +70,6 @@
 .d58.d2 .nu-row:not(:has(.nu-wait)) .nu-rtx { margin-right: 34px; }
 .d58.d2 .nu-wait { min-width: 28px; text-align: right; }
 @media (prefers-reduced-motion: reduce) { .d58.d2 .nu-wait, .d58.d2 .nu-go { transition: none; } }
+
+/* ── Phase 3 · the buttons: one filled (`.d2-open`, the filled primitive), gone quiet's second the outline primitive ── */
+.d58.d2 .nu-acts .nu-out { flex: none; }

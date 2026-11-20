@@ -356,6 +356,17 @@ export const Dash58: React.FC<Dash58Props> = ({
     if (qid) openQueryPanel(qid, "dashboard");
     else run(a);
   };
+  /* Next up v1, Phase 3 — a lead button opens the slide-out AT the task's step, filled in and waiting: the query's panel,
+     with the task's own journey stepped into it (as the Query Centre's tray buttons do). The writer confirms there.
+     A response is the card's composer (`run`); a task about no query opens what it opens today. */
+  const stepTask = (a: ListAction) => {
+    const qid = a.kind === "drawer" && a.request.mode !== "log" && a.request.mode !== "resp" ? a.request.queryId : undefined;
+    if (!qid || a.kind !== "drawer") { run(a); return; }
+    const q = queries.find((x) => x.id === qid);
+    const ag = q ? agents.find((x) => x.id === q.agentId) : undefined;
+    const name = (ag?.name || ag?.agency || "The agent").trim();
+    openQueryPanel(qid, "dashboard", { ...a.request, panel: { name, agency: (ag?.name ? ag?.agency ?? "" : "").trim(), first: (ag?.name || "").trim().split(/\s+/)[0] ?? "" } });
+  };
 
   /* ── the founding writer card (v105): a press ID — the writer's name and founding number, feedback composed in the
      card, the rank read live from their own `foundingStats` doc. The sidebar's Give feedback (FeedbackDock) is unchanged. */
@@ -669,7 +680,7 @@ export const Dash58: React.FC<Dash58Props> = ({
               {/* Dashboard v3, Phase 5: Getting started by stage — before the first query the full card leads and Next up is
                   not drawn; two or more steps left, the full card under Next up; one step left, one row under Agents on file;
                   all done or hidden, gone */}
-              {!pre && <Dash2Next loading={loading} plan={nextPlan} ctx={taskCtx} onView={viewTask} onSeeAll={() => onNavigate(plan.all.tab, plan.all.sub)} />}
+              {!pre && <Dash2Next loading={loading} plan={nextPlan} ctx={taskCtx} onView={viewTask} onStep={stepTask} onSeeAll={() => onNavigate(plan.all.tab, plan.all.sub)} />}
               {(gsPlace === "lead" || gsPlace === "under-next") && (
                 <div className="d2-gs" data-d2="gs-slot">
                   <GsSheet loading={loading} rows={gsRows} path={path} onGo={goGs} onHide={gsHide} />

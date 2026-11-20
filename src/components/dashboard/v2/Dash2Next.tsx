@@ -10,7 +10,8 @@
  *
  * ⚠️ THE PLAN IS THE APP'S: the items and their order are `dashList`'s (via Dashboard v3's `withoutContradictions`);
  *    the words and numbers are `lib/nextUp`'s, read from the Query Centre's own rows. ⚠️ THE DASHBOARD NEVER COMPLETES
- *    A TASK: every control here calls `onView`, which opens where the task is done.
+ *    A TASK: a row calls `onView` (what the task opens today); a lead button calls `onStep`, which opens the slide-out
+ *    at that step of the task's own journey, filled in and waiting. The writer confirms there; nothing saves here.
  * ⚠️ STATUS IS DRAWN BY THE REAL StatusDot, the seal is the real AgentDisc; nothing here redraws a mark.
  */
 import React, { useMemo } from "react";
@@ -21,10 +22,9 @@ import { StatusDot } from "../../StatusDot";
 import { AgentDisc } from "../../shared/AgentDisc";
 import { Frame } from "./Frame";
 import { STAGE_COLOURS, bandBackground, quietBackground } from "../../../lib/stageColours";
-import { nextLead, nextRow, type NextLead, type Track } from "../../../lib/nextUp";
+import { nextButtons, nextLead, nextRow, type NextLead, type Track } from "../../../lib/nextUp";
 import "./nextUp.css";
 
-export const OPEN_TASK = "Open task";
 export const SEE_ALL = "See all";
 /** how many tasks the card shows: the top one and the next two */
 export const NEXT_SHOWN = 3;
@@ -83,9 +83,12 @@ export const Dash2Next: React.FC<{
   loading: boolean;
   plan: ListPlan;
   ctx: TaskCtx;
+  /** a row: opens what the task opens today */
   onView: (a: ListAction) => void;
+  /** a lead button: opens the slide-out at the task's step, filled in and waiting (rows' `onView` where omitted) */
+  onStep?: (a: ListAction) => void;
   onSeeAll: () => void;
-}> = ({ loading, plan, ctx, onView, onSeeAll }) => {
+}> = ({ loading, plan, ctx, onView, onStep = onView, onSeeAll }) => {
   const items = plan.items;
   const n = items.length;
   const top = items[0] ?? null;
@@ -110,7 +113,10 @@ export const Dash2Next: React.FC<{
             <div className="d2-nup nu-lead" data-d2="next-top" data-key={top.key} data-kind={lead.kind}
               style={stage ? { background: STAGE_COLOURS[stage].tint } : undefined}>
               <Lead lead={lead}>
-                <button type="button" className="d2-open" data-d2="open-task" onClick={() => onView(top.action)}>{OPEN_TASK}</button>
+                {nextButtons(top, lead.kind).map((b) => (
+                  <button key={b.label} type="button" className={b.filled ? "d2-open" : "sp-btn sp-btn--line nu-out"}
+                    data-d2={b.filled ? "open-task" : "open-task-alt"} onClick={() => onStep(b.action)}>{b.label}</button>
+                ))}
               </Lead>
             </div>
             {rest.length > 0 && (
