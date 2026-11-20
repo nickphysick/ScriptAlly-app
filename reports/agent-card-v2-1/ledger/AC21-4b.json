@@ -1,0 +1,110 @@
+[
+ {
+  "lock": "AC21-4b",
+  "where": "holding the tick: the frame at PRESS.to (0.985) ±0.003",
+  "ok": true,
+  "detail": "0.985"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "the tick saved and closed the wishlist",
+  "ok": true,
+  "detail": "{\"wish\":false,\"err\":\"\",\"toast\":\"Saved the wishlist for EdaUNDO✕\"}"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "the pop peaks at BUMP.peak (1.03) ±0.005",
+  "ok": true,
+  "detail": "1.02946"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "…from where the press left it (held at the press until the rise, and the first frame of the rise still under 1)",
+  "ok": true,
+  "detail": "25 frames before the rise; first rising frame 0.9943"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "…and returns to 1",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "two sections open, one ticked: it pops once",
+  "ok": true,
+  "detail": "1 rises"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "the light runs exactly once round the agent card's border",
+  "ok": true,
+  "detail": "[{\"t0\":668.8000001907349,\"end\":2002.9000000953674,\"turn\":\"-40deg → 320deg\",\"mirror\":\"1\"}]"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "…clockwise",
+  "ok": true,
+  "detail": "{\"t0\":668.8000001907349,\"end\":2002.9000000953674,\"turn\":\"-40deg → 320deg\",\"mirror\":\"1\"}"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "…and is gone within its own 1300ms + 200",
+  "ok": true,
+  "detail": "1334ms"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "the rim's breath is back within 2.5s of the light finishing",
+  "ok": true,
+  "detail": "0ms after the trace"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "Undo of a saved section: the light runs once, the other way",
+  "ok": true,
+  "detail": "[{\"t0\":402.7999999523163,\"end\":1718.8999998569489,\"turn\":\"40deg → -320deg\",\"mirror\":\"-1 1\"}]"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "…and the card sinks back (never above 1)",
+  "ok": true,
+  "detail": "0.9767 … 1.0000"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "…and the agent is exactly as it was before the save",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "Undo of a discard: no light",
+  "ok": true,
+  "detail": "[]"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "dragging off the tick: eases back, no pop, no light",
+  "ok": true,
+  "detail": "max 1.0000, lights 0"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "a tick with nothing changed: no pop, no light, the tint at 0",
+  "ok": true,
+  "detail": "max 1.0000 · lights 0 · tint 0"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "a star pops with no light",
+  "ok": true,
+  "detail": "max 1.0295 · lights 0"
+ },
+ {
+  "lock": "AC21-4b",
+  "where": "Add note pops with no light",
+  "ok": true,
+  "detail": "max 1.0294 · lights 0"
+ }
+]

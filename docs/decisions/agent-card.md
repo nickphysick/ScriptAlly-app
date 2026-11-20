@@ -4,7 +4,62 @@ Read this before touching `src/components/agents/contact/AgentCard262*.tsx`, `Ag
 `src/components/agents/card/HostAgentCard.tsx` / `AgentCardHost.tsx`, `lib/agentCardV2.ts`, or any query-card part the
 agent card borrows (`QcAgent158`, `QcNotes158`, `QcFoot1581`, `QcThreadRead`, `qcMotion160`).
 
-## Current state (Agent card v2, 19 Nov 2026 — branch `agent-card-v2`, not merged)
+## Current state (Agent card v2.1, 20 Nov 2026 — branch `agent-card-v2-1`, not merged)
+
+v2.1 (`design-refs/agent-card-v2-1/`) changes how the card is edited and adds the head's contact line and the border's
+colour. Everything under "Agent card v2" below still holds except where this section says otherwise.
+
+### Reading
+- Profile's order: the Finish block (when details are missing), the fact boxes, Wishlist, Genres {first} takes, What {first}
+  asks for, then "Added {date}". Profile has no contact row and no "Edit these details".
+- The head carries the contact line under the place: the email as its address (a mail glyph, then a quiet 28px copy
+  button, `#9a948b`, no fill until hover; snackbar "Email address copied"); the website as its address, underlined,
+  opening in a new tab; "+ Add email" / "+ Add a website" in their place when missing. `NxCopyEmail`/`NxSite` are the query
+  card's and stay there; the agent card no longer draws them.
+- The place line: the stored country's flag (flag-icons via `flagFor`, 18 × 13.5, 2px radius), then the city, or the
+  country's name when there is no city. **The flag comes from the stored country alone, never the city.** No country: no flag.
+
+### Editing — by section only, in place
+- No band pencil, no "Edit these details", no save bar, no tinted box, no header bar, no "Close". Ways in: each section's
+  28px pencil (hover, and focus within the section), the name's pencil (Contact details), the value itself (a faint edge on
+  hover; buttons inside a value keep their action), the Finish block's buttons, the head's "+ Add …".
+- An open section looks like itself with its contents live: a 1.5px navy outline 9px outside it; its heading and top edge
+  do not move (the 7px of air is below it only). The fact boxes and the head show the draft as it changes.
+- Each open section has its own cross (discard; no question; snackbar "Changes to {section} discarded" with Undo, which
+  reopens it with the draft back) and tick (save that section only). A section's fields: `SEC_FIELDS` (`AgentCard262`).
+- A tick saves the base with that section's fields from the draft (`partOf`) through the built save (`kit.onSave` →
+  `saveDraft` → `commitCardSave`), so `cardPatch` writes exactly what it wrote for those fields before; How's tick carries its
+  offer's plan, no other tick carries any. The other open sections keep their drafts (`useAgentForm` `commit` / `revert` /
+  `rebase`). Snackbar "Saved {section} for {first}" (+ ", and moved the query’s dates"), Undo = that save's snapshot.
+- Leaving with something unsaved (a tab, the arrows, ✕, Esc, another agent, a footer action, another page): the rust bar
+  (`GuardBar`) takes the footer's place — "Unsaved changes", the sections named, Keep editing, Discard, Save all ("Save it"
+  for one). Save all saves each changed section, one snackbar ("Saved {n} sections for {first}") whose Undo restores every
+  snapshot in reverse, then carries on. With nothing unsaved, leaving just closes the open sections.
+- How's controls follow the boxes: Response time (with its offer), If they don't reply, How they take queries, Open to queries?
+- Based in: country control and city on one row. A city in `lib/knownCities` known to be in another country gets an offer
+  ("{City} is in {country}. Change the country?"), never a block; "Keep" is remembered per city and country while Contact
+  details is open. Names two countries share are left out of the table.
+- What they ask for: the same list, each row a tick, its quantity controls on the row (`MaterialRows`). Every change is
+  `lib/matOps` `MAT_OPS` — MaterialPills' own transitions, lifted, so both dresses store the same thing.
+- Genres: `GenreChips dress="field"` — one 52px field with the chips inside (the manuscript's genre ticked), the matches 8px
+  beneath, "Suggested" 14px beneath; focus back in the input after every add and remove.
+
+### Motion — the query card's own (qcMotion160 + v163), on the agent card's frame
+- The frame (`.cl262-card.acv2`) draws its paper and shadow with `::before`; the breath swells that and nothing inside moves.
+- The border's colour is the frame's `data-qc163-rim` / `data-qc163-rim-hi`: the agent's query's stage (v163's `rim`), or
+  `NO_QUERY_RIM` slate `#5e7189` / `#c3cedb` with no query. qcMotion160 reads it through `rimColours` (the query card names
+  none, so it reads its stage as before). The rim layer's CSS covers both frames by `--qc163-rim-w` / `-r`.
+- A section opens: `breatheOpen`; typing: `breatheType`; the last closes: `breatheClose`. A tick, a star, Add note, Save all:
+  `pressAtPointer` → `pressThen`, the pop (`bump`) on landing, held until the page is quiet (`hold`/`release`). A section's
+  save (tick, Save all) runs v163's light once round; a star and Add note pass `{ light: false }` and hold no colour unless
+  a section is open (`pressIn(frame, { tint: false })`). Undo of a section's save: `bump(…, "undo")` (sink, light reversed).
+  Failure or nothing changed: `pressBack`. What changed settles (`SETTLE.from` → 1, the saved tint fading over 1.8s).
+
+### Locks
+AC21-1 … AC21-4 (`tests/e2e/acv21.measure.ts`, fixtures `seedAcv21.mjs`). Retired: AC2-6 (save bar and v2 motion — moved
+to AC21-4), CO9 (the save bar's second line), AA10 (the band pencil and the save bar's names), CL262's editing shots.
+
+## Agent card v2 (19 Nov 2026 — branch `agent-card-v2`, not merged)
 
 The agent card is the query card's built parts inside the agent card's own frame. Reference: `design-refs/agent-card-v2/`.
 
