@@ -6,6 +6,10 @@ Branch `query-card-v163` (from v161.2 @ 4528a82f4). Dev serves **`index-cIuMwb1S
 
 ## For Nick to rule
 
+**Ruled 20 Nov:** full and offer stand; closed's rim is now **#857e74** (rimHi #e6e3de unchanged); QC163-4's freeze
+reading and the 920px light stand. The closed frames were re-shot at 1× and 4×: the ring reads rgb(173,168,162) at its
+top and both sides, = #857e74 at the frame's 0.66 tint (expected 174,170,163; the old #9a9389 would read 188,184,177).
+
 1. **Colours for full, offer and closed** (built as the table; see the mid-breath frames):
    `frames/1x-breath-full.png` (#557aa3 / #c5d4e6), `frames/1x-breath-offer.png` (#c98f8a / #f6dedb),
    `frames/1x-breath-closed.png` (#9a9389 / #e6e3de). Closed is the faintest of the five against the white paper.

@@ -34,7 +34,7 @@ test.beforeAll(() => { seed(); });
 test.afterAll(() => { seed("--clean"); });
 
 /** the stage colours this pack added (lib/stageColours `rim`), as the browser writes them */
-const HEX = { queried: "#bfa87e", partial: "#6f8fb3", full: "#557aa3", offer: "#c98f8a", closed: "#9a9389" } as const;
+const HEX = { queried: "#bfa87e", partial: "#6f8fb3", full: "#557aa3", offer: "#c98f8a", closed: "#857e74" } as const;
 const HI = { queried: "#f3ead9", partial: "#d6e1ee", full: "#c5d4e6", offer: "#f6dedb", closed: "#e6e3de" } as const;
 type St = keyof typeof HEX;
 const rgb = (h: string) => { const n = parseInt(h.slice(1), 16); return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`; };
