@@ -91,7 +91,7 @@
   box-shadow: var(--sp-fld-edge); font: 400 16px/1.45 var(--sp-serif) !important; color: #1c130f;
 }
 .qc152 .qc1522-in { height: var(--sp-fld-h); padding: var(--sp-fld-pad); font: var(--sp-fld-font) !important; }
-.qc152 .qc1522-ta { min-height: 62px; resize: vertical; }
+.qc152 .qc1522-ta { min-height: 62px; height: 62px; resize: vertical; } /* stated: two rows of 16 would make it 62.4 */
 .qc152 .qc1522-in:focus, .qc152 .qc1522-ta:focus { box-shadow: var(--sp-fld-focus); }
 .qc152 .qc1522-chks { display: grid; gap: 6px; }
 .qc152 .qc1522-chk { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; cursor: pointer; font: 400 14.5px var(--sp-serif) !important; color: #1c130f; }

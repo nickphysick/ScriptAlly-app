@@ -215,8 +215,8 @@
 .laq .laq-nt { display: flex; justify-content: flex-end; margin-top: 14px; }
 /* Consistency roll-out v1.1, Phase 6: the note box takes the text field (primitives.css `.sp-fld`): radius 9 → 10, the 1px
    edge inside (it was a 1px #d9cfc2 border, so the padding gains that 1px and the text does not move), 14.5 → 16, and the
-   1.5px navy edge at focus. A textarea keeps its own height (58) and padding. */
-.laq .laq-nt textarea { box-sizing: border-box; width: 100%; min-height: 58px; resize: vertical; font: 400 16px/1.45 var(--laq-se); padding: 8px 11px; border-radius: var(--sp-fld-r); border: 0; box-shadow: var(--sp-fld-edge); outline: none; color: var(--laq-ink); background: #fff; }
+   1.5px navy edge at focus. A textarea keeps its own height: 58, stated, since two rows of 16 would make it 62.4. */
+.laq .laq-nt textarea { box-sizing: border-box; width: 100%; min-height: 58px; height: 58px; resize: vertical; font: 400 16px/1.45 var(--laq-se); padding: 8px 11px; border-radius: var(--sp-fld-r); border: 0; box-shadow: var(--sp-fld-edge); outline: none; color: var(--laq-ink); background: #fff; }
 .laq .laq-nt textarea:focus { box-shadow: var(--sp-fld-focus); }
 .laq p.laq-qs.is-foot { margin: auto 0 0; padding-top: 14px; text-align: center; }
 

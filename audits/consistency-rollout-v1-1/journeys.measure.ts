@@ -44,7 +44,15 @@ async function fields(page: Page, root: string): Promise<Field[]> {
       const focus = read(e);
       e.blur();
       const id = e.getAttribute("data-qls") || e.getAttribute("data-qc1522") || e.getAttribute("aria-label") || e.className || `f${i}`;
-      return { id: String(id).slice(0, 40), tag: e.tagName.toLowerCase(), cls: String(e.className).slice(0, 60), placeholder: (e.getAttribute("placeholder") || "").slice(0, 50), rest, focus: { shadow: focus.shadow, border: focus.border, outline: focus.outline } };
+      /* the field's label (the grid's cell before the field's own cell) and the nearest scroller's offset, so a move
+         can be told apart from a scroll */
+      const cell = e.closest("div"); const lab = cell?.previousElementSibling as HTMLElement | null;
+      const lr = lab && lab.tagName === "LABEL" ? lab.getBoundingClientRect() : null;
+      let sc: Element | null = e.parentElement; while (sc && !(sc.scrollHeight > sc.clientHeight + 1 && /auto|scroll/.test(getComputedStyle(sc).overflowY))) sc = sc.parentElement;
+      const scr = sc ? { top: Math.round(sc.scrollTop * 10) / 10, y: Math.round(sc.getBoundingClientRect().top * 10) / 10 } : null;
+      const row = cell ? cell.getBoundingClientRect() : null;
+      return { id: String(id).slice(0, 40), tag: e.tagName.toLowerCase(), cls: String(e.className).slice(0, 60), placeholder: (e.getAttribute("placeholder") || "").slice(0, 50), rest, focus: { shadow: focus.shadow, border: focus.border, outline: focus.outline },
+        label: lr ? { y: Math.round(lr.top * 10) / 10, h: Math.round(lr.height * 10) / 10 } : null, cell: row ? { y: Math.round(row.top * 10) / 10, h: Math.round(row.height * 10) / 10 } : null, scroller: scr };
     });
   }, root);
 }
