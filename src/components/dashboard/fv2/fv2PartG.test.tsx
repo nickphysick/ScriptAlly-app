@@ -54,10 +54,13 @@ describe("FV2-G · on the page", () => {
         currentUser={{ id: "u1", name: "Audit S1", todoPrefs, notifyPrefs } as unknown as User} activeManuscript={ms} onNavigate={() => {}} onPrefs={() => {}} now={now} />
     </MemoryRouter>,
   );
-  it("shows under the first query's row, naming its agent", () => {
+  /* RE-POINTED (Dashboard v3, Phase 2): the ask is one line now — "Email me when a nudge is due", Yes / Not now */
+  it("shows under the first query's row, as one line with its two answers", () => {
     const html = page();
     expect(html).toContain('data-fv2="reminder-ask"');
-    expect(html).toContain("If Tessa hasn&#x27;t replied in time");
+    expect(html).toContain("Email me when a nudge is due");
+    expect(html).toContain('data-fv2="reminder-yes"');
+    expect(html).toContain('data-fv2="reminder-not-now"');
     expect(html.indexOf('data-fv2="reminder-ask"')).toBeGreaterThan(html.indexOf('data-df1="mini"'));
   });
   it("never once answered, and never when nudges were already on", () => {

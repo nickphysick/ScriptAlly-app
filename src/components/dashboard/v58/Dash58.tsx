@@ -29,8 +29,6 @@ import type { TaskCtx } from "../../../lib/dashTaskCard";
 import { gettingStartedRows } from "../../../lib/dashEmpty";
 import { openQueryDrawer } from "../../../lib/queryActions/drawerStore";
 import { openAgentCard } from "../../../lib/agentCardStore";
-import { queriesForIds, queriesPathFor } from "../../../lib/queriesFilterParam";
-import { CLOSED_BUCKETS } from "../../../lib/dashClosed";
 import { contactListForStatus } from "../../../lib/contactList";
 import { dashAid, useDashHold, type DashAid } from "../../../lib/dashReviewAid";
 import { readShape, writeShape } from "../../../lib/dashShape";
@@ -39,9 +37,9 @@ import { readImportNotice, clearImportNotice, onImportNoticeChange, noticeHeadli
 import { DashPopupProvider } from "../DashPopup";
 import { F1Feed } from "../f1/F1Feed";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
-import { ClosedHoop, AgentsHoop } from "../v60/Dash60Left";
+import { AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { foundingFoldWrite, gsCloseWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, firstNameOf, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { foundingFoldWrite, gsCloseWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
@@ -51,7 +49,7 @@ import { ExampleDashboard } from "../fv2/ExampleDashboard";
 import { ResumeCard } from "../fv2/ResumeCard";
 import { LoadFailed } from "../../notes/LoadFailed";
 import type { PageLoadFailure } from "../../notes/useLoadFailure";
-import { ReminderAsk, ReminderDone } from "../fv2/ReminderAsk";
+import { ReminderDone } from "../fv2/ReminderAsk";
 import { FinishLine } from "../fv2/FinishLine";
 import { logEvent } from "../../../lib/events";
 import type { DraftMeta } from "../../../lib/importDraft";
@@ -62,7 +60,8 @@ import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import { Dash2Band } from "../v2/Dash2Band";
 import { wholeWeeksQuerying } from "../../../lib/dash2";
-import { stageMarks } from "../../../lib/dash3";
+import { stageMarks, withoutContradictions } from "../../../lib/dash3";
+import { Dash3Reminder } from "../v3/Dash3Reminder";
 import { Dash2Next } from "../v2/Dash2Next";
 import { Dash2Active } from "../v2/Dash2Active";
 import { Dash2Founding } from "../v2/Dash2Founding";
@@ -328,6 +327,9 @@ export const Dash58: React.FC<Dash58Props> = ({
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scopedTasks, userTasks, queries, scopedQueries, agents, manuscripts, taskFlags, scopedActivities, activities, activeManuscript, currentUser, now, aid.drop.join(","), empty, versions, scopeId]);
+
+  /* Dashboard v3, Phase 2: an agent who has asked for materials is never also a nudge or a close in Next up */
+  const nextPlan = useMemo(() => withoutContradictions(plan, queries), [plan, queries]);
 
   /* v2.1: the feed opens a big event only while its query is in Next up's "Agents are waiting" group */
   const needsYou = useMemo(() => needsYouIds(plan), [plan]);
@@ -612,20 +614,15 @@ export const Dash58: React.FC<Dash58Props> = ({
   const askReminder = !loading && !example && !!currentUser && !!onPrefs && !!firstQuery && reminderSaid === null
     && shouldAskReminder({ queries: queries.length, answered: prefs.reminder, storedNudges: (currentUser?.notifyPrefs as { nudges?: unknown } | undefined)?.nudges });
   const reminderNode = askReminder && firstQuery ? (
-    <ReminderAsk
-      agentFirst={firstNameOf(agents.find((a) => a.id === firstQuery.agentId)?.name)}
+    /* Dashboard v3, Phase 2: the ask as one line — same two answers, same writes */
+    <Dash3Reminder
       onYes={() => { setReminderSaid("yes"); void onPrefs?.(REMINDER_YES); logEvent(currentUser?.id, "reminder_answered", path ?? "ready", { answer: "yes" }); }}
       onNotNow={() => { setReminderSaid("not_now"); void onPrefs?.(REMINDER_NOT_NOW); logEvent(currentUser?.id, "reminder_answered", path ?? "ready", { answer: "not_now" }); }}
     />
   ) : reminderSaid === "yes" ? <ReminderDone onSettings={() => navigate("/account")} /> : null;
 
   /* ── the querying page's cards (Dashboard feed v1). Each is the app's own component; the layout below places them. ── */
-  const closedCard = (
-    <ClosedHoop loading={loading} tile={closed} play={paint} onSeeAll={() => navigate(queriesPathFor("closed"))}
-      /* v118 Part B — a slice or row opens the Query Centre on exactly its queries, this manuscript's only */
-      onOpen={(k) => closed && navigate(queriesForIds(closed.members[k] ?? [], CLOSED_BUCKETS.find((b) => b.key === k)?.label))}
-      queries={scopedQueries} agents={agents} manuscript={activeManuscript?.title ?? ""} noneWhileLoading={shape.closed === "none"} />
-  );
+  /* ⚠️ DASHBOARD v3, Phase 2: the Closed queries card is off the Dashboard (ClosedHoop stays exported in v60/Dash60Left) */
   const agentsCard = (
     <AgentsHoop loading={loading} cov={cov} play={paint} onReady={toContacts}
       /* v118 Part B — a slice or row opens the Contact list filtered to that status */
@@ -660,15 +657,17 @@ export const Dash58: React.FC<Dash58Props> = ({
             onAllNotes={example ? undefined : () => navigate("/your-notes")} />
           {loadFail ? <LoadFailed words={loadFail.words} onRetry={loadFail.retry} busy={loadFail.busy} probe="dashboard" /> : (
           <div className="d2-grid" data-d2="grid">
+            {/* ⚠️ DASHBOARD v3 (ref design-refs/dashboard-v3.html), Phase 2: left — Next up, Agents on file, Getting started;
+                middle — the chart, then Expected back; right — the feed */}
             <div className="d2-col d2-left" data-d2="left">
+              {!pre && <Dash2Next loading={loading} plan={nextPlan} ctx={taskCtx} onView={viewTask} onSeeAll={() => onNavigate(plan.all.tab, plan.all.sub)} />}
+              {!pre && hasAgents && agentsCard}
               {gsSheetOpen && (
                 <div className="d2-gs" data-d2="gs-slot">
                   <GsSheet loading={loading} rows={gsRows} path={path} onGo={goGs} onHide={gsHide}
                     finish={gsWhat === "finish" ? <FinishLine path={path} onClose={closeGs} /> : undefined} />
                 </div>
               )}
-              {!pre && <Dash2Next loading={loading} plan={plan} ctx={taskCtx} onView={viewTask} onSeeAll={() => onNavigate(plan.all.tab, plan.all.sub)} />}
-              {!pre && hasAgents && agentsCard}
             </div>
             <div className="d2-col d2-mid" data-d2="mid">
               {pre ? (
@@ -688,7 +687,6 @@ export const Dash58: React.FC<Dash58Props> = ({
                 <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities} agents={agents}
                   activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} />
               )}
-              {!pre && closedCard}
             </div>
             <div className="d2-right" data-d2="right">
               <div className="d2-feed" data-d2="feed">

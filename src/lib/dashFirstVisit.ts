@@ -145,7 +145,8 @@ export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): D
     tour: raw.tour === "done",
     reminder: raw.reminder === "yes" || raw.reminder === "not_now" ? raw.reminder : null,
     gsClosed: flags(raw.gsClosed),
-    foundingFolded: raw.foundingFolded === true,
+    /* Dashboard v3, Phase 2: folded to the slim strip BY DEFAULT — only a stored `false` (the chevron opened it) unfolds */
+    foundingFolded: raw.foundingFolded !== false,
   };
 }
 

@@ -19,3 +19,21 @@
 .d58.d2 .d3-marks + .d2-acts { margin-left: 0; }
 .d58.d2 .d2-acts { flex: none; }
 @media (max-width: 1180px) { .d58.d2 .d3-marks { display: none; } .d58.d2 .d3-marks + .d2-acts { margin-left: auto; } }
+
+/* ── Phase 2 · three columns under the band and the founding strip (the ref's `.gA`) ── */
+.d58.d2 .d2-grid { grid-template-columns: minmax(300px, 1fr) minmax(380px, 1.3fr) minmax(250px, 0.78fr); gap: 16px; align-items: stretch; margin-top: 16px; }
+.d58.d2 .d2-col { gap: 16px; }
+.d58.d2 .d22-fw { margin-top: 16px; }
+@media (max-width: 1320px) { .d58.d2 .d2-grid { grid-template-columns: minmax(280px, 1fr) minmax(340px, 1.3fr) minmax(250px, 0.78fr); gap: 16px; } }
+@media (max-width: 1180px) {
+  .d58.d2 .d2-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .d58.d2 .d2-right { grid-column: 1 / -1; min-height: 520px; }
+}
+
+/* the nudge-email ask, one line (the ref's `.mail`) */
+.d58.d2 .d3-mail { display: flex; align-items: center; gap: 10px; margin: 12px 0 4px; padding: 8px 8px 8px 12px; border-radius: 12px; background: #f8e8e5; box-shadow: inset 0 0 0 1px #dfb1ac; font-size: 14px; color: var(--d2-ink); }
+.d58.d2 .d3-mail svg { flex: none; width: 15px; height: 15px; fill: none; stroke: #a0675a; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.d58.d2 .d3-mail span { flex: 1 1 auto; min-width: 0; }
+.d58.d2 .d3-mail button { height: 32px; padding: 0 12px; border: 0; border-radius: 16px; background: transparent; box-shadow: inset 0 0 0 1px #e3d5c9; font-weight: 600; font-size: 14px; white-space: nowrap; cursor: pointer; color: var(--d2-ink); }
+.d58.d2 .d3-mail button.is-x { box-shadow: none; color: var(--d2-muted); padding: 0 6px; }
+.d58.d2 .d3-mail button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
