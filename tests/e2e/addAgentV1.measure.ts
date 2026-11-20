@@ -444,7 +444,7 @@ test("AA12 · the edit routes open the card in edit mode; nothing renders the lo
   if (MUT === "AA12") await page.evaluate(() => document.body.insertAdjacentHTML("beforeend", "<div class='cl252-em' style='position:fixed;top:0;left:0;width:20px;height:20px'></div>"));
   await panel.locator("[data-cl262='edit-all']").click();
   await card("Contact list · band pencil");
-  /* the Query Centre: a query's Agent tab, then its "+ Website" / "+ Add {first}'s wishlist" door (openAgentCard at a
+  /* the Query Centre: a query's Agent tab, then its "+ Add a website" / "+ Add an email" door (v158's words; earlier "+ Website") (openAgentCard at a
      field, from another page — the app-level host, not the Contact list's own card) */
   await openApp(page, "/queries", VP);
   const qrow = page.locator("[data-qc151='row']:visible, [data-qcv='row']:visible, tr[data-id]:visible").first();
@@ -453,7 +453,7 @@ test("AA12 · the edit routes open the card in edit mode; nothing renders the lo
   await page.waitForTimeout(1200);
   await page.locator("[role='tab']:visible", { hasText: /agent/i }).first().click();
   await page.waitForTimeout(800);
-  const door = page.locator("button:visible", { hasText: /^\s*\+\s*(Website|Add .*wishlist)/ }).first();
+  const door = page.locator("button:visible", { hasText: /^\s*\+\s*(Website|Add a website|Add an email|Add .*wishlist)/ }).first();
   L.check("population: a door on the agent tab", (await door.count()) > 0, "door");
   await door.click();
   await card("Query Centre · agent tab door");
