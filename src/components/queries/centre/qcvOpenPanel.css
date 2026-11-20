@@ -50,7 +50,6 @@
 .qsp .qcv-open-ft .qcv-open-stand { margin: 0; font-family: var(--sp-serif); font-size: 15px; line-height: 21px; letter-spacing: 0; text-transform: none; color: #1c130f; }
 .qsp .qcv-open-ft .qcv-open-stand b { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 17px; line-height: 1.15; color: #1c130f; }
 .qsp .qcv-open-ft .qcv-open-stand span { display: block; margin-top: 2px; font-family: var(--sp-serif); font-style: italic; font-size: 14.5px; line-height: 20px; color: rgba(28, 19, 15, 0.6); }
-.qsp .qcv-open[data-over="true"] .qcv-open-ft .qcv-open-stand span { color: #a2452a; }
 .qsp .qcv-open-more { width: 40px; height: 40px; border: 1px solid rgba(28, 19, 15, 0.2); background: #fff; }
 .qsp .qcv-open-more i { font-family: var(--sp-serif); font-size: 18px; letter-spacing: 0.04em; }
 .qsp .qcv-open-doors { padding: 14px 26px 18px; gap: 10px; background: #fbf9f5; }

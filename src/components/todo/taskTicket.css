@@ -193,7 +193,6 @@
 .tkt .cell .v { font-size: 12.5px; line-height: 1.2; font-weight: 500; color: var(--ink2); margin-top: 3px; }
 /* ⚠️ BURGUNDY IS "A CLOCK YOU ARE ANSWERABLE TO", and only an agent request sets it — see
    `ticketFacts`. It is not "this number is big". */
-.tkt .cell .v.late { color: var(--burg); }
 
 .tkt .tfoot {
   display: flex; align-items: center; gap: 9px; min-width: 0;

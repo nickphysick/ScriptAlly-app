@@ -221,7 +221,6 @@
   .qc1512-nn b { min-width: 30px; text-align: right; font: 400 26px/1 var(--sp-type) !important; }
   .qc1512-nn small { font: 400 12.5px/1.15 var(--sp-serif) !important; }
   .qc1512-nt { font: 400 14.5px/1.2 var(--sp-serif) !important; }
-  .qc1512-nx--late, .qc1512-nx--late b, .qc1512-nx--late small { color: #8a3a28 !important; }
   .qc1512-nx--ink b { color: var(--ink); }
   .qc1512-nx--ink small { color: var(--mut); }
   .qc1512-nx--faint, .qc1512-nx--faint b, .qc1512-nx--faint small, .qc1512-nx--none { color: #8a8076 !important; }

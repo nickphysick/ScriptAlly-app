@@ -26,7 +26,6 @@ button.cl255-w:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; 
 .cl255-cap { margin-top: 8px; font: italic 400 14.5px/1.4 var(--sp-serif) !important; color: #5b4f47; }
 .cl255-cap.solo { margin-top: 0; }
 .cl255-cap > b { font: 400 16px/1.3 var(--sp-type) !important; font-style: normal; color: #1c130f; }
-.cl255-cap > b.late { color: #a2452a; }
 .cl255-cap > i { font: inherit !important; color: inherit; }
 
 .cl255-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }

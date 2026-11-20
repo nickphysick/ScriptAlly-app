@@ -19,7 +19,6 @@
 .qc151 .qc1522-tr:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
 .qc151 .qc1522-tr b { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 15.5px/1.35 var(--sp-serif) !important; color: #1c130f; }
 .qc151 .qc1522-tr i { flex: none; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: #8a7f75; white-space: nowrap; }
-.qc151 .qc1522-tr[data-late] i { color: #a2452a; }
 
 /* §1.4 one divider: 30px under the banner, 22px over the tabs; none under the Showing row */
 .qc151 .qc1522-dv { display: block; height: 0; margin: 30px 0 0; border: 0; border-top: 1px solid #ddd3c6; }

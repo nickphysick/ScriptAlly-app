@@ -224,8 +224,6 @@
   .qc138-sheet .qc138-dial.over { background: #fff; animation: qc138-breathe 2.4s ease-in-out infinite; }
   .qc138-sheet .qc138-dial.over .qc138-dial-tr { stroke: rgba(162, 69, 42, 0.18); }
   .qc138-sheet .qc138-dial.over .qc138-dial-arc { stroke: #a2452a; }
-  .qc138-sheet .qc138-dial.over .qc138-dial-d { color: #a2452a; }
-  .qc138-sheet .qc138-dial.over .qc138-dial-m { color: rgba(162, 69, 42, 0.75); }
   .qc138-sheet .qc138-st { min-width: 0; }
   .qc138-sheet .qc138-ws1 { display: flex; align-items: center; gap: 8px; font: 400 15.5px/1.35 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; }
   .qc138-sheet .qc138-ws1 > span { font: inherit !important; overflow: hidden; text-overflow: ellipsis; }

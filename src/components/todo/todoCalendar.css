@@ -2056,7 +2056,6 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-ccact { margin-top: 10px; display: flex; justify-content: flex-end; gap: 8px; align-items: center; }
 .tl-cccv { font-family: Caveat, cursive; font-size: 15px; color: #6f6055; }
-.tl-cccv.od { color: #8c4f4a; }
 .tl-ccbtn {
   padding: 5px 10px; border-radius: 9px; border: 1.5px solid #2a1f17; background: #fff;
   cursor: pointer; color: var(--tl-nearblack);
@@ -2355,7 +2354,6 @@ button.tl-tchip { cursor: pointer; }
   letter-spacing: 0; text-transform: none; color: #6f6055;
 }
 /* the urgent label is rose — the one place on a card where lateness is stated in colour */
-.tl-act--od .tl-actlab { color: #8c4f4a; }
 
 .tl-actbtn {
   flex: 0 0 auto; cursor: pointer;

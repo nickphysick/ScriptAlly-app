@@ -323,7 +323,6 @@
 }
 .ac .acq-qrow { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
 .ac .acq-qtx { flex: 1 1 180px; font: 400 14.5px var(--clv-serif); color: var(--clv-ink-70); }
-.ac .acq-qtx.late { color: var(--clv-rust); }
 .ac .acq-hist {
   border: 0;
   background: none;

@@ -295,10 +295,9 @@ describe("§5 · the list's groups, as rendered", () => {
    * `+N DAYS` figure and by the dot, and a tint was the row saying in colour what it says twice
    * already in words and in a mark.
    */
-  it("overdue is terracotta, and the row carries no tint at all", () => {
-    expect(declValue(rule(".qc-gh-od span"), "color"), "the overdue label stopped reading its token").toBe("var(--qc-acc-late)");
-    expect(css, "the overdue accent is not terracotta").toContain("--qc-acc-late: #a05a45;");
-    expect(css, "the overdue accent went burgundy").not.toContain("--qc-acc-late: var(--burg)");
+  /* consistency roll-out v1 (A2): colour never marks time, so the overdue label takes the ink around it */
+  it("overdue takes the ink, and the row carries no tint at all", () => {
+    expect(rule(".qc-gh-od span"), "the overdue label took a colour of its own again").toBe("");
     /* the rules, the tokens and the class are all gone — a rule that paints nothing is the next
        thing someone puts a value back into */
     expect(rule(".f12-row-od"), "the overdue tint came back").toBe("");
