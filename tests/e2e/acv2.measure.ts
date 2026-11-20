@@ -33,10 +33,10 @@ import { BUMP } from "../../src/components/queries/centre/qcMotion160";
 /** the slide-out query card's panel (the To-do page keeps a hidden preview panel of the same class) */
 const QC = ".spanel.qsp:not(.tws-pvpanel)";
 const hexRgb = (h: string) => { const n = parseInt(h.slice(1), 16); return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`; };
-const seed = () => execFileSync("node", ["tests/e2e/seedAcv2.mjs"], { stdio: "inherit" });
-const clean = () => execFileSync("node", ["tests/e2e/seedAcv2.mjs", "--clean"], { stdio: "inherit" });
+const seed = () => execFileSync("node", ["tests/e2e/seedAcv2.mjs"], { stdio: "inherit", timeout: 60_000 });
+const clean = () => execFileSync("node", ["tests/e2e/seedAcv2.mjs", "--clean"], { stdio: "inherit", timeout: 60_000 });
 /** the agent and its queries as stored (the SDK may print a warning before the JSON: the JSON is the last line) */
-const dump = (id: string) => { const out = execFileSync("node", ["tests/e2e/seedAcv2.mjs", "--dump", id]).toString(); return out.slice(out.indexOf("{\"agent\"")); };
+const dump = (id: string) => { const out = execFileSync("node", ["tests/e2e/seedAcv2.mjs", "--dump", id], { timeout: 60_000 }).toString(); return out.slice(out.indexOf("{\"agent\"")); };
 
 /** one read of the open card */
 async function readCard(page: Page) {
@@ -371,7 +371,10 @@ const peaks = (tr: { t: number; s: number }[]) => {
   return { top, rises };
 };
 
-test("AC2-6 · save bumps once; cancel, discard, undo never; the saved tint; Undo is exact", async ({ page }) => {
+/* RETIRED by Agent card v2.1: the save bar's Save and Cancel are gone and the motion is the query card's latest. Its
+   checks moved: the pop's peak, once, and never on a discard or a cross (AC21-4b, AC21-4c); the settle's tint (AC21-4b's
+   settle); reduced motion (AC21-4c); Undo restores the agent exactly (AC21-4b). */
+test.skip("AC2-6 · save bumps once; cancel, discard, undo never; the saved tint; Undo is exact", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("AC2-6");
   const vp = SIZES[0];
@@ -393,7 +396,7 @@ test("AC2-6 · save bumps once; cancel, discard, undo never; the saved tint; Und
   const edit = async () => {
     await page.locator(`${AC} [data-cl262='pen'][data-k='how']`).click({ force: true });
     await page.waitForTimeout(450);
-    const r = page.locator(`${AC} .cl262-sec[data-k='how'] [data-aap='weeks'] input[type='range']`).first();
+    const r = page.locator(`${AC} [data-cl262='sec'][data-k='how'] [data-aap='weeks'] input[type='range']`).first();
     await r.focus();
     await page.keyboard.press("ArrowRight");
     await page.waitForTimeout(400);
@@ -533,7 +536,7 @@ test("AC2-8 · the add doors focus their own field", async ({ page }) => {
     await page.waitForTimeout(900);
     const ae = await page.evaluate(() => (document.activeElement as HTMLElement | null)?.dataset.ae ?? document.activeElement?.tagName ?? "");
     L.check(`${k} · the cursor is in its own field`, ae === k, ae);
-    L.check(`${k} · Contact details is open`, (await page.locator(`${AC} .cl262-sec[data-k='contact'].is-edit`).count()) === 1, "");
+    L.check(`${k} · Contact details is open`, (await page.locator(`${AC} [data-acv21='open'][data-k='contact']`).count()) === 1, "");
   }
   /* an unknown fact box's Add: an agent with a box that reads "Not known yet" */
   let done = false;
@@ -547,7 +550,7 @@ test("AC2-8 · the add doors focus their own field", async ({ page }) => {
     const f = await page.evaluate(() => document.activeElement?.closest<HTMLElement>("[data-f]")?.dataset.f ?? "");
     const want = { reply: "weeks", method: "method", door: "door" }[k];
     L.check(`box Add · ${r.name} · ${k} lands in ${want}`, f === want, f || "nowhere");
-    L.check(`box Add · How ${r.name.split(" ")[0]} works is open`, (await page.locator(`${AC} .cl262-sec[data-k='how'].is-edit`).count()) === 1, "");
+    L.check(`box Add · How ${r.name.split(" ")[0]} works is open`, (await page.locator(`${AC} [data-acv21='open'][data-k='how']`).count()) === 1, "");
     done = true;
     return true;
   });

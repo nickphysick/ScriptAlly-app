@@ -34,7 +34,9 @@ test("CL262 shots — the card", async ({ page }) => {
   await page.screenshot({ path: `${shotDir()}/09-card-1280.png` });
 });
 
-test("CL262 shots — editing", async ({ page }) => {
+/* RETIRED by Agent card v2.1: v26.2's edit mode (the band pencil, the tinted sections, the save bar) is gone; v2.1's
+   editing shots are reports/agent-card-v2-1/shots. */
+test.skip("CL262 shots — editing", async ({ page }) => {
   test.setTimeout(300_000);
   const pen = (k: string) => page.evaluate((key) => (document.querySelector(`[data-cl262='pen'][data-k='${key}']`) as HTMLElement | null)?.click(), k);
   await openCard(page, SIZES[0], { stand: "none" });

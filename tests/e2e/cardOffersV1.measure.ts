@@ -45,7 +45,7 @@ class Ledger {
   }
 }
 
-export const emu = (cmd: string): string => execFileSync("node", ["tests/e2e/co1Emu.mjs", cmd], { encoding: "utf8" }).trim();
+export const emu = (cmd: string): string => execFileSync("node", ["tests/e2e/co1Emu.mjs", cmd], { encoding: "utf8", timeout: 60_000 }).trim();
 export const read = (): Record<string, { status: string; nudgeDate: string | null; writerExpectedDate: string | null; dateSent: string;
   activity: { type: string | null; eventKey: string | null; resultingStatus: string | null }[]; feed: { eventKey: string | null; resultingStatus: string | null }[];
   agent: { weeks: number | null; door: string | null } | null }> => JSON.parse(emu("read"));
@@ -75,25 +75,26 @@ export async function editHow(page: Page, panel: Locator) {
   await panel.locator("[data-cl262='sec'][data-k='how'] [data-cl262='pen']").click({ force: true }).catch(async () => {
     await panel.locator("[data-cl262='sec'][data-k='how'] [data-cl262='pen']").evaluate((e) => (e as HTMLElement).click());
   });
-  await panel.locator(".cl262-sec[data-k='how'].is-edit").waitFor({ timeout: 10_000 });
+  await panel.locator("[data-acv21='open'][data-k='how']").waitFor({ timeout: 10_000 });
   await page.waitForTimeout(300);
 }
 /** step the response-time slider by keyboard (each step is a settled change) */
 export async function weeksBy(page: Page, panel: Locator, n: number) {
-  const r = panel.locator(".cl262-sec[data-k='how'] [data-aap='weeks'] input[type='range']");
+  const r = panel.locator("[data-cl262='sec'][data-k='how'] [data-aap='weeks'] input[type='range']");
   await r.focus();
   for (let i = 0; i < Math.abs(n); i++) await page.keyboard.press(n < 0 ? "ArrowLeft" : "ArrowRight");
   await page.waitForTimeout(350);
 }
 export async function closeDoor(page: Page, panel: Locator) {
-  await panel.locator(".cl262-sec[data-k='how'] [data-aap='door'] [data-door='closed']").evaluate((e) => (e as HTMLElement).click());
+  await panel.locator("[data-cl262='sec'][data-k='how'] [data-aap='door'] [data-door='closed']").evaluate((e) => (e as HTMLElement).click());
   await page.waitForTimeout(500);
   /* the reopening calendar opens on its own; it is not this lock's subject */
   if (await page.locator("[data-ae='calendar']").count()) await page.keyboard.press("Escape").catch(() => {});
   await page.waitForTimeout(250);
 }
 export async function discard(page: Page, panel: Locator) {
-  if (await panel.locator("[data-cl262='cancel']").count()) await panel.locator("[data-cl262='cancel']").click();
+  /* Agent card v2.1 — re-pointed: each open section has its own cross (no Cancel, no question) */
+  for (let i = 0; i < 6 && (await panel.locator("[data-acv21='cross']").count()); i++) await panel.locator("[data-acv21='cross']").first().click({ timeout: 4000 }).catch(() => {});
   if (await panel.locator("[data-cl262='discard']").count()) await panel.locator("[data-cl262='discard']").click();
   await page.waitForTimeout(300);
 }
@@ -111,7 +112,7 @@ test("CO8 · Response time 8 → 6 with an open query: the offer, dates struck o
   await editHow(page, panel);
   if (MUT === "CO8") await css(page, ".co-offer[data-co='rt']{display:none!important}");
   /* held: a press on the thumb, a drag — the offer is not there yet */
-  const r = panel.locator(".cl262-sec[data-k='how'] [data-aap='weeks'] input[type='range']");
+  const r = panel.locator("[data-cl262='sec'][data-k='how'] [data-aap='weeks'] input[type='range']");
   /* Agent card v2 — the card is the query card's height and only its body scrolls, so the open "How {first} works"
      runs below the save bar at 900px: bring the slider into view before pressing it by its coordinates */
   await r.scrollIntoViewIfNeeded();
@@ -156,7 +157,9 @@ test("CO8 · Response time 8 → 6 with an open query: the offer, dates struck o
 });
 
 /* ═════════ CO9 ═════════ */
-test("CO9 · the save bar's second line follows the choice", async ({ page }) => {
+/* RETIRED by Agent card v2.1: there is no save bar, so no second line to follow the choice. The choice is read in the offer
+   itself (CO8, CO10, CO11) and, after the tick, in the snackbar (", and moved the query’s dates": AC21-2d's words). */
+test.skip("CO9 · the save bar's second line follows the choice", async ({ page }) => {
   test.setTimeout(240_000);
   const L = new Ledger("CO9");
   const panel = await openCard(page, "co1-rt");
@@ -180,7 +183,7 @@ test("CO9 · the save bar's second line follows the choice", async ({ page }) =>
   const t4 = ((await names.textContent().catch(() => "")) ?? "").trim();
   L.check("Close it as no reply: · closes 1 query as no reply, and the dates no longer move", t4.endsWith("· closes 1 query as no reply"), t4);
   L.check("…and the response-time offer stands down with the mock's line", (await shown(panel.locator("[data-co='rt']"))) === 0
-    && /Your query is closing as no reply, so its dates don’t need to move\./.test((await panel.locator(".cl262-sec[data-k='how']").textContent()) ?? ""), "rt offer gone");
+    && /Your query is closing as no reply, so its dates don’t need to move\./.test((await panel.locator("[data-cl262='sec'][data-k='how']").textContent()) ?? ""), "rt offer gone");
   if (MUT === "CO9") await css(page, "[data-cl262='save-names']{visibility:hidden!important}");
   L.check("the line is visible in the navy bar", await names.isVisible(), "visible");
   await page.screenshot({ path: `${DIR}/shots/co9-savebar-1440.png` }).catch(() => {});
@@ -244,15 +247,17 @@ test("CO12 · no rust Also-changes element anywhere on the card", async ({ page 
   test.setTimeout(240_000);
   const L = new Ledger("CO12");
   const panel = await openCard(page, "co1-rt");
-  await panel.locator("[data-cl262='edit-all']").click();
+  /* Agent card v2.1 — re-pointed: editing is by section (no band pencil): How and Contact details, each by its pencil */
+  await editHow(page, panel);
+  await panel.locator("[data-cl262='pen'][data-k='contact']").evaluate((e) => (e as HTMLElement).click());
   await page.waitForTimeout(500);
   await weeksBy(page, panel, -2);
   await closeDoor(page, panel);
-  await panel.locator(".cl262-sec[data-k='how'] [data-nrn='yes']").evaluate((e) => (e as HTMLElement).click());
+  await panel.locator("[data-cl262='sec'][data-k='how'] [data-nrn='yes']").evaluate((e) => (e as HTMLElement).click());
   await panel.locator("[data-ae='name']").fill("Sarah Offerton-Pike");
   await page.waitForTimeout(400);
-  if (MUT === "CO12") await panel.locator(".cl262-sec[data-k='how']").evaluate((s) => { const d = document.createElement("div"); d.className = "cl262-also"; d.dataset.cl262 = "also"; d.innerHTML = "<em>Also changes</em><p>x</p>"; s.appendChild(d); });
-  L.check("edits made: several things changed", Number(await panel.locator("[data-cl262='save-sum']").getAttribute("data-n")) >= 3, "n");
+  if (MUT === "CO12") await panel.locator("[data-cl262='sec'][data-k='how']").evaluate((s) => { const d = document.createElement("div"); d.className = "cl262-also"; d.dataset.cl262 = "also"; d.innerHTML = "<em>Also changes</em><p>x</p>"; s.appendChild(d); });
+  L.check("edits made: two sections open with changes", (await panel.locator("[data-acv21='open']").count()) === 2, "n");
   L.check("no Also element", (await panel.locator(".cl262-also, [data-cl262='also']").count()) === 0, "count");
   L.check("no \"Also changes\" words", !/Also changes/.test((await panel.textContent()) ?? ""), "text");
   /* nothing on the card wears the rust edge the box drew (inset 3px #a2452a) */
@@ -266,8 +271,9 @@ test("CO12 · no rust Also-changes element anywhere on the card", async ({ page 
 
 const isoDay = (iso: string | null) => (iso ? dm(new Date(iso)) : "none");
 export async function saveCard(page: Page, panel: Locator) {
-  await panel.locator("[data-cl262='save']").click();
-  await panel.locator(".cl262-sec.is-edit").first().waitFor({ state: "detached", timeout: 20_000 }).catch(() => {});
+  /* Agent card v2.1 — re-pointed: How's own tick saves How (there is no save bar) */
+  await panel.locator("[data-acv21='tick'][data-k='how']").click();
+  await panel.locator("[data-acv21='open']").first().waitFor({ state: "detached", timeout: 20_000 }).catch(() => {});
   await page.waitForTimeout(2500);
 }
 /** Agent card v2 — the next-step box is retired; the footer says where the query stands (lib/agentCardV2 acFoot) */
@@ -295,7 +301,8 @@ test("CO13 · Update moves the stored nudge, and the Query Centre shows the new 
   await saveCard(page, panel);
   const t = await toastText(page);
   /* Agent card v2's snackbar words (lib/agentCardV2 savedWords) */
-  L.check("the toast: Saved 1 change to Sarah, and moved the query’s dates", /Saved 1 change to Sarah, and moved the query’s dates/.test(t), t);
+  /* Agent card v2.1 — re-pointed: a section's save names the section */
+  L.check("the toast: Saved how they work for Sarah, and moved the query’s dates", /Saved how they work for Sarah, and moved the query’s dates/.test(t), t);
   const st = read()["co1-rt"];
   L.check("the agent holds 6 weeks", st.agent?.weeks === 6, String(st.agent?.weeks));
   L.check("the stored nudge moved to the new window's", isoDay(st.nudgeDate) === dm(nudgeOn(6)), `${isoDay(st.nudgeDate)} vs ${dm(nudgeOn(6))}`);
@@ -337,7 +344,7 @@ test("CO15 · Keep: the card and the Query Centre still show the old date after 
   await saveCard(page, panel);
   const t = await toastText(page);
   /* Agent card v2's snackbar: the count and the agent, nothing about dates when nothing moved */
-  L.check("the toast: Saved 1 change to Sarah, and no dates moved", /Saved 1 change to Sarah/.test(t) && !/moved|closed/.test(t), t);
+  L.check("the toast: Saved how they work for Sarah, and no dates moved", /Saved how they work for Sarah/.test(t) && !/moved|closed/.test(t), t);
   const st = read()["co1-rt"];
   L.check("the agent holds 6 weeks", st.agent?.weeks === 6, String(st.agent?.weeks));
   L.check("the old date is held on the query (stamped)", isoDay(st.writerExpectedDate) === dm(expOn(8)), `${isoDay(st.writerExpectedDate)} vs ${dm(expOn(8))}`);
@@ -357,11 +364,13 @@ test("CO16 · Close it as no reply: No Response, nudge gone, on the Wall of no, 
   await editHow(page, panel);
   await closeDoor(page, panel);
   if (MUT === "CO16") await panel.locator("[data-co='close-keep']").click();
-  const extras = (await panel.locator("[data-cl262='save-sum']").getAttribute("data-extras")) ?? "";
-  L.check("the bar: closes 1 query as no reply (the suggestion)", extras === "closes 1 query as no reply", extras);
+  /* Agent card v2.1 — re-pointed: no save bar; the choice is the offer's own (Suggested, checked), and the snackbar names
+     the section ("Saved how they work for Olive, and closed the query as no reply") */
+  const extras = (await panel.locator("[data-co='close-close']").getAttribute("aria-checked")) ?? "";
+  L.check("the offer: Close it as no reply (the suggestion) is chosen", extras === "true", extras);
   await saveCard(page, panel);
   const t = await toastText(page);
-  L.check("the toast: Saved … to Olive, and closed the query as no reply", /Saved \d+ changes? to Olive, and closed the query as no reply/.test(t), t);
+  L.check("the toast: Saved how they work for Olive, and closed the query as no reply", /Saved how they work for Olive, and closed the query as no reply/.test(t), t);
   const st = read()["co1-old"];
   L.check("the query is No Response", st.status === "No Response", st.status);
   L.check("its nudge is removed", st.nudgeDate == null, String(st.nudgeDate));
@@ -479,7 +488,7 @@ test.skip("CO20 · + Website and + Email open Contact details with the cursor in
     });
     L.check(`+ ${k}: the cursor is in the ${k} field`, r.ae === k, r.ae);
     L.check(`+ ${k}: the field is in view in the card`, r.inView, String(r.inView));
-    L.check(`+ ${k}: Contact details is open`, (await panel.locator(".cl262-sec[data-k='contact'].is-edit").count()) === 1, "contact");
+    L.check(`+ ${k}: Contact details is open`, (await panel.locator("[data-acv21='open'][data-k='contact']").count()) === 1, "contact");
     await page.screenshot({ path: `${DIR}/shots/co20-${k}-1440.png` }).catch(() => {});
   }
   L.done(6);

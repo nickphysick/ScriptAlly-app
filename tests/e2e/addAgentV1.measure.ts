@@ -349,7 +349,7 @@ test("AA9 · the finish screen: the real card face, whole inside the body; Fill 
   await panel.waitFor({ timeout: 20_000 });
   await page.waitForTimeout(800);
   L.check("the real card opens", await panel.isVisible(), "panel");
-  L.check("in edit mode", (await panel.locator(".cl262-sec.is-edit").count()) > 0, `${await panel.locator(".cl262-sec.is-edit").count()} sections editing`);
+  L.check("in edit mode", (await panel.locator("[data-acv21='open']").count()) > 0, `${await panel.locator("[data-acv21='open']").count()} sections editing`);
   L.check("the add panel is gone", (await page.locator("[data-aaj='journey']").count()) === 0, "journey");
   await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.keyboard.press("Escape");
   L.done(7);
@@ -368,24 +368,28 @@ async function openQueryingCard(page: Page) {
 }
 
 /* ═════════ AA10 ═════════ */
-test("AA10 · on the card: every section from the band pencil, Contact first; what a reply change does; changes by name", async ({ page }) => {
+/* RETIRED by Agent card v2.1: editing is by section only — there is no band pencil opening every section, and no save bar
+   naming the changes. Contact details by its pencil is AC21-2c; What a reply change does is CO8; the rust bar names the
+   sections (AC21-2e). */
+test.skip("AA10 · on the card: every section from the band pencil, Contact first; what a reply change does; changes by name", async ({ page }) => {
   test.setTimeout(300_000);
   const L = new Ledger("AA10");
   const panel = await openQueryingCard(page);
-  await panel.locator("[data-cl262='edit-all']").click();
+  /* Agent card v2.1 — re-pointed: no band pencil; Contact details by the name's pencil */
+  await panel.locator("[data-cl262='pen'][data-k='contact']").evaluate((e) => (e as HTMLElement).click());
   await page.waitForTimeout(500);
   if (MUT === "AA10") await css(page, ".co-offer, .co-quiet{display:none !important}");
-  const secs = await panel.locator(".cl262-sec.is-edit").evaluateAll((es) => es.map((e) => (e as HTMLElement).dataset.k));
+  const secs = await panel.locator("[data-acv21='open']").evaluateAll((es) => es.map((e) => (e as HTMLElement).dataset.k));
   L.check("every section opens", ["contact", "genres", "wishlist", "materials", "how"].every((k) => secs.includes(k)), JSON.stringify(secs));
   L.check("Contact details first", secs[0] === "contact", JSON.stringify(secs));
   L.check("the band says EDITING", await panel.locator("[data-cl262='editing-chip']").isVisible(), "chip");
-  const slider = panel.locator(".cl262-sec[data-k='how'] input[type='range']");
+  const slider = panel.locator("[data-cl262='sec'][data-k='how'] input[type='range']");
   await slider.focus();
   const before = await slider.inputValue();
   await page.keyboard.press("ArrowRight"); await page.keyboard.press("ArrowRight");
   await page.waitForTimeout(400);
   /* Card offers v1 — the change says what it does to the query, inside the section: an offer or a quiet footnote */
-  const says = panel.locator(".cl262-sec[data-k='how'] [data-co='rt'], .cl262-sec[data-k='how'] [data-co='quiet']");
+  const says = panel.locator("[data-cl262='sec'][data-k='how'] [data-co='rt'], [data-cl262='sec'][data-k='how'] [data-co='quiet']");
   const saysText = ((await says.allTextContents().catch(() => [])) ?? []).join(" ");
   L.check("what it does to the query, inside the section", (await says.count()) > 0 && (await says.first().isVisible()) && /query|request|dates/i.test(saysText), saysText.slice(0, 120) || `slider ${before}`);
   L.check("no rust Also-changes box", (await panel.locator("[data-cl262='also'], .cl262-also").count()) === 0, "also");
@@ -406,7 +410,8 @@ test("AA11 · × with changes asks in rust; Keep editing returns; Discard closes
   const L = new Ledger("AA11");
   const panel = await openQueryingCard(page);
   const first = ((await panel.locator(".apc-nm, [data-apc='name']").first().textContent()) ?? "").trim().split(/\s+/)[0];
-  await panel.locator("[data-cl262='edit-all']").click();
+  /* Agent card v2.1 — re-pointed: no band pencil; Contact details by the name's pencil */
+  await panel.locator("[data-cl262='pen'][data-k='contact']").evaluate((e) => (e as HTMLElement).click());
   await panel.locator("[data-ae='city']").fill("Elsewhereton");
   if (MUT === "AA11") await css(page, ".cl262-save.is-guard{background:#2a3a52 !important}");
   await panel.locator("[data-cl262='close']").click();
@@ -414,9 +419,11 @@ test("AA11 · × with changes asks in rust; Keep editing returns; Discard closes
   L.check("the guard is up", (await bar.getAttribute("data-guard")) === "", String(await bar.getAttribute("data-guard")));
   L.check("rust", (await bar.evaluate((e) => getComputedStyle(e).backgroundColor)) === "rgb(162, 69, 42)", await bar.evaluate((e) => getComputedStyle(e).backgroundColor));
   const t = ((await bar.textContent()) ?? "");
-  L.check("its words", t.includes(`Discard 1 change to ${first}?`) && t.includes("Nothing has been saved yet."), t);
+  /* Agent card v2.1 — re-pointed: the rust bar's words are "Unsaved changes" and the sections named; Keep editing takes it
+     away (there is no save bar to fall back to) and the draft stays */
+  L.check("its words", t.includes("Unsaved changes") && t.includes("contact details"), t);
   await panel.locator("[data-cl262='keep']").click();
-  L.check("Keep editing returns", (await bar.getAttribute("data-guard")) === null && (await panel.locator("[data-ae='city']").inputValue()) === "Elsewhereton", "kept");
+  L.check("Keep editing returns", (await bar.count()) === 0 && (await panel.locator("[data-ae='city']").inputValue()) === "Elsewhereton", "kept");
   await panel.locator("[data-cl262='close']").click();
   await panel.locator("[data-cl262='discard']").click();
   await page.waitForTimeout(600);
@@ -434,7 +441,7 @@ test("AA12 · the edit routes open the card in edit mode; nothing renders the lo
     await p.waitFor({ timeout: 20_000 }).catch(() => {});
     await page.waitForTimeout(700);
     L.check(`${where}: the card`, await p.isVisible().catch(() => false), "panel");
-    L.check(`${where}: in edit mode`, (await p.locator(".cl262-sec.is-edit").count()) > 0, `${await p.locator(".cl262-sec.is-edit").count()}`);
+    L.check(`${where}: in edit mode`, (await p.locator("[data-acv21='open']").count()) > 0, `${await p.locator("[data-acv21='open']").count()}`);
     L.check(`${where}: no long form`, (await longForm()) === 0, `${await longForm()}`);
     await page.keyboard.press("Escape"); await page.waitForTimeout(400);
     if (await page.locator("[data-cl262='discard']").count()) await page.locator("[data-cl262='discard']").click();
@@ -442,7 +449,8 @@ test("AA12 · the edit routes open the card in edit mode; nothing renders the lo
   /* the Contact list: the band pencil, a section pencil, "+ Website" and "Fill them in →" */
   const panel = await openQueryingCard(page);
   if (MUT === "AA12") await page.evaluate(() => document.body.insertAdjacentHTML("beforeend", "<div class='cl252-em' style='position:fixed;top:0;left:0;width:20px;height:20px'></div>"));
-  await panel.locator("[data-cl262='edit-all']").click();
+  /* Agent card v2.1 — re-pointed: no band pencil; Contact details by the name's pencil */
+  await panel.locator("[data-cl262='pen'][data-k='contact']").evaluate((e) => (e as HTMLElement).click());
   await card("Contact list · band pencil");
   /* the Query Centre: a query's Agent tab, then its "+ Add a website" / "+ Add an email" door (v158's words; earlier "+ Website") (openAgentCard at a
      field, from another page — the app-level host, not the Contact list's own card) */
@@ -540,7 +548,8 @@ test("AA14 · no green and no burgundy in the add panel or card edit mode; WeekS
   L.check("its readout is not burgundy", wk.read !== "rgb(124, 58, 42)", wk.read);
   await closeAdd(page);
   const panel = await openQueryingCard(page);
-  await panel.locator("[data-cl262='edit-all']").click();
+  /* Agent card v2.1 — re-pointed: no band pencil; Contact details by the name's pencil */
+  await panel.locator("[data-cl262='pen'][data-k='contact']").evaluate((e) => (e as HTMLElement).click());
   await page.waitForTimeout(500);
   const b = await page.evaluate(COLOUR_SCAN("[data-cl262='panel']")) as { n: number; bad: string[] };
   L.check("population: the card in edit mode", b.n > 120, `${b.n} elements`);

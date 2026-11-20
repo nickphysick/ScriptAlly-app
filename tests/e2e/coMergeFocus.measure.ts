@@ -60,12 +60,12 @@ async function openByRow(page: Page, id: string): Promise<Locator> {
   return panel;
 }
 async function editHow(page: Page, panel: Locator) {
-  await panel.locator(".cl262-sec[data-k='how'] [data-cl262='pen']").evaluate((e) => (e as HTMLElement).click());
-  await panel.locator(".cl262-sec[data-k='how'].is-edit").waitFor({ timeout: 10_000 });
+  await panel.locator("[data-cl262='sec'][data-k='how'] [data-cl262='pen']").evaluate((e) => (e as HTMLElement).click());
+  await panel.locator("[data-acv21='open'][data-k='how']").waitFor({ timeout: 10_000 });
   await page.waitForTimeout(400);
 }
 async function weeksBy(page: Page, panel: Locator, n: number) {
-  const r = panel.locator(".cl262-sec[data-k='how'] [data-aap='weeks'] input[type='range']");
+  const r = panel.locator("[data-cl262='sec'][data-k='how'] [data-aap='weeks'] input[type='range']");
   await r.focus();
   for (let i = 0; i < Math.abs(n); i++) await page.keyboard.press(n < 0 ? "ArrowLeft" : "ArrowRight");
   await page.waitForTimeout(350);
