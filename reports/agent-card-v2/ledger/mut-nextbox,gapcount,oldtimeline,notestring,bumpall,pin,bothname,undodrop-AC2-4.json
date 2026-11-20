@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "AC2-4",
+  "where": "no \"next\" row · Clara Beaumont",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "AC2-4",
+  "where": "the four-step fixture · four bubbles",
+  "ok": true,
+  "detail": "4"
+ },
+ {
+  "lock": "AC2-4",
+  "where": "bubbles equal Tracking · Clara Beaumont (4)",
+  "ok": true,
+  "detail": "card [\"me|You sent Clara your query|2 Sep\",\"them|Clara asked for a partial|26 Sep\",\"me|You sent Clara your partial|29 Sep\",\"them|Clara asked for your full manuscript|10 Oct\"] vs Tracking [\"me|You sent Clara your query|2 Sep\",\"them|Clara asked for a partial|26 Sep\",\"me|You sent Clara your partial|29 Sep\",\"them|Clara asked for your full manuscript|10 Oct\"]"
+ },
+ {
+  "lock": "AC2-4",
+  "where": "no \"next\" row · Sophie Dunn",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "AC2-4",
+  "where": "bubbles equal Tracking · Sophie Dunn (1)",
+  "ok": true,
+  "detail": "card [\"me|You sent Sophie your query|3 Jun\"] vs Tracking [\"me|You sent Sophie your query|3 Jun\"]"
+ },
+ {
+  "lock": "AC2-4",
+  "where": "no \"next\" row · Tom Ellery",
+  "ok": false,
+  "detail": "1"
+ },
+ {
+  "lock": "AC2-4",
+  "where": "bubbles equal Tracking · Tom Ellery (1)",
+  "ok": true,
+  "detail": "card [\"me|You sent Tom your query|22 Aug\"] vs Tracking [\"me|You sent Tom your query|22 Aug\"]"
+ },
+ {
+  "lock": "AC2-4",
+  "where": "queries compared",
+  "ok": true,
+  "detail": "3"
+ },
+ {
+  "lock": "AC2-4",
+  "where": "not queried · No history yet",
+  "ok": true,
+  "detail": "No history yetWhen you query Nell, every step lands here."
+ }
+]

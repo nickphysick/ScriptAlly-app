@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "AC2-7",
+  "where": "pinned · first in the list",
+  "ok": true,
+  "detail": "acv2fx-n05"
+ },
+ {
+  "lock": "AC2-7",
+  "where": "pinned · says so",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-7",
+  "where": "pinned · stored",
+  "ok": true,
+  "detail": "acv2fx-n05"
+ },
+ {
+  "lock": "AC2-7",
+  "where": "another · the pin moves",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-7",
+  "where": "another · stored",
+  "ok": true,
+  "detail": "acv2fx-n09"
+ },
+ {
+  "lock": "AC2-7",
+  "where": "unpin · nothing pinned",
+  "ok": true,
+  "detail": ""
+ }
+]

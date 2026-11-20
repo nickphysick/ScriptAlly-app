@@ -118,4 +118,6 @@ the `is-saved` outline flash; `bandWords`, `metaLine`, `howTiles`, `materialChip
 ### Locks
 `tests/e2e/acv2.measure.ts` (AC2-1 … AC2-6; mutations by `AC2_MUTATE`), fixtures `tests/e2e/seedAcv2.mjs`, screens
 `acv2Shots.measure.ts`. AC2-7 … AC2-9 are the rulings' locks. Retired or re-pointed: CL262 J1, J3, J4 and its shots; agentCardV1's two store-over-a-page cases;
-addAgentV1 AA5 and AA9 (re-pointed); cardOffersV1 CO20.
+addAgentV1 AA5, AA9 and AA12 (re-pointed); cardOffersV1 CO20 (retired), `editHow` and CO8, CO13–CO16 (re-pointed).
+CL262's editing locks open `cl262fx-full` (every section filled) or, for an empty section, the Finish block's door.
+Only the body scrolls: a test that presses by coordinates scrolls its target into view first (CO8).

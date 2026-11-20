@@ -1,0 +1,44 @@
+[
+ {
+  "lock": "AC2-9",
+  "where": "the old string is a note with Edit and Delete",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-9",
+  "where": "edit · the string is the new words",
+  "ok": true,
+  "detail": "\"Met Nora at the York festival.\\nLikes dark comedy, hates prologues.\\nAnd she answers within a week. (edited)\""
+ },
+ {
+  "lock": "AC2-9",
+  "where": "edit · nothing else on the agent changed",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-9",
+  "where": "delete · the string is cleared",
+  "ok": true,
+  "detail": "\"\""
+ },
+ {
+  "lock": "AC2-9",
+  "where": "delete · the note is gone from the card",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-9",
+  "where": "undo · byte for byte",
+  "ok": false,
+  "detail": "\"\""
+ },
+ {
+  "lock": "AC2-9",
+  "where": "undo · shown again, first",
+  "ok": false,
+  "detail": ""
+ }
+]

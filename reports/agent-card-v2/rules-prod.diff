@@ -1,0 +1,24 @@
+diff --git a/firestore.rules b/firestore.rules
+index 135af4275..b2416a71f 100644
+--- a/firestore.rules
++++ b/firestore.rules
+@@ -371,6 +371,8 @@ service cloud.firestore {
+         && (!data.keys().hasAll(['socials']) || (data.socials is list && data.socials.size() <= 30))
+         && (!data.keys().hasAll(['importedNeedsReview']) || data.importedNeedsReview is bool)
+         && (!data.keys().hasAll(['setAside']) || data.setAside is bool)
++        // Agent card v2 — the pinned note's id (a notes-subcollection id, or "__flat__" for the old notes string)
++        && (!data.keys().hasAll(['pinnedNoteId']) || (data.pinnedNoteId is string && data.pinnedNoteId.size() >= 1 && data.pinnedNoteId.size() <= 128))
+         // Assisted-fill provenance — a small map keyed by agent field name ({source, foundAt} per
+         // entry). Written only when a found value is saved unedited (To-do housekeeping batch).
+         && (!data.keys().hasAll(['fieldSources']) || (data.fieldSources is map && data.fieldSources.size() <= 12))
+@@ -1068,7 +1070,9 @@ service cloud.firestore {
+             'name', 'agency', 'email', 'website', 'country', 'city', 'twitter', 'bluesky', 'instagram', 'socials', 'genres', 'mswlNotes',
+             'starRating', 'submissionStatus', 'responseTimeWeeks', 'noResponseMeansNo', 'submissionMethod',
+             'materialsWanted', 'lastCheckedDate', 'notes', 'agentNotes', 'requeryPreference', 'importedNeedsReview', 'setAside', 'fieldSources',
+-            'reopensOn', 'mswlCheckedAt', 'notePreview', 'agencyUnknown', 'submissionMethodOther'
++            'reopensOn', 'mswlCheckedAt', 'notePreview', 'agencyUnknown', 'submissionMethodOther',
++            // Agent card v2 (19 Nov) — the note pinned to the top of the card's Notes; additive
++            'pinnedNoteId'
+           ])
+         );
+ 

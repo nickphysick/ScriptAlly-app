@@ -1,0 +1,122 @@
+[
+ {
+  "lock": "AC2-1",
+  "where": "1512 · full agent",
+  "ok": false,
+  "detail": "card 863 vs the query card's rule 700"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "1512 · equals the drawn query card",
+  "ok": false,
+  "detail": "agent card 863 vs query card 700"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "1512 · name-only agent",
+  "ok": false,
+  "detail": "card 513 vs 700"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "1280 · full agent",
+  "ok": false,
+  "detail": "card 863 vs the query card's rule 700"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "1280 · equals the drawn query card",
+  "ok": false,
+  "detail": "agent card 863 vs query card 700"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "1280 · name-only agent",
+  "ok": false,
+  "detail": "card 513 vs 700"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "band · you (Clara Beaumont)",
+  "ok": true,
+  "detail": "rgb(94, 113, 137)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "frame · you",
+  "ok": true,
+  "detail": "rgb(165, 131, 123)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "pill · partial (Clara Beaumont)",
+  "ok": true,
+  "detail": "rgb(243, 246, 249) vs rgb(243, 246, 249)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "pill · offer (Tom Ellery)",
+  "ok": true,
+  "detail": "rgb(248, 232, 229) vs rgb(248, 232, 229)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "pill · full (Aisha Kapoor)",
+  "ok": true,
+  "detail": "rgb(223, 231, 240) vs rgb(223, 231, 240)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "band · agent (Nadia Hussain)",
+  "ok": true,
+  "detail": "rgb(94, 113, 137)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "frame · agent",
+  "ok": true,
+  "detail": "rgb(165, 131, 123)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "pill · queried (Nadia Hussain)",
+  "ok": true,
+  "detail": "rgb(248, 244, 237) vs rgb(248, 244, 237)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "band · none (Theo Abara)",
+  "ok": true,
+  "detail": "rgb(94, 113, 137)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "frame · none",
+  "ok": true,
+  "detail": "rgb(165, 131, 123)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "band · closed (George Ashworth)",
+  "ok": true,
+  "detail": "rgb(94, 113, 137)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "frame · closed",
+  "ok": true,
+  "detail": "rgb(165, 131, 123)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "pill · closed (George Ashworth)",
+  "ok": true,
+  "detail": "rgb(246, 245, 243) vs rgb(246, 245, 243)"
+ },
+ {
+  "lock": "AC2-1",
+  "where": "pill · five stages seen",
+  "ok": true,
+  "detail": "partial, offer, full, queried, closed"
+ }
+]

@@ -1,0 +1,392 @@
+[
+ {
+  "lock": "AC2-3",
+  "where": "Housekeeping read",
+  "ok": true,
+  "detail": "54 agents"
+ },
+ {
+  "lock": "AC2-3",
+  "where": "finish · Clara Beaumont",
+  "ok": true,
+  "detail": "card {\"n\":2,\"keys\":[\"reply\",\"wishlist\"]} vs Housekeeping [\"reply\",\"wishlist\"]"
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Clara Beaumont",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "finish · Sophie Dunn",
+  "ok": true,
+  "detail": "card {\"n\":2,\"keys\":[\"reply\",\"wishlist\"]} vs Housekeeping [\"reply\",\"wishlist\"]"
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Sophie Dunn",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "finish · Tom Ellery",
+  "ok": true,
+  "detail": "card {\"n\":2,\"keys\":[\"reply\",\"wishlist\"]} vs Housekeeping [\"reply\",\"wishlist\"]"
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Tom Ellery",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "finish · Aisha Kapoor",
+  "ok": true,
+  "detail": "card {\"n\":2,\"keys\":[\"reply\",\"wishlist\"]} vs Housekeeping [\"reply\",\"wishlist\"]"
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Aisha Kapoor",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Jonathan Marsh",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Hester Quinn",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Marcus Reed",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Nadia Hussain",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Daniel O’Rourke",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Priya Raman",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Fenella Strand",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Theo Abara",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Wren Ashcombe",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Hester Blaine",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Cormac Bligh",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Noah Bright",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Wren Calloway",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Alasdair Crewe",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Ana Duarte",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Tom Ellery",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Imogen Farr",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Ottoline Frayn",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Elinor Hale",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Bea Halloran",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Tobias Hark",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Tomas Keller",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Mira Kovic",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Edda Kron",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Iris Kwan",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Rachel Lin",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · David Marsh",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no finish block · Ingrid Marsh (complete)",
+  "ok": true,
+  "detail": "null"
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Ingrid Marsh",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Priya Nair",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Nell Nameonly",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Nora Notekeeper",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Sam Okoro",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Rufus Oyelaran",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Sun-hee Park",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Tamsin Probewell",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Tobias Quint",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Rosa Quintana",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Imogen Rackham",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Devendra Rao",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Marcus Reed",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Douglas Renner",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Wren Tallis",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Imogen Vale",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Imogen Vale",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Rosalind Vale",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Peter Vance",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Edda Voss",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Joan Whitfield",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · George Ashworth",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · William Tan",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no small spaced capitals · Eleanor Whitfield",
+  "ok": false,
+  "detail": "SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\" | SPAN. 10.5px/1.785px \"SPACED\""
+ },
+ {
+  "lock": "AC2-3",
+  "where": "name-only · no fact boxes",
+  "ok": true,
+  "detail": "{\"boxes\":0,\"ghosts\":0,\"asks\":0,\"wish\":0,\"genres\":0,\"gapLine\":0}"
+ },
+ {
+  "lock": "AC2-3",
+  "where": "name-only · no ghost bars",
+  "ok": true,
+  "detail": "{\"boxes\":0,\"ghosts\":0,\"asks\":0,\"wish\":0,\"genres\":0,\"gapLine\":0}"
+ },
+ {
+  "lock": "AC2-3",
+  "where": "name-only · no empty sections",
+  "ok": true,
+  "detail": "{\"boxes\":0,\"ghosts\":0,\"asks\":0,\"wish\":0,\"genres\":0,\"gapLine\":0}"
+ },
+ {
+  "lock": "AC2-3",
+  "where": "no gap line in the tab row",
+  "ok": true,
+  "detail": "{\"boxes\":0,\"ghosts\":0,\"asks\":0,\"wish\":0,\"genres\":0,\"gapLine\":0}"
+ }
+]

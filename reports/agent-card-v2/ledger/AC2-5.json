@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "AC2-5",
+  "where": "old string shown first",
+  "ok": true,
+  "detail": "\"Met Nora at the York festival.\\nLikes dark comedy, hates prologues.\""
+ },
+ {
+  "lock": "AC2-5",
+  "where": "writing box in view · 12 notes",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-5",
+  "where": "writing box in view · scrolled",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-5",
+  "where": "stored string byte-identical",
+  "ok": true,
+  "detail": "\"Met Nora at the York festival.\\nLikes dark comedy, hates prologues.\""
+ },
+ {
+  "lock": "AC2-5",
+  "where": "old string still shown first",
+  "ok": true,
+  "detail": "\"Met Nora at the York festival.\\nLikes dark comedy, hates prologues.\""
+ },
+ {
+  "lock": "AC2-5",
+  "where": "the new note is listed",
+  "ok": true,
+  "detail": "14 notes"
+ }
+]

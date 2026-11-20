@@ -1,0 +1,56 @@
+[
+ {
+  "lock": "AC2-8",
+  "where": "email · the door is there",
+  "ok": true,
+  "detail": "+ Add email"
+ },
+ {
+  "lock": "AC2-8",
+  "where": "email · the cursor is in its own field",
+  "ok": false,
+  "detail": "name"
+ },
+ {
+  "lock": "AC2-8",
+  "where": "email · Contact details is open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-8",
+  "where": "website · the door is there",
+  "ok": true,
+  "detail": "+ Add a website"
+ },
+ {
+  "lock": "AC2-8",
+  "where": "website · the cursor is in its own field",
+  "ok": false,
+  "detail": "name"
+ },
+ {
+  "lock": "AC2-8",
+  "where": "website · Contact details is open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-8",
+  "where": "box Add · Clara Beaumont · reply lands in weeks",
+  "ok": true,
+  "detail": "weeks"
+ },
+ {
+  "lock": "AC2-8",
+  "where": "box Add · How Clara works is open",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-8",
+  "where": "an unknown box was found",
+  "ok": true,
+  "detail": ""
+ }
+]

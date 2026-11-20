@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "AC2-6",
+  "where": "save · bumps once",
+  "ok": true,
+  "detail": "1 rises"
+ },
+ {
+  "lock": "AC2-6",
+  "where": "save · peak 1.035 ±0.004",
+  "ok": true,
+  "detail": "1.0350"
+ },
+ {
+  "lock": "AC2-6",
+  "where": "save · one bump of 520ms (qcMotion160's)",
+  "ok": true,
+  "detail": "[520]"
+ },
+ {
+  "lock": "AC2-6",
+  "where": "save · back to 1 within 520ms ±60 of rising",
+  "ok": true,
+  "detail": "417ms"
+ },
+ {
+  "lock": "AC2-6",
+  "where": "undo · no bump",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "AC2-6",
+  "where": "undo · the snackbar says so",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-6",
+  "where": "undo · the agent and its queries exactly",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-6",
+  "where": "saved tint · within 200ms of the save's acknowledgement",
+  "ok": true,
+  "detail": "ack 311ms, tint 338ms (rgb(223, 231, 240))"
+ },
+ {
+  "lock": "AC2-6",
+  "where": "saved tint · its own colour by 2.2s",
+  "ok": true,
+  "detail": "{\"bg\":\"rgba(0, 0, 0, 0)\",\"a\":0}"
+ },
+ {
+  "lock": "AC2-6",
+  "where": "discard · no bump",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "AC2-6",
+  "where": "cancel (no changes) · no bump",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "AC2-6",
+  "where": "reduced motion · no animation on the card",
+  "ok": true,
+  "detail": "0 running"
+ },
+ {
+  "lock": "AC2-6",
+  "where": "documents back after the run",
+  "ok": true,
+  "detail": ""
+ }
+]

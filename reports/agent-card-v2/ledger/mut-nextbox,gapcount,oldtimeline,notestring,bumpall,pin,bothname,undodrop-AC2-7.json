@@ -1,0 +1,38 @@
+[
+ {
+  "lock": "AC2-7",
+  "where": "pinned · first in the list",
+  "ok": false,
+  "detail": "__flat__"
+ },
+ {
+  "lock": "AC2-7",
+  "where": "pinned · says so",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-7",
+  "where": "pinned · stored",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AC2-7",
+  "where": "another · the pin moves",
+  "ok": false,
+  "detail": ""
+ },
+ {
+  "lock": "AC2-7",
+  "where": "another · stored",
+  "ok": false,
+  "detail": "undefined"
+ },
+ {
+  "lock": "AC2-7",
+  "where": "unpin · nothing pinned",
+  "ok": true,
+  "detail": ""
+ }
+]

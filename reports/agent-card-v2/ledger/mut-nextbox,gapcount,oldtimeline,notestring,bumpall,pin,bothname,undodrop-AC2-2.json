@@ -1,0 +1,878 @@
+[
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Clara Beaumont",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Clara Beaumont (you)",
+  "ok": true,
+  "detail": "stand you, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Clara Beaumont",
+  "ok": true,
+  "detail": "rgb(243, 246, 249) (partial)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "send · line 1 (Clara Beaumont)",
+  "ok": true,
+  "detail": "Clara asked for your partial"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "send · line 2",
+  "ok": true,
+  "detail": "Send it, then log it here"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "send · button",
+  "ok": true,
+  "detail": "Mark partial sent"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "send · opens sent",
+  "ok": true,
+  "detail": "[{\"via\":\"drawer\",\"mode\":\"sent\",\"queryId\":\"cv25-q-06\",\"agentId\":null}]"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Sophie Dunn",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Sophie Dunn (you)",
+  "ok": true,
+  "detail": "stand you, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Sophie Dunn",
+  "ok": true,
+  "detail": "rgb(243, 246, 249) (partial)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Tom Ellery",
+  "ok": false,
+  "detail": "2 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Tom Ellery (you)",
+  "ok": true,
+  "detail": "stand you, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Tom Ellery",
+  "ok": true,
+  "detail": "rgb(248, 232, 229) (offer)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "offer · line 1 (Tom Ellery)",
+  "ok": true,
+  "detail": "Tom made an offer"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "offer · line 2",
+  "ok": true,
+  "detail": "Tom hasn’t given an answer-by date"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "offer · button",
+  "ok": true,
+  "detail": "Record your answer"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "offer · link",
+  "ok": true,
+  "detail": "Make it a task"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "offer · opens offer",
+  "ok": true,
+  "detail": "[{\"via\":\"drawer\",\"mode\":\"offer\",\"queryId\":\"cv25-q-08\",\"agentId\":null}]"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Aisha Kapoor",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Aisha Kapoor (you)",
+  "ok": true,
+  "detail": "stand you, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Aisha Kapoor",
+  "ok": true,
+  "detail": "rgb(223, 231, 240) (full)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Jonathan Marsh",
+  "ok": false,
+  "detail": "2 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Jonathan Marsh (you)",
+  "ok": true,
+  "detail": "stand you, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Jonathan Marsh",
+  "ok": true,
+  "detail": "rgb(223, 231, 240) (full)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Hester Quinn",
+  "ok": false,
+  "detail": "3 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Hester Quinn (you)",
+  "ok": true,
+  "detail": "stand you, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Hester Quinn",
+  "ok": true,
+  "detail": "rgb(243, 246, 249) (partial)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Marcus Reed",
+  "ok": false,
+  "detail": "4 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Marcus Reed (you)",
+  "ok": true,
+  "detail": "stand you, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Marcus Reed",
+  "ok": true,
+  "detail": "rgb(243, 246, 249) (partial)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Nadia Hussain",
+  "ok": false,
+  "detail": "5 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Nadia Hussain (agent)",
+  "ok": true,
+  "detail": "stand agent, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Nadia Hussain",
+  "ok": true,
+  "detail": "rgb(248, 244, 237) (queried)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "agent · line 1 (Nadia Hussain)",
+  "ok": true,
+  "detail": "Waiting on Nadia"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "agent · line 2",
+  "ok": true,
+  "detail": "Sent 30 Sep"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "agent · button",
+  "ok": true,
+  "detail": "Record a response"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "agent · opens resp",
+  "ok": true,
+  "detail": "[{\"via\":\"response\",\"mode\":\"resp\",\"queryId\":\"cv25-q-13\"},{\"via\":\"query-card\",\"mode\":\"open\",\"queryId\":\"cv25-q-13\",\"back\":\"Nadia\"}]"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Daniel O’Rourke",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Daniel O’Rourke (agent)",
+  "ok": true,
+  "detail": "stand agent, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Daniel O’Rourke",
+  "ok": true,
+  "detail": "rgb(248, 244, 237) (queried)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Priya Raman",
+  "ok": false,
+  "detail": "2 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Priya Raman (agent)",
+  "ok": true,
+  "detail": "stand agent, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Priya Raman",
+  "ok": true,
+  "detail": "rgb(248, 244, 237) (queried)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Fenella Strand",
+  "ok": false,
+  "detail": "3 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Fenella Strand (agent)",
+  "ok": true,
+  "detail": "stand agent, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · Fenella Strand",
+  "ok": true,
+  "detail": "rgb(248, 244, 237) (queried)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Theo Abara",
+  "ok": false,
+  "detail": "4 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Theo Abara (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "none · line 1 (Theo Abara)",
+  "ok": true,
+  "detail": "Not queried yet"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "none · line 2",
+  "ok": true,
+  "detail": "Theo is open to queries"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "none · button",
+  "ok": true,
+  "detail": "Log a query"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "none · opens log",
+  "ok": true,
+  "detail": "[{\"via\":\"drawer\",\"mode\":\"log\",\"queryId\":null,\"agentId\":\"msv12-agent-4\"}]"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Wren Ashcombe",
+  "ok": false,
+  "detail": "1 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Wren Ashcombe (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Hester Blaine",
+  "ok": false,
+  "detail": "2 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Hester Blaine (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Cormac Bligh",
+  "ok": false,
+  "detail": "3 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Cormac Bligh (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Noah Bright",
+  "ok": false,
+  "detail": "4 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Noah Bright (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Wren Calloway",
+  "ok": false,
+  "detail": "5 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Wren Calloway (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Alasdair Crewe",
+  "ok": false,
+  "detail": "6 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Alasdair Crewe (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Ana Duarte",
+  "ok": false,
+  "detail": "7 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Ana Duarte (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Tom Ellery",
+  "ok": false,
+  "detail": "8 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Tom Ellery (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Imogen Farr",
+  "ok": false,
+  "detail": "9 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Imogen Farr (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Ottoline Frayn",
+  "ok": false,
+  "detail": "10 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Ottoline Frayn (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Elinor Hale",
+  "ok": false,
+  "detail": "11 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Elinor Hale (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Bea Halloran",
+  "ok": false,
+  "detail": "12 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Bea Halloran (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Tobias Hark",
+  "ok": false,
+  "detail": "13 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Tobias Hark (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Tomas Keller",
+  "ok": false,
+  "detail": "14 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Tomas Keller (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Mira Kovic",
+  "ok": false,
+  "detail": "15 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Mira Kovic (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Edda Kron",
+  "ok": false,
+  "detail": "16 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Edda Kron (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Iris Kwan",
+  "ok": false,
+  "detail": "17 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Iris Kwan (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Rachel Lin",
+  "ok": false,
+  "detail": "18 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Rachel Lin (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · David Marsh",
+  "ok": false,
+  "detail": "19 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · David Marsh (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Ingrid Marsh",
+  "ok": false,
+  "detail": "20 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Ingrid Marsh (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Priya Nair",
+  "ok": false,
+  "detail": "21 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Priya Nair (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Nell Nameonly",
+  "ok": false,
+  "detail": "22 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Nell Nameonly (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Nora Notekeeper",
+  "ok": false,
+  "detail": "23 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Nora Notekeeper (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Sam Okoro",
+  "ok": false,
+  "detail": "24 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Sam Okoro (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Rufus Oyelaran",
+  "ok": false,
+  "detail": "25 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Rufus Oyelaran (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Sun-hee Park",
+  "ok": false,
+  "detail": "26 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Sun-hee Park (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Tamsin Probewell",
+  "ok": false,
+  "detail": "27 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Tamsin Probewell (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Tobias Quint",
+  "ok": false,
+  "detail": "28 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Tobias Quint (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Rosa Quintana",
+  "ok": false,
+  "detail": "29 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Rosa Quintana (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Imogen Rackham",
+  "ok": false,
+  "detail": "30 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Imogen Rackham (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Devendra Rao",
+  "ok": false,
+  "detail": "31 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Devendra Rao (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Marcus Reed",
+  "ok": false,
+  "detail": "32 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Marcus Reed (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Douglas Renner",
+  "ok": false,
+  "detail": "33 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Douglas Renner (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Wren Tallis",
+  "ok": false,
+  "detail": "34 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Wren Tallis (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Imogen Vale",
+  "ok": false,
+  "detail": "35 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Imogen Vale (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Imogen Vale",
+  "ok": false,
+  "detail": "36 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Imogen Vale (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Rosalind Vale",
+  "ok": false,
+  "detail": "37 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Rosalind Vale (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Peter Vance",
+  "ok": false,
+  "detail": "38 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Peter Vance (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Edda Voss",
+  "ok": false,
+  "detail": "39 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Edda Voss (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · Joan Whitfield",
+  "ok": false,
+  "detail": "40 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · Joan Whitfield (none)",
+  "ok": true,
+  "detail": "stand none, box false"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "no next-step box · George Ashworth",
+  "ok": false,
+  "detail": "41 found"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box · George Ashworth (closed)",
+  "ok": true,
+  "detail": "stand closed, box true"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query box fill · George Ashworth",
+  "ok": true,
+  "detail": "rgb(246, 245, 243) (closed)"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "closed · line 1 (George Ashworth)",
+  "ok": true,
+  "detail": "Closed"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "closed · line 2",
+  "ok": true,
+  "detail": "George passed · 20 Aug"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "closed · button",
+  "ok": true,
+  "detail": "Query again"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "closed · opens log",
+  "ok": true,
+  "detail": "[{\"via\":\"drawer\",\"mode\":\"log\",\"queryId\":null,\"agentId\":\"cv25-agent-12\"}]"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "a fixture for none",
+  "ok": true,
+  "detail": "send, offer, agent, none, closed"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "a fixture for agent",
+  "ok": true,
+  "detail": "send, offer, agent, none, closed"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "a fixture for send",
+  "ok": true,
+  "detail": "send, offer, agent, none, closed"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "a fixture for offer",
+  "ok": true,
+  "detail": "send, offer, agent, none, closed"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "a fixture for closed",
+  "ok": true,
+  "detail": "send, offer, agent, none, closed"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "query card · ← Back to {first}",
+  "ok": true,
+  "detail": "← Back to Clara"
+ },
+ {
+  "lock": "AC2-2",
+  "where": "back · the tab it left",
+  "ok": true,
+  "detail": "notes"
+ }
+]
