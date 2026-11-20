@@ -1,0 +1,134 @@
+[
+ {
+  "lock": "P",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "state querying, 2 queries across 2 stages"
+ },
+ {
+  "lock": "H1",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "no Log a query in the band"
+ },
+ {
+  "lock": "H2",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "[{\"t\":\"Record a response\",\"bg\":\"rgba(0, 0, 0, 0)\"},{\"t\":\"Add an agent\",\"bg\":\"rgba(0, 0, 0, 0)\"}]"
+ },
+ {
+  "lock": "H3",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "[{\"stage\":\"queried\",\"n\":1,\"vis\":true},{\"stage\":\"full\",\"n\":1,\"vis\":true}]"
+ },
+ {
+  "lock": "H4",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "queried,full"
+ },
+ {
+  "lock": "H5",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "band 149px, 44px over its text"
+ },
+ {
+  "lock": "L1",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "three columns, left to right"
+ },
+ {
+  "lock": "L2",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "founding folded=1"
+ },
+ {
+  "lock": "L3",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "no Closed queries card"
+ },
+ {
+  "lock": "L4",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "next > gs-slot > agents-hoop"
+ },
+ {
+  "lock": "L5",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "active > expected"
+ },
+ {
+  "lock": "L6",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "[\"Open task\"]"
+ },
+ {
+  "lock": "C1",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "expected head rgb(239, 230, 214)"
+ },
+ {
+  "lock": "C2",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "chart head rgb(45, 58, 80)"
+ },
+ {
+  "lock": "C3",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "agents head rgb(255, 255, 255)"
+ },
+ {
+  "lock": "C4",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "next queried rgb(239, 230, 214)"
+ },
+ {
+  "lock": "N1",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "horizontal overflow 0px"
+ },
+ {
+  "lock": "N2",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "N3",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "K1",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "{\"pos\":\"fixed\",\"x\":1142,\"y\":495,\"width\":134,\"height\":225,\"top\":495,\"right\":1276,\"bottom\":720,\"left\":1142}"
+ },
+ {
+  "lock": "G1",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "1 of 2 agents asked to read more. (3 bars)"
+ },
+ {
+  "lock": "G2",
+  "where": "first-weeks 1280x720",
+  "ok": true,
+  "detail": "chart band overflow 0px"
+ }
+]

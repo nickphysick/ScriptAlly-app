@@ -84,6 +84,7 @@ describe("DB3-4a · How it's going", () => {
     expect(goingHeading({ sent: 23, asked: 2, full: 1, offers: 0, closedNoRequest: 3 })).toBe("2 of 23 agents asked to read more.");
     expect(goingSub({ sent: 23, asked: 2, full: 1, offers: 0, closedNoRequest: 3 })).toBe("One full and one partial. 3 queries closed without a request.");
     expect(goingSub({ sent: 6, asked: 1, full: 0, offers: 0, closedNoRequest: 0 })).toBe("One partial. Nothing closed yet.");
+    expect(goingSub({ sent: 52, asked: 22, full: 15, offers: 1, closedNoRequest: 11 })).toBe("15 fulls and 7 partials. 11 queries closed without a request.");
   });
 });
 

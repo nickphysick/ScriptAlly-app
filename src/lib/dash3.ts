@@ -69,7 +69,7 @@ export function howItsGoing(scopedQueries: readonly Query[], activities: readonl
 }
 
 const NUM = ["No", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"];
-const word = (n: number) => NUM[n] ?? n.toLocaleString("en-GB");
+const wordOf = (n: number) => (n <= 9 ? NUM[n] : undefined) ?? n.toLocaleString("en-GB");
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 
 /** "2 of 23 agents asked to read more." */
@@ -78,6 +78,8 @@ export const goingHeading = (g: HowItsGoing): string => `${g.asked.toLocaleStrin
 /** "One full and one partial. 3 queries closed without a request." — counts, nothing else */
 export function goingSub(g: HowItsGoing): string {
   const partial = g.asked - g.full;
+  /* words for one to nine, unless any count in the line passes nine — then digits throughout, never "15 and seven" */
+  const word = Math.max(g.full, partial) > 9 ? (n: number) => n.toLocaleString("en-GB") : wordOf;
   const parts: string[] = [];
   if (g.full > 0) parts.push(`${word(g.full).toLowerCase()} ${plural(g.full, "full", "fulls")}`);
   if (partial > 0) parts.push(`${word(partial).toLowerCase()} ${plural(partial, "partial", "partials")}`);
