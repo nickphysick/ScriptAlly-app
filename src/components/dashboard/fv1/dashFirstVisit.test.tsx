@@ -71,10 +71,13 @@ describe("DFV-A · the pre-query page", () => {
     expect(html.indexOf('data-d2="grid"')).toBeLessThan(html.indexOf('data-fv1="setup"'));
     expect(html).not.toContain('class="d59-rule"');
   });
-  /* RE-POINTED (Dashboard v2): the band carries no buttons before the first query, and no status label of any kind */
-  it("carries no buttons on the band before the first query, and no status label", () => {
+  /* RE-POINTED (Dashboard v3): before the first query the band carries its two outline actions (as the ref's Day one),
+     no stage marks, and no status label of any kind */
+  it("carries its two outline actions and no marks before the first query, and no status label", () => {
     expect(html).toContain('data-d2="band"');
-    expect(html).not.toContain('data-d2="buttons"');
+    expect(html).toContain('data-d2="buttons"');
+    expect(html).not.toContain('data-d3="marks"');
+    expect(html).not.toContain('data-d2="log"');
     expect(html).not.toContain(">Getting ready<");
   });
   it("retires the doors, the lift tiles and Where do I start?", () => {

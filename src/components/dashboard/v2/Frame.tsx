@@ -9,7 +9,7 @@
 import React from "react";
 import "./dash2Frame.css";
 
-export type FrameTone = "sand" | "sage" | "stone" | "navy" | "rose";
+export type FrameTone = "sand" | "sage" | "stone" | "navy" | "rose" | "paper";
 
 export const Frame: React.FC<{
   tone: FrameTone;
@@ -21,14 +21,16 @@ export const Frame: React.FC<{
   probe: string;
   loading?: boolean;
   className?: string;
+  /** Dashboard v3, Phase 3: a stage's band as the head's `background` (lib/stageColours `bandBackground`), over the tone */
+  bandStyle?: React.CSSProperties;
   /** extra `data-*` attributes for the section (the founding card's figures, read by its lock) */
   data?: Record<string, string | number | undefined>;
   children: React.ReactNode;
-}> = ({ tone, title, meta, after, label, probe, loading, className, data, children }) => (
+}> = ({ tone, title, meta, after, label, probe, loading, className, bandStyle, data, children }) => (
   <section className={`os-card d2-card${className ? ` ${className}` : ""}`} role="group" aria-label={label} data-d2-card={probe} data-loading={loading ? "1" : "0"}
     {...Object.fromEntries(Object.entries(data ?? {}).filter(([, v]) => v !== undefined).map(([k, v]) => [`data-${k}`, v]))}>
     <div className="os-frame">
-      <div className={`os-band d2-tone--${tone}`}>
+      <div className={`os-band d2-tone--${tone}`} style={bandStyle}>
         <div className="os-bandrow">
           <h2 className="os-cardttl d2-cardttl">{title}</h2>
           {after}

@@ -49,16 +49,21 @@ describe("FV2-H · on the page", () => {
         currentUser={{ id: "u1", name: "Audit S1", todoPrefs, notifyPrefs: { nudges: true } } as unknown as User} activeManuscript={ms} onNavigate={() => {}} onPrefs={() => {}} now={new Date(2026, 9, 29, 12)} />
     </MemoryRouter>,
   );
-  it("all five done: the finish line in the sheet, and no Then: naming Getting started", () => {
+  /* RE-POINTED (Dashboard v3, Phase 5): all done, Getting started is gone from the Dashboard — no finish line */
+  it("all five done: Getting started is gone, and no Then: naming Getting started", () => {
     const html = page();
-    expect(html).toContain('data-fv2="finish"');
-    expect(html).toContain(">That&#x27;s you set up<");
+    expect(html).not.toContain('data-fv2="finish"');
+    expect(html).not.toContain('data-fv2="gs"');
+    expect(html).toContain('data-gs="none"');
     expect(html).not.toContain("Then: finish getting started");
   });
-  it("one undone: the list", () => {
+  /* RE-POINTED (Dashboard v3, Phase 5): one step left folds to the single row, under Agents on file */
+  it("one undone: the one-row fold, under Agents on file", () => {
     const html = page(undefined, [versions[0]]);
     expect(html).not.toContain('data-fv2="finish"');
-    expect(html).toContain('data-fv2="gs-count"');
+    expect(html).toContain('data-d3="gs-row"');
+    expect(html).toContain("Getting started, 4 of 5 done. Last one: add your query letter and synopsis.");
+    expect(html.indexOf('data-d60="agents-hoop"')).toBeLessThan(html.indexOf('data-d3="gs-row"'));
   });
   /* RE-POINTED (Dashboard v2): the goal sheet is retired, so a closed Getting started leaves the slot empty */
   it("closed: Getting started goes and nothing takes its place", () => {

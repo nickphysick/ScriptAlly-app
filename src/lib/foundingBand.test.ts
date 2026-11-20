@@ -93,8 +93,9 @@ describe("foundingBand · the stored fold (Part E)", () => {
   it("is one dotted leaf under todoPrefs.dash, read as true only when stored true", () => {
     expect(foundingFoldWrite(true)).toEqual({ "todoPrefs.dash.foundingFolded": true });
     expect(foundingFoldWrite(false)).toEqual({ "todoPrefs.dash.foundingFolded": false });
-    expect(dashPrefsOf({ todoPrefs: { dash: { foundingFolded: true } } } as never).foundingFolded).toBe(true);
-    for (const v of [undefined, false, "yes", 1]) expect(dashPrefsOf({ todoPrefs: { dash: { foundingFolded: v } } } as never).foundingFolded).toBe(false);
-    expect(dashPrefsOf(null).foundingFolded).toBe(false);
+    /* RE-POINTED (Dashboard v3, Phase 2): folded by default; only a stored false — the chevron opening it — unfolds */
+    for (const v of [true, undefined, "yes", 1]) expect(dashPrefsOf({ todoPrefs: { dash: { foundingFolded: v } } } as never).foundingFolded).toBe(true);
+    expect(dashPrefsOf({ todoPrefs: { dash: { foundingFolded: false } } } as never).foundingFolded).toBe(false);
+    expect(dashPrefsOf(null).foundingFolded).toBe(true);
   });
 });

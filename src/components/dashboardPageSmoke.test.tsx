@@ -90,7 +90,9 @@ describe("/dashboard renders", () => {
     /* ⚠️ RETARGETED AGAIN (Dashboard v60): "Agents on file" IS a landmark of the querying page now —
        the slate hoop card beside Closed, under the full-width chart. */
     expect(html).toContain("Agents on file");
-    expect(html).toContain('data-d60="closed-hoop"');
+    /* RE-POINTED (Dashboard v3, Phase 2): Closed queries is off the Dashboard; the chart card is the populated landmark */
+    expect(html).toContain('data-d2-card="active"');
+    expect(html).not.toContain('data-d60="closed-hoop"');
     /* ⚠️ RETARGETED (Dashboard v58): the header no longer states a figure — it is the book. The
        populated landmarks are the title-page eyebrow and the list column's own title. */
     /* ⚠️ RETARGETED (Dashboard feed v1, Part A): the navy header band is retired from the querying page, so its eyebrow

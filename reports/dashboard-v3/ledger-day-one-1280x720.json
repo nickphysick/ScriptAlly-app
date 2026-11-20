@@ -1,0 +1,175 @@
+{
+ "vw": 1280,
+ "vh": 720,
+ "state": "pre",
+ "nQueriesCount": 0,
+ "marks": [],
+ "band": {
+  "x": 112,
+  "y": 134,
+  "width": 1128,
+  "height": 121.484375,
+  "top": 134,
+  "right": 1240,
+  "bottom": 255.484375,
+  "left": 112
+ },
+ "bandH": 121.484375,
+ "bandSlack": 44,
+ "title": {
+  "x": 140,
+  "y": 156,
+  "width": 296.921875,
+  "height": 49.390625,
+  "top": 156,
+  "right": 436.921875,
+  "bottom": 205.390625,
+  "left": 140
+ },
+ "buttons": {
+  "x": 1124,
+  "y": 174.734375,
+  "width": 88,
+  "height": 40,
+  "top": 174.734375,
+  "right": 1212,
+  "bottom": 214.734375,
+  "left": 1124
+ },
+ "pills": [
+  {
+   "t": "Record a response",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  {
+   "t": "Add an agent",
+   "bg": "rgba(0, 0, 0, 0)"
+  }
+ ],
+ "logInBand": false,
+ "founding": {
+  "x": 112,
+  "y": 271.484375,
+  "width": 1128,
+  "height": 62,
+  "top": 271.484375,
+  "right": 1240,
+  "bottom": 333.484375,
+  "left": 112
+ },
+ "foundingFolded": "1",
+ "left": {
+  "x": 112,
+  "y": 349.484375,
+  "width": 355.84375,
+  "height": 681.1875,
+  "top": 349.484375,
+  "right": 467.84375,
+  "bottom": 1030.671875,
+  "left": 112
+ },
+ "mid": {
+  "x": 483.84375,
+  "y": 349.484375,
+  "width": 462.59375,
+  "height": 681.1875,
+  "top": 349.484375,
+  "right": 946.4375,
+  "bottom": 1030.671875,
+  "left": 483.84375
+ },
+ "right": {
+  "x": 962.4375,
+  "y": 349.484375,
+  "width": 277.5625,
+  "height": 681.1875,
+  "top": 349.484375,
+  "right": 1240,
+  "bottom": 1030.671875,
+  "left": 962.4375
+ },
+ "order": {
+  "left": [
+   "gs-slot",
+   "agents-hoop"
+  ],
+  "mid": [
+   "setup",
+   "expected"
+  ]
+ },
+ "closedHoop": false,
+ "heads": {
+  "next": "",
+  "nextStage": null,
+  "expected": "rgb(239, 230, 214)",
+  "chart": "",
+  "agents": "rgb(255, 255, 255)"
+ },
+ "expected": {
+  "rows": 0,
+  "past": 0,
+  "say": "When to expect each reply."
+ },
+ "gsPlace": "lead",
+ "clippers": [],
+ "cards": [
+  {
+   "name": "agents-hoop",
+   "x": 112,
+   "y": 711.484375,
+   "width": 355.84375,
+   "height": 197,
+   "top": 711.484375,
+   "right": 467.84375,
+   "bottom": 908.484375,
+   "left": 112
+  },
+  {
+   "name": "os-card fv1-setup",
+   "x": 483.84375,
+   "y": 349.484375,
+   "width": 462.59375,
+   "height": 331.1875,
+   "top": 349.484375,
+   "right": 946.4375,
+   "bottom": 680.671875,
+   "left": 483.84375
+  },
+  {
+   "name": "expected",
+   "x": 483.84375,
+   "y": 696.671875,
+   "width": 462.59375,
+   "height": 334,
+   "top": 696.671875,
+   "right": 946.4375,
+   "bottom": 1030.671875,
+   "left": 483.84375
+  },
+  {
+   "name": "d2-feed",
+   "x": 962.4375,
+   "y": 349.484375,
+   "width": 277.5625,
+   "height": 681.1875,
+   "top": 349.484375,
+   "right": 1240,
+   "bottom": 1030.671875,
+   "left": 962.4375
+  }
+ ],
+ "navyFilled": [],
+ "hScroll": 0,
+ "hawk": {
+  "pos": "fixed",
+  "x": 1142,
+  "y": 495,
+  "width": 134,
+  "height": 225,
+  "top": 495,
+  "right": 1276,
+  "bottom": 720,
+  "left": 1142
+ }
+}

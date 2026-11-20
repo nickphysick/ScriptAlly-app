@@ -1,0 +1,200 @@
+{
+ "vw": 1280,
+ "vh": 720,
+ "state": "querying",
+ "nQueriesCount": 2,
+ "marks": [
+  {
+   "stage": "queried",
+   "n": 1,
+   "vis": true
+  },
+  {
+   "stage": "full",
+   "n": 1,
+   "vis": true
+  }
+ ],
+ "band": {
+  "x": 112,
+  "y": 134,
+  "width": 1128,
+  "height": 149.078125,
+  "top": 134,
+  "right": 1240,
+  "bottom": 283.078125,
+  "left": 112
+ },
+ "bandH": 149.078125,
+ "bandSlack": 44,
+ "title": {
+  "x": 140,
+  "y": 183.59375,
+  "width": 324.640625,
+  "height": 49.390625,
+  "top": 183.59375,
+  "right": 464.640625,
+  "bottom": 232.984375,
+  "left": 140
+ },
+ "buttons": {
+  "x": 1124,
+  "y": 188.53125,
+  "width": 88,
+  "height": 40,
+  "top": 188.53125,
+  "right": 1212,
+  "bottom": 228.53125,
+  "left": 1124
+ },
+ "pills": [
+  {
+   "t": "Record a response",
+   "bg": "rgba(0, 0, 0, 0)"
+  },
+  {
+   "t": "Add an agent",
+   "bg": "rgba(0, 0, 0, 0)"
+  }
+ ],
+ "logInBand": false,
+ "founding": {
+  "x": 112,
+  "y": 299.078125,
+  "width": 1128,
+  "height": 62,
+  "top": 299.078125,
+  "right": 1240,
+  "bottom": 361.078125,
+  "left": 112
+ },
+ "foundingFolded": "1",
+ "left": {
+  "x": 112,
+  "y": 377.078125,
+  "width": 355.84375,
+  "height": 1000.046875,
+  "top": 377.078125,
+  "right": 467.84375,
+  "bottom": 1377.125,
+  "left": 112
+ },
+ "mid": {
+  "x": 483.84375,
+  "y": 377.078125,
+  "width": 462.59375,
+  "height": 1000.046875,
+  "top": 377.078125,
+  "right": 946.4375,
+  "bottom": 1377.125,
+  "left": 483.84375
+ },
+ "right": {
+  "x": 962.4375,
+  "y": 377.078125,
+  "width": 277.5625,
+  "height": 1000.046875,
+  "top": 377.078125,
+  "right": 1240,
+  "bottom": 1377.125,
+  "left": 962.4375
+ },
+ "order": {
+  "left": [
+   "next",
+   "gs-slot",
+   "agents-hoop"
+  ],
+  "mid": [
+   "active",
+   "expected"
+  ]
+ },
+ "closedHoop": false,
+ "heads": {
+  "next": "rgb(239, 230, 214)",
+  "nextStage": "queried",
+  "expected": "rgb(239, 230, 214)",
+  "chart": "rgb(45, 58, 80)",
+  "agents": "rgb(255, 255, 255)"
+ },
+ "expected": {
+  "rows": 0,
+  "past": 2,
+  "say": "Nothing due back this week."
+ },
+ "gsPlace": "under-next",
+ "clippers": [],
+ "cards": [
+  {
+   "name": "next",
+   "x": 112,
+   "y": 377.078125,
+   "width": 355.84375,
+   "height": 434.234375,
+   "top": 377.078125,
+   "right": 467.84375,
+   "bottom": 811.3125,
+   "left": 112
+  },
+  {
+   "name": "agents-hoop",
+   "x": 112,
+   "y": 1180.125,
+   "width": 355.84375,
+   "height": 197,
+   "top": 1180.125,
+   "right": 467.84375,
+   "bottom": 1377.125,
+   "left": 112
+  },
+  {
+   "name": "active",
+   "x": 483.84375,
+   "y": 377.078125,
+   "width": 462.59375,
+   "height": 346,
+   "top": 377.078125,
+   "right": 946.4375,
+   "bottom": 723.078125,
+   "left": 483.84375
+  },
+  {
+   "name": "expected",
+   "x": 483.84375,
+   "y": 739.078125,
+   "width": 462.59375,
+   "height": 309.5,
+   "top": 739.078125,
+   "right": 946.4375,
+   "bottom": 1048.578125,
+   "left": 483.84375
+  },
+  {
+   "name": "d2-feed",
+   "x": 962.4375,
+   "y": 377.078125,
+   "width": 277.5625,
+   "height": 1000.046875,
+   "top": 377.078125,
+   "right": 1240,
+   "bottom": 1377.125,
+   "left": 962.4375
+  }
+ ],
+ "navyFilled": [
+  "Open task"
+ ],
+ "hScroll": 0,
+ "hawk": {
+  "pos": "fixed",
+  "x": 1142,
+  "y": 495,
+  "width": 134,
+  "height": 225,
+  "top": 495,
+  "right": 1276,
+  "bottom": 720,
+  "left": 1142
+ }
+}

@@ -132,8 +132,16 @@ const AGENT_LABEL: Record<AgentStackKey, string> = { querying: "Querying", close
  */
 export const AGENTS_NONE = { title: "No agents yet.", line: "Add the agents you'd like to query, even before you send.", link: "Import a list" } as const;
 export const MORE_IN_DISCOVER = "More in Discover";
+/* ⚠️ DASHBOARD v3, Phase 5 (ref design-refs/dashboard-v3.html): the ring's centre is the total and the word "agents";
+   under the key, "{n} still to query. See them →" (the Not yet queried agents on the Contact list) or, at none, "No one
+   left to query." with Discover; with no agents, the ref's sentence and the two ways in. The band links the Contact list. */
+export const AGENTS_NONE_V3 = { line: "The agents you plan to query live here, with who's been queried and who's next.", add: "Add an agent", discover: "Find agents in Discover" } as const;
+export const NO_ONE_LEFT = "No one left to query.";
+export const stillToQuery = (n: number): string => `${n.toLocaleString("en-GB")} still to query.`;
+export const SEE_THEM = "See them";
+export const CONTACT_LIST_LINK = "Contact list";
 
-export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: boolean; onReady: () => void; onOpen?: (key: AgentStackKey) => void; agents?: readonly Agent[]; queries?: readonly Query[]; msId?: string | null; onDiscover?: () => void; onImport?: () => void }> = ({ loading, cov, play, onReady, onOpen, agents = [], queries = [], msId = null, onDiscover, onImport }) => {
+export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: boolean; onReady: () => void; onOpen?: (key: AgentStackKey) => void; agents?: readonly Agent[]; queries?: readonly Query[]; msId?: string | null; onDiscover?: () => void; onImport?: () => void; onAddAgent?: () => void }> = ({ loading, cov, play, onReady, onOpen, agents = [], queries = [], msId = null, onDiscover, onAddAgent }) => {
   const segs: HoopSeg[] = [
     { key: "querying", n: loading ? 0 : cov.querying, color: AGENT_SEG.querying },
     { key: "closed", n: loading ? 0 : cov.closed, color: AGENT_SEG.closed },
@@ -160,6 +168,7 @@ export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: 
           <div className="os-bandrow">
             <h3 className="os-cardttl">Agents on file</h3>
             {cov.addedThisWeek > 0 && <span className="d60-bl d60-week" data-d60="agents-week">+{cov.addedThisWeek} this week</span>}
+            {!loading && cov.total > 0 && <button type="button" className="d2-link d3-aglink" data-d3="contact-list" onClick={onReady}>{CONTACT_LIST_LINK} →</button>}
           </div>
         </div>
         {none ? (
@@ -168,25 +177,27 @@ export const AgentsHoop: React.FC<{ loading: boolean; cov: AgentCoverage; play: 
               <svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="none" stroke="#ece8e1" strokeWidth="9" strokeDasharray="3 4" /></svg>
             </div>
             <div className="fv1-nonet">
-              <p className="fv1-nonettl">{AGENTS_NONE.title}</p>
-              <p className="fv1-nonep">{AGENTS_NONE.line}</p>
-              <button type="button" className="d60-ready" data-fv1="agents-import" onClick={onImport}>{AGENTS_NONE.link} →</button>
+              <p className="fv1-nonep" data-d3="agents-none-line">{AGENTS_NONE_V3.line}</p>
+              <p className="d3-agnone">
+                <button type="button" className="d60-ready" data-d3="agents-add" onClick={onAddAgent}>{AGENTS_NONE_V3.add} →</button>
+                <button type="button" className="d60-ready" data-d60="discover" onClick={onDiscover}>{AGENTS_NONE_V3.discover} →</button>
+              </p>
             </div>
           </div>
         ) : (
         <div className="d60-hb">
           <Hoop segs={segs} play={play} label={`${cov.queried} of ${cov.total} queried: ${cov.querying} querying, ${cov.closed} closed, ${cov.none} not yet queried`}
             hit={loading ? undefined : { ...hv.slice, label: (k) => `${AGENT_LABEL[k as AgentStackKey]}: ${n(k)}`, onClick: (k) => { open(k); } }}>
-            <b className={`d60-hn${loading ? " d58-sk" : ""}`} data-d60="hoop-queried"><CountUp n={cov.queried} /></b>
-            <small data-d60="hoop-total">OF {cov.total.toLocaleString("en-GB")}</small>
+            <b className={`d60-hn${loading ? " d58-sk" : ""}`} data-d60="hoop-n"><CountUp n={cov.total} /></b>
+            <small data-d60="hoop-total">{cov.total === 1 ? "agent" : "agents"}</small>
           </Hoop>
           <ul className="d60-hl" data-d60="agents-legend">
             {shows("querying") && <li className={cov.querying === 0 ? "is-zero" : undefined} {...row("querying")}><i style={{ background: AGENT_SEG.querying }} /><b><CountUp n={cov.querying} /></b>Querying</li>}
             {shows("closed") && <li className={cov.closed === 0 ? "is-zero" : undefined} {...row("closed")}><i style={{ background: AGENT_SEG.closed }} /><b><CountUp n={cov.closed} /></b>Closed</li>}
             {shows("none") && <li className={cov.none === 0 ? "is-zero" : undefined} {...row("none")}><i style={{ background: AGENT_SEG.none }} /><b><CountUp n={cov.none} /></b>Not yet queried</li>}
-            <li className="d60-go">{loading || cov.ready > 0
-              ? <button type="button" className="d60-ready" data-d60="ready" disabled={loading} onClick={onReady}>{cov.ready} ready to query →</button>
-              : <button type="button" className="d60-ready" data-d60="discover" onClick={onDiscover}>{MORE_IN_DISCOVER} →</button>}</li>
+            <li className="d60-go d3-agnote" data-d3="agents-note">{loading || cov.none > 0
+              ? <>{stillToQuery(cov.none)} <button type="button" className="d60-ready" data-d3="see-them" disabled={loading} onClick={() => { open("none"); }}>{SEE_THEM} →</button></>
+              : <>{NO_ONE_LEFT} <button type="button" className="d60-ready" data-d60="discover" onClick={onDiscover}>{MORE_IN_DISCOVER} →</button></>}</li>
           </ul>
           <span className="d116-live" aria-live="polite" data-d116="live">{live}</span>
         </div>

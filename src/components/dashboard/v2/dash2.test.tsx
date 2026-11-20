@@ -60,10 +60,10 @@ describe("DB21-A · the weeks-querying tag", () => {
     expect(weeksTag(153)).toBe("153 weeks querying");
   });
   it("sits above the title in the band, and is absent with no send", () => {
-    const html = renderToStaticMarkup(<Dash2Band loading={false} title="T" author="A" buttons weeks={3} onLog={() => {}} onRecord={() => {}} onAddAgent={() => {}} />);
+    const html = renderToStaticMarkup(<Dash2Band loading={false} title="T" author="A" weeks={3} onRecord={() => {}} onAddAgent={() => {}} />);
     expect(html.indexOf("3 weeks querying")).toBeGreaterThan(-1);
     expect(html.indexOf("3 weeks querying")).toBeLessThan(html.indexOf('data-d2="title"'));
-    const none = renderToStaticMarkup(<Dash2Band loading={false} title="T" author="A" buttons={false} weeks={null} onLog={() => {}} onRecord={() => {}} onAddAgent={() => {}} />);
+    const none = renderToStaticMarkup(<Dash2Band loading={false} title="T" author="A" weeks={null} onRecord={() => {}} onAddAgent={() => {}} />);
     expect(none).not.toContain("querying");
     expect(page()).toContain("9 weeks querying");
     expect(page([])).not.toContain("weeks querying");
@@ -83,11 +83,12 @@ describe("DB21-B · Active queries is the chart only", () => {
 });
 
 describe("DB2-A · the band", () => {
-  it("is the title, then 'by {author}', then the three actions — and no status label", () => {
-    const html = renderToStaticMarkup(<Dash2Band loading={false} title="Murphy's Day Out" author="Bethany Carter" buttons onLog={() => {}} onRecord={() => {}} onAddAgent={() => {}} />);
+  /* RE-POINTED (Dashboard v3, Phase 1): two outline actions — Log a query is the top bar's alone, and nothing is filled */
+  it("is the title, then 'by {author}', then two outline actions — and no status label", () => {
+    const html = renderToStaticMarkup(<Dash2Band loading={false} title="Murphy's Day Out" author="Bethany Carter" onRecord={() => {}} onAddAgent={() => {}} />);
     expect(html.indexOf("Murphy&#x27;s Day Out")).toBeLessThan(html.indexOf("by Bethany Carter"));
-    for (const w of ["Log a query", "Record a response", "Add an agent"]) expect(html).toContain(w);
-    for (const w of ["Querying", "QUERYING", "Getting ready", "Between rounds"]) expect(html).not.toContain(w);
+    for (const w of ["Record a response", "Add an agent"]) expect(html).toContain(w);
+    for (const w of ["Log a query", "d2-pill--pri", "Querying", "QUERYING", "Getting ready", "Between rounds"]) expect(html).not.toContain(w);
   });
   it("the page renders it before the grid, and no Top tip, Scout, goal sheet, footer or feed tab", () => {
     const html = page();

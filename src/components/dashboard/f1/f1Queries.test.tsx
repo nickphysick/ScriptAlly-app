@@ -42,17 +42,21 @@ describe("DF1-C · Active and Closed, one card", () => {
     const at = (s: string) => html.indexOf(s);
 /* RE-POINTED (Dashboard v2.2, 6 Nov): the founding writer is a band before the grid; the left column is Next up then
        Agents on file; the middle is the chart, then Closed; the feed is the right column. Order in the markup is order on the page. */
-    for (const s of ['data-d2-card="founding"', 'data-d2="grid"', 'data-d2="left"', 'data-d2-card="next"', 'data-d60="agents-hoop"', 'data-d2="mid"', 'data-d2-card="active"', 'data-d60="closed-hoop"', 'data-d2="right"', 'data-d2="feed"']) expect(at(s), s).toBeGreaterThan(-1);
+    /* RE-POINTED (Dashboard v3, Phase 2): Closed queries is off the Dashboard — the middle is the chart, then Expected back */
+    for (const s of ['data-d2-card="founding"', 'data-d2="grid"', 'data-d2="left"', 'data-d2-card="next"', 'data-d60="agents-hoop"', 'data-d2="mid"', 'data-d2-card="active"', 'data-d2="right"', 'data-d2="feed"']) expect(at(s), s).toBeGreaterThan(-1);
+    expect(at('data-d60="closed-hoop"')).toBe(-1);
+    /* Dashboard v3, Phase 4b: Expected back follows the chart in the middle column */
+    expect(at('data-d2-card="active"')).toBeLessThan(at('data-d2-card="expected"'));
+    expect(at('data-d2-card="expected"')).toBeLessThan(at('data-d2="right"'));
     expect(at('data-d2-card="founding"')).toBeLessThan(at('data-d2="grid"'));
     expect(at('data-d2-card="next"')).toBeLessThan(at('data-d60="agents-hoop"'));
     expect(at('data-d60="agents-hoop"')).toBeLessThan(at('data-d2="mid"'));
-    expect(at('data-d2-card="active"')).toBeLessThan(at('data-d60="closed-hoop"'));
-    expect(at('data-d60="closed-hoop"')).toBeLessThan(at('data-d2="right"'));
+    expect(at('data-d2-card="active"')).toBeLessThan(at('data-d2="right"'));
     expect(html).not.toContain('data-probe="chart-card"');
   });
-  it("draws no Agents on file card before the first agent (first visit v2, Part A)", () => {
-    /* RE-POINTED (Dashboard v2): the hoop's own probe — the old slot attribute is gone, so asserting its absence was vacuous */
-    expect(page([])).not.toContain('data-d60="agents-hoop"');
+  /* RE-POINTED (Dashboard v3, Phase 5): Agents on file is drawn in every state (the ref's Day one shows it at 0) */
+  it("draws Agents on file before the first agent too", () => {
+    expect(page([])).toContain('data-d60="agents-hoop"');
     expect(page()).toContain('data-d60="agents-hoop"');
   });
   it("words the founding card's footer for this page", () => {
