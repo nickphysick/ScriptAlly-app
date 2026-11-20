@@ -45,3 +45,15 @@
 .d58.d2 .d2-tone--paper .os-cardttl { color: var(--d2-ink); }
 .d58.d2 .os-card.d60-agents .os-band.d60-band--slate { background: #ffffff; border-bottom: 1px solid #e3d5c9; }
 .d58.d2 .d2-gs .fv2-gsh { padding-bottom: 10px; border-bottom: 1px solid #e3d5c9; }
+
+/* ── Phase 4a · How it's going: the sentence, a line of counts, three bars (the ref's `.fun`) ── */
+.d58.d2 .d3-going { box-sizing: border-box; padding: 18px 18px 16px; }
+.d58.d2 .d3-gsay { margin: 0 0 4px; font-family: var(--d58-type) !important; font-size: 22px; line-height: 1.3; color: var(--d2-ink); }
+.d58.d2 .d3-gsub { margin: 0 0 16px; font-size: 15px; color: var(--d2-muted); }
+.d58.d2 .d3-frow { display: grid; grid-template-columns: 140px minmax(0, 1fr); align-items: center; gap: 12px; margin-top: 10px; font-size: 15px; }
+.d58.d2 .d3-flab { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.d58.d2 .d3-trk { position: relative; display: block; height: 30px; border-radius: 8px; background: #f6f5f3; }
+.d58.d2 .d3-fill, .d58.d2 .d3-none { position: absolute; top: 0; bottom: 0; left: 0; box-sizing: border-box; display: flex; align-items: center; padding-left: 10px; border-radius: 8px; font-family: var(--d58-type) !important; font-size: 18px; color: var(--d2-ink); }
+.d58.d2 .d3-fill { min-width: 38px; }
+.d58.d2 .d3-none { right: 0; border: 1px dashed #a8a199; color: var(--d2-muted); }
+.d58.d2 .d22-tog { flex-wrap: nowrap; }

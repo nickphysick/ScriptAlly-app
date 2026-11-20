@@ -12,6 +12,10 @@
  *            (`sentWeeks`, by `sentAt`), this week in rose; 0 to 1.15 × the highest week, gridlines at 25/50/75%.
  * Hovering or focusing a week draws a dashed line through it and shows that week's card; switching mode hides it.
  *
+ * DASHBOARD v3 (Phase 4a; ref design-refs/dashboard-v3.html): a third view, "How it's going" — the sentence "{n} of {m}
+ * agents asked to read more.", a line of counts, then three bars: Queries sent, Asked for more, Offers (a dashed empty
+ * bar at zero). Facts only (`howItsGoing`, lib/dash3: the analytics rows' history rungs). Bars take the stage table's bands.
+ *
  * ⚠️ EVERY FIGURE IS AN EXISTING DERIVATION (lib/dash2): Active's totals are the ledger's weekly stock and its card's
  * rows are `weekMix` folded by `weekCallout`; Sent counts each query once at its first-sent date. A query with no sent
  * date is in neither plot.
@@ -26,6 +30,10 @@ import {
 } from "../../../lib/dash2";
 import { agentPrimary, agentSecondary } from "../../../lib/agentDisplay";
 import { Frame } from "./Frame";
+import { StatusDot } from "../../StatusDot";
+import { QueryStatus } from "../../../types";
+import { goingHeading, goingSub, type HowItsGoing } from "../../../lib/dash3";
+import { STAGE_COLOURS, bandBackground } from "../../../lib/stageColours";
 
 export const PLOT_H = 270;
 export const EDGE = 22;
@@ -41,7 +49,32 @@ const SENT_TOP = 44;
 const TIP_W = 250;
 const SENT_AGENTS = 3;
 
-export type ChartMode = "active" | "sent";
+export type ChartMode = "active" | "sent" | "going";
+export const GOING_TITLE = "How it’s going";
+const MODE_LABEL: Record<ChartMode, string> = { active: "Active", sent: "Sent", going: GOING_TITLE };
+
+/** v3 Phase 4a: the third view — counts and bars, no adjectives */
+export const Going: React.FC<{ g: HowItsGoing }> = ({ g }) => {
+  const pc = (n: number) => (g.sent > 0 ? Math.max(0, Math.min(100, (n / g.sent) * 100)) : 0);
+  const bar = (key: string, status: QueryStatus, label: string, n: number, fill: string) => (
+    <div className="d3-frow" data-d3="going-row" data-key={key} data-n={n}>
+      <span className="d3-flab"><StatusDot status={status} overrideSize={18} decorative />{label}</span>
+      <span className="d3-trk">
+        {n > 0 ? <span className="d3-fill" style={{ width: `${pc(n)}%`, background: fill }}>{n.toLocaleString("en-GB")}</span>
+          : <span className="d3-none">0</span>}
+      </span>
+    </div>
+  );
+  return (
+    <div className="d3-going" data-d3="going" style={{ minHeight: PLOT_H }}>
+      <p className="d3-gsay" data-d3="going-say">{goingHeading(g)}</p>
+      <p className="d3-gsub" data-d3="going-sub">{goingSub(g)}</p>
+      {bar("sent", QueryStatus.QUERIED, "Queries sent", g.sent, STAGE_COLOURS.queried.band)}
+      {bar("asked", QueryStatus.FULL_REQUESTED, "Asked for more", g.asked, STAGE_COLOURS.full.band)}
+      {bar("offers", QueryStatus.OFFER, "Offers", g.offers, bandBackground("offer"))}
+    </div>
+  );
+};
 
 export const Dash2Active: React.FC<{
   loading: boolean;
@@ -51,7 +84,11 @@ export const Dash2Active: React.FC<{
   activeCount: number | null;
   undatedCount: number;
   now: Date;
-}> = ({ loading, queries, activities, agents = [], activeCount, undatedCount, now }) => {
+  /** v3: the third view's figures; absent → no third button */
+  going?: HowItsGoing | null;
+}> = ({ loading, queries, activities, agents = [], activeCount, undatedCount, now, going = null }) => {
+  /* ⚠️ DECLARED FIRST (v3): the plot's measuring effect re-runs on it — the plot unmounts under "How it's going" */
+  const [mode, setMode] = useState<ChartMode>("active");
   const plotRef = useRef<HTMLDivElement | null>(null);
   const [w, setW] = useState(0);
   useLayoutEffect(() => {
@@ -62,9 +99,8 @@ export const Dash2Active: React.FC<{
     const ro = typeof ResizeObserver !== "undefined" ? new ResizeObserver(read) : null;
     ro?.observe(el);
     return () => ro?.disconnect();
-  }, [loading]);
+  }, [loading, mode]);
 
-  const [mode, setMode] = useState<ChartMode>("active");
   const all = useMemo(() => (loading ? [] : dash2Weeks(queries, now)), [loading, queries, now]);
   const weeks = useMemo(() => visibleWeeks(all, w, EDGE), [all, w]);
   const offset = all.length - weeks.length;
@@ -124,8 +160,8 @@ export const Dash2Active: React.FC<{
   })();
 
   const fresh = loading ? 0 : sentThisWeek(queries, now);
-  const title = mode === "sent" ? (loading ? "Queries sent" : sentCount(sentAllTime(queries, now))) : activeTitle(activeCount, undatedCount);
-  const change = fresh > 0 ? (mode === "sent" ? `${fresh} this week` : `+${fresh} this week`) : null;
+  const title = mode === "going" ? GOING_TITLE : mode === "sent" ? (loading ? "Queries sent" : sentCount(sentAllTime(queries, now))) : activeTitle(activeCount, undatedCount);
+  const change = mode !== "going" && fresh > 0 ? (mode === "sent" ? `${fresh} this week` : `+${fresh} this week`) : null;
 
   return (
     <Frame tone="navy" label="Active queries" probe="active" loading={loading} className="d22-chart" data={{ mode }}
@@ -133,13 +169,14 @@ export const Dash2Active: React.FC<{
       after={change ? <span className="d2-bpill" data-d2="this-week">{change}</span> : null}
       meta={
         <span className="d22-tog" role="tablist" aria-label="Chart" data-d2="chart-toggle">
-          {(["active", "sent"] as const).map((m) => (
+          {(going ? (["active", "sent", "going"] as const) : (["active", "sent"] as const)).map((m) => (
             <button key={m} type="button" role="tab" aria-selected={mode === m} aria-controls="d22-plot" data-m={m} onClick={() => pick(m)}>
-              {m === "active" ? "Active" : "Sent"}
+              {MODE_LABEL[m]}
             </button>
           ))}
         </span>
       }>
+      {mode === "going" && going ? <Going g={going} /> : (
       <div className="d2-aq" data-d2="aq">
         <div className={`d2-plot${mode === "sent" ? " is-sent" : ""}`} id="d22-plot" role="tabpanel" ref={plotRef} data-d2="plot" data-mode={mode} style={{ height: H }}>
           {w > 0 && weeks.length > 0 && mode === "active" && (
@@ -198,6 +235,7 @@ export const Dash2Active: React.FC<{
           )}
         </div>
       </div>
+      )}
       {hk !== null && mode === "active" && bd && tipPos && typeof document !== "undefined" && createPortal(
         <div ref={tipRef} className="d2-wtip" id="d2-wtip" role="status" data-d2="wtip" data-i={hk + offset} style={{ left: tipPos.left, top: tipPos.top }}>
           <small>Week of</small>

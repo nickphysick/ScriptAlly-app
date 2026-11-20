@@ -60,7 +60,7 @@ import { TOUR_DONE_PATH, TOUR_STOPS, registerTourReplay, tourDecision, tourState
 import { FirstWinStamp } from "../fv1/FirstWinStamp";
 import { Dash2Band } from "../v2/Dash2Band";
 import { wholeWeeksQuerying } from "../../../lib/dash2";
-import { stageMarks, withoutContradictions } from "../../../lib/dash3";
+import { howItsGoing, stageMarks, withoutContradictions } from "../../../lib/dash3";
 import { Dash3Reminder } from "../v3/Dash3Reminder";
 import { Dash2Next } from "../v2/Dash2Next";
 import { Dash2Active } from "../v2/Dash2Active";
@@ -602,6 +602,8 @@ export const Dash58: React.FC<Dash58Props> = ({
 
   /* Dashboard v3, Phase 1: the header's stage marks — current-stage counts for this manuscript */
   const marks = useMemo(() => stageMarks(scopedQueries), [scopedQueries]);
+  /* Phase 4a: the chart's third view — sent, ever asked for more, ever an offer */
+  const going = useMemo(() => (loading ? null : howItsGoing(scopedQueries, scopedActivities, agents, now.getTime())), [loading, scopedQueries, scopedActivities, agents, now]);
   const author = (currentUser?.name ?? "").trim();
   const title = (activeManuscript?.title ?? "").trim();
 
@@ -685,7 +687,7 @@ export const Dash58: React.FC<Dash58Props> = ({
                 </div>
               ) : (
                 <Dash2Active loading={loading} queries={scopedQueries} activities={scopedActivities} agents={agents}
-                  activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} />
+                  activeCount={activeCount} undatedCount={loading ? 0 : undatedLiveCount(scopedQueries)} now={now} going={going} />
               )}
             </div>
             <div className="d2-right" data-d2="right">

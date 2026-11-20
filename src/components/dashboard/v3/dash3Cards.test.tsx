@@ -38,3 +38,28 @@ describe("DB3-3 · Next up's head is the lead task's stage", () => {
     expect(html(QueryStatus.FULL_REQUESTED).match(/d2-open/g)?.length).toBe(1);
   });
 });
+
+import { Dash2Active, Going, GOING_TITLE } from "../v2/Dash2Active";
+import { bandBackground } from "../../../lib/stageColours";
+
+describe("DB3-4a · the chart's third view", () => {
+  it("the toggle offers Active, Sent and How it's going", () => {
+    const h = renderToStaticMarkup(<Dash2Active loading={false} queries={[]} activities={[]} activeCount={0} undatedCount={0} now={new Date(2026, 10, 18)}
+      going={{ sent: 0, asked: 0, full: 0, offers: 0, closedNoRequest: 0 }} />);
+    expect(h).toContain(">Active<");
+    expect(h).toContain(">Sent<");
+    expect(h).toContain(`>${GOING_TITLE}<`);
+  });
+  it("three bars from the counts; a dashed empty bar at zero offers; facts only", () => {
+    const h = renderToStaticMarkup(<Going g={{ sent: 23, asked: 2, full: 1, offers: 0, closedNoRequest: 3 }} />);
+    expect(h).toContain("2 of 23 agents asked to read more.");
+    expect(h).toContain("One full and one partial. 3 queries closed without a request.");
+    expect(h.match(/data-d3="going-row"/g)?.length).toBe(3);
+    expect(h).toMatch(/data-key="offers" data-n="0">[\s\S]*d3-none/);
+    expect(h).toContain(`background:${STAGE_COLOURS.queried.band}`);
+    const text = h.replace(/<[^>]*>/g, " ");
+    for (const w of [/\bgood\b/i, /\bgreat\b/i, /\bstrong\b/i, /\bweak\b/i, /\baverage\b/i, /\bbenchmark/i, /%/]) expect(text, String(w)).not.toMatch(w);
+    const one = renderToStaticMarkup(<Going g={{ sent: 2, asked: 1, full: 0, offers: 1, closedNoRequest: 0 }} />);
+    expect(one).toContain(bandBackground("offer").slice(0, 30));
+  });
+});
