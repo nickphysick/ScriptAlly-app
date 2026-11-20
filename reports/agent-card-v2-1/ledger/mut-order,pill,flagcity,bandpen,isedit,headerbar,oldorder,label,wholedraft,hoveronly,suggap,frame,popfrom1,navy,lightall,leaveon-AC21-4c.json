@@ -1,0 +1,50 @@
+[
+ {
+  "lock": "AC21-4c",
+  "where": "population: an agent whose query is at Full requested",
+  "ok": true,
+  "detail": "cv25-agent-09"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "Full requested: the border breathes in v163's rim for Full (#557aa3)",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"running\":true}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "no query: the border breathes in slate, rgb(94, 113, 137)",
+  "ok": false,
+  "detail": "{\"bg\":\"rgb(42, 58, 82)\",\"running\":true}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "the cross: after the last section closes, the rim rests, the tint at 0, nothing on the border",
+  "ok": false,
+  "detail": "{\"live\":[{\"id\":\"\",\"on\":\"before\",\"inf\":true,\"dur\":3200,\"peak\":1.01,\"state\":\"running\"}],\"tint\":0,\"before\":1.00448}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "a tick with nothing changed: after the last section closes, the rim rests, the tint at 0, nothing on the border",
+  "ok": false,
+  "detail": "{\"live\":[{\"id\":\"\",\"on\":\"before\",\"inf\":true,\"dur\":3200,\"peak\":1.01,\"state\":\"running\"}],\"tint\":0,\"before\":1.00031}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "Esc: after the last section closes, the rim rests, the tint at 0, nothing on the border",
+  "ok": false,
+  "detail": "{\"live\":[{\"id\":\"\",\"on\":\"before\",\"inf\":true,\"dur\":3200,\"peak\":1.01,\"state\":\"running\"}],\"tint\":0,\"before\":1.00542}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "the rust bar's Discard: after the last section closes, the rim rests, the tint at 0, nothing on the border",
+  "ok": false,
+  "detail": "{\"live\":[{\"id\":\"\",\"on\":\"before\",\"inf\":true,\"dur\":3200,\"peak\":1.01,\"state\":\"running\"}],\"tint\":0,\"before\":1.00979}"
+ },
+ {
+  "lock": "AC21-4c",
+  "where": "reduced motion: no animation on the card",
+  "ok": false,
+  "detail": "[{\"id\":\"\",\"on\":\"before\",\"inf\":true,\"dur\":3200,\"peak\":1.01,\"state\":\"running\"}]"
+ }
+]

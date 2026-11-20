@@ -9,6 +9,7 @@
  *   acv21fx-us     a US agent (New York) — AC21-1's flag
  *   acv21fx-none   an agent with no country and no city — AC21-1's "no flag"
  *   acv21fx-edit   a second complete UK agent the section saves write to (AC21-2's stored-document comparisons)
+ *   acv21fx-nameonly  a name and nothing else (the report's screen 19)
  *
  * ⚠️ SELF-CLEANING: every document carries the `acv21fx-` prefix; the locks write them before they measure and `--clean`
  *    removes them in the same run. Through fsTarget, so the emulator by default.
@@ -70,5 +71,6 @@ await setDoc(doc(db, "users", uid, "agents", `${PREFIX}edit`), full(`${PREFIX}ed
 await setDoc(doc(db, "users", uid, "agents", `${PREFIX}ie`), { ...base(`${PREFIX}ie`, "Aoife Liffey"), agency: "Liffey Literary", country: "IE", city: "Dublin" });
 await setDoc(doc(db, "users", uid, "agents", `${PREFIX}us`), { ...base(`${PREFIX}us`, "Una Hudson"), agency: "Hudson Agency", country: "US", city: "New York" });
 await setDoc(doc(db, "users", uid, "agents", `${PREFIX}none`), { ...base(`${PREFIX}none`, "Nora Nowhere"), agency: "Nowhere Books" });
+await setDoc(doc(db, "users", uid, "agents", `${PREFIX}nameonly`), { ...base(`${PREFIX}nameonly`, "Nell Nameonly") });
 console.log("acv21fx: seeded");
 process.exit(0);

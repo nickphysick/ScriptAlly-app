@@ -1,0 +1,80 @@
+[
+ {
+  "lock": "AC21-2c",
+  "where": "the name's pencil opens Contact details",
+  "ok": true,
+  "detail": "[\"contact\"]"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "typing the name changes the head's name in the same frame",
+  "ok": true,
+  "detail": "{\"name\":\"Fiona Q Fullcard\",\"flag\":\"GB\"}"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "choosing a country changes the head's flag in the same frame",
+  "ok": true,
+  "detail": "{\"flag\":\"IE\",\"frames\":0}"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "typing a city never changes the flag",
+  "ok": true,
+  "detail": "{\"name\":\"Fiona Q Fullcard\",\"flag\":\"GB\"}"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "typing “Dublin” with the UK chosen leaves the flag GB",
+  "ok": false,
+  "detail": "{\"name\":\"Fiona Q Fullcard\",\"flag\":\"IE\"}"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "the offer shows: “Dublin is in Ireland. Change the country?”",
+  "ok": true,
+  "detail": "Dublin is in Ireland. Change the country?\nChange to Ireland\nKeep the UK"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "“Change to Ireland” sets the control and the head's flag",
+  "ok": true,
+  "detail": "{\"pill\":\"true\",\"flag\":\"IE\",\"offer\":0}"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "back on the UK, the offer returns",
+  "ok": true,
+  "detail": "1"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "its keep reads “Keep the UK”",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "“Keep the UK” removes the offer",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "…and it stays away for that city",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "a city the table doesn't know: no offer",
+  "ok": true,
+  "detail": "0"
+ },
+ {
+  "lock": "AC21-2c",
+  "where": "the cross puts the head back",
+  "ok": true,
+  "detail": "Fiona Fullcard"
+ }
+]

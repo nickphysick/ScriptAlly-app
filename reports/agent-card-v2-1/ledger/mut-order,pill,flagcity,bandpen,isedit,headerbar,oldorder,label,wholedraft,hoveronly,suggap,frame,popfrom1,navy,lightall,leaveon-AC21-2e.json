@@ -1,0 +1,62 @@
+[
+ {
+  "lock": "AC21-2e",
+  "where": "the rust bar takes the footer's place",
+  "ok": true,
+  "detail": "{\"n\":1,\"names\":\"the wishlist, genres\",\"tab\":\"profile\",\"foot\":0,\"btn\":\"Save all\"}"
+ },
+ {
+  "lock": "AC21-2e",
+  "where": "it names both sections",
+  "ok": true,
+  "detail": "the wishlist, genres"
+ },
+ {
+  "lock": "AC21-2e",
+  "where": "nothing else happened (still on Profile)",
+  "ok": true,
+  "detail": "profile"
+ },
+ {
+  "lock": "AC21-2e",
+  "where": "its button reads “Save all”",
+  "ok": true,
+  "detail": "Save all"
+ },
+ {
+  "lock": "AC21-2e",
+  "where": "Save all stores both",
+  "ok": true,
+  "detail": "Saved by Save all. · [\"Thriller\",\"Crime\",\"Western\"]"
+ },
+ {
+  "lock": "AC21-2e",
+  "where": "…and lands on the tab asked for",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-2e",
+  "where": "…one snackbar for both: “Saved 2 sections for Eda”",
+  "ok": true,
+  "detail": " | Saved 2 sections for EdaUNDO✕ | Saved 2 sections for EdaUNDO✕"
+ },
+ {
+  "lock": "AC21-2e",
+  "where": "the arrows ask too",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-2e",
+  "where": "Discard stores neither",
+  "ok": true,
+  "detail": "Saved by Save all. · [\"Thriller\",\"Crime\",\"Western\"]"
+ },
+ {
+  "lock": "AC21-2e",
+  "where": "…and carries on (the next agent)",
+  "ok": true,
+  "detail": "seed-agent-2"
+ }
+]

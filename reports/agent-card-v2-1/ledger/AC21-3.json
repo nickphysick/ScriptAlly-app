@@ -1,0 +1,74 @@
+[
+ {
+  "lock": "AC21-3",
+  "where": "the field: 52px tall at rest at least, a 12px radius",
+  "ok": true,
+  "detail": "{\"f\":{\"t\":577.96875,\"b\":629.96875,\"l\":937,\"r\":1459,\"h\":52},\"r\":\"12px\"}"
+ },
+ {
+  "lock": "AC21-3",
+  "where": "its placeholder reads “Add another” once a genre is chosen",
+  "ok": true,
+  "detail": "Add another"
+ },
+ {
+  "lock": "AC21-3",
+  "where": "the Suggested row's label is 14px ±2 beneath the field",
+  "ok": true,
+  "detail": "14.0"
+ },
+ {
+  "lock": "AC21-3",
+  "where": "field and suggestions don't overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-3",
+  "where": "no chip or pill under 32px",
+  "ok": true,
+  "detail": "[34,34,36,36,36,36]"
+ },
+ {
+  "lock": "AC21-3",
+  "where": "typing: the matches sit 8px beneath the field, not over it",
+  "ok": true,
+  "detail": "8.0"
+ },
+ {
+  "lock": "AC21-3",
+  "where": "typing: each row at least 38px",
+  "ok": true,
+  "detail": "[38,38]"
+ },
+ {
+  "lock": "AC21-3",
+  "where": "typing: the list, the field and the suggestions don't overlap",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-3",
+  "where": "Enter adds the first match",
+  "ok": true,
+  "detail": "Horror → [\"Thriller\",\"Crime\",\"Horror\"]"
+ },
+ {
+  "lock": "AC21-3",
+  "where": "…and leaves focus in the input",
+  "ok": true,
+  "detail": ""
+ },
+ {
+  "lock": "AC21-3",
+  "where": "Backspace in the empty input removes the last chip",
+  "ok": true,
+  "detail": "[\"Thriller\",\"Crime\"]"
+ },
+ {
+  "lock": "AC21-3",
+  "where": "…and focus stays in the input",
+  "ok": true,
+  "detail": ""
+ }
+]
