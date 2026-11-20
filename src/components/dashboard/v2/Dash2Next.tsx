@@ -17,6 +17,7 @@ import { taskCardModel, type TaskCtx } from "../../../lib/dashTaskCard";
 import { CAUGHT_UP } from "../v71/Dash71Task";
 import { StatusDot } from "../../StatusDot";
 import { Frame } from "./Frame";
+import { STAGE_COLOURS, bandBackground, stageOf } from "../../../lib/stageColours";
 
 const WEEK = 7 * 86_400_000;
 const weeks = (ms: number) => Math.max(1, Math.round(ms / WEEK));
@@ -62,8 +63,11 @@ export const Dash2Next: React.FC<{
   const reason = top && model ? nextReason(top, ctx, model.line) : null;
   const rest = items.slice(1, NEXT_SHOWN);
   const shown = Math.min(NEXT_SHOWN, n);
+  /* Dashboard v3, Phase 3: the head takes the stage of the lead task's query; a task not about a query has a paper head */
+  const stage = !loading && top?.status ? stageOf(top.status) : null;
   return (
-    <Frame tone="sand" title="Next up" label="Next up" probe="next" loading={loading}
+    <Frame tone="paper" title="Next up" label="Next up" probe="next" loading={loading}
+      bandStyle={stage ? { background: bandBackground(stage) } : undefined} data={{ stage: stage ?? "none" }}
       meta={n > 0 && !loading ? <>{shown} of {n} · <button type="button" className="d2-link" data-d2="see-all" onClick={onSeeAll}>{SEE_ALL}</button></> : null}>
       <div className="d2-body d2-next" data-d2="next" data-n={n}>
         {loading ? (
@@ -72,7 +76,7 @@ export const Dash2Next: React.FC<{
           <p className="d2-empty" data-d2="next-empty">{CAUGHT_UP}</p>
         ) : (
           <>
-            <div className="d2-nup" data-d2="next-top" data-key={top.key}>
+            <div className="d2-nup" data-d2="next-top" data-key={top.key} style={stage ? { background: STAGE_COLOURS[stage].tint } : undefined}>
               <span className="d2-nic"><Mark item={top} size={22} /></span>
               <div className="d2-ntx">
                 <b className="d2-ntitle">{model.pre}{model.who}{model.post}</b>

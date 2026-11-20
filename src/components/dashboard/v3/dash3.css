@@ -37,3 +37,11 @@
 .d58.d2 .d3-mail button { height: 32px; padding: 0 12px; border: 0; border-radius: 16px; background: transparent; box-shadow: inset 0 0 0 1px #e3d5c9; font-weight: 600; font-size: 14px; white-space: nowrap; cursor: pointer; color: var(--d2-ink); }
 .d58.d2 .d3-mail button.is-x { box-shadow: none; color: var(--d2-muted); padding: 0 6px; }
 .d58.d2 .d3-mail button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+
+/* ── Phase 3 · card heads: a head takes the colour of the stage it is about (lib/stageColours, set inline by the card);
+   anything not about a stage is plain paper with a hairline beneath. The chart stays navy. No blush, no grey. ── */
+.d58.d2 .d2-tone--paper { background: #ffffff; color: var(--d2-ink); }
+.d58.d2 .d2-tone--paper:not([style]) { border-bottom: 1px solid #e3d5c9; }
+.d58.d2 .d2-tone--paper .os-cardttl { color: var(--d2-ink); }
+.d58.d2 .os-card.d60-agents .os-band.d60-band--slate { background: #ffffff; border-bottom: 1px solid #e3d5c9; }
+.d58.d2 .d2-gs .fv2-gsh { padding-bottom: 10px; border-bottom: 1px solid #e3d5c9; }
