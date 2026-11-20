@@ -93,7 +93,7 @@
 .qsp .qn-wrap .qn-editrow { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 .qsp .qn-wrap .qn-editx, .qsp .qn-wrap .qn-editgo { height: 34px; padding: 1px 16px 0; border: 0; border-radius: 17px; cursor: pointer; font-family: var(--sp-type); font-size: 14.5px; letter-spacing: 0; text-transform: none; }
 .qsp .qn-wrap .qn-editx { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.45); }
-.qsp .qn-wrap .qn-editgo { background: #2d3a50; color: #f4eee5; }
+.qsp .qn-wrap .qn-editgo { background: var(--sp-anthracite); color: #f4eee5; }
 .qsp .qn-wrap .qn-editgo:disabled { opacity: 0.45; cursor: default; }
 /* the composer: the panel's foot. A 48px field and a navy Save */
 .qsp .qn-wrap .qn-dock { flex: 0 0 auto; margin: 0; padding: 16px 26px 18px; border-top: 1px solid rgba(28, 19, 15, 0.1); background: #fbf9f5; }
@@ -102,8 +102,8 @@
   flex: 1 1 0; width: auto; min-width: 0; min-height: 48px; box-sizing: border-box; padding: 12px 14px; border: 0; border-radius: 12px; background: #fff; resize: none;
   box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18); font-family: var(--sp-serif); font-size: 16px; line-height: 24px; color: #1c130f;
 }
-.qsp .qn-wrap .qn-ta:focus { outline: none; box-shadow: inset 0 0 0 2px #2d3a50; }
+.qsp .qn-wrap .qn-ta:focus { outline: none; box-shadow: inset 0 0 0 2px var(--sp-anthracite); }
 .qsp .qn-wrap .qn-ta::placeholder { font-family: var(--sp-serif); font-style: italic; color: rgba(28, 19, 15, 0.45); }
 .qsp .qn-wrap .qn-crow { flex: none; display: flex; align-self: flex-end; width: auto; margin: 0; padding: 0; border: 0; }
-.qsp .qn-wrap .qn-send { height: 48px; padding: 2px 22px 0; border: 0; border-radius: 24px; background: #2d3a50; color: #f4eee5; cursor: pointer; font-family: var(--sp-type); font-weight: 400; font-size: 16px; line-height: 1; letter-spacing: 0; text-transform: none; }
+.qsp .qn-wrap .qn-send { height: 48px; padding: 2px 22px 0; border: 0; border-radius: 24px; background: var(--sp-anthracite); color: #f4eee5; cursor: pointer; font-family: var(--sp-type); font-weight: 400; font-size: 16px; line-height: 1; letter-spacing: 0; text-transform: none; }
 .qsp .qn-wrap .qn-send--off { opacity: 0.45; cursor: default; }

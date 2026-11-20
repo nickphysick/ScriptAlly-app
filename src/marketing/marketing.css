@@ -108,7 +108,7 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
   /* The primary button on ink: `--hpanel-primary-bg`. Its text is the shell's ink. */
   --mk-cream-btn: #f3eee6;
   /* The founding offer's navy panel: `--ink-band`, the ground of the app's own header panel. */
-  --mk-panel: #2d3a50;
+  --mk-panel: #2a3a52;
   /* A card on a tinted band: the app's `--fc-card`. True white, which `--mk-card` (#fffefb) is not. */
   --mk-white: #ffffff;
   --mk-hero-ground: #fbf9f5;

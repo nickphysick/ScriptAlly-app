@@ -53,7 +53,7 @@ const Bars: React.FC<{ sent: StripSent; loading: boolean }> = ({ sent, loading }
         /* an empty week is a 1px tick; this week's is rust even when it is empty, so the last mark is always "now" */
         if (w.n === 0) return <rect key={w.start} data-qcv="strip-bar" data-n="0" data-last={last ? "true" : "false"} data-tip={w.tip} x={x} y={39} width={bw} height={1} fill={last ? "#a2452a" : "rgba(28, 19, 15, 0.15)"} />;
         const h = Math.max(3, (w.n / max) * 38);
-        return <rect key={w.start} data-qcv="strip-bar" data-n={w.n} data-last={last ? "true" : "false"} data-tip={w.tip} x={x} y={40 - h} width={bw} height={h} rx={1.2} fill={last ? "#a2452a" : "#2d3a50"} />;
+        return <rect key={w.start} data-qcv="strip-bar" data-n={w.n} data-last={last ? "true" : "false"} data-tip={w.tip} x={x} y={40 - h} width={bw} height={h} rx={1.2} fill={last ? "#a2452a" : "#2a3a52"} />;
       })}
     </svg>
   );

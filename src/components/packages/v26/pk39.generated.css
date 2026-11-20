@@ -2202,7 +2202,7 @@
   margin-block-start: 0px;
   margin-inline-end: 0px;
   margin-inline-start: 0px;
-  outline-color: #2d3a50;
+  outline-color: var(--sp-anthracite);
   outline-offset: 3px;
   outline-style: solid;
   outline-width: 2px;
@@ -2267,7 +2267,7 @@
   margin-block-start: 0px;
   margin-inline-end: 0px;
   margin-inline-start: 0px;
-  outline-color: #2d3a50;
+  outline-color: var(--sp-anthracite);
   outline-offset: 3px;
   outline-style: solid;
   outline-width: 2px;

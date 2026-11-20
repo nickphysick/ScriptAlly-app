@@ -10,7 +10,7 @@
 import type { RailLine } from "./packagesV41";
 
 /** Every package icon is navy with a cream glyph (v42 Part E): the stored colour is kept and never shown. */
-export const PACKAGE_NAVY = "#2d3a50";
+export const PACKAGE_NAVY = "#2a3a52";
 
 /* ══ Part C · the stat tiles ══ */
 /* v43: v42's "Current batch" tag is retired with the tiles; the list's flag says "Going out with new queries" (packagesV43). */

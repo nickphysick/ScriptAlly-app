@@ -238,8 +238,8 @@
   --ink-paper: #fffdf9;
   --ink-paper-2: #f7f4ef;
   --ink-terra-deep: #9a5638;
-  --ink-band: #2d3a50;
-  --ink-band-rgb: 45, 58, 80;
+  --ink-band: #2a3a52; /* consistency roll-out v1, ruling 3: the app's one navy (--sp-anthracite) */
+  --ink-band-rgb: 42, 58, 82;
   /* ⚠️ THE SECTION RHYTHM (Contact list v13, 5 Oct): 40px between a band and the section under it,
      and between sections — the Query Centre v126 rhythm, stated once. The Query Centre still writes
      its own 40s (`.qcv-deskw`, `.qcv-cz`, `.qcv-lbw`); adopting this token there is its follow-up. */

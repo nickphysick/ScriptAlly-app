@@ -13,7 +13,7 @@
 .cb2, .cb2-layer {
   --cb2-ink: #1c130f; --cb2-i72: rgba(28, 19, 15, .72); --cb2-i60: rgba(28, 19, 15, .6); --cb2-i55: rgba(28, 19, 15, .55);
   --cb2-i45: rgba(28, 19, 15, .45); --cb2-i30: rgba(28, 19, 15, .3); --cb2-i14: rgba(28, 19, 15, .14); --cb2-i08: rgba(28, 19, 15, .08);
-  --cb2-navy: #2d3a50; --cb2-cream: #f4eee5; --cb2-c55: rgba(244, 238, 229, .55); --cb2-stone: #ece8e3;
+  --cb2-navy: var(--sp-anthracite); --cb2-cream: #f4eee5; --cb2-c55: rgba(244, 238, 229, .55); --cb2-stone: #ece8e3;
   --cb2-you: #b0603e; --cb2-rust: #a2452a; --cb2-link: #2f5f86; --cb2-peach: #e7a184;
   --cb2-page: var(--ws-page, #f2eee8);
   /* the faces are READ from the shell's tokens (primitives.css), never named here (marketingTokens.test) */
@@ -288,7 +288,7 @@ body.cb2-dragging .cb2-note:hover { transform: none; }
   padding: 18px; border: 1.5px dashed rgba(28, 19, 15, .22); border-radius: 4px; background: rgba(255, 255, 255, .35); color: var(--cb2-i60);
   text-align: center; cursor: pointer; transition: background .15s, border-color .15s, color .15s;
 }
-.cb2-ghost:hover { background: rgba(255, 255, 255, .75); border-color: rgba(45, 58, 80, .55); color: var(--cb2-ink); }
+.cb2-ghost:hover { background: rgba(255, 255, 255, .75); border-color: rgba(42, 58, 82, .55); color: var(--cb2-ink); }
 .cb2 .cb2-ghost b { font: 400 19px/1.3 var(--cb2-type) !important; color: inherit !important; }
 .cb2 .cb2-ghost small { font: italic 400 14px/1.3 var(--cb2-serif) !important; color: var(--cb2-i45) !important; }
 .cb2-gsw { display: flex; gap: 6px; margin-top: 6px; }
@@ -326,7 +326,7 @@ body.cb2-dragging .cb2-note:hover { transform: none; }
 .cb2-picks label { display: grid; grid-template-columns: 18px 22px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 12px; border-top: 1px solid var(--cb2-i08); cursor: pointer; }
 .cb2-picks label:first-child { border-top: 0; }
 .cb2-picks label:hover { background: #f8f6f2; }
-.cb2-picks input { width: 16px; height: 16px; margin: 0; accent-color: #2d3a50; }
+.cb2-picks input { width: 16px; height: 16px; margin: 0; accent-color: var(--sp-anthracite); }
 .cb2-picks i { width: 20px; height: 20px; border-radius: 2px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .12); }
 .cb2-layer .cb2-picks span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font: 400 15px/1.3 var(--cb2-type) !important; color: var(--cb2-ink) !important; }
 .cb2-layer .cb2-picks small { white-space: nowrap; font: italic 400 13px/1.3 var(--cb2-serif) !important; color: var(--cb2-i55) !important; }

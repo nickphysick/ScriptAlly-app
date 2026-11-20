@@ -12,7 +12,7 @@
  * ⚠️ BARS AND MARKS ARE NAVY (#2a3a52). No rust or red on this page.
  */
 .qlp {
-  --ql-ink: #1c130f; --ql-navy: #2a3a52; --ql-btn: #2d3a50; --ql-cream: #f4eee5;
+  --ql-ink: #1c130f; --ql-navy: #2a3a52; --ql-btn: var(--sp-anthracite); --ql-cream: #f4eee5;
   --ql-berry: #8f4a5a; --ql-blush: #f8e8ea;
   --ql-t62: rgba(28, 19, 15, .62); --ql-t72: rgba(28, 19, 15, .72); --ql-line: rgba(28, 19, 15, .12);
   position: relative; box-sizing: border-box; min-width: 0;

@@ -26,7 +26,7 @@
 .qlg .qlg-c .qlg-t em { font-style: italic; color: rgba(28, 19, 15, 0.55); }
 .qlg .qlg-c--quiet .qlg-t { font-size: 16px; color: rgba(28, 19, 15, 0.62); }
 .qlg .qlg-c .qlg-from { margin: 4px 0 0; font-family: var(--sp-serif); font-style: italic; font-size: 15px; line-height: 1.45; color: rgba(28, 19, 15, 0.62); }
-.qlg > .qlg-c--on { background: linear-gradient(90deg, rgba(45, 58, 80, 0.06), transparent); border-radius: 8px; }
+.qlg > .qlg-c--on { background: linear-gradient(90deg, rgba(42, 58, 82, 0.06), transparent); border-radius: 8px; }
 @keyframes qlgFresh { from { background-color: rgba(217, 150, 122, 0.28); } to { background-color: rgba(217, 150, 122, 0); } }
 .qlg > .qlg-c--fresh { animation: qlgFresh 1.4s ease-out backwards; border-radius: 8px; }
 @media (prefers-reduced-motion: reduce) { .qlg > .qlg-c--fresh { animation: none; } }

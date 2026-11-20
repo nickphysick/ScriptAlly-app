@@ -17,7 +17,7 @@
 .vv6, .v6-mapdim {
   --v6-stage-queried: #efe6d6; --v6-stage-partial: #e4ebf2; --v6-stage-full: #b7c9de; --v6-stage-closed: #eceae6;
   --v6-chart-queried: #dccdb3; --v6-chart-partial: #b9cbdf; --v6-chart-full: #7f9cbf;
-  --v6-ink: #1c130f; --v6-navy: #2d3a50; --v6-t62: rgba(28, 19, 15, .62); --v6-t72: rgba(28, 19, 15, .72);
+  --v6-ink: #1c130f; --v6-navy: var(--sp-anthracite); --v6-t62: rgba(28, 19, 15, .62); --v6-t72: rgba(28, 19, 15, .72);
   --v6-tile: #f7f4ef; --v6-sel: #f1ede7;
 }
 .vv6 :where(.v6-card, .v6-fb, .v6-notice, .v6-vone, .v6-mhd, .v6-seg) :where(span, p, div, button, li, b, em, small, u, i, label, h2, h3, h4, ul, ol) { font-family: inherit; }
@@ -45,7 +45,7 @@
 .vv6 .v6-band { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; min-height: 64px; padding: 12px 18px; }
 .vv6 .v6-tone--sand { background: #f4e6d6; }
 .vv6 .v6-tone--stone { background: #ebe7e1; }
-.vv6 .v6-tone--navy { background: #2d3a50; color: #fffaf3; }
+.vv6 .v6-tone--navy { background: var(--sp-anthracite); color: #fffaf3; }
 .vv2.vv6 .v6-bt { margin: 0; font: 400 20px/1.3 var(--sp-type) !important; color: inherit; overflow-wrap: anywhere; }
 .vv6 .v6-band p { margin: 4px 0 0; font: italic 400 15px/1.3 var(--sp-serif); color: var(--v6-t62); }
 .vv6 .v6-tone--navy p { color: rgba(255, 250, 243, .78); }
@@ -65,7 +65,7 @@
 .vv6 :is(.v6-pb, .v6-pill)[disabled] { opacity: .5; cursor: default; }
 .vv6 .v6-inuse { display: inline-flex; align-items: center; gap: 8px; height: 40px; padding: 0 16px; border-radius: 999px; background: #fffaf3; color: var(--v6-ink); font: 600 15px/1 var(--sp-serif); white-space: nowrap; }
 .vv6 .v6-inuse i { width: 8px; height: 8px; border-radius: 50%; background: var(--v6-navy); animation: v6-beacon 1.8s ease-out infinite; }
-@keyframes v6-beacon { 0% { box-shadow: 0 0 0 0 rgba(45, 58, 80, .55); } 100% { box-shadow: 0 0 0 9px rgba(45, 58, 80, 0); } }
+@keyframes v6-beacon { 0% { box-shadow: 0 0 0 0 rgba(42, 58, 82, .55); } 100% { box-shadow: 0 0 0 9px rgba(42, 58, 82, 0); } }
 /* bold underlined link: dashboard fv2 `.fv2-askset` */
 .vv6 .v6-lk { padding: 0; border: 0; background: none; min-height: 32px; font: 700 15px/1.3 var(--sp-serif); color: var(--v6-ink); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 .vv6 .v6-lk:hover { color: var(--v6-navy); }

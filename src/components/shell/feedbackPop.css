@@ -12,7 +12,7 @@
 .fb-panel.fb3 {
   width: 500px; max-width: calc(100vw - 16px); padding: 7px; border-radius: 22px; background: #fff; overflow-y: auto;
   box-shadow: 0 0 0 1px #ecd6cd, 0 30px 60px -20px rgba(28, 19, 15, 0.5), 0 2px 6px rgba(28, 19, 15, 0.08);
-  --fb3-ink: #1c130f; --fb3-ink2: #3b322c; --fb3-muted: #7d7067; --fb3-rose: #a0675a; --fb3-navy: #2d3a50;
+  --fb3-ink: #1c130f; --fb3-ink2: #3b322c; --fb3-muted: #7d7067; --fb3-rose: #a0675a; --fb3-navy: var(--sp-anthracite);
 }
 .fb-panel.fb3 :where(p, span, div, button, label, b, small, i, em) { font-family: inherit; }
 .fb-panel.fb3 * { box-sizing: border-box; }

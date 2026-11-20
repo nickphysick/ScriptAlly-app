@@ -13,7 +13,7 @@
 
 /* ── the page: the landing page's warm gradient, on the dashboard's own scroller only ── */
 .dash-mode .ws-wbody:has(.d58.d2) { background: linear-gradient(180deg, #fbf9f5 0%, #eeebe5 100%); }
-.d58.d2 { --d2-navy: #2d3a50; --d2-ink: #1c130f; --d2-muted: #7d7067; --d2-rose: #a0675a; --d2-hair: #ebe4da; background: transparent; }
+.d58.d2 { --d2-navy: var(--sp-anthracite); --d2-ink: #1c130f; --d2-muted: #7d7067; --d2-rose: #a0675a; --d2-hair: #ebe4da; background: transparent; }
 /* ⚠️ THE PAGE MAY SCROLL, as feed v1's did: v58's one-screen height (`.d58`'s height from the scrollport, the page
    `flex: 1 1 0`) is switched off for this mode the way df1.css switches it off for `f1`. The page element is
    `.d58-page` (v58's); the sheet's padding is the ref's 28px 32px around content capped at 1360px. */
@@ -30,7 +30,7 @@
    every page's scroller, so a smaller inset puts the band's rounded corners under it. DB2 A1 measures it. */
 .d2-band {
   box-sizing: border-box; display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
-  padding: 22px 28px; border-radius: 18px; background: #2d3a50; color: #fffaf3;
+  padding: 22px 28px; border-radius: 18px; background: var(--sp-anthracite); color: #fffaf3;
   box-shadow: 0 8px 22px rgba(27, 36, 51, 0.18); position: relative; z-index: 2;
 }
 .d2-bandtx { min-width: 0; display: flex; flex-direction: column; gap: 6px; }

@@ -18,7 +18,7 @@
 .rsp, .rsp-layer {
   --rs-ink: #1c130f; --rs-i72: rgba(28, 19, 15, 0.72); --rs-i60: rgba(28, 19, 15, 0.6); --rs-i55: rgba(28, 19, 15, 0.55);
   --rs-i45: rgba(28, 19, 15, 0.45); --rs-i30: rgba(28, 19, 15, 0.3); --rs-i14: rgba(28, 19, 15, 0.14); --rs-i08: rgba(28, 19, 15, 0.08);
-  --rs-shell: #1b2433; --rs-navy: #2d3a50; --rs-disc: #2a3a52; --rs-cream: #f4eee5; --rs-c55: rgba(244, 238, 229, 0.55); --rs-c25: rgba(244, 238, 229, 0.25);
+  --rs-shell: #1b2433; --rs-navy: var(--sp-anthracite); --rs-disc: #2a3a52; --rs-cream: #f4eee5; --rs-c55: rgba(244, 238, 229, 0.55); --rs-c25: rgba(244, 238, 229, 0.25);
   --rs-oat: #f2eee8; --rs-paper: #fbf9f5; --rs-head: #e9edf3; --rs-blush: #f6e2d8; --rs-stone: #ece8e3; --rs-grey: #b3aca5;
   --rs-rust: #a2452a; --rs-you: #b0603e; --rs-peach: #e7a184; --rs-closed: #7c7168; --rs-closed-disc: #d9d3cc; --rs-sage: #e0e5dd; --rs-sage-c: #3f5a39;
   --rs-type: var(--sp-type); --rs-serif: var(--sp-serif); --rs-mono: var(--font-mono);

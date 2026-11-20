@@ -109,7 +109,7 @@ export const F1Book: React.FC<F1BookProps> = ({ loading, title, author, coverUrl
           <div className="df1-ring" data-df1="ring" data-count={g.count} data-target={g.target} role="img" aria-label={`${g.count} of ${g.target} queries`}>
             <svg viewBox="0 0 60 60" aria-hidden="true">
               <circle cx="30" cy="30" r={R} fill="none" stroke="#ece7de" strokeWidth="6" />
-              {frac > 0 && <circle cx="30" cy="30" r={R} fill="none" stroke="#2d3a50" strokeWidth="6" strokeLinecap="round" strokeDasharray={`${(frac * C).toFixed(2)} ${C.toFixed(2)}`} />}
+              {frac > 0 && <circle cx="30" cy="30" r={R} fill="none" stroke="#2a3a52" strokeWidth="6" strokeLinecap="round" strokeDasharray={`${(frac * C).toFixed(2)} ${C.toFixed(2)}`} />}
             </svg>
             <div data-df1="ring-text"><b>{loading ? " " : g.count}</b><small>of {g.target}</small></div>
           </div>

@@ -12,7 +12,7 @@
 
 .yn, .yn-layer {
   --yn-ink: #1c130f; --yn-ink2: #3b322c; --yn-muted: #7d7067; --yn-faint: #a39a91;
-  --yn-hair: #ebe4da; --yn-fill: #f1ece4; --yn-rose: #a0675a; --yn-navy: #2d3a50;
+  --yn-hair: #ebe4da; --yn-fill: #f1ece4; --yn-rose: #a0675a; --yn-navy: var(--sp-anthracite);
 }
 .yn :where(p, span, div, button, label, li, small, b, em, i, time, textarea, a),
 .yn-layer :where(p, span, div, button, label, li, small, b, em, i, time, textarea, a) { font-family: inherit; }

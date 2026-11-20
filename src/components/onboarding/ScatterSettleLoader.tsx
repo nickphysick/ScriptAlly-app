@@ -387,7 +387,7 @@ export const ScatterSettleLoader: React.FC<ScatterSettleLoaderProps> = ({ cards,
         @keyframes saScSpark{0%{transform:scale(.3);opacity:0}20%{transform:scale(1.1);opacity:1}55%{transform:scale(1);opacity:1}100%{transform:scale(.96) translateY(-10px);opacity:0}}
         .sa-sc-card{transition:left .6s cubic-bezier(.34,1.3,.5,1), top .6s cubic-bezier(.34,1.3,.5,1), transform .7s cubic-bezier(.5,0,.3,1), width .55s cubic-bezier(.4,0,.2,1), opacity .5s ease .12s, background .4s ease, border-color .4s ease, box-shadow .5s ease;}
         @keyframes saScBigtick{0%{transform:translate(-50%,-50%) scale(0);opacity:0}60%{transform:translate(-50%,-50%) scale(1.12);opacity:1}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
-        @keyframes saScHalo{0%{box-shadow:0 0 0 0 rgba(45,58,80,.42)}100%{box-shadow:0 0 0 26px rgba(45,58,80,0)}}
+        @keyframes saScHalo{0%{box-shadow:0 0 0 0 rgba(42, 58, 82,.42)}100%{box-shadow:0 0 0 26px rgba(42, 58, 82,0)}}
         .sa-sc-bigtick{animation:saScBigtick .75s cubic-bezier(.34,1.56,.64,1) forwards, saScHalo 1.6s ease .5s;}
         @media(prefers-reduced-motion:reduce){.sa-sc-bigtick{animation:none;transform:translate(-50%,-50%) scale(1);opacity:1;}}
         .sa-sc-appear{animation:saScAppear .4s ease both;}

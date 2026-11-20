@@ -24,7 +24,7 @@
 .d58.d2 .d2-wk {
   position: absolute; z-index: 2; box-sizing: border-box; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; cursor: pointer;
   transform: translate(-50%, -50%); transition: transform 0.15s ease;
-  background: #2d3a50; color: #fffaf3; box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #1c130f;
+  background: var(--sp-anthracite); color: #fffaf3; box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px #1c130f;
   font-family: var(--d58-type) !important; font-size: 15px; line-height: 1; display: grid; place-items: center;
 }
 .d58.d2 .d2-wk:hover, .d58.d2 .d2-wk:focus-visible { transform: translate(-50%, -50%) scale(1.08); outline: none; z-index: 3; }
@@ -43,7 +43,7 @@
 .d2-wtip small { display: block; font-family: var(--sp-mono) !important; font-weight: 500; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: #7d7067; }
 .d2-wtip .d2-wdt { display: block; margin-top: 2px; font-family: var(--sp-type) !important; font-size: 19px; line-height: 1.2; }
 .d2-wtip .d2-wbig { display: flex; align-items: center; gap: 10px; margin: 6px 0 12px; }
-.d2-wtip .d2-wbig b { font-family: var(--sp-type) !important; font-weight: 400; font-size: 46px; line-height: 1; color: #2d3a50; }
+.d2-wtip .d2-wbig b { font-family: var(--sp-type) !important; font-weight: 400; font-size: 46px; line-height: 1; color: var(--sp-anthracite); }
 .d2-wtip .d2-wbig span { font-size: 15px; line-height: 1.15; color: #3b322c; }
 .d2-wtip .d2-wbig em { margin-left: auto; font-style: normal; font-family: var(--sp-mono) !important; font-size: 12px; color: #7d7067; text-align: right; }
 .d2-wtip .d2-wbar { display: flex; gap: 3px; height: 9px; margin-bottom: 10px; }
@@ -75,10 +75,10 @@
 /* ── v2.2 Part B · Sent: a bar per week over Active's weeks, on the card's white ── */
 .d58.d2 .d22-grid { position: absolute; left: 0; right: 0; height: 0; border-top: 1px solid rgba(28, 19, 15, 0.08); pointer-events: none; }
 .d58.d2 .d22-col { position: absolute; top: 0; bottom: 0; z-index: 2; padding: 0; border: 0; background: transparent; cursor: pointer; }
-.d58.d2 .d22-col.is-on, .d58.d2 .d22-col:focus-visible { background: rgba(45, 58, 80, 0.06); outline: none; }
-.d58.d2 .d22-bar { position: absolute; left: 50%; transform: translateX(-50%); border-radius: 6px 6px 0 0; background: #2d3a50; }
+.d58.d2 .d22-col.is-on, .d58.d2 .d22-col:focus-visible { background: rgba(42, 58, 82, 0.06); outline: none; }
+.d58.d2 .d22-bar { position: absolute; left: 50%; transform: translateX(-50%); border-radius: 6px 6px 0 0; background: var(--sp-anthracite); }
 .d58.d2 .d22-col.is-now .d22-bar { background: #a0675a; }
-.d58.d2 .d22-bar.is-zero, .d58.d2 .d22-col.is-now .d22-bar.is-zero { background: rgba(45, 58, 80, 0.18); border-radius: 2px 2px 0 0; }
+.d58.d2 .d22-bar.is-zero, .d58.d2 .d22-col.is-now .d22-bar.is-zero { background: rgba(42, 58, 82, 0.18); border-radius: 2px 2px 0 0; }
 .d58.d2 .d22-bn { position: absolute; left: 50%; transform: translate(-50%, -100%); font-family: var(--d58-type) !important; font-size: 13px; line-height: 1; color: #1c130f; white-space: nowrap; }
 .d58.d2 .d22-col.is-now .d22-bn { font-size: 15px; color: #a0675a; }
 .d58.d2 .d22-svline { z-index: 3; }

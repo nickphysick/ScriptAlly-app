@@ -17,7 +17,7 @@
 
 .cp32 {
   --c32-type: var(--sp-type); --c32-serif: var(--sp-serif); --c32-mono: var(--font-mono);
-  --c32-ink: #1c130f; --c32-navy: #2a3a52; --c32-btn: #2d3a50; --c32-cream: #f4eee5; --c32-muted: #7d7067; --c32-rose: #a0675a;
+  --c32-ink: #1c130f; --c32-navy: #2a3a52; --c32-btn: var(--sp-anthracite); --c32-cream: #f4eee5; --c32-muted: #7d7067; --c32-rose: #a0675a;
   --c32-oat: #f5f1eb; --c32-hair: #ebe4da; --c32-frame: #e9e3d9;
 }
 

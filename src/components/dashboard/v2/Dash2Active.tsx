@@ -147,8 +147,8 @@ export const Dash2Active: React.FC<{
               <svg className="d2-plotsvg" width={w} height={H} viewBox={`0 0 ${w} ${H}`} aria-hidden="true">
                 <defs>
                   <linearGradient id="d2-fill" x1="0" y1="0" x2="0" y2={H} gradientUnits="userSpaceOnUse">
-                    <stop offset="0" stopColor="rgb(45,58,80)" stopOpacity="0.92" />
-                    <stop offset="1" stopColor="rgb(45,58,80)" stopOpacity="0.5" />
+                    <stop offset="0" stopColor="rgb(42, 58, 82)" stopOpacity="0.92" />
+                    <stop offset="1" stopColor="rgb(42, 58, 82)" stopOpacity="0.5" />
                   </linearGradient>
                 </defs>
                 <path d={fillD} fill="url(#d2-fill)" data-d2="fill" />
@@ -222,7 +222,7 @@ export const Dash2Active: React.FC<{
             <>
               <div className="d2-wbig"><b data-d2="stip-n">{sent[hk].n}</b><span>{sent[hk].n === 1 ? "query sent" : "queries sent"}</span></div>
               <ul>
-                {sentRows.slice(0, SENT_AGENTS).map((r, k) => <li key={k} data-d2="stip-row"><i style={{ background: "#2d3a50" }} />{r}</li>)}
+                {sentRows.slice(0, SENT_AGENTS).map((r, k) => <li key={k} data-d2="stip-row"><i style={{ background: "#2a3a52" }} />{r}</li>)}
                 {sentRows.length > SENT_AGENTS && <li className="d22-smore" data-d2="stip-more">and {sentRows.length - SENT_AGENTS} more</li>}
               </ul>
             </>

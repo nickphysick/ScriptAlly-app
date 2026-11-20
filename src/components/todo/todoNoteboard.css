@@ -395,7 +395,7 @@
 .nb-scope {
   --cb-paper: #fbf9f5;
   --cb-line: #ddd6ca;
-  --cb-band: #2d3a50;
+  --cb-band: var(--sp-anthracite);
   --cb-cream: #f6efe2;
   --cb-ink: #1c130f;
   --cb-mute: #6f675e;
@@ -553,7 +553,7 @@
 /* the pin: an 18px head with a highlight and a cast shadow, in rust, navy or slate (`--pc`) */
 .cb-pin {
   position: absolute; top: -9px; left: 50%; margin-left: -9px; width: 18px; height: 18px; border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.75) 0 14%, transparent 16%), radial-gradient(circle at 60% 70%, rgba(0, 0, 0, 0.28), transparent 62%), var(--pc, #2d3a50);
+  background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.75) 0 14%, transparent 16%), radial-gradient(circle at 60% 70%, rgba(0, 0, 0, 0.28), transparent 62%), var(--pc, var(--sp-anthracite));
   box-shadow: 3px 6px 5px -1px rgba(30, 20, 10, 0.45), inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 }
 /* the tape: a torn strip across the top edge, slate or cream */

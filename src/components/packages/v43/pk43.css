@@ -45,7 +45,7 @@
    The WORKSPACE is Query letters' surface (`.qlp-work`): #fbf9f5, radius 18, a hairline and the paper shadow, 26 / 32
    inside; the builder sits in it as built (v42's white `.p42-bw` container is retired). */
 .pk43 {
-  --ql-ink: #1c130f; --ql-navy: #2a3a52; --ql-btn: #2d3a50; --ql-cream: #f4eee5;
+  --ql-ink: #1c130f; --ql-navy: #2a3a52; --ql-btn: var(--sp-anthracite); --ql-cream: #f4eee5;
   --ql-berry: #8f4a5a; --ql-blush: #f8e8ea;
   --ql-t62: rgba(28, 19, 15, .62); --ql-t72: rgba(28, 19, 15, .72); --ql-line: rgba(28, 19, 15, .12);
 }
@@ -144,7 +144,7 @@
 @media (min-width: 768px) {
   .pk43 .pk43-d1 { grid-column: 1; list-style: none; margin: 0; padding: 4px 0 0; display: flex; flex-direction: column; gap: 26px; }
   .pk43 .pk43-d1 li { display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: 16px; align-items: start; }
-  .pk43 .pk43-d1-n { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: #2d3a50; color: #f4eee5; font: 400 17px/1 var(--sp-type); }
+  .pk43 .pk43-d1-n { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--sp-anthracite); color: #f4eee5; font: 400 17px/1 var(--sp-type); }
   .pk43 .pk43-d1-t b { display: block; font: 400 21px/1.25 var(--sp-type); color: var(--ql-ink); }
   .pk43 .pk43-d1-t span { display: block; margin-top: 4px; font: 400 16.5px/1.5 var(--sp-serif); color: var(--ql-t72); }
   /* no buttons on day one: the title block keeps its rhythm without the empty button row */

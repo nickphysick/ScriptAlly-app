@@ -24,7 +24,7 @@
 .d58.d2 .d2-feed .df1-crow[data-kind="request"]:is([data-status="Full Requested"], [data-status="Revise & Resubmit"]) { --t: #dfe7f0; }
 .d58.d2 .d2-feed .df1-crow[data-kind="offer"] { --t: #f8e8e5; }
 .d58.d2 .d2-feed .df1-crow:hover { border-color: #d9c8ba; }
-.d58.d2 .d2-feed .df1-crow:focus-visible, .d2-feed .df1-fold:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.d58.d2 .d2-feed .df1-crow:focus-visible, .d2-feed .df1-fold:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d58.d2 .d2-feed .df1-cg { display: grid; place-items: center; }
 .d58.d2 .d2-feed .df1-ctx { min-width: 0; }
 .d58.d2 .d2-feed .df1-ctx b { display: block; font-family: var(--d58-type) !important; font-weight: 400; font-size: 16px; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

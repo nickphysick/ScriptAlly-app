@@ -84,7 +84,7 @@
   justify-content: space-between;
   gap: 10px;
   padding: 7px 14px;
-  background: #2d3a50;
+  background: var(--sp-anthracite);
   color: #fffaf3;
 }
 /* ⚠️ TWO CLASSES AND `!important`: brand.tsx forces a face on every h2 at runtime */
@@ -141,7 +141,7 @@
   box-sizing: border-box;
   padding: 14px 14px 12px;
   border-radius: 16px;
-  background: #2d3a50;
+  background: var(--sp-anthracite);
   color: #fffaf3;
   box-shadow: 0 8px 20px rgba(27, 36, 51, 0.18);
 }
@@ -257,7 +257,7 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
 }
 .d58 .df1-streak > b { font-family: var(--d58-type) !important; font-weight: 400; font-size: 18px; }
 .df1-weeks { margin-left: auto; display: flex; gap: 3px; }
-.df1-weeks i { width: 20px; height: 6px; border-radius: 3px; background: #2d3a50; }
+.df1-weeks i { width: 20px; height: 6px; border-radius: 3px; background: var(--sp-anthracite); }
 .df1-weeks i.is-off { background: #ece7de; }
 
 /* ── Part D: the feed ─────────────────────────────────────────────────────────────────────────────────────────────

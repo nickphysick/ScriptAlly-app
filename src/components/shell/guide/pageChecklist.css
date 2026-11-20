@@ -79,7 +79,7 @@
 .pck-pg { font: 500 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.16em; text-transform: uppercase; color: #a2452a; }
 .pck-x { all: unset; flex: none; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: rgba(28, 19, 15, 0.5); font-size: 13px; }
 .pck-x:hover { background: rgba(162, 69, 42, 0.1); color: #1c130f; }
-.pck-x:focus-visible { outline: 2px solid #2d3a50; outline-offset: 1px; }
+.pck-x:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 1px; }
 .pck-bar { display: flex; gap: 4px; margin: 12px 6px 0 0; }
 .pck-bar i { flex: 1; height: 4px; border-radius: 2px; background: rgba(162, 69, 42, 0.16); transition: background 0.3s; }
 .pck-bar i.on { background: #a2452a; }
@@ -96,22 +96,22 @@
   all: unset; cursor: pointer; font: 400 10px/1.4 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.08em;
   color: #a2452a; border-bottom: 1px dotted currentColor;
 }
-.pck-act:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.pck-act:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .pck-l li:hover button:not(.pck-act) { background: #fbf9f5; }
 .pck-tx .pck-sk { font: 400 13px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.45); }
-.pck-l li.is-skip .pck-tick { background: #fbf9f5; border: 1.5px solid rgba(45, 58, 80, 0.45); color: #2d3a50; }
+.pck-l li.is-skip .pck-tick { background: #fbf9f5; border: 1.5px solid rgba(42, 58, 82, 0.45); color: var(--sp-anthracite); }
 .pck-l li + li { border-top: 1px solid rgba(28, 19, 15, 0.07); }
 .pck-l button {
   all: unset; box-sizing: border-box; cursor: pointer; width: 100%; display: grid; grid-template-columns: 24px 1fr auto; gap: 12px;
   align-items: center; padding: 9px 6px 9px 4px; border-radius: 10px;
 }
 .pck-l button:hover { background: #f6f3ee; }
-.pck-l button:focus-visible { outline: 2px solid #2d3a50; outline-offset: -2px; }
+.pck-l button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: -2px; }
 .pck-tick {
-  box-sizing: border-box; width: 22px; height: 22px; border-radius: 50%; border: 1.5px dotted rgba(45, 58, 80, 0.5); display: grid; place-items: center;
+  box-sizing: border-box; width: 22px; height: 22px; border-radius: 50%; border: 1.5px dotted rgba(42, 58, 82, 0.5); display: grid; place-items: center;
   font: 600 12px/1 var(--sp-serif) !important; color: #f4eee5; transition: background 0.2s, border-color 0.2s;
 }
-.pck-l li.is-done .pck-tick { background: #2d3a50; border: 1.5px solid #2d3a50; }
+.pck-l li.is-done .pck-tick { background: var(--sp-anthracite); border: 1.5px solid var(--sp-anthracite); }
 .pck-l li.just .pck-tick { animation: pck-pop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1); }
 @keyframes pck-pop { 0% { transform: scale(0.7); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
 .pck-tx { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
@@ -119,7 +119,7 @@
 .pck-tx small { font: 400 13px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
 .pck-l li.is-done .pck-tx b { color: rgba(28, 19, 15, 0.5); font-weight: 400 !important; }
 .pck-l li.is-done .pck-tx small { display: none; }
-.pck-go { font: 400 15px/1 var(--sp-type) !important; color: #2d3a50; opacity: 0; transform: translateX(-4px); transition: opacity 0.15s, transform 0.15s; }
+.pck-go { font: 400 15px/1 var(--sp-type) !important; color: var(--sp-anthracite); opacity: 0; transform: translateX(-4px); transition: opacity 0.15s, transform 0.15s; }
 .pck-l button:hover .pck-go, .pck-l button:focus-visible .pck-go { opacity: 1; transform: none; }
 .pck-n { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 6px 12px 10px; }
 .pck-n i { font: italic 400 12.5px/1.2 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.5); }
@@ -128,7 +128,7 @@
   text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 3px;
 }
 .pck-off:hover { color: #1c130f; }
-.pck-off:focus-visible, .pck-sb button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.pck-off:focus-visible, .pck-sb button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .pck-sure { padding: 14px 16px; }
 .pck-sure b { display: block; margin-bottom: 6px; font: 400 17px/1.2 var(--sp-type) !important; color: #1c130f; }
 .pck-sure p { margin: 0 0 12px; font: 400 14px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.7); }
@@ -158,10 +158,10 @@
    family on bare b at runtime, so the face is restated with !important and two classes) */
 .pck-card .pck-ci b { font: 600 14.5px/1.45 var(--sp-serif) !important; color: #1c130f; }
 .pck-back {
-  all: unset; cursor: pointer; width: max-content; margin-top: 6px; font: 400 13px/1.2 var(--sp-serif) !important; color: #2d3a50;
+  all: unset; cursor: pointer; width: max-content; margin-top: 6px; font: 400 13px/1.2 var(--sp-serif) !important; color: var(--sp-anthracite);
   text-decoration: underline; text-underline-offset: 3px;
 }
-.pck-back:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.pck-back:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── the note, under the pill, after a step is done ── */
 .pck-note {
@@ -186,7 +186,7 @@
 .pck-note--final .pck-nt { gap: 4px; }
 .pck-note--final .pck-nl { font: 400 12.5px/1.4 var(--sp-serif) !important; letter-spacing: 0 !important; text-transform: none !important; color: rgba(28, 19, 15, 0.62) !important; }
 .pck-note--final .pck-nt button { margin: 6px 0 0; width: max-content; }
-.pck-ok { width: 26px; height: 26px; border-radius: 50%; background: #2d3a50; color: #f4eee5; display: grid; place-items: center; font: 600 13px/1 var(--sp-serif) !important; }
+.pck-ok { width: 26px; height: 26px; border-radius: 50%; background: var(--sp-anthracite); color: #f4eee5; display: grid; place-items: center; font: 600 13px/1 var(--sp-serif) !important; }
 .pck-nt { display: flex; flex-direction: column; gap: 2px; }
 .pck-nt b { font: 500 14.5px/1.2 var(--sp-serif) !important; color: #1c130f; }
 .pck-nt small { font: 500 9.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
@@ -196,7 +196,7 @@
   all: unset; cursor: pointer; margin-left: 6px; height: 32px; padding: 0 13px; border-radius: 16px; background: #2a3a52; color: #f4eee5;
   font: 500 13.5px/32px var(--sp-serif) !important; white-space: nowrap;
 }
-.pck-note button:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.pck-note button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .pck-all { margin-left: 6px; font: italic 400 13.5px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
 
 @media (prefers-reduced-motion: reduce) {
@@ -218,7 +218,7 @@
   all: unset; box-sizing: border-box; cursor: pointer; height: 36px; padding: 0 16px; border-radius: 18px; background: #2a3a52; color: #f4eee5;
   font: 400 15px/36px var(--sp-type) !important; white-space: nowrap;
 }
-.pck-cta:focus-visible { outline: 2px solid #2d3a50; outline-offset: 2px; }
+.pck-cta:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* a card beside a panel on its right: the arrow on the card's right edge */
 .pck-card.side::before { left: auto; right: -6px; top: 22px; box-shadow: 1px -1px 0 rgba(28, 19, 15, 0.12); }
 /* the log journey's card: presses outside the hole reach the page (the drawer's own Cancel) */
@@ -229,7 +229,7 @@
 .pck-l li.is-off button:hover { background: none; }
 .pck-l li.is-off .pck-tx b { color: rgba(28, 19, 15, 0.35); }
 .pck-l li.is-off .pck-tx small { font-style: italic !important; }
-.pck-l li.is-off .pck-tick { border-color: rgba(45, 58, 80, 0.2); }
+.pck-l li.is-off .pck-tick { border-color: rgba(42, 58, 82, 0.2); }
 
 /* all done: the header says so (the pill's sage is with the pill's rules above) */
 .pck-fin { margin: 14px 14px 2px; font: 400 15px/1.5 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.75); }

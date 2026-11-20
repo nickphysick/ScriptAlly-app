@@ -35,7 +35,7 @@ describe("Part C · reading a package's colour", () => {
     expect(hexOf({})).toBe("#1d4b63");
     expect(hexOf({ colour: "pine" })).toBe("#2e5641");
     /* v42 E: the stored colour is read, never painted — every package paints navy */
-    expect(pcStyle({ colour: "lake" })).toEqual({ "--pc": "#2d3a50" });
+    expect(pcStyle({ colour: "lake" })).toEqual({ "--pc": "#2a3a52" }); // roll-out v1, ruling 3: one navy
     expect(pcStyle({ colour: "plum" })).toEqual(pcStyle({ colour: "pine" }));
   });
   it("a value from outside the eight (a stale or hand-edited record) reads as Harbour, never as itself", () => {

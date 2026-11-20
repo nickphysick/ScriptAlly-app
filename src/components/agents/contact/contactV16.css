@@ -175,6 +175,6 @@
 }
 .cl16-frow .cl16-fchip b { font-family: inherit !important; font-weight: 600; }
 .cl16-frow .cl16-fchip:hover { background: #ebe5db; }
-.cl16-frow .cl16-fchip[aria-pressed="true"] { background: #2d3a50; color: #f4eee5; }
+.cl16-frow .cl16-fchip[aria-pressed="true"] { background: var(--sp-anthracite); color: #f4eee5; }
 .cl16-frow .cl16-fchip:focus-visible { outline: 2px solid #1f2a3c; outline-offset: 2px; }
 .cl16-list[data-pinned="true"] .cl16-frow .cl16-fchip { height: 30px; }

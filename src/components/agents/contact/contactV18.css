@@ -79,10 +79,10 @@
   font: 400 16px/1 var(--sp-type) !important; white-space: nowrap; /* v18.3: box is the toolbar's `.ltb-ctl` */
 }
 .cl18-lh .cl18-fb span { font: inherit !important; }
-.cl18-lh .cl18-fb.on { background: #f4eee5; color: #2d3a50; box-shadow: none; }
+.cl18-lh .cl18-fb.on { background: #f4eee5; color: var(--sp-anthracite); box-shadow: none; }
 .cl18-lh .cl18-fb em {
   display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 6px; box-sizing: border-box;
-  border-radius: 10px; background: #2d3a50; color: #f4eee5; font: normal 500 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important;
+  border-radius: 10px; background: var(--sp-anthracite); color: #f4eee5; font: normal 500 11px/1 var(--font-mono, "JetBrains Mono", monospace) !important;
 }
 .cl18-lh .cl18-fb:focus-visible, .cl18-lh .cl18-dens button:focus-visible, .cl18-lh .cl18-fsb:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 /* v18.3: the density pair is the toolbar's `.ltb-dens` */

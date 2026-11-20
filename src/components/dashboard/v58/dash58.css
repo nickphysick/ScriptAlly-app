@@ -369,14 +369,14 @@
    A white card under the day heading, unlike the flat rows around it: the one event that says what a whole
    list did. Navy disc and tag; the counts bold, the manuscript in the typewriter face. */
 .d58-ev.d58-evimp {
-  --c: #2d3a50; --t: #2d3a50;
+  --c: var(--sp-anthracite); --t: var(--sp-anthracite);
   grid-template-columns: 40px minmax(0, 1fr); gap: 16px; margin: 6px 0; padding: 18px 20px;
   border: 1px solid #e4ded6; border-radius: 12px; background: #ffffff;
 }
 .d58-day + .d58-ev.d58-evimp { border-top-color: #e4ded6; }
-.d58-evimp .d58-evimpdisc { width: 40px; height: 40px; margin: 0; background: #2d3a50; color: #f4eee5; }
+.d58-evimp .d58-evimpdisc { width: 40px; height: 40px; margin: 0; background: var(--sp-anthracite); color: #f4eee5; }
 .d58-evimp .d58-evimpdisc > svg { width: 19px; height: 19px; }
-.d58-evimp .d58-evtag { font-weight: 600; color: #2d3a50; }
+.d58-evimp .d58-evtag { font-weight: 600; color: var(--sp-anthracite); }
 .d58-evimp .d58-evsay { margin-top: 6px; font-size: 17px; line-height: 1.45; }
 .d58-evimp .d58-evsay b { font-weight: 600; }
 .d58-evimp .d58-evsay i { font-style: normal; font-family: var(--d58-type) !important; }

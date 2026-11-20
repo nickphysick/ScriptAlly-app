@@ -11,7 +11,7 @@
  */
 
 .pk62, .k62-layer {
-  --k62-ink: #1c130f; --k62-navy: #2a3a52; --k62-btn: #2d3a50; --k62-cream: #f4eee5;
+  --k62-ink: #1c130f; --k62-navy: #2a3a52; --k62-btn: var(--sp-anthracite); --k62-cream: #f4eee5;
   --k62-muted: #7d7067; --k62-soft: #4d443d; --k62-hair: #ebe4da;
   --k62-t62: rgba(28, 19, 15, .62); --k62-t72: rgba(28, 19, 15, .72);
   --k62-type: var(--sp-type);

@@ -8,7 +8,7 @@
    that asks something and is never a button fill. */
 
 .sf {
-  --im-band: #2d3a50;                 /* the current step's dot, the loader's fills */
+  --im-band: var(--sp-anthracite);                 /* the current step's dot, the loader's fills */
   --im-ink: #1b2433;                  /* a list card's head */
   --im-cream: #f4eee5;
   --im-cream-rgb: 244, 238, 229;
@@ -502,7 +502,7 @@ button.im-pick { cursor: pointer; }
 .sf .im-ldremblem { position: relative; width: 160px; height: 160px; display: grid; place-items: center; margin: 0 auto 22px; }
 .sf .im-ldrring {
   position: absolute; top: 50%; left: 50%; width: 104px; height: 104px; margin: -52px 0 0 -52px; border-radius: 50%;
-  border: 1.5px solid rgba(45, 58, 80, .45); animation: imLdrPing 2.4s ease-out infinite;
+  border: 1.5px solid rgba(42, 58, 82, .45); animation: imLdrPing 2.4s ease-out infinite;
 }
 .sf .im-ldrring.r2 { animation-delay: 1.2s; }
 .sf .im-ldrdisc {
@@ -514,7 +514,7 @@ button.im-pick { cursor: pointer; }
 .sf .im-ldrcard.is-done .im-ldrdisc { background: var(--sp-anthracite); color: var(--im-cream); animation: imLdrSettle .6s ease forwards; }
 .sf .im-ldrcard .im-ldrh { font-family: var(--sp-type) !important; font-weight: 400; font-size: 25px; line-height: 1.15; margin: 0 0 10px; color: var(--ink-on-light); }
 .sf .im-ldrmsg { font-family: var(--sp-mono); font-size: 12.5px; letter-spacing: .02em; color: rgba(var(--im-text-rgb), .6); margin: 0 auto 22px; min-height: 18px; animation: imLdrFade .3s ease; }
-.sf .im-ldrtrack { width: 240px; max-width: 100%; height: 5px; border-radius: 5px; background: rgba(45, 58, 80, .14); overflow: hidden; position: relative; margin: 0 auto; transition: opacity .4s ease; }
+.sf .im-ldrtrack { width: 240px; max-width: 100%; height: 5px; border-radius: 5px; background: rgba(42, 58, 82, .14); overflow: hidden; position: relative; margin: 0 auto; transition: opacity .4s ease; }
 .sf .im-ldrtrack span { position: absolute; top: 0; left: -40%; height: 100%; width: 38%; border-radius: 5px; background: linear-gradient(90deg, transparent, #2a3a52, transparent); animation: imLdrSlide 1.35s ease-in-out infinite; }
 .sf .im-ldrcard.is-done .im-ldrtrack { opacity: 0; }
 @keyframes imLdrBreathe { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.06); } }

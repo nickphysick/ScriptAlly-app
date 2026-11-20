@@ -78,7 +78,7 @@ describe("PK43 P7 (source) — the list is Query letters' rows, reused; the stat
 describe("PK43 P9 (source) — no green in the builder on this page", () => {
   it("the step disc, the open step and the status dot are navy here", () => {
     const s = css("components/packages/v41/pk41.css");
-    expect(s).toMatch(/\.p41 \.p41-bld \.p93-done \.p93-sn \{ background: #2d3a50; color: #f4eee5; \}/);
+    expect(s).toMatch(/\.p41 \.p41-bld \.p93-done \.p93-sn \{ background: var\(--sp-anthracite\); color: #f4eee5; \}/); // roll-out v1, ruling 3: one navy
     for (const g of ["#3e7d5a", "#4e6b58", "#f3f6f2", "#7fc89a"]) expect(s, g).not.toContain(g);
   });
 });
