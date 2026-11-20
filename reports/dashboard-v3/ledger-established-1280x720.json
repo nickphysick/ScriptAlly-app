@@ -126,11 +126,12 @@
   ]
  },
  "closedHoop": false,
+ "navy": "rgb(42, 58, 82)",
  "heads": {
   "next": "rgb(239, 205, 201)",
   "nextStage": "offer",
   "expected": "rgb(239, 230, 214)",
-  "chart": "rgb(45, 58, 80)",
+  "chart": "rgb(42, 58, 82)",
   "agents": "rgb(255, 255, 255)"
  },
  "expected": {

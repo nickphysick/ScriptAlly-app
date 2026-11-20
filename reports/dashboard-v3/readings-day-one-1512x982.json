@@ -69,13 +69,13 @@
   "lock": "L6",
   "where": "day-one 1512x982",
   "ok": true,
-  "detail": "[]"
+  "detail": "[\"Add comparable titles →\"]"
  },
  {
   "lock": "C2",
   "where": "day-one 1512x982",
   "ok": true,
-  "detail": "chart head "
+  "detail": "chart head , the band's navy rgb(42, 58, 82)"
  },
  {
   "lock": "C3",

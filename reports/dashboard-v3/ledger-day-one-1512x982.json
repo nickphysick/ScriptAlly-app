@@ -99,6 +99,7 @@
   ]
  },
  "closedHoop": false,
+ "navy": "rgb(42, 58, 82)",
  "heads": {
   "next": "",
   "nextStage": null,
@@ -159,7 +160,9 @@
    "left": 1135.6875
   }
  ],
- "navyFilled": [],
+ "navyFilled": [
+  "Add comparable titles →"
+ ],
  "hScroll": 0,
  "hawk": {
   "pos": "fixed",

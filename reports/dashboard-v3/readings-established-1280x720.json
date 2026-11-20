@@ -81,7 +81,13 @@
   "lock": "C2",
   "where": "established 1280x720",
   "ok": true,
-  "detail": "chart head rgb(45, 58, 80)"
+  "detail": "chart head rgb(42, 58, 82), the band's navy rgb(42, 58, 82)"
+ },
+ {
+  "lock": "L7",
+  "where": "established 1280x720",
+  "ok": true,
+  "detail": "[\"Open task\"]"
  },
  {
   "lock": "C3",
