@@ -70,8 +70,8 @@
 .cp32 .cp32-band b { font: 400 20px/1.2 var(--c32-type); }
 .cp32 .cp32-band i { width: 1px; height: 26px; background: rgba(28, 19, 15, .22); }
 .cp32 .cp32-band p { flex: 1; min-width: 240px; margin: 0; font: 400 16px/1.5 var(--c32-serif); color: #4a2f29; }
-.cp32 .cp32-pill { display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 18px; border: 0; border-radius: 999px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .1); font: 600 15.5px/1 var(--c32-serif); color: var(--c32-ink); white-space: nowrap; cursor: pointer; }
-.cp32 .cp32-pill:hover { box-shadow: 0 2px 6px rgba(28, 19, 15, .18); }
+/* Phase 9: the outline action button (it was a white 38-high pill) */ .cp32 .cp32-pill { display: inline-flex; align-items: center; gap: 8px; border: 0; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); white-space: nowrap; cursor: pointer; }
+.cp32 .cp32-pill:hover { background: var(--sp-btn-line-hov); }
 
 /* ══ C · your shelf and the open comp ═════════════════════════════════════════════════════════════════════════════ */
 /* 48 under the header (its own margin); 40 under the band */
