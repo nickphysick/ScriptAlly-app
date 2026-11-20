@@ -159,11 +159,11 @@ export function nextNum(r: QcRow, nowMs: number): NextNum {
     }
     const d = daysFrom(due, nowMs);
     /* v152.2 §1.7 — never "0 days": a reply due today says so */
-    return d < 0 ? { kind: "num", n: -d, label: [unit(-d), "overdue"], tone: "late" } : d === 0 ? { kind: "text", text: "Reply due today", tone: "faint" } : { kind: "num", n: d, label: [unit(d), "to reply"], tone: "faint" };
+    return d < 0 ? { kind: "num", n: -d, label: [unit(-d), "past expected"], tone: "late" } : d === 0 ? { kind: "text", text: "Reply due today", tone: "faint" } : { kind: "num", n: d, label: [unit(d), "to reply"], tone: "faint" };
   }
   if (due == null) return { kind: "text", text: "No date yet", tone: "faint" };
   const d = daysFrom(due, nowMs);
-  return d < 0 ? { kind: "num", n: -d, label: [unit(-d), "late"], tone: "late" } : d === 0 ? { kind: "text", text: "Due today", tone: "late" } : { kind: "num", n: d, label: [unit(d), "left"], tone: "ink" };
+  return d < 0 ? { kind: "num", n: -d, label: [unit(-d), "past expected"], tone: "late" } : d === 0 ? { kind: "text", text: "Due today", tone: "late" } : { kind: "num", n: d, label: [unit(d), "left"], tone: "ink" };
 }
 
 /* ── the row's one action: the list's button and Birds-eye's hover button ─────────────────────────────────────── */

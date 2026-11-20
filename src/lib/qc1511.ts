@@ -168,7 +168,7 @@ export function weekSummary(rows: readonly QcRow[], nowMs: number): WeekSummary 
       const set = of.filter((r) => isLate(r, nowMs) === lt);
       if (!set.length) continue;
       const noun = NOUN[k][set.length === 1 ? 0 : 1];
-      pills.push({ key: `${k}:${lt ? "late" : "ok"}`, status: KIND_GLYPH[k], late: lt, text: k === "nudge" ? `${set.length} ${noun} ${lt ? "due" : "to send"}` : `${set.length} ${noun} ${lt ? "late" : ONTIME[k]}` });
+      pills.push({ key: `${k}:${lt ? "late" : "ok"}`, status: KIND_GLYPH[k], late: lt, text: k === "nudge" ? `${set.length} ${noun} ${lt ? "due" : "to send"}` : `${set.length} ${noun} ${lt ? "past expected" : ONTIME[k]}` });
     }
   }
   return {

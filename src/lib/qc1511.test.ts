@@ -73,7 +73,7 @@ describe("the summary card (v151.1 §2)", () => {
     expect(s.n).toBe(4);
     expect(s.heading).toBe("4 queries need you this week");
     expect(s.detail).toBe("Tom Ellery made an offer on 2 Oct, and two partials are past expected.");
-    expect(s.pills.map((p) => [p.text, p.late])).toEqual([["1 offer to answer", false], ["2 partials late", true], ["1 full to send", false]]);
+    expect(s.pills.map((p) => [p.text, p.late])).toEqual([["1 offer to answer", false], ["2 partials past expected", true], ["1 full to send", false]]);
     expect(s.pills.map((p) => p.status)).toEqual([QueryStatus.OFFER, QueryStatus.PARTIAL_REQUESTED, QueryStatus.FULL_REQUESTED]);
   });
   it("one query: singular", () => {
