@@ -349,7 +349,7 @@ export function daysWaiting(t: WsTask, nowMs: number): number | null {
   return t.kind === "own" ? null : daysSinceAnchor(t.item, nowMs);
 }
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
-const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day past expected", "days past expected"), late: true }
+const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day late", "days late"), late: true }
   : d === 0 ? { n: "Today", words: "", late: true } : { n: String(d), words: plural(d, "day left", "days left"), late: false };
 /**
  * The figure at a row's right: a request "{n} days waiting" (since the agent asked), a nudge "{n} days late", Gone quiet
