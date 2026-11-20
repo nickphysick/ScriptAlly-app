@@ -27,7 +27,6 @@
    screen (decided by what is rendered, as inkShell's own header-sheet rule is: a hidden page's slot carries
    `data-stage-off`). The scroll area then paints the same token, so tab and sheet are one piece. ──────────────── */
 @media (min-width: 768px) {
-  .ws-app:has(.qc-wpg--v11:not([data-stage-off] *)) .ws-main { --ws-page-rgb: 246, 243, 238; --ws-page: rgb(var(--ws-page-rgb)); }
   .ws-window .qc-wpg.qc-wpg--v11.qc-wpg--v11.qc-wpg--v11 > .wpg-scroll.wpg-scroll {
     background-color: var(--ws-page);
     background-image: linear-gradient(rgba(var(--ws-page-rgb), 0.45), rgba(var(--ws-page-rgb), 0.45)), url("/images/qc/doodle-tile.svg");

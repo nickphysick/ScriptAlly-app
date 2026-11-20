@@ -32,10 +32,10 @@ describe("v156 §4 · cards: full stage colour and navy seals", () => {
 });
 
 describe("v156 §5 · one page colour, and nothing clipping the header's shadow", () => {
-  it("the Query Centre retones the page token where the tab and the sheet read it", () => {
-    const r = rule(".ws-app:has(.qc-wpg--v11:not([data-stage-off] *)) .ws-main");
-    expect(r).toMatch(/--ws-page-rgb:\s*246, 243, 238/);
-    expect(r).toMatch(/--ws-page:\s*rgb\(var\(--ws-page-rgb\)\)/);
+  /* consistency roll-out v1, ruling 1: the Query Centre takes the app-wide oat --ws-page like every workspace page */
+  it("the Query Centre no longer retones the page token", () => {
+    expect(rule(".ws-app:has(.qc-wpg--v11:not([data-stage-off] *)) .ws-main"), "Queries took its own page colour again").toBe("");
+    expect(css).not.toMatch(/--ws-page-rgb:\s*246, 243, 238/);
   });
   it("the scroll area paints that token, not a second literal", () => {
     const r = rule(".ws-window .qc-wpg.qc-wpg--v11.qc-wpg--v11.qc-wpg--v11 > .wpg-scroll.wpg-scroll");
