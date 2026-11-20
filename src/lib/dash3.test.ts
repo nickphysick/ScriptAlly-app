@@ -31,7 +31,8 @@ describe("DB3-3 · card heads read the one stage table", () => {
     const hexes = new Set((css.match(/#[0-9a-f]{6}\b/gi) ?? []).map((h) => h.toLowerCase()));
     const table = new Set(Object.values(STAGE_COLOURS).flatMap((c) => [c.band, c.tint, c.edge, c.mark]));
     /* page tokens the sheet may use besides the table: navy, paper, ink and the existing hairline */
-    const page = new Set(["#2d3a50", "#fffaf3", "#1c130f", "#e3d5c9", "#ebe4da", "#ffffff", "#7d7067", "#5d5850", "#a0675a", "#ece6dc", "#f1ece4"]);
+    /* ⚠️ no navy hex: the sheet reads `var(--d2-navy)`, the page's one navy (Consistency roll-out v1 repoints it) */
+    const page = new Set(["#fffaf3", "#1c130f", "#e3d5c9", "#ebe4da", "#ffffff", "#7d7067", "#5d5850", "#a0675a", "#ece6dc", "#f1ece4"]);
     for (const h of hexes) expect(table.has(h) || page.has(h), h).toBe(true);
   });
 });
