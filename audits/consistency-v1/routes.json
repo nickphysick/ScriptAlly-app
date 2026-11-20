@@ -191,6 +191,14 @@
       "signedOut": true
     },
     {
+      "path": "/welcome?v=verified",
+      "family": "public",
+      "key": "welcome-verified",
+      "name": "Welcome (verified, no reference)",
+      "signedOut": true,
+      "note": "roll-out v1.1: the invite page's verified state, which draws the alternating bands; no reference, so nothing is fetched or written"
+    },
+    {
       "path": "/terms",
       "family": "public",
       "name": "Terms",
