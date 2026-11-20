@@ -13,7 +13,7 @@
  * Module scope, like `drawerStore`: nothing to mount means nothing to forget.
  */
 import { spyJourney } from "./journeySpy";
-import { openQueryDrawer } from "./queryActions/drawerStore";
+import { openQueryDrawer, type OpenRequest } from "./queryActions/drawerStore";
 /* "agent" (Contact list v16 §F): opened from an agent's panel, on its Queries tab — the query view carries a way back */
 export type PanelOrigin = "dashboard" | "feed" | "other" | "agent";
 export interface PanelRequest { id: string; from: PanelOrigin }
@@ -23,11 +23,34 @@ const subs = new Set<() => void>();
 const tell = () => { for (const f of [...subs]) f(); };
 
 export const currentQueryPanel = (): PanelRequest | null => current;
-export function openQueryPanel(id: string, from: PanelOrigin = "other"): void {
-  if (current?.id === id && current.from === from) return;
-  back = null;
-  current = { id, from };
-  tell();
+export function openQueryPanel(id: string, from: PanelOrigin = "other", step?: OpenRequest): void {
+  if (!(current?.id === id && current.from === from)) {
+    back = null;
+    current = { id, from };
+    tell();
+  }
+  if (step) stepWhenReady(id, step);
+}
+
+/**
+ * Next up v1, Phase 3 — OPEN AT THIS STEP. The panel opens, and once ITS slot is on the page the journey is asked for
+ * with `panel` set, so its form steps into the panel exactly as the Query Centre's own tray buttons do (Queries.tsx
+ * `stepRow` → `pendingStepRef`). Nothing about the journey changes: the request is the task's own door, and the
+ * writer confirms (or cancels, which saves nothing) in the panel. A later open, or the panel closing, drops the wait.
+ */
+let stepToken = 0;
+const STEP_WAIT_MS = 4000;
+function stepWhenReady(id: string, req: OpenRequest): void {
+  const token = ++stepToken;
+  if (typeof document === "undefined" || typeof requestAnimationFrame === "undefined") return;
+  const sel = `[data-qp="panel"][data-qp-id="${CSS.escape(id)}"] [data-side-slot]`;
+  const until = Date.now() + STEP_WAIT_MS;
+  const tick = () => {
+    if (token !== stepToken || current?.id !== id) return;
+    if (document.querySelector(sel)) { openQueryDrawer({ ...req, queryId: id }); return; }
+    if (Date.now() < until) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 /**
  * Contact list v16 §F — THE AGENT A QUERY WAS OPENED FROM. The agent's panel shows one of its queries in the query

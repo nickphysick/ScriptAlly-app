@@ -69,7 +69,7 @@
   "lock": "L6",
   "where": "established 1280x720",
   "ok": true,
-  "detail": "[\"Open task\"]"
+  "detail": "[\"Record your answer\"]"
  },
  {
   "lock": "C1",
@@ -87,7 +87,7 @@
   "lock": "L7",
   "where": "established 1280x720",
   "ok": true,
-  "detail": "[\"Open task\"]"
+  "detail": "[\"Record your answer\"]"
  },
  {
   "lock": "C3",

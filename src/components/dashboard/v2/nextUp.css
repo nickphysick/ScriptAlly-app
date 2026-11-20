@@ -1,0 +1,77 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * NEXT UP v1 (ref design-refs/next-up-v1.html) — the lead card's five rows and the rows beneath. The ref is the oracle
+ * for structure, order and alignment; values are the code's own tokens (`--sp-*`, `--d2-*`, `--d58-*`) and
+ * `lib/stageColours` (the tint is set inline by the card). Every rule is scoped to `.d58.d2` and names an `nu-` class
+ * only this card renders, so it wins ties against dash2Frame.css without reaching anything else on the page.
+ *
+ * ⚠️ ALIGNMENT IS THE POINT: the track runs edge to edge of the lead's content box. Its first stop's centre sits under
+ *    the seal's centre (the seal is 40px, a stop 28px, so the track starts 6px in) and its last stop's right edge under
+ *    the number's right edge. Every text line is one line, shortened with an ellipsis, so no name can change the height.
+ */
+
+/* the lead: five rows, block flow, the tint inline */
+.d58.d2 .d2-nup.nu-lead { display: block; padding: 16px; border-radius: 12px; }
+.d58.d2 .nu-lead > * { margin: 0; }
+
+/* 1 · the agent row */
+/* ⚠️ ONE HEIGHT FOR EVERY CARD: name over agency is 44.6px measured; a card with no agency line, or the several-queries
+   seals, would otherwise sit 4–8px shorter and move the four rows beneath (NU1 R3, measured) */
+.d58.d2 .nu-who { display: flex; align-items: center; gap: 12px; min-height: 46px; background: inherit; }
+.d58.d2 .nu-seal { flex: none; }
+.d58.d2 .nu-id { flex: 1 1 auto; min-width: 0; display: block; font-family: var(--d58-serif); }
+.d58.d2 .nu-name { display: block; font: 600 17px/1.2 var(--d58-serif); color: var(--d2-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .nu-agency { display: block; font: italic 400 14px/1.35 var(--d58-serif); color: var(--d2-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .nu-fig { flex: none; margin-left: auto; text-align: right; display: block; }
+.d58.d2 .nu-n { display: block; font-family: var(--d58-type) !important; font-size: 26px; line-height: 1; color: var(--d2-ink); white-space: nowrap; }
+.d58.d2 .nu-cap { display: block; margin-top: 3px; font: 400 12px/1.3 var(--d58-serif); color: var(--d2-muted); white-space: nowrap; }
+/* several queries: up to four overlapping seals, each in a ring of the card's tint */
+.d58.d2 .nu-seals { display: flex; flex: 1 1 auto; min-width: 0; background: inherit; }
+.d58.d2 .nu-ring { display: block; flex: none; padding: 2px; margin-left: -10px; border-radius: 50%; background: inherit; }
+.d58.d2 .nu-ring:first-child { margin-left: -2px; }
+
+/* 2 · the sentence, in the typewriter, one line */
+.d58.d2 .nu-ask { margin-top: 14px; font-family: var(--d58-type) !important; font-size: 22px; line-height: 1.25; color: var(--d2-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .nu-sub { margin-top: 4px; font-size: 15px; line-height: 1.4; color: var(--d2-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* 3 · the track: four stops, edge to edge; the line fills to the ringed one */
+.d58.d2 .nu-track { position: relative; display: flex; justify-content: space-between; margin-top: 18px; padding-left: 6px; background: inherit; }
+.d58.d2 .nu-line { position: absolute; left: 20px; right: 14px; top: 13px; height: 2px; background: color-mix(in srgb, var(--sp-anthracite) 18%, transparent); }
+.d58.d2 .nu-fill { display: block; height: 100%; background: var(--sp-anthracite); text-decoration: none; transform-origin: left center; animation: nu-draw 700ms ease-out both; }
+.d58.d2 .nu-track.is-quiet .nu-fill { background: repeating-linear-gradient(90deg, var(--sp-anthracite) 0 3px, transparent 3px 9px); }
+.d58.d2 .nu-stp { position: relative; z-index: 1; box-sizing: border-box; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: inherit; color: var(--sp-anthracite); }
+.d58.d2 .nu-stp.is-faint { color: color-mix(in srgb, var(--sp-anthracite) 32%, transparent); }
+.d58.d2 .nu-stp.is-cur { background: #fff; box-shadow: 0 0 0 2px #fff, 0 0 0 3.5px var(--sp-anthracite); }
+@keyframes nu-draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: reduce) { .d58.d2 .nu-fill { animation: none; } }
+
+/* 4 · the label: one line, what the current stop is and when */
+.d58.d2 .nu-lab { margin-top: 10px; min-height: 19px; font-size: 14px; line-height: 1.35; color: var(--d2-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .nu-lab b { font-weight: 600; color: var(--d2-ink); }
+
+/* 5 · the buttons */
+.d58.d2 .nu-acts { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.d58.d2 .nu-acts .d2-open { margin-top: 0; }
+
+/* ── Phase 2 · the rows beneath: small navy seal, the task in one line, its wait; hover or focus swaps the wait for the
+   navy arrow chip, and the whole row is the click target ── */
+.d58.d2 .nu-rows { margin: 8px 0 0; }
+.d58.d2 .nu-row { position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 8px 6px; border: 0; border-radius: 8px; background: transparent; cursor: pointer; text-align: left; font: 400 16px/1.3 var(--d58-serif); color: var(--d2-ink); }
+.d58.d2 .nu-row:hover { background: color-mix(in srgb, var(--d2-hair) 45%, transparent); }
+.d58.d2 .nu-row:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.d58.d2 .nu-rseal { flex: none; }
+.d58.d2 .nu-rtx { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .nu-wait { flex: none; margin-left: auto; font-size: 14px; color: var(--d2-muted); white-space: nowrap; transition: opacity 150ms ease; }
+.d58.d2 .nu-go { position: absolute; right: 6px; top: 50%; width: 28px; height: 28px; margin-top: -14px; border-radius: 8px; background: var(--sp-anthracite); color: #fffaf3; display: grid; place-items: center; opacity: 0; transition: opacity 150ms ease; }
+.d58.d2 .nu-go svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2.6; }
+.d58.d2 .nu-row:hover .nu-go, .d58.d2 .nu-row:focus-visible .nu-go { opacity: 1; }
+.d58.d2 .nu-row:hover .nu-wait, .d58.d2 .nu-row:focus-visible .nu-wait { opacity: 0; }
+/* the text never runs under the chip */
+.d58.d2 .nu-row:not(:has(.nu-wait)) .nu-rtx { margin-right: 34px; }
+.d58.d2 .nu-wait { min-width: 28px; text-align: right; }
+@media (prefers-reduced-motion: reduce) { .d58.d2 .nu-wait, .d58.d2 .nu-go { transition: none; } }
+
+/* ── Phase 3 · the buttons: one filled (`.d2-open`, the filled primitive), gone quiet's second the outline primitive ── */
+.d58.d2 .nu-acts .nu-out { flex: none; }
