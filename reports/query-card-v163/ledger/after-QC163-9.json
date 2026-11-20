@@ -1,0 +1,32 @@
+[
+ {
+  "name": "population: frames with the rim breathing",
+  "ok": true,
+  "got": "205"
+ },
+ {
+  "name": "the rim moved in them (the paper's scale above 1.005 somewhere)",
+  "ok": true,
+  "got": "1.01"
+ },
+ {
+  "name": "every button in the drawer keeps one box throughout",
+  "ok": true,
+  "got": "1 distinct"
+ },
+ {
+  "name": "the frame's own scale stays 1",
+  "ok": true,
+  "got": "[1]"
+ },
+ {
+  "name": "an ordinary locator click (Playwright's own, with its stability wait) lands on a tile",
+  "ok": true,
+  "got": "65ms"
+ },
+ {
+  "name": "with the breath still running at the click",
+  "ok": true,
+  "got": "true"
+ }
+]

@@ -1,0 +1,5 @@
+✓ 4070 modules transformed.
+✓ built in 13.07s
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.6s)
+  ✓  2 [measure] › tests/e2e/qc163.measure.ts:510:15 › QC163-F · frames (2.6m)
+  2 passed (3.0m)

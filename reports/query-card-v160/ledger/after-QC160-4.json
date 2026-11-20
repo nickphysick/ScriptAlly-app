@@ -10,9 +10,9 @@
   "got": "1"
  },
  {
-  "name": "population: two bumps ran (the save's and the undo's)",
+  "name": "population: two pops ran (the save's and the undo's)",
   "ok": true,
-  "got": "2"
+  "got": "[\"qc1611-press\",\"qc160-bump\",\"qc1611-press\",\"qc160-bump\"]"
  },
  {
   "name": "the frame's box at rest equals its box before the save",

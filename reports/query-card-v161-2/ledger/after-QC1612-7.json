@@ -1,0 +1,22 @@
+[
+ {
+  "name": "population: reduced motion is on",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the drawer was open throughout (sampled)",
+  "ok": true,
+  "got": "395"
+ },
+ {
+  "name": "no animation of any kind on the frame",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "its scale and its rim's are 1 throughout",
+  "ok": true,
+  "got": "[1]"
+ }
+]

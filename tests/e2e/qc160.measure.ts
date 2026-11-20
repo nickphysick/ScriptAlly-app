@@ -14,7 +14,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { liftMotionSuppression, openRoute } from "./measure";
 
-const PHASE = process.env.SA_PHASE === "before" ? "before" : process.env.SA_PHASE === "mutant" ? "mutant" : "after";
+const PHASE = process.env.SA_PHASE === "before" ? "before" : /^mutant[A-Z]?$/.test(process.env.SA_PHASE ?? "") ? process.env.SA_PHASE! /* each mutant build keeps its own ledgers */ : "after";
 const ONLY = process.env.QC160_ONLY ?? "";
 const run = (id: string) => !ONLY || ONLY.split(",").includes(id);
 const DIR = "reports/query-card-v160";
@@ -26,8 +26,8 @@ test.setTimeout(600_000);
 mkdirSync(`${DIR}/ledger`, { recursive: true });
 mkdirSync(`${DIR}/frames`, { recursive: true });
 
-const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe" });
-const dump = (key: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --dump ${key}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!);
+const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe", timeout: 60_000, killSignal: "SIGKILL" });
+const dump = (key: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --dump ${key}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 60_000, killSignal: "SIGKILL" }).trim().split("\n").pop()!);
 test.beforeAll(() => { seed(); });
 test.afterAll(() => { seed("--clean"); });
 
@@ -163,7 +163,7 @@ if (PHASE === "before") {
 }
 
 /* ══ the locks ════════════════════════════════════════════════════════════════════════════════════════════════════ */
-interface Fr { t: number; scale: string; rotate: string; translate: string; transform: string; anims: { uid: number; id: string; props: string[]; dur: number; peak: number; play: string }[] }
+interface Fr { t: number; scale: string; rotate: string; translate: string; transform: string; anims: { uid: number; id: string; props: string[]; dur: number; peak: number; low: number; play: string }[] }
 /** every frame: the frame's own scale/rotate/translate/transform, and every animation running on the frame itself */
 async function sampleFrame(page: Page) {
   await page.evaluate((cardSel) => {
@@ -176,13 +176,14 @@ async function sampleFrame(page: Page) {
       const frame = document.querySelector<HTMLElement>(cardSel)?.closest<HTMLElement>(".spanel");
       if (frame) {
         const cs = getComputedStyle(frame);
-        const anims = frame.getAnimations().filter((a) => (a.effect as KeyframeEffect).target === frame && a.playState === "running").map((a) => {
+        /* the frame's own box: v161.2/v163 animate its ::before (the paper), whose effect also targets the frame */
+        const anims = frame.getAnimations().filter((a) => (a.effect as KeyframeEffect).target === frame && !(a.effect as KeyframeEffect).pseudoElement && a.playState === "running").map((a) => {
           const ks = (a.effect as KeyframeEffect).getKeyframes();
           const props = [...new Set(ks.flatMap((k) => Object.keys(k).filter((x) => !["offset", "easing", "composite", "computedOffset"].includes(x))))];
           if (a instanceof CSSTransition) props.push(`transition:${a.transitionProperty}`);
           if (a instanceof CSSAnimation) props.push(`css:${a.animationName}`);
-          const peak = Math.max(...ks.map((k) => parseFloat(String((k as Record<string, unknown>).scale ?? "1")) || 1));
-          return { uid: uid(a), id: a.id, props, dur: Number(a.effect?.getTiming().duration) || 0, peak, play: a.playState };
+          const sc = ks.map((k) => parseFloat(String((k as Record<string, unknown>).scale ?? "1")) || 1);
+          return { uid: uid(a), id: a.id, props, dur: Number(a.effect?.getTiming().duration) || 0, peak: Math.max(...sc), low: Math.min(...sc), play: a.playState };
         });
         w.__fs.push({ t: Math.round(performance.now() - t0), scale: cs.scale, rotate: cs.rotate, translate: cs.translate, transform: cs.transform, anims });
       }
@@ -208,10 +209,15 @@ async function saveOne(page: Page, key: string, reply: string | null = null): Pr
   await click(page, C("[data-qc1522='save']"), 50);
   return waitToast(page);
 }
-/** v161.1: one press (at most) then exactly one pop — 520ms, peaking at 1.035 — and no other scale animation */
+/** v161.1: one press (at most) then exactly one pop — v163: 620ms, peaking at 1.03 — and no other scale animation */
 const pressAndPop = (sa: Fr["anims"]) => {
   const pops = sa.filter((a) => a.id === "qc160-bump"), presses = sa.filter((a) => a.id === "qc1611-press");
-  return pops.length === 1 && presses.length <= 1 && sa.length === pops.length + presses.length && Math.abs(pops[0].dur - 520) < 1 && Math.abs(pops[0].peak - 1.035) < 0.0005;
+  return pops.length === 1 && presses.length <= 1 && sa.length === pops.length + presses.length && Math.abs(pops[0].dur - 620) < 1 && Math.abs(pops[0].peak - 1.03) < 0.0005;
+};
+/** v163: an undo's landing sinks instead — one press (at most) then one bump, 620ms, down to 0.975, never above 1 */
+const pressAndSink = (sa: Fr["anims"]) => {
+  const pops = sa.filter((a) => a.id === "qc160-bump"), presses = sa.filter((a) => a.id === "qc1611-press");
+  return pops.length === 1 && presses.length <= 1 && sa.length === pops.length + presses.length && Math.abs(pops[0].dur - 620) < 1 && Math.abs(pops[0].low - 0.975) < 0.0005 && pops[0].peak <= 1;
 };
 const bumpReads = (L: Ledger, tag: string, fs: Fr[]) => {
   const sa = scaleAnims(fs);
@@ -220,8 +226,9 @@ const bumpReads = (L: Ledger, tag: string, fs: Fr[]) => {
   L.check(`${tag}: exactly one pop, at most one press, and no other scale animation on the frame`, pops.length === 1 && presses.length <= 1 && sa.length === pops.length + presses.length, JSON.stringify(sa));
   const b = pops[0];
   L.check(`${tag}: they animate scale only, never transform`, sa.every((a) => a.props.join() === "scale"), JSON.stringify(sa.map((a) => a.props)));
-  L.check(`${tag}: the pop is 520ms`, !!b && Math.abs(b.dur - 520) < 1, String(b?.dur));
-  L.check(`${tag}: the pop peaks at 1.035`, !!b && Math.abs(b.peak - 1.035) < 0.0005, String(b?.peak));
+  L.check(`${tag}: the bump is 620ms (v163)`, !!b && Math.abs(b.dur - 620) < 1, String(b?.dur));
+  if (tag === "undo") L.check(`${tag}: it sinks to 0.975 and never rises above 1 (v163)`, !!b && Math.abs(b.low - 0.975) < 0.0005 && b.peak <= 1, `${b?.low} ${b?.peak}`);
+  else L.check(`${tag}: the pop peaks at 1.03 (v163)`, !!b && Math.abs(b.peak - 1.03) < 0.0005, String(b?.peak));
   const during = fs.filter((f) => f.anims.some((a) => a.uid === b?.uid));
   L.check(`${tag}: population — frames with the bump running`, during.length >= 5, String(during.length));
   /* (the lean's own return, a 320ms transition from the composer's close, can still be ending: 0.01° is its tail) */
@@ -631,13 +638,13 @@ if (PHASE !== "before") {
       const fs = await stopFrame(page);
       if (!ok) { L.check(`${what}: saved (not run: no undo toast)`, true, ""); continue; }
       const s1 = scaleAnims(fs);
-      L.check(`${what}: the save presses in and pops (at most one press; one pop, 520ms, peak 1.035)`, pressAndPop(s1), JSON.stringify(s1));
+      L.check(`${what}: the save presses in and pops (at most one press; one pop, 620ms, peak 1.03)`, pressAndPop(s1), JSON.stringify(s1));
       await sampleFrame(page);
       await page.locator(C("[data-qc1522='undo']")).first().click();
       await page.waitForTimeout(2000);
       const fu = await stopFrame(page);
       const s2 = scaleAnims(fu);
-      L.check(`${what}: its undo presses in and pops`, pressAndPop(s2), JSON.stringify(s2));
+      L.check(`${what}: its undo presses in and sinks (v163)`, pressAndSink(s2), JSON.stringify(s2));
       ran.push(what);
     }
     L.check("it ran at least four different actions", ran.length >= 4, JSON.stringify(ran));
@@ -710,7 +717,7 @@ if (PHASE !== "before") {
       L.check(`population: a To-do task's query card (${qid}) saved from its composer, a draft showing`, ok, String(qid));
       L.check("the route is the To-do desk", /todo/.test(page.url()), page.url());
       const sa = scaleAnims(fs);
-      L.check("the save presses the card's frame in and pops it (at most one press; one pop, 520ms, peak 1.035)", pressAndPop(sa), JSON.stringify(sa));
+      L.check("the save presses the card's frame in and pops it (at most one press; one pop, 620ms, peak 1.03)", pressAndPop(sa), JSON.stringify(sa));
       L.check(added ? "the draft settled in place (the same element, now the step)" : "the save drew no new step on this desk (as on the base): nothing to settle",
         !added || (tr.length > 5 && tr.every((f) => (f.tagged as { in: boolean } | null)?.in) && !(tr[tr.length - 1].tagged as { draft: boolean }).draft && tr.some((f) => (f.lastBxAnims as string[]).includes("qc160-fill"))),
         `${n0} → ${await real()} · ${JSON.stringify(tr[tr.length - 1]?.tagged)}`);
@@ -719,7 +726,7 @@ if (PHASE !== "before") {
       await page.locator(C("[data-qc1522='undo']")).first().click();
       await page.waitForTimeout(2000);
       const fu = await stopFrame(page);
-      L.check("its undo presses in and pops too", pressAndPop(scaleAnims(fu)), JSON.stringify(scaleAnims(fu)));
+      L.check("its undo presses in and sinks (v163)", pressAndSink(scaleAnims(fu)), JSON.stringify(scaleAnims(fu)));
       done = true;
     }
     L.check("a To-do task whose card saves from a composer with a draft was found", done, "");

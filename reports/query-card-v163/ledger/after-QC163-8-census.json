@@ -1,0 +1,51 @@
+[
+ {
+  "id": "qc1612-breath",
+  "props": [
+   "scale"
+  ]
+ },
+ {
+  "id": "qc163-rim-breath",
+  "props": [
+   "scale"
+  ]
+ },
+ {
+  "id": "qc163-tint",
+  "props": [
+   "opacity"
+  ]
+ },
+ {
+  "id": "qc1612-rest",
+  "props": [
+   "scale"
+  ]
+ },
+ {
+  "id": "qc163-rim-rest",
+  "props": [
+   "scale"
+  ]
+ },
+ {
+  "id": "qc163-tint-hold",
+  "props": [
+   "opacity"
+  ]
+ },
+ {
+  "id": "qc163-tint-fade",
+  "props": [
+   "opacity"
+  ]
+ },
+ {
+  "id": "qc163-light",
+  "props": [
+   "opacity",
+   "rotate"
+  ]
+ }
+]

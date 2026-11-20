@@ -1,0 +1,131 @@
+✓ 4070 modules transformed.
+✓ built in 44.20s
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.8s)
+QC160-1 ✓ population: the save landed (toast) — 
+QC160-1 ✓ save: exactly one pop, at most one press, and no other scale animation on the frame — [{"uid":3,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":4,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1.03,"low":0.985,"play":"running"}]
+QC160-1 ✓ save: they animate scale only, never transform — [["scale"],["scale"]]
+QC160-1 ✓ save: the bump is 620ms (v163) — 620
+QC160-1 ✓ save: the pop peaks at 1.03 (v163) — 1.03
+QC160-1 ✓ save: population — frames with the bump running — 37
+QC160-1 ✓ save: the frame's rotate is unchanged during it (frames where the lean's own return is not running) — 37 frames: ["1.6deg"]
+QC160-1 ✓ save: the frame's translate is unchanged during it — ["none"]
+QC160-1 ✓ save: transform is never set on the frame — ["none"]
+QC160-2 ✓ population: Undo was pressed — 76
+QC160-2 ✓ undo: exactly one pop, at most one press, and no other scale animation on the frame — [{"uid":5,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":6,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1,"low":0.975,"play":"running"}]
+QC160-2 ✓ undo: they animate scale only, never transform — [["scale"],["scale"]]
+QC160-2 ✓ undo: the bump is 620ms (v163) — 620
+QC160-2 ✓ undo: it sinks to 0.975 and never rises above 1 (v163) — 0.975 1
+QC160-2 ✓ undo: population — frames with the bump running — 36
+QC160-2 ✓ undo: the frame's rotate is unchanged during it (frames where the lean's own return is not running) — 36 frames: ["1.6deg"]
+QC160-2 ✓ undo: the frame's translate is unchanged during it — ["none"]
+QC160-2 ✓ undo: transform is never set on the frame — ["none"]
+  ✓   2 [measure] › tests/e2e/qc160.measure.ts:247:17 › QC160-1/2 · the bump on save and on undo (12.0s)
+QC160-3 ✓ population: opening the card was sampled — 92
+QC160-3 ✓ opening the card: no scale animation on the frame — []
+QC160-3 ✓ population: changing tab was sampled — 104
+QC160-3 ✓ changing tab: no scale animation on the frame — []
+QC160-3 ✓ population: adding a note was sampled — 189
+QC160-3 ✓ adding a note: no scale animation on the frame — []
+QC160-3 ✓ population: stepping to the next query was sampled — 108
+QC160-3 ✓ stepping to the next query: no scale animation on the frame — []
+QC160-3 ✓ population: opening the composer was sampled — 114
+QC160-3 ✓ opening the composer: no scale animation on the frame — []
+QC160-3 ✓ population: the note was added — 
+  ✓   3 [measure] › tests/e2e/qc160.measure.ts:265:17 › QC160-3 · no bump otherwise (17.3s)
+QC160-4 ✓ population: the save landed and Undo was pressed — 
+QC160-4 ✓ at most one running scale animation on the frame in any frame — 1
+QC160-4 ✓ population: two pops ran (the save's and the undo's) — ["qc1611-press","qc160-bump","qc1611-press","qc160-bump"]
+QC160-4 ✓ the frame's box at rest equals its box before the save — 932,100,540,700,none,1.6deg → 932,100,540,700,none,1.6deg
+  ✓   4 [measure] › tests/e2e/qc160.measure.ts:298:17 › QC160-4 · a save then Undo 100ms later: no stacking, the frame's box at rest unchanged (11.6s)
+QC160-5 ✓ population: a draft was showing, and the save landed — {"ok":true,"tagged":true}
+QC160-5 ✓ population: the landing frame was found — 21
+QC160-5 ✓ population: the held motion was released — 39
+QC160-5 ✓ the same bubble element stays in the DOM through the save — []
+QC160-5 ✓ it is the thread's newest step after the landing, no longer a draft — {"in":true,"draft":false,"isLast":true,"cls":"qc152-m them"}
+QC160-5 ✓ its background-size animates (the fill runs on the bubble) — 42
+QC160-5 ✓ the fill starts near 0% and reaches 100% — ["0% 100%","99.999% 100%"]
+QC160-5 ✓ the fill's run is 420ms (none after 500ms) — 
+QC160-5 ✓ after 500ms its background is the stage's Band — rgb(228, 235, 242) vs rgb(228, 235, 242) (#e4ebf2)
+QC160-5 ✓ after 500ms it has no dashed outline — none rgb(28, 19, 15) / solid
+QC160-5 ✓ it eased in from scale 1.015 — ["1.015","1.015","1.015","1.015"]
+QC160-5 ✓ no new element popped in (no .new on it) — 
+QC160-6 ✓ population: the save changes the stage (the strip's colour) — rgb(239, 230, 214) → rgb(228, 235, 242)
+QC160-6 ✓ population: both ends are single colours — none / none
+QC160-6 ✓ at 200ms the strip's background-color is strictly between the old and new — rgb(239, 230, 214) | rgb(230, 234, 236) @195ms | rgb(228, 235, 242)
+QC160-6 ✓ by 500ms it equals the new colour — rgb(228, 235, 242)
+QC160-6 ✓ the label's colour eases too (between at 200ms, where it changes) — rgb(248, 244, 237) | rgb(244, 246, 246) | rgb(243, 246, 249)
+QC160-6 ✓ the footer's new contents fade in (opacity strictly between 0 and 1 during the run) — [0,0,0.0254657,0.0854018,0.177176,0.290248,0.408504,0.517604,0.611607,0.691346]
+QC160-6 ✓ the footer is fully drawn by 500ms — 1
+  ✓   5 [measure] › tests/e2e/qc160.measure.ts:339:17 › QC160-5/6 · the draft settles in place; the strip and the label ease (12.2s)
+QC160-9 ✓ population: the save landed — 
+QC160-9 ✓ on Undo: some frame shows the leaving toast with opacity strictly between 0 and 1 — [1,1,1,1,1,1,1,1,1,1,1,1]
+QC160-9 ✓ on Undo: it is invisible by 400ms, and the live toast gone — ghost from 388ms; []
+QC160-9 ✓ on Undo: the leaving copy is removed by 1s — 
+QC160-9 ✓ population: the second save landed — 
+QC160-9 ✓ timed out: some frame shows it leaving, opacity strictly between 0 and 1 — [1,1,0.990009,0.962689,0.921485,0.868135,0.804908,0.732285,0.651568,0.563484,0.468572,0.367827]
+QC160-9 ✓ timed out: the live toast is gone — undefined
+  ✓   6 [measure] › tests/e2e/qc160.measure.ts:387:17 › QC160-9 · the toast leaves over 220ms (on Undo, and when it times out) (28.9s)
+QC160-7 ✓ population: the save landed — 
+QC160-7 ✓ population: the newest bubble is the step just saved — {"n":3,"title":"You sent Mira your partial","h":61}
+QC160-7 ✓ population: the undone bubble began to leave — 13
+QC160-7 ✓ at 150ms it is still in the DOM, opacity below 1 — {"t":853.2999999523163,"in":true,"leaving":true,"op":0.210847,"h":61,"above":380,"pe":"none","waits":2}
+QC160-7 ✓ at 350ms its height is under half its original — 4 of 61
+QC160-7 ✓ by 500ms it is gone — {"t":1203.1999998092651,"in":false,"leaving":true,"op":null,"h":null,"above":380,"pe":null,"waits":0}
+QC160-7 ✓ it takes no clicks while leaving — 40
+QC160-7 ✓ the bubble above never moves more than 2px between two frames — max step 0px over 102 frames
+QC160-7 ✓ its wait line folds with it (the bubble and its line leaving, then gone) — [0,2]
+QC160-8 ✓ the stored query is restored, byte for byte — 
+QC160-8 ✓ population: the restore's read and its commit were seen — [{"t":34,"kind":"read"},{"t":46,"kind":"read"},{"t":60,"kind":"read"},{"t":70,"kind":"read"},{"t":366,"kind":"commit"}]
+QC160-8 ✓ population: the press was timed by the page — 1795197171844
+QC160-8 ✓ the restore starts at the press (its read goes out within 100ms) — {"t":34,"kind":"read"}
+QC160-8 ✓ the undo's commit is not held for a motion: it goes out before the fold has run (420ms) — {"commit":{"t":366,"kind":"commit"},"foldFromPress":560}
+  ✓   7 [measure] › tests/e2e/qc160.measure.ts:451:17 › QC160-7/8 · undo folds the step away; the undo is not held for the motion (13.6s)
+QC160-14 ✓ population: the grid has solid, offer and gone-quiet cards — 
+QC160-14 ✓ population: the grid card's band changed colour — rgb(239, 230, 214) → rgb(228, 235, 242)
+QC160-14 ✓ the band is part-way between the old and new colour 150–300ms in (the card stayed mounted) — rgb(239, 230, 214) | rgb(232, 233, 232) | rgb(228, 235, 242) · mounted once: true
+QC160-14 ✓ the band's ease ran on the grid card (Web Animations, 500ms) — 
+QC160-14 ✓ it has the new colour by 560ms — rgb(228, 235, 242)
+  ✓   8 [measure] › tests/e2e/qc160.measure.ts:511:18 › QC160-14 · the grid card's band eases to a new stage (13.2s)
+QC160-10 ✓ population: the page reports reduced motion — 
+QC160-10 ✓ population: the save landed — 
+QC160-10 ✓ the save started no animation and no transition anywhere in the card — []
+QC160-10 ✓ after the save: the strip, label and footer moved on — {"w0":{"band":"MATERIALS REQUESTED","pill":"Partial requested","foot":"Send the partial by 27 Nov Mark partial sent","steps":["You sent Mira your query","Mira asked for a partial"]},"w1":{"band":"WITH THE AGENT","pill":"Partial sent","foot":"Waiting on Mira Reply expected by 12 Feb 2027 Record a response","steps":["You sent Mira your query","Mira asked for a partial","You sent Mira your partial"]}}
+QC160-10 ✓ after the save: one more step, the one saved — ["You sent Mira your query","Mira asked for a partial","You sent Mira your partial"]
+QC160-10 ✓ the undo started no animation and no transition anywhere in the card — []
+QC160-10 ✓ after the undo: exactly as before the save — {"w0":{"band":"MATERIALS REQUESTED","pill":"Partial requested","foot":"Send the partial by 27 Nov Mark partial sent","steps":["You sent Mira your query","Mira asked for a partial"]},"w2":{"band":"MATERIALS REQUESTED","pill":"Partial requested","foot":"Send the partial by 27 Nov Mark partial sent","steps":["You sent Mira your query","Mira asked for a partial"]}}
+QC160-10 ✓ no leaving copy of the toast or of a step is left — 
+  ✓   9 [measure] › tests/e2e/qc160.measure.ts:584:18 › QC160-10 · reduced motion: a save and an undo start no animation and no transition; every end state is right (15.4s)
+QC160-11 ✓ mark the partial sent: the save presses in and pops (at most one press; one pop, 620ms, peak 1.03) — [{"uid":2,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":3,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1.03,"low":0.985,"play":"running"}]
+QC160-11 ✓ mark the partial sent: its undo presses in and sinks (v163) — [{"uid":4,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":5,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1,"low":0.975,"play":"running"}]
+QC160-11 ✓ log a nudge: the save presses in and pops (at most one press; one pop, 620ms, peak 1.03) — [{"uid":2,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":3,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1.03,"low":0.985,"play":"running"}]
+QC160-11 ✓ log a nudge: its undo presses in and sinks (v163) — [{"uid":4,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":5,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1,"low":0.975,"play":"running"}]
+QC160-11 ✓ record a response (a request): the save presses in and pops (at most one press; one pop, 620ms, peak 1.03) — [{"uid":2,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":3,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1.03,"low":0.985,"play":"running"}]
+QC160-11 ✓ record a response (a request): its undo presses in and sinks (v163) — [{"uid":4,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":5,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1,"low":0.975,"play":"running"}]
+QC160-11 ✓ record a response (a pass, which closes it): the save presses in and pops (at most one press; one pop, 620ms, peak 1.03) — [{"uid":2,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":3,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1.03,"low":0.985,"play":"running"}]
+QC160-11 ✓ record a response (a pass, which closes it): its undo presses in and sinks (v163) — [{"uid":4,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":5,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1,"low":0.975,"play":"running"}]
+QC160-11 ✓ close the query: the save presses in and pops (at most one press; one pop, 620ms, peak 1.03) — [{"uid":2,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":3,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1.03,"low":0.985,"play":"running"}]
+QC160-11 ✓ close the query: its undo presses in and sinks (v163) — [{"uid":4,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":5,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1,"low":0.975,"play":"running"}]
+QC160-11 ✓ reopen a closed query: its composer saves in one press (not run: no save) — 
+QC160-11 ✓ answer an offer: its composer saves in one press (not run: no save) — 
+QC160-11 ✓ it ran at least four different actions — ["mark the partial sent","log a nudge","record a response (a request)","record a response (a pass, which closes it)","close the query"]
+  ✓  10 [measure] › tests/e2e/qc160.measure.ts:612:18 › QC160-11 · every save and undo from Step 0.3 bumps, on at least four actions (2.1m)
+QC160-12 ✓ materials: population — boxes read — 73
+QC160-12 ✓ materials: population — the save landed and was undone — 
+QC160-12 ✓ materials: the same elements — 73 → 73
+QC160-12 ✓ materials: every box equals its baseline within 1px — []
+QC160-12 ✓ materials: no wording changed — 
+QC160-12 ✓ agent: population — boxes read — 58
+QC160-12 ✓ agent: population — the save landed and was undone — 
+QC160-12 ✓ agent: the same elements — 58 → 58
+QC160-12 ✓ agent: every box equals its baseline within 1px — []
+QC160-12 ✓ agent: no wording changed — 
+  ✓  11 [measure] › tests/e2e/qc160.measure.ts:654:18 › QC160-12 · nothing else moved: at rest after a save and its undo, every box and every word as before (56.2s)
+QC160-13 ✓ population: a To-do task's query card (seed-pkgq-3) saved from its composer, a draft showing — seed-pkgq-3
+QC160-13 ✓ the route is the To-do desk — http://127.0.0.1:4321/todo
+QC160-13 ✓ the save presses the card's frame in and pops it (at most one press; one pop, 620ms, peak 1.03) — [{"uid":1,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":2,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1.03,"low":0.985,"play":"running"}]
+QC160-13 ✓ the save drew no new step on this desk (as on the base): nothing to settle — 3 → 3 · {"in":false,"draft":true,"isLast":false,"cls":"qc152-m me qc1522-draft"}
+QC160-13 ✓ its undo presses in and sinks (v163) — [{"uid":3,"id":"qc1611-press","props":["scale"],"dur":120,"peak":1,"low":0.985,"play":"running"},{"uid":4,"id":"qc160-bump","props":["scale"],"dur":620,"peak":1,"low":0.975,"play":"running"}]
+QC160-13 ✓ a To-do task whose card saves from a composer with a draft was found — 
+  ✓  12 [measure] › tests/e2e/qc160.measure.ts:683:18 › QC160-13 · the To-do desk: a save in the card it opens bumps and settles as in the Query Centre (18.5s)
+  ✓  13 [measure] › tests/e2e/qc160.measure.ts:739:36 › QC160-F · frames of one save and one undo (20.5s)
+  13 passed (6.2m)

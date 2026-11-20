@@ -2,7 +2,7 @@
  {
   "name": "a tab change: population — sampled",
   "ok": true,
-  "got": "69"
+  "got": "70"
  },
  {
   "name": "a tab change: no scale animation on the frame",
@@ -12,7 +12,7 @@
  {
   "name": "adding a note: population — sampled",
   "ok": true,
-  "got": "133"
+  "got": "270"
  },
  {
   "name": "adding a note: no scale animation on the frame",

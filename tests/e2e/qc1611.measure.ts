@@ -12,7 +12,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { liftMotionSuppression, openRoute } from "./measure";
 
-const PHASE = process.env.SA_PHASE === "before" ? "before" : process.env.SA_PHASE === "mutant" ? "mutant" : "after";
+const PHASE = process.env.SA_PHASE === "before" ? "before" : /^mutant[A-Z]?$/.test(process.env.SA_PHASE ?? "") ? process.env.SA_PHASE! /* each mutant build keeps its own ledgers */ : "after";
 const ONLY = process.env.QC1611_ONLY ?? "";
 const run = (id: string) => !ONLY || ONLY.split(",").includes(id);
 const DIR = "reports/query-card-v161-1";
@@ -24,7 +24,7 @@ test.setTimeout(900_000);
 test.use({ viewport: VP });
 mkdirSync(`${DIR}/ledger`, { recursive: true });
 mkdirSync(`${DIR}/frames`, { recursive: true });
-const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe" });
+const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe", timeout: 60_000, killSignal: "SIGKILL" });
 test.beforeAll(() => { seed(); });
 test.afterAll(() => { seed("--clean"); });
 
@@ -116,10 +116,11 @@ function shape(tr: Tr) {
   const heldAt = after.find((f) => Math.abs(f.scale - 0.985) < 0.0005);
   const held = heldAt && popStart != null ? after.filter((f) => f.t >= heldAt.t && f.t < popStart) : [];
   const peak = pop.length ? Math.max(...pop.map((f) => f.scale)) : null;
+  const low = pop.length ? Math.min(...pop.map((f) => f.scale)) : null;
   const longsInHold = heldAt && popStart != null ? tr.longs.filter((l) => l.start < popStart && l.start + l.dur > heldAt.t) : [];
   const last = tr.frames[tr.frames.length - 1];
   return { firstInMs: firstIn ? Math.round(firstIn.t - p) : null, held, heldAt: heldAt?.t ?? null, popStart, popFrames: pop.length, popSpan: popStart != null ? Math.round(popEnd! - popStart) : 0,
-    peak, endScale: last?.scale ?? null, longsInHold, lastAnims: last?.anims ?? [] };
+    peak, low, endScale: last?.scale ?? null, longsInHold, lastAnims: last?.anims ?? [] };
 }
 const shapeChecks = (L: Ledger, tag: string, tr: Tr, opts: { press?: boolean; hold?: boolean; pop?: boolean } = { press: true, hold: true, pop: true }) => {
   const s = shape(tr);
@@ -129,8 +130,9 @@ const shapeChecks = (L: Ledger, tag: string, tr: Tr, opts: { press?: boolean; ho
     L.check(`${tag}: every one at scale 0.985`, s.held.length > 0 && s.held.every((f) => Math.abs(f.scale - 0.985) < 0.0005), JSON.stringify([...new Set(s.held.map((f) => f.scale))]));
   }
   if (opts.pop) {
-    L.check(`${tag}: the pop rises above 1.03 and stays below 1.04`, s.peak != null && s.peak > 1.03 && s.peak < 1.04, String(s.peak));
-    L.check(`${tag}: at least 24 frames painted in the pop's 520ms`, s.popFrames >= 24, `${s.popFrames} frames over ${s.popSpan}ms`);
+    /* v163: the pop peaks at 1.03 (was 1.035) over 620ms (was 520): the same 0.005 below the peak, and the same frame rate */
+    L.check(`${tag}: the pop rises above 1.025 and never above 1.03`, s.peak != null && s.peak > 1.025 && s.peak <= 1.0301, String(s.peak));
+    L.check(`${tag}: at least 28 frames painted in the pop's 620ms`, s.popFrames >= 28, `${s.popFrames} frames over ${s.popSpan}ms`);
     L.check(`${tag}: it ends at exactly 1`, s.endScale === 1, String(s.endScale));
   }
   return s;
@@ -216,7 +218,7 @@ if (PHASE !== "before") {
       if (!ok) { await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 }); L.check(`${a.what}: saved (not run: no Undo)`, true, ""); continue; }
       const s = shape(tr);
       L.check(`${a.what}: pressed in within 100ms`, s.firstInMs != null && s.firstInMs <= 100, `${s.firstInMs}ms`);
-      L.check(`${a.what}: the pop above 1.03, below 1.04, ending at 1, 24+ frames`, s.peak != null && s.peak > 1.03 && s.peak < 1.04 && s.endScale === 1 && s.popFrames >= 24, `${s.peak} · ${s.popFrames} frames · ends ${s.endScale}`);
+      L.check(`${a.what}: the pop above 1.025, never above 1.03, ending at 1, 28+ frames`, s.peak != null && s.peak > 1.025 && s.peak <= 1.0301 && s.endScale === 1 && s.popFrames >= 28, `${s.peak} · ${s.popFrames} frames · ends ${s.endScale}`);
       await startTrace(page); await page.waitForTimeout(150);
       await press(page, UNDO).catch(() => {});
       await page.waitForTimeout(4500);
@@ -224,7 +226,8 @@ if (PHASE !== "before") {
       await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
       const u = shape(tu);
       L.check(`${a.what} · its undo: pressed in within 100ms`, u.firstInMs != null && u.firstInMs <= 100, `${u.firstInMs}ms`);
-      L.check(`${a.what} · its undo: the pop above 1.03, below 1.04, ending at 1, 24+ frames`, u.peak != null && u.peak > 1.03 && u.peak < 1.04 && u.endScale === 1 && u.popFrames >= 24, `${u.peak} · ${u.popFrames} frames · ends ${u.endScale}`);
+      /* v163: an undo sinks (0.975 at 30%) and never rises above 1 */
+      L.check(`${a.what} · its undo: the sink below 0.98, never above 1, ending at 1, 28+ frames`, u.low != null && u.low < 0.98 && u.peak != null && u.peak <= 1.0001 && u.endScale === 1 && u.popFrames >= 28, `${u.low}–${u.peak} · ${u.popFrames} frames · ends ${u.endScale}`);
       ran.push(a.what);
     }
     L.check("it ran at least five different actions", ran.length >= 5, JSON.stringify(ran));
@@ -344,7 +347,7 @@ if (PHASE !== "before") {
    CDP's screencast takes the compositor's own frames, so it also has frames painted while the page's main thread is busy
    (where rAF, and so every trace above, has none). For each CPU rate: the frame nearest the press + 70ms, the middle of
    the longest long task between the press and the pop (at 1× with no long task: midway from the press-in to the pop),
-   the pop's peak (its start + 40% of 520ms) and at rest (its end + 400ms). */
+   the pop's peak (v163: its start + 81ms, where the one easing over 620ms reaches the 42% keyframe) and at rest (its end + 400ms). */
 if (PHASE === "after" && run("F")) test("QC1611-F · frames of one save at CPU 1× and 4×: the press, mid-freeze, the pop's peak, at rest", async ({ page }) => {
   const index: Record<string, unknown> = {};
   for (const rate of [1, 4]) {
@@ -370,7 +373,7 @@ if (PHASE === "after" && run("F")) test("QC1611-F · frames of one save at CPU 1
     await cdp.send("Emulation.setCPUThrottlingRate", { rate: 1 });
     const s = shape(tr), p = tr.press ?? 0, popStart = s.popStart ?? p, popEnd = popStart + s.popSpan;
     const long = tr.longs.filter((l) => l.start + l.dur > p && l.start < popStart).sort((a, b) => b.dur - a.dur)[0];
-    const marks: Record<string, number> = { press: p + 70, freeze: long ? long.start + long.dur / 2 : ((s.heldAt ?? p) + popStart) / 2, peak: popStart + 0.4 * 520, rest: popEnd + 400 };
+    const marks: Record<string, number> = { press: p + 70, freeze: long ? long.start + long.dur / 2 : ((s.heldAt ?? p) + popStart) / 2, peak: popStart + 81, rest: popEnd + 400 };
     const got: Record<string, unknown> = {};
     for (const [k, at] of Object.entries(marks)) {
       const near = shots.reduce<{ t: number; data: string } | null>((b, x) => (!b || Math.abs(x.t - at) < Math.abs(b.t - at) ? x : b), null);

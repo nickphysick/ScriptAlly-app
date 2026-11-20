@@ -1,0 +1,52 @@
+✓ 4070 modules transformed.
+✓ built in 15.63s
+[emu-guard] 33.2 GB free. Debug logs: /dev/null.
+  ✓   1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.4s)
+  ✘   2 [measure] › tests/e2e/qc160.measure.ts:247:17 › QC160-1/2 · the bump on save and on undo (26.0s)
+QC160-3 ✓ population: opening the card was sampled — 92
+QC160-3 ✓ opening the card: no scale animation on the frame — []
+QC160-3 ✓ population: changing tab was sampled — 103
+QC160-3 ✓ changing tab: no scale animation on the frame — []
+QC160-3 ✓ population: adding a note was sampled — 182
+QC160-3 ✓ adding a note: no scale animation on the frame — []
+QC160-3 ✓ population: stepping to the next query was sampled — 110
+QC160-3 ✓ stepping to the next query: no scale animation on the frame — []
+QC160-3 ✓ population: opening the composer was sampled — 114
+QC160-3 ✗ opening the composer: no scale animation on the frame — [{"uid":3,"id":"qc1612-breath","props":["scale"],"dur":3200,"peak":1.01,"low":1,"play":"running"}]
+QC160-3 ✓ population: the note was added — 
+  ✘   3 [measure] › tests/e2e/qc160.measure.ts:265:17 › QC160-3 · no bump otherwise (17.8s)
+  ✘   4 [measure] › tests/e2e/qc160.measure.ts:298:17 › QC160-4 · a save then Undo 100ms later: no stacking, the frame's box at rest unchanged (18.1s)
+  ✘   5 [measure] › tests/e2e/qc160.measure.ts:339:17 › QC160-5/6 · the draft settles in place; the strip and the label ease (17.8s)
+  ✘   6 [measure] › tests/e2e/qc160.measure.ts:387:17 › QC160-9 · the toast leaves over 220ms (on Undo, and when it times out) (18.0s)
+  ✘   7 [measure] › tests/e2e/qc160.measure.ts:451:17 › QC160-7/8 · undo folds the step away; the undo is not held for the motion (18.7s)
+QC160-14 ✓ population: the grid has solid, offer and gone-quiet cards — 
+  ✘   8 [measure] › tests/e2e/qc160.measure.ts:511:18 › QC160-14 · the grid card's band eases to a new stage (18.7s)
+QC160-10 ✓ population: the page reports reduced motion — 
+QC160-10 ✓ population: the save landed — 
+QC160-10 ✓ the save started no animation and no transition anywhere in the card — []
+QC160-10 ✓ after the save: the strip, label and footer moved on — {"w0":{"band":"MATERIALS REQUESTED","pill":"Partial requested","foot":"Send the partial by 27 Nov Mark partial sent","steps":["You sent Mira your query","Mira asked for a partial"]},"w1":{"band":"WITH THE AGENT","pill":"Partial sent","foot":"Waiting on Mira Reply expected by 12 Feb 2027 Record a response","steps":["You sent Mira your query","Mira asked for a partial","You sent Mira your partial"]}}
+QC160-10 ✓ after the save: one more step, the one saved — ["You sent Mira your query","Mira asked for a partial","You sent Mira your partial"]
+QC160-10 ✓ the undo started no animation and no transition anywhere in the card — []
+QC160-10 ✓ after the undo: exactly as before the save — {"w0":{"band":"MATERIALS REQUESTED","pill":"Partial requested","foot":"Send the partial by 27 Nov Mark partial sent","steps":["You sent Mira your query","Mira asked for a partial"]},"w2":{"band":"MATERIALS REQUESTED","pill":"Partial requested","foot":"Send the partial by 27 Nov Mark partial sent","steps":["You sent Mira your query","Mira asked for a partial"]}}
+QC160-10 ✓ no leaving copy of the toast or of a step is left — 
+  ✓   9 [measure] › tests/e2e/qc160.measure.ts:584:18 › QC160-10 · reduced motion: a save and an undo start no animation and no transition; every end state is right (15.5s)
+  ✘  10 [measure] › tests/e2e/qc160.measure.ts:612:18 › QC160-11 · every save and undo from Step 0.3 bumps, on at least four actions (10.0m)
+QC160-12 ✓ materials: population — boxes read — 73
+  ✘  11 [measure] › tests/e2e/qc160.measure.ts:654:18 › QC160-12 · nothing else moved: at rest after a save and its undo, every box and every word as before (39.3s)
+  ✘  12 [measure] › tests/e2e/qc160.measure.ts:683:18 › QC160-13 · the To-do desk: a save in the card it opens bumps and settles as in the Query Centre (10.0m)
+  ✘  13 [measure] › tests/e2e/qc160.measure.ts:739:36 › QC160-F · frames of one save and one undo (22.2s)
+QC163-9 ✓ population: frames with the rim breathing — 204
+QC163-9 ✗ the rim moved in them (the paper's scale above 1.005 somewhere) — 1
+QC163-9 ✗ every button in the drawer keeps one box throughout — 201 distinct
+QC163-9 ✗ the frame's own scale stays 1 — [1.00038,1.00042,1.00047,1.00052,1.00057,1.00063,1.00069,1.00075,1.00081,1.00088,1.00094,1.00101,1.00109,1.00116,1.00124,1.00132,1.0014,1.00148,1.00157,1.00166,1.00175,1.00184,1.00194,1.00204,1.00214,1.00224,1.00234,1.00245,1.00256,1.00267,1.00278,1.00289,1.00301,1.00313,1.00325,1.00337,1.00349,1.00362,1.00374,1.00387,1.004,1.00413,1.00427,1.0044,1.00454,1.00468,1.00482,1.00496,1.0051,1.00525,1.00539,1.00554,1.00569,1.00584,1.00599,1.00614,1.00644,1.0066,1.00675,1.00691,1.00707,1.00723,1.00738,1.00754,1.00771,1.00787,1.00803,1.00819,1.00835,1.00852,1.00868,1.00884,1.00901,1.00917,1.00934,1.0095,1.00967,1.00983,1.01,1.00984,1.00951,1.00918,1.00885,1.00836,1.00755,1.00739,1.00676,1.00645,1.00629,1.0054,1.00441,1.00414,1.00375,1.00185,1.00149,1.00102,1.00095,1.00058,1.00034,1.0003,1.00026,1.00022,1.00019,1.00016,1.00013,1.00011,1.00008,1.00006,1.00005,1.00003,1.00002,1.00001,1,1.00029,1.00033]
+QC163-9 ✗ an ordinary locator click (Playwright's own, with its stability wait) lands on a tile — 30011ms
+QC163-9 ✓ with the breath still running at the click — true
+  ✘  14 [measure] › tests/e2e/qc163.measure.ts:412:15 › QC163-9 · nothing clickable moves while the rim breathes, and an ordinary locator click lands (41.0s)
+QC163-11 ✓ population: the press held the tint (0.6 or more within 300ms) — 0.72
+QC163-11 ✗ population: it was given back (qc163-tint-back) about 700ms after the press — —
+QC163-11 ✗ from 200ms after that the tint is at 0 — []
+QC163-11 ✓ and no light was made — 
+QC163-11 ✓ and nothing was saved (no Undo toast) — 
+  ✘  15 [measure] › tests/e2e/qc163.measure.ts:457:16 › QC163-11 · pressBack: the tint back to 0 within 200ms, and no light (9.2s)
+  13 failed
+  2 passed (26.0m)

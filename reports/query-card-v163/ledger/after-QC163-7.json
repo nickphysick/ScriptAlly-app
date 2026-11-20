@@ -1,0 +1,32 @@
+[
+ {
+  "name": "save: population — frames with the pop running",
+  "ok": true,
+  "got": "64"
+ },
+ {
+  "name": "save: the pop's keyframes peak at 1.03 (42%), 620ms",
+  "ok": true,
+  "got": "[{\"offset\":\"null\",\"easing\":\"linear\",\"scale\":\"0.985\"},{\"offset\":\"0.42\",\"easing\":\"linear\",\"scale\":\"1.03\"},{\"offset\":\"null\",\"easing\":\"linear\",\"scale\":\"1\"}]"
+ },
+ {
+  "name": "save: the painted peak is above 1.025, never above 1.03",
+  "ok": true,
+  "got": "1.02945"
+ },
+ {
+  "name": "undo: population — frames with the bump running",
+  "ok": true,
+  "got": "61"
+ },
+ {
+  "name": "undo: the bump's keyframes dip to 0.975 (30%), 620ms, none above 1",
+  "ok": true,
+  "got": "[{\"offset\":\"null\",\"easing\":\"linear\",\"scale\":\"0.985\"},{\"offset\":\"0.3\",\"easing\":\"linear\",\"scale\":\"0.975\"},{\"offset\":\"null\",\"easing\":\"linear\",\"scale\":\"1\"}]"
+ },
+ {
+  "name": "undo: the frame never exceeds 1 from the press to rest",
+  "ok": true,
+  "got": "1"
+ }
+]

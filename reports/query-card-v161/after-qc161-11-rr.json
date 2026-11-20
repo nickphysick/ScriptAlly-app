@@ -1,0 +1,24 @@
+{
+ "got": {
+  "q": "{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-13\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-20\",\"manuscriptId\":\"seed-ms-1\",\"materialsWanted\":[\"Query letter\"],\"packageId\":\"\",\"NEW\":\"QC152 fixture: agent\",\"responseReceivedAt\":\"2026-11-20\",\"revisionRound\":1,\"sendMethod\":\"Email\",\"status\":\"Revise & Resubmit\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}",
+  "log": [
+   "[\"NEW\",{\"agentName\":\"Rufus Vale\",\"createdAt\":{\"day\":20777},\"eventKey\":\"rr_requested\",\"manuscriptTitle\":\"The Smoke Test\",\"materials\":[{\"kind\":\"full\"}],\"note\":\"Revise & resubmit requested\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Revise & Resubmit\",\"type\":\"Revise & Resubmit\"}]",
+   "[\"q152-agent-sent\",{\"agentName\":\"Rufus Vale\",\"createdAt\":{\"day\":20770},\"manuscriptTitle\":\"seed\",\"note\":\"Query sent to Rufus Vale at State & Window\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Queried\",\"type\":\"Queried\"}]"
+  ],
+  "feed": [
+   "[\"NEW\",{\"activityType\":\"Status Changed\",\"date\":\"2026-11-20\",\"description\":\"Revise & Resubmit request received from Rufus Vale at State & Window\",\"details\":\"Respond by 18 Dec 2026\",\"eventKey\":\"rr_requested\",\"id\":\"NEW\",\"logEntryId\":\"NEW\",\"manuscriptId\":\"seed-ms-1\",\"materials\":[{\"kind\":\"full\"}],\"queryId\":\"q152-agent\",\"resultingStatus\":\"Revise & Resubmit\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}]",
+   "[\"q152-agent-sent\",{\"activityType\":\"Query Sent\",\"date\":\"2026-11-13\",\"description\":\"Query sent to Rufus Vale at State & Window\",\"details\":\"\",\"id\":\"q152-agent-sent\",\"manuscriptId\":\"seed-ms-1\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Queried\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}]"
+  ]
+ },
+ "want": {
+  "q": "{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-12\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-19\",\"manuscriptId\":\"seed-ms-1\",\"materialsWanted\":[\"Query letter\"],\"packageId\":\"\",\"NEW\":\"QC152 fixture: agent\",\"responseReceivedAt\":\"2026-11-19\",\"revisionRound\":1,\"sendMethod\":\"Email\",\"status\":\"Revise & Resubmit\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}",
+  "log": [
+   "[\"NEW\",{\"agentName\":\"Rufus Vale\",\"createdAt\":{\"day\":20776},\"eventKey\":\"rr_requested\",\"manuscriptTitle\":\"The Smoke Test\",\"materials\":[{\"kind\":\"full\"}],\"note\":\"Revise & resubmit requested\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Revise & Resubmit\",\"type\":\"Revise & Resubmit\"}]",
+   "[\"q152-agent-sent\",{\"agentName\":\"Rufus Vale\",\"createdAt\":{\"day\":20769},\"manuscriptTitle\":\"seed\",\"note\":\"Query sent to Rufus Vale at State & Window\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Queried\",\"type\":\"Queried\"}]"
+  ],
+  "feed": [
+   "[\"NEW\",{\"activityType\":\"Status Changed\",\"date\":\"2026-11-19\",\"description\":\"Revise & Resubmit request received from Rufus Vale at State & Window\",\"details\":\"Respond by 17 Dec 2026\",\"eventKey\":\"rr_requested\",\"id\":\"NEW\",\"logEntryId\":\"NEW\",\"manuscriptId\":\"seed-ms-1\",\"materials\":[{\"kind\":\"full\"}],\"queryId\":\"q152-agent\",\"resultingStatus\":\"Revise & Resubmit\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}]",
+   "[\"q152-agent-sent\",{\"activityType\":\"Query Sent\",\"date\":\"2026-11-12\",\"description\":\"Query sent to Rufus Vale at State & Window\",\"details\":\"\",\"id\":\"q152-agent-sent\",\"manuscriptId\":\"seed-ms-1\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Queried\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}]"
+  ]
+ }
+}

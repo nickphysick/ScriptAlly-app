@@ -1,0 +1,60 @@
+{
+ "1x-breath-queried": {
+  "peakReached": true,
+  "tint": "0.6605"
+ },
+ "1x-breath-partial": {
+  "peakReached": true,
+  "tint": "0.6605"
+ },
+ "1x-breath-full": {
+  "peakReached": true,
+  "tint": "0.6605"
+ },
+ "1x-breath-offer": {
+  "peakReached": true,
+  "tint": "0.660571"
+ },
+ "1x-breath-closed": {
+  "peakReached": true,
+  "tint": "0.660571"
+ },
+ "1x-landing": {
+  "thirdSave": true,
+  "thirdUndo": true,
+  "long": {
+   "at": 227,
+   "dur": 311
+  },
+  "midFreezeShotMs": 377
+ },
+ "4x-breath-queried": {
+  "peakReached": true,
+  "tint": "0.6605"
+ },
+ "4x-breath-partial": {
+  "peakReached": true,
+  "tint": "0.6605"
+ },
+ "4x-breath-full": {
+  "peakReached": true,
+  "tint": "0.6605"
+ },
+ "4x-breath-offer": {
+  "peakReached": true,
+  "tint": "0.6605"
+ },
+ "4x-breath-closed": {
+  "peakReached": true,
+  "tint": "0.660428"
+ },
+ "4x-landing": {
+  "thirdSave": true,
+  "thirdUndo": true,
+  "long": {
+   "at": 708,
+   "dur": 1119
+  },
+  "midFreezeShotMs": 1874
+ }
+}
