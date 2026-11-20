@@ -1,0 +1,50 @@
+✓ 4070 modules transformed.
+✓ built in 21.35s
+[emu-guard] 33.3 GB free. Debug logs: /dev/null.
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (16.8s)
+QC163-2 ✓ population: one of each (paper, ring, tint) — 1 1 1
+QC163-2 ✗ all three are 3200ms — [1900,1900,1900]
+QC163-2 ✓ they start within one frame (16.7ms) of each other — [6096.2,6096.2,6096.2]
+QC163-2 ✓ the paper is the frame's ::before, the ring the rim layer — frame::before ring
+QC163-2 ✓ population: frames with the breath running — 92
+QC163-2 ✓ in every one the ring's scale equals the paper's — [[1.00299,1.00299],[1.00319,1.00319],[1.00339,1.00339]]
+  ✘  2 [measure] › tests/e2e/qc163.measure.ts:244:15 › QC163-2 · the tint and the paper share one 3200ms clock, started together (10.0s)
+QC163-4 ✓ population: the save landed — 
+QC163-4 ✗ within 300ms of the press a painted frame shows the tint at 0.6 or more — max 0
+QC163-4 ✓ in the stage of the press (queried) — ["rgb(191, 168, 126)"]
+QC163-4 ✓ population: a long task (the app's freeze) of 520ms or more after the press — [[136,129],[1228,1584],[2813,75],[3372,51],[3423,123],[3641,55],[3979,64]]
+QC163-4 ✓ population: the screen 500ms into the freeze is a compositor frame painted after the hold's 280ms — 729ms after the press · frames inside the freeze: 0 (a still screen sends none)
+QC163-4 ✗ the tint is still held there (0.6 or more, read off the ring's pixel, which lies on the white → queried rim line) — 0.000 from 255,255,255
+QC163-4 ✗ the painted frames either side of the freeze show the tint at 0.6 or more, by the hold (any fade parked) — 0 → 0.72 across 1584ms · tint anims before: []
+  ✘  3 [measure] › tests/e2e/qc163.measure.ts:292:15 › QC163-4 · the press holds the tint at 0.72, on the compositor, through the app's freeze (CPU 4×) (18.6s)
+QC163-5 ✓ population: the save landed (queried → a partial asked for) — 
+QC163-5 ✓ one qc163-light, on the light — ["light"]
+QC163-5 ✓ it rotates from −40deg to 320deg — -40deg → 320deg
+QC163-5 ✓ 1300ms, opacity 0 → 1 (14%) → 1 (76%) → 0 — [{"offset":"null","easing":"linear","opacity":"0","rotate":"-40deg"},{"offset":"0.14","easing":"linear","opacity":"1"},{"offset":"0.76","easing":"linear","opacity":"1"},{"offset":"null","easing":"linear","opacity":"0","rotate":"320deg"}]
+QC163-5 ✓ with scale 1 1 (not mirrored) — ["1"]
+QC163-5 ✓ coloured for the stage moved TO (partial: #6f8fb3 → #d6e1ee) — conic-gradient(rgba(0, 0, 0, 0) 0deg, rgba(0, 0, 0, 0) 58%, rgb(111, 143, 179) 84%, rgb(214, 225, 238) 93%, rgba(0, 0, 0, 0) 100%)
+QC163-7 ✓ save: population — frames with the pop running — 63
+QC163-7 ✓ save: the pop's keyframes peak at 1.03 (42%), 620ms — [{"offset":"null","easing":"linear","scale":"0.985"},{"offset":"0.42","easing":"linear","scale":"1.03"},{"offset":"null","easing":"linear","scale":"1"}]
+QC163-7 ✓ save: the painted peak is above 1.025, never above 1.03 — 1.02946
+QC163-6 ✓ population: the undo landed (back to queried) — queried
+QC163-6 ✓ one qc163-light — 1
+QC163-6 ✗ it rotates from 40deg to −320deg (anticlockwise) — -40deg → 320deg
+QC163-6 ✗ mirrored: scale −1 1 — ["1"]
+QC163-6 ✓ coloured for the stage returned TO (queried: #bfa87e → #f3ead9) — conic-gradient(rgba(0, 0, 0, 0) 0deg, rgba(0, 0, 0, 0) 58%, rgb(191, 168, 126) 84%, rgb(243, 234, 217) 93%, rgba(0, 0, 0, 0) 100%)
+QC163-7 ✓ undo: population — frames with the bump running — 58
+QC163-7 ✗ undo: the bump's keyframes dip to 0.975 (30%), 620ms, none above 1 — [{"offset":"null","easing":"linear","scale":"0.985"},{"offset":"0.42","easing":"linear","scale":"1.03"},{"offset":"null","easing":"linear","scale":"1"}]
+QC163-7 ✗ undo: the frame never exceeds 1 from the press to rest — 1.02946
+  ✘  4 [measure] › tests/e2e/qc163.measure.ts:341:39 › QC163-5/6/7 · save: the light clockwise in the new stage, the pop; undo: mirrored, back, the old stage, the sink (16.4s)
+QC163-10 ✓ population: the save landed under reduced motion — 
+QC163-10 ✗ no qc163-* animation was made — ["qc1612-breath","qc163-rim-breath","qc163-tint","qc1612-rest","qc163-rim-rest","qc163-tint-rest"]
+QC163-10 ✗ the tint's opacity is 0 in every frame — 0.72
+QC163-10 ✓ and the light's — 
+  ✘  5 [measure] › tests/e2e/qc163.measure.ts:436:16 › QC163-10 · with prefers-reduced-motion: reduce, no qc163-* animation is made and the tint stays at 0 (17.0s)
+QC163-11 ✗ population: the press held the tint (0.6 or more within 300ms) — 0
+QC163-11 ✗ population: it was given back (qc163-tint-back) about 700ms after the press — —
+QC163-11 ✗ from 200ms after that the tint is at 0 — []
+QC163-11 ✓ and no light was made — 
+QC163-11 ✓ and nothing was saved (no Undo toast) — 
+  ✘  6 [measure] › tests/e2e/qc163.measure.ts:457:16 › QC163-11 · pressBack: the tint back to 0 within 200ms, and no light (10.5s)
+  5 failed
+  1 passed (2.1m)

@@ -204,7 +204,7 @@ describe("Query card v163 — rim and rimHi, one pair per stage", () => {
     partial: { rim: "#6f8fb3", rimHi: "#d6e1ee" },
     full: { rim: "#557aa3", rimHi: "#c5d4e6" },
     offer: { rim: "#c98f8a", rimHi: "#f6dedb" },
-    closed: { rim: "#9a9389", rimHi: "#e6e3de" },
+    closed: { rim: "#857e74", rimHi: "#e6e3de" },  /* Nick, 20 Nov: closed darkened from #9a9389 */
   };
   it("all five stages carry both keys, as literal lower-case hex, equal to the pack's table", () => {
     expect(Object.keys(STAGE_COLOURS).sort()).toEqual(Object.keys(RIM).sort());

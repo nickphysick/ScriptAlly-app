@@ -1,0 +1,32 @@
+[
+ {
+  "name": "population: the save landed (queried → a partial asked for)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "one qc163-light, on the light",
+  "ok": true,
+  "got": "[\"light\"]"
+ },
+ {
+  "name": "it rotates from −40deg to 320deg",
+  "ok": true,
+  "got": "-40deg → 320deg"
+ },
+ {
+  "name": "1300ms, opacity 0 → 1 (14%) → 1 (76%) → 0",
+  "ok": true,
+  "got": "[{\"offset\":\"null\",\"easing\":\"linear\",\"opacity\":\"0\",\"rotate\":\"-40deg\"},{\"offset\":\"0.14\",\"easing\":\"linear\",\"opacity\":\"1\"},{\"offset\":\"0.76\",\"easing\":\"linear\",\"opacity\":\"1\"},{\"offset\":\"null\",\"easing\":\"linear\",\"opacity\":\"0\",\"rotate\":\"320deg\"}]"
+ },
+ {
+  "name": "with scale 1 1 (not mirrored)",
+  "ok": true,
+  "got": "[\"1\"]"
+ },
+ {
+  "name": "coloured for the stage moved TO (partial: #6f8fb3 → #d6e1ee)",
+  "ok": true,
+  "got": "conic-gradient(rgba(0, 0, 0, 0) 0deg, rgba(0, 0, 0, 0) 58%, rgb(111, 143, 179) 84%, rgb(214, 225, 238) 93%, rgba(0, 0, 0, 0) 100%)"
+ }
+]

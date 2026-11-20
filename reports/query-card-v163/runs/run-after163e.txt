@@ -1,0 +1,13 @@
+✓ 4070 modules transformed.
+✓ built in 14.37s
+[emu-guard] 32.4 GB free. Debug logs: /dev/null.
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.0s)
+QC163-4 ✓ population: the save landed — 
+QC163-4 ✓ within 300ms of the press a painted frame shows the tint at 0.6 or more — max 0.671626
+QC163-4 ✓ in the stage of the press (queried) — ["rgb(191, 168, 126)"]
+QC163-4 ✓ population: a long task (the app's freeze) of 520ms or more after the press — [[110,65],[906,1171],[2370,132]]
+QC163-4 ✓ population: the screen 500ms into the freeze is a compositor frame painted after the hold's 280ms — 585ms after the press · frames inside the freeze: 0 (a still screen sends none)
+QC163-4 ✓ the tint is still held there (0.6 or more, read off the ring's pixel, which lies on the white → queried rim line) — 0.721 from 209,192,162
+QC163-4 ✓ the painted frames either side of the freeze show the tint at 0.6 or more, by the hold (any fade parked) — 0.72 → 0.72 across 1171ms · tint anims before: ["qc163-tint-hold:finished","qc163-tint-fade:paused"]
+  ✓  2 [measure] › tests/e2e/qc163.measure.ts:292:15 › QC163-4 · the press holds the tint at 0.72, on the compositor, through the app's freeze (CPU 4×) (14.9s)
+  2 passed (37.2s)

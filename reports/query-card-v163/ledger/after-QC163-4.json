@@ -1,0 +1,37 @@
+[
+ {
+  "name": "population: the save landed",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "within 300ms of the press a painted frame shows the tint at 0.6 or more",
+  "ok": true,
+  "got": "max 0.707769"
+ },
+ {
+  "name": "in the stage of the press (queried)",
+  "ok": true,
+  "got": "[\"rgb(191, 168, 126)\"]"
+ },
+ {
+  "name": "population: a long task (the app's freeze) of 520ms or more after the press",
+  "ok": true,
+  "got": "[[728,1138],[2216,54],[2272,84]]"
+ },
+ {
+  "name": "population: the screen 500ms into the freeze is a compositor frame painted after the hold's 280ms",
+  "ok": true,
+  "got": "560ms after the press · frames inside the freeze: 0 (a still screen sends none)"
+ },
+ {
+  "name": "the tint is still held there (0.6 or more, read off the ring's pixel, which lies on the white → queried rim line)",
+  "ok": true,
+  "got": "0.721 from 209,192,162"
+ },
+ {
+  "name": "the painted frames either side of the freeze show the tint at 0.6 or more, by the hold (any fade parked)",
+  "ok": true,
+  "got": "0.72 → 0.72 across 1138ms · tint anims before: [\"qc163-tint-hold:finished\",\"qc163-tint-fade:paused\"]"
+ }
+]

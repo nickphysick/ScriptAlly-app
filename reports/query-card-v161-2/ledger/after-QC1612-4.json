@@ -1,0 +1,32 @@
+[
+ {
+  "name": "population: breathing before the first key",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: the keys were seen in the drawer",
+  "ok": true,
+  "got": "21"
+ },
+ {
+  "name": "from 250ms after the first key to the last, the frame is at scale 1",
+  "ok": true,
+  "got": "[1]"
+ },
+ {
+  "name": "and no breath runs while typing",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "2.5s after the last key it is breathing again",
+  "ok": true,
+  "got": "65 frames, max 1.01"
+ },
+ {
+  "name": "and not before 2s after it",
+  "ok": true,
+  "got": "[1]"
+ }
+]

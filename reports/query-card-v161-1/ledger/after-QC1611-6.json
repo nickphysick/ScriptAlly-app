@@ -2,11 +2,11 @@
  {
   "name": "population: the click and the save's requests were seen",
   "ok": true,
-  "got": "{\"at\":1795103627969,\"first\":1795103628006}"
+  "got": "{\"at\":1795186199264,\"first\":1795186199289}"
  },
  {
   "name": "the save's first request goes out within 50ms of the click",
   "ok": true,
-  "got": "37ms"
+  "got": "25ms"
  }
 ]

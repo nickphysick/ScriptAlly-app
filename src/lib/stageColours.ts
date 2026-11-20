@@ -25,7 +25,7 @@ export const STAGE_COLOURS: Record<Stage, StageColour> = {
   partial: { band: "#e4ebf2", tint: "#f3f6f9", edge: "#cbd7e4", mark: "#a9bdd2", rim: "#6f8fb3", rimHi: "#d6e1ee" },
   full: { band: "#b7c9de", tint: "#dfe7f0", edge: "#9db4cf", mark: "#7391b3", rim: "#557aa3", rimHi: "#c5d4e6" },
   offer: { band: "#efcdc9", tint: "#f8e8e5", edge: "#dfb1ac", mark: "#cf9a96", rim: "#c98f8a", rimHi: "#f6dedb" },
-  closed: { band: "#eceae6", tint: "#f6f5f3", edge: "#dedbd5", mark: "#a8a199", rim: "#9a9389", rimHi: "#e6e3de" },
+  closed: { band: "#eceae6", tint: "#f6f5f3", edge: "#dedbd5", mark: "#a8a199", rim: "#857e74", rimHi: "#e6e3de" },
 };
 
 /** the white sheen over the offer's band, as one layer (position 30% 0, size 260% 100%) */

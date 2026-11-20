@@ -1,0 +1,53 @@
+✓ 4070 modules transformed.
+✓ built in 16.87s
+[emu-guard] 37.4 GB free. Debug logs: /dev/null.
+  ✓  1 [setup] › tests/e2e/auth.setup.ts:73:1 › authenticate (17.0s)
+QC1612-3 ✓ Cancel: population — breathing before it — 
+QC1612-3 ✓ Cancel: population — the action reached the page — 
+QC1612-3 note · Cancel: the drawer left the page 4ms after it
+QC1612-3 ✓ Cancel: the frame is at scale 1 within 200ms, and stays there — 81 frames: [1]
+QC1612-3 ✓ Cancel: no breathing animation remains — ["rotate:running"]
+  ✓  2 [measure] › tests/e2e/qc1612.measure.ts:253:56 › QC1612-3.1 · every way out: Cancel (10.4s)
+QC1612-3 ✓ ✕: population — breathing before it — 
+QC1612-3 ✓ ✕: population — the action reached the page — 
+QC1612-3 note · ✕: the drawer left the page 0ms after it
+QC1612-3 ✓ ✕: the frame is at scale 1 within 200ms, and stays there — 80 frames: [1]
+QC1612-3 ✓ ✕: no breathing animation remains — ["rotate:running"]
+  ✓  3 [measure] › tests/e2e/qc1612.measure.ts:253:56 › QC1612-3.2 · every way out: ✕ (10.5s)
+QC1612-3 ✓ Escape: population — breathing before it — 
+QC1612-3 ✓ Escape: population — the action reached the page — 
+QC1612-3 note · Escape: the drawer left the page 12ms after it
+QC1612-3 ✓ Escape: the frame is at scale 1 within 200ms, and stays there — 79 frames: [1]
+QC1612-3 ✓ Escape: no breathing animation remains — ["rotate:running"]
+  ✓  4 [measure] › tests/e2e/qc1612.measure.ts:253:56 › QC1612-3.3 · every way out: Escape (10.0s)
+QC1612-3 ✓ discard (Cancel with words typed, then Discard): population — breathing before it — 
+QC1612-3 ✓ discard (Cancel with words typed, then Discard): population — the action reached the page — 
+QC1612-3 note · discard (Cancel with words typed, then Discard): the drawer left the page 9ms after it
+QC1612-3 ✓ discard (Cancel with words typed, then Discard): the frame is at scale 1 within 200ms, and stays there — 80 frames: [1]
+QC1612-3 ✓ discard (Cancel with words typed, then Discard): no breathing animation remains — ["rotate:running"]
+  ✓  5 [measure] › tests/e2e/qc1612.measure.ts:253:56 › QC1612-3.4 · every way out: discard (Cancel with words typed, then Discard) (13.3s)
+QC1612-3 ✓ stepping to another query: population — breathing before it — 
+QC1612-3 ✓ stepping to another query: population — the action reached the page — 
+QC1612-3 note · stepping to another query: the drawer left the page 199ms after it
+QC1612-3 ✓ stepping to another query: the frame is at scale 1 within 200ms, and stays there — 73 frames: [1]
+QC1612-3 ✓ stepping to another query: no breathing animation remains — ["rotate:running"]
+  ✓  6 [measure] › tests/e2e/qc1612.measure.ts:253:56 › QC1612-3.5 · every way out: stepping to another query (10.3s)
+QC1612-3 ✓ closing the card: population — breathing before it — 
+QC1612-3 ✓ closing the card: population — the action reached the page — 
+QC1612-3 note · closing the card: the drawer left the page 178ms after it
+QC1612-3 ✓ closing the card: the frame is at scale 1 within 200ms, and stays there — 57 frames: [1]
+QC1612-3 ✓ closing the card: no breathing animation remains — []
+  ✓  7 [measure] › tests/e2e/qc1612.measure.ts:253:56 › QC1612-3.6 · every way out: closing the card (10.1s)
+QC1612-3 ✓ a save: population — breathing before it — 
+QC1612-3 ✓ a save: population — the action reached the page — 
+QC1612-3 note · a save: the drawer left the page 33ms after it
+QC1612-3 ✓ a save: the press took over — no breath 200ms after the press — 0 frames breathing
+QC1612-3 ✓ a save: at scale 1 once the pop ends, no breath left — 1 []
+  ✓  8 [measure] › tests/e2e/qc1612.measure.ts:253:56 › QC1612-3.7 · every way out: a save (19.2s)
+QC1612-3 ✓ ← Someone else (Cancel, when the query came from Who replied?): population — breathing before it — 
+QC1612-3 ✓ ← Someone else (Cancel, when the query came from Who replied?): population — the action reached the page — 
+QC1612-3 note · ← Someone else (Cancel, when the query came from Who replied?): the drawer left the page 144ms after it
+QC1612-3 ✓ ← Someone else (Cancel, when the query came from Who replied?): the frame is at scale 1 within 200ms, and stays there — 78 frames: [1]
+QC1612-3 ✓ ← Someone else (Cancel, when the query came from Who replied?): no breathing animation remains — []
+  ✓  9 [measure] › tests/e2e/qc1612.measure.ts:253:56 › QC1612-3.8 · every way out: ← Someone else (Cancel, when the query came from Who replied?) (11.3s)
+  9 passed (2.0m)

@@ -2,37 +2,37 @@
  {
   "name": "population: Undo was pressed",
   "ok": true,
-  "got": "74"
+  "got": "76"
  },
  {
-  "name": "undo: exactly one scale animation on the frame",
+  "name": "undo: exactly one pop, at most one press, and no other scale animation on the frame",
   "ok": true,
-  "got": "[{\"uid\":4,\"props\":[\"scale\"],\"dur\":500,\"peak\":1.022,\"play\":\"running\"}]"
+  "got": "[{\"uid\":5,\"id\":\"qc1611-press\",\"props\":[\"scale\"],\"dur\":120,\"peak\":1,\"low\":0.985,\"play\":\"running\"},{\"uid\":6,\"id\":\"qc160-bump\",\"props\":[\"scale\"],\"dur\":620,\"peak\":1,\"low\":0.975,\"play\":\"running\"}]"
  },
  {
-  "name": "undo: it animates scale only, never transform",
+  "name": "undo: they animate scale only, never transform",
   "ok": true,
-  "got": "[\"scale\"]"
+  "got": "[[\"scale\"],[\"scale\"]]"
  },
  {
-  "name": "undo: 500ms",
+  "name": "undo: the bump is 620ms (v163)",
   "ok": true,
-  "got": "500"
+  "got": "620"
  },
  {
-  "name": "undo: peaks between 1.02 and 1.025",
+  "name": "undo: it sinks to 0.975 and never rises above 1 (v163)",
   "ok": true,
-  "got": "1.022"
+  "got": "0.975 1"
  },
  {
   "name": "undo: population — frames with the bump running",
   "ok": true,
-  "got": "30"
+  "got": "36"
  },
  {
   "name": "undo: the frame's rotate is unchanged during it (frames where the lean's own return is not running)",
   "ok": true,
-  "got": "30 frames: [\"1.6deg\"]"
+  "got": "36 frames: [\"1.6deg\"]"
  },
  {
   "name": "undo: the frame's translate is unchanged during it",

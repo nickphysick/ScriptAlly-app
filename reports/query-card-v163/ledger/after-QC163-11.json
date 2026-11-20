@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: the press held the tint (0.6 or more within 300ms)",
+  "ok": true,
+  "got": "0.72"
+ },
+ {
+  "name": "population: it was given back (qc163-tint-back) about 700ms after the press",
+  "ok": true,
+  "got": "712ms"
+ },
+ {
+  "name": "from 200ms after that the tint is at 0",
+  "ok": true,
+  "got": "[\"0.000\"]"
+ },
+ {
+  "name": "and no light was made",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "and nothing was saved (no Undo toast)",
+  "ok": true,
+  "got": ""
+ }
+]

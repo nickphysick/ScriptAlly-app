@@ -7,21 +7,21 @@
  {
   "name": "population: the restore's read and its commit were seen",
   "ok": true,
-  "got": "[{\"t\":90,\"kind\":\"read\"},{\"t\":127,\"kind\":\"read\"},{\"t\":140,\"kind\":\"read\"},{\"t\":154,\"kind\":\"read\"},{\"t\":532,\"kind\":\"commit\"}]"
+  "got": "[{\"t\":34,\"kind\":\"read\"},{\"t\":46,\"kind\":\"read\"},{\"t\":60,\"kind\":\"read\"},{\"t\":70,\"kind\":\"read\"},{\"t\":366,\"kind\":\"commit\"}]"
  },
  {
   "name": "population: the press was timed by the page",
   "ok": true,
-  "got": "1795051789811"
+  "got": "1795197171844"
  },
  {
   "name": "the restore starts at the press (its read goes out within 100ms)",
   "ok": true,
-  "got": "{\"t\":90,\"kind\":\"read\"}"
+  "got": "{\"t\":34,\"kind\":\"read\"}"
  },
  {
   "name": "the undo's commit is not held for a motion: it goes out before the fold has run (420ms)",
   "ok": true,
-  "got": "{\"commit\":{\"t\":532,\"kind\":\"commit\"},\"foldFromPress\":508}"
+  "got": "{\"commit\":{\"t\":366,\"kind\":\"commit\"},\"foldFromPress\":560}"
  }
 ]

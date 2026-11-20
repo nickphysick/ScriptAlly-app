@@ -12,6 +12,6 @@
  {
   "name": "save: a painted frame shows the frame's scale below 1 within 100ms of the press",
   "ok": true,
-  "got": "35ms"
+  "got": "43ms"
  }
 ]

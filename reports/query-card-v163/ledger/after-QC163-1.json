@@ -1,0 +1,42 @@
+[
+ {
+  "name": "queried: population — the drawer opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "queried: an animation qc163-tint runs on the rim layer's tint",
+  "ok": true,
+  "got": "[[\"tint\",\"running\"]]"
+ },
+ {
+  "name": "queried: its colour is the stage's rim (#bfa87e)",
+  "ok": true,
+  "got": "[\"rgb(191, 168, 126)\"]"
+ },
+ {
+  "name": "queried: it rises above 0.5 and never above 0.72",
+  "ok": true,
+  "got": "0.72"
+ },
+ {
+  "name": "partial: population — the drawer opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "partial: an animation qc163-tint runs on the rim layer's tint",
+  "ok": true,
+  "got": "[[\"tint\",\"running\"]]"
+ },
+ {
+  "name": "partial: its colour is the stage's rim (#6f8fb3)",
+  "ok": true,
+  "got": "[\"rgb(111, 143, 179)\"]"
+ },
+ {
+  "name": "partial: it rises above 0.5 and never above 0.72",
+  "ok": true,
+  "got": "0.719929"
+ }
+]

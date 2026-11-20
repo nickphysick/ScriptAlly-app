@@ -1,0 +1,17 @@
+[
+ {
+  "name": "population: compositor frames arrived during the 600ms block",
+  "ok": true,
+  "got": "29 frames"
+ },
+ {
+  "name": "the rim changes from frame to frame while the page is blocked (top of the ring)",
+  "ok": true,
+  "got": "9 distinct of 29"
+ },
+ {
+  "name": "and at its side (the light passing, the tint changing)",
+  "ok": true,
+  "got": "14 distinct of 29"
+ }
+]

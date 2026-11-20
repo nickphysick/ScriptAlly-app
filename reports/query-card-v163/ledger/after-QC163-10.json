@@ -1,0 +1,22 @@
+[
+ {
+  "name": "population: the save landed under reduced motion",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no qc163-* animation was made",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "the tint's opacity is 0 in every frame",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "and the light's",
+  "ok": true,
+  "got": ""
+ }
+]

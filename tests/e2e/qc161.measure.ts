@@ -14,7 +14,7 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { liftMotionSuppression, openRoute } from "./measure";
 
-const PHASE = process.env.SA_PHASE === "before" ? "before" : process.env.SA_PHASE === "mutant" ? "mutant" : "after";
+const PHASE = process.env.SA_PHASE === "before" ? "before" : /^mutant[A-Z]?$/.test(process.env.SA_PHASE ?? "") ? process.env.SA_PHASE! /* each mutant build keeps its own ledgers */ : "after";
 const ONLY = process.env.QC161_ONLY ?? "";
 const run = (id: string) => !ONLY || ONLY.split(",").includes(id);
 const DIR = "reports/query-card-v161";
@@ -26,7 +26,7 @@ test.setTimeout(600_000);
 test.use({ viewport: VP });
 mkdirSync(`${DIR}/ledger`, { recursive: true });
 mkdirSync(`${DIR}/shots`, { recursive: true });
-const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe" });
+const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe", timeout: 60_000, killSignal: "SIGKILL" });
 test.beforeAll(() => { seed(); });
 test.afterAll(() => { seed("--clean"); });
 
@@ -235,12 +235,15 @@ if (PHASE !== "before") {
 /** the running bump's window: frames painted while it ran, its distinct scales above 1, long tasks over 50ms overlapping */
 function runningBump(m: MT) {
   const fr = m.frames.filter((f) => f.bumpPlay === "running");
-  if (!fr.length) return { frames: 0, scales: 0, longs: [] as { start: number; dur: number }[], span: 0, start: null as number | null };
+  if (!fr.length) return { frames: 0, scales: 0, below: 0, top: 0, longs: [] as { start: number; dur: number }[], span: 0, start: null as number | null };
   const a = fr[0].t, b = fr[fr.length - 1].t;
   const painted = m.frames.filter((f) => f.t >= a && f.t <= b).length;
   const longs = m.longs.filter((l) => l.dur > 50 && l.start < b && l.start + l.dur > a).map((l) => ({ start: Math.round(l.start - a), dur: Math.round(l.dur) }));
   const scales = new Set(fr.map((f) => f.scale).filter((s) => s && s !== "none" && parseFloat(s) > 1)).size;
-  return { frames: painted, scales, longs, span: Math.round(b - a), start: a };
+  /* v163 — an undo sinks (0.975, never above 1): its motion is counted below 1 */
+  const below = new Set(fr.map((f) => f.scale).filter((s) => s && s !== "none" && parseFloat(s) < 1)).size;
+  const top = Math.max(1, ...fr.map((f) => (f.scale && f.scale !== "none" ? parseFloat(f.scale) : 1)));
+  return { frames: painted, scales, below, top, longs, span: Math.round(b - a), start: a };
 }
 if (PHASE !== "before") {
   if (run("6")) test("QC161-6/7 · CPU 4×: the bump on save and on undo is seen — 24+ frames, 10+ scales, no long task under it; the fold too", async ({ page }) => {
@@ -273,7 +276,7 @@ if (PHASE !== "before") {
     const ru = runningBump(u);
     L7.check("population: the bump ran on undo", ru.frames > 0, JSON.stringify(ru));
     L7.check("at least 24 frames painted while it ran", ru.frames >= 24, `${ru.frames} frames over ${ru.span}ms`);
-    L7.check("the frame's scale took at least 10 distinct values above 1", ru.scales >= 10, String(ru.scales));
+    L7.check("v163: the frame's scale took at least 10 distinct values below 1 (the sink), never above 1", ru.below >= 10 && ru.top <= 1.0001, `${ru.below} below, top ${ru.top}`);
     L7.check("no long task over 50ms overlaps it", ru.longs.length === 0, JSON.stringify(ru.longs));
     const folds = new Set(u.frames.map((f) => f.fold).filter((h) => h != null));
     L7.check("the undone step's height took at least 6 distinct values while folding", folds.size >= 6, JSON.stringify([...folds].slice(0, 12)));
@@ -312,7 +315,7 @@ const LINES = (f: string, queryOnly: boolean): Record<string, string> => ({ req:
   offer: `Record it and when ${f} needs an answer`, rr: `${f} wants changes, then another look`, passed: "Closes this query", more: "A question, a call, more pages" });
 const LABELS = (queryOnly: boolean): Record<string, string> => ({ req: queryOnly ? "Asked for the partial" : "Asked for the full", offer: "Made an offer", rr: "Revise & resubmit", passed: "Passed", more: "Something else" });
 const BAND: Record<string, string> = { partial: "rgb(228, 235, 242)", full: "rgb(183, 201, 222)", offer: "rgb(239, 205, 201)", closed: "rgb(236, 234, 230)", queried: "rgb(239, 230, 214)" };
-const dumpKey = (key: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --dump ${key}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim().split("\n").pop()!);
+const dumpKey = (key: string) => JSON.parse(execSync(`node tests/e2e/seedQc152.mjs --dump ${key}`, { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"], timeout: 60_000, killSignal: "SIGKILL" }).trim().split("\n").pop()!);
 /** a stored query as the save left it, minus what differs run to run: new ids (the app's `act-…` and Firestore's),
  *  times of day, Timestamps' seconds; the log's and the feed's entries then sorted by what they hold, not their ids */
 const clean = (x: unknown) => JSON.stringify(x)

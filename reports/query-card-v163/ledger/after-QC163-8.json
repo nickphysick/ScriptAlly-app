@@ -1,0 +1,17 @@
+[
+ {
+  "name": "population: the breath, the tint's hold and fade, and the light were all seen",
+  "ok": true,
+  "got": "[\"qc1612-breath\",\"qc1612-rest\",\"qc163-light\",\"qc163-rim-breath\",\"qc163-rim-rest\",\"qc163-tint\",\"qc163-tint-fade\",\"qc163-tint-hold\"]"
+ },
+ {
+  "name": "every one animates only opacity, rotate or scale",
+  "ok": true,
+  "got": "[]"
+ },
+ {
+  "name": "none is on the frame's own box (the paper is its ::before)",
+  "ok": true,
+  "got": "[]"
+ }
+]

@@ -16,7 +16,7 @@ import { mkdirSync, writeFileSync, renameSync, readdirSync, readFileSync } from 
 import { execSync } from "node:child_process";
 import { liftMotionSuppression, openRoute } from "./measure";
 
-const PHASE = process.env.SA_PHASE === "mutant" ? "mutant" : process.env.SA_PHASE === "base" ? "base" : "after";
+const PHASE = /^mutant[A-Z]?$/.test(process.env.SA_PHASE ?? "") ? process.env.SA_PHASE! /* each mutant build keeps its own ledgers */ : process.env.SA_PHASE === "base" ? "base" : "after";
 const ONLY = process.env.QC1612_ONLY ?? "";
 const run = (id: string) => PHASE === "base" ? id === "R" : (!ONLY && id !== "rec") || ONLY.split(",").includes(id);
 const DIR = "reports/query-card-v161-2";
@@ -30,7 +30,7 @@ const CP = C("[data-qc1522='composer']");
 test.setTimeout(90_000);
 test.use({ viewport: VP });
 mkdirSync(`${DIR}/ledger`, { recursive: true });
-const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe" });
+const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe", timeout: 60_000, killSignal: "SIGKILL" });
 test.beforeAll(() => { seed(); });
 test.afterAll(() => { seed("--clean"); });
 
@@ -161,7 +161,7 @@ const pickRufus = async (page: Page) => {
 };
 const framesAfter = (tr: Tr, t0: number, t1 = Infinity) => tr.frames.filter((f) => f.t >= t0 && f.t <= t1);
 
-if (run("1")) test("QC1612-1 · it breathes: the drawer open and untouched for 4s", async ({ page }) => {
+if (run("1")) test("QC1612-1 · it breathes: the drawer open and untouched for 6s (v163: one breath is 3.2s, so two peaks need 6s)", async ({ page }) => {
   const L = new Ledger("QC1612-1");
   await fresh(page, "q152-agent");
   await startTrace(page);
@@ -170,12 +170,12 @@ if (run("1")) test("QC1612-1 · it breathes: the drawer open and untouched for 4
   await page.locator(CP).waitFor();
   const title = (await page.locator(C("[data-qc1522='composer-title']")).innerText()).trim();
   L.check(`population: the drawer is "What did Rufus say?"`, title === "What did Rufus say?", title);
-  await page.waitForTimeout(4600);
+  await page.waitForTimeout(6000);
   const tr = await stopTrace(page);
   const o = tr.mark.open;
-  const win = framesAfter(tr, o, o + 4600);
+  const win = framesAfter(tr, o, o + 6000);
   const s = breathShape(win);
-  L.check("population: frames sampled over the 4s", win.length > 120, String(win.length));
+  L.check("population: frames sampled over the 6s", win.length > 160, String(win.length));
   L.check("the frame's scale passes above 1.008 at least twice", s.peaks >= 2, `${s.peaks} peaks`);
   L.check("and returns below 1.002 between", s.dipsBetween >= 1, `${s.dipsBetween} dips`);
   L.check("it never exceeds 1.011", s.max != null && s.max <= 1.011, String(s.max));
@@ -258,10 +258,11 @@ if (run("3")) for (const [i, o] of WAYS_OUT.entries()) test(`QC1612-3.${i + 1} �
     if (o.prep) await o.prep(page);
     await page.waitForTimeout(2400);
     await startTrace(page); await page.waitForTimeout(150);
-    const was = await page.evaluate((s) => !!document.querySelector<HTMLElement>(s)?.closest<HTMLElement>(".spanel")?.getAnimations().some((a) => a.id === "qc1612-breath" && a.playState === "running"), CARD);
+    const was = await page.evaluate((s) => !!document.querySelector<HTMLElement>(s)?.closest<HTMLElement>(".spanel")?.getAnimations({ subtree: true }).some((a) => a.id === "qc1612-breath" && a.playState === "running"), CARD);
     L.check(`${o.what}: population — breathing before it`, was, "");
     try { await mark(page, "out"); await o.act(page); } catch (e) { L.check(`${o.what}: could be done`, false, String(e).slice(0, 160)); await stopTrace(page); L.done(1); return; }
-    if (o.save) { await waitUndo(page); await page.waitForTimeout(1600); } else await page.waitForTimeout(700);
+    /* (1500ms, not 700: closing the card re-renders the page under it, and in 500ms it may paint only one frame) */
+    if (o.save) { await waitUndo(page); await page.waitForTimeout(1600); } else await page.waitForTimeout(1500);
     const tr = await stopTrace(page);
     /* the moment the way out happened: the page's own click (or Escape) after the mark */
     /* (a key has no actionability wait: the mark is its moment; the app's Escape layer takes the key before a listener here) */
@@ -292,7 +293,7 @@ if (run("4")) test("QC1612-4 · still while typing in Their words; breathing aga
   await tap(page, C("[data-qc1522='their-words']"));
   await page.waitForTimeout(2600);
   await startTrace(page); await page.waitForTimeout(100);
-  const was = await page.evaluate((s) => document.querySelector<HTMLElement>(s)!.closest<HTMLElement>(".spanel")!.getAnimations().some((a) => a.id === "qc1612-breath"), CARD);
+  const was = await page.evaluate((s) => document.querySelector<HTMLElement>(s)!.closest<HTMLElement>(".spanel")!.getAnimations({ subtree: true }).some((a) => a.id === "qc1612-breath"), CARD);
   L.check("population: breathing before the first key", was, "");
   await page.keyboard.type("They loved the voice.", { delay: 110 });
   await page.waitForTimeout(3600);
@@ -335,7 +336,7 @@ if (run("5")) test("QC1612-5 · hands over: a press mid-breath, no jump, then th
   const held = tr.frames.find((f) => f.t > p && Math.abs(f.frameScale - 0.985) < 0.0005);
   L.check("then the press-in to 0.985 (the frame, as v161.1 built it)", !!held, held ? `${Math.round(held.t - p)}ms` : "—");
   const peak = Math.max(...tr.frames.filter((f) => f.anims.some((a) => a.id === "qc160-bump")).map((f) => f.frameScale));
-  L.check("and the pop to above 1.03", peak > 1.03 && peak < 1.04, String(peak));
+  L.check("and the pop to above 1.025, never above 1.03 (v163)", peak > 1.025 && peak <= 1.0301, String(peak));
   L.check("the rim is at 1 by then, and stays", tr.frames.filter((f) => f.anims.some((a) => a.id === "qc160-bump")).every((f) => f.scale === 1), "");
   await undo(page);
   L.done(8);
@@ -429,7 +430,7 @@ if (run("click")) test("QC1612 · an ordinary locator click lands on a breathing
   await fresh(page, "q152-agent");
   await footer(page); await page.locator(CP).waitFor();
   await page.waitForTimeout(1500);
-  const was = await page.evaluate((s) => !!document.querySelector<HTMLElement>(s)?.closest<HTMLElement>(".spanel")?.getAnimations().some((a) => a.id === "qc1612-breath" && a.playState === "running"), CARD);
+  const was = await page.evaluate((s) => !!document.querySelector<HTMLElement>(s)?.closest<HTMLElement>(".spanel")?.getAnimations({ subtree: true }).some((a) => a.id === "qc1612-breath" && a.playState === "running"), CARD);
   L.check("population: the breath is running", was, "");
   const t0 = Date.now();
   let err = "";

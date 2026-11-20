@@ -10,19 +10,19 @@
   "got": "http://127.0.0.1:4321/todo"
  },
  {
-  "name": "the save bumps the card's frame (one scale animation, 500ms, peak 1.022)",
+  "name": "the save presses the card's frame in and pops it (at most one press; one pop, 620ms, peak 1.03)",
   "ok": true,
-  "got": "[{\"uid\":1,\"props\":[\"scale\"],\"dur\":500,\"peak\":1.022,\"play\":\"running\"}]"
+  "got": "[{\"uid\":1,\"id\":\"qc1611-press\",\"props\":[\"scale\"],\"dur\":120,\"peak\":1,\"low\":0.985,\"play\":\"running\"},{\"uid\":2,\"id\":\"qc160-bump\",\"props\":[\"scale\"],\"dur\":620,\"peak\":1.03,\"low\":0.985,\"play\":\"running\"}]"
  },
  {
   "name": "the save drew no new step on this desk (as on the base): nothing to settle",
   "ok": true,
-  "got": "1 → 1 · {\"in\":false,\"draft\":true,\"isLast\":false,\"cls\":\"qc152-m me qc1522-draft\"}"
+  "got": "3 → 3 · {\"in\":false,\"draft\":true,\"isLast\":false,\"cls\":\"qc152-m me qc1522-draft\"}"
  },
  {
-  "name": "its undo bumps too",
+  "name": "its undo presses in and sinks (v163)",
   "ok": true,
-  "got": "[{\"uid\":2,\"props\":[\"scale\"],\"dur\":500,\"peak\":1.022,\"play\":\"running\"}]"
+  "got": "[{\"uid\":3,\"id\":\"qc1611-press\",\"props\":[\"scale\"],\"dur\":120,\"peak\":1,\"low\":0.985,\"play\":\"running\"},{\"uid\":4,\"id\":\"qc160-bump\",\"props\":[\"scale\"],\"dur\":620,\"peak\":1,\"low\":0.975,\"play\":\"running\"}]"
  },
  {
   "name": "a To-do task whose card saves from a composer with a draft was found",

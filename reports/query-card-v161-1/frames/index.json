@@ -1,75 +1,75 @@
 {
  "1x": {
-  "shots": 66,
-  "shotsDuringLong": 0,
+  "shots": 139,
+  "shotsDuringLong": 7,
   "long": {
-   "at": 618,
-   "dur": 388
+   "at": 315,
+   "dur": 282
   },
-  "firstInMs": 19,
-  "popAt": 1502,
-  "peak": 1.03492,
+  "firstInMs": 43,
+  "popAt": 1226,
+  "peak": 1.02545,
   "frames": {
    "press": {
     "wantMs": 70,
-    "shotMs": 69,
-    "nearestRafScale": 0.988866,
-    "nearestRafMs": 69
+    "shotMs": 76,
+    "nearestRafScale": 0.991142,
+    "nearestRafMs": 76
    },
    "freeze": {
-    "wantMs": 812,
-    "shotMs": 585,
+    "wantMs": 456,
+    "shotMs": 460,
     "nearestRafScale": 0.985,
-    "nearestRafMs": 602
+    "nearestRafMs": 593
    },
    "peak": {
-    "wantMs": 1710,
-    "shotMs": 1702,
-    "nearestRafScale": 1.03109,
-    "nearestRafMs": 1719
+    "wantMs": 1307,
+    "shotMs": 1310,
+    "nearestRafScale": 1.02545,
+    "nearestRafMs": 1326
    },
    "rest": {
-    "wantMs": 2419,
-    "shotMs": 2069,
+    "wantMs": 2243,
+    "shotMs": 2243,
     "nearestRafScale": 1,
-    "nearestRafMs": 2069
+    "nearestRafMs": 2243
    }
   }
  },
  "4x": {
-  "shots": 75,
+  "shots": 138,
   "shotsDuringLong": 0,
   "long": {
-   "at": 751,
-   "dur": 1361
+   "at": 739,
+   "dur": 1247
   },
-  "firstInMs": 33,
-  "popAt": 3133,
-  "peak": 1.03499,
+  "firstInMs": 40,
+  "popAt": 3190,
+  "peak": 1.02545,
   "frames": {
    "press": {
     "wantMs": 70,
-    "shotMs": 67,
-    "nearestRafScale": 0.988875,
-    "nearestRafMs": 83
+    "shotMs": 73,
+    "nearestRafScale": 0.991126,
+    "nearestRafMs": 74
    },
    "freeze": {
-    "wantMs": 1431,
-    "shotMs": 2200,
+    "wantMs": 1363,
+    "shotMs": 2057,
     "nearestRafScale": 0.985,
-    "nearestRafMs": 2183
+    "nearestRafMs": 2073
    },
    "peak": {
-    "wantMs": 3341,
-    "shotMs": 3333,
-    "nearestRafScale": 1.03499,
-    "nearestRafMs": 3333
+    "wantMs": 3271,
+    "shotMs": 3273,
+    "nearestRafScale": 1.02545,
+    "nearestRafMs": 3290
    },
    "rest": {
-    "wantMs": 4033,
-    "shotMs": 3717,
+    "wantMs": 4207,
+    "shotMs": 4207,
     "nearestRafScale": 1,
-    "nearestRafMs": 3716
+    "nearestRafMs": 4207
    }
   }
  }

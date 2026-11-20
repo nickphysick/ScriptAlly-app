@@ -1,0 +1,22 @@
+[
+ {
+  "name": "← Someone else (Cancel, when the query came from Who replied?): population — breathing before it",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "← Someone else (Cancel, when the query came from Who replied?): population — the action reached the page",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "← Someone else (Cancel, when the query came from Who replied?): the frame is at scale 1 within 200ms, and stays there",
+  "ok": true,
+  "got": "78 frames: [1]"
+ },
+ {
+  "name": "← Someone else (Cancel, when the query came from Who replied?): no breathing animation remains",
+  "ok": true,
+  "got": "[]"
+ }
+]
