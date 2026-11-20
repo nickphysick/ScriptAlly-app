@@ -24,7 +24,7 @@ const DIR = resolve(process.cwd(), "audits/consistency-v1");
 const OUT = resolve(process.cwd(), process.env.CA_OUT || "audits/consistency-v1/.run");
 const COLLECT = readFileSync(resolve(DIR, "collect.js"), "utf8");
 const CFG = JSON.parse(readFileSync(resolve(DIR, "routes.json"), "utf8")) as {
-  routes: { path: string; family: string; name?: string; signedOut?: boolean; key?: string; note?: string }[];
+  routes: { path: string; family: string; name?: string; signedOut?: boolean; key?: string; note?: string; storage?: Record<string, string> }[];
   overlays: { from: string; name: string; open: { button?: string; firstOf?: string; key?: string } }[];
 };
 /* Consistency fixes v1: CA_RULES=1 also runs the rule probe and crops each instance into CA_RULE_SHOTS (git-ignored) */
@@ -250,6 +250,16 @@ test("consistency audit v1 — every route, both viewports", async ({ browser })
       const entry: Record<string, unknown> = { key, path: r.path, family: r.family, name: r.name || r.path, vw: vp.w, vh: vp.h };
       const errors: string[] = [];
       page.on("pageerror", (e) => errors.push(String(e.message).slice(0, 200)));
+      /* roll-out v1.1: a route's `storage` is written to localStorage before the page loads (the Dashboard's first-visit
+         state: the active book set to the harness's book with no queries), and the values it replaced are put back
+         after the page is measured, so no later route or overlay sees them. Nothing is written to the database. */
+      if (r.storage) {
+        await page.addInitScript((st) => {
+          const w = window as unknown as { __caPrevLs?: Record<string, string | null> };
+          if (!w.__caPrevLs) w.__caPrevLs = Object.fromEntries(Object.keys(st).map((k) => [k, localStorage.getItem(k)]));
+          for (const [k, v] of Object.entries(st)) localStorage.setItem(k, v);
+        }, r.storage);
+      }
       try {
         await page.goto(r.path, { waitUntil: "domcontentloaded", timeout: 45_000 });
         await settle(page, !r.signedOut);
@@ -286,6 +296,12 @@ test("consistency audit v1 — every route, both viewports", async ({ browser })
         }
       } catch (e) {
         entry.failed = `load error: ${String((e as Error).message).slice(0, 200)}`;
+      }
+      if (r.storage) {
+        await page.evaluate(() => {
+          const prev = (window as unknown as { __caPrevLs?: Record<string, string | null> }).__caPrevLs || {};
+          for (const [k, v] of Object.entries(prev)) { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); }
+        }).catch(() => { entry.storageNotRestored = true; });
       }
       entry.errors = errors;
       log.push(entry);
