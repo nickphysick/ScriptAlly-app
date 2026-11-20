@@ -4,8 +4,9 @@
  *
  * Contact list v26.2 Part C, rebuilt by Add agent v1 Phase 4 (design-refs/add-agent-v1/agent-card-edit-v1.html) —
  * EDITING ON THE CARD, with the add journey's own controls (`agentPills`): each profile section's fields drawn where its
- * read-only content was, over the editor's one draft (`useAgentForm`: `CardDraft`, `changedFields`, the Also-changes dry
- * run, one save), and the navy save bar.
+ * read-only content was, over the editor's one draft (`useAgentForm`: `CardDraft`, `changedFields`). Agent card v2.1: each
+ * section saves its own fields (its tick, in AgentCard262); there is no save bar, and the rust `GuardBar` appears only when
+ * leaving with something unsaved.
  *
  *   Contact details  Name and Agency side by side (the agency rule), Based in, Email and Website side by side, the
  *                    submission link (conditional), MSWL, Social            — powder
@@ -13,12 +14,12 @@
  *   Materials        "What {First} asks for — pick all that apply"          — sand
  *   How {First} works taking queries, how they take them, response time, if they don't reply — sand
  *
- * ⚠️ THE SAVE BAR IS ALSO THE DISCARD GUARD: with unsaved changes, ✕, Esc, Cancel, paging and another row turn it rust and
- *    ask; nothing else happens until one answer is chosen.
+ * ⚠️ THE RUST BAR IS THE DISCARD GUARD: with unsaved changes, ✕, Esc, a tab, paging and another row bring it up in the
+ *    footer's place; nothing else happens until Keep editing, Discard or Save all is chosen.
  * ⚠️ CARD OFFERS v1 (design-refs/card-offers-v1/agent-card-edit-v8.html): THE RUST "ALSO CHANGES" BOX IS GONE. What an edit
  *    does to the queries already out is an OFFER that asks (`cardOffers`): the close offer under Taking queries, the
  *    response-time offer under the slider's hint, a powder note when a request in progress is safe, and quiet grey
- *    footnotes for the rest. Nothing happens until Save; the save bar's second line repeats the choice.
+ *    footnotes for the rest. Nothing happens until How's tick; the snackbar names what it did.
  */
 import React from "react";
 import { QueryStatus, type Agent } from "../../../types";
@@ -32,9 +33,13 @@ import { emailOk, hostOf, linkOk, type CardDraft } from "../../../lib/cardDraft"
 import type { AgentForm } from "../card/useAgentForm";
 import type { CardFormKit } from "./AgentCard24";
 import {
-  AaField, CountryPills, DoorPills, GenreChips, MaterialPills, MethodPills, PolicyPills, ResponseTime, SocialField, WishlistArea,
-  formLinkLabel, formLinkPlaceholder,
+  AaField, CountryPills, DoorPills, GenreChips, MAT_OPS, MethodPills, PolicyPills, ResponseTime, SAMPLE_UNITS, SocialField, WishlistArea,
+  formLinkLabel, formLinkPlaceholder, sampleBad,
 } from "../card/agentPills";
+import { floorCopy } from "../../../lib/createQty";
+import { askList } from "../../../lib/agentCardV2";
+import { encodeMats, type CardMats } from "../../../lib/cardDraft";
+import { cityOffer, keepKey } from "../../../lib/knownCities";
 import "../card/agentCard.css";
 import "../card/agentEditMode.css";
 import "../card/agentPills.css";
@@ -162,21 +167,78 @@ const firstOf = (d: Pick<CardDraft, "name" | "agency">) => {
 
 export const EditGenres: React.FC<{ form: AgentForm; kit: CardFormKit; isHit: (g: string) => boolean }> = ({ form, kit }) => (
   <>
-    <GenreChips genres={form.d.genres} onGenres={(g) => form.set({ genres: g })} onNew={kit.onNewGenre}
+    <GenreChips dress="field" genres={form.d.genres} onGenres={(g) => form.set({ genres: g })} onNew={kit.onNewGenre}
       options={{ ms: kit.msGenre, pool: kit.genrePool, personal: kit.personalGenres, all: kit.allGenres }} />
   </>
 );
 
+/** Agent card v2.1 — the wishlist open: the same quote block, typeable, a navy left edge, no quote marks, growing with the text */
 export const EditWishlist: React.FC<{ form: AgentForm }> = ({ form }) => (
-  <div className="cl262-wishf" data-cl262="wish-form">
-    <WishlistArea value={form.d.wishlist} onValue={(v) => form.set({ wishlist: v })} />
+  <div className="cl262-wishf acv21-wishf" data-cl262="wish-form">
+    <WishlistArea value={form.d.wishlist} onValue={(v) => form.set({ wishlist: v })} className="nx-quote acv21-wish" />
   </div>
 );
 
+const RTICK = <svg viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><circle cx="11" cy="11" r="10" fill="#2a3a52" /><path d="M6.6 11.3l2.9 2.9 5.9-6.2" fill="none" stroke="#fff" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" /></svg>;
+const RNONE = <svg viewBox="0 0 22 22" width="22" height="22" aria-hidden="true"><circle cx="11" cy="11" r="9.6" fill="#fff" stroke="#b8afa3" strokeWidth="1.4" /></svg>;
+/** a stepper: − {words} + */
+const Step: React.FC<{ words: string; less: () => void; more: () => void; lessOff: boolean; moreOff: boolean; k: string; noun: string }> = ({ words, less, more, lessOff, moreOff, k, noun }) => (
+  <span className="ag-step" data-acv21="step" data-k={k}>
+    <button type="button" data-acv21="less" aria-label={`Fewer ${noun}`} disabled={lessOff} onClick={less}>−</button>
+    <b data-acv21="step-val">{words}</b>
+    <button type="button" data-acv21="more" aria-label={`More ${noun}`} disabled={moreOff} onClick={more}>+</button>
+  </span>
+);
+/**
+ * Agent card v2.1 — WHAT THEY ASK FOR, OPEN: the same list, each row a tick. A ticked row carries its quantity controls
+ * (Synopsis its pages stepper; the opening sample its label as the card will read it, then the unit switch and the
+ * "First {n}" stepper on a line beneath; Other its words). Every change is `MAT_OPS`'s — MaterialPills' own — so this
+ * dress stores exactly what the add journey's pills store for the same choices.
+ */
+export const MaterialRows: React.FC<{ mats: CardMats; onMats: (m: CardMats) => void }> = ({ mats: m, onMats }) => {
+  const bad = sampleBad(m);
+  const smpLabel = askList({ materialsWanted: encodeMats(m) }).find((r) => r.kind === "pages")?.label ?? "Opening sample";
+  const othRef = React.useRef<HTMLInputElement>(null);
+  const wasOth = React.useRef(m.oth.on);
+  React.useEffect(() => { if (m.oth.on && !wasOth.current) othRef.current?.focus({ preventScroll: true }); wasOth.current = m.oth.on; }, [m.oth.on]);
+  const row = (k: string, on: boolean, label: React.ReactNode, toggle: () => void, right: React.ReactNode, sub?: React.ReactNode) => (
+    <li key={k} data-acv21="mrow" data-k={k} data-on={on ? "" : undefined}>
+      <div className="ag-mrow">
+        <button type="button" role="checkbox" aria-checked={on} data-acv21="mtick" data-k={k} onClick={toggle}>{on ? RTICK : RNONE}<span>{label}</span></button>
+        {on ? right : <span className="r" data-acv21="not-asked">not asked for</span>}
+      </div>
+      {on && sub ? <div className="ag-msub">{sub}</div> : null}
+    </li>
+  );
+  return (
+    <>
+      <ul className="nx-list ag-mlist" data-acv21="mats" data-mats="">
+        {row("ql", m.ql, "Covering letter", () => onMats(MAT_OPS.ql(m)), null)}
+        {row("syn", m.syn.on, "Synopsis", () => onMats(m.syn.on ? MAT_OPS.synOff(m) : MAT_OPS.synOn(m)),
+          <Step k="syn" noun="pages" words={m.syn.len ? `${m.syn.len} ${m.syn.len === 1 ? "page" : "pages"}` : "Any length"}
+            less={() => onMats(MAT_OPS.synLess(m))} more={() => onMats(MAT_OPS.synMore(m))} lessOff={MAT_OPS.synLessOff(m)} moreOff={MAT_OPS.synMoreOff(m)} />)}
+        {row("smp", m.smp.on, m.smp.on ? <span data-acv21="smp-label">{smpLabel}</span> : "Opening sample", () => onMats(m.smp.on ? MAT_OPS.smpOff(m) : MAT_OPS.smpOn(m)), null,
+          <>
+            <span className="ag-useg" role="radiogroup" aria-label="Unit" data-acv21="unit">
+              {SAMPLE_UNITS.map((x) => (
+                <button key={x} type="button" role="radio" aria-checked={m.smp.unit === x} className={m.smp.unit === x ? "on" : undefined} data-unit={x}
+                  onClick={() => onMats(MAT_OPS.smpUnit(m, x))}>{x}</button>
+              ))}
+            </span>
+            <Step k="smp" noun={m.smp.unit.toLowerCase()} words={m.smp.qty ? `First ${m.smp.qty}` : "First …"}
+              less={() => onMats(MAT_OPS.smpLess(m))} more={() => onMats(MAT_OPS.smpMore(m))} lessOff={MAT_OPS.smpLessOff(m)} moreOff={MAT_OPS.smpMoreOff(m)} />
+            {bad ? <span className="aap-hint bad" data-aap="floor">{floorCopy(m.smp.unit)} for the opening sample.</span> : null}
+          </>)}
+        {row("oth", m.oth.on, "Other", () => onMats(m.oth.on ? MAT_OPS.othOff(m) : MAT_OPS.othOn(m)),
+          <input ref={othRef} className="ag-oth" data-aap="mat-oth-input" value={m.oth.text} placeholder="e.g. Author photo" aria-label="Other"
+            onChange={(e) => onMats(MAT_OPS.othType(m, e.target.value))} />)}
+      </ul>
+    </>
+  );
+};
+
 export const EditMaterials: React.FC<{ form: AgentForm }> = ({ form }) => (
-  <AaField label={`What ${firstOf(form.d)} asks for`} small="pick all that apply" k="mats">
-    <MaterialPills mats={form.d.mats} onMats={(m) => form.set({ mats: m })} />
-  </AaField>
+  <MaterialRows mats={form.d.mats} onMats={(m) => form.set({ mats: m })} />
 );
 
 export const EditHow: React.FC<{ form: AgentForm; agent: Agent; kit: CardFormKit; first: string; offers?: OfferKit | null }> = ({ form, kit, first, offers }) => {
@@ -197,14 +259,9 @@ export const EditHow: React.FC<{ form: AgentForm; agent: Agent; kit: CardFormKit
   }, [onDrag]);
   return (
     <div className="cl262-how" data-cl262="how-form">
-      <AaField label="Taking queries?" k="door">
-        <DoorPills door={d.door} reopens={d.reopens} nowMs={kit.nowMs} first={first} onChange={(door, reopens) => form.set({ door, reopens })} />
-      </AaField>
-      {offers ? <div className="co-door" data-co="door-offers"><CloseOffer kit={offers} first={first} /><SafeNote kit={offers} first={first} /><Quiet lines={doorQuiet} /></div> : null}
-      <AaField label="How they take them" k="method">
-        <MethodPills method={d.method} other={d.methodOther} onChange={(m, o) => form.set({ method: m, methodOther: o })} />
-      </AaField>
-        <AaField label="Response time" k="weeks">
+      {/* Agent card v2.1 — the controls in the boxes' order: Replies in (response time, and the reply policy beneath it),
+          Takes queries, Open to queries */}
+      <AaField label="Response time" k="weeks">
         {/* the offer settles when the slider is released: a press on the thumb holds it, the change event lets it go */}
         <div className="co-wkwrap" ref={wkRef} onPointerDown={(e) => { if ((e.target as HTMLElement).matches("input[type='range']")) offers?.onDrag(true); }}>
           <ResponseTime weeks={d.weeks} onWeeks={(w) => form.set({ weeks: w })} />
@@ -212,12 +269,41 @@ export const EditHow: React.FC<{ form: AgentForm; agent: Agent; kit: CardFormKit
         {offers ? <><RtOffer kit={offers} first={first} /><Quiet lines={rtQuiet} /></> : null}
       </AaField>
       <AaField label="If they don’t reply" k="nrn"><PolicyPills nrn={d.nrn} onNrn={(v) => form.set({ nrn: v })} /></AaField>
+      <AaField label="How they take queries" k="method">
+        <MethodPills method={d.method} other={d.methodOther} onChange={(m, o) => form.set({ method: m, methodOther: o })} />
+      </AaField>
+      <AaField label="Open to queries?" k="door">
+        <DoorPills door={d.door} reopens={d.reopens} nowMs={kit.nowMs} first={first} onChange={(door, reopens) => form.set({ door, reopens })} />
+      </AaField>
+      {offers ? <div className="co-door" data-co="door-offers"><CloseOffer kit={offers} first={first} /><SafeNote kit={offers} first={first} /><Quiet lines={doorQuiet} /></div> : null}
+    </div>
+  );
+};
+
+/** Agent card v2.1 (screens 05–06) — THE CITY OFFER: "{City} is in {country}. Change the country?" in the built offers' dress,
+ *  easing in under the Based in row and brought into view by only what it needs */
+export const CityOfferBox: React.FC<{ city: string; country: string; kept: ReadonlySet<string>; onKeep: (k: string) => void; onSet: (iso: string) => void }> = ({ city, country, kept, onKeep, onSet }) => {
+  const o = cityOffer(city, country, kept);
+  const ref = React.useRef<HTMLDivElement>(null);
+  const shown = !!o;
+  React.useEffect(() => { if (shown) ref.current?.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, [shown]);
+  if (!o) return null;
+  const refocus = () => window.requestAnimationFrame(() => ref.current?.closest("[data-f='country']")?.querySelector<HTMLInputElement>("input[data-ae='city']")?.focus({ preventScroll: true }));
+  return (
+    <div ref={ref} className="co-offer acv21-geooffer" role="status" data-acv21="city-offer" data-is={o.is}>
+      <div className="co-h"><b>{o.head}</b></div>
+      <div className="aap-pills co-ask">
+        <button type="button" className="aap-pill on" data-acv21="city-set" onClick={() => { onSet(o.is); refocus(); }}>{o.set}</button>
+        <button type="button" className="aap-pill" data-acv21="city-keep" onClick={() => { onKeep(keepKey(city, country)); refocus(); }}>{o.keep}</button>
+      </div>
     </div>
   );
 };
 
 /** Contact details (edit everything): Name and Agency, Based in, Email and Website, the submission link, MSWL, Social */
-export const EditContact: React.FC<{ form: AgentForm; agent: Agent; kit: CardFormKit; nameRef?: React.Ref<HTMLInputElement> }> = ({ form, nameRef }) => {
+export const EditContact: React.FC<{ form: AgentForm; agent: Agent; kit: CardFormKit; nameRef?: React.Ref<HTMLInputElement>;
+  /** Agent card v2.1 — the city offer's "Keep" answers, remembered while the section is open (city|country) */
+  geo?: { kept: ReadonlySet<string>; keep: (k: string) => void } }> = ({ form, nameRef, geo }) => {
   const d = form.d;
   const first = firstOf(d);
   const needAgency = !!d.name.trim() && !d.agency.trim() && !d.agencyUnknown;
@@ -249,8 +335,13 @@ export const EditContact: React.FC<{ form: AgentForm; agent: Agent; kit: CardFor
         </div>
       ) : null}
       <AaField label="Based in" k="country">
-        <CountryPills country={d.country} onCountry={(c) => form.set({ country: c })} />
-        <input className="aap-inp" data-ae="city" value={d.city} placeholder="City, if you know it" autoComplete="off" onChange={(e) => form.set({ city: e.target.value })} />
+        {/* Agent card v2.1 — the country control and the city on one row, country first; the flag follows the country
+            control and nothing else; a known city in another country gets an offer, never a block */}
+        <div className="acv21-geo" data-acv21="geo">
+          <CountryPills country={d.country} onCountry={(c) => form.set({ country: c })} />
+          <input className="aap-inp" data-ae="city" value={d.city} placeholder="City, if you know it" autoComplete="off" onChange={(e) => form.set({ city: e.target.value })} />
+        </div>
+        {geo ? <CityOfferBox city={d.city} country={d.country} kept={geo.kept} onKeep={geo.keep} onSet={(iso) => form.set({ country: iso })} /> : null}
       </AaField>
       <div className="cl262-two">
         <AaField label="Email" k="email">
@@ -283,35 +374,16 @@ export const FIELD_NAME: Partial<Record<keyof CardDraft, string>> = {
 };
 export const changeNames = (changed: readonly (keyof CardDraft)[]): string[] => [...new Set(changed.map((k) => FIELD_NAME[k] ?? String(k)))];
 
-/** the save bar: "{n} changes" (by name), the names and what the save also does (the offers' choices), Cancel, Save
- *  changes — or the rust guard */
-export const SaveBar: React.FC<{
-  form: AgentForm; first: string; guard: { n: number } | null; onCancel: () => void; onSave: () => void; onKeep: () => void; onDiscard: () => void;
-  /** Card offers v1 — the second line's tail: "closes 1 query as no reply", "moves 1 query’s dates", … */
-  extras?: readonly string[];
-}> = ({ form, first, guard, onCancel, onSave, onKeep, onDiscard, extras = [] }) => {
-  const names = changeNames(form.changed);
-  const n = names.length;
-  if (guard) {
-    const g = guard.n;
-    return (
-      <div className="cl262-save is-guard" data-cl262="save-bar" data-guard="" role="alertdialog" aria-label="Unsaved changes">
-        <span className="cl262-sv"><b>Discard {g} {g === 1 ? "change" : "changes"} to {first}?</b><i>Nothing has been saved yet.</i></span>
-        <button type="button" className="cl262-sx" data-cl262="keep" onClick={onKeep}>Keep editing</button>
-        <button type="button" className="cl262-sb" data-cl262="discard" onClick={onDiscard}>Discard</button>
-      </div>
-    );
-  }
-  const problem = form.failure ? `Couldn’t save: ${form.failure}` : form.firstProblem ?? (form.dup ? `${form.dup.name} is already on your list` : null);
-  return (
-    <div className="cl262-save" data-cl262="save-bar" role="status">
-      <span className="cl262-sv" data-cl262="save-sum" data-n={n} data-extras={extras.join(" · ")}>
-        {problem ? <><b className="cl262-svbad">{problem}</b><i>Fix this to save.</i></>
-          : n ? <><b>{n} {n === 1 ? "change" : "changes"}</b><i data-cl262="save-names">{names.slice(0, 3).join(", ")}{extras.map((x) => ` · ${x}`).join("")}</i></>
-          : <><b>No changes yet</b><i>Edit as many sections as you like, then save once.</i></>}
-      </span>
-      <button type="button" className="cl262-sx" data-cl262="cancel" onClick={onCancel}>Cancel</button>
-      <button type="button" className="cl262-sb" data-cl262="save" disabled={!form.canSave} onClick={onSave}>Save changes</button>
-    </div>
-  );
-};
+/**
+ * Agent card v2.1 — THE RUST BAR: only when leaving with something unsaved (another tab, the arrows, ✕, Esc, another agent,
+ * another page). It takes the footer's place: "Unsaved changes", the sections named beneath, then Keep editing, Discard
+ * and Save all ("Save it" for one). There is no save bar: each open section has its own tick and cross.
+ */
+export const GuardBar: React.FC<{ names: readonly string[]; busy: boolean; problem: string | null; onKeep: () => void; onDiscard: () => void; onSaveAll: () => void; onSaveAllDown?: () => void }> = ({ names, busy, problem, onKeep, onDiscard, onSaveAll, onSaveAllDown }) => (
+  <div className="cl262-save is-guard acv21-guard" data-cl262="save-bar" data-acv21="guard" data-guard="" role="alertdialog" aria-label="Unsaved changes">
+    <span className="cl262-sv"><b>Unsaved changes</b><i data-acv21="guard-names">{problem ?? names.join(", ")}</i></span>
+    <button type="button" className="cl262-sx" data-cl262="keep" onClick={onKeep}>Keep editing</button>
+    <button type="button" className="cl262-sx" data-cl262="discard" onClick={onDiscard}>Discard</button>
+    <button type="button" className="cl262-sb" data-acv21="save-all" disabled={busy} onPointerDown={onSaveAllDown} onClick={onSaveAll}>{names.length === 1 ? "Save it" : "Save all"}</button>
+  </div>
+);

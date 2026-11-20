@@ -167,4 +167,19 @@ export function savedWords(n: number, first: string, plan: { moved: number; kept
   if (plan.moved) return `${base}, and moved ${plan.moved === 1 ? "the query’s dates" : `${plan.moved} queries’ dates`}`;
   return base;
 }
+/** Agent card v2.1 — the offer's tail on a save's snackbar: what it did to the queries already out */
+function planTail(plan: { moved: number; kept: number; close: readonly unknown[] } | null | undefined): string {
+  if (!plan) return "";
+  if (plan.close.length) return `, and closed ${plan.close.length === 1 ? "the query" : `${plan.close.length} queries`} as no reply`;
+  if (plan.moved) return `, and moved ${plan.moved === 1 ? "the query’s dates" : `${plan.moved} queries’ dates`}`;
+  return "";
+}
+/** Agent card v2.1 — one section saved: "Saved {section} for {first}", plus what it did to the query */
+export function sectionSavedWords(section: string, first: string, plan: { moved: number; kept: number; close: readonly unknown[] } | null | undefined): string {
+  return `Saved ${section} for ${first}${planTail(plan)}`;
+}
+/** Agent card v2.1 — Save all: "Saved {n} sections for {first}" ("Saved {section} for {first}" for one) */
+export function sectionsSavedWords(sections: readonly string[], first: string, plan: { moved: number; kept: number; close: readonly unknown[] } | null | undefined): string {
+  return sections.length === 1 ? sectionSavedWords(sections[0], first, plan) : `Saved ${sections.length} sections for ${first}${planTail(plan)}`;
+}
 export const UNDONE_WORDS = "Changes undone";

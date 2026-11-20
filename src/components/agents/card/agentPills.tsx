@@ -51,8 +51,10 @@ export const METHOD_PILLS: [SubmissionMethod, string][] = [
   [SubmissionMethod.EMAIL, "Email"], [SubmissionMethod.ONLINE_FORM, "Online form"],
   [SubmissionMethod.QUERY_MANAGER, "QueryManager"], [SubmissionMethod.POST, "Post"],
 ];
-export const OTHER_MAX = 40;
-export const SYN_MAX = 20;
+/* Agent card v2.1 — the materials' limits and every change a materials control makes live in lib/matOps (a pure module the
+   locks can import); they are this module's as before */
+export { OTHER_MAX, SYN_MAX, sampleFloor, sampleBad, MAT_OPS, SAMPLE_UNITS } from "../../../lib/matOps";
+import { OTHER_MAX, sampleBad, sampleFloor, MAT_OPS, SAMPLE_UNITS } from "../../../lib/matOps";
 
 /** the label over the submission link, by method — null: the field does not appear */
 export function formLinkLabel(m: SubmissionMethod | null): string | null {
@@ -76,9 +78,6 @@ export function socialFromHost(v: string): string | null {
   return SOCIAL_HOSTS.find(([h]) => t.includes(h))?.[1] ?? null;
 }
 
-/** the floor a sample amount must reach — the create sheet's own (`CREATE_QTY`) */
-export const sampleFloor = (u: SampleUnit): number => CREATE_QTY[u].min;
-export const sampleBad = (m: CardMats): boolean => m.smp.on && (!m.smp.qty || m.smp.qty < sampleFloor(m.smp.unit));
 
 /* ── the field: a label above its control ─────────────────────────────────────────────────────── */
 
@@ -159,9 +158,8 @@ const AmountBox: React.FC<{ value: number | null; placeholder?: string; label: s
     onChange={(e) => { const d = digits(e.target.value); onType(d ? parseInt(d, 10) : null); }} />
 );
 
+
 export const MaterialPills: React.FC<{ mats: CardMats; onMats: (m: CardMats) => void }> = ({ mats: m, onMats }) => {
-  const u = UNIT_CFG[m.smp.unit];
-  const floor = sampleFloor(m.smp.unit);
   const bad = sampleBad(m);
   const othRef = useRef<HTMLInputElement>(null);
   const wasOth = useRef(m.oth.on);
@@ -171,45 +169,45 @@ export const MaterialPills: React.FC<{ mats: CardMats; onMats: (m: CardMats) => 
   return (
     <>
       <div className="aap-pills aap-mats" data-mats="" data-aap="mats">
-        <Pill role="button" on={m.ql} data={{ "data-mat": "ql" }} onClick={() => onMats({ ...m, ql: !m.ql })}>{m.ql ? ck : plus}Covering letter</Pill>
+        <Pill role="button" on={m.ql} data={{ "data-mat": "ql" }} onClick={() => onMats(MAT_OPS.ql(m))}>{m.ql ? ck : plus}Covering letter</Pill>
         {m.syn.on ? (
           <span className="aap-pill on amt" data-aap="mat-syn">
             {ck}Synopsis
-            <button type="button" className="aap-mb" data-syn="-1" disabled={!m.syn.len} aria-label="Shorter"
-              onClick={() => onMats({ ...m, syn: { on: true, len: m.syn.len && m.syn.len > 1 ? m.syn.len - 1 : null } })}>−</button>
+            <button type="button" className="aap-mb" data-syn="-1" disabled={MAT_OPS.synLessOff(m)} aria-label="Shorter"
+              onClick={() => onMats(MAT_OPS.synLess(m))}>−</button>
             <AmountBox value={m.syn.len} placeholder="any" label="Synopsis length in pages" data="syn-qty"
-              onType={(n) => onMats({ ...m, syn: { on: true, len: n ? Math.min(SYN_MAX, n) : null } })} />
-            <button type="button" className="aap-mb" data-syn="1" disabled={(m.syn.len ?? 0) >= SYN_MAX} aria-label="Longer"
-              onClick={() => onMats({ ...m, syn: { on: true, len: Math.min(SYN_MAX, (m.syn.len ?? 0) + 1) } })}>+</button>
+              onType={(n) => onMats(MAT_OPS.synType(m, n))} />
+            <button type="button" className="aap-mb" data-syn="1" disabled={MAT_OPS.synMoreOff(m)} aria-label="Longer"
+              onClick={() => onMats(MAT_OPS.synMore(m))}>+</button>
             {m.syn.len ? (m.syn.len === 1 ? "page" : "pages") : "length"}
-            <button type="button" className="aap-x" data-mat="syn" aria-label="Remove synopsis" onClick={() => onMats({ ...m, syn: { on: false, len: m.syn.len } })}>×</button>
+            <button type="button" className="aap-x" data-mat="syn" aria-label="Remove synopsis" onClick={() => onMats(MAT_OPS.synOff(m))}>×</button>
           </span>
-        ) : <Pill role="button" on={false} data={{ "data-mat": "syn" }} onClick={() => onMats({ ...m, syn: { ...m.syn, on: true } })}>{plus}Synopsis</Pill>}
+        ) : <Pill role="button" on={false} data={{ "data-mat": "syn" }} onClick={() => onMats(MAT_OPS.synOn(m))}>{plus}Synopsis</Pill>}
         {m.smp.on ? (
           <span className={`aap-pill on amt wide${bad ? " bad" : ""}`} data-aap="mat-smp" data-bad={bad ? "" : undefined}>
             {ck}Opening sample<span className="aap-gap" />
-            <button type="button" className="aap-x" data-mat="smp" aria-label="Remove opening sample" onClick={() => onMats({ ...m, smp: { ...m.smp, on: false } })}>×</button>
+            <button type="button" className="aap-x" data-mat="smp" aria-label="Remove opening sample" onClick={() => onMats(MAT_OPS.smpOff(m))}>×</button>
             <span className="aap-br" />First
-            <button type="button" className="aap-mb" data-qty="-1" disabled={!!m.smp.qty && m.smp.qty <= floor} aria-label="Fewer"
-              onClick={() => onMats({ ...m, smp: { ...m.smp, qty: Math.max(floor, Math.min(u.max, (m.smp.qty || u.def) - u.step)) } })}>−</button>
-            <AmountBox value={m.smp.qty || null} label="How many" data="smp-qty" onType={(n) => onMats({ ...m, smp: { ...m.smp, qty: n ? Math.min(u.max, n) : 0 } })} />
-            <button type="button" className="aap-mb" data-qty="1" disabled={m.smp.qty >= u.max} aria-label="More"
-              onClick={() => onMats({ ...m, smp: { ...m.smp, qty: Math.min(u.max, Math.max(floor, (m.smp.qty || u.def - u.step) + u.step)) } })}>+</button>
+            <button type="button" className="aap-mb" data-qty="-1" disabled={MAT_OPS.smpLessOff(m)} aria-label="Fewer"
+              onClick={() => onMats(MAT_OPS.smpLess(m))}>−</button>
+            <AmountBox value={m.smp.qty || null} label="How many" data="smp-qty" onType={(n) => onMats(MAT_OPS.smpType(m, n))} />
+            <button type="button" className="aap-mb" data-qty="1" disabled={MAT_OPS.smpMoreOff(m)} aria-label="More"
+              onClick={() => onMats(MAT_OPS.smpMore(m))}>+</button>
             <span className="aap-useg" role="radiogroup" aria-label="Unit" data-aap="unit">
-              {(["Chapters", "Pages", "Words"] as SampleUnit[]).map((x) => (
+              {SAMPLE_UNITS.map((x) => (
                 <button key={x} type="button" role="radio" aria-checked={m.smp.unit === x} className={m.smp.unit === x ? "on" : undefined} data-unit={x}
-                  onClick={() => { if (m.smp.unit !== x) onMats({ ...m, smp: { ...m.smp, unit: x, qty: UNIT_CFG[x].def } }); }}>{x.toLowerCase()}</button>
+                  onClick={() => { if (m.smp.unit !== x) onMats(MAT_OPS.smpUnit(m, x)); }}>{x.toLowerCase()}</button>
               ))}
             </span>
           </span>
-        ) : <Pill role="button" on={false} data={{ "data-mat": "smp" }} onClick={() => onMats({ ...m, smp: { ...m.smp, on: true, qty: m.smp.qty || UNIT_CFG[m.smp.unit].def } })}>{plus}Opening sample</Pill>}
+        ) : <Pill role="button" on={false} data={{ "data-mat": "smp" }} onClick={() => onMats(MAT_OPS.smpOn(m))}>{plus}Opening sample</Pill>}
         {m.oth.on ? (
           <span className="aap-pill on amt" data-aap="mat-oth">
             {ck}<input ref={othRef} className="aap-pin" data-aap="mat-oth-input" maxLength={Math.max(OTHER_MAX, m.oth.text.length)} value={m.oth.text} placeholder="e.g. Author photo" aria-label="Other"
-              onChange={(e) => { const v = e.target.value; onMats({ ...m, oth: { on: true, text: v.length > OTHER_MAX && v.length > m.oth.text.length ? m.oth.text : v } }); }} />
-            <button type="button" className="aap-x" data-mat="oth" aria-label="Remove other" onClick={() => onMats({ ...m, oth: { on: false, text: m.oth.text } })}>×</button>
+              onChange={(e) => onMats(MAT_OPS.othType(m, e.target.value))} />
+            <button type="button" className="aap-x" data-mat="oth" aria-label="Remove other" onClick={() => onMats(MAT_OPS.othOff(m))}>×</button>
           </span>
-        ) : <Pill role="button" on={false} data={{ "data-mat": "oth" }} onClick={() => onMats({ ...m, oth: { ...m.oth, on: true } })}>{plus}Other</Pill>}
+        ) : <Pill role="button" on={false} data={{ "data-mat": "oth" }} onClick={() => onMats(MAT_OPS.othOn(m))}>{plus}Other</Pill>}
       </div>
       {bad ? <span className="aap-hint bad" data-aap="floor">{floorCopy(m.smp.unit)} for the opening sample.</span> : null}
     </>
@@ -281,7 +279,18 @@ export const GenreChips: React.FC<{
   options: { ms: string | null; pool: string[]; personal: string[]; all: readonly string[] };
   onNew: (typed: string) => Promise<{ ok: true; label: string } | { ok: false; reason: string }>;
   inputRef?: React.Ref<HTMLInputElement>;
-}> = ({ genres, onGenres, options, onNew, inputRef }) => {
+  /** Agent card v2.1 (screens 10, 12) — the card's dress: one 52px field with the chosen genres inside it as 34px chips (the
+   *  manuscript's genre ticked), the matches 8px beneath, a "Suggested" row 14px beneath; focus back in the input after
+   *  every add and remove. The rules are this component's own, unchanged. */
+  dress?: "field";
+}> = ({ genres, onGenres, options, onNew, inputRef, dress }) => {
+  const own = useRef<HTMLInputElement | null>(null);
+  const setInput = (el: HTMLInputElement | null) => {
+    own.current = el;
+    if (typeof inputRef === "function") inputRef(el); else if (inputRef) (inputRef as React.MutableRefObject<HTMLInputElement | null>).current = el;
+  };
+  const refocus = () => { if (dress) window.requestAnimationFrame(() => own.current?.focus({ preventScroll: true })); };
+  const isMs = (g: string) => !!options.ms && g.toLowerCase() === options.ms.toLowerCase();
   const [q, setQ] = useState("");
   const [hi, setHi] = useState(0);
   const [refused, setRefused] = useState<string | null>(null);
@@ -310,15 +319,18 @@ export const GenreChips: React.FC<{
     }
     if (!taken(label)) onGenres([...genres, label]);
     setQ(""); setHi(0); setRefused(null);
+    refocus();
   };
+  const remove = (next: string[]) => { onGenres(next); refocus(); };
   return (
     <>
-      <div className="aap-gp" data-aap="genres" onClick={(e) => { if (e.target === e.currentTarget) (e.currentTarget.querySelector("input") as HTMLInputElement | null)?.focus(); }}>
+      <div className={dress ? "aap-gp ag-gfield" : "aap-gp"} data-aap="genres" onClick={(e) => { if (e.target === e.currentTarget) (e.currentTarget.querySelector("input") as HTMLInputElement | null)?.focus(); }}>
         {genres.map((g) => (
-          <span key={g} className="aap-chip" data-aap="genre-chip" data-g={g}>{g}
-            <button type="button" aria-label={`Remove ${g}`} onClick={() => onGenres(genres.filter((x) => x !== g))}>×</button></span>
+          <span key={g} className={dress ? "aap-chip ag-gchip" : "aap-chip"} data-aap="genre-chip" data-g={g} data-ms={dress && isMs(g) ? "" : undefined}>
+            {dress && isMs(g) ? <span className="ag-gtick" aria-hidden="true"><svg viewBox="0 0 16 16" width="16" height="16"><circle cx="8" cy="8" r="7.5" fill="#2a3a52" /><path d="M4.6 8.3l2.2 2.2 4.6-4.8" fill="none" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" /></svg></span> : null}{g}
+            <button type="button" aria-label={`Remove ${g}`} onClick={() => remove(genres.filter((x) => x !== g))}>×</button></span>
         ))}
-        <input ref={inputRef} data-aap="genre-input" value={q} placeholder={genres.length ? "Add another" : "Type to find a genre"} autoComplete="off"
+        <input ref={setInput} data-aap="genre-input" value={q} placeholder={genres.length ? "Add another" : "Type to find a genre"} autoComplete="off"
           aria-expanded={items.length > 0}
           onChange={(e) => { setQ(e.target.value); setHi(0); setRefused(null); }}
           onKeyDown={(e) => {
@@ -326,24 +338,31 @@ export const GenreChips: React.FC<{
             else if (e.key === "ArrowUp" && items.length) { e.preventDefault(); setHi((h) => Math.max(h - 1, 0)); }
             else if (e.key === "Enter") { e.preventDefault(); e.stopPropagation(); if (items.length) void add(items[Math.min(hi, items.length - 1)]); }
             else if (e.key === "Escape" && q) { e.preventDefault(); e.stopPropagation(); setQ(""); }
-            else if (e.key === "Backspace" && !q && genres.length) onGenres(genres.slice(0, -1));
+            else if (e.key === "Backspace" && !q && genres.length) remove(genres.slice(0, -1));
           }} />
       </div>
       {items.length ? (
-        <div className="aap-glist" role="listbox" data-aap="genre-list">
+        <div className={dress ? "aap-glist ag-glist" : "aap-glist"} role="listbox" data-aap="genre-list">
           {items.map((it, i) => (
             <button key={`${it.v}-${i}`} type="button" role="option" aria-selected={i === hi} className={i === hi ? "hi" : undefined} data-addg={it.v}
               onMouseDown={(e) => { e.preventDefault(); void add(it); }}>{it.l}{it.s ? <small>{it.s}</small> : null}</button>
           ))}
         </div>
       ) : null}
-      {!t && sugs.length ? (
+      {!t && sugs.length ? (dress ? (
+        <div className="ag-sug" data-aap="genre-sugg">
+          <span data-acv21="sugg-label">Suggested</span>
+          <div>{sugs.map((g) => (
+            <button key={g} type="button" className="nx-btn gh" data-addg={g} onClick={() => void add({ v: g })}>+ {g}{isMs(g) ? <em>your book</em> : null}</button>
+          ))}</div>
+        </div>
+      ) : (
         <div className="aap-sug" data-aap="genre-sugg">
           {sugs.map((g) => (
             <button key={g} type="button" data-addg={g} onClick={() => void add({ v: g })}>+ {g}{options.ms && g.toLowerCase() === options.ms.toLowerCase() ? <em> · your book</em> : null}</button>
           ))}
         </div>
-      ) : null}
+      )) : null}
       {refused ? <span className="aap-hint bad" data-aap="genre-refused">{refused}</span> : null}
     </>
   );
@@ -351,9 +370,11 @@ export const GenreChips: React.FC<{
 
 /* ── wishlist ─────────────────────────────────────────────────────────────────────────────────── */
 
-export const WishlistArea: React.FC<{ value: string; onValue: (v: string) => void; inputRef?: React.Ref<HTMLTextAreaElement> }> = ({ value, onValue, inputRef }) => (
+export const WishlistArea: React.FC<{ value: string; onValue: (v: string) => void; inputRef?: React.Ref<HTMLTextAreaElement>;
+  /** Agent card v2.1 — the card's dress: the quote itself, typeable (its rules unchanged) */
+  className?: string }> = ({ value, onValue, inputRef, className }) => (
   <>
-    <textarea ref={inputRef} className="aap-inp aap-ta" data-aap="wishlist" value={value} maxLength={Math.max(400, value.length)}
+    <textarea ref={inputRef} className={className ?? "aap-inp aap-ta"} data-aap="wishlist" value={value} maxLength={Math.max(400, value.length)}
       placeholder="In their words: paste from their MSWL or agency page" aria-label="Wishlist"
       onChange={(e) => { const v = e.target.value; onValue(v.length > 400 && v.length > value.length ? value : v); }} />
     {value.length > 300 ? <span className="aap-note" data-aap="wish-count">{value.length} / 400</span> : null}

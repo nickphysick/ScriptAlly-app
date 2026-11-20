@@ -40,18 +40,20 @@
    white border and masked to that ring (the middle cut out), so nothing inside the frame is covered or moved. It holds the
    TINT (`b`: the ring in one flat colour, the stage's `rim`) and the LIGHT (`i`: a 920px conic square centred on the frame,
    coloured and turned at a landing). Both at opacity 0 at rest; every value that moves is a Web Animation. */
-.spanel > .qc163-rim {
-  position: absolute; inset: 0; z-index: 1; box-sizing: border-box; padding: 7px; border-radius: 20px;
+/* Agent card v2.1 — the agent card's frame (`.cl262-card.acv2`) carries the same layer over its own 10px mat: its width and
+   radius are the frame's own (--qc163-rim-w, --qc163-rim-r, set on that frame); the query card's are the defaults */
+.spanel > .qc163-rim, .cl262-card.acv2 > .qc163-rim {
+  position: absolute; inset: 0; z-index: 1; box-sizing: border-box; padding: var(--qc163-rim-w, 7px); border-radius: var(--qc163-rim-r, 20px);
   pointer-events: none; overflow: hidden;
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
-.spanel > .qc163-rim > i {
+.spanel > .qc163-rim > i, .cl262-card.acv2 > .qc163-rim > i {
   position: absolute; left: 50%; top: 50%; width: 920px; height: 920px; translate: -50% -50%; opacity: 0;
   will-change: rotate, opacity;
 }
-.spanel > .qc163-rim > b { position: absolute; inset: 0; opacity: 0; will-change: opacity; }
+.spanel > .qc163-rim > b, .cl262-card.acv2 > .qc163-rim > b { position: absolute; inset: 0; opacity: 0; will-change: opacity; }
 @media (max-width: 1400px) { .spanel.qsp.qsp:has(> .spanel-own > [data-qc152]) { width: 504px; right: 28px; } }
 @media (prefers-reduced-motion: reduce) {
   .spanel.qsp.qsp:has(> .spanel-own > [data-qc152]) { animation: none; transition: none; }

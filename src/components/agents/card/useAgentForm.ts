@@ -91,7 +91,32 @@ export function useAgentForm(o: AgentFormOptions) {
     setBase(b); setD(b); setAsk(false); setFailure(null); setCarried(false);
   }, [personal]);
 
-  return { reset, base, d, set, changed, problems, firstProblem, dirty, also, dup, canSave, saving, failure, carried, ask, setAsk, leave, discard, save };
+  /* Agent card v2.1 — EDITING BY SECTION: each section's fields are saved, discarded or re-read on their own, and every
+     other field's draft is left exactly as it is. `rebase` re-reads fields from a source (a section opening over the agent
+     as it is now); `commit` moves fields of a saved draft into the base (a section saved: they no longer differ);
+     `revert` puts fields of the draft back to the base (a section discarded). */
+  const rebase = useCallback((keys: readonly (keyof CardDraft)[], src: CardDraft) => {
+    const part = pickDraft(src, keys);
+    setBase((prev) => ({ ...prev, ...part }));
+    setD((prev) => ({ ...prev, ...part }));
+  }, []);
+  const commit = useCallback((keys: readonly (keyof CardDraft)[], src: CardDraft) => {
+    setBase((prev) => ({ ...prev, ...pickDraft(src, keys) }));
+    setFailure(null);
+  }, []);
+  const revert = useCallback((keys: readonly (keyof CardDraft)[]) => {
+    setD((prev) => ({ ...prev, ...pickDraft(base, keys) }));
+    setFailure(null);
+  }, [base]);
+
+  return { reset, base, d, set, changed, problems, firstProblem, dirty, also, dup, canSave, saving, failure, carried, ask, setAsk, leave, discard, save, rebase, commit, revert };
+}
+
+/** some fields of a draft, as a patch */
+export function pickDraft(src: CardDraft, keys: readonly (keyof CardDraft)[]): Partial<CardDraft> {
+  const out: Partial<CardDraft> = {};
+  for (const k of keys) (out as Record<string, unknown>)[k] = src[k];
+  return out;
 }
 
 export type AgentForm = ReturnType<typeof useAgentForm>;

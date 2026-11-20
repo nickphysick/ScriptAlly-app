@@ -41,15 +41,18 @@ export const SINK = { low: 0.975, at: 0.3 } as const;
 export const LIGHT = { ms: 1300, ease: "cubic-bezier(0.4, 0.05, 0.25, 1)", from: -40, to: 320, inAt: 0.14, outAt: 0.76 } as const;
 const pressed = new WeakMap<Element, { a: Animation; t: number }>();
 export const isPressed = (frame: Element | null): boolean => !!frame && pressed.has(frame);
+/** Agent card v2.1 — `tint: false`: the press holds no colour (the query card never passes it) */
+export interface PressOpts { tint?: boolean }
 /** at the press: the frame eases to 0.985 over 120ms and holds there (on the compositor, whatever the page then does).
  *  A second press while one is held does nothing. Never longer than 4s: the safety net eases it back. */
-export function pressIn(frame: HTMLElement | null): void {
+export function pressIn(frame: HTMLElement | null, o: PressOpts = {}): void {
   if (!frame || reduced() || pressed.has(frame)) return;
   bumps.get(frame)?.cancel();
   /* v161.2 — the breath gives way: the rim eases back to 1 over the press-in's own 120ms; v163 — the tint does not stop:
-     it rises to 0.72 from wherever it is and holds through the save */
-  const o = breaths.has(frame) ? breathEnd(frame) : opacityNow(rimOf(frame).tint);
-  tintHold(frame, o);
+     it rises to 0.72 from wherever it is and holds through the save (Agent card v2.1: unless the press says it holds no
+     colour — a star or Add note with no section open) */
+  const was = breaths.has(frame) ? breathEnd(frame) : opacityNow(rimOf(frame).tint);
+  if (o.tint !== false) tintHold(frame, was);
   const a = frame.animate([{ scale: "1" }, { scale: String(PRESS.to) }], { duration: PRESS.ms, easing: "ease-out", fill: "forwards" });
   a.id = "qc1611-press";
   pressed.set(frame, { a, t: window.setTimeout(() => pressBack(frame), PRESS.net) });
@@ -107,6 +110,14 @@ export function rimOf(frame: HTMLElement): Rim {
   }
   return { ring, light: ring.querySelector<HTMLElement>(":scope > i")!, tint: ring.querySelector<HTMLElement>(":scope > b")! };
 }
+/** Agent card v2.1 — the rim's two colours for a frame: the frame's own `data-qc163-rim` / `data-qc163-rim-hi` when it
+ *  names them (the agent card: its query's stage, or slate with no query), else the `rim` of the stage the query card in it
+ *  shows now. The query card's frame names none, so it reads exactly as before. */
+export function rimColours(frame: HTMLElement): { rim: string; rimHi: string } {
+  const rim = frame.dataset?.qc163Rim, rimHi = frame.dataset?.qc163RimHi;
+  if (rim && rimHi) return { rim, rimHi };
+  return STAGE_COLOURS[stageAt(frame)];
+}
 /** the stage the card in this frame shows now (QcCard152's `data-qc163-stage`) */
 export function stageAt(frame: HTMLElement): Stage {
   const s = frame.querySelector<HTMLElement>("[data-qc152='card']")?.getAttribute("data-qc163-stage");
@@ -162,7 +173,7 @@ function breathStart(frame: HTMLElement): void {
   for (const x of b.rest) x.cancel();
   b.rest = [];
   const { ring, tint } = rimOf(frame);
-  tint.style.background = STAGE_COLOURS[stageAt(frame)].rim;
+  tint.style.background = rimColours(frame).rim;
   const t = { duration: BREATHE.ms, iterations: Infinity, easing: BREATHE.ease };
   const sk = [{ scale: "1" }, { scale: String(BREATHE.peak) }, { scale: "1" }];
   const paper = frame.animate(sk, { ...t, pseudoElement: RIM });
@@ -227,7 +238,7 @@ const landings = new WeakMap<Element, Animation[]>();
 function tintHold(frame: HTMLElement, from: number): void {
   const { tint } = rimOf(frame);
   holds.get(frame)?.cancel();
-  tint.style.background = STAGE_COLOURS[stageAt(frame)].rim;
+  tint.style.background = rimColours(frame).rim;
   const h = tint.animate([{ opacity: from }, { opacity: RIM163.peak }], { duration: RIM163.holdMs, easing: "ease-out", fill: "forwards" });
   h.id = "qc163-tint-hold";
   holds.set(frame, h);
@@ -243,7 +254,7 @@ function tintBack(frame: HTMLElement): void {
   tint.animate([{ opacity: o }, { opacity: 0 }], { duration: RIM163.backMs, easing: "ease-out" }).id = "qc163-tint-back";
 }
 /** the landing's tint and light (`bump` calls it); `owner` holds them with the rest of the landing */
-function landRim(frame: HTMLElement, owner: Element | null, kind: "save" | "undo"): Animation[] {
+function landRim(frame: HTMLElement, owner: Element | null, kind: "save" | "undo", withLight = true): Animation[] {
   const { tint, light } = rimOf(frame);
   const made: Animation[] = [];
   const h = holds.get(frame);
@@ -255,7 +266,9 @@ function landRim(frame: HTMLElement, owner: Element | null, kind: "save" | "undo
     f.finished.then(end, () => h.cancel());
     made.push(park(owner, f));
   }
-  const c = STAGE_COLOURS[stageAt(frame)];
+  /* Agent card v2.1 — a landing with no light (a star, Add note): the held colour just fades */
+  if (!withLight) return made;
+  const c = rimColours(frame);
   const back = kind === "undo";
   light.style.background = `conic-gradient(from 0deg, transparent 0 58%, ${c.rim} 84%, ${c.rimHi} 93%, transparent 100%)`;
   light.style.scale = back ? "-1 1" : "1 1";
@@ -279,20 +292,20 @@ function breathResume(frame: HTMLElement): void {
  *  made inside that task cannot reach the compositor until it ends. If no click follows within 700ms (the pointer was
  *  dragged off), the frame eases back. */
 const armed = new WeakMap<Element, number>();
-export function pressAtPointer(frame: HTMLElement | null): void {
+export function pressAtPointer(frame: HTMLElement | null, o: PressOpts = {}): void {
   if (!frame || reduced() || pressed.has(frame)) return;
-  pressIn(frame);
+  pressIn(frame, o);
   armed.set(frame, window.setTimeout(() => { armed.delete(frame); pressBack(frame); }, 700));
 }
 /** at the click (or Enter/Space): press in if the pointer has not already, then save. A save starts at once (Step 0.4:
  *  its long task is ~680ms after the press, 35 frames painted between). Undo waits (`yieldFrames`) for two painted
  *  frames when the press began here, at the click — its own work re-renders the page straight away — and never more
  *  than 50ms. */
-export function pressThen<T>(frame: HTMLElement | null, run: () => T, yieldFrames = false): void {
+export function pressThen<T>(frame: HTMLElement | null, run: () => T, yieldFrames = false, o: PressOpts = {}): void {
   const a = frame ? armed.get(frame) : undefined;
   if (frame && a != null) { window.clearTimeout(a); armed.delete(frame); run(); return; }
-  if (!frame || reduced() || pressed.has(frame) || !yieldFrames) { pressIn(frame); run(); return; }
-  pressIn(frame);
+  if (!frame || reduced() || pressed.has(frame) || !yieldFrames) { pressIn(frame, o); run(); return; }
+  pressIn(frame, o);
   let done = false;
   const go = () => { if (!done) { done = true; run(); } };
   requestAnimationFrame(() => requestAnimationFrame(() => window.setTimeout(go, 0)));
@@ -348,7 +361,7 @@ export function finishAll(owner: Element | null): void {
 
 const bumps = new WeakMap<Element, Animation>();
 /** Phase 1 — the bump, on the card's frame (the panel), never stacking */
-export function bump(frame: HTMLElement | null, owner: Element | null = null, kind: "save" | "undo" = "save"): void {
+export function bump(frame: HTMLElement | null, owner: Element | null = null, kind: "save" | "undo" = "save", o: { light?: boolean } = {}): void {
   if (!frame || reduced()) return;
   bumps.get(frame)?.cancel();
   /* v163 — a second landing ends the running light and tint at once: they never stack */
@@ -364,7 +377,7 @@ export function bump(frame: HTMLElement | null, owner: Element | null = null, ki
   a.id = "qc160-bump";
   park(owner, a);
   bumps.set(frame, a);
-  landings.set(frame, landRim(frame, owner, kind));
+  landings.set(frame, landRim(frame, owner, kind, o.light !== false));
   const clear = () => { if (bumps.get(frame) === a) bumps.delete(frame); };
   a.finished.then(clear, clear);
 }

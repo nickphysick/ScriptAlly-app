@@ -168,7 +168,9 @@ describe("Query card v161.1 — press in, hold, pop", () => {
     expect(f).toMatch(/if \(!frame \|\| reduced\(\) \|\| pressed\.has\(frame\)\) return;/);
     expect(f).toMatch(/\[\{ scale: "1" \}, \{ scale: String\(PRESS\.to\) \}\], \{ duration: PRESS\.ms, easing: "ease-out", fill: "forwards" \}/);
     /* v161.2: the press ends the breath (the rim eases back on its own layer); v163: the tint is held from where it was */
-    expect(f).toMatch(/const o = breaths\.has\(frame\) \? breathEnd\(frame\) : opacityNow\(rimOf\(frame\)\.tint\);\s*tintHold\(frame, o\);/);
+    /* Agent card v2.1 — re-pointed: the hold is skipped only when a press says `tint: false` (the agent card's star and Add
+       note with nothing open); the query card never says it */
+    expect(f).toMatch(/const was = breaths\.has\(frame\) \? breathEnd\(frame\) : opacityNow\(rimOf\(frame\)\.tint\);\s*if \(o\.tint !== false\) tintHold\(frame, was\);/);
     expect(f).toMatch(/window\.setTimeout\(\(\) => pressBack\(frame\), PRESS\.net\)/);
   });
   it("starts at the pointer's press; the click confirms it and saves; Undo yields two painted frames, never over 50ms", () => {
@@ -234,15 +236,18 @@ describe("Query card v163 — the rim layer breathes in the stage's colour", () 
   const css = read("./qcv152card.css");
   const rule = (sel: string) => css.match(new RegExp(`${sel.replace(/[.*+?^${}()|[\]\\>]/g, "\\$&")} \\{[^}]*\\}`))?.[0] ?? "";
   it("the ring: over the 7px border, masked to it in both forms, no pointer events, no layout", () => {
-    const r = rule(".spanel > .qc163-rim");
+    /* Agent card v2.1 — re-pointed: the rule also covers the agent card's frame, whose width and radius are its own
+       variables; the query card's are the defaults (7px, 20px) */
+    const r = rule(".spanel > .qc163-rim, .cl262-card.acv2 > .qc163-rim");
     expect(r).toMatch(/position: absolute; inset: 0;/);
-    expect(r).toMatch(/padding: 7px; border-radius: 20px;/);
+    expect(r).toMatch(/padding: var\(--qc163-rim-w, 7px\); border-radius: var\(--qc163-rim-r, 20px\);/);
+    expect(css).not.toMatch(/\.spanel[^{]*\{[^}]*--qc163-rim-[wr]:/);
     expect(r).toMatch(/pointer-events: none; overflow: hidden;/);
     expect(r).toMatch(/-webkit-mask: linear-gradient\(#000 0 0\) content-box, linear-gradient\(#000 0 0\);/);
     expect(r).toMatch(/-webkit-mask-composite: xor;/);
     expect(r).toMatch(/mask: linear-gradient\(#000 0 0\) content-box exclude, linear-gradient\(#000 0 0\);/);
-    expect(rule(".spanel > .qc163-rim > i")).toMatch(/width: 920px; height: 920px; translate: -50% -50%; opacity: 0;/);
-    expect(rule(".spanel > .qc163-rim > b")).toMatch(/inset: 0; opacity: 0;/);
+    expect(rule(".spanel > .qc163-rim > i, .cl262-card.acv2 > .qc163-rim > i")).toMatch(/width: 920px; height: 920px; translate: -50% -50%; opacity: 0;/);
+    expect(rule(".spanel > .qc163-rim > b, .cl262-card.acv2 > .qc163-rim > b")).toMatch(/inset: 0; opacity: 0;/);
     const f = fnOf("rimOf");
     expect(f).toMatch(/ring\.setAttribute\("aria-hidden", "true"\);/);
     expect(f).toMatch(/frame\.append\(ring\);/);
@@ -250,7 +255,9 @@ describe("Query card v163 — the rim layer breathes in the stage's colour", () 
   it("the tint breathes with the paper: same keyframe clock (one startTime), 0 → 0.72 → 0, the current stage's rim", () => {
     expect(MOTION).toMatch(/export const RIM163 = \{ peak: 0\.72, holdMs: 280, fadeMs: 700, backMs: 150 \} as const;/);
     const f = fnOf("breathStart");
-    expect(f).toMatch(/tint\.style\.background = STAGE_COLOURS\[stageAt\(frame\)\]\.rim;/);
+    expect(f).toMatch(/tint\.style\.background = rimColours\(frame\)\.rim;/);
+    /* Agent card v2.1 — re-pointed: the colour is `rimColours`, which is the stage's `rim` unless the frame names its own */
+    expect(fnOf("rimColours")).toMatch(/if \(rim && rimHi\) return \{ rim, rimHi \};\s*return STAGE_COLOURS\[stageAt\(frame\)\];/);
     expect(f).toMatch(/const rim = ring\.animate\(sk, t\);/);
     expect(f).toMatch(/tint\.animate\(\[\{ opacity: 0 \}, \{ opacity: RIM163\.peak \}, \{ opacity: 0 \}\], t\)/);
     expect(f).toMatch(/glow\.id = "qc163-tint";/);
@@ -272,7 +279,9 @@ describe("Query card v163 — the press, the landing light, the pop and the sink
   const fnOf = (name: string) => code(MOTION).match(new RegExp(`(?:export )?function ${name}\\([\\s\\S]*?\\n}`))?.[0] ?? "";
   it("at the press the tint rises to 0.72 over 280ms, ease-out, and holds (fill forwards), in the stage of the press", () => {
     const f = fnOf("tintHold");
-    expect(f).toMatch(/tint\.style\.background = STAGE_COLOURS\[stageAt\(frame\)\]\.rim;/);
+    expect(f).toMatch(/tint\.style\.background = rimColours\(frame\)\.rim;/);
+    /* Agent card v2.1 — re-pointed: the colour is `rimColours`, which is the stage's `rim` unless the frame names its own */
+    expect(fnOf("rimColours")).toMatch(/if \(rim && rimHi\) return \{ rim, rimHi \};\s*return STAGE_COLOURS\[stageAt\(frame\)\];/);
     expect(f).toMatch(/tint\.animate\(\[\{ opacity: from \}, \{ opacity: RIM163\.peak \}\], \{ duration: RIM163\.holdMs, easing: "ease-out", fill: "forwards" \}\)/);
     expect(f).toMatch(/h\.id = "qc163-tint-hold";/);
   });
@@ -286,7 +295,7 @@ describe("Query card v163 — the press, the landing light, the pop and the sink
     expect(MOTION).toMatch(/LIGHT = \{ ms: 1300, ease: "cubic-bezier\(0\.4, 0\.05, 0\.25, 1\)", from: -40, to: 320, inAt: 0\.14, outAt: 0\.76 \}/);
     const f = fnOf("landRim");
     expect(f).toMatch(/tint\.animate\(\[\{ opacity: RIM163\.peak \}, \{ opacity: 0 \}\], \{ duration: RIM163\.fadeMs, easing: "ease-out", fill: "forwards" \}\)/);
-    expect(f).toMatch(/const c = STAGE_COLOURS\[stageAt\(frame\)\];/);
+    expect(f).toMatch(/const c = rimColours\(frame\);/);
     expect(f).toMatch(/conic-gradient\(from 0deg, transparent 0 58%, \$\{c\.rim\} 84%, \$\{c\.rimHi\} 93%, transparent 100%\)/);
     expect(f).toMatch(/const back = kind === "undo";/);
     expect(f).toMatch(/light\.style\.scale = back \? "-1 1" : "1 1";/);
@@ -299,7 +308,7 @@ describe("Query card v163 — the press, the landing light, the pop and the sink
     const f = code(MOTION).match(/export function bump[\s\S]*?\n}/)?.[0] ?? "";
     expect(f.indexOf("for (const x of landings.get(frame) ?? []) x.cancel();")).toBeGreaterThan(-1);
     expect(f.indexOf("for (const x of landings.get(frame) ?? []) x.cancel();")).toBeLessThan(f.indexOf("frame.animate("));
-    expect(f).toMatch(/landings\.set\(frame, landRim\(frame, owner, kind\)\);/);
+    expect(f).toMatch(/landings\.set\(frame, landRim\(frame, owner, kind, o\.light !== false\)\);/);
   });
   it("the new motion changes only opacity, rotate and scale; no var(), no color-mix(), no transform", () => {
     for (const n of ["tintHold", "tintBack", "landRim"]) {
