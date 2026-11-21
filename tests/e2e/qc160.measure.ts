@@ -90,7 +90,10 @@ async function startTrace(page: Page) {
       const card = document.querySelector<HTMLElement>(cardSel);
       const frame = card?.closest<HTMLElement>(".spanel") ?? null;
       const band = card?.querySelector<HTMLElement>("[data-qc152='band']") ?? null;
-      const pill = card?.querySelector<HTMLElement>("[data-qc152='pill']") ?? null;
+      /* Query card v164 — the label is gone; its place is the strip's status (the track and the name), and its mark's
+         pop is on the track's current mark */
+      const pill = card?.querySelector<HTMLElement>("[data-qc164='status']") ?? null;
+      const curMark = card?.querySelector<HTMLElement>("[data-qc164='track'] [data-qc153='node'][data-state='cur'] > span") ?? null;
       const foot = card?.querySelector<HTMLElement>("[data-qc152='reply']") ?? null;
       const msgs = card ? [...card.querySelectorAll<HTMLElement>("[data-qc152='thread'] > .qc152-m")] : [];
       const last = msgs[msgs.length - 1] ?? null;
@@ -106,7 +109,7 @@ async function startTrace(page: Page) {
         t: Math.round(performance.now() - t0), card: idOf(card), frame: idOf(frame),
         frameScale: cs(frame)?.scale, frameRotate: cs(frame)?.rotate, frameTranslate: cs(frame)?.translate, frameTransform: cs(frame)?.transform,
         bandBg: cs(band)?.backgroundColor, bandImg: cs(band)?.backgroundImage?.slice(0, 60), bandWord: band?.querySelector("[data-qc152='band-word']")?.textContent,
-        pill: pill?.textContent, pillBg: cs(pill)?.backgroundColor,
+        pill: pill?.getAttribute("aria-label") ?? undefined, markPop: !!curMark?.getAnimations().some((a) => a.id === "qc160-mark"),
         foot: foot?.textContent?.slice(0, 80), footH: foot?.offsetHeight, footOp: cs(foot)?.opacity,
         msgs: msgs.length, lastId: idOf(last), lastCls: last?.className, lastTitle: last?.querySelector("[data-qc152='msg-title']")?.textContent, lastText: last?.textContent?.slice(0, 60),
         lastBg: cs(bx)?.backgroundColor, lastBorder: cs(bx)?.borderTopStyle, lastOutline: `${cs(bx)?.outlineStyle} ${cs(bx)?.outlineColor}`, lastOp: cs(last)?.opacity, lastH: last?.offsetHeight,
@@ -378,8 +381,9 @@ if (PHASE !== "before") {
     L6.check("at 200ms the strip's background-color is strictly between the old and new", between, `${tr[li - 1]?.bandBg} | ${at200?.bandBg} @${(at200?.t ?? 0) - t0}ms | ${tr[tr.length - 1]?.bandBg}`);
     const at500 = after.find((f) => f.t - t0 >= 500)!;
     L6.check("by 500ms it equals the new colour", nums(at500?.bandBg).join() === to.join(), `${at500?.bandBg}`);
-    const pillMid = after.find((f) => f.t - t0 >= 190)?.pillBg, pillA = tr[li - 1]?.pillBg, pillB = tr[tr.length - 1]?.pillBg;
-    L6.check("the label's colour eases too (between at 200ms, where it changes)", pillA === pillB || (pillMid !== pillA && pillMid !== pillB), `${pillA} | ${pillMid} | ${pillB}`);
+    /* v164 — re-pointed: the label (and its colour ease) is gone; the mark it popped is now the track's current mark */
+    L6.check("the track's current mark pops (qc160-mark) as the stage moves", after.some((f) => f.markPop), `${after.filter((f) => f.markPop).length} frames`);
+    L6.check("the strip's status moved on with it", tr[li - 1]?.pill !== tr[tr.length - 1]?.pill, `${tr[li - 1]?.pill} → ${tr[tr.length - 1]?.pill}`);
     /* the footer: its new contents fade and rise in (from 120ms in, over 320ms) */
     const fo = after.filter((f) => f.t - t0 > 60 && f.t - t0 < 440).map((f) => Number(f.footOp));
     L6.check("the footer's new contents fade in (opacity strictly between 0 and 1 during the run)", fo.some((o) => o > 0.02 && o < 0.98), JSON.stringify(fo.slice(0, 10)));
@@ -572,7 +576,8 @@ const stopAll = (page: Page): Promise<string[][]> => page.evaluate(() => { const
 const words160 = (page: Page) => page.evaluate((s) => {
   const c = document.querySelector<HTMLElement>(s)!;
   const t = (q: string) => (c.querySelector<HTMLElement>(q)?.innerText ?? "").replace(/\s+/g, " ").trim();
-  return { band: t("[data-qc152='band-word']"), pill: t("[data-qc152='pill']"), foot: t("[data-qc152='reply']"),
+  /* v164 — "pill" is the strip's status now (its accessible name: the status and the step) */
+  return { band: t("[data-qc152='band-word']"), pill: c.querySelector<HTMLElement>("[data-qc164='status']")?.getAttribute("aria-label") ?? "", foot: t("[data-qc152='reply']"),
     steps: [...c.querySelectorAll<HTMLElement>("[data-qc152='thread'] > .qc152-m [data-qc152='msg-title']")].map((e) => e.innerText.trim()) };
 }, CARD);
 /** every box in the card at rest (layout boxes: the card leans), and its words */
