@@ -38,4 +38,10 @@
     content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--tw-navy);
   }
 
+
+  /* ── v58 · 3 · the figure on one line: the number in typewriter, then its words in serif ── */
+  .tws .tws-du { display: flex; align-items: baseline; justify-content: flex-end; gap: 5px; }
+  .tws .tws-du b { font-size: 15px; }
+  .tws .tws-du small { font-size: 13.5px; }
+
 }
