@@ -1,0 +1,1890 @@
+{
+ "rows": [
+  {
+   "lock": "P",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-partial-cor-move-a"
+  },
+  {
+   "lock": "R1",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs number right 500.2 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs the lead's content edge 500.2"
+  },
+  {
+   "lock": "W1",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "12 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "Send your partial. | 2 months waiting | Partial asked for · 7 Sep"
+  },
+  {
+   "lock": "W4",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "\"Send your partial.\" (18 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "[{\"t\":\"Log it as sent\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "Log it as sent → sent \"The request\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "partial 1512x982",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-full-rj-dupe"
+  },
+  {
+   "lock": "R1",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs number right 500.2 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs the lead's content edge 500.2"
+  },
+  {
+   "lock": "W1",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "12 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "Send your full. | 2 months waiting | Full asked for · 9 Sep"
+  },
+  {
+   "lock": "W4",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Imogen Vale\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "\"Send your full.\" (15 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "[{\"t\":\"Log it as sent\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "Log it as sent → sent \"The request\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "full 1512x982",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-rr-seed-query-11"
+  },
+  {
+   "lock": "R1",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs number right 500.2 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs the lead's content edge 500.2"
+  },
+  {
+   "lock": "W1",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "12 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "Send your revision. | 4 months waiting | Revision asked for · 8 Jul"
+  },
+  {
+   "lock": "W4",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "\"Send your revision.\" (19 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "[{\"t\":\"Log it as sent\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "Log it as sent → sent \"The request\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "revision 1512x982",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-nudge-seed-cal-bang-q"
+  },
+  {
+   "lock": "R1",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs number right 500.2 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs the lead's content edge 500.2"
+  },
+  {
+   "lock": "W1",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "11 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "Send a nudge. | today  | Queried 19 Aug · reply expected by 9 Dec"
+  },
+  {
+   "lock": "W4",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "\"Send a nudge.\" (13 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "[{\"t\":\"Log the nudge\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "Log the nudge → nudge \"The nudge\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "nudge 1512x982",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-no-res-close-cor-move-b"
+  },
+  {
+   "lock": "R1",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs number right 500.2 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs the lead's content edge 500.2"
+  },
+  {
+   "lock": "W1",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "13 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "Close it or nudge? | 3 months quiet | Gone quiet · queried 3 Aug"
+  },
+  {
+   "lock": "W4",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "\"Close it or nudge?\" (18 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "[{\"t\":\"Close it\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"},{\"t\":\"Log a nudge\",\"filled\":false,\"bg\":\"rgba(0, 0, 0, 0)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "Close it → close \"Where it stands\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B2",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "Log a nudge → nudge \"The nudge\" in panel true"
+  },
+  {
+   "lock": "B2w",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "quiet 1512x982",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-offer-seed-query-12"
+  },
+  {
+   "lock": "R1",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs number right 500.2 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs the lead's content edge 500.2"
+  },
+  {
+   "lock": "W1",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "12 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "Answer the offer. | 3 months ago | Offer made · 19 Aug"
+  },
+  {
+   "lock": "W4",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "[{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"},{\"text\":\"Send your full to Imogen Vale\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "\"Answer the offer.\" (17 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "[{\"t\":\"Record your answer\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "Record your answer → offer \"Your decision\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "offer 1512x982",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-offer-tell-all-seed-query-12"
+  },
+  {
+   "lock": "W1",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "10 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "Tell the others. | 38 still reading | "
+  },
+  {
+   "lock": "W4",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "3 of 30 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "\"Tell the others.\" (16 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "[{\"t\":\"See who to tell\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "B1",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "See who to tell → offer \"The others\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "S",
+   "where": "tell 1512x982",
+   "ok": true,
+   "detail": "6 queries marked with seed-query-12's offer for this case, restored after"
+  },
+  {
+   "lock": "P",
+   "where": "other 1512x982",
+   "ok": true,
+   "detail": "leads on seed-ms-1: hk:reply"
+  },
+  {
+   "lock": "W1",
+   "where": "other 1512x982",
+   "ok": true,
+   "detail": "9 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "other 1512x982",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "other 1512x982",
+   "ok": true,
+   "detail": "Add typical reply times for 20 agents. |   | "
+  },
+  {
+   "lock": "W4",
+   "where": "other 1512x982",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "other 1512x982",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-Fo",
+   "where": "other 1512x982",
+   "ok": true,
+   "detail": "\"Add typical reply times for 20 agents.\" (38 chars) runs 85px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "other 1512x982",
+   "ok": true,
+   "detail": "[{\"t\":\"Fill in\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "P",
+   "where": "ready 1512x982",
+   "ok": true,
+   "detail": "leads on seed-ms-1: ready:thin-ag-chase"
+  },
+  {
+   "lock": "W1",
+   "where": "ready 1512x982",
+   "ok": true,
+   "detail": "8 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "ready 1512x982",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "ready 1512x982",
+   "ok": true,
+   "detail": "Query Tobias Quint. |   | "
+  },
+  {
+   "lock": "W4",
+   "where": "ready 1512x982",
+   "ok": true,
+   "detail": "[{\"text\":\"Query Rosalind Vale\",\"wait\":null},{\"text\":\"Query Imogen Farr\",\"wait\":null}]"
+  },
+  {
+   "lock": "W5",
+   "where": "ready 1512x982",
+   "ok": true,
+   "detail": "3 of 6 · See all"
+  },
+  {
+   "lock": "NU11-Fo",
+   "where": "ready 1512x982",
+   "ok": true,
+   "detail": "\"Query Tobias Quint.\" (19 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "ready 1512x982",
+   "ok": true,
+   "detail": "[{\"t\":\"Log a query\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "ready 1512x982",
+   "ok": true,
+   "detail": "height 198.5 → 198.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "P",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "leads on seed-ms-1: coming:seed-cal-soon-q"
+  },
+  {
+   "lock": "R1",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "last stop right 500.2 vs the lead's content edge 500.2"
+  },
+  {
+   "lock": "W1",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "8 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "Reply window ends for Hester Blaine. |   | Reply expected by 1 Dec"
+  },
+  {
+   "lock": "W4",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "[{\"text\":\"Reply window ends for Alasdair Crewe\",\"wait\":null},{\"text\":\"Response expected from Wren Calloway\",\"wait\":null}]"
+  },
+  {
+   "lock": "W5",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "3 of 3 · See all"
+  },
+  {
+   "lock": "NU11-Fo",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "\"Reply window ends for Hester Blaine.\" (36 chars) runs 76px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "[{\"t\":\"Record a response\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "coming 1512x982",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "P",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-partial-cor-move-a"
+  },
+  {
+   "lock": "R1",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs number right 424.8 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs the lead's content edge 424.8"
+  },
+  {
+   "lock": "W1",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "12 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "Send your partial. | 2 months waiting | Partial asked for · 7 Sep"
+  },
+  {
+   "lock": "W4",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "\"Send your partial.\" (18 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "[{\"t\":\"Log it as sent\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "Log it as sent → sent \"The request\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "partial 1280x720",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-full-rj-dupe"
+  },
+  {
+   "lock": "R1",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs number right 424.8 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs the lead's content edge 424.8"
+  },
+  {
+   "lock": "W1",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "12 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "Send your full. | 2 months waiting | Full asked for · 9 Sep"
+  },
+  {
+   "lock": "W4",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Imogen Vale\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "\"Send your full.\" (15 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "[{\"t\":\"Log it as sent\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "Log it as sent → sent \"The request\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "full 1280x720",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-rr-seed-query-11"
+  },
+  {
+   "lock": "R1",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs number right 424.8 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs the lead's content edge 424.8"
+  },
+  {
+   "lock": "W1",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "12 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "Send your revision. | 4 months waiting | Revision asked for · 8 Jul"
+  },
+  {
+   "lock": "W4",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "\"Send your revision.\" (19 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "[{\"t\":\"Log it as sent\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "Log it as sent → sent \"The request\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "revision 1280x720",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-nudge-seed-cal-bang-q"
+  },
+  {
+   "lock": "R1",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs number right 424.8 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs the lead's content edge 424.8"
+  },
+  {
+   "lock": "W1",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "11 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "Send a nudge. | today  | Queried 19 Aug · reply expected by 9 Dec"
+  },
+  {
+   "lock": "W4",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "\"Send a nudge.\" (13 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "[{\"t\":\"Log the nudge\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "Log the nudge → nudge \"The nudge\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "nudge 1280x720",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-no-res-close-cor-move-b"
+  },
+  {
+   "lock": "R1",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs number right 424.8 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs the lead's content edge 424.8"
+  },
+  {
+   "lock": "W1",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "13 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "Close it or nudge? | 3 months quiet | Gone quiet · queried 3 Aug"
+  },
+  {
+   "lock": "W4",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "\"Close it or nudge?\" (18 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "[{\"t\":\"Close it\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"},{\"t\":\"Log a nudge\",\"filled\":false,\"bg\":\"rgba(0, 0, 0, 0)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "Close it → close \"Where it stands\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B2",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "Log a nudge → nudge \"The nudge\" in panel true"
+  },
+  {
+   "lock": "B2w",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "quiet 1280x720",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-offer-seed-query-12"
+  },
+  {
+   "lock": "R1",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A2",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs number right 424.8 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs the lead's content edge 424.8"
+  },
+  {
+   "lock": "W1",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "12 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "Answer the offer. | 3 months ago | Offer made · 19 Aug"
+  },
+  {
+   "lock": "W4",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "[{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"},{\"text\":\"Send your full to Imogen Vale\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "\"Answer the offer.\" (17 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "[{\"t\":\"Record your answer\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "B1",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "Record your answer → offer \"Your decision\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "offer 1280x720",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "P",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "leads on seed-ms-1: task-offer-tell-all-seed-query-12"
+  },
+  {
+   "lock": "W1",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "10 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "Tell the others. | 38 still reading | "
+  },
+  {
+   "lock": "W4",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "3 of 30 · See all"
+  },
+  {
+   "lock": "NU11-F",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "\"Tell the others.\" (16 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "[{\"t\":\"See who to tell\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "B1",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "See who to tell → offer \"The others\" in panel true"
+  },
+  {
+   "lock": "B1w",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "no writes on close"
+  },
+  {
+   "lock": "B9",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "activity log: rungs 117 → 117, feed 0 → 0"
+  },
+  {
+   "lock": "S",
+   "where": "tell 1280x720",
+   "ok": true,
+   "detail": "6 queries marked with seed-query-12's offer for this case, restored after"
+  },
+  {
+   "lock": "P",
+   "where": "other 1280x720",
+   "ok": true,
+   "detail": "leads on seed-ms-1: hk:reply"
+  },
+  {
+   "lock": "W1",
+   "where": "other 1280x720",
+   "ok": true,
+   "detail": "9 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "other 1280x720",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "other 1280x720",
+   "ok": true,
+   "detail": "Add typical reply times for 20 agents. |   | "
+  },
+  {
+   "lock": "W4",
+   "where": "other 1280x720",
+   "ok": true,
+   "detail": "[{\"text\":\"Answer Noah Bright’s offer\",\"wait\":\"3 months\"},{\"text\":\"Send your full to Tobias Hark\",\"wait\":\"2 months\"}]"
+  },
+  {
+   "lock": "W5",
+   "where": "other 1280x720",
+   "ok": true,
+   "detail": "3 of 29 · See all"
+  },
+  {
+   "lock": "NU11-Fo",
+   "where": "other 1280x720",
+   "ok": true,
+   "detail": "\"Add typical reply times for 20 agents.\" (38 chars) runs 160px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "other 1280x720",
+   "ok": true,
+   "detail": "[{\"t\":\"Fill in\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "P",
+   "where": "ready 1280x720",
+   "ok": true,
+   "detail": "leads on seed-ms-1: ready:thin-ag-chase"
+  },
+  {
+   "lock": "W1",
+   "where": "ready 1280x720",
+   "ok": true,
+   "detail": "8 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "ready 1280x720",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "ready 1280x720",
+   "ok": true,
+   "detail": "Query Tobias Quint. |   | "
+  },
+  {
+   "lock": "W4",
+   "where": "ready 1280x720",
+   "ok": true,
+   "detail": "[{\"text\":\"Query Rosalind Vale\",\"wait\":null},{\"text\":\"Query Imogen Farr\",\"wait\":null}]"
+  },
+  {
+   "lock": "W5",
+   "where": "ready 1280x720",
+   "ok": true,
+   "detail": "3 of 6 · See all"
+  },
+  {
+   "lock": "NU11-Fo",
+   "where": "ready 1280x720",
+   "ok": true,
+   "detail": "\"Query Tobias Quint.\" (19 chars) runs 0px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "ready 1280x720",
+   "ok": true,
+   "detail": "[{\"t\":\"Log a query\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "ready 1280x720",
+   "ok": true,
+   "detail": "height 198.5 → 198.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "P",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "leads on seed-ms-1: coming:seed-cal-soon-q"
+  },
+  {
+   "lock": "R1",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "4 stops, 1 ringed"
+  },
+  {
+   "lock": "R2",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "16 < 76 < 121.5 < 159.5 < 192.5"
+  },
+  {
+   "lock": "A1",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "first stop centre 175.0 vs seal centre 175.0 (0.0px)"
+  },
+  {
+   "lock": "A3",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "last stop right 424.8 vs the lead's content edge 424.8"
+  },
+  {
+   "lock": "W1",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "8 lines, one line each, inside the card"
+  },
+  {
+   "lock": "W2",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "horizontal overflow 0px"
+  },
+  {
+   "lock": "W3",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "Reply window ends for Hester Blaine. |   | Reply expected by 1 Dec"
+  },
+  {
+   "lock": "W4",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "[{\"text\":\"Reply window ends for Alasdair Crewe\",\"wait\":null},{\"text\":\"Response expected from Wren Calloway\",\"wait\":null}]"
+  },
+  {
+   "lock": "W5",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "3 of 3 · See all"
+  },
+  {
+   "lock": "NU11-Fo",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "\"Reply window ends for Hester Blaine.\" (36 chars) runs 151px past its box"
+  },
+  {
+   "lock": "W6",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "[{\"t\":\"Record a response\",\"filled\":true,\"bg\":\"rgb(42, 58, 82)\"}]"
+  },
+  {
+   "lock": "E1",
+   "where": "coming 1280x720",
+   "ok": true,
+   "detail": "height 248.5 → 248.5 with a 40-character name and agency"
+  },
+  {
+   "lock": "NU11-D1",
+   "where": "cv25 1512",
+   "ok": false,
+   "detail": "Jonathan Marsh: \"Full asked for · 24 Sep\""
+  },
+  {
+   "lock": "NU11-D2",
+   "where": "cv25 1512",
+   "ok": false,
+   "detail": "number \"58\" caption \"days waiting\""
+  },
+  {
+   "lock": "R3",
+   "where": "1280",
+   "ok": true,
+   "detail": "7 kinds; {\"partial\":[16,76,121.5,159.5,192.5],\"full\":[16,76,121.5,159.5,192.5],\"revision\":[16,76,121.5,159.5,192.5],\"nudge\":[16,76,121.5,159.5,192.5],\"quiet\":[16,76,121.5,159.5,192.5],\"offer\":[16,76,121.5,159.5,192.5],\"coming\":[16,76,121.5,159.5,192.5]}"
+  },
+  {
+   "lock": "R3",
+   "where": "1512",
+   "ok": true,
+   "detail": "7 kinds; {\"partial\":[16,76,121.5,159.5,192.5],\"full\":[16,76,121.5,159.5,192.5],\"revision\":[16,76,121.5,159.5,192.5],\"nudge\":[16,76,121.5,159.5,192.5],\"quiet\":[16,76,121.5,159.5,192.5],\"offer\":[16,76,121.5,159.5,192.5],\"coming\":[16,76,121.5,159.5,192.5]}"
+  }
+ ],
+ "offsets": {
+  "1280": {
+   "partial": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "full": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "revision": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "nudge": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "quiet": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "offer": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "tell": [],
+   "other": [],
+   "ready": [],
+   "coming": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ]
+  },
+  "1512": {
+   "partial": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "full": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "revision": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "nudge": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "quiet": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "offer": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ],
+   "tell": [],
+   "other": [],
+   "ready": [],
+   "coming": [
+    16,
+    76,
+    121.5,
+    159.5,
+    192.5
+   ]
+  }
+ }
+}
