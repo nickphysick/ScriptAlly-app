@@ -20,7 +20,7 @@ import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../../lib/db";
 import type { BoardCard } from "../../../lib/todoBoard";
 import {
-  NO_WS_FILTERS, WS_GROUPINGS, WS_GROUPS, breakdownOf, dueChip, mentorLine, passes, milestoneFor, trayFigure, wsSections,
+  NO_WS_FILTERS, WS_GROUPINGS, WS_GROUPS, breakdownOf, deskChip, mentorLine, passes, milestoneFor, stageVars, trayFigure, wsSections, wsStage,
   type DoneRow, type WsFilters, type WsGrouping, type WsTask,
 } from "../../../lib/todoWs";
 import { RULE_OFF_WORDS, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
@@ -57,6 +57,7 @@ import { openingView, type BatchView } from "../../../lib/todoBatch54";
 import { devBatchCap } from "../../../lib/todoBatchReviewAid";
 import "./todoWs55.css";
 import "./todoWs57.css";
+import "./todoWs58.css";
 import { WsTrayHead55, SVG_EXPAND } from "./WsTrayHead55";
 import { filterLine, stripCounts } from "../../../lib/todoTrayHead55";
 
@@ -455,12 +456,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     const fig = trayFigure(t, now);
     const on = !!sel && sel.key === t.key && !adding;
     const house = t.group === "house";
+    /* v58: the query's stage, as custom properties the glyph's disc reads (none for an own task or housekeeping) */
+    const stage = wsStage(t);
     /* v53 (D4): every row leads with its glyph — the query's status (StatusDot), a nudge's "!" ring, Gone quiet's dotted
        ring, a form for housekeeping, a real tick for the writer's own task */
     const glyph = t.kind === "nudge" ? NUDGE_MARK : t.kind === "quiet" ? QUIET_MARK
       : t.query ? <StatusDot status={t.query.status as QueryStatus} overrideSize={20} decorative /> : null;
     return (
       <div key={t.key} className="tws-ti" role="button" tabIndex={0} data-tws-row={t.key} data-kind={t.kind} aria-current={on ? "true" : undefined}
+        data-tws58-stage={stage ?? undefined} style={stageVars(stage) as React.CSSProperties | undefined}
         data-ticked={held?.task.key === t.key ? "" : undefined} data-leaving={held?.task.key === t.key && held.phase === "leave" ? "" : undefined}
         onClick={() => go(t.key)} onKeyDown={(e) => { if (e.key === "Enter") go(t.key); }} title={t.title}>
         {t.kind === "own" ? <span className="tws-av" data-k="own" data-tws="glyph" aria-hidden="true">{TICK}</span>
@@ -492,7 +496,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         <React.Fragment key={s.id}>
           <div className="tws-gbw" data-tws-group={s.id}>
             <button type="button" className="tws-gb" data-band={s.band} aria-expanded={!isShut} onClick={() => setShut((x) => toggleSet(x, s.id))}>
-              <b>{s.name}</b><em>{s.tasks.length}</em><span className="tws-cv" aria-hidden="true">⌄</span>
+              <b>{s.name}</b><em>{s.tasks.length}</em><span className="tws58-rule" data-tws58="rule" aria-hidden="true" /><span className="tws-cv" aria-hidden="true">⌄</span>
             </button>
             {/* v53 (D4): Housekeeping's Quick fill opens the group on its first task */}
             {s.id === "house" && s.tasks.length ? (
@@ -594,7 +598,9 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       );
     }
     const t = deskT ?? sel;
-    const chip = dueChip(t);
+    const chip = deskChip(t, now);
+    /* v58 (phase 7): the hawk's bubble wears the task's query stage; a task with no query keeps the blush bubble */
+    const deskStage = wsStage(t);
     const seqPos = seq.findIndex((x) => x.key === t.key);
     const band = t.group === "wait" ? "wait" : t.group;
     const meta = t.kind === "own" ? "Your task" : [t.agentName, t.agency && t.agency !== t.agentName ? t.agency : ""].filter(Boolean).join(" · ");
@@ -625,7 +631,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
          logs (D7). The hawk sits above the rail, and steps aside on the check step. */
       main = (
         <DeskTiles.Provider value={true}>
-          {onCheck ? null : <div className="tws-mnote" data-tws="hawk"><img src={MENTOR} alt="" /><p>{mentorLine(t, facts)}</p></div>}
+          {onCheck ? null : <div className="tws-mnote" data-tws="hawk" data-tws58-stage={deskStage ?? undefined} style={stageVars(deskStage) as React.CSSProperties | undefined}><img src={MENTOR} alt="" /><p>{mentorLine(t, facts)}</p></div>}
           <ol className="tws-rail" data-tws="rail">
             {qs.map((q, i) => i < cur ? (
               <li key={q.key} className="tws-st" data-st="done" data-tws-step={q.key}>

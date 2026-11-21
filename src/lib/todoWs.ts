@@ -21,6 +21,7 @@ import type { AgentDataNeed } from "./agentDataQuality";
 import { isTaskType, type TaskType } from "./todoActions";
 import { londonDayEnd, londonWeekStart, type ClearedAct } from "./todoCleared";
 import type { SetAsideItem } from "./taskSettings";
+import { STAGE_COLOURS, STAGE_INK, bandBackground, stageOf, type Stage } from "./stageColours";
 
 const DAY = 86400000;
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -350,10 +351,10 @@ export function daysWaiting(t: WsTask, nowMs: number): number | null {
   return t.kind === "own" ? null : daysSinceAnchor(t.item, nowMs);
 }
 const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
-const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day late", "days late"), late: true }
+const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day past expected", "days past expected"), late: true }
   : d === 0 ? { n: "Today", words: "", late: true } : { n: String(d), words: plural(d, "day left", "days left"), late: false };
 /**
- * The figure at a row's right: a request "{n} days waiting" (since the agent asked), a nudge "{n} days late", Gone quiet
+ * The figure at a row's right: a request "{n} days waiting" (since the agent asked), a nudge "{n} days past expected", Gone quiet
  * "{n} days quiet", an own task its due date. ⚠️ NEVER "No date": a task with no number to give shows none.
  * Housekeeping shows its Quick fill label instead (null here).
  */
@@ -389,7 +390,29 @@ export function milestoneFor(all: readonly WsTask[], t: WsTask): "list" | "group
   return rest.some((x) => x.group === t.group) ? null : "group";
 }
 
-/** the desk header's due chip: [figure, words], or null */
+/**
+ * To-do list v58 — THE STAGE A TASK WEARS: its query's stage (the slate ladder, lib/stageColours), or null. An own task
+ * and a housekeeping row (a gap to fill, a batch) have none and keep their own drawing, even where a batch names a query.
+ */
+export function wsStage(t: WsTask): Stage | null {
+  if (t.kind === "own" || t.group === "house" || !t.query) return null;
+  return stageOf(t.query.status);
+}
+/** the stage as the inline custom properties todoWs58.css reads (band, edge, ink); undefined where there is no stage */
+export function stageVars(s: Stage | null): Record<"--tws58-band" | "--tws58-edge" | "--tws58-ink", string> | undefined {
+  return s ? { "--tws58-band": bandBackground(s), "--tws58-edge": STAGE_COLOURS[s].edge, "--tws58-ink": STAGE_INK } : undefined;
+}
+
+/**
+ * To-do list v58 (5.1) — THE DESK'S CHIP SAYS WHAT THE ROW SAYS: the same number and words as the task's tray row, read
+ * from `trayFigure`; null (no chip) where the row shows no figure. (dueChip below is the phone's, unchanged.)
+ */
+export function deskChip(t: WsTask, nowMs: number): { b: string; s: string; late: boolean } | null {
+  const f = trayFigure(t, nowMs);
+  return f ? { b: f.n, s: f.words, late: f.late } : null;
+}
+
+/** the desk header's due chip: [figure, words], or null (the phone's task screen reads it; the desk reads deskChip) */
 export function dueChip(t: WsTask): { b: string; s: string; late: boolean } | null {
   if (t.kind === "fix") return null;
   if (t.kind === "quiet") return t.quietDays != null ? { b: String(t.quietDays), s: "days", late: false } : null;
@@ -465,7 +488,7 @@ export const andList = (a: readonly string[]): string => (a.length < 2 ? (a[0] ?
 
 /* ── To-do list v52 Part B — the tray's Start here card, and the collapsed strip ─────────────────── */
 
-/** Start here's italic reason: "Due tomorrow", "8 days late", or "Nothing urgent" (the priority task's own urgency) */
+/** Start here's italic reason: "Due tomorrow", "8 days past expected", or "Nothing urgent" (the priority task's own urgency) */
 export function startReason(p: { task: WsTask | null; urgent: boolean }): string {
   const d = p.task?.dueDays;
   if (!p.task || !p.urgent || d == null) return "Nothing urgent";
@@ -482,7 +505,7 @@ export interface StripWords { name: string; what: string; when: string; hot: boo
 
 /**
  * A task in the collapsed strip: who (the agent's first name, or an own task's first two words), what it is, and when
- * ("8d late", "Today", "Tmrw", "7d", "16 wks"; nothing when undated). `hot` is terracotta: late, today or tomorrow.
+ * ("8d past", "Today", "Tmrw", "7d", "16 wks"; nothing when undated). `hot` is terracotta: late, today or tomorrow.
  */
 export function stripWords(t: WsTask): StripWords {
   const name = t.kind === "own" ? (t.userTask?.text ?? t.title).trim().split(/\s+/).slice(0, 2).join(" ") : t.first;
@@ -502,7 +525,7 @@ export function stripWords(t: WsTask): StripWords {
   if (t.kind === "quiet") return { name, what, when: t.quietDays != null ? `${Math.round(t.quietDays / 7)} wks` : "", hot: false };
   if (t.kind === "fix" || t.kind === "batch" || t.dueDays == null) return { name, what, when: "", hot: false };
   const d = t.dueDays;
-  if (d < 0) return { name, what, when: `${-d}d late`, hot: true };
+  if (d < 0) return { name, what, when: `${-d}d past`, hot: true };
   if (d === 0) return { name, what, when: "Today", hot: true };
   if (d === 1) return { name, what, when: "Tmrw", hot: true };
   return { name, what, when: `${d}d`, hot: false };

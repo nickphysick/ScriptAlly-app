@@ -1,0 +1,67 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do list v58 — the tray and the hawk's bubble (design-refs/todo-list-v58/todo-list-v58.html, the state it opens in:
+ * all six switches on, open row "Navy edge", colour "Behind the glyph", hawk's bubble "Stage colour"). The ref's
+ * blocks "v58 · 1" to "v58 · 6", "v58.2" and "v58.3" ported with their `body[data-…]` switch prefixes dropped.
+ * Desktop only (768px up); imported last, after todoWs57.css, so it wins at equal specificity.
+ *
+ * ⚠️ NO STAGE HEX IS WRITTEN HERE. The row and the hawk's note carry the query's stage as inline custom properties
+ *    (`--tws58-band`, `--tws58-edge`, `--tws58-ink`, from `stageVars` in lib/todoWs.ts, which reads STAGE_COLOURS and
+ *    bandBackground); a task with no stage carries none and keeps its own drawing.
+ */
+@media (min-width: 768px) {
+  /* ── v58 · 1 · group headings: a ruled line (the Query Centre's), never a band. Supersedes v57 rule 5's chip. ── */
+  .tws .tws-gb, .tws .tws-gb[data-band] { height: 32px; padding: 0 2px; background: none; box-shadow: none; border-radius: 6px; color: var(--tw-ink); }
+  .tws .tws-gb em, .tws .tws-gb[data-band] em { min-width: 0; height: auto; padding: 0; background: none; box-shadow: none; color: var(--tw-mut2); }
+  .tws .tws-gb .tws58-rule { display: block; flex: 1; height: 1px; background: var(--tw-hair); margin: 0 4px 0 6px; }
+  .tws .tws-gb .tws-cv { margin-left: 0; margin-right: 4px; }
+  .tws .tws-gb:hover b { text-decoration: underline; text-decoration-color: var(--tw-hair); text-underline-offset: 4px; }
+
+
+  /* ── v58.2 · one 32px glyph column. A StatusDot row draws its glyph (ink, 19px) on a disc in its query's stage band
+        with a 1px inset edge in the stage's edge colour; every other kind keeps its own drawing at 32px. ── */
+  .tws .tws-ti { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 11px; }
+  .tws .tws-ti .tws-av { width: 32px; height: 32px; }
+  .tws .tws-ti[data-tws58-stage] .tws-av[data-k="glyph"] {
+    border-radius: 50%; background: var(--tws58-band); box-shadow: inset 0 0 0 1px var(--tws58-edge); color: var(--tw-ink);
+  }
+  .tws .tws-ti[data-tws58-stage] .tws-av[data-k="glyph"] svg { width: 19px; height: 19px; }
+
+
+  /* ── v58 · 2 · the open row: white, a hairline ring, a soft shadow and a 3px navy bar on its left edge ── */
+  .tws .tws-ti[aria-current="true"], .tws .tws-ti[aria-current="true"]:hover {
+    background: #fff; box-shadow: 0 0 0 1px var(--tw-hair), 0 6px 16px -10px rgba(28, 19, 15, 0.3); margin-top: 4px; margin-bottom: 6px;
+  }
+  .tws .tws-ti[aria-current="true"]::after {
+    content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--tw-navy);
+  }
+
+
+  /* ── v58 · 3 · the figure on one line: the number in typewriter, then its words in serif ── */
+  .tws .tws-du { display: flex; align-items: baseline; justify-content: flex-end; gap: 5px; }
+  .tws .tws-du b { font-size: 15px; }
+  .tws .tws-du small { font-size: 13.5px; }
+
+
+  /* ── v58 · 4 · nothing changes colour with how long a task has waited: the figure is one ink on every row, and the
+        desk's chip (which now says what the row says) is drawn one way on every task, as the ref's chip is ── */
+  .tws .tws-du[data-late] b { color: var(--tw-ink2); }
+  .tws .tws-du[data-late] small { color: var(--tw-mut2); }
+  .tws .tws-dchip, .tws .tws-dchip[data-late] { color: inherit; box-shadow: inset 0 0 0 1px var(--tw-terra); }
+
+
+  /* ── v58 · 6 · one row height, a hairline between rows, more air above a group ── */
+  .tws .tws-ti { min-height: 58px; padding: 8px 11px; margin: 0; border-radius: 10px; }
+  .tws .tws-ti:not([aria-current="true"]) + .tws-ti:not([aria-current="true"])::before {
+    content: ""; position: absolute; top: 0; left: 54px; right: 11px; border-top: 1px solid #ece6dc;
+  }
+  .tws .tws-ti:hover::before, .tws .tws-ti:hover + .tws-ti::before { display: none; }
+  .tws .tws-gbw { margin: 24px 0 6px; }
+  .tws .tws-gbw:first-child { margin-top: 10px; }
+
+
+  /* ── v58.3 · the hawk's bubble in its query's stage colour; a task with no query keeps the blush bubble ── */
+  .tws .tws-mnote[data-tws58-stage] p { background: var(--tws58-band); box-shadow: inset 0 0 0 1px var(--tws58-edge); color: var(--tws58-ink); }
+}
