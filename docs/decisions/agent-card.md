@@ -36,7 +36,7 @@ colour. Everything under "Agent card v2" below still holds except where this sec
   for one). Save all saves each changed section, one snackbar ("Saved {n} sections for {first}") whose Undo restores every
   snapshot in reverse, then carries on. With nothing unsaved, leaving just closes the open sections.
 - How's controls follow the boxes: Response time (with its offer), If they don't reply, How they take queries, Open to queries?
-- Based in: country control and city on one row. A city in `lib/knownCities` known to be in another country gets an offer
+- Based in: two lines at every card width (ruling 21 Nov) — line 1 the country control (pills, Elsewhere's search beside them, its list 280px running leftwards), line 2 the city, full width; locked by AC21-2g. A city in `lib/knownCities` known to be in another country gets an offer
   ("{City} is in {country}. Change the country?"), never a block; "Keep" is remembered per city and country while Contact
   details is open. Names two countries share are left out of the table.
 - What they ask for: the same list, each row a tick, its quantity controls on the row (`MaterialRows`). Every change is

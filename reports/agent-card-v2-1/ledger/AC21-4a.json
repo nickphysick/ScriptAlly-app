@@ -33,7 +33,7 @@
   "lock": "AC21-4a",
   "where": "an ordinary click on a control in the open section lands while it runs",
   "ok": true,
-  "detail": "76ms"
+  "detail": "32ms"
  },
  {
   "lock": "AC21-4a",

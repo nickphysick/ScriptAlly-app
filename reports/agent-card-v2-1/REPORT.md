@@ -120,8 +120,8 @@ Green after: AC2-1…5, 7, 8, 9; CO8, CO10–CO16, CO18; AA1–AA9, AA11–AA14;
 
 `shots/{1512,1280}-NN-*.png` beside the reference's screens 01–14 and 19 (30 files). Two differences from the reference:
 
-- **City field wraps (05, 06):** with "Elsewhere" kept, as the brief asks, four country pills and the city don't fit one row
-  in the 540px card. The city field wraps beneath the pills.
+- **Based in is two lines (05, 06, 20, 21):** ruled 21 Nov — see §10. The city sits beneath the country control at every
+  card width.
 - **Pills hidden while typing (10):** the "Suggested" pills hide while text is typed, as the built `GenreChips` does.
 
 ## 6. Recordings
@@ -154,6 +154,45 @@ whole-file run, and its tsc, functions tsc, build and Vitest match the baseline.
 - **Not built, by the brief:** History's "You changed…" lines (Agent history v1).
 - **A thing the undo removes folds away:** there is nothing to apply it to. Adding a note has no Undo on the agent card today
   (its snackbar has none), so no fold runs.
-- **Ruling wanted:** with Elsewhere kept, the Based in row wraps at 540px. Keep, or move Elsewhere's combobox below the city?
+- **Ruled 21 Nov:** keep the wrap, but make it deliberate — two lines at every width (§10).
 - **Worktrees:** there were six besides the primary when I started (rule: more than five → tell you). Mine is removed at the
   end; the scratch base and deploy checkouts too.
+
+## 10. Based in: two lines (21 Nov ruling)
+
+**What changed.** Based in is now a two-row grid at every card width, with no width-dependent wrapping:
+- **Line 1** is the country control: the pills, on one line. When Elsewhere is chosen, its search sits on the same line,
+  after the pills.
+- **Line 2** is the city, full width.
+- The city-and-country offer still eases in under line 2.
+
+The change is CSS only (`acv21.css`), plus a comment in `AgentCard262Edit.tsx`. `CountryPills` and `CountryCombobox`
+logic are untouched.
+
+**What it costs, measured.** Line 1 leaves Elsewhere's search only what the pills don't take: **112px in the 580 card,
+72px in the 540**. In the 540 card its placeholder reads "Typ…". Two scoped rules keep it usable:
+- the placeholder ends in an ellipsis;
+- the open list is 280px wide and runs from the row's right edge leftwards over the pills, inside the card (29px from its
+  right edge at both widths).
+
+See `shots/{1512,1280}-20-based-in-elsewhere.png` and `-21-…-list.png`.
+
+**The lock: AC21-2g, 17 readings.** At 580 and 540, with a near country and with Elsewhere, it reads:
+- the city's top is below the country control's bottom;
+- the city runs the full width;
+- the pills are one line.
+
+With Elsewhere it also reads that the search is on the pills' line, after them. Then the list's width and position, and
+the two card widths.
+
+**Red first:**
+
+| Mutation | Red | What went red |
+|---|---|---|
+| `oneline` — all of Based in on one row | 8/17 | City above the control's bottom and not full width, both widths, both states |
+| `georow` — the pre-ruling wrapping row | 8/17 | The Elsewhere-state readings at both widths: the city at 545 against the control's 586 (580 card), 494 against 535 (540 card); the search on its own line; the list off the card |
+
+Under `georow` the near-country readings stay green: the old row had already wrapped the city there.
+
+**Green.** A whole-file AC21 run passed 13/13 tests, 2g at 17/17. tsc and the build are clean.
+

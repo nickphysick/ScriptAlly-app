@@ -103,11 +103,18 @@
 .acv2 .ag-oth::placeholder { font-style: italic; color: rgba(28, 19, 15, 0.4); }
 .acv2 .ag-msub .aap-hint { flex-basis: 100%; }
 
-/* Based in: the country control and the city on one row, country first; the city offer eases in under it (240ms) */
-.acv2 .acv21-geo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
-.acv2 .acv21-geo > .aap-pills { flex: none; }
-.acv2 .acv21-geo > input[data-ae="city"] { flex: 1 1 180px; min-width: 160px; width: auto; }
-.acv2 .acv21-geo > .aap-cty { flex-basis: 100%; }
+/* Based in: two lines at every card width, never a width-dependent wrap (ruling, 21 Nov). Line 1 is the country
+   control: the pills, and Elsewhere's search on the same line when Elsewhere is chosen. Line 2 is the city, full width.
+   The city offer eases in under line 2 (240ms) */
+.acv2 .acv21-geo { display: grid; grid-template-columns: max-content minmax(0, 1fr); column-gap: 8px; row-gap: 10px; align-items: center; }
+.acv2 .acv21-geo > .aap-pills { grid-row: 1; grid-column: 1; flex-wrap: nowrap; }
+.acv2 .acv21-geo > .aap-cty { grid-row: 1; grid-column: 2; min-width: 0; padding: 0; background: none; box-shadow: none; }
+.acv2 .acv21-geo > input[data-ae="city"] { grid-row: 2; grid-column: 1 / -1; width: 100%; min-width: 0; }
+/* line 1 leaves Elsewhere's search what the pills don't take (112px in the 580 card, 72px in the 540): the placeholder
+   ends in an ellipsis, and the open list runs from the row's right edge leftwards over the pills, at a usable width */
+.acv2 .acv21-geo > .aap-cty .sa-cc-ph,
+.acv2 .acv21-geo > .aap-cty .sa-cc-val { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.acv2 .acv21-geo > .aap-cty .sa-cc-menu { left: auto; right: 0; width: 280px; max-width: none; }
 .acv2 .acv21-geooffer { margin-top: 10px; animation: acv21-offer-in 240ms ease-out; }
 .acv2 .acv21-geooffer .co-ask { margin-top: 8px; }
 @keyframes acv21-offer-in { from { opacity: 0; translate: 0 -4px; } to { opacity: 1; translate: 0 0; } }
