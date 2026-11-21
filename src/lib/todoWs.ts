@@ -14,8 +14,9 @@
  * ⚠️ NOTES TO SELF NEVER REACH THE TRAY. A user task without a due date is a note (`isNoteTask`); only dated tasks
  *    are tasks. The board already keeps notes off its columns; `wsTasks` checks again so a note can never arrive here.
  */
-import { QueryStatus, type Agent, type Query, type UserTask } from "../types";
+import type { Agent, Query, UserTask } from "../types";
 import type { TrayItem } from "./todoTray";
+import { sendKindOf } from "./queryActions/sendKind";
 import type { AgentDataNeed } from "./agentDataQuality";
 import { isTaskType, type TaskType } from "./todoActions";
 import { londonDayEnd, londonWeekStart, type ClearedAct } from "./todoCleared";
@@ -136,7 +137,7 @@ const TYPE_OF: Record<WsKind, WsType | null> = { send: "Send", rr: "Send", own: 
 
 function titleOf(kind: WsKind, i: TrayItem, first: string, need?: AgentDataNeed): string {
   switch (kind) {
-    case "send": return `Send ${first} your ${i.query?.status === QueryStatus.FULL_REQUESTED ? "full" : "partial"}`;
+    case "send": return `Send ${first} your ${i.query && sendKindOf(i.query) === "full" ? "full" : "partial"}`;
     case "rr": return `Send ${first} your revision`;
     case "offer": return `Answer ${poss(first)} offer`;
     case "nudge": return `Nudge ${first}`;
@@ -285,7 +286,7 @@ export function doingPhrase(t: WsTask): string {
   const who = t.agency && t.agentName && t.agentName !== t.agency ? `${t.first} at ${t.agency}` : t.first;
   switch (t.kind) {
     case "offer": return t.agency && t.agentName !== t.agency ? `Answering ${poss(t.first)} offer from ${t.agency}` : `Answering ${poss(t.first)} offer`;
-    case "send": return `Sending ${who} your ${t.query?.status === QueryStatus.FULL_REQUESTED ? "full" : "partial"}`;
+    case "send": return `Sending ${who} your ${t.query && sendKindOf(t.query) === "full" ? "full" : "partial"}`;
     case "rr": return `Sending ${who} your revision`;
     case "nudge": return `Nudging ${who}`;
     case "quiet": return `Deciding what to do about ${who}`;
@@ -414,7 +415,7 @@ export function mentorLine(t: WsTask, facts?: QuietFacts): string {
   switch (t.kind) {
     /* v53 (D12): the hawk only says what the app does — it works out dates and adds tasks; it never watches, checks or
        hears from an agent, because the writer logs everything */
-    case "send": return `${a} asked for your ${t.query?.status === QueryStatus.FULL_REQUESTED ? "full manuscript" : "partial"}. Once you’ve sent it, log it here and I’ll work out when ${poss(a)} reply is due.`;
+    case "send": return `${a} asked for your ${t.query && sendKindOf(t.query) === "full" ? "full manuscript" : "partial"}. Once you’ve sent it, log it here and I’ll work out when ${poss(a)} reply is due.`;
     case "rr": return `${a} asked you to revise and resubmit. Once you’ve sent the new version, log it here and I’ll work out when ${poss(a)} reply is due.`;
     case "offer": return `An offer! Take your time. Tell me what you said to ${a} and I’ll sort out what happens next.`;
     /* the agent's stated reply time is said only where it is set (Agent.responseTimeWeeks); otherwise nothing about it */
@@ -487,7 +488,7 @@ export function stripWords(t: WsTask): StripWords {
   const name = t.kind === "own" ? (t.userTask?.text ?? t.title).trim().split(/\s+/).slice(0, 2).join(" ") : t.first;
   let what: string;
   switch (t.kind) {
-    case "send": what = t.query?.status === QueryStatus.FULL_REQUESTED ? "Full" : "Partial"; break;
+    case "send": what = t.query && sendKindOf(t.query) === "full" ? "Full" : "Partial"; break;
     case "rr": what = "Revision"; break;
     case "offer": what = "Offer"; break;
     case "nudge": what = "Nudge"; break;

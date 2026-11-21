@@ -199,7 +199,7 @@ export function QueryDrawer() {
     }
     parkQueryDrawer({
       req: r, step: st.step, seen: st.seen, of: st.of, answers,
-      title: journeyTitle(r.mode, q?.status), doing: journeyDoing(r.mode, q?.status),
+      title: journeyTitle(r.mode, q), doing: journeyDoing(r.mode, q),
       name: (a?.name || a?.agency || "").trim(),
     });
     /* the instance is hidden by now; take the shrink off it so a resume slides in from the side */
@@ -313,7 +313,7 @@ export function QueryDrawer() {
     const q = clash.queryId ? db.queries.find((x) => x.id === clash.queryId) : undefined;
     const aid = agentIdOf(clash, db.queries);
     const a = aid ? db.agents.find((x) => x.id === aid) : undefined;
-    return { doing: journeyDoing(clash.mode, q?.status), name: (a?.name || a?.agency || "").trim() };
+    return { doing: journeyDoing(clash.mode, q), name: (a?.name || a?.agency || "").trim() };
   }, [clash, db.queries, db.agents]);
 
   const chip = parked && !req ? <ParkedChip key={parked.req.instance ?? "restored"} parked={parked} clash={clash} next={next} /> : null;
