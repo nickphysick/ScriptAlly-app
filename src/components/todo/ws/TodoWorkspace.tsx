@@ -599,6 +599,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     }
     const t = deskT ?? sel;
     const chip = deskChip(t, now);
+    /* v58 (phase 7): the hawk's bubble wears the task's query stage; a task with no query keeps the blush bubble */
+    const deskStage = wsStage(t);
     const seqPos = seq.findIndex((x) => x.key === t.key);
     const band = t.group === "wait" ? "wait" : t.group;
     const meta = t.kind === "own" ? "Your task" : [t.agentName, t.agency && t.agency !== t.agentName ? t.agency : ""].filter(Boolean).join(" · ");
@@ -629,7 +631,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
          logs (D7). The hawk sits above the rail, and steps aside on the check step. */
       main = (
         <DeskTiles.Provider value={true}>
-          {onCheck ? null : <div className="tws-mnote" data-tws="hawk"><img src={MENTOR} alt="" /><p>{mentorLine(t, facts)}</p></div>}
+          {onCheck ? null : <div className="tws-mnote" data-tws="hawk" data-tws58-stage={deskStage ?? undefined} style={stageVars(deskStage) as React.CSSProperties | undefined}><img src={MENTOR} alt="" /><p>{mentorLine(t, facts)}</p></div>}
           <ol className="tws-rail" data-tws="rail">
             {qs.map((q, i) => i < cur ? (
               <li key={q.key} className="tws-st" data-st="done" data-tws-step={q.key}>

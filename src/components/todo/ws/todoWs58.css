@@ -61,4 +61,7 @@
   .tws .tws-gbw { margin: 24px 0 6px; }
   .tws .tws-gbw:first-child { margin-top: 10px; }
 
+
+  /* ── v58.3 · the hawk's bubble in its query's stage colour; a task with no query keeps the blush bubble ── */
+  .tws .tws-mnote[data-tws58-stage] p { background: var(--tws58-band); box-shadow: inset 0 0 0 1px var(--tws58-edge); color: var(--tws58-ink); }
 }
