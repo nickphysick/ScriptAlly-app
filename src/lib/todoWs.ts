@@ -360,14 +360,39 @@ const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plu
  * To-do list v58.2 — THE FIGURE'S WORDS SAY WHAT IT COUNTS FROM (Nick, 21 Nov):
  *   · a nudge past the agent's reply window: "{n} days past expected"; past the writer's own date (a hold, a planned
  *     nudge or a booked check-in, `taskDue`'s "hold" / "reminder" / "check-in"): "{n} days since your reminder";
+ *   · an offer: "{n} days since it came in", from `offerDate`, else `lastStatusChange`; never "past expected" or "left";
  *   Not yet reached: "{n} days left"; the day itself: "Today". Which date wins is `taskDue`'s, unchanged.
  */
 const WRITER_SET: ReadonlySet<DueSource> = new Set<DueSource>(["hold", "reminder", "check-in"]);
 const nudgeFigure = (d: number, source: DueSource | undefined): TrayFigure =>
   d < 0 && source && WRITER_SET.has(source) ? { n: String(-d), words: plural(-d, "day since your reminder", "days since your reminder"), late: true } : dueFigure(d);
+/** the day an offer came in (local ms), or null: `offerDate` when stored, else the status's last move */
+function offerCameInMs(q: Query | undefined): number | null {
+  for (const v of [q?.offerDate, q?.lastStatusChange]) {
+    const at = anyMs(v);
+    if (at != null) return at;
+  }
+  return null;
+}
+const anyMs = (v: unknown): number | null => {
+  if (v == null || v === "") return null;
+  if (typeof v === "string") { const t = Date.parse(v); return Number.isFinite(t) ? t : null; }
+  if (typeof v === "number") return Number.isFinite(v) ? v : null;
+  if (v instanceof Date) return v.getTime();
+  const o = v as { toMillis?: () => number; seconds?: number };
+  if (typeof o.toMillis === "function") return o.toMillis();
+  if (typeof o.seconds === "number") return o.seconds * 1000;
+  return null;
+};
+function offerFigure(t: WsTask, nowMs: number): TrayFigure | null {
+  const at = offerCameInMs(t.query);
+  if (at == null) return null;
+  const d = Math.max(0, daysBetweenYmd(localYmd(at), localYmd(nowMs)));
+  return d === 0 ? { n: "Today", words: "", late: false } : { n: String(d), words: plural(d, "day since it came in", "days since it came in"), late: false };
+}
 /**
  * The figure at a row's right: a request "{n} days waiting" (since the agent asked), a nudge past expected or since your
- * reminder, Gone quiet "{n} days quiet", an offer or an own task its due date. ⚠️ NEVER "No date": a
+ * reminder, Gone quiet "{n} days quiet", an offer "since it came in", an own task its due date. ⚠️ NEVER "No date": a
  * task with no number to give shows none. Housekeeping shows its Quick fill label instead (null here).
  */
 export function trayFigure(t: WsTask, nowMs: number): TrayFigure | null {
@@ -378,7 +403,8 @@ export function trayFigure(t: WsTask, nowMs: number): TrayFigure | null {
     case "quiet": return t.quietDays == null ? null : { n: String(t.quietDays), words: plural(t.quietDays, "day quiet", "days quiet"), late: false };
     case "send": case "rr": return waiting();
     case "nudge": return t.dueDays == null ? waiting() : nudgeFigure(t.dueDays, t.dueSource);
-    case "offer": case "own": case "other": return t.dueDays == null ? (t.kind === "own" ? null : waiting()) : dueFigure(t.dueDays);
+    case "offer": return offerFigure(t, nowMs);
+    case "own": case "other": return t.dueDays == null ? (t.kind === "own" ? null : waiting()) : dueFigure(t.dueDays);
     default: { const unhandled: never = t.kind; return unhandled; }
   }
 }
