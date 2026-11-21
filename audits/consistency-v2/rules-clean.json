@@ -1,0 +1,4548 @@
+{
+ "generated": "2026-11-21T17:46:39.983Z",
+ "rules": {
+  "R1": "No rendered text under 12px (artwork, scaled-down previews and the manuscript spine title exempt)",
+  "R2": "No #2d3a50; no green; red only on the agreed destructive actions; burgundy #7c3a2a only as a MountCard frame border",
+  "R3": "Page ground is oat (#f2eee8) on workspace and public pages",
+  "R4": "Navy header: title 40px (±1) from its top, 40px (±1) to the content below, the same distance from the sheet's top on every page",
+  "R5": "Section, card and small headings match the three settled styles",
+  "R6": "Action buttons in a page body match the filled or outline standard; at most one filled per view",
+  "R7": "Framed cards match the standard (rim 8 / 20 / shadow; inner 13 / 1px #e9e3d9)",
+  "R8": "Boxed text fields match the standard (44 high, radius 10, 1px ink edge, 16px)",
+  "R9": "View switches are boxed; slide-out close buttons are 36px; slide-out action footers are 72px",
+  "R10": "No user-visible \"late\" or \"overdue\"",
+  "R11": "Small warm accents use --sp-rust (#7a3f31)"
+ },
+ "pagesFailing": {
+  "R1": [
+   "about",
+   "agents-discover",
+   "dashboard",
+   "dashboard-fv",
+   "goals",
+   "import",
+   "journey-laq-nudge",
+   "journey-laq-who",
+   "journey-rr-composer",
+   "journey-rr-more",
+   "journey-rr-picker",
+   "materials",
+   "overlay-Account-menu",
+   "overlay-Add-a-comp",
+   "overlay-Agent-card",
+   "overlay-Keyboard-shortcuts",
+   "overlay-Log-a-query-journey",
+   "overlay-Query-card-slide-out",
+   "overlay-Record-a-response-journey",
+   "pricing",
+   "queries-responses",
+   "root",
+   "signin",
+   "signup",
+   "you"
+  ],
+  "R2": [
+   "account-data",
+   "account-emails",
+   "account-preferences",
+   "account-profile",
+   "help",
+   "help-public",
+   "signin",
+   "signup"
+  ],
+  "R3": [],
+  "R4": [
+   "queries-packages-empty",
+   "queries-responses",
+   "queries-responses-empty"
+  ],
+  "R5": [
+   "account-data",
+   "account-emails",
+   "account-plan",
+   "account-preferences",
+   "account-profile",
+   "agents-discover",
+   "dashboard",
+   "dashboard-fv",
+   "goals",
+   "help",
+   "journey-laq-check",
+   "journey-laq-fork",
+   "journey-laq-how",
+   "journey-laq-note",
+   "journey-laq-nudge",
+   "journey-laq-package",
+   "journey-laq-when",
+   "journey-laq-who",
+   "journey-rr-composer",
+   "journey-rr-more",
+   "journey-rr-picker",
+   "manuscripts-comps",
+   "manuscripts-comps-empty",
+   "manuscripts-versions",
+   "manuscripts-versions-empty",
+   "materials",
+   "overlay-Account-menu",
+   "overlay-Add-a-comp",
+   "overlay-Add-an-agent-journey",
+   "overlay-Agent-card",
+   "overlay-Keyboard-shortcuts",
+   "overlay-Log-a-query-journey",
+   "overlay-New-package",
+   "overlay-Query-card-slide-out",
+   "overlay-Record-a-response-journey",
+   "overlay-Search-palette",
+   "plans",
+   "queries",
+   "queries-all",
+   "queries-analytics",
+   "queries-analytics-empty",
+   "queries-empty",
+   "queries-packages",
+   "queries-packages-empty",
+   "queries-responses-empty",
+   "todo",
+   "todo-empty",
+   "you",
+   "your-notes"
+  ],
+  "R6": [
+   "dashboard-fv",
+   "queries-analytics",
+   "queries-packages",
+   "queries-responses",
+   "todo",
+   "todo-corkboard",
+   "todo-corkboard-empty",
+   "todo-empty"
+  ],
+  "R7": [
+   "overlay-Agent-card"
+  ],
+  "R8": [],
+  "R9": [
+   "dashboard",
+   "goals",
+   "journey-rr-composer",
+   "journey-rr-more",
+   "materials",
+   "overlay-Account-menu",
+   "you"
+  ],
+  "R10": [
+   "about"
+  ],
+  "R11": [
+   "about",
+   "account-data",
+   "account-emails",
+   "agents-discover",
+   "contact",
+   "dashboard",
+   "dashboard-fv",
+   "founders",
+   "goals",
+   "journey-laq-who",
+   "manuscripts-comps",
+   "materials",
+   "overlay-Account-menu",
+   "overlay-Add-a-comp",
+   "overlay-Log-a-query-journey",
+   "overlay-Search-palette",
+   "pricing",
+   "privacy",
+   "root",
+   "terms",
+   "welcome-verified",
+   "you",
+   "your-notes"
+  ]
+ },
+ "failures": {
+  "R1": [
+   {
+    "rule": "R1",
+    "sel": "span.sa-disc.nu-rseal",
+    "detail": "9.5px",
+    "text": "[data]",
+    "pages": [
+     "dashboard",
+     "goals",
+     "materials",
+     "overlay-Account-menu",
+     "you"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 20
+   },
+   {
+    "rule": "R1",
+    "sel": "div.qc152-ag",
+    "detail": "10.5px",
+    "text": "[data]",
+    "pages": [
+     "journey-rr-composer",
+     "journey-rr-more",
+     "overlay-Agent-card",
+     "overlay-Query-card-slide-out"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 8
+   },
+   {
+    "rule": "R1",
+    "sel": "span.qcrr-kb > kbd",
+    "detail": "11px",
+    "text": "↑",
+    "pages": [
+     "journey-rr-composer",
+     "journey-rr-picker",
+     "overlay-Record-a-response-journey"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 18
+   },
+   {
+    "rule": "R1",
+    "sel": "span.laq-faces > i",
+    "detail": "8px",
+    "text": "[data]",
+    "pages": [
+     "journey-laq-who",
+     "overlay-Log-a-query-journey"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 16
+   },
+   {
+    "rule": "R1",
+    "sel": "button.qc152-ch",
+    "detail": "8.5px",
+    "text": "Covering letter",
+    "pages": [
+     "journey-rr-composer",
+     "journey-rr-more"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 8
+   },
+   {
+    "rule": "R1",
+    "sel": "span.ws-beta",
+    "detail": "8px",
+    "text": "BETA",
+    "pages": [
+     "signin",
+     "signup"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R1",
+    "sel": "kbd.sks-cap",
+    "detail": "11px",
+    "text": "⌘",
+    "pages": [
+     "overlay-Keyboard-shortcuts"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 118
+   },
+   {
+    "rule": "R1",
+    "sel": "h3.sks-scope",
+    "detail": "9px",
+    "text": "Everywhere",
+    "pages": [
+     "overlay-Keyboard-shortcuts"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 22
+   },
+   {
+    "rule": "R1",
+    "sel": "label.cf-fld > span",
+    "detail": "9px",
+    "text": "[data]",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 10
+   },
+   {
+    "rule": "R1",
+    "sel": "span.mk-be-tk",
+    "detail": "10px",
+    "text": "[data]",
+    "pages": [
+     "root"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 10
+   },
+   {
+    "rule": "R1",
+    "sel": "span.mk-aplatetag",
+    "detail": "10px",
+    "text": "Illustration · The paper avalanche",
+    "pages": [
+     "about"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 8
+   },
+   {
+    "rule": "R1",
+    "sel": "span.mk-rungline",
+    "detail": "9px",
+    "text": "[data]",
+    "pages": [
+     "pricing"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 8
+   },
+   {
+    "rule": "R1",
+    "sel": "div.dv1-ph > span",
+    "detail": "9.5px",
+    "text": "Illustration",
+    "pages": [
+     "agents-discover"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R1",
+    "sel": "div.qc152-bkc > span",
+    "detail": "9.5px",
+    "text": "[data]",
+    "pages": [
+     "overlay-Query-card-slide-out"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R1",
+    "sel": "span.mk-rungline > em",
+    "detail": "9px",
+    "text": "[data]",
+    "pages": [
+     "pricing"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R1",
+    "sel": "p.impg-fact",
+    "detail": "9px",
+    "text": "[data]",
+    "pages": [
+     "import"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R1",
+    "sel": "div.sa-wk-ends > span",
+    "detail": "9px",
+    "text": "[data]",
+    "pages": [
+     "journey-laq-nudge"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R1",
+    "sel": "span.cf-n",
+    "detail": "10.5px",
+    "text": "[data]",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R1",
+    "sel": "p.cf-sech > em",
+    "detail": "9px",
+    "text": "Only the title is needed now",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R1",
+    "sel": "span.dv1-pro",
+    "detail": "9px",
+    "text": "PRO",
+    "pages": [
+     "agents-discover"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "span.fv2-extag",
+    "detail": "11.5px",
+    "text": "[data]",
+    "pages": [
+     "dashboard-fv"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "button.sa-wk-unkbtn",
+    "detail": "9px",
+    "text": "Unknown",
+    "pages": [
+     "journey-laq-nudge"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "span.am-iav",
+    "detail": "11.5px",
+    "text": "[data]",
+    "pages": [
+     "overlay-Account-menu"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "span.am-iplan-t > small",
+    "detail": "8px",
+    "text": "Your plan",
+    "pages": [
+     "overlay-Account-menu"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "div.cf-axc i",
+    "detail": "10px",
+    "text": "?",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "b.cf-req",
+    "detail": "9px",
+    "text": "*",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "div.cf-ready.is-idle > i",
+    "detail": "11px",
+    "text": "·",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "div.cf-fld > span",
+    "detail": "9px",
+    "text": "What it shares with your book",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "div.cf-sugg > span",
+    "detail": "9px",
+    "text": "Try",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "div.qc152-ms small",
+    "detail": "10px",
+    "text": "[data]",
+    "pages": [
+     "overlay-Query-card-slide-out"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "button.on > i",
+    "detail": "11px",
+    "text": "↓",
+    "pages": [
+     "queries-responses"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R1",
+    "sel": "span.mk-be-ttag",
+    "detail": "9px",
+    "text": "[data]",
+    "pages": [
+     "root"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   }
+  ],
+  "R2": [
+   {
+    "rule": "R2",
+    "sel": "span.acct-chip.acct-chip--muted",
+    "detail": "border #7c3a2a/16 (burgundy, not a MountCard frame border)",
+    "text": "Always on",
+    "pages": [
+     "account-emails",
+     "account-preferences",
+     "account-profile"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R2",
+    "sel": "span.sc-cf-note > button",
+    "detail": "color #7c3a2a (burgundy, not a MountCard frame border)",
+    "text": "Privacy policy",
+    "pages": [
+     "account-data",
+     "account-emails"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R2",
+    "sel": "button.ph-secondary",
+    "detail": "shadow #7c3a2a (burgundy, not a MountCard frame border)",
+    "text": "Tell us",
+    "pages": [
+     "help",
+     "help-public"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R2",
+    "sel": "button.sf-google.au-gap path",
+    "detail": "fill #34a853 (green)",
+    "text": "",
+    "pages": [
+     "signin",
+     "signup"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R2",
+    "sel": "button.sf-google.au-gap path",
+    "detail": "fill #ea4335 (red)",
+    "text": "",
+    "pages": [
+     "signin",
+     "signup"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R2",
+    "sel": "div.sc-cb",
+    "detail": "shadow #a63d2f/28 (red)",
+    "text": "[data]",
+    "pages": [
+     "account-data"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R2",
+    "sel": "div.sc-dsc > button",
+    "detail": "color #7c3a2a (burgundy, not a MountCard frame border)",
+    "text": "Change when that is",
+    "pages": [
+     "account-emails"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   }
+  ],
+  "R3": [],
+  "R4": [
+   {
+    "rule": "R4",
+    "sel": "header.qc1531-hd.pk43-hd",
+    "detail": "48px to the content below (section.k62-rc.k62-first)",
+    "text": "",
+    "pages": [
+     "queries-packages-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R4",
+    "sel": "header.qc1531-hd.wsnh-hd",
+    "detail": "0px to the content below (div.rsp15-body)",
+    "text": "",
+    "pages": [
+     "queries-responses"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R4",
+    "sel": "header.qc1531-hd.wsnh-hd.wsnh-hd--two",
+    "detail": "0px to the content below (div.rsp15-empty)",
+    "text": "",
+    "pages": [
+     "queries-responses-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   }
+  ],
+  "R5": [
+   {
+    "rule": "R5",
+    "sel": "section.qc151-end h2",
+    "detail": "section: 28px, line 36.4",
+    "text": "[data]",
+    "pages": [
+     "journey-laq-check",
+     "journey-laq-fork",
+     "journey-laq-how",
+     "journey-laq-note",
+     "journey-laq-nudge",
+     "journey-laq-package",
+     "journey-laq-when",
+     "journey-laq-who",
+     "journey-rr-composer",
+     "journey-rr-more",
+     "journey-rr-picker",
+     "overlay-Keyboard-shortcuts",
+     "overlay-Log-a-query-journey",
+     "overlay-Query-card-slide-out",
+     "overlay-Record-a-response-journey",
+     "overlay-Search-palette",
+     "queries",
+     "queries-all",
+     "queries-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 38
+   },
+   {
+    "rule": "R5",
+    "sel": "h3.flh-t",
+    "detail": "card: 26px, line 29.9",
+    "text": "Logging new query",
+    "pages": [
+     "journey-laq-check",
+     "journey-laq-fork",
+     "journey-laq-how",
+     "journey-laq-note",
+     "journey-laq-nudge",
+     "journey-laq-package",
+     "journey-laq-when",
+     "journey-laq-who",
+     "overlay-Add-an-agent-journey",
+     "overlay-Log-a-query-journey"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 20
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.laq-qh",
+    "detail": "section: 22px, line 27.5",
+    "text": "[data]",
+    "pages": [
+     "journey-laq-check",
+     "journey-laq-fork",
+     "journey-laq-how",
+     "journey-laq-note",
+     "journey-laq-nudge",
+     "journey-laq-package",
+     "journey-laq-when",
+     "journey-laq-who",
+     "overlay-Log-a-query-journey"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 18
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.os-cardttl.d2-cardttl",
+    "detail": "section: 20px, line 25",
+    "text": "Next up",
+    "pages": [
+     "dashboard",
+     "dashboard-fv",
+     "goals",
+     "materials",
+     "overlay-Account-menu",
+     "you",
+     "your-notes"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 38
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.sc-ch-h",
+    "detail": "section: 19px, line 24.7",
+    "text": "Take a copy",
+    "pages": [
+     "account-data",
+     "account-emails",
+     "account-plan",
+     "account-preferences",
+     "account-profile"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 26
+   },
+   {
+    "rule": "R5",
+    "sel": "div.qc1522-ch > h3",
+    "detail": "card: 21px, line 27.3",
+    "text": "[data]",
+    "pages": [
+     "journey-rr-composer",
+     "journey-rr-more"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R5",
+    "sel": "div.qcrr-head > h3",
+    "detail": "card: 25px, line 28.8",
+    "text": "Who replied?",
+    "pages": [
+     "journey-rr-picker",
+     "overlay-Record-a-response-journey"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.cp32-plh",
+    "detail": "section: 44px, line 48.4",
+    "text": "The podium",
+    "pages": [
+     "manuscripts-comps",
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.v6-bt",
+    "detail": "section: 20px, line 25",
+    "text": "How it works",
+    "pages": [
+     "manuscripts-versions",
+     "manuscripts-versions-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R5",
+    "sel": "div.k62-encl > h4",
+    "detail": "small: font Special Elite, 15px, weight 400, line 18",
+    "text": "Sent with it",
+    "pages": [
+     "overlay-New-package",
+     "queries-packages"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R5",
+    "sel": "div.tws-wh > h2",
+    "detail": "section: 22px",
+    "text": "[data]",
+    "pages": [
+     "todo",
+     "todo-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R5",
+    "sel": "h3.tws-qh",
+    "detail": "card: font Source Serif 4, weight 600",
+    "text": "What went with it?",
+    "pages": [
+     "todo",
+     "todo-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R5",
+    "sel": "h3.sks-scope",
+    "detail": "card: font JetBrains Mono, 9px, weight 600, line 11.7",
+    "text": "EVERYWHERE",
+    "pages": [
+     "overlay-Keyboard-shortcuts"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 22
+   },
+   {
+    "rule": "R5",
+    "sel": "h3.hc-rh.hc-rh",
+    "detail": "card: 18px, line 23.4",
+    "text": "Status key",
+    "pages": [
+     "help"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R5",
+    "sel": "div.pl3-in > h3",
+    "detail": "card: 26px, line 31.2",
+    "text": "[data]",
+    "pages": [
+     "plans"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R5",
+    "sel": "div.a26-cm.a26-rd > h3",
+    "detail": "card: font Source Serif 4, 16px, weight 600, line 20.8",
+    "text": "[data]",
+    "pages": [
+     "queries-analytics"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R5",
+    "sel": "div.a26-cm > h3",
+    "detail": "card: font Source Serif 4, 16px, weight 600, line 20.8",
+    "text": "[data]",
+    "pages": [
+     "queries-analytics"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R5",
+    "sel": "h3.rsp15-fth",
+    "detail": "card: 22px, line 26.4",
+    "text": "Track your requests",
+    "pages": [
+     "queries-responses-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.hc-h2.hc-h2",
+    "detail": "section: line 30",
+    "text": "For you right now",
+    "pages": [
+     "help"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R5",
+    "sel": "section.acv2-sec.ag-sec > h4",
+    "detail": "small: font Special Elite, 17px, weight 400",
+    "text": "[data]",
+    "pages": [
+     "overlay-Agent-card"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.plt-h",
+    "detail": "section: font Playfair Display",
+    "text": "Everything, side by side",
+    "pages": [
+     "account-plan"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "section.dv1-hw > h2",
+    "detail": "section: 38px, line 41.8",
+    "text": "How it works.",
+    "pages": [
+     "agents-discover"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "div.dv1-sofar h3",
+    "detail": "card: 26px",
+    "text": "The catalogue so far.",
+    "pages": [
+     "agents-discover"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.fv2-gst",
+    "detail": "section: 22px",
+    "text": "Getting started",
+    "pages": [
+     "dashboard-fv"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h4.fv1-ph",
+    "detail": "small: font Special Elite, 21px, weight 400, line 25.2",
+    "text": "Get ahead while you write",
+    "pages": [
+     "dashboard-fv"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.fv2-et",
+    "detail": "section: 21px, line 27.3",
+    "text": "Your activity lands here",
+    "pages": [
+     "dashboard-fv"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h3.hc-ah.hc-ah",
+    "detail": "card: 19px",
+    "text": "[data]",
+    "pages": [
+     "help"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h3.laq-qh.is-q2",
+    "detail": "card: 19px, line 23.8",
+    "text": "Want a reminder to nudge?",
+    "pages": [
+     "journey-laq-nudge"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.cp32-firsth",
+    "detail": "section: 28px, line 32.2",
+    "text": "How it works",
+    "pages": [
+     "manuscripts-comps-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h3.cp30-dtl",
+    "detail": "card: 30px, line 33",
+    "text": "Add a comp",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.qc152-nm.qcv-open-nm",
+    "detail": "section: font Source Serif 4, 22px, weight 700",
+    "text": "[data]",
+    "pages": [
+     "overlay-Agent-card"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.sks-title",
+    "detail": "section: line 31.2",
+    "text": "Keyboard shortcuts",
+    "pages": [
+     "overlay-Keyboard-shortcuts"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "div.k62-hdr-head > h3",
+    "detail": "card: 24px, line 26.4",
+    "text": "[data]",
+    "pages": [
+     "overlay-New-package"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "div.a26-find > h3",
+    "detail": "card: font Source Serif 4, 19px, weight 600",
+    "text": "[data]",
+    "pages": [
+     "queries-analytics"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "div.a26-first-in > h2",
+    "detail": "section: 28px, line 32.2",
+    "text": "How it works",
+    "pages": [
+     "queries-analytics-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "div.k62-first-in > h2",
+    "detail": "section: 28px, line 32.2",
+    "text": "How it works",
+    "pages": [
+     "queries-packages-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h2.rsp15-wwt",
+    "detail": "section: 28px, line 30.8",
+    "text": "While you wait",
+    "pages": [
+     "queries-responses-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "div.qc1531-lgh > h2",
+    "detail": "section: 19px, line 22.8",
+    "text": "Where they are",
+    "pages": [
+     "your-notes"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R5",
+    "sel": "h3.yn-eh",
+    "detail": "card: 24px, line 31.2",
+    "text": "Nothing sent yet",
+    "pages": [
+     "your-notes"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   }
+  ],
+  "R6": [
+   {
+    "rule": "R6",
+    "sel": "button.tws-qfb",
+    "detail": "light-filled: a light fill #ffffff, 30 high, radius 15, Source Serif 4 400 14px",
+    "text": "Quick fill",
+    "pages": [
+     "todo",
+     "todo-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R6",
+    "sel": "button.tws-addt",
+    "detail": "outline: edge 1px dashed #cbbfae, 43 high, radius 12, Source Serif 4 400 15px",
+    "text": "+ Add a task",
+    "pages": [
+     "todo",
+     "todo-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R6",
+    "sel": "button.cb15-ghost",
+    "detail": "outline: edge 1px dashed #cbc0b0, 196 high, radius 4, Special Elite 400 17px",
+    "text": "[data]",
+    "pages": [
+     "todo-corkboard",
+     "todo-corkboard-empty"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R6",
+    "sel": "button.a26-go",
+    "detail": "text: a text button (neither filled nor outline), 28 high, radius 0",
+    "text": "See each round in Queries →",
+    "pages": [
+     "queries-analytics"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R6",
+    "sel": "button.k62-pb.k62-g",
+    "detail": "outline: edge #f4eee5/60 0px 0px 0px 1.5px inset, 42 high, radius 999, Source Serif 4 600 16px",
+    "text": "[data]",
+    "pages": [
+     "queries-packages"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R6",
+    "sel": "button.fv1-btn",
+    "detail": "filled: 42 high, radius 11",
+    "text": "[data]",
+    "pages": [
+     "dashboard-fv"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R6",
+    "sel": "button.a26-go",
+    "detail": "text: a text button (neither filled nor outline), 38.8 high, radius 0, Source Serif 4 600 16px",
+    "text": "See what went out with those queries →",
+    "pages": [
+     "queries-analytics"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R6",
+    "sel": "button.k62-tag.k62-tag-add",
+    "detail": "outline: edge #d9d1c5 0px 0px 0px 1.5px inset, 32 high, radius 999, Source Serif 4 400 14px",
+    "text": "+ Add one",
+    "pages": [
+     "queries-packages"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R6",
+    "sel": "button.rsp15-gb-fold",
+    "detail": "text: a text button (neither filled nor outline), 32 high, radius 999, Source Serif 4 600 13.5px",
+    "text": "[data]",
+    "pages": [
+     "queries-responses"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   }
+  ],
+  "R7": [
+   {
+    "rule": "R7",
+    "sel": "div.apc-frame.acv2-frame",
+    "detail": "inner frame: edge 1px solid #a5837b",
+    "text": "[data]",
+    "pages": [
+     "overlay-Agent-card"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   }
+  ],
+  "R8": [],
+  "R9": [
+   {
+    "rule": "R9",
+    "sel": "span.d22-tog > button",
+    "detail": "view switch button: 30 high, radius 999",
+    "text": "[data]",
+    "pages": [
+     "dashboard",
+     "goals",
+     "materials",
+     "overlay-Account-menu",
+     "you"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 30
+   },
+   {
+    "rule": "R9",
+    "sel": "div.df1-sw > button",
+    "detail": "view switch button: 32 high, radius 999",
+    "text": "All activity",
+    "pages": [
+     "dashboard",
+     "goals",
+     "materials",
+     "overlay-Account-menu",
+     "you"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 30
+   },
+   {
+    "rule": "R9",
+    "sel": "button.qc1522-x",
+    "detail": "close 30×30",
+    "text": "✕",
+    "pages": [
+     "journey-rr-composer",
+     "journey-rr-more"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   }
+  ],
+  "R10": [
+   {
+    "rule": "R10",
+    "sel": "p.mk-notep",
+    "detail": "text",
+    "text": "[data]",
+    "pages": [
+     "about"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   }
+  ],
+  "R11": [
+   {
+    "rule": "R11",
+    "sel": "g.d105-egg ellipse",
+    "detail": "fill #8a4a3c",
+    "text": "",
+    "pages": [
+     "dashboard",
+     "dashboard-fv",
+     "goals",
+     "materials",
+     "overlay-Account-menu",
+     "you",
+     "your-notes"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 34
+   },
+   {
+    "rule": "R11",
+    "sel": "g.d105-egg > g",
+    "detail": "fill #8a4a3c",
+    "text": "",
+    "pages": [
+     "dashboard",
+     "dashboard-fv",
+     "goals",
+     "materials",
+     "overlay-Account-menu",
+     "you",
+     "your-notes"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 14
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.d105-nest.d22-egg > path",
+    "detail": "fill #9a6a3c",
+    "text": "",
+    "pages": [
+     "dashboard",
+     "dashboard-fv",
+     "goals",
+     "materials",
+     "overlay-Account-menu",
+     "you",
+     "your-notes"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 14
+   },
+   {
+    "rule": "R11",
+    "sel": "button.mk-doclink",
+    "detail": "color #a2452a",
+    "text": "Say hello",
+    "pages": [
+     "about",
+     "contact",
+     "founders",
+     "pricing",
+     "terms"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 10
+   },
+   {
+    "rule": "R11",
+    "sel": "span.mk-pv-n",
+    "detail": "color #a2452a",
+    "text": "[data]",
+    "pages": [
+     "privacy",
+     "terms"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 20
+   },
+   {
+    "rule": "R11",
+    "sel": "span.laq-tag.is-closed",
+    "detail": "color #a2452a",
+    "text": "[data]",
+    "pages": [
+     "journey-laq-who",
+     "overlay-Log-a-query-journey"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 16
+   },
+   {
+    "rule": "R11",
+    "sel": "span.sc-cf-note > button",
+    "detail": "color #7c3a2a",
+    "text": "Privacy policy",
+    "pages": [
+     "account-data",
+     "account-emails"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R11",
+    "sel": "span.cp32-bdisc > svg",
+    "detail": "color #6b3d33",
+    "text": "",
+    "pages": [
+     "manuscripts-comps",
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "span.cp32-bdisc rect",
+    "detail": "color #6b3d33",
+    "text": "",
+    "pages": [
+     "manuscripts-comps",
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "span.cp32-bdisc path",
+    "detail": "color #6b3d33",
+    "text": "",
+    "pages": [
+     "manuscripts-comps",
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "span.cp32-bdisc > svg",
+    "detail": "stroke #6b3d33",
+    "text": "",
+    "pages": [
+     "manuscripts-comps",
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "span.cp32-bdisc rect",
+    "detail": "stroke #6b3d33",
+    "text": "",
+    "pages": [
+     "manuscripts-comps",
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "span.cp32-bdisc path",
+    "detail": "stroke #6b3d33",
+    "text": "",
+    "pages": [
+     "manuscripts-comps",
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.mk-dtick > path",
+    "detail": "stroke #a2452a",
+    "text": "",
+    "pages": [
+     "root"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 12
+   },
+   {
+    "rule": "R11",
+    "sel": "ol.dv1-steps i",
+    "detail": "color #a0452e",
+    "text": "[data]",
+    "pages": [
+     "agents-discover"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.mk-dtick",
+    "detail": "color #a2452a",
+    "text": "",
+    "pages": [
+     "root"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R11",
+    "sel": "ul.mk-wel-ticks circle",
+    "detail": "stroke #a2452a",
+    "text": "",
+    "pages": [
+     "welcome-verified"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R11",
+    "sel": "ul.mk-wel-ticks path",
+    "detail": "stroke #a2452a",
+    "text": "",
+    "pages": [
+     "welcome-verified"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 6
+   },
+   {
+    "rule": "R11",
+    "sel": "span.cf-n",
+    "detail": "color #a2452a",
+    "text": "[data]",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.lucide.lucide-send > path",
+    "detail": "color #9a5638",
+    "text": "",
+    "pages": [
+     "overlay-Search-palette"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.lucide.lucide-reply > path",
+    "detail": "color #9a5638",
+    "text": "",
+    "pages": [
+     "overlay-Search-palette"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.lucide.lucide-send > path",
+    "detail": "stroke #9a5638",
+    "text": "",
+    "pages": [
+     "overlay-Search-palette"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.lucide.lucide-reply > path",
+    "detail": "stroke #9a5638",
+    "text": "",
+    "pages": [
+     "overlay-Search-palette"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.mk-dtick > path",
+    "detail": "color #a2452a",
+    "text": "",
+    "pages": [
+     "root"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 4
+   },
+   {
+    "rule": "R11",
+    "sel": "button.mk-acloselink",
+    "detail": "color #a2452a",
+    "text": "See the plans",
+    "pages": [
+     "about"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "div.sc-dsc > button",
+    "detail": "color #7c3a2a",
+    "text": "Change when that is",
+    "pages": [
+     "account-emails"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "span.am-iav",
+    "detail": "color #9a5638",
+    "text": "[data]",
+    "pages": [
+     "overlay-Account-menu"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "b.cf-req",
+    "detail": "color #a2452a",
+    "text": "*",
+    "pages": [
+     "overlay-Add-a-comp"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.lucide.lucide-send",
+    "detail": "color #9a5638",
+    "text": "",
+    "pages": [
+     "overlay-Search-palette"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.lucide.lucide-reply",
+    "detail": "color #9a5638",
+    "text": "",
+    "pages": [
+     "overlay-Search-palette"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.lucide.lucide-send",
+    "detail": "stroke #9a5638",
+    "text": "",
+    "pages": [
+     "overlay-Search-palette"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.lucide.lucide-reply",
+    "detail": "stroke #9a5638",
+    "text": "",
+    "pages": [
+     "overlay-Search-palette"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "span.mk-fbtag",
+    "detail": "color #a2452a",
+    "text": "Founding writers",
+    "pages": [
+     "pricing"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.mk-fbchev",
+    "detail": "color #a2452a",
+    "text": "",
+    "pages": [
+     "pricing"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.mk-fbchev > path",
+    "detail": "color #a2452a",
+    "text": "",
+    "pages": [
+     "pricing"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "span.mk-rungline > em",
+    "detail": "color #a2452a",
+    "text": "[data]",
+    "pages": [
+     "pricing"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "a.mk-pv4suitlink",
+    "detail": "color #a2452a",
+    "text": "Which plan suits me best?",
+    "pages": [
+     "pricing"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.mk-fbchev",
+    "detail": "stroke #a2452a",
+    "text": "",
+    "pages": [
+     "pricing"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "svg.mk-fbchev > path",
+    "detail": "stroke #a2452a",
+    "text": "",
+    "pages": [
+     "pricing"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "span.mk-drtag",
+    "detail": "color #a2452a",
+    "text": "Working draft",
+    "pages": [
+     "terms"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "span.mk-wpass-stamp > span",
+    "detail": "color #a2452a",
+    "text": "Confirmed",
+    "pages": [
+     "welcome-verified"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   },
+   {
+    "rule": "R11",
+    "sel": "span.d22-prize > span",
+    "detail": "color #6b4237",
+    "text": "[data]",
+    "pages": [
+     "your-notes"
+    ],
+    "widths": [
+     1512,
+     1920
+    ],
+    "n": 2
+   }
+  ]
+ },
+ "exemptedTotal": 376,
+ "unusedExceptions": [
+  {
+   "i": 2,
+   "rule": "R2",
+   "match": {
+    "sel": "tws-go",
+    "detail": "red"
+   },
+   "reason": "The To-do's dismiss pop, red option picked (--tw-late): listed for Nick's ruling, not yet ruled.",
+   "used": 0
+  },
+  {
+   "i": 3,
+   "rule": "R2",
+   "match": {
+    "sel": "tws-po",
+    "detail": "red"
+   },
+   "reason": "The To-do's dismiss pop warning text (--tw-late): listed for Nick's ruling, not yet ruled.",
+   "used": 0
+  },
+  {
+   "i": 4,
+   "rule": "R2",
+   "match": {
+    "sel": "tws55-pip",
+    "detail": "red"
+   },
+   "reason": "The To-do filter pip (--tw-late): listed for Nick's ruling, not yet ruled.",
+   "used": 0
+  },
+  {
+   "i": 5,
+   "rule": "R2",
+   "match": {
+    "sel": "tws-bd",
+    "detail": "red"
+   },
+   "reason": "The To-do's past-expected badge (--tw-late): listed for Nick's ruling, not yet ruled.",
+   "used": 0
+  },
+  {
+   "i": 6,
+   "rule": "R2",
+   "match": {
+    "sel": "mk-lc",
+    "detail": "burgundy"
+   },
+   "reason": "The landing hero card's burgundy is part of an illustration (fixes v1.1 left it).",
+   "used": 0
+  },
+  {
+   "i": 12,
+   "rule": "R5",
+   "match": {
+    "sel": "qc153-rail"
+   },
+   "reason": "In flight: the Views rail headings (qcv154) sit in list-filters-v1-1's files, audit-only at roll-out v1.1 (Phase 4 item 5).",
+   "used": 0
+  },
+  {
+   "i": 17,
+   "rule": "R10",
+   "match": {
+    "text": "late repl"
+   },
+   "reason": "\"Late reply\" means a reply after the query closed, not time pressure; left with a suggestion (\"a reply after closing\") for Nick.",
+   "used": 0
+  },
+  {
+   "i": 18,
+   "rule": "R10",
+   "match": {
+    "text": "run late"
+   },
+   "reason": "The price estimate's \"replies run late\" was left with a suggestion (\"take longer than expected\") for Nick.",
+   "used": 0
+  },
+  {
+   "i": 21,
+   "rule": "R10",
+   "match": {
+    "text": "\\d+d late"
+   },
+   "reason": "The To-do strip's \"8d late\" has no room for the longer words; left for Nick.",
+   "used": 0
+  }
+ ],
+ "failedToLoad": [],
+ "table": [
+  {
+   "page": "about",
+   "vw": 1512,
+   "family": "public",
+   "R1": 4,
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": 1,
+   "R11": 2
+  },
+  {
+   "page": "about",
+   "vw": 1920,
+   "family": "public",
+   "R1": 4,
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": 1,
+   "R11": 2
+  },
+  {
+   "page": "account-data",
+   "vw": 1512,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": 3,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 2
+  },
+  {
+   "page": "account-data",
+   "vw": 1920,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": 3,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 2
+  },
+  {
+   "page": "account-emails",
+   "vw": 1512,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": 3,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 2
+  },
+  {
+   "page": "account-emails",
+   "vw": 1920,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": 3,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 2
+  },
+  {
+   "page": "account-plan",
+   "vw": 1512,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "account-plan",
+   "vw": 1920,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "account-preferences",
+   "vw": 1512,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": 1,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 4,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "account-preferences",
+   "vw": 1920,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": 1,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 4,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "account-profile",
+   "vw": 1512,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": 1,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "account-profile",
+   "vw": 1920,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": 1,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "agents",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "agents",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "agents-discover",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": 4,
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 3
+  },
+  {
+   "page": "agents-discover",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": 4,
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 3
+  },
+  {
+   "page": "contact",
+   "vw": 1512,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 1
+  },
+  {
+   "page": "contact",
+   "vw": 1920,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 1
+  },
+  {
+   "page": "dashboard",
+   "vw": 1512,
+   "family": "dashboard",
+   "R1": 2,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "pass",
+   "R5": 3,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": 6,
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "dashboard",
+   "vw": 1920,
+   "family": "dashboard",
+   "R1": 2,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "pass",
+   "R5": 3,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": 6,
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "dashboard-fv",
+   "vw": 1512,
+   "family": "dashboard",
+   "R1": 1,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "pass",
+   "R5": 4,
+   "R6": 1,
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "dashboard-fv",
+   "vw": 1920,
+   "family": "dashboard",
+   "R1": 1,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "pass",
+   "R5": 4,
+   "R6": 1,
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "founders",
+   "vw": 1512,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 1
+  },
+  {
+   "page": "founders",
+   "vw": 1920,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 1
+  },
+  {
+   "page": "goals",
+   "vw": 1512,
+   "family": "dashboard",
+   "R1": 2,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "pass",
+   "R5": 3,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": 6,
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "goals",
+   "vw": 1920,
+   "family": "dashboard",
+   "R1": 2,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "pass",
+   "R5": 3,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": 6,
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "help",
+   "vw": 1512,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": 1,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 6,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "help",
+   "vw": 1920,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": 1,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 6,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "help-public",
+   "vw": 1512,
+   "family": "public",
+   "R1": "pass",
+   "R2": 1,
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "help-public",
+   "vw": 1920,
+   "family": "public",
+   "R1": "pass",
+   "R2": 1,
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "import",
+   "vw": 1512,
+   "family": "onboarding",
+   "R1": 2,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "import",
+   "vw": 1920,
+   "family": "onboarding",
+   "R1": 2,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-check",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-check",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-fork",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-fork",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-how",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-how",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-note",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-note",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-nudge",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 3,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 4,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-nudge",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 3,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 4,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-package",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-package",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-when",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-when",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-laq-who",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 4,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "journey-laq-who",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 4,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "journey-rr-composer",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 6,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": 1,
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-rr-composer",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 6,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": 1,
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-rr-more",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 3,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "pass",
+   "R9": 1,
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-rr-more",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 3,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "pass",
+   "R9": 1,
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-rr-picker",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 3,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "journey-rr-picker",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 3,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "manuscripts",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "pass",
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "manuscripts",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "pass",
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "manuscripts-comps",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": 6
+  },
+  {
+   "page": "manuscripts-comps",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": 6
+  },
+  {
+   "page": "manuscripts-comps-empty",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "manuscripts-comps-empty",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "manuscripts-empty",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "pass",
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "manuscripts-empty",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "pass",
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "manuscripts-versions",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "manuscripts-versions",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "manuscripts-versions-empty",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "manuscripts-versions-empty",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "materials",
+   "vw": 1512,
+   "family": "dashboard",
+   "R1": 2,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "pass",
+   "R5": 3,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": 6,
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "materials",
+   "vw": 1920,
+   "family": "dashboard",
+   "R1": 2,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "pass",
+   "R5": 3,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": 6,
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "materials-letters",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "n/a",
+   "R6": "pass",
+   "R7": "n/a",
+   "R8": "pass",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "materials-letters",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "n/a",
+   "R6": "pass",
+   "R7": "n/a",
+   "R8": "pass",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "materials-letters-empty",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "n/a",
+   "R6": "pass",
+   "R7": "n/a",
+   "R8": "pass",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "materials-letters-empty",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "n/a",
+   "R6": "pass",
+   "R7": "n/a",
+   "R8": "pass",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Account-menu",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 4,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": 6,
+   "R10": "pass",
+   "R11": 5
+  },
+  {
+   "page": "overlay-Account-menu",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 4,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": 6,
+   "R10": "pass",
+   "R11": 5
+  },
+  {
+   "page": "overlay-Add-a-comp",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 14,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "pass",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": 9
+  },
+  {
+   "page": "overlay-Add-a-comp",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 14,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "pass",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": 9
+  },
+  {
+   "page": "overlay-Add-an-agent-journey",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "pass",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Add-an-agent-journey",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "pass",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Agent-card",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 1,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": 1,
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Agent-card",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 1,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": 1,
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Keyboard-shortcuts",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 70,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 13,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Keyboard-shortcuts",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 70,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 13,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Log-a-query-journey",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 4,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "overlay-Log-a-query-journey",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 4,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "overlay-New-package",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "pass",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-New-package",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "pass",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Query-card-slide-out",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 5,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Query-card-slide-out",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 5,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Record-a-response-journey",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": 3,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Record-a-response-journey",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": 3,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 2,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "overlay-Search-palette",
+   "vw": 1512,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": 12
+  },
+  {
+   "page": "overlay-Search-palette",
+   "vw": 1920,
+   "family": "overlays",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": 12
+  },
+  {
+   "page": "plans",
+   "vw": 1512,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "plans",
+   "vw": 1920,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 3,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "pricing",
+   "vw": 1512,
+   "family": "public",
+   "R1": 7,
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 8
+  },
+  {
+   "page": "pricing",
+   "vw": 1920,
+   "family": "public",
+   "R1": 7,
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 8
+  },
+  {
+   "page": "privacy",
+   "vw": 1512,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 6
+  },
+  {
+   "page": "privacy",
+   "vw": 1920,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 6
+  },
+  {
+   "page": "queries",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-all",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-all",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-analytics",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 7,
+   "R6": 3,
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-analytics",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 7,
+   "R6": 3,
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-analytics-empty",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-analytics-empty",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-empty",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-empty",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": "pass",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-packages",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": 3,
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-packages",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 1,
+   "R6": 3,
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-packages-empty",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": 1,
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-packages-empty",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": 1,
+   "R5": 1,
+   "R6": "n/a",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-responses",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": 1,
+   "R2": "pass",
+   "R3": "pass",
+   "R4": 1,
+   "R5": "pass",
+   "R6": 1,
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-responses",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": 1,
+   "R2": "pass",
+   "R3": "pass",
+   "R4": 1,
+   "R5": "pass",
+   "R6": 1,
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-responses-empty",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": 1,
+   "R5": 4,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "queries-responses-empty",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": 1,
+   "R5": 4,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "root",
+   "vw": 1512,
+   "family": "public",
+   "R1": 6,
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 11
+  },
+  {
+   "page": "root",
+   "vw": 1920,
+   "family": "public",
+   "R1": 6,
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 11
+  },
+  {
+   "page": "signin",
+   "vw": 1512,
+   "family": "onboarding",
+   "R1": 1,
+   "R2": 2,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "signin",
+   "vw": 1920,
+   "family": "onboarding",
+   "R1": 1,
+   "R2": 2,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "signup",
+   "vw": 1512,
+   "family": "onboarding",
+   "R1": 1,
+   "R2": 2,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "signup",
+   "vw": 1920,
+   "family": "onboarding",
+   "R1": 1,
+   "R2": 2,
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "terms",
+   "vw": 1512,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 6
+  },
+  {
+   "page": "terms",
+   "vw": 1920,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 6
+  },
+  {
+   "page": "todo",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 2,
+   "R6": 2,
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "todo",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 2,
+   "R6": 2,
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "todo-corkboard",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "pass",
+   "R6": 1,
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "todo-corkboard",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "pass",
+   "R6": 1,
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "todo-corkboard-empty",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "pass",
+   "R6": 1,
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "todo-corkboard-empty",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": "pass",
+   "R6": 1,
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "pass",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "todo-empty",
+   "vw": 1512,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 2,
+   "R6": 2,
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "todo-empty",
+   "vw": 1920,
+   "family": "workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "pass",
+   "R5": 2,
+   "R6": 2,
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "welcome",
+   "vw": 1512,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "welcome",
+   "vw": 1920,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": "pass"
+  },
+  {
+   "page": "welcome-verified",
+   "vw": 1512,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 7
+  },
+  {
+   "page": "welcome-verified",
+   "vw": 1920,
+   "family": "public",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "pass",
+   "R4": "n/a",
+   "R5": "n/a",
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 7
+  },
+  {
+   "page": "you",
+   "vw": 1512,
+   "family": "dashboard",
+   "R1": 2,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "pass",
+   "R5": 3,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": 6,
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "you",
+   "vw": 1920,
+   "family": "dashboard",
+   "R1": 2,
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "pass",
+   "R5": 3,
+   "R6": "pass",
+   "R7": "pass",
+   "R8": "n/a",
+   "R9": 6,
+   "R10": "pass",
+   "R11": 4
+  },
+  {
+   "page": "your-notes",
+   "vw": 1512,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 5,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 8
+  },
+  {
+   "page": "your-notes",
+   "vw": 1920,
+   "family": "non-workspace",
+   "R1": "pass",
+   "R2": "pass",
+   "R3": "n/a",
+   "R4": "n/a",
+   "R5": 5,
+   "R6": "n/a",
+   "R7": "n/a",
+   "R8": "n/a",
+   "R9": "n/a",
+   "R10": "pass",
+   "R11": 8
+  }
+ ]
+}
