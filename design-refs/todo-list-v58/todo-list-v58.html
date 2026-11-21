@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk To-do list v58: the list, and the hawk's bubble</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tw-navy: #2a3a52; --tw-hair: #e3dbcf; --tw-ink: #1c130f; --tw-ink2: #3a332d; --tw-mut: #5b4f47; --tw-mut2: #8a8076;
+    --tw-tray: #fbf9f5; --tw-beige: #ebe4d9; --tw-sand: #eee7db; --tw-cream: #faf8f4;
+    --tw-type: "Special Elite", "Courier New", Courier, monospace;
+    --tw-serif: "Source Serif 4", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: #f1eee8; color: var(--tw-ink); font-family: var(--tw-serif); -webkit-font-smoothing: antialiased; }
+  button { font-family: inherit; }
+  [hidden] { display: none !important; }
+
+  /* ── the mock's own controls (not part of the app) ── */
+  .ctl { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid var(--tw-hair); padding: 12px 20px 12px; }
+  .ctl-top { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .ctl h1 { margin: 0; font: 400 19px var(--tw-type); }
+  .ctl p { margin: 0; font-size: 14px; color: var(--tw-mut); }
+  .ctl-all { margin-left: auto; display: flex; gap: 6px; }
+  .ctl-all button { height: 32px; padding: 0 13px; border: 1px solid #d4cabd; border-radius: 8px; background: #fff; font-size: 14px; color: var(--tw-ink); cursor: pointer; }
+  .ctl-all button:hover { background: var(--tw-cream); }
+  .ctl-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+  .sw { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px 0 8px; border: 1px solid #d4cabd; border-radius: 17px; background: #fff; font-size: 14px; color: var(--tw-ink); cursor: pointer; }
+  .sw i { width: 28px; height: 16px; border-radius: 8px; background: #d4cabd; position: relative; transition: background .15s; flex: none; }
+  .sw i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; transition: transform .15s; }
+  .sw[aria-pressed="true"] { border-color: var(--tw-navy); }
+  .sw[aria-pressed="true"] i { background: var(--tw-navy); }
+  .sw[aria-pressed="true"] i::after { transform: translateX(12px); }
+  .seg { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--tw-mut); margin-left: 6px; }
+  .seg div { display: inline-flex; padding: 2px; border: 1px solid #d4cabd; border-radius: 17px; background: #fff; }
+  .seg button { height: 28px; padding: 0 11px; border: 0; border-radius: 14px; background: none; font-size: 14px; color: var(--tw-ink); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--tw-navy); color: #fff; }
+  .sw:focus-visible, .seg button:focus-visible, .ctl-all button:focus-visible, .tws-ti:focus-visible, .tws-gb:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
+
+  /* ── the stage ── */
+  .stage { padding: 26px 24px 16px; overflow-x: hidden; }
+  .tws-ws { display: grid; grid-template-columns: 394px minmax(0, 1fr); width: 1562px; height: 500px; margin: 0 auto;
+    background: var(--tw-tray); border: 1px solid #ebe5db; border-radius: 16px 16px 0 0; border-bottom: 0; overflow: hidden; }
+  .cap { max-width: 1562px; margin: 10px auto 0; font: italic 14px var(--tw-serif); color: var(--tw-mut); }
+
+  .desk { position: relative; overflow: hidden; min-width: 0; }
+  .desk img { display: block; width: 1166.5px; height: 503.5px; max-width: none; }
+  .desk .fix { position: absolute; left: 850px; top: 20px; width: 148px; height: 42px; background: #2d3a50; display: none; align-items: center; justify-content: flex-end; padding-right: 4px; }
+  .desk .fix span { height: 29px; padding: 0 12px; border-radius: 15px; background: #4b5669; box-shadow: inset 0 0 0 1px #b8806c; color: #fff; font: 400 15px var(--tw-serif); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .desk .fix b { font: 400 15px var(--tw-type); }
+  body[data-w="1"] .desk .fix { display: flex; }
+
+  /* ── the tray, as on dev (todoWs.css, todoWs55.css, todoWs57.css) ── */
+  .tws-tray { background: var(--tw-tray); display: flex; flex-direction: column; min-height: 0; border-right: 1px solid #efe9e0; }
+  .tws55-th { flex: none; padding: 14px 12px 0; }
+  .tws55-head { display: flex; align-items: center; gap: 16px; min-height: 44px; padding: 0 2px; border-bottom: 1px solid var(--tw-hair); }
+  .tws55-tabs { display: flex; align-items: center; gap: 16px; }
+  .tws55-tab { padding: 9px 0 10px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; font: 400 15.5px var(--tw-serif); color: var(--tw-mut); cursor: pointer; white-space: nowrap; }
+  .tws55-tab[aria-pressed="true"] { color: var(--tw-ink); border-bottom-color: var(--tw-navy); font-weight: 600; }
+  .tws55-tab sup { font: 400 12px var(--tw-type); margin-left: 3px; }
+  .tws55-icons { margin-left: auto; display: flex; gap: 2px; }
+  .tws55-ic { width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px; background: transparent; display: grid; place-items: center; color: var(--tw-ink2); cursor: pointer; }
+  .tws55-ic:hover { background: var(--tw-beige); }
+  .tws55-ic svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .tws-tl { flex: 1; min-height: 0; overflow-y: auto; padding: 0 11px 30px 12px; scrollbar-width: thin;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent); }
+  .tws-gbw { margin: 14px 0 4px; }
+  .tws-gbw:first-child { margin-top: 2px; }
+  .tws-gb { height: 40px; display: flex; align-items: center; gap: 8px; margin: 0; padding: 0 12px; border: 0; width: 100%; border-radius: 9px; cursor: pointer; text-align: left; color: var(--tw-ink); background: var(--tw-sand); }
+  .tws-gb[data-band="wait"] { background: #fff; box-shadow: inset 0 0 0 1px #d9d0c3; }
+  .tws-gb[data-band="quiet"] { background: linear-gradient(90deg, #e3dbcf, #f1ece5 55%, #ffffff); }
+  .tws-gb[data-band="house"] { background: #e4ebf1; color: #2f4357; }
+  .tws-gb b { font: 400 16px var(--tw-type); }
+  .tws-gb em { min-width: 26px; height: 22px; padding: 1px 7px 0; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; background: rgba(255,255,255,.62); font: normal 14px var(--tw-type); }
+  .tws-gb[data-band="wait"] em { box-shadow: inset 0 0 0 1px #d9d0c3; }
+  .tws-gb .rule { display: none; }
+  .tws-gb .tws-cv { margin-left: auto; width: 8px; height: 8px; margin-right: 5px; opacity: .55; border: solid currentColor; border-width: 0 1.6px 1.6px 0; transform: translateY(-2px) rotate(45deg); transition: transform .15s; }
+  .tws-gb[aria-expanded="false"] .tws-cv { transform: translateX(-2px) rotate(-45deg); }
+
+  .tws-ti { position: relative; display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 11px; width: 100%; padding: 10px 11px; margin: 0 0 2px; border: 0; border-radius: 12px; background: none; text-align: left; cursor: pointer; transition: background .15s, box-shadow .15s; }
+  .tws-ti:hover { background: #fff; box-shadow: 0 0 0 1px var(--tw-hair); }
+  .tws-ti[aria-current="true"], .tws-ti[aria-current="true"]:hover { background: #fff; box-shadow: 0 0 0 1.5px var(--tw-navy), 0 8px 18px -12px rgba(28,19,15,.4); }
+  .tws-av { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; background: #fff; box-shadow: inset 0 0 0 1px #e3dbcf; color: var(--tw-ink); }
+  .tws-av svg { width: 20px; height: 20px; display: block; }
+  .tws-tx { min-width: 0; }
+  .tws-tx b { display: block; font: 500 15px/1.25 var(--tw-serif); color: var(--tw-ink2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tws-ti[aria-current="true"] .tws-tx b { font-weight: 600; color: var(--tw-ink); }
+  .tws-tx span { display: block; font: italic 14px/1.45 var(--tw-serif); color: var(--tw-mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tws-du { text-align: right; min-width: 40px; line-height: 1.15; }
+  .tws-du b { display: block; font: 400 16px var(--tw-type); color: var(--tw-ink2); }
+  .tws-du small { display: block; font: 14px var(--tw-serif); color: var(--tw-mut2); white-space: nowrap; }
+  .tws-du[data-new] { display: none; }
+  .w1 { display: none; }
+
+  /* ── v58 · 1 · group headings: the Query Centre's ruled line ── */
+  body[data-g="1"] .tws-gb, body[data-g="1"] .tws-gb[data-band] { height: 32px; padding: 0 2px; background: none; box-shadow: none; border-radius: 6px; color: var(--tw-ink); }
+  body[data-g="1"] .tws-gb em { min-width: 0; height: auto; padding: 0; background: none; box-shadow: none; color: var(--tw-mut2); }
+  body[data-g="1"] .tws-gb .rule { display: block; flex: 1; height: 1px; background: var(--tw-hair); margin: 0 4px 0 6px; }
+  body[data-g="1"] .tws-gb .tws-cv { margin-left: 0; margin-right: 4px; }
+  body[data-g="1"] .tws-gb:hover b { text-decoration: underline; text-decoration-color: var(--tw-hair); text-underline-offset: 4px; }
+
+  /* ── v58 · 2 · the open row ── */
+  body[data-s="ring"] .tws-ti[aria-current="true"], body[data-s="ring"] .tws-ti[aria-current="true"]:hover { box-shadow: 0 0 0 1px var(--tw-navy), 0 6px 14px -10px rgba(28,19,15,.3); margin-top: 4px; margin-bottom: 6px; }
+  body[data-s="edge"] .tws-ti[aria-current="true"], body[data-s="edge"] .tws-ti[aria-current="true"]:hover { box-shadow: 0 0 0 1px var(--tw-hair), 0 6px 16px -10px rgba(28,19,15,.3); margin-top: 4px; margin-bottom: 6px; }
+  body[data-s="edge"] .tws-ti[aria-current="true"]::after { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--tw-navy); }
+
+  /* ── v58 · 3 · one figure on every row, on one line ── */
+  body[data-f="1"] .tws-du, body[data-f="1"] .tws-du[data-new] { display: flex; align-items: baseline; justify-content: flex-end; gap: 5px; }
+  body[data-f="1"] .tws-du b { font-size: 15px; }
+  body[data-f="1"] .tws-du small { font-size: 13.5px; }
+
+  /* ── v58 · 4 · the row and the desk say the same thing, and nothing says "late" ── */
+  body[data-w="1"] .w0 { display: none; }
+  body[data-w="1"] .w1 { display: inline; }
+
+  /* ── v58 · 5 · the glyph without its disc ── */
+  body[data-y="1"] .tws-ti { grid-template-columns: 24px minmax(0, 1fr) auto; gap: 13px; }
+  body[data-y="1"] .tws-av { width: 24px; height: 24px; background: none; box-shadow: none; }
+  body[data-y="1"] .tws-av svg { width: 22px; height: 22px; }
+
+  /* ── v58 · 6 · one row height, a hairline between rows, more air above a group ── */
+  body[data-r="1"] .tws-ti { min-height: 58px; padding: 8px 11px; margin: 0; border-radius: 10px; }
+  body[data-r="1"] .tws-ti:not([aria-current="true"]) + .tws-ti:not([aria-current="true"])::before { content: ""; position: absolute; top: 0; left: 58px; right: 11px; border-top: 1px solid #ece6dc; }
+  body[data-r="1"][data-y="1"] .tws-ti:not([aria-current="true"]) + .tws-ti:not([aria-current="true"])::before { left: 48px; }
+  body[data-r="1"] .tws-ti:hover::before, body[data-r="1"] .tws-ti:hover + .tws-ti::before { display: none; }
+  body[data-r="1"] .tws-gbw { margin: 24px 0 6px; }
+  body[data-r="1"] .tws-gbw:first-child { margin-top: 10px; }
+
+  /* ── v58.2 · colour behind the glyph: the query's STAGE colour (src/lib/stageColours.ts, the slate ladder: band + edge) ── */
+  .tws-ti[data-st="queried"] { --c: #efe6d6; --e: #e0d2bb; }
+  .tws-ti[data-st="partial"] { --c: #e4ebf2; --e: #cbd7e4; }
+  .tws-ti[data-st="full"] { --c: #b7c9de; --e: #9db4cf; }
+  body[data-c="disc"] .tws-ti[data-st] { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 11px; }
+  body[data-c="disc"] .tws-ti[data-st] .tws-av { width: 32px; height: 32px; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px var(--e); }
+  body[data-c="disc"] .tws-ti[data-st] .tws-av svg { width: 19px; height: 19px; }
+  body[data-c="disc"][data-r="1"] .tws-ti:not([aria-current="true"]) + .tws-ti:not([aria-current="true"])::before { left: 54px; }
+
+  /* ── v58.3 · the hawk's bubble: blush as on dev, one neutral paper bubble, or the query's stage colour ── */
+  .desk .hb { position: absolute; left: 87px; top: 86px; width: 558px; height: 64px; background: #fff; display: none; }
+  .desk .hb p { position: absolute; inset: 1px; margin: 0; padding: 0 14px; border-radius: 12px; display: flex; align-items: center; font: 400 17px/22px var(--tw-serif); color: #3d2a22; }
+  body[data-h="paper"] .desk .hb, body[data-h="stage"] .desk .hb { display: block; }
+  body[data-h="paper"] .desk .hb p, body[data-h="paper"] .cmp .hk { background: #fbf9f5; box-shadow: inset 0 0 0 1px #e3dbcf; }
+  body[data-h="stage"] .desk .hb p { background: #e4ebf2; box-shadow: inset 0 0 0 1px #cbd7e4; }
+  .cmp { max-width: 1562px; margin: 22px auto 0; }
+  .cmp h2 { margin: 0 0 4px; font: 400 17px var(--tw-type); }
+  .cmp > p { margin: 0 0 12px; font-size: 14.5px; color: var(--tw-mut); }
+  .cmp-g { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+  .cmp-c { background: #fff; border: 1px solid #ebe5db; border-radius: 14px; padding: 14px 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .cmp-c h3 { margin: 0 0 2px; font: 600 14.5px var(--tw-serif); color: var(--tw-ink2); }
+  .cmp .hk, .cmp .ag { padding: 9px 12px; border-radius: 12px; font: 400 15px/1.35 var(--tw-serif); color: #3d2a22; max-width: 92%; }
+  .cmp .hk { align-self: flex-start; background: #f4e3d9; }
+  .cmp .ag { align-self: flex-start; background: var(--c); box-shadow: inset 0 0 0 1px var(--e); color: var(--tw-ink); }
+  .cmp .ag[data-you] { align-self: flex-end; background: #fbf9f5; box-shadow: inset 0 0 0 1px #e3dbcf; }
+  .cmp small { font: italic 13px var(--tw-serif); color: var(--tw-mut2); }
+  .cmp-c[data-st="queried"] { --c: #efe6d6; --e: #e0d2bb; }
+  .cmp-c[data-st="partial"] { --c: #e4ebf2; --e: #cbd7e4; }
+  .cmp-c[data-st="full"] { --c: #b7c9de; --e: #9db4cf; }
+  .cmp-c[data-st="offer"] { --c: #efcdc9; --e: #dfb1ac; }
+  .cmp-c[data-st="offer"] .ag { background: linear-gradient(112deg, rgba(255,255,255,0) 22%, rgba(255,255,255,.55) 40%, rgba(255,255,255,.12) 52%, rgba(255,255,255,0) 66%) 30% 0 / 260% 100% no-repeat, #efcdc9; }
+  body[data-h="stage"] .cmp .hk { background: var(--c); box-shadow: inset 0 0 0 1px var(--e); }
+  body[data-h="stage"] .cmp-c[data-st="offer"] .hk { background: #efcdc9; }
+  @media (max-width: 900px) { .cmp-g { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body data-h="stage" data-c="disc" data-g="1" data-s="edge" data-f="1" data-w="1" data-y="1" data-r="1">
+
+<div class="ctl">
+  <div class="ctl-top">
+    <h1>To-do list v58: the list, and the hawk's bubble</h1>
+    <p>Six changes, each on its own switch. Only the list is live; the desk is a picture of dev.</p>
+    <div class="ctl-all"><button type="button" id="allOff">As on dev</button><button type="button" id="allOn">All six on</button></div>
+  </div>
+  <div class="ctl-row">
+    <button type="button" class="sw" data-k="g" aria-pressed="true"><i></i>1 Group headings</button>
+    <button type="button" class="sw" data-k="s" aria-pressed="true"><i></i>2 Open row</button>
+    <button type="button" class="sw" data-k="f" aria-pressed="true"><i></i>3 Figures</button>
+    <button type="button" class="sw" data-k="w" aria-pressed="true"><i></i>4 Row and desk agree</button>
+    <button type="button" class="sw" data-k="y" aria-pressed="true"><i></i>5 Glyphs</button>
+    <button type="button" class="sw" data-k="r" aria-pressed="true"><i></i>6 Row rhythm</button>
+    <span class="seg" id="selSeg">Open row as
+      <div><button type="button" data-v="ring" aria-pressed="false">Thin ring</button><button type="button" data-v="edge" aria-pressed="true">Navy edge</button></div>
+    </span>
+    <span class="seg" id="colSeg">Colour
+      <div><button type="button" data-v="0" aria-pressed="false">None</button><button type="button" data-v="disc" aria-pressed="true">Behind the glyph</button></div>
+    </span>
+    <span class="seg" id="hawkSeg">Hawk's bubble
+      <div><button type="button" data-v="blush" aria-pressed="false">Blush, as now</button><button type="button" data-v="paper" aria-pressed="false">Paper</button><button type="button" data-v="stage" aria-pressed="true">Stage colour</button></div>
+    </span>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="tws-ws">
+    <div class="tws-tray">
+      <div class="tws55-th">
+        <div class="tws55-head">
+          <div class="tws55-tabs">
+            <button type="button" class="tws55-tab" aria-pressed="true">To do<sup>41</sup></button>
+            <button type="button" class="tws55-tab" aria-pressed="false">Snoozed</button>
+            <button type="button" class="tws55-tab" aria-pressed="false">Done</button>
+          </div>
+          <div class="tws55-icons">
+            <button type="button" class="tws55-ic" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></button>
+            <button type="button" class="tws55-ic" aria-label="Filter and group"><svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button>
+            <button type="button" class="tws55-ic" aria-label="Collapse the list"><svg viewBox="0 0 24 24"><path d="M11 7l-5 5 5 5M18 7l-5 5 5 5"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tws-tl" id="list">
+        <div class="tws-gbw"><button type="button" class="tws-gb" data-band="wait" aria-expanded="true"><b>Agents are waiting</b><em>3</em><span class="rule"></span><span class="tws-cv"></span></button></div>
+        <div class="grp">
+          <button type="button" class="tws-ti" data-st="partial" aria-current="true">
+            <span class="tws-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="6 4"/><path d="M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z" fill="currentColor" stroke="none"/></svg></span>
+            <span class="tws-tx"><b>Send Greg your partial</b><span>Greg Panetta</span></span>
+            <span class="tws-du"><b><span class="w0">1</span><span class="w1">2</span></b><small><span class="w0">day waiting</span><span class="w1">days waiting</span></small></span>
+          </button>
+          <button type="button" class="tws-ti" data-st="full">
+            <span class="tws-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="6 4"/><circle cx="12" cy="12" r="6.5" fill="currentColor" stroke="none"/></svg></span>
+            <span class="tws-tx"><b>Send Jonathan your full</b><span>The Marsh Agency</span></span>
+            <span class="tws-du" data-new><b>4</b><small>days waiting</small></span>
+          </button>
+          <button type="button" class="tws-ti" data-st="partial">
+            <span class="tws-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="6 4"/><path d="M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z" fill="currentColor" stroke="none"/></svg></span>
+            <span class="tws-tx"><b>Send Daniel your partial</b><span>Inkwell &amp; Stone</span></span>
+            <span class="tws-du" data-new><b>9</b><small>days waiting</small></span>
+          </button>
+        </div>
+
+        <div class="tws-gbw"><button type="button" class="tws-gb" data-band="nudge" aria-expanded="true"><b>Nudges</b><em>4</em><span class="rule"></span><span class="tws-cv"></span></button></div>
+        <div class="grp">
+          <button type="button" class="tws-ti" data-st="queried">
+            <span class="tws-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.2"/><path d="M12 16.3v.2"/></svg></span>
+            <span class="tws-tx"><b>Nudge William</b><span>Foxglove Literary</span></span>
+            <span class="tws-du"><b>114</b><small><span class="w0">days late</span><span class="w1">days past expected</span></small></span>
+          </button>
+          <button type="button" class="tws-ti" data-st="queried">
+            <span class="tws-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.2"/><path d="M12 16.3v.2"/></svg></span>
+            <span class="tws-tx"><b>Nudge Daniel</b><span>Inkwell &amp; Stone</span></span>
+            <span class="tws-du"><b>61</b><small><span class="w0">days late</span><span class="w1">days past expected</span></small></span>
+          </button>
+          <button type="button" class="tws-ti" data-st="queried">
+            <span class="tws-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.2"/><path d="M12 16.3v.2"/></svg></span>
+            <span class="tws-tx"><b>Nudge Jonathan</b><span>The Marsh Agency</span></span>
+            <span class="tws-du"><b>48</b><small><span class="w0">days late</span><span class="w1">days past expected</span></small></span>
+          </button>
+          <button type="button" class="tws-ti" data-st="queried">
+            <span class="tws-av"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.2"/><path d="M12 16.3v.2"/></svg></span>
+            <span class="tws-tx"><b>Nudge Priya</b><span>Harrow &amp; Finch</span></span>
+            <span class="tws-du"><b>33</b><small><span class="w0">days late</span><span class="w1">days past expected</span></small></span>
+          </button>
+        </div>
+
+        <div class="tws-gbw"><button type="button" class="tws-gb" data-band="quiet" aria-expanded="false"><b>Gone quiet</b><em>5</em><span class="rule"></span><span class="tws-cv"></span></button></div>
+        <div class="grp" hidden></div>
+        <div class="tws-gbw"><button type="button" class="tws-gb" data-band="house" aria-expanded="false"><b>Housekeeping</b><em>29</em><span class="rule"></span><span class="tws-cv"></span></button></div>
+        <div class="grp" hidden></div>
+      </div>
+    </div>
+
+    <div class="desk">
+      <img src="desk.jpg" alt="The desk as on dev, with Send Greg your partial open">
+      <div class="hb"><p>Greg asked for your partial. Once you&rsquo;ve sent it, log it here and I&rsquo;ll work out when Greg&rsquo;s reply is due.</p></div>
+      <div class="fix"><span><b>2</b> days waiting</span></div>
+    </div>
+  </div>
+  <p class="cap">Click a row to open it, or a heading to fold its group. Glyph discs take each query's stage colour: sand for queried, pale blue for a partial, deeper blue for a full. The figures on Jonathan's and Daniel's rows are examples: on dev those rows show none.</p>
+  <div class="cmp">
+    <h2>The hawk beside the card's own bubbles, at each stage</h2>
+    <p>The hawk's line is on top; beneath it is the newest message on that query's card. The example lines are placeholders.</p>
+    <div class="cmp-g">
+      <div class="cmp-c" data-st="queried"><h3>Queried: a nudge</h3><span class="hk">Send William a nudge, then log it here.</span><small>on the card</small><span class="ag" data-you>You sent William your query</span></div>
+      <div class="cmp-c" data-st="partial"><h3>Partial: materials asked for</h3><span class="hk">Greg asked for your partial. Once you&rsquo;ve sent it, log it here.</span><small>on the card</small><span class="ag">Greg asked for a partial</span></div>
+      <div class="cmp-c" data-st="full"><h3>Full: materials asked for</h3><span class="hk">Jonathan asked for your full. Once you&rsquo;ve sent it, log it here.</span><small>on the card</small><span class="ag">Jonathan asked for the full</span></div>
+      <div class="cmp-c" data-st="offer"><h3>Offer</h3><span class="hk">Marcus made an offer. Log your answer here once you&rsquo;ve decided.</span><small>on the card</small><span class="ag">Marcus made an offer</span></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var body = document.body;
+  var sel = 'edge';
+  function setK(k, on) {
+    if (k === 's') body.dataset.s = on ? sel : 'dev';
+    else body.dataset[k] = on ? '1' : '0';
+    document.querySelector('.sw[data-k="' + k + '"]').setAttribute('aria-pressed', on ? 'true' : 'false');
+    if (k === 's') document.getElementById('selSeg').style.opacity = on ? '1' : '.45';
+  }
+  document.querySelectorAll('.sw').forEach(function (b) {
+    b.addEventListener('click', function () { setK(b.dataset.k, b.getAttribute('aria-pressed') !== 'true'); });
+  });
+  document.querySelectorAll('#selSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      sel = b.dataset.v;
+      document.querySelectorAll('#selSeg button').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+      setK('s', true);
+    });
+  });
+  var ws = document.querySelector('.tws-ws');
+  function fit() { var z = Math.min(1, (document.documentElement.clientWidth - 48) / 1562); ws.style.zoom = z; }
+  fit(); window.addEventListener('resize', fit);
+  document.querySelectorAll('.tws-gb').forEach(function (g) { g.parentElement.nextElementSibling.dataset.k = g.dataset.band; });
+  document.querySelectorAll('#colSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      body.dataset.c = b.dataset.v;
+      document.querySelectorAll('#colSeg button').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+    });
+  });
+  document.querySelectorAll('#hawkSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      body.dataset.h = b.dataset.v;
+      document.querySelectorAll('#hawkSeg button').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+    });
+  });
+  var keys = ['g', 's', 'f', 'w', 'y', 'r'];
+  document.getElementById('allOff').addEventListener('click', function () { keys.forEach(function (k) { setK(k, false); }); });
+  document.getElementById('allOn').addEventListener('click', function () { keys.forEach(function (k) { setK(k, true); }); });
+
+  document.querySelectorAll('.tws-ti').forEach(function (r) {
+    r.addEventListener('click', function () {
+      document.querySelectorAll('.tws-ti').forEach(function (o) { o.removeAttribute('aria-current'); });
+      r.setAttribute('aria-current', 'true');
+    });
+  });
+  document.querySelectorAll('.tws-gb').forEach(function (g) {
+    g.addEventListener('click', function () {
+      var grp = g.parentElement.nextElementSibling;
+      if (!grp.children.length) return;
+      var open = g.getAttribute('aria-expanded') === 'true';
+      g.setAttribute('aria-expanded', open ? 'false' : 'true');
+      grp.hidden = open;
+    });
+  });
+</script>
+</body>
+</html>

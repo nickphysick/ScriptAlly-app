@@ -57,6 +57,7 @@ import { openingView, type BatchView } from "../../../lib/todoBatch54";
 import { devBatchCap } from "../../../lib/todoBatchReviewAid";
 import "./todoWs55.css";
 import "./todoWs57.css";
+import "./todoWs58.css";
 import { WsTrayHead55, SVG_EXPAND } from "./WsTrayHead55";
 import { filterLine, stripCounts } from "../../../lib/todoTrayHead55";
 
@@ -492,7 +493,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
         <React.Fragment key={s.id}>
           <div className="tws-gbw" data-tws-group={s.id}>
             <button type="button" className="tws-gb" data-band={s.band} aria-expanded={!isShut} onClick={() => setShut((x) => toggleSet(x, s.id))}>
-              <b>{s.name}</b><em>{s.tasks.length}</em><span className="tws-cv" aria-hidden="true">⌄</span>
+              <b>{s.name}</b><em>{s.tasks.length}</em><span className="tws58-rule" data-tws58="rule" aria-hidden="true" /><span className="tws-cv" aria-hidden="true">⌄</span>
             </button>
             {/* v53 (D4): Housekeeping's Quick fill opens the group on its first task */}
             {s.id === "house" && s.tasks.length ? (

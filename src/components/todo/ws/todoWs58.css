@@ -1,0 +1,22 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do list v58 — the tray and the hawk's bubble (design-refs/todo-list-v58/todo-list-v58.html, the state it opens in:
+ * all six switches on, open row "Navy edge", colour "Behind the glyph", hawk's bubble "Stage colour"). The ref's
+ * blocks "v58 · 1" to "v58 · 6", "v58.2" and "v58.3" ported with their `body[data-…]` switch prefixes dropped.
+ * Desktop only (768px up); imported last, after todoWs57.css, so it wins at equal specificity.
+ *
+ * ⚠️ NO STAGE HEX IS WRITTEN HERE. The row and the hawk's note carry the query's stage as inline custom properties
+ *    (`--tws58-band`, `--tws58-edge`, `--tws58-ink`, from `stageVars` in lib/todoWs.ts, which reads STAGE_COLOURS and
+ *    bandBackground); a task with no stage carries none and keeps its own drawing.
+ */
+@media (min-width: 768px) {
+  /* ── v58 · 1 · group headings: a ruled line (the Query Centre's), never a band. Supersedes v57 rule 5's chip. ── */
+  .tws .tws-gb, .tws .tws-gb[data-band] { height: 32px; padding: 0 2px; background: none; box-shadow: none; border-radius: 6px; color: var(--tw-ink); }
+  .tws .tws-gb em, .tws .tws-gb[data-band] em { min-width: 0; height: auto; padding: 0; background: none; box-shadow: none; color: var(--tw-mut2); }
+  .tws .tws-gb .tws58-rule { display: block; flex: 1; height: 1px; background: var(--tw-hair); margin: 0 4px 0 6px; }
+  .tws .tws-gb .tws-cv { margin-left: 0; margin-right: 4px; }
+  .tws .tws-gb:hover b { text-decoration: underline; text-decoration-color: var(--tw-hair); text-underline-offset: 4px; }
+
+}
