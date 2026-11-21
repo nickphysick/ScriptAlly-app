@@ -25,7 +25,7 @@
 .slh-b .slh-p1 { background: #2a3a52; color: #fff; border: 1px solid #2a3a52; }
 .slh-b .slh-p1:hover:not(:disabled) { background: #1c130f; border-color: #1c130f; }
 .slh-b .slh-p2 { background: #fff; color: #1c130f; border: 1px solid rgba(28, 19, 15, 0.18); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.06); }
-.slh-b button:focus-visible, .slh-card button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.slh-b button:focus-visible, .slh-card button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .slh-b button:disabled { cursor: default; opacity: 0.6; }
 
 /* the card */

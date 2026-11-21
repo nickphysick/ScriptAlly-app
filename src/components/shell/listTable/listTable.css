@@ -47,7 +47,7 @@ button.lt-lab { cursor: pointer; }
 button.lt-lab:hover { color: #1c130f; }
 .lt-lab.on { color: #1c130f; }
 .lt-lab i { font-style: normal; }
-.lt-lab:focus-visible { outline: 2px solid #3f566b; outline-offset: 2px; border-radius: 3px; }
+.lt-lab:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 3px; }
 
 /* §5 — the group header: sticky at the scroller's top, the powder band */
 .lt-gh {

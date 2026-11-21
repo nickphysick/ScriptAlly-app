@@ -95,7 +95,7 @@
 /* "Add a note: who is this for?" is the note line itself, pressable (v26.1's "+ Add a note", in the ref's words) */
 .p9-pb-grid.p9-v39 .p9-po-tt > small .p9-po-addnote { all: unset; cursor: pointer; font: inherit; color: inherit; }
 .p9-pb-grid.p9-v39 .p9-po-tt > small .p9-po-addnote:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
-.p9-pb-grid.p9-v39 .p9-po-tt > small .p9-po-addnote:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 3px; }
+.p9-pb-grid.p9-v39 .p9-po-tt > small .p9-po-addnote:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 3px; }
 .p9-pb-grid.p9-v39 .p9-po-tt > small { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 /* rename in place: the keyboard focus state of the dashed underline (ref `.po-nm[contenteditable]:focus`) */
 .p9-pb-grid.p9-v39 .p9-po-tt .p9-po-nm:not(.p9-locked):focus { outline: 0; background: rgba(255, 255, 255, 0.12); border-bottom-color: #fff; }
@@ -170,7 +170,7 @@
 .p9-agg3 .p9-id-aggMain .p9-rs-empty > b { display: block; font: 400 18px/normal var(--sp-type); }
 .p9-agg3 .p9-id-aggMain .p9-rs-empty > span { display: block; max-width: 520px; margin: 6px auto 0; font: 400 15px/22.5px var(--sp-serif); color: var(--sp-quiet); }
 /* a tab's focus ring (ref `.rl-tabs button:focus-visible`) */
-.p9-agg3 .p9-rl-tabs button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; border-radius: 3px; }
+.p9-agg3 .p9-rl-tabs button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 3px; }
 /* v40's ruling, carried: the showcase kickers, the card tags, the list headings and the art placeholders in the
    typewriter, sentence case */
 .p9-agg3 .p9-ag3 .p9-ag3-k { font: 400 16px/normal var(--sp-type) !important; letter-spacing: 0 !important; text-transform: none !important; }

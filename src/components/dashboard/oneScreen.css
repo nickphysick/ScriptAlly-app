@@ -484,7 +484,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   outline-offset: 2px;
 }
 .os-acglyph.at { transform: translate(-50%, -50%) scale(1.25); }
-.os-acglyph:focus-visible { outline: 2px solid var(--dash-navy); }
+.os-acglyph:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .os-acglyphn { font-family: "JetBrains Mono", monospace; font-size: 9.5px; font-weight: 500; line-height: 1; color: var(--dash-ink); }
 /* two digits inside a 14px ring */
 .os-acglyphn--wide { font-size: 7.5px; letter-spacing: -0.02em; }
@@ -575,7 +575,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   cursor: grab;
 }
 .os-mmwin:active { cursor: grabbing; }
-.os-mmwin:focus-visible { outline: 2px solid #f5f1eb; outline-offset: 1px; }
+.os-mmwin:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .os-mmwin i { position: absolute; top: 6px; bottom: 6px; left: 4px; width: 2px; border-radius: 2px; background: #f5f1eb; }
 .os-mmwin i + i { left: auto; right: 4px; }
 /* ⚠️ NEVER HIDDEN. 470px of CARD or less — a 1280px window — and the control takes the full line
@@ -632,7 +632,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   transition: background 0.15s; cursor: pointer; outline-offset: -2px;
 }
 .os-clrow.at { background: #f6f1ea; }
-.os-clrow:focus-visible { outline: 2px solid var(--dash-navy); }
+.os-clrow:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* a hairline under No reply sets it apart: it is not a verdict */
 .os-clrow--first { border-bottom: 1px solid var(--dash-hair); border-radius: 6px 6px 0 0; padding-bottom: 9px; margin-bottom: 3px; }
 /* ⚠️ A BUCKET WITH NOTHING IN IT KEEPS ITS ROW — absent, and greyed, not gone — and is not a control. */
@@ -782,7 +782,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 }
 .os-fent--go { cursor: pointer; }
 .os-fent--go:hover, .os-fent--go:focus-visible { background: var(--dash-parchment); }
-.os-fent--go:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: -2px; }
+.os-fent--go:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* ⚠️ THE ROW IT OPENED STAYS LIT WHILE THE PEEK IS UP, so the reader can see what they clicked. */
 .os-fent--open { background: var(--dash-parchment); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.08); }
 .os-fmain { min-width: 0; }
@@ -896,7 +896,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
 .os-tdbox:hover { border-color: var(--dash-ink); }
-.os-tdbox:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 2px; }
+.os-tdbox:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .os-tdbox svg { opacity: 0; transform: scale(0.6); display: block; transition: opacity 0.18s ease, transform 0.18s ease; }
 .os-tdbox--on { background: var(--dash-ink); border-color: var(--dash-ink); }
 .os-tdbox--on svg { opacity: 1; transform: none; }
@@ -970,7 +970,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   color: var(--sp-quiet); cursor: pointer; background: none; border: 1px solid transparent;
 }
 .os-tdact:hover { background: var(--dash-page); border-color: var(--dash-hair); color: var(--dash-ink); }
-.os-tdact:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 1px; }
+.os-tdact:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the quick reference stays lit while its card is open */
 .os-tdact--on { background: var(--dash-parchment); border-color: var(--dash-frame); color: var(--dash-ink); }
 
@@ -1084,7 +1084,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   padding: 5px 12px; background: var(--dash-page); cursor: pointer; color: var(--dash-ink);
 }
 .os-tdopt:hover { border-color: rgba(28, 19, 15, 0.28); }
-.os-tdopt:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 1px; }
+.os-tdopt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .os-tdopt--on { background: var(--dash-ink); color: var(--dash-page); border-color: var(--dash-ink); }
 .os-tdnote {
   font: inherit; font-size: 14px; width: 100%; min-height: 54px; resize: vertical;
@@ -1102,7 +1102,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 }
 .os-tdb--ink { background: var(--dash-ink); color: var(--dash-page); border-color: var(--dash-ink); }
 .os-tdb--quiet { border-color: transparent; color: var(--sp-muted); }
-.os-tdb:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 2px; }
+.os-tdb:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 .os-tdmenu {
   display: flex; flex-direction: column; gap: 2px;
@@ -1119,7 +1119,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   background: none; border: 0; cursor: pointer; text-align: left; width: 100%;
 }
 .os-tdmi:hover { background: var(--dash-page); }
-.os-tdmi:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: -2px; }
+.os-tdmi:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .os-tdmi .os-tdic {
   width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--dash-hair);
   display: flex; align-items: center; justify-content: center; background: var(--dash-page);

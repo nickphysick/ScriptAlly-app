@@ -55,7 +55,7 @@
 .cl252-em .cl252-b2 { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.45); }
 .cl252-em .cl252-b1 { background: #2a3a52; color: #f4eee5; }
 .cl252-em .cl252-b1:disabled { opacity: 0.45; cursor: default; }
-.cl252-em :is(.cl252-b1, .cl252-b2):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl252-em :is(.cl252-b1, .cl252-b2):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl252-em .cl252-emfoot .qad-conf span:not([class]) { font: 400 13px/1.35 var(--sp-serif) !important; }
 
 @media (prefers-reduced-motion: reduce) { .cl252-em .qad-conf { animation: none; } }

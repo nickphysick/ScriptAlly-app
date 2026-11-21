@@ -93,7 +93,7 @@
   .cl24-th button { all: unset; cursor: pointer; font: 600 10.5px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(42, 58, 82, 0.62); }
   .cl24-th button.on { color: #2a3a52; }
   .cl24-th button i { font-style: normal; }
-  .cl24-th button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+  .cl24-th button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .cl24-gh {
     position: sticky; top: 98px; z-index: 4; box-sizing: border-box; display: flex; align-items: center; height: 40px; padding: 0 28px 0 26px;
     background: #f6f3ee; box-shadow: inset 0 1px 0 rgba(28, 19, 15, 0.09), inset 0 -1px 0 rgba(28, 19, 15, 0.09);
@@ -244,7 +244,7 @@
   display: inline-flex; align-items: center; cursor: pointer; white-space: nowrap; font: 400 15px/1 var(--sp-type);
 }
 .cl24c-call button:hover { background: #334763; }
-.cl24c-call button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl24c-call button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* You and {first}: rows are buttons that open the query */
 .cl24c .cl24c-hrow { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 0; border-bottom: 1px solid #f0ebe3; font: 400 15.5px var(--sp-serif); cursor: pointer; }
 .cl24c .cl24c-hrow:last-child { border-bottom: 0; }
@@ -345,7 +345,7 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
   .cl24-fex { all: unset; box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 9px; height: 42px; padding: 0 16px; border-radius: 10px; background: #2a3a52; color: #f4eee5; cursor: pointer; white-space: nowrap; }
   .cl24-fex span { font: 400 15.5px var(--sp-serif) !important; color: inherit; }
   .cl24-fex:hover { background: #334763; }
-  .cl24-fch:focus-visible, .cl24-fex:focus-visible, .cl24-fadd:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .cl24-fch:focus-visible, .cl24-fex:focus-visible, .cl24-fadd:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .cl24-fsel { flex: 1; display: flex; align-items: center; gap: 14px; height: 42px; min-width: 0; }
   .cl24-fsel b { font: 400 16px var(--sp-type) !important; }
   .cl24-fsel button { all: unset; cursor: pointer; font: 400 15px var(--sp-serif) !important; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, 0.35); }
@@ -426,7 +426,7 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
 .cl24w-acts .p { background: #2a3a52; color: #f4eee5; box-shadow: 0 6px 14px -8px rgba(42, 58, 82, 0.6); }
 .cl24w-acts .p:hover { background: #334763; }
 .cl24w-acts .s { border: 1px solid rgba(28, 19, 15, 0.22); background: #fff; color: #1c130f; line-height: 38px; }
-.cl24w-acts button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl24w-acts button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl24w-bd { flex: 1 1 auto; min-height: 0; overflow: auto; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1.05fr); grid-template-areas: "a b c"; }
 .cl24w-bd > section { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 20px 22px; }
 .cl24w-bd > section + section { border-left: 1px solid #ece6de; }

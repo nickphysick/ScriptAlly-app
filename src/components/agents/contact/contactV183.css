@@ -73,7 +73,7 @@
 .cl1833-pk .cl1833-it.is-add .cl183-pd { background: transparent; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22); color: rgba(28, 19, 15, 0.38); }
 .cl1833-pk .cl1833-it.is-add .cl183-pt { font-style: italic !important; color: var(--sp-quiet); }
 .cl1833-pk .cl1833-it.is-add:hover .cl183-pt { color: var(--sp-anthracite); text-decoration: underline; text-underline-offset: 3px; }
-.cl1833-pk .cl1833-it:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; border-radius: 15px; }
+.cl1833-pk .cl1833-it:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 15px; }
 /* §C — the email is the copy button: hover/focus turns the disc navy with a cream copy glyph and underlines the address;
    a copy reads "Copied" in green for 1400ms */
 .cl1833-pk .cl1833-em { cursor: pointer; }

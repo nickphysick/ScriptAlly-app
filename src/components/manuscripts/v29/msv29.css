@@ -28,7 +28,7 @@
   .ms29 .ms29-vit-g span { display: block; margin-top: 6px; font: italic 400 15px/1.35 var(--sp-serif) !important; color: rgba(244, 238, 229, .8); white-space: nowrap; }
   .ms29 .ms29-cdot { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: #f4eee5; vertical-align: 1px; }
   .ms29 .ms29-vit-add { padding: 0; border: 0; background: none; color: #f4eee5; font: 600 16px/1.3 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 4px; min-height: 32px; cursor: pointer; white-space: nowrap; }
-  .ms29 .wsnh :focus-visible { outline: 2px solid #e8bdb4; outline-offset: 3px; }
+  .ms29 .wsnh :focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 
   /* ── the frames (as on Versions v6 and the Dashboard) ──────────────────────────────────────────────────────── */
   /* Consistency roll-out v1, Phase 8: the framed card (primitives.css `.sp-rc` › `.sp-rc-in`) — rim radius 28 → 20, padding 10 → 8, inner radius 20 → 13 */
@@ -48,7 +48,7 @@
   .ms29 .ms29-b2.is-done { background: #e0e5dd; box-shadow: 0 0 0 1px rgba(28, 19, 15, .14); }
   .ms29 .ms29-lk { padding: 0; border: 0; background: none; min-height: 32px; cursor: pointer; font: 600 16px/1.3 var(--sp-serif) !important; color: #1c130f; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; white-space: nowrap; }
   .ms29 .ms29-lk:hover { color: #2a3a52; }
-  .ms29 :is(.ms29-b2, .ms29-lk, .ms29-dt-r):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .ms29 :is(.ms29-b2, .ms29-lk, .ms29-dt-r):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   /* ── the desk: the pitch · the details ─────────────────────────────────────────────────────────────────────── */
   /* the ref's 24 under the header (its `.head` margin), where the shared header sheet gives every page 48 */
@@ -116,4 +116,10 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .ms29 .ms29-pt.is-flash { animation: none !important; }
+}
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+@media (min-width: 768px) {
+  .ms29 .ms29-dt-r:hover { background: #f8f4ed; }
 }

@@ -80,7 +80,7 @@
 .qc152 .qc152-x:hover { background: #fff; }
 .qc152 .qc152-band.dk .qc152-x { background: rgba(255, 255, 255, 0.14); color: #fff; }
 .qc152 .qc152-band.dk .qc152-x:hover { background: rgba(255, 255, 255, 0.26); }
-.qc152 .qc152-x:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.qc152 .qc152-x:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the head: initials, name, agency, the status pill (white body, coloured cap, StatusDot) */
 .qc152 .qc152-agent { display: flex; align-items: center; gap: 14px; padding: 14px 18px 11px; }
@@ -105,7 +105,7 @@
 .qc152 .qc152-tabs button { all: unset; cursor: pointer; padding-bottom: 9px; font: 400 16px var(--sp-serif); color: #9a948b; }
 .qc152 .qc152-tabs button[aria-selected="true"] { color: #1c130f; box-shadow: inset 0 -2px 0 #1c130f; }
 .qc152 .qc152-tabs button:hover { color: #1c130f; }
-.qc152 .qc152-tabs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+.qc152 .qc152-tabs button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the tab body is the only thing that scrolls */
 /* v158: it takes all the room between the tab bar and the footer */
@@ -203,7 +203,7 @@
 .qc152 .qc152-rbtn.nv { background: #2a3a52; color: #fff; }
 .qc152 .qc152-rbtn.gh { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .qc152 .qc152-rbtn:hover { filter: brightness(1.12); }
-.qc152 .qc152-rbtn:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152 .qc152-rbtn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (max-width: 1400px) {
   .qc152 .qc152-bx { min-width: 0; }
   .qc152 .qc152-th { padding: 16px 14px 12px; }
@@ -250,3 +250,7 @@
 /* Query card v158 — the card is always its full height (--qc152-h, above) while reading, in every tab and for every
    query: it no longer shrinks to a short thread or changes size with the tab, so the footer never moves. (Workspace
    width v2's `height: auto` while reading is gone.) A journey stepping inside keeps the height it has. */
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.qc152 .qc152-rbtn.nv:hover:not(:disabled) { background: var(--sp-navy-hover); }

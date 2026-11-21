@@ -134,6 +134,9 @@
   /* Consistency roll-out v2, Phase 2 (ruling 10): red only on "Delete account…", "Withdraw it" and
      "I've decided not to send it" — the three actions that end something for good. */
   --sp-danger: #a63d2f;
+  /* Consistency roll-out v2, Phase 6 (ruling 11): a filled navy button's hover ground. --sp-anthracite-hov (#34465f, a
+     LIGHTER step) keeps its value for the header pills that still read it. */
+  --sp-navy-hover: #24304a;
   --sp-lift: 0 2px 8px rgba(28, 19, 15, 0.06);
   /* Consistency roll-out v1, Phase 7 (ruling 6): three heading sizes for the page body of workspace pages and the
      Dashboard. Each is a whole `font` shorthand, read as `font: var(--sp-h-…) !important` (brand.tsx forces h1–h3
@@ -197,7 +200,7 @@
 :root { --sp-px-size: 36px; --sp-pfoot-h: 72px; --sp-pfoot-pad: 14px 24px; --sp-pfoot-rule: 1px solid rgba(28, 19, 15, .1); }
 .sp-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
 .sp-btn--fill { background: var(--sp-anthracite); color: #fff; }
-.sp-btn--fill:hover:not(:disabled) { background: var(--sp-anthracite-hov); }
+.sp-btn--fill:hover:not(:disabled) { background: var(--sp-navy-hover); } /* roll-out v2, Phase 6 (ruling 11): darker, not --sp-anthracite-hov's lighter step */
 .sp-btn--line { background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); }
 .sp-btn--line:hover:not(:disabled) { background: var(--sp-btn-line-hov); }
 .sp-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
@@ -293,7 +296,7 @@
 }
 .sp-inkpill:hover { background: var(--sp-anthracite-hov); }
 .sp-inkpill:active { transform: translateY(1px); }
-.sp-inkpill:focus-visible { outline: 2px solid var(--sp-frame); outline-offset: 2px; }
+.sp-inkpill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .sp-inkpill svg { width: 17px; height: 17px; flex: none; margin-top: -2px; stroke-width: 1.9; }
 .sp-inkpill-l { font-family: var(--sp-type); padding-top: 2px; }
 
@@ -315,4 +318,13 @@
     transition: none;
   }
   .sp-disc:hover, .sp-inkpill:active { transform: none; }
+}
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): ONE FOCUS RING. Every focusable button, link, tab, pill and row
+   that states no ring of its own takes a 2px navy outline, 2px off; on navy and other dark grounds the sheets state cream
+   #f4eee5. :where() keeps this at zero specificity, so a sheet's own (now standard) ring wins. Text fields are not in it:
+   they keep their navy focus edge and take no outer ring. */
+:where(button, a[href], summary, [role="button"], [role="tab"], [role="radio"], [role="option"], [role="switch"], [role="menuitem"], [role="checkbox"], [tabindex]:not([tabindex="-1"])):where(:not(input, textarea, select)):focus-visible {
+  outline: 2px solid var(--sp-anthracite);
+  outline-offset: 2px;
 }

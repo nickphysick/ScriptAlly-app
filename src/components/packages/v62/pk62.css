@@ -25,7 +25,7 @@
 .pk62 *, .k62-layer * { box-sizing: border-box; }
 .pk62 h2, .pk62 h3, .pk62 h4, .pk62 p, .k62-layer h3, .k62-layer p { margin: 0; }
 .pk62 button, .k62-layer button { font-family: inherit; color: inherit; cursor: pointer; }
-.pk62 :focus-visible, .k62-layer :focus-visible { outline: 2px solid var(--k62-navy); outline-offset: 2px; }
+.pk62 :focus-visible, .k62-layer :focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* ⚠️ THE BRAND FONT OVERRIDE (lib/brand.tsx) names span/p/div/button/label as the body sans on every route and forces
    h1/h2/h3 to the brand heading face with !important. Text elements here inherit their card's face; the page's own
    headings state theirs with !important (two classes, so they win between two important declarations). */
@@ -365,3 +365,8 @@
 @media (prefers-reduced-motion: reduce) {
   .pk62 *, .k62-layer * { animation: none !important; transition: none !important; }
 }
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.k62-layer .k62-btn.k62-pri:hover:not(:disabled) { background: var(--sp-navy-hover); }
+.pk62 .k62-prow:hover:not([aria-current="true"]) { background: #f8f4ed; }

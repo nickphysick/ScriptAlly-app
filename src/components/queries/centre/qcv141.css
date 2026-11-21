@@ -41,7 +41,7 @@
 }
 .qc141-rw:first-of-type { border-top: 0; }
 .qc141-rw:hover { background: #f6f2ec; }
-.qc141-rw:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.qc141-rw:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qc141-rw:disabled { cursor: default; }
 .qc141-rw b { font: 400 22px/1 var(--sp-type) !important; color: #1c130f; text-align: right; }
 .qc141-rw .qc141-rl, .qc141-rw .qc141-rl span { font: 400 15px/1.15 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
@@ -100,7 +100,7 @@
   .qc138-sheet .qc141-rws button span { font: inherit !important; color: inherit; }
   .qc138-sheet .qc141-rws .qc141-m--b { width: 9px; height: 9px; border-radius: 2px; align-self: center; }
   .qc138-sheet .qc141-rws button:hover:not(:disabled) { background: rgba(244, 238, 229, 0.09); }
-  .qc138-sheet .qc141-rws button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
+  .qc138-sheet .qc141-rws button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
   .qc138-sheet .qc141-rws button.on { background: #f4eee5; color: #1c130f; }
   .qc138-sheet .qc141-rws button.on b { color: #1c130f; }
   .qc138-sheet .qc141-bk.pk .qc141-rws button:not(.on) { opacity: 0.5; }

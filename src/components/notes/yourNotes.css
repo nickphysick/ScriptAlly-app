@@ -59,7 +59,7 @@
 .yn .yn-grid .os-card { margin: 0; }
 .yn .d2-meta .yn-newlink { all: unset; cursor: pointer; font-weight: 600; color: var(--yn-ink); }
 .yn .d2-meta .yn-newlink:hover { text-decoration: underline; text-underline-offset: 3px; }
-.yn .d2-meta .yn-newlink:focus-visible { outline: 2px solid var(--yn-navy); outline-offset: 2px; border-radius: 4px; }
+.yn .d2-meta .yn-newlink:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 4px; }
 
 /* the switch: the feed's light pill (dashboard-v2-2 `.fsw`) */
 .yn-nf { padding: 14px 18px 4px; }
@@ -70,7 +70,7 @@
 }
 .yn .yn-fsw button[aria-pressed="true"] { background: #fff; color: var(--yn-ink); box-shadow: 0 1px 3px rgba(28, 19, 15, 0.12); }
 .yn .yn-fsw button small { margin-left: 5px; font: 400 12.5px var(--sp-serif) !important; color: var(--sp-quiet); }
-.yn .yn-fsw button:focus-visible { outline: 2px solid var(--yn-navy); outline-offset: 1px; }
+.yn .yn-fsw button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* a note */
 .yn-nl { list-style: none; margin: 0; padding: 6px 10px 10px; }
@@ -80,7 +80,7 @@
 }
 .yn-nl li + li .yn-nr { border-top: 1px solid var(--yn-hair); border-radius: 0 0 12px 12px; }
 .yn .yn-nr:hover { background: #faf6f1; }
-.yn .yn-nr:focus-visible { outline: 2px solid var(--yn-rose); outline-offset: 2px; }
+.yn .yn-nr:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .yn .yn-nk, .yn-layer .yn-nk { width: 38px; height: 38px; flex: none; border-radius: 50%; background: #f6e2d9; color: var(--yn-rose); display: grid; place-items: center; }
 .yn-nk svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .yn-nt { min-width: 0; }
@@ -132,7 +132,7 @@
 }
 .yn .yn-btn.pri, .yn-layer .yn-btn.pri { background: var(--yn-navy); color: #fff; box-shadow: none; }
 .yn .yn-btn:disabled, .yn-layer .yn-btn:disabled { background: #d9d3cb !important; color: #fff !important; cursor: not-allowed; box-shadow: none; }
-.yn .yn-btn:focus-visible, .yn-layer .yn-btn:focus-visible { outline: 2px solid var(--yn-navy); outline-offset: 2px; }
+.yn .yn-btn:focus-visible, .yn-layer .yn-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── a note's panel ─────────────────────────────────────────────────────────────────────────────────────────────── */
 .yn-layer.d58 { position: fixed; inset: 0; z-index: 70; height: auto; display: block; font: 16px/1.5 var(--sp-serif) !important; color: var(--yn-ink); }
@@ -147,7 +147,7 @@
 .yn-layer .yn-pcard h2.os-cardttl { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .yn-layer .yn-dx { all: unset; box-sizing: border-box; cursor: pointer; margin-left: auto; width: 30px; height: 30px; flex: none; border-radius: 50%; background: rgba(255, 255, 255, 0.75); display: grid; place-items: center; box-shadow: inset 0 0 0 1px #e2c8bc; }
 .yn-layer .yn-dx svg { width: 14px; height: 14px; fill: none; stroke: #7a3f31; stroke-width: 2; stroke-linecap: round; }
-.yn-layer .yn-dx:focus-visible { outline: 2px solid var(--yn-navy); outline-offset: 2px; }
+.yn-layer .yn-dx:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .yn-db { flex: 1; overflow-y: auto; padding: 18px 20px; }
 .yn-layer .yn-dk { margin: 0 0 8px; font: 600 14px var(--sp-serif) !important; color: var(--sp-rust); }
 .yn-layer .yn-dnote { padding: 14px 16px; border-radius: 12px; background: var(--yn-fill); font: 16px/1.55 var(--sp-serif) !important; color: var(--yn-ink); white-space: pre-wrap; overflow-wrap: anywhere; }

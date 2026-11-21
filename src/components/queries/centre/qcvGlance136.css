@@ -37,7 +37,7 @@
 .qcg .qcg-card.is-on { box-shadow: 0 0 0 2px var(--sp-anthracite); }
 /* the whole card is the button; its contents sit above it and let presses through (the faces take the pointer for their popup) */
 .qcg .qcg-hit { position: absolute; inset: 0; z-index: 0; margin: 0; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; }
-.qcg .qcg-card:has(.qcg-hit:focus-visible) { outline: 2px solid #e0a188; outline-offset: 2px; }
+.qcg .qcg-card:has(.qcg-hit:focus-visible) { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .qcg .qcg-hit:focus-visible { outline: none; }
 .qcg .qcg-card > *:not(.qcg-hit) { position: relative; z-index: 1; pointer-events: none; }
 

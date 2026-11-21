@@ -36,7 +36,7 @@
 .qlp :is(h1, h2, h3, h4, p):not(.qc1531-hd *) { margin: 0; }
 .qlp button:not(.qc1531-hd *) { cursor: pointer; color: inherit; }
 .qlp > * { max-width: calc(var(--work-max) - 2 * var(--work-gutter)); margin-inline: auto; }
-.qlp :focus-visible { outline: 2px solid var(--ql-navy); outline-offset: 2px; }
+.qlp :focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── the header (v2.4): the Query Centre's navy header as built (qcv1534 §2–3, qcv156 §1), reached through the
    `.qc151.qc153` wrapper. This page's one difference: two parts, the drawing and the title block, so the right-hand

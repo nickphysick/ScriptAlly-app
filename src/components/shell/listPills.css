@@ -23,7 +23,7 @@
 .lp.lp--joined { border-radius: 20px 0 0 20px; padding-right: 12px; }
 .lp.lp-dir { border-radius: 0 20px 20px 0; width: 40px; padding: 0; margin-left: 1px; justify-content: center; font-size: 15px; }
 .lp-join { display: inline-flex; }
-.lp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.lp:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the popover */
 .lpop {

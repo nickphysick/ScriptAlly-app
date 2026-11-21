@@ -16,7 +16,7 @@
 .phc .phc-p:hover { background:#334763 }
 .phc .phc-s { border:1px solid rgba(28,19,15,.22);background:#fff;color:#1c130f }
 .phc .phc-s:hover { border-color:rgba(28,19,15,.45) }
-.phc .phc-b button:focus-visible { outline:2px solid #c9765d;outline-offset:2px }
+.phc .phc-b button:focus-visible { outline:2px solid var(--sp-anthracite);outline-offset:2px }
 .phc .phc-art { position:relative;height:150px;display:grid;place-items:center }
 .phc .phc-art img { height:180px;width:auto;object-fit:contain;filter:drop-shadow(0 10px 14px rgba(28,19,15,.18)) }
 /* the `sheet` container is the Versions page root's (versionsV2.app.css); on a page without one this never applies */

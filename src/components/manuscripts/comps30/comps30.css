@@ -26,7 +26,7 @@
 .cp30 *, .cp30 *::before, .cp30 *::after, .cp30-layer *, .cp30-layer *::before, .cp30-layer *::after { box-sizing: border-box; }
 .cp30 :where(h1, h2, h3, h4, p, ul), .cp30-layer :where(h1, h2, h3, h4, p, ul) { margin: 0; }
 .cp30 :where(button), .cp30-layer :where(button) { font: inherit; color: inherit; cursor: pointer; }
-.cp30 :focus-visible, .cp30-layer :focus-visible { outline: 2px solid var(--c30-navy); outline-offset: 3px; }
+.cp30 :focus-visible, .cp30-layer :focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── buttons (the app's) ── */
 :is(.cp30, .cp30-layer) .cp30-btn { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 20px; border-radius: 10px; border: 0; font: 400 16px/1 var(--c30-type); white-space: nowrap; }

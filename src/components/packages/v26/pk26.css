@@ -30,7 +30,7 @@
 /* focus: one ring in Harbour, inside the page and its layers */
 .p6 :is(button, a, [role="tab"], [draggable="true"]):focus-visible,
 .p6-layer :is(button, a, [role="tab"], [role="radio"]):focus-visible {
-  outline: 2px solid #1d4b63;
+  outline: 2px solid var(--sp-anthracite);
   outline-offset: 2px;
 }
 .p6-layer :is(input, textarea):focus,

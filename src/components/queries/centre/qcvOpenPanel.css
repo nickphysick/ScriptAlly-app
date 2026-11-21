@@ -28,7 +28,7 @@
   font-family: var(--sp-serif); font-weight: 400; font-size: 24px; line-height: 1; display: grid; place-items: center;
 }
 .qsp .qcv-open-x:hover { background: rgba(244, 238, 229, 0.12); color: #f4eee5; }
-.qsp .qcv-open-x:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
+.qsp .qcv-open-x:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .qsp .qcv-open .qcv-open-line { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; margin: 0; padding: 16px 26px 0; }
 .qsp .qcv-open .qcv-open-pill { display: flex; align-items: center; gap: 7px; height: 30px; padding: 0 13px; border-radius: 15px; background: #f4eee5; color: #1c130f; font-family: var(--sp-serif); font-size: 15px; line-height: 1; white-space: nowrap; }
 .qsp .qcv-open .qcv-open-day { margin: 0; font-family: var(--sp-serif); font-weight: 400; font-size: 15px; line-height: 21px; letter-spacing: 0; text-transform: none; color: rgba(244, 238, 229, 0.75); }

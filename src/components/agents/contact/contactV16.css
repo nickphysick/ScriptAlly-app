@@ -103,7 +103,7 @@
 .cl16-list .clv-ixtab.on { background: #1f2a3c; color: #f4eee5; }
 .cl16-list .clv-ixtab.on i { color: rgba(244, 238, 229, 0.7); }
 .cl16-list .clv-ixtab.clv-ixall { background: #e6dfd3; font: 500 12px/1 var(--sp-serif); color: #1c130f; }
-.cl16-list .clv-ixtab:focus-visible { outline: 2px solid #1f2a3c; outline-offset: 2px; }
+.cl16-list .clv-ixtab:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* a letter's landing: the row it scrolled to, washed for 1.4s (the page removes the mark) */
 .cl16-list .clv-row[data-wash] { background: #fbf6ea; }
 
@@ -144,7 +144,7 @@
   }
   .cl16-list[data-pinned="true"] .cl16-frow .cl16-sum span { font-family: inherit !important; }
   .cl16-list[data-pinned="true"] .cl16-frow .cl16-sum:hover { background: rgba(28, 19, 15, 0.05); }
-  .cl16-list .cl16-sum:focus-visible { outline: 2px solid #1f2a3c; outline-offset: 2px; }
+  .cl16-list .cl16-sum:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 }
 
 /* ── §E · FULL SCREEN. The bar's button; and, while on, the header panel, the strip, "The full list" and the
@@ -160,7 +160,7 @@
 }
 .cl16-bar .cl16-fsb svg { display: block; flex: none; }
 .cl16-bar .cl16-fsb:hover, .cl16-bar .cl16-fsb[aria-pressed="true"] { background: #f4eee5; color: #1f2a3c; box-shadow: none; }
-.cl16-bar .cl16-fsb:focus-visible { outline: 2px solid #e0a188; outline-offset: 2px; }
+.cl16-bar .cl16-fsb:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 @media (max-width: 767.98px) { .cl16-bar .cl16-fsb { display: none; } }
 @media (min-width: 768px) {
   .clv-group[data-full] > :is(.cl16-gl, .af) { display: none; }
@@ -176,5 +176,5 @@
 .cl16-frow .cl16-fchip b { font-family: inherit !important; font-weight: 600; }
 .cl16-frow .cl16-fchip:hover { background: #ebe5db; }
 .cl16-frow .cl16-fchip[aria-pressed="true"] { background: var(--sp-anthracite); color: #f4eee5; }
-.cl16-frow .cl16-fchip:focus-visible { outline: 2px solid #1f2a3c; outline-offset: 2px; }
+.cl16-frow .cl16-fchip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl16-list[data-pinned="true"] .cl16-frow .cl16-fchip { height: 30px; }

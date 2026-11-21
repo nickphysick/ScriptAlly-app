@@ -70,7 +70,7 @@
 .d58 .d71-hb > span { font-family: inherit !important; }
 .d58 .d71-hb svg { flex: none; width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
 .d58 .d71-hb:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.32); }
-.d58 .d71-hb:focus-visible { outline: 2px solid #f4efe6; outline-offset: 2px; }
+.d58 .d71-hb:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .d58 .d71-hb--pri { background: #f4efe6; color: var(--d58-ink); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25); }
 .d58 .d71-hb--pri svg { stroke: var(--sp-rust); }
 .d58 .d71-hb--pri:hover { background: #fff; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25); transform: translateY(-1px); }
@@ -233,7 +233,7 @@
   line-height: 1;
   cursor: pointer;
 }
-.d58 .d71-pos button:focus-visible, .d58 .d71-view:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d58 .d71-pos button:focus-visible, .d58 .d71-view:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d71-th[data-ink="dark"] .d71-pos button { background: #fff; color: var(--d58-ink); }
 .d71-th[data-ink="light"] .d71-pos button:focus-visible { outline-color: #fff; }
 

@@ -19,7 +19,7 @@
   --c15-type: var(--sp-type); --c15-serif: var(--sp-serif);
 }
 .cb15 button, .cb15-layer button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; text-align: left; }
-.cb15 button:focus-visible, .cb15 [tabindex]:focus-visible, .cb15-layer button:focus-visible, .cb15-layer [tabindex]:focus-visible { outline: 2.5px solid #6a89a7; outline-offset: 2px; }
+.cb15 button:focus-visible, .cb15 [tabindex]:focus-visible, .cb15-layer button:focus-visible, .cb15-layer [tabindex]:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cb15 [hidden], .cb15-layer [hidden] { display: none !important; }
 .cb15 svg { flex: none; }
 
@@ -37,7 +37,7 @@
 .cb15 .cb15-brk svg { width: 16px; height: 16px; flex: none; opacity: .8; }
 .cb15 .cb15-brk button:hover span, .cb15 .cb15-brk button.cb15-on span { color: #fff; text-decoration: underline; text-underline-offset: 4px; }
 .cb15 .cb15-brk button.cb15-on b { color: var(--c15-terra); }
-.cb15 .cb15-brk button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+.cb15 .cb15-brk button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 /* the narrower desk (the ref at 1280): the figures sit tighter so the title and its two buttons keep one line each */
 @media (max-width: 1440px) {
   .cb15 .cb15-brk button { min-width: 0; padding: 6px 16px 8px; }
@@ -53,7 +53,7 @@
 .cb15 .cb15-psws .cb2-hsw i { display: block; width: 54px; height: 54px; border-radius: 2px; background: var(--c); box-shadow: 0 10px 12px -8px rgba(0, 0, 0, .7); transition: transform .15s; }
 .cb15 .cb15-psws .cb2-hsw:hover i { transform: translateY(-3px); }
 .cb15 .cb15-psws .cb2-hsw span { font: 400 14px/1 var(--c15-serif) !important; color: rgba(244, 238, 229, .88); }
-.cb15 .cb15-psws .cb2-hsw:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+.cb15 .cb15-psws .cb2-hsw:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 
 /* ═════════ the page ═════════ */
 .cb15 .cb15-desk { padding-bottom: 90px; color: var(--c15-ink); font: 400 16px/1.45 var(--c15-serif); }
@@ -112,7 +112,7 @@
 .cb15 .cb15-note { position: relative; cursor: pointer; outline: none; transition: transform .18s ease, opacity .2s; }
 .cb15 .cb15-note:hover, .cb15 .cb15-note:focus-visible { transform: translateY(-2px); }
 .cb15 .cb15-note:focus-visible { outline: none; }
-.cb15 .cb15-note:focus-visible .cb15-paper { outline: 2.5px solid #6a89a7; outline-offset: 3px; }
+.cb15 .cb15-note:focus-visible .cb15-paper { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cb15 .cb15-note[draggable="true"] { cursor: grab; }
 .cb15 .cb15-note.cb15-drag { opacity: .35; }
 .cb15 .cb15-note.cb15-dt::before { content: ""; position: absolute; left: 0; right: 0; top: -12px; height: 4px; border-radius: 2px; background: var(--c15-navy); }

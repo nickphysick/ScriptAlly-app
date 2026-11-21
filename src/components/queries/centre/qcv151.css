@@ -32,7 +32,7 @@
   .qc151-btn--g { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px #d9d0c3; }
   .qc151-btn--g:hover { box-shadow: inset 0 0 0 1px #b9ad9e; }
   .qc151-btn--n { background: var(--navy); color: #fff; }
-  .qc151-btn:focus-visible, .qc151-bb:focus-visible, .qc151-mv:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+  .qc151-btn:focus-visible, .qc151-bb:focus-visible, .qc151-mv:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .qc151-btn:disabled { opacity: 0.55; cursor: default; }
 
   /* v151.2 §1 the header is a navy banner: the title and the count line left, two 46px pill buttons right */
@@ -117,7 +117,7 @@
   .qc1511-q b { margin-left: 6px; font: 400 16px/1 var(--sp-type) !important; color: var(--ink); }
   .qc1511-q[aria-pressed="true"] { background: var(--navy); color: #fff; }
   .qc1511-q[aria-pressed="true"] b { color: #fff; }
-  .qc1511-q:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+  .qc1511-q:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .qc1511-qr .qc151-sw { margin-right: 0; }
 
   /* v151.1 §4 the control line: no container, a hairline under it */
@@ -144,7 +144,7 @@
   .qc1511-fadd:hover { color: var(--ink); box-shadow: inset 0 0 0 1px #c9bdae; }
   .qc1511-crs { all: unset; cursor: pointer; margin-left: auto; font: 400 14.5px/1.4 var(--sp-serif) !important; color: var(--sp-muted); text-decoration: underline; text-underline-offset: 3px; }
   .qc1511-crs:hover { color: var(--ink); }
-  .qc1511-fpb:focus-visible, .qc1511-fx:focus-visible, .qc1511-fadd:focus-visible, .qc1511-crs:focus-visible { outline: 2px solid #c9765d; outline-offset: -2px; }
+  .qc1511-fpb:focus-visible, .qc1511-fx:focus-visible, .qc1511-fadd:focus-visible, .qc1511-crs:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   /* v151.2 §3 the table: each group is ONE card — its coloured header on top, then its rows (white, 1px hairlines
      between, a 1.5px edge, 18px outer corners); 22px between cards; one soft drop under the table */
@@ -182,7 +182,7 @@
   .qc1511-lbl button:hover, .qc1511-lbl.is-on button { color: var(--sp-quiet); }
   .qc1511-ar { margin-left: 5px; font: 500 11px/1 var(--sp-serif) !important; color: var(--gh-ar); }
   .qc1511-lbl.is-on .qc1511-ar { color: var(--sp-quiet); }
-  .qc1511-lbl button:focus-visible, .qc1511-cv:focus-visible { outline: 2px solid #c9765d; outline-offset: 2px; }
+  .qc1511-lbl button:focus-visible, .qc1511-cv:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   /* v151.2 §4 a row: exactly 68px, white, a hairline under it; the card's edge on the outer cells */
   .qc1511-r { cursor: pointer; }
@@ -193,7 +193,7 @@
   .qc1511-r.is-last > td:first-child { border-bottom-left-radius: 18px; }
   .qc1511-r.is-last > td:last-child { border-bottom-right-radius: 18px; }
   .qc1511-r:hover > td, .qc1511-r.is-sel > td { background: #fffdfb; }
-  .qc1511-r:focus-visible { outline: 2px solid #c9765d; outline-offset: -2px; }
+  .qc1511-r:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .qc1511-tbl td.qc1511-tk { width: 104px; padding: 0 14px 0 16px; }
   .qc1511-day { display: block; margin-bottom: 6px; font: 700 13px/17px var(--sp-mono, "JetBrains Mono", monospace) !important; color: var(--sp-quiet); }
   .qc1512-nl { display: flex; align-items: center; gap: 9px; min-width: 0; }
@@ -360,7 +360,7 @@
     border-radius: 999px; color: #fff; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.35);
   }
   .qc151 .qc152-setbtn:hover, .qc151 .qc152-setbtn[aria-expanded="true"] { box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, 0.6); background: rgba(255, 255, 255, 0.08); }
-  .qc151 .qc152-setbtn:focus-visible { outline: 2px solid #f3c8ba; outline-offset: 2px; }
+  .qc151 .qc152-setbtn:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
   .qc151 .qc152-setpop {
     position: absolute; z-index: 30; top: calc(100% + 10px); right: 0; box-sizing: border-box; width: max-content; max-width: 560px;
     display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 14px 16px; border-radius: 12px;
@@ -372,5 +372,5 @@
   .qc151 .qc152-sg { display: inline-flex; gap: 2px; padding: 3px; border-radius: 11px; background: #f3efe8; }
   .qc151 .qc152-sg button { all: unset; cursor: pointer; padding: 6px 11px; border-radius: 8px; font: 400 14.5px/1.2 var(--sp-serif) !important; color: var(--sp-muted); }
   .qc151 .qc152-sg button.on { background: var(--navy); color: #fff; }
-  .qc151 .qc152-sg button:focus-visible { outline: 2px solid var(--navy); outline-offset: 1px; }
+  .qc151 .qc152-sg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 }

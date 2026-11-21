@@ -59,7 +59,7 @@
     opacity: 0; transform: translateY(4px); pointer-events: none; transition: opacity 150ms, transform 150ms;
   }
   .qc151 .qc154-card:hover .qc1561-chip, .qc151 .qc154-card:focus-within .qc1561-chip { opacity: 1; transform: none; pointer-events: auto; }
-  .qc151 .qc154-card .qc1561-chip:focus-visible { opacity: 1; transform: none; outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .qc151 .qc154-card .qc1561-chip:focus-visible { opacity: 1; transform: none; outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .qc151 .qc1561-chip:hover { background: #334763; }
   .qc151 .qc1561-arr { font: 600 17px/1 var(--sp-serif) !important; color: #f4eee5; }
   /* the tooltip: the action's label, above the chip, right-aligned to it */

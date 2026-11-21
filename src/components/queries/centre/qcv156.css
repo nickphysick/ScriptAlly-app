@@ -63,7 +63,7 @@
   :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-b--n:hover { background: #fbf7f0; }
   :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-b--g { background: transparent; color: #f4eee5; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.6); }
   :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-b--g:hover { box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, 0.9); background: rgba(244, 238, 229, 0.06); }
-  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-b:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+  :is(.qc151.qc153, .cl27, .tws56-hdw, .wsnh) > .qc1531-hd.qc1531-hd .qc1531-b:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 }
 
 /* ── §2 · "this week" as a line, straight on the navy (QcLine156): the ref's .zalt, 380 wide against the list's right
@@ -120,7 +120,7 @@
     border-radius: 10px; background: #2a3a52; color: #fbf7f0; font: 400 16px/1 var(--sp-type) !important; white-space: nowrap;
   }
   :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sb:hover { background: #334763; }
-  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sb:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sb:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sb:disabled { opacity: 0.55; cursor: default; }
 }
 @media (min-width: 768px) and (prefers-reduced-motion: reduce) {

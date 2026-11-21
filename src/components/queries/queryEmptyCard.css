@@ -71,4 +71,4 @@
 .qce-alts .qce-alt { margin-top: 0; }
 .qce-dot { color: #cdbfae; font-size: 9px; }
 .qce-cta:focus-visible,
-.qce-alt:focus-visible { outline: 2px solid var(--sage, #8a9e88); outline-offset: 2px; }
+.qce-alt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }

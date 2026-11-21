@@ -151,7 +151,7 @@
   scrollbar-width: none;
 }
 .dc-strip::-webkit-scrollbar { display: none; }
-.dc-strip:focus-visible { outline: 2px solid var(--dc-accent); outline-offset: -3px; border-radius: 14px; }
+.dc-strip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 14px; }
 
 /* ---------- back-to-today: reserved footer row (no jump/overlap), hidden until scrolled off today ---------- */
 .dc-featfoot { display: flex; justify-content: center; min-height: 40px; margin-top: 2px; }

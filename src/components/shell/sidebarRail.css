@@ -137,7 +137,7 @@
   .wsr .wsr-av:hover { background: rgba(var(--ink-cream-rgb), 0.16); }
 
   /* keyboard focus: one terracotta ring everywhere in the rail */
-  .wsr :focus-visible { outline: 2px solid var(--ink-terra) !important; outline-offset: 2px; border-radius: 10px; }
+  .wsr :focus-visible { outline: 2px solid #f4eee5 !important; outline-offset: 2px; border-radius: 10px; }
   .wsr .wsr-ni:focus-visible { outline-offset: -2px; }
 
   /* ── short windows: rows keep their height, the icons and rules tighten, the nav scrolls ── */

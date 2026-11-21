@@ -468,7 +468,7 @@
 /* the way back reads as a line of text in the panel, as the reference draws it */
 .qad-root.qad-root--panel .qad-from { display: block; margin: 0 0 12px; padding: 0; border-radius: 0; background: none; color: rgba(255, 255, 255, 0.92); font-family: var(--qad-serif); font-weight: 400; font-size: 15px; line-height: 1.3; letter-spacing: 0; text-transform: none; cursor: pointer; }
 .qad-root.qad-root--panel .qad-from:hover { background: none; color: #fff; text-decoration: underline; text-underline-offset: 4px; }
-.qad-root.qad-root--panel .qad-from:focus-visible { outline: 2px solid #fff; outline-offset: 2px; border-radius: 3px; }
+.qad-root.qad-root--panel .qad-from:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 3px; }
 .qad-root--panel .qad-head { padding: 22px 26px 18px; }
 /* ruling 4 — at the panel's width the stepper is its numbered circles, and only the CURRENT step's name is drawn,
    on one line under its circle. Every step still carries its name as its accessible name and its title. A flex

@@ -31,7 +31,7 @@
 }
 .d58.d2 .d22-fold:hover { background: #fff; }
 .d58.d2 .d22-fold svg { width: 14px; height: 14px; }
-.d58.d2 :is(.d22-fold, .d22-how, .d22-tell button, .d22-road li):focus-visible { outline: 2px solid #7a3f31; outline-offset: 2px; }
+.d58.d2 :is(.d22-fold, .d22-how, .d22-tell button, .d22-road li):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the body */
 .d58.d2 .d22-body {

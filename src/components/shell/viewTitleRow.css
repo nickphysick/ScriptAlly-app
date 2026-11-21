@@ -31,7 +31,7 @@
 .cl20-vs button svg { flex: none; }
 .cl20-vs button:hover:not([aria-selected="true"]):not(:disabled) { background: #f4f0e9; color: #1c130f; }
 .cl20-vs button[aria-selected="true"] { background: #2a3a52; color: #f4eee5; cursor: default; }
-.cl20-vs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl20-vs button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* Full screen: 10px after the pill, the same white and ring */
 .cl20-tr .cl20-fs {
@@ -42,7 +42,7 @@
 }
 .cl20-tr .cl20-fs > span:not(.cl20-tip) { font: inherit !important; }
 .cl20-tr .cl20-fs:hover { background: #f4f0e9; }
-.cl20-tr .cl20-fs:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl20-tr .cl20-fs:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the tooltip (v138.6's): "Full screen" and the F key cap, under the button after 400ms; never a native title */
 .cl20-tip {
@@ -70,4 +70,4 @@
 .cl20-vsi button .cl20-vsl { display: none; font: inherit !important; color: inherit; }
 .cl20-vsi button:hover:not([aria-selected="true"]):not(:disabled) { background: rgba(244, 238, 229, 0.12); }
 .cl20-vsi button[aria-selected="true"] { background: rgb(244, 238, 229); color: #2a3a52; cursor: default; }
-.cl20-vsi button:focus-visible { outline: 2px solid rgb(244, 238, 229); outline-offset: 1px; }
+.cl20-vsi button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }

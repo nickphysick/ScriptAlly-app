@@ -127,7 +127,7 @@
   font-size: 15px; color: #7d6c5c;
 }
 .tl-wchv:hover { background: #f6f1ea; color: var(--tl-nearblack); }
-.tl-wchv:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+.tl-wchv:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* ⚠️ PRESENT ONLY ONCE THE WINDOW HAS MOVED, and gone again on return — a Today link beside a
    board already showing today is a control that does nothing. The same rule the sidebar's
    `Back to today` followed; this is that control, moved and renamed. */
@@ -148,7 +148,7 @@
   background: transparent; font-size: 11.5px; color: #6a5a50;
 }
 .tl-dseg button[data-on="true"] { background: #fff; color: var(--tl-nearblack); box-shadow: 0 1px 2px rgba(58, 28, 20, .08); }
-.tl-dseg button:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+.tl-dseg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ THE VIEWS PILLS AND THE AT-A-GLANCE TILES ARE DELETED WITH THEIR RENDERERS (v64 §E) — every
    `.gpill`, `.sbx`, `.sbh`, `.slbl` and `.st` rule. Both directions checked: nothing renders the
@@ -186,7 +186,7 @@
 /* an OPEN card squares its foot so the options below are the same object */
 .tl-pr.open { border-radius: 10px 10px 0 0; border-bottom-color: transparent; }
 .tl-pr:hover { border-color: #cdbfa8; }
-.tl-pr:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+.tl-pr:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .tl-prchev { color: #a89880; font-size: 12px; transition: transform .12s; }
 .tl-pr.open .tl-prchev { transform: rotate(90deg); }
 @media (prefers-reduced-motion: reduce) { .tl-prchev { transition: none; } }
@@ -210,7 +210,7 @@
   font-size: 12px; color: #4a3d33;
 }
 .tl-px > button:hover { background: rgba(255, 255, 255, .7); }
-.tl-px > button:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+.tl-px > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .tl-px > button b {
   margin-left: auto;
   font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 8px; letter-spacing: .1em;
@@ -902,7 +902,7 @@
   color: var(--tl-label); cursor: pointer; background: none; border: 0; padding: 0; margin-left: 2px;
 }
 .tl-gtbtn:hover { color: var(--tl-nearblack); }
-.tl-gtbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+.tl-gtbtn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ NO BORDER, NO RADIUS, NO CLIP — THE ROWS HAVE NO CONTAINER OF THEIR OWN.
    The ref draws ONE card, its `.panel`, and says so in its own prose: "Rows are full width to a
@@ -1158,7 +1158,7 @@
   border: 0; background: none; padding: 0 12px; margin: 0; font: inherit; color: inherit;
   text-align: left; cursor: pointer;
 }
-.tl-nmbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+.tl-nmbtn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 .tl-ag {
   font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 7.5px; letter-spacing: 0.13em;
@@ -1553,7 +1553,7 @@
    20px one — the marker grows and the thing inside it does not. */
 .tl-mk2 svg { display: block; width: calc(var(--mk) * .42); height: calc(var(--mk) * .42); }
 button.tl-mk2 { cursor: pointer; }
-.tl-mk2:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+.tl-mk2:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .tl-rrow.closed .tl-mk2 { opacity: .6; }
 
 
@@ -1598,7 +1598,7 @@ button.tl-mk2 { cursor: pointer; }
 .tl-tchip.grab { cursor: grab; }
 .tl-tchip.grab:active { cursor: grabbing; }
 button.tl-tchip { cursor: pointer; }
-.tl-tchip:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+.tl-tchip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ══ TODAY, THE CROSSHAIR AND THE ONE TOOLTIP ══════════════════════════════════════════════
  *
@@ -1773,7 +1773,7 @@ button.tl-tchip { cursor: pointer; }
 }
 .tl-btn:hover { border-color: #d3c4b3; color: #1c130f; }
 .tl-btn.primary { background: #f5e2da; border-color: #e8c8bc; color: #1c130f; }
-.tl-btn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 1px; }
+.tl-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ THE WORKSPACE'S WHOLE CSS FAMILY IS DELETED (v65 §A) — `.tl-split`, the collapsed day
    column (`.tl-col*`, `.tl-crow`, `.tl-mini`, `.tl-cempty`), the work column (`.tl-ws*`,
@@ -2363,7 +2363,7 @@ button.tl-tchip { cursor: pointer; }
   letter-spacing: .14em; text-transform: uppercase; white-space: nowrap;
 }
 .tl-actbtn:hover { background: #faf6ef; }
-.tl-actbtn:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+.tl-actbtn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ THE URGENT FLAG'S STAGGERED PULSE IS RETIRED WITH THE FLAG (v63, §E). It offset alternate
    rows so a board of late work did not throb in unison; there is no flag to throb — an urgent row
@@ -2572,7 +2572,7 @@ button.tl-tchip { cursor: pointer; }
   text-align: left; text-decoration: none;
 }
 .tl-fnmlink:hover { text-decoration: underline; text-underline-offset: 2px; }
-.tl-fnmlink:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; border-radius: 2px; }
+.tl-fnmlink:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 /* ⚠️ LINE TWO IS A SENTENCE, NOT A LABEL. It was mono 8.5px uppercase with `.1em` tracking — the
    register of a tag — for a line that reads "Due 28 Aug · 15 days overdue". Inter at 12px in the
    card's own ink reads as prose, which is what it is. The `agcy` and `sepd` spans are DELETED, not
@@ -2800,7 +2800,7 @@ button.tl-tchip { cursor: pointer; }
    stuck bar covers everything scrolling beneath it; z 8 let a card's own stacking rise past it.
    The rendered ref: `.gdiv` sticky top 0, z 25, on the split layout. */
 .tl-gdiv { position: sticky; top: 0; z-index: 25; cursor: pointer; }
-.tl-gdiv:focus-visible { outline: 2px solid #7a3a28; outline-offset: -2px; }
+.tl-gdiv:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the chevron states which way the group is — it is the only thing that changes when it collapses */
 .tl-gchev {
   margin-left: 10px; flex: 0 0 auto;
@@ -2897,7 +2897,7 @@ button.tl-tchip { cursor: pointer; }
   font-family: inherit; font-size: 12px; font-weight: 500; color: var(--tl-ch-tx);
   text-decoration: underline; text-underline-offset: 3px; text-decoration-color: #b8a889;
 }
-.tl-axis .backtoday:focus-visible { outline: 2px solid #7a3a28; outline-offset: 2px; }
+.tl-axis .backtoday:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* At a glance — four tiles, two by two */
 
 

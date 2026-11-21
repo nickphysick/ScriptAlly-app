@@ -33,7 +33,7 @@
   transition: background-color 0.14s ease, color 0.14s ease;
 }
 .os-goal-more:hover { background: #f4ede4; color: #7c3a2a; }
-.os-goal-more:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+.os-goal-more:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .os-goal-more[aria-expanded="true"] { background: #f4ede4; color: #7c3a2a; }
 
 /* ── the unset state ──────────────────────────────────────────────────────────────────────── */
@@ -48,7 +48,7 @@
   transition: background-color 0.14s ease, border-color 0.14s ease;
 }
 .os-goal-set:hover { background: #f0d6cb; border-color: #dfb8a9; }
-.os-goal-set:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+.os-goal-set:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── the count, shared by the in-progress and reached states ──────────────────────────────── */
 
@@ -215,7 +215,7 @@
   transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease;
 }
 .gts-stepb:hover:not(:disabled) { background: #f5e2da; border-color: #e8c8bc; }
-.gts-stepb:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+.gts-stepb:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* ⚠️ THE ENDS DISABLE RATHER THAN WRAP. A `+` at 99 that silently returned to 1 would record a
    target the writer did not choose — the same fault as a default branch inventing a value. */
 .gts-stepb:disabled { color: #c9bcae; cursor: default; background: #faf7f2; }
@@ -235,7 +235,7 @@
   transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease;
 }
 .gts-segb:hover { background: #faf5ee; }
-.gts-segb:focus-visible { outline: 2px solid #b98a76; outline-offset: 1px; }
+.gts-segb:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the Form 11 selected treatment — the same pair the shell's own button wears */
 .gts-segb.on { background: #f5e2da; border-color: #e8c8bc; color: #7c3a2a; font-weight: 500; }
 

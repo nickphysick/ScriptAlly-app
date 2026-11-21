@@ -23,7 +23,7 @@
 .vv6 :where(.v6-card, .v6-fb, .v6-notice, .v6-vone, .v6-mhd, .v6-seg) :where(span, p, div, button, li, b, em, small, u, i, label, h2, h3, h4, ul, ol) { font-family: inherit; }
 .vv6 :where(.v6-card, .v6-fb, .v6-notice, .v6-mhd) { font-family: var(--sp-serif); color: var(--v6-ink); }
 .vv6 :where(.v6-card, .v6-fb, .v6-notice, .v6-vone, .v6-mhd) :where(button) { cursor: pointer; }
-.vv6 :where(.v6-card, .v6-notice, .v6-fb) :where(button):focus-visible { outline: 2px solid var(--v6-navy); outline-offset: 2px; }
+.vv6 :where(.v6-card, .v6-notice, .v6-fb) :where(button):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── spacing: tight inside a section, generous between (the ref's "spacing" block) ── */
 .vv6 .qc151.qc153.wsnh > .qc1531-hd.wsnh-hd.wsnh-hd { margin-bottom: 16px; }
@@ -82,7 +82,7 @@
 .vv6 .v6-vone-w > b { display: block; font: 400 24px/1.15 var(--sp-type); }
 .vv6 .v6-vone-w > span { display: block; margin-top: 4px; font: italic 400 16px/1.3 var(--sp-serif); color: rgba(244, 238, 229, .82); }
 .vv6 .v6-vone-w > u { display: inline-block; margin-top: 8px; font: 600 16px/1 var(--sp-serif); text-underline-offset: 4px; }
-.vv6 .v6-vone:focus-visible { outline: 2px solid #e8bdb4; outline-offset: 3px; border-radius: 12px; }
+.vv6 .v6-vone:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 12px; }
 
 /* ── the founding writer band: Dashboard Dash2Founding's shell (white rim, the -45° stripe) holding Packages'
    Pk41Banner content (tag, line, "Tell us what you think") ── */

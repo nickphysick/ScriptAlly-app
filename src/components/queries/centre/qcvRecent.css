@@ -37,7 +37,7 @@
     transition: background-color 0.15s;
   }
   .qcr .qcr-all:hover { background: #1c130f; }
-  .qcr .qcr-all:focus-visible { outline: 2px solid #2f5f86; outline-offset: 3px; }
+  .qcr .qcr-all:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   /* ── the stage: the panel, and the card lying over its left 150px ── */
   .qcr .qcr-stage { position: relative; padding: 0 0 30px; min-width: 0; }
@@ -61,7 +61,7 @@
   }
   .qcr .qcr-row:hover { background: #faf8f5; }
   .qcr .qcr-row.on { background: #f6efe9; }
-  .qcr .qcr-row:focus-visible { outline: 2px solid #2f5f86; outline-offset: -2px; }
+  .qcr .qcr-row:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .qcr .qcr-disc {
     width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
     font-family: var(--sp-mono); font-weight: 700; font-size: 10px; letter-spacing: 0.04em;

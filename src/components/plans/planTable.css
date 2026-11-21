@@ -8,7 +8,7 @@
 .plt-seg { display: inline-flex; gap: 3px; padding: 3px; border-radius: 999px; background: #f3ece2; border: 1px solid #e2d6c6; }
 .plt-seg button { all: unset; cursor: pointer; padding: 6px 14px; min-height: 24px; border-radius: 999px; font-size: 14px; color: var(--sp-ink); }
 .plt-seg button[aria-checked="true"] { background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .12); font-weight: 600; }
-.plt-seg button:focus-visible { outline: 2px solid var(--ink-band); outline-offset: 2px; }
+.plt-seg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .plt-scroll { overflow-x: auto; }
 .plt-t { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 16px; color: var(--sp-ink); }
 .plt-t th, .plt-t td { text-align: left; vertical-align: middle; padding: 11px 14px; border-bottom: 1px solid #efe6db; }

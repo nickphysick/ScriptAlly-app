@@ -73,8 +73,8 @@
   color: #3a2b23;
 }
 .set-railhead:focus-visible {
-  outline: 2px solid #9caa96;
-  outline-offset: 3px;
+  outline: 2px solid var(--sp-anthracite);
+  outline-offset: 2px;
   border-radius: 6px;
 }
 
@@ -122,8 +122,8 @@
   font-weight: 600;
 }
 .set-railitem:focus-visible {
-  outline: 2px solid #9caa96;
-  outline-offset: -2px;
+  outline: 2px solid var(--sp-anthracite);
+  outline-offset: 2px;
 }
 
 /* ── the foot: the plan strip ─────────────────────────────────────────────────────────────── */

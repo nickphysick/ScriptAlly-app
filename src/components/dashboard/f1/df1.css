@@ -106,7 +106,7 @@
   font-family: var(--d58-serif) !important; font-size: 13.5px; font-weight: 600; color: rgba(255, 250, 243, 0.8);
 }
 .d58 .df1-qtg button[aria-pressed="true"] { background: #fffaf3; color: #2a3a52; }
-.df1-qtg button:focus-visible { outline: 2px solid #fffaf3; outline-offset: 2px; }
+.df1-qtg button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 /* ⚠️ 224, WHICHEVER VIEW SHOWS: both views share one cell, so the switch cannot move anything below the card */
 .df1-qv { position: relative; display: grid; height: 224px; }
 .df1-qpane { grid-area: 1 / 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; }
@@ -210,7 +210,7 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
 .d58 .df1-ba:hover { background: rgba(255, 255, 255, 0.08); }
 .d58 .df1-ba--pri { background: #fffaf3; color: var(--d58-ink); box-shadow: none; }
 .d58 .df1-ba--pri:hover { background: #fff; }
-.df1-ba:focus-visible { outline: 2px solid #fffaf3; outline-offset: 2px; }
+.df1-ba:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 
 /* the goal sheet: white, square at the top so it reads as tucked under the card's bottom edge, with no gap */
 .df1-goal {
@@ -238,7 +238,7 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
   font-family: var(--d58-serif) !important; font-size: 13px; font-weight: 600; line-height: 1.25; color: var(--d58-ink);
   text-decoration: underline; text-underline-offset: 3px;
 }
-.df1-setgoal:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.df1-setgoal:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .df1-tiles { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; min-width: 0; }
 .df1-tiles > div { min-width: 0; padding: 8px 10px; border-radius: 10px; background: #f5f1eb; }
 .d58 .df1-tiles b { display: block; font-family: var(--d58-type) !important; font-weight: 400; font-size: 22px; line-height: 1; color: var(--d58-ink); }
@@ -270,7 +270,7 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
   font-family: var(--d58-serif) !important; font-size: 14px; font-weight: 600; color: #3b322c;
 }
 .d58 .df1-sw button[aria-pressed="true"] { background: #fff; color: var(--d58-ink); box-shadow: 0 1px 3px rgba(28, 19, 15, 0.12); }
-.df1-sw button:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.df1-sw button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .df1-fscroll {
   flex: 1 1 0;
   min-height: 0;
@@ -327,7 +327,7 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
 .df1-trk:empty + .df1-jf, .df1-journey > .df1-jf:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
 .d58 .df1-chip { display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 999px; background: #ece8f3; box-shadow: inset 0 0 0 1px #ddd6ea; font-size: 12px; font-weight: 600; color: var(--d58-ink); }
 .d58 .df1-btn { display: inline-flex; align-items: center; height: 30px; padding: 0 12px; border: 0; border-radius: 9px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc1; font-size: 13px; font-weight: 600; color: var(--d58-ink); white-space: nowrap; cursor: pointer; }
-.df1-btn:focus-visible, .df1-earlier:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.df1-btn:focus-visible, .df1-earlier:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .df1-mats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 8px; }
 .df1-mat { min-height: 78px; display: flex; flex-direction: column; justify-content: space-between; padding: 10px 10px 9px; border-radius: 8px; background: #fbf6ee; box-shadow: inset 0 0 0 1px #efe8de; }
 .df1-matl { display: grid; gap: 4px; }
@@ -356,7 +356,7 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
 .d58 .df1-pg { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 14px; }
 .d58 .df1-pg button { width: 26px; height: 26px; display: grid; place-items: center; padding: 0; border: 0; border-radius: 50%; background: #fff; box-shadow: inset 0 0 0 1px #e7ddd2; cursor: pointer; color: var(--d58-ink); }
 .df1-pg svg, .df1-tipx svg { width: 12px; height: 12px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.df1-pg button:focus-visible, .df1-box:focus-visible, .df1-go:focus-visible, .df1-tipx:focus-visible, .df1-tipdots button:focus-visible, .df1-notify:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.df1-pg button:focus-visible, .df1-box:focus-visible, .df1-go:focus-visible, .df1-tipx:focus-visible, .df1-tipdots button:focus-visible, .df1-notify:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* ⚠️ EVERY PAGE IN ONE CELL: the card is the tallest page's height, so paging moves nothing below it */
 .df1-tkstack { display: grid; }
 .df1-tkstack > .df1-tkb { grid-area: 1 / 1; }
@@ -454,5 +454,5 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
 .df1-fsel { display: flex; gap: 8px; margin: 16px 0 12px; }
 .d58 .df1-fsel button { height: 38px; padding: 0 14px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc1; font-family: inherit; font-size: 14.5px; color: var(--d58-ink); cursor: pointer; }
 .d58 .df1-fsel button:hover { background: #fbf9f5; }
-.df1-foot a:focus-visible, .df1-fsel button:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.df1-foot a:focus-visible, .df1-fsel button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d58 .df1-foot small { font-family: inherit; font-size: 13.5px; color: var(--sp-quiet); }

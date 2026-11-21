@@ -24,7 +24,7 @@
   }
   .cl251-cell + .cl251-cell { box-shadow: inset 1px 0 0 rgba(28, 19, 15, 0.09); }
   .cl251-cell:hover:not(:disabled):not([data-on]) { background: #faf8f5; }
-  .cl251-cell:focus-visible { outline: 2px solid #2a3a52; outline-offset: -2px; }
+  .cl251-cell:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .cl251-cell:disabled { cursor: default; }
   /* pressed: a pale wash and a 3px navy bar along the bottom edge (kept with the rule beside it) */
   .cl251-cell[data-on] { background: #f2f4f8; box-shadow: inset 0 -3px 0 #2a3a52; }
@@ -74,7 +74,7 @@
   .cl24-th button[data-cl251="head"].on { color: #2a3a52; }
   .cl24-th button[data-cl251="head"].on > span { box-shadow: inset 0 -2px 0 #2a3a52; }
   .cl24-th button[data-cl251="head"].on > i { opacity: 1; }
-  .cl24-th button[data-cl251="head"]:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; border-radius: 3px; }
+  .cl24-th button[data-cl251="head"]:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 3px; }
 
   /* E2 — a matching tag: "✓ THRILLER", its powder fill and a navy ring; "+n" in the typewriter */
   .cl24-gen .cl24-tag { flex: none; }

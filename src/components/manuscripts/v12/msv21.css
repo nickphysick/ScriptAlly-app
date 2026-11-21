@@ -52,14 +52,14 @@
 .ms21 .ms21-b2 { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .ms21 .ms21-b1:hover, .ms21 .ms21-pill:hover { background: #22304a; }
 .ms21 .ms21-b2:hover { background: #f6f3ee; }
-.ms21 :is(.ms21-b1, .ms21-b2, .ms21-pill, .ms21-ring, .ms21-arw, .ms21-vc-go, .ms21-vo, .ms21-seeall, .ms21-more):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.ms21 :is(.ms21-b1, .ms21-b2, .ms21-pill, .ms21-ring, .ms21-arw, .ms21-vc-go, .ms21-vo, .ms21-seeall, .ms21-more):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the buttons on the panel: the panel's primary and secondary treatment (they arrive as children, so the colours are
    stated here from the panel's tokens rather than by class) */
 .ms21 .ms21-hd .ms21-b1 { background: var(--hpanel-primary-bg); color: var(--hpanel-primary-fg); }
 .ms21 .ms21-hd .ms21-b1:hover { background: #fff; }
 .ms21 .ms21-hd .ms21-b2 { background: transparent; color: var(--hpanel-fg); box-shadow: inset 0 0 0 1.5px var(--hpanel-ring); }
 .ms21 .ms21-hd .ms21-b2:hover { background: rgba(244, 238, 229, 0.1); }
-.ms21 .ms21-hd :is(.ms21-b1, .ms21-b2):focus-visible { outline: 2px solid var(--hpanel-stamp); outline-offset: 2px; }
+.ms21 .ms21-hd :is(.ms21-b1, .ms21-b2):focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 /* THE DRAWING: on the panel's white disc (`.hpanel-disc`), 206 (170) across, in the right column, centred on the text. */
 .ms21-art { justify-self: end; align-self: center; flex: none; box-sizing: border-box; width: 206px; padding: 14px; }
 @media (max-width: 1439.5px) {
@@ -132,7 +132,7 @@
 }
 .ms21 button.ms21-frow { cursor: pointer; }
 .ms21 button.ms21-frow:hover .ms21-ft b { text-decoration: underline; text-decoration-color: rgba(28, 19, 15, 0.3); text-underline-offset: 3px; }
-.ms21 button.ms21-frow:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 6px; }
+.ms21 button.ms21-frow:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 6px; }
 .ms21-fd { font: 600 8.5px/1.9 var(--font-mono); letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; color: var(--sp-quiet); }
 .ms21-fi { display: flex; margin-top: 4px; }
 .ms21-sq { width: 11px; height: 11px; border-radius: 3px; background: #8a4a3c; }
@@ -206,7 +206,7 @@
   transition: transform 0.4s cubic-bezier(0.22, 0.8, 0.3, 1), opacity 0.4s;
 }
 .ms21-vc.is-on { cursor: default; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 24px 46px -24px rgba(28, 19, 15, 0.5); }
-.ms21-vc:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+.ms21-vc:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .ms21-vc-bd { display: flex; align-items: center; justify-content: space-between; gap: 10px; height: 36px; padding: 0 14px; background: #5f7b93; color: #f5f1eb; }
 .ms21-vc.is-cur .ms21-vc-bd { background: #2a3a52; }
 .ms21-vc-chip { padding: 4px 7px; border-radius: 6px; background: rgba(245, 241, 235, 0.16); font: 700 7.5px/10px var(--font-mono); letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap; color: #f5f1eb; }
@@ -367,11 +367,11 @@
 .ms21-seg { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border-radius: 12px; background: var(--ws-page); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.1); }
 .ms21-seg button { padding: 7px 12px; border: 0; border-radius: 9px; background: transparent; cursor: pointer; white-space: nowrap; font: 400 13px/18px var(--sp-type); color: var(--sp-quiet); }
 .ms21-seg button.is-on { background: #fff; color: #1c130f; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.1), inset 0 0 0 1px rgba(28, 19, 15, 0.1); }
-.ms21-seg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.ms21-seg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .ms21-layer .ms21-derr { grid-column: 1 / -1; font: 400 13.5px/1.4 var(--sp-serif); color: #7c2d2d; }
 .ms21-mf { display: flex; justify-content: flex-end; gap: 10px; padding: 0 24px 22px; }
 .ms21-mf button { height: 42px; padding: 0 20px; border: 0; border-radius: 999px; cursor: pointer; font: 400 15px var(--sp-type); }
 .ms21-mf .ms21-mc { background: #fff; color: #1c130f; box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .ms21-mf .ms21-ms { background: #2a3a52; color: #f5f1eb; }
 .ms21-mf .ms21-ms:disabled { opacity: 0.6; cursor: default; }
-.ms21-mf button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.ms21-mf button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }

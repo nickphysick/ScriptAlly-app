@@ -131,4 +131,4 @@
   border-bottom: 1px solid transparent; transition: color .15s, border-color .15s;
 }
 .tdb-qtool .tdb-export:hover { color: var(--burg); border-bottom-color: rgba(124, 58, 42, 0.4); }
-.tdb-qtool .tdb-export:focus-visible { outline: 2px solid var(--burg); outline-offset: 2px; }
+.tdb-qtool .tdb-export:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }

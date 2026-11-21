@@ -398,7 +398,7 @@ describe("the sheet", () => {
   });
   it("every var() the sheet reads resolves — to a token it declares, to an app :root token, or to a PUBLISHED measurement", () => {
     /* --sp-muted / --sp-quiet: consistency roll-out v2, Phase 2 — the two muted text colours, :root in shell/primitives.css */
-    const APP = ["--sp-muted", "--sp-quiet", "--font-serif", "--font-mono", "--sp-type", "--wpg-gutter", "--wpg-measure", "--ws-window", "--ws-window-rgb", "--ws-page-rgb"];
+    const APP = ["--sp-muted", "--sp-quiet", "--sp-anthracite", "--sp-navy-hover", "--sp-btn-line-hov" /* roll-out v2, Phase 6: the focus ring and hovers */, "--font-serif", "--font-mono", "--sp-type", "--wpg-gutter", "--wpg-measure", "--ws-window", "--ws-window-rgb", "--ws-page-rgb"];
     /**
      * ⚠️ A MEASUREMENT PUBLISHED FROM JS IS LEGITIMATELY ABSENT FROM THE SHEET, and its FALLBACK is
      * what renders until it lands — the one case CLAUDE.md names for a fallback ("a token that might

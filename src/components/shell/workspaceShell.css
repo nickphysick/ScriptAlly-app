@@ -500,7 +500,7 @@
   text-align: left; font: inherit; font-size: 13px; color: inherit; white-space: nowrap;
 }
 .ws-helpmenu button:hover { background: rgba(124, 58, 42, 0.08); }
-.ws-helpmenu button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: -2px; }
+.ws-helpmenu button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
 .ws-panel,
@@ -964,7 +964,7 @@
 /* keyboard parity — every interactive element in the shell answers focus-visible */
 .ws-panel a:focus-visible, .ws-panel button:focus-visible,
 .ws-main a:focus-visible, .ws-main button:focus-visible {
-  outline: 2px solid #b98a76;
+  outline: 2px solid var(--sp-anthracite);
   outline-offset: 2px;
   border-radius: 8px;
 }

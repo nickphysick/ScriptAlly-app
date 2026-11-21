@@ -204,7 +204,7 @@
   margin-left: 4px;
 }
 .pkgw-tab.on .n { color: var(--pkg-burg); }
-.pkgw-tab:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 3px; border-radius: 3px; }
+.pkgw-tab:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 3px; }
 
 /* Tab body: flow content. The PAGE scrolls (the agents-page model — the scroll region owns the
    padding so the scrollbar rides the page edge), not individual panes; the viewport-fit pane model
@@ -284,7 +284,7 @@
   transition: border-color .15s, box-shadow .15s;
 }
 .pkgw-mchip:hover { border-color: var(--pkg-dash); box-shadow: 2px 3px 0 rgba(46, 39, 35, .06); }
-.pkgw-mchip:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+.pkgw-mchip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .pkgw-mchip.sel { border-color: var(--pkg-burg); box-shadow: 0 0 0 2px rgba(124, 58, 42, .12); }
 .pkgw-mchip .nm2 { font-family: 'Playfair Display', Georgia, serif; font-size: 13.5px; line-height: 1.1; display: block; }
 .pkgw-mchip .use {
@@ -364,7 +364,7 @@
 }
 .pkgw-req + .pkgw-spin { margin-left: 8px; }
 .pkgw-spin:hover { border-color: var(--pkg-ink); }
-.pkgw-spin:focus-visible { outline: 2px solid var(--pkg-burg); outline-offset: 2px; }
+.pkgw-spin:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 .pkgw-fbd { padding: 13px 14px; flex: 1; min-height: 0; }
 .pkgw-fbd .nm { font-family: 'Playfair Display', Georgia, serif; font-size: 17.5px; line-height: 1.15; }

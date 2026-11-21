@@ -32,7 +32,7 @@
 .qcs .qcs-cell:hover:not(:disabled), .qcs .qcs-cell.is-on { background: #fcfaf7; }
 .qcs .qcs-cell.is-on::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--sp-anthracite); }
 .qcs .qcs-cell:disabled { cursor: default; }
-.qcs .qcs-cell:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: -2px; z-index: 1; }
+.qcs .qcs-cell:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; z-index: 1; }
 .qcs .qcs-cell .qcs-lb { font: 500 11px/1.2 var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--sp-quiet); }
 .qcs .qcs-cell .qcs-cue { position: absolute; top: 18px; right: 16px; font: 400 9.5px/1.2 var(--font-mono); letter-spacing: 0.06em; color: rgba(28, 19, 15, 0.4); opacity: 0; white-space: nowrap; }
 .qcs .qcs-cell:hover:not(:disabled) .qcs-cue, .qcs .qcs-cell:focus-visible .qcs-cue { opacity: 1; }

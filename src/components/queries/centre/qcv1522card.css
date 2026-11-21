@@ -129,7 +129,7 @@
 .qc152 .qc1522-btn:active { transform: scale(0.97); }
 .qc152 .qc1522-btn.nv { background: #2a3a52; color: #fff; }
 .qc152 .qc1522-btn.gh { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px #2a3a52; }
-.qc152 .qc1522-btn:hover { filter: brightness(1.12); }
+.qc152 .qc1522-btn:hover { filter: none; } /* roll-out v2, Phase 6: the brightness lift is replaced by the standard hover below */
 .qc152 .qc1522-btn:disabled { opacity: 0.38; pointer-events: none; }
 .qc152 .qc1522-conf { flex: none; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #fbf2ee; border-top: 1px solid #f0d9cf; font: 400 14.5px/1.4 var(--sp-serif) !important; color: #1c130f; }
 .qc152 .qc1522-conf.in { margin: 12px -14px -12px; border-radius: 0 0 12px 12px; }
@@ -181,4 +181,9 @@
 .qc152 .qc152-bkto { all: unset; cursor: pointer; margin-right: 4px; padding: 4px 10px; border-radius: 999px; font: 400 13.5px var(--sp-serif) !important; letter-spacing: 0; text-transform: none; background: rgba(255, 255, 255, 0.16); }
 .qc152 .qc152-band:not(.dk) .qc152-bkto { background: rgba(28, 19, 15, 0.07); }
 .qc152 .qc152-bkto:hover { filter: brightness(1.15); }
-.qc152 .qc152-bkto:focus-visible { outline: 2px solid currentColor; outline-offset: 1px; }
+.qc152 .qc152-bkto:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.qc152 .qc1522-btn.nv:hover { background: var(--sp-navy-hover); }
+.qc152 .qc1522-btn.gh:hover { background: var(--sp-btn-line-hov); }

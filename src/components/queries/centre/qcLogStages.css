@@ -62,7 +62,7 @@
 .laq .laq-s.is-d .laq-l, .laq .laq-s.is-n .laq-l { color: var(--laq-ink); }
 .laq .laq-s.is-d .laq-l b { display: block; font: italic 400 12.5px var(--laq-se); color: var(--laq-mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .laq .laq-s.is-d:hover .laq-l { text-decoration: underline; text-underline-offset: 3px; }
-.laq .laq-s:focus-visible .laq-nd { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-s:focus-visible .laq-nd { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .laq .laq-nd, .laq .laq-si::after { transition: none; } }
 
 /* v1.2 — THE NAVY HEADER (the reference's `.ci.hc` rules, chosen over "as built" and "warm sand"). The FlowHead and the
@@ -133,7 +133,7 @@
 .laq .laq-off > span:last-child { margin-left: auto; font: italic 400 13px var(--laq-se); }
 .laq .laq-none { margin: 10px 0; padding: 16px; border-radius: 12px; background: #faf8f4; text-align: center; font: 400 15px var(--laq-se); color: var(--laq-mut); }
 .laq .laq-lk { all: unset; cursor: pointer; color: var(--laq-navy); text-decoration: underline; text-underline-offset: 3px; }
-.laq .laq-lk:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; border-radius: 2px; }
+.laq .laq-lk:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 
 /* the inline calendar */
 .laq .laq-cal { margin-top: 10px; padding: 12px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; animation: laq-fadein .2s both; }
@@ -227,13 +227,13 @@
 .laq .laq-btn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 17px; border-radius: 21px; font: 600 14.5px var(--laq-se); white-space: nowrap; transition: filter .15s, transform .1s; background: var(--laq-navy); color: #fff; }
 .laq .laq-btn:active { transform: scale(.97); }
 .laq .laq-btn:hover { filter: brightness(1.12); }
-.laq .laq-btn:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .laq .laq-btn.is-ghost { background: #fff; color: var(--laq-navy); box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
 .laq .laq-btn.is-sm { height: 36px; padding: 0 14px; font-size: 14px; }
 .laq .laq-btn:disabled { opacity: .38; pointer-events: none; }
 .laq .laq-lnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--laq-se); color: var(--sp-muted); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 .laq .laq-lnk:hover { color: var(--laq-navy); }
-.laq .laq-lnk:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; border-radius: 2px; }
+.laq .laq-lnk:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 .laq .laq-lnk:disabled { opacity: .38; pointer-events: none; }
 
 /* v1.2 — the leave check, in the footer's place */
@@ -322,7 +322,7 @@
 .laq .laq-nch { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 12px 44px; }
 .laq .laq-chip { all: unset; cursor: pointer; font: 400 13px/1.3 var(--laq-tw); padding: 6px 11px; border-radius: 18px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.22); background: #fff; }
 .laq .laq-chip.is-on { background: var(--laq-navy); color: #fff; box-shadow: none; }
-.laq .laq-chip:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-chip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .laq .laq-ncal { margin: 0 14px 12px 44px; }
 
 /* materials fork v1 (design-refs/log-query-materials-fork-v1/) — THE FORK, THE PIECES' GROUPS. The ochre is the
@@ -334,7 +334,7 @@
 .laq .laq-tile { all: unset; box-sizing: border-box; cursor: pointer; min-height: 248px; padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 10px;
   border-radius: 16px; background: #fdf9f5; box-shadow: inset 0 0 0 1.5px #ddd3c6; }
 .laq .laq-tile:hover { box-shadow: inset 0 0 0 1.5px var(--laq-ochre); }
-.laq .laq-tile:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-tile:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .laq .laq-ti { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 11px; background: var(--laq-ochre); color: #fff; }
 .laq .laq-tt { font: 400 21px/1.2 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); }
 .laq .laq-td { font: 400 15px/1.45 var(--laq-se); color: var(--laq-mut); }
@@ -352,7 +352,7 @@
 .laq .laq-opt { all: unset; box-sizing: border-box; cursor: pointer; min-height: 52px; padding: 10px 12px; display: flex; align-items: center; gap: 10px;
   border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1.5px #ddd3c6; font: 400 15.5px/1.3 var(--laq-se); color: var(--laq-ink); }
 .laq .laq-opt:hover { box-shadow: inset 0 0 0 1.5px var(--laq-ochre); }
-.laq .laq-opt:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-opt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .laq .laq-opt.is-on { background: var(--laq-ochre-tint); box-shadow: inset 0 0 0 2px var(--laq-ochre); }
 .laq .laq-on { min-width: 0; overflow-wrap: anywhere; }
 .laq .laq-rdo { flex: none; width: 18px; height: 18px; box-sizing: border-box; border-radius: 50%; border: 2px solid #8c8177; background: #fff; box-shadow: inset 0 0 0 3px #fff; }
@@ -366,3 +366,9 @@
 .laq .laq-slot { display: inline-flex; align-items: center; justify-content: flex-end; min-height: 42px; }
 .laq .laq-grps + .laq-ask, .laq .laq-big + .laq-ask { margin-top: 12px; }
 .laq .laq-ask .laq-lk { min-height: 44px; display: inline-flex; align-items: center; }
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.laq .laq-btn:hover:not(:disabled) { filter: none; background: var(--sp-navy-hover); }
+.laq .laq-btn.is-ghost:hover:not(:disabled) { background: var(--sp-btn-line-hov); }
+.laq .laq-busy:hover { background: #f8f4ed; }

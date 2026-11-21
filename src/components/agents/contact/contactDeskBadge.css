@@ -32,7 +32,7 @@
   border-radius: 11px; border: 1.25px solid var(--cdb-c40); pointer-events: none;
 }
 .cdb-hit { position: absolute; inset: 0; z-index: 0; margin: 0; padding: 0; border: 0; border-radius: inherit; background: transparent; cursor: pointer; }
-.cdb-hit:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 6px; }
+.cdb-hit:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cdb-card > *:not(.cdb-hit) { position: relative; z-index: 1; pointer-events: none; }
 
 /* ── the header strip ── */

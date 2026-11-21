@@ -61,7 +61,7 @@
   padding: 6px 90px 22px 4px; scrollbar-width: none;
 }
 .qcv-cz-track::-webkit-scrollbar { display: none; }
-.qcv-cz-track:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; border-radius: 14px; }
+.qcv-cz-track:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 14px; }
 
 .qcv-cz-item { flex: none; width: 282px; scroll-snap-align: start; border-radius: 12px; cursor: pointer; outline: none; }
 .qcv-cz-item:focus-visible .qcard { box-shadow: 0 0 0 2px var(--qcv-navy), 0 10px 22px -12px rgba(28, 19, 15, 0.45); }

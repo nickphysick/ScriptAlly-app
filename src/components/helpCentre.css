@@ -22,7 +22,7 @@
 .hc *, .hc *::before, .hc *::after { box-sizing: border-box; }
 .hc [hidden] { display: none !important; }
 .hc button { font: inherit; color: inherit; cursor: pointer; }
-.hc button:focus-visible, .hc a:focus-visible, .hc input:focus-visible, .hc textarea:focus-visible { outline: 2px solid var(--hc-rust); outline-offset: 2px; }
+.hc button:focus-visible, .hc a:focus-visible, .hc input:focus-visible, .hc textarea:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .hc h1, .hc h2, .hc h3 { margin: 0; text-wrap: balance; }
 .hc p { margin: 0; }
 .hc .ph-primary, .hc .ph-secondary { display: inline-flex; align-items: center; gap: 8px; }
@@ -192,3 +192,7 @@
 @media (prefers-reduced-motion: reduce) {
   .hc *, .hc *::before, .hc *::after { animation: none !important; transition: none !important; }
 }
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.hc .hc-alink:hover { background: #f8f4ed; }

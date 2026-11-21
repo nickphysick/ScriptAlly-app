@@ -140,7 +140,7 @@
 }
 .qcv-tl-bar--past { opacity: 0.42; transition: opacity 0.12s; }
 .qcv-tl-row:hover .qcv-tl-bar--past { opacity: 0.7; }
-.qcv-tl-bar:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 1px; }
+.qcv-tl-bar:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /**
  * A MISSING DATE IS A TORN EDGE, never a stripe or a dash: square at that end, with a white

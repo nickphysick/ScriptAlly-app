@@ -74,7 +74,7 @@
   .qcw .qcw-clear { margin-left: auto; flex: none; padding: 0; border: 0; background: none; cursor: pointer; white-space: nowrap; font-family: var(--sp-serif); font-weight: 400; font-size: 14px; color: #2f5f86; text-decoration: underline; text-underline-offset: 3px; }
   /* the unfolded row, laid out where nobody sees it, so its width is measurable */
   .qcw .qcw-strip-measure { position: absolute; left: 0; top: 0; display: flex; gap: 8px; padding: 0 28px; visibility: hidden; pointer-events: none; white-space: nowrap; }
-  .qcw :is(.qcw-pill, .qcw-ctl, .qcw-chip, .qcw-dens button, .qcw-clear):focus-visible { outline: 2px solid #8fb2d2; outline-offset: 2px; }
+  .qcw :is(.qcw-pill, .qcw-ctl, .qcw-chip, .qcw-dens button, .qcw-clear):focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 
   @media (prefers-reduced-motion: reduce) { .qcw .qcw-pill { transition: none; } .qcw .qcw-pill:hover { transform: none; } }
 }
@@ -83,7 +83,7 @@
   /* the keyboard button and its card (§4) */
   .qcw .qcw-kbw { position: relative; flex: none; }
   .qcw .qcw-kbh { width: 40px; height: 40px; border: 0; border-radius: 50%; display: grid; place-items: center; background: rgba(255, 255, 255, 0.12); color: #fff; cursor: pointer; }
-  .qcw .qcw-kbh:focus-visible { outline: 2px solid #8fb2d2; outline-offset: 2px; }
+  .qcw .qcw-kbh:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
   .qcw .qcw-kpop {
     position: absolute; right: 0; top: 50px; z-index: 40; box-sizing: border-box; width: 290px; padding: 16px 18px;
     background: #fff; border-radius: 14px; box-shadow: 0 22px 50px -20px rgba(28, 19, 15, 0.5), 0 0 0 1px rgba(28, 19, 15, 0.08);

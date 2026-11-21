@@ -19,7 +19,7 @@
 .qc152.qcrr .qcrr-grp { margin: 14px 8px 4px; font: 400 14px var(--sp-serif); color: #7d7268; }
 .qc152.qcrr .qcrr-row { all: unset; cursor: pointer; box-sizing: border-box; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 58px; padding: 8px 10px; border-radius: 12px; }
 .qc152.qcrr .qcrr-row:hover, .qc152.qcrr .qcrr-row.hi { background: #f7f3ee; }
-.qc152.qcrr .qcrr-row:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152.qcrr .qcrr-row:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qc152.qcrr .qcrr-row .qc152-disc { width: 36px; height: 36px; font-size: 10px; }
 .qc152.qcrr .qcrr-nm { flex: 1; min-width: 0; }
 .qc152.qcrr .qcrr-nm b { display: block; font: 500 16px/1.2 var(--sp-serif); }

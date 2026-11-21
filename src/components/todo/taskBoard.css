@@ -94,7 +94,7 @@
   box-shadow: 0 2px 4px rgba(58, 28, 20, 0.05), 0 12px 28px rgba(58, 28, 20, 0.10);
   transform: translateY(-1px);
 }
-.brd-card:focus-visible { outline: 2px solid var(--burg); outline-offset: 2px; }
+.brd-card:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .brd-card.sel { box-shadow: 0 0 0 2px var(--pink-b), 0 12px 28px rgba(58, 28, 20, 0.10); }
 /* the urgent card's resting mark — the burgundy head. Phase 6 adds the motion, elsewhere. */
 .brd-card.urgent { border-top-color: var(--burg); }

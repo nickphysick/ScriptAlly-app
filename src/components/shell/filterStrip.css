@@ -34,7 +34,7 @@
   background: transparent; color: var(--sp-muted); cursor: pointer;
 }
 .cl20-fsx:hover { background: #f4f0e9; color: #1c130f; }
-.cl20-fs-strip :is(.cl20-fsc, .cl20-fsx, .cl20-chip, .cl20-seg button, .cl20-fmore):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl20-fs-strip :is(.cl20-fsc, .cl20-fsx, .cl20-chip, .cl20-seg button, .cl20-fmore):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the four columns, each scrolling inside itself if it must */
 /* no column clips a chip or the segment: each column's floor is its own widest choice */
 .cl20-fsb { display: grid; grid-template-columns: minmax(min-content, 1.25fr) minmax(min-content, 1.4fr) minmax(min-content, 1fr) minmax(min-content, 1.5fr); }

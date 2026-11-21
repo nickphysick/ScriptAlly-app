@@ -90,7 +90,7 @@
   background: #fff; box-shadow: inset 0 0 0 1.5px #2f5f86; color: #2f5f86; font: 500 14.5px var(--clv-serif);
 }
 .cl14-next .cl15-dt-btn:hover { background: #2f5f86; color: #fff; }
-.cl14-next .cl15-dt-btn:focus-visible { outline: 2px solid #2f5f86; outline-offset: 2px; }
+.cl14-next .cl15-dt-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl14-next .cl15-dt-btn.is-on { background: #e3eef6; box-shadow: none; color: #2f5f86; }
 
 /* the ready-only mode's marker on the "Showing" line, and its ✕ */

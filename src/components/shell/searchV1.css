@@ -143,3 +143,7 @@
 @media (min-width: 768px) and (prefers-reduced-motion: reduce) {
   .sp-pal.sp-pal--ink.sp-pal--v1 { animation: none; }
 }
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.sv1 .sv1-btn--main:hover:not(:disabled) { background: var(--sp-navy-hover); }

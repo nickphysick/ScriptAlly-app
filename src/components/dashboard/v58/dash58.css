@@ -166,7 +166,7 @@
 .d58-cal small { display: block; padding: 2px 0; background: var(--d58-navy); color: var(--d58-cream); font-family: var(--d58-mono) !important; font-size: 8.5px; letter-spacing: 0.12em; line-height: 12px; }
 .d58-cal b { display: block; padding: 3px 0 4px; font-family: var(--d58-type) !important; font-weight: 400; font-size: 18px; line-height: 20px; color: var(--d58-ink); }
 
-.d58-link:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d58-link:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d58-quietline { margin: 0 0 4px; font-family: var(--d58-serif) !important; font-size: 15.5px; line-height: 1.45; color: var(--sp-muted); }
 
 /* ── the drawer (portalled: `.d58-layer`) ──────────────────────────────────────────────────── */
@@ -205,7 +205,7 @@
   flex: none; margin-left: auto; width: 38px; height: 38px; border-radius: 50%; cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.3); background: none; color: var(--d58-cream); font-size: 15px; line-height: 1;
 }
-.d58-dx:focus-visible, .d58-seg button:focus-visible, .d58-range:focus-visible { outline: 2px solid var(--d58-cream); outline-offset: 2px; }
+.d58-dx:focus-visible, .d58-seg button:focus-visible, .d58-range:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .d58-dctrl { display: flex; align-items: center; gap: 10px; margin-top: 16px; }
 .d58-seg { display: flex; padding: 3px; border-radius: 10px; background: rgba(255, 255, 255, 0.12); }
 .d58-seg button {
@@ -268,7 +268,7 @@
   display: inline-flex; margin-top: 10px; padding: 7px 12px; border: 0; border-radius: 9px; cursor: pointer;
   background: var(--d58-navy); color: var(--d58-cream); font-family: var(--d58-serif) !important; font-size: 14px; font-weight: 600; line-height: 20px;
 }
-.d58-evact:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d58-evact:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d58-evdone { display: inline-block; margin-top: 9px; font-size: 13.5px; line-height: 19px; color: var(--d58-sage); }
 /* housekeeping: one muted line */
 .d58-ev[data-family="housekeeping"] { padding: 6px 12px; align-items: center; }
@@ -340,7 +340,7 @@
   text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 5px; text-decoration-color: rgba(91, 42, 31, .4);
 }
 .d58 .d58-noticebtn:hover { text-decoration-color: #5b2a1f; }
-.d58 .d58-noticebtn:focus-visible { outline: 2px solid #5b2a1f; outline-offset: 3px; border-radius: 2px; }
+.d58 .d58-noticebtn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 .d58-noticelist { list-style: none; margin: 10px 0 0; padding: 10px 0 0; border-top: 1px solid rgba(91, 42, 31, .18); display: grid; gap: 8px; }
 .d58-noticelist li { display: grid; gap: 1px; }
 .d58-noticelist small { font-size: 14px; color: rgba(91, 42, 31, .78); }
@@ -385,4 +385,4 @@
 .d58-evfoot { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 12px; padding-top: 12px; border-top: 1px solid #efe9e1; }
 .d58-evfoot > span { font-family: var(--d58-mono) !important; font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sp-quiet); }
 .d58-evsee { border: 0; background: none; padding: 0; cursor: pointer; font-family: var(--sp-serif) !important; font-weight: 600; font-size: 15px; color: var(--d58-ink); text-decoration: underline; text-underline-offset: 5px; }
-.d58-evsee:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.d58-evsee:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }

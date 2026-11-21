@@ -113,7 +113,7 @@
   cursor: pointer;
 }
 .d105-info:hover { background: #fff; }
-.d105-info:focus-visible { outline: 2px solid #5a2418; outline-offset: 2px; }
+.d105-info:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d105-info svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
 
 /* ── the body ── */
@@ -156,7 +156,7 @@
   transition: transform 0.12s, border-color 0.12s;
 }
 .d105-btn:hover { border-color: var(--d58-ink); transform: translateY(-1px); }
-.d105-btn:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d105-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d105-fw .d105-btn span { font-family: inherit; }
 .d105-btn i, .d105-cbtn { display: grid; place-items: center; color: var(--d58-ink); }
 .d105-btn svg, .d105-cbtn svg, .d105-wic svg {
@@ -198,7 +198,7 @@
   transition: transform 0.12s, border-color 0.12s;
 }
 .d105-cbtn:hover { border-color: var(--d58-ink); transform: translateY(-1px); }
-.d105-cbtn:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d105-cbtn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d105-fw .d105-cline { display: none; }
 
 /* write */
@@ -226,7 +226,7 @@
   font-size: 14px; line-height: 1.45;
   color: var(--d58-ink);
 }
-.d105-ta:focus { outline: 2px solid rgba(42, 58, 82, 0.25); border-color: var(--d58-navy); }
+.d105-ta:focus { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-color: var(--d58-navy); }
 .d105-wf { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
 .d105-fw .d105-wn { min-width: 0; font-style: italic; font-size: 12px; line-height: 1.35; color: var(--sp-quiet); }
 .d105-fw .d105-wn.is-err { color: var(--sp-rust); font-style: normal; font-weight: 600; }
@@ -241,7 +241,7 @@
   box-shadow: 0 2px 6px -3px rgba(42, 58, 82, 0.6);
 }
 .d105-send:disabled { opacity: 0.4; cursor: default; }
-.d105-send:focus-visible, .d105-give:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d105-send:focus-visible, .d105-give:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d105-send--side { display: none; }
 
 /* sent and the celebration: the art box, then the words */
@@ -518,7 +518,7 @@
   font-weight: 600; font-size: 13.5px; line-height: 1.4; cursor: pointer; white-space: nowrap;
   box-shadow: 0 2px 6px -3px rgba(42, 58, 82, 0.6);
 }
-.d105-how button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.d105-how button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) {
   .d105-dim, .d105-how, .d105-slides, .d105-sdots i { transition: none; }
 }

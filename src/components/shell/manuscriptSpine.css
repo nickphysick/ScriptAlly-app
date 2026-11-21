@@ -38,7 +38,7 @@
   }
   /* ⚠️ THE REF'S RING, NOT THE RAIL'S TERRACOTTA ONE: `.wsr :focus-visible` (sidebarRail.css) is `!important`, so
      this states its own with one more class and `!important` too. */
-  .wsr .ms-spine-btn:focus-visible { outline: 2px solid #9db7d8 !important; outline-offset: 2px; border-radius: 10px; }
+  .wsr .ms-spine-btn:focus-visible { outline: 2px solid #f4eee5 !important; outline-offset: 2px; border-radius: 10px; }
   .wsr .ms-spine {
     /* the short-window rule: min(152px, free height - 24px), never under 72px. The free height is the slot's
        (`100cqh`) less the shelf line's 1px. */

@@ -55,7 +55,7 @@
   .qcw-list .qcw-chev { font-size: 12px; opacity: 0.6; transition: transform 0.2s; }
   .qcw-list .qcw-band .qcw-gn + .qcw-chev { margin-left: auto; }
   .qcw-list .qcw-grp.shut .qcw-chev { transform: rotate(-90deg); }
-  .qcw-list .qcw-band:focus-visible { outline: 2px solid #2f5f86; outline-offset: 2px; }
+  .qcw-list .qcw-band:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   /* ── the rows: flat on the panel ── */
   .qcw-list .qcw-row {
@@ -145,7 +145,7 @@
   }
   .qcw-list .qcw-tile.on { color: #2a3a52; background: #f4f1ec; box-shadow: none; }
   .qcw-list .qcw-tile svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-  .qcw-list .qcw-tile:focus-visible { outline: 2px solid #2f5f86; outline-offset: 1px; }
+  .qcw-list .qcw-tile:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   /* ── the popup ── */
   .qcw-tip {

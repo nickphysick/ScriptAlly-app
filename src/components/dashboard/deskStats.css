@@ -56,7 +56,7 @@
 /* the whole is the first reading; the parts are the second */
 .ds-rtrack:hover .ds-rfill, .ds-rtrack:focus-within .ds-rfill { opacity: 0; }
 .ds-rtrack:hover .ds-rseg, .ds-rtrack:focus-within .ds-rseg { opacity: 1; }
-.ds-rseg:focus-visible { outline: 2px solid #7c3a2a; outline-offset: 2px; }
+.ds-rseg:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .ds-rmark {
   position: absolute; top: 50%; width: 13px; height: 13px; border-radius: 50%;
   background: #fdfaf5; border: 1.6px solid #7c3a2a; transform: translate(-50%, -50%);

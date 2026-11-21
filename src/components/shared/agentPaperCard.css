@@ -55,7 +55,7 @@
   background: none; color: #2a3a52; cursor: pointer; font: 400 14px/1.3 var(--sp-serif) !important;
 }
 .apc .apc-add:hover { background: rgba(42, 58, 82, 0.05); }
-.apc .apc-add:focus-visible, .apc a:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.apc .apc-add:focus-visible, .apc a:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* ghost: every value a rounded bar */
 .apc .apc-bar { display: inline-block; border-radius: 6px; background: #dcd6cf; }
 .apc.apc--ghost .apc-disc { background: #dcd6cf; }
@@ -74,7 +74,7 @@
   background: transparent; color: rgba(244, 238, 229, 0.85); cursor: pointer; font: 400 24px/1 var(--sp-serif) !important;
 }
 .apc.apc--panel .apc-x:hover { background: rgba(244, 238, 229, 0.14); }
-.apc.apc--panel .apc-x:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
+.apc.apc--panel .apc-x:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .apc.apc--panel .apc-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
 .apc.apc--panel .apc-head { margin: 0; padding: 18px 20px 0; gap: 14px; border-bottom: 0; }
 .apc.apc--panel .apc-who { gap: 0; }

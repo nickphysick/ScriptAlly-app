@@ -63,7 +63,7 @@
   .pk43 .pk43-row .p41-ic.pk43-ic { flex: none; width: 32px; height: 32px; border-radius: 8px; margin-top: 1px; }
   .pk43 .pk43-row .p41-ic.pk43-ic .p41-pic { width: 16px; height: 16px; }
   .pk43 .pk43-row--ret { opacity: .62; }
-  .pk43 .pk43-row:focus-visible { outline: 2px solid var(--ql-navy); outline-offset: 2px; }
+  .pk43 .pk43-row:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .pk43 .pk43-list-f { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 12px; }
   .pk43 .pk43-list-f .qlp-lnk { font-family: var(--sp-serif); cursor: pointer; }
 
@@ -109,7 +109,7 @@
     background: none; color: #f4eee5; font: 400 17px/1 var(--sp-type); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .6);
   }
   .pk43 .pk43-go-ch:hover { background: rgba(244, 238, 229, .06); box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .9); }
-  .pk43 .pk43-go-ch:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+  .pk43 .pk43-go-ch:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
   .pk43 .pk43-pick {
     position: absolute; z-index: 20; top: calc(100% + 8px); right: 0; width: 300px; padding: 6px; box-sizing: border-box;
     background: #fff; color: #1c130f; border-radius: 12px; box-shadow: 0 0 0 1px #e6dfd5, 0 18px 36px -16px rgba(28, 19, 15, .4);
@@ -120,7 +120,7 @@
   }
   .pk43 .pk43-pick [role="option"]:hover { background: #faf6f1; }
   .pk43 .pk43-pick [role="option"][aria-selected="true"] { background: #f8e8ea; }
-  .pk43 .pk43-pick [role="option"]:focus-visible { outline: 2px solid #2a3a52; outline-offset: 0; }
+  .pk43 .pk43-pick [role="option"]:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .pk43 .pk43-pick b { min-width: 0; font: 400 16px/1.2 var(--sp-type); overflow-wrap: anywhere; }
   .pk43 .pk43-pick span { flex: none; font: italic 14px/1.2 var(--sp-serif); color: var(--sp-muted); }
   .pk43 .pk43-pick p { margin: 0; padding: 8px 10px 6px; font: 14px/1.45 var(--sp-serif); color: var(--sp-muted); }

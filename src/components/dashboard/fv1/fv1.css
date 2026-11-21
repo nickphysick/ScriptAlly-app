@@ -42,7 +42,7 @@
 /* the chosen answer: powder fill, a 1.5px navy ring, and the radio's dot */
 .d58 .fv1-choice.is-on { background: #eef3f9; box-shadow: inset 0 0 0 1.5px var(--d58-navy); }
 .d58 .fv1-choice.is-on > i { box-shadow: inset 0 0 0 6px var(--d58-navy); }
-.d58 .fv1-choice:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
+.d58 .fv1-choice:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the path the answer chose: an oat panel, the words on the left, the art slot on the right */
 .d58 .fv1-path {
@@ -69,7 +69,7 @@
   text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px;
 }
 .d58 .fv1-btn:focus-visible, .d58 .fv1-lnk:focus-visible, .d58 .fv1-gsl:focus-visible {
-  outline: 2px solid var(--d58-navy); outline-offset: 2px;
+  outline: 2px solid var(--sp-anthracite); outline-offset: 2px;
 }
 .d58 .fv1-btn:disabled, .d58 .fv1-lnk:disabled, .d58 .fv1-choice:disabled { cursor: default; }
 .d58 .fv1-art { flex: 0 0 140px; width: 140px; }

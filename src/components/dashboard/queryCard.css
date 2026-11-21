@@ -121,7 +121,7 @@
   color: var(--qcard-ink); font-weight: 600;
   border-bottom: 2px solid var(--qcard-ink); margin-bottom: -1px;
 }
-.qcard-tabs button:focus-visible { outline: 2px solid var(--qcard-rust); outline-offset: -2px; }
+.qcard-tabs button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── the body: the story, or a tab's facts ───────────────────────────────────────────────── */
 .qcard-tl, .qcard-facts { padding: 12px 16px 6px; min-height: 0; overflow-y: auto; }

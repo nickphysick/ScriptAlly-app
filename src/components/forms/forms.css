@@ -341,7 +341,7 @@
 /* outside min/max — inert, and it must READ inert, or a click that does nothing looks broken */
 .sa-dp-day.off { color: #d5cabc; cursor: default; pointer-events: none; }
 .sa-dp-day.off:hover { background: transparent; }
-.sa-dp-day:focus-visible { outline: 2px solid #7c3a2a; outline-offset: -2px; }
+.sa-dp-day:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* The hub trigger IS the hub's field idiom — 42px, 11px radius, hairline, calendar glyph right —
    so it sits level with "Sent by" and the manuscript field beside it. `margin-bottom` is zeroed:

@@ -108,7 +108,7 @@
   font: 400 14px/1.3 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px;
 }
 .hk82-ways .hk82-wx:hover { color: #1c130f; }
-.hk82-ways button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.hk82-ways button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── §D.4 · THE "+n" FLIGHT: fixed, in the top layer (a portal at the end of the body), placed by its own transform
    (the drawer's script sets it from the Save button's centre to the ring's). Invisible until its animation starts. ── */
@@ -129,7 +129,7 @@
   display: flex; width: fit-content; gap: 4px; margin: 2px 0 12px; color: var(--sp-anthracite); cursor: pointer;
   font: 400 14px/1.3 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px;
 }
-.hk8-card .hk82-web:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.hk8-card .hk82-web:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── §D.8 · "Pick a date…": a chip of the chips' size with a dashed edge, then a native date input ── */
 /* the chips draw their edge as an inset shadow, so the dashed edge is a real border of the same 1px, the shadow off */

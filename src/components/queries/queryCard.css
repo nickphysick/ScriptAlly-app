@@ -119,7 +119,7 @@
   background: transparent;
   pointer-events: none;
 }
-.qcc-open:focus-visible { outline: 2px solid var(--sage, #8a9e88); outline-offset: 2px; }
+.qcc-open:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* Selected adds a ring; it never adds a fill. A filled card would compete with the band. */
 .qcc--sel {
   /* the ring is the edge when selected — the hairline takes its colour so there is one line, not
@@ -235,7 +235,7 @@
   cursor: pointer;
 }
 .qcc-vb:hover { background: #f6efe6; color: #3a1c14; }
-.qcc-vb:focus-visible { outline: 2px solid var(--sage, #8a9e88); outline-offset: 2px; }
+.qcc-vb:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the primary — the app's one near-black fill, carrying its name in mono capitals */
 .qcc-vb--p,
 .qcc-vb--p:hover {

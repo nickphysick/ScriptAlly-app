@@ -48,7 +48,7 @@
     border-radius: 9px; color: inherit; font: 400 14px/1.2 var(--r15-serif) !important;
   }
   .rsp15-hd .rsp15-tkey button:hover { background: rgba(244, 238, 229, 0.1); }
-  .rsp15-hd .rsp15-tkey button:focus-visible { outline: 2.5px solid #6a89a7; outline-offset: 2px; }
+  .rsp15-hd .rsp15-tkey button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .rsp15-hd .rsp15-tkey i { width: 4px; height: 16px; border-radius: 2px; }
   .rsp15-hd .rsp15-tkey b { font: 400 15px/1 var(--r15-type) !important; color: #fbf7f0; }
 }
@@ -97,7 +97,7 @@
 .rsp15 .rsp15-gb-road button {
   all: unset; box-sizing: border-box; cursor: pointer; position: relative; display: block; width: 100%; padding: 0 4px 6px 0; border-radius: 12px;
 }
-.rsp15 .rsp15-gb-road button:focus-visible { outline: 2.5px solid #6a89a7; outline-offset: 2px; }
+.rsp15 .rsp15-gb-road button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .rsp15 .rsp15-gb-n {
   position: relative; display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: #fff; color: #55504a;
   box-shadow: 0 0 0 3px #fff, 0 0 0 4.5px #9b958c; transition: background 0.15s, color 0.15s;
@@ -158,7 +158,7 @@
 .rsp15 .rsp15-seg button em { font: normal 400 13.5px/1 var(--r15-type) !important; margin-left: 5px; opacity: 0.8; }
 .rsp15 .rsp15-seg button.on { background: var(--r15-navy); color: #fff; font-weight: 600 !important; }
 .rsp15 :is(.rsp15-nav, .rsp15-pg, .rsp15-seg, .rsp15-dots, .rsp15-rch, .rsp15-rcf) button:focus-visible,
-.rsp15 :is(.rsp15-rcr, .rsp15-spi, .rsp15-qt, .rsp15-open, .rsp15-toan, .rsp15-rbn, .rsp15-dot):focus-visible { outline: 2.5px solid #6a89a7; outline-offset: 2px; }
+.rsp15 :is(.rsp15-rcr, .rsp15-spi, .rsp15-qt, .rsp15-open, .rsp15-toan, .rsp15-rbn, .rsp15-dot):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ═════ the line of facts (ref `.sum`) and early days (ref `.calm`) ═════ */
 .rsp15 .rsp15-sum { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 0; font: 400 16px/1.45 var(--r15-serif) !important; color: var(--sp-muted); }
@@ -375,3 +375,7 @@
   .rsp15 .rsp15-spq q { animation: none; }
   .rsp15 .rsp15-act, .rsp15 .rsp15-qt, .rsp15 .rsp15-rcr, .rsp15 .rsp15-dot, .rsp15 .rsp15-dots button::after, .rsp15 .rsp15-nav button, .rsp15 .rsp15-spi { transition: none; }
 }
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.rsp15 .rsp15-rbn:hover { background: var(--sp-btn-line-hov); }

@@ -28,7 +28,7 @@
 .gst .gst-cell:hover:not(:disabled), .gst .gst-cell.is-on { background: #fcfaf7; }
 .gst .gst-cell.is-on::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--sp-anthracite); }
 .gst .gst-cell:disabled { cursor: default; }
-.gst .gst-cell:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: -2px; z-index: 1; }
+.gst .gst-cell:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; z-index: 1; }
 .gst .gst-cell .gst-lb { font: 500 11px/1.2 var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--sp-quiet); }
 .gst .gst-cell .gst-cue { position: absolute; top: 18px; right: 16px; font: 400 9.5px/1.2 var(--font-mono); letter-spacing: 0.06em; color: rgba(28, 19, 15, 0.4); opacity: 0; white-space: nowrap; }
 .gst .gst-cell:hover:not(:disabled) .gst-cue, .gst .gst-cell:focus-visible .gst-cue, .gst .gst-cell.is-on .gst-cue { opacity: 1; }

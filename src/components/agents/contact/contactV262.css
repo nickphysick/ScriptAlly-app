@@ -134,7 +134,7 @@
   box-sizing: border-box; width: 100%; min-height: 96px; padding: 10px 12px; border: 0; border-radius: 10px; background: #fff; resize: vertical;
   box-shadow: inset 0 0 0 1px rgba(28, 19, 15, .16); color: #1c130f; font: italic 400 18px/1.45 var(--sp-serif) !important;
 }
-.cl262-wta:focus { outline: 2px solid #2a3a52; outline-offset: 0; }
+.cl262-wta:focus { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl262-cnt { align-self: flex-end; font: 400 12.5px/1 var(--sp-type) !important; color: var(--sp-quiet); }
 /* materials: the editor's rows, 22px boxes, ticked navy with a cream ✓ */
 .cl262-card .cl262-fx .ae-mt { display: flex; flex-direction: column; gap: 10px; }
@@ -190,7 +190,7 @@ button.cl262-hint { cursor: pointer; color: #2a3a52; text-decoration: underline;
 .cl262-card.apc .cl262-sec.is-edit > h5 { margin: 0 0 4px; padding: 10px 12px; min-height: 0; background: var(--t); color: var(--td); }
 .cl262-card.apc .cl262-sec.is-edit > .cl262-fx { padding: 4px 14px 0; }
 .cl262-done { all: unset; cursor: pointer; margin-left: auto; font: italic 400 13.5px var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #6c675f; box-shadow: inset 0 -1px 0 rgba(28, 19, 15, .25); }
-.cl262-done:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl262-done:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl262-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
 .cl262-ctg { display: block; }
 .cl262-card .cl262-fx .aap-inp { box-sizing: border-box; }
@@ -239,7 +239,7 @@ button.cl262-hint { cursor: pointer; color: #2a3a52; text-decoration: underline;
 .cl262-card .co-ask { display: flex; flex-wrap: wrap; gap: 8px; }
 .cl262-card .co-why { margin: 10px 0 0; font: italic 400 13.5px/1.45 var(--sp-serif) !important; color: var(--sp-quiet); }
 .cl262-card .co-opt { all: unset; box-sizing: border-box; cursor: pointer; display: flex; gap: 12px; width: 100%; padding: 11px 13px; margin-top: 8px; border-radius: 10px; background: #faf7f2; box-shadow: inset 0 0 0 1px #ece4d9; font: 400 15px/1.35 var(--sp-serif) !important; color: #1c130f; }
-.cl262-card .co-opt:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl262-card .co-opt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl262-card .co-opt small { display: block; margin-top: 2px; font: italic 400 13.5px/1.4 var(--sp-serif) !important; color: var(--sp-quiet); }
 .cl262-card .co-rd { flex: none; width: 18px; height: 18px; margin-top: 1px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #b9ae9f; background: #fff; }
 .cl262-card .co-opt[aria-checked="true"] { background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; }

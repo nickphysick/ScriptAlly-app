@@ -60,7 +60,7 @@
 .cp32 .cp32-btn svg { width: 16px; height: 16px; }
 /* Phase 9: the filled action button */ .cp32 .cp32-btn.is-pri { background: var(--sp-anthracite); color: #fff; box-shadow: none; }
 .cp32 .cp32-btn.is-pri:hover { background: #24324a; }
-.cp32 :focus-visible { outline: 2px solid var(--c32-navy); outline-offset: 2px; }
+.cp32 :focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ══ B · the striped band (the Founding writer band's construction) ═══════════════════════════════════════════════ */
 .cp32 .cp32-band { margin-top: 0; padding: 6px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .06); }
@@ -159,7 +159,7 @@
 .cp32 .cp32-podc:nth-child(3) .cp32-pcard { transform: rotate(-2deg); }
 .cp32 button.cp32-podc:hover .cp32-pcard, .cp32 button.cp32-podc:focus-visible .cp32-pcard { transform: translateY(-6px) rotate(0); box-shadow: 0 0 0 1px #d9d1c5, 0 22px 30px -16px rgba(28, 19, 15, .4); }
 .cp32 button.cp32-podc:focus-visible { outline: 0; }
-.cp32 button.cp32-podc:focus-visible .cp32-pcard { outline: 2px solid var(--c32-btn); outline-offset: 3px; }
+.cp32 button.cp32-podc:focus-visible .cp32-pcard { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cp32 .cp32-pcard > .cp32-rdisc { background: var(--c32-oat); margin: 0 0 12px; color: var(--sp-muted); }
 .cp32 .cp32-pcard b { display: block; padding-right: 76px; font: 600 21px/1.25 var(--c32-serif); overflow-wrap: anywhere; }
 .cp32 .cp32-pcard > span:not(.cp32-rdisc):not(.cp32-pmark) { display: block; margin-top: 2px; font: 400 15px/1.4 var(--c32-serif); color: var(--sp-quiet); }
@@ -273,3 +273,7 @@
 @media (min-width: 768px) {
   .cp32 .cp32-tag, .cp32 .cp32-rowu, .cp32 h3.cp32-scth > span { box-sizing: border-box; display: inline-flex; align-items: center; height: var(--sp-tag-h); min-height: 0; padding: var(--sp-tag-pad); border-radius: var(--sp-tag-r); font: var(--sp-tag-font) !important; font-style: normal !important; }
 }
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.cp32 .cp32-row:hover:not([aria-current="true"]) { background: #f8f4ed; }

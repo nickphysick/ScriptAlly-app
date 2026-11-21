@@ -21,7 +21,7 @@
   box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.22); transition: background 0.15s, box-shadow 0.15s;
 }
 .pck-pill:hover, .pck-pill.open { box-shadow: inset 0 0 0 1px rgba(var(--ink-cream-rgb), 0.4); }
-.pck-pill:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: 3px; }
+.pck-pill:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .pck-pill .gr-ring { flex: none; display: block; }
 .pck-pill .gr-ring circle:first-child { stroke: rgba(var(--ink-cream-rgb), 0.2); }
 .pck-pill:not(.all) .gr-arc { stroke: var(--ink-terra); }
@@ -79,7 +79,7 @@
 .pck-pg { font: 500 10px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sp-rust); }
 .pck-x { all: unset; flex: none; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; color: var(--sp-quiet); font-size: 13px; }
 .pck-x:hover { background: rgba(162, 69, 42, 0.1); color: #1c130f; }
-.pck-x:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 1px; }
+.pck-x:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .pck-bar { display: flex; gap: 4px; margin: 12px 6px 0 0; }
 .pck-bar i { flex: 1; height: 4px; border-radius: 2px; background: rgba(162, 69, 42, 0.16); transition: background 0.3s; }
 .pck-bar i.on { background: var(--sp-rust); }
@@ -106,7 +106,7 @@
   align-items: center; padding: 9px 6px 9px 4px; border-radius: 10px;
 }
 .pck-l button:hover { background: #f6f3ee; }
-.pck-l button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: -2px; }
+.pck-l button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .pck-tick {
   box-sizing: border-box; width: 22px; height: 22px; border-radius: 50%; border: 1.5px dotted rgba(42, 58, 82, 0.5); display: grid; place-items: center;
   font: 600 12px/1 var(--sp-serif) !important; color: #f4eee5; transition: background 0.2s, border-color 0.2s;
@@ -240,5 +240,5 @@
 .pck-note .pck-nb { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
 .pck-note .pck-nb button { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; background: #4b6151; color: #fff; font: 400 13px var(--sp-type); white-space: nowrap; }
 .pck-note .pck-nb button + button { background: #fff; color: #4b6151; box-shadow: inset 0 0 0 1.5px rgba(75, 97, 81, 0.5); }
-.pck-note .pck-nb button:focus-visible { outline: 2px solid #4b6151; outline-offset: 2px; }
+.pck-note .pck-nb button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .pck-pop .pck-after { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 12px 10px; }

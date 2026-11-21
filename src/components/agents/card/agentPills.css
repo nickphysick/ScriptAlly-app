@@ -18,7 +18,7 @@
   transition: background .12s, box-shadow .12s, color .12s;
 }
 .aap-pill:hover:not(.on) { box-shadow: inset 0 0 0 1px #9a8f82; background: var(--t, #faf7f2); }
-.aap-pill:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.aap-pill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .aap-pill.on { background: #2a3a52; color: #f4eee5; box-shadow: none; }
 .aap-ck { font-size: 12px; margin-left: -3px; }
 .aap-plus { color: #9a948b; margin-left: -4px; }
@@ -42,7 +42,7 @@
 .aap-useg { display: inline-flex; gap: 2px; margin-left: 6px; padding: 2px; border-radius: 999px; background: rgba(244,238,229,.12); }
 .aap-useg button { all: unset; cursor: pointer; height: 26px; padding: 0 10px; border-radius: 999px; font: 400 14px/26px var(--sp-serif); color: rgba(244,238,229,.85); }
 .aap-useg button.on { background: #f4eee5; color: #1c130f; }
-.aap-useg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.aap-useg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the closed pill holds the app's date control, in cream */
 .aap-pill.amt[data-door-box] .ae-fl { position: relative; display: inline-flex; }
@@ -122,7 +122,7 @@
 .aap-stars button.on { color: #2a3a52; }
 .aap-fit.pv .aap-stars button.pv { color: #7d8ea6; }
 .aap-stars button:hover { transform: scale(1.08); }
-.aap-stars button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; border-radius: 4px; }
+.aap-stars button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 4px; }
 .aap-fit--field .aap-fitw { margin-left: 10px; font: italic 400 15px var(--sp-serif); color: #3d3530; }
 .aap-fit--band .aap-stars button { font-size: 16px; padding: 0 1px; color: #f4eee5; opacity: .35; }
 .aap-fit--band .aap-stars button.on { color: #f4eee5; opacity: 1; }
@@ -133,7 +133,7 @@
 .aap-info { position: relative; display: inline-grid; place-items: center; width: 18px; height: 18px; margin-left: 6px; border-radius: 50%; cursor: help; flex: none;
   box-shadow: inset 0 0 0 1.3px currentColor; font: italic 600 12px/1 var(--sp-serif); color: #8f8a82; vertical-align: middle; }
 .aap-info.light { color: rgba(244,238,229,.85); }
-.aap-info:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.aap-info:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .aap-tip { position: fixed; z-index: 400; width: 280px; max-width: calc(100vw - 24px); box-sizing: border-box; padding: 10px 12px; border-radius: 10px; background: #1c130f; color: #f4eee5;
   font: normal 400 13.5px/1.45 var(--sp-serif); text-align: left; box-shadow: 0 10px 24px rgba(28,19,15,.3); pointer-events: none; }
 .aap-tip b { display: block; margin-bottom: 3px; font: 400 14px var(--sp-type); }

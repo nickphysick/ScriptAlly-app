@@ -38,7 +38,7 @@
 }
 .qlg .qlg-c:hover .qlg-fix, .qlg .qlg-fix:focus-visible, .qlg .qlg-c--on .qlg-fix { opacity: 1; }
 .qlg .qlg-fix:hover { background: #efe9e1; color: #1c130f; }
-.qlg .qlg-fix:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.qlg .qlg-fix:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (hover: none) { .qlg .qlg-fix { opacity: 1; } }
 
 /* the inline delete confirm takes the entry's place, across all three columns */
@@ -84,7 +84,7 @@
   font-family: var(--sp-serif); font-style: normal; font-weight: 400; font-size: 15px; line-height: 1.4; color: #2a3a52; cursor: pointer;
 }
 .qlg .qsc .qsc-link:hover { border-bottom-color: #2a3a52; }
-.qlg .qsc .qsc-link:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+.qlg .qsc .qsc-link:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qlg .qsc .qsc-set { margin-top: 12px; }
 /* the slider's own sheet (f12.css) reads tokens the panel does not carry, so its card, its label and its
    two buttons are stated here; the track and thumb stay WeekSlider's */

@@ -107,7 +107,7 @@
 .p9-tip .p9-td-l { border: 0; padding: 0; background: none; font: 600 14px var(--sp-serif); color: #1d4b63; cursor: pointer; white-space: nowrap; text-decoration: underline; text-underline-offset: 3px; }
 .p9-tip .p9-tip-x { width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--sp-quiet); cursor: pointer; }
 .p9-tip .p9-tip-x:hover { background: rgba(29, 75, 99, 0.1); color: #1c130f; }
-.p9-tip :is(.p9-td-l, .p9-tip-x):focus-visible { outline: 2px solid #1d4b63; outline-offset: 2px; }
+.p9-tip :is(.p9-td-l, .p9-tip-x):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .p9-tip { transition: none; } }
 
 /* ── H · New package and Package details in the drawer (ref `#drw .pd-b`; the form is pk391.generated.css) ──

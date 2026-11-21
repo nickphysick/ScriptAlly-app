@@ -46,7 +46,7 @@
   border-radius: 10px; cursor: pointer; font: inherit; transition: background .12s, border-color .12s;
 }
 .cor-branch:hover { background: var(--paper, #faf6f0); border-color: var(--muted, #7d7469); }
-.cor-branch:focus-visible { outline: 2px solid var(--sage-edge, #c8d0c5); outline-offset: 2px; }
+.cor-branch:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .cor-bglyph { flex: none; font-size: 15px; line-height: 1.3; color: var(--muted, #7d7469); }
 .cor-btx { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .cor-btx b { font-size: 13.5px; font-weight: 600; color: var(--ink, #1a1917); }
@@ -109,7 +109,7 @@
   background: var(--white, #fffdfb); cursor: pointer; font: inherit; transition: background .12s, border-color .12s;
 }
 .cor-act:hover { background: var(--paper, #faf6f0); border-color: var(--muted, #7d7469); }
-.cor-act:focus-visible { outline: 2px solid var(--sage-edge, #c8d0c5); outline-offset: 2px; }
+.cor-act:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .cor-act b { font-size: 13px; font-weight: 600; color: var(--ink, #1a1917); }
 .cor-act i { font-style: normal; font-size: 11.5px; color: var(--muted, #7d7469); }
 .cor-act--danger b { color: var(--burg, #7c3a2a); }

@@ -181,4 +181,4 @@
   margin: 0 0 0 4px; padding: 0; border: 0; background: none; color: #1c130f; cursor: pointer;
   font: 400 14px/1.45 var(--sp-type) !important; text-decoration: underline; text-underline-offset: 3px;
 }
-.hkv-tnote button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.hkv-tnote button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }

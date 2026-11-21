@@ -208,7 +208,7 @@
 }
 .qc138-pop .qc138-opt:hover { background: #f6f3ee; }
 .qc138-pop .qc138-opt.on { background: #f2f4f8; }
-.qc138-pop .qc138-opt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: -2px; }
+.qc138-pop .qc138-opt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qc138-pop .qc138-opt.zero .qc138-ol, .qc138-pop .qc138-opt.zero small { color: rgba(28, 19, 15, 0.4); }
 .qc138-pop .qc138-opt .qc138-ol { flex: 1 1 auto; min-width: 0; font: inherit !important; }
 .qc138-pop .qc138-opt .qc138-ol i { display: block; margin-top: 1px; font: italic 400 13px/1.3 var(--sp-serif) !important; color: var(--sp-quiet); }

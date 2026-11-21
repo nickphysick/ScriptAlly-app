@@ -49,7 +49,7 @@
   font: 400 14px var(--sp-type); color: var(--qcv-ink, #1c130f);
 }
 .pgd-next:hover { text-decoration: underline; }
-.pgd-x:focus-visible, .pgd-next:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; border-radius: 3px; }
+.pgd-x:focus-visible, .pgd-next:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 3px; }
 
 /* ── Contact list v13 §8 — the guide's dress (the mock's `.pg`): 340 wide, above the page's floating
    tab, a mono kicker "How this page works · n of N", the title in the typewriter at 20, one paragraph,

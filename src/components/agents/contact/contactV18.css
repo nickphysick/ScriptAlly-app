@@ -31,7 +31,7 @@
 .ws-app.sheet-wide .cl18-tabs button[aria-current="true"], .ws-app.sheet-wide .cl18-tabs button[aria-current="true"]:hover { height: 52px; }
 .cl18-tabs button[aria-current="true"] span { color: rgba(244, 238, 229, 0.7); }
 .cl18-tabs button:disabled { background: #efe9df; color: rgba(28, 19, 15, 0.22); cursor: default; }
-.cl18-tabs button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl18-tabs button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── §A · THE COMPACT LETTERS (`LetterTabs variant="pin"`). v138.6 §C retired the pinned row that held them, so the
    variant is mounted nowhere today; its rules stay with the component. ── */
@@ -45,7 +45,7 @@
 .cl18-pl button:not(:disabled):hover { background: rgba(42, 58, 82, 0.08); }
 .cl18-pl button[aria-current="true"], .cl18-pl button[aria-current="true"]:hover { background: #2a3a52; color: #f4eee5; }
 .cl18-pl button:disabled { color: rgba(28, 19, 15, 0.2); cursor: default; }
-.cl18-pl button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.cl18-pl button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .cl18-tabs button { transition: none; } }
 
 /* ── §B · THE LIST HEADER: the top of the list sheet, slate. One sentence left; search, Filters, density and full
@@ -65,7 +65,7 @@
   margin: 0; padding: 0; border: 0; background: none; color: #f4eee5; cursor: pointer; font: inherit !important;
   text-decoration: underline dotted #e7a184; text-decoration-thickness: 2px; text-underline-offset: 6px;
 }
-.cl18-lh .cl18-gn:focus-visible, .cl18-lh .cl18-clear:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; border-radius: 3px; }
+.cl18-lh .cl18-gn:focus-visible, .cl18-lh .cl18-clear:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 3px; }
 .cl18-lh .cl18-clear {
   margin: 0 0 0 14px; padding: 0; border: 0; background: none; cursor: pointer; vertical-align: 2px;
   font: italic 400 15px/1 var(--sp-serif) !important; color: #e7a184; text-decoration: underline; text-underline-offset: 3px;
@@ -162,5 +162,5 @@
   flex: none; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52;
   font: 400 15px/1.3 var(--sp-type) !important; text-decoration: underline; text-underline-offset: 4px;
 }
-.cl18-pk button:focus-visible, .cl18-pk a:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl18-pk button:focus-visible, .cl18-pk a:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .cl18-pk { animation: none; } }

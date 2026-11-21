@@ -39,7 +39,7 @@
     font: 400 15px/21px var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(28, 19, 15, 0.35);
   }
   .qc138-sheet .qc140-af-export:disabled { color: rgba(28, 19, 15, 0.35); cursor: default; text-decoration: none; }
-  .qc138-sheet .qc140-af-export:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .qc138-sheet .qc140-af-export:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .qc138-sheet .qc140-af-export + .qc140-af-clear { margin-left: 22px; }
 }
 

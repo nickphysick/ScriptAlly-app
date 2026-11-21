@@ -130,7 +130,7 @@
   font-family: var(--sp-type); font-size: 14.5px; line-height: 1; color: var(--ink-on-light);
 }
 .sf .o9-pill:hover { box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, .75); }
-.sf .o9-pill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .o9-pill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* picked: white, a 2px navy ring and a tick */
 .sf .o9-pill.is-on { box-shadow: inset 0 0 0 2px var(--hpanel-bg); }
 /* the primary, and the one age category picked: navy fill, cream text */
@@ -296,7 +296,7 @@
 .sf .o9-dot::after { content: ""; position: absolute; inset: -8px; }
 .sf .o9-dot.is-on { background: var(--im-stamp); }
 .sf .o9-dot.is-done { background: rgba(244, 238, 229, .85); }
-.sf .o9-dot:focus-visible { outline: 2px solid var(--im-cream); outline-offset: 3px; }
+.sf .o9-dot:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .sf .o9-deckfaq { padding: 6px 22px 10px; background: var(--im-pill); border-bottom: 1px solid rgba(28, 19, 15, .08); }
 .sf .o9-deckfaq .im-faq .im-faqh { display: none; }
 .sf .o9-deckbody { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: stretch; }
@@ -329,7 +329,7 @@
   font-family: var(--sp-type); font-size: 15.5px; color: var(--ink-on-light); display: inline-flex; align-items: center; gap: 10px;
 }
 .sf .o9-pick:hover { background: var(--im-pill); }
-.sf .o9-pick:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 3px; }
+.sf .o9-pick:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* v1.2: the reading a page's own key gives, chosen before the writer confirms it (the pill's own ring) */
 .sf .o9-pick.is-on { box-shadow: inset 0 0 0 2px var(--hpanel-bg); }
 .sf .o9-q--built .im-reason { display: grid; gap: 14px; }

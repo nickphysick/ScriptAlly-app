@@ -49,7 +49,7 @@
 .vv2 .cx-sh .sp { flex:1 }
 .vv2 .cx-lnk { all:unset;cursor:pointer;font:400 14px var(--machine);color:var(--cx-rust);text-decoration:underline;text-underline-offset:3px;white-space:nowrap }
 .vv2 .cx-lnk:hover { color:#7c3a2a }
-.vv2 .cx-lnk:focus-visible { outline:2px solid var(--cx-navy);outline-offset:2px;border-radius:3px }
+.vv2 .cx-lnk:focus-visible { outline:2px solid var(--sp-anthracite);outline-offset:2px;border-radius:3px }
 .vv2 .cx-band { position:relative;margin-top:72px;padding:56px 0 64px;z-index:0 }
 .vv2 .cx-band::before { content:"";position:absolute;inset:0;z-index:-1;background:var(--cx-paper);box-shadow:0 0 0 100vmax var(--cx-paper);clip-path:inset(0 -100vmax) }
 .vv2 .cx-band .cx-sec { margin-top:0 }
@@ -59,11 +59,11 @@
 .vv2 .cx-b.p[disabled] { background:#b9b3ad;cursor:default }
 .vv2 .cx-b.g { background:#fff;color:var(--cx-navy);box-shadow:inset 0 0 0 1.5px rgba(42,58,82,.35) }
 .vv2 .cx-b.g:hover { box-shadow:inset 0 0 0 1.5px var(--cx-navy) }
-.vv2 .cx-b:focus-visible { outline:2px solid var(--cx-navy);outline-offset:2px }
+.vv2 .cx-b:focus-visible { outline:2px solid var(--sp-anthracite);outline-offset:2px }
 .vv2 .cx-x { all:unset;cursor:pointer;flex:none;width:36px;height:36px;border-radius:50%;display:grid;place-items:center;padding:0;line-height:0;background:rgba(255,255,255,.12);color:#fff }
 .vv2 .cx-x svg { width:14px;height:14px;display:block }
 .vv2 .cx-x:hover { background:rgba(255,255,255,.22) }
-.vv2 .cx-x:focus-visible { outline:2px solid #fff;outline-offset:2px }
+.vv2 .cx-x:focus-visible { outline:2px solid #f4eee5;outline-offset:2px }
 .vv2 .cx-x.lt { background:#efe9e1;color:var(--cx-ink) }
 .vv2 .cx-x.lt:hover { background:#e4dcd2 }
 .vv2 .cx-x.lt:focus-visible { outline-color:var(--cx-navy) }
@@ -171,7 +171,7 @@
 .vv2 .mh-b .hw { all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:8px;margin-left:10px;font:400 15px var(--serif);color:var(--sp-muted);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--cx-i30);white-space:nowrap }
 .vv2 .mh-b .hw:hover { color:var(--cx-ink) }
 .vv2 .mh-b .hw i { width:20px;height:20px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--cx-i45);display:grid;place-items:center;font:600 10.5px var(--mono);font-style:normal }
-.vv2 .mh-b .hw:focus-visible, .vv2 .mh-b button:focus-visible { outline:2px solid var(--cx-navy);outline-offset:3px }
+.vv2 .mh-b .hw:focus-visible, .vv2 .mh-b button:focus-visible { outline:2px solid var(--sp-anthracite);outline-offset:2px }
 @container sheet (max-width: 1440px) {
 .vv2 .mh-b .hw span { display:none }
 .vv2 .mh-b .hw { margin-left:4px }
@@ -182,7 +182,7 @@
 .vv2 .mh-r:hover .mcard { transform:translateY(-3px);box-shadow:0 0 0 1px rgba(28,19,15,.12),0 22px 34px -20px rgba(28,19,15,.45) }
 .vv2 .mcard .rg { all:unset;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;border-radius:10px;padding:4px 0 }
 .vv2 .mcard .rg:hover b { text-decoration:underline;text-underline-offset:3px }
-.vv2 .mcard .rg:focus-visible { outline:2px solid #2a3a52;outline-offset:2px }
+.vv2 .mcard .rg:focus-visible { outline:2px solid var(--sp-anthracite);outline-offset:2px }
 .vv2 .mcard .rg svg { width:80px;height:80px }
 .vv2 .mcard .rg b { font:400 14.5px var(--machine);color:var(--ink);white-space:nowrap }
 .vv2 .mcard .rg small { display:block;margin-top:-2px;font:italic 400 12px var(--serif);color:var(--sp-quiet);white-space:nowrap }
@@ -385,7 +385,7 @@
 .vv2 .tr-col { flex:1 1 0;min-width:240px;display:flex;flex-direction:column;gap:18px;position:relative;z-index:1 }
 .vv2 .tr-n { all:unset;cursor:pointer;box-sizing:border-box;display:flex;flex-direction:column;padding:16px 16px 14px;border-radius:16px;background:#fbf9f5;box-shadow:0 0 0 1px rgba(28,19,15,.1);transition:transform .15s,box-shadow .15s }
 .vv2 .tr-n:hover { transform:translateY(-2px);box-shadow:0 0 0 1px rgba(28,19,15,.14),0 8px 18px rgba(28,19,15,.08) }
-.vv2 .tr-n:focus-visible { outline:2px solid #2a3a52;outline-offset:2px }
+.vv2 .tr-n:focus-visible { outline:2px solid var(--sp-anthracite);outline-offset:2px }
 .vv2 .tr-n.use { box-shadow:0 0 0 2px #2a3a52 }
 .vv2 .tr-h { display:flex;align-items:center;gap:10px;min-height:32px }
 .vv2 .tr-h .vl-n { flex:0 0 auto }
@@ -426,7 +426,7 @@
 .vv2 .vp-m { grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:6px;margin-top:4px;padding:8px;border-radius:14px;background:#f3efe8 }
 .vv2 .vp-o { all:unset;cursor:pointer;box-sizing:border-box;display:flex;align-items:center;gap:10px;padding:9px 12px 9px 9px;border-radius:10px;background:#fff;box-shadow:0 0 0 1px rgba(28,19,15,.07) }
 .vv2 .vp-o:hover:not([disabled]) { box-shadow:0 0 0 1px rgba(28,19,15,.2) }
-.vv2 .vp-o:focus-visible { outline:2px solid #2a3a52;outline-offset:1px }
+.vv2 .vp-o:focus-visible { outline:2px solid var(--sp-anthracite);outline-offset:2px }
 .vv2 .vp-o[aria-selected="true"] { box-shadow:0 0 0 2px #2a3a52 }
 .vv2 .vp-ot { flex:1;min-width:0 }
 .vv2 .vp-ot b { display:block;font:400 14.5px/1.25 var(--machine);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
@@ -538,7 +538,7 @@
 .vv2 .vcar-sort span { padding:0 10px 0 8px;font:600 8.5px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--sp-quiet) }
 .vv2 .vcar-sort button { all:unset;cursor:pointer;height:32px;padding:0 13px;border-radius:9px;font:400 14px var(--machine);color:var(--sp-muted) }
 .vv2 .vcar-sort button[aria-checked="true"] { background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(28,19,15,.12),0 0 0 1px rgba(28,19,15,.06) }
-.vv2 .vcar-sort button:focus-visible { outline:2px solid #2a3a52;outline-offset:1px }
+.vv2 .vcar-sort button:focus-visible { outline:2px solid var(--sp-anthracite);outline-offset:2px }
 .vv2 .vcar-n { margin-left:auto;font:italic 14.5px var(--serif);color:var(--sp-quiet) }
 .vv2 .vcar-ar { display:flex;gap:8px }
 .vv2 .vcar-ar button { all:unset;cursor:pointer;display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(28,19,15,.14);color:var(--ink) }
@@ -613,7 +613,7 @@
 .vv2 .db-h .r { text-align:right }
 .vv2 .db-r { align-items:start;padding-top:18px;padding-bottom:18px;border-bottom:1px solid rgba(28,19,15,.1);cursor:pointer;transition:background .15s;background:transparent }
 .vv2 .db-r:hover { background:#fff }
-.vv2 .db-r:focus-visible { outline:2px solid #2a3a52;outline-offset:-2px }
+.vv2 .db-r:focus-visible { outline:2px solid var(--sp-anthracite);outline-offset:2px }
 .vv2 .db-id { display:flex;gap:12px;align-items:flex-start;min-width:0 }
 .vv2 .db-id .vl-n { flex:none;margin-top:-2px }
 .vv2 .db-r.use .vl-n { background:#2a3a52;color:#f4eee5 }
@@ -775,7 +775,7 @@
 .vv2 #tiles[data-lk="b"] .db-r.use .da:hover { background:rgba(244,238,229,.12);color:#f4eee5 }
 .vv2 #tiles[data-lk="b"] .db-r.use .da.u.on { color:#f4eee5 }
 .vv2 #tiles[data-lk="b"] .db-r.use .da[disabled]:not(.on) { opacity:.3 }
-.vv2 .db-r .da:focus-visible { outline:2px solid #c9765d;outline-offset:1px }
+.vv2 .db-r .da:focus-visible { outline:2px solid var(--sp-anthracite);outline-offset:2px }
 .vv2 .hfC-w { position:relative }
 .vv2 .hfC-b { cursor:default;transition:opacity .15s }
 .vv2 .hfC-w.hv .hfC-b:not(.on) { opacity:.4 }

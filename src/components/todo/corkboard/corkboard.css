@@ -71,7 +71,7 @@
 .cb2-row:hover span { text-decoration: underline; text-underline-offset: 4px; }
 .cb2-rows--f .cb2-row:not([aria-pressed="true"]) { opacity: .35; }
 .cb2-row[aria-pressed="true"] span { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; }
-.cb2-row:focus-visible { outline: 2px solid #e0a188; outline-offset: 2px; }
+.cb2-row:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .cb2-pick { padding-bottom: 20px; }
 .cb2-sws { display: flex; gap: 10px; margin-top: 4px; }
 .cb2-sw {
@@ -80,7 +80,7 @@
 }
 .cb2-sw::before { content: ""; position: absolute; inset: 0 0 auto; height: 10px; background: rgba(28, 19, 15, .04); }
 .cb2-sw:hover { transform: translateY(-2px); }
-.cb2-sw:focus-visible { outline: 2px solid #e0a188; outline-offset: 3px; }
+.cb2-sw:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .cb2-panel .cb2-sw span {
   position: absolute; left: -6px; right: -6px; top: 47px; text-align: center; white-space: nowrap;
   font: 400 12.5px/1.2 var(--cb2-serif) !important; color: var(--cb2-c55) !important;
@@ -96,7 +96,7 @@
   .cb2 .cb2-hsw i { display: block; width: 46px; height: 46px; border-radius: 6px; box-shadow: 0 0 0 2px rgba(244, 238, 229, .5); transition: transform .15s; }
   .cb2 .cb2-hsw:hover i { transform: translateY(-2px); }
   .cb2 .cb2-hsw span { font: 400 14px/1 var(--cb2-serif) !important; color: rgba(244, 238, 229, .85); }
-  .cb2 .cb2-hsw:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; border-radius: 6px; }
+  .cb2 .cb2-hsw:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 6px; }
 }
 @media (min-width: 768px) and (prefers-reduced-motion: reduce) { .cb2 .cb2-hsw i { transition: none; } }
 
@@ -147,7 +147,7 @@
 }
 .cb2-opt:hover, .cb2-opt:focus-visible { background: #f6f3ee; outline: 0; }
 .cb2-opt[aria-checked="true"]::after { content: "✓"; color: var(--cb2-navy); }
-.cb2 :focus-visible { outline: 2px solid var(--cb2-navy); outline-offset: 2px; }
+.cb2 :focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ═════════ the header and tool row below 1180 and on a phone (ref) ═════════ */
 @media (max-width: 1180px) {
@@ -169,7 +169,7 @@
 .cb2-wall { display: grid; grid-template-columns: repeat(auto-fill, minmax(232px, 1fr)); gap: 24px; }
 .cb2-note { position: relative; cursor: pointer; outline: none; transition: transform .18s ease, opacity .2s ease; }
 .cb2-note:hover, .cb2-note:focus-visible { transform: translateY(-2px); }
-.cb2-note:focus-visible .cb2-paper { outline: 2px solid var(--cb2-navy); outline-offset: 3px; }
+.cb2-note:focus-visible .cb2-paper { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cb2-dim { opacity: .22; }
 .cb2-fresh { animation: cb2-land .45s ease; }
 @keyframes cb2-land { 0% { opacity: 0; transform: translateY(-10px); } 100% { opacity: 1; transform: none; } }

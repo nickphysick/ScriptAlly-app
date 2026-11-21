@@ -35,7 +35,7 @@
     text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 4px;
   }
   .cl254-fillp:hover { text-decoration-color: #2a3a52; }
-  .cl254-fillp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; border-radius: 2px; }
+  .cl254-fillp:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 }
 @media (min-width: 768px) and (max-width: 1440px) {
   /* ≤1440: Agent · What they want · Replies in · Your query — Agent fit drops, Replies in comes back */
@@ -50,4 +50,4 @@
   all: unset; cursor: pointer; font: italic 400 14px/1.4 var(--sp-serif) !important; color: #2a3a52;
   text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 3px;
 }
-.cl254-gapl > button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl254-gapl > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }

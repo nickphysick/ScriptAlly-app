@@ -34,7 +34,7 @@
   color: var(--sp-muted); cursor: pointer; white-space: nowrap; font: 400 14.5px/1 var(--sp-type) !important; font-style: normal;
 }
 .sc-pop .sc-seg button[aria-checked="true"] { background: #2a3a52; color: #f4eee5; }
-.sc-pop .sc-seg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.sc-pop .sc-seg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .sc-pop .sc-note { margin: 10px 8px 0; font: 400 13.5px/1.4 var(--sp-type) !important; font-style: normal; color: var(--sp-quiet); }
 
 /* List filters v1 — the bars' labelled chip ("Sort:" muted serif, the field 600, the arrow and caret navy) */

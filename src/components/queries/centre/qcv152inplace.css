@@ -17,7 +17,7 @@
 .qc152 .qc152-edstrip > span:not(.qc152-pi) { font: italic 400 13.5px var(--sp-serif) !important; color: #4a5a74; letter-spacing: 0; }
 .qc152 .qc152-edstrip > button { all: unset; cursor: pointer; margin-left: auto; padding: 5px 12px; border-radius: 999px; font: 400 14px var(--sp-serif) !important; color: #2a3a52; box-shadow: inset 0 0 0 1px #b7c2d4; }
 .qc152 .qc152-edstrip > button:hover { background: #fff; }
-.qc152 .qc152-edstrip > button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152 .qc152-edstrip > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* 3 · the surface takes a faint cool wash; the book block a cooler grey */
 .qc152[data-editing] .qc152-body, .qc152[data-editing] .qc152-agent, .qc152[data-editing] .qc152-tabs { background: #fbfcfe; }
@@ -36,14 +36,14 @@
 .qc152 .qc152-ebtn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 21px; background: #fff; color: #2a3a52; font: 600 14px var(--sp-serif) !important; white-space: nowrap; transition: filter .15s, transform .1s; }
 .qc152 .qc152-ebtn:active { transform: scale(.97); }
 .qc152 .qc152-ebtn:disabled { opacity: .45; pointer-events: none; }
-.qc152 .qc152-elnk:focus-visible, .qc152 .qc152-ebtn:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.qc152 .qc152-elnk:focus-visible, .qc152 .qc152-ebtn:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 
 /* editable values: a fine dotted underline in edit mode; a soft navy tint on hover and while its menu is open */
 .qc152 .qc152-ed { all: unset; cursor: text; border-radius: 4px; font: inherit; transition: background .15s, box-shadow .15s, color .15s; }
 .qc152 .qc152-agent .qc152-ed { display: block; width: fit-content; max-width: 100%; font: 400 16px var(--sp-serif); }
 .qc152[data-editing] .qc152-ed { cursor: pointer; background-image: linear-gradient(90deg, #b9ad9e 50%, transparent 0); background-size: 4px 1px; background-repeat: repeat-x; background-position: 0 100%; padding-bottom: 1px; }
 .qc152[data-editing] .qc152-ed:hover, .qc152[data-editing] .qc152-ed.open { background-color: rgba(42, 58, 82, .06); box-shadow: 0 0 0 3px rgba(42, 58, 82, .06); }
-.qc152[data-editing] .qc152-ed:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152[data-editing] .qc152-ed:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qc152[data-editing] .qc152-ed.chg, .qc152[data-editing] .qc152-ed.chg .qc152-nm { color: #2a3a52; font-weight: 600; }
 .qc152[data-editing] .qc152-ed.chg::after, .qc152 .qc152-chgdot { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 0 0 4px; border-radius: 50%; background: var(--sp-rust); vertical-align: 3px; }
 .qc152[data-editing] .qc152-agent .qc152-ed.chg { display: flex; align-items: center; }
@@ -58,7 +58,7 @@
 .qc152 .qc152-agt-ed .qc152-agq > div { box-shadow: none; }
 .qc152 .qc152-qsnote { margin: 10px 0 10px; font: italic 400 13px/1.45 var(--sp-serif) !important; color: #6f645b; }
 .qc152 .qc152-lk2 { all: unset; cursor: pointer; font: inherit; font-style: normal; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
-.qc152 .qc152-lk2:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152 .qc152-lk2:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qc152 .qc152-agsec { margin: 16px 0 8px; display: flex; align-items: baseline; gap: 8px; font: 400 15px var(--sp-type) !important; color: #1c130f; }
 .qc152 .qc152-agsec small { font: italic 400 12.5px var(--sp-serif) !important; color: #6f645b; }
 .qc152 .qc152-share { display: inline-flex; align-items: center; gap: 5px; font: inherit; }
@@ -67,7 +67,7 @@
 .qc152 .qc152-seg2 button { all: unset; cursor: pointer; padding: 2px 10px; border-radius: 999px; font: 400 13.5px var(--sp-serif) !important; color: #6f645b; }
 .qc152 .qc152-seg2 button:hover { background: #f3eee6; }
 .qc152 .qc152-seg2 button.on { background: #f3eee6; color: #1c130f; box-shadow: inset 0 0 0 1px #cfc4b5; }
-.qc152 .qc152-seg2 button:focus-visible, .qc152 .qc152-tgl:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152 .qc152-seg2 button:focus-visible, .qc152 .qc152-tgl:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qc152 .qc152-tgl { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 7px; margin: 6px 0 0; font: 400 13.5px var(--sp-serif) !important; color: #6f645b; }
 .qc152 .qc152-tgl i { width: 26px; height: 15px; border-radius: 999px; background: #d9cfc2; position: relative; transition: background .15s; }
 .qc152 .qc152-tgl i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 11px; height: 11px; border-radius: 50%; background: #fff; transition: left .15s; }
@@ -105,7 +105,7 @@
 .qc152 .qc152-llnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--sp-serif) !important; color: var(--sp-muted); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 .qc152 .qc152-llnk:hover { color: #2a3a52; }
 .qc152 .qc152-lbtn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 21px; background: #2a3a52; color: #fff; font: 600 14px var(--sp-serif) !important; }
-.qc152 .qc152-llnk:focus-visible, .qc152 .qc152-lbtn:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152 .qc152-llnk:focus-visible, .qc152 .qc152-lbtn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the menu: our small anchored popover (the logging flow's family), flipping up when there is no room below */
 .qc152 .qc152-pp { position: absolute; z-index: 40; min-width: 240px; max-width: 300px; max-height: 340px; overflow: auto; padding: 6px; border-radius: 12px; background: #fff;
@@ -127,7 +127,7 @@
 .qc152 .qc1522-sseg button { all: unset; cursor: pointer; padding: 5px 11px; border-radius: 999px; box-shadow: inset 0 0 0 1px #d9cfc2; font: 400 13.5px var(--sp-serif) !important; color: #1c130f; }
 .qc152 .qc1522-sseg button:hover { box-shadow: inset 0 0 0 1.5px #8e8274; }
 .qc152 .qc1522-sseg button.on { background: #2a3a52; color: #fff; box-shadow: none; }
-.qc152 .qc1522-sseg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152 .qc1522-sseg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the step editor's buttons at the reference's small size (its `.btn.sm`: 14px) */
 .qc152 .qc1522-ebx .qc1522-btn.sm { font-size: 14px !important; }

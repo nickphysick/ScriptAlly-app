@@ -24,7 +24,7 @@
   white-space: nowrap;
 }
 .d58 span.d60-bl { cursor: default; text-decoration: none; }
-.d58 .d60-bl:focus-visible, .d58 .d60-ready:focus-visible{ outline: 2px solid var(--d58-navy); outline-offset: 3px; border-radius: 2px; }
+.d58 .d60-bl:focus-visible, .d58 .d60-ready:focus-visible{ outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 
 /* ── the two hoops, beneath the full-width chart ─────────────────────────────────────────────── */
 /* ⚠️ MOVED BY DASHBOARD v71: the hoop-need column floor (`--d60-hoop-need`, measured by the page) now feeds

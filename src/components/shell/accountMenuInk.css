@@ -42,7 +42,7 @@
     text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(var(--ink-cream-rgb), 0.3);
   }
   .am-menu--ink .am-iplan-a:hover { color: var(--ink-cream-92); }
-  .am-menu--ink .am-iplan-a:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: 2px; border-radius: 3px; }
+  .am-menu--ink .am-iplan-a:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 3px; }
   /* shell nav v3: the Your notes row's "{n} new" — the full sidebar link's mark (inkShell.css `.ws-fblink i`) */
   .am-menu--ink .am-new {
     margin-left: auto; font-style: normal; padding: 1px 7px; border-radius: 999px; background: var(--ink-terra);

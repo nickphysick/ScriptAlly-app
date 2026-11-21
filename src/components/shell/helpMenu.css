@@ -47,7 +47,7 @@
   font: 400 12.5px/1.3 var(--sp-serif) !important; white-space: nowrap;
 }
 .hm .hm-go:hover { background: #3b4a66; }
-.hm .hm-go:focus-visible { outline: 2px solid var(--sp-rust); outline-offset: 2px; }
+.hm .hm-go:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* sections */
 .hm .hm-sec { padding: 6px; }
@@ -94,7 +94,7 @@
 }
 .hm .hm-sw[aria-checked="false"] { background: #c9c3b9; }
 .hm .hm-sw[aria-checked="false"]::after { left: 3px; }
-.hm .hm-sw:focus-visible { outline: 2px solid var(--sp-rust); outline-offset: 2px; }
+.hm .hm-sw:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 @media (prefers-reduced-motion: reduce) {
   .hm, .hm .hm-sw::after { animation: none; transition: none; }

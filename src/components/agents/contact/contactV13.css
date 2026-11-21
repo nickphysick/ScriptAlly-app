@@ -22,7 +22,7 @@
   cursor: pointer; transition: transform 0.18s; color: var(--clv-ink); font-family: var(--clv-serif);
 }
 .cl14-nxc > .cl13-ac:hover { transform: translateY(-3px); }
-.cl14-nxc > .cl13-ac:focus-visible { outline: 2px solid var(--clv-btn); outline-offset: 2px; }
+.cl14-nxc > .cl13-ac:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl14-nxc .cl13-ac .cl13-acb { height: 40px; background: var(--clv-slate); display: flex; align-items: center; gap: 8px; padding: 0 12px; flex: none; }
 .cl14-nxc .cl13-ac .cl13-acchip {
   font: 500 8px/1 var(--sp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: #fff;

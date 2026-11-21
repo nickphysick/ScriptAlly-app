@@ -36,7 +36,7 @@
   font: 400 15px/1 var(--clv-serif); white-space: nowrap; cursor: pointer; transition: background 0.15s, color 0.15s;
 }
 .cl14-out:hover, .cl14-out:focus-visible { background: var(--cl14-blue); color: #fff; }
-.cl14-out:focus-visible { outline: 2px solid var(--cl14-blue); outline-offset: 2px; }
+.cl14-out:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl14-out.is-on { background: var(--cl14-blue); color: #fff; }
 .cl14-out--sm { height: 32px; padding: 0 14px; font-size: 14px; border-radius: 16px; }
 /* the ink pill (Add an agent, Add to my list) */
@@ -45,7 +45,7 @@
   font: 500 13.5px/1 var(--clv-serif); white-space: nowrap; cursor: pointer;
 }
 .cl14-go:hover { background: #1b2433; }
-.cl14-go:focus-visible { outline: 2px solid var(--cl14-blue); outline-offset: 2px; }
+.cl14-go:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the card on the stage: the oracle's ring and deep shadow, over the card's own carousel shadow (contactV13.css, 0-2-0) */
 .cl14-next .fs-card > .cl13-ac { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 24px 46px -24px rgba(28, 19, 15, 0.45); }
@@ -155,7 +155,7 @@
 .cl14-pill--ready { background: #dbe9f5; color: #24476b; }
 .cl14-pill--ready::before { background: #2f5f86; }
 .cl14-pill[aria-pressed="true"] { box-shadow: inset 0 0 0 2px currentColor; }
-.cl14-pill:focus-visible { outline: 2px solid var(--cl14-cream); outline-offset: 2px; }
+.cl14-pill:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 /* row 2 — the controls, all on WHITE (a set control keeps the white; its value says it is set) */
 .cl14-bar-r2 { padding: 0 28px 22px; }
 .cl14-bar .cl13-ctl { justify-content: flex-start; flex-wrap: nowrap; gap: 8px; }
@@ -182,7 +182,7 @@
 .cl14-fp em { font-style: normal; font: 500 9.5px var(--sp-mono); color: var(--sp-quiet); }
 .cl14-fp.on { background: var(--clv-slate-ink); color: #f5f1eb; box-shadow: none; }
 .cl14-fp.on :is(i, em) { color: rgba(245, 241, 235, 0.75); }
-.cl14-fp:focus-visible { outline: 2px solid var(--clv-slate-ink); outline-offset: 2px; }
+.cl14-fp:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the genre field — predictive tokens from the app's genre list, never free text */
 .cl14-gtok {
   box-sizing: border-box; position: relative; display: inline-flex; align-items: center; flex-wrap: nowrap; gap: 6px;
@@ -266,7 +266,7 @@
 .clv-row::after { content: ""; position: absolute; left: 18px; right: 22px; bottom: 0; height: 1px; background: rgba(28, 19, 15, 0.07); }
 .clv-row:last-child::after, .clv-row:has(+ .lt-div)::after { display: none; }
 .clv-row:hover { background: #fdfbf8; }
-.clv-row:focus-visible { outline: 2px solid var(--clv-btn); outline-offset: -2px; }
+.clv-row:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .clv-row[aria-current="true"] { box-shadow: inset 0 0 0 1.5px var(--clv-ink); }
 /* Agent: the initials disc, the name, then "agency · city" */
 .clv-rwho { display: flex; align-items: center; gap: 11px; min-width: 0; }
@@ -314,7 +314,7 @@
   font: 500 12.5px var(--clv-serif); color: var(--clv-slate-ink); white-space: nowrap; cursor: pointer;
 }
 .clv-miss:hover { background: #eef2f5; outline-color: var(--clv-slate-ink); }
-.clv-miss:focus-visible { outline: 2px solid var(--clv-slate-ink); outline-offset: 1px; }
+.clv-miss:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* Replies: "~N wks" over the door */
 .clv-rrep b { display: block; font: 400 14.5px var(--clv-type) !important; color: #1c130f; }
 .clv-rrep b.unk { color: var(--sp-quiet); }
@@ -355,7 +355,7 @@
   font: 400 13px var(--clv-type); color: #1c130f; white-space: nowrap; cursor: pointer;
 }
 .clv-trb.p { background: #2a3a52; color: #f5f1eb; box-shadow: none; }
-.clv-trb:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.clv-trb:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .clv-rtray { transition: none; } }
 
 /* ══ v14 §7 — THE TOUCHES (the mock's own values) ══ */
@@ -385,7 +385,7 @@
   font: 500 9px var(--sp-mono); letter-spacing: 0.08em; text-transform: uppercase; color: rgba(244, 238, 229, 0.6);
 }
 .cl14-dens button.on { background: #fff; color: #2a3a52; }
-.cl14-dens button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 1px; }
+.cl14-dens button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .cl14-kbh {
   position: relative; width: 34px; height: 34px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
   background: rgba(255, 255, 255, 0.12); color: #fff; cursor: default; flex: none;

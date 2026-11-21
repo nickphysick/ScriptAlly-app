@@ -16,7 +16,7 @@
 .qc152 .nx h4 .r { margin-left: auto; font: 400 13.5px var(--sp-serif) !important; color: #7a7066; white-space: nowrap; }
 .qc152 .nx-lk { all: unset; cursor: pointer; font: 400 14.5px var(--sp-serif) !important; color: #2a3a52; text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 3px; }
 .qc152 .nx-lk:hover { text-decoration-color: #2a3a52; }
-.qc152 .nx-lk:focus-visible, .qc152 .nx button:focus-visible, .qc152 .nx a:focus-visible, .qc152 .nx-notes button:focus-visible, .qc152 .nx-notes textarea:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.qc152 .nx-lk:focus-visible, .qc152 .nx button:focus-visible, .qc152 .nx a:focus-visible, .qc152 .nx-notes button:focus-visible, .qc152 .nx-notes textarea:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qc152 .nx-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 4px; }
 .qc152 .nx-empty { margin: 0; font: italic 400 14.5px var(--sp-serif) !important; color: #7a7066; }
 
