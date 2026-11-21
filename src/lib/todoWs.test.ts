@@ -198,7 +198,7 @@ describe("v51.1 — the priority phrase and the row titles", () => {
     expect(startReason({ task: null, urgent: false })).toBe("Nothing urgent");
   });
   it("v52 · the collapsed strip names each task by first name, kind and when, with apostrophes, hyphens and accents intact", () => {
-    expect(stripWords({ ...by("send"), dueDays: -8 })).toEqual({ name: "Zoë", what: "Partial", when: "8d late", hot: true });
+    expect(stripWords({ ...by("send"), dueDays: -8 })).toEqual({ name: "Zoë", what: "Partial", when: "8d past", hot: true });
     expect(stripWords({ ...by("full"), dueDays: 7 })).toEqual({ name: "Mary-Kate", what: "Full", when: "7d", hot: false });
     expect(stripWords({ ...by("offer"), dueDays: 1 })).toEqual({ name: "Zoë", what: "Offer", when: "Tmrw", hot: true });
     expect(stripWords({ ...by("nudge"), dueDays: 0 })).toEqual({ name: "Mary-Kate", what: "Nudge", when: "Today", hot: true });
@@ -288,7 +288,7 @@ describe("doneTabRows", () => {
 });
 
 describe("v53 — the tray's figure and the breakdown bar", () => {
-  it("a request counts days waiting, a nudge days late, Gone quiet days quiet; never \"No date\"", () => {
+  it("a request counts days waiting, a nudge days past expected, Gone quiet days quiet; never \"No date\"", () => {
     const now = Date.parse("2026-11-08T12:00:00");
     for (const t of tasks as WsTask[]) {
       const f = trayFigure(t, now);

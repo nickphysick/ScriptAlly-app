@@ -20,7 +20,7 @@ import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../../lib/db";
 import type { BoardCard } from "../../../lib/todoBoard";
 import {
-  NO_WS_FILTERS, WS_GROUPINGS, WS_GROUPS, breakdownOf, dueChip, mentorLine, passes, milestoneFor, stageVars, trayFigure, wsSections, wsStage,
+  NO_WS_FILTERS, WS_GROUPINGS, WS_GROUPS, breakdownOf, deskChip, mentorLine, passes, milestoneFor, stageVars, trayFigure, wsSections, wsStage,
   type DoneRow, type WsFilters, type WsGrouping, type WsTask,
 } from "../../../lib/todoWs";
 import { RULE_OFF_WORDS, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
@@ -598,7 +598,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       );
     }
     const t = deskT ?? sel;
-    const chip = dueChip(t);
+    const chip = deskChip(t, now);
     const seqPos = seq.findIndex((x) => x.key === t.key);
     const band = t.group === "wait" ? "wait" : t.group;
     const meta = t.kind === "own" ? "Your task" : [t.agentName, t.agency && t.agency !== t.agentName ? t.agency : ""].filter(Boolean).join(" · ");

@@ -44,4 +44,11 @@
   .tws .tws-du b { font-size: 15px; }
   .tws .tws-du small { font-size: 13.5px; }
 
+
+  /* ── v58 · 4 · nothing changes colour with how long a task has waited: the figure is one ink on every row, and the
+        desk's chip (which now says what the row says) is drawn one way on every task, as the ref's chip is ── */
+  .tws .tws-du[data-late] b { color: var(--tw-ink2); }
+  .tws .tws-du[data-late] small { color: var(--tw-mut2); }
+  .tws .tws-dchip, .tws .tws-dchip[data-late] { color: inherit; box-shadow: inset 0 0 0 1px var(--tw-terra); }
+
 }
