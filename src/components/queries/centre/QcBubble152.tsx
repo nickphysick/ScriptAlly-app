@@ -76,6 +76,8 @@ export interface BubbleProps {
   /** after the bubble's contents (the thread's ✎ Edit) */
   after?: React.ReactNode;
   className?: string;
+  /** Query card v164 — the agent's words under the title, before what went (the slide-in card passes it) */
+  wordsFirst?: boolean;
 }
 
 export const Bubble: React.FC<BubbleProps> = (b) => {
@@ -87,7 +89,10 @@ export const Bubble: React.FC<BubbleProps> = (b) => {
   const room = ts ? <span className="qc152-tsp" aria-hidden="true">{ts}</span> : null;
   /* the via WORDS stay only where they are not a method (a close's reason, an offer deadline) */
   const viaText = b.via && !(b.side === "me" && b.viaIcon) ? b.via : null;
-  const tail = b.sub ? "sub" : b.quote ? "quote" : b.chips || viaText ? "r2" : "r1";
+  /* v164 (`wordsFirst`, the slide-in card only) — their words sit under the title, before what went; the stamp's room goes
+     on whichever line is last */
+  const tail = b.sub ? "sub" : b.wordsFirst ? (b.chips || viaText ? "r2" : b.quote ? "quote" : "r1") : b.quote ? "quote" : b.chips || viaText ? "r2" : "r1";
+  const quote = b.quote ? <div className="qc152-qt" data-qc152="quote">“{b.quote}”{tail === "quote" ? room : null}</div> : null;
   return (
     <div {...(b.outer as React.HTMLAttributes<HTMLDivElement>)} className={`qc152-m ${b.side}${b.draft ? " drf" : ""}${b.className ? ` ${b.className}` : ""}`}>
       {b.side === "them" ? <span className="qc152-av" aria-hidden="true">{b.initials}</span> : null}
@@ -104,8 +109,9 @@ export const Bubble: React.FC<BubbleProps> = (b) => {
               {b.draft ? <span className="qc152-drt" data-qc152="draft-mark">· draft</span> : null}
               {tail === "r1" ? room : null}
             </div>
+            {b.wordsFirst ? quote : null}
             {b.chips || viaText ? <div className="qc152-r2">{b.chips}{viaText ? <em data-qc152="via">{viaText}</em> : null}{tail === "r2" ? room : null}</div> : null}
-            {b.quote ? <div className="qc152-qt" data-qc152="quote">“{b.quote}”{tail === "quote" ? room : null}</div> : null}
+            {b.wordsFirst ? null : quote}
             {b.sub ? <div className="qc1522-sb" data-qc1522="sub">{b.sub}{tail === "sub" ? room : null}</div> : null}
           </div>
         </div>

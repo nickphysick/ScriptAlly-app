@@ -30,7 +30,7 @@ import "./qcv153thread.css";
 import { footer1522, type FootAct, type FootCtx } from "../../../lib/qcFoot1522";
 import { waitWords } from "../../../lib/qc1522";
 import { PopCtx, useOutsideClose } from "./QcEdit152";
-import { Bubble, StepGlyph, chipIcon } from "./QcBubble152";
+import { Bubble, StepGlyph } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import {
   AgentEditPane, ASK_POOL, Ed, EdMenu, EditStrip, LeaveAsk, METHODS, MenuItem, NotesEditPane, SaveBar, useEditLayer,
@@ -399,12 +399,18 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     return () => window.clearTimeout(t);
   }, [motionN, motionDone, !p.motion]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* v164 — what went is ONE LINE: a paperclip, then each item in Source Serif, joined by " · ". Each item is still its
+     own button and does what its chip did (the tip, with its detail). */
   const chips = (cs: ThreadChip[], key: string) => cs.length ? (
-    <span className="qc152-chs" data-qc152="chips">
+    <span className="qc152-chs qc164-went" data-qc152="chips">
+      {CLIP}
       {cs.map((c, i) => (
-        <button key={`${key}-${i}`} type="button" className="qc152-ch" data-qc152="chip"
-          onClick={(e) => { e.stopPropagation(); tip.show(e.currentTarget, c.detail, c.label); }}
-          onBlur={() => tip.hide()}>{chipIcon(c.label)}{c.label}</button>
+        <React.Fragment key={`${key}-${i}`}>
+          {i ? <span className="qc164-sep" aria-hidden="true"> · </span> : null}
+          <button type="button" className="qc152-ch" data-qc152="chip"
+            onClick={(e) => { e.stopPropagation(); tip.show(e.currentTarget, c.detail, c.label); }}
+            onBlur={() => tip.hide()}>{c.label}</button>
+        </React.Fragment>
       ))}
     </span>
   ) : null;
@@ -423,8 +429,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     /* v160 — keyed beside the thread's own steps, so the step that arrives for it can take its element */
     return [
       gap != null ? <div key={`${draftKey}:w`} className={`qc1522-lt ${m.side}`} data-qc1522="draft-wait" data-rk={`${draftKey}:w`}>{waitWords(gap)}</div> : null,
-      <React.Fragment key={draftKey}><Bubble side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated={m.dated} tint={m.tint} grey={m.grey} initials={r.initials}
-        chips={m.chips.length ? <span className="qc152-chs">{m.chips.map((c, k) => <span key={k} className="qc152-ch">{chipIcon(c.label)}{c.label}</span>)}</span> : null}
+      <React.Fragment key={draftKey}><Bubble wordsFirst side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated={m.dated} tint={m.tint} grey={m.grey} initials={r.initials}
+        chips={m.chips.length ? <span className="qc152-chs qc164-went">{CLIP}{m.chips.map((c, k) => <React.Fragment key={k}>{k ? <span className="qc164-sep" aria-hidden="true"> · </span> : null}<span className="qc152-ch">{c.label}</span></React.Fragment>)}</span> : null}
         via={m.via} quote={m.quote} follows={m.follows} nth={null} sub={m.sub} className="qc1522-draft" stamp={m.stamp} viaIcon={m.side === "me" ? viaKind(m.via) : null}
         outer={{ "data-qc152": "msg", "data-qc1522": "draft", "data-side": m.side, "data-rk": draftKey, style: { ["--dr" as string]: col } }} /></React.Fragment>,
     ];
@@ -477,7 +483,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         const stamped = !!desk.stampKey && (it.activityId === desk.stampKey || it.key === desk.stampKey);
         return (
           <React.Fragment key={rk(it.key)}>
-            <Bubble side={it.side} status={it.status} kind={it.kind} title={clip ? `You sent ${first} your materials` : it.title} date={it.date} dated={it.dated}
+            <Bubble wordsFirst side={it.side} status={it.status} kind={it.kind} title={clip ? `You sent ${first} your materials` : it.title} date={it.date} dated={it.dated}
               stamp={it.stamp} viaIcon={it.side === "me" ? viaKind(it.via) : null}
               tint={it.tint} grey={it.grey} initials={r.initials} chips={clip ? clipChip(clip) : chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
               className={[(p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) && !alias.current.map.has(it.key)) || enter.includes(it.key) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : "", out ? "qc160-out" : ""].filter(Boolean).join(" ") || undefined}
