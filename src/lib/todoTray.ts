@@ -20,6 +20,7 @@ import { QueryStatus } from "../types";
 import type { BoardCard } from "./todoBoard";
 import { cardBucket, taskDeed, type Bucket } from "./todoBuckets";
 import { listRowInputs, dueFor, type TaskData } from "./taskCardFacts";
+import type { DueSource } from "./taskDue";
 import { ticketFacts } from "./ticketFacts";
 import { elapsedPhrase } from "./elapsed";
 import { agentPrimary } from "./agentDisplay";
@@ -167,6 +168,9 @@ export interface TrayItem {
    *  creation) so the sorts have a number; a figure counted from that fallback read "0 days waiting". Every day count
    *  reads this instead, through `daysWaiting` (lib/todoWs). Optional so a hand-built item reads as before. */
   waitMs?: number | null;
+  /** v58.2 (A1): where the due day came from (`taskDue`'s own `source`: a hold, a reminder, a check-in, the reply window…),
+   *  so a figure can say what it is counting from. Read, never re-decided. Optional so a hand-built item reads as before. */
+  dueSource?: DueSource;
   /** a search haystack: deed, agent, agency */
   hay: string;
   /** the due bucket for the Due filter */
@@ -250,6 +254,7 @@ export function trayItem(card: BoardCard, db: TrayDb, now: number): TrayItem {
     initials: own ? null : initialsOf(name || agency || (isSweepCard(card) ? `${card.sweepOf} ` : card.title)),
     who, whoSub, dial, anchorMs: Number.isFinite(anchorMs) ? anchorMs : (userTask?.createdAt ? Date.parse(userTask.createdAt) : now),
     waitMs: Number.isFinite(anchorMs) ? anchorMs : null,
+    dueSource: due.source,
     hay: `${deed} ${name} ${agency} ${card.title}`.toLowerCase(), due: dueKey, sweep: isSweepCard(card),
   };
 }

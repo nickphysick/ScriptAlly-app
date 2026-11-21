@@ -16,6 +16,7 @@
  */
 import type { Agent, Query, UserTask } from "../types";
 import type { TrayItem } from "./todoTray";
+import type { DueSource } from "./taskDue";
 import { sendKindOf } from "./queryActions/sendKind";
 import type { AgentDataNeed } from "./agentDataQuality";
 import { isTaskType, type TaskType } from "./todoActions";
@@ -51,6 +52,8 @@ export interface WsTask {
   dueDays: number | null;
   /** Gone quiet: days since the last thing was sent */
   quietDays: number | null;
+  /** v58.2 (A1): where `dueDays` was counted from (`taskDue`'s source, carried on the tray item); undefined on a hand-built item */
+  dueSource?: DueSource;
   type: WsType | null;
   /** search haystack */
   hay: string;
@@ -169,7 +172,7 @@ export function wsTasks(items: readonly TrayItem[], agents: readonly Agent[], sw
     const title = titleOf(kind, i, first || "the agent", need);
     return {
       key, item: i, kind, group: GROUP_OF[i.group.id] ?? "house", title, first: first || "The agent", agentName, agency,
-      query, agent, userTask: i.userTask, need, dueDays, quietDays,
+      query, agent, userTask: i.userTask, need, dueDays, quietDays, dueSource: i.dueSource,
       type: kind === "other" && (i.card.taskType === "materials_unrecorded" || i.card.taskType === "materials_unrecorded_bulk") ? "Fill in" : TYPE_OF[kind],
       hay: `${title} ${agentName} ${agency}`.toLowerCase(),
     };
@@ -354,9 +357,18 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day past expected", "days past expected"), late: true }
   : d === 0 ? { n: "Today", words: "", late: true } : { n: String(d), words: plural(d, "day left", "days left"), late: false };
 /**
- * The figure at a row's right: a request "{n} days waiting" (since the agent asked), a nudge "{n} days past expected", Gone quiet
- * "{n} days quiet", an own task its due date. ⚠️ NEVER "No date": a task with no number to give shows none.
- * Housekeeping shows its Quick fill label instead (null here).
+ * To-do list v58.2 — THE FIGURE'S WORDS SAY WHAT IT COUNTS FROM (Nick, 21 Nov):
+ *   · a nudge past the agent's reply window: "{n} days past expected"; past the writer's own date (a hold, a planned
+ *     nudge or a booked check-in, `taskDue`'s "hold" / "reminder" / "check-in"): "{n} days since your reminder";
+ *   Not yet reached: "{n} days left"; the day itself: "Today". Which date wins is `taskDue`'s, unchanged.
+ */
+const WRITER_SET: ReadonlySet<DueSource> = new Set<DueSource>(["hold", "reminder", "check-in"]);
+const nudgeFigure = (d: number, source: DueSource | undefined): TrayFigure =>
+  d < 0 && source && WRITER_SET.has(source) ? { n: String(-d), words: plural(-d, "day since your reminder", "days since your reminder"), late: true } : dueFigure(d);
+/**
+ * The figure at a row's right: a request "{n} days waiting" (since the agent asked), a nudge past expected or since your
+ * reminder, Gone quiet "{n} days quiet", an offer or an own task its due date. ⚠️ NEVER "No date": a
+ * task with no number to give shows none. Housekeeping shows its Quick fill label instead (null here).
  */
 export function trayFigure(t: WsTask, nowMs: number): TrayFigure | null {
   const waited = daysWaiting(t, nowMs);
@@ -365,7 +377,7 @@ export function trayFigure(t: WsTask, nowMs: number): TrayFigure | null {
     case "fix": case "batch": return null;
     case "quiet": return t.quietDays == null ? null : { n: String(t.quietDays), words: plural(t.quietDays, "day quiet", "days quiet"), late: false };
     case "send": case "rr": return waiting();
-    case "nudge": return t.dueDays == null ? waiting() : dueFigure(t.dueDays);
+    case "nudge": return t.dueDays == null ? waiting() : nudgeFigure(t.dueDays, t.dueSource);
     case "offer": case "own": case "other": return t.dueDays == null ? (t.kind === "own" ? null : waiting()) : dueFigure(t.dueDays);
     default: { const unhandled: never = t.kind; return unhandled; }
   }
