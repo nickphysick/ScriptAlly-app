@@ -295,9 +295,9 @@ test.describe.serial("NU1 · Next up v1 on the page", () => {
   }
 
   /* NU11-D (v1.1) · the book Nick read on dev ("Murphy's Day Out", cv25-ms): Jonathan Marsh's Full Requested has no
-     request date anywhere (seeded straight to the status by seedCompsV25), so the label says so and no number shows.
-     The card as it stands is written out whole, so the report can say what Daniel O'Rourke's row is from the page. */
-  test("NU11-D · the cv25 book: an undated request, and the card as it stands", async ({ page }) => {
+     request date (seeded straight to the status by seedCompsV25) but does have `lastStatusChange`. The card as it
+     stands is written out whole, so the report can say what is and is not in Next up from the page. */
+  test("NU11-D · the cv25 book: Marsh's request date, and the card as it stands", async ({ page }) => {
     test.setTimeout(120_000);
     const vp = SIZES[0];
     const seen: Record<string, unknown> = {};
@@ -308,8 +308,13 @@ test.describe.serial("NU1 · Next up v1 on the page", () => {
     seen.fullLead = m;
     const marsh = await page.locator(`${CARD} [data-d2="next-top"] [data-nu="name"]`).first().textContent().catch(() => null);
     seen.fullLeadName = marsh;
-    check("NU11-D1", "cv25 1512", marsh === "Jonathan Marsh" && m?.label === "Full asked for · date not recorded", `${marsh}: "${m?.label}"`);
-    check("NU11-D2", "cv25 1512", m?.n === "" && m?.cap === "", `number "${m?.n}" caption "${m?.cap}"`);
+    /* ⚠️ CORRECTED (21 Nov): Marsh's query IS dated — by `lastStatusChange` (24 Sep), which qcStages reads where the
+       document has no request date. Measured on the emulator AND on the live dev page (bundle index-BJO6iTBo.js):
+       "Full asked for · 24 Sep", 58 days. So the lock is the rule, not one answer: a dated label always has its number,
+       and "date not recorded" never has one. */
+    const undated = m?.label?.endsWith("· date not recorded") ?? false;
+    check("NU11-D1", "cv25 1512", marsh === "Jonathan Marsh" && /^Full asked for · /.test(m?.label ?? ""), `${marsh}: "${m?.label}"`);
+    check("NU11-D2", "cv25 1512", undated ? m?.n === "" && m?.cap === "" : m?.n !== "" && /waiting$/.test(m?.cap ?? ""), `label "${m?.label}", number "${m?.n}" caption "${m?.cap}"`);
     mkdirSync(DIR, { recursive: true });
     writeFileSync(`${DIR}/cv25-card.json`, JSON.stringify(seen, null, 1));
   });
