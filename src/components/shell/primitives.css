@@ -175,6 +175,9 @@
 /* Consistency roll-out v1, Phase 12 (ruling 9): a slide-out panel's close button is a 36 × 36 circle; its fixed action
    footer is 72 high with 14 24 of padding and a 1px hairline above. Builds, shells, headers and positions are the
    panels' own. */
+/* Consistency roll-out v2, Phase 1 (rulings v2, ruling 7): a view switch is boxed — the track radius 12, each option 34
+   high with radius 9. Each switch's own rule reads these. */
+:root { --sp-vsw-r: 12px; --sp-vsw-opt-h: 34px; --sp-vsw-opt-r: 9px; }
 :root { --sp-px-size: 36px; --sp-pfoot-h: 72px; --sp-pfoot-pad: 14px 24px; --sp-pfoot-rule: 1px solid rgba(28, 19, 15, .1); }
 .sp-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
 .sp-btn--fill { background: var(--sp-anthracite); color: #fff; }

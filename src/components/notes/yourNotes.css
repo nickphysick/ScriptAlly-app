@@ -120,7 +120,7 @@
 
 /* empty, loading and a failed read */
 .yn-empty { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 40px 20px 44px; text-align: center; }
-.yn .yn-empty h3.yn-eh { margin: 0; font: 400 24px/1.3 var(--sp-type) !important; color: var(--yn-ink) !important; }
+.yn .yn-empty h3.yn-eh { margin: 0; font: var(--sp-h-card) !important; color: var(--yn-ink) !important; }
 .yn .yn-empty p { margin: 0; max-width: 460px; font: 15.5px/1.5 var(--sp-serif) !important; color: var(--yn-ink2); }
 .yn-sk { display: grid; gap: 12px; padding: 20px 22px 24px; }
 .yn-sk i { display: block; height: 64px; border-radius: 12px; background: rgba(28, 19, 15, 0.05); }

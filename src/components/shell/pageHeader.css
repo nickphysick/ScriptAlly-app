@@ -556,7 +556,7 @@
 .ph-primary { background: var(--sp-anthracite); color: #fff; }
 /* ⚠️ THE SECONDARY IS THE CARD'S EDGE, drawn with two inset shadows rather than a border — a border
    would take part in the box and change the button's height beside the primary. */
-.ph-secondary { background: #fff; color: var(--sp-ink); box-shadow: inset 0 0 0 5px #fff, inset 0 0 0 6px var(--sp-frame); }
+.ph-secondary { background: #fff; color: var(--sp-ink); box-shadow: var(--sp-btn-ring); } /* Consistency roll-out v2, Phase 1: the standard outline, not the burgundy ring */
 .ph-primary:disabled, .ph-secondary:disabled { opacity: 0.45; cursor: default; }
 
 /**

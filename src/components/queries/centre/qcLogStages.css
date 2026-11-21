@@ -283,7 +283,7 @@
 }
 
 /* ── v1.3 — the Nudge stage (design-refs/log-a-query-v1-3, "Nudge, with a response time") ─────────────────────────── */
-.laq h3.laq-qh.is-q2 { margin: 20px 0 10px; font: 400 19px/1.25 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
+.laq h3.laq-qh.is-q2 { margin: 20px 0 10px; font: var(--sp-h-card) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
 .laq .laq-wkb { padding: 14px 16px 12px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; margin-bottom: 6px; }
 .laq .laq-wkb .sa-fld { margin: 0; }
 /* the app's WeekSlider, as the agent card draws it; its label speaks in the stage's serif, never a mono eyebrow */

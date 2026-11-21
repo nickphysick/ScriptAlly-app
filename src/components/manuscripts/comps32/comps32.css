@@ -228,7 +228,7 @@
 
 /* ══ day one ══════════════════════════════════════════════════════════════════════════════════════════════════════ */
 .cp32 .cp32-first-in { padding: 40px 44px; }
-.cp32 .cp32-first h2.cp32-firsth { margin: 0; font: 400 28px/1.15 var(--c32-type) !important; color: var(--c32-ink) !important; }
+.cp32 .cp32-first h2.cp32-firsth { margin: 0; font: var(--sp-h-section) !important; color: var(--c32-ink) !important; }
 .cp32 .cp32-steps { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
 .cp32 .cp32-steps li { padding: 24px 24px 28px; border-radius: 12px; background: var(--c32-oat); font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
 .cp32 .cp32-slot { display: grid; place-items: center; height: 130px; margin-bottom: 16px; border-radius: 8px; overflow: hidden; background: repeating-linear-gradient(135deg, #fdfbf7, #fdfbf7 6px, #faf6ef 6px, #faf6ef 12px); box-shadow: 0 0 0 1px rgba(28, 19, 15, .08); }

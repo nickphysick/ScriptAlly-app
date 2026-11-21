@@ -74,7 +74,7 @@
 .qc152 .qc152-band > span { font: inherit; letter-spacing: inherit; }
 .qc152 .qc152-day { margin-left: auto; font: 500 15px/1 var(--sp-mono) !important; letter-spacing: 0.06em !important; }
 .qc152 .qc152-x {
-  all: unset; box-sizing: border-box; cursor: pointer; width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%;
+  all: unset; box-sizing: border-box; cursor: pointer; width: var(--sp-px-size); height: var(--sp-px-size); display: grid; place-items: center; border-radius: 50%;
   font: 400 12px/1 var(--sp-serif); color: inherit; background: rgba(255, 255, 255, 0.55);
 }
 .qc152 .qc152-x:hover { background: #fff; }

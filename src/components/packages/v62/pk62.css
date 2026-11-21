@@ -127,7 +127,7 @@
 /* Consistency roll-out v1, Phase 7: the section heading */ .pk62 .k62-band-t h2 { font: var(--sp-h-section); overflow-wrap: anywhere; }
 .pk62 .k62-band-t p { margin-top: 5px; font: italic 400 15.5px/1.3 var(--k62-serif); color: rgba(244, 238, 229, .8); }
 .pk62 .k62-acts { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.pk62 .k62-pb { display: inline-flex; align-items: center; height: 42px; padding: 0 20px; border: 0; border-radius: 999px; font: 600 16px/1 var(--k62-serif); white-space: nowrap; }
+.pk62 .k62-pb { display: inline-flex; align-items: center; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border: 0; border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; white-space: nowrap; }
 .pk62 .k62-pb.k62-w { background: #fff; color: var(--k62-ink); }
 .pk62 .k62-pb.k62-w:hover { background: #f4eee5; }
 .pk62 .k62-pb.k62-g { background: none; color: #f4eee5; box-shadow: inset 0 0 0 1.5px rgba(244, 238, 229, .6); }
@@ -196,7 +196,7 @@
 .pk62 .k62-fade { display: block; height: 5px; margin-top: 12px; border-radius: 3px; background: #efe9e0; }
 .pk62 .k62-fade + .k62-fade { width: 72%; margin-top: 8px; }
 .pk62 .k62-encl { margin-top: 18px; }
-.pk62 .k62-encl h4 { margin: 0 0 10px; font: 400 15px/1.2 var(--k62-type); color: var(--k62-soft); }
+.pk62 .k62-encl h4 { margin: 0 0 10px; font: var(--sp-h-small) !important; color: var(--k62-soft); }
 .pk62 .k62-encl ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .pk62 .k62-encl li { display: flex; align-items: center; gap: 12px; font-size: 15px; }
 .pk62 .k62-encl li .k62-svg { width: 16px; height: 16px; color: var(--k62-soft); }
@@ -247,9 +247,9 @@
 .pk62 .k62-tbl-n { padding: 20px 28px 22px; border-top: 1px solid var(--k62-hair); font-size: 15px; color: var(--k62-muted); }
 
 /* ══ §6 · How it works: the storyboard, the pop-up, day one ══ */
-.pk62 .k62-first { margin-top: 48px; }
+.pk62 .k62-first { margin-top: 40px; } /* Consistency roll-out v2, Phase 1: 40 under the navy header */
 .pk62 .k62-first-in { padding: 40px 44px; }
-.pk62 .k62-first h2 { font: 400 28px/1.15 var(--k62-type); }
+.pk62 .k62-first h2 { font: var(--sp-h-section) !important; }
 .pk62 .k62-first .k62-sb { margin-top: 28px; max-width: 1100px; }
 .pk62 .k62-first-n { margin-top: 28px; color: var(--k62-muted); }
 .k62-map-eg { margin-top: 6px !important; font-size: 16px; color: var(--k62-muted); }

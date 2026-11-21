@@ -97,13 +97,16 @@
   const navyHeader = header || null;
   const h1s = pageEls.filter((e) => e.tagName === "H1");
   if (!header && h1s.length) { let e = h1s[0]; for (let i = 0; i < 3 && e.parentElement && pageRoot.contains(e.parentElement); i++) { if (e.parentElement.getBoundingClientRect().height > 320) break; e = e.parentElement; } header = e; }
+  /* roll-out v2: the gap is to the first thing that paints below the header, not to a wrapper whose content starts lower (Responses' body is flow-root with its first child 40 down) */
+  const paints = (e) => { const c = getComputedStyle(e); return !!ownText(e) || /^(IMG|SVG|CANVAS|INPUT|BUTTON|TEXTAREA|SELECT|VIDEO)$/i.test(e.tagName) || (c.backgroundColor !== "rgba(0, 0, 0, 0)" && c.backgroundColor !== "transparent") || parseFloat(c.borderTopWidth) > 0 || c.boxShadow !== "none" || c.backgroundImage !== "none"; };
+  const paintTop = (el) => { let t = Infinity; for (const e of [el, ...el.querySelectorAll("*")]) { if (!vis(e) || !paints(e)) continue; const y = e.getBoundingClientRect().top; if (y < t) t = y; } return t === Infinity ? el.getBoundingClientRect().top : t; };
   let headerRec = null, titleEl = null;
   if (header) {
     const r = header.getBoundingClientRect(), cs = getComputedStyle(header);
     titleEl = header.querySelector("h1") || [...header.querySelectorAll("*")].filter(vis).filter((e) => ownText(e)).sort((a, b) => parseFloat(getComputedStyle(b).fontSize) - parseFloat(getComputedStyle(a).fontSize))[0] || null;
     const tr = titleEl ? titleEl.getBoundingClientRect() : null;
     const below = pageEls.filter((e) => !header.contains(e) && !e.contains(header) && e.getBoundingClientRect().top >= r.bottom - 1 && e.getBoundingClientRect().height > 8).sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
-    headerRec = { kind: headerKind, sel: selector(header), topFromSheet: px(r.top - sheetRect.top), height: px(r.height), bg: bgOf(header).bg, radius: radius(cs), padding: pad(cs), titleTop: tr ? px(tr.top - r.top) : null, titleLeft: tr ? px(tr.left - r.left) : null, title: titleEl ? { ...typeSig(getComputedStyle(titleEl)), sel: selector(titleEl) } : null, gapBelow: below ? px(below.getBoundingClientRect().top - r.bottom) : null, belowSel: below ? selector(below) : null };
+    headerRec = { kind: headerKind, sel: selector(header), topFromSheet: px(r.top - sheetRect.top), height: px(r.height), bg: bgOf(header).bg, radius: radius(cs), padding: pad(cs), titleTop: tr ? px(tr.top - r.top) : null, titleLeft: tr ? px(tr.left - r.left) : null, title: titleEl ? { ...typeSig(getComputedStyle(titleEl)), sel: selector(titleEl) } : null, gapBelow: below ? px(paintTop(below) - r.bottom) : null, belowSel: below ? selector(below) : null };
   }
 
   /* ── named tests ─────────────────────────────────────────────────────────────────────────────── */

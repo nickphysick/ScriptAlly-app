@@ -19,7 +19,7 @@
 /* ── Part A · Getting started, in the goal sheet's slot ── */
 .d58 .df1-goal.fv2-gs { display: block; padding: 18px 16px 10px; }
 .fv2-gsh { display: flex; align-items: baseline; gap: 12px; }
-.d58 .fv2-gsh .fv2-gst { margin: 0; flex: 1 1 auto; min-width: 0; font: 400 22px/1.3 var(--d58-type) !important; color: var(--d58-ink); letter-spacing: 0; }
+.d58 .fv2-gsh .fv2-gst { margin: 0; flex: 1 1 auto; min-width: 0; font: var(--sp-h-section) !important; color: var(--d58-ink); letter-spacing: 0; }
 .d58 .fv2-gsn { flex: none; font: 400 14px/1.3 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.6); white-space: nowrap; }
 .d58 .fv2-hide {
   padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink);
@@ -34,7 +34,7 @@
 
 /* ── Part A · the empty feed ── */
 .fv2-empty { min-width: 0; padding: 0 4px; }
-.d58 .fv2-empty .fv2-et { margin: 0; font: 400 21px/1.3 var(--d58-type) !important; color: var(--d58-ink); letter-spacing: 0; }
+.d58 .fv2-empty .fv2-et { margin: 0; font: var(--sp-h-section) !important; color: var(--d58-ink); letter-spacing: 0; }
 .d58 .fv2-ep { margin: 4px 0 0; font: 400 15px/1.5 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.62); }
 .d58 .fv2-elink {
   display: inline; padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink);

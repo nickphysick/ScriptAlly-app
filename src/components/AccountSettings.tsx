@@ -81,7 +81,7 @@ const ghostBtn: React.CSSProperties = {
   fontWeight: 500, color: burgundy, background: "#fff", border: `1px solid ${burgundy}`, borderRadius: 8, cursor: "pointer", minHeight: 36,
 };
 const linkBtn: React.CSSProperties = {
-  background: "none", border: "none", padding: 0, font: "inherit", color: burgundy, textDecoration: "underline",
+  background: "none", border: "none", padding: 0, font: "inherit", color: "var(--sp-ink)", textDecoration: "underline",
   textUnderlineOffset: 2, cursor: "pointer", minHeight: 24,
 };
 const helpText: React.CSSProperties = { fontFamily: FONT_SANS, fontSize: 14, color: mutedInk, lineHeight: 1.45 };

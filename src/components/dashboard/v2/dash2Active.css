@@ -60,9 +60,9 @@
 .d58.d2 .d22-chart h2.os-cardttl { font-size: 20px !important; color: #fffaf3 !important; }
 .d58.d2 .d22-chart .d2-bpill { height: auto; padding: 0; border-radius: 0; background: none; font-weight: 600; font-size: 13px; line-height: 1.3; color: #e8b9a6; white-space: nowrap; }
 .d58.d2 .d22-chart .d2-meta { margin-left: auto; color: #fffaf3; }
-.d58.d2 .d22-tog { display: inline-flex; padding: 3px; border-radius: 999px; background: rgba(255, 255, 255, 0.1); }
+.d58.d2 .d22-tog { display: inline-flex; padding: 3px; border-radius: var(--sp-vsw-r); background: rgba(255, 255, 255, 0.1); }
 .d58.d2 .d22-tog button {
-  height: 30px; padding: 0 18px; border: 0; border-radius: 999px; cursor: pointer; background: transparent;
+  height: var(--sp-vsw-opt-h); padding: 0 18px; border: 0; border-radius: var(--sp-vsw-opt-r); cursor: pointer; background: transparent;
   font-family: var(--d58-serif); font-weight: 600; font-size: 13.5px; line-height: 1; color: rgba(255, 250, 243, 0.75);
 }
 .d58.d2 .d22-tog button[aria-selected="true"] { background: #fffaf3; color: #1c130f; }

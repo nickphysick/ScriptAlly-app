@@ -81,8 +81,8 @@
     margin: 0;
     font-family: var(--sp-type) !important;
     font-weight: 400;
-    font-size: 19px;
-    line-height: 1.3;
+    font-size: 20px; /* Consistency roll-out v2, Phase 1: the card heading (--sp-h-card) */
+    line-height: 1.25;
     color: var(--ink-on-light);
   }
   .acct-page .sc-ch-p {
@@ -133,7 +133,6 @@
   .acct-page .sc-cf--strip .acct-actions { margin-left: auto; display: inline-flex; gap: 10px; font-style: normal; }
 
   /* the danger card */
-  .acct-page .sc-card--danger .sc-cb { box-shadow: 0 0 0 1px rgba(166, 61, 47, 0.28); }
   .acct-page .sc-card--danger .sc-ch-h { color: var(--ink-on-light); }
 
   /* ── rows: 18/22 padding, a dashed rule between, the control on the right 28px from the words ── */

@@ -264,9 +264,9 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
    The switch, then a list that scrolls inside the column with a 28px fade at its foot. The app's request and offer
    tints for the journeys (dash58.css's families); every face `!important` because brand.tsx names one on bare tags. */
 .df1-feedcol { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; }
-.df1-sw { flex: none; display: flex; margin-bottom: 10px; padding: 3px; border-radius: 999px; background: #ece7de; }
+.df1-sw { flex: none; display: flex; margin-bottom: 10px; padding: 3px; border-radius: var(--sp-vsw-r); background: #ece7de; }
 .d58 .df1-sw button {
-  flex: 1 1 0; height: 32px; border: 0; border-radius: 999px; background: none; cursor: pointer;
+  flex: 1 1 0; height: var(--sp-vsw-opt-h); border: 0; border-radius: var(--sp-vsw-opt-r); background: none; cursor: pointer;
   font-family: var(--d58-serif) !important; font-size: 14px; font-weight: 600; color: #3b322c;
 }
 .d58 .df1-sw button[aria-pressed="true"] { background: #fff; color: var(--d58-ink); box-shadow: 0 1px 3px rgba(28, 19, 15, 0.12); }

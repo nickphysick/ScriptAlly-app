@@ -55,10 +55,10 @@
 .d58 .fv1-pp { margin: 6px 0 0; font: 400 15px/1.5 var(--d58-serif) !important; color: rgba(28, 19, 15, 0.72); }
 .d58 .fv1-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 14px; }
 .d58 .fv1-btn {
-  display: inline-flex; align-items: center; height: 42px; padding: 0 16px;
-  border: 0; border-radius: 11px; cursor: pointer;
+  display: inline-flex; align-items: center; height: var(--sp-btn-h); padding: var(--sp-btn-pad);
+  border: 0; border-radius: var(--sp-btn-r); cursor: pointer;
   background: var(--d58-navy); color: #fff;
-  font: 600 15.5px/1 var(--d58-serif) !important;
+  font: var(--sp-btn-font) !important;
   white-space: nowrap;
 }
 .d58 .fv1-btn:hover { background: #1f2c3f; }

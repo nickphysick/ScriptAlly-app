@@ -260,7 +260,7 @@
   .qc151-end { display: flex; align-items: center; gap: 24px; margin: 48px 0 96px; padding: 22px 26px; border-radius: 16px; background: var(--oat); box-shadow: inset 0 0 0 1px #e2d9cc; }
   .qc151-end img { flex: none; width: 110px; height: auto; }
   .qc151-end > div:nth-child(2) { flex: 1; }
-  .qc151 .qc151-end h2 { margin: 0; font: 400 28px/1.3 var(--sp-type) !important; color: var(--ink) !important; }
+  .qc151 .qc151-end h2 { margin: 0; font: var(--sp-h-section) !important; color: var(--ink) !important; }
   .qc151-end p { margin: 4px 0 0; font: 400 16px/1.45 var(--sp-serif); color: var(--mut); }
   .qc151-end-b { display: flex; gap: 10px; flex: none; }
 

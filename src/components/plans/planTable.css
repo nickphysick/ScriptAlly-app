@@ -3,6 +3,7 @@
 .plt { background: #fff; border: 1px solid #e0d5c8; border-radius: 12px; padding: 22px 22px 18px; box-sizing: border-box; }
 .plt-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
 .plt-h { font-family: var(--sp-type); font-weight: 400; font-size: 24px; line-height: 1.2; margin: 0 0 4px; color: var(--sp-ink); }
+.plt-h.plt-h { font: var(--sp-h-section) !important; } /* Consistency roll-out v2, Phase 1: brand.tsx forces h2 into Playfair; two classes and !important outrank it */
 .plt-sub { margin: 0; font-size: 16px; color: rgba(28, 19, 15, .66); }
 .plt-seg { display: inline-flex; gap: 3px; padding: 3px; border-radius: 999px; background: #f3ece2; border: 1px solid #e2d6c6; }
 .plt-seg button { all: unset; cursor: pointer; padding: 6px 14px; min-height: 24px; border-radius: 999px; font-size: 14px; color: var(--sp-ink); }

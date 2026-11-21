@@ -229,7 +229,7 @@
 /* ── H · day one ── */
 .a26-page .a26-first { margin-top: 40px; }
 .a26-page .a26-first-in { padding: 40px 44px; }
-.a26-page .a26-first h2 { font: 400 28px/1.15 var(--a26-type) !important; }
+.a26-page .a26-first h2 { font: var(--sp-h-section) !important; }
 .a26-page .a26-steps { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; counter-reset: a26s; }
 .a26-page .a26-steps li { counter-increment: a26s; padding: 24px 24px 28px; border-radius: 12px; background: var(--a26-soft); color: var(--a26-body); }
 .a26-page .a26-steps li > b { display: block; margin-bottom: 6px; font: 600 18px/1.3 var(--a26-serif); color: var(--a26-ink); }
