@@ -335,8 +335,9 @@ export const EditContact: React.FC<{ form: AgentForm; agent: Agent; kit: CardFor
         </div>
       ) : null}
       <AaField label="Based in" k="country">
-        {/* Agent card v2.1 — the country control and the city on one row, country first; the flag follows the country
-            control and nothing else; a known city in another country gets an offer, never a block */}
+        {/* Agent card v2.1 — two lines: the country control (Elsewhere's search beside the pills), then the city, full
+            width; the flag follows the country control and nothing else; a known city in another country gets an offer,
+            never a block */}
         <div className="acv21-geo" data-acv21="geo">
           <CountryPills country={d.country} onCountry={(c) => form.set({ country: c })} />
           <input className="aap-inp" data-ae="city" value={d.city} placeholder="City, if you know it" autoComplete="off" onChange={(e) => form.set({ city: e.target.value })} />

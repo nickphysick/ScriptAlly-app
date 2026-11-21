@@ -12,8 +12,10 @@
  *           and its heading holds still; How's controls in the boxes' order, the boxes showing the draft; the head showing
  *           Contact details' draft; the city offer; the opening sample's encoding; a tick saves its section only; each
  *           section's stored agent; the cross and its Undo; the rust bar's Save all and Discard; the pencils at rest, on
- *           hover and on focus; a value opens only its own section; Tab reaches every pencil, cross and tick
- *           mutations: bandpen · isedit · headerbar · oldorder · flagcity · label (expectation side) · wholedraft · hoveronly
+ *           hover and on focus; a value opens only its own section; Tab reaches every pencil, cross and tick; Based in as two
+ *           lines (the country control, then the city) in the 580 and the 540 card
+ *           mutations: bandpen · isedit · headerbar · oldorder · flagcity · label (expectation side) · wholedraft · hoveronly ·
+ *           georow (Based in back on the pre-ruling wrapping row) · oneline (Based in all on one row)
  */
 import { test, expect, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
@@ -464,6 +466,73 @@ test("AC21-2f · the pencils, the values as doors, and Tab", async ({ page }) =>
   await cross(page, "wishlist");
   await cross(page, "genres");
   L.done(16);
+});
+
+/* ══ AC21-2g · Based in: two lines at every card width (ruling, 21 Nov) ═══════════════════════════════════════════════
+   line 1 the country control (the pills, Elsewhere's search beside them); line 2 the city, full width.
+   mutations: georow (the pre-ruling row: the pills and the city side by side, wrapping by width) · oneline (all of it on
+   one row, never wrapping) */
+test("AC21-2g · Based in: the country control, then the city beneath it, at 580 and 540", async ({ page }) => {
+  test.setTimeout(90_000 * 2);
+  const L = new Ledger("AC21-2g");
+  const widths: number[] = [];
+  for (const vp of SIZES) {
+    await openAc(page, "acv21fx-full", vp);
+    if (MUTS.has("georow")) await page.addStyleTag({ content: `
+      .acv2 .acv21-geo { display: flex !important; flex-wrap: wrap !important; align-items: center; gap: 8px; }
+      .acv2 .acv21-geo > .aap-pills { flex: none; flex-wrap: wrap !important; }
+      .acv2 .acv21-geo > input[data-ae="city"] { flex: 1 1 180px; min-width: 160px; width: auto !important; }
+      .acv2 .acv21-geo > .aap-cty { flex-basis: auto; }` });
+    if (MUTS.has("oneline")) await page.addStyleTag({ content: `
+      .acv2 .acv21-geo { display: flex !important; flex-wrap: nowrap !important; align-items: center; gap: 8px; }
+      .acv2 .acv21-geo > * { flex: 0 1 auto; min-width: 0; }
+      .acv2 .acv21-geo > input[data-ae="city"] { flex: 1 1 0; width: auto !important; }` });
+    await pen(page, "contact");
+    const geo = () => page.evaluate((js) => {
+      const c = eval(js) as HTMLElement;
+      const g = c.querySelector<HTMLElement>("[data-acv21='geo']")!;
+      const box = (e: Element | null) => { if (!e) return null; const b = e.getBoundingClientRect(); return { t: b.top, b: b.bottom, l: b.left, r: b.right, w: b.width }; };
+      const pills = box(g.querySelector("[data-aap='country']"));
+      const cty = box(g.querySelector("[data-aap='country-more']"));
+      const ctl = cty && pills ? { t: Math.min(pills.t, cty.t), b: Math.max(pills.b, cty.b) } : pills;
+      const tops = [...g.querySelectorAll<HTMLElement>("[data-aap='country'] .aap-pill")].map((e) => Math.round(e.getBoundingClientRect().top));
+      return { card: Math.round(c.getBoundingClientRect().width), geo: box(g), pills, cty, ctl, city: box(g.querySelector("input[data-ae='city']")), tops };
+    }, CARD_JS);
+    const read = (state: string, g: Awaited<ReturnType<typeof geo>>) => {
+      const at = `${g.card}px card, ${state}`;
+      L.check(`${at}: the city's top is below the country control's bottom`, !!g.ctl && !!g.city && g.city.t >= g.ctl.b - 0.5,
+        g.ctl && g.city ? `control ${g.ctl.t.toFixed(1)}–${g.ctl.b.toFixed(1)} · city top ${g.city.t.toFixed(1)}` : "none");
+      L.check(`${at}: the city runs the full width`, !!g.city && !!g.geo && Math.abs(g.city.w - g.geo.w) <= 1, g.city && g.geo ? `${g.city.w.toFixed(1)} of ${g.geo.w.toFixed(1)}` : "none");
+      L.check(`${at}: the pills are one line`, g.tops.length >= 4 && g.tops.every((t) => Math.abs(t - g.tops[0]) <= 1), JSON.stringify(g.tops));
+    };
+    const g1 = await geo();
+    widths.push(g1.card);
+    read("a country of the three", g1);
+    await page.evaluate((js) => { (eval(js) as HTMLElement).querySelector<HTMLElement>("[data-aap='country'] [data-country='elsewhere']")!.click(); }, CARD_JS);
+    await page.waitForTimeout(250);
+    const g2 = await geo();
+    read("Elsewhere chosen", g2);
+    L.check(`${g2.card}px card, Elsewhere chosen: its search sits on the pills' line, after them`,
+      !!g2.cty && !!g2.pills && g2.cty.l >= g2.pills.r - 0.5 && g2.cty.t < g2.pills.b && g2.pills.t < g2.cty.b,
+      g2.cty && g2.pills ? `pills ${g2.pills.t.toFixed(1)}–${g2.pills.b.toFixed(1)} r ${g2.pills.r.toFixed(1)} · search ${g2.cty.t.toFixed(1)}–${g2.cty.b.toFixed(1)} l ${g2.cty.l.toFixed(1)} w ${g2.cty.w.toFixed(1)}` : "none");
+    mkdirSync("reports/agent-card-v2-1/shots", { recursive: true });
+    const geoClip = async () => { const b = await page.locator(`${AC} [data-acv21='geo']`).first().boundingBox(); return b ? { x: b.x - 24, y: b.y - 40, width: b.width + 48, height: b.height + 300 } : undefined; };
+    await page.screenshot({ path: `reports/agent-card-v2-1/shots/${vp.width}-20-based-in-elsewhere.png`, clip: await geoClip() }).catch(() => {});
+    /* the open list: inside the card, at a usable width */
+    await page.locator(`${AC} [data-aap='country-more'] .sa-cc-control`).first().click();
+    await page.waitForTimeout(250);
+    const m = await page.evaluate((js) => {
+      const c = eval(js) as HTMLElement; const cb = c.getBoundingClientRect();
+      const e = c.querySelector<HTMLElement>("[data-acv21='geo'] .sa-cc-menu"); if (!e) return null; const b = e.getBoundingClientRect();
+      return { w: b.width, l: b.left - cb.left, r: cb.right - b.right };
+    }, CARD_JS);
+    L.check(`${g2.card}px card, Elsewhere's list: 280px wide and inside the card`, !!m && Math.abs(m.w - 280) <= 1 && m.l >= 0 && m.r >= 0, JSON.stringify(m));
+    await page.screenshot({ path: `reports/agent-card-v2-1/shots/${vp.width}-21-based-in-elsewhere-list.png`, clip: await geoClip() }).catch(() => {});
+    await page.keyboard.press("Escape"); await page.waitForTimeout(200);
+    await cross(page, "contact");
+  }
+  L.check("the two cards are 580 and 540 wide", JSON.stringify(widths) === JSON.stringify([580, 540]), JSON.stringify(widths));
+  L.done(17);
 });
 
 /* ══ AC21-3 · the genre editor ═══════════════════════════════════════════════════════════════════════════════════
