@@ -361,11 +361,13 @@ const dueFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plu
  *   · a nudge past the agent's reply window: "{n} days past expected"; past the writer's own date (a hold, a planned
  *     nudge or a booked check-in, `taskDue`'s "hold" / "reminder" / "check-in"): "{n} days since your reminder";
  *   · an offer: "{n} days since it came in", from `offerDate`, else `lastStatusChange`; never "past expected" or "left";
+ *   · an own task past its date: "{n} days past its date".
  *   Not yet reached: "{n} days left"; the day itself: "Today". Which date wins is `taskDue`'s, unchanged.
  */
 const WRITER_SET: ReadonlySet<DueSource> = new Set<DueSource>(["hold", "reminder", "check-in"]);
 const nudgeFigure = (d: number, source: DueSource | undefined): TrayFigure =>
   d < 0 && source && WRITER_SET.has(source) ? { n: String(-d), words: plural(-d, "day since your reminder", "days since your reminder"), late: true } : dueFigure(d);
+const ownFigure = (d: number): TrayFigure => d < 0 ? { n: String(-d), words: plural(-d, "day past its date", "days past its date"), late: true } : dueFigure(d);
 /** the day an offer came in (local ms), or null: `offerDate` when stored, else the status's last move */
 function offerCameInMs(q: Query | undefined): number | null {
   for (const v of [q?.offerDate, q?.lastStatusChange]) {
@@ -404,7 +406,8 @@ export function trayFigure(t: WsTask, nowMs: number): TrayFigure | null {
     case "send": case "rr": return waiting();
     case "nudge": return t.dueDays == null ? waiting() : nudgeFigure(t.dueDays, t.dueSource);
     case "offer": return offerFigure(t, nowMs);
-    case "own": case "other": return t.dueDays == null ? (t.kind === "own" ? null : waiting()) : dueFigure(t.dueDays);
+    case "own": return t.dueDays == null ? null : ownFigure(t.dueDays);
+    case "other": return t.dueDays == null ? waiting() : dueFigure(t.dueDays);
     default: { const unhandled: never = t.kind; return unhandled; }
   }
 }
