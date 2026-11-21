@@ -218,7 +218,10 @@ export function nextLead(item: ListItem, ctx: TaskCtx): NextLead {
         figure: asked != null ? dayFigure(daysSince(asked, now), "waiting") : null,
         sentence: `Send your ${kind}.`,
         track: track(),
-        label: dated(ASKED_WORD[kind], asked),
+        /* v1.1 — a request with no recorded date says so, rather than ending at "Full asked for" as if a date were
+           missing by mistake. Nothing dates it (no request date on the query, no rung in either activity store), so
+           the number and its caption stay absent and the row beneath shows no wait: no figure is invented. */
+        label: asked != null ? dated(ASKED_WORD[kind], asked) : { lead: ASKED_WORD[kind], rest: " · date not recorded" },
       };
     }
     case "nudge": {

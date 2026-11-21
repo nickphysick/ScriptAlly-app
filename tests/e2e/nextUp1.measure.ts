@@ -294,6 +294,26 @@ test.describe.serial("NU1 · Next up v1 on the page", () => {
     });
   }
 
+  /* NU11-D (v1.1) · the book Nick read on dev ("Murphy's Day Out", cv25-ms): Jonathan Marsh's Full Requested has no
+     request date anywhere (seeded straight to the status by seedCompsV25), so the label says so and no number shows.
+     The card as it stands is written out whole, so the report can say what Daniel O'Rourke's row is from the page. */
+  test("NU11-D · the cv25 book: an undated request, and the card as it stands", async ({ page }) => {
+    test.setTimeout(120_000);
+    const vp = SIZES[0];
+    const seen: Record<string, unknown> = {};
+    await openDash(page, "cv25-ms", vp, "");
+    seen.asItStands = await read(page);
+    await openDash(page, "cv25-ms", vp, "full");
+    const m = await read(page);
+    seen.fullLead = m;
+    const marsh = await page.locator(`${CARD} [data-d2="next-top"] [data-nu="name"]`).first().textContent().catch(() => null);
+    seen.fullLeadName = marsh;
+    check("NU11-D1", "cv25 1512", marsh === "Jonathan Marsh" && m?.label === "Full asked for · date not recorded", `${marsh}: "${m?.label}"`);
+    check("NU11-D2", "cv25 1512", m?.n === "" && m?.cap === "", `number "${m?.n}" caption "${m?.cap}"`);
+    mkdirSync(DIR, { recursive: true });
+    writeFileSync(`${DIR}/cv25-card.json`, JSON.stringify(seen, null, 1));
+  });
+
   test("NU1 · R3 the five rows sit at the same offsets on every tracked card", () => {
     for (const [w, byKind] of Object.entries(offsets)) {
       const tracked = Object.entries(byKind).filter(([, o]) => o.length === 5);

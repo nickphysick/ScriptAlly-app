@@ -263,3 +263,22 @@ describe("NU11-a · the sentence names no agent and is 18 characters at most (v1
     expect(l.sentence).not.toMatch(/Rosalind|Achebe/);
   });
 });
+
+describe("NU11-b · a request with no recorded date says so (v1.1)", () => {
+  for (const [taskType, status, word] of [
+    ["partial_requested", QueryStatus.PARTIAL_REQUESTED, "Partial asked for"],
+    ["full_requested", QueryStatus.FULL_REQUESTED, "Full asked for"],
+    ["revise_resubmit", QueryStatus.REVISE_RESUBMIT, "Revision asked for"],
+  ] as const) it(`${word} · date not recorded; no number, no caption, no wait`, () => {
+    const it_ = item({ taskType, status });
+    const c = ctx(query({ status }), row({ status, stageStartMs: null }));
+    const l = nextLead(it_, c);
+    expect(l.label).toEqual({ lead: word, rest: " · date not recorded" });
+    expect(l.figure).toBe(null);
+    expect(nextRow(it_, c).wait).toBe(null);
+  });
+  it("a dated request is unchanged", () => {
+    const l = nextLead(item({ taskType: "full_requested" }), ctx(query({ status: QueryStatus.FULL_REQUESTED }), row({ status: QueryStatus.FULL_REQUESTED, stageStartMs: new Date(2026, 10, 1).getTime() })));
+    expect(l.label).toEqual({ lead: "Full asked for", rest: " · 1 Nov" });
+  });
+});
