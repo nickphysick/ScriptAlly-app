@@ -132,9 +132,3 @@
 /* Consistency roll-out v1, Phase 9: the outline action button (primitives.css `.sp-btn`) */ .d58 .fv2-finclose { height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); border: 0; cursor: pointer; }
 .fv2-finclose:focus-visible { outline: 2px solid var(--d58-navy); outline-offset: 2px; }
 .d58 .fv2-finrow small { font: 400 13.5px/1.35 var(--d58-serif) !important; color: var(--sp-quiet); }
-
-/* Consistency roll-out v2, Phase 3 (rulings v3, ruling 4): the text tag — 28 high, 0 12, fully rounded, Source Serif 4
-   600 14 (shell/primitives.css --sp-tag-*). Each keeps its own fill, edge and text colour. Desktop only. */
-@media (min-width: 768px) {
-  .d58 .fv2-extag { box-sizing: border-box; display: inline-flex; align-items: center; height: var(--sp-tag-h); min-height: 0; padding: var(--sp-tag-pad); border-radius: var(--sp-tag-r); font: var(--sp-tag-font) !important; font-style: normal !important; }
-}

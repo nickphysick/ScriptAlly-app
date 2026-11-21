@@ -366,9 +366,3 @@
 .laq .laq-slot { display: inline-flex; align-items: center; justify-content: flex-end; min-height: 42px; }
 .laq .laq-grps + .laq-ask, .laq .laq-big + .laq-ask { margin-top: 12px; }
 .laq .laq-ask .laq-lk { min-height: 44px; display: inline-flex; align-items: center; }
-
-/* Consistency roll-out v2, Phase 3 (rulings v3, ruling 4): the text tag — 28 high, 0 12, fully rounded, Source Serif 4
-   600 14 (shell/primitives.css --sp-tag-*). Each keeps its own fill, edge and text colour. Desktop only. */
-@media (min-width: 768px) {
-  .laq .laq-pvtag { box-sizing: border-box; display: inline-flex; align-items: center; height: var(--sp-tag-h); min-height: 0; padding: var(--sp-tag-pad); border-radius: var(--sp-tag-r); font: var(--sp-tag-font) !important; font-style: normal !important; }
-}
