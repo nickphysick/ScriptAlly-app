@@ -81,3 +81,10 @@
 /* their words: under the title, a 2px rule, four lines at most */
 .qc152[data-qc164] .qc152-qt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; line-clamp: 4; overflow: hidden; margin: 6px 0 2px; padding: 0 0 0 10px; border-left: 2px solid rgba(28, 19, 15, 0.22); border-radius: 0; background: none; font: italic 400 14px/1.45 var(--sp-serif); color: #3b322c; }
 
+
+/* ── D. the toast: in the layout above the footer, full width, never over the thread ── */
+.qc152[data-qc164] .qc152-in > .qc1522-toast { order: 1; position: static; transform: none; left: auto; bottom: auto; align-self: stretch; justify-content: space-between; margin: 0; padding: 9px 16px; border-radius: 0; animation-name: qc164Toast; }
+.qc152[data-qc164] .qc152-in > :is(.qc152-rb, .qc1522-cp, [data-qc152='reply']) { order: 2; }
+.qc152[data-qc164] .qc152-in > :is(.qc1522-burst, .qc152-pop) { order: 3; }
+@keyframes qc164Toast { from { opacity: 0; transform: translateY(10px); } }
+@media (prefers-reduced-motion: reduce) { .qc152[data-qc164] .qc152-in > .qc1522-toast { animation: none; } }

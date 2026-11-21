@@ -248,7 +248,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     const el = bodyRef.current;
     if (el && p.tab === "tracking") el.scrollTop = el.scrollHeight;
     else if (el) el.scrollTop = 0;
-  }, [r.id, p.tab, thread.length, !!p.composer, p.draft?.status, p.draft?.kind]);
+    /* v164 — the toast takes its own row above the footer, so the thread's box shortens: it stays at its end */
+  }, [r.id, p.tab, thread.length, !!p.composer, p.draft?.status, p.draft?.kind, !!p.toast]);
   useEffect(() => { tip.hide(); }, [r.id, p.tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* a chip's tip closes on any click elsewhere */
@@ -599,7 +600,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             </button>
           ))}
         </div>
-        <div ref={bodyRef} className={`qc152-body${p.toast ? " qc1522-tpad" : ""}`} data-qc152="body" role="tabpanel">
+        <div ref={bodyRef} className="qc152-body" data-qc152="body" role="tabpanel">
           {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{ed.on && ed.dr && p.editData ? <NotesEditPane layer={ed} data={p.editData} /> : p.notes}</div>}
         </div>
         {ed.on ? <SaveBar keys={ed.keys} nudge={ed.nudge} busy={ed.busy} onCancel={() => ed.ask()} onSave={() => void ed.save()} />
