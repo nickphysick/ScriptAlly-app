@@ -1,0 +1,241 @@
+{
+ "asItStands": {
+  "kind": "offer",
+  "key": "task-offer-cv25-q-08",
+  "head": "linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%), none rgb(239, 205, 201)",
+  "meta": "3 of 9 · See all",
+  "leadH": 248.5,
+  "off": {
+   "who": 16,
+   "ask": 76,
+   "track": 121.5,
+   "label": 159.5,
+   "acts": 192.5,
+   "sub": -1
+  },
+  "sealCx": 175,
+  "firstCx": 175,
+  "figR": 500.15625,
+  "lastR": 500.15625,
+  "leadInnerR": 500.15625,
+  "nStops": 4,
+  "cur": 1,
+  "lines": [
+   {
+    "cls": "d2-meta",
+    "lines": 1,
+    "inside": true,
+    "text": "3 of 9 · See all"
+   },
+   {
+    "cls": "nu-name",
+    "lines": 1,
+    "inside": true,
+    "text": "Tom Ellery"
+   },
+   {
+    "cls": "nu-agency",
+    "lines": 1,
+    "inside": true,
+    "text": "Ellery & Finch"
+   },
+   {
+    "cls": "nu-n",
+    "lines": 1,
+    "inside": true,
+    "text": "2"
+   },
+   {
+    "cls": "nu-cap",
+    "lines": 1,
+    "inside": true,
+    "text": "months ago"
+   },
+   {
+    "cls": "nu-ask",
+    "lines": 1,
+    "inside": true,
+    "text": "Answer Tom’s offer."
+   },
+   {
+    "cls": "nu-lab",
+    "lines": 1,
+    "inside": true,
+    "text": "Offer made · 22 Aug"
+   },
+   {
+    "cls": "d2-open",
+    "lines": 1,
+    "inside": true,
+    "text": "Record your answer"
+   },
+   {
+    "cls": "nu-rtx",
+    "lines": 1,
+    "inside": true,
+    "text": "Send your full to Jonathan Marsh"
+   },
+   {
+    "cls": "nu-wait",
+    "lines": 1,
+    "inside": true,
+    "text": "58 days"
+   },
+   {
+    "cls": "nu-rtx",
+    "lines": 1,
+    "inside": true,
+    "text": "Send your partial to Clara Beaumont"
+   },
+   {
+    "cls": "nu-wait",
+    "lines": 1,
+    "inside": true,
+    "text": "2 months"
+   }
+  ],
+  "askOver": 0,
+  "sentence": "Answer Tom’s offer.",
+  "label": "Offer made · 22 Aug",
+  "cap": "months ago",
+  "n": "2",
+  "buttons": [
+   {
+    "t": "Record your answer",
+    "filled": true,
+    "bg": "rgb(42, 58, 82)"
+   }
+  ],
+  "rows": [
+   {
+    "text": "Send your full to Jonathan Marsh",
+    "wait": "58 days"
+   },
+   {
+    "text": "Send your partial to Clara Beaumont",
+    "wait": "2 months"
+   }
+  ],
+  "hScroll": 0
+ },
+ "fullLead": {
+  "kind": "full",
+  "key": "task-full-cv25-q-09",
+  "head": "none rgb(183, 201, 222)",
+  "meta": "3 of 9 · See all",
+  "leadH": 248.5,
+  "off": {
+   "who": 16,
+   "ask": 76,
+   "track": 121.5,
+   "label": 159.5,
+   "acts": 192.5,
+   "sub": -1
+  },
+  "sealCx": 175,
+  "firstCx": 175,
+  "figR": 500.15625,
+  "lastR": 500.15625,
+  "leadInnerR": 500.15625,
+  "nStops": 4,
+  "cur": 1,
+  "lines": [
+   {
+    "cls": "d2-meta",
+    "lines": 1,
+    "inside": true,
+    "text": "3 of 9 · See all"
+   },
+   {
+    "cls": "nu-name",
+    "lines": 1,
+    "inside": true,
+    "text": "Jonathan Marsh"
+   },
+   {
+    "cls": "nu-agency",
+    "lines": 1,
+    "inside": true,
+    "text": "The Marsh Agency"
+   },
+   {
+    "cls": "nu-n",
+    "lines": 1,
+    "inside": true,
+    "text": "58"
+   },
+   {
+    "cls": "nu-cap",
+    "lines": 1,
+    "inside": true,
+    "text": "days waiting"
+   },
+   {
+    "cls": "nu-ask",
+    "lines": 1,
+    "inside": true,
+    "text": "Send your full."
+   },
+   {
+    "cls": "nu-lab",
+    "lines": 1,
+    "inside": true,
+    "text": "Full asked for · 24 Sep"
+   },
+   {
+    "cls": "d2-open",
+    "lines": 1,
+    "inside": true,
+    "text": "Log it as sent"
+   },
+   {
+    "cls": "nu-rtx",
+    "lines": 1,
+    "inside": true,
+    "text": "Answer Tom Ellery’s offer"
+   },
+   {
+    "cls": "nu-wait",
+    "lines": 1,
+    "inside": true,
+    "text": "2 months"
+   },
+   {
+    "cls": "nu-rtx",
+    "lines": 1,
+    "inside": true,
+    "text": "Send your partial to Clara Beaumont"
+   },
+   {
+    "cls": "nu-wait",
+    "lines": 1,
+    "inside": true,
+    "text": "2 months"
+   }
+  ],
+  "askOver": 0,
+  "sentence": "Send your full.",
+  "label": "Full asked for · 24 Sep",
+  "cap": "days waiting",
+  "n": "58",
+  "buttons": [
+   {
+    "t": "Log it as sent",
+    "filled": true,
+    "bg": "rgb(42, 58, 82)"
+   }
+  ],
+  "rows": [
+   {
+    "text": "Answer Tom Ellery’s offer",
+    "wait": "2 months"
+   },
+   {
+    "text": "Send your partial to Clara Beaumont",
+    "wait": "2 months"
+   }
+  ],
+  "hScroll": 0
+ },
+ "fullLeadName": "Jonathan Marsh"
+}
