@@ -49,7 +49,7 @@
         desk's chip (which now says what the row says) is drawn one way on every task, as the ref's chip is ── */
   .tws .tws-du[data-late] b { color: var(--tw-ink2); }
   .tws .tws-du[data-late] small { color: var(--tw-mut2); }
-  .tws .tws-dchip, .tws .tws-dchip[data-late] { color: inherit; box-shadow: inset 0 0 0 1px var(--tw-terra); }
+  .tws .tws-dchip, .tws .tws-dchip[data-late] { color: inherit; } /* its edge: v58.1 rule 3, none */
 
 
   /* ── v58 · 6 · one row height, a hairline between rows, more air above a group ── */
@@ -94,4 +94,8 @@
   .tws .tws-qact [role="button"]:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 1px; }
   .tws .tws-ti:focus-within:not(:hover):not(:focus-visible):not(:has(:focus-visible)) .tws-qact { display: none; }
   .tws .tws-ti:focus-within:not(:hover):not(:focus-visible):not(:has(:focus-visible)) :is(.tws-du, .tws-qf) { visibility: visible; }
+
+  /* ── v58.1 · 3 · no edge on the desk chip, on any task: same ground, same type. Colour never signals time pressure
+     (todoWs.css still draws a terracotta edge on [data-late]; this takes it away). ── */
+  .tws .tws-dchip, .tws .tws-dchip[data-late] { box-shadow: none; }
 }
