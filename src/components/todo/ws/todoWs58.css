@@ -64,4 +64,22 @@
 
   /* ── v58.3 · the hawk's bubble in its query's stage colour; a task with no query keeps the blush bubble ── */
   .tws .tws-mnote[data-tws58-stage] p { background: var(--tws58-band); box-shadow: inset 0 0 0 1px var(--tws58-edge); color: var(--tws58-ink); }
+
+
+  /* ══ v58.1 — five fixes to v58 (design-refs/todo-list-v58-1/) ═══════════════════════════════════════════════════ */
+
+  /* ── v58.1 · 1 · the desk header is navy on every task: the wait band's ground, ink and header tokens (todoWs.css's
+     [data-band="wait"]), whatever the band. Stage colour lives on the row's disc, the hawk's bubble and the card, never
+     on the desk header. The housekeeping batch band (todoWs54) keeps its layout; only its colours turn over to read on
+     navy. One shared rule carries the values: CSS cannot point at another rule's declarations, so they are the wait
+     band's, restated once. ── */
+  .tws .tws-wh[data-band], .tws .tws-wh.tws54-band[data-band] {
+    background: var(--tw-navy); color: #fff;
+    --wh-mut: rgba(255, 255, 255, 0.72); --wh-chip: rgba(255, 255, 255, 0.14); --wh-ring: #fff;
+  }
+  .tws .tws-wh.tws54-band .tws54-now, .tws .tws-wh.tws54-band .tws54-now b { color: #fff; }
+  .tws .tws-wh.tws54-band .tws54-prog span { background: rgba(255, 255, 255, 0.22); }
+  .tws .tws-wh.tws54-band .tws54-prog span[data-st="cur"] { background: rgba(255, 255, 255, 0.6); }
+  .tws .tws-wh.tws54-band .tws54-prog span[data-st="done"] { background: #fff; }
+  .tws .tws-wh.tws54-band .tws54-vsw { border-color: transparent; }
 }

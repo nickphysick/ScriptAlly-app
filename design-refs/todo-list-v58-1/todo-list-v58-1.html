@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk To-do list v58.1: five fixes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,500;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --tw-navy: #2a3a52; --tw-hair: #e3dbcf; --tw-ink: #1c130f; --tw-ink2: #3a332d; --tw-mut: #5b4f47; --tw-mut2: #8a8076;
+    --tw-tray: #fbf9f5; --tw-beige: #ebe4d9; --tw-cream: #faf8f4; --tw-terra: #c9765d;
+    --tw-type: "Special Elite", "Courier New", Courier, monospace;
+    --tw-serif: "Source Serif 4", Georgia, serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: #f1eee8; color: var(--tw-ink); font-family: var(--tw-serif); -webkit-font-smoothing: antialiased; }
+  button { font-family: inherit; }
+  [hidden] { display: none !important; }
+
+  /* ── the mock's own controls (not part of the app) ── */
+  .ctl { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid var(--tw-hair); padding: 12px 20px; }
+  .ctl-top { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .ctl h1 { margin: 0; font: 400 19px var(--tw-type); }
+  .ctl p { margin: 0; font-size: 14px; color: var(--tw-mut); }
+  .ctl-all { margin-left: auto; display: flex; gap: 6px; }
+  .ctl-all button { height: 32px; padding: 0 13px; border: 1px solid #d4cabd; border-radius: 8px; background: #fff; font-size: 14px; color: var(--tw-ink); cursor: pointer; }
+  .ctl-all button:hover { background: var(--tw-cream); }
+  .ctl-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; align-items: center; }
+  .sw { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px 0 8px; border: 1px solid #d4cabd; border-radius: 17px; background: #fff; font-size: 14px; color: var(--tw-ink); cursor: pointer; }
+  .sw i { width: 28px; height: 16px; border-radius: 8px; background: #d4cabd; position: relative; transition: background .15s; flex: none; }
+  .sw i::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; transition: transform .15s; }
+  .sw[aria-pressed="true"] { border-color: var(--tw-navy); }
+  .sw[aria-pressed="true"] i { background: var(--tw-navy); }
+  .sw[aria-pressed="true"] i::after { transform: translateX(12px); }
+  .seg { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--tw-mut); margin-left: 6px; }
+  .seg div { display: inline-flex; padding: 2px; border: 1px solid #d4cabd; border-radius: 17px; background: #fff; }
+  .seg button { height: 28px; padding: 0 11px; border: 0; border-radius: 14px; background: none; font-size: 14px; color: var(--tw-ink); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--tw-navy); color: #fff; }
+  .sw:focus-visible, .seg button:focus-visible, .ctl-all button:focus-visible, .tws-ti:focus-visible, .tws-gb:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
+
+  /* ── the stage ── */
+  .stage { padding: 26px 24px 16px; overflow-x: hidden; }
+  .tws-ws { display: grid; grid-template-columns: 394px 1164px; width: 1558px; height: 494px; margin: 0 auto;
+    background: var(--tw-tray); border: 1px solid #ebe5db; border-radius: 16px 16px 0 0; border-bottom: 0; overflow: hidden; }
+  body[data-t="narrow"] .tws-ws { grid-template-columns: 340px 1164px; width: 1504px; }
+  .cap { max-width: 1558px; margin: 10px auto 0; font: italic 14px var(--tw-serif); color: var(--tw-mut); }
+
+  /* ── the desk: a picture of dev with the header drawn over it ── */
+  .desk { position: relative; overflow: hidden; min-width: 0; }
+  .desk img { display: block; width: 1164.5px; height: 496.5px; max-width: none; }
+  .tws-wh { position: absolute; left: 14.5px; top: 14.5px; width: 1134px; height: 58px; border-radius: 14px 14px 0 0; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 22px;
+    background: #c5d0dd; color: var(--tw-ink); --wh-mut: #46556a; --wh-chip: rgba(255,255,255,.55); --wh-ring: #46556a; transition: background .2s, color .2s; }
+  body[data-a="1"] .tws-wh { background: var(--tw-navy); color: #fff; --wh-mut: rgba(255,255,255,.72); --wh-chip: rgba(255,255,255,.14); --wh-ring: #fff; }
+  .tws-wh h2 { margin: 0; font: 400 22px/1.3 var(--tw-type); white-space: nowrap; }
+  .tws-wh .tws-m { font: italic 15px var(--tw-serif); color: var(--wh-mut); white-space: nowrap; }
+  .tws-wh .tws-sp { flex: 1; }
+  .tws-dchip { flex: none; height: 30px; display: inline-flex; align-items: center; gap: 5px; padding: 0 12px; border-radius: 15px; background: var(--wh-chip); font: 14px var(--tw-serif); white-space: nowrap; box-shadow: inset 0 0 0 1px var(--tw-terra); }
+  .tws-dchip b { font: 400 14px var(--tw-type); }
+  body[data-c="1"] .tws-dchip { box-shadow: none; }
+  .tws-pos { flex: none; font: 14.5px var(--tw-serif); color: var(--wh-mut); white-space: nowrap; }
+  .tws-pos b { font-weight: 600; }
+  .tws-wb { flex: none; width: 40px; height: 40px; border: 0; border-radius: 10px; background: none; color: inherit; font: 18px var(--tw-serif); box-shadow: inset 0 0 0 1px var(--wh-ring); opacity: .6; }
+
+  /* ── the tray, as v58 is built on dev ── */
+  .tws-tray { background: var(--tw-tray); display: flex; flex-direction: column; min-height: 0; border-right: 1px solid #efe9e0; container-type: inline-size; }
+  .tws55-th { flex: none; padding: 14px 12px 0; }
+  .tws55-head { display: flex; align-items: center; gap: 16px; min-height: 44px; padding: 0 2px; border-bottom: 1px solid var(--tw-hair); }
+  .tws55-tabs { display: flex; align-items: center; gap: 16px; }
+  .tws55-tab { padding: 9px 0 10px; margin-bottom: -1px; border: 0; border-bottom: 2px solid transparent; background: none; font: 400 15.5px var(--tw-serif); color: var(--tw-mut); cursor: pointer; white-space: nowrap; }
+  .tws55-tab[aria-pressed="true"] { color: var(--tw-ink); border-bottom-color: var(--tw-navy); font-weight: 600; }
+  .tws55-tab sup { font: 400 12px var(--tw-type); margin-left: 3px; }
+  .tws55-icons { margin-left: auto; display: flex; gap: 2px; }
+  .tws55-ic { width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px; background: transparent; display: grid; place-items: center; color: var(--tw-ink2); cursor: pointer; }
+  .tws55-ic:hover { background: var(--tw-beige); }
+  .tws55-ic svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .tws-tl { flex: 1; min-height: 0; overflow-y: auto; padding: 0 11px 30px 12px; scrollbar-width: thin; scroll-behavior: smooth;
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 30px), transparent); }
+  .tws-gbw { position: relative; margin: 24px 0 6px; }
+  .tws-gbw:first-child { margin-top: 10px; }
+  .tws-gb { height: 32px; display: flex; align-items: center; gap: 8px; margin: 0; padding: 0 2px; border: 0; width: 100%; border-radius: 6px; cursor: pointer; text-align: left; color: var(--tw-ink); background: none; }
+  .tws-gb b { font: 400 16px var(--tw-type); }
+  .tws-gb em { font: normal 14px var(--tw-type); color: var(--tw-mut2); }
+  .tws-gb .rule { flex: 1; height: 1px; background: var(--tw-hair); margin: 0 4px 0 6px; }
+  .tws-gb .tws-cv { width: 8px; height: 8px; margin-right: 4px; opacity: .55; border: solid currentColor; border-width: 0 1.6px 1.6px 0; transform: translateY(-2px) rotate(45deg); transition: transform .15s; }
+  .tws-gb[aria-expanded="false"] .tws-cv { transform: translateX(-2px) rotate(-45deg); }
+  .tws-qfb { position: absolute; right: 34px; top: 50%; transform: translateY(-50%); height: 30px; padding: 0 12px; border: 0; border-radius: 15px; background: #fff; box-shadow: inset 0 0 0 1px #c9d5e0; color: #2f4357; font: 14px var(--tw-serif); cursor: pointer; white-space: nowrap; }
+  .tws-qfb:hover { box-shadow: inset 0 0 0 1.5px var(--tw-navy); color: var(--tw-navy); }
+
+  .tws-ti { position: relative; display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 11px; width: 100%; min-height: 58px; padding: 8px 11px; margin: 0; border: 0; border-radius: 10px; background: none; text-align: left; cursor: pointer; outline-offset: -2px; transition: background .15s, box-shadow .15s; }
+  .tws-ti:hover { background: #fff; box-shadow: 0 0 0 1px var(--tw-hair); }
+  .tws-ti[aria-current="true"], .tws-ti[aria-current="true"]:hover { background: #fff; box-shadow: 0 0 0 1px var(--tw-hair), 0 6px 16px -10px rgba(28,19,15,.3); margin-top: 4px; margin-bottom: 6px; }
+  .tws-ti[aria-current="true"]::after { content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--tw-navy); }
+  .tws-ti:not([aria-current="true"]) + .tws-ti:not([aria-current="true"])::before { content: ""; position: absolute; top: 0; left: 54px; right: 11px; border-top: 1px solid #ece6dc; }
+  .tws-ti:hover::before, .tws-ti:hover + .tws-ti::before { display: none; }
+  .tws-ti[data-st="queried"] { --c: #efe6d6; --e: #e0d2bb; }
+  .tws-ti[data-st="partial"] { --c: #e4ebf2; --e: #cbd7e4; }
+  .tws-ti[data-st="full"] { --c: #b7c9de; --e: #9db4cf; }
+  .tws-av { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex: none; background: var(--c); box-shadow: inset 0 0 0 1px var(--e); color: var(--tw-ink); }
+  .tws-av svg { width: 19px; height: 19px; display: block; }
+  .tws-av[data-k="form"] { border-radius: 9px; background: #fff; box-shadow: inset 0 0 0 1px #e3dbcf; }
+  .tws-tx { min-width: 0; }
+  .tws-tx b { font: 500 15px/1.25 var(--tw-serif); color: var(--tw-ink2); overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .tws-ti[aria-current="true"] .tws-tx b { font-weight: 600; color: var(--tw-ink); }
+  .tws-tx span { display: block; font: italic 14px/1.45 var(--tw-serif); color: var(--tw-mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tws-du { display: flex; align-items: baseline; justify-content: flex-end; gap: 5px; line-height: 1.2; }
+  .tws-du b { font: 400 15px var(--tw-type); color: var(--tw-ink2); }
+  .tws-du small { font: 13.5px var(--tw-serif); color: var(--tw-mut2); white-space: nowrap; }
+  .tws-qf { height: 26px; display: inline-flex; align-items: center; padding: 0 10px; border-radius: 13px; background: #e4ebf1; color: #2f4357; font: 14px var(--tw-serif); white-space: nowrap; }
+  .tws-qact { position: absolute; right: 8px; top: 50%; transform: translateY(-50%); display: none; gap: 4px; }
+  .tws-qact span { width: 30px; height: 30px; border-radius: 9px; display: inline-flex; align-items: center; justify-content: center; color: var(--tw-mut); box-shadow: inset 0 0 0 1px #d9d0c3; background: #fff; }
+  .tws-qact span:hover { color: var(--tw-navy); box-shadow: inset 0 0 0 1.5px var(--tw-navy); }
+  .tws-qact svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .tws-ti:hover .tws-qact { display: flex; }
+  .tws-ti:hover :is(.tws-du, .tws-qf) { visibility: hidden; }
+
+  /* ── as on dev today · a clicked row keeps focus: the browser's blue ring, and the quick actions in place of its figure ── */
+  body[data-b="0"] .tws-ti[aria-current="true"] { outline: 2.5px solid #2563eb; }
+  body[data-b="0"] .tws-ti[aria-current="true"] .tws-qact { display: flex; }
+  body[data-b="0"] .tws-ti[aria-current="true"] :is(.tws-du, .tws-qf) { visibility: hidden; }
+
+  /* ── fix 4 · on a narrow tray the figure's words drop under its number, so the title keeps its line ── */
+  @container (max-width: 360px) {
+    body[data-d="1"] .tws-du { flex-direction: column; align-items: flex-end; gap: 1px; }
+    body[data-d="1"] .tws-du small { font-size: 13px; }
+  }
+
+  /* ── fix 5 · the heading's rule stops short of Quick fill ── */
+  body[data-e="1"] .tws-gbw:has(.tws-qfb) .rule { margin-right: 96px; }
+
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; scroll-behavior: auto !important; } }
+</style>
+</head>
+<body data-a="1" data-b="1" data-c="1" data-d="1" data-e="1" data-t="wide">
+
+<div class="ctl">
+  <div class="ctl-top">
+    <h1>To-do list v58.1: five fixes</h1>
+    <p>v58 as it is on dev, with each fix on its own switch. Only the list and the desk's header are live; the rest of the desk is a picture of dev.</p>
+    <div class="ctl-all"><button type="button" id="allOff">As on dev</button><button type="button" id="allOn">All five on</button></div>
+  </div>
+  <div class="ctl-row">
+    <button type="button" class="sw" data-k="a" aria-pressed="true"><i></i>1 Navy desk header</button>
+    <button type="button" class="sw" data-k="b" aria-pressed="true"><i></i>2 Clicked row</button>
+    <button type="button" class="sw" data-k="c" aria-pressed="true"><i></i>3 No edge on the chip</button>
+    <button type="button" class="sw" data-k="d" aria-pressed="true"><i></i>4 Figure stacks when narrow</button>
+    <button type="button" class="sw" data-k="e" aria-pressed="true"><i></i>5 Quick fill clear of the rule</button>
+    <span class="seg" id="widSeg">List width
+      <div><button type="button" data-v="wide" aria-pressed="true">Wide screen</button><button type="button" data-v="narrow" aria-pressed="false">At 1280</button></div>
+    </span>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="tws-ws">
+    <div class="tws-tray">
+      <div class="tws55-th">
+        <div class="tws55-head">
+          <div class="tws55-tabs">
+            <button type="button" class="tws55-tab" aria-pressed="true">To do<sup>41</sup></button>
+            <button type="button" class="tws55-tab" aria-pressed="false">Snoozed</button>
+            <button type="button" class="tws55-tab" aria-pressed="false">Done</button>
+          </div>
+          <div class="tws55-icons">
+            <button type="button" class="tws55-ic" aria-label="Search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></svg></button>
+            <button type="button" class="tws55-ic" aria-label="Filter and group"><svg viewBox="0 0 24 24"><path d="M4 7h16M7 12h10M10 17h4"/></svg></button>
+            <button type="button" class="tws55-ic" aria-label="Collapse the list"><svg viewBox="0 0 24 24"><path d="M11 7l-5 5 5 5M18 7l-5 5 5 5"/></svg></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="tws-tl" id="list"></div>
+    </div>
+
+    <div class="desk">
+      <img src="desk2.jpg" alt="The desk as on dev, with Nudge William open">
+      <div class="tws-wh">
+        <h2>Nudge William</h2><span class="tws-m">William Tan · Foxglove Literary</span><span class="tws-sp"></span>
+        <span class="tws-dchip"><b>115</b> days past expected</span>
+        <span class="tws-pos"><b>4</b>/41</span>
+        <button type="button" class="tws-wb" aria-label="Previous task" tabindex="-1">‹</button>
+        <button type="button" class="tws-wb" aria-label="Next task" tabindex="-1">›</button>
+      </div>
+    </div>
+  </div>
+  <p class="cap">Hover a row to see its two quick actions. Switch the list to "At 1280" to see fix 4, and turn on fix 5 to jump to Housekeeping. The desk stays on Nudge William whichever row you click.</p>
+</div>
+
+<script>
+  var body = document.body;
+  var G = {
+    half: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="6 4"/><path d="M12 12L12 5.5A6.5 6.5 0 0 1 12 18.5Z" fill="currentColor" stroke="none"/></svg>',
+    full: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-dasharray="6 4"/><circle cx="12" cy="12" r="6.5" fill="currentColor" stroke="none"/></svg>',
+    nudge: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.2"/><path d="M12 16.3v.2"/></svg>',
+    form: '<svg viewBox="0 0 24 24" fill="none" stroke="#5b4f47" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3.5h7l4 4V20a.5.5 0 0 1-.5.5h-10A.5.5 0 0 1 7 20z"/><path d="M10 12h5M10 15.5h5"/></svg>'
+  };
+  var QA = '<span class="tws-qact" aria-hidden="true"><span title="Snooze"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 2"/></svg></span><span title="Dismiss"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M6.5 17.5l11-11"/></svg></span></span>';
+  var groups = [
+    { name: 'Agents are waiting', n: 3, rows: [
+      ['partial', 'half', 'Send Greg your partial', 'Greg Panetta', '3', 'days waiting'],
+      ['full', 'full', 'Send Jonathan your full', 'The Marsh Agency', '', ''],
+      ['partial', 'half', 'Send Daniel your partial', 'Inkwell &amp; Stone', '', ''] ] },
+    { name: 'Nudges', n: 4, rows: [
+      ['queried', 'nudge', 'Nudge William', 'Foxglove Literary', '115', 'days past expected', true],
+      ['queried', 'nudge', 'Nudge Daniel', 'Inkwell &amp; Stone', '62', 'days past expected'],
+      ['queried', 'nudge', 'Nudge Jonathan', 'The Marsh Agency', '49', 'days past expected'],
+      ['queried', 'nudge', 'Nudge Bartholomew', 'Whitfield &amp; Crane', '34', 'days past expected'] ] },
+    { name: 'Gone quiet', n: 5, shut: true, rows: [] },
+    { name: 'Housekeeping', n: 29, house: true, rows: [
+      ['', 'form', 'Fill in what you sent', 'Marcus Webb and 28 others', 'qf', ''] ] }
+  ];
+  var h = '';
+  groups.forEach(function (g) {
+    h += '<div class="tws-gbw"' + (g.house ? ' id="house"' : '') + '><button type="button" class="tws-gb" aria-expanded="' + (g.shut ? 'false' : 'true') + '"><b>' + g.name + '</b><em>' + g.n + '</em><span class="rule"></span><span class="tws-cv"></span></button>' +
+      (g.house ? '<button type="button" class="tws-qfb">Quick fill</button>' : '') + '</div><div class="grp"' + (g.shut ? ' hidden' : '') + '>';
+    g.rows.forEach(function (r) {
+      var fig = r[4] === 'qf' ? '<span class="tws-qf">Quick fill</span>' : r[4] ? '<span class="tws-du"><b>' + r[4] + '</b><small>' + r[5] + '</small></span>' : '<span class="tws-du"></span>';
+      h += '<button type="button" class="tws-ti"' + (r[0] ? ' data-st="' + r[0] + '"' : '') + (r[6] ? ' aria-current="true"' : '') + '><span class="tws-av"' + (r[1] === 'form' ? ' data-k="form"' : '') + '>' + G[r[1]] + '</span><span class="tws-tx"><b>' + r[2] + '</b><span>' + r[3] + '</span></span>' + fig + QA + '</button>';
+    });
+    h += '</div>';
+  });
+  var list = document.getElementById('list');
+  list.innerHTML = h;
+
+  function setK(k, on) {
+    body.dataset[k] = on ? '1' : '0';
+    document.querySelector('.sw[data-k="' + k + '"]').setAttribute('aria-pressed', on ? 'true' : 'false');
+  }
+  document.querySelectorAll('.sw').forEach(function (b) {
+    b.addEventListener('click', function () {
+      setK(b.dataset.k, b.getAttribute('aria-pressed') !== 'true');
+      if (b.dataset.k === 'e') list.scrollTop = list.scrollHeight;
+    });
+  });
+  var keys = ['a', 'b', 'c', 'd', 'e'];
+  document.getElementById('allOff').addEventListener('click', function () { keys.forEach(function (k) { setK(k, false); }); });
+  document.getElementById('allOn').addEventListener('click', function () { keys.forEach(function (k) { setK(k, true); }); });
+
+  var ws = document.querySelector('.tws-ws');
+  function fit() { var w = body.dataset.t === 'narrow' ? 1504 : 1558; ws.style.zoom = Math.min(1, (document.documentElement.clientWidth - 48) / w); }
+  document.querySelectorAll('#widSeg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      body.dataset.t = b.dataset.v;
+      document.querySelectorAll('#widSeg button').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+      fit();
+    });
+  });
+  fit(); window.addEventListener('resize', fit);
+
+  list.addEventListener('click', function (ev) {
+    var r = ev.target.closest('.tws-ti');
+    if (r) { list.querySelectorAll('.tws-ti').forEach(function (o) { o.removeAttribute('aria-current'); }); r.setAttribute('aria-current', 'true'); return; }
+    var g = ev.target.closest('.tws-gb');
+    if (g) {
+      var grp = g.parentElement.nextElementSibling;
+      if (!grp.children.length) return;
+      var open = g.getAttribute('aria-expanded') === 'true';
+      g.setAttribute('aria-expanded', open ? 'false' : 'true'); grp.hidden = open;
+    }
+  });
+</script>
+</body>
+</html>
