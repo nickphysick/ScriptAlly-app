@@ -81,8 +81,8 @@
     margin: 0;
     font-family: var(--sp-type) !important;
     font-weight: 400;
-    font-size: 20px; /* Consistency roll-out v2, Phase 1: the card heading (--sp-h-card) */
-    line-height: 1.25;
+    font-size: 19px; /* Consistency roll-out v2, Phase 1: left at 19 — at 20, "Keeping your list current" wraps in its 268px column (Preferences) */
+    line-height: 1.3;
     color: var(--ink-on-light);
   }
   .acct-page .sc-ch-p {
