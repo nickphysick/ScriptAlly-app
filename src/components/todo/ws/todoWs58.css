@@ -29,4 +29,13 @@
   }
   .tws .tws-ti[data-tws58-stage] .tws-av[data-k="glyph"] svg { width: 19px; height: 19px; }
 
+
+  /* ── v58 · 2 · the open row: white, a hairline ring, a soft shadow and a 3px navy bar on its left edge ── */
+  .tws .tws-ti[aria-current="true"], .tws .tws-ti[aria-current="true"]:hover {
+    background: #fff; box-shadow: 0 0 0 1px var(--tw-hair), 0 6px 16px -10px rgba(28, 19, 15, 0.3); margin-top: 4px; margin-bottom: 6px;
+  }
+  .tws .tws-ti[aria-current="true"]::after {
+    content: ""; position: absolute; left: 0; top: 10px; bottom: 10px; width: 3px; border-radius: 0 3px 3px 0; background: var(--tw-navy);
+  }
+
 }
