@@ -82,4 +82,16 @@
   .tws .tws-wh.tws54-band .tws54-prog span[data-st="cur"] { background: rgba(255, 255, 255, 0.6); }
   .tws .tws-wh.tws54-band .tws54-prog span[data-st="done"] { background: #fff; }
   .tws .tws-wh.tws54-band .tws54-vsw { border-color: transparent; }
+
+  /* ── v58.1 · 2 · a clicked row looks like an open row. No outline from a mouse click; a navy ring for the keyboard
+     (`:focus-visible`), never the browser's blue. The quick actions show, and the figure hides, on hover or keyboard
+     focus only: todoWs.css and v57 rule 4 also do it on `:focus-within`, which a click leaves set, so a row focused
+     with nothing focus-visible and no pointer over it turns back. Tab still reaches both actions (they show as soon as
+     the row or either action is focus-visible). ── */
+  .tws .tws-ti:focus { outline: none; }
+  .tws .tws-ti:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
+  .tws .tws-qact [role="button"]:focus { outline: none; }
+  .tws .tws-qact [role="button"]:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 1px; }
+  .tws .tws-ti:focus-within:not(:hover):not(:focus-visible):not(:has(:focus-visible)) .tws-qact { display: none; }
+  .tws .tws-ti:focus-within:not(:hover):not(:focus-visible):not(:has(:focus-visible)) :is(.tws-du, .tws-qf) { visibility: visible; }
 }
