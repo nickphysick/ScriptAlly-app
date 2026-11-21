@@ -1,0 +1,15 @@
+{
+  "about": "States v1 could not open, added to v1's routes. Each `storage` is written to localStorage before the page loads and put back after it is measured; nothing reaches the database. db60-pre is the harness's book with no queries, so the pages scoped to the active book show their empty state, where they have one. The Dashboard's first visit (dashboard-fv) is already in v1's routes.",
+  "routes": [
+    { "path": "/queries", "key": "queries-empty", "family": "workspace", "state": "empty", "storage": { "scriptally_active_manuscript_id": "db60-pre" } },
+    { "path": "/queries/analytics", "key": "queries-analytics-empty", "family": "workspace", "state": "empty", "storage": { "scriptally_active_manuscript_id": "db60-pre" } },
+    { "path": "/queries/responses", "key": "queries-responses-empty", "family": "workspace", "state": "empty", "storage": { "scriptally_active_manuscript_id": "db60-pre" } },
+    { "path": "/queries/packages", "key": "queries-packages-empty", "family": "workspace", "state": "empty", "storage": { "scriptally_active_manuscript_id": "db60-pre" } },
+    { "path": "/manuscripts", "key": "manuscripts-empty", "family": "workspace", "state": "empty", "storage": { "scriptally_active_manuscript_id": "db60-pre" } },
+    { "path": "/manuscripts/comps", "key": "manuscripts-comps-empty", "family": "workspace", "state": "empty", "storage": { "scriptally_active_manuscript_id": "db60-pre" } },
+    { "path": "/manuscripts/versions", "key": "manuscripts-versions-empty", "family": "workspace", "state": "empty", "storage": { "scriptally_active_manuscript_id": "db60-pre" } },
+    { "path": "/materials/letters", "key": "materials-letters-empty", "family": "workspace", "state": "empty", "storage": { "scriptally_active_manuscript_id": "db60-pre" } },
+    { "path": "/todo", "key": "todo-empty", "family": "workspace", "state": "empty", "storage": { "scriptally_active_manuscript_id": "db60-pre" } },
+    { "path": "/todo/corkboard", "key": "todo-corkboard-empty", "family": "workspace", "state": "empty", "storage": { "scriptally_active_manuscript_id": "db60-pre" } }
+  ]
+}
