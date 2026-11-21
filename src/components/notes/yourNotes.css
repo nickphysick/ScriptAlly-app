@@ -230,3 +230,9 @@
   .yn-panel { top: auto; left: 0; right: 0; bottom: 0; width: 100%; max-width: none; height: 92vh; transform: translateY(30px); }
   .yn-layer .yn-pcard.os-card { border-radius: 20px 20px 0 0; }
 }
+
+/* Consistency roll-out v2, Phase 3 (rulings v3, ruling 4): the text tag — 28 high, 0 12, fully rounded, Source Serif 4
+   600 14 (shell/primitives.css --sp-tag-*). Each keeps its own fill, edge and text colour. Desktop only. */
+@media (min-width: 768px) {
+  .yn .yn-oc, .yn-layer .yn-oc { box-sizing: border-box; display: inline-flex; align-items: center; height: var(--sp-tag-h); min-height: 0; padding: var(--sp-tag-pad); border-radius: var(--sp-tag-r); font: var(--sp-tag-font) !important; font-style: normal !important; }
+}

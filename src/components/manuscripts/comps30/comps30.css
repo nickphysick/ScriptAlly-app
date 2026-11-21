@@ -75,6 +75,6 @@
 .cp30-layer.cp30-dh .cp30-md { width: 64px; height: 64px; background: var(--c30-cream); color: var(--c30-navy); box-shadow: none; }
 .cp30-layer.cp30-dh .cp30-md svg { width: 26px; height: 26px; }
 .cp30-layer.cp30-dh .cp30-dhx { flex: 1 1 auto; min-width: 0; }
-.cp30-layer.cp30-dh h3.cp30-dtl { font: 400 30px/1.1 var(--c30-type) !important; color: var(--c30-cream); margin: 0; overflow-wrap: anywhere; }
+.cp30-layer.cp30-dh h3.cp30-dtl { font: var(--sp-panel-t) !important; color: var(--c30-cream); margin: 0; overflow-wrap: anywhere; }
 .cp30-layer.cp30-dh .cp30-dby { display: block; margin-top: 6px; font: italic 400 16px/1.35 var(--c30-serif); color: rgba(244, 238, 229, .75); }
 /* comps v32: the drawer's detail view (its figures, letters, queries and foot) is retired with the view */

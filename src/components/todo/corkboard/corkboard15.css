@@ -85,8 +85,8 @@
 .cb15 .cb15-mn button.cb15-on { background: #eef1f5; font-weight: 600 !important; }
 
 /* tag pills (`.pills`) */
-.cb15 .cb15-pills { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 2px 0 0; min-height: 36px; }
-.cb15 .cb15-pill { display: inline-flex; align-items: center; gap: 8px; height: 36px; padding: 0 14px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #e3ddd3; font: 400 15px/1 var(--c15-serif) !important; white-space: nowrap; transition: box-shadow .15s, background .15s; }
+.cb15 .cb15-pills { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 2px 0 0; min-height: var(--sp-fpill-h); }
+.cb15 .cb15-pill { display: inline-flex; align-items: center; gap: 8px; height: var(--sp-fpill-h); padding: 0 14px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px #e3ddd3; font: 400 var(--sp-fpill-size)/1 var(--c15-serif) !important; white-space: nowrap; transition: box-shadow .15s, background .15s; }
 .cb15 .cb15-pill:hover { box-shadow: inset 0 0 0 1px #b9ae9f; }
 .cb15 .cb15-pill em { font: 400 13.5px/1 var(--c15-type) !important; font-style: normal; color: #756b61; }
 .cb15 .cb15-pill.cb15-on { background: var(--c15-navy); color: #fff; font-weight: 600 !important; box-shadow: none; }

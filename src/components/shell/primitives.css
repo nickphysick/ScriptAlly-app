@@ -185,6 +185,15 @@
 /* Consistency roll-out v2, Phase 1 (rulings v2, ruling 7): a view switch is boxed — the track radius 12, each option 34
    high with radius 9. Each switch's own rule reads these. */
 :root { --sp-vsw-r: 12px; --sp-vsw-opt-h: 34px; --sp-vsw-opt-r: 9px; }
+/* Consistency roll-out v2, Phase 3 (rulings v3): the text tag (ruling 4) — a pill that holds only words and labels
+   something; not a chip with a person in it, a count, a percentage, a Pro tag, a key cap, StatusDot, a filter pill or a
+   button. The filter pill (ruling 5): 32 high, Source Serif 4 14.5. The slide-out panel title (ruling 3): Special Elite
+   400 24/1.2, the section heading's size; the agent card's name is a person's name and stays its own. */
+:root {
+  --sp-tag-h: 28px; --sp-tag-pad: 0 12px; --sp-tag-r: 999px; --sp-tag-font: 600 14px/1 var(--sp-serif);
+  --sp-fpill-h: 32px; --sp-fpill-size: 14.5px;
+  --sp-panel-t: 400 24px/1.2 var(--sp-type);
+}
 :root { --sp-px-size: 36px; --sp-pfoot-h: 72px; --sp-pfoot-pad: 14px 24px; --sp-pfoot-rule: 1px solid rgba(28, 19, 15, .1); }
 .sp-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
 .sp-btn--fill { background: var(--sp-anthracite); color: #fff; }

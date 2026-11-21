@@ -92,3 +92,9 @@
 .d58.d2 .d3-gstx { flex: 1 1 auto; min-width: 0; }
 .d58.d2 .d3-gsrow .d2-link { white-space: nowrap; }
 .d58.d2 .d3-gshide { flex: none; border: 0; background: transparent; padding: 6px; font-size: 14px; color: var(--d2-muted); text-decoration: underline; cursor: pointer; }
+
+/* Consistency roll-out v2, Phase 3 (rulings v3, ruling 4): the text tag — 28 high, 0 12, fully rounded, Source Serif 4
+   600 14 (shell/primitives.css --sp-tag-*). Each keeps its own fill, edge and text colour. Desktop only. */
+@media (min-width: 768px) {
+  .d58.d2 .d3-egtag { box-sizing: border-box; display: inline-flex; align-items: center; height: var(--sp-tag-h); min-height: 0; padding: var(--sp-tag-pad); border-radius: var(--sp-tag-r); font: var(--sp-tag-font) !important; font-style: normal !important; }
+}

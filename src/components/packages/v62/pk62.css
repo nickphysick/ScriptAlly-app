@@ -307,7 +307,7 @@
 .k62-hdr { position: fixed; top: 8px; right: 8px; bottom: 8px; z-index: 75; width: min(560px, calc(100vw - 16px)); display: flex; flex-direction: column; background: var(--k62-cream); border-radius: 12px; overflow: hidden; box-shadow: -24px 0 48px -24px rgba(28, 19, 15, .45), 0 0 0 1px rgba(28, 19, 15, .08); animation: k62-slide .3s cubic-bezier(.22, .8, .3, 1); }
 @keyframes k62-slide { 0% { transform: translateX(104%); } 100% { transform: none; } }
 .k62-hdr-head { position: relative; padding: 22px 24px; background: var(--k62-navy); color: var(--k62-cream); }
-.k62-hdr-head h3 { font: 400 24px/1.1 var(--k62-type); padding-right: 40px; }
+.k62-hdr-head h3 { font: var(--sp-panel-t) !important; padding-right: 40px; }
 .k62-hdr-head small { display: block; margin-top: 6px; font-style: italic; font-size: 14px; color: rgba(244, 238, 229, .8); }
 .k62-hdr-x { position: absolute; top: 18px; right: 18px; width: 36px; height: 36px; padding: 0; border: 0; border-radius: 50%; display: grid; place-items: center; background: rgba(244, 238, 229, .1); color: var(--k62-cream) !important; font-size: 16px; line-height: 1; }
 .k62-hdr-x:focus-visible { outline-color: var(--k62-cream) !important; }
