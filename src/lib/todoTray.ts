@@ -21,6 +21,7 @@ import type { BoardCard } from "./todoBoard";
 import { cardBucket, taskDeed, type Bucket } from "./todoBuckets";
 import { listRowInputs, dueFor, type TaskData } from "./taskCardFacts";
 import type { DueSource } from "./taskDue";
+import { dropSupersededProvisional, getActivityTime, normalizeResultingStatus } from "./queryDerivation";
 import { ticketFacts } from "./ticketFacts";
 import { elapsedPhrase } from "./elapsed";
 import { agentPrimary } from "./agentDisplay";
@@ -197,6 +198,33 @@ const weekEndYmd = (now: number): string => {
   return localYmd(now + (6 - wd) * DAY);
 };
 
+/**
+ * To-do list v58.2 (A4) — WHEN THE AGENT ASKED, FOR A REQUEST'S FIGURE. The stored request date when the record holds one
+ * (`partialRequestedDate` / `fullRequestedDate`; an R&R has none); else the EARLIEST matching request in the query's
+ * activity log (the Tracking tab keeps the earliest of each status too); else null, and the row shows no figure.
+ * ⚠️ NEVER `lastStatusChange`: any later status write moves it, so a figure counted from it restarted ("3 days waiting"
+ *    on a request asked for in June). A PURE READ: nothing is written and `recomputeQuery` is not touched.
+ * ⚠️ THE LOG READ IS `users/{uid}/activities` (resultingStatus + date) — the log `recomputeQuery` derives from, and the
+ *    one the page holds. The Tracking tab reads its mirror, `queries/{id}/activity` (type + createdAt), written in the same
+ *    batch; where an old or seeded record has only the mirror, this finds nothing (reports/todo-list-v58-2/REPORT.md, A4).
+ * Returns undefined for a task that is not a request, so its anchor stays as it was.
+ */
+export function requestAskedMs(card: BoardCard, q: Query | undefined, activities: readonly Activity[]): number | null | undefined {
+  const status = card.taskType === "partial_requested" ? QueryStatus.PARTIAL_REQUESTED
+    : card.taskType === "full_requested" ? QueryStatus.FULL_REQUESTED
+    : card.taskType === "revise_resubmit" ? QueryStatus.REVISE_RESUBMIT
+    : undefined;
+  if (!status) return undefined;
+  const stored = status === QueryStatus.PARTIAL_REQUESTED ? q?.partialRequestedDate : status === QueryStatus.FULL_REQUESTED ? q?.fullRequestedDate : undefined;
+  const storedMs = stored ? Date.parse(String(stored)) : NaN;
+  if (Number.isFinite(storedMs)) return storedMs;
+  if (!q) return null;
+  const mine = activities.filter((a) => a.queryId === q.id);
+  const kept = dropSupersededProvisional(mine, (a) => ({ status: normalizeResultingStatus(a.resultingStatus), provisional: (a as { dateProvisional?: boolean }).dateProvisional === true }));
+  const times = kept.filter((a) => normalizeResultingStatus(a.resultingStatus) === status).map((a) => getActivityTime(a.date)).filter((t) => Number.isFinite(t) && t > 0);
+  return times.length ? Math.min(...times) : null;
+}
+
 export function dialFor(dueYmd: string | null, anchorMs: number, now: number): Dial {
   if (!dueYmd) return { kind: "none", frac: 0, day: null, mon: "", ymd: null, title: "No date" };
   const due = ymdMs(dueYmd);
@@ -222,6 +250,8 @@ export function trayItem(card: BoardCard, db: TrayDb, now: number): TrayItem {
   const inp = listRowInputs(card, db);
   const due = dueFor(card, db, db.taskFlags);
   const anchorMs = typeof inp.days === "number" ? now - inp.days * DAY : NaN;
+  /* v58.2 (A4): a request's figure counts from when the agent asked — never from the status's last move */
+  const asked = requestAskedMs(card, query, db.activities ?? []);
   const dial = dialFor(due.ymd, anchorMs, now);
   const own = !!card.userTaskId;
   const name = agent ? agentPrimary(agent) : "";
@@ -253,7 +283,7 @@ export function trayItem(card: BoardCard, db: TrayDb, now: number): TrayItem {
     card, key: card.key, group: groupOf(card), kind: kindOf(card), bucket, deed, query, agent, userTask, sub,
     initials: own ? null : initialsOf(name || agency || (isSweepCard(card) ? `${card.sweepOf} ` : card.title)),
     who, whoSub, dial, anchorMs: Number.isFinite(anchorMs) ? anchorMs : (userTask?.createdAt ? Date.parse(userTask.createdAt) : now),
-    waitMs: Number.isFinite(anchorMs) ? anchorMs : null,
+    waitMs: asked !== undefined ? asked : Number.isFinite(anchorMs) ? anchorMs : null,
     dueSource: due.source,
     hay: `${deed} ${name} ${agency} ${card.title}`.toLowerCase(), due: dueKey, sweep: isSweepCard(card),
   };
