@@ -20,6 +20,7 @@ import type { AgentDataNeed } from "./agentDataQuality";
 import { isTaskType, type TaskType } from "./todoActions";
 import { londonDayEnd, londonWeekStart, type ClearedAct } from "./todoCleared";
 import type { SetAsideItem } from "./taskSettings";
+import { STAGE_COLOURS, STAGE_INK, bandBackground, stageOf, type Stage } from "./stageColours";
 
 const DAY = 86400000;
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -386,6 +387,19 @@ export function milestoneFor(all: readonly WsTask[], t: WsTask): "list" | "group
   const rest = all.filter((x) => x.key !== t.key);
   if (!rest.length) return "list";
   return rest.some((x) => x.group === t.group) ? null : "group";
+}
+
+/**
+ * To-do list v58 — THE STAGE A TASK WEARS: its query's stage (the slate ladder, lib/stageColours), or null. An own task
+ * and a housekeeping row (a gap to fill, a batch) have none and keep their own drawing, even where a batch names a query.
+ */
+export function wsStage(t: WsTask): Stage | null {
+  if (t.kind === "own" || t.group === "house" || !t.query) return null;
+  return stageOf(t.query.status);
+}
+/** the stage as the inline custom properties todoWs58.css reads (band, edge, ink); undefined where there is no stage */
+export function stageVars(s: Stage | null): Record<"--tws58-band" | "--tws58-edge" | "--tws58-ink", string> | undefined {
+  return s ? { "--tws58-band": bandBackground(s), "--tws58-edge": STAGE_COLOURS[s].edge, "--tws58-ink": STAGE_INK } : undefined;
 }
 
 /** the desk header's due chip: [figure, words], or null */

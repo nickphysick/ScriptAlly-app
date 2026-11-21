@@ -19,4 +19,14 @@
   .tws .tws-gb .tws-cv { margin-left: 0; margin-right: 4px; }
   .tws .tws-gb:hover b { text-decoration: underline; text-decoration-color: var(--tw-hair); text-underline-offset: 4px; }
 
+
+  /* ── v58.2 · one 32px glyph column. A StatusDot row draws its glyph (ink, 19px) on a disc in its query's stage band
+        with a 1px inset edge in the stage's edge colour; every other kind keeps its own drawing at 32px. ── */
+  .tws .tws-ti { grid-template-columns: 32px minmax(0, 1fr) auto; gap: 11px; }
+  .tws .tws-ti .tws-av { width: 32px; height: 32px; }
+  .tws .tws-ti[data-tws58-stage] .tws-av[data-k="glyph"] {
+    border-radius: 50%; background: var(--tws58-band); box-shadow: inset 0 0 0 1px var(--tws58-edge); color: var(--tw-ink);
+  }
+  .tws .tws-ti[data-tws58-stage] .tws-av[data-k="glyph"] svg { width: 19px; height: 19px; }
+
 }

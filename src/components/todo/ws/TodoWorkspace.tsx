@@ -20,7 +20,7 @@ import { WorkspacePageGrid } from "../../shell/WorkspacePageGrid";
 import { useScriptAllyDb } from "../../../lib/db";
 import type { BoardCard } from "../../../lib/todoBoard";
 import {
-  NO_WS_FILTERS, WS_GROUPINGS, WS_GROUPS, breakdownOf, dueChip, mentorLine, passes, milestoneFor, trayFigure, wsSections,
+  NO_WS_FILTERS, WS_GROUPINGS, WS_GROUPS, breakdownOf, dueChip, mentorLine, passes, milestoneFor, stageVars, trayFigure, wsSections, wsStage,
   type DoneRow, type WsFilters, type WsGrouping, type WsTask,
 } from "../../../lib/todoWs";
 import { RULE_OFF_WORDS, RULE_TITLE, RULE_PLAIN, type SetAsideItem } from "../../../lib/taskSettings";
@@ -456,12 +456,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
     const fig = trayFigure(t, now);
     const on = !!sel && sel.key === t.key && !adding;
     const house = t.group === "house";
+    /* v58: the query's stage, as custom properties the glyph's disc reads (none for an own task or housekeeping) */
+    const stage = wsStage(t);
     /* v53 (D4): every row leads with its glyph — the query's status (StatusDot), a nudge's "!" ring, Gone quiet's dotted
        ring, a form for housekeeping, a real tick for the writer's own task */
     const glyph = t.kind === "nudge" ? NUDGE_MARK : t.kind === "quiet" ? QUIET_MARK
       : t.query ? <StatusDot status={t.query.status as QueryStatus} overrideSize={20} decorative /> : null;
     return (
       <div key={t.key} className="tws-ti" role="button" tabIndex={0} data-tws-row={t.key} data-kind={t.kind} aria-current={on ? "true" : undefined}
+        data-tws58-stage={stage ?? undefined} style={stageVars(stage) as React.CSSProperties | undefined}
         data-ticked={held?.task.key === t.key ? "" : undefined} data-leaving={held?.task.key === t.key && held.phase === "leave" ? "" : undefined}
         onClick={() => go(t.key)} onKeyDown={(e) => { if (e.key === "Enter") go(t.key); }} title={t.title}>
         {t.kind === "own" ? <span className="tws-av" data-k="own" data-tws="glyph" aria-hidden="true">{TICK}</span>
