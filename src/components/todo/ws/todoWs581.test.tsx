@@ -118,14 +118,14 @@ describe("v58.1 fix 3 — no edge on the desk chip", () => {
 });
 
 describe("v58.1 fix 2 — a clicked row looks like an open row", () => {
-  const POINTER = ".tws .tws-ti:focus-within:not(:hover):not(:focus-visible):not(:has(:focus-visible))";
+  const POINTER = ".tws .tws-ti:focus:not(:focus-visible):not(:hover)";
   it("every rendered row has a figure and the two quick actions to swap", () => {
     const html = open("send");
     const rows = html.match(/<div[^>]*class="tws-ti"[\s\S]*?<span class="tws-qact">[\s\S]*?aria-label="Dismiss"/g) ?? [];
     expect(rows.length).toBeGreaterThan(0);
     for (const r of rows) { expect(r).toContain('class="tws-du"'); expect(r).toContain('aria-label="Snooze"'); }
   });
-  it("pointer focus (focus-within, no hover, nothing focus-visible) hides the quick actions and shows the figure", () => {
+  it("pointer focus (the row focused, not focus-visible, no hover) hides the quick actions and shows the figure", () => {
     const hide = RULES.find((r) => r.sel.includes(`${POINTER} .tws-qact`));
     const show = RULES.find((r) => r.sel.includes(`${POINTER} :is(.tws-du, .tws-qf)`));
     expect(hide && decl(hide, "display")).toBe("none");
@@ -134,7 +134,12 @@ describe("v58.1 fix 2 — a clicked row looks like an open row", () => {
   it("keyboard focus keeps them: nothing in todoWs58.css hides the actions on :focus-visible, and the row's ring is navy", () => {
     const hiders = RULES.filter((r) => decl(r, "display") === "none" && r.sel.some((s) => /\.tws-qact$/.test(s)));
     expect(hiders.length).toBeGreaterThan(0);
-    for (const r of hiders) for (const s of r.sel) if (/\.tws-qact$/.test(s)) expect(s, s).toContain(":not(:focus-visible):not(:has(:focus-visible))");
+    for (const r of hiders) for (const s of r.sel) if (/\.tws-qact$/.test(s)) {
+      /* keyed on the row's own :focus — a :focus-within hider hides Snooze in the instant Tab lands on it, and Chromium
+         then blurs it to <body> (after run 1) */
+      expect(s, s).toContain(".tws-ti:focus:not(:focus-visible)");
+      expect(s, s).not.toMatch(/:focus-within|:has\(/);
+    }
     const ring = RULES.find((r) => r.sel.includes(".tws .tws-ti:focus-visible"));
     expect(ring && decl(ring, "outline")).toBe("2px solid var(--tw-navy)");
     const click = RULES.find((r) => r.sel.includes(".tws .tws-ti:focus"));

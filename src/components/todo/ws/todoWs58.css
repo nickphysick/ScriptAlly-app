@@ -87,13 +87,16 @@
      (`:focus-visible`), never the browser's blue. The quick actions show, and the figure hides, on hover or keyboard
      focus only: todoWs.css and v57 rule 4 also do it on `:focus-within`, which a click leaves set, so a row focused
      with nothing focus-visible and no pointer over it turns back. Tab still reaches both actions (they show as soon as
-     the row or either action is focus-visible). ── */
+     the row or either action is focus-visible).
+     ⚠️ The hider is keyed on the ROW holding focus (`:focus`), never `:focus-within` + `:not(:has(:focus-visible))`:
+     that form hid Snooze in the instant Tab moved focus onto it, and Chromium blurs an element turned display:none, so
+     focus fell to <body> (measured, after run 1). ── */
   .tws .tws-ti:focus { outline: none; }
   .tws .tws-ti:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
   .tws .tws-qact [role="button"]:focus { outline: none; }
   .tws .tws-qact [role="button"]:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 1px; }
-  .tws .tws-ti:focus-within:not(:hover):not(:focus-visible):not(:has(:focus-visible)) .tws-qact { display: none; }
-  .tws .tws-ti:focus-within:not(:hover):not(:focus-visible):not(:has(:focus-visible)) :is(.tws-du, .tws-qf) { visibility: visible; }
+  .tws .tws-ti:focus:not(:focus-visible):not(:hover) .tws-qact { display: none; }
+  .tws .tws-ti:focus:not(:focus-visible):not(:hover) :is(.tws-du, .tws-qf) { visibility: visible; }
 
   /* ── v58.1 · 3 · no edge on the desk chip, on any task: same ground, same type. Colour never signals time pressure
      (todoWs.css still draws a terracotta edge on [data-late]; this takes it away). ── */

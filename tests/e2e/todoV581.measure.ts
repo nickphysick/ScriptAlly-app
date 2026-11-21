@@ -201,9 +201,11 @@ test("keyboard: a row reached by Tab shows a navy ring and its two quick actions
      first row's quick actions on the way): Tab is what sets :focus-visible */
   await rows.nth(0).evaluate((e) => (e as HTMLElement).focus());
   let key: string | null = null;
+  const trail: string[] = [];
   for (let i = 0; i < 6 && !key; i++) {
     await page.keyboard.press("Tab");
     await page.waitForTimeout(150);
+    trail.push(await page.evaluate(() => { const a = document.activeElement as HTMLElement | null; return a ? `${a.getAttribute("data-tws-row") ?? a.getAttribute("aria-label") ?? a.tagName}` : "none"; }));
     key = await page.evaluate((f) => { const a = document.activeElement as HTMLElement | null; const k = a?.getAttribute("data-tws-row"); return k && k !== f ? k : null; }, first);
   }
   expect(key, "Tab reached a second row").not.toBeNull();
@@ -218,12 +220,14 @@ test("keyboard: a row reached by Tab shows a navy ring and its two quick actions
   await page.waitForTimeout(250);
   const inner = await row.evaluate((r) => ({
     inSnooze: r.querySelector(".tws-qact")!.contains(document.activeElement), label: document.activeElement?.getAttribute("aria-label"),
+    at: (() => { const a = document.activeElement as HTMLElement | null; return a ? `${a.tagName}.${a.className}|row=${a.getAttribute("data-tws-row") ?? a.closest("[data-tws-row]")?.getAttribute("data-tws-row") ?? ""}|fv=${a.matches(":focus-visible")}` : "none"; })(),
+    rowHas: r.matches(":has(:focus-visible)"), rowFw: r.matches(":focus-within"),
     qact: getComputedStyle(r.querySelector(".tws-qact")!).display,
   }));
   await page.keyboard.press("Tab");
   await page.waitForTimeout(250);
   const inner2 = await row.evaluate((r) => ({ label: document.activeElement?.getAttribute("aria-label"), qact: getComputedStyle(r.querySelector(".tws-qact")!).display }));
-  note("keyboard", { kb, inner, inner2 });
+  note("keyboard", { first, key, trail, kb, inner, inner2 });
   if (AFTER) {
     expect(kb.focused && kb.fv).toBe(true);
     expect(kb.outline).toContain(NAVY);
