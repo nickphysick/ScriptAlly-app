@@ -1,0 +1,39 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Query card v164 (design-refs/query-card-v164/query-card-v164.html, every switch on) — THE SLIDE-IN CARD'S LOOK while
+ * you read it: the four-step track and the status name in the strip, the type to the consistency rules, roomier bubbles
+ * with their mark in a disc, what went as one line, the writer's bubbles on white, the agent's words quoted, and the
+ * toast in the layout above the footer.
+ *
+ * ⚠️ SCOPED TO `.qc152[data-qc164]` — QcCard152's root only. The agent card (AgentCard262 `.acv2-qc`) and the reply
+ *    picker (QcWhoReplied `.qcrr`) reuse the qc152 classes and must not move.
+ * ⚠️ Imported last by QcCard152, so it sits over every earlier layer; `!important` only where an earlier layer used it.
+ */
+
+/* ── A. the strip ── */
+.qc152[data-qc164] .qc152-band:not(.is-ed) { min-height: 54px; box-sizing: border-box; padding-top: 8px; padding-bottom: 8px; font: 400 15px/1 var(--sp-serif); letter-spacing: 0; }
+.qc152[data-qc164] .qc164-st { flex: 0 1 auto; min-width: 0; display: inline-flex; align-items: center; gap: 12px; }
+.qc152[data-qc164] .qc164-sp { flex: 1 1 auto; }
+.qc152[data-qc164] .qc164-w { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 600 16px/1.2 var(--sp-serif) !important; letter-spacing: 0 !important; text-transform: none; }
+.qc152[data-qc164] .qc164-trk { flex: none; display: inline-flex; }
+.qc152[data-qc164] .qc164-trk .qc153-trk { display: inline-flex; align-items: center; color: #1c130f; }
+.qc152[data-qc164] .qc164-trk .qc153-nd { position: relative; display: grid; place-items: center; width: 16px; height: 16px; color: #1c130f; }
+.qc152[data-qc164] .qc164-trk .qc153-nd svg { display: block; width: 16px; height: 16px; overflow: visible; }
+.qc152[data-qc164] .qc164-trk .qc153-nd--cur { width: 30px; height: 30px; border-radius: 50%; background: rgba(255, 255, 255, 0.72); box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1); }
+.qc152[data-qc164] .qc164-trk .qc153-nd--cur svg { width: 22px; height: 22px; }
+.qc152[data-qc164] .qc164-trk .qc153-ln { display: block; flex: none; width: 17px; height: 2px; margin: 0 3px; border-radius: 1px; background: #1c130f; }
+.qc152[data-qc164] .qc164-trk .qc153-ln--skip { background: repeating-linear-gradient(90deg, #1c130f 0 2px, transparent 2px 4px); }
+/* not yet reached: marks at 60%, lines at 50%; a step skipped (query straight to full) reads as not reached */
+.qc152[data-qc164] .qc164-trk :is(.qc153-nd--fut, .qc153-nd--skip) { opacity: 0.6; }
+.qc152[data-qc164] .qc164-trk .qc153-ln--fut { opacity: 0.5; }
+/* a closed query: its closing mark large at the step it reached, the rest faded */
+.qc152[data-qc164] .qc164-trk .qc153-trk.is-ended .qc153-nd:not(.qc153-nd--cur) { opacity: 0.6; }
+.qc152[data-qc164] .qc164-trk .qc153-trk.is-ended .qc153-ln { opacity: 0.5; }
+/* the grid card's badges are not drawn here */
+.qc152[data-qc164] .qc164-trk :is(.qc153-arw, .qc154-thl) { display: none; }
+.qc152[data-qc164] .qc152-band .qc152-x { width: var(--sp-px-size) !important; height: var(--sp-px-size) !important; font-size: 14px !important; letter-spacing: 0 !important; }
+/* the day, at the name row's end (shown by the strip's old rule) */
+.qc152[data-qc164] .qc164-day { margin-left: auto; flex: none; align-self: center; font: 400 14px/1 var(--sp-serif); color: #6f655c; white-space: nowrap; }
+

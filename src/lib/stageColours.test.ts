@@ -58,7 +58,10 @@ describe("Stage colours v1 · Phase 2 · the slide-out card", () => {
   });
   it("the label: Tint, a 1px ink-at-9% line, 30px, 14px / 600; the mark ink with no disc", () => {
     expect(sheet).toMatch(/\.qc152-pill\[data-stage\] \{ height: 30px; background: var\(--tint\); box-shadow: inset 0 0 0 1px rgba\(28, 19, 15, 0\.09\); font: 600 14px\/1/);
-    expect(card).toMatch(/<span className="qc152-cap"><StatusDot status=\{r\.status\} overrideSize=\{17\} tone="ink" decorative \/><\/span>/);
+    /* Query card v164 — the slide-in card draws no label (the strip names the status, beside the track); the rule above
+       stays for the agent card's label (AgentCard262), which shares it */
+    expect(card).not.toContain(`data-qc152="pill"`);
+    expect(card).toContain(`<Track153 t={ss.track} status={r.status} />`);
   });
   it("the seals are navy with paper initials", () => {
     expect(sheet).toContain(".qc152 .qc152-disc { background: #2a3a52; color: #f4eee5;");
