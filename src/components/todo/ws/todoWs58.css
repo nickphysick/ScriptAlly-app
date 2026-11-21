@@ -108,4 +108,9 @@
     .tws .tws-ti .tws-du { flex-direction: column; align-items: flex-end; gap: 1px; }
     .tws .tws-ti .tws-du small { font-size: 13px; }
   }
+
+  /* ── v58.1 · 5 · Housekeeping's ruled line stops short of Quick fill instead of running under it; the button and the
+     chevron do not move. The ref's 96px leaves the rule 1px under the button on the app (measured: rule end 414, button
+     321–406 at 1280), so 108px: it ends ~11px clear of the button, about the gap the button keeps from the chevron. ── */
+  .tws .tws-gbw:has(.tws-qfb) .tws58-rule { margin-right: 108px; }
 }
