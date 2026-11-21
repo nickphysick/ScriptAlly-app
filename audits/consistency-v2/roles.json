@@ -1,0 +1,822 @@
+{
+ "about": "Consistency audit v2 — the explicit role map. collect2.js gives every candidate element (anything clickable, any edged or filled box, any small mark, any form control, any row, any heading) the FIRST role whose test it passes, reading the roles in this order. A candidate no role claims is recorded as unclassified, with its selector and page, and is never forced into a group. Tests are class selectors from shell/primitives.css and the known components (`sel`), or one of the named structural tests below (`test`), never a guess from colour. `within` limits a role to elements inside a context the collector finds (navyHeader, pageHeader, dialog, footer, queryCard). A variant (filled / outline / text, selected / rest) is MEASURED inside a role, never used to choose it.",
+ "tests": {
+  "iconOnly": "a clickable element with no text of its own and an svg or img inside",
+  "inDialog": "inside [role=dialog], [aria-modal=true] or dialog[open]",
+  "dialogRoot": "the [role=dialog] / [aria-modal=true] / dialog[open] element itself",
+  "dialogClose": "a button inside a dialog whose aria-label or text is close / dismiss / ×",
+  "dialogFooter": "the last visible child of a dialog that holds a button, and is at the dialog's bottom edge",
+  "dialogHeader": "the first visible child of a dialog, when it holds the dialog's title",
+  "headingTag": "h1–h6, sorted by tag and context (see headings below)",
+  "statusDot": "StatusDot's own markup: a square span (6–28px) holding one unclassed svg with viewBox 0 0 24 24 and stroke currentColor (lucide icons share the viewBox but carry class lucide)",
+  "selectedState": "aria-selected / aria-pressed / aria-checked = true, or the class on / is-on / is-sel / sel / cb15-on"
+ },
+ "roles": [
+  {
+   "role": "panels/shell",
+   "test": "dialogRoot"
+  },
+  {
+   "role": "panels/close",
+   "sel": [
+    ".qc152-x",
+    ".cp30-x",
+    ".flh-x",
+    ".k62-hdr-x",
+    ".sks-x",
+    ".pgd-x",
+    ".hdr-x",
+    ".spanel-x"
+   ],
+   "test": "dialogClose"
+  },
+  {
+   "role": "panels/footer",
+   "sel": [
+    ".hdr-foot",
+    ".k62-hdr-foot",
+    ".pgd-f",
+    ".qc152-rf",
+    ".ws-pfoot",
+    ".laq-foot",
+    ".aaj-foot",
+    ".qc1522-foot"
+   ],
+   "test": "dialogFooter"
+  },
+  {
+   "role": "panels/header",
+   "sel": [
+    ".hdr-head",
+    ".k62-hdr-head",
+    ".sks-head",
+    ".qc152-hd",
+    ".laq-head",
+    ".aaj-head"
+   ],
+   "test": "dialogHeader"
+  },
+  {
+   "role": "nav/view-switch",
+   "sel": [
+    ".qc153-vsw",
+    ".cp32-tog",
+    ".cb15-vsw",
+    ".d22-tog",
+    ".df1-sw",
+    ".plt-seg",
+    "[role='tablist'][data-kind='view']"
+   ]
+  },
+  {
+   "role": "nav/view-switch-option",
+   "sel": [
+    ".qc153-vsw > button",
+    ".cp32-tog > button",
+    ".cb15-vsw > button",
+    ".d22-tog > button",
+    ".df1-sw > button",
+    ".plt-seg > button"
+   ]
+  },
+  {
+   "role": "nav/underlined-tab",
+   "sel": [
+    ".tws55-tab",
+    ".qc152-tabs > button",
+    ".ws-fttab",
+    ".ws-ftab",
+    "[role='tab']"
+   ]
+  },
+  {
+   "role": "nav/tab-list",
+   "sel": [
+    ".qc152-tabs",
+    "[role='tablist']"
+   ]
+  },
+  {
+   "role": "nav/filter-pill",
+   "sel": [
+    ".fp-pill",
+    ".cb15-pill",
+    ".sf-lab",
+    ".rsp15-tkey > button",
+    ".lf-pill",
+    ".clq-chip",
+    ".qc1531-lg button"
+   ]
+  },
+  {
+   "role": "nav/choice-segment",
+   "sel": [
+    ".fp-sg",
+    ".mk-rung",
+    ".pl-len > button",
+    ".aap-pill",
+    ".mk-jychip",
+    ".sv1-scope",
+    ".cf-type > button",
+    ".cf-sugg > button",
+    "[role='radiogroup'] > button",
+    ".d2-wk",
+    ".qc152-ch"
+   ]
+  },
+  {
+   "role": "nav/step",
+   "sel": [
+    ".laq-s",
+    ".laq-si",
+    ".aaj-step",
+    ".qls-step"
+   ],
+   "note": "a journey's step marker / step button"
+  },
+  {
+   "role": "nav/choice-tile",
+   "sel": [
+    ".fp-tile",
+    ".tws-tile",
+    ".k62-icons > button",
+    ".d22-tell > button",
+    ".impg-opt",
+    ".laq-tile",
+    ".qc161-tile",
+    ".laq-nopt button"
+   ]
+  },
+  {
+   "role": "nav/toolbar-menu",
+   "sel": [
+    ".qc153-dd",
+    ".cb15-dd > button",
+    ".lf-exp",
+    ".clq-sort",
+    ".clq-group",
+    ".sc-chip"
+   ]
+  },
+  {
+   "role": "nav/letter-index",
+   "sel": [
+    ".cl26-ix",
+    ".cl26-ixe",
+    ".clq-capin button",
+    ".cl26-pin button"
+   ]
+  },
+  {
+   "role": "nav/top-links",
+   "sel": [
+    ".mk-links > button",
+    ".mk-links > a",
+    ".mk-login",
+    ".mk-navpass",
+    ".mk-navwrap a",
+    ".af a",
+    ".mk-foot a",
+    ".af-link",
+    ".mk-footcol button",
+    ".mk-doclink",
+    ".mk-brand-link",
+    ".sf-link",
+    ".sf-exit",
+    ".mk-footbase a"
+   ]
+  },
+  {
+   "role": "lists/list-row",
+   "sel": [
+    ".tws-ti",
+    ".qcrr-row",
+    ".cl26-row",
+    ".k62-prow",
+    ".cp32-row",
+    ".d2-lrow",
+    ".d3-ex",
+    ".aaj-row",
+    ".sks-row",
+    ".laq-big > button",
+    ".rsp15-rcr",
+    ".ms29-dt-r",
+    ".tws-st",
+    ".k62-cr",
+    ".fv1-gsr",
+    ".laq-busy",
+    ".hc-alink",
+    "[role='listitem']",
+    "[role='option']",
+    ".sc-row",
+    ".nu-row",
+    ".cp32-podc"
+   ]
+  },
+  {
+   "role": "lists/group-section",
+   "sel": [
+    ".cl26-sec",
+    ".fp-sec",
+    ".a26-grp",
+    ".tws-grp"
+   ]
+  },
+  {
+   "role": "lists/group-header",
+   "sel": [
+    ".a26-grp-h",
+    ".fp-fold",
+    ".tws-gb",
+    ".rsp15-rcm",
+    ".plt-grp",
+    ".qc153-sec",
+    "[class*='group-head']",
+    "[class*='grp-h']"
+   ]
+  },
+  {
+   "role": "lists/column-header",
+   "sel": [
+    "th",
+    "[role='columnheader']",
+    ".cl26-thx",
+    ".cl26-th > span",
+    ".rsp15-rch > button"
+   ]
+  },
+  {
+   "role": "lists/table-head",
+   "sel": [
+    ".cl26-th",
+    "thead > tr",
+    ".rsp15-rch"
+   ]
+  },
+  {
+   "role": "lists/table-row",
+   "sel": [
+    "tr",
+    "[role='row']"
+   ]
+  },
+  {
+   "role": "lists/list-item",
+   "sel": [
+    "li"
+   ]
+  },
+  {
+   "role": "controls/switch",
+   "sel": [
+    ".acct-toggle",
+    "[role='switch']"
+   ]
+  },
+  {
+   "role": "controls/checkbox",
+   "sel": [
+    "input[type='checkbox']",
+    "[role='checkbox']"
+   ]
+  },
+  {
+   "role": "controls/radio",
+   "sel": [
+    "input[type='radio']",
+    "[role='radio']",
+    ".aap-stars > button"
+   ]
+  },
+  {
+   "role": "controls/select",
+   "sel": [
+    "select",
+    ".sa-cc-control",
+    "[role='combobox']:not(input)"
+   ]
+  },
+  {
+   "role": "controls/textarea",
+   "sel": [
+    "textarea"
+   ]
+  },
+  {
+   "role": "controls/headline-field",
+   "sel": [
+    ".aap-inp.big",
+    ".cf-big",
+    "input.sp-fld--big",
+    ".laq-hl input"
+   ]
+  },
+  {
+   "role": "controls/search-field",
+   "sel": [
+    ".qc153-find",
+    ".cp32-find",
+    ".cb15-find",
+    ".laq-srch",
+    ".qcrr-srch",
+    ".sv1-in",
+    ".hc-search",
+    ".sp-search"
+   ]
+  },
+  {
+   "role": "controls/bare-input",
+   "sel": [
+    ".qc153-find input",
+    ".cp32-find input",
+    ".cb15-find input",
+    ".laq-srch input",
+    ".qcrr-srch input",
+    ".sv1-in input",
+    ".hc-search input",
+    ".cf-tagbox input",
+    ".sp-search-f",
+    ".mk-trap input"
+   ]
+  },
+  {
+   "role": "controls/text-field",
+   "sel": [
+    ".sp-fld",
+    "input.acct-input",
+    ".sf-in",
+    ".aap-inp",
+    ".cf-fld input",
+    ".k62-fld input",
+    ".qlp-fld input",
+    ".mk-field input",
+    ".qc1522-in",
+    ".laq input:not([type='checkbox']):not([type='radio']):not([type='range'])",
+    "form input:not([type='checkbox']):not([type='radio']):not([type='hidden']):not([type='range'])",
+    "input:not([type]), input[type='text'], input[type='email'], input[type='search'], input[type='url'], input[type='number'], input[type='password'], input[type='date']"
+   ]
+  },
+  {
+   "role": "buttons/destructive",
+   "sel": [
+    ".acct-btn--danger",
+    "[data-red]",
+    ".f11-discard",
+    "[data-destructive]",
+    "[data-qc1522='discard']",
+    "[data-qls='leave-discard']"
+   ]
+  },
+  {
+   "role": "buttons/header-action",
+   "within": "navyHeader",
+   "sel": [
+    "button",
+    "a[class*='btn']",
+    "[role='button']"
+   ]
+  },
+  {
+   "role": "buttons/icon-only",
+   "sel": [
+    ".d22-fold",
+    ".tws55-ic",
+    ".sf-eye",
+    ".rsp15-nav > button",
+    ".tws-wb"
+   ],
+   "test": "iconOnly"
+  },
+  {
+   "role": "buttons/text-link",
+   "sel": [
+    ".d2-link",
+    ".qc153-lnk",
+    ".df1-earlier",
+    ".k62-go",
+    ".cp32-go",
+    ".ms29-lk",
+    ".qlp-lnk",
+    ".fv1-lnk",
+    ".fv1-gsl",
+    ".fv2-elink",
+    ".rsp15-toan",
+    ".d60-ready",
+    ".pgd-next",
+    ".hc-link",
+    ".mk-link",
+    ".sc-cf-note > button",
+    ".qc1533-clip"
+   ],
+   "note": "a link-styled button that moves you somewhere (\"See all\", \"Show earlier →\"); not an action button, so R6 does not read it"
+  },
+  {
+   "role": "buttons/action",
+   "sel": [
+    ".sp-btn",
+    ".fp-clr",
+    ".d2-open",
+    ".fv1-btn",
+    ".v6-pill",
+    ".qlp-b1",
+    ".k62-btn",
+    ".k62-pb",
+    ".k62-tag-add",
+    ".aaj-save",
+    ".aaj-nx",
+    ".qc152-rbtn",
+    ".qc156-sb",
+    ".qc156-sw",
+    ".qc152-coll",
+    ".tws-go",
+    ".tws-addt",
+    ".tws-qfb",
+    ".tws-sb",
+    ".impg-btn",
+    ".acct-btn",
+    ".ph-primary",
+    ".ph-secondary",
+    ".sv1-btn",
+    ".mk-btn",
+    ".mk-cbtn",
+    ".mk-lsuit",
+    ".mk-fbmore",
+    ".sf-btn",
+    ".sf-google",
+    ".dv1-b1",
+    ".dv1-b2",
+    ".cv-pillbtn",
+    ".cv-ghost",
+    ".cb15-ghost",
+    ".cb15-add",
+    ".cb15-brk > button",
+    ".cp32-pill",
+    ".cp32-btn",
+    ".ms29-b2",
+    ".nx-btn",
+    ".cl26-open",
+    ".laq-lnk",
+    ".qc1522-flink",
+    ".a26-go",
+    ".qc151-btn",
+    ".rsp15-rbn",
+    ".rsp15-gb-fold",
+    ".d2-pill",
+    ".hc-btn",
+    ".yn-btn",
+    ".laq-cta",
+    ".laq-btn",
+    ".qc1522-btn",
+    ".qc161-btn",
+    "[data-qls='add-note']",
+    "[data-qls='nudge-continue']",
+    "[data-qls='pieces-continue']",
+    "[data-qc1522='cancel']",
+    "input[type='submit']",
+    "input[type='button']"
+   ]
+  },
+  {
+   "role": "marks/chart-point",
+   "sel": [
+    ".d2-dot",
+    "circle.d116-hit",
+    ".rsp15-dots > button",
+    ".a26-tl-m",
+    ".a26-tl-x",
+    ".a26-mk"
+   ]
+  },
+  {
+   "role": "marks/initials-disc",
+   "sel": [
+    ".qc153-sm:not(.qc153-sm--more)",
+    ".qc152-av",
+    ".qc152-disc",
+    ".laq-faces > i",
+    ".sp-disc",
+    ".sp-ava",
+    "[class*='-av']:not(button)",
+    "[class*='avatar']",
+    ".sa-disc"
+   ]
+  },
+  {
+   "role": "marks/count-badge",
+   "sel": [
+    ".qc153-sm--more",
+    ".qc153-sec small",
+    ".tws-gb em",
+    ".tws-sn",
+    ".aaj-n",
+    ".cl26-bang",
+    "[class*='count']",
+    "[class*='badge']",
+    ".sp-ct"
+   ]
+  },
+  {
+   "role": "marks/pro-tag",
+   "sel": [
+    ".dv1-pro",
+    "[class*='pro-tag']",
+    "[class*='protag']",
+    ".sa-pro",
+    ".ws-pro"
+   ]
+  },
+  {
+   "role": "marks/key-cap",
+   "sel": [
+    "kbd",
+    ".sv1-key"
+   ]
+  },
+  {
+   "role": "marks/chip",
+   "sel": [
+    ".cl252-pill",
+    ".qc152-bkc span",
+    ".mk-lc-chips span",
+    ".sp-inkpill"
+   ]
+  },
+  {
+   "role": "marks/status-tag",
+   "sel": [
+    ".qc152-pill",
+    ".mk-lc-pill",
+    ".acct-chip",
+    ".ms29-bk-f",
+    ".pl3-pill",
+    ".plt-chip",
+    ".d3-egtag",
+    ".fv2-extag",
+    ".cp32-tag",
+    ".cp32-rowu",
+    ".mk-fbtag",
+    ".ms29-soon",
+    ".cp32-scth span",
+    ".yn-oc",
+    ".mk-be-ttag",
+    ".tws-dchip",
+    ".cl26-pct",
+    ".mk-wel-env",
+    "[class*='tag']",
+    "[class*='pill']",
+    "[class*='chip']",
+    ".d22-fstat"
+   ]
+  },
+  {
+   "role": "marks/statusdot",
+   "test": "statusDot"
+  },
+  {
+   "role": "cards/query-card",
+   "sel": [
+    ".qc154-card",
+    ".qc-card"
+   ]
+  },
+  {
+   "role": "cards/part-of-component",
+   "within": "queryCard",
+   "note": "boxes drawn inside a query card belong to the card; not compared as cards"
+  },
+  {
+   "role": "cards/framed",
+   "sel": [
+    ".sp-rc",
+    ".os-card",
+    ".cp32-rc",
+    ".k62-rc",
+    ".a26-rc",
+    ".ms29-frame",
+    ".v6-card",
+    ".cl262-card"
+   ]
+  },
+  {
+   "role": "cards/framed-inner",
+   "sel": [
+    ".sp-rc-in",
+    ".os-frame",
+    ".cp32-rc-in",
+    ".k62-rc-in",
+    ".a26-rc-in",
+    ".ms29-in",
+    ".v6-frame",
+    ".apc-frame",
+    ".mk-lc-in"
+   ]
+  },
+  {
+   "role": "cards/side-panel",
+   "sel": [
+    ".qc153-rail",
+    ".spanel:not([role='dialog'])",
+    ".tws-pvpanel",
+    ".tws-ws",
+    ".tws-tray"
+   ]
+  },
+  {
+   "role": "cards/stat-tile",
+   "sel": [
+    ".nx-box",
+    ".cp32-pstep",
+    ".cp32-pcard",
+    ".cp32-plinth",
+    ".d60-tile",
+    ".a26-tile",
+    ".sp-card-i",
+    "[class*='stat']",
+    ".a26-cm",
+    ".cp32-nums",
+    ".rsp15-ct"
+   ]
+  },
+  {
+   "role": "cards/journey-card",
+   "sel": [
+    ".laq-in",
+    ".aaj-sec",
+    ".fv1-setup",
+    ".d2-gs",
+    ".qlp-first-p",
+    ".ag-fin",
+    ".fv2-ex",
+    ".d22-ask",
+    ".tws-wsx",
+    ".d2-nup",
+    ".df1-goal",
+    ".fv1-path"
+   ]
+  },
+  {
+   "role": "cards/art-placeholder",
+   "sel": [
+    ".art-box",
+    ".yn-ph",
+    "[class*='illo']",
+    "[class*='art-ph']"
+   ]
+  },
+  {
+   "role": "cards/band",
+   "sel": [
+    ".sband",
+    ".rsp15-band",
+    ".rsp15-rcs",
+    ".cp32-band",
+    ".cp32-cpd",
+    ".k62-rb",
+    ".a26-rb",
+    ".a26-means",
+    ".mk-wel-band",
+    ".mk-wel-close",
+    ".qc151-end",
+    ".qc153-fold",
+    ".mk-fb",
+    ".wpg-chrome",
+    ".dv1-sofar",
+    ".clq-capin",
+    ".cl26-pin",
+    ".impg-quiet",
+    ".mk-bef-win",
+    ".mk-bef-rw",
+    ".os-band"
+   ]
+  },
+  {
+   "role": "cards/note",
+   "sel": [
+    ".cb15-paper",
+    ".k62-paper"
+   ],
+   "note": "a paper note or letter drawn as an object"
+  },
+  {
+   "role": "cards/plain-card",
+   "sel": [
+    ".sp-card",
+    ".mk-lcard",
+    ".pl-tier",
+    ".mk-claimcard",
+    ".mk-formcard",
+    ".sf-card",
+    ".sf-offer",
+    ".mk-aclosecard",
+    ".mk-dh-card",
+    ".mk-vpoint",
+    ".mk-wel-note",
+    ".mk-pv-short",
+    ".mk-wpass",
+    ".hc-area",
+    ".hc-rcard",
+    ".hc-search",
+    ".impg-tile",
+    ".sc-cb",
+    ".plt",
+    ".dv1-hw",
+    ".ms29-bk",
+    ".ms29-nx",
+    ".mk-lc",
+    ".cl26-card",
+    ".sks",
+    ".sp-pal",
+    ".pgd",
+    ".k62-hdr",
+    ".hdr",
+    ".sc-card",
+    ".ms29-pt",
+    ".cp32-scout",
+    ".mk-pv-sec",
+    ".mk-fwcard",
+    ".mk-callout",
+    ".mk-pv4qa"
+   ]
+  },
+  {
+   "role": "surfaces/page-footer",
+   "sel": [
+    "footer.af",
+    ".af-in",
+    ".af-base",
+    "footer.mk-foot",
+    ".mk-footbase"
+   ]
+  },
+  {
+   "role": "surfaces/page-background",
+   "test": "body"
+  },
+  {
+   "role": "surfaces/stage",
+   "sel": [
+    "#app-stage-scroll"
+   ]
+  },
+  {
+   "role": "surfaces/sheet",
+   "sel": [
+    ".ws-window",
+    ".mk-sheet"
+   ]
+  },
+  {
+   "role": "surfaces/sidebar",
+   "sel": [
+    "#ws-sidebar",
+    ".ws-panel"
+   ]
+  },
+  {
+   "role": "surfaces/rail",
+   "test": "position: a full-height opaque box 40–110px wide at the left edge"
+  },
+  {
+   "role": "surfaces/top-bar",
+   "sel": [
+    ".sa-betastrip",
+    ".mk-navwrap",
+    ".ws-pagebar"
+   ],
+   "test": "position: an opaque box at the top edge, 28–110px high, at least half the width, outside the stage"
+  },
+  {
+   "role": "headings/page-title",
+   "test": "headingTag",
+   "note": "the page header's title (h1, or its largest text when it has none)"
+  },
+  {
+   "role": "headings/hero-line",
+   "test": "headingTag",
+   "note": "an h1 or h2 on a public page's first band, or inside a class naming hero, that is not the page header's title"
+  },
+  {
+   "role": "headings/footer-heading",
+   "test": "headingTag",
+   "note": "h2–h6 inside a footer"
+  },
+  {
+   "role": "headings/section",
+   "test": "headingTag",
+   "note": "h2, and any element with class sp-h-section"
+  },
+  {
+   "role": "headings/card",
+   "test": "headingTag",
+   "note": "h3, and any element with class sp-card-h or sp-h-card"
+  },
+  {
+   "role": "headings/small",
+   "test": "headingTag",
+   "note": "h4–h6, and any element with class sp-h-small"
+  }
+ ],
+ "text": {
+  "about": "Text that is not a heading, and not inside a button, a mark or a control, is sorted for Phase 3 by what it is, not counted as unclassified: numeral (a number, money or percentage alone), label (a <label>, or uppercase / letter-spaced text), caption (figcaption, small, or under 13px), body (a <p>, or the page's body ink), secondary (lighter than the page's body ink)."
+ }
+}
