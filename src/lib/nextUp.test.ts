@@ -10,7 +10,7 @@ import { QueryStatus, type Agent, type Query } from "../types";
 import type { ListItem } from "./dashList";
 import type { TaskCtx } from "./dashTaskCard";
 import type { QcRow } from "./qcSummary";
-import { dayFigure, daysSince, nextKind, nextLead, quietFigure, trackOf } from "./nextUp";
+import { dayFigure, daysSince, LEAD_SENTENCE_MAX, nextKind, nextLead, quietFigure, trackOf } from "./nextUp";
 
 const NOW = new Date(2026, 10, 20, 12).getTime();
 const DAY = 86_400_000;
@@ -92,7 +92,7 @@ describe("NU1-c · sentence, number, caption and label by kind", () => {
   it("nudge due: days past the expected date, the send and the expected date", () => {
     const l = nextLead(item({ group: "nudge", taskType: "nudge_overdue", status: QueryStatus.QUERIED, action: { kind: "drawer", request: { mode: "nudge", queryId: "q1" } } }),
       ctx(query(), row({ stageStartMs: new Date(2026, 7, 12).getTime(), expectedMs: new Date(2026, 9, 12).getTime() }), agent({ name: "Tom Okafor" })));
-    expect(l.sentence).toBe("Send Tom a nudge.");
+    expect(l.sentence).toBe("Send a nudge.");
     expect(l.figure).toMatchObject({ value: "39", caption: "days past date" });
     expect(l.label).toEqual({ lead: "Queried", rest: " 12 Aug · reply expected by 12 Oct" });
     expect(l.track?.cur).toBe(0);
@@ -102,17 +102,17 @@ describe("NU1-c · sentence, number, caption and label by kind", () => {
       ctx(query({ status: QueryStatus.PARTIAL_SENT }), row({ status: QueryStatus.PARTIAL_SENT, stageStartMs: new Date(2026, 6, 1).getTime(), expectedMs: ago(5) })));
     expect(l.label?.lead).toBe("Partial sent");
   });
-  it("no first name saved: the agent, never he or she", () => {
+  it("no first name saved: still no he or she, and the sentence names nobody", () => {
     const l = nextLead(item({ group: "nudge", action: { kind: "drawer", request: { mode: "nudge", queryId: "q1" } } }), ctx(query(), row(), agent({ name: "" })));
-    expect(l.sentence).toBe("Send the agent a nudge.");
+    expect(l.sentence).toBe("Send a nudge.");
     const o = nextLead(item({ taskType: "offer_received", status: QueryStatus.OFFER }), ctx(query({ status: QueryStatus.OFFER }), row({ status: QueryStatus.OFFER }), agent({ name: "  " })));
-    expect(o.sentence).toBe("Answer the agent’s offer.");
+    expect(o.sentence).toBe("Answer the offer.");
     for (const s of [l.sentence, o.sentence]) expect(s).not.toMatch(/\b(he|she|his|her)\b/i);
   });
   it("gone quiet: time since the last event; the query and the nudge dated; a dotted track", () => {
     const l = nextLead(item({ group: "quiet", taskType: "nudge_overdue", action: { kind: "drawer", request: { mode: "nudge", queryId: "q1" } } }),
       ctx(query({ lastNudgeSentDate: new Date(2026, 8, 2).toISOString() }), row({ sentMs: new Date(2026, 5, 21).getTime(), lastMs: new Date(2026, 5, 1).getTime() })));
-    expect(l.sentence).toBe("Close it, or nudge again?");
+    expect(l.sentence).toBe("Close it or nudge?");
     expect(l.figure).toMatchObject({ value: "5", caption: "months quiet" });
     expect(l.label).toEqual({ lead: "Gone quiet", rest: " · queried 21 Jun · nudged 2 Sep" });
     expect(l.track?.quiet).toBe(true);
@@ -125,7 +125,7 @@ describe("NU1-c · sentence, number, caption and label by kind", () => {
   it("answer the offer", () => {
     const l = nextLead(item({ taskType: "offer_received", status: QueryStatus.OFFER }),
       ctx(query({ status: QueryStatus.OFFER, offerDate: new Date(2026, 10, 18).toISOString() }), row({ status: QueryStatus.OFFER }), agent({ name: "Rosalind Achebe" })));
-    expect(l.sentence).toBe("Answer Rosalind’s offer.");
+    expect(l.sentence).toBe("Answer the offer.");
     expect(l.figure).toMatchObject({ value: "2", caption: "days ago" });
     expect(l.label).toEqual({ lead: "Offer made", rest: " · 18 Nov" });
     expect(l.track?.cur).toBe(3);
@@ -143,7 +143,7 @@ describe("NU1-c · sentence, number, caption and label by kind", () => {
     const closed = row({ id: "gone", court: "closed" });
     const l = nextLead(item({ taskType: "offer_tell_all", status: QueryStatus.OFFER, action: { kind: "drawer", request: { mode: "offer", queryId: "q1" } } }),
       ctx(query({ status: QueryStatus.OFFER, offerDate: new Date(2026, 10, 18).toISOString() }), row({ status: QueryStatus.OFFER }), agent({ name: "Rosalind Achebe" }), [...others, closed]));
-    expect(l.sentence).toBe("Tell the others you have an offer.");
+    expect(l.sentence).toBe("Tell the others.");
     expect(l.figure).toMatchObject({ value: "14", caption: "still reading" });
     expect(l.seals).toEqual({ initials: ["A0", "A1", "A2", "A3"], more: 10 });
     expect(l.track).toBe(null);
@@ -239,5 +239,27 @@ describe("NU1-f · the opener takes one optional step, and the journey is untouc
   it("the Dashboard's lead buttons go through it with the panel named; the rows keep viewTask", () => {
     expect(dash).toMatch(/onView=\{viewTask\} onStep=\{stepTask\}/);
     expect(dash).toMatch(/openQueryPanel\(qid, "dashboard", \{ \.\.\.a\.request, panel: \{/);
+  });
+});
+
+describe("NU11-a · the sentence names no agent and is 18 characters at most (v1.1)", () => {
+  const named = { name: "Rosalind Achebe-Featherstonehaugh" };
+  const cases: [string, Partial<ListItem>, Query, QcRow, string][] = [
+    ["partial", { taskType: "partial_requested", status: QueryStatus.PARTIAL_REQUESTED }, query({ status: QueryStatus.PARTIAL_REQUESTED }), row({ status: QueryStatus.PARTIAL_REQUESTED, stageStartMs: ago(3) }), "Send your partial."],
+    ["full", { taskType: "full_requested", status: QueryStatus.FULL_REQUESTED }, query({ status: QueryStatus.FULL_REQUESTED }), row({ status: QueryStatus.FULL_REQUESTED, stageStartMs: ago(3) }), "Send your full."],
+    ["revision", { taskType: "revise_resubmit", status: QueryStatus.REVISE_RESUBMIT }, query({ status: QueryStatus.REVISE_RESUBMIT }), row({ status: QueryStatus.REVISE_RESUBMIT, stageStartMs: ago(3) }), "Send your revision."],
+    ["nudge", { group: "nudge", taskType: "nudge_overdue", action: { kind: "drawer", request: { mode: "nudge", queryId: "q1" } } }, query(), row({ expectedMs: ago(4) }), "Send a nudge."],
+    ["quiet", { group: "quiet", taskType: "no_response_close" }, query(), row({ sentMs: ago(100), lastMs: ago(40) }), "Close it or nudge?"],
+    ["offer", { taskType: "offer_received", status: QueryStatus.OFFER }, query({ status: QueryStatus.OFFER }), row({ status: QueryStatus.OFFER }), "Answer the offer."],
+    ["tell", { taskType: "offer_tell_all", status: QueryStatus.OFFER, action: { kind: "drawer", request: { mode: "offer", queryId: "q1" } } }, query({ status: QueryStatus.OFFER }), row({ status: QueryStatus.OFFER }), "Tell the others."],
+  ];
+  for (const [kind, it_, q, r, want] of cases) it(`${kind}: "${want}"`, () => {
+    const l = nextLead(item(it_), ctx(q, r, agent(named)));
+    expect(l.kind).toBe(kind);
+    expect(l.sentence).toBe(want);
+    /* "Send your revision." is 19: Nick ruled the three send sentences unchanged, and that ruling wins over the 18. The
+       rendered check (NU11-F in nextUp1.measure.ts) is what proves it fits without the ellipsis. */
+    expect(l.sentence.length).toBeLessThanOrEqual(kind === "revision" ? LEAD_SENTENCE_MAX + 1 : LEAD_SENTENCE_MAX);
+    expect(l.sentence).not.toMatch(/Rosalind|Achebe/);
   });
 });

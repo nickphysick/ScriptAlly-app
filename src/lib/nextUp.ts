@@ -13,7 +13,11 @@
  * ⚠️ THE TRACK IS ALWAYS FOUR STOPS (queried, partial, full, offer). Events that are not a stage never add one: a
  *    revision request is the arrows mark on the stop it relates to (StatusDot draws it), and a nudge is said only in the
  *    label line.
- * ⚠️ NO "HE" OR "SHE": the agent is their first name, or "the agent".
+ * ⚠️ THE SENTENCE NAMES NO AGENT AND IS 18 CHARACTERS AT MOST (v1.1, Nick's ruling): the agent row above it already says
+ *    who, and in Dashboard v3's narrow column a longer sentence ended in an ellipsis. `LEAD_SENTENCE_MAX` is the limit
+ *    and NU11-a holds every kind to it, bar "Send your revision." (19), which Nick ruled unchanged with the other two
+ *    send sentences. The ellipsis in nextUp.css stays only as a safety net.
+ * ⚠️ NO "HE" OR "SHE" anywhere: the agent is their first name, or "the agent".
  * ⚠️ NO VERDICT WORDS (overdue, late) and no green: a number and what it counts, nothing more.
  */
 import { QueryStatus, type Agent, type Query } from "../types";
@@ -27,6 +31,8 @@ import { dayMonth } from "./dates";
 import { agentInitials, agentPrimary } from "./agentDisplay";
 
 const DAY = 86_400_000;
+/** The longest a lead card's sentence may be, in characters (v1.1): it fits Dashboard v3's column without the ellipsis. */
+export const LEAD_SENTENCE_MAX = 18;
 const MONTH_DAYS = 30.4375;
 
 /** The eight cards of the reference, plus "other" for a task not about a query's next step. */
@@ -158,10 +164,6 @@ export interface NextLead {
   sub: string | null;
 }
 
-export const firstNameOf = (a: Pick<Agent, "name"> | null | undefined): string => {
-  const n = (a?.name ?? "").trim();
-  return n ? n.split(/\s+/)[0] : "the agent";
-};
 const possessive = (name: string): string => `${name}’s`;
 const full = (s: string): string => (/[.?!]$/.test(s.trim()) ? s.trim() : `${s.trim()}.`);
 
@@ -198,7 +200,6 @@ export function nextLead(item: ListItem, ctx: TaskCtx): NextLead {
   const agent = agentId ? ctx.agents.find((a) => a.id === agentId) : undefined;
   const status = (qc?.status ?? q?.status ?? item.status ?? null) as QueryStatus | null;
   const stage = status ? stageOf(status) : null;
-  const first = firstNameOf(agent);
   const spans = qc?.history.spans ?? [];
   const now = ctx.nowMs;
   /* a housekeeping gap across several agents names them as a count ("4 agents"), under the gap's own two letters */
@@ -227,7 +228,7 @@ export function nextLead(item: ListItem, ctx: TaskCtx): NextLead {
       return {
         ...base,
         figure: exp != null ? dayFigure(daysSince(exp, now), "past date") : null,
-        sentence: `Send ${first} a nudge.`,
+        sentence: "Send a nudge.",
         track: track(),
         label: { lead: word, rest: `${sent != null ? ` ${dayMonth(sent)}` : ""}${exp != null ? ` · reply expected by ${dayMonth(exp)}` : ""}` },
       };
@@ -239,7 +240,7 @@ export function nextLead(item: ListItem, ctx: TaskCtx): NextLead {
       return {
         ...base,
         figure: last != null && last > 0 ? quietFigure(daysSince(last, now)) : null,
-        sentence: "Close it, or nudge again?",
+        sentence: "Close it or nudge?",
         track: track(true),
         label: { lead: "Gone quiet", rest: `${queried != null ? ` · queried ${dayMonth(queried)}` : ""}${nudged != null ? ` · nudged ${dayMonth(nudged)}` : ""}` },
       };
@@ -249,7 +250,7 @@ export function nextLead(item: ListItem, ctx: TaskCtx): NextLead {
       return {
         ...base,
         figure: on != null ? dayFigure(daysSince(on, now), "ago") : null,
-        sentence: `Answer ${possessive(first)} offer.`,
+        sentence: "Answer the offer.",
         track: track(),
         label: dated("Offer made", on),
       };
@@ -262,7 +263,7 @@ export function nextLead(item: ListItem, ctx: TaskCtx): NextLead {
         agent: null,
         seals: { initials: others.slice(0, 4).map((r) => r.initials), more: Math.max(0, others.length - 4) },
         figure: { value: String(others.length), caption: "still reading", wait: "" },
-        sentence: "Tell the others you have an offer.",
+        sentence: "Tell the others.",
         track: null,
         label: null,
         sub: `${one.name} made an offer${on != null ? ` on ${dayMonth(on)}` : ""}.`,
