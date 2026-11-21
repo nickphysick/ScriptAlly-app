@@ -98,4 +98,14 @@
   /* ── v58.1 · 3 · no edge on the desk chip, on any task: same ground, same type. Colour never signals time pressure
      (todoWs.css still draws a terracotta edge on [data-late]; this takes it away). ── */
   .tws .tws-dchip, .tws .tws-dchip[data-late] { box-shadow: none; }
+
+  /* ── v58.1 · 4 · on a narrow tray (360px or less) the figure's words drop under its number, right-aligned, so the
+     title keeps its line; wider, the figure stays on one line as v58 built it. The tray is a NAMED size container (its
+     width is its grid column's clamp, never its content), so no unnamed @container query inside it changes target;
+     the collapsed strip is left out. ── */
+  .tws .tws-tray:not([data-slim]) { container: tws581tray / inline-size; }
+  @container tws581tray (max-width: 360px) {
+    .tws .tws-ti .tws-du { flex-direction: column; align-items: flex-end; gap: 1px; }
+    .tws .tws-ti .tws-du small { font-size: 13px; }
+  }
 }
