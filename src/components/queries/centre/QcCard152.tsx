@@ -50,7 +50,7 @@ import "./qcv160.css";
 import { useLanding160, type Motion160 } from "./useLanding160";
 /* Query card v164 — the strip carries the track and the status name; the type, the bubbles and the toast to the rules */
 import { Track153 } from "./QcSlip153";
-import { stripStatus164 } from "../../../lib/qc164";
+import { bookLine164, stripStatus164 } from "../../../lib/qc164";
 import "./qcv164.css";
 
 export interface QcCard152Data {
@@ -579,8 +579,9 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         ) : (
         <div className="qc152-ms" data-qc152="book">
           <span className="qc152-bk" aria-hidden="true">{BOOK}</span>
-          <div><small>QUERYING</small><b>{p.msTitle ?? "No manuscript"}</b>
-            {p.bookChips.length ? <div className="qc152-bkc">{p.bookChips.map((c) => <span key={c}>{c}</span>)}</div> : null}</div>
+          {/* v164 — no "QUERYING" label; the title in --sp-h-card; genre and word count one sentence-case line */}
+          <div><b>{p.msTitle ?? "No manuscript"}</b>
+            {p.bookChips.length ? <div className="qc164-bkl" data-qc164="book-line">{bookLine164(p.bookChips)}</div> : null}</div>
         </div>
         )}
         <div className="qc152-tabs" role="tablist" aria-label="The query">

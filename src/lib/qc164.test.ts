@@ -50,3 +50,12 @@ describe("v164 L2 — the track's current step matches the status", () => {
     }
   });
 });
+
+describe("v164 B — the manuscript box's one line", () => {
+  it("age category, genre and word count in sentence case, joined by ' · '", async () => {
+    const { bookLine164 } = await import("./qc164");
+    expect(bookLine164(["Young Adult", "Thriller", "50,000 words"])).toBe("Young adult · Thriller · 50,000 words");
+    expect(bookLine164(["LITERARY FICTION"])).toBe("Literary fiction");
+    expect(bookLine164([])).toBe("");
+  });
+});

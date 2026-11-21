@@ -37,3 +37,20 @@
 /* the day, at the name row's end (shown by the strip's old rule) */
 .qc152[data-qc164] .qc164-day { margin-left: auto; flex: none; align-self: center; font: 400 14px/1 var(--sp-serif); color: #6f655c; white-space: nowrap; }
 
+
+/* ── B. type ── */
+.qc152[data-qc164] .qc152-nm { font: 600 22px/1.2 var(--sp-serif) !important; }
+.qc152[data-qc164] .qc152-ag { font: italic 400 14px/1.3 var(--sp-serif) !important; letter-spacing: 0 !important; text-transform: none; color: #6f655c; }
+.qc152[data-qc164] .qc152-disc { font: 400 13px var(--sp-serif); letter-spacing: 0; }
+.qc152[data-qc164] .qc152-ms b { margin: 0; font: var(--sp-h-card) !important; }
+.qc152[data-qc164] .qc152-ms { align-items: center; }
+.qc152[data-qc164] .qc164-bkl { display: block; margin-top: 3px; font: 400 14px/1.3 var(--sp-serif); color: #6f655c; }
+.qc152[data-qc164] :is(.qc152-rbtn, .qc1522-btn) { height: var(--sp-btn-h) !important; min-height: var(--sp-btn-h) !important; border-radius: var(--sp-btn-r) !important; font: var(--sp-btn-font) !important; padding: var(--sp-btn-pad) !important; }
+.qc152[data-qc164] .qc152-rf { border-radius: 12px; }
+.qc152[data-qc164] .qc152-rft b { font-size: 15px !important; }
+.qc152[data-qc164] .qc152-rft span { font-size: 13px !important; }
+
+/* nothing under 12px, no JetBrains Mono on the header or the thread: the initials' disc, the bubble's initials, "2nd" */
+.qc152[data-qc164] .qc152-av { font: 600 12px/1 var(--sp-serif) !important; letter-spacing: 0; }
+.qc152[data-qc164] .qc152-nth { font-size: 12px !important; }
+

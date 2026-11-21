@@ -19,3 +19,8 @@ export function stripStatus164(r: Pick<QcRow, "status" | "furthest" | "history">
   const step = track.cur + 1;
   return { name, track, step, label: track.ended ? name : `${name}, step ${step} of 4` };
 }
+
+/** sentence case: the first letter up, the rest down ("Young Adult" → "Young adult", "50,000 words" stays) */
+export const sentence164 = (x: string): string => { const t = x.trim().toLowerCase(); return t ? t[0].toUpperCase() + t.slice(1) : t; };
+/** the manuscript box's one line: its age category, genre and word count, sentence case, joined by " · " */
+export const bookLine164 = (chips: readonly string[]): string => chips.map(sentence164).filter(Boolean).join(" · ");
