@@ -7,7 +7,7 @@
  * stated with `!important` where brand.tsx names bare elements at runtime.
  */
 .sc-chip .sc-ic { flex: none; color: #2a3a52; }
-.sc-chip .sc-sby { font: 400 14px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.6); white-space: nowrap; }
+.sc-chip .sc-sby { font: 400 14px/1 var(--sp-type) !important; font-style: normal; color: var(--sp-quiet); white-space: nowrap; }
 .sc-chip .sc-f { font: 600 15px/1 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; }
 .sc-chip .sc-dir { font: 600 15px/1 var(--sp-serif) !important; font-style: normal; color: #2a3a52; }
 .sc-chip[data-narrow] .sc-sby { display: none; }
@@ -16,7 +16,7 @@
   position: fixed; z-index: 60; box-sizing: border-box; width: 320px; padding: 14px 12px 12px; border-radius: 14px; background: #fff; color: #1c130f;
   box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 22px 48px -18px rgba(28, 19, 15, 0.45);
 }
-.sc-pop .sc-mh { margin: 0 8px 8px; font: 500 10px/1.2 var(--sp-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+.sc-pop .sc-mh { margin: 0 8px 8px; font: 500 10px/1.2 var(--sp-mono) !important; letter-spacing: 0.18em; text-transform: uppercase; color: var(--sp-quiet); }
 .sc-pop .sc-opt {
   box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 36px; margin: 0; padding: 6px 8px; border: 0;
   border-radius: 8px; background: transparent; color: #1c130f; text-align: left; cursor: pointer;
@@ -31,12 +31,12 @@
 .sc-pop .sc-seg { display: flex; gap: 2px; margin: 10px 0 0; padding: 3px; border-radius: 10px; background: #f4f0e9; }
 .sc-pop .sc-seg button {
   flex: 1 1 0; box-sizing: border-box; height: 34px; margin: 0; padding: 0 10px; border: 0; border-radius: 7px; background: transparent;
-  color: rgba(28, 19, 15, 0.7); cursor: pointer; white-space: nowrap; font: 400 14.5px/1 var(--sp-type) !important; font-style: normal;
+  color: var(--sp-muted); cursor: pointer; white-space: nowrap; font: 400 14.5px/1 var(--sp-type) !important; font-style: normal;
 }
 .sc-pop .sc-seg button[aria-checked="true"] { background: #2a3a52; color: #f4eee5; }
 .sc-pop .sc-seg button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
-.sc-pop .sc-note { margin: 10px 8px 0; font: 400 13.5px/1.4 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.6); }
+.sc-pop .sc-note { margin: 10px 8px 0; font: 400 13.5px/1.4 var(--sp-type) !important; font-style: normal; color: var(--sp-quiet); }
 
 /* List filters v1 — the bars' labelled chip ("Sort:" muted serif, the field 600, the arrow and caret navy) */
-.sc-chip .sc-sby.sc-lab { font: 400 14.5px/1 var(--sp-serif) !important; color: #5b4f47; }
-.sc-chip .sc-cv { flex: none; color: #5b4f47; }
+.sc-chip .sc-sby.sc-lab { font: 400 14.5px/1 var(--sp-serif) !important; color: var(--sp-muted); }
+.sc-chip .sc-cv { flex: none; color: var(--sp-muted); }

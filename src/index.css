@@ -415,7 +415,7 @@
   --shell-active-fg: #fdf9f5;
   --shell-hover-bg: rgba(255, 255, 255, 0.45);
   --shell-hairline: rgba(28, 19, 15, 0.12); /* the ref's --hair: switcher ring, user-row rule, avatar ring */
-  --shell-mute: rgba(28, 19, 15, 0.58);     /* the ref's --muted: meta, counts */
+  --shell-mute: var(--sp-quiet);     /* the ref's --muted: meta, counts */
   --shell-label: rgba(28, 19, 15, 0.45);    /* the sidebar's section labels (v126) */
   --shell-ring: rgba(28, 19, 15, 0.28);     /* the outline ring: Give feedback, Upgrade, the circles' hover */
   --shell-btn-hover: rgba(255, 255, 255, 0.6); /* the outline buttons' hover wash */

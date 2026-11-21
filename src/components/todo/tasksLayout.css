@@ -87,7 +87,7 @@
 .tpl-eyebrow {
   margin-right: auto; white-space: nowrap;
   font-family: 'JetBrains Mono', monospace; font-size: 9px;
-  letter-spacing: 0.11em; text-transform: uppercase; color: #8a7a6c;
+  letter-spacing: 0.11em; text-transform: uppercase; color: var(--sp-quiet);
 }
 
 /* the tool row — margin/rule per the ref (.tools): the hairline is ITS bottom edge, so the

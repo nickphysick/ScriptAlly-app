@@ -26,7 +26,7 @@
   background: repeating-linear-gradient(135deg, #f4f0ea 0 6px, #efeae2 6px 12px); box-shadow: none;
 }
 .p8-agg3 .p8-ag3.p8-none .p8-ag2-v { cursor: default; }
-.p8-agg3 .p8-ag3.p8-none > h3 .p8-o { font-style: italic; color: rgba(28, 19, 15, 0.55); }
+.p8-agg3 .p8-ag3.p8-none > h3 .p8-o { font-style: italic; color: var(--sp-quiet); }
 
 /* ── 2. no mono capitals (v40's ruling): typewriter, sentence case ── */
 .p8-pkl .p8-pkl-k,
@@ -52,7 +52,7 @@
 /* ── 1. the locked builder (v38 over v40's lock): no ref state draws it, so these are written to the builder's own
    grammar — the quiet empty slot for a slot that went empty, and the foot's own line and buttons ── */
 .p6 .p6-pk-locked .p6-mr-em--lk { display: flex; align-items: center; min-height: 44px; padding: 0 16px; border-radius: 10px;
-  background: rgba(28, 19, 15, 0.03); font: italic 400 15px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.55); }
+  background: rgba(28, 19, 15, 0.03); font: italic 400 15px/1.4 var(--sp-serif); color: var(--sp-quiet); }
 .p6 .p6-po-foot.p6-po-foot--lk { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
 .p6 .p6-po-foot--lk > span:first-child { display: inline-flex; align-items: center; gap: 8px; }
 .p6 .p6-po-foot--lk > span:first-child svg { width: 14px; height: 14px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; }

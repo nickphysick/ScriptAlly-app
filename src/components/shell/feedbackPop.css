@@ -12,7 +12,7 @@
 .fb-panel.fb3 {
   width: 500px; max-width: calc(100vw - 16px); padding: 7px; border-radius: 22px; background: #fff; overflow-y: auto;
   box-shadow: 0 0 0 1px #ecd6cd, 0 30px 60px -20px rgba(28, 19, 15, 0.5), 0 2px 6px rgba(28, 19, 15, 0.08);
-  --fb3-ink: #1c130f; --fb3-ink2: #3b322c; --fb3-muted: #7d7067; --fb3-rose: #a0675a; --fb3-navy: var(--sp-anthracite);
+  --fb3-ink: #1c130f; --fb3-ink2: #3b322c; --fb3-muted: var(--sp-quiet); --fb3-rose: #a0675a; --fb3-navy: var(--sp-anthracite);
 }
 .fb-panel.fb3 :where(p, span, div, button, label, b, small, i, em) { font-family: inherit; }
 .fb-panel.fb3 * { box-sizing: border-box; }
@@ -49,7 +49,7 @@
 .fb-panel.fb3 .fb3-ki { display: grid; place-items: center; width: 34px; height: 34px; margin-bottom: 8px; border-radius: 50%; background: #f6e2d9; color: var(--fb3-rose); transition: background 0.15s, color 0.15s; }
 .fb-panel.fb3 .fb3-ki svg, .fb-panel.fb3 .fb3-nk svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .fb-panel.fb3 .fb3-k b { font: 600 16px/1.2 var(--sp-serif) !important; color: var(--fb3-ink); }
-.fb-panel.fb3 .fb3-k small { font: 13px/1.3 var(--sp-serif) !important; color: var(--fb3-muted); }
+.fb-panel.fb3 .fb3-k small { font: 13px/1.3 var(--sp-serif) !important; color: var(--sp-quiet); }
 .fb-panel.fb3 .fb3-k[aria-checked="true"] { background: var(--fb3-navy); box-shadow: none; transform: none; }
 .fb-panel.fb3 .fb3-k[aria-checked="true"] b { color: #fffaf3; }
 .fb-panel.fb3 .fb3-k[aria-checked="true"] small { color: rgba(255, 250, 243, 0.72); }
@@ -78,7 +78,7 @@
 .fb-panel.fb3 .fb3-ta:focus { outline: 0; box-shadow: inset 0 0 0 2px var(--fb3-navy); }
 .fb-panel.fb3 .fb3-ta::placeholder { color: #a39a91; }
 .fb-panel.fb3 .fb-drop, .fb-panel.fb3 .fb-thumb, .fb-panel.fb3 .fb-err:not(.fb-err--send) { margin-top: 10px; }
-.fb-panel.fb3 .fb3-ctx { margin: 8px 2px 0; font: 12.5px/1.45 var(--sp-serif) !important; color: var(--fb3-muted); }
+.fb-panel.fb3 .fb3-ctx { margin: 8px 2px 0; font: 12.5px/1.45 var(--sp-serif) !important; color: var(--sp-quiet); }
 .fb-panel.fb3 .fb-err--send { margin: 0; border-radius: 0; border: 1px solid #e6cfc4; border-top: 0; border-bottom: 0; padding: 8px 18px; }
 
 /* the foot */
@@ -95,7 +95,7 @@
    foot is narrow, and at 1280 the line ran into "Send another" */
 .fb-panel.fb3 .fb3-rkt { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 6px; align-items: baseline; min-width: 0; }
 .fb-panel.fb3 .fb3-rkt b { font: 400 16px/1.1 var(--sp-type) !important; color: var(--fb3-ink); }
-.fb-panel.fb3 .fb3-rkt span { font: 12.5px var(--sp-serif) !important; color: var(--fb3-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fb-panel.fb3 .fb3-rkt span { font: 12.5px var(--sp-serif) !important; color: var(--sp-quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .fb-panel.fb3 .fb3-notes, .fb-panel.fb3 .fb3-btn { flex: none; }
 .fb-panel.fb3 .fb3-bar { grid-column: 1 / -1; display: block; width: 140px; height: 4px; margin-top: 5px; border-radius: 2px; background: #ead7ce; overflow: hidden; }
 .fb-panel.fb3 .fb3-bar em { display: block; height: 100%; border-radius: 2px; background: var(--fb3-rose); }
@@ -122,8 +122,8 @@
 }
 .fb-panel.fb3 .fb3-nk { width: 38px; height: 38px; border-radius: 50%; background: #f6e2d9; color: var(--fb3-rose); display: grid; place-items: center; }
 .fb-panel.fb3 .fb3-sent b { display: block; font: 600 15px/1.35 var(--sp-serif) !important; overflow-wrap: anywhere; }
-.fb-panel.fb3 .fb3-sent div span { display: block; margin-top: 2px; font: 13px var(--sp-serif) !important; color: var(--fb3-muted); }
-.fb-panel.fb3 .fb3-oc { display: inline-flex; padding: 3px 10px; border-radius: 999px; white-space: nowrap; background: #fff; box-shadow: inset 0 0 0 1px #e2d6cc; font: normal 600 12.5px var(--sp-serif) !important; color: var(--fb3-muted); }
+.fb-panel.fb3 .fb3-sent div span { display: block; margin-top: 2px; font: 13px var(--sp-serif) !important; color: var(--sp-quiet); }
+.fb-panel.fb3 .fb3-oc { display: inline-flex; padding: 3px 10px; border-radius: 999px; white-space: nowrap; background: #fff; box-shadow: inset 0 0 0 1px #e2d6cc; font: normal 600 12.5px var(--sp-serif) !important; color: var(--sp-quiet); }
 
 @media (prefers-reduced-motion: reduce) {
   .fb-panel.fb3 .fb3-k, .fb-panel.fb3 .fb3-ki { transition: none; }

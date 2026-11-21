@@ -391,7 +391,7 @@
   font-family: var(--font-mono); font-size: 8px; letter-spacing: .12em; text-transform: uppercase;
   line-height: 1.35; white-space: nowrap;
 }
-.qcc-fact--calm   .qcc-rc { background: var(--parchment, #fdfaf5); border: .5px solid var(--hairline, #ece0d2); color: #8a7a6c; }
+.qcc-fact--calm   .qcc-rc { background: var(--parchment, #fdfaf5); border: .5px solid var(--hairline, #ece0d2); color: var(--sp-quiet); }
 .qcc-fact--late   .qcc-rc { background: #fff; border: 1.2px solid var(--ink, #1c130f); color: var(--ink, #1c130f); }
 .qcc-fact--you    .qcc-rc { background: var(--state-you); border: .5px solid var(--state-you-deep); color: var(--body-ink, #3a1c14); }
 .qcc-fact--offer  .qcc-rc { background: var(--state-offer); border: .5px solid var(--state-offer-deep); color: var(--body-ink, #3a1c14); }
@@ -403,7 +403,7 @@
 .qcc-fact--late   .qcc-s,
 .qcc-fact--you    .qcc-s,
 .qcc-fact--offer  .qcc-s { color: var(--ink, #1c130f); font-weight: 500; }
-.qcc-fact--closed .qcc-s { color: #8a7a6c; }
+.qcc-fact--closed .qcc-s { color: var(--sp-quiet); }
 
 /* ── the materials cluster ──────────────────────────────────────────────────────────────────── */
 .qcc-mats { position: relative; display: inline-flex; align-items: center; gap: 4px; flex: none; }
@@ -430,7 +430,7 @@
   text-transform: uppercase; color: #9c8878; margin-bottom: 6px; }
 .qcc-tip-row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px;
   color: #3a1c14; padding: 3px 0; }
-.qcc-tip-v { color: #8a7a6c; text-align: right; white-space: nowrap; }
+.qcc-tip-v { color: var(--sp-quiet); text-align: right; white-space: nowrap; }
 .qcc-tip-row--no { color: #c0b0a0; }
 .qcc-tip-row--no .qcc-tip-v { color: #d0c4b6; }
 
@@ -439,7 +439,7 @@
    read as a card that had half-loaded rather than as a preview of one being made. */
 .qcc--ghost { background: transparent; border: 1.5px dashed #d2c4b4; box-shadow: none; cursor: default; }
 .qcc--ghost .qcc-band { background: transparent; border-bottom: 1px dashed #e0d4c4; }
-.qcc--ghost .qcc-word { color: #8a7a6c; }
+.qcc--ghost .qcc-word { color: var(--sp-quiet); }
 .qcc--ghost .qcc-chip { background: transparent; box-shadow: none; border: 1px dashed #d2c4b4; color: #b0a090; }
 .qcc--ghost .qcc-leaf { background: transparent; box-shadow: none; border-style: dashed; }
 .qcc--ghost .qcc-leaf-mo { background: transparent; }

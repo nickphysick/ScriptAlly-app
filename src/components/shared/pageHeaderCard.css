@@ -7,8 +7,8 @@
 .phc.phc { --phc-machine:var(--sp-type);--phc-serif:var(--sp-serif);--phc-mono:'JetBrains Mono',monospace;
   display:grid;grid-template-columns:minmax(0,1fr) 300px;align-items:center;gap:32px;padding:30px 36px;border-radius:18px;background:#fbf8f4;box-shadow:0 1px 2px rgba(28,19,15,.05),0 18px 34px -28px rgba(28,19,15,.4),inset 0 0 0 1px rgba(28,19,15,.1);overflow:hidden }
 .phc.phc h1 { display:flex;align-items:center;gap:12px;margin:0;font:400 34px/1.1 var(--phc-machine);color:#1c130f;letter-spacing:-.01em }
-.phc .phc-tag { display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:#f6e2d8;font:600 10px var(--phc-mono);letter-spacing:.14em;text-transform:uppercase;color:#a2452a }
-.phc .phc-tx>p { max-width:640px;margin:12px 0 0;font:400 16.5px/1.55 var(--phc-serif);color:rgba(28,19,15,.78) }
+.phc .phc-tag { display:inline-flex;align-items:center;height:24px;padding:0 10px;border-radius:999px;background:#f6e2d8;font:600 10px var(--phc-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--sp-rust) }
+.phc .phc-tx>p { max-width:640px;margin:12px 0 0;font:400 16.5px/1.55 var(--phc-serif);color:var(--sp-muted) }
 .phc .phc-tx>p b { font-weight:600;color:#1c130f }
 .phc .phc-b { display:flex;gap:10px;margin-top:20px }
 .phc .phc-b button { height:42px;padding:0 20px;border-radius:10px;font:400 15px var(--phc-machine);cursor:pointer }

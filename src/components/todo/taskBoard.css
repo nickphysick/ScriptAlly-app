@@ -22,7 +22,7 @@
    a sage that belongs to a different system. A token that resolves to the WRONG value is worse
    than one that resolves to nothing: nothing leaves a mark somebody eventually notices. */
 .brd { --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e8e0d8; --paper:#fdfaf5; --white:#ffffff;
-       --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c; --sage:#5a6e58; }
+       --ink2:#3a1c14; --muted:#9c8878; --muted2:var(--sp-quiet); --sage:#5a6e58; }
 
 .brd {
   display: grid;
@@ -67,7 +67,7 @@
 }
 .brd-colh .r2 {
   font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: 0.14em;
-  text-transform: uppercase; color: var(--muted2); padding-left: 38px; margin-top: 2px;
+  text-transform: uppercase; color: var(--sp-quiet); padding-left: 38px; margin-top: 2px;
 }
 
 .brd-stack {

@@ -137,7 +137,7 @@
   .qcv-group[data-v138] .qc138-sheet .qc138-sumc { flex-direction: row; flex-wrap: nowrap; align-items: baseline; gap: 16px; }
   .qcv-group[data-v138] .qc138-sheet .qc138-sum-h { flex: none; font: 400 15px/1.2 var(--sp-type) !important; }
   .qcv-group[data-v138] .qc138-sheet .qc138-sum-l { flex: 0 1 auto; min-width: 0; font: italic 400 14.5px/1.2 var(--sp-serif) !important; }
-  .qcv-group[data-v138] .qc138-sheet .qc138-sum-l.hot { font: italic 400 14.5px/1.2 var(--sp-serif) !important; color: #a2452a; }
+  .qcv-group[data-v138] .qc138-sheet .qc138-sum-l.hot { font: italic 400 14.5px/1.2 var(--sp-serif) !important; color: var(--sp-rust); }
   .qcv-group[data-v138] .qc138-sheet .qc138-sum-a { flex: none; margin: 0 0 0 auto; font: 400 14.5px/1.2 var(--sp-serif) !important; }
   .qcv-group[data-v138] .qc138-sheet .qc138-tlw { margin: 0 70px 0 44px; padding-left: 0; }
 }

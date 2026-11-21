@@ -33,7 +33,7 @@
   .cl20-card > .apc { transition: none; }
   .cl20-card:hover > .apc { transform: none; }
 }
-.cl20-none { margin: 0; padding: 48px 22px 56px; text-align: center; font: italic 400 16px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.cl20-none { margin: 0; padding: 48px 22px 56px; text-align: center; font: italic 400 16px/1.45 var(--sp-serif) !important; color: var(--sp-quiet); }
 
 /* ── §D · THE CARDS VIEW'S RULED HEADING: spans the grid, 58 tall on the grid's ground; the mark, the name (typewriter
    21), "N AGENTS" (mono 10.5, .14em, 60%), then a 1px 16% hairline to the right edge, 16 after the count. Its box is
@@ -51,7 +51,7 @@
 .cl20-rh .cl20-rhl { font: 400 21px/1 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
 .cl20-rh .cl20-rhn {
   margin-left: 12px; font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; font-style: normal; letter-spacing: 0.14em;
-  text-transform: uppercase; color: rgba(28, 19, 15, 0.6); white-space: nowrap;
+  text-transform: uppercase; color: var(--sp-quiet); white-space: nowrap;
 }
 .cl20-rh .cl20-rhr { flex: 1 1 auto; min-width: 0; height: 1px; margin-left: 16px; background: rgba(28, 19, 15, 0.16); }
 .clv-group[data-loading] .cl20-rh { opacity: 0; }
@@ -62,7 +62,7 @@
    the controls' ring and the chosen button navy with a cream icon. In full screen at 1600 and over the buttons show their
    words. Full screen is the v19 Pin button (cl19-pin) with the four corners, upright. ── */
 .cl19-head[data-pinned] .cl20-vsi { background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.12), 0 1px 2px rgba(28, 19, 15, 0.06); }
-.cl19-head[data-pinned] .cl20-vsi button { color: rgba(28, 19, 15, 0.62); }
+.cl19-head[data-pinned] .cl20-vsi button { color: var(--sp-muted); }
 .cl19-head[data-pinned] .cl20-vsi button:hover:not([aria-selected="true"]):not(:disabled) { background: #f4f0e9; color: #1c130f; }
 .cl19-head[data-pinned] .cl20-vsi button[aria-selected="true"] { background: #2a3a52; color: rgb(244, 238, 229); }
 .cl19-head[data-pinned] .cl20-vsi button:focus-visible { outline-color: #2a3a52; }
@@ -84,7 +84,7 @@
 .cl20-lg .cl20-lgm .cl19-gm { width: 18px; height: 18px; }
 .clv-group .cl19-card .cl19-gb.cl20-lg .cl19-gbl { font: 400 21px/1 var(--sp-type) !important; color: #1c130f; }
 .clv-group .cl19-card .cl19-gb.cl20-lg .cl19-gbn {
-  height: auto; margin-left: 12px; padding: 0; border-radius: 0; background: none; color: rgba(28, 19, 15, 0.6);
+  height: auto; margin-left: 12px; padding: 0; border-radius: 0; background: none; color: var(--sp-quiet);
   font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; font-style: normal; letter-spacing: 0.14em; text-transform: uppercase;
 }
 

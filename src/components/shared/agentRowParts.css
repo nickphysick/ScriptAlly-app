@@ -23,8 +23,8 @@
 .cl252-track > svg { display: block; overflow: visible; }
 .cl252-tnode { position: absolute; top: 0; width: 12px; height: 12px; line-height: 0; }
 .cl252-tnode > * { display: block; }
-.cl252-next { font: 400 14px/1.2 var(--sp-type) !important; color: #a2452a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.cl252-sent { font: italic 400 13.5px/1.2 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.cl252-next { font: 400 14px/1.2 var(--sp-type) !important; color: var(--sp-rust); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.cl252-sent { font: italic 400 13.5px/1.2 var(--sp-serif) !important; color: var(--sp-quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 
 /* ══ A7 · the tally bars (the Getting started pill's) ══ */
 .cl252-tally { display: inline-flex; align-items: center; gap: 9px; white-space: nowrap; }

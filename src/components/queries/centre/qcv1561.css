@@ -29,7 +29,7 @@
   .qc151 .qc1561-sw { display: flex; align-items: center; gap: 10px; white-space: nowrap; }
   .qc151 .qc1561-sfl { flex: none; display: block; width: 17px; height: 22px; }
   .qc151 .qc1561-sw b { font: 400 18px/1 var(--sp-type) !important; color: #1c130f; }
-  .qc151 .qc1561-sw em { font: italic 400 15px/1.2 var(--sp-serif) !important; color: #5b4f47; }
+  .qc151 .qc1561-sw em { font: italic 400 15px/1.2 var(--sp-serif) !important; color: var(--sp-muted); }
 }
 
 /* ── §2 · the Sent and Next boxes line up: one height (the row stretches them), one padding (10 12 11), 86px at least,

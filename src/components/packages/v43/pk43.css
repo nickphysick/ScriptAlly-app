@@ -122,8 +122,8 @@
   .pk43 .pk43-pick [role="option"][aria-selected="true"] { background: #f8e8ea; }
   .pk43 .pk43-pick [role="option"]:focus-visible { outline: 2px solid #2a3a52; outline-offset: 0; }
   .pk43 .pk43-pick b { min-width: 0; font: 400 16px/1.2 var(--sp-type); overflow-wrap: anywhere; }
-  .pk43 .pk43-pick span { flex: none; font: italic 14px/1.2 var(--sp-serif); color: rgba(28, 19, 15, .62); }
-  .pk43 .pk43-pick p { margin: 0; padding: 8px 10px 6px; font: 14px/1.45 var(--sp-serif); color: rgba(28, 19, 15, .62); }
+  .pk43 .pk43-pick span { flex: none; font: italic 14px/1.2 var(--sp-serif); color: var(--sp-muted); }
+  .pk43 .pk43-pick p { margin: 0; padding: 8px 10px 6px; font: 14px/1.45 var(--sp-serif); color: var(--sp-muted); }
 }
 @media (min-width: 768px) and (max-width: 1099.98px) {
   .pk43 .pk43-go { display: none; }
@@ -146,7 +146,7 @@
   .pk43 .pk43-d1 li { display: grid; grid-template-columns: 36px minmax(0, 1fr); column-gap: 16px; align-items: start; }
   .pk43 .pk43-d1-n { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; background: var(--sp-anthracite); color: #f4eee5; font: 400 17px/1 var(--sp-type); }
   .pk43 .pk43-d1-t b { display: block; font: 400 21px/1.25 var(--sp-type); color: var(--ql-ink); }
-  .pk43 .pk43-d1-t span { display: block; margin-top: 4px; font: 400 16.5px/1.5 var(--sp-serif); color: var(--ql-t72); }
+  .pk43 .pk43-d1-t span { display: block; margin-top: 4px; font: 400 16.5px/1.5 var(--sp-serif); color: var(--sp-muted); }
   /* no buttons on day one: the title block keeps its rhythm without the empty button row */
   .pk43.pk43--day1 .qc1531-hd.pk43-hd .qc1531-acts:empty { display: none; }
 }

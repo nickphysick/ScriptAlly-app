@@ -22,7 +22,7 @@
 /* ⚠️ brand.tsx forces `h2` (0-0-1) at runtime: a class and an element (0-1-1) plus !important win honestly */
 .fs-lede h2.fs-title { margin: 0; font: 400 40px/1.08 var(--sp-type) !important; color: #1c130f; }
 .fs-lede h2.fs-title.is-compact { font-size: 34px !important; }
-.fs .fs-sentence { margin: 0; max-width: 34ch; font: 400 17px/1.55 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+.fs .fs-sentence { margin: 0; max-width: 34ch; font: 400 17px/1.55 var(--sp-serif); color: var(--sp-muted); }
 .fs .fs-sentence b { font-weight: 600; color: #1c130f; }
 .fs .fs-go {
   margin-top: 8px; box-sizing: border-box; height: 46px; padding: 0 24px; border-radius: 23px; border: 0; cursor: pointer;
@@ -44,7 +44,7 @@
 }
 .fs-ph { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid rgba(28, 19, 15, 0.1); }
 .fs-ph h3 { margin: 0; font: 400 20px var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
-.fs-ph > span { font: italic 400 13.5px var(--sp-serif); color: rgba(28, 19, 15, 0.5); white-space: nowrap; }
+.fs-ph > span { font: italic 400 13.5px var(--sp-serif); color: var(--sp-quiet); white-space: nowrap; }
 .fs-list { list-style: none; margin: 0; padding: 0; }
 .fs-row {
   display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; gap: 14px; align-items: center;
@@ -59,8 +59,8 @@
 .fs-lead { display: inline-flex; }
 .fs-m { min-width: 0; display: flex; flex-direction: column; }
 .fs .fs-m b { display: block; font: 500 16.5px var(--sp-serif); color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fs .fs-m i { display: block; font: italic 400 14px var(--sp-serif); color: rgba(28, 19, 15, 0.6); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.fs .fs-side { display: inline-flex; align-items: center; gap: 10px; font: 400 13px var(--sp-serif); color: rgba(28, 19, 15, 0.55); white-space: nowrap; }
+.fs .fs-m i { display: block; font: italic 400 14px var(--sp-serif); color: var(--sp-quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fs .fs-side { display: inline-flex; align-items: center; gap: 10px; font: 400 13px var(--sp-serif); color: var(--sp-quiet); white-space: nowrap; }
 .fs .fs-more {
   align-self: flex-start; margin-top: 10px; border: 0; background: none; padding: 2px 0; cursor: pointer;
   font: 500 15px var(--sp-serif); color: #2a3a52; text-decoration: underline; text-underline-offset: 3px;

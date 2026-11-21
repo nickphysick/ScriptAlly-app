@@ -68,7 +68,7 @@
 .sf .o9-acklbl { display: grid; gap: 2px; min-width: 0; }
 .sf .o9-acklbl small {
   font-family: var(--sp-mono); font-size: 9.5px; line-height: 1.4; letter-spacing: .2em; text-transform: uppercase;
-  color: rgba(28, 19, 15, .5);
+  color: var(--sp-quiet);
 }
 .sf .o9-acklbl b { font-family: var(--sp-type); font-weight: 400; font-size: clamp(28px, 3vw, 40px); line-height: 1.3; color: var(--ink-on-light); }
 .sf .o9-ackchange { margin: 0 0 6px 6px; align-self: flex-end; color: var(--sf-ink72); }
@@ -78,7 +78,7 @@
    Your campaign is underway." on one line. The old 60ch sat on the container, so it was 60ch of the
    container's 16px and broke the 27px lead over two lines. */
 .sf .o9-beats { display: grid; gap: 10px; cursor: default; }
-.sf .o9-beat { margin: 0; font-family: var(--sp-serif); font-size: 18.5px; line-height: 1.5; color: rgba(28, 19, 15, .78); max-width: 60ch; }
+.sf .o9-beat { margin: 0; font-family: var(--sp-serif); font-size: 18.5px; line-height: 1.5; color: var(--sp-muted); max-width: 60ch; }
 .sf .o9-beat--lead { font-family: var(--sp-type); font-size: 27px; line-height: 1.3; color: var(--ink-on-light); max-width: 30em; }
 .sf .o9-beat em { font-style: italic; font-weight: 600; color: var(--ink-on-light); }
 .sf .o9-beat span { font: inherit; color: inherit; }
@@ -110,9 +110,9 @@
 .sf .o9-byline { margin: 8px 0 0; width: 100%; max-width: 520px; display: flex; align-items: center; gap: 12px; }
 .sf .o9-byline::before { content: ""; flex: none; width: 34px; height: 1px; background: rgba(28, 19, 15, .45); }
 .sf .o9-byline::after { content: ""; flex: 1 1 0; height: 1px; background: rgba(28, 19, 15, .15); }
-.sf .o9-byline > span { font-family: var(--sp-serif); font-style: italic; font-size: 18px; line-height: 25px; color: rgba(28, 19, 15, .62); white-space: nowrap; }
+.sf .o9-byline > span { font-family: var(--sp-serif); font-style: italic; font-size: 18px; line-height: 25px; color: var(--sp-muted); white-space: nowrap; }
 .sf .o9-late.is-rise { opacity: 1; animation: o9-rise .5s ease-out both; }
-.sf .o9-small { font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); margin: 0; }
+.sf .o9-small { font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: var(--sp-muted); margin: 0; }
 .sf .o9-cardsub { margin: 6px 0 22px; }
 .sf .o9-fields { display: grid; gap: 20px; }
 .sf .o9-late.is-in .o9-fields > * { animation: o9-rise .45s ease-out both; }
@@ -140,7 +140,7 @@
   font-family: var(--sp-mono); font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase; margin-left: 9px;
   padding: 3px 5px 2px; border-radius: 4px; background: rgba(244, 238, 229, .18); color: inherit;
 }
-.sf .o9-gsum { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 10px 0 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); }
+.sf .o9-gsum { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 10px 0 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: var(--sp-muted); }
 .sf .o9-gsum b { font-weight: 600; color: var(--ink-on-light); }
 .sf .o9-gsum span { font: inherit; color: inherit; }
 /* the search: a dashed rule, and a list that FLOATS over the fields below */
@@ -171,9 +171,9 @@
 }
 .sf .o9-drop button:hover, .sf .o9-drop button:focus-visible { background: var(--sf-note); outline: 0; }
 .sf .o9-drop button b { font-weight: 600; }
-.sf .o9-dropfoot { margin: 4px 0 0; padding: 9px 12px 6px; border-top: 1px solid rgba(28, 19, 15, .08); font-family: var(--sp-serif); font-size: 13.5px; line-height: 1.4; color: rgba(28, 19, 15, .6); }
+.sf .o9-dropfoot { margin: 4px 0 0; padding: 9px 12px 6px; border-top: 1px solid rgba(28, 19, 15, .08); font-family: var(--sp-serif); font-size: 13.5px; line-height: 1.4; color: var(--sp-quiet); }
 .sf .o9-desc { margin-top: 12px; padding: 13px 16px 14px; border-radius: 11px; background: var(--sf-note); display: grid; gap: 5px; max-width: 62ch; animation: o9-rise .35s ease-out both; }
-.sf .o9-desceye { font-family: var(--sp-mono); font-size: 9px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: rgba(28, 19, 15, .5); }
+.sf .o9-desceye { font-family: var(--sp-mono); font-size: 9px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--sp-quiet); }
 .sf .o9-desc p { margin: 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .82); }
 .sf .o9-desc p i { font-style: italic; }
 @media (max-width: 1439px) { .sf .o9-byline > span { font-size: 16.5px; line-height: 23px; } }
@@ -189,7 +189,7 @@
 .sf .o9-waylist { list-style: none; margin: 0 0 18px; padding: 0; display: grid; gap: 5px; }
 .sf .o9-waylist li {
   display: flex; gap: 10px; align-items: baseline; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.35;
-  color: rgba(28, 19, 15, .78);
+  color: var(--sp-muted);
 }
 .sf .o9-waylist li::before { content: ""; flex: none; width: 6px; height: 6px; border-radius: 50%; background: var(--sp-anthracite); transform: translateY(-2px); }
 .sf .o9-wayacts { flex-direction: row; flex-wrap: wrap; margin: auto 0 0; }
@@ -201,7 +201,7 @@
 .sf .sf-quiet {
   display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 18px;
   max-width: 1040px; margin: 22px 0 0; padding: 14px 18px; border-radius: 12px; background: var(--sf-note);
-  font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .8);
+  font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: var(--sp-muted);
 }
 @media (max-width: 1079.98px) { .sf .sf-tiles.sf-doors { grid-template-columns: minmax(0, 1fr); } }
 /* brand.tsx names a bare <span> as sans on every route: the line's sentence inherits the serif */
@@ -215,7 +215,7 @@
 .sf .o9-conf .sf-stepcard { min-width: 0; }
 .o9-d2 { animation-delay: .2s; }
 .sf .o9-how { display: grid; gap: 14px; min-width: 0; }
-.sf .o9-howeye { margin: 0; font-family: var(--sp-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .24em; line-height: 14px; text-transform: uppercase; color: rgba(28, 19, 15, .5); }
+.sf .o9-howeye { margin: 0; font-family: var(--sp-mono); font-size: 10.5px; font-weight: 600; letter-spacing: .24em; line-height: 14px; text-transform: uppercase; color: var(--sp-quiet); }
 .sf .o9-howlist { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; counter-reset: o9how; }
 .sf .o9-howlist li {
   counter-increment: o9how; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 16px; align-items: center;
@@ -224,8 +224,8 @@
 .sf .o9-howslot { width: 96px; height: 96px; border-radius: 10px; }
 .sf .o9-howtx { display: block; min-width: 0; }
 .sf .o9-howtx b { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 18px; line-height: 1.15; color: var(--ink-on-light); }
-.sf .o9-howtx b::before { content: counter(o9how) " · "; color: rgba(28, 19, 15, .45); }
-.sf .o9-howtx > span { display: block; margin-top: 3px; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.4; color: rgba(28, 19, 15, .66); }
+.sf .o9-howtx b::before { content: counter(o9how) " · "; color: var(--sp-quiet); }
+.sf .o9-howtx > span { display: block; margin-top: 3px; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.4; color: var(--sp-muted); }
 @media (max-width: 1099.98px) { .sf .o9-conf { grid-template-columns: minmax(0, 1fr); } }
 
 /* ── 5 · success marks. Sage is for these and the "all answered" band, and nothing else. ── */
@@ -257,7 +257,7 @@
   margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: clamp(30px, 3.1vw, 44px); line-height: 1.06;
   color: var(--ink-on-light); max-width: none;
 }
-.sf .o9-mtxt > span { font-family: var(--sp-serif); font-size: 18px; line-height: 1.4; color: rgba(28, 19, 15, .7); }
+.sf .o9-mtxt > span { font-family: var(--sp-serif); font-size: 18px; line-height: 1.4; color: var(--sp-muted); }
 
 /* the summary: the mark first, then the paragraph, then the two cards */
 .sf .im-sum .o9-markrow { grid-column: 1; }
@@ -276,7 +276,7 @@
 .sf .o9-alldone > div { display: grid; gap: 3px; min-width: 0; }
 .sf .o9-alldone b { font-family: var(--sp-type); font-weight: 400; font-size: 23px; line-height: 1.2; color: var(--ink-on-light); }
 .sf .o9-alldone span { font-family: var(--sp-serif); font-size: 16px; line-height: 1.4; color: var(--go-ink); }
-.sf .o9-barhint { margin: 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: rgba(28, 19, 15, .62); max-width: 62ch; }
+.sf .o9-barhint { margin: 0; font-family: var(--sp-serif); font-size: 14.5px; line-height: 1.45; color: var(--sp-muted); max-width: 62ch; }
 
 /* ── 6 · the answer deck: one question at a time, then the rows that are ready ── */
 .sf .o9-deck {
@@ -310,7 +310,7 @@
 .sf .o9-qwho { display: flex; align-items: center; gap: 14px; min-width: 0; }
 .sf .o9-qwho > div { min-width: 0; }
 .sf .o9-qwho b { display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 18px; line-height: 1.2; color: var(--ink-on-light); overflow-wrap: anywhere; }
-.sf .o9-qwho small { display: block; margin-top: 4px; font-family: var(--sp-mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: rgba(28, 19, 15, .56); }
+.sf .o9-qwho small { display: block; margin-top: 4px; font-family: var(--sp-mono); font-size: 9.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--sp-quiet); }
 .sf .o9-qwho .im-chip { margin-left: auto; flex: none; }
 .sf .o9-q, .sf .o9-answered { display: grid; gap: 18px; min-width: 0; }
 .sf .o9-ask { margin: 0; font-family: var(--sp-type); font-size: 23px; line-height: 1.25; color: var(--ink-on-light); }
@@ -319,7 +319,7 @@
 /* two-door import v1: the sheet's own date cells above a date question (the mock's .raws) */
 .sf .o9-raws { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 4px; }
 .sf .o9-raws .o9-raw { font-size: 14px; overflow-wrap: anywhere; }
-.sf .o9-why { margin: -8px 0 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: rgba(28, 19, 15, .66); max-width: 62ch; }
+.sf .o9-why { margin: -8px 0 0; font-family: var(--sp-serif); font-size: 15.5px; line-height: 1.45; color: var(--sp-muted); max-width: 62ch; }
 .sf .o9-ans { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 14px; }
 .sf .o9-ans .o9-ansfld { flex: 1 1 260px; margin: 0; }
 .sf .o9-esc { flex-basis: 100%; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
@@ -334,7 +334,7 @@
 .sf .o9-pick.is-on { box-shadow: inset 0 0 0 2px var(--hpanel-bg); }
 .sf .o9-q--built .im-reason { display: grid; gap: 14px; }
 .sf .o9-q--built .im-fixq { margin: 0; font-family: var(--sp-type); font-size: 21px; line-height: 1.3; color: var(--ink-on-light); }
-.sf .o9-upnext { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-family: var(--sp-serif); font-size: 14.5px; color: rgba(28, 19, 15, .62); animation-delay: .4s; }
+.sf .o9-upnext { margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; font-family: var(--sp-serif); font-size: 14.5px; color: var(--sp-muted); animation-delay: .4s; }
 .sf .o9-upnext .im-chip { text-transform: none; letter-spacing: .06em; font-size: 11px; }
 .sf .o9-ready { animation-delay: .45s; }
 .sf .o9-ready [data-im="rows"] > .im-rw { animation: o9-rise .4s ease-out both; }

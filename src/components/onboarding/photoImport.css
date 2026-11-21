@@ -68,7 +68,7 @@
 .sf .o9-pnote span, .sf .o9-pnote b { font-family: inherit; }
 .sf .o9-pnote b { font-weight: 600; }
 .sf .o9-pnote .sf-link { color: var(--im-blush-ink); font-size: 14.5px; text-decoration-color: rgba(91, 42, 31, .4); }
-.sf .o9-plede { margin: 18px 0 0; font-size: 16px; color: rgba(28, 19, 15, .78); }
+.sf .o9-plede { margin: 18px 0 0; font-size: 16px; color: var(--sp-muted); }
 .sf .o9-ptip { margin: 10px 0 0; }
 
 /* ── The writer's own line, cut from their photo, on a review card ───────────────────────────── */

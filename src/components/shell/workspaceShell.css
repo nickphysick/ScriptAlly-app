@@ -832,7 +832,7 @@
 .ws-ms-it .ws-ms-t { font-size: 15px; }
 .ws-ms-it:hover, .ws-ms-it:focus-visible { background: var(--shell-menu-on); outline: none; }
 .ws-ms-it:focus-visible, .ws-ms-act:focus-visible { box-shadow: inset 0 0 0 1.5px var(--sp-anthracite); }
-.ws-ms-rm { display: block; font-family: var(--sp-serif); font-size: 13px; line-height: 1.25; color: rgba(28, 19, 15, 0.66); }
+.ws-ms-rm { display: block; font-family: var(--sp-serif); font-size: 13px; line-height: 1.25; color: var(--sp-muted); }
 .ws-ms-rf { display: block; font-family: "JetBrains Mono", monospace; font-size: 8px; line-height: 1.2; letter-spacing: 0.13em; text-transform: uppercase; color: var(--shell-ink-45); }
 .ws-ms-it--shelved .ws-ms-cov, .ws-ms-it--shelved .ws-ms-tx { opacity: 0.6; }
 .ws-ms-ck { flex: none; width: 22px; height: 22px; border-radius: 50%; background: var(--sp-anthracite); color: #fff; display: grid; place-items: center; }

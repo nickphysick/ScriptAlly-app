@@ -61,7 +61,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   line-height: 1.5;
-  color: #8a7a6c;
+  color: var(--sp-quiet);
   text-decoration: none;
   cursor: pointer;
 }

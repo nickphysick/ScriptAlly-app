@@ -234,7 +234,7 @@
 /* ⚠️ NO TOP MARGIN: the ref's `.facts` is `margin: 0` under a 48px title at `line-height: 1.02`, and
    the 8px this carried made the head 145 against the ref's 137 — eight pixels that pushed every
    page down and were nobody's decision. */
-.qcv-line { margin: 10px 0 0; font-family: var(--qcv-serif); font-size: 16px; line-height: 22px; color: var(--qcv-ink-70); }
+.qcv-line { margin: 10px 0 0; font-family: var(--qcv-serif); font-size: 16px; line-height: 22px; color: var(--sp-muted); }
 /* ⚠️ `line-height: 0` ON THE INLINE TITLE: a second face inside the line has its own ascent, and at
    the line's 22px it pushed the line box to 25 — the head measured 82 against the ref's 79. */
 .qcv-line .qcv-line-ms { font-family: var(--qcv-type); font-style: normal; font-size: 15px; line-height: 0; color: var(--qcv-ink); }
@@ -302,13 +302,13 @@
 .qcv-lhead .qcv-lh-ttl small {
   font: 400 9px var(--qcv-mono);
   letter-spacing: 0.14em;
-  color: var(--qcv-ink-45);
+  color: var(--sp-quiet);
   margin-left: 10px;
   vertical-align: 4px;
 }
 .qcv-lh-find {
   display: flex; align-items: center; gap: 8px; justify-self: center; min-width: 0;
-  font-family: var(--qcv-type); font-size: 15px; color: var(--qcv-ink-45);
+  font-family: var(--qcv-type); font-size: 15px; color: var(--sp-quiet);
 }
 .qcv-lh-find svg { flex: none; }
 .qcv-lh-find input {
@@ -358,13 +358,13 @@
  */
 .qcv-stage { display: block; }
 .qcv-ledger { min-width: 0; container-type: inline-size; }
-.qcv-none { margin: 0; padding: 34px 18px; text-align: center; font-family: var(--qcv-serif); font-size: 15px; color: var(--qcv-ink-70); }
+.qcv-none { margin: 0; padding: 34px 18px; text-align: center; font-family: var(--qcv-serif); font-size: 15px; color: var(--sp-muted); }
 .qcv-none button { font: inherit; background: none; border: 0; border-bottom: 1.5px dashed rgba(28, 19, 15, 0.4); padding: 0; margin-left: 10px; cursor: pointer; color: var(--qcv-ink); }
 
 /* Export: a mono link under the stage, right-aligned */
 .qcv-foot { display: flex; justify-content: flex-end; margin: 12px 2px 0; }
 .qcv-export {
-  font-family: var(--qcv-mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-70);
+  font-family: var(--qcv-mono); font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sp-muted);
   background: none; border: 0; border-bottom: 1px solid rgba(28, 19, 15, 0.25); padding: 0 0 2px; cursor: pointer;
 }
 .qcv-export:hover { color: var(--qcv-ink); border-bottom-color: var(--qcv-ink); }
@@ -378,7 +378,7 @@
   box-shadow: 0 14px 34px -14px rgba(28, 19, 15, 0.38), 0 2px 6px rgba(28, 19, 15, 0.06);
   overflow-y: auto; color: #1c130f; font-family: var(--font-serif);
 }
-.qcv-menu-h { margin: 8px 10px 4px; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.qcv-menu-h { margin: 8px 10px 4px; font-family: var(--font-mono); font-size: 8.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); }
 .qcv-menu-sep { height: 1px; margin: 6px 4px; background: rgba(28, 19, 15, 0.11); }
 .qcv-menu button {
   display: flex; align-items: center; gap: 9px; width: 100%; box-sizing: border-box; padding: 9px 10px; border: 0; border-radius: 7px;
@@ -388,7 +388,7 @@
 .qcv-menu button[aria-checked="true"] { background: #f5f1eb; font-weight: 600; }
 .qcv-menu .qcv-menu-sw { flex: none; width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(28, 19, 15, 0.12); }
 .qcv-menu .qcv-menu-l { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: inherit; }
-.qcv-menu .qcv-menu-n { flex: none; margin-left: 12px; font-family: var(--font-mono); font-size: 10px; font-weight: 400; color: rgba(28, 19, 15, 0.45); }
+.qcv-menu .qcv-menu-n { flex: none; margin-left: 12px; font-family: var(--font-mono); font-size: 10px; font-weight: 400; color: var(--sp-quiet); }
 
 /* ── below 900px of main column the docked column goes (the page sets the class by MEASURING the
    column, never the window): the closed card sits under the live one ── */

@@ -72,7 +72,7 @@
 .d58 .d71-hb:hover { background: rgba(255, 255, 255, 0.1); box-shadow: inset 0 0 0 1px rgba(246, 241, 232, 0.32); }
 .d58 .d71-hb:focus-visible { outline: 2px solid #f4efe6; outline-offset: 2px; }
 .d58 .d71-hb--pri { background: #f4efe6; color: var(--d58-ink); box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25); }
-.d58 .d71-hb--pri svg { stroke: #a2452a; }
+.d58 .d71-hb--pri svg { stroke: var(--sp-rust); }
 .d58 .d71-hb--pri:hover { background: #fff; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25); transform: translateY(-1px); }
 
 /* first use: "Where do I start?" sits in the button row as a ghost on the ink */
@@ -304,14 +304,14 @@
   letter-spacing: 0.16em;
   line-height: 13px;
   text-transform: uppercase;
-  color: rgba(28, 19, 15, 0.55);
+  color: var(--sp-quiet);
 }
 .d58 .d71-line {
   margin: 0;
   font-family: var(--d58-serif) !important;
   font-size: 15.5px;
   line-height: 1.5;
-  color: rgba(28, 19, 15, 0.72);
+  color: var(--sp-muted);
 }
 
 /* the reply-window bar: solid from the send to the expected date, hatched from there to today */
@@ -355,7 +355,7 @@
   font-weight: 500;
   letter-spacing: 0.08em;
   line-height: 13px;
-  color: rgba(28, 19, 15, 0.55);
+  color: var(--sp-quiet);
   white-space: nowrap;
 }
 .d71-wlab > span:first-child { left: 0; }
@@ -365,7 +365,7 @@
 
 /* the step chips: done steps filled; the step still to do DASHED — "not happened yet" */
 .d71-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
-.d58 .d71-steps > b { font-weight: 400; color: rgba(28, 19, 15, 0.55); }
+.d58 .d71-steps > b { font-weight: 400; color: var(--sp-quiet); }
 .d58 .d71-step {
   box-sizing: border-box;
   padding: 5px 10px;
@@ -377,7 +377,7 @@
 }
 .d58 .d71-step small { font-family: var(--d58-mono) !important; font-size: 9px; letter-spacing: 0.04em; opacity: 0.75; }
 .d58 .d71-step.is-done { background: #e8eef6; color: #2a3a52; border: 1.5px solid transparent; }
-.d58 .d71-step.is-todo { background: transparent; color: #a2452a; border: 1.5px dashed #a2452a; }
+.d58 .d71-step.is-todo { background: transparent; color: var(--sp-rust); border: 1.5px dashed var(--sp-rust); }
 .d58 .d71-step.is-todo small { opacity: 0.6; }
 
 /* the foot */
@@ -409,7 +409,7 @@
   min-width: 0;
   font-family: var(--d58-serif) !important;
   font-size: 13px;
-  color: rgba(28, 19, 15, 0.55);
+  color: var(--sp-quiet);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -109,11 +109,11 @@
   }
   :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-st { margin: 0; display: flex; align-items: baseline; gap: 14px; min-width: 0; white-space: nowrap; overflow: hidden; }
   :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-st b { flex: none; font: 400 24px/1.2 var(--sp-type) !important; color: #1c130f; }
-  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-st i { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: italic 400 16px/1.2 var(--sp-serif) !important; color: #5b4f47; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-st i { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: italic 400 16px/1.2 var(--sp-serif) !important; color: var(--sp-muted); }
   :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sa { flex: none; margin-left: auto; display: flex; align-items: center; }
   :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sw { display: flex; align-items: baseline; gap: 10px; white-space: nowrap; }
   :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sw b { font: 400 18px/1 var(--sp-type) !important; color: #1c130f; }
-  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sw em { font: italic 400 15px/1 var(--sp-serif) !important; color: #5b4f47; }
+  :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sw em { font: italic 400 15px/1 var(--sp-serif) !important; color: var(--sp-muted); }
   .qc151 .qc156-sk { display: flex; align-items: center; gap: 5px; margin-left: 16px; white-space: nowrap; font: 600 13.5px/1 var(--sp-serif) !important; color: #2a3a52; }
   :is(.qc151, .cl27, .tws56, .pk43, .wsnh) .qc156-sb {
     all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; height: 40px; margin-left: 26px; padding: 0 18px;

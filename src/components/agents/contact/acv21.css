@@ -59,12 +59,12 @@
 .acv2 .ag-sx { margin: -6px 0 -6px auto; display: inline-flex; align-items: center; gap: 8px; align-self: center; }
 .acv2 .ag-sx button { all: unset; box-sizing: border-box; cursor: pointer; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; }
 .acv2 .ag-sx .ag-no { color: #55504a; box-shadow: inset 0 0 0 1px #cfc7bc; background: #fff; }
-.acv2 .ag-sx .ag-no:hover { box-shadow: inset 0 0 0 1.5px #a2452a; color: #a2452a; }
+.acv2 .ag-sx .ag-no:hover { box-shadow: inset 0 0 0 1.5px var(--sp-rust); color: var(--sp-rust); }
 .acv2 .ag-sx .ag-ok { background: #2a3a52; color: #fff; }
 .acv2 .ag-sx .ag-ok:hover { background: #1f2c40; }
 .acv2 .ag-sx .ag-ok:disabled { opacity: 0.55; cursor: default; }
 .acv2 .ag-sx button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
-.acv2 .acv21-err { margin: 0 0 8px; font: 400 14px/1.35 var(--sp-serif) !important; color: #a2452a; }
+.acv2 .acv21-err { margin: 0 0 8px; font: 400 14px/1.35 var(--sp-serif) !important; color: var(--sp-rust); }
 .acv2 .ag-ctl { margin-top: 14px; }
 .acv2 .acv21-body .aap-f:first-child { margin-top: 0; }
 

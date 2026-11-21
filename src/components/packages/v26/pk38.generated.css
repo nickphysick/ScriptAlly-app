@@ -158,7 +158,7 @@
   width: 13px;
 }
 .p8-db > h5 {
-  color: rgba(28,19,15,0.5);
+  color: var(--sp-quiet);
   font-family: "JetBrains Mono", monospace;
   font-size: 9.5px;
   font-style: normal;
@@ -169,7 +169,7 @@
   text-transform: uppercase;
 }
 .p8-df > span {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   flex: 1 1 0%;
   font-family: var(--sp-serif);
@@ -203,7 +203,7 @@
 .p8-pkl .p8-pkl-f {
   appearance: auto;
   background-color: initial;
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   cursor: pointer;
   display: block;
   font-family: var(--sp-serif);
@@ -261,7 +261,7 @@
   background-color: #fff;
   border-radius: 8px;
   box-shadow: rgba(28,19,15,0.09) 0px 0px 0px 1px inset;
-  color: rgba(28,19,15,0.75);
+  color: var(--sp-muted);
   font-family: var(--sp-serif);
   font-size: 14px;
   font-style: normal;
@@ -295,7 +295,7 @@
   margin-top: 12px;
 }
 .p8-db .p8-cp-n {
-  color: rgba(28,19,15,0.62);
+  color: var(--sp-muted);
   font-family: var(--sp-serif);
   font-size: 14px;
   font-style: normal;
@@ -310,7 +310,7 @@
   gap: 8px;
 }
 .p8-db .p8-ptx-none {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   font-family: var(--sp-serif);
   font-size: 14.5px;
   font-style: italic;
@@ -431,7 +431,7 @@
   white-space-collapse: collapse;
 }
 .p8-db .p8-mc span > small {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-serif);
   font-size: 12.5px;
@@ -453,7 +453,7 @@
   line-height: normal;
 }
 .p8-db .p8-dst-r div > span {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-serif);
   font-size: 12.5px;
@@ -470,7 +470,7 @@
   line-height: 24px;
 }
 .p8-db .p8-ptx-t div > span {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-serif);
   font-size: 12.5px;
@@ -745,7 +745,7 @@
   text-transform: uppercase;
 }
 .p8-agg3 .p8-ag3 .p8-ag3-d {
-  color: rgba(28,19,15,0.68);
+  color: var(--sp-muted);
   font-family: var(--sp-serif);
   font-size: 15px;
   font-style: normal;
@@ -780,7 +780,7 @@
   text-transform: none;
 }
 .p8-agg3 .p8-ag3 .p8-o {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   font-family: var(--sp-serif);
   font-size: 13.5px;
   font-style: italic;
@@ -803,7 +803,7 @@
   height: 10px;
 }
 .p8-agg3 .p8-ov .p8-ov-n {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   font-family: var(--sp-serif);
   font-size: 13.5px;
   font-style: normal;
@@ -921,7 +921,7 @@
   width: 34px;
 }
 .p8-db .p8-dpz .p8-dpz-l {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: "JetBrains Mono", monospace;
   font-size: 9px;
@@ -947,7 +947,7 @@
 }
 .p8-db .p8-ptx-fn .p8-fn-r {
   align-items: center;
-  color: rgba(28,19,15,0.75);
+  color: var(--sp-muted);
   display: grid;
   font-family: var(--sp-serif);
   font-size: 13.5px;
@@ -1017,7 +1017,7 @@
   white-space-collapse: collapse;
 }
 .p8-pkl .p8-pkl-b .p8-pkl-t > small {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-serif);
   font-size: 12.5px;
@@ -1048,7 +1048,7 @@
   line-height: normal;
 }
 .p8-agg3 .p8-ag3-row .p8-ag3-h > span {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-serif);
   font-size: 15px;
@@ -1099,7 +1099,7 @@
   overflow: hidden;
 }
 .p8-agg3 .p8-ov .p8-ov-b > b {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-type);
   font-size: 13px;
@@ -1254,7 +1254,7 @@
   text-decoration-line: none;
 }
 .p8-agg3 div.p8-id-aggMain .p8-ag3-f > p {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   flex: 1 1 0%;
   font-family: var(--sp-serif);
   font-size: 14.5px;
@@ -1273,7 +1273,7 @@
   white-space-collapse: collapse;
 }
 .p8-db .p8-mc.p8-none span > b {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-serif);
   font-size: 14.5px;
@@ -1294,7 +1294,7 @@
   line-height: normal;
 }
 .p8-agg3 div.p8-id-aggMain .p8-rs-empty > span {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-serif);
   font-size: 15px;
@@ -1387,7 +1387,7 @@
 .p8-agg3 .p8-ov .p8-early.p8-ov-b {
   align-items: center;
   border-radius: 6px;
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: grid;
   font-family: var(--sp-serif);
   font-size: 12.5px;
@@ -1654,7 +1654,7 @@
   width: 28px;
 }
 .p8-db .p8-dst-r .p8-rg:not(.p8-early) {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   flex: 0 0 auto;
   font-family: var(--sp-serif);
@@ -1754,7 +1754,7 @@
   padding: 0px 24px;
 }
 .p8-db .p8-dst-r .p8-early.p8-rg {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   flex: 0 0 auto;
   font-family: var(--sp-serif);
@@ -1854,7 +1854,7 @@
   overflow: hidden;
 }
 .p8-agg3 .p8-ov .p8-early.p8-ov-b > b {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-type);
   font-size: 13px;
@@ -1891,7 +1891,7 @@
   font-family: var(--sp-serif);
 }
 .p8-agg3 .p8-ac-m.p8-t-let .p8-am-b > p {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   font-family: var(--sp-serif);
   font-size: 14px;
   font-style: italic;
@@ -1914,7 +1914,7 @@
   font-family: var(--sp-serif);
 }
 .p8-agg3 .p8-ac-m.p8-t-syn .p8-am-b > p {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   font-family: var(--sp-serif);
   font-size: 14px;
   font-style: italic;
@@ -1927,7 +1927,7 @@
   font-family: var(--sp-serif);
 }
 .p8-agg3 .p8-ac-m.p8-t-ver .p8-am-b > p {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   font-family: var(--sp-serif);
   font-size: 14px;
   font-style: italic;
@@ -1950,7 +1950,7 @@
   white-space-collapse: collapse;
 }
 .p8-pkl .p8-pkl-b.p8-ret .p8-pkl-t > small {
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-serif);
   font-size: 12.5px;
@@ -2138,7 +2138,7 @@
 .p8-agg3 .p8-ov .p8-ov-b:not(.p8-early):not(.p8-on) {
   align-items: center;
   border-radius: 6px;
-  color: rgba(28,19,15,0.58);
+  color: var(--sp-quiet);
   display: grid;
   font-family: var(--sp-serif);
   font-size: 12.5px;

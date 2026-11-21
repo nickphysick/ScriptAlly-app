@@ -42,17 +42,17 @@
 .qcg .qcg-card > *:not(.qcg-hit) { position: relative; z-index: 1; pointer-events: none; }
 
 .qcg .qcg-card .qcg-top { grid-area: top; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; min-width: 0; }
-.qcg .qcg-card .qcg-lb { font-family: "JetBrains Mono", var(--sp-mono), monospace; font-weight: 500; font-size: 11px; line-height: 1.2; letter-spacing: 0.2em; text-transform: uppercase; color: rgba(28, 19, 15, 0.58); white-space: nowrap; }
-.qcg .qcg-card .qcg-pill { flex: none; padding: 4px 8px; border-radius: 10px; background: #f4efe9; font-family: "JetBrains Mono", var(--sp-mono), monospace; font-weight: 500; font-size: 10.5px; line-height: 1.2; letter-spacing: 0.08em; color: rgba(28, 19, 15, 0.6); white-space: nowrap; }
+.qcg .qcg-card .qcg-lb { font-family: "JetBrains Mono", var(--sp-mono), monospace; font-weight: 500; font-size: 11px; line-height: 1.2; letter-spacing: 0.2em; text-transform: uppercase; color: var(--sp-quiet); white-space: nowrap; }
+.qcg .qcg-card .qcg-pill { flex: none; padding: 4px 8px; border-radius: 10px; background: #f4efe9; font-family: "JetBrains Mono", var(--sp-mono), monospace; font-weight: 500; font-size: 10.5px; line-height: 1.2; letter-spacing: 0.08em; color: var(--sp-quiet); white-space: nowrap; }
 
 /* the number, with a divider on its right running the headlines' height */
 .qcg .qcg-card .qcg-num { grid-area: num; align-self: stretch; display: flex; align-items: center; box-sizing: content-box; min-width: 44px; padding-right: 16px; border-right: 1px solid rgba(28, 19, 15, 0.1); font-family: var(--sp-type); font-weight: 400; font-size: 52px; line-height: 0.85; color: #1c130f; }
 .qcg .qcg-card .qcg-lines { grid-area: list; list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; min-width: 0; }
 .qcg .qcg-card .qcg-line { display: grid; grid-template-columns: 26px minmax(0, 1fr); column-gap: 10px; align-items: baseline; }
 .qcg .qcg-card .qcg-line b { text-align: right; font-family: var(--sp-type); font-weight: 400; font-size: 19px; line-height: 1.1; color: #1c130f; }
-.qcg .qcg-card .qcg-line span { font-family: var(--sp-serif); font-weight: 400; font-size: 15px; line-height: 1.25; color: rgba(28, 19, 15, 0.8); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qcg .qcg-card .qcg-line span { font-family: var(--sp-serif); font-weight: 400; font-size: 15px; line-height: 1.25; color: var(--sp-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 /* a hot line: the figure in rust, the label in full ink */
-.qcg .qcg-card .qcg-line.is-hot b { color: #a2452a; }
+.qcg .qcg-card .qcg-line.is-hot b { color: var(--sp-rust); }
 .qcg .qcg-card .qcg-line.is-hot span { color: #1c130f; }
 
 /* the faces: one row, never two. The row's height is the disc's. */
@@ -67,7 +67,7 @@
 .qcg .qcg-card .qcg-fc--you { background: #b0603e; color: #f4eee5; }
 .qcg .qcg-card .qcg-fc--agent { background: #3d5070; color: #f4eee5; }
 .qcg .qcg-card .qcg-fc--closed { background: #d9d3cc; color: #2b2622; }
-.qcg .qcg-card .qcg-more { flex: none; margin-left: 10px; font-family: var(--sp-serif); font-weight: 400; font-size: 14px; line-height: 1; color: rgba(28, 19, 15, 0.6); white-space: nowrap; }
+.qcg .qcg-card .qcg-more { flex: none; margin-left: 10px; font-family: var(--sp-serif); font-weight: 400; font-size: 14px; line-height: 1; color: var(--sp-quiet); white-space: nowrap; }
 
 /* loading: the same boxes, nothing stated */
 .qcg .qcg-blank { visibility: hidden; }

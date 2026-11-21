@@ -13,7 +13,7 @@
 
 /* ── the page: the landing page's warm gradient, on the dashboard's own scroller only ── */
 .dash-mode .ws-wbody:has(.d58.d2) { background: linear-gradient(180deg, #fbf9f5 0%, #eeebe5 100%); }
-.d58.d2 { --d2-navy: var(--sp-anthracite); --d2-ink: #1c130f; --d2-muted: #7d7067; --d2-rose: #a0675a; --d2-hair: #ebe4da; background: transparent; }
+.d58.d2 { --d2-navy: var(--sp-anthracite); --d2-ink: #1c130f; --d2-muted: var(--sp-quiet); --d2-rose: #a0675a; --d2-hair: #ebe4da; background: transparent; }
 /* ⚠️ THE PAGE MAY SCROLL, as feed v1's did: v58's one-screen height (`.d58`'s height from the scrollport, the page
    `flex: 1 1 0`) is switched off for this mode the way df1.css switches it off for `f1`. The page element is
    `.d58-page` (v58's); the sheet's padding is the ref's 28px 32px around content capped at 1360px. */

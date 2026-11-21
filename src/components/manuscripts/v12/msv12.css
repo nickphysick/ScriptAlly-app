@@ -23,7 +23,7 @@
   --msv12-parch-2: #f7f3ee;
   --msv12-parch-3: #f3eee7;
   --msv12-hair: rgba(28, 19, 15, 0.12);
-  --msv12-muted: rgba(28, 19, 15, 0.58);
+  --msv12-muted: var(--sp-quiet);
   --msv12-type: var(--sp-type);
   --msv12-serif: "Source Serif 4", Georgia, serif;
   --msv12-mono: var(--font-mono);

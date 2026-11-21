@@ -64,10 +64,10 @@
 .hkv-db { padding: 22px 28px 30px; font-family: var(--sp-serif); color: #1c130f; }
 .hkv-start { display: grid; grid-template-columns: auto 1fr; gap: 16px; align-items: start; background: #f7f3ee; border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; }
 .hkv-star { width: 30px; height: 30px; border-radius: 50%; background: #2a3a52; color: #f5f1eb; display: flex; align-items: center; justify-content: center; font-size: 13px; }
-.hkv-start em { font-style: normal; font: 400 8.5px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); display: block; margin-bottom: 4px; }
+.hkv-start em { font-style: normal; font: 400 8.5px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); display: block; margin-bottom: 4px; }
 .hkv-start p { margin: 0; font-size: 15px; line-height: 1.45; }
 .hkv-start p em, .hkv-gx em, .hkv-why em, .hkv-done em { font-style: italic; font: inherit; font-style: italic; color: inherit; letter-spacing: normal; text-transform: none; display: inline; margin: 0; }
-.hkv-lab { font: 400 9px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); margin: 0 0 8px; display: flex; align-items: center; gap: 10px; }
+.hkv-lab { font: 400 9px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); margin: 0 0 8px; display: flex; align-items: center; gap: 10px; }
 .hkv-lab::after { content: ""; flex: 1; height: 1px; background: rgba(28, 19, 15, 0.11); }
 
 .hkv-row { border-radius: 12px; margin-bottom: 8px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.11); background: #fff; overflow: hidden; }
@@ -77,17 +77,17 @@
 .hkv-rh { display: grid; grid-template-columns: 34px 1fr auto; gap: 12px; align-items: center; padding: 11px 14px; cursor: pointer; }
 .hkv-av { width: 30px; height: 30px; font-size: 9.5px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: var(--font-mono, "JetBrains Mono", monospace); }
 .hkv-nm b { display: inline; font-weight: 600; font-size: 15.5px; }
-.hkv-nm small { display: block; font-style: italic; font-size: 13px; color: rgba(28, 19, 15, 0.45); }
+.hkv-nm small { display: block; font-style: italic; font-size: 13px; color: var(--sp-quiet); }
 .hkv-tag { display: inline-block; font: 500 7.5px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.12em; text-transform: uppercase; background: #f5e6df; color: #7c3a2a; padding: 3px 6px; border-radius: 4px; margin-left: 8px; vertical-align: 2px; }
 .hkv-add { height: 28px; padding: 0 12px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.45); font: 500 9px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.12em; text-transform: uppercase; display: inline-flex; align-items: center; white-space: nowrap; }
 .hkv-row.open .hkv-add { visibility: hidden; }
 /* ⚠️ TWO COLUMNS (§6): the why and "Where to find it" left, the fix and its actions right */
 .hkv-hb { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 22px; padding: 4px 16px 16px 60px; }
-.hkv-why { margin: 0; font-size: 14.5px; line-height: 1.5; color: rgba(28, 19, 15, 0.7); }
-.hkv-find { margin: 10px 0 0; font-size: 13.5px; line-height: 1.45; color: rgba(28, 19, 15, 0.7); background: #f7f3ee; border-radius: 8px; padding: 9px 11px; }
-.hkv-find em { display: block; font-style: normal; font: 400 8px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); margin-bottom: 3px; }
+.hkv-why { margin: 0; font-size: 14.5px; line-height: 1.5; color: var(--sp-muted); }
+.hkv-find { margin: 10px 0 0; font-size: 13.5px; line-height: 1.45; color: var(--sp-muted); background: #f7f3ee; border-radius: 8px; padding: 9px 11px; }
+.hkv-find em { display: block; font-style: normal; font: 400 8px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); margin-bottom: 3px; }
 .hkv-fx { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.hkv-hint { font-size: 13px; color: rgba(28, 19, 15, 0.7); margin: 0; line-height: 1.45; }
+.hkv-hint { font-size: 13px; color: var(--sp-muted); margin: 0; line-height: 1.45; }
 .hkv-hint button { border: 0; background: none; padding: 0; font: inherit; text-decoration: underline; color: #1c130f; cursor: pointer; }
 .hkv-also { margin: 0; padding: 8px 10px; list-style: none; border-radius: 8px; background: #fbf9f6; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.11); font-size: 13px; line-height: 1.45; color: #1c130f; }
 .hkv-chips { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -99,7 +99,7 @@
 .hkv-acts { display: flex; align-items: center; gap: 10px; margin-top: 4px; }
 .hkv-center { justify-content: center; }
 .hkv-sp { flex: 1; }
-.hkv-ln { border: 0; background: none; padding: 0; font: inherit; font-size: 13.5px; color: rgba(28, 19, 15, 0.7); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.hkv-ln { border: 0; background: none; padding: 0; font: inherit; font-size: 13.5px; color: var(--sp-muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .hkv-card { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; padding: 0; color: #3f566b; font-family: var(--sp-type); font-size: 13.5px; cursor: pointer; }
 .hkv-sv { height: 34px; padding: 0 18px; border-radius: 17px; border: 0; background: #2a3a52; color: #f5f1eb; font-family: var(--sp-type); font-size: 14px; cursor: pointer; white-space: nowrap; }
 .hkv-sv:disabled { opacity: 0.4; cursor: default; }
@@ -111,25 +111,25 @@
 .hkv-gh em { font-style: normal; font: 500 9px var(--font-mono, "JetBrains Mono", monospace); background: #2a3a52; color: #f5f1eb; border-radius: 9px; padding: 2px 7px; }
 .hkv-chev { font-style: normal; display: inline-block; margin-left: 6px; color: rgba(28, 19, 15, 0.45); transition: transform 0.2s; }
 .hkv-grp.shut .hkv-chev { transform: rotate(-90deg); }
-.hkv-gx { margin: 0 0 10px; font-size: 14px; line-height: 1.45; color: rgba(28, 19, 15, 0.7); max-width: 62ch; }
+.hkv-gx { margin: 0 0 10px; font-size: 14px; line-height: 1.45; color: var(--sp-muted); max-width: 62ch; }
 
 .hkv-ci { margin-top: 26px; background: #f7f3ee; border-radius: 12px; padding: 16px 18px; display: grid; grid-template-columns: 1fr auto; gap: 8px 18px; align-items: center; }
 .hkv-ci b { font-family: var(--sp-type); font-weight: 400; font-size: 17px; }
-.hkv-ci p { margin: 4px 0 0; font-size: 14px; color: rgba(28, 19, 15, 0.7); line-height: 1.45; }
+.hkv-ci p { margin: 4px 0 0; font-size: 14px; color: var(--sp-muted); line-height: 1.45; }
 .hkv-ci-a { display: flex; gap: 10px; align-items: center; }
-.hkv-ci-f { grid-column: 1 / -1; font-size: 13px; color: rgba(28, 19, 15, 0.7); display: flex; align-items: center; gap: 8px; }
+.hkv-ci-f { grid-column: 1 / -1; font-size: 13px; color: var(--sp-muted); display: flex; align-items: center; gap: 8px; }
 .hkv-seg { display: inline-flex; padding: 3px; border-radius: 17px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.11); }
-.hkv-seg button { border: 0; background: none; color: rgba(28, 19, 15, 0.7); height: 26px; padding: 0 12px; border-radius: 13px; font-family: var(--sp-type); font-size: 12.5px; cursor: pointer; }
+.hkv-seg button { border: 0; background: none; color: var(--sp-muted); height: 26px; padding: 0 12px; border-radius: 13px; font-family: var(--sp-type); font-size: 12.5px; cursor: pointer; }
 .hkv-seg button[aria-checked="true"] { background: #2a3a52; color: #f5f1eb; }
-.hkv-ci.quiet { display: block; padding: 12px 16px; font-size: 14px; color: rgba(28, 19, 15, 0.7); }
+.hkv-ci.quiet { display: block; padding: 12px 16px; font-size: 14px; color: var(--sp-muted); }
 .hkv-ci.quiet b { font-family: inherit; font-size: inherit; font-weight: 600; color: #1c130f; }
 
 .hkv-done { text-align: center; padding: 24px 10px 10px; }
 .hkv-done > b { display: block; font: 400 20px var(--sp-type); margin-bottom: 6px; }
-.hkv-done p { margin: 0; font-size: 14px; line-height: 1.45; color: rgba(28, 19, 15, 0.7); }
+.hkv-done p { margin: 0; font-size: 14px; line-height: 1.45; color: var(--sp-muted); }
 .hkv-done p b { color: #1c130f; }
 
-.hkv-foot { border-top: 1px solid rgba(28, 19, 15, 0.11); padding: 14px 28px; font: 400 13.5px var(--sp-serif); color: rgba(28, 19, 15, 0.7); display: flex; align-items: center; gap: 8px; min-height: 22px; }
+.hkv-foot { border-top: 1px solid rgba(28, 19, 15, 0.11); padding: 14px 28px; font: 400 13.5px var(--sp-serif); color: var(--sp-muted); display: flex; align-items: center; gap: 8px; min-height: 22px; }
 .hkv-foot button { border: 0; background: none; padding: 0; font: 400 9px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.12em; text-transform: uppercase; color: #1c130f; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 
 /* ── by agent ── */
@@ -155,10 +155,10 @@
 .hkv-prog { display: flex; gap: 3px; margin: 0 2px 14px; }
 .hkv-prog i { flex: 1; height: 4px; border-radius: 2px; background: #e7e1d9; }
 .hkv-prog i.d { background: #2a3a52; }
-.hkv-k { font: 400 8.5px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.hkv-k { font: 400 8.5px var(--font-mono, "JetBrains Mono", monospace); letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); }
 .hkv-scard h4 { margin: 6px 0 2px; font: 600 19px var(--sp-serif) !important; }
 .hkv-ag:not(.open) .hkv-ab { display: none; }
-.hkv-sag { font: italic 400 13.5px var(--sp-serif); color: rgba(28, 19, 15, 0.7); margin: 0 0 10px; }
+.hkv-sag { font: italic 400 13.5px var(--sp-serif); color: var(--sp-muted); margin: 0 0 10px; }
 .hkv-scard .hkv-why { margin: 10px 0 0; color: #1c130f; }
 .hkv-scard .hkv-fx { margin-top: 12px; }
 .hkv-quote { font-style: italic; }

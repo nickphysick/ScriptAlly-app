@@ -134,7 +134,7 @@
 .sf .im-tip-art img { position: absolute; left: -14px; bottom: 14px; width: 168px; height: 168px; max-width: none; object-fit: contain; pointer-events: none; }
 .sf .im-tip-main { flex: 1; min-width: 0; box-sizing: border-box; padding: 18px 20px 0 22px; display: flex; flex-direction: column; gap: 10px; }
 .sf .im-tip-head { display: flex; align-items: center; justify-content: space-between; }
-.sf .im-tip-kick { font-family: var(--sp-mono); font-size: 10px; letter-spacing: .2em; color: #a2452a; }
+.sf .im-tip-kick { font-family: var(--sp-mono); font-size: 10px; letter-spacing: .2em; color: var(--sp-rust); }
 .sf .im-tip-num { font-family: var(--sp-mono); font-size: 10.5px; color: rgba(var(--im-text-rgb), .55); }
 .sf .im-tip-stack { position: relative; height: 118px; }
 .sf .im-tip-one {

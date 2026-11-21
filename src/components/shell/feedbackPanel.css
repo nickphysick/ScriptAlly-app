@@ -26,13 +26,13 @@
 
 .fb-panel .fb-drop {
   position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 10px;
-  border: 1.5px dashed rgba(28, 19, 15, 0.22); background: #fbf9f5; font: 400 13.5px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62);
+  border: 1.5px dashed rgba(28, 19, 15, 0.22); background: #fbf9f5; font: 400 13.5px/1.45 var(--sp-serif) !important; color: var(--sp-muted);
 }
 .fb-panel .fb-drop span { font: inherit !important; }
 .fb-panel .fb-drop.over { border-color: #2d3a52; background: #f1f3f7; }
 .fb-panel .fb-drop label { color: #2d3a52; font-weight: 600 !important; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .fb-panel .fb-drop input { position: absolute; width: 1px; height: 1px; opacity: 0; }
-.fb-panel .fb-drop:focus-within label { outline: 2px solid #a2452a; outline-offset: 2px; }
+.fb-panel .fb-drop:focus-within label { outline: 2px solid var(--sp-rust); outline-offset: 2px; }
 .fb-panel .fb-thumb {
   display: flex; align-items: center; gap: 10px; padding: 6px 10px 6px 6px; border-radius: 10px; border: 1px solid rgba(28, 19, 15, 0.12);
   font: 400 13px/1.3 var(--sp-serif) !important;
@@ -40,7 +40,7 @@
 .fb-panel .fb-thumb img { width: 54px; height: 36px; object-fit: cover; border-radius: 5px; background: #e4e1db; }
 .fb-panel .fb-thumb span { font: inherit !important; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .fb-panel .fb-thumb button {
-  all: unset; cursor: pointer; margin-left: auto; text-decoration: underline; font: 400 12.5px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62);
+  all: unset; cursor: pointer; margin-left: auto; text-decoration: underline; font: 400 12.5px/1.3 var(--sp-serif) !important; color: var(--sp-muted);
 }
 .fb-panel .fb-err { margin: 0; padding: 8px 10px; border-radius: 8px; background: #fbeee8; font: 400 13px/1.45 var(--sp-serif) !important; color: #1c130f; }
 .fb-panel .fb-err--send { margin: 6px 18px 0; }

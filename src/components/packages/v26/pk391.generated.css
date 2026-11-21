@@ -37,7 +37,7 @@
   word-spacing: 0px;
 }
 .pa-db.pa-pd-b .pa-pd-f > span {
-  color: rgba(28,19,15,0.5);
+  color: var(--sp-quiet);
   display: block;
   font-family: "JetBrains Mono", monospace;
   font-size: 9.5px;
@@ -48,7 +48,7 @@
   text-transform: uppercase;
 }
 .pa-db.pa-pd-b .pa-pd-f span > em {
-  color: rgba(28,19,15,0.45);
+  color: var(--sp-quiet);
   font-family: var(--sp-serif);
   font-size: 12.5px;
   font-style: italic;
@@ -80,7 +80,7 @@
   line-height: normal;
 }
 .pa-db.pa-pd-b .pa-pd-from button > small {
-  color: rgba(28,19,15,0.6);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-serif);
   font-size: 13px;
@@ -192,7 +192,7 @@
   line-height: normal;
 }
 .pa-db.pa-pd-b .pa-pd-from button[aria-checked="true"] > small {
-  color: rgba(28,19,15,0.6);
+  color: var(--sp-quiet);
   display: block;
   font-family: var(--sp-serif);
   font-size: 13px;

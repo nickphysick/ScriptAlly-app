@@ -4,7 +4,7 @@
 .plt-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
 .plt-h { font-family: var(--sp-type); font-weight: 400; font-size: 24px; line-height: 1.2; margin: 0 0 4px; color: var(--sp-ink); }
 .plt-h.plt-h { font: var(--sp-h-section) !important; } /* Consistency roll-out v2, Phase 1: brand.tsx forces h2 into Playfair; two classes and !important outrank it */
-.plt-sub { margin: 0; font-size: 16px; color: rgba(28, 19, 15, .66); }
+.plt-sub { margin: 0; font-size: 16px; color: var(--sp-muted); }
 .plt-seg { display: inline-flex; gap: 3px; padding: 3px; border-radius: 999px; background: #f3ece2; border: 1px solid #e2d6c6; }
 .plt-seg button { all: unset; cursor: pointer; padding: 6px 14px; min-height: 24px; border-radius: 999px; font-size: 14px; color: var(--sp-ink); }
 .plt-seg button[aria-checked="true"] { background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .12); font-weight: 600; }
@@ -14,11 +14,11 @@
 .plt-t th, .plt-t td { text-align: left; vertical-align: middle; padding: 11px 14px; border-bottom: 1px solid #efe6db; }
 .plt-t td, .plt-t thead th { text-align: center; width: 22%; }
 .plt-t th[scope="row"] b { display: block; font-weight: 600; }
-.plt-t th[scope="row"] small { display: block; font-size: 14px; color: rgba(28, 19, 15, .62); font-weight: 400; margin-top: 2px; }
+.plt-t th[scope="row"] small { display: block; font-size: 14px; color: var(--sp-muted); font-weight: 400; margin-top: 2px; }
 .plt-t thead th { vertical-align: bottom; border-bottom: 1px solid #e0d5c8; }
 .plt-t thead th b { display: block; font-family: var(--sp-type); font-weight: 400; font-size: 22px; }
 .plt-t thead th span { display: block; font-size: 16px; font-weight: 600; margin-top: 4px; }
-.plt-t thead th small { display: block; font-size: 14px; font-weight: 400; color: rgba(28, 19, 15, .62); margin-top: 2px; }
+.plt-t thead th small { display: block; font-size: 14px; font-weight: 400; color: var(--sp-muted); margin-top: 2px; }
 .plt-t .plt-p { background: var(--ink-band); color: var(--ink-cream); border-bottom-color: rgba(244, 238, 229, .14); }
 .plt-t thead .plt-p { border-radius: 12px 12px 0 0; }
 .plt-t thead .plt-p small { color: var(--ink-cream-66); }
@@ -49,8 +49,8 @@
 .plt-phr { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 12px; border-bottom: 1px solid #efe6db; font-size: 16px; }
 .plt-phr:last-child { border-bottom: 0; }
 .plt-phr b { display: block; font-weight: 600; }
-.plt-phr small { display: block; font-size: 14px; color: rgba(28, 19, 15, .62); }
-.plt-phr.is-off { color: rgba(28, 19, 15, .5); }
+.plt-phr small { display: block; font-size: 14px; color: var(--sp-muted); }
+.plt-phr.is-off { color: var(--sp-quiet); }
 .plt-tag { font-size: 14px; padding: 2px 10px; border-radius: 999px; background: var(--ink-band); color: var(--ink-cream); white-space: nowrap; }
 .plt-more { all: unset; cursor: pointer; display: block; margin: 14px auto 0; font-size: 14px; text-decoration: underline; min-height: 24px; }
 .plt-phcta { margin-top: 14px; display: flex; justify-content: center; }

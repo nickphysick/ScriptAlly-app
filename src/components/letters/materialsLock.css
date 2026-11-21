@@ -14,8 +14,8 @@
 .mlk-ic { display: inline-grid; place-items: center; width: 50px; height: 50px; border-radius: 50%; background: #f8e8ea; color: #8f4a5a; margin-bottom: 12px; }
 .mlk-ic svg { width: 22px; height: 22px; }
 .mlk-over h2.mlk-h.mlk-h { margin: 0; font: 400 26px/1.15 var(--sp-serif) !important; color: #1c130f; }
-.mlk-p { margin: 10px 0 0; font-size: 16px; line-height: 1.5; color: rgba(28, 19, 15, .72); }
-.mlk-free { font-style: italic; font-size: 15px; color: rgba(28, 19, 15, .58); }
+.mlk-p { margin: 10px 0 0; font-size: 16px; line-height: 1.5; color: var(--sp-muted); }
+.mlk-free { font-style: italic; font-size: 15px; color: var(--sp-quiet); }
 .mlk-acts { display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap; }
 .mlk-over .mlk-b1, .mlk-over .mlk-b2 { display: inline-flex; align-items: center; height: 46px; padding: 0 22px; border: 0; border-radius: 12px; font: 400 17px/1 var(--sp-type) !important; white-space: nowrap; cursor: pointer; }
 .mlk-b1 { background: var(--sp-anthracite); color: #f4eee5; }

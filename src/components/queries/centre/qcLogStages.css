@@ -26,7 +26,7 @@
 
 .laq {
   --laq-ink: #1c130f; --laq-mut: #6f645b; --laq-mut2: #9a8f84; --laq-paper: #f6f3ee; --laq-line: #e2d9cc;
-  --laq-navy: #2a3a52; --laq-harbour: #2f4a5c; --laq-rust: #a2452a;
+  --laq-navy: #2a3a52; --laq-harbour: #2f4a5c; --laq-rust: var(--sp-rust);
   /* materials fork v1 — the packages/materials object colour */
   --laq-ochre: #9a7233; --laq-ochre-ink: #7a5a22; --laq-ochre-tint: #f6efe2;
   --laq-tw: var(--sp-type); --laq-se: var(--sp-serif); --laq-mono: var(--sp-mono);
@@ -101,7 +101,7 @@
 .laq .laq-big > button:hover, .laq .laq-big > button.is-hi { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
 .laq .laq-big > button:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
 .laq .laq-big > button.is-on { box-shadow: inset 0 0 0 1.5px var(--laq-navy); background: #f7f5f1; }
-.laq .laq-g { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--laq-paper); font: 500 12px var(--laq-mono) !important; color: #5b4f47; }
+.laq .laq-g { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--laq-paper); font: 500 12px var(--laq-mono) !important; color: var(--sp-muted); }
 .laq .laq-g.is-pkg { border-radius: 9px; background: var(--laq-harbour); }
 .laq .laq-tx { flex: 1 1 auto; min-width: 0; }
 .laq .laq-tx b { display: block; font: 500 16.5px/1.25 var(--laq-se); }
@@ -124,7 +124,7 @@
 .laq .laq-busy { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; background: #faf8f4; box-shadow: inset 0 0 0 1px #ece5da; font: 400 14.5px var(--laq-se); color: var(--laq-mut); }
 .laq .laq-busy:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
 .laq .laq-faces { display: flex; }
-.laq .laq-faces i { display: grid; place-items: center; width: 24px; height: 24px; margin-left: -6px; border-radius: 50%; background: var(--laq-paper); box-shadow: 0 0 0 2px #faf8f4, inset 0 0 0 1px var(--laq-line); font: 500 8px var(--laq-mono) !important; font-style: normal; color: #5b4f47; }
+.laq .laq-faces i { display: grid; place-items: center; width: 24px; height: 24px; margin-left: -6px; border-radius: 50%; background: var(--laq-paper); box-shadow: 0 0 0 2px #faf8f4, inset 0 0 0 1px var(--laq-line); font: 500 8px var(--laq-mono) !important; font-style: normal; color: var(--sp-muted); }
 .laq .laq-faces i:first-child { margin-left: 0; }
 .laq .laq-busy u { margin-left: auto; color: var(--laq-navy); text-underline-offset: 3px; }
 .laq .laq-off { display: flex; align-items: center; gap: 12px; padding: 8px 14px; opacity: .55; }
@@ -140,7 +140,7 @@
 @keyframes laq-fadein { from { opacity: 0; transform: translateY(-3px); } }
 .laq .laq-calh { display: flex; align-items: center; margin: 0 2px 8px; }
 .laq .laq-calh b { flex: 1 1 auto; text-align: center; font: 400 16px var(--laq-tw); }
-.laq .laq-calh button { all: unset; cursor: pointer; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #5b4f47; }
+.laq .laq-calh button { all: unset; cursor: pointer; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: var(--sp-muted); }
 .laq .laq-calh button:hover { background: #f6f2ec; }
 .laq .laq-calh button:disabled { opacity: .25; pointer-events: none; }
 .laq .laq-calg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
@@ -170,7 +170,7 @@
 .laq .laq-asks.is-pkg .laq-mk { width: 6px; height: 6px; box-shadow: none; background: #8e8274; }
 .laq .laq-asks li.is-ok .laq-mk { background: var(--laq-navy); box-shadow: none; color: #fff; }
 .laq .laq-asks li.is-diff .laq-mk { background: #fff; box-shadow: inset 0 0 0 1.5px var(--laq-rust); color: var(--laq-rust); }
-.laq .laq-af { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid #e0d4c3; font: 400 14px/1.4 var(--laq-se); color: #5b4f47; }
+.laq .laq-af { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid #e0d4c3; font: 400 14px/1.4 var(--laq-se); color: var(--sp-muted); }
 .laq .laq-af.is-ok { color: var(--laq-ink); }
 .laq .laq-af .laq-why { display: block; color: var(--laq-rust); }
 .laq .laq-af .laq-xtra { display: block; font-style: italic; }
@@ -231,14 +231,14 @@
 .laq .laq-btn.is-ghost { background: #fff; color: var(--laq-navy); box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
 .laq .laq-btn.is-sm { height: 36px; padding: 0 14px; font-size: 14px; }
 .laq .laq-btn:disabled { opacity: .38; pointer-events: none; }
-.laq .laq-lnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--laq-se); color: #5b4f47; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.laq .laq-lnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--laq-se); color: var(--sp-muted); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 .laq .laq-lnk:hover { color: var(--laq-navy); }
 .laq .laq-lnk:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; border-radius: 2px; }
 .laq .laq-lnk:disabled { opacity: .38; pointer-events: none; }
 
 /* v1.2 — the leave check, in the footer's place */
 .laq .laq-cf.is-leave { background: #faf6f0; }
-.laq .laq-lv { font: 400 14.5px/1.35 var(--laq-se); color: #5b4f47; }
+.laq .laq-lv { font: 400 14.5px/1.35 var(--laq-se); color: var(--sp-muted); }
 .laq .laq-lv b { font-weight: 600; color: var(--laq-ink); }
 
 /* the batch toast */
@@ -260,7 +260,7 @@
 .laq h2.laq-yh { margin: 14px 0 6px; min-height: 35px; font: 400 30px/1.15 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
 .laq .laq-cur { display: inline-block; width: 2px; height: 26px; margin-left: 2px; vertical-align: -3px; background: var(--laq-ink); animation: laq-blink .8s steps(1) infinite; }
 @keyframes laq-blink { 50% { opacity: 0; } }
-.laq p.laq-yl { margin: 0 0 4px; max-width: 400px; font: italic 400 15.5px/1.5 var(--laq-se); color: #5b4f47; animation: laq-fade .4s .7s both; }
+.laq p.laq-yl { margin: 0 0 4px; max-width: 400px; font: italic 400 15.5px/1.5 var(--laq-se); color: var(--sp-muted); animation: laq-fade .4s .7s both; }
 @keyframes laq-fade { from { opacity: 0; } }
 .laq .laq-cnt { display: inline-flex; align-items: baseline; gap: 6px; margin: 6px 0 14px; animation: laq-fade .4s .8s both; font: 400 14.5px var(--laq-se); color: var(--laq-mut); }
 .laq .laq-odo { display: inline-block; height: 1.15em; overflow: hidden; vertical-align: bottom; font: 400 22px/1.15 var(--laq-tw) !important; color: var(--laq-ink); }
@@ -276,7 +276,7 @@
 .laq .laq-yay .laq-pvtag { display: none; }
 .laq .laq-yay .laq-stamp { top: 96px; }
 .laq .qi-slot { display: flex; align-items: center; justify-content: center; flex: none; background: repeating-linear-gradient(135deg, rgba(58,28,20,.05) 0 6px, transparent 6px 12px); border: 1px dashed rgba(58,28,20,.22); border-radius: 14px; }
-.laq .qi-ph { color: #8a7a6c; font: 400 8px/1.5 var(--laq-mono) !important; letter-spacing: .12em; text-transform: uppercase; }
+.laq .qi-ph { color: var(--sp-quiet); font: 400 8px/1.5 var(--laq-mono) !important; letter-spacing: .12em; text-transform: uppercase; }
 
 @media (prefers-reduced-motion: reduce) {
   .laq *, .laq *::before, .laq *::after { animation: none !important; transition: none !important; }

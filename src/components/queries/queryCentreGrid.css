@@ -314,7 +314,7 @@
 .qcc-foot-lnk[disabled] { opacity: 0.45; cursor: default; }
 
 .qcc-none {
-  text-align: center; padding: 70px 0 60px; color: #8a7a6c;
+  text-align: center; padding: 70px 0 60px; color: var(--sp-quiet);
   font-family: var(--font-serif); font-style: italic; font-size: 16px;
 }
 .qcc-none-btn {
@@ -331,7 +331,7 @@
    does, which is why the wrapper is the board's and not the page's. */
 .qcc-boardwrap { overflow-x: auto; overflow-y: visible; margin: 0 -2px; padding: 0 2px 4px; }
 .qcc-calph {
-  font-family: var(--font-serif); font-style: italic; font-size: 15px; color: #8a7a6c;
+  font-family: var(--font-serif); font-style: italic; font-size: 15px; color: var(--sp-quiet);
   background: #fdfaf5; border-radius: 14px; padding: 48px 24px; text-align: center; margin: 0;
 }
 

@@ -91,7 +91,7 @@
   :root:root .sa-mi:hover:not([aria-disabled="true"]) svg,
   :root:root .sa-mi:focus-visible:not([aria-disabled="true"]) svg { color: var(--ink-terra-deep); }
 
-  :root:root .sa-mi--mute { color: rgba(28, 19, 15, 0.58); }
+  :root:root .sa-mi--mute { color: var(--sp-quiet); }
   :root:root .sa-mi[aria-disabled="true"] { color: rgba(28, 19, 15, 0.42); cursor: default; }
   :root:root .sa-mi[aria-disabled="true"] svg { color: rgba(28, 19, 15, 0.42); }
 
@@ -106,7 +106,7 @@
     font-weight: 600;
     font-size: 9.5px;
     line-height: 1.3;
-    color: rgba(28, 19, 15, 0.58);
+    color: var(--sp-quiet);
   }
   /* the SOON tag (1b) — a disabled row's only mark of why */
   :root:root .sa-soon {

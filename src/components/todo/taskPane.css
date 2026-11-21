@@ -25,7 +25,7 @@
 
 .tpn {
   --ground:var(--ws-page); --window:#fefcfa; --white:#ffffff; --field:#fdfbf7;
-  --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c;
+  --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:var(--sp-quiet);
   --hair:#e7ddd2; --hair2:#e0d5c8;
   /* ⚠️ THE CONTRACT'S VALUE. Three were in play — this file had #ece4d9, the brief's prose says
      #e6dccd, and the contract says #e8e0d8. The files are the contract (owner's instruction), so
@@ -66,7 +66,7 @@
 .tpn .u-now .b-sub { color:#8a6558; }
 .tpn .u-house .b-sub { color:#5f7059; }
 .tpn .u-yours .b-sub { color:#8a7a5c; }
-.tpn .act .sub { font-size:12px;color:var(--muted2);font-weight:300;margin-top:3px;margin-bottom:17px;line-height:1.5; }
+.tpn .act .sub { font-size:12px;color:var(--sp-quiet);font-weight:300;margin-top:3px;margin-bottom:17px;line-height:1.5; }
 .tpn .act .sub a, .tpn .act a.lk { color:var(--burg);text-decoration:none;border-bottom:1px solid rgba(124,58,42,0.3); }
 /* ⚠️ FLEX, NOT BLOCK — the contract's own change, and the steer square is why: a `::before` on a
    block label sits on the text's baseline and rides up and down with the cap height. As a flex row
@@ -96,14 +96,14 @@
 .tpn .mat .box svg { opacity:0;color:#fff; }
 .tpn .mat.on .box svg { opacity:1; }
 .tpn .mat .nm { font-size:12.5px;color:var(--ink);font-weight:500; }
-.tpn .mat .hint { font-size:11px;color:var(--muted2);font-weight:300;margin-top:1px; }
+.tpn .mat .hint { font-size:11px;color:var(--sp-quiet);font-weight:300;margin-top:1px; }
 .tpn .mat-extra { display:none;align-items:center;gap:8px;padding:0 13px 0 40px;margin-top:-2px; }
 .tpn .mat.on+.mat-extra { display:flex; }
 .tpn .mini { background:var(--white);border:0.5px solid var(--hair2);border-radius:8px;padding:6px 10px;font-family:'Inter',sans-serif;font-size:12px;color:var(--ink);outline:none; }
 .tpn .mini.num { width:62px; }
 .tpn .mini:focus { border-color:#8a9e88; }
 .tpn .asks { display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:10px 13px;background:#fbf7f1;border:0.5px dashed #ddd0c0;border-radius:10px;margin-bottom:15px; }
-.tpn .asks .t { font-size:11.5px;color:var(--muted2);font-weight:300; }
+.tpn .asks .t { font-size:11.5px;color:var(--sp-quiet);font-weight:300; }
 .tpn .asks .t b { font-weight:500;color:var(--ink2); }
 .tpn .b-tiny { cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:0.06em;background:var(--white);color:var(--ink2);border:0.5px solid var(--hair2);border-radius:8px;padding:7px 12px;transition:all .18s;white-space:nowrap; }
 .tpn .b-tiny:hover { border-color:#c9a89e;color:var(--burg); }
@@ -130,7 +130,7 @@
 .tpn .cf input { background:var(--white);border:0.5px solid var(--hair2);border-radius:8px;padding:7px 66px 7px 11px;font-family:'Inter',sans-serif;font-size:12.5px;color:var(--ink);outline:none;width:132px; }
 .tpn .cf input:focus { border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12); }
 .tpn .cf .sfx { position:absolute;right:11px;top:50%;transform:translateY(-50%);font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;color:#b8a898;pointer-events:none; }
-.tpn .smpread { font-size:11.5px;color:var(--muted2);font-weight:300;margin-top:10px; }
+.tpn .smpread { font-size:11.5px;color:var(--sp-quiet);font-weight:300;margin-top:10px; }
 .tpn .smpread b { font-weight:500;color:var(--ink2); }
 .tpn .smpread .none { color:#c0b0a0;font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase; }
 .tpn .verow { display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 13px;background:var(--field);border:0.5px solid var(--hair2);border-radius:10px;margin-bottom:16px; }
@@ -142,12 +142,12 @@
 .tpn .vsel:focus { border-color:#8a9e88;box-shadow:0 0 0 3px rgba(138,158,136,0.12); }
 .tpn .matver { display:flex;align-items:center;gap:8px;padding:0 13px 0 40px;margin:-2px 0 2px; }
 .tpn .matver .vlb { white-space:nowrap; }
-.tpn .upsell { margin-top:16px;padding-top:13px;border-top:1px dashed var(--dash);font-size:11.5px;color:var(--muted2);font-weight:300;display:flex;align-items:center;gap:8px; }
+.tpn .upsell { margin-top:16px;padding-top:13px;border-top:1px dashed var(--dash);font-size:11.5px;color:var(--sp-quiet);font-weight:300;display:flex;align-items:center;gap:8px; }
 .tpn .upsell .tag { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.13em;text-transform:uppercase;color:var(--burg);background:var(--pink);border:0.5px solid var(--pink-b);border-radius:5px;padding:3px 7px; }
 .tpn .upsell a { color:var(--burg);text-decoration:none;border-bottom:1px solid rgba(124,58,42,0.3); }
-.tpn .pkgnote { font-size:11px;color:var(--muted2);font-weight:300;margin-top:11px;line-height:1.5; }
+.tpn .pkgnote { font-size:11px;color:var(--sp-quiet);font-weight:300;margin-top:11px;line-height:1.5; }
 .tpn .bulkbar { display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;background:#fbf7f1;border:0.5px dashed #ddd0c0;border-radius:10px;margin-bottom:16px; }
-.tpn .bulkbar .t { font-size:11.5px;color:var(--muted2);font-weight:300; }
+.tpn .bulkbar .t { font-size:11.5px;color:var(--sp-quiet);font-weight:300; }
 .tpn .bt { width:100%;border-collapse:collapse; }
 .tpn .bt { margin-top:2px; }
 .tpn .bt thead th { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:0 10px 8px;border-bottom:1px solid var(--hair); }
@@ -156,8 +156,8 @@
 .tpn .bt tbody tr:last-child td { border-bottom:0; }
 .tpn .bt tbody tr.done { background:#fcfaf5; }
 .tpn .bt .ag { font-size:12.5px;color:var(--ink);font-weight:500; }
-.tpn .bt .ay { font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:1px; }
-.tpn .bt .dt { font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--muted2);white-space:nowrap; }
+.tpn .bt .ay { font-size:10.5px;color:var(--sp-quiet);font-weight:300;margin-top:1px; }
+.tpn .bt .dt { font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--sp-quiet);white-space:nowrap; }
 .tpn .bt tbody tr.sub td { padding:2px 10px 12px;border-bottom:1px dashed #efe6da; }
 .tpn .bt tbody tr.sub { display:none; }
 .tpn .bt tbody tr.sub.open { display:table-row; }
@@ -167,7 +167,7 @@
 .tpn .subin .unitpill { padding:5px 11px;font-size:9px; }
 .tpn .more { text-align:center;padding:12px 0 2px; }
 .tpn .more a { font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);text-decoration:none; }
-.tpn .caveat { font-size:11px;color:var(--muted2);font-weight:300;margin:11px 0 0;line-height:1.5; }
+.tpn .caveat { font-size:11px;color:var(--sp-quiet);font-weight:300;margin:11px 0 0;line-height:1.5; }
 /* (`.tl-head`, its unused `.c` count and `.tl-in` are retired — the record card's head is `.rhead`
    and its body is `.rtl`, both the corrected contract's own words. The RUNGS keep `.tl-e`: an entry
    is the same object wherever it is drawn, and renaming it would have moved `rung()` and the
@@ -190,7 +190,7 @@
 .tpn .tl-e.in .sd::before { border-color:var(--sage); }
 .tpn .tl-e.now .sd::before { background:var(--burg);border-color:var(--burg); }
 .tpn .tl-e .t { font-size:11.5px;color:var(--ink);font-weight:500;line-height:1.3; }
-.tpn .tl-e.minor .t { font-weight:400;color:var(--muted2);font-size:11.5px; }
+.tpn .tl-e.minor .t { font-weight:400;color:var(--sp-quiet);font-size:11.5px; }
 .tpn .tl-e.now .t { color:var(--burg); }
 .tpn .tl-e .d { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);margin-top:2px; }
 /* the send rung's extras (clean-up pass, 28 Sep): the requery line and the materials box */
@@ -532,7 +532,7 @@
    does not. `.formpad` goes the same way: the worksheet's padding is `.form`'s, which is the
    contract's own element.) */
 .tpn .f-h { font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2); }
-.tpn .f-sub { font-size:11.5px;color:var(--muted2);font-weight:300;margin:3px 0 15px;line-height:1.5; }
+.tpn .f-sub { font-size:11.5px;color:var(--sp-quiet);font-weight:300;margin:3px 0 15px;line-height:1.5; }
 /* ⚠️ THE LAW, VERBATIM: A BACKGROUND TINT INSIDE THE FORM CARD MEANS THE THING IS TOUCHABLE.
    (steer round, Phase 4. Also in CLAUDE.md.)
    The card is WHITE throughout. Tint survives on exactly five things, and every one of them is
@@ -593,7 +593,7 @@
 .tpn .willrec .lead { font-family:'JetBrains Mono',monospace;font-size:9.5px;letter-spacing:0.11em;text-transform:uppercase;color:var(--muted);margin-right:7px; }
 .tpn .willrec b { color:var(--ink2);font-weight:500; }
 .tpn .ab { cursor:pointer;height:34px;display:inline-flex;align-items:center;gap:7px;padding:0 15px;border-radius:999px;font-size:12px;font-weight:500;white-space:nowrap;transition:all .15s; }
-.tpn .ab.quiet { background:var(--white);border:1px solid var(--hair);color:var(--muted2); }
+.tpn .ab.quiet { background:var(--white);border:1px solid var(--hair);color:var(--sp-quiet); }
 .tpn .ab.quiet:hover { background:#f5f2ee; }
 .tpn .ab.go { background:var(--pink);border:1px solid var(--pink-b);color:var(--burg);font-weight:600; }
 .tpn .ab.go:hover { background:#efd5ca; }
@@ -604,7 +604,7 @@
 .tpn .dlg-card h3 { font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink2); }
 .tpn .dlg-card p { font-size:12px;color:#6a584a;font-weight:300;line-height:1.6;margin:8px 0 0; }
 .tpn .dlg-card p b { font-weight:500;color:var(--ink2); }
-.tpn .dlg-where { background:var(--field);border:0.5px dashed #ddd0c0;border-radius:9px;padding:10px 12px;margin-top:12px;font-size:11px;color:var(--muted2);font-weight:300;line-height:1.55; }
+.tpn .dlg-where { background:var(--field);border:0.5px dashed #ddd0c0;border-radius:9px;padding:10px 12px;margin-top:12px;font-size:11px;color:var(--sp-quiet);font-weight:300;line-height:1.55; }
 .tpn .dlg-where b { color:var(--ink2);font-weight:500; }
 .tpn .dlg-foot { display:flex;justify-content:flex-end;gap:9px;margin-top:16px; }
 
@@ -668,14 +668,14 @@
 .tpn .bulk th { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);font-weight:500;text-align:left;padding:8px 9px;border-bottom:1px solid var(--hair);white-space:nowrap; }
 .tpn .bulk td { padding:9px;border-bottom:1px solid #f3ece3;font-size:12px;vertical-align:middle; }
 .tpn .bulk-who { font-weight:500;color:var(--ink2); }
-.tpn .bulk-agy { color:var(--muted2);font-weight:300; }
-.tpn .bulk-sent { font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted2);white-space:nowrap; }
+.tpn .bulk-agy { color:var(--sp-quiet);font-weight:300; }
+.tpn .bulk-sent { font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--sp-quiet);white-space:nowrap; }
 .tpn .bulk .txt.bulk-other { font-size:11.5px;padding:6px 9px; }
 .tpn .bulk-editrow > td { background:var(--field);border-bottom:1px solid #f3ece3; }
 .tpn .fillrow { display:flex;gap:8px;margin:0 0 12px;flex-wrap:wrap;align-items:center; }
 .tpn .fb { cursor:pointer;font-size:11.5px;background:var(--field);border:0.5px solid var(--hair2);border-radius:9px;padding:7px 12px;color:var(--ink2); }
 .tpn .fb:hover { background:var(--white);border-color:var(--hair); }
-.tpn .caveat { font-size:10.5px;color:var(--muted2);font-weight:300;margin-left:auto; }
+.tpn .caveat { font-size:10.5px;color:var(--sp-quiet);font-weight:300;margin-left:auto; }
 /* ⚠️ SCOPED TO THE TABLE IT RENDERS IN (workspace round, Phase 3). `.tick` was `.tpn .tick`, and
    the ledger's answered row wears the contract's own `.tick` for its sage check — two very
    different objects under one name. `BulkFillTable` renders this one inside `table.bulk` and
@@ -683,7 +683,7 @@
    specificity further down. */
 .tpn .bulk .tick { width:17px;height:17px;border-radius:5px;border:1.5px solid var(--hair2);background:var(--field);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;color:transparent;transition:all .13s; }
 .tpn .bulk .tick.on { background:var(--pink);border-color:var(--pink-b);color:var(--burg); }
-.tpn .samp { cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--muted2);border-bottom:1px dashed #d5c7b5;white-space:nowrap;background:none;border-top:0;border-left:0;border-right:0;padding:0; }
+.tpn .samp { cursor:pointer;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--sp-quiet);border-bottom:1px dashed #d5c7b5;white-space:nowrap;background:none;border-top:0;border-left:0;border-right:0;padding:0; }
 .tpn .bulk-foot { font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;margin-top:10px; }
 .tpn .bulk-foot a { color:var(--burg);text-decoration:none; }
 
@@ -741,7 +741,7 @@
 .tpn .fk .g {
   grid-column:1;grid-row:1/3;width:26px;height:26px;border-radius:7px;
   background:var(--white);border:0.5px solid var(--hair2);
-  display:inline-flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted2);
+  display:inline-flex;align-items:center;justify-content:center;font-size:14px;color:var(--sp-quiet);
   flex-shrink:0;transition:border-color .15s,color .15s;
 }
 .tpn .fk:hover .g { border-color:var(--pink-b);color:var(--burg); }
@@ -750,7 +750,7 @@
    minimum could never be the height — the number was in the stylesheet and nothing obeyed it.
    Measured before and after rather than reasoned: 67.2 → the contract's row. */
 .tpn .fk .t { grid-column:2;grid-row:1;display:block;font-size:13px;font-weight:500;color:var(--ink2);line-height:1.35; }
-.tpn .fk .s { grid-column:2;grid-row:2;display:block;font-size:10.5px;font-weight:300;color:var(--muted2);line-height:1.45; }
+.tpn .fk .s { grid-column:2;grid-row:2;display:block;font-size:10.5px;font-weight:300;color:var(--sp-quiet);line-height:1.45; }
 /* ⚠️ A CROSSOVER SAYS SO BEFORE IT IS PRESSED — swapping the whole journey unannounced would read
    as the pane losing its place. */
 .tpn .fk .x { grid-column:3;grid-row:1/3;display:block;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--burg);white-space:nowrap;margin:0; }
@@ -788,10 +788,10 @@
    caption row rather than a statement of what the writer had decided. */
 .tpn .receipt .rk { font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:0.11em;text-transform:uppercase;color:var(--muted); }
 .tpn .receipt .rv { font-family:'Playfair Display',serif;font-size:15px;font-weight:600;color:var(--ink2); }
-.tpn .receipt .rlink { cursor:pointer;background:none;border:0;padding:0;font-family:'Inter',sans-serif;font-size:13px;color:var(--muted2);text-decoration:underline;text-underline-offset:3px;border-bottom:0; }
+.tpn .receipt .rlink { cursor:pointer;background:none;border:0;padding:0;font-family:'Inter',sans-serif;font-size:13px;color:var(--sp-quiet);text-decoration:underline;text-underline-offset:3px;border-bottom:0; }
 .tpn .receipt .rlink:hover { color:var(--burg); }
-.tpn .cleared { font-size:10.5px;color:var(--muted2);font-weight:300;padding:0 0 6px;line-height:1.5; }
-.tpn .flowinfo { font-size:11.5px;color:var(--muted2);font-weight:300;padding:6px 0 4px;line-height:1.55; }
+.tpn .cleared { font-size:10.5px;color:var(--sp-quiet);font-weight:300;padding:0 0 6px;line-height:1.5; }
+.tpn .flowinfo { font-size:11.5px;color:var(--sp-quiet);font-weight:300;padding:6px 0 4px;line-height:1.55; }
 
 .tpn .q { border-bottom:1px solid var(--hair); }
 /* ⚠️ `:last-of-type` MATCHED NOTHING, AND THE RULE HAD NEVER APPLIED (found by the steer round's
@@ -867,7 +867,7 @@
 .tpn .addlink:hover { border-bottom-style:solid; }
 /* the hint belongs to the open question and renders only under it — a form of quiet lines above
    questions nobody is answering is a form explaining itself to no one */
-.tpn .q .hint { font-size:10.5px;color:var(--muted2);font-weight:300;margin-top:8px;line-height:1.5; }
+.tpn .q .hint { font-size:10.5px;color:var(--sp-quiet);font-weight:300;margin-top:8px;line-height:1.5; }
 
 /* ── the count chip and the missing line (steer round, Phase 5) ─────────────────────────────── */
 /* ⚠️ IT WRAPS, IT DOES NOT TRUNCATE. A line naming the missing answers is useless with the last two
@@ -918,7 +918,7 @@
 .tpn .who { display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--hair);flex:0 0 auto; }
 .tpn .who .av { width:32px;height:32px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0; }
 .tpn .who .n { font-size:13px;font-weight:500;color:var(--ink);line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.tpn .who .a { font-size:11px;color:var(--muted2);font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.tpn .who .a { font-size:11px;color:var(--sp-quiet);font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
 .tpn .who .lk { margin-left:auto;font-size:10.5px;color:#b3a494;white-space:nowrap;text-decoration:none;flex-shrink:0; }
 .tpn .who:hover .lk, .tpn .who .lk:hover { color:var(--burg); }
 
@@ -929,7 +929,7 @@
 .tpn .fact { display:grid;grid-template-columns:82px 1fr;gap:10px;align-items:baseline;padding:7px 0; }
 .tpn .fact .k { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted); }
 .tpn .fact .v { font-size:12.5px;color:var(--ink);font-weight:500;min-width:0; }
-.tpn .fact .v small { display:block;font-size:10px;color:var(--muted2);font-weight:300;margin-top:1px; }
+.tpn .fact .v small { display:block;font-size:10px;color:var(--sp-quiet);font-weight:300;margin-top:1px; }
 /* absence in the mono absent voice — "None sent", never a dash and never an invented value */
 .tpn .fact .v.absent { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0;font-weight:400; }
 
@@ -940,7 +940,7 @@
 .tpn .qbtn:hover { border-bottom-style:solid; }
 
 /* the collapsed spine — the label vertical, and the way back */
-.tpn .rh { cursor:pointer;width:100%;height:100%;border:0;background:var(--field);display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;color:var(--muted2); }
+.tpn .rh { cursor:pointer;width:100%;height:100%;border:0;background:var(--field);display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px 0;color:var(--sp-quiet); }
 .tpn .rh .t { writing-mode:vertical-rl;transform:rotate(180deg);font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.14em;text-transform:uppercase; }
 .tpn .rh:hover { background:#f6f1ea;color:var(--burg); }
 

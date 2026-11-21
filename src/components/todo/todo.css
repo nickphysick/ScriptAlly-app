@@ -1229,7 +1229,7 @@ button.tdb-ldot { cursor: pointer; }
 .tdb-tsettagpal { display: inline-flex; gap: 4px; margin-left: auto; }
 .tdb-tsettagc { width: 15px; height: 15px; border-radius: 5px; border: 1px solid transparent; cursor: pointer; padding: 0; }
 .tdb-tsettagc.on { outline: 1.5px solid #2a1a13; outline-offset: 1px; }
-.tdb-tsettagdel { background: transparent; border: 0; font: inherit; font-size: 11px; color: #8a7a6c; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+.tdb-tsettagdel { background: transparent; border: 0; font: inherit; font-size: 11px; color: var(--sp-quiet); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
 .tdb-tsettagdel.armed { color: #7c3a2a; font-weight: 700; }
 .tdb-nc-tags { display: block; width: 100%; margin-top: 8px; }
 /* ⚠️ SUPERSEDED BY `todoDock.css` (pane faults, Phase 5) — this had no horizontal padding, and the

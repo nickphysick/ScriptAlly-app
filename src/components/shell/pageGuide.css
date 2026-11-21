@@ -24,14 +24,14 @@
 }
 .pgd p {
   margin: 0; font-family: var(--font-serif);
-  font-size: 14.5px; line-height: 1.5; color: rgba(28, 19, 15, 0.7);
+  font-size: 14.5px; line-height: 1.5; color: var(--sp-muted);
 }
 .pgd p + p { margin-top: 8px; }
 .pgd-x {
   position: absolute; top: 8px; right: 10px;
   margin: 0; padding: 4px 6px; border: 0; background: none; cursor: pointer;
   font: 400 16px var(--sp-type); line-height: 1;
-  color: rgba(28, 19, 15, 0.45);
+  color: var(--sp-quiet);
 }
 .pgd-x:hover { color: var(--qcv-ink, #1c130f); }
 .pgd-f { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
@@ -42,7 +42,7 @@
 .pgd-f em.on { background: var(--qcv-ink, #1c130f); }
 .pgd-f span {
   font: 400 12px var(--font-mono); letter-spacing: 0.14em;
-  text-transform: uppercase; color: rgba(28, 19, 15, 0.45);
+  text-transform: uppercase; color: var(--sp-quiet);
 }
 .pgd-next {
   margin: 0 0 0 auto; padding: 0; border: 0; background: none; cursor: pointer;
@@ -59,7 +59,7 @@
    at 66 it sat over the list pills' menus and took their clicks (measured, the first neighbour run) */
 .pgd.pgd--dress { width: 340px; z-index: 58; border-radius: 16px; padding: 18px 18px 14px;
   box-shadow: 0 24px 54px -18px rgba(20, 14, 10, 0.5), 0 0 0 1px rgba(28, 19, 15, 0.1); }
-.pgd--dress .pgd-k { display: block; font: 400 8.5px var(--sp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.pgd--dress .pgd-k { display: block; font: 400 8.5px var(--sp-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); }
 .pgd--dress .pgd-t { margin: 6px 0; font: 400 20px var(--sp-type); }
 .pgd--dress .pgd-x { top: 12px; right: 12px; width: 26px; height: 26px; border-radius: 50%; padding: 0; }
 .pgd--dress .pgd-f { gap: 8px; margin-top: 14px; }

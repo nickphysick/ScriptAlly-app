@@ -169,7 +169,7 @@
 .acct-note {
   font-family: var(--font-sans, "Source Sans Pro", system-ui, sans-serif);
   font-size: 12.5px;
-  color: #8a7a6c;
+  color: var(--sp-quiet);
   line-height: 1.5;
   margin: var(--acct-s-note) 0 0;
 }

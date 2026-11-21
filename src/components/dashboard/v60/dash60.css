@@ -67,7 +67,7 @@
   font-family: var(--d58-serif) !important;
   font-size: 14.5px;
   line-height: 1.3;
-  color: rgba(28, 19, 15, 0.72);
+  color: var(--sp-muted);
 }
 .d60-hl li { display: flex; align-items: center; white-space: nowrap; min-width: 0; }
 .d60-hl li > i { flex: none; width: 10px; height: 10px; margin-right: 9px; border-radius: 3px; }

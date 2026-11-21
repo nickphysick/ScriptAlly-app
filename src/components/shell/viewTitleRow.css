@@ -24,7 +24,7 @@
 }
 .cl20-vs button {
   box-sizing: border-box; display: inline-flex; align-items: center; gap: 7px; height: 30px; margin: 0; padding: 0 13px 0 11px; border: 0;
-  border-radius: 7px; background: transparent; color: rgba(28, 19, 15, 0.62); cursor: pointer; white-space: nowrap;
+  border-radius: 7px; background: transparent; color: var(--sp-muted); cursor: pointer; white-space: nowrap;
   font: 400 15px/1 var(--sp-type) !important;
 }
 .cl20-vs button span { font: inherit !important; color: inherit; }

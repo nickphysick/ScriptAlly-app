@@ -45,7 +45,7 @@
 .qc152[data-editing] .qc152-ed:hover, .qc152[data-editing] .qc152-ed.open { background-color: rgba(42, 58, 82, .06); box-shadow: 0 0 0 3px rgba(42, 58, 82, .06); }
 .qc152[data-editing] .qc152-ed:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
 .qc152[data-editing] .qc152-ed.chg, .qc152[data-editing] .qc152-ed.chg .qc152-nm { color: #2a3a52; font-weight: 600; }
-.qc152[data-editing] .qc152-ed.chg::after, .qc152 .qc152-chgdot { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 0 0 4px; border-radius: 50%; background: #a2452a; vertical-align: 3px; }
+.qc152[data-editing] .qc152-ed.chg::after, .qc152 .qc152-chgdot { content: ""; display: inline-block; width: 5px; height: 5px; margin: 0 0 0 4px; border-radius: 50%; background: var(--sp-rust); vertical-align: 3px; }
 .qc152[data-editing] .qc152-agent .qc152-ed.chg { display: flex; align-items: center; }
 
 /* text values: typed straight onto a dashed rule, no box */
@@ -77,8 +77,8 @@
 /* the chips keep the card's own look; a chip's × and a row's "+ Add" only on hover of their row */
 .qc152 .qc152-arm { all: unset; display: none; cursor: pointer; margin-left: 4px; color: #9a8f84; font: 400 13.5px var(--sp-serif); }
 .qc152 .qc152-askc i:hover .qc152-arm, .qc152 .qc152-arm:focus-visible { display: inline; }
-.qc152 .qc152-arm:hover { color: #a2452a; }
-.qc152[data-editing] .qc152-add2, .qc152 .qc152-add2 { background-image: none !important; padding-bottom: 0; font: 400 13px var(--sp-serif) !important; color: #8a8076; opacity: 0; transition: opacity .15s; }
+.qc152 .qc152-arm:hover { color: var(--sp-rust); }
+.qc152[data-editing] .qc152-add2, .qc152 .qc152-add2 { background-image: none !important; padding-bottom: 0; font: 400 13px var(--sp-serif) !important; color: var(--sp-quiet); opacity: 0; transition: opacity .15s; }
 .qc152 .qc152-add2:hover { color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
 .qc152 dd:hover .qc152-add2, .qc152 .qc152-nt2:hover .qc152-add2, .qc152 .qc152-add2.always, .qc152 .qc152-add2:focus-visible, .qc152 .qc152-add2.open { opacity: 1; }
 .qc152 .qc152-cgrid { display: grid; gap: 6px; }
@@ -86,7 +86,7 @@
 /* Notes in edit mode */
 .qc152 .qc152-nt2 { position: relative; padding: 10px 12px; border-radius: 12px; background: #f7f5f1; margin: 0 0 8px; font: 400 15px/1.5 var(--sp-serif); }
 .qc152 .qc152-ndel { all: unset; float: right; margin-top: 4px; cursor: pointer; }
-.qc152 .qc152-notes-ed > .qc152-add2.always { all: unset; cursor: pointer; font: 400 13px var(--sp-serif) !important; color: #8a8076; }
+.qc152 .qc152-notes-ed > .qc152-add2.always { all: unset; cursor: pointer; font: 400 13px var(--sp-serif) !important; color: var(--sp-quiet); }
 .qc152 .qc152-notes-ed > .qc152-add2.always:hover { color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; }
 
 /* Tracking in edit mode: one quiet line pointing at the step editor */
@@ -94,7 +94,7 @@
 
 /* the tab dot: a tab with unsaved changes */
 .qc152 .qc152-tabs button { position: relative; }
-.qc152 .qc152-dot { position: absolute; top: 2px; right: -9px; width: 7px; height: 7px; border-radius: 50%; background: #a2452a; }
+.qc152 .qc152-dot { position: absolute; top: 2px; right: -9px; width: 7px; height: 7px; border-radius: 50%; background: var(--sp-rust); }
 
 /* the leave check */
 .qc152 .qc152-in { position: relative; }
@@ -102,7 +102,7 @@
   box-shadow: 0 14px 30px -12px rgba(28, 19, 15, .4), 0 0 0 1px #e2d9cc; animation: qc152-edin .18s both; font: 400 14.5px var(--sp-serif); color: #1c130f; }
 .qc152 .qc152-leave > span:first-child { font: inherit; }
 .qc152 .qc152-leave .sp { flex: 1 1 auto; }
-.qc152 .qc152-llnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--sp-serif) !important; color: #5b4f47; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.qc152 .qc152-llnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--sp-serif) !important; color: var(--sp-muted); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 .qc152 .qc152-llnk:hover { color: #2a3a52; }
 .qc152 .qc152-lbtn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; height: 36px; padding: 0 14px; border-radius: 21px; background: #2a3a52; color: #fff; font: 600 14px var(--sp-serif) !important; }
 .qc152 .qc152-llnk:focus-visible, .qc152 .qc152-lbtn:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }

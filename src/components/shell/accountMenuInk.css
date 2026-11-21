@@ -22,7 +22,7 @@
   }
   .am-menu--ink .am-iemail {
     display: block; font-family: var(--sp-serif); font-size: 12.5px; line-height: 1.35;
-    color: rgba(28, 19, 15, 0.58); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: var(--sp-quiet); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .am-menu--ink .am-iplan {
     display: flex; align-items: center; margin: 0 10px 6px; padding: 10px 12px; border-radius: 10px;

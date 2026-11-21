@@ -26,7 +26,7 @@
 
 .tlc {
   --ground:var(--ws-page); --white:#ffffff; --field:#fdfbf7; --paper:#fdfaf5;
-  --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:#8a7a6c;
+  --ink:#241209; --ink2:#3a1c14; --muted:#9c8878; --muted2:var(--sp-quiet);
   --hair:#e7ddd2; --hair2:#e0d5c8; --edge:#e8e0d8;
   --burg:#7c3a2a; --sage:#5a6e58;
   --pink:#f5e2da; --pink-b:#e8c8bc;
@@ -90,14 +90,14 @@
    62px. The contract declares none of these because ITS page inherits `normal`; ours does not, and
    a format that inherits its typography is not a format. 1.2 is what the contract renders them at. */
 .tlc .ltask .h { font-size:14px;line-height:1.2;font-weight:600;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.tlc .ltask .s { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted2);margin-top:3px; }
+.tlc .ltask .s { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.13em;text-transform:uppercase;color:var(--sp-quiet);margin-top:3px; }
 
 /* the person: disc, name, and the agency beneath it (ref `.a` / `.av` / `.a .n` / `.a .n small`) */
 .tlc .lag { display:flex;align-items:center;gap:9px;min-width:0; }
 .tlc .lag .av { width:30px;height:30px;border-radius:50%;background:#efe4dc;color:var(--burg);font-family:'JetBrains Mono',monospace;font-size:8.5px;font-weight:500;display:inline-flex;align-items:center;justify-content:center;border:1px solid rgba(124,58,42,0.18);flex-shrink:0;box-sizing:border-box; }
 .tlc .lag .av.yours { background:var(--u-yours-1);color:#8a7440;border-color:#e8dcc0; }
 .tlc .lag .n { font-size:12.5px;line-height:1.2;font-weight:500;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0; }
-.tlc .lag .n small { display:block;font-size:10.5px;line-height:1.2;color:var(--muted2);font-weight:300; }
+.tlc .lag .n small { display:block;font-size:10.5px;line-height:1.2;color:var(--sp-quiet);font-weight:300; }
 
 /* ── Due — the Query Centre's calendar chip (ref `.chip`) ────────────────────────────────────────── */
 .tlc .lchip { width:52px;border:1px solid var(--edge);border-radius:9px;overflow:hidden;text-align:center;background:var(--white);box-sizing:border-box; }
@@ -118,8 +118,8 @@
 .tlc .lov .u { font-size:12.5px;color:var(--ink2);font-weight:500; }
 .tlc .lov.owed b { color:var(--burg); }
 .tlc .lov.owed .u { color:var(--burg); }
-.tlc .lov.ahead b { color:var(--muted2);font-weight:400; }
-.tlc .lov.ahead .u { color:var(--muted2);font-weight:400; }
+.tlc .lov.ahead b { color:var(--sp-quiet);font-weight:400; }
+.tlc .lov.ahead .u { color:var(--sp-quiet);font-weight:400; }
 .tlc .lov.none { font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:#c0b0a0; }
 
 /* ⋯ — the row's one control, the snooze door (ref `.more`). A button, so it takes the reset a span
@@ -153,7 +153,7 @@
 .tlc .fchip .k { font-family:'JetBrains Mono',monospace;font-size:7.5px;letter-spacing:0.1em;text-transform:uppercase;color:#a3785f; }
 .tlc .fchip .x { cursor:pointer;font-size:12px;line-height:1;opacity:.7;background:none;border:0;color:inherit;padding:0; }
 .tlc .fchip .x:hover { opacity:1; }
-.tlc .l-clear { margin-left:auto;font-size:10.5px;color:var(--muted2);cursor:pointer;background:none;border:0;padding:0; border-bottom:1px dashed rgba(124,58,42,0.3); }
+.tlc .l-clear { margin-left:auto;font-size:10.5px;color:var(--sp-quiet);cursor:pointer;background:none;border:0;padding:0; border-bottom:1px dashed rgba(124,58,42,0.3); }
 
 /* ── the receipt window's row (drawer round, Phase 5) ────────────────────────────────────────────
    ⚠️ THE ROW STATES ITS HEIGHT, so the fade animates the real property — 62 to 0 — rather than a

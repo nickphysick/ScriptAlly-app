@@ -98,12 +98,12 @@
 .t-edn .sa-fstat { background: #ffffff; border-color: transparent; border-radius: 16px; box-shadow: 0 1px 2px rgba(20,20,20,0.05), 0 12px 32px rgba(20,20,20,0.07); }
 .sa-fstat .sa-cap {
   display: flex; align-items: center; gap: 8px;
-  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: #8a7a6c;
+  font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--sp-quiet);
 }
 .t-edn .sa-fstat .sa-cap { color: #8b8b8b; }
 .sa-fstat .sa-cap svg { stroke: var(--sd-hue, #7c3a2a); flex: none; }
 .sa-fstat .sa-bign { font-family: var(--font-serif); font-size: 52px; font-weight: 500; color: var(--ink, #3a1c14); line-height: 1; margin-top: 16px; }
-.sa-fstat .sa-sub { font-size: 12.5px; color: #8a7a6c; margin-top: 8px; }
+.sa-fstat .sa-sub { font-size: 12.5px; color: var(--sp-quiet); margin-top: 8px; }
 .t-edn .sa-fstat .sa-sub { color: #6b6b6b; }
 .sa-fstat .sa-ffoot { margin-top: auto; padding-top: 18px; }
 .sa-unpin {
@@ -143,7 +143,7 @@
 .sa-stat:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(58,28,20,0.10); }
 .t-bold .sa-stat { border: 1.5px solid #1d1712; border-radius: 14px; box-shadow: none; }
 .t-edn .sa-stat { border-color: transparent; border-radius: 16px; box-shadow: 0 1px 2px rgba(20,20,20,0.05), 0 12px 32px rgba(20,20,20,0.07); }
-.sa-stat .sa-cap { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #8a7a6c; margin-bottom: 15px; }
+.sa-stat .sa-cap { display: flex; align-items: center; gap: 8px; font-family: var(--font-mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); margin-bottom: 15px; }
 .t-edn .sa-stat .sa-cap { color: #8b8b8b; }
 .sa-stat .sa-cap svg { width: 15px; height: 15px; stroke: var(--sd-hue, #7c3a2a); }
 .sa-stat .sa-numrow { display: flex; align-items: baseline; gap: 10px; margin-top: 0; }
@@ -185,7 +185,7 @@
 .sa-person.on { color: var(--sd-hue, #7c3a2a); }
 .sa-agrid-more {
   display: inline-flex; align-items: center; justify-content: center;
-  font-family: var(--font-mono); font-size: 9px; color: #8a7a6c;
+  font-family: var(--font-mono); font-size: 9px; color: var(--sp-quiet);
   border: 1px solid var(--bd, #e7ddd2); border-radius: 99px; padding: 0 6px;
 }
 .sa-slider { position: relative; height: 6px; border-radius: 6px; background: #ece2d6; width: 100%; }
@@ -266,13 +266,13 @@
   font-family: var(--font-serif); font-weight: 600;
 }
 .sa-hp-name { font-family: var(--font-serif); font-size: 14.5px; color: var(--ink, #3a1c14); line-height: 1.15; }
-.sa-hp-agency { font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7a6c; margin-top: 1px; }
+.sa-hp-agency { font-family: var(--font-mono); font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sp-quiet); margin-top: 1px; }
 .sa-hp-day {
   margin-left: auto; flex: none;
   font-family: var(--font-mono); font-size: 7.5px; letter-spacing: 0.08em;
-  border: 1px solid var(--bd, #e7ddd2); border-radius: 6px; padding: 2px 6px; color: #8a7a6c;
+  border: 1px solid var(--bd, #e7ddd2); border-radius: 6px; padding: 2px 6px; color: var(--sp-quiet);
 }
-.sa-hp-more { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7a6c; padding: 4px 0 2px; }
+.sa-hp-more { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sp-quiet); padding: 4px 0 2px; }
 .sa-hp-count { margin-left: auto; font-family: var(--font-serif); font-size: 15px; color: var(--ink, #3a1c14); }
 .sa-hp-label { font-family: var(--font-sans); font-size: 12px; color: var(--ink, #3a1c14); }
 .sa-hp-foot {
@@ -281,7 +281,7 @@
   color: var(--band-meta, #705e46);
 }
 .sa-hp-quiet { font-family: var(--font-serif); font-style: italic; font-size: 13px; color: #6a5a50; padding: 8px 12px 2px; }
-.sa-hp-quiet-sub { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: #8a7a6c; padding: 0 12px 10px; }
+.sa-hp-quiet-sub { font-family: var(--font-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sp-quiet); padding: 0 12px 10px; }
 .sa-hp-pill {
   display: inline-flex; align-items: center; gap: 6px; margin: 6px 12px 10px;
   border: 1px solid var(--bd, #e7ddd2); border-radius: 99px; padding: 4px 10px;

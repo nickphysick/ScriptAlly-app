@@ -23,7 +23,7 @@ button.cl255-w:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; 
 .cl255-bar.wt > i.rust { background: #c9765d; }
 .cl255-sc { display: flex; justify-content: space-between; margin-top: 5px; font: 500 9.5px/1.2 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.12em; text-transform: uppercase; color: #a39b91; }
 .cl255-sc > span { font: inherit !important; }
-.cl255-cap { margin-top: 8px; font: italic 400 14.5px/1.4 var(--sp-serif) !important; color: #5b4f47; }
+.cl255-cap { margin-top: 8px; font: italic 400 14.5px/1.4 var(--sp-serif) !important; color: var(--sp-muted); }
 .cl255-cap.solo { margin-top: 0; }
 .cl255-cap > b { font: 400 16px/1.3 var(--sp-type) !important; font-style: normal; color: #1c130f; }
 .cl255-cap > i { font: inherit !important; color: inherit; }
@@ -76,11 +76,11 @@ button.cl255-w:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; 
 .cl255-tl > li + li::before { content: ""; position: absolute; left: 8px; top: -9px; height: 18px; border-left: 1.5px solid #d8d1c7; }
 .cl255-tl > li.nx::before { border-left-style: dashed; border-color: #e0bfb2; }
 .cl255-tl .g { width: 18px; display: grid; place-items: center; flex: none; }
-.cl255-tl > li > b { font: 400 15.5px/1.3 var(--sp-serif) !important; color: #5b4f47; }
+.cl255-tl > li > b { font: 400 15.5px/1.3 var(--sp-serif) !important; color: var(--sp-muted); }
 .cl255-tl > li.cur > b { font-weight: 600 !important; color: #1c130f; }
 .cl255-tl > li > em { margin-left: auto; font: 400 13px/1 var(--sp-type) !important; font-style: normal; color: #8a857e; white-space: nowrap; }
-.cl255-tl > li.nx > b { font-style: italic !important; color: #a2452a; }
-.cl255-tl > li.nx > em { color: #a2452a; }
+.cl255-tl > li.nx > b { font-style: italic !important; color: var(--sp-rust); }
+.cl255-tl > li.nx > em { color: var(--sp-rust); }
 .cl255-nx { width: 13px; height: 13px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #c9765d; background: #fff; }
 .cl255-dot { width: 6px; height: 6px; border-radius: 50%; background: #8a857e; }
 .cl255-tl > li.nd > b { font-style: italic !important; }

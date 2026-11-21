@@ -20,7 +20,7 @@
   container: ms27 / inline-size;
   --ms27-ink: #1c130f;
   --ms27-navy: #2a3a52;
-  --ms27-rust: #a2452a;
+  --ms27-rust: var(--sp-rust);
   --ms27-serif: var(--msv12-serif);
   --ms27-txt: var(--hero-text-x, 243px);
 }
@@ -61,7 +61,7 @@
 .ms27-mh-r { position: absolute; right: var(--ms27-ins); top: var(--hero-top, 36px); height: var(--hero-stack-h); width: var(--ms27-cw); display: flex; align-items: center; z-index: 2; }
 /* the Versions page: the same header on the page, no card on the right */
 .ms27-mh--page .ms27-mh-t { max-width: calc(100% - var(--ms27-txt) - 24px); }
-.ms27 .ms27-mh-b .ms27-hw { all: unset; cursor: pointer; margin-left: 10px; font: 400 15px var(--ms27-serif); color: rgba(28, 19, 15, 0.72); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(28, 19, 15, 0.3); white-space: nowrap; }
+.ms27 .ms27-mh-b .ms27-hw { all: unset; cursor: pointer; margin-left: 10px; font: 400 15px var(--ms27-serif); color: var(--sp-muted); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(28, 19, 15, 0.3); white-space: nowrap; }
 .ms27 .ms27-mh-b .ms27-hw:hover { color: var(--ms27-ink); }
 
 

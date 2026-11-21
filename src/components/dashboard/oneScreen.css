@@ -296,7 +296,7 @@
   font-size: var(--dash-eyebrow);
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--dash-ink-45);
+  color: var(--sp-quiet);
   line-height: 1.4;
 }
 /* ⚠️ `font-family: inherit` — `lib/brand.tsx` names bare spans as the body sans at runtime, so a
@@ -311,7 +311,7 @@
   border: 1px solid var(--dash-hair);
   border-radius: 20px;
   padding: 6px 12px;
-  color: var(--dash-ink-70);
+  color: var(--sp-muted);
   white-space: nowrap;
   background: var(--dash-page);
   flex: none;
@@ -390,7 +390,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 /* ⚠️ THE SEPARATOR'S SPACES ARE REAL TEXT AT ZERO WIDTH, so a screen reader and a copy-paste both get
    "out · 3" rather than "out·3", and the dot still carries its two margins. */
 .os-hdsep { font-size: 0; }
-.os-hddot { font-size: 17px; margin: 0 8px; color: var(--dash-ink-45); }
+.os-hddot { font-size: 17px; margin: 0 8px; color: var(--sp-quiet); }
 
 /* ══ §4 · QUICK ACTIONS ═══════════════════════════════════════════════════════════════════════
    One tile and two lines (v33), and no header at all (the v34 mockup). */
@@ -519,7 +519,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   font-family: "JetBrains Mono", monospace;
   font-size: 10.5px;
   line-height: 1.5;
-  color: var(--dash-ink-45);
+  color: var(--sp-quiet);
   margin-top: 8px;
   margin-right: var(--stand);
   flex: none;
@@ -533,7 +533,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   font-style: italic;
   font-size: 13.5px;
   line-height: 1.3;
-  color: var(--dash-ink-45);
+  color: var(--sp-quiet);
 }
 .os-acx span { flex: 1 1 0; min-width: 0; white-space: nowrap; text-align: center; position: relative; padding-top: 10px; min-height: 25.8px; box-sizing: border-box; }
 .os-acx span::before {
@@ -556,7 +556,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 
 .os-sparse { position: absolute; inset: 0; display: none; place-items: center; text-align: center; padding: 16px; }
 .os-sparse.on { display: grid; }
-.os-sparse span { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px; color: var(--dash-ink-45); }
+.os-sparse span { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px; color: var(--sp-quiet); }
 
 /* ── the range control: the whole campaign, and the eight weeks in view — IN THE NAVY BAND ──────
    (the v34 mockup, 19 Sep; it sat under the date axis in v33, with two labels, both retired) */
@@ -628,7 +628,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   display: grid; grid-template-columns: 18px auto 1fr; align-items: center; gap: 10px;
   padding: 6px 8px; margin: 0 -8px; border-radius: 6px;
   /* the row is as tall as its 18px chip — the ref's — not as tall as the page's 1.5 line-height */
-  font-size: 13.5px; line-height: 18px; color: var(--dash-ink-70);
+  font-size: 13.5px; line-height: 18px; color: var(--sp-muted);
   transition: background 0.15s; cursor: pointer; outline-offset: -2px;
 }
 .os-clrow.at { background: #f6f1ea; }
@@ -675,23 +675,23 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-tip.on { opacity: 1; transform: none; transition: opacity 0.16s 0.28s, transform 0.16s 0.28s; }
 .os-tip.pinned { pointer-events: auto; transition-delay: 0s !important; background: rgba(255, 253, 250, 0.93); border-color: rgba(28, 19, 15, 0.3); }
 .os-tip p { margin: 0; }
-.os-tip-ey { font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); }
+.os-tip-ey { font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); }
 .os-tip-big { font-family: var(--os-type, "Courier New", Courier, monospace); font-size: 20px; line-height: 1.15; margin-top: 5px !important; }
 .os-tip-name { font-size: 19px; }
-.os-tip-sub { font-size: 13px; line-height: 1.45; color: rgba(28, 19, 15, 0.7); margin-top: 3px !important; }
+.os-tip-sub { font-size: 13px; line-height: 1.45; color: var(--sp-muted); margin-top: 3px !important; }
 .os-tip-sub i { font-style: italic; }
 .os-tip-list { list-style: none; margin: 10px 0 0; padding: 10px 0 0; border-top: 1px solid rgba(28, 19, 15, 0.11); display: grid; gap: 8px; }
 .os-tip-list li { display: grid; grid-template-columns: 16px 1fr; gap: 9px; align-items: start; font-size: 13.5px; line-height: 1.4; }
 .os-tip-list li > span, .os-tip-list li b, .os-tip-list li em { font-family: inherit; }
 .os-tip-list li b { font-weight: 600; }
-.os-tip-list li em { display: block; font-style: normal; font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(28, 19, 15, 0.45); margin-top: 3px; }
+.os-tip-list li em { display: block; font-style: normal; font-family: "JetBrains Mono", monospace; font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sp-quiet); margin-top: 3px; }
 .os-tip-list li em:only-child { margin-top: 0; }
 .os-tip-list li.os-tip-st { grid-template-columns: 16px 1fr auto; align-items: center; }
 .os-tip-list li.os-tip-st b { font-variant-numeric: tabular-nums; }
-.os-tip-st--undated { color: rgba(28, 19, 15, 0.7); }
+.os-tip-st--undated { color: var(--sp-muted); }
 .os-tip-st--undated i { width: 16px; height: 16px; box-sizing: border-box; border: 1px dashed rgba(28, 19, 15, 0.3); border-radius: 50%; display: block; }
 .os-tip-list--plain { gap: 5px; }
-.os-tip-list--plain li { display: block; font-size: 13px; color: rgba(28, 19, 15, 0.7); }
+.os-tip-list--plain li { display: block; font-size: 13px; color: var(--sp-muted); }
 .os-tip-link, .os-tip-rowlink {
   font: inherit; color: #1c130f; background: none; border: 0; padding: 0; cursor: pointer; text-align: left;
   text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(28, 19, 15, 0.3);
@@ -761,7 +761,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-fday {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
-  color: var(--dash-ink-45);
+  color: var(--sp-quiet);
   display: flex; align-items: center; gap: 10px;
   margin: 12px 0 8px;
 }
@@ -787,7 +787,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-fent--open { background: var(--dash-parchment); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.08); }
 .os-fmain { min-width: 0; }
 .os-fband { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
-.os-ftime { font-family: "JetBrains Mono", monospace; font-size: 9px; color: var(--dash-ink-45); }
+.os-ftime { font-family: "JetBrains Mono", monospace; font-size: 9px; color: var(--sp-quiet); }
 .os-fsay { margin: 0; font-size: 14px; line-height: 1.45; color: var(--dash-ink); }
 .os-fwho { font-weight: 600; }
 .os-fbook { font-family: var(--os-type); font-style: normal; font-size: 13.5px; }
@@ -795,7 +795,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   display: block;
   font-family: "JetBrains Mono", monospace;
   font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--dash-ink-45); margin-top: 3px;
+  color: var(--sp-quiet); margin-top: 3px;
 }
 .os-flink {
   font-size: 13px; color: var(--dash-ink); text-decoration: underline; text-underline-offset: 3px;
@@ -814,14 +814,14 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   width: 3px; border-radius: 0 2px 2px 0;
   background: var(--dash-rust);
 }
-.os-fent--app .os-fsay { color: var(--dash-ink-70); }
+.os-fent--app .os-fsay { color: var(--sp-muted); }
 /* ⚠️ THE ROW'S OWN AFFORDANCE, SHOWN ONLY ON HOVER. A row with an explicit action already says what
    it does; a row without one still opens the query, and this is how it says so without adding a
    permanent second link to every line in the feed. */
 .os-fpeek {
   font-family: "JetBrains Mono", monospace;
   font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase;
-  color: var(--dash-ink-45); white-space: nowrap;
+  color: var(--sp-quiet); white-space: nowrap;
   opacity: 0; transition: opacity 0.12s ease;
 }
 .os-fent--go:hover .os-fpeek, .os-fent--go:focus-visible .os-fpeek, .os-fent--open .os-fpeek { opacity: 1; }
@@ -829,7 +829,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-fempty {
   margin: 18px 0 0; text-align: center;
   font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px;
-  color: var(--dash-ink-45);
+  color: var(--sp-quiet);
 }
 
 /* ══ §9 · THE TO-DO CARD ══════════════════════════════════════════════════════════════════════ */
@@ -858,12 +858,12 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   display: flex; align-items: center; gap: 10px;
   font-family: "JetBrains Mono", monospace;
   font-size: 8.5px; letter-spacing: 0.13em; text-transform: uppercase;
-  color: var(--dash-ink-45); margin: 14px 4px 8px;
+  color: var(--sp-quiet); margin: 14px 4px 8px;
 }
 .os-tdgh::after { content: ""; flex: 1; height: 1px; background: var(--dash-hair); }
 /* ⚠️ RUST ON THE FIRST HEADING ONLY — it is the one group where somebody else is waiting on you. */
 .os-tdgh--hot { color: var(--dash-rust); }
-.os-tdgh .os-tdgc { background: var(--dash-page); border-radius: 10px; padding: 2px 7px; color: var(--dash-ink-70); }
+.os-tdgh .os-tdgc { background: var(--dash-page); border-radius: 10px; padding: 2px 7px; color: var(--sp-muted); }
 
 /* ── the row ──────────────────────────────────────────────────────────────────────────────── */
 .os-tdrow {
@@ -908,7 +908,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   width: 38px; height: 38px; border-radius: 50%;
   background: var(--dash-page); border: 1px solid var(--dash-hair);
   display: flex; align-items: center; justify-content: center;
-  font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--dash-ink-70); flex: none;
+  font-family: "JetBrains Mono", monospace; font-size: 11px; color: var(--sp-muted); flex: none;
 }
 
 /* ── the task ─────────────────────────────────────────────────────────────────────────────── */
@@ -929,7 +929,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-tdl2 {
   display: flex; align-items: center; gap: 9px; margin-top: 5px;
   font-family: "JetBrains Mono", monospace;
-  font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--dash-ink-45);
+  font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; color: var(--sp-quiet);
   min-width: 0;
 }
 /* the fact line gives before the pill does — the pill is three words, the line is a sentence */
@@ -937,7 +937,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 
 /* ⚠️ A COMPLETED ROW STRIKES THE SENTENCE AND NOTHING ELSE. The meta line is the one line on a
    finished row that is newly TRUE, and a struck receipt reads as a fact retracted. */
-.os-tdrow--done .os-tdl1 { color: var(--dash-ink-45); }
+.os-tdrow--done .os-tdl1 { color: var(--sp-quiet); }
 .os-tdrow--done .os-tdtx { text-decoration: line-through; text-decoration-color: rgba(28, 19, 15, 0.28); }
 .os-tdrow--done .os-tdl2 { text-decoration: none; }
 
@@ -946,14 +946,14 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-tdn {
   font-family: "JetBrains Mono", monospace;
   font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--dash-ink-45); white-space: nowrap; text-align: right;
+  color: var(--sp-quiet); white-space: nowrap; text-align: right;
 }
 .os-tdn b {
   display: block; font-family: inherit; font-size: 22px; font-weight: 600;
   letter-spacing: 0; color: var(--dash-ink); line-height: 1; font-variant-numeric: tabular-nums;
 }
 .os-tdn--hot b { color: var(--dash-rust); }
-.os-tdgo { font-size: 16px; color: var(--dash-ink-45); font-style: normal; }
+.os-tdgo { font-size: 16px; color: var(--sp-quiet); font-style: normal; }
 
 /**
  * ⚠️ WIDTH, NOT OPACITY — the controls take no room until they are wanted, so the day figure sits
@@ -967,7 +967,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-tdact {
   width: 26px; height: 26px; padding: 0; flex: none; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
-  color: var(--dash-ink-45); cursor: pointer; background: none; border: 1px solid transparent;
+  color: var(--sp-quiet); cursor: pointer; background: none; border: 1px solid transparent;
 }
 .os-tdact:hover { background: var(--dash-page); border-color: var(--dash-hair); color: var(--dash-ink); }
 .os-tdact:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 1px; }
@@ -1008,7 +1008,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 
   .os-tdl1 { display: block; font-size: 15px; line-height: 1.35; }
   /* the manuscript drops to its own typewriter line, so the task never wraps past two */
-  .os-tdl1 .os-tdms { display: block; font-size: 13.5px; margin-top: 2px; color: var(--dash-ink-70); }
+  .os-tdl1 .os-tdms { display: block; font-size: 13.5px; margin-top: 2px; color: var(--sp-muted); }
 
   .os-tdl2 { gap: 8px; margin-top: 6px; flex-wrap: wrap; }
   /* ⚠️ THE FACT GIVES, NEVER THE PILL — the pill is the state, and a state truncated to "Full requ…"
@@ -1049,7 +1049,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-tdstrip {
   display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
   background: var(--dash-parchment); border: 1px solid var(--dash-hair); border-radius: 10px;
-  padding: 11px 14px; font-size: 14px; color: var(--dash-ink-70);
+  padding: 11px 14px; font-size: 14px; color: var(--sp-muted);
 }
 .os-tdstrip b { color: var(--dash-ink); font-weight: 600; }
 .os-tdstrip .os-tdsp { flex: 1; }
@@ -1076,7 +1076,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 }
 .os-tdk {
   font-family: "JetBrains Mono", monospace;
-  font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--dash-ink-45);
+  font-size: 9px; letter-spacing: 0.11em; text-transform: uppercase; color: var(--sp-quiet);
 }
 .os-tdv { font-size: 14px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .os-tdopt {
@@ -1094,14 +1094,14 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-tdef { display: flex; align-items: center; gap: 10px; padding: 11px 15px; background: var(--dash-parchment); }
 .os-tdrec {
   font-family: "JetBrains Mono", monospace;
-  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dash-ink-45); flex: 1;
+  font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sp-quiet); flex: 1;
 }
 .os-tdb {
   font: inherit; font-size: 13px; border-radius: 20px; padding: 7px 14px;
   border: 1px solid var(--dash-hair); background: #ffffff; cursor: pointer; color: var(--dash-ink);
 }
 .os-tdb--ink { background: var(--dash-ink); color: var(--dash-page); border-color: var(--dash-ink); }
-.os-tdb--quiet { border-color: transparent; color: var(--dash-ink-70); }
+.os-tdb--quiet { border-color: transparent; color: var(--sp-muted); }
 .os-tdb:focus-visible { outline: 2px solid var(--dash-frame); outline-offset: 2px; }
 
 .os-tdmenu {
@@ -1110,7 +1110,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 }
 .os-tdmh {
   font-family: "JetBrains Mono", monospace;
-  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dash-ink-45);
+  font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--sp-quiet);
   padding: 6px 10px 8px; margin: 0;
 }
 .os-tdmi {
@@ -1124,7 +1124,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--dash-hair);
   display: flex; align-items: center; justify-content: center; background: var(--dash-page);
 }
-.os-tdmi small { display: block; font-size: 12.5px; color: var(--dash-ink-45); margin-top: 2px; }
+.os-tdmi small { display: block; font-size: 12.5px; color: var(--sp-quiet); margin-top: 2px; }
 /* ⚠️ WHAT IT DOES TO THE QUERY, ON THE RIGHT — the option's title says what you are doing and this
    says what the app will do with it. A menu that only stated the first would be asking a writer to
    guess which of three options closes a query. */
@@ -1137,12 +1137,12 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 .os-tdmi .os-tdwhat {
   font-family: "JetBrains Mono", monospace;
   font-size: 8.5px; letter-spacing: 0.1em; text-transform: uppercase;
-  color: var(--dash-ink-45); white-space: nowrap;
+  color: var(--sp-quiet); white-space: nowrap;
 }
 
 .os-tdfoot {
   margin: auto 0 0; padding-top: 12px; border-top: 1px solid var(--dash-hair);
-  font-size: 13px; color: var(--dash-ink-70); flex: none;
+  font-size: 13px; color: var(--sp-muted); flex: none;
 }
 .os-see {
   font-size: 13px; color: var(--dash-ink); font-weight: 400;
@@ -1150,7 +1150,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   text-decoration: underline; text-underline-offset: 3px;
 }
 .os-tempty { min-height: 80px; display: grid; place-items: center; gap: 10px; padding: 16px; text-align: center; }
-.os-tempty span { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px; color: var(--dash-ink-45); }
+.os-tempty span { font-family: var(--font-serif), Georgia, serif; font-style: italic; font-size: 13.5px; color: var(--sp-quiet); }
 .os-dayone-ctas { display: flex; gap: 8px; justify-content: center; }
 .os-btn-mini {
   font-size: 10.5px; font-weight: 500; border-radius: 99px; padding: 0 12px; height: 24px;
@@ -1453,11 +1453,11 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
   border: solid #2b2118; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg);
 }
 .os-tgs-deed { font-size: 13px; line-height: 1.35; color: #2b2118; }
-.os-tgs-deed small { display: block; margin-top: 3px; font-size: 11px; line-height: 1.4; color: #8a7a6c; }
+.os-tgs-deed small { display: block; margin-top: 3px; font-size: 11px; line-height: 1.4; color: var(--sp-quiet); }
 /* ⚠️ THE STRIKE IS ON THE DEED AND NEVER ON ITS NOTE — ref `.tl li.done .deed small{text-decoration:none}`.
    The note is what the row says ABOUT being done ("Done — … is on the shelf"); striking through the
    sentence that reports the outcome makes the outcome look cancelled. */
-.os-tgs-list li.done .os-tgs-deed { color: #8a7a6c; text-decoration: line-through; text-decoration-color: rgba(0, 0, 0, 0.3); }
+.os-tgs-list li.done .os-tgs-deed { color: var(--sp-quiet); text-decoration: line-through; text-decoration-color: rgba(0, 0, 0, 0.3); }
 .os-tgs-list li.done .os-tgs-deed small { text-decoration: none; }
 /* ref `.tl .go` — a quiet capsule naming the page the deed is done on */
 .os-tgs-go {
@@ -1473,7 +1473,7 @@ button.os-mini:hover { border-color: rgba(28, 19, 15, 0.3); }
 /* ref `.todo .foot` */
 .os-tgs-foot {
   margin: 0; padding: 12px 18px 16px; border-top: 1px solid rgba(0, 0, 0, 0.06);
-  font-family: "Caveat", cursive; font-size: 17px; line-height: 1.2; color: #8a7a6c;
+  font-family: "Caveat", cursive; font-size: 17px; line-height: 1.2; color: var(--sp-quiet);
 }
 
 /* ══ §16 · PARKED: components kept but not mounted on this page ═══════════════════════════════

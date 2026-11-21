@@ -100,7 +100,8 @@ export function dismissReasons(t: WsTask, ruleWord: string | null): Reason[] | n
       ...(ruleWord ? [{ k: "rule" as const, label: `Stop asking about ${ruleWord} for all agents`, sub: "You can turn them back on from the Done tab." }] : []),
     ];
     case "batch": return [{ k: "dismiss", label: `Stop asking about all ${t.batch?.length ?? 0}`, sub: "They come off your list until you bring them back from the Done tab" }];
-    case "own": return [{ k: "delete", label: "Delete this task", sub: "It goes for good once the undo has gone", warn: true }];
+    /* Consistency roll-out v2, Phase 2 (ruling 10): red is for the three named actions only, so deleting your own task is not red */
+    case "own": return [{ k: "delete", label: "Delete this task", sub: "It goes for good once the undo has gone" }];
     default: return [{ k: "dismiss", label: "This doesn’t need doing", sub: "It comes off your list until you bring it back" }];
   }
 }
