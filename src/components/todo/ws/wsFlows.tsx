@@ -19,6 +19,7 @@ import { QueryStatus, SubmissionMethod, type Agent, type Manuscript, type Query 
 import { type WsTask, type QuietAct, andList } from "../../../lib/todoWs";
 import { addDays, dayDiff, dayIso, dm, fmt, offWeekend } from "../../../lib/queryActions/dates";
 import { saveNudgeSent, saveOfferDecision, saveOfferMoreTime, saveSent, sentDefaults, type SentKind } from "../../../lib/queryActions/stepSaves";
+import { sendKindOf } from "../../../lib/queryActions/sendKind";
 import type { useScriptAllyDb } from "../../../lib/db";
 import { saveClose, noreplyAnswers } from "../../../lib/queryActions/closeSave";
 import { courtOf, expectedFor } from "../../../lib/qcSummary";
@@ -126,9 +127,7 @@ const dateQ = (ctx: FlowCtx, key: string, title: string, dir: "past" | "future" 
 
 /* ── send: a partial, a full, a revision ─────────────────────────────────────────────────────── */
 
-/** which send a request asks for (the sent journey's own reading of the status) */
-const sendKindOf = (q: Pick<Query, "status">): SentKind =>
-  q.status === QueryStatus.FULL_REQUESTED ? "full" : q.status === QueryStatus.REVISE_RESUBMIT ? "rr" : "partial";
+/* which send a request asks for: the one reading, lib/queryActions/sendKind (v1.1 — an offer's "send the full" is a full) */
 const SEND_TARGET: Record<SentKind, QueryStatus> = { partial: QueryStatus.PARTIAL_SENT, full: QueryStatus.FULL_SENT, rr: QueryStatus.RESUBMITTED };
 
 function sendFlow(ctx: FlowCtx): Flow {

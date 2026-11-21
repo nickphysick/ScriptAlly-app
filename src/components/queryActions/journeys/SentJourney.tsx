@@ -28,12 +28,13 @@ import {
   Chips, DateField, Fl, Note, NoteLink, PlanTrack, Radios, SampleControl, SampleLine, TextBox, Toggle, Who,
 } from "../controls";
 import type { JourneyProps } from "../QueryDrawer";
+import { sendKindOf, type SentKind } from "../../../lib/queryActions/sendKind";
 import type { Guard, JourneyStep, JourneyView } from "../journey";
 import type { TrackPoint } from "../../../lib/queryActions/track";
 import { emptyView } from "./ResponseJourney";
 import { agentName, dayIn, dayOut, firstName, nrmnOf, seedOf, viaLabel, viaOptions, whoLine } from "./common";
 
-type Kind = "partial" | "full" | "rr";
+type Kind = SentKind;
 
 /** The stored request → the sample it asked for, or null when the request named no amount. */
 export function requestSample(q: Query): Sample | null {
@@ -85,7 +86,8 @@ export function SentJourney({ req, today, children }: JourneyProps) {
   const [touched, setTouched] = useState(!!req.seed);
 
   if (!q) return children(emptyView("SENT WHAT THEY ASKED FOR", "I’ve sent it"));
-  const kind: Kind = q.status === QueryStatus.FULL_REQUESTED ? "full" : q.status === QueryStatus.REVISE_RESUBMIT ? "rr" : "partial";
+  /* v1.1 — one reading (lib/queryActions/sendKind): an offer's "send the full" is a full, whatever the status */
+  const kind: Kind = sendKindOf(q);
   const first = firstName(agent);
   const reqOn = (kind === "partial" ? toDay(q.partialRequestedDate) : kind === "full" ? toDay(q.fullRequestedDate) : null) ?? toDay(q.lastStatusChange) ?? today;
   const due = toDay(q.expectedSendDate);

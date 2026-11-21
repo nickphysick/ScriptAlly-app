@@ -212,7 +212,10 @@ export function nextLead(item: ListItem, ctx: TaskCtx): NextLead {
     case "partial":
     case "full":
     case "revision": {
-      const asked = qc?.stageStartMs ?? null;
+      /* v1.1 — an offer's "send the full" hangs on a query whose stage is not the ask (Queried, Partial requested or
+         sent): the ask is the agent's reply to being told of the offer, recorded with the telling (`offerToldOn`). */
+      const offerAsk = item.taskType === "offer_send_full" && status !== QueryStatus.FULL_REQUESTED;
+      const asked = offerAsk ? anyToMs(q?.offerToldOn) : qc?.stageStartMs ?? null;
       return {
         ...base,
         figure: asked != null ? dayFigure(daysSince(asked, now), "waiting") : null,

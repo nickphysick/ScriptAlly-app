@@ -282,3 +282,19 @@ describe("NU11-b · a request with no recorded date says so (v1.1)", () => {
     expect(l.label).toEqual({ lead: "Full asked for", rest: " · 1 Nov" });
   });
 });
+
+describe("NU11-c · an offer's send the full on the Next up card (v1.1)", () => {
+  it("dates the ask from the reply to the offer, not the query's stage", () => {
+    const told = new Date(2026, 10, 15).getTime();
+    const l = nextLead(item({ taskType: "offer_send_full", status: QueryStatus.QUERIED }),
+      ctx(query({ status: QueryStatus.QUERIED, offerReply: "full", offerRefQueryId: "o1", offerToldOn: new Date(told).toISOString() }), row({ status: QueryStatus.QUERIED, stageStartMs: new Date(2026, 5, 20).getTime() })));
+    expect(l.kind).toBe("full");
+    expect(l.label).toEqual({ lead: "Full asked for", rest: " · 15 Nov" });
+    expect(l.figure).toMatchObject({ value: "5", caption: "days waiting" });
+  });
+  it("an undated reply says date not recorded", () => {
+    const l = nextLead(item({ taskType: "offer_send_full", status: QueryStatus.PARTIAL_SENT }),
+      ctx(query({ status: QueryStatus.PARTIAL_SENT, offerReply: "full", offerRefQueryId: "o1" }), row({ status: QueryStatus.PARTIAL_SENT, stageStartMs: ago(30) })));
+    expect(l.label?.rest).toBe(" · date not recorded");
+  });
+});

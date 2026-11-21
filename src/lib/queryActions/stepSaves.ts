@@ -23,7 +23,8 @@ import { STAGE_RESPONSE_WINDOWS } from "../queryAmbient";
 import { addDays, dayIso, futureWeeks, offWeekend } from "./dates";
 
 type Db = ReturnType<typeof useScriptAllyDb>;
-export type SentKind = "partial" | "full" | "rr";
+import type { SentKind } from "./sendKind";
+export type { SentKind } from "./sendKind";
 const TARGET: Record<SentKind, QueryStatus> = { partial: QueryStatus.PARTIAL_SENT, full: QueryStatus.FULL_SENT, rr: QueryStatus.RESUBMITTED };
 const KEY: Record<SentKind, EventKey> = { partial: "partial_sent", full: "full_sent", rr: "resubmitted" };
 

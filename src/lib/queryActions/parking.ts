@@ -13,7 +13,8 @@
  * surface may be long gone. So a park strips them (`bareRequest`) and a resume takes the hooks of
  * whatever asked for it, or of the card open at the time.
  */
-import { QueryStatus } from "../../types";
+import type { Query, QueryStatus } from "../../types";
+import { sendKindOf, type SentKind } from "./sendKind";
 import type { DrawerMode, DrawerPreset, LogAgain, OpenRequest } from "./drawerStore";
 
 /** The reload key (§6.4 names it; the mock's script says `qh.parked`, and the prompt wins). */
@@ -36,12 +37,14 @@ export interface ParkedJourney {
   live: boolean;
 }
 
-type SendKind = "full" | "partial" | "rr";
-const sendKind = (status?: string | null): SendKind =>
-  status === QueryStatus.FULL_REQUESTED ? "full" : status === QueryStatus.REVISE_RESUBMIT ? "rr" : "partial";
+/* which send: the one reading (lib/queryActions/sendKind). Given the query, an offer's "send the full" is a full; given a
+   bare status (older callers, tests) it reads the status alone. */
+type SendOf = string | Pick<Query, "status" | "offerReply" | "offerRefQueryId"> | null | undefined;
+const sendKind = (of: SendOf): SentKind =>
+  sendKindOf(of && typeof of === "object" ? of : { status: (of ?? "") as QueryStatus });
 
 /** The chip's title — the card's own verbs (the mock's TITLE), never the drawer's review button. */
-export function journeyTitle(mode: DrawerMode, status?: string | null): string {
+export function journeyTitle(mode: DrawerMode, status?: SendOf): string {
   switch (mode) {
     case "sent": {
       const k = sendKind(status);
@@ -61,7 +64,7 @@ export function journeyTitle(mode: DrawerMode, status?: string | null): string {
 }
 
 /** What starting it is called, for the clash ask: "…and start recording a response for Ana Reyes." */
-export function journeyDoing(mode: DrawerMode, status?: string | null): string {
+export function journeyDoing(mode: DrawerMode, status?: SendOf): string {
   switch (mode) {
     case "sent": {
       const k = sendKind(status);
