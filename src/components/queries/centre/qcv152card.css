@@ -261,10 +261,10 @@
 .qc152 .qc152-band.dk :where(button, [role="button"], a[href]):focus-visible { outline-color: #f4eee5; }
 
 /* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
-   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only.
+   Left under 12: Record a response's chips (8.5) and the query card's book chips (9.5) — at 12 a chip wraps onto a second
+   line (measured: one moves -56/+14; the card's content drops 18). */
 @media (min-width: 768px) {
   .qc152 .qc152-ag { font-size: 12px; }
-  .qc152 .qc152-ch { font-size: 12px; }
-  .qc152 .qc152-bkc span { font-size: 12px; }
   .qc152 .qc152-ms small { font-size: 12px; }
 }
