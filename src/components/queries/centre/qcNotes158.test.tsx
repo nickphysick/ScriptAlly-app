@@ -23,14 +23,14 @@ const html = (notes: NoteIn[], q: QuoteIn[] = quotes, actions = true) => renderT
     onPin={actions ? () => {} : null} onTask={actions ? () => {} : null} onCork={actions ? () => {} : null} />);
 
 describe("QC158-10 (source) notes and the agent's words, one list in date order", () => {
-  it("the fixture has notes and quotes; the list interleaves them oldest first; a quote's background is its stage's Band", () => {
+  it("the fixture has notes and quotes; the list interleaves them oldest first; a quote's background is its status's band (Plumage colours v1)", () => {
     const notes = [note("a", 50, "Picked for the list."), note("b", 10, "Chase in a fortnight.")];
     expect(quotes.length).toBe(2);
     const h = html(notes);
     const order = [...h.matchAll(/data-qc158="(note|quote)"[^>]*data-(?:id|status)="([^"]+)"/g)].map((m) => m[2]);
     expect(order).toEqual(["a", "Partial Requested", "Full Requested", "b"]);
-    expect(h).toContain(`--bt:${STAGE_COLOURS.partial.band};--be:${STAGE_COLOURS.partial.edge}`);
-    expect(h).toContain(`--bt:${STAGE_COLOURS.full.band};--be:${STAGE_COLOURS.full.edge}`);
+    expect(h).toContain(`--bt:${STAGE_COLOURS.partial.bandRequested};--be:${STAGE_COLOURS.partial.edge}`);
+    expect(h).toContain(`--bt:${STAGE_COLOURS.full.bandRequested};--be:${STAGE_COLOURS.full.edge}`);
     expect(h).toContain("<b>Fenella</b><span>when asking for the partial");
     expect(h).toContain("“Sorry for the wait.”");
     expect(h).not.toContain("not the agent's");
