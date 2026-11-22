@@ -48,9 +48,11 @@ Pack: `design-refs/plumage-colours-v1/` (eight files, SHA256 as briefed, enrolle
 | 4 | b0e81dc96 | every other reader: Dashboard, Responses, Versions, To-do desk, phone, search chips, filters |
 | 4 fix | af3c69ad9 | the Materials tab's disc reads its status |
 | 5 | 0c9aa9f3d | `lib/kindColours.ts` and the four search tiles |
-| 6 | (see git log) | `pc1.measure.ts`, retired and updated locks, decisions, this report |
+| 6 | 8f039987d | `pc1.measure.ts`, retired and updated locks, decisions, this report |
+| 4 fix | 55bd39554 | the phone query page adds no new shadow rule (Phone style census) |
+| 2 fix | 62579f629 | an offer's faint track steps are faint; QC157-3 and LF4 to the navy offer |
 
-Dev bundle before / after: see §6.
+Dev bundle before `index-DFqkcJAV.js`, after `index-e5w8GY12.js` (§6).
 
 ## 2. AUDIT.md re-walked (design-refs/stage-colours-v1/AUDIT.md, 24 in-scope rows)
 
@@ -185,6 +187,37 @@ Two faults in my own spec were caught on the way, and both are fixed:
 The first green attempt never measured anything: the worktree had no `.env.local`, so the harness login
 (`authUser.mjs`) had no `SA_E2E_PASSWORD`. The primary's (untracked) file was linked in.
 
+**The deploy.**
+- Dev served `dev/main-material-icons-v1-pst1-cf1` @ 2be478629, confirmed by building it: `index-DFqkcJAV.js`, the
+  served hash.
+- Integration branch `dev/main-material-icons-v1-pst1-cf1-pc1` (pushed, tip a97f81c6f). Its first merge conflicted
+  only in `design-refs/.refhashes.json` (both sides enrolled refs; resolved as the union, no ref with two hashes,
+  1266 verified).
+- The gates on the integration branch found three dev-line-only readers of the old table, fixed there or on this
+  branch:
+  - `phone/PsParts` `leadBackground` imported the deleted `OFFER_SHEEN_LAYER`. The lead card is now the stage's tint,
+    flat (integration commit 0646f80c7).
+  - Phone style v1's census (`phoneStyle.census.test.ts`) counted two new box-shadows and the paper hex in the phone
+    sheets. The query page outline went inline and the offer's track ring reuses the existing rule (this branch,
+    55bd39554). The census palette now admits `OFFER_INK`, the table's ink on the offer (0646f80c7).
+  - `qc157` QC157-3 caught a real bug: an offer's faint track steps drew solid paper, because a specificity tie was
+    lost. Fixed on the grid card and the slip (62579f629). lf1 LF4 counted the app's navy chrome as a stage colour,
+    because the offer's band now is that navy; the lock now excludes it (same commit, and §5 B).
+- Integration gates at a97f81c6f: tsc 0; `build:dev` clean. Vitest 6 failed / 13218 passed: the four known reds,
+  plus `sc1source` and `timelineCopy`, which timed out at 5s under machine load and pass when run alone.
+- Rendered locks at a97f81c6f: pc1 PC1-1 … PC1-7 green; qc157 QC157-1 and QC157-3, qc163 QC163-0 … 8, lf1 (all
+  widths), qc158 except QC158-1/15 green.
+- **Seven reds, all pre-existing:** QC157-6/7/9 ×2 ("nudged" copy), QC157-11 ×2 (geometry against its 18 Nov baseline,
+  worst 3354.59px), QC158-1/15 ×2 (against the v158 baseline), QC163-W (WebKit: 0 rim rules read). Each fails
+  identically on the untouched dev base 2be478629 (same values), so none comes from this work.
+- Deployed hosting only, from a clean checkout of the pushed tip:
+  `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`. The served hash was checked
+  inside the command (`DFqkcJAV` or stop) before deploying.
+- **Dev now serves `index-e5w8GY12.js`** (before: `index-DFqkcJAV.js`).
+- Not merged to `main`. Prod is Nick's.
+
 ## 7. The worktree
 
-(Filled in at the end.)
+Removed: `ScriptAlly-pc1` (this branch's worktree; everything committed and pushed), the measurement worktree
+`ScriptAlly-pc1-mut`, and the scratchpad's integration, base and deploy checkouts. Their uncommitted files were only the
+screenshots and ledgers the older specs rewrite on every run. None held source changes.
