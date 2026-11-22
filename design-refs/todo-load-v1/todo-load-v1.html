@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk To-do list: the page load v1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #2a3a52; --hair: #e3dbcf; --ink: #1c130f; --mut: #5b4f47; --mut2: #8a8076; --sk: #ece6dc; --sk2: #f3eee6;
+    --type: "Special Elite", "Courier New", Courier, monospace; --serif: "Source Serif 4", Georgia, serif; --u: 0.65916px; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: #e9e5de; color: var(--ink); font-family: var(--serif); -webkit-font-smoothing: antialiased; }
+  button { font-family: inherit; }
+
+  /* ── the mock's own controls ── */
+  .ctl { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid var(--hair); padding: 12px 20px; }
+  .ctl-top { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+  .ctl h1 { margin: 0; font: 400 19px var(--type); }
+  .ctl p { margin: 0; font-size: 14px; color: var(--mut); }
+  .ctl-row { display: flex; flex-wrap: wrap; gap: 10px 14px; margin-top: 10px; align-items: center; }
+  .seg { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; color: var(--mut); }
+  .seg div { display: inline-flex; padding: 2px; border: 1px solid #d4cabd; border-radius: 17px; background: #fff; }
+  .seg button { height: 28px; padding: 0 11px; border: 0; border-radius: 14px; background: none; font-size: 14px; color: var(--ink); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--navy); color: #fff; }
+  .seg[data-off] { opacity: .45; }
+  #replay { height: 34px; padding: 0 16px; border: 0; border-radius: 9px; background: var(--navy); color: #fff; font-size: 14.5px; cursor: pointer; }
+  #clock { font: 14px var(--serif); color: var(--mut); min-width: 320px; }
+  #clock b { font: 400 14px var(--type); color: var(--ink); }
+  button:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+
+  /* ── the page: a picture of the loaded To-do page, with the loading layers drawn over it ── */
+  .stage { padding: 20px 24px 12px; overflow: hidden; }
+  .page { position: relative; width: 1615.0px; height: 790.0px; margin: 0 auto; overflow: hidden; border-radius: 14px 0 0 0; background: #f0ede8; }
+  .page > img { display: block; width: 1615.0px; height: 790.0px; }
+  .lay { position: absolute; inset: 0; pointer-events: none; transition: opacity .22s ease-out; }
+  .lay[data-on="0"] { opacity: 0; }
+  .lay[data-snap] { transition: none; }
+  .lay i { position: absolute; display: block; }
+  .n { background: #2d3a50; }                       /* a navy patch over the header's numbers */
+  .w { background: rgba(255, 255, 255, .13); border-radius: 6px; }
+  .s { background: var(--sk); border-radius: 6px; }
+  .s2 { background: var(--sk2); }
+  .bars { transition: opacity .15s ease-out; }
+  .bars[data-on="0"] { opacity: 0; }
+  body[data-pulse="1"] .bars[data-on="1"] :is(.s, .w, .s2) { animation: breathe 1.6s ease-in-out infinite; }
+  @keyframes breathe { 0%, 100% { opacity: 1; } 50% { opacity: .55; } }
+  .tabs { position: absolute; display: flex; gap: 16px; font: 400 15.5px var(--serif); color: var(--mut); }
+  .tabs b { font-weight: 600; color: var(--ink); }
+  .still { position: absolute; font: italic 14.5px var(--serif); color: var(--mut); opacity: 0; transition: opacity .2s; }
+  .still[data-on="1"] { opacity: 1; }
+
+  .caught, .err { position: absolute; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  .caught { background: #f0ede8; }
+  .caught div { padding: 26px 44px; border-radius: 16px; background: #f5e2da; font: 400 26px var(--type); }
+  .caught small { margin-top: 12px; font: italic 14px var(--serif); color: var(--mut2); }
+  .err { background: #fbf9f5; pointer-events: auto; padding: 0 28px; opacity: 0; visibility: hidden; transition: opacity .2s; }
+  .err[data-on="1"] { opacity: 1; visibility: visible; }
+  .err h3 { margin: 0 0 6px; font: 400 20px var(--type); }
+  .err p { margin: 0 0 16px; font-size: 15px; color: var(--mut); }
+  .err button { height: 40px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--navy); color: #fff; font-size: 15.5px; cursor: pointer; }
+
+  .cap { max-width: 1615px; margin: 10px auto 0; font: italic 14px var(--serif); color: var(--mut); }
+  @media (prefers-reduced-motion: reduce) { .lay, .bars, .still, .err { transition: none !important; } .bars :is(.s, .w, .s2) { animation: none !important; } }
+</style>
+</head>
+<body data-pulse="0">
+
+<div class="ctl">
+  <div class="ctl-top">
+    <h1>To-do list: the page load v1</h1>
+    <p>Press Replay to watch the page arrive. The loaded page is a picture of dev; the loading layers are drawn over it.</p>
+  </div>
+  <div class="ctl-row">
+    <button type="button" id="replay">Replay</button>
+    <span class="seg" id="modeSeg">Load
+      <div><button type="button" data-v="dev" aria-pressed="false">As on dev</button><button type="button" data-v="new" aria-pressed="true">New</button></div>
+    </span>
+    <span class="seg" id="speedSeg">Connection
+      <div><button type="button" data-v="fast" aria-pressed="false">Fast</button><button type="button" data-v="normal" aria-pressed="true">Normal</button><button type="button" data-v="slow" aria-pressed="false">Slow</button><button type="button" data-v="fail" aria-pressed="false">Doesn't load</button></div>
+    </span>
+    <span class="seg" id="pulseSeg">Outline
+      <div><button type="button" data-v="0" aria-pressed="true">Still</button><button type="button" data-v="1" aria-pressed="false">Soft pulse</button></div>
+    </span>
+    <span id="clock"></span>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="page" id="page">
+    <img src="page.jpg" alt="The To-do page on dev, loaded, with Send Greg your partial open">
+    <div class="lay" id="frame" data-on="0"></div>
+    <div class="lay" id="caught" data-on="0" data-snap></div>
+  </div>
+  <p class="cap" id="cap"></p>
+</div>
+
+<script>
+  var OX = 126, OY = 100;                                   // the picture's origin in the screenshot's own coordinates
+  function box(x, y, w, h, cls, r, extra) {
+    return '<i class="' + cls + '" style="left:calc(var(--u)*' + (x - OX) + ');top:calc(var(--u)*' + (y - OY) + ');width:calc(var(--u)*' + w + ');height:calc(var(--u)*' + h + ');' +
+      (r != null ? 'border-radius:calc(var(--u)*' + r + ');' : '') + (extra || '') + '"></i>';
+  }
+  var ring = '<svg style="position:absolute;left:calc(var(--u)*' + (1895 - OX) + ');top:calc(var(--u)*' + (208 - OY) + ');width:calc(var(--u)*240);height:calc(var(--u)*240)" viewBox="0 0 240 240"><circle cx="120" cy="120" r="85" fill="none" stroke="rgba(255,255,255,.13)" stroke-width="30"/></svg>';
+
+  // what the page can draw before any task has arrived: the header's frame, the panels, the tabs
+  var frame = '' +
+    box(600, 200, 720, 105, 'n') + box(1880, 195, 640, 265, 'n') + ring +
+    box(170, 545, 2363, 770, '', 22, 'background:#f6f3ef;box-shadow:inset 0 0 0 1px #e9e3d9;border-bottom-left-radius:0;border-bottom-right-radius:0;') +
+    box(170, 545, 600, 770, '', null, 'background:#fbf9f5;border-radius:calc(var(--u)*22) 0 0 0;box-shadow:inset -1px 0 0 #efe9e0, inset 1px 1px 0 #e9e3d9;') +
+    box(191, 632, 560, 1.6, '', 0, 'background:#e3dbcf;') + box(191, 629, 86, 4, '', 0, 'background:#2a3a52;') +
+    '<span class="tabs" style="left:calc(var(--u)*' + (191 - OX) + ');top:calc(var(--u)*' + (581 - OY) + ')"><b>To do</b><span>Snoozed</span><span>Done</span></span>' +
+    box(792, 567, 1720, 748, '', 22, 'background:#fff;border-bottom-left-radius:0;border-bottom-right-radius:0;') +
+    box(792, 567, 1720, 88, '', null, 'background:#2d3a50;border-radius:calc(var(--u)*22) calc(var(--u)*22) 0 0;') +
+    box(1789, 655, 1.6, 660, '', 0, 'background:#efe9e0;') +
+    '<span class="still" id="still" style="left:calc(var(--u)*' + (191 - OX) + ');top:calc(var(--u)*' + (648 - OY) + ')">Still loading your tasks.</span>';
+
+  // the outline: one bar or disc where each real thing will land, in the real thing's size and place
+  var bars = box(618, 222, 560, 58, 'w', 10) + box(2152, 290, 290, 30, 'w', 8) + box(2152, 345, 230, 22, 'w', 8) + box(1975, 316, 80, 24, 'w', 8);
+  function row(cy) { return box(205, cy - 24, 48, 48, 's', 24) + box(270, cy - 22, 250, 18, 's', 6) + box(270, cy + 8, 150, 14, 's', 6) + box(640, cy - 8, 95, 16, 's', 6); }
+  bars += box(191, 662, 230, 20, 's', 6) + row(750) + row(847) + row(935) + box(191, 1028, 110, 20, 's', 6) + row(1118) + row(1206) + row(1294);
+  bars += box(826, 596, 390, 30, 'w', 8) + box(2390, 591, 46, 40, 'w', 10) + box(2452, 591, 46, 40, 'w', 10);
+  bars += box(835, 682, 54, 84, 's', 12) + box(905, 680, 841, 92, 's2', 16) + box(833, 797, 44, 44, 's', 22) + box(895, 806, 260, 28, 's', 6) + box(895, 852, 250, 18, 's', 6) +
+    box(895, 898, 417, 83, 's2', 14) + box(1329, 898, 417, 83, 's2', 14) + box(895, 998, 417, 90, 's2', 14) + box(833, 1110, 44, 44, 's', 22) + box(895, 1122, 170, 20, 's', 6) + box(833, 1170, 44, 44, 's', 22) + box(895, 1182, 215, 20, 's', 6);
+  bars += box(1823, 688, 657, 627, '', 16, 'box-shadow:inset 0 0 0 1px #ece6dc;border-bottom-left-radius:0;border-bottom-right-radius:0;') + box(1823, 688, 657, 42, 's2', null, 'border-radius:calc(var(--u)*16) calc(var(--u)*16) 0 0;') +
+    box(1844, 746, 56, 56, 's', 28) + box(1915, 754, 160, 24, 's', 6) + box(1915, 788, 90, 12, 's', 5) + box(2238, 760, 216, 34, 's2', 17) + box(1845, 819, 613, 44, 's2', 10) +
+    box(1847, 882, 82, 18, 's', 6) + box(1960, 882, 56, 18, 's', 6) + box(2045, 882, 88, 18, 's', 6) + box(2163, 882, 54, 18, 's', 6) +
+    box(2086, 938, 370, 50, 's2', 14) + box(1887, 1047, 336, 50, 's2', 14) + box(2093, 1156, 363, 50, 's2', 14);
+
+  var frameEl = document.getElementById('frame'), caughtEl = document.getElementById('caught');
+  frameEl.innerHTML = frame + '<div class="bars" id="bars" data-on="0">' + bars + '</div>' +
+    '<div class="err" id="err" style="left:calc(var(--u)*' + (171 - OX) + ');top:calc(var(--u)*' + (640 - OY) + ');width:calc(var(--u)*598);height:calc(var(--u)*670)"><h3>Your tasks didn&rsquo;t load.</h3><p>Check your connection, then try again.</p><button type="button" id="again">Try again</button></div>';
+  caughtEl.innerHTML = box(600, 200, 720, 105, 'n') + box(1880, 195, 640, 265, 'n') + ring +
+    '<div class="caught" style="left:calc(var(--u)*' + (160 - OX) + ');top:calc(var(--u)*' + (530 - OY) + ');width:calc(var(--u)*2390);height:calc(var(--u)*790)"><div>You&rsquo;re all caught up.</div><small>A stand-in for the real all-caught-up screen</small></div>';
+
+  var barsEl = document.getElementById('bars'), still = document.getElementById('still'), err = document.getElementById('err'), clock = document.getElementById('clock'), cap = document.getElementById('cap');
+  var mode = 'new', speed = 'normal', timers = [], t0 = 0, tick = 0;
+  var ARRIVE = { fast: 110, normal: 900, slow: 4500, fail: null };
+  var CAPS = {
+    dev: 'As on dev: the page decides there are no tasks before the tasks have arrived, shows the all-caught-up screen, then swaps to the real list.',
+    fast: 'Fast: the tasks arrive before the outline is due (0.15s), so the page goes straight to the real thing. No outline, no flash.',
+    normal: 'Normal: the header, panels and tabs are there at once. The outline appears at 0.15s and the real page fades in over it, in the same places, when the tasks arrive.',
+    slow: 'Slow: as Normal, and after 3 seconds one quiet line says it is still loading.',
+    fail: 'Doesn’t load: after 5 seconds the list says so plainly and offers one button. All caught up is never shown unless the tasks have loaded and there really are none.'
+  };
+  function clear() { timers.forEach(clearTimeout); timers = []; clearInterval(tick); }
+  function at(ms, fn) { timers.push(setTimeout(fn, ms)); }
+  function say(msg) { clock.innerHTML = '<b>' + ((performance.now() - t0) / 1000).toFixed(2) + 's</b> ' + msg; }
+  function play() {
+    clear(); t0 = performance.now();
+    still.dataset.on = '0'; err.dataset.on = '0'; barsEl.dataset.on = '0';
+    frameEl.setAttribute('data-snap', ''); caughtEl.dataset.on = '0'; frameEl.dataset.on = '0';
+    cap.textContent = mode === 'dev' ? CAPS.dev : CAPS[speed];
+    if (mode === 'dev') {
+      caughtEl.dataset.on = '1'; say('all caught up shows');
+      at(ARRIVE[speed === 'fail' ? 'slow' : speed] || 900, function () { caughtEl.dataset.on = '0'; say('the tasks arrive and the page swaps'); });
+      return;
+    }
+    frameEl.dataset.on = '1'; say('header, panels and tabs');
+    void frameEl.offsetWidth; frameEl.removeAttribute('data-snap');
+    var arrive = ARRIVE[speed];
+    at(150, function () { if (arrive == null || arrive > 150) { barsEl.dataset.on = '1'; say('the outline appears'); } });
+    if (speed === 'slow' || speed === 'fail') at(3000, function () { still.dataset.on = '1'; say('one line: still loading'); });
+    if (arrive != null) at(arrive, function () { frameEl.dataset.on = '0'; say('the tasks arrive: the page fades in'); });
+    else at(5000, function () { still.dataset.on = '0'; err.dataset.on = '1'; say('it says so, with one way forward'); });
+  }
+  function body() { return document.body; }
+  function seg(id, fn) {
+    document.querySelectorAll('#' + id + ' button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        document.querySelectorAll('#' + id + ' button').forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+        fn(b.dataset.v);
+      });
+    });
+  }
+  seg('modeSeg', function (v) { mode = v; document.getElementById('pulseSeg').toggleAttribute('data-off', v === 'dev'); play(); });
+  seg('speedSeg', function (v) { speed = v; play(); });
+  seg('pulseSeg', function (v) { document.body.dataset.pulse = v; if (mode === 'new') play(); });
+  document.getElementById('replay').addEventListener('click', play);
+  document.getElementById('again').addEventListener('click', function () {
+    speed = 'normal';
+    document.querySelectorAll('#speedSeg button').forEach(function (o) { o.setAttribute('aria-pressed', o.dataset.v === 'normal' ? 'true' : 'false'); });
+    play();
+  });
+
+  var page = document.getElementById('page');
+  function fit() { page.style.zoom = Math.min(1, (document.documentElement.clientWidth - 48) / 1615.0); }
+  fit(); window.addEventListener('resize', fit);
+  play();
+</script>
+</body>
+</html>
