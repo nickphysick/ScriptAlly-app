@@ -466,7 +466,9 @@ if (PHASE !== "before" && !BASELINE) {
       /* ⚠️ the reply journey's contents changed by design (tiles for chips): its drawer sizes to them, under the same
          66% cap, so its box is not the baseline's. Every other journey's contents are as built, and so is its box. */
       if (j === "reply") L.check(`${j}: its box grows with the tiles, under the drawer's cap (66% of the card)`, b1[3] >= b0[3] && b1[2] === b0[2], `${JSON.stringify(b0)} → ${JSON.stringify(b1)}`);
-      else L.check(`${j}: its box equals the baseline within 1px`, b0.length === 4 && b1.every((v, i) => Math.abs(v - b0[i]) <= 1), `${JSON.stringify(b0)} → ${JSON.stringify(b1)}`);
+      /* Query card v164 — the drawer's buttons take the .sp-btn height (40, was 42): the drawer is 2px shorter, its foot
+         where it was. Its left, its width and its bottom stay the baseline's within 1px. */
+      else L.check(`${j}: its box is the baseline's, 2px shorter for the 40px buttons (v164), within 1px`, b0.length === 4 && b1.length === 4 && Math.abs(b1[0] - b0[0]) <= 1 && Math.abs(b1[2] - b0[2]) <= 1 && Math.abs((b1[1] + b1[3]) - (b0[1] + b0[3])) <= 1 && Math.abs(b1[3] - (b0[3] - 2)) <= 1, `${JSON.stringify(b0)} → ${JSON.stringify(b1)}`);
       await page.keyboard.press("Escape"); await page.waitForTimeout(300); await page.keyboard.press("Escape"); await page.waitForTimeout(500);
     }
     L.done(24);

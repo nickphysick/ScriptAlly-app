@@ -7,7 +7,7 @@
  {
   "name": "population: frames sampled over the 6s",
   "ok": true,
-  "got": "357"
+  "got": "359"
  },
  {
   "name": "the frame's scale passes above 1.008 at least twice",
@@ -27,7 +27,7 @@
  {
   "name": "it starts 300ms after the drawer's 320ms entrance (no sooner than 600ms after the press)",
   "ok": true,
-  "got": "1059ms"
+  "got": "1011ms"
  },
  {
   "name": "one breathing animation at most in any frame",

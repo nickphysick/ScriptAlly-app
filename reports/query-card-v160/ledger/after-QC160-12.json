@@ -2,7 +2,7 @@
  {
   "name": "materials: population — boxes read",
   "ok": true,
-  "got": "73"
+  "got": "80"
  },
  {
   "name": "materials: population — the save landed and was undone",
@@ -12,7 +12,7 @@
  {
   "name": "materials: the same elements",
   "ok": true,
-  "got": "73 → 73"
+  "got": "80 → 80"
  },
  {
   "name": "materials: every box equals its baseline within 1px",
@@ -27,7 +27,7 @@
  {
   "name": "agent: population — boxes read",
   "ok": true,
-  "got": "58"
+  "got": "65"
  },
  {
   "name": "agent: population — the save landed and was undone",
@@ -37,7 +37,7 @@
  {
   "name": "agent: the same elements",
   "ok": true,
-  "got": "58 → 58"
+  "got": "65 → 65"
  },
  {
   "name": "agent: every box equals its baseline within 1px",

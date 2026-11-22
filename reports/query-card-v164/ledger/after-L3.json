@@ -1,0 +1,112 @@
+[
+ {
+  "name": "q152-agent: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-agent: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "Day 7 · in band false"
+ },
+ {
+  "name": "q152-quiet: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-quiet: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "Day 54 · in band false"
+ },
+ {
+  "name": "q152-materials: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-materials: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "Day 30 · in band false"
+ },
+ {
+  "name": "q152-undated: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-undated: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "Day 80 · in band false"
+ },
+ {
+  "name": "q152-fullreq: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-fullreq: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "Day 40 · in band false"
+ },
+ {
+  "name": "q152-long: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-long: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "Day 150 · in band false"
+ },
+ {
+  "name": "q152-rr: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-rr: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "Day 100 · in band false"
+ },
+ {
+  "name": "q152-offer: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-offer: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "Day 50 · in band false"
+ },
+ {
+  "name": "q152-closed: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-closed: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "null · in band false"
+ },
+ {
+  "name": "q152-passed: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-passed: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "null · in band false"
+ },
+ {
+  "name": "q152-withdrew: no status label in the name row",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-withdrew: the day is in the name row, not the strip",
+  "ok": true,
+  "got": "null · in band false"
+ }
+]

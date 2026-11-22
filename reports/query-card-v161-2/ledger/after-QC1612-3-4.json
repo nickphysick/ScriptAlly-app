@@ -12,7 +12,7 @@
  {
   "name": "discard (Cancel with words typed, then Discard): the frame is at scale 1 within 200ms, and stays there",
   "ok": true,
-  "got": "80 frames: [1]"
+  "got": "79 frames: [1]"
  },
  {
   "name": "discard (Cancel with words typed, then Discard): no breathing animation remains",

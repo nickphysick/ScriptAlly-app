@@ -1,0 +1,222 @@
+[
+ {
+  "name": "q152-agent · tracking: 21 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Rufus your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Covering letter\" | div.qc152-m.me[msg] > div.qc152-bx[bubble] > span.qc152-ts[msg-date] 10px \"15 Nov\""
+ },
+ {
+  "name": "q152-agent · agent: 51 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"4 weeks\""
+ },
+ {
+  "name": "q152-agent · materials: 24 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"15 Nov, by email\" | ul.nx-items > li > span.r 10px \"What you sent with the query.\""
+ },
+ {
+  "name": "q152-agent · notes: 21 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-nl > div.nx-nempty > b 10px \"Nothing noted yet\" | div.nx-nl > div.nx-nempty > span 10px \"This is the place for why you picked Ruf\""
+ },
+ {
+  "name": "q152-quiet · tracking: 23 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Quinn your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Covering letter\" | div.qc152-m.me[msg] > div.qc152-bx[bubble] > span.qc152-ts[msg-date] 10px \"29 Sep\""
+ },
+ {
+  "name": "q152-quiet · agent: 53 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"2 weeks\""
+ },
+ {
+  "name": "q152-quiet · materials: 26 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"29 Sep, by email\" | ul.nx-items > li > span.r 10px \"What you sent with the query.\""
+ },
+ {
+  "name": "q152-quiet · notes: 23 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-nl > div.nx-nempty > b 10px \"Nothing noted yet\" | div.nx-nl > div.nx-nempty > span 10px \"This is the place for why you picked Qui\""
+ },
+ {
+  "name": "q152-materials · tracking: 28 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Mira your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Covering letter\" | div.qc152-m.me[msg] > div.qc152-bx[bubble] > span.qc152-ts[msg-date] 10px \"23 Oct\""
+ },
+ {
+  "name": "q152-materials · agent: 50 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"6 weeks\""
+ },
+ {
+  "name": "q152-materials · materials: 28 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"23 Oct, by email\" | ul.nx-items > li > span.r 10px \"What you sent with the query.\" | div.nx-grp.pend > h4 > span.r 10px \"asked 18 Nov\""
+ },
+ {
+  "name": "q152-materials · notes: 21 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-nl > div.nx-nempty > b 10px \"Nothing noted yet\" | div.nx-nl > div.nx-nempty > span 10px \"This is the place for why you picked Mir\""
+ },
+ {
+  "name": "q152-undated · tracking: 30 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Uma your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Query letter\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc164-sep 10px \"·\""
+ },
+ {
+  "name": "q152-undated · agent: 51 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"6 weeks\""
+ },
+ {
+  "name": "q152-undated · materials: 35 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"3 Sep, by email\" | ul.nx-items > li > span.r 10px \"Query letter\" | ul.nx-items > li > span.r 10px \"Synopsis\""
+ },
+ {
+  "name": "q152-undated · notes: 21 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-nl > div.nx-nempty > b 10px \"Nothing noted yet\" | div.nx-nl > div.nx-nempty > span 10px \"This is the place for why you picked Uma\""
+ },
+ {
+  "name": "q152-fullreq · tracking: 30 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Hannah your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Covering letter\" | div.qc152-m.me[msg] > div.qc152-bx[bubble] > span.qc152-ts[msg-date] 10px \"13 Oct\""
+ },
+ {
+  "name": "q152-fullreq · agent: 50 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"8 weeks\""
+ },
+ {
+  "name": "q152-fullreq · materials: 30 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"13 Oct, by email\" | ul.nx-items > li > span.r 10px \"What you sent with the query.\" | div.nx-grp.pend > h4 > span.r 10px \"asked 13 Nov\""
+ },
+ {
+  "name": "q152-fullreq · notes: 21 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-nl > div.nx-nempty > b 10px \"Nothing noted yet\" | div.nx-nl > div.nx-nempty > span 10px \"This is the place for why you picked Han\""
+ },
+ {
+  "name": "q152-long · tracking: 37 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Jonathan your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Covering letter\" | div.qc152-m.me[msg] > div.qc152-bx[bubble] > span.qc152-ts[msg-date] 10px \"25 Jun\""
+ },
+ {
+  "name": "q152-long · agent: 50 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"6 weeks\""
+ },
+ {
+  "name": "q152-long · materials: 30 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"25 Jun, by email\" | ul.nx-items > li > span.r 10px \"What you sent with the query.\" | div.nx-grp > h4 > span.r 10px \"14 Aug, asked 25 Jul\""
+ },
+ {
+  "name": "q152-long · notes: 21 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-nl > div.nx-nempty > b 10px \"Nothing noted yet\" | div.nx-nl > div.nx-nempty > span 10px \"This is the place for why you picked Jon\""
+ },
+ {
+  "name": "q152-rr · tracking: 40 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Rhea your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Query letter\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc164-sep 10px \"·\""
+ },
+ {
+  "name": "q152-rr · agent: 50 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"6 weeks\""
+ },
+ {
+  "name": "q152-rr · materials: 35 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"14 Aug, by email\" | ul.nx-items > li > span.r 10px \"Query letter\" | ul.nx-items > li > span.r 10px \"Synopsis\""
+ },
+ {
+  "name": "q152-rr · notes: 26 text nodes, none under 12px",
+  "ok": false,
+  "got": "article.nx-n.them > header > b 10px \"Rhea\""
+ },
+ {
+  "name": "q152-offer · tracking: 27 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Olive your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Covering letter\" | div.qc152-m.me[msg] > div.qc152-bx[bubble] > span.qc152-ts[msg-date] 10px \"3 Oct\""
+ },
+ {
+  "name": "q152-offer · agent: 50 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"6 weeks\""
+ },
+ {
+  "name": "q152-offer · materials: 24 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"3 Oct, by email\" | ul.nx-items > li > span.r 10px \"What you sent with the query.\""
+ },
+ {
+  "name": "q152-offer · notes: 21 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-nl > div.nx-nempty > b 10px \"Nothing noted yet\" | div.nx-nl > div.nx-nempty > span 10px \"This is the place for why you picked Oli\""
+ },
+ {
+  "name": "q152-closed · tracking: 24 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Clara your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Covering letter\" | div.qc152-m.me[msg] > div.qc152-bx[bubble] > span.qc152-ts[msg-date] 10px \"23 Sep\""
+ },
+ {
+  "name": "q152-closed · agent: 48 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"6 weeks\""
+ },
+ {
+  "name": "q152-closed · materials: 22 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"23 Sep, by email\" | ul.nx-items > li > span.r 10px \"What you sent with the query.\""
+ },
+ {
+  "name": "q152-closed · notes: 19 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-nl > div.nx-nempty > b 10px \"Nothing noted yet\" | div.nx-nl > div.nx-nempty > span 10px \"This is the place for why you picked Cla\""
+ },
+ {
+  "name": "q152-passed · tracking: 38 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Paul your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Query letter\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc164-sep 10px \"·\""
+ },
+ {
+  "name": "q152-passed · agent: 48 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"6 weeks\""
+ },
+ {
+  "name": "q152-passed · materials: 29 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"24 Aug, by email\" | ul.nx-items > li > span.r 10px \"Query letter\" | ul.nx-items > li > span.r 10px \"Synopsis\""
+ },
+ {
+  "name": "q152-passed · notes: 24 text nodes, none under 12px",
+  "ok": false,
+  "got": "article.nx-n.them > header > b 10px \"Paul\""
+ },
+ {
+  "name": "q152-withdrew · tracking: 27 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.qc152-qx > div.qc152-r1 > b[msg-title] 10px \"You sent Wanda your query\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc152-ch[chip] 10px \"Query letter\" | div.qc152-r2 > span.qc152-chs.qc164-went[chips] > span.qc164-sep 10px \"·\""
+ },
+ {
+  "name": "q152-withdrew · agent: 49 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-boxes > div.nx-box > small 10px \"Replies in\" | div.nx-boxes > div.nx-box > b 10px \"About\" | div.nx-boxes > div.nx-box > b 10px \"6 weeks\""
+ },
+ {
+  "name": "q152-withdrew · materials: 26 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-grp > h4 > span.r 10px \"23 Sep, by email\" | ul.nx-items > li > span.r 10px \"Query letter\" | ul.nx-items > li > span.r 10px \"Synopsis\""
+ },
+ {
+  "name": "q152-withdrew · notes: 19 text nodes, none under 12px",
+  "ok": false,
+  "got": "div.nx-nl > div.nx-nempty > b 10px \"Nothing noted yet\" | div.nx-nl > div.nx-nempty > span 10px \"This is the place for why you picked Wan\""
+ }
+]

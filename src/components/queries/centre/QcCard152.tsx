@@ -15,10 +15,9 @@
  */
 import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
-import { STAGE_NAME, type QcRow } from "../../../lib/qcSummary";
-import { STATE_BAND, type QueryState } from "../../../lib/queryState";
+import { type QcRow } from "../../../lib/qcSummary";
+import { type QueryState } from "../../../lib/queryState";
 import { STAGE_COLOURS, STAGE_INK, bandBackground, quietBackground, stageOf } from "../../../lib/stageColours";
 import { isQuietCard } from "../../../lib/qc154";
 import {
@@ -28,10 +27,10 @@ import {
 import "./qcv152card.css";
 import "./qcv1522card.css";
 import "./qcv153thread.css";
-import { band1522, footer1522, type FootAct, type FootCtx } from "../../../lib/qcFoot1522";
+import { footer1522, type FootAct, type FootCtx } from "../../../lib/qcFoot1522";
 import { waitWords } from "../../../lib/qc1522";
 import { PopCtx, useOutsideClose } from "./QcEdit152";
-import { Bubble, StepGlyph, chipIcon } from "./QcBubble152";
+import { Bubble, StepGlyph } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import {
   AgentEditPane, ASK_POOL, Ed, EdMenu, EditStrip, LeaveAsk, METHODS, MenuItem, NotesEditPane, SaveBar, useEditLayer,
@@ -46,9 +45,13 @@ import { AgentTab158 } from "./QcAgent158";
 import { MaterialsTab158 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
 /* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
-import { breatheClose, bump, easeBg, fadeIn, finishAll, fold, foot as footIn, hold, isHeld, isPressed, markPop, pressAtPointer, pressBack, pressThen, reduced, release, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
+import { breatheClose, bump, fadeIn, finishAll, fold, foot as footIn, hold, isHeld, isPressed, markPop, pressAtPointer, pressBack, pressThen, reduced, release, settle, strip as stripIn, toastOut, words } from "./qcMotion160";
 import "./qcv160.css";
 import { useLanding160, type Motion160 } from "./useLanding160";
+/* Query card v164 — the strip carries the track and the status name; the type, the bubbles and the toast to the rules */
+import { Track153 } from "./QcSlip153";
+import { bookLine164, stripStatus164 } from "../../../lib/qc164";
+import "./qcv164.css";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -177,15 +180,16 @@ const PREV = <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke=
 const NEXT = <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 3.5 10.5 8 6 12.5" /></svg>;
 
 /** v160 — what the strip, the label and the footer looked like, read off the page */
-interface Snap160 { bg: string; img: string; word: string; pill: string; pillBg: string; foot: string; footH: number | null }
+interface Snap160 { bg: string; img: string; word: string; cur: string; foot: string; footH: number | null }
 function readSnap160(root: HTMLElement): Snap160 {
   const band = root.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc152='band']");
-  const pill = root.querySelector<HTMLElement>("[data-qc152='pill']");
+  /* v164 — the label is gone; its mark's place is the track's current step (which step, and what it draws) */
+  const cur = root.querySelector<HTMLElement>("[data-qc164='track'] [data-qc153='node'][data-state='cur']");
   const ft = root.querySelector<HTMLElement>("[data-qc152='reply']");
   const bs = band ? getComputedStyle(band) : null;
   return {
     bg: bs?.backgroundColor ?? "", img: bs?.backgroundImage ?? "none", word: band?.querySelector("[data-qc152='band-word']")?.textContent ?? "",
-    pill: pill?.textContent ?? "", pillBg: pill ? getComputedStyle(pill).backgroundColor : "",
+    cur: cur ? `${cur.getAttribute("title") ?? ""}|${cur.innerHTML}` : "",
     foot: ft ? `${ft.dataset.rows ?? ""}|${ft.textContent ?? ""}` : "", footH: ft ? ft.offsetHeight : null,
   };
 }
@@ -199,7 +203,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   /* Stage colours v1 — the strip is the card's stage Band in ink (the sheen on an offer); gone quiet (the grid card's
      own test, lib/qc154 `isQuietCard`) fades that band to white. Its words are v152.2's. The card publishes its stage's
      four colours as --band / --tint / --edge / --mark for the pill, the footer disc and the draft outline. */
-  const bnd = band1522(d.state, d.foot?.phase ?? null);
+  /* v164 — the strip's status: the track and the status's own name (lib/qc164) */
+  const ss = stripStatus164(r);
   const stage = stageOf(r.status);
   const quiet = stage !== "offer" && isQuietCard(r, nowMs);
   const bandBg = quiet ? quietBackground(stage) : bandBackground(stage);
@@ -238,12 +243,25 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   useEffect(() => { setUnfold(false); }, [r.id]);
   useLayoutEffect(() => { if (!built.has(r.id)) { built.add(r.id); setBuildId(r.id); } else setBuildId(null); }, [r.id]);
 
-  /* the thread opens scrolled to the end, on every query and every return to Tracking */
+  /* the thread opens scrolled to the end, on every query and every return to Tracking.
+     v164 — ⚠️ not when the only change is the thread LOSING a step (an undo): v160's fold is still drawing the step that
+     left, and with the toast now in the layout the thread's box is a row shorter, so the fold's last frames overflow it
+     and a scroll to the end jumps the bubbles above by 10px for two frames (QC160-7, 22 Nov). The fold shrinks in place. */
+  const lastScroll = useRef<{ k: string; n: number } | null>(null);
   useLayoutEffect(() => {
     const el = bodyRef.current;
+    const k = `${r.id}|${p.tab}|${!!p.composer}|${p.draft?.status}|${p.draft?.kind}`, was = lastScroll.current;
+    lastScroll.current = { k, n: thread.length };
+    if (was && was.k === k && thread.length < was.n) return;
     if (el && p.tab === "tracking") el.scrollTop = el.scrollHeight;
     else if (el) el.scrollTop = 0;
   }, [r.id, p.tab, thread.length, !!p.composer, p.draft?.status, p.draft?.kind]);
+  /* v164 — the toast takes its own row above the footer, so the thread's box shortens when it arrives: the thread stays
+     at its end (only on arriving — on leaving, the box grows and nothing needs to move) */
+  useLayoutEffect(() => {
+    const el = bodyRef.current;
+    if (el && p.toast && p.tab === "tracking") el.scrollTop = el.scrollHeight;
+  }, [!!p.toast]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { tip.hide(); }, [r.id, p.tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* a chip's tip closes on any click elsewhere */
@@ -317,13 +335,13 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         const keys = goneNow.map((g) => g.item.key);
         fold(root, els, () => setLeaving((x) => x.filter((l) => !keys.includes(l.item.key))));
       }
-      if (was && (was.word !== now.word || was.bg !== now.bg || was.img !== now.img || was.pill !== now.pill)) {
+      if (was && (was.word !== now.word || was.bg !== now.bg || was.img !== now.img || was.cur !== now.cur)) {
         const band = root.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc152='band']");
         if (band) stripIn(root, band, was);
-        const pill = root.querySelector<HTMLElement>("[data-qc152='pill']");
-        if (pill) easeBg(root, pill, was.pillBg);
-        words(root, [band?.querySelector<HTMLElement>("[data-qc152='band-word']") ?? null, pill?.querySelector<HTMLElement>(":scope > span:not(.qc152-cap)") ?? null]);
-        markPop(root, pill?.querySelector<HTMLElement>(".qc152-cap") ?? null);
+        /* v164 — the motion follows the move: the strip's word was the status name's, the label's mark is the track's
+           current mark (the label, and its colour ease, are gone with it) */
+        words(root, [band?.querySelector<HTMLElement>("[data-qc152='band-word']") ?? null]);
+        markPop(root, band?.querySelector<HTMLElement>("[data-qc164='track'] [data-qc153='node'][data-state='cur'] > span") ?? null);
       }
       const ft = root.querySelector<HTMLElement>("[data-qc152='reply']");
       if (ft && was && was.foot !== now.foot) footIn(root, ft, was.footH);
@@ -394,12 +412,18 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     return () => window.clearTimeout(t);
   }, [motionN, motionDone, !p.motion]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  /* v164 — what went is ONE LINE: a paperclip, then each item in Source Serif, joined by " · ". Each item is still its
+     own button and does what its chip did (the tip, with its detail). */
   const chips = (cs: ThreadChip[], key: string) => cs.length ? (
-    <span className="qc152-chs" data-qc152="chips">
+    <span className="qc152-chs qc164-went" data-qc152="chips">
+      {CLIP}
       {cs.map((c, i) => (
-        <button key={`${key}-${i}`} type="button" className="qc152-ch" data-qc152="chip"
-          onClick={(e) => { e.stopPropagation(); tip.show(e.currentTarget, c.detail, c.label); }}
-          onBlur={() => tip.hide()}>{chipIcon(c.label)}{c.label}</button>
+        <React.Fragment key={`${key}-${i}`}>
+          {i ? <span className="qc164-sep" aria-hidden="true"> · </span> : null}
+          <button type="button" className="qc152-ch" data-qc152="chip"
+            onClick={(e) => { e.stopPropagation(); tip.show(e.currentTarget, c.detail, c.label); }}
+            onBlur={() => tip.hide()}>{c.label}</button>
+        </React.Fragment>
       ))}
     </span>
   ) : null;
@@ -418,8 +442,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     /* v160 — keyed beside the thread's own steps, so the step that arrives for it can take its element */
     return [
       gap != null ? <div key={`${draftKey}:w`} className={`qc1522-lt ${m.side}`} data-qc1522="draft-wait" data-rk={`${draftKey}:w`}>{waitWords(gap)}</div> : null,
-      <React.Fragment key={draftKey}><Bubble side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated={m.dated} tint={m.tint} grey={m.grey} initials={r.initials}
-        chips={m.chips.length ? <span className="qc152-chs">{m.chips.map((c, k) => <span key={k} className="qc152-ch">{chipIcon(c.label)}{c.label}</span>)}</span> : null}
+      <React.Fragment key={draftKey}><Bubble wordsFirst side={m.side} status={m.status} kind={m.kind} title={m.title} date={m.date} dated={m.dated} tint={m.tint} grey={m.grey} initials={r.initials}
+        chips={m.chips.length ? <span className="qc152-chs qc164-went">{CLIP}{m.chips.map((c, k) => <React.Fragment key={k}>{k ? <span className="qc164-sep" aria-hidden="true"> · </span> : null}<span className="qc152-ch">{c.label}</span></React.Fragment>)}</span> : null}
         via={m.via} quote={m.quote} follows={m.follows} nth={null} sub={m.sub} className="qc1522-draft" stamp={m.stamp} viaIcon={m.side === "me" ? viaKind(m.via) : null}
         outer={{ "data-qc152": "msg", "data-qc1522": "draft", "data-side": m.side, "data-rk": draftKey, style: { ["--dr" as string]: col } }} /></React.Fragment>,
     ];
@@ -472,7 +496,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         const stamped = !!desk.stampKey && (it.activityId === desk.stampKey || it.key === desk.stampKey);
         return (
           <React.Fragment key={rk(it.key)}>
-            <Bubble side={it.side} status={it.status} kind={it.kind} title={clip ? `You sent ${first} your materials` : it.title} date={it.date} dated={it.dated}
+            <Bubble wordsFirst side={it.side} status={it.status} kind={it.kind} title={clip ? `You sent ${first} your materials` : it.title} date={it.date} dated={it.dated}
               stamp={it.stamp} viaIcon={it.side === "me" ? viaKind(it.via) : null}
               tint={it.tint} grey={it.grey} initials={r.initials} chips={clip ? clipChip(clip) : chips(it.chips, it.key)} via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
               className={[(p.freshKey && (it.activityId === p.freshKey || it.key === p.freshKey) && !alias.current.map.has(it.key)) || enter.includes(it.key) ? "new" : "", checking ? "qc153-chk" : "", stamped ? "qc153-lgd" : "", out ? "qc160-out" : ""].filter(Boolean).join(" ") || undefined}
@@ -535,7 +559,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
     <PopCtx.Provider value={pop}>
     <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view} data-qc163-stage={stage}
       data-lean={view === "read" && !jOpen && !ed.on ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
-      data-stage={stage} data-quiet={quiet ? "" : undefined} style={stageVars}>
+      data-stage={stage} data-quiet={quiet ? "" : undefined} data-qc164="" style={stageVars}>
       <div ref={inRef} className="qc152-in">
         {ed.on ? (
         <div className="qc152-band is-ed" data-qc152="band" data-edit="">
@@ -544,8 +568,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         ) : (
         <div className="qc152-band" data-qc152="band" data-stage={stage} data-quiet={quiet ? "" : undefined} style={{ background: bandBg, color: STAGE_INK }}>
           {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={p.backTo.onBack}>← {p.backTo.label}</button> : null}
-          <span data-qc152="band-word">{d.foot ? bnd.word : r.status === QueryStatus.OFFER ? "OFFER" : STATE_BAND[d.state]}</span>
-          {d.state !== "closed" && r.dayN != null ? <span className="qc152-day" data-qc152="day">Day {r.dayN}</span> : <span className="qc152-day" />}
+          {/* v164 — the four-step track and the status name; the footer says whose move it is */}
+          <span className="qc164-st" data-qc164="status" role="img" aria-label={ss.label}>
+            <span className="qc164-trk" data-qc164="track" aria-hidden="true"><Track153 t={ss.track} status={r.status} /></span>
+            <span className="qc164-w" data-qc152="band-word" aria-hidden="true">{ss.name}</span>
+          </span>
+          <span className="qc164-sp" aria-hidden="true" />
           {p.stepCard && p.stepCard.of > 1 ? <>
             <button type="button" className="qc152-x" data-qc152="prev" aria-label="Previous query" title="Previous query" disabled={p.stepCard.at <= 0} onClick={(e) => { breatheClose(e.currentTarget.closest<HTMLElement>(".spanel")); p.stepCard!.go(-1); }}>{PREV}</button>
             <button type="button" className="qc152-x" data-qc152="next" aria-label="Next query" title="Next query" disabled={p.stepCard.at >= p.stepCard.of - 1} onClick={(e) => { breatheClose(e.currentTarget.closest<HTMLElement>(".spanel")); p.stepCard!.go(1); }}>{NEXT}</button>
@@ -559,8 +587,9 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           <span className="qc152-disc" aria-hidden="true">{r.initials}</span>
           <div className="qc152-who">{p.editData ? (
             <Ed k="agent" layer={ed} changed={ed.keys.includes("agent")} label="The agent this query is to"><span className="qc152-nm qcv-open-nm" data-qc149c="name">{edAgent?.name ?? r.agentName}</span></Ed>
-          ) : <div className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div>}<div className="qc152-ag">{((edAgent ? edAgent.agency : r.agency) || "").toUpperCase()}</div></div>
-          <span className="qc152-pill" data-qc152="pill" data-stage={stage}><span className="qc152-cap"><StatusDot status={r.status} overrideSize={17} tone="ink" decorative /></span><span>{STAGE_NAME[r.status]}</span></span>
+          ) : <div className="qc152-nm qcv-open-nm" data-qc149c="name">{r.agentName}</div>}<div className="qc152-ag" data-qc164="agency">{(edAgent ? edAgent.agency : r.agency) || ""}</div></div>
+          {/* v164 — no status label (the strip names it); the day sits at the row's end, by the strip's old rule */}
+          {d.state !== "closed" && r.dayN != null ? <span className="qc164-day" data-qc164="day">Day {r.dayN}</span> : null}
         </div>
         {view !== "read" ? p.editBody : <>
         {desk.bookRow ? (
@@ -569,8 +598,9 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         ) : (
         <div className="qc152-ms" data-qc152="book">
           <span className="qc152-bk" aria-hidden="true">{BOOK}</span>
-          <div><small>QUERYING</small><b>{p.msTitle ?? "No manuscript"}</b>
-            {p.bookChips.length ? <div className="qc152-bkc">{p.bookChips.map((c) => <span key={c}>{c}</span>)}</div> : null}</div>
+          {/* v164 — no "QUERYING" label; the title in --sp-h-card; genre and word count one sentence-case line */}
+          <div><b>{p.msTitle ?? "No manuscript"}</b>
+            {p.bookChips.length ? <div className="qc164-bkl" data-qc164="book-line">{bookLine164(p.bookChips)}</div> : null}</div>
         </div>
         )}
         <div className="qc152-tabs" role="tablist" aria-label="The query">
@@ -582,7 +612,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
             </button>
           ))}
         </div>
-        <div ref={bodyRef} className={`qc152-body${p.toast ? " qc1522-tpad" : ""}`} data-qc152="body" role="tabpanel">
+        <div ref={bodyRef} className="qc152-body" data-qc152="body" role="tabpanel">
           {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{ed.on && ed.dr && p.editData ? <NotesEditPane layer={ed} data={p.editData} /> : p.notes}</div>}
         </div>
         {ed.on ? <SaveBar keys={ed.keys} nudge={ed.nudge} busy={ed.busy} onCancel={() => ed.ask()} onSave={() => void ed.save()} />

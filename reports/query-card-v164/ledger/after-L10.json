@@ -1,0 +1,27 @@
+[
+ {
+  "name": "population: the save landed (Undo offered)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the toast's box does not meet the last bubble's (the bubble ends above the toast)",
+  "ok": true,
+  "got": "{\"tb\":{\"y\":559,\"h\":45,\"w\":524},\"lb\":{\"y\":371,\"h\":56}}"
+ },
+ {
+  "name": "the toast sits below the thread's box and above the footer",
+  "ok": true,
+  "got": "{\"tb\":{\"y\":559,\"h\":45,\"w\":524},\"body\":{\"y\":239,\"b\":559},\"foot\":{\"y\":604}}"
+ },
+ {
+  "name": "the toast is full width (within the card's inner frame)",
+  "ok": true,
+  "got": "524 of 524"
+ },
+ {
+  "name": "restore: the card is back at Queried",
+  "ok": true,
+  "got": "Queried"
+ }
+]

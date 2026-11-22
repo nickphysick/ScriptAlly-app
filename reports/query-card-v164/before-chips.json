@@ -1,0 +1,129 @@
+{
+ "q152-agent": [
+  {
+   "label": "Covering letter",
+   "focusable": true,
+   "tip": "Covering letterWhat you sent with the query."
+  }
+ ],
+ "q152-quiet": [
+  {
+   "label": "Covering letter",
+   "focusable": true,
+   "tip": "Covering letterWhat you sent with the query."
+  }
+ ],
+ "q152-materials": [
+  {
+   "label": "Covering letter",
+   "focusable": true,
+   "tip": "Covering letterWhat you sent with the query."
+  }
+ ],
+ "q152-undated": [
+  {
+   "label": "Query letter",
+   "focusable": true,
+   "tip": "Query letterQuery letter"
+  },
+  {
+   "label": "Synopsis",
+   "focusable": true,
+   "tip": "SynopsisSynopsis"
+  },
+  {
+   "label": "10 pages",
+   "focusable": true,
+   "tip": "10 pages10 pages"
+  }
+ ],
+ "q152-fullreq": [
+  {
+   "label": "Covering letter",
+   "focusable": true,
+   "tip": "Covering letterWhat you sent with the query."
+  },
+  {
+   "label": "Full manuscript",
+   "focusable": true,
+   "tip": "Full manuscriptFull manuscript"
+  },
+  {
+   "label": "Synopsis",
+   "focusable": true,
+   "tip": "SynopsisSynopsis"
+  }
+ ],
+ "q152-long": [
+  {
+   "label": "Covering letter",
+   "focusable": true,
+   "tip": "Covering letterWhat you sent with the query."
+  }
+ ],
+ "q152-rr": [
+  {
+   "label": "Query letter",
+   "focusable": true,
+   "tip": "Query letterQuery letter"
+  },
+  {
+   "label": "Synopsis",
+   "focusable": true,
+   "tip": "SynopsisSynopsis"
+  },
+  {
+   "label": "10 pages",
+   "focusable": true,
+   "tip": "10 pages10 pages"
+  }
+ ],
+ "q152-offer": [
+  {
+   "label": "Covering letter",
+   "focusable": true,
+   "tip": "Covering letterWhat you sent with the query."
+  }
+ ],
+ "q152-closed": [
+  {
+   "label": "Covering letter",
+   "focusable": true,
+   "tip": "Covering letterWhat you sent with the query."
+  }
+ ],
+ "q152-passed": [
+  {
+   "label": "Query letter",
+   "focusable": true,
+   "tip": "Query letterQuery letter"
+  },
+  {
+   "label": "Synopsis",
+   "focusable": true,
+   "tip": "SynopsisSynopsis"
+  },
+  {
+   "label": "10 pages",
+   "focusable": true,
+   "tip": "10 pages10 pages"
+  }
+ ],
+ "q152-withdrew": [
+  {
+   "label": "Query letter",
+   "focusable": true,
+   "tip": "Query letterQuery letter"
+  },
+  {
+   "label": "Synopsis",
+   "focusable": true,
+   "tip": "SynopsisSynopsis"
+  },
+  {
+   "label": "10 pages",
+   "focusable": true,
+   "tip": "10 pages10 pages"
+  }
+ ]
+}

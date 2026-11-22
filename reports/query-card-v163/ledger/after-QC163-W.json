@@ -1,18 +1,18 @@
 [
  {
   "name": "population: the three rim rules were read from the stylesheet",
-  "ok": true,
-  "got": "3"
+  "ok": false,
+  "got": "0"
  },
  {
   "name": "WebKit: the ring (top) shows the tint",
-  "ok": true,
-  "got": "111,143,179"
+  "ok": false,
+  "got": "255,255,255"
  },
  {
   "name": "WebKit: the ring (side) shows the tint",
-  "ok": true,
-  "got": "111,143,179"
+  "ok": false,
+  "got": "255,255,255"
  },
  {
   "name": "WebKit: the middle is cut out (white)",

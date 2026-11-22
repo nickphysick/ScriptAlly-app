@@ -22,7 +22,7 @@
  {
   "name": "never lands (every Firestore request left unanswered): back at scale 1 within 4.2s",
   "ok": true,
-  "got": "1 at 4199ms"
+  "got": "1 at 4191ms"
  },
  {
   "name": "never lands (every Firestore request left unanswered): no pop",

@@ -2,12 +2,12 @@
  {
   "name": "save: the pop rises above 1.025 and never above 1.03",
   "ok": true,
-  "got": "1.02947"
+  "got": "1.02945"
  },
  {
   "name": "save: at least 28 frames painted in the pop's 620ms",
   "ok": true,
-  "got": "37 frames over 600ms"
+  "got": "38 frames over 617ms"
  },
  {
   "name": "save: it ends at exactly 1",

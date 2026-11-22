@@ -12,7 +12,7 @@
  {
   "name": "Cancel: the frame is at scale 1 within 200ms, and stays there",
   "ok": true,
-  "got": "81 frames: [1]"
+  "got": "79 frames: [1]"
  },
  {
   "name": "Cancel: no breathing animation remains",

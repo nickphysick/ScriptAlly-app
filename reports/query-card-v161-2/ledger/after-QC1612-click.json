@@ -7,11 +7,11 @@
  {
   "name": "the click resolved",
   "ok": true,
-  "got": "177ms"
+  "got": "70ms"
  },
  {
   "name": "it landed: the reply's questions are showing (Their words)",
   "ok": true,
-  "got": "177ms"
+  "got": "70ms"
  }
 ]
