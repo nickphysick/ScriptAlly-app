@@ -99,9 +99,9 @@
    "match": {
     "sel": "qc152-rb"
    },
-   "reason": "For Nick (rulings v4, item 2): the query card's and agent card's footer is ruled 80 (14 above and below a 52px reply box, 24 at the sides), but the reply box measures 60 (agent card) and 62.8 (query card), so the footer cannot be 80 without the reply box itself changing. The rules check now measures the footer bar (.qc152-rb), not the box inside it.",
+   "reason": "Ruled (rulings v4, item 2, amended 22 Nov): the query card's and agent card's footer is padded 14 above and below the reply box and 24 at the sides, whatever height that gives (about 90); the reply box is not redesigned. The rules check measures these two footers by their padding. Today they are padded 12 14 14 14 (qcv152card.css .qc152-rb, qcv158.css .nf). Both files are audit-only: the live query-card-v167 branch edits them, so the style change waits for that session to land.",
    "source": "consistency wrap-up v1 (rulings v4)",
-   "kind": "open"
+   "kind": "in-flight"
   },
   {
    "rule": "R11",

@@ -33,9 +33,10 @@ export const STD = {
   card: { padding: "8 8 8 8", radius: "20", shadow: "#1c130f/4 0px 1px 2px 0px, #1c130f/7 0px 6px 18px 0px", innerRadius: "13", innerEdge: "1px solid #e9e3d9" },
   field: { height: 44, radius: "10", size: 16, edge: "#1c130f/18 0px 0px 0px 1px inset", focusEdge: "#2a3a52 0px 0px 0px 1.5px inset" },
   viewSwitch: { radius: "12", optHeight: 34, optRadius: "9" },
-  /* consistency wrap-up v1 (rulings v4, item 2): the query card's and agent card's action footer is 80 (14 above and below the
-     52px reply box, 24 at the sides); every other slide-out action footer stays 72. `cardFooter` names those two footers. */
-  panel: { close: 36, footer: 72, cardFooterH: 80, cardFooter: ["qc152-rb"] },
+  /* consistency wrap-up v1 (rulings v4, item 2, as amended 22 Nov): the query card's and agent card's action footer is measured
+     by its PADDING — 14 above and below the reply box, 24 at the sides — whatever height that gives (about 90); every other
+     slide-out action footer stays 72 high. `cardFooter` names those two footers. */
+  panel: { close: 36, footer: 72, cardFooterPad: "14 24 14 24", cardFooter: ["qc152-rb"] },
   /* consistency roll-out v2 (rulings v3) */
   danger: "#a63d2f", muted: "#5b4f47", quiet: "#6b6058", retiredGreys: ["#4d443d", "#7d7067", "#8a7a6c", "#8a8076"],
   body: { off: [14.5, 15, 15.5, 16.5, 17] },
@@ -56,7 +57,7 @@ export const RULES = {
   R6: "Action buttons in a page body match the filled or outline standard (or, inside a header band, the small outline button); at most one filled per view",
   R7: "Framed cards match the standard (rim 8 / 20 / shadow; inner 13 / 1px #e9e3d9)",
   R8: "Boxed text fields match the standard (44 high, radius 10, 1px ink edge, 16px)",
-  R9: "View switches are boxed; slide-out close buttons are 36px; slide-out action footers are 72px (the query card's and agent card's, 80px)",
+  R9: "View switches are boxed; slide-out close buttons are 36px; slide-out action footers are 72px (the query card's and agent card's: padded 14 / 24)",
   R10: "No user-visible \"late\" or \"overdue\"",
   R11: "Small warm accents use --sp-rust (#7a3f31)",
   R12: "Running text in Source Serif 4 is 16 (body) or 14 (secondary) on workspace pages, the Dashboard and panels",
@@ -247,8 +248,9 @@ function check(v, ctx) {
     }
     for (const r of recs("panels/footer").filter(inSlide)) {
       mark("R9");
-      const want = STD.panel.cardFooter.some((c) => (r.sel || "").includes(c)) ? STD.panel.cardFooterH : STD.panel.footer;
-      if (!near(r.sig.height, want, 1)) fail("R9", { sel: r.sel, text: r.text, detail: `footer ${r.sig.height} high (want ${want})` });
+      if (STD.panel.cardFooter.some((c) => (r.sel || "").includes(c))) {
+        if (r.sig.padding !== STD.panel.cardFooterPad) fail("R9", { sel: r.sel, text: r.text, detail: `card footer padding ${r.sig.padding} (want ${STD.panel.cardFooterPad})` });
+      } else if (!near(r.sig.height, STD.panel.footer, 1)) fail("R9", { sel: r.sel, text: r.text, detail: `footer ${r.sig.height} high (want ${STD.panel.footer})` });
     }
   }
 
