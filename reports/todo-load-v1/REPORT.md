@@ -168,3 +168,13 @@ Three source tests that pinned the old header and tab lines were re-pointed, not
 - **`WsSlim56`** (the slim bar, shown only once the header has scrolled away) still counts `all.length` while loading. It cannot show during a load from the top of the page.
 - **The phone and Dashboard skeletons, and other pages' skeletons**, untouched.
 - **7 worktrees besides the primary**, over CLAUDE.md's 5. All belong to other sessions, so none was touched.
+
+## Deploy
+
+One dev deploy for the night, after both parts:
+- **Branch:** `dev/cr1-qc163-db3-acv2-cr5-qcc-acv21-nu1-cr11-acv211-nu11-td58-td581-td582-tl1` @ `c6c317087`, which is `todo-load-v1`'s tip. It contains `todo-list-v58-2` and fast-forwards the branch dev was serving.
+- **Build:** `npm run build:dev` from a clean, detached checkout of that pushed tip.
+- **Guard:** the deploy command refused to run unless dev still served `index-C2XX1fR5.js`; it did.
+- **Dev now serves `index-B2Wbs__x.js`** (https://scriptally-dev.web.app).
+
+Nothing went to prod or main.

@@ -243,3 +243,13 @@ A plain `vite build` (production mode) builds only the public pages (417 modules
 - `startReason` still says "past expected" for any negative due day; nothing outside its tests calls it.
 - Three seed sends (`cv25-q-06`, `-07`, `-09`) now show no figure, because their records hold no request at all.
 - There are 7 worktrees besides the primary, over CLAUDE.md's 5. All belong to other sessions, so none was touched.
+
+## Deploy
+
+One dev deploy for the night, after both parts:
+- **Branch:** `dev/cr1-qc163-db3-acv2-cr5-qcc-acv21-nu1-cr11-acv211-nu11-td58-td581-td582-tl1` @ `c6c317087`, which is `todo-load-v1`'s tip. It contains `todo-list-v58-2` and fast-forwards the branch dev was serving.
+- **Build:** `npm run build:dev` from a clean, detached checkout of that pushed tip.
+- **Guard:** the deploy command refused to run unless dev still served `index-C2XX1fR5.js`; it did.
+- **Dev now serves `index-B2Wbs__x.js`** (https://scriptally-dev.web.app).
+
+Nothing went to prod or main.
