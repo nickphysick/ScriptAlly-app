@@ -38,7 +38,7 @@
   }
   .qc153-who { display: block; min-width: 0; }
   .qc153-nm { display: block; font: 600 19px/1.3 var(--sp-serif) !important; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .qc153-ag { display: block; font: italic 400 14.5px/1.35 var(--sp-serif) !important; color: var(--sp-quiet); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .qc153-ag { display: block; font: italic 400 var(--sp-sec-size)/1.35 var(--sp-serif) !important; color: var(--sp-quiet); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .qc153-rt { display: flex; align-items: center; gap: 18px; }
   .qc153-st { display: flex; flex-direction: column; align-items: flex-end; gap: 9px; }
   .qc153-wd { font: 400 16px/1.1 var(--sp-type) !important; color: var(--ink); white-space: nowrap; text-align: right; }
@@ -83,7 +83,7 @@
   .qc153-fi svg { display: block; width: 100%; height: 100%; }
   .qc153-fact b { display: block; font: 400 16.5px/1.2 var(--sp-type) !important; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .qc153-fact em { display: block; margin-top: 3px; font: italic 400 12.5px/1.3 var(--sp-serif) !important; color: var(--sp-quiet); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .qc153-fact.is-soft b { font: italic 400 15.5px/1.2 var(--sp-serif) !important; color: var(--sp-quiet); }
+  .qc153-fact.is-soft b { font: italic 400 var(--sp-body-size)/1.2 var(--sp-serif) !important; color: var(--sp-quiet); }
   .qc153-fact.is-hot { background: #f6eee8; }
   .qc153-fact.is-hot b::after { content: ""; display: inline-block; width: 7px; height: 7px; margin-left: 8px; border-radius: 50%; background: var(--navy); vertical-align: 3px; }
   .qc153-win { display: block; position: relative; height: 5px; margin-top: 7px; border-radius: 3px; background: #ebe4d9; text-decoration: none; overflow: hidden; }
@@ -126,7 +126,7 @@
   .qc153-ftx { min-width: 0; }
   .qc151 .qc153-ftx b { font: 400 20px/1.3 var(--sp-type) !important; color: var(--ink); }
   .qc151 .qc153-ftx small { margin-left: 6px; font: 400 15px/1 var(--sp-serif) !important; color: var(--sp-quiet); }
-  .qc151 .qc153-ftx p { margin: 0; font: 400 14.5px/1.4 var(--sp-serif) !important; color: var(--sp-muted); }
+  .qc151 .qc153-ftx p { margin: 0; font: 400 var(--sp-sec-size)/1.4 var(--sp-serif) !important; color: var(--sp-muted); }
   .qc153-stack { display: flex; margin-left: auto; padding-left: 8px; }
   .qc151 .qc153-sm {
     display: grid; place-items: center; width: 30px; height: 30px; margin-left: -8px; border-radius: 50%;

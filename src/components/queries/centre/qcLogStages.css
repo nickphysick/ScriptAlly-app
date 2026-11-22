@@ -93,7 +93,7 @@
 @keyframes laq-slide { from { opacity: 0; transform: translateX(18px); } }
 @keyframes laq-slideb { from { opacity: 0; transform: translateX(-18px); } }
 .laq h2.laq-qh { margin: 0 0 4px; font: 400 22px/1.25 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
-.laq p.laq-qs { margin: 0 0 16px; font: italic 400 15px/1.45 var(--laq-se); color: var(--laq-mut); }
+.laq p.laq-qs { margin: 0 0 16px; font: italic 400 var(--sp-body-size)/1.45 var(--laq-se); color: var(--laq-mut); }
 
 /* big choices */
 .laq .laq-big { display: grid; gap: 8px; }
@@ -161,7 +161,7 @@
 /* v1.2 — WHAT {FIRST} ASKS FOR (the reference's `.asks`): Queried sand, the asks as one wrapping row, a foot under a rule */
 .laq .laq-asks { margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; background: #efe7da; animation: laq-fadein .25s ease-out both; }
 .laq .laq-ah { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; }
-.laq .laq-ah b { font: 600 15.5px var(--laq-se); }
+.laq .laq-ah b { font: 600 var(--sp-body-size) var(--laq-se); }
 .laq .laq-ah span { margin-left: auto; font: italic 400 13px var(--laq-se); color: #7d7268; }
 .laq .laq-asks ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; }
 .laq .laq-asks li { display: flex; align-items: center; gap: 7px; }

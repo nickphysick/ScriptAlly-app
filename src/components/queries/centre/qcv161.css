@@ -8,7 +8,7 @@
 .qc152 .qc1522-cp .qc1522-cf { background: #fbf9f5; }
 
 /* the answers */
-.qc152 .qc161-sub { margin: -2px 0 12px; font: italic 400 14.5px/1.4 var(--sp-serif) !important; color: #7a7066; }
+.qc152 .qc161-sub { margin: -2px 0 12px; font: italic 400 var(--sp-sec-size)/1.4 var(--sp-serif) !important; color: #7a7066; }
 .qc152 .qc161-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 0 6px; }
 .qc152 .qc161-tile {
   all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 11px; min-height: 58px; padding: 8px 12px 8px 10px;

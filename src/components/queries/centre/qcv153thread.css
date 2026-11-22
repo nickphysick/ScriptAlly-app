@@ -11,7 +11,7 @@
 .qc152 .qc152-bx { padding: 7px 10px 7px 12px; border-radius: 14px; min-width: 0; }
 .qc152 .qc152-m.them .qc152-bx { border-bottom-left-radius: 4px; }
 .qc152 .qc152-m.me .qc152-bx { border-bottom-right-radius: 4px; }
-.qc152 .qc152-r1 b { font: 400 15px/1.35 var(--sp-serif); white-space: normal; }
+.qc152 .qc152-r1 b { font: 400 var(--sp-body-size)/1.35 var(--sp-serif); white-space: normal; }
 .qc152 .qc152-r1 { display: block; }
 .qc152 .qc152-r1 .qc152-nth, .qc152 .qc152-r1 .qc152-drt { margin-left: 6px; }
 /* the stamp, and the hidden room it keeps on the last line */
