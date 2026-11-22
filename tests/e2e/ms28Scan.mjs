@@ -5,6 +5,7 @@
  *
  *   node tests/e2e/ms28Scan.mjs
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -12,8 +13,8 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 import { canonicalIdOf } from "../../src/lib/genres.ts";
 
 const env = (f) => Object.fromEntries(readFileSync(f, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")).map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }));
-const dev = env(".env.development"); const local = existsSync(".env.local") ? env(".env.local") : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("not dev");
+const dev = targetEnv(); const local = existsSync(".env.local") ? env(".env.local") : {};
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error("not dev");
 const ACCOUNTS = ["harness@scriptally.test", "dv1@scriptally.test", "ms21-filled@scriptally.test", "ms21-empty@scriptally.test", "ms21-delete@scriptally.test"];
 const AGE_WORDS = /^(adult|young adult|ya|middle grade|mg|new adult|na|picture book|early reader|young fiction|young-adult|middle-grade|picture-book|new-adult|childrens|children's)$/i;
 const tally = (m, k) => m.set(k, (m.get(k) ?? 0) + 1);

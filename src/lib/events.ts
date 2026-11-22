@@ -32,7 +32,7 @@ export const EVENTS = {
   first_letter: "db.addVersion — the writer's first query-letter version",
   reminder_answered: "Dash58 — the nudge-email ask answered",
   getting_started_step: "Dash58 — a Getting started row ticks while the dashboard is mounted",
-  getting_started_done: "Dash58 — Close this list on the finish line",
+  getting_started_done: "Dash58 — the last Getting started row ticks while the dashboard is mounted; once per account (todoPrefs.dash.gsDone)",
   getting_started_hidden: "Dash58 — Hide on the Getting started sheet",
   example_opened: "Dash58 — the example dashboard opened",
   opened_app: "WorkspaceShell — the first app load of a calendar day (Europe/London)",

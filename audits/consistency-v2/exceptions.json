@@ -97,11 +97,11 @@
     "*"
    ],
    "match": {
-    "sel": "qc152-rf"
+    "sel": "qc152-rb"
    },
-   "reason": "For Nick (B7): the card footer at 72 with 14/24 padding leaves 44px for the 52px reply pill and action (v152.1); meeting it needs the pill redesigned, a slide-out panel build (consolidate-and-finish v1, B6).",
-   "source": "consolidate-and-finish v1",
-   "kind": "open"
+   "reason": "Ruled (rulings v4, item 2, amended 22 Nov): the query card's and agent card's footer is padded 14 above and below the reply box and 24 at the sides, whatever height that gives (about 90); the reply box is not redesigned. The rules check measures these two footers by their padding. Today they are padded 12 14 14 14 (qcv152card.css .qc152-rb, qcv158.css .nf). Both files are audit-only: the live query-card-v167 branch edits them, so the style change waits for that session to land.",
+   "source": "consistency wrap-up v1 (rulings v4)",
+   "kind": "in-flight"
   },
   {
    "rule": "R11",
@@ -190,15 +190,6 @@
    "kind": "agreed"
   },
   {
-   "rule": "R6",
-   "match": {
-    "sel": "tws-qfb"
-   },
-   "reason": "For Nick (B7): the To-do's light 'Quick fill' pill is neither a filled nor an outline button.",
-   "kind": "open",
-   "source": "consolidate-and-finish v1"
-  },
-  {
    "rule": "R7",
    "match": {
     "sel": "acv2-frame"
@@ -229,15 +220,6 @@
    },
    "reason": "Artwork: Your notes' prize illustration.",
    "kind": "agreed"
-  },
-  {
-   "rule": "R11",
-   "match": {
-    "sel": "cp32-bdisc"
-   },
-   "reason": "For Nick (B7): Comps' book disc icon (#6b3d33) — is it artwork?",
-   "kind": "open",
-   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
@@ -384,18 +366,18 @@
    "match": {
     "sel": "span.fv2-exw > b"
    },
-   "reason": "Left at 15: at 16 \"Nadia asked for the full manuscript\" needs 258.3px and its column is 252, so it wraps; it needs 7px more (measured, consolidate-and-finish v1, B1).",
-   "kind": "open",
-   "source": "consolidate-and-finish v1"
+   "reason": "Left at 15: at 16 \"Nadia asked for the full manuscript\" needs 258.3px and its column is 252, so it wraps; it needs 7px more (measured, consolidate-and-finish v1, B1). Agreed (rulings v4, item 5, 22 Nov 2026): the first-visit example title stays at its current size.",
+   "kind": "agreed",
+   "source": "consistency wrap-up v1 (rulings v4)"
   },
   {
    "rule": "R12",
    "match": {
     "sel": "div.ms29-dt-f > span"
    },
-   "reason": "Left at 15 (reverted in consolidate-and-finish v1, B1): at 16 the line wraps (+23px) in its 210px span; it needs 12px more width.",
-   "kind": "open",
-   "source": "consolidate-and-finish v1"
+   "reason": "Left at 15 (reverted in consolidate-and-finish v1, B1): at 16 the line wraps (+23px) in its 210px span; it needs 12px more width. Agreed (rulings v4, item 5, 22 Nov 2026): the Manuscripts date line stays at its current size.",
+   "kind": "agreed",
+   "source": "consistency wrap-up v1 (rulings v4)"
   },
   {
    "rule": "R12",
@@ -420,9 +402,9 @@
    "match": {
     "sel": "div.qc152-r1 > b"
    },
-   "kind": "open",
-   "reason": "Left at 15.5 (reverted in consolidate-and-finish v1, B1): at 16 the first thread line in the To-do desk's card preview wraps its time onto a second line.",
-   "source": "consolidate-and-finish v1"
+   "kind": "agreed",
+   "reason": "Left at 15.5 (reverted in consolidate-and-finish v1, B1): at 16 the first thread line in the To-do desk's card preview wraps its time onto a second line. Agreed (rulings v4, item 5, 22 Nov 2026): the first thread line in the To-do desk's card preview stays at its current size.",
+   "source": "consistency wrap-up v1 (rulings v4)"
   }
  ]
 }

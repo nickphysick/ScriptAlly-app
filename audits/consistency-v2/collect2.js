@@ -184,7 +184,7 @@
       if (r.height >= 12 && r.height <= 30 && r.width <= 260 && t && t.length <= 32 && (filled || border(cs) !== "none") && !el.querySelector("button, input")) kind = "mark";
       else if (statusDot(el)) kind = "mark";
       else if (r.width >= 140 && r.height >= 40 && r.width < pr.width * 0.985 && (filled || edged) && (edged || parseFloat(cs.borderTopLeftRadius) >= 4 || r.width >= pr.width * 0.7)) kind = "box";
-      else if (/(^|\s)(sp-rc|os-card|sp-card|art-box|sband)(\s|$)/.test(clsStr(el))) kind = "box";
+      else if (/(^|\s)(sp-rc|os-card|sp-card|art-box|sband|qc152-rb)(\s|$)/.test(clsStr(el))) kind = "box";
     }
     if (!kind) continue;
     /* a box inside a button, a row or a claimed atomic part belongs to it */

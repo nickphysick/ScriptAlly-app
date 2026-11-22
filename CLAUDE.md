@@ -6,6 +6,8 @@
 
 The full reasoning, dates and incidents behind every rule below are in `docs/decisions/rules-long-form.md` (verbatim, as it stood before the 11 Nov 2026 diet). Older code comments that say "see CLAUDE.md" for a page, CSS or measurement note: that note now lives in `docs/decisions/` (grep there) or, if superseded, in `docs/archive/claude-md-history-2026-11.md`. Never load the archive by default.
 
+Forty-three page sections that only the dev line's old CLAUDE.md held (Contact list v20–v26.2, Dashboard v71–v118.1, Packages v26–v42, Query Centre v142–v152.1, Versions, Pricing, phone, and four more) were recovered verbatim on 22 Nov 2026 into `docs/archive/claude-md-recovered/` (one file per area). They are history: read one only when a task needs that page's past, and check it against the page's docs/decisions file first.
+
 ## Working discipline
 
 ### Repo and branches
@@ -135,10 +137,11 @@ Nick's consistency rulings (design-refs/consistency-rollout-v1/consistency-rulin
 - **A heading is what it heads on the rendered page, not its tag:** a section of the page → section; one card or one panel section → card; inside a card under its heading → small. A one-off statement line (Comps' "The podium", the Analytics finding headline, Queries' "That's all 88.") is a display line, not a heading, and keeps its own look.
 - **Navy header:** title 40px from the header's top; 40px gap to the content below (`src/components/shell/wsnh.css` §1b).
 - **Action buttons in a page body:** `.sp-btn` + `.sp-btn--fill` / `.sp-btn--line` (`--sp-btn-h` 40, `--sp-btn-r` 10, `--sp-btn-font` Source Serif 600 15). One filled navy per view; others outline. Not header, toggle, tab, pill, row, icon-only, destructive, Settings or public buttons.
+- **Small outline button** — the agreed kind for a button inside a header band (To-do's Quick fill, `.tws-qfb`): 30 high, radius 8, padding 0 12, white ground, `inset 0 0 0 1.5px` navy edge, navy Source Serif 4 600 14; hover navy at 6% (`--sp-btn-line-hov`). The rules check names each one (`STD.smallOutline.in` in audits/consistency-v2/rules.mjs); anything else is held to the 40px standard.
 - **Framed card:** `.sp-rc` › `.sp-rc-in` (`--sp-rc-r` 20, `--sp-rc-pad` 8, `--sp-rc-sh`; inner `--sp-rc-in-r` 13, `--sp-rc-edge` 1px #e9e3d9). Side panels (the Views rails) use the single-edge card, not this.
 - **Text field:** `.sp-fld` (`--sp-fld-h` 44, `--sp-fld-r` 10, `--sp-fld-edge` 1px ink edge, `--sp-fld-font` 16px; `--sp-fld-focus` navy edge on focus). A headline field keeps its height and size.
 - **View switches are boxed** (box radius 12, buttons 34 high, radius 9: the Query Centre's List / Birds-eye switch, `.cp32-tog` on Comps). Underlined tabs are for different lists.
-- **Slide-out panels:** close button `--sp-px-size` (36 × 36); action footer `--sp-pfoot-h` (72) with `--sp-pfoot-pad` (14px 24px) and `--sp-pfoot-rule`.
+- **Slide-out panels:** close button `--sp-px-size` (36 × 36); action footer `--sp-pfoot-h` (72) with `--sp-pfoot-pad` (14px 24px) and `--sp-pfoot-rule`. **The query card's and agent card's footer is padded 14 above and below the reply box and 24 at the sides**, whatever height that gives (about 90; rulings v4 as amended 22 Nov 2026 — the reply box is not redesigned). The rules check measures that footer, `.qc152-rb`, by its padding (`STD.panel.cardFooterPad`), not a height. Not yet built: it is padded 12 14 14 14 in `qcv152card.css` / `qcv158.css`, files the query-card-v167 branch is changing, so R9 carries an in-flight exception.
 - **Copy:** "past expected", never "late" or "overdue"; the Query Centre's Next box says "{n} days past"; a reply to a closed query is "a reply after closing". Colour never marks time pressure. No verdict words.
 - **Muted text:** `--sp-muted` (#5b4f47) for supporting text, `--sp-quiet` (#6b6058) for captions and meta (both pass 4.5:1 on oat and white). No other grey-brown on light grounds.
 - **Body text:** running Source Serif on workspace pages, the Dashboard and panels is `--sp-body-size` (16) or `--sp-sec-size` (14).

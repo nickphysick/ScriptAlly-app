@@ -1,0 +1,14 @@
+# To-do list — sections recovered from the old CLAUDE.md
+
+History recovered from the old CLAUDE.md on 22 Nov 2026; later rulings may supersede it.
+
+## To-do list v51 — the task workspace, on the dev line (6 Nov; ref = design-refs/todo-list-v50/todo-list-v50.html; report reports/todo-list-v51/REPORT.md; branch `todo-list-v51` off dev's `…-qc1521-sr1`, NOT merged; SUPERSEDES the desktop tray of v5, v5.1, v5.2, v7 and v12 — their page is deleted)
+- **Desktop `/todo` is `components/todo/ws/TodoWorkspace.tsx`: a slim navy header naming the one task that matters most, then a tray (To do · Snoozed · Done; search, Filters, Group) beside a desk that does the selected task — the Mentor's bubble, one question at a time, a summary of what gets logged, "Log it", and the real card beside it.** The phone keeps `TodoPhone`.
+- **⚠️ THE To do TAB'S NUMBER IS THE SIDEBAR BADGE'S: `boardFigures(cols).cards` off the same `assembleBoardColumns` call.** The tray draws a housekeeping sweep as one row per agent (`lib/todoWs.wsTasks`), so its rows can outnumber the tab; each heading counts its own rows. The dashboard's Next up is a different list (`dashList`) and was not changed.
+- **⚠️ THE DESK SAVES THROUGH `lib/queryActions/stepSaves`, the drawer's own path**: `saveSent` (its reply date and nudge are `sentDefaults`, the house window v152 ruled), `saveNudgeSent`, `saveOfferDecision` / `saveOfferMoreTime` (moved out of `OfferJourney`, which calls them too), plus `recordQueryResponse`, `saveClose` and `commitCardSave`. There is no `deskSaves`.
+- **⚠️ AN AGENT'S REPLY TIME IS SAID ONLY WHERE IT IS SET**: the nudge and Gone quiet Mentor lines name `responseTimeWeeks`; saving one names each live query whose date moves, by a dry run through `expectedFor` (`wsFlows.replyDatesMoved`). A send never reads it (v152: partials and fulls read the house window).
+- **The agent preview is the address book's `AgentCard262`**, its props built from the Contact list's libraries, every handler inert. Never `scrollIntoView` inside the preview.
+- **The phone's snooze pop-up moved out of the tray**: `components/todo/SetAsidePop.tsx`, `MonthCal.tsx`, `setAsidePop.css` (the rules that reached the phone, verbatim).
+- **Dropped with the tray, flagged in the report:** Needs you now, the calendar drawer, the pin (and `F`), bulk close, the desk's parked journeys, a note from the compose card. Covered by the workspace: the date menu (Snooze → Pick a date; an own task's due menu), Done today (the Done tab). Kept: the arrival keys, `TODO_OPEN_COMPOSER` (now heard on /todo), tags (Filters → Manage your tags).
+- **Own tasks: `UserTask.steps` (new) and the link (`queryId` / `agentId`, now updatable).** Dev rules not deployed until Nick reads the report.
+- **Locks:** `tests/e2e/todoWs.measure.ts`; unit `lib/todoWs.test.ts`, `ws/todoWorkspaceSmoke.test.tsx`, `ws/replyDatesMoved.test.ts`, `lib/queryActions/stepSaves.test.ts`. Retired: `tests/e2e/RETIRED-todo-list-v51.md`.

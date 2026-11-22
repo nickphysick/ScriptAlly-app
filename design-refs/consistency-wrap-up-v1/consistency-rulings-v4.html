@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QueryHawk consistency rulings v4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@500;600&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,400&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+
+  :root {
+    --sp-type: "Special Elite", "Courier New", Courier, monospace;
+    --sp-serif: "Source Serif 4", Georgia, serif;
+    --mono: "JetBrains Mono", monospace;
+    --ink-shell: #1b2433; --ink-cream: #f4eee5; --ink-cream-rgb: 244, 238, 229;
+    --ink-terra: #d9967a; --ink-terra-rgb: 217, 150, 122; --ink-bright: #fffaf3;
+    --ink-band: #2d3a50; --ink: #1c130f; --page: #f2eee8;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #faf8f4; color: var(--ink); font: 400 16px/1.5 var(--sp-serif); }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 40px 28px 120px; }
+  h1 { font: 400 34px/1.2 var(--sp-type); margin: 0 0 8px; }
+  .lede { margin: 0 0 8px; max-width: 70ch; color: #4d443d; }
+  .how { margin: 0 0 36px; color: #6b5f56; font-size: 15px; }
+  section { margin: 0 0 28px; background: #fff; border-radius: 16px; box-shadow: inset 0 0 0 1px #e6dfd4; padding: 26px 28px 22px; }
+  h2 { font: 400 23px/1.25 var(--sp-type); margin: 0 0 6px; }
+  h2 span { color: #8a8076; margin-right: 10px; }
+  .q { margin: 0 0 18px; color: #4d443d; max-width: 78ch; }
+  .cmp { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cmp.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 820px) { .cmp, .cmp.three { grid-template-columns: 1fr; } }
+  .pane { border-radius: 12px; box-shadow: inset 0 0 0 1px #e6dfd4; overflow: hidden; display: flex; flex-direction: column; }
+  .pane > b { display: block; padding: 9px 14px; font: 600 14px/1.3 var(--sp-serif); background: #f4f0ea; border-bottom: 1px solid #e6dfd4; }
+  .pane > b small { font-weight: 400; color: #6b5f56; font-size: 14px; }
+  .stage { flex: 1; padding: 22px 18px; display: flex; flex-wrap: wrap; gap: 22px; align-items: center; justify-content: center; }
+  .stage.shell { background: var(--ink-shell); }
+  .stage.page { background: var(--page); }
+  .stage.white { background: #fff; }
+  .stage.col { flex-direction: column; align-items: stretch; }
+  .rec { margin: 16px 0 0; font-size: 15px; color: #3a332d; }
+  .rec b { font-weight: 700; }
+  .pick { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pick label { display: inline-flex; align-items: center; gap: 8px; min-height: 36px; padding: 0 14px; border-radius: 999px; box-shadow: inset 0 0 0 1px #cfc6b8; cursor: pointer; font-size: 15px; background: #fff; }
+  .pick input { accent-color: #2a3a52; margin: 0; }
+  .pick label:has(input:checked) { box-shadow: inset 0 0 0 2px #2a3a52; background: #eef1f5; }
+  .pick label:focus-within { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .cap { font-size: 14px; color: #6b5f56; text-align: center; width: 100%; margin: 0; }
+  .stage.shell .cap { color: rgba(244, 238, 229, .66); }
+
+  /* ── rail (sidebarRail.css) ── */
+  .wsr { width: 80px; padding: 10px 6px 12px; display: flex; flex-direction: column; background: var(--ink-shell); }
+  .wsr-ni { position: relative; width: 100%; height: 58px; margin-bottom: 4px; padding: 0 2px; border-radius: 9px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: rgba(244, 238, 229, .66); }
+  .wsr-ic { display: grid; place-items: center; width: 48px; height: 30px; border-radius: 15px; opacity: .5; }
+  .wsr-ic svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .wsr-lbl { font: 400 11.5px/1.15 var(--sp-serif); letter-spacing: -0.005em; white-space: nowrap; color: rgba(244, 238, 229, .58); }
+  .wsr-on { color: var(--ink-bright); }
+  .wsr-on .wsr-ic { opacity: 1; color: var(--ink-terra); background: rgba(217, 150, 122, .2); }
+  .wsr-on .wsr-ic svg { stroke-width: 2.6; }
+  .wsr-on .wsr-lbl { color: var(--ink-bright); font-weight: 600; }
+  .wsr-ct { position: absolute; left: calc(50% + 9px); top: 3px; min-width: 16px; height: 15px; padding: 0 4px; border-radius: 8px; background: var(--ink-terra); color: var(--ink-shell); font: 600 9px/15px var(--mono); text-align: center; box-shadow: 0 0 0 2px var(--ink-shell); }
+  .wsr-fb { margin-top: 10px; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .wsr-fbi { position: relative; width: 42px; height: 34px; border-radius: 10px; box-shadow: inset 0 0 0 1.5px var(--ink-terra); color: var(--ink-terra); display: grid; place-items: center; }
+  .wsr-fbi svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .wsr-t { font: 600 11px/normal var(--sp-serif); color: var(--ink-terra); }
+  .p12 .wsr-lbl { font-size: 12px; }
+  .p12 .wsr-t { font-size: 12px; }
+  .p12 .wsr-ct { font: 600 12px/18px var(--mono); min-width: 20px; height: 18px; border-radius: 9px; padding: 0 5px; top: 1px; }
+
+  
+  .send { position: sticky; bottom: 0; margin-top: 36px; background: #1b2433; color: #f4eee5; border-radius: 16px; padding: 18px 22px; display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; }
+  .send p { margin: 0; font-size: 15px; }
+  .send button { height: 40px; padding: 0 20px; border: 0; border-radius: 999px; background: #f4eee5; color: #1b2433; font: 600 15px var(--sp-serif); cursor: pointer; }
+  .send button:focus-visible { outline: 2px solid #d9967a; outline-offset: 2px; }
+  textarea { width: 100%; min-height: 220px; margin-top: 12px; border-radius: 10px; border: 1px solid #cfc6b8; padding: 12px; font: 14px/1.5 var(--mono); display: none; }
+  .note { margin: 14px 0 0; padding: 10px 14px; border-radius: 10px; background: #f4f0ea; font-size: 15px; color: #3a332d; }
+  .lbl { font-size: 14px; color: #6b5f56; margin: 0; text-align: center; }
+  .stage.shell .lbl, .stage.navy .lbl { color: rgba(244,238,229,.7); }
+  .stage.navy { background: #2a3a52; }
+  .stage.top { align-items: flex-start; }
+  .item { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .item.l { align-items: flex-start; }
+  .cmp.four { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 980px) { .cmp.four { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .cmp.four { grid-template-columns: 1fr; } }
+  .sub { font: 600 15px/1.3 var(--sp-serif); margin: 22px 0 10px; }
+
+  /* 1 page colour */
+  .ground { width: 100%; padding: 22px; display: flex; justify-content: center; }
+  .ground .c { width: 100%; max-width: 300px; background: #fff; border-radius: 13px; border: 1px solid #e9e3d9; padding: 14px 16px; }
+  .ground .c h3 { margin: 0 0 6px; font: 400 20px/1.25 var(--sp-type); }
+  .bar { height: 10px; border-radius: 5px; background: #ece7df; margin: 8px 0; }
+  .bar.s { width: 60%; }
+
+  /* 2 gap under header */
+  .gaps { display: flex; gap: 10px; width: 100%; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+  .gap { width: 104px; }
+  .gap .hd { height: 34px; background: #2a3a52; border-radius: 0 0 10px 10px; }
+  .gap .ct { height: 46px; background: #fff; border-radius: 10px 10px 0 0; border: 1px solid #e9e3d9; border-bottom: 0; }
+  .gap p { margin: 6px 0 0; font-size: 14px; line-height: 1.3; text-align: center; color: #4d443d; }
+  .gap p b { display: block; color: #1c130f; }
+
+  /* 3,4 buttons */
+  .btn { display: inline-flex; align-items: center; white-space: nowrap; color: #fff; }
+  .sw { width: 86px; height: 56px; border-radius: 10px; }
+
+  /* 5 cards */
+  .cardA { background: #fff; border-radius: 20px; padding: 8px; box-shadow: 0 1px 2px rgba(28,19,15,.04), 0 6px 18px rgba(28,19,15,.07); }
+  .cardA > div { border-radius: 13px; border: 1px solid #e9e3d9; padding: 16px 18px; }
+  .cardB { background: #fff; border-radius: 20px; padding: 7px; box-shadow: 0 1px 2px rgba(28,19,15,.08), 0 22px 40px -22px rgba(28,19,15,.32); }
+  .cardB > div { border-radius: 14px; border: 1px solid #e3d5c9; padding: 16px 18px; }
+  .cardC { background: #fff; border-radius: 28px; padding: 10px; box-shadow: 0 22px 40px -28px rgba(28,19,15,.4), 0 0 0 1px rgba(28,19,15,.03); }
+  .cardC > div { border-radius: 20px; border: 1px solid rgba(28,19,15,.13); padding: 16px 18px; }
+  .cardD { background: #fff; border-radius: 18px; box-shadow: 0 0 0 1px #e3dbcf, 0 18px 30px -24px rgba(28,19,15,.35); padding: 16px 18px; }
+  .card { width: 100%; }
+  .card h3 { margin: 0 0 6px; font: 400 20px/1.25 var(--sp-type); }
+
+  /* 6 headings */
+  .hs { width: 100%; display: grid; gap: 12px; }
+  .hs div { display: flex; align-items: baseline; justify-content: space-between; gap: 14px; }
+  .hs div span:last-child { font-size: 14px; color: #6b5f56; white-space: nowrap; }
+  .se { font-family: var(--sp-type); font-weight: 400; color: #1c130f; }
+
+  /* 7 view switch */
+  .seg { display: inline-flex; gap: 4px; }
+  .seg span { display: inline-flex; align-items: center; height: 34px; padding: 0 12px; border-radius: 9px; font: 400 14.5px var(--sp-serif); background: #efe9df; color: #5b4f47; }
+  .seg span.on { background: #2a3a52; color: #fff; font-weight: 600; }
+  .segp span { height: 34px; padding: 0 18px; border-radius: 999px; font: 600 15px var(--sp-serif); background: rgba(255,255,255,.12); color: rgba(255,250,243,.78); }
+  .segp span.on { background: #fffaf3; color: #1c130f; }
+  .segp.r9 span { border-radius: 9px; }
+  .tabs { display: inline-flex; gap: 22px; background: #fbf9f5; padding: 0 14px; border-radius: 8px; }
+  .tabs span { display: inline-flex; align-items: center; height: 42px; font: 400 15.5px var(--sp-serif); color: #5b4f47; border-bottom: 2px solid transparent; }
+  .tabs span.on { color: #1c130f; font-weight: 600; border-bottom-color: #2a3a52; }
+
+  /* 8 inputs */
+  .inp { display: flex; align-items: center; width: 240px; background: #fff; color: #1c130f; font-family: var(--sp-serif); }
+
+  /* 9 slide-outs */
+  .crop { width: 300px; height: 150px; overflow: hidden; position: relative; background: rgba(28,19,15,.28); }
+  .shA { position: absolute; left: 24px; top: 16px; width: 420px; height: 400px; background: #fff; border-radius: 20px; padding: 7px; box-shadow: 0 1px 2px rgba(28,19,15,.08), 0 26px 48px -20px rgba(28,19,15,.38); }
+  .shA .in { border-radius: 14px; height: 100%; padding: 18px 18px; }
+  .shA .x, .shB .x { position: absolute; display: grid; place-items: center; border-radius: 50%; font: 400 22px/1 var(--sp-serif); }
+  .shA h4, .shB h4 { margin: 0; font: 400 22px/1.2 var(--sp-type); }
+  .shB { position: absolute; left: 24px; top: 0; width: 420px; height: 400px; background: #fff; border-radius: 12px 0 0 12px; box-shadow: -24px 0 48px -24px rgba(28,19,15,.45), 0 0 0 1px rgba(28,19,15,.08); overflow: hidden; }
+  .shB .hd { background: #2a3a52; color: #f4eee5; padding: 22px 24px; height: 97px; }
+  .xs { display: flex; gap: 18px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .xb { display: grid; place-items: center; border-radius: 50%; font: 400 22px/1 var(--sp-serif); color: #f4eee5; }
+
+  /* 12 rail badge variants */
+  .bB .wsr-ct { left: auto; right: 2px; font: 600 12px/18px var(--mono); min-width: 20px; height: 18px; border-radius: 9px; padding: 0 5px; top: 1px; }
+  .bC .wsr-ct { font: 600 11px/17px var(--mono); min-width: 18px; height: 17px; border-radius: 9px; padding: 0 4px; top: 2px; }
+  .rails { display: flex; gap: 14px; }
+
+  .gb { position:relative; width:100%; max-width:420px; height:40px; display:flex; align-items:center; gap:8px; padding:0 12px; border-radius:9px; background:#e4ebf1; color:#2f4357; }
+  .gb b { font:400 16px var(--sp-type); } .gb em { font:normal 15px var(--sp-type); opacity:.75; } .gb i { margin-left:auto; font-style:normal; font-size:13px; opacity:.6; }
+  .qfb { position:absolute; right:34px; top:50%; transform:translateY(-50%); display:inline-flex; align-items:center; white-space:nowrap; color:#2f4357; font-family:var(--sp-serif); background:#fff; }
+  .foot { width:100%; max-width:470px; background:#fff; border-top:1px solid rgba(28,19,15,.1); display:flex; align-items:center; gap:10px; padding-left:24px; padding-right:24px; box-shadow:0 0 0 1px #e6dfd4; }
+  .rf { flex:1; min-height:52px; display:flex; align-items:center; gap:11px; padding:8px 16px 8px 10px; border-radius:12px; background:#f5f1ea; font:600 14px/1.3 var(--sp-serif); }
+  .rf span { width:34px; height:34px; border-radius:50%; background:#e4ded3; flex:none; }
+  .act { height:52px; padding:0 18px; border-radius:12px; background:#2a3a52; color:#fff; font:600 15px var(--sp-serif); display:inline-flex; align-items:center; flex:none; }
+  .bdisc { width:46px; height:46px; border-radius:50%; display:grid; place-items:center; background:#fbf4ee; box-shadow:0 0 0 2px #b98372; color:#6b3d33; }
+  .bdisc svg { width:20px; height:20px; fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+  .colbox { box-shadow:inset 0 0 0 1px #e6dfd4; border-radius:8px; padding:10px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Consistency rulings v4</h1>
+  <p class="lede">Five decisions left over from the finishing pass. Each is drawn at real size from the styles now on main.</p>
+  <p class="how">Pick an answer under each one, then press "Copy my rulings" at the bottom and paste it into the chat. My recommendation is pre-selected.</p>
+  
+  <section data-q="1 Late reply wording">
+    <h2><span>1</span>"Late reply"</h2>
+    <p class="q">The finishing pass reworded these lines to avoid "late". An earlier note in the code says you once ruled "Record a late reply" should stay. Here "late" means a reply that arrives after a query has closed.</p>
+    <div class="cmp">
+      <div class="pane"><b>Before <small>your earlier wording</small></b><div class="stage white col" style="align-items:flex-start">
+        <span class="btn" style="background:#2a3a52;height:40px;padding:0 20px;border-radius:10px;font:600 15px var(--sp-serif)">Record a late reply</span>
+        <p style="margin:0;font:400 14px var(--sp-serif);color:#5b4f47">Closed · a late reply reopens it</p>
+      </div></div>
+      <div class="pane"><b>On main now</b><div class="stage white col" style="align-items:flex-start">
+        <span class="btn" style="background:#2a3a52;height:40px;padding:0 20px;border-radius:10px;font:600 15px var(--sp-serif)">Record a reply after closing</span>
+        <p style="margin:0;font:400 14px var(--sp-serif);color:#5b4f47">Closed · a reply after closing reopens it</p>
+      </div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> go back to "late reply". It reads the way a person would say it, it's shorter on the button, and it describes when the reply came rather than pressing the writer about time. It would be the one agreed use of the word.</p>
+    <div class="pick">
+      <label><input type="radio" name="q1" value="Restore 'late reply' wording on these lines, as the one agreed use of 'late'" checked>Restore "late reply"</label>
+      <label><input type="radio" name="q1" value="Keep 'a reply after closing' wording">Keep "a reply after closing"</label>
+    </div>
+  </section>
+
+  <section data-q="2 Card footer height">
+    <h2><span>2</span>The footer on the query card and agent card</h2>
+    <p class="q">You ruled action footers are 72px high. This one holds a 52px reply box and a 52px action, which don't fit in 72px with the standard padding. This drawing is simplified: the heights and padding are real, the contents are stand-ins.</p>
+    <div class="cmp">
+      <div class="pane"><b>80px <small>14 above and below</small></b><div class="stage page"><div class="foot" style="height:80px"><div class="rf"><span></span>Reply box</div><span class="act">Action</span></div></div></div>
+      <div class="pane"><b>72px <small>10 above and below</small></b><div class="stage page"><div class="foot" style="height:72px"><div class="rf"><span></span>Reply box</div><span class="act">Action</span></div></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> 80px for these two cards. It keeps the same 14px breathing room as every other footer, where 72px would leave the reply box looking squeezed.</p>
+    <div class="pick">
+      <label><input type="radio" name="q2" value="Query card and agent card footers are 80px high (14px above and below the 52px reply box); other footers stay 72px" checked>80px on these two cards</label>
+      <label><input type="radio" name="q2" value="Query card and agent card footers are 72px high with 10px above and below">72px, tighter padding</label>
+      <label><input type="radio" name="q2" value="Leave the card footer as it is built, as an agreed exception">Leave as built</label>
+    </div>
+  </section>
+
+  <section data-q="3 Comps book icon">
+    <h2><span>3</span>The round icon on Comps</h2>
+    <p class="q">This disc uses its own dark brown (#6b3d33) and a tan ring, neither of which is the app's rust.</p>
+    <div class="cmp">
+      <div class="pane"><b>Now</b><div class="stage white"><span class="bdisc"><svg viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span></div></div>
+      <div class="pane"><b>In the app's rust</b><div class="stage white"><span class="bdisc" style="color:#7a3f31;box-shadow:0 0 0 2px #7a3f31"><svg viewBox="0 0 24 24"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg></span></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> leave it. It's a small drawn mark, like the illustrations, and the softer ring suits it.</p>
+    <div class="pick">
+      <label><input type="radio" name="q3" value="Leave Comps' round icon as it is, treated as artwork" checked>Leave it, as artwork</label>
+      <label><input type="radio" name="q3" value="Comps' round icon and its ring take the app's rust #7a3f31">Move to the app's rust</label>
+    </div>
+  </section>
+
+  <section data-q="4 Quick fill pill">
+    <h2><span>4</span>To-do's "Quick fill"</h2>
+    <p class="q">This small pill sits at the right of the Housekeeping group header. It's neither of your two button styles, and the standard 40px button is as tall as the header it sits in.</p>
+    <div class="cmp three">
+      <div class="pane"><b>Now <small>30 high</small></b><div class="stage white"><div class="gb"><b>Housekeeping</b><em>4</em><i>⌄</i><span class="qfb" style="height:30px;padding:0 12px;border-radius:15px;box-shadow:inset 0 0 0 1px #c9d5e0;font-size:14px">Quick fill</span></div></div></div>
+      <div class="pane"><b>As a filter pill <small>32 high</small></b><div class="stage white"><div class="gb"><b>Housekeeping</b><em>4</em><i>⌄</i><span class="qfb" style="height:32px;padding:0 12px;border-radius:999px;box-shadow:inset 0 0 0 1px #e9e0d4;background:#faf7f2;color:#1c130f;font-size:14.5px">Quick fill</span></div></div></div>
+      <div class="pane"><b>As a small outline button</b><div class="stage white"><div class="gb"><b>Housekeeping</b><em>4</em><i>⌄</i><span class="qfb" style="height:30px;padding:0 12px;border-radius:8px;box-shadow:inset 0 0 0 1.5px #2a3a52;color:#2a3a52;font-size:14px;font-weight:600">Quick fill</span></div></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> leave it as it is and record it as a "header shortcut". It's the only one of its kind, it matches its blue-grey header, and neither standard fits the space better.</p>
+    <div class="pick">
+      <label><input type="radio" name="q4" value="Leave Quick fill as it is, recorded as a header shortcut" checked>Leave it</label>
+      <label><input type="radio" name="q4" value="Quick fill takes the filter pill standard (32 high, 14.5px)">Filter pill</label>
+      <label><input type="radio" name="q4" value="Quick fill becomes a small outline button (30 high, radius 8, navy edge)">Small outline button</label>
+    </div>
+  </section>
+
+  <section data-q="5 Lines that wrap at 16px">
+    <h2><span>5</span>Three lines that wrap at 16px</h2>
+    <p class="q">Three lines of body text stayed at 15 or 15.5 because they break onto a second line at 16 in the space they have: the first-visit example title, the date line on Manuscripts, and the first thread line in the To-do card preview. The first is shown here in its real 252px column.</p>
+    <div class="cmp">
+      <div class="pane"><b>Now <small>15px, one line</small></b><div class="stage white"><div class="colbox" style="width:252px"><b style="font:600 15px/1.35 var(--sp-serif)">Nadia asked for the full manuscript</b></div></div></div>
+      <div class="pane"><b>At 16px <small>wraps</small></b><div class="stage white"><div class="colbox" style="width:252px"><b style="font:600 16px/1.35 var(--sp-serif)">Nadia asked for the full manuscript</b></div></div></div>
+    </div>
+    <p class="rec"><b>Recommendation:</b> leave all three at their current size. The difference is half a pixel to one pixel, nobody will see it, and widening the columns risks moving things that are already right.</p>
+    <div class="pick">
+      <label><input type="radio" name="q5" value="Leave the three wrapping lines at their current size, as agreed exceptions" checked>Leave all three</label>
+      <label><input type="radio" name="q5" value="Widen their containers by the measured amount (7px and 12px) and set 16px where that works; leave the thread line">Widen and set 16</label>
+    </div>
+  </section>
+
+  <div class="send">
+    <p>When you've picked all five, copy them and paste into the chat.</p>
+    <button type="button" id="copy">Copy my rulings</button>
+  </div>
+  <textarea id="out" aria-label="Your rulings" readonly></textarea>
+</div>
+<script>
+
+  document.getElementById("copy").addEventListener("click", function () {
+    var lines = ["Consistency rulings v4"];
+    document.querySelectorAll("section").forEach(function (s) {
+      var c = s.querySelector("input:checked");
+      lines.push(s.getAttribute("data-q") + ": " + (c ? c.value : "not picked"));
+    });
+    var text = lines.join("\n"), out = document.getElementById("out"), btn = this;
+    out.value = text; out.style.display = "block";
+    function done(ok) { btn.textContent = ok ? "Copied" : "Copy the text below"; if (!ok) { out.focus(); out.select(); } }
+    try { navigator.clipboard.writeText(text).then(function () { done(true); }, function () { done(false); }); } catch (e) { done(false); }
+  });
+
+</script>
+</body>
+</html>
