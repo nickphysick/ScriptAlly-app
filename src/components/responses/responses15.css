@@ -274,7 +274,7 @@
 }
 .rsp15 .rsp15-rch button:hover { color: var(--r15-ink); }
 .rsp15 .rsp15-rch button.on { color: var(--r15-ink); font-weight: 600 !important; }
-.rsp15 .rsp15-rch button i { font-style: normal; font-size: 11px; opacity: 0; }
+.rsp15 .rsp15-rch button i { font-style: normal; font-size: 12px; opacity: 0; }
 .rsp15 .rsp15-rch button.on i { opacity: 1; }
 .rsp15 .rsp15-rcm { display: flex; justify-content: space-between; align-items: center; height: 34px; padding: 0 20px 0 16px; background: #f1efec; font: 400 15px/1 var(--r15-type) !important; }
 .rsp15 .rsp15-rcm em { font: italic 400 13.5px/1 var(--r15-serif) !important; color: #756b61; }
