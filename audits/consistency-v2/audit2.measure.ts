@@ -130,9 +130,10 @@ async function measure(page: Page, entry: Record<string, unknown>, vw: number) {
   const data = (await page.evaluate(COLLECT)) as { records: Rec[]; meta: { dialogs: string[] } } & Record<string, unknown>;
   let hover: unknown[] = [], shots: Record<string, string> = {};
   /* hover / focus and crops at 1512 only: a style's interactive states do not change with the width */
-  if (MODE === "audit" && vw === 1512) {
+  if (vw === 1512) {
+    /* roll-out v2: the rules check reads focus (R15), so rules mode takes the readings too; crops stay audit-only */
     hover = await interactive(page, data.records);
-    shots = await crops(page, String(entry.key), data.records);
+    if (MODE === "audit") shots = await crops(page, String(entry.key), data.records);
   }
   writeFileSync(resolve(OUT, `${entry.key}@${vw}.json`), JSON.stringify({ ...entry, ...data, hover, shots }, null, 1));
   return data;

@@ -31,7 +31,17 @@ export const STD = {
   field: { height: 44, radius: "10", size: 16, edge: "#1c130f/18 0px 0px 0px 1px inset", focusEdge: "#2a3a52 0px 0px 0px 1.5px inset" },
   viewSwitch: { radius: "12", optHeight: 34, optRadius: "9" },
   panel: { close: 36, footer: 72 },
+  /* consistency roll-out v2 (rulings v3) */
+  danger: "#a63d2f", muted: "#5b4f47", quiet: "#6b6058", retiredGreys: ["#4d443d", "#7d7067", "#8a7a6c", "#8a8076"],
+  body: { off: [14.5, 15, 15.5, 16.5, 17] },
+  tag: { height: 28, radius: "999", font: "Source Serif 4", size: 14, weight: "600" },
+  panelTitle: { font: "Special Elite", size: 24, weight: "400", lh: 28.8 },
+  ring: ["2px solid rgb(42, 58, 82)", "2px solid rgb(244, 238, 229)"],
 };
+/* a slide-out panel's title (ruling 3): read against the panel title standard, not the card heading */
+export const PANEL_TITLE = /(flh-t|qcrr-head|qc1522-ch|cp30-dtl|k62-hdr-head)/;
+/* status-tag records that are not text tags (ruling 4): they hold a mark, a person, a figure or an icon, or are a public page's */
+export const NOT_TAGS = /(qc152-pill|d22-fstat|cl26-pct|ms29-bk-f|k62-sb-tag|pl3-pill|plt-chip|tws-dchip|mk-)/;
 export const RULES = {
   R1: "No rendered text under 12px (artwork, scaled-down previews and the manuscript spine title exempt)",
   R2: "No #2d3a50; no green; red only on the agreed destructive actions; burgundy #7c3a2a only as a MountCard frame border",
@@ -44,10 +54,16 @@ export const RULES = {
   R9: "View switches are boxed; slide-out close buttons are 36px; slide-out action footers are 72px",
   R10: "No user-visible \"late\" or \"overdue\"",
   R11: "Small warm accents use --sp-rust (#7a3f31)",
+  R12: "Running text in Source Serif 4 is 16 (body) or 14 (secondary) on workspace pages, the Dashboard and panels",
+  R13: "Muted text uses --sp-muted (#5b4f47) or --sp-quiet (#6b6058), not a retired grey",
+  R14: "Text tags match the standard (28 high, fully rounded, Source Serif 4 600 14)",
+  R15: "One focus ring: 2px navy, or cream on dark grounds",
 };
 /* which families each rule reads (the rulings' own scope) */
 const SCOPE = {
   R1: null, R2: null, R10: null, R11: null,
+  R12: ["workspace", "dashboard", "overlays"], R13: ["workspace", "dashboard", "non-workspace", "overlays", "onboarding"],
+  R14: ["workspace", "dashboard", "non-workspace", "overlays"], R15: ["workspace", "dashboard", "non-workspace", "overlays", "onboarding"],
   R3: ["workspace", "public"],
   R4: ["workspace", "dashboard", "non-workspace"],
   R5: ["workspace", "dashboard", "non-workspace", "overlays"],
@@ -104,7 +120,8 @@ function check(v, ctx) {
     const ex = (fn) => c.ex.filter(fn);
     if (base(c.colour) === STD.oldNavy) for (const e of c.ex) fail("R2", { sel: e.sel, chain: e.chain, text: e.text, detail: `${c.prop} ${c.colour} (#2d3a50)` });
     if (isGreen(p)) for (const e of ex((e) => !e.art)) fail("R2", { sel: e.sel, chain: e.chain, text: e.text, detail: `${c.prop} ${c.colour} (green)` });
-    if (isRed(p)) for (const e of ex((e) => !e.art)) fail("R2", { sel: e.sel, chain: e.chain, text: e.text, detail: `${c.prop} ${c.colour} (red${e.destructive ? ", on a destructive control" : ""})`, destructive: e.destructive });
+    /* ruling 10: red only on the three named actions, in --sp-danger (the Settings danger button, the To-do's red go and warning) */
+    if (isRed(p)) for (const e of ex((e) => !e.art && !(base(c.colour) === STD.danger && (e.destructive || /tws-po/.test([e.sel, ...(e.chain || [])].join(" ")))))) fail("R2", { sel: e.sel, chain: e.chain, text: e.text, detail: `${c.prop} ${c.colour} (red${e.destructive ? ", on a destructive control" : ""})`, destructive: e.destructive });
     if (dE(p, parse(STD.burgundy)) < 3) for (const e of ex((e) => !(c.prop === "border" && e.mountFrame) && !e.art)) fail("R2", { sel: e.sel, chain: e.chain, text: e.text, detail: `${c.prop} ${c.colour} (burgundy, not a MountCard frame border)` });
   }
 
@@ -129,7 +146,7 @@ function check(v, ctx) {
   if (inScope("R5")) for (const r of recs(/^headings\/(section|card|small)$/)) {
     if (r.scope === "shell") continue;
     mark("R5");
-    const s = STD.headings[r.role], g = r.sig, why = [];
+    const s = PANEL_TITLE.test(r.sel) ? STD.panelTitle : STD.headings[r.role], g = r.sig, why = [];
     if (g.font !== s.font) why.push(`font ${g.font}`);
     if (!near(g.size, s.size, 0.5)) why.push(`${g.size}px`);
     if (String(g.weight) !== s.weight) why.push(`weight ${g.weight}`);
@@ -218,6 +235,37 @@ function check(v, ctx) {
       mark("R9");
       if (!near(r.sig.height, STD.panel.footer, 1)) fail("R9", { sel: r.sel, text: r.text, detail: `footer ${r.sig.height} high` });
     }
+  }
+
+  /* R12 — body sizes (ruling 1) */
+  if (inScope("R12")) for (const r of recs(/^text\/(body|secondary)$/)) {
+    if (r.scope === "shell" || !r.sig || r.sig.font !== "Source Serif 4") continue;
+    mark("R12");
+    if (STD.body.off.includes(+r.sig.size)) fail("R12", { sel: r.sel, text: r.text, detail: `${r.sig.size}px` });
+  }
+  /* R13 — muted text (ruling 2) */
+  if (inScope("R13")) for (const r of recs(/^text\//)) {
+    if (!r.sig || !r.sig.color) continue;
+    mark("R13");
+    if (STD.retiredGreys.includes(base(r.sig.color))) fail("R13", { sel: r.sel, text: r.text, detail: `colour ${r.sig.color}` });
+  }
+  /* R14 — text tags (ruling 4) */
+  if (inScope("R14")) for (const r of recs("marks/status-tag")) {
+    if (NOT_TAGS.test(r.sel)) continue;
+    mark("R14");
+    const g = r.sig, t = STD.tag, why = [];
+    if (!near(g.height, t.height, 1)) why.push(`${g.height} high`);
+    if (g.radius !== t.radius) why.push(`radius ${g.radius}`);
+    if (g.font !== t.font || !near(g.size, t.size, 0.5) || String(g.weight) !== t.weight) why.push(`${g.font} ${g.weight} ${g.size}px`);
+    if (why.length) fail("R14", { sel: r.sel, text: r.text, detail: why.join(", ") });
+  }
+  /* R15 — one focus ring (ruling 11), from the focus readings (1512): a ring that is drawn must be the standard one */
+  if (inScope("R15")) for (const h of v.hover || []) {
+    if (!h.focus || !/^(buttons|lists|nav)\//.test(h.role)) continue;
+    const o = h.focus.outline || ""; if (/\bnone\b/.test(o) || /^0px/.test(o)) continue;
+    mark("R15");
+    const rec = v.records.find((r) => r.id === h.id);
+    if (!STD.ring.some((x) => o.startsWith(x))) fail("R15", { sel: rec ? rec.sel : h.id, text: rec ? rec.text : "", detail: `focus ${o}` });
   }
 
   /* R10 */
