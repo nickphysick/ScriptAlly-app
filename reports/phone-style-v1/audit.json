@@ -1,0 +1,5392 @@
+{
+ "Today · Queries (built to the sheet; the calibration)": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 0,
+   "PS1-2": 0,
+   "PS1-3": 0,
+   "PS1-4": 0,
+   "PS1-5": 0,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {},
+  "pop": {
+   "texts": 112,
+   "cards": 3,
+   "taps": 46,
+   "rows": 31
+  },
+  "pressed": {
+   "n": 16,
+   "none": [
+    "button.t \"Today\"",
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.on \"Queries\"",
+    "button. \"Agents\"",
+    "button. \"Activity\"",
+    "button.pa5-be-row \"Quint\"",
+    "button.pa5-be-row \"Vale\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.8px",
+    "cap": "round",
+    "where": "ps-link"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "Today · Agents": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 4,
+   "PS1-2": 4,
+   "PS1-3": 6,
+   "PS1-4": 0,
+   "PS1-5": 3,
+   "PS1-6": 3,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "b.pa4-T \"5\" 30px",
+    "b.pa4-T \"43\" 30px",
+    "b.pa4-T \"5\" 30px",
+    "button.pa4-cta \"Log a query to Ingrid\" 17px"
+   ],
+   "PS1-2": [
+    "span.pa5-gapn.pa4-T \"20\" typewriter 16px 400",
+    "span.pa5-gapn.pa4-T \"3\" typewriter 16px 400",
+    "span.pa5-gapn.pa4-T \"52\" typewriter 16px 400",
+    "span.pa5-gapn.pa4-T \"4\" typewriter 16px 400"
+   ],
+   "PS1-3": [
+    "div.pa4-card.pa5-hl \"69%List health79 gaps ac\" radius 24px",
+    "div.pa4-card.pa5-hl \"69%List health79 gaps ac\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1",
+    "div.pa4-card.pa5-nq \"Next to queryIMIngrid Ma\" radius 24px",
+    "div.pa4-card.pa5-nq \"Next to queryIMIngrid Ma\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1",
+    "div.pa4-card.pa5-dr \"Discover\" radius 24px",
+    "div.pa4-card.pa5-dr \"Discover\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1"
+   ],
+   "PS1-5": [
+    "button.pa4-tap.pa5-hl-g \"Know when replies are du\" row 52",
+    "button.pa4-tap.pa5-hl-g \"Know what to send3\" row 52",
+    "button.pa4-tap.pa5-hl-g \"Know who fits your book5\" row 52"
+   ],
+   "PS1-6": [
+    "span. \"to query\" grey on the page",
+    "span. \"querying\" grey on the page",
+    "span. \"closed\" grey on the page"
+   ]
+  },
+  "pop": {
+   "texts": 44,
+   "cards": 3,
+   "taps": 18,
+   "rows": 5
+  },
+  "pressed": {
+   "n": 11,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.pa5-need \"105 things need you\"",
+    "button. \"Queries\"",
+    "button.on \"Agents\"",
+    "button. \"Activity\"",
+    "button. \"5to query\"",
+    "button. \"43querying\"",
+    "button. \"5closed\"",
+    "button.pa4-tap \"Know when replies are \"",
+    "button.pa4-tap \"Know what to send3\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "Today · Activity": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 0,
+   "PS1-2": 4,
+   "PS1-3": 0,
+   "PS1-4": 1,
+   "PS1-5": 0,
+   "PS1-6": 8,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 4
+  },
+  "samples": {
+   "PS1-2": [
+    "span.pa4-s.pa4-T \"30 Oct\" typewriter 14px 400",
+    "span.pa4-s.pa4-T \"30 Oct\" typewriter 14px 400",
+    "span.pa4-s.pa4-T \"30 Oct\" typewriter 14px 400",
+    "span.pa4-s.pa4-T \"30 Oct\" typewriter 14px 400"
+   ],
+   "PS1-4": [
+    "h2.pa4-h \"Lately\" 24 / 24"
+   ],
+   "PS1-6": [
+    "span.pa4-s \"You imported your list: \" grey on the page",
+    "span.pa4-s.pa4-T \"30 Oct\" grey on the page",
+    "span.pa4-s \"You imported your list: \" grey on the page",
+    "span.pa4-s.pa4-T \"30 Oct\" grey on the page",
+    "span.pa4-s \"You imported your list: \" grey on the page",
+    "span.pa4-s.pa4-T \"30 Oct\" grey on the page",
+    "span.pa4-s \"You imported your list: \" grey on the page",
+    "span.pa4-s.pa4-T \"30 Oct\" grey on the page"
+   ],
+   "PS1-10": [
+    "button.pa4-tap \"1 agentYou imported your\" loose on the page",
+    "button.pa4-tap \"1 agentYou imported your\" loose on the page",
+    "button.pa4-tap \"1 agentYou imported your\" loose on the page",
+    "button.pa4-tap \"1 agentYou imported your\" loose on the page"
+   ]
+  },
+  "pop": {
+   "texts": 27,
+   "cards": 0,
+   "taps": 11,
+   "rows": 4
+  },
+  "pressed": {
+   "n": 9,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.pa5-need \"105 things need you\"",
+    "button. \"Queries\"",
+    "button. \"Agents\"",
+    "button.on \"Activity\"",
+    "button.pa4-tap \"1 agentYou imported yo\"",
+    "button.pa4-tap \"1 agentYou imported yo\"",
+    "button.pa4-tap \"1 agentYou imported yo\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "To do": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 2,
+   "PS1-2": 0,
+   "PS1-3": 4,
+   "PS1-4": 1,
+   "PS1-5": 98,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "h1.pa5-tdh-h \"To do\" 32px",
+    "button.pa4-cta \"Send\" 17px"
+   ],
+   "PS1-3": [
+    "div.pa4-card.pa5-dkc \"LaterDo it1 of 105Send M\" radius 24px",
+    "div.pa4-card.pa5-dkc \"LaterDo it1 of 105Send M\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1",
+    "div.pa4-card.pa5-ckc \"Send Ana your fullWas du\" radius 24px",
+    "div.pa4-card.pa5-ckc \"Send Ana your fullWas du\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1"
+   ],
+   "PS1-4": [
+    "h2.pa4-h.pa5-tdsec \"Then\" 24 / 24"
+   ],
+   "PS1-5": [
+    "button.pa5-ck \"Send Ana your fullWas du\" row 60",
+    "button.pa5-ck \"Send David your partialW\" row 61",
+    "button.pa5-ck \"Send Rachel your partial\" row 61",
+    "button.pa5-ck \"Answer Tom’s offerWas du\" row 61",
+    "button.pa5-ck \"Send Clara your partialW\" row 61",
+    "button.pa5-ck \"Send Tobias your fullWas\" row 61",
+    "button.pa5-ck \"Send Marcus your partial\" row 61",
+    "button.pa5-ck \"Send Imogen your fullWas\" row 61",
+    "button.pa5-ck \"Send Edda your partialWa\" row 61",
+    "button.pa5-ck \"Send Theo your fullWas d\" row 61",
+    "button.pa5-ck \"Send Jonathan your fullW\" row 61",
+    "button.pa5-ck \"Answer Noah’s offerBrigh\" row 61",
+    "button.pa5-ck \"Send Ottoline your fullF\" row 61",
+    "button.pa5-ck \"Send Marcus your partial\" row 61",
+    "button.pa5-ck \"Send Iris your revisionK\" row 61",
+    "button.pa5-ck \"Nudge MarcusWas due 4 Se\" row 61",
+    "button.pa5-ck \"Nudge TomReply was due 2\" row 61",
+    "button.pa5-ck \"Nudge ImogenWas due 18 S\" row 61",
+    "button.pa5-ck \"Nudge AlasdairWas due 4 \" row 61",
+    "button.pa5-ck \"Nudge WrenWas due 4 Oct\" row 61",
+    "button.pa5-ck \"Nudge HesterWas due 12 O\" row 61",
+    "button.pa5-ck \"Nudge DevendraReply was \" row 61",
+    "button.pa5-ck \"Nudge DouglasWas due 20 \" row 61",
+    "button.pa5-ck \"Nudge MiraWas due 31 Oct\" row 61",
+    "button.pa5-ck \"Rosalind’s gone quietLas\" row 61",
+    "button.pa5-ck \"Mira’s gone quietLast se\" row 61",
+    "button.pa5-ck \"Imogen’s gone quietLast \" row 61",
+    "button.pa5-ck \"Devendra’s gone quietLas\" row 61",
+    "button.pa5-ck \"Elinor’s gone quietLast \" row 61",
+    "button.pa5-ck \"Tom’s gone quietLast sen\" row 61",
+    "button.pa5-ck \"Sam’s gone quietLast sen\" row 61",
+    "button.pa5-ck \"Ana’s gone quietLast sen\" row 61",
+    "button.pa5-ck \"Tobias’ gone quietLast s\" row 61",
+    "button.pa5-ck \"Peter’s gone quietLast s\" row 61",
+    "button.pa5-ck \"Tom’s gone quietLast sen\" row 61",
+    "button.pa5-ck \"Joan’s gone quietLast se\" row 61",
+    "button.pa5-ck \"Priya’s gone quietLast s\" row 61",
+    "button.pa5-ck \"Rachel’s gone quietLast \" row 61",
+    "button.pa5-ck \"Elinor’s gone quietReply\" row 61",
+    "button.pa5-ck \"Cormac’s gone quietLast \" row 61",
+    "button.pa5-ck \"Bea’s gone quietLast sen\" row 61",
+    "button.pa5-ck \"Rufus’ gone quietReply w\" row 61",
+    "button.pa5-ck \"David’s gone quietReply \" row 61",
+    "button.pa5-ck \"Tamsin’s gone quietLast \" row 61",
+    "button.pa5-ck \"Fill in what you sent · \" row 61",
+    "button.pa5-ck \"Add Eleanor’s wishlistGr\" row 61",
+    "button.pa5-ck \"Add William’s wishlistPe\" row 61",
+    "button.pa5-ck \"Add Priya’s wishlistRama\" row 61",
+    "button.pa5-ck \"Add Daniel’s wishlistInk\" row 61",
+    "button.pa5-ck \"Add Sophie’s wishlistAsh\" row 61",
+    "button.pa5-ck \"Add Clara’s wishlistHarb\" row 61",
+    "button.pa5-ck \"Add Marcus’ wishlistBloo\" row 61",
+    "button.pa5-ck \"Add Tom’s wishlistEllery\" row 61",
+    "button.pa5-ck \"Add Jonathan’s wishlistT\" row 61",
+    "button.pa5-ck \"Add Aisha’s wishlistThe \" row 61",
+    "button.pa5-ck \"Add Hester’s wishlistQui\" row 61",
+    "button.pa5-ck \"Add George’s wishlistAsh\" row 61",
+    "button.pa5-ck \"Add Nadia’s wishlistNort\" row 61",
+    "button.pa5-ck \"Add Fenella’s wishlistBr\" row 61",
+    "button.pa5-ck \"Add Mira’s wishlistOld H\" row 61",
+    "button.pa5-ck \"Add Douglas’ wishlistRen\" row 61",
+    "button.pa5-ck \"Add Edda’s wishlistVoss \" row 61",
+    "button.pa5-ck \"Add Theo’s wishlistAbara\" row 61",
+    "button.pa5-ck \"Add Sun-hee’s wishlistMe\" row 61",
+    "button.pa5-ck \"Add Rosa’s wishlistQuint\" row 61",
+    "button.pa5-ck \"Add Wren’s wishlistCallo\" row 61",
+    "button.pa5-ck \"Add Imogen’s wishlistRac\" row 61",
+    "button.pa5-ck \"Add Imogen’s wishlistVal\" row 61",
+    "button.pa5-ck \"Add Tobias’ wishlistHark\" row 61",
+    "button.pa5-ck \"Add Tamsin’s wishlistPro\" row 61",
+    "button.pa5-ck \"Add Peter’s wishlistVanc\" row 61",
+    "button.pa5-ck \"Add Iris’ wishlistKwan &\" row 61",
+    "button.pa5-ck \"Add Noah’s wishlistBrigh\" row 61",
+    "button.pa5-ck \"Add Tom’s wishlistCurtis\" row 61",
+    "button.pa5-ck \"Add Marcus’ wishlistReed\" row 61",
+    "button.pa5-ck \"Add Priya’s wishlistNort\" row 61",
+    "button.pa5-ck \"Add Joan’s wishlistWhitf\" row 61",
+    "button.pa5-ck \"Add Sam’s wishlistOkoro \" row 61",
+    "button.pa5-ck \"Add Rachel’s wishlistLin\" row 61",
+    "button.pa5-ck \"Add David’s wishlistMars\" row 61",
+    "button.pa5-ck \"Add Ana’s wishlistDuarte\" row 61",
+    "button.pa5-ck \"Add Bea’s wishlistHallor\" row 61",
+    "button.pa5-ck \"Add Rufus’ wishlistOyela\" row 61",
+    "button.pa5-ck \"Add Alasdair’s wishlistC\" row 61",
+    "button.pa5-ck \"Add Wren’s wishlistAshco\" row 61",
+    "button.pa5-ck \"Add Cormac’s wishlistBli\" row 61",
+    "button.pa5-ck \"Add Ottoline’s wishlistF\" row 61",
+    "button.pa5-ck \"Add Hester’s wishlistBla\" row 61",
+    "button.pa5-ck \"Add Tobias’ wishlistQuin\" row 61",
+    "button.pa5-ck \"Add Rosalind’s wishlistV\" row 61",
+    "button.pa5-ck \"Add Devendra’s wishlistR\" row 61",
+    "button.pa5-ck \"Add Imogen’s wishlistFar\" row 61",
+    "button.pa5-ck \"Add Imogen’s wishlistVal\" row 61",
+    "button.pa5-ck \"Add Tomas’ wishlistKelle\" row 61",
+    "button.pa5-ck \"Add Wren’s wishlistTalli\" row 61",
+    "button.pa5-ck \"Chase the Blaine partial\" row 61",
+    "button.pa5-ck \"Read chapters 1–3 aloudW\" row 61",
+    "button.pa5-ck \"Update the bio paragraph\" row 61"
+   ]
+  },
+  "pop": {
+   "texts": 219,
+   "cards": 2,
+   "taps": 107,
+   "rows": 104
+  },
+  "pressed": {
+   "n": 7,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-cta \"Send\"",
+    "button.pa4-link \"Not now, show the next\"",
+    "button.pa5-ck \"Send Ana your fullWas \"",
+    "button.pa5-ck \"Send David your partia\"",
+    "button.pa5-ck \"Send Rachel your parti\"",
+    "button.pa5-ck \"Answer Tom’s offerWas \""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "the task screen": {
+  "roots": [
+   "[data-ps-root=\"0\"]"
+  ],
+  "rules": {
+   "PS1-1": 20,
+   "PS1-2": 1,
+   "PS1-3": 1,
+   "PS1-4": 1,
+   "PS1-5": 10,
+   "PS1-6": 1,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 1
+  },
+  "samples": {
+   "PS1-1": [
+    "span.tdp-pos \"1 of 105\" 13px",
+    "h1.tdp-ttitle \"Send Marcus your full\" 23px",
+    "span. \"Full requested\" 12.5px",
+    "span. \"Day 151\" 12.5px",
+    "b. \"Marcus Reed\" 14.5px",
+    "span. \"The Smoke Test\" 12.5px",
+    "span.tdp-due \"155 days past expected\" 12.5px",
+    "b. \"155\" 17px",
+    "button.tdp-slot \"What went\" 12px unmarked",
+    "button.tdp-slot \"Version\" 12px unmarked",
+    "button.tdp-slot \"When\" 12px unmarked",
+    "span.tdp-peek \"Tap to see the whole car\" 12px unmarked",
+    "p.tdp-bub \"Marcus asked for your fu\" 14.5px",
+    "h2.tdp-qt \"What went with it?\" 22px",
+    "span.tws-tn \"Query letter\" 15.5px",
+    "span.tws-tn \"Synopsis\" 15.5px",
+    "span.tws-tn \"Full manuscriptWhat Marc\" 15.5px",
+    "small. \"What Marcus asked for\" 13px",
+    "em.tdp-of \"1 of 3\" 13px",
+    "button.tdp-pill \"Next →\" 15.5px"
+   ],
+   "PS1-2": [
+    "b. \"155\" typewriter 17px 400"
+   ],
+   "PS1-3": [
+    "div.tws-tiles \"Query letterSynopsisFull\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.0"
+   ],
+   "PS1-4": [
+    "div.tdp-mini \"Full requestedDay 151Mar\" 18 / 18"
+   ],
+   "PS1-5": [
+    "button.pa-ring \"\" 44×44",
+    "button.pa-ring \"\" 44×44",
+    "button.pa-ring \"\" 44×44",
+    "button.tdp-slot \"What went\" 80×26",
+    "button.tdp-slot \"Version\" 62×26",
+    "button.tdp-slot \"When\" 53×26",
+    "button.tdp-ghost \"\" 46×46",
+    "button.tdp-ghost \"\" 46×46",
+    "button.tws-tile \"Query letter\" row 56",
+    "button.tws-tile \"Synopsis\" row 56"
+   ],
+   "PS1-6": [
+    "p.tdp-qh \"Tick everything you sent\" grey on the page"
+   ],
+   "PS1-10": [
+    "div.tdp-mini \"Full requestedDay 151Mar\" loose on the page"
+   ]
+  },
+  "pop": {
+   "texts": 22,
+   "cards": 2,
+   "taps": 13,
+   "rows": 4
+  },
+  "pressed": {
+   "n": 7,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-cta \"Send\"",
+    "button.pa4-link \"Not now, show the next\"",
+    "button.pa5-ck \"Send Ana your fullWas \"",
+    "button.pa5-ck \"Send David your partia\"",
+    "button.pa5-ck \"Send Rachel your parti\"",
+    "button.pa5-ck \"Answer Tom’s offerWas \""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5-ck"
+   },
+   {
+    "box": "19×19",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "pa-ring"
+   },
+   {
+    "box": "19×19",
+    "stroke": "2px",
+    "cap": "butt",
+    "where": "pa-ring"
+   },
+   {
+    "box": "19×19",
+    "stroke": "2px",
+    "cap": "butt",
+    "where": "pa-ring"
+   },
+   {
+    "box": "14×14",
+    "stroke": "2.4px",
+    "cap": "round",
+    "where": "tws-tk"
+   },
+   {
+    "box": "14×14",
+    "stroke": "2.4px",
+    "cap": "round",
+    "where": "tws-tk"
+   },
+   {
+    "box": "14×14",
+    "stroke": "2.4px",
+    "cap": "round",
+    "where": "tws-tk"
+   },
+   {
+    "box": "20×20",
+    "stroke": "1.6px",
+    "cap": "round",
+    "where": "tdp-ghost"
+   },
+   {
+    "box": "20×20",
+    "stroke": "1.6px",
+    "cap": "round",
+    "where": "tdp-ghost"
+   }
+  ],
+  "legacy": [],
+  "followers": [
+   {
+    "what": "fade tdp-foot",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   }
+  ]
+ },
+ "Materials · Packages": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 4,
+   "PS1-2": 3,
+   "PS1-3": 0,
+   "PS1-4": 0,
+   "PS1-5": 0,
+   "PS1-6": 3,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 1
+  },
+  "samples": {
+   "PS1-1": [
+    "b.pa5m-hdc \"Choose what goes out wit\" 17px",
+    "b. \"5 from 5\" 22px",
+    "b. \"1 from 5\" 22px",
+    "b. \"0 from 1\" 22px"
+   ],
+   "PS1-2": [
+    "small. \"from 5\" typewriter 14px 400",
+    "small. \"from 5\" typewriter 14px 400",
+    "small. \"from 1\" typewriter 14px 400"
+   ],
+   "PS1-6": [
+    "button. \"Letters\" grey on the page",
+    "button. \"Versions\" grey on the page",
+    "button. \"Comps\" grey on the page"
+   ],
+   "PS1-10": [
+    "button.pa5m-hdpk \"Dear agent,SynopsisChapt\" loose on the page"
+   ]
+  },
+  "pop": {
+   "texts": 38,
+   "cards": 0,
+   "taps": 11,
+   "rows": 1
+  },
+  "pressed": {
+   "n": 8,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa5m-hdpk \"Dear agent,SynopsisCha\"",
+    "button.on \"Packages\"",
+    "button. \"Letters\"",
+    "button. \"Versions\"",
+    "button. \"Comps\"",
+    "button.pa4-card \"Not sent yetDear agent\"",
+    "button.pa4-card \"5 from 5asked for more\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5m-hdr"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "Materials · Letters": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 1,
+   "PS1-2": 0,
+   "PS1-3": 0,
+   "PS1-4": 2,
+   "PS1-5": 0,
+   "PS1-6": 13,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 1
+  },
+  "samples": {
+   "PS1-1": [
+    "b.pa5m-hdc \"Choose what goes out wit\" 17px"
+   ],
+   "PS1-4": [
+    "h2.pa5m-h \"Query letters\" 24 / 41",
+    "h2.pa5m-h \"Synopses\" 24 / 38"
+   ],
+   "PS1-6": [
+    "button. \"Packages\" grey on the page",
+    "button. \"Versions\" grey on the page",
+    "button. \"Comps\" grey on the page",
+    "span.pa4-s \"3\" grey on the page",
+    "span.pa4-s \"Not sent yet\" grey on the page",
+    "span.pa4-s \"Mentions 2 comps\" grey on the page",
+    "span.pa4-s \"6 from 9 asked for more\" grey on the page",
+    "span.pa4-s \"Mentions 2 comps\" grey on the page",
+    "span.pa4-s \"1 from 5 asked for more\" grey on the page",
+    "span.pa4-s \"Comps not noted\" grey on the page",
+    "span.pa4-s \"1\" grey on the page",
+    "span.pa4-s \"7 from 14 asked for more\" grey on the page",
+    "span.pa4-s \"In 4 packages\" grey on the page"
+   ],
+   "PS1-10": [
+    "button.pa5m-hdpk \"Dear agent,SynopsisChapt\" loose on the page"
+   ]
+  },
+  "pop": {
+   "texts": 24,
+   "cards": 0,
+   "taps": 11,
+   "rows": 1
+  },
+  "pressed": {
+   "n": 9,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa5m-hdpk \"Dear agent,SynopsisCha\"",
+    "button. \"Packages\"",
+    "button.on \"Letters\"",
+    "button. \"Versions\"",
+    "button. \"Comps\"",
+    "button.pa5m-sheet \"Dear agent,Query lette\"",
+    "button.pa5m-sheet \"Dear agent,Query lette\"",
+    "button.pa5m-sheet \"Dear agent,Query lette\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5m-hdr"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "Materials · Versions": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 1,
+   "PS1-2": 0,
+   "PS1-3": 0,
+   "PS1-4": 0,
+   "PS1-5": 0,
+   "PS1-6": 4,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 1
+  },
+  "samples": {
+   "PS1-1": [
+    "b.pa5m-hdc \"Choose what goes out wit\" 17px"
+   ],
+   "PS1-6": [
+    "button. \"Packages\" grey on the page",
+    "button. \"Letters\" grey on the page",
+    "button. \"Comps\" grey on the page",
+    "p.pa4-s.pa5m-lede \"No versions of your manu\" grey on the page"
+   ],
+   "PS1-10": [
+    "button.pa5m-hdpk \"Dear agent,SynopsisChapt\" loose on the page"
+   ]
+  },
+  "pop": {
+   "texts": 9,
+   "cards": 0,
+   "taps": 7,
+   "rows": 1
+  },
+  "pressed": {
+   "n": 7,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa5m-hdpk \"Dear agent,SynopsisCha\"",
+    "button. \"Packages\"",
+    "button. \"Letters\"",
+    "button.on \"Versions\"",
+    "button. \"Comps\"",
+    "button.pa4-link \"Save a new version\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5m-hdr"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "Materials · Comps": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 1,
+   "PS1-2": 0,
+   "PS1-3": 2,
+   "PS1-4": 0,
+   "PS1-5": 0,
+   "PS1-6": 4,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 1
+  },
+  "samples": {
+   "PS1-1": [
+    "b.pa5m-hdc \"Choose what goes out wit\" 17px"
+   ],
+   "PS1-3": [
+    "div.pa4-card.pa5m-list \"TTThe Tidewater LineR. O\" radius 24px",
+    "div.pa4-card.pa5m-list \"TTThe Tidewater LineR. O\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1"
+   ],
+   "PS1-6": [
+    "button. \"Packages\" grey on the page",
+    "button. \"Letters\" grey on the page",
+    "button. \"Versions\" grey on the page",
+    "p.pa4-s.pa5m-lede \"Your comparable titles. \" grey on the page"
+   ],
+   "PS1-10": [
+    "button.pa5m-hdpk \"Dear agent,SynopsisChapt\" loose on the page"
+   ]
+  },
+  "pop": {
+   "texts": 30,
+   "cards": 1,
+   "taps": 14,
+   "rows": 8
+  },
+  "pressed": {
+   "n": 10,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa5m-hdpk \"Dear agent,SynopsisCha\"",
+    "button. \"Packages\"",
+    "button. \"Letters\"",
+    "button. \"Versions\"",
+    "button.on \"Comps\"",
+    "button.pa4-tap \"TTThe Tidewater LineR.\"",
+    "button.pa4-tap \"SRSalt RoadImogen Hale\"",
+    "button.pa4-tap \"NMNine Miles OutCallum\"",
+    "button.pa4-tap \"BWBright WaterAoife Br\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa5m-hdr"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "Profile": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 0,
+   "PS1-2": 0,
+   "PS1-3": 8,
+   "PS1-4": 0,
+   "PS1-5": 0,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-3": [
+    "div.pa4-card.pa4-lapcard \"87queries sent32asked fo\" radius 24px",
+    "div.pa4-card.pa4-lapcard \"87queries sent32asked fo\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1",
+    "div.pa4-card \"Wall of no15 so farEvery\" radius 24px",
+    "div.pa4-card \"Wall of no15 so farEvery\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1",
+    "div.pa4-card \"Your notes\" radius 24px",
+    "div.pa4-card \"Your notes\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1",
+    "div.pa4-card \"ResponsesYour bookCorkbo\" radius 24px",
+    "div.pa4-card \"ResponsesYour bookCorkbo\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1"
+   ]
+  },
+  "pop": {
+   "texts": 21,
+   "cards": 4,
+   "taps": 9,
+   "rows": 5
+  },
+  "pressed": {
+   "n": 6,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-link \"See the full picture\"",
+    "button.pa4-card \"This week0 of your 1 q\"",
+    "button.pa4-link \"Open the wall\"",
+    "button.pa4-tap \"Your notes\"",
+    "button.pa4-tap \"Responses\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-link"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-link"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "the full query list": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 1,
+   "PS1-2": 176,
+   "PS1-3": 0,
+   "PS1-4": 4,
+   "PS1-5": 0,
+   "PS1-6": 156,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 88
+  },
+  "samples": {
+   "PS1-1": [
+    "h1.pa4-d2.pa4-hl \"24 need you.5 are with a\" 24px"
+   ],
+   "PS1-2": [
+    "span.pa4-nm \"Tom Ellery\" weight 700",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Noah Bright\" weight 700",
+    "span.pa4-s.pa4-T \"14w\" typewriter 14px 400",
+    "span.pa4-nm \"Jonathan Marsh\" weight 700",
+    "span.pa4-s.pa4-T \"8w\" typewriter 14px 400",
+    "span.pa4-nm \"Ottoline Frayn\" weight 700",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Theo Abara\" weight 700",
+    "span.pa4-s.pa4-T \"11w\" typewriter 14px 400",
+    "span.pa4-nm \"Imogen Vale\" weight 700",
+    "span.pa4-s.pa4-T \"10w\" typewriter 14px 400",
+    "span.pa4-nm \"Edda Voss\" weight 700",
+    "span.pa4-s.pa4-T \"11w\" typewriter 14px 400",
+    "span.pa4-nm \"Marcus Reed\" weight 700",
+    "span.pa4-s.pa4-T \"10w\" typewriter 14px 400",
+    "span.pa4-nm \"Tobias Hark\" weight 700",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Marcus Reed\" weight 700",
+    "span.pa4-s.pa4-T \"11w\" typewriter 14px 400",
+    "span.pa4-nm \"Clara Beaumont\" weight 700",
+    "span.pa4-s.pa4-T \"12w\" typewriter 14px 400",
+    "span.pa4-nm \"Rachel Lin\" weight 700",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Ana Duarte\" weight 700",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"David Marsh\" weight 700",
+    "span.pa4-s.pa4-T \"14w\" typewriter 14px 400",
+    "span.pa4-nm \"Iris Kwan\" weight 700",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Marcus Reed\" weight 700",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Hester Blaine\" weight 700",
+    "span.pa4-s.pa4-T \"11w\" typewriter 14px 400",
+    "span.pa4-nm \"Elinor Hale\" weight 700",
+    "span.pa4-s.pa4-T \"12w\" typewriter 14px 400",
+    "span.pa4-nm \"Tom Ellery\" weight 700",
+    "span.pa4-s.pa4-T \"12w\" typewriter 14px 400",
+    "span.pa4-nm \"Devendra Rao\" weight 700",
+    "span.pa4-s.pa4-T \"12w\" typewriter 14px 400",
+    "span.pa4-nm \"Priya Nair\" weight 700",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"David Marsh\" weight 700",
+    "span.pa4-s.pa4-T \"14w\" typewriter 14px 400",
+    "span.pa4-nm \"Alasdair Crewe\" weight 700",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Rufus Oyelaran\" weight 700",
+    "span.pa4-s.pa4-T \"18w\" typewriter 14px 400",
+    "span.pa4-nm \"Wren Calloway\" weight 500",
+    "span.pa4-s.pa4-T \"5w\" typewriter 14px 400",
+    "span.pa4-nm \"Nadia Hussain\" weight 500",
+    "span.pa4-s.pa4-T \"8w\" typewriter 14px 400",
+    "span.pa4-nm \"Fenella Strand\" weight 500",
+    "span.pa4-s.pa4-T \"8w\" typewriter 14px 400",
+    "span.pa4-nm \"Agent not recorded\" weight 500",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Agent not recorded\" weight 500",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Elinor Hale\" weight 500",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Elinor Hale\" weight 500",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Elinor Hale\" weight 500",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Sam Okoro\" weight 500",
+    "span.pa4-s.pa4-T \"11w\" typewriter 14px 400",
+    "span.pa4-nm \"Douglas Renner\" weight 500",
+    "span.pa4-s.pa4-T \"11w\" typewriter 14px 400",
+    "span.pa4-nm \"Mira Kovic\" weight 500",
+    "span.pa4-s.pa4-T \"11w\" typewriter 14px 400",
+    "span.pa4-nm \"Imogen Farr\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Bea Halloran\" weight 500",
+    "span.pa4-s.pa4-T \"14w\" typewriter 14px 400",
+    "span.pa4-nm \"Cormac Bligh\" weight 500",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Marcus Reed\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Wren Ashcombe\" weight 500",
+    "span.pa4-s.pa4-T \"15w\" typewriter 14px 400",
+    "span.pa4-nm \"Priya Nair\" weight 500",
+    "span.pa4-s.pa4-T \"15w\" typewriter 14px 400",
+    "span.pa4-nm \"Rachel Lin\" weight 500",
+    "span.pa4-s.pa4-T \"16w\" typewriter 14px 400",
+    "span.pa4-nm \"Priya Nair\" weight 500",
+    "span.pa4-s.pa4-T \"16w\" typewriter 14px 400",
+    "span.pa4-nm \"Joan Whitfield\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Tom Ellery\" weight 500",
+    "span.pa4-s.pa4-T \"17w\" typewriter 14px 400",
+    "span.pa4-nm \"Elinor Hale\" weight 500",
+    "span.pa4-s.pa4-T \"17w\" typewriter 14px 400",
+    "span.pa4-nm \"Sun-hee Park\" weight 500",
+    "span.pa4-s.pa4-T \"21w\" typewriter 14px 400",
+    "span.pa4-nm \"Peter Vance\" weight 500",
+    "span.pa4-s.pa4-T \"15w\" typewriter 14px 400",
+    "span.pa4-nm \"Tobias Quint\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Ana Duarte\" weight 500",
+    "span.pa4-s.pa4-T \"26w\" typewriter 14px 400",
+    "span.pa4-nm \"Ana Duarte\" weight 500",
+    "span.pa4-s.pa4-T \"16w\" typewriter 14px 400",
+    "span.pa4-nm \"Sam Okoro\" weight 500",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Hester Quinn\" weight 500",
+    "span.pa4-s.pa4-T \"19w\" typewriter 14px 400",
+    "span.pa4-nm \"Priya Raman\" weight 500",
+    "span.pa4-s.pa4-T \"21w\" typewriter 14px 400",
+    "span.pa4-nm \"Tamsin Probewell\" weight 500",
+    "span.pa4-s.pa4-T \"21w\" typewriter 14px 400",
+    "span.pa4-nm \"Daniel O’Rourke\" weight 500",
+    "span.pa4-s.pa4-T \"22w\" typewriter 14px 400",
+    "span.pa4-nm \"Aisha Kapoor\" weight 500",
+    "span.pa4-s.pa4-T \"25w\" typewriter 14px 400",
+    "span.pa4-nm \"Sophie Dunn\" weight 500",
+    "span.pa4-s.pa4-T \"25w\" typewriter 14px 400",
+    "span.pa4-nm \"Elinor Hale\" weight 500",
+    "span.pa4-s.pa4-T \"25w\" typewriter 14px 400",
+    "span.pa4-nm \"Tom Ellery\" weight 500",
+    "span.pa4-s.pa4-T \"25w\" typewriter 14px 400",
+    "span.pa4-nm \"Tobias Quint\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Rosalind Vale\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Peter Vance\" weight 500",
+    "span.pa4-s.pa4-T \"14w\" typewriter 14px 400",
+    "span.pa4-nm \"Devendra Rao\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Imogen Farr\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Tobias Quint\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Mira Kovic\" weight 500",
+    "span.pa4-s.pa4-T \"37w\" typewriter 14px 400",
+    "span.pa4-nm \"Rosalind Vale\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Rachel Lin\" weight 500",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Rosalind Vale\" weight 500",
+    "span.pa4-s.pa4-T \"66w\" typewriter 14px 400",
+    "span.pa4-nm \"Elinor Hale\" weight 500",
+    "span.pa4-s.pa4-T \"3w\" typewriter 14px 400",
+    "span.pa4-nm \"Joan Whitfield\" weight 500",
+    "span.pa4-s.pa4-T \"8w\" typewriter 14px 400",
+    "span.pa4-nm \"Tom Ellery\" weight 500",
+    "span.pa4-s.pa4-T \"9w\" typewriter 14px 400",
+    "span.pa4-nm \"Imogen Rackham\" weight 500",
+    "span.pa4-s.pa4-T \"12w\" typewriter 14px 400",
+    "span.pa4-nm \"George Ashworth\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"Elinor Hale\" weight 500",
+    "span.pa4-s.pa4-T \"16w\" typewriter 14px 400",
+    "span.pa4-nm \"Joan Whitfield\" weight 500",
+    "span.pa4-s.pa4-T \"14w\" typewriter 14px 400",
+    "span.pa4-nm \"Marcus Reed\" weight 500",
+    "span.pa4-s.pa4-T \"16w\" typewriter 14px 400",
+    "span.pa4-nm \"Priya Nair\" weight 500",
+    "span.pa4-s.pa4-T \"16w\" typewriter 14px 400",
+    "span.pa4-nm \"Sam Okoro\" weight 500",
+    "span.pa4-s.pa4-T \"14w\" typewriter 14px 400",
+    "span.pa4-nm \"Tom Ellery\" weight 500",
+    "span.pa4-s.pa4-T \"13w\" typewriter 14px 400",
+    "span.pa4-nm \"David Marsh\" weight 500",
+    "span.pa4-s.pa4-T \"17w\" typewriter 14px 400",
+    "span.pa4-nm \"Sam Okoro\" weight 500",
+    "span.pa4-s.pa4-T \"21w\" typewriter 14px 400",
+    "span.pa4-nm \"Joan Whitfield\" weight 500",
+    "span.pa4-s.pa4-T \"21w\" typewriter 14px 400",
+    "span.pa4-nm \"Rosa Quintana\" weight 500",
+    "span.pa4-s.pa4-T \"38w\" typewriter 14px 400",
+    "span.pa4-nm \"William Tan\" weight 500",
+    "span.pa4-s.pa4-T \"32w\" typewriter 14px 400",
+    "span.pa4-nm \"Eleanor Whitfield\" weight 500",
+    "span.pa4-s.pa4-T \"36w\" typewriter 14px 400",
+    "span.pa4-nm \"Douglas Renner\" weight 500",
+    "span.pa4-s.pa4-T \"37w\" typewriter 14px 400"
+   ],
+   "PS1-4": [
+    "h2.pa4-h \"With you\" 24 / 285",
+    "h2.pa4-h \"With the agent\" 24 / 231",
+    "h2.pa4-h \"Gone quiet\" 24 / 266",
+    "h2.pa4-h \"Closed\" 24 / 302"
+   ],
+   "PS1-6": [
+    "span.pa4-s \"24\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-s.pa4-T \"14w\" grey on the page",
+    "span.pa4-s.pa4-T \"8w\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-s.pa4-T \"11w\" grey on the page",
+    "span.pa4-s.pa4-T \"10w\" grey on the page",
+    "span.pa4-s.pa4-T \"11w\" grey on the page",
+    "span.pa4-s.pa4-T \"10w\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-s.pa4-T \"11w\" grey on the page",
+    "span.pa4-s.pa4-T \"12w\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-s.pa4-T \"14w\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-s.pa4-T \"11w\" grey on the page",
+    "span.pa4-s.pa4-T \"12w\" grey on the page",
+    "span.pa4-s.pa4-T \"12w\" grey on the page",
+    "span.pa4-s.pa4-T \"12w\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-s.pa4-T \"14w\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-s.pa4-T \"18w\" grey on the page",
+    "span.pa4-s \"5\" grey on the page",
+    "span.pa4-s.pa4-T \"5w\" grey on the page",
+    "span.pa4-pv \"Full sent · Reply expect\" grey on the page",
+    "span.pa4-s.pa4-T \"8w\" grey on the page",
+    "span.pa4-pv \"Queried · Sent 30 Sep\" grey on the page",
+    "span.pa4-s.pa4-T \"8w\" grey on the page",
+    "span.pa4-pv \"Queried · Sent 28 Sep\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-pv \"Queried · Sent 20 Sep\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-pv \"Queried · Sent 20 Sep\" grey on the page",
+    "span.pa4-s \"41\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-pv \"Queried · 9 weeks ago\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-pv \"Queried · 2 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-pv \"Queried · 2 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"11w\" grey on the page",
+    "span.pa4-pv \"Full sent · 2 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"11w\" grey on the page",
+    "span.pa4-pv \"Queried · 2 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"11w\" grey on the page",
+    "span.pa4-pv \"Queried · 3 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Queried · 3 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"14w\" grey on the page",
+    "span.pa4-pv \"Queried · 3 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-pv \"Queried · 3 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Queried · 3 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"15w\" grey on the page",
+    "span.pa4-pv \"Queried · 3 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"15w\" grey on the page",
+    "span.pa4-pv \"Queried · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"16w\" grey on the page",
+    "span.pa4-pv \"Queried · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"16w\" grey on the page",
+    "span.pa4-pv \"Queried · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Queried · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"17w\" grey on the page",
+    "span.pa4-pv \"Queried · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"17w\" grey on the page",
+    "span.pa4-pv \"Queried · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"21w\" grey on the page",
+    "span.pa4-pv \"Full sent · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"15w\" grey on the page",
+    "span.pa4-pv \"Partial sent · 4 months \" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Queried · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"26w\" grey on the page",
+    "span.pa4-pv \"Full sent · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"16w\" grey on the page",
+    "span.pa4-pv \"Full sent · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-pv \"Queried · 4 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"19w\" grey on the page",
+    "span.pa4-pv \"Partial sent · 4 months \" grey on the page",
+    "span.pa4-s.pa4-T \"21w\" grey on the page",
+    "span.pa4-pv \"Queried · 5 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"21w\" grey on the page",
+    "span.pa4-pv \"Queried · quiet since 21\" grey on the page",
+    "span.pa4-s.pa4-T \"22w\" grey on the page",
+    "span.pa4-pv \"Queried · 5 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"25w\" grey on the page",
+    "span.pa4-pv \"Full sent · 6 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"25w\" grey on the page",
+    "span.pa4-pv \"Partial sent · 6 months \" grey on the page",
+    "span.pa4-s.pa4-T \"25w\" grey on the page",
+    "span.pa4-pv \"Queried · 6 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"25w\" grey on the page",
+    "span.pa4-pv \"Full sent · 6 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Queried · 7 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Queried · 7 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"14w\" grey on the page",
+    "span.pa4-pv \"Full sent · 8 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Queried · 8 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Queried · 8 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Queried · 8 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"37w\" grey on the page",
+    "span.pa4-pv \"Queried · 8 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Queried · 9 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-pv \"Queried · 11 months ago\" grey on the page",
+    "span.pa4-s.pa4-T \"66w\" grey on the page",
+    "span.pa4-pv \"Queried · 1.3 years ago\" grey on the page",
+    "span.pa4-s \"18\" grey on the page",
+    "span.pa4-s.pa4-T \"3w\" grey on the page",
+    "span.pa4-pv \"Passed · 28 Oct\" grey on the page",
+    "span.pa4-s.pa4-T \"8w\" grey on the page",
+    "span.pa4-pv \"Passed · 27 Sep\" grey on the page",
+    "span.pa4-s.pa4-T \"9w\" grey on the page",
+    "span.pa4-pv \"Passed · 17 Sep\" grey on the page",
+    "span.pa4-s.pa4-T \"12w\" grey on the page",
+    "span.pa4-pv \"Passed · 30 Aug\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Passed · 20 Aug\" grey on the page",
+    "span.pa4-s.pa4-T \"16w\" grey on the page",
+    "span.pa4-pv \"Passed · 5 Aug\" grey on the page",
+    "span.pa4-s.pa4-T \"14w\" grey on the page",
+    "span.pa4-pv \"Withdrawn · 19 Aug\" grey on the page",
+    "span.pa4-s.pa4-T \"16w\" grey on the page",
+    "span.pa4-pv \"Passed · 5 Aug\" grey on the page",
+    "span.pa4-s.pa4-T \"16w\" grey on the page",
+    "span.pa4-pv \"Passed · 5 Aug\" grey on the page",
+    "span.pa4-s.pa4-T \"14w\" grey on the page",
+    "span.pa4-pv \"Closed with no reply · 1\" grey on the page",
+    "span.pa4-s.pa4-T \"13w\" grey on the page",
+    "span.pa4-pv \"Passed · 20 Aug\" grey on the page",
+    "span.pa4-s.pa4-T \"17w\" grey on the page",
+    "span.pa4-pv \"Passed · 24 Jul\" grey on the page",
+    "span.pa4-s.pa4-T \"21w\" grey on the page",
+    "span.pa4-pv \"Passed · 1 Jul\" grey on the page",
+    "span.pa4-s.pa4-T \"21w\" grey on the page",
+    "span.pa4-pv \"Passed · 29 Jun\" grey on the page",
+    "span.pa4-s.pa4-T \"38w\" grey on the page",
+    "span.pa4-pv \"Passed · 3 Mar\" grey on the page",
+    "span.pa4-s.pa4-T \"32w\" grey on the page",
+    "span.pa4-pv \"Passed · 11 Apr\" grey on the page",
+    "span.pa4-s.pa4-T \"36w\" grey on the page",
+    "span.pa4-pv \"Passed · 14 Mar\" grey on the page",
+    "span.pa4-s.pa4-T \"37w\" grey on the page",
+    "span.pa4-pv \"Closed with no reply · 5\" grey on the page"
+   ],
+   "PS1-10": [
+    "button.pa4-ib2.un \"TETom Ellery13wOffer · 3\" loose on the page",
+    "button.pa4-ib2.un \"NBNoah Bright14wOffer · \" loose on the page",
+    "button.pa4-ib2.un \"JMJonathan Marsh8wFull r\" loose on the page",
+    "button.pa4-ib2.un \"OFOttoline Frayn9wFull r\" loose on the page",
+    "button.pa4-ib2.un \"TATheo Abara11wFull requ\" loose on the page",
+    "button.pa4-ib2.un \"IVImogen Vale10wFull req\" loose on the page",
+    "button.pa4-ib2.un \"EVEdda Voss11wPartial re\" loose on the page",
+    "button.pa4-ib2.un \"MRMarcus Reed10wPartial \" loose on the page",
+    "button.pa4-ib2.un \"THTobias Hark9wFull requ\" loose on the page",
+    "button.pa4-ib2.un \"MRMarcus Reed11wPartial \" loose on the page",
+    "button.pa4-ib2.un \"CBClara Beaumont12wParti\" loose on the page",
+    "button.pa4-ib2.un \"RLRachel Lin13wPartial r\" loose on the page",
+    "button.pa4-ib2.un \"ADAna Duarte13wFull requ\" loose on the page",
+    "button.pa4-ib2.un \"DMDavid Marsh14wPartial \" loose on the page",
+    "button.pa4-ib2.un \"IKIris Kwan13wRevise & r\" loose on the page",
+    "button.pa4-ib2.un \"MRMarcus Reed13wFull req\" loose on the page",
+    "button.pa4-ib2.un \"HBHester Blaine11wQuerie\" loose on the page",
+    "button.pa4-ib2.un \"EHElinor Hale12wPartial \" loose on the page",
+    "button.pa4-ib2.un \"TETom Ellery12wQueried ·\" loose on the page",
+    "button.pa4-ib2.un \"DRDevendra Rao12wPartial\" loose on the page",
+    "button.pa4-ib2.un \"PNPriya Nair13wPartial s\" loose on the page",
+    "button.pa4-ib2.un \"DMDavid Marsh14wPartial \" loose on the page",
+    "button.pa4-ib2.un \"ACAlasdair Crewe9wQuerie\" loose on the page",
+    "button.pa4-ib2.un \"RORufus Oyelaran18wParti\" loose on the page",
+    "button.pa4-ib2 \"WCWren Calloway5wFull se\" loose on the page",
+    "button.pa4-ib2 \"NHNadia Hussain8wQueried\" loose on the page",
+    "button.pa4-ib2 \"FSFenella Strand8wQuerie\" loose on the page",
+    "button.pa4-ib2 \"ANAgent not recorded9wQu\" loose on the page",
+    "button.pa4-ib2 \"ANAgent not recorded9wQu\" loose on the page",
+    "button.pa4-ib2 \"EHElinor Hale9wQueried ·\" loose on the page",
+    "button.pa4-ib2 \"EHElinor Hale9wQueried ·\" loose on the page",
+    "button.pa4-ib2 \"EHElinor Hale9wQueried ·\" loose on the page",
+    "button.pa4-ib2 \"SOSam Okoro11wFull sent \" loose on the page",
+    "button.pa4-ib2 \"DRDouglas Renner11wQueri\" loose on the page",
+    "button.pa4-ib2 \"MKMira Kovic11wQueried ·\" loose on the page",
+    "button.pa4-ib2 \"IFImogen Farr13wQueried \" loose on the page",
+    "button.pa4-ib2 \"BHBea Halloran14wQueried\" loose on the page",
+    "button.pa4-ib2 \"CBCormac Bligh9wQueried \" loose on the page",
+    "button.pa4-ib2 \"MRMarcus Reed13wQueried \" loose on the page",
+    "button.pa4-ib2 \"WAWren Ashcombe15wQuerie\" loose on the page",
+    "button.pa4-ib2 \"PNPriya Nair15wQueried ·\" loose on the page",
+    "button.pa4-ib2 \"RLRachel Lin16wQueried ·\" loose on the page",
+    "button.pa4-ib2 \"PNPriya Nair16wQueried ·\" loose on the page",
+    "button.pa4-ib2 \"JWJoan Whitfield13wQueri\" loose on the page",
+    "button.pa4-ib2 \"TETom Ellery17wQueried ·\" loose on the page",
+    "button.pa4-ib2 \"EHElinor Hale17wQueried \" loose on the page",
+    "button.pa4-ib2 \"SPSun-hee Park21wFull se\" loose on the page",
+    "button.pa4-ib2 \"PVPeter Vance15wPartial \" loose on the page",
+    "button.pa4-ib2 \"TQTobias Quint13wQueried\" loose on the page",
+    "button.pa4-ib2 \"ADAna Duarte26wFull sent\" loose on the page",
+    "button.pa4-ib2 \"ADAna Duarte16wFull sent\" loose on the page",
+    "button.pa4-ib2 \"SOSam Okoro9wQueried · 4\" loose on the page",
+    "button.pa4-ib2 \"HQHester Quinn19wPartial\" loose on the page",
+    "button.pa4-ib2 \"PRPriya Raman21wQueried \" loose on the page",
+    "button.pa4-ib2 \"TPTamsin Probewell21wQue\" loose on the page",
+    "button.pa4-ib2 \"DODaniel O’Rourke22wQuer\" loose on the page",
+    "button.pa4-ib2 \"AKAisha Kapoor25wFull se\" loose on the page",
+    "button.pa4-ib2 \"SDSophie Dunn25wPartial \" loose on the page",
+    "button.pa4-ib2 \"EHElinor Hale25wQueried \" loose on the page",
+    "button.pa4-ib2 \"TETom Ellery25wFull sent\" loose on the page",
+    "button.pa4-ib2 \"TQTobias Quint13wQueried\" loose on the page",
+    "button.pa4-ib2 \"RVRosalind Vale13wQuerie\" loose on the page",
+    "button.pa4-ib2 \"PVPeter Vance14wFull sen\" loose on the page",
+    "button.pa4-ib2 \"DRDevendra Rao13wQueried\" loose on the page",
+    "button.pa4-ib2 \"IFImogen Farr13wQueried \" loose on the page",
+    "button.pa4-ib2 \"TQTobias Quint13wQueried\" loose on the page",
+    "button.pa4-ib2 \"MKMira Kovic37wQueried ·\" loose on the page",
+    "button.pa4-ib2 \"RVRosalind Vale13wQuerie\" loose on the page",
+    "button.pa4-ib2 \"RLRachel Lin9wQueried · \" loose on the page",
+    "button.pa4-ib2 \"RVRosalind Vale66wQuerie\" loose on the page",
+    "button.pa4-ib2 \"EHElinor Hale3wPassed · \" loose on the page",
+    "button.pa4-ib2 \"JWJoan Whitfield8wPassed\" loose on the page",
+    "button.pa4-ib2 \"TETom Ellery9wPassed · 1\" loose on the page",
+    "button.pa4-ib2 \"IRImogen Rackham12wPasse\" loose on the page",
+    "button.pa4-ib2 \"GAGeorge Ashworth13wPass\" loose on the page",
+    "button.pa4-ib2 \"EHElinor Hale16wPassed ·\" loose on the page",
+    "button.pa4-ib2 \"JWJoan Whitfield14wWithd\" loose on the page",
+    "button.pa4-ib2 \"MRMarcus Reed16wPassed ·\" loose on the page",
+    "button.pa4-ib2 \"PNPriya Nair16wPassed · \" loose on the page",
+    "button.pa4-ib2 \"SOSam Okoro14wClosed wit\" loose on the page",
+    "button.pa4-ib2 \"TETom Ellery13wPassed · \" loose on the page",
+    "button.pa4-ib2 \"DMDavid Marsh17wPassed ·\" loose on the page",
+    "button.pa4-ib2 \"SOSam Okoro21wPassed · 1\" loose on the page",
+    "button.pa4-ib2 \"JWJoan Whitfield21wPasse\" loose on the page",
+    "button.pa4-ib2 \"RQRosa Quintana38wPassed\" loose on the page",
+    "button.pa4-ib2 \"WTWilliam Tan32wPassed ·\" loose on the page",
+    "button.pa4-ib2 \"EWEleanor Whitfield36wPa\" loose on the page",
+    "button.pa4-ib2 \"DRDouglas Renner37wClose\" loose on the page"
+   ]
+  },
+  "pop": {
+   "texts": 287,
+   "cards": 0,
+   "taps": 97,
+   "rows": 88
+  },
+  "pressed": {
+   "n": 14,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.on \"List\"",
+    "button. \"Birds-eye\"",
+    "button.pa4-chip \"All 88\"",
+    "button.pa4-chip \"With you 24\"",
+    "button.pa4-chip \"With the agent 5\"",
+    "button.pa4-chip \"Gone quiet 41\"",
+    "button.pa4-chip \"Closed 18\"",
+    "button.pa4-ib2 \"TETom Ellery13wOffer ·\"",
+    "button.pa4-ib2 \"NBNoah Bright14wOffer \"",
+    "button.pa4-ib2 \"JMJonathan Marsh8wFull\"",
+    "button.pa4-ib2 \"OFOttoline Frayn9wFull\"",
+    "button.pa4-ib2 \"TATheo Abara11wFull re\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   }
+  ],
+  "legacy": [],
+  "followers": [
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   }
+  ]
+ },
+ "one query · Queried": {
+  "roots": [
+   "[data-ps-root=\"0\"]"
+  ],
+  "rules": {
+   "PS1-1": 1,
+   "PS1-2": 1,
+   "PS1-3": 2,
+   "PS1-4": 1,
+   "PS1-5": 0,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "button.pa4-cta \"I’ve nudged Hester\" 17px"
+   ],
+   "PS1-2": [
+    "time.pa4-s.pa4-T \"8 Sep\" typewriter 14px 400"
+   ],
+   "PS1-3": [
+    "div.pa4-bub \"You sent Hester your que\" radius 18px",
+    "div.pa4-bub \"You sent Hester your que\" shadow rgba(31, 38, 51, 0.08) 0px 1px 2px 0px"
+   ],
+   "PS1-4": [
+    "div.pa4-bub \"You sent Hester your que\" 149 / 16"
+   ]
+  },
+  "pop": {
+   "texts": 9,
+   "cards": 1,
+   "taps": 5,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 14,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.on \"List\"",
+    "button. \"Birds-eye\"",
+    "button.pa4-chip \"All 88\"",
+    "button.pa4-chip \"With you 24\"",
+    "button.pa4-chip \"With the agent 5\"",
+    "button.pa4-chip \"Gone quiet 41\"",
+    "button.pa4-chip \"Closed 18\"",
+    "button.pa4-ib2 \"TETom Ellery13wOffer ·\"",
+    "button.pa4-ib2 \"NBNoah Bright14wOffer \"",
+    "button.pa4-ib2 \"JMJonathan Marsh8wFull\"",
+    "button.pa4-ib2 \"OFOttoline Frayn9wFull\"",
+    "button.pa4-ib2 \"TATheo Abara11wFull re\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   }
+  ],
+  "legacy": [],
+  "followers": [
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   }
+  ]
+ },
+ "one query · Partial": {
+  "roots": [
+   "[data-ps-root=\"0\"]"
+  ],
+  "rules": {
+   "PS1-1": 1,
+   "PS1-2": 2,
+   "PS1-3": 4,
+   "PS1-4": 2,
+   "PS1-5": 0,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "button.pa4-cta \"Mark partial sent\" 17px"
+   ],
+   "PS1-2": [
+    "time.pa4-s.pa4-T \"6 Sep\" typewriter 14px 400",
+    "time.pa4-s.pa4-T \"6 Sep\" typewriter 14px 400"
+   ],
+   "PS1-3": [
+    "div.pa4-bub \"You sent Edda your query\" radius 18px",
+    "div.pa4-bub \"You sent Edda your query\" shadow rgba(31, 38, 51, 0.08) 0px 1px 2px 0px",
+    "div.pa4-bub.t \"Edda asked for a partial\" radius 18px",
+    "div.pa4-bub.t \"Edda asked for a partial\" shadow rgba(31, 38, 51, 0.08) 0px 1px 2px 0px"
+   ],
+   "PS1-4": [
+    "div.pa4-bub \"You sent Edda your query\" 161 / 16",
+    "div.pa4-bub.t \"Edda asked for a partial\" 16 / 176"
+   ]
+  },
+  "pop": {
+   "texts": 13,
+   "cards": 2,
+   "taps": 6,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 14,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.on \"List\"",
+    "button. \"Birds-eye\"",
+    "button.pa4-chip \"All 88\"",
+    "button.pa4-chip \"With you 24\"",
+    "button.pa4-chip \"With the agent 5\"",
+    "button.pa4-chip \"Gone quiet 41\"",
+    "button.pa4-chip \"Closed 18\"",
+    "button.pa4-ib2 \"TETom Ellery13wOffer ·\"",
+    "button.pa4-ib2 \"NBNoah Bright14wOffer \"",
+    "button.pa4-ib2 \"JMJonathan Marsh8wFull\"",
+    "button.pa4-ib2 \"OFOttoline Frayn9wFull\"",
+    "button.pa4-ib2 \"TATheo Abara11wFull re\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   }
+  ],
+  "legacy": [],
+  "followers": [
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   }
+  ]
+ },
+ "one query · Full": {
+  "roots": [
+   "[data-ps-root=\"0\"]"
+  ],
+  "rules": {
+   "PS1-1": 1,
+   "PS1-2": 1,
+   "PS1-3": 2,
+   "PS1-4": 1,
+   "PS1-5": 0,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "button.pa4-cta \"Mark full sent\" 17px"
+   ],
+   "PS1-2": [
+    "time.pa4-s.pa4-T \"24 Sep\" typewriter 14px 400"
+   ],
+   "PS1-3": [
+    "div.pa4-bub \"You sent Jonathan your q\" radius 18px",
+    "div.pa4-bub \"You sent Jonathan your q\" shadow rgba(31, 38, 51, 0.08) 0px 1px 2px 0px"
+   ],
+   "PS1-4": [
+    "div.pa4-bub \"You sent Jonathan your q\" 130 / 16"
+   ]
+  },
+  "pop": {
+   "texts": 11,
+   "cards": 1,
+   "taps": 6,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 14,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.on \"List\"",
+    "button. \"Birds-eye\"",
+    "button.pa4-chip \"All 88\"",
+    "button.pa4-chip \"With you 24\"",
+    "button.pa4-chip \"With the agent 5\"",
+    "button.pa4-chip \"Gone quiet 41\"",
+    "button.pa4-chip \"Closed 18\"",
+    "button.pa4-ib2 \"TETom Ellery13wOffer ·\"",
+    "button.pa4-ib2 \"NBNoah Bright14wOffer \"",
+    "button.pa4-ib2 \"JMJonathan Marsh8wFull\"",
+    "button.pa4-ib2 \"OFOttoline Frayn9wFull\"",
+    "button.pa4-ib2 \"TATheo Abara11wFull re\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   }
+  ],
+  "legacy": [],
+  "followers": [
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   }
+  ]
+ },
+ "one query · Offer": {
+  "roots": [
+   "[data-ps-root=\"0\"]"
+  ],
+  "rules": {
+   "PS1-1": 1,
+   "PS1-2": 1,
+   "PS1-3": 2,
+   "PS1-4": 1,
+   "PS1-5": 0,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "button.pa4-cta \"Record your answer\" 17px"
+   ],
+   "PS1-2": [
+    "time.pa4-s.pa4-T \"22 Aug\" typewriter 14px 400"
+   ],
+   "PS1-3": [
+    "div.pa4-bub \"You sent Tom your query2\" radius 18px",
+    "div.pa4-bub \"You sent Tom your query2\" shadow rgba(31, 38, 51, 0.08) 0px 1px 2px 0px"
+   ],
+   "PS1-4": [
+    "div.pa4-bub \"You sent Tom your query2\" 166 / 16"
+   ]
+  },
+  "pop": {
+   "texts": 9,
+   "cards": 1,
+   "taps": 5,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 14,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.on \"List\"",
+    "button. \"Birds-eye\"",
+    "button.pa4-chip \"All 88\"",
+    "button.pa4-chip \"With you 24\"",
+    "button.pa4-chip \"With the agent 5\"",
+    "button.pa4-chip \"Gone quiet 41\"",
+    "button.pa4-chip \"Closed 18\"",
+    "button.pa4-ib2 \"TETom Ellery13wOffer ·\"",
+    "button.pa4-ib2 \"NBNoah Bright14wOffer \"",
+    "button.pa4-ib2 \"JMJonathan Marsh8wFull\"",
+    "button.pa4-ib2 \"OFOttoline Frayn9wFull\"",
+    "button.pa4-ib2 \"TATheo Abara11wFull re\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   }
+  ],
+  "legacy": [],
+  "followers": [
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   }
+  ]
+ },
+ "one query · closed": {
+  "roots": [
+   "[data-ps-root=\"0\"]"
+  ],
+  "rules": {
+   "PS1-1": 0,
+   "PS1-2": 2,
+   "PS1-3": 2,
+   "PS1-4": 1,
+   "PS1-5": 0,
+   "PS1-6": 1,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-2": [
+    "time.pa4-s.pa4-T \"16 Sep\" typewriter 14px 400",
+    "time.pa4-s.pa4-T \"28 Oct\" typewriter 14px 400"
+   ],
+   "PS1-3": [
+    "div.pa4-bub \"You sent Elinor your que\" radius 18px",
+    "div.pa4-bub \"You sent Elinor your que\" shadow rgba(31, 38, 51, 0.08) 0px 1px 2px 0px"
+   ],
+   "PS1-4": [
+    "div.pa4-bub \"You sent Elinor your que\" 157 / 16"
+   ],
+   "PS1-6": [
+    "div.pa4-gap.pa4-s \"42 days later\" grey on the page"
+   ]
+  },
+  "pop": {
+   "texts": 11,
+   "cards": 1,
+   "taps": 3,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 17,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.on \"List\"",
+    "button. \"Birds-eye\"",
+    "button.pa4-chip \"All 88\"",
+    "button.pa4-chip \"With you 24\"",
+    "button.pa4-chip \"With the agent 5\"",
+    "button.pa4-chip \"Gone quiet 41\"",
+    "button.pa4-chip \"Closed 18\"",
+    "button.pa4-ib2 \"EHElinor Hale3wPassed \"",
+    "button.pa4-ib2 \"JWJoan Whitfield8wPass\"",
+    "button.pa4-ib2 \"TETom Ellery9wPassed ·\"",
+    "button.pa4-ib2 \"IRImogen Rackham12wPas\"",
+    "button.pa4-ib2 \"GAGeorge Ashworth13wPa\"",
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.pa4-link \"Edit query\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   }
+  ],
+  "legacy": [],
+  "followers": [
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   },
+   {
+    "what": "seal ring",
+    "got": "rgb(242, 238, 232)",
+    "page": "rgb(242, 238, 232)",
+    "onCard": false
+   }
+  ]
+ },
+ "the agent sheet": {
+  "roots": [
+   "[data-ps-root=\"0\"]",
+   "[data-ps-root=\"1\"]"
+  ],
+  "rules": {
+   "PS1-1": 1,
+   "PS1-2": 0,
+   "PS1-3": 1,
+   "PS1-4": 0,
+   "PS1-5": 0,
+   "PS1-6": 1,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "button.pa4-cta \"Log a query to Edda\" 17px"
+   ],
+   "PS1-3": [
+    "div.pa4-card \"Your fit★★★★★Not rated y\" radius 24px"
+   ],
+   "PS1-6": [
+    "div.pa4-s \"Kron Literary\" grey on the page"
+   ]
+  },
+  "pop": {
+   "texts": 17,
+   "cards": 1,
+   "taps": 3,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 14,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.pa5-need \"105 things need you\"",
+    "button. \"Queries\"",
+    "button.on \"Agents\"",
+    "button. \"Activity\"",
+    "button. \"5to query\"",
+    "button. \"43querying\"",
+    "button. \"5closed\"",
+    "button.pa4-tap \"Know when replies are \"",
+    "button.pa4-tap \"Know what to send3\"",
+    "button.pa4-ib \"\"",
+    "button.pa4-cta \"Log a query to Edda\"",
+    "button.pa4-link \"Edit details\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "the + sheet": {
+  "roots": [
+   "[data-ps-root=\"0\"]",
+   "[data-ps-root=\"1\"]"
+  ],
+  "rules": {
+   "PS1-1": 0,
+   "PS1-2": 0,
+   "PS1-3": 0,
+   "PS1-4": 0,
+   "PS1-5": 0,
+   "PS1-6": 5,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-6": [
+    "span.pa4-s \"Ingrid\" grey on the page",
+    "span.pa4-s \"Tomas\" grey on the page",
+    "span.pa4-s \"Edda\" grey on the page",
+    "span.pa4-s \"Imogen\" grey on the page",
+    "span.pa4-s \"Other\" grey on the page"
+   ]
+  },
+  "pop": {
+   "texts": 9,
+   "cards": 0,
+   "taps": 7,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 18,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.pa5-need \"105 things need you\"",
+    "button. \"Queries\"",
+    "button.on \"Agents\"",
+    "button. \"Activity\"",
+    "button. \"5to query\"",
+    "button. \"43querying\"",
+    "button. \"5closed\"",
+    "button.pa4-tap \"Know when replies are \"",
+    "button.pa4-tap \"Know what to send3\"",
+    "button.pa4-face \"IMIngrid\"",
+    "button.pa4-face \"TKTomas\"",
+    "button.pa4-face \"EKEdda\"",
+    "button.pa4-face \"IVImogen\"",
+    "button.pa4-face \"Other\"",
+    "button.pa4-link \"An agent replied\"",
+    "button.pa4-link \"Pin a note\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "quick log": {
+  "roots": [
+   "[data-ps-root=\"0\"]",
+   "[data-ps-root=\"1\"]"
+  ],
+  "rules": {
+   "PS1-1": 0,
+   "PS1-2": 0,
+   "PS1-3": 0,
+   "PS1-4": 0,
+   "PS1-5": 0,
+   "PS1-6": 5,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-6": [
+    "span.pa4-s \"Ingrid\" grey on the page",
+    "span.pa4-s \"Tomas\" grey on the page",
+    "span.pa4-s \"Edda\" grey on the page",
+    "span.pa4-s \"Imogen\" grey on the page",
+    "span.pa4-s \"Other\" grey on the page"
+   ]
+  },
+  "pop": {
+   "texts": 9,
+   "cards": 0,
+   "taps": 7,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 18,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.pa5-need \"105 things need you\"",
+    "button. \"Queries\"",
+    "button.on \"Agents\"",
+    "button. \"Activity\"",
+    "button. \"5to query\"",
+    "button. \"43querying\"",
+    "button. \"5closed\"",
+    "button.pa4-tap \"Know when replies are \"",
+    "button.pa4-tap \"Know what to send3\"",
+    "button.pa4-face \"IMIngrid\"",
+    "button.pa4-face \"TKTomas\"",
+    "button.pa4-face \"EKEdda\"",
+    "button.pa4-face \"IVImogen\"",
+    "button.pa4-face \"Other\"",
+    "button.pa4-link \"An agent replied\"",
+    "button.pa4-link \"Pin a note\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "search": {
+  "roots": [
+   "[data-ps-root=\"0\"]"
+  ],
+  "rules": {
+   "PS1-1": 0,
+   "PS1-2": 0,
+   "PS1-3": 4,
+   "PS1-4": 1,
+   "PS1-5": 0,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-3": [
+    "label.pa4-field \"\" radius 24px",
+    "label.pa4-field \"\" shadow rgb(232, 200, 188) 0px 0px 0px 2px",
+    "div.pa4-card \"ResponsesAnalyticsPackag\" radius 24px",
+    "div.pa4-card \"ResponsesAnalyticsPackag\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1"
+   ],
+   "PS1-4": [
+    "label.pa4-field \"\" 16 / 88"
+   ]
+  },
+  "pop": {
+   "texts": 15,
+   "cards": 2,
+   "taps": 15,
+   "rows": 13
+  },
+  "pressed": {
+   "n": 23,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button.pa5-need \"105 things need you\"",
+    "button. \"Queries\"",
+    "button.on \"Agents\"",
+    "button. \"Activity\"",
+    "button. \"5to query\"",
+    "button. \"43querying\"",
+    "button. \"5closed\"",
+    "button.pa4-tap \"Know when replies are \"",
+    "button.pa4-tap \"Know what to send3\"",
+    "button.pa4-link \"Cancel\"",
+    "button.pa4-tap \"Responses\"",
+    "button.pa4-tap \"Analytics\"",
+    "button.pa4-tap \"Packages\"",
+    "button.pa4-tap \"Query letters\"",
+    "button.pa4-tap \"Synopses and comps\"",
+    "button.pa4-tap \"Wall of no\"",
+    "button.pa4-tap \"Corkboard\"",
+    "button.pa4-tap \"Your book\"",
+    "button.pa4-tap \"Streaks and goals\"",
+    "button.pa4-tap \"Discover\"",
+    "button.pa4-tap \"Help centre\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-field"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "the full Birds-eye view": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 0,
+   "PS1-2": 4,
+   "PS1-3": 0,
+   "PS1-4": 4,
+   "PS1-5": 34,
+   "PS1-6": 4,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 17
+  },
+  "samples": {
+   "PS1-2": [
+    "h2.pa5bv-gt \"Past its date\" typewriter 14px 400",
+    "h2.pa5bv-gt \"Upcoming\" typewriter 14px 400",
+    "h2.pa5bv-gt \"Watch and wait\" typewriter 14px 400",
+    "h2.pa5bv-gt \"No date\" typewriter 14px 400"
+   ],
+   "PS1-4": [
+    "h2.pa5bv-gt \"Past its date\" 16 / 283",
+    "h2.pa5bv-gt \"Upcoming\" 16 / 307",
+    "h2.pa5bv-gt \"Watch and wait\" 16 / 268",
+    "h2.pa5bv-gt \"No date\" 16 / 322"
+   ],
+   "PS1-5": [
+    "button.pa5bv-top \"Vale\" 390×27",
+    "button.pa5bv-top \"Halloran\" 390×27",
+    "button.pa5bv-top \"Kovic\" 390×27",
+    "button.pa5bv-top \"Kovic\" 390×27",
+    "button.pa5bv-top \"Nair\" 390×27",
+    "button.pa5bv-top \"Blaine\" 390×27",
+    "button.pa5bv-top \"Duarte\" 390×27",
+    "button.pa5bv-top \"Beaumont\" 390×27",
+    "button.pa5bv-top \"Marsh\" 390×27",
+    "button.pa5bv-top \"Voss\" 390×27",
+    "button.pa5bv-top \"Crewe\" 390×27",
+    "button.pa5bv-top \"Calloway\" 390×27",
+    "button.pa5bv-top \"recorded\" 390×27",
+    "button.pa5bv-top \"recorded\" 390×27",
+    "button.pa5bv-top \"O’Rourke\" 390×27",
+    "button.pa5bv-top \"Strand\" 390×27",
+    "button.pa5bv-top \"Hussain\" 390×27",
+    "button.pa5bv-top \"Vale\" row 27",
+    "button.pa5bv-top \"Halloran\" row 27",
+    "button.pa5bv-top \"Kovic\" row 27",
+    "button.pa5bv-top \"Kovic\" row 27",
+    "button.pa5bv-top \"Nair\" row 27",
+    "button.pa5bv-top \"Blaine\" row 27",
+    "button.pa5bv-top \"Duarte\" row 27",
+    "button.pa5bv-top \"Beaumont\" row 27",
+    "button.pa5bv-top \"Marsh\" row 27",
+    "button.pa5bv-top \"Voss\" row 27",
+    "button.pa5bv-top \"Crewe\" row 27",
+    "button.pa5bv-top \"Calloway\" row 27",
+    "button.pa5bv-top \"recorded\" row 27",
+    "button.pa5bv-top \"recorded\" row 27",
+    "button.pa5bv-top \"O’Rourke\" row 27",
+    "button.pa5bv-top \"Strand\" row 27",
+    "button.pa5bv-top \"Hussain\" row 27"
+   ],
+   "PS1-6": [
+    "span. \"47\" grey on the page",
+    "span. \"15\" grey on the page",
+    "span. \"2\" grey on the page",
+    "span. \"6\" grey on the page"
+   ],
+   "PS1-10": [
+    "button.pa5bv-top \"Vale\" loose on the page",
+    "button.pa5bv-top \"Halloran\" loose on the page",
+    "button.pa5bv-top \"Kovic\" loose on the page",
+    "button.pa5bv-top \"Kovic\" loose on the page",
+    "button.pa5bv-top \"Nair\" loose on the page",
+    "button.pa5bv-top \"Blaine\" loose on the page",
+    "button.pa5bv-top \"Duarte\" loose on the page",
+    "button.pa5bv-top \"Beaumont\" loose on the page",
+    "button.pa5bv-top \"Marsh\" loose on the page",
+    "button.pa5bv-top \"Voss\" loose on the page",
+    "button.pa5bv-top \"Crewe\" loose on the page",
+    "button.pa5bv-top \"Calloway\" loose on the page",
+    "button.pa5bv-top \"recorded\" loose on the page",
+    "button.pa5bv-top \"recorded\" loose on the page",
+    "button.pa5bv-top \"O’Rourke\" loose on the page",
+    "button.pa5bv-top \"Strand\" loose on the page",
+    "button.pa5bv-top \"Hussain\" loose on the page"
+   ]
+  },
+  "pop": {
+   "texts": 34,
+   "cards": 0,
+   "taps": 28,
+   "rows": 17
+  },
+  "pressed": {
+   "n": 26,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button. \"List\"",
+    "button.on \"Birds-eye\"",
+    "button.pa4-ib \"\"",
+    "button.pa4-chip \"1 month\"",
+    "button.pa4-chip \"3 months\"",
+    "button.pa4-chip \"6 months\"",
+    "button.pa4-ib \"\"",
+    "button.pa5bv-top \"Vale\"",
+    "button.pa5bv-top \"Halloran\"",
+    "button.pa5bv-top \"Kovic\"",
+    "button.pa5bv-top \"Kovic\"",
+    "button.pa5bv-top \"Nair\"",
+    "button.pa5bv-fold \"Show 42 more\"",
+    "button.pa5bv-top \"Blaine\"",
+    "button.pa5bv-top \"Duarte\"",
+    "button.pa5bv-top \"Beaumont\"",
+    "button.pa5bv-top \"Marsh\"",
+    "button.pa5bv-top \"Voss\"",
+    "button.pa5bv-fold \"Show 10 more\"",
+    "button.pa5bv-top \"Crewe\"",
+    "button.pa5bv-top \"Calloway\"",
+    "button.pa5bv-top \"recorded\"",
+    "button.pa5bv-top \"recorded\"",
+    "button.pa5bv-top \"O’Rourke\"",
+    "button.pa5bv-top \"Strand\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "pa4-ib"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "the gaps sheet": {
+  "roots": [
+   "[data-ps-root=\"0\"]",
+   "[data-ps-root=\"1\"]"
+  ],
+  "rules": {
+   "PS1-1": 2,
+   "PS1-2": 0,
+   "PS1-3": 1,
+   "PS1-4": 0,
+   "PS1-5": 0,
+   "PS1-6": 1,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "button.pa5-gs-x \"✕\" 18px",
+    "button.pa4-cta \"Save and next\" 17px"
+   ],
+   "PS1-3": [
+    "div.pa4-card.pa5-gc \"AKAisha KapoorThe Lanter\" radius 24px"
+   ],
+   "PS1-6": [
+    "div.pa4-s \"Filling the gaps · 1 of \" grey on the page"
+   ]
+  },
+  "pop": {
+   "texts": 15,
+   "cards": 2,
+   "taps": 7,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 18,
+   "none": [
+    "button.t \"Today\"",
+    "button.pa4-ib \"\"",
+    "button.pa4-ib \"\"",
+    "button. \"Queries\"",
+    "button.on \"Agents\"",
+    "button. \"Activity\"",
+    "button.pa4-tap \"Know when replies are \"",
+    "button.pa4-tap \"Know what to send3\"",
+    "button.pa4-tap \"Know who fits your boo\"",
+    "button.pa4-tap \"Catch agents when they\"",
+    "button.pa4-link \"Fill in the gaps\"",
+    "button.pa4-cta \"Log a query to Ingrid\"",
+    "button.pa5-gs-x \"✕\"",
+    "button. \"−\"",
+    "button. \"+\"",
+    "button.hk8-chip \"They don’t say\"",
+    "button.pa4-link \"Ask me later\"",
+    "button.pa4-link \"Skip\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   }
+  ],
+  "legacy": [
+   {
+    "sel": ".pa5-gc-where",
+    "same": true,
+    "bg": "rgb(248, 246, 242)"
+   }
+  ],
+  "followers": []
+ },
+ "Settings": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 9,
+   "PS1-2": 3,
+   "PS1-3": 4,
+   "PS1-4": 3,
+   "PS1-5": 1,
+   "PS1-6": 1,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "span.pa3-seal \"H\" 13.5px",
+    "span.pa3-s \"Pro trial\" 13.5px",
+    "h2.pa3-h2 \"Reminders\" 18px",
+    "span. \"Nudge reminders by email\" 14.5px",
+    "span. \"Call a query gone quiet \" 14.5px",
+    "p.pa3-note \"QueryHawk doesn’t send t\" 13.5px",
+    "h2.pa3-h2 \"Help and tools\" 18px",
+    "span.pa3-s \"Bring a spreadsheet acro\" 13.5px",
+    "h2.pa3-h2 \"Your account\" 18px"
+   ],
+   "PS1-2": [
+    "h2.pa3-h2 \"Reminders\" typewriter 18px 400",
+    "h2.pa3-h2 \"Help and tools\" typewriter 18px 400",
+    "h2.pa3-h2 \"Your account\" typewriter 18px 400"
+   ],
+   "PS1-3": [
+    "div.pa3-card \"HharnessPro trial\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.0",
+    "div.pa3-card \"Nudge reminders by email\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.0",
+    "div.pa3-card \"Import queriesBring a sp\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.0",
+    "div.pa3-card \"YouPreferencesEmailsPlan\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.0"
+   ],
+   "PS1-4": [
+    "h2.pa3-h2 \"Reminders\" 20 / 275",
+    "h2.pa3-h2 \"Help and tools\" 20 / 236",
+    "h2.pa3-h2 \"Your account\" 20 / 250"
+   ],
+   "PS1-5": [
+    "button.pa3-sw.on \"\" 50×30"
+   ],
+   "PS1-6": [
+    "p.pa3-note \"QueryHawk doesn’t send t\" grey on the page"
+   ]
+  },
+  "pop": {
+   "texts": 21,
+   "cards": 4,
+   "taps": 12,
+   "rows": 10
+  },
+  "pressed": {
+   "n": 8,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa3-sw \"\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "18×18",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-row"
+   },
+   {
+    "box": "40×40",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-icw"
+   },
+   {
+    "box": "18×18",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-row"
+   },
+   {
+    "box": "40×40",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-icw"
+   },
+   {
+    "box": "18×18",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-row"
+   },
+   {
+    "box": "40×40",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-icw"
+   },
+   {
+    "box": "18×18",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-row"
+   },
+   {
+    "box": "40×40",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-icw"
+   },
+   {
+    "box": "18×18",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-row"
+   },
+   {
+    "box": "40×40",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-icw"
+   },
+   {
+    "box": "18×18",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-row"
+   },
+   {
+    "box": "40×40",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-icw"
+   },
+   {
+    "box": "18×18",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-row"
+   },
+   {
+    "box": "40×40",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-icw"
+   },
+   {
+    "box": "18×18",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-row"
+   },
+   {
+    "box": "40×40",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-icw"
+   },
+   {
+    "box": "18×18",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-row"
+   },
+   {
+    "box": "40×40",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-icw"
+   },
+   {
+    "box": "18×18",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "pa3-row"
+   }
+  ],
+  "legacy": [
+   {
+    "sel": ".pa3 .pa3-row",
+    "same": true,
+    "bg": "rgb(248, 246, 242)"
+   }
+  ],
+  "followers": []
+ },
+ "Settings · a section": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 0,
+   "PS1-2": 0,
+   "PS1-3": 8,
+   "PS1-4": 0,
+   "PS1-5": 0,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-3": [
+    "div.pa4-card.pa4-lapcard \"87queries sent32asked fo\" radius 24px",
+    "div.pa4-card.pa4-lapcard \"87queries sent32asked fo\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1",
+    "div.pa4-card \"Wall of no15 so farEvery\" radius 24px",
+    "div.pa4-card \"Wall of no15 so farEvery\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1",
+    "div.pa4-card \"Your notes\" radius 24px",
+    "div.pa4-card \"Your notes\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1",
+    "div.pa4-card \"ResponsesYour bookCorkbo\" radius 24px",
+    "div.pa4-card \"ResponsesYour bookCorkbo\" shadow rgba(31, 38, 51, 0.05) 0px 1px 2px 0px, rgba(31, 38, 51, 0.1"
+   ]
+  },
+  "pop": {
+   "texts": 21,
+   "cards": 4,
+   "taps": 9,
+   "rows": 5
+  },
+  "pressed": {
+   "n": 6,
+   "none": [
+    "button.pa4-ib \"\"",
+    "button.pa4-link \"See the full picture\"",
+    "button.pa4-card \"This week0 of your 1 q\"",
+    "button.pa4-link \"Open the wall\"",
+    "button.pa4-tap \"Your notes\"",
+    "button.pa4-tap \"Responses\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-ib"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-link"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-link"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   },
+   {
+    "box": "24×24",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "pa4-tap"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "set-up · a set-up step": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 5,
+   "PS1-2": 1,
+   "PS1-3": 2,
+   "PS1-4": 1,
+   "PS1-5": 1,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "span.ws-bwm \"QueryHawk\" 18.5px",
+    "span.ws-beta \"BETA\" 8px",
+    "button.sf-exit \"Skip for now\" 14.5px",
+    "small.sf-pbstep \"Step 3 of 3\" 13px",
+    "b.sf-pbname \"Your list\" 22px"
+   ],
+   "PS1-2": [
+    "button.sf-exit \"Skip for now\" typewriter 14.5px 400"
+   ],
+   "PS1-3": [
+    "div.ws-main.sf-main \"QueryHawkBETAGetting set\" page rgba(0, 0, 0, 0)",
+    "div.ws-window.sf-sheet \"Lab filler — the frame i\" radius 20px"
+   ],
+   "PS1-4": [
+    "div.ws-window.sf-sheet \"Lab filler — the frame i\" 8 / 8"
+   ],
+   "PS1-5": [
+    "button.sf-exit \"Skip for now\" 94×44"
+   ]
+  },
+  "pop": {
+   "texts": 8,
+   "cards": 1,
+   "taps": 1,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 1,
+   "none": [
+    "button.sf-exit \"Skip for now\""
+   ]
+  },
+  "icons": [],
+  "legacy": [],
+  "followers": []
+ },
+ "account · sign-in": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 4,
+   "PS1-2": 2,
+   "PS1-3": 1,
+   "PS1-4": 0,
+   "PS1-5": 1,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "span.ws-bwm \"QueryHawk\" 18.5px",
+    "span.ws-beta \"BETA\" 12px unmarked",
+    "b.ws-ftn \"Sign in\" 19px",
+    "button.sf-exit \"Back to site\" 14.5px"
+   ],
+   "PS1-2": [
+    "b.ws-ftn \"Sign in\" typewriter 19px 400",
+    "button.sf-exit \"Back to site\" typewriter 14.5px 400"
+   ],
+   "PS1-3": [
+    "div.ws-main.sf-main \"QueryHawkBETAYour accoun\" page rgba(0, 0, 0, 0)"
+   ],
+   "PS1-5": [
+    "button.sf-exit \"Back to site\" 89×22"
+   ]
+  },
+  "pop": {
+   "texts": 7,
+   "cards": 0,
+   "taps": 1,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 1,
+   "none": [
+    "button.sf-exit \"Back to site\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "13×12",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "ws-ftab"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "account · sign-up": {
+  "roots": [
+   "body"
+  ],
+  "rules": {
+   "PS1-1": 4,
+   "PS1-2": 2,
+   "PS1-3": 1,
+   "PS1-4": 0,
+   "PS1-5": 1,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "span.ws-bwm \"QueryHawk\" 18.5px",
+    "span.ws-beta \"BETA\" 12px unmarked",
+    "b.ws-ftn \"Create account\" 19px",
+    "button.sf-exit \"Back to site\" 14.5px"
+   ],
+   "PS1-2": [
+    "b.ws-ftn \"Create account\" typewriter 19px 400",
+    "button.sf-exit \"Back to site\" typewriter 14.5px 400"
+   ],
+   "PS1-3": [
+    "div.ws-main.sf-main \"QueryHawkBETAYour accoun\" page rgba(0, 0, 0, 0)"
+   ],
+   "PS1-5": [
+    "button.sf-exit \"Back to site\" 89×22"
+   ]
+  },
+  "pop": {
+   "texts": 7,
+   "cards": 0,
+   "taps": 1,
+   "rows": 0
+  },
+  "pressed": {
+   "n": 1,
+   "none": [
+    "button.sf-exit \"Back to site\""
+   ]
+  },
+  "icons": [
+   {
+    "box": "13×12",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "ws-ftab"
+   }
+  ],
+  "legacy": [],
+  "followers": []
+ },
+ "(loads)": {
+  "/dashboard": {
+   "cls": 0.001,
+   "spinnerTicks": 0
+  },
+  "/todo": {
+   "cls": 1.196,
+   "spinnerTicks": 0
+  },
+  "/materials": {
+   "cls": 0,
+   "spinnerTicks": 0
+  },
+  "/you": {
+   "cls": 0,
+   "spinnerTicks": 0
+  },
+  "/queries/all?view=list": {
+   "cls": 0.44,
+   "spinnerTicks": 0
+  }
+ },
+ "(legacy, by class chain)": [
+  {
+   "sel": ".pf-av.pf-empty",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pf-lctray",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pa-addrow",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pa-anote",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pa-aq",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pa-dwish",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pa5-gc-where",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pa5bv-xpi",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pa-mtile .pa-mi",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pa-set .sc-cf",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pa-pg .pa-annote",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  },
+  {
+   "sel": ".pa3 .pa3-row",
+   "newPage": "rgba(0, 0, 0, 0)",
+   "oldPage": "rgba(0, 0, 0, 0)",
+   "same": true
+  },
+  {
+   "sel": ".pa3 .pa3-opt.on",
+   "newPage": "rgb(248, 246, 242)",
+   "oldPage": "rgb(248, 246, 242)",
+   "same": true
+  }
+ ],
+ "the phone landing": {
+  "rules": {
+   "PS1-1": 76,
+   "PS1-2": 5,
+   "PS1-3": 10,
+   "PS1-4": 24,
+   "PS1-5": 10,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 0,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "a.mk-skip \"Skip to content\" 15.2px",
+    "span.mk-navword \"QueryHawk\" 17px",
+    "button.mk-wljoin \"Join\" 15px",
+    "mark. \"literary agent?\" 41px",
+    "p.mk-wl-strap \"No more winging it.\" 42px",
+    "a.mk-wl-fjoin \"Become a founding writer\" 17px",
+    "h2. \"A bird’s-eye view of you\" 25px",
+    "span. \"All your queries from st\" 15.5px",
+    "span. \"Much easier on the eye t\" 15.5px",
+    "span. \"Anything that needs you \" 15.5px",
+    "h2.mk-det-h \"Speedy set-up, at-a-glan\" 24px",
+    "span.mk-det-keep \"at-a-glance\" 24px",
+    "p.mk-det-sub \"Our tools do the legwork\" 16.5px",
+    "h3. \"Every query tracked, fro\" 25px",
+    "p.mk-wl-fline \"Every query keeps a rich\" 16.5px",
+    "span. \"Queries, partials and fu\" 15.5px",
+    "span. \"Reply-by dates worked ou\" 15.5px",
+    "span. \"A nudge when an agent go\" 15.5px",
+    "h3. \"A home for your agents\" 25px",
+    "p.mk-wl-fline \"Know your query quarry. \" 16.5px",
+    "span. \"Their manuscript wish li\" 15.5px",
+    "span. \"Their reply policies (al\" 15.5px",
+    "span. \"Their contact details an\" 15.5px",
+    "h3. \"Paste an email. We’ll do\" 25px",
+    "p.mk-wl-fline \"Paste any email you’ve s\" 16.5px",
+    "span. \"Works with any email, se\" 15.5px",
+    "span. \"Nothing changes until yo\" 15.5px",
+    "span. \"Less typing, fewer misse\" 15.5px",
+    "h3. \"Find the package that ge\" 25px",
+    "p.mk-wl-fline \"Keep each version of you\" 16.5px",
+    "span. \"Letter, synopsis and pag\" 15.5px",
+    "span. \"Attach a package to any \" 15.5px",
+    "span. \"Request rates for every \" 15.5px",
+    "h3. \"Comps that work for you\" 25px",
+    "p.mk-wl-fline \"Build your library of co\" 16.5px",
+    "span. \"Add comps to letters\" 15.5px",
+    "span. \"Track responses and requ\" 15.5px",
+    "span. \"The Scout recommends goo\" 15.5px",
+    "h3. \"Already querying? No pro\" 25px",
+    "p.mk-wl-fline \"Whether it’s handwritten\" 16.5px",
+    "span. \"Smart Import reads your \" 15.5px",
+    "span. \"You check everything bef\" 15.5px",
+    "span. \"Or if you’d rather, brin\" 15.5px",
+    "h3. \"Get good stories told.\" 22px",
+    "p. \"A captivating story shou\" 15.5px",
+    "h3. \"Make querying straightfo\" 22px",
+    "p. \"Stop shooting from the h\" 15.5px",
+    "h3. \"Let writers write.\" 22px",
+    "p. \"Less time trawling throu\" 15.5px",
+    "h2.mk-cch2 \"Help get things off the \" 27px",
+    "span. \"QueryHawk Pro, free for \" 15.5px",
+    "b. \"QueryHawk Pro, free\" 15.5px",
+    "span. \"A direct line to the fou\" 15.5px",
+    "b. \"A direct line\" 15.5px",
+    "span. \"Smart Import to bring yo\" 15.5px",
+    "b. \"Smart Import\" 15.5px",
+    "span. \"An exclusive Early Bird \" 15.5px",
+    "b. \"An exclusive Early Bird \" 15.5px",
+    "button.mk-btn.mk-btn--navy \"Join the waitlist\" 17px",
+    "p.mk-ccnote \"All we ask is occasional\" 13px",
+    "p.mk-betanote \"We'll only use your addr\" 13px",
+    "button.mk-doclink \"Privacy\" 13px",
+    "h2.mk-wl-faqh \"Questions\" 27px",
+    "summary. \"What does it cost?\" 17px",
+    "p. \"Nothing for founding wri\" 15.5px",
+    "summary. \"Do I need a finished man\" 17px",
+    "p. \"No. If you're still writ\" 15.5px",
+    "summary. \"I already track my queri\" 17px",
+    "p. \"Bring it with you. Smart\" 15.5px",
+    "summary. \"What do you ask of found\" 17px",
+    "p. \"Occasional feedback to h\" 15.5px",
+    "span.mk-wordmark \"QueryHawk\" 25px",
+    "p.mk-foottag \"A bird's-eye view of you\" 16.5px",
+    "p. \"© 2026 QueryHawk\" 14.5px",
+    "span.mk-footname \"QueryHawk\" 14.5px",
+    "button.mk-footmail \"Privacy\" 14.5px"
+   ],
+   "PS1-2": [
+    "span.mk-navword \"QueryHawk\" weight 700",
+    "b. \"QueryHawk Pro, free\" weight 700",
+    "b. \"A direct line\" weight 700",
+    "b. \"Smart Import\" weight 700",
+    "b. \"An exclusive Early Bird \" weight 700"
+   ],
+   "PS1-3": [
+    "body. \"Skip to contentQueryHawk\" page rgba(0, 0, 0, 0)",
+    "article.mk-vcard \"Get good stories told.A \" radius 22px",
+    "article.mk-vcard \"Get good stories told.A \" shadow rgba(0, 0, 0, 0.6) 0px 18px 34px -18px",
+    "article.mk-vcard \"Make querying straightfo\" radius 22px",
+    "article.mk-vcard \"Make querying straightfo\" shadow rgba(0, 0, 0, 0.6) 0px 18px 34px -18px",
+    "article.mk-vcard \"Let writers write.Less t\" radius 22px",
+    "article.mk-vcard \"Let writers write.Less t\" shadow rgba(0, 0, 0, 0.6) 0px 18px 34px -18px",
+    "div.mk-tkt \"Founding writer placeHel\" radius 24px",
+    "div.mk-tkt \"Founding writer placeHel\" shadow rgba(28, 19, 15, 0.13) 0px 1px 0px 0px, rgba(28, 19, 15, 0.1",
+    "div.mk-tkt-stub \"Founding writer place\" radius 24px"
+   ],
+   "PS1-4": [
+    "ul.mk-wl-ticks \"All your queries from st\" 24 / 24",
+    "ul.mk-wl-ticks \"Queries, partials and fu\" 24 / 24",
+    "ul.mk-wl-ticks \"Their manuscript wish li\" 24 / 24",
+    "ul.mk-wl-ticks \"Works with any email, se\" 24 / 24",
+    "ul.mk-wl-ticks \"Letter, synopsis and pag\" 24 / 24",
+    "ul.mk-wl-ticks \"Add comps to lettersTrac\" 24 / 24",
+    "ul.mk-wl-ticks \"Smart Import reads your \" 24 / 24",
+    "article.mk-vcard \"Get good stories told.A \" 24 / 24",
+    "article.mk-vcard \"Make querying straightfo\" 390 / -342",
+    "article.mk-vcard \"Let writers write.Less t\" 756 / -708",
+    "h2. \"A bird’s-eye view of you\" 24 / 24",
+    "h2.mk-det-h \"Speedy set-up, at-a-glan\" 22 / 22",
+    "h3. \"Every query tracked, fro\" 24 / 24",
+    "h3. \"A home for your agents\" 24 / 24",
+    "h3. \"Paste an email. We’ll do\" 24 / 24",
+    "h3. \"Find the package that ge\" 24 / 24",
+    "h3. \"Comps that work for you\" 24 / 24",
+    "h3. \"Already querying? No pro\" 24 / 24",
+    "h2.mk-wl-whyh \"Our mission? Simple.\" 24 / 24",
+    "h3. \"Get good stories told.\" 44 / 44",
+    "h3. \"Make querying straightfo\" 410 / -322",
+    "h3. \"Let writers write.\" 776 / -688",
+    "h2.mk-cch2 \"Help get things off the \" 36 / 36",
+    "h2.mk-wl-faqh \"Questions\" 24 / 24"
+   ],
+   "PS1-5": [
+    "button.mk-brand.mk-brand-link \"QueryHawk\" 128×26",
+    "button.mk-wljoin \"Join\" 61×36",
+    "a. \"Query tracking\" 169×46",
+    "a. \"A home for your agents\" 169×46",
+    "a. \"Bring your list across\" 169×46",
+    "a. \"Submission packages\" 169×46",
+    "a. \"Speedy email drop\" 169×46",
+    "a. \"Comparable titles\" 169×46",
+    "button.mk-doclink \"Privacy\" 40×19",
+    "button.mk-footmail \"Privacy\" 44×22"
+   ]
+  },
+  "pop": {
+   "texts": 88,
+   "cards": 12,
+   "taps": 15,
+   "rows": 0
+  },
+  "icons": [
+   {
+    "box": "20×20",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-wl-see"
+   },
+   {
+    "box": "16×16",
+    "stroke": "2px",
+    "cap": "butt",
+    "where": "mk-bef-gly"
+   },
+   {
+    "box": "20×20",
+    "stroke": "2px",
+    "cap": "butt",
+    "where": "mk-bef-gly"
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "15×15",
+    "stroke": "fill",
+    "cap": "butt",
+    "where": "mk-lc-disc"
+   },
+   {
+    "box": "9×9",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": "mk-lc-pill"
+   },
+   {
+    "box": "12×12",
+    "stroke": "1.8px",
+    "cap": "round",
+    "where": ""
+   },
+   {
+    "box": "9×10",
+    "stroke": "1.1px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "8×9",
+    "stroke": "1.1px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "10×10",
+    "stroke": "1.1px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "10×10",
+    "stroke": "1.1px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "10×10",
+    "stroke": "1.5px",
+    "cap": "butt",
+    "where": "mk-taskchip"
+   },
+   {
+    "box": "9×9",
+    "stroke": "1.8px",
+    "cap": "round",
+    "where": "mk-ok"
+   },
+   {
+    "box": "10×10",
+    "stroke": "1.5px",
+    "cap": "butt",
+    "where": "mk-taskchip"
+   },
+   {
+    "box": "9×9",
+    "stroke": "1.8px",
+    "cap": "round",
+    "where": ""
+   },
+   {
+    "box": "10×10",
+    "stroke": "1.5px",
+    "cap": "butt",
+    "where": "mk-taskchip"
+   },
+   {
+    "box": "10×10",
+    "stroke": "1.1px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "13×13",
+    "stroke": "1.6px",
+    "cap": "round",
+    "where": ""
+   },
+   {
+    "box": "7×7",
+    "stroke": "1.2px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   },
+   {
+    "box": "18×18",
+    "stroke": "1.6px",
+    "cap": "butt",
+    "where": ""
+   }
+  ]
+ },
+ "pricing": {
+  "rules": {
+   "PS1-1": 57,
+   "PS1-2": 21,
+   "PS1-3": 5,
+   "PS1-4": 5,
+   "PS1-5": 18,
+   "PS1-6": 0,
+   "PS1-7": 0,
+   "PS1-8": 0,
+   "PS1-9": 1,
+   "PS1-10": 0
+  },
+  "samples": {
+   "PS1-1": [
+    "a.mk-skip \"Skip to content\" 15.2px",
+    "span.mk-navword \"QueryHawk\" 17px",
+    "button.mk-lg \"Log in\" 15px",
+    "h1.mk-pvh1 \"A free QueryHawk campaig\" 29.6px",
+    "p.mk-pvsub \"We're looking for foundi\" 16.64px",
+    "button.mk-btn.mk-btn--navy \"Join the waitlist\" 16.32px",
+    "p.mk-betanote \"We'll only use your addr\" 13.6px",
+    "button.mk-doclink \"Privacy\" 13.6px",
+    "p.mk-pvlaunchh \"Then, once we launch:\" 19.2px",
+    "span. \"Free\" 16.8px",
+    "small. \"£0\" 13px",
+    "span. \"Pro\" 16.8px",
+    "small. \"from £3.75 a month\" 13px",
+    "h2.mk-lname \"Pro\" 23.2px",
+    "span.mk-rungname \"1 month\" 17.6px",
+    "span.mk-rungline \"The monthly rate\" 13px",
+    "span.mk-rungprice \"£7.99\" 25.6px",
+    "span.mk-rungname \"3 months\" 17.6px",
+    "span.mk-rungline \"£6.33 a month · save 20%\" 13px",
+    "em. \"save 20%\" 13px",
+    "span.mk-rungprice \"£19\" 25.6px",
+    "span.mk-rungname \"6 months\" 17.6px",
+    "span.mk-rungline \"£4.83 a month · save 40%\" 13px",
+    "em. \"save 40%\" 13px",
+    "span.mk-rungprice \"£29\" 25.6px",
+    "span.mk-rungname \"12 months\" 17.6px",
+    "span.mk-rungline \"£3.75 a month · save 53%\" 13px",
+    "em. \"save 53%\" 13px",
+    "span.mk-rungprice \"£45\" 25.6px",
+    "p.mk-lsmall \"Renews monthly at £7.99 \" 12.8px",
+    "button.mk-lsuit \"Which plan suits me best\" 15.68px",
+    "h2.mk-pvfaqh \"Questions\" 24px",
+    "span. \"Is it really free for fo\" 16.32px",
+    "span. \"What happens when my fou\" 16.32px",
+    "span. \"What's the difference be\" 16.32px",
+    "span. \"Is there a free trial?\" 16.32px",
+    "span. \"Is Pro a subscription?\" 16.32px",
+    "span. \"Which plan should I choo\" 16.32px",
+    "span. \"What if my campaign runs\" 16.32px",
+    "span. \"What if I sign with an a\" 16.32px",
+    "span. \"Can I bring across the s\" 16.32px",
+    "span.mk-wordmark \"QueryHawk\" 25px",
+    "p.mk-foottag \"A bird's-eye view of you\" 16.5px",
+    "h4. \"Product\" 15px",
+    "button. \"Features\" 16.5px",
+    "button. \"Pricing\" 16.5px",
+    "h4. \"Company\" 15px",
+    "button. \"About\" 16.5px",
+    "button. \"Founding writers\" 16.5px",
+    "button. \"Contact\" 16.5px",
+    "h4. \"Legal\" 15px",
+    "button. \"Privacy\" 16.5px",
+    "button. \"Terms\" 16.5px",
+    "p. \"© 2026 QueryHawk\" 14.5px",
+    "span.mk-footname \"QueryHawk\" 14.5px",
+    "p.mk-footmade \"Made in the UK, for writ\" 14.5px",
+    "a.mk-footmail \"hello@queryhawk.net\" 14.5px"
+   ],
+   "PS1-2": [
+    "span.mk-navword \"QueryHawk\" weight 700",
+    "button.mk-lg \"Log in\" weight 500",
+    "p.mk-pvlaunchh \"Then, once we launch:\" typewriter 19.2px 400",
+    "span. \"Free\" typewriter 16.8px 400",
+    "small. \"£0\" weight 500",
+    "span. \"Pro\" typewriter 16.8px 400",
+    "small. \"from £3.75 a month\" weight 500",
+    "span.mk-rungname \"1 month\" typewriter 17.6px 400",
+    "span.mk-rungline \"The monthly rate\" weight 500",
+    "span.mk-rungname \"3 months\" typewriter 17.6px 400",
+    "span.mk-rungline \"£6.33 a month · save 20%\" weight 500",
+    "em. \"save 20%\" weight 500",
+    "span.mk-rungname \"6 months\" typewriter 17.6px 400",
+    "span.mk-rungline \"£4.83 a month · save 40%\" weight 500",
+    "em. \"save 40%\" weight 500",
+    "span.mk-rungname \"12 months\" typewriter 17.6px 400",
+    "span.mk-rungline \"£3.75 a month · save 53%\" weight 500",
+    "em. \"save 53%\" weight 500",
+    "h4. \"Product\" typewriter 15px 400",
+    "h4. \"Company\" typewriter 15px 400",
+    "h4. \"Legal\" typewriter 15px 400"
+   ],
+   "PS1-3": [
+    "body. \"Skip to contentQueryHawk\" page rgba(0, 0, 0, 0)",
+    "section.mk-pvbox \"Founding writersA free Q\" radius 20px",
+    "section.mk-pvbox \"Founding writersA free Q\" shadow rgba(28, 19, 15, 0.05) 0px 1px 2px 0px, rgba(28, 19, 15, 0.3",
+    "article.mk-lcard.mk-lcard--pro \"ProChoose how long to st\" radius 22px",
+    "article.mk-lcard.mk-lcard--pro \"ProChoose how long to st\" shadow rgba(28, 19, 15, 0.08) 0px 0px 0px 1px, rgba(28, 19, 15, 0.3"
+   ],
+   "PS1-4": [
+    "section.mk-pvbox \"Founding writersA free Q\" 14 / 14",
+    "div.mk-pvtabsin \"Free£0Profrom £3.75 a mo\" 14 / 14",
+    "article.mk-lcard.mk-lcard--pro \"ProChoose how long to st\" 14 / 14",
+    "h2.mk-lname \"Pro\" 42 / 42",
+    "h2.mk-pvfaqh \"Questions\" 18 / 18"
+   ],
+   "PS1-5": [
+    "button.mk-brand.mk-brand-link \"QueryHawk\" 128×26",
+    "button.mk-lg \"Log in\" 66×36",
+    "button.mk-burger \"\" 32×41",
+    "button.mk-doclink \"Privacy\" 49×20",
+    "button.mk-lsuit \"Which plan suits me best\" 215×24",
+    "button. \"Features\" 59×44",
+    "button. \"Pricing\" 48×44",
+    "button. \"About\" 44×44",
+    "button. \"Founding writers\" 117×44",
+    "button. \"Contact\" 54×44",
+    "button. \"Privacy\" 50×44",
+    "button. \"Terms\" 44×44",
+    "a.mk-footmail \"hello@queryhawk.net\" 134×23",
+    "button.mk-pvmore \"What founding writers ge\" row 56",
+    "button. \"Is it really free for fo\" row 60",
+    "button. \"Is there a free trial?\" row 60",
+    "button. \"Is Pro a subscription?\" row 60",
+    "button. \"Which plan should I choo\" row 60"
+   ],
+   "PS1-9": [
+    "ul.mk-llist \"Everything in Free, plus\" Top dashed"
+   ]
+  },
+  "pop": {
+   "texts": 69,
+   "cards": 3,
+   "taps": 32,
+   "rows": 10
+  },
+  "icons": [
+   {
+    "box": "13×13",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-pvmore"
+   },
+   {
+    "box": "16×16",
+    "stroke": "1.7px",
+    "cap": "round",
+    "where": "mk-lsuit"
+   },
+   {
+    "box": "12×12",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-pvpm"
+   },
+   {
+    "box": "12×12",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-pvpm"
+   },
+   {
+    "box": "12×12",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-pvpm"
+   },
+   {
+    "box": "12×12",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-pvpm"
+   },
+   {
+    "box": "12×12",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-pvpm"
+   },
+   {
+    "box": "12×12",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-pvpm"
+   },
+   {
+    "box": "12×12",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-pvpm"
+   },
+   {
+    "box": "12×12",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-pvpm"
+   },
+   {
+    "box": "12×12",
+    "stroke": "2px",
+    "cap": "round",
+    "where": "mk-pvpm"
+   },
+   {
+    "box": "16×16",
+    "stroke": "1.6px",
+    "cap": "round",
+    "where": "mk-footmade"
+   }
+  ]
+ }
+}

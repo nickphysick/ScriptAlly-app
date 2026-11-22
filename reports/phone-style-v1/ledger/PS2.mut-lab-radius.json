@@ -1,0 +1,440 @@
+[
+ {
+  "id": "PS2",
+  "what": "the page is oat (--ps-page)",
+  "ok": true,
+  "got": "rgb(242, 238, 232) vs rgb(242, 238, 232)"
+ },
+ {
+  "id": "PS2",
+  "what": "slim rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "slim header 56 high, navy",
+  "ok": true,
+  "got": "56 rgb(42, 58, 82)"
+ },
+ {
+  "id": "PS2",
+  "what": "slim-t rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "slim title 20, the typewriter face",
+  "ok": true,
+  "got": "20px 400 \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "id": "PS2",
+  "what": "tab-on rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a tab 48 high, 14 semibold, navy when on",
+  "ok": true,
+  "got": "48 14px 600 rgb(42, 58, 82)"
+ },
+ {
+  "id": "PS2",
+  "what": "tile rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "tile: 80 high, radius 16, padding 12",
+  "ok": true,
+  "got": "80 16px 12px 12px"
+ },
+ {
+  "id": "PS2",
+  "what": "tile-navy rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "tile-navy: 80 high, radius 16, padding 12",
+  "ok": true,
+  "got": "80 16px 12px 12px"
+ },
+ {
+  "id": "PS2",
+  "what": "tile-q rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "tile-q: 80 high, radius 16, padding 12",
+  "ok": true,
+  "got": "80 16px 12px 12px"
+ },
+ {
+  "id": "PS2",
+  "what": "tile rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a white tile casts the card's hairline",
+  "ok": true,
+  "got": "rgba(31, 38, 51, 0.06) 0px 0px 0px 1px, rgba(31, 38, 51, 0.04) 0px 1px 2px 0px rgb(255, 255, 255)"
+ },
+ {
+  "id": "PS2",
+  "what": "tile-navy rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "the navy tile is navy with no shadow",
+  "ok": true,
+  "got": "rgb(42, 58, 82) none"
+ },
+ {
+  "id": "PS2",
+  "what": "tile-qb rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "tile-b rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "the quiet tile's figures are grey",
+  "ok": true,
+  "got": "rgb(107, 111, 120)"
+ },
+ {
+  "id": "PS2",
+  "what": "a tile's numeral is the part numeral",
+  "ok": true,
+  "got": "28px \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "id": "PS2",
+  "what": "tile-s rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "tile-s type = token (14px 400)",
+  "ok": true,
+  "got": "14px 400 -apple-system, \"system-ui\", \"SF Pro Text\", \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif"
+ },
+ {
+  "id": "PS2",
+  "what": "hdg rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a heading: 24 above, 8 below, 16 in, 16 semibold",
+  "ok": true,
+  "got": "24px 8px 16px 16px 600 -apple-system, \"system-ui\", \"SF Pro Text\", \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif"
+ },
+ {
+  "id": "PS2",
+  "what": "lead rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "the lead card: radius 16, padding 16, the card's hairline",
+  "ok": true,
+  "got": "16px 16px rgba(31, 38, 51, 0.06) 0px 0px 0px 1px, rgba(31, 38, 51, 0.04) 0px 1px 2px 0px"
+ },
+ {
+  "id": "PS2",
+  "what": "lead rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "lead 16 from each edge",
+  "ok": true,
+  "got": "16 / 16"
+ },
+ {
+  "id": "PS2",
+  "what": "head rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "head type = token (20px 400)",
+  "ok": true,
+  "got": "20px 400 \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "id": "PS2",
+  "what": "lead-b rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "lead-b type = token (28px 400)",
+  "ok": true,
+  "got": "28px 400 \"Special Elite\", \"Courier New\", Courier, monospace"
+ },
+ {
+  "id": "PS2",
+  "what": "lead-cap rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "lead-cap type = token (12px 400)",
+  "ok": true,
+  "got": "12px 400 -apple-system, \"system-ui\", \"SF Pro Text\", \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif"
+ },
+ {
+  "id": "PS2",
+  "what": "cta rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "the filled button: 48 high, fully round, navy, 16 semibold",
+  "ok": true,
+  "got": "48 999px rgb(42, 58, 82) 16px 600"
+ },
+ {
+  "id": "PS2",
+  "what": "card rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a card: radius 16, the card's hairline",
+  "ok": false,
+  "got": "12px rgba(31, 38, 51, 0.06) 0px 0px 0px 1px, rgba(31, 38, 51, 0.04) 0px 1px 2px 0px"
+ },
+ {
+  "id": "PS2",
+  "what": "card rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "card 16 from each edge",
+  "ok": true,
+  "got": "16 / 16"
+ },
+ {
+  "id": "PS2",
+  "what": "row rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a row: at least 64 high, padding 8 / 16, 12 between disc and text",
+  "ok": true,
+  "got": "64 8px 16px 12px"
+ },
+ {
+  "id": "PS2",
+  "what": "row-press rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a pressed row dims (--ps-press)",
+  "ok": true,
+  "got": "rgba(31, 38, 51, 0.05) vs rgba(31, 38, 51, 0.05)"
+ },
+ {
+  "id": "PS2",
+  "what": "disc rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a row's disc is 40, round",
+  "ok": true,
+  "got": "40×40 50%"
+ },
+ {
+  "id": "PS2",
+  "what": "name rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "name type = token (16px 600)",
+  "ok": true,
+  "got": "16px 600 -apple-system, \"system-ui\", \"SF Pro Text\", \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif"
+ },
+ {
+  "id": "PS2",
+  "what": "sec rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "sec type = token (14px 400)",
+  "ok": true,
+  "got": "14px 400 -apple-system, \"system-ui\", \"SF Pro Text\", \"Segoe UI\", Roboto, \"Helvetica Neue\", Arial, sans-serif"
+ },
+ {
+  "id": "PS2",
+  "what": "sec rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "secondary text on a card is the grey",
+  "ok": true,
+  "got": "rgb(107, 111, 120)"
+ },
+ {
+  "id": "PS2",
+  "what": "time rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a row's time at 14",
+  "ok": true,
+  "got": "14px 400"
+ },
+ {
+  "id": "PS2",
+  "what": "link rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a link row: 48 high, 14 semibold, navy",
+  "ok": true,
+  "got": "48 14px 600 rgb(42, 58, 82)"
+ },
+ {
+  "id": "PS2",
+  "what": "ber rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a Birds-eye row is 40 high",
+  "ok": true,
+  "got": "40"
+ },
+ {
+  "id": "PS2",
+  "what": "ber-nm rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "its name column is 104 wide",
+  "ok": true,
+  "got": "104"
+ },
+ {
+  "id": "PS2",
+  "what": "ber-bar rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "its bar is 10 high with round ends",
+  "ok": true,
+  "got": "10 999px"
+ },
+ {
+  "id": "PS2",
+  "what": "tlink rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a text link: 48 high, 16 semibold, navy",
+  "ok": true,
+  "got": "48 16px rgb(42, 58, 82)"
+ },
+ {
+  "id": "PS2",
+  "what": "chip rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a chip: 28 high, fully round, on the warm fill, 14 semibold",
+  "ok": true,
+  "got": "28 999px rgb(236, 231, 222)"
+ },
+ {
+  "id": "PS2",
+  "what": "need rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "the need pill: 32 high, fully round, 14 semibold",
+  "ok": true,
+  "got": "32 999px"
+ },
+ {
+  "id": "PS2",
+  "what": "snack rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "the snackbar: 48 high, fully round, navy, the raised shadow",
+  "ok": true,
+  "got": "48 999px rgba(31, 38, 51, 0.06) 0px 0px 0px 1px, rgba(31, 38, 51, 0.16) 0px 12px 32px 0px"
+ },
+ {
+  "id": "PS2",
+  "what": "skel rendered",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a loading row is a row's 64",
+  "ok": true,
+  "got": "64"
+ }
+]

@@ -195,7 +195,9 @@ async function probe(page: Page, roots: string[], extra: { cardSel?: string } = 
       const filled = alpha(cs.backgroundColor) > 0.5 || cs.backgroundImage !== "none";
       return filled && parseFloat(cs.borderTopLeftRadius) >= 8 && b.width >= vw * 0.5 && !["BUTTON", "A", "INPUT", "TEXTAREA"].includes(e.tagName) && cs.backgroundColor !== NAVY;
     };
-    const cards = all.filter(isCardEl);
+    /* a sheet runs edge to edge with its top corners at 24 (P19): it is not a card, so the card rules skip it */
+    const isSheet = (e: HTMLElement) => { const b = e.getBoundingClientRect(); return b.left <= 0.5 && b.right >= vw - 0.5; };
+    const cards = all.filter((e) => isCardEl(e) && !isSheet(e));
     const bgOf = (e: HTMLElement): string => {
       for (let n: HTMLElement | null = e; n; n = n.parentElement) {
         const cs = getComputedStyle(n);
@@ -394,9 +396,10 @@ test.describe("PSL lead", () => {
 const LEGACY = [".pf-av.pf-empty", ".pf-lctray", ".pa-addrow", ".pa-anote", ".pa-aq", ".pa-dwish", ".pa5-gc-where", ".pa5bv-xpi",
   ".pa-mtile .pa-mi", ".pa-set .sc-cf", ".pa-pg .pa-annote", ".pa3 .pa3-row", ".pa3 .pa3-opt.on"];
 const press = async (page: Page, sel: string) => { const l = page.locator(sel).filter({ visible: true }).first(); await l.click({ timeout: 12_000 }); await page.waitForTimeout(900); };
-const go = async (page: Page, path: string) => { await page.goto(path); await page.locator('[data-pa5="dock"], [data-pa3="layer"], main, body').first().waitFor({ timeout: 30_000 }); await settle(page, 1500); };
+const go = async (page: Page, path: string) => { await page.goto(path); await page.locator("#root > *").first().waitFor({ state: "attached", timeout: 30_000 }); await settle(page, 2000); };
 type Screen = [string, (page: Page) => Promise<void>];
 const SCREENS: Screen[] = [
+  ["Today · Queries (built to the sheet; the calibration)", async (p) => { await go(p, "/dashboard"); await press(p, '[data-pa5="tab"][data-tab="queries"]'); await stageTo(p, "move"); await p.waitForTimeout(500); }],
   ["Today · Agents", async (p) => { await go(p, "/dashboard"); await press(p, '[data-pa5="tab"][data-tab="agents"]'); }],
   ["Today · Activity", async (p) => { await go(p, "/dashboard"); await press(p, '[data-pa5="tab"][data-tab="activity"]'); }],
   ["To do", async (p) => { await go(p, "/todo"); }],
@@ -407,9 +410,10 @@ const SCREENS: Screen[] = [
   ["Materials · Comps", async (p) => { await go(p, "/materials"); await press(p, '[data-pa5="tab"][data-tab="comps"]'); }],
   ["Profile", async (p) => { await go(p, "/you"); }],
   ["the full query list", async (p) => { await go(p, "/queries/all?view=list"); await p.locator('[data-pa4="qrow"]').filter({ visible: true }).first().waitFor(); }],
-  ...["Queried", "Partial", "Full", "Offer", "Rejected"].map((w): Screen => [`one query · ${w}`, async (p) => {
+  ...["Queried", "Partial", "Full", "Offer", "Rejected"].map((w): Screen => [`one query · ${w === "Rejected" ? "closed" : w}`, async (p) => {
     await go(p, "/queries/all?view=list");
-    const ok = await p.evaluate((word) => { const r = [...document.querySelectorAll<HTMLElement>('[data-pa4="qrow"]')].find((x) => x.getClientRects().length && (x.querySelector('[data-pa4="qline"]')?.textContent ?? "").startsWith(word)); r?.click(); return !!r; }, w);
+    if (w === "Rejected") await press(p, '[data-pa4="chip"][data-k="closed"]');
+    const ok = await p.evaluate((word) => { const rows = [...document.querySelectorAll<HTMLElement>('[data-pa4="qrow"]')].filter((x) => x.getClientRects().length); const r = word === "Rejected" ? rows.find((x) => x.dataset.court === "closed") : rows.find((x) => (x.querySelector('[data-pa4="qline"]')?.textContent ?? "").startsWith(word)); r?.click(); return !!r; }, w);
     if (!ok) throw new Error(`no ${w} query in the list`);
     await p.locator('[data-pa3="layer"]').first().waitFor(); await settle(p, 900);
   }]),
@@ -419,9 +423,11 @@ const SCREENS: Screen[] = [
   ["search", async (p) => { await go(p, "/dashboard"); await press(p, '[data-pa5="today-hd"] [data-pa4="search"]'); }],
   ["the full Birds-eye view", async (p) => { await go(p, "/queries/all?view=birds"); }],
   ["the gaps sheet", async (p) => { await go(p, "/dashboard"); await press(p, '[data-pa5="tab"][data-tab="agents"]'); await press(p, '[data-pa5="fill-gaps"]'); }],
-  ["Settings", async (p) => { await go(p, "/settings"); }],
-  ["set-up · the fork", async (p) => { await go(p, "/#/onb-lab?s=fork"); }],
-  ["set-up · sign-in", async (p) => { await go(p, "/#/onb-lab?s=signin"); }],
+  ["Settings", async (p) => { await go(p, "/account"); }],
+  ["Settings · a section", async (p) => { await go(p, "/account"); await p.evaluate(() => { const b = [...document.querySelectorAll<HTMLElement>("a[href], button")].find((x) => x.getClientRects().length && /^(Profile|Your details|Account|Notifications)/.test((x.textContent ?? "").trim())); b?.click(); }); await p.waitForTimeout(1200); }],
+  ["set-up · a set-up step", async (p) => { await go(p, "/#/onb-lab?s=frame&form=setup&flow=B&at=list&ms=1"); }],
+  ["account · sign-in", async (p) => { await go(p, "/#/onb-lab?s=frame&form=account&mode=signin"); }],
+  ["account · sign-up", async (p) => { await go(p, "/#/onb-lab?s=frame&form=account&mode=signup"); }],
 ];
 const PUBLIC: [string, string][] = [["the phone landing", "/"], ["pricing", "/pricing"]];
 
@@ -437,20 +443,33 @@ async function pressed(page: Page): Promise<{ n: number; none: string[] }> {
   const look = (i: number) => page.evaluate((k) => { const e = document.querySelector<HTMLElement>(`[data-ps-press="${k}"]`); if (!e) return ""; const cs = getComputedStyle(e); return [cs.backgroundColor, cs.transform, cs.opacity, cs.filter, cs.boxShadow, cs.color].join("|"); }, i);
   const none: string[] = [];
   let n = 0;
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send("DOM.enable"); await cdp.send("CSS.enable");
   for (const b of boxes.filter((x) => x.inView)) {
     const before = await look(b.i);
-    await page.mouse.move(b.x, b.y); await page.mouse.down(); await page.waitForTimeout(100);
+    /* the pressed state, forced (DevTools' :active): a synthetic touch or mouse press did not raise :active in this
+       emulation even on Today's rows, whose pressed state is known (the calibration), so it is forced here. What this
+       cannot see: a press drawn by script on pointerdown (To do's card) — named in the report as not covered. */
+    const { root } = await cdp.send("DOM.getDocument", { depth: 0 });
+    const { nodeId } = await cdp.send("DOM.querySelector", { nodeId: root.nodeId, selector: `[data-ps-press="${b.i}"]` });
+    if (!nodeId) continue;
+    await cdp.send("CSS.forcePseudoState", { nodeId, forcedPseudoClasses: ["active"] }); await page.waitForTimeout(60);
     const during = await look(b.i);
-    await page.mouse.move(b.x, b.y + 2000); await page.mouse.up(); await page.waitForTimeout(150);
+    await cdp.send("CSS.forcePseudoState", { nodeId, forcedPseudoClasses: [] });
     n++; if (before === during) none.push(b.label);
   }
+  await cdp.detach();
   return { n, none };
 }
 /** P22: every icon — its box and its stroke */
 async function icons(page: Page) {
   return page.evaluate(() => {
     const v = (window as unknown as { __v: (s: string) => HTMLElement[] }).__v;
-    return v("svg").filter((s) => !s.closest('.pa-disc, .ps-disc, [data-pa5="mini-track"], .pa5-ch, .sd, [data-status-dot], [data-pa5="dock"]') && s.getBoundingClientRect().width <= 40 && s.getBoundingClientRect().width > 0)
+    /* a status mark is not an icon (P22: status is drawn only by the marks): StatusDot is a span[role=img] named for
+       the status around its svg; V3Glyph and the seal's badge carry their own classes */
+    const STATUS = /^(Queried|Partial|Full|Offer|Revise|Rejected|Withdrawn|No Response|Resubmitted|Signed|Closed|Not queried)/i;
+    const isMark = (s: Element) => !!s.closest('.pa-disc, .ps-disc, .pa3-gl, .pa4-seal, [data-pa5="mini-track"], .pa5-ch, [data-pa5="dock"]') || [s.parentElement, s.parentElement?.parentElement].some((a) => !!a && a.getAttribute("role") === "img" && STATUS.test(a.getAttribute("aria-label") ?? ""));
+    return v("svg").filter((s) => !isMark(s) && s.getBoundingClientRect().width <= 40 && s.getBoundingClientRect().width > 0)
       .map((s) => { const b = s.getBoundingClientRect(); const p = s.querySelector("path, circle, line, rect, polyline") ?? s; const cs = getComputedStyle(p); return { box: `${Math.round(b.width)}×${Math.round(b.height)}`, stroke: cs.stroke === "none" ? "fill" : cs.strokeWidth, cap: cs.strokeLinecap, where: String((s.parentElement?.className as unknown) ?? "").split(" ")[0] }; });
   });
 }
@@ -462,7 +481,8 @@ async function load(page: Page, path: string) {
   await cdp.send("Emulation.setCPUThrottlingRate", { rate: 4 });
   await page.addInitScript(() => { const w = window as unknown as { __cls: number; __spin: number }; w.__cls = 0; w.__spin = 0;
     try { new PerformanceObserver((l) => { for (const e of l.getEntries() as unknown as { value: number; hadRecentInput: boolean }[]) if (!e.hadRecentInput) w.__cls += e.value; }).observe({ type: "layout-shift", buffered: true }); } catch { /* none */ }
-    const t = setInterval(() => { if (document.querySelector('[role="progressbar"], [class*="spin"], [class*="Spin"], [aria-busy="true"]')) w.__spin++; }, 100); setTimeout(() => clearInterval(t), 15_000); });
+    /* a spinner: something visible turning (an animation named for spinning or rotating) or a progressbar */
+    const t = setInterval(() => { const on = [...document.querySelectorAll<HTMLElement>("body *")].some((e) => e.getClientRects().length > 0 && (e.getAttribute("role") === "progressbar" || /spin|rotat/i.test(getComputedStyle(e).animationName))); if (on) w.__spin++; }, 100); setTimeout(() => clearInterval(t), 15_000); });
   await page.goto(path); await page.waitForTimeout(9000);
   const r = await page.evaluate(() => { const w = window as unknown as { __cls: number; __spin: number }; return { cls: Math.round(w.__cls * 1000) / 1000, spinnerTicks: w.__spin }; });
   await cdp.send("Network.emulateNetworkConditions", { offline: false, latency: 0, downloadThroughput: -1, uploadThroughput: -1 });
@@ -478,7 +498,10 @@ async function legacyPixels(page: Page) {
     const loc = page.locator(`[data-ps-legacy="${s}"]`).first();
     await loc.scrollIntoViewIfNeeded().catch(() => {});
     const box = await loc.boundingBox(); if (!box || box.width < 6 || box.height < 6) continue;
-    const clip = { x: box.x + 2, y: box.y + 2, width: box.width - 4, height: box.height - 4 };
+    /* inside the element: clear of its rounded corners, where the page behind shows through and is meant to change */
+    /* (its own corners or a parent card's: 24 clears the largest phone corner, P19) */
+    const rad = Math.min(box.width / 2 - 1, 24);
+    const clip = { x: box.x + rad, y: box.y + 2, width: Math.max(2, box.width - 2 * rad), height: box.height - 4 };
     const cdp = s.includes("pa3-row") ? await page.context().newCDPSession(page) : null;
     if (cdp) { const { root } = await cdp.send("DOM.getDocument"); const { nodeId } = await cdp.send("DOM.querySelector", { nodeId: root.nodeId, selector: `[data-ps-legacy="${s}"]` }); await cdp.send("CSS.enable"); await cdp.send("CSS.forcePseudoState", { nodeId, forcedPseudoClasses: ["active"] }); }
     const a = await page.screenshot({ clip });
@@ -488,6 +511,7 @@ async function legacyPixels(page: Page) {
     await page.evaluate((id) => document.getElementById(id)?.remove(), tagId);
     const bg = await loc.evaluate((e) => getComputedStyle(e).backgroundColor);
     if (cdp) await cdp.detach();
+    if (!a.equals(b)) { const k = s.replace(/[^a-z0-9]+/gi, "-"); writeFileSync(resolve(DIR, "audit", `legacy${k}-new.png`), a); writeFileSync(resolve(DIR, "audit", `legacy${k}-old.png`), b); }
     out.push({ sel: s, same: a.equals(b), bg });
   }
   return out;
@@ -524,19 +548,46 @@ test.describe("PS1R audit", () => {
       const slug = name.replace(/[^a-z0-9]+/gi, "-").toLowerCase();
       try { await open(page); }
       catch (e) { report[name] = { failed: String(e).slice(0, 200) }; L.check("PS1R", `${name}: reached`, false, String(e).slice(0, 160)); continue; }
-      const r = await probe(page, ["body"]);
+      /* an open overlay covers the page under it: read the overlay alone */
+      const roots = await page.evaluate(() => {
+        const o = [...document.querySelectorAll<HTMLElement>('[data-pa3="layer"] > *, [role="dialog"][aria-modal="true"]')].filter((e) => e.getClientRects().length && e.getBoundingClientRect().height > 200);
+        o.forEach((e, i) => e.setAttribute("data-ps-root", String(i)));
+        return o.length ? o.map((_, i) => `[data-ps-root="${i}"]`) : ["body"];
+      });
+      const r = await probe(page, roots);
       const legacy = await legacyPixels(page);
       const fol = await followers(page);
       const ic = await icons(page);
       await page.screenshot({ path: resolve(DIR, "audit", `${slug}.png`) });
       const pr = await pressed(page);
-      report[name] = { rules: Object.fromEntries(PS_RULES.map((k) => [k, r.rules[k]?.length ?? 0])), samples: r.rules, pop: r.pop, pressed: pr, icons: ic, legacy, followers: fol };
+      report[name] = { roots, rules: Object.fromEntries(PS_RULES.map((k) => [k, r.rules[k]?.length ?? 0])), samples: r.rules, pop: r.pop, pressed: pr, icons: ic, legacy, followers: fol };
       L.check("PS1R", `${name}: reached (${r.pop.texts} texts, ${r.pop.taps} taps)`, r.pop.texts > 0, "");
+      /* PSR — the rulings, hard: 1a every fade's opaque end and every ring on the page equal the page; 1b every legacy
+         reader on show is pixel-identical inside itself with the page at either colour */
+      for (const x of fol) if (!x.onCard) L.check("PSR-1a", `${name}: ${x.what} = the page`, x.got === x.page, `${x.got} vs ${x.page}`);
+      for (const x of legacy) L.check("PSR-1b", `${name}: ${x.sel} unchanged inside (pixels)`, x.same, x.bg);
     }
     /* loads: a throttled reload of each root */
     const loads: Record<string, unknown> = {};
     for (const p of ["/dashboard", "/todo", "/materials", "/you", "/queries/all?view=list"]) loads[p] = await load(page, p);
     report["(loads)"] = loads;
+    /* ruling 1b, for every reader: its own class chain built inside a phone layer, its background read with the page
+       at the new oat and at the old #f8f6f2 (the pixel proof above covers the readers a screen showed) */
+    report["(legacy, by class chain)"] = await page.evaluate((sels) => sels.map((sel) => {
+      const host = document.createElement("div"); host.className = "pa-layer"; document.body.appendChild(host);
+      let parent: HTMLElement = host, leaf: HTMLElement = host;
+      for (const part of sel.split(" ")) { const [cls, ...pseudo] = part.split(":"); const e = document.createElement("div"); e.className = cls.split(".").filter(Boolean).join(" "); parent.appendChild(e); parent = e; leaf = e; void pseudo; }
+      /* the pressed row reads the holding value only while pressed: at rest it is transparent in both states, and its
+         pressed pixels are read on a screen that shows it (forced :active) */
+      const active = sel.includes(":active");
+      const read = () => getComputedStyle(leaf).backgroundColor;
+      const a = active ? "(pressed state: read by pixels only)" : read();
+      const st = document.createElement("style"); st.textContent = ":is(.sa-shellframe,.pa-layer){--pa-page:#f8f6f2 !important}"; document.head.appendChild(st);
+      const b = active ? a : read();
+      st.remove(); host.remove();
+      return { sel, newPage: a, oldPage: b, same: a === b };
+    }), LEGACY);
+    for (const x of report["(legacy, by class chain)"] as { sel: string; same: boolean; newPage: string }[]) L.check("PSR-1b", `${x.sel}: its background unchanged by the page (class chain)`, x.same && (x.sel === ".pa3 .pa3-row" || x.newPage === "rgb(248, 246, 242)"), x.newPage);
     /* the public pages, as a stranger */
     const ctx = await browser.newContext({ viewport: PHONES[0], isMobile: true, hasTouch: true, storageState: { cookies: [], origins: [] } });
     const pub = await ctx.newPage();
@@ -552,7 +603,7 @@ test.describe("PS1R audit", () => {
     await ctx.close();
     writeFileSync(resolve(DIR, "audit.json"), JSON.stringify(report, null, 1));
     L.write();
-    /* report mode: only a screen the probe could not reach fails */
+    /* report mode: only a screen the probe could not reach fails — and the rulings (PSR), which are locks */
     expect(L.red().map((x) => `${x.what}: ${x.got}`)).toEqual([]);
   });
 });

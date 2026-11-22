@@ -1,0 +1,662 @@
+[
+ {
+  "id": "PS1",
+  "what": "390x844 · top: population (111 texts, 3 cards, 43 taps, 31 rows)",
+  "ok": true,
+  "got": "{\"texts\":111,\"cards\":3,\"taps\":43,\"rows\":31}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · top",
+  "ok": false,
+  "got": "span. \"Nearest their date\" 15px | h2.ps-hdg \"Your move 24\" 15px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · scrolled: population (112 texts, 3 cards, 46 taps, 31 rows)",
+  "ok": true,
+  "got": "{\"texts\":112,\"cards\":3,\"taps\":46,\"rows\":31}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · scrolled",
+  "ok": false,
+  "got": "span. \"Nearest their date\" 15px | h2.ps-hdg \"Your move 24\" 15px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · offer: population (112 texts, 3 cards, 46 taps, 31 rows)",
+  "ok": true,
+  "got": "{\"texts\":112,\"cards\":3,\"taps\":46,\"rows\":31}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · offer",
+  "ok": false,
+  "got": "span. \"Nearest their date\" 15px | h2.ps-hdg \"Your move 24\" 15px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · ordinary: population (106 texts, 3 cards, 44 taps, 29 rows)",
+  "ok": true,
+  "got": "{\"texts\":106,\"cards\":3,\"taps\":44,\"rows\":29}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · ordinary",
+  "ok": false,
+  "got": "span. \"Nearest their date\" 15px | h2.ps-hdg \"Your move 22\" 15px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · one-query: population (36 texts, 2 cards, 13 taps, 1 rows)",
+  "ok": true,
+  "got": "{\"texts\":36,\"cards\":2,\"taps\":13,\"rows\":1}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · one-query",
+  "ok": false,
+  "got": "span. \"Nearest their date\" 15px | h2.ps-hdg \"Your move 1\" 15px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · top: population (111 texts, 3 cards, 43 taps, 31 rows)",
+  "ok": true,
+  "got": "{\"texts\":111,\"cards\":3,\"taps\":43,\"rows\":31}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · top",
+  "ok": false,
+  "got": "span. \"Nearest their date\" 15px | h2.ps-hdg \"Your move 24\" 15px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · scrolled: population (112 texts, 3 cards, 46 taps, 31 rows)",
+  "ok": true,
+  "got": "{\"texts\":112,\"cards\":3,\"taps\":46,\"rows\":31}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · scrolled",
+  "ok": false,
+  "got": "span. \"Nearest their date\" 15px | h2.ps-hdg \"Your move 24\" 15px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · offer: population (112 texts, 3 cards, 46 taps, 31 rows)",
+  "ok": true,
+  "got": "{\"texts\":112,\"cards\":3,\"taps\":46,\"rows\":31}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · offer",
+  "ok": false,
+  "got": "span. \"Nearest their date\" 15px | h2.ps-hdg \"Your move 24\" 15px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · offer",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · ordinary: population (106 texts, 3 cards, 44 taps, 29 rows)",
+  "ok": true,
+  "got": "{\"texts\":106,\"cards\":3,\"taps\":44,\"rows\":29}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · ordinary",
+  "ok": false,
+  "got": "span. \"Nearest their date\" 15px | h2.ps-hdg \"Your move 22\" 15px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · ordinary",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · one-query: population (36 texts, 2 cards, 13 taps, 1 rows)",
+  "ok": true,
+  "got": "{\"texts\":36,\"cards\":2,\"taps\":13,\"rows\":1}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · one-query",
+  "ok": false,
+  "got": "span. \"Nearest their date\" 15px | h2.ps-hdg \"Your move 1\" 15px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · one-query",
+  "ok": true,
+  "got": ""
+ }
+]
