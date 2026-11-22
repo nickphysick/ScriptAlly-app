@@ -110,8 +110,9 @@ describe("one count on the page, and the badge says what it counts", () => {
     expect(w).toContain("const seq = useMemo(() => sections.flatMap((s) => s.tasks), [sections]);");
     expect(w).toContain("<WsTrayHead55 tab={tab} onTab={(t) => { setTab(t); setMenuState(false); }} todo={all.length}");
     /* v56 re-pointed: the header is WsHeader56 (the navy panel), still counting every task */
-    /* RE-POINTED (overnight fixes v1, Part 2): null — a blank count — only while a read is down */
-    expect(w).toContain("<WsHeader56 todo={loadFail ? null : all.length}");
+    /* RE-POINTED (overnight fixes v1, Part 2): null — a blank count — only while a read is down;
+       (To-do load v1, B1) or while the tasks are not yet in */
+    expect(w).toContain("<WsHeader56 todo={readFailed || !tasksIn ? null : all.length}");
     expect(w).toMatch(/<b>\{seqPos \+ 1\}<\/b>\/\{seq\.length\}/);
     expect(w, "the tab no longer reads the board's card count").not.toContain("boardFigures(");
   });

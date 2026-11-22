@@ -273,6 +273,14 @@ interface DbContextType {
   entitlement: Entitlement;
   authReady: boolean;
   collectionsReady: boolean;
+  /** ADDITIVE (To-do load v1, Phase B1): the To-do list's own "loaded" — true once the task list has been computed with
+   *  every read it is computed from in hand (manuscripts, agents and queries — `collectionsReady` — plus the activity
+   *  feed, the writer's own tasks and the task flags). `collectionsReady` can be true a render before the tasks exist
+   *  (they are computed in an effect from those collections), and own tasks and flags were never part of it.
+   *  Optional so test contexts need not carry it: absent, a page reads `collectionsReady` as before. */
+  tasksReady?: boolean;
+  /** ADDITIVE (To-do load v1): the own-tasks or task-flags listener errored (Firestore ends a listener on its error) */
+  tasksReadFailed?: boolean;
   /** ADDITIVE (Contact list principles v1): how the agents listener stands — "failed" once it errored (the listener is
    *  dead: Firestore ends a listener on its error), "retrying" while `retryAgents` waits for its first loaded snapshot.
    *  Optional so the page sandboxes and test contexts need not carry it (absent reads as "ok"). */
@@ -642,6 +650,11 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   //                  delivered their first snapshot. Lets the dashboard tell "loading" from "empty".
   const [authReady, setAuthReady] = useState<boolean>(false);
   const [collectionsReady, setCollectionsReady] = useState<boolean>(false);
+  /* To-do load v1 (B1): the two task reads `collectionsReady` never covered, and the computed list's own readiness */
+  const [userTasksReady, setUserTasksReady] = useState<boolean>(false);
+  const [taskFlagsReady, setTaskFlagsReady] = useState<boolean>(false);
+  const [tasksReady, setTasksReady] = useState<boolean>(false);
+  const [tasksReadFailed, setTasksReadFailed] = useState<boolean>(false);
   const [agentsRead, setAgentsRead] = useState<"ok" | "failed" | "retrying">("ok");
   /* the agents listener's own (re)subscribe, set by the auth effect for the signed-in user; null when signed out */
   const resubAgentsRef = useRef<(() => void) | null>(null);
@@ -710,6 +723,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         setAccountCreatedMs(null);
         setAuthReady(true);          // auth resolved: definitively logged out
         setCollectionsReady(false);  // next sign-in starts in the loading state
+        setUserTasksReady(false); setTaskFlagsReady(false); setTasksReady(false); setTasksReadFailed(false);
         setAgentsRead("ok");
         resubAgentsRef.current = null;
         setQueriesRead("ok"); setManuscriptsRead("ok");
@@ -743,6 +757,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       // tell "still loading" from "genuinely empty" (kills the empty-state flicker on boot).
       setCollectionsReady(false);
       setActivitiesReady(false);
+      setUserTasksReady(false); setTaskFlagsReady(false); setTasksReady(false); setTasksReadFailed(false);
       let mLoaded = false, aLoaded = false, qLoaded = false;
       const markCollectionsLoaded = () => {
         if (mLoaded && aLoaded && qLoaded) setCollectionsReady(true);
@@ -770,6 +785,7 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         mLoaded = aLoaded = qLoaded = true;
         markCollectionsLoaded();
         setActivitiesReady(true);
+        setUserTasksReady(true); setTaskFlagsReady(true);
       }, 6000);
       readinessNetRef.current = readinessNet;
 
@@ -985,7 +1001,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: UserTask[] = [];
           snap.forEach(d => arr.push(d.data() as UserTask));
           setUserTasks(arr);
+          if (snapshotIsLoaded(snap)) setUserTasksReady(true);
         }, (error) => {
+          setUserTasksReady(true); setTasksReadFailed(true); /* To-do load v1: a dead listener is a failed load, never an empty list */
           handleFirestoreError(error, OperationType.GET, `users/${uid}/tasks`);
         });
 
@@ -1003,7 +1021,9 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
           const arr: TaskFlag[] = [];
           snap.forEach(d => arr.push(d.data() as TaskFlag));
           setTaskFlags(arr);
+          if (snapshotIsLoaded(snap)) setTaskFlagsReady(true);
         }, (error) => {
+          setTaskFlagsReady(true); setTasksReadFailed(true); /* To-do load v1 */
           handleFirestoreError(error, OperationType.GET, `users/${uid}/taskFlags`);
         });
 
@@ -1437,11 +1457,14 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     });
 
     setTasks(activeTasks);
+    /* To-do load v1 (B1) — ⚠️ SET HERE, IN THE SAME EFFECT AS `setTasks`, so the two commit together: "ready" can never
+       be true over a list computed without every read it needs, nor a render before the list exists. */
+    setTasksReady(collectionsReady && activitiesReady && userTasksReady && taskFlagsReady);
     /* ⚠️ `userTasks` IS A DEPENDENCY SINCE §3 — the close suggestion is suppressed by a scheduled
        reminder, so completing or deleting that reminder has to re-run this. Without it the
        suggestion would reappear only on the next unrelated change, which is the shape of a bug
        nobody can reproduce. */
-  }, [queries, manuscripts, agents, taskFlags, activities, currentUser, userTasks]);
+  }, [queries, manuscripts, agents, taskFlags, activities, currentUser, userTasks, collectionsReady, activitiesReady, userTasksReady, taskFlagsReady]);
 
   /**
    * ══ §1 (provenance pack) · THE ONE-TIME EXPECTED-DATE MIGRATION ═════════════════════════════
@@ -4141,6 +4164,8 @@ export const DbProvider: React.FC<{ children: React.ReactNode }> = ({ children }
         entitlement,
         authReady,
         collectionsReady,
+        tasksReady,
+        tasksReadFailed,
         agentsRead,
         retryAgents,
         queriesRead,

@@ -91,7 +91,9 @@ describe("each page draws the error before its day-one or empty state (source)",
     expect(src("src/components/Dashboard.tsx")).toContain("loadFailure={loadFailure}");
     const td = src("src/components/todo/ws/TodoWorkspace.tsx");
     expect(td).toContain("{loadFail ? <LoadFailed words={loadFail.words}");
-    expect(td).toContain("<WsHeader56 todo={loadFail ? null : all.length}");
+    /* RE-POINTED (To-do load v1, B1): the count is blank while a read is down OR the tasks are not yet in */
+    expect(td).toContain("<WsHeader56 todo={readFailed || !tasksIn ? null : all.length}");
+    expect(td).toContain("const readFailed = !!loadFail || !!tasksReadFailed;");
     expect(src("src/components/QueryAnalytics.tsx")).toMatch(/if \(anFail\) \{\n\s+body = <LoadFailed/);
     expect(src("src/components/import/ImportPage.tsx")).toContain("if (importFail && !inFlow) {");
   });

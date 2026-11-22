@@ -104,12 +104,17 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   const location = useLocation();
   const db = useScriptAllyDb();
   const {
-    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, currentUser, collectionsReady,
+    tasks, userTasks, queries, agents, manuscripts, taskFlags, activities, packages, currentUser, collectionsReady, tasksReady, tasksReadFailed,
     addUserTask, updateUserTask, deleteUserTask, restoreUserTask, upsertTaskFlag, dismissTask, restoreTaskFlag, updateUserProfile, updateUserPaths,
   } = db;
 
   /* overnight fixes v1, Part 2 — non-null while a read this page draws from is down (lib/loadFailure) */
   const loadFail = useLoadFailure();
+  /* To-do load v1 (B1) — THE PAGE'S ONE ANSWER TO "HAVE THE TASKS LOADED?": the store's `tasksReady` (the list computed
+     with every read it needs), or `collectionsReady` where a context predates it. Every empty state below, the page
+     header's numbers and the arrival keys read it; nothing here decides "no tasks" from an empty array alone. */
+  const tasksIn = tasksReady ?? collectionsReady;
+  const readFailed = !!loadFail || !!tasksReadFailed;
   /* the clock, re-read each minute */
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const id = window.setInterval(() => setNow(Date.now()), 60000); return () => window.clearInterval(id); }, []);
@@ -203,13 +208,13 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   /* arrival: the Corkboard's "open this task", and "+ New task" from elsewhere */
   useEffect(() => {
     /* read once the board is in: the key is one-shot, so reading it before the tasks arrive would lose the task */
-    if (location.pathname !== "/todo" || !collectionsReady) return;
+    if (location.pathname !== "/todo" || !tasksIn) return;
     let id: string | null = null, compose: string | null = null;
     try { id = sessionStorage.getItem(TODO_OPEN_TASK_KEY); compose = sessionStorage.getItem("sa.todoCompose"); } catch { /* private mode */ }
     try { sessionStorage.removeItem(TODO_OPEN_TASK_KEY); sessionStorage.removeItem("sa.todoCompose"); } catch { /* private mode */ }
     if (id) { const t = all.find((x) => x.userTask?.id === id || x.key === id); if (t) go(t.key); }
     if (compose) { setMile(null); setAdding(true); }
-  }, [location.pathname, collectionsReady]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.pathname, tasksIn]); // eslint-disable-line react-hooks/exhaustive-deps
   /* the shell's "+ Task" while already on /todo: an event, not the one-shot key (AppShell, TODO_OPEN_COMPOSER) */
   useEffect(() => {
     const on = () => { setMile(null); setAdding(true); };
@@ -517,6 +522,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   })();
 
   const trayBody = (() => {
+    /* B1: nothing in the tray says "nothing" until the tasks are in */
+    if (!tasksIn || readFailed) return null;
     if (tab === "snoozed") {
       const byDay = new Map<string, SetAsideItem[]>();
       for (const a of [...snoozed].sort((x, y) => (x.until ?? "").localeCompare(y.until ?? ""))) {
@@ -570,6 +577,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   })();
   /* ── render: the desk ── */
   const desk = (() => {
+    /* B1: nor does the desk — no "Nothing to do yet", no "You're all caught up." before the tasks are in */
+    if (!tasksIn || readFailed) return null;
     if (adding) return <AddTask today={today} onCancel={() => setAdding(false)} onAdd={async (text, due, detail) => {
       /* the desk goes back at once; the new task is opened when it lands, unless another has been picked meanwhile
          (the write resolves when the server answers, which can be after the writer has moved on) */
@@ -828,7 +837,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
           {/* v56: the page header is the Query Centre's navy panel — the hawk at the desk, "{n} things to do", "for {book}"
               between rules (one book only), "+ Add a task" and "Quick fill", the ring and "What needs doing". A segment
               settles the page on the pinned workspace, then scrolls the tray to its group. */}
-          <WsHeader56 todo={loadFail ? null : all.length} bd={bd} book={statBook}
+          <WsHeader56 todo={readFailed || !tasksIn ? null : all.length} bd={bd} book={statBook}
             onAdd={openAdd}
             onQuickFill={all.some((x) => x.key === "materials-batch") ? () => quickFill() : null}
             onJump={(k) => { settle(); jump(k); }} />
