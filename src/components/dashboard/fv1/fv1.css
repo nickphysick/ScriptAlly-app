@@ -51,7 +51,7 @@
   border-radius: 14px; background: #f7f4ef;
 }
 .d58 .fv1-pt { flex: 1 1 auto; min-width: 0; align-self: flex-start; }
-.d58 .fv1-path .fv1-ph { margin: 0; font: 400 21px/1.2 var(--d58-type) !important; color: var(--d58-ink); letter-spacing: 0; }
+.d58 .fv1-path .fv1-ph { margin: 0; font: var(--sp-h-small) !important; color: var(--d58-ink); letter-spacing: 0; }
 .d58 .fv1-pp { margin: 6px 0 0; font: 400 var(--sp-body-size)/1.5 var(--d58-serif) !important; color: var(--sp-muted); }
 .d58 .fv1-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 14px; }
 .d58 .fv1-btn {
