@@ -41,7 +41,8 @@ import "./qcv152inplace.css";
 import "./sc1card.css";
 /* Query card v158 — the Agent, Materials and Notes tab bodies */
 import "./qcv158.css";
-import { AgentTab158 } from "./QcAgent158";
+import { AgentTab158, type ProfileKey } from "./QcAgent158";
+import { ProfileDrawer, journeyName167, type ProfileIn, type ProfilePatch } from "./QcProfile167";
 import { MaterialsTab158 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
 /* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
@@ -136,6 +137,12 @@ export interface QcCard152Props {
   backTo?: { label: string; onBack: () => void } | null;
   /** Query card v160 — a save has started, or Undo was pressed (a new `n` each time): the card moves when it lands */
   motion?: Motion160 | null;
+  /** Query card v167 §C — the agent's profile as stored (the card adds the seal's initials), and its one save (the agent
+   *  card's path; true when it landed). Absent: a tile opens the agent's card at that detail, as before. */
+  profile?: Omit<ProfileIn, "initials"> | null;
+  onSaveProfile?: (patch: ProfilePatch) => Promise<boolean>;
+  /** v167 §C step 3 — the asks drawer's body (QcAsks167), drawn by the host that knows the book */
+  asksBody?: (prof: ProfileIn, set: (p: ProfilePatch | null) => void) => React.ReactNode;
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
@@ -228,6 +235,44 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   /* v1.1 — the edit layer: the pencil, or a double-click on a value, enters it; Esc closes a menu, then asks */
   const ed = useEditLayer(p.editData, p.onSaveEdits, r.id);
   const inRef = useRef<HTMLDivElement>(null);
+  /* ══ v167 §C/§D — THE PROFILE DRAWER: in the composer's slot; a journey already open waits under it, still mounted
+     (hidden), so every answer and its step stay as they were. Saving, going back or Esc returns to it, focus on the
+     control it left. */
+  const [prof, setProf] = useState<{ k: ProfileKey; journey: string | null; back: HTMLElement | null } | null>(null);
+  const [profBusy, setProfBusy] = useState(false);
+  const [just, setJust] = useState<{ k: ProfileKey; n: number } | null>(null);
+  const jFocus = useRef<HTMLElement | null>(null);
+  useEffect(() => { setProf(null); setJust(null); jFocus.current = null; }, [r.id]);
+  /* the journey's last focused control, remembered as the writer moves through it */
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
+    const on = (e: FocusEvent) => { const t = e.target as HTMLElement; if (t.closest?.("[data-qc1522='composer']")) jFocus.current = t; };
+    root.addEventListener("focusin", on);
+    return () => root.removeEventListener("focusin", on);
+  }, []);
+  const profileIn: ProfileIn | null = p.profile ? { ...p.profile, initials: r.initials } : null;
+  const openProf = (k: ProfileKey) => {
+    const cp = rootRef.current?.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc1522='composer']");
+    setProf({ k, journey: cp ? journeyName167(cp.dataset.j ?? "") : null, back: document.activeElement as HTMLElement | null });
+  };
+  const closeProf = () => {
+    const was = prof;
+    setProf(null);
+    window.requestAnimationFrame(() => {
+      const cp = rootRef.current?.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc1522='composer']");
+      const to = cp ? (jFocus.current && cp.contains(jFocus.current) ? jFocus.current : cp.querySelector<HTMLElement>("button, input, textarea")) : was?.back;
+      if (to && to.isConnected) to.focus({ preventScroll: true });
+    });
+  };
+  const saveProf = async (patch: ProfilePatch) => {
+    if (!prof || !p.onSaveProfile || profBusy) return;
+    const k = prof.k;
+    setProfBusy(true);
+    let ok = false;
+    try { ok = await p.onSaveProfile(patch); } finally { setProfBusy(false); }
+    if (ok) { setJust({ k, n: Date.now() }); closeProf(); }
+  };
   useEscapeLayer(ed.on, () => {
     if (ed.open) ed.setOpen(null);
     else if (ed.leave) ed.keep();
@@ -535,8 +580,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const agentPane = (
     <AgentTab158 first={first} initials={r.initials} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
       sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} asks={ask} hasAsks={d.asks.length > 0}
-      onOpen={ed.on ? null : (k) => p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials")}
-      onFullCard={() => p.onAgentField(null)} />
+      onOpen={ed.on ? null : (k) => (profileIn && p.onSaveProfile ? openProf(k) : p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials"))}
+      onFullCard={() => p.onAgentField(null)} editing={prof?.k ?? null} just={just} />
   );
 
   /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). "Edit what went" opens
@@ -553,7 +598,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   return (
     <PopCtx.Provider value={pop}>
     <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view} data-qc163-stage={stage}
-      data-lean={view === "read" && !jOpen && !ed.on ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
+      data-lean={view === "read" && !jOpen && !ed.on && !prof ? undefined : "flat"} data-qc167-prof={prof ? prof.k : undefined} data-qc167-jc={p.composer ? "" : undefined} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
       data-stage={stage} data-quiet={quiet ? "" : undefined} data-qc164="" style={stageVars}>
       <div ref={inRef} className="qc152-in">
         {ed.on ? (
@@ -610,8 +655,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         <div ref={bodyRef} className="qc152-body" data-qc152="body" role="tabpanel">
           {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{ed.on && ed.dr && p.editData ? <NotesEditPane layer={ed} data={p.editData} /> : p.notes}</div>}
         </div>
+        {!ed.on && prof && profileIn ? (
+          <ProfileDrawer key={`${r.id}:${prof.k}`} k={prof.k} prof={profileIn} journey={prof.journey} busy={profBusy} onBack={closeProf} onSave={(x) => void saveProf(x)}
+            asks={p.asksBody ? (set) => p.asksBody!(profileIn, set) : undefined} />
+        ) : null}
         {ed.on ? <SaveBar keys={ed.keys} nudge={ed.nudge} busy={ed.busy} onCancel={() => ed.ask()} onSave={() => void ed.save()} />
-          : p.composer ? p.composer : d.foot ? (() => {
+          : p.composer ? p.composer : prof ? null : d.foot ? (() => {
           /* v152.2 §3.2 — the footer: two lines, the button, and the quieter link. v158.1: with more than one action it is
              two rows (Foot, below) */
           const ft = footer1522({ ...d.foot, state: d.state, status: r.status, first, nowMs });

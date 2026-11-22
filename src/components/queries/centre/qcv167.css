@@ -66,3 +66,43 @@
   .qc152 .qc167-g, .qc152 .qc167-ga, .qc152 [data-qc167-ed], .qc152 .qc167-gso, .qc152 .qc167-gsw .nx-tick, .qc152 .qc167-gsw .qc167-g, .qc152 .nx-box.qc167-tile .qc167-pn { transition: none; }
   .qc152 .qc167-fin { animation: none; }
 }
+
+/* ── §C the profile drawers ──────────────────────────────────────────────────────────────────────────────────── */
+/* a journey open when a profile drawer opened waits under it, mounted and hidden (its answers and step kept) */
+.qc152[data-qc167-prof] .qc152-in > [data-qc1522="composer"] { display: none; }
+.qc152 .qc167-pf { flex: none; display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #f3efe8; border-bottom: 1px solid #e6ddd0; }
+.qc152 .qc167-pf b { display: block; font: 600 14.5px/1.25 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc167-pf i { display: block; font: italic 400 13px/1.3 var(--sp-serif) !important; color: #6f655c; }
+.qc152 .qc167-cp .qc1522-cb { min-height: 150px; }
+.qc152 .qc167-cp .sa-wk-slider { width: 100%; }
+.qc152 .qc167-cp .qc1522-btn.nv svg { margin-left: 6px; }
+/* "No reply means no" */
+.qc152 .qc167-rem {
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 12px; padding: 11px 12px;
+  border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px #e6ddd0; transition: box-shadow 0.18s ease;
+}
+.qc152 .qc167-rem:hover, .qc152 .qc167-rem:focus-visible { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .qc167-rem .t { flex: 1; display: flex; flex-direction: column; }
+.qc152 .qc167-rem b { font: 600 14.5px/1.2 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc167-rem i { font: italic 400 13px/1.3 var(--sp-serif) !important; color: #6f655c; }
+.qc152 .qc167-tog { position: relative; flex: none; width: 38px; height: 22px; border-radius: 11px; background: #d5ccbf; transition: background-color 0.15s; }
+.qc152 .qc167-tog::after { content: ""; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: translate 0.15s; }
+.qc152 .qc167-rem.on .qc167-tog { background: #2a3a52; }
+.qc152 .qc167-rem.on .qc167-tog::after { translate: 16px 0; }
+/* choice tiles: the methods, and the asks drawer's two plain ticks */
+.qc152 .qc167-mt { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.qc152 .qc167-pk {
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 7px 12px;
+  border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #e6ddd0; transition: box-shadow 0.18s ease;
+}
+.qc152 .qc167-pk:hover, .qc152 .qc167-pk:focus-visible, .qc152 .qc167-pk.on { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .qc167-pk .t { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.qc152 .qc167-pk b { font: 600 15px/1.2 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc167-pk i { font: italic 400 13px/1.3 var(--sp-serif) !important; color: #6f655c; }
+.qc152 .qc167-pk .k, .qc152 .qc167-xt .xh .k {
+  flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px #cfc5b8; color: transparent; transition: background-color 0.18s ease;
+}
+.qc152 .qc167-pk.on .k, .qc152 .qc167-xt.on .xh .k { background: #2a3a52; box-shadow: none; color: #fff; }
+@media (prefers-reduced-motion: reduce) {
+  .qc152 .qc167-rem, .qc152 .qc167-tog, .qc152 .qc167-tog::after, .qc152 .qc167-pk, .qc152 .qc167-pk .k { transition: none; }
+}

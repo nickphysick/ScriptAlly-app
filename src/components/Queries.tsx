@@ -123,6 +123,7 @@ import { blankSample } from "../lib/queryActions/sample";
 import { dayIso } from "../lib/queryActions/dates";
 import { isLive as qaIsLive, viaLabel } from "./queryActions/journeys/common";
 import { commitCardSave } from "../lib/agentCardSave";
+import { savedToast as profileSavedToast } from "./queries/centre/QcProfile167";
 import { copyText } from "./agents/contact/ContactCells";
 import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import { METHODS as EDIT_METHODS, type AgentDetails } from "./queries/centre/QcCardEdit152";
@@ -6348,6 +6349,40 @@ export const Queries: React.FC<{
           wishlist: a.mswlNotes ?? "", email: a.email ?? "", website: a.website ?? "",
         };
       };
+      /* Query card v167 §C — the agent's profile, edited from the card's own drawers. ONE write: the agent card's save path
+         (commitCardSave: its snapshot, the reply-time deadline fan-out, the data-quality flag), for every query with this
+         agent. Undo restores that snapshot (the house rule: put back what the save changed, never a second write). */
+      if (ag) {
+        card1522.profile = {
+          agentId: ag.id, first,
+          weeks: typeof ag.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0 ? ag.responseTimeWeeks : null,
+          nrmn: typeof ag.noResponseMeansNo === "boolean" ? ag.noResponseMeansNo : null,
+          method: ag.submissionMethod ? String(ag.submissionMethod) : null,
+          methodOther: (ag as { submissionMethodOther?: string | null }).submissionMethodOther ?? null,
+          materialsWanted: (ag.materialsWanted ?? []).map((x) => String(x)).filter(Boolean),
+        };
+        card1522.onSaveProfile = async (x) => {
+          if (qc152Busy) return false;
+          const patch: AgentEditPatch = {};
+          if ("weeks" in x) patch.responseTimeWeeks = x.weeks ?? null;
+          if ("nrmn" in x && typeof x.nrmn === "boolean") patch.noResponseMeansNo = x.nrmn;
+          if ("method" in x && x.method) patch.submissionMethod = x.method;
+          if ("materialsWanted" in x && x.materialsWanted) patch.materialsWanted = x.materialsWanted;
+          if (!Object.keys(patch).length) return false;
+          setQc152Busy(true);
+          try {
+            const out = await commitCardSave({ uid, agent: ag, queries, patch, resolveTaskFlag: scriptDb.resolveTaskFlag });
+            if ("error" in out.res) throw new Error(String(out.res.error));
+            const undo = out.undo;
+            setQc1522Toast({ msg: profileSavedToast(first), undo: undo ? async () => { if (!(await undo())) throw new Error("profile undo refused"); } : null, bump: false });
+            return true;
+          } catch (err) {
+            console.error("[query card] profile save failed", err);
+            showToast({ message: "Couldn't save that to the profile. Nothing was changed." });
+            return false;
+          } finally { setQc152Busy(false); }
+        };
+      }
       card1522.editData = {
         agentId: q.agentId,
         agents: [...agents].map((a) => ({ id: a.id, name: agentPrimary(a), agency: agentAgencyLine(a) || null })).sort((a, b) => a.name.localeCompare(b.name)),
