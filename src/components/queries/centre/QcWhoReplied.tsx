@@ -10,7 +10,7 @@
  *   band     navy, "Record a response", ✕
  *   head     "Who replied?" and the search field ("Find the agent"), focused on open
  *   groups   Waiting to hear back · n (longest wait first), Already with you · n; closed queries ONLY while something
- *            is typed, under "Closed · a late reply reopens it"
+ *            is typed, under "Closed · a reply after closing reopens it"
  *   empty    no match: "No query with “…”." + Log a query to them; nothing live: the day-one state + Log a query
  *   keys     ↑ ↓ move the highlight, Enter picks, Escape clears the search first and closes second
  *
@@ -56,7 +56,7 @@ export function whoGroups(rows: readonly WhoRow[], find: string): { g: WhoGroup;
   return [
     { g: "wait" as const, label: `Waiting to hear back · ${wait.length}`, rows: wait },
     { g: "you" as const, label: `Already with you · ${you.length}`, rows: you },
-    { g: "closed" as const, label: "Closed · a late reply reopens it", rows: closed },
+    { g: "closed" as const, label: "Closed · a reply after closing reopens it", rows: closed },
   ].filter((x) => x.rows.length);
 }
 

@@ -247,7 +247,7 @@ test.describe("Query panel v1", () => {
       you: { primary: /^Mark (partial|full|revision) sent$/, title: (f) => `What went to ${f}?` },
       offer: { primary: /^Record your answer$/, title: (f) => `Your answer to ${f}` },
       /* ⚠️ the brief's table says "Reopen query"; the app has no reopen journey — a late reply is what reopens */
-      closed: { primary: /^Record a late reply$/, title: (f) => `What did ${f} say?` },
+      closed: { primary: /^Record a reply after closing$/, title: (f) => `What did ${f} say?` },
     };
     const seen: Record<string, number> = {};
     for (const vp of SIZES) {

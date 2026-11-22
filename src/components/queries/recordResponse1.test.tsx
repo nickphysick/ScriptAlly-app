@@ -93,7 +93,7 @@ describe("R4 · closed queries only by searching", () => {
   });
   it("typing a closed agent's name lists it under its own heading", () => {
     const g = whoGroups(ROWS, "geo");
-    expect(g.map((x) => x.label)).toEqual(["Closed · a late reply reopens it"]);
+    expect(g.map((x) => x.label)).toEqual(["Closed · a reply after closing reopens it"]);
     expect(g[0].rows.map((r) => r.id)).toEqual(["g"]);
   });
   it("a closed query opens at Reopen (the opener's own rule)", () => {

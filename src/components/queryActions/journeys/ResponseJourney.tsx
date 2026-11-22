@@ -97,7 +97,7 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
   const plannedNudge = toDay(q.nudgeDate);
 
   const lateNote = late ? (
-    <Note kind="warn" tag="LATE REPLY">
+    <Note kind="warn" tag="REPLY AFTER CLOSING">
       This query was {q.status === QueryStatus.REJECTED ? "recorded as passed" : "closed"}{closedOn ? ` on ${fmt(closedOn)}` : ""}{closedNoReply ? " (no reply)" : ""}. Recording a reply reopens it{closedNoReply ? " and replaces that ending" : ""}.
     </Note>
   ) : null;

@@ -194,7 +194,7 @@ test.describe("query drawer journeys", () => {
       const ids2 = [closed.id];
       const before2 = await readSet(ids2);
       await openDrawer(page, { mode: "resp", queryId: closed.id });
-      await expect(page.locator('[data-qad-note="LATE REPLY"]')).toBeVisible();
+      await expect(page.locator('[data-qad-note="REPLY AFTER CLOSING"]')).toBeVisible();
       await page.locator('[data-qad-chips="resp"] [data-qad-chip="pass"]').click();
       await toReview(page);
       await saveAndUndo(page, () => ids2, before2, async () => {

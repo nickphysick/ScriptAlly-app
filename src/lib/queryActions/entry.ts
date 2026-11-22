@@ -30,7 +30,7 @@ export interface Door { mode: DrawerMode; label: string; primary?: boolean }
 
 /** The query card's footer, by status — the mock's table (MOCK-SPEC §3.4). */
 export function cardDoors(status: QueryStatus | string): Door[] {
-  if (ENDED.has(status)) return [{ mode: "resp", label: "Record a late reply", primary: true }];
+  if (ENDED.has(status)) return [{ mode: "resp", label: "Record a reply after closing", primary: true }];
   if (status === QueryStatus.SIGNED) return [];
   if (status === QueryStatus.OFFER) return [{ mode: "offer", label: "Offer: next steps", primary: true }];
   if (OWED.has(status)) return [
@@ -50,7 +50,7 @@ export function cardDoors(status: QueryStatus | string): Door[] {
  * the journeys are `cardDoors`'s own (nothing here opens anything new); what the panel adds is the wording
  * and one rule — a query with the agent for over a year with no reply leads with Close.
  *
- * ⚠️ A CLOSED QUERY'S DOOR IS STILL "Record a late reply". There is no reopen-without-a-reply journey: what
+ * ⚠️ A CLOSED QUERY'S DOOR IS STILL "Record a reply after closing". There is no reopen-without-a-reply journey: what
  *    reopens a query is the reply that arrived, and the response journey records it.
  */
 /** v141.1 — a year with the agent: no longer what decides the lead (that is the nudge window); only the row's second
@@ -63,7 +63,7 @@ export type AgentLead = "close" | "nudge" | null;
  *              tracking"), "nudge" inside it, null otherwise. `leadDoors` works it out (lib/nudgeWindow).
  */
 export function panelDoors(status: QueryStatus | string, lead: AgentLead = null): Door[] {
-  if (ENDED.has(status)) return [{ mode: "resp", label: "Record a late reply", primary: true }];
+  if (ENDED.has(status)) return [{ mode: "resp", label: "Record a reply after closing", primary: true }];
   if (status === QueryStatus.SIGNED) return [];
   if (status === QueryStatus.OFFER) return [{ mode: "offer", label: "Record your answer", primary: true }, { mode: "close", label: "Close query" }];
   if (OWED.has(status)) return [
@@ -99,7 +99,7 @@ export function panelDoors(status: QueryStatus | string, lead: AgentLead = null)
  *    (v141.1 — the nudge window is lib/nudgeWindow, the rule the Next action grouping and the four sets read: the
  *    year-with-the-agent rule that decided Close before is retired as a lead)
  *      with the agent, otherwise          → Record a response
- *      closed                             → Record a late reply   (signed: nothing)
+ *      closed                             → Record a reply after closing   (signed: nothing)
  *
  *    It reads four facts of the row: its status, whose court it is in, how long it has waited, whether its
  *    expected-reply date has gone — and the writer's "Keep tracking" (`closureOfferDismissed`). Record a response
@@ -156,7 +156,7 @@ export function rowDoors(status: QueryStatus | string): Door[] {
   if (OWED.has(status)) return [{ mode: "sent", label: "✓ SENT IT" }];
   if (status === QueryStatus.OFFER) return [{ mode: "offer", label: "OFFER" }];
   if (status === QueryStatus.SIGNED) return [];
-  if (ENDED.has(status)) return [{ mode: "resp", label: "LATE REPLY" }];
+  if (ENDED.has(status)) return [{ mode: "resp", label: "REPLY AFTER CLOSING" }];
   return [{ mode: "resp", label: "✓ RESPONSE" }, { mode: "nudge", label: "NUDGE" }];
 }
 

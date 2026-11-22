@@ -243,7 +243,7 @@ describe("one next move for every row (ruling, 13 Oct)", () => {
   });
   it("Close as the lead carries the no-reply reason; a closed query's move is a late reply", () => {
     expect(trayOpen("chase", mk("Queried", "agent", 400, { over: 40 }))).toEqual({ mode: "close", queryId: "q", preset: { closeWhy: "noreply" } });
-    expect(nextDoor(mk("Rejected", "closed", 400))?.label).toBe("Record a late reply");
+    expect(nextDoor(mk("Rejected", "closed", 400))?.label).toBe("Record a reply after closing");
     expect(nextDoor(mk("Signed", "closed", 10))).toBeNull();
   });
   it("inside the last week of the wait the column names it \"Reply due\": the move is still Record a response", () => {
