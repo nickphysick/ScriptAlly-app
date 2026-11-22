@@ -19,6 +19,7 @@ import {
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
 import { STAGE_COLOURS, bandBackground, bandInk, stageOf } from "../../lib/stageColours";
+import { kindTileStyle } from "../../lib/kindColours";
 import {
   GROUP_LABEL, PaletteItem, PaletteResult, PaletteRow, PaletteScope, SCOPE_CHIPS, highlightParts, isSelectable,
   secondLineParts, type HighlightPart, type PeekFact,
@@ -87,11 +88,12 @@ const StatusChip: React.FC<{ status: string }> = ({ status }) => {
 /** The 32px tile (44px in the peek), by kind. */
 const Tile: React.FC<{ it: PaletteItem; big?: boolean; pageIcon?: (path: string) => React.ReactNode | null }> = ({ it, big, pageIcon }) => {
   const cls = `sv1-tile${big ? " sv1-tile--big" : ""}`;
-  if (it.kind === "agent") return <span className={cls} data-tile="agent">{initialsOf(it.title)}</span>;
+  /* Plumage colours v1 — the four kind tiles (lib/kindColours): an agent's initials in ink on the Scout's teal; a query
+     the paper with its status mark in ink (the status itself is the chip's, never the tile's) */
+  if (it.kind === "agent") return <span className={cls} data-tile="agent" style={kindTileStyle("agent")}>{initialsOf(it.title)}</span>;
   if (it.kind === "query" && it.status) {
-    const st = stageOf(it.status);
     return (
-      <span className={cls} data-tile="query" style={{ background: bandBackground(it.status), boxShadow: `inset 0 0 0 1px ${STAGE_COLOURS[st].edge}` }}>
+      <span className={cls} data-tile="query" style={kindTileStyle("query")}>
         <StatusDot status={it.status as QueryStatus} overrideSize={big ? 22 : 16} decorative />
       </span>
     );
@@ -102,8 +104,8 @@ const Tile: React.FC<{ it: PaletteItem; big?: boolean; pageIcon?: (path: string)
     const icon = (it.run.kind === "path" ? pageIcon?.(it.run.path) : null) ?? ID_ICON[it.id] ?? <LayoutGrid aria-hidden="true" />;
     return <span className={cls} data-tile="page">{icon}</span>;
   }
-  if (it.kind === "task") return <span className={cls} data-tile="task"><ListChecks aria-hidden="true" /></span>;
-  if (it.kind === "material") return <span className={cls} data-tile="material">{it.materialKind === "package" ? <Package aria-hidden="true" /> : <Mail aria-hidden="true" />}</span>;
+  if (it.kind === "task") return <span className={cls} data-tile="task" style={kindTileStyle("task")}><ListChecks aria-hidden="true" /></span>;
+  if (it.kind === "material") return <span className={cls} data-tile="material" style={kindTileStyle("material")}>{it.materialKind === "package" ? <Package aria-hidden="true" /> : <Mail aria-hidden="true" />}</span>;
   return <span className={cls} data-tile="help"><HelpCircle aria-hidden="true" /></span>;
 };
 
