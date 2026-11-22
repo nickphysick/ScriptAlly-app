@@ -115,7 +115,7 @@
   .qcw-list .qcw-pkg svg { width: 18px; height: 18px; flex: none; }
   .qcw-list .qcw-pkg--on { background: #f6e2d8; color: #8a4a2e; }
   .qcw-list .qcw-pkg--add { color: var(--sp-quiet); outline: 1.5px dashed rgba(28, 19, 15, 0.25); outline-offset: -1.5px; padding: 0 12px; }
-  .qcw-list .qcw-pkg--add:hover, .qcw-list .qcw-pkg--add:focus-visible { color: #2a3a52; outline-color: #2a3a52; }
+  .qcw-list .qcw-pkg--add:hover, .qcw-list .qcw-pkg--add:focus-visible { color: #2a3a52; outline-color: var(--sp-anthracite); }
   .qcw-list .qcw-pkg--none { pointer-events: none; }
 
   /* ── THE NARROW PANEL (v132 follow-up, 8 Oct). Below 1100px of workspace panel — a 1280 window with

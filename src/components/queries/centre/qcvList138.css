@@ -242,7 +242,7 @@
   .qc138-sheet .qc138-pkg svg { flex: none; width: 14px; height: 14px; }
   .qc138-sheet .qc138-pkg--on { background: #f6e2d8; color: #8a4a2e; }
   .qc138-sheet .qc138-pkg--add { color: var(--sp-quiet); outline: 1.5px dashed rgba(28, 19, 15, 0.25); outline-offset: -1.5px; }
-  .qc138-sheet .qc138-pkg--add:hover, .qc138-sheet .qc138-pkg--add:focus-visible { color: #2a3a52; outline-color: #2a3a52; }
+  .qc138-sheet .qc138-pkg--add:hover, .qc138-sheet .qc138-pkg--add:focus-visible { color: #2a3a52; outline-color: var(--sp-anthracite); }
   .qc138-sheet .qc138-tile {
     flex: none; display: grid; place-items: center; box-sizing: border-box; width: 20px; height: 20px; border-radius: 5px;
     color: rgba(28, 19, 15, 0.2); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.07);

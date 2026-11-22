@@ -235,7 +235,7 @@
 }
 .d58 .d71-pos button:focus-visible, .d58 .d71-view:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .d71-th[data-ink="dark"] .d71-pos button { background: #fff; color: var(--d58-ink); }
-.d71-th[data-ink="light"] .d71-pos button:focus-visible { outline-color: #fff; }
+.d71-th[data-ink="light"] .d71-pos button:focus-visible { outline-color: #f4eee5; }
 
 /* the progress segments: just under the band, on the card's white (v93); past and current in the kind's accent */
 .d71-prog {

@@ -73,7 +73,7 @@
 .laq .flh p.flh-l { color: rgba(255, 255, 255, .78); }
 .laq .flh .flh-x { color: #fff; }
 .laq .flh .flh-x:hover { background: rgba(255, 255, 255, .12); }
-.laq .flh .flh-x:focus-visible { outline-color: #fff; }
+.laq .flh .flh-x:focus-visible { outline-color: #f4eee5; }
 .laq .laq-trk .laq-nd { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .35); color: rgba(255, 255, 255, .55); }
 .laq .laq-trk .laq-si:not(:last-child)::after { background: rgba(255, 255, 255, .22); }
 .laq .laq-trk .laq-si:has(> .is-d):not(:last-child)::after { background: #fff; }
@@ -83,7 +83,7 @@
 .laq .laq-trk .laq-l { color: rgba(255, 255, 255, .5); }
 .laq .laq-trk .laq-s.is-d .laq-l, .laq .laq-trk .laq-s.is-n .laq-l { color: #fff; }
 .laq .laq-trk .laq-s.is-d .laq-l b { color: rgba(255, 255, 255, .7); }
-.laq .laq-trk .laq-s:focus-visible .laq-nd { outline-color: #fff; }
+.laq .laq-trk .laq-s:focus-visible .laq-nd { outline-color: #f4eee5; }
 
 /* the stage body */
 .laq .laq-sb { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 20px 20px 12px; display: flex; flex-direction: column; }
@@ -99,7 +99,7 @@
 .laq .laq-big { display: grid; gap: 8px; }
 .laq .laq-big > button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; background: #fff; }
 .laq .laq-big > button:hover, .laq .laq-big > button.is-hi { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
-.laq .laq-big > button:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-big > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; } /* roll-out v2, Phase 6: the one ring, not an inset edge */
 .laq .laq-big > button.is-on { box-shadow: inset 0 0 0 1.5px var(--laq-navy); background: #f7f5f1; }
 .laq .laq-g { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--laq-paper); font: 500 12px var(--laq-mono) !important; color: var(--sp-muted); }
 .laq .laq-g.is-pkg { border-radius: 9px; background: var(--laq-harbour); }
@@ -147,7 +147,7 @@
 .laq .laq-calg > span { font: 400 12px var(--laq-se); color: var(--laq-mut2); padding: 2px 0 4px; }
 .laq .laq-calg > button { all: unset; cursor: pointer; height: 32px; border-radius: 50%; font: 400 14px var(--laq-se); }
 .laq .laq-calg > button:hover { background: #f6f2ec; }
-.laq .laq-calg > button:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-calg > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; } /* roll-out v2, Phase 6: the one ring, not an inset edge */
 .laq .laq-calg > button.is-today { box-shadow: inset 0 0 0 1px #cfc4b5; }
 .laq .laq-calg > button.is-on { background: var(--laq-navy); color: #fff; }
 .laq .laq-calg > button:disabled { color: #d3cbc0; pointer-events: none; }
@@ -310,7 +310,7 @@
 .laq .laq-nopt { border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; }
 .laq .laq-nopt.is-on { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
 .laq .laq-nopt > button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px; }
-.laq .laq-nopt > button:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-nopt > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; } /* roll-out v2, Phase 6: the one ring, not an inset edge */
 .laq .laq-rd { flex: none; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #b9ad9e; }
 .laq .laq-nopt.is-on .laq-rd { box-shadow: inset 0 0 0 5.5px var(--laq-navy); }
 .laq .laq-nopt .laq-tx { flex: 1; min-width: 0; }
@@ -372,3 +372,7 @@
 .laq .laq-btn:hover:not(:disabled) { filter: none; background: var(--sp-navy-hover); }
 .laq .laq-btn.is-ghost:hover:not(:disabled) { background: var(--sp-btn-line-hov); }
 .laq .laq-busy:hover { background: #f8f4ed; }
+
+/* Consistency roll-out v2, Phase 6 (ruling 11): the one focus ring for this component's buttons. They are `all: unset`, which
+   also unsets the shell's zero-specificity ring, so the ring is stated here — (0,2,0), below every rule that names its own. */
+.laq :where(button, [role="button"], [role="radio"], a[href]):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }

@@ -110,7 +110,7 @@
 .cp32 .cp32-tog { display: flex; flex: none; padding: 3px; border-radius: 12px; background: rgba(255, 255, 255, .12); }
 .cp32 .cp32-tog button { height: 34px; padding: 0 12px; border: 0; border-radius: 9px; background: none; font: 400 14.5px/1 var(--c32-serif); color: rgba(255, 250, 243, .78); cursor: pointer; }
 .cp32 .cp32-tog button[aria-pressed="true"] { background: #fffaf3; color: var(--c32-ink); font-weight: 600; }
-.cp32 .cp32-tog button:focus-visible { outline-color: #e8bdb4; }
+.cp32 .cp32-tog button:focus-visible { outline-color: #f4eee5; }
 .cp32 .cp32-wk { padding: 28px 32px 36px; }
 .cp32 .cp32-wktop { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .cp32 .cp32-wkby { flex: 1 1 240px; margin: 0; font: italic 400 17px/1.3 var(--c32-serif); color: var(--sp-quiet); }

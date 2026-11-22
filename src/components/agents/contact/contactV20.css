@@ -65,7 +65,7 @@
 .cl19-head[data-pinned] .cl20-vsi button { color: var(--sp-muted); }
 .cl19-head[data-pinned] .cl20-vsi button:hover:not([aria-selected="true"]):not(:disabled) { background: #f4f0e9; color: #1c130f; }
 .cl19-head[data-pinned] .cl20-vsi button[aria-selected="true"] { background: #2a3a52; color: rgb(244, 238, 229); }
-.cl19-head[data-pinned] .cl20-vsi button:focus-visible { outline-color: #2a3a52; }
+.cl19-head[data-pinned] .cl20-vsi button:focus-visible { outline-color: var(--sp-anthracite); }
 @media (min-width: 1600px) {
   .cl19-head[data-pinned] .cl20-vsi button { width: auto; padding: 0 11px 0 9px; }
   .cl19-head[data-pinned] .cl20-vsi button .cl20-vsl { display: inline; }
