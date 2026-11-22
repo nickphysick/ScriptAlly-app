@@ -1,17 +1,6 @@
 {
- "about": "Consistency audit v2 — the rules check's exceptions. Each entry names a rule, the pages it covers (\"*\" for all, or a key prefix ending in *), what it matches (sel: a class or selector fragment found in the element's selector or ancestry; text: a case-insensitive pattern on its text; detail: a pattern on the reading), and why it is allowed. An entry without a reason stops the check. Seeded from what the roll-out reports recorded as left, skipped or in flight; rules-result.json lists every entry that matched nothing on a run. Roll-out v2 (rulings v3): stale entries removed, the agreed exceptions and everything the run left added, each with its reason.",
+ "about": "Consistency audit v2 — the rules check's exceptions. Each entry names a rule, the pages it covers (\"*\" for all, or a key prefix ending in *), what it matches (sel: a class or selector fragment found in the element's selector or ancestry; text: a case-insensitive pattern on its text; detail: a pattern on the reading), and why it is allowed. An entry without a reason stops the check. Seeded from what the roll-out reports recorded as left, skipped or in flight; rules-result.json lists every entry that matched nothing on a run. Roll-out v2 (rulings v3): stale entries removed, the agreed exceptions and everything the run left added, each with its reason. Every entry has a kind: agreed (a ruling or a baked decision), in-flight (another session's file) or open (left, reverted or untraced); consolidate-and-finish v1.",
  "exceptions": [
-  {
-   "rule": "R1",
-   "pages": [
-    "*"
-   ],
-   "match": {
-    "sel": "wsr-ct"
-   },
-   "reason": "The rail's count badge stays at 9px: ruling 12's 12px badge was reverted in roll-out v1 Phase 1 (\"99+\" covered 58% of the icon). It waits for a new fit.",
-   "source": "memory consistency-rollout-v1-state; roll-out v1 review"
-  },
   {
    "rule": "R4",
    "pages": [
@@ -22,7 +11,8 @@
    ],
    "match": {},
    "reason": "Baked decision: the Dashboard header differs on purpose (/goals, /materials and /you render the Dashboard).",
-   "source": "roll-out v1.1 prompt, baked decisions"
+   "source": "roll-out v1.1 prompt, baked decisions",
+   "kind": "agreed"
   },
   {
    "rule": "R4",
@@ -31,7 +21,8 @@
    ],
    "match": {},
    "reason": "Baked decision: the To-do's slim header differs on purpose.",
-   "source": "roll-out v1.1 prompt, baked decisions"
+   "source": "roll-out v1.1 prompt, baked decisions",
+   "kind": "agreed"
   },
   {
    "rule": "R4",
@@ -42,7 +33,8 @@
     "sel": "dv1-aep"
    },
    "reason": "Discover's navy box is its hero, not a page header (baked decision: heroes differ on purpose; ruling 5 lets Discover's hero line stay larger).",
-   "source": "roll-out v1.1 prompt, baked decisions; consistency-rulings-v2 §5"
+   "source": "roll-out v1.1 prompt, baked decisions; consistency-rulings-v2 §5",
+   "kind": "agreed"
   },
   {
    "rule": "R4",
@@ -55,7 +47,8 @@
     "detail": "to the content below"
    },
    "reason": "In flight: the Query Centre page (QcPage151) sits in list-filters-v1-1's files, audit-only at roll-out v1.1 (Phase 4 item 1).",
-   "source": "roll-out v1.1 report, section 6"
+   "source": "roll-out v1.1 report, section 6",
+   "kind": "in-flight"
   },
   {
    "rule": "R4",
@@ -64,7 +57,8 @@
    ],
    "match": {},
    "reason": "In flight: the Contact list header (contactPrinciples) sits in list-filters-v1-1's files, audit-only at roll-out v1.1 (Phase 4 item 2).",
-   "source": "roll-out v1.1 report, section 6"
+   "source": "roll-out v1.1 report, section 6",
+   "kind": "in-flight"
   },
   {
    "rule": "R6",
@@ -77,7 +71,8 @@
     "sel": "qc151-btn"
    },
    "reason": "In flight: the Query Centre's buttons (QcPage151) sit in list-filters-v1-1's files, audit-only at roll-out v1.1 (Phase 4 item 1).",
-   "source": "roll-out v1.1 report, section 6"
+   "source": "roll-out v1.1 report, section 6",
+   "kind": "in-flight"
   },
   {
    "rule": "R7",
@@ -93,7 +88,8 @@
     "detail": "padding"
    },
    "reason": "The Dashboard chart card keeps 7px of rim padding: at 8 the chart drops a week at 1920 (roll-out v1.1 Phase 5b). The account menu opens over the Dashboard, so the same card is read there too.",
-   "source": "roll-out v1.1 report, section 7"
+   "source": "roll-out v1.1 report, section 7",
+   "kind": "agreed"
   },
   {
    "rule": "R9",
@@ -103,22 +99,9 @@
    "match": {
     "sel": "qc152-rf"
    },
-   "reason": "In flight: the query card and agent card footer (QcFoot1581) belongs with the card's own sheet, skipped as audit-only in roll-out v1 Phase 12.",
-   "source": "memory consistency-rollout-v1-state, Phase 12"
-  },
-  {
-   "rule": "R10",
-   "pages": [
-    "queries*",
-    "overlay-*",
-    "journey-*"
-   ],
-   "match": {
-    "sel": "qc154-nx",
-    "text": "(late|overdue)"
-   },
-   "reason": "The Query Centre's Next box: \"N days past expected\" clips there, so the change was reverted (roll-out v1.1 Phase 2c); left with a suggestion (\"N days past\").",
-   "source": "roll-out v1.1 report, sections 5 and 7"
+   "reason": "For Nick (B7): the card footer at 72 with 14/24 padding leaves 44px for the 52px reply pill and action (v152.1); meeting it needs the pill redesigned, a slide-out panel build (consolidate-and-finish v1, B6).",
+   "source": "consolidate-and-finish v1",
+   "kind": "open"
   },
   {
    "rule": "R11",
@@ -137,7 +120,8 @@
    "match": {
     "detail": "#a2452a"
    },
-   "reason": "Ruling 9 (rulings v3): the public pages keep their brighter rust, named once as --mk-rust (#a2452a). The app keeps --sp-rust."
+   "reason": "Ruling 9 (rulings v3): the public pages keep their brighter rust, named once as --mk-rust (#a2452a). The app keeps --sp-rust.",
+   "kind": "agreed"
   },
   {
    "rule": "R1",
@@ -154,644 +138,318 @@
     "welcome-verified"
    ],
    "match": {},
-   "reason": "Public pages are out of scope for the small-text ruling in roll-out v2 (do-not-touch list); their small labels are left for their own pass."
+   "reason": "Public pages are out of scope for the small-text ruling in roll-out v2 (do-not-touch list); their small labels are left for their own pass.",
+   "kind": "agreed"
   },
   {
    "rule": "R2",
    "match": {
     "sel": "sf-google"
    },
-   "reason": "Google's sign-in button keeps Google's logo colours (rulings v3, ruling 7; board's settled list)."
+   "reason": "Google's sign-in button keeps Google's logo colours (rulings v3, ruling 7; board's settled list).",
+   "kind": "agreed"
   },
   {
    "rule": "R6",
    "match": {
     "detail": "^text:"
    },
-   "reason": "Plain text buttons are their own kind, not action buttons (roll-out v2 brief, Phase 9)."
+   "reason": "Plain text buttons are their own kind, not action buttons (roll-out v2 brief, Phase 9).",
+   "kind": "agreed"
   },
   {
    "rule": "R6",
    "match": {
     "sel": "tws-addt"
    },
-   "reason": "A dashed \"add\" button is its own kind, not an action button (roll-out v2 brief, Phase 9)."
+   "reason": "A dashed \"add\" button is its own kind, not an action button (roll-out v2 brief, Phase 9).",
+   "kind": "agreed"
   },
   {
    "rule": "R6",
    "match": {
     "sel": "cb15-ghost"
    },
-   "reason": "The Corkboard's dashed \"+ New stack\" card is a dashed add, not an action button (roll-out v2 brief, Phase 9)."
+   "reason": "The Corkboard's dashed \"+ New stack\" card is a dashed add, not an action button (roll-out v2 brief, Phase 9).",
+   "kind": "agreed"
   },
   {
    "rule": "R6",
    "match": {
     "sel": "k62-tag-add"
    },
-   "reason": "Packages' \"+ Add one\" is a dashed-style add pill, its own kind (roll-out v2 brief, Phase 9)."
+   "reason": "Packages' \"+ Add one\" is a dashed-style add pill, its own kind (roll-out v2 brief, Phase 9).",
+   "kind": "agreed"
   },
   {
    "rule": "R6",
    "match": {
     "sel": "k62-g"
    },
-   "reason": "Packages' band buttons sit on navy: their outline is cream, the right edge for that ground (shape is the standard since roll-out v2 Phase 1)."
+   "reason": "Packages' band buttons sit on navy: their outline is cream, the right edge for that ground (shape is the standard since roll-out v2 Phase 1).",
+   "kind": "agreed"
   },
   {
    "rule": "R6",
    "match": {
     "sel": "tws-qfb"
    },
-   "reason": "Consistency roll-out v2 left this: the To-do's light \"Quick fill\" pill is not covered by a ruling (neither filled nor outline); for Nick."
+   "reason": "For Nick (B7): the To-do's light 'Quick fill' pill is neither a filled nor an outline button.",
+   "kind": "open",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R7",
    "match": {
     "sel": "acv2-frame"
    },
-   "reason": "The agent card's inner frame is drawn in its stage colour (agent card v2.1, by design; roll-out v2 brief, Phase 9)."
+   "reason": "The agent card's inner frame is drawn in its stage colour (agent card v2.1, by design; roll-out v2 brief, Phase 9).",
+   "kind": "agreed"
   },
   {
    "rule": "R11",
    "match": {
     "sel": "d105-egg"
    },
-   "reason": "Artwork: the Dashboard's egg illustration."
+   "reason": "Artwork: the Dashboard's egg illustration.",
+   "kind": "agreed"
   },
   {
    "rule": "R11",
    "match": {
     "sel": "d22-egg"
    },
-   "reason": "Artwork: the Dashboard's nest illustration."
+   "reason": "Artwork: the Dashboard's nest illustration.",
+   "kind": "agreed"
   },
   {
    "rule": "R11",
    "match": {
     "sel": "d22-prize"
    },
-   "reason": "Artwork: Your notes' prize illustration."
-  },
-  {
-   "rule": "R11",
-   "match": {
-    "sel": "lucide"
-   },
-   "reason": "Consistency roll-out v2 left this: the search palette's icons use #9a5638; icon colours were not in rulings v3. For the next pass."
-  },
-  {
-   "rule": "R11",
-   "match": {
-    "sel": "am-iav"
-   },
-   "reason": "Consistency roll-out v2 left this: the account menu's initials disc uses the terracotta pair (#9a5638); not in rulings v3."
-  },
-  {
-   "rule": "R11",
-   "match": {
-    "sel": "dv1-steps"
-   },
-   "reason": "Consistency roll-out v2 left this: Discover's step numerals (#a0452e) sit in its hero; not in rulings v3."
+   "reason": "Artwork: Your notes' prize illustration.",
+   "kind": "agreed"
   },
   {
    "rule": "R11",
    "match": {
     "sel": "cp32-bdisc"
    },
-   "reason": "Consistency roll-out v2 left this: Comps' book disc icon (#6b3d33) is a drawn mark; not in rulings v3."
-  },
-  {
-   "rule": "R1",
-   "match": {
-    "sel": "qc152-ch"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 7, reverted): Record a response's chips stay at 8.5px; at 12 a chip wraps onto a second line."
-  },
-  {
-   "rule": "R1",
-   "match": {
-    "sel": "qc152-bkc"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 7, reverted): the query card's book chips stay at 9.5px; at 12 the row wraps and the card drops 18px."
-  },
-  {
-   "rule": "R1",
-   "match": {
-    "sel": "dv1-pro"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 7): Discover's Pro tag stays at 9px — the 12px rule is outranked by the tag's own rule; for the next pass."
-  },
-  {
-   "rule": "R1",
-   "match": {
-    "sel": "button.on"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 7): Responses' \"button.on > i\" (11px) — the audit could not trace its rule."
+   "reason": "For Nick (B7): Comps' book disc icon (#6b3d33) — is it artwork?",
+   "kind": "open",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "sc-ch-h"
    },
-   "reason": "Consistency roll-out v2 left this (Phase 1, reverted): Settings card headings stay at 19; at 20 \"Keeping your list current\" wraps in its 268px column."
+   "reason": "Settings card headings stay at 19: at 20 'Keeping your list current' wraps in its 268px column, and widening the column to 280 moves the controls 12px and wraps a Preferences row (consolidate-and-finish v1, B2, reverted).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "qc152-nm"
    },
-   "reason": "The agent card's name is a person's name, not a heading style (rulings v3, ruling 3)."
+   "reason": "The agent card's name is a person's name, not a heading style (rulings v3, ruling 3).",
+   "kind": "agreed"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "pl3-in"
    },
-   "reason": "The plan card is out of scope (rulings v3, ruling 6)."
+   "reason": "The plan card is out of scope (rulings v3, ruling 6).",
+   "kind": "agreed"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "dv1-hw"
    },
-   "reason": "Discover's \"How it works.\" is its hero line (baked decision: heroes differ on purpose)."
+   "reason": "Discover's \"How it works.\" is its hero line (baked decision: heroes differ on purpose).",
+   "kind": "agreed"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "dv1-sofar"
    },
-   "reason": "Discover's \"The catalogue so far.\" belongs to its hero band (baked decision)."
+   "reason": "Discover's \"The catalogue so far.\" belongs to its hero band (baked decision).",
+   "kind": "agreed"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "cp32-plh"
    },
-   "reason": "Comps' \"The podium\" is a display line, left for a ruling."
+   "reason": "Display line, not a heading: Comps' 'The podium' (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "os-cardttl"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
+   "reason": "Classified as a card heading (it heads one Dashboard card) and already drawn as one; its tag is h2/h3 (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "v6-bt"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
+   "reason": "Classified as a card heading ('How it works' heads the Versions card) and already drawn as one; its tag is h2 (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "a26-cm"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
+   "reason": "Classified as a card heading (a stat tile's title heads that card) and now drawn as one (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "fv1-ph"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
+   "reason": "Classified as a small heading (inside the set-up card under its heading) and now drawn as one (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "laq-qh"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
+   "reason": "Classified as a card heading (the question heads one section of the Log a query panel) and now drawn as one; its tag is h2 (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "acv2-sec"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
+   "reason": "Classified as a small heading (inside the agent card under the name) and now drawn as one (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "sks-scope"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
+   "reason": "Classified as a card heading (each scope heads a section of the shortcuts panel) and now drawn as one (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "a26-find"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
+   "reason": "Display line, not a heading: the Analytics finding headline (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "tws-wh"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
+   "reason": "Classified as a card heading (the task title heads the To-do desk card) and now drawn as one; its tag is h2 (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "tws-qh"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
+   "reason": "Classified as a small heading (the question sits inside the desk card under its title) and now drawn as one; its tag is h3 (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R5",
    "match": {
     "sel": "qc1531-lgh"
    },
-   "reason": "Consistency roll-out v2 left this: this heading's role is unclear (its tag and its look name different roles); reported for a ruling."
-  },
-  {
-   "rule": "R13",
-   "match": {
-    "sel": "sc-ctl"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 2): Settings' control notes take their grey inline from lib/designTokens (mutedInk), which also feeds SVG attributes; not repointed."
+   "reason": "Classified as a card heading ('Where they are' heads the key panel) and now drawn as one; its tag is h2 (consolidate-and-finish v1, B2).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R14",
    "match": {
     "sel": "laq-pvtag"
    },
-   "reason": "Consistency roll-out v2 left this (Phase 3, reverted): Log a query's \"Preview\" label straddles the box edge; at 28 it would cover 9px more of the box."
+   "reason": "Corner label, not a text tag: Log a query's 'Preview' straddles the box edge (consolidate-and-finish v1, B3).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R14",
    "match": {
     "sel": "fv2-extag"
    },
-   "reason": "Consistency roll-out v2 left this (Phase 3, reverted): the first-visit corner tag straddles its card's edge; at 28 it would cover 10px more of the card."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.cl26-hm"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.qc153-cnt"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "em.cl252-none"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.fv1-gsd"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.fv1-sr"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "p.fv2-said"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.d3-exw > b"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
+   "reason": "Corner label, not a text tag: the first-visit corner tag straddles its card's edge (consolidate-and-finish v1, B3).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R12",
    "match": {
     "sel": "span.fv2-exw > b"
    },
-   "reason": "Consistency roll-out v2 left this (Phase 8): at 16 it wraps in its 252px column (reverted); for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "p.flh-l"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.qc154-tn"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "li.is-dot > b"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "p.laq-wkx"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.laq-grp"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.t > b"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
+   "reason": "Left at 15: at 16 it wraps in its 252px column; it needs about 8px more (roll-out v2 Phase 8; consolidate-and-finish v1, B1).",
+   "kind": "open",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R12",
    "match": {
     "sel": "div.ms29-dt-f > span"
    },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.ms29-nx-t > span"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.cp32-nums span"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "dl.cp32-facts > dt"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "dl.cp32-facts > dd"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.cp32-lstx > span"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "th > span"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.cp32-who b"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.cf-ready.is-idle > span"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.aap-l"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.aap-fitw"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.aaj-sum"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.ag-mail > span"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.nx-chip.no"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.qc152-rft > b"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.sks-label"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.k62-cv > b"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "li.k62-no"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.k62-encl b"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.k62-encl span"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "p.k62-dfoot"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.k62-who b"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "p.k62-tbl-n"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
+   "reason": "Left at 15 (reverted in consolidate-and-finish v1, B1): at 16 the line wraps (+23px) in its 210px span; it needs 12px more width.",
+   "kind": "open",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R12",
    "match": {
     "sel": "span.wsnh-k"
    },
-   "reason": "Consistency roll-out v2 left this (Phase 8): it is navy-header text (the header file is shared; not running text in the page body); for the next pass."
+   "reason": "Navy-header text: the shared workspace header is out of scope for the body-size rule (consolidate-and-finish v1, B1).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R12",
    "match": {
     "sel": "span.wsnh-s > span"
    },
-   "reason": "Consistency roll-out v2 left this (Phase 8): it is navy-header text (the header file is shared; not running text in the page body); for the next pass."
+   "reason": "Navy-header text: the shared workspace header is out of scope for the body-size rule (consolidate-and-finish v1, B1).",
+   "kind": "agreed",
+   "source": "consolidate-and-finish v1"
   },
   {
    "rule": "R12",
    "match": {
-    "sel": "div.a26-pr > span"
+    "sel": "div.qc152-r1 > b"
    },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "p.a26-lede"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.a26-tl-l"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "p.a26-cav"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "b.pgd-t"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.k62-sb-s"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.k62-sb-t"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.rsp15-sl"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.rsp15-bub > b"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.rsp15-bub > q"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.tws-m"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "span.tws-pos"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
-  },
-  {
-   "rule": "R12",
-   "match": {
-    "sel": "div.cb15-h2.cb15-first > p"
-   },
-   "reason": "Consistency roll-out v2 left this (Phase 8): its size is inherited or set in a rule the board did not trace; for the next pass."
+   "kind": "open",
+   "reason": "Left at 15.5 (reverted in consolidate-and-finish v1, B1): at 16 the first thread line in the To-do desk's card preview wraps its time onto a second line.",
+   "source": "consolidate-and-finish v1"
   }
  ]
 }
