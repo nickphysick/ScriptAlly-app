@@ -44,6 +44,9 @@ export const ESC_LEVEL = {
   sidebarFloat: 25,
   /** the query drawer, which stacks over a docked card */
   drawer: 30,
+  /** Log a query v2 — the staged journey inside whichever host mounts it (the side panel, the Query Centre's query panel,
+   *  the Contact list's panel): its in-place pickers and its leave check, before the host would close */
+  journey: 32,
   /** the docked card shown above its chip (v13 §7) — folds before the drawer hears the key, after a
    *  popup inside the drawer (ruling Q5) */
   dockPeek: 35,

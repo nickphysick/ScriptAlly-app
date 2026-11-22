@@ -497,15 +497,38 @@ export const MILESTONE: Record<number, string> = {
 };
 
 /**
- * The one line under "Off to {First}." — Gone quiet by the app's own rule (`stampRows`), else the reply window, else no
- * window on the card. ⚠️ A FOURTH CASE THE BRIEF DOES NOT NAME: a reply date already passed but not yet Gone quiet
- * (the app's "Nudge due"). "Expect something by {a past date}" would be false, so it says the window has passed.
+ * v2 · Phase 7 — THE ONE LINE UNDER "Off to {First}.", by the reminder the writer chose (the mock's `ending()`):
+ *
+ *   past the reply date   now  → a nudge is on today's to-do list · nudge → reminded on {day} · none → it waits
+ *   no reply date         nudge → reminded on {day} · otherwise → no date and no reminder, it waits
+ *   a reply date ahead    "{First} usually replies within {n} weeks, so expect something by {day}." then
+ *                         nudge → reminded on {day} · close → closed for you the day after · none → keep an eye on it
+ *
+ * ⚠️ NO PROMISE THE APP WILL NOT KEEP: a nudge is the query's own `nudgeDate` (it goes on the To-do list on the day),
+ *    "we'll close it for you" is `ifNo: "close"`'s auto-close the day after the reply date (`closeDateIso`), and the
+ *    rest promise nothing.
  */
-export function celebrationLine(p: Pick<Preview, "state" | "expectMs" | "noWindow">, first: string, weeks: number | null, nowMs: number): string {
-  if (p.state === "quiet") return `It's been a while since it went, so ${first} goes straight into Gone quiet. Worth a nudge?`;
-  if (p.noWindow || p.expectMs == null || !weeks) return `Add a reply window to ${first}'s card and we'll remind you when it's time to nudge.`;
-  if (sod(p.expectMs) < sod(nowMs)) return `${first}'s reply window passed on ${dayMonY(p.expectMs, nowMs)}, so it's already worth a nudge.`;
-  return `${first} usually replies within ${weeks} weeks, so expect something by ${dayMonY(p.expectMs, nowMs)}. We'll remind you if it goes quiet.`;
+export interface EndingFacts { first: string; wk: number | null; sentMs: number; nowMs: number; reply: ReplyAnswers }
+export function celebrationLine(f: EndingFacts): string {
+  const { first, nowMs } = f;
+  const ex = expectOf(f.sentMs, f.wk);
+  const nd = nudgeDateOf(f.reply, f.sentMs, nowMs);
+  const n = nd ? dayMonY(nd.getTime(), nowMs) : null;
+  const choice = f.reply.ifNo;
+  if (ex && sod(ex.getTime()) < sod(nowMs)) {
+    if (choice === "now") return `It’s past ${first}’s usual reply time, so a nudge is on your to-do list for today.`;
+    if (choice === "nudge" && n) return `It’s past ${first}’s usual reply time. We’ll remind you to nudge on ${n}.`;
+    return `It’s past ${first}’s usual reply time, and there’s no reminder set. It’s waiting on your Queries page.`;
+  }
+  if (!ex) {
+    return choice === "nudge" && n
+      ? `There’s no reply date for ${first}, so we’ll remind you to nudge on ${n}.`
+      : `No reply date and no reminder for ${first}. It’s waiting on your Queries page.`;
+  }
+  const lead = `${first} usually replies within ${f.wk} weeks, so expect something by ${dayMonY(ex.getTime(), nowMs)}. `;
+  if (choice === "nudge" && n) return `${lead}We’ll remind you to nudge on ${n}.`;
+  if (choice === "close") return `${lead}If there’s nothing by ${dayMonY(addDays(ex, 1).getTime(), nowMs)} we’ll close it for you.`;
+  return `${lead}There’s no reminder set, so keep an eye on it.`;
 }
 
 /* ── the inline calendar ──────────────────────────────────────────────────────────────────────────────────────── */

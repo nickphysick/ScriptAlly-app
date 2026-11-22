@@ -14,7 +14,8 @@
  *    the only one — then `resolveInitialManuscriptId` over the books that can be queried, the other two hosts' own rule.
  * ⚠️ NO RIGHT-PANEL CLAIM: the journey opens over an agent's or a query's panel (the agent card docks under it), so it
  *    must not close them. The dim covers them, and the panel sits above (z 68, qcLogStages.css).
- * ⚠️ ESCAPE closes, as before; a press on the dimmed page runs the journey's leave check (ask with answers).
+ * ⚠️ v2 — ESCAPE RUNS THE SAME LEAVE CHECK as a press on the dimmed page (ask with answers): the journey's own layer
+ *    (ESC_LEVEL.journey) sits above this panel's, so this one only closes when the journey is not mounted.
  */
 import React, { useRef } from "react";
 import { useScriptAllyDb } from "../../../lib/db";

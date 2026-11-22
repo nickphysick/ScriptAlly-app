@@ -241,7 +241,7 @@
 .laq .laq-yay > * { flex: none; }
 .laq .laq-yay .qi-slot { animation: laq-rise .55s .05s cubic-bezier(.2,1.2,.4,1) both; }
 @keyframes laq-rise { from { opacity: 0; transform: translateY(16px) scale(.94); } }
-.laq h2.laq-yh { margin: 14px 0 6px; min-height: 35px; font: 400 30px/1.15 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
+.laq h2.laq-yh { margin: 12px 0 6px; min-height: 35px; font: 400 28px/1.15 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
 .laq .laq-cur { display: inline-block; width: 2px; height: 26px; margin-left: 2px; vertical-align: -3px; background: var(--laq-ink); animation: laq-blink .8s steps(1) infinite; }
 @keyframes laq-blink { 50% { opacity: 0; } }
 .laq p.laq-yl { margin: 0 0 4px; max-width: 400px; font: italic 400 15.5px/1.5 var(--laq-se); color: var(--sp-muted); animation: laq-fade .4s .7s both; }
@@ -429,3 +429,7 @@
 @keyframes laq-march { to { stroke-dashoffset: -22; } }
 @keyframes laq-pulse { from { opacity: .55; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .laq .rvs-g, .laq .rvs-d { animation: none; } }
+
+/* v2 · Phase 7 — the logged screen under the same navy header: its body is the stage body's frame with the celebration's
+   own padding inside */
+.laq .laq-sb.laq-yayb { padding: 0; }

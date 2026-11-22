@@ -272,3 +272,59 @@ describe("v2 · Phase 6 — the preview row is the row the saved query produces"
     expect(reviewCounts(book, { ...p.query, status: QueryStatus.REJECTED } as Query, new Date(NOW)).active).toEqual([1, 1]);
   });
 });
+
+/* ── Phase 7 — the logged screen's line ── */
+import { celebrationLine } from "./logStages";
+
+describe("v2 · Phase 7 — celebrationLine, by the reminder chosen", () => {
+  const r = (ifNo: "nudge" | "close" | "none" | "now", wk: number | null, nWhen: "week" | "8w" | "n2" = "week") => ({ wk, saveWk: false, ifNo, nWhen, nPick: null });
+  it("nudge set", () => {
+    expect(celebrationLine({ first: "Harriet", wk: 8, sentMs: daysAgo(0), nowMs: NOW, reply: r("nudge", 8) }))
+      .toBe("Harriet usually replies within 8 weeks, so expect something by 17 Jan 2027. We’ll remind you to nudge on 25 Jan 2027.");
+  });
+  it("will close if no reply", () => {
+    expect(celebrationLine({ first: "Harriet", wk: 8, sentMs: daysAgo(0), nowMs: NOW, reply: r("close", 8) }))
+      .toBe("Harriet usually replies within 8 weeks, so expect something by 17 Jan 2027. If there’s nothing by 18 Jan 2027 we’ll close it for you.");
+  });
+  it("no reminder", () => {
+    expect(celebrationLine({ first: "Harriet", wk: 8, sentMs: daysAgo(0), nowMs: NOW, reply: r("none", 8) }))
+      .toBe("Harriet usually replies within 8 weeks, so expect something by 17 Jan 2027. There’s no reminder set, so keep an eye on it.");
+  });
+  it("no date", () => {
+    expect(celebrationLine({ first: "Callum", wk: null, sentMs: daysAgo(0), nowMs: NOW, reply: r("nudge", null, "8w") }))
+      .toBe("There’s no reply date for Callum, so we’ll remind you to nudge on 18 Jan 2027.");
+    expect(celebrationLine({ first: "Callum", wk: null, sentMs: daysAgo(0), nowMs: NOW, reply: r("none", null) }))
+      .toBe("No reply date and no reminder for Callum. It’s waiting on your Queries page.");
+  });
+  it("already past the date", () => {
+    expect(celebrationLine({ first: "Harriet", wk: 8, sentMs: daysAgo(60), nowMs: NOW, reply: r("now", 8, "n2") }))
+      .toBe("It’s past Harriet’s usual reply time, so a nudge is on your to-do list for today.");
+    expect(celebrationLine({ first: "Harriet", wk: 8, sentMs: daysAgo(60), nowMs: NOW, reply: r("nudge", 8, "n2") })).toMatch(/^It’s past Harriet’s usual reply time\. We’ll remind you to nudge on /);
+    expect(celebrationLine({ first: "Harriet", wk: 8, sentMs: daysAgo(60), nowMs: NOW, reply: r("none", 8) }))
+      .toBe("It’s past Harriet’s usual reply time, and there’s no reminder set. It’s waiting on your Queries page.");
+  });
+});
+
+/* ── Phase 7 — Escape is the leave check ── */
+import { ESC_LEVEL } from "../escapeStack";
+
+describe("v2 · Phase 7 — Escape runs the leave check, in order", () => {
+  const src = readFileSync("src/components/queries/centre/QcLogStages.tsx", "utf8");
+  const esc = src.slice(src.indexOf("useEscapeLayer(true, () => {"), src.indexOf("}, ESC_LEVEL.journey);"));
+  it("the journey's layer sits above every host that mounts it, below the paperclip and a docked card's peek", () => {
+    expect(ESC_LEVEL.journey).toBeGreaterThan(ESC_LEVEL.drawer);       // LogStagesPanel
+    expect(ESC_LEVEL.journey).toBeGreaterThan(ESC_LEVEL.pageDrawer);   // QueryPanelHost, the Contact list's panel
+    expect(ESC_LEVEL.journey).toBeLessThan(ESC_LEVEL.dockPeek);
+    expect(ESC_LEVEL.journey).toBeLessThan(ESC_LEVEL.drawerPopup);     // the review card's paperclip (QcCard154 preview)
+    expect(readFileSync("src/components/queries/centre/QcCard154.tsx", "utf8")).toMatch(/escLevel=\{preview \? ESC_LEVEL\.drawerPopup/);
+  });
+  it("order: the leave check (Esc keeps the journey) → an in-place picker → ask (or close with nothing entered)", () => {
+    expect(esc.length).toBeGreaterThan(100);
+    const at = (k: string) => { const i = esc.indexOf(k); expect(i, k).toBeGreaterThan(-1); return i; };
+    expect(at("if (leaveAsk) { setLeaveAsk(false)")).toBeLessThan(at("s.earlier"));
+    expect(at("s.earlier")).toBeLessThan(at("s.pOpen.letter"));
+    expect(at("s.pOpen.letter")).toBeLessThan(at("leave();"));
+    /* and leave() asks only with something entered, otherwise closes — the dimmed page's own check */
+    expect(src).toMatch(/const leave = \(\) => \{ if \(phase === "flow" && !s\.notSent && touched\.current\) setLeaveAsk\(true\); else p\.onClose\(\); \};/);
+  });
+});

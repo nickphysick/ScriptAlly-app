@@ -23,6 +23,7 @@ import { bookVersionsOf, latestVersion, readVersions } from "../../../lib/bookVe
 import { bookOf } from "../../../lib/queryActions/sample";
 import { previousQueryFor } from "../../../lib/requery";
 import { quietWeeksOf } from "../../../lib/queryState";
+import { liveCount } from "../../../lib/dashBreakdown";
 import { agentFromDraft } from "../../../lib/agentCreate";
 import { emptyCardDraft, problemsOf } from "../../../lib/cardDraft";
 import { emptyCreated, toRemoveOnDiscard, toRemoveOnUndo, withAgent, withHeld, withLogged, withoutAgent, withoutHeld, withoutLogged, heldTaskFor, type JourneyCreated } from "../../../lib/queryActions/journeyCreated";
@@ -176,6 +177,7 @@ export const LogStagesHost: React.FC<{
       packages={model.stPackages} activePackageId={model.active} letters={model.ctx.letters} synopses={model.ctx.synopses} bookVersions={model.ctx.bookVersions}
       count={forBook.length} quietWeeks={quietWeeksOf(currentUser)} ctx={model.ctx} book={bookOf(ms.wordCount)} onClose={close}
       onCreateAgent={onCreateAgent} onNotSent={onNotSent} onSentAfterAll={onSentAfterAll} bookQueries={forBook}
+      activeNow={liveCount(forBook)}
       onSave={onSave} seedPackageId={seedPackageId} again={again} leaveRef={leaveRef} />
   );
 };

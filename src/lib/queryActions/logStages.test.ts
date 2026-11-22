@@ -9,7 +9,7 @@ import { describe, expect, it } from "vitest";
 import { QueryStatus, SubmissionMethod, SubmissionStatus, type Agent, type Query } from "../../types";
 import { logPayload } from "./logSave";
 import {
-  askWords, calMonth, sizeName, celebrationLine, choiceOfSample, sampleOfChoice, flowLine, materialsOf, MILESTONE, planOf, previewOf,
+  askWords, calMonth, sizeName, choiceOfSample, sampleOfChoice, flowLine, materialsOf, MILESTONE, planOf, previewOf,
   stageAgents, titleName, whoGroups, type PlanContext, type StagePackage,
 } from "./logStages";
 import type { PackageCard } from "./packages";
@@ -88,18 +88,6 @@ describe("the check and the celebration", () => {
     expect(pv.row.agentName).toBe("Marcus Reed");
     expect(pv.packageName).toBe("First round");
     expect(pv.state).toBe("agent");
-  });
-  it("an old send lands in Gone quiet by the app's own rule, and says so", () => {
-    const sent = new Date(2026, 4, 1).getTime();
-    const plan = planOf({ agentId: "mr", sent, via: SubmissionMethod.EMAIL, packageId: "pa", letterId: null, synopsisId: null, sample: null, note: "" }, CTX, "pv", false)!;
-    const pv = previewOf(plan, NOW, 4);
-    expect(pv.state).toBe("quiet");
-    expect(celebrationLine(pv, "Marcus", 8, NOW)).toMatch(/goes straight into Gone quiet/);
-  });
-  it("with a window it gives the date, and with none it asks for one", () => {
-    expect(celebrationLine({ state: "agent", expectMs: new Date(2027, 0, 4).getTime(), noWindow: false }, "Marcus", 8, NOW))
-      .toBe("Marcus usually replies within 8 weeks, so expect something by 4 Jan 2027. We'll remind you if it goes quiet.");
-    expect(celebrationLine({ state: "agent", expectMs: null, noWindow: true }, "Jo", null, NOW)).toBe("Add a reply window to Jo's card and we'll remind you when it's time to nudge.");
   });
   it("the milestones, worded exactly", () => {
     expect(Object.keys(MILESTONE).map(Number)).toEqual([1, 10, 25, 50, 100]);

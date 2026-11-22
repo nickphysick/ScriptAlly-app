@@ -31,6 +31,7 @@ import type { LogAgain } from "../../../lib/queryActions/drawerStore";
 /* the sample control's rules and its --qad-* tokens (declared for `.laq` there too) */
 import "../../queryActions/queryDrawer.css";
 import { IlloSlot } from "../IlloSlot";
+import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
 import "./qcLogStages.css";
@@ -58,7 +59,7 @@ export interface Logged {
   agentGoesOnUndo?: () => boolean;
 }
 /** the celebration's facts, fixed at the moment of the log */
-interface LoggedView extends Logged { n: number; first: string; preview: Preview; weeks: number | null; before: FlowState }
+interface LoggedView extends Logged { n: number; first: string; preview: Preview; weeks: number | null; before: FlowState; reply: ReplyAnswers | null }
 
 export function useReducedMotion(): boolean {
   const q = "(prefers-reduced-motion: reduce)";
@@ -97,6 +98,9 @@ export interface QcLogStagesProps {
   onSentAfterAll: (agentId: string) => Promise<void>;
   /** v2 · Phase 6 — this book's queries, for the review's two numbers (the Dashboard's own functions read them) */
   bookQueries: readonly Query[];
+  /** v2 · Phase 7 — the Dashboard's active count for this book, live (read back after a save) */
+  activeNow?: number;
+
   onSave: (a: LogAnswers) => Promise<Logged | null>;
   /** v1.2 — a door that names a package (a package's builder): it is preselected on the Materials stage, still unanswered,
    *  so the ask card shows over it */
@@ -180,16 +184,18 @@ export { NO_LETTER, NO_SYN };
 /* v1.1 — THE TRACK (option C): the stages (six from v1.3) as the slip's own status track, on the FlowHead's ground. A finished
    node is a button (navy, ✓, its answer under its label) that opens that stage; the current one is a white disc ringed
    in navy; the rest are faint outlines and are not focusable. */
-export const Stepper: React.FC<{ s: FlowState; values: Record<StageKey, string | null>; onGo: (k: StageKey) => void; locked?: boolean }> = ({ s, values, onGo, locked }) => (
+export const Stepper: React.FC<{ s: FlowState; values: Record<StageKey, string | null>; onGo: (k: StageKey) => void; locked?: boolean;
+  /** v2 — the logged screen: every step done, the last one too */
+  allDone?: boolean }> = ({ s, values, onGo, locked, allDone }) => (
   <div className="laq-trk" data-qls="steps" data-laq="track" role="list" aria-label="Logging a query, step by step">
     {STAGES.map((k, i) => {
       const now = !locked && s.step === k;
-      const done = !now && answered(s, k);
+      const done = allDone || (!now && answered(s, k));
       const state = now ? "now" : done ? "done" : "todo";
       const cls = `laq-s${now ? " is-n" : ""}${done ? " is-d" : ""}`;
       const inner = <>
         <span className="laq-nd" data-laq="node" aria-hidden="true">{done ? "✓" : i + 1}</span>
-        <span className="laq-l">{STAGE_LABEL[k]}{done ? <b data-qls="step-value">{values[k] ?? ""}</b> : null}</span>
+        <span className="laq-l">{STAGE_LABEL[k]}{done && k !== "check" ? <b data-qls="step-value">{values[k] ?? ""}</b> : null}</span>
       </>;
       return (
         <div key={k} role="listitem" className="laq-si">
@@ -925,7 +931,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         });
       });
     } else {
-      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: rp?.wk ?? null, before }); setPhase("yay"); });
+      stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: rp?.wk ?? null, before, reply: rp }); setPhase("yay"); });
     }
   };
   /* ⌘↵ / Ctrl↵ logs from the check */
@@ -1002,12 +1008,24 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   /* v1.2 — THE DIMMED PAGE'S LEAVE CHECK, the action drawers' own: with answers it asks, without it closes. The host's
      scrim calls it through `leaveRef`; Escape is unchanged (the host closes). */
   const [leaveAsk, setLeaveAsk] = useState(false);
-  if (p.leaveRef) p.leaveRef.current = () => { if (phase === "flow" && !s.notSent && touched.current) setLeaveAsk(true); else p.onClose(); };
+  const leave = () => { if (phase === "flow" && !s.notSent && touched.current) setLeaveAsk(true); else p.onClose(); };
+  if (p.leaveRef) p.leaveRef.current = leave;
+  /* v2 · Phase 7 — ESCAPE IS THE SAME LEAVE CHECK, on the one Escape stack (lib/escapeStack), at ESC_LEVEL.journey: above
+     every host that mounts the journey (so none of them closes it first), below a docked card's peek. Order: an open paperclip (its own layer above the drawer's, so it never reaches here) → an in-place picker
+     (the sent calendar, an open piece on the pieces screen) → the leave check (Esc there keeps the journey) → close.
+     With nothing entered yet it just closes. */
+  useEscapeLayer(true, () => {
+    if (phase !== "flow") { p.onClose(); return; }
+    if (leaveAsk) { setLeaveAsk(false); return; }
+    if (s.step === "when" && s.earlier) { setS((o) => ({ ...o, earlier: false })); return; }
+    if (s.step === "what" && (s.pOpen.letter || s.pOpen.syn || s.pOpen.sample)) { setS((o) => ({ ...o, pOpen: { letter: false, syn: false, sample: false } })); return; }
+    leave();
+  }, ESC_LEVEL.journey);
   const leaveFoot = (
     <>
       <span className="laq-lv" role="alertdialog" aria-label="Discard this query?"><b>Discard this?</b> Nothing has been saved yet.</span>
       <span className="laq-sp" />
-      <button type="button" className="laq-lnk" data-qls="leave-keep" onClick={() => setLeaveAsk(false)}>Keep going</button>
+      <button type="button" className="laq-lnk" data-qls="leave-keep" autoFocus onClick={() => setLeaveAsk(false)}>Keep going</button>
       <button type="button" className="laq-btn" data-qls="leave-discard" onClick={p.onClose}>Discard</button>
     </>
   );
@@ -1048,13 +1066,29 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
 
   if (phase === "yay" && logged) {
     const L = logged;
-    const line = celebrationLine(L.preview, L.first, L.weeks, nowMs);
+    const line = L.reply && L.before.sent != null
+      ? celebrationLine({ first: L.first, wk: L.weeks, sentMs: L.before.sent, nowMs, reply: L.reply })
+      : "";
+    /* v2 · Phase 7 — the header on the logged screen: "Logged. Off to {First}!" and the active count READ BACK from the
+       Dashboard's own count (the host's live `activeNow`), never n+1 assumed; every step done, none a door */
+    const passedL = L.before.sent != null && isPastReply(L.before.sent, L.weeks, nowMs);
+    const [y1, y2] = headline({ sitting, agentChosen: true, sentMs: L.before.sent, nowMs, logged: { first: L.first, passed: passedL, active: p.activeNow ?? null } });
+    const yTop = (
+      <div className="laq-top" data-laq="top">
+        <FlowHead title={<>{y1}<span className="is-c br" data-laq="head-2">{y2}</span></>} titleKey={`${y1}|${y2}`}
+          mark={<img className="flh-m" data-laq="mentor" src="/icon-192.png" alt="" width={48} height={48} />}
+          onClose={p.onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
+        <Stepper s={L.before} values={values} onGo={() => {}} locked allDone />
+      </div>
+    );
     const mile = MILESTONE[L.n] ?? null;
     return (
       <div ref={rootRef} className="laq" data-qc149f="log" data-qls="root" data-step="yay">
         <div className="laq-in">
+          {yTop}
+          <div className="laq-sb laq-yayb" data-qls="body">
           <div className="laq-yay" data-qls="yay">
-            <IlloSlot name="celebration · query sent" width={210} height={130} />
+            <IlloSlot name="celebration · query sent" width={170} height={96} />
             <TypedHead text={`Off to ${L.first}.`} reduce={reduce} />
             <p className="laq-yl" data-qls="yay-line">{line}</p>
             <span className="laq-cnt" data-qls="count">Query number <Odometer n={L.n} /> for {p.bookTitle}</span>
@@ -1062,6 +1096,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
             <div className="laq-slipw">
               {card(L.preview, true, L.before.sent)}
             </div>
+          </div>
           </div>
           <div className="laq-cf" data-qls="foot">
             <button type="button" className="laq-lnk" data-qls="open-card" onClick={() => L.openCard()}>Open {L.first}'s card</button>
