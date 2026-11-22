@@ -366,18 +366,18 @@
    "match": {
     "sel": "span.fv2-exw > b"
    },
-   "reason": "Left at 15: at 16 \"Nadia asked for the full manuscript\" needs 258.3px and its column is 252, so it wraps; it needs 7px more (measured, consolidate-and-finish v1, B1).",
-   "kind": "open",
-   "source": "consolidate-and-finish v1"
+   "reason": "Left at 15: at 16 \"Nadia asked for the full manuscript\" needs 258.3px and its column is 252, so it wraps; it needs 7px more (measured, consolidate-and-finish v1, B1). Agreed (rulings v4, item 5, 22 Nov 2026): the first-visit example title stays at its current size.",
+   "kind": "agreed",
+   "source": "consistency wrap-up v1 (rulings v4)"
   },
   {
    "rule": "R12",
    "match": {
     "sel": "div.ms29-dt-f > span"
    },
-   "reason": "Left at 15 (reverted in consolidate-and-finish v1, B1): at 16 the line wraps (+23px) in its 210px span; it needs 12px more width.",
-   "kind": "open",
-   "source": "consolidate-and-finish v1"
+   "reason": "Left at 15 (reverted in consolidate-and-finish v1, B1): at 16 the line wraps (+23px) in its 210px span; it needs 12px more width. Agreed (rulings v4, item 5, 22 Nov 2026): the Manuscripts date line stays at its current size.",
+   "kind": "agreed",
+   "source": "consistency wrap-up v1 (rulings v4)"
   },
   {
    "rule": "R12",
@@ -402,9 +402,9 @@
    "match": {
     "sel": "div.qc152-r1 > b"
    },
-   "kind": "open",
-   "reason": "Left at 15.5 (reverted in consolidate-and-finish v1, B1): at 16 the first thread line in the To-do desk's card preview wraps its time onto a second line.",
-   "source": "consolidate-and-finish v1"
+   "kind": "agreed",
+   "reason": "Left at 15.5 (reverted in consolidate-and-finish v1, B1): at 16 the first thread line in the To-do desk's card preview wraps its time onto a second line. Agreed (rulings v4, item 5, 22 Nov 2026): the first thread line in the To-do desk's card preview stays at its current size.",
+   "source": "consistency wrap-up v1 (rulings v4)"
   }
  ]
 }
