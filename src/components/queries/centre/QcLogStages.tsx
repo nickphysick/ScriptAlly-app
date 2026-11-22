@@ -19,7 +19,7 @@ import { FlowHead } from "../../shared/FlowHead";
 import {
   HOW, MILESTONE, PREVIEW_ID, firstName, monthLong, STAGES, celebrationLine, STAGE_LABEL, headline, calMonth, dayMon, dayMonY, howLabel, askItems, askFill, sizeName, NO_LETTER, NO_SYN,
   planOf, previewOf, sameDay, sod, choiceOfSample, sampleOfChoice, titleName, weekdayDay, whoGroups, yesterday, type Preview,
-  WEEKDAY, calMonthAhead, cardOffer, expectOf, nudgeAnswer, nudgeChips, nudgeDateOf, replyDefaults, replyReady, toggleUnknown, withWeeks, type ReplyAnswers,
+  WEEKDAY, calMonthAhead, cardOffer, expectOf, nudgeAnswer, nudgeChips, nudgeDateOf, isPastReply, settleReply, chipOn, daysBefore, replyDefaults, replyReady, toggleUnknown, withWeeks, type ReplyAnswers,
   type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
 import { QcSlip153 } from "./QcSlip153";
@@ -715,14 +715,18 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
 
   /* ── v1.3 — the Nudge stage: when they might reply, and whether to be reminded ── */
   const agentWk = agent?.weeks ?? null;
-  const rp: ReplyAnswers | null = s.reply ?? (agent ? replyDefaults({ responseTimeWeeks: agentWk ?? undefined, noResponseMeansNo: agent.nrmn }) : null);
+  /* v2 · Phase 5 — the answers settled against the dates (settleReply): "now" only while the reply date has passed (and
+     the default the first time it has), Close it only with a reply date still ahead */
+  const rp0: ReplyAnswers | null = s.reply ?? (agent ? replyDefaults({ responseTimeWeeks: agentWk ?? undefined, noResponseMeansNo: agent.nrmn }) : null);
+  const rp: ReplyAnswers | null = rp0 && s.sent != null ? settleReply(rp0, s.sent, nowMs, !s.reply) : rp0;
   const setReply = (r: ReplyAnswers) => set({ reply: r });
   const nudgeBody = () => {
     if (!rp || s.sent == null) return null;
     const sent = s.sent;
     const ex = expectOf(sent, rp.wk);
+    const past = isPastReply(sent, rp.wk, nowMs);
     const offer = cardOffer(agentWk, rp.wk);
-    const nd = nudgeDateOf(rp, sent);
+    const nd = nudgeDateOf(rp, sent, nowMs);
     const day = (d: Date) => `${WEEKDAY[d.getDay()].slice(0, 3)} ${dayMonY(d.getTime(), nowMs)}`;
     const opt = (k: ReplyAnswers["ifNo"], title: string, sub: string, extra: React.ReactNode, dis: boolean, tag: string | null) => (
       <div className={`laq-nopt${rp.ifNo === k ? " is-on" : ""}${dis ? " is-dis" : ""}`} data-qls="nudge-opt" data-k={k} data-on={rp.ifNo === k ? "1" : "0"}>
@@ -733,15 +737,16 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         {rp.ifNo === k && extra ? extra : null}
       </div>
     );
-    const chips = nudgeChips(sent, rp.wk);
+    const chips = nudgeChips(sent, rp.wk, nowMs);
+    const on = chipOn(rp, chips);
     const calAt = s.nCal ?? (() => { const d = new Date(rp.nPick ?? nd?.getTime() ?? nowMs); return d.getFullYear() * 12 + d.getMonth(); })();
     const cal = calMonthAhead(Math.floor(calAt / 12), calAt % 12, nowMs);
     const chipRow = (
       <>
         <div className="laq-nch" data-qls="nudge-chips" role="radiogroup" aria-label="When to be reminded">
           {chips.map((c) => (
-            <button key={c.k} type="button" role="radio" aria-checked={rp.nWhen === c.k} className={`laq-chip${rp.nWhen === c.k ? " is-on" : ""}`} data-qls="nudge-chip" data-k={c.k}
-              onClick={() => setReply({ ...rp, nWhen: c.k })}>{c.label}</button>
+            <button key={c.k} type="button" role="radio" aria-checked={on === c.k} className={`laq-chip${on === c.k ? " is-on" : ""}`} data-qls="nudge-chip" data-k={c.k}
+              onClick={() => setReply({ ...rp, ifNo: "nudge", nWhen: c.k })}>{c.label}</button>
           ))}
           <button type="button" role="radio" aria-checked={rp.nWhen === "pick"} className={`laq-chip${rp.nWhen === "pick" ? " is-on" : ""}`} data-qls="nudge-chip" data-k="pick"
             onClick={() => set({ reply: { ...rp, nWhen: "pick" }, nCal: null })}>Pick a date</button>
@@ -767,12 +772,13 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     );
     return (
       <>
-        <h2 className="laq-qh">When might {first} reply?</h2>
+        <h2 className="laq-qh">{past ? `How long does ${first} usually take?` : `When might ${first} reply?`}</h2>
         <p className="laq-qs" data-qls="nudge-sub">{agentWk ? `${first}'s card says ${agentWk} weeks.` : `Nothing on ${first}'s card about how long they take. Your best guess is fine.`}</p>
         <div className="laq-wkb" data-qls="weeks">
           <WeekSlider label="Response time" value={rp.wk} min={1} max={26}
             onChange={(w) => setReply(withWeeks(rp, w, agentWk))} onUnknown={() => setReply(toggleUnknown(rp, agentWk))} />
-          <p className="laq-wkx" data-qls="reply-by">{ex ? <>Reply expected by <b>{day(ex)}</b>.</> : "No reply date, so choose when to be reminded below."}</p>
+          <p className="laq-wkx" data-qls="reply-by">{!ex ? "No reply date, so choose when to be reminded below."
+            : past ? <>That was <b>{day(ex)}</b>, {Math.max(1, daysBefore(ex.getTime(), nowMs))} days ago.</> : <>Reply expected by <b>{day(ex)}</b>.</>}</p>
           {offer ? (
             <label className={`laq-svk${rp.saveWk ? " is-on" : ""}`} data-qls="save-weeks" data-kind={offer.kind} data-on={rp.saveWk ? "1" : "0"}>
               <input type="checkbox" className="sr-only" checked={rp.saveWk} onChange={() => setReply({ ...rp, saveWk: !rp.saveWk })} />
@@ -783,14 +789,24 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
             </label>
           ) : null}
         </div>
+        {past ? <>
+          {/* v2 · Phase 5 — the reply date had already gone by on the date given (screen 09) */}
+          <h3 className="laq-qh is-q2">It’s past that date. What now?</h3>
+          <div className="laq-nopts" data-qls="nudge-opts" data-past="1" role="radiogroup" aria-label="It’s past that date. What now?">
+            {opt("now", `I’ll nudge ${first} now`, "It goes on your to-do list for today.", null, false, null)}
+            {opt("nudge", "Give it longer", nd && rp.ifNo === "nudge" ? `Remind me to nudge on ${day(nd)}.` : `Remind me to nudge on ${day(chips[1].d)}.`, chipRow, false, null)}
+            {opt("none", "No reminder", "Nothing goes on your to-do list.", null, false, null)}
+          </div>
+        </> : <>
         <h3 className="laq-qh is-q2">Want a reminder to nudge?</h3>
         <div className="laq-nopts" data-qls="nudge-opts" role="radiogroup" aria-label="Want a reminder to nudge?">
-          {opt("nudge", "Remind me to nudge", nd ? `On ${day(nd)}. It goes on your to-do list.` : rp.nWhen === "pick" ? "Pick the day below." : "", chipRow, false, null)}
+          {opt("nudge", "Remind me to nudge", nd ? `On ${day(nd)}. It goes on your to-do list.` : rp.nWhen === "pick" && rp.ifNo === "nudge" ? "Pick the day below." : `On ${day(chips[1].d)}. It goes on your to-do list.`, chipRow, false, null)}
           {opt("close", "Close it if there's no reply", ex ? `On ${day(addDays(ex, 1))}, marked as no reply.` : "Needs a response time first.", null, !ex, agent?.nrmn ? `${first}'s card says no reply means no` : null)}
           {/* ⚠️ the brief's "You can add one later from the query card." is not true today: the card logs a nudge sent and
              snoozes one that is due, but nothing there sets a new reminder (reported in v1.3's REPORT) */}
           {opt("none", "No reminder", "Nothing goes on your to-do list.", null, false, null)}
         </div>
+        </>}
       </>
     );
   };
@@ -802,7 +818,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   const preview = useMemo(() => {
     const a = answers();
     if (!a || (s.step !== "check" && phase === "flow")) return null;
-    const plan = planOf(a, p.ctx, PREVIEW_ID, false);
+    const plan = planOf(a, p.ctx, PREVIEW_ID, false, nowMs);
     return plan ? previewOf(plan, nowMs, p.quietWeeks) : null;
   }, [s, phase, p.ctx, nowMs, p.quietWeeks]); // eslint-disable-line react-hooks/exhaustive-deps
   const slip = (pv: NonNullable<typeof preview>, tag: boolean) => (
@@ -922,7 +938,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     when: s.sent == null ? null : sameDay(s.sent, nowMs) ? "Today" : sameDay(s.sent, y) ? "Yesterday" : dayMon(s.sent),
     what: !s.piecesSet ? null : s.packageId ? p.packages.find((x) => x.id === s.packageId)?.name ?? "Package" : `${pieceCount} ${pieceCount === 1 ? "piece" : "pieces"}`,
     how: s.via ? howLabel(s.via) : null,
-    nudge: s.replySet && rp && s.sent != null ? nudgeAnswer(rp, s.sent) : null,
+    nudge: s.replySet && rp && s.sent != null ? nudgeAnswer(rp, s.sent, nowMs) : null,
     check: null,
   };
 

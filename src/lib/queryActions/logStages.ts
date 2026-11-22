@@ -306,19 +306,21 @@ export function materialsOf(a: LogAnswers, ctx: PlanContext): { pkCard: PackageC
   return { pkCard: null, mat, pieceV: { ...pieceV, bookVersion: bv } };
 }
 
-export function planOf(a: LogAnswers, ctx: PlanContext, id: string, requery: boolean): LogPlan | null {
+export function planOf(a: LogAnswers, ctx: PlanContext, id: string, requery: boolean, nowMs: number = a.sent): LogPlan | null {
   const agent = ctx.agents.find((x) => x.id === a.agentId);
   if (!agent) return null;
   const sent = new Date(a.sent);
   const { pkCard, mat, pieceV } = materialsOf(a, ctx);
-  return { id, manuscriptId: ctx.manuscriptId, agent, sent, via: a.via, pkCard, mat, pieceV, basedOn: null, ...replyPlan(a.reply ?? replyDefaults(agent), agent, a.sent), requery };
+  return { id, manuscriptId: ctx.manuscriptId, agent, sent, via: a.via, pkCard, mat, pieceV, basedOn: null, ...replyPlan(a.reply ?? replyDefaults(agent), agent, a.sent, nowMs), requery };
 }
 
 /* ── v1.3 — the Nudge stage ───────────────────────────────────────────────────────────────────────────────────── */
 
-/** the reminder chips: counted from the reply date, or from the day it was sent when the reply time is Unknown */
-export type NudgeWhen = "w0" | "week" | "2w" | "6w" | "8w" | "12w" | "pick";
-export type ReplyChoice = "nudge" | "close" | "none";
+/** the reminder chips: counted from the reply date while it is ahead; otherwise from TODAY (v2): with Unknown, and once the
+ *  reply date has passed or the query went more than a week ago with no reply date ("n1" / "n2" / "n4") */
+export type NudgeWhen = "w0" | "week" | "2w" | "6w" | "8w" | "12w" | "n1" | "n2" | "n4" | "pick";
+/** v2 — "now": the reply date has already passed on the date given, and the writer will nudge today */
+export type ReplyChoice = "nudge" | "close" | "none" | "now";
 export interface ReplyAnswers {
   /** the slider: weeks, or null for Unknown */
   wk: number | null;
@@ -355,21 +357,52 @@ export function toggleUnknown(r: ReplyAnswers, agentWk: number | null): ReplyAns
 /** the reply date: sent + weeks, or null with Unknown */
 export const expectOf = (sentMs: number, wk: number | null): Date | null => (wk ? addDays(new Date(sod(sentMs)), wk * 7) : null);
 
-export interface NudgeChip { k: NudgeWhen; label: string; d: Date }
-/** the chips, weekend-shifted as the old journey's were (`reminderAnchors`) */
-export function nudgeChips(sentMs: number, wk: number | null): NudgeChip[] {
+/** v2 — the reply date has already gone by on the sent date given (a reply date today has not) */
+export const isPastReply = (sentMs: number, wk: number | null, nowMs: number): boolean => {
   const ex = expectOf(sentMs, wk);
+  return !!ex && sod(ex.getTime()) < sod(nowMs);
+};
+
+export interface NudgeChip { k: NudgeWhen; label: string; d: Date }
+/**
+ * The chips, weekend-shifted as the old journey's were (`reminderAnchors`).
+ * ⚠️ v2 — NEVER A DATE IN THE PAST: counted from the reply date only while it is still ahead; with Unknown they count
+ *    from today (v1.3 counted from the sent date, so a query sent 60 days ago offered "In 6 weeks" 18 days back), and
+ *    once the reply date has passed, or the query went over a week ago with no reply date, they are a week, two weeks
+ *    and a month from today (the mock's). `nowMs` defaults to the sent day (logging on the day it went).
+ */
+export function nudgeChips(sentMs: number, wk: number | null, nowMs: number = sentMs): NudgeChip[] {
+  const ex = expectOf(sentMs, wk);
+  const today = new Date(sod(nowMs));
+  if ((ex && sod(ex.getTime()) < today.getTime()) || (!ex && isCatchingUp(sentMs, nowMs))) {
+    return reminderAnchors(today, [["n1", "In a week", 7], ["n2", "In two weeks", 14], ["n4", "In a month", 30]]).map((a) => ({ k: a.k as NudgeWhen, label: a.label, d: a.d! }));
+  }
   const list: [string, string, number][] = ex
     ? [["w0", "On the day", 0], ["week", "A week later", 7], ["2w", "Two weeks later", 14]]
     : [["6w", "In 6 weeks", 42], ["8w", "In 8 weeks", 56], ["12w", "In 12 weeks", 84]];
-  return reminderAnchors(ex ?? new Date(sod(sentMs)), list).map((a) => ({ k: a.k as NudgeWhen, label: a.label, d: a.d! }));
+  return reminderAnchors(ex ?? today, list).map((a) => ({ k: a.k as NudgeWhen, label: a.label, d: a.d! }));
 }
-/** the nudge day, or null (no reminder, Close it, or "Pick a date" with no day yet) */
-export function nudgeDateOf(r: ReplyAnswers, sentMs: number): Date | null {
+/** the chip on show: the one chosen if it is in today's set, else the middle one (the mock's) */
+export const chipOn = (r: ReplyAnswers, chips: readonly NudgeChip[]): NudgeWhen =>
+  r.nWhen === "pick" || chips.some((c) => c.k === r.nWhen) ? r.nWhen : chips[1].k;
+/** the nudge day, or null (no reminder, Close it, or "Pick a date" with no day yet); "now" is today */
+export function nudgeDateOf(r: ReplyAnswers, sentMs: number, nowMs: number = sentMs): Date | null {
+  if (r.ifNo === "now") return new Date(sod(nowMs));
   if (r.ifNo !== "nudge") return null;
   if (r.nWhen === "pick") return r.nPick != null ? new Date(sod(r.nPick)) : null;
-  const chips = nudgeChips(sentMs, r.wk);
+  const chips = nudgeChips(sentMs, r.wk, nowMs);
   return (chips.find((c) => c.k === r.nWhen) ?? chips[1]).d;
+}
+/**
+ * v2 — the answers as they stand against the dates: "now" exists only while the reply date has passed, and Close it only
+ * with a reply date (each falls back to "Remind me to nudge"); the first time the date is past, "now" is the default.
+ */
+export function settleReply(r: ReplyAnswers, sentMs: number, nowMs: number, fresh: boolean): ReplyAnswers {
+  const past = isPastReply(sentMs, r.wk, nowMs);
+  if (past && fresh) return { ...r, ifNo: "now" };
+  if (r.ifNo === "now" && !past) return { ...r, ifNo: "nudge" };
+  if (r.ifNo === "close" && (past || !expectOf(sentMs, r.wk))) return { ...r, ifNo: past ? "now" : "nudge" };
+  return r;
 }
 /** Continue waits only while "Pick a date" has no day */
 export const replyReady = (r: ReplyAnswers): boolean => !(r.ifNo === "nudge" && r.nWhen === "pick" && r.nPick == null);
@@ -384,26 +417,28 @@ export function cardOffer(agentWk: number | null, wk: number | null): CardOffer 
 /** the weeks to save to the card when the query is logged, or null */
 export const cardWeeksToSave = (r: ReplyAnswers, agentWk: number | null): number | null => (cardOffer(agentWk, r.wk) && r.saveWk ? r.wk : null);
 
-const IF_NO_OF: Record<ReplyChoice, IfNo> = { nudge: "nudge", close: "close", none: "nothing" };
+const IF_NO_OF: Record<ReplyChoice, IfNo> = { nudge: "nudge", close: "close", none: "nothing", now: "nudge" };
 /**
  * The answers → the reply half of the log save's own `LogPlan` (the old journey's fields, unchanged). The reply date is
  * the WRITER'S whenever it is not the card's own weeks (`writerExpected`, as the old journey's "moved off the usual");
  * Unknown saves none. Close it needs a reply date, so with Unknown it falls back to no reminder.
  */
-export function replyPlan(r: ReplyAnswers, agent: Pick<Agent, "responseTimeWeeks">, sentMs: number): Pick<LogPlan, "expect" | "writerExpected" | "ifNo" | "nudgeDate" | "nrmnOverride"> {
+export function replyPlan(r: ReplyAnswers, agent: Pick<Agent, "responseTimeWeeks">, sentMs: number, nowMs: number = sentMs): Pick<LogPlan, "expect" | "writerExpected" | "ifNo" | "nudgeDate" | "nrmnOverride"> {
   const expect = expectOf(sentMs, r.wk);
   const choice: ReplyChoice = r.ifNo === "close" && !expect ? "none" : r.ifNo;
   return {
     expect,
     writerExpected: !!expect && r.wk !== cardWeeks(agent),
     ifNo: IF_NO_OF[choice],
-    nudgeDate: nudgeDateOf({ ...r, ifNo: choice }, sentMs),
+    /* v2 — "I'll nudge {First} now": a nudge reminder for today, the same field the chips set */
+    nudgeDate: nudgeDateOf({ ...r, ifNo: choice }, sentMs, nowMs),
     nrmnOverride: null,
   };
 }
 /** the track's finished answer under Nudge */
-export const nudgeAnswer = (r: ReplyAnswers, sentMs: number): string => {
-  const d = nudgeDateOf(r, sentMs);
+export const nudgeAnswer = (r: ReplyAnswers, sentMs: number, nowMs: number = sentMs): string => {
+  if (r.ifNo === "now") return "Now";
+  const d = nudgeDateOf(r, sentMs, nowMs);
   return d ? dayMon(d.getTime()) : r.ifNo === "close" ? "Close it" : "None";
 };
 

@@ -94,7 +94,7 @@ export const LogStagesHost: React.FC<{
     const uid = currentUser.id;
     const id = doc(collection(db, "users", uid, "queries")).id;
     const prev = previousQueryFor({ id: "__new__", agentId: a.agentId, manuscriptId: ms.id, status: QueryStatus.QUERIED, dateSent: "" }, forBook, a.sent);
-    const plan = planOf(a, model.ctx, id, !!prev);
+    const plan = planOf(a, model.ctx, id, !!prev, Date.now());
     if (!plan) return null;
     let snap;
     try {

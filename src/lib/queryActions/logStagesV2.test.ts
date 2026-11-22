@@ -159,3 +159,61 @@ describe("v2 · Phase 4 — I sent what {First} asks for", () => {
     expect(askItems({ ...full, syn: false, sample: smp("pages", 50) })).toEqual(["Query letter", "First 50 pages"]);
   });
 });
+
+/* ── Phase 5 — the Nudge step ── */
+import { chipOn, isPastReply, nudgeChips, nudgeDateOf, replyDefaults, replyPlan, settleReply, nudgeAnswer } from "./logStages";
+
+describe("v2 · Phase 5 — nudgeChips never offers a date in the past", () => {
+  const today = sod(NOW);
+  const notPast = (cs: { d: Date }[]) => cs.every((c) => c.d.getTime() >= today);
+  it("sent 60 days ago with an 8-week window: the reply date has passed, so a week / two weeks / a month from today", () => {
+    expect(isPastReply(daysAgo(60), 8, NOW)).toBe(true);
+    const cs = nudgeChips(daysAgo(60), 8, NOW);
+    expect(cs.map((c) => [c.k, c.label])).toEqual([["n1", "In a week"], ["n2", "In two weeks"], ["n4", "In a month"]]);
+    expect(notPast(cs)).toBe(true);
+  });
+  it("sent today: counted from the reply date, all ahead", () => {
+    const cs = nudgeChips(daysAgo(0), 8, NOW);
+    expect(cs.map((c) => c.k)).toEqual(["w0", "week", "2w"]);
+    expect(notPast(cs)).toBe(true);
+    expect(isPastReply(daysAgo(0), 8, NOW)).toBe(false);
+  });
+  it("Unknown: counted from today, never from the sent date", () => {
+    const recent = nudgeChips(daysAgo(3), null, NOW);
+    expect(recent.map((c) => c.k)).toEqual(["6w", "8w", "12w"]);
+    expect(notPast(recent)).toBe(true);
+    /* v1.3 counted from the sent date: 42 days after a date 60 days back is 18 days ago */
+    const old = nudgeChips(daysAgo(60), null, NOW);
+    expect(old.map((c) => c.k)).toEqual(["n1", "n2", "n4"]);
+    expect(notPast(old)).toBe(true);
+  });
+  it("a reply date of today has not passed", () => {
+    expect(isPastReply(daysAgo(56), 8, NOW)).toBe(false);
+    expect(nudgeChips(daysAgo(56), 8, NOW)[0].k).toBe("w0");
+  });
+});
+
+describe("v2 · Phase 5 — past that date: nudge now, give it longer, or no reminder", () => {
+  const harriet = { responseTimeWeeks: 8, noResponseMeansNo: false };
+  it("the first look defaults to nudge now; now becomes a reminder for today", () => {
+    const r = settleReply(replyDefaults(harriet), daysAgo(60), NOW, true);
+    expect(r.ifNo).toBe("now");
+    expect(nudgeDateOf(r, daysAgo(60), NOW)!.getTime()).toBe(today0());
+    const plan = replyPlan(r, harriet, daysAgo(60), NOW);
+    expect(plan.ifNo).toBe("nudge");
+    expect(plan.nudgeDate!.getTime()).toBe(today0());
+    expect(nudgeAnswer(r, daysAgo(60), NOW)).toBe("Now");
+  });
+  it("now falls back to a reminder once the window is no longer past; close needs a date ahead", () => {
+    expect(settleReply({ ...replyDefaults(harriet), ifNo: "now" }, daysAgo(2), NOW, false).ifNo).toBe("nudge");
+    expect(settleReply({ ...replyDefaults(harriet), ifNo: "close" }, daysAgo(60), NOW, false).ifNo).toBe("now");
+    expect(settleReply({ ...replyDefaults(harriet), ifNo: "none" }, daysAgo(60), NOW, false).ifNo).toBe("none");
+  });
+  it("give it longer: the chip shown is the middle one until one in today's set is picked", () => {
+    const r = { ...replyDefaults(harriet), ifNo: "nudge" as const };
+    const cs = nudgeChips(daysAgo(60), 8, NOW);
+    expect(chipOn(r, cs)).toBe("n2");
+    expect(nudgeDateOf(r, daysAgo(60), NOW)!.getTime()).toBe(cs[1].d.getTime());
+  });
+});
+function today0() { return sod(NOW); }
