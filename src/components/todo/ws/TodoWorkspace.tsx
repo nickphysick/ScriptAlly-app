@@ -487,7 +487,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
       : t.query ? <StatusDot status={t.query.status as QueryStatus} overrideSize={20} decorative /> : null;
     return (
       <div key={t.key} className="tws-ti" role="button" tabIndex={0} data-tws-row={t.key} data-kind={t.kind} aria-current={on ? "true" : undefined}
-        data-tws58-stage={stage ?? undefined} style={stageVars(stage) as React.CSSProperties | undefined}
+        data-tws58-stage={stage ?? undefined} style={stageVars(stage, t.query?.status) as React.CSSProperties | undefined}
         data-ticked={held?.task.key === t.key ? "" : undefined} data-leaving={held?.task.key === t.key && held.phase === "leave" ? "" : undefined}
         onClick={() => go(t.key)} onKeyDown={(e) => { if (e.key === "Enter") go(t.key); }} title={t.title}>
         {t.kind === "own" ? <span className="tws-av" data-k="own" data-tws="glyph" aria-hidden="true">{TICK}</span>
@@ -659,7 +659,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
          logs (D7). The hawk sits above the rail, and steps aside on the check step. */
       main = (
         <DeskTiles.Provider value={true}>
-          {onCheck ? null : <div className="tws-mnote" data-tws="hawk" data-tws58-stage={deskStage ?? undefined} style={stageVars(deskStage) as React.CSSProperties | undefined}><img src={MENTOR} alt="" /><p>{mentorLine(t, facts)}</p></div>}
+          {onCheck ? null : <div className="tws-mnote" data-tws="hawk" data-tws58-stage={deskStage ?? undefined} style={stageVars(deskStage, t.query?.status) as React.CSSProperties | undefined}><img src={MENTOR} alt="" /><p>{mentorLine(t, facts)}</p></div>}
           <ol className="tws-rail" data-tws="rail">
             {qs.map((q, i) => i < cur ? (
               <li key={q.key} className="tws-st" data-st="done" data-tws-step={q.key}>

@@ -78,7 +78,7 @@ const StatusChip: React.FC<{ status: string }> = ({ status }) => {
   const st = stageOf(status);
   return (
     <span className="sv1-chip" data-stage={st} style={{ background: bandBackground(status), color: bandInk(status), borderColor: STAGE_COLOURS[st].edge }}>
-      <StatusDot status={status as QueryStatus} overrideSize={14} decorative />
+      <StatusDot status={status as QueryStatus} overrideSize={14} tone="inherit" decorative />
       {status}
     </span>
   );
@@ -297,7 +297,7 @@ export const SearchDesk: React.FC<SearchDeskProps> = ({
           {head(p.sub)}
           {p.status && st ? (
             <div className="sv1-pk-band" style={{ background: bandBackground(p.status), color: bandInk(p.status), borderColor: STAGE_COLOURS[st].edge }}>
-              <StatusDot status={p.status as QueryStatus} overrideSize={22} decorative />
+              <StatusDot status={p.status as QueryStatus} overrideSize={22} tone="inherit" decorative />
               <div><b>{p.status}</b><span>{p.queriedLine}</span></div>
             </div>
           ) : <div className="sv1-pk-plain">Not queried for {p.manuscript}.</div>}
@@ -309,7 +309,7 @@ export const SearchDesk: React.FC<SearchDeskProps> = ({
       body = (
         <>
           <div className="sv1-pk-band" style={{ background: bandBackground(p.status), color: bandInk(p.status), borderColor: STAGE_COLOURS[st].edge }}>
-            <StatusDot status={p.status as QueryStatus} overrideSize={22} decorative />
+            <StatusDot status={p.status as QueryStatus} overrideSize={22} tone="inherit" decorative />
             <div><b>{p.status}</b><span>{p.who}</span></div>
           </div>
           <Facts facts={p.facts} />

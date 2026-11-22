@@ -35,7 +35,9 @@ describe("DB3-3 · card heads read the one stage table", () => {
     const page = new Set(["#fffaf3", "#1c130f", "#e3d5c9", "#ebe4da", "#ffffff", "#7d7067", "#5d5850", "#a0675a", "#ece6dc", "#f1ece4",
       /* Plumage colours v1: the nudge-email ask (.d3-mail) keeps its rose, the old ladder's offer tint and edge; it is
          not a query's stage, so it did not move with the offer to navy (named in reports/plumage-colours-v1) */
-      "#f8e8e5", "#dfb1ac"]);
+      "#f8e8e5", "#dfb1ac",
+      /* the paper: words on the offer's navy head (lib/stageColours OFFER_INK) */
+      "#f4eee5"]);
     for (const h of hexes) expect(table.has(h) || page.has(h), h).toBe(true);
   });
 });

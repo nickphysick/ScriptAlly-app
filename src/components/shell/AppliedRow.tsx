@@ -38,7 +38,7 @@ export const AppliedRow: React.FC<{ hook: `data-${string}`; chips: readonly Appl
         <button key={c.key} type="button" className={`lf-apc${c.stage ? " lf-apc--stage" : ""}`} {...h("applied-chip")} data-k={c.key} data-stage={c.stage}
           aria-label={`Remove ${c.label}`} onClick={c.onRemove}
           style={c.stage ? ({ background: STAGE_COLOURS[c.stage].band, color: stageInk(c.stage), "--sf-edge": STAGE_COLOURS[c.stage].edge } as React.CSSProperties) : undefined}>
-          {c.stage && c.mark ? <StatusDot status={c.mark} overrideSize={14} decorative /> : null}
+          {c.stage && c.mark ? <StatusDot status={c.mark} overrideSize={14} tone="inherit" decorative /> : null}
           <span>{c.label}</span><i aria-hidden="true">×</i>
         </button>
       ))}

@@ -40,6 +40,8 @@ const QUERIES = [
 ];
 const TASKS = [task("t1", "partial_requested", "q1"), task("t2", "full_requested", "q2"), task("t3", "nudge_overdue", "q3")];
 const STAGE_OF_ROW: Record<string, Stage> = { "Send Greg your partial": "partial", "Send Jonathan your full": "full", "Nudge William": "queried" };
+/** Plumage colours v1 — the band is the query's status band: the two asks are requested, so the lighter shade */
+const BAND_OF_ROW: Record<string, string> = { "Send Greg your partial": "#f1d9cf", "Send Jonathan your full": "#d4d4da", "Nudge William": "#efe6d6" };
 
 vi.mock("../../../lib/firebase", () => ({ db: {}, auth: {}, OperationType: { GET: "GET", WRITE: "WRITE", DELETE: "DELETE" }, handleFirestoreError: () => {} }));
 vi.mock("firebase/firestore", () => ({
@@ -82,14 +84,14 @@ const styleOf = (tag: string): Record<string, string> => {
 };
 
 describe("v58 phase 2 — the glyph's disc is the query's stage", () => {
-  it("a Partial requested, a Full requested and a Queried row carry STAGE_COLOURS' band and edge", () => {
+  it("a Partial requested, a Full requested and a Queried row carry their status band and their stage's edge", () => {
     const rows = rowsOf(populated()).filter((r) => r.title in STAGE_OF_ROW);
     expect(rows.map((r) => r.title).sort()).toEqual(Object.keys(STAGE_OF_ROW).sort());
     for (const r of rows) {
       const st = STAGE_OF_ROW[r.title];
       expect(r.tag, r.title).toContain(`data-tws58-stage="${st}"`);
       const v = styleOf(r.tag);
-      expect(v["--tws58-band"], r.title).toBe(STAGE_COLOURS[st].band);
+      expect(v["--tws58-band"], r.title).toBe(BAND_OF_ROW[r.title]);
       expect(v["--tws58-edge"], r.title).toBe(STAGE_COLOURS[st].edge);
     }
   });
@@ -113,14 +115,14 @@ describe("v58 phase 7 — the hawk's bubble takes the stage colour", () => {
     const st = STAGE_OF_ROW[open[0].title];
     expect(st).toBeDefined();
     expect(hawk![1]).toContain(`data-tws58-stage="${st}"`);
-    expect(styleOf(hawk![1])["--tws58-band"]).toBe(STAGE_COLOURS[st].band);
+    expect(styleOf(hawk![1])["--tws58-band"]).toBe(BAND_OF_ROW[open[0].title]);
     expect(styleOf(hawk![1])["--tws58-edge"]).toBe(STAGE_COLOURS[st].edge);
   });
   it("…and over the model for all three (the desk opens one at a time)", () => {
     const tasks = modelTasks().filter((t) => t.query && ["send", "nudge"].includes(t.kind));
     expect(tasks.length).toBe(3);
     const src = readFileSync("src/components/todo/ws/TodoWorkspace.tsx", "utf8");
-    expect(src).toMatch(/className="tws-mnote" data-tws="hawk" data-tws58-stage=\{deskStage \?\? undefined\} style=\{stageVars\(deskStage\)/);
+    expect(src).toMatch(/className="tws-mnote" data-tws="hawk" data-tws58-stage=\{deskStage \?\? undefined\} style=\{stageVars\(deskStage, t\.query\?\.status\)/);
   });
 });
 

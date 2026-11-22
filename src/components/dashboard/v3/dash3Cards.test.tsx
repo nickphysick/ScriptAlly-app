@@ -25,7 +25,7 @@ describe("DB3-3 · Next up's head is the lead task's stage", () => {
   it("a full request: the full band on the head, the full tint on the lead card", () => {
     const h = html(QueryStatus.FULL_REQUESTED);
     expect(h).toContain('data-stage="full"');
-    expect(h).toContain(`style="background:${statusBand(QueryStatus.FULL_REQUESTED)}"`); /* Plumage colours v1: the status's band */
+    expect(h).toContain(`style="background:${statusBand(QueryStatus.FULL_REQUESTED)};box-shadow:inset 0 0 0 3px #b5b6c0;border-radius:12px 12px 0 0"`); /* the with-you outline */ /* Plumage colours v1: the status's band */
     expect(h).toContain(`style="background:${STAGE_COLOURS.full.tint}"`);
   });
   it("a task not about a query: a plain paper head, no stage fill", () => {

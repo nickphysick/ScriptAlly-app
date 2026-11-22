@@ -188,12 +188,12 @@ describe("Plumage colours v1 · Dashboard and Responses restate the table", () =
 });
 
 describe("Plumage colours v1 · the phone", () => {
-  it("the phone's statusFill and disc are the stage bands; Signed sits with the offer", async () => {
+  it("Phase 4: the phone's statusFill and disc are the status bands; Signed sits with the offer", async () => {
     const { statusFill } = await import("../components/phone/v3/V3Parts");
     const { phoneFill } = await import("../components/phone/PhoneDisc");
     for (const s of Object.values(QueryStatus)) {
-      expect([s, statusFill(s)]).toEqual([s, STAGE_COLOURS[stageOf(s)].band]);
-      expect([s, phoneFill(s)]).toEqual([s, STAGE_COLOURS[stageOf(s)].band]);
+      expect([s, statusFill(s)]).toEqual([s, statusBand(s)]);
+      expect([s, phoneFill(s)]).toEqual([s, statusBand(s)]);
     }
     expect(statusFill(null)).toBe("#efe6d6");
   });
@@ -276,5 +276,27 @@ describe("rim and rimHi, one pair per stage", () => {
       expect(src).toMatch(new RegExp(`\\b${stage}: \\{[^}]*rim: "${c.rim}", rimHi: "${c.rimHi}" \\}`));
       expect(c.rim).toMatch(/^#[0-9a-f]{6}$/);
     }
+  });
+});
+
+describe("Plumage colours v1 · Phase 4 · the outline is on card bands and strips only", () => {
+  const read = (f: string) => readFileSync(f, "utf8");
+  it("these draw it: the grid card, the slip, the slide-out strip, the phone query page band, the Responses strip, Next up's head", () => {
+    for (const f of [
+      "src/components/queries/centre/QcCard154.tsx", "src/components/queries/centre/QcSlip153.tsx", "src/components/queries/centre/QcCard152.tsx",
+      "src/components/phone/v4/QueryPageV4.tsx", "src/components/responses/RspPanel.tsx", "src/components/dashboard/v2/Dash2Next.tsx",
+    ]) expect([f, read(f).includes("withYouOutline(")]).toEqual([f, true]);
+  });
+  it("these never do: bars, bubbles, chips, discs and chart segments", () => {
+    for (const f of [
+      "src/lib/qcThread152.ts", "src/components/phone/PhoneDisc.tsx", "src/components/phone/v3/V3Parts.tsx", "src/components/phone/v5/BirdsBlockV5.tsx",
+      "src/components/phone/v5/BirdsViewV5.tsx", "src/components/queries/centre/QcBirds150.tsx", "src/components/shell/SearchDesk.tsx",
+      "src/components/shell/StageFilter.tsx", "src/components/shell/AppliedRow.tsx", "src/lib/dash2.ts", "src/lib/dashHover.ts",
+    ]) expect([f, /withYouOutline|withYouShadow|--wy/.test(read(f))]).toEqual([f, false]);
+  });
+  it("the To-do desk takes the status band where it knows the status; Versions' chart takes the marks", () => {
+    expect(read("src/components/todo/ws/TodoWorkspace.tsx")).toContain("stageVars(stage, t.query?.status)");
+    expect(read("src/components/versions/v6/versionsV6.css")).toContain(`--v6-chart-queried: ${STAGE_COLOURS.queried.mark}; --v6-chart-partial: ${STAGE_COLOURS.partial.mark}; --v6-chart-full: ${STAGE_COLOURS.full.mark};`);
+    expect(read("src/components/versions/v6/versionsV6.css")).toContain(`--v6-stage-queried: ${STAGE_COLOURS.queried.band}; --v6-stage-partial: ${STAGE_COLOURS.partial.band}; --v6-stage-full: ${STAGE_COLOURS.full.band};`);
   });
 });

@@ -13,7 +13,8 @@
  *
  * ⚠️ EVERY COLOUR IS lib/stageColours' (`STAGE_COLOURS[stage].band` — a stage's sent band — and `.edge`), written inline so the rendered
  *    background IS the table's value (LF3). Offer is flat navy (Plumage colours v1).
- * ⚠️ STATUS MARKS ARE INK, drawn by StatusDot, never redrawn and never a stage colour.
+ * ⚠️ STATUS MARKS ARE INK (the paper on the offer's navy, Plumage colours v1: `tone="inherit"` under the shape's
+ *    `color`), drawn by StatusDot, never redrawn and never a stage colour.
  */
 import React from "react";
 import { StatusDot } from "../StatusDot";
@@ -44,7 +45,7 @@ export const StageLabel: React.FC<{ item: StageItem }> = ({ item: x }) => {
   return (
     <button type="button" role="checkbox" aria-checked={x.on} className={`sf-lab${x.on ? " is-on" : ""}${zero ? " is-zero" : ""}`} {...h("stage")}
       data-stage={x.stage} data-n={x.n} style={ground(x.stage)} disabled={loading || zero} onClick={x.onToggle}>
-      <StatusDot status={x.mark} overrideSize={15} decorative /><span className="sf-nm">{x.label}</span><Num n={x.n} className="sf-n" />
+      <StatusDot status={x.mark} overrideSize={15} tone="inherit" decorative /><span className="sf-nm">{x.label}</span><Num n={x.n} className="sf-n" />
     </button>
   );
 };

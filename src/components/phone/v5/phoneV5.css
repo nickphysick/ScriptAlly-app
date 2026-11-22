@@ -226,6 +226,8 @@
   .pa5-dlab.r { left: 16px; background: var(--pa-navy); color: #fff; opacity: var(--r, 0); }
   .pa5-dkb { padding: 20px 24px 16px; display: flex; gap: 16px; align-items: center; }
   .pa5-dkb .pa3-gl { flex: none; }
+  /* Plumage colours v1 — a task about an offer sits on the offer's navy: its words are the paper */
+  .pa5-dkb:is([data-status="Offer"], [data-status="Signed"]) .pa5-dkx, .pa5-dkb:is([data-status="Offer"], [data-status="Signed"]) .pa5-dkx .pa4-s { color: #f4eee5; }
   .pa5-dkx { flex: 1; min-width: 0; overflow-wrap: anywhere; }
   .pa5-dkx .pa4-s { color: var(--pa-body); }
   .pa5-dkm { padding: 16px 24px 8px; }
