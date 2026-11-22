@@ -3,6 +3,7 @@
  * book version (edition-true, packageReplies.creditedSlot), how many resolve to one, and how many packages state one.
  * Also `unrecordedVersion`'s package-only figure, for comparison. Writes nothing.  npx tsx tests/e2e/ver1Scan.mjs
  */
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
@@ -12,8 +13,8 @@ import { sentRecordOf } from "../../src/lib/queryActions/sentRecord.ts";
 import { unrecordedVersion, bookVersionsOf } from "../../src/lib/bookVersions.ts";
 
 const env = (f) => Object.fromEntries(readFileSync(f, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")).map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }));
-const dev = env(".env.development"); const local = existsSync(".env.local") ? env(".env.local") : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("not dev");
+const dev = targetEnv(); const local = existsSync(".env.local") ? env(".env.local") : {};
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error("not dev");
 const CLOSED = new Set(["Rejected", "Withdrawn", "No Response", "Signed"]);
 for (const email of ["harness@scriptally.test", "ms21-filled@scriptally.test", "dv1@scriptally.test"]) {
   const app = initializeApp({ apiKey: dev.VITE_FIREBASE_API_KEY, authDomain: dev.VITE_FIREBASE_AUTH_DOMAIN, projectId: dev.VITE_FIREBASE_PROJECT_ID, appId: dev.VITE_FIREBASE_APP_ID }, email);

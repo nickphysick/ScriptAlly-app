@@ -1,12 +1,13 @@
 // QC149.1 Step 0 — a read-only census of the harness account: which fields queries, their steps, agents and
 // manuscripts actually hold, and the two duplicate pairs. Writes nothing.
+import { targetEnv, TARGET_PROJECT } from "./fsTarget.mjs";
 import { readFileSync, existsSync, writeFileSync, mkdirSync } from "node:fs";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
 const env = (f) => Object.fromEntries(readFileSync(f, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")).map((l) => { const i = l.indexOf("="); return [l.slice(0, i), l.slice(i + 1).replace(/^["']|["']$/g, "")]; }));
-const dev = env(".env.development"); const local = existsSync(".env.local") ? env(".env.local") : {};
-if (dev.VITE_FIREBASE_PROJECT_ID !== "scriptally-dev") throw new Error("dev only");
+const dev = targetEnv(); const local = existsSync(".env.local") ? env(".env.local") : {};
+if (dev.VITE_FIREBASE_PROJECT_ID !== TARGET_PROJECT) throw new Error("dev only");
 const app = initializeApp({ apiKey: dev.VITE_FIREBASE_API_KEY, authDomain: dev.VITE_FIREBASE_AUTH_DOMAIN, projectId: dev.VITE_FIREBASE_PROJECT_ID, appId: dev.VITE_FIREBASE_APP_ID });
 const db = getFirestore(app);
 const { user } = await signInWithEmailAndPassword(getAuth(app), "harness@scriptally.test", local.SA_E2E_PASSWORD);
