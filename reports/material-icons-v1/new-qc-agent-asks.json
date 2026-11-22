@@ -1,0 +1,27 @@
+{
+ "name": "qc-agent-asks",
+ "rows": [
+  {
+   "key": "0:Query letternot sent",
+   "text": "Query letternot sent",
+   "h": 42,
+   "icon": {
+    "w": 20.5506591796875,
+    "h": 20.55059814453125,
+    "before": true,
+    "kind": "letter"
+   }
+  },
+  {
+   "key": "1:Synopsisnot sent",
+   "text": "Synopsisnot sent",
+   "h": 42,
+   "icon": {
+    "w": 20.55059814453125,
+    "h": 20.5506591796875,
+    "before": true,
+    "kind": "synopsis"
+   }
+  }
+ ]
+}

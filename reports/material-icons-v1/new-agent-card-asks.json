@@ -1,0 +1,27 @@
+{
+ "name": "agent-card-asks",
+ "rows": [
+  {
+   "key": "0:Covering letter",
+   "text": "Covering letter",
+   "h": 42,
+   "icon": {
+    "w": 20.4144287109375,
+    "h": 20.4144287109375,
+    "before": true,
+    "kind": "letter"
+   }
+  },
+  {
+   "key": "1:Synopsis",
+   "text": "Synopsis",
+   "h": 42,
+   "icon": {
+    "w": 20.41448974609375,
+    "h": 20.41448974609375,
+    "before": true,
+    "kind": "synopsis"
+   }
+  }
+ ]
+}

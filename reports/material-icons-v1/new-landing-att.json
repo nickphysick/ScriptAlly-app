@@ -1,0 +1,85 @@
+{
+ "name": "landing-att",
+ "rows": [
+  {
+   "key": "0:Letter v3",
+   "text": "Letter v3",
+   "h": 24,
+   "icon": {
+    "w": 16,
+    "h": 16,
+    "before": true,
+    "kind": "letter"
+   }
+  },
+  {
+   "key": "1:Synopsis",
+   "text": "Synopsis",
+   "h": 24,
+   "icon": {
+    "w": 16,
+    "h": 16,
+    "before": true,
+    "kind": "synopsis"
+   }
+  },
+  {
+   "key": "2:15 pages",
+   "text": "15 pages",
+   "h": 24,
+   "icon": {
+    "w": 16,
+    "h": 16,
+    "before": true,
+    "kind": "pages"
+   }
+  },
+  {
+   "key": "3:First 3 chapters",
+   "text": "First 3 chapters",
+   "h": 24,
+   "icon": {
+    "w": 16,
+    "h": 16,
+    "before": true,
+    "kind": "chapters"
+   }
+  },
+  {
+   "key": "4:Task created",
+   "text": "Task created",
+   "h": 24,
+   "icon": null
+  },
+  {
+   "key": "5:answered: First 3 chapters",
+   "text": "answered: First 3 chapters",
+   "h": 24,
+   "icon": null
+  },
+  {
+   "key": "6:Task complete",
+   "text": "Task complete",
+   "h": 24,
+   "icon": null
+  },
+  {
+   "key": "7:Reminder in 2 weeks",
+   "text": "Reminder in 2 weeks",
+   "h": 24,
+   "icon": null
+  },
+  {
+   "key": "8:Reminder set",
+   "text": "Reminder set",
+   "h": 24,
+   "icon": null
+  },
+  {
+   "key": "9:Full manuscript",
+   "text": "Full manuscript",
+   "h": 24,
+   "icon": null
+  }
+ ]
+}

@@ -1,0 +1,27 @@
+{
+ "name": "package-sent-with",
+ "rows": [
+  {
+   "key": "0:No sample yet",
+   "text": "No sample yet",
+   "h": 23,
+   "icon": {
+    "w": 16,
+    "h": 16,
+    "before": true,
+    "kind": "pages"
+   }
+  },
+  {
+   "key": "1:Synopsis Synopsis, 1 page",
+   "text": "Synopsis Synopsis, 1 page",
+   "h": 23,
+   "icon": {
+    "w": 16,
+    "h": 16,
+    "before": true,
+    "kind": "synopsis"
+   }
+  }
+ ]
+}
