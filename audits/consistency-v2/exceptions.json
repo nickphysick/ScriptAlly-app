@@ -190,15 +190,6 @@
    "kind": "agreed"
   },
   {
-   "rule": "R6",
-   "match": {
-    "sel": "tws-qfb"
-   },
-   "reason": "For Nick (B7): the To-do's light 'Quick fill' pill is neither a filled nor an outline button.",
-   "kind": "open",
-   "source": "consolidate-and-finish v1"
-  },
-  {
    "rule": "R7",
    "match": {
     "sel": "acv2-frame"

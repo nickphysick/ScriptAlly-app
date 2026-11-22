@@ -27,6 +27,9 @@ export const STD = {
     "headings/small": { font: "Source Serif 4", size: 16, weight: "600", lh: 20.8 },
   },
   button: { height: 40, radius: "10", font: "Source Serif 4", size: 15, weight: "600" },
+  /* consistency wrap-up v1 (rulings v4, item 4): the SMALL OUTLINE BUTTON, the agreed kind for a button inside a header band —
+     30 high, radius 8, Source Serif 4 600 14, a 1.5px navy edge. `in` names the agreed ones; anything else is held to `button`. */
+  smallOutline: { height: 30, radius: "8", font: "Source Serif 4", size: 14, weight: "600", in: ["tws-qfb"] },
   card: { padding: "8 8 8 8", radius: "20", shadow: "#1c130f/4 0px 1px 2px 0px, #1c130f/7 0px 6px 18px 0px", innerRadius: "13", innerEdge: "1px solid #e9e3d9" },
   field: { height: 44, radius: "10", size: 16, edge: "#1c130f/18 0px 0px 0px 1px inset", focusEdge: "#2a3a52 0px 0px 0px 1.5px inset" },
   viewSwitch: { radius: "12", optHeight: 34, optRadius: "9" },
@@ -48,7 +51,7 @@ export const RULES = {
   R3: "Page ground is oat (#f2eee8) on workspace and public pages",
   R4: "Navy header: title 40px (±1) from its top, 40px (±1) to the content below, the same distance from the sheet's top on every page",
   R5: "Section, card and small headings match the three settled styles",
-  R6: "Action buttons in a page body match the filled or outline standard; at most one filled per view",
+  R6: "Action buttons in a page body match the filled or outline standard (or, inside a header band, the small outline button); at most one filled per view",
   R7: "Framed cards match the standard (rim 8 / 20 / shadow; inner 13 / 1px #e9e3d9)",
   R8: "Boxed text fields match the standard (44 high, radius 10, 1px ink edge, 16px)",
   R9: "View switches are boxed; slide-out close buttons are 36px; slide-out action footers are 72px",
@@ -161,6 +164,15 @@ function check(v, ctx) {
     const b = STD.button;
     for (const r of btns) {
       const g = r.sig, why = [];
+      const so = STD.smallOutline, small = so.in.some((c) => (r.sel || "").includes(c));
+      if (small) {
+        if (!(r.variant === "outline" || (r.variant === "light-filled" && base(g.bg) === "#ffffff")) || !(/inset/.test(g.shadow) && g.shadow.includes(STD.navy) && /1\.5px/.test(g.shadow))) why.push(`small outline: edge ${g.shadow !== "none" ? g.shadow : g.border}`);
+        if (!near(g.height, so.height, 1)) why.push(`${g.height} high`);
+        if (g.radius !== so.radius) why.push(`radius ${g.radius}`);
+        if (g.font !== so.font || !near(g.size, so.size, 0.5) || String(g.weight) !== so.weight) why.push(`${g.font} ${g.weight} ${g.size}px`);
+        if (why.length) fail("R6", { sel: r.sel, text: r.text, detail: `small outline: ${why.join(", ")}` });
+        continue;
+      }
       if (r.variant === "filled") { if (base(g.bg) !== STD.navy) why.push(`fill ${g.bg}`); }
       else if (r.variant === "outline") { if (!(/inset/.test(g.shadow) && g.shadow.includes(STD.navy)) && !(g.border && g.border.includes(STD.navy))) why.push(`edge ${g.shadow !== "none" ? g.shadow : g.border}`); }
       else why.push(r.variant === "text" ? "a text button (neither filled nor outline)" : `a light fill ${g.bg}`);

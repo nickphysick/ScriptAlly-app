@@ -522,11 +522,14 @@
 
 .tws-qf { flex: none; height: 26px; display: inline-flex; align-items: center; padding: 0 10px; border-radius: 13px; background: #e4ebf1; color: #2f4357; font: 14px var(--tw-serif); white-space: nowrap; }
 /* v53 (D4): the folded Housekeeping header's Quick fill, over the header's right end (its chevron moves left of it) */
+/* Consistency wrap-up v1 (rulings v4, item 4): a SMALL OUTLINE BUTTON, the agreed kind for a button inside a header band —
+   30 high, radius 8, padding 0 12, white ground, 1.5px navy edge, navy Source Serif 4 600 14; hover is the outline standard's
+   navy at 6% (over the white, so the band does not show through). Its place in the header is unchanged. */
 .tws-qfb {
-  position: absolute; right: 34px; top: 50%; transform: translateY(-50%); height: 30px; padding: 0 12px; border: 0; border-radius: 15px;
-  background: #fff; box-shadow: inset 0 0 0 1px #c9d5e0; color: #2f4357; font: 14px var(--tw-serif); cursor: pointer; white-space: nowrap;
+  position: absolute; right: 34px; top: 50%; transform: translateY(-50%); height: 30px; padding: 0 12px; border: 0; border-radius: 8px;
+  background: #fff; box-shadow: inset 0 0 0 1.5px var(--tw-navy); color: var(--tw-navy); font: 600 14px var(--tw-serif); cursor: pointer; white-space: nowrap;
 }
-.tws-qfb:hover { box-shadow: inset 0 0 0 1.5px var(--tw-navy); color: var(--tw-navy); }
+.tws-qfb:hover { background: linear-gradient(var(--sp-btn-line-hov), var(--sp-btn-line-hov)), #fff; }
 
 /* v53 (D3): the breakdown — one thin bar in the groups' header colours, then the words */
 .tws-bd { margin: 2px 2px 0; }
