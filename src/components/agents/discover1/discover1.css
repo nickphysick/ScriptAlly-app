@@ -335,7 +335,7 @@
 /* Consistency roll-out v1, Phase 7: the card heading */ .dv1-steps h3 { margin: 0 auto; max-width: 330px; font: var(--sp-h-card) !important; color: var(--dv1-ink); text-wrap: balance; }
 .dv1-steps p { margin: 12px auto 0; max-width: 300px; font: 400 16px/1.6 var(--dv1-serif); color: var(--sp-muted); text-wrap: balance; }
 .dv1-steps li[data-on] h3 { text-decoration: underline; text-decoration-color: var(--dv1-rust); text-underline-offset: 6px; }
-.dv1-hwn { margin: 36px auto 0; max-width: 64ch; font: italic 400 15px/1.5 var(--dv1-serif); color: var(--sp-quiet); }
+.dv1-hwn { margin: 36px auto 0; max-width: 64ch; font: italic 400 var(--sp-body-size)/1.5 var(--dv1-serif); color: var(--sp-quiet); }
 @container dv1hw (max-width: 1100px) { .dv1-hw h2 { font-size: 34px !important; } .dv1-steps { gap: 36px; } .dv1-steps li + li::before { left: -30px; } }
 @container dv1hw (max-width: 857px) { .dv1-hw { padding: 44px 28px 40px; } .dv1-steps { gap: 28px; } .dv1-steps li + li::before { left: -26px; top: 80px; } .dv1-steps h3 { font-size: 19px !important; } .dv1-steps p { font-size: 15px; } }
 
