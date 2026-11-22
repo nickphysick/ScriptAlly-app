@@ -97,10 +97,10 @@
     "*"
    ],
    "match": {
-    "sel": "qc152-rf"
+    "sel": "qc152-rb"
    },
-   "reason": "For Nick (B7): the card footer at 72 with 14/24 padding leaves 44px for the 52px reply pill and action (v152.1); meeting it needs the pill redesigned, a slide-out panel build (consolidate-and-finish v1, B6).",
-   "source": "consolidate-and-finish v1",
+   "reason": "For Nick (rulings v4, item 2): the query card's and agent card's footer is ruled 80 (14 above and below a 52px reply box, 24 at the sides), but the reply box measures 60 (agent card) and 62.8 (query card), so the footer cannot be 80 without the reply box itself changing. The rules check now measures the footer bar (.qc152-rb), not the box inside it.",
+   "source": "consistency wrap-up v1 (rulings v4)",
    "kind": "open"
   },
   {
