@@ -7,11 +7,12 @@
  * A group is a 34px disc in its stage's Band holding the stage's mark in ink, a typewriter heading with when it went
  * (and when it was asked for) to its right, and the items in a box. A request not yet answered is a white box outlined
  * in navy ("needs you"), each item "not sent yet".
- * ⚠️ COLOUR IS THE STAGE (lib/stageColours, set as --d on the disc); the mark is ink; navy is only the pending outline.
+ * ⚠️ THE DISC IS THE STATUS'S BAND (Plumage colours v1, lib/stageColours `statusBand`, set as --d); no outline on a disc;
+ *    the mark is ink; navy is only the pending outline.
  */
 import React from "react";
 import { StatusDot } from "../../StatusDot";
-import { STAGE_COLOURS, stageOf } from "../../../lib/stageColours";
+import { stageOf, statusBand } from "../../../lib/stageColours";
 import type { MatGroup } from "../../../lib/qcThread152";
 import { chipIcon } from "./QcBubble152";
 import { sentenceCase } from "./QcAgent158";
@@ -30,7 +31,7 @@ export const MaterialsTab158: React.FC<MaterialsTab158Props> = (p) => (
       {p.groups.map((g) => (
         <div key={g.key} className={`nx-grp${g.pending ? " pend" : ""}`} data-qc158="group" data-kind={g.kind} data-stage={stageOf(g.status)}
           data-pending={g.pending ? "" : undefined}>
-          <span className="nx-disc" data-qc158="disc" style={{ ["--d" as string]: STAGE_COLOURS[stageOf(g.status)].band } as React.CSSProperties}>
+          <span className="nx-disc" data-qc158="disc" style={{ ["--d" as string]: statusBand(g.status) } as React.CSSProperties}>
             <StatusDot status={g.status} overrideSize={18} tone="ink" decorative />
           </span>
           <h4 data-qc158="heading">{g.heading}{g.pkg && p.packageName ? <em data-qc158="package">{p.packageName}</em> : null}<span className="r" data-qc158="when">{g.when}</span></h4>

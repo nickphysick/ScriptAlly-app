@@ -13,7 +13,7 @@
  * ⚠️ EVERY LINE IS A RECORDED FACT: a date nothing records is a dash, never a guess; "as their guidelines say" appears
  *    only where the agent's own record says no reply means no.
  */
-import { stageOf, type Stage } from "../../lib/stageColours";
+import { bandInk, stageOf, statusBand, withYouOutline, type Stage } from "../../lib/stageColours";
 import React, { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import type { Agent } from "../../types";
 import { QueryStatus } from "../../types";
@@ -34,6 +34,13 @@ type Item = RespItem<QcRow>;
 /** the status strip's colour, by the answer (the reference's `col`) */
 /** Stage colours v1 — the strip is the answer's stage (a pass is `closed`), never whose move it is */
 export const stripTone = (i: Item): Stage => (i.group !== "more" ? "closed" : stageOf(i.row.status));
+/** Plumage colours v1 — the strip's band is the answer's STATUS band (a pass the closed band); a request still with the
+ *  writer carries the with-you outline (3px inset; the strip sits under the mast, so its corners are square) */
+export const stripStyle = (i: Item): React.CSSProperties => {
+  const st = i.group !== "more" ? QueryStatus.REJECTED : i.row.status;
+  const wy = withYouOutline(st);
+  return { background: statusBand(st), color: bandInk(st), ...(wy ? { boxShadow: `inset 0 0 0 3px ${wy}` } : {}) };
+};
 
 /** the footer's primary and the journey it runs: a request's own card action, else Edit the response */
 export function panelAct(i: Item): { label: string; mode: DrawerMode } {
@@ -173,8 +180,8 @@ export const RspPanel: React.FC<{
           </span>
           <button type="button" className="rsp5-dx" ref={closeBtn} data-rsn="close" aria-label="Close this answer" onClick={onClose}>{"×"}</button>
         </header>
-        <div className="rsp5-dst" data-rsn="status" data-tone={stripTone(item)}>
-          <StatusDot status={r.status} overrideSize={16} decorative />{STEP_WORD[r.status] ?? r.status}
+        <div className="rsp5-dst" data-rsn="status" data-tone={stripTone(item)} style={stripStyle(item)}>
+          <StatusDot status={r.status} overrideSize={16} tone="inherit" decorative />{STEP_WORD[r.status] ?? r.status}
         </div>
         <div className="rsp5-dbody" data-rsn="body">
           <div>

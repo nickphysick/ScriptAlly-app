@@ -2,8 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  *
- * Query Centre v157 (design-refs/query-centre-v157.html, read from the rendered page) — the grid card only: the foil on
- * an offer, the track in ink on every band, the Sent and Next boxes centred with the navy needs-you outline, and gone
+ * Query Centre v157 (design-refs/query-centre-v157.html, read from the rendered page) — the grid card only: the track in ink on every band, the Sent and Next boxes centred with the navy needs-you outline, and gone
  * quiet. The stage bands themselves are qcv154.css's (`--tone`, from lib/stageColours). Desktop only (768px and up).
  *
  * ⚠️ OVERRIDES WIN ON SPECIFICITY, NOT ON BUNDLE ORDER: each selector is a repeated class (or more) above the
@@ -12,21 +11,18 @@
  * ⚠️ No `color-mix()`, no `var()` inside `@keyframes`.
  */
 
-/* ── Phase 2 · the sheen on an offer (Stage colours v1: rose, lib/stageColours OFFER_SHEEN): the Offer band (#efcdc9, the table's) under a white sheen that sits at 30% and
-   moves once to 85% while the card is hovered or keyboard-focused, then stays. Nothing loops. Offer and Signed share
-   it (both are the `offer` stage); no other stage has it. ─────────────────────────────────────────────────────── */
+/* ── Phase 2 · (Plumage colours v1) the offer's foil and sheen are retired: an offer's band is the flat navy of
+   lib/stageColours, set inline as --tone like every other status. On the navy the words and marks are the paper
+   (#f4eee5, lib/stageColours OFFER_INK) — the one band that is not ink; the track's current step keeps its white disc
+   and ink mark. ────────────────────────────────────────────────────────────────────────────────────────────────── */
 @media (min-width: 768px) {
-  .qc151.qc153 .qc154-card.qc154-card[data-tone="offer"] .qc154-hd.qc154-hd {
-    background:
-      linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
-      #efcdc9;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-    transition: background-position 0.7s ease-out;
-  }
-  .qc151.qc153 .qc154-card.qc154-card[data-tone="offer"]:is(:hover, :focus-visible) .qc154-hd.qc154-hd { background-position: 85% 0; }
-}
-@media (min-width: 768px) and (prefers-reduced-motion: reduce) {
-  .qc151.qc153 .qc154-card.qc154-card[data-tone="offer"] .qc154-hd.qc154-hd { transition: none; }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc154-nm.qc154-nm { color: #f4eee5; }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc154-ag.qc154-ag { color: rgba(244, 238, 229, 0.72); }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd:not(.qc153-nd--cur) { color: #f4eee5; }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd--fut,
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd--skip { color: rgba(244, 238, 229, 0.5); }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-ln.qc153-ln { background: rgba(244, 238, 229, 0.35); }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-ln.qc153-ln--done { background: #f4eee5; }
 }
 
 /* ── Phase 3 · the track reads on every band: colours only, no node, link or badge moves. A reached step and the

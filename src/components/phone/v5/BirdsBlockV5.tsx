@@ -21,7 +21,7 @@
  *    slides in. With reduced motion it never plays (and phoneV4.css stops every animation under `.pa4`).
  * ⚠️ COPY: never "overdue" or "late" — the one-line status is v4.1's `longLabel` ("{Stage} · date was {date}").
  */
-import { bandBackground, stageOf } from "../../../lib/stageColours";
+import { bandBackground } from "../../../lib/stageColours";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { beLine, type BeLine } from "../../../lib/qc150";
@@ -162,7 +162,7 @@ export const BirdsBlockV5: React.FC<{ qs: readonly V3Query[]; c: V3Counts; nowMs
                   {tk.past.map((b, i) => <i key={i} className="pa5-be-p" style={{ left: `${b.l}%`, width: `${b.w}%`, background: statusFill(b.status) }} />)}
                   {cur ? (<>
                     {cur.rem > 0 ? <i className={`pa5-be-rm${cur.off ? " off" : ""}`} style={{ left: `${cur.l}%`, width: `${cur.rem}%`, background: statusFill(cur.status) }} /> : null}
-                    <i className="pa5-be-s" data-pa5="be-solid" style={{ left: `${cur.l}%`, width: `${cur.solid}%`, background: bandBackground(stageOf(String(cur.status))) }} />
+                    <i className="pa5-be-s" data-pa5="be-solid" style={{ left: `${cur.l}%`, width: `${cur.solid}%`, background: bandBackground(String(cur.status)) }} />
                     {cur.deep ? <i className="pa5-be-dp" data-pa5="be-deep" style={{ left: `${cur.deep.l}%`, width: `${cur.deep.w}%`, background: statusFill(cur.status) }} /> : null}
                     {cur.notch != null ? <s data-pa5="be-notch" style={{ left: `${cur.notch}%` }} /> : null}
                   </>) : null}

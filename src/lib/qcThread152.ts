@@ -19,7 +19,7 @@ import { QueryStatus } from "../types";
 import { MONTHS_SHORT } from "./dates";
 import { STAGE_RESPONSE_WINDOWS } from "./queryAmbient";
 import { STATUS_FILL, statusKind } from "./qc1512";
-import { STAGE_COLOURS, stageOf } from "./stageColours";
+import { STAGE_COLOURS, stageOf, statusBand } from "./stageColours";
 import { classifyMaterial } from "./agentMaterials";
 import type { QueryState } from "./queryState";
 import { waitWords } from "./qc1522";
@@ -133,12 +133,12 @@ export function viaKind(via: string | null | undefined): "email" | "form" | "pos
  * passed), its own glyph and its quoted note.
  */
 export const MY_PAPER = "#f6f3ee";
-/** Stage colours v1 — an agent's reply takes the Band of the stage it moved the query to, with that stage's Edge
- *  (asked for a partial → partial; the full, or R&R → full; an offer → offer, with the sheen in CSS; a pass → closed).
- *  Every value is read from lib/stageColours; this file holds no stage hex. */
+/** Plumage colours v1 — an agent's reply takes the band of the STATUS that reply set (asked for a partial → the Partial
+ *  requested band; asked for the full → Full requested; R&R → Full sent; an offer → the offer's flat navy; a pass →
+ *  closed), with its stage's Edge. No outline on a bubble. Every value is read from lib/stageColours; no stage hex here. */
 export const agentTint = (status: QueryStatus | string): { fill: string; edge: string } => {
   const c = STAGE_COLOURS[stageOf(status)];
-  return { fill: c.band, edge: c.edge };
+  return { fill: statusBand(status), edge: c.edge };
 };
 /** a holding reply: white, the agent hairline */
 export const HOLDING_TINT = { fill: "#ffffff", edge: "#e3dbd0" };

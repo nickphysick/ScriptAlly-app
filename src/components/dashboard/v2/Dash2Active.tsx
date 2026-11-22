@@ -33,7 +33,7 @@ import { Frame } from "./Frame";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { goingHeading, goingSub, type HowItsGoing } from "../../../lib/dash3";
-import { STAGE_COLOURS, bandBackground } from "../../../lib/stageColours";
+import { STAGE_COLOURS, OFFER_INK } from "../../../lib/stageColours";
 
 export const PLOT_H = 270;
 export const EDGE = 22;
@@ -56,11 +56,11 @@ const MODE_LABEL: Record<ChartMode, string> = { active: "Active", sent: "Sent", 
 /** v3 Phase 4a: the third view — counts and bars, no adjectives */
 export const Going: React.FC<{ g: HowItsGoing }> = ({ g }) => {
   const pc = (n: number) => (g.sent > 0 ? Math.max(0, Math.min(100, (n / g.sent) * 100)) : 0);
-  const bar = (key: string, status: QueryStatus, label: string, n: number, fill: string) => (
+  const bar = (key: string, status: QueryStatus, label: string, n: number, fill: string, ink?: string) => (
     <div className="d3-frow" data-d3="going-row" data-key={key} data-n={n}>
       <span className="d3-flab"><StatusDot status={status} overrideSize={18} decorative />{label}</span>
       <span className="d3-trk">
-        {n > 0 ? <span className="d3-fill" style={{ width: `${pc(n)}%`, background: fill }}>{n.toLocaleString("en-GB")}</span>
+        {n > 0 ? <span className="d3-fill" style={{ width: `${pc(n)}%`, background: fill, color: ink }}>{n.toLocaleString("en-GB")}</span>
           : <span className="d3-none">0</span>}
       </span>
     </div>
@@ -71,7 +71,7 @@ export const Going: React.FC<{ g: HowItsGoing }> = ({ g }) => {
       <p className="d3-gsub" data-d3="going-sub">{goingSub(g)}</p>
       {bar("sent", QueryStatus.QUERIED, "Queries sent", g.sent, STAGE_COLOURS.queried.band)}
       {bar("asked", QueryStatus.FULL_REQUESTED, "Asked for more", g.asked, STAGE_COLOURS.full.band)}
-      {bar("offers", QueryStatus.OFFER, "Offers", g.offers, bandBackground("offer"))}
+      {bar("offers", QueryStatus.OFFER, "Offers", g.offers, STAGE_COLOURS.offer.band, OFFER_INK)}
     </div>
   );
 };

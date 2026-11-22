@@ -1,0 +1,37 @@
+[
+ {
+  "name": "offer cards: population non-zero",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "Offer seed-query-12: flat navy, no gradient layer",
+  "ok": false,
+  "got": "rgb(42, 58, 82) / linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0) 66%)"
+ },
+ {
+  "name": "Offer seed-query-12: name in the paper",
+  "ok": true,
+  "got": "rgb(244, 238, 229)"
+ },
+ {
+  "name": "Offer cv25-q-08: flat navy, no gradient layer",
+  "ok": false,
+  "got": "rgb(42, 58, 82) / linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0) 66%)"
+ },
+ {
+  "name": "Offer cv25-q-08: name in the paper",
+  "ok": true,
+  "got": "rgb(244, 238, 229)"
+ },
+ {
+  "name": "Offer cv25-q-08: flat navy, no gradient layer",
+  "ok": false,
+  "got": "rgb(42, 58, 82) / linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0) 66%)"
+ },
+ {
+  "name": "Offer cv25-q-08: name in the paper",
+  "ok": true,
+  "got": "rgb(244, 238, 229)"
+ }
+]

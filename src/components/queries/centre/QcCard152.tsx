@@ -18,7 +18,7 @@ import { createPortal } from "react-dom";
 import { QueryStatus } from "../../../types";
 import { type QcRow } from "../../../lib/qcSummary";
 import { type QueryState } from "../../../lib/queryState";
-import { STAGE_COLOURS, STAGE_INK, bandBackground, quietBackground, stageOf } from "../../../lib/stageColours";
+import { STAGE_COLOURS, bandBackground, bandInk, quietBackground, stageOf, statusBand, withYouOutline } from "../../../lib/stageColours";
 import { isQuietCard } from "../../../lib/qc154";
 import {
   askChips, buildThread, dayLabel, materialGroups, replyBox, viaKind,
@@ -207,10 +207,14 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const ss = stripStatus164(r);
   const stage = stageOf(r.status);
   const quiet = stage !== "offer" && isQuietCard(r, nowMs);
-  const bandBg = quiet ? quietBackground(stage) : bandBackground(stage);
+  const bandBg = quiet ? quietBackground(r.status) : bandBackground(r.status);
   const sc = STAGE_COLOURS[stage];
-  const stageVars = { ["--band" as string]: sc.band, ["--tint" as string]: sc.tint, ["--edge" as string]: sc.edge, ["--mark" as string]: sc.mark,
-    ["--fdisc" as string]: quiet ? `linear-gradient(90deg, ${sc.band}, #fff)` : sc.band } as React.CSSProperties;
+  /* Plumage colours v1 — the card's band is its status's (requested lighter than sent); the strip carries the with-you
+     outline when the query is with the writer (never when quiet: a requested query is never quiet) */
+  const band = statusBand(r.status);
+  const wy = quiet ? null : withYouOutline(r.status);
+  const stageVars = { ["--band" as string]: band, ["--tint" as string]: sc.tint, ["--edge" as string]: sc.edge, ["--mark" as string]: sc.mark,
+    ["--fdisc" as string]: quiet ? `linear-gradient(90deg, ${band}, #fff)` : band } as React.CSSProperties;
   const jOpen = !!p.composer || !!p.editingId;
   const tip = useTip();
   const view = p.view ?? "read";
@@ -566,7 +570,8 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           <EditStrip n={ed.keys.length} onStop={() => ed.ask()} />
         </div>
         ) : (
-        <div className="qc152-band" data-qc152="band" data-stage={stage} data-quiet={quiet ? "" : undefined} style={{ background: bandBg, color: STAGE_INK }}>
+        <div className="qc152-band" data-qc152="band" data-stage={stage} data-quiet={quiet ? "" : undefined} data-wy={wy ? "" : undefined}
+          style={{ background: bandBg, color: bandInk(r.status), ...(wy ? { ["--wy" as string]: wy } : {}) }}>
           {p.backTo ? <button type="button" className="qc152-bkto" data-qc152="back-to" onClick={p.backTo.onBack}>← {p.backTo.label}</button> : null}
           {/* v164 — the four-step track and the status name; the footer says whose move it is */}
           <span className="qc164-st" data-qc164="status" role="img" aria-label={ss.label}>

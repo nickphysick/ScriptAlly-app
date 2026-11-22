@@ -1,0 +1,22 @@
+[
+ {
+  "name": "a live Partial requested card to open",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "strip: the Partial requested band, flat",
+  "ok": false,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "strip: the outline, 3px inset, the Partial sent shade",
+  "ok": true,
+  "got": "rgb(232, 192, 175) 0px 0px 0px 3px inset"
+ },
+ {
+  "name": "strip: top corners 13px, bottom square",
+  "ok": true,
+  "got": "13px 13px 0px 0px"
+ }
+]

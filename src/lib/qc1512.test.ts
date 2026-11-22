@@ -27,10 +27,10 @@ describe("the colour scheme", () => {
   it("one colour per status family; requested and sent share it", () => {
     expect(STATUS_FILL[statusKind(QueryStatus.QUERIED)]).toBe("#efe6d6"); // Stage colours v1: the stage table's Bands
     expect(statusKind(QueryStatus.PARTIAL_REQUESTED)).toBe(statusKind(QueryStatus.PARTIAL_SENT));
-    expect(STATUS_FILL[statusKind(QueryStatus.PARTIAL_SENT)]).toBe("#e4ebf2");
+    expect(STATUS_FILL[statusKind(QueryStatus.PARTIAL_SENT)]).toBe("#e8c0af");
     expect(statusKind(QueryStatus.FULL_REQUESTED)).toBe(statusKind(QueryStatus.FULL_SENT));
-    expect(STATUS_FILL[statusKind(QueryStatus.FULL_SENT)]).toBe("#b7c9de");
-    expect(STATUS_FILL[statusKind(QueryStatus.OFFER)]).toBe("#efcdc9");
+    expect(STATUS_FILL[statusKind(QueryStatus.FULL_SENT)]).toBe("#b5b6c0");
+    expect(STATUS_FILL[statusKind(QueryStatus.OFFER)]).toBe("#2a3a52");
     for (const s of [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN]) expect(STATUS_FILL[statusKind(s)]).toBe("#eceae6");
   });
 });

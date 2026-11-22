@@ -29,7 +29,7 @@ import "./qcv154.css";
 import "./qcv1561.css";
 import "./qcv157.css";
 /* Query card v160, Phase 4 — the band eases to a new stage */
-import { STAGE_COLOURS } from "../../../lib/stageColours";
+import { statusBand, withYouOutline } from "../../../lib/stageColours";
 import { gridBand, gridEase } from "./qcMotion160";
 
 const BELL = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M8 2.5a4 4 0 0 0-4 4v2.5L2.8 11h10.4L12 9V6.5a4 4 0 0 0-4-4zM6.5 13a1.5 1.5 0 0 0 3 0" /></svg>;
@@ -63,8 +63,11 @@ const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, pac
   /* v160 Phase 4 — the band's colour eases over 500ms when the stage changes; a gradient band (the offer's sheen, gone
      quiet's fade) at either end changes at once. Web Animations from the committed change, so it runs in the frame the
      new colour is drawn in (a CSS transition, measured, did not start behind the open card). */
-  const tone = slipTone(r.status);
-  const bandNow = { band: STAGE_COLOURS[tone].band, grad: quiet || tone === "offer" };
+  /* Plumage colours v1 — the band is the status's shade (requested lighter than sent), flat on every stage; a query
+     with the writer (Partial or Full requested, R&R) carries the with-you outline (qcv154.css `[data-wy]`) */
+  const band = statusBand(r.status);
+  const wy = withYouOutline(r.status);
+  const bandNow = { band, grad: quiet };
   const bandWas = useRef(bandNow);
   const hdRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -79,7 +82,8 @@ const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, pac
   const press = chipPress(quiet, cta);
   return (
     <div className={`qc154-card${selected ? " is-sel" : ""}${popOpen ? " has-pop" : ""}`} id={`query-row-${r.id}`} data-qc154="card" data-qcv="row" data-id={r.id}
-      data-tone={slipTone(r.status)} data-status={r.status} data-quiet={quiet ? "" : undefined} role="button" tabIndex={0}
+      data-tone={slipTone(r.status)} data-status={r.status} data-quiet={quiet ? "" : undefined} data-wy={wy ? "" : undefined} role="button" tabIndex={0}
+      style={{ "--tone": band, ...(wy ? { "--wy": wy } : {}) } as React.CSSProperties}
       aria-label={`${r.agentName}, ${r.agency}, ${word}`} aria-pressed={selected}
       onClick={open}
       onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); open(); } }}>

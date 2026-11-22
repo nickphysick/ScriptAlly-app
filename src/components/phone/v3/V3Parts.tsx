@@ -7,7 +7,7 @@
  * ⚠️ THE STATUS GLYPH IS StatusDot, IMPORTED, NEVER REDRAWN (baked decision 5). The disc behind it is the status fill:
  *    the five phone tokens, chosen the ref's way (`fillOf`): closed grey, an offer slate, a request pink, the rest sand.
  */
-import { STAGE_COLOURS, stageOf } from "../../../lib/stageColours";
+import { bandInk, statusBand } from "../../../lib/stageColours";
 import React from "react";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
@@ -17,15 +17,15 @@ import type { WsTask } from "../../../lib/todoWs";
 /** the existing hawk portrait (public/images/hawk-portrait.webp, the marketing pages' own file and version) */
 export const HAWK_SRC = "/images/hawk-portrait.webp?v=a8d0e9fe";
 
-/** Stage colours v1 — the status fill is the Band of the status's stage (lib/stageColours): one stage, one colour, so
- *  asked and sent are not told apart, and Signed sits with the offer. No status reads as Queried. */
+/** Plumage colours v1 — the status fill is the status's band (lib/stageColours `statusBand`): requested lighter than
+ *  sent, Signed with the offer. No status reads as Queried. */
 export function statusFill(status: string | null | undefined): string {
-  return STAGE_COLOURS[stageOf(status ?? QueryStatus.QUERIED)].band;
+  return statusBand(status ?? QueryStatus.QUERIED);
 }
 
 export const V3Glyph: React.FC<{ status: string | null | undefined; size?: number; bg?: string; label?: boolean }> = ({ status, size = 40, bg, label = true }) => (
-  <span className="pa3-gl" data-pa3="glyph" data-status={status ?? ""} style={{ background: bg ?? statusFill(status), width: size, height: size }}>
-    {status ? <StatusDot status={status} overrideSize={Math.round(size * 0.55)} decorative={!label} /> : null}
+  <span className="pa3-gl" data-pa3="glyph" data-status={status ?? ""} style={{ background: bg ?? statusFill(status), color: bg ? undefined : bandInk(status), width: size, height: size }}>
+    {status ? <StatusDot status={status} overrideSize={Math.round(size * 0.55)} decorative={!label} tone={bg ? undefined : "inherit"} /> : null}
   </span>
 );
 

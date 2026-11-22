@@ -7,6 +7,15 @@
 - Moved verbatim from CLAUDE.md on 11 Nov 2026 (CLAUDE.md diet; map in docs/claude-md-diet/MAP.md). Sections are newest first by the date in their heading; undated sections come last. A section headed “Branch-only” was recorded as not merged; the note under it says what the 11 Nov check found.
 - Later work than the newest section here may exist on branches, with its report under reports/<name>/REPORT.md on that branch. Check `git log` before trusting any “current” claim below.
 
+## Kind tiles — one colour per kind of thing (Plumage colours v1, 22 Nov 2026; branch `plumage-colours-v1`, NOT merged)
+
+- One table, `src/lib/kindColours.ts` (pack design-refs/plumage-colours-v1/, `kinds`), each colour taken from the hawk artwork: query `#efe6d6` (the paper, edge `#e0d2bb`, glyph ink), agent `#b0c1be` (the Scout's teal at 45%, edge `#96aca9`, initials in ink), material `#903830` (the Archivist's oxblood, white glyph), task `#2e3f4f` (the Courier's midnight, white glyph). `kindTileStyle(kind)` draws one.
+- **Tiles only, search only for now** (shell/SearchDesk, both the 32px list tile and the 44px peek tile). A kind colour never fills a band, strip, bar or chip.
+- A query tile is the paper with its status mark in ink: the status is carried by the chip beside it, never the tile.
+- `#903830` is allowed for the material tile and nowhere else (kindColours.test.ts sweeps `src/`). Burgundy `#7c3a2a` is still not a brand colour.
+- Note, action, page, help and more tiles are unchanged.
+- The query status colours themselves are docs/decisions/query-centre.md's "Plumage colours v1".
+
 ## Standing notes moved from CLAUDE.md’s cross-cutting sections
 
 Each block below sat inside a larger CLAUDE.md section (named in its heading) and is moved verbatim.

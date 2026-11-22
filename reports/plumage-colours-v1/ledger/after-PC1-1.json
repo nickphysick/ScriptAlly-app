@@ -1,0 +1,517 @@
+[
+ {
+  "name": "cards on the page",
+  "ok": true,
+  "got": "95"
+ },
+ {
+  "name": "Queried: population non-zero",
+  "ok": true,
+  "got": "38"
+ },
+ {
+  "name": "Partial Requested: population non-zero",
+  "ok": true,
+  "got": "8"
+ },
+ {
+  "name": "Partial Sent: population non-zero",
+  "ok": true,
+  "got": "10"
+ },
+ {
+  "name": "Full Requested: population non-zero",
+  "ok": true,
+  "got": "8"
+ },
+ {
+  "name": "Full Sent: population non-zero",
+  "ok": true,
+  "got": "9"
+ },
+ {
+  "name": "Offer: population non-zero",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "Rejected: population non-zero",
+  "ok": true,
+  "got": "15"
+ },
+ {
+  "name": "Offer seed-query-12: band #2a3a52",
+  "ok": true,
+  "got": "rgb(42, 58, 82) / none"
+ },
+ {
+  "name": "Offer cv25-q-08: band #2a3a52",
+  "ok": true,
+  "got": "rgb(42, 58, 82) / none"
+ },
+ {
+  "name": "Partial Requested seed-query-7: band #f1d9cf",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: band #b5b6c0",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none"
+ },
+ {
+  "name": "Full Requested seed-query-9: band #d4d4da",
+  "ok": true,
+  "got": "rgb(212, 212, 218) / none"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: band #f1d9cf",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Partial Requested seed-query-20: band #f1d9cf",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: band #f1d9cf",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Full Requested rj-send: band #d4d4da",
+  "ok": true,
+  "got": "rgb(212, 212, 218) / none"
+ },
+ {
+  "name": "Full Requested cv25-q-09: band #d4d4da",
+  "ok": true,
+  "got": "rgb(212, 212, 218) / none"
+ },
+ {
+  "name": "Partial Requested cor-move-a: band #f1d9cf",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: band #f1d9cf",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: band #d4d4da",
+  "ok": true,
+  "got": "rgb(212, 212, 218) / none"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: band #d4d4da",
+  "ok": true,
+  "got": "rgb(212, 212, 218) / none"
+ },
+ {
+  "name": "Full Requested msv12-q-4: band #d4d4da",
+  "ok": true,
+  "got": "rgb(212, 212, 218) / none"
+ },
+ {
+  "name": "Full Requested rj-dupe: band #d4d4da",
+  "ok": true,
+  "got": "rgb(212, 212, 218) / none"
+ },
+ {
+  "name": "Queried seed-query-2: band #efe6d6",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: band #e8c0af",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Partial Sent cor-pair: band #e8c0af",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Partial Sent seed-query-23: band #e8c0af",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Partial Sent seed-query-8: band #e8c0af",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: band #e8c0af",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: band #efe6d6",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: band #efe6d6",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Full Sent qc150l9-q: band #b5b6c0",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none"
+ },
+ {
+  "name": "Queried probe-un-both: band #efe6d6",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Queried probe-un-noagent: band #efe6d6",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Queried cv25-q-14: band #efe6d6",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Queried cv25-q-13: band #efe6d6",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none"
+ },
+ {
+  "name": "Queried thin-q-close (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-22 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried msv12-q-1 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried msv12-q-7 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-4 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-19 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-2 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-1 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-6 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-3 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-5 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-cohort-4 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent seed-query-10 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(181, 182, 192) 0px, rgb(181, 182, 192) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-ms2-a (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried rj-nudge (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-chase (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(181, 182, 192) 0px, rgb(181, 182, 192) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent cv25-q-10 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(181, 182, 192) 0px, rgb(181, 182, 192) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Partial Sent cv25-q-05 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb(232, 192, 175) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-6 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-pkgq-1 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-pkgq-2 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-5 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent cor-undo (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(181, 182, 192) 0px, rgb(181, 182, 192) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried cor-move-b (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-pkgq-7 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-query-3 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried seed-cal-near-q (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Partial Sent cv25-q-11 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb(232, 192, 175) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(181, 182, 192) 0px, rgb(181, 182, 192) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent seed-query-21 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(181, 182, 192) 0px, rgb(181, 182, 192) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb(232, 192, 175) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent msv12-q-5 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(181, 182, 192) 0px, rgb(181, 182, 192) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried thin-q-remind (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried msv12-q-2 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried probe-dangling-pkg (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried probe-un-noms (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried probe-goalstress-today (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried cv25-q-04 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Queried cv25-q-03 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(239, 230, 214) 0px, rgb(239, 230, 214) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Rejected seed-pkgq-8: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "No Response msv12-q-8: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected cv25-q-01: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-query-1: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-query-13: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected cv25-q-12: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected rej-query-1: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected cor-move-c: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-pkgq-5: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Withdrawn seed-query-17: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-query-15: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-query-16: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected msv12-q-6: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-pkgq-6: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "No Response seed-query-18: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected cor-closed: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected seed-query-14: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Rejected cv25-q-02: band #eceae6",
+  "ok": true,
+  "got": "rgb(236, 234, 230) / none"
+ },
+ {
+  "name": "Full Requested cv25-q-09: band #d4d4da",
+  "ok": true,
+  "got": "rgb(212, 212, 218) / none"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: band #f1d9cf",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: band #f1d9cf",
+  "ok": true,
+  "got": "rgb(241, 217, 207) / none"
+ },
+ {
+  "name": "Offer cv25-q-08: band #2a3a52",
+  "ok": true,
+  "got": "rgb(42, 58, 82) / none"
+ },
+ {
+  "name": "Partial Sent cv25-q-05 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb(232, 192, 175) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Full Sent cv25-q-10 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(181, 182, 192) 0px, rgb(181, 182, 192) 26%, rgb(255, 255, 255) 82%)"
+ },
+ {
+  "name": "Partial Sent cv25-q-11 (quiet): fades from its status band",
+  "ok": true,
+  "got": "linear-gradient(90deg, rgb(232, 192, 175) 0px, rgb(232, 192, 175) 26%, rgb(255, 255, 255) 82%)"
+ }
+]

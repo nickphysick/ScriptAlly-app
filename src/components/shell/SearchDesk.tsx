@@ -18,7 +18,8 @@ import {
 } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
-import { STAGE_COLOURS, bandBackground, stageOf } from "../../lib/stageColours";
+import { STAGE_COLOURS, bandBackground, bandInk, stageOf } from "../../lib/stageColours";
+import { kindTileStyle } from "../../lib/kindColours";
 import {
   GROUP_LABEL, PaletteItem, PaletteResult, PaletteRow, PaletteScope, SCOPE_CHIPS, highlightParts, isSelectable,
   secondLineParts, type HighlightPart, type PeekFact,
@@ -73,12 +74,12 @@ const Marked: React.FC<{ parts: HighlightPart[] }> = ({ parts }) => (
   <>{parts.map((p, j) => (p.match ? <mark key={j}>{p.text}</mark> : <React.Fragment key={j}>{p.text}</React.Fragment>))}</>
 );
 
-/** The status chip: the stage's band (Offer keeps its sheen), its edge, the real StatusDot, and the status in words. */
+/** The status chip: the status's band (Plumage colours v1; no outline on a chip), its stage's edge, the real StatusDot, and the status in words. */
 const StatusChip: React.FC<{ status: string }> = ({ status }) => {
   const st = stageOf(status);
   return (
-    <span className="sv1-chip" data-stage={st} style={{ background: bandBackground(st), borderColor: STAGE_COLOURS[st].edge }}>
-      <StatusDot status={status as QueryStatus} overrideSize={14} decorative />
+    <span className="sv1-chip" data-stage={st} style={{ background: bandBackground(status), color: bandInk(status), borderColor: STAGE_COLOURS[st].edge }}>
+      <StatusDot status={status as QueryStatus} overrideSize={14} tone="inherit" decorative />
       {status}
     </span>
   );
@@ -87,11 +88,12 @@ const StatusChip: React.FC<{ status: string }> = ({ status }) => {
 /** The 32px tile (44px in the peek), by kind. */
 const Tile: React.FC<{ it: PaletteItem; big?: boolean; pageIcon?: (path: string) => React.ReactNode | null }> = ({ it, big, pageIcon }) => {
   const cls = `sv1-tile${big ? " sv1-tile--big" : ""}`;
-  if (it.kind === "agent") return <span className={cls} data-tile="agent">{initialsOf(it.title)}</span>;
+  /* Plumage colours v1 — the four kind tiles (lib/kindColours): an agent's initials in ink on the Scout's teal; a query
+     the paper with its status mark in ink (the status itself is the chip's, never the tile's) */
+  if (it.kind === "agent") return <span className={cls} data-tile="agent" style={kindTileStyle("agent")}>{initialsOf(it.title)}</span>;
   if (it.kind === "query" && it.status) {
-    const st = stageOf(it.status);
     return (
-      <span className={cls} data-tile="query" style={{ background: bandBackground(st), boxShadow: `inset 0 0 0 1px ${STAGE_COLOURS[st].edge}` }}>
+      <span className={cls} data-tile="query" style={kindTileStyle("query")}>
         <StatusDot status={it.status as QueryStatus} overrideSize={big ? 22 : 16} decorative />
       </span>
     );
@@ -102,8 +104,8 @@ const Tile: React.FC<{ it: PaletteItem; big?: boolean; pageIcon?: (path: string)
     const icon = (it.run.kind === "path" ? pageIcon?.(it.run.path) : null) ?? ID_ICON[it.id] ?? <LayoutGrid aria-hidden="true" />;
     return <span className={cls} data-tile="page">{icon}</span>;
   }
-  if (it.kind === "task") return <span className={cls} data-tile="task"><ListChecks aria-hidden="true" /></span>;
-  if (it.kind === "material") return <span className={cls} data-tile="material">{it.materialKind === "package" ? <Package aria-hidden="true" /> : <Mail aria-hidden="true" />}</span>;
+  if (it.kind === "task") return <span className={cls} data-tile="task" style={kindTileStyle("task")}><ListChecks aria-hidden="true" /></span>;
+  if (it.kind === "material") return <span className={cls} data-tile="material" style={kindTileStyle("material")}>{it.materialKind === "package" ? <Package aria-hidden="true" /> : <Mail aria-hidden="true" />}</span>;
   return <span className={cls} data-tile="help"><HelpCircle aria-hidden="true" /></span>;
 };
 
@@ -296,8 +298,8 @@ export const SearchDesk: React.FC<SearchDeskProps> = ({
         <>
           {head(p.sub)}
           {p.status && st ? (
-            <div className="sv1-pk-band" style={{ background: bandBackground(st), borderColor: STAGE_COLOURS[st].edge }}>
-              <StatusDot status={p.status as QueryStatus} overrideSize={22} decorative />
+            <div className="sv1-pk-band" style={{ background: bandBackground(p.status), color: bandInk(p.status), borderColor: STAGE_COLOURS[st].edge }}>
+              <StatusDot status={p.status as QueryStatus} overrideSize={22} tone="inherit" decorative />
               <div><b>{p.status}</b><span>{p.queriedLine}</span></div>
             </div>
           ) : <div className="sv1-pk-plain">Not queried for {p.manuscript}.</div>}
@@ -308,8 +310,8 @@ export const SearchDesk: React.FC<SearchDeskProps> = ({
       const st = stageOf(p.status);
       body = (
         <>
-          <div className="sv1-pk-band" style={{ background: bandBackground(st), borderColor: STAGE_COLOURS[st].edge }}>
-            <StatusDot status={p.status as QueryStatus} overrideSize={22} decorative />
+          <div className="sv1-pk-band" style={{ background: bandBackground(p.status), color: bandInk(p.status), borderColor: STAGE_COLOURS[st].edge }}>
+            <StatusDot status={p.status as QueryStatus} overrideSize={22} tone="inherit" decorative />
             <div><b>{p.status}</b><span>{p.who}</span></div>
           </div>
           <Facts facts={p.facts} />

@@ -8,13 +8,21 @@
  * except the label pill, whose 30px height and 14px / 600 word are the reference's.
  *
  * ⚠️ COLOUR IS THE STAGE. Navy is the agent's seal and the "needs you" button, never a stage. Every mark is ink.
- * ⚠️ The offer's sheen is written once, in lib/stageColours OFFER_SHEEN; the bubble's restates it, and
- *    stageColours.test.ts asserts the two are equal.
+ * ⚠️ Plumage colours v1: no sheen on any offer surface; an offer's bubble is the flat navy band (--bt), in paper.
  * ⚠️ THE CARD PORTALS WITH THE PANEL, so no page token reaches it: colours are literals or the card's own variables.
  */
 
-/* the strip: ink on the band (the band itself is the inline background); its buttons on white discs */
+/* the strip: ink on the band (the band itself is the inline background), the paper on the offer's navy; its buttons on
+   white discs. Plumage colours v1 — the with-you outline: 3px inside the strip, its top corners the frame's inner radius
+   (.spanel-own's 14px less its 1px edge = 13px), its bottom corners square. */
 .qc152 .qc152-band[data-stage] { color: #1c130f; }
+.qc152 .qc152-band[data-stage="offer"] { color: #f4eee5; }
+.qc152 .qc152-band[data-wy] { box-shadow: inset 0 0 0 3px var(--wy); border-radius: 13px 13px 0 0; }
+.qc152[data-qc164] .qc152-band[data-stage="offer"] .qc164-trk .qc153-trk { color: #f4eee5; }
+.qc152[data-qc164] .qc152-band[data-stage="offer"] .qc164-trk .qc153-nd:not(.qc153-nd--cur) { color: #f4eee5; }
+.qc152[data-qc164] .qc152-band[data-stage="offer"] .qc164-trk .qc153-nd--cur { color: #1c130f; }
+.qc152[data-qc164] .qc152-band[data-stage="offer"] .qc164-trk .qc153-ln { background: #f4eee5; }
+.qc152[data-qc164] .qc152-band[data-stage="offer"] .qc164-trk .qc153-ln--skip { background: repeating-linear-gradient(90deg, #f4eee5 0 2px, transparent 2px 4px); }
 .qc152 .qc152-band[data-stage] .qc152-x,
 .qc152 .qc152-band[data-stage] .qc152-bkto { background: rgba(255, 255, 255, 0.7); color: #1c130f; }
 .qc152 .qc152-band[data-stage] .qc152-x:hover,
@@ -28,14 +36,12 @@
 .qc152 .qc152-pill[data-stage] { height: 30px; background: var(--tint); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.09); font: 600 14px/1 var(--sp-serif); color: #1c130f; }
 .qc152 .qc152-pill[data-stage] .qc152-cap { height: 30px; background: none; }
 
-/* the thread: only the agent's bubbles are coloured (QcBubble152 sets --bt / --be from the stage the reply moved to);
-   an offer's carries the sheen; on full and offer the stamp darkens to read */
-.qc152 .qc152-m.them[data-status="Offer"]:not(.qc1522-draft) .qc152-bx {
-  background:
-    linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
-    #efcdc9;
-}
-.qc152 .qc152-m.them:is([data-status="Full Requested"], [data-status="Revise & Resubmit"], [data-status="Offer"]) .qc152-ts { color: var(--sp-quiet); }
+/* the thread: only the agent's bubbles are coloured (QcBubble152 sets --bt / --be from the status the reply set);
+   on full and offer the stamp darkens to read; an offer's bubble is the navy, its words, stamp and quote rule the paper */
+.qc152 .qc152-m.them:is([data-status="Offer"], [data-status="Signed"]):not(.qc1522-draft) .qc152-bx { color: #f4eee5; }
+.qc152 .qc152-m.them:is([data-status="Offer"], [data-status="Signed"]):not(.qc1522-draft) .qc152-ts { color: rgba(244, 238, 229, 0.75); }
+.qc152 .qc152-m.them:is([data-status="Offer"], [data-status="Signed"]):not(.qc1522-draft) .qc152-qt { border-left-color: rgba(244, 238, 229, 0.5); }
+.qc152 .qc152-m.them:is([data-status="Full Requested"], [data-status="Revise & Resubmit"]) .qc152-ts { color: var(--sp-quiet); }
 
 /* the footer: the disc behind its mark is the card's Band (fading to white when quiet), the mark in ink */
 .qc152 .qc152-rb .qc152-fg, .qc152 .qc152-rb .qc152-fc { background: var(--fdisc, #fff); }

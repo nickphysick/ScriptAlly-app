@@ -349,7 +349,7 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
       const statusOf = (r: (typeof REPLIES)[number]): QueryStatus | string =>
         r.k === "req" ? (c.queryOnly ? QueryStatus.PARTIAL_REQUESTED : QueryStatus.FULL_REQUESTED) : r.status ?? c.status ?? QueryStatus.QUERIED;
       const disc = (r: (typeof REPLIES)[number]) => (
-        <span className="d" data-qc161="disc" aria-hidden="true" style={{ background: bandBackground(stageOf(statusOf(r))) }}>
+        <span className="d" data-qc161="disc" aria-hidden="true" style={{ background: bandBackground(statusOf(r)) }}>
           <StatusDot status={statusOf(r)} overrideSize={18} tone="ink" decorative />
         </span>
       );

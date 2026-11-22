@@ -25,6 +25,7 @@ import type { QcRow } from "../../../lib/qcSummary";
 import type { RowAct } from "../../../lib/qc1512";
 import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { heardFact, nextFact, queriedFact, slipTone, slipTrack, standWords, type SlipTrack } from "../../../lib/qc153";
+import { statusBand, withYouOutline } from "../../../lib/stageColours";
 import { policyWords } from "../../../lib/qc1531";
 import { materialGroups, materialsName, tabAccent157, type MatGroups, type TabAccent } from "../../../lib/qc1533";
 import { MaterialIcon } from "../../shared/MaterialIcon";
@@ -176,6 +177,8 @@ export const QcSlip153: React.FC<QcSlip153Props> = ({ row: r, nowMs, selected, p
   return (
     <div className={`sa-slip qc153-slip${selected ? " is-sel" : ""}${popOpen ? " has-pop" : ""}${preview ? " is-preview" : ""}`} id={preview ? undefined : `query-row-${r.id}`}
       data-qc153="slip" data-qcv={preview ? "preview" : "row"} data-id={r.id} data-tone={slipTone(r.status)} data-status={r.status}
+      data-wy={withYouOutline(r.status) ? "" : undefined}
+      style={{ "--tone": statusBand(r.status), ...(withYouOutline(r.status) ? { "--wy": withYouOutline(r.status) } : {}) } as React.CSSProperties}
       {...(preview
         ? { role: "group", "aria-label": `Preview: ${r.agentName}, ${r.agency}, ${word}` }
         : { role: "button", tabIndex: 0, "aria-label": `${r.agentName}, ${r.agency}, ${word}`, "aria-pressed": selected, onClick: open,

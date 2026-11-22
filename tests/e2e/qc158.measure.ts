@@ -14,7 +14,7 @@ import { test, expect, type Page } from "@playwright/test";
 import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { openRoute } from "./measure";
-import { STAGE_COLOURS } from "../../src/lib/stageColours";
+import { STAGE_COLOURS, statusBand } from "../../src/lib/stageColours";
 
 const PAGE = ".qc151.qc153";
 const PHASE = process.env.SA_PHASE === "before" ? "before" : process.env.SA_PHASE === "mutant" ? "mutant" : "after";
@@ -345,8 +345,8 @@ test.describe("Query card v158", () => {
         const notes = l.filter((x) => x.t === "note"), quotes = l.filter((x) => x.t === "quote");
         L10.check(`the fixture holds notes (${notes.length}) and recorded words (${quotes.length})`, notes.length >= 1 && quotes.length >= 1, "");
         L10.check("one list in date order: the older recorded words before this week's notes", l.findIndex((x) => x.t === "note") > l.map((x) => x.t).lastIndexOf("quote"), l.map((x) => x.t[0]).join(""));
-        const BAND: Record<string, string> = { "Partial Requested": STAGE_COLOURS.partial.band, "Full Requested": STAGE_COLOURS.full.band, Offer: STAGE_COLOURS.offer.band, Rejected: STAGE_COLOURS.closed.band, "Revise & Resubmit": STAGE_COLOURS.full.band };
-        for (const q of quotes) L10.check(`${q.status}: background is its stage's Band; Send to Corkboard only`, q.bg === rgb(BAND[q.status]) && q.acts.join(",") === "cork", `${q.bg} ${q.acts}`);
+        /* Plumage colours v1 — a quote's background is the band of the status the reply set (lib/stageColours statusBand) */
+        for (const q of quotes) L10.check(`${q.status}: background is its status's band; Send to Corkboard only`, q.bg === rgb(statusBand(q.status)) && q.acts.join(",") === "cork", `${q.bg} ${q.acts}`);
         /* QC158-12: task, corkboard, the note unchanged; pin one, then another: only one pinned, first */
         const errs: string[] = [];
         page.on("console", (m) => { if (m.type() === "error" || /pin|journal/i.test(m.text())) errs.push(m.text().slice(0, 200)); });

@@ -27,9 +27,9 @@ describe("the applied row", () => {
   });
   it("a chip is named for removal; a whole stage's chip is on its band with its mark, the others are navy", () => {
     expect(h).toMatch(/aria-label="Remove Your move"/);
-    expect(h).toMatch(/class="lf-apc lf-apc--stage"[^>]*data-stage="partial"[^>]*style="background:#e4ebf2;--sf-edge:#cbd7e4"><span aria-hidden="true"[^>]*><svg[^>]*style="display:block;color:#1c130f"/);
+    expect(h).toMatch(/class="lf-apc lf-apc--stage"[^>]*data-stage="partial"[^>]*style="background:#e8c0af;color:#1c130f;--sf-edge:#e2b09c"><span aria-hidden="true"[^>]*><svg[^>]*style="display:block"/); /* tone="inherit": the mark takes the chip's ink (the paper on the offer) */
     expect(h).toMatch(/class="lf-apc" data-tst="applied-chip" data-k="find" aria-label="Remove “vane”"><span>“vane”<\/span><i aria-hidden="true">×<\/i>/);
-    expect(STAGE_COLOURS.partial.band).toBe("#e4ebf2");
+    expect(STAGE_COLOURS.partial.band).toBe("#e8c0af"); /* Plumage colours v1: a whole stage reads its sent band */
   });
 });
 

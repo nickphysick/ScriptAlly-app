@@ -22,7 +22,7 @@ import type { AgentDataNeed } from "./agentDataQuality";
 import { isTaskType, type TaskType } from "./todoActions";
 import { londonDayEnd, londonWeekStart, type ClearedAct } from "./todoCleared";
 import type { SetAsideItem } from "./taskSettings";
-import { STAGE_COLOURS, STAGE_INK, bandBackground, stageOf, type Stage } from "./stageColours";
+import { STAGE_COLOURS, stageInk, stageOf, statusBand, type Stage } from "./stageColours";
 
 const DAY = 86400000;
 const MONTHS_LONG = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
@@ -440,8 +440,9 @@ export function wsStage(t: WsTask): Stage | null {
   return stageOf(t.query.status);
 }
 /** the stage as the inline custom properties todoWs58.css reads (band, edge, ink); undefined where there is no stage */
-export function stageVars(s: Stage | null): Record<"--tws58-band" | "--tws58-edge" | "--tws58-ink", string> | undefined {
-  return s ? { "--tws58-band": bandBackground(s), "--tws58-edge": STAGE_COLOURS[s].edge, "--tws58-ink": STAGE_INK } : undefined;
+export function stageVars(s: Stage | null, status?: string | null): Record<"--tws58-band" | "--tws58-edge" | "--tws58-ink", string> | undefined {
+  /* Plumage colours v1 — the band is the query's status band where the status is known, else the stage's (sent) band */
+  return s ? { "--tws58-band": status ? statusBand(status) : STAGE_COLOURS[s].band, "--tws58-edge": STAGE_COLOURS[s].edge, "--tws58-ink": stageInk(s) } : undefined;
 }
 
 /**

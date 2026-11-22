@@ -20,12 +20,18 @@
   .qc153-slip:hover { transform: translateY(-1px); box-shadow: 0 1px 2px rgba(28, 19, 15, 0.1), 0 26px 44px -22px rgba(28, 19, 15, 0.42); }
   .qc153-slip:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--navy), 0 22px 40px -22px rgba(28, 19, 15, 0.32); }
   .qc153-slip.is-sel { box-shadow: 0 0 0 2px var(--navy), 0 22px 40px -22px rgba(28, 19, 15, 0.32); }
-  /* Stage colours v1 — the slip's band is its stage's Band (as the grid card's, qcv154.css) */
-  .qc153-slip[data-tone="queried"] { --tone: #efe6d6; }
-  .qc153-slip[data-tone="partial"] { --tone: #e4ebf2; }
-  .qc153-slip[data-tone="full"] { --tone: #b7c9de; }
-  .qc153-slip[data-tone="offer"] { --tone: #efcdc9; }
-  .qc153-slip[data-tone="closed"] { --tone: #eceae6; }
+  /* Plumage colours v1 — the slip's band (--tone) is its status's band, set inline by QcSlip153 (lib/stageColours
+     `statusBand`), as the grid card's. A query with the writer carries the with-you outline: 3px inside the band, its
+     top corners the frame's inner radius (.sa-slip-in's 14px less its 1px edge = 13px), its bottom corners square.
+     On the offer's navy the words and marks are the paper; the current step keeps its white disc. */
+  .qc153-slip[data-wy] .qc153-top { box-shadow: inset 0 0 0 3px var(--wy); border-radius: 13px 13px 0 0; }
+  .qc153-slip[data-tone="offer"] .qc153-top .qc153-nm { color: #f4eee5; }
+  .qc153-slip[data-tone="offer"] .qc153-top .qc153-ag { color: rgba(244, 238, 229, 0.72); }
+  .qc153-slip[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd:not(.qc153-nd--cur) { color: #f4eee5; }
+  .qc153-slip[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd--fut,
+  .qc153-slip[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd--skip { color: rgba(244, 238, 229, 0.5); }
+  .qc153-slip[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-ln { background: rgba(244, 238, 229, 0.35); }
+  .qc153-slip[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-ln--done { background: #f4eee5; }
 
   .qc153-top {
     display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: 16px;
@@ -271,18 +277,10 @@
 @media (min-width: 768px) {
   .qc151 .qc153-main > .qc151-be.sa-slip { margin: 14px 0 96px; border-radius: 20px; box-shadow: 0 1px 2px rgba(28, 19, 15, 0.08), 0 22px 40px -22px rgba(28, 19, 15, 0.32); overflow: visible; }
   .qc151 .qc151-be.sa-slip > .sa-slip-in { overflow: clip; }
-  /* Stage colours v1 — the current bar is its stage's Band (lib/stageColours, restated here and asserted equal in
-     stageColours.test.ts): one stage, one colour, so requested and sent, and watch-and-wait rows, are not told apart by
-     shade. An offer carries the sheen. Past bars, hatching and the today line are unchanged. */
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="queried"] { background: #efe6d6; }
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="partial"] { background: #e4ebf2; }
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="full"] { background: #b7c9de; }
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="offer"] {
-    background:
-      linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
-      #efcdc9;
-  }
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="closed"] { background: #eceae6; }
+  /* Plumage colours v1 — the current bar is its status's band, set inline by QcBirds150 (`barFill`, lib/stageColours
+     `statusBand`): requested and sent differ. Bars never carry the with-you outline. On the offer's navy the label is
+     the paper. Past bars, hatching and the today line are unchanged. */
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="offer"] .qc150-lb { color: #f4eee5; }
   /* "30 days over", "in 15 days": sentence case, Source Serif 14, ink, no tracking */
   .qc151 .qc150-be .qc150-tx, .qc151 .qc150-be .qc150-tail--in .qc150-tx {
     font: 400 14px/1 var(--sp-serif) !important; letter-spacing: 0; text-transform: none; color: #1c130f;
