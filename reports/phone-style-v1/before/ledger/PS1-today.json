@@ -1,0 +1,302 @@
+[
+ {
+  "id": "PS1",
+  "what": "390x844 · top: population (109 texts, 0 cards, 43 taps, 32 rows)",
+  "ok": false,
+  "got": "{\"texts\":109,\"cards\":0,\"taps\":43,\"rows\":32}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · top",
+  "ok": false,
+  "got": "h1.pa5-hd-h \"Today\" 32px | b.pa4-T \"24\" 30px | b.pa4-T \"5\" 30px | b.pa4-T \"41\" 30px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · top",
+  "ok": false,
+  "got": "span.pa5-ch-tag \"Today\" typewriter 14px 400 | span. \"Jun\" typewriter 14px 400 | span. \"Nov\" typewriter 14px 400 | span. \"Apr\" typewriter 14px 400 | span. \"Sep\" typewriter 14px 400 | strong. \"Today\" typewriter 14px 400"
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · top",
+  "ok": false,
+  "got": "div.ws-main \"DashboardDashboardDashbo\" page rgb(248, 246, 242)"
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · top",
+  "ok": false,
+  "got": "h2.pa4-h \"Your move\" 24 / 270"
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · top",
+  "ok": false,
+  "got": "button.pa5-be-row \"Vale\" loose on the page | button.pa5-be-row \"Halloran\" loose on the page | button.pa5-be-row \"Kovic\" loose on the page | button.pa5-be-row \"Kovic\" loose on the page | button.pa5-be-row \"Nair\" loose on the page | button.pa5-be-row \"Lin\" loose on the page"
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · scrolled: population (109 texts, 0 cards, 43 taps, 32 rows)",
+  "ok": false,
+  "got": "{\"texts\":109,\"cards\":0,\"taps\":43,\"rows\":32}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "390x844 · scrolled",
+  "ok": false,
+  "got": "h1.pa5-hd-h \"Today\" 32px | b.pa4-T \"24\" 30px | b.pa4-T \"5\" 30px | b.pa4-T \"41\" 30px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "390x844 · scrolled",
+  "ok": false,
+  "got": "span.pa5-ch-tag \"Today\" typewriter 14px 400 | span. \"Jun\" typewriter 14px 400 | span. \"Nov\" typewriter 14px 400 | span. \"Apr\" typewriter 14px 400 | span. \"Sep\" typewriter 14px 400 | strong. \"Today\" typewriter 14px 400"
+ },
+ {
+  "id": "PS1-3",
+  "what": "390x844 · scrolled",
+  "ok": false,
+  "got": "div.ws-main \"DashboardDashboardDashbo\" page rgb(248, 246, 242)"
+ },
+ {
+  "id": "PS1-4",
+  "what": "390x844 · scrolled",
+  "ok": false,
+  "got": "h2.pa4-h \"Your move\" 24 / 270"
+ },
+ {
+  "id": "PS1-5",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "390x844 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "390x844 · scrolled",
+  "ok": false,
+  "got": "button.pa5-be-row \"Vale\" loose on the page | button.pa5-be-row \"Halloran\" loose on the page | button.pa5-be-row \"Kovic\" loose on the page | button.pa5-be-row \"Kovic\" loose on the page | button.pa5-be-row \"Nair\" loose on the page | button.pa5-be-row \"Lin\" loose on the page"
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · offer: the state is reachable",
+  "ok": false,
+  "got": "no such query on the harness"
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · ordinary: the state is reachable",
+  "ok": false,
+  "got": "no such query on the harness"
+ },
+ {
+  "id": "PS1",
+  "what": "390x844 · one-query: the state is reachable",
+  "ok": false,
+  "got": "no such query on the harness"
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · top: population (109 texts, 0 cards, 43 taps, 32 rows)",
+  "ok": false,
+  "got": "{\"texts\":109,\"cards\":0,\"taps\":43,\"rows\":32}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · top",
+  "ok": false,
+  "got": "h1.pa5-hd-h \"Today\" 32px | b.pa4-T \"24\" 30px | b.pa4-T \"5\" 30px | b.pa4-T \"41\" 30px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · top",
+  "ok": false,
+  "got": "span.pa5-ch-tag \"Today\" typewriter 14px 400 | span. \"Jun\" typewriter 14px 400 | span. \"Nov\" typewriter 14px 400 | span. \"Apr\" typewriter 14px 400 | span. \"Sep\" typewriter 14px 400 | strong. \"Today\" typewriter 14px 400"
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · top",
+  "ok": false,
+  "got": "div.ws-main \"DashboardDashboardDashbo\" page rgb(248, 246, 242)"
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · top",
+  "ok": false,
+  "got": "h2.pa4-h \"Your move\" 24 / 240"
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · top",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · top",
+  "ok": false,
+  "got": "button.pa5-be-row \"Vale\" loose on the page | button.pa5-be-row \"Halloran\" loose on the page | button.pa5-be-row \"Kovic\" loose on the page | button.pa5-be-row \"Kovic\" loose on the page | button.pa5-be-row \"Nair\" loose on the page | button.pa5-be-row \"Lin\" loose on the page"
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · scrolled: population (109 texts, 0 cards, 43 taps, 32 rows)",
+  "ok": false,
+  "got": "{\"texts\":109,\"cards\":0,\"taps\":43,\"rows\":32}"
+ },
+ {
+  "id": "PS1-1",
+  "what": "360x740 · scrolled",
+  "ok": false,
+  "got": "h1.pa5-hd-h \"Today\" 32px | b.pa4-T \"24\" 30px | b.pa4-T \"5\" 30px | b.pa4-T \"41\" 30px"
+ },
+ {
+  "id": "PS1-2",
+  "what": "360x740 · scrolled",
+  "ok": false,
+  "got": "span.pa5-ch-tag \"Today\" typewriter 14px 400 | span. \"Jun\" typewriter 14px 400 | span. \"Nov\" typewriter 14px 400 | span. \"Apr\" typewriter 14px 400 | span. \"Sep\" typewriter 14px 400 | strong. \"Today\" typewriter 14px 400"
+ },
+ {
+  "id": "PS1-3",
+  "what": "360x740 · scrolled",
+  "ok": false,
+  "got": "div.ws-main \"DashboardDashboardDashbo\" page rgb(248, 246, 242)"
+ },
+ {
+  "id": "PS1-4",
+  "what": "360x740 · scrolled",
+  "ok": false,
+  "got": "h2.pa4-h \"Your move\" 24 / 240"
+ },
+ {
+  "id": "PS1-5",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-6",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-7",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-8",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-9",
+  "what": "360x740 · scrolled",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "id": "PS1-10",
+  "what": "360x740 · scrolled",
+  "ok": false,
+  "got": "button.pa5-be-row \"Vale\" loose on the page | button.pa5-be-row \"Halloran\" loose on the page | button.pa5-be-row \"Kovic\" loose on the page | button.pa5-be-row \"Kovic\" loose on the page | button.pa5-be-row \"Nair\" loose on the page | button.pa5-be-row \"Lin\" loose on the page"
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · offer: the state is reachable",
+  "ok": false,
+  "got": "no such query on the harness"
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · ordinary: the state is reachable",
+  "ok": false,
+  "got": "no such query on the harness"
+ },
+ {
+  "id": "PS1",
+  "what": "360x740 · one-query: the state is reachable",
+  "ok": false,
+  "got": "no such query on the harness"
+ }
+]

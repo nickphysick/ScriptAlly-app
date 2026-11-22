@@ -3,13 +3,20 @@
    the same values as the page. Every value is the ref's own; nothing here is re-derived.
 
    ⚠️ NEW TOKENS ONLY (`--pa-*`). No token a page already reads is re-valued, so the desktop and every phone page that
-      has not been rebuilt yet are unchanged by this file. The ink navy is the app's own `--sp-anthracite` (#2a3a52),
+      has not been rebuilt yet are unchanged by this file — with ONE exception, Phone style v1's `--pa-page` (oat, P1). The ink navy is the app's own `--sp-anthracite` (#2a3a52),
       aliased rather than restated where it is defined.
    ⚠️ LIGHT ONLY. No dark-mode rules on the phone (the ref sets `color-scheme: light`). */
 @media (max-width: 767.98px) {
   .sa-shellframe,
   .pa-layer {
-    --pa-page: #f8f6f2;
+    /* Phone style v1 (P1): THE PAGE IS OAT ON EVERY PHONE SCREEN — the desktop's own page colour, read, never restated.
+       It resolves here, on the root, so a portalled layer and the shell read the same oat (`--ws-page` is set at :root). */
+    --pa-page: var(--ws-page, #f2eee8);
+    /* ⚠️ A HOLDING VALUE OUTSIDE THE STYLE SHEET. The page's old #f8f6f2, kept only for the insets, fills, the pressed
+       row and the selected option that used to borrow `--pa-page` (ruling 1b, 22 Nov), so re-valuing the page changed
+       none of them. Each reader takes its sheet colour (white, --ps-fill or --ps-press) at roll-out; the census counts
+       every reader as a breach until then. Never a new reader. */
+    --pa-inset-legacy: #f8f6f2;
     --pa-card: #ffffff;
     --pa-navy: var(--sp-anthracite, #2a3a52);
     --pa-navy-2: #364a66;
@@ -60,6 +67,43 @@
     --pa-sh: 0 1px 2px rgba(31, 38, 51, 0.05), 0 6px 18px rgba(31, 38, 51, 0.07);
     --pa-sh-up: 0 -10px 30px rgba(31, 38, 51, 0.16);
     --pa-spring: cubic-bezier(0.22, 1, 0.36, 1);
+
+    /* ── PHONE STYLE v1 (design-refs/phone-style-v1/phone-style-v1.html, "For Claude Code") — NEW TOKENS, the sheet's
+       values exactly. Aliased where the sheet aliases (--sp-anthracite, --sp-rust, --sp-type, --pa-sans). New phone
+       work reads these; a value not here is a question for Nick. ── */
+    --ps-page: #f2eee8; /* the desktop's --ws-page */
+    --ps-card: #ffffff;
+    --ps-navy: var(--sp-anthracite); /* #2a3a52 */
+    --ps-ink: #1f2633;
+    --ps-body: #4a4f5a; /* text on the page */
+    --ps-muted: #6b6f78; /* small text, on cards only */
+    --ps-on-navy: #c9d2df;
+    --ps-rule: #efebe4;
+    --ps-fill: #ece7de;
+    --ps-blush: #e8c8bc;
+    --ps-rust: var(--sp-rust); /* #7a3f31 */
+    --ps-type: var(--sp-type); /* Special Elite */
+    --ps-hero: 400 56px/1 var(--ps-type);
+    --ps-title: 400 28px/1.1 var(--ps-type);
+    --ps-headline: 400 20px/1.25 var(--ps-type);
+    --ps-numeral: 400 28px/1 var(--ps-type);
+    --ps-name: 600 16px/1.3 var(--pa-sans);
+    --ps-body-text: 400 16px/1.5 var(--pa-sans);
+    --ps-secondary: 400 14px/1.4 var(--pa-sans);
+    --ps-label: 600 14px/1.2 var(--pa-sans);
+    --ps-caption: 400 12px/1.2 var(--pa-sans);
+    --ps-s1: 4px; --ps-s2: 8px; --ps-s3: 12px; --ps-s4: 16px; --ps-s5: 24px; --ps-s6: 32px;
+    --ps-gutter: 16px;
+    --ps-row-h: 64px;
+    --ps-tap: 48px;
+    --ps-r-card: 16px;
+    --ps-r-sheet: 24px;
+    --ps-disc: 40px;
+    --ps-btn-h: 48px;
+    --ps-sh-card: 0 0 0 1px rgba(31,38,51,.06), 0 1px 2px rgba(31,38,51,.04);
+    --ps-sh-raised: 0 0 0 1px rgba(31,38,51,.06), 0 12px 32px rgba(31,38,51,.16);
+    --ps-press: rgba(31,38,51,.05);
+    --ps-ease: cubic-bezier(.22, 1, .36, 1);
     color-scheme: light;
   }
   /* ⚠️ SPECIAL ELITE HAS ONE WEIGHT, so it is never fake-bolded anywhere on the phone (ref `body{font-synthesis:none}`) */

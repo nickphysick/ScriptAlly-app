@@ -1256,7 +1256,9 @@
     "design-refs/analytics-v26/screens/03-day-one-390@2x.png": "6940673793a6a5322d4c8776bfb102903bf5257e71177623ced0ee7f0af53553",
     "design-refs/manuscripts-v29/manuscripts-v29.html": "4ed4f3bae217f9c43b25e8cbe23a322ff7be58b577937f328723c3099d45f960",
     "design-refs/material-icons-v1/material-icons-v1.json": "e020d74ba30952553defd54246ea5744640416b18d5850ddf4a863ffa1bb628e",
-    "design-refs/material-icons-v1/material-icons-in-app-v3.html": "9023eba64e8dd8a66f24b3c7b67d9870ad377126246df5feb196648cf9d4920f"
+    "design-refs/material-icons-v1/material-icons-in-app-v3.html": "9023eba64e8dd8a66f24b3c7b67d9870ad377126246df5feb196648cf9d4920f",
+    "design-refs/phone-style-v1/phone-style-v1.html": "42d81906d253ef632b25755765ca98ac19d0df7433d2d141daeda58e95177bd0",
+    "design-refs/phone-style-v1/phone-today-v6.html": "1e12a1f2a7cb48a7163b370e08f5195b0f552fc2e9c5ca70a00f77aba457d9d7"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

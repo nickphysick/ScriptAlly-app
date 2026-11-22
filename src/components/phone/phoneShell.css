@@ -173,7 +173,7 @@
     text-align: left; cursor: pointer; background: #fff; border-radius: var(--pa-r); box-shadow: var(--pa-sh); color: var(--pa-ink);
   }
   .pa-mtile[disabled] { cursor: default; opacity: 0.55; }
-  .pa-mtile .pa-mi { width: 34px; height: 34px; border-radius: 50%; background: var(--pa-page); display: grid; place-items: center; margin-bottom: 8px; color: var(--pa-ink-2); }
+  .pa-mtile .pa-mi { width: 34px; height: 34px; border-radius: 50%; background: var(--pa-inset-legacy); display: grid; place-items: center; margin-bottom: 8px; color: var(--pa-ink-2); }
   .pa-mtile .pa-mi svg { width: 18px; height: 18px; }
   .pa-mtile b { font: 600 15px/1.2 var(--pa-sans) !important; }
   .pa-mtile .pa-sub { font-family: var(--pa-sans) !important; }
@@ -246,7 +246,7 @@
   .pa-edgefade {
     position: fixed; left: 0; right: 0; bottom: 0; z-index: 39; pointer-events: none;
     height: calc(66px + 14px + 32px + env(safe-area-inset-bottom, 0px));
-    background: linear-gradient(rgba(248, 246, 242, 0), rgba(248, 246, 242, 0.9) 55%, var(--pa-page));
+    background: linear-gradient(rgba(var(--ws-page-rgb), 0), rgba(var(--ws-page-rgb), 0.9) 55%, var(--pa-page));
     transition: opacity 0.3s;
   }
   .pa-edgefade.off { opacity: 0; }

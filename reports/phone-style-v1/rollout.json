@@ -1,0 +1,13 @@
+[
+ { "screens": "Today · Agents and Activity (finish Today)", "size": "small", "change": "The agent summary's figures become tiles; List health and Lately sit in white cards under page headings; the feed's dates leave the typewriter for 14 system; Lately's rows go into a card (4 loose today)." },
+ { "screens": "To do", "size": "medium", "change": "The card's corners 24 → 16; the title 32 → 28; the 98 \"Then\" rows grow from 60 to 64 and sit in one card; a press state on the rows and the card's two buttons. The throttled reload jumps (layout shift 1.2): the loading shapes P26 asks for." },
+ { "screens": "The full query list", "size": "medium", "change": "Rows into a card per group (88 loose); names 700 → 600 (176); the grey count and status text off the oat (156); the headline 24 → 28. Repeated rows, so one change each. The reload jumps (0.44)." },
+ { "screens": "One query (every state)", "size": "medium", "change": "The bubbles' corners 18 → 16; their dates leave the typewriter (14 → system); the filled button 56/17 → 48/16 (the sheet's); the bubbles keep the 16 gutter." },
+ { "screens": "The full Birds-eye view", "size": "medium", "change": "Rows 27 → 40 inside a card, as on Today; the group headings leave the typewriter; the grey counts off the oat." },
+ { "screens": "The task screen", "size": "large", "change": "Twenty off-scale sizes (13, 17, 18 …) onto the six; ten small targets (the 44 close ring, chips) to 48; the tiles' shadow to the card's; the footer copy off the oat." },
+ { "screens": "Materials (four tabs)", "size": "small", "change": "The header line 17 → 16; the tab labels and empty-state text off the oat; the package row into its card; the comps list's corners 24 → 16." },
+ { "screens": "The sheets: + sheet, quick log, agent sheet, gaps, search", "size": "small", "change": "Their grey text now sits on the oat (the sheets take the page colour): it goes ink or the darker grey, or onto white cards; the search field's corners; the agent sheet's 56 button → 48." },
+ { "screens": "Profile and Settings", "size": "small", "change": "Card corners 24 → 16 (8 on Profile, 8 on a Settings section); Settings' headings and sizes onto the six; the 13 holding-value insets take their sheet colours (white, --ps-fill, --ps-press)." },
+ { "screens": "Set-up and account screens", "size": "small", "change": "The wordmark 18.5 and the typewriter \"Skip for now\" / \"Sign in\" (14.5, 19) onto the six and the system font; the 44 exit link to 48." },
+ { "screens": "The phone landing and pricing", "size": "large", "change": "A different tier (marketing). 76 and 57 off-scale sizes, weight 700 in the nav, the 16 gutter. A question first: do the public pages follow the app's phone sheet at all?" }
+]

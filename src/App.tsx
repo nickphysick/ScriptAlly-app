@@ -89,6 +89,7 @@ import { NotesLab } from "./components/notes/NotesLab";
 import { ContactListLab } from "./components/agents/ContactListLab";
 import { OnbLab } from "./components/onboarding/OnbLab";
 import { EmailDropLab } from "./components/emailImport/EmailDropLab";
+import { PsLab } from "./components/phone/PsLab";
 import { QueryDrawer } from "./components/queryActions/QueryDrawer";
 import { PracticeOverlay } from "./components/queries/practice/PracticeOverlay";
 import { AgentCardHost } from "./components/agents/card/AgentCardHost";
@@ -410,6 +411,10 @@ function AppContent() {
      served by `build:dev`, absent from production. It carries a query (`?s=fork&…`), so it is
      matched by prefix. ⚠️ `MODE` FIRST: with the hash first, the minifier kept the `startsWith`
      call, and the lab's name with it, in the production bundle (`prodBuild.test.ts` P1). */
+  /* #/ps-lab — every part of the phone style sheet, for the PS2 lock (Phone style v1, Phase 2). Dev only, MODE first. */
+  if (import.meta.env.MODE !== "production" && hash === "#/ps-lab") {
+    return <PsLab />;
+  }
   /* #/email-drop-lab — the phone email drop over a fixture (phone last screens v1, PLS1 L6). Dev only.
      MODE first, for the same reason. */
   if (import.meta.env.MODE !== "production" && hash.startsWith("#/email-drop-lab")) {

@@ -42,7 +42,7 @@
   .pa3-card { background: var(--pa-card); border-radius: 16px; box-shadow: var(--pa-sh); overflow: hidden; }
   .pa3 .pa3-row { display: flex; gap: 12px; align-items: center; width: 100%; padding: 13px 14px; min-height: 64px; position: relative; box-sizing: border-box; }
   .pa3-row + .pa3-row::before { content: ""; position: absolute; top: 0; left: 66px; right: 0; height: 1px; background: var(--pa-rule); }
-  .pa3 .pa3-row:active { background: var(--pa-page); }
+  .pa3 .pa3-row:active { background: var(--pa-inset-legacy); }
   .pa3-row .pa3-tx { flex: 1; min-width: 0; display: block; }
   .pa3-row .pa3-t, .pa3-row .pa3-s { display: block; }
   .pa3-row .pa3-t { font-size: 16px; font-weight: 600; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -130,7 +130,7 @@
   .pa3-opt small { display: block; font-size: 13px; color: var(--pa-muted); font-weight: 400; margin-top: 1px; }
   .pa3-opt .pa3-tx { flex: 1; min-width: 0; }
   /* ref #f3f6fa → nearest token --pa-page */
-  .pa3 .pa3-opt.on { box-shadow: inset 0 0 0 2px var(--pa-navy); background: var(--pa-page); }
+  .pa3 .pa3-opt.on { box-shadow: inset 0 0 0 2px var(--pa-navy); background: var(--pa-inset-legacy); }
   /* ref #c9ccd3 ring → nearest token --pa-st-slate */
   .pa3-opt .pa3-ck { flex: none; width: 24px; height: 24px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--pa-st-slate); display: grid; place-items: center; color: #fff; }
   .pa3-opt.on .pa3-ck { background: var(--pa-navy); box-shadow: none; }

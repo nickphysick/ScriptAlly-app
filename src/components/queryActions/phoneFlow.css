@@ -38,12 +38,12 @@
   .pf-lcband .pf-day { font-family: var(--pa-type); font-weight: 400; font-size: 14px; }
   .pf-lcag { display: flex; align-items: center; gap: 10px; padding: 12px 14px 10px; }
   .pf-av { width: 40px; height: 40px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--pa-fill); color: var(--pa-ink); font-size: 14px; font-weight: 600; }
-  .pf-av.pf-empty { background: var(--pa-page); box-shadow: inset 0 0 0 1.5px var(--pa-rule); }
+  .pf-av.pf-empty { background: var(--pa-inset-legacy); box-shadow: inset 0 0 0 1.5px var(--pa-rule); }
   .pf-lcwho { flex: 1; min-width: 0; }
   .pf-lcnm { display: block; font-family: var(--pa-type); font-size: 18px; text-align: left; color: var(--pa-ink); background: none; border: 0; padding: 0; }
   .pf-ph { height: 10px; border-radius: 5px; background: var(--pa-fill); }
   .pf-sub { font-size: 13px; color: var(--pa-muted); }
-  .pf-lctray { margin: 0 12px 12px; background: var(--pa-page); border-radius: 12px; padding: 9px 11px; }
+  .pf-lctray { margin: 0 12px 12px; background: var(--pa-inset-legacy); border-radius: 12px; padding: 9px 11px; }
   .pf-book { font-size: 12px; }
   .pf-lcfs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
   .pf-lcf { display: inline-flex; align-items: center; max-width: 100%; min-height: 26px; padding: 0 10px; border-radius: 999px; font-size: 12.5px; font-weight: 500;

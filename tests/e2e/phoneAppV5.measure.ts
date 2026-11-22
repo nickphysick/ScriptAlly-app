@@ -350,7 +350,9 @@ group("today", "PA5-1 · 3 · 4 · 5 · 6 · 7", async (page, info) => {
     await blockIntoView(page);
     await mutate(page);
     const blockRows = () => page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be-row"]').map((r) => ({ id: r.dataset.id!, court: r.dataset.court! })));
-    const counts = await page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be-count"]').map((b) => ({ k: b.dataset.k!, n: Number(b.dataset.n), dis: (b as HTMLButtonElement).disabled })));
+    const counts = await page.evaluate(() => (window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="be-count"]').map((b) => ({ k: b.dataset.k!, n: Number(b.dataset.n), dis: (b as HTMLButtonElement).disabled, tile: b.classList.contains("ps-tile"), navy: b.classList.contains("navy") })));
+    /* Phone style v1: re-pointed at the tiles — the three counts ARE the three tiles, with you the navy one */
+    L.check("PA5-4", `${at} · the counts are the three tiles (with you navy)`, counts.length === 3 && counts.every((c) => c.tile) && counts.every((c) => c.navy === (c.k === "you")), JSON.stringify(counts));
     const all0 = await blockRows();
     L.check("PA5-4", `${at} · counts and rows (population ${counts.map((c) => `${c.k} ${c.n}`).join(", ")}; ${all0.length} rows)`, counts.length === 3 && counts.some((c) => c.n > 0) && all0.length > 0, "");
     const fig = await page.evaluate(() => Number((window as unknown as { __v: (s: string) => HTMLElement[] }).__v('[data-pa5="figure"]')[0]?.dataset.n ?? -1));
@@ -896,10 +898,12 @@ const sweep = (page: Page, roots: string): Promise<Sweep> => page.evaluate((rs) 
     const r = e.getBoundingClientRect(), cs = getComputedStyle(e);
     if (r.width === 0 || r.height === 0 || cs.visibility === "hidden" || e.closest("svg")) continue;
     if (r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > vw) continue;
-    const dock = !!e.closest('[data-pa5="dock"]');
+    /* Phone style v1 (Nick's pending question 1, as proposed): 12 is allowed only where the element is marked
+       `data-ps-cap` — the dock's labels, a chart's axis labels, a numeral's unit (P12). It was "dock labels" alone. */
+    const cap = !!e.closest("[data-ps-cap]");
     if ([...e.childNodes].some((n) => n.nodeType === 3 && (n.textContent ?? "").trim())) {
       out.texts++;
-      if (!dock && parseFloat(cs.fontSize) < 13.99) out.smallText.push(`${String(e.className).slice(0, 30)} "${e.textContent?.trim().slice(0, 20)}" ${cs.fontSize}`);
+      if (!cap && parseFloat(cs.fontSize) < 13.99) out.smallText.push(`${String(e.className).slice(0, 30)} "${e.textContent?.trim().slice(0, 20)}" ${cs.fontSize}`);
     }
     if (e.matches("button:not([disabled]), a[href], [role='button'], [role='tab'], input, textarea, select") && !e.closest("[aria-hidden='true']")) {
       out.taps++;
@@ -950,7 +954,7 @@ group("sizes", "PA5-13", async (page, info) => {
         }
       }
       L.check("PA5-13", `${at} · ${name} · population ${agg.texts} texts, ${agg.taps} targets`, agg.texts > 3 && agg.taps > 0, "");
-      L.check("PA5-13", `${at} · ${name} · text ≥ 14px (dock labels excepted)`, agg.smallText.length === 0, agg.smallText.slice(0, 6).join(" | "));
+      L.check("PA5-13", `${at} · ${name} · text ≥ 14px (elements marked data-ps-cap excepted)`, agg.smallText.length === 0, agg.smallText.slice(0, 6).join(" | "));
       L.check("PA5-13", `${at} · ${name} · targets ≥ 48×48 (Birds-eye rows excepted)`, agg.smallTap.length === 0, agg.smallTap.slice(0, 6).join(" | "));
       /* 125% text: the root at 20px; nothing past the right edge, and no sideways page scroll */
       await page.evaluate(() => { document.documentElement.style.fontSize = "20px"; }); await page.waitForTimeout(600);

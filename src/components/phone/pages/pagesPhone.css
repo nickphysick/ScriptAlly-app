@@ -139,7 +139,7 @@
   .pa-pg .pa-rec { width: 150px; box-sizing: border-box; }
   .pa-recv { font-size: 22px; margin-top: 6px; color: var(--pa-ink); line-height: 1.15; }
   .pa-recw { margin-top: 4px; }
-  .pa-pg .pa-annote { background: var(--pa-page); box-shadow: none; padding: 16px 2px; }
+  .pa-pg .pa-annote { background: var(--pa-inset-legacy); box-shadow: none; padding: 16px 2px; }
   .pa-annote b { font-size: 15px; }
   .pa-annote p { font-size: 14px; line-height: 1.45; margin: 6px 0 0; }
 
