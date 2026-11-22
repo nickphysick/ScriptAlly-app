@@ -7,6 +7,7 @@
  * or package. Shown in the "How packages work" pop-up, and on day one in a framed card under the header.
  * The pop-up traps focus, closes on Escape, a click outside or Got it, and gives focus back to the button that opened it.
  */
+import { MaterialIcon } from "../../shared/MaterialIcon";
 import React, { useEffect, useRef } from "react";
 import { createPortal } from "react-dom";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
@@ -27,19 +28,19 @@ export const Pk62Storyboard: React.FC = () => (
     <i className="k62-sb-v" aria-hidden="true" style={at(2, 5)} />
     <div className="k62-sb-l" style={{ gridRow: 3 }}><i>2</i><span>What gives them<br />their answer</span></div>
     <div className="k62-sb-c" style={at(3, "2 / 5")}>
-      <span className="k62-disc"><M62 k="mail" /></span><span><b>Your query letter</b><span>one of your letters</span></span>
+      <span className="k62-disc"><MaterialIcon kind="letter" size={20} /></span><span><b>Your query letter</b><span>one of your letters</span></span>
       <em className="k62-sb-tag"><M62 k="open" />names your comps</em>
     </div>
     <div className="k62-sb-c" style={at(3, 5)}>
-      <span className="k62-disc"><M62 k="book" /></span><span><b>Your manuscript sample</b><span>taken from one of your versions</span></span>
+      <span className="k62-disc"><MaterialIcon kind="pages" size={20} /></span><span><b>Your manuscript sample</b><span>taken from one of your versions</span></span>
     </div>
     <i className="k62-sb-v" aria-hidden="true" style={at(4, "2 / 5")} />
     <i className="k62-sb-v" aria-hidden="true" style={at(4, 5)} />
     <div className="k62-sb-l" style={{ gridRow: 5 }}><i>3</i><span>The things<br />you send</span></div>
     <div className="k62-sb-pk" style={{ gridRow: 5 }}>
       <b>A package</b>
-      <span className="k62-sb-s"><M62 k="mail" />Query letter</span>
-      <span className="k62-sb-s"><M62 k="book" />Manuscript sample</span>
+      <span className="k62-sb-s"><MaterialIcon kind="letter" />Query letter</span>
+      <span className="k62-sb-s"><MaterialIcon kind="pages" />Manuscript sample</span>
       <span className="k62-sb-plus" aria-hidden="true">+</span>
       <span className="k62-sb-s k62-opt">anything else they ask for</span>
       <p>Mix them however you like, and make as many as you want. A package is locked once it’s sent.</p>

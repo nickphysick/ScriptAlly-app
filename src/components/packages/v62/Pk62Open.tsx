@@ -14,6 +14,7 @@
  *    book, marked "(example)"; the subject; "Dear {first name},"; the opening of the letter's STORED text.
  * ⚠️ THE ROW LABEL IS "Sample", never "Manuscript sample": the value carries the "From".
  */
+import { MaterialIcon } from "../../shared/MaterialIcon";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { iconOf } from "../../../lib/packagesV26";
 import { greetingName, letterOpening, previewAgent } from "../../../lib/packagesV393";
@@ -206,9 +207,11 @@ export const Pk62Open: React.FC<{
               <div className="k62-encl">
                 <h4>Sent with it</h4>
                 <ul>
-                  {i.version ? <li><M62 k="book" /><span><b>Sample</b> <span>taken from {i.version.name}</span></span></li> : <li className="k62-no"><M62 k="book" />{ro ? "No sample recorded" : "No sample yet"}</li>}
-                  {i.synopsis ? <li><M62 k="page" /><span><b>Synopsis</b> <span>{i.synopsis.name}</span></span></li> : null}
-                  {i.extras.map((x) => <li key={x}><M62 k="clip" /><span><b>{x}</b> <span>if asked</span></span></li>)}
+                  {/* Material icons v1: a package's Sample takes "pages" (a package states no unit); Synopsis its own; the extras are
+                      the writer's free text and take none */}
+                  {i.version ? <li><MaterialIcon kind="pages" /><span><b>Sample</b> <span>taken from {i.version.name}</span></span></li> : <li className="k62-no"><MaterialIcon kind="pages" />{ro ? "No sample recorded" : "No sample yet"}</li>}
+                  {i.synopsis ? <li><MaterialIcon kind="synopsis" /><span><b>Synopsis</b> <span>{i.synopsis.name}</span></span></li> : null}
+                  {i.extras.map((x) => <li key={x}><span><b>{x}</b> <span>if asked</span></span></li>)}
                 </ul>
               </div>
             </div>

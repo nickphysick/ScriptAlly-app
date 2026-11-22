@@ -15,6 +15,7 @@
  * Every screen below the hub is a full-screen page keyed by the address (`?pkg=`, `?build=`, `?mat=`, `?ver=`,
  * `?comps=1`, `?compsin=`, `?all=`, `?edit=`), so the back gesture closes it.
  */
+import { MaterialIcon } from "../../shared/MaterialIcon";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -236,8 +237,8 @@ const Pieces: React.FC<{ model: Pk26Model; p: SubmissionPackage }> = ({ model, p
   return (
     <span className="pa-apkp" data-pa="pk-pieces">
       {ver ? <span className="pa-pc v">{PI.book}{ver}</span> : null}
-      {let_ ? <span className="pa-pc l">{PI.doc}{let_}</span> : null}
-      {syn ? <span className="pa-pc l">{PI.note}{syn}</span> : null}
+      {let_ ? <span className="pa-pc l"><MaterialIcon kind="letter" size={14} />{let_}</span> : null}
+      {syn ? <span className="pa-pc l"><MaterialIcon kind="synopsis" size={14} />{syn}</span> : null}
       {!ver && !let_ && !syn ? <span className="pa-sub">Nothing in it yet</span> : null}
     </span>
   );
@@ -272,7 +273,7 @@ function landing(model: Pk26Model, usage?: Usage, letterNames?: (id: string) => 
   const bl = bestPiece(model.figItems("let").map((i) => ({ id: i.id, name: i.name, f: i.f, retired: i.retired })));
   if (bl) {
     const m = model.lettersAll.find((x) => x.id === bl.item.id);
-    cards.push({ key: "let", rank: "Your best letter", name: bl.item.name, colour: "#9b4a57", icon: PI.doc, metric: resultWords(bl.item.f), line: m && m.inPackages.length ? `Used in ${m.inPackages.map((x) => x.packageName).join(" and ")}` : "", target: ["mat", bl.item.id] });
+    cards.push({ key: "let", rank: "Your best letter", name: bl.item.name, colour: "#9b4a57", icon: <MaterialIcon kind="letter" />, metric: resultWords(bl.item.f), line: m && m.inPackages.length ? `Used in ${m.inPackages.map((x) => x.packageName).join(" and ")}` : "", target: ["mat", bl.item.id] });
   } else hidden.push("letter");
   const bv = bestPiece(model.figItems("ver").map((i) => ({ id: i.id, name: i.name, f: i.f, retired: i.retired })));
   if (bv) {
@@ -283,7 +284,7 @@ function landing(model: Pk26Model, usage?: Usage, letterNames?: (id: string) => 
   const bs = bestPiece(model.figItems("syn").map((i) => ({ id: i.id, name: i.name, f: i.f, retired: i.retired })));
   if (bs) {
     const m = model.synopsesAll.find((x) => x.id === bs.item.id);
-    cards.push({ key: "syn", rank: "Your best synopsis", name: bs.item.name, colour: "#9b4a57", icon: PI.note, metric: resultWords(bs.item.f), line: m && m.inPackages.length ? `Used in ${m.inPackages.map((x) => x.packageName).join(" and ")}` : "", target: ["mat", bs.item.id] });
+    cards.push({ key: "syn", rank: "Your best synopsis", name: bs.item.name, colour: "#9b4a57", icon: <MaterialIcon kind="synopsis" />, metric: resultWords(bs.item.f), line: m && m.inPackages.length ? `Used in ${m.inPackages.map((x) => x.packageName).join(" and ")}` : "", target: ["mat", bs.item.id] });
   }
   /* most named comp: the comp named in the most queries' letters (compUsage, the desktop's own count) */
   if (usage) {
@@ -364,8 +365,8 @@ const Shelves: React.FC<{ model: Pk26Model; usage: Usage; onOpen: (k: string, v:
           <div className="pa-lockn" data-pa="pk-ver-locked">{lockI}<span>Versions are part of Pro. Keep each draft you send, and see which one gets requests.</span></div>
         </section>
       )}
-      {shelf("Query letters", "let", model.letters.map((m) => ({ id: m.id, name: m.name, s: factsLine("let", m.id), inUse: m.inUse })), "l", PI.doc, "Query letter", "New letter", () => onOpen("edit", "new-let"), "mat")}
-      {shelf("Synopses", "syn", model.synopses.map((m) => ({ id: m.id, name: m.name, s: factsLine("syn", m.id), inUse: m.inUse })), "l", PI.note, "Synopsis", "New synopsis", () => onOpen("edit", "new-syn"), "mat")}
+      {shelf("Query letters", "let", model.letters.map((m) => ({ id: m.id, name: m.name, s: factsLine("let", m.id), inUse: m.inUse })), "l", <MaterialIcon kind="letter" size={14} />, "Query letter", "New letter", () => onOpen("edit", "new-let"), "mat")}
+      {shelf("Synopses", "syn", model.synopses.map((m) => ({ id: m.id, name: m.name, s: factsLine("syn", m.id), inUse: m.inUse })), "l", <MaterialIcon kind="synopsis" size={14} />, "Synopsis", "New synopsis", () => onOpen("edit", "new-syn"), "mat")}
       {shelf("Comps", "comp", usage.comps.map((c, i) => {
         const u = usage.byKey.get(compKey(c, i));
         const age = compAge(c, currentYear());
@@ -589,9 +590,9 @@ const BuilderPage: React.FC<{ model: Pk26Model; id: string; nav: ReturnType<type
         <div className="pa-mail" data-pa="build-mail">
           <div className="pa-mh"><div><span>To</span>the agent’s email or form</div><div data-pa="build-subject"><span>Subject</span>{subject}</div></div>
           <SlotRow k="ver" order={0} now={now} filled={!!verRow} icon={mi(PI.book, "#e3ebf0")} title={verRow ? `Pages from ${verRow.name}` : "Choose a version"} sub={verRow ? `From ${verRow.name}${words ? ` · ${words.toLocaleString("en-GB")} words` : ""}` : "The pages they read come from a version of your book"} action={verRow ? "Change" : "Choose"} onPick={() => setPick("ver")} />
-          <SlotRow k="let" order={1} now={now} filled={!!letter} icon={mi(PI.doc, MPINK)} title={letter ? letter.name : "Choose a query letter"} sub={letter ? "Query letter · in the email" : "The letter agents read first"} action={letter ? "Change" : "Choose"} onPick={() => setPick("let")} />
+          <SlotRow k="let" order={1} now={now} filled={!!letter} icon={mi(<MaterialIcon kind="letter" size={20} />, MPINK)} title={letter ? letter.name : "Choose a query letter"} sub={letter ? "Query letter · in the email" : "The letter agents read first"} action={letter ? "Change" : "Choose"} onPick={() => setPick("let")} />
           {letter?.text ? <div className="pa-excerpt" data-pa="build-excerpt">{letter.text.slice(0, 140).trim()}{letter.text.length > 140 ? "…" : ""}</div> : null}
-          <SlotRow k="syn" order={2} now={now} filled={!!syn} icon={mi(PI.note, syn ? MPINK : "#fff")} title={syn ? model.matName("syn", syn) ?? "Synopsis" : "Add a synopsis"} sub={syn ? "Synopsis" : "Skip it if this agent doesn’t ask for one"} action={syn ? "Change" : "Choose"} onPick={() => setPick("syn")} />
+          <SlotRow k="syn" order={2} now={now} filled={!!syn} icon={mi(<MaterialIcon kind="synopsis" size={20} />, syn ? MPINK : "#fff")} title={syn ? model.matName("syn", syn) ?? "Synopsis" : "Add a synopsis"} sub={syn ? "Synopsis" : "Skip it if this agent doesn’t ask for one"} action={syn ? "Change" : "Choose"} onPick={() => setPick("syn")} />
           <SlotRow k="ext" order={3} now={now} filled={ext.length > 0} icon={mi(PI.plus)} title="Also sends" sub={ext.length ? model.extras.filter((e) => ext.includes(e.id)).map((e) => e.name).join(" · ") : "Author bio, a cover note, anything else"} action={ext.length ? "Change" : "Add"} onPick={() => setPick("ext")} last />
         </div>
         <button type="button" className="pa-btn pri blk pa-hb pa-mt16" data-pa="build-ready" disabled={!let_ || !ver || saving} onClick={() => void save(true)}>Mark as ready</button>
@@ -635,7 +636,7 @@ const Picker: React.FC<{
             </button>
           )) : rows.map((r) => (
             <button key={r.id} type="button" className={`pa-mslot${r.id === cur ? " now" : ""}`} data-pa="pick-row" data-id={r.id} onClick={() => onChoose(kind!, r.id)}>
-              {mi(kind === "ver" ? PI.book : kind === "let" ? PI.doc : PI.note, kind === "ver" ? "#e3ebf0" : MPINK)}
+              {mi(kind === "ver" ? PI.book : kind === "let" ? <MaterialIcon kind="letter" size={20} /> : <MaterialIcon kind="synopsis" size={20} />, kind === "ver" ? "#e3ebf0" : MPINK)}
               <span className="t"><b>{r.name}{r.inUse ? <span className="pa-inuse">In use</span> : null}</b><small>{r.f.n ? `In ${plural(r.f.n, "query", "queries")} · ${plural(r.f.more, "request")}` : "Not sent yet"}</small></span>
               {r.id === cur ? <span className="pa-tick">{PI.check}</span> : null}
             </button>
@@ -974,7 +975,7 @@ const AllPage: React.FC<{ model: Pk26Model; usage: Usage; kind: string; nav: Ret
     <Sub title={title} onBack={nav.back}>
       <div className="pa-card pa-pad0">{rows.map((r) => {
         const f = model.pieceFacts(kind as "let" | "syn" | "ver", r.id);
-        return <button key={r.id} type="button" className="pa-mslot" data-pa="all-row" onClick={() => nav.open(r.page, r.id)}>{mi(kind === "ver" ? PI.book : kind === "let" ? PI.doc : PI.note, kind === "ver" ? "#e3ebf0" : MPINK)}<span className="t"><b>{r.name}{r.inUse ? <span className="pa-inuse">In use</span> : null}</b><small>{f.n ? `In ${plural(f.n, "query", "queries")} · ${plural(f.more, "request")}` : "Not sent yet"}{"retired" in r && r.retired ? " · put away" : ""}</small></span><span className="pa-chev">{PI.chev}</span></button>;
+        return <button key={r.id} type="button" className="pa-mslot" data-pa="all-row" onClick={() => nav.open(r.page, r.id)}>{mi(kind === "ver" ? PI.book : kind === "let" ? <MaterialIcon kind="letter" size={20} /> : <MaterialIcon kind="synopsis" size={20} />, kind === "ver" ? "#e3ebf0" : MPINK)}<span className="t"><b>{r.name}{r.inUse ? <span className="pa-inuse">In use</span> : null}</b><small>{f.n ? `In ${plural(f.n, "query", "queries")} · ${plural(f.more, "request")}` : "Not sent yet"}{"retired" in r && r.retired ? " · put away" : ""}</small></span><span className="pa-chev">{PI.chev}</span></button>;
       })}</div>
     </Sub>
   );
