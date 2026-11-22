@@ -53,12 +53,10 @@ const pl = (n: number, one: string) => `${n} ${n === 1 ? one : `${one}s`}`;
 /** "Query letter" → "Query letter"; "FIRST 5 CHAPTERS" → "First 5 chapters" */
 export const sentenceCase = (s: string): string => { const t = s.trim(); return t ? t.charAt(0).toUpperCase() + t.slice(1).toLowerCase() : t; };
 
-export const MAIL = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
-export const WEB = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M2 8h12M8 2c2 2 2 10 0 12M8 2c-2 2-2 10 0 12" /></svg>;
 export const TICK = <svg viewBox="0 0 12 12" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="m3 6.2 2 2 4-4.4" /></svg>;
 
-/* Agent card v2 — the presentational parts the agent card shares (lifted, not copied): a fact box, Copy email, the
-   website button. Their DOM is the query card's own; the agent card draws them inside its own `.qc152` root. */
+/* Agent card v2 — the presentational part the agent card shares (lifted, not copied): a fact box (v167 retired Copy
+   email and the website button with the tab's contact row; the agent card draws its own). Their DOM is the query card's own; the agent card draws them inside its own `.qc152` root. */
 export const NxBox: React.FC<{ k: string; label: string; value: React.ReactNode; sub?: React.ReactNode; extra?: Record<string, unknown> }> = ({ k, label, value, sub, extra }) => (
   <div className="nx-box" data-qc158="box" data-k={k} {...extra}>
     <small>{label}</small>
@@ -66,12 +64,6 @@ export const NxBox: React.FC<{ k: string; label: string; value: React.ReactNode;
     {sub ? <i>{sub}</i> : null}
   </div>
 );
-export const NxCopyEmail: React.FC<{ email: string; onCopy: () => void; extra?: Record<string, unknown> }> = ({ email, onCopy, extra }) => (
-  <button type="button" className="nx-btn" data-qc158="copy-email" onClick={onCopy} {...extra}>{MAIL}Copy email<small data-qc158="address">{email}</small></button>
-);
-export const NxSite: React.FC<{ label: string; href: string | null; extra?: Record<string, unknown> }> = ({ label, href, extra }) => (href
-  ? <a className="nx-btn gh" data-qc158="website" href={href} target="_blank" rel="noreferrer" {...extra}>{WEB}{label}</a>
-  : <span className="nx-btn gh" data-qc158="website" {...extra}>{WEB}{label}</span>);
 
 /** v167 — a fact box on the query card: a fixed 86px, the value on one line, a ghost bar where nothing is recorded */
 const Tile: React.FC<{ k: string; label: string; value: React.ReactNode | null; sub?: React.ReactNode; ghost: { w: number; words: string } | null;

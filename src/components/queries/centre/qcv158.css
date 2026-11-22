@@ -18,7 +18,6 @@
 .qc152 .nx-lk:hover { text-decoration-color: #2a3a52; }
 .qc152 .nx-lk:focus-visible, .qc152 .nx button:focus-visible, .qc152 .nx a:focus-visible, .qc152 .nx-notes button:focus-visible, .qc152 .nx-notes textarea:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qc152 .nx-foot { display: flex; align-items: center; justify-content: space-between; padding-top: 4px; }
-.qc152 .nx-empty { margin: 0; font: italic 400 14.5px var(--sp-serif) !important; color: #7a7066; }
 
 /* ── §3 Agent: the grid card's fact boxes ── */
 .qc152 .nx-boxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -29,14 +28,12 @@
 .qc152 .nx-box i { font: italic 400 13px var(--sp-serif) !important; color: #7a7066; }
 
 /* the contact row: one line, never wrapping; the address is cut */
-.qc152 .nx-reach { display: flex; flex-wrap: nowrap; gap: 8px; min-width: 0; }
 .qc152 .nx-btn { all: unset; box-sizing: border-box; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; height: 38px; padding: 0 14px; border-radius: 19px; background: #fff; box-shadow: inset 0 0 0 1.5px #2a3a52; font: 600 14.5px var(--sp-serif) !important; color: #2a3a52; white-space: nowrap; flex: none; }
 .qc152 .nx-btn:hover { background: #2a3a52; color: #fff; }
 .qc152 .nx-btn svg { flex: none; }
 .qc152 .nx-btn.gh { box-shadow: inset 0 0 0 1px #d9cfc1; font-weight: 400 !important; color: #55504a; }
 .qc152 .nx-btn.gh:hover { background: #f6f3ee; color: #1c130f; }
 .qc152 .nx-btn small { font: 400 13px var(--sp-serif) !important; opacity: 0.75; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.qc152 .nx-reach .nx-btn:first-child { flex: 0 1 auto; min-width: 0; }
 
 /* what the agent asks for: a checklist */
 .qc152 .nx-list { margin: 0; padding: 0; list-style: none; border-radius: 10px; box-shadow: inset 0 0 0 1px #ece6de; overflow: hidden; }
@@ -45,7 +42,6 @@
 .qc152 .nx-list li .r { margin-left: auto; font: italic 400 13.5px var(--sp-serif) !important; color: #7a7066; white-space: nowrap; }
 .qc152 .nx-tick { flex: none; display: grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; background: #2a3a52; color: #fff; }
 .qc152 .nx-tick.no { background: #fff; box-shadow: inset 0 0 0 1.5px #b8afa4; color: transparent; }
-.qc152 .nx-sum { margin: 8px 0 0; font: italic 400 14px var(--sp-serif) !important; color: #55504a; }
 .qc152 .nx-quote { margin: 0; padding: 10px 14px; border-radius: 10px; background: #fbf9f5; border-left: 3px solid #d9cfc1; font: italic 400 16px/1.45 var(--sp-serif) !important; color: #1c130f; white-space: pre-wrap; }
 
 /* ── §4 Materials, by what it went with ── */

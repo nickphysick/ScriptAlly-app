@@ -5,8 +5,9 @@
  * Log a query v1.1 Phase 3 (design-refs/log-a-query-v1-1/edit-in-place-v1.html) — EDITING IN PLACE ON THE QUERY CARD.
  * It replaces the "Query details" composer. Two kinds of editing, kept apart:
  *   · a Tracking step is edited by dev's step editor (QcStepEdit1522), one step at a time, in or out of this mode;
- *   · everything else is ONE edit mode from the band's pencil: the agent the query is to (the header), the agent's own
- *     details (the Agent tab, saved to the agent's record), and the notes.
+ *   · everything else is ONE edit mode from the band's pencil: the agent the query is to (the header) and the notes.
+ *     (Query card v167 retired the Agent tab's edit pane: the agent's details are edited in the card's profile drawers,
+ *     QcProfile167, and saved to the agent's profile. The draft still carries them for the agent move.)
  * This module holds the draft and draws the layer's parts; QcCard152 places them, and the page saves (`onSaveEdits`).
  *
  * ⚠️ THE CARD STILL WRITES NOTHING: Save hands the changes to the page, which writes the agent move through the old
@@ -53,13 +54,10 @@ export const ED_LABEL: Record<EdKey, string> = {
   wishlist: "wishlist", email: "email", website: "website", notes: "notes",
 };
 const DETAIL_KEYS = ["weeks", "nrmn", "asks", "method", "wishlist", "email", "website"] as const;
-export const REPLY_WEEKS = [4, 6, 8, 12] as const;
 /** the stored submission methods (types.ts SubmissionMethod) and their words */
 export const METHODS: { v: string; label: string }[] = [
   { v: "Email", label: "Email" }, { v: "Query Manager", label: "QueryManager" }, { v: "Online Form", label: "Online form" }, { v: "Post", label: "Post" },
 ];
-/** the asks menu: the agent materials encoder's own spellings (lib/agentMaterials buildAgentMaterials) */
-export const ASK_POOL = ["Query letter", "Synopsis", "First 5 pages", "First 10 pages", "First 50 pages", "First 3 chapters"];
 
 type NoteDraft = { id: string | null; text: string; gone?: boolean };
 interface Draft { agentId: string; base: AgentDetails; details: AgentDetails; notes: NoteDraft[] }
@@ -177,7 +175,6 @@ export function useEditLayer(data: CardEditData | undefined, onSave: ((e: CardEd
 /* ── the parts ─────────────────────────────────────────────────────────────────────────────────────────────────── */
 
 const PEN = <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 2.5l2.5 2.5L5.5 13H3v-2.5z" /></svg>;
-const CARD = <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.5" aria-hidden="true"><rect x="2" y="3" width="12" height="10" rx="2" /><circle cx="6" cy="7" r="1.6" /><path d="M4 11c.6-1.3 1.4-2 2-2s1.4.7 2 2M10 6.5h2.5M10 9h2.5" /></svg>;
 
 /** the band in edit mode: pale navy, a pencil disc, "Editing", the line, Stop editing */
 export const EditStrip: React.FC<{ n: number; onStop: () => void }> = ({ n, onStop }) => (
@@ -273,53 +270,6 @@ export const MenuItem: React.FC<{ on: boolean; label: string; sub?: string | nul
     <span className="ck" aria-hidden="true">{on ? "✓" : ""}</span>{label}{sub ? <small>{sub}</small> : null}
   </button>
 );
-
-/** the Agent tab in edit mode: the strip read-only (it belongs to the Query sent step), then the agent's own details */
-export const AgentEditPane: React.FC<{
-  layer: EditLayer; first: string; strip: React.ReactNode; onQueryStep: (() => void) | null;
-}> = ({ layer, first, strip, onQueryStep }) => {
-  const dr = layer.dr!;
-  const d = dr.details, b = dr.base;
-  const ch = (k: EdKey) => layer.keys.includes(k);
-  return (
-    <div className="qc152-agt qc152-agt-ed" data-qc152="agent-pane" data-editing="">
-      {strip}
-      <p className="qc152-qsnote" data-qc152="query-step-note">The query’s date, method and package belong to its first step:{" "}
-        {onQueryStep ? <button type="button" className="qc152-lk2" data-qc152="edit-query-step" onClick={onQueryStep}>edit the Query sent step</button> : "edit the Query sent step"}.</p>
-      <div className="qc152-agsec" data-qc152="agent-section">{first}’s details{" "}
-        <small><span className="qc152-share">{CARD} changes here update {first}’s Contact list card too</span></small></div>
-      <dl className="qc152-agf">
-        <dt>Replies in</dt>
-        <dd data-qc152="reply-in">
-          <span className={`qc152-seg2${ch("weeks") ? " chg" : ""}`} role="radiogroup" aria-label="Reply time">
-            {REPLY_WEEKS.map((w) => <button key={w} type="button" role="radio" aria-checked={d.weeks === w} className={d.weeks === w ? "on" : undefined} data-qc152="reply-opt" data-w={w}
-              onClick={() => layer.patch({ weeks: w })}>{w} weeks</button>)}
-          </span><br />
-          <button type="button" className={`qc152-tgl${d.nrmn ? " on" : ""}${ch("nrmn") ? " chg" : ""}`} role="switch" aria-checked={!!d.nrmn} data-qc152="nrmn"
-            onClick={() => layer.patch({ nrmn: !d.nrmn })}><i aria-hidden="true" />No reply means no</button>
-        </dd>
-        <dt>Asks for</dt>
-        <dd data-qc152="asks" className="qc152-row">
-          <span className="qc152-askc">
-            {d.asks.map((a, i) => <i key={`${a}-${i}`} data-qc152="ask">{a}<button type="button" className="qc152-arm" aria-label={`Remove ${a}`} data-qc152="ask-remove"
-              onClick={() => layer.patch({ asks: d.asks.filter((_, j) => j !== i) })}>×</button></i>)}
-            <Ed k="asks" layer={layer} className="qc152-add2" label={`Add what ${first} asks for`}>+ Add</Ed>
-          </span>
-          {ch("asks") ? <span className="qc152-chgdot" aria-hidden="true" /> : null}
-        </dd>
-        <dt>How to submit</dt>
-        <dd data-qc152="how"><Ed k="method" layer={layer} changed={ch("method")}>{METHODS.find((m) => m.v === d.method)?.label ?? d.method ?? `Not stated`}</Ed></dd>
-        <dt>Wishlist</dt>
-        <dd><Inl k="wishlist" rows={2} label={`${first}’s wishlist`} value={d.wishlist} base={b.wishlist} onChange={(v) => layer.patch({ wishlist: v })} /></dd>
-        <dt>Contact</dt>
-        <dd className="qc152-cgrid">
-          <Inl k="email" label={`${first}’s email`} value={d.email} base={b.email} onChange={(v) => layer.patch({ email: v })} />
-          <Inl k="website" label={`${first}’s website`} value={d.website} base={b.website} onChange={(v) => layer.patch({ website: v })} />
-        </dd>
-      </dl>
-    </div>
-  );
-};
 
 /** the Notes tab in edit mode: every note on a dashed line, Delete on hover, + Add a note */
 export const NotesEditPane: React.FC<{ layer: EditLayer; data: CardEditData }> = ({ layer, data }) => {

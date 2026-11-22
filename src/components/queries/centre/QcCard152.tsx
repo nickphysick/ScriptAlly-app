@@ -33,7 +33,7 @@ import { PopCtx, useOutsideClose } from "./QcEdit152";
 import { Bubble, StepGlyph } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import {
-  AgentEditPane, ASK_POOL, Ed, EdMenu, EditStrip, LeaveAsk, METHODS, MenuItem, NotesEditPane, SaveBar, useEditLayer,
+  Ed, EdMenu, EditStrip, LeaveAsk, MenuItem, NotesEditPane, SaveBar, useEditLayer,
   type CardEditData, type CardEdits,
 } from "./QcCardEdit152";
 import "./qcv152inplace.css";
@@ -564,16 +564,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
 
   /* §2.6 the Agent tab */
   const ask = askChips(d.asks, d.sentLabels);
-  const agentStrip = (
-      <div className="qc152-agq" data-qc152="agent-strip">
-        <div><small>Queried</small><b>{r.sentMs != null ? dayLabel(r.sentMs, nowMs) : "Not dated"}</b><em>{d.queriedVia ?? "how not recorded"}</em></div>
-        {d.free
-          ? <div><small>What went</small><b>{d.sentLabels.length} {d.sentLabels.length === 1 ? "thing" : "things"}</b><em>with the query</em></div>
-          : <div><small>Package</small><b>{p.packageName ?? "None"}</b><em>{d.sentLabels.length ? `${d.sentLabels.length} ${d.sentLabels.length === 1 ? "thing" : "things"} sent` : "nothing recorded"}</em></div>}
-        <div><small>Last heard</small><b>{d.lastHeardMs != null ? dayLabel(d.lastHeardMs, nowMs) : "Not yet"}</b>
-          <em>{d.lastHeardMs != null ? `${Math.max(0, Math.round((nowMs - d.lastHeardMs) / 86_400_000))} days ago` : r.sentMs != null ? `since ${dayLabel(r.sentMs, nowMs)}` : ""}</em></div>
-      </div>
-  );
   /* v158 §3 / v167 §B — the Agent tab: three tiles, what the agent asks for, and the row to the agent's full card. Every
      value is the agent's own record (lib/qcCardView). A tile or the asks list opens the agent's card at that detail.
      The agent is always named, never a pronoun. */
@@ -647,7 +637,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           {(["tracking", "agent", "materials", "notes"] as const).map((t) => (
             <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => p.onTab(t)}>
               {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : t === "materials" ? "Materials" : "Notes"}
-              {ed.on && ((t === "agent" && ed.keys.some((k) => k !== "agent" && k !== "notes")) || (t === "notes" && ed.keys.includes("notes")))
+              {ed.on && t === "notes" && ed.keys.includes("notes")
                 ? <span className="qc152-dot" data-qc152="tab-dot" aria-label="unsaved changes" /> : null}
             </button>
           ))}
@@ -683,16 +673,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               <div className="ph">Who’s this query to?</div>
               {p.editData.agents.map((a) => <MenuItem key={a.id} data={a.id} on={ed.dr!.agentId === a.id} label={a.name} sub={a.agency} onPick={() => { ed.setAgent(a.id); ed.setOpen(null); }} />)}
               <div className="pf">Moves this query to another agent. Their details come with them.</div>
-            </> : ed.open === "asks" ? <>
-              <div className="ph">What they ask for</div>
-              {[...new Set([...ASK_POOL, ...ed.dr.details.asks])].map((a) => {
-                const on = ed.dr!.details.asks.includes(a);
-                return <MenuItem key={a} data={a} on={on} label={a} onPick={() => ed.patch({ asks: on ? ed.dr!.details.asks.filter((x) => x !== a) : [...ed.dr!.details.asks, a] })} />;
-              })}
-              <div className="pf">Tick as many as apply.</div>
-            </> : ed.open === "method" ? <>
-              <div className="ph">How they take queries</div>
-              {METHODS.map((m) => <MenuItem key={m.v} data={m.v} on={ed.dr!.details.method === m.v} label={m.label} onPick={() => { ed.patch({ method: m.v }); ed.setOpen(null); }} />)}
             </> : null}
           </EdMenu>
         ) : null}
