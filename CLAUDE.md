@@ -6,6 +6,8 @@
 
 The full reasoning, dates and incidents behind every rule below are in `docs/decisions/rules-long-form.md` (verbatim, as it stood before the 11 Nov 2026 diet). Older code comments that say "see CLAUDE.md" for a page, CSS or measurement note: that note now lives in `docs/decisions/` (grep there) or, if superseded, in `docs/archive/claude-md-history-2026-11.md`. Never load the archive by default.
 
+Forty-three page sections that only the dev line's old CLAUDE.md held (Contact list v20–v26.2, Dashboard v71–v118.1, Packages v26–v42, Query Centre v142–v152.1, Versions, Pricing, phone, and four more) were recovered verbatim on 22 Nov 2026 into `docs/archive/claude-md-recovered/` (one file per area). They are history: read one only when a task needs that page's past, and check it against the page's docs/decisions file first.
+
 ## Working discipline
 
 ### Repo and branches
