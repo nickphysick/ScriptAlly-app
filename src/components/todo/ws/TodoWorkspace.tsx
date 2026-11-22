@@ -49,7 +49,7 @@ import TagsPane from "../TagsSheet";
 import "./todoWs.css";
 import "./todoWs54.css";
 import { WsHeader56 } from "./WsHeader56";
-import { LoadFailed } from "../../notes/LoadFailed";
+import { useTodoLoad, TrayOutline, TrayStill, TrayFailed, DeskOutline, LOAD_WORDS } from "./WsLoading";
 import { useLoadFailure } from "../../notes/useLoadFailure";
 import { WsSlim56 } from "./WsSlim56";
 import { WsBatch54 } from "./WsBatch54";
@@ -115,6 +115,16 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
      header's numbers and the arrival keys read it; nothing here decides "no tasks" from an empty array alone. */
   const tasksIn = tasksReady ?? collectionsReady;
   const readFailed = !!loadFail || !!tasksReadFailed;
+  /* B2–B4 — the load's phase: blank (0–150ms), the outline, failed (an error, or 5s), loaded */
+  const load = useTodoLoad(tasksIn, readFailed, null);
+  const loaded = load.phase === "loaded";
+  /* "Try again" (R7): re-subscribe the reads that failed where the store can (queries, agents, manuscripts); for anything
+     else — the own-tasks or flags listener, or 5s with no answer — reload the route */
+  const retryLoad = () => {
+    if (loadFail) loadFail.retry();
+    else window.location.reload();
+    load.restart();
+  };
   /* the clock, re-read each minute */
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => { const id = window.setInterval(() => setNow(Date.now()), 60000); return () => window.clearInterval(id); }, []);
@@ -208,13 +218,13 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   /* arrival: the Corkboard's "open this task", and "+ New task" from elsewhere */
   useEffect(() => {
     /* read once the board is in: the key is one-shot, so reading it before the tasks arrive would lose the task */
-    if (location.pathname !== "/todo" || !tasksIn) return;
+    if (location.pathname !== "/todo" || !loaded) return;
     let id: string | null = null, compose: string | null = null;
     try { id = sessionStorage.getItem(TODO_OPEN_TASK_KEY); compose = sessionStorage.getItem("sa.todoCompose"); } catch { /* private mode */ }
     try { sessionStorage.removeItem(TODO_OPEN_TASK_KEY); sessionStorage.removeItem("sa.todoCompose"); } catch { /* private mode */ }
     if (id) { const t = all.find((x) => x.userTask?.id === id || x.key === id); if (t) go(t.key); }
     if (compose) { setMile(null); setAdding(true); }
-  }, [location.pathname, tasksIn]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location.pathname, loaded]); // eslint-disable-line react-hooks/exhaustive-deps
   /* the shell's "+ Task" while already on /todo: an event, not the one-shot key (AppShell, TODO_OPEN_COMPOSER) */
   useEffect(() => {
     const on = () => { setMile(null); setAdding(true); };
@@ -522,8 +532,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   })();
 
   const trayBody = (() => {
-    /* B1: nothing in the tray says "nothing" until the tasks are in */
-    if (!tasksIn || readFailed) return null;
+    /* B1: nothing in the tray says "nothing" until the tasks are in — the outline, then the failed state (R1, R4, R7) */
+    if (!loaded) return load.phase === "failed" ? <TrayFailed onRetry={retryLoad} busy={loadFail?.busy} /> : <TrayOutline on={load.phase === "outline"} />;
     if (tab === "snoozed") {
       const byDay = new Map<string, SetAsideItem[]>();
       for (const a of [...snoozed].sort((x, y) => (x.until ?? "").localeCompare(y.until ?? ""))) {
@@ -577,8 +587,9 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   })();
   /* ── render: the desk ── */
   const desk = (() => {
-    /* B1: nor does the desk — no "Nothing to do yet", no "You're all caught up." before the tasks are in */
-    if (!tasksIn || readFailed) return null;
+    /* B1: nor does the desk — no "Nothing to do yet", no "You're all caught up." before the tasks are in; its navy bar
+       at once, the outline from 150ms (R2, R4) */
+    if (!loaded) return <DeskOutline on={load.phase === "outline"} />;
     if (adding) return <AddTask today={today} onCancel={() => setAdding(false)} onAdd={async (text, due, detail) => {
       /* the desk goes back at once; the new task is opened when it lands, unless another has been picked meanwhile
          (the write resolves when the server answers, which can be after the writer has moved on) */
@@ -837,14 +848,15 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
           {/* v56: the page header is the Query Centre's navy panel — the hawk at the desk, "{n} things to do", "for {book}"
               between rules (one book only), "+ Add a task" and "Quick fill", the ring and "What needs doing". A segment
               settles the page on the pinned workspace, then scrolls the tray to its group. */}
-          <WsHeader56 todo={readFailed || !tasksIn ? null : all.length} bd={bd} book={statBook}
+          <WsHeader56 todo={loaded ? all.length : null} loading={loaded ? null : load.phase === "outline" ? "outline" : "blank"} bd={bd} book={statBook}
             onAdd={openAdd}
             onQuickFill={all.some((x) => x.key === "materials-batch") ? () => quickFill() : null}
             onJump={(k) => { settle(); jump(k); }} />
 
-          {/* overnight fixes v1, Part 2 — a failed read: the error in the workspace's place, never "Nothing to do yet." */}
-          {loadFail ? <LoadFailed words={loadFail.words} onRetry={loadFail.retry} busy={loadFail.busy} probe="todo" /> : (
-          <div className="tws-ws" data-tws="workspace" data-slim={slim ? "" : undefined}>
+          {/* To-do load v1 — the workspace is always drawn: while loading it carries aria-busy and one polite message, and a
+              failed read shows in the tray (R7), never "Nothing to do yet." (overnight fixes v1, Part 2) */}
+          <span className="twl-live" role="status" aria-live="polite" data-twl="live">{loaded || load.phase === "failed" ? "" : LOAD_WORDS.live}</span>
+          <div className="tws-ws" data-tws="workspace" data-slim={slim ? "" : undefined} aria-busy={loaded ? undefined : true} data-twl-phase={load.phase} data-twl-enter={load.entering ? "" : undefined}>
             {slim ? (
               /* v55 (D5): the tray as a 64px strip — » and one round count per category group (the name is its
                  tooltip); a click anywhere on the strip opens the tray again */
@@ -857,7 +869,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
             ) : (
             <aside className="tws-tray" data-tws="tray" aria-label="Your tasks">
               <div className="tws55-th">
-                <WsTrayHead55 tab={tab} onTab={(t) => { setTab(t); setMenuState(false); }} todo={all.length}
+                <WsTrayHead55 tab={tab} onTab={(t) => { setTab(t); setMenuState(false); }} todo={loaded ? all.length : null}
                   searching={searching} q={filters.q} onQ={(q) => setFilters((f) => ({ ...f, q }))} onOpenSearch={openSearch} onCloseSearch={closeSearch}
                   menu={menu} onMenu={setMenu}
                   filters={filters} onType={(k) => { setTab("todo"); setFilters((f) => ({ ...f, types: toggleSet(f.types, k) })); }}
@@ -866,6 +878,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
                   grouping={grouping} onGroup={(g) => { setTab("todo"); setGrouping(g); }} groupings={WS_GROUPINGS}
                   onCollapse={() => setSlim(true)} menuRef={filtRef}
                   extra={<button type="button" className="tws-mlink" data-tws="tags-open" onClick={() => { setMenuState(false); setTagsOpen(true); }}>Manage your tags</button>} />
+                {!loaded && load.still ? <TrayStill /> : null}
                 {tab === "todo" && fLine ? (
                   <p className="tws55-fline" data-tws55="fline">{fLine} · <button type="button" data-tws55="fline-clear" onClick={clearFilters}>Clear</button></p>
                 ) : null}
@@ -882,7 +895,6 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
               ) : null}
             </section>
           </div>
-          )}
         </div>
       </WorkspacePageGrid>
       {offPop && offRows.length ? <SwitchedOffPop rows={offRows} opener={offPop} onClose={() => setOffPop(null)} onTurnOn={(r) => void turnOn(r)} /> : null}

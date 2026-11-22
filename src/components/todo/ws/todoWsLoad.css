@@ -1,0 +1,107 @@
+/**
+ * @license
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * To-do load v1 (design-refs/todo-load-v1/) — THE OUTLINE'S BARS, the "Still loading" line and the failed state.
+ * Desktop only (768px up); imported last (WsLoading.tsx, after todoWs58.css), so it overrides at equal specificity.
+ * ⚠️ ONLY THE BARS ARE DRAWN HERE. Rows, headings, the desk's navy bar, the rail and the card column are the real classes
+ *    (`.tws-ti`, `.tws-gb`, `.tws-wh`, `.tws-rail`, `.tws-wp`…) with their own sizes; this takes away what a placeholder
+ *    must not have (hover, cursor, a disc's fill) and puts a bar where the words go.
+ * ⚠️ STILL (R8): no animation on any bar. The only motion is the outline's 150ms fade in and the loaded page's 220ms fade
+ *    in over it; under prefers-reduced-motion both are instant.
+ * Colours: on cream, the app's shared skeleton base (`--sa-sk-base`, index.css; the ref's #ece6dc is #ece6de there) and
+ * the ref's #f3eee6 for large blocks (no shared token exists for it); on navy, white at 13%.
+ */
+@media (min-width: 768px) {
+  .tws { --twl-bar: var(--sa-sk-base, #ece6de); --twl-block: #f3eee6; --twl-navy: rgba(255, 255, 255, 0.13); }
+
+  /* ── the one polite message while loading, for a screen reader only ── */
+  .tws .twl-live { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+  /* ── the bar ── */
+  .tws .twl-b { display: block; flex: none; height: 10px; border-radius: 6px; background: var(--twl-bar); }
+  .tws .twl-b[data-block] { background: var(--twl-block); }
+  .tws .twl-b[data-on="navy"] { background: var(--twl-navy); }
+
+  /* ── the outline fades in once, at 150ms (R4) ── */
+  .tws [data-twl-out] .twl-in, .tws .twl-out { opacity: 0; transition: opacity 0.15s ease-out; }
+  .tws [data-twl-out][data-on] .twl-in, .tws .twl-out[data-on] { opacity: 1; }
+
+  /* ── the tray: the real row and heading, made inert ── */
+  .tws .twl-out .tws-ti, .tws .twl-out .tws-ti:hover { cursor: default; background: none; box-shadow: none; pointer-events: none; }
+  .tws .twl-out .tws-ti .twl-disc { border-radius: 50%; background: var(--twl-bar); }
+  .tws .twl-out .tws-tx { display: flex; flex-direction: column; gap: 9px; }
+  .tws .twl-out [data-twl="t1"] { width: 62%; height: 11px; }
+  .tws .twl-out [data-twl="t2"] { width: 38%; height: 9px; }
+  .tws .twl-out .tws-du { visibility: visible; }
+  .tws .twl-out [data-twl="fig"] { width: 48px; height: 9px; }
+  .tws .twl-out .tws-gb { pointer-events: none; }
+  .tws .twl-out [data-twl="h1"] { width: 116px; height: 11px; }
+  .tws .twl-out [data-twl="h2"] { width: 56px; height: 11px; }
+
+  /* ── "Still loading your tasks." under the tabs (R6) ── */
+  .tws .twl-still { margin: 6px 2px 0; font: italic 14.5px/1.4 var(--tw-serif); color: var(--tw-mut); }
+
+  /* ── the failed state, in the tray (R7) ── */
+  .tws .twl-err { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 320px; padding: 0 28px; }
+  .tws .twl-err h3 { margin: 0 0 6px; font: 400 20px/1.3 var(--tw-type); color: var(--tw-ink); }
+  .tws .twl-err p { margin: 0 0 16px; font: 15px/1.45 var(--tw-serif); color: var(--tw-mut); }
+  .tws .twl-again { height: 40px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--tw-navy); color: #fff; font: 15.5px var(--tw-serif); cursor: pointer; }
+  .tws .twl-again:focus { outline: none; }
+  .tws .twl-again:focus-visible { outline: 2px solid var(--tw-navy); outline-offset: 2px; }
+  .tws .twl-again[disabled] { opacity: 0.6; cursor: default; }
+
+  /* ── the desk: its navy bar at once; the outline inside it ── */
+  .tws .twl-desk .tws-wh h2.twl-in { display: flex; align-items: center; min-height: 29px; }
+  .tws .twl-desk [data-twl="dtitle"] { width: 195px; height: 15px; }
+  .tws .twl-desk .tws-wh span.twl-in { display: flex; gap: 8px; }
+  .tws .twl-desk [data-twl="nav"] { width: 23px; height: 20px; border-radius: 5px; }
+  .tws .twl-desk .twl-mnote { align-items: stretch; }
+  .tws .twl-desk [data-twl="hawk"] { width: 27px; height: 42px; border-radius: 6px; }
+  .tws .twl-desk [data-twl="bubble"] { flex: 1; height: 46px; border-radius: 8px; }
+  .tws .twl-desk .twl-sn, .tws .twl-desk .tws-st[data-st] .twl-sn { background: var(--twl-bar); box-shadow: none; color: transparent; }
+  .tws .twl-desk .tws-sx { display: flex; flex-direction: column; gap: 10px; }
+  .tws .twl-desk [data-twl="qh"] { width: 130px; height: 14px; }
+  .tws .twl-desk [data-twl="hint"] { width: 125px; height: 9px; }
+  .tws .twl-desk .twl-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .tws .twl-desk [data-twl="tile"] { height: 42px; border-radius: 7px; }
+  .tws .twl-desk [data-twl="step2"] { width: 85px; height: 10px; }
+  .tws .twl-desk [data-twl="step3"] { width: 108px; height: 10px; }
+  .tws .twl-desk .twl-card { display: flex; flex-direction: column; gap: 12px; border-radius: 8px; box-shadow: inset 0 0 0 1px var(--twl-bar); padding-bottom: 16px; min-height: 100%; }
+  .tws .twl-desk [data-twl="band"] { height: 21px; border-radius: 8px 8px 0 0; }
+  .tws .twl-desk .twl-cwho { display: flex; align-items: center; gap: 8px; padding: 0 10px; }
+  .tws .twl-desk .twl-cwho > span:not(.twl-cdisc) { display: flex; flex-direction: column; gap: 6px; flex: 1; }
+  .tws .twl-desk .twl-cdisc { flex: none; width: 28px; height: 28px; border-radius: 50%; background: var(--twl-bar); }
+  .tws .twl-desk [data-twl="cname"] { width: 80px; height: 12px; }
+  .tws .twl-desk [data-twl="cagency"] { width: 45px; height: 6px; }
+  .tws .twl-desk [data-twl="cpill"] { width: 108px; height: 17px; border-radius: 9px; }
+  .tws .twl-desk [data-twl="cms"] { height: 22px; margin: 0 10px; border-radius: 5px; }
+  .tws .twl-desk .twl-ctabs { display: flex; gap: 14px; padding: 0 12px; }
+  .tws .twl-desk [data-twl="ctab"] { width: 34px; height: 9px; }
+  .tws .twl-desk [data-twl^="bub"] { height: 25px; border-radius: 7px; margin: 0 12px; }
+  .tws .twl-desk [data-twl="bub1"] { width: 56%; align-self: flex-end; margin-top: 16px; }
+  .tws .twl-desk [data-twl="bub2"] { width: 51%; align-self: flex-start; }
+  .tws .twl-desk [data-twl="bub3"] { width: 55%; align-self: flex-end; }
+
+  /* ── the page header while loading: a bar where the title, the ring's figure and the two lines go (R4) ── */
+  .tws [data-twl="htitle"] { display: inline-block; width: 280px; height: 29px; border-radius: 6px; vertical-align: middle; }
+  .tws [data-twl-head] .tws56-midl { visibility: hidden; }
+  .tws [data-twl="hneed"] { position: absolute; left: 50%; top: 50%; width: 40px; height: 12px; margin: -6px 0 0 -20px; }
+  .tws [data-twl-head] .tws56-ring { position: relative; }
+  .tws [data-twl-head] .tws56-words { position: relative; }
+  .tws [data-twl-head] .tws56-words > b, .tws [data-twl-head] .tws56-words > small { visibility: hidden; }
+  .tws [data-twl-head] .twl-hw { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; gap: 14px; padding-top: 6px; opacity: 0; transition: opacity 0.15s ease-out; }
+  .tws [data-twl-head="outline"] .twl-hw, .tws [data-twl-head="outline"] [data-twl="htitle"], .tws [data-twl-head="outline"] [data-twl="hneed"] { opacity: 1; }
+  .tws [data-twl-head="blank"] [data-twl="htitle"], .tws [data-twl-head="blank"] [data-twl="hneed"] { opacity: 0; }
+  .tws [data-twl="hw1"] { width: 145px; height: 15px; }
+  .tws [data-twl="hw2"] { width: 115px; height: 11px; }
+
+  /* ── the loaded page fades in over the outline, 220ms (R5) ── */
+  .tws [data-twl-enter] :is(.tws-tl, .tws-desk, [data-tws56="title"]), .tws [data-twl-enter] .tws56-rc { animation: twl-enter 0.22s ease-out both; }
+  @keyframes twl-enter { from { opacity: 0; } to { opacity: 1; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tws .twl-out, .tws [data-twl-out] .twl-in, .tws [data-twl-head] .twl-hw { transition: none; }
+    .tws [data-twl-enter] :is(.tws-tl, .tws-desk, [data-tws56="title"]), .tws [data-twl-enter] .tws56-rc { animation: none; }
+  }
+}

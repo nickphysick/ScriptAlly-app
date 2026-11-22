@@ -41,7 +41,7 @@ const onKey = (go: () => void) => (e: React.KeyboardEvent) => {
 };
 
 /** the ring on navy: three segments, each a button; the need-you figure in its centre */
-export const NeedRing56: React.FC<{ bd: Breakdown; onJump: (k: RingKey56) => void; blank?: boolean }> = ({ bd, onJump, blank = false }) => {
+export const NeedRing56: React.FC<{ bd: Breakdown; onJump: (k: RingKey56) => void; blank?: boolean; hold?: React.ReactNode }> = ({ bd, onJump, blank = false, hold = null }) => {
   const arcs = needArcs(bd);
   const seg = (k: RingKey56) => ({
     "data-tws56": "seg", "data-k": k, role: "button", tabIndex: 0, className: "tws56-seg",
@@ -61,6 +61,7 @@ export const NeedRing56: React.FC<{ bd: Breakdown; onJump: (k: RingKey56) => voi
         <text className="tws56-midn" data-tws56="need" x="105" y="118" textAnchor="middle" aria-hidden="true">{blank ? "" : needYou(bd)}</text>
         <text className="tws56-midl" x="105" y="142" textAnchor="middle" aria-hidden="true">need you</text>
       </svg>
+      {hold}
     </div>
   );
 };
@@ -70,16 +71,19 @@ export const WsHeader56: React.FC<{
    *  blank, never 0 — the Query Centre header's own " " while it has no counts */
   todo: number | null; bd: Breakdown; book: string | null;
   onAdd: () => void; onQuickFill: (() => void) | null; onJump: (k: RingKey56) => void;
-}> = ({ todo, bd, book, onAdd, onQuickFill, onJump }) => {
+  /** To-do load v1: while the tasks load, "blank" (the frame only) then "outline" (a still bar where the title, the ring's
+   *  figure and the two lines will land); null once loaded. The hawk, the "for" line and both buttons draw at once. */
+  loading?: "blank" | "outline" | null;
+}> = ({ todo, bd, book, onAdd, onQuickFill, onJump, loading = null }) => {
   const parts = wordsLine56(bd);
   return (
-    <div className="qc151 tws56-hdw tws-hd" data-tws="header">
+    <div className="qc151 tws56-hdw tws-hd" data-tws="header" data-twl-head={loading ?? undefined}>
       <OpenHeader
         className="tws56-hd"
         attrs={{ "data-tws56": "header" }}
         art={<img src={TODO_HEADER_ART} alt="" width={TODO_ART_W} draggable={false} data-tws56="art" />}
         artClassName="tws56-art"
-        title={todo === null ? " " : thingsTitle(todo)}
+        title={loading ? <i className="twl-b" data-on="navy" data-twl="htitle" aria-hidden="true" /> : todo === null ? " " : thingsTitle(todo)}
         titleAttrs={{ "data-tws54": "title" }}
         forLine={book ? { lead: "for", text: book, attrs: { "data-tws54": "for" } } : null}
         actions={<>
@@ -88,8 +92,9 @@ export const WsHeader56: React.FC<{
         </>}
         ring={
           <div className="tws56-rc" data-tws56="rc">
-            <NeedRing56 bd={bd} onJump={onJump} blank={todo === null} />
+            <NeedRing56 bd={bd} onJump={onJump} blank={todo === null} hold={loading ? <i className="twl-b" data-on="navy" data-twl="hneed" aria-hidden="true" /> : null} />
             <div className="tws56-words" data-tws56="words">
+              {loading ? <span className="twl-hw" aria-hidden="true"><i className="twl-b" data-on="navy" data-twl="hw1" /><i className="twl-b" data-on="navy" data-twl="hw2" /></span> : null}
               <b>What needs doing</b>
               {parts.length && todo !== null ? (
                 <small data-tws56="line">

@@ -23,7 +23,7 @@ export const SVG_EXPAND = <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M
 export type TrayTab = "todo" | "snoozed" | "done";
 
 export function WsTrayHead55(p: {
-  tab: TrayTab; onTab: (t: TrayTab) => void; todo: number;
+  tab: TrayTab; onTab: (t: TrayTab) => void; /** null while the tasks load (To-do load v1): the tab shows no count */ todo: number | null;
   searching: boolean; q: string; onQ: (q: string) => void; onOpenSearch: () => void; onCloseSearch: () => void;
   menu: boolean; onMenu: (open: boolean) => void;
   filters: WsFilters; onType: (k: WsType) => void; onWhen: (k: WsWhen) => void; onClear: () => void;
@@ -62,7 +62,7 @@ export function WsTrayHead55(p: {
         <>
           <div className="tws55-tabs" role="group" aria-label="Show">
             <button type="button" className="tws55-tab" data-tws55-tab="todo" aria-pressed={p.tab === "todo"} onClick={() => p.onTab("todo")}>
-              To do<sup data-tws="todo-count">{p.todo}</sup>
+              To do{p.todo === null ? null : <sup data-tws="todo-count">{p.todo}</sup>}
             </button>
             <button type="button" className="tws55-tab" data-tws55-tab="snoozed" aria-pressed={p.tab === "snoozed"} onClick={() => p.onTab("snoozed")}>Snoozed</button>
             <button type="button" className="tws55-tab" data-tws55-tab="done" aria-pressed={p.tab === "done"} onClick={() => p.onTab("done")}>Done</button>
