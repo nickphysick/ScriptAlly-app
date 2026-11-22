@@ -324,7 +324,8 @@ test.describe("Query panel v2", () => {
         L.check("V5", `${c} its ground is the court's tint`, g.standBg === TINT[g.court], `${g.standBg} (court ${g.court})`);
         L.check("V5", `${c} no old verdict line is left`, g.old === 0, `${g.old}`);
         /* Nick's ruling (12 Oct): the panel never says "late" or "overdue". The one exception is the name of an action
-           he ruled stays (since reworded "Record a reply after closing", consolidate and finish v1) — a reply after the close, not a verdict. */
+           he ruled stays (since reworded "Record a reply after closing", consolidate and finish v1) — a reply after the close, not a verdict.
+           That older ruling ("Record a late reply" stays) was superseded on 22 Nov 2026: rulings v4 keep "a reply after closing". */
         const m = /\b(late|overdue)\b/i.exec(g.words);
         L.check("V5", `${c} the panel says neither "late" nor "overdue"`, !m, m ? `"${g.words.slice(Math.max(0, m.index - 30), m.index + 30).replace(/\s+/g, " ")}"` : "neither");
         const state = STATES.find(([, re]) => re.test(g.heading))?.[0] ?? null;
