@@ -63,7 +63,7 @@
 .d58.d2 .d3-exl { list-style: none; margin: 0; padding: 0; }
 .d58.d2 .d3-exl li + li { border-top: 1px solid #ebe4da; }
 .d58.d2 .d3-exl.is-example { opacity: 0.55; }
-.d58.d2 .d3-ex { box-sizing: border-box; width: 100%; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(70px, 1fr) auto; align-items: center; gap: 12px; min-height: 44px; padding: 6px 4px; border: 0; border-radius: 8px; background: none; text-align: left; font-size: 15px; color: var(--d2-ink); }
+.d58.d2 .d3-ex { box-sizing: border-box; width: 100%; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(70px, 1fr) auto; align-items: center; gap: 12px; min-height: 44px; padding: 6px 4px; border: 0; border-radius: 8px; background: none; text-align: left; font-size: var(--sp-body-size); color: var(--d2-ink); }
 .d58.d2 button.d3-ex { cursor: pointer; }
 .d58.d2 button.d3-ex:hover { background: #f8f4ed; }
 .d58.d2 button.d3-ex:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
