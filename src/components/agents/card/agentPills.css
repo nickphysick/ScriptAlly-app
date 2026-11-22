@@ -7,7 +7,7 @@
  */
 .aap-f { display: block; margin-top: 20px; }
 .aap-f:first-child { margin-top: 2px; }
-.aap-l { display: flex; align-items: baseline; gap: 8px; margin: 0 0 9px; font: 600 15px/1.25 var(--sp-serif); color: #3d3530; }
+.aap-l { display: flex; align-items: baseline; gap: 8px; margin: 0 0 9px; font: 600 var(--sp-body-size)/1.25 var(--sp-serif); color: #3d3530; }
 .aap-l small { font: italic 400 13.5px var(--sp-serif); color: #6c675f; }
 .aap-c { min-width: 0; display: flex; flex-direction: column; gap: 8px; }
 
@@ -123,7 +123,7 @@
 .aap-fit.pv .aap-stars button.pv { color: #7d8ea6; }
 .aap-stars button:hover { transform: scale(1.08); }
 .aap-stars button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 4px; }
-.aap-fit--field .aap-fitw { margin-left: 10px; font: italic 400 15px var(--sp-serif); color: #3d3530; }
+.aap-fit--field .aap-fitw { margin-left: 10px; font: italic 400 var(--sp-body-size) var(--sp-serif); color: #3d3530; }
 .aap-fit--band .aap-stars button { font-size: 16px; padding: 0 1px; color: #f4eee5; opacity: .35; }
 .aap-fit--band .aap-stars button.on { color: #f4eee5; opacity: 1; }
 .aap-fit--band.pv .aap-stars button.pv { color: #f4eee5; opacity: .8; }
