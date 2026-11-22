@@ -41,18 +41,25 @@ export const RECORD_LINE: Record<"partial" | "full" | "pass" | "offer", string> 
 };
 
 export const FlowHead: React.FC<{
-  title: string;
+  /** Log a query v2 — a node, for the two-line headline (its second line in a span) */
+  title: React.ReactNode;
   line?: string | null;
   onClose: () => void;
   closeLabel?: string;
   /** beside the × (the log flow's Day chip) */
   right?: React.ReactNode;
+  /** Log a query v2 — a picture left of the title, centred to its lines (the mentor); absent everywhere else */
+  mark?: React.ReactNode;
+  /** Log a query v2 — keys the title so it fades in when it changes */
+  titleKey?: string;
   data?: Data;
   closeData?: Data;
-}> = ({ title, line, onClose, closeLabel = "Close", right, data, closeData }) => (
+}> = ({ title, line, onClose, closeLabel = "Close", right, mark, titleKey, data, closeData }) => (
   <div className="flh" data-flh="head" {...data}>
     <div className="flh-tx">
-      <h3 className="flh-t" data-flh="title">{title}</h3>
+      {mark
+        ? <div className="flh-hd" data-flh="hd">{mark}<h3 key={titleKey} className="flh-t" data-flh="title">{title}</h3></div>
+        : <h3 className="flh-t" data-flh="title">{title}</h3>}
       {line ? <p key={line} className="flh-l" data-flh="line">{line}</p> : null}
     </div>
     <span className="flh-rt">

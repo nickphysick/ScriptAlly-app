@@ -15,9 +15,9 @@
 import { MaterialIcon } from "../../shared/MaterialIcon";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { SubmissionMethod } from "../../../types";
-import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
+import { FlowHead } from "../../shared/FlowHead";
 import {
-  HOW, MILESTONE, PREVIEW_ID, monthLong, STAGES, celebrationLine, STAGE_LABEL, flowLine, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk,
+  HOW, MILESTONE, PREVIEW_ID, monthLong, STAGES, celebrationLine, STAGE_LABEL, headline, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk,
   planOf, previewOf, sameDay, sod, askCard, choiceOfSample, sampleOfChoice, type AskCard, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   WEEKDAY, calMonthAhead, cardOffer, expectOf, nudgeAnswer, nudgeChips, nudgeDateOf, replyDefaults, replyReady, toggleUnknown, withWeeks, type ReplyAnswers,
   type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
@@ -319,6 +319,8 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   /* the flow, then the celebration once a query is logged with "Log query" */
   const [phase, setPhase] = useState<"flow" | "yay">("flow");
   const [logged, setLogged] = useState<LoggedView | null>(null);
+  /* v2 — "Log and start another" this sitting: the headline's "That's {n} logged." (Undo steps it back) */
+  const [sitting, setSitting] = useState(0);
   const agent = agents.find((a) => a.id === s.agentId) ?? null;
   const findRef = useRef<HTMLInputElement>(null);
   const sbRef = useRef<HTMLDivElement>(null);
@@ -394,7 +396,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     const nm = titleName(q);
     return (
       <>
-        <h2 className="laq-qh">Who are you querying?</h2>
+        <h2 className="laq-qh">Who did you query?</h2>
         <label className="laq-srch">{ICON.search}
           <input ref={findRef} value={s.find} data-qls="find" placeholder="Find an agent in your Contact list" aria-label="Find an agent in your Contact list" autoComplete="off"
             onChange={(e) => set({ find: e.target.value, hi: 0 })}
@@ -405,14 +407,14 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
               else if (e.key === "Enter" && n) { e.preventDefault(); choose(pick[hi].id); }
             }} />
         </label>
-        {g.ready.length ? <><div className="laq-grp" data-qls="group" data-k="ready">Ready to query <span>{g.ready.length}</span></div><div className="laq-big">{g.ready.map(row)}</div></> : null}
+        {g.ready.length ? <><div className="laq-grp" data-qls="group" data-k="ready">Not queried yet <span>{g.ready.length}</span></div><div className="laq-big">{g.ready.map(row)}</div></> : null}
         {g.closed.length ? <><div className="laq-grp" data-qls="group" data-k="closed">Closed right now <span>{g.closed.length}</span></div><div className="laq-big">{g.closed.map(row)}</div></> : null}
         {q && g.busyHit.length ? <><div className="laq-grp" data-qls="group" data-k="busy">Already querying</div>{g.busyHit.map(off)}</> : null}
         {!q && g.busy.length ? (s.showBusy
           ? <><div className="laq-grp" data-qls="group" data-k="busy">Already querying <span>{g.busy.length}</span><button type="button" className="laq-lk" style={{ marginLeft: "auto", fontSize: 13.5 }} data-qls="busy-hide" onClick={() => set({ showBusy: false })}>Hide</button></div>{g.busy.map(off)}</>
           : <button type="button" className="laq-busy" data-qls="busy" onClick={() => set({ showBusy: true })}>
               <span className="laq-faces" aria-hidden="true">{g.busy.slice(0, 4).map((a) => <i key={a.id}>{a.initials}</i>)}</span>
-              You're already querying {g.busy.length} {g.busy.length === 1 ? "agent" : "agents"} with this book<u>Show</u>
+              You've already queried {g.busy.length} {g.busy.length === 1 ? "agent" : "agents"} with this book<u>Show</u>
             </button>) : null}
         {q && !pick.length && !g.busyHit.length ? (
           <div className="laq-none" data-qls="none">No one called “{q}” in your Contact list.<br />
@@ -768,7 +770,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   const checkBody = () => (
     <>
       <h2 className="laq-qh">Ready to log {first}?</h2>
-      <p className="laq-qs">Here's how {first} will look in your Query Centre. Hover the paperclip to check what went.</p>
+      <p className="laq-qs">Here’s how {first} will look on your Queries page. Tap the paperclip to check what went.</p>
       {preview ? slip(preview, true) : null}
       <div className="laq-nt">
         {s.noteOpen
@@ -812,7 +814,8 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
       stampThen(() => {
         /* the date and materials carry over; how comes from the next agent's card */
         setS((o) => ({ ...o, step: "who", dir: "in", agentId: null, via: null, find: "", note: "", noteOpen: false, hi: 0, showBusy: false, carried: lastFirst, reply: null, replySet: false, nCal: null }));
-        showToast(`${lastFirst} logged`, async () => { setToast(null); await done.undo(); setS({ ...before, step: "check", dir: "back" }); });
+        setSitting((k) => k + 1);
+        showToast(`${lastFirst} logged.`, async () => { setToast(null); await done.undo(); setSitting((k) => Math.max(0, k - 1)); setS({ ...before, step: "check", dir: "back" }); });
       });
     } else {
       stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: rp?.wk ?? null, before }); setPhase("yay"); });
@@ -869,8 +872,18 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     check: null,
   };
 
-  /* v1.2 — one line for the whole journey; a step changed from the check (every stage answered, back on one) says so */
-  const line = flowLine({ carried: s.carried, changing: s.step !== "check" && STAGES.slice(0, -1).every((k) => answered(s, k)) });
+  /* v2 — the headline (lib/queryActions/logStages `headline`): two lines, the same on every step, by where the writer is */
+  const [hl1, hl2] = headline({ sitting, agentChosen: !!s.agentId, sentMs: s.sent, nowMs });
+  /* D1 — ONE NAVY PIECE: the FlowHead and the track sit on one painted block (.laq-top), so there is no join between two
+     navy boxes to show as a hairline at any zoom. The mentor is decorative (empty alt). */
+  const top = (
+    <div className="laq-top" data-laq="top">
+      <FlowHead title={<>{hl1}<span className="is-c br" data-laq="head-2">{hl2}</span></>} titleKey={`${hl1}|${hl2}`}
+        mark={<img className="flh-m" data-laq="mentor" src="/icon-192.png" alt="" width={48} height={48} />}
+        onClose={p.onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
+      <Stepper s={s} values={values} onGo={(k) => go(k)} />
+    </div>
+  );
   const backFoot = (hint: string | null) => (
     <>
       <button type="button" className="laq-lnk" data-qls={s.step === "who" ? "cancel" : "back"} onClick={() => (s.step === "who" ? p.onClose() : go(STAGES[Math.max(0, STAGES.indexOf(s.step) - 1)], "back"))}>{s.step === "who" ? "Cancel" : "Back"}</button>
@@ -967,8 +980,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   return (
     <div ref={rootRef} className="laq" data-qc149f="log" data-qls="root" data-step={s.step}>
       <div className={`laq-in${bump ? " is-bump" : ""}`}>
-        <FlowHead title={FLOW_WORDS.log.title} line={line} onClose={p.onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
-        <Stepper s={s} values={values} onGo={(k) => go(k)} />
+        {top}
         <div ref={sbRef} key={s.step === "what" ? `what:${mat}` : s.step} className={`laq-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
         <div className={`laq-cf${leaveAsk ? " is-leave" : ""}`} data-qls="foot">{leaveAsk ? leaveFoot : foot}</div>
         <div className={`laq-toast${toast ? " is-on" : ""}`} data-qls="toast" role="status" aria-live="polite">

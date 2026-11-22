@@ -61,6 +61,49 @@ export function flowLine(o: { carried: string | null; changing: boolean }): stri
   return o.carried ? carriedLine(o.carried) : FLOW_LINE;
 }
 
+/**
+ * Log a query v2 (design-refs/log-a-query-v2/, mock v22) — THE HEADLINE: two lines in the navy header, the same on every
+ * step, chosen by where the writer is. v2 replaces v1.2's title + FLOW_LINE in this journey (the exports above stay for
+ * the files that still read them). Every case the journey can be in is a case here, so no string is scattered.
+ *
+ *   logged          "Logged. Off to {First}!" ("Logged." alone past 11 letters) / "That makes {n} active queries."
+ *                   (or "It's on your Queries page." when the reply date has passed, or the count is not known yet)
+ *   not sent yet    "Not out yet? No problem." / "It's on your to-do list."
+ *   catching up     "Catching up." / "Let's log the details." — sent more than 7 days before today
+ *   after "Log and start another"   "That's {n} logged." / "Who's next?" (then "Let's log the details." once an agent is chosen)
+ *   otherwise       "Another query out. Great work!" / "Let's log the details."
+ */
+export interface HeadState {
+  /** "Log and start another" this sitting: how many have gone in */
+  sitting: number;
+  agentChosen: boolean;
+  /** the sent date chosen, if any (start of day, ms) */
+  sentMs: number | null;
+  nowMs: number;
+  notSent?: boolean;
+  /** the logged screen's facts */
+  logged?: { first: string; passed: boolean; active: number | null } | null;
+}
+export const DETAILS_LINE = "Let’s log the details.";
+/** calendar days from `ms` to today (0 = today) */
+export const daysBefore = (ms: number, nowMs: number): number => Math.round((sod(nowMs) - sod(ms)) / 86_400_000);
+/** more than a week back: 7 days ago is a normal log, 8 is catching up */
+export const isCatchingUp = (sentMs: number | null, nowMs: number): boolean => sentMs != null && daysBefore(sentMs, nowMs) > 7;
+/** the agent's first name stands in the headline up to 11 letters; longer reads "Logged." alone */
+export const LOGGED_NAME_MAX = 11;
+export function headline(s: HeadState): [string, string] {
+  if (s.logged) {
+    const f = s.logged.first;
+    const a = f.length > LOGGED_NAME_MAX ? "Logged." : `Logged. Off to ${f}!`;
+    const n = s.logged.active;
+    return [a, s.logged.passed || n == null ? "It’s on your Queries page." : `That makes ${n} active ${n === 1 ? "query" : "queries"}.`];
+  }
+  if (s.notSent) return ["Not out yet? No problem.", "It’s on your to-do list."];
+  if (isCatchingUp(s.sentMs, s.nowMs)) return ["Catching up.", DETAILS_LINE];
+  if (s.sitting > 0) return [`That’s ${s.sitting} logged.`, s.agentChosen ? DETAILS_LINE : "Who’s next?"];
+  return ["Another query out. Great work!", DETAILS_LINE];
+}
+
 /* ── the agents ───────────────────────────────────────────────────────────────────────────────────────────────── */
 
 export interface StageAgent {

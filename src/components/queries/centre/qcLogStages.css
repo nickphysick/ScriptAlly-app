@@ -26,7 +26,7 @@
 
 .laq {
   --laq-ink: #1c130f; --laq-mut: #6f645b; --laq-mut2: #9a8f84; --laq-paper: #f6f3ee; --laq-line: #e2d9cc;
-  --laq-navy: #2a3a52; --laq-harbour: #2f4a5c; --laq-rust: var(--sp-rust);
+  --laq-navy: var(--sp-anthracite); --laq-harbour: #2f4a5c; --laq-rust: var(--sp-rust);
   /* materials fork v1 — the packages/materials object colour */
   --laq-ochre: #9a7233; --laq-ochre-ink: #7a5a22; --laq-ochre-tint: #f6efe2;
   --laq-tw: var(--sp-type); --laq-se: var(--sp-serif); --laq-mono: var(--sp-mono);
@@ -38,6 +38,8 @@
 .laq .laq-in {
   position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; overflow: hidden;
   box-sizing: border-box; padding: 0; margin: 0; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px #d9c8ba;
+  /* v2 — the header's mentor reads the panel's width (a container query: the panel is 540/504, the viewport says nothing) */
+  container-type: inline-size; container-name: laq;
 }
 .laq .laq-in.is-bump { animation: laq-bump .32s .22s both; }
 @keyframes laq-bump { 30% { transform: translateY(2px); } 60% { transform: translateY(-1px); } }
@@ -384,3 +386,22 @@
   .laq .laq-wkb .sa-wk-ends, .laq .laq-wkb .sa-wk-ends span { font-size: 12px !important; }
   .laq .laq-wkb .sa-wk-unkbtn { font-size: 12px !important; }
 }
+
+/* ══ Log a query v2 (design-refs/log-a-query-v2/, mock v22) ═══════════════════════════════════════════════════════════
+   One navy: --sp-anthracite (through --laq-navy). Emphasis rose: #e8b9a6, the v1.2 navy header's own value for the
+   emphasised line (the ref's `.flh-t span.is-c`). */
+
+/* D1 — THE HEADER IS ONE NAVY PIECE. The FlowHead and the track are transparent on one painted block, so there is no
+   join between two navy boxes (the sub-pixel seam v1.2 showed at 110% and 125%). */
+.laq .laq-top { flex: none; background: var(--laq-navy); }
+.laq .laq-top .flh, .laq .laq-top .laq-trk { background: transparent; border: 0; box-shadow: none; }
+.laq .laq-top .flh { padding: 18px 12px 10px 20px; }
+.laq .laq-top .laq-trk { padding-top: 6px; }
+.laq .flh .flh-hd { display: flex; align-items: center; gap: 12px; }
+.laq .flh .flh-hd h3.flh-t { flex: 1 1 auto; min-width: 0; font-size: 22.5px !important; line-height: 29px !important; color: #fff; animation: flh-in 250ms ease-out both; }
+.laq .flh .flh-hd h3.flh-t .br { display: block; }
+.laq .flh .flh-hd h3.flh-t .is-c { color: #e8b9a6; }
+.laq .flh .flh-m { flex: none; display: block; width: 48px; height: 48px; }
+/* the mentor gives way before the headline would wrap to a third line: a narrow panel, or the page zoomed far in */
+@container laq (max-width: 470px) { .laq .flh .flh-m { display: none; } }
+@media (prefers-reduced-motion: reduce) { .laq .flh .flh-hd h3.flh-t { animation: none; } }
