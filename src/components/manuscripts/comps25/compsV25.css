@@ -274,3 +274,12 @@
 
 .cv-hintline { margin: 40px 0 90px; font: 400 16px/1.5 var(--sp-serif); color: var(--sp-quiet); }
 
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  .cf-fld > span { font-size: 12px; }
+  .cf-sech .cf-n { width: 28px; height: 28px; font-size: 12px; }
+  .cf-sech em { font-size: 12px; }
+  .cf-ready i { width: 22px; height: 22px; font-size: 12px; }
+  .cf-sugg > span { font-size: 12px; }
+}

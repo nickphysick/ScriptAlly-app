@@ -32,3 +32,9 @@
   :is(.cf-body, .cx-xpop) .cf-ax { grid-template-columns: minmax(0, 1fr); }
   :is(.cf-body, .cx-xpop) .cf-ax-art { display: none; }
 }
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  :is(.cf-body, .cx-xpop) .cf-axc button i { width: 22px; height: 22px; font-size: 12px; }
+}

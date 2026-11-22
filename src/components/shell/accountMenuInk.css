@@ -51,3 +51,10 @@
   /* the foot row stays lit while its menu is open */
   .ws-pfrow.is-lit { background: rgba(var(--ink-cream-rgb), 0.09); border-radius: 10px; }
 }
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  .am-menu--ink .am-iav { width: 40px; height: 40px; font-size: 12px; }
+  .am-menu--ink .am-iplan-t small { font-size: 12px; }
+}

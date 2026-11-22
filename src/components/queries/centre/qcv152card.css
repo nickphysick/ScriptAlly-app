@@ -259,3 +259,12 @@
    also unsets the shell's zero-specificity ring, so the ring is stated here — (0,2,0), below every rule that names its own. */
 .qc152 :where(button, [role="button"], [role="tab"], a[href]):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .qc152 .qc152-band.dk :where(button, [role="button"], a[href]):focus-visible { outline-color: #f4eee5; }
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  .qc152 .qc152-ag { font-size: 12px; }
+  .qc152 .qc152-ch { font-size: 12px; }
+  .qc152 .qc152-bkc span { font-size: 12px; }
+  .qc152 .qc152-ms small { font-size: 12px; }
+}

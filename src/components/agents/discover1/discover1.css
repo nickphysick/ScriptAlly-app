@@ -398,3 +398,10 @@
 .dv1-sofar .dv1-figs { gap: 14px; }
 .dv1-sofar .dv1-fig b { font-size: 34px !important; }
 @container dv1ae (max-width: 857px) { .dv1-sofar { grid-template-columns: 1fr; } }
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  .dv1-ph span { font-size: 12px; }
+  .dv1-aek .dv1-pro { font-size: 12px; }
+}

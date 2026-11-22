@@ -42,3 +42,9 @@
 /* Consistency roll-out v2, Phase 6 (ruling 11): the one focus ring for this component's buttons. They are `all: unset`, which
    also unsets the shell's zero-specificity ring, so the ring is stated here — (0,2,0), below every rule that names its own. */
 .qc152.qcrr :where(button, [role="button"], a[href]):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  .qc152.qcrr .qcrr-kb kbd { font-size: 12px; }
+}
