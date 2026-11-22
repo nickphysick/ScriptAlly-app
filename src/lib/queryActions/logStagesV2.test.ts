@@ -112,3 +112,50 @@ describe("v2 · Phase 3 — not sent yet", () => {
     expect(body).not.toMatch(/saveLog|onSave/);
   });
 });
+
+/* ── Phase 4 — what the agent asks for ── */
+import { askFill, askItems, NO_LETTER, NO_SYN, type StagePackage } from "./logStages";
+import type { GuidelineAsk, PackageCard } from "./packages";
+import { blankSample } from "./sample";
+
+describe("v2 · Phase 4 — I sent what {First} asks for", () => {
+  const smp = (unit: "pages" | "chapters", amt: number) => ({ ...blankSample(), unit, amt });
+  const full: GuidelineAsk = { stated: true, ql: true, syn: true, sample: smp("chapters", 3) };
+  const pcard = (x: Partial<PackageCard>): PackageCard => ({ id: "p", name: "P", ql: true, syn: true, qlVersion: "Letter B", synVersion: "One-page synopsis", qlId: "lb", synId: "s1", bookVersion: "Version 2", other: null, edition: 1, summary: "", ...x } as PackageCard);
+  const pk = (c: PackageCard): StagePackage => ({ id: c.id, name: c.name, active: false, card: c, pieces: [] });
+  const d = { letter: "lb", synopsis: "s1", book: "v2" };
+  it("exact match: the package, with the sample at the size the card asks for", () => {
+    const packs = [pk(pcard({ id: "p2", name: "Letter and sample", syn: false, synId: null })), pk(pcard({ id: "p1", name: "Full submission" }))];
+    const f = askFill(full, packs, d);
+    expect(f?.kind).toBe("pkg");
+    expect(f?.kind === "pkg" && f.pkg.name).toBe("Full submission");
+    expect(f?.pieces).toEqual({ letterId: "lb", synopsisId: "s1", sample: { unit: "chapters", amt: 3, bookVersionId: null } });
+  });
+  it("no match (a package with an extra, or with opening pages the card does not want): the pieces themselves", () => {
+    const packs = [pk(pcard({ id: "x", other: "Author bio" }))];
+    const f = askFill(full, packs, d);
+    expect(f).toEqual({ kind: "pieces", pieces: { letterId: "lb", synopsisId: "s1", sample: { unit: "chapters", amt: 3, bookVersionId: "v2" } } });
+    const noSample: GuidelineAsk = { ...full, sample: { ...blankSample(), unit: "none" } };
+    expect(askFill(noSample, [pk(pcard({ id: "y" }))], d)?.kind).toBe("pieces");
+  });
+  it("a partial card (only 'first three chapters'): the sample alone", () => {
+    const partial: GuidelineAsk = { stated: true, ql: false, syn: false, sample: smp("chapters", 3) };
+    expect(askItems(partial)).toEqual(["First 3 chapters"]);
+    expect(askFill(partial, [], d)).toEqual({ kind: "pieces", pieces: { letterId: null, synopsisId: null, sample: { unit: "chapters", amt: 3, bookVersionId: "v2" } } });
+  });
+  it("nothing on the card: no items and no button", () => {
+    const nil: GuidelineAsk = { stated: false, ql: false, syn: false, sample: { ...blankSample(), unit: "none" } };
+    expect(askItems(nil)).toEqual([]);
+    expect(askFill(nil, [], d)).toBeNull();
+    expect(askFill(null, [], d)).toBeNull();
+  });
+  it("nothing saved: the generic stand-ins the build already stores (no new field)", () => {
+    expect(askFill(full, [], { letter: null, synopsis: null, book: null })).toEqual({
+      kind: "pieces", pieces: { letterId: NO_LETTER, synopsisId: NO_SYN, sample: { unit: "chapters", amt: 3, bookVersionId: null } },
+    });
+  });
+  it("the items read as the ref lists them", () => {
+    expect(askItems(full)).toEqual(["Query letter", "Synopsis", "First 3 chapters"]);
+    expect(askItems({ ...full, syn: false, sample: smp("pages", 50) })).toEqual(["Query letter", "First 50 pages"]);
+  });
+});

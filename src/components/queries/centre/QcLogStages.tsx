@@ -17,8 +17,8 @@ import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "re
 import { SubmissionMethod, type Query } from "../../../types";
 import { FlowHead } from "../../shared/FlowHead";
 import {
-  HOW, MILESTONE, PREVIEW_ID, firstName, monthLong, STAGES, celebrationLine, STAGE_LABEL, headline, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk,
-  planOf, previewOf, sameDay, sod, askCard, choiceOfSample, sampleOfChoice, type AskCard, titleName, weekdayDay, whoGroups, yesterday, type Preview,
+  HOW, MILESTONE, PREVIEW_ID, firstName, monthLong, STAGES, celebrationLine, STAGE_LABEL, headline, calMonth, dayMon, dayMonY, howLabel, askItems, askFill, sizeName, NO_LETTER, NO_SYN,
+  planOf, previewOf, sameDay, sod, choiceOfSample, sampleOfChoice, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   WEEKDAY, calMonthAhead, cardOffer, expectOf, nudgeAnswer, nudgeChips, nudgeDateOf, replyDefaults, replyReady, toggleUnknown, withWeeks, type ReplyAnswers,
   type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
@@ -26,7 +26,6 @@ import { QcSlip153 } from "./QcSlip153";
 import { WeekSlider } from "../../forms/WeekSlider";
 import { addDays } from "../../../lib/queryActions/dates";
 import { SampleControl } from "../../queryActions/controls";
-import { sampleName } from "../../../lib/queryActions/sample";
 import type { Book, Materials } from "../../../lib/queryActions/sample";
 import type { LogAgain } from "../../../lib/queryActions/drawerStore";
 /* the sample control's rules and its --qad-* tokens (declared for `.laq` there too) */
@@ -133,8 +132,10 @@ export interface FlowState {
   /** materials fork v1 — the pieces screen's own picks, kept while the writer goes back to the fork or tries a package,
    *  and copied into `pieces` only when they carry on from that screen */
   picked: Pieces;
-  /** the pieces screen has been given its starting picks (from the agent's card) */
+  /** the pieces screen has been given its starting picks */
   piecesTouched: boolean;
+  /** v2 — which of the pieces screen's three ticks are open in place (Escape folds them, keeping the tick) */
+  pOpen: { letter: boolean; syn: boolean; sample: boolean };
   via: SubmissionMethod | null;
   note: string;
   noteOpen: boolean;
@@ -158,7 +159,7 @@ export const freshState = (nowMs: number): FlowState => ({
   step: "who", dir: "", find: "", hi: 0, showBusy: false, agentId: null, sent: null, earlier: false,
   calY: new Date(nowMs).getFullYear(), calM: new Date(nowMs).getMonth(),
   mat: "fork", packageId: null, pieces: { letterId: null, synopsisId: null, sample: null }, piecesSet: false,
-  picked: { letterId: null, synopsisId: null, sample: null }, piecesTouched: false,
+  picked: { letterId: null, synopsisId: null, sample: null }, piecesTouched: false, pOpen: { letter: false, syn: false, sample: false },
   via: null, note: "", noteOpen: false, carried: null, pkgSeed: null, reply: null, replySet: false, nCal: null,
   adding: null, notSent: false,
 });
@@ -172,9 +173,7 @@ export function nextStage(s: FlowState, from: StageKey): StageKey {
 }
 
 /** stand-ins for a piece the book has no version of yet: ticked, but recorded with no version id */
-export const NO_LETTER = "__letter";
-export const NO_SYN = "__synopsis";
-const NO_PIECES: Pieces = { letterId: null, synopsisId: null, sample: null };
+export { NO_LETTER, NO_SYN };
 
 /* ── the shared parts ─────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -220,40 +219,23 @@ export const BigRow: React.FC<{
   </button>
 );
 
-/* v1.2 — WHAT {FIRST} ASKS FOR: the agent card's asks at the top of the Materials stage, checked against what is
-   ticked (lib/queryActions/logStages `askCard`). It reads the card and never writes it. */
-const MARK: Record<string, string> = { ok: "✓", diff: "≠", no: "", dot: "" };
-const MARK_WORDS: Record<string, string> = { ok: "sending it", diff: "sending something different", no: "not chosen", dot: "" };
-/* materials fork v1 — `noPkgs`: on the fork with no packages saved, the card offers what the agent asks for without
-   claiming that none of the writer's packages matches it */
-export const AskCardView: React.FC<{ card: AskCard; first: string; onUse: () => void; noPkgs?: boolean }> = ({ card, first, onUse, noPkgs }) => {
-  if (card.kind === "nil") return (
+/* v2 · Phase 4 — WHAT {FIRST} ASKS FOR heads the Materials step (D9): the card's asks as plain items, and one button
+   that fills the materials to match and moves on (lib/queryActions/logStages `askFill`). Nothing on the card: the nil line
+   and no button. It reads the agent's card and never writes it. */
+export const AskCardView: React.FC<{ items: readonly string[]; first: string; fitName: string | null; onUse: () => void }> = ({ items, first, fitName, onUse }) => {
+  if (!items.length) return (
     <div className="laq-asks is-nil" data-qls="asks" data-kind="nil"><p>Nothing on {first}'s card about what they ask for, so tell us what went.</p></div>
   );
   return (
-    <div className={`laq-asks${card.kind === "pkg" ? " is-pkg" : ""}`} data-qls="asks" data-kind={card.kind}>
+    <div className="laq-asks" data-qls="asks" data-kind="card">
       <div className="laq-ah"><b>What {first} asks for</b><span>From {first}'s card</span></div>
       <ul>
-        {card.items.map((it) => (
-          <li key={it.key} className={`is-${it.mark}`} data-qls="ask" data-k={it.key} data-mark={it.mark}
-            aria-label={it.mark === "dot" ? it.label : `${it.label}: ${MARK_WORDS[it.mark]}`}>
-            <span className="laq-mk" aria-hidden="true">{MARK[it.mark]}</span><b aria-hidden="true">{it.label}</b>
-          </li>
-        ))}
+        {items.map((t) => <li key={t} data-qls="ask"><span className="laq-mk" aria-hidden="true" /><b>{t}</b></li>)}
       </ul>
-      {card.kind === "pkg" ? (
-        card.fit
-          ? <p className="laq-af" data-qls="ask-foot" data-k="fit">Your <b>{card.fit}</b> package matches it.</p>
-          : <p className="laq-af" data-qls="ask-foot" data-k="none">{noPkgs ? null : "None of your packages matches it. "}<button type="button" className="laq-btn is-xs" data-qls="use-ask" onClick={onUse}>Send what {first} asks for</button></p>
-      ) : card.ok ? (
-        <p className="laq-af is-ok" data-qls="ask-foot" data-k="ok">✓ That's what you're sending.</p>
-      ) : (
-        <p className="laq-af" data-qls="ask-foot" data-k="differs" aria-live="polite">
-          {card.whys.map((w) => <span key={w} className="laq-why" data-qls="ask-why">{w}</span>)}
-          {card.extra ? <span className="laq-xtra" data-qls="ask-extra">{card.extra}</span> : null}
-          <button type="button" className="laq-btn is-xs" data-qls="use-ask" onClick={onUse}>Use what {first} asks for</button>
-        </p>
-      )}
+      <p className="laq-af" data-qls="ask-foot">
+        {fitName ? <span data-qls="ask-fit">Your <b>{fitName}</b> package matches it.</span> : null}
+        <button type="button" className="laq-btn is-xs" data-qls="use-ask" onClick={onUse}>I sent what {first} asks for {ICON.arrow}</button>
+      </p>
     </div>
   );
 };
@@ -553,16 +535,31 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     </>
   );
 
-  /* ── the Materials stage ── (materials fork v1: design-refs/log-query-materials-fork-v1/)
-     Three screens under one stage: THE FORK (two tiles, a package or the pieces), THE PACKAGES (a tap carries on, as
-     before) and THE PIECES (one group each for the letter, the synopsis and the version the sample is from).
+  /* ── the Materials stage ── v2 · Phase 4 (screens 06, 07, 12, 19, 22)
+     What is on offer depends on what the writer has saved (4b): packages → the fork's two tiles (A package / Materials);
+     named materials and no packages → straight to the pieces; nothing saved → the pieces with generic pieces and a note.
+     ONE PIECES SCREEN for everyone (4c): three ticks, each opening in place — Query letter and Synopsis offer the named
+     ones where some are saved, A sample opens the app's SampleControl (and "Which version is it from?" when versions are
+     saved). Collapsed, each says what it is: the sample always states its size (D8).
      ⚠️ ONLY THE SCREEN CARRIED ON FROM IS SAVED: a package writes `pieces` from the package; the pieces screen works on
-        `picked` and copies it into `pieces` on Carry on. Going back to the fork, or trying the other screen, loses nothing. */
+        `picked` and copies it into `pieces` on Carry on. Generic pieces are the stand-ins the build already stores
+        (NO_LETTER / NO_SYN, a sample with no book version) — no new field. */
   const dflt = { letter: p.letters[0]?.id ?? null, synopsis: p.synopses[0]?.id ?? null, book: p.bookVersions.find((b) => b.current)?.id ?? p.bookVersions[0]?.id ?? null };
   const ask = agent?.ask ?? null;
   const hasPkgs = p.packages.length > 0;
-  /* with no packages the packages screen is never shown: the pieces are what step 3 has always shown then */
-  const mat: MatView = s.mat === "pkg" && !hasPkgs ? "pcs" : s.mat;
+  const hasNamed = p.letters.length > 0 || p.synopses.length > 0 || p.bookVersions.length > 0;
+  /* with no packages there is no fork and no packages screen: the pieces are the step */
+  const mat: MatView = hasPkgs ? s.mat : "pcs";
+  const items = askItems(ask);
+  const fill = askFill(ask, p.packages, dflt);
+  /* D9 — one tap: the package that matches exactly, else the pieces the card names; then on to the next step. Everything
+     stays editable from the track. */
+  const useAsk = () => {
+    if (!fill) return;
+    if (fill.kind === "pkg") answer({ packageId: fill.pkg.id, piecesSet: true, mat: "pkg", pieces: fill.pieces });
+    else answer({ packageId: null, piecesSet: true, mat: "pcs", pieces: fill.pieces, picked: fill.pieces, piecesTouched: true, pOpen: { letter: false, syn: false, sample: false } });
+  };
+  const asks = () => <AskCardView items={items} first={first} fitName={fill?.kind === "pkg" ? fill.pkg.name : null} onUse={useAsk} />;
   const usePackage = (pk: StagePackage) => {
     /* a package sets the letter and the synopsis; a package states no sample size, so where it tests a book version
        the portion is what the agent asks for, else the house opening sample (3 chapters) */
@@ -571,55 +568,30 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
       : null;
     answer({ packageId: pk.id, piecesSet: true, mat: "pkg", pieces: { letterId: pk.card.qlId, synopsisId: pk.card.synId, sample } });
   };
-  /* the pieces screen starts from what the agent asks for, the first time it is shown for this agent; a card that states
-     nothing starts with nothing chosen. Set by `toMat` as the screen opens; this catches any other way in */
-  useEffect(() => {
-    if (s.step === "what" && mat === "pcs" && !s.piecesTouched) set(startPicks("pcs"));
-  }); // eslint-disable-line react-hooks/exhaustive-deps
-  /* the pieces' starting picks are set as the screen opens, so it never paints empty and then fills */
-  const startPicks = (to: MatView): Partial<FlowState> =>
-    (to === "pcs" || (to === "pkg" && !hasPkgs)) && !s.piecesTouched ? { picked: ask?.stated ? piecesFromAsk(ask, NO_PIECES, dflt) : NO_PIECES, piecesTouched: true } : {};
-  const toMat = (to: MatView) => set({ mat: to, dir: to === "fork" ? "back" : "in", ...startPicks(to) });
-
-  /* the sample control opens inline under the version group */
-  const [sampOpen, setSampOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-  /* v1.3 B — opening the sample control brings its Done line into view */
-  const sampWas = useRef(false);
-  useLayoutEffect(() => {
-    const now = sampOpen && !!s.picked.sample;
-    /* once the control's fade-in has finished: it starts 3px higher (laq-fadein), and a scroll measured then stops 3px short */
-    if (now && !sampWas.current) {
-      const ctl = sbRef.current?.querySelector<HTMLElement>('[data-qls="sample-control"]');
-      const done = () => sbRef.current?.querySelector<HTMLElement>('[data-qls="sample-done"]')?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      Promise.all((ctl?.getAnimations?.() ?? []).map((a) => a.finished)).then(done, done);
-    }
-    sampWas.current = now;
+  /* the pieces screen's first look: the query letter ticked (every query has one) and open; nothing else */
+  const startPicks = (): Partial<FlowState> => (s.piecesTouched ? {} : {
+    picked: { letterId: dflt.letter ?? NO_LETTER, synopsisId: null, sample: null }, piecesTouched: true, pOpen: { letter: true, syn: false, sample: false },
   });
+  useEffect(() => {
+    if (s.step === "what" && mat === "pcs" && !s.piecesTouched) set(startPicks());
+  }); // eslint-disable-line react-hooks/exhaustive-deps
+  const toMat = (to: MatView) => set({ mat: to, dir: to === "fork" ? "back" : "in", ...(to === "pcs" ? startPicks() : {}) });
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const pc = s.pieces;
   const pk = s.picked;
-  const sampleNow: SampleChoice = pk.sample ?? { unit: ask && ask.sample.unit !== "none" ? ask.sample.unit : "chapters", amt: ask && ask.sample.unit !== "none" ? ask.sample.amt : 3, bookVersionId: dflt.book };
+  /** the sample a tick starts from: what the agent asks for, else the house opening sample (3 chapters) */
+  const sampleStart: SampleChoice = { unit: ask && ask.sample.unit !== "none" ? ask.sample.unit : "chapters", amt: ask && ask.sample.unit !== "none" ? ask.sample.amt : 3, bookVersionId: dflt.book };
   /** a change on the pieces screen; while the pieces are the stage's answer it stays the answer, as the old picker's did */
-  const setPicked = (patch: Partial<Pieces>) => {
+  const setPicked = (patch: Partial<Pieces>, open?: Partial<FlowState["pOpen"]>) => {
     const picked = { ...pk, ...patch };
-    const live = s.piecesSet && !s.packageId && (!!picked.letterId || !!picked.synopsisId || !!picked.sample);
-    set({ picked, ...(live ? { pieces: picked } : {}) });
+    const keep = s.piecesSet && !s.packageId && (!!picked.letterId || !!picked.synopsisId || !!picked.sample);
+    set({ picked, ...(keep ? { pieces: picked } : {}), ...(open ? { pOpen: { ...s.pOpen, ...open } } : {}) });
   };
   const pieceCount = [!!pc.letterId, !!pc.synopsisId, !!pc.sample].filter(Boolean).length;
   /* Carry on stands under today's rule: any one piece will do */
   const anyPicked = !!pk.letterId || !!pk.synopsisId || !!pk.sample;
-  const useAsk = (from: Pieces) => { if (ask) setPicked(piecesFromAsk(ask, from, dflt)); };
-  const carryOn = () => answer({ packageId: null, piecesSet: true, mat: "pcs", pieces: pk });
-
-  const asks = (view: "pkg" | "pcs", noPkgs = false) => (
-    <AskCardView card={askCard(ask, view, view === "pcs" ? pk : pc, p.packages, first)} first={first} noPkgs={noPkgs}
-      onUse={() => {
-        if (!ask) return;
-        if (view === "pcs") useAsk(pk);
-        else set({ mat: "pcs", dir: "in", piecesTouched: true, picked: piecesFromAsk(ask, NO_PIECES, dflt) });
-      }} />
-  );
+  const carryOn = () => answer({ packageId: null, piecesSet: true, mat: "pcs", pieces: pk, pOpen: { letter: false, syn: false, sample: false } });
 
   const forkBody = () => {
     const n = p.packages.length;
@@ -634,94 +606,82 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     return (
       <>
         <h2 className="laq-qh">What did you send {first}?</h2>
-        {asks("pkg", !hasPkgs)}
+        {asks()}
         <div className="laq-fork" data-qls="fork">
-          {tile("pkg", ICON.box, "A package", "A set you've already put together: letter, synopsis and version in one go.",
-            n ? `${n} saved ${n === 1 ? "package" : "packages"}` : "No saved packages yet")}
+          {tile("pkg", ICON.box, "A package", "A set you've already put together: letter, synopsis and version in one go.", `${n} saved ${n === 1 ? "package" : "packages"}`)}
           {tile("pcs", ICON.pages, "Materials", "Pick the pieces yourself: a query letter, a synopsis, and the version your opening is from.", "Choose what went")}
         </div>
       </>
     );
   };
 
-  const pkgBody = () => {
-    const fitOne = ask ? p.packages.find((x) => packageFits(x, ask))?.id ?? null : null;
-    return (
-      <>
-        <h2 className="laq-qh">Which package went to {first}?</h2>
-        {asks("pkg")}
-        <div className="laq-big" data-qls="packages">
-          {p.packages.map((x) => (
-            <BigRow key={x.id} glyph={ICON.pkg} glyphClass="is-pkg" title={x.name} sub={x.pieces.join(" · ")} on={(s.piecesSet ? s.packageId : s.pkgSeed) === x.id}
-              tag={x.id === fitOne ? `✓ What ${first} asks for` : x.active ? "Active" : null} tagClass={x.id === fitOne ? "is-y" : undefined}
-              data={{ "data-qls": "package", "data-id": x.id }} onClick={() => usePackage(x)} />
-          ))}
-        </div>
-        <p className="laq-ask"><button type="button" className="laq-lk" data-qls="choose-pieces" onClick={() => toMat("pcs")}>Choose the pieces myself instead</button></p>
-      </>
-    );
-  };
+  const pkgBody = () => (
+    <>
+      <h2 className="laq-qh">Which package went to {first}?</h2>
+      <p className="laq-qs">Tap the one you sent.</p>
+      <div className="laq-big" data-qls="packages">
+        {p.packages.map((x) => (
+          <BigRow key={x.id} glyph={ICON.pkg} glyphClass="is-pkg" title={x.name} sub={x.pieces.join(" · ")} on={(s.piecesSet ? s.packageId : s.pkgSeed) === x.id}
+            tag={x.active ? "Active" : null} tagClass="is-m" data={{ "data-qls": "package", "data-id": x.id }} onClick={() => usePackage(x)} />
+        ))}
+      </div>
+      <p className="laq-ask"><button type="button" className="laq-lk" data-qls="choose-pieces" onClick={() => toMat("pcs")}>Choose the pieces myself instead</button></p>
+    </>
+  );
 
   const pcsBody = () => {
-    const group = (k: "letter" | "syn" | "ver", title: string, opts: readonly { id: string; name: string; on: boolean; pick: () => void }[]) => {
-      const chosen = opts.some((o) => o.on);
+    const opts = (k: "letter" | "syn" | "ver", list: readonly { id: string; name: string }[], on: (id: string) => boolean, pick: (id: string) => void) => (
+      <div className="laq-opts" role="radiogroup" aria-label={k === "letter" ? "Which query letter" : k === "syn" ? "Which synopsis" : "Which version"}>
+        {list.map((o) => (
+          <button key={o.id} type="button" role="radio" aria-checked={on(o.id)} className={`laq-opt${on(o.id) ? " is-on" : ""}`} data-qls="pc-opt" data-k={k} data-id={o.id} onClick={() => pick(o.id)}>
+            <span className="laq-rdo" aria-hidden="true" /><span className="laq-on">{o.name}</span>
+          </button>
+        ))}
+      </div>
+    );
+    /** one tick: unticked → ticked and open; ticked and open → unticked (the ref); ticked and folded (Esc) → open */
+    const tile = (k: "letter" | "syn" | "sample", icon: React.ReactNode, title: string, ticked: boolean, sub: string | null, extra: React.ReactNode | null, tick: (on: boolean) => void) => {
+      const open = ticked && s.pOpen[k] && !!extra;
       return (
-        <div className="laq-grp2" data-qls="pc-group" data-k={k} role="group" aria-label={title}>
-          <div className="laq-gh"><b>{k === "letter" ? <MaterialIcon kind="letter" inline /> : k === "syn" ? <MaterialIcon kind="synopsis" inline /> : null}{title}</b><span data-qls="pc-state">{chosen ? "Chosen" : "Pick one"}</span></div>
-          <div className="laq-opts">
-            {opts.map((o) => (
-              <button key={o.id} type="button" className={`laq-opt${o.on ? " is-on" : ""}`} data-qls="pc-opt" data-k={k} data-id={o.id} aria-pressed={o.on} onClick={o.pick}>
-                <span className="laq-rdo" aria-hidden="true" /><span className="laq-on">{o.name}</span>
-              </button>
-            ))}
-          </div>
+        <div className={`laq-gt${ticked ? " is-on" : ""}`} data-qls="piece" data-k={k} data-on={ticked ? "1" : "0"}>
+          <button type="button" role="checkbox" aria-checked={ticked} aria-expanded={extra ? open : undefined}
+            onClick={() => { if (!ticked) tick(true); else if (open || !extra) tick(false); else set({ pOpen: { ...s.pOpen, [k]: true } }); }}>
+            <span className="laq-ck" aria-hidden="true">{ticked ? "✓" : ""}</span>
+            <span className="laq-tx"><b>{icon}{title}</b>{sub ? <span data-qls="piece-sub">{sub}</span> : null}</span>
+          </button>
+          {open ? <div className="laq-gs" data-qls="piece-open">{extra}</div> : null}
         </div>
       );
     };
-    /* a type with nothing saved keeps the old picker's stand-in: one choice, recorded with no version id */
-    const letters = p.letters.length ? p.letters : [{ id: NO_LETTER, name: "Query letter" }];
-    const syns = p.synopses.length ? p.synopses : [{ id: NO_SYN, name: "Synopsis" }];
-    /* the sample's book version; a book with no versions saved records the sample with none, as before */
-    const vers = p.bookVersions.length ? p.bookVersions.map((b) => ({ id: b.id, name: b.name })) : [{ id: "", name: p.bookTitle }];
-    const verOf = (id: string) => (id === "" ? null : id);
-    const open = sampOpen && !!pk.sample;
+    const letterName = p.letters.find((l) => l.id === pk.letterId)?.name ?? null;
+    const synName = p.synopses.find((l) => l.id === pk.synopsisId)?.name ?? null;
     const verNow = p.bookVersions.find((b) => b.id === pk.sample?.bookVersionId) ?? null;
+    const sampleSub = pk.sample ? `${sizeName(pk.sample)}${verNow ? ` · ${verNow.name}` : ""}` : "Pages, chapters or words";
     return (
       <>
-        <h2 className="laq-qh">Which pieces went to {first}?</h2>
-        {asks("pcs")}
-        <div className="laq-grps" data-qls="pieces">
-          {group("letter", "Query letter", letters.map((l) => ({ id: l.id, name: l.name, on: pk.letterId === l.id, pick: () => setPicked({ letterId: pk.letterId === l.id ? null : l.id }) })))}
-          {group("syn", "Synopsis", syns.map((l) => ({ id: l.id, name: l.name, on: pk.synopsisId === l.id, pick: () => setPicked({ synopsisId: pk.synopsisId === l.id ? null : l.id }) })))}
-          <div className="laq-pcw" data-qls="sample-block">
-            {group("ver", "Which version is your opening from?", vers.map((v) => {
-              const on = !!pk.sample && (pk.sample.bookVersionId ?? "") === v.id;
-              return { id: v.id, name: v.name, on, pick: () => {
-                setPicked({ sample: on ? null : { ...sampleNow, bookVersionId: verOf(v.id) } });
-                /* as the old picker: closed while the card states what they ask for (the ask set the size); open the moment
-                   a version is first picked when it says nothing */
-                if (on) setSampOpen(false); else if (!pk.sample) setSampOpen(!ask?.stated);
-              } };
-            }))}
-            {pk.sample ? (
-              /* the size of the sample, in words, with the app's own sample control a tap away (unchanged) */
-              <div className="laq-sline" data-qls="sample-line">
-                <p>Sending the <b>{sampleName(sampleOfChoice(pk.sample))}</b>{verNow ? <> of {verNow.name}</> : null}.</p>
-                <button type="button" className="laq-lk" data-qls="sample-change" aria-expanded={open} aria-controls="laq-sample-control" onClick={() => setSampOpen(!open)}>{open ? "Close" : "Change"}</button>
-              </div>
-            ) : null}
-            {open && pk.sample ? (
-              <div className="laq-qsamp" id="laq-sample-control" data-qls="sample-control">
+        <h2 className="laq-qh">{hasPkgs ? `Which pieces went to ${first}?` : `What did you send ${first}?`}</h2>
+        {asks()}
+        <div className="laq-gen" data-qls="pieces">
+          {tile("letter", <MaterialIcon kind="letter" inline />, "Query letter", !!pk.letterId, letterName,
+            p.letters.length ? opts("letter", p.letters, (id) => pk.letterId === id, (id) => setPicked({ letterId: id })) : null,
+            (on) => setPicked({ letterId: on ? dflt.letter ?? NO_LETTER : null }, { letter: on }))}
+          {tile("syn", <MaterialIcon kind="synopsis" inline />, "Synopsis", !!pk.synopsisId, synName,
+            p.synopses.length ? opts("syn", p.synopses, (id) => pk.synopsisId === id, (id) => setPicked({ synopsisId: id })) : null,
+            (on) => setPicked({ synopsisId: on ? dflt.synopsis ?? NO_SYN : null }, { syn: on }))}
+          {tile("sample", null, "A sample", !!pk.sample, sampleSub,
+            pk.sample ? (
+              <div className="laq-qsamp" data-qls="sample-control">
                 <SampleControl name="laq" sample={sampleOfChoice(pk.sample)} book={p.book}
                   onChange={(x) => setPicked({ sample: choiceOfSample(x, pk.sample?.bookVersionId ?? null) })} />
-                <div className="laq-sdone" data-qls="sample-done">
-                  <p>Sending the <b>{sampleName(sampleOfChoice(pk.sample))}</b>{verNow ? <> of {verNow.name}</> : null}.</p>
-                  <button type="button" className="laq-btn is-sd" data-qls="sample-done-btn" onClick={() => setSampOpen(false)}>Done</button>
-                </div>
+                {p.bookVersions.length ? <>
+                  <div className="laq-gh laq-verh"><b>Which version is it from?</b></div>
+                  {opts("ver", p.bookVersions, (id) => (pk.sample?.bookVersionId ?? "") === id, (id) => setPicked({ sample: pk.sample ? { ...pk.sample, bookVersionId: id } : null }))}
+                </> : null}
               </div>
-            ) : null}
-          </div>
+            ) : null,
+            (on) => setPicked({ sample: on ? (pk.sample ?? sampleStart) : null }, { sample: on }))}
         </div>
+        {hasNamed ? null : <p className="laq-info laq-gnote" data-qls="generic-note">You haven’t saved any named materials yet, so these go on the query as they are. Name them later on your Materials page if you want to compare versions.</p>}
         {hasPkgs ? <p className="laq-ask"><button type="button" className="laq-lk" data-qls="back-packages" onClick={() => toMat("pkg")}>Use a saved package instead</button></p> : null}
       </>
     );
@@ -1012,7 +972,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   );
   const piecesFoot = (
     <>
-      <button type="button" className="laq-lnk" data-qls="back" onClick={() => toMat("fork")}>Back</button>
+      <button type="button" className="laq-lnk" data-qls="back" onClick={() => (hasPkgs ? toMat("fork") : go("when", "back"))}>Back</button>
       <span className="laq-sp" />
       <span className="laq-slot" data-qls="carry-slot">
         {anyPicked

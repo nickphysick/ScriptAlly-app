@@ -212,77 +212,47 @@ export function askWords(ask: GuidelineAsk): string | null {
 }
 
 export interface Pieces { letterId: string | null; synopsisId: string | null; sample: SampleChoice | null }
-/** the pieces ticked from what the agent asks for; nothing stated → letter and synopsis */
-export function piecesFromAsk(ask: GuidelineAsk, cur: Pieces, d: { letter: string | null; synopsis: string | null; book: string | null }): Pieces {
-  const wantQl = ask.stated ? ask.ql : true, wantSyn = ask.stated ? ask.syn : true;
-  return {
-    letterId: wantQl ? cur.letterId ?? d.letter : null,
-    synopsisId: wantSyn ? cur.synopsisId ?? d.synopsis : null,
-    sample: ask.sample.unit !== "none" ? { unit: ask.sample.unit, amt: ask.sample.amt, bookVersionId: cur.sample?.bookVersionId ?? d.book } : null,
-  };
-}
-export function piecesMatchAsk(ask: GuidelineAsk, p: Pieces): boolean {
-  if (!ask.stated) return false;
-  return !!p.letterId === ask.ql && !!p.synopsisId === ask.syn && sampleMatchesAsk(ask, p.sample);
-}
-/** ⚠️ a specific section never counts as matching an opening-pages ask, whatever its size */
-export function sampleMatchesAsk(ask: GuidelineAsk, s: SampleChoice | null): boolean {
-  return ask.sample.unit === "none" ? !s : !!s && !s.sect && s.unit === ask.sample.unit && s.amt === ask.sample.amt;
-}
 export const packageFits = (p: StagePackage, ask: GuidelineAsk): boolean => packageMatches(p.card, ask);
 
-/* ── v1.2 · what {First} asks for ─────────────────────────────────────────────────────────────────────────────── */
+/** stand-ins for a piece the book has no named version of: ticked, but recorded with no version id (as before v2) */
+export const NO_LETTER = "__letter";
+export const NO_SYN = "__synopsis";
 
-/** how one ask stands against what is ticked: sent as asked, sent differently, not ticked — or a plain dot (packages) */
-export type AskMark = "ok" | "diff" | "no" | "dot";
-export interface AskItem { key: "ql" | "syn" | "sample"; label: string; mark: AskMark }
-export type AskCard =
-  /** nothing on the card: the quiet note, no button */
-  | { kind: "nil" }
-  /** over the packages: the asks as dots, and the package that matches (by `packageFits`), if one does */
-  | { kind: "pkg"; items: AskItem[]; fit: string | null }
-  /** over the pieces: each ask marked, and the lines that say what differs */
-  | { kind: "pcs"; items: AskItem[]; ok: boolean; whys: string[]; extra: string | null };
+/* ── v2 · what {First} asks for ───────────────────────────────────────────────────────────────────────────────── */
 
-const lowerFirst = (t: string): string => (t ? t[0].toLowerCase() + t.slice(1) : t);
-const listWords = (b: string[]): string => (b.length > 1 ? `${b.slice(0, -1).join(", ")} and ${b[b.length - 1]}` : b[0] ?? "");
+/** the card's asks as the Materials step lists them: "Query letter", "Synopsis", "First 3 chapters"; empty when the card
+ *  says nothing (the step's nil line, and no button) */
+export function askItems(ask: GuidelineAsk | null): string[] {
+  if (!ask || !ask.stated) return [];
+  return [ask.ql ? "Query letter" : null, ask.syn ? "Synopsis" : null, ask.sample.unit !== "none" ? sizeName(ask.sample) : null].filter((x): x is string => !!x);
+}
+
+export type AskFill =
+  /** a saved package is exactly what the card asks for: the package, with the sample at the size asked for */
+  | { kind: "pkg"; pkg: StagePackage; pieces: Pieces }
+  /** no package matches: the pieces the card names, the sample at the size asked for */
+  | { kind: "pieces"; pieces: Pieces };
 
 /**
- * The card at the top of the Materials stage. It reads the agent's card (`GuidelineAsk`) and what is ticked, and never
- * writes either: changing the materials here never changes the agent's card.
- * ⚠️ A SPECIFIC SECTION NEVER MATCHES AN OPENING-PAGES ASK (`sampleMatchesAsk`), so "pages 1–10" against "the first 10
- *    pages" is a difference, as the writer sent a section rather than the opening.
+ * D9 — "I sent what {First} asks for": the materials that match the agent's card, in one tap. Null when the card says
+ * nothing (no button then). A package matches EXACTLY when it has the letter and the synopsis the card asks for and no
+ * others (`packageMatches`), carries opening pages exactly when the card asks for a sample, and holds nothing else; a
+ * package states no sample size, so the size is always the card's.
+ * ⚠️ The pieces take the writer's named letter, synopsis and current book version where they have saved some, else the
+ *    generic stand-ins — the same choices the pieces screen starts from.
  */
-export function askCard(ask: GuidelineAsk | null, view: "pkg" | "pcs", pieces: Pieces, packages: readonly StagePackage[], first: string): AskCard {
-  if (!ask || !ask.stated) return { kind: "nil" };
-  const sampleLabel = ask.sample.unit !== "none" ? sizeName(ask.sample) : "";
-  if (view === "pkg") {
-    const items: AskItem[] = [];
-    if (ask.ql) items.push({ key: "ql", label: "Query letter", mark: "dot" });
-    if (ask.syn) items.push({ key: "syn", label: "Synopsis", mark: "dot" });
-    if (ask.sample.unit !== "none") items.push({ key: "sample", label: sampleLabel, mark: "dot" });
-    return { kind: "pkg", items, fit: packages.find((x) => packageFits(x, ask))?.name ?? null };
-  }
-  const items: AskItem[] = [];
-  const whys: string[] = [];
-  if (ask.ql) items.push({ key: "ql", label: "Query letter", mark: pieces.letterId ? "ok" : "no" });
-  if (ask.syn) items.push({ key: "syn", label: "Synopsis", mark: pieces.synopsisId ? "ok" : "no" });
-  if (ask.sample.unit !== "none") {
-    const s = pieces.sample;
-    const mark: AskMark = !s ? "no" : sampleMatchesAsk(ask, s) ? "ok" : "diff";
-    items.push({ key: "sample", label: sampleLabel, mark });
-  }
-  /* one line per difference, in the order of the asks */
-  for (const it of items) {
-    if (it.mark === "no") whys.push(`${it.label} isn't chosen.`);
-    else if (it.mark === "diff" && pieces.sample) whys.push(`You're sending the ${lowerFirst(sizeName(pieces.sample))}, not the ${lowerFirst(sampleLabel)}.`);
-  }
-  const extraBits: string[] = [];
-  if (pieces.letterId && !ask.ql) extraBits.push("a query letter");
-  if (pieces.synopsisId && !ask.syn) extraBits.push("a synopsis");
-  if (pieces.sample && ask.sample.unit === "none") extraBits.push("opening pages");
-  const extra = extraBits.length ? `You're also sending ${listWords(extraBits)}, which ${first} doesn't ask for.` : null;
-  return { kind: "pcs", items, ok: piecesMatchAsk(ask, pieces), whys, extra };
+export function askFill(ask: GuidelineAsk | null, packages: readonly StagePackage[], d: { letter: string | null; synopsis: string | null; book: string | null }): AskFill | null {
+  if (!askItems(ask).length) return null;
+  const a = ask!;
+  const wantSample = a.sample.unit !== "none";
+  const size = wantSample ? { unit: a.sample.unit as SampleChoice["unit"], amt: a.sample.amt } : null;
+  const exact = packages.find((p) => packageFits(p, a) && !!p.card.bookVersion === wantSample && !p.card.other);
+  if (exact) return { kind: "pkg", pkg: exact, pieces: { letterId: exact.card.qlId, synopsisId: exact.card.synId, sample: size ? { ...size, bookVersionId: null } : null } };
+  return { kind: "pieces", pieces: {
+    letterId: a.ql ? d.letter ?? NO_LETTER : null,
+    synopsisId: a.syn ? d.synopsis ?? NO_SYN : null,
+    sample: size ? { ...size, bookVersionId: d.book } : null,
+  } };
 }
 
 /* ── how ──────────────────────────────────────────────────────────────────────────────────────────────────────── */
