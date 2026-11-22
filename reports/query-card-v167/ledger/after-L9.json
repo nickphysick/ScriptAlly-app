@@ -1,0 +1,22 @@
+[
+ {
+  "name": "the agent now replies in 10 weeks",
+  "ok": true,
+  "got": "{\"responseTimeWeeks\":10,\"noResponseMeansNo\":null,\"submissionMethod\":\"Email\",\"materialsWanted\":[],\"updatedAt\":null}"
+ },
+ {
+  "name": "the other fields as they were",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "the other query shows the new value",
+  "ok": true,
+  "got": "About 10 weeks"
+ },
+ {
+  "name": "restored",
+  "ok": true,
+  "got": "8"
+ }
+]

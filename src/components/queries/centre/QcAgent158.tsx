@@ -104,9 +104,10 @@ export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
 
       <section data-qc158="asks" data-qc167="asks">
         <h4 data-qc167="asks-head">What {p.first} asks for</h4>
+        {/* one wrapper whatever is recorded (the same shell): the list, or three ghost rows with the words over them */}
         {p.hasAsks ? (
-          <ul key={finKey("asks")} className={`nx-list qc167-asks${ed("asks")}${fin("asks") ? ` ${fin("asks")}` : ""}`} data-qc167="asks-list"
-            {...editable(`What ${p.first} asks for: edit`, open("asks"))}>
+          <div className={`qc167-gsw${ed("asks")}`} data-qc167="asks-list" {...editable(`What ${p.first} asks for: edit`, open("asks"))}>
+          <ul key={finKey("asks")} className={`nx-list qc167-asks${fin("asks") ? ` ${fin("asks")}` : ""}`}>
             {p.asks.chips.map((c) => (
               <li key={c.label} data-qc158="ask" data-sent={c.sent ? "" : undefined}>
                 <span className={`nx-tick${c.sent ? "" : " no"}`} aria-hidden="true">{TICK}</span>
@@ -115,6 +116,7 @@ export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
               </li>
             ))}
           </ul>
+          </div>
         ) : (
           <div className={`qc167-gsw${ed("asks")}`} data-qc167="asks-list" data-ghost="" {...editable(`+ Add what ${p.first} asks for`, open("asks"))}>
             <ul className="nx-list qc167-gl">

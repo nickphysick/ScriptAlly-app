@@ -1,0 +1,62 @@
+[
+ {
+  "name": "nothing: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "some: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "everything: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "agent: population",
+  "ok": true,
+  "got": "div[tile]{box}.nx-box div[tile]{box}.nx-box div[tile]{box}.nx-box section[asks]{asks} h4[asks-head] div[asks-list].qc167-gsw button[full-card].qc167-fullc"
+ },
+ {
+  "name": "agent: Nothing = Some",
+  "ok": true,
+  "got": "div[tile]{box}.nx-box div[tile]{box}.nx-box div[tile]{box}.nx-box section[asks]{asks} h4[asks-head] div[asks-list].qc167-gsw button[full-card].qc167-fullc | div[tile]{box}.nx-box div[tile]{box}.nx-box div[tile]{box}.nx-box section[asks]{asks} h4[asks-head] div[asks-list].qc167-gsw button[full-card].qc167-fullc"
+ },
+ {
+  "name": "agent: Nothing = Everything",
+  "ok": true,
+  "got": "div[tile]{box}.nx-box div[tile]{box}.nx-box div[tile]{box}.nx-box section[asks]{asks} h4[asks-head] div[asks-list].qc167-gsw button[full-card].qc167-fullc | div[tile]{box}.nx-box div[tile]{box}.nx-box div[tile]{box}.nx-box section[asks]{asks} h4[asks-head] div[asks-list].qc167-gsw button[full-card].qc167-fullc"
+ },
+ {
+  "name": "materials: population",
+  "ok": true,
+  "got": "div{group}.nx-grp h4{heading} ul.nx-items div.nx-foot"
+ },
+ {
+  "name": "materials: Nothing = Some",
+  "ok": true,
+  "got": "div{group}.nx-grp h4{heading} ul.nx-items div.nx-foot | div{group}.nx-grp h4{heading} ul.nx-items div.nx-foot"
+ },
+ {
+  "name": "materials: Nothing = Everything",
+  "ok": true,
+  "got": "div{group}.nx-grp h4{heading} ul.nx-items div.nx-foot | div{group}.nx-grp h4{heading} ul.nx-items div.nx-foot"
+ },
+ {
+  "name": "notes: population",
+  "ok": true,
+  "got": "div{list}.nx-nl div{compose}.nx-nc"
+ },
+ {
+  "name": "notes: Nothing = Some",
+  "ok": true,
+  "got": "div{list}.nx-nl div{compose}.nx-nc | div{list}.nx-nl div{compose}.nx-nc"
+ },
+ {
+  "name": "notes: Nothing = Everything",
+  "ok": true,
+  "got": "div{list}.nx-nl div{compose}.nx-nc | div{list}.nx-nl div{compose}.nx-nc"
+ }
+]

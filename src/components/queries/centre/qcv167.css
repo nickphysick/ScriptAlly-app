@@ -27,7 +27,7 @@
 
 /* "What {first} asks for": the sub-heading, the list (one box that edits it), or three ghost rows */
 .qc152 .nx h4[data-qc167="asks-head"] { font: var(--sp-h-small) !important; }
-.qc152 .nx-list.qc167-asks.is-ed, .qc152 .qc167-gsw.is-ed { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .qc167-gsw.is-ed { box-shadow: inset 0 0 0 1.5px #2a3a52; }
 .qc152 .qc167-gsw { position: relative; border-radius: 10px; }
 .qc152 .qc167-gl li .qc167-g { flex: none; }
 .qc152 .qc167-gsw .nx-tick, .qc152 .qc167-gsw .qc167-g { transition: opacity 0.18s ease; }
@@ -109,7 +109,9 @@
 
 /* ── §C step 3 the asks drawer: two ticks, then two tiles that expand in place ──────────────────────────────── */
 /* the list scrolls inside the drawer (capped, as the ref): the card's header and thread are never pushed off */
-.qc152 .qc167-cp .qc1522-cb.qc167-ak { max-height: 212px; overflow: auto; overscroll-behavior: contain; }
+/* ⚠️ a FIXED height, not a max: a tile expanding inside it scrolls the list and moves nothing above it (lock 12); it
+   gives way on a short window (1280×720) so the card's own body keeps room */
+.qc152 .qc167-cp .qc1522-cb.qc167-ak { flex: none; height: clamp(120px, 24vh, 212px); overflow: auto; overscroll-behavior: contain; }
 .qc152 .qc167-asks-ed { display: flex; flex-direction: column; gap: 8px; }
 .qc152 .qc167-xt { border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #e6ddd0; transition: box-shadow 0.18s ease; }
 .qc152 .qc167-xt:hover, .qc152 .qc167-xt.on { box-shadow: inset 0 0 0 1.5px #2a3a52; }
@@ -125,5 +127,5 @@
 .qc152 .qc167-sug { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 12px 0; }
 .qc152 .qc167-xt .expi > .sp-fld { display: block; width: calc(100% - 24px); margin: 8px 12px 12px; }
 @media (prefers-reduced-motion: reduce) {
-  .qc152 .qc167-xt, .qc152 .qc167-xt .exp, .qc152 .qc167-xt .expi { transition: none; }
+  .qc152 .qc167-xt, .qc152 .qc167-xt .exp, .qc152 .qc167-xt .expi, .qc152 .qc167-xt .xh .k { transition: none; }
 }

@@ -1,0 +1,207 @@
+[
+ {
+  "name": "nothing: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing/agent: population — editable boxes",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "nothing/agent: population — parts read",
+  "ok": true,
+  "got": "15"
+ },
+ {
+  "name": "nothing/agent #0: hover moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "nothing/agent #0: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "nothing/agent #0: focus moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "nothing/agent #1: hover moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "nothing/agent #1: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "nothing/agent #1: focus moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "nothing/agent #2: hover moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "nothing/agent #2: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "nothing/agent #2: focus moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "nothing/materials: population — editable boxes",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "nothing/materials: population — parts read",
+  "ok": true,
+  "got": "6"
+ },
+ {
+  "name": "nothing/materials #0: hover moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "nothing/materials #0: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "nothing/materials #0: focus moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "nothing/notes: population — parts read",
+  "ok": true,
+  "got": "8"
+ },
+ {
+  "name": "nothing/notes: back at rest, as before",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "pending: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "pending/agent: population — editable boxes",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "pending/agent: population — parts read",
+  "ok": true,
+  "got": "15"
+ },
+ {
+  "name": "pending/agent #0: hover moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/agent #0: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/agent #0: focus moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/agent #1: hover moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/agent #1: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/agent #1: focus moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/agent #2: hover moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/agent #2: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/agent #2: focus moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/materials: population — editable boxes",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "pending/materials: population — parts read",
+  "ok": true,
+  "got": "11"
+ },
+ {
+  "name": "pending/materials #0: hover moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/materials #0: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/materials #0: focus moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/materials #1: hover moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/materials #1: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/materials #1: focus moves nothing",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/notes: population — parts read",
+  "ok": true,
+  "got": "8"
+ },
+ {
+  "name": "pending/notes: back at rest, as before",
+  "ok": true,
+  "got": ""
+ }
+]

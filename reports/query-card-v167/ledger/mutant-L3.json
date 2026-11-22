@@ -1,0 +1,97 @@
+[
+ {
+  "name": "nothing/agent: no empty sentence",
+  "ok": true,
+  "got": "Replies in / + Add reply time /   / Takes queries / + Add how /   / Last heard / Not yet / since"
+ },
+ {
+  "name": "nothing/agent: every bar 12px",
+  "ok": false,
+  "got": "10,10,10,10,10"
+ },
+ {
+  "name": "nothing/materials: no empty sentence",
+  "ok": false,
+  "got": "With the query / 23 Oct, by email / + Add what went / Nothing recorded / + Add something"
+ },
+ {
+  "name": "nothing/materials: every bar 12px",
+  "ok": false,
+  "got": "10"
+ },
+ {
+  "name": "nothing/notes: no empty sentence",
+  "ok": true,
+  "got": "Add note"
+ },
+ {
+  "name": "nothing/notes: every bar 12px",
+  "ok": false,
+  "got": "10,10,10,10,10"
+ },
+ {
+  "name": "pending/agent: no empty sentence",
+  "ok": true,
+  "got": "Replies in / + Add reply time /   / Takes queries / + Add how /   / Last heard / 18 Nov / 4 days"
+ },
+ {
+  "name": "pending/agent: every bar 12px",
+  "ok": false,
+  "got": "10,10,10,10,10"
+ },
+ {
+  "name": "pending/materials: no empty sentence",
+  "ok": false,
+  "got": "With the query / 23 Oct, by email / + Add what went / Nothing recorded / With the partia"
+ },
+ {
+  "name": "pending/materials: every bar 12px",
+  "ok": false,
+  "got": "10,10"
+ },
+ {
+  "name": "pending/notes: no empty sentence",
+  "ok": true,
+  "got": "Add note"
+ },
+ {
+  "name": "pending/notes: every bar 12px",
+  "ok": false,
+  "got": "10,10,10,10,10"
+ },
+ {
+  "name": "some/agent: no empty sentence",
+  "ok": true,
+  "got": "Replies in / About 8 weeks /   / Takes queries / By email / you queried by email / Last hear"
+ },
+ {
+  "name": "some/agent: every bar 12px",
+  "ok": false,
+  "got": "10,10,10"
+ },
+ {
+  "name": "some/materials: no empty sentence",
+  "ok": true,
+  "got": "With the query / 23 Oct, by email / Query letter / Query letter / + Add something you se"
+ },
+ {
+  "name": "some/materials: every bar 12px",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "some/notes: no empty sentence",
+  "ok": true,
+  "got": "Add note"
+ },
+ {
+  "name": "some/notes: every bar 12px",
+  "ok": false,
+  "got": "10,10,10,10,10"
+ },
+ {
+  "name": "population: bars were read",
+  "ok": true,
+  "got": "31"
+ }
+]
