@@ -21,7 +21,8 @@
 import type { QueryMaterial } from "../types";
 import { materialToken } from "./materials";
 import { parseAgentMaterials, type MatOpt } from "./agentMaterials";
-import { isSampleItem, sampleOfItem } from "./sentSample";
+import { isSampleItem, sampleOfItem, SAMPLE_MATERIAL } from "./sentSample";
+import type { StepMaterial } from "./qc152Write";
 
 export type MaterialIconKind = "letter" | "synopsis" | "pages" | "chapters" | "words" | "bio";
 
@@ -67,4 +68,21 @@ export function materialIconKind(item: string | QueryMaterial): MaterialIconKind
     if (/sample/i.test(token)) return "pages";
   }
   return null;
+}
+
+/**
+ * Material icons v1 — the drawing a step's stored material takes, read off the map as `matLabel` reads it: the kind,
+ * and for a sample its unit (matLabel's default unit is chapters, so the icon agrees with the words). Full manuscript
+ * keeps its own mark ("full"); "something else" is free text and takes none.
+ */
+export function stepMaterialIcon(m: Pick<StepMaterial, "kind" | "unit"> | null | undefined): MaterialIconKind | "full" | null {
+  switch (m?.kind) {
+    case "letter": return "letter";
+    case "synopsis": return "synopsis";
+    case "sample": return materialIconKind({ material: SAMPLE_MATERIAL, type: m.unit ?? "chapters" });
+    case "full": return "full";
+    case "other": return null;
+    case undefined: return null;
+    default: { const unhandled: never = m.kind; return unhandled; }
+  }
 }

@@ -7,8 +7,6 @@ import {
   X,
   Clock,
   Send,
-  List,
-  Type,
   MoreHorizontal,
   Bell,
   ArrowRight,
@@ -16,6 +14,7 @@ import {
 import { Query, QueryStatus, SubmissionMethod, QueryMaterial } from "../types";
 import { StatusPill } from "./StatusPill";
 import { formatQueryMaterial } from "../lib/materials";
+import { MaterialIcon } from "./shared/MaterialIcon";
 import { agentPrimary, agentSecondary } from "../lib/agentDisplay";
 import { FormShell, BrandDatePicker } from "./forms";
 import { formatDate } from "../lib/dates";
@@ -287,18 +286,21 @@ export const RecordResponseModal: React.FC<RecordResponseModalProps> = ({
           <label className="sa-label">What did they request?</label>
           <div className="grid grid-cols-4 gap-1.5 mb-3">
             {([
-              { t: "Pages", icon: FileText },
-              { t: "Words", icon: Type },
-              { t: "Chapters", icon: List },
-              { t: "Other", icon: MoreHorizontal },
-            ] as const).map(({ t, icon: Icon }) => (
+              /* Material icons v1: the three sample units take the shared drawing, in the tile's own ink (never burgundy);
+                 Other is not a material icon and keeps its "more" mark */
+              { t: "Pages", kind: "pages" },
+              { t: "Words", kind: "words" },
+              { t: "Chapters", kind: "chapters" },
+              { t: "Other", kind: null },
+            ] as const).map(({ t, kind }) => (
               <div
                 key={t}
                 onClick={() => setMaterialsType(t)}
                 style={cardSelect(materialsType === t)}
                 className="border rounded-lg p-2 flex flex-col items-center justify-center cursor-pointer text-center"
               >
-                <Icon className={`w-3.5 h-3.5 mb-1 shrink-0 ${materialsType === t ? "text-[#7c3d3d]" : "text-[#c9a89e]"}`} />
+                {kind ? <MaterialIcon kind={kind} size={14} className="mb-1" />
+                  : <MoreHorizontal className={`w-3.5 h-3.5 mb-1 shrink-0 ${materialsType === t ? "text-[#7c3d3d]" : "text-[#c9a89e]"}`} />}
                 <span className="text-[11px] font-semibold text-[#3a1c14]">{t}</span>
               </div>
             ))}

@@ -1,0 +1,4 @@
+/* Material icons v1 — the icon's own box is pinned inline (MaterialIcon.tsx). This file holds only the INLINE
+   variant: an icon set in running text rather than in a flex row, centred on the text and spaced from its words
+   without growing the line. */
+.mat-ico--inline { display: inline-block; vertical-align: -0.24em; margin-right: 0.38em; }

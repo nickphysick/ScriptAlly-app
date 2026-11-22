@@ -138,7 +138,7 @@ export function SentJourney({ req, today, children }: JourneyProps) {
     body: kind === "partial" ? (
       <>
         <SampleControl name="sent" sample={s} book={book} onChange={(x) => { setS(x); setTouched(true); }} />
-        <Toggle testId="syn" on={syn} onClick={() => { setSyn(!syn); setTouched(true); }}>A synopsis too</Toggle>
+        <Toggle material="synopsis" testId="syn" on={syn} onClick={() => { setSyn(!syn); setTouched(true); }}>A synopsis too</Toggle>
         <SampleLine label={`${syn ? "Synopsis and " : ""}${sampleName(s)}`} sample={s} book={book} />
         {reqSample && !mismatch ? <Note kind="ok" tag="MATCH">Matches what {first} asked for.</Note> : null}
         {mismatch ? <Note kind="warn" tag="CHECK">{first} asked for the {sampleName(reqSample!)}. <NoteLink onClick={() => { setS(reqSample!); setTouched(true); }}>Match the request</NoteLink></Note> : null}
@@ -158,7 +158,7 @@ export function SentJourney({ req, today, children }: JourneyProps) {
               }))} />
           </>
         ) : null}
-        <Toggle testId="syn" on={syn} onClick={() => { setSyn(!syn); setTouched(true); }} style={{ marginTop: 12 }}>A synopsis too</Toggle>
+        <Toggle material="synopsis" testId="syn" on={syn} onClick={() => { setSyn(!syn); setTouched(true); }} style={{ marginTop: 12 }}>A synopsis too</Toggle>
         {kind === "rr" ? (<><Fl>WHAT YOU CHANGED · OPTIONAL</Fl><TextBox value={changed} onChange={(v) => { setChanged(v); setTouched(true); }} placeholder="A few lines on the revision, for your own record." /></>) : null}
         {kind === "rr" && lastRead && ver === lastRead ? <Note kind="warn" tag="CHECK">That's the version {first} has already read.</Note> : null}
       </>

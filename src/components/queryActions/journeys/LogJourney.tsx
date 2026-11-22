@@ -439,8 +439,8 @@ export function LogJourney({ req, today, children }: JourneyProps) {
           ) : (
             <>
               <Fl right={askLine}>WHAT YOU SENT</Fl>
-              <Toggle testId="ql" on={mat.ql} onClick={() => touchMat({ ...mat, ql: !mat.ql })} small={mat.ql ? versionTag(indQl.name, !basedOn || indQl.id === qlV?.id) : ""}>Query letter</Toggle>
-              <Toggle testId="syn" on={mat.syn} onClick={() => touchMat({ ...mat, syn: !mat.syn })} small={mat.syn ? versionTag(indSyn.name, !basedOn || indSyn.id === synV?.id) : ""}>Synopsis</Toggle>
+              <Toggle material="letter" testId="ql" on={mat.ql} onClick={() => touchMat({ ...mat, ql: !mat.ql })} small={mat.ql ? versionTag(indQl.name, !basedOn || indQl.id === qlV?.id) : ""}>Query letter</Toggle>
+              <Toggle material="synopsis" testId="syn" on={mat.syn} onClick={() => touchMat({ ...mat, syn: !mat.syn })} small={mat.syn ? versionTag(indSyn.name, !basedOn || indSyn.id === synV?.id) : ""}>Synopsis</Toggle>
               <SampleControl name="log" sample={mat.s} book={book} allowNone onChange={(s) => touchMat({ ...mat, s })} />
               <SampleLine label={materialsName(mat)} sample={mat.s} book={book} />
               {basedOn && changes.length ? (

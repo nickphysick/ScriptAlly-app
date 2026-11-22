@@ -14,6 +14,7 @@
  * ⚠️ "THEIR USUAL" IS SAID ONLY WHEN THE AGENT STATES A REPLY TIME (Nick's ruling): their weeks for the query stage,
  *    the house 12 for a partial or a full. Without one, the tip states the days and nothing else.
  */
+import { materialIconKind, type MaterialIconKind } from "./materialIcon";
 import { QueryStatus } from "../types";
 import { MONTHS_SHORT } from "./dates";
 import { STAGE_RESPONSE_WINDOWS } from "./queryAmbient";
@@ -37,7 +38,8 @@ const fullDay = (ms: number) => { const d = new Date(ms); return `${d.getDate()}
 const pl = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;
 
 export type Side = "them" | "me";
-export interface ThreadChip { label: string; detail: string }
+/** `icon` (Material icons v1): the stored item's drawing, "full" for the full manuscript's own mark, null for free text */
+export interface ThreadChip { label: string; detail: string; icon: MaterialIconKind | "full" | null }
 export interface ThreadStepIn {
   key: string;
   activityId?: string;
@@ -416,9 +418,10 @@ export function covers(sent: string, ask: string): boolean {
   if (a.n == null || s.n == null || a.unit !== s.unit) return true;
   return s.n >= a.n;
 }
-export interface AskChip { label: string; sent: boolean }
+/** `icon`: the agent's stored material string's drawing (Material icons v1); null for Full manuscript and free text */
+export interface AskChip { label: string; sent: boolean; icon: MaterialIconKind | null }
 export function askChips(asks: readonly string[], sent: readonly string[]): { chips: AskChip[]; missing: string[] } {
-  const chips = asks.map((a) => ({ label: a, sent: sent.some((s) => covers(s, a)) }));
+  const chips = asks.map((a) => ({ label: a, sent: sent.some((s) => covers(s, a)), icon: materialIconKind(a) }));
   return { chips, missing: chips.filter((c) => !c.sent).map((c) => c.label) };
 }
 

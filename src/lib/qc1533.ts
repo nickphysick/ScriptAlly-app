@@ -21,8 +21,11 @@ import { partialAsked } from "./qcCardStory";
 import { anyToMs } from "./qcStages";
 import { shortDate } from "./qc151";
 import { stageOf, type Stage } from "./stageColours";
+import { materialIconKind, type MaterialIconKind } from "./materialIcon";
+import { SAMPLE_MATERIAL } from "./sentSample";
 
-export interface TabChip { name: string; asked: boolean }
+/** `mark`: the material's icon (Material icons v1), "full" for the full / revised manuscript's own sheet, null for free text */
+export interface TabChip { name: string; asked: boolean; mark: MaterialIconKind | "full" | null }
 export interface MatGroup { kind: "query" | "asked" | "sent"; label: string; chips: TabChip[]; pkg: string | null }
 export interface MatGroups { count: number; groups: MatGroup[] }
 
@@ -36,29 +39,37 @@ export function materialGroups(q: MatQuery, status: QueryStatus | string, packag
   const seen = new Set<string>();
   const fresh = (name: string) => { const k = name.trim().toLowerCase(); if (!k || seen.has(k)) return false; seen.add(k); return true; };
   const withQuery: TabChip[] = [];
-  for (const item of q.materialsWanted ?? []) { const n = formatQueryMaterial(item).trim(); if (fresh(n)) withQuery.push({ name: n, asked: false }); }
-  const asks: { name: string; ms: number | null }[] = [];
-  const sends: { name: string; ms: number | null }[] = [];
+  for (const item of q.materialsWanted ?? []) {
+    const n = formatQueryMaterial(item).trim();
+    if (!fresh(n)) continue;
+    const token = String(typeof item === "string" ? item : item?.material ?? "").trim().toLowerCase();
+    withQuery.push({ name: n, asked: false, mark: materialIconKind(item) ?? (token === "full manuscript" ? "full" : null) });
+  }
+  type Piece = { name: string; ms: number | null; mark: TabChip["mark"] };
+  const asks: Piece[] = [];
+  const sends: Piece[] = [];
   const st = status as QueryStatus;
   const partial = partialAsked(q);
-  if (st === QueryStatus.PARTIAL_REQUESTED) asks.push({ name: partial, ms: anyToMs(q.partialRequestedDate) ?? stageStartMs });
-  else if (st === QueryStatus.PARTIAL_SENT || q.partialSentDate) sends.push({ name: partial, ms: anyToMs(q.partialSentDate) ?? (st === QueryStatus.PARTIAL_SENT ? stageStartMs : null) });
-  if (st === QueryStatus.FULL_REQUESTED) asks.push({ name: "Full manuscript", ms: anyToMs(q.fullRequestedDate) ?? stageStartMs });
-  else if (FULL_SENT.includes(st) || q.fullSentDate) sends.push({ name: "Full manuscript", ms: anyToMs(q.fullSentDate) ?? (st === QueryStatus.FULL_SENT ? stageStartMs : null) });
-  if (st === QueryStatus.REVISE_RESUBMIT) asks.push({ name: "Revised manuscript", ms: stageStartMs });
-  else if (st === QueryStatus.RESUBMITTED) sends.push({ name: "Revised manuscript", ms: stageStartMs });
+  const unit = (["pages", "chapters", "words"] as const).find((u) => u === String(q.materialsRequestedType ?? "").toLowerCase());
+  const pmark = materialIconKind({ material: SAMPLE_MATERIAL, type: unit });
+  if (st === QueryStatus.PARTIAL_REQUESTED) asks.push({ name: partial, ms: anyToMs(q.partialRequestedDate) ?? stageStartMs, mark: pmark });
+  else if (st === QueryStatus.PARTIAL_SENT || q.partialSentDate) sends.push({ name: partial, ms: anyToMs(q.partialSentDate) ?? (st === QueryStatus.PARTIAL_SENT ? stageStartMs : null), mark: pmark });
+  if (st === QueryStatus.FULL_REQUESTED) asks.push({ name: "Full manuscript", ms: anyToMs(q.fullRequestedDate) ?? stageStartMs, mark: "full" });
+  else if (FULL_SENT.includes(st) || q.fullSentDate) sends.push({ name: "Full manuscript", ms: anyToMs(q.fullSentDate) ?? (st === QueryStatus.FULL_SENT ? stageStartMs : null), mark: "full" });
+  if (st === QueryStatus.REVISE_RESUBMIT) asks.push({ name: "Revised manuscript", ms: stageStartMs, mark: "full" });
+  else if (st === QueryStatus.RESUBMITTED) sends.push({ name: "Revised manuscript", ms: stageStartMs, mark: "full" });
 
   const groups: MatGroup[] = [];
   const pkg = packageName?.trim() || null;
   if (withQuery.length || pkg) groups.push({ kind: "query", label: "With the query", chips: withQuery, pkg });
-  const byDay = (items: { name: string; ms: number | null }[], kind: "asked" | "sent", undated: string, word: string) => {
+  const byDay = (items: Piece[], kind: "asked" | "sent", undated: string, word: string) => {
     const days = new Map<string, MatGroup & { at: number }>();
     for (const it of items) {
       if (!fresh(it.name)) continue;
       const day = it.ms == null ? null : Math.floor(it.ms / DAY);
       const key = day == null ? "none" : String(day);
       if (!days.has(key)) days.set(key, { kind, label: it.ms == null ? undated : `${word} ${shortDate(it.ms, nowMs)}`, chips: [], pkg: null, at: day ?? Number.MAX_SAFE_INTEGER });
-      days.get(key)!.chips.push({ name: it.name, asked: kind === "asked" });
+      days.get(key)!.chips.push({ name: it.name, asked: kind === "asked", mark: it.mark });
     }
     return [...days.values()].sort((a, b) => a.at - b.at).map(({ at: _at, ...g }) => g);
   };

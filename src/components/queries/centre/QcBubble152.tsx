@@ -11,6 +11,8 @@
  * ⚠️ THE NUDGE'S "!" IS DRAWN HERE AND IN THE RECORD FORM ONLY, never on a row, pill, tag or Birds-eye bar (§2.4): it is not
  *    a status, so StatusDot stays the only status glyph.
  */
+import { MaterialIcon } from "../../shared/MaterialIcon";
+import type { ThreadChip } from "../../../lib/qcThread152";
 import React from "react";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
@@ -31,11 +33,11 @@ export function StepGlyph({ status, kind }: { status: QueryStatus | null; kind: 
   return status ? <StatusDot status={status} overrideSize={18} decorative /> : HOLD;
 }
 
-/* §2.2 a chip's small line icon: an envelope for the letter, a page for the synopsis, stacked pages for samples and the full */
-const ICO_L = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
-const ICO_S = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M4 2h6l2.5 2.5V14H4z" /><path d="M6 7h4M6 9.5h4" /></svg>;
+/* §2.2 the full manuscript's own small mark (stacked pages) — it keeps it (Material icons v1) */
 const ICO_P = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M5 2.5h7v10H5z" /><path d="M3.5 4.5v10h7" /></svg>;
-export const chipIcon = (label: string) => (/letter/i.test(label) ? ICO_L : /synopsis/i.test(label) ? ICO_S : ICO_P);
+/** Material icons v1 — a chip's icon is its STORED item's (`ThreadChip.icon`), never read off the label; free text has none */
+export const chipIcon = (icon: ThreadChip["icon"], size = 14): React.ReactNode =>
+  icon == null ? null : icon === "full" ? ICO_P : <MaterialIcon kind={icon} size={size} />;
 
 /* v53 (D9): how a writer's step went, after the stamp — the envelope for email, the agent card's form for an online form
    or QueryManager (AgentCardParts255 IC255.form), and a small parcel for post (the app had no post mark) */

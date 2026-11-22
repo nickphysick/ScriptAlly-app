@@ -14,19 +14,19 @@ describe("the materials, grouped by when they went", () => {
   it("with the query: the pieces, then the package", () => {
     const g = materialGroups({ materialsWanted: ["Query letter", "Synopsis"] }, QueryStatus.QUERIED, "Spring round", null, NOW)!;
     expect(g.count).toBe(2);
-    expect(g.groups).toEqual([{ kind: "query", label: "With the query", chips: [{ name: "Covering letter", asked: false }, { name: "Synopsis", asked: false }], pkg: "Spring round" }]);
+    expect(g.groups).toEqual([{ kind: "query", label: "With the query", chips: [{ name: "Covering letter", asked: false, mark: "letter" }, { name: "Synopsis", asked: false, mark: "synopsis" }], pkg: "Spring round" }]);
   });
 
   it("asked: what the agent asked for and has not had, dated by its request", () => {
     const g = materialGroups({ materialsWanted: ["Query letter"], materialsRequestedType: "pages", materialsRequestedQuantity: 50, partialRequestedDate: "2026-10-03T10:00:00.000Z" }, QueryStatus.PARTIAL_REQUESTED, null, STAGE, NOW)!;
     expect(g.groups.map((x) => x.label)).toEqual(["With the query", "Asked 3 Oct"]);
-    expect(g.groups[1].chips).toEqual([{ name: "First 50 pages", asked: true }]);
+    expect(g.groups[1].chips).toEqual([{ name: "First 50 pages", asked: true, mark: "pages" }]);
     expect(g.count).toBe(2);
   });
 
   it("an asked piece with no request date falls back to the day the stage began", () => {
     const g = materialGroups({}, QueryStatus.FULL_REQUESTED, null, STAGE, NOW)!;
-    expect(g.groups).toEqual([{ kind: "asked", label: "Asked 20 Oct", chips: [{ name: "Full manuscript", asked: true }], pkg: null }]);
+    expect(g.groups).toEqual([{ kind: "asked", label: "Asked 20 Oct", chips: [{ name: "Full manuscript", asked: true, mark: "full" }], pkg: null }]);
   });
 
   it("sent: later pieces that have gone, one group per day, oldest first; 'Sent later' with no date", () => {
@@ -37,12 +37,19 @@ describe("the materials, grouped by when they went", () => {
       ["sent", "Sent 12 Oct", ["Full manuscript"]],
     ]);
     const undated = materialGroups({ materialsRequestedType: "pages", materialsRequestedQuantity: 50 }, QueryStatus.PARTIAL_SENT, null, null, NOW)!;
-    expect(undated.groups).toEqual([{ kind: "sent", label: "Sent later", chips: [{ name: "First 50 pages", asked: false }], pkg: null }]);
+    expect(undated.groups).toEqual([{ kind: "sent", label: "Sent later", chips: [{ name: "First 50 pages", asked: false, mark: "pages" }], pkg: null }]);
   });
 
   it("a full asked after a partial went: Asked comes before Sent", () => {
     const g = materialGroups({ materialsRequestedType: "pages", materialsRequestedQuantity: 50, partialSentDate: "2026-09-01T09:00:00.000Z", fullRequestedDate: "2026-10-20T09:00:00.000Z" }, QueryStatus.FULL_REQUESTED, null, STAGE, NOW)!;
     expect(g.groups.map((x) => x.label)).toEqual(["Asked 20 Oct", "Sent 1 Sep"]);
+  });
+
+  it("Material icons v1: each chip's mark is its item's — chapters by unit, free text none, the full manuscript its own sheet", () => {
+    const g = materialGroups({ materialsWanted: ["Query Letter", "Author bio", "5,000 words", "Marketing plan", { material: "Sample Pages", type: "chapters", quantity: 3 }], materialsRequestedType: "chapters", materialsRequestedQuantity: 3, partialRequestedDate: "2026-10-03T10:00:00.000Z" }, QueryStatus.PARTIAL_REQUESTED, null, STAGE, NOW)!;
+    expect(g.groups.flatMap((x) => x.chips.map((c) => c.mark))).toEqual(["letter", "bio", "words", null, "chapters"]);
+    const f = materialGroups({ materialsWanted: ["Full manuscript"] }, QueryStatus.FULL_REQUESTED, null, STAGE, NOW)!;
+    expect(f.groups.flatMap((x) => x.chips.map((c) => c.mark))).toEqual(["full"]);
   });
 
   it("empty groups are left out, and with no material data there is no tab", () => {

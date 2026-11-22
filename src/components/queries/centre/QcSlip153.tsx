@@ -27,6 +27,7 @@ import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { heardFact, nextFact, queriedFact, slipTone, slipTrack, standWords, type SlipTrack } from "../../../lib/qc153";
 import { policyWords } from "../../../lib/qc1531";
 import { materialGroups, materialsName, tabAccent157, type MatGroups, type TabAccent } from "../../../lib/qc1533";
+import { MaterialIcon } from "../../shared/MaterialIcon";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import type { Agent } from "../../../types";
 import { StatusDot } from "../../StatusDot";
@@ -130,7 +131,7 @@ export const MatTab1533: React.FC<{ id: string; g: MatGroups; status: string; ac
               <span className="qc1533-mxr">
                 {x.chips.map((c) => (
                   <span key={c.name} className={`qc1533-mc${c.asked ? " is-ask" : ""}`} data-qc1533="chip" data-asked={c.asked ? "" : undefined}>
-                    <i className="qc1533-sh" aria-hidden="true" />{c.name}{c.asked ? " · asked" : null}
+                    {c.mark === "full" ? <i className="qc1533-sh" aria-hidden="true" /> : c.mark ? <MaterialIcon kind={c.mark} size={16} /> : null}{c.name}{c.asked ? " · asked" : null}
                   </span>
                 ))}
                 {x.pkg ? <span className="qc1533-mpk" data-qc1533="pkg">{x.pkg}</span> : null}

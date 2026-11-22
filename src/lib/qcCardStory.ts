@@ -29,10 +29,17 @@ import { MONTHS_SHORT } from "./dates";
 import { STAGE_NAME, type QcRow, type WhereKey } from "./qcSummary";
 import { nextDoor, type Door } from "./queryActions/entry";
 import { methodAnswer, panelDoor } from "./agentPanel";
+import { materialIconKind, type MaterialIconKind } from "./materialIcon";
+import { SAMPLE_MATERIAL } from "./sentSample";
+import type { QueryMaterial } from "../types";
 
 export type ChipTone = "ask" | "ok" | "plain";
-export type ChipIcon = "letter" | "synopsis" | "pages" | "full" | "bell" | "notes";
-export interface StoryChip { label: string; tone: ChipTone; icon: ChipIcon }
+/** Material icons v1: the six material kinds are `MaterialIconKind` (the shared drawing); `full`, `bell` and `notes`
+ *  keep the card's own marks. `null` = no icon (the writer's free text). */
+export type ChipIcon = MaterialIconKind | "full" | "bell" | "notes";
+export interface StoryChip { label: string; tone: ChipTone; icon: ChipIcon | null }
+/** One thing that went with the query: its display label, and the STORED item it stands for (null = free text). */
+export interface SentWith { label: string; item: string | QueryMaterial | null }
 export interface StoryStep {
   key: string;
   activityId?: string;
@@ -84,15 +91,18 @@ export interface StoryInput {
   rows: readonly StoryRow[];
   query: Query;
   manuscript: Pick<Manuscript, "bookVersions"> | null;
-  /** what the query records as sent with it ("Query letter", "First 5,000 words") */
-  sentWithQuery: readonly string[];
+  /** what the query records as sent with it ("Query letter", "First 5,000 words"), each with its stored item */
+  sentWithQuery: readonly SentWith[];
 }
 
 export function storySteps({ rows, query: q, manuscript, sentWithQuery }: StoryInput): StoryStep[] {
   const version = q.bookVersionId ? (manuscript?.bookVersions ?? []).find((v) => v.id === q.bookVersionId)?.name ?? null : null;
   const revision = (q.revisionRound ?? 1) >= 2;
   const asked: { partial: StoryChip[] | null; full: StoryChip[] | null } = { partial: null, full: null };
-  const iconOf = (label: string): ChipIcon => (/letter/i.test(label) ? "letter" : /synopsis/i.test(label) ? "synopsis" : /full|manuscript/i.test(label) ? "full" : "pages");
+  /* the icon comes from the stored item, never the label (Material icons v1); Full manuscript keeps its own mark */
+  const iconOf = (w: SentWith): ChipIcon | null => (w.item == null ? null : materialIconKind(w.item) ?? (/full manuscript/i.test(String(typeof w.item === "string" ? w.item : w.item.material)) ? "full" : null));
+  /* the partial asked for, in the unit the agent asked in */
+  const askedIcon: ChipIcon = materialIconKind({ material: SAMPLE_MATERIAL, type: (["pages", "chapters", "words"] as const).find((u) => u === String(q.materialsRequestedType ?? "").toLowerCase()) }) ?? "pages";
   return rows.map((r) => {
     /* an empty or unreadable createdAt is no date (an undated step), never NaN on the page */
     const base = { key: r.key, activityId: r.activityId, ms: typeof r.timeMs === "number" && Number.isFinite(r.timeMs) ? r.timeMs : null };
@@ -104,9 +114,9 @@ export function storySteps({ rows, query: q, manuscript, sentWithQuery }: StoryI
     let chips: StoryChip[] = [];
     if (s === QueryStatus.QUERIED) {
       qualifier = methodQualifier(q.sendMethod);
-      chips = sentWithQuery.map((label) => ({ label, tone: "plain", icon: iconOf(label) }));
+      chips = sentWithQuery.map((w) => ({ label: w.label, tone: "plain", icon: iconOf(w) }));
     } else if (s === QueryStatus.PARTIAL_REQUESTED) {
-      chips = [{ label: partialAsked(q), tone: "ask", icon: "pages" }, ...(q.requestSynopsis ? [{ label: "Synopsis", tone: "ask" as const, icon: "synopsis" as const }] : [])];
+      chips = [{ label: partialAsked(q), tone: "ask", icon: askedIcon }, ...(q.requestSynopsis ? [{ label: "Synopsis", tone: "ask" as const, icon: "synopsis" as const }] : [])];
       asked.partial = chips;
     } else if (s === QueryStatus.FULL_REQUESTED) {
       chips = [{ label: "Full manuscript", tone: "ask", icon: "full" }];
@@ -116,7 +126,7 @@ export function storySteps({ rows, query: q, manuscript, sentWithQuery }: StoryI
       asked.full = [{ label: "Revised manuscript", tone: "ask", icon: "full" }];
     } else if (s === QueryStatus.PARTIAL_SENT) {
       const a = asked.partial;
-      chips = (a ?? [{ label: partialAsked(q), tone: "plain", icon: "pages" }]).map((c) => ({ ...c, tone: a ? "ok" : "plain" }));
+      chips = (a ?? [{ label: partialAsked(q), tone: "plain", icon: askedIcon }]).map((c) => ({ ...c, tone: a ? "ok" : "plain" }));
     } else if (s === QueryStatus.FULL_SENT || s === QueryStatus.RESUBMITTED) {
       const a = asked.full;
       if (revision || s === QueryStatus.RESUBMITTED) qualifier = "the revision";

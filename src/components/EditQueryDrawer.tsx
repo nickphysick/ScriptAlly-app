@@ -25,7 +25,7 @@ import { collection, onSnapshot, orderBy, query as fsQuery } from "firebase/fire
 import { db } from "../lib/firebase";
 import { useScriptAllyDb } from "../lib/db";
 import { agentPrimary, agentSecondary, AGENT_NOT_SPECIFIED } from "../lib/agentDisplay";
-import { Agent, Query, QueryStatus, SubmissionMethod } from "../types";
+import { Agent, Query, QueryStatus, SubmissionMethod, type QueryMaterial } from "../types";
 import {
   Form11Drawer, Form11DrawerHandle, Form11Footer, Form11HeaderAvatar, Form11Select, RestingField,
   ConfirmGuard, F11, F11_MONO, F11_SERIF, DirtyDot,
@@ -34,6 +34,8 @@ import { StatusDot } from "./StatusDot";
 import { getStatusLabel } from "./StatusPill";
 import { getActivityTime, normalizeResultingStatus } from "../lib/queryDerivation";
 import { formatQueryMaterial } from "../lib/materials";
+import { materialIconKind } from "../lib/materialIcon";
+import { MaterialItemIcon } from "./shared/MaterialIcon";
 import { computeResponseDeadline } from "../lib/responseDeadline";
 import { writerExpectedIso } from "../lib/expectedDate";
 import { HOLDING_REPLY_TYPE } from "../lib/holdingReply";
@@ -157,11 +159,13 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
   // ── effective field values ──────────────────────────────────────────────────────
   const effMethod = draftMethod ?? (query.sendMethod || SubmissionMethod.EMAIL);
   const effPersonalisation = draftPersonalisation ?? (query.personalisationNotes || "");
-  const baseMaterials: string[] = (() => {
-    const list = (query.materialsWanted && query.materialsWanted.length ? query.materialsWanted : origAgent?.materialsWanted) || [];
-    return list.map(formatQueryMaterial).filter(Boolean);
-  })();
+  const baseList = ((query.materialsWanted && query.materialsWanted.length ? query.materialsWanted : origAgent?.materialsWanted) || []) as (string | QueryMaterial)[];
+  const baseShown = baseList.filter((it) => !!formatQueryMaterial(it));
+  const baseMaterials: string[] = baseShown.map(formatQueryMaterial);
   const effMaterials = draftMaterials ?? baseMaterials;
+  /* Material icons v1: the pill's icon is its STORED item's — the record's own item until the list is edited, then the
+     pill's string, which is what an edit stores */
+  const effIcons = effMaterials.map((m, i) => materialIconKind(draftMaterials ? m : baseShown[i] ?? m));
 
   // Parity fields (stored). Package + materials are mutually exclusive (one source of truth), so the
   // free-text pills show only when no package is linked. Active packages for the (staged) manuscript.
@@ -477,7 +481,7 @@ export const EditQueryDrawer: React.FC<EditQueryDrawerProps> = ({ query, isOpen,
             <div className="eq-matpills">
               {effMaterials.length === 0 && !matAdding && <span style={{ fontSize: 12, color: C.muted, fontStyle: "italic" }}>No materials recorded</span>}
               {effMaterials.map((m, i) => (
-                <span key={`${m}-${i}`} className="eq-matpill">{m}<button type="button" className="eq-matx" aria-label={`Remove ${m}`} onClick={() => removeMaterial(i)}>✕</button></span>
+                <span key={`${m}-${i}`} className="eq-matpill"><MaterialItemIcon kind={effIcons[i]} size={14} />{m}<button type="button" className="eq-matx" aria-label={`Remove ${m}`} onClick={() => removeMaterial(i)}>✕</button></span>
               ))}
               {matAdding ? (
                 <input autoFocus className="eq-matinput" placeholder="e.g. First 3 chapters" value={matInput}

@@ -12,6 +12,7 @@
  * ⚠️ NO FREE-TEXT DATE AND NO NATIVE <select>: the date is Today / Yesterday / an inline calendar, and every choice is
  *    a big row or our own menu.
  */
+import { MaterialIcon } from "../../shared/MaterialIcon";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { SubmissionMethod } from "../../../types";
 import { FlowHead, FLOW_WORDS } from "../../shared/FlowHead";
@@ -576,7 +577,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
       const chosen = opts.some((o) => o.on);
       return (
         <div className="laq-grp2" data-qls="pc-group" data-k={k} role="group" aria-label={title}>
-          <div className="laq-gh"><b>{title}</b><span data-qls="pc-state">{chosen ? "Chosen" : "Pick one"}</span></div>
+          <div className="laq-gh"><b>{k === "letter" ? <MaterialIcon kind="letter" inline /> : k === "syn" ? <MaterialIcon kind="synopsis" inline /> : null}{title}</b><span data-qls="pc-state">{chosen ? "Chosen" : "Pick one"}</span></div>
           <div className="laq-opts">
             {opts.map((o) => (
               <button key={o.id} type="button" className={`laq-opt${o.on ? " is-on" : ""}`} data-qls="pc-opt" data-k={k} data-id={o.id} aria-pressed={o.on} onClick={o.pick}>

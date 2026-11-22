@@ -12,7 +12,9 @@
 import React from "react";
 import { buildThread, viaKind, type ThreadStepIn } from "../../../lib/qcThread152";
 import type { QueryState } from "../../../lib/queryState";
-import { Bubble, chipIcon } from "./QcBubble152";
+/* Material icons v1: these chips are words only — 8.5px type in an unpadded ~18px chip, and even the 14px minimum
+   would grow it (reports/material-icons-v1/REPORT.md) */
+import { Bubble } from "./QcBubble152";
 
 export interface ThreadReadProps {
   steps: readonly ThreadStepIn[];
@@ -37,7 +39,7 @@ export const ThreadRead: React.FC<ThreadReadProps> = (p) => {
         <Bubble key={it.key} side={it.side} status={it.status} kind={it.kind} title={it.title} date={it.date} dated={it.dated}
           stamp={it.stamp} viaIcon={it.side === "me" ? viaKind(it.via) : null}
           tint={it.tint} grey={it.grey} initials={p.initials}
-          chips={it.chips.length ? <span className="qc152-chs" data-qc152="chips">{it.chips.map((c, k) => <span key={k} className="qc152-ch" data-qc152="chip">{chipIcon(c.label)}{c.label}</span>)}</span> : null}
+          chips={it.chips.length ? <span className="qc152-chs" data-qc152="chips">{it.chips.map((c, k) => <span key={k} className="qc152-ch" data-qc152="chip">{c.label}</span>)}</span> : null}
           via={it.via} quote={it.quote} follows={it.follows} nth={it.nth} sub={it.sub}
           outer={{ "data-qc152": "msg", "data-side": it.side, "data-status": it.status ?? undefined, "data-kind": it.kind ?? undefined, "data-activity": it.activityId }} />
       )))}

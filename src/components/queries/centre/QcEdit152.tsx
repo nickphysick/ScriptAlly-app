@@ -10,9 +10,11 @@
  *    their field or above it when there is no room, stay inside the card's edges and follow the field as it scrolls.
  * ⚠️ ONE OPEN AT A TIME, and the card's one Escape handler closes it before stepping back (`PopCtx.close`).
  */
+import { MaterialIcon } from "../../shared/MaterialIcon";
 import React, { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { MONTHS_SHORT } from "../../../lib/dates";
+import { stepMaterialIcon } from "../../../lib/materialIcon";
 import { KIND_LABEL, UNIT, matLabel, type MatKind, type SampleUnit, type StepMaterial } from "../../../lib/qc152Write";
 import "./qcv152edit.css";
 
@@ -298,7 +300,7 @@ const MatChip: React.FC<{
   })() : null;
   return (
     <span className={`qc152-mpw${open ? " open" : ""}`}>
-      <button ref={btn} type="button" className="qc152-mp" data-qc152="mat-chip" data-kind={m.kind} data-pop-anchor="" title="Change this" onClick={() => api.setOpen(open ? null : chipId)}>{label}</button>
+      <button ref={btn} type="button" className="qc152-mp" data-qc152="mat-chip" data-kind={m.kind} data-pop-anchor="" title="Change this" onClick={() => api.setOpen(open ? null : chipId)}>{(() => { const k = stepMaterialIcon(m); return k && k !== "full" ? <MaterialIcon kind={k} size={16} inline /> : null; })()}{label}</button>
       <button type="button" className="qc152-mx" data-qc152="mat-x" aria-label={`Remove ${label}`} onClick={() => { onDrop(); api.setOpen(null); }}>✕</button>
       {open ? (
         <Pop anchor={btn} className="qc152-menu qc152-mpop" data="mat-editor">

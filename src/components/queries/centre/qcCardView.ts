@@ -26,7 +26,8 @@ export const FIELD_NUDGE_KEY = "field-nudge";
 import { dayLabel as dayLabel152, sideOf as side152, type ThreadStepIn } from "../../../lib/qcThread152";
 import { getActivityTime } from "../../../lib/queryDerivation";
 import { anyToMs } from "../../../lib/qcStages";
-import { storedLabels, TOLD_TYPE } from "../../../lib/qc152Write";
+import { storedLabels, TOLD_TYPE, type StepMaterial } from "../../../lib/qc152Write";
+import { materialIconKind, stepMaterialIcon } from "../../../lib/materialIcon";
 import { bookVersionsOf } from "../../../lib/bookVersions";
 import { hrefFor } from "../../../lib/quickAdd";
 import { fieldDay, type CardStep } from "./QcQueryCard149";
@@ -71,11 +72,11 @@ export function buildCardView(i: CardViewIn) {
     .sort((a, b) => (a.timeMs ?? Infinity) - (b.timeMs ?? Infinity));
   const steps: CardStep[] = ledger.map((r0, ix) => ({ key: r0.key, activityId: r0.activityId, title: r0.title, ms: r0.timeMs ?? null, status: r0.kind ? null : r0.status, root: ix === 0 }));
   const sv = sentView(q, packages as SubmissionPackage[]);
-  const sent = sv.pieces.map((pc) => ({ label: pc.key === "sample" && pc.value ? capWord(pc.value.split(" · ")[0]) : pc.label }));
+  const sent = sv.pieces.map((pc) => ({ label: pc.key === "sample" && pc.value ? capWord(pc.value.split(" · ")[0]) : pc.label, item: pc.item }));
   /* v149.1 Part A — the story, the next step, the strip and the Agent tab, every value from the record (lib/qcCardStory) */
   const firstName = (ag?.name || "").trim().split(/\s+/)[0] || ag?.agency || "the agent";
   const storyCtx = { row, first: firstName, nowMs: now, agentWeeks: typeof ag?.responseTimeWeeks === "number" && ag.responseTimeWeeks > 0 ? ag.responseTimeWeeks : null };
-  const story = storySteps({ rows: ledger, query: q, manuscript: ms, sentWithQuery: sent.map((x) => x.label) });
+  const story = storySteps({ rows: ledger, query: q, manuscript: ms, sentWithQuery: sent });
   const toAgent = queries.filter((x) => x.agentId === q.agentId);
   const msGenres = [ms?.genre, ...((ms as { subGenres?: string[] } | null)?.subGenres ?? [])].filter(Boolean).map((g) => String(g).trim().toLowerCase());
   const agView = qcAgentView(ag, toAgent as Query[], (id) => manuscripts.find((m) => m.id === id)?.title ?? "A manuscript", q.id, now);
@@ -97,7 +98,7 @@ export function buildCardView(i: CardViewIn) {
       const detail = free ? KIND[pc.key] ?? label
         : pc.key === "sample" ? capWord(pc.value || "Opening sample")
         : pc.value ? `${pc.label} · ${pc.value}` : KIND[pc.key] ?? label;
-      return { label, detail };
+      return { label, detail, icon: pc.item ? materialIconKind(pc.item) : null };
     });
     const evById = evStore;
     const stepChips = (activityId?: string) => {
@@ -106,8 +107,10 @@ export function buildCardView(i: CardViewIn) {
       /* v152.1 — a step's recorded materials are maps ({ kind, name, unit, n, versionId }: lib/qc152Write storeMats); v152
          read a `label` they never carry, so every step's own materials drew nothing. Read them as the writer wrote them. */
       const vs = bookVersionsOf(ms);
-      return storedLabels(m, { free, versionName: (id) => vs.find((v) => v.id === id)?.name ?? null, originalId: vs[0]?.id ?? null })
-        .map((label) => ({ label, detail: label }));
+      const o = { free, versionName: (id: string) => vs.find((v) => v.id === id)?.name ?? null, originalId: vs[0]?.id ?? null };
+      /* one entry at a time, so each label keeps its own stored item for its icon (Material icons v1) */
+      return m.flatMap((x) => storedLabels([x], o).map((label) => ({ label, detail: label,
+        icon: typeof x === "string" ? materialIconKind(x) : x && typeof x === "object" && "kind" in x ? stepMaterialIcon(x as StepMaterial) : null })));
     };
     /* v152.1 §2.6 — what the agent said: the step's own `replyNote`; on an older query, the one text the query holds for
        that kind of reply, shown on the LATEST step of that kind only (display-only, Nick: rrNotes, rejectionFeedbackText,

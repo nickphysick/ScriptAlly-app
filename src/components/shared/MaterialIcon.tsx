@@ -15,6 +15,7 @@
  * Which kind an item takes is `materialIconKind` (lib/materialIcon) — never decided from label text.
  */
 import type { MaterialIconKind } from "../../lib/materialIcon";
+import "./materialIcon.css";
 
 export type { MaterialIconKind } from "../../lib/materialIcon";
 
@@ -30,11 +31,13 @@ export const MATERIAL_ICON_INNER: Readonly<Record<MaterialIconKind, string>> = {
 /** Never below 14px (the ruling). */
 export const MATERIAL_ICON_MIN = 14;
 
-export function MaterialIcon({ kind, size = 16, className }: { kind: MaterialIconKind; size?: number; className?: string }) {
+/** `inline`: set in running text (not a flex row) — centred on the text, spaced from its words (materialIcon.css). */
+export function MaterialIcon({ kind, size = 16, className, inline }: { kind: MaterialIconKind; size?: number; className?: string; inline?: boolean }) {
   const px = Math.max(MATERIAL_ICON_MIN, size);
+  const cls = ["mat-ico", inline ? "mat-ico--inline" : "", className ?? ""].filter(Boolean).join(" ");
   return (
     <svg
-      className={className ? `mat-ico ${className}` : "mat-ico"}
+      className={cls}
       data-mat-icon={kind}
       width={px}
       height={px}
@@ -46,13 +49,15 @@ export function MaterialIcon({ kind, size = 16, className }: { kind: MaterialIco
       strokeLinejoin="round"
       aria-hidden="true"
       focusable="false"
-      style={{ flex: "none" }}
+      /* ⚠️ INLINE, NOT ONLY ATTRIBUTES: host rules such as `.qc-mchip svg { width: 11px; stroke-width: 1.7 }` and
+         `.qc-mchip-att svg { stroke: var(--burg) }` beat presentation attributes, and would shrink it or turn it burgundy */
+      style={{ flex: "none", width: px, height: px, fill: "none", stroke: "currentColor", strokeWidth: 1.8 }}
       dangerouslySetInnerHTML={{ __html: MATERIAL_ICON_INNER[kind] }}
     />
   );
 }
 
 /** The icon for an ITEM, or nothing (Full manuscript, Other, free text). The common call site. */
-export function MaterialItemIcon({ kind, size, className }: { kind: MaterialIconKind | null; size?: number; className?: string }) {
-  return kind ? <MaterialIcon kind={kind} size={size} className={className} /> : null;
+export function MaterialItemIcon({ kind, size, className, inline }: { kind: MaterialIconKind | null; size?: number; className?: string; inline?: boolean }) {
+  return kind ? <MaterialIcon kind={kind} size={size} className={className} inline={inline} /> : null;
 }

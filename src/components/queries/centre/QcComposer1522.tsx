@@ -17,8 +17,9 @@ import React, { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { QueryStatus } from "../../../types";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { matLabel as matLabelOf, type StepMaterial } from "../../../lib/qc152Write";
+import { stepMaterialIcon } from "../../../lib/materialIcon";
 import { MONTHS_SHORT } from "../../../lib/dates";
-import type { ThreadStepIn } from "../../../lib/qcThread152";
+import type { ThreadChip, ThreadStepIn } from "../../../lib/qcThread152";
 import { CalendarField, MatChips, PopCtx, type MatEnv } from "./QcEdit152";
 import { StepGlyph } from "./QcBubble152";
 import "./qcv1522card.css";
@@ -199,8 +200,8 @@ export const QcComposer1522: React.FC<QcComposerProps> = ({ journey: j0, ctx, re
 
   /* §3.1 the draft: what you're about to add, as a dashed bubble at the end of the thread */
   const draft: ThreadStepIn | null = useMemo(() => {
-    const base = { key: "__draft", ms: day, chips: [] as { label: string; detail: string }[] };
-    const chips = (ms: StepMaterial[]) => ms.map((m) => ({ label: labelOf(m), detail: labelOf(m) }));
+    const base = { key: "__draft", ms: day, chips: [] as ThreadChip[] };
+    const chips = (ms: StepMaterial[]): ThreadChip[] => ms.map((m) => ({ label: labelOf(m), detail: labelOf(m), icon: stepMaterialIcon(m) }));
     switch (j) {
       case "send": return { ...base, status: c.sendKind === "partial_sent" ? QueryStatus.PARTIAL_SENT : c.sendKind === "resubmitted" ? QueryStatus.RESUBMITTED : QueryStatus.FULL_SENT, kind: null, chips: chips(mats) };
       case "nudge": return { ...base, status: null, kind: "nudge", via: `by ${via === "QueryManager" ? "QueryManager" : via.toLowerCase()}` };

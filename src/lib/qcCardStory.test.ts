@@ -13,7 +13,7 @@ const row = (status: QueryStatus, day: number, o: Partial<StoryRow> = {}): Story
 
 describe("v149.1 A2 — each step tells its part of the story", () => {
   it("a request is rust; the send that answers it is green with the same words; the query's own pieces are oat", () => {
-    const s = storySteps({ rows: [row(QueryStatus.QUERIED, 1), row(QueryStatus.PARTIAL_REQUESTED, 5), row(QueryStatus.PARTIAL_SENT, 8)], query: q({ materialsRequestedType: "pages", materialsRequestedQuantity: "50" } as Partial<Query>), manuscript: null, sentWithQuery: ["Query letter"] });
+    const s = storySteps({ rows: [row(QueryStatus.QUERIED, 1), row(QueryStatus.PARTIAL_REQUESTED, 5), row(QueryStatus.PARTIAL_SENT, 8)], query: q({ materialsRequestedType: "pages", materialsRequestedQuantity: "50" } as Partial<Query>), manuscript: null, sentWithQuery: [{ label: "Query letter", item: "Query letter" }] });
     expect(s[0].qualifier).toBe("by email");
     expect(s[0].chips).toEqual([{ label: "Query letter", tone: "plain", icon: "letter" }]);
     expect(s[1].chips).toEqual([{ label: "First 50 pages", tone: "ask", icon: "pages" }]);
@@ -33,6 +33,32 @@ describe("v149.1 A2 — each step tells its part of the story", () => {
     const s = storySteps({ rows: [row(QueryStatus.PARTIAL_REQUESTED, 5)], query: q(), manuscript: null, sentWithQuery: [] });
     expect(s[0].note).toBeNull();
     expect(partialAsked(q())).toBe("Partial");
+  });
+});
+
+describe("Material icons v1 — a chip's icon comes from the stored item, never its label", () => {
+  it("each sent piece by its item; free text has none; Full manuscript keeps its own mark", () => {
+    const s = storySteps({ rows: [row(QueryStatus.QUERIED, 1)], query: q(), manuscript: null, sentWithQuery: [
+      { label: "Query letter", item: "Query Letter" },
+      { label: "Synopsis", item: "Synopsis" },
+      { label: "First 5 chapters", item: { material: "Sample Pages", type: "chapters", quantity: 5 } },
+      { label: "First 5,000 words", item: { material: "Sample Pages", type: "words", quantity: 5000 } },
+      { label: "Author bio", item: "Author bio" },
+      { label: "Full manuscript", item: "Full manuscript" },
+      { label: "Also", item: null },
+      /* a label that LOOKS like a sample, over a free-text item: no icon */
+      { label: "50 pages", item: { material: "Other", type: "other", quantity: "50 pages" } },
+    ] });
+    expect(s[0].chips.map((c) => c.icon)).toEqual(["letter", "synopsis", "chapters", "words", "bio", "full", null, null]);
+  });
+  it("a partial asked in chapters takes the chapters icon, asked and answered", () => {
+    const s = storySteps({ rows: [row(QueryStatus.PARTIAL_REQUESTED, 5), row(QueryStatus.PARTIAL_SENT, 8)], query: q({ materialsRequestedType: "chapters", materialsRequestedQuantity: "3" } as Partial<Query>), manuscript: null, sentWithQuery: [] });
+    expect(s[0].chips[0]).toEqual({ label: "First 3 chapters", tone: "ask", icon: "chapters" });
+    expect(s[1].chips[0]).toEqual({ label: "First 3 chapters", tone: "ok", icon: "chapters" });
+  });
+  it("a partial with no unit is pages", () => {
+    const s = storySteps({ rows: [row(QueryStatus.PARTIAL_REQUESTED, 5)], query: q(), manuscript: null, sentWithQuery: [] });
+    expect(s[0].chips[0].icon).toBe("pages");
   });
 });
 

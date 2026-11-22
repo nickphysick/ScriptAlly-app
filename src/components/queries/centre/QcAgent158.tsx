@@ -12,6 +12,7 @@
  * ⚠️ AN UNRECORDED VALUE IS A LINK, never a dash: it opens the agent's card at that detail (`onField`).
  * ⚠️ COPY EMAIL KEEPS THE PAGE'S BEHAVIOUR AND TOAST (`onCopyEmail`); the contact row never wraps, the address is cut.
  */
+import { MaterialItemIcon } from "../../shared/MaterialIcon";
 import React from "react";
 import type { AskChip } from "../../../lib/qcThread152";
 import { dayLabel } from "../../../lib/qcThread152";
@@ -104,7 +105,7 @@ export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
             {p.asks.chips.map((c) => (
               <li key={c.label} data-qc158="ask" data-sent={c.sent ? "" : undefined}>
                 <span className={`nx-tick${c.sent ? "" : " no"}`} aria-hidden="true">{TICK}</span>
-                {sentenceCase(c.label)}
+                <MaterialItemIcon kind={c.icon} size={20} />{sentenceCase(c.label)}
                 <span className="r">{c.sent ? "sent with your query" : "not sent"}</span>
               </li>
             ))}

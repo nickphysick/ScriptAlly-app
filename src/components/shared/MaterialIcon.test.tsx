@@ -33,6 +33,8 @@ describe("MaterialIcon — the svg frame", () => {
   it("aria-hidden, flex none, 16px by default", () => {
     expect(html).toContain('aria-hidden="true"');
     expect(html).toContain("flex:none");
+    /* pinned inline so a host `… svg {}` rule cannot resize or recolour it */
+    expect(html).toMatch(/style="[^"]*width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8/);
     expect(html).toContain('width="16"');
     expect(html).toContain('height="16"');
   });

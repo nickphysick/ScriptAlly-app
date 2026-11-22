@@ -235,8 +235,8 @@ export function EditJourney({ req, today, children }: JourneyProps) {
         </>
       ) : how === "individual" ? (
         <>
-          <Toggle testId="edql" on={indMat.ql} onClick={() => { setSent({ how: "individual", mat: { ...indMat, ql: !indMat.ql } }); setTouched(true); }} small={indMat.ql && qlV ? qlV.versionName.toUpperCase() : ""}>Query letter</Toggle>
-          <Toggle testId="edsyn" on={indMat.syn} onClick={() => { setSent({ how: "individual", mat: { ...indMat, syn: !indMat.syn } }); setTouched(true); }} small={indMat.syn && synV ? synV.versionName.toUpperCase() : ""}>Synopsis</Toggle>
+          <Toggle material="letter" testId="edql" on={indMat.ql} onClick={() => { setSent({ how: "individual", mat: { ...indMat, ql: !indMat.ql } }); setTouched(true); }} small={indMat.ql && qlV ? qlV.versionName.toUpperCase() : ""}>Query letter</Toggle>
+          <Toggle material="synopsis" testId="edsyn" on={indMat.syn} onClick={() => { setSent({ how: "individual", mat: { ...indMat, syn: !indMat.syn } }); setTouched(true); }} small={indMat.syn && synV ? synV.versionName.toUpperCase() : ""}>Synopsis</Toggle>
           <SampleControl name="edit" sample={indMat.s} book={book} allowNone onChange={(s2: Sample) => { setSent({ how: "individual", mat: { ...indMat, s: s2 } }); setTouched(true); }} />
         </>
       ) : <p className="qad-secs">Nothing is recorded about what went with this query. Choose one of the two ways to add it.</p>}

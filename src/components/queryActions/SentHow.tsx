@@ -22,6 +22,10 @@ import type { Query, QueryMaterial, SubmissionPackage } from "../../types";
 import { sentRecordOf } from "../../lib/queryActions/sentRecord";
 import { readSummary, type SentPiece } from "../../lib/queryActions/packages";
 import { formatQueryMaterial } from "../../lib/materials";
+import { isSampleItem, SAMPLE_MATERIAL } from "../../lib/sentSample";
+import { materialIconKind } from "../../lib/materialIcon";
+import { ComponentType } from "../../types";
+import { MaterialItemIcon } from "../shared/MaterialIcon";
 import "./sentHow.css";
 
 type Q = Partial<Pick<Query, "packageId" | "sentHow" | "sentPackageId" | "sentPackageEdition" | "sentPackageName" | "basedOnPackageId" | "basedOnPackageEdition"
@@ -51,6 +55,22 @@ const dayMon = (iso: string) => {
   return isNaN(d.getTime()) ? "" : `${d.getDate()} ${["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"][d.getMonth()]}`;
 };
 
+/** A piece of what went, with the STORED item it stands for — what `materialIconKind` reads (Material icons
+ *  v1). Never the label: the label is display copy, and "Also" free text has no item. */
+export type SentViewPiece = SentPiece & { item: string | QueryMaterial | null };
+
+/** The stored item behind a summary piece. The sample's unit is the query's own (D2), so its item is the
+ *  query's sample entry; "other" is the writer's free text and takes no icon. */
+function pieceItem(p: SentPiece, q: Q): string | QueryMaterial | null {
+  switch (p.key) {
+    case "ql": return ComponentType.QUERY_LETTER;
+    case "syn": return ComponentType.SYNOPSIS;
+    case "sample": return ((q.materialsWanted ?? []) as (string | QueryMaterial)[]).find((m) => isSampleItem(m)) ?? SAMPLE_MATERIAL;
+    case "other": return null;
+    default: { const unhandled: never = p.key; return unhandled; }
+  }
+}
+
 export interface SentView {
   how: "package" | "individual" | "unrecorded";
   /** The package attached (package) or started from (based on), as named on the day. */
@@ -59,7 +79,7 @@ export interface SentView {
   basedOn: boolean;
   retired: boolean;
   packageId: string | null;
-  pieces: SentPiece[];
+  pieces: SentViewPiece[];
   /** Changed pieces, keyed by the piece's label: the value it had in the package. */
   was: Record<string, string>;
   corrected: string | null;
@@ -71,11 +91,10 @@ export function sentView(q: Q, packages: readonly SubmissionPackage[] = []): Sen
   const sum = readSummary(r.materials);
   const id = r.packageId ?? r.basedOnId;
   const live = id ? packages.find((p) => p.id === id) : undefined;
-  let pieces = sum.pieces;
+  let pieces: SentViewPiece[] = sum.pieces.map((p) => ({ ...p, item: pieceItem(p, q) }));
   if (!pieces.length && (q.materialsWanted ?? []).length) {
     /* a query written before summaries existed: its own materials list, read as rows */
-    pieces = (q.materialsWanted as (string | QueryMaterial)[]).map((m, i) => ({ key: "other" as const, label: formatQueryMaterial(m), value: "", i }))
-      .map(({ key, label, value }) => ({ key, label, value }));
+    pieces = (q.materialsWanted as (string | QueryMaterial)[]).map((m) => ({ key: "other" as const, label: formatQueryMaterial(m), value: "", item: m }));
   }
   const was: Record<string, string> = {};
   for (const c of r.changes) {
@@ -122,7 +141,7 @@ const Rows = ({ v }: { v: SentView }) => {
         const was = v.was[p.label];
         return (
           <div key={p.label} className={`sh-row${was != null ? " chg" : ""}`}>
-            <span><i className="sh-tk">✓</i>{p.label}</span>
+            <span><i className="sh-tk">✓</i><MaterialItemIcon kind={p.item ? materialIconKind(p.item) : null} size={14} />{p.label}</span>
             <span>{was != null && was !== "none" ? <><s>{was}</s> </> : null}{p.value}</span>
           </div>
         );

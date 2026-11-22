@@ -77,3 +77,19 @@ describe("materialIconKind — structured QueryMaterial", () => {
     [q({ material: "Marketing plan", type: "other" }), null],
   ] as const)("%j → %s", (item, kind) => expect(materialIconKind(item)).toBe(kind));
 });
+
+import { stepMaterialIcon } from "./materialIcon";
+describe("stepMaterialIcon — a step's stored material map", () => {
+  it.each([
+    [{ kind: "letter" }, "letter"],
+    [{ kind: "synopsis" }, "synopsis"],
+    [{ kind: "sample", unit: "pages" }, "pages"],
+    [{ kind: "sample", unit: "words" }, "words"],
+    [{ kind: "sample", unit: "chapters" }, "chapters"],
+    /* matLabel words an un-united sample as chapters ("First 3 chapters"), so the icon agrees with the words */
+    [{ kind: "sample" }, "chapters"],
+    [{ kind: "full" }, "full"],
+    [{ kind: "other" }, null],
+    [null, null],
+  ] as const)("%j → %s", (m, k) => expect(stepMaterialIcon(m as never)).toBe(k));
+});

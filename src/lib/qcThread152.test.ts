@@ -115,15 +115,15 @@ describe("the Agent tab (§2.6): page counts compare properly", () => {
 });
 
 describe("the Materials tab, by what it went with (v158 §4; QC158-8/9's source halves)", () => {
-  const q = st("q", QueryStatus.QUERIED, 60, { chips: [{ label: "Letter", detail: "" }, { label: "10 pages", detail: "" }], via: "by email" });
-  const pr = st("pr", QueryStatus.PARTIAL_REQUESTED, 16, { chips: [{ label: "First 50 pages", detail: "" }] });
+  const q = st("q", QueryStatus.QUERIED, 60, { chips: [{ label: "Letter", detail: "", icon: "letter" }, { label: "10 pages", detail: "", icon: "pages" }], via: "by email" });
+  const pr = st("pr", QueryStatus.PARTIAL_REQUESTED, 16, { chips: [{ label: "First 50 pages", detail: "", icon: "pages" }] });
   it("a request not yet answered is its own pending group, headed as it will be once sent", () => {
     const g = materialGroups([q, pr], { nowMs: NOW });
     expect(g.map((x) => [x.heading, x.pending, x.when])).toEqual([["With the query", false, "9 Aug, by email"], ["With the partial", true, "asked 22 Sep"]]);
     expect(g[1].items.map((c) => c.label)).toEqual(["First 50 pages"]);
   });
   it("once sent, the request and what was sent are one group, dated when it went and when it was asked for", () => {
-    const g = materialGroups([q, pr, st("ps", QueryStatus.PARTIAL_SENT, 2, { chips: [{ label: "First 50 pages", detail: "" }] })], { nowMs: NOW });
+    const g = materialGroups([q, pr, st("ps", QueryStatus.PARTIAL_SENT, 2, { chips: [{ label: "First 50 pages", detail: "", icon: "pages" }] })], { nowMs: NOW });
     expect(g.map((x) => [x.heading, x.pending, x.when])).toEqual([["With the query", false, "9 Aug, by email"], ["With the partial", false, "6 Oct, asked 22 Sep"]]);
   });
   it("query, partial and full in the order they happened; a resubmission is its own group in the full stage", () => {

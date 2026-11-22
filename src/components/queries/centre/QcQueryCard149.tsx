@@ -22,10 +22,12 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
-import { QueryStatus } from "../../../types";
+import { QueryStatus, type QueryMaterial } from "../../../types";
 import { MONTHS_SHORT } from "../../../lib/dates";
 import { STAGE_NAME, WHERE_LABEL, whereItStands, type QcRow, type WhereKey } from "../../../lib/qcSummary";
 import { STRIP_TINT, type AgentView, type ChipIcon, type NextStep, type StoryStep, type Strip } from "../../../lib/qcCardStory";
+import { MaterialIcon, MaterialItemIcon, type MaterialIconKind } from "../../shared/MaterialIcon";
+import { materialIconKind } from "../../../lib/materialIcon";
 import "../../../marketing/heroCard.css";
 import "./qcv149card.css";
 import { FlowHead, FLOW_WORDS, RECORD_LINE } from "../../shared/FlowHead";
@@ -109,18 +111,17 @@ export function parseDay(s: string, nowMs: number): number | null {
 }
 
 const CLOCK = <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6" /><path d="M8 4.5V8l2.5 1.5" /></svg>;
-const DOC = <svg width="11" height="12" viewBox="0 0 11 12" fill="none" stroke="currentColor" strokeWidth="1.1" aria-hidden="true"><rect x="1" y="1" width="9" height="10" rx=".5" /><path d="M3 4h5M3 6h5M3 8h3" /></svg>;
 const LEFT = <svg viewBox="0 0 20 20" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 4l-6 6 6 6" /></svg>;
 /* v149.1 — the mock's own marks (design-refs/query-centre-v149-1/query-card-panel-v2.html) */
 const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
-const CHIP_ICON: Record<ChipIcon, React.ReactNode> = {
-  letter: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"><rect x="3" y="2" width="10" height="12" rx="1.4" /><path d="M5.5 5.5h5M5.5 8h5M5.5 10.5h3" strokeLinecap="round" /></svg>,
-  synopsis: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M3 4h10M3 8h10M3 12h6" /></svg>,
-  pages: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"><rect x="4.5" y="4" width="8.5" height="10" rx="1.2" /><path d="M3 11.5V3.2c0-.7.5-1.2 1.2-1.2h6.3" /></svg>,
+/* Material icons v1 — the material kinds draw the shared MaterialIcon (chipIcon below); these three keep the card's own marks */
+const CHIP_ICON: Record<Exclude<ChipIcon, MaterialIconKind>, React.ReactNode> = {
   full: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round"><rect x="3" y="2" width="10" height="12" rx="1.4" /><path d="M3 11h10" /></svg>,
   bell: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"><path d="M4.5 11h7l-1-1.4V7a2.5 2.5 0 0 0-5 0v2.6zM7 12.6a1.1 1.1 0 0 0 2 0" /></svg>,
   notes: <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"><path d="M3 4h10M3 8h10M3 12h6" /></svg>,
 };
+const chipIcon = (icon: ChipIcon | null): React.ReactNode =>
+  icon == null ? null : icon === "full" || icon === "bell" || icon === "notes" ? CHIP_ICON[icon] : <MaterialIcon kind={icon} size={16} />;
 const TICK = <svg viewBox="0 0 16 16" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" /></svg>;
 /** a nudge is not a status: the ring with a bell (the landing card's own) */
 const NUDGE_G = <svg className="qc149c-g" viewBox="0 0 20 20" width="17" height="17" fill="none" stroke="#1c130f" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="#fff" /><path d="M7 12.5h6l-.9-1.2V9a2.1 2.1 0 0 0-4.2 0v2.3zM9.2 14h1.6" /></svg>;
@@ -135,7 +136,8 @@ export interface QcQueryCard149Props {
   nowMs: number;
   msTitle: string | null;
   packageName: string | null;
-  sent: { label: string }[];
+  /** `item`: the stored material the piece stands for (Material icons v1); null for free text */
+  sent: { label: string; item?: string | QueryMaterial | null }[];
   agent: CardAgent;
   steps: CardStep[];
   /** the step to light briefly (just added) */
@@ -413,13 +415,18 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
       ))}
     </div>
   );
+  /* Material icons v1: a sent piece's icon is its stored item's; the edit pieces are keyed ql / syn / sample, and the
+     sample's unit is the query's own sample item. Free text has none. */
+  const sampleKind = p.sent.map((s) => (s.item ? materialIconKind(s.item) : null)).find((k) => k === "pages" || k === "chapters" || k === "words") ?? "pages";
+  const pieceIcon = (key: string) => <MaterialItemIcon kind={key === "ql" ? "letter" : key === "syn" ? "synopsis" : key === "sample" ? sampleKind : null} />;
+  const sentIcon = (s: { item?: string | QueryMaterial | null }, size?: number) => <MaterialItemIcon kind={s.item ? materialIconKind(s.item) : null} size={size} />;
   const sentChips = editing
     ? p.pieces.map((pc) => {
       const on = ed.pieces[pc.key] ?? pc.on;
       return <button key={pc.key} type="button" className={`qc149c-piece${on ? "" : " off"}`} data-qc149c="piece" data-k={pc.key} aria-pressed={on}
-        onClick={() => setEd((x) => ({ ...x, pieces: { ...x.pieces, [pc.key]: !on } }))}>{DOC}{pc.label}</button>;
+        onClick={() => setEd((x) => ({ ...x, pieces: { ...x.pieces, [pc.key]: !on } }))}>{pieceIcon(pc.key)}{pc.label}</button>;
     })
-    : p.sent.map((s) => <span key={s.label}>{DOC}{s.label}</span>);
+    : p.sent.map((s) => <span key={s.label}>{sentIcon(s)}{s.label}</span>);
 
   const panes = (
     <>
@@ -450,7 +457,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
                       <div className="qc149c-chs" data-qc149c="chips">
                         {s.chips.map((c) => (
                           <span key={c.label} className={`qc149c-ch${c.tone === "plain" ? "" : ` ${c.tone}`}`} data-qc149c="chip" data-tone={c.tone}>
-                            {c.tone === "ok" ? TICK : CHIP_ICON[c.icon]}{c.label}
+                            {c.tone === "ok" ? TICK : chipIcon(c.icon)}{c.label}
                           </span>
                         ))}
                       </div>
@@ -571,7 +578,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
             {!editing ? <button type="button" className="qc149c-small" data-qc149c="mat-change" onClick={() => { p.onMode("edit"); setTab("tracking"); }}>Change</button> : null}</div>
           <h5>What you sent</h5>
           {p.sent.length ? p.sent.map((s) => (
-            <div key={s.label} className="qc149c-mrow" data-qc149c="mat-piece">{DOC}{s.label}
+            <div key={s.label} className="qc149c-mrow" data-qc149c="mat-piece">{sentIcon(s, 20)}{s.label}
               <button type="button" className="qc149c-small" onClick={() => p.onOpenPiece(s.label)}>Open</button></div>
           )) : <div className="qc149c-mrow"><i>Nothing logged yet</i></div>}
         </div>

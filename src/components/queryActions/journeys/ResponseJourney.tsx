@@ -124,7 +124,7 @@ function ResponseJourneyForQuery({ req, today, children }: JourneyProps) {
         <>
           <p className="qad-secs">Most requests are the opening pages; some want a later section.</p>
           <SampleControl name="req" sample={s} onChange={(x) => { setS(x); setTouched(true); }} book={book} />
-          <Toggle testId="syn" on={syn} onClick={() => { setSyn(!syn); setTouched(true); }}>A synopsis too</Toggle>
+          <Toggle material="synopsis" testId="syn" on={syn} onClick={() => { setSyn(!syn); setTouched(true); }}>A synopsis too</Toggle>
           <SampleLine label={`${syn ? "Synopsis and " : ""}${capFirst(sampleName(s))}`} sample={s} book={book} />
         </>
       ),

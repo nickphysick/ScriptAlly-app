@@ -7,6 +7,7 @@
  * and the agent card. Every journey composes these and nothing else, so one control never looks two
  * ways in two journeys.
  */
+import { MaterialIcon, type MaterialIconKind } from "../shared/MaterialIcon";
 import { typedWhole } from "../../lib/sentSample";
 import React, { createContext, useContext, useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
@@ -64,10 +65,11 @@ export function NoteLink({ onClick, children }: { onClick: () => void; children:
   return <button type="button" className="lk" onClick={onClick}>{children}</button>;
 }
 
-export function Toggle({ on, onClick, children, small, style, testId }: { on: boolean; onClick: () => void; children: React.ReactNode; small?: React.ReactNode; style?: React.CSSProperties; testId?: string }) {
+/** `material` (Material icons v1): the toggle names a material — its icon goes immediately before the words */
+export function Toggle({ on, onClick, children, small, style, testId, material }: { on: boolean; onClick: () => void; children: React.ReactNode; small?: React.ReactNode; style?: React.CSSProperties; testId?: string; material?: MaterialIconKind }) {
   return (
     <button type="button" className={`qad-tgl${on ? " on" : ""}`} onClick={onClick} style={style} aria-pressed={on} data-qad-toggle={testId}>
-      <span className="bx">{on ? "✓" : ""}</span><b>{children}</b>{small ? <small>{small}</small> : null}
+      <span className="bx">{on ? "✓" : ""}</span><b>{material ? <MaterialIcon kind={material} inline /> : null}{children}</b>{small ? <small>{small}</small> : null}
     </button>
   );
 }
