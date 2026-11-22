@@ -24,7 +24,7 @@
 }
 .pgd p {
   margin: 0; font-family: var(--font-serif);
-  font-size: 14.5px; line-height: 1.5; color: var(--sp-muted);
+  font-size: var(--sp-sec-size); line-height: 1.5; color: var(--sp-muted);
 }
 .pgd p + p { margin-top: 8px; }
 .pgd-x {
