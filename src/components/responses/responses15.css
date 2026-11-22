@@ -30,7 +30,7 @@
   .qc151.qc153.wsnh.rsp15-hd .wsnh-rc { display: block; width: 100%; max-width: 540px; min-width: 0; justify-self: end; }
   .rsp15-hd .rsp15-rt { width: 100%; color: #f4eee5; }
   .rsp15-hd .rsp15-rt .rsp15-st { font: 400 32px/1.05 var(--r15-type) !important; color: #fbf7f0; white-space: nowrap; }
-  .rsp15-hd .rsp15-rt .rsp15-sl { margin-top: 4px; font: italic 400 15.5px/1.35 var(--r15-serif) !important; color: rgba(244, 238, 229, 0.88); }
+  .rsp15-hd .rsp15-rt .rsp15-sl { margin-top: 4px; font: italic 400 var(--sp-body-size)/1.35 var(--r15-serif) !important; color: rgba(244, 238, 229, 0.88); }
   .rsp15-hd .rsp15-rt .rsp15-sl:empty { display: none; }
   .rsp15-hd .rsp15-tally { display: block; width: 100%; height: 58px; margin-top: 16px; }
   .rsp15-hd .rsp15-tally path { fill: none; stroke-width: 3.4; stroke-linecap: round; transition: opacity 0.2s; }
@@ -356,10 +356,10 @@
 .rsp15 .rsp15-exc.qc151 { padding-top: 0; width: 336px; max-width: 100%; pointer-events: none; }
 .rsp15 .rsp15-bub {
   position: relative; display: block; max-width: 280px; padding: 14px 16px; border-radius: 16px 16px 16px 4px; background: var(--sb); color: var(--r15-ink);
-  font: 400 15px/1.45 var(--r15-serif) !important;
+  font: 400 var(--sp-body-size)/1.45 var(--r15-serif) !important;
 }
 .rsp15 .rsp15-bub .rsp15-g { float: left; margin-right: 8px; }
-.rsp15 .rsp15-bub > b { display: block; font: 600 15px/1.4 var(--r15-serif) !important; color: var(--tk); }
+.rsp15 .rsp15-bub > b { display: block; font: 600 var(--sp-body-size)/1.4 var(--r15-serif) !important; color: var(--tk); }
 .rsp15 .rsp15-bub q { display: block; quotes: none; margin-top: 6px; }
 .rsp15 .rsp15-bub time { display: block; margin-top: 6px; font: 400 12.5px/1 var(--r15-type) !important; color: var(--tk); }
 .rsp15 .rsp15-minis { display: flex; gap: 10px; }
