@@ -413,7 +413,9 @@ async function words(page: Page, root: string, L: Ledger, state: string, filtere
 /** LF4 — no stage colour off a stage, no powder anywhere; the population proved first */
 async function arbitrary(page: Page, root: string, W: number) {
   const L = new Ledger(`LF4-${root === QC ? "q" : "a"}-${W}`);
-  const stageCols = root === CL ? STAGES.flatMap((s) => [rgb(STAGE_COLOURS[s].band), rgb(STAGE_COLOURS[s].tint)]) : [];
+  /* Plumage colours v1: the offer's band IS the app's navy (Nick, 22 Nov), which the panel's own chrome has always used,
+     so navy cannot tell a stage here; every other stage band and tint still counts */
+  const stageCols = root === CL ? STAGES.flatMap((s) => [rgb(STAGE_COLOURS[s].band), rgb(STAGE_COLOURS[s].tint)]).filter((c) => c !== rgb("#2a3a52")) : [];
   const powder = ["#e3e8ef", "#eef2f7", "#e9eef5"].map(rgb);
   const r = await page.evaluate(([root, h, rh]) => {
     const pg = [...document.querySelectorAll<HTMLElement>(root)].find((e) => e.getBoundingClientRect().width > 0)!;
