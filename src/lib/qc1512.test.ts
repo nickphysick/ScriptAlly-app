@@ -29,8 +29,8 @@ describe("the colour scheme", () => {
     expect(statusKind(QueryStatus.PARTIAL_REQUESTED)).toBe(statusKind(QueryStatus.PARTIAL_SENT));
     expect(STATUS_FILL[statusKind(QueryStatus.PARTIAL_SENT)]).toBe("#e8c0af");
     expect(statusKind(QueryStatus.FULL_REQUESTED)).toBe(statusKind(QueryStatus.FULL_SENT));
-    expect(STATUS_FILL[statusKind(QueryStatus.FULL_SENT)]).toBe("#b5b6c0");
-    expect(STATUS_FILL[statusKind(QueryStatus.OFFER)]).toBe("#2a3a52");
+    expect(STATUS_FILL[statusKind(QueryStatus.FULL_SENT)]).toBe("#b9c9da");
+    expect(STATUS_FILL[statusKind(QueryStatus.OFFER)]).toBe("#c5e0d8"); /* Plumage colours v2: duck egg */
     for (const s of [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN]) expect(STATUS_FILL[statusKind(s)]).toBe("#eceae6");
   });
 });

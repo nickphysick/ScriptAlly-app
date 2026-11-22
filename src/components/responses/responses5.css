@@ -58,12 +58,12 @@
 .rsp5-layer .rsp5-dnav button:disabled { opacity: 0.35; cursor: default; }
 .rsp5-layer .rsp5-dx { border: 0; background: none; color: var(--r5-cr66); font-size: 22px; line-height: 1; cursor: pointer; padding: 2px 4px; }
 .rsp5-layer .rsp5-dst { flex: none; display: flex; align-items: center; gap: 10px; padding: 13px 20px; font: 400 16px var(--r5-machine) !important; }
-/* Plumage colours v1 — the strip is the stage's (sent) band in ink (lib/stageColours); the offer flat navy, in paper */
+/* Plumage colours v2 — the strip is the stage's (sent) band in ink (lib/stageColours); the offer flat duck egg */
 .rsp5-layer .rsp5-dst[data-tone] { color: #1c130f; }
 .rsp5-layer .rsp5-dst[data-tone="queried"] { background: #efe6d6; }
 .rsp5-layer .rsp5-dst[data-tone="partial"] { background: #e8c0af; }
-.rsp5-layer .rsp5-dst[data-tone="full"] { background: #b5b6c0; }
-.rsp5-layer .rsp5-dst[data-tone="offer"] { background: #2a3a52; color: #f4eee5; }
+.rsp5-layer .rsp5-dst[data-tone="full"] { background: #b9c9da; }
+.rsp5-layer .rsp5-dst[data-tone="offer"] { background: #c5e0d8; }
 .rsp5-layer .rsp5-dst[data-tone="closed"] { background: #eceae6; }
 /* workspace width v2 (8 Nov): actions follow the content — the body hugs, the footer sits under it */
 .rsp5-layer .rsp5-dbody { flex: 0 1 auto; min-height: 0; overflow: auto; display: flex; flex-direction: column; gap: 18px; padding: 18px 20px 20px; }

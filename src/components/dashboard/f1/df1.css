@@ -309,8 +309,8 @@ img.df1-covimg { padding: 0; object-fit: cover; background: none; }
 .df1-entry { --t: #fdfaf5; }
 /* Stage colours v1 — the stage's Tint, as the collapsed row's (v2/dash2Feed.css) */
 .df1-entry[data-kind="request"] { --t: #f9f0ec; }
-.df1-entry[data-kind="request"]:is([data-status="Full Requested"], [data-status="Revise & Resubmit"]) { --t: #ededef; }
-.df1-entry[data-kind="offer"] { --t: #d9dce0; }
+.df1-entry[data-kind="request"]:is([data-status="Full Requested"], [data-status="Revise & Resubmit"]) { --t: #eff3f7; }
+.df1-entry[data-kind="offer"] { --t: #eef6f3; }
 .df1-journey { margin-top: 12px; padding: 14px 14px 10px; border-radius: 10px; background: var(--t); }
 .df1-trk { display: flex; margin: 0; padding: 0; list-style: none; }
 .df1-trk > li { position: relative; flex: 1 1 0; min-width: 0; }

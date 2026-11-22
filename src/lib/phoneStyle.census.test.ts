@@ -22,7 +22,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { STAGE_COLOURS, STAGE_INK, OFFER_INK } from "./stageColours";
+import { STAGE_COLOURS, STAGE_INK } from "./stageColours";
 
 const BASELINE = "src/lib/phoneStyle.baseline.json";
 const KINDS = ["font", "hex", "legacy", "radius", "shadow"] as const;
@@ -33,8 +33,6 @@ type Counts = Record<Kind, number>;
 const PALETTE = new Set([
   "#f2eee8", "#ffffff", "#2a3a52", "#1f2633", "#4a4f5a", "#6b6f78", "#c9d2df", "#e8c8bc", "#7a3f31", "#efebe4", "#ece7de", "#222f44",
   ...Object.values(STAGE_COLOURS).flatMap((c) => Object.values(c)), STAGE_INK,
-  /* Plumage colours v1: the table's ink on the offer's navy band (lib/stageColours OFFER_INK) */
-  OFFER_INK,
 ].map((h) => h.toLowerCase()));
 const SIZES = new Set([56, 28, 20, 16, 14, 12]);
 

@@ -71,9 +71,10 @@ describe("the tab's accent follows the stage (Stage colours v1: the slip preview
     const mix = (h: string) => [1, 3, 5].map((i) => Math.round(parseInt(h.slice(i, i + 2), 16) * 0.82 + 255 * 0.18));
     for (const a of Object.values(TAB_ACCENT_157)) expect(mix(a.ink)).toEqual([1, 3, 5].map((i) => parseInt(a.rest.slice(i, i + 2), 16)));
   });
-  it("by status (Plumage colours v1): the offer navy, the partial and full their plumage, waiting sand", () => {
+  it("by status (Plumage colours v2): the offer duck egg, the partial and full their plumage, waiting sand", () => {
     expect(tabAccent157(QueryStatus.OFFER)).toBe(TAB_ACCENT_157.offer);
-    expect(TAB_ACCENT_157.offer).toEqual({ accent: "#243247", ink: "#f4eee5", rest: "#f6f1ea" });
+    expect(TAB_ACCENT_157.offer).toEqual({ accent: "#a9cdc2", ink: "#2f5a4e", rest: "#54786e" });
+    expect(TAB_ACCENT_157.full).toEqual({ accent: "#9fb3c8", ink: "#3d5673", rest: "#60748c" });
     expect(tabAccent157(QueryStatus.PARTIAL_REQUESTED)).toBe(TAB_ACCENT_157.partial);
     expect(tabAccent157(QueryStatus.FULL_REQUESTED)).toBe(TAB_ACCENT_157.full);
     expect(tabAccent157(QueryStatus.QUERIED)).toBe(TAB_ACCENT_157.queried);

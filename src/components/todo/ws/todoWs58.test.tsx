@@ -41,7 +41,7 @@ const QUERIES = [
 const TASKS = [task("t1", "partial_requested", "q1"), task("t2", "full_requested", "q2"), task("t3", "nudge_overdue", "q3")];
 const STAGE_OF_ROW: Record<string, Stage> = { "Send Greg your partial": "partial", "Send Jonathan your full": "full", "Nudge William": "queried" };
 /** Plumage colours v1 — the band is the query's status band: the two asks are requested, so the lighter shade */
-const BAND_OF_ROW: Record<string, string> = { "Send Greg your partial": "#f1d9cf", "Send Jonathan your full": "#d4d4da", "Nudge William": "#efe6d6" };
+const BAND_OF_ROW: Record<string, string> = { "Send Greg your partial": "#f1d9cf", "Send Jonathan your full": "#dbe4ee", "Nudge William": "#efe6d6" };
 
 vi.mock("../../../lib/firebase", () => ({ db: {}, auth: {}, OperationType: { GET: "GET", WRITE: "WRITE", DELETE: "DELETE" }, handleFirestoreError: () => {} }));
 vi.mock("firebase/firestore", () => ({
@@ -95,13 +95,13 @@ describe("v58 phase 2 — the glyph's disc is the query's stage", () => {
       expect(v["--tws58-edge"], r.title).toBe(STAGE_COLOURS[st].edge);
     }
   });
-  it("an offer row's band is the offer's flat navy, its ink the paper (Plumage colours v1)", () => {
+  it("an offer row's band is the offer's flat duck egg, its ink ink (Plumage colours v2)", () => {
     seed.tasks = [task("t9", "offer_received", "q9")]; seed.agents = [agent("a9", "Marcus Hale")];
     seed.queries = [query("q9", "a9", QueryStatus.OFFER)];
     const rows = rowsOf(render());
     expect(rows.length).toBeGreaterThan(0);
     expect(styleOf(rows[0].tag)["--tws58-band"]).toBe(STAGE_COLOURS.offer.band);
-    expect(styleOf(rows[0].tag)["--tws58-ink"]).toBe("#f4eee5");
+    expect(styleOf(rows[0].tag)["--tws58-ink"]).toBe("#1c130f");
   });
 });
 

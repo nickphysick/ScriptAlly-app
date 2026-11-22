@@ -43,8 +43,6 @@
 .d58.d2 .d2-tone--paper { background: #ffffff; color: var(--d2-ink); }
 .d58.d2 .d2-tone--paper:not([style]) { border-bottom: 1px solid #e3d5c9; }
 .d58.d2 .d2-tone--paper .os-cardttl { color: var(--d2-ink); }
-/* Plumage colours v1 — a head on the offer's navy: its title, count and link are the paper */
-.d58.d2 .os-card[data-stage="offer"] > .os-frame > .os-band :is(.os-cardttl, .d2-meta, .d2-link) { color: #f4eee5; }
 .d58.d2 .os-card.d60-agents .os-band.d60-band--slate { background: #ffffff; border-bottom: 1px solid #e3d5c9; }
 .d58.d2 .d2-gs .fv2-gsh { padding-bottom: 10px; border-bottom: 1px solid #e3d5c9; }
 
