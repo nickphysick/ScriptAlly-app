@@ -319,36 +319,9 @@
   {
    "rule": "R5",
    "match": {
-    "sel": "fv1-ph"
-   },
-   "reason": "Classified as a small heading (inside the set-up card under its heading) and now drawn as one (consolidate-and-finish v1, B2).",
-   "kind": "agreed",
-   "source": "consolidate-and-finish v1"
-  },
-  {
-   "rule": "R5",
-   "match": {
     "sel": "laq-qh"
    },
    "reason": "Classified as a card heading (the question heads one section of the Log a query panel) and now drawn as one; its tag is h2 (consolidate-and-finish v1, B2).",
-   "kind": "agreed",
-   "source": "consolidate-and-finish v1"
-  },
-  {
-   "rule": "R5",
-   "match": {
-    "sel": "acv2-sec"
-   },
-   "reason": "Classified as a small heading (inside the agent card under the name) and now drawn as one (consolidate-and-finish v1, B2).",
-   "kind": "agreed",
-   "source": "consolidate-and-finish v1"
-  },
-  {
-   "rule": "R5",
-   "match": {
-    "sel": "sks-scope"
-   },
-   "reason": "Classified as a card heading (each scope heads a section of the shortcuts panel) and now drawn as one (consolidate-and-finish v1, B2).",
    "kind": "agreed",
    "source": "consolidate-and-finish v1"
   },
@@ -411,7 +384,7 @@
    "match": {
     "sel": "span.fv2-exw > b"
    },
-   "reason": "Left at 15: at 16 it wraps in its 252px column; it needs about 8px more (roll-out v2 Phase 8; consolidate-and-finish v1, B1).",
+   "reason": "Left at 15: at 16 \"Nadia asked for the full manuscript\" needs 258.3px and its column is 252, so it wraps; it needs 7px more (measured, consolidate-and-finish v1, B1).",
    "kind": "open",
    "source": "consolidate-and-finish v1"
   },
