@@ -4,10 +4,12 @@
  *
  * To-do load v1 — THE LOAD'S CLOCK AND ITS REVIEW SWITCH. The clock runs on fake timers here exactly as it runs in the
  * page (`useTodoLoad` wraps it): no outline for tasks inside 150ms; the outline at 150ms; "Still loading" at 3s; the
- * failed state at 5s; and tasks that arrive after that still load the page.
+ * failed state at 5s; and tasks that arrive after that still load the page. The review switch answers nothing on a
+ * production build, and its one call site is gated on the same build constant.
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { TODO_LOAD, todoLoadClock, todoLoadPhase, type TodoLoadState } from "./todoLoad";
+import { readFileSync } from "node:fs";
+import { TODO_LOAD, loadHoldFor, todoLoadClock, todoLoadPhase, type TodoLoadState } from "./todoLoad";
 
 beforeEach(() => { vi.useFakeTimers(); vi.setSystemTime(new Date("2026-11-22T09:00:00Z")); });
 afterEach(() => { vi.useRealTimers(); });
@@ -73,5 +75,32 @@ describe("the clock, on fake timers", () => {
   it("the pure phase agrees: ready always wins", () => {
     expect(todoLoadPhase({ ready: true, failed: true, sinceMs: 9000 }).phase).toBe("loaded");
     expect(todoLoadPhase({ ready: false, failed: false, sinceMs: 0 }).phase).toBe("blank");
+  });
+});
+
+describe("B5 — the review switch is impossible on prod", () => {
+  it("dev and emulator builds read ?load=fast|normal|slow|fail", () => {
+    expect(loadHoldFor("?load=fast", "development")).toBe(110);
+    expect(loadHoldFor("?load=normal", "emulator")).toBe(900);
+    expect(loadHoldFor("?x=1&load=slow", "development")).toBe(4500);
+    expect(loadHoldFor("?load=fail", "development")).toBe(Infinity);
+    expect(loadHoldFor("?load=other", "development")).toBeNull();
+  });
+  it("a production build answers null whatever the URL says", () => {
+    for (const v of ["fast", "normal", "slow", "fail"]) expect(loadHoldFor(`?load=${v}`, "production")).toBeNull();
+  });
+  it("the one call site carries the build gate, so production compiles the branch out", () => {
+    const src = readFileSync("src/components/todo/ws/TodoWorkspace.tsx", "utf8");
+    const calls = src.match(/loadHoldFor\(/g) ?? [];
+    expect(calls.length).toBe(1);
+    expect(src).toContain('import.meta.env.MODE !== "production" ? loadHoldFor(location.search, import.meta.env.MODE) : null');
+  });
+  it("a held load keeps the page loading until the hold ends, even with the tasks in", () => {
+    const r = run({ ready: true, hold: 900 });
+    expect(r.c.get().phase).toBe("blank");
+    vi.advanceTimersByTime(899);
+    expect(r.c.get().phase).toBe("outline");
+    vi.advanceTimersByTime(1);
+    expect(r.c.get().phase).toBe("loaded");
   });
 });

@@ -50,6 +50,7 @@ import "./todoWs.css";
 import "./todoWs54.css";
 import { WsHeader56 } from "./WsHeader56";
 import { useTodoLoad, TrayOutline, TrayStill, TrayFailed, DeskOutline, LOAD_WORDS } from "./WsLoading";
+import { loadHoldFor } from "../../../lib/todoLoad";
 import { useLoadFailure } from "../../notes/useLoadFailure";
 import { WsSlim56 } from "./WsSlim56";
 import { WsBatch54 } from "./WsBatch54";
@@ -115,8 +116,11 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
      header's numbers and the arrival keys read it; nothing here decides "no tasks" from an empty array alone. */
   const tasksIn = tasksReady ?? collectionsReady;
   const readFailed = !!loadFail || !!tasksReadFailed;
+  /* B5 — the review switch (`/todo?load=fast|normal|slow|fail`): ⚠️ THE CALL SITE CARRIES THE BUILD GATE, so a production
+     build compiles the branch out; `loadHoldFor` refuses production too. Read once per mount. */
+  const [loadHold] = useState<number | null>(() => (import.meta.env.MODE !== "production" ? loadHoldFor(location.search, import.meta.env.MODE) : null));
   /* B2–B4 — the load's phase: blank (0–150ms), the outline, failed (an error, or 5s), loaded */
-  const load = useTodoLoad(tasksIn, readFailed, null);
+  const load = useTodoLoad(tasksIn, readFailed, loadHold);
   const loaded = load.phase === "loaded";
   /* "Try again" (R7): re-subscribe the reads that failed where the store can (queries, agents, manuscripts); for anything
      else — the own-tasks or flags listener, or 5s with no answer — reload the route */

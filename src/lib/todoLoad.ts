@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  *
  * To-do load v1 (design-refs/todo-load-v1/) — WHAT THE TO-DO PAGE SHOWS WHILE ITS TASKS ARRIVE. Pure: the timings, the
- * phase and the clock. `components/todo/ws/WsLoading.tsx` runs the clock and draws it.
+ * phase, and the dev-only review switch. `components/todo/ws/WsLoading.tsx` runs the clock and draws it.
  *
  *   · blank   — before 150ms: the frame (header, panels, tabs, the desk's navy bar) with nothing in it;
  *   · outline — from 150ms: one still bar where each real thing will land; from 3s, one line "Still loading your tasks.";
@@ -34,6 +34,19 @@ export function todoLoadPhase(s: { ready: boolean; failed: boolean; sinceMs: num
   if (s.failed || s.sinceMs >= t.failAfterMs) return { phase: "failed", still: false };
   if (s.sinceMs >= t.outlineAfterMs) return { phase: "outline", still: s.sinceMs >= t.stillAfterMs };
   return { phase: "blank", still: false };
+}
+
+/**
+ * B5 — A REVIEW AID: `/todo?load=fast|normal|slow|fail` holds the page in its loading state for 110ms, 900ms, 4.5s, or
+ * until it fails. ⚠️ NEVER ON PROD: a production build answers null whatever the URL says (and the call site is gated
+ * on the same build constant, so the branch is compiled out).
+ */
+export const LOAD_HOLDS = { fast: 110, normal: 900, slow: 4500, fail: Infinity } as const;
+export type LoadHold = keyof typeof LOAD_HOLDS;
+export function loadHoldFor(search: string, mode: string): number | null {
+  if (mode === "production") return null;
+  const m = /[?&]load=(fast|normal|slow|fail)\b/.exec(search);
+  return m ? LOAD_HOLDS[m[1] as LoadHold] : null;
 }
 
 /**
