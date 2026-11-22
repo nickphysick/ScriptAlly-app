@@ -349,9 +349,15 @@
  },
  {
   "id": "PS2",
-  "what": "a Birds-eye row is 40 high",
+  "what": "ber-card rendered",
   "ok": true,
-  "got": "40"
+  "got": ""
+ },
+ {
+  "id": "PS2",
+  "what": "a Birds-eye row is 40 high, 16 inside its card",
+  "ok": true,
+  "got": "40 · 16 / 16"
  },
  {
   "id": "PS2",
