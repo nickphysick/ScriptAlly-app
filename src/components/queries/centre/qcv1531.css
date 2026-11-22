@@ -143,7 +143,7 @@
   /* the legend's heading: the filter rail's header treatment, a 2px navy rule under it */
   .qc1531-lgw { min-width: 0; }
   .qc1531-lgh { display: flex; align-items: baseline; gap: 12px; padding: 0 4px 8px; margin-bottom: 6px; border-bottom: 2px solid var(--navy); }
-  .qc151 .qc1531-lgh h2 { margin: 0; font: 400 19px/1.2 var(--sp-type) !important; color: var(--ink) !important; letter-spacing: 0; }
+  .qc151 .qc1531-lgh h2 { margin: 0; font: var(--sp-h-card) !important; color: var(--ink) !important; letter-spacing: 0; }
   .qc151 .qc1531-lgh small { margin-left: auto; font: italic 400 13px/1.2 var(--sp-serif) !important; color: var(--sp-muted); white-space: nowrap; }
   /* the rows: tighter, finer hairlines, a soft white fill when hovered or linked */
   .qc1531-lg li + li { border-top: 1px solid rgba(28, 19, 15, 0.08); }
