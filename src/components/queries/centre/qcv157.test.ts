@@ -16,27 +16,13 @@ const rules = (sel: string): string[] => {
 const rule = (sel: string): string => rules(sel)[0] ?? "";
 const OFFER = '.qc151.qc153 .qc154-card.qc154-card[data-tone="offer"] .qc154-hd.qc154-hd';
 
-describe("v157 Phase 2 · the sheen on an offer (Stage colours v1: rose)", () => {
-  it("the band: the sheen at 30% 0 / 260% 100% over the Offer band, a 1px white inset, a .7s position transition", () => {
-    const r = rule(OFFER);
-    expect(r.replace(/\s+/g, " ")).toContain(
-      "linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat, #efcdc9;",
-    );
-    expect(r).toContain("box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5)");
-    expect(r).toContain("transition: background-position 0.7s ease-out");
-  });
-  it("its hex is the table's Offer band", () => {
-    expect(rule(OFFER)).toContain(STAGE_COLOURS.offer.band);
-  });
-  it("hovered or keyboard-focused it moves to 85% and stays: no animation, nothing loops", () => {
-    expect(rule('.qc151.qc153 .qc154-card.qc154-card[data-tone="offer"]:is(:hover, :focus-visible) .qc154-hd.qc154-hd')).toMatch(/background-position:\s*85% 0/);
+/* Plumage colours v1 retires v157 Phase 2 (the sheen on an offer): the offer is the flat navy band from qcv154.css's
+   --tone, like every other stage. The sheen's four locks are replaced by this one; stageColours.test.ts sweeps src/. */
+describe("Plumage colours v1 · no foil on the offer", () => {
+  it("no rule here draws a gradient, a moving position or a white inset on the offer band", () => {
+    expect(rules(OFFER)).toEqual([]);
+    expect(css).not.toMatch(/112deg|background-position:\s*85%/);
     expect(css).not.toMatch(/animation[^;]*infinite/);
-  });
-  it("under reduced motion there is no transition", () => {
-    expect(rules(OFFER).some((r) => /transition:\s*none/.test(r))).toBe(true);
-  });
-  it("no other stage has it: the sheen is named on the offer tone only", () => {
-    for (const m of css.matchAll(/([^{}]+)\{[^{}]*linear-gradient\(112deg/g)) { expect(m[1]).toContain('[data-tone="offer"]'); expect(m[1]).not.toMatch(/data-tone="(queried|partial|full|closed)"/); }
   });
 });
 

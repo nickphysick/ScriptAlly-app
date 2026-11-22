@@ -8,7 +8,7 @@ import { describe, it, expect } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { QueryStatus } from "../../../types";
-import { STAGE_COLOURS } from "../../../lib/stageColours";
+import { STAGE_COLOURS, statusBand } from "../../../lib/stageColours";
 import { Dash2Next } from "../v2/Dash2Next";
 import type { ListItem, ListPlan } from "../../../lib/dashList";
 import type { TaskCtx } from "../../../lib/dashTaskCard";
@@ -25,7 +25,7 @@ describe("DB3-3 · Next up's head is the lead task's stage", () => {
   it("a full request: the full band on the head, the full tint on the lead card", () => {
     const h = html(QueryStatus.FULL_REQUESTED);
     expect(h).toContain('data-stage="full"');
-    expect(h).toContain(`style="background:${STAGE_COLOURS.full.band}"`);
+    expect(h).toContain(`style="background:${statusBand(QueryStatus.FULL_REQUESTED)}"`); /* Plumage colours v1: the status's band */
     expect(h).toContain(`style="background:${STAGE_COLOURS.full.tint}"`);
   });
   it("a task not about a query: a plain paper head, no stage fill", () => {

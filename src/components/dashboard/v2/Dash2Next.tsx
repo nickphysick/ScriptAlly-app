@@ -111,7 +111,8 @@ export const Dash2Next: React.FC<{
   /* Dashboard v3, Phase 3: the head takes the stage of the lead task's query; a task not about a query has a paper head.
      Gone quiet fades the head, as the Queries cards do. */
   const stage = !loading && lead?.stage ? lead.stage : null;
-  const head = stage ? (lead?.kind === "quiet" && stage !== "offer" ? quietBackground(stage) : bandBackground(stage)) : null;
+  const st = lead?.status ?? null;
+  const head = stage ? (lead?.kind === "quiet" && stage !== "offer" ? quietBackground(st) : bandBackground(st)) : null;
   return (
     <Frame tone="paper" title="Next up" label="Next up" probe="next" loading={loading}
       bandStyle={head ? { background: head } : undefined} data={{ stage: stage ?? "none" }}

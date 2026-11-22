@@ -57,11 +57,11 @@ describe("the v154 card", () => {
     expect(css).toMatch(/@media \(prefers-reduced-motion: reduce\)\s*\{[^}]*\.qc1561-chip[^{]*\{[^}]*transform:\s*none/);
   });
 
-  it("draws no rust, and text on the partial band is ink (v157: the slate ladder)", () => {
+  it("draws no rust, and text on the partial band is ink (Plumage colours v1)", () => {
     expect(card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"))).not.toMatch(/a2452a|8a3a28|b4553f/i);
     const css = readFileSync(new URL("./qcv154.css", import.meta.url), "utf8");
     expect(css).not.toMatch(/a2452a|8a3a28|b4553f/i);
-    expect(css).toMatch(/\[data-tone="partial"\][^{]*\{[^}]*--tone:\s*#e4ebf2/);
+    expect(css).toMatch(/\[data-tone="partial"\][^{]*\{[^}]*--tone:\s*#e8c0af/);
     expect(css).toMatch(/\.qc154-nm \{[^}]*color: #1c130f/);
   });
 });

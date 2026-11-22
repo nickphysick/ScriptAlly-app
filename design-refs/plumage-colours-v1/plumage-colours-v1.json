@@ -1,0 +1,106 @@
+{
+ "name": "Plumage colours v1",
+ "source": "Sampled from public/images: dash/mentor-leaning.png (breast #d1805f, wing #65667c, wing in shadow #524a5e, beak #e49c54), binocular-hawk.webp (teal #50756f), dash/archivist.png (oxblood #903830), dash/courier.png (midnight #2e3f4f). Every band is the exact feather colour mixed with white at the stated percentage.",
+ "ink": "#1c130f",
+ "navy": "#2a3a52",
+ "stages": {
+  "queried": {
+   "band": "#efe6d6",
+   "tint": "#f8f4ed",
+   "edge": "#e0d2bb",
+   "mark": "#dccdb3",
+   "rim": "#bfa87e",
+   "rimHi": "#f3ead9",
+   "note": "unchanged"
+  },
+  "partial": {
+   "bandRequested": "#f1d9cf",
+   "bandSent": "#e8c0af",
+   "tint": "#f9f0ec",
+   "edge": "#e2b09c",
+   "mark": "#d1805f",
+   "rim": "#d1805f",
+   "rimHi": "#f1d9cf",
+   "from": "breast 30% / 50%; tint 12%; edge 62%; mark and rim 100%"
+  },
+  "full": {
+   "bandRequested": "#d4d4da",
+   "bandSent": "#b5b6c0",
+   "tint": "#ededef",
+   "edge": "#a0a0ae",
+   "mark": "#65667c",
+   "rim": "#65667c",
+   "rimHi": "#d4d4da",
+   "from": "wing 28% / 48%; tint 12%; edge 62%; mark and rim 100%"
+  },
+  "offer": {
+   "band": "#e49c54",
+   "tint": "#faede0",
+   "edge": "#c48648",
+   "mark": "#c48648",
+   "rim": "#c48648",
+   "rimHi": "#f4d7bb",
+   "from": "beak 100%; tint 18%; edge, mark and rim the beak darkened to 86%; rimHi 40%",
+   "sheen": "none"
+  },
+  "closed": {
+   "band": "#eceae6",
+   "tint": "#f6f5f3",
+   "edge": "#dedbd5",
+   "mark": "#a8a199",
+   "rim": "#857e74",
+   "rimHi": "#e6e3de",
+   "note": "unchanged"
+  }
+ },
+ "statusBand": {
+  "Queried": "#efe6d6",
+  "Partial requested": "#f1d9cf",
+  "Partial sent": "#e8c0af",
+  "Full requested": "#d4d4da",
+  "Full sent": "#b5b6c0",
+  "Revise and resubmit": "#b5b6c0",
+  "Resubmitted": "#b5b6c0",
+  "Offer": "#e49c54",
+  "Signed": "#e49c54",
+  "Rejected": "#eceae6",
+  "No response": "#eceae6",
+  "Withdrawn": "#eceae6"
+ },
+ "withYouOutline": {
+  "width": "3px, drawn inside the band (inset)",
+  "corners": "the band's top corners take the container's inner radius (its radius less its edge width; 12px on the grid card), bottom corners square",
+  "Partial requested": "#e8c0af",
+  "Full requested": "#b5b6c0",
+  "Revise and resubmit": "#2a3a52"
+ },
+ "accentInk": {
+  "partial": "#7a4532",
+  "full": "#524a5e",
+  "offer": "#6b4a1e"
+ },
+ "kinds": {
+  "query": {
+   "tile": "#efe6d6",
+   "glyph": "#1c130f",
+   "edge": "#e0d2bb",
+   "from": "the paper, same as a Queried band"
+  },
+  "agent": {
+   "tile": "#b0c1be",
+   "glyph": "#1c130f",
+   "edge": "#96aca9",
+   "from": "the Scout's teal #50756f at 45%"
+  },
+  "material": {
+   "tile": "#903830",
+   "glyph": "#ffffff",
+   "from": "the Archivist's oxblood, exact"
+  },
+  "task": {
+   "tile": "#2e3f4f",
+   "glyph": "#ffffff",
+   "from": "the Courier's midnight wing, exact"
+  }
+ }
+}

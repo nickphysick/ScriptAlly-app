@@ -22,9 +22,9 @@
   .qc153-slip.is-sel { box-shadow: 0 0 0 2px var(--navy), 0 22px 40px -22px rgba(28, 19, 15, 0.32); }
   /* Stage colours v1 — the slip's band is its stage's Band (as the grid card's, qcv154.css) */
   .qc153-slip[data-tone="queried"] { --tone: #efe6d6; }
-  .qc153-slip[data-tone="partial"] { --tone: #e4ebf2; }
-  .qc153-slip[data-tone="full"] { --tone: #b7c9de; }
-  .qc153-slip[data-tone="offer"] { --tone: #efcdc9; }
+  .qc153-slip[data-tone="partial"] { --tone: #e8c0af; }
+  .qc153-slip[data-tone="full"] { --tone: #b5b6c0; }
+  .qc153-slip[data-tone="offer"] { --tone: #2a3a52; }
   .qc153-slip[data-tone="closed"] { --tone: #eceae6; }
 
   .qc153-top {
@@ -275,13 +275,9 @@
      stageColours.test.ts): one stage, one colour, so requested and sent, and watch-and-wait rows, are not told apart by
      shade. An offer carries the sheen. Past bars, hatching and the today line are unchanged. */
   .qc151 .qc150-be .qc150-bar--cur[data-sk="queried"] { background: #efe6d6; }
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="partial"] { background: #e4ebf2; }
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="full"] { background: #b7c9de; }
-  .qc151 .qc150-be .qc150-bar--cur[data-sk="offer"] {
-    background:
-      linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
-      #efcdc9;
-  }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="partial"] { background: #e8c0af; }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="full"] { background: #b5b6c0; }
+  .qc151 .qc150-be .qc150-bar--cur[data-sk="offer"] { background: #2a3a52; }
   .qc151 .qc150-be .qc150-bar--cur[data-sk="closed"] { background: #eceae6; }
   /* "30 days over", "in 15 days": sentence case, Source Serif 14, ink, no tracking */
   .qc151 .qc150-be .qc150-tx, .qc151 .qc150-be .qc150-tail--in .qc150-tx {

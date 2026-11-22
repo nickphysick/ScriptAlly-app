@@ -16,7 +16,7 @@
  */
 import React from "react";
 import { StatusDot } from "../StatusDot";
-import { STAGE_COLOURS, bandBackground, type Stage } from "../../lib/stageColours";
+import { STAGE_COLOURS, stageInk, type Stage } from "../../lib/stageColours";
 import "./appliedRow.css";
 
 export interface AppliedChip {
@@ -37,7 +37,7 @@ export const AppliedRow: React.FC<{ hook: `data-${string}`; chips: readonly Appl
       {chips.map((c) => (
         <button key={c.key} type="button" className={`lf-apc${c.stage ? " lf-apc--stage" : ""}`} {...h("applied-chip")} data-k={c.key} data-stage={c.stage}
           aria-label={`Remove ${c.label}`} onClick={c.onRemove}
-          style={c.stage ? ({ background: bandBackground(c.stage), "--sf-edge": STAGE_COLOURS[c.stage].edge } as React.CSSProperties) : undefined}>
+          style={c.stage ? ({ background: STAGE_COLOURS[c.stage].band, color: stageInk(c.stage), "--sf-edge": STAGE_COLOURS[c.stage].edge } as React.CSSProperties) : undefined}>
           {c.stage && c.mark ? <StatusDot status={c.mark} overrideSize={14} decorative /> : null}
           <span>{c.label}</span><i aria-hidden="true">×</i>
         </button>

@@ -70,7 +70,7 @@ describe("v152.2 §3.2 the footer", () => {
     expect(band1522("offer", "deciding").word).toBe("DECIDING");
     expect(band1522("materials", null).word).toBe("MATERIALS REQUESTED");
     const card = readFileSync("src/components/queries/centre/QcCard152.tsx", "utf8");
-    expect(card).toContain("const bandBg = quiet ? quietBackground(stage) : bandBackground(stage);");
+    expect(card).toContain("const bandBg = quiet ? quietBackground(r.status) : bandBackground(r.status);");
     expect(card).toContain("style={{ background: bandBg, color: STAGE_INK }}");
     expect(card).not.toMatch(/BAND_NAVY|STATE_HEAD/);
   });

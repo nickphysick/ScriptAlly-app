@@ -49,7 +49,7 @@ describe("v154.1 · quiet Queried bands and quiet seals", () => {
       expect(m[1].trim()).toBe('.qc151.qc153 .qc154-card[data-status="Queried"] .qc154-hd');
     }
     const v154 = read("qcv154.css");
-    expect(v154).toContain('.qc154-card[data-tone="partial"] { --tone: #e4ebf2;');
+    expect(v154).toContain('.qc154-card[data-tone="partial"] { --tone: #e8c0af;');
     const h = card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"));
     expect(h).toContain('data-tone="partial"');
     expect(h).toContain('data-status="Partial Requested"');

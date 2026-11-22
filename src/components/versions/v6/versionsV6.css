@@ -15,7 +15,7 @@
 /* ── the stage colours: no shared token carries the ref's partial / full bands (f12's --state-* set is queried /
    agent / you / offer / closed), so they are declared ONCE here and re-pointed in one place (report: open item) ── */
 .vv6, .v6-mapdim {
-  --v6-stage-queried: #efe6d6; --v6-stage-partial: #e4ebf2; --v6-stage-full: #b7c9de; --v6-stage-closed: #eceae6;
+  --v6-stage-queried: #efe6d6; --v6-stage-partial: #e8c0af; --v6-stage-full: #b5b6c0; --v6-stage-closed: #eceae6;
   --v6-chart-queried: #dccdb3; --v6-chart-partial: #b9cbdf; --v6-chart-full: #7f9cbf;
   --v6-ink: #1c130f; --v6-navy: var(--sp-anthracite); --v6-t62: rgba(28, 19, 15, .62); --v6-t72: rgba(28, 19, 15, .72);
   --v6-tile: #f7f4ef; --v6-sel: #f1ede7;

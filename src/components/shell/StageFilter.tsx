@@ -11,19 +11,19 @@
  *   StageLabel   a pill on the stage's band, a 1px line in its edge, the stage's StatusDot mark at 15px (ink), the name,
  *                the count. On: a white then navy ring and the name in 600; the band never changes. Zero and off: inert.
  *
- * ⚠️ EVERY COLOUR IS lib/stageColours' (`bandBackground`, `STAGE_COLOURS[stage].edge`), written inline so the rendered
- *    background IS the table's value (LF3). Offer carries its sheen because bandBackground draws it.
+ * ⚠️ EVERY COLOUR IS lib/stageColours' (`STAGE_COLOURS[stage].band` — a stage's sent band — and `.edge`), written inline so the rendered
+ *    background IS the table's value (LF3). Offer is flat navy (Plumage colours v1).
  * ⚠️ STATUS MARKS ARE INK, drawn by StatusDot, never redrawn and never a stage colour.
  */
 import React from "react";
 import { StatusDot } from "../StatusDot";
-import { STAGE_COLOURS, bandBackground, type Stage } from "../../lib/stageColours";
+import { STAGE_COLOURS, stageInk, type Stage } from "../../lib/stageColours";
 import { useFilterHook, Num } from "./FilterPanel";
 import "./stageFilter.css";
 
 export interface StageItem { stage: Stage; label: string; mark: string; n: number; on: boolean; onToggle: () => void }
 
-const ground = (s: Stage): React.CSSProperties => ({ background: bandBackground(s), "--sf-edge": STAGE_COLOURS[s].edge } as React.CSSProperties);
+const ground = (s: Stage): React.CSSProperties => ({ background: STAGE_COLOURS[s].band, color: stageInk(s), "--sf-edge": STAGE_COLOURS[s].edge } as React.CSSProperties);
 
 export const StageBar: React.FC<{ items: readonly StageItem[] }> = ({ items }) => {
   const { h, loading } = useFilterHook();

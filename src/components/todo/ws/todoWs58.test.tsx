@@ -17,7 +17,7 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
 import { QueryStatus, UserPlan, type Agent, type Query, type Task } from "../../../types";
-import { STAGE_COLOURS, bandBackground, type Stage } from "../../../lib/stageColours";
+import { STAGE_COLOURS, type Stage } from "../../../lib/stageColours";
 import { dayBit, deskChip, dueChip, startReason, stripWords, trayFigure, wsTasks, type WsKind, type WsTask } from "../../../lib/todoWs";
 import type { TrayItem } from "../../../lib/todoTray";
 
@@ -93,12 +93,13 @@ describe("v58 phase 2 — the glyph's disc is the query's stage", () => {
       expect(v["--tws58-edge"], r.title).toBe(STAGE_COLOURS[st].edge);
     }
   });
-  it("an offer row's band is bandBackground(\"offer\"), sheen and all", () => {
+  it("an offer row's band is the offer's flat navy, its ink the paper (Plumage colours v1)", () => {
     seed.tasks = [task("t9", "offer_received", "q9")]; seed.agents = [agent("a9", "Marcus Hale")];
     seed.queries = [query("q9", "a9", QueryStatus.OFFER)];
     const rows = rowsOf(render());
     expect(rows.length).toBeGreaterThan(0);
-    expect(styleOf(rows[0].tag)["--tws58-band"]).toBe(bandBackground("offer"));
+    expect(styleOf(rows[0].tag)["--tws58-band"]).toBe(STAGE_COLOURS.offer.band);
+    expect(styleOf(rows[0].tag)["--tws58-ink"]).toBe("#f4eee5");
   });
 });
 

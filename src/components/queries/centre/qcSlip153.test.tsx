@@ -61,8 +61,8 @@ describe("the slip", () => {
     expect(tab).toContain("<i>2</i>");
     // the tab sits with the name and agency, after them
     expect(h.indexOf('data-qc153="agency"')).toBeLessThan(h.indexOf('data-qc1533="tab"'));
-    // the stage's accent (Stage colours v1: the grid card's, tabAccent157): a partial is the partial blue
-    expect(tab).toContain("--acc:#cbd7e4");
+    // the stage's accent (Plumage colours v1: the stage's edge, tabAccent157): a partial is the breast's edge
+    expect(tab).toContain("--acc:#e2b09c");
     // the pop-up only when open
     expect(h).not.toContain('data-qc1533="pop"');
   });

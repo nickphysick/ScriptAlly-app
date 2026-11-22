@@ -73,13 +73,13 @@ export function materialGroups(q: MatQuery, status: QueryStatus | string, packag
 export interface TabAccent { accent: string; ink: string; rest: string }
 /* `rest` is the ink 82% over white, worked out here rather than with `color-mix()` at run time. Stage colours v1: the
    slip preview takes the grid card's stage accent too (the v153 tone accents are gone). */
-/** v157 — the grid card's accent follows its stage on the slate ladder. Closed keeps Queried's sand accent (the pack
+/** Plumage colours v1 — the accent is the stage's edge, the ink the JSON's `accentInk` (the offer's the paper, on navy). Closed keeps Queried's sand accent (the pack
  *  names four; a closed card's was sand before, and stays so). */
 export const TAB_ACCENT_157: Record<Stage, TabAccent> = {
   queried: { accent: "#e0d2bb", ink: "#5e4c36", rest: "#7b6c5a" },
-  partial: { accent: "#cbd7e4", ink: "#3d5370", rest: "#60728a" },
-  full: { accent: "#9db4cf", ink: "#2a4666", rest: "#506782" },
-  offer: { accent: "#dfb1ac", ink: "#7a3f3c", rest: "#92625f" },
+  partial: { accent: "#e2b09c", ink: "#7a4532", rest: "#926657" },
+  full: { accent: "#a0a0ae", ink: "#524a5e", rest: "#716b7b" },
+  offer: { accent: "#243247", ink: "#f4eee5", rest: "#f6f1ea" },
   closed: { accent: "#e0d2bb", ink: "#5e4c36", rest: "#7b6c5a" },
 };
 export const tabAccent157 = (status: QueryStatus | string): TabAccent => TAB_ACCENT_157[stageOf(status)];

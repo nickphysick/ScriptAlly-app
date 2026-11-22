@@ -15,7 +15,7 @@
 import React from "react";
 import { expectedHeading, moreLine, pastHeading, type ExpectedBack, type ExpectedRow } from "../../../lib/dash3";
 import { Frame } from "../v2/Frame";
-import { bandBackground } from "../../../lib/stageColours";
+import { STAGE_COLOURS } from "../../../lib/stageColours";
 
 export const EXPECTED_TITLE = "Expected back";
 export const EXAMPLE_TAG = "Example";
@@ -47,7 +47,7 @@ export const Dash3Expected: React.FC<{
   onAll: () => void;
 }> = ({ loading, model, onOpen, onAll }) => (
   /* Phase 3: Expected back is about queries out with agents — the Queried band */
-  <Frame tone="paper" bandStyle={{ background: bandBackground("queried") }} title={EXPECTED_TITLE} label={EXPECTED_TITLE} probe="expected" loading={loading} className="d3-expected">
+  <Frame tone="paper" bandStyle={{ background: STAGE_COLOURS.queried.band }} title={EXPECTED_TITLE} label={EXPECTED_TITLE} probe="expected" loading={loading} className="d3-expected">
     <div className="d2-body d3-exbody" data-d3="expected" data-week={model?.thisWeek} data-past={model?.pastCount} data-more={model?.more}>
       {!model ? (
         <>

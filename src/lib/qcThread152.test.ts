@@ -18,8 +18,8 @@ describe("the thread (v152 §2.3)", () => {
   it("the disc is the status's cap colour; Query sent and a nudge have none (the record form's options)", () => {
     expect(discFill({ status: QueryStatus.QUERIED, kind: null })).toBe("transparent");
     expect(discFill({ status: null, kind: "nudge" })).toBe("transparent");
-    expect(discFill({ status: QueryStatus.PARTIAL_REQUESTED, kind: null })).toBe("#e4ebf2");
-    expect(discFill({ status: QueryStatus.FULL_SENT, kind: null })).toBe("#b7c9de");
+    expect(discFill({ status: QueryStatus.PARTIAL_REQUESTED, kind: null })).toBe("#e8c0af");
+    expect(discFill({ status: QueryStatus.FULL_SENT, kind: null })).toBe("#b5b6c0");
   });
   it("v152.1 §2.1 only events: no Day 1, no today, no ending; your Query sent first and the latest step last", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 60), st("pr", QueryStatus.PARTIAL_REQUESTED, 16)], { ...ctx, state: "materials", replyMs: null });
@@ -39,8 +39,8 @@ describe("the thread (v152 §2.3)", () => {
   it("v152.1 §2.2 yours paper (no tint), theirs the Band of the stage the reply moved it to (Stage colours v1); a pass and your closes grey", () => {
     const t = buildThread([st("q", QueryStatus.QUERIED, 90), st("fr", QueryStatus.FULL_REQUESTED, 60), st("rr", QueryStatus.REVISE_RESUBMIT, 40), st("x", QueryStatus.REJECTED, 20)], { ...ctx, state: "closed", replyMs: null });
     const m = t.filter((x) => x.t === "msg") as Extract<(typeof t)[number], { t: "msg" }>[];
-    expect(m.map((x) => x.tint?.fill ?? null)).toEqual([null, "#b7c9de", "#b7c9de", "#eceae6"]);
-    expect(m.map((x) => x.tint?.edge ?? null)).toEqual([null, "#9db4cf", "#9db4cf", "#dedbd5"]);
+    expect(m.map((x) => x.tint?.fill ?? null)).toEqual([null, "#b5b6c0", "#b5b6c0", "#eceae6"]);
+    expect(m.map((x) => x.tint?.edge ?? null)).toEqual([null, "#a0a0ae", "#a0a0ae", "#dedbd5"]);
     expect(m.map((x) => x.grey)).toEqual([false, false, false, true]);
     /* v53 (D9): the thread reads as messages */
     expect(m.map((x) => x.title)).toEqual([`You sent ${ctx.first} your query`, `${ctx.first.charAt(0).toUpperCase()}${ctx.first.slice(1)} asked for your full manuscript`,

@@ -207,7 +207,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const ss = stripStatus164(r);
   const stage = stageOf(r.status);
   const quiet = stage !== "offer" && isQuietCard(r, nowMs);
-  const bandBg = quiet ? quietBackground(stage) : bandBackground(stage);
+  const bandBg = quiet ? quietBackground(r.status) : bandBackground(r.status);
   const sc = STAGE_COLOURS[stage];
   const stageVars = { ["--band" as string]: sc.band, ["--tint" as string]: sc.tint, ["--edge" as string]: sc.edge, ["--mark" as string]: sc.mark,
     ["--fdisc" as string]: quiet ? `linear-gradient(90deg, ${sc.band}, #fff)` : sc.band } as React.CSSProperties;

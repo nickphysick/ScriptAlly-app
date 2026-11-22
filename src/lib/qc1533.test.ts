@@ -64,16 +64,16 @@ describe("the tab's accent follows the stage (Stage colours v1: the slip preview
     const mix = (h: string) => [1, 3, 5].map((i) => Math.round(parseInt(h.slice(i, i + 2), 16) * 0.82 + 255 * 0.18));
     for (const a of Object.values(TAB_ACCENT_157)) expect(mix(a.ink)).toEqual([1, 3, 5].map((i) => parseInt(a.rest.slice(i, i + 2), 16)));
   });
-  it("by status: an offer rose, a partial and a full their blues, waiting sand", () => {
+  it("by status (Plumage colours v1): the offer navy, the partial and full their plumage, waiting sand", () => {
     expect(tabAccent157(QueryStatus.OFFER)).toBe(TAB_ACCENT_157.offer);
-    expect(TAB_ACCENT_157.offer).toEqual({ accent: "#dfb1ac", ink: "#7a3f3c", rest: "#92625f" });
+    expect(TAB_ACCENT_157.offer).toEqual({ accent: "#243247", ink: "#f4eee5", rest: "#f6f1ea" });
     expect(tabAccent157(QueryStatus.PARTIAL_REQUESTED)).toBe(TAB_ACCENT_157.partial);
     expect(tabAccent157(QueryStatus.FULL_REQUESTED)).toBe(TAB_ACCENT_157.full);
     expect(tabAccent157(QueryStatus.QUERIED)).toBe(TAB_ACCENT_157.queried);
   });
-  it("no red or rust ink, except the offer's rose, which the writer chose (Stage colours v1)", () => {
+  it("no red or rust ink, except the partial's breast ink (#7a4532, the plumage pack's accentInk)", () => {
     for (const [k, a] of Object.entries(TAB_ACCENT_157)) {
-      if (k === "offer") continue;
+      if (k === "partial") { expect(a.ink).toBe("#7a4532"); continue; }
       const [r, g, b] = [1, 3, 5].map((i) => parseInt(a.ink.slice(i, i + 2), 16));
       expect(r - Math.max(g, b), a.ink).toBeLessThan(40);
     }

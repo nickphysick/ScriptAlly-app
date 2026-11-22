@@ -1254,7 +1254,15 @@
     "design-refs/analytics-v26/screens/03-day-one-1280@2x.png": "b8e6fdd6e3fa0a3d592e48d0ccb3bff3ed80b7d00af5020f7139ac9525bc1e26",
     "design-refs/analytics-v26/screens/01-everyday-1280@2x.png": "8ff7003dd31c8c784cbab7cf36e67e26daaa1cb54190a3fa4bd19ed1a289321a",
     "design-refs/analytics-v26/screens/03-day-one-390@2x.png": "6940673793a6a5322d4c8776bfb102903bf5257e71177623ced0ee7f0af53553",
-    "design-refs/manuscripts-v29/manuscripts-v29.html": "4ed4f3bae217f9c43b25e8cbe23a322ff7be58b577937f328723c3099d45f960"
+    "design-refs/manuscripts-v29/manuscripts-v29.html": "4ed4f3bae217f9c43b25e8cbe23a322ff7be58b577937f328723c3099d45f960",
+    "design-refs/plumage-colours-v1/plumage-colours-v1.json": "9845d8740f996b99503625a25dd8ba839b844c1228b15e2b38198406afe85bdd",
+    "design-refs/plumage-colours-v1/queries-page.html": "1484ab5271c7d8d36982aa9e51ebc839d0b852c7ed4573fa03279de3ccd23a26",
+    "design-refs/plumage-colours-v1/screens/01-list-1500.png": "9bcbccfef6e695a341e79fd91e5b38c39c8d3b76460c40c2a447a6eeeb92c782",
+    "design-refs/plumage-colours-v1/screens/02-birds-eye-1500.png": "ddce5292101818e9b9ac6754457b1347758b1019aec9b84c34cfb606dab67007",
+    "design-refs/plumage-colours-v1/screens/03-requested-cards@3x.png": "ffe6a1abd89387d2c4cf8fbefb206ce458d29734c2b97da91f170f6a78230b5e",
+    "design-refs/plumage-colours-v1/screens/04-revise-resubmit@3x.png": "d2516cf9ce700d3fa00ebb1a174c18a7f562bb302d04a2f66865848e27f960be",
+    "design-refs/plumage-colours-v1/screens/05-search-tiles@2x.png": "58e8f2028d0645ea4e856e8a00fd0a489af9be314cb6b6ae36091d29c5253eea",
+    "design-refs/plumage-colours-v1/screens/06-search-materials@2x.png": "d8fbed1c2fb2d37288c74650cbecb9324f7d1915a9f92a0fce0f0ca20e7de23d"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

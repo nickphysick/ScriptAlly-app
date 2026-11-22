@@ -156,6 +156,8 @@ export interface NextLead {
   figure: Figure | null;
   /** the stage the head and tint take; null for a task not about a query */
   stage: Stage | null;
+  /** Plumage colours v1 — the lead query's status, for its band (requested and sent differ); null with no query */
+  status: QueryStatus | null;
   sentence: string;
   track: Track | null;
   /** the line under the track: the bold part, then the rest */
@@ -205,7 +207,7 @@ export function nextLead(item: ListItem, ctx: TaskCtx): NextLead {
   /* a housekeeping gap across several agents names them as a count ("4 agents"), under the gap's own two letters */
   const many = item.action.kind === "agent" && item.action.sequence.length > 1;
   const one = many ? { initials: item.initials, name: item.who, agency: "" } : agentRow(agent, item.who, item.initials);
-  const base = { kind, queryId, agent: one, seals: null, stage, sub: null } as const;
+  const base = { kind, queryId, agent: one, seals: null, stage, status, sub: null } as const;
   const track = (quiet = false): Track | null => (status ? trackOf(status, spans, quiet) : null);
 
   switch (kind) {

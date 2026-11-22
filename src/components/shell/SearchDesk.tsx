@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { StatusDot } from "../StatusDot";
 import { QueryStatus } from "../../types";
-import { STAGE_COLOURS, bandBackground, stageOf } from "../../lib/stageColours";
+import { STAGE_COLOURS, bandBackground, bandInk, stageOf } from "../../lib/stageColours";
 import {
   GROUP_LABEL, PaletteItem, PaletteResult, PaletteRow, PaletteScope, SCOPE_CHIPS, highlightParts, isSelectable,
   secondLineParts, type HighlightPart, type PeekFact,
@@ -73,11 +73,11 @@ const Marked: React.FC<{ parts: HighlightPart[] }> = ({ parts }) => (
   <>{parts.map((p, j) => (p.match ? <mark key={j}>{p.text}</mark> : <React.Fragment key={j}>{p.text}</React.Fragment>))}</>
 );
 
-/** The status chip: the stage's band (Offer keeps its sheen), its edge, the real StatusDot, and the status in words. */
+/** The status chip: the status's band (Plumage colours v1; no outline on a chip), its stage's edge, the real StatusDot, and the status in words. */
 const StatusChip: React.FC<{ status: string }> = ({ status }) => {
   const st = stageOf(status);
   return (
-    <span className="sv1-chip" data-stage={st} style={{ background: bandBackground(st), borderColor: STAGE_COLOURS[st].edge }}>
+    <span className="sv1-chip" data-stage={st} style={{ background: bandBackground(status), color: bandInk(status), borderColor: STAGE_COLOURS[st].edge }}>
       <StatusDot status={status as QueryStatus} overrideSize={14} decorative />
       {status}
     </span>
@@ -91,7 +91,7 @@ const Tile: React.FC<{ it: PaletteItem; big?: boolean; pageIcon?: (path: string)
   if (it.kind === "query" && it.status) {
     const st = stageOf(it.status);
     return (
-      <span className={cls} data-tile="query" style={{ background: bandBackground(st), boxShadow: `inset 0 0 0 1px ${STAGE_COLOURS[st].edge}` }}>
+      <span className={cls} data-tile="query" style={{ background: bandBackground(it.status), boxShadow: `inset 0 0 0 1px ${STAGE_COLOURS[st].edge}` }}>
         <StatusDot status={it.status as QueryStatus} overrideSize={big ? 22 : 16} decorative />
       </span>
     );
@@ -296,7 +296,7 @@ export const SearchDesk: React.FC<SearchDeskProps> = ({
         <>
           {head(p.sub)}
           {p.status && st ? (
-            <div className="sv1-pk-band" style={{ background: bandBackground(st), borderColor: STAGE_COLOURS[st].edge }}>
+            <div className="sv1-pk-band" style={{ background: bandBackground(p.status), color: bandInk(p.status), borderColor: STAGE_COLOURS[st].edge }}>
               <StatusDot status={p.status as QueryStatus} overrideSize={22} decorative />
               <div><b>{p.status}</b><span>{p.queriedLine}</span></div>
             </div>
@@ -308,7 +308,7 @@ export const SearchDesk: React.FC<SearchDeskProps> = ({
       const st = stageOf(p.status);
       body = (
         <>
-          <div className="sv1-pk-band" style={{ background: bandBackground(st), borderColor: STAGE_COLOURS[st].edge }}>
+          <div className="sv1-pk-band" style={{ background: bandBackground(p.status), color: bandInk(p.status), borderColor: STAGE_COLOURS[st].edge }}>
             <StatusDot status={p.status as QueryStatus} overrideSize={22} decorative />
             <div><b>{p.status}</b><span>{p.who}</span></div>
           </div>

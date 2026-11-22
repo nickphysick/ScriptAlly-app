@@ -8,8 +8,7 @@
  * except the label pill, whose 30px height and 14px / 600 word are the reference's.
  *
  * ⚠️ COLOUR IS THE STAGE. Navy is the agent's seal and the "needs you" button, never a stage. Every mark is ink.
- * ⚠️ The offer's sheen is written once, in lib/stageColours OFFER_SHEEN; the bubble's restates it, and
- *    stageColours.test.ts asserts the two are equal.
+ * ⚠️ Plumage colours v1: no sheen on any offer surface; an offer's bubble is the flat navy band (--bt), in paper.
  * ⚠️ THE CARD PORTALS WITH THE PANEL, so no page token reaches it: colours are literals or the card's own variables.
  */
 
@@ -29,12 +28,7 @@
 .qc152 .qc152-pill[data-stage] .qc152-cap { height: 30px; background: none; }
 
 /* the thread: only the agent's bubbles are coloured (QcBubble152 sets --bt / --be from the stage the reply moved to);
-   an offer's carries the sheen; on full and offer the stamp darkens to read */
-.qc152 .qc152-m.them[data-status="Offer"]:not(.qc1522-draft) .qc152-bx {
-  background:
-    linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
-    #efcdc9;
-}
+   on full and offer the stamp darkens to read */
 .qc152 .qc152-m.them:is([data-status="Full Requested"], [data-status="Revise & Resubmit"], [data-status="Offer"]) .qc152-ts { color: var(--sp-quiet); }
 
 /* the footer: the disc behind its mark is the card's Band (fading to white when quiet), the mark in ink */
