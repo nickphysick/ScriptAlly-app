@@ -8,6 +8,20 @@
 - Stage colours come from one table, `src/lib/stageColours.ts` (band, tint, mark per stage). The grid card reads `band` only; `tint` and `mark` wait for the next pack.
 - Not yet on the slate ladder (they move in the next pack): the stage ring, Birds-eye, the log-a-query slip preview, the pull-out query card, Dashboard, activity feed, Analytics, Contact list, Responses, To-do, phone pages.
 
+## Query card v167 — ghost bars, the slimmer Agent tab, the agent's profile from the card (22 Nov 2026)
+
+Ref design-refs/query-card-v167/query-card-v167.html; report reports/query-card-v167/REPORT.md; branch `query-card-v167`, NOT merged.
+
+Decisions (the pack's, plus Nick's ruling):
+1. Nothing recorded is a ghost bar (#ebe5db, 12px, rounded), never an empty sentence. Its "+ Add …" words cross-fade in at the SAME spot on hover/focus (180ms, 1.5px navy inner edge): nothing moves. The shell's parts and their order never depend on what is recorded.
+2. The Agent tab is three 86px tiles, "What {first} asks for", and "{first}'s full card". Contact, website, wishlist, "Edit these details" and the sent-everything line live on the full card only.
+3. The agent's profile is edited from the card in a drawer with a band: the seal, "{first}'s profile", "Saved for every query you send {first}"; Cancel and "Save to profile"; toast "Saved to {first}'s profile" with Undo. It saves through `commitCardSave` (no second save path).
+4. Reply time is the real WeekSlider, untouched, plus "No reply means no". Takes queries is METHOD_PILLS tiles; a stored Other shows selected.
+5. The asks drawer writes through the agentMaterials encoder (lib/qcAsks167). Nothing stored is lost: Author bio and Full manuscript are kept, as are extra legacy sample units. The sample is units and amount only (`SampleControl openingOnly`).
+6. Mid-journey, the journey waits: the band says "'{journey}' is waiting for you.", Cancel becomes Back to "{journey}", and Save/Back/Esc return to the same step with focus restored. The composer stays mounted and hidden. Nick ruled (22 Nov) that **the tabs stay visible while a journey is open**; only the book folds.
+
+Locks: tests/e2e/qc167.measure.ts (L1–L13, each proved red under its own named mutation), qcProfile167.test.tsx, src/lib/qcAsks167.test.ts, qcAgent158.test.tsx (QC167-5).
+
 ## Query Centre v157 — the slate ladder, the foil offer, centred boxes, gone quiet (18 Nov 2026)
 
 Baked decisions (the pack's; do not reopen):
