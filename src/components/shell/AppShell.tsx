@@ -60,6 +60,7 @@ import { BackgroundLab } from "../dev/BackgroundLab";
 import "./contentColumn.css";
 import "./mobileShell.css";
 import "../phone/phoneTokens.css";
+import "../phone/phoneStyle.css";
 import "../phone/phone.css";
 import "../phone/phoneShell.css";
 import "../phone/sweepPhone.css";

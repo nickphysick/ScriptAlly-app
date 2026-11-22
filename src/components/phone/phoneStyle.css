@@ -1,0 +1,119 @@
+/* ── PHONE STYLE v1 — THE PARTS (design-refs/phone-style-v1/phone-style-v1.html, "phone parts, to this sheet") ──────────
+   Below 768px only, on the token sheet's own roots (`.sa-shellframe`, every portalled `.pa-layer`), on the `--ps-*`
+   tokens (phoneTokens.css). The ref's part CSS is ported as it stands; three places depart, each to keep the sheet's
+   own rules (P19, P20), and each is named in the report:
+     - a hairline between rows is a 1px top border, not an inset shadow (P20: two shadows and nothing else);
+     - the tabs' rule under the strip is a border, not a shadow (P20);
+     - the round ends of the tab underline, a Birds-eye bar and a loading shape are fully round (P19), not 2px / 5px / 8px.
+   ⚠️ NEW `ps-` CLASSES BESIDE THE PHONE'S OWN. `.pa4-card` (24, the v4 shadow), `.pa4-cta` (56), `.pa4-tap`, `.pa4-grp`,
+      `.pa4-link`, `.pa4-chip` are read by every v4/v5 screen: extending them would restyle screens this pack only audits.
+      What IS extended here is scoped to Today by the attribute it already carries (`[data-page="today"]` on the tab
+      strip, `[data-pin="today"]` on the slim bar, `.pa5-be` and `.pa5-need`, which only Today renders).
+   ⚠️ brand.tsx sets every h2/h3 to the brand serif with !important, so a heading part carries !important on its family.
+   Nothing here applies at 768px and up. */
+@media (max-width: 767.98px) {
+  :is(.sa-shellframe, .pa-layer) .ps-card { margin: 0 var(--ps-gutter); background: var(--ps-card); border-radius: var(--ps-r-card); box-shadow: var(--ps-sh-card); overflow: hidden; }
+
+  /* ── a list row (ref `.row`): disc, text, time; the pressed state dims within a tenth of a second (P23) ── */
+  :is(.sa-shellframe, .pa-layer) .ps-row {
+    display: flex; align-items: center; gap: var(--ps-s3); width: 100%; min-height: var(--ps-row-h); padding: var(--ps-s2) var(--ps-s4);
+    margin: 0; border: 0; background: transparent; color: var(--ps-ink); font: var(--ps-body-text); text-align: left; cursor: pointer;
+    transition: background-color 0.1s var(--ps-ease); -webkit-tap-highlight-color: transparent; box-sizing: border-box;
+  }
+  :is(.sa-shellframe, .pa-layer) .ps-row + .ps-row { border-top: 1px solid var(--ps-rule); }
+  :is(.sa-shellframe, .pa-layer) .ps-row:active, :is(.sa-shellframe, .pa-layer) .ps-row.press { background: var(--ps-press); }
+  :is(.sa-shellframe, .pa-layer) .ps-disc { flex: none; width: var(--ps-disc) !important; height: var(--ps-disc) !important; border-radius: 50%; display: grid; place-items: center; }
+  :is(.sa-shellframe, .pa-layer) .ps-tx { flex: 1; min-width: 0; }
+  :is(.sa-shellframe, .pa-layer) .ps-name { display: block; font: var(--ps-name); color: var(--ps-ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  :is(.sa-shellframe, .pa-layer) .ps-sec { display: block; font: var(--ps-secondary); color: var(--ps-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  :is(.sa-shellframe, .pa-layer) .ps-time { flex: none; font: var(--ps-secondary); line-height: 1.2; color: var(--ps-muted); font-variant-numeric: tabular-nums; }
+  :is(.sa-shellframe, .pa-layer) .ps-cap { font: var(--ps-caption); color: var(--ps-muted); font-variant-numeric: tabular-nums; }
+
+  /* ── a section heading (ref `.hdg`): on the page, 24 above, 8 below; its count in the darker grey (P6) ── */
+  :is(.sa-shellframe, .pa-layer) .ps-hdg {
+    display: flex; align-items: baseline; gap: var(--ps-s2); margin: 0; padding: var(--ps-s5) var(--ps-gutter) var(--ps-s2);
+    font: var(--ps-name); font-family: var(--pa-sans) !important; color: var(--ps-ink); letter-spacing: 0;
+  }
+  :is(.sa-shellframe, .pa-layer) .ps-hdg small { font: var(--ps-secondary); color: var(--ps-body); font-variant-numeric: tabular-nums; }
+
+  /* ── tiles (ref `.tl`): counts that filter. White, 80 high, numeral over label; the navy one, the grey one ── */
+  :is(.sa-shellframe, .pa-layer) .ps-tiles { display: flex; gap: var(--ps-s2); padding: var(--ps-s4) var(--ps-gutter) 0; }
+  :is(.sa-shellframe, .pa-layer) .ps-tile {
+    flex: 1 1 0; min-width: 0; height: 80px; margin: 0; border: 0; border-radius: var(--ps-r-card); padding: var(--ps-s3);
+    display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; text-align: left;
+    background: var(--ps-card); color: var(--ps-ink); box-shadow: var(--ps-sh-card); cursor: pointer; box-sizing: border-box;
+    transition: transform 0.1s var(--ps-ease); -webkit-tap-highlight-color: transparent;
+  }
+  :is(.sa-shellframe, .pa-layer) .ps-tile:active:not(:disabled) { transform: scale(0.97); }
+  :is(.sa-shellframe, .pa-layer) .ps-tile b { font: var(--ps-numeral); font-variant-numeric: tabular-nums; }
+  :is(.sa-shellframe, .pa-layer) .ps-tile > span { font: var(--ps-secondary); color: var(--ps-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  :is(.sa-shellframe, .pa-layer) .ps-tile.navy { background: var(--ps-navy); color: #fff; box-shadow: none; }
+  :is(.sa-shellframe, .pa-layer) .ps-tile.navy > span { color: var(--ps-on-navy); }
+  :is(.sa-shellframe, .pa-layer) .ps-tile.q b, :is(.sa-shellframe, .pa-layer) .ps-tile.q > span,
+  :is(.sa-shellframe, .pa-layer) .ps-tile:disabled b, :is(.sa-shellframe, .pa-layer) .ps-tile:disabled > span { color: var(--ps-muted); }
+  :is(.sa-shellframe, .pa-layer) .ps-tile:disabled { cursor: default; }
+  :is(.sa-shellframe, .pa-layer) .ps-tile.navy:disabled { background: var(--ps-card); box-shadow: var(--ps-sh-card); }
+  /* the selected filter: v5's own selected treatment (the label goes ink and semibold), restated on the tile */
+  :is(.sa-shellframe, .pa-layer) .ps-tile.on > span { color: var(--ps-ink); font-weight: 600; }
+  :is(.sa-shellframe, .pa-layer) .ps-tile.navy.on > span { color: #fff; }
+
+  /* ── the lead card (ref `.lead`): the one coloured card, in its stage's tint (inline); an offer adds the sheen ── */
+  :is(.sa-shellframe, .pa-layer) .ps-lead { margin: 0 var(--ps-gutter) var(--ps-s2); border-radius: var(--ps-r-card); padding: var(--ps-s4); box-shadow: var(--ps-sh-card); color: var(--ps-ink); }
+  :is(.sa-shellframe, .pa-layer) .ps-lead-who { display: flex; gap: var(--ps-s3); align-items: center; }
+  :is(.sa-shellframe, .pa-layer) .ps-lead .ps-disc { background: var(--ps-card) !important; }
+  :is(.sa-shellframe, .pa-layer) .ps-lead .ps-sec { color: var(--ps-body); }
+  :is(.sa-shellframe, .pa-layer) .ps-lead-n { margin-left: auto; flex: none; text-align: right; }
+  :is(.sa-shellframe, .pa-layer) .ps-lead-n b { display: block; margin-bottom: 2px; font: var(--ps-numeral); font-variant-numeric: tabular-nums; }
+  :is(.sa-shellframe, .pa-layer) .ps-lead-n .ps-cap { color: var(--ps-body); }
+  :is(.sa-shellframe, .pa-layer) .ps-head { margin: var(--ps-s4) 0; font: var(--ps-headline); font-family: var(--ps-type) !important; color: var(--ps-ink); letter-spacing: 0; }
+
+  /* ── the one filled button (ref `.cta`), 48 high, fully round; it presses in slightly (P23) ── */
+  :is(.sa-shellframe, .pa-layer) .ps-cta {
+    display: flex; align-items: center; justify-content: center; width: 100%; min-height: var(--ps-btn-h); margin: 0; padding: 0 var(--ps-s4);
+    border: 0; border-radius: 999px; background: var(--ps-navy); color: #fff; font: 600 16px/1.25 var(--pa-sans); text-align: center; cursor: pointer;
+    transition: transform 0.1s var(--ps-ease), background-color 0.1s var(--ps-ease); -webkit-tap-highlight-color: transparent; box-sizing: border-box;
+  }
+  :is(.sa-shellframe, .pa-layer) .ps-cta:active, :is(.sa-shellframe, .pa-layer) .ps-cta.press { transform: scale(0.97); background: #222f44; }
+
+  /* ── text links: a link row at a card's foot (ref `.lnk`) and a centred link (ref `.tlink`), both 48 high ── */
+  :is(.sa-shellframe, .pa-layer) .ps-link {
+    display: flex; align-items: center; justify-content: space-between; gap: var(--ps-s2); width: 100%; min-height: var(--ps-tap); margin: 0; padding: 0 var(--ps-s4);
+    border: 0; border-top: 1px solid var(--ps-rule); background: transparent; font: var(--ps-label); color: var(--ps-navy); text-align: left; cursor: pointer;
+    transition: background-color 0.1s var(--ps-ease); -webkit-tap-highlight-color: transparent; box-sizing: border-box;
+  }
+  :is(.sa-shellframe, .pa-layer) .ps-link:active { background: var(--ps-press); }
+  :is(.sa-shellframe, .pa-layer) .ps-link svg { flex: none; width: 24px; height: 24px; opacity: 0.55; }
+  :is(.sa-shellframe, .pa-layer) .ps-tlink { display: flex; align-items: center; justify-content: center; min-height: var(--ps-tap); border: 0; background: transparent; font: 600 16px/1.25 var(--pa-sans); color: var(--ps-navy); cursor: pointer; }
+
+  /* ── a chip (ref `.chip`): 28 high on the warm fill ── */
+  :is(.sa-shellframe, .pa-layer) .ps-chip { display: inline-flex; align-items: center; height: 28px; padding: 0 var(--ps-s3); border-radius: 999px; background: var(--ps-fill); font: var(--ps-label); color: var(--ps-ink); }
+
+  /* ── the need pill on navy (ref `.need`): an outline with the blush dot, inside a 48 target ── */
+  :is(.sa-shellframe, .pa-layer) .ps-need {
+    display: inline-flex; align-items: center; gap: var(--ps-s2); height: 32px; padding: 0 var(--ps-s3); border-radius: 999px; white-space: nowrap;
+    background: rgba(232, 200, 188, 0.16); color: #fff; box-shadow: inset 0 0 0 1px rgba(232, 200, 188, 0.5); font: var(--ps-label);
+  }
+  :is(.sa-shellframe, .pa-layer) .ps-need > i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ps-blush); }
+
+  /* ── the snackbar (ref `.snack`) and the loading shapes (ref `.skel`) ── */
+  :is(.sa-shellframe, .pa-layer) .ps-snack { display: flex; align-items: center; gap: var(--ps-s3); min-height: var(--ps-btn-h); padding: 0 20px; border-radius: 999px; background: var(--ps-navy); color: #fff; font: var(--ps-body-text); box-shadow: var(--ps-sh-raised); }
+  :is(.sa-shellframe, .pa-layer) .ps-snack b { margin-left: auto; font-weight: 600; color: var(--ps-blush); }
+  :is(.sa-shellframe, .pa-layer) .ps-skel { height: var(--ps-row-h); display: flex; align-items: center; gap: var(--ps-s3); padding: var(--ps-s2) var(--ps-s4); }
+  :is(.sa-shellframe, .pa-layer) .ps-skel + .ps-skel { border-top: 1px solid var(--ps-rule); }
+  :is(.sa-shellframe, .pa-layer) .ps-skel i { display: block; background: var(--ps-fill); border-radius: 999px; }
+
+  /* ── a Birds-eye row (ref `.ber`): 40 high inside a card, the name column 104, bars 10 high with round ends ── */
+  :is(.sa-shellframe, .pa-layer) .ps-ber { display: flex; align-items: center; gap: var(--ps-s3); height: 40px; font: 400 14px/1 var(--pa-sans); color: var(--ps-ink); }
+  :is(.sa-shellframe, .pa-layer) .ps-ber + .ps-ber { border-top: 1px solid var(--ps-rule); }
+  :is(.sa-shellframe, .pa-layer) .ps-ber-nm { flex: none; width: 104px; display: flex; align-items: center; gap: var(--ps-s2); overflow: hidden; white-space: nowrap; }
+  :is(.sa-shellframe, .pa-layer) .ps-ber-bx { flex: 1; height: 10px; position: relative; }
+  :is(.sa-shellframe, .pa-layer) .ps-ber-bx i { position: absolute; top: 0; bottom: 0; border-radius: 999px; }
+
+  /* ── the slim header (ref `.slim`) and the tabs (ref `.tabs`): the parts, for a screen built to the sheet ── */
+  :is(.sa-shellframe, .pa-layer) .ps-slim { display: flex; align-items: center; height: 56px; padding: 0 var(--ps-s1) 0 var(--ps-s4); background: var(--ps-navy); color: #fff; }
+  :is(.sa-shellframe, .pa-layer) .ps-slim .ps-slim-t { flex: 1; min-width: 0; font: 400 20px/1.1 var(--ps-type) !important; color: #fff; }
+  :is(.sa-shellframe, .pa-layer) .ps-tabs { display: flex; background: var(--ps-card); border-bottom: 1px solid var(--ps-rule); }
+  :is(.sa-shellframe, .pa-layer) .ps-tabs > * { flex: 1; position: relative; min-height: var(--ps-tap); text-align: center; font: 600 14px/48px var(--pa-sans); color: var(--ps-muted); border: 0; background: none; }
+  :is(.sa-shellframe, .pa-layer) .ps-tabs > .on { color: var(--ps-navy); }
+  :is(.sa-shellframe, .pa-layer) .ps-tabs > .on::after { content: ""; position: absolute; left: 24%; right: 24%; bottom: 0; height: 3px; border-radius: 999px; background: var(--ps-navy); }
+}

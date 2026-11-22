@@ -186,7 +186,7 @@ Below 768px only. The sheet is `design-refs/phone-style-v1/phone-style-v1.html` 
 - **The locks:** PS1, measured — `npm run e2e:emu -- tests/e2e/phoneStyle.measure.ts --project=pixel` (Today is a hard gate; every other phone screen runs in report mode, `PS_OUT`, `PS_MUTATE`). The ratchet, in CI — `src/lib/phoneStyle.census.test.ts` against `phoneStyle.baseline.json`: a phone stylesheet's breach count may only go down; a pack that fixes a screen lowers the baseline.
 
 ## Dev-only routes and locked surfaces
-- Dev-only lab routes (`#/contact-lab`, `#/onb-lab`, `#/shell-lab`, `#/status-dots`) are gated on `MODE`/`import.meta.env.DEV`; a review aid's call site carries its own mode gate so production ships none of it. Grep the production bundle for a lab's names before a prod release; remove any dev route that has outlived its purpose before it reaches prod.
+- Dev-only lab routes (`#/contact-lab`, `#/onb-lab`, `#/shell-lab`, `#/status-dots`, `#/ps-lab`) are gated on `MODE`/`import.meta.env.DEV`; a review aid's call site carries its own mode gate so production ships none of it. Grep the production bundle for a lab's names before a prod release; remove any dev route that has outlived its purpose before it reaches prod.
 - `#/pkg-lab` and its six components are deleted (25 Aug). `AllManuscripts.tsx` (the book profile) is locked and unit-tested and rendered by no route — do not delete or edit it casually.
 - Locked files need an explicit reason in the brief to change: `src/types.ts` (the data contract) and `firestore.rules` (any field outside an update allowlist's `hasOnly()` is denied silently; prod rules deploys are Nick's).
 
