@@ -405,3 +405,22 @@
 /* the mentor gives way before the headline would wrap to a third line: a narrow panel, or the page zoomed far in */
 @container laq (max-width: 470px) { .laq .flh .flh-m { display: none; } }
 @media (prefers-reduced-motion: reduce) { .laq .flh .flh-hd h3.flh-t { animation: none; } }
+
+/* v2 · Phase 2 — "Add a new agent", the list's quiet last row, and the add screen in this panel (the ref's v21 rules) */
+.laq .laq-addw { margin-top: 8px; }
+.laq .laq-big > button.is-quiet .laq-g { background: none; box-shadow: inset 0 0 0 1.5px #b9ad9e; color: var(--laq-navy); font: 400 18px/1 var(--laq-se); }
+.laq .laq-fl { display: block; margin: 0 0 14px; }
+.laq .laq-fl > span { display: block; margin-bottom: 6px; font: 500 15px var(--laq-se); }
+.laq .laq-fl > span i { font: italic 400 13.5px var(--laq-se); color: var(--laq-mut); margin-left: 6px; }
+.laq .laq-fl input { all: unset; box-sizing: border-box; display: block; width: 100%; height: 46px; padding: 0 14px; border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc2; font: 400 17px var(--laq-se); color: var(--laq-ink); }
+.laq .laq-fl input:focus { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
+.laq .laq-fl input:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.laq .laq-info { margin: 4px 0 0; padding: 10px 14px; border-radius: 12px; background: #efe7da; font: 400 14.5px/1.45 var(--laq-se); color: #5b4f47; }
+.laq .laq-err { margin: 0 0 10px; font: italic 400 14px/1.4 var(--laq-se); color: var(--laq-rust); }
+
+/* v2 · Phase 3 — not sent yet: the link under the dates, and the task it makes */
+.laq .laq-notsent { margin-top: 16px; }
+.laq .laq-todo { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 14px; background: #fff; box-shadow: inset 0 0 0 1px #ddd3c6; }
+.laq .laq-todo > i { flex: none; width: 22px; height: 22px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #b9ad9e; }
+.laq .laq-todo b { display: block; font: 500 16.5px/1.25 var(--laq-se); }
+.laq .laq-todo span span { display: block; font: 400 13.5px/1.4 var(--laq-se); color: var(--laq-mut); }

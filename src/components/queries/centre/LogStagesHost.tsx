@@ -23,7 +23,9 @@ import { bookVersionsOf, latestVersion, readVersions } from "../../../lib/bookVe
 import { bookOf } from "../../../lib/queryActions/sample";
 import { previousQueryFor } from "../../../lib/requery";
 import { quietWeeksOf } from "../../../lib/queryState";
-import { openNewAgentCard } from "../../../lib/agentCardStore";
+import { agentFromDraft } from "../../../lib/agentCreate";
+import { emptyCardDraft, problemsOf } from "../../../lib/cardDraft";
+import { emptyCreated, toRemoveOnDiscard, toRemoveOnUndo, withAgent, withHeld, withLogged, withoutAgent, withoutHeld, withoutLogged, heldTaskFor, type JourneyCreated } from "../../../lib/queryActions/journeyCreated";
 import { isLive as qaIsLive } from "../../queryActions/journeys/common";
 import { useToast } from "../../toast/ToastProvider";
 import { QcLogStages, type Logged } from "./QcLogStages";
@@ -50,7 +52,7 @@ export const LogStagesHost: React.FC<{
   onLogged?: (queryId: string, undo: () => Promise<void>) => void;
 }> = ({ ms, seedAgentId, onClose, onOpenCard, seedPackageId, again, leaveRef, onLogged }) => {
   const scriptDb = useScriptAllyDb();
-  const { currentUser, agents, queries, packages, versions, addJournalEntry, deleteJournalEntry } = scriptDb;
+  const { currentUser, agents, queries, packages, versions, addJournalEntry, deleteJournalEntry, addAgent, deleteAgent, addUserTask, deleteUserTask } = scriptDb;
   const { showToast } = useToast();
   /* Undo runs later than the save: it reads the journal as it is then, not as it was when the save began */
   const live = useRef(scriptDb);
@@ -60,6 +62,11 @@ export const LogStagesHost: React.FC<{
      offer: the toast and the celebration are this journey's) */
   const { saveDraft } = useAgentSave({ editCtx: { queries, agents, msGenre: ms.genre ?? null, msTitle: ms.title ?? null, nowMs } });
   const forBook = useMemo(() => queries.filter((q) => q.manuscriptId === ms.id), [queries, ms.id]);
+  /* v2 — what this journey created (an agent, its "Finish" task, a not-sent task), for discard and Undo
+     (lib/queryActions/journeyCreated) */
+  const made = useRef<JourneyCreated>(emptyCreated());
+  const agentsNow = useRef(agents);
+  agentsNow.current = agents;
 
   const model = useMemo(() => {
     const stAgents = stageAgents(agents, forBook.filter(qaIsLive), nowMs);
@@ -110,22 +117,65 @@ export const LogStagesHost: React.FC<{
       else undoCard = r.undo;
     }
     const s0 = snap;
-    /* the card first: its snapshot holds the new query, so the log's own undo must run after it */
+    made.current = withLogged(made.current, a.agentId);
+    /* the card first: its snapshot holds the new query, so the log's own undo must run after it. v2 — and an agent this
+       journey added for it goes too, with its "Finish" task, when nothing else now uses it */
     const undo = async () => {
       if (undoCard) await undoCard();
       await restoreSnapshot(s0);
       for (const j of live.current.journalEntries.filter((x) => x.queryId === id)) await deleteJournalEntry(j.id);
+      const gone = toRemoveOnUndo(made.current, a.agentId);
+      made.current = withoutLogged(made.current, a.agentId);
+      if (gone) { await deleteAgent(gone.id); made.current = withoutAgent(made.current, gone.id); }
     };
     onLogged?.(id, undo);
     /* the note is the one thing the snapshot does not hold: it lives in journalEntries, keyed by the query */
-    return { id, undo, openCard: () => onOpenCard(id) };
+    return { id, undo, openCard: () => onOpenCard(id), agentGoesOnUndo: () => !!toRemoveOnUndo(made.current, a.agentId) };
+  };
+
+  /* v2 · Phase 2 — "Add and carry on": the new agent card's own create (the same draft mapping, the same `addAgent` with
+     its duplicate merge and its AGENT_ADDED activity, the same name/agency rule), then one task to finish the card */
+  const onCreateAgent = async (name: string, agency: string): Promise<{ id: string; created: boolean } | { error: string }> => {
+    const d = { ...emptyCardDraft(), name: name.trim(), agency: agency.trim(), agencyUnknown: !agency.trim() };
+    const pr = problemsOf(d);
+    if (!d.name) return { error: "Add their name to carry on." };
+    if (pr.name || pr.agency) return { error: (pr.name ?? pr.agency)! };
+    const before = new Set(agentsNow.current.map((x) => x.id));
+    const res = await addAgent(agentFromDraft(d));
+    if (!res.success || !res.id) return { error: res.error ?? "Couldn’t add the agent." };
+    const isNew = !before.has(res.id);
+    if (isNew) {
+      const taskId = await addUserTask({ text: `Finish ${d.name}’s card`, agentId: res.id });
+      made.current = withAgent(made.current, res.id, taskId ?? null);
+    }
+    return { id: res.id, created: isNew };
+  };
+  /* v2 · Phase 3 — "Not sent yet? Put it on your to-do list": one task per agent, however often it is pressed */
+  const onNotSent = async (agentId: string, agentName: string): Promise<string | null> => {
+    const had = heldTaskFor(made.current, agentId);
+    if (had) return had;
+    const taskId = await addUserTask({ text: `Send your query to ${agentName}`, agentId, manuscriptId: ms.id });
+    if (taskId) made.current = withHeld(made.current, agentId, taskId);
+    return taskId ?? null;
+  };
+  /* "It has gone after all": that task goes */
+  const onSentAfterAll = async (agentId: string): Promise<void> => {
+    const t = heldTaskFor(made.current, agentId);
+    made.current = withoutHeld(made.current, agentId);
+    if (t) await deleteUserTask(t);
+  };
+  /* every way out (Cancel, ×, Discard, Done): an agent this journey added that nothing uses goes, with its task */
+  const close = () => {
+    const gone = toRemoveOnDiscard(made.current);
+    for (const g of gone) { made.current = withoutAgent(made.current, g.id); void deleteAgent(g.id); }
+    onClose();
   };
 
   return (
     <QcLogStages nowMs={nowMs} agents={model.stAgents} seedAgentId={seedAgentId} bookTitle={ms.title || "Untitled manuscript"}
       packages={model.stPackages} activePackageId={model.active} letters={model.ctx.letters} synopses={model.ctx.synopses} bookVersions={model.ctx.bookVersions}
-      count={forBook.length} quietWeeks={quietWeeksOf(currentUser)} ctx={model.ctx} book={bookOf(ms.wordCount)} onClose={onClose}
-      onAddAgent={(name, done) => openNewAgentCard({ from: "button", host: "panel", ...(name ? { prefill: { name } } : {}), onCreated: done })}
+      count={forBook.length} quietWeeks={quietWeeksOf(currentUser)} ctx={model.ctx} book={bookOf(ms.wordCount)} onClose={close}
+      onCreateAgent={onCreateAgent} onNotSent={onNotSent} onSentAfterAll={onSentAfterAll} bookQueries={forBook}
       onSave={onSave} seedPackageId={seedPackageId} again={again} leaveRef={leaveRef} />
   );
 };

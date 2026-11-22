@@ -47,3 +47,68 @@ describe("v2 · Phase 3 — catching up", () => {
     expect(headline({ ...base, sentMs: daysAgo(30), notSent: true })[0]).toBe("Not out yet? No problem.");
   });
 });
+
+/* ── Phase 2 — an agent added in the journey ── */
+import { emptyCreated, heldTaskFor, toRemoveOnDiscard, toRemoveOnUndo, withAgent, withHeld, withLogged, withoutAgent, withoutHeld } from "./journeyCreated";
+import { cascadePlan } from "../cascade";
+import { agentFromDraft } from "../agentCreate";
+import { emptyCardDraft, problemsOf } from "../cardDraft";
+import { readFileSync } from "node:fs";
+
+describe("v2 · Phase 2 — adding an agent without leaving", () => {
+  it("the record is the new agent card's own: name and agency through the one mapping, an unknown agency marked so", () => {
+    const d = { ...emptyCardDraft(), name: "Jo March", agency: "", agencyUnknown: true };
+    expect(problemsOf(d)).toEqual({});
+    const rec = agentFromDraft(d);
+    expect(rec.name).toBe("Jo March");
+    expect((rec as { agencyUnknown?: boolean }).agencyUnknown).toBe(true);
+    /* without the mark the card's own rule asks for one — which is why the journey sets it */
+    expect(problemsOf({ ...d, agencyUnknown: false }).agency).toBeTruthy();
+  });
+  it("create → select → discard removes the agent, and the agent's delete takes its Finish task", () => {
+    let c = withAgent(emptyCreated(), "agent-new", "task-finish");
+    expect(toRemoveOnDiscard(c)).toEqual([{ id: "agent-new", taskId: "task-finish" }]);
+    /* the one delete (db.deleteAgent → cascadePlan) takes the agent's stored tasks with it */
+    const plan = cascadePlan("agent", "agent-new", { queries: [], activities: [], taskFlags: [], userTasks: [{ id: "task-finish", agentId: "agent-new" }, { id: "other", agentId: "x" }] } as never);
+    expect(plan.docs).toContainEqual({ col: "tasks", id: "task-finish" });
+    expect(plan.docs).not.toContainEqual({ col: "tasks", id: "other" });
+    c = withoutAgent(c, "agent-new");
+    expect(toRemoveOnDiscard(c)).toEqual([]);
+  });
+  it("a logged agent is kept on close; Undo of that query removes it", () => {
+    const c = withLogged(withAgent(emptyCreated(), "a1", "t1"), "a1");
+    expect(toRemoveOnDiscard(c)).toEqual([]);
+    expect(toRemoveOnUndo(c, "a1")).toEqual({ id: "a1", taskId: "t1" });
+  });
+  it("an agent the journey did not create is never removed (the duplicate check merged into it)", () => {
+    const c = withLogged(emptyCreated(), "existing");
+    expect(toRemoveOnDiscard(c)).toEqual([]);
+    expect(toRemoveOnUndo(c, "existing")).toBeNull();
+  });
+  it("the host records an agent only when its id was not on the list before (the twin case is not recorded)", () => {
+    const host = readFileSync("src/components/queries/centre/LogStagesHost.tsx", "utf8");
+    expect(host).toMatch(/const isNew = !before\.has\(res\.id\);\s*if \(isNew\)/);
+    expect(host).toMatch(/await addAgent\(agentFromDraft\(d\)\)/);
+    expect(host).not.toMatch(/openNewAgentCard/);
+  });
+});
+
+describe("v2 · Phase 3 — not sent yet", () => {
+  it("one task per agent however often the link is pressed; a kept task keeps a new agent", () => {
+    let c = withAgent(emptyCreated(), "a1", "t1");
+    c = withHeld(c, "a1", "send-1");
+    c = withHeld(c, "a1", "send-2");
+    expect(c.held).toEqual([{ agentId: "a1", taskId: "send-1" }]);
+    expect(heldTaskFor(c, "a1")).toBe("send-1");
+    expect(toRemoveOnDiscard(c)).toEqual([]);
+    c = withoutHeld(c, "a1");
+    expect(heldTaskFor(c, "a1")).toBeNull();
+    expect(toRemoveOnDiscard(c)).toEqual([{ id: "a1", taskId: "t1" }]);
+  });
+  it("the host reuses the held task before it makes one, and the not-sent route never saves a query", () => {
+    const host = readFileSync("src/components/queries/centre/LogStagesHost.tsx", "utf8");
+    const body = host.slice(host.indexOf("const onNotSent"), host.indexOf("const onSentAfterAll"));
+    expect(body.indexOf("heldTaskFor")).toBeLessThan(body.indexOf("addUserTask"));
+    expect(body).not.toMatch(/saveLog|onSave/);
+  });
+});

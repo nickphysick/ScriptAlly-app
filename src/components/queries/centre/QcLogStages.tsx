@@ -14,10 +14,10 @@
  */
 import { MaterialIcon } from "../../shared/MaterialIcon";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { SubmissionMethod } from "../../../types";
+import { SubmissionMethod, type Query } from "../../../types";
 import { FlowHead } from "../../shared/FlowHead";
 import {
-  HOW, MILESTONE, PREVIEW_ID, monthLong, STAGES, celebrationLine, STAGE_LABEL, headline, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk,
+  HOW, MILESTONE, PREVIEW_ID, firstName, monthLong, STAGES, celebrationLine, STAGE_LABEL, headline, calMonth, dayMon, dayMonY, howLabel, packageFits, piecesFromAsk,
   planOf, previewOf, sameDay, sod, askCard, choiceOfSample, sampleOfChoice, type AskCard, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   WEEKDAY, calMonthAhead, cardOffer, expectOf, nudgeAnswer, nudgeChips, nudgeDateOf, replyDefaults, replyReady, toggleUnknown, withWeeks, type ReplyAnswers,
   type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
@@ -53,7 +53,11 @@ export const ICON = {
 } as const;
 
 /** what a save hands back: the new query's id, how to undo it, and the door to its card */
-export interface Logged { id: string; undo: () => Promise<void>; openCard: () => void }
+export interface Logged {
+  id: string; undo: () => Promise<void>; openCard: () => void;
+  /** v2 — Undo also removes the agent this journey added for it (nothing else uses them): the journey goes back to step one */
+  agentGoesOnUndo?: () => boolean;
+}
 /** the celebration's facts, fixed at the moment of the log */
 interface LoggedView extends Logged { n: number; first: string; preview: Preview; weeks: number | null; before: FlowState }
 
@@ -87,8 +91,13 @@ export interface QcLogStagesProps {
   /** the book's sizes, for the sample control's ceilings and presets */
   book: Book;
   onClose: () => void;
-  /** "+ Add {Name} as a new agent": opens Adding new agent; `done` is handed the new agent's id */
-  onAddAgent: (name: string, done: (id: string) => void) => void;
+  /** v2 · Phase 2 — "Add and carry on": the new agent card's own create; `created` is false when it merged into a twin */
+  onCreateAgent: (name: string, agency: string) => Promise<{ id: string; created: boolean } | { error: string }>;
+  /** v2 · Phase 3 — "Not sent yet?": the to-do task's id (one per agent), and "It has gone after all" (removes it) */
+  onNotSent: (agentId: string, agentName: string) => Promise<string | null>;
+  onSentAfterAll: (agentId: string) => Promise<void>;
+  /** v2 · Phase 6 — this book's queries, for the review's two numbers (the Dashboard's own functions read them) */
+  bookQueries: readonly Query[];
   onSave: (a: LogAnswers) => Promise<Logged | null>;
   /** v1.2 — a door that names a package (a package's builder): it is preselected on the Materials stage, still unanswered,
    *  so the ask card shows over it */
@@ -139,6 +148,10 @@ export interface FlowState {
   replySet: boolean;
   /** v1.3 — the month "Pick a date" shows, as year·12 + month */
   nCal: number | null;
+  /** v2 · Phase 2 — the add-an-agent screen, in this panel (prefilled from the search) */
+  adding: { name: string; agency: string; error: string | null; busy: boolean } | null;
+  /** v2 · Phase 3 — the not-sent screen is showing */
+  notSent: boolean;
 }
 
 export const freshState = (nowMs: number): FlowState => ({
@@ -147,6 +160,7 @@ export const freshState = (nowMs: number): FlowState => ({
   mat: "fork", packageId: null, pieces: { letterId: null, synopsisId: null, sample: null }, piecesSet: false,
   picked: { letterId: null, synopsisId: null, sample: null }, piecesTouched: false,
   via: null, note: "", noteOpen: false, carried: null, pkgSeed: null, reply: null, replySet: false, nCal: null,
+  adding: null, notSent: false,
 });
 
 export const answered = (s: FlowState, k: StageKey): boolean =>
@@ -167,10 +181,10 @@ const NO_PIECES: Pieces = { letterId: null, synopsisId: null, sample: null };
 /* v1.1 — THE TRACK (option C): the stages (six from v1.3) as the slip's own status track, on the FlowHead's ground. A finished
    node is a button (navy, ✓, its answer under its label) that opens that stage; the current one is a white disc ringed
    in navy; the rest are faint outlines and are not focusable. */
-export const Stepper: React.FC<{ s: FlowState; values: Record<StageKey, string | null>; onGo: (k: StageKey) => void }> = ({ s, values, onGo }) => (
+export const Stepper: React.FC<{ s: FlowState; values: Record<StageKey, string | null>; onGo: (k: StageKey) => void; locked?: boolean }> = ({ s, values, onGo, locked }) => (
   <div className="laq-trk" data-qls="steps" data-laq="track" role="list" aria-label="Logging a query, step by step">
     {STAGES.map((k, i) => {
-      const now = s.step === k;
+      const now = !locked && s.step === k;
       const done = !now && answered(s, k);
       const state = now ? "now" : done ? "done" : "todo";
       const cls = `laq-s${now ? " is-n" : ""}${done ? " is-d" : ""}`;
@@ -180,7 +194,7 @@ export const Stepper: React.FC<{ s: FlowState; values: Record<StageKey, string |
       </>;
       return (
         <div key={k} role="listitem" className="laq-si">
-          {done ? (
+          {done && !locked ? (
             <button type="button" className={cls} data-qls="step" data-k={k} data-state={state}
               aria-label={`${STAGE_LABEL[k]}: ${values[k] ?? ""}. Change it`} onClick={() => onGo(k)}>{inner}</button>
           ) : (
@@ -195,8 +209,10 @@ export const Stepper: React.FC<{ s: FlowState; values: Record<StageKey, string |
 export const BigRow: React.FC<{
   glyph: React.ReactNode; glyphClass?: string; title: string; sub?: string | null; tag?: React.ReactNode; tagClass?: string;
   on?: boolean; hi?: boolean; arrow?: boolean; onClick: () => void; data?: Record<string, string>;
-}> = ({ glyph, glyphClass, title, sub, tag, tagClass, on, hi, arrow = true, onClick, data }) => (
-  <button type="button" className={`${on ? "is-on" : ""}${hi ? " is-hi" : ""}`} onClick={onClick} aria-pressed={on ? true : undefined} {...data}>
+  /** v2 — the quiet row ("Add a new agent"): no frame, an underlined title */
+  quiet?: boolean;
+}> = ({ glyph, glyphClass, title, sub, tag, tagClass, on, hi, arrow = true, onClick, data, quiet }) => (
+  <button type="button" className={`${on ? "is-on" : ""}${hi ? " is-hi" : ""}${quiet ? " is-quiet" : ""}`} onClick={onClick} aria-pressed={on ? true : undefined} {...data}>
     <span className={`laq-g${glyphClass ? ` ${glyphClass}` : ""}`} aria-hidden="true">{glyph}</span>
     <span className="laq-tx"><b>{title}</b>{sub ? <span>{sub}</span> : null}</span>
     {tag ? <span className={`laq-tag${tagClass ? ` ${tagClass}` : ""}`} data-qls="tag">{tag}</span> : null}
@@ -376,6 +392,47 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     sbRef.current?.querySelector<HTMLElement>(".laq-big > button.is-hi")?.scrollIntoView({ block: "nearest" });
   }, [hi, s.step]);
 
+  /* v2 · Phase 2 — the add-an-agent screen, in this panel: the name from the search, an agency if they know it */
+  const startAdd = () => set({ adding: { name: titleName(s.find), agency: "", error: null, busy: false }, dir: "in" });
+  /** agents added here, by id → their name, until the Contact list's listener brings the record in */
+  const addedNames = useRef<Record<string, string>>({});
+  const createdIds = useRef<Set<string>>(new Set());
+  const addAgent = async () => {
+    const ad = s.adding;
+    if (!ad || ad.busy || !ad.name.trim()) return;
+    setS((o) => (o.adding ? { ...o, adding: { ...o.adding, busy: true, error: null } } : o));
+    const r = await p.onCreateAgent(titleName(ad.name), ad.agency);
+    if ("error" in r) { setS((o) => (o.adding ? { ...o, adding: { ...o.adding, busy: false, error: r.error } } : o)); return; }
+    addedNames.current[r.id] = titleName(ad.name);
+    if (r.created) createdIds.current.add(r.id);
+    answer({ adding: null, agentId: r.id, find: "", via: null, reply: null, replySet: false, nCal: null });
+  };
+  const addBody = () => {
+    const ad = s.adding!;
+    const upd = (patch: Partial<NonNullable<FlowState["adding"]>>) => set({ adding: { ...ad, ...patch, error: null } });
+    const key = (e: React.KeyboardEvent) => { if (e.key === "Enter" && ad.name.trim()) { e.preventDefault(); void addAgent(); } };
+    return (
+      <>
+        <h2 className="laq-qh">Who’s the new agent?</h2>
+        <p className="laq-qs">Just the name for now. You’ll carry straight on with this query.</p>
+        <label className="laq-fl"><span>Name</span>
+          <input data-qls="add-name" autoComplete="off" value={ad.name} autoFocus={!ad.name} onChange={(e) => upd({ name: e.target.value })} onKeyDown={key} /></label>
+        <label className="laq-fl"><span>Agency<i>if you know it</i></span>
+          <input data-qls="add-agency" autoComplete="off" value={ad.agency} autoFocus={!!ad.name} onChange={(e) => upd({ agency: e.target.value })} onKeyDown={key} /></label>
+        {ad.error ? <p className="laq-err" data-qls="add-error" role="alert">{ad.error}</p> : null}
+        <p className="laq-info" data-qls="add-info">They go on your Contact list now. Filling in the rest of their card goes on your to-do list, so it doesn’t hold this up.</p>
+      </>
+    );
+  };
+  const addFoot = (
+    <>
+      <button type="button" className="laq-lnk" data-qls="add-back" onClick={() => set({ adding: null, dir: "back" })}>Back</button>
+      <span className="laq-sp" />
+      <button type="button" className="laq-btn" data-qls="add-go" disabled={!s.adding?.name.trim() || s.adding?.busy} aria-busy={s.adding?.busy || undefined}
+        onClick={() => void addAgent()}>Add and carry on {ICON.arrow}</button>
+    </>
+  );
+
   const whoBody = () => {
     let i = 0;
     const row = (a: StageAgent) => {
@@ -405,10 +462,17 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
               if (e.key === "ArrowDown" && n) { e.preventDefault(); set({ hi: (hi + 1) % n }); }
               else if (e.key === "ArrowUp" && n) { e.preventDefault(); set({ hi: (hi - 1 + n) % n }); }
               else if (e.key === "Enter" && n) { e.preventDefault(); choose(pick[hi].id); }
+              else if (e.key === "Enter" && q) { e.preventDefault(); startAdd(); }
             }} />
         </label>
         {g.ready.length ? <><div className="laq-grp" data-qls="group" data-k="ready">Not queried yet <span>{g.ready.length}</span></div><div className="laq-big">{g.ready.map(row)}</div></> : null}
         {g.closed.length ? <><div className="laq-grp" data-qls="group" data-k="closed">Closed right now <span>{g.closed.length}</span></div><div className="laq-big">{g.closed.map(row)}</div></> : null}
+        {q && !pick.length && !g.busyHit.length ? <div className="laq-none" data-qls="none">No one called “{q}” in your Contact list.</div> : null}
+        {/* v2 · Phase 2 — adding an agent is always the list's last row, and never leaves this journey */}
+        <div className="laq-big laq-addw">
+          <BigRow glyph="+" title={q && !pick.length ? `Add ${nm} as a new agent` : "Add a new agent"} quiet arrow={false} onClick={startAdd}
+            data={{ "data-qls": "new-agent" }} />
+        </div>
         {q && g.busyHit.length ? <><div className="laq-grp" data-qls="group" data-k="busy">Already querying</div>{g.busyHit.map(off)}</> : null}
         {!q && g.busy.length ? (s.showBusy
           ? <><div className="laq-grp" data-qls="group" data-k="busy">Already querying <span>{g.busy.length}</span><button type="button" className="laq-lk" style={{ marginLeft: "auto", fontSize: 13.5 }} data-qls="busy-hide" onClick={() => set({ showBusy: false })}>Hide</button></div>{g.busy.map(off)}</>
@@ -416,17 +480,12 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
               <span className="laq-faces" aria-hidden="true">{g.busy.slice(0, 4).map((a) => <i key={a.id}>{a.initials}</i>)}</span>
               You've already queried {g.busy.length} {g.busy.length === 1 ? "agent" : "agents"} with this book<u>Show</u>
             </button>) : null}
-        {q && !pick.length && !g.busyHit.length ? (
-          <div className="laq-none" data-qls="none">No one called “{q}” in your Contact list.<br />
-            <button type="button" className="laq-btn is-ghost is-sm" style={{ marginTop: 10 }} data-qls="new-agent" onClick={() => p.onAddAgent(nm, (id) => answer({ agentId: id, find: "", reply: null, replySet: false, nCal: null }))}>+ Add {nm} as a new agent</button>
-          </div>
-        ) : null}
       </>
     );
   };
 
   /* ── the Sent stage ── */
-  const first = agent?.first ?? "the agent";
+  const first = agent?.first ?? (s.agentId && addedNames.current[s.agentId] ? firstName(addedNames.current[s.agentId]) : "the agent");
   const y = yesterday(nowMs);
   const isEarlier = s.sent != null && !sameDay(s.sent, nowMs) && !sameDay(s.sent, y);
   const calRef = useRef<HTMLDivElement>(null);
@@ -461,9 +520,38 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
             </div>
           </div>
         ) : null}
+        {/* v2 · Phase 3 — not sent yet: a to-do task, and no query record */}
+        <p className="laq-ask laq-notsent">Not sent yet? <button type="button" className="laq-lk" data-qls="not-sent" disabled={nsBusy} onClick={() => void notSent()}>Put it on your to-do list</button></p>
       </>
     );
   };
+
+  /* ── v2 · Phase 3 — not sent yet ── */
+  const [nsBusy, setNsBusy] = useState(false);
+  const notSent = async () => {
+    if (!s.agentId || nsBusy) return;
+    setNsBusy(true);
+    const id = await p.onNotSent(s.agentId, agent?.name ?? addedNames.current[s.agentId] ?? first);
+    setNsBusy(false);
+    if (id) set({ notSent: true, earlier: false, dir: "in" });
+  };
+  const notSentBody = () => (
+    <>
+      <h2 className="laq-qh">We’ll hold it for you.</h2>
+      <p className="laq-qs">Nothing is logged yet. It’s on your to-do list for when it goes.</p>
+      <div className="laq-todo" data-qls="not-sent-task">
+        <i aria-hidden="true" />
+        <span><b>Send your query to {agent?.name ?? (s.agentId ? addedNames.current[s.agentId] : null) ?? first}</b><span>{agent?.agency || "No agency yet"} · added today</span></span>
+      </div>
+    </>
+  );
+  const notSentFoot = (
+    <>
+      <button type="button" className="laq-lnk" data-qls="sent-after-all" onClick={async () => { if (s.agentId) await p.onSentAfterAll(s.agentId); set({ notSent: false, sent: null, dir: "back", step: "when" }); }}>It has gone after all</button>
+      <span className="laq-sp" />
+      <button type="button" className="laq-btn" data-qls="not-sent-done" onClick={p.onClose}>Done</button>
+    </>
+  );
 
   /* ── the Materials stage ── (materials fork v1: design-refs/log-query-materials-fork-v1/)
      Three screens under one stage: THE FORK (two tiles, a package or the pieces), THE PACKAGES (a tap carries on, as
@@ -815,7 +903,13 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         /* the date and materials carry over; how comes from the next agent's card */
         setS((o) => ({ ...o, step: "who", dir: "in", agentId: null, via: null, find: "", note: "", noteOpen: false, hi: 0, showBusy: false, carried: lastFirst, reply: null, replySet: false, nCal: null }));
         setSitting((k) => k + 1);
-        showToast(`${lastFirst} logged.`, async () => { setToast(null); await done.undo(); setSitting((k) => Math.max(0, k - 1)); setS({ ...before, step: "check", dir: "back" }); });
+        showToast(`${lastFirst} logged.`, async () => {
+          setToast(null);
+          const gone = !!done.agentGoesOnUndo?.();
+          await done.undo();
+          setSitting((k) => Math.max(0, k - 1));
+          setS(gone ? { ...before, agentId: null, via: null, reply: null, replySet: false, nCal: null, step: "who", dir: "back" } : { ...before, step: "check", dir: "back" });
+        });
       });
     } else {
       stampThen(() => { setLogged({ ...done, n, first: lastFirst, preview: preview!, weeks: rp?.wk ?? null, before }); setPhase("yay"); });
@@ -873,7 +967,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   };
 
   /* v2 — the headline (lib/queryActions/logStages `headline`): two lines, the same on every step, by where the writer is */
-  const [hl1, hl2] = headline({ sitting, agentChosen: !!s.agentId, sentMs: s.sent, nowMs });
+  const [hl1, hl2] = headline({ sitting, agentChosen: !!s.agentId, sentMs: s.sent, nowMs, notSent: s.notSent });
   /* D1 — ONE NAVY PIECE: the FlowHead and the track sit on one painted block (.laq-top), so there is no join between two
      navy boxes to show as a hairline at any zoom. The mentor is decorative (empty alt). */
   const top = (
@@ -881,7 +975,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
       <FlowHead title={<>{hl1}<span className="is-c br" data-laq="head-2">{hl2}</span></>} titleKey={`${hl1}|${hl2}`}
         mark={<img className="flh-m" data-laq="mentor" src="/icon-192.png" alt="" width={48} height={48} />}
         onClose={p.onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
-      <Stepper s={s} values={values} onGo={(k) => go(k)} />
+      <Stepper s={s} values={values} onGo={(k) => go(k)} locked={s.notSent} />
     </div>
   );
   const backFoot = (hint: string | null) => (
@@ -895,7 +989,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
   /* v1.2 — THE DIMMED PAGE'S LEAVE CHECK, the action drawers' own: with answers it asks, without it closes. The host's
      scrim calls it through `leaveRef`; Escape is unchanged (the host closes). */
   const [leaveAsk, setLeaveAsk] = useState(false);
-  if (p.leaveRef) p.leaveRef.current = () => { if (phase === "flow" && touched.current) setLeaveAsk(true); else p.onClose(); };
+  if (p.leaveRef) p.leaveRef.current = () => { if (phase === "flow" && !s.notSent && touched.current) setLeaveAsk(true); else p.onClose(); };
   const leaveFoot = (
     <>
       <span className="laq-lv" role="alertdialog" aria-label="Discard this query?"><b>Discard this?</b> Nothing has been saved yet.</span>
@@ -905,7 +999,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     </>
   );
 
-  const body = s.step === "who" ? whoBody() : s.step === "when" ? whenBody() : s.step === "what" ? whatBody() : s.step === "how" ? howBody()
+  const body = s.notSent ? notSentBody() : s.adding ? addBody() : s.step === "who" ? whoBody() : s.step === "when" ? whenBody() : s.step === "what" ? whatBody() : s.step === "how" ? howBody()
     : s.step === "nudge" ? nudgeBody() : checkBody();
   /* materials fork v1 — the fork's Back is the stage's (to Sent); a branch's Back is the fork. The pieces screen's right
      side is the tip until Carry on can be pressed, in one slot of the button's height, so nothing moves when it swaps */
@@ -935,7 +1029,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
         onClick={() => { if (rp) answer({ reply: rp, replySet: true }); }}>Continue {ICON.arrow}</button>
     </>
   );
-  const foot = s.step === "who" ? backFoot("↑ ↓ and ↵") : s.step === "what" && mat === "pcs" ? piecesFoot
+  const foot = s.notSent ? notSentFoot : s.adding ? addFoot : s.step === "who" ? backFoot("↑ ↓ and ↵") : s.step === "what" && mat === "pcs" ? piecesFoot
     : s.step === "what" && mat === "pkg" ? matBack("Tap a package to carry on")
     : s.step === "nudge" ? nudgeFoot : s.step === "check" ? checkFoot : backFoot("Tap one to carry on");
 
@@ -965,8 +1059,10 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
             <span className="laq-sp" />
             <button type="button" className="laq-lnk" data-qls="undo" disabled={busy} onClick={async () => {
               setBusy(true);
+              const gone = !!L.agentGoesOnUndo?.();
               try { await L.undo(); } finally { setBusy(false); }
-              setLogged(null); setPhase("flow"); setS({ ...L.before, step: "check", dir: "back" });
+              setLogged(null); setPhase("flow");
+              setS(gone ? { ...L.before, agentId: null, via: null, reply: null, replySet: false, nCal: null, step: "who", dir: "back" } : { ...L.before, step: "check", dir: "back" });
             }}>Undo</button>
             <button type="button" className="laq-lnk" data-qls="done" onClick={p.onClose}>Done</button>
             <button type="button" className="laq-btn" data-qls="log-another" onClick={() => { setLogged(null); setPhase("flow"); setS({ ...freshState(nowMs), dir: "in" }); }}>Log another {ICON.arrow}</button>
@@ -981,7 +1077,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     <div ref={rootRef} className="laq" data-qc149f="log" data-qls="root" data-step={s.step}>
       <div className={`laq-in${bump ? " is-bump" : ""}`}>
         {top}
-        <div ref={sbRef} key={s.step === "what" ? `what:${mat}` : s.step} className={`laq-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
+        <div ref={sbRef} key={s.notSent ? "not-sent" : s.adding ? "adding" : s.step === "what" ? `what:${mat}` : s.step} className={`laq-sb${s.dir ? ` is-${s.dir}` : ""}`} data-qls="body">{body}</div>
         <div className={`laq-cf${leaveAsk ? " is-leave" : ""}`} data-qls="foot">{leaveAsk ? leaveFoot : foot}</div>
         <div className={`laq-toast${toast ? " is-on" : ""}`} data-qls="toast" role="status" aria-live="polite">
           {toast ? <>{toast.text}<button type="button" data-qls="toast-undo" onClick={toast.undo}>Undo</button></> : null}
