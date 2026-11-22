@@ -142,7 +142,7 @@
 /* the section heading row (ref `.h2`) */
 .rsp15 .rsp15-h2 { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 18px; margin: 0 0 16px; }
 /* Consistency roll-out v1, Phase 7: the section heading */ .rsp15 .rsp15-h2 .rsp15-h2t { margin: 0; font: var(--sp-h-section) !important; color: var(--r15-ink); }
-.rsp15 .rsp15-h2 p { margin: 0; font: italic 400 16.5px/1.4 var(--r15-serif) !important; color: var(--sp-muted); }
+.rsp15 .rsp15-h2 p { margin: 0; font: italic 400 var(--sp-body-size)/1.4 var(--r15-serif) !important; color: var(--sp-muted); }
 .rsp15 .rsp15-sp { flex: 1; }
 .rsp15 .rsp15-nav { display: flex; gap: 8px; align-self: center; }
 .rsp15 .rsp15-nav button, .rsp15 .rsp15-pg button {
