@@ -67,10 +67,10 @@ const STEP_WRAP = 12;
    draws the ring and fits inside the smallest current node (28px). */
 const RR_CUR_WRAP = 17;
 
-/** the four-step track: ink to the current step, faded future, a dotted line into a skipped step. v154: `label`, when
- *  given, is drawn under the current step only (the card's "Draw the journey" hover shows it; hidden at rest).
+/** the four-step track: ink to the current step, faded future, a dotted line into a skipped step. (v154's hover label
+ *  under the current step is retired: Plumage colours v2 names the status on the grid card's band label.)
  *  v157: `quiet` (the grid card's gone quiet) draws three dots in the current step's badge in place of the arrow. */
-export const Track153: React.FC<{ t: SlipTrack; label?: string; status?: string; quiet?: boolean }> = ({ t, label, status, quiet }) => (
+export const Track153: React.FC<{ t: SlipTrack; status?: string; quiet?: boolean }> = ({ t, status, quiet }) => (
   <span className={`qc153-trk${t.ended ? " is-ended" : ""}`} data-qc153="track" data-dir={t.dir}>
     {t.nodes.map((n, i) => {
       const rr = n === "cur" && status === QueryStatus.REVISE_RESUBMIT;
@@ -83,7 +83,6 @@ export const Track153: React.FC<{ t: SlipTrack; label?: string; status?: string;
           <span className={`qc153-nd qc153-nd--${n}`} data-qc153="node" data-state={n} title={NODE_TITLE[i]}>
             <StatusDot status={st} overrideSize={rr ? RR_CUR_WRAP : STEP_WRAP} tone="inherit" reached={reached} decorative />
             {n === "cur" ? <b className={`qc153-arw qc153-arw--${t.dir}${quiet ? " qc153-arw--quiet" : ""}`} data-qc153="arrow" data-dir={t.dir} data-quiet={quiet ? "" : undefined} aria-hidden="true">{quiet ? A_QUIET : t.dir === "in" ? A_IN : t.dir === "out" ? A_OUT : A_END}</b> : null}
-            {n === "cur" && label ? <span className="qc154-thl" data-qc154="track-label" aria-hidden="true">{label}</span> : null}
           </span>
         </React.Fragment>
       );

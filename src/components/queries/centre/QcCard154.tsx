@@ -28,8 +28,9 @@ import "./qcv1531.css";
 import "./qcv154.css";
 import "./qcv1561.css";
 import "./qcv157.css";
+import "./pc2card.css";
 /* Query card v160, Phase 4 — the band eases to a new stage */
-import { bandBackground, statusBand } from "../../../lib/stageColours";
+import { STAGE_COLOURS, bandBackground, stageOf, statusBand } from "../../../lib/stageColours";
 import { gridBand, gridEase } from "./qcMotion160";
 
 const BELL = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M8 2.5a4 4 0 0 0-4 4v2.5L2.8 11h10.4L12 9V6.5a4 4 0 0 0-4-4zM6.5 13a1.5 1.5 0 0 0 3 0" /></svg>;
@@ -96,9 +97,12 @@ const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, pac
             <span className="qc154-ag" data-qc154="agency">{r.agency}</span>
           </span>
           <span className="qc154-trkw" data-qc154="track" role="img" tabIndex={0} aria-label={`Where it stands: ${word}`} title={word}>
-            <Track153 t={t} label={word} status={r.status} quiet={quiet} />
+            <Track153 t={t} status={r.status} quiet={quiet} />
           </span>
           <span className="qc154-sr" data-qc154="word">{word}</span>
+          {/* Plumage colours v2 — the status's name on a label across the band's bottom edge (pc2card.css); it replaces the
+              hover label under the track */}
+          <span className="pc2-lbl" data-pc2="label" aria-hidden="true" style={{ ["--pc2-edge" as string]: STAGE_COLOURS[stageOf(r.status)].edge } as React.CSSProperties}>{word}</span>
         </div>
         <div className="qc154-fx" data-qc154="facts">
           <div className="qc154-f" data-qc154="fact" data-k="sent">
