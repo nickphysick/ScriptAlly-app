@@ -127,9 +127,9 @@ The full reasoning, dates and incidents behind every rule below are in `docs/dec
 - **A mutation is run and undone in the measurement worktree**, never with `git checkout` in the primary checkout; backup names come from the full path (macOS is case-insensitive).
 
 ## Design rules (settled)
-Nick's consistency rulings (design-refs/consistency-rollout-v1/consistency-rulings-v2.html), as built by Consistency roll-out v1. Tokens and classes live in `src/components/shell/primitives.css` (`:root`) unless named otherwise.
+Nick's consistency rulings (design-refs/consistency-rollout-v1/consistency-rulings-v2.html), as built by Consistency roll-out v1. Tokens and classes live in `src/components/shell/primitives.css` (`:root`) unless named otherwise. Rulings v3 (design-refs/consistency-rollout-v2/consistency-rulings-v3.html) were built by Consistency roll-out v2.
 - **Page colour is oat `--ws-page` (#f2eee8, index.css)** on workspace and public pages; public pages, which never load the shell, write #f2eee8.
-- **One navy: `--sp-anthracite` (#2a3a52)**, hover `--sp-anthracite-hov`; `--ink-band` (index.css) is the same navy. **One rust for small accents: `--sp-rust` (#7a3f31).** Burgundy only as the MountCard frame border. No green. Red only on destructive actions.
+- **One navy: `--sp-anthracite` (#2a3a52)**, a filled navy button hovers to `--sp-navy-hover` (#24304a; the older, lighter `--sp-anthracite-hov` stays for the header pills); `--ink-band` (index.css) is the same navy. **One rust for small accents: `--sp-rust` (#7a3f31).** Burgundy only as the MountCard frame border. No green. Red only on destructive actions.
 - **Nothing under 12px**, except artwork and scaled-down previews.
 - **Headings:** section `font: var(--sp-h-section)` (Special Elite 24), card `--sp-h-card` (Special Elite 20), small `--sp-h-small` (Source Serif 600 16), each read with `!important` (brand.tsx forces h1–h3). Heroes may be larger.
 - **Navy header:** title 40px from the header's top; 40px gap to the content below (`src/components/shell/wsnh.css` §1b).
@@ -139,7 +139,17 @@ Nick's consistency rulings (design-refs/consistency-rollout-v1/consistency-rulin
 - **View switches are boxed** (box radius 12, buttons 34 high, radius 9: the Query Centre's List / Birds-eye switch, `.cp32-tog` on Comps). Underlined tabs are for different lists.
 - **Slide-out panels:** close button `--sp-px-size` (36 × 36); action footer `--sp-pfoot-h` (72) with `--sp-pfoot-pad` (14px 24px) and `--sp-pfoot-rule`.
 - **Copy:** "past expected", never "late" or "overdue". Colour never marks time pressure. No verdict words.
+- **Muted text:** `--sp-muted` (#5b4f47) for supporting text, `--sp-quiet` (#6b6058) for captions and meta (both pass 4.5:1 on oat and white). No other grey-brown on light grounds.
+- **Body text:** running Source Serif on workspace pages, the Dashboard and panels is `--sp-body-size` (16) or `--sp-sec-size` (14).
+- **Red** only on "Delete account…", "Withdraw it" and "I've decided not to send it": `--sp-danger` (#a63d2f).
+- **Public pages** keep Source Sans and their brighter rust, `--mk-rust` (#a2452a, on `:root` in marketing.css); the app keeps `--sp-rust`.
+- **Text tag** (a pill that holds only words): `--sp-tag-*`, 28 high, 0 12, fully rounded, Source Serif 600 14, its own colours. Not a tag: chips with a person, counts, percentages, Pro tags, key caps, StatusDot, filter pills, buttons.
+- **Filter pills:** 32 high, Source Serif 14.5 (`--sp-fpill-h` / `--sp-fpill-size`), navy when selected.
+- **Slide-out panel title:** `--sp-panel-t` (Special Elite 400 24/1.2). The agent card's name is a person's name and stays its own.
+- **Focus:** one ring, `outline: 2px solid var(--sp-anthracite); outline-offset: 2px` (cream #f4eee5 on navy and dark grounds); text fields keep their navy focus edge and take no ring. **Hover:** filled navy → `--sp-navy-hover`, outline → navy at 6%, clickable row → #f8f4ed; no transition over 150ms, none under reduced motion.
+- **Settings, sign-in, sign-up and import** use the standard button and field; sign-in keeps its typewriter pill buttons and Google's button its logo colours.
 - **New work uses these shared classes and tokens.** Do not write a new size, colour or radius on a page when one of these fits; point the page's own rule at the token.
+- **The rules check:** `npm run audit:rules` (audits/consistency-v2: fifteen rules, exceptions in `exceptions.json`, each with a reason; `CA_ONLY`, `CA_VIEWPORTS`, `CA_OUT`).
 - **The consistency audit:** `npm run e2e:emu -- --config audits/consistency-v1/playwright.audit.config.ts` (through the test slot; `CA_ONLY=<pages>`, `CA_VIEWPORTS=1512,1920`, `CA_OUT=<dir>`), then `node audits/consistency-v1/analyse.mjs <dir>` writes findings.json.
 
 ## Dev-only routes and locked surfaces
