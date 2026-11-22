@@ -2,7 +2,7 @@
 
 **Status: built and measured.** Locks L1–L10 green on the v164 build and each red under its named mutation;
 qc160/161/1611/1612/163 no worse than the base. The browser half of Phase 5 was blocked on the emulator guard on
-21 Nov (19.9 GB free) and ran on 22 Nov at 22–25 GB. Dev deploy: see "Phase 6" at the end.
+21 Nov (19.9 GB free) and ran on 22 Nov at 22–25 GB. **Dev serves `index-McyfFrDf.js`** (Phase 6 at the end).
 
 ## Step 0
 
@@ -115,3 +115,16 @@ gone quiet, closed passed (and with their words), closed withdrawn, R&R with wor
 - All `.qc1522-btn` in the card (including the in-place editor's small ones) take the 40px `.sp-btn` shape.
 - The To-do desk's one-row book ("Querying" label) is untouched.
 - The panel's lean (~1.6°) is untouched.
+
+## Phase 6 — dev deploy (22 Nov, ~02:10Z)
+
+- Re-checked what dev served: `index-B2Wbs__x.js`, not Step 0's `index-DDBRal-w.js` — named in the reports of
+  `dev/cr1-qc163-db3-acv2-cr5-qcc-acv21-nu1-cr11-acv211-nu11-td58-td581-td582-tl1` @ `83d77ffe7` (To-do v58.1, v58.2,
+  To-do load v1), 22 commits on v164's base, none touching v164's files.
+- New branch `…-td58-td581-td582-tl1-qc164` = that tip + `query-card-v164` (merge `3c420e7e1`, clean, no
+  conflicts), pushed. Gates on the merge: tsc clean; card, agent, lib and To-do suites 1,306 passed / 3 skipped.
+- Built from a clean checkout of the pushed tip (scratchpad worktree): `index-McyfFrDf.js`, no `demo-scriptally`,
+  no prod project id. Deployed with the served hash checked in the command (`index-B2Wbs__x.js`, else stop):
+  `firebase deploy --only hosting --config firebase.dev.json --project scriptally-dev`.
+- **Proof:** https://scriptally-dev.web.app serves `index-McyfFrDf.js`; its `AppRoot-D58pkxWC.js` carries
+  `data-qc164` and `AppRoot-CS6pysWM.css` carries `qc164-went`. Hosting only; no rules or functions.
