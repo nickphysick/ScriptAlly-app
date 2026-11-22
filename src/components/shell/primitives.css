@@ -197,6 +197,9 @@
   --sp-fpill-h: 32px; --sp-fpill-size: 14.5px;
   --sp-panel-t: 400 24px/1.2 var(--sp-type);
 }
+/* Consistency roll-out v2, Phase 8 (rulings v3, ruling 1): running text in Source Serif 4 on workspace pages, the Dashboard and
+   slide-out panels is 16 (body) or 14 (secondary); 15, 15.5, 16.5 and 17 became 16, and 14.5 became 14. */
+:root { --sp-body-size: 16px; --sp-sec-size: 14px; }
 :root { --sp-px-size: 36px; --sp-pfoot-h: 72px; --sp-pfoot-pad: 14px 24px; --sp-pfoot-rule: 1px solid rgba(28, 19, 15, .1); }
 .sp-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
 .sp-btn--fill { background: var(--sp-anthracite); color: #fff; }
