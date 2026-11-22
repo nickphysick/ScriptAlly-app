@@ -1,0 +1,548 @@
+{
+ "src/components/agents/card/agentEditMode.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/agents/contact/contactDeskBadge.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/agents/contact/contactV16.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/agents/contact/contactV17.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/agents/panel/agentPanel.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/agents/phone/agentsPhone.css": {
+  "font": 22,
+  "hex": 1,
+  "legacy": 4,
+  "radius": 5,
+  "shadow": 6
+ },
+ "src/components/agents/phone/agentsPhoneR2.css": {
+  "font": 4,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 1
+ },
+ "src/components/analytics/a26.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/auth.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/dashboard/dashboardV37.css": {
+  "font": 0,
+  "hex": 2,
+  "legacy": 0,
+  "radius": 1,
+  "shadow": 0
+ },
+ "src/components/dashboard/diaryCarousel.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/dashboard/oneScreen.css": {
+  "font": 3,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/dashboard/v2/dash2Hawk.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/dashboard/v58/dash58.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/forms/forms.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/helpCentre.css": {
+  "font": 1,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/import/importMatcher.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/letters/materialsLock.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/manuscripts/comps.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/manuscripts/comps25/compsV25.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/notFound.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/notes/yourNotes.css": {
+  "font": 11,
+  "hex": 5,
+  "legacy": 0,
+  "radius": 2,
+  "shadow": 2
+ },
+ "src/components/onboarding/importFlow.css": {
+  "font": 16,
+  "hex": 8,
+  "legacy": 0,
+  "radius": 5,
+  "shadow": 5
+ },
+ "src/components/onboarding/onboarding.css": {
+  "font": 12,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 7,
+  "shadow": 2
+ },
+ "src/components/onboarding/v9/onbV9.css": {
+  "font": 12,
+  "hex": 6,
+  "legacy": 0,
+  "radius": 2,
+  "shadow": 3
+ },
+ "src/components/packages/phone/packagesPhone.css": {
+  "font": 34,
+  "hex": 28,
+  "legacy": 0,
+  "radius": 18,
+  "shadow": 15
+ },
+ "src/components/packages/v62/pk62.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/phone/materials/phoneMaterials.css": {
+  "font": 9,
+  "hex": 6,
+  "legacy": 0,
+  "radius": 3,
+  "shadow": 1
+ },
+ "src/components/phone/pages/pagesPhone.css": {
+  "font": 48,
+  "hex": 8,
+  "legacy": 1,
+  "radius": 6,
+  "shadow": 13
+ },
+ "src/components/phone/pages/settingsPhone.css": {
+  "font": 5,
+  "hex": 0,
+  "legacy": 1,
+  "radius": 0,
+  "shadow": 3
+ },
+ "src/components/phone/phone.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/phone/phoneShell.css": {
+  "font": 19,
+  "hex": 1,
+  "legacy": 1,
+  "radius": 7,
+  "shadow": 11
+ },
+ "src/components/phone/phoneStyle.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/phone/phoneTokens.css": {
+  "font": 0,
+  "hex": 17,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/phone/replyWheel.css": {
+  "font": 4,
+  "hex": 8,
+  "legacy": 0,
+  "radius": 1,
+  "shadow": 1
+ },
+ "src/components/phone/sweepPhone.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/phone/v3/phoneV3.css": {
+  "font": 22,
+  "hex": 0,
+  "legacy": 2,
+  "radius": 17,
+  "shadow": 16
+ },
+ "src/components/phone/v4/phoneV4.css": {
+  "font": 6,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 14,
+  "shadow": 13
+ },
+ "src/components/phone/v5/phoneV5.css": {
+  "font": 19,
+  "hex": 6,
+  "legacy": 2,
+  "radius": 25,
+  "shadow": 20
+ },
+ "src/components/plans/plansPage.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/queries/centre/qcv154.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/queries/centre/qcvGlance136.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/queries/phone/editQueryPhone.css": {
+  "font": 12,
+  "hex": 20,
+  "legacy": 0,
+  "radius": 6,
+  "shadow": 9
+ },
+ "src/components/queries/phone/queriesPhone.css": {
+  "font": 43,
+  "hex": 62,
+  "legacy": 0,
+  "radius": 27,
+  "shadow": 27
+ },
+ "src/components/queryActions/phoneFlow.css": {
+  "font": 25,
+  "hex": 4,
+  "legacy": 2,
+  "radius": 6,
+  "shadow": 21
+ },
+ "src/components/reading-pane/correctionSheet.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/responses/responses.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/settings/clockTimeline.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/settings/deletionBanner.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/settings/settingsCards.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/settings/settingsInk.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shared/slideOver.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/appFooter.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/betaChrome.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/emptyPanel.css": {
+  "font": 2,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/f12.css": {
+  "font": 1,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 1,
+  "shadow": 1
+ },
+ "src/components/shell/feedbackPop.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 1,
+  "shadow": 0
+ },
+ "src/components/shell/headerPanel.css": {
+  "font": 7,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/headerSheet.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/inkShell.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/lightHeader.css": {
+  "font": 1,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/mobileShell.css": {
+  "font": 7,
+  "hex": 4,
+  "legacy": 0,
+  "radius": 5,
+  "shadow": 2
+ },
+ "src/components/shell/pageHeader.css": {
+  "font": 2,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/searchPalette.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/sidebarRail.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/shell/workspaceShell.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/todo/corkboard/corkboard.css": {
+  "font": 1,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 1,
+  "shadow": 0
+ },
+ "src/components/todo/phone/todoPhoneV1.css": {
+  "font": 27,
+  "hex": 20,
+  "legacy": 0,
+  "radius": 7,
+  "shadow": 12
+ },
+ "src/components/todo/todo.css": {
+  "font": 1,
+  "hex": 1,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/todo/todoNoteboard.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/todo/todoSide.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/components/versions/versionsV2.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/marketing/heroCard.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/marketing/marketing.css": {
+  "font": 23,
+  "hex": 3,
+  "legacy": 0,
+  "radius": 7,
+  "shadow": 4
+ },
+ "src/marketing/privacy.css": {
+  "font": 4,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 1,
+  "shadow": 0
+ },
+ "src/marketing/public.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/marketing/waitlist.css": {
+  "font": 0,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 0,
+  "shadow": 0
+ },
+ "src/marketing/welcome.css": {
+  "font": 10,
+  "hex": 0,
+  "legacy": 0,
+  "radius": 2,
+  "shadow": 0
+ }
+}
