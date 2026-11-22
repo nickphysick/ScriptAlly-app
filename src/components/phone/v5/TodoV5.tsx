@@ -59,7 +59,7 @@ const agencyOf = (t: WsTask): string => {
 };
 /** the card's one button: the workspace's own verb (`type`, as v4's Up next); an own task's is its journey's own pill,
  *  "Mark done" (the workspace types an own task "Send", which would not say what the button does) */
-const verbOf = (t: WsTask): string => (t.kind === "own" ? "Mark done" : t.type ?? "Open");
+export const verbOf = (t: WsTask): string => (t.kind === "own" ? "Mark done" : t.type ?? "Open");
 const dueYmdOf = (t: WsTask): string | null => (t.kind === "own" ? t.userTask?.dueDate ?? null : t.item?.dial?.ymd ?? null);
 const chipsOf = (t: WsTask, q: V3Query | null, now: number) =>
   todoChips({ kind: t.kind, dueYmd: dueYmdOf(t), replyMs: q?.replyMs ?? null, quietDays: t.quietDays }, now);

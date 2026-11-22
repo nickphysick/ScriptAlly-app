@@ -38,7 +38,7 @@ import { feedEntries } from "../../../lib/dashFeed";
 import { dayMonth } from "../../../lib/dates";
 import { QueryStatus, type Activity } from "../../../types";
 import { Chev, Cta, LapCard as LapCard0, Link4 } from "../v4/V4Parts";
-import { QRowV4 } from "../v4/QueriesV4";
+import { YourMoveV5 } from "./YourMoveV5";
 import { V5TabStrip } from "./V5Tabs";
 import { AgentsTabV5 } from "./AgentsTabV5";
 import { openFeedbackSheet } from "./FeedbackSheetV5";
@@ -142,19 +142,16 @@ export const TodayV5: React.FC<{ loading?: boolean }> = ({ loading = false }) =>
   const hasQueries = aid?.queries === 0 ? false : v.qs.length > 0;
   let panel: React.ReactNode = null;
   if (tab === "queries") {
-    panel = (<>
-      <div className="pa4-inset" style={{ paddingTop: 16 }}>
-        {/* v5: the Birds-eye block, straight on the page; absent with nothing open (day one shows above the tabs) */}
-        {hasQueries && be.c.active > 0 ? <BirdsBlockV5 qs={be.qs} c={be.c} nowMs={be.now} /> : null}
+    /* Phone style v1, Phase 3 (phone-today-v6.html): the tiles, "Nearest their date" with its rows in a card, then
+       "Your move" — the lead card and the rest of its rows in a card (YourMoveV5) */
+    panel = (<div className="ps-today" data-ps="today-queries">
+      {/* v5: the Birds-eye block; absent with nothing open (day one shows above the tabs) */}
+      {hasQueries && be.c.active > 0 ? <BirdsBlockV5 qs={be.qs} c={be.c} nowMs={be.now} /> : null}
+      <YourMoveV5 mine={mine} now={now} />
+      <div className="ps-today-all">
+        <button type="button" className="ps-tlink" data-pa4="all-queries" data-pa5="all-queries" onClick={() => navigate(QUERIES_ALL_PATH)}>See all queries</button>
       </div>
-      {mine.length ? (<>
-        <div className="pa4-grp" data-pa5="your-move"><h2 className="pa4-h">Your move</h2><span className="pa4-s">{mine.length}</span></div>
-        {mine.map((q) => <QRowV4 key={q.id} q={q} now={now} />)}
-      </>) : null}
-      <div className="pa4-inset">
-        <Link4 sb pa4="all-queries" data-pa5="all-queries" onClick={() => navigate(QUERIES_ALL_PATH)}>See all queries</Link4>
-      </div>
-    </>);
+    </div>);
   } else if (tab === "agents") {
     panel = <AgentsTabV5 />;
   } else {

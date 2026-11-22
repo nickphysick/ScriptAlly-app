@@ -17,7 +17,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { MONTHS_SHORT } from "../../../lib/dates";
 import { changeWords, needWords, type WeekPoint } from "../../../lib/phoneV41";
-import { CAST, Chev, IconBtn } from "../v4/V4Parts";
+import { CAST, IconBtn } from "../v4/V4Parts";
 import { FEEDBACK_ICON } from "./V5Chrome";
 import "../v4/phoneV4.css";
 import "./phoneV5.css";
@@ -104,7 +104,7 @@ export const TodayHeaderV5: React.FC<TodayHeaderV5Props> = ({ day, streakWeeks, 
           <div className="pa5-hd-l">
             {need > 0 ? (
               <button type="button" className="pa5-need" data-pa5="need" data-n={need} onClick={onNeed}>
-                <span><i aria-hidden="true" />{needWords(need)}<Chev /></span>
+                <span className="ps-need"><i aria-hidden="true" />{needWords(need)}</span>
               </button>
             ) : null}
             {streakWeeks > 0 ? (
@@ -126,8 +126,8 @@ export const TodayHeaderV5: React.FC<TodayHeaderV5Props> = ({ day, streakWeeks, 
             <path className="pa5-ch-l" d={ch.d} fill="none" stroke="var(--pa-blush)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" pathLength={1} vectorEffect="non-scaling-stroke" />
           </svg>
           <i className="pa5-ch-d" style={{ left: `${(ch.ex / CH_W) * 100}%`, top: ch.ey }} aria-hidden="true" />
-          <span className="pa5-ch-tag" data-pa5="today-tag" style={ch.ey >= 34 ? { top: ch.ey - 34 } : { top: Math.max(0, ch.ey - 10), right: 44 }}>Today</span>
-          <div className="pa5-ch-x" data-pa5="months">{ch.months.map((m) => <span key={m.label + m.x} style={{ left: `${(m.x / CH_W) * 100}%` }}>{m.label}</span>)}</div>
+          <span className="pa5-ch-tag" data-pa5="today-tag" data-ps-cap="" style={ch.ey >= 34 ? { top: ch.ey - 34 } : { top: Math.max(0, ch.ey - 10), right: 44 }}>Today</span>
+          <div className="pa5-ch-x" data-pa5="months">{ch.months.map((m) => <span key={m.label + m.x} data-ps-cap="" style={{ left: `${(m.x / CH_W) * 100}%` }}>{m.label}</span>)}</div>
         </div>
       ) : null}
       <img className="pa5-hd-m" data-pa5="mentor" data-pa4="cast" src={CAST.mentor} alt="" />

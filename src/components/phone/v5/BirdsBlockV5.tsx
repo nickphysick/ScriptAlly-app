@@ -6,9 +6,10 @@
  * `beRender` with beP "B", `sumBar`, `mt`, `btrack`, `.bed-*`). Straight on the page: no card, no title, no art.
  * Below 768px only. It replaces v4.1's Birds-eye card on Today.
  *
- *   - The counts: a thin bar split in proportion, then the three figures (with you / with agents / gone quiet) — the
- *     ring card's own `v3Counts`. A figure filters the rows to its group and lifts onto a white tile; again, or "Show
- *     all", clears. A zero figure is greyed and cannot be tapped.
+ *   - The counts: Phone style v1 (phone-today-v6.html) draws them as three tiles — with you navy, with agents white,
+ *     gone quiet white with grey figures — the ring card's own `v3Counts`. A tile filters the rows to its group (its
+ *     label goes ink and semibold, v5's selected treatment); again, or "Show all", clears. A zero is disabled.
+ *   - Phone style v1: the label is a heading on the page, and the rows, the few-line and the footer share one card.
  *   - The rows: the desktop Birds-eye engine's own (`phoneGroups` → `beLine`, lib/qc150), nearest their date, up to
  *     eight. Each: the mini four-stage track, the surname, then a 12px bar (lib/phoneV5 `beTrack`). Past its date the
  *     bar carries on from the notch to today in a deeper tone — no line, no ring, no chip.
@@ -37,7 +38,6 @@ import "./phoneV5.css";
 
 /** v4.1's once-a-day replay memory, kept */
 export const BE_REPLAY_KEY = "pa41.birds-card.replayed";
-const COURT_FILL: Record<BeCourt, string> = { you: "var(--pa-blush)", agent: "var(--pa-ring-agent)", quiet: "var(--pa-ring-quiet)" };
 
 const reduced = (): boolean => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } };
 
@@ -119,36 +119,31 @@ export const BirdsBlockV5: React.FC<{ qs: readonly V3Query[]; c: V3Counts; nowMs
 
   const pick = (k: BeCourt) => { setOpen(null); setF((p) => (p === k ? null : k)); };
   const total = f ? c[f] : c.you + c.agent + c.quiet;
-  const sum = c.you + c.agent + c.quiet;
 
   return (
     <div ref={ref} className={`pa5-be${play ? " play" : ""}`} data-pa5="be" data-filter={f ?? ""} data-n={rows.length} data-play={play ? "1" : "0"}
       data-from={win.fromMs} data-to={win.toMs}>
-      <div className="pa5-be-sm">
-        <div className="pa5-be-sb" aria-hidden="true" data-pa5="be-bar">
-          {sum > 0 ? BE_COURTS.filter((k) => c[k] > 0).map((k) => (
-            <i key={k} data-k={k} style={{ flex: `${c[k]} 1 0`, background: COURT_FILL[k], opacity: f && f !== k ? 0.25 : 1 }} />
-          )) : null}
-        </div>
-        <div className="pa5-be-sn">
-          {BE_COURTS.map((k) => (
-            <button key={k} type="button" className={f === k ? "on" : ""} aria-pressed={f === k} disabled={c[k] === 0}
-              data-pa5="be-count" data-k={k} data-n={c[k]} onClick={() => pick(k)}>
-              <b className="pa4-T">{c[k]}</b><span><i style={{ background: COURT_FILL[k] }} aria-hidden="true" />{BE_COUNT_WORDS[k]}</span>
-            </button>
-          ))}
-        </div>
+      {/* Phone style v1: the counts are three tiles (ref `.tl`) — with you the navy one, with agents white, gone quiet white
+          with grey figures. Still the filters: a tap filters the rows to its group, again clears; a zero is disabled. */}
+      <div className="ps-tiles" data-ps="tiles">
+        {BE_COURTS.map((k) => (
+          <button key={k} type="button" className={`ps-tile${k === "you" ? " navy" : k === "quiet" ? " q" : ""}${f === k ? " on" : ""}`} aria-pressed={f === k} disabled={c[k] === 0}
+            data-pa5="be-count" data-k={k} data-n={c[k]} onClick={() => pick(k)}>
+            <b>{c[k]}</b><span>{BE_COUNT_WORDS[k]}</span>
+          </button>
+        ))}
       </div>
-      <div className="pa5-be-l">
+      <h2 className="ps-hdg pa5-be-l" data-ps="be-hdg">
         <span data-pa5="be-label">{beLabel(f, cut, rows.length)}</span>
         {f ? <button type="button" className="pa5-be-x" data-pa5="be-showall" onClick={() => { setOpen(null); setF(null); }}>Show all</button> : null}
-      </div>
+      </h2>
+      <div className="ps-card pa5-be-card" data-ps="be-card">
       <div className="pa5-be-b" data-pa5="be-rows" data-n={rows.length}>
         <div className="pa5-be-r" aria-hidden="true">
           <span />
           <div className="pa5-be-m" ref={ruler}>
-            <strong data-pa5="be-pill" style={{ left: `${tp}%` }}>Today</strong>
-            {months.map((m) => <em key={m.ms} data-pa5="be-month" data-ms={m.ms} style={{ left: `${m.l}%`, visibility: hide.has(m.ms) ? "hidden" : undefined }}>{m.label}</em>)}
+            <strong data-pa5="be-pill" data-ps-cap="" style={{ left: `${tp}%` }}>Today</strong>
+            {months.map((m) => <em key={m.ms} data-pa5="be-month" data-ps-cap="" data-ms={m.ms} style={{ left: `${m.l}%`, visibility: hide.has(m.ms) ? "hidden" : undefined }}>{m.label}</em>)}
           </div>
         </div>
         {rows.map((r) => {
@@ -188,9 +183,10 @@ export const BirdsBlockV5: React.FC<{ qs: readonly V3Query[]; c: V3Counts; nowMs
         {rows.length ? <i className="pa5-be-now" data-pa5="be-now" style={{ left: `calc(116px + (100% - 116px) * ${tp / 100})` }} aria-hidden="true" /> : null}
       </div>
       {rows.length < 3 ? <p className="pa4-s pa5-be-few" data-pa5="be-few">{BE_FEW_LINE}</p> : null}
-      <button type="button" className="pa5-be-f" data-pa5="be-foot" data-court={f ?? ""} onClick={() => navigate(beViewPath(f))}>
-        <span>{beFooter(total, f)}</span><span aria-hidden="true">›</span>
+      <button type="button" className="ps-link pa5-be-f" data-pa5="be-foot" data-court={f ?? ""} onClick={() => navigate(beViewPath(f))}>
+        <span>{beFooter(total, f)}</span><svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 6l6 6-6 6" /></svg>
       </button>
+      </div>
     </div>
   );
 };

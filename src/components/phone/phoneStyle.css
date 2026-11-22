@@ -2,7 +2,8 @@
    Below 768px only, on the token sheet's own roots (`.sa-shellframe`, every portalled `.pa-layer`), on the `--ps-*`
    tokens (phoneTokens.css). The ref's part CSS is ported as it stands; three places depart, each to keep the sheet's
    own rules (P19, P20), and each is named in the report:
-     - a hairline between rows is a 1px top border, not an inset shadow (P20: two shadows and nothing else);
+     - a hairline between rows, and the need pill's outline, are 1px borders, not inset shadows (P20: two shadows and
+       nothing else);
      - the tabs' rule under the strip is a border, not a shadow (P20);
      - the round ends of the tab underline, a Birds-eye bar and a loading shape are fully round (P19), not 2px / 5px / 8px.
    ⚠️ NEW `ps-` CLASSES BESIDE THE PHONE'S OWN. `.pa4-card` (24, the v4 shadow), `.pa4-cta` (56), `.pa4-tap`, `.pa4-grp`,
@@ -91,7 +92,7 @@
   /* ── the need pill on navy (ref `.need`): an outline with the blush dot, inside a 48 target ── */
   :is(.sa-shellframe, .pa-layer) .ps-need {
     display: inline-flex; align-items: center; gap: var(--ps-s2); height: 32px; padding: 0 var(--ps-s3); border-radius: 999px; white-space: nowrap;
-    background: rgba(232, 200, 188, 0.16); color: #fff; box-shadow: inset 0 0 0 1px rgba(232, 200, 188, 0.5); font: var(--ps-label);
+    background: rgba(232, 200, 188, 0.16); color: #fff; border: 1px solid rgba(232, 200, 188, 0.5); box-sizing: border-box; font: var(--ps-label);
   }
   :is(.sa-shellframe, .pa-layer) .ps-need > i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--ps-blush); }
 
@@ -116,4 +117,60 @@
   :is(.sa-shellframe, .pa-layer) .ps-tabs > * { flex: 1; position: relative; min-height: var(--ps-tap); text-align: center; font: 600 14px/48px var(--pa-sans); color: var(--ps-muted); border: 0; background: none; }
   :is(.sa-shellframe, .pa-layer) .ps-tabs > .on { color: var(--ps-navy); }
   :is(.sa-shellframe, .pa-layer) .ps-tabs > .on::after { content: ""; position: absolute; left: 24%; right: 24%; bottom: 0; height: 3px; border-radius: 999px; background: var(--ps-navy); }
+}
+
+
+/* ── TODAY, TO THE SHEET (Phase 3; design-refs/phone-style-v1/phone-today-v6.html) — the phone's own parts that only
+   Today renders, or Today's instance of a shared one (scoped by the attribute it already carries) ── */
+@media (max-width: 767.98px) {
+  /* the slim pinned header on Today: 56 high, the title at 20 (P8; ref `.slim`) */
+  .pa4-mini.pa5-mini[data-pin="today"] { min-height: calc(56px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) var(--ps-s1) 0 var(--ps-s4); }
+  .pa4-mini.pa5-mini[data-pin="today"] .t { font: 400 20px/1.1 var(--ps-type) !important; }
+  /* Today's tab strip: 48 high on white with the navy underline, labels at 14 (ref `.tabs`) */
+  .pa5 .pa5-tabs[data-page="today"] { background: var(--ps-card); border-bottom: 1px solid var(--ps-rule); padding: 0; }
+  .pa5 .pa5-tabs[data-page="today"] > button { min-height: var(--ps-tap); font: var(--ps-label); line-height: 48px; color: var(--ps-muted); }
+  .pa5 .pa5-tabs[data-page="today"] > button.on { color: var(--ps-navy); }
+  .pa5 .pa5-tabs[data-page="today"] > button.on::after { left: 24%; right: 24%; bottom: 0; border-radius: 999px; }
+  .pa5 .pa5-tabs[data-page="today"].pin { box-shadow: none; }
+
+  /* ── the header (ref `.hd`): one 16 gutter; the title 28; the one hero, the numeral, at 56; its label and the day
+     line at 14; the pattern at the ref's lower strength — the same artwork under half a navy veil (ref .035 against
+     the app's .07); the chart's Today point with its soft ring; axis labels at 12 in the system font; the Mentor at 76 ── */
+  .pa5 .pa5-hd { padding-left: var(--ps-gutter); padding-right: var(--ps-gutter); background-image: linear-gradient(rgba(42, 58, 82, 0.5), rgba(42, 58, 82, 0.5)), var(--pa-doodle); }
+  .pa5 .pa5-hd .pa5-hd-h { font: var(--ps-title) !important; }
+  .pa5 .pa5-hd .pa5-hd-day { font: var(--ps-secondary); color: var(--ps-on-navy); }
+  .pa5 .pa5-hd .pa5-hd-n { font: var(--ps-hero) !important; letter-spacing: -1px; font-variant-numeric: tabular-nums; }
+  .pa5 .pa5-hd .pa5-hd-cap { font: var(--ps-secondary); color: var(--ps-on-navy); }
+  .pa5 .pa5-hd .pa5-hd-chg { font: var(--ps-secondary); }
+  .pa5 .pa5-hd .pa5-need { min-height: var(--ps-tap); }
+  .pa5 .pa5-hd .pa5-ch { margin: var(--ps-s2) calc(-1 * var(--ps-gutter)) 0; }
+  .pa5 .pa5-hd .pa5-ch-d { width: 12px; height: 12px; margin: -6px 0 0 -6px; box-shadow: none; outline: 7px solid rgba(232, 200, 188, 0.22); }
+  .pa5 .pa5-hd .pa5-ch-tag { font: 600 12px/1.2 var(--pa-sans) !important; }
+  .pa5 .pa5-hd .pa5-ch-x span { font: var(--ps-caption) !important; color: var(--ps-on-navy); }
+  .pa5 .pa5-hd .pa5-hd-m { width: 76px; }
+
+  /* ── the Birds-eye block (ref `.tls`, `.hdg`, `.card`, `.ber`): tiles, the heading on the page, the rows in a card.
+     The engine, the window, the order and the past-date drawing are untouched; the track still starts 116 in
+     (the name column 104 and the 12 between, ref `.ber`), so every inline position is the same arithmetic. ── */
+  .pa5 .pa5-be .pa5-be-l { min-height: 0; color: var(--ps-ink); }
+  .pa5 .pa5-be .pa5-be-x { min-height: var(--ps-tap); margin: -12px 0; font: var(--ps-label); color: var(--ps-navy); }
+  .pa5 .pa5-be-card .pa5-be-b { margin: 0 var(--ps-gutter); padding: 0 0 var(--ps-s1); border-top: 0; }
+  .pa5 .pa5-be-card .pa5-be-row { height: 40px; border-bottom: 0; border-top: 1px solid var(--ps-rule); }
+  .pa5 .pa5-be-card .pa5-be-row.op { background: transparent; }
+  .pa5 .pa5-be-card .pa5-be-nm { width: 104px; margin-right: var(--ps-s3); padding-left: 0; gap: var(--ps-s2); font: 400 14px/1 var(--pa-sans); }
+  .pa5 .pa5-be-card .pa5-be-tk { height: 10px; }
+  .pa5 .pa5-be-card .pa5-be-tk i { height: 10px; border-radius: 999px; box-shadow: none; }
+  .pa5 .pa5-be-card .pa5-be-tk .pa5-be-rm.off { border-radius: 999px 0 0 999px; }
+  .pa5 .pa5-be-card .pa5-be-tk .pa5-be-dp { border-radius: 0 999px 999px 0; }
+  .pa5 .pa5-be-card .pa5-be-tk s { top: -3px; }
+  .pa5 .pa5-be-card .pa5-be-m em { font: var(--ps-caption) !important; top: 1.5rem; }
+  .pa5 .pa5-be-card .pa5-be-m strong { font: 600 12px/1.5 var(--pa-sans) !important; border-radius: 999px; }
+  .pa5 .pa5-be-card .pa5-be-d { border-radius: 0; border-bottom: 0; border-top: 1px solid var(--ps-rule); }
+  .pa5 .pa5-be-card .pa5-be-few { margin: 0; padding: var(--ps-s3) var(--ps-gutter); }
+  .pa5 .pa5-be .pa5-be-f { min-height: var(--ps-tap); padding: 0 var(--ps-gutter); font: var(--ps-label); color: var(--ps-navy); }
+
+  /* ── the page under it: "See all queries" as the sheet's text link, inside the one gutter ── */
+  .pa5 .ps-today { padding-bottom: var(--ps-s5); }
+  .pa5 .ps-today-all { margin: var(--ps-s2) var(--ps-gutter) 0; }
+  .pa5 .ps-today-all .ps-tlink { width: 100%; }
 }

@@ -54,7 +54,7 @@ export const V5Dock: React.FC<{
   const tab = (t: (typeof V3_TABS)[number]) => {
     const active = on === t.key;
     return (
-      <button key={t.key} type="button" className={active ? "on" : ""} data-pa5="dock-tab" data-pa4="tab" data-pa3="tab" data-tab={t.key}
+      <button key={t.key} type="button" className={active ? "on" : ""} data-pa5="dock-tab" data-pa4="tab" data-pa3="tab" data-tab={t.key} data-ps-cap=""
         aria-current={active ? "page" : undefined} aria-label={t.key === "todo" ? todoLabel(badge) : t.label}
         onClick={() => onGo(t.path, t.key)}>
         <span className="pa5-dic"><Ic d={ICON[t.key]} />{t.key === "todo" && badge > 0 ? <i className="pa5-bdg" data-pa5="badge" data-n={badge} aria-hidden="true">{badge}</i> : null}</span>
