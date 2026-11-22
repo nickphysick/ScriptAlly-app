@@ -152,7 +152,7 @@
 .pk62 .k62-empty .k62-tk { background: none; box-shadow: inset 0 0 0 1.5px #cfc6b8; }
 .pk62 .k62-ck { flex: none; width: 104px; font-size: var(--sp-body-size); color: var(--sp-quiet); }
 .pk62 .k62-cv { flex: 1; min-width: 0; }
-.pk62 .k62-cv b { font: 600 17px/1.3 var(--k62-serif); }
+.pk62 .k62-cv b { font: 600 var(--sp-body-size)/1.3 var(--k62-serif); }
 .pk62 .k62-cv em { display: block; font: 400 var(--sp-sec-size)/1.35 var(--k62-serif); font-style: normal; color: var(--sp-quiet); }
 .pk62 .k62-empty .k62-cv b { font-weight: 400; color: var(--sp-quiet); }
 .pk62 .k62-cr-h > .k62-go { flex: none; }
@@ -181,7 +181,7 @@
 .pk62 .k62-tag-in { min-height: 32px; width: 180px; padding: 0 14px; border: 0; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1.5px var(--k62-btn); font: 400 14px/1 var(--k62-serif); outline: none; }
 .pk62 .k62-lockl { display: flex; align-items: center; gap: 10px; margin-top: 16px; padding: 12px 14px; border-radius: 12px; background: #f7f4ef; font-size: 15px; color: var(--sp-muted); }
 .pk62 .k62-lockl .k62-svg { width: 16px; height: 16px; }
-.pk62 .k62-dfoot { padding: 15px 28px 17px; border-top: 1px solid var(--k62-hair); font-size: 15px; color: var(--sp-quiet); }
+.pk62 .k62-dfoot { padding: 15px 28px 17px; border-top: 1px solid var(--k62-hair); font-size: var(--sp-body-size); color: var(--sp-quiet); }
 
 /* What an agent receives: a sheet of paper on the desk */
 .pk62 .k62-mat { padding: 22px 22px 20px; border-radius: 12px; background: #f5f1eb; }
@@ -198,7 +198,7 @@
 .pk62 .k62-encl { margin-top: 18px; }
 .pk62 .k62-encl h4 { margin: 0 0 10px; font: var(--sp-h-small) !important; color: var(--sp-muted); }
 .pk62 .k62-encl ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-.pk62 .k62-encl li { display: flex; align-items: center; gap: 12px; font-size: 15px; }
+.pk62 .k62-encl li { display: flex; align-items: center; gap: 12px; font-size: var(--sp-body-size); }
 .pk62 .k62-encl li .k62-svg { width: 16px; height: 16px; color: var(--k62-soft); }
 .pk62 .k62-encl li b { font-weight: 600; }
 .pk62 .k62-encl li span span { color: var(--sp-quiet); }
@@ -240,11 +240,11 @@
 .pk62 .k62-tbl tbody tr:focus-visible { outline-offset: -2px; }
 .pk62 .k62-who { display: flex; align-items: center; gap: 14px; }
 .pk62 .k62-who .k62-disc { background: #f5f1eb; width: 38px; height: 38px; }
-.pk62 .k62-who b { display: block; font: 600 16.5px/1.3 var(--k62-serif); }
+.pk62 .k62-who b { display: block; font: 600 var(--sp-body-size)/1.3 var(--k62-serif); }
 .pk62 .k62-who b .k62-ptag { margin-left: 10px; }
 .pk62 .k62-who em { display: block; font: 400 14px/1.3 var(--k62-serif); font-style: normal; color: var(--sp-quiet); }
 .pk62 .k62-tbl td.k62-tell { font: 600 var(--sp-body-size)/1.3 var(--k62-serif); }
-.pk62 .k62-tbl-n { padding: 20px 28px 22px; border-top: 1px solid var(--k62-hair); font-size: 15px; color: var(--sp-quiet); }
+.pk62 .k62-tbl-n { padding: 20px 28px 22px; border-top: 1px solid var(--k62-hair); font-size: var(--sp-body-size); color: var(--sp-quiet); }
 
 /* ══ §6 · How it works: the storyboard, the pop-up, day one ══ */
 .pk62 .k62-first { margin-top: 40px; } /* Consistency roll-out v2, Phase 1: 40 under the navy header */
@@ -274,13 +274,13 @@
 .k62-sb-tag .k62-svg { width: 14px; height: 14px; }
 .k62-sb-pk { grid-column: 2 / 6; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin: 0 12px 12px 0; padding: 16px 18px; border-radius: 18px; background: var(--k62-navy); color: #fffaf3; box-shadow: 7px 7px 0 -1px #6c7890, 14px 14px 0 -2px #a9b1c0; }
 .k62-sb-pk > b { margin-right: 8px; font: 400 21px/1.2 var(--k62-type); }
-.k62-sb-s { flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 8px 14px; border-radius: 10px; background: #fffaf3; color: var(--k62-ink); font: 600 15.5px/1.25 var(--k62-serif); }
+.k62-sb-s { flex: 1 1 150px; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 8px 14px; border-radius: 10px; background: #fffaf3; color: var(--k62-ink); font: 600 var(--sp-body-size)/1.25 var(--k62-serif); }
 .k62-sb-s .k62-svg { width: 17px; height: 17px; color: var(--k62-soft); }
 .k62-sb-s.k62-opt { background: none; color: #fffaf3; box-shadow: inset 0 0 0 1.5px rgba(255, 250, 243, .5); font-weight: 400; }
 .k62-sb-plus { font: 400 20px/1 var(--k62-type); color: #dcd6cc; }
 .k62-sb-pk p { flex-basis: 100%; margin: 2px 2px 0; font-size: var(--sp-sec-size); color: #dcd6cc; }
 .k62-sb-n { grid-column: 2 / 6; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.k62-sb-t { display: inline-flex; align-items: center; gap: 9px; min-height: 46px; padding: 8px 18px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1.5px #d9d1c5; font: 600 15.5px/1.25 var(--k62-serif); }
+.k62-sb-t { display: inline-flex; align-items: center; gap: 9px; min-height: 46px; padding: 8px 18px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1.5px #d9d1c5; font: 600 var(--sp-body-size)/1.25 var(--k62-serif); }
 .k62-sb-t.k62-again { background: #f5e3db; box-shadow: none; }
 .k62-sb-t .k62-svg, .k62-sb-n > .k62-svg { width: 17px; height: 17px; }
 .k62-sb-n > .k62-svg { color: var(--k62-btn); }
