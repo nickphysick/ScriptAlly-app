@@ -353,7 +353,7 @@ export const QcQueryCard149: React.FC<QcQueryCard149Props> = (p) => {
         tab={tab} onTab={setTab}
         notes={<NotesTab158 first={p.agent.first || "the agent"} nowMs={nowMs} resetKey={r.id} onAdd={p.onAddNote}
           notes={p.notes.map((n) => ({ id: n.id, text: n.text, ms: n.ms ?? null, pinned: !!n.pinned }))} quotes={quotesOf(v152.steps)}
-          onPin={p.onPinNote ?? null} onTask={p.onNoteTask ?? null} onCork={p.onNoteCork ?? null} />}
+          onPin={p.onPinNote ?? null} onTask={p.onNoteTask ?? null} onCork={p.onNoteCork ?? null} ghost />}
         onClose={p.onClose}
         onPencil={() => (p.onPencil152 ? p.onPencil152() : p.onMode("edit"))}
         onEditStep={(id) => (p.onEditStep152 ? p.onEditStep152(id) : (setTab("tracking"), p.onMode("edit")))}

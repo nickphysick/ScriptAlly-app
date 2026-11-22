@@ -52,6 +52,7 @@ import { useLanding160, type Motion160 } from "./useLanding160";
 import { Track153 } from "./QcSlip153";
 import { bookLine164, stripStatus164 } from "../../../lib/qc164";
 import "./qcv164.css";
+import "./qcv167.css";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -552,7 +553,9 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const lastSent = [...groups].reverse().find((g) => !g.pending && g.activityId)?.activityId ?? null;
   const matPane = (
     <MaterialsTab158 groups={groups} packageName={!d.free ? p.packageName ?? null : null}
-      onAddSent={queryStepId ? () => openStep(queryStepId) : null} onEditWent={lastSent ? () => openStep(lastSent) : null} />
+      onAddSent={queryStepId ? () => openStep(queryStepId) : null} onEditWent={lastSent ? () => openStep(lastSent) : null}
+      /* v167 — a group's ghost row: what went, in its send's step editor; what is going, in the send journey */
+      onAddTo={(g) => { if (g.pending) p.onFoot?.("sent"); else { const id = g.activityId ?? queryStepId; if (id) openStep(id); } }} />
   );
 
   return (

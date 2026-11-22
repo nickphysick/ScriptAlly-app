@@ -7,15 +7,18 @@
  * website), what the agent asks for as a checklist, the wishlist, and two links. The editing view (AgentEditPane) is
  * QcCard152's, untouched.
  *
+ * Query card v167 §A — THE SAME SHELL WHATEVER IS RECORDED: a missing value is a ghost bar in its place (QcGhost167),
+ * never a sentence, a dash or a link. The three boxes are a fixed 86px, their value 15.5px on one line.
+ *
  * ⚠️ THE AGENT IS ALWAYS NAMED. Never "he", "she" or "they": the shared method words' "Through their submission form" is
  *    said "By online form" here (`takesWords`).
- * ⚠️ AN UNRECORDED VALUE IS A LINK, never a dash: it opens the agent's card at that detail (`onField`).
  * ⚠️ COPY EMAIL KEEPS THE PAGE'S BEHAVIOUR AND TOAST (`onCopyEmail`); the contact row never wraps, the address is cut.
  */
 import { MaterialItemIcon } from "../../shared/MaterialIcon";
 import React from "react";
 import type { AskChip } from "../../../lib/qcThread152";
 import { dayLabel } from "../../../lib/qcThread152";
+import { Bar, Ghost, editable } from "./QcGhost167";
 
 type Field = "wishlist" | "email" | "website" | "method" | "reply" | "materials" | null;
 type Dbl = (k: "weeks" | "asks" | "method" | "wishlist" | "email" | "website") => Record<string, unknown>;
@@ -68,25 +71,37 @@ export const NxSite: React.FC<{ label: string; href: string | null; extra?: Reco
   ? <a className="nx-btn gh" data-qc158="website" href={href} target="_blank" rel="noreferrer" {...extra}>{WEB}{label}</a>
   : <span className="nx-btn gh" data-qc158="website" {...extra}>{WEB}{label}</span>);
 
+/** v167 — a fact box on the query card: a fixed 86px, the value on one line, a ghost bar where nothing is recorded */
+const Tile: React.FC<{ k: string; label: string; value: React.ReactNode | null; sub?: React.ReactNode; ghost: { w: number; words: string } | null;
+  open: (() => void) | null; valueClass?: string; extra?: Record<string, unknown> }> = ({ k, label, value, sub, ghost, open, valueClass, extra }) => (
+  <div className="nx-box qc167-tile" data-qc158="box" data-qc167="tile" data-k={k} data-ghost={value == null ? "" : undefined}
+    {...editable(value == null && ghost ? `${label}: + ${ghost.words}` : `${label}: edit`, open)} {...extra}>
+    <small>{label}</small>
+    {value == null
+      ? <b data-qc158="value" className="qc167-gv">{ghost ? <Ghost w={ghost.w} words={open ? ghost.words : null} /> : null}</b>
+      : <b data-qc158="value" className={valueClass}>{value}</b>}
+    <i data-qc167="sub">{value != null && sub ? sub : " "}</i>
+  </div>
+);
+
 export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
-  const add = (label: string, f: Field, k: string) => (
-    <button type="button" className="nx-lk" data-qc158="add" data-k={k} onClick={() => p.onField(f)}>{label}</button>
-  );
   const how = takesWords(p.how);
   const site = p.website.replace(/^https?:\/\//, "").replace(/\/$/, "");
+  const heardSub = p.lastHeardMs != null ? (days(p.nowMs, p.lastHeardMs) === 0 ? "today" : `${pl(days(p.nowMs, p.lastHeardMs), "day")} ago`)
+    : p.sentMs != null ? <>since {dayLabel(p.sentMs, p.nowMs)}</> : null;
   return (
-    <div className="nx" data-qc152="agent-pane" data-qc158="agent">
+    <div className="nx" data-qc152="agent-pane" data-qc158="agent" data-qc167="agent">
       <div className="nx-boxes" data-qc158="boxes">
-        <NxBox k="reply" label="Replies in" extra={p.dbl("weeks")}
-          value={p.weeks != null ? <>About {pl(p.weeks, "week")}</> : add("Add reply time", "reply", "reply")}
+        <Tile k="reply" label="Replies in" extra={p.dbl("weeks")} open={() => p.onField("reply")}
+          value={p.weeks != null ? <>About {pl(p.weeks, "week")}</> : null} ghost={{ w: 70, words: "Add reply time" }}
           sub={p.nrmn === true ? "no reply means no" : p.nrmn === false ? "always replies" : null} />
-        <NxBox k="method" label="Takes queries" extra={p.dbl("method")}
-          value={how ? how : add(`Add how ${p.first} takes queries`, "method", "method")}
+        <Tile k="method" label="Takes queries" extra={p.dbl("method")} open={() => p.onField("method")}
+          value={how ?? null} ghost={{ w: 62, words: "Add how" }}
           sub={p.queriedVia ? <>you queried {p.queriedVia}</> : null} />
-        <NxBox k="heard" label="Last heard"
-          value={p.lastHeardMs != null ? dayLabel(p.lastHeardMs, p.nowMs) : "Not yet"}
-          sub={p.lastHeardMs != null ? (days(p.nowMs, p.lastHeardMs) === 0 ? "today" : `${pl(days(p.nowMs, p.lastHeardMs), "day")} ago`)
-            : p.sentMs != null ? <>since {dayLabel(p.sentMs, p.nowMs)}</> : null} />
+        {/* Last heard is the thread's, never the profile's: not editable, and "Not yet" (smaller, italic, grey) until a reply */}
+        <Tile k="heard" label="Last heard" open={null} ghost={null}
+          value={p.lastHeardMs != null ? dayLabel(p.lastHeardMs, p.nowMs) : "Not yet"} valueClass={p.lastHeardMs != null ? undefined : "qc167-notyet"}
+          sub={heardSub} />
       </div>
 
       <div className="nx-reach" data-qc158="contact">
@@ -98,10 +113,10 @@ export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
           : <button type="button" className="nx-btn gh" data-qc158="add" data-k="website" onClick={() => p.onField("website")}>+ Add a website</button>}
       </div>
 
-      <section data-qc158="asks" {...p.dbl("asks")}>
-        <h4>What {p.first} asks for</h4>
+      <section data-qc158="asks" data-qc167="asks" {...p.dbl("asks")}>
+        <h4 data-qc167="asks-head">What {p.first} asks for</h4>
         {p.hasAsks ? <>
-          <ul className="nx-list">
+          <ul className="nx-list qc167-asks" data-qc167="asks-list" {...editable(`What ${p.first} asks for: edit`, () => p.onField("materials"))}>
             {p.asks.chips.map((c) => (
               <li key={c.label} data-qc158="ask" data-sent={c.sent ? "" : undefined}>
                 <span className={`nx-tick${c.sent ? "" : " no"}`} aria-hidden="true">{TICK}</span>
@@ -113,13 +128,20 @@ export const AgentTab158: React.FC<AgentTab158Props> = (p) => {
           <p className="nx-sum" data-qc158="ask-sum">{p.asks.missing.length
             ? `You didn’t send ${p.asks.missing.map((x) => x.toLowerCase()).join(", ")}.`
             : `You sent everything ${p.first} asks for.`}</p>
-        </> : <p className="nx-empty">Nothing saved yet. {add(`Add what ${p.first} asks for`, "materials", "asks")}</p>}
+        </> : (
+          <div className="qc167-gsw" data-qc167="asks-list" data-ghost="" {...editable(`+ Add what ${p.first} asks for`, () => p.onField("materials"))}>
+            <ul className="nx-list qc167-gl">
+              {[38, 30, 46].map((w) => <li key={w}><span className="nx-tick no" aria-hidden="true" /><Bar w={w} /></li>)}
+            </ul>
+            <span className="qc167-gso" data-qc167="words" aria-hidden="true">+ Add what {p.first} asks for</span>
+          </div>
+        )}
       </section>
 
       <section data-qc158="wishlist" {...p.dbl("wishlist")}>
         <h4>Wishlist <em>in {p.first}’s words</em></h4>
         {p.wishlist ? <p className="nx-quote" data-qc152="wishlist">{p.wishlist}</p>
-          : <p className="nx-empty">Nothing saved yet. {add(`Add ${p.first}’s wishlist`, "wishlist", "wishlist")}</p>}
+          : <p className="nx-empty">Nothing saved yet. <button type="button" className="nx-lk" data-qc158="add" data-k="wishlist" onClick={() => p.onField("wishlist")}>Add {p.first}’s wishlist</button></p>}
       </section>
 
       <div className="nx-foot">

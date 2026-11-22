@@ -8,6 +8,9 @@
  * (and when it was asked for) to its right, and the items in a box. A request not yet answered is a white box outlined
  * in navy ("needs you"), each item "not sent yet".
  * ⚠️ COLOUR IS THE STAGE (lib/stageColours, set as --d on the disc); the mark is ink; navy is only the pending outline.
+ * Query card v167 §A — a group with nothing recorded keeps its box and shows ONE ghost row (QcGhost167), never "Nothing
+ * recorded"; "not sent yet" stays on a pending one. The row is the way in: what went (the send's step editor), or what
+ * is going (the send journey).
  */
 import React from "react";
 import { StatusDot } from "../../StatusDot";
@@ -15,6 +18,7 @@ import { STAGE_COLOURS, stageOf } from "../../../lib/stageColours";
 import type { MatGroup } from "../../../lib/qcThread152";
 import { chipIcon } from "./QcBubble152";
 import { sentenceCase } from "./QcAgent158";
+import { Ghost, editable } from "./QcGhost167";
 
 export interface MaterialsTab158Props {
   groups: MatGroup[];
@@ -22,6 +26,8 @@ export interface MaterialsTab158Props {
   packageName: string | null;
   onAddSent: (() => void) | null;
   onEditWent: (() => void) | null;
+  /** v167 — a group's ghost row: add what went with it (null: the row is not a way in) */
+  onAddTo?: ((g: MatGroup) => void) | null;
 }
 
 export const MaterialsTab158: React.FC<MaterialsTab158Props> = (p) => (
@@ -40,7 +46,13 @@ export const MaterialsTab158: React.FC<MaterialsTab158Props> = (p) => (
                 {chipIcon(c.icon, 20)}{sentenceCase(c.label)}
                 {g.pending ? <span className="r">not sent yet</span> : c.detail ? <span className="r">{c.detail}</span> : null}
               </li>
-            )) : <li data-qc158="item" className="none"><em>Nothing recorded</em>{g.pending ? <span className="r">not sent yet</span> : null}</li>}
+            )) : (
+              <li data-qc158="item" data-qc167="ghost-row" data-ghost="" className="qc167-grow"
+                {...editable(`+ ${g.pending ? "Add what’s going" : "Add what went"}`, p.onAddTo ? () => p.onAddTo!(g) : null)}>
+                <Ghost w={34} words={p.onAddTo ? (g.pending ? "Add what’s going" : "Add what went") : null} />
+                {g.pending ? <span className="r">not sent yet</span> : null}
+              </li>
+            )}
           </ul>
         </div>
       ))}

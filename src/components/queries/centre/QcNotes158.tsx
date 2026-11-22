@@ -18,6 +18,7 @@ import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { StatusDot } from "../../StatusDot";
 import { QueryStatus } from "../../../types";
 import { dayLabel, sideOf, tintOf, type ThreadStepIn } from "../../../lib/qcThread152";
+import { Bar } from "./QcGhost167";
 
 export interface NoteIn { id: string; text: string; ms: number | null; pinned: boolean; /** Agent card v2 — an undated note drawn first among the notes (the agent's old notes string) */ top?: boolean }
 export interface QuoteIn { key: string; status: QueryStatus | null; kind: "holding" | null; text: string; ms: number | null; fill: string; edge: string }
@@ -76,6 +77,9 @@ export interface NotesTab158Props {
   onEdit?: ((id: string, text: string) => Promise<boolean>) | null;
   /** Agent card v2 — a writer's note deleted (the caller offers Undo); absent: no Delete */
   onDelete?: ((id: string) => void) | null;
+  /** Query card v167 §A — with no notes, two ghost note shapes in place of the empty words (the query card passes it;
+   *  the agent card's empty state is its own and unchanged) */
+  ghost?: boolean;
 }
 
 export const NotesTab158: React.FC<NotesTab158Props> = (p) => {
@@ -117,7 +121,12 @@ export const NotesTab158: React.FC<NotesTab158Props> = (p) => {
   return (
     <div className="nx-notes" data-qc152="notes" data-qc158="notes">
       <div className="nx-nl" ref={list} data-qc158="list">
-        {entries.length === 0 ? (
+        {entries.length === 0 && p.ghost ? (
+          <>
+            <div className="qc167-gn" data-qc167="ghost-note" data-ghost=""><Bar w={22} /><Bar w={88} /><Bar w={56} /></div>
+            <div className="qc167-gn dim" data-qc167="ghost-note" data-ghost=""><Bar w={18} /><Bar w={70} /></div>
+          </>
+        ) : entries.length === 0 ? (
           <div className="nx-nempty" data-qc158="empty">
             <b>Nothing noted yet</b>
             <span>{p.emptySub ?? `This is the place for why you picked ${p.first}, and what you’d change if this one’s a no.`}</span>

@@ -32,12 +32,15 @@ describe("QC158-5 (source) three fact boxes", () => {
     expect(h).toContain("you queried by email");
     expect(h).toContain("29 days ago");
     expect(html({ nrmn: false })).toContain("always replies");
-    expect(html({ lastHeardMs: null })).toMatch(/>Not yet<\/b><i>since 28 Sept?<\/i>/);
+    /* v167 — "Not yet" is smaller, italic, grey (its own class); "since {sent date}" beneath as built */
+    expect(html({ lastHeardMs: null })).toMatch(/class="qc167-notyet">Not yet<\/b><i data-qc167="sub">since 28 Sept?<\/i>/);
   });
-  it("an unrecorded value is a link that opens the agent's card at it, never a dash", () => {
+  /* v167 §A re-points this lock: an unrecorded value is a ghost bar with its "+ Add …" words over it (the box itself is
+     the way in), never a link, a sentence or a dash */
+  it("an unrecorded value is a ghost bar with its words over it, never a dash", () => {
     const h = html({ weeks: null, how: null });
-    expect(h).toContain(">Add reply time</button>");
-    expect(h).toContain(">Add how Fenella takes queries</button>");
+    expect(h).toMatch(/data-k="reply" data-ghost=""[^]*?data-qc167="bar"[^]*?>\+ Add reply time<\/span>/);
+    expect(h).toMatch(/data-k="method" data-ghost=""[^]*?data-qc167="bar"[^]*?>\+ Add how<\/span>/);
     expect(h).not.toMatch(/>—</);
   });
   it("the boxes centre their contents top to bottom, and are the grid card's boxes", () => {
@@ -60,7 +63,11 @@ describe("QC158-6 (source) what the agent asks for", () => {
     expect(rows[1]).toMatch(/class="nx-tick no"[^]*>not sent</);
     expect(h).toContain("You didn’t send synopsis, first 5 chapters.");
     expect(html()).toContain("You sent everything Fenella asks for.");
-    expect(html({ hasAsks: false, asks: { chips: [], missing: [] } })).toMatch(/Nothing saved yet\. <button[^>]*>Add what Fenella asks for<\/button>/);
+    /* v167 §A — nothing recorded: three ghost rows and the words over them, no sentence */
+    const none = html({ hasAsks: false, asks: { chips: [], missing: [] } });
+    expect(none).not.toContain("Nothing saved yet");
+    expect((none.match(/data-qc167="bar"/g) ?? []).length).toBeGreaterThanOrEqual(3);
+    expect(none).toContain(">+ Add what Fenella asks for<");
   });
   it("items read in sentence case", () => {
     expect(sentenceCase("FIRST 5 CHAPTERS")).toBe("First 5 chapters");
