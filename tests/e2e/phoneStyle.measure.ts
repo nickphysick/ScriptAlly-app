@@ -108,7 +108,7 @@ test.describe("PS2 lab", () => {
           pt: cs.paddingTop, pb: cs.paddingBottom, pl: cs.paddingLeft, pr: cs.paddingRight, gap: cs.columnGap };
       };
       const parts: Record<string, unknown> = {};
-      for (const k of ["slim", "tab-on", "tile", "tile-navy", "tile-q", "hdg", "lead", "lead-n", "head", "cta", "card", "row", "row-press", "name", "sec", "time", "link", "ber", "ber-bar", "tlink", "chip", "need", "snack", "skel"]) parts[k] = read(k);
+      for (const k of ["slim", "tab-on", "tile", "tile-navy", "tile-q", "hdg", "lead", "lead-n", "head", "cta", "card", "row", "row-press", "name", "sec", "time", "link", "ber", "ber-card", "ber-bar", "tlink", "chip", "need", "snack", "skel"]) parts[k] = read(k);
       parts["slim-t"] = read("slim", ".ps-slim-t"); parts["tile-b"] = read("tile", "b"); parts["tile-s"] = read("tile", "span"); parts["tile-qb"] = read("tile-q", "b"); parts["lead-b"] = read("lead-n", "b");
       parts["lead-cap"] = read("lead-n", ".ps-cap"); parts["disc"] = read("row", ".ps-disc"); parts["ber-nm"] = read("ber", ".ps-ber-nm");
       return { tok, parts, pageBg: getComputedStyle(lab).backgroundColor };
@@ -148,7 +148,7 @@ test.describe("PS2 lab", () => {
     { const v = has("sec"); L.check("PS2", "secondary text on a card is the grey", v.c === t.muted, v.c); }
     { const v = has("time"); L.check("PS2", "a row's time at 14", v.fs === "14px" && v.fw === "400", `${v.fs} ${v.fw}`); }
     { const v = has("link"); L.check("PS2", "a link row: 48 high, 14 semibold, navy", v.h === 48 && v.fs === t.label.fs && v.fw === t.label.fw && v.c === t.navy, `${v.h} ${v.fs} ${v.fw} ${v.c}`); }
-    { const v = has("ber"); L.check("PS2", "a Birds-eye row is 40 high", v.h === 40, String(v.h)); }
+    { const v = has("ber"); const c = has("ber-card"); L.check("PS2", "a Birds-eye row is 40 high, 16 inside its card", v.h === 40 && Math.abs(v.l - c.l - 16) < 0.6 && Math.abs(v.rr - c.rr - 16) < 0.6, `${v.h} · ${v.l - c.l} / ${v.rr - c.rr}`); }
     { const v = has("ber-nm"); L.check("PS2", "its name column is 104 wide", v.w === 104, String(v.w)); }
     { const v = has("ber-bar"); L.check("PS2", "its bar is 10 high with round ends", v.h === 10 && round(v), `${v.h} ${v.rad}`); }
     { const v = has("tlink"); L.check("PS2", "a text link: 48 high, 16 semibold, navy", v.h === 48 && v.fs === "16px" && v.fw === "600" && v.c === t.navy, `${v.h} ${v.fs} ${v.c}`); }

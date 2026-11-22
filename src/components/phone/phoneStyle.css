@@ -104,7 +104,7 @@
   :is(.sa-shellframe, .pa-layer) .ps-skel i { display: block; background: var(--ps-fill); border-radius: 999px; }
 
   /* ── a Birds-eye row (ref `.ber`): 40 high inside a card, the name column 104, bars 10 high with round ends ── */
-  :is(.sa-shellframe, .pa-layer) .ps-ber { display: flex; align-items: center; gap: var(--ps-s3); height: 40px; font: 400 14px/1 var(--pa-sans); color: var(--ps-ink); }
+  :is(.sa-shellframe, .pa-layer) .ps-ber { display: flex; align-items: center; gap: var(--ps-s3); height: 40px; margin: 0 var(--ps-gutter); font: 400 14px/1 var(--pa-sans); color: var(--ps-ink); }
   :is(.sa-shellframe, .pa-layer) .ps-ber + .ps-ber { border-top: 1px solid var(--ps-rule); }
   :is(.sa-shellframe, .pa-layer) .ps-ber-nm { flex: none; width: 104px; display: flex; align-items: center; gap: var(--ps-s2); overflow: hidden; white-space: nowrap; }
   :is(.sa-shellframe, .pa-layer) .ps-ber-bx { flex: 1; height: 10px; position: relative; }
