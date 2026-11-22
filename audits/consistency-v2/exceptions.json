@@ -46,7 +46,7 @@
    "match": {
     "detail": "to the content below"
    },
-   "reason": "In flight: the Query Centre page (QcPage151) sits in list-filters-v1-1's files, audit-only at roll-out v1.1 (Phase 4 item 1).",
+   "reason": "In flight: the Query Centre page (QcPage151) sits in list-filters-v1-1's files, audit-only at roll-out v1.1 (Phase 4 item 1). Still in flight at main-green v1 (22 Nov): list-filters-v1-1 (032b49745, 19 Nov) is unmerged and changes QcPage151.tsx, qcv154.css, contactPrinciples.css and FilterPanel.tsx; no worktree holds it.",
    "source": "roll-out v1.1 report, section 6",
    "kind": "in-flight"
   },
@@ -56,7 +56,7 @@
     "agents"
    ],
    "match": {},
-   "reason": "In flight: the Contact list header (contactPrinciples) sits in list-filters-v1-1's files, audit-only at roll-out v1.1 (Phase 4 item 2).",
+   "reason": "In flight: the Contact list header (contactPrinciples) sits in list-filters-v1-1's files, audit-only at roll-out v1.1 (Phase 4 item 2). Still in flight at main-green v1 (22 Nov): list-filters-v1-1 (032b49745, 19 Nov) is unmerged and changes QcPage151.tsx, qcv154.css, contactPrinciples.css and FilterPanel.tsx; no worktree holds it.",
    "source": "roll-out v1.1 report, section 6",
    "kind": "in-flight"
   },
@@ -70,7 +70,7 @@
    "match": {
     "sel": "qc151-btn"
    },
-   "reason": "In flight: the Query Centre's buttons (QcPage151) sit in list-filters-v1-1's files, audit-only at roll-out v1.1 (Phase 4 item 1).",
+   "reason": "In flight: the Query Centre's buttons (QcPage151) sit in list-filters-v1-1's files, audit-only at roll-out v1.1 (Phase 4 item 1). Still in flight at main-green v1 (22 Nov): list-filters-v1-1 (032b49745, 19 Nov) is unmerged and changes QcPage151.tsx, qcv154.css, contactPrinciples.css and FilterPanel.tsx; no worktree holds it.",
    "source": "roll-out v1.1 report, section 6",
    "kind": "in-flight"
   },
@@ -99,7 +99,7 @@
    "match": {
     "sel": "qc152-rb"
    },
-   "reason": "Ruled (rulings v4, item 2, amended 22 Nov): the query card's and agent card's footer is padded 14 above and below the reply box and 24 at the sides, whatever height that gives (about 90); the reply box is not redesigned. The rules check measures these two footers by their padding. Today they are padded 12 14 14 14 (qcv152card.css .qc152-rb, qcv158.css .nf). Both files are audit-only: the live query-card-v167 branch edits them, so the style change waits for that session to land.",
+   "reason": "Ruled (rulings v4, item 2, amended 22 Nov): the query card's and agent card's footer is padded 14 above and below the reply box and 24 at the sides, whatever height that gives (about 90); the reply box is not redesigned. The rules check measures these two footers by their padding. Today they are padded 12 14 14 14 (qcv152card.css .qc152-rb, qcv158.css .nf). Both files are audit-only: the live query-card-v167 branch edits them, so the style change waits for that session to land. Still in flight at main-green v1 (22 Nov): query-card-v167 (and the dev lines …-qc167, …-qc167-cwu1) is unmerged and changes both files.",
    "source": "consistency wrap-up v1 (rulings v4)",
    "kind": "in-flight"
   },
