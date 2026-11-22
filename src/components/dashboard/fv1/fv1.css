@@ -87,7 +87,7 @@
   flex: 0 0 19px; height: 19px; margin-top: 1px; border-radius: 50%; box-sizing: border-box;
   border: 1.5px solid rgba(28, 19, 15, 0.3); display: grid; place-items: center;
 }
-.d58 .fv1-gsd { font: 400 14.5px/1.3 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv1-gsd { font: 400 var(--sp-sec-size)/1.3 var(--d58-serif) !important; color: var(--d58-ink); }
 .d58 .fv1-gsr.is-done .fv1-gsd { color: var(--sp-quiet); }
 .d58 .fv1-gsr.is-done > i { background: var(--d58-navy); border-color: var(--d58-navy); }
 .d58 .fv1-gsr.is-done > i::after {
