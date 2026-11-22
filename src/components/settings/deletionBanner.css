@@ -60,7 +60,7 @@
 }
 .del-banner-a:hover:not(:disabled) { background: #fff; border-color: rgba(140, 47, 47, 0.55); }
 .del-banner-a:disabled { opacity: 0.55; cursor: default; }
-.del-banner-a:focus-visible { outline: 2px solid #8c2f2f; outline-offset: 2px; }
+.del-banner-a:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ⚠️ BELOW md IT WRAPS RATHER THAN SHRINKING THE SENTENCE. The date is the information; a button
    that squeezes it onto three lines to stay on one row has the priority backwards. */

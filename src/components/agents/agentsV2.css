@@ -1235,7 +1235,7 @@
 .agv2 .ag-sortsel:focus-visible,
 .agv2 .ag-hoveracts button:focus-visible,
 .agv2 .ag-note-send:focus-visible {
-  outline: 2px solid var(--ag-accent);
+  outline: 2px solid var(--sp-anthracite);
   outline-offset: 2px;
 }
 .agv2 .ag-searchpill:focus-within { border-color: var(--ag-accent); }

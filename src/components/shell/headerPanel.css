@@ -56,7 +56,7 @@
 .hpanel .hpanel-b2:hover:not(:disabled) { background: rgba(244, 238, 229, 0.1); }
 /* disabled stays legible on the blue: the same fills, never a 45% wash over a dark ground */
 .hpanel .hpanel-b1:disabled, .hpanel .hpanel-b2:disabled { opacity: 1; cursor: default; }
-.hpanel :is(button, a, [tabindex]):focus-visible { outline: 2px solid var(--hpanel-stamp); outline-offset: 2px; }
+.hpanel :is(button, a, [tabindex]):focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 
 /* a drawing made for a light ground stands on a white disc (the Analytics band's `BandDisc` construction) */
 .hpanel-disc { display: block; aspect-ratio: 1; border-radius: 50%; background: #fff; overflow: hidden; }

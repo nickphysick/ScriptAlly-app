@@ -12,7 +12,7 @@
 @media (min-width: 768px) {
   /* ── the header: three columns on the page's own ground ─────────────────────────────────────────────────── */
   .qc1531-hd {
-    --ink: #1c130f; --mut: #5b4f47; --navy: #2a3a52; --cream: #f4eee5;
+    --ink: #1c130f; --mut: var(--sp-muted); --navy: #2a3a52; --cream: #f4eee5;
     box-sizing: border-box; display: grid; grid-template-columns: 190px minmax(0, 1fr) minmax(400px, 560px);
     align-items: center; gap: 36px; padding: 0 0 18px; color: var(--ink);
   }
@@ -27,7 +27,7 @@
   .qc1531-for { display: flex; align-items: center; gap: 18px; max-width: 640px; margin: 8px 0 12px; }
   .qc1531-for i { flex: 1 1 0; height: 1px; background: #cfc5b7; }
   :is(.qc151, .cl27) .qc1531-for span { flex: none; max-width: 70%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 21px/1.25 var(--sp-type) !important; color: var(--ink); }
-  :is(.qc151, .cl27) .qc1531-for em { margin-right: 6px; font: italic 400 19px/1.25 var(--sp-serif) !important; color: var(--mut); }
+  :is(.qc151, .cl27) .qc1531-for em { margin-right: 6px; font: italic 400 19px/1.25 var(--sp-serif) !important; color: var(--sp-muted); }
   /* with no "for" line (several manuscripts, none scoped) the buttons keep the same distance from the title */
   .qc1531-t + .qc1531-acts { margin-top: 18px; }
   .qc1531-acts { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; }
@@ -38,7 +38,7 @@
   :is(.qc151, .cl27) .qc1531-b--n { background: var(--navy); color: #fff; }
   :is(.qc151, .cl27) .qc1531-b--g { background: #fff; color: var(--ink); box-shadow: inset 0 0 0 1px #d9d0c3, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
   :is(.qc151, .cl27) .qc1531-b--g:hover { box-shadow: inset 0 0 0 1px #b9ad9e, 0 2px 6px -4px rgba(28, 19, 15, 0.3); }
-  :is(.qc151, .cl27) .qc1531-b:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+  :is(.qc151, .cl27) .qc1531-b:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   :is(.qc151, .cl27) .qc1531-b:disabled { opacity: 0.55; cursor: default; }
   /* nothing in the row wraps mid-label; the row itself may wrap */
   .qc1531-acts > * { white-space: nowrap; }
@@ -79,12 +79,12 @@
   .qc151 .qc1531-lg button:disabled { cursor: default; }
   .qc151 .qc1531-lg button.is-on, .qc151 .qc1531-lg button.is-pick { background: #f6f1ea; }
   .qc151 .qc1531-lg button.is-pick .qc1531-lbl { text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.55); text-underline-offset: 3px; }
-  .qc151 .qc1531-lg button:focus-visible { outline: 2px solid var(--navy); outline-offset: -2px; }
+  .qc151 .qc1531-lg button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .qc1531-sw { display: block; width: 16px; height: 16px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
   .qc1531-sw.is-hatch { background: repeating-linear-gradient(45deg, #d8d1c7 0 2px, #f1eee9 2px 5px); }
   .qc1531-lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .qc151 .qc1531-lg b { font: 400 17px/1 var(--sp-type) !important; text-align: right; }
-  .qc151 .qc1531-lg em { font: italic 400 13px/1 var(--sp-serif) !important; color: var(--mut); text-align: right; }
+  .qc151 .qc1531-lg em { font: italic 400 13px/1 var(--sp-serif) !important; color: var(--sp-muted); text-align: right; }
 
   @media (prefers-reduced-motion: reduce) { .qc1531-seg, .qc1531-segn { transition: none; } }
 }
@@ -144,7 +144,7 @@
   .qc1531-lgw { min-width: 0; }
   .qc1531-lgh { display: flex; align-items: baseline; gap: 12px; padding: 0 4px 8px; margin-bottom: 6px; border-bottom: 2px solid var(--navy); }
   .qc151 .qc1531-lgh h2 { margin: 0; font: 400 19px/1.2 var(--sp-type) !important; color: var(--ink) !important; letter-spacing: 0; }
-  .qc151 .qc1531-lgh small { margin-left: auto; font: italic 400 13px/1.2 var(--sp-serif) !important; color: var(--mut); white-space: nowrap; }
+  .qc151 .qc1531-lgh small { margin-left: auto; font: italic 400 13px/1.2 var(--sp-serif) !important; color: var(--sp-muted); white-space: nowrap; }
   /* the rows: tighter, finer hairlines, a soft white fill when hovered or linked */
   .qc1531-lg li + li { border-top: 1px solid rgba(28, 19, 15, 0.08); }
   .qc151 .qc1531-lg button { padding: 6px 4px; }
@@ -189,7 +189,7 @@
   }
   .qc151 .qc1533-clip:hover i, .qc151 .qc1533-clip:focus i, .qc151 .qc1533-clip.is-open i { -webkit-text-stroke: 0.25px currentColor; }
   .qc1533-clip:hover svg, .qc1533-clip:focus svg, .qc1533-clip.is-open svg { stroke-width: 1.8; }
-  .qc151 .qc1533-clip:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .qc151 .qc1533-clip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   .qc151 .qc1533-pop {
     position: absolute; left: 0; top: calc(100% + 8px); z-index: 50; display: block; box-sizing: border-box; min-width: 270px;
@@ -202,7 +202,7 @@
   .qc1533-pg:first-of-type { padding-top: 2px; }
   .qc1533-pg + .qc1533-pg { border-top: 1px solid #f1ebe2; }
   .qc1533-pg:last-child { padding-bottom: 0; }
-  .qc151 .qc1533-pgh { display: block; margin: 0 0 6px; font: italic 400 12.5px/1.35 var(--sp-serif) !important; color: #5b4f47; }
+  .qc151 .qc1533-pgh { display: block; margin: 0 0 6px; font: italic 400 12.5px/1.35 var(--sp-serif) !important; color: var(--sp-muted); }
   .qc1533-mxr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
   .qc151 .qc1533-mc {
     box-sizing: border-box; display: inline-flex; align-items: center; gap: 4px; height: 20px; padding: 0 7px 0 5px; border-radius: 6px;
@@ -210,7 +210,7 @@
   }
   .qc151 .qc1533-mc.is-ask { background: transparent; box-shadow: none; border: 1px dashed rgba(42, 58, 82, 0.6); color: #2a3a52; }
   .qc1533-sh { flex: none; display: block; width: 8px; height: 10px; border-radius: 1px 2.5px 1px 1px; background: #fff; box-shadow: inset 0 0 0 1px #a99e91; }
-  .qc151 .qc1533-mpk { margin-left: 2px; font: italic 400 12px/1.3 var(--sp-serif) !important; color: #5b4f47; }
+  .qc151 .qc1533-mpk { margin-left: 2px; font: italic 400 12px/1.3 var(--sp-serif) !important; color: var(--sp-muted); }
   @media (prefers-reduced-motion: reduce) { .qc1533-clip, .qc1533-clip svg, .qc1533-clip i { transition: none; } }
 }
 
@@ -225,7 +225,7 @@
   :is(.qc151, .cl27) .qc153-rail .qc153-rsec { border-top: 1px solid #f1ebe2; }
   :is(.qc151, .cl27) .qc153-rail .qc153-rbd + .qc153-rsec { border-top: 0; }
   :is(.qc151, .cl27) .qc153-rail .qc153-rh5 button { padding: 13px 16px 8px; font: 400 15px/1.2 var(--sp-type) !important; color: #1c130f; }
-  :is(.qc151, .cl27) .qc153-rail .qc153-rh5 i { display: grid; place-items: center; width: 14px; height: 14px; color: #8a8076; }
+  :is(.qc151, .cl27) .qc153-rail .qc153-rh5 i { display: grid; place-items: center; width: 14px; height: 14px; color: var(--sp-quiet); }
   .qc153-rail .qc153-rh5 i svg { display: block; width: 12px; height: 12px; }
 
   /* Most used: pills in a wrapping row */
@@ -236,12 +236,12 @@
     transition: background 0.15s, box-shadow 0.15s;
   }
   :is(.qc151, .cl27) .qc1533-pill .qc153-tx { flex: none; font: 400 14px/1.25 var(--sp-serif) !important; color: inherit; }
-  :is(.qc151, .cl27) .qc1533-pill .qc153-n { font: 400 12.5px/1 var(--sp-type) !important; color: #5b4f47; }
+  :is(.qc151, .cl27) .qc1533-pill .qc153-n { font: 400 12.5px/1 var(--sp-type) !important; color: var(--sp-muted); }
   :is(.qc151, .cl27) .qc1533-pill:hover:not(.is-on) { background: #fff; box-shadow: inset 0 0 0 1px #d6cabb; }
   :is(.qc151, .cl27) .qc1533-pill.is-on { background: #2a3a52; color: #f4eee5; box-shadow: none; }
   :is(.qc151, .cl27) .qc1533-pill.is-on .qc153-n { color: rgba(244, 238, 229, 0.75); }
   :is(.qc151, .cl27) .qc1533-pill.is-zero { opacity: 0.45; cursor: default; pointer-events: none; }
-  :is(.qc151, .cl27) .qc1533-pill:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  :is(.qc151, .cl27) .qc1533-pill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   /* Where it stands: the tiles in their stage colours, then the stage rows */
   :is(.qc151, .cl27) .qc153-rail .qc1533-where { padding: 0 8px 10px; }

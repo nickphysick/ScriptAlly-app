@@ -15,8 +15,8 @@
 .gst .gst-head { display: flex; align-items: baseline; gap: 16px; margin: 0 0 14px; min-width: 0; }
 .gst .gst-head h2.gst-h { margin: 0; font: 400 25px/1.1 var(--sp-type) !important; letter-spacing: 0; color: #1c130f; white-space: nowrap; }
 .ws-app.sheet-wide .gst .gst-head h2.gst-h { font-size: 28px !important; }
-.gst .gst-head .gst-k { font: 500 11px/1.2 var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.gst .gst-head .gst-hint { margin-left: auto; font: italic 400 14px/1.2 var(--sp-serif); color: rgba(28, 19, 15, 0.55); white-space: nowrap; }
+.gst .gst-head .gst-k { font: 500 11px/1.2 var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--sp-quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.gst .gst-head .gst-hint { margin-left: auto; font: italic 400 14px/1.2 var(--sp-serif); color: var(--sp-quiet); white-space: nowrap; }
 
 .gst .gst-box { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-radius: 14px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.16); overflow: hidden; }
 .gst .gst-cell {
@@ -28,16 +28,16 @@
 .gst .gst-cell:hover:not(:disabled), .gst .gst-cell.is-on { background: #fcfaf7; }
 .gst .gst-cell.is-on::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--sp-anthracite); }
 .gst .gst-cell:disabled { cursor: default; }
-.gst .gst-cell:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: -2px; z-index: 1; }
-.gst .gst-cell .gst-lb { font: 500 11px/1.2 var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: rgba(28, 19, 15, 0.58); }
+.gst .gst-cell:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; z-index: 1; }
+.gst .gst-cell .gst-lb { font: 500 11px/1.2 var(--font-mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--sp-quiet); }
 .gst .gst-cell .gst-cue { position: absolute; top: 18px; right: 16px; font: 400 9.5px/1.2 var(--font-mono); letter-spacing: 0.06em; color: rgba(28, 19, 15, 0.4); opacity: 0; white-space: nowrap; }
 .gst .gst-cell:hover:not(:disabled) .gst-cue, .gst .gst-cell:focus-visible .gst-cue, .gst .gst-cell.is-on .gst-cue { opacity: 1; }
 .gst .gst-cell .gst-fig { margin-top: 10px; font: 400 44px/1 var(--sp-type); letter-spacing: -0.02em; color: #1c130f; }
 .ws-app.sheet-wide .gst .gst-cell .gst-fig { font-size: 52px; }
-.gst .gst-cell .gst-line { margin-top: 10px; font: italic 400 14.5px/1.4 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+.gst .gst-cell .gst-line { margin-top: 10px; font: italic 400 14.5px/1.4 var(--sp-serif); color: var(--sp-muted); }
 .ws-app.sheet-wide .gst .gst-cell .gst-line { font-size: 16px; }
 .gst .gst-cell .gst-line b { font-family: inherit; font-style: normal; font-weight: 600; color: #1c130f; }
-.gst .gst-cell .gst-line b.is-hot { color: #a2452a; }
+.gst .gst-cell .gst-line b.is-hot { color: var(--sp-rust); }
 .gst .gst-cell .gst-foot { display: flex; align-items: flex-end; width: 100%; min-width: 0; margin-top: auto; padding-top: 18px; min-height: 52px; box-sizing: content-box; }
 /* a blank holds its box and draws nothing */
 .gst .gst-blank { visibility: hidden; }

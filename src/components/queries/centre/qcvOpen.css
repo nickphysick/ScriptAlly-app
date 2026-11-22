@@ -49,7 +49,7 @@
 .qcv-open-tabs button:hover { color: var(--qcv-ink); }
 /* the current tab: ink, with a 1.6px ink underline sitting ON the hairline */
 .qcv-open-tabs button[aria-selected="true"] { color: var(--qcv-ink); border-bottom-color: var(--qcv-ink); }
-.qcv-open-tabs button:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; border-radius: 3px; }
+.qcv-open-tabs button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 3px; }
 .qcv-open-tabn { margin-left: 6px; font-style: normal; font-family: var(--qcv-mono); font-size: 9px; color: var(--qcv-ink-45); }
 .qcv-open-tab { padding: 14px 0 12px; }
 
@@ -57,16 +57,16 @@
 .qcv-open-stand { flex: 1 1 auto; min-width: 0; margin: 0; font-family: var(--qcv-mono); font-size: 9px; line-height: 13.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--qcv-ink-70); }
 .qcv-open-act { flex: none; height: 38px; padding: 3px 18px 0; border: 0; border-radius: 22px; background: var(--qcv-navy); color: #ffffff; cursor: pointer; white-space: nowrap; font-family: var(--qcv-type); font-size: 14.5px; line-height: 1; }
 .qcv-open-act:hover { background: var(--qcv-navy-hov); }
-.qcv-open-act:focus-visible, .qcv-open-more:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+.qcv-open-act:focus-visible, .qcv-open-more:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* Query actions v1 — the footer's doors (the mock's card footer, MOCK-SPEC §3.4): the primary is the
    navy pill above, the others are white pills with a hairline. A row of their own under the stand
    line, so three doors never crowd the facts off a 396px card. */
 .qcv-open-doors { flex: none; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 0 18px 14px; background: #ffffff; }
 .qcv-open-cb { flex: none; height: 38px; padding: 3px 16px 0; border: 0; border-radius: 22px; background: #ffffff; color: var(--qcv-ink); box-shadow: inset 0 0 0 1.3px rgba(28, 19, 15, 0.25); cursor: pointer; white-space: nowrap; font-family: var(--qcv-type); font-size: 14px; line-height: 1; }
 .qcv-open-cb:hover { background: #f7f3ee; }
-.qcv-open-cb:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+.qcv-open-cb:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the quiet delete at the row's right, and its inline ink confirm (the mock's `.cdel` / `.delc`) */
-.qcv-open-cdel { margin-left: auto; border: 0; background: none; font: 700 8px var(--qcv-mono); letter-spacing: 0.1em; color: rgba(28, 19, 15, 0.45); cursor: pointer; }
+.qcv-open-cdel { margin-left: auto; border: 0; background: none; font: 700 8px var(--qcv-mono); letter-spacing: 0.1em; color: var(--sp-quiet); cursor: pointer; }
 .qcv-open-cdel:hover { color: #8a4a3c; }
 .qcv-open-delc { display: flex; align-items: center; gap: 8px; background: #1c130f; color: #f5f1eb; border-radius: 12px; padding: 10px 10px 10px 14px; width: 100%; }
 .qcv-open-delc span { flex: 1; font-size: 12.5px; color: rgba(245, 241, 235, 0.75); }
@@ -96,7 +96,7 @@
   cursor: pointer;
 }
 .qcv-open-x:hover { background: #ffffff; }
-.qcv-open-x:focus-visible { outline: 2px solid var(--qcv-ink); outline-offset: 2px; }
+.qcv-open-x:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* v1.1 — the same ink confirm, in place of a timeline row (the mock swaps the row for it) */
 .tl-delrow { margin: 4px 0 12px; }
 .tl-delrow .qcv-open-delc { box-sizing: border-box; }

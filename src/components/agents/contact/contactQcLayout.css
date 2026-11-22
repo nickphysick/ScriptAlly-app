@@ -30,7 +30,7 @@
     text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; text-decoration-color: rgba(244, 238, 229, 0.45);
   }
   .cl27 > .qc1531-hd .qc1531-for .clq-nq:hover { text-decoration-color: #f4eee5; }
-  .cl27 > .qc1531-hd .qc1531-for .clq-nq:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; border-radius: 2px; }
+  .cl27 > .qc1531-hd .qc1531-for .clq-nq:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 2px; }
   .cl27 > .qc1531-hd .qc1531-for .clq-nq:disabled { cursor: default; }
   /* the ruled line's words are the Query Centre's italic serif (its `em`), at its size; day one's line wraps */
   .cl27 > .qc1531-hd .qc1531-for > span { font: italic 400 19px/1.25 var(--sp-serif) !important; color: #f4eee5; }
@@ -46,7 +46,7 @@
   .cl27 .clq-rc { display: flex; align-items: center; margin: 0 22px 0 40px; }
   .cl27 .clq-rc .cl26-health[data-fill] { height: auto; gap: 22px; align-self: center; }
   .cl27 .clq-rc .cl26-ring { margin-top: -10px; }
-  .cl27 .clq-rc .cl26-ring:focus-visible { outline: 2px solid #e8bdb4; outline-offset: 4px; border-radius: 50%; }
+  .cl27 .clq-rc .cl26-ring:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; border-radius: 50%; }
   /* the archivist breaks out above the ring's top edge: 118 wide (105 tall), his foot 43px over the ring's foot, so
      his head clears the ring's top by 8px. (The ref draws 30px, which leaves his box 5px INSIDE the ring's top.) */
   .cl27 .clq-rc .cl26-ring .cl26-arch { bottom: 43px; width: 118px; }
@@ -66,7 +66,7 @@
     font: 400 16px/1 var(--sp-type) !important; white-space: nowrap;
   }
   .cl27 .clq-rc .cl26-fill:hover { background: rgba(244, 238, 229, 0.08); }
-  .cl27 .clq-rc .cl26-fill:focus-visible { outline: 2px solid #f4eee5; outline-offset: 3px; }
+  .cl27 .clq-rc .cl26-fill:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 }
 
 /* ── Phase 2 · the Views panel: RETIRED in List filters v1, with its powder "your book" tag. The card is
@@ -123,14 +123,14 @@
   }
   .cl27 .qc156-slim .clq-sh svg { flex: none; display: block; align-self: center; }
   .cl27 .qc156-slim .clq-sh:hover { background: rgba(28, 19, 15, 0.05); }
-  .cl27 .qc156-slim .clq-sh:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .cl27 .qc156-slim .clq-sh:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   /* the subline's "{x} not yet queried" is still the button onto that filter: the subline's own type, underlined */
   .cl27 .qc156-slim .clq-snq {
     all: unset; cursor: pointer; font: inherit !important; color: inherit;
     text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; text-decoration-color: rgba(91, 79, 71, 0.45);
   }
   .cl27 .qc156-slim .clq-snq:hover { text-decoration-color: #5b4f47; }
-  .cl27 .qc156-slim .clq-snq:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 2px; }
+  .cl27 .qc156-slim .clq-snq:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 }
 
 /* ── v1.1 Phase 3 · THE CAP: the card's top as one sticky block (ref `.card2`, `.cap`, `.capin`, `.captop`, `.rowsf`) ──

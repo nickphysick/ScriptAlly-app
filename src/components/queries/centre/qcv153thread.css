@@ -11,12 +11,12 @@
 .qc152 .qc152-bx { padding: 7px 10px 7px 12px; border-radius: 14px; min-width: 0; }
 .qc152 .qc152-m.them .qc152-bx { border-bottom-left-radius: 4px; }
 .qc152 .qc152-m.me .qc152-bx { border-bottom-right-radius: 4px; }
-.qc152 .qc152-r1 b { font: 400 15px/1.35 var(--sp-serif); white-space: normal; }
+.qc152 .qc152-r1 b { font: 400 var(--sp-body-size)/1.35 var(--sp-serif); white-space: normal; }
 .qc152 .qc152-r1 { display: block; }
 .qc152 .qc152-r1 .qc152-nth, .qc152 .qc152-r1 .qc152-drt { margin-left: 6px; }
 /* the stamp, and the hidden room it keeps on the last line */
 .qc152 .qc152-tsp { display: inline-block; visibility: hidden; padding-left: 10px; font: 400 12px/1 var(--sp-serif); white-space: nowrap; }
-.qc152 .qc152-ts { position: absolute; right: 10px; bottom: 6px; font: 400 12px/1 var(--sp-serif); color: #8a8076; white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; }
+.qc152 .qc152-ts { position: absolute; right: 10px; bottom: 6px; font: 400 12px/1 var(--sp-serif); color: var(--sp-quiet); white-space: nowrap; display: inline-flex; align-items: center; gap: 3px; }
 .qc152 .qc152-m.them .qc152-ts { color: #5d6b7c; }
 .qc152 .qc152-via { display: inline-flex; font-style: normal; color: inherit; }
 .qc152 .qc152-tsp .qc152-via { display: inline-flex; }

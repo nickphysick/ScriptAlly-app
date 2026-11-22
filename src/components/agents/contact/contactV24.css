@@ -61,9 +61,9 @@
   }
   .cl24-sheet .cl24-ch:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
   .cl24-sheet .cl24-ch .cl24-ic { flex: none; color: #2a3a52; }
-  .cl24-sheet .cl24-ch .cl24-cv { flex: none; color: rgba(28, 19, 15, 0.55); }
+  .cl24-sheet .cl24-ch .cl24-cv { flex: none; color: var(--sp-quiet); }
   .cl24-sheet .cl24-ch .cl24-cl { font: inherit !important; color: inherit; }
-  .cl24-sheet .cl24-ch .cl24-gby { font: 400 14px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.6); }
+  .cl24-sheet .cl24-ch .cl24-gby { font: 400 14px/1 var(--sp-type) !important; font-style: normal; color: var(--sp-quiet); }
   .cl24-sheet .cl24-ch > b { font: 400 15.5px/1 var(--sp-type) !important; color: #1c130f; }
   .cl24-sheet .cl24-ch .cl24-n {
     box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px;
@@ -93,7 +93,7 @@
   .cl24-th button { all: unset; cursor: pointer; font: 600 10.5px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(42, 58, 82, 0.62); }
   .cl24-th button.on { color: #2a3a52; }
   .cl24-th button i { font-style: normal; }
-  .cl24-th button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+  .cl24-th button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .cl24-gh {
     position: sticky; top: 98px; z-index: 4; box-sizing: border-box; display: flex; align-items: center; height: 40px; padding: 0 28px 0 26px;
     background: #f6f3ee; box-shadow: inset 0 1px 0 rgba(28, 19, 15, 0.09), inset 0 -1px 0 rgba(28, 19, 15, 0.09);
@@ -101,7 +101,7 @@
   .cl24-grp:first-child .cl24-gh { box-shadow: inset 0 -1px 0 rgba(28, 19, 15, 0.09); }
   .cl24-gh > svg, .cl24-gh > span { flex: none; margin-right: 12px; color: #1c130f; }
   .cl24-gh b { font: 400 19px/1 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
-  .cl24-gh small { margin-left: 12px; font: 500 10.5px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+  .cl24-gh small { margin-left: 12px; font: 500 10.5px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); }
   .cl24-tr {
     position: relative; box-sizing: border-box; min-height: 82px; padding-top: 12px; padding-bottom: 12px;
     border-bottom: 1px solid rgba(28, 19, 15, 0.07); cursor: pointer; transition: background 0.12s; outline: 0;
@@ -112,34 +112,34 @@
   .cl24-who { display: flex; align-items: center; gap: 14px; min-width: 0; }
   .cl24-whot { min-width: 0; }
   .cl24-whot b { display: block; font: 600 17.5px/1.3 var(--sp-serif) !important; color: #1c130f; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .cl24-whot small { display: block; font: italic 400 14px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.58); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cl24-whot small { display: block; font: italic 400 14px/1.35 var(--sp-serif) !important; color: var(--sp-quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   /* v25.1 E2 — one line: never wraps */
   .cl24-gen { display: flex; flex-wrap: nowrap; align-items: center; gap: 5px; min-width: 0; overflow: hidden; }
   .cl24-tag {
     display: inline-flex; align-items: center; height: 24px; padding: 0 9px; border-radius: 6px; background: #f4f0eb;
-    font: 500 10.5px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(28, 19, 15, 0.72); white-space: nowrap;
+    font: 500 10.5px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.08em; text-transform: uppercase; color: var(--sp-muted); white-space: nowrap;
   }
   .cl24-tag.hit { background: #e8edf4; color: #2a3a52; }
-  .cl24-add { all: unset; cursor: pointer; font: italic 400 14px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.45); white-space: nowrap; }
+  .cl24-add { all: unset; cursor: pointer; font: italic 400 14px var(--sp-serif) !important; color: var(--sp-quiet); white-space: nowrap; }
   .cl24-add:hover { color: #2a3a52; text-decoration: underline; }
   .cl24-c2 b { display: block; font: 400 15.5px/1.3 var(--sp-serif) !important; color: #1c130f; }
-  .cl24-c2 small { display: block; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); }
+  .cl24-c2 small { display: block; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: var(--sp-quiet); }
   .cl24-door { display: inline-flex; align-items: center; gap: 7px; font: 400 15.5px var(--sp-serif) !important; color: #1c130f; white-space: nowrap; }
   .cl24-door i { width: 8px; height: 8px; border-radius: 50%; background: #4e7d60; }
   .cl24-door--closed i { background: #b5aea6; }
   .cl24-door--unknown i { background: none; box-shadow: inset 0 0 0 1.3px rgba(28, 19, 15, 0.4); }
-  .cl24-door--closed, .cl24-door--unknown { color: rgba(28, 19, 15, 0.6); }
+  .cl24-door--closed, .cl24-door--unknown { color: var(--sp-quiet); }
   .cl24-qs { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
   .cl24-ql { display: flex; align-items: center; gap: 8px; font: 400 15.5px var(--sp-serif) !important; color: #1c130f; }
-  .cl24-qs small { padding-left: 23px; font: italic 400 13.5px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.55); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .cl24-qs small.due { font: 600 13.5px var(--sp-serif) !important; font-style: normal; color: #a2452a; }
+  .cl24-qs small { padding-left: 23px; font: italic 400 13.5px var(--sp-serif) !important; color: var(--sp-quiet); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .cl24-qs small.due { font: 600 13.5px var(--sp-serif) !important; font-style: normal; color: var(--sp-rust); }
   .cl24-lq {
     all: unset; box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; width: max-content; height: 30px; padding: 0 12px;
     border-radius: 8px; background: #f4f0eb; color: #1c130f; cursor: pointer; white-space: nowrap; font: 400 14px/1 var(--sp-type) !important;
   }
   .cl24-lq:hover { background: #2a3a52; color: #f4eee5; }
-  .cl24-shut { font: italic 400 14px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.45); }
-  .cl24-ad { font: 400 14.5px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.7); white-space: nowrap; }
+  .cl24-shut { font: italic 400 14px var(--sp-serif) !important; color: var(--sp-quiet); }
+  .cl24-ad { font: 400 14.5px var(--sp-serif) !important; color: var(--sp-muted); white-space: nowrap; }
   .cl24-qa { position: absolute; right: 18px; top: 50%; transform: translateY(-50%); display: flex; gap: 6px; opacity: 0; pointer-events: none; transition: opacity 0.12s; }
   .cl24-tr:hover .cl24-qa, .cl24-tr:focus-within .cl24-qa { opacity: 1; pointer-events: auto; }
   .cl24-tr:hover .cl24-ad, .cl24-tr:focus-within .cl24-ad { visibility: hidden; }
@@ -148,7 +148,7 @@
     display: grid; place-items: center; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14), 0 4px 10px -6px rgba(28, 19, 15, 0.35);
   }
   .cl24-qa > *:hover { background: #2a3a52; color: #f4eee5; }
-  .cl24-none { padding: 48px 22px 56px; text-align: center; font: italic 400 16px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+  .cl24-none { padding: 48px 22px 56px; text-align: center; font: italic 400 16px/1.45 var(--sp-serif) !important; color: var(--sp-quiet); }
   .cl24-none button { all: unset; margin-left: 10px; cursor: pointer; text-decoration: underline; color: #2a3a52; font: inherit; }
 
   /* B3 · Cards */
@@ -159,7 +159,7 @@
   }
   .cl24-rh > svg, .cl24-rh > span { flex: none; margin-right: 12px; color: #1c130f; }
   .cl24-rh b { font: 400 21px/1 var(--sp-type) !important; color: #1c130f; white-space: nowrap; }
-  .cl24-rh small { margin-left: 12px; font: 500 10.5px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(28, 19, 15, 0.6); }
+  .cl24-rh small { margin-left: 12px; font: 500 10.5px/1 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase; color: var(--sp-quiet); }
   .cl24-rh hr { flex: 1; height: 0; margin: 0 0 0 16px; border: 0; border-top: 1px solid rgba(28, 19, 15, 0.16); }
   .cl24-grid { display: grid; grid-template-columns: repeat(var(--cols, 3), minmax(0, 1fr)); gap: 24px 22px; padding: 4px 0 18px; align-items: start; }
   .cl24-cg:not(:has(.cl24-rh)) .cl24-grid { padding-top: 20px; }
@@ -193,7 +193,7 @@
 .cl24-dsc--agent { background: #2a3a52; color: #f4eee5; }
 /* v25.2 B — the rust/blush your-move disc is retired: navy, like Querying, with the rust "!" (shared/agentRowParts.css) */
 .cl24-dsc--you { background: #2a3a52; color: #f4eee5; }
-.cl24-dsc--closed { background: #ebe7e2; color: rgba(28, 19, 15, 0.5); }
+.cl24-dsc--closed { background: #ebe7e2; color: var(--sp-quiet); }
 .cl24-nq { flex: none; color: #1c130f; }
 
 /* the Group by menu */
@@ -201,12 +201,12 @@
   position: fixed; z-index: 60; box-sizing: border-box; width: 300px; padding: 14px 10px 10px; border-radius: 14px; background: #fff; color: #1c130f;
   box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.1), 0 22px 48px -18px rgba(28, 19, 15, 0.45);
 }
-.cl24-gpop h6 { margin: 0 8px 8px; font: 500 10px/1.2 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(28, 19, 15, 0.55); }
+.cl24-gpop h6 { margin: 0 8px 8px; font: 500 10px/1.2 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.18em; text-transform: uppercase; color: var(--sp-quiet); }
 .cl24-gopt { all: unset; box-sizing: border-box; display: flex; gap: 10px; width: 100%; padding: 9px 8px; border-radius: 9px; cursor: pointer; }
 .cl24-gopt:hover { background: #f6f3ee; }
 .cl24-gopt i { flex: none; width: 14px; font-style: normal; color: #2a3a52; font-size: 10px; line-height: 20px; }
 .cl24-gopt b { display: block; font: 600 15px/1.3 var(--sp-serif) !important; }
-.cl24-gopt small { display: block; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.cl24-gopt small { display: block; font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: var(--sp-quiet); }
 
 /* ═════════ C · the agent card (the query card's own classes do the rest: qcv149card.css, heroCard.css) ═════════
    ⚠️ IT PORTALS WITH THE PANEL: literals only, no page token. */
@@ -214,7 +214,7 @@
 .cl24c .cl24c-added { font: 400 11px/1 var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.17em; text-transform: uppercase; }
 .cl24c .cl24-dsc { margin-right: 2px; }
 /* E3 · your rating, under the agency: five rust stars and "your rating" in italic */
-.cl24c-stars { display: flex; align-items: center; gap: 2px; margin-top: 7px; color: #a2452a; font: 400 14px/1 var(--sp-serif); }
+.cl24c-stars { display: flex; align-items: center; gap: 2px; margin-top: 7px; color: var(--sp-rust); font: 400 14px/1 var(--sp-serif); }
 .cl24c-stars i { font-style: normal; opacity: 0.22; }
 .cl24c-stars i.on { opacity: 1; }
 .cl24c-stars small { margin-left: 8px; font: italic 400 13px var(--sp-serif); color: #8a857e; }
@@ -244,7 +244,7 @@
   display: inline-flex; align-items: center; cursor: pointer; white-space: nowrap; font: 400 15px/1 var(--sp-type);
 }
 .cl24c-call button:hover { background: #334763; }
-.cl24c-call button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl24c-call button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* You and {first}: rows are buttons that open the query */
 .cl24c .cl24c-hrow { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: 10px; width: 100%; padding: 7px 0; border-bottom: 1px solid #f0ebe3; font: 400 15.5px var(--sp-serif); cursor: pointer; }
 .cl24c .cl24c-hrow:last-child { border-bottom: 0; }
@@ -285,7 +285,7 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
 .cl24c-del p { flex: 1 1 100%; margin: 0; font: 400 15px/1.4 var(--sp-serif); color: #1c130f; }
 .cl24c-del input { flex: 1 1 160px; min-width: 0; height: 34px; padding: 0 10px; border: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px #d9c8ba; font: 400 15px var(--sp-serif); }
 .cl24c-del button { all: unset; cursor: pointer; height: 34px; padding: 0 14px; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22); font: 400 14.5px/34px var(--sp-type); }
-.cl24c-del button.go { background: #a2452a; color: #fff; box-shadow: none; }
+.cl24c-del button.go { background: var(--sp-rust); color: #fff; box-shadow: none; }
 .cl24c-del button.go:disabled { opacity: 0.45; cursor: default; }
 /* the Profile pane's blocks, 13 apart (the mock's) */
 .cl24c.qc149c .qc149c-pg { display: flex; flex-direction: column; gap: 13px; padding: 14px 18px 12px; }
@@ -331,7 +331,7 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
   .cl24-fadd { all: unset; flex: none; box-sizing: border-box; height: 44px; padding: 0 20px; border-radius: 10px; background: #f4eee5; color: #1c130f; cursor: pointer; white-space: nowrap; font: 400 16px/44px var(--sp-type) !important; }
   .cl24-fadd:hover { background: #fff; }
   .cl24-ftool { display: flex; align-items: center; gap: 10px; height: 66px; padding: 0 14px 0 250px; background: #f2eee8; border-bottom: 1px solid rgba(28, 19, 15, 0.1); box-sizing: border-box; }
-  .cl24-ffind { box-sizing: border-box; flex: 1; max-width: 600px; display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 14px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14); color: rgba(28, 19, 15, 0.6); }
+  .cl24-ffind { box-sizing: border-box; flex: 1; max-width: 600px; display: flex; align-items: center; gap: 10px; height: 42px; padding: 0 14px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.14); color: var(--sp-quiet); }
   .cl24-ffind:focus-within { box-shadow: inset 0 0 0 2px #2a3a52; }
   .cl24-ffind input { all: unset; flex: 1; min-width: 0; font: italic 400 16px var(--sp-serif) !important; color: #1c130f; }
   .cl24-ffind input::placeholder { color: rgba(28, 19, 15, 0.48); }
@@ -345,7 +345,7 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
   .cl24-fex { all: unset; box-sizing: border-box; flex: none; display: inline-flex; align-items: center; gap: 9px; height: 42px; padding: 0 16px; border-radius: 10px; background: #2a3a52; color: #f4eee5; cursor: pointer; white-space: nowrap; }
   .cl24-fex span { font: 400 15.5px var(--sp-serif) !important; color: inherit; }
   .cl24-fex:hover { background: #334763; }
-  .cl24-fch:focus-visible, .cl24-fex:focus-visible, .cl24-fadd:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .cl24-fch:focus-visible, .cl24-fex:focus-visible, .cl24-fadd:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   .cl24-fsel { flex: 1; display: flex; align-items: center; gap: 14px; height: 42px; min-width: 0; }
   .cl24-fsel b { font: 400 16px var(--sp-type) !important; }
   .cl24-fsel button { all: unset; cursor: pointer; font: 400 15px var(--sp-serif) !important; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(42, 58, 82, 0.35); }
@@ -357,15 +357,15 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
   .cl24-scr:focus-visible { box-shadow: inset 0 0 0 2px #2a3a52; }
   .cl24-lh { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 9px; height: 34px; padding: 0 18px; background: #f6f3ee; }
   .cl24-lh span { font: 400 16px/1 var(--sp-type) !important; color: #1c130f; }
-  .cl24-lh small { margin-left: auto; font: 500 10px var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; color: rgba(28, 19, 15, 0.5); }
+  .cl24-lh small { margin-left: auto; font: 500 10px var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; color: var(--sp-quiet); }
   .cl24-br { position: relative; box-sizing: border-box; display: flex; align-items: center; gap: 12px; height: 62px; padding: 0 16px 0 18px; border-bottom: 1px solid rgba(28, 19, 15, 0.06); cursor: pointer; outline: 0; }
   .cl24-br:hover { background: #f8f5f0; }
   .cl24-br[aria-current="true"] { background: #eef2f7; box-shadow: inset 3px 0 0 #2a3a52; }
   .cl24-br .cl24-whot { flex: 1; min-width: 0; }
   .cl24-br .cl24-whot b { font-size: 16px !important; line-height: 1.25 !important; }
   .cl24-br .cl24-whot small { font-size: 13.5px !important; }
-  .cl24-rt { flex: none; display: flex; align-items: center; gap: 6px; font: 500 10px var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(28, 19, 15, 0.5); }
-  .cl24-rt.due { color: #a2452a; }
+  .cl24-rt { flex: none; display: flex; align-items: center; gap: 6px; font: 500 10px var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.1em; text-transform: uppercase; color: var(--sp-quiet); }
+  .cl24-rt.due { color: var(--sp-rust); }
   .cl24-bav { position: relative; flex: none; display: grid; }
   .cl24-tk {
     all: unset; position: absolute; inset: 0; box-sizing: border-box; border-radius: 50%; display: grid; place-items: center; cursor: pointer;
@@ -374,7 +374,7 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
   .cl24-br:hover .cl24-tk, .cl24-br[data-ticked] .cl24-tk, .cl24-tk:focus-visible { opacity: 1; }
   .cl24-br:hover:not([data-ticked]) .cl24-tk { background: rgba(42, 58, 82, 0.85); }
   .cl24-alpha { flex: none; width: 22px; display: flex; flex-direction: column; justify-content: center; gap: 1px; border-left: 1px solid rgba(28, 19, 15, 0.06); background: #fbf9f6; }
-  .cl24-alpha button { all: unset; cursor: pointer; padding: 2px 0; text-align: center; font: 500 9.5px var(--sp-mono, "JetBrains Mono", monospace) !important; color: rgba(28, 19, 15, 0.55); }
+  .cl24-alpha button { all: unset; cursor: pointer; padding: 2px 0; text-align: center; font: 500 9.5px var(--sp-mono, "JetBrains Mono", monospace) !important; color: var(--sp-quiet); }
   .cl24-alpha button:hover:not(:disabled) { color: #2a3a52; font-weight: 700 !important; }
   .cl24-alpha button:disabled { opacity: 0.25; cursor: default; }
   .cl24-fsd { min-width: 0; min-height: 0; display: flex; padding: 14px; background: #f6f3ee; }
@@ -426,7 +426,7 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
 .cl24w-acts .p { background: #2a3a52; color: #f4eee5; box-shadow: 0 6px 14px -8px rgba(42, 58, 82, 0.6); }
 .cl24w-acts .p:hover { background: #334763; }
 .cl24w-acts .s { border: 1px solid rgba(28, 19, 15, 0.22); background: #fff; color: #1c130f; line-height: 38px; }
-.cl24w-acts button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl24w-acts button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl24w-bd { flex: 1 1 auto; min-height: 0; overflow: auto; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, 1.05fr); grid-template-areas: "a b c"; }
 .cl24w-bd > section { display: flex; flex-direction: column; gap: 14px; min-width: 0; padding: 20px 22px; }
 .cl24w-bd > section + section { border-left: 1px solid #ece6de; }
@@ -447,7 +447,7 @@ button.cl24c-hb:hover b { text-decoration: underline; text-underline-offset: 3px
 .cl24w-steps .t { font: 400 16.5px/1.25 var(--sp-serif); }
 .cl24w-steps li.now .t { font-weight: 600; }
 .cl24w-steps .d { font: 400 10.5px var(--sp-mono, "JetBrains Mono", monospace); letter-spacing: 0.1em; color: #8f8a82; text-transform: uppercase; white-space: nowrap; }
-.cl24w-steps .d.due { color: #a2452a; }
+.cl24w-steps .d.due { color: var(--sp-rust); }
 .cl24w-steps li.next .t { font-style: italic; color: #7a746c; }
 .cl24w-noq { margin: 0; font: italic 400 15.5px var(--sp-serif); color: #7a746c; }
 .cl24w-bd .sc .cl24c-call { position: static; margin: 0; }

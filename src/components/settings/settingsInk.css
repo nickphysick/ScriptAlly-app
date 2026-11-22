@@ -57,7 +57,7 @@
     font-family: var(--sp-serif);
     font-size: 16px;
     line-height: 1.3;
-    color: rgba(28, 19, 15, 0.58);
+    color: var(--sp-quiet);
   }
 
   /* ── a section: two columns, 268 then the rest, a 40px gap, 30px of air, a dashed rule beneath ── */
@@ -81,7 +81,7 @@
     margin: 0;
     font-family: var(--sp-type) !important;
     font-weight: 400;
-    font-size: 19px;
+    font-size: 19px; /* Consistency roll-out v2, Phase 1: left at 19 — at 20, "Keeping your list current" wraps in its 268px column (Preferences) */
     line-height: 1.3;
     color: var(--ink-on-light);
   }
@@ -90,7 +90,7 @@
     font-family: var(--sp-serif);
     font-size: 14px;
     line-height: 1.5;
-    color: rgba(28, 19, 15, 0.58);
+    color: var(--sp-quiet);
   }
 
   /* ── the card: paper, 14px corners, a 1px ring ── */
@@ -118,7 +118,7 @@
     font-style: italic;
     font-size: 13.5px;
     line-height: 1.45;
-    color: rgba(28, 19, 15, 0.58);
+    color: var(--sp-quiet);
   }
   .acct-page .sc-cf.sc-cf--strip {
     display: flex;
@@ -133,7 +133,6 @@
   .acct-page .sc-cf--strip .acct-actions { margin-left: auto; display: inline-flex; gap: 10px; font-style: normal; }
 
   /* the danger card */
-  .acct-page .sc-card--danger .sc-cb { box-shadow: 0 0 0 1px rgba(166, 61, 47, 0.28); }
   .acct-page .sc-card--danger .sc-ch-h { color: var(--ink-on-light); }
 
   /* ── rows: 18/22 padding, a dashed rule between, the control on the right 28px from the words ── */
@@ -146,8 +145,8 @@
   .acct-page .sc-row:first-child { border-top: 0; }
   .acct-page .sc-row--full { grid-template-columns: 1fr; }
   .acct-page .sc-lbl { font-family: var(--sp-serif); font-weight: 600; font-size: 15px; line-height: 1.3; color: var(--ink-on-light); }
-  .acct-page .sc-dsc { margin-top: 3px; font-family: var(--sp-serif); font-size: 14px; line-height: 1.45; color: rgba(28, 19, 15, 0.58); }
-  .acct-page .sc-note { font-family: var(--sp-serif); font-size: 14px; color: rgba(28, 19, 15, 0.58); }
+  .acct-page .sc-dsc { margin-top: 3px; font-family: var(--sp-serif); font-size: 14px; line-height: 1.45; color: var(--sp-quiet); }
+  .acct-page .sc-note { font-family: var(--sp-serif); font-size: 14px; color: var(--sp-quiet); }
 
   /* the identity row — the reference's `.me` */
   .acct-page .sc-id { gap: 16px; padding: 2px 0; }
@@ -162,22 +161,23 @@
     color: var(--sp-rust);
   }
   .acct-page .sc-id-n { font-family: var(--sp-serif); font-weight: 600; font-size: 17px; color: var(--ink-on-light); }
-  .acct-page .sc-id-m { margin-top: 2px; font-family: var(--sp-serif); font-size: 14px; color: rgba(28, 19, 15, 0.58); }
+  .acct-page .sc-id-m { margin-top: 2px; font-family: var(--sp-serif); font-size: 14px; color: var(--sp-quiet); }
 
   /* ── controls ── */
-  /* inputs and selects: 300×40, 9px corners, white, a 1px inset ring; focus = a 1.5px band ring + halo */
+  /* inputs and selects — consistency roll-out v2, Phase 4 (rulings v3, ruling 6): the app's standard field
+     (shell/primitives.css --sp-fld-*): 44 high, radius 10, a 1px ink edge, 16px; at focus a 1.5px navy edge, no halo */
   .acct-page .acct-input,
   .acct-page .sa-cc-control {
     box-sizing: border-box !important;
     width: 100% !important;
-    height: 40px !important;
-    padding: 0 12px !important;
+    height: var(--sp-fld-h) !important;
+    padding: var(--sp-fld-pad) !important;
     border: 0 !important;
-    border-radius: 9px !important;
+    border-radius: var(--sp-fld-r) !important;
     background: #ffffff !important;
-    box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.18) !important;
+    box-shadow: var(--sp-fld-edge) !important;
     font-family: var(--sp-serif) !important;
-    font-size: 15px !important;
+    font-size: 16px !important;
     color: var(--ink-on-light) !important;
     outline: none !important;
   }
@@ -187,7 +187,7 @@
   .acct-page .acct-input:focus-visible,
   .acct-page .sa-cc-control:focus,
   .acct-page .sa-cc-control:focus-visible {
-    box-shadow: inset 0 0 0 1.5px var(--ink-band), 0 0 0 4px rgba(var(--ink-band-rgb), 0.12) !important;
+    box-shadow: var(--sp-fld-focus) !important;
   }
   .acct-page select.acct-input {
     appearance: none;
@@ -203,26 +203,29 @@
   .acct-page .acct-toggle[aria-checked="true"] { background: var(--ink-band) !important; }
   .acct-page .acct-toggle .acct-toggle-k { top: 3px !important; left: 3px !important; width: 16px !important; height: 16px !important; background: #ffffff !important; box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important; }
   .acct-page .acct-toggle[aria-checked="true"] .acct-toggle-k { left: 19px !important; background: var(--ink-cream) !important; }
-  .acct-page .acct-toggle:focus-visible { outline: 2px solid var(--ink-band); outline-offset: 2px; }
+  .acct-page .acct-toggle:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
-  /* buttons: pills, 36 tall; primary = the band blue with cream; secondary = a 1px inset ring */
+  /* buttons — consistency roll-out v2, Phase 4 (rulings v3, ruling 6): the app's standard button (--sp-btn-*): 40 high,
+     radius 10, 0 20, Source Serif 4 600 15. Filled = navy with cream; outline = navy words in the 1.5px navy ring;
+     "Delete account…" = the same outline in --sp-danger */
   .acct-page .acct-btn {
     box-sizing: border-box !important;
-    height: 36px !important;
-    padding: 0 18px !important;
+    height: var(--sp-btn-h) !important;
+    padding: var(--sp-btn-pad) !important;
     border: 0 !important;
-    border-radius: 99px !important;
+    border-radius: var(--sp-btn-r) !important;
     font-family: var(--sp-serif) !important;
     font-style: normal !important;
     font-weight: 600 !important;
-    font-size: 14px !important;
+    font-size: 15px !important;
+    line-height: 1 !important;
     white-space: nowrap;
   }
   .acct-page .acct-btn--primary { background: var(--ink-band) !important; color: var(--ink-cream) !important; }
-  .acct-page .acct-btn--ghost { background: transparent !important; color: var(--ink-on-light) !important; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.22) !important; }
-  .acct-page .acct-btn--ghost:hover { box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.4) !important; }
-  .acct-page .acct-btn--danger { background: transparent !important; color: #a63d2f !important; box-shadow: inset 0 0 0 1px rgba(166, 61, 47, 0.4) !important; }
-  .acct-page .acct-btn:focus-visible { outline: 2px solid var(--ink-band); outline-offset: 2px; }
+  .acct-page .acct-btn--ghost { background: transparent !important; color: var(--sp-anthracite) !important; box-shadow: var(--sp-btn-ring) !important; }
+  .acct-page .acct-btn--ghost:hover { background: var(--sp-btn-line-hov) !important; }
+  .acct-page .acct-btn--danger { background: transparent !important; color: var(--sp-danger) !important; box-shadow: inset 0 0 0 1.5px var(--sp-danger) !important; }
+  .acct-page .acct-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   /* the theme picker — a segmented control: an ink-6% track, the chosen segment paper with a ring */
   .acct-page .acct-seg { gap: 2px !important; padding: 3px !important; border: 0 !important; border-radius: 10px !important; background: rgba(28, 19, 15, 0.06) !important; }
@@ -235,7 +238,7 @@
     font-family: var(--sp-serif) !important;
     font-size: 14px !important;
     font-weight: 400 !important;
-    color: rgba(28, 19, 15, 0.58) !important;
+    color: var(--sp-quiet) !important;
   }
   .acct-page .acct-seg .acct-seg-b[aria-checked="true"] {
     background: var(--ink-paper) !important;
@@ -254,3 +257,16 @@
 
 /* the description beside each section exists only on the desktop */
 @media (max-width: 767.98px) { .sc-ch-aside { display: none; } }
+
+/* Consistency roll-out v2, Phase 3 (rulings v3, ruling 4): the text tag — 28 high, 0 12, fully rounded, Source Serif 4
+   600 14 (shell/primitives.css --sp-tag-*). Each keeps its own fill, edge and text colour. Desktop only. */
+@media (min-width: 768px) {
+  .acct-page .acct-chip { box-sizing: border-box; display: inline-flex; align-items: center; height: var(--sp-tag-h); min-height: 0; padding: var(--sp-tag-pad); border-radius: var(--sp-tag-r); font: var(--sp-tag-font) !important; font-style: normal !important; }
+}
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+@media (min-width: 768px) {
+  .acct-page .acct-btn--primary:hover:not(:disabled) { background: var(--sp-navy-hover) !important; }
+  .acct-page .acct-btn--danger:hover:not(:disabled) { background: rgba(166, 61, 47, 0.06) !important; }
+}

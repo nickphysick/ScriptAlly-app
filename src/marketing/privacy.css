@@ -9,7 +9,7 @@
  */
 
 .mk-pv {
-  --pv-navy: #1b2433; --pv-navy2: #2a3a52; --pv-blush: #e8b4a3; --pv-rust: #a2452a;
+  --pv-navy: #1b2433; --pv-navy2: #2a3a52; --pv-blush: #e8b4a3; --pv-rust: var(--mk-rust);
   --pv-ink: #1c130f; --pv-body: rgba(28, 19, 15, .85); --pv-cream: #fbf6ef;
   color: var(--pv-ink); font: 400 16px/1.55 var(--mk-f-serif);
 }

@@ -30,7 +30,7 @@ describe("QC158-3/4 (source) Tracking: no day pill, no status line, the wait at 
   });
   it("the wait: italic serif 13px #8a8076, 14px above and 5px below; the agent's side past the seal; one-day messages 14px apart", () => {
     const c = css("qcv1522card.css");
-    expect(c).toMatch(/\.qc152 \.qc1522-lt \{ margin: 14px 6px 5px; font: italic 400 13px\/1\.2 var\(--sp-serif\) !important; color: #8a8076; \}/);
+    expect(c).toMatch(/\.qc152 \.qc1522-lt \{ margin: 14px 6px 5px; font: italic 400 13px\/1\.2 var\(--sp-serif\) !important; color: var\(--sp-quiet\); \}/); /* roll-out v2, Phase 2 (ruling 2): #8a8076 is --sp-quiet */
     expect(c).toMatch(/\.qc152 \.qc1522-lt\.me \{ align-self: flex-end;[^}]*text-align: right;/);
     expect(c).toMatch(/\.qc152 \.qc1522-lt\.them \{ align-self: flex-start; margin-left: 40px;/);
     expect(c).toMatch(/\.qc152 \.qc152-th > \.qc152-m \+ \.qc152-m \{ margin-top: 14px; \}/);

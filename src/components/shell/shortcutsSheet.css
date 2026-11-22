@@ -10,7 +10,7 @@
   --sks-scrim: rgba(28, 19, 15, 0.28);
   --sks-card: #ffffff;
   --sks-rule: rgba(28, 19, 15, 0.1);
-  --sks-muted: rgba(28, 19, 15, 0.55);
+  --sks-muted: var(--sp-quiet);
   --sks-cap-bg: #f5f1eb;
 }
 .sks-scrim {
@@ -26,7 +26,7 @@
   outline: none; overflow: hidden;
 }
 .sks-head { flex: none; display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 12px 24px; }
-.sks-title { margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 24px; line-height: 1.3; color: var(--sp-ink); }
+.sks-title { margin: 0; font-family: var(--sp-type) !important; font-weight: 400; font-size: 24px; line-height: 1.2; color: var(--sp-ink); }
 .sks-x {
   flex: none; width: 34px; height: 34px; display: grid; place-items: center;
   border: 0; border-radius: 10px; background: transparent; color: var(--sp-ink); cursor: pointer;
@@ -36,7 +36,7 @@
 .sks-group + .sks-group { margin-top: 18px; }
 .sks-scope {
   margin: 0 0 6px; font-family: var(--sp-mono) !important; font-weight: 600; font-size: 9px; line-height: 1.3;
-  letter-spacing: 0.16em; text-transform: uppercase; color: var(--sks-muted);
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--sp-quiet);
 }
 .sks-list { margin: 0; padding: 0; list-style: none; }
 .sks-row {
@@ -51,4 +51,11 @@
   font-family: var(--sp-mono); font-size: 11px; line-height: 1; color: var(--sp-ink);
   background: var(--sks-cap-bg); border-radius: 6px; box-shadow: inset 0 -1px 0 var(--sks-rule), inset 0 0 0 1px var(--sks-rule);
 }
-.sks-or { font-family: var(--sp-serif); font-size: 12px; color: var(--sks-muted); margin: 0 2px; }
+.sks-or { font-family: var(--sp-serif); font-size: 12px; color: var(--sp-quiet); margin: 0 2px; }
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  .sks-cap { font-size: 12px; }
+  .sks-scope { font-size: 12px; }
+}

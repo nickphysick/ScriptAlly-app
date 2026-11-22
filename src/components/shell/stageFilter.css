@@ -17,11 +17,11 @@
     min-height: 32px; padding: 5px 11px 5px 9px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--sf-edge);
     font: 400 14.5px/1.2 var(--sp-serif) !important; color: #1c130f;
   }
-  :is(.qc151.qc153, .cl27) .fp .sf-lab .sf-n { font: 400 12.5px/1 var(--sp-type) !important; color: #5b4f47; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab .sf-n { font: 400 12.5px/1 var(--sp-type) !important; color: var(--sp-muted); }
   :is(.qc151.qc153, .cl27) .fp .sf-lab.is-on { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #2a3a52; }
   :is(.qc151.qc153, .cl27) .fp .sf-lab.is-on .sf-nm { font-weight: 600 !important; }
   :is(.qc151.qc153, .cl27) .fp .sf-lab.is-zero { opacity: 0.45; cursor: default; }
-  :is(.qc151.qc153, .cl27) .fp .sf-lab:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  :is(.qc151.qc153, .cl27) .fp .sf-lab:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
   :is(.qc151.qc153, .cl27) .fp .sf-lab.is-on:focus-visible { outline-offset: 5px; }
   :is(.qc151.qc153, .cl27) .fp .sf-lab svg { flex: none; }
 }

@@ -47,6 +47,9 @@ html:has(.mk-scope) { scroll-behavior: smooth; }
 html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
 @media (prefers-reduced-motion: reduce) { html:has(.mk-scope) { scroll-behavior: auto; } }
 
+/* Consistency roll-out v2, Phase 2 (rulings v3, ruling 9): the public pages' brighter rust, named once. The app keeps
+   --sp-rust (#7a3f31). On :root so pages outside .mk-scope read it too. */
+:root { --mk-rust: #a2452a; }
 .mk-scope {
   /* ⚠️ TWO SURFACES, AND THE BOUNDARY IS THE ONLY MARKER. The hero sits on the APP's content-area
      ground; everything from the section break down sits on the brand's warmer desk. There is no
@@ -192,7 +195,8 @@ html:has(.mk-scope), body:has(.mk-scope) { overflow-x: clip; }
      `--mk-ink-hov` is to `--mk-nearblack`. */
   --mk-navy-hov: #1f2c3f;
   /* The accent on LIGHT: the Query Centre's rust. Terracotta (`--mk-terra`) is the accent on ink. */
-  --mk-rust: #a2452a;
+  /* --mk-rust is declared on :root at the top of this file (consistency roll-out v2, Phase 2), so the public pages
+     outside .mk-scope (welcome, privacy, waitlist) read the same named colour */
   /* ── The founding-writers banner ──
      ⚠️ THE BUTTON'S TEXT DELIBERATELY DOES *NOT* GET A TOKEN. The brief asks for #f5f1eb on the
      ink pill; `--mk-cta-ink` is #f7f0e9 and already means "the cream the ink pill prints in".

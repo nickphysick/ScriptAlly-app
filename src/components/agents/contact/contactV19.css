@@ -94,7 +94,7 @@
   box-shadow: 0 0 0 1px rgba(42, 58, 82, 0.35), 0 1px 2px rgba(28, 19, 15, 0.1);
 }
 .cl19-az button:disabled { color: rgba(28, 19, 15, 0.2); cursor: default; }
-.cl19-az button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.cl19-az button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the give-way order: (1) letters with no agents hide, (2) the letters tighten */
 .cl19-tb[data-fit="1"] .cl19-az button:disabled,
 .cl19-tb[data-fit="2"] .cl19-az button:disabled { display: none; }
@@ -111,7 +111,7 @@
   font: 400 14.5px/1.2 var(--sp-serif) !important; cursor: pointer;
 }
 .cl19-ctl:hover:not(:disabled) { background: #fbf9f5; }
-.cl19-ctl:focus-visible, .cl19-pin:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl19-ctl:focus-visible, .cl19-pin:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl19-ctl .cl19-ic { display: inline-flex; color: #2a3a52; }
 .cl19-ctl .cl19-l { font: inherit; }
 .cl19-ctl .cl19-l b { font-weight: 600; font-family: inherit; }
@@ -124,7 +124,7 @@
 
 /* Find: 150 wide; at ≤1440 a 42px icon button that opens to 240 over the letter row (focus, or a search held) */
 .cl19-findw { position: relative; flex: none; display: inline-flex; width: 150px; height: 34px; }
-.cl19-find { width: 100%; padding: 0 16px; cursor: text; color: rgba(28, 19, 15, 0.45); }
+.cl19-find { width: 100%; padding: 0 16px; cursor: text; color: var(--sp-quiet); }
 .cl19-find svg { flex: none; }
 .cl19-find input {
   flex: 1 1 auto; min-width: 0; width: 100%; height: 22px; margin: 0; padding: 0; border: 0; outline: 0; background: transparent;
@@ -181,7 +181,7 @@
 .cl19-seg button b { font: 400 16px/1 var(--sp-type) !important; color: rgb(244, 238, 229); }
 .cl19-seg button:hover:not(:disabled) { color: rgb(244, 238, 229); }
 .cl19-seg button[aria-pressed="true"] { background: rgba(244, 238, 229, 0.14); color: rgb(244, 238, 229); box-shadow: none; }
-.cl19-seg button:focus-visible { outline: 2px solid rgba(244, 238, 229, 0.8); outline-offset: -2px; }
+.cl19-seg button:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 @media (max-width: 1440px) { .cl19-seg button { padding: 0 9px; } }
 .cl19-ym { display: inline-flex; align-items: center; gap: 8px; flex: none; height: 32px; padding: 0 12px 0 10px; font: 400 14px/1 var(--sp-serif); }
 .cl19-ym > b {
@@ -197,7 +197,7 @@
   background: transparent; color: rgb(244, 238, 229); cursor: pointer; text-align: left;
 }
 .cl19-hl:hover:not(:disabled) { background: rgba(244, 238, 229, 0.08); }
-.cl19-hl:focus-visible { outline: 2px solid rgba(244, 238, 229, 0.8); outline-offset: 0; }
+.cl19-hl:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .cl19-ring { width: 34px; height: 34px; flex: none; display: block; }
 .cl19-hlt { display: flex; flex-direction: column; gap: 2px; }
 .cl19-hlt b { font: 400 15px/1 var(--sp-type) !important; color: rgb(244, 238, 229); }
@@ -209,7 +209,7 @@
 }
 .cl19-add > span { font: 400 19px/1 var(--sp-type); }
 .cl19-add:hover { background: #f7f4ee; }
-.cl19-add:focus-visible { outline: 2px solid rgba(244, 238, 229, 0.9); outline-offset: 2px; }
+.cl19-add:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 @media (max-width: 1440px) { .cl19-add { padding: 0 12px; } }
 
 /* ── the folder tab and the sheet's lip, pinned only, on this page only: navy, joined to the band by an inverted
@@ -286,14 +286,14 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-c .cl19-em:is(:hover, :focus-visible) .cl19-et { text-decoration: underline; text-decoration-color: rgba(42, 58, 82, 0.35); text-underline-offset: 4px; }
 .cl19-c .cl19-ext { display: inline-block; margin-left: 4px; font: normal 400 13px/1 var(--sp-serif); color: #2a3a52; opacity: 0; }
 .cl19-c .cl19-web:hover .cl19-ext, .cl19-c .cl19-web:focus-visible .cl19-ext { opacity: 1; }
-.cl19-c .cl19-web:focus-visible, .cl19-c .cl19-em:focus-visible, .cl19-c .cl19-miss:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; border-radius: 3px; }
+.cl19-c .cl19-web:focus-visible, .cl19-c .cl19-em:focus-visible, .cl19-c .cl19-miss:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 3px; }
 .cl19-c .cl19-em { cursor: pointer; }
 .cl19-c .cl19-ew { position: relative; display: inline-block; }
 /* the copy: "✓ Copied" over the address, which stays laid out (hidden) so the column keeps its width */
 .cl19-c .cl19-em[data-done] .cl19-et { visibility: hidden; }
 .cl19-c .cl19-copied { position: absolute; left: 0; top: 0; font-style: italic; color: #2f6b4f; white-space: nowrap; }
 /* stacked: the email under the website, at 72% ink */
-.cl19-c.cl19-cs .cl19-em { color: rgba(28, 19, 15, 0.72); }
+.cl19-c.cl19-cs .cl19-em { color: var(--sp-muted); }
 /* v19.1 §A — a missing website or email: blank at rest. While the row is hovered or anything in it has focus, "+ Add
    website" / "+ Add email" shows: body serif 14px, navy, no icon, a navy underline at 35% offset 4px that goes full colour
    on hover. Hidden is `visibility: hidden` on the WORDS only — the button stays laid out (the row never shifts) and stays
@@ -336,7 +336,7 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-strip .cl19-pill {
   display: inline-flex; align-items: center; gap: 4px; height: 23px; padding: 0 10px; box-sizing: border-box;
   border-radius: 999px; background: #fff; box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.06);
-  font: 400 12.5px/1 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.75); white-space: nowrap;
+  font: 400 12.5px/1 var(--sp-serif) !important; color: var(--sp-muted); white-space: nowrap;
 }
 /* the fit mark: a tick and an ink ring, as the row's chips wore it */
 .cl19-strip .cl19-pill.clv-hit { color: rgb(28, 19, 15); box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.85); }
@@ -370,7 +370,7 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
   padding: 0; border: 0; border-radius: 50%; background: #2a3a52; color: #fff; cursor: pointer;
 }
 .cl19-grpx:hover:not(:disabled) { background: #1f2c40; }
-.cl19-grpx:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl19-grpx:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the jump row: a button per group — its mark and count, the current one white with a navy ring and its name */
 .cl19-jump { gap: 2px; overflow: hidden; height: 36px; }
@@ -384,7 +384,7 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-jump button[data-cl19="jump-group"]:hover:not(:disabled) { background: #fff; box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.12); }
 .cl19-jump button[data-cl19="jump-group"][aria-current="true"] { background: #fff; box-shadow: inset 0 0 0 1px rgba(42, 58, 82, 0.28); }
 .cl19-jump button[data-cl19="jump-group"][aria-current="true"] .cl19-jl { display: inline; }
-.cl19-jump button[data-cl19="jump-group"]:focus-visible { outline: 2px solid #2a3a52; outline-offset: 1px; }
+.cl19-jump button[data-cl19="jump-group"]:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl19-jump button[data-cl19="jump-group"] .cl19-gm { margin-right: 2px; }
 /* give way: (1) the current group's name goes, (2) the groups that do not fit whole go into "+N more" */
 .cl19-tb:is([data-fit="1"], [data-fit="2"]) .cl19-jump button[aria-current="true"] .cl19-jl { display: none; }
@@ -396,7 +396,7 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 }
 .cl19-jmore[hidden] { display: none; }
 .cl19-jmore:hover, .cl19-jmore[aria-expanded="true"] { background: #edf1f7; }
-.cl19-jmore:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl19-jmore:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl19-jmore svg { color: rgba(28, 19, 15, 0.5); }
 /* its menu (portalled to body: every value stated, no page token) */
 .cl19-jpop {
@@ -411,7 +411,7 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-jpop button i { font: 400 12.5px/1 var(--sp-type) !important; font-style: normal; color: rgba(28, 19, 15, 0.42); }
 .cl19-jpop button:hover { background: #edf1f7; }
 .cl19-jpop button[aria-current="true"] { background: #e6edf6; }
-.cl19-jpop button:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl19-jpop button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* a group's mark: the StatusDot (ink), a drawn mark, or a flag */
 .cl19-gm { display: inline-grid; place-items: center; flex: none; color: rgb(28, 19, 15); line-height: 0; }
@@ -469,7 +469,7 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 @media (min-width: 768px) {
   .clv-group .cl16-list .cl19-af { position: sticky; top: calc(var(--cl17-pin-h) + var(--lt-stick, 0px)); }
 }
-.cl19-af-n { flex: none; font: 400 14px/20px var(--sp-serif) !important; color: rgba(28, 19, 15, 0.6); }
+.cl19-af-n { flex: none; font: 400 14px/20px var(--sp-serif) !important; color: var(--sp-quiet); }
 .cl19-af-n b { font-weight: 700; color: rgb(28, 19, 15); }
 .cl19-af-chips { flex: 1 1 auto; min-width: 0; display: flex; gap: 7px; overflow: hidden; }
 .cl19-af-c {
@@ -483,7 +483,7 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 .cl19-af-c:hover svg { color: #2a3a52; }
 .cl19-af-more { padding: 0 12px; color: #2a3a52; }
 .cl19-af-clear { flex: none; font: 400 13.5px/19px var(--sp-serif) !important; }
-.cl19-af-c:focus-visible, .cl19-af-clear:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl19-af-c:focus-visible, .cl19-af-clear:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ── v19 §G — THE LIST'S LOADING SKELETON: the toolbar, the headings and rows, over the list area, until the list is ready.
    The rows are the page's own rows (ContactSkeleton) drawn as their SHAPES — the disc, the name and agency lines and each
@@ -542,14 +542,14 @@ html.cl19-vt::view-transition-new(root) { animation: 300ms cubic-bezier(.22, .8,
 }
 
 /* ── v19.2 §B · THE REPLIES CELL: the reply time alone for an open agent; a closed one adds "Closed till 1 Nov" (or
-   "Closed to queries") under it in rust italic serif 13px — v18's rust, #a2452a. Not compact-hidden: it is a fact. */
+   "Closed to queries") under it in rust italic serif 13px — v18's rust, var(--sp-rust). Not compact-hidden: it is a fact. */
 .clv-rrep .cl192-shut {
-  display: block; margin-top: 3px; font: italic 400 13px/1.3 var(--sp-serif) !important; color: #a2452a; white-space: nowrap;
+  display: block; margin-top: 3px; font: italic 400 13px/1.3 var(--sp-serif) !important; color: var(--sp-rust); white-space: nowrap;
 }
 
 /* ── v19.2 §C · "Not stated" — an absent (or zero) reply time — is ink at 55% (was 45). The stated window reads
    "~6 weeks", spelled out (lib/contactList `replyWeeksLabel`). */
-.clv-group .clv-rrep b.unk { color: rgba(28, 19, 15, 0.55); }
+.clv-group .clv-rrep b.unk { color: var(--sp-quiet); }
 
 /* ── v19.2 §E · "Imported" under the Date added, serif italic 12.5px, ink at 50%. The cell is a flex column sized to
    its content, so the label adds a line and never a width: the column is measured from the date line (contactColumns'

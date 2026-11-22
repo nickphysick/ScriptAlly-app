@@ -53,7 +53,7 @@
 /* ⚠️ AND IT IS SAGE, NOT `--ink` (§3b). "The page's single focus-ring treatment" has to be single
    to be worth naming: the row's ring and every control's outline are now one token, so the page
    cannot come to have two answers to "what does focus look like here". */
-.t-f12 button:not(.f12-row):focus-visible { outline: 2px solid var(--qc-ring); outline-offset: 1px; border-radius: var(--r-sm); }
+.t-f12 button:not(.f12-row):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: var(--r-sm); }
 .f12-root svg { display: block; }
 .f12-kbd { font-family: var(--f12-mono); font-size: 9px; color: var(--faint); border: 1px solid var(--line); border-radius: 5px; padding: 1px 5px; background: var(--panel); }
 
@@ -3690,7 +3690,7 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
   transition: box-shadow 0.15s, background 0.15s; font-family: inherit;
 }
 .qr-out:hover { background: var(--white); box-shadow: inset 0 0 0 1px var(--line); }
-.qr-out:focus-visible { outline: 2px solid var(--burg); outline-offset: 2px; }
+.qr-out:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* Selected takes a RING, not a fill: the marks below already carry the colour, and a filled card
    under a coloured mark makes the mark unreadable. */
 .qr-out.on { background: var(--white); box-shadow: inset 0 0 0 2px var(--sage-edge); }
@@ -4386,7 +4386,7 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
  */
 .qp-stat--edit { width: 100%; text-align: left; background: transparent; border: 0; font: inherit; color: inherit; cursor: pointer; border-radius: 9px; transition: background-color 0.12s; }
 .qp-stat--edit:hover { background: var(--paper); }
-.qp-stat--edit:focus-visible { outline: 2px solid var(--qc-ring); outline-offset: 1px; }
+.qp-stat--edit:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ══ §1 · THE EDITOR PANEL — ONE SURFACE, THREE CONTENTS ══════════════════════════════════════
  *
@@ -4478,7 +4478,7 @@ button.qc-mname:hover, button.qc-mname:focus-visible {
  */
 .tl-ghostpanel { display: flex; align-items: center; gap: 10px; width: 100%; min-height: var(--tl-mark); padding: 10px 12px; border: 1px dashed var(--oatline); border-radius: 10px; background: transparent; box-shadow: none; font: inherit; text-align: left; cursor: pointer; }
 .tl-ghostpanel:hover { border-color: var(--qc-rim-h); }
-.tl-ghostpanel:focus-visible { outline: 2px solid var(--qc-ring); outline-offset: 2px; }
+.tl-ghostpanel:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .tl-ghostwho { font-family: "Inter", sans-serif; font-size: 12.5px; color: var(--ink-2); }
 .tl-ghostwhen { margin-left: auto; font-family: var(--f12-mono); font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--faint); font-variant-numeric: tabular-nums; white-space: nowrap; }
 

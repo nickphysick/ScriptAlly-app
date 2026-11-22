@@ -33,7 +33,7 @@
 }
 .rmenu .rm-row:hover { background: rgba(var(--ink-cream-rgb), 0.07); color: rgba(var(--ink-cream-rgb), 0.95); }
 .rmenu .rm-row.cur { background: rgba(var(--ink-terra-rgb), 0.2); color: var(--ink-bright); font-weight: 600; }
-.rmenu .rm-row:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: -2px; }
+.rmenu .rm-row:focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 .rmenu .rm-lbl { min-width: 0; overflow: hidden; text-overflow: ellipsis; font: inherit; color: inherit; }
 .rmenu .rm-pro {
   flex: none; padding: 0 5px; height: 15px; border-radius: 4px;

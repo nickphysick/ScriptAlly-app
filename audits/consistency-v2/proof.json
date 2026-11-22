@@ -1,0 +1,174 @@
+{
+ "about": "Consistency audit v2, Phase 2: each rule proven by one planted fault on a page where it passed, the check run (npm run audit:rules, CA_ONLY=<page>, 1512), the fault reverted and git diff -- src confirmed empty. CAUGHT = the target rule went red there and no other rule changed. Compared against the clean tree run (rules-clean.json).",
+ "notes": [
+  "R1's first planting (.ms29-lk { font-size: 11px !important }) did not render: the page rule .ms29 .ms29-lk sets its font !important at higher specificity, so the link still measured 16px and the check correctly stayed green. It was re-planted at higher specificity (below); a check cannot be proven by a fault that never reaches the page.",
+  "R9 has three parts. The view-switch part (Query Centre) and the slide-out close-button part (Add a comp) were each faulted. The footer part was not: only the query card, agent card and New package slide-outs draw a footer the collector finds (Add a comp's footer is not picked up)."
+ ],
+ "proofs": [
+  {
+   "rule": "R1",
+   "page": "manuscripts",
+   "fault": "Manuscripts' \"Edit\" link set to 11px",
+   "at": "2026-11-21T17:46:38.994Z",
+   "changed": [
+    "R1: pass → fail 2"
+   ],
+   "newFails": [
+    "button.ms29-lk [11px]",
+    "button.ms29-lk [11px]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R2",
+   "page": "manuscripts",
+   "fault": "Manuscripts' \"Edit\" link turned green (#2e8b57)",
+   "at": "2026-11-21T17:46:39.040Z",
+   "changed": [
+    "R2: pass → fail 2"
+   ],
+   "newFails": [
+    "button.ms29-lk [color #2e8b57 (green)]",
+    "button.ms29-lk [color #2e8b57 (green)]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R3",
+   "page": "manuscripts",
+   "fault": "Manuscripts' page ground set to white",
+   "at": "2026-11-21T17:46:39.080Z",
+   "changed": [
+    "R3: pass → fail 1"
+   ],
+   "newFails": [
+    "#app-stage-scroll [ground #ffffff]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R4",
+   "page": "manuscripts",
+   "fault": "Manuscripts' navy-header title moved 12px down",
+   "at": "2026-11-21T17:46:39.132Z",
+   "changed": [
+    "R4: pass → fail 1"
+   ],
+   "newFails": [
+    "header.qc1531-hd.wsnh-hd.wsnh-hd--wrap [title 52px from the header's top]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R5",
+   "page": "manuscripts",
+   "fault": "Manuscripts' section headings set to 26px",
+   "at": "2026-11-21T17:46:39.170Z",
+   "changed": [
+    "R5: pass → fail 3"
+   ],
+   "newFails": [
+    "h2.ms29-bh [section: 26px, line 31.2]",
+    "h2.ms29-bh [section: 26px, line 31.2]",
+    "h2.ms29-bh [section: 26px, line 31.2]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R6",
+   "page": "manuscripts",
+   "fault": "Manuscripts' \"Add one\" buttons given a 4px radius",
+   "at": "2026-11-21T17:46:39.216Z",
+   "changed": [
+    "R6: pass → fail 3"
+   ],
+   "newFails": [
+    "button.ms29-b2 [outline: radius 4]",
+    "button.ms29-b2 [outline: radius 4]",
+    "button.ms29-b2 [outline: radius 4]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R7",
+   "page": "manuscripts",
+   "fault": "Manuscripts' framed cards given a 12px rim",
+   "at": "2026-11-21T17:46:39.254Z",
+   "changed": [
+    "R7: pass → fail 3"
+   ],
+   "newFails": [
+    "section.ms29-frame [rim: padding 12 12 12 12]",
+    "section.ms29-frame [rim: padding 12 12 12 12]",
+    "section.ms29-frame [rim: padding 12 12 12 12]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R8",
+   "page": "materials-letters",
+   "fault": "Letters' Name field made 50px high",
+   "at": "2026-11-21T17:46:39.297Z",
+   "changed": [
+    "R8: pass → fail 1"
+   ],
+   "newFails": [
+    "label.qlp-fld > input [50 high]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R9",
+   "page": "queries",
+   "fault": "Query Centre's List / Birds-eye switch given a 4px radius",
+   "at": "2026-11-21T17:46:39.338Z",
+   "changed": [
+    "R9: pass → fail 1"
+   ],
+   "newFails": [
+    "div.qc153-vsw [view switch: radius 4]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R10",
+   "page": "manuscripts",
+   "fault": "Manuscripts' \"No queries sent\" line given the word \"late\"",
+   "at": "2026-11-21T17:46:39.394Z",
+   "changed": [
+    "R10: pass → fail 1"
+   ],
+   "newFails": [
+    "div.ms29-dt-f > span [text]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R11",
+   "page": "manuscripts",
+   "fault": "Manuscripts' \"Edit\" link given an off-standard rust (#9a5030)",
+   "at": "2026-11-21T17:46:39.434Z",
+   "changed": [
+    "R11: pass → fail 2"
+   ],
+   "newFails": [
+    "button.ms29-lk [color #9a5030]",
+    "button.ms29-lk [color #9a5030]"
+   ],
+   "verdict": "CAUGHT"
+  },
+  {
+   "rule": "R9",
+   "page": "overlay-Add-a-comp",
+   "fault": "Add a comp's close button shrunk to 30px",
+   "at": "2026-11-21T17:46:39.482Z",
+   "changed": [
+    "R9: pass → fail 1"
+   ],
+   "newFails": [
+    "button.cp30-x [close 30×30]"
+   ],
+   "verdict": "CAUGHT"
+  }
+ ]
+}

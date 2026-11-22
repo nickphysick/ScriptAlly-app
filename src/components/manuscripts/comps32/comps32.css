@@ -17,7 +17,7 @@
 
 .cp32 {
   --c32-type: var(--sp-type); --c32-serif: var(--sp-serif); --c32-mono: var(--font-mono);
-  --c32-ink: #1c130f; --c32-navy: #2a3a52; --c32-btn: var(--sp-anthracite); --c32-cream: #f4eee5; --c32-muted: #7d7067; --c32-rose: #a0675a;
+  --c32-ink: #1c130f; --c32-navy: #2a3a52; --c32-btn: var(--sp-anthracite); --c32-cream: #f4eee5; --c32-muted: var(--sp-quiet); --c32-rose: #a0675a;
   --c32-oat: #f5f1eb; --c32-hair: #ebe4da; --c32-frame: #e9e3d9;
 }
 
@@ -34,10 +34,10 @@
   /* the right-hand block: one column, 320 wide (the ref's `.cb`) */
   .cp32 .qc151.qc153.wsnh.cp32-hdr .wsnh-rc { display: block; width: 320px; max-width: 320px; }
   .cp32 .cp32-cb { display: block; color: #f4eee5; }
-  .cp32 .cp32-cbk { display: block; font: italic 400 17px/1.2 var(--c32-serif) !important; color: rgba(244, 238, 229, .8); }
+  .cp32 .cp32-cbk { display: block; font: italic 400 var(--sp-body-size)/1.2 var(--c32-serif) !important; color: rgba(244, 238, 229, .8); }
   .cp32 .cp32-cbn { display: block; margin-top: 8px; font: 400 26px/1.2 var(--c32-type) !important; color: #fbf7f0; overflow-wrap: anywhere; }
   .cp32 .cp32-cbn span { display: block; font: inherit !important; }
-  .cp32 .cp32-cbs { display: block; margin-top: 8px; font: italic 400 17px/1.3 var(--c32-serif) !important; color: rgba(244, 238, 229, .8); }
+  .cp32 .cp32-cbs { display: block; margin-top: 8px; font: italic 400 var(--sp-body-size)/1.3 var(--c32-serif) !important; color: rgba(244, 238, 229, .8); }
   .cp32 .qc151.qc153.wsnh.cp32-hdr .cp32-cb .qc1531-b { height: 38px; margin-top: 14px; padding: 0 16px; font-size: 16px !important; }
 }
 @media (min-width: 768px) and (max-width: 1380px) {
@@ -50,7 +50,7 @@
 .cp32 .cp32-rc-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; height: 100%; }
 .cp32 .cp32-rb { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 66px; padding: 14px 28px; }
 .cp32 .cp32-rb h2.cp32-rbt { min-width: 0; margin: 0; /* Consistency roll-out v1, Phase 7: the section heading */ overflow-wrap: anywhere; font: var(--sp-h-section) !important; color: inherit !important; }
-.cp32 .cp32-rb small { text-align: right; font: 400 15px/1.2 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-rb small { text-align: right; font: 400 15px/1.2 var(--c32-serif); color: var(--sp-quiet); }
 .cp32 .cp32-rb.is-navy { background: var(--c32-navy); color: #fffaf3; }
 .cp32 .cp32-rb.is-sand { background: #f2e6d8; color: var(--c32-ink); }
 .cp32 .cp32-go { padding: 0; border: 0; background: none; font: 600 15px/1.3 var(--c32-serif); color: var(--c32-ink); text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; min-height: 28px; text-align: left; cursor: pointer; }
@@ -60,7 +60,7 @@
 .cp32 .cp32-btn svg { width: 16px; height: 16px; }
 /* Phase 9: the filled action button */ .cp32 .cp32-btn.is-pri { background: var(--sp-anthracite); color: #fff; box-shadow: none; }
 .cp32 .cp32-btn.is-pri:hover { background: #24324a; }
-.cp32 :focus-visible { outline: 2px solid var(--c32-navy); outline-offset: 2px; }
+.cp32 :focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* ══ B · the striped band (the Founding writer band's construction) ═══════════════════════════════════════════════ */
 .cp32 .cp32-band { margin-top: 0; padding: 6px; border-radius: 20px; background: #fff; box-shadow: 0 1px 2px rgba(28, 19, 15, .04), 0 6px 18px rgba(28, 19, 15, .06); }
@@ -91,16 +91,16 @@
 .cp32 .cp32-row { display: flex; align-items: center; gap: 16px; width: 100%; padding: 16px 18px; border: 0; border-radius: 12px; background: var(--c32-oat); color: var(--c32-ink); text-align: left; cursor: pointer; transition: background-color .15s, box-shadow .15s; }
 .cp32 .cp32-row:hover { background: #f0ece5; }
 .cp32 .cp32-row[aria-current="true"] { background: #fff; box-shadow: 0 0 0 2px var(--c32-btn), 0 8px 18px -12px rgba(28, 19, 15, .4); }
-.cp32 .cp32-rdisc { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: #4d443d; }
+.cp32 .cp32-rdisc { flex: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; background: #fff; color: var(--sp-muted); }
 .cp32 .cp32-row[aria-current="true"] .cp32-rdisc { background: var(--c32-oat); }
 .cp32 .cp32-rdisc svg { width: 19px; height: 19px; }
 .cp32 .cp32-rowx { flex: 1; min-width: 0; }
 .cp32 .cp32-rown { display: block; font: 600 17px/1.3 var(--c32-serif); overflow-wrap: anywhere; }
-.cp32 .cp32-rows-l { display: block; font: 400 14.5px/1.45 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-rows-l { display: block; font: 400 14.5px/1.45 var(--c32-serif); color: var(--sp-quiet); }
 .cp32 .cp32-rows-l b { font-weight: 600; color: var(--c32-ink); }
 .cp32 .cp32-rowu { display: inline-flex; align-items: center; min-height: 22px; margin-top: 6px; padding: 0 10px; border-radius: 999px; background: #f5e3db; color: var(--sp-rust); font: 600 12.5px/1.2 var(--c32-serif); }
 .cp32 .cp32-shelf-f { margin: 20px 0 0; padding: 0 4px; }
-.cp32 .cp32-none { margin: 0; padding: 14px 4px; color: var(--c32-muted); }
+.cp32 .cp32-none { margin: 0; padding: 14px 4px; color: var(--sp-quiet); }
 
 /* the open comp: sticky under the collapsed bar (60) while the shelf scrolls */
 .cp32 .cp32-work { position: sticky; top: 76px; }
@@ -110,24 +110,24 @@
 .cp32 .cp32-tog { display: flex; flex: none; padding: 3px; border-radius: 12px; background: rgba(255, 255, 255, .12); }
 .cp32 .cp32-tog button { height: 34px; padding: 0 12px; border: 0; border-radius: 9px; background: none; font: 400 14.5px/1 var(--c32-serif); color: rgba(255, 250, 243, .78); cursor: pointer; }
 .cp32 .cp32-tog button[aria-pressed="true"] { background: #fffaf3; color: var(--c32-ink); font-weight: 600; }
-.cp32 .cp32-tog button:focus-visible { outline-color: #e8bdb4; }
+.cp32 .cp32-tog button:focus-visible { outline-color: #f4eee5; }
 .cp32 .cp32-wk { padding: 28px 32px 36px; }
 .cp32 .cp32-wktop { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.cp32 .cp32-wkby { flex: 1 1 240px; margin: 0; font: italic 400 17px/1.3 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-wkby { flex: 1 1 240px; margin: 0; font: italic 400 var(--sp-body-size)/1.3 var(--c32-serif); color: var(--sp-quiet); }
 .cp32 .cp32-nums { display: flex; gap: 56px; flex-wrap: wrap; margin-top: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--c32-hair); }
 .cp32 .cp32-nums b { display: block; font: 400 32px/1 var(--c32-type); }
-.cp32 .cp32-nums span { display: block; margin-top: 6px; font: 400 14.5px/1.4 var(--c32-serif); color: var(--c32-muted); }
-.cp32 .cp32-wait { padding: 16px 18px; border-radius: 12px; background: var(--c32-oat); color: #4d443d; }
+.cp32 .cp32-nums span { display: block; margin-top: 6px; font: 400 14.5px/1.4 var(--c32-serif); color: var(--sp-quiet); }
+.cp32 .cp32-wait { padding: 16px 18px; border-radius: 12px; background: var(--c32-oat); color: var(--sp-muted); }
 .cp32 .cp32-wait p { margin: 0; }
 .cp32 .cp32-wait .cp32-btn { margin-top: 12px; }
 .cp32 .cp32-two2 { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.2fr); gap: 56px; margin-top: 32px; align-items: start; }
 /* Consistency roll-out v1, Phase 7: the card heading */ .cp32 h3.cp32-h3 { margin: 0 0 16px; font: var(--sp-h-card) !important; color: var(--c32-ink); }
-.cp32 .cp32-why p { margin: 0; font: 400 17px/1.5 var(--c32-serif); }
-.cp32 .cp32-why .cp32-gap { color: var(--c32-muted); }
+.cp32 .cp32-why p { margin: 0; font: 400 var(--sp-body-size)/1.5 var(--c32-serif); }
+.cp32 .cp32-why .cp32-gap { color: var(--sp-quiet); }
 .cp32 .cp32-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
 .cp32 .cp32-tag { display: inline-flex; align-items: center; min-height: 30px; padding: 0 13px; border-radius: 999px; background: #eae6de; font: 600 14px/1.2 var(--c32-serif); }
 .cp32 .cp32-facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 24px; margin: 28px 0 0; font: 400 15px/1.4 var(--c32-serif); }
-.cp32 .cp32-facts dt { color: var(--c32-muted); }
+.cp32 .cp32-facts dt { color: var(--sp-quiet); }
 .cp32 .cp32-facts dd { margin: 0; }
 .cp32 .cp32-lst { list-style: none; margin: 0; padding: 0; }
 .cp32 .cp32-lst li { display: flex; align-items: center; gap: 16px; min-height: 72px; padding: 14px 0; border-top: 1px solid var(--c32-hair); }
@@ -135,11 +135,11 @@
 .cp32 .cp32-lst .cp32-rdisc { background: var(--c32-oat); width: 38px; height: 38px; }
 .cp32 .cp32-lst .cp32-ini { font: 600 12.5px/1 var(--c32-serif); background: var(--c32-navy); color: #fff; }
 .cp32 .cp32-lstx { flex: 1; min-width: 0; }
-.cp32 .cp32-lstx b { display: block; font: 600 16.5px/1.3 var(--c32-serif); overflow-wrap: anywhere; }
-.cp32 .cp32-lstx > span { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font: 400 14.5px/1.4 var(--c32-serif); color: var(--c32-muted); min-width: 0; }
+.cp32 .cp32-lstx b { display: block; font: 600 var(--sp-body-size)/1.3 var(--c32-serif); overflow-wrap: anywhere; }
+.cp32 .cp32-lstx > span { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font: 400 14.5px/1.4 var(--c32-serif); color: var(--sp-quiet); min-width: 0; }
 .cp32 .cp32-lstx > span svg { flex: none; }
 .cp32 .cp32-lstx > span i { font-style: normal; color: var(--c32-ink); }
-.cp32 .cp32-lstr { flex: none; max-width: 45%; text-align: right; font: 400 14px/1.35 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-lstr { flex: none; max-width: 45%; text-align: right; font: 400 14px/1.35 var(--c32-serif); color: var(--sp-quiet); }
 .cp32 .cp32-lstr b { display: block; font: 400 19px/1.1 var(--c32-type); color: var(--c32-ink); }
 .cp32 .cp32-lstr time { font: 400 12px/1 var(--c32-mono); color: #a39a91; }
 .cp32 .cp32-lstf { margin: 8px 0 0; padding-top: 10px; border-top: 1px solid var(--c32-hair); }
@@ -159,21 +159,21 @@
 .cp32 .cp32-podc:nth-child(3) .cp32-pcard { transform: rotate(-2deg); }
 .cp32 button.cp32-podc:hover .cp32-pcard, .cp32 button.cp32-podc:focus-visible .cp32-pcard { transform: translateY(-6px) rotate(0); box-shadow: 0 0 0 1px #d9d1c5, 0 22px 30px -16px rgba(28, 19, 15, .4); }
 .cp32 button.cp32-podc:focus-visible { outline: 0; }
-.cp32 button.cp32-podc:focus-visible .cp32-pcard { outline: 2px solid var(--c32-btn); outline-offset: 3px; }
-.cp32 .cp32-pcard > .cp32-rdisc { background: var(--c32-oat); margin: 0 0 12px; color: #4d443d; }
+.cp32 button.cp32-podc:focus-visible .cp32-pcard { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+.cp32 .cp32-pcard > .cp32-rdisc { background: var(--c32-oat); margin: 0 0 12px; color: var(--sp-muted); }
 .cp32 .cp32-pcard b { display: block; padding-right: 76px; font: 600 21px/1.25 var(--c32-serif); overflow-wrap: anywhere; }
-.cp32 .cp32-pcard > span:not(.cp32-rdisc):not(.cp32-pmark) { display: block; margin-top: 2px; font: 400 15px/1.4 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-pcard > span:not(.cp32-rdisc):not(.cp32-pmark) { display: block; margin-top: 2px; font: 400 15px/1.4 var(--c32-serif); color: var(--sp-quiet); }
 .cp32 .cp32-pcard > span.cp32-pres { margin-top: 16px; padding-top: 16px; border-top: 1px dashed #d9d1c5; font-size: 16px; color: var(--c32-ink); }
 .cp32 .cp32-pmark { position: absolute; top: -18px; right: -14px; width: 96px; height: 96px; transform: rotate(9deg); color: var(--c32-navy); }
 .cp32 .cp32-pmark svg { display: block; width: 100%; height: 100%; }
 .cp32 .cp32-pmark text { font-family: var(--c32-type); fill: currentColor; }
-.cp32 .cp32-pstep { position: relative; z-index: 1; display: grid; place-items: center; height: 76px; border-radius: 10px 10px 0 0; background: #eae7e2; color: rgba(28, 19, 15, .5); font: 400 64px/1 var(--c32-type); }
+.cp32 .cp32-pstep { position: relative; z-index: 1; display: grid; place-items: center; height: 76px; border-radius: 10px 10px 0 0; background: #eae7e2; color: var(--sp-quiet); font: 400 64px/1 var(--c32-type); }
 .cp32 .is-p1 .cp32-pstep { height: 168px; background: var(--c32-navy); color: #fffaf3; font-size: 96px; box-shadow: 0 -10px 24px -14px rgba(27, 36, 51, .5); }
-.cp32 .is-p2 .cp32-pstep { height: 112px; background: #f2e6d8; color: rgba(28, 19, 15, .62); }
+.cp32 .is-p2 .cp32-pstep { height: 112px; background: #f2e6d8; color: var(--sp-muted); }
 .cp32 .is-p3 .cp32-pstep { height: 76px; }
 .cp32 .cp32-pstep small { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font: 600 13.5px/1 var(--c32-serif); opacity: .85; }
 .cp32 .cp32-podc.is-off { cursor: default; }
-.cp32 .cp32-podc.is-off .cp32-pcard { background: none; box-shadow: none; border: 1.5px dashed #d2cabd; transform: none; color: var(--c32-muted); padding: 22px; font: 400 15px/1.45 var(--c32-serif); }
+.cp32 .cp32-podc.is-off .cp32-pcard { background: none; box-shadow: none; border: 1.5px dashed #d2cabd; transform: none; color: var(--sp-quiet); padding: 22px; font: 400 15px/1.45 var(--c32-serif); }
 .cp32 .cp32-podc.is-off .cp32-pstep { background: repeating-linear-gradient(135deg, #f0ece5, #f0ece5 6px, #e6e1d8 6px, #e6e1d8 12px); color: rgba(28, 19, 15, .35); box-shadow: none; }
 .cp32 .cp32-pod.is-bare { max-width: 640px; }
 .cp32 .cp32-pod.is-bare .is-p1 .cp32-pstep { height: 120px; font-size: 64px; }
@@ -181,7 +181,7 @@
 .cp32 .cp32-pod.is-bare .is-p3 .cp32-pstep { height: 58px; font-size: 40px; }
 .cp32 .cp32-plinth { max-width: 1080px; margin: 0 auto; padding: 22px 24px 18px; border-radius: 4px 4px 14px 14px; background: var(--c32-navy); color: #fffaf3; text-align: center; box-shadow: 0 18px 28px -18px rgba(27, 36, 51, .55); }
 .cp32 .cp32-plinth h2.cp32-plh { margin: 0; font: 400 44px/1.1 var(--c32-type) !important; color: #fffaf3 !important; }
-.cp32 .cp32-plinth-s { margin: 22px auto 0; max-width: 620px; text-align: center; font: 400 17px/1.5 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-plinth-s { margin: 22px auto 0; max-width: 620px; text-align: center; font: 400 var(--sp-body-size)/1.5 var(--c32-serif); color: var(--sp-quiet); }
 .cp32 .cp32-res.is-bare .cp32-plinth { max-width: 640px; }
 .cp32 .cp32-res.is-bare .cp32-plinth h2.cp32-plh { font-size: 32px !important; }
 
@@ -195,10 +195,10 @@
 .cp32 .cp32-cpd-ic { flex: none; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center; background: var(--c32-navy); color: #fffaf3; box-shadow: 0 0 0 5px rgba(255, 255, 255, .7); }
 .cp32 .cp32-cpd-ic svg { width: 28px; height: 28px; }
 /* Consistency roll-out v1, Phase 7: the section heading */ .cp32 .cp32-cpd h2.cp32-cpdh { margin: 0; font: var(--sp-h-section) !important; color: var(--c32-ink) !important; }
-.cp32 .cp32-cpd p { margin: 6px 0 0; font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
+.cp32 .cp32-cpd p { margin: 6px 0 0; font: 400 16px/1.5 var(--c32-serif); color: var(--sp-muted); }
 .cp32 .cp32-ribbon { position: absolute; top: 0; right: 150px; width: 28px; height: calc(100% + 14px); background: linear-gradient(90deg, #7d3f4e, #96505f 45%, #874655); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 11px), 0 100%); z-index: 1; }
 .cp32 .cp32-tbl table { width: 100%; border-collapse: collapse; }
-.cp32 .cp32-tbl th { padding: 18px 28px; text-align: right; font: 400 14.5px/1.2 var(--c32-serif); color: var(--c32-muted); border-bottom: 1px solid var(--c32-hair); }
+.cp32 .cp32-tbl th { padding: 18px 28px; text-align: right; font: 400 14.5px/1.2 var(--c32-serif); color: var(--sp-quiet); border-bottom: 1px solid var(--c32-hair); }
 .cp32 .cp32-tbl th:first-child, .cp32 .cp32-tbl td:first-child { text-align: left; }
 .cp32 .cp32-tbl td { padding: 10px 28px; height: 76px; text-align: right; border-bottom: 1px solid var(--c32-hair); font: 400 19px/1 var(--c32-type); }
 .cp32 .cp32-tbl tbody tr:last-child td { border-bottom: 0; }
@@ -208,34 +208,34 @@
 .cp32 .cp32-who { display: flex; align-items: center; gap: 14px; }
 .cp32 .cp32-who .cp32-rdisc { background: var(--c32-oat); width: 38px; height: 38px; }
 .cp32 .cp32-who b { display: block; font: 600 16.5px/1.3 var(--c32-serif); overflow-wrap: anywhere; }
-.cp32 .cp32-who em { display: block; font: 400 14px/1.3 var(--c32-serif); font-style: normal; color: var(--c32-muted); }
+.cp32 .cp32-who em { display: block; font: 400 14px/1.3 var(--c32-serif); font-style: normal; color: var(--sp-quiet); }
 .cp32 .cp32-rate { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
-.cp32 .cp32-rate em { font: 400 14.5px/1.3 var(--c32-serif); font-style: normal; color: var(--c32-muted); }
+.cp32 .cp32-rate em { font: 400 var(--sp-sec-size)/1.3 var(--c32-serif); font-style: normal; color: var(--sp-quiet); }
 .cp32 .cp32-tr { display: block; width: 140px; flex: none; height: 6px; border-radius: 3px; background: #ebe7df; overflow: hidden; }
 .cp32 .cp32-tr i { display: block; height: 100%; border-radius: 3px; background: var(--c32-btn); }
 .cp32 .cp32-tr.is-na { background: repeating-linear-gradient(135deg, #ece6dc, #ece6dc 4px, #d9d1c4 4px, #d9d1c4 8px); }
-.cp32 .cp32-tbln { margin: 0; padding: 20px 28px 22px; border-top: 1px solid var(--c32-hair); font: 400 15px/1.5 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-tbln { margin: 0; padding: 20px 28px 22px; border-top: 1px solid var(--c32-hair); font: 400 var(--sp-body-size)/1.5 var(--c32-serif); color: var(--sp-quiet); }
 /* the Scout closes the book: a blush foot, the bird perched inside it */
 .cp32 .cp32-scout { display: flex; align-items: center; gap: 28px; flex-wrap: wrap; padding: 22px 32px 22px 28px; border-top: 1px solid var(--c32-frame); background: radial-gradient(120% 160% at 0 0, #fbefe9 0%, #f4e0d7 100%); }
 .cp32 .cp32-perch { flex: none; width: 118px; height: auto; margin: -6px 0 -10px; filter: drop-shadow(0 6px 8px rgba(28, 19, 15, .18)); }
 .cp32 .cp32-scout > div { flex: 1; min-width: 260px; }
 .cp32 .cp32-scout h3.cp32-scth { display: flex; align-items: center; gap: 12px; /* Consistency roll-out v1, Phase 7: the card heading */ flex-wrap: wrap; margin: 0; font: var(--sp-h-card) !important; color: var(--c32-ink) !important; }
 .cp32 .cp32-scout h3 span { display: inline-flex; align-items: center; height: 26px; padding: 0 12px; border-radius: 13px; background: #fff; color: var(--c32-rose); font: 600 13px/1 var(--c32-serif); }
-.cp32 .cp32-scout p { margin: 6px 0 0; max-width: 680px; font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
+.cp32 .cp32-scout p { margin: 6px 0 0; max-width: 680px; font: 400 16px/1.5 var(--c32-serif); color: var(--sp-muted); }
 
 /* the app's own footer, 96 under the last card */
 .cp32 > .af { margin-top: 96px; }
 
 /* ══ day one ══════════════════════════════════════════════════════════════════════════════════════════════════════ */
 .cp32 .cp32-first-in { padding: 40px 44px; }
-.cp32 .cp32-first h2.cp32-firsth { margin: 0; font: 400 28px/1.15 var(--c32-type) !important; color: var(--c32-ink) !important; }
+.cp32 .cp32-first h2.cp32-firsth { margin: 0; font: var(--sp-h-section) !important; color: var(--c32-ink) !important; }
 .cp32 .cp32-steps { list-style: none; margin: 32px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 32px; }
-.cp32 .cp32-steps li { padding: 24px 24px 28px; border-radius: 12px; background: var(--c32-oat); font: 400 16px/1.5 var(--c32-serif); color: #4d443d; }
+.cp32 .cp32-steps li { padding: 24px 24px 28px; border-radius: 12px; background: var(--c32-oat); font: 400 16px/1.5 var(--c32-serif); color: var(--sp-muted); }
 .cp32 .cp32-slot { display: grid; place-items: center; height: 130px; margin-bottom: 16px; border-radius: 8px; overflow: hidden; background: repeating-linear-gradient(135deg, #fdfbf7, #fdfbf7 6px, #faf6ef 6px, #faf6ef 12px); box-shadow: 0 0 0 1px rgba(28, 19, 15, .08); }
 .cp32 .cp32-slot img { display: block; height: 118px; width: auto; max-width: 100%; }
 .cp32 .cp32-steps li b { display: block; margin-bottom: 6px; font: 600 18px/1.3 var(--c32-serif); color: var(--c32-ink); }
 .cp32 .cp32-stepn { display: inline-grid; place-items: center; width: 28px; height: 28px; margin-right: 10px; border-radius: 50%; background: var(--c32-btn); color: #fff; font: 600 14px/1 var(--c32-serif); vertical-align: 2px; }
-.cp32 .cp32-first-in > p { margin: 32px 0 0; font: 400 16px/1.5 var(--c32-serif); color: var(--c32-muted); }
+.cp32 .cp32-first-in > p { margin: 32px 0 0; font: 400 16px/1.5 var(--c32-serif); color: var(--sp-quiet); }
 
 /* ══ the ref's breakpoints: 1380, 1160, 900 ═══════════════════════════════════════════════════════════════════════ */
 @media (max-width: 1380px) {
@@ -267,3 +267,13 @@
   .cp32 .cp32-pcard, .cp32 .cp32-row { transition: none; }
   .cp32 button.cp32-podc:hover .cp32-pcard, .cp32 button.cp32-podc:focus-visible .cp32-pcard { transform: none; }
 }
+
+/* Consistency roll-out v2, Phase 3 (rulings v3, ruling 4): the text tag — 28 high, 0 12, fully rounded, Source Serif 4
+   600 14 (shell/primitives.css --sp-tag-*). Each keeps its own fill, edge and text colour. Desktop only. */
+@media (min-width: 768px) {
+  .cp32 .cp32-tag, .cp32 .cp32-rowu, .cp32 h3.cp32-scth > span { box-sizing: border-box; display: inline-flex; align-items: center; height: var(--sp-tag-h); min-height: 0; padding: var(--sp-tag-pad); border-radius: var(--sp-tag-r); font: var(--sp-tag-font) !important; font-style: normal !important; }
+}
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.cp32 .cp32-row:hover:not([aria-current="true"]) { background: #f8f4ed; }

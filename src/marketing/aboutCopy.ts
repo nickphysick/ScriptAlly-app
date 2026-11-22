@@ -151,7 +151,7 @@ export const ABOUT_NOTE_BODY: CopyRun[][] = [
   [
     "I started querying with a spreadsheet, like most people do. I work with spreadsheets for " +
     "a living, and it still got away from me. Which version of the letter went to whom, which " +
-    "agent had said no reply means no, which nudge was already a week late.",
+    "agent had said no reply means no, which nudge should have gone a week ago.",
   ],
   [
     "So I built the tool I wanted. QueryHawk is designed, built and run by me, here in the UK, " +

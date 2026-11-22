@@ -167,7 +167,7 @@
 .qcv-qa-b1:hover { background: var(--qcv-navy-hov); }
 /* §3 (v96) — the ⋯ went with Snooze; `.qcv-qa-q` is the outlined pair, Edit and Close. */
 .qcv-qa-q:hover { background: var(--state-queried); }
-.qcv-qa-b:focus-visible { outline: 2px solid var(--qcv-navy); outline-offset: 2px; }
+.qcv-qa-b:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /**
  * §3 · THE TWO FOLDS, ON THE ROW'S OWN CONTAINER RATHER THAN THE VIEWPORT.

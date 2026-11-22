@@ -22,7 +22,7 @@
 .cl20-fsh > b { font: 400 17px/1 var(--sp-type) !important; color: #1c130f; }
 .cl20-fsh > span {
   flex: 1 1 auto; font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(28, 19, 15, 0.55);
+  color: var(--sp-quiet);
 }
 .cl20-fs-strip .cl20-fsc {
   margin: 0; padding: 0; border: 0; background: none; cursor: pointer; color: #2a3a52; font-size: 14px !important; line-height: 20px;
@@ -31,10 +31,10 @@
 .cl20-fs-strip .cl20-fsc:disabled { opacity: 0.38; cursor: default; text-decoration: none; }
 .cl20-fsx {
   box-sizing: border-box; display: grid; place-items: center; width: 28px; height: 28px; margin: 0; padding: 0; border: 0; border-radius: 50%;
-  background: transparent; color: rgba(28, 19, 15, 0.65); cursor: pointer;
+  background: transparent; color: var(--sp-muted); cursor: pointer;
 }
 .cl20-fsx:hover { background: #f4f0e9; color: #1c130f; }
-.cl20-fs-strip :is(.cl20-fsc, .cl20-fsx, .cl20-chip, .cl20-seg button, .cl20-fmore):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl20-fs-strip :is(.cl20-fsc, .cl20-fsx, .cl20-chip, .cl20-seg button, .cl20-fmore):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the four columns, each scrolling inside itself if it must */
 /* no column clips a chip or the segment: each column's floor is its own widest choice */
 .cl20-fsb { display: grid; grid-template-columns: minmax(min-content, 1.25fr) minmax(min-content, 1.4fr) minmax(min-content, 1fr) minmax(min-content, 1.5fr); }
@@ -43,14 +43,14 @@
 .cl20-fcol + .cl20-fcol { border-left: 1px solid rgba(28, 19, 15, 0.07); }
 .cl20-fcol h4 {
   margin: 0 0 10px; font: 500 9.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.18em; text-transform: uppercase;
-  color: rgba(28, 19, 15, 0.5);
+  color: var(--sp-quiet);
 }
 .cl20-fchips { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
 .cl20-chip {
   box-sizing: border-box; display: inline-flex; align-items: center; gap: 6px; height: 30px; margin: 0; padding: 0 10px; border: 0; border-radius: 8px;
   background: #f4f0eb; color: #1c130f; cursor: pointer; white-space: nowrap; font-size: 14px !important; line-height: 1 !important;
 }
-.cl20-chip i { font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; font-style: normal; color: rgba(28, 19, 15, 0.5); }
+.cl20-chip i { font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; font-style: normal; color: var(--sp-quiet); }
 .cl20-chip .cl19-gm { width: 14px; height: 14px; }
 .cl20-chip:hover:not(:disabled):not(.on) { background: #ebe5da; }
 .cl20-chip.on { background: #2a3a52; color: rgb(244, 238, 229); }
@@ -65,9 +65,9 @@
 .cl20-seg { display: inline-flex; margin: 0 0 8px; padding: 3px; border-radius: 10px; background: #f4f0e9; }
 .cl20-seg button {
   box-sizing: border-box; display: inline-flex; align-items: center; gap: 5px; height: 28px; margin: 0; padding: 0 11px; border: 0; border-radius: 7px;
-  background: transparent; color: rgba(28, 19, 15, 0.7); cursor: pointer; white-space: nowrap; font-size: 14px !important; line-height: 1 !important;
+  background: transparent; color: var(--sp-muted); cursor: pointer; white-space: nowrap; font-size: 14px !important; line-height: 1 !important;
 }
-.cl20-seg button i { font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; font-style: normal; color: rgba(28, 19, 15, 0.45); }
+.cl20-seg button i { font: 500 10.5px/1 var(--font-mono, "JetBrains Mono", monospace) !important; font-style: normal; color: var(--sp-quiet); }
 .cl20-seg button.on { background: #fff; color: #1c130f; box-shadow: 0 1px 3px rgba(28, 19, 15, 0.14), 0 0 0 1px rgba(28, 19, 15, 0.06); }
 .cl20-seg button:disabled { opacity: 0.38; cursor: default; }
 .cl20-seg.cl20-seg--s button { height: 24px; padding: 0 9px; font-size: 13px !important; }

@@ -26,7 +26,7 @@
 
 .laq {
   --laq-ink: #1c130f; --laq-mut: #6f645b; --laq-mut2: #9a8f84; --laq-paper: #f6f3ee; --laq-line: #e2d9cc;
-  --laq-navy: #2a3a52; --laq-harbour: #2f4a5c; --laq-rust: #a2452a;
+  --laq-navy: #2a3a52; --laq-harbour: #2f4a5c; --laq-rust: var(--sp-rust);
   /* materials fork v1 — the packages/materials object colour */
   --laq-ochre: #9a7233; --laq-ochre-ink: #7a5a22; --laq-ochre-tint: #f6efe2;
   --laq-tw: var(--sp-type); --laq-se: var(--sp-serif); --laq-mono: var(--sp-mono);
@@ -62,7 +62,7 @@
 .laq .laq-s.is-d .laq-l, .laq .laq-s.is-n .laq-l { color: var(--laq-ink); }
 .laq .laq-s.is-d .laq-l b { display: block; font: italic 400 12.5px var(--laq-se); color: var(--laq-mut); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .laq .laq-s.is-d:hover .laq-l { text-decoration: underline; text-underline-offset: 3px; }
-.laq .laq-s:focus-visible .laq-nd { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-s:focus-visible .laq-nd { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 @media (prefers-reduced-motion: reduce) { .laq .laq-nd, .laq .laq-si::after { transition: none; } }
 
 /* v1.2 — THE NAVY HEADER (the reference's `.ci.hc` rules, chosen over "as built" and "warm sand"). The FlowHead and the
@@ -73,7 +73,7 @@
 .laq .flh p.flh-l { color: rgba(255, 255, 255, .78); }
 .laq .flh .flh-x { color: #fff; }
 .laq .flh .flh-x:hover { background: rgba(255, 255, 255, .12); }
-.laq .flh .flh-x:focus-visible { outline-color: #fff; }
+.laq .flh .flh-x:focus-visible { outline-color: #f4eee5; }
 .laq .laq-trk .laq-nd { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .35); color: rgba(255, 255, 255, .55); }
 .laq .laq-trk .laq-si:not(:last-child)::after { background: rgba(255, 255, 255, .22); }
 .laq .laq-trk .laq-si:has(> .is-d):not(:last-child)::after { background: #fff; }
@@ -83,7 +83,7 @@
 .laq .laq-trk .laq-l { color: rgba(255, 255, 255, .5); }
 .laq .laq-trk .laq-s.is-d .laq-l, .laq .laq-trk .laq-s.is-n .laq-l { color: #fff; }
 .laq .laq-trk .laq-s.is-d .laq-l b { color: rgba(255, 255, 255, .7); }
-.laq .laq-trk .laq-s:focus-visible .laq-nd { outline-color: #fff; }
+.laq .laq-trk .laq-s:focus-visible .laq-nd { outline-color: #f4eee5; }
 
 /* the stage body */
 .laq .laq-sb { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; padding: 20px 20px 12px; display: flex; flex-direction: column; }
@@ -93,15 +93,15 @@
 @keyframes laq-slide { from { opacity: 0; transform: translateX(18px); } }
 @keyframes laq-slideb { from { opacity: 0; transform: translateX(-18px); } }
 .laq h2.laq-qh { margin: 0 0 4px; font: 400 22px/1.25 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
-.laq p.laq-qs { margin: 0 0 16px; font: italic 400 15px/1.45 var(--laq-se); color: var(--laq-mut); }
+.laq p.laq-qs { margin: 0 0 16px; font: italic 400 var(--sp-body-size)/1.45 var(--laq-se); color: var(--laq-mut); }
 
 /* big choices */
 .laq .laq-big { display: grid; gap: 8px; }
 .laq .laq-big > button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 12px 14px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; background: #fff; }
 .laq .laq-big > button:hover, .laq .laq-big > button.is-hi { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
-.laq .laq-big > button:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-big > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; } /* roll-out v2, Phase 6: the one ring, not an inset edge */
 .laq .laq-big > button.is-on { box-shadow: inset 0 0 0 1.5px var(--laq-navy); background: #f7f5f1; }
-.laq .laq-g { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--laq-paper); font: 500 12px var(--laq-mono) !important; color: #5b4f47; }
+.laq .laq-g { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: var(--laq-paper); font: 500 12px var(--laq-mono) !important; color: var(--sp-muted); }
 .laq .laq-g.is-pkg { border-radius: 9px; background: var(--laq-harbour); }
 .laq .laq-tx { flex: 1 1 auto; min-width: 0; }
 .laq .laq-tx b { display: block; font: 500 16.5px/1.25 var(--laq-se); }
@@ -124,7 +124,7 @@
 .laq .laq-busy { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; background: #faf8f4; box-shadow: inset 0 0 0 1px #ece5da; font: 400 14.5px var(--laq-se); color: var(--laq-mut); }
 .laq .laq-busy:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
 .laq .laq-faces { display: flex; }
-.laq .laq-faces i { display: grid; place-items: center; width: 24px; height: 24px; margin-left: -6px; border-radius: 50%; background: var(--laq-paper); box-shadow: 0 0 0 2px #faf8f4, inset 0 0 0 1px var(--laq-line); font: 500 8px var(--laq-mono) !important; font-style: normal; color: #5b4f47; }
+.laq .laq-faces i { display: grid; place-items: center; width: 24px; height: 24px; margin-left: -6px; border-radius: 50%; background: var(--laq-paper); box-shadow: 0 0 0 2px #faf8f4, inset 0 0 0 1px var(--laq-line); font: 500 8px var(--laq-mono) !important; font-style: normal; color: var(--sp-muted); }
 .laq .laq-faces i:first-child { margin-left: 0; }
 .laq .laq-busy u { margin-left: auto; color: var(--laq-navy); text-underline-offset: 3px; }
 .laq .laq-off { display: flex; align-items: center; gap: 12px; padding: 8px 14px; opacity: .55; }
@@ -133,21 +133,21 @@
 .laq .laq-off > span:last-child { margin-left: auto; font: italic 400 13px var(--laq-se); }
 .laq .laq-none { margin: 10px 0; padding: 16px; border-radius: 12px; background: #faf8f4; text-align: center; font: 400 15px var(--laq-se); color: var(--laq-mut); }
 .laq .laq-lk { all: unset; cursor: pointer; color: var(--laq-navy); text-decoration: underline; text-underline-offset: 3px; }
-.laq .laq-lk:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; border-radius: 2px; }
+.laq .laq-lk:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 
 /* the inline calendar */
 .laq .laq-cal { margin-top: 10px; padding: 12px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; animation: laq-fadein .2s both; }
 @keyframes laq-fadein { from { opacity: 0; transform: translateY(-3px); } }
 .laq .laq-calh { display: flex; align-items: center; margin: 0 2px 8px; }
 .laq .laq-calh b { flex: 1 1 auto; text-align: center; font: 400 16px var(--laq-tw); }
-.laq .laq-calh button { all: unset; cursor: pointer; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: #5b4f47; }
+.laq .laq-calh button { all: unset; cursor: pointer; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; color: var(--sp-muted); }
 .laq .laq-calh button:hover { background: #f6f2ec; }
 .laq .laq-calh button:disabled { opacity: .25; pointer-events: none; }
 .laq .laq-calg { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; }
 .laq .laq-calg > span { font: 400 12px var(--laq-se); color: var(--laq-mut2); padding: 2px 0 4px; }
 .laq .laq-calg > button { all: unset; cursor: pointer; height: 32px; border-radius: 50%; font: 400 14px var(--laq-se); }
 .laq .laq-calg > button:hover { background: #f6f2ec; }
-.laq .laq-calg > button:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-calg > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; } /* roll-out v2, Phase 6: the one ring, not an inset edge */
 .laq .laq-calg > button.is-today { box-shadow: inset 0 0 0 1px #cfc4b5; }
 .laq .laq-calg > button.is-on { background: var(--laq-navy); color: #fff; }
 .laq .laq-calg > button:disabled { color: #d3cbc0; pointer-events: none; }
@@ -161,7 +161,7 @@
 /* v1.2 — WHAT {FIRST} ASKS FOR (the reference's `.asks`): Queried sand, the asks as one wrapping row, a foot under a rule */
 .laq .laq-asks { margin: 0 0 14px; padding: 12px 14px; border-radius: 14px; background: #efe7da; animation: laq-fadein .25s ease-out both; }
 .laq .laq-ah { display: flex; align-items: baseline; gap: 10px; margin: 0 0 8px; }
-.laq .laq-ah b { font: 600 15.5px var(--laq-se); }
+.laq .laq-ah b { font: 600 var(--sp-body-size) var(--laq-se); }
 .laq .laq-ah span { margin-left: auto; font: italic 400 13px var(--laq-se); color: #7d7268; }
 .laq .laq-asks ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; }
 .laq .laq-asks li { display: flex; align-items: center; gap: 7px; }
@@ -170,7 +170,7 @@
 .laq .laq-asks.is-pkg .laq-mk { width: 6px; height: 6px; box-shadow: none; background: #8e8274; }
 .laq .laq-asks li.is-ok .laq-mk { background: var(--laq-navy); box-shadow: none; color: #fff; }
 .laq .laq-asks li.is-diff .laq-mk { background: #fff; box-shadow: inset 0 0 0 1.5px var(--laq-rust); color: var(--laq-rust); }
-.laq .laq-af { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid #e0d4c3; font: 400 14px/1.4 var(--laq-se); color: #5b4f47; }
+.laq .laq-af { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid #e0d4c3; font: 400 14px/1.4 var(--laq-se); color: var(--sp-muted); }
 .laq .laq-af.is-ok { color: var(--laq-ink); }
 .laq .laq-af .laq-why { display: block; color: var(--laq-rust); }
 .laq .laq-af .laq-xtra { display: block; font-style: italic; }
@@ -227,18 +227,18 @@
 .laq .laq-btn { all: unset; box-sizing: border-box; cursor: pointer; flex: none; display: inline-flex; align-items: center; gap: 8px; height: 42px; padding: 0 17px; border-radius: 21px; font: 600 14.5px var(--laq-se); white-space: nowrap; transition: filter .15s, transform .1s; background: var(--laq-navy); color: #fff; }
 .laq .laq-btn:active { transform: scale(.97); }
 .laq .laq-btn:hover { filter: brightness(1.12); }
-.laq .laq-btn:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .laq .laq-btn.is-ghost { background: #fff; color: var(--laq-navy); box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
 .laq .laq-btn.is-sm { height: 36px; padding: 0 14px; font-size: 14px; }
 .laq .laq-btn:disabled { opacity: .38; pointer-events: none; }
-.laq .laq-lnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--laq-se); color: #5b4f47; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.laq .laq-lnk { all: unset; cursor: pointer; flex: none; padding: 0 4px; font: 400 14px var(--laq-se); color: var(--sp-muted); text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
 .laq .laq-lnk:hover { color: var(--laq-navy); }
-.laq .laq-lnk:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; border-radius: 2px; }
+.laq .laq-lnk:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; border-radius: 2px; }
 .laq .laq-lnk:disabled { opacity: .38; pointer-events: none; }
 
 /* v1.2 — the leave check, in the footer's place */
 .laq .laq-cf.is-leave { background: #faf6f0; }
-.laq .laq-lv { font: 400 14.5px/1.35 var(--laq-se); color: #5b4f47; }
+.laq .laq-lv { font: 400 14.5px/1.35 var(--laq-se); color: var(--sp-muted); }
 .laq .laq-lv b { font-weight: 600; color: var(--laq-ink); }
 
 /* the batch toast */
@@ -260,7 +260,7 @@
 .laq h2.laq-yh { margin: 14px 0 6px; min-height: 35px; font: 400 30px/1.15 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
 .laq .laq-cur { display: inline-block; width: 2px; height: 26px; margin-left: 2px; vertical-align: -3px; background: var(--laq-ink); animation: laq-blink .8s steps(1) infinite; }
 @keyframes laq-blink { 50% { opacity: 0; } }
-.laq p.laq-yl { margin: 0 0 4px; max-width: 400px; font: italic 400 15.5px/1.5 var(--laq-se); color: #5b4f47; animation: laq-fade .4s .7s both; }
+.laq p.laq-yl { margin: 0 0 4px; max-width: 400px; font: italic 400 15.5px/1.5 var(--laq-se); color: var(--sp-muted); animation: laq-fade .4s .7s both; }
 @keyframes laq-fade { from { opacity: 0; } }
 .laq .laq-cnt { display: inline-flex; align-items: baseline; gap: 6px; margin: 6px 0 14px; animation: laq-fade .4s .8s both; font: 400 14.5px var(--laq-se); color: var(--laq-mut); }
 .laq .laq-odo { display: inline-block; height: 1.15em; overflow: hidden; vertical-align: bottom; font: 400 22px/1.15 var(--laq-tw) !important; color: var(--laq-ink); }
@@ -276,14 +276,14 @@
 .laq .laq-yay .laq-pvtag { display: none; }
 .laq .laq-yay .laq-stamp { top: 96px; }
 .laq .qi-slot { display: flex; align-items: center; justify-content: center; flex: none; background: repeating-linear-gradient(135deg, rgba(58,28,20,.05) 0 6px, transparent 6px 12px); border: 1px dashed rgba(58,28,20,.22); border-radius: 14px; }
-.laq .qi-ph { color: #8a7a6c; font: 400 8px/1.5 var(--laq-mono) !important; letter-spacing: .12em; text-transform: uppercase; }
+.laq .qi-ph { color: var(--sp-quiet); font: 400 8px/1.5 var(--laq-mono) !important; letter-spacing: .12em; text-transform: uppercase; }
 
 @media (prefers-reduced-motion: reduce) {
   .laq *, .laq *::before, .laq *::after { animation: none !important; transition: none !important; }
 }
 
 /* ── v1.3 — the Nudge stage (design-refs/log-a-query-v1-3, "Nudge, with a response time") ─────────────────────────── */
-.laq h3.laq-qh.is-q2 { margin: 20px 0 10px; font: 400 19px/1.25 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
+.laq h3.laq-qh.is-q2 { margin: 20px 0 10px; font: var(--sp-h-card) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
 .laq .laq-wkb { padding: 14px 16px 12px; border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; margin-bottom: 6px; }
 .laq .laq-wkb .sa-fld { margin: 0; }
 /* the app's WeekSlider, as the agent card draws it; its label speaks in the stage's serif, never a mono eyebrow */
@@ -310,7 +310,7 @@
 .laq .laq-nopt { border-radius: 14px; box-shadow: inset 0 0 0 1px #ddd3c6; }
 .laq .laq-nopt.is-on { box-shadow: inset 0 0 0 1.5px var(--laq-navy); }
 .laq .laq-nopt > button { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 14px; border-radius: 14px; }
-.laq .laq-nopt > button:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); }
+.laq .laq-nopt > button:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; } /* roll-out v2, Phase 6: the one ring, not an inset edge */
 .laq .laq-rd { flex: none; width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #b9ad9e; }
 .laq .laq-nopt.is-on .laq-rd { box-shadow: inset 0 0 0 5.5px var(--laq-navy); }
 .laq .laq-nopt .laq-tx { flex: 1; min-width: 0; }
@@ -322,7 +322,7 @@
 .laq .laq-nch { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 12px 44px; }
 .laq .laq-chip { all: unset; cursor: pointer; font: 400 13px/1.3 var(--laq-tw); padding: 6px 11px; border-radius: 18px; box-shadow: inset 0 0 0 1.2px rgba(28,19,15,.22); background: #fff; }
 .laq .laq-chip.is-on { background: var(--laq-navy); color: #fff; box-shadow: none; }
-.laq .laq-chip:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-chip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .laq .laq-ncal { margin: 0 14px 12px 44px; }
 
 /* materials fork v1 (design-refs/log-query-materials-fork-v1/) — THE FORK, THE PIECES' GROUPS. The ochre is the
@@ -334,7 +334,7 @@
 .laq .laq-tile { all: unset; box-sizing: border-box; cursor: pointer; min-height: 248px; padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 10px;
   border-radius: 16px; background: #fdf9f5; box-shadow: inset 0 0 0 1.5px #ddd3c6; }
 .laq .laq-tile:hover { box-shadow: inset 0 0 0 1.5px var(--laq-ochre); }
-.laq .laq-tile:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-tile:focus-visible { box-shadow: inset 0 0 0 2px var(--laq-navy); outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .laq .laq-ti { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 11px; background: var(--laq-ochre); color: #fff; }
 .laq .laq-tt { font: 400 21px/1.2 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); }
 .laq .laq-td { font: 400 15px/1.45 var(--laq-se); color: var(--laq-mut); }
@@ -352,7 +352,7 @@
 .laq .laq-opt { all: unset; box-sizing: border-box; cursor: pointer; min-height: 52px; padding: 10px 12px; display: flex; align-items: center; gap: 10px;
   border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1.5px #ddd3c6; font: 400 15.5px/1.3 var(--laq-se); color: var(--laq-ink); }
 .laq .laq-opt:hover { box-shadow: inset 0 0 0 1.5px var(--laq-ochre); }
-.laq .laq-opt:focus-visible { outline: 2px solid var(--laq-navy); outline-offset: 2px; }
+.laq .laq-opt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .laq .laq-opt.is-on { background: var(--laq-ochre-tint); box-shadow: inset 0 0 0 2px var(--laq-ochre); }
 .laq .laq-on { min-width: 0; overflow-wrap: anywhere; }
 .laq .laq-rdo { flex: none; width: 18px; height: 18px; box-sizing: border-box; border-radius: 50%; border: 2px solid #8c8177; background: #fff; box-shadow: inset 0 0 0 3px #fff; }
@@ -366,3 +366,21 @@
 .laq .laq-slot { display: inline-flex; align-items: center; justify-content: flex-end; min-height: 42px; }
 .laq .laq-grps + .laq-ask, .laq .laq-big + .laq-ask { margin-top: 12px; }
 .laq .laq-ask .laq-lk { min-height: 44px; display: inline-flex; align-items: center; }
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.laq .laq-btn:hover:not(:disabled) { filter: none; background: var(--sp-navy-hover); }
+.laq .laq-btn.is-ghost:hover:not(:disabled) { background: var(--sp-btn-line-hov); }
+.laq .laq-busy:hover { background: #f8f4ed; }
+
+/* Consistency roll-out v2, Phase 6 (ruling 11): the one focus ring for this component's buttons. They are `all: unset`, which
+   also unsets the shell's zero-specificity ring, so the ring is stated here — (0,2,0), below every rule that names its own. */
+.laq :where(button, [role="button"], [role="radio"], a[href]):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  .laq .laq-faces i { width: 36px; height: 36px; font-size: 12px !important; }
+  .laq .laq-wkb .sa-wk-ends, .laq .laq-wkb .sa-wk-ends span { font-size: 12px !important; }
+  .laq .laq-wkb .sa-wk-unkbtn { font-size: 12px !important; }
+}

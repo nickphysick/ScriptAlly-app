@@ -46,5 +46,5 @@
 }
 .edp-tk:checked { background: #2a3a52; border-color: #2a3a52; }
 .edp-tk:checked::after { content: "✓"; color: #fff; font: 700 16px var(--font-sans); }
-.edp-back:focus-visible, .edp-btn:focus-visible, .edp-chip:focus-visible, .edp-skip:focus-visible, .edp-tk:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+.edp-back:focus-visible, .edp-btn:focus-visible, .edp-chip:focus-visible, .edp-skip:focus-visible, .edp-tk:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .edp-back:focus-visible { outline-color: #fff; }

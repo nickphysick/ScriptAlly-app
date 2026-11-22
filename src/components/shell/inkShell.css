@@ -1197,3 +1197,9 @@
   .set-mode .set-planlink:hover { text-decoration: underline; text-underline-offset: 3px; }
   .set-mode .set-planlink:focus-visible { outline: 2px solid var(--ink-terra); outline-offset: 2px; border-radius: 3px; }
 }
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  .ws-beta { font-size: 12px; }
+}

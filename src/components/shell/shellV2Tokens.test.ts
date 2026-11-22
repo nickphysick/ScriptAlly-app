@@ -50,7 +50,7 @@ const BAKED: Record<string, string> = {
   "--shell-active-fg": "#fdf9f5",
   "--shell-hover-bg": "rgba(255, 255, 255, 0.45)",
   "--shell-hairline": "rgba(28, 19, 15, 0.12)",
-  "--shell-mute": "rgba(28, 19, 15, 0.58)",
+  "--shell-mute": "var(--sp-quiet)", /* consistency roll-out v2, Phase 2 (ruling 2): was ink at 58% */
   "--shell-ring": "rgba(28, 19, 15, 0.28)",
   "--shell-btn-hover": "rgba(255, 255, 255, 0.6)",
   "--shell-switch-bg": "rgba(255, 255, 255, 0.7)",

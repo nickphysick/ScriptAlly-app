@@ -330,7 +330,9 @@ describe("the kicker's and the CTA's treatment", () => {
      * buttons whose entire justification was that they matched.
      */
     expect(rule(".ph-primary"), "the header's primary states its own colour").toContain("background: var(--sp-anthracite)");
-    expect(rule(".ph-secondary"), "the secondary's edge is a literal").toContain("var(--sp-frame)");
+    /* Consistency roll-out v2, Phase 1: burgundy is only a MountCard frame border now, so the secondary's edge is the
+       standard outline token (--sp-btn-ring), still a token and never a literal */
+    expect(rule(".ph-secondary"), "the secondary's edge is the standard outline token").toContain("var(--sp-btn-ring)");
     expect(strip(css), "a near-black literal came back into the header").not.toMatch(/background:\s*#2a3a52/);
   });
 

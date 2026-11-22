@@ -204,7 +204,7 @@ describe("§4a · the ring belongs to the keyboard", () => {
    */
   it("the row has its own ring, and the shared one no longer reaches it", () => {
     expect(css, "the shared ring still reaches list rows")
-      .toContain("button:not(.f12-row):focus-visible { outline: 2px solid var(--qc-ring)");
+      .toContain("button:not(.f12-row):focus-visible { outline: 2px solid var(--sp-anthracite)"); /* roll-out v2, Phase 6: the one ring */
     /* ⚠️ AND `--ink` IS GONE FROM IT (§3b). The exclusion was right and the COLOUR was the fault
        that survived it: a page cannot claim "one focus-ring treatment" while its controls outline
        in near-black and its rows ring in something else. */

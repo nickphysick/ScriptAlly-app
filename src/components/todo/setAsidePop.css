@@ -21,7 +21,7 @@
 .td5-ph b {font: 400 18px/1.2 var(--sp-type) !important;}
 .td5-ph span {font: italic 400 13.5px/1.3 var(--sp-serif) !important;}
 .td5-pchips {display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px;}
-.td5-pjn {margin: 0 0 10px; padding: 9px 12px; border-radius: 10px; background: #f6f3ee; font: 400 14px/1.45 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.7);}
+.td5-pjn {margin: 0 0 10px; padding: 9px 12px; border-radius: 10px; background: #f6f3ee; font: 400 14px/1.45 var(--sp-serif) !important; color: var(--sp-muted);}
 .td5-pjn b {display: inline-block; margin-right: 8px; font: 600 8.5px/1.2 var(--font-mono) !important; letter-spacing: 0.14em; text-transform: uppercase;}
 .td5-pdis b {display: block; font: 600 15px/1.3 var(--sp-serif) !important;}
 .td5-pdis small {display: block; margin-top: 2px; font: italic 400 13.5px/1.35 var(--sp-serif) !important;}
@@ -47,4 +47,4 @@
 .td52-dm .td5-calg button:disabled {color: rgba(28, 19, 15, 0.25); cursor: default;}
 .td52-dm .td5-calg button[data-today] {box-shadow: inset 0 0 0 1px #2a3a52;}
 .td52-dm .td5-calg button[aria-pressed="true"] {background: #2a3a52; color: #f4eee5;}
-.td52-dm .td5-calg button:focus-visible {outline: 2px solid #2a3a52; outline-offset: 1px;}
+.td52-dm .td5-calg button:focus-visible {outline: 2px solid var(--sp-anthracite); outline-offset: 2px;}

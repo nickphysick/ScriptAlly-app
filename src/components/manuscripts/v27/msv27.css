@@ -20,7 +20,7 @@
   container: ms27 / inline-size;
   --ms27-ink: #1c130f;
   --ms27-navy: #2a3a52;
-  --ms27-rust: #a2452a;
+  --ms27-rust: var(--sp-rust);
   --ms27-serif: var(--msv12-serif);
   --ms27-txt: var(--hero-text-x, 243px);
 }
@@ -57,11 +57,11 @@
 .ms27 .ms27-p1:hover { background: #1c130f; }
 .ms27 .ms27-p2 { background: #fff; color: var(--ms27-ink); box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.14), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
 .ms27 .ms27-p2:hover { box-shadow: 0 0 0 1px rgba(28, 19, 15, 0.3), 0 4px 10px -6px rgba(28, 19, 15, 0.3); }
-.ms27 :is(.ms27-p1, .ms27-p2, .ms27-lnk):focus-visible { outline: 2px solid var(--ms27-navy); outline-offset: 3px; }
+.ms27 :is(.ms27-p1, .ms27-p2, .ms27-lnk):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .ms27-mh-r { position: absolute; right: var(--ms27-ins); top: var(--hero-top, 36px); height: var(--hero-stack-h); width: var(--ms27-cw); display: flex; align-items: center; z-index: 2; }
 /* the Versions page: the same header on the page, no card on the right */
 .ms27-mh--page .ms27-mh-t { max-width: calc(100% - var(--ms27-txt) - 24px); }
-.ms27 .ms27-mh-b .ms27-hw { all: unset; cursor: pointer; margin-left: 10px; font: 400 15px var(--ms27-serif); color: rgba(28, 19, 15, 0.72); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(28, 19, 15, 0.3); white-space: nowrap; }
+.ms27 .ms27-mh-b .ms27-hw { all: unset; cursor: pointer; margin-left: 10px; font: 400 15px var(--ms27-serif); color: var(--sp-muted); text-decoration: underline; text-underline-offset: 4px; text-decoration-color: rgba(28, 19, 15, 0.3); white-space: nowrap; }
 .ms27 .ms27-mh-b .ms27-hw:hover { color: var(--ms27-ink); }
 
 
@@ -72,6 +72,6 @@
 }
 .pck-pop .ms27-gl { all: unset; cursor: pointer; padding: 6px 12px; border-radius: 999px; background: #4b6151; color: #fff; font: 400 13px var(--sp-type); white-space: nowrap; }
 .pck-pop .ms27-gl + .ms27-gl { background: #fff; color: #4b6151; box-shadow: inset 0 0 0 1.5px rgba(75, 97, 81, 0.5); }
-.pck-pop .ms27-gl:focus-visible { outline: 2px solid #4b6151; outline-offset: 2px; }
+.pck-pop .ms27-gl:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* Manuscripts v29 retired the logline strip, the details card and the book view: their rules went with them. */

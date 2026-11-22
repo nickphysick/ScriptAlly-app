@@ -35,7 +35,7 @@
     linear-gradient(112deg, rgba(255, 255, 255, 0) 22%, rgba(255, 255, 255, 0.55) 40%, rgba(255, 255, 255, 0.12) 52%, rgba(255, 255, 255, 0) 66%) 30% 0 / 260% 100% no-repeat,
     #efcdc9;
 }
-.qc152 .qc152-m.them:is([data-status="Full Requested"], [data-status="Revise & Resubmit"], [data-status="Offer"]) .qc152-ts { color: rgba(28, 19, 15, 0.6); }
+.qc152 .qc152-m.them:is([data-status="Full Requested"], [data-status="Revise & Resubmit"], [data-status="Offer"]) .qc152-ts { color: var(--sp-quiet); }
 
 /* the footer: the disc behind its mark is the card's Band (fading to white when quiet), the mark in ink */
 .qc152 .qc152-rb .qc152-fg, .qc152 .qc152-rb .qc152-fc { background: var(--fdisc, #fff); }

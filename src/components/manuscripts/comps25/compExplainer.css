@@ -15,20 +15,26 @@
 :is(.cf-body, .cx-xpop) .cf-ax-art { width: 76px; height: 76px; border-radius: 50%; background: #efe6dc; overflow: hidden; display: grid; place-items: end center; }
 :is(.cf-body, .cx-xpop) .cf-ax-art img { display: block; width: 62px; height: auto; margin-bottom: -8px; }
 :is(.cf-body, .cx-xpop) .cf-ax-h { margin: 2px 0 6px; font: 400 21px/1.25 var(--sp-type); color: #1c130f; }
-:is(.cf-body, .cx-xpop) .cf-ax-p { margin: 0; font: 400 15.5px/1.5 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+:is(.cf-body, .cx-xpop) .cf-ax-p { margin: 0; font: 400 15.5px/1.5 var(--sp-serif); color: var(--sp-muted); }
 :is(.cf-body, .cx-xpop) .cf-ax ul { list-style: none; margin: 14px 0 0; padding: 14px 0 0; border-top: 1px dashed rgba(28, 19, 15, 0.16); display: grid; gap: 9px; }
-:is(.cf-body, .cx-xpop) .cf-ax li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; font: 400 14.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.72); }
+:is(.cf-body, .cx-xpop) .cf-ax li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 10px; font: 400 14.5px/1.45 var(--sp-serif); color: var(--sp-muted); }
 :is(.cf-body, .cx-xpop) .cf-ax li b { margin-right: 4px; font: 400 14.5px/1.45 var(--sp-type); color: #1c130f; }
-:is(.cf-body, .cx-xpop) .cf-ax li i { width: 20px; height: 20px; margin-top: 1px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px #a2452a; color: #a2452a; font: 600 10px/1 var(--font-mono); font-style: normal; }
+:is(.cf-body, .cx-xpop) .cf-ax li i { width: 20px; height: 20px; margin-top: 1px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px var(--sp-rust); color: var(--sp-rust); font: 600 10px/1 var(--font-mono); font-style: normal; }
 :is(.cf-body, .cx-xpop) .cf-axf { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; margin-top: 2px; padding-top: 12px; border-top: 1px solid rgba(28, 19, 15, 0.08); }
-:is(.cf-body, .cx-xpop) .cf-axf span { font: 400 13.5px/1.45 var(--sp-serif); color: rgba(28, 19, 15, 0.58); }
-:is(.cf-body, .cx-xpop) .cf-axf button { flex: none; margin-left: auto; padding: 0; border: 0; background: none; cursor: pointer; white-space: nowrap; font: 400 13.5px/1.3 var(--sp-type); color: #a2452a; text-decoration: underline; text-underline-offset: 3px; }
+:is(.cf-body, .cx-xpop) .cf-axf span { font: 400 13.5px/1.45 var(--sp-serif); color: var(--sp-quiet); }
+:is(.cf-body, .cx-xpop) .cf-axf button { flex: none; margin-left: auto; padding: 0; border: 0; background: none; cursor: pointer; white-space: nowrap; font: 400 13.5px/1.3 var(--sp-type); color: var(--sp-rust); text-decoration: underline; text-underline-offset: 3px; }
 :is(.cf-body, .cx-xpop) .cf-axc { display: flex; align-items: center; margin: -4px 0 22px; }
 :is(.cf-body, .cx-xpop) .cf-axc button { display: inline-flex; align-items: center; gap: 8px; padding: 0; border: 0; background: none; cursor: pointer; font: 400 14px/1.3 var(--sp-type); color: #1c130f; text-decoration: underline; text-underline-offset: 3px; }
-:is(.cf-body, .cx-xpop) .cf-axc button i { flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.45); font: 600 10px/1 var(--font-mono); font-style: normal; color: rgba(28, 19, 15, 0.58); text-decoration: none; }
+:is(.cf-body, .cx-xpop) .cf-axc button i { flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px rgba(28, 19, 15, 0.45); font: 600 10px/1 var(--font-mono); font-style: normal; color: var(--sp-quiet); text-decoration: none; }
 
 /* below 1100px of page the art hides and the card is one column (the mock's own breakpoint) */
 @media (max-width: 1099.98px) {
   :is(.cf-body, .cx-xpop) .cf-ax { grid-template-columns: minmax(0, 1fr); }
   :is(.cf-body, .cx-xpop) .cf-ax-art { display: none; }
+}
+
+/* Consistency roll-out v2, Phase 7 (rulings v3, ruling 12): the last text under 12px is raised to 12, and its container
+   is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
+@media (min-width: 768px) {
+  :is(.cf-body, .cx-xpop) .cf-axc button i { width: 22px; height: 22px; font-size: 12px; }
 }

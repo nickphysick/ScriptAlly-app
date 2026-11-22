@@ -37,7 +37,7 @@
 .ltb.ltb .ltb-r { display: flex; align-items: center; gap: 8px; flex: none; }
 .ltb.ltb .ltb-search {
   flex: none; display: inline-flex; align-items: center; gap: 8px; box-sizing: border-box; width: 200px; height: 36px; padding: 0 14px;
-  border-radius: 18px; background: #fff; box-shadow: none; color: rgba(28, 19, 15, 0.55);
+  border-radius: 18px; background: #fff; box-shadow: none; color: var(--sp-quiet);
 }
 .ws-app.sheet-wide .ltb.ltb .ltb-search { width: 240px; }
 .ltb.ltb .ltb-ctl {
@@ -69,7 +69,7 @@
 .lth.lth.is-stuck::after, .lth.lth[data-stuck]::after { opacity: 1; }
 .lth.lth .lth-lab, .lth.lth .lt-lab, .lth.lth .qc138-h button, .lth.lth .qc138-h span {
   font: 500 10.5px/1.2 var(--font-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.14em; text-transform: uppercase;
-  color: rgba(28, 19, 15, 0.5);
+  color: var(--sp-quiet);
 }
 .lth.lth .lt-lab.on, .lth.lth .qc138-h.on button, .lth.lth .qc138-h.on span { color: rgba(28, 19, 15, 0.85); }
 /* the shared pin button, inside a toolbar: 36 round, the same ring */

@@ -11,7 +11,7 @@
   background: rgba(255, 255, 255, 0.55); box-shadow: inset 0 0 0 1px rgba(28, 19, 15, 0.11);
   font-family: var(--sp-type); font-size: 14px; color: #1c130f;
 }
-.lp em { font-style: normal; color: rgba(28, 19, 15, 0.45); }
+.lp em { font-style: normal; color: var(--sp-quiet); }
 .lp b { font-weight: 400; }
 .lp .lp-ic { font-size: 12px; opacity: 0.7; display: inline-flex; }
 .lp .lp-car { font-size: 12px; margin-left: 2px; }
@@ -23,7 +23,7 @@
 .lp.lp--joined { border-radius: 20px 0 0 20px; padding-right: 12px; }
 .lp.lp-dir { border-radius: 0 20px 20px 0; width: 40px; padding: 0; margin-left: 1px; justify-content: center; font-size: 15px; }
 .lp-join { display: inline-flex; }
-.lp:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.lp:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the popover */
 .lpop {
@@ -34,7 +34,7 @@
 }
 .lpop h6 {
   margin: 12px 2px 6px; font: 400 8.5px/1.3 var(--sp-mono); letter-spacing: 0.14em;
-  text-transform: uppercase; color: rgba(28, 19, 15, 0.45);
+  text-transform: uppercase; color: var(--sp-quiet);
 }
 .lpop-sec:first-child h6 { margin-top: 0; }
 .lpop-opt {
@@ -49,9 +49,9 @@
 .lpop-opt.on .lpop-bx { background: #2a3a52; box-shadow: none; }
 .lpop-rd { width: 18px; height: 18px; border-radius: 50%; box-shadow: inset 0 0 0 1.4px rgba(28, 19, 15, 0.45); flex: none; }
 .lpop-opt.on .lpop-rd { box-shadow: inset 0 0 0 5px #2a3a52; }
-.lpop-opt small { margin-left: auto; font: 400 9px/1 var(--sp-mono); color: rgba(28, 19, 15, 0.45); }
-.lpop-lb i { display: block; font-size: 12.5px; color: rgba(28, 19, 15, 0.45); margin-top: 1px; }
+.lpop-opt small { margin-left: auto; font: 400 9px/1 var(--sp-mono); color: var(--sp-quiet); }
+.lpop-lb i { display: block; font-size: 12.5px; color: var(--sp-quiet); margin-top: 1px; }
 .lpop-hr { border: 0; border-top: 1px solid rgba(28, 19, 15, 0.11); margin: 6px 0; }
 .lpop-ft { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(28, 19, 15, 0.11); }
-.lpop-ft button { border: 0; background: none; font: inherit; font-size: 14px; text-decoration: underline; color: rgba(28, 19, 15, 0.7); cursor: pointer; }
+.lpop-ft button { border: 0; background: none; font: inherit; font-size: 14px; text-decoration: underline; color: var(--sp-muted); cursor: pointer; }
 .lpop-ft .dn { text-decoration: none; background: #2a3a52; color: #f5f1eb; height: 32px; padding: 0 16px; border-radius: 16px; font-family: var(--sp-type); }

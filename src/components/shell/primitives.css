@@ -127,6 +127,16 @@
   --sp-cream: #f5f1eb;
   --sp-frame: #7c3a2a;
   --sp-rust: #7a3f31; /* consistency fixes v1.1, ruling 6: the one rust for small warm accents (text and icons) */
+  /* Consistency roll-out v2, Phase 2 (rulings v3, ruling 2): two muted text colours on light grounds. Muted is for
+     supporting text (6.9:1 on oat), quiet for captions and meta (5.3:1 on oat). Both pass 4.5:1 on oat, cream and white. */
+  --sp-muted: #5b4f47;
+  --sp-quiet: #6b6058;
+  /* Consistency roll-out v2, Phase 2 (ruling 10): red only on "Delete account…", "Withdraw it" and
+     "I've decided not to send it" — the three actions that end something for good. */
+  --sp-danger: #a63d2f;
+  /* Consistency roll-out v2, Phase 6 (ruling 11): a filled navy button's hover ground. --sp-anthracite-hov (#34465f, a
+     LIGHTER step) keeps its value for the header pills that still read it. */
+  --sp-navy-hover: #24304a;
   --sp-lift: 0 2px 8px rgba(28, 19, 15, 0.06);
   /* Consistency roll-out v1, Phase 7 (ruling 6): three heading sizes for the page body of workspace pages and the
      Dashboard. Each is a whole `font` shorthand, read as `font: var(--sp-h-…) !important` (brand.tsx forces h1–h3
@@ -175,10 +185,25 @@
 /* Consistency roll-out v1, Phase 12 (ruling 9): a slide-out panel's close button is a 36 × 36 circle; its fixed action
    footer is 72 high with 14 24 of padding and a 1px hairline above. Builds, shells, headers and positions are the
    panels' own. */
+/* Consistency roll-out v2, Phase 1 (rulings v2, ruling 7): a view switch is boxed — the track radius 12, each option 34
+   high with radius 9. Each switch's own rule reads these. */
+:root { --sp-vsw-r: 12px; --sp-vsw-opt-h: 34px; --sp-vsw-opt-r: 9px; }
+/* Consistency roll-out v2, Phase 3 (rulings v3): the text tag (ruling 4) — a pill that holds only words and labels
+   something; not a chip with a person in it, a count, a percentage, a Pro tag, a key cap, StatusDot, a filter pill or a
+   button. The filter pill (ruling 5): 32 high, Source Serif 4 14.5. The slide-out panel title (ruling 3): Special Elite
+   400 24/1.2, the section heading's size; the agent card's name is a person's name and stays its own. */
+:root {
+  --sp-tag-h: 28px; --sp-tag-pad: 0 12px; --sp-tag-r: 999px; --sp-tag-font: 600 14px/1 var(--sp-serif);
+  --sp-fpill-h: 32px; --sp-fpill-size: 14.5px;
+  --sp-panel-t: 400 24px/1.2 var(--sp-type);
+}
+/* Consistency roll-out v2, Phase 8 (rulings v3, ruling 1): running text in Source Serif 4 on workspace pages, the Dashboard and
+   slide-out panels is 16 (body) or 14 (secondary); 15, 15.5, 16.5 and 17 became 16, and 14.5 became 14. */
+:root { --sp-body-size: 16px; --sp-sec-size: 14px; }
 :root { --sp-px-size: 36px; --sp-pfoot-h: 72px; --sp-pfoot-pad: 14px 24px; --sp-pfoot-rule: 1px solid rgba(28, 19, 15, .1); }
 .sp-btn { box-sizing: border-box; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; cursor: pointer; white-space: nowrap; height: var(--sp-btn-h); padding: var(--sp-btn-pad); border-radius: var(--sp-btn-r); font: var(--sp-btn-font) !important; }
 .sp-btn--fill { background: var(--sp-anthracite); color: #fff; }
-.sp-btn--fill:hover:not(:disabled) { background: var(--sp-anthracite-hov); }
+.sp-btn--fill:hover:not(:disabled) { background: var(--sp-navy-hover); } /* roll-out v2, Phase 6 (ruling 11): darker, not --sp-anthracite-hov's lighter step */
 .sp-btn--line { background: transparent; color: var(--sp-anthracite); box-shadow: var(--sp-btn-ring); }
 .sp-btn--line:hover:not(:disabled) { background: var(--sp-btn-line-hov); }
 .sp-rc { padding: var(--sp-rc-pad); border-radius: var(--sp-rc-r); background: #fff; box-shadow: var(--sp-rc-sh); min-width: 0; }
@@ -219,7 +244,7 @@
 .sp-search-l {
   flex: 1 1 auto; min-width: 0;
   font-family: var(--sp-type); font-size: 16px; line-height: 1.2; padding-top: 2px;
-  color: rgba(28, 19, 15, 0.45);
+  color: var(--sp-quiet);
   overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
 }
 /* the shortcut, as an ink keycap */
@@ -274,7 +299,7 @@
 }
 .sp-inkpill:hover { background: var(--sp-anthracite-hov); }
 .sp-inkpill:active { transform: translateY(1px); }
-.sp-inkpill:focus-visible { outline: 2px solid var(--sp-frame); outline-offset: 2px; }
+.sp-inkpill:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .sp-inkpill svg { width: 17px; height: 17px; flex: none; margin-top: -2px; stroke-width: 1.9; }
 .sp-inkpill-l { font-family: var(--sp-type); padding-top: 2px; }
 
@@ -296,4 +321,13 @@
     transition: none;
   }
   .sp-disc:hover, .sp-inkpill:active { transform: none; }
+}
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): ONE FOCUS RING. Every focusable button, link, tab, pill and row
+   that states no ring of its own takes a 2px navy outline, 2px off; on navy and other dark grounds the sheets state cream
+   #f4eee5. :where() keeps this at zero specificity, so a sheet's own (now standard) ring wins. Text fields are not in it:
+   they keep their navy focus edge and take no outer ring. */
+:where(button, a[href], summary, [role="button"], [role="tab"], [role="radio"], [role="option"], [role="switch"], [role="menuitem"], [role="checkbox"], [tabindex]:not([tabindex="-1"])):where(:not(input, textarea, select)):focus-visible {
+  outline: 2px solid var(--sp-anthracite);
+  outline-offset: 2px;
 }

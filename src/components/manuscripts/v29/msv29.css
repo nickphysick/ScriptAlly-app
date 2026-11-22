@@ -25,10 +25,10 @@
   .ms29 .ms29-vit-n small { display: block; margin-top: 8px; font: italic 400 15px/1 var(--sp-serif) !important; color: rgba(244, 238, 229, .8); }
   .ms29 .ms29-vit > i { width: 1px; align-self: stretch; background: rgba(244, 238, 229, .25); }
   .ms29 .ms29-vit-g b { display: block; font: 400 22px/1.2 var(--sp-type) !important; color: #f4eee5; }
-  .ms29 .ms29-vit-g span { display: block; margin-top: 6px; font: italic 400 15px/1.35 var(--sp-serif) !important; color: rgba(244, 238, 229, .8); white-space: nowrap; }
+  .ms29 .ms29-vit-g span { display: block; margin-top: 6px; font: italic 400 var(--sp-body-size)/1.35 var(--sp-serif) !important; color: rgba(244, 238, 229, .8); white-space: nowrap; }
   .ms29 .ms29-cdot { display: inline-block; width: 8px; height: 8px; margin-right: 8px; border-radius: 50%; background: #f4eee5; vertical-align: 1px; }
   .ms29 .ms29-vit-add { padding: 0; border: 0; background: none; color: #f4eee5; font: 600 16px/1.3 var(--sp-serif) !important; text-decoration: underline; text-underline-offset: 4px; min-height: 32px; cursor: pointer; white-space: nowrap; }
-  .ms29 .wsnh :focus-visible { outline: 2px solid #e8bdb4; outline-offset: 3px; }
+  .ms29 .wsnh :focus-visible { outline: 2px solid #f4eee5; outline-offset: 2px; }
 
   /* ── the frames (as on Versions v6 and the Dashboard) ──────────────────────────────────────────────────────── */
   /* Consistency roll-out v1, Phase 8: the framed card (primitives.css `.sp-rc` › `.sp-rc-in`) — rim radius 28 → 20, padding 10 → 8, inner radius 20 → 13 */
@@ -36,7 +36,7 @@
   .ms29 .ms29-in { border: var(--sp-rc-edge); border-radius: var(--sp-rc-in-r); overflow: hidden; background: #fff; }
   .ms29 .ms29-band { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; min-height: 76px; padding: 18px 26px; }
   /* Consistency roll-out v1, Phase 7: the section heading */ .ms29 .ms29-band h2.ms29-bh { margin: 0; font: var(--sp-h-section) !important; color: #1c130f; }
-  .ms29 .ms29-band p.ms29-bs { margin: 4px 0 0; font: italic 400 15px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-band p.ms29-bs { margin: 4px 0 0; font: italic 400 var(--sp-body-size)/1.3 var(--sp-serif) !important; color: var(--sp-muted); }
   .ms29 .ms29-band--sand { background: #f3e6da; }
   .ms29 .ms29-band--stone { background: #ebe7e2; }
   /* Consistency roll-out v1, Phase 9: the outline action button (primitives.css `.sp-btn`); it was a white pill */
@@ -48,7 +48,7 @@
   .ms29 .ms29-b2.is-done { background: #e0e5dd; box-shadow: 0 0 0 1px rgba(28, 19, 15, .14); }
   .ms29 .ms29-lk { padding: 0; border: 0; background: none; min-height: 32px; cursor: pointer; font: 600 16px/1.3 var(--sp-serif) !important; color: #1c130f; text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1.5px; white-space: nowrap; }
   .ms29 .ms29-lk:hover { color: #2a3a52; }
-  .ms29 :is(.ms29-b2, .ms29-lk, .ms29-dt-r):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+  .ms29 :is(.ms29-b2, .ms29-lk, .ms29-dt-r):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
   /* ── the desk: the pitch · the details ─────────────────────────────────────────────────────────────────────── */
   /* the ref's 24 under the header (its `.head` margin), where the shared header sheet gives every page 48 */
@@ -58,7 +58,7 @@
   .ms29 .ms29-pt { display: grid; grid-template-columns: 176px minmax(0, 1fr) auto; gap: 8px 28px; align-items: start; padding: 26px 26px 28px; }
   .ms29 .ms29-pt + .ms29-pt { border-top: 1px dashed rgba(28, 19, 15, .18); }
   /* Consistency roll-out v1, Phase 7: the card heading */ .ms29 .ms29-pt-h h3.ms29-ph { margin: 0; font: var(--sp-h-card) !important; color: #1c130f; }
-  .ms29 .ms29-pt-h em { display: block; margin-top: 4px; font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-pt-h em { display: block; margin-top: 4px; font: italic 400 14px/1.3 var(--sp-serif) !important; color: var(--sp-muted); }
   .ms29 .ms29-pt-a { display: flex; align-items: center; gap: 16px; }
   .ms29 .ms29-pt-x { min-width: 0; max-width: 74ch; }
   .ms29 .ms29-pt-x p { margin: 0; font: 400 17px/1.6 var(--sp-serif) !important; color: #1c130f; white-space: pre-line; overflow-wrap: anywhere; }
@@ -66,24 +66,24 @@
   .ms29 .ms29-pt-x p.ms29-q .ms29-qend { font: inherit !important; white-space: nowrap; }
   .ms29 .ms29-pt-x p.ms29-cl { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 5; overflow: hidden; }
   .ms29 .ms29-pt-x .ms29-lk { margin-top: 8px; font-size: 15px !important; }
-  .ms29 .ms29-pt-x .ms29-cnt { margin-left: 14px; font: italic 400 14px var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-pt-x .ms29-cnt { margin-left: 14px; font: italic 400 14px var(--sp-serif) !important; color: var(--sp-muted); }
   .ms29 .ms29-pt-x > p + .ms29-cnt { display: inline-block; margin: 8px 0 0; }
-  .ms29 .ms29-pt.is-none .ms29-pt-x p { font: italic 400 16px/1.5 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
-  .ms29 .ms29-pt.is-none .ms29-pt-x p b { display: block; margin-bottom: 2px; font: 400 17px/1.4 var(--sp-serif) !important; color: #1c130f; }
+  .ms29 .ms29-pt.is-none .ms29-pt-x p { font: italic 400 16px/1.5 var(--sp-serif) !important; color: var(--sp-muted); }
+  .ms29 .ms29-pt.is-none .ms29-pt-x p b { display: block; margin-bottom: 2px; font: 400 var(--sp-body-size)/1.4 var(--sp-serif) !important; color: #1c130f; }
   .ms29 .ms29-pt.is-flash { animation: ms29-fl 1.1s ease-out; }
   @keyframes ms29-fl { 0% { background: #f3e6da; } 100% { background: #fff; } }
 
   .ms29 .ms29-dt { padding: 6px 26px 8px; }
   .ms29 .ms29-dt-r { display: flex; align-items: baseline; gap: 10px; width: 100%; min-height: 52px; padding: 14px 0; border: 0; border-bottom: 1px dashed rgba(28, 19, 15, .18); background: none; text-align: left; color: #1c130f; cursor: pointer; }
   .ms29 .ms29-dt-r:last-child { border-bottom: 0; }
-  .ms29 .ms29-dt-r .ms29-dt-l { flex: none; font: italic 400 15px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-dt-r .ms29-dt-l { flex: none; font: italic 400 15px/1.3 var(--sp-serif) !important; color: var(--sp-muted); }
   .ms29 .ms29-dt-r > i { flex: 1; min-width: 16px; border-bottom: 1.5px dotted rgba(28, 19, 15, .25); transform: translateY(-4px); }
   .ms29 .ms29-dt-r .ms29-dt-v { font: 400 18px/1.3 var(--sp-type) !important; text-align: right; max-width: 230px; }
-  .ms29 .ms29-dt-r .ms29-dt-v small { display: block; margin-top: 3px; font: italic 400 14px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
-  .ms29 .ms29-dt-r .ms29-dt-v.is-mu { font: italic 400 16px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-dt-r .ms29-dt-v small { display: block; margin-top: 3px; font: italic 400 14px/1.3 var(--sp-serif) !important; color: var(--sp-muted); }
+  .ms29 .ms29-dt-r .ms29-dt-v.is-mu { font: italic 400 16px/1.3 var(--sp-serif) !important; color: var(--sp-muted); }
   .ms29 .ms29-ndot { display: inline-block; width: 9px; height: 9px; margin-right: 8px; border-radius: 50%; background: #2a3a52; }
   .ms29 .ms29-dt-f { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 26px 16px; border-top: 1px solid rgba(28, 19, 15, .08); background: #fbf9f5; }
-  .ms29 .ms29-dt-f > span { font: italic 400 15px var(--sp-serif) !important; color: rgba(28, 19, 15, .72); }
+  .ms29 .ms29-dt-f > span { font: italic 400 15px var(--sp-serif) !important; color: var(--sp-muted); }
   .ms29 .ms29-dt-f > span b { margin-right: 6px; font: 400 18px var(--sp-type) !important; font-style: normal; color: #1c130f; }
 
   /* ── your manuscripts: the active book, and room for the next ──────────────────────────────────────────────── */
@@ -99,12 +99,12 @@
   .ms29 .ms29-bk-f { flex: none; display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 13px; border-radius: 999px; background: #fff; color: #1c130f; font: 600 14px/1 var(--sp-serif) !important; }
   .ms29 .ms29-bk-f i { width: 8px; height: 8px; border-radius: 50%; background: #2a3a52; }
   .ms29 .ms29-nx { display: flex; align-items: center; gap: 14px; min-height: 88px; padding: 14px 16px; border-radius: 14px; border: 1.5px dashed rgba(28, 19, 15, .28); background: #fbf9f5; cursor: default; }
-  .ms29 .ms29-nx-p { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: #ece7df; color: rgba(28, 19, 15, .55); }
+  .ms29 .ms29-nx-p { flex: none; width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: #ece7df; color: var(--sp-quiet); }
   .ms29 .ms29-nx-p svg { width: 18px; height: 18px; }
   .ms29 .ms29-nx-t { flex: 1; min-width: 0; }
   .ms29 .ms29-nx-t p { margin: 0; display: flex; align-items: center; justify-content: space-between; gap: 8px 12px; flex-wrap: wrap; }
-  .ms29 .ms29-nx-t b { font: 400 19px/1.2 var(--sp-type) !important; color: rgba(28, 19, 15, .72); white-space: nowrap; }
-  .ms29 .ms29-nx-t > span { display: block; margin-top: 4px; font: italic 400 15px/1.3 var(--sp-serif) !important; color: rgba(28, 19, 15, .62); }
+  .ms29 .ms29-nx-t b { font: 400 19px/1.2 var(--sp-type) !important; color: var(--sp-muted); white-space: nowrap; }
+  .ms29 .ms29-nx-t > span { display: block; margin-top: 4px; font: italic 400 15px/1.3 var(--sp-serif) !important; color: var(--sp-muted); }
   .ms29 .ms29-soon { flex: none; display: inline-flex; align-items: center; height: 28px; padding: 0 12px; border-radius: 999px; background: #f5e2da; color: var(--sp-rust); font: 600 14px/1 var(--sp-serif) !important; font-style: normal !important; white-space: nowrap; }
 }
 
@@ -116,4 +116,10 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .ms29 .ms29-pt.is-flash { animation: none !important; }
+}
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+@media (min-width: 768px) {
+  .ms29 .ms29-dt-r:hover { background: #f8f4ed; }
 }

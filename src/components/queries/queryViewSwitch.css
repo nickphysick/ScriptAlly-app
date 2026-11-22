@@ -13,7 +13,7 @@
 .qvs button {
   border: none; background: transparent; cursor: pointer; display: inline-flex; align-items: center;
   gap: 7px; padding: 7px 13px; border-radius: 99px; font-family: var(--font-serif); font-size: 14px;
-  color: #8a7a6c;
+  color: var(--sp-quiet);
 }
 .qvs button:hover { color: #3a1c14; }
 .qvs .qvs-on { background: #f5e2da; color: var(--ink, #1c130f); }

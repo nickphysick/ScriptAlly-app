@@ -27,7 +27,7 @@
   border-radius: 12px; background: var(--t); transition: background .12s;
 }
 .aaj-row:hover { background: var(--t2); }
-.aaj-row:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.aaj-row:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .aaj-row[aria-disabled="true"] { cursor: default; background: #f5f1ea; }
 .aaj-row[aria-disabled="true"]:hover { background: #f5f1ea; }
 .aaj-row[aria-disabled="true"] .aaj-rt, .aaj-row[aria-disabled="true"] .aaj-rh { opacity: .5; }
@@ -52,7 +52,7 @@
 /* the agent strip — the who section, folded */
 .aaj-strip { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 12px; background: #e6edf6; margin-bottom: 8px; cursor: pointer; }
 .aaj-strip:hover { background: #dbe4ee; }
-.aaj-strip:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.aaj-strip:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .aaj-disc { flex: none; width: 46px; height: 46px; border-radius: 50%; display: grid; place-items: center; font: 400 12.5px/1 var(--font-mono, monospace); background: #2a3a52; color: #f4eee5; }
 .aaj-who { flex: 1; min-width: 0; }
 .aaj-nm { font: 700 22px/1.15 var(--sp-serif); }
@@ -71,7 +71,7 @@
 .aaj-nx { all: unset; cursor: pointer; height: 36px; padding: 0 16px; border-radius: 999px; background: #fff; box-shadow: inset 0 0 0 1.5px rgba(42,58,82,.45); color: #2a3a52; font: 400 15px/36px var(--sp-serif); }
 .aaj-nx:hover { background: #f8f6f2; }
 .aaj-nx[aria-disabled="true"] { opacity: .45; cursor: default; }
-.aaj-nx:focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.aaj-nx:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .aaj-skip { all: unset; cursor: pointer; font: 400 15px var(--sp-serif); color: #6c675f; }
 .aaj-skip:hover { color: #1c130f; }
 
@@ -79,12 +79,12 @@
 .aaj-ft { position: relative; flex: none; display: flex; align-items: center; gap: 16px; margin: 0; padding: 14px 20px; border-top: 1px solid #ece6de; min-height: 70px; background: #fff; box-sizing: border-box; }
 .aaj-sum { flex: 1; min-width: 0; font: italic 400 14.5px/1.35 var(--sp-serif); color: #6c675f; }
 .aaj-sum b { font-style: normal; font-weight: 600; color: #1c130f; }
-.aaj-sum .bad { font-style: normal; color: #a2452a; }
+.aaj-sum .bad { font-style: normal; color: var(--sp-rust); }
 .aaj-cx { all: unset; cursor: pointer; font: 400 16px/1 var(--sp-serif); padding-bottom: 3px; box-shadow: inset 0 -1px 0 rgba(28,19,15,.35); }
 .aaj-save { all: unset; cursor: pointer; height: 42px; padding: 0 20px; border-radius: 10px; background: #2a3a52; color: #f4eee5; font: 400 16.5px/42px var(--sp-type); white-space: nowrap; transition: opacity .15s; }
 .aaj-save:hover:not([aria-disabled="true"]) { background: #1f2c40; }
 .aaj-save[aria-disabled="true"] { opacity: .35; cursor: default; }
-.aaj-cx:focus-visible, .aaj-save:focus-visible { outline: 2px solid #2a3a52; outline-offset: 3px; }
+.aaj-cx:focus-visible, .aaj-save:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .aaj-ft .aaj-conf { position: absolute; inset: 0; display: flex; align-items: center; gap: 12px; padding: 0 20px; background: #fff; }
 
 /* the finish screen: the real card, scaled to fit */
@@ -97,3 +97,8 @@
 @keyframes aajSwing { 0% { transform: rotate(3deg) translateY(16px); opacity: 0; } 60% { transform: rotate(-2deg); opacity: 1; } 100% { transform: rotate(-1.2deg); } }
 
 @media (prefers-reduced-motion: reduce) { .aaj-enter, .aaj-fitin .cl262-card { animation: none; } }
+
+/* Consistency roll-out v2, Phase 6 (rulings v3, ruling 11): hover — filled navy goes to --sp-navy-hover (#24304a),
+   an outline button takes navy at 6%, a clickable row #f8f4ed; no transitions added. */
+.aaj-save:hover:not([aria-disabled="true"]) { background: var(--sp-navy-hover); }
+.aaj-row:hover:not([aria-disabled="true"]) { background: #f8f4ed; }

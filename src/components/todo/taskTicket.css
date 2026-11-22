@@ -45,7 +45,7 @@
    (#9c8878), so one page drew two muteds three inches apart: the grid's mono captions and the
    list's. Stated here, at the same values its two siblings use, so the three views cannot disagree
    about a colour they all call the same thing. */
-.tkt { --hair: #e7ddd2; --hair2: #e0d5c8; --ink2: #3a1c14; --muted: #9c8878; --muted2: #8a7a6c; }
+.tkt { --hair: #e7ddd2; --hair2: #e0d5c8; --ink2: #3a1c14; --muted: #9c8878; --muted2: var(--sp-quiet); }
 
 :root {
   --u-now-1: var(--pink);
@@ -110,7 +110,7 @@
   transition: border-color .16s, box-shadow .16s;
 }
 .tkt:hover { border-color: #d8c8bd; box-shadow: 0 2px 10px rgba(58, 28, 20, 0.07); }
-.tkt:focus-visible { outline: 2px solid var(--burg); outline-offset: 2px; }
+.tkt:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the status tint, as a flat fill the card's own radius clips */
 /* ref `.tk:before{width:6px}` — the one place the query's state tint appears on a ticket */
@@ -212,7 +212,7 @@
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .tkt .tfoot .n small {
-  display: block; font-size: 10px; line-height: 1.2; color: var(--muted2); font-weight: 300; margin-top: 1px;
+  display: block; font-size: 10px; line-height: 1.2; color: var(--sp-quiet); font-weight: 300; margin-top: 1px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 /* ⚠️ THE VERB IS QUIET UNTIL THE CARD IS HOVERED — the contract's `.card .foot .go` and

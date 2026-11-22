@@ -209,8 +209,8 @@
 }
 /* Absence is not a failure — it is stated in the muted ink, never in the warning one. */
 .acct-chip--muted {
-  border-color: rgba(124, 58, 42, 0.16);
-  background: rgba(124, 58, 42, 0.06);
+  border-color: rgba(122, 63, 49, 0.16); /* Consistency roll-out v2, Phase 1: the app rust (--sp-rust), not burgundy */
+  background: rgba(122, 63, 49, 0.06);
   color: #8a7d6c;
 }
 

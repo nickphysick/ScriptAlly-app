@@ -622,7 +622,8 @@ describe("the waiting-list hero is a white card over the navy (ref design-refs/l
   });
   it("the strap is the hand face, in rust", () => {
     expect(rule(".mk-dh-strap")).toMatch(/var\(--mk-f-hand\)/);
-    expect(rule(".mk-dh-strap")).toMatch(/#a2452a/);
+    /* Consistency roll-out v2, Phase 2 (ruling 9): the public rust is named once, --mk-rust (#a2452a) */
+    expect(rule(".mk-dh-strap")).toMatch(/var\(--mk-rust\)/);
   });
 });
 

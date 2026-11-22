@@ -26,12 +26,12 @@
 .ac.cl252-em .ae-f.cl252-f { display: block; margin-bottom: 14px; }
 .ac.cl252-em .ae-f.cl252-f > label {
   display: block; margin: 0 0 7px; padding: 0; font: 500 10px/1.2 var(--sp-mono, "JetBrains Mono", monospace) !important; letter-spacing: 0.16em;
-  text-transform: uppercase; color: rgba(28, 19, 15, 0.55);
+  text-transform: uppercase; color: var(--sp-quiet);
 }
 .ac.cl252-em .ae-f.cl252-f > .ae-fl { display: flex; flex-direction: column; align-items: stretch; gap: 8px; min-width: 0; }
 .ac.cl252-em .ae-f.cl252-f > .ae-fl > .ae-seg, .ac.cl252-em .ae-f.cl252-f > .ae-fl > .ae-step, .ac.cl252-em .ae-f.cl252-f > .ae-fl > .cl252-tally { align-self: flex-start; }
 .ac.cl252-em textarea.cl252-wish { min-height: 92px; font: italic 400 17px/1.45 var(--sp-serif) !important; }
-.ac.cl252-em [data-ae="weeks-warn"] { font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); }
+.ac.cl252-em [data-ae="weeks-warn"] { font: italic 400 13.5px/1.35 var(--sp-serif) !important; color: var(--sp-muted); }
 .ac.cl252-em .ae-seg button:disabled { opacity: 0.4; cursor: default; }
 .ac.cl252-em .cl252-cty { max-width: 100%; }
 
@@ -45,9 +45,9 @@
   position: relative; flex: none; display: flex; align-items: center; gap: 10px; min-height: 72px; box-sizing: border-box; padding: 14px 24px 16px;
   border-top: 1px solid rgba(28, 19, 15, 0.1); background: #fff; overflow: hidden;
 }
-.cl252-em .cl252-sum { flex: 1 1 0; min-width: 0; font: italic 400 14px/1.35 var(--sp-serif) !important; color: rgba(28, 19, 15, 0.62); }
+.cl252-em .cl252-sum { flex: 1 1 0; min-width: 0; font: italic 400 14px/1.35 var(--sp-serif) !important; color: var(--sp-muted); }
 .cl252-em .cl252-sum b { font-style: normal; font-weight: 600; color: #1c130f; }
-.cl252-em .cl252-sum .bad { color: #a2452a; font-style: normal; }
+.cl252-em .cl252-sum .bad { color: var(--sp-rust); font-style: normal; }
 .cl252-em :is(.cl252-b1, .cl252-b2) {
   all: unset; box-sizing: border-box; flex: none; cursor: pointer; height: 44px; padding: 2px 22px 0; border-radius: 22px; white-space: nowrap;
   font: 400 17px/42px var(--sp-type) !important;
@@ -55,7 +55,7 @@
 .cl252-em .cl252-b2 { background: #fff; color: #2a3a52; box-shadow: inset 0 0 0 1.5px rgba(42, 58, 82, 0.45); }
 .cl252-em .cl252-b1 { background: #2a3a52; color: #f4eee5; }
 .cl252-em .cl252-b1:disabled { opacity: 0.45; cursor: default; }
-.cl252-em :is(.cl252-b1, .cl252-b2):focus-visible { outline: 2px solid #2a3a52; outline-offset: 2px; }
+.cl252-em :is(.cl252-b1, .cl252-b2):focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 .cl252-em .cl252-emfoot .qad-conf span:not([class]) { font: 400 13px/1.35 var(--sp-serif) !important; }
 
 @media (prefers-reduced-motion: reduce) { .cl252-em .qad-conf { animation: none; } }
