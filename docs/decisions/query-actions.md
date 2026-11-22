@@ -2,9 +2,31 @@
 
 ## Current state
 
+- **Log a query v2 (22 Nov 2026, branch `log-a-query-v2`, NOT merged)** — the journey's header, add-agent, not-sent, materials, nudge, review and leave rules: section "Log a query v2" below.
 - Query actions v1 + v1.1 (27–28 Sep): every page finishes in the one query drawer; ref design-refs/query-actions-v11.html, report reports/query-actions-v1/. Prod rules for its fields are Nick's.
 - Moved verbatim from CLAUDE.md on 11 Nov 2026 (CLAUDE.md diet; map in docs/claude-md-diet/MAP.md). Sections are newest first by the date in their heading; undated sections come last. A section headed “Branch-only” was recorded as not merged; the note under it says what the 11 Nov check found.
 - Later work than the newest section here may exist on branches, with its report under reports/<name>/REPORT.md on that branch. Check `git log` before trusting any “current” claim below.
+
+## Log a query v2 — the journey in mock v22 (22 Nov 2026; ref design-refs/log-a-query-v2/; report reports/log-a-query-v2/REPORT.md; branch `log-a-query-v2`, NOT merged)
+- **The header is one navy piece** (`.laq-top`): FlowHead and the track are transparent on one painted block, so there is no
+  join to show as a seam at any zoom. Mentor left of a two-line headline from **`headline(state)`** in
+  `lib/queryActions/logStages` — the one source of those strings; add a case there, never a string in the component.
+- **Adding an agent never leaves the journey**: the add screen is in the same panel and creates through the new agent card's
+  own path (`emptyCardDraft` → `problemsOf` → `agentFromDraft` → `addAgent`, duplicate merge included). What the journey
+  created is tracked in **`lib/queryActions/journeyCreated`**: an added agent nothing uses is removed on any close, and with
+  the query on Undo; a twin the duplicate check merged into is never recorded, so never removed.
+- **Not sent yet** makes one to-do task per agent and no query record.
+- **Materials**: "I sent what {agent} asks for" is **`askFill`** (an exact package match, else the pieces the card names,
+  the sample always at the size asked). Packages saved → the two tiles; none → straight to one pieces screen of three ticks.
+  Generic pieces are the old stand-ins (`NO_LETTER`, `NO_SYN`), no new field. SampleControl is used unforked.
+- **Nudge chips never offer a past date**: from the reply date only while it is ahead; otherwise from today. Past the date
+  offers "nudge now" (a nudge reminder for today, the plan's own `nudgeDate`).
+- **The review is the Queries page's grid card** (`QcCard154 preview`), from `previewOf`'s row (the save's own record).
+  Preview: no role, no tab stop, no hover action, no lift; the paperclip's Escape is `ESC_LEVEL.drawerPopup`. The two tiles
+  are **`reviewCounts`**: the Dashboard's `liveCount` / `sentAllTime` / `sentWeeks`, without and with the record.
+- **Escape is the leave check** on its own layer, **`ESC_LEVEL.journey` (32)**: above every host that mounts the journey
+  (LogStagesPanel 30, QueryPanelHost and the Contact list's panel 6), below a dock peek (35) and the paperclip (40). The ×
+  runs the same check. Locks: `logStagesV2.test.ts`; measurement: `tests/e2e/laqV2.measure.ts` over `seedLaq2.mjs`.
 
 ## Query actions v1 — EVERY PAGE FINISHES IN THE QUERY DRAWER (27 Sep; ref = design-refs/query-actions-v11.html; report reports/query-actions-v1/)
 - **⚠️ THE STANDING SENTENCE IS NOW "EVERY PAGE FINISHES IN THE QUERY DRAWER"** — it SUPERSEDES the

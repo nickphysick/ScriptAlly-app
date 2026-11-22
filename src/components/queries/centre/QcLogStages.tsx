@@ -993,7 +993,8 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     <div className="laq-top" data-laq="top">
       <FlowHead title={<>{hl1}<span className="is-c br" data-laq="head-2">{hl2}</span></>} titleKey={`${hl1}|${hl2}`}
         mark={<img className="flh-m" data-laq="mentor" src="/icon-192.png" alt="" width={48} height={48} />}
-        onClose={p.onClose} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
+        /* v2 — the × runs the same leave check as Escape and the dimmed page (the ref's `tryLeave`) */
+        onClose={() => leave()} data={{ "data-qc149f": "band" }} closeData={{ "data-qc149f": "close" }} />
       <Stepper s={s} values={values} onGo={(k) => go(k)} locked={s.notSent} />
     </div>
   );
