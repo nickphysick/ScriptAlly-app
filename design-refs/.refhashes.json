@@ -1,5 +1,5 @@
 {
-  "_note": "Hashes of the design refs that are ACTIVE design authorities \u2014 a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act \u2014 `--update design-refs/<file>.html` \u2014 because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
+  "_note": "Hashes of the design refs that are ACTIVE design authorities — a curated watchlist over an archive (4 guarded of ~361 .html in this directory). Verified on every build:dev / build:prod by scripts/check-design-refs.mjs. `--update` re-records the watchlist and NAMES what changed; enrolling a NEW ref is an explicit act — `--update design-refs/<file>.html` — because a sweep would guard 357 historical refs and make the word 'active' meaningless. Never re-record from a build.",
   "refs": {
     "design-refs/about-page-v1/about-page-v1.html": "9183edc1ce978579745753f2db198a83a39a663aaaab4a21886752a6d2f742d2",
     "design-refs/action-journey.html": "129247fc29907b723cb4a9d58d5cab25d439220ba34eb2bb248f4eb0ba56c89d",
@@ -1266,10 +1266,12 @@
     "public/images/qc/qc-courier-disc.png": "bed183ffb8a3edb0c0ec7943015befafd3ae65ff8ae12d9fb7b90ad537d0e81f",
     "public/images/qc/qc-list-perch.png": "a9fc31d38173b71832cf74d6347359b22f7e156e9449bc72ae59d6d9a976bcb0",
     "public/images/qc/qc-plate-courier-figure.png": "b0e20bf289042551cfcb0ef2c08541101dedca014dc773199a5b1dd5873229a8",
-    "public/images/qc/qc-plate-courier.png": "a87188273c3497ba113a5e17e91fa954871b0599f775c21e6d835664eeeac86b"
+    "public/images/qc/qc-plate-courier.png": "a87188273c3497ba113a5e17e91fa954871b0599f775c21e6d835664eeeac86b",
+    "design-refs/plumage-colours-v2/plumage-colours-v2.json": "5fcea6ded9d740094460563f4d6a0cab4c164e0f9a745a0103e0c9425054ff11",
+    "design-refs/plumage-colours-v2/query-cards-v2.html": "af5c57513c98423b2cafea93b9378d597eff9bf3ff312e46b0769b240bbed7f5"
   },
   "superseded": {
-    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history \u2014 its hero and empty state carry forward.",
+    "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",
     "design-refs/manuscripts/manuscripts-v13.html": "Superseded 9 Oct by design-refs/manuscripts/manuscripts-v21.html (manuscripts v21, the Contact list look); kept for history.",
     "design-refs/materials/packages-v2.html": "Superseded 28 Sep by design-refs/materials/packages-v2-1.html (packages v2.1); kept for history."
   }
