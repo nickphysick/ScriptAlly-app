@@ -12,7 +12,7 @@
  *     link beneath it the second action. Both open the app's existing journeys.
  * ⚠️ NO ART ON THIS PAGE (baked decision 4). "Edit query" and "Close this query" stay reachable at the foot of the thread.
  */
-import { bandBackground, bandInk, withYouOutline } from "../../../lib/stageColours";
+import { bandBackground, bandInk, withYouOutline, withYouShadow } from "../../../lib/stageColours";
 import React, { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
@@ -83,7 +83,7 @@ export const QueryPageV4: React.FC<{ v: V3Query; nowMs: number; quietWeeks: numb
         {ag ? <IconBtn label={`About ${v.row.agentName}`} n="user" pa4="about" onClick={() => openV3Agent(ag.id)} /> : null}
       </div>
       <div className="pa4-scroll">
-        <div className="pa4-band" style={{ background: bandBackground(String(v.row.status)), color: bandInk(String(v.row.status)), ...(withYouOutline(String(v.row.status)) ? { ["--wy" as string]: withYouOutline(String(v.row.status)) } : {}) }}
+        <div className="pa4-band" style={{ background: bandBackground(String(v.row.status)), color: bandInk(String(v.row.status)), ...(withYouOutline(String(v.row.status)) ? { boxShadow: withYouShadow(String(v.row.status)) } : {}) }}
           data-pa4="band" data-status={v.row.status} data-wy={withYouOutline(String(v.row.status)) ? "" : undefined}>
           <div className="row">
             <V3Glyph status={String(v.row.status)} size={40} bg="rgba(255,255,255,.7)" />
