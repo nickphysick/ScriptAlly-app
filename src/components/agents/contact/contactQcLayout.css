@@ -57,7 +57,7 @@
   }
   .cl27 .clq-rc .cl26-hw { gap: 0; }
   .cl27 .clq-rc .cl26-ht { font: 400 28px/1.2 var(--sp-type) !important; color: #f4eee5; font-weight: 400; }
-  .cl27 .clq-rc .cl26-hm { margin: 6px 0 14px; font: italic 400 17px/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.75) !important; }
+  .cl27 .clq-rc .cl26-hm { margin: 6px 0 14px; font: italic 400 var(--sp-body-size)/1.3 var(--sp-serif) !important; color: rgba(244, 238, 229, 0.75) !important; }
   .cl27 .clq-rc .cl26-hm em { font: 400 17px/1 var(--sp-type) !important; font-style: normal !important; color: #e8bdb4; }
   .cl27 .clq-rc .cl26-hb { margin: 0; }
   .cl27 .clq-rc .cl26-fill {
