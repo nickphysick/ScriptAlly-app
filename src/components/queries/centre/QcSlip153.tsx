@@ -97,7 +97,9 @@ export const POP_FLIP_BELOW = 200;
 
 /** v153.3 — the paperclip tab and its pop-up: the materials, grouped by when they went */
 /** v157: `accent`, when given, replaces the v153 tone's (the grid card passes its stage's, lib/qc1533 `tabAccent157`) */
-export const MatTab1533: React.FC<{ id: string; g: MatGroups; status: string; accent?: TabAccent; onOpen: (open: boolean) => void }> = ({ id, g, status, accent, onOpen }) => {
+export const MatTab1533: React.FC<{ id: string; g: MatGroups; status: string; accent?: TabAccent; onOpen: (open: boolean) => void;
+  /** Log a query v2 — the Escape level when the tab sits inside a drawer (the journey's review card); the page's otherwise */
+  escLevel?: number }> = ({ id, g, status, accent, onOpen, escLevel = ESC_LEVEL.page }) => {
   const [open, setOpen] = useState(false);
   const [up, setUp] = useState(false);
   const btn = useRef<HTMLButtonElement>(null);
@@ -109,7 +111,7 @@ export const MatTab1533: React.FC<{ id: string; g: MatGroups; status: string; ac
   };
   const hide = () => setOpen(false);
   useEffect(() => { onOpen(open); }, [open, onOpen]);
-  useEscapeLayer(open, () => { hide(); btn.current?.focus(); }, ESC_LEVEL.page);
+  useEscapeLayer(open, () => { hide(); btn.current?.focus(); }, escLevel);
   const a = accent ?? tabAccent157(status);
   const popId = `qc1533-pop-${id}`;
   return (

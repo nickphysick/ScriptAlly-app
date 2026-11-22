@@ -25,6 +25,9 @@ import { logPayload, pieceVersions, type IfNo, type LogPlan, type PieceVersions 
 import { addDays, reminderAnchors } from "./dates";
 import { guidelineAsk, packageMatches, type GuidelineAsk, type PackageCard } from "./packages";
 import { blankSample, sampleName, capFirst, type FromUnit, type Materials, type Sample } from "./sample";
+import { liveCount } from "../dashBreakdown";
+import { sentAllTime, sentWeeks } from "../dash2";
+import { isoWeekStart } from "../dashboardStats";
 
 /** the calendar's heading month, through the platform rather than a second month table (lib/dates owns the one) */
 export const monthLong = (year: number, month: number): string => new Date(year, month, 1).toLocaleString("en-GB", { month: "long" });
@@ -444,7 +447,9 @@ export const nudgeAnswer = (r: ReplyAnswers, sentMs: number, nowMs: number = sen
 
 export const PREVIEW_ID = "__log-preview__";
 
-export interface Preview { row: QcRow; packageName: string | null; agent: Agent; state: QueryState | undefined; expectMs: number | null; noWindow: boolean }
+export interface Preview { row: QcRow; packageName: string | null; agent: Agent; state: QueryState | undefined; expectMs: number | null; noWindow: boolean;
+  /** v2 — the record the save will write, as a Query (the review's two numbers read it) */
+  query: Query }
 /** the unsaved query as the Query Centre will list it: the save's own record, through the list's own helpers */
 export function previewOf(plan: LogPlan, nowMs: number, quietWeeks: number): Preview {
   const { payload, summary } = logPayload(plan);
@@ -452,7 +457,33 @@ export function previewOf(plan: LogPlan, nowMs: number, quietWeeks: number): Pre
   const [row0] = buildQcRows([q], [plan.agent], [], nowMs);
   const [row] = stampRows([row0], [plan.agent], { quietWeeks, nowMs });
   const noWindow = !plan.expect;
-  return { row, packageName: plan.pkCard?.name ?? null, agent: plan.agent, state: row.qs, expectMs: plan.expect ? plan.expect.getTime() : null, noWindow };
+  return { row, packageName: plan.pkCard?.name ?? null, agent: plan.agent, state: row.qs, expectMs: plan.expect ? plan.expect.getTime() : null, noWindow, query: q };
+}
+
+/* ── v2 · Phase 6 — the review's two numbers ──────────────────────────────────────────────────────────────────── */
+
+export interface ReviewCounts {
+  /** the Dashboard's active count for this book (its header's `liveCount`), before and with this query */
+  active: [number, number];
+  /** its "{n} queries sent" (`sentAllTime`), before and with this query */
+  sent: [number, number];
+  /** queries first sent in each of the last seven weeks, this week last, before this one (`sentWeeks`) */
+  weeks: number[];
+}
+/**
+ * ⚠️ NOT A SECOND COUNT: both figures are the Dashboard's own functions, run over this book's queries as they are and
+ *    with the unsaved query added (`previewOf`'s record — the save's own). So "Active queries" steps up only when the
+ *    Dashboard would count it, and the tile shows only then.
+ */
+export function reviewCounts(book: readonly Query[], unsaved: Query | null, now: Date): ReviewCounts {
+  const withIt = unsaved ? [...book, unsaved] : [...book];
+  const mon = isoWeekStart(now);
+  const starts = Array.from({ length: 7 }, (_, i) => { const d = new Date(mon); d.setDate(d.getDate() - (6 - i) * 7); return { start: d }; });
+  return {
+    active: [liveCount(book), liveCount(withIt)],
+    sent: [sentAllTime(book, now), sentAllTime(withIt, now)],
+    weeks: sentWeeks(book, starts, now).map((w) => w.n),
+  };
 }
 
 /* ── the celebration ──────────────────────────────────────────────────────────────────────────────────────────── */

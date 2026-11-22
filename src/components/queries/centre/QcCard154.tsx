@@ -22,6 +22,9 @@ import type { DrawerMode } from "../../../lib/queryActions/drawerStore";
 import { queriedFact, slipTone, slipTrack, standWords } from "../../../lib/qc153";
 import { NEXT_WAIT_LABEL, OVERDUE_LINE, OVERDUE_VALUE, QUIET_CHIP, QUIET_LABEL, QUIET_VALUE, chipPress, nextBox154, nudgeOnLine } from "../../../lib/qc154";
 import { materialGroups, tabAccent157 } from "../../../lib/qc1533";
+import { scheduledNudgeMs } from "../../../lib/qc153";
+import { shortDate } from "../../../lib/qc151";
+import { ESC_LEVEL } from "../../../lib/escapeStack";
 import { MatTab1533, Track153 } from "./QcSlip153";
 import "./qcv153.css";
 import "./qcv1531.css";
@@ -42,9 +45,16 @@ export interface QcCard154Props {
   act: RowAct | null;
   onOpen: (id: string) => void;
   onAct: (id: string, mode?: DrawerMode) => void;
+  /**
+   * Log a query v2 — THE REVIEW'S PREVIEW of a query not yet saved (the row is the save's own record, lib/queryActions/
+   * logStages `previewOf`): not a link (no open on click or Enter, no tab stop, no role), no hover action in the Next box,
+   * no hover lift, kept out of the page's row probes (no `data-qcv`). The paperclip stays a real button, its Escape
+   * above the drawer's. With no reply date the Next box reads "No date yet" and the reminder, if one is set.
+   */
+  preview?: boolean;
 }
 
-const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, packageName, act, onOpen, onAct }) => {
+const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, packageName, act, onOpen, onAct, preview }) => {
   /* v161 Phase 2 — a render count per query, for the e2e lock only (no production build carries it) */
   if (import.meta.env.MODE !== "production" && typeof window !== "undefined") {
     const w = window as unknown as { __qc154r?: Record<string, number> };
@@ -80,13 +90,19 @@ const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, pac
   const open = () => onOpen(r.id);
   const actLabel = quiet ? QUIET_CHIP : cta ? cta.label : "Open the card";
   const press = chipPress(quiet, cta);
+  /* v2 preview — no reply date yet (Unknown on the Nudge step): the box says so, and names the reminder if there is one */
+  const noDate = !!preview && r.court === "agent" && r.expectedMs == null && !r.pastExpected && nx.kind === "other";
+  const pvNudge = noDate ? scheduledNudgeMs(r, nowMs) : null;
+  const ctl = preview ? { role: "group" as const } : {
+    role: "button" as const, tabIndex: 0, "aria-pressed": selected, "data-qcv": "row",
+    onClick: open,
+    onKeyDown: (e: React.KeyboardEvent) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); open(); } },
+  };
   return (
-    <div className={`qc154-card${selected ? " is-sel" : ""}${popOpen ? " has-pop" : ""}`} id={`query-row-${r.id}`} data-qc154="card" data-qcv="row" data-id={r.id}
-      data-tone={slipTone(r.status)} data-status={r.status} data-quiet={quiet ? "" : undefined} data-wy={wy ? "" : undefined} role="button" tabIndex={0}
+    <div className={`qc154-card${selected ? " is-sel" : ""}${popOpen ? " has-pop" : ""}`} id={`query-row-${r.id}`} data-qc154="card" data-id={r.id}
+      data-tone={slipTone(r.status)} data-status={r.status} data-quiet={quiet ? "" : undefined} data-wy={wy ? "" : undefined} data-preview={preview ? "" : undefined}
       style={{ "--tone": band, ...(wy ? { "--wy": wy } : {}) } as React.CSSProperties}
-      aria-label={`${r.agentName}, ${r.agency}, ${word}`} aria-pressed={selected}
-      onClick={open}
-      onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); open(); } }}>
+      aria-label={`${r.agentName}, ${r.agency}, ${word}`} {...ctl}>
       <div className="qc154-in">
         <div ref={hdRef} className="qc154-hd" data-qc154="band">
           <span className="qc153-seal qc154-seal" aria-hidden="true">{r.initials}</span>
@@ -107,7 +123,11 @@ const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, pac
           {/* v154 §3 — the Next box by state: waiting (the date, the window bar, the planned nudge if any), overdue (words
               only; the nudge is the hover's), or the slip's own Next copy */}
           <div className={`qc154-f qc154-nx${hot ? " is-hot" : ""}`} data-qc154="fact" data-k="next" data-state={nx.kind} data-hot={hot ? "" : undefined}>
-            {nx.kind === "wait" ? <>
+            {noDate ? <>
+              <span className="qc154-fl">{NEXT_WAIT_LABEL}</span>
+              <b data-qc154="no-date">No date yet</b>
+              {pvNudge != null ? <em className="qc154-nl" data-qc154="nudge-on">{BELL}{nudgeOnLine(shortDate(pvNudge, nowMs))}</em> : <em>No reminder set</em>}
+            </> : nx.kind === "wait" ? <>
               <span className="qc154-fl">{NEXT_WAIT_LABEL}</span>
               <b>{nx.due}</b>
               <u className="qc154-bar" data-qc154="window" aria-hidden="true"><i style={{ width: `${Math.round(nx.bar * 100)}%` }} /></u>
@@ -125,18 +145,18 @@ const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, pac
             {/* v156.1 §3 — the action is a 32px arrow chip in the box's corner, a real button named by the action's label (the
                 label also its tooltip); its click runs the action and stops there, so the card's own click (the slide-out)
                 does not run as well. The box keeps its content and colour. */}
-            <button type="button" className="qc1561-chip" data-qc154="act" data-mode={press.kind === "act" ? press.mode : "open"} aria-label={actLabel}
+            {preview ? null : <button type="button" className="qc1561-chip" data-qc154="act" data-mode={press.kind === "act" ? press.mode : "open"} aria-label={actLabel}
               onClick={(e) => { e.stopPropagation(); if (press.kind === "act") onAct(r.id, press.mode); else open(); }}
               onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") e.stopPropagation(); }}>
               <span className="qc1561-arr" aria-hidden="true">→</span>
               <span className="qc1561-tip" aria-hidden="true">{actLabel}</span>
-            </button>
+            </button>}
           </div>
         </div>
       </div>
       {/* v157 — the z's: over the band, crossing the card's top edge, outside the inner card (which clips) */}
       {quiet ? <span className="qc157-zz" data-qc157="zz" aria-hidden="true"><b>z</b><b>z</b><b>z</b></span> : null}
-      {mats ? <span className="qc154-clipw" data-qc154="clip"><MatTab1533 id={r.id} g={mats} status={r.status} accent={tabAccent157(r.status)} onOpen={setPopOpen} /></span> : null}
+      {mats ? <span className="qc154-clipw" data-qc154="clip"><MatTab1533 id={r.id} g={mats} status={r.status} accent={tabAccent157(r.status)} onOpen={setPopOpen} escLevel={preview ? ESC_LEVEL.drawerPopup : undefined} /></span> : null}
     </div>
   );
 };
@@ -153,7 +173,7 @@ const sigOf = (o: unknown): string => {
   return s;
 };
 export const sameCard154 = (a: QcCard154Props, b: QcCard154Props): boolean =>
-  a.selected === b.selected && a.packageName === b.packageName && Math.floor(a.nowMs / 3_600_000) === Math.floor(b.nowMs / 3_600_000)
+  a.selected === b.selected && a.packageName === b.packageName && a.preview === b.preview && Math.floor(a.nowMs / 3_600_000) === Math.floor(b.nowMs / 3_600_000)
   && (a.row === b.row || sigOf(a.row) === sigOf(b.row)) && sigOf(a.act) === sigOf(b.act);
 export const QcCard154 = React.memo(QcCard154Inner, sameCard154);
 

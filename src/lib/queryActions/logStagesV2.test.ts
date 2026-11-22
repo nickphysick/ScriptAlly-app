@@ -217,3 +217,58 @@ describe("v2 · Phase 5 — past that date: nudge now, give it longer, or no rem
   });
 });
 function today0() { return sod(NOW); }
+
+/* ── Phase 6 — the review card is the saved card ── */
+import { planOf, previewOf, reviewCounts, PREVIEW_ID, type LogAnswers, type PlanContext } from "./logStages";
+import { logPayload } from "./logSave";
+import { buildQcRows } from "../qcSummary";
+import { stampRows } from "../queryState";
+import { liveCount } from "../dashBreakdown";
+import { sentAllTime } from "../dash2";
+import { ActivityType, QueryStatus, SubmissionMethod, SubmissionStatus, type Activity, type Agent, type Query } from "../../types";
+
+describe("v2 · Phase 6 — the preview row is the row the saved query produces", () => {
+  const harriet = { id: "hv", name: "Harriet Vance", agency: "Vance & Wren", email: "", submissionStatus: SubmissionStatus.OPEN, submissionMethod: SubmissionMethod.EMAIL,
+    materialsWanted: ["Query Letter", "Synopsis", "First 3 chapters"], responseTimeWeeks: 8, noResponseMeansNo: false } as unknown as Agent;
+  const ctx: PlanContext = { manuscriptId: "m1", agents: [harriet], packages: [], letters: [{ id: "lb", name: "Letter B" }], synopses: [], bookVersions: [] };
+  const base: LogAnswers = { agentId: "hv", sent: daysAgo(0), via: SubmissionMethod.EMAIL, packageId: null, letterId: "lb", synopsisId: null,
+    sample: { unit: "chapters", amt: 3, bookVersionId: null }, note: "" };
+  /** what addQuery writes for this plan (db.tsx: the payload, the id, QUERIED, undefined stripped) and its query-sent entry */
+  const saved = (a: LogAnswers) => {
+    const plan = planOf(a, ctx, "q-saved", false, NOW)!;
+    const { payload, summary } = logPayload(plan);
+    const q = Object.fromEntries(Object.entries({ ...payload, id: "q-saved", userId: "u", status: QueryStatus.QUERIED, sentMaterials: summary }).filter(([, v]) => v !== undefined)) as unknown as Query;
+    const act = { id: "act-1", userId: "u", queryId: "q-saved", manuscriptId: "m1", activityType: ActivityType.QUERY_SENT, description: "", date: new Date(NOW).toISOString(),
+      details: summary, resultingStatus: QueryStatus.QUERIED, eventKey: "query_sent" } as unknown as Activity;
+    const [r0] = buildQcRows([q], [harriet], [act], NOW);
+    return stampRows([r0], [harriet], { quietWeeks: 8, nowMs: NOW })[0];
+  };
+  const pv = (a: LogAnswers) => previewOf(planOf(a, ctx, PREVIEW_ID, false, NOW)!, NOW, 8).row;
+  /* the facts the grid card draws from (QcCard154: slipTrack, standWords, queriedFact, nextBox154, materialGroups) */
+  const drawn = (r: ReturnType<typeof pv>) => ({
+    status: r.status, court: r.court, withYou: r.withYou, sentMs: r.sentMs, expectedMs: r.expectedMs, pastExpected: r.pastExpected, stageStartMs: r.stageStartMs,
+    qs: (r as { qs?: unknown }).qs, agentName: r.agentName, agency: r.agency, initials: r.initials,
+    nudgeDate: (r.query as { nudgeDate?: unknown }).nudgeDate ?? null, sentMaterials: (r.query as { sentMaterials?: unknown }).sentMaterials ?? null,
+  });
+  const cases: [string, LogAnswers][] = [
+    ["normal", base],
+    ["no date (Unknown), a reminder in 8 weeks", { ...base, reply: { wk: null, saveWk: false, ifNo: "nudge", nWhen: "8w", nPick: null } }],
+    ["past the date (sent 60 days ago, 8 weeks), nudge now", { ...base, sent: daysAgo(60), reply: { wk: 8, saveWk: false, ifNo: "now", nWhen: "n2", nPick: null } }],
+    ["generic materials (nothing named saved)", { ...base, letterId: "__letter", synopsisId: "__synopsis", sample: { unit: "pages", amt: 10, bookVersionId: null } }],
+  ];
+  for (const [name, a] of cases) {
+    it(name, () => { expect(drawn(pv(a))).toEqual(drawn(saved(a))); });
+  }
+  it("the two numbers are the Dashboard's own, without and with the query", () => {
+    const book = [{ id: "q1", agentId: "x", manuscriptId: "m1", status: QueryStatus.QUERIED, dateSent: "2026-11-02" } as Query,
+      { id: "q2", agentId: "y", manuscriptId: "m1", status: QueryStatus.REJECTED, dateSent: "2026-10-01" } as Query];
+    const p = previewOf(planOf(base, ctx, PREVIEW_ID, false, NOW)!, NOW, 8);
+    const c = reviewCounts(book, p.query, new Date(NOW));
+    expect(c.active).toEqual([liveCount(book), liveCount([...book, p.query])]);
+    expect(c.active).toEqual([1, 2]);
+    expect(c.sent).toEqual([sentAllTime(book, new Date(NOW)), 3]);
+    expect(c.weeks).toHaveLength(7);
+    /* a query the Dashboard would not count as active leaves "Active queries" where it was (the tile then hides) */
+    expect(reviewCounts(book, { ...p.query, status: QueryStatus.REJECTED } as Query, new Date(NOW)).active).toEqual([1, 1]);
+  });
+});

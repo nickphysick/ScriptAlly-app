@@ -20,9 +20,9 @@ import {
   HOW, MILESTONE, PREVIEW_ID, firstName, monthLong, STAGES, celebrationLine, STAGE_LABEL, headline, calMonth, dayMon, dayMonY, howLabel, askItems, askFill, sizeName, NO_LETTER, NO_SYN,
   planOf, previewOf, sameDay, sod, choiceOfSample, sampleOfChoice, titleName, weekdayDay, whoGroups, yesterday, type Preview,
   WEEKDAY, calMonthAhead, cardOffer, expectOf, nudgeAnswer, nudgeChips, nudgeDateOf, isPastReply, settleReply, chipOn, daysBefore, replyDefaults, replyReady, toggleUnknown, withWeeks, type ReplyAnswers,
-  type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
+  reviewCounts, type ReviewCounts, type BookChoice, type Choice, type LogAnswers, type Pieces, type PlanContext, type SampleChoice, type StageAgent, type StageKey, type StagePackage,
 } from "../../../lib/queryActions/logStages";
-import { QcSlip153 } from "./QcSlip153";
+import { QcCard154 } from "./QcCard154";
 import { WeekSlider } from "../../forms/WeekSlider";
 import { addDays } from "../../../lib/queryActions/dates";
 import { SampleControl } from "../../queryActions/controls";
@@ -302,9 +302,43 @@ const Odometer: React.FC<{ n: number }> = ({ n }) => {
   );
 };
 
-/** v1.3 — the preview's policy fact reads the weeks the Nudge stage settled on, as the mock's slip does */
-const slipAgent = (a: Preview["agent"], r: ReplyAnswers | null): Preview["agent"] =>
-  r && r.wk != null ? { ...a, responseTimeWeeks: r.wk } : a;
+const noop = () => {};
+
+/* v2 · Phase 6 — WHAT LOGGING THIS DOES, under the review card (the ref's v22 `.rvs`): two small quiet tiles of one height,
+   "Active queries {n} → {n+1}" with a line stepping up one, and "Queries sent {n} → {n+1}" with this week's bar gaining a
+   block. The figures are `reviewCounts` (the Dashboard's own functions); "Active queries" shows only when the Dashboard
+   would count this query. Reduced motion: the final state, still. */
+const ARROW_R = <svg width="18" height="12" viewBox="0 0 18 12" fill="none" stroke="#a0675a" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 6h15M11.5 1.5 16 6l-4.5 4.5" /></svg>;
+export const ReviewNumbers: React.FC<{ c: ReviewCounts }> = ({ c }) => {
+  const showActive = c.active[1] > c.active[0];
+  const top = Math.max(1, ...c.weeks, c.weeks[c.weeks.length - 1] + 1);
+  const hOf = (v: number) => (v ? Math.max(5, Math.round((v / top) * 26)) : 2);
+  const last = c.weeks.length - 1;
+  const lastH = hOf(c.weeks[last] ?? 0);
+  const num = (a: number, b: number) => <span className="rvs-n"><i>{a}</i>{ARROW_R}<b>{b}</b></span>;
+  return (
+    <div className={`rvs${showActive ? "" : " is-one"}`} role="group" aria-label="What logging this does" data-qls="counts">
+      {showActive ? (
+        <div className="rvs-t" data-qls="count-tile" data-k="active" aria-label={`Active queries: ${c.active[0]}, then ${c.active[1]}`}>
+          <span className="rvs-l">Active queries</span>{num(c.active[0], c.active[1])}
+          <svg className="rvs-sp" width="84" height="30" viewBox="0 0 112 40" aria-hidden="true">
+            <path d="M0,27 H62" stroke="var(--laq-navy)" strokeOpacity=".55" strokeWidth="2" fill="none" strokeLinecap="round" />
+            <path className="rvs-g" d="M62,27 C80,27 80,12 98,12" stroke="#a0675a" strokeWidth="2" fill="none" strokeLinecap="round" strokeDasharray="4 4.5" />
+            <circle cx="62" cy="27" r="3.5" fill="#fff" stroke="var(--laq-navy)" strokeWidth="1.8" />
+            <circle className="rvs-d" cx="98" cy="12" r="5" fill="#f5e2da" stroke="#a0675a" strokeWidth="1.8" />
+          </svg>
+        </div>
+      ) : null}
+      <div className="rvs-t" data-qls="count-tile" data-k="sent" aria-label={`Queries sent: ${c.sent[0]}, then ${c.sent[1]}`}>
+        <span className="rvs-l">Queries sent</span>{num(c.sent[0], c.sent[1])}
+        <svg className="rvs-sp" width="84" height="30" viewBox="0 0 112 40" aria-hidden="true">
+          {c.weeks.map((v, i) => { const h = hOf(v); return <rect key={i} x={8 + i * 14} y={34 - h} width="9" height={h} rx="2" fill="var(--laq-navy)" fillOpacity={v ? (i === last ? 1 : 0.55) : 0.2} />; })}
+          <rect className="rvs-d" x={8 + last * 14 + 0.8} y={Math.max(1, 34 - lastH - 9.2)} width="7.4" height="7.4" rx="1.8" fill="#f5e2da" stroke="#a0675a" strokeWidth="1.6" strokeDasharray="2.5 2.5" />
+        </svg>
+      </div>
+    </div>
+  );
+};
 
 /* ── the journey ──────────────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -821,26 +855,29 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
     const plan = planOf(a, p.ctx, PREVIEW_ID, false, nowMs);
     return plan ? previewOf(plan, nowMs, p.quietWeeks) : null;
   }, [s, phase, p.ctx, nowMs, p.quietWeeks]); // eslint-disable-line react-hooks/exhaustive-deps
-  const slip = (pv: NonNullable<typeof preview>, tag: boolean) => (
+  /* v2 · Phase 6 — THE PREVIEW IS THE QUERIES PAGE'S OWN GRID CARD (QcCard154, `preview`), given the row the save's own
+     record makes (`previewOf`); QcSlip153 leaves this journey. The page's root classes (.qc151.qc153) carry its sheet. */
+  const card = (pv: NonNullable<typeof preview>, stampOn: boolean, sentMs: number | null) => (
     <div className="laq-pv laq-pvw qc151 qc153" data-qls="preview">
-      {tag ? <span className="laq-pvtag" data-qls="preview-tag">Preview</span> : null}
-      <QcSlip153 row={pv.row} nowMs={nowMs} selected={false} packageName={pv.packageName} agent={slipAgent(pv.agent, rp)} act={null} onOpen={() => {}} onAct={() => {}}
-        preview={pv.noWindow ? { policy: { value: "Not on their card", line: null } } : {}} />
-      {stamp ? <span className={`laq-stamp${reduce ? "" : " is-thump"}`} data-qls="stamp"><span>Logged</span><small>{dayMon(s.sent ?? nowMs).toUpperCase()}</small></span> : null}
+      <QcCard154 row={pv.row} nowMs={nowMs} selected={false} packageName={pv.packageName} act={null} onOpen={noop} onAct={noop} preview />
+      {stampOn ? <span className={`laq-stamp${reduce ? "" : " is-thump"}`} data-qls="stamp"><span>Logged</span><small>{dayMon(sentMs ?? nowMs).toUpperCase()}</small></span> : null}
     </div>
   );
+  /* the two quiet numbers under the card: the Dashboard's own functions, without and with this query */
+  const counts = useMemo(() => (preview ? reviewCounts(p.bookQueries, preview.query, new Date(nowMs)) : null), [preview, p.bookQueries, nowMs]);
   const noteRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => { if (s.noteOpen) noteRef.current?.focus({ preventScroll: true }); }, [s.noteOpen]);
   const checkBody = () => (
     <>
       <h2 className="laq-qh">Ready to log {first}?</h2>
       <p className="laq-qs">Here’s how {first} will look on your Queries page. Tap the paperclip to check what went.</p>
-      {preview ? slip(preview, true) : null}
+      {preview ? card(preview, stamp, s.sent) : null}
       <div className="laq-nt">
         {s.noteOpen
           ? <textarea ref={noteRef} data-qls="note" value={s.note} placeholder={`Anything about this query for ${first}. It goes on the query card.`} aria-label="A note on this query" onChange={(e) => set({ note: e.target.value })} />
           : <button type="button" className="laq-lk" data-qls="add-note" onClick={() => set({ noteOpen: true })}>+ Add a note</button>}
       </div>
+      {counts ? <ReviewNumbers c={counts} /> : null}
       <p className="laq-qs is-foot">Something not right? Tap any step above to change it.</p>
     </>
   );
@@ -1023,11 +1060,7 @@ export const QcLogStages: React.FC<QcLogStagesProps> = (p) => {
             <span className="laq-cnt" data-qls="count">Query number <Odometer n={L.n} /> for {p.bookTitle}</span>
             {mile ? <span className="laq-ms" data-qls="milestone">{mile}</span> : null}
             <div className="laq-slipw">
-              <div className="laq-pv laq-pvw qc151 qc153" data-qls="preview">
-                <QcSlip153 row={L.preview.row} nowMs={nowMs} selected={false} packageName={L.preview.packageName} agent={slipAgent(L.preview.agent, L.before.reply ?? null)} act={null} onOpen={() => {}} onAct={() => {}}
-                  preview={L.preview.noWindow ? { policy: { value: "Not on their card", line: null } } : {}} />
-                <span className="laq-stamp" data-qls="stamp"><span>Logged</span><small>{dayMon(L.before.sent ?? nowMs).toUpperCase()}</small></span>
-              </div>
+              {card(L.preview, true, L.before.sent)}
             </div>
           </div>
           <div className="laq-cf" data-qls="foot">
