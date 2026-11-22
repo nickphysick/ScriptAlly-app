@@ -89,7 +89,7 @@ const helpText: React.CSSProperties = { fontFamily: FONT_SANS, fontSize: 14, col
 /** The ink toggle, 24px tall (the target floor), with its On/Off word beside it. */
 const Toggle: React.FC<{ on: boolean; onChange: (next: boolean, el: HTMLElement) => void; label: string }> = ({ on, onChange, label }) => (
   <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-    <span aria-hidden="true" style={{ fontSize: 14, color: mutedInk, minWidth: 22 }}>{on ? "On" : "Off"}</span>
+    <span aria-hidden="true" className="sc-onoff" style={{ fontSize: 14, minWidth: 22 }}>{on ? "On" : "Off"}</span>
     <button
       type="button" role="switch" aria-checked={on} aria-label={label} className="acct-toggle"
       onClick={(e) => onChange(!on, e.currentTarget)}

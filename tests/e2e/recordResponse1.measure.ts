@@ -161,7 +161,7 @@ for (const vp of SIZES) {
       const c4 = await page.evaluate(() => ({ rows: [...document.querySelectorAll<HTMLElement>("[data-qcrr='row']")].map((r) => ({ id: r.dataset.id, g: r.dataset.group })),
         label: document.querySelector("[data-qcrr='group-label']")?.textContent }));
       L.check("R4 typing finds the closed query", c4.rows.some((r) => r.g === "closed"), JSON.stringify(c4));
-      L.check("R4 under its own heading", c4.label === "Closed · a late reply reopens it", String(c4.label));
+      L.check("R4 under its own heading", c4.label === "Closed · a reply after closing reopens it", String(c4.label));
       await shot(page, `picker-closed-search-${vp.width}`);
       await page.keyboard.press("Enter");
       await settle(page, 1200);

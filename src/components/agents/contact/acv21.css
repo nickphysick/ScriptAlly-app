@@ -18,7 +18,7 @@
 /* the app's flag (flag-icons, never an emoji): 18 × 13.5, a 2px radius, a hairline so white flags read on white */
 .acv2 .ag-flag.fi { flex: none; width: 18px; height: 13.5px; line-height: 13.5px; border-radius: 2px; background-size: cover; box-shadow: 0 0 0 0.5px rgba(28, 19, 15, 0.18); }
 .acv2 .ag-contact { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 20px; min-height: 32px; margin: -2px 14px 8px 20px; border-radius: 8px; }
-.acv2 .ag-mail, .acv2 .ag-web { display: inline-flex; align-items: center; gap: 8px; min-height: 30px; font: 400 14.5px var(--sp-serif) !important; color: #1c130f; }
+.acv2 .ag-mail, .acv2 .ag-web { display: inline-flex; align-items: center; gap: 8px; min-height: 30px; font: 400 var(--sp-sec-size) var(--sp-serif) !important; color: #1c130f; }
 .acv2 .ag-mail > span, .acv2 .ag-web > span { font: inherit !important; color: inherit; }
 .acv2 .ag-mail > svg, .acv2 .ag-web > svg { flex: none; color: #7a7066; }
 .acv2 .ag-web { text-decoration: none; cursor: pointer; }

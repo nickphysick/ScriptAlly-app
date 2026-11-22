@@ -101,7 +101,7 @@ describe("§B the timeline — merges within two days, three label rows", () => 
 
 describe("§F the doors — one table for the card and the row", () => {
   it("the card footer by status is the mock's table", () => {
-    expect(cardDoors(QueryStatus.NO_RESPONSE).map((d) => d.label)).toEqual(["Record a late reply"]);
+    expect(cardDoors(QueryStatus.NO_RESPONSE).map((d) => d.label)).toEqual(["Record a reply after closing"]);
     expect(cardDoors(QueryStatus.OFFER).map((d) => d.label)).toEqual(["Offer: next steps"]);
     expect(cardDoors(QueryStatus.PARTIAL_REQUESTED).map((d) => d.label)).toEqual(["I've sent it", "Record a response", "Close"]);
     expect(cardDoors(QueryStatus.QUERIED).map((d) => d.label)).toEqual(["Record a response", "Nudge", "Close query"]);
@@ -109,7 +109,7 @@ describe("§F the doors — one table for the card and the row", () => {
   });
   it("the row actions by status", () => {
     expect(rowDoors(QueryStatus.FULL_REQUESTED).map((d) => d.label)).toEqual(["✓ SENT IT"]);
-    expect(rowDoors(QueryStatus.REJECTED).map((d) => d.label)).toEqual(["LATE REPLY"]);
+    expect(rowDoors(QueryStatus.REJECTED).map((d) => d.label)).toEqual(["REPLY AFTER CLOSING"]);
     expect(rowDoors(QueryStatus.QUERIED).map((d) => d.label)).toEqual(["✓ RESPONSE", "NUDGE"]);
   });
   it("a door opens the drawer only when its journey is live", () => {

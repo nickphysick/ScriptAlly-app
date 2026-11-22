@@ -66,7 +66,7 @@
 .acv2 .ag-fin .adds { display: flex; flex-wrap: wrap; gap: 8px; }
 .acv2 .qc152 .ag-fin .nx-btn { height: 36px; border-radius: 18px; }
 .acv2 .nx-chips { display: flex; flex-wrap: wrap; gap: 6px; }
-.acv2 .nx-chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px 0 8px; border-radius: 15px; background: #f6f3ee; font: 400 14.5px var(--sp-serif) !important; color: #1c130f; box-sizing: border-box; }
+.acv2 .nx-chip { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 11px 0 8px; border-radius: 15px; background: #f6f3ee; font: 400 var(--sp-sec-size) var(--sp-serif) !important; color: #1c130f; box-sizing: border-box; }
 .acv2 .nx-chip.no { padding-left: 11px; background: #fff; box-shadow: inset 0 0 0 1px #d9cfc1; color: #7a7066; }
 .acv2 .qc152 .nx-chip .nx-tick { width: 16px; height: 16px; }
 .acv2 .ag-added { font: italic 400 13.5px var(--sp-serif) !important; color: #7a7066; }

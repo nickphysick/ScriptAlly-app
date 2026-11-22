@@ -310,7 +310,7 @@ test.describe("Query panel v2", () => {
             sentHasSlip: sent ? !!sent.querySelector('[data-qp="slip"]') : null, textLeft: entries[0] ? entries[0].getBoundingClientRect().left - lr.left : -1,
             stands: stands.length, standLast: !!st && lg.lastElementChild === st, standBg: st ? getComputedStyle(st).backgroundColor : "", standSpan: st ? Math.abs(st.getBoundingClientRect().width - lr.width) : -1,
             heading: st?.querySelector('[data-qp="stand-heading"]')?.textContent ?? "", figure: st?.querySelector('[data-qp="stand-figure"]')?.textContent ?? "", late: st?.dataset.past === "true", tone: st?.dataset.tone ?? "",
-            old: p.querySelectorAll(".tl-wbar, .tl-pastfig, .tl-conv, .tl-offer, .tl-nhist").length, words: (p.innerText || "").replace(/Record a late reply/g, ""), headFace: st ? getComputedStyle(st.querySelector('[data-qp="stand-heading"]')!).fontFamily : "", headSize: st ? parseFloat(getComputedStyle(st.querySelector('[data-qp="stand-heading"]')!).fontSize) : 0,
+            old: p.querySelectorAll(".tl-wbar, .tl-pastfig, .tl-conv, .tl-offer, .tl-nhist").length, words: (p.innerText || "").replace(/Record a reply after closing/g, ""), headFace: st ? getComputedStyle(st.querySelector('[data-qp="stand-heading"]')!).fontFamily : "", headSize: st ? parseFloat(getComputedStyle(st.querySelector('[data-qp="stand-heading"]')!).fontSize) : 0,
           };
         });
         const c = `${w} ${r.id}`;
@@ -324,7 +324,7 @@ test.describe("Query panel v2", () => {
         L.check("V5", `${c} its ground is the court's tint`, g.standBg === TINT[g.court], `${g.standBg} (court ${g.court})`);
         L.check("V5", `${c} no old verdict line is left`, g.old === 0, `${g.old}`);
         /* Nick's ruling (12 Oct): the panel never says "late" or "overdue". The one exception is the name of an action
-           he ruled stays, "Record a late reply" — a reply that came after the close, not a verdict on anybody. */
+           he ruled stays (since reworded "Record a reply after closing", consolidate and finish v1) — a reply after the close, not a verdict. */
         const m = /\b(late|overdue)\b/i.exec(g.words);
         L.check("V5", `${c} the panel says neither "late" nor "overdue"`, !m, m ? `"${g.words.slice(Math.max(0, m.index - 30), m.index + 30).replace(/\s+/g, " ")}"` : "neither");
         const state = STATES.find(([, re]) => re.test(g.heading))?.[0] ?? null;
@@ -529,7 +529,7 @@ test.describe("Query panel v2", () => {
         if (pill !== undefined) pillsRead++;
         if (r.court === "closed") {
           /* a closed query: the list offers no move, and the panel's is a late reply */
-          if (r.tray !== "" || lead !== "Record a late reply") off.push(`${r.id} (closed): tray "${r.tray}" · panel "${lead}"`);
+          if (r.tray !== "" || lead !== "Record a reply after closing") off.push(`${r.id} (closed): tray "${r.tray}" · panel "${lead}"`);
           moves["closed"] = (moves["closed"] ?? 0) + 1;
           continue;
         }

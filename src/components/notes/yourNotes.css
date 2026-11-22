@@ -213,7 +213,7 @@
   .yn .yn-hdw .qc1531-midl { font: italic 400 12.5px var(--sp-serif); fill: #7a6f66; }
   .yn .yn-hdw .qc1531-segn { font: 400 13px var(--sp-type); pointer-events: none; }
   .yn .yn-hdw .qc1531-lgh { display: flex; align-items: baseline; gap: 12px; padding: 0 4px 8px; margin-bottom: 6px; border-bottom: 2px solid #2a3a52; }
-  .yn .yn-hdw .qc1531-lgh h2 { margin: 0; font: 400 19px/1.2 var(--sp-type) !important; color: var(--yn-ink) !important; }
+  .yn .yn-hdw .qc1531-lgh h2 { margin: 0; font: var(--sp-h-card) !important; color: var(--yn-ink) !important; }
   .yn .yn-hdw .qc1531-lgh small { margin-left: auto; font: italic 400 13px/1.2 var(--sp-serif) !important; color: var(--sp-muted); }
   .yn .yn-hdw .qc1531-lg { margin: 0; padding: 0; list-style: none; }
   .yn .yn-hdw .qc1531-lg li + li { border-top: 1px solid rgba(28, 19, 15, 0.08); }

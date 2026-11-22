@@ -133,7 +133,7 @@ export const estimateCampaign = (a: CampaignAnswers, today: Date): CampaignEstim
      and the reminder live in the small print and the FAQ, so the result card does not restate them.
      (Before: 24 Oct "we'll be in touch with options to extend"; before that, a month at £5.99.) */
   const tail = months > 13 ? "If you're still querying after that, your plan simply carries on month by month."
-    : over > 0.25 ? "If your last replies run late, your plan simply carries on month by month until you're done."
+    : over > 0.25 ? "If your last replies take longer than expected, your plan simply carries on month by month until you're done."
     : fit - months > 2 ? "It leaves room for slow replies, or for revising if an agent asks."
     : "There's a little room in it for slow replies.";
 

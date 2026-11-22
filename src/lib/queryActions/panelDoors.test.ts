@@ -48,7 +48,7 @@ describe("panelDoors", () => {
     expect(others(QueryStatus.OFFER)).toEqual(["Close query"]);
   });
   it("closed: one door, the late reply (there is no reopen journey); signed: none", () => {
-    for (const s of [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN]) expect(panelDoors(s, "close")).toEqual([{ mode: "resp", label: "Record a late reply", primary: true }]);
+    for (const s of [QueryStatus.REJECTED, QueryStatus.NO_RESPONSE, QueryStatus.WITHDRAWN]) expect(panelDoors(s, "close")).toEqual([{ mode: "resp", label: "Record a reply after closing", primary: true }]);
     expect(panelDoors(QueryStatus.SIGNED, null)).toEqual([]);
   });
   it("⚠️ every door the panel offers is a journey the card already offered, or Close on an offer", () => {

@@ -61,7 +61,7 @@
 .fv2-extrk > i.is-now { background: #7f8794; }
 
 /* ── Part B · the set-up card says what the writer told us, and offers to change it ── */
-.d58 .fv2-said { margin: 0; padding: 18px 28px 0; font: 400 15.5px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-said { margin: 0; padding: 18px 28px 0; font: 400 var(--sp-body-size)/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
 .d58 .fv2-said em { font: italic 400 var(--sp-body-size)/1.5 var(--d58-serif) !important; }
 .d58 .fv1-lnk.fv2-change { margin-left: 6px; font-size: 15.5px !important; color: var(--d58-ink); }
 /* the three answers, stacked: each a full-width card */

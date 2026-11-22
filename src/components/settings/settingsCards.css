@@ -118,6 +118,9 @@
 .sc-ctl { display: flex; justify-content: flex-end; align-items: center; gap: 10px; min-width: 0; }
 /* A field that should take the column rather than sit at its right edge. */
 .sc-ctl > .sc-grow { flex: 1; min-width: 0; }
+/* Consolidate and finish v1, B4: a toggle's On/Off note takes its grey from CSS (it was inline mutedInk, which also
+   feeds SVG attributes and stays). Phones keep mutedInk's #8a7a6c; desktop reads --sp-quiet (settingsInk.css). */
+.sc-onoff { color: #8a7a6c; }
 
 .sc-note {
   margin: 0;

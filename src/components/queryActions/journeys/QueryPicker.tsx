@@ -6,8 +6,8 @@
  * step is choosing the query: an agent search over LIVE queries only, drawn with the Log journey's
  * own picker markup (`.qad-apick` / `.qad-sugg`), so the two searches read as one control.
  *
- * ⚠️ LIVE ONLY. A closed query's late reply is recorded from that query's own card ("Record a late
- * reply"), where the writer can see what they are reopening; a search that offered closed queries
+ * ⚠️ LIVE ONLY. A closed query's late reply is recorded from that query's own card ("Record a reply after
+ * closing"), where the writer can see what they are reopening; a search that offered closed queries
  * here would put a reopening one keystroke from a routine response.
  *
  * Picking a row hands the id to the drawer (`pickQuery`), which remounts the response journey on

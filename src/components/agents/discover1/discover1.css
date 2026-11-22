@@ -60,7 +60,7 @@
    for the coming-soon panel's eyebrow. */
 .dv1-pro {
   display: inline-block; margin-left: 14px; padding: 3px 8px 2px; border-radius: 5px; vertical-align: 2px;
-  font: 600 9px/normal var(--dv1-mono) !important; letter-spacing: 0.18em; background: #e2e7ef; color: var(--dv1-navy);
+  font: 600 12px/normal var(--dv1-mono) !important; letter-spacing: 0.18em; background: #e2e7ef; color: var(--dv1-navy);
 }
 
 /* ── the empty header: the navy panel ─────────────────────────────────── */
@@ -331,7 +331,7 @@
 .dv1-ph { width: 108px; height: 160px; border: 1.5px dashed rgba(28, 19, 15, 0.3); border-radius: 54px 54px 12px 12px; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 6px; padding: 0 10px 12px; text-align: center; }
 .dv1-ph span { font: 600 9.5px/normal var(--dv1-mono); letter-spacing: 0.2em; text-transform: uppercase; color: var(--sp-quiet); }
 .dv1-ph em { font: italic 12.5px/1.3 var(--dv1-serif); color: var(--sp-quiet); }
-.dv1-steps li > i { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--dv1-rust); color: var(--dv1-rust); font: 600 12px/1 var(--dv1-mono); font-style: normal; margin-bottom: 12px; }
+.dv1-steps li > i { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--sp-rust); color: var(--sp-rust); font: 600 12px/1 var(--dv1-mono); font-style: normal; margin-bottom: 12px; }
 /* Consistency roll-out v1, Phase 7: the card heading */ .dv1-steps h3 { margin: 0 auto; max-width: 330px; font: var(--sp-h-card) !important; color: var(--dv1-ink); text-wrap: balance; }
 .dv1-steps p { margin: 12px auto 0; max-width: 300px; font: 400 16px/1.6 var(--dv1-serif); color: var(--sp-muted); text-wrap: balance; }
 .dv1-steps li[data-on] h3 { text-decoration: underline; text-decoration-color: var(--dv1-rust); text-underline-offset: 6px; }
@@ -403,5 +403,4 @@
    is given the room (an initials disc grows as a whole, in proportion, and stays round). Desktop only. */
 @media (min-width: 768px) {
   .dv1-ph span { font-size: 12px; }
-  .dv1-aek .dv1-pro { font-size: 12px; }
 }

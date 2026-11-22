@@ -132,24 +132,27 @@ Nick's consistency rulings (design-refs/consistency-rollout-v1/consistency-rulin
 - **One navy: `--sp-anthracite` (#2a3a52)**, a filled navy button hovers to `--sp-navy-hover` (#24304a; the older, lighter `--sp-anthracite-hov` stays for the header pills); `--ink-band` (index.css) is the same navy. **One rust for small accents: `--sp-rust` (#7a3f31).** Burgundy only as the MountCard frame border. No green. Red only on destructive actions.
 - **Nothing under 12px**, except artwork and scaled-down previews.
 - **Headings:** section `font: var(--sp-h-section)` (Special Elite 24), card `--sp-h-card` (Special Elite 20), small `--sp-h-small` (Source Serif 600 16), each read with `!important` (brand.tsx forces h1–h3). Heroes may be larger.
+- **A heading is what it heads on the rendered page, not its tag:** a section of the page → section; one card or one panel section → card; inside a card under its heading → small. A one-off statement line (Comps' "The podium", the Analytics finding headline, Queries' "That's all 88.") is a display line, not a heading, and keeps its own look.
 - **Navy header:** title 40px from the header's top; 40px gap to the content below (`src/components/shell/wsnh.css` §1b).
 - **Action buttons in a page body:** `.sp-btn` + `.sp-btn--fill` / `.sp-btn--line` (`--sp-btn-h` 40, `--sp-btn-r` 10, `--sp-btn-font` Source Serif 600 15). One filled navy per view; others outline. Not header, toggle, tab, pill, row, icon-only, destructive, Settings or public buttons.
 - **Framed card:** `.sp-rc` › `.sp-rc-in` (`--sp-rc-r` 20, `--sp-rc-pad` 8, `--sp-rc-sh`; inner `--sp-rc-in-r` 13, `--sp-rc-edge` 1px #e9e3d9). Side panels (the Views rails) use the single-edge card, not this.
 - **Text field:** `.sp-fld` (`--sp-fld-h` 44, `--sp-fld-r` 10, `--sp-fld-edge` 1px ink edge, `--sp-fld-font` 16px; `--sp-fld-focus` navy edge on focus). A headline field keeps its height and size.
 - **View switches are boxed** (box radius 12, buttons 34 high, radius 9: the Query Centre's List / Birds-eye switch, `.cp32-tog` on Comps). Underlined tabs are for different lists.
 - **Slide-out panels:** close button `--sp-px-size` (36 × 36); action footer `--sp-pfoot-h` (72) with `--sp-pfoot-pad` (14px 24px) and `--sp-pfoot-rule`.
-- **Copy:** "past expected", never "late" or "overdue". Colour never marks time pressure. No verdict words.
+- **Copy:** "past expected", never "late" or "overdue"; the Query Centre's Next box says "{n} days past"; a reply to a closed query is "a reply after closing". Colour never marks time pressure. No verdict words.
 - **Muted text:** `--sp-muted` (#5b4f47) for supporting text, `--sp-quiet` (#6b6058) for captions and meta (both pass 4.5:1 on oat and white). No other grey-brown on light grounds.
 - **Body text:** running Source Serif on workspace pages, the Dashboard and panels is `--sp-body-size` (16) or `--sp-sec-size` (14).
 - **Red** only on "Delete account…", "Withdraw it" and "I've decided not to send it": `--sp-danger` (#a63d2f).
 - **Public pages** keep Source Sans and their brighter rust, `--mk-rust` (#a2452a, on `:root` in marketing.css); the app keeps `--sp-rust`.
 - **Text tag** (a pill that holds only words): `--sp-tag-*`, 28 high, 0 12, fully rounded, Source Serif 600 14, its own colours. Not a tag: chips with a person, counts, percentages, Pro tags, key caps, StatusDot, filter pills, buttons.
+- **Corner labels** (a label that straddles a box edge: Log a query's "Preview", the first-visit corner tag) are not text tags and keep their own size.
+- **Rail count badge** (`.wsr-ct`, sidebarRail.css): 600 12px/18px mono, at least 20 wide, 18 high, radius 9, `left: calc(50% + 9px)`, top 1px; it shows at most "99" (`railCount`), and its aria-label and title keep the true count.
 - **Filter pills:** 32 high, Source Serif 14.5 (`--sp-fpill-h` / `--sp-fpill-size`), navy when selected.
 - **Slide-out panel title:** `--sp-panel-t` (Special Elite 400 24/1.2). The agent card's name is a person's name and stays its own.
 - **Focus:** one ring, `outline: 2px solid var(--sp-anthracite); outline-offset: 2px` (cream #f4eee5 on navy and dark grounds); text fields keep their navy focus edge and take no ring. **Hover:** filled navy → `--sp-navy-hover`, outline → navy at 6%, clickable row → #f8f4ed; no transition over 150ms, none under reduced motion.
 - **Settings, sign-in, sign-up and import** use the standard button and field; sign-in keeps its typewriter pill buttons and Google's button its logo colours.
 - **New work uses these shared classes and tokens.** Do not write a new size, colour or radius on a page when one of these fits; point the page's own rule at the token.
-- **The rules check:** `npm run audit:rules` (audits/consistency-v2: fifteen rules, exceptions in `exceptions.json`, each with a reason; `CA_ONLY`, `CA_VIEWPORTS`, `CA_OUT`).
+- **The rules check:** `npm run audit:rules` (audits/consistency-v2: fifteen rules, exceptions in `exceptions.json`, each with a reason and a `kind`: agreed, in-flight or open; `CA_ONLY`, `CA_VIEWPORTS`, `CA_OUT`).
 - **The consistency audit:** `npm run e2e:emu -- --config audits/consistency-v1/playwright.audit.config.ts` (through the test slot; `CA_ONLY=<pages>`, `CA_VIEWPORTS=1512,1920`, `CA_OUT=<dir>`), then `node audits/consistency-v1/analyse.mjs <dir>` writes findings.json.
 
 ## Phone style (settled)

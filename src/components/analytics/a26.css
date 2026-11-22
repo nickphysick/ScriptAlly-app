@@ -89,14 +89,14 @@
 .a26-page .a26-go:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the filled button (day one) */
 .a26-page .a26-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--a26-navy); color: #fff; font: 600 16px/1 var(--a26-serif); white-space: nowrap; }
-.a26-page .a26-btn:hover { background: var(--sp-anthracite-hov); }
+.a26-page .a26-btn:hover { background: var(--sp-navy-hover); }
 .a26-page .a26-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the grey foot of a card */
 .a26-page .a26-means { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 28px; padding: 16px 20px; border-radius: 12px; background: var(--a26-soft); color: var(--sp-muted); font-size: 16px; }
 .a26-page .a26-means p { flex: 1; min-width: 260px; }
 .a26-page .a26-means b { font-weight: 600; color: var(--a26-ink); }
-.a26-page .a26-lede { font-size: 17px; line-height: 1.5; color: var(--sp-muted); max-width: 62ch; }
+.a26-page .a26-lede { font-size: var(--sp-body-size); line-height: 1.5; color: var(--sp-muted); max-width: 62ch; }
 .a26-page .a26-lede b { font-weight: 600; color: var(--a26-ink); }
 .a26-page .a26-h3 { margin-bottom: 6px; font: 400 20px/1.25 var(--a26-type) !important; }
 .a26-page .a26-h3s { margin-bottom: 22px; font-size: var(--sp-body-size); color: var(--sp-quiet); }
@@ -143,7 +143,7 @@
 .a26-page .a26-grp-s { display: block; margin-top: 4px; font-size: var(--sp-sec-size); color: var(--sp-quiet); }
 .a26-page .a26-path { display: grid; gap: 16px; }
 .a26-page .a26-pr { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: baseline; }
-.a26-page .a26-pr > span { font: 600 16.5px/1.3 var(--a26-serif); }
+.a26-page .a26-pr > span { font: 600 var(--sp-body-size)/1.3 var(--a26-serif); }
 .a26-page .a26-pr > b { font: 400 26px/1 var(--a26-type); }
 .a26-page .a26-pr > em { grid-column: 1 / -1; display: block; height: 20px; border-radius: 10px; background: var(--a26-track); overflow: hidden; font-style: normal; }
 .a26-page .a26-pr > em > i { display: block; height: 100%; border-radius: 10px; }
@@ -169,7 +169,7 @@
 /* the three-up tiles (rounds, comparison) */
 .a26-page .a26-cmp { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
 .a26-page .a26-cm { display: flex; flex-direction: column; padding: 18px 14px 16px; border-radius: 14px; background: var(--a26-well); text-align: center; min-width: 0; }
-/* Consistency roll-out v1, Phase 7: the small heading */ .a26-page .a26-cm h3 { font: var(--sp-h-small) !important; min-height: 42px; }
+/* Consolidate and finish v1, B2: a stat tile's title heads that one card, so it is the card heading */ .a26-page .a26-cm h3 { font: var(--sp-h-card) !important; min-height: 50px; }
 .a26-page .a26-cm-v { margin-top: 14px; font: 400 18px/1.2 var(--a26-type); }
 .a26-page .a26-cm-n { margin-top: 4px; font-size: 14px; color: var(--sp-quiet); }
 .a26-page .a26-rd { text-align: left; padding: 18px; }
@@ -194,7 +194,7 @@
 .a26-page .a26-tl { margin: 30px 0 0; }
 .a26-page .a26-tl-row { display: grid; grid-template-columns: 132px minmax(0, 1fr); align-items: end; }
 .a26-page .a26-tl-r1 { margin-top: 30px; }
-.a26-page .a26-tl-l { padding: 0 16px 10px 0; font: 600 15.5px/1.3 var(--a26-serif); }
+.a26-page .a26-tl-l { padding: 0 16px 10px 0; font: 600 var(--sp-body-size)/1.3 var(--a26-serif); }
 .a26-page .a26-tl-l small { display: block; font: 400 14px/1.3 var(--a26-serif); color: var(--sp-quiet); }
 .a26-page .a26-tl-p { position: relative; display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 1.25fr); }
 .a26-page .a26-tl-m { position: relative; border-bottom: 2px solid var(--a26-rule); }
@@ -221,7 +221,7 @@
 .a26-page .a26-cols .a26-most i { background: var(--a26-most); }
 .a26-page .a26-cols-l { display: flex; justify-content: center; gap: 16px; margin-top: 8px; font-size: 14px; color: var(--sp-quiet); }
 .a26-page .a26-cols-l span { width: 56px; }
-.a26-page .a26-cav { margin-top: 18px; font-size: 14.5px; color: var(--sp-quiet); }
+.a26-page .a26-cav { margin-top: 18px; font-size: var(--sp-sec-size); color: var(--sp-quiet); }
 
 /* ── G · the closing line ── */
 .a26-page .a26-note { margin-top: 48px; text-align: center; font: italic 400 16px/1.5 var(--a26-serif); color: var(--sp-quiet); }

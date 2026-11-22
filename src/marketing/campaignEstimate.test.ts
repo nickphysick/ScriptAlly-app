@@ -35,7 +35,7 @@ describe("estimateCampaign agrees with the ref, case for case", () => {
     expect(new Set(cases.map((c) => c.tail)).size).toBe(4);
     /* ⚠️ THE 26 OCT POLICY: a plan carries on month by month; no tail sells a month or promises a call. */
     expect(cases.filter((c) => c.tail === "If you're still querying after that, your plan simply carries on month by month.").length).toBe(206);
-    expect(cases.filter((c) => c.tail === "If your last replies run late, your plan simply carries on month by month until you're done.").length).toBe(115);
+    expect(cases.filter((c) => c.tail === "If your last replies take longer than expected, your plan simply carries on month by month until you're done.").length).toBe(115);
     expect(cases.some((c) => /options to extend|never renew|won't renew/.test(c.tail))).toBe(false);
     expect(cases.some((c) => c.tail.includes("£"))).toBe(false);
     expect(cases.some((c) => c.label === "About a year or more")).toBe(true);

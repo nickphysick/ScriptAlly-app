@@ -116,7 +116,7 @@
 .cp32 .cp32-wkby { flex: 1 1 240px; margin: 0; font: italic 400 var(--sp-body-size)/1.3 var(--c32-serif); color: var(--sp-quiet); }
 .cp32 .cp32-nums { display: flex; gap: 56px; flex-wrap: wrap; margin-top: 28px; padding-bottom: 28px; border-bottom: 1px solid var(--c32-hair); }
 .cp32 .cp32-nums b { display: block; font: 400 32px/1 var(--c32-type); }
-.cp32 .cp32-nums span { display: block; margin-top: 6px; font: 400 14.5px/1.4 var(--c32-serif); color: var(--sp-quiet); }
+.cp32 .cp32-nums span { display: block; margin-top: 6px; font: 400 var(--sp-sec-size)/1.4 var(--c32-serif); color: var(--sp-quiet); }
 .cp32 .cp32-wait { padding: 16px 18px; border-radius: 12px; background: var(--c32-oat); color: var(--sp-muted); }
 .cp32 .cp32-wait p { margin: 0; }
 .cp32 .cp32-wait .cp32-btn { margin-top: 12px; }
@@ -126,7 +126,7 @@
 .cp32 .cp32-why .cp32-gap { color: var(--sp-quiet); }
 .cp32 .cp32-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 20px; }
 .cp32 .cp32-tag { display: inline-flex; align-items: center; min-height: 30px; padding: 0 13px; border-radius: 999px; background: #eae6de; font: 600 14px/1.2 var(--c32-serif); }
-.cp32 .cp32-facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 24px; margin: 28px 0 0; font: 400 15px/1.4 var(--c32-serif); }
+.cp32 .cp32-facts { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 24px; margin: 28px 0 0; font: 400 var(--sp-body-size)/1.4 var(--c32-serif); }
 .cp32 .cp32-facts dt { color: var(--sp-quiet); }
 .cp32 .cp32-facts dd { margin: 0; }
 .cp32 .cp32-lst { list-style: none; margin: 0; padding: 0; }
@@ -136,7 +136,7 @@
 .cp32 .cp32-lst .cp32-ini { font: 600 12.5px/1 var(--c32-serif); background: var(--c32-navy); color: #fff; }
 .cp32 .cp32-lstx { flex: 1; min-width: 0; }
 .cp32 .cp32-lstx b { display: block; font: 600 var(--sp-body-size)/1.3 var(--c32-serif); overflow-wrap: anywhere; }
-.cp32 .cp32-lstx > span { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font: 400 14.5px/1.4 var(--c32-serif); color: var(--sp-quiet); min-width: 0; }
+.cp32 .cp32-lstx > span { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font: 400 var(--sp-sec-size)/1.4 var(--c32-serif); color: var(--sp-quiet); min-width: 0; }
 .cp32 .cp32-lstx > span svg { flex: none; }
 .cp32 .cp32-lstx > span i { font-style: normal; color: var(--c32-ink); }
 .cp32 .cp32-lstr { flex: none; max-width: 45%; text-align: right; font: 400 14px/1.35 var(--c32-serif); color: var(--sp-quiet); }
@@ -198,7 +198,7 @@
 .cp32 .cp32-cpd p { margin: 6px 0 0; font: 400 16px/1.5 var(--c32-serif); color: var(--sp-muted); }
 .cp32 .cp32-ribbon { position: absolute; top: 0; right: 150px; width: 28px; height: calc(100% + 14px); background: linear-gradient(90deg, #7d3f4e, #96505f 45%, #874655); clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - 11px), 0 100%); z-index: 1; }
 .cp32 .cp32-tbl table { width: 100%; border-collapse: collapse; }
-.cp32 .cp32-tbl th { padding: 18px 28px; text-align: right; font: 400 14.5px/1.2 var(--c32-serif); color: var(--sp-quiet); border-bottom: 1px solid var(--c32-hair); }
+.cp32 .cp32-tbl th { padding: 18px 28px; text-align: right; font: 400 var(--sp-sec-size)/1.2 var(--c32-serif); color: var(--sp-quiet); border-bottom: 1px solid var(--c32-hair); }
 .cp32 .cp32-tbl th:first-child, .cp32 .cp32-tbl td:first-child { text-align: left; }
 .cp32 .cp32-tbl td { padding: 10px 28px; height: 76px; text-align: right; border-bottom: 1px solid var(--c32-hair); font: 400 19px/1 var(--c32-type); }
 .cp32 .cp32-tbl tbody tr:last-child td { border-bottom: 0; }
@@ -207,7 +207,7 @@
 .cp32 .cp32-tbl tbody tr:focus-visible { outline-offset: -2px; }
 .cp32 .cp32-who { display: flex; align-items: center; gap: 14px; }
 .cp32 .cp32-who .cp32-rdisc { background: var(--c32-oat); width: 38px; height: 38px; }
-.cp32 .cp32-who b { display: block; font: 600 16.5px/1.3 var(--c32-serif); overflow-wrap: anywhere; }
+.cp32 .cp32-who b { display: block; font: 600 var(--sp-body-size)/1.3 var(--c32-serif); overflow-wrap: anywhere; }
 .cp32 .cp32-who em { display: block; font: 400 14px/1.3 var(--c32-serif); font-style: normal; color: var(--sp-quiet); }
 .cp32 .cp32-rate { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
 .cp32 .cp32-rate em { font: 400 var(--sp-sec-size)/1.3 var(--c32-serif); font-style: normal; color: var(--sp-quiet); }
