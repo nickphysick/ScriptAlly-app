@@ -159,7 +159,10 @@ test.describe("Query Centre v157", () => {
       for (const g of got) {
         for (const n of g.nodes) {
           const k = `${g.status}:${n.s}`; if (seen.has(k)) continue; seen.add(k);
-          const want = n.s === "reached" || n.s === "cur" ? "rgb(28, 19, 15)" : "rgba(28, 19, 15, 0.42)";
+          /* Plumage colours v1: on the offer's navy a reached or faint step is the paper (the current step keeps its
+             white disc and ink mark) */
+          const offer = g.status === "Offer" || g.status === "Signed";
+          const want = n.s === "cur" ? "rgb(28, 19, 15)" : n.s === "reached" ? (offer ? "rgb(244, 238, 229)" : "rgb(28, 19, 15)") : offer ? "rgba(244, 238, 229, 0.5)" : "rgba(28, 19, 15, 0.42)";
           L.check(`${g.status} ${n.s} step: ${want}`, n.c === want, n.c);
         }
       }

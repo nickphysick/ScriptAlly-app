@@ -19,8 +19,9 @@
   .qc151.qc153 .qc154-card[data-tone="offer"] .qc154-nm.qc154-nm { color: #f4eee5; }
   .qc151.qc153 .qc154-card[data-tone="offer"] .qc154-ag.qc154-ag { color: rgba(244, 238, 229, 0.72); }
   .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd:not(.qc153-nd--cur) { color: #f4eee5; }
-  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd--fut,
-  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd--skip { color: rgba(244, 238, 229, 0.5); }
+  /* the same weight as the rule above (each carries :not(.qc153-nd--cur)), so, coming later, it wins on the faint steps */
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd--fut:not(.qc153-nd--cur),
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd--skip:not(.qc153-nd--cur) { color: rgba(244, 238, 229, 0.5); }
   .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-ln.qc153-ln { background: rgba(244, 238, 229, 0.35); }
   .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-ln.qc153-ln--done { background: #f4eee5; }
 }
