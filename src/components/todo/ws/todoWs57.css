@@ -59,7 +59,7 @@
 
   /* 9 · the question headings in the page's own serif (they were the last Playfair Display on the page; the batch
          view's headings already use this) */
-  .tws .tws-wq h3.tws-qh { font: 600 20px/1.3 var(--tw-serif) !important; letter-spacing: 0; }
+  .tws .tws-wq h3.tws-qh { font: var(--sp-h-small) !important; letter-spacing: 0; }
 
   /* 10 · the pop-ups (snooze, dismiss, switched off) portal to the body, where lib/brand's bare-`span` rule set their
           option labels in the sans face; they take the pop-up's serif, and its heading the typewriter like the filter menu */
