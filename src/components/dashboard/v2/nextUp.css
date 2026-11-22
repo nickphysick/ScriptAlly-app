@@ -22,7 +22,7 @@
 .d58.d2 .nu-who { display: flex; align-items: center; gap: 12px; min-height: 46px; background: inherit; }
 .d58.d2 .nu-seal { flex: none; }
 .d58.d2 .nu-id { flex: 1 1 auto; min-width: 0; display: block; font-family: var(--d58-serif); }
-.d58.d2 .nu-name { display: block; font: 600 17px/1.2 var(--d58-serif); color: var(--d2-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.d58.d2 .nu-name { display: block; font: 600 var(--sp-body-size)/1.2 var(--d58-serif); color: var(--d2-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .d58.d2 .nu-agency { display: block; font: italic 400 14px/1.35 var(--d58-serif); color: var(--d2-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .d58.d2 .nu-fig { flex: none; margin-left: auto; text-align: right; display: block; }
 .d58.d2 .nu-n { display: block; font-family: var(--d58-type) !important; font-size: 26px; line-height: 1; color: var(--d2-ink); white-space: nowrap; }

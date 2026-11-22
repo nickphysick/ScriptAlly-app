@@ -17,7 +17,7 @@
   }
   .am-menu--ink .am-iid { display: block; min-width: 0; }
   .am-menu--ink .am-iname {
-    display: block; font-family: var(--sp-serif); font-weight: 600; font-size: 15px; line-height: 1.3;
+    display: block; font-family: var(--sp-serif); font-weight: 600; font-size: var(--sp-body-size); line-height: 1.3;
     color: var(--ink-on-light); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
   .am-menu--ink .am-iemail {

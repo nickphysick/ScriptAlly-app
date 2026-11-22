@@ -35,7 +35,7 @@
 /* ── Part A · the empty feed ── */
 .fv2-empty { min-width: 0; padding: 0 4px; }
 .d58 .fv2-empty .fv2-et { margin: 0; font: var(--sp-h-section) !important; color: var(--d58-ink); letter-spacing: 0; }
-.d58 .fv2-ep { margin: 4px 0 0; font: 400 15px/1.5 var(--d58-serif) !important; color: var(--sp-muted); }
+.d58 .fv2-ep { margin: 4px 0 0; font: 400 var(--sp-body-size)/1.5 var(--d58-serif) !important; color: var(--sp-muted); }
 .d58 .fv2-elink {
   display: inline; padding: 0; border: 0; background: none; cursor: pointer; color: var(--d58-ink);
   font: 700 15px/1.5 var(--d58-serif) !important; text-decoration: underline; text-underline-offset: 3px; text-align: left;
@@ -53,7 +53,7 @@
 .fv2-exrow { display: flex; align-items: center; gap: 10px; }
 .d58 .fv2-exdisc { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: #3d4553; color: #fff; font: 600 13px/1 var(--d58-serif) !important; }
 .fv2-exw { min-width: 0; }
-.d58 .fv2-exw b { display: block; font: 700 15px/1.3 var(--d58-serif) !important; color: var(--d58-ink); }
+.d58 .fv2-exw b { display: block; font: 700 var(--sp-body-size)/1.3 var(--d58-serif) !important; color: var(--d58-ink); }
 .d58 .fv2-exw small { display: block; font: 400 13px/1.35 var(--d58-serif) !important; color: var(--sp-quiet); }
 .fv2-extrk { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
 .fv2-extrk > i { height: 4px; border-radius: 2px; background: #e4ded4; }
@@ -62,7 +62,7 @@
 
 /* ── Part B · the set-up card says what the writer told us, and offers to change it ── */
 .d58 .fv2-said { margin: 0; padding: 18px 28px 0; font: 400 15.5px/1.5 var(--d58-serif) !important; color: var(--d58-ink); }
-.d58 .fv2-said em { font: italic 400 15.5px/1.5 var(--d58-serif) !important; }
+.d58 .fv2-said em { font: italic 400 var(--sp-body-size)/1.5 var(--d58-serif) !important; }
 .d58 .fv1-lnk.fv2-change { margin-left: 6px; font-size: 15.5px !important; color: var(--d58-ink); }
 /* the three answers, stacked: each a full-width card */
 .d58 .fv1-ch.fv2-ch { grid-template-columns: minmax(0, 1fr); gap: 10px; }
