@@ -109,9 +109,9 @@
 
   /* the count: a corner badge on the icon; absolute, so its arrival moves nothing */
   .wsr-ct {
-    position: absolute; left: calc(50% + 9px); top: 3px; min-width: 16px; height: 15px; padding: 0 4px; border-radius: 8px;
+    position: absolute; left: calc(50% + 9px); top: 1px; min-width: 20px; height: 18px; padding: 0 5px; border-radius: 9px;
     background: var(--ink-terra); color: var(--ink-shell);
-    font: 600 9px/15px var(--font-mono, "JetBrains Mono", monospace); text-align: center;
+    font: 600 12px/18px var(--font-mono, "JetBrains Mono", monospace); text-align: center;
     box-shadow: 0 0 0 2px var(--ink-shell);
   }
 

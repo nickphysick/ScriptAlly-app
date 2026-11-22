@@ -90,8 +90,9 @@ const settingsIcon = (id: string) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{SETTINGS_ICONS[id]}</svg>
 );
 
-/** "99+" above 99. */
-export const railCount = (n: number): string => (n > 99 ? "99+" : String(n));
+/** At most "99": the badge is sized for two digits (consolidate and finish v1, B3); the badge's aria-label and
+ *  title keep the true count. */
+export const railCount = (n: number): string => (n > 99 ? "99" : String(n));
 
 /** The rail with its menu. The menu never opens while the full sidebar is floating or pinned, nor on the settings
  *  rail. The view below is the rail itself, hook-free, so a source test can call it as a function. */
