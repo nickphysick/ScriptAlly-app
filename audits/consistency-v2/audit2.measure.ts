@@ -136,6 +136,8 @@ async function measure(page: Page, entry: Record<string, unknown>, vw: number) {
     if (MODE === "audit") shots = await crops(page, String(entry.key), data.records);
   }
   if (vw === 1512 && TRACE.length) await trace(page, String(entry.key), data.records);
+  /* CA_PROBE=<file of JS>: evaluated on the page at 1512 (it must only read, or put back what it changes); the result goes to <key>@probe.json */
+  if (vw === 1512 && process.env.CA_PROBE) writeFileSync(resolve(OUT, `${entry.key}@probe.json`), JSON.stringify(await page.evaluate(readFileSync(process.env.CA_PROBE, "utf8")).catch((e) => ({ error: String(e) })), null, 1));
   writeFileSync(resolve(OUT, `${entry.key}@${vw}.json`), JSON.stringify({ ...entry, ...data, hover, shots }, null, 1));
   return data;
 }
