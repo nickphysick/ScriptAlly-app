@@ -12,7 +12,7 @@
  {
   "name": "at 200ms the strip's background-color is strictly between the old and new",
   "ok": true,
-  "got": "rgb(239, 230, 214) | rgb(230, 234, 236) @195ms | rgb(228, 235, 242)"
+  "got": "rgb(239, 230, 214) | rgb(230, 234, 237) @198ms | rgb(228, 235, 242)"
  },
  {
   "name": "by 500ms it equals the new colour",
@@ -20,14 +20,19 @@
   "got": "rgb(228, 235, 242)"
  },
  {
-  "name": "the label's colour eases too (between at 200ms, where it changes)",
+  "name": "the track's current mark pops (qc160-mark) as the stage moves",
   "ok": true,
-  "got": "rgb(248, 244, 237) | rgb(244, 246, 246) | rgb(243, 246, 249)"
+  "got": "47 frames"
+ },
+ {
+  "name": "the strip's status moved on with it",
+  "ok": true,
+  "got": "Queried, step 1 of 4 → Partial requested, step 2 of 4"
  },
  {
   "name": "the footer's new contents fade in (opacity strictly between 0 and 1 during the run)",
   "ok": true,
-  "got": "[0,0,0.0254657,0.0854018,0.177176,0.290248,0.408504,0.517604,0.611607,0.691346]"
+  "got": "[0,0,0.0255128,0.0854842,0.176659,0.290377,0.408628,0.517102,0.611701,0.691425]"
  },
  {
   "name": "the footer is fully drawn by 500ms",

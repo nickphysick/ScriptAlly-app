@@ -2,7 +2,7 @@
  {
   "name": "population: Undo was pressed",
   "ok": true,
-  "got": "76"
+  "got": "79"
  },
  {
   "name": "undo: exactly one pop, at most one press, and no other scale animation on the frame",
@@ -27,12 +27,12 @@
  {
   "name": "undo: population — frames with the bump running",
   "ok": true,
-  "got": "36"
+  "got": "37"
  },
  {
   "name": "undo: the frame's rotate is unchanged during it (frames where the lean's own return is not running)",
   "ok": true,
-  "got": "36 frames: [\"1.6deg\"]"
+  "got": "37 frames: [\"1.6deg\"]"
  },
  {
   "name": "undo: the frame's translate is unchanged during it",

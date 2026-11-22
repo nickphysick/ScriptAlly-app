@@ -26,7 +26,7 @@ const C = (s: string) => `${CARD} ${s}`;
 const CP = C("[data-qc1522='composer']");
 const SAVE = C("[data-qc1522='composer'] [data-qc1522='save']");
 const UNDO = C("[data-qc1522='undo']");
-test.setTimeout(240_000);
+test.setTimeout(900_000); // 11 cards × 4 tabs read in one test
 mkdirSync(`${DIR}/ledger`, { recursive: true });
 mkdirSync(`${DIR}/frames`, { recursive: true });
 const seed = (a = "") => execSync(`node tests/e2e/seedQc152.mjs ${a}`, { encoding: "utf8", stdio: "pipe", timeout: 60_000, killSignal: "SIGKILL" });
@@ -153,15 +153,18 @@ async function chipBehaviour(page: Page) {
   const out: { label: string; focusable: boolean; tip: string | null }[] = [];
   const chips = page.locator(C("[data-qc152='thread'] [data-qc152='chip']"));
   const n = await chips.count();
+  /* ⚠️ every call bounded, and the tip dismissed by blurring the chip (its own close path) — a click outside lands on
+     the dim and closes the card, after which an unbounded nth(i) waits for ever (15 min hang, 22 Nov) */
   for (let i = 0; i < n; i++) {
     const ch = chips.nth(i);
-    const label = ((await ch.textContent()) ?? "").trim();
-    const focusable = await ch.evaluate((e) => { (e as HTMLElement).focus(); return document.activeElement === e && (e as HTMLElement).tabIndex >= 0; });
-    await ch.click({ force: true }).catch(() => {});
+    if (!(await page.locator(CARD).count())) break;
+    const label = ((await ch.textContent({ timeout: 3000 }).catch(() => "")) ?? "").trim();
+    const focusable = await ch.evaluate((e) => { (e as HTMLElement).focus(); return document.activeElement === e && (e as HTMLElement).tabIndex >= 0; }, null, { timeout: 3000 }).catch(() => false);
+    await ch.click({ force: true, timeout: 3000 }).catch(() => {});
     await page.waitForTimeout(150);
-    const tip = await page.locator("[data-qc152='tip']").first().textContent({ timeout: 800 }).catch(() => null);
-    out.push({ label, focusable, tip: tip ? tip.trim() : null });
-    await page.mouse.click(4, 4); await page.waitForTimeout(100);
+    const tip = await page.evaluate(() => { const t = document.querySelector<HTMLElement>("[data-qc152='tip']"); if (!t) return null; const cs = getComputedStyle(t); return cs.display === "none" || cs.visibility === "hidden" || cs.opacity === "0" ? null : (t.textContent ?? "").trim(); });
+    out.push({ label, focusable, tip });
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur()); await page.waitForTimeout(100);
   }
   return out;
 }
@@ -204,17 +207,19 @@ if (TAG !== "before" && run("1")) test("QC164-1/2/3/8/9 · strip name and track,
       const st = band.querySelector<HTMLElement>("[data-qc164='status']");
       const nodes = [...band.querySelectorAll<HTMLElement>("[data-qc164='track'] [data-qc153='node']")];
       const cur = nodes.findIndex((n) => n.dataset.state === "cur");
-      const curBox = cur >= 0 ? nodes[cur].getBoundingClientRect() : null;
-      const curSvg = cur >= 0 ? nodes[cur].querySelector("svg")?.getBoundingClientRect() : null;
-      const other = nodes.find((n, i) => i !== cur)?.querySelector("svg")?.getBoundingClientRect();
+      /* ⚠️ layout sizes, never bounding boxes: the panel leans (~1.6°), so every rect of the frame reads too big */
+      const px = (e: Element | null | undefined) => (e ? parseFloat(getComputedStyle(e).width) : 0);
+      const curBox = cur >= 0 ? { width: nodes[cur].offsetWidth, height: nodes[cur].offsetHeight } : null;
+      const curSvg = cur >= 0 ? { width: px(nodes[cur].querySelector("svg")) } : null;
+      const other = { width: px(nodes.find((n, i) => i !== cur)?.querySelector("svg")) };
       return {
         word: band.querySelector("[data-qc152='band-word']")?.textContent ?? null, label: st?.getAttribute("aria-label") ?? null, role: st?.getAttribute("role") ?? null,
         bandText: band.textContent ?? "", nodes: nodes.length, cur, ended: !!band.querySelector(".qc153-trk.is-ended"),
         curDisc: curBox ? `${Math.round(curBox.width)}x${Math.round(curBox.height)}` : "", curSvg: curSvg ? Math.round(curSvg.width) : 0, otherSvg: other ? Math.round(other.width) : 0,
-        bandH: Math.round(band.getBoundingClientRect().height),
+        bandH: band.offsetHeight,
         pill: !!r.querySelector("[data-qc152='pill']"), day: r.querySelector(".qc152-agent [data-qc164='day']")?.textContent ?? null,
         dayInBand: /Day \d/.test(band.textContent ?? ""),
-        btns: [...band.querySelectorAll<HTMLElement>(".qc152-x")].map((b) => `${Math.round(b.getBoundingClientRect().width)}x${Math.round(b.getBoundingClientRect().height)}`),
+        btns: [...band.querySelectorAll<HTMLElement>(".qc152-x")].map((b) => `${b.offsetWidth}x${b.offsetHeight}`),
       };
     }, CARD);
     L1.check(`${id}: the strip names the status "${name}"`, s.word === name, String(s.word));
@@ -230,7 +235,7 @@ if (TAG !== "before" && run("1")) test("QC164-1/2/3/8/9 · strip name and track,
     /* L8 — the writer's bubbles white; the agent's their stage band (a holding reply white) */
     const bx = await page.evaluate((card) => [...document.querySelectorAll<HTMLElement>(`${card} [data-qc152='thread'] > [data-qc152='msg']`)].map((m) => ({
       side: m.dataset.side, status: m.dataset.status ?? "", kind: m.dataset.kind ?? "", bg: getComputedStyle(m.querySelector<HTMLElement>("[data-qc152='bubble']")!).backgroundColor,
-      quote: m.querySelector<HTMLElement>("[data-qc152='quote']") ? (() => { const q = m.querySelector<HTMLElement>("[data-qc152='quote']")!; const cs = getComputedStyle(q); return { text: q.textContent ?? "", clamp: cs.webkitLineClamp || (cs as unknown as Record<string, string>).lineClamp, h: q.getBoundingClientRect().height, lh: parseFloat(cs.lineHeight), rule: cs.borderLeftWidth + " " + cs.borderLeftColor }; })() : null,
+      quote: m.querySelector<HTMLElement>("[data-qc152='quote']") ? (() => { const q = m.querySelector<HTMLElement>("[data-qc152='quote']")!; const cs = getComputedStyle(q); const cl = q.cloneNode(true) as HTMLElement; cl.querySelectorAll(".qc152-tsp").forEach((x) => x.remove()); return { text: cl.textContent ?? "", clamp: cs.webkitLineClamp || (cs as unknown as Record<string, string>).lineClamp, h: q.offsetHeight, lh: parseFloat(cs.lineHeight), rule: cs.borderLeftWidth + " " + cs.borderLeftColor }; })() : null,
     })), CARD);
     for (const [i, b] of bx.entries()) {
       if (b.side === "me") L8.check(`${id} #${i}: the writer's bubble is white`, b.bg === "rgb(255, 255, 255)", b.bg);
@@ -286,7 +291,7 @@ if (TAG !== "before" && run("6")) test("QC164-6/7 · footer and drawer buttons 4
     if (!(await openCard(page, id))) continue;
     const b = await page.evaluate((card) => {
       const r = document.querySelector<HTMLElement>(card)!;
-      const box = (e: Element) => { const cs = getComputedStyle(e); return `${Math.round(e.getBoundingClientRect().height)}/${cs.borderTopLeftRadius}`; };
+      const box = (e: Element) => { const cs = getComputedStyle(e); return `${(e as HTMLElement).offsetHeight}/${cs.borderTopLeftRadius}`; };
       return { btn: [...r.querySelectorAll(".qc152-rbtn")].map(box), rf: [...r.querySelectorAll(".qc152-rf")].map((e) => getComputedStyle(e).borderTopLeftRadius) };
     }, CARD);
     L6.check(`${id}: footer buttons 40 high, radius 10`, b.btn.length > 0 && b.btn.every((x) => x === "40/10px"), b.btn.join(","));
@@ -305,7 +310,7 @@ if (TAG !== "before" && run("6")) test("QC164-6/7 · footer and drawer buttons 4
   await page.locator(C("[data-qc152='reply-btn']")).click();
   await page.locator(CP).waitFor({ timeout: 8000 });
   await page.waitForTimeout(500); await mutate(page);
-  const db = await page.evaluate((cp) => [...document.querySelectorAll(`${cp} .qc1522-btn`)].map((e) => `${Math.round(e.getBoundingClientRect().height)}/${getComputedStyle(e).borderTopLeftRadius}`), CP);
+  const db = await page.evaluate((cp) => [...document.querySelectorAll(`${cp} .qc1522-btn`)].map((e) => `${(e as HTMLElement).offsetHeight}/${getComputedStyle(e).borderTopLeftRadius}`), CP);
   L6.check("the drawer's buttons 40 high, radius 10", db.length > 0 && db.every((x) => x === "40/10px"), db.join(","));
   await page.keyboard.press("Escape"); await page.waitForTimeout(400);
   L6.done(8); L7.done(8);
@@ -324,19 +329,24 @@ if (TAG !== "before" && run("10")) test("QC164-10 · after a save the toast's bo
   const ok = await page.locator(UNDO).waitFor({ timeout: 30_000 }).then(() => true, () => false);
   L.check("population: the save landed (Undo offered)", ok, "");
   await page.waitForTimeout(1600); await mutate(page); await page.waitForTimeout(100);
+  /* ⚠️ in the card's own layout space (offsets within .qc152-in, the thread's scroll taken off), never bounding boxes:
+     the panel leans ~1.6°, so a rect of the frame is a rotated box's envelope and overlaps what it does not touch */
   const g = await page.evaluate((card) => {
     const r = document.querySelector<HTMLElement>(card)!;
-    const t = r.querySelector<HTMLElement>("[data-qc1522='toast']");
+    const inn = r.querySelector<HTMLElement>(".qc152-in")!;
+    const body = inn.querySelector<HTMLElement>(":scope > [data-qc152='body']")!;
+    const t = inn.querySelector<HTMLElement>(":scope > [data-qc1522='toast']");
+    const foot = inn.querySelector<HTMLElement>(":scope > :is([data-qc152='reply'], .qc152-rb)");
     const msgs = [...r.querySelectorAll<HTMLElement>("[data-qc152='thread'] > [data-qc152='msg']")];
-    const last = msgs[msgs.length - 1]?.querySelector("[data-qc152='bubble']");
-    const body = r.querySelector<HTMLElement>("[data-qc152='body']")!.getBoundingClientRect();
-    const foot = r.querySelector<HTMLElement>("[data-qc152='reply']")?.getBoundingClientRect() ?? null;
-    const box = (e: Element | null | undefined) => (e ? e.getBoundingClientRect() : null);
-    const tb = box(t), lb = box(last), card0 = r.getBoundingClientRect();
-    return { tb: tb && { x: tb.x, y: tb.y, w: tb.width, h: tb.height }, lb: lb && { x: lb.x, y: lb.y, w: lb.width, h: lb.height }, body: { y: body.y, b: body.bottom }, foot: foot && { y: foot.y }, cw: card0.width, text: t?.textContent ?? "" };
+    const last = msgs[msgs.length - 1]?.querySelector<HTMLElement>("[data-qc152='bubble']") ?? null;
+    const top = (e: HTMLElement) => { let y = 0; for (let x: HTMLElement | null = e; x && x !== inn; x = x.offsetParent as HTMLElement | null) y += x.offsetTop; return y; };
+    const lbTop = last ? top(last) - (body.contains(last) ? body.scrollTop : 0) : null;
+    return {
+      tb: t && { y: t.offsetTop, h: t.offsetHeight, w: t.offsetWidth }, lb: last && { y: lbTop!, h: last.offsetHeight },
+      body: { y: body.offsetTop, b: body.offsetTop + body.offsetHeight }, foot: foot && { y: foot.offsetTop }, cw: inn.offsetWidth, text: t?.textContent ?? "",
+    };
   }, CARD);
-  const meet = !!g.tb && !!g.lb && !(g.tb.x + g.tb.w <= g.lb.x || g.lb.x + g.lb.w <= g.tb.x || g.tb.y + g.tb.h <= g.lb.y || g.lb.y + g.lb.h <= g.tb.y);
-  L.check("the toast's box does not meet the last bubble's", !!g.tb && !!g.lb && !meet, JSON.stringify({ tb: g.tb, lb: g.lb }));
+  L.check("the toast's box does not meet the last bubble's (the bubble ends above the toast)", !!g.tb && !!g.lb && g.lb.y + g.lb.h <= g.tb.y + 0.5, JSON.stringify({ tb: g.tb, lb: g.lb }));
   L.check("the toast sits below the thread's box and above the footer", !!g.tb && g.tb.y >= g.body.b - 0.5 && (!g.foot || g.tb.y + g.tb.h <= g.foot.y + 0.5), JSON.stringify({ tb: g.tb, body: g.body, foot: g.foot }));
   L.check("the toast is full width (within the card's inner frame)", !!g.tb && g.tb.w >= g.cw - 40, `${g.tb?.w} of ${g.cw}`);
   await page.screenshot({ path: `${DIR}/frames/${TAG}-1512-after-save.png` });

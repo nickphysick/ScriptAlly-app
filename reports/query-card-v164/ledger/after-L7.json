@@ -1,0 +1,272 @@
+[
+ {
+  "name": "population: the base's chip behaviour was recorded (QC164_TAG=before)",
+  "ok": true,
+  "got": "11"
+ },
+ {
+  "name": "q152-agent: as many material items as the base had chips (1)",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "q152-agent · \"Covering letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-agent · \"Covering letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Covering letterWhat you sent with the query. | base Covering letterWhat you sent with the query."
+ },
+ {
+  "name": "q152-quiet: as many material items as the base had chips (1)",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "q152-quiet · \"Covering letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-quiet · \"Covering letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Covering letterWhat you sent with the query. | base Covering letterWhat you sent with the query."
+ },
+ {
+  "name": "q152-materials: as many material items as the base had chips (1)",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "q152-materials · \"Covering letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-materials · \"Covering letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Covering letterWhat you sent with the query. | base Covering letterWhat you sent with the query."
+ },
+ {
+  "name": "q152-undated: as many material items as the base had chips (3)",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "q152-undated · \"Query letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-undated · \"Query letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Query letterQuery letter | base Query letterQuery letter"
+ },
+ {
+  "name": "q152-undated · \"Synopsis\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-undated · \"Synopsis\": the press shows what the chip's did",
+  "ok": true,
+  "got": "SynopsisSynopsis | base SynopsisSynopsis"
+ },
+ {
+  "name": "q152-undated · \"10 pages\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-undated · \"10 pages\": the press shows what the chip's did",
+  "ok": true,
+  "got": "10 pages10 pages | base 10 pages10 pages"
+ },
+ {
+  "name": "q152-fullreq: as many material items as the base had chips (3)",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "q152-fullreq · \"Covering letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-fullreq · \"Covering letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Covering letterWhat you sent with the query. | base Covering letterWhat you sent with the query."
+ },
+ {
+  "name": "q152-fullreq · \"Full manuscript\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-fullreq · \"Full manuscript\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Full manuscriptFull manuscript | base Full manuscriptFull manuscript"
+ },
+ {
+  "name": "q152-fullreq · \"Synopsis\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-fullreq · \"Synopsis\": the press shows what the chip's did",
+  "ok": true,
+  "got": "SynopsisSynopsis | base SynopsisSynopsis"
+ },
+ {
+  "name": "q152-long: as many material items as the base had chips (1)",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "q152-long · \"Covering letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-long · \"Covering letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Covering letterWhat you sent with the query. | base Covering letterWhat you sent with the query."
+ },
+ {
+  "name": "q152-rr: as many material items as the base had chips (3)",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "q152-rr · \"Query letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-rr · \"Query letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Query letterQuery letter | base Query letterQuery letter"
+ },
+ {
+  "name": "q152-rr · \"Synopsis\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-rr · \"Synopsis\": the press shows what the chip's did",
+  "ok": true,
+  "got": "SynopsisSynopsis | base SynopsisSynopsis"
+ },
+ {
+  "name": "q152-rr · \"10 pages\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-rr · \"10 pages\": the press shows what the chip's did",
+  "ok": true,
+  "got": "10 pages10 pages | base 10 pages10 pages"
+ },
+ {
+  "name": "q152-offer: as many material items as the base had chips (1)",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "q152-offer · \"Covering letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-offer · \"Covering letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Covering letterWhat you sent with the query. | base Covering letterWhat you sent with the query."
+ },
+ {
+  "name": "q152-closed: as many material items as the base had chips (1)",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "q152-closed · \"Covering letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-closed · \"Covering letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Covering letterWhat you sent with the query. | base Covering letterWhat you sent with the query."
+ },
+ {
+  "name": "q152-passed: as many material items as the base had chips (3)",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "q152-passed · \"Query letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-passed · \"Query letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Query letterQuery letter | base Query letterQuery letter"
+ },
+ {
+  "name": "q152-passed · \"Synopsis\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-passed · \"Synopsis\": the press shows what the chip's did",
+  "ok": true,
+  "got": "SynopsisSynopsis | base SynopsisSynopsis"
+ },
+ {
+  "name": "q152-passed · \"10 pages\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-passed · \"10 pages\": the press shows what the chip's did",
+  "ok": true,
+  "got": "10 pages10 pages | base 10 pages10 pages"
+ },
+ {
+  "name": "q152-withdrew: as many material items as the base had chips (3)",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "q152-withdrew · \"Query letter\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-withdrew · \"Query letter\": the press shows what the chip's did",
+  "ok": true,
+  "got": "Query letterQuery letter | base Query letterQuery letter"
+ },
+ {
+  "name": "q152-withdrew · \"Synopsis\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-withdrew · \"Synopsis\": the press shows what the chip's did",
+  "ok": true,
+  "got": "SynopsisSynopsis | base SynopsisSynopsis"
+ },
+ {
+  "name": "q152-withdrew · \"10 pages\": focusable",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "q152-withdrew · \"10 pages\": the press shows what the chip's did",
+  "ok": true,
+  "got": "10 pages10 pages | base 10 pages10 pages"
+ }
+]

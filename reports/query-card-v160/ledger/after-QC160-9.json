@@ -7,12 +7,12 @@
  {
   "name": "on Undo: some frame shows the leaving toast with opacity strictly between 0 and 1",
   "ok": true,
-  "got": "[1,1,1,1,1,1,1,1,1,1,1,1]"
+  "got": "[0.0503367,0.151903,0.294925,0.444742,0.575375,0.682341,0.767144,0.833682,0.885134,0.924821,0.954473,0.975589]"
  },
  {
   "name": "on Undo: it is invisible by 400ms, and the live toast gone",
   "ok": true,
-  "got": "ghost from 388ms; []"
+  "got": "ghost from 1038ms; []"
  },
  {
   "name": "on Undo: the leaving copy is removed by 1s",
@@ -27,7 +27,7 @@
  {
   "name": "timed out: some frame shows it leaving, opacity strictly between 0 and 1",
   "ok": true,
-  "got": "[1,1,0.990009,0.962689,0.921485,0.868135,0.804908,0.732285,0.651568,0.563484,0.468572,0.367827]"
+  "got": "[1,1,0.962723,0.921531,0.868191,0.804974,0.732359,0.651649,0.563571,0.469254,0.367927,0.260979]"
  },
  {
   "name": "timed out: the live toast is gone",

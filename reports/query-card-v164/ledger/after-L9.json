@@ -1,0 +1,57 @@
+[
+ {
+  "name": "q152-agent: no words stored, no quote element",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "q152-quiet: no words stored, no quote element",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "q152-materials: no words stored, no quote element",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "q152-undated: no words stored, no quote element",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "q152-fullreq: no words stored, no quote element",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "q152-long: no words stored, no quote element",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "q152-offer: no words stored, no quote element",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "q152-closed: no words stored, no quote element",
+  "ok": true,
+  "got": "0"
+ },
+ {
+  "name": "q152-passed: the stored words are shown in curly quotes",
+  "ok": true,
+  "got": "“Beautifully written, but I didn’t fall for it quite enough.”"
+ },
+ {
+  "name": "q152-passed: clamped to four lines, with the 2px rule",
+  "ok": true,
+  "got": "4 · 41 / 20.3 · 2px rgba(28, 19, 15, 0.22)"
+ },
+ {
+  "name": "q152-withdrew: no words stored, no quote element",
+  "ok": true,
+  "got": "0"
+ }
+]

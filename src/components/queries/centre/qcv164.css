@@ -87,4 +87,6 @@
 .qc152[data-qc164] .qc152-in > :is(.qc152-rb, .qc1522-cp, [data-qc152='reply']) { order: 2; }
 .qc152[data-qc164] .qc152-in > :is(.qc1522-burst, .qc152-pop) { order: 3; }
 @keyframes qc164Toast { from { opacity: 0; transform: translateY(10px); } }
-@media (prefers-reduced-motion: reduce) { .qc152[data-qc164] .qc152-in > .qc1522-toast { animation: none; } }
+/* reduced motion: the toast arrives still, and the writer's white paper lands without qcv152card's 0.15s shadow fade
+   (a save changes the bubble's shadow from the draft's to the paper's — QC160-10) */
+@media (prefers-reduced-motion: reduce) { .qc152[data-qc164] .qc152-in > .qc1522-toast { animation: none; } .qc152[data-qc164] .qc152-bx { transition: none; } }

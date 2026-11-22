@@ -243,13 +243,25 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   useEffect(() => { setUnfold(false); }, [r.id]);
   useLayoutEffect(() => { if (!built.has(r.id)) { built.add(r.id); setBuildId(r.id); } else setBuildId(null); }, [r.id]);
 
-  /* the thread opens scrolled to the end, on every query and every return to Tracking */
+  /* the thread opens scrolled to the end, on every query and every return to Tracking.
+     v164 — ⚠️ not when the only change is the thread LOSING a step (an undo): v160's fold is still drawing the step that
+     left, and with the toast now in the layout the thread's box is a row shorter, so the fold's last frames overflow it
+     and a scroll to the end jumps the bubbles above by 10px for two frames (QC160-7, 22 Nov). The fold shrinks in place. */
+  const lastScroll = useRef<{ k: string; n: number } | null>(null);
   useLayoutEffect(() => {
     const el = bodyRef.current;
+    const k = `${r.id}|${p.tab}|${!!p.composer}|${p.draft?.status}|${p.draft?.kind}`, was = lastScroll.current;
+    lastScroll.current = { k, n: thread.length };
+    if (was && was.k === k && thread.length < was.n) return;
     if (el && p.tab === "tracking") el.scrollTop = el.scrollHeight;
     else if (el) el.scrollTop = 0;
-    /* v164 — the toast takes its own row above the footer, so the thread's box shortens: it stays at its end */
-  }, [r.id, p.tab, thread.length, !!p.composer, p.draft?.status, p.draft?.kind, !!p.toast]);
+  }, [r.id, p.tab, thread.length, !!p.composer, p.draft?.status, p.draft?.kind]);
+  /* v164 — the toast takes its own row above the footer, so the thread's box shortens when it arrives: the thread stays
+     at its end (only on arriving — on leaving, the box grows and nothing needs to move) */
+  useLayoutEffect(() => {
+    const el = bodyRef.current;
+    if (el && p.toast && p.tab === "tracking") el.scrollTop = el.scrollHeight;
+  }, [!!p.toast]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { tip.hide(); }, [r.id, p.tab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   /* a chip's tip closes on any click elsewhere */

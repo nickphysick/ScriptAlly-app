@@ -1,0 +1,167 @@
+[
+ {
+  "name": "q152-agent: four steps, the current at step 1",
+  "ok": true,
+  "got": "4 nodes · cur 0 · \"Queried, step 1 of 4\""
+ },
+ {
+  "name": "q152-agent: live: the track is not ended",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "q152-agent: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ },
+ {
+  "name": "q152-quiet: four steps, the current at step 1",
+  "ok": true,
+  "got": "4 nodes · cur 0 · \"Queried, step 1 of 4\""
+ },
+ {
+  "name": "q152-quiet: live: the track is not ended",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "q152-quiet: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ },
+ {
+  "name": "q152-materials: four steps, the current at step 2",
+  "ok": true,
+  "got": "4 nodes · cur 1 · \"Partial requested, step 2 of 4\""
+ },
+ {
+  "name": "q152-materials: live: the track is not ended",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "q152-materials: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ },
+ {
+  "name": "q152-undated: four steps, the current at step 2",
+  "ok": true,
+  "got": "4 nodes · cur 1 · \"Partial sent, step 2 of 4\""
+ },
+ {
+  "name": "q152-undated: live: the track is not ended",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "q152-undated: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ },
+ {
+  "name": "q152-fullreq: four steps, the current at step 3",
+  "ok": true,
+  "got": "4 nodes · cur 2 · \"Full requested, step 3 of 4\""
+ },
+ {
+  "name": "q152-fullreq: live: the track is not ended",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "q152-fullreq: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ },
+ {
+  "name": "q152-long: four steps, the current at step 3",
+  "ok": true,
+  "got": "4 nodes · cur 2 · \"Full sent, step 3 of 4\""
+ },
+ {
+  "name": "q152-long: live: the track is not ended",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "q152-long: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ },
+ {
+  "name": "q152-rr: four steps, the current at step 3",
+  "ok": true,
+  "got": "4 nodes · cur 2 · \"Revise & resubmit, step 3 of 4\""
+ },
+ {
+  "name": "q152-rr: live: the track is not ended",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "q152-rr: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ },
+ {
+  "name": "q152-offer: four steps, the current at step 4",
+  "ok": true,
+  "got": "4 nodes · cur 3 · \"Offer, step 4 of 4\""
+ },
+ {
+  "name": "q152-offer: live: the track is not ended",
+  "ok": true,
+  "got": "false"
+ },
+ {
+  "name": "q152-offer: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ },
+ {
+  "name": "q152-closed: four steps, the current at step 1",
+  "ok": true,
+  "got": "4 nodes · cur 0 · \"Passed\""
+ },
+ {
+  "name": "q152-closed: closed: the track is ended",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "q152-closed: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ },
+ {
+  "name": "q152-passed: four steps, the current at step 3",
+  "ok": true,
+  "got": "4 nodes · cur 2 · \"Passed\""
+ },
+ {
+  "name": "q152-passed: closed: the track is ended",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "q152-passed: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ },
+ {
+  "name": "q152-withdrew: four steps, the current at step 1",
+  "ok": true,
+  "got": "4 nodes · cur 0 · \"Withdrawn\""
+ },
+ {
+  "name": "q152-withdrew: closed: the track is ended",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "q152-withdrew: the current mark 22px on a 30px disc; the others 16px",
+  "ok": true,
+  "got": "30x30 · 22 · 16"
+ }
+]
