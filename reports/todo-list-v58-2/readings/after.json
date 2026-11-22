@@ -1,0 +1,790 @@
+{
+ "load-1512": {
+  "trayW": 394.4,
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "title": "Send Marcus your full",
+    "titleLines": 1,
+    "fig": "155 days waiting"
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "title": "Send Ana your full",
+    "titleLines": 1,
+    "fig": "95 days waiting"
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "title": "Send David your partial",
+    "titleLines": 1,
+    "fig": "95 days waiting"
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "title": "Send Rachel your partial",
+    "titleLines": 1,
+    "fig": "95 days waiting"
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "title": "Answer Tom’s offer",
+    "titleLines": 1,
+    "fig": "92 days since it came in"
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "title": "Send Clara your partial",
+    "titleLines": 1,
+    "fig": ""
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "title": "Send Tobias your full",
+    "titleLines": 1,
+    "fig": "73 days waiting"
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "title": "Send Marcus your partial",
+    "titleLines": 1,
+    "fig": ""
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "title": "Send Imogen your full",
+    "titleLines": 1,
+    "fig": "70 days waiting"
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "title": "Send Edda your partial",
+    "titleLines": 1,
+    "fig": "71 days waiting"
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "title": "Send Theo your full",
+    "titleLines": 1,
+    "fig": "64 days waiting"
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "title": "Send Jonathan your full",
+    "titleLines": 1,
+    "fig": ""
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "title": "Answer Noah’s offer",
+    "titleLines": 2,
+    "fig": "95 days since it came in"
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "title": "Send Ottoline your full",
+    "titleLines": 1,
+    "fig": ""
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "title": "Send Marcus your partial",
+    "titleLines": 1,
+    "fig": "76 days waiting"
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "title": "Send Iris your revision",
+    "titleLines": 1,
+    "fig": "147 days waiting"
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "title": "Nudge Marcus",
+    "titleLines": 1,
+    "fig": "79 days since your reminder"
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "title": "Nudge Tom",
+    "titleLines": 1,
+    "fig": "79 days since your reminder"
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "title": "Nudge Imogen",
+    "titleLines": 1,
+    "fig": "65 days since your reminder"
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "title": "Nudge Alasdair",
+    "titleLines": 2,
+    "fig": "49 days since your reminder"
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "title": "Nudge Wren",
+    "titleLines": 1,
+    "fig": "49 days past expected"
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "title": "Nudge Hester",
+    "titleLines": 1,
+    "fig": "41 days since your reminder"
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "title": "Nudge Devendra",
+    "titleLines": 1,
+    "fig": "38 days past expected"
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "title": "Nudge Douglas",
+    "titleLines": 1,
+    "fig": "33 days past expected"
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "title": "Nudge Mira",
+    "titleLines": 1,
+    "fig": "22 days past expected"
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "title": "Rosalind’s gone quiet",
+    "titleLines": 1,
+    "fig": "462 days quiet"
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "title": "Mira’s gone quiet",
+    "titleLines": 1,
+    "fig": "256 days quiet"
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "title": "Imogen’s gone quiet",
+    "titleLines": 1,
+    "fig": "244 days quiet"
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "title": "Devendra’s gone quiet",
+    "titleLines": 1,
+    "fig": "235 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "title": "Elinor’s gone quiet",
+    "titleLines": 1,
+    "fig": "174 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "title": "Tom’s gone quiet",
+    "titleLines": 1,
+    "fig": "174 days quiet"
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "title": "Sam’s gone quiet",
+    "titleLines": 1,
+    "fig": "141 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "title": "Ana’s gone quiet",
+    "titleLines": 1,
+    "fig": "126 days quiet"
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "title": "Tobias’ gone quiet",
+    "titleLines": 1,
+    "fig": "122 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "title": "Peter’s gone quiet",
+    "titleLines": 1,
+    "fig": "121 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "title": "Tom’s gone quiet",
+    "titleLines": 1,
+    "fig": "118 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "title": "Joan’s gone quiet",
+    "titleLines": 1,
+    "fig": "116 days quiet"
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "title": "Priya’s gone quiet",
+    "titleLines": 1,
+    "fig": "111 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "title": "Rachel’s gone quiet",
+    "titleLines": 1,
+    "fig": "110 days quiet"
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "title": "Elinor’s gone quiet",
+    "titleLines": 1,
+    "fig": "106 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "title": "Cormac’s gone quiet",
+    "titleLines": 1,
+    "fig": "103 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "title": "Bea’s gone quiet",
+    "titleLines": 1,
+    "fig": "95 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "title": "Rufus’ gone quiet",
+    "titleLines": 1,
+    "fig": "95 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "title": "David’s gone quiet",
+    "titleLines": 1,
+    "fig": "92 days quiet"
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "title": "Tamsin’s gone quiet",
+    "titleLines": 1,
+    "fig": "61 days quiet"
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "title": "Chase the Blaine partial",
+    "titleLines": 2,
+    "fig": "60 days past its date"
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "title": "Reread the O'Rourke pages before Thursday",
+    "titleLines": 2,
+    "fig": "53 days past its date"
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "title": "Read chapters 1–3 aloud",
+    "titleLines": 2,
+    "fig": "38 days past its date"
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "title": "Comp idea: the lighthouse keeper one. Check its publication year",
+    "titleLines": 2,
+    "fig": "37 days past its date"
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "title": "Zz td51 probe task-zztd51i3mvd0hg51",
+    "titleLines": 2,
+    "fig": "35 days past its date"
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "title": "Zz td51 probe task-zztd51i3mvgv7nze",
+    "titleLines": 2,
+    "fig": "33 days past its date"
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "title": "Book a one-to-one at the writing festival",
+    "titleLines": 2,
+    "fig": "30 days past its date"
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "title": "Update the bio paragraph",
+    "titleLines": 2,
+    "fig": "27 days past its date"
+   }
+  ]
+ },
+ "wraps-1512": {
+  "wraps": 10,
+  "of": 53,
+  "trayW": 394.4
+ },
+ "load-1280": {
+  "trayW": 340,
+  "rows": [
+   {
+    "key": "task-full-seed-pkgq-3",
+    "kind": "send",
+    "title": "Send Marcus your full",
+    "titleLines": 1,
+    "fig": "155 days waiting"
+   },
+   {
+    "key": "task-full-seed-query-9",
+    "kind": "send",
+    "title": "Send Ana your full",
+    "titleLines": 1,
+    "fig": "95 days waiting"
+   },
+   {
+    "key": "task-partial-seed-query-20",
+    "kind": "send",
+    "title": "Send David your partial",
+    "titleLines": 2,
+    "fig": "95 days waiting"
+   },
+   {
+    "key": "task-partial-seed-query-7",
+    "kind": "send",
+    "title": "Send Rachel your partial",
+    "titleLines": 2,
+    "fig": "95 days waiting"
+   },
+   {
+    "key": "task-offer-cv25-q-08",
+    "kind": "offer",
+    "title": "Answer Tom’s offer",
+    "titleLines": 2,
+    "fig": "92 days since it came in"
+   },
+   {
+    "key": "task-partial-cv25-q-06",
+    "kind": "send",
+    "title": "Send Clara your partial",
+    "titleLines": 1,
+    "fig": ""
+   },
+   {
+    "key": "task-full-rj-dupe",
+    "kind": "send",
+    "title": "Send Tobias your full",
+    "titleLines": 1,
+    "fig": "73 days waiting"
+   },
+   {
+    "key": "task-partial-cv25-q-07",
+    "kind": "send",
+    "title": "Send Marcus your partial",
+    "titleLines": 1,
+    "fig": ""
+   },
+   {
+    "key": "task-full-rj-send",
+    "kind": "send",
+    "title": "Send Imogen your full",
+    "titleLines": 1,
+    "fig": "70 days waiting"
+   },
+   {
+    "key": "task-partial-msv12-q-3",
+    "kind": "send",
+    "title": "Send Edda your partial",
+    "titleLines": 1,
+    "fig": "71 days waiting"
+   },
+   {
+    "key": "task-full-msv12-q-4",
+    "kind": "send",
+    "title": "Send Theo your full",
+    "titleLines": 1,
+    "fig": "64 days waiting"
+   },
+   {
+    "key": "task-full-cv25-q-09",
+    "kind": "send",
+    "title": "Send Jonathan your full",
+    "titleLines": 1,
+    "fig": ""
+   },
+   {
+    "key": "task-offer-seed-query-12",
+    "kind": "offer",
+    "title": "Answer Noah’s offer",
+    "titleLines": 2,
+    "fig": "95 days since it came in"
+   },
+   {
+    "key": "task-full-seed-cal-passed865-q",
+    "kind": "send",
+    "title": "Send Ottoline your full",
+    "titleLines": 1,
+    "fig": ""
+   },
+   {
+    "key": "task-partial-cor-move-a",
+    "kind": "send",
+    "title": "Send Marcus your partial",
+    "titleLines": 2,
+    "fig": "76 days waiting"
+   },
+   {
+    "key": "task-rr-seed-query-11",
+    "kind": "rr",
+    "title": "Send Iris your revision",
+    "titleLines": 1,
+    "fig": "147 days waiting"
+   },
+   {
+    "key": "task-nudge-seed-query-3",
+    "kind": "nudge",
+    "title": "Nudge Marcus",
+    "titleLines": 2,
+    "fig": "79 days since your reminder"
+   },
+   {
+    "key": "task-nudge-seed-query-2",
+    "kind": "nudge",
+    "title": "Nudge Tom",
+    "titleLines": 1,
+    "fig": "79 days since your reminder"
+   },
+   {
+    "key": "task-nudge-thin-q-remind",
+    "kind": "nudge",
+    "title": "Nudge Imogen",
+    "titleLines": 2,
+    "fig": "65 days since your reminder"
+   },
+   {
+    "key": "task-nudge-seed-cal-bang-q",
+    "kind": "nudge",
+    "title": "Nudge Alasdair",
+    "titleLines": 2,
+    "fig": "49 days since your reminder"
+   },
+   {
+    "key": "task-nudge-seed-cal-near-q",
+    "kind": "nudge",
+    "title": "Nudge Wren",
+    "titleLines": 1,
+    "fig": "49 days past expected"
+   },
+   {
+    "key": "task-nudge-seed-cal-soon-q",
+    "kind": "nudge",
+    "title": "Nudge Hester",
+    "titleLines": 2,
+    "fig": "41 days since your reminder"
+   },
+   {
+    "key": "task-nudge-thin-q-gap-solo",
+    "kind": "nudge",
+    "title": "Nudge Devendra",
+    "titleLines": 1,
+    "fig": "38 days past expected"
+   },
+   {
+    "key": "task-nudge-msv12-q-2",
+    "kind": "nudge",
+    "title": "Nudge Douglas",
+    "titleLines": 1,
+    "fig": "33 days past expected"
+   },
+   {
+    "key": "task-nudge-msv12-q-1",
+    "kind": "nudge",
+    "title": "Nudge Mira",
+    "titleLines": 1,
+    "fig": "22 days past expected"
+   },
+   {
+    "key": "task-no-res-close-thin-q-close",
+    "kind": "quiet",
+    "title": "Rosalind’s gone quiet",
+    "titleLines": 1,
+    "fig": "462 days quiet"
+   },
+   {
+    "key": "task-no-res-close-msv12-q-7",
+    "kind": "quiet",
+    "title": "Mira’s gone quiet",
+    "titleLines": 1,
+    "fig": "256 days quiet"
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-3",
+    "kind": "quiet",
+    "title": "Imogen’s gone quiet",
+    "titleLines": 1,
+    "fig": "244 days quiet"
+   },
+   {
+    "key": "task-no-res-close-thin-q-cohort-4",
+    "kind": "quiet",
+    "title": "Devendra’s gone quiet",
+    "titleLines": 1,
+    "fig": "235 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-a",
+    "kind": "quiet",
+    "title": "Elinor’s gone quiet",
+    "titleLines": 1,
+    "fig": "174 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-ms2-b",
+    "kind": "quiet",
+    "title": "Tom’s gone quiet",
+    "titleLines": 1,
+    "fig": "174 days quiet"
+   },
+   {
+    "key": "task-no-res-close-cor-undo",
+    "kind": "quiet",
+    "title": "Sam’s gone quiet",
+    "titleLines": 1,
+    "fig": "141 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-9",
+    "kind": "quiet",
+    "title": "Ana’s gone quiet",
+    "titleLines": 1,
+    "fig": "126 days quiet"
+   },
+   {
+    "key": "task-no-res-close-thin-q-chase",
+    "kind": "quiet",
+    "title": "Tobias’ gone quiet",
+    "titleLines": 1,
+    "fig": "122 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-10",
+    "kind": "quiet",
+    "title": "Peter’s gone quiet",
+    "titleLines": 1,
+    "fig": "121 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-2",
+    "kind": "quiet",
+    "title": "Tom’s gone quiet",
+    "titleLines": 1,
+    "fig": "118 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-5",
+    "kind": "quiet",
+    "title": "Joan’s gone quiet",
+    "titleLines": 1,
+    "fig": "116 days quiet"
+   },
+   {
+    "key": "task-no-res-close-cor-move-b",
+    "kind": "quiet",
+    "title": "Priya’s gone quiet",
+    "titleLines": 1,
+    "fig": "111 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-pkgq-7",
+    "kind": "quiet",
+    "title": "Rachel’s gone quiet",
+    "titleLines": 1,
+    "fig": "110 days quiet"
+   },
+   {
+    "key": "task-no-res-close-cor-pair",
+    "kind": "quiet",
+    "title": "Elinor’s gone quiet",
+    "titleLines": 1,
+    "fig": "106 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-cal-passed20-q",
+    "kind": "quiet",
+    "title": "Cormac’s gone quiet",
+    "titleLines": 1,
+    "fig": "103 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-22",
+    "kind": "quiet",
+    "title": "Bea’s gone quiet",
+    "titleLines": 1,
+    "fig": "95 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-23",
+    "kind": "quiet",
+    "title": "Rufus’ gone quiet",
+    "titleLines": 1,
+    "fig": "95 days quiet"
+   },
+   {
+    "key": "task-no-res-close-seed-query-8",
+    "kind": "quiet",
+    "title": "David’s gone quiet",
+    "titleLines": 1,
+    "fig": "92 days quiet"
+   },
+   {
+    "key": "task-no-res-close-rj-nudge",
+    "kind": "quiet",
+    "title": "Tamsin’s gone quiet",
+    "titleLines": 1,
+    "fig": "61 days quiet"
+   },
+   {
+    "key": "seed-cal-carried",
+    "kind": "own",
+    "title": "Chase the Blaine partial",
+    "titleLines": 2,
+    "fig": "60 days past its date"
+   },
+   {
+    "key": "seed-cal-task",
+    "kind": "own",
+    "title": "Reread the O'Rourke pages before Thursday",
+    "titleLines": 2,
+    "fig": "53 days past its date"
+   },
+   {
+    "key": "cbseed-t1",
+    "kind": "own",
+    "title": "Read chapters 1–3 aloud",
+    "titleLines": 2,
+    "fig": "38 days past its date"
+   },
+   {
+    "key": "cbseed-n5",
+    "kind": "own",
+    "title": "Comp idea: the lighthouse keeper one. Check its publication year",
+    "titleLines": 2,
+    "fig": "37 days past its date"
+   },
+   {
+    "key": "task-zztd51i3mvd0hg51",
+    "kind": "own",
+    "title": "Zz td51 probe task-zztd51i3mvd0hg51",
+    "titleLines": 2,
+    "fig": "35 days past its date"
+   },
+   {
+    "key": "task-zztd51i3mvgv7nze",
+    "kind": "own",
+    "title": "Zz td51 probe task-zztd51i3mvgv7nze",
+    "titleLines": 2,
+    "fig": "33 days past its date"
+   },
+   {
+    "key": "cbseed-t2",
+    "kind": "own",
+    "title": "Book a one-to-one at the writing festival",
+    "titleLines": 2,
+    "fig": "30 days past its date"
+   },
+   {
+    "key": "cbseed-t3",
+    "kind": "own",
+    "title": "Update the bio paragraph",
+    "titleLines": 2,
+    "fig": "27 days past its date"
+   }
+  ]
+ },
+ "wraps-1280": {
+  "wraps": 17,
+  "of": 53,
+  "trayW": 340
+ },
+ "opens-1512": {
+  "nudge-window": {
+   "key": "task-nudge-seed-cal-near-q",
+   "title": "Nudge Wren",
+   "row": "49 days past expected",
+   "chip": "49 days past expected"
+  },
+  "nudge-reminder": {
+   "key": "task-nudge-seed-query-3",
+   "title": "Nudge Marcus",
+   "row": "79 days since your reminder",
+   "chip": "79 days since your reminder"
+  },
+  "offer": {
+   "key": "task-offer-cv25-q-08",
+   "title": "Answer Tom’s offer",
+   "row": "92 days since it came in",
+   "chip": "92 days since it came in"
+  },
+  "own": {
+   "key": "seed-cal-carried",
+   "title": "Chase the Blaine partial",
+   "row": "60 days past its date",
+   "chip": "60 days past its date"
+  }
+ }
+}
