@@ -118,6 +118,8 @@ export interface DashPrefs {
   gsClosed: Record<string, true>;
   /** Dashboard v2.2 (Part E): the founding writer band folded to its slim strip */
   foundingFolded: boolean;
+  /** consistency wrap-up v1: `getting_started_done` has been logged for this account (it is logged once per account) */
+  gsDone: boolean;
 }
 
 const ROOT = "todoPrefs.dash";
@@ -128,7 +130,7 @@ export const seg = (id: string): string => id.replace(/[^A-Za-z0-9_-]/g, "_");
 /** Total reader: whatever is stored (or nothing), a well-formed value comes back. */
 export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): DashPrefs {
   const raw = ((user?.todoPrefs as { dash?: Record<string, unknown> } | undefined)?.dash ?? {}) as {
-    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>; tour?: unknown; reminder?: unknown; gsClosed?: Record<string, unknown>; foundingFolded?: unknown;
+    start?: Record<string, unknown>; tip?: unknown; wins?: Record<string, unknown>; gsHidden?: Record<string, unknown>; tour?: unknown; reminder?: unknown; gsClosed?: Record<string, unknown>; foundingFolded?: unknown; gsDone?: unknown;
   };
   const start: Record<string, LegacyStart> = {};
   for (const [k, v] of Object.entries(raw.start ?? {})) if (v === "yes" || v === "notyet") start[k] = v;
@@ -147,6 +149,7 @@ export function dashPrefsOf(user: Pick<User, "todoPrefs"> | null | undefined): D
     gsClosed: flags(raw.gsClosed),
     /* Dashboard v3, Phase 2: folded to the slim strip BY DEFAULT — only a stored `false` (the chevron opened it) unfolds */
     foundingFolded: raw.foundingFolded !== false,
+    gsDone: raw.gsDone === true,
   };
 }
 
@@ -211,6 +214,19 @@ export const gsHideWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsHidden.${
 /** Dashboard v2.2 (Part E): one dotted leaf, so it never wipes a sibling under `todoPrefs.dash`. */
 export const foundingFoldWrite = (folded: boolean): UserPaths => ({ [`${ROOT}.foundingFolded`]: folded });
 export const gsCloseWrite = (msId: string): UserPaths => ({ [`${ROOT}.gsClosed.${seg(msId)}`]: true });
+
+/** consistency wrap-up v1: the account has had its `getting_started_done` (once per account, whichever book it was on) */
+export const gsDoneWrite = (): UserPaths => ({ [`${ROOT}.gsDone`]: true });
+
+/**
+ * consistency wrap-up v1 (Nick, 22 Nov): `getting_started_done` is logged when the LAST Getting started row ticks — a row
+ * not done on the previous pass (`prev`, the rows done then; null before the first loaded pass, whose rows are not ticks)
+ * is done now, and with it every row is done.
+ */
+export function lastStepTicked(prev: ReadonlySet<string> | null, rows: readonly { key: string; done: boolean }[]): boolean {
+  if (!prev || rows.length === 0 || !rows.every((r) => r.done)) return false;
+  return rows.some((r) => !prev.has(r.key));
+}
 
 /* ── first visit v2, Part H: the finish line ── */
 export const FINISH = {

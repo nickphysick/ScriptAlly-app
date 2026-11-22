@@ -39,7 +39,7 @@ import { F1Feed } from "../f1/F1Feed";
 import { agentCoverage, isPreQuery } from "../../../lib/dashFirstUse";
 import { AgentsHoop } from "../v60/Dash60Left";
 import { openNewAgentCard } from "../../../lib/agentCardStore";
-import { foundingFoldWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
+import { foundingFoldWrite, gsSlot, REMINDER_NOT_NOW, REMINDER_YES, shouldAskReminder, answerFor, answerWrite, bookLabel, gsRowDone, dashState, seg, dashPrefsOf, gsHideWrite, gsDoneWrite, lastStepTicked, gsOrder, legacyStartOf, pathAfter, type AnswerChoice, type AnswerWrite, type DashState, type GsLink, type StartPath } from "../../../lib/dashFirstVisit";
 import type { UserPaths } from "../../../lib/userPaths";
 import { SetUpCard } from "../fv1/SetUpCard";
 import { GsSheet } from "../fv2/GsSheet";
@@ -291,10 +291,17 @@ export const Dash58: React.FC<Dash58Props> = ({
   /* Part I: a Getting started row ticking while this page is mounted. The rows already done when it first loads are not
      ticks; nor is anything in the ghost or the example. */
   const gsSeen = useRef<Set<string> | null>(null);
+  const gsDoneSent = useRef(false);
   useEffect(() => {
     if (loading || example || !currentUser || rootRef.current?.closest(".im-ghost")) return;
     const done = new Set(gsRows.filter((r) => r.done).map((r) => r.key));
     if (gsSeen.current) for (const k of done) if (!gsSeen.current.has(k)) logEvent(currentUser.id, "getting_started_step", path ?? "ready", { step: k });
+    /* consistency wrap-up v1: the tick that finishes the list is set-up done — logged once per account (todoPrefs.dash.gsDone) */
+    if (onPrefs && !prefs.gsDone && !gsDoneSent.current && lastStepTicked(gsSeen.current, gsRows)) {
+      gsDoneSent.current = true;
+      void onPrefs(gsDoneWrite());
+      logEvent(currentUser.id, "getting_started_done", path ?? "ready");
+    }
     gsSeen.current = done;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loading, gsRows]);
