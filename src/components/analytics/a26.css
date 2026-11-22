@@ -89,7 +89,7 @@
 .a26-page .a26-go:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 /* the filled button (day one) */
 .a26-page .a26-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 18px; border: 0; border-radius: 10px; background: var(--a26-navy); color: #fff; font: 600 16px/1 var(--a26-serif); white-space: nowrap; }
-.a26-page .a26-btn:hover { background: var(--sp-anthracite-hov); }
+.a26-page .a26-btn:hover { background: var(--sp-navy-hover); }
 .a26-page .a26-btn:focus-visible { outline: 2px solid var(--sp-anthracite); outline-offset: 2px; }
 
 /* the grey foot of a card */
