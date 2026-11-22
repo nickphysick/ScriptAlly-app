@@ -13,6 +13,8 @@
  *    the save writes; "Nudge {first}" is said only where a nudge date is written; "I'll suggest closing it" only where a
  *    "Consider closing" plan is. TD53 L4 compares the dates with the save's own writes.
  */
+import { materialIconKind } from "../../../lib/materialIcon";
+import { SAMPLE_MATERIAL } from "../../../lib/sentSample";
 import React from "react";
 import { deleteField } from "firebase/firestore";
 import { QueryStatus, SubmissionMethod, type Agent, type Manuscript, type Query } from "../../../types";
@@ -138,9 +140,10 @@ function sendFlow(ctx: FlowCtx): Flow {
   const req = requestSample(q);
   const asked = kind === "full" ? "Full manuscript" : kind === "rr" ? "Revised manuscript" : req ? capFirst(sampleName(req)) : "The partial";
   const opts: TileOpt<string>[] = [
-    { k: "Query letter", label: "Query letter", doc: true },
-    { k: "Synopsis", label: "Synopsis", doc: true, sub: q.requestSynopsis ? `${t.first} asked for one` : undefined },
-    { k: asked, label: asked, doc: true, sub: `What ${t.first} asked for` },
+    { k: "Query letter", label: "Query letter", doc: true, mat: "letter" },
+    { k: "Synopsis", label: "Synopsis", doc: true, mat: "synopsis", sub: q.requestSynopsis ? `${t.first} asked for one` : undefined },
+    /* the partial by its unit (none stated: pages); the full / revised manuscript keeps the DOC mark */
+    { k: asked, label: asked, doc: true, mat: kind === "partial" ? (req && req.unit !== "none" ? materialIconKind({ material: SAMPLE_MATERIAL, type: req.unit }) : "pages") : null, sub: `What ${t.first} asked for` },
   ];
   const mats = (A.mats as string[] | undefined) ?? [];
   const versions = [...(ms?.bookVersions ?? [])].reverse();
@@ -589,7 +592,7 @@ function materialsFlow(ctx: FlowCtx): Flow {
   return {
     questions: [{
       key: "mats", title: `What went to ${t.first}?`, hint: "Tick everything that went with this query.", answered: picked.length > 0, summary: andList(names),
-      body: <Tiles name={`What went to ${t.first}`} multi opts={MAT_TILES.map(([k, l]) => ({ k, label: l, doc: true }))} value={picked}
+      body: <Tiles name={`What went to ${t.first}`} multi opts={MAT_TILES.map(([k, l]) => ({ k, label: l, doc: true, mat: k === "queryLetter" ? "letter" : k === "synopsis" ? "synopsis" : "pages" }))} value={picked}
         onPick={(k) => set({ mats: picked.includes(k) ? picked.filter((x) => x !== k) : [...picked, k] })} />,
     }],
     sentence: <>You sent {t.first} your <b>{andList(names.map((n) => n.toLowerCase()))}</b>.</>,

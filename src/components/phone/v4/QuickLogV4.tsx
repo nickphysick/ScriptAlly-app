@@ -13,6 +13,9 @@
  * ⚠️ "Log query" CALLS THE SAME WRITER WITH THE SAME RECORD AS v3's JOURNEY (`saveLog`, field for field — PA4-7), with
  *    v3's Undo (the snapshot restore). v3's step-by-step log screens retire.
  */
+import { MaterialIcon } from "../../shared/MaterialIcon";
+import { materialIconKind } from "../../../lib/materialIcon";
+import { SAMPLE_MATERIAL } from "../../../lib/sentSample";
 import React, { useMemo, useRef, useState } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
 import { SampleSpecPicker } from "../../materials/SampleSpecPicker";
@@ -160,9 +163,9 @@ export const QuickLogV4: React.FC<{ agentId?: string }> = ({ agentId }) => {
     } else if (line === "mats") {
       title = "What went with it?";
       body = (<>
-        <Opt sq on={on("queryLetter")} onClick={() => toggle("queryLetter")} t="Query letter" pa3="mat" data={{ "data-k": "queryLetter" }} />
-        <Opt sq on={on("synopsis")} onClick={() => toggle("synopsis")} t="Synopsis" pa3="mat" data={{ "data-k": "synopsis" }} />
-        <Opt sq on={on("sample")} onClick={() => toggle("sample")} t="Opening sample" s={on("sample") ? sampleWords(s) : null} pa3="mat" data={{ "data-k": "sample" }} />
+        <Opt sq g={<MaterialIcon kind="letter" size={20} />} on={on("queryLetter")} onClick={() => toggle("queryLetter")} t="Query letter" pa3="mat" data={{ "data-k": "queryLetter" }} />
+        <Opt sq g={<MaterialIcon kind="synopsis" size={20} />} on={on("synopsis")} onClick={() => toggle("synopsis")} t="Synopsis" pa3="mat" data={{ "data-k": "synopsis" }} />
+        <Opt sq g={<MaterialIcon kind={(s.unit !== "none" ? materialIconKind({ material: SAMPLE_MATERIAL, type: s.unit }) : null) ?? "pages"} size={20} />} on={on("sample")} onClick={() => toggle("sample")} t="Opening sample" s={on("sample") ? sampleWords(s) : null} pa3="mat" data={{ "data-k": "sample" }} />
         {on("sample") ? (
           <div className="pa3-spk" data-pa3="sample-picker" data-pa4="sample-picker">
             <SampleSpecPicker rows={rows} onChange={setRows} join="and" mode="sent" idPrefix="pa4s" />

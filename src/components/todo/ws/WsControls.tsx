@@ -7,6 +7,7 @@
  *
  * ⚠️ NOTHING HERE IS PRE-ANSWERED except the date, which opens on today and says so under the question.
  */
+import { MaterialIcon, type MaterialIconKind } from "../../shared/MaterialIcon";
 import React, { useEffect, useRef, useState } from "react";
 import { replyWords } from "../../../lib/todoWs";
 import { DOW, MONL, addDays, dayDiff } from "../../../lib/queryActions/dates";
@@ -26,7 +27,9 @@ export const QUIET_MARK = <svg viewBox="0 0 24 24" width="20" height="20" fill="
 /** v53 (D4): housekeeping's row icon, one small form for every job */
 export const FORM = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#7a7066" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true" data-tws="form-mark"><rect x="6" y="4" width="12" height="16" rx="2" /><path d="M9 9h6M9 13h6" strokeLinecap="round" /></svg>;
 
-export interface TileOpt<K extends string> { k: K; label: string; sub?: string; suggested?: boolean; disabled?: boolean; doc?: boolean }
+/** `doc`: the tile names a material. `mat` (Material icons v1): which drawing; absent on a doc tile = the full / revised
+ *  manuscript, which keeps the DOC mark */
+export interface TileOpt<K extends string> { k: K; label: string; sub?: string; suggested?: boolean; disabled?: boolean; doc?: boolean; mat?: MaterialIconKind | null }
 
 /**
  * v53 (D5) — THE DESK DRAWS ITS ANSWERS AS TILES. The desktop desk wraps its questions in `DeskTiles`; inside it every
@@ -48,8 +51,8 @@ export function Tiles<K extends string>({ opts, value, onPick, multi = false, na
       {opts.map((o) => (
         <button key={o.k} type="button" className="tws-tile" data-tws-opt={o.k} disabled={o.disabled}
           {...(multi ? { "aria-pressed": on(o.k) } : { role: "radio", "aria-checked": on(o.k) })} onClick={() => onPick(o.k)}>
-          {desk ? <span className="tws-ti2" aria-hidden="true">{on(o.k) ? TICK : o.doc ? DOC : multi ? BOX : RING}</span>
-            : o.doc ? <span className="tws-di">{DOC}</span> : null}
+          {desk ? <span className="tws-ti2" aria-hidden="true">{on(o.k) ? TICK : o.mat ? <MaterialIcon kind={o.mat} /> : o.doc ? DOC : multi ? BOX : RING}</span>
+            : o.doc ? <span className="tws-di">{o.mat ? <MaterialIcon kind={o.mat} /> : DOC}</span> : null}
           <span className="tws-tn">{o.label}{o.suggested ? <i className="tws-sugg">Suggested</i> : null}{o.sub ? <small>{o.sub}</small> : null}</span>
           {desk ? null : <span className="tws-tk">{TICK}</span>}
         </button>

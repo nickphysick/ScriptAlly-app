@@ -17,6 +17,9 @@
  * ⚠️ THE VIEW IS THE WRITER'S CHOICE ONCE THEY MAKE ONE (D9): `todoPrefs.batchView`, one leaf on the user doc (the map is
  *    unconstrained, so no rules change). With none, under 8 queries is one at a time and 8 or more is the table.
  */
+import { MaterialIcon } from "../../shared/MaterialIcon";
+import { materialIconKind } from "../../../lib/materialIcon";
+import { SAMPLE_MATERIAL } from "../../../lib/sentSample";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { deleteField } from "firebase/firestore";
 import type { Agent, Query } from "../../../types";
@@ -31,7 +34,6 @@ import { SentSamplePicker } from "../../materials/SentSamplePicker";
 import { TICK } from "./WsControls";
 
 const MENTOR = "/images/todo/mentor.webp";
-const DOC = <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M6 3.5h5.5L14.5 6.5V16.5H6z" /><path d="M11.5 3.5v3h3" /></svg>;
 const firstOf = (a: Agent | undefined): string => (a?.name ?? "").trim().split(/\s+/)[0] || (a?.agency ?? "").trim() || "the agent";
 /** "3 Mar 2024" */
 const dayOf = (ms: number | null): string => { if (ms == null) return "no date"; const d = new Date(ms); return `${d.getDate()} ${MON[d.getMonth()]} ${d.getFullYear()}`; };
@@ -169,7 +171,7 @@ export const WsBatch54: React.FC<WsBatch54Props> = ({ queue, queries, agents, wo
           {BATCH_MATS.map((m) => (
             <button key={m.k} type="button" className="tws-tile" data-tws-opt={m.k} aria-pressed={on(m.k)}
               onClick={() => put(r.id, { ...a, [m.k]: !on(m.k) } as BatchAnswer)}>
-              <span className="tws-ti2" aria-hidden="true">{on(m.k) ? TICK : DOC}</span>
+              <span className="tws-ti2" aria-hidden="true">{on(m.k) ? TICK : <MaterialIcon kind={m.k === "ql" ? "letter" : m.k === "syn" ? "synopsis" : (a.s && a.s.unit !== "none" ? materialIconKind({ material: SAMPLE_MATERIAL, type: a.s.unit }) : null) ?? "pages"} />}</span>
               <span className="tws-tn">{m.label}{m.k === "samp" && a.samp ? <small data-tws54="tile-note">{sampleName(a.s)}</small> : null}</span>
             </button>
           ))}

@@ -29,6 +29,7 @@
  * state, and is memoised. `split()` is idempotent because StrictMode runs the effect twice in dev.
  */
 
+import { MaterialIcon } from "../components/shared/MaterialIcon";
 import React, { useEffect, useLayoutEffect, useRef } from "react";
 import "./heroCard.css";
 import { HERO_PHONE_MS, HERO_PHONE_MS_FRONT, HERO_PHONE_TAGS, PHONE_STORY } from "./landingCopy";
@@ -52,9 +53,6 @@ const PILL: Record<string, string> = {
 const AGENT = { bg: "#e2e6e0", fg: "#4d524a", pill: "#e6e9e4", word: "With the agent" };
 const YOU = { bg: "#f5e6df", fg: "#7c3a2a", pill: "#f5e6df", word: "With you" };
 
-const DocIcon = () => <svg width="11" height="12" viewBox="0 0 11 12" fill="none" stroke="currentColor" strokeWidth="1.1"><rect x="1" y="1" width="9" height="10" rx=".5" /><path d="M3 4h5M3 6h5M3 8h3" /></svg>;
-const SynIcon = () => <svg width="10" height="12" viewBox="0 0 10 12" fill="none" stroke="currentColor" strokeWidth="1.1"><path d="M1 1h5l3 3v7H1z" /><path d="M6 1v3h3" /></svg>;
-const PagesIcon = () => <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.1"><path d="M4 1h7v8H4z" /><path d="M1 3v8h7" /></svg>;
 const BellIcon = ({ w = 11, h = 12, sw = 1.8, stroke = "currentColor" }: { w?: number; h?: number; sw?: number; stroke?: string }) =>
   <svg width={w} height={h} viewBox="0 0 20 20" fill="none" stroke={stroke} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round"><path d="M5.5 14h9l-1.3-1.8V9a3.2 3.2 0 0 0-6.4 0v3.2zM8.6 16.2h2.8" /></svg>;
 
@@ -660,12 +658,12 @@ const FrontCard: React.FC<{ phone: boolean }> = ({ phone }) => (
             <li className="mk-lc-step">
               <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" /></svg>
               <span className="mk-lc-t">Query sent <i>by email</i></span><span className="mk-lc-d">14 MAR</span>
-              <span className="mk-lc-att"><span><DocIcon />Letter v3</span><span><SynIcon />Synopsis</span><span><PagesIcon />15 pages</span></span>
+              <span className="mk-lc-att"><span><MaterialIcon kind="letter" />Letter v3</span><span><MaterialIcon kind="synopsis" />Synopsis</span><span><MaterialIcon kind="pages" />15 pages</span></span>
             </li>
             <li className="mk-lc-step">
               <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" strokeDasharray="2.2 2.2" /><path d="M10 4.5a5.5 5.5 0 0 1 0 11z" fill="#1c130f" /></svg>
               <span className="mk-lc-t">Partial requested</span><span className="mk-lc-d">18 APR</span>
-              <span className="mk-lc-att"><span><PagesIcon />First 3 chapters</span></span>
+              <span className="mk-lc-att"><span><MaterialIcon kind="chapters" />First 3 chapters</span></span>
             </li>
             <li className="mk-lc-step">
               <svg className="mk-lc-g" width="17" height="17" viewBox="0 0 20 20"><circle cx="10" cy="10" r="7.5" fill="none" stroke="#1c130f" strokeWidth="1.6" /><path d="M10 2.5a7.5 7.5 0 0 1 0 15z" fill="#1c130f" /></svg>

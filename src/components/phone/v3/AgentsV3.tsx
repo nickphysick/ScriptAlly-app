@@ -12,6 +12,7 @@
  *    own save (`useAgentSave().saveDraft`, which runs `commitCardSave`), with its Undo. The duplicate check and the
  *    Also-changes offers are the form's own (`dup`, `alsoChanges`).
  */
+import { MaterialIcon } from "../../shared/MaterialIcon";
 import React, { useMemo, useState } from "react";
 import { useScriptAllyDb } from "../../../lib/db";
 import { useAgentForm } from "../../agents/card/useAgentForm";
@@ -136,7 +137,7 @@ export const AgentFormV3: React.FC<{ editId?: string; name?: string }> = ({ edit
           return (
             <button key={k} type="button" className={`pa3-opt sq${on ? " on" : ""}`} style={{ minHeight: 50 }} aria-pressed={on} data-pa3="want" data-k={k}
               onClick={() => setRows(rows.some((x) => x.key === k) ? rows.map((x) => (x.key === k ? ({ ...x, on: !x.on } as MaterialRow) : x)) : [...rows, k === "queryLetter" ? { key: k, kind: "binary", name: "Query letter", on: true } : { key: k, kind: "binary", name: "Synopsis", on: true, pages: "" }])}>
-              <span className="pa3-tx">{k === "queryLetter" ? "Query letter" : "Synopsis"}</span><span className="pa3-ck"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></span>
+              <MaterialIcon kind={k === "queryLetter" ? "letter" : "synopsis"} size={20} /><span className="pa3-tx">{k === "queryLetter" ? "Query letter" : "Synopsis"}</span><span className="pa3-ck"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" /></svg></span>
             </button>
           );
         })}
