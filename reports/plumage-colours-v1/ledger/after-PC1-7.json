@@ -1,0 +1,167 @@
+[
+ {
+  "name": "query: population non-zero",
+  "ok": true,
+  "got": "4"
+ },
+ {
+  "name": "query: tile #efe6d6, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "query: 1px edge #e0d2bb",
+  "ok": true,
+  "got": "rgb(224, 210, 187) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "query: tile #efe6d6, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "query: 1px edge #e0d2bb",
+  "ok": true,
+  "got": "rgb(224, 210, 187) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "query: tile #efe6d6, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "query: 1px edge #e0d2bb",
+  "ok": true,
+  "got": "rgb(224, 210, 187) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "query: tile #efe6d6, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "query: 1px edge #e0d2bb",
+  "ok": true,
+  "got": "rgb(224, 210, 187) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "agent: population non-zero",
+  "ok": true,
+  "got": "12"
+ },
+ {
+  "name": "agent: tile #b0c1be, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(176, 193, 190) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "agent: 1px edge #96aca9",
+  "ok": true,
+  "got": "rgb(150, 172, 169) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "agent: tile #b0c1be, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(176, 193, 190) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "agent: 1px edge #96aca9",
+  "ok": true,
+  "got": "rgb(150, 172, 169) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "agent: tile #b0c1be, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(176, 193, 190) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "agent: 1px edge #96aca9",
+  "ok": true,
+  "got": "rgb(150, 172, 169) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "agent: tile #b0c1be, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(176, 193, 190) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "agent: 1px edge #96aca9",
+  "ok": true,
+  "got": "rgb(150, 172, 169) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "agent: tile #b0c1be, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(176, 193, 190) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "agent: 1px edge #96aca9",
+  "ok": true,
+  "got": "rgb(150, 172, 169) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "agent (44px): tile #b0c1be, glyph #1c130f",
+  "ok": true,
+  "got": "rgb(176, 193, 190) / rgb(28, 19, 15)"
+ },
+ {
+  "name": "agent (44px): 1px edge #96aca9",
+  "ok": true,
+  "got": "rgb(150, 172, 169) 0px 0px 0px 1px inset"
+ },
+ {
+  "name": "material: population non-zero",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "material: tile #903830, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(144, 56, 48) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "material: tile #903830, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(144, 56, 48) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "material: tile #903830, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(144, 56, 48) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "task: population non-zero",
+  "ok": true,
+  "got": "11"
+ },
+ {
+  "name": "task: tile #2e3f4f, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(46, 63, 79) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "task: tile #2e3f4f, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(46, 63, 79) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "task: tile #2e3f4f, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(46, 63, 79) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "task: tile #2e3f4f, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(46, 63, 79) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "task: tile #2e3f4f, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(46, 63, 79) / rgb(255, 255, 255)"
+ },
+ {
+  "name": "task: tile #2e3f4f, glyph #ffffff",
+  "ok": true,
+  "got": "rgb(46, 63, 79) / rgb(255, 255, 255)"
+ }
+]

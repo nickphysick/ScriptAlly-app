@@ -1,0 +1,202 @@
+[
+ {
+  "name": "Partial Requested: population non-zero",
+  "ok": true,
+  "got": "8"
+ },
+ {
+  "name": "Partial Requested seed-query-7: outline 3px inset #e8c0af",
+  "ok": false,
+  "got": "rgb(232, 192, 175) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Partial Requested seed-query-7: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: outline 3px inset #e8c0af",
+  "ok": false,
+  "got": "rgb(232, 192, 175) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Partial Requested seed-query-20: outline 3px inset #e8c0af",
+  "ok": false,
+  "got": "rgb(232, 192, 175) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Partial Requested seed-query-20: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: outline 3px inset #e8c0af",
+  "ok": false,
+  "got": "rgb(232, 192, 175) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Partial Requested cor-move-a: outline 3px inset #e8c0af",
+  "ok": false,
+  "got": "rgb(232, 192, 175) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Partial Requested cor-move-a: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: outline 3px inset #e8c0af",
+  "ok": false,
+  "got": "rgb(232, 192, 175) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: outline 3px inset #e8c0af",
+  "ok": false,
+  "got": "rgb(232, 192, 175) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: outline 3px inset #e8c0af",
+  "ok": false,
+  "got": "rgb(232, 192, 175) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Full Requested: population non-zero",
+  "ok": true,
+  "got": "8"
+ },
+ {
+  "name": "Full Requested seed-query-9: outline 3px inset #b5b6c0",
+  "ok": false,
+  "got": "rgb(181, 182, 192) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Full Requested seed-query-9: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Full Requested rj-send: outline 3px inset #b5b6c0",
+  "ok": false,
+  "got": "rgb(181, 182, 192) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Full Requested rj-send: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Full Requested cv25-q-09: outline 3px inset #b5b6c0",
+  "ok": false,
+  "got": "rgb(181, 182, 192) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Full Requested cv25-q-09: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: outline 3px inset #b5b6c0",
+  "ok": false,
+  "got": "rgb(181, 182, 192) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: outline 3px inset #b5b6c0",
+  "ok": false,
+  "got": "rgb(181, 182, 192) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Full Requested msv12-q-4: outline 3px inset #b5b6c0",
+  "ok": false,
+  "got": "rgb(181, 182, 192) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Full Requested msv12-q-4: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Full Requested rj-dupe: outline 3px inset #b5b6c0",
+  "ok": false,
+  "got": "rgb(181, 182, 192) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Full Requested rj-dupe: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Full Requested cv25-q-09: outline 3px inset #b5b6c0",
+  "ok": false,
+  "got": "rgb(181, 182, 192) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Full Requested cv25-q-09: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "Revise & Resubmit: population non-zero",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: outline 3px inset #2a3a52",
+  "ok": false,
+  "got": "rgb(42, 58, 82) 0px 0px 0px 2px inset"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: top corners 12px, bottom square",
+  "ok": true,
+  "got": "12px 12px 0px 0px"
+ },
+ {
+  "name": "statuses not with the writer: population non-zero",
+  "ok": true,
+  "got": "78"
+ },
+ {
+  "name": "statuses not with the writer: no outline",
+  "ok": true,
+  "got": "none"
+ },
+ {
+  "name": "R&R's outline is navy",
+  "ok": true,
+  "got": "#2a3a52"
+ }
+]

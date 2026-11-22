@@ -4,11 +4,33 @@
 
 ## Current state
 
+- **Colours (Plumage colours v1, 22 Nov 2026; branch `plumage-colours-v1`, NOT merged):** one table, `src/lib/stageColours.ts`, taken from the mentor hawk's plumage (pack design-refs/plumage-colours-v1/). The band is the STATUS's shade; an outline means the query is with the writer. Section "Plumage colours v1" below has the rules. This supersedes v157's "colour is the stage and nothing else" and its foil offer.
 - Newest build on this line: Query Centre v157 (18 Nov 2026; ref design-refs/query-centre-v157.html; report reports/query-centre-v157/REPORT.md; branch `query-centre-v157`, NOT merged). The grid card is `QcCard154.tsx`, styled by qcv154 → qcv1541 → qcv156 → qcv1561 → qcv157.
 - Stage colours come from one table, `src/lib/stageColours.ts` (band, tint, mark per stage). The grid card reads `band` only; `tint` and `mark` wait for the next pack.
 - Not yet on the slate ladder (they move in the next pack): the stage ring, Birds-eye, the log-a-query slip preview, the pull-out query card, Dashboard, activity feed, Analytics, Contact list, Responses, To-do, phone pages.
 
+## Plumage colours v1 — the band is the status's shade; an outline means it is with the writer (22 Nov 2026)
+
+Pack: design-refs/plumage-colours-v1/ (`plumage-colours-v1.json` is the oracle for every hex). Report: reports/plumage-colours-v1/REPORT.md. Branch `plumage-colours-v1`, NOT merged.
+
+The rules (baked; do not reopen):
+1. Queried `#efe6d6` and Closed `#eceae6` are unchanged.
+2. Partial is the mentor's breast, Full his wing, each in two shades: lighter while requested, deeper once sent. Partial requested `#f1d9cf`, Partial sent `#e8c0af`; Full requested `#d4d4da`, Full sent `#b5b6c0`. Revise & Resubmit and Resubmitted take the Full sent band.
+3. **The offer is the app's navy `#2a3a52`, flat** (Nick's amendment to the pack's gold, 22 Nov). Offer and Signed share it. Its text and marks are the paper `#f4eee5`; every other band's are ink `#1c130f`. Its tint `#d9dce0`, edge / mark / rim `#243247` and rimHi `#aab0ba` are the navy mixed by the pack's own rules for the beak (18% to white; darkened to 86%; 40% to white), locked in stageColours.test.ts. No sheen, foil or gradient on any offer surface.
+4. The with-you outline: Partial requested `#e8c0af`, Full requested `#b5b6c0`, Revise & Resubmit navy `#2a3a52`. 3px, inset (nothing moves), top corners the container's inner radius (its radius less its edge), bottom corners square. Card bands and strips only: the grid card (12px), the slip preview (13px), the slide-out strip (13px), the phone query page band (square), the Responses strip (square, under the mast), Next up's head (12px). Bars, bubbles, chips, discs and chart segments never carry it. A requested query is never quiet, so quiet never carries one.
+5. A surface that knows the status takes `statusBand(status)`; one that knows only the stage takes `STAGE_COLOURS[stage].band`, which is the SENT shade (`bandRequested` is the lighter one).
+6. A status mark is never a stage colour: StatusDot draws ink, or (`tone="inherit"`) the band's ink, so the paper on the navy.
+7. The Next box's navy "needs you" outline is unchanged.
+
+How it is built:
+- `stageColours.ts`: `STAGE_COLOURS` (band, bandRequested, tint, edge, mark, rim, rimHi), `statusBand`, `withYouOutline` / `withYouShadow` / `WITH_YOU_OUTLINE_PX`, `bandInk` / `stageInk` (`OFFER_INK`), `bandBackground(status)` (flat, always), `quietBackground(status)`, `ACCENT_INK` (the paperclip; the offer's is the paper). `OFFER_SHEEN` is deleted.
+- The grid card and the slip set `--tone` (and `--wy`) inline from the table; no stylesheet restates a stage's tone. Birds-eye's current bar takes `barFill` inline. The paperclip accent is the stage's edge with the pack's `accentInk`.
+- Group swatches: Offers navy (flat, no glass, paper count), Materials requested the Partial requested band, a Status group its status's band.
+- Locks: src/lib/stageColours.test.ts (the table against the JSON, statusBand, the outline map, the no-sheen sweep, where the outline is drawn); tests/e2e/pc1.measure.ts PC1-1 … PC1-7 (computed colours on the rendered page). sc1.measure.ts is retired (REPORT.md names what replaced each lock).
+
 ## Query Centre v157 — the slate ladder, the foil offer, centred boxes, gone quiet (18 Nov 2026)
+
+> Its colour rules (1 and 4 below) are superseded by Plumage colours v1, above.
 
 Baked decisions (the pack's; do not reopen):
 1. Colour is the stage and nothing else. Whose move it is never changes a band's colour.

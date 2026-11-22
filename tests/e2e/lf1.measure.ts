@@ -8,7 +8,7 @@
  *
  *   LF1  one panel       both pages render shell/FilterPanel; no Views panel; the head is rgb(42, 58, 82) and reads Filter
  *   LF2  pages differ    /queries: Stage, no splits. /agents: two splits, no Stage, no Your move / Waiting to hear back
- *   LF3  stage colours   each StageLabel's and segment's background = STAGE_COLOURS[stage].band (Offer: the sheen over it)
+ *   LF3  stage colours   each StageLabel's and segment's background = STAGE_COLOURS[stage].band, flat (Plumage colours v1: no sheen)
  *   LF4  nothing arbitrary  /agents: nothing in the panel, bar or applied row on a stage band or tint; both pages: none
  *                        on #e3e8ef / #eef2f7 / #e9eef5; the population is at least 20 elements
  *   LF5  stage writes    Partial → only Partial's statuses in the list, its count, one chip "Partial"; again → cleared
@@ -130,8 +130,8 @@ if (PHASE === "locks") for (const vp of SIZES) {
     L3.check("five labels and at least one segment", bands.filter((b) => b.kind === "label").length === 5 && bands.some((b) => b.kind === "seg"), `${bands.length}`);
     for (const b of bands) {
       const want = rgb(STAGE_COLOURS[b.stage as Stage].band);
-      const sheen = b.stage === "offer" ? b.img.includes("linear-gradient") : b.img === "none";
-      L3.check(`${b.kind} ${b.stage}: background = STAGE_COLOURS.${b.stage}.band${b.stage === "offer" ? " under its sheen" : ""}`, b.bg === want && sheen, `${b.bg} ${b.img.slice(0, 30)}`);
+      const sheen = b.img === "none"; /* Plumage colours v1: every stage flat, the offer too */
+      L3.check(`${b.kind} ${b.stage}: background = STAGE_COLOURS.${b.stage}.band`, b.bg === want && sheen, `${b.bg} ${b.img.slice(0, 30)}`);
     }
     L3.done(6);
 

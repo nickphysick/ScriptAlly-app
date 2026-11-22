@@ -1,0 +1,17 @@
+[
+ {
+  "name": "the agent's Partial requested bubble: population non-zero",
+  "ok": true,
+  "got": "1 of 1"
+ },
+ {
+  "name": "bubble: the Partial requested band (the status the reply set)",
+  "ok": false,
+  "got": "rgb(232, 192, 175)"
+ },
+ {
+  "name": "bubble: no outline, no gradient",
+  "ok": true,
+  "got": "rgb(226, 176, 156) 0px 0px 0px 1px inset / none"
+ }
+]

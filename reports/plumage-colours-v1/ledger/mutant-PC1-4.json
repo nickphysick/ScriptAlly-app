@@ -1,0 +1,362 @@
+[
+ {
+  "name": "bars with a known status: population non-zero",
+  "ok": true,
+  "got": "70 of 70"
+ },
+ {
+  "name": "requested and sent both on the chart",
+  "ok": true,
+  "got": "Queried, Full Sent, Partial Sent, Partial Requested, Revise & Resubmit, Full Requested, Offer"
+ },
+ {
+  "name": "Queried thin-q-close: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-query-22: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried msv12-q-1: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried msv12-q-7: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-query-4: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-query-19: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried thin-q-cohort-2: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried thin-q-cohort-1: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried thin-q-cohort-6: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried thin-q-cohort-3: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried thin-q-cohort-5: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried thin-q-cohort-4: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Full Sent seed-query-10: bar #b5b6c0, flat, no outline",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Queried seed-query-ms2-a: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried rj-nudge: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried thin-q-chase: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Full Sent seed-query-ms2-b: bar #b5b6c0, flat, no outline",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Full Sent cv25-q-10: bar #b5b6c0, flat, no outline",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Partial Sent cv25-q-05: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Queried seed-cal-passed20-q: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-query-6: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-pkgq-1: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-pkgq-2: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-query-5: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Full Sent cor-undo: bar #b5b6c0, flat, no outline",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Queried cor-move-b: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-pkgq-7: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-query-3: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Partial Requested seed-query-7: bar #f1d9cf, flat, no outline",
+  "ok": false,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Queried seed-cal-near-q: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Partial Sent cv25-q-11: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Full Sent seed-pkgq-9: bar #b5b6c0, flat, no outline",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Full Sent seed-query-21: bar #b5b6c0, flat, no outline",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-10: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Full Sent msv12-q-5: bar #b5b6c0, flat, no outline",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Queried thin-q-remind: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Revise & Resubmit seed-query-11: bar #b5b6c0, flat, no outline",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Queried msv12-q-2: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-query-2: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Partial Sent thin-q-gap-solo: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Partial Sent cor-pair: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Partial Sent seed-query-23: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Partial Sent seed-query-8: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Queried probe-dangling-pkg: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried probe-un-noms: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Partial Sent seed-pkgq-4: bar #e8c0af, flat, no outline",
+  "ok": true,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Queried probe-goalstress-today: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried seed-cal-soon-q: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Full Requested seed-query-9: bar #d4d4da, flat, no outline",
+  "ok": false,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Partial Requested cv25-q-06: bar #f1d9cf, flat, no outline",
+  "ok": false,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Partial Requested seed-query-20: bar #f1d9cf, flat, no outline",
+  "ok": false,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Partial Requested msv12-q-3: bar #f1d9cf, flat, no outline",
+  "ok": false,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Full Requested rj-send: bar #d4d4da, flat, no outline",
+  "ok": false,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Full Requested cv25-q-09: bar #d4d4da, flat, no outline",
+  "ok": false,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Partial Requested cor-move-a: bar #f1d9cf, flat, no outline",
+  "ok": false,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Partial Requested cv25-q-07: bar #f1d9cf, flat, no outline",
+  "ok": false,
+  "got": "rgb(232, 192, 175) / none / none"
+ },
+ {
+  "name": "Full Requested seed-pkgq-3: bar #d4d4da, flat, no outline",
+  "ok": false,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Offer seed-query-12: bar #2a3a52, flat, no outline",
+  "ok": true,
+  "got": "rgb(42, 58, 82) / none / none"
+ },
+ {
+  "name": "Full Requested seed-cal-passed865-q: bar #d4d4da, flat, no outline",
+  "ok": false,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Full Requested msv12-q-4: bar #d4d4da, flat, no outline",
+  "ok": false,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Full Requested rj-dupe: bar #d4d4da, flat, no outline",
+  "ok": false,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Offer cv25-q-08: bar #2a3a52, flat, no outline",
+  "ok": true,
+  "got": "rgb(42, 58, 82) / none / none"
+ },
+ {
+  "name": "Queried seed-cal-bang-q: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Full Sent qc150l9-q: bar #b5b6c0, flat, no outline",
+  "ok": true,
+  "got": "rgb(181, 182, 192) / none / none"
+ },
+ {
+  "name": "Queried probe-un-both: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried probe-un-noagent: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried cv25-q-04: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried cv25-q-14: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried cv25-q-13: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ },
+ {
+  "name": "Queried cv25-q-03: bar #efe6d6, flat, no outline",
+  "ok": true,
+  "got": "rgb(239, 230, 214) / none / none"
+ }
+]

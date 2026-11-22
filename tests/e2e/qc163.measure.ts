@@ -9,6 +9,7 @@
  *   QC163_ONLY=F     the frames (reports/query-card-v163/frames/); QC163_ONLY=1,5 runs only those
  */
 import { test, expect, webkit, type Page, type CDPSession } from "@playwright/test";
+import { STAGE_COLOURS } from "../../src/lib/stageColours";
 import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { execSync } from "node:child_process";
 import { liftMotionSuppression, openRoute } from "./measure";
@@ -34,8 +35,9 @@ test.beforeAll(() => { seed(); });
 test.afterAll(() => { seed("--clean"); });
 
 /** the stage colours this pack added (lib/stageColours `rim`), as the browser writes them */
-const HEX = { queried: "#bfa87e", partial: "#6f8fb3", full: "#557aa3", offer: "#c98f8a", closed: "#857e74" } as const;
-const HI = { queried: "#f3ead9", partial: "#d6e1ee", full: "#c5d4e6", offer: "#f6dedb", closed: "#e6e3de" } as const;
+/* Plumage colours v1 — the rim and its light read the one table (they were literals of the slate ladder's) */
+const HEX = Object.fromEntries(Object.entries(STAGE_COLOURS).map(([k, c]) => [k, c.rim])) as Record<keyof typeof STAGE_COLOURS, string>;
+const HI = Object.fromEntries(Object.entries(STAGE_COLOURS).map(([k, c]) => [k, c.rimHi])) as Record<keyof typeof STAGE_COLOURS, string>;
 type St = keyof typeof HEX;
 const rgb = (h: string) => { const n = parseInt(h.slice(1), 16); return `rgb(${n >> 16}, ${(n >> 8) & 255}, ${n & 255})`; };
 const rgbArr = (h: string) => { const n = parseInt(h.slice(1), 16); return [n >> 16, (n >> 8) & 255, n & 255]; };
@@ -356,7 +358,7 @@ if (run("5") || run("6") || run("7")) test("QC163-5/6/7 · save: the light clock
   L5.check("1300ms, opacity 0 → 1 (14%) → 1 (76%) → 0", ls[0]?.dur === 1300 && k.map((x) => x.opacity).join() === "0,1,1,0" && k[1]?.offset === "0.14" && k[2]?.offset === "0.76", JSON.stringify(k));
   const lit = ts.frames.filter((f) => f.anims.some((a) => a.id === "qc163-light"));
   L5.check("with scale 1 1 (not mirrored)", lit.length > 10 && lit.every((f) => f.lightScale === "1 1" || f.lightScale === "1"), JSON.stringify([...new Set(lit.map((f) => f.lightScale))]));
-  L5.check("coloured for the stage moved TO (partial: #6f8fb3 → #d6e1ee)", lit.length > 0 && lit.every((f) => f.lightBg.includes(rgb(HEX.partial)) && f.lightBg.includes(rgb(HI.partial))), lit[0]?.lightBg ?? "");
+  L5.check(`coloured for the stage moved TO (partial: ${HEX.partial} → ${HI.partial})`, lit.length > 0 && lit.every((f) => f.lightBg.includes(rgb(HEX.partial)) && f.lightBg.includes(rgb(HI.partial))), lit[0]?.lightBg ?? "");
   const pop = ts.frames.filter((f) => f.anims.some((a) => a.id === "qc160-bump"));
   const peak = Math.max(...pop.map((f) => f.frame));
   L7.check("save: population — frames with the pop running", pop.length >= 20, String(pop.length));
@@ -375,7 +377,7 @@ if (run("5") || run("6") || run("7")) test("QC163-5/6/7 · save: the light clock
   L6.check("it rotates from 40deg to −320deg (anticlockwise)", ku[0]?.rotate === "40deg" && ku[ku.length - 1]?.rotate === "-320deg", `${ku[0]?.rotate} → ${ku[ku.length - 1]?.rotate}`);
   const litU = tu.frames.filter((f) => f.anims.some((a) => a.id === "qc163-light"));
   L6.check("mirrored: scale −1 1", litU.length > 10 && litU.every((f) => f.lightScale === "-1 1"), JSON.stringify([...new Set(litU.map((f) => f.lightScale))]));
-  L6.check("coloured for the stage returned TO (queried: #bfa87e → #f3ead9)", litU.length > 0 && litU.every((f) => f.lightBg.includes(rgb(HEX.queried)) && f.lightBg.includes(rgb(HI.queried))), litU[0]?.lightBg ?? "");
+  L6.check(`coloured for the stage returned TO (queried: ${HEX.queried} → ${HI.queried})`, litU.length > 0 && litU.every((f) => f.lightBg.includes(rgb(HEX.queried)) && f.lightBg.includes(rgb(HI.queried))), litU[0]?.lightBg ?? "");
   const sink = tu.frames.filter((f) => f.anims.some((a) => a.id === "qc160-bump"));
   L7.check("undo: population — frames with the bump running", sink.length >= 20, String(sink.length));
   L7.check("undo: the bump's keyframes dip to 0.975 (30%), 620ms, none above 1", (() => { const b = animsOf(tu, "qc160-bump")[0]; return b?.dur === 620 && b.kf[1]?.scale === "0.975" && b.kf[1]?.offset === "0.3" && b.kf.every((x) => parseFloat(x.scale) <= 1); })(), JSON.stringify(animsOf(tu, "qc160-bump")[0]?.kf));

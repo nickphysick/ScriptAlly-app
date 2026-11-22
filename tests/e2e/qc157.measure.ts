@@ -16,7 +16,7 @@ import { mkdirSync, readFileSync, writeFileSync, existsSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { resolve } from "node:path";
 import { openRoute } from "./measure";
-import { STAGE_COLOURS, stageOf } from "../../src/lib/stageColours";
+import { statusBand } from "../../src/lib/stageColours";
 
 const PAGE = ".qc151.qc153";
 const PHASE = process.env.SA_PHASE === "before" ? "before" : process.env.SA_PHASE === "ref" ? "ref" : "after";
@@ -135,8 +135,8 @@ test.describe("Query Centre v157", () => {
       for (const c of got) {
         if (seen.has(`${c.status}${c.quiet}`)) continue;
         seen.add(`${c.status}${c.quiet}`);
-        const want = rgb(STAGE_COLOURS[stageOf(c.status)].band);
-        /* a quiet band is a gradient (no colour of its own): its first stop is the stage's band */
+        const want = rgb(statusBand(c.status));
+        /* a quiet band is a gradient (no colour of its own): its first stop is the status's band (Plumage colours v1) */
         const v = c.quiet ? (c.image.match(/rgb\([^)]*\)/)?.[0] ?? "none") : c.color;
         L.check(`${c.status}${c.quiet ? " (quiet)" : ""}: band ${want}`, v === want, `${c.id} ${v}`);
       }
@@ -145,27 +145,8 @@ test.describe("Query Centre v157", () => {
       L.done(6);
     });
 
-    test(`QC157-2 foil — ${w}`, async ({ page }) => {
-      test.skip(PHASE === "ref", "not on the reference");
-      await openQc(page, vp);
-      await letMotion(page);
-      const L = new Ledger(`QC157-2-${vp.width}`);
-      const offer = page.locator(`${PAGE} [data-qc154='card'][data-status='Offer']`).first();
-      const full = page.locator(`${PAGE} [data-qc154='card'][data-status='Full Sent']`).first();
-      L.check("an Offer card and a Full Sent card exist", (await offer.count()) === 1 && (await full.count()) === 1, "");
-      const read = (l: typeof offer) => l.evaluate((c) => { const cs = getComputedStyle(c.querySelector<HTMLElement>("[data-qc154='band']")!); return { image: cs.backgroundImage, size: cs.backgroundSize, x: cs.backgroundPositionX, color: cs.backgroundColor }; });
-      await offer.scrollIntoViewIfNeeded();
-      await page.mouse.move(2, 2); await page.waitForTimeout(900);
-      const rest = await read(offer);
-      L.check("Offer at rest: the gradient, 260% 100%, x 30%", /linear-gradient\(112deg/.test(rest.image) && rest.size.startsWith("260% 100%") && rest.x.startsWith("30%"), JSON.stringify(rest));
-      await offer.locator("[data-qc154='name']").hover(); await page.waitForTimeout(900);
-      const hov = await read(offer);
-      L.check("Offer hovered: x 85%", hov.x.startsWith("85%"), hov.x);
-      const f = await read(full);
-      L.check("a Full Sent card has no gradient", f.image === "none", f.image);
-      if (vp.width === 1512) await offer.screenshot({ path: `${SHOTS}/after-offer-hover-1512.png` });
-      L.done(4);
-    });
+    /* QC157-2 (the offer's foil) is retired by Plumage colours v1: the offer is flat navy, measured by
+       tests/e2e/pc1.measure.ts PC1-3 (no gradient layer, the paper name). */
 
     test(`QC157-3 track — ${w}`, async ({ page }) => {
       test.skip(PHASE === "ref", "not on the reference");
