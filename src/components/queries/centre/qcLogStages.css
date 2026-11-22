@@ -92,7 +92,7 @@
 .laq .laq-sb.is-back { animation: laq-slideb .28s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes laq-slide { from { opacity: 0; transform: translateX(18px); } }
 @keyframes laq-slideb { from { opacity: 0; transform: translateX(-18px); } }
-.laq h2.laq-qh { margin: 0 0 4px; font: 400 22px/1.25 var(--laq-tw) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
+.laq h2.laq-qh { margin: 0 0 4px; font: var(--sp-h-card) !important; font-family: var(--laq-tw) !important; color: var(--laq-ink); letter-spacing: 0; text-transform: none; }
 .laq p.laq-qs { margin: 0 0 16px; font: italic 400 var(--sp-body-size)/1.45 var(--laq-se); color: var(--laq-mut); }
 
 /* big choices */
