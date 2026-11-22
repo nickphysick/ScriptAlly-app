@@ -1,0 +1,207 @@
+[
+ {
+  "name": "nothing: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing/agent: population — editable boxes",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "nothing/agent: population — parts read",
+  "ok": true,
+  "got": "15"
+ },
+ {
+  "name": "nothing/agent #0: hover moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 30,288,93x12→0,0,0x0"
+ },
+ {
+  "name": "nothing/agent #0: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "nothing/agent #0: focus moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 30,288,93x12→0,0,0x0"
+ },
+ {
+  "name": "nothing/agent #1: hover moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 195,288,83x12→0,0,0x0"
+ },
+ {
+  "name": "nothing/agent #1: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "nothing/agent #1: focus moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 195,288,83x12→0,0,0x0"
+ },
+ {
+  "name": "nothing/agent #2: hover moves nothing",
+  "ok": false,
+  "got": "total 357→377; section[asks] 18,357,488x155→18,357,488x175; div[asks-list].qc167-gsw 18,386,488x126→18,386,488x146; span[bar].qc167-g 60,401,176x12→0,0,0x0; span[bar].qc167-g 60,444,139x12→0,0,0x0; span[bar].qc167-g 60,486,213x12→0,0,0x0; button[full-card].qc167-fullc 18,530,488x48→18,550,488x48"
+ },
+ {
+  "name": "nothing/agent #2: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "nothing/agent #2: focus moves nothing",
+  "ok": false,
+  "got": "total 357→377; section[asks] 18,357,488x155→18,357,488x175; div[asks-list].qc167-gsw 18,386,488x126→18,386,488x146; span[bar].qc167-g 60,401,176x12→0,0,0x0; span[bar].qc167-g 60,444,139x12→0,0,0x0; span[bar].qc167-g 60,486,213x12→0,0,0x0; button[full-card].qc167-fullc 18,530,488x48→18,550,488x48"
+ },
+ {
+  "name": "nothing/materials: population — editable boxes",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "nothing/materials: population — parts read",
+  "ok": true,
+  "got": "6"
+ },
+ {
+  "name": "nothing/materials #0: hover moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 76,302,142x12→0,0,0x0"
+ },
+ {
+  "name": "nothing/materials #0: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "nothing/materials #0: focus moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 76,302,142x12→0,0,0x0"
+ },
+ {
+  "name": "nothing/notes: population — parts read",
+  "ok": true,
+  "got": "8"
+ },
+ {
+  "name": "nothing/notes: back at rest, as before",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "pending: the card opened",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "pending/agent: population — editable boxes",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "pending/agent: population — parts read",
+  "ok": true,
+  "got": "15"
+ },
+ {
+  "name": "pending/agent #0: hover moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 30,288,93x12→0,0,0x0"
+ },
+ {
+  "name": "pending/agent #0: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/agent #0: focus moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 30,288,93x12→0,0,0x0"
+ },
+ {
+  "name": "pending/agent #1: hover moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 195,288,83x12→0,0,0x0"
+ },
+ {
+  "name": "pending/agent #1: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/agent #1: focus moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 195,288,83x12→0,0,0x0"
+ },
+ {
+  "name": "pending/agent #2: hover moves nothing",
+  "ok": false,
+  "got": "total 357→377; section[asks] 18,357,488x155→18,357,488x175; div[asks-list].qc167-gsw 18,386,488x126→18,386,488x146; span[bar].qc167-g 60,401,176x12→0,0,0x0; span[bar].qc167-g 60,444,139x12→0,0,0x0; span[bar].qc167-g 60,486,213x12→0,0,0x0; button[full-card].qc167-fullc 18,530,488x48→18,550,488x48"
+ },
+ {
+  "name": "pending/agent #2: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/agent #2: focus moves nothing",
+  "ok": false,
+  "got": "total 357→377; section[asks] 18,357,488x155→18,357,488x175; div[asks-list].qc167-gsw 18,386,488x126→18,386,488x146; span[bar].qc167-g 60,401,176x12→0,0,0x0; span[bar].qc167-g 60,444,139x12→0,0,0x0; span[bar].qc167-g 60,486,213x12→0,0,0x0; button[full-card].qc167-fullc 18,530,488x48→18,550,488x48"
+ },
+ {
+  "name": "pending/materials: population — editable boxes",
+  "ok": true,
+  "got": "2"
+ },
+ {
+  "name": "pending/materials: population — parts read",
+  "ok": true,
+  "got": "11"
+ },
+ {
+  "name": "pending/materials #0: hover moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 76,302,142x12→0,0,0x0"
+ },
+ {
+  "name": "pending/materials #0: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/materials #0: focus moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 76,302,142x12→0,0,0x0"
+ },
+ {
+  "name": "pending/materials #1: hover moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 76,394,113x12→0,0,0x0"
+ },
+ {
+  "name": "pending/materials #1: hover shows the words",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/materials #1: focus moves nothing",
+  "ok": false,
+  "got": "span[bar].qc167-g 76,394,113x12→0,0,0x0"
+ },
+ {
+  "name": "pending/notes: population — parts read",
+  "ok": true,
+  "got": "8"
+ },
+ {
+  "name": "pending/notes: back at rest, as before",
+  "ok": true,
+  "got": ""
+ }
+]

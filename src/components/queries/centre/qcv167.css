@@ -1,0 +1,131 @@
+/* Query card v167 (design-refs/query-card-v167/query-card-v167.html) — the Agent, Materials and Notes tabs: ghost bars,
+   the slimmer Agent tab, and the profile drawers.
+   ⚠️ Bar and words share ONE reserved space: the words are absolutely placed over the bar and only their opacity
+      changes. Never `display`, never a conditional render (v167 lock 1). Nothing here is under 12px. */
+
+/* ── the ghost bar ───────────────────────────────────────────────────────────────────────────────────────────── */
+.qc152 .qc167-gw { display: block; position: relative; min-height: 22px; min-width: 0; }
+.qc152 .qc167-g { display: block; height: 12px; width: var(--w, 60%); border-radius: 999px; background: #ebe5db; margin: 5px 0; transition: opacity 0.18s ease; }
+.qc152 .qc167-g.dim { opacity: 0.6; }
+.qc152 .qc167-ga {
+  position: absolute; left: 0; top: 50%; translate: 0 -50%; opacity: 0; pointer-events: none; transition: opacity 0.18s ease;
+  font: 400 14.5px/22px var(--sp-serif) !important; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap;
+}
+.qc152 [data-qc167-ed] { cursor: pointer; outline: none; transition: box-shadow 0.18s ease; }
+.qc152 [data-qc167-ed]:hover, .qc152 [data-qc167-ed]:focus-visible { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 [data-qc167-ed]:hover .qc167-g, .qc152 [data-qc167-ed]:focus-visible .qc167-g { opacity: 0; }
+.qc152 [data-qc167-ed]:hover .qc167-ga, .qc152 [data-qc167-ed]:focus-visible .qc167-ga { opacity: 1; }
+
+/* ── the Agent tab's three tiles: a fixed 86px, the value 15.5px on one line ─────────────────────────────────── */
+.qc152 .nx-box.qc167-tile { position: relative; height: 86px; min-height: 86px; overflow: hidden; }
+.qc152 .nx-box.qc167-tile b { font-size: 15.5px !important; line-height: 22px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.qc152 .nx-box.qc167-tile i { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qc152 .nx-box.qc167-tile b.qc167-notyet { font: italic 400 15px/22px var(--sp-serif) !important; color: #8a8076; }
+.qc152 .nx-box.qc167-tile .qc167-pn { position: absolute; right: 9px; top: 9px; display: grid; color: #2a3a52; opacity: 0; transition: opacity 0.18s ease; }
+.qc152 .nx-box.qc167-tile:hover .qc167-pn, .qc152 .nx-box.qc167-tile:focus-visible .qc167-pn { opacity: 1; }
+.qc152 .nx-box.qc167-tile.is-ed { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+
+/* "What {first} asks for": the sub-heading, the list (one box that edits it), or three ghost rows */
+.qc152 .nx h4[data-qc167="asks-head"] { font: var(--sp-h-small) !important; }
+.qc152 .qc167-gsw.is-ed { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .qc167-gsw { position: relative; border-radius: 10px; }
+.qc152 .qc167-gl li .qc167-g { flex: none; }
+.qc152 .qc167-gsw .nx-tick, .qc152 .qc167-gsw .qc167-g { transition: opacity 0.18s ease; }
+.qc152 .qc167-gso {
+  position: absolute; inset: 0; display: grid; place-items: center; opacity: 0; pointer-events: none; transition: opacity 0.18s ease;
+  font: 400 14.5px var(--sp-serif) !important; color: #2a3a52; text-decoration: underline; text-underline-offset: 3px;
+}
+.qc152 .qc167-gsw:hover .qc167-g, .qc152 .qc167-gsw:focus-visible .qc167-g, .qc152 .qc167-gsw:hover .nx-tick, .qc152 .qc167-gsw:focus-visible .nx-tick { opacity: 0.25; }
+.qc152 .qc167-gsw:hover .qc167-gso, .qc152 .qc167-gsw:focus-visible .qc167-gso { opacity: 1; }
+
+/* "{first}'s full card": the one row to the agent's card */
+.qc152 .qc167-fullc {
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 11px; min-height: 48px; padding: 6px 14px 6px 8px;
+  border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #e6ddd0; font: 600 15px var(--sp-serif) !important; color: #1c130f; transition: box-shadow 0.18s ease;
+}
+.qc152 .qc167-fullc:hover, .qc152 .qc167-fullc:focus-visible { box-shadow: inset 0 0 0 1.5px #2a3a52; outline: none; }
+.qc152 .qc167-fullc .qc167-ar { margin-left: auto; color: #2a3a52; display: grid; }
+/* the agent's seal: initials on navy (12px: nothing smaller, where the ref drew 10–11px) */
+.qc152 .qc167-seal { flex: none; display: grid; place-items: center; border-radius: 50%; background: #2a3a52; color: #f4eee5; font: 400 12px var(--sp-type) !important; letter-spacing: 0.04em; }
+.qc152 .qc167-seal.md { width: 32px; height: 32px; }
+.qc152 .qc167-seal.sm { width: 28px; height: 28px; }
+
+/* ── Materials: a group with nothing recorded is one ghost row ───────────────────────────────────────────────── */
+.qc152 .nx-items li.qc167-grow { border-radius: 10px; }
+.qc152 .nx-items li.qc167-grow .qc167-gw { flex: 1; }
+
+/* ── Notes: two ghost note shapes ────────────────────────────────────────────────────────────────────────────── */
+.qc152 .qc167-gn { padding: 12px 14px; border-radius: 12px; background: #f8f5f0; }
+.qc152 .qc167-gn.dim { opacity: 0.6; }
+
+/* the saved value fades in, in its tile (the tile's size does not change) */
+@keyframes qc167Fin { from { opacity: 0; } to { opacity: 1; } }
+.qc152 .qc167-fin { animation: qc167Fin 0.35s ease both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .qc152 .qc167-g, .qc152 .qc167-ga, .qc152 [data-qc167-ed], .qc152 .qc167-gso, .qc152 .qc167-gsw .nx-tick, .qc152 .qc167-gsw .qc167-g, .qc152 .nx-box.qc167-tile .qc167-pn { transition: none; }
+  .qc152 .qc167-fin { animation: none; }
+}
+
+/* ── §C the profile drawers ──────────────────────────────────────────────────────────────────────────────────── */
+/* a journey open when a profile drawer opened waits under it, mounted and hidden (its answers and step kept) */
+.qc152[data-qc167-prof] .qc152-in > [data-qc1522="composer"] { display: none; }
+.qc152 .qc167-pf { flex: none; display: flex; align-items: center; gap: 10px; padding: 10px 16px; background: #f3efe8; border-bottom: 1px solid #e6ddd0; }
+.qc152 .qc167-pf b { display: block; font: 600 14.5px/1.25 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc167-pf i { display: block; font: italic 400 13px/1.3 var(--sp-serif) !important; color: #6f655c; }
+.qc152 .qc167-cp .qc1522-cb { min-height: 150px; }
+.qc152 .qc167-cp .sa-wk-slider { width: 100%; }
+.qc152 .qc167-cp .qc1522-btn.nv svg { margin-left: 6px; }
+/* "No reply means no" */
+.qc152 .qc167-rem {
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; margin-top: 12px; padding: 11px 12px;
+  border-radius: 12px; background: #fff; box-shadow: inset 0 0 0 1px #e6ddd0; transition: box-shadow 0.18s ease;
+}
+.qc152 .qc167-rem:hover, .qc152 .qc167-rem:focus-visible { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .qc167-rem .t { flex: 1; display: flex; flex-direction: column; }
+.qc152 .qc167-rem b { font: 600 14.5px/1.2 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc167-rem i { font: italic 400 13px/1.3 var(--sp-serif) !important; color: #6f655c; }
+.qc152 .qc167-tog { position: relative; flex: none; width: 38px; height: 22px; border-radius: 11px; background: #d5ccbf; transition: background-color 0.15s; }
+.qc152 .qc167-tog::after { content: ""; position: absolute; left: 2px; top: 2px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: translate 0.15s; }
+.qc152 .qc167-rem.on .qc167-tog { background: #2a3a52; }
+.qc152 .qc167-rem.on .qc167-tog::after { translate: 16px 0; }
+/* choice tiles: the methods, and the asks drawer's two plain ticks */
+.qc152 .qc167-mt { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.qc152 .qc167-pk {
+  all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 7px 12px;
+  border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #e6ddd0; transition: box-shadow 0.18s ease;
+}
+.qc152 .qc167-pk:hover, .qc152 .qc167-pk:focus-visible, .qc152 .qc167-pk.on { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .qc167-pk .t { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.qc152 .qc167-pk b { font: 600 15px/1.2 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc167-pk i { font: italic 400 13px/1.3 var(--sp-serif) !important; color: #6f655c; }
+.qc152 .qc167-pk .k, .qc152 .qc167-xt .xh .k {
+  flex: none; width: 18px; height: 18px; border-radius: 50%; display: grid; place-items: center; box-shadow: inset 0 0 0 1.5px #cfc5b8; color: transparent; transition: background-color 0.18s ease;
+}
+.qc152 .qc167-pk.on .k, .qc152 .qc167-xt.on .xh .k { background: #2a3a52; box-shadow: none; color: #fff; }
+@media (prefers-reduced-motion: reduce) {
+  .qc152 .qc167-rem, .qc152 .qc167-tog, .qc152 .qc167-tog::after, .qc152 .qc167-pk, .qc152 .qc167-pk .k { transition: none; }
+}
+
+/* ── §C step 3 the asks drawer: two ticks, then two tiles that expand in place ──────────────────────────────── */
+/* the list scrolls inside the drawer (capped, as the ref): the card's header and thread are never pushed off */
+/* ⚠️ a FIXED height, not a max: a tile expanding inside it scrolls the list and moves nothing above it (lock 12); it
+   gives way on a short window (1280×720) so the card's own body keeps room */
+.qc152 .qc167-cp .qc1522-cb.qc167-ak { flex: none; height: clamp(120px, 24vh, 212px); overflow: auto; overscroll-behavior: contain; }
+.qc152 .qc167-asks-ed { display: flex; flex-direction: column; gap: 8px; }
+.qc152 .qc167-xt { border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #e6ddd0; transition: box-shadow 0.18s ease; }
+.qc152 .qc167-xt:hover, .qc152 .qc167-xt.on { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .qc167-xt .xh { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 7px 12px; }
+.qc152 .qc167-xt .xh .t { flex: 1; display: flex; flex-direction: column; }
+.qc152 .qc167-xt .xh b { font: 600 15px/1.2 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc167-xt .xh i { font: italic 400 13px/1.3 var(--sp-serif) !important; color: #6f655c; }
+.qc152 .qc167-xt .exp { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.26s cubic-bezier(0.3, 0.7, 0.2, 1); }
+.qc152 .qc167-xt.on .exp { grid-template-rows: 1fr; }
+.qc152 .qc167-xt .expi { overflow: hidden; min-height: 0; opacity: 0; transition: opacity 0.2s ease; }
+.qc152 .qc167-xt.on .expi { opacity: 1; transition-delay: 0.07s; }
+.qc152 .qc167-xt .expi .qad-samp { padding: 0 12px 12px; }
+.qc152 .qc167-sug { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 12px 0; }
+.qc152 .qc167-xt .expi > .sp-fld { display: block; width: calc(100% - 24px); margin: 8px 12px 12px; }
+@media (prefers-reduced-motion: reduce) {
+  .qc152 .qc167-xt, .qc152 .qc167-xt .exp, .qc152 .qc167-xt .expi, .qc152 .qc167-xt .xh .k { transition: none; }
+}

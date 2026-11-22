@@ -1,0 +1,22 @@
+[
+ {
+  "name": "population",
+  "ok": true,
+  "got": "0:54 296:56 412:46 412:46 466:49"
+ },
+ {
+  "name": "nothing above the tile moved",
+  "ok": true,
+  "got": "0:54 296:56 412:46 412:46 466:49 → 0:54 296:56 412:46 412:46 466:49"
+ },
+ {
+  "name": "reduced motion: the expand makes no animation",
+  "ok": false,
+  "got": "grid-template-rows,opacity"
+ },
+ {
+  "name": "reduced motion: the tile is open at once",
+  "ok": false,
+  "got": "0px"
+ }
+]

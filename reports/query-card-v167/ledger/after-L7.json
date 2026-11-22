@@ -1,0 +1,37 @@
+[
+ {
+  "name": "the app's SampleControl",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no element offers a fixed amount",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "units and amount only (no section)",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "saved through the encoder's spelling",
+  "ok": true,
+  "got": "[\"First 4 chapters\"]"
+ },
+ {
+  "name": "the tab shows it",
+  "ok": true,
+  "got": "First 4 chapters / not sent"
+ },
+ {
+  "name": "the full card shows the same sample",
+  "ok": true,
+  "got": "Good fit / ★ / ★ / ★ / ★ / ★ / i / 1 / 1 / ✕ / SL / Sami Lark / LARK & FIELD / London / Not queried / q167-ag-some@example.test / + Add a website / Profile / History / Notes / Finish Sami’s profile / "
+ },
+ {
+  "name": "restored (re-seeded)",
+  "ok": true,
+  "got": "[]"
+ }
+]

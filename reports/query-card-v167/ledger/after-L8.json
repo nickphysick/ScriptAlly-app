@@ -1,0 +1,77 @@
+[
+ {
+  "name": "weeks: the band names Evie's profile",
+  "ok": true,
+  "got": "EL / Evie’s profile / Saved for every query you send Evie"
+ },
+ {
+  "name": "weeks: the button reads Save to profile",
+  "ok": true,
+  "got": "Save to profile"
+ },
+ {
+  "name": "weeks: the toast",
+  "ok": true,
+  "got": "Saved to Evie’s profile Undo"
+ },
+ {
+  "name": "weeks: the change was written",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "weeks: Undo restored every field",
+  "ok": true,
+  "got": "{\"responseTimeWeeks\":26,\"noResponseMeansNo\":true,\"submissionMethod\":\"Online Form\",\"materialsWanted\":[\"Query letter\",\"Synopsis (2 pages)\",\"First 3 chapters\",\"A one-page CV\"],\"updatedAt\":null}"
+ },
+ {
+  "name": "method: the band names Evie's profile",
+  "ok": true,
+  "got": "EL / Evie’s profile / Saved for every query you send Evie"
+ },
+ {
+  "name": "method: the button reads Save to profile",
+  "ok": true,
+  "got": "Save to profile"
+ },
+ {
+  "name": "method: the toast",
+  "ok": true,
+  "got": "Saved to Evie’s profile Undo"
+ },
+ {
+  "name": "method: the change was written",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "method: Undo restored every field",
+  "ok": true,
+  "got": "{\"responseTimeWeeks\":26,\"noResponseMeansNo\":true,\"submissionMethod\":\"Online Form\",\"materialsWanted\":[\"Query letter\",\"Synopsis (2 pages)\",\"First 3 chapters\",\"A one-page CV\"],\"updatedAt\":null}"
+ },
+ {
+  "name": "asks: the band names Evie's profile",
+  "ok": true,
+  "got": "EL / Evie’s profile / Saved for every query you send Evie"
+ },
+ {
+  "name": "asks: the button reads Save to profile",
+  "ok": true,
+  "got": "Save to profile"
+ },
+ {
+  "name": "asks: the toast",
+  "ok": true,
+  "got": "Saved to Evie’s profile Undo"
+ },
+ {
+  "name": "asks: the change was written",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "asks: Undo restored every field",
+  "ok": true,
+  "got": "{\"responseTimeWeeks\":26,\"noResponseMeansNo\":true,\"submissionMethod\":\"Online Form\",\"materialsWanted\":[\"Query letter\",\"Synopsis (2 pages)\",\"First 3 chapters\",\"A one-page CV\"],\"updatedAt\":null}"
+ }
+]

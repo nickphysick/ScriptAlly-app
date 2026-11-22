@@ -1,0 +1,65 @@
+{
+ "nothing": {
+  "agent": [
+   "div[tile]{box}.nx-box",
+   "div[tile]{box}.nx-box",
+   "div[tile]{box}.nx-box",
+   "section[asks]{asks}",
+   "h4[asks-head]",
+   "div[asks-list].qc167-gsw",
+   "button[full-card].qc167-fullc"
+  ],
+  "materials": [
+   "div{group}.nx-grp",
+   "h4{heading}",
+   "ul.nx-items",
+   "div.nx-foot"
+  ],
+  "notes": [
+   "div{list}.nx-nl",
+   "div{compose}.nx-nc"
+  ]
+ },
+ "some": {
+  "agent": [
+   "div[tile]{box}.nx-box",
+   "div[tile]{box}.nx-box",
+   "div[tile]{box}.nx-box",
+   "section[asks]{asks}",
+   "h4[asks-head]",
+   "div[asks-list].qc167-gsw",
+   "button[full-card].qc167-fullc"
+  ],
+  "materials": [
+   "div{group}.nx-grp",
+   "h4{heading}",
+   "ul.nx-items",
+   "div.nx-foot"
+  ],
+  "notes": [
+   "div{list}.nx-nl",
+   "div{compose}.nx-nc"
+  ]
+ },
+ "everything": {
+  "agent": [
+   "div[tile]{box}.nx-box",
+   "div[tile]{box}.nx-box",
+   "div[tile]{box}.nx-box",
+   "section[asks]{asks}",
+   "h4[asks-head]",
+   "div[asks-list].qc167-gsw",
+   "button[full-card].qc167-fullc"
+  ],
+  "materials": [
+   "div{group}.nx-grp",
+   "h4{heading}",
+   "ul.nx-items",
+   "div.nx-foot"
+  ],
+  "notes": [
+   "div{list}.nx-nl",
+   "div{compose}.nx-nc"
+  ]
+ }
+}

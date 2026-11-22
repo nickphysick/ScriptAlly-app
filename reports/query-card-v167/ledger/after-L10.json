@@ -1,0 +1,387 @@
+[
+ {
+  "name": "pending/send/save: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Pip. “Mark sent” is waiting for you."
+ },
+ {
+  "name": "pending/send/save: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Mark sent”"
+ },
+ {
+  "name": "pending/send/save: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "pending/send/save: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/send/save: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/send/save: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Partial Requested\",\"log\":[\"q167-pending-preq\",\"q167-pending-sent\"]} → {\"status\":\"Partial Requested\",\"log\":[\"q167-pending-preq\",\"q167-pending-sent\"]}"
+ },
+ {
+  "name": "pending/send/save: the agent restored",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "pending/send/back: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Pip. “Mark sent” is waiting for you."
+ },
+ {
+  "name": "pending/send/back: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Mark sent”"
+ },
+ {
+  "name": "pending/send/back: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "pending/send/back: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/send/back: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/send/back: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Partial Requested\",\"log\":[\"q167-pending-preq\",\"q167-pending-sent\"]} → {\"status\":\"Partial Requested\",\"log\":[\"q167-pending-preq\",\"q167-pending-sent\"]}"
+ },
+ {
+  "name": "pending/send/esc: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Pip. “Mark sent” is waiting for you."
+ },
+ {
+  "name": "pending/send/esc: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Mark sent”"
+ },
+ {
+  "name": "pending/send/esc: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "pending/send/esc: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "pending/send/esc: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "pending/send/esc: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Partial Requested\",\"log\":[\"q167-pending-preq\",\"q167-pending-sent\"]} → {\"status\":\"Partial Requested\",\"log\":[\"q167-pending-preq\",\"q167-pending-sent\"]}"
+ },
+ {
+  "name": "some/reply/save: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Sami. “Record a response” is waiting for you."
+ },
+ {
+  "name": "some/reply/save: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Record a response”"
+ },
+ {
+  "name": "some/reply/save: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "some/reply/save: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "some/reply/save: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "some/reply/save: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Queried\",\"log\":[\"q167-some-sent\"]} → {\"status\":\"Queried\",\"log\":[\"q167-some-sent\"]}"
+ },
+ {
+  "name": "some/reply/save: the agent restored",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "some/reply/back: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Sami. “Record a response” is waiting for you."
+ },
+ {
+  "name": "some/reply/back: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Record a response”"
+ },
+ {
+  "name": "some/reply/back: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "some/reply/back: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "some/reply/back: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "some/reply/back: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Queried\",\"log\":[\"q167-some-sent\"]} → {\"status\":\"Queried\",\"log\":[\"q167-some-sent\"]}"
+ },
+ {
+  "name": "some/reply/esc: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Sami. “Record a response” is waiting for you."
+ },
+ {
+  "name": "some/reply/esc: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Record a response”"
+ },
+ {
+  "name": "some/reply/esc: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "some/reply/esc: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "some/reply/esc: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "some/reply/esc: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Queried\",\"log\":[\"q167-some-sent\"]} → {\"status\":\"Queried\",\"log\":[\"q167-some-sent\"]}"
+ },
+ {
+  "name": "offer/offer/save: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Ola. “Answer an offer” is waiting for you."
+ },
+ {
+  "name": "offer/offer/save: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Answer an offer”"
+ },
+ {
+  "name": "offer/offer/save: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "offer/offer/save: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "offer/offer/save: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "offer/offer/save: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Offer\",\"log\":[\"q167-offer-offer\",\"q167-offer-sent\"]} → {\"status\":\"Offer\",\"log\":[\"q167-offer-offer\",\"q167-offer-sent\"]}"
+ },
+ {
+  "name": "offer/offer/save: the agent restored",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "offer/offer/back: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Ola. “Answer an offer” is waiting for you."
+ },
+ {
+  "name": "offer/offer/back: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Answer an offer”"
+ },
+ {
+  "name": "offer/offer/back: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "offer/offer/back: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "offer/offer/back: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "offer/offer/back: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Offer\",\"log\":[\"q167-offer-offer\",\"q167-offer-sent\"]} → {\"status\":\"Offer\",\"log\":[\"q167-offer-offer\",\"q167-offer-sent\"]}"
+ },
+ {
+  "name": "offer/offer/esc: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Ola. “Answer an offer” is waiting for you."
+ },
+ {
+  "name": "offer/offer/esc: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Answer an offer”"
+ },
+ {
+  "name": "offer/offer/esc: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "offer/offer/esc: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "offer/offer/esc: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "offer/offer/esc: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Offer\",\"log\":[\"q167-offer-offer\",\"q167-offer-sent\"]} → {\"status\":\"Offer\",\"log\":[\"q167-offer-offer\",\"q167-offer-sent\"]}"
+ },
+ {
+  "name": "passed/reopen/save: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Pat. “Reopen” is waiting for you."
+ },
+ {
+  "name": "passed/reopen/save: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Reopen”"
+ },
+ {
+  "name": "passed/reopen/save: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "passed/reopen/save: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "passed/reopen/save: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "passed/reopen/save: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Rejected\",\"log\":[\"q167-passed-pass\",\"q167-passed-sent\"]} → {\"status\":\"Rejected\",\"log\":[\"q167-passed-pass\",\"q167-passed-sent\"]}"
+ },
+ {
+  "name": "passed/reopen/save: the agent restored",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "passed/reopen/back: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Pat. “Reopen” is waiting for you."
+ },
+ {
+  "name": "passed/reopen/back: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Reopen”"
+ },
+ {
+  "name": "passed/reopen/back: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "passed/reopen/back: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "passed/reopen/back: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "passed/reopen/back: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Rejected\",\"log\":[\"q167-passed-pass\",\"q167-passed-sent\"]} → {\"status\":\"Rejected\",\"log\":[\"q167-passed-pass\",\"q167-passed-sent\"]}"
+ },
+ {
+  "name": "passed/reopen/esc: the band says the journey waits",
+  "ok": true,
+  "got": "Saved for every query you send Pat. “Reopen” is waiting for you."
+ },
+ {
+  "name": "passed/reopen/esc: Cancel is Back to it",
+  "ok": true,
+  "got": "Back to “Reopen”"
+ },
+ {
+  "name": "passed/reopen/esc: the journey is back",
+  "ok": true,
+  "got": "true"
+ },
+ {
+  "name": "passed/reopen/esc: the same step and answers",
+  "ok": true,
+  "got": "same"
+ },
+ {
+  "name": "passed/reopen/esc: focus on the control it left",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "passed/reopen/esc: nothing written to the query",
+  "ok": true,
+  "got": "{\"status\":\"Rejected\",\"log\":[\"q167-passed-pass\",\"q167-passed-sent\"]} → {\"status\":\"Rejected\",\"log\":[\"q167-passed-pass\",\"q167-passed-sent\"]}"
+ },
+ {
+  "name": "population: the journeys run",
+  "ok": true,
+  "got": "send,reply,offer,reopen"
+ }
+]

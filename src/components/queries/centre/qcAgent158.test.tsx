@@ -12,10 +12,9 @@ import { askChips } from "../../../lib/qcThread152";
 const NOW = new Date(2026, 10, 18, 12).getTime();
 const DAY = 86_400_000;
 const base: AgentTab158Props = {
-  first: "Fenella", nowMs: NOW, weeks: 8, nrmn: true, how: "By email", queriedVia: "by email", sentMs: NOW - 51 * DAY,
+  first: "Fenella", initials: "FV", nowMs: NOW, weeks: 8, nrmn: true, how: "By email", queriedVia: "by email", sentMs: NOW - 51 * DAY,
   lastHeardMs: NOW - 29 * DAY, asks: askChips(["Query letter", "Synopsis", "First 5 chapters"], ["Query letter", "Synopsis", "First 5 chapters"]),
-  hasAsks: true, wishlist: "Big-hearted YA thrillers.", email: "fenella@brightwater.example", website: "", websiteHref: null,
-  onCopyEmail: () => {}, onField: () => {}, onEdit: () => {}, dbl: () => ({}),
+  hasAsks: true, onOpen: () => {}, onFullCard: () => {},
 };
 const html = (p: Partial<AgentTab158Props> = {}) => renderToStaticMarkup(<AgentTab158 {...base} {...p} />);
 const css = readFileSync("src/components/queries/centre/qcv158.css", "utf8").replace(/\/\*[\s\S]*?\*\//g, "");
@@ -32,12 +31,15 @@ describe("QC158-5 (source) three fact boxes", () => {
     expect(h).toContain("you queried by email");
     expect(h).toContain("29 days ago");
     expect(html({ nrmn: false })).toContain("always replies");
-    expect(html({ lastHeardMs: null })).toMatch(/>Not yet<\/b><i>since 28 Sept?<\/i>/);
+    /* v167 — "Not yet" is smaller, italic, grey (its own class); "since {sent date}" beneath as built */
+    expect(html({ lastHeardMs: null })).toMatch(/class="qc167-notyet">Not yet<\/b><i data-qc167="sub">since 28 Sept?<\/i>/);
   });
-  it("an unrecorded value is a link that opens the agent's card at it, never a dash", () => {
+  /* v167 §A re-points this lock: an unrecorded value is a ghost bar with its "+ Add …" words over it (the box itself is
+     the way in), never a link, a sentence or a dash */
+  it("an unrecorded value is a ghost bar with its words over it, never a dash", () => {
     const h = html({ weeks: null, how: null });
-    expect(h).toContain(">Add reply time</button>");
-    expect(h).toContain(">Add how Fenella takes queries</button>");
+    expect(h).toMatch(/data-k="reply" data-ghost=""[^]*?data-qc167="bar"[^]*?>\+ Add reply time<\/span>/);
+    expect(h).toMatch(/data-k="method" data-ghost=""[^]*?data-qc167="bar"[^]*?>\+ Add how<\/span>/);
     expect(h).not.toMatch(/>—</);
   });
   it("the boxes centre their contents top to bottom, and are the grid card's boxes", () => {
@@ -58,35 +60,33 @@ describe("QC158-6 (source) what the agent asks for", () => {
     expect(rows.length).toBe(3);
     expect(rows[0]).toMatch(/data-sent=""[^]*class="nx-tick"[^]*sent with your query/);
     expect(rows[1]).toMatch(/class="nx-tick no"[^]*>not sent</);
-    expect(h).toContain("You didn’t send synopsis, first 5 chapters.");
-    expect(html()).toContain("You sent everything Fenella asks for.");
-    expect(html({ hasAsks: false, asks: { chips: [], missing: [] } })).toMatch(/Nothing saved yet\. <button[^>]*>Add what Fenella asks for<\/button>/);
+    /* v167 §B re-points this: the "You sent everything" / "You didn't send" line lives on the agent's full card */
+    expect(h).not.toContain("You didn’t send");
+    expect(html()).not.toContain("You sent everything");
+    /* v167 §A — nothing recorded: three ghost rows and the words over them, no sentence */
+    const none = html({ hasAsks: false, asks: { chips: [] } });
+    expect(none).not.toContain("Nothing saved yet");
+    expect((none.match(/data-qc167="bar"/g) ?? []).length).toBeGreaterThanOrEqual(3);
+    expect(none).toContain(">+ Add what Fenella asks for<");
   });
   it("items read in sentence case", () => {
     expect(sentenceCase("FIRST 5 CHAPTERS")).toBe("First 5 chapters");
   });
 });
 
-describe("QC158-7 (source) the contact row never wraps", () => {
-  it("Copy email with the address cut by an ellipsis, then the website or + Add a website, on one line", () => {
-    expect(css).toMatch(/\.qc152 \.nx-reach \{ display: flex; flex-wrap: nowrap;/);
-    expect(css).toMatch(/\.qc152 \.nx-btn small \{[^}]*overflow: hidden; text-overflow: ellipsis; white-space: nowrap;/);
-    expect(css).toMatch(/\.qc152 \.nx-reach \.nx-btn:first-child \{ flex: 0 1 auto; min-width: 0; \}/);
+/* v167 §B retires QC158-7 (the contact row, the wishlist and the two links): they live on the agent's full card. Its
+   replacement is v167 lock 5's source half — none of them renders, and the one row opens the full card. */
+describe("QC167-5 (source) the slimmer Agent tab", () => {
+  it("no Copy email, website, wishlist, Edit these details or You sent everything; one full-card row", () => {
     const h = html();
-    expect(h).toMatch(/data-qc158="copy-email"[^>]*>[^]*Copy email<small data-qc158="address">fenella@brightwater\.example<\/small>/);
-    expect(h).toContain(">+ Add a website</button>");
+    for (const gone of ["Copy email", "Add a website", "Wishlist", "in Fenella’s words", "Edit these details", "You sent everything", "Nothing saved yet"]) expect(h).not.toContain(gone);
+    expect(h).toMatch(/data-qc167="full-card"[^>]*>[^]*?>FV<\/span><span>Fenella’s full card<\/span>/);
   });
-  it("wishlist as a quote, and the two links", () => {
-    const h = html();
-    expect(h).toContain('<p class="nx-quote" data-qc152="wishlist">Big-hearted YA thrillers.</p>');
-    expect(h).toContain("in Fenella’s words");
-    expect(h).toContain(">Open Fenella’s full card</button>");
-    expect(h).toContain(">Edit these details</button>");
-    expect(html({ wishlist: "" })).toMatch(/Nothing saved yet\. <button[^>]*>Add Fenella’s wishlist<\/button>/);
-  });
-  it("the old strip and the definition list are gone from the reading view", () => {
+  it("the tab's double-click entry and the edit pane are gone from the reading view", () => {
     const card = readFileSync("src/components/queries/centre/QcCard152.tsx", "utf8");
     expect(card).toMatch(/<AgentTab158 /);
+    expect(card).not.toMatch(/<AgentEditPane\b/);
+    expect(card).not.toMatch(/const dbl = /);
     expect(card).not.toMatch(/<div className="qc152-agt" data-qc152="agent-pane">/);
   });
 });

@@ -15,8 +15,9 @@
  */
 
 /* `.laq` — the staged Log a query journey (queries/centre/QcLogStages) mounts the app's own SampleControl, whose rules read
-   these tokens; declaring them there too is what lets that control sit outside the drawer unchanged (Log a query v1.2). */
-.qad-root, .qad-dock, .qad-toast, .qad-park, .laq {
+   these tokens; declaring them there too is what lets that control sit outside the drawer unchanged (Log a query v1.2).
+   `.qc167-asks-ed` — the query card's "What {first} asks for" drawer mounts it the same way (Query card v167). */
+.qad-root, .qad-dock, .qad-toast, .qad-park, .laq, .qc167-asks-ed {
   --qad-ink: #1c130f; --qad-ink70: rgba(28,19,15,.7); --qad-ink45: rgba(28,19,15,.45); --qad-ink25: rgba(28,19,15,.25);
   --qad-hair: rgba(28,19,15,.1); --qad-btn: #2a3a52; --qad-rust: #8a4a3c; --qad-page: #f5f1eb;
   --qad-sand: #f7efe3; --qad-rose: #f5e6df; --qad-sage: #e0e5dd; --qad-offer: #d7e0e8; --qad-stone: #e4e1db; --qad-blush: #e9c9b8;

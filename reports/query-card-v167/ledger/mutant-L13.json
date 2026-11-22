@@ -1,0 +1,67 @@
+[
+ {
+  "name": "nothing/agent",
+  "ok": false,
+  "got": "10px \"+\"; mono caps \"+\"; 10px \"Add reply time\"; mono caps \"Add reply time\"; 10px \"+\"; mono caps \"+\"; 10px \"Add how\"; mono caps \"Add how\""
+ },
+ {
+  "name": "nothing/materials",
+  "ok": false,
+  "got": "10px \"+\"; mono caps \"+\"; 10px \"Add what went\"; mono caps \"Add what went\""
+ },
+ {
+  "name": "nothing/notes",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing drawer [data-qc167='tile'][data-k='reply']",
+  "ok": false,
+  "got": "10px \"+\"; mono caps \"+\"; 10px \"Add reply time\"; mono caps \"Add reply time\"; 10px \"+\"; mono caps \"+\"; 10px \"Add how\"; mono caps \"Add how\"; 10px \"Saved for every quer\"; mono caps \"Saved for every quer\""
+ },
+ {
+  "name": "nothing drawer [data-qc167='tile'][data-k='method']",
+  "ok": false,
+  "got": "10px \"+\"; mono caps \"+\"; 10px \"Add reply time\"; mono caps \"Add reply time\"; 10px \"+\"; mono caps \"+\"; 10px \"Add how\"; mono caps \"Add how\"; 10px \"Saved for every quer\"; mono caps \"Saved for every quer\""
+ },
+ {
+  "name": "nothing drawer [data-qc167='asks-list']",
+  "ok": false,
+  "got": "10px \"+\"; mono caps \"+\"; 10px \"Add reply time\"; mono caps \"Add reply time\"; 10px \"+\"; mono caps \"+\"; 10px \"Add how\"; mono caps \"Add how\"; 10px \"Saved for every quer\"; mono caps \"Saved for every quer\""
+ },
+ {
+  "name": "everything/agent",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "everything/materials",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "everything/notes",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "everything drawer [data-qc167='tile'][data-k='reply']",
+  "ok": false,
+  "got": "10px \"Saved for every quer\"; mono caps \"Saved for every quer\""
+ },
+ {
+  "name": "everything drawer [data-qc167='tile'][data-k='method']",
+  "ok": false,
+  "got": "10px \"Saved for every quer\"; mono caps \"Saved for every quer\""
+ },
+ {
+  "name": "everything drawer [data-qc167='asks-list']",
+  "ok": false,
+  "got": "10px \"Saved for every quer\"; mono caps \"Saved for every quer\""
+ },
+ {
+  "name": "population: text read",
+  "ok": true,
+  "got": "284"
+ }
+]

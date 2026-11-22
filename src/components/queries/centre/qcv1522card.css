@@ -35,7 +35,9 @@
 /* while a composer or an edit is open: the book and tabs fold away, and no ✎ Edit shows */
 .qc152 .qc152-ms, .qc152 .qc152-tabs { transition: max-height 0.35s ease, margin 0.35s ease, padding 0.35s ease, opacity 0.25s ease; max-height: 160px; overflow: hidden; }
 .qc152[data-j] .qc152-ms { max-height: 0; margin-top: 0; margin-bottom: 0; padding-top: 0; padding-bottom: 0; opacity: 0; }
-.qc152[data-j] .qc152-tabs { max-height: 0; margin-top: 0; opacity: 0; border-color: transparent; }
+/* Query card v167 §D (Nick, 22 Nov): with a journey's composer open the tabs STAY, so the Agent tab's profile drawers can
+   be reached mid-journey; they still fold for a bubble edited in place */
+.qc152[data-j]:not([data-qc167-jc]) .qc152-tabs { max-height: 0; margin-top: 0; opacity: 0; border-color: transparent; }
 .qc152[data-j] .qc152-fx { display: none !important; }
 .qc152 .qc152-body.qc1522-tpad { padding-bottom: 64px; }
 

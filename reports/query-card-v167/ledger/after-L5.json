@@ -1,0 +1,47 @@
+[
+ {
+  "name": "no \"Copy email\"",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no \"Add a website\"",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no \"Wishlist\"",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no \"Edit these details\"",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no \"You sent everything\"",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "no \"You didn’t send\"",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "one full-card row",
+  "ok": true,
+  "got": "1"
+ },
+ {
+  "name": "its words",
+  "ok": true,
+  "got": "EL / Evie’s full card"
+ },
+ {
+  "name": "it opens Evie's card",
+  "ok": true,
+  "got": "true"
+ }
+]

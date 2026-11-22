@@ -33,7 +33,7 @@ import { PopCtx, useOutsideClose } from "./QcEdit152";
 import { Bubble, StepGlyph } from "./QcBubble152";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import {
-  AgentEditPane, ASK_POOL, Ed, EdMenu, EditStrip, LeaveAsk, METHODS, MenuItem, NotesEditPane, SaveBar, useEditLayer,
+  Ed, EdMenu, EditStrip, LeaveAsk, MenuItem, NotesEditPane, SaveBar, useEditLayer,
   type CardEditData, type CardEdits,
 } from "./QcCardEdit152";
 import "./qcv152inplace.css";
@@ -41,7 +41,8 @@ import "./qcv152inplace.css";
 import "./sc1card.css";
 /* Query card v158 — the Agent, Materials and Notes tab bodies */
 import "./qcv158.css";
-import { AgentTab158 } from "./QcAgent158";
+import { AgentTab158, type ProfileKey } from "./QcAgent158";
+import { ProfileDrawer, journeyName167, type ProfileIn, type ProfilePatch } from "./QcProfile167";
 import { MaterialsTab158 } from "./QcMaterials158";
 import { Foot } from "./QcFoot1581";
 /* Query card v160 — the card bumps when a save or an undo lands; the draft settles, the strip, label and footer ease */
@@ -52,6 +53,7 @@ import { useLanding160, type Motion160 } from "./useLanding160";
 import { Track153 } from "./QcSlip153";
 import { bookLine164, stripStatus164 } from "../../../lib/qc164";
 import "./qcv164.css";
+import "./qcv167.css";
 
 export interface QcCard152Data {
   state: QueryState;
@@ -135,6 +137,12 @@ export interface QcCard152Props {
   backTo?: { label: string; onBack: () => void } | null;
   /** Query card v160 — a save has started, or Undo was pressed (a new `n` each time): the card moves when it lands */
   motion?: Motion160 | null;
+  /** Query card v167 §C — the agent's profile as stored (the card adds the seal's initials), and its one save (the agent
+   *  card's path; true when it landed). Absent: a tile opens the agent's card at that detail, as before. */
+  profile?: Omit<ProfileIn, "initials"> | null;
+  onSaveProfile?: (patch: ProfilePatch) => Promise<boolean>;
+  /** v167 §C step 3 — the asks drawer's body (QcAsks167), drawn by the host that knows the book */
+  asksBody?: (prof: ProfileIn, set: (p: ProfilePatch | null) => void) => React.ReactNode;
 }
 
 const PEN = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z" /></svg>;
@@ -231,6 +239,44 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   /* v1.1 — the edit layer: the pencil, or a double-click on a value, enters it; Esc closes a menu, then asks */
   const ed = useEditLayer(p.editData, p.onSaveEdits, r.id);
   const inRef = useRef<HTMLDivElement>(null);
+  /* ══ v167 §C/§D — THE PROFILE DRAWER: in the composer's slot; a journey already open waits under it, still mounted
+     (hidden), so every answer and its step stay as they were. Saving, going back or Esc returns to it, focus on the
+     control it left. */
+  const [prof, setProf] = useState<{ k: ProfileKey; journey: string | null; back: HTMLElement | null } | null>(null);
+  const [profBusy, setProfBusy] = useState(false);
+  const [just, setJust] = useState<{ k: ProfileKey; n: number } | null>(null);
+  const jFocus = useRef<HTMLElement | null>(null);
+  useEffect(() => { setProf(null); setJust(null); jFocus.current = null; }, [r.id]);
+  /* the journey's last focused control, remembered as the writer moves through it */
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return undefined;
+    const on = (e: FocusEvent) => { const t = e.target as HTMLElement; if (t.closest?.("[data-qc1522='composer']")) jFocus.current = t; };
+    root.addEventListener("focusin", on);
+    return () => root.removeEventListener("focusin", on);
+  }, []);
+  const profileIn: ProfileIn | null = p.profile ? { ...p.profile, initials: r.initials } : null;
+  const openProf = (k: ProfileKey) => {
+    const cp = rootRef.current?.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc1522='composer']");
+    setProf({ k, journey: cp ? journeyName167(cp.dataset.j ?? "") : null, back: document.activeElement as HTMLElement | null });
+  };
+  const closeProf = () => {
+    const was = prof;
+    setProf(null);
+    window.requestAnimationFrame(() => {
+      const cp = rootRef.current?.querySelector<HTMLElement>(":scope > .qc152-in > [data-qc1522='composer']");
+      const to = cp ? (jFocus.current && cp.contains(jFocus.current) ? jFocus.current : cp.querySelector<HTMLElement>("button, input, textarea")) : was?.back;
+      if (to && to.isConnected) to.focus({ preventScroll: true });
+    });
+  };
+  const saveProf = async (patch: ProfilePatch) => {
+    if (!prof || !p.onSaveProfile || profBusy) return;
+    const k = prof.k;
+    setProfBusy(true);
+    let ok = false;
+    try { ok = await p.onSaveProfile(patch); } finally { setProfBusy(false); }
+    if (ok) { setJust({ k, n: Date.now() }); closeProf(); }
+  };
   useEscapeLayer(ed.on, () => {
     if (ed.open) ed.setOpen(null);
     else if (ed.leave) ed.keep();
@@ -522,32 +568,14 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
 
   /* §2.6 the Agent tab */
   const ask = askChips(d.asks, d.sentLabels);
-  const agentStrip = (
-      <div className="qc152-agq" data-qc152="agent-strip">
-        <div><small>Queried</small><b>{r.sentMs != null ? dayLabel(r.sentMs, nowMs) : "Not dated"}</b><em>{d.queriedVia ?? "how not recorded"}</em></div>
-        {d.free
-          ? <div><small>What went</small><b>{d.sentLabels.length} {d.sentLabels.length === 1 ? "thing" : "things"}</b><em>with the query</em></div>
-          : <div><small>Package</small><b>{p.packageName ?? "None"}</b><em>{d.sentLabels.length ? `${d.sentLabels.length} ${d.sentLabels.length === 1 ? "thing" : "things"} sent` : "nothing recorded"}</em></div>}
-        <div><small>Last heard</small><b>{d.lastHeardMs != null ? dayLabel(d.lastHeardMs, nowMs) : "Not yet"}</b>
-          <em>{d.lastHeardMs != null ? `${Math.max(0, Math.round((nowMs - d.lastHeardMs) / 86_400_000))} days ago` : r.sentMs != null ? `since ${dayLabel(r.sentMs, nowMs)}` : ""}</em></div>
-      </div>
-  );
-  /* a double-click on a detail outside edit mode enters it (with that detail's menu open, where it has one) */
-  const dbl = (k: "weeks" | "asks" | "method" | "wishlist" | "email" | "website") => p.editData ? {
-    "data-ed-r": k,
-    onDoubleClick: (e: React.MouseEvent<HTMLElement>) => { if (ed.on) return; ed.start(k === "asks" || k === "method" ? k : null, e.currentTarget); },
-  } : {};
-  /* v158 §3 — the Agent tab, facts first: three fact boxes, contact, what the agent asks for, the wishlist, two links.
-     Every value is the agent's own record (lib/qcCardView); an unrecorded one is a link that opens the agent's card at it.
-     Double-click on a box or row enters edit mode at that detail, as before. The agent is always named, never a pronoun. */
-  const agentPane = ed.on && ed.dr ? (
-    <AgentEditPane layer={ed} first={(edAgent?.name ?? p.first ?? "the agent").split(/\s+/)[0]} strip={agentStrip}
-      onQueryStep={queryStepId ? () => openStep(queryStepId) : null} />
-  ) : (
-    <AgentTab158 first={first} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
+  /* v158 §3 / v167 §B — the Agent tab: three tiles, what the agent asks for, and the row to the agent's full card. Every
+     value is the agent's own record (lib/qcCardView). A tile or the asks list opens the agent's card at that detail.
+     The agent is always named, never a pronoun. */
+  const agentPane = (
+    <AgentTab158 first={first} initials={r.initials} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
       sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} asks={ask} hasAsks={d.asks.length > 0}
-      wishlist={p.wishlist} email={p.email} website={p.website} websiteHref={p.websiteHref ?? null}
-      onCopyEmail={p.onCopyEmail} onField={p.onAgentField} onEdit={() => (p.editData ? ed.start() : p.onPencil())} dbl={dbl} />
+      onOpen={ed.on ? null : (k) => (profileIn && p.onSaveProfile ? openProf(k) : p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials"))}
+      onFullCard={() => p.onAgentField(null)} editing={prof?.k ?? null} just={just} />
   );
 
   /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). "Edit what went" opens
@@ -556,13 +584,15 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
   const lastSent = [...groups].reverse().find((g) => !g.pending && g.activityId)?.activityId ?? null;
   const matPane = (
     <MaterialsTab158 groups={groups} packageName={!d.free ? p.packageName ?? null : null}
-      onAddSent={queryStepId ? () => openStep(queryStepId) : null} onEditWent={lastSent ? () => openStep(lastSent) : null} />
+      onAddSent={queryStepId ? () => openStep(queryStepId) : null} onEditWent={lastSent ? () => openStep(lastSent) : null}
+      /* v167 — a group's ghost row: what went, in its send's step editor; what is going, in the send journey */
+      onAddTo={(g) => { if (g.pending) p.onFoot?.("sent"); else { const id = g.activityId ?? queryStepId; if (id) openStep(id); } }} />
   );
 
   return (
     <PopCtx.Provider value={pop}>
     <div ref={rootRef} className="qc149c qcv-legacy qc152" data-qc149c="card" data-qc152="card" data-mode={view === "read" ? "view" : view} data-view={view} data-qc163-stage={stage}
-      data-lean={view === "read" && !jOpen && !ed.on ? undefined : "flat"} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
+      data-lean={view === "read" && !jOpen && !ed.on && !prof ? undefined : "flat"} data-qc167-prof={prof ? prof.k : undefined} data-qc167-jc={p.composer ? "" : undefined} data-id={r.id} data-state={d.state} data-j={jOpen ? "" : undefined} data-phase={d.foot?.phase ?? undefined} data-editing={ed.on ? "" : undefined}
       data-stage={stage} data-quiet={quiet ? "" : undefined} data-qc164="" style={stageVars}>
       <div ref={inRef} className="qc152-in">
         {ed.on ? (
@@ -612,7 +642,7 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           {(["tracking", "agent", "materials", "notes"] as const).map((t) => (
             <button key={t} type="button" role="tab" data-qc152="tab" data-tab={t} aria-selected={p.tab === t} onClick={() => p.onTab(t)}>
               {t === "tracking" ? "Tracking" : t === "agent" ? "Agent" : t === "materials" ? "Materials" : "Notes"}
-              {ed.on && ((t === "agent" && ed.keys.some((k) => k !== "agent" && k !== "notes")) || (t === "notes" && ed.keys.includes("notes")))
+              {ed.on && t === "notes" && ed.keys.includes("notes")
                 ? <span className="qc152-dot" data-qc152="tab-dot" aria-label="unsaved changes" /> : null}
             </button>
           ))}
@@ -620,8 +650,12 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
         <div ref={bodyRef} className="qc152-body" data-qc152="body" role="tabpanel">
           {p.tab === "tracking" ? trackingPane : p.tab === "agent" ? agentPane : p.tab === "materials" ? matPane : <div className="qc152-notes">{ed.on && ed.dr && p.editData ? <NotesEditPane layer={ed} data={p.editData} /> : p.notes}</div>}
         </div>
+        {!ed.on && prof && profileIn ? (
+          <ProfileDrawer key={`${r.id}:${prof.k}`} k={prof.k} prof={profileIn} journey={prof.journey} busy={profBusy} onBack={closeProf} onSave={(x) => void saveProf(x)}
+            asks={p.asksBody ? (set) => p.asksBody!(profileIn, set) : undefined} />
+        ) : null}
         {ed.on ? <SaveBar keys={ed.keys} nudge={ed.nudge} busy={ed.busy} onCancel={() => ed.ask()} onSave={() => void ed.save()} />
-          : p.composer ? p.composer : d.foot ? (() => {
+          : p.composer ? p.composer : prof ? null : d.foot ? (() => {
           /* v152.2 §3.2 — the footer: two lines, the button, and the quieter link. v158.1: with more than one action it is
              two rows (Foot, below) */
           const ft = footer1522({ ...d.foot, state: d.state, status: r.status, first, nowMs });
@@ -644,16 +678,6 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
               <div className="ph">Who’s this query to?</div>
               {p.editData.agents.map((a) => <MenuItem key={a.id} data={a.id} on={ed.dr!.agentId === a.id} label={a.name} sub={a.agency} onPick={() => { ed.setAgent(a.id); ed.setOpen(null); }} />)}
               <div className="pf">Moves this query to another agent. Their details come with them.</div>
-            </> : ed.open === "asks" ? <>
-              <div className="ph">What they ask for</div>
-              {[...new Set([...ASK_POOL, ...ed.dr.details.asks])].map((a) => {
-                const on = ed.dr!.details.asks.includes(a);
-                return <MenuItem key={a} data={a} on={on} label={a} onPick={() => ed.patch({ asks: on ? ed.dr!.details.asks.filter((x) => x !== a) : [...ed.dr!.details.asks, a] })} />;
-              })}
-              <div className="pf">Tick as many as apply.</div>
-            </> : ed.open === "method" ? <>
-              <div className="ph">How they take queries</div>
-              {METHODS.map((m) => <MenuItem key={m.v} data={m.v} on={ed.dr!.details.method === m.v} label={m.label} onPick={() => { ed.patch({ method: m.v }); ed.setOpen(null); }} />)}
             </> : null}
           </EdMenu>
         ) : null}

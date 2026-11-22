@@ -1,0 +1,67 @@
+[
+ {
+  "name": "nothing/agent",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing/materials",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing/notes",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing drawer [data-qc167='tile'][data-k='reply']",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing drawer [data-qc167='tile'][data-k='method']",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "nothing drawer [data-qc167='asks-list']",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "everything/agent",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "everything/materials",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "everything/notes",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "everything drawer [data-qc167='tile'][data-k='reply']",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "everything drawer [data-qc167='tile'][data-k='method']",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "everything drawer [data-qc167='asks-list']",
+  "ok": true,
+  "got": ""
+ },
+ {
+  "name": "population: text read",
+  "ok": true,
+  "got": "284"
+ }
+]

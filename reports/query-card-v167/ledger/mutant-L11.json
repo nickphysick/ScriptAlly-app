@@ -1,0 +1,32 @@
+[
+ {
+  "name": "1512×900: the card's scroll overflow is 0",
+  "ok": false,
+  "got": "{\"over\":170,\"top\":0,\"bandTop\":0,\"bodyH\":57}"
+ },
+ {
+  "name": "1512×900: the header in view (not scrolled)",
+  "ok": true,
+  "got": "{\"over\":170,\"top\":0,\"bandTop\":0,\"bodyH\":57}"
+ },
+ {
+  "name": "1512×900: the tabs' body still has room",
+  "ok": true,
+  "got": "57"
+ },
+ {
+  "name": "1280×720: the card's scroll overflow is 0",
+  "ok": false,
+  "got": "{\"over\":209,\"top\":0,\"bandTop\":0,\"bodyH\":60}"
+ },
+ {
+  "name": "1280×720: the header in view (not scrolled)",
+  "ok": true,
+  "got": "{\"over\":209,\"top\":0,\"bandTop\":0,\"bodyH\":60}"
+ },
+ {
+  "name": "1280×720: the tabs' body still has room",
+  "ok": true,
+  "got": "60"
+ }
+]

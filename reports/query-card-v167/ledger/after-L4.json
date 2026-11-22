@@ -1,0 +1,37 @@
+[
+ {
+  "name": "population: three tiles",
+  "ok": true,
+  "got": "3"
+ },
+ {
+  "name": "the longest value",
+  "ok": true,
+  "got": "About 26 weeks"
+ },
+ {
+  "name": "before: every tile 86px",
+  "ok": true,
+  "got": "86,86,86"
+ },
+ {
+  "name": "before: every value on one line, uncut",
+  "ok": true,
+  "got": "[{\"h\":86,\"text\":\"About 26 weeks\",\"one\":true},{\"h\":86,\"text\":\"By online form\",\"one\":true},{\"h\":86,\"text\":\"Not yet\",\"one\":true}]"
+ },
+ {
+  "name": "after: the new value",
+  "ok": true,
+  "got": "About 25 weeks"
+ },
+ {
+  "name": "after: every tile 86px",
+  "ok": true,
+  "got": "86,86,86"
+ },
+ {
+  "name": "restored: the agent as before",
+  "ok": true,
+  "got": "26"
+ }
+]
