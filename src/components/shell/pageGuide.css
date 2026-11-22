@@ -20,7 +20,7 @@
 
 .pgd-t {
   display: block; margin-bottom: 6px;
-  font: 400 17px var(--sp-type);
+  font: 400 var(--sp-body-size) var(--sp-type);
 }
 .pgd p {
   margin: 0; font-family: var(--font-serif);
