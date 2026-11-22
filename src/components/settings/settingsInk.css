@@ -76,6 +76,7 @@
     overflow: visible;
   }
   .acct-page .sc-card:last-of-type { border-bottom: 0; }
+  .acct-page .sc-onoff { color: var(--sp-quiet); }
   .acct-page .sc-ch { grid-column: 1; grid-row: 1 / span 2; padding: 0; }
   .acct-page .sc-ch .sc-ch-h {
     margin: 0;
