@@ -604,7 +604,13 @@ async function frames(page: Page, eng: string) {
   for (const [n, open] of [["reply", "[data-qc167='tile'][data-k='reply']"], ["method", "[data-qc167='tile'][data-k='method']"], ["asks", "[data-qc167='asks-list']"]] as const) {
     await page.locator(C(open)).click(); await page.locator(PROF).waitFor({ timeout: 10_000 });
     await shot(`drawer-${n}`);
-    if (n === "asks") { for (const x of ["sample", "other"]) await page.locator(C(`[data-qc167='expand'][data-x='${x}'] [data-qc167='expand-head']`)).click(); await shot("drawer-asks-both-open"); }
+    /* open only what is closed: Evie's stored sample and Other are already ticked and open, and a click would untick them */
+    if (n === "asks") {
+      for (const x of ["sample", "other"]) { const h = page.locator(C(`[data-qc167='expand'][data-x='${x}'] [data-qc167='expand-head']`)); if ((await h.getAttribute("aria-expanded")) !== "true") await h.click(); }
+      await page.waitForTimeout(400);
+      await page.locator(C("[data-qc167='expand'][data-x='other']")).evaluate((e) => e.scrollIntoView({ block: "end", behavior: "instant" }));
+      await shot("drawer-asks-both-open");
+    }
     await page.locator(C("[data-qc167='cancel']")).click(); await page.waitForTimeout(300);
   }
   await openCard(page, "pending");
