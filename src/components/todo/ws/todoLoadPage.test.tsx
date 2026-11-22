@@ -10,9 +10,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { MemoryRouter } from "react-router-dom";
-import { UserPlan } from "../../../types";
+import { QueryStatus, UserPlan, type Agent, type Query, type Task } from "../../../types";
 
-const store = { tasksReady: false as boolean | undefined, tasksReadFailed: false };
+const store = { tasksReady: false as boolean | undefined, tasksReadFailed: false, tasks: [] as Task[], queries: [] as Query[], agents: [] as Agent[] };
+const ISO = (d: number) => new Date(Date.now() + d * 86400000).toISOString();
 vi.mock("../../../lib/firebase", () => ({ db: {}, auth: {}, OperationType: { GET: "GET", WRITE: "WRITE", DELETE: "DELETE" }, handleFirestoreError: () => {} }));
 vi.mock("firebase/firestore", () => ({
   collection: () => ({}), onSnapshot: () => () => {}, orderBy: () => ({}), query: () => ({}), doc: () => ({}), setDoc: async () => undefined,
@@ -21,7 +22,7 @@ vi.mock("firebase/firestore", () => ({
 vi.mock("../../../lib/db", () => ({
   useScriptAllyDb: () => ({
     collectionsReady: true, tasksReady: store.tasksReady, tasksReadFailed: store.tasksReadFailed,
-    tasks: [], userTasks: [], queries: [], agents: [], manuscripts: [{ id: "m1", userId: "u1", title: "The Marsh" }], packages: [], versions: [], activities: [], taskFlags: [],
+    tasks: store.tasks, userTasks: [], queries: store.queries, agents: store.agents, manuscripts: [{ id: "m1", userId: "u1", title: "The Marsh" }], packages: [], versions: [], activities: [], taskFlags: [],
     currentUser: { id: "u1", name: "Nick Physick", plan: UserPlan.FREE },
     entitlement: { basis: "founding", pro: true, prompts: false, trialEndsMs: null },
     addUserTask: async () => undefined, updateUserTask: async () => undefined, deleteUserTask: async () => undefined, restoreUserTask: async () => undefined,
@@ -33,7 +34,7 @@ vi.mock("../../../lib/db", () => ({
 import { TodoWorkspace } from "./TodoWorkspace";
 
 const render = (path = "/todo") => renderToStaticMarkup(<MemoryRouter initialEntries={[path]}><TodoWorkspace onNavigate={() => {}} /></MemoryRouter>);
-afterEach(() => { store.tasksReady = false; store.tasksReadFailed = false; });
+afterEach(() => { store.tasksReady = false; store.tasksReadFailed = false; store.tasks = []; store.queries = []; store.agents = []; });
 const EMPTY = [/all caught up/i, /Nothing yet/, /Nothing to do yet/, /Nothing snoozed/];
 
 describe("while loading, no empty state", () => {
@@ -54,6 +55,21 @@ describe("while loading, no empty state", () => {
     expect(html).toMatch(/data-tws55-tab="todo"[^>]*>\s*To do<\/button>/);
     expect(html).not.toContain('data-tws="todo-count"');
     expect(html).toMatch(/data-twl-out="desk"[\s\S]*?class="tws-wh" data-band="wait"/);
+  });
+});
+
+describe("the header's ring while loading", () => {
+  it("a list already in hand (a nudge) draws no ring segment and no count until the page has loaded", () => {
+    store.agents = [{ id: "a1", userId: "u1", name: "William Fox", agency: "Fox Literary", status: "Active", createdAt: ISO(-200), updatedAt: ISO(-200), responseTimeWeeks: 4 } as unknown as Agent];
+    store.queries = [{ id: "q1", userId: "u1", agentId: "a1", manuscriptId: "m1", status: QueryStatus.QUERIED, dateSent: ISO(-120).slice(0, 10), createdAt: ISO(-120), updatedAt: ISO(-10) } as unknown as Query];
+    store.tasks = [{ id: "t1", priority: "urgent", title: "", description: "", manuscriptTitle: "", context: "", relatedRecordId: "q1", taskType: "nudge_overdue", actionLabel: "", actionPath: "" } as Task];
+    store.tasksReady = true;
+    const loaded = render();
+    expect(loaded, "loaded: the nudge draws its segment").toContain('data-tws56="seg"');
+    store.tasksReady = false;
+    const loading = render();
+    expect(loading).not.toContain('data-tws56="seg"');
+    expect(loading).not.toContain('data-tws="todo-count"');
   });
 });
 

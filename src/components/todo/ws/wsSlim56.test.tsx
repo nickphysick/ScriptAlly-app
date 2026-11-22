@@ -31,7 +31,7 @@ describe("the To-do list's slim bar (WsSlim56)", () => {
     expect(w).toMatch(/<div className="tws tws56" data-tws="page">\s*\{[^}]*\}\s*<WsSlim56 todo=\{all\.length\} bd=\{bd\} book=\{statBook\} onAdd=\{openAdd\} \/>/);
     /* RE-POINTED (overnight fixes v1, Part 2): the header's count is blank while a read is down;
        (To-do load v1, B1) and while the tasks are not yet in */
-    expect(w).toContain('<WsHeader56 todo={loaded ? all.length : null} loading={loaded ? null : load.phase === "outline" ? "outline" : "blank"} bd={bd} book={statBook}\n            onAdd={openAdd}');
+    expect(w).toContain('<WsHeader56 todo={loaded ? all.length : null} loading={loaded ? null : load.phase === "outline" ? "outline" : "blank"} bd={loaded ? bd : NO_BREAKDOWN} book={statBook}\n            onAdd={openAdd}');
   });
   it("the pin: 72px under the scroller's top, the scrollport less 84 (a constant height); the bar on the scroller's top", () => {
     expect(read("todoWs54.css")).toContain(".tws .tws-ws { position: sticky; top: 72px; height: calc(var(--tws-port, 800px) - 84px); min-height: 0; }");

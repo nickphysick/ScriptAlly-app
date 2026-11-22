@@ -39,12 +39,16 @@ export function useTodoLoad(ready: boolean, failed: boolean, hold: number | null
   const clock = useRef<TodoLoadClock | null>(null);
   const shown = useRef(false);
   const [entering, setEntering] = useState(false);
+  /* ⚠️ A REVIEW HOLD (B5) STARTS ITS CLOCK WHEN THE REAL TASKS ARE IN, so `?load=fast` really arrives at 110ms after
+     the page could have shown them — measured: counted from mount, the real load (~0.9s on the harness) swallowed it */
+  const startKey = hold != null ? ready : null;
   useEffect(() => {
+    if (hold != null && !ready) return undefined;
     const c = todoLoadClock(setState, { ready, failed, hold });
     clock.current = c;
     setState(c.get());
     return () => { c.dispose(); clock.current = null; };
-  }, [hold]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [hold, startKey]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { clock.current?.setReady(ready); }, [ready]);
   useEffect(() => { clock.current?.setFailed(failed); }, [failed]);
   /* the loaded page fades in over the outline — only when there was an outline to fade over */

@@ -68,6 +68,8 @@ const HOUR = "/images/todo/hour.webp";
    leaf each, beside v54's batchView); v52's per-device `sa.todoTraySlim` is no longer read */
 const DAY = 86400000;
 const UNDO_MS = 7000;
+/** To-do load v1: the header's breakdown while the tasks load — every count 0, so the ring draws its track alone */
+const NO_BREAKDOWN = { wait: 0, nudge: 0, quiet: 0, house: 0, late: 0, need: 0 } as const;
 /** v53 (D10): the snackbar after a log runs for 6s; the stamp holds the logged task on the desk for ~850ms first */
 const SNACK_MS = 6000;
 const STAMP_MS = 850;
@@ -122,6 +124,8 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
   /* B2–B4 — the load's phase: blank (0–150ms), the outline, failed (an error, or 5s), loaded */
   const load = useTodoLoad(tasksIn, readFailed, loadHold);
   const loaded = load.phase === "loaded";
+  /* while loading the ring is its track alone (R4): a partial list must not draw segments (measured: housekeeping's arc
+     showed under the outline) */
   /* "Try again" (R7): re-subscribe the reads that failed where the store can (queries, agents, manuscripts); for anything
      else — the own-tasks or flags listener, or 5s with no answer — reload the route */
   const retryLoad = () => {
@@ -852,7 +856,7 @@ export const TodoWorkspace: React.FC<{ onNavigate: (tab: string, sub?: string, o
           {/* v56: the page header is the Query Centre's navy panel — the hawk at the desk, "{n} things to do", "for {book}"
               between rules (one book only), "+ Add a task" and "Quick fill", the ring and "What needs doing". A segment
               settles the page on the pinned workspace, then scrolls the tray to its group. */}
-          <WsHeader56 todo={loaded ? all.length : null} loading={loaded ? null : load.phase === "outline" ? "outline" : "blank"} bd={bd} book={statBook}
+          <WsHeader56 todo={loaded ? all.length : null} loading={loaded ? null : load.phase === "outline" ? "outline" : "blank"} bd={loaded ? bd : NO_BREAKDOWN} book={statBook}
             onAdd={openAdd}
             onQuickFill={all.some((x) => x.key === "materials-batch") ? () => quickFill() : null}
             onJump={(k) => { settle(); jump(k); }} />

@@ -40,7 +40,10 @@
   .tws .twl-out [data-twl="h2"] { width: 56px; height: 11px; }
 
   /* ── "Still loading your tasks." under the tabs (R6) ── */
-  .tws .twl-still { margin: 6px 2px 0; font: italic 14.5px/1.4 var(--tw-serif); color: var(--tw-mut); }
+  /* ⚠️ OUT OF THE FLOW (measured: in the flow it pushed the outline down 0.002 CLS when it came, and again when it went):
+     it sits under the tab head (.tws55-th, already position: relative) over the first heading's bar, which steps aside */
+  .tws .twl-still { position: absolute; left: 14px; top: 100%; z-index: 1; margin: 9px 0 0; font: italic 14.5px/1.4 var(--tw-serif); color: var(--tw-mut); }
+  .tws .tws-tray:has(.twl-still) .twl-out > .twl-gbw:first-child .twl-b { visibility: hidden; }
 
   /* ── the failed state, in the tray (R7) ── */
   .tws .twl-err { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; min-height: 320px; padding: 0 28px; }
@@ -97,11 +100,12 @@
   .tws [data-twl="hw2"] { width: 115px; height: 11px; }
 
   /* ── the loaded page fades in over the outline, 220ms (R5) ── */
-  .tws [data-twl-enter] :is(.tws-tl, .tws-desk, [data-tws56="title"]), .tws [data-twl-enter] .tws56-rc { animation: twl-enter 0.22s ease-out both; }
+  /* the tray list and the desk sit inside the workspace; the header is its sibling, reached from the page root */
+  .tws [data-twl-enter] :is(.tws-tl, .tws-desk), .tws:has(> [data-tws="workspace"][data-twl-enter]) :is([data-tws54="title"], .tws56-rc) { animation: twl-enter 0.22s ease-out both; }
   @keyframes twl-enter { from { opacity: 0; } to { opacity: 1; } }
 
   @media (prefers-reduced-motion: reduce) {
     .tws .twl-out, .tws [data-twl-out] .twl-in, .tws [data-twl-head] .twl-hw { transition: none; }
-    .tws [data-twl-enter] :is(.tws-tl, .tws-desk, [data-tws56="title"]), .tws [data-twl-enter] .tws56-rc { animation: none; }
+    .tws [data-twl-enter] :is(.tws-tl, .tws-desk), .tws:has(> [data-tws="workspace"][data-twl-enter]) :is([data-tws54="title"], .tws56-rc) { animation: none; }
   }
 }

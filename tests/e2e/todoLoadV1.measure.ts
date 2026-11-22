@@ -131,7 +131,7 @@ for (const c of ["fast", "normal", "slow", "fail"] as const) {
     await page.goto(`/todo?load=${c}`);
     const geo: Record<string, unknown> = {};
     const t0 = Date.now();
-    const n = await frames(page, c, c === "fail" ? 6500 : c === "slow" ? 5600 : 2000, c === "fast" ? 60 : 150);
+    const n = await frames(page, c, c === "fail" ? 7500 : c === "slow" ? 6500 : 2800, c === "fast" ? 60 : 150);
     void t0;
     /* the geometry while loading (taken from the log's phase) and once loaded */
     await page.waitForTimeout(800);
@@ -160,7 +160,7 @@ test("B6.2 — nothing moves at the swap (load=slow, measured while loading and 
   await page.waitForTimeout(1500);
   const loading = await geom(page);
   const swapAt = await page.evaluate(() => performance.now());
-  await page.waitForTimeout(4500);
+  await page.waitForTimeout(6000);
   const loaded = await geom(page);
   const cls = (await page.evaluate(() => (window as unknown as { __cls: { t: number; v: number }[] }).__cls));
   const atSwap = cls.filter((e) => e.t >= swapAt);
