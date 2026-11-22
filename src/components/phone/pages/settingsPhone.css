@@ -31,7 +31,7 @@
   .pa-set .sc-dsc, .pa-set .sc-note { font-size: 13px !important; color: var(--pa-muted) !important; margin-top: 2px; }
   .pa-set .sc-ctl { flex: none; max-width: 100%; }
   .pa-set .sc-row--full .sc-row-l, .pa-set .sc-row--full > * { flex: 1 1 100%; }
-  .pa-set .sc-cf { padding: 10px 14px 12px !important; border: 0 !important; background: var(--pa-page) !important; }
+  .pa-set .sc-cf { padding: 10px 14px 12px !important; border: 0 !important; background: var(--pa-inset-legacy) !important; }
   .pa-set .sc-cf-note { font-size: 13px !important; color: var(--pa-muted) !important; }
 
   /* the switch (ref .toggle-sw) — the desktop's own control and its handler, only its dress */

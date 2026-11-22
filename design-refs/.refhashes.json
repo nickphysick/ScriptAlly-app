@@ -1254,7 +1254,9 @@
     "design-refs/analytics-v26/screens/03-day-one-1280@2x.png": "b8e6fdd6e3fa0a3d592e48d0ccb3bff3ed80b7d00af5020f7139ac9525bc1e26",
     "design-refs/analytics-v26/screens/01-everyday-1280@2x.png": "8ff7003dd31c8c784cbab7cf36e67e26daaa1cb54190a3fa4bd19ed1a289321a",
     "design-refs/analytics-v26/screens/03-day-one-390@2x.png": "6940673793a6a5322d4c8776bfb102903bf5257e71177623ced0ee7f0af53553",
-    "design-refs/manuscripts-v29/manuscripts-v29.html": "4ed4f3bae217f9c43b25e8cbe23a322ff7be58b577937f328723c3099d45f960"
+    "design-refs/manuscripts-v29/manuscripts-v29.html": "4ed4f3bae217f9c43b25e8cbe23a322ff7be58b577937f328723c3099d45f960",
+    "design-refs/phone-style-v1/phone-style-v1.html": "42d81906d253ef632b25755765ca98ac19d0df7433d2d141daeda58e95177bd0",
+    "design-refs/phone-style-v1/phone-today-v6.html": "1e12a1f2a7cb48a7163b370e08f5195b0f552fc2e9c5ca70a00f77aba457d9d7"
   },
   "superseded": {
     "design-refs/manuscripts/manuscripts-v12.html": "Superseded 3 Oct by design-refs/manuscripts/manuscripts-v13.html (manuscripts v13, the shelf); kept for history — its hero and empty state carry forward.",

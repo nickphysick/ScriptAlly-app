@@ -152,6 +152,39 @@ Nick's consistency rulings (design-refs/consistency-rollout-v1/consistency-rulin
 - **The rules check:** `npm run audit:rules` (audits/consistency-v2: fifteen rules, exceptions in `exceptions.json`, each with a reason; `CA_ONLY`, `CA_VIEWPORTS`, `CA_OUT`).
 - **The consistency audit:** `npm run e2e:emu -- --config audits/consistency-v1/playwright.audit.config.ts` (through the test slot; `CA_ONLY=<pages>`, `CA_VIEWPORTS=1512,1920`, `CA_OUT=<dir>`), then `node audits/consistency-v1/analyse.mjs <dir>` writes findings.json.
 
+## Phone style (settled)
+Below 768px only. The sheet is `design-refs/phone-style-v1/phone-style-v1.html` (P1–P27; tokens `--ps-*` in `src/components/phone/phoneTokens.css`; parts in `src/components/phone/phoneStyle.css`). Today's Queries tab is built to it (`phone-today-v6.html`); every other phone screen is audited (`reports/phone-style-v1/audit.md`) and rolled out only on Nick's order.
+- P1 The page is oat, the same as the desktop. Content sits on white cards.
+- P2 One navy for the header, the filled button, links and the selected state. Text on navy is white.
+- P3 Blush is an accent, never a button. Text on blush is ink.
+- P4 Stage colours come only from the stage table, and appear only on a mark's disc, the lead card and a Birds-eye bar.
+- P5 One coloured card per screen. It is the thing that needs you. Every other card is white.
+- P6 Small grey text sits on white only. On the oat page it falls below the contrast floor, so text on the page is ink or the darker grey.
+- P7 No green. Red only on a destructive action. Colour never marks a passed date.
+- P8 Six sizes and no others: 56, 28, 20, 16, 14, 12.
+- P9 Two weights: regular and semibold. Semibold is for names, section headings, buttons, tabs and links. Not for sentences.
+- P10 The typewriter face is for three things: the page title, numerals that are the point of a part, and one headline per screen. Never below 20, never bold, never for labels.
+- P11 Everything else is the phone's own system font.
+- P12 12 is for three named uses only: dock labels, chart axis labels, and the unit under a numeral. Everything else that is read is 14 or more.
+- P13 Sentence case throughout. No capitals-only labels, no letter-spaced labels. Times and counts use tabular figures.
+- P14 Spacing steps: 4, 8, 12, 16, 24, 32. Nothing in between.
+- P15 16 from the screen edge to every card, heading and tile. One left edge, one right edge.
+- P16 24 above a section heading, 8 below it. 8 between cards in the same section.
+- P17 16 inside a card. 12 between a disc and its text. 8 between tiles.
+- P18 A row is at least 64 high. Anything you can tap is at least 48 by 48.
+- P19 Corners: 16 for cards and tiles, 24 for the top of a sheet, fully round for buttons, pills, chips and discs.
+- P20 Two shadows: the card's hairline, and one raised shadow for things that float (sheets, the snackbar). Nothing else casts one.
+- P21 A dashed or dotted edge means "not filled in yet" and nothing else.
+- P22 One icon set: drawn on a 24 box with a 1.8 line and round ends. Status is only ever drawn by the status marks.
+- P23 Everything you can tap answers the touch: a row dims, a button presses in slightly. Within a tenth of a second.
+- P24 Motion confirms and never decorates. 150 to 300 milliseconds, easing out. The stamp is the one signature moment.
+- P25 After any save: the snackbar with Undo. Never a pop-up that says "Success".
+- P26 While loading: grey shapes in the layout of the card that is coming. Never a spinner on a blank screen, and nothing jumps when the data lands.
+- P27 With reduced motion switched on, nothing moves.
+- **The parts** (`phoneStyle.css`): `ps-card`, `ps-row` (pressed state), `ps-hdg`, `ps-tiles`/`ps-tile`, `ps-lead`, `ps-cta`, `ps-link`, `ps-tlink`, `ps-chip`, `ps-need`, `ps-slim`, `ps-tabs`, `ps-ber`, `ps-snack`, `ps-skel`; a row's mark is `PhoneDisc` at 40 (StatusDot on its stage band). Marks for the locks: `data-ps-cap` (a permitted 12), `data-ps-empty` (a permitted dashed edge).
+- **New phone work uses these tokens and parts.** A size, colour, radius, shadow or part that is not in the sheet is a question for Nick, never a local decision. `--pa-inset-legacy` is a holding value: never a new reader.
+- **The locks:** PS1, measured — `npm run e2e:emu -- tests/e2e/phoneStyle.measure.ts --project=pixel` (Today is a hard gate; every other phone screen runs in report mode, `PS_OUT`, `PS_MUTATE`). The ratchet, in CI — `src/lib/phoneStyle.census.test.ts` against `phoneStyle.baseline.json`: a phone stylesheet's breach count may only go down; a pack that fixes a screen lowers the baseline.
+
 ## Dev-only routes and locked surfaces
 - Dev-only lab routes (`#/contact-lab`, `#/onb-lab`, `#/shell-lab`, `#/status-dots`) are gated on `MODE`/`import.meta.env.DEV`; a review aid's call site carries its own mode gate so production ships none of it. Grep the production bundle for a lab's names before a prod release; remove any dev route that has outlived its purpose before it reaches prod.
 - `#/pkg-lab` and its six components are deleted (25 Aug). `AllManuscripts.tsx` (the book profile) is locked and unit-tested and rendered by no route — do not delete or edit it casually.
