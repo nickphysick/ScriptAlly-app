@@ -10,6 +10,8 @@
  *    the pack's. Nothing on the card writes a status.
  * ⚠️ NO PRONOUNS FOR THE AGENT: every line names them.
  */
+import { materialIconKind, type MaterialIconKind } from "./materialIcon";
+import { SAMPLE_MATERIAL } from "./sentSample";
 import { QueryStatus, SubmissionMethod, type Agent } from "../types";
 import type { AgentFacts } from "./contactList";
 import type { CallBox } from "./contactV24";
@@ -135,16 +137,18 @@ export function factBoxes(a: Agent, door: AgentFacts["door"]): FactBoxIn[] {
 }
 export const factBoxesShown = (boxes: readonly FactBoxIn[]): boolean => boxes.some((b) => b.value != null);
 
-/** "What {first} asks for": one line each, the quantity at the right ("2 pages", "3 chapters") */
-export function askList(a: Pick<Agent, "materialsWanted">): { label: string; qty: string | null; kind: "letter" | "doc" | "pages" }[] {
+/** "What {first} asks for": one line each, the quantity at the right ("2 pages", "3 chapters").
+ *  `icon` (Material icons v1): the row's material drawing — the sample's by its unit; Other is free text and has none. */
+export function askList(a: Pick<Agent, "materialsWanted">): { label: string; qty: string | null; kind: "letter" | "doc" | "pages"; icon: MaterialIconKind | null }[] {
   return materialRowsFromAgent(a.materialsWanted).filter((r) => r.on).map((r) => {
     if (r.key === "sample") {
       const n = parseInt(r.amount, 10);
-      return Number.isFinite(n) && n > 0 ? { label: `First ${r.amount} ${r.unit.toLowerCase()}`, qty: null, kind: "pages" as const } : { label: "Opening sample", qty: null, kind: "pages" as const };
+      const icon = materialIconKind({ material: SAMPLE_MATERIAL, type: r.unit.toLowerCase() as "pages" | "chapters" | "words" });
+      return Number.isFinite(n) && n > 0 ? { label: `First ${r.amount} ${r.unit.toLowerCase()}`, qty: null, kind: "pages" as const, icon } : { label: "Opening sample", qty: null, kind: "pages" as const, icon };
     }
-    if (r.key === "synopsis") return { label: "Synopsis", qty: r.pages ? `${r.pages} ${String(r.pages) === "1" ? "page" : "pages"}` : null, kind: "doc" as const };
-    if (r.key === "other") return { label: (r.text ?? "").trim() || "Something else", qty: null, kind: "doc" as const };
-    return { label: r.name, qty: null, kind: "letter" as const };
+    if (r.key === "synopsis") return { label: "Synopsis", qty: r.pages ? `${r.pages} ${String(r.pages) === "1" ? "page" : "pages"}` : null, kind: "doc" as const, icon: "synopsis" as const };
+    if (r.key === "other") return { label: (r.text ?? "").trim() || "Something else", qty: null, kind: "doc" as const, icon: null };
+    return { label: r.name, qty: null, kind: "letter" as const, icon: "letter" as const };
   });
 }
 

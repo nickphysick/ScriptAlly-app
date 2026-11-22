@@ -31,10 +31,6 @@ export const ICO = {
   web: <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><circle cx="7" cy="7" r="5.5" /><path d="M1.5 7h11M7 1.5c2 2 2 9 0 11M7 1.5c-2 2-2 9 0 11" /></svg>,
   mail: <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="1.5" y="3" width="11" height="8" rx="1" /><path d="M1.5 3.5l5.5 4 5.5-4" /></svg>,
   list: <svg viewBox="0 0 14 14" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M4 3.5h8M4 7h8M4 10.5h8" /><circle cx="1.8" cy="3.5" r=".6" /><circle cx="1.8" cy="7" r=".6" /><circle cx="1.8" cy="10.5" r=".6" /></svg>,
-  ql: <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><rect x="2.5" y="1.5" width="9" height="11" rx="1" /><path d="M4.5 4.5h5M4.5 7h5M4.5 9.5h3" /></svg>,
-  syn: <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M3 1.5h5.5L11 4v8.5H3z" /><path d="M8.5 1.5V4H11" /></svg>,
-  smp: <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M4.5 3.5h7v9h-7z" /><path d="M2.5 10.5v-9h7" /></svg>,
-  oth: <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.2" aria-hidden="true"><path d="M7 2.5v9M2.5 7h9" /></svg>,
   pen: <svg viewBox="0 0 14 14" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.3" aria-hidden="true"><path d="M9.5 2l2.5 2.5L5 11.5 2 12l.5-3z" /></svg>,
 };
 
@@ -93,7 +89,8 @@ export const MaterialsBlock: React.FC<{ mats: MatChip[]; label?: string; onAdd: 
     <h4 className="acq-lab">{label}</h4>
     {mats.length ? (
       <div className="acq-mats">
-        {mats.map((m) => <span key={`${m.kind}-${m.label}`} className="acq-mat">{ICO[m.kind]}{m.label}</span>)}
+        {/* Material icons v1: words only — 9.5px type in a padded chip, and the 14px minimum would grow it (REPORT.md) */}
+        {mats.map((m) => <span key={`${m.kind}-${m.label}`} className="acq-mat">{m.label}</span>)}
       </div>
     ) : <Torn text="Not recorded" clv="torn-materials" onAdd={onAdd} probe={probe} />}
   </div>

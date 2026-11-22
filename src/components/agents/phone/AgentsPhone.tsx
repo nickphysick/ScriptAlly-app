@@ -12,6 +12,8 @@
  *
  * Missing facts are left out — never a dash, never "Unknown".
  */
+import { MaterialItemIcon } from "../../shared/MaterialIcon";
+import { materialIconKind } from "../../../lib/materialIcon";
 import React, { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useScriptAllyDb } from "../../../lib/db";
@@ -140,7 +142,7 @@ export const DiscoverPhone: React.FC = () => {
             <div className="pa-dname">{peek.name || peek.agency}</div>
             {peek.name && peek.agency ? <div className="pa-asub">{peek.agency}</div> : null}
             {peek.mswlNotes?.trim() ? <><div className="pa-asec">What they’re looking for</div><p className="pa-aquote">“{peek.mswlNotes.trim().replace(/[.]$/, "")}.”</p></> : null}
-            {peek.materialsWanted?.length ? <><div className="pa-asec">They ask for</div><div className="pa-pillrow">{peek.materialsWanted.map((m) => <span key={m} className="pa-tag white">{m}</span>)}</div></> : null}
+            {peek.materialsWanted?.length ? <><div className="pa-asec">They ask for</div><div className="pa-pillrow">{peek.materialsWanted.map((m) => <span key={m} className="pa-tag white"><MaterialItemIcon kind={materialIconKind(m)} inline />{m}</span>)}</div></> : null}
             <p className="pa-asub">{[howWords(peek.submissionMethod), domainOf(peek)].filter(Boolean).join(" · ")}</p>
             <p className="pa-asub">{doorWords(peek)}</p>
           </div>

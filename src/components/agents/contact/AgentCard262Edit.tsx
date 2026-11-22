@@ -21,6 +21,9 @@
  *    response-time offer under the slider's hint, a powder note when a request in progress is safe, and quiet grey
  *    footnotes for the rest. Nothing happens until How's tick; the snackbar names what it did.
  */
+import { MaterialItemIcon, type MaterialIconKind } from "../../shared/MaterialIcon";
+import { materialIconKind } from "../../../lib/materialIcon";
+import { SAMPLE_MATERIAL } from "../../../lib/sentSample";
 import React from "react";
 import { QueryStatus, type Agent } from "../../../types";
 import { StatusDot } from "../../StatusDot";
@@ -201,10 +204,12 @@ export const MaterialRows: React.FC<{ mats: CardMats; onMats: (m: CardMats) => v
   const othRef = React.useRef<HTMLInputElement>(null);
   const wasOth = React.useRef(m.oth.on);
   React.useEffect(() => { if (m.oth.on && !wasOth.current) othRef.current?.focus({ preventScroll: true }); wasOth.current = m.oth.on; }, [m.oth.on]);
+  /* Material icons v1: each row's material drawing before its words (the sample's by its unit; Other has none) */
+  const ICON: Record<string, MaterialIconKind | null> = { ql: "letter", syn: "synopsis", smp: m.smp.on ? materialIconKind({ material: SAMPLE_MATERIAL, type: m.smp.unit.toLowerCase() as "pages" | "chapters" | "words" }) : "pages", oth: null };
   const row = (k: string, on: boolean, label: React.ReactNode, toggle: () => void, right: React.ReactNode, sub?: React.ReactNode) => (
     <li key={k} data-acv21="mrow" data-k={k} data-on={on ? "" : undefined}>
       <div className="ag-mrow">
-        <button type="button" role="checkbox" aria-checked={on} data-acv21="mtick" data-k={k} onClick={toggle}>{on ? RTICK : RNONE}<span>{label}</span></button>
+        <button type="button" role="checkbox" aria-checked={on} data-acv21="mtick" data-k={k} onClick={toggle}>{on ? RTICK : RNONE}<MaterialItemIcon kind={ICON[k] ?? null} size={20} /><span>{label}</span></button>
         {on ? right : <span className="r" data-acv21="not-asked">not asked for</span>}
       </div>
       {on && sub ? <div className="ag-msub">{sub}</div> : null}

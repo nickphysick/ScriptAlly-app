@@ -21,6 +21,9 @@
  * treatment ships (grey #a09080, no strike-through — reporting, not appraising) so the day the
  * field exists the grammar is waiting, and a lock asserts no chip wears it today.
  */
+import { MaterialItemIcon } from "../shared/MaterialIcon";
+import { materialIconKind } from "../../lib/materialIcon";
+import { SAMPLE_MATERIAL } from "../../lib/sentSample";
 import React from "react";
 import { StatusDot } from "../StatusDot";
 import { materialRowsFromAgent } from "../../lib/agentMaterials";
@@ -63,6 +66,10 @@ export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, on
       if (r.key === "other") return r.text.trim() || r.name;
       return r.name;
     });
+  /* Material icons v1: each chip's drawing from its row (the sample's by its unit; Other has none) */
+  const askIcons = materialRowsFromAgent(agent.materialsWanted).filter((r) => r.on)
+    .map((r) => (r.key === "queryLetter" ? "letter" as const : r.key === "synopsis" ? "synopsis" as const
+      : r.key === "sample" ? materialIconKind({ material: SAMPLE_MATERIAL, type: r.unit.toLowerCase() as "pages" | "chapters" | "words" }) : null));
   const socials = (agent.socials ?? []).filter((s) => s.handle?.trim());
   const yourCount = history.length;
 
@@ -132,7 +139,7 @@ export const QueryAgentTab: React.FC<QueryAgentTabProps> = ({ agent, history, on
       {asks.length > 0 && (
         <div className="qat-asks">
           <span className="qat-ak">{(agent.name || agent.agency).split(/\s+/)[0]} asks for</span>
-          {asks.map((a) => <span key={a} className="qat-achip">{a}</span>)}
+          {asks.map((a, i) => <span key={a} className="qat-achip"><MaterialItemIcon kind={askIcons[i] ?? null} inline />{a}</span>)}
         </div>
       )}
 

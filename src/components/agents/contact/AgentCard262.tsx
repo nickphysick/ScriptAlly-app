@@ -23,6 +23,7 @@
  *    The fields' rules, the offers and what each field stores are as built (Contact list v26.2 C, Card offers v1, Add
  *    agent v1). Decisions: docs/decisions/agent-card.md.
  */
+import { MaterialItemIcon } from "../../shared/MaterialIcon";
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ESC_LEVEL, useEscapeLayer } from "../../../lib/escapeStack";
 import { StatusDot } from "../../StatusDot";
@@ -174,9 +175,6 @@ const BOX_FIELD: Record<"reply" | "method" | "door", string> = { reply: "weeks",
 /** the dotted "not queried" ring, at the size the query card's footer disc holds */
 const NQ16 = <svg viewBox="0 0 14 14" width="16" height="16" aria-hidden="true"><circle cx="7" cy="7" r="5.6" fill="none" stroke="#2a3a52" strokeWidth="1.5" strokeDasharray="1.6 2" /></svg>;
 const BOOK = <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#5f5a53" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><path d="M3.5 5.5c2.8-1.3 5.8-1.3 8.5.6 2.7-1.9 5.7-1.9 8.5-.6v13c-2.8-1.3-5.8-1.3-8.5.6-2.7-1.9-5.7-1.9-8.5-.6z" /><path d="M12 6.1v13" /></svg>;
-const LETTER = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
-const PAGE = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M4 2h6l2.5 2.5V14H4z" /><path d="M6 7h4M6 9.5h4" /></svg>;
-const PAGES = <svg viewBox="0 0 16 16" width="13" height="13" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><path d="M5 2.5h7v10H5z" /><path d="M3.5 4.5v10h7" /></svg>;
 /* Agent card v2.1 — the head's contact line: the mail glyph, the copy glyph, the globe */
 const MAIL15 = <svg viewBox="0 0 16 16" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true"><rect x="2" y="3.5" width="12" height="9" rx="1.5" /><path d="m2.5 4.5 5.5 4 5.5-4" /></svg>;
 const COPY = <svg viewBox="0 0 20 20" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinejoin="round" aria-hidden="true"><rect x="7" y="7" width="10" height="10" rx="2" /><path d="M13 7V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2" /></svg>;
@@ -900,7 +898,7 @@ export const AgentCard262: React.FC<AgentCard262Props> = (p) => {
         <section className="acv2-sec ag-sec" data-cl262="sec" data-k="materials" data-qc158="asks" data-acv2="asks" data-acv2-part="asks">
           <h4>What {m.first} asks for{penFor("materials")}</h4>
           <ul className="nx-list" {...doorOf("materials")}>{asks.map((c) => (
-            <li key={c.label} data-acv2="ask">{c.kind === "letter" ? LETTER : c.kind === "pages" ? PAGES : PAGE}{c.label}{c.qty ? <span className="r">{c.qty}</span> : null}</li>
+            <li key={c.label} data-acv2="ask"><MaterialItemIcon kind={c.icon} size={20} />{c.label}{c.qty ? <span className="r">{c.qty}</span> : null}</li>
           ))}</ul>
         </section>
       ) : null}

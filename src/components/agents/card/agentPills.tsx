@@ -35,6 +35,9 @@ import { useFixedMenu } from "../../forms/useFixedMenu";
 import { WeekSlider } from "../../forms/WeekSlider";
 import { CountryCombobox } from "../../forms/CountryCombobox";
 import { DateField } from "./cardInputs";
+import { MaterialIcon } from "../../shared/MaterialIcon";
+import { materialIconKind } from "../../../lib/materialIcon";
+import { SAMPLE_MATERIAL } from "../../../lib/sentSample";
 import "./agentPills.css";
 
 /* ── the words ─────────────────────────────────────────────────────────────────────────────────── */
@@ -166,13 +169,15 @@ export const MaterialPills: React.FC<{ mats: CardMats; onMats: (m: CardMats) => 
   useEffect(() => { if (m.oth.on && !wasOth.current) othRef.current?.focus({ preventScroll: true }); wasOth.current = m.oth.on; }, [m.oth.on]);
   const ck = <span className="aap-ck" aria-hidden="true">✓</span>;
   const plus = <span className="aap-plus" aria-hidden="true">+</span>;
+  /* Material icons v1: the sample's drawing follows its unit; an unpicked sample is pages */
+  const smpIcon = materialIconKind({ material: SAMPLE_MATERIAL, type: m.smp.unit.toLowerCase() as "pages" | "chapters" | "words" }) ?? "pages";
   return (
     <>
       <div className="aap-pills aap-mats" data-mats="" data-aap="mats">
-        <Pill role="button" on={m.ql} data={{ "data-mat": "ql" }} onClick={() => onMats(MAT_OPS.ql(m))}>{m.ql ? ck : plus}Covering letter</Pill>
+        <Pill role="button" on={m.ql} data={{ "data-mat": "ql" }} onClick={() => onMats(MAT_OPS.ql(m))}>{m.ql ? ck : plus}<MaterialIcon kind="letter" />Covering letter</Pill>
         {m.syn.on ? (
           <span className="aap-pill on amt" data-aap="mat-syn">
-            {ck}Synopsis
+            {ck}<MaterialIcon kind="synopsis" />Synopsis
             <button type="button" className="aap-mb" data-syn="-1" disabled={MAT_OPS.synLessOff(m)} aria-label="Shorter"
               onClick={() => onMats(MAT_OPS.synLess(m))}>−</button>
             <AmountBox value={m.syn.len} placeholder="any" label="Synopsis length in pages" data="syn-qty"
@@ -182,10 +187,10 @@ export const MaterialPills: React.FC<{ mats: CardMats; onMats: (m: CardMats) => 
             {m.syn.len ? (m.syn.len === 1 ? "page" : "pages") : "length"}
             <button type="button" className="aap-x" data-mat="syn" aria-label="Remove synopsis" onClick={() => onMats(MAT_OPS.synOff(m))}>×</button>
           </span>
-        ) : <Pill role="button" on={false} data={{ "data-mat": "syn" }} onClick={() => onMats(MAT_OPS.synOn(m))}>{plus}Synopsis</Pill>}
+        ) : <Pill role="button" on={false} data={{ "data-mat": "syn" }} onClick={() => onMats(MAT_OPS.synOn(m))}>{plus}<MaterialIcon kind="synopsis" />Synopsis</Pill>}
         {m.smp.on ? (
           <span className={`aap-pill on amt wide${bad ? " bad" : ""}`} data-aap="mat-smp" data-bad={bad ? "" : undefined}>
-            {ck}Opening sample<span className="aap-gap" />
+            {ck}<MaterialIcon kind={smpIcon} />Opening sample<span className="aap-gap" />
             <button type="button" className="aap-x" data-mat="smp" aria-label="Remove opening sample" onClick={() => onMats(MAT_OPS.smpOff(m))}>×</button>
             <span className="aap-br" />First
             <button type="button" className="aap-mb" data-qty="-1" disabled={MAT_OPS.smpLessOff(m)} aria-label="Fewer"
@@ -200,7 +205,7 @@ export const MaterialPills: React.FC<{ mats: CardMats; onMats: (m: CardMats) => 
               ))}
             </span>
           </span>
-        ) : <Pill role="button" on={false} data={{ "data-mat": "smp" }} onClick={() => onMats(MAT_OPS.smpOn(m))}>{plus}Opening sample</Pill>}
+        ) : <Pill role="button" on={false} data={{ "data-mat": "smp" }} onClick={() => onMats(MAT_OPS.smpOn(m))}>{plus}<MaterialIcon kind="pages" />Opening sample</Pill>}
         {m.oth.on ? (
           <span className="aap-pill on amt" data-aap="mat-oth">
             {ck}<input ref={othRef} className="aap-pin" data-aap="mat-oth-input" maxLength={Math.max(OTHER_MAX, m.oth.text.length)} value={m.oth.text} placeholder="e.g. Author photo" aria-label="Other"

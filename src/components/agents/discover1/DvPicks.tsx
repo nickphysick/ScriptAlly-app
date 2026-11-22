@@ -12,6 +12,8 @@
  *    a modal, and while any escape-stack layer is open (the Tune drawer, the passed list, the query drawer) — lock C3.
  * ⚠️ THE FLAG AND EVERY ARROW ARE DRAWN — flag-icons' SVG and inline paths — never typed characters.
  */
+import { MaterialItemIcon } from "../../shared/MaterialIcon";
+import { materialIconKind } from "../../../lib/materialIcon";
 import React, { useEffect, useRef } from "react";
 import { SubmissionStatus, type CommunityAgent, type Manuscript } from "../../../types";
 import { highlightSegments } from "../../../lib/discoverAgents";
@@ -34,7 +36,6 @@ const Ico = {
   clock: <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>,
   mail: <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></svg>,
   mute: <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z" /><path d="m16 9 5 6M21 9l-5 6" /></svg>,
-  doc: <svg viewBox="0 0 12 14" aria-hidden="true"><path d="M1.5 1h6l3 3v9h-9z" /><path d="M3.5 7h5M3.5 9.5h5" /></svg>,
   out: <svg viewBox="0 0 12 12" aria-hidden="true"><path d="M4 2h6v6M10 2 3 9" /></svg>,
 };
 
@@ -119,7 +120,7 @@ const LeadCard: React.FC<{
         <div className="dv1-facts" data-dv1="facts">
           {a.genres?.length ? <div className="dv1-fg"><h5>Genres sought</h5><div className="dv1-chips">{a.genres.map((g) => <span key={g} className={hit(g) ? "hit" : ""}>{g}</span>)}</div></div> : null}
           {segs.length ? <div className="dv1-wish"><h5>Manuscript wish list</h5><p className="dv1-quote">{segs.map((s, i) => (s.hit ? <b key={i}>{s.text}</b> : <React.Fragment key={i}>{s.text}</React.Fragment>))}</p></div> : null}
-          {mats.length ? <div className="dv1-fm"><h5>Materials requested</h5><div className="dv1-chips dv1-mats">{mats.map((m) => <span key={m}>{Ico.doc}{m}</span>)}</div></div> : null}
+          {mats.length ? <div className="dv1-fm"><h5>Materials requested</h5><div className="dv1-chips dv1-mats">{mats.map((m) => <span key={m}><MaterialItemIcon kind={materialIconKind(m)} size={14} />{m}</span>)}</div></div> : null}
         </div>
         <div className="dv1-acts">
           <button type="button" className="dv1-b p dv1-lg" data-dv1="add" disabled={busy} onClick={() => onDecide("add")}>+ Add to contact list</button>

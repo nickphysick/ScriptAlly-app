@@ -56,11 +56,9 @@ const Stars: React.FC<{ n: number }> = ({ n }) => (
   </span>
 );
 
-export const PaperIcon: React.FC<{ kind: "doc" | "pages" | "web" | "mail" }> = ({ kind }) => (
+export const PaperIcon: React.FC<{ kind: "web" | "mail" }> = ({ kind }) => (
   <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-    {kind === "doc" ? <path d="M4 1.5h5.5L12.5 4.5v10h-8.5zM9.5 1.5v3h3" />
-      : kind === "pages" ? <path d="M5.5 3.5h7v11h-7zM3.5 12.5v-11h7" />
-      : kind === "web" ? <><circle cx="8" cy="8" r="6.2" /><path d="M1.8 8h12.4M8 1.8c2 2.2 2 10.2 0 12.4M8 1.8c-2 2.2-2 10.2 0 12.4" /></>
+    {kind === "web" ? <><circle cx="8" cy="8" r="6.2" /><path d="M1.8 8h12.4M8 1.8c2 2.2 2 10.2 0 12.4M8 1.8c-2 2.2-2 10.2 0 12.4" /></>
       : <><rect x="1.8" y="3.5" width="12.4" height="9" rx="1.2" /><path d="m2.2 4.2 5.8 4.6 5.8-4.6" /></>}
   </svg>
 );
@@ -165,7 +163,8 @@ export const AgentPaperCard: React.FC<{
   const mats = ghost ? <span className="apc-chips">{bar(96, 28)}</span>
     : d.materials.length ? (
       <span className="apc-chips" data-apc="materials">
-        {d.materials.map((m) => <span key={m.label} className="apc-mat"><PaperIcon kind={m.kind} />{m.label}</span>)}
+        {/* Material icons v1: words only — 11.5px type in a 7px-padded chip, and the 14px minimum would grow it (REPORT.md) */}
+        {d.materials.map((m) => <span key={m.label} className="apc-mat">{m.label}</span>)}
       </span>
     ) : add("materials", "+ Add what they ask for");
   const body = (
