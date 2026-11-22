@@ -529,22 +529,14 @@ export const QcCard152: React.FC<QcCard152Props> = (p) => {
           <em>{d.lastHeardMs != null ? `${Math.max(0, Math.round((nowMs - d.lastHeardMs) / 86_400_000))} days ago` : r.sentMs != null ? `since ${dayLabel(r.sentMs, nowMs)}` : ""}</em></div>
       </div>
   );
-  /* a double-click on a detail outside edit mode enters it (with that detail's menu open, where it has one) */
-  const dbl = (k: "weeks" | "asks" | "method" | "wishlist" | "email" | "website") => p.editData ? {
-    "data-ed-r": k,
-    onDoubleClick: (e: React.MouseEvent<HTMLElement>) => { if (ed.on) return; ed.start(k === "asks" || k === "method" ? k : null, e.currentTarget); },
-  } : {};
-  /* v158 §3 — the Agent tab, facts first: three fact boxes, contact, what the agent asks for, the wishlist, two links.
-     Every value is the agent's own record (lib/qcCardView); an unrecorded one is a link that opens the agent's card at it.
-     Double-click on a box or row enters edit mode at that detail, as before. The agent is always named, never a pronoun. */
-  const agentPane = ed.on && ed.dr ? (
-    <AgentEditPane layer={ed} first={(edAgent?.name ?? p.first ?? "the agent").split(/\s+/)[0]} strip={agentStrip}
-      onQueryStep={queryStepId ? () => openStep(queryStepId) : null} />
-  ) : (
-    <AgentTab158 first={first} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
+  /* v158 §3 / v167 §B — the Agent tab: three tiles, what the agent asks for, and the row to the agent's full card. Every
+     value is the agent's own record (lib/qcCardView). A tile or the asks list opens the agent's card at that detail.
+     The agent is always named, never a pronoun. */
+  const agentPane = (
+    <AgentTab158 first={first} initials={r.initials} nowMs={nowMs} weeks={d.agentWeeks} nrmn={d.nrmn} how={d.how} queriedVia={d.queriedVia}
       sentMs={r.sentMs ?? null} lastHeardMs={d.lastHeardMs} asks={ask} hasAsks={d.asks.length > 0}
-      wishlist={p.wishlist} email={p.email} website={p.website} websiteHref={p.websiteHref ?? null}
-      onCopyEmail={p.onCopyEmail} onField={p.onAgentField} onEdit={() => (p.editData ? ed.start() : p.onPencil())} dbl={dbl} />
+      onOpen={ed.on ? null : (k) => p.onAgentField(k === "weeks" ? "reply" : k === "method" ? "method" : "materials")}
+      onFullCard={() => p.onAgentField(null)} />
   );
 
   /* v158 §4 — the Materials tab, by what each thing went with (lib/qcThread152 materialGroups). "Edit what went" opens
