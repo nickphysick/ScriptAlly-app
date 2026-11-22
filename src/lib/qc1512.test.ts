@@ -81,9 +81,9 @@ describe("the Next-action groups", () => {
 
 describe("the Next number", () => {
   it("late, left, overdue, to reply, none", () => {
-    expect(nextNum(row({ status: QueryStatus.PARTIAL_REQUESTED, expected: at(-8) }), NOW)).toEqual({ kind: "num", n: 8, label: ["days", "late"], tone: "late" });
+    expect(nextNum(row({ status: QueryStatus.PARTIAL_REQUESTED, expected: at(-8) }), NOW)).toEqual({ kind: "num", n: 8, label: ["days", "past"], tone: "late" });
     expect(nextNum(row({ status: QueryStatus.OFFER, expected: at(1) }), NOW)).toEqual({ kind: "num", n: 1, label: ["day", "left"], tone: "ink" });
-    expect(nextNum(row({ status: QueryStatus.QUERIED, expected: at(-37) }), NOW)).toEqual({ kind: "num", n: 37, label: ["days", "overdue"], tone: "late" });
+    expect(nextNum(row({ status: QueryStatus.QUERIED, expected: at(-37) }), NOW)).toEqual({ kind: "num", n: 37, label: ["days", "past"], tone: "late" });
     expect(nextNum(row({ status: QueryStatus.FULL_SENT, expected: at(36) }), NOW)).toEqual({ kind: "num", n: 36, label: ["days", "to reply"], tone: "faint" });
     expect(nextNum(row({ status: QueryStatus.REJECTED }), NOW)).toEqual({ kind: "dash" });
   });
