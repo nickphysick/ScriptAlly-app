@@ -2,7 +2,7 @@
  {
   "name": "save: population — frames held between the press-in and the landing",
   "ok": true,
-  "got": "75"
+  "got": "74"
  },
  {
   "name": "save: every one at scale 0.985",
@@ -12,12 +12,12 @@
  {
   "name": "population: a long task (over 50ms) ran while the frame was held",
   "ok": true,
-  "got": "[1309,56,50,96,52]"
+  "got": "[1088,91]"
  },
  {
   "name": "the frames either side of the long task are at 0.985",
   "ok": true,
-  "got": "[0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985,0.985]"
+  "got": "[0.985,0.985,0.985,0.985,0.985,0.985,0.985]"
  },
  {
   "name": "the press is a finished animation filled forwards (the compositor holds it)",

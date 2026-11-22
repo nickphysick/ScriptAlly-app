@@ -12,7 +12,7 @@
  {
   "name": "stepping to another query: the frame is at scale 1 within 200ms, and stays there",
   "ok": true,
-  "got": "73 frames: [1]"
+  "got": "77 frames: [1]"
  },
  {
   "name": "stepping to another query: no breathing animation remains",

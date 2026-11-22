@@ -2,7 +2,7 @@
  {
   "name": "save: population — frames with the pop running",
   "ok": true,
-  "got": "64"
+  "got": "67"
  },
  {
   "name": "save: the pop's keyframes peak at 1.03 (42%), 620ms",
@@ -12,12 +12,12 @@
  {
   "name": "save: the painted peak is above 1.025, never above 1.03",
   "ok": true,
-  "got": "1.02945"
+  "got": "1.02946"
  },
  {
   "name": "undo: population — frames with the bump running",
   "ok": true,
-  "got": "61"
+  "got": "63"
  },
  {
   "name": "undo: the bump's keyframes dip to 0.975 (30%), 620ms, none above 1",

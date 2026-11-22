@@ -1,13 +1,13 @@
 {
  "got": {
-  "q": "{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-13\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-20\",\"manuscriptId\":\"seed-ms-1\",\"materialsWanted\":[\"Query letter\"],\"offerDate\":{\"day\":20777},\"offerResponseDeadline\":{\"day\":20791},\"packageId\":\"\",\"NEW\":\"QC152 fixture: agent\",\"responseReceivedAt\":\"2026-11-20\",\"revisionRound\":1,\"sendMethod\":\"Email\",\"status\":\"Offer\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}",
+  "q": "{\"agentId\":\"q152-ag-agent\",\"dateSent\":\"2026-11-15\",\"hasAgentResponded\":true,\"id\":\"q152-agent\",\"lastStatusChange\":\"2026-11-22\",\"manuscriptId\":\"seed-ms-1\",\"materialsWanted\":[\"Query letter\"],\"offerDate\":{\"day\":20779},\"offerResponseDeadline\":{\"day\":20793},\"packageId\":\"\",\"NEW\":\"QC152 fixture: agent\",\"responseReceivedAt\":\"2026-11-22\",\"revisionRound\":1,\"sendMethod\":\"Email\",\"status\":\"Offer\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}",
   "log": [
-   "[\"NEW\",{\"agentName\":\"Rufus Vale\",\"createdAt\":{\"day\":20777},\"eventKey\":\"offer\",\"manuscriptTitle\":\"The Smoke Test\",\"note\":\"Offer of representation received\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Offer\",\"type\":\"Offer\"}]",
-   "[\"q152-agent-sent\",{\"agentName\":\"Rufus Vale\",\"createdAt\":{\"day\":20770},\"manuscriptTitle\":\"seed\",\"note\":\"Query sent to Rufus Vale at State & Window\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Queried\",\"type\":\"Queried\"}]"
+   "[\"NEW\",{\"agentName\":\"Rufus Vale\",\"createdAt\":{\"day\":20779},\"eventKey\":\"offer\",\"manuscriptTitle\":\"The Smoke Test\",\"note\":\"Offer of representation received\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Offer\",\"type\":\"Offer\"}]",
+   "[\"q152-agent-sent\",{\"agentName\":\"Rufus Vale\",\"createdAt\":{\"day\":20772},\"manuscriptTitle\":\"seed\",\"note\":\"Query sent to Rufus Vale at State & Window\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Queried\",\"type\":\"Queried\"}]"
   ],
   "feed": [
-   "[\"NEW\",{\"activityType\":\"Status Changed\",\"date\":\"2026-11-20\",\"description\":\"Congratulations! You've received an offer of representation from Rufus Vale at State & Window!\",\"details\":\"Respond by 18 Dec 2026\",\"eventKey\":\"offer\",\"id\":\"NEW\",\"logEntryId\":\"NEW\",\"manuscriptId\":\"seed-ms-1\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Offer\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}]",
-   "[\"q152-agent-sent\",{\"activityType\":\"Query Sent\",\"date\":\"2026-11-13\",\"description\":\"Query sent to Rufus Vale at State & Window\",\"details\":\"\",\"id\":\"q152-agent-sent\",\"manuscriptId\":\"seed-ms-1\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Queried\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}]"
+   "[\"NEW\",{\"activityType\":\"Status Changed\",\"date\":\"2026-11-22\",\"description\":\"Congratulations! You've received an offer of representation from Rufus Vale at State & Window!\",\"details\":\"Respond by 20 Dec 2026\",\"eventKey\":\"offer\",\"id\":\"NEW\",\"logEntryId\":\"NEW\",\"manuscriptId\":\"seed-ms-1\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Offer\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}]",
+   "[\"q152-agent-sent\",{\"activityType\":\"Query Sent\",\"date\":\"2026-11-15\",\"description\":\"Query sent to Rufus Vale at State & Window\",\"details\":\"\",\"id\":\"q152-agent-sent\",\"manuscriptId\":\"seed-ms-1\",\"queryId\":\"q152-agent\",\"resultingStatus\":\"Queried\",\"userId\":\"LS4ymFFCEvhN82advZQJ5zkr7sv2\"}]"
   ]
  },
  "want": {

@@ -22,7 +22,7 @@
  {
   "name": "2.5s after the last key it is breathing again",
   "ok": true,
-  "got": "65 frames, max 1.01"
+  "got": "66 frames, max 1.01"
  },
  {
   "name": "and not before 2s after it",

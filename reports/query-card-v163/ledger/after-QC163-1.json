@@ -17,7 +17,7 @@
  {
   "name": "queried: it rises above 0.5 and never above 0.72",
   "ok": true,
-  "got": "0.72"
+  "got": "0.719929"
  },
  {
   "name": "partial: population — the drawer opened",
@@ -37,6 +37,6 @@
  {
   "name": "partial: it rises above 0.5 and never above 0.72",
   "ok": true,
-  "got": "0.719929"
+  "got": "0.72"
  }
 ]

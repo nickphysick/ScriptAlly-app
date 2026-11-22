@@ -1,0 +1,142 @@
+[
+ {
+  "name": "q152-agent #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-quiet #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-materials #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-materials #1: the agent's bubble is its stage band (partial)",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ },
+ {
+  "name": "q152-undated #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-undated #1: the agent's bubble is its stage band (partial)",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ },
+ {
+  "name": "q152-undated #2: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-fullreq #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-fullreq #1: the agent's bubble is tinted, not white",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ },
+ {
+  "name": "q152-long #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-long #1: the agent's bubble is its stage band (partial)",
+  "ok": true,
+  "got": "rgb(228, 235, 242)"
+ },
+ {
+  "name": "q152-long #2: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-long #3: the agent's bubble is tinted, not white",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ },
+ {
+  "name": "q152-long #4: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-rr #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-rr #1: the agent's bubble is tinted, not white",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ },
+ {
+  "name": "q152-rr #2: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-rr #3: the agent's bubble is tinted, not white",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ },
+ {
+  "name": "q152-offer #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-offer #1: the agent's bubble is tinted, not white",
+  "ok": true,
+  "got": "rgb(239, 205, 201)"
+ },
+ {
+  "name": "q152-closed #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-closed #1: the agent's bubble is tinted, not white",
+  "ok": true,
+  "got": "rgb(236, 234, 230)"
+ },
+ {
+  "name": "q152-passed #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-passed #1: the agent's bubble is tinted, not white",
+  "ok": true,
+  "got": "rgb(183, 201, 222)"
+ },
+ {
+  "name": "q152-passed #2: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-passed #3: the agent's bubble is tinted, not white",
+  "ok": true,
+  "got": "rgb(236, 234, 230)"
+ },
+ {
+  "name": "q152-withdrew #0: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ },
+ {
+  "name": "q152-withdrew #1: the writer's bubble is white",
+  "ok": false,
+  "got": "rgb(246, 243, 238)"
+ }
+]

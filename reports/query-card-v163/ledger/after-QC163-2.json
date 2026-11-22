@@ -12,7 +12,7 @@
  {
   "name": "they start within one frame (16.7ms) of each other",
   "ok": true,
-  "got": "[5781,5781,5781]"
+  "got": "[5757.9,5757.9,5757.9]"
  },
  {
   "name": "the paper is the frame's ::before, the ring the rim layer",
@@ -22,7 +22,7 @@
  {
   "name": "population: frames with the breath running",
   "ok": true,
-  "got": "90"
+  "got": "89"
  },
  {
   "name": "in every one the ring's scale equals the paper's",

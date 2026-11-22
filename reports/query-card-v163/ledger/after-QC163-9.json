@@ -2,7 +2,7 @@
  {
   "name": "population: frames with the rim breathing",
   "ok": true,
-  "got": "205"
+  "got": "204"
  },
  {
   "name": "the rim moved in them (the paper's scale above 1.005 somewhere)",
@@ -22,7 +22,7 @@
  {
   "name": "an ordinary locator click (Playwright's own, with its stability wait) lands on a tile",
   "ok": true,
-  "got": "65ms"
+  "got": "92ms"
  },
  {
   "name": "with the breath still running at the click",

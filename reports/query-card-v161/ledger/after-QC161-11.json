@@ -7,7 +7,7 @@
  {
   "name": "req: the stored query, its log and its feed are the old chip row's",
   "ok": false,
-  "got": "…{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-13\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-20\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\", ≠ …{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-12\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\","
+  "got": "…{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-15\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-22\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\", ≠ …{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-12\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\","
  },
  {
   "name": "population: the old chip row's plan for offer",
@@ -17,7 +17,7 @@
  {
   "name": "offer: the stored query, its log and its feed are the old chip row's",
   "ok": false,
-  "got": "…{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-13\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-20\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\", ≠ …{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-12\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\","
+  "got": "…{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-15\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-22\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\", ≠ …{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-12\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\","
  },
  {
   "name": "population: the old chip row's plan for rr",
@@ -27,7 +27,7 @@
  {
   "name": "rr: the stored query, its log and its feed are the old chip row's",
   "ok": false,
-  "got": "…{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-13\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-20\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\", ≠ …{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-12\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\","
+  "got": "…{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-15\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-22\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\", ≠ …{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-12\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\","
  },
  {
   "name": "population: the old chip row's plan for passed",
@@ -37,7 +37,7 @@
  {
   "name": "passed: the stored query, its log and its feed are the old chip row's",
   "ok": false,
-  "got": "…{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-13\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-20\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\", ≠ …{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-12\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\","
+  "got": "…{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-15\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-22\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\", ≠ …{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-12\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\","
  },
  {
   "name": "population: the old chip row's plan for more",
@@ -47,6 +47,6 @@
  {
   "name": "more: the stored query, its log and its feed are the old chip row's",
   "ok": false,
-  "got": "…{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-13\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-20\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\", ≠ …{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-12\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\","
+  "got": "…{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-15\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-22\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\", ≠ …{\"q\":\"{\\\"agentId\\\":\\\"q152-ag-agent\\\",\\\"dateSent\\\":\\\"2026-11-12\\\",\\\"hasAgentResponded\\\":true,\\\"id\\\":\\\"q152-agent\\\",\\\"lastStatusChange\\\":\\\"2026-11-19\\\",\\\"manuscriptId\\\":\\\"seed-ms-1\\\","
  }
 ]

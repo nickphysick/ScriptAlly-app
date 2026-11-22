@@ -7,32 +7,32 @@
  {
   "name": "population: pressed mid-breath (the rim at the press above 1.004)",
   "ok": true,
-  "got": "1.00852"
+  "got": "1.00787"
  },
  {
   "name": "the rim eases back from where it was (within 0.004), over the press-in's 120ms",
   "ok": true,
-  "got": "1.00852 from 1.00852, 120ms"
+  "got": "1.00787 from 1.00787, 120ms"
  },
  {
   "name": "population: painted frames across the hand-over",
   "ok": true,
-  "got": "18"
+  "got": "19"
  },
  {
   "name": "no frame-to-frame change greater than 0.004 in the rim, nor in the frame, from the press",
   "ok": true,
-  "got": "rim 0.00186 · frame 0.00329"
+  "got": "rim 0.00172 · frame 0.00331"
  },
  {
   "name": "then the press-in to 0.985 (the frame, as v161.1 built it)",
   "ok": true,
-  "got": "131ms"
+  "got": "130ms"
  },
  {
   "name": "and the pop to above 1.025, never above 1.03 (v163)",
   "ok": true,
-  "got": "1.02945"
+  "got": "1.02946"
  },
  {
   "name": "the rim is at 1 by then, and stays",
