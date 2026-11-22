@@ -74,7 +74,9 @@ export const QcBirds150: React.FC<{
   act?: (id: string) => { tone: "navy" | "nudge" | "plain"; label: string; mode: string } | null;
   /** v151.2 §5 — the current bar's status colour family (lib/qc1512 `statusKind`) */
   barKind?: (r: EyeRow) => string;
-}> = ({ groups, banded, nowMs, moves, onOpen, onAct, selectedId, closedN, lead, pinkAct, act, barKind }) => {
+  /** Plumage colours v1 — the current bar's fill (its status's band) */
+  barFill?: (r: EyeRow) => string;
+}> = ({ groups, banded, nowMs, moves, onOpen, onAct, selectedId, closedN, lead, pinkAct, act, barKind, barFill }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const axRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -375,7 +377,7 @@ export const QcBirds150: React.FC<{
                         })}
                         {l.cur && L ? (
                           <div className={`qc150-bar qc150-bar--cur qc150-t-${l.cur.tint}${l.cur.overdue ? " qc150-bar--o" : ""}`} data-qc150="be-bar" data-sk={barKind?.(r)} data-from={l.cur.fromMs}
-                            title={l.cur.title} style={{ left: L.s, width: Math.max(L.e - L.s, 4) }}>
+                            title={l.cur.title} style={{ left: L.s, width: Math.max(L.e - L.s, 4), ...(barFill ? { background: barFill(r) } : {}) }}>
                             {L.inside ? <span className="qc150-lb" data-qc150="be-label" data-lb="cur" data-l={L.s} data-r={L.e - (l.cur.overdue ? 22 : 0)} data-lw={measure(L.inside, 14) + 28}>{L.inside}</span> : null}
                           </div>
                         ) : null}

@@ -18,7 +18,7 @@ import { CLOSED_STATUSES, isClosedRow, lastHeardMs, liveLevel, shortDate } from 
 import { nextNum, type NextNum } from "./qc1512";
 import { stateOf } from "./queryState";
 import { MONTHS_SHORT } from "./dates";
-import { STAGE_COLOURS, stageOf, type Stage } from "./stageColours";
+import { OFFER_INK, STAGE_COLOURS, STAGE_INK, stageOf, statusBand, type Stage } from "./stageColours";
 
 /* ── the header's colour ─────────────────────────────────────────────────────────────────────────────────────── */
 
@@ -200,17 +200,21 @@ export function nextLine(r: QcRow, nowMs: number): string | null {
 export const ACTION_WHY_153: Partial<Record<string, string>> = {
   offer: "Waiting on your answer", materials: "Agents want pages", nudge: "Past their reply date", agent: "With agents, not yet due",
 };
-/** v157 — the slate ladder's bands; Gone quiet keeps its own pale stone (#f4efe6), which is no stage's */
+/** Plumage colours v1 — the table's bands: Offers the offer's navy, Materials requested the Partial requested band;
+ *  Gone quiet keeps its own pale stone (#f4efe6), which is no stage's */
 const ACTION_SWATCH: Partial<Record<string, string>> = {
-  offer: STAGE_COLOURS.offer.band, materials: STAGE_COLOURS.partial.band, nudge: STAGE_COLOURS.queried.band, agent: STAGE_COLOURS.queried.band,
+  offer: STAGE_COLOURS.offer.band, materials: STAGE_COLOURS.partial.bandRequested, nudge: STAGE_COLOURS.queried.band, agent: STAGE_COLOURS.queried.band,
   quiet: "#f4efe6", closed: STAGE_COLOURS.closed.band,
 };
-/** a heading's swatch: Action's own colours; a Status group takes its stage's band; anything else Queried's */
+/** a heading's swatch: Action's own colours; a Status group takes its status's band (Plumage colours v1); anything
+ *  else Queried's */
 export function sectionSwatch(group: string, key: string): string {
   if (group === "attention") return ACTION_SWATCH[key] ?? SLIP_TONE_FILL.queried;
-  if (group === "status") return key === "closed" ? SLIP_TONE_FILL.closed : SLIP_TONE_FILL[slipTone(key)];
+  if (group === "status") return key === "closed" ? SLIP_TONE_FILL.closed : statusBand(key);
   return SLIP_TONE_FILL.queried;
 }
+/** the count's ink on a swatch: the paper on the offer's navy, ink on every other */
+export const swatchInk = (swatch: string): string => (swatch === STAGE_COLOURS.offer.band ? OFFER_INK : STAGE_INK);
 /** the groups that fold into one row: Gone quiet and Closed */
 export const isFoldKey = (group: string, key: string): boolean => (group === "attention" && (key === "quiet" || key === "closed")) || (group === "status" && key === "closed");
 export const FOLD_LINE: Record<"quiet" | "closed", string> = {

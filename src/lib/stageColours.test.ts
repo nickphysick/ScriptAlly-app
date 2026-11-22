@@ -207,12 +207,21 @@ describe("Plumage colours v1 · the phone", () => {
 });
 
 describe("Plumage colours v1 · the Query Centre's stylesheets restate the table", () => {
-  it("each stage's grid card --tone equals its band", () => {
-    const v154 = css("qcv154.css");
-    for (const [stage, c] of Object.entries(STAGE_COLOURS)) {
-      const m = v154.match(new RegExp(`\\.qc154-card\\[data-tone="${stage}"\\]\\s*\\{[^}]*--tone:\\s*(#[0-9a-f]{6})`));
-      expect([stage, m?.[1]]).toEqual([stage, c.band]);
-    }
+  it("Phase 2: the grid card and the slip take --tone inline from statusBand, with the outline from withYouOutline; no stylesheet restates a stage's tone", () => {
+    const card = readFileSync("src/components/queries/centre/QcCard154.tsx", "utf8");
+    expect(card).toContain("const band = statusBand(r.status);");
+    expect(card).toContain("const wy = withYouOutline(r.status);");
+    expect(card).toContain('style={{ "--tone": band, ...(wy ? { "--wy": wy } : {}) } as React.CSSProperties}');
+    const slip = readFileSync("src/components/queries/centre/QcSlip153.tsx", "utf8");
+    expect(slip).toContain('style={{ "--tone": statusBand(r.status), ...(withYouOutline(r.status) ? { "--wy": withYouOutline(r.status) } : {}) } as React.CSSProperties}');
+    expect(css("qcv154.css")).not.toMatch(/data-tone="[a-z]+"\]\s*\{\s*--tone/);
+    expect(css("qcv153.css")).not.toMatch(/data-tone="[a-z]+"\]\s*\{\s*--tone/);
+  });
+  it("Phase 2: the outline is 3px inside the band, top corners the frame's inner radius, bottom square", () => {
+    expect(css("qcv154.css")).toContain(".qc154-card[data-wy] .qc154-hd { box-shadow: inset 0 0 0 3px var(--wy); border-radius: 12px 12px 0 0; }");
+    expect(css("qcv154.css")).toMatch(/\.qc154-in \{[^}]*border: 1px solid #e3d5c9; border-radius: 13px;/);
+    expect(css("qcv153.css")).toContain(".qc153-slip[data-wy] .qc153-top { box-shadow: inset 0 0 0 3px var(--wy); border-radius: 13px 13px 0 0; }");
+    expect(readFileSync("src/components/containers/framedSlip.css", "utf8")).toMatch(/\.sa-slip-in \{[^}]*border: 1px solid #e3d5c9;\s*border-radius: 14px;/);
   });
   it("slipTone is the stage, and the fill its band — a closed card is grey, not sand", () => {
     for (const s of Object.values(QueryStatus)) expect(slipTone(s)).toBe(stageOf(s));
@@ -221,12 +230,13 @@ describe("Plumage colours v1 · the Query Centre's stylesheets restate the table
   });
   it("group swatches: Offers, Materials, Nudge due, Watch and wait, Gone quiet (unchanged), Closed; a Status group its stage", () => {
     expect(sectionSwatch("attention", "offer")).toBe("#2a3a52");
-    expect(sectionSwatch("attention", "materials")).toBe("#e8c0af");
+    expect(sectionSwatch("attention", "materials")).toBe("#f1d9cf"); /* Phase 2: the Partial requested band */
     expect(sectionSwatch("attention", "nudge")).toBe("#efe6d6");
     expect(sectionSwatch("attention", "agent")).toBe("#efe6d6");
     expect(sectionSwatch("attention", "quiet")).toBe("#f4efe6");
     expect(sectionSwatch("attention", "closed")).toBe("#eceae6");
     expect(sectionSwatch("status", QueryStatus.FULL_SENT)).toBe(STAGE_COLOURS.full.band);
+    expect(sectionSwatch("status", QueryStatus.FULL_REQUESTED)).toBe("#d4d4da"); /* Phase 2: a Status group its status's band */
     expect(sectionSwatch("status", "closed")).toBe(STAGE_COLOURS.closed.band);
   });
   it("the paperclip accent is the stage's edge and the pack's accent ink; the resting ink is the ink 82% over white", () => {
@@ -246,14 +256,11 @@ describe("Plumage colours v1 · the Query Centre's stylesheets restate the table
     expect(STATUS_PALE).toEqual({ sand: "#f8f4ed", pink: "#f9f0ec", navy: "#ededef", sage: "#d9dce0", grey: "#f6f5f3" });
     expect(readFileSync("src/lib/qc1512.ts", "utf8").match(/export const STATUS_(FILL|PALE)[^;]*;/gs)!.join("")).not.toMatch(/#[0-9a-f]{6}/i);
   });
-  it("the log-a-query slip and the Birds-eye current bar restate the table by stage", () => {
+  it("Phase 2: the log-a-query slip keeps its stage tone; each Birds-eye current bar takes its status's band inline", () => {
     expect(readFileSync("src/components/queries/centre/QcSlip153.tsx", "utf8")).toContain("data-tone={slipTone(r.status)}");
-    const v153 = css("qcv153.css");
-    for (const [stage, c] of Object.entries(STAGE_COLOURS)) {
-      expect([stage, v153.match(new RegExp(`\\.qc153-slip\\[data-tone="${stage}"\\]\\s*\\{\\s*--tone:\\s*(#[0-9a-f]{6})`))?.[1]]).toEqual([stage, c.band]);
-      const bar = v153.match(new RegExp(`\\.qc150-bar--cur\\[data-sk="${stage}"\\]\\s*\\{([^}]*)\\}`))?.[1] ?? "";
-      expect([stage, bar.match(/#[0-9a-f]{6}/)?.[0]]).toEqual([stage, c.band]);
-    }
+    expect(readFileSync("src/components/Queries.tsx", "utf8")).toContain("barFill={(r) => statusBand(r.row.status)}");
+    expect(readFileSync("src/components/queries/centre/QcBirds150.tsx", "utf8")).toContain("...(barFill ? { background: barFill(r) } : {})");
+    expect(css("qcv153.css")).not.toMatch(/\.qc150-bar--cur\[data-sk="[a-z]+"\]\s*\{[^}]*#[0-9a-f]{6}/);
     const all = css("qcv150.css") + css("qcv151.css") + css("qcv153.css");
     expect(all).not.toMatch(/\.qc150-br--w\s+\.qc150-(bar--cur|t-)/);
     expect(all).not.toMatch(/data-sk="(sand|rose|blue|heather|pink|navy|sage)"/);

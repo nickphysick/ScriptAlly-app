@@ -12,7 +12,18 @@
  */
 
 /* ── Phase 2 · (Plumage colours v1) the offer's foil and sheen are retired: an offer's band is the flat navy of
-   lib/stageColours, from qcv154.css's --tone like every other stage. ────────────────────────────────────────────── */
+   lib/stageColours, set inline as --tone like every other status. On the navy the words and marks are the paper
+   (#f4eee5, lib/stageColours OFFER_INK) — the one band that is not ink; the track's current step keeps its white disc
+   and ink mark. ────────────────────────────────────────────────────────────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc154-nm.qc154-nm { color: #f4eee5; }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc154-ag.qc154-ag { color: rgba(244, 238, 229, 0.72); }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd:not(.qc153-nd--cur) { color: #f4eee5; }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd--fut,
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-nd.qc153-nd--skip { color: rgba(244, 238, 229, 0.5); }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-ln.qc153-ln { background: rgba(244, 238, 229, 0.35); }
+  .qc151.qc153 .qc154-card[data-tone="offer"] .qc153-trk:not(.is-ended) .qc153-ln.qc153-ln--done { background: #f4eee5; }
+}
 
 /* ── Phase 3 · the track reads on every band: colours only, no node, link or badge moves. A reached step and the
    current step are ink on every stage (no per-stage ink); a step not yet reached, and a skipped step, ink at .42;

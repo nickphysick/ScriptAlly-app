@@ -61,7 +61,9 @@ describe("the v154 card", () => {
     expect(card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"))).not.toMatch(/a2452a|8a3a28|b4553f/i);
     const css = readFileSync(new URL("./qcv154.css", import.meta.url), "utf8");
     expect(css).not.toMatch(/a2452a|8a3a28|b4553f/i);
-    expect(css).toMatch(/\[data-tone="partial"\][^{]*\{[^}]*--tone:\s*#e8c0af/);
+    /* Plumage colours v1 — the band is inline: a Partial requested card is the requested shade with its outline */
+    const h = card154(row154(QueryStatus.PARTIAL_REQUESTED, "you"));
+    expect(h).toMatch(/data-wy=""[^>]*style="--tone:#f1d9cf;--wy:#e8c0af"/);
     expect(css).toMatch(/\.qc154-nm \{[^}]*color: #1c130f/);
   });
 });
