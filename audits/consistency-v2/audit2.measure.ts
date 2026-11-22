@@ -135,8 +135,42 @@ async function measure(page: Page, entry: Record<string, unknown>, vw: number) {
     hover = await interactive(page, data.records);
     if (MODE === "audit") shots = await crops(page, String(entry.key), data.records);
   }
+  if (vw === 1512 && TRACE.length) await trace(page, String(entry.key), data.records);
   writeFileSync(resolve(OUT, `${entry.key}@${vw}.json`), JSON.stringify({ ...entry, ...data, hover, shots }, null, 1));
   return data;
+}
+
+/* Consolidate and finish v1, B1: CA_TRACE=<comma-separated sels> reads, at 1512, where each matching element's font size
+   is set: the matched rules of the element and then of each ancestor (CDP CSS.getMatchedStylesForNode), up to the first
+   rule that declares font-size or the font shorthand. Writes <key>@trace.json beside the run. Reads only. */
+const TRACE = (process.env.CA_TRACE || "").split(",").map((s) => s.trim()).filter(Boolean);
+async function trace(page: Page, key: string, recs: Rec[]) {
+  const hits = (recs as unknown as { id: string; sel: string }[]).filter((r) => TRACE.includes(r.sel));
+  if (!hits.length) return;
+  const cdp = await page.context().newCDPSession(page);
+  const out: Record<string, unknown>[] = [];
+  try {
+    await cdp.send("DOM.enable"); await cdp.send("CSS.enable");
+    const { root } = await cdp.send("DOM.getDocument", { depth: -1 });
+    const seen = new Set<string>();
+    for (const h of hits) {
+      if (seen.has(h.sel)) continue; seen.add(h.sel);
+      const { nodeId } = await cdp.send("DOM.querySelector", { nodeId: root.nodeId, selector: `[data-ca2="${h.id}"]` });
+      if (!nodeId) continue;
+      const m = await cdp.send("CSS.getMatchedStylesForNode", { nodeId }) as { matchedCSSRules?: { rule: { selectorList: { text: string }; origin: string; style: { cssProperties: { name: string; value: string; disabled?: boolean }[] } } }[]; inherited?: { matchedCSSRules: { rule: { selectorList: { text: string }; origin: string; style: { cssProperties: { name: string; value: string }[] } } }[] }[]; inlineStyle?: { cssProperties: { name: string; value: string }[] } };
+      const pick = (rules: { rule: { selectorList: { text: string }; origin: string; style: { cssProperties: { name: string; value: string }[] } } }[] = []) => {
+        for (let i = rules.length - 1; i >= 0; i--) { const r = rules[i]; if (r.rule.origin !== "regular") continue; const p = r.rule.style.cssProperties.find((c) => (c.name === "font-size" || c.name === "font") && c.value); if (p) return { sel: r.rule.selectorList.text, prop: p.name, value: p.value }; }
+        return null;
+      };
+      const chain: unknown[] = [];
+      const own = pick(m.matchedCSSRules); chain.push({ level: 0, rule: own });
+      if (!own) (m.inherited || []).some((inh, i) => { const r = pick(inh.matchedCSSRules); chain.push({ level: i + 1, rule: r }); return !!r; });
+      const info = await page.evaluate((id) => { const e = document.querySelector(`[data-ca2="${id}"]`) as HTMLElement; const c = getComputedStyle(e); const path: string[] = []; let x: Element | null = e; for (let i = 0; x && i < 6; i++, x = x.parentElement) path.push(x.tagName.toLowerCase() + (x.className && typeof x.className === "string" ? "." + x.className.trim().split(/\s+/).join(".") : "")); return { size: c.fontSize, lh: c.lineHeight, path, w: e.getBoundingClientRect().width, text: (e.textContent || "").slice(0, 60) }; }, h.id);
+      out.push({ sel: h.sel, ...info, chain });
+    }
+  } catch (e) { out.push({ error: String(e) }); }
+  await cdp.detach().catch(() => {});
+  writeFileSync(resolve(OUT, `${key}@trace.json`), JSON.stringify(out, null, 1));
 }
 
 async function failedReason(page: Page): Promise<string | null> {
