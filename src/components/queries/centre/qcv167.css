@@ -106,3 +106,24 @@
 @media (prefers-reduced-motion: reduce) {
   .qc152 .qc167-rem, .qc152 .qc167-tog, .qc152 .qc167-tog::after, .qc152 .qc167-pk, .qc152 .qc167-pk .k { transition: none; }
 }
+
+/* ── §C step 3 the asks drawer: two ticks, then two tiles that expand in place ──────────────────────────────── */
+/* the list scrolls inside the drawer (capped, as the ref): the card's header and thread are never pushed off */
+.qc152 .qc167-cp .qc1522-cb.qc167-ak { max-height: 212px; overflow: auto; overscroll-behavior: contain; }
+.qc152 .qc167-asks-ed { display: flex; flex-direction: column; gap: 8px; }
+.qc152 .qc167-xt { border-radius: 10px; background: #fff; box-shadow: inset 0 0 0 1px #e6ddd0; transition: box-shadow 0.18s ease; }
+.qc152 .qc167-xt:hover, .qc152 .qc167-xt.on { box-shadow: inset 0 0 0 1.5px #2a3a52; }
+.qc152 .qc167-xt .xh { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; gap: 10px; width: 100%; min-height: 46px; padding: 7px 12px; }
+.qc152 .qc167-xt .xh .t { flex: 1; display: flex; flex-direction: column; }
+.qc152 .qc167-xt .xh b { font: 600 15px/1.2 var(--sp-serif) !important; color: #1c130f; }
+.qc152 .qc167-xt .xh i { font: italic 400 13px/1.3 var(--sp-serif) !important; color: #6f655c; }
+.qc152 .qc167-xt .exp { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.26s cubic-bezier(0.3, 0.7, 0.2, 1); }
+.qc152 .qc167-xt.on .exp { grid-template-rows: 1fr; }
+.qc152 .qc167-xt .expi { overflow: hidden; min-height: 0; opacity: 0; transition: opacity 0.2s ease; }
+.qc152 .qc167-xt.on .expi { opacity: 1; transition-delay: 0.07s; }
+.qc152 .qc167-xt .expi .qad-samp { padding: 0 12px 12px; }
+.qc152 .qc167-sug { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 12px 0; }
+.qc152 .qc167-xt .expi > .sp-fld { display: block; width: calc(100% - 24px); margin: 8px 12px 12px; }
+@media (prefers-reduced-motion: reduce) {
+  .qc152 .qc167-xt, .qc152 .qc167-xt .exp, .qc152 .qc167-xt .expi { transition: none; }
+}

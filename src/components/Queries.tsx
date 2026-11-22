@@ -124,6 +124,8 @@ import { dayIso } from "../lib/queryActions/dates";
 import { isLive as qaIsLive, viaLabel } from "./queryActions/journeys/common";
 import { commitCardSave } from "../lib/agentCardSave";
 import { savedToast as profileSavedToast } from "./queries/centre/QcProfile167";
+import { QcAsks167 } from "./queries/centre/QcAsks167";
+import { bookOf } from "../lib/queryActions/sample";
 import { copyText } from "./agents/contact/ContactCells";
 import type { AgentEditPatch } from "../lib/saveAgentEdits";
 import { METHODS as EDIT_METHODS, type AgentDetails } from "./queries/centre/QcCardEdit152";
@@ -6382,6 +6384,9 @@ export const Queries: React.FC<{
             return false;
           } finally { setQc152Busy(false); }
         };
+        /* the sample picker converts between units by the book this query is for (its own word count) */
+        const book167 = bookOf(manuscripts.find((m) => m.id === q.manuscriptId)?.wordCount ?? null);
+        card1522.asksBody = (prof, set) => <QcAsks167 prof={prof} book={book167} onPatch={set} />;
       }
       card1522.editData = {
         agentId: q.agentId,

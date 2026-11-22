@@ -245,7 +245,9 @@ function TypedWhole({ value, show, cls, label, onSet }: { value: number; show: s
   );
 }
 
-export function SampleControl({ sample, onChange, book, allowNone, name }: { sample: Sample; onChange: (s: Sample) => void; book: Book; allowNone?: boolean; name?: string }) {
+/** `openingOnly` (Query card v167, the agent's profile): units and amount only — the profile stores no section, so
+ *  "From the opening / A specific section" is not offered. Every other use leaves it unset and draws as before. */
+export function SampleControl({ sample, onChange, book, allowNone, name, openingOnly }: { sample: Sample; onChange: (s: Sample) => void; book: Book; allowNone?: boolean; name?: string; openingOnly?: boolean }) {
   const units: SampleUnit[] = ["pages", "words", "chapters", ...(allowNone ? (["none"] as SampleUnit[]) : [])];
   const s = sample;
   const tick = useTick(s.unit === "none" ? null : s.amt);
@@ -272,7 +274,7 @@ export function SampleControl({ sample, onChange, book, allowNone, name }: { sam
           <div className="qad-presets">
             {U.pre.map((p) => <Chip key={p} on={s.amt === p} onClick={() => onChange({ ...s, amt: p })}>{n0(p)}</Chip>)}
           </div>
-          <div className="qad-from">
+          {openingOnly ? null : <div className="qad-from">
             <Seg wide value={s.sect ? "sect" : "open"} onPick={(k) => onChange(setSect(s, k === "sect", book))}
               options={[["open", "From the opening"], ["sect", "A specific section"]]} />
             {s.sect ? (
@@ -286,7 +288,7 @@ export function SampleControl({ sample, onChange, book, allowNone, name }: { sam
                 </span>
               </div>
             ) : null}
-          </div>
+          </div>}
         </>
       ) : null}
     </div>
