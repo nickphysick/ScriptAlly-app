@@ -9,7 +9,7 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { QueryStatus } from "../types";
 import {
-  ACCENT_INK, STAGE_COLOURS, STAGE_INK, STAGE_STATUSES,
+  ACCENT_INK, OFFER_STRIPES, STAGE_COLOURS, STAGE_INK, STAGE_STATUSES, STRIPE_PAPER,
   bandBackground, bandInk, quietBackground, stageInk, stageOf, statusBand,
 } from "./stageColours";
 import * as TABLE from "./stageColours";
@@ -107,6 +107,50 @@ describe("Plumage colours v2 · no with-you outline", () => {
     expect(ringed).toEqual([]);
     /* and no inline one in a band's style */
     expect(all.filter((f) => /\.tsx$/.test(f) && /inset 0 0 0 3px/.test(code(f)))).toEqual([]);
+  });
+});
+
+/* LOCK 4 (source half) — Plumage colours v2: the offer's soft stripes are the JSON's, built from the table, and drawn by
+   the two card bands only (QcCard154's band, QcCard152's strip, through bandBackground); every other surface is flat. */
+describe("Plumage colours v2 · the offer's stripes, on two card bands only", () => {
+  it("are the JSON's stripes, character for character, and are built from the table's requested shades", () => {
+    expect(OFFER_STRIPES).toBe(V2.offerStripes);
+    expect(STRIPE_PAPER).toBe("#f6f0e5");
+    expect(OFFER_STRIPES).toContain(`${STAGE_COLOURS.partial.bandRequested} 22px 44px`);
+    expect(OFFER_STRIPES).toContain(`${STAGE_COLOURS.full.bandRequested} 44px 66px`);
+    expect(readFileSync("src/lib/stageColours.ts", "utf8")).toContain("${STAGE_COLOURS.partial.bandRequested} 22px 44px,${STAGE_COLOURS.full.bandRequested} 44px 66px");
+  });
+  it("bandBackground is the stripes for Offer and Signed, the flat status band for every other status", () => {
+    for (const s of Object.values(QueryStatus)) expect([s, bandBackground(s)]).toEqual([s, stageOf(s) === "offer" ? OFFER_STRIPES : statusBand(s)]);
+    expect(bandBackground(null)).toBe("#efe6d6");
+  });
+  const files: string[] = [];
+  const walk = (d: string) => { for (const f of readdirSync(d)) { const p = join(d, f); if (statSync(p).isDirectory()) walk(p); else if (/\.(tsx?|css)$/.test(f) && !/\.test\.tsx?$/.test(f)) files.push(p); } };
+  walk("src");
+  const code = (f: string) => readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+  it("only the grid card and the slide-in card call bandBackground or name OFFER_STRIPES", () => {
+    expect(files.length).toBeGreaterThan(500);
+    const users = files.filter((f) => f !== "src/lib/stageColours.ts" && /\bbandBackground\(|\bOFFER_STRIPES\b/.test(code(f))).sort();
+    expect(users).toEqual(["src/components/queries/centre/QcCard152.tsx", "src/components/queries/centre/QcCard154.tsx"]);
+  });
+  it("the grid card puts it on its band only, when not quiet; the slide-in card on its strip", () => {
+    const g = code("src/components/queries/centre/QcCard154.tsx");
+    expect(g.match(/bandBackground\(/g)?.length).toBe(1);
+    expect(g).toContain("const bandBg = quiet ? null : bandBackground(r.status);");
+    expect(g).toContain('className="qc154-hd" data-qc154="band" style={striped ? { background: bandBg! } : undefined}');
+    expect(g).toContain("const bandNow = { band, grad: quiet || striped };");
+    const c = code("src/components/queries/centre/QcCard152.tsx");
+    expect(c.match(/bandBackground\(/g)?.length).toBe(1);
+    expect(c).toContain("const bandBg = quiet ? quietBackground(r.status) : bandBackground(r.status);");
+  });
+  it("no stylesheet draws the stripes, and no offer rule anywhere carries a gradient, an animation or a transition", () => {
+    const sheets = files.filter((f) => f.endsWith(".css"));
+    /* the offer's stripes by their colours (Comps' own 118° stripes, #edd8cd/#e6cec1, are not the offer's) */
+    expect(sheets.filter((f) => /repeating-linear-gradient\(\s*118deg[^;]*(#f6f0e5|#f1d9cf|#dbe4ee)/i.test(code(f)))).toEqual([]);
+    const offerRules = sheets.flatMap((f) => [...code(f).matchAll(/([^{}]+)\{([^}]*)\}/g)]
+      .filter((m) => /data-(tone|stage|sk)="offer"|"Offer"|"Signed"|\[data-offer\]/.test(m[1]) && /gradient|animation|transition/.test(m[2]))
+      .map((m) => `${f}: ${m[1].trim()}`));
+    expect(offerRules).toEqual([]);
   });
 });
 

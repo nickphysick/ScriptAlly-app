@@ -29,7 +29,7 @@ import "./qcv154.css";
 import "./qcv1561.css";
 import "./qcv157.css";
 /* Query card v160, Phase 4 — the band eases to a new stage */
-import { statusBand } from "../../../lib/stageColours";
+import { bandBackground, statusBand } from "../../../lib/stageColours";
 import { gridBand, gridEase } from "./qcMotion160";
 
 const BELL = <svg viewBox="0 0 16 16" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true"><path d="M8 2.5a4 4 0 0 0-4 4v2.5L2.8 11h10.4L12 9V6.5a4 4 0 0 0-4-4zM6.5 13a1.5 1.5 0 0 0 3 0" /></svg>;
@@ -63,9 +63,12 @@ const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, pac
   /* v160 Phase 4 — the band's colour eases over 500ms when the stage changes; a gradient band (the offer's sheen, gone
      quiet's fade) at either end changes at once. Web Animations from the committed change, so it runs in the frame the
      new colour is drawn in (a CSS transition, measured, did not start behind the open card). */
-  /* Plumage colours v1 — the band is the status's shade (requested lighter than sent). Plumage colours v2: no outline */
+  /* Plumage colours v1 — the band is the status's shade (requested lighter than sent). Plumage colours v2: no outline;
+     an offer's band is the soft stripes (lib/stageColours bandBackground), inline on the band, so it eases at once */
   const band = statusBand(r.status);
-  const bandNow = { band, grad: quiet };
+  const bandBg = quiet ? null : bandBackground(r.status);
+  const striped = bandBg !== null && bandBg !== band;
+  const bandNow = { band, grad: quiet || striped };
   const bandWas = useRef(bandNow);
   const hdRef = useRef<HTMLDivElement>(null);
   useLayoutEffect(() => {
@@ -86,7 +89,7 @@ const QcCard154Inner: React.FC<QcCard154Props> = ({ row: r, nowMs, selected, pac
       onClick={open}
       onKeyDown={(e) => { if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) { e.preventDefault(); open(); } }}>
       <div className="qc154-in">
-        <div ref={hdRef} className="qc154-hd" data-qc154="band">
+        <div ref={hdRef} className="qc154-hd" data-qc154="band" style={striped ? { background: bandBg! } : undefined}>
           <span className="qc153-seal qc154-seal" aria-hidden="true">{r.initials}</span>
           <span className="qc154-who">
             <b className="qc154-nm" data-qc154="name">{r.agentName}</b>

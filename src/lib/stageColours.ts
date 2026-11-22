@@ -71,8 +71,17 @@ export const bandInk = (_status?: QueryStatus | string | null): string => STAGE_
 /** the same, for a surface that only knows the stage */
 export const stageInk = (_s?: Stage): string => STAGE_INK;
 
-/** a status's band as a CSS `background`: flat, always */
-export const bandBackground = (status: QueryStatus | string | null | undefined): string => statusBand(status);
+/** the stripes' paper (plumage-colours-v2.json `offerStripes`; not a stage's band) */
+export const STRIPE_PAPER = "#f6f0e5";
+/** the offer's soft stripes: the paper, the Partial requested band, the Full requested band, 22px each at 118°. They
+ *  follow the table: change a requested shade and the stripes change with it. Card bands only (`bandBackground`). */
+export const OFFER_STRIPES =
+  `repeating-linear-gradient(118deg,${STRIPE_PAPER} 0 22px,${STAGE_COLOURS.partial.bandRequested} 22px 44px,${STAGE_COLOURS.full.bandRequested} 44px 66px)`;
+
+/** a CARD BAND's CSS `background` — the grid card's band and the slide-in card's strip, and nothing else: the offer's
+ *  stripes for Offer and Signed, the flat status band for every other status. Every other surface reads `statusBand`. */
+export const bandBackground = (status: QueryStatus | string | null | undefined): string =>
+  status && stageOf(status) === "offer" ? OFFER_STRIPES : statusBand(status);
 /** gone quiet: the status's band fading to white (the grid card's v157 stops). A requested query is never quiet;
  *  nor is an offer. */
 export const quietBackground = (status: QueryStatus | string | null | undefined): string => {
