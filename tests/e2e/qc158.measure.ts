@@ -263,35 +263,39 @@ test.describe("Query card v158", () => {
           const card = document.querySelector<HTMLElement>(sel)!;
           /* layout offsets, not bounding rects: the card leans, and a rotated box's rect is skewed */
           const boxes = [...card.querySelectorAll<HTMLElement>("[data-qc158='box']")].map((b) => {
-            const kids = [...b.children].filter((k) => (k as HTMLElement).offsetHeight > 0) as HTMLElement[];
-            const t = kids[0].offsetTop - b.offsetTop, z = kids[kids.length - 1].offsetTop - b.offsetTop + kids[kids.length - 1].offsetHeight;
-            return { k: b.dataset.k, top: b.offsetTop, h: b.offsetHeight, above: t, below: b.offsetHeight - z, value: b.querySelector("[data-qc158='value']")?.textContent ?? "", link: !!b.querySelector("[data-qc158='value'] button") };
+            /* the text block only: v167's edit pencil sits absolutely in the tile's corner, outside the flow */
+            const kids = [...b.children].filter((k) => (k as HTMLElement).offsetHeight > 0 && getComputedStyle(k).position !== "absolute") as HTMLElement[];
+            /* v167 made the tile positioned (its ghost words sit on the bar), so its children measure from the tile itself */
+            const rel = (k: HTMLElement) => (k.offsetParent === b ? k.offsetTop : k.offsetTop - b.offsetTop);
+            const t = rel(kids[0]), z = rel(kids[kids.length - 1]) + kids[kids.length - 1].offsetHeight;
+            return { k: b.dataset.k, top: b.offsetTop, h: b.offsetHeight, above: t, below: b.offsetHeight - z, value: b.querySelector("[data-qc158='value']")?.textContent ?? "", ghost: b.hasAttribute("data-ghost"), link: !!b.querySelector("[data-qc158='value'] button") };
           });
           const asks = [...card.querySelectorAll<HTMLElement>("[data-qc158='ask']")].map((a) => ({ sent: a.hasAttribute("data-sent"), tick: !a.querySelector(".nx-tick")!.classList.contains("no"), r: a.querySelector(".r")?.textContent ?? "" }));
           const sum = card.querySelector("[data-qc158='ask-sum']")?.textContent ?? "";
-          const row = card.querySelector<HTMLElement>("[data-qc158='contact']")!;
-          const btns = [...row.children].map((c) => ({ top: (c as HTMLElement).offsetTop }));
-          const addr = row.querySelector<HTMLElement>("[data-qc158='address']");
-          return { boxes, asks, sum, rowH: row.offsetHeight, w504: card.closest<HTMLElement>(".spanel")!.offsetWidth, tops: btns.map((b) => Math.round(b.top)), cardW: card.closest<HTMLElement>(".spanel")!.offsetWidth,
-            addr: addr ? { ov: getComputedStyle(addr).textOverflow, ws: getComputedStyle(addr).whiteSpace, cut: addr.scrollWidth > addr.clientWidth } : null };
+          /* v167 retired the contact row (Copy email, website, wishlist): they live on the agent's full card */
+          const contact = [...card.querySelectorAll<HTMLElement>("[data-qc158='contact'], [data-qc158='address']")].length;
+          const copy = /Copy email|wishlist/i.test(card.querySelector<HTMLElement>("[data-qc158='agent']")?.innerText ?? "");
+          return { boxes, asks, sum, contact, copy, w504: card.closest<HTMLElement>(".spanel")!.offsetWidth };
         }, CARD);
         L5.check(`${id}: three boxes`, r.boxes.length === 3, r.boxes.map((b) => b.k).join(","));
         L5.check(`${id}: equal tops and heights`, r.boxes.every((b) => Math.abs(b.top - r.boxes[0].top) <= 1 && Math.abs(b.h - r.boxes[0].h) <= 1), r.boxes.map((b) => `${b.top.toFixed(1)}/${b.h.toFixed(1)}`).join(" "));
         L5.check(`${id}: each text block centred within 1px`, r.boxes.every((b) => Math.abs(b.above - b.below) <= 1), r.boxes.map((b) => `${b.above.toFixed(1)}:${b.below.toFixed(1)}`).join(" "));
         const wk = typeof ag?.responseTimeWeeks === "number" && (ag.responseTimeWeeks as number) > 0 ? ag.responseTimeWeeks as number : null;
         const reply = r.boxes.find((b) => b.k === "reply")!;
-        L5.check(`${id}: Replies in matches the agent (${wk ?? "unrecorded"})`, wk != null ? reply.value === `About ${wk} week${wk === 1 ? "" : "s"}` : reply.link && reply.value === "Add reply time", reply.value);
+        L5.check(`${id}: Replies in matches the agent (${wk ?? "unrecorded"})`, wk != null ? reply.value === `About ${wk} week${wk === 1 ? "" : "s"}` : reply.ghost && reply.value.trim() === "", `${reply.value}${reply.ghost ? " (ghost)" : ""}`); /* v167: an unrecorded value is a ghost bar */
         L5.check(`${id}: no value is a dash`, r.boxes.every((b) => !/^[—–-]$/.test(b.value.trim())), r.boxes.map((b) => b.value).join(" | "));
         const want = Array.isArray(ag?.materialsWanted) ? (ag!.materialsWanted as string[]).length : 0;
         L6.check(`${id}: one row per item the agent asks for (${want})`, r.asks.length === want, String(r.asks.length));
         for (const a of r.asks) L6.check(`${id}: ${a.sent ? "sent: ticked disc, 'sent with your query'" : "not sent: empty ring, 'not sent'"}`, a.sent ? a.tick && a.r === "sent with your query" : !a.tick && a.r === "not sent", `${a.tick} ${a.r}`);
-        if (r.asks.length) L6.check(`${id}: the summary matches`, r.asks.every((a) => a.sent) ? /^You sent everything /.test(r.sum) : /^You didn’t send /.test(r.sum), r.sum);
-        L7.check(`${id}: the contact row is one line (${r.cardW.toFixed(0)}px card)`, new Set(r.tops).size === 1 && r.rowH <= 40, `${r.tops} h${r.rowH}`);
+        /* v167: the "You sent everything / You didn't send" line is retired (it lives on the full card) */
+        L6.check(`${id}: no summary line (v167)`, r.sum === "", r.sum);
+        /* QC158-7 re-pointed by v167: the contact row is gone from the tab */
+        L7.check(`${id}: no contact row or address (v167)`, r.contact === 0, String(r.contact));
+        L7.check(`${id}: no Copy email or wishlist on the tab (v167)`, !r.copy, String(r.copy));
         L7.check(`${id}: the card is 504px wide for this read`, r.w504 === 504, String(r.w504));
-        if (r.addr) L7.check(`${id}: the address is cut with an ellipsis, not wrapped`, r.addr.ov === "ellipsis" && r.addr.ws === "nowrap" && r.addr.cut, JSON.stringify(r.addr));
         await closeCard(page);
       }
-      L5.done(10); L6.done(2); L7.done(4);
+      L5.done(10); L6.done(2); L7.done(6);
     });
 
     test(`QC158-8 groups · QC158-9 not sent yet — ${w}`, async ({ page }) => {
@@ -391,18 +395,13 @@ test.describe("Query card v158", () => {
         await openCard(page, FIX.one); await tab(page, "notes"); await page.waitForTimeout(500);
         const none = await boxOf();
         L11.check("its bottom edge is the same with twelve notes as with none", Math.abs(twelve.bottom - none.bottom) <= 1, `${twelve.bottom.toFixed(1)} vs ${none.bottom.toFixed(1)}`);
-        /* QC158-13: empty, centred in the body (the space above the writing box) */
-        const e = await page.evaluate((sel) => {
-          const card = document.querySelector<HTMLElement>(sel)!; const em = card.querySelector<HTMLElement>("[data-qc158='empty']");
-          if (!em) return null;
-          /* the space the empty state has: from the notes pane's padding edge to the writing box (layout offsets: the card leans) */
-          const pane = card.querySelector<HTMLElement>("[data-qc158='notes']")!, box = card.querySelector<HTMLElement>("[data-qc158='compose']")!;
-          const top = pane.offsetTop + parseFloat(getComputedStyle(pane).paddingTop), bottom = box.offsetTop - parseFloat(getComputedStyle(pane).rowGap || "0");
-          const mid = em.offsetTop + em.offsetHeight / 2;
-          return { text: em.textContent ?? "", off: mid - (top + bottom) / 2 };
+        /* QC158-13 re-pointed by v167: with no notes, two ghost note shapes and no empty sentence */
+        const g = await page.evaluate((sel) => {
+          const card = document.querySelector<HTMLElement>(sel)!;
+          return { ghosts: card.querySelectorAll("[data-qc158='notes'] [data-qc167='ghost-note']").length, words: (card.querySelector<HTMLElement>("[data-qc158='notes']")?.innerText ?? "").match(/Nothing noted yet|This is the place for why/g)?.length ?? 0 };
         }, CARD);
-        L13.check("the empty wording names the agent", !!e && /^Nothing noted yetThis is the place for why you picked [A-Z][\w’'-]*, and what you’d change if this one’s a no\.$/.test(e.text), e?.text ?? "none");
-        L13.check("centred in the body within 2px", !!e && Math.abs(e.off) <= 2, String(e?.off));
+        L13.check("two ghost note shapes (v167)", g.ghosts === 2, String(g.ghosts));
+        L13.check("no empty sentence (v167)", g.words === 0, String(g.words));
         await closeCard(page);
       } finally { seed("--clean"); }
       L10.done(3); L11.done(4); L12.done(5); L13.done(2);
